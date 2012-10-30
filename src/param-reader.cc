@@ -1,0 +1,69 @@
+/*
+ *
+ *    Copyright (c) 2012
+ *      maximilian attems <attems@fias.uni-frankfurt.de>
+ *
+ *    GNU General Public License (GPLv3)
+ *
+ */
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+
+#include "include/param-reader.h"
+#include "include/box.h"
+
+/* FIXME: hardcoded length cap */
+#define FILELEN 256
+
+/* space separation between items */
+const char *sep = " \t\n";
+
+/* process_params - read in params */
+void process_params(char *path) {
+  char *line = NULL, *saveptr = NULL, params[FILELEN];
+  size_t len = 0;
+  ssize_t read;
+  char *key, *value;
+  FILE *fp;
+
+  /* Looking for parameters in config file
+   * If none exists, we'll use default values.
+   */
+  snprintf(params, strlen(path) + 12, "%s/params.txt", path);
+  fp = fopen(params, "r");
+  if (!fp) {
+    fprintf(stderr, "W: No params.txt at %s path.\n", path);
+    return;
+  }
+
+  if (verbose)
+    fprintf(stdout, "Processing %s/params.txt.\n", path);
+
+  while ((read = getline(&line, &len, fp)) != -1) {
+    if (line[0] == '#' || line[0] == '\n' || line[0] == '\t' || line[0] == '/')
+      continue;
+
+    key = strtok_r(line, sep, &saveptr);
+    value = strtok_r(NULL, sep, &saveptr);
+
+    /* integer values */
+    if (strcmp(key, "STEPS") == 0) {
+      STEPS = abs(atoi(value));
+      return;
+    }
+
+
+    /* double or float values */
+    if (strcmp(key, "A") == 0) {
+      A = atof(value);
+      return;
+    }
+    if (strcmp(key, "EPS") == 0) {
+      EPS = atof(value);
+      return;
+    }
+  }
+  free(line);
+  fclose(fp);
+}

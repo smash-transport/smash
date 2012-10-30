@@ -1,0 +1,10 @@
+// Sample params.txt file
+
+// Cube size
+A	5.0
+
+// temporal grid spacing
+EPS	0.1
+
+// maximum of steps to take
+STEPS	10000
