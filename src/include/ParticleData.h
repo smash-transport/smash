@@ -9,9 +9,10 @@ class ParticleData {
   private:
     /* Each particle has a unique identifier */
     int id;
-    /* Data of the particle type */
-    float isospin;
-    double mass;
+    /* longitudinal momenta */
+    double momenta_l;
+    /* tranverse momenta */
+    double momenta_t;
 };
 
 #endif  // SRC_INCLUDE_PARTICLEDATA_H_
