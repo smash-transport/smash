@@ -14,6 +14,7 @@
 #include <cstring>
 
 #include "include/ParticleData.h"
+#include "include/ParticleType.h"
 #include "include/param-reader.h"
 
 /* build dependent variables */

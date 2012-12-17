@@ -7,11 +7,18 @@
 
 #include <string>
 
-class ParticleType {
+class ParticleType : public ParticleData {
+  public:
+    /* Use improbable values for default constructor */
+    ParticleType() : name("unknown"), mass(-1) {}
+    /* Explicit constructor */
+    ParticleType(std::string n, double m) : name(n), mass(m) {}
+
   private:
     /* Data of the particle type */
-    string name;
-    double mass;
+    const std::string name;
+    const double mass;
+    double lifetime;
     float isospin;
 };
 
