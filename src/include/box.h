@@ -17,4 +17,12 @@ extern int STEPS;
 /* Debug runs generate more output */
 extern bool verbose;
 
+/* Compile time debug info */
+#define DEBUG 1
+#ifdef DEBUG
+# define printd printf
+#else
+# define printd(...) ((void)0)
+#endif
+
 #endif  // SRC_INCLUDE_BOX_H_

@@ -16,6 +16,7 @@
 #include "include/ParticleData.h"
 #include "include/ParticleType.h"
 #include "include/param-reader.h"
+#include "include/initial-conditions.h"
 
 /* build dependent variables */
 #include "include/Config.h"
@@ -85,6 +86,9 @@ int main(int argc, char *argv[]) {
   path = reinterpret_cast<char *>(malloc(len));
   snprintf(path, len, "./");
   process_params(path);
+
+  /* Initialize box */
+  initial_conditions();
 
   /* Compute stuff */
   rc = Evolve();
