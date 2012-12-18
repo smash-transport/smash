@@ -5,6 +5,8 @@
 #ifndef SRC_INCLUDE_INITIAL_CONDITIONS_H_
 #define SRC_INCLUDE_INITIAL_CONDITIONS_H_
 
-void initial_conditions(void);
+class ParticleData;
+
+void initial_conditions(ParticleData *particles);
 
 #endif  // SRC_INCLUDE_INITIAL_CONDITIONS_H_

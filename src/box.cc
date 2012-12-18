@@ -35,6 +35,9 @@ float EPS = 0.1;
 /* Total number of steps */
 int STEPS = 10000;
 
+/* Default random seed */
+unsigned int seedp = 1;
+
 static void usage(int rc) {
   printf("\nUsage: %s [option]\n\n", progname);
   printf("Calculate transport box\n"
@@ -54,6 +57,7 @@ static int Evolve(void) {
 int main(int argc, char *argv[]) {
   char *p, *path;
   int opt, rc;
+  ParticleData *particles;
 
   struct option longopts[] = {
     { "help",       no_argument,            0, 'h' },
@@ -88,7 +92,7 @@ int main(int argc, char *argv[]) {
   process_params(path);
 
   /* Initialize box */
-  initial_conditions();
+  initial_conditions(particles);
 
   /* Compute stuff */
   rc = Evolve();
