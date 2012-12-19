@@ -57,7 +57,7 @@ static int Evolve(void) {
 int main(int argc, char *argv[]) {
   char *p, *path;
   int opt, rc;
-  ParticleData *particles;
+  ParticleData *particles = NULL;
 
   struct option longopts[] = {
     { "help",       no_argument,            0, 'h' },
