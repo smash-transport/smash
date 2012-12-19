@@ -14,6 +14,9 @@ extern float EPS;
 /* number of steps */
 extern int STEPS;
 
+/* Temperature of the Boltzmann distribution for thermal initialization */
+extern float temperature;
+
 /* Debug runs generate more output */
 extern bool verbose;
 

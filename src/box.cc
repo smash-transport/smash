@@ -35,16 +35,28 @@ float EPS = 0.1;
 /* Total number of steps */
 int STEPS = 10000;
 
+/* Temperature of the Boltzmann distribution for thermal initialization */
+float temperature = 0.1;
+
 /* Default random seed */
 unsigned int seedp = 1;
 
 static void usage(int rc) {
   printf("\nUsage: %s [option]\n\n", progname);
   printf("Calculate transport box\n"
+         "  -e, --eps            time step\n"
          "  -h, --help           usage information\n"
+         "  -l, --length         length of the box in fermi\n"
+         "  -T, --temperature    initial temperature\n"
          "  -v, --verbose        show debug info\n"
          "  -V, --version\n\n");
   exit(rc);
+}
+
+static void print_startup(void) {
+  printf("Size of the box: %g [fm]\n", A);
+  printf("Initial temperature: %g [GeV]\n", temperature);
+  printf("Using temporal stepsize: %g [GeV]\n", EPS);
 }
 
 static int Evolve(void) {
@@ -60,7 +72,10 @@ int main(int argc, char *argv[]) {
   ParticleData *particles = NULL;
 
   struct option longopts[] = {
+    { "eps",    no_argument,                0, 'e' },
     { "help",       no_argument,            0, 'h' },
+    { "length",    no_argument,             0, 'l' },
+    { "temperature", no_argument,           0, 'T' },
     { "verbose",    no_argument,            0, 'v' },
     { "version",    no_argument,            0, 'V' },
     { NULL,         0, 0, 0 }
@@ -72,10 +87,19 @@ int main(int argc, char *argv[]) {
     progname = p + 1;
 
   /* parse the command line options */
-  while ((opt = getopt_long(argc, argv, "hVv", longopts, NULL)) != -1) {
+  while ((opt = getopt_long(argc, argv, "e:hl:T:Vv", longopts, NULL)) != -1) {
     switch (opt) {
+    case 'e':
+      EPS = atof(optarg);
+      break;
     case 'h':
       usage(EXIT_SUCCESS);
+      break;
+    case 'l':
+      A = atof(optarg);
+      break;
+    case 'T':
+      temperature = atof(optarg);
       break;
     case 'V':
       printf("%s (%d.%d)\n", progname, VERSION_MAJOR, VERSION_MINOR);
@@ -90,6 +114,9 @@ int main(int argc, char *argv[]) {
   path = reinterpret_cast<char *>(malloc(len));
   snprintf(path, len, "./");
   process_params(path);
+
+  /* Output IC values */
+  print_startup();
 
   /* Initialize box */
   initial_conditions(particles);
