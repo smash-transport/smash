@@ -15,8 +15,9 @@
 
 #include "include/ParticleData.h"
 #include "include/ParticleType.h"
-#include "include/param-reader.h"
 #include "include/initial-conditions.h"
+#include "include/param-reader.h"
+#include "include/outputroutines.h"
 
 /* build dependent variables */
 #include "include/Config.h"
@@ -51,12 +52,6 @@ static void usage(int rc) {
          "  -v, --verbose        show debug info\n"
          "  -V, --version\n\n");
   exit(rc);
-}
-
-static void print_startup(void) {
-  printf("Size of the box: %g [fm]\n", A);
-  printf("Initial temperature: %g [GeV]\n", temperature);
-  printf("Using temporal stepsize: %g [GeV]\n", EPS);
 }
 
 static int Evolve(void) {
