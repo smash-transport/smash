@@ -7,12 +7,5 @@
 #
 *.o
 *.S
-*.tgz
 *~
 *.bak
-*.swp
-*.swo
-#
-# Top-level generic files
-#
-box
