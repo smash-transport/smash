@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2012
+ *    Copyright (c) 2012-2013
  *      maximilian attems <attems@fias.uni-frankfurt.de>
  *
  *    GNU General Public License (GPLv3)

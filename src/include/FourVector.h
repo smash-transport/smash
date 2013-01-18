@@ -27,23 +27,23 @@ class FourVector {
 };
 
 double inline FourVector::x0(void) {
-	return x0_;
+  return x0_;
 }
 
 double inline FourVector::x1(void) {
-	return x1_;
+  return x1_;
 }
 
 double inline FourVector::x2(void) {
-	return x2_;
+  return x2_;
 }
 
 double inline FourVector::x3(void) {
-	return x3_;
+  return x3_;
 }
 
 void inline FourVector::set_FourVector(double t, double z, double x,
-		double y) {
+                                       double y) {
   x0_ = t;
   x1_ = z;
   x2_ = x;

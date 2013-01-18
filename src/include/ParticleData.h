@@ -1,26 +1,28 @@
 /*
- *    Copyright (c) 2012 maximilian attems <attems@fias.uni-frankfurt.de>
+ *    Copyright (c) 2012-2013
+ *      maximilian attems <attems@fias.uni-frankfurt.de>
  *    GNU General Public License (GPLv3)
  */
 #ifndef SRC_INCLUDE_PARTICLEDATA_H_
 #define SRC_INCLUDE_PARTICLEDATA_H_
+
+#include "FourVector.h"
 
 class ParticleData {
   public:
   /* Use improbable values for default constructor */
   ParticleData() :id_(-1) {}
   int id(void);
-  void inline set(int id, double momenta_l, double momenta_t);
-  void inline set_id(int id);
+  void inline set(const int &id, const double &momenta_l,
+                  const double &momenta_t);
+  void inline set_id(const int &id);
   double inline momenta_l(void);
-  void inline set_momenta_l(double momenta_l);
+  void inline set_momenta_l(const double &momenta_l);
   double inline momenta_t(void);
-  void inline set_momenta_t(double momenta_t);
-  void inline set_momenta(double momenta_l, double momenta_t);
-  float inline x(void);
-  float inline y(void);
-  float inline z(void);
-  void inline set_position(float pos_x, float pos_y, float pos_z);
+  void inline set_momenta_t(const double &momenta_t);
+  void inline set_momenta(const double &momenta_l, const double &momenta_t);
+  FourVector inline x(void);
+  void inline set_position(const FourVector &position);
 
   private:
     /* Each particle has a unique identifier */
@@ -30,16 +32,14 @@ class ParticleData {
     /* tranverse momenta */
     double momenta_t_;
     /* position in space */
-    float x_;
-    float y_;
-    float z_;
+    FourVector x_;
 };
 
 int inline ParticleData::id(void) {
   return id_;
 }
 
-void inline ParticleData::set_id(int i) {
+void inline ParticleData::set_id(const int &i) {
   id_ = i;
 }
 
@@ -47,7 +47,7 @@ double inline ParticleData::momenta_l(void) {
   return momenta_l_;
 }
 
-void inline ParticleData::set_momenta_l(double m_l) {
+void inline ParticleData::set_momenta_l(const double &m_l) {
   momenta_l_ = m_l;
 }
 
@@ -55,31 +55,21 @@ double inline ParticleData::momenta_t(void) {
   return momenta_t_;
 }
 
-void inline ParticleData::set_momenta_t(double m_t) {
+void inline ParticleData::set_momenta_t(const double &m_t) {
   momenta_t_ = m_t;
 }
 
-void inline ParticleData::set_momenta(double m_l, double m_t) {
+void inline ParticleData::set_momenta(const double &m_l, const double &m_t) {
   momenta_l_ = m_l;
   momenta_t_ = m_t;
 }
 
-float inline ParticleData::x(void) {
+FourVector inline ParticleData::x(void) {
   return x_;
 }
 
-float inline ParticleData::y(void) {
-  return y_;
-}
-
-float inline ParticleData::z(void) {
-  return z_;
-}
-
-void inline ParticleData::set_position(float pos_x, float pos_y, float pos_z) {
-  x_ = pos_x;
-  y_ = pos_y;
-  z_ = pos_z;
+void inline ParticleData::set_position(const FourVector &pos) {
+  x_ = pos;
 }
 
 #endif  // SRC_INCLUDE_PARTICLEDATA_H_
