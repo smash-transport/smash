@@ -7,6 +7,6 @@
 
 class ParticleData;
 
-void initial_conditions(ParticleData *particles);
+ParticleData* initial_conditions(ParticleData *particles);
 
 #endif  // SRC_INCLUDE_INITIAL_CONDITIONS_H_

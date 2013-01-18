@@ -16,7 +16,7 @@
 #include "include/random.h"
 
 /* initial_conditions - sets partilce data for @particles */
-void initial_conditions(ParticleData *particles) {
+ParticleData* initial_conditions(ParticleData *particles) {
   int num = 5;
   float x_pos, y_pos, z_pos;
   ParticleType pi("pi", 0.13957);
@@ -41,4 +41,6 @@ void initial_conditions(ParticleData *particles) {
     printd("Particle %d position: %g %g %g\n", particles[i].id(),
       particles[i].x(), particles[i].y(), particles[i].z());
   }
+
+  return particles;
 }

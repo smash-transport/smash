@@ -114,11 +114,12 @@ int main(int argc, char *argv[]) {
   print_startup();
 
   /* Initialize box */
-  initial_conditions(particles);
+  particles = initial_conditions(particles);
 
   /* Compute stuff */
   rc = Evolve();
 
+  delete [] particles;
   free(path);
   return rc;
 }
