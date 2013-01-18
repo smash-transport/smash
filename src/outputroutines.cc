@@ -18,5 +18,5 @@ void print_startup(void) {
   printf("Initial temperature: %g [GeV]\n", temperature);
   printf("Using temporal stepsize: %g [GeV]\n", EPS);
   printf("Maximum number of steps: %i \n", STEPS);
-  printf("Random number seed: %i \n", seedp);
+  printf("Random number seed: %u \n", seedp);
 }
