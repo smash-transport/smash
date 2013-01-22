@@ -19,7 +19,6 @@
 ParticleData* initial_conditions(ParticleData *particles) {
   int num = 5;
   double x_pos, y_pos, z_pos, time_start;
-  FourVector position;
   ParticleType pi("pi", 0.13957);
   ParticleType pi0("pi0", 0.134977);
 
@@ -38,8 +37,8 @@ ParticleData* initial_conditions(ParticleData *particles) {
     x_pos = 1.0 * rand_r(&seedp) / RAND_MAX * A;
     y_pos = 1.0 * rand_r(&seedp) / RAND_MAX * A;
     z_pos = 1.0 * rand_r(&seedp) / RAND_MAX * A;
-    position.set_FourVector(time_start, z_pos, x_pos, y_pos);
-    particles[i].set_position(position);
+    particles[i].set_position(time_start, z_pos, x_pos, y_pos);
+
     printd("Particle %d momentum: %g %g %g %g [GeV]\n", particles[i].id(),
       particles[i].momentum().x0(), particles[i].momentum().x1(),
       particles[i].momentum().x2(), particles[i].momentum().x3());
