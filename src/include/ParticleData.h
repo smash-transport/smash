@@ -8,6 +8,8 @@
 
 #include "FourVector.h"
 
+#include "math.h"
+
 class ParticleData {
   public:
   /* Use improbable values for default constructor */
@@ -16,21 +18,18 @@ class ParticleData {
   void inline set(const int &id, const double &momenta_l,
                   const double &momenta_t);
   void inline set_id(const int &id);
-  double inline momenta_l(void);
-  void inline set_momenta_l(const double &momenta_l);
-  double inline momenta_t(void);
-  void inline set_momenta_t(const double &momenta_t);
-  void inline set_momenta(const double &momenta_l, const double &momenta_t);
+  FourVector inline momentum(void);
+  void inline set_momentum(const FourVector &momentum_vector);
+  void inline set_momentum(const double &mass, const double &px,
+                           const double &py, const double &pz);
   FourVector inline x(void);
   void inline set_position(const FourVector &position);
 
   private:
     /* Each particle has a unique identifier */
     int id_;
-    /* longitudinal momenta */
-    double momenta_l_;
-    /* tranverse momenta */
-    double momenta_t_;
+    /* momenta of the particle */
+    FourVector momentum_;
     /* position in space */
     FourVector x_;
 };
@@ -43,25 +42,18 @@ void inline ParticleData::set_id(const int &i) {
   id_ = i;
 }
 
-double inline ParticleData::momenta_l(void) {
-  return momenta_l_;
+FourVector inline ParticleData::momentum(void) {
+  return momentum_;
 }
 
-void inline ParticleData::set_momenta_l(const double &m_l) {
-  momenta_l_ = m_l;
+void inline ParticleData::set_momentum(const FourVector &momentum_vector) {
+  momentum_ = momentum_vector;
 }
 
-double inline ParticleData::momenta_t(void) {
-  return momenta_t_;
-}
-
-void inline ParticleData::set_momenta_t(const double &m_t) {
-  momenta_t_ = m_t;
-}
-
-void inline ParticleData::set_momenta(const double &m_l, const double &m_t) {
-  momenta_l_ = m_l;
-  momenta_t_ = m_t;
+void inline ParticleData::set_momentum(const double &mass, const double &px,
+                          const double &py, const double &pz) {
+  momentum_.set_FourVector(sqrt(mass * mass + px * px + py * py + pz * pz),
+                           px, py, pz);
 }
 
 FourVector inline ParticleData::x(void) {

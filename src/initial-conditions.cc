@@ -27,23 +27,25 @@ ParticleData* initial_conditions(ParticleData *particles) {
   printd("Pi^0 mass: %g [GeV]\n", pi0.mass());
 
   /* Set random IC:
-   * particles at random position in the box with random momenta
+   * particles at random position in the box with random momentum
    */
   particles = new ParticleData[num];
   for (int i = 0; i < num; i++) {
     particles[i].set_id(i);
-    particles[i].set_momenta(randGauss(1.0), randGauss(1.0));
+    particles[i].set_momentum(pi.mass(), randGauss(1.0), randGauss(1.0),
+      randGauss(1.0));
     time_start = 1.0;
     x_pos = 1.0 * rand_r(&seedp) / RAND_MAX * A;
     y_pos = 1.0 * rand_r(&seedp) / RAND_MAX * A;
     z_pos = 1.0 * rand_r(&seedp) / RAND_MAX * A;
     position.set_FourVector(time_start, z_pos, x_pos, y_pos);
     particles[i].set_position(position);
-    printd("Particle %d momenta: %g %g [GeV]\n", particles[i].id(),
-      particles[i].momenta_l(), particles[i].momenta_t());
-    printd("Particle %d position: %g %g %g\n", particles[i].id(),
-      particles[i].x().x1(), particles[i].x().x2(),
-      particles[i].x().x3());
+    printd("Particle %d momentum: %g %g %g %g [GeV]\n", particles[i].id(),
+      particles[i].momentum().x0(), particles[i].momentum().x1(),
+      particles[i].momentum().x2(), particles[i].momentum().x3());
+    printd("Particle %d position: %g %g %g %g\n", particles[i].id(),
+      particles[i].x().x0(), particles[i].x().x1(),
+      particles[i].x().x2(), particles[i].x().x3());
   }
 
   return particles;
