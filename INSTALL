@@ -1,0 +1,16 @@
+Quick instructions how to build shatter.
+
+Build it in a seperate directory:
+  mkdir build
+  cd build
+
+Cmake build types:
+  cmake -DCMAKE_BUILD_TYPE=Debug ../
+or
+  cmake -DCMAKE_BUILD_TYPE=Release ../
+
+Build it:
+  make
+
+Run it:
+  ./src/box
