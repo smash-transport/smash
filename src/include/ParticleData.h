@@ -54,7 +54,7 @@ void inline ParticleData::set_momentum(const FourVector &momentum_vector) {
 
 void inline ParticleData::set_momentum(const double &mass, const double &px,
                           const double &py, const double &pz) {
-  momentum_.set_FourVector(sqrt(mass * mass + px * px + py * py + pz * pz),
+  x_.set_FourVector(sqrt(mass * mass + px * px + py * py + pz * pz),
                            px, py, pz);
 }
 
