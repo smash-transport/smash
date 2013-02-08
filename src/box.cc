@@ -63,7 +63,7 @@ static int Evolve(void) {
 
 int main(int argc, char *argv[]) {
   char *p, *path;
-  int opt, rc;
+  int opt, rc, number = 0;
   ParticleData *particles = NULL;
 
   struct option longopts[] = {
@@ -114,7 +114,8 @@ int main(int argc, char *argv[]) {
   print_startup();
 
   /* Initialize box */
-  particles = initial_conditions(particles);
+  particles = initial_conditions(particles, number);
+  print_particles(particles, number);
 
   /* Compute stuff */
   rc = Evolve();

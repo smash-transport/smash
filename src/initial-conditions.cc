@@ -16,8 +16,7 @@
 #include "include/random.h"
 
 /* initial_conditions - sets partilce data for @particles */
-ParticleData* initial_conditions(ParticleData *particles) {
-  int num = 5;
+ParticleData* initial_conditions(ParticleData *particles, int number) {
   double x_pos, y_pos, z_pos, time_start;
   ParticleType pi("pi", 0.13957);
   ParticleType pi0("pi0", 0.134977);
@@ -28,8 +27,9 @@ ParticleData* initial_conditions(ParticleData *particles) {
   /* Set random IC:
    * particles at random position in the box with random momentum
    */
-  particles = new ParticleData[num];
-  for (int i = 0; i < num; i++) {
+  number = 50;
+  particles = new ParticleData[number];
+  for (int i = 0; i < number; i++) {
     particles[i].set_id(i);
     particles[i].set_momentum(pi.mass(), randGauss(1.0), randGauss(1.0),
       randGauss(1.0));
