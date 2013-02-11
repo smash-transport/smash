@@ -12,6 +12,6 @@ class ParticleData;
 void print_startup(void);
 
 /* data files */
-void print_particles(ParticleData *particles, int number);
+void print_particles(ParticleData *particles, const int number);
 
 #endif  // SRC_INCLUDE_OUTPUTROUTINES_H_

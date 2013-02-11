@@ -24,7 +24,7 @@ void print_startup(void) {
 }
 
 /* print_particles - writes out data of the specific particles */
-void print_particles(ParticleData *particles, int number) {
+void print_particles(ParticleData *particles, const int number) {
   FILE *fp;
 
   fp = fopen("momenta.dat", "a");
