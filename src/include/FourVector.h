@@ -16,7 +16,8 @@ class FourVector {
     double inline x1();
     double inline x2();
     double inline x3();
-    void inline set_FourVector(double t, double z, double x, double y);
+    void inline set_FourVector(const double t, const double z, const double x,
+      const double y);
     double Dot(FourVector);
 
     /* overloaded operators */
@@ -42,8 +43,8 @@ double inline FourVector::x3(void) {
   return x3_;
 }
 
-void inline FourVector::set_FourVector(double t, double z, double x,
-                                       double y) {
+void inline FourVector::set_FourVector(const double t, const double z,
+                                       const double x, const double y) {
   x0_ = t;
   x1_ = z;
   x2_ = x;
