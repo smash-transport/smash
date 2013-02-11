@@ -16,7 +16,7 @@
 #include "include/random.h"
 
 /* initial_conditions - sets partilce data for @particles */
-ParticleData* initial_conditions(ParticleData *particles, int number) {
+ParticleData* initial_conditions(ParticleData *particles, int &number) {
   double x_pos, y_pos, z_pos, time_start;
   ParticleType pi("pi", 0.13957);
   ParticleType pi0("pi0", 0.134977);

@@ -8,6 +8,6 @@
 /* forward declaration */
 class ParticleData;
 
-ParticleData* initial_conditions(ParticleData *particles, int number);
+ParticleData* initial_conditions(ParticleData *particles, int &number);
 
 #endif  // SRC_INCLUDE_INITIAL_CONDITIONS_H_
