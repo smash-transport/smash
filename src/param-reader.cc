@@ -45,7 +45,11 @@ void process_params(char *path) {
       continue;
 
     key = strtok_r(line, sep, &saveptr);
+    if (key == NULL)
+      continue;
     value = strtok_r(NULL, sep, &saveptr);
+    if (value == NULL)
+      continue;
 
     /* integer values */
     if (strcmp(key, "STEPS") == 0) {
