@@ -54,10 +54,18 @@ static void usage(int rc) {
   exit(rc);
 }
 
-static int Evolve(void) {
-  /* do something */
-  for (int i = 0; i < STEPS; i++)
-    continue;
+static int Evolve(ParticleData *particles, int number) {
+  FourVector distance;	
+
+  for (int steps = 0; steps < STEPS; steps++)
+    for (int i = 0; i < number; i++) {
+       /* calculate particles motion */
+       distance.set_FourVector(1.0, particles[i].velocity_x(),	    
+         particles[i].velocity_y(), particles[i].velocity_z());
+       distance *= EPS;
+       printd("Particle %d motion: %g %g %g %g\n", particles[i].id(),
+         distance.x0(), distance.x1(), distance.x2(), distance.x3());
+    }
   return 0;
 }
 
@@ -118,7 +126,7 @@ int main(int argc, char *argv[]) {
   print_particles(particles, number);
 
   /* Compute stuff */
-  rc = Evolve();
+  rc = Evolve(particles, number);
 
   delete [] particles;
   free(path);
