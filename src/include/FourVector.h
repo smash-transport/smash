@@ -21,6 +21,7 @@ class FourVector {
     double Dot(FourVector);
 
     /* overloaded operators */
+    FourVector inline operator*=(const double &a) const;
 // XX:    FourVector operator+(const FourVector &a) const;
 
   private:
@@ -51,5 +52,13 @@ void inline FourVector::set_FourVector(const double t, const double z,
   x3_ = y;
 }
 
+FourVector inline FourVector::operator*=(const double &a) const {
+  FourVector x = *this;
+  x.x0_ *= a;
+  x.x1_ *= a;
+  x.x2_ *= a;
+  x.x3_ *= a;
+  return x;
+}
 
 #endif  // SRC_INCLUDE_FOURVECTOR_H_
