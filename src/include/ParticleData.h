@@ -26,6 +26,10 @@ class ParticleData {
   void inline set_position(const FourVector &position);
   void inline set_position(const double &x0, const double &x3,
                            const double &x1, const double &x2);
+  /* get velocities */
+  double inline velocity_x(void) { return momentum().x2() / momentum().x0(); }
+  double inline velocity_y(void) { return momentum().x3() / momentum().x0(); }
+  double inline velocity_z(void) { return momentum().x1() / momentum().x0(); }
 
   private:
     /* Each particle has a unique identifier */
