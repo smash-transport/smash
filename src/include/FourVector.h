@@ -21,7 +21,8 @@ class FourVector {
     double Dot(FourVector);
 
     /* overloaded operators */
-    FourVector inline operator*=(const double &a) const;
+    FourVector inline operator+=(const FourVector &a);
+    FourVector inline operator*=(const double &a);
 // XX:    FourVector operator+(const FourVector &a) const;
 
   private:
@@ -52,7 +53,16 @@ void inline FourVector::set_FourVector(const double t, const double z,
   x3_ = y;
 }
 
-FourVector inline FourVector::operator*=(const double &a) const {
+FourVector inline FourVector::operator+=(const FourVector &a) {
+  FourVector x = *this;
+  x.x0_ += a.x0_;
+  x.x1_ += a.x1_;
+  x.x2_ += a.x2_;
+  x.x3_ += a.x3_;
+  return x;
+}
+
+FourVector inline FourVector::operator*=(const double &a) {
   FourVector x = *this;
   x.x0_ *= a;
   x.x1_ *= a;
