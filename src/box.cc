@@ -59,12 +59,19 @@ static int Evolve(ParticleData *particles, int number) {
 
   for (int steps = 0; steps < STEPS; steps++)
     for (int i = 0; i < number; i++) {
+       /* XXX: interactions */
        /* calculate particles motion */
        distance.set_FourVector(1.0, particles[i].velocity_x(),	    
          particles[i].velocity_y(), particles[i].velocity_z());
        distance *= EPS;
        printd("Particle %d motion: %g %g %g %g\n", particles[i].id(),
          distance.x0(), distance.x1(), distance.x2(), distance.x3());
+
+       /* XXX : treat properly boundaries */
+       particles[i].add_position(distance);
+       printd("Particle %d position: %g %g %g %g\n", particles[i].id(),
+                particles[i].x().x0(), particles[i].x().x1(),
+                particles[i].x().x2(), particles[i].x().x3());
     }
   return 0;
 }
