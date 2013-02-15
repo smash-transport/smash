@@ -23,8 +23,8 @@ void print_startup(void) {
   printf("Random number seed: %u \n", seedp);
 }
 
-/* print_particles - writes out data of the specific particles */
-void print_particles(ParticleData *particles, const int number) {
+/* write_particles - writes out data of the specific particles */
+void write_particles(ParticleData *particles, const int number) {
   FILE *fp;
 
   fp = fopen("momenta.dat", "a");

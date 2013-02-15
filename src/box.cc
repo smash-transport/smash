@@ -130,7 +130,7 @@ int main(int argc, char *argv[]) {
 
   /* Initialize box */
   particles = initial_conditions(particles, number);
-  print_particles(particles, number);
+  write_particles(particles, number);
 
   /* Compute stuff */
   rc = Evolve(particles, number);

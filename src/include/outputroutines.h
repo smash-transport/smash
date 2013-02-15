@@ -11,7 +11,7 @@ class ParticleData;
 /* console output */
 void print_startup(void);
 
-/* data files */
-void print_particles(ParticleData *particles, const int number);
+/* output data files */
+void write_particles(ParticleData *particles, const int number);
 
 #endif  // SRC_INCLUDE_OUTPUTROUTINES_H_
