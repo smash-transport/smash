@@ -110,7 +110,7 @@ int main(int argc, char *argv[]) {
       temperature = atof(optarg);
       break;
     case 'V':
-      printf("%s (%d.%d)\n", progname, VERSION_MAJOR, VERSION_MINOR);
+      printf("%s (%d)\n", progname, VERSION_MAJOR);
       exit(EXIT_SUCCESS);
     default:
       usage(EXIT_FAILURE);

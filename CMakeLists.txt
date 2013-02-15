@@ -5,8 +5,7 @@ project (NUrQMD)
 cmake_minimum_required(VERSION 2.8)
 
 # The current version number
-set (VERSION_MAJOR 0)
-set (VERSION_MINOR 0)
+set (VERSION_MAJOR 15022013)
 
 # Set the relevant g++ flags
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g")
