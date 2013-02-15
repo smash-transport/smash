@@ -23,6 +23,20 @@ void print_startup(void) {
   printf("Random number seed: %u \n", seedp);
 }
 
+/* printd_momenta - print debug data of the specific particle */
+void printd_momenta(ParticleData particle) {
+  printd("Particle %d momenta: %g %g %g %g [GeV]\n", particle.id(),
+      particle.momentum().x0(), particle.momentum().x1(),
+      particle.momentum().x2(), particle.momentum().x3());
+}
+
+/* printd_position - print debug data of the specific particle */
+void printd_position(ParticleData particle) {
+  printd("Particle %d position: %g %g %g %g [fm]\n", particle.id(),
+      particle.x().x0(), particle.x().x1(), particle.x().x2(),
+      particle.x().x3());
+}
+
 /* write_particles - writes out data of the specific particles */
 void write_particles(ParticleData *particles, const int number) {
   FILE *fp;

@@ -69,9 +69,7 @@ static int Evolve(ParticleData *particles, int number) {
 
        /* XXX : treat properly boundaries */
        particles[i].add_position(distance);
-       printd("Particle %d position: %g %g %g %g\n", particles[i].id(),
-                particles[i].x().x0(), particles[i].x().x1(),
-                particles[i].x().x2(), particles[i].x().x3());
+       printd_position(particles[i]);
     }
   return 0;
 }

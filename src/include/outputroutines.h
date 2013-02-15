@@ -11,6 +11,10 @@ class ParticleData;
 /* console output */
 void print_startup(void);
 
+/* console debug output */
+void printd_position(ParticleData particle);
+void printd_momenta(ParticleData particle);
+
 /* output data files */
 void write_particles(ParticleData *particles, const int number);
 

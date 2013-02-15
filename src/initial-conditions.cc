@@ -14,6 +14,7 @@
 #include "include/ParticleData.h"
 #include "include/ParticleType.h"
 #include "include/random.h"
+#include "include/outputroutines.h"
 
 /* initial_conditions - sets partilce data for @particles */
 ParticleData* initial_conditions(ParticleData *particles, int &number) {
@@ -39,12 +40,8 @@ ParticleData* initial_conditions(ParticleData *particles, int &number) {
     z_pos = 1.0 * rand_r(&seedp) / RAND_MAX * A;
     particles[i].set_position(time_start, z_pos, x_pos, y_pos);
 
-    printd("Particle %d momentum: %g %g %g %g [GeV]\n", particles[i].id(),
-      particles[i].momentum().x0(), particles[i].momentum().x1(),
-      particles[i].momentum().x2(), particles[i].momentum().x3());
-    printd("Particle %d position: %g %g %g %g\n", particles[i].id(),
-      particles[i].x().x0(), particles[i].x().x1(),
-      particles[i].x().x2(), particles[i].x().x3());
+    printd_momenta(particles[i]);
+    printd_position(particles[i]);
   }
 
   return particles;
