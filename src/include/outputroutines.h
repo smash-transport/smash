@@ -11,6 +11,9 @@ class ParticleData;
 /* console output */
 void print_startup(void);
 
+/* data directory */
+void mkdir_data(void);
+
 /* console debug output */
 void printd_position(ParticleData particle);
 void printd_momenta(ParticleData particle);

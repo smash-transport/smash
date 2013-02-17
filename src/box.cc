@@ -125,6 +125,7 @@ int main(int argc, char *argv[]) {
 
   /* Output IC values */
   print_startup();
+  mkdir_data();
 
   /* Initialize box */
   particles = initial_conditions(particles, number);
