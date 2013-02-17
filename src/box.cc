@@ -31,7 +31,7 @@ bool verbose = 0;
 float A = 5.0;
 
 /* Time steps */
-float EPS = 0.1;
+float EPS = 0.05;
 
 /* Total number of steps */
 int STEPS = 10000;
@@ -55,6 +55,8 @@ static void usage(int rc) {
 }
 
 static int Evolve(ParticleData *particles, int number) {
+  /* XXX: UPDATE should be configurable */
+  int UPDATE = 10;
   FourVector distance;	
 
   for (int steps = 0; steps < STEPS; steps++)
@@ -70,6 +72,10 @@ static int Evolve(ParticleData *particles, int number) {
        /* XXX : treat properly boundaries */
        particles[i].add_position(distance);
        printd_position(particles[i]);
+       
+       /* save evolution data */
+       if (i > 0 && i % UPDATE == 0)
+         write_particles(particles, number);
     }
   return 0;
 }
