@@ -6,9 +6,9 @@
 #ifndef SRC_INCLUDE_PARTICLEDATA_H_
 #define SRC_INCLUDE_PARTICLEDATA_H_
 
-#include "FourVector.h"
+#include <math.h>
 
-#include "math.h"
+#include "../include/FourVector.h"
 
 class ParticleData {
   public:

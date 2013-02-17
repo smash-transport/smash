@@ -57,13 +57,13 @@ static void usage(int rc) {
 static int Evolve(ParticleData *particles, int number) {
   /* XXX: UPDATE should be configurable */
   int UPDATE = 10;
-  FourVector distance;	
+  FourVector distance;
 
   for (int steps = 0; steps < STEPS; steps++)
     for (int i = 0; i < number; i++) {
        /* XXX: interactions */
        /* calculate particles motion */
-       distance.set_FourVector(1.0, particles[i].velocity_x(),	    
+       distance.set_FourVector(1.0, particles[i].velocity_x(),
          particles[i].velocity_y(), particles[i].velocity_z());
        distance *= EPS;
        printd("Particle %d motion: %g %g %g %g\n", particles[i].id(),
@@ -72,7 +72,7 @@ static int Evolve(ParticleData *particles, int number) {
        /* XXX : treat properly boundaries */
        particles[i].add_position(distance);
        printd_position(particles[i]);
-       
+
        /* save evolution data */
        if (i > 0 && i % UPDATE == 0)
          write_particles(particles, number);
@@ -134,7 +134,7 @@ int main(int argc, char *argv[]) {
   mkdir_data();
 
   /* Initialize box */
-  particles = initial_conditions(particles, number);
+  particles = initial_conditions(particles, &number);
   write_particles(particles, number);
 
   /* Compute stuff */
