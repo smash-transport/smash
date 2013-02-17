@@ -54,21 +54,19 @@ void inline FourVector::set_FourVector(const double t, const double z,
 }
 
 FourVector inline FourVector::operator+=(const FourVector &a) {
-  FourVector x = *this;
-  x.x0_ += a.x0_;
-  x.x1_ += a.x1_;
-  x.x2_ += a.x2_;
-  x.x3_ += a.x3_;
-  return x;
+  this->x0_ += a.x0_;
+  this->x1_ += a.x1_;
+  this->x2_ += a.x2_;
+  this->x3_ += a.x3_;
+  return *this;
 }
 
 FourVector inline FourVector::operator*=(const double &a) {
-  FourVector x = *this;
-  x.x0_ *= a;
-  x.x1_ *= a;
-  x.x2_ *= a;
-  x.x3_ *= a;
-  return x;
+  this->x0_ *= a;
+  this->x1_ *= a;
+  this->x2_ *= a;
+  this->x3_ *= a;
+  return *this;
 }
 
 #endif  // SRC_INCLUDE_FOURVECTOR_H_
