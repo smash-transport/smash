@@ -24,7 +24,6 @@ extern bool verbose;
 extern unsigned int seedp;
 
 /* Compile time debug info */
-#define DEBUG 1
 #ifdef DEBUG
 # define printd printf
 #else
