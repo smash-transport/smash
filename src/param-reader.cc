@@ -56,6 +56,10 @@ void process_params(box box, char *path) {
       box.set_steps(abs(atoi(value)));
       return;
     }
+    if (strcmp(key, "UPDATE") == 0) {
+      box.set_update(abs(atoi(value)));
+      return;
+    }
 
 
     /* double or float values */

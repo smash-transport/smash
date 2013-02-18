@@ -9,30 +9,35 @@
 
 class box {
   public:
-    void inline set(const int STEPS, const float A, const float EPS,
-      const float TEMPERATURE);
+    void inline set(const int STEPS, const int UPDATE,
+      const float A, const float EPS, const float TEMPERATURE);
     float inline a();
     void inline set_a(const float &A);
     float inline eps();
     void inline set_eps(const float &EPS);
     int inline steps();
     void inline set_steps(const int &STEPS);
+    int inline update();
+    void inline set_update(const int &UPDATE);
     float inline temperature();
     void inline set_temperature(const float &T);
   private:
+    /* number of steps */
+    int steps_;
+    /* number of steps before giving measurables */
+    int update_;
     /* Cube edge length */
     float a_;
     /* temporal time step */
     float eps_;
-    /* number of steps */
-    int steps_;
     /* Temperature of the Boltzmann distribution for thermal initialization */
     float temperature_;
 };
 
-void inline box::set(const int STEPS, const float A, const float EPS,
-      const float TEMPERATURE) {
+void inline box::set(const int STEPS, const int UPDATE, const float A,
+      const float EPS, const float TEMPERATURE) {
   steps_ = STEPS;
+  update_ = UPDATE;
   a_ = A;
   eps_ = EPS;
   temperature_ = TEMPERATURE;
@@ -60,6 +65,14 @@ int inline box::steps(void) {
 
 void inline box::set_steps(const int &STEPS) {
   steps_ = STEPS;
+}
+
+int inline box::update(void) {
+  return update_;
+}
+
+void inline box::set_update(const int &UPDATE) {
+  update_ = UPDATE;
 }
 
 float inline box::temperature(void) {

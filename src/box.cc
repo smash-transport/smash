@@ -43,8 +43,6 @@ static void usage(int rc) {
 }
 
 static int Evolve(ParticleData *particles, int number, box box) {
-  /* XXX: UPDATE should be configurable */
-  int UPDATE = 10;
   FourVector distance;
 
   for (int steps = 0; steps < box.steps(); steps++)
@@ -62,7 +60,7 @@ static int Evolve(ParticleData *particles, int number, box box) {
        printd_position(particles[i]);
 
        /* save evolution data */
-       if (i > 0 && i % UPDATE == 0)
+       if (i > 0 && i % box.update() == 0)
          write_particles(particles, number);
     }
   return 0;
