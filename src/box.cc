@@ -27,18 +27,6 @@ char *progname;
 /* Be chatty on demand */
 bool verbose = 0;
 
-/* Side length of the cube in fm */
-float A = 5.0;
-
-/* Time steps */
-float EPS = 0.05;
-
-/* Total number of steps */
-int STEPS = 10000;
-
-/* Temperature of the Boltzmann distribution for thermal initialization */
-float temperature = 0.1;
-
 /* Default random seed */
 unsigned int seedp = 1;
 
@@ -54,18 +42,18 @@ static void usage(int rc) {
   exit(rc);
 }
 
-static int Evolve(ParticleData *particles, int number) {
+static int Evolve(ParticleData *particles, int number, box box) {
   /* XXX: UPDATE should be configurable */
   int UPDATE = 10;
   FourVector distance;
 
-  for (int steps = 0; steps < STEPS; steps++)
+  for (int steps = 0; steps < box.steps(); steps++)
     for (int i = 0; i < number; i++) {
        /* XXX: interactions */
        /* calculate particles motion */
        distance.set_FourVector(1.0, particles[i].velocity_x(),
          particles[i].velocity_y(), particles[i].velocity_z());
-       distance *= EPS;
+       distance *= box.eps();
        printd("Particle %d motion: %g %g %g %g\n", particles[i].id(),
          distance.x0(), distance.x1(), distance.x2(), distance.x3());
 
@@ -84,6 +72,7 @@ int main(int argc, char *argv[]) {
   char *p, *path;
   int opt, rc, number = 0;
   ParticleData *particles = NULL;
+  box box;
 
   struct option longopts[] = {
     { "eps",    no_argument,                0, 'e' },
@@ -104,16 +93,16 @@ int main(int argc, char *argv[]) {
   while ((opt = getopt_long(argc, argv, "e:hl:T:Vv", longopts, NULL)) != -1) {
     switch (opt) {
     case 'e':
-      EPS = atof(optarg);
+      box.set_eps(atof(optarg));
       break;
     case 'h':
       usage(EXIT_SUCCESS);
       break;
     case 'l':
-      A = atof(optarg);
+      box.set_a(atof(optarg));
       break;
     case 'T':
-      temperature = atof(optarg);
+      box.set_temperature(atof(optarg));
       break;
     case 'V':
       printf("%s (%d)\n", progname, VERSION_MAJOR);
@@ -127,18 +116,19 @@ int main(int argc, char *argv[]) {
   int len = 3;
   path = reinterpret_cast<char *>(malloc(len));
   snprintf(path, len, "./");
-  process_params(path);
+  process_params(box, path);
 
   /* Output IC values */
-  print_startup();
+  box = init_box(box);
+  print_startup(box);
   mkdir_data();
 
   /* Initialize box */
-  particles = initial_conditions(particles, &number);
+  particles = initial_conditions(particles, &number, box);
   write_particles(particles, number);
 
   /* Compute stuff */
-  rc = Evolve(particles, number);
+  rc = Evolve(particles, number, box);
 
   delete [] particles;
   free(path);

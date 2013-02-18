@@ -1,21 +1,74 @@
 /*
- *    Copyright (c) 2012 maximilian attems <attems@fias.uni-frankfurt.de>
+ *    Copyright (c) 2012-2013
+ *      maximilian attems <attems@fias.uni-frankfurt.de>
+ *      Jussi Auvinen <auvinen@fias.uni-frankfurt.de>
  *    GNU General Public License (GPLv3)
  */
 #ifndef SRC_INCLUDE_BOX_H_
 #define SRC_INCLUDE_BOX_H_
 
-/* Cube edge length */
-extern float A;
+class box {
+  public:
+    void inline set(const int STEPS, const float A, const float EPS,
+      const float TEMPERATURE);
+    float inline a();
+    void inline set_a(const float &A);
+    float inline eps();
+    void inline set_eps(const float &EPS);
+    int inline steps();
+    void inline set_steps(const int &STEPS);
+    float inline temperature();
+    void inline set_temperature(const float &T);
+  private:
+    /* Cube edge length */
+    float a_;
+    /* temporal time step */
+    float eps_;
+    /* number of steps */
+    int steps_;
+    /* Temperature of the Boltzmann distribution for thermal initialization */
+    float temperature_;
+};
 
-/* temporal time step */
-extern float EPS;
+void inline box::set(const int STEPS, const float A, const float EPS,
+      const float TEMPERATURE) {
+  steps_ = STEPS;
+  a_ = A;
+  eps_ = EPS;
+  temperature_ = TEMPERATURE;
+}
 
-/* number of steps */
-extern int STEPS;
+float inline box::a(void) {
+  return a_;
+}
 
-/* Temperature of the Boltzmann distribution for thermal initialization */
-extern float temperature;
+void inline box::set_a(const float &A) {
+  a_ = A;
+}
+
+float inline box::eps(void) {
+  return eps_;
+}
+
+void inline box::set_eps(const float &EPS) {
+  eps_ = EPS;
+}
+
+int inline box::steps(void) {
+  return steps_;
+}
+
+void inline box::set_steps(const int &STEPS) {
+  steps_ = STEPS;
+}
+
+float inline box::temperature(void) {
+  return temperature_;
+}
+
+void inline box::set_temperature(const float &T) {
+  temperature_ = T;
+}
 
 /* Debug runs generate more output */
 extern bool verbose;

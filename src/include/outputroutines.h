@@ -5,11 +5,12 @@
 #ifndef SRC_INCLUDE_OUTPUTROUTINES_H_
 #define SRC_INCLUDE_OUTPUTROUTINES_H_
 
-/* forward declaration */
+/* forward declarations */
+class box;
 class ParticleData;
 
 /* console output */
-void print_startup(void);
+void print_startup(box box);
 
 /* data directory */
 void mkdir_data(void);

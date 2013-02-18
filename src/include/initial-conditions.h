@@ -5,9 +5,11 @@
 #ifndef SRC_INCLUDE_INITIAL_CONDITIONS_H_
 #define SRC_INCLUDE_INITIAL_CONDITIONS_H_
 
-/* forward declaration */
+/* forward declarations */
 class ParticleData;
+class box;
 
-ParticleData* initial_conditions(ParticleData *particles, int *number);
+box init_box(box box);
+ParticleData* initial_conditions(ParticleData *particles, int *number, box box);
 
 #endif  // SRC_INCLUDE_INITIAL_CONDITIONS_H_

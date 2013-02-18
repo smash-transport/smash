@@ -20,7 +20,7 @@
 const char *sep = " \t\n";
 
 /* process_params - read in params */
-void process_params(char *path) {
+void process_params(box box, char *path) {
   char *line = NULL, *saveptr = NULL, params[FILELEN];
   size_t len = 0;
   ssize_t read;
@@ -53,18 +53,22 @@ void process_params(char *path) {
 
     /* integer values */
     if (strcmp(key, "STEPS") == 0) {
-      STEPS = abs(atoi(value));
+      box.set_steps(abs(atoi(value)));
       return;
     }
 
 
     /* double or float values */
     if (strcmp(key, "A") == 0) {
-      A = atof(value);
+      box.set_a(atof(value));
       return;
     }
     if (strcmp(key, "EPS") == 0) {
-      EPS = atof(value);
+      box.set_eps(atof(value));
+      return;
+    }
+    if (strcmp(key, "TEMPERATURE") == 0) {
+      box.set_temperature(atof(value));
       return;
     }
   }
