@@ -36,6 +36,7 @@ static void usage(int rc) {
          "  -e, --eps            time step\n"
          "  -h, --help           usage information\n"
          "  -l, --length         length of the box in fermi\n"
+         "  -s, --steps          number of steps\n"
          "  -T, --temperature    initial temperature\n"
          "  -v, --verbose        show debug info\n"
          "  -V, --version\n\n");
@@ -76,6 +77,7 @@ int main(int argc, char *argv[]) {
     { "eps",    no_argument,                0, 'e' },
     { "help",       no_argument,            0, 'h' },
     { "length",    no_argument,             0, 'l' },
+    { "steps",	   no_argument,             0, 's' },
     { "temperature", no_argument,           0, 'T' },
     { "verbose",    no_argument,            0, 'v' },
     { "version",    no_argument,            0, 'V' },
@@ -87,8 +89,8 @@ int main(int argc, char *argv[]) {
   if ((p = strrchr(progname, '/')) != NULL)
     progname = p + 1;
 
-  /* parse the command line options */
-  while ((opt = getopt_long(argc, argv, "e:hl:T:Vv", longopts, NULL)) != -1) {
+  /* parse the command line options, they override all previous */
+  while ((opt = getopt_long(argc, argv, "e:hl:s:T:Vv", longopts, NULL)) != -1) {
     switch (opt) {
     case 'e':
       box.set_eps(atof(optarg));
@@ -98,6 +100,9 @@ int main(int argc, char *argv[]) {
       break;
     case 'l':
       box.set_a(atof(optarg));
+      break;
+    case 's':
+      box.set_steps(atof(optarg));
       break;
     case 'T':
       box.set_temperature(atof(optarg));
@@ -110,14 +115,16 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  /* Read config file */
+  /* Read config file overrides default */
   int len = 3;
   path = reinterpret_cast<char *>(malloc(len));
   snprintf(path, len, "./");
   process_params(box, path);
 
-  /* Output IC values */
+  /* set default box configuration */
   box = init_box(box);
+
+  /* Output IC values */
   print_startup(box);
   mkdir_data();
 
