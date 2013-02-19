@@ -43,8 +43,43 @@ static void usage(int rc) {
   exit(rc);
 }
 
+
+/* boundary_condition - enforce specific type of boundaries */
+static FourVector boundary_condition(FourVector position, FourVector distance,
+       box box) {
+  /* Check positivity and box size */
+  if (position.x1() > 0 && position.x2() > 0 && position.x3() > 0
+      && position.x1() < box.a() && position.x2() < box.a()
+      && position.x3() < box.a())
+    goto out;
+  
+  /* XXX: add hard wall conditions too */
+  /* Enforce periodic boundary condition */
+  if (position.x1() < 0)
+    position.set_x1(position.x1() + box.a());
+
+  if (position.x2() < 0)
+    position.set_x2(position.x2() + box.a());
+
+  if (position.x3() < 0)
+    position.set_x3(position.x3() + box.a());
+
+  if (position.x1() > box.a())
+    position.set_x1(position.x1() - box.a());
+
+  if (position.x2() > box.a())
+    position.set_x2(position.x2() - box.a());
+
+  if (position.x3() > box.a())
+    position.set_x3(position.x3() - box.a());
+
+out:
+    return position;
+}
+
+/* Evolve - the core of the box, stepping forward in time */
 static int Evolve(ParticleData *particles, int number, box box) {
-  FourVector distance;
+  FourVector distance, position;
 
   for (int steps = 0; steps < box.steps(); steps++)
     for (int i = 0; i < number; i++) {
@@ -56,8 +91,12 @@ static int Evolve(ParticleData *particles, int number, box box) {
        printd("Particle %d motion: %g %g %g %g\n", particles[i].id(),
          distance.x0(), distance.x1(), distance.x2(), distance.x3());
 
-       /* XXX : treat properly boundaries */
-       particles[i].add_position(distance);
+       /* treat the box boundaries */
+       position = particles[i].x();
+       position += distance;
+       position = boundary_condition(position, distance, box);
+       printd_position(particles[i]);
+       particles[i].set_position(position);
        printd_position(particles[i]);
 
        /* save evolution data */
