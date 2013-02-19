@@ -12,10 +12,14 @@ class FourVector {
     /* default constructor */
     FourVector(): x0_(0), x1_(0), x2_(0), x3_(0) {}
     /* t, z, x_\perp */
-    double inline x0();
-    double inline x1();
-    double inline x2();
-    double inline x3();
+    double inline x0(void);
+    void inline set_x0(double t);
+    double inline x1(void);
+    void inline set_x1(double z);
+    double inline x2(void);
+    void inline set_x2(double x);
+    double inline x3(void);
+    void inline set_x3(double y);
     void inline set_FourVector(const double t, const double z, const double x,
       const double y);
     double Dot(FourVector);
@@ -33,16 +37,32 @@ double inline FourVector::x0(void) {
   return x0_;
 }
 
+void inline FourVector::set_x0(const double t) {
+  x0_ = t;
+}
+
 double inline FourVector::x1(void) {
   return x1_;
+}
+
+void inline FourVector::set_x1(const double z) {
+  x1_ = z;
 }
 
 double inline FourVector::x2(void) {
   return x2_;
 }
 
+void inline FourVector::set_x2(const double x) {
+  x2_ = x;
+}
+
 double inline FourVector::x3(void) {
   return x3_;
+}
+
+void inline FourVector::set_x3(const double y) {
+  x3_ = y;
 }
 
 void inline FourVector::set_FourVector(const double t, const double z,
