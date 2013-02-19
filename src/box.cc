@@ -89,6 +89,15 @@ int main(int argc, char *argv[]) {
   if ((p = strrchr(progname, '/')) != NULL)
     progname = p + 1;
 
+  /* set default box configuration */
+  box = init_box(box);
+
+  /* Read config file overrides default */
+  int len = 3;
+  path = reinterpret_cast<char *>(malloc(len));
+  snprintf(path, len, "./");
+  process_params(box, path);
+
   /* parse the command line options, they override all previous */
   while ((opt = getopt_long(argc, argv, "e:hl:s:T:Vv", longopts, NULL)) != -1) {
     switch (opt) {
@@ -114,15 +123,6 @@ int main(int argc, char *argv[]) {
       usage(EXIT_FAILURE);
     }
   }
-
-  /* Read config file overrides default */
-  int len = 3;
-  path = reinterpret_cast<char *>(malloc(len));
-  snprintf(path, len, "./");
-  process_params(box, path);
-
-  /* set default box configuration */
-  box = init_box(box);
 
   /* Output IC values */
   print_startup(box);
