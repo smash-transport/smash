@@ -52,7 +52,7 @@ static FourVector boundary_condition(FourVector position, FourVector distance,
       && position.x1() < box.a() && position.x2() < box.a()
       && position.x3() < box.a())
     goto out;
-  
+
   /* XXX: add hard wall conditions too */
   /* Enforce periodic boundary condition */
   if (position.x1() < 0)
@@ -73,7 +73,7 @@ static FourVector boundary_condition(FourVector position, FourVector distance,
   if (position.x3() > box.a())
     position.set_x3(position.x3() - box.a());
 
-out:
+ out:
     return position;
 }
 
@@ -95,7 +95,6 @@ static int Evolve(ParticleData *particles, int number, box box) {
        position = particles[i].x();
        position += distance;
        position = boundary_condition(position, distance, box);
-       printd_position(particles[i]);
        particles[i].set_position(position);
        printd_position(particles[i]);
 
@@ -113,10 +112,10 @@ int main(int argc, char *argv[]) {
   box box;
 
   struct option longopts[] = {
-    { "eps",    no_argument,                0, 'e' },
+    { "eps",        no_argument,            0, 'e' },
     { "help",       no_argument,            0, 'h' },
-    { "length",    no_argument,             0, 'l' },
-    { "steps",	   no_argument,             0, 's' },
+    { "length",     no_argument,            0, 'l' },
+    { "steps",      no_argument,            0, 's' },
     { "temperature", no_argument,           0, 'T' },
     { "verbose",    no_argument,            0, 'v' },
     { "version",    no_argument,            0, 'V' },

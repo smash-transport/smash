@@ -21,6 +21,7 @@ class box {
     void inline set_update(const int &UPDATE);
     float inline temperature();
     void inline set_temperature(const float &T);
+
   private:
     /* number of steps */
     int steps_;
