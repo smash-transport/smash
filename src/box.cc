@@ -149,7 +149,7 @@ int main(int argc, char *argv[]) {
       box.set_a(atof(optarg));
       break;
     case 's':
-      box.set_steps(atof(optarg));
+      box.set_steps(abs(atoi(optarg)));
       break;
     case 'T':
       box.set_temperature(atof(optarg));
