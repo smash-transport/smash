@@ -9,6 +9,7 @@
 #include "include/initial-conditions.h"
 
 #include <stdio.h>
+#include <gsl/gsl_sf_bessel.h>
 
 #include "include/box.h"
 #include "include/ParticleData.h"
@@ -19,7 +20,7 @@
 /* Set default IC for the box */
 box init_box(box box) {
   int steps = 10000, update = 10;
-  float A = 5.0, EPS = 0.05, temperature = 0.1;
+  float A = 5.0, EPS = 0.05, temperature = 0.2;
 
   box.set(steps, update, A, EPS, temperature);
   return box;
@@ -28,17 +29,31 @@ box init_box(box box) {
 /* initial_conditions - sets partilce data for @particles */
 ParticleData* initial_conditions(ParticleData *particles, int *number,
       box box) {
-  double x_pos, y_pos, z_pos, time_start;
+  double x_pos, y_pos, z_pos, time_start, number_density;
   ParticleType pi("pi", 0.13957);
   ParticleType pi0("pi0", 0.134977);
 
   printd("Pi^± mass: %g [GeV]\n", pi.mass());
   printd("Pi^0 mass: %g [GeV]\n", pi0.mass());
 
+  /* 
+   * The particle number depends on distribution function
+   * (assumes Bose-Einstein):
+   * Volume m^2 T BesselK[2, m/T] / (2\pi^2)
+   * XXX: define GeV conversion constant 0.19733
+   */
+  number_density = pi.mass() * pi.mass() * box.temperature()
+    * gsl_sf_bessel_Knu(2, pi.mass() / box.temperature())
+    / 2 / M_PI / M_PI / 0.19733 / 0.19733 / 0.19733;
+  /* XXX: fix cast to reflect probability */
+  *number = box.a() * box.a() * box.a() * number_density;
+  printf("IC number density %f [fm^-3]\n", number_density);
+  printf("IC number of %s %f\n", pi.name().c_str(), number_density
+    * box.a() * box.a() * box.a());
+
   /* Set random IC:
    * particles at random position in the box with random momentum
    */
-  *number = 50;
   particles = new ParticleData[*number];
   for (int i = 0; i < *number; i++) {
     particles[i].set_id(i);

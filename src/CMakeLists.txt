@@ -10,3 +10,6 @@ configure_file (
   "${PROJECT_BINARY_DIR}/src/include/Config.h"
 )
 include_directories("${PROJECT_BINARY_DIR}/src")
+
+# link with gsl
+target_link_libraries(box gsl gslcblas)
