@@ -1,0 +1,3 @@
+Find cmake build errors
+(best debugged with full compiler output):
+ make VERBOSE=1
