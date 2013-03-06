@@ -167,7 +167,7 @@ int main(int argc, char *argv[]) {
   mkdir_data();
 
   /* Initialize box */
-  particles = initial_conditions(particles, &number, box);
+  particles = initial_conditions(particles, number, box);
   write_particles(particles, number);
 
   /* Compute stuff */

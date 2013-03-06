@@ -27,7 +27,7 @@ box init_box(box box) {
 }
 
 /* initial_conditions - sets partilce data for @particles */
-ParticleData* initial_conditions(ParticleData *particles, int *number,
+ParticleData* initial_conditions(ParticleData *particles, int &number,
       box box) {
   double x_pos, y_pos, z_pos, time_start, number_density;
   ParticleType pi("pi", 0.13957);
@@ -46,7 +46,7 @@ ParticleData* initial_conditions(ParticleData *particles, int *number,
     * gsl_sf_bessel_Knu(2, pi.mass() / box.temperature())
     / 2 / M_PI / M_PI / 0.19733 / 0.19733 / 0.19733;
   /* XXX: fix cast to reflect probability */
-  *number = box.a() * box.a() * box.a() * number_density;
+  number = box.a() * box.a() * box.a() * number_density;
   printf("IC number density %f [fm^-3]\n", number_density);
   printf("IC number of %s %f\n", pi.name().c_str(), number_density
     * box.a() * box.a() * box.a());
@@ -54,8 +54,8 @@ ParticleData* initial_conditions(ParticleData *particles, int *number,
   /* Set random IC:
    * particles at random position in the box with random momentum
    */
-  particles = new ParticleData[*number];
-  for (int i = 0; i < *number; i++) {
+  particles = new ParticleData[number];
+  for (int i = 0; i < number; i++) {
     particles[i].set_id(i);
     particles[i].set_momentum(pi.mass(), randGauss(1.0), randGauss(1.0),
       randGauss(1.0));
