@@ -45,11 +45,13 @@ ParticleData* initial_conditions(ParticleData *particles, int &number,
   number_density = pi.mass() * pi.mass() * box.temperature()
     * gsl_sf_bessel_Knu(2, pi.mass() / box.temperature())
     / 2 / M_PI / M_PI / 0.19733 / 0.19733 / 0.19733;
-  /* XXX: fix cast to reflect probability */
+  /* cast while reflecting probability of extra particle */
   number = box.a() * box.a() * box.a() * number_density;
+  srand48(time(NULL));
+  if (box.a() * box.a() * box.a() * number_density - number > drand48())
+    number++;
   printf("IC number density %f [fm^-3]\n", number_density);
-  printf("IC number of %s %f\n", pi.name().c_str(), number_density
-    * box.a() * box.a() * box.a());
+  printf("IC %d number of %s\n", number, pi.name().c_str());
 
   /* Set random IC:
    * particles at random position in the box with random momentum
