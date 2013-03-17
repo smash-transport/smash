@@ -28,8 +28,8 @@ class FourVector {
 
     /* overloaded operators */
     FourVector inline operator+=(const FourVector &a);
+    FourVector inline operator-=(const FourVector &a);
     FourVector inline operator*=(const double &a);
-// XX:    FourVector operator+(const FourVector &a) const;
 
   private:
     double x0_, x1_, x2_, x3_;
@@ -81,6 +81,24 @@ FourVector inline FourVector::operator+=(const FourVector &a) {
   this->x2_ += a.x2_;
   this->x3_ += a.x3_;
   return *this;
+}
+
+inline FourVector operator+(FourVector a, const FourVector &b) {
+  a += b;
+  return a;
+}
+
+FourVector inline FourVector::operator-=(const FourVector &a) {
+  this->x0_ -= a.x0_;
+  this->x1_ -= a.x1_;
+  this->x2_ -= a.x2_;
+  this->x3_ -= a.x3_;
+  return *this;
+}
+
+inline FourVector operator-(FourVector a, const FourVector &b) {
+  a -= b;
+  return a;
 }
 
 FourVector inline FourVector::operator*=(const double &a) {
