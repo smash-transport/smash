@@ -11,6 +11,8 @@ class FourVector {
   public:
     /* default constructor */
     FourVector(): x0_(0), x1_(0), x2_(0), x3_(0) {}
+    FourVector(double y0, double y1, double y2, double y3): x0_(y0),
+      x1_(y1), x2_(y2), x3_(y3) {}
     /* t, z, x_\perp */
     double inline x0(void);
     void inline set_x0(double t);
