@@ -134,7 +134,7 @@ int main(int argc, char *argv[]) {
   int len = 3;
   path = reinterpret_cast<char *>(malloc(len));
   snprintf(path, len, "./");
-  process_params(box, path);
+  box = process_params(box, path);
 
   /* parse the command line options, they override all previous */
   while ((opt = getopt_long(argc, argv, "e:hl:s:T:Vv", longopts, NULL)) != -1) {

@@ -20,7 +20,7 @@
 const char *sep = " \t\n";
 
 /* process_params - read in params */
-void process_params(box box, char *path) {
+box process_params(box box, char *path) {
   char *line = NULL, *saveptr = NULL, params[FILELEN];
   size_t len = 0;
   ssize_t read;
@@ -34,7 +34,7 @@ void process_params(box box, char *path) {
   fp = fopen(params, "r");
   if (!fp) {
     fprintf(stderr, "W: No params.txt at %s path.\n", path);
-    return;
+    return box;
   }
 
   printf("Processing %s/params.txt.\n", path);
@@ -78,4 +78,5 @@ void process_params(box box, char *path) {
   }
   free(line);
   fclose(fp);
+  return box;
 }
