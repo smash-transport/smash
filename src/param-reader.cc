@@ -37,10 +37,10 @@ void process_params(box box, char *path) {
     return;
   }
 
-  if (verbose)
-    fprintf(stdout, "Processing %s/params.txt.\n", path);
+  printf("Processing %s/params.txt.\n", path);
 
   while ((read = getline(&line, &len, fp)) != -1) {
+    /* Skip comments and blank lines */
     if (line[0] == '#' || line[0] == '\n' || line[0] == '\t' || line[0] == '/')
       continue;
 
@@ -54,26 +54,26 @@ void process_params(box box, char *path) {
     /* integer values */
     if (strcmp(key, "STEPS") == 0) {
       box.set_steps(abs(atoi(value)));
-      return;
+      continue;
     }
     if (strcmp(key, "UPDATE") == 0) {
       box.set_update(abs(atoi(value)));
-      return;
+      continue;
     }
 
 
     /* double or float values */
     if (strcmp(key, "A") == 0) {
       box.set_a(atof(value));
-      return;
+      continue;
     }
     if (strcmp(key, "EPS") == 0) {
       box.set_eps(atof(value));
-      return;
+      continue;
     }
     if (strcmp(key, "TEMPERATURE") == 0) {
       box.set_temperature(atof(value));
-      return;
+      continue;
     }
   }
   free(line);
