@@ -112,6 +112,11 @@ FourVector inline FourVector::operator*=(const double &a) {
   return *this;
 }
 
+inline FourVector operator*(FourVector a, const double &b) {
+  a *= b;
+  return a;
+}
+
 double inline FourVector::Dot(const FourVector &a) {
   return x0_ * a.x0_ - x1_ * a.x1_ - x2_ * a.x2_ - x3_ * a.x3_;
 }
