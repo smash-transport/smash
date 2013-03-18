@@ -28,6 +28,7 @@ class FourVector {
       const double y);
     /* operations */
     double Dot(const FourVector &a);
+    double DiffThree(const FourVector &a);
 
     /* overloaded operators */
     FourVector inline operator+=(const FourVector &a);
@@ -119,6 +120,10 @@ inline FourVector operator*(FourVector a, const double &b) {
 
 double inline FourVector::Dot(const FourVector &a) {
   return x0_ * a.x0_ - x1_ * a.x1_ - x2_ * a.x2_ - x3_ * a.x3_;
+}
+
+double inline FourVector::DiffThree(const FourVector &a) {
+  return x1_ - a.x1_ + x2_ - a.x2_ + x3_ - a.x3_;
 }
 
 #endif  // SRC_INCLUDE_FOURVECTOR_H_
