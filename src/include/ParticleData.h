@@ -20,6 +20,8 @@ class ParticleData {
   void inline set_id(const int &id);
   int collision_id(void);
   void inline set_collision_id(const int &collision_id);
+  double collision_time(void);
+  void inline set_collision_time(const double &collision_time);
   FourVector inline momentum(void);
   void inline set_momentum(const FourVector &momentum_vector);
   void inline set_momentum(const double &mass, const double &px,
@@ -39,6 +41,8 @@ class ParticleData {
     int id_;
     /* Next particle we'd collide against */
     int collision_id_;
+    /* collision time */
+    double collision_time_;
     /* momenta of the particle */
     FourVector momentum_;
     /* position in space */
@@ -59,6 +63,14 @@ int inline ParticleData::collision_id(void) {
 
 void inline ParticleData::set_collision_id(const int &collision_i) {
   collision_id_ = collision_i;
+}
+
+double inline ParticleData::collision_time(void) {
+  return collision_time_;
+}
+
+void inline ParticleData::set_collision_time(const double &collision_t) {
+  collision_time_ = collision_t;
 }
 
 FourVector inline ParticleData::momentum(void) {
