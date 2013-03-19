@@ -13,11 +13,13 @@
 class ParticleData {
   public:
   /* Use improbable values for default constructor */
-  ParticleData() :id_(-1) {}
-  int id(void);
+  ParticleData() :id_(-1), collision_id_(-1) {}
   void inline set(const int &id, const double &momenta_l,
                   const double &momenta_t);
+  int id(void);
   void inline set_id(const int &id);
+  int collision_id(void);
+  void inline set_collision_id(const int &collision_id);
   FourVector inline momentum(void);
   void inline set_momentum(const FourVector &momentum_vector);
   void inline set_momentum(const double &mass, const double &px,
@@ -35,6 +37,8 @@ class ParticleData {
   private:
     /* Each particle has a unique identifier */
     int id_;
+    /* Next particle we'd collide against */
+    int collision_id_;
     /* momenta of the particle */
     FourVector momentum_;
     /* position in space */
@@ -47,6 +51,14 @@ int inline ParticleData::id(void) {
 
 void inline ParticleData::set_id(const int &i) {
   id_ = i;
+}
+
+int inline ParticleData::collision_id(void) {
+  return collision_id_;
+}
+
+void inline ParticleData::set_collision_id(const int &collision_i) {
+  collision_id_ = collision_i;
 }
 
 FourVector inline ParticleData::momentum(void) {
