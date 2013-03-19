@@ -22,6 +22,8 @@ class ParticleData {
   void inline set_collision_id(const int &collision_id);
   double collision_time(void);
   void inline set_collision_time(const double &collision_time);
+  void inline set_collision(const double &collision_time,
+    const int &collision_id);
   FourVector inline momentum(void);
   void inline set_momentum(const FourVector &momentum_vector);
   void inline set_momentum(const double &mass, const double &px,
@@ -71,6 +73,12 @@ double inline ParticleData::collision_time(void) {
 
 void inline ParticleData::set_collision_time(const double &collision_t) {
   collision_time_ = collision_t;
+}
+
+void inline ParticleData::set_collision(const double &collision_t,
+  const int &collision_i) {
+  collision_time_ = collision_t;
+  collision_id_ = collision_i;
 }
 
 FourVector inline ParticleData::momentum(void) {
