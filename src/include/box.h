@@ -84,6 +84,16 @@ void inline box::set_temperature(const float &T) {
   temperature_ = T;
 }
 
+/* support for gcc branch prediction */
+#ifdef __GNUC__
+#define likely(x)       __builtin_expect((x), 1)
+#define unlikely(x)     __builtin_expect((x), 0)
+#else
+#define likely(x)       (x)
+#define unlikely(x)     (x)
+#endif
+
+/*XXX: get rid of those globals */
 /* Debug runs generate more output */
 extern bool verbose;
 
