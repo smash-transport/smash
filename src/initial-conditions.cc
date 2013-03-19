@@ -12,6 +12,7 @@
 #include <gsl/gsl_sf_bessel.h>
 
 #include "include/box.h"
+#include "include/constants.h"
 #include "include/ParticleData.h"
 #include "include/ParticleType.h"
 #include "include/random.h"
@@ -40,17 +41,16 @@ ParticleData* initial_conditions(ParticleData *particles, int &number,
    * The particle number depends on distribution function
    * (assumes Bose-Einstein):
    * Volume m^2 T BesselK[2, m/T] / (2\pi^2)
-   * XXX: define GeV conversion constant 0.19733
    */
   number_density = pi.mass() * pi.mass() * box.temperature()
     * gsl_sf_bessel_Knu(2, pi.mass() / box.temperature())
-    / 2 / M_PI / M_PI / 0.19733 / 0.19733 / 0.19733;
+    / 2 / M_PI / M_PI / hbarc / hbarc / hbarc;
   /* cast while reflecting probability of extra particle */
   number = box.a() * box.a() * box.a() * number_density;
   srand48(time(NULL));
   if (box.a() * box.a() * box.a() * number_density - number > drand48())
     number++;
-  printf("IC number density %f [fm^-3]\n", number_density);
+  printf("IC number density %.6g [fm^-3]\n", number_density);
   printf("IC %d number of %s\n", number, pi.name().c_str());
 
   /* Set random IC:
