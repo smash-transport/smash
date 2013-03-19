@@ -90,11 +90,4 @@ extern bool verbose;
 /* Default random seed */
 extern unsigned int seedp;
 
-/* Compile time debug info */
-#ifdef DEBUG
-# define printd printf
-#else
-# define printd(...) ((void)0)
-#endif
-
 #endif  // SRC_INCLUDE_BOX_H_

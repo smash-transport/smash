@@ -15,6 +15,13 @@ void print_startup(box box);
 /* data directory */
 void mkdir_data(void);
 
+/* Compile time debug info */
+#ifdef DEBUG
+# define printd printf
+#else
+# define printd(...) ((void)0)
+#endif
+
 /* console debug output */
 void printd_position(ParticleData particle);
 void printd_momenta(ParticleData particle);
