@@ -41,8 +41,7 @@ static void usage(int rc) {
 
 
 /* boundary_condition - enforce specific type of boundaries */
-static FourVector boundary_condition(FourVector position, FourVector distance,
-       box box) {
+static FourVector boundary_condition(FourVector position, box box) {
   /* Check positivity and box size */
   if (position.x1() > 0 && position.x2() > 0 && position.x3() > 0
       && position.x1() < box.a() && position.x2() < box.a()
@@ -90,7 +89,7 @@ static int Evolve(ParticleData *particles, int number, box box) {
        /* treat the box boundaries */
        position = particles[i].x();
        position += distance;
-       position = boundary_condition(position, distance, box);
+       position = boundary_condition(position, box);
        particles[i].set_position(position);
        printd_position(particles[i]);
 
