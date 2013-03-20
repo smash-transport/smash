@@ -26,10 +26,10 @@ class FourVector {
     /* set all four values */
     void inline set_FourVector(const double t, const double z, const double x,
       const double y);
-    /* operations */
-    double Dot(const FourVector &a);
-    double DotThree(const FourVector &a);
-    double DiffThree(const FourVector &a);
+    /* inlined operations */
+    double inline Dot(const FourVector &a);
+    double inline DotThree(const FourVector &a);
+    double inline DiffThree(const FourVector &a);
     /* operations */
     FourVector LorentzBoost(FourVector a, FourVector b);
 
