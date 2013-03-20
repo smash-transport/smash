@@ -30,6 +30,8 @@ class FourVector {
     double Dot(const FourVector &a);
     double DotThree(const FourVector &a);
     double DiffThree(const FourVector &a);
+    /* operations */
+    FourVector LorentzBoost(FourVector a, FourVector b);
 
     /* overloaded operators */
     FourVector inline operator+=(const FourVector &a);

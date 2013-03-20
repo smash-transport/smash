@@ -1,5 +1,5 @@
 # list the source files
-add_executable(box box.cc initial-conditions.cc param-reader.cc
+add_executable(box box.cc fourvector.cc initial-conditions.cc param-reader.cc
 	outputroutines.cc)
 
 # configure a header file to pass some of the CMake settings
