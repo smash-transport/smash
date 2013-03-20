@@ -94,9 +94,6 @@ void inline box::set_temperature(const float &T) {
 #endif
 
 /*XXX: get rid of those globals */
-/* Debug runs generate more output */
-extern bool verbose;
-
 /* Default random seed */
 extern unsigned int seedp;
 

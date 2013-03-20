@@ -24,9 +24,6 @@
 
 char *progname;
 
-/* Be chatty on demand */
-bool verbose = 0;
-
 /* Default random seed */
 unsigned int seedp = 1;
 
@@ -38,7 +35,6 @@ static void usage(int rc) {
          "  -l, --length         length of the box in fermi\n"
          "  -s, --steps          number of steps\n"
          "  -T, --temperature    initial temperature\n"
-         "  -v, --verbose        show debug info\n"
          "  -V, --version\n\n");
   exit(rc);
 }
@@ -117,7 +113,6 @@ int main(int argc, char *argv[]) {
     { "length",     no_argument,            0, 'l' },
     { "steps",      no_argument,            0, 's' },
     { "temperature", no_argument,           0, 'T' },
-    { "verbose",    no_argument,            0, 'v' },
     { "version",    no_argument,            0, 'V' },
     { NULL,         0, 0, 0 }
   };
@@ -137,7 +132,7 @@ int main(int argc, char *argv[]) {
   box = process_params(box, path);
 
   /* parse the command line options, they override all previous */
-  while ((opt = getopt_long(argc, argv, "e:hl:s:T:Vv", longopts, NULL)) != -1) {
+  while ((opt = getopt_long(argc, argv, "e:hl:s:T:V", longopts, NULL)) != -1) {
     switch (opt) {
     case 'e':
       box.set_eps(atof(optarg));
