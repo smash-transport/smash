@@ -88,13 +88,21 @@ void write_oscar_header(void) {
 
 /* write_oscar - OSCAR file */
 void write_oscar(const ParticleData &particle1,
-  const ParticleData &particle2) {
+  const ParticleData &particle2, int flag) {
   /* XXX: generalise particle types */
   ParticleType pi("pi", 0.13957);
   FourVector momentum, position;
   FILE *fp;
 
   fp = fopen("data/collision.dat", "a");
+  /* flag adds OSCAR line prefix with the meanings:
+   * particle creation -> 0 0
+   * particle 2<-> collision -> 2 2
+   */
+  if (flag == 0)
+    fprintf(fp, "%i %i \n", 0, 0);
+  else if (flag == 1)
+    fprintf(fp, "%i %i \n", 2, 2);
   /* particle_index, particle_pdgcode, ?, momenta, mass position */
   momentum = particle1.momentum(), position = particle1.x();
   fprintf(fp, "%i %i %i %g %g %g %g %g %g %g %g %g \n",
