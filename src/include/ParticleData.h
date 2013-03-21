@@ -16,19 +16,19 @@ class ParticleData {
   ParticleData() :id_(-1), collision_id_(-1) {}
   void inline set(const int &id, const double &momenta_l,
                   const double &momenta_t);
-  int id(void);
+  int id(void) const;
   void inline set_id(const int &id);
-  int collision_id(void);
+  int collision_id(void) const;
   void inline set_collision_id(const int &collision_id);
-  double collision_time(void);
+  double collision_time(void) const;
   void inline set_collision_time(const double &collision_time);
   void inline set_collision(const double &collision_time,
     const int &collision_id);
-  FourVector inline momentum(void);
+  FourVector inline momentum(void) const;
   void inline set_momentum(const FourVector &momentum_vector);
   void inline set_momentum(const double &mass, const double &px,
                            const double &py, const double &pz);
-  FourVector inline x(void);
+  FourVector inline x(void) const;
   void inline set_position(const FourVector &position);
   void inline set_position(const double &x0, const double &x3,
                            const double &x1, const double &x2);
@@ -51,7 +51,7 @@ class ParticleData {
     FourVector x_;
 };
 
-int inline ParticleData::id(void) {
+int inline ParticleData::id(void) const {
   return id_;
 }
 
@@ -59,7 +59,7 @@ void inline ParticleData::set_id(const int &i) {
   id_ = i;
 }
 
-int inline ParticleData::collision_id(void) {
+int inline ParticleData::collision_id(void) const {
   return collision_id_;
 }
 
@@ -67,7 +67,7 @@ void inline ParticleData::set_collision_id(const int &collision_i) {
   collision_id_ = collision_i;
 }
 
-double inline ParticleData::collision_time(void) {
+double inline ParticleData::collision_time(void) const {
   return collision_time_;
 }
 
@@ -81,7 +81,7 @@ void inline ParticleData::set_collision(const double &collision_t,
   collision_id_ = collision_i;
 }
 
-FourVector inline ParticleData::momentum(void) {
+FourVector inline ParticleData::momentum(void) const {
   return momentum_;
 }
 
@@ -95,7 +95,7 @@ void inline ParticleData::set_momentum(const double &mass, const double &px,
                            px, py, pz);
 }
 
-FourVector inline ParticleData::x(void) {
+FourVector inline ParticleData::x(void) const {
   return x_;
 }
 

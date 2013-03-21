@@ -14,8 +14,8 @@ class ParticleType {
     /* Explicit constructor */
     ParticleType(std::string n, double m) : name_(n), mass_(m) {}
     /* access data */
-    std::string inline name(void);
-    double inline mass(void);
+    std::string inline name(void) const;
+    double inline mass(void) const;
 
   private:
     /* Data of the particle type */
@@ -25,11 +25,11 @@ class ParticleType {
     float isospin_;
 };
 
-double inline ParticleType::mass(void) {
+double inline ParticleType::mass(void) const {
   return mass_;
 }
 
-std::string inline ParticleType::name(void) {
+std::string inline ParticleType::name(void) const {
   return name_;
 }
 

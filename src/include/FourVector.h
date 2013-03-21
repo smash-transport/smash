@@ -15,13 +15,13 @@ class FourVector {
     FourVector(double y0, double y1, double y2, double y3): x0_(y0),
       x1_(y1), x2_(y2), x3_(y3) {}
     /* t, z, x_\perp */
-    double inline x0(void);
+    double inline x0(void) const;
     void inline set_x0(double t);
-    double inline x1(void);
+    double inline x1(void) const;
     void inline set_x1(double z);
-    double inline x2(void);
+    double inline x2(void) const;
     void inline set_x2(double x);
-    double inline x3(void);
+    double inline x3(void) const;
     void inline set_x3(double y);
     /* set all four values */
     void inline set_FourVector(const double t, const double z, const double x,
@@ -42,7 +42,7 @@ class FourVector {
     double x0_, x1_, x2_, x3_;
 };
 
-double inline FourVector::x0(void) {
+double inline FourVector::x0(void) const {
   return x0_;
 }
 
@@ -50,7 +50,7 @@ void inline FourVector::set_x0(const double t) {
   x0_ = t;
 }
 
-double inline FourVector::x1(void) {
+double inline FourVector::x1(void) const {
   return x1_;
 }
 
@@ -58,7 +58,7 @@ void inline FourVector::set_x1(const double z) {
   x1_ = z;
 }
 
-double inline FourVector::x2(void) {
+double inline FourVector::x2(void) const {
   return x2_;
 }
 
@@ -66,7 +66,7 @@ void inline FourVector::set_x2(const double x) {
   x2_ = x;
 }
 
-double inline FourVector::x3(void) {
+double inline FourVector::x3(void) const {
   return x3_;
 }
 
