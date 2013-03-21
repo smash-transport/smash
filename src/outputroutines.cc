@@ -21,6 +21,7 @@ void print_startup(box box) {
   float A = box.a();
   printf("Size of the box: %g x %g x %g [fm]\n", A, A, A);
   printf("Initial temperature: %g [GeV]\n", box.temperature());
+  printf("Elastic cross section: %g [mb]\n", box.cross_section());
   printf("Using temporal stepsize: %g [GeV]\n", box.eps());
   printf("Maximum number of steps: %i \n", box.steps());
   printf("Random number seed: %u \n", seedp);

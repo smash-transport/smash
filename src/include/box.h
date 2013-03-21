@@ -9,8 +9,10 @@
 
 class box {
   public:
+    /* XXX: add default constructor*/
+    /* member funtions */
     void inline set(const int STEPS, const int UPDATE,
-      const float A, const float EPS, const float TEMPERATURE);
+      const float A, const float EPS, const float T, const float sigma);
     float inline a();
     void inline set_a(const float &A);
     float inline eps();
@@ -21,6 +23,8 @@ class box {
     void inline set_update(const int &UPDATE);
     float inline temperature();
     void inline set_temperature(const float &T);
+    float inline cross_section();
+    void inline set_cross_section(const float &sigma);
 
   private:
     /* number of steps */
@@ -33,15 +37,18 @@ class box {
     float eps_;
     /* Temperature of the Boltzmann distribution for thermal initialization */
     float temperature_;
+    /* cross section of the elastic scattering */
+    float cross_section_;
 };
 
 void inline box::set(const int STEPS, const int UPDATE, const float A,
-      const float EPS, const float TEMPERATURE) {
+      const float EPS, const float T, const float sigma) {
   steps_ = STEPS;
   update_ = UPDATE;
   a_ = A;
   eps_ = EPS;
-  temperature_ = TEMPERATURE;
+  temperature_ = T;
+  cross_section_ = sigma;
 }
 
 float inline box::a(void) {
@@ -82,6 +89,14 @@ float inline box::temperature(void) {
 
 void inline box::set_temperature(const float &T) {
   temperature_ = T;
+}
+
+float inline box::cross_section(void) {
+  return cross_section_;
+}
+
+void inline box::set_cross_section(const float &sigma) {
+  cross_section_ = sigma;
 }
 
 /* support for gcc branch prediction */

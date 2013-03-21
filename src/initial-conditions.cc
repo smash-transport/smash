@@ -21,9 +21,9 @@
 /* Set default IC for the box */
 box init_box(box box) {
   int steps = 10000, update = 10;
-  float A = 10.0, EPS = 0.05, temperature = 0.2;
+  float A = 10.0, EPS = 0.05, temperature = 0.2, sigma = 10.0;
 
-  box.set(steps, update, A, EPS, temperature);
+  box.set(steps, update, A, EPS, temperature, sigma);
   return box;
 }
 

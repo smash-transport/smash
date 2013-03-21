@@ -8,3 +8,6 @@ EPS	0.1
 
 // maximum of steps to take
 STEPS	10000
+
+// elastic cross section
+SIGMA	10.0

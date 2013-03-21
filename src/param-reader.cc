@@ -75,6 +75,10 @@ box process_params(box box, char *path) {
       box.set_temperature(atof(value));
       continue;
     }
+    if (strcmp(key, "SIGMA") == 0) {
+      box.set_cross_section(atof(value));
+      continue;
+    }
   }
   free(line);
   fclose(fp);
