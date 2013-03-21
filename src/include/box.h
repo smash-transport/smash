@@ -13,17 +13,17 @@ class box {
     /* member funtions */
     void inline set(const int STEPS, const int UPDATE,
       const float A, const float EPS, const float T, const float sigma);
-    float inline a();
+    float inline a() const;
     void inline set_a(const float &A);
-    float inline eps();
+    float inline eps() const;
     void inline set_eps(const float &EPS);
-    int inline steps();
+    int inline steps() const;
     void inline set_steps(const int &STEPS);
-    int inline update();
+    int inline update() const;
     void inline set_update(const int &UPDATE);
-    float inline temperature();
+    float inline temperature() const;
     void inline set_temperature(const float &T);
-    float inline cross_section();
+    float inline cross_section() const;
     void inline set_cross_section(const float &sigma);
 
   private:
@@ -51,7 +51,7 @@ void inline box::set(const int STEPS, const int UPDATE, const float A,
   cross_section_ = sigma;
 }
 
-float inline box::a(void) {
+float inline box::a(void) const {
   return a_;
 }
 
@@ -59,7 +59,7 @@ void inline box::set_a(const float &A) {
   a_ = A;
 }
 
-float inline box::eps(void) {
+float inline box::eps(void) const {
   return eps_;
 }
 
@@ -67,7 +67,7 @@ void inline box::set_eps(const float &EPS) {
   eps_ = EPS;
 }
 
-int inline box::steps(void) {
+int inline box::steps(void) const {
   return steps_;
 }
 
@@ -75,7 +75,7 @@ void inline box::set_steps(const int &STEPS) {
   steps_ = STEPS;
 }
 
-int inline box::update(void) {
+int inline box::update(void) const {
   return update_;
 }
 
@@ -83,7 +83,7 @@ void inline box::set_update(const int &UPDATE) {
   update_ = UPDATE;
 }
 
-float inline box::temperature(void) {
+float inline box::temperature(void) const {
   return temperature_;
 }
 
@@ -91,7 +91,7 @@ void inline box::set_temperature(const float &T) {
   temperature_ = T;
 }
 
-float inline box::cross_section(void) {
+float inline box::cross_section(void) const {
   return cross_section_;
 }
 
