@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2012
+ *    Copyright (c) 2012-2013
  *      maximilian attems <attems@fias.uni-frankfurt.de>
  *      Jussi Auvinen <auvinen@fias.uni-frankfurt.de>
  *
@@ -15,6 +15,7 @@
 
 #include "include/box.h"
 #include "include/ParticleData.h"
+#include "include/ParticleType.h"
 
 /* print_startup - console output on startup */
 void print_startup(box box) {
@@ -70,5 +71,42 @@ void write_particles(ParticleData *particles, const int number) {
        particles[i].x().x1(),  particles[i].x().x2(),
        particles[i].x().x3());
   }
+  fclose(fp);
+}
+
+/* write_oscar_header - OSCAR header format */
+void write_oscar_header(void) {
+  FILE *fp;
+
+  fp = fopen("data/collision.dat", "w");
+  fprintf(fp, "# OSC1999A\n");
+  fprintf(fp, "# Elastic scattering history\n");
+  fprintf(fp, "# Pionbox \n");
+  fprintf(fp, "# \n");
+  fclose(fp);
+}
+
+/* write_oscar - OSCAR file */
+void write_oscar(const ParticleData &particle1,
+  const ParticleData &particle2) {
+  /* XXX: generalise particle types */
+  ParticleType pi("pi", 0.13957);
+  FourVector momentum, position;
+  FILE *fp;
+
+  fp = fopen("data/collision.dat", "a");
+  /* particle_index, particle_pdgcode, ?, momenta, mass position */
+  momentum = particle1.momentum(), position = particle1.x();
+  fprintf(fp, "%i %i %i %g %g %g %g %g %g %g %g %g \n",
+              particle1.id(), 0, 0,
+              momentum.x1(), momentum.x2(), momentum.x3(), momentum.x0(),
+              pi.mass(), position.x1(), position.x2(), position.x3(),
+              position.x0());
+  momentum = particle2.momentum(), position = particle2.x();
+  fprintf(fp, "%i %i %i %g %g %g %g %g %g %g %g %g \n",
+              particle2.id(), 0, 0,
+              momentum.x1(), momentum.x2(), momentum.x3(), momentum.x0(),
+              pi.mass(), position.x1(), position.x2(), position.x3(),
+              position.x0());
   fclose(fp);
 }

@@ -1,5 +1,7 @@
 /*
- *    Copyright (c) 2012 maximilian attems <attems@fias.uni-frankfurt.de>
+ *    Copyright (c) 2012-2013
+ *      maximilian attems <attems@fias.uni-frankfurt.de>
+ *      Jussi Auvinen <auvinen@fias.uni-frankfurt.de>
  *    GNU General Public License (GPLv3)
  */
 #ifndef SRC_INCLUDE_OUTPUTROUTINES_H_
@@ -28,5 +30,7 @@ void printd_momenta(ParticleData particle);
 
 /* output data files */
 void write_particles(ParticleData *particles, const int number);
+void write_oscar_header(void);
+void write_oscar(const ParticleData &particle1, const ParticleData &particle2);
 
 #endif  // SRC_INCLUDE_OUTPUTROUTINES_H_
