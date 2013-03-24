@@ -25,8 +25,8 @@ void mkdir_data(void);
 #endif
 
 /* console debug output */
-void printd_position(ParticleData particle);
-void printd_momenta(ParticleData particle);
+void printd_position(const ParticleData &particle);
+void printd_momenta(const ParticleData &particle);
 
 /* output data files */
 void write_particles(ParticleData *particles, const int number);
