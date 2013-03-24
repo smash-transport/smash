@@ -12,7 +12,7 @@ class box;
 class ParticleData;
 
 /* console output */
-void print_startup(box box);
+void print_startup(const box &box);
 
 /* data directory */
 void mkdir_data(void);

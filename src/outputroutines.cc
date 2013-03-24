@@ -18,7 +18,7 @@
 #include "include/ParticleType.h"
 
 /* print_startup - console output on startup */
-void print_startup(box box) {
+void print_startup(const box &box) {
   float A = box.a();
   printf("Size of the box: %g x %g x %g [fm]\n", A, A, A);
   printf("Initial temperature: %g [GeV]\n", box.temperature());

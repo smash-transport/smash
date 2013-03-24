@@ -41,7 +41,7 @@ static void usage(int rc) {
 
 
 /* boundary_condition - enforce specific type of boundaries */
-static FourVector boundary_condition(FourVector position, box box) {
+static FourVector boundary_condition(FourVector position, const box &box) {
   /* Check positivity and box size */
   if (position.x1() > 0 && position.x2() > 0 && position.x3() > 0
       && position.x1() < box.a() && position.x2() < box.a()
