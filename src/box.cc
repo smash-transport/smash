@@ -2,6 +2,7 @@
  *
  *    Copyright (c) 2012-2013
  *      maximilian attems <attems@fias.uni-frankfurt.de>
+ *      Jussi Auvinen <auvinen@fias.uni-frankfurt.de>
  *
  *    GNU General Public License (GPLv3)
  *
@@ -12,11 +13,13 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <list>
 
 #include "include/ParticleData.h"
 #include "include/ParticleType.h"
 #include "include/initial-conditions.h"
 #include "include/param-reader.h"
+#include "include/particles.h"
 #include "include/outputroutines.h"
 
 /* build dependent variables */
@@ -38,7 +41,6 @@ static void usage(int rc) {
          "  -V, --version\n\n");
   exit(rc);
 }
-
 
 /* boundary_condition - enforce specific type of boundaries */
 static FourVector boundary_condition(FourVector position, const box &box) {
@@ -73,30 +75,39 @@ static FourVector boundary_condition(FourVector position, const box &box) {
 }
 
 /* Evolve - the core of the box, stepping forward in time */
-static int Evolve(ParticleData *particles, int number, box box) {
+static int Evolve(ParticleData *particles, int &number, const box &box) {
   FourVector distance, position;
+  std::list<ParticleData> collision_list;
 
-  for (int steps = 0; steps < box.steps(); steps++)
+  for (int steps = 0; steps < box.steps(); steps++) {
+    /* fill collision table */
+    for (int i = 0; i < number; i++)
+      check_collision(particles, &collision_list, box, i, number);
+
+    /* particle interactions */
+    if (collision_list.size() > 0)
+      collide_particles(particles, &collision_list);
+
+    /* propagate all particles */
     for (int i = 0; i < number; i++) {
-       /* XXX: interactions */
-       /* calculate particles motion */
-       distance.set_FourVector(1.0, particles[i].velocity_x(),
-         particles[i].velocity_y(), particles[i].velocity_z());
-       distance *= box.eps();
-       printd("Particle %d motion: %g %g %g %g\n", particles[i].id(),
+      distance.set_FourVector(1.0, particles[i].velocity_x(),
+        particles[i].velocity_y(), particles[i].velocity_z());
+      distance *= box.eps();
+      printd("Particle %d motion: %g %g %g %g\n", particles[i].id(),
          distance.x0(), distance.x1(), distance.x2(), distance.x3());
 
-       /* treat the box boundaries */
-       position = particles[i].x();
-       position += distance;
-       position = boundary_condition(position, box);
-       particles[i].set_position(position);
-       printd_position(particles[i]);
+      /* treat the box boundaries */
+      position = particles[i].x();
+      position += distance;
+      position = boundary_condition(position, box);
+      particles[i].set_position(position);
+      printd_position(particles[i]);
 
-       /* save evolution data */
-       if (i > 0 && i % box.update() == 0)
-         write_particles(particles, number);
+      /* save evolution data */
+      if (i > 0 && i % box.update() == 0)
+        write_particles(particles, number);
     }
+  }
   return 0;
 }
 
@@ -159,6 +170,7 @@ int main(int argc, char *argv[]) {
   /* Output IC values */
   print_startup(box);
   mkdir_data();
+  write_oscar_header();
 
   /* Initialize box */
   particles = initial_conditions(particles, number, box);
