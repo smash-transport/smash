@@ -1,3 +1,5 @@
-Find cmake build errors
-(best debugged with full compiler output):
+* Find cmake build errors (best debugged with full compiler output):
  make VERBOSE=1
+
+* Change c++ compiler:
+ cmake ../ -DCMAKE_CXX_COMPILER=$HOME/lib/bin/g++
