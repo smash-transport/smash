@@ -75,7 +75,7 @@ static double particle_distance(ParticleData *particle_orig1,
   ParticleData *particle_orig2) {
   ParticleData particle1 = *particle_orig1, particle2 = *particle_orig2;
   FourVector velocity_com, position_diff, momentum_diff;
-  double distance;
+  double distance_squared;
 
   /* XXX: allow Kodama + UrQMD distance criteria */
   /* arXiv:nucl-th/9803035 (3.27): in center of momemtum frame
@@ -84,11 +84,11 @@ static double particle_distance(ParticleData *particle_orig1,
   boost_COM(&particle1, &particle2, &velocity_com);
   position_diff = particle1.x() - particle2.x();
   momentum_diff = particle1.momentum() - particle2.momentum();
-  distance = - position_diff.DotThree(position_diff)
+  distance_squared = - position_diff.DotThree(position_diff)
     + position_diff.DotThree(momentum_diff)
       * position_diff.DotThree(momentum_diff)
       / momentum_diff.DotThree(momentum_diff);
-  return distance;
+  return distance_squared;
 }
 
 /* time_collision - measure collision time of two particles */
@@ -118,19 +118,19 @@ static void momenta_exchange(ParticleData *particle1, ParticleData *particle2) {
 /* check_collision - check if a collision can happen betwenn particles */
 void check_collision(ParticleData *particle,
   std::list<ParticleData> *collision_list, box box, int id, int number) {
-  double distance, time_collision;
+  double distance_squared, time_collision;
 
   /* check which particles interact */
   for (int i = id + 1; i < number; i++) {
     /* XXX: only check particles within nearest neighbour cells - size
      * according to cross_section */
-    distance = particle_distance(&particle[id], &particle[i]);
+    distance_squared = particle_distance(&particle[id], &particle[i]);
 
     /* particles are far apart */
-    if (distance >= box.cross_section() * fm2_mb / M_PI)
+    if (distance_squared >= box.cross_section() * fm2_mb / M_PI)
       continue;
 
-    /* check according timestep */
+    /* check according timestep: positive and smaller */
     time_collision = collision_time(&particle[id], &particle[i]);
     if (time_collision < 0 || time_collision >= box.eps())
       continue;
@@ -155,8 +155,8 @@ void check_collision(ParticleData *particle,
     }
 
     /* setup collision partners */
+    printd("distance particle %d <-> %d: %g \n", id, i, distance_squared);
     printd("t_coll particle %d <-> %d: %g \n", id, i, time_collision);
-    printd("distance particle %d <-> %d: %g \n", id, i, distance);
     particle[id].set_collision(time_collision, i);
     particle[i].set_collision(time_collision, id);
     /* XXX: check if not already in the list */
