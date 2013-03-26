@@ -104,7 +104,7 @@ static int Evolve(ParticleData *particles, int &number, const box &box) {
       printd_position(particles[i]);
 
       /* save evolution data */
-      if (i > 0 && i % box.update() == 0)
+      if (steps > 0 && steps % box.update() == 0)
         write_particles(particles, number);
     }
   }
