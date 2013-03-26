@@ -65,9 +65,13 @@ void print_measurements(const ParticleData *particles, const double &time,
 
   for (int i = 0; i < number; i++)
     momentum_total += particles[i].momentum();
-  printf("%13g%13g%13g%13g\n", time, momentum_total.x0(),
+  if (likely(time > 0))
+    printf("%13g%13g%13g%13g\n", time, momentum_total.x0(),
           -1 * momentum_total.DotThree(),
           scatterings_total * 2 / (number * time));
+  else
+    printf("%13g%13g%13g%13g\n", 0.0, momentum_total.x0(),
+          -1 * momentum_total.DotThree(), 0.0);
 }
 
 /* printd_momenta - print debug data of the specific particle */

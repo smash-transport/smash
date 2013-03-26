@@ -80,8 +80,8 @@ static int Evolve(ParticleData *particles, int &number, const box &box) {
   std::list<ParticleData> collision_list;
   size_t scatterings_total = 0;
 
-  /* startup values with allmost null time */
-  print_measurements(particles, 10E-19, number, scatterings_total);
+  /* startup values */
+  print_measurements(particles, 0, number, scatterings_total);
 
   for (int steps = 0; steps < box.steps(); steps++) {
     /* fill collision table */
