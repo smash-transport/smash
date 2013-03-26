@@ -16,7 +16,7 @@ class ParticleData;
 /* console output */
 void print_startup(const box &box);
 void print_header(void);
-void print_measurements(const ParticleData *particle, const double &time,
+void print_measurements(const ParticleData *particle, 
   const int &num, const size_t &scatterings_total);
 
 /* data directory */

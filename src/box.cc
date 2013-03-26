@@ -81,7 +81,7 @@ static int Evolve(ParticleData *particles, int &number, const box &box) {
   size_t scatterings_total = 0;
 
   /* startup values */
-  print_measurements(particles, 0, number, scatterings_total);
+  print_measurements(particles, number, scatterings_total);
 
   for (int steps = 0; steps < box.steps(); steps++) {
     /* fill collision table */
@@ -115,8 +115,7 @@ static int Evolve(ParticleData *particles, int &number, const box &box) {
     }
     /* physics output during the run */
     if (steps > 0 && steps % box.update() == 0)
-      print_measurements(particles, steps * box.eps(), number,
-        scatterings_total);
+      print_measurements(particles, number, scatterings_total);
   }
   return 0;
 }

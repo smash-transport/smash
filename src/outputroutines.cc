@@ -59,9 +59,11 @@ void mkdir_data(void) {
 }
 
 /* print_measurements - console output during simulation */
-void print_measurements(const ParticleData *particles, const double &time,
-  const int &number, const size_t &scatterings_total) {
+void print_measurements(const ParticleData *particles, const int &number,
+  const size_t &scatterings_total) {
   FourVector momentum_total(0, 0, 0, 0);
+  /* use the time from the first particle - startup time */
+  double time = particles[0].x().x0() - 1.0;
 
   for (int i = 0; i < number; i++)
     momentum_total += particles[i].momentum();
@@ -70,7 +72,7 @@ void print_measurements(const ParticleData *particles, const double &time,
           -1 * momentum_total.DotThree(),
           scatterings_total * 2 / (number * time));
   else
-    printf("%13g%13g%13g%13g\n", 0.0, momentum_total.x0(),
+    printf("%13g%13g%13g%13g\n", time, momentum_total.x0(), 
           -1 * momentum_total.DotThree(), 0.0);
 }
 
