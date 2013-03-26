@@ -21,7 +21,7 @@
 /* Set default IC for the box */
 box init_box(box box) {
   int steps = 10000, update = 10;
-  float A = 10.0, EPS = 0.05, temperature = 0.2, sigma = 10.0;
+  float A = 10.0, EPS = 0.01, temperature = 0.3, sigma = 10.0;
 
   box.set(steps, update, A, EPS, temperature, sigma);
   return box;
@@ -31,6 +31,7 @@ box init_box(box box) {
 ParticleData* initial_conditions(ParticleData *particles, int &number,
       box box) {
   double x_pos, y_pos, z_pos, time_start, number_density;
+  double phi, theta, momentum_radial;
   ParticleType pi("pi", 0.13957);
   ParticleType pi0("pi0", 0.134977);
 
@@ -61,8 +62,20 @@ ParticleData* initial_conditions(ParticleData *particles, int &number,
   particles = new ParticleData[number];
   for (int i = 0; i < number; i++) {
     particles[i].set_id(i);
-    particles[i].set_momentum(pi.mass(), randGauss(1.0), randGauss(1.0),
-      randGauss(1.0));
+
+    /* XXX: replace with full distribution */
+    momentum_radial = box_muller(sqrt((3 * box.temperature())
+      * (3 * box.temperature()) - pi.mass() * pi.mass()), 0.01);
+    /* direction of the momenta is random */
+    phi =  2 * M_PI * rand_r(&seedp) / RAND_MAX;
+    theta = M_PI * rand_r(&seedp) / RAND_MAX;
+    printd("Particle %d radial momenta %g phi %g theta %g\n", i,
+      momentum_radial, phi, theta);
+    particles[i].set_momentum(pi.mass(),
+      momentum_radial * cos(phi) * sin(theta),
+      momentum_radial * sin(phi) * sin(theta),
+      momentum_radial * cos(theta));
+
     time_start = 1.0;
     x_pos = 1.0 * rand_r(&seedp) / RAND_MAX * box.a();
     y_pos = 1.0 * rand_r(&seedp) / RAND_MAX * box.a();
