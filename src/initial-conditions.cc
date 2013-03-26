@@ -34,6 +34,7 @@ ParticleData* initial_conditions(ParticleData *particles, int &number,
   ParticleType pi("pi", 0.13957);
   ParticleType pi0("pi0", 0.134977);
 
+  /* XXX: move to proper startup */
   printd("Pi^± mass: %g [GeV]\n", pi.mass());
   printd("Pi^0 mass: %g [GeV]\n", pi0.mass());
 
@@ -52,6 +53,7 @@ ParticleData* initial_conditions(ParticleData *particles, int &number,
     number++;
   printf("IC number density %.6g [fm^-3]\n", number_density);
   printf("IC %d number of %s\n", number, pi.name().c_str());
+  print_header();
 
   /* Set random IC:
    * particles at random position in the box with random momentum

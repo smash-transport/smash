@@ -14,8 +14,18 @@
 #include <sys/types.h>
 
 #include "include/box.h"
+#include "include/FourVector.h"
 #include "include/ParticleData.h"
 #include "include/ParticleType.h"
+
+/* print_line - output a visible seperator */
+static void print_line(void) {
+  int field_width = 13;
+
+  for (int i = 0; i < 5 * field_width; i++)
+    printf("-");
+  printf("\n");
+}
 
 /* print_startup - console output on startup */
 void print_startup(const box &box) {
@@ -28,6 +38,14 @@ void print_startup(const box &box) {
   printf("Random number seed: %u \n", seedp);
 }
 
+/* print_startup - console output on startup */
+void print_header(void) {
+  print_line();
+  printf("        Time        <Etot>      <ptot>  <scattering_rate>\n");
+  print_line();
+}
+
+
 /* mkdir_data - directory for data files */
 void mkdir_data(void) {
   int ret;
@@ -38,6 +56,18 @@ void mkdir_data(void) {
     return;
   }
   fprintf(stderr, "mkdir 'data' failed.\n");
+}
+
+/* print_measurements - console output during simulation */
+void print_measurements(const ParticleData *particles, const double &time,
+  const int &number, const size_t &scatterings_total) {
+  FourVector momentum_total(0, 0, 0, 0);
+
+  for (int i = 0; i < number; i++)
+    momentum_total += particles[i].momentum();
+  printf("%13g%13g%13g%13g\n", time, momentum_total.x0(),
+          -1 * momentum_total.DotThree(),
+          scatterings_total * 2 / (number * time));
 }
 
 /* printd_momenta - print debug data of the specific particle */

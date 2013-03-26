@@ -78,6 +78,10 @@ static FourVector boundary_condition(FourVector position, const box &box) {
 static int Evolve(ParticleData *particles, int &number, const box &box) {
   FourVector distance, position;
   std::list<ParticleData> collision_list;
+  size_t scatterings_total = 0;
+
+  /* startup values with allmost null time */
+  print_measurements(particles, 10E-19, number, scatterings_total);
 
   for (int steps = 0; steps < box.steps(); steps++) {
     /* fill collision table */
@@ -85,8 +89,10 @@ static int Evolve(ParticleData *particles, int &number, const box &box) {
       check_collision(particles, &collision_list, box, i, number);
 
     /* particle interactions */
-    if (collision_list.size() > 0)
+    if (collision_list.size() > 0) {
+      scatterings_total += collision_list.size();
       collide_particles(particles, &collision_list);
+    }
 
     /* propagate all particles */
     for (int i = 0; i < number; i++) {
@@ -107,6 +113,10 @@ static int Evolve(ParticleData *particles, int &number, const box &box) {
       if (steps > 0 && steps % box.update() == 0)
         write_particles(particles, number);
     }
+    /* physics output during the run */
+    if (steps > 0 && steps % box.update() == 0)
+      print_measurements(particles, steps * box.eps(), number,
+        scatterings_total);
   }
   return 0;
 }

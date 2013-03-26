@@ -7,12 +7,17 @@
 #ifndef SRC_INCLUDE_OUTPUTROUTINES_H_
 #define SRC_INCLUDE_OUTPUTROUTINES_H_
 
+#include <cstdlib>
+
 /* forward declarations */
 class box;
 class ParticleData;
 
 /* console output */
 void print_startup(const box &box);
+void print_header(void);
+void print_measurements(const ParticleData *particle, const double &time,
+  const int &num, const size_t &scatterings_total);
 
 /* data directory */
 void mkdir_data(void);
