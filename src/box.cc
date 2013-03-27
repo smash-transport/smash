@@ -110,11 +110,11 @@ static int Evolve(ParticleData *particles, int &number, const box &box) {
       printd_position(particles[i]);
 
       /* save evolution data */
-      if (steps > 0 && steps % box.update() == 0)
+      if (steps > 0 && (steps + 1) % box.update() == 0)
         write_particles(particles, number);
     }
     /* physics output during the run */
-    if (steps > 0 && steps % box.update() == 0)
+    if (steps > 0 && (steps + 1) % box.update() == 0)
       print_measurements(particles, number, scatterings_total);
   }
   return 0;
