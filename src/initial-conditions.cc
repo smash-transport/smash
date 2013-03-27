@@ -57,7 +57,7 @@ ParticleData* initial_conditions(ParticleData *particles, int &number,
   print_header();
 
   /* Set random IC:
-   * particles at random position in the box with random momentum
+   * particles at random position in the box with thermal momentum
    */
   particles = new ParticleData[number];
   for (int i = 0; i < number; i++) {
@@ -66,15 +66,25 @@ ParticleData* initial_conditions(ParticleData *particles, int &number,
     /* XXX: replace with full distribution */
     momentum_radial = box_muller(sqrt((3 * box.temperature())
       * (3 * box.temperature()) - pi.mass() * pi.mass()), 0.01);
-    /* direction of the momenta is random */
-    phi =  2 * M_PI * rand_r(&seedp) / RAND_MAX;
-    theta = M_PI * rand_r(&seedp) / RAND_MAX;
-    printd("Particle %d radial momenta %g phi %g theta %g\n", i,
-      momentum_radial, phi, theta);
-    particles[i].set_momentum(pi.mass(),
-      momentum_radial * cos(phi) * sin(theta),
-      momentum_radial * sin(phi) * sin(theta),
-      momentum_radial * cos(theta));
+    /* back to back pair creation with random momenta direction */
+    if (unlikely(i == number - 1 && !(i % 2))) {
+      /* poor last guy just sits around */
+      particles[i].set_momentum(pi.mass(), 0, 0, 0);
+    } else if (!(i % 2)) {
+      phi =  2 * M_PI * rand_r(&seedp) / RAND_MAX;
+      theta = M_PI * rand_r(&seedp) / RAND_MAX;
+      printd("Particle %d radial momenta %g phi %g theta %g\n", i,
+        momentum_radial, phi, theta);
+      particles[i].set_momentum(pi.mass(),
+        momentum_radial * cos(phi) * sin(theta),
+        momentum_radial * sin(phi) * sin(theta),
+        momentum_radial * cos(theta));
+    } else {
+      particles[i].set_momentum(pi.mass(),
+        - particles[i - 1].momentum().x1(),
+        - particles[i - 1].momentum().x2(),
+        - particles[i - 1].momentum().x3());
+    }
 
     time_start = 1.0;
     x_pos = 1.0 * rand_r(&seedp) / RAND_MAX * box.a();
