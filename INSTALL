@@ -1,16 +1,12 @@
-Quick instructions how to build shatter.
+Quick instructions how to build dash.
 
 Build it in a seperate directory:
   mkdir build
   cd build
-
-Cmake build types:
-  cmake -DCMAKE_BUILD_TYPE=Debug ../
-or
-  cmake -DCMAKE_BUILD_TYPE=Release ../
-
-Build it:
+  cmake ../
   make
 
-Run it:
+Run it with specific settings:
+  cp ../src/params.txt .
+  vi params.txt
   ./src/box

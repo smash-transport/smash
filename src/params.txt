@@ -1,13 +1,19 @@
 // Sample params.txt file
 
 // Cube size
-A	10.0
+A		10.0
 
 // temporal grid spacing
-EPS	0.1
+EPS		0.001
 
 // maximum of steps to take
-STEPS	10000
+STEPS		10000
+
+// how many steps before recording measurables
+UPDATE          100
+
+// initialization temperature
+TEMPERATURE	0.2
 
 // elastic cross section
-SIGMA	10.0
+SIGMA		10.0
