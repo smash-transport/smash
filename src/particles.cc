@@ -142,8 +142,11 @@ void check_collision(ParticleData *particle,
 
     /* just collided with this particle */
     if (particle[id].collision_time() == 0
-        && i == particle[id].collision_id())
+        && i == particle[id].collision_id()) {
+      printd("%g Skipping particle %d <-> %d\n", particle[id].x().x0(), id, 
+        i);
       continue;
+    }
 
     /* handle minimal collision time */
     if (unlikely(particle[id].collision_time() > 0)) {
@@ -185,6 +188,7 @@ void collide_particles(ParticleData *particle,
     /* unset collision time for both particles */
     particle[p->collision_id()].set_collision_time(0);
     particle[p->id()].set_collision_time(0);
-    p = collision_list->erase(p);
   }
+  /* empty the collision table */
+  collision_list->clear();
 }
