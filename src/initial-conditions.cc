@@ -86,12 +86,17 @@ ParticleData* initial_conditions(ParticleData *particles, int &number,
     }
     momentum_total += particles[i].momentum();
 
+    /* ramdom position in the box */
     time_start = 1.0;
     x_pos = 1.0 * rand_r(&seedp) / RAND_MAX * box->a();
     y_pos = 1.0 * rand_r(&seedp) / RAND_MAX * box->a();
     z_pos = 1.0 * rand_r(&seedp) / RAND_MAX * box->a();
     particles[i].set_position(time_start, z_pos, x_pos, y_pos);
 
+    /* no collision yet to happen */
+    particles[i].set_collision(0, 0);
+
+    /* IC: debug checks */
     printd_momenta(particles[i]);
     printd_position(particles[i]);
   }
