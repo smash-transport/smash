@@ -41,7 +41,7 @@ void print_startup(const box &box) {
 /* print_startup - console output on startup */
 void print_header(void) {
   print_line();
-  printf("        Time        <Etot>      <ptot>  <scattering_rate>\n");
+  printf("        Time        <Etot>    <Ediff>      <ptot>        <sigma>\n");
   print_line();
 }
 
@@ -60,7 +60,7 @@ void mkdir_data(void) {
 
 /* print_measurements - console output during simulation */
 void print_measurements(const ParticleData *particles, const int &number,
-  const size_t &scatterings_total) {
+  const size_t &scatterings_total, const box &box) {
   FourVector momentum_total(0, 0, 0, 0);
   /* use the time from the first particle - startup time */
   double time = particles[0].x().x0() - 1.0;
@@ -68,11 +68,13 @@ void print_measurements(const ParticleData *particles, const int &number,
   for (int i = 0; i < number; i++)
     momentum_total += particles[i].momentum();
   if (likely(time > 0))
-    printf("%13g%13g%13g%13g\n", time, momentum_total.x0(),
+    printf("%13g%13g%13g%13g%13g\n", time, momentum_total.x0(),
+          box.energy_initial() - momentum_total.x0(),
           sqrt(-1 * momentum_total.DotThree()),
           scatterings_total * 2 / (number * time));
   else
-    printf("%13g%13g%13g%13g\n", time, momentum_total.x0(), 
+    printf("%13g%13g%13g%13g%13g\n", time, momentum_total.x0(),
+          box.energy_initial() - momentum_total.x0(),
           sqrt(-1 * momentum_total.DotThree()), 0.0);
 }
 

@@ -31,6 +31,7 @@ ParticleData* initial_conditions(ParticleData *particles, int &number,
       box *box) {
   double x_pos, y_pos, z_pos, time_start, number_density;
   double phi, theta, momentum_radial;
+  FourVector momentum_total(0, 0, 0, 0);
   ParticleType pi("pi", 0.13957);
   ParticleType pi0("pi0", 0.134977);
 
@@ -53,7 +54,6 @@ ParticleData* initial_conditions(ParticleData *particles, int &number,
     number++;
   printf("IC number density %.6g [fm^-3]\n", number_density);
   printf("IC %d number of %s\n", number, pi.name().c_str());
-  print_header();
 
   /* Set random IC:
    * particles at random position in the box with thermal momentum
@@ -84,6 +84,7 @@ ParticleData* initial_conditions(ParticleData *particles, int &number,
         - particles[i - 1].momentum().x2(),
         - particles[i - 1].momentum().x3());
     }
+    momentum_total += particles[i].momentum();
 
     time_start = 1.0;
     x_pos = 1.0 * rand_r(&seedp) / RAND_MAX * box->a();
@@ -94,6 +95,10 @@ ParticleData* initial_conditions(ParticleData *particles, int &number,
     printd_momenta(particles[i]);
     printd_position(particles[i]);
   }
+  /* allows to check energy conservation */
+  printf("IC total energy: %g [GeV]\n", momentum_total.x0());
+  box->set_energy_initial(momentum_total.x0());
+  print_header();
 
   return particles;
 }

@@ -26,6 +26,8 @@ class box {
     void inline set_temperature(const float &T);
     float inline cross_section() const;
     void inline set_cross_section(const float &sigma);
+    float inline energy_initial() const;
+    void inline set_energy_initial(const float &energy);
 
   private:
     /* number of steps */
@@ -40,6 +42,8 @@ class box {
     float temperature_;
     /* cross section of the elastic scattering */
     float cross_section_;
+    /* initial total energy of the box */
+    float energy_initial_;
 };
 
 void inline box::set(const int STEPS, const int UPDATE, const float A,
@@ -98,6 +102,14 @@ float inline box::cross_section(void) const {
 
 void inline box::set_cross_section(const float &sigma) {
   cross_section_ = sigma;
+}
+
+float inline box::energy_initial(void) const {
+  return energy_initial_;
+}
+
+void inline box::set_energy_initial(const float &energy) {
+  energy_initial_ = energy;
 }
 
 /* support for gcc branch prediction */

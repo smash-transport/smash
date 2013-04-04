@@ -143,7 +143,7 @@ void check_collision(ParticleData *particle,
     /* just collided with this particle */
     if (particle[id].collision_time() == 0
         && i == particle[id].collision_id()) {
-      printd("%g Skipping particle %d <-> %d\n", particle[id].x().x0(), id, 
+      printd("%g Skipping particle %d <-> %d\n", particle[id].x().x0(), id,
         i);
       continue;
     }
