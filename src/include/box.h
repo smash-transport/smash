@@ -9,7 +9,8 @@
 
 class box {
   public:
-    /* XXX: add default constructor*/
+    /* default constructor with improbable values */
+    box(): steps_(0) {}
     /* member funtions */
     void inline set(const int STEPS, const int UPDATE,
       const float A, const float EPS, const float T, const float sigma);
