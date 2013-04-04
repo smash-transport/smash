@@ -11,6 +11,6 @@ class box;
 extern const char *sep;
 
 /* read params file parameters */
-box process_params(box box, char *paramfile);
+void process_params(box *box, char *paramfile);
 
 #endif  // SRC_INCLUDE_PARAM_READER_H_

@@ -19,17 +19,16 @@
 #include "include/outputroutines.h"
 
 /* Set default IC for the box */
-box init_box(box box) {
+void init_box(box *box) {
   int steps = 10000, update = 10;
   float A = 10.0, EPS = 0.01, temperature = 0.3, sigma = 10.0;
 
-  box.set(steps, update, A, EPS, temperature, sigma);
-  return box;
+  box->set(steps, update, A, EPS, temperature, sigma);
 }
 
 /* initial_conditions - sets partilce data for @particles */
 ParticleData* initial_conditions(ParticleData *particles, int &number,
-      box box) {
+      box *box) {
   double x_pos, y_pos, z_pos, time_start, number_density;
   double phi, theta, momentum_radial;
   ParticleType pi("pi", 0.13957);
@@ -44,13 +43,13 @@ ParticleData* initial_conditions(ParticleData *particles, int &number,
    * (assumes Bose-Einstein):
    * Volume m^2 T BesselK[2, m/T] / (2\pi^2)
    */
-  number_density = pi.mass() * pi.mass() * box.temperature()
-    * gsl_sf_bessel_Knu(2, pi.mass() / box.temperature())
+  number_density = pi.mass() * pi.mass() * box->temperature()
+    * gsl_sf_bessel_Knu(2, pi.mass() / box->temperature())
     / 2 / M_PI / M_PI / hbarc / hbarc / hbarc;
   /* cast while reflecting probability of extra particle */
-  number = box.a() * box.a() * box.a() * number_density;
+  number = box->a() * box->a() * box->a() * number_density;
   srand48(time(NULL));
-  if (box.a() * box.a() * box.a() * number_density - number > drand48())
+  if (box->a() * box->a() * box->a() * number_density - number > drand48())
     number++;
   printf("IC number density %.6g [fm^-3]\n", number_density);
   printf("IC %d number of %s\n", number, pi.name().c_str());
@@ -64,8 +63,8 @@ ParticleData* initial_conditions(ParticleData *particles, int &number,
     particles[i].set_id(i);
 
     /* XXX: replace with full distribution */
-    momentum_radial = box_muller(sqrt((3 * box.temperature())
-      * (3 * box.temperature()) - pi.mass() * pi.mass()), 0.01);
+    momentum_radial = box_muller(sqrt((3 * box->temperature())
+      * (3 * box->temperature()) - pi.mass() * pi.mass()), 0.01);
     /* back to back pair creation with random momenta direction */
     if (unlikely(i == number - 1 && !(i % 2))) {
       /* poor last guy just sits around */
@@ -87,9 +86,9 @@ ParticleData* initial_conditions(ParticleData *particles, int &number,
     }
 
     time_start = 1.0;
-    x_pos = 1.0 * rand_r(&seedp) / RAND_MAX * box.a();
-    y_pos = 1.0 * rand_r(&seedp) / RAND_MAX * box.a();
-    z_pos = 1.0 * rand_r(&seedp) / RAND_MAX * box.a();
+    x_pos = 1.0 * rand_r(&seedp) / RAND_MAX * box->a();
+    y_pos = 1.0 * rand_r(&seedp) / RAND_MAX * box->a();
+    z_pos = 1.0 * rand_r(&seedp) / RAND_MAX * box->a();
     particles[i].set_position(time_start, z_pos, x_pos, y_pos);
 
     printd_momenta(particles[i]);

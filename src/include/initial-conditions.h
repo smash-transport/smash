@@ -9,7 +9,7 @@
 class ParticleData;
 class box;
 
-box init_box(box box);
-ParticleData* initial_conditions(ParticleData *particles, int &number, box box);
+void init_box(box *box);
+ParticleData* initial_conditions(ParticleData *particles, int &number, box *box);
 
 #endif  // SRC_INCLUDE_INITIAL_CONDITIONS_H_

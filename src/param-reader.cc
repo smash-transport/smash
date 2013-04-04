@@ -20,7 +20,7 @@
 const char *sep = " \t\n";
 
 /* process_params - read in params */
-box process_params(box box, char *path) {
+void process_params(box *box, char *path) {
   char *line = NULL, *saveptr = NULL, params[FILELEN];
   size_t len = 0;
   ssize_t read;
@@ -34,7 +34,7 @@ box process_params(box box, char *path) {
   fp = fopen(params, "r");
   if (!fp) {
     fprintf(stderr, "W: No params.txt at %s path.\n", path);
-    return box;
+    return;
   }
 
   printf("Processing %s/params.txt.\n", path);
@@ -53,34 +53,33 @@ box process_params(box box, char *path) {
 
     /* integer values */
     if (strcmp(key, "STEPS") == 0) {
-      box.set_steps(abs(atoi(value)));
+      box->set_steps(abs(atoi(value)));
       continue;
     }
     if (strcmp(key, "UPDATE") == 0) {
-      box.set_update(abs(atoi(value)));
+      box->set_update(abs(atoi(value)));
       continue;
     }
 
 
     /* double or float values */
     if (strcmp(key, "A") == 0) {
-      box.set_a(atof(value));
+      box->set_a(atof(value));
       continue;
     }
     if (strcmp(key, "EPS") == 0) {
-      box.set_eps(atof(value));
+      box->set_eps(atof(value));
       continue;
     }
     if (strcmp(key, "TEMPERATURE") == 0) {
-      box.set_temperature(atof(value));
+      box->set_temperature(atof(value));
       continue;
     }
     if (strcmp(key, "SIGMA") == 0) {
-      box.set_cross_section(atof(value));
+      box->set_cross_section(atof(value));
       continue;
     }
   }
   free(line);
   fclose(fp);
-  return box;
 }

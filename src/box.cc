@@ -124,7 +124,7 @@ int main(int argc, char *argv[]) {
   char *p, *path;
   int opt, rc, number = 0;
   ParticleData *particles = NULL;
-  box box;
+  box *cube = new box;
 
   struct option longopts[] = {
     { "eps",        no_argument,            0, 'e' },
@@ -142,31 +142,31 @@ int main(int argc, char *argv[]) {
     progname = p + 1;
 
   /* set default box configuration */
-  box = init_box(box);
+  init_box(cube);
 
   /* Read config file overrides default */
   int len = 3;
   path = reinterpret_cast<char *>(malloc(len));
   snprintf(path, len, "./");
-  box = process_params(box, path);
+  process_params(cube, path);
 
   /* parse the command line options, they override all previous */
   while ((opt = getopt_long(argc, argv, "e:hl:s:T:V", longopts, NULL)) != -1) {
     switch (opt) {
     case 'e':
-      box.set_eps(atof(optarg));
+      cube->set_eps(atof(optarg));
       break;
     case 'h':
       usage(EXIT_SUCCESS);
       break;
     case 'l':
-      box.set_a(atof(optarg));
+      cube->set_a(atof(optarg));
       break;
     case 's':
-      box.set_steps(abs(atoi(optarg)));
+      cube->set_steps(abs(atoi(optarg)));
       break;
     case 'T':
-      box.set_temperature(atof(optarg));
+      cube->set_temperature(atof(optarg));
       break;
     case 'V':
       printf("%s (%d)\n", progname, VERSION_MAJOR);
@@ -177,18 +177,19 @@ int main(int argc, char *argv[]) {
   }
 
   /* Output IC values */
-  print_startup(box);
+  print_startup(*cube);
   mkdir_data();
   write_oscar_header();
 
   /* Initialize box */
-  particles = initial_conditions(particles, number, box);
+  particles = initial_conditions(particles, number, cube);
   write_particles(particles, number);
 
   /* Compute stuff */
-  rc = Evolve(particles, number, box);
+  rc = Evolve(particles, number, *cube);
 
   delete [] particles;
+  delete cube;
   free(path);
   return rc;
 }
