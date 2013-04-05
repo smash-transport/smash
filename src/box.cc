@@ -115,6 +115,7 @@ static int Evolve(ParticleData *particles, int &number, const box &box) {
       print_measurements(particles, number, scatterings_total, box);
       /* save evolution data */
       write_particles(particles, number);
+      write_vtk(particles, number);
     }
   }
   return 0;

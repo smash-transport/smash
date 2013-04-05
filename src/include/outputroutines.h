@@ -38,5 +38,6 @@ void write_particles(ParticleData *particles, const int number);
 void write_oscar_header(void);
 void write_oscar(const ParticleData &particle1, const ParticleData &particle2,
   int flag);
+void write_vtk(const ParticleData *particles, int number);
 
 #endif  // SRC_INCLUDE_OUTPUTROUTINES_H_

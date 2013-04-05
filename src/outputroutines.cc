@@ -156,3 +156,28 @@ void write_oscar(const ParticleData &particle1,
               position.x0());
   fclose(fp);
 }
+
+/* write_vtk - VTK file describing particle postion */
+void write_vtk(const ParticleData *particles, const int number) {
+  FILE *fp;
+  char filename[256];
+
+  sprintf(filename, "data/pos_%5f.vtk", particles[0].x().x0() - 1.0);
+  fp = fopen(filename, "w");
+  /* Legacy VTK file format */
+  fprintf(fp, "# vtk DataFile Version 2.0\n");
+  fprintf(fp, "Generated from molecular-offset data\n");
+  fprintf(fp, "ASCII\n");
+  /* Unstructured data sets are composed of points, lines, polygons, .. */
+  fprintf(fp, "DATASET UNSTRUCTURED_GRID\n");
+  fprintf(fp, "POINTS %d double\n", number);
+  for (int i = 0; i < number; i++)
+    fprintf(fp, "%g %g %g\n", particles[i].x().x1(), particles[i].x().x2(),
+      particles[i].x().x3());
+  fprintf(fp, "POINT_DATA %d\n", number);
+  fprintf(fp, "SCALARS momenta_x double 1\n");
+  fprintf(fp, "LOOKUP_TABLE default\n");
+  for (int i = 0; i < number; i++) 
+    fprintf(fp, "%g\n", particles[i].momentum().x1());
+  fclose(fp);
+}
