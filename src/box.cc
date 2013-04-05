@@ -89,7 +89,7 @@ static int Evolve(ParticleData *particles, int &number, const box &box) {
       check_collision(particles, &collision_list, box, i, number);
 
     /* particle interactions */
-    if (collision_list.size() > 0) {
+    if (!collision_list.empty()) {
       scatterings_total += collision_list.size();
       collide_particles(particles, &collision_list);
     }
@@ -108,14 +108,14 @@ static int Evolve(ParticleData *particles, int &number, const box &box) {
       position = boundary_condition(position, box);
       particles[i].set_position(position);
       printd_position(particles[i]);
-
-      /* save evolution data */
-      if (steps > 0 && (steps + 1) % box.update() == 0)
-        write_particles(particles, number);
     }
+
     /* physics output during the run */
-    if (steps > 0 && (steps + 1) % box.update() == 0)
+    if (steps > 0 && (steps + 1) % box.update() == 0) {
       print_measurements(particles, number, scatterings_total, box);
+      /* save evolution data */
+      write_particles(particles, number);
+    }
   }
   return 0;
 }
