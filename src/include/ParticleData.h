@@ -37,6 +37,8 @@ class ParticleData {
   double inline velocity_x(void) { return momentum().x2() / momentum().x0(); }
   double inline velocity_y(void) { return momentum().x3() / momentum().x0(); }
   double inline velocity_z(void) { return momentum().x1() / momentum().x0(); }
+  /* overloaded operators */
+  bool inline operator==(const ParticleData &a);
 
   private:
     /* Each particle has a unique identifier */
@@ -110,6 +112,10 @@ void inline ParticleData::set_position(const double &x0, const double &x3,
 
 void inline ParticleData::add_position(const FourVector &pos) {
   x_ += pos;
+}
+
+bool inline ParticleData::operator==(const ParticleData &a) {
+  return this->id_ == a.id_;
 }
 
 #endif  // SRC_INCLUDE_PARTICLEDATA_H_
