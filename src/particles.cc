@@ -94,15 +94,16 @@ static double particle_distance(ParticleData *particle_orig1,
 /* time_collision - measure collision time of two particles */
 static double collision_time(ParticleData *particle1,
   ParticleData *particle2) {
-  FourVector position_diff, momentum_diff;
+  FourVector position_diff, velocity_diff;
   double time;
 
   /* XXX: allow both Kodama + UrQMD distance criteria */
   /* arXiv:1203.4418 (5.15): t_{coll} = - (x1 - x2) . (v1 - v2) / (v1 - v2)^2 */
   position_diff = particle1->x() - particle2->x();
-  momentum_diff = particle1->momentum() - particle2->momentum();
-  time = - position_diff.DotThree(momentum_diff)
-           / momentum_diff.DotThree(momentum_diff);
+  velocity_diff = particle1->momentum() / particle1->momentum().x0()
+    - particle2->momentum() / particle2->momentum().x0();
+  time = - position_diff.DotThree(velocity_diff)
+           / velocity_diff.DotThree(velocity_diff);
   return time;
 }
 

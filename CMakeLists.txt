@@ -5,7 +5,7 @@ project(box)
 cmake_minimum_required(VERSION 2.8)
 
 # The current version number
-set(VERSION_MAJOR 08042013)
+set(VERSION_MAJOR 8042013)
 
 # Set the relevant generic g++ flags (optimisation + warnings)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -march=native")
