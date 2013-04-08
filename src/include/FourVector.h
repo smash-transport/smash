@@ -39,6 +39,7 @@ class FourVector {
     FourVector inline operator+=(const FourVector &a);
     FourVector inline operator-=(const FourVector &a);
     FourVector inline operator*=(const double &a);
+    FourVector inline operator/=(const double &a);
 
   private:
     double x0_, x1_, x2_, x3_;
@@ -120,6 +121,19 @@ FourVector inline FourVector::operator*=(const double &a) {
 
 inline FourVector operator*(FourVector a, const double &b) {
   a *= b;
+  return a;
+}
+
+FourVector inline FourVector::operator/=(const double &a) {
+  this->x0_ /= a;
+  this->x1_ /= a;
+  this->x2_ /= a;
+  this->x3_ /= a;
+  return *this;
+}
+
+inline FourVector operator/(FourVector a, const double &b) {
+  a /= b;
   return a;
 }
 
