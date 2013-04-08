@@ -177,7 +177,7 @@ void write_vtk(const ParticleData *particles, const int number) {
   fprintf(fp, "POINT_DATA %d\n", number);
   fprintf(fp, "SCALARS momenta_x double 1\n");
   fprintf(fp, "LOOKUP_TABLE default\n");
-  for (int i = 0; i < number; i++) 
+  for (int i = 0; i < number; i++)
     fprintf(fp, "%g\n", particles[i].momentum().x1());
   fclose(fp);
 }

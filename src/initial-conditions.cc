@@ -2,6 +2,7 @@
  *
  *    Copyright (c) 2012-2013
  *      maximilian attems <attems@fias.uni-frankfurt.de>
+ *      Jussi Auvinen <auvinen@fias.uni-frankfurt.de>
  *
  *    GNU General Public License (GPLv3)
  *
@@ -24,6 +25,41 @@ void init_box(box *box) {
   float A = 10.0, EPS = 0.01, temperature = 0.3, sigma = 10.0;
 
   box->set(steps, update, A, EPS, temperature, sigma);
+}
+
+/* density_integrand - Maxwell-Boltzmann distribution */
+static double inline density_integrand(double momentum, double temp,
+  double mass) {
+  return 4 * M_PI * momentum * momentum
+    * exp(- sqrt(momentum * momentum + mass * mass) / temp);
+}
+
+/* sample_momenta - return thermal momenta */
+static double sample_momenta(box *box, ParticleType pi) {
+  double momentum_radial, momentum_average, momentum_min, momentum_max;
+  double probability = 0, probability_max, probability_random = 1;
+
+  /* massless particles peak would be at <E>=3T */
+  momentum_average = sqrt((3 * box->temperature()) * (3 * box->temperature())
+    - pi.mass() * pi.mass());
+  momentum_min = pi.mass();
+  momentum_max = 50.0 * box->temperature();
+  /* double the massless peak value to be above maximum of the distribution */
+  probability_max = 2 * density_integrand(momentum_average, box->temperature(),
+    pi.mass());
+
+  /* random momenta and random probability need to be below the distribution */
+  while (probability_random > probability) {
+    momentum_radial = (momentum_max - momentum_min) * rand_r(&seedp) / RAND_MAX
+      + momentum_min;
+    momentum_radial = sqrt(momentum_radial * momentum_radial
+      - pi.mass() * pi.mass());
+    probability = density_integrand(momentum_radial, box->temperature(),
+      pi.mass());
+    probability_random = probability_max * rand_r(&seedp) / RAND_MAX;
+  }
+
+  return momentum_radial;
 }
 
 /* initial_conditions - sets partilce data for @particles */
@@ -62,9 +98,8 @@ ParticleData* initial_conditions(ParticleData *particles, int &number,
   for (int i = 0; i < number; i++) {
     particles[i].set_id(i);
 
-    /* XXX: replace with full distribution */
-    momentum_radial = box_muller(sqrt((3 * box->temperature())
-      * (3 * box->temperature()) - pi.mass() * pi.mass()), 0.01);
+    /* thermal momentum according Maxwell-Boltzmann distribution */
+    momentum_radial = sample_momenta(box, pi);
     /* back to back pair creation with random momenta direction */
     if (unlikely(i == number - 1 && !(i % 2))) {
       /* poor last guy just sits around */
