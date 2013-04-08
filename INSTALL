@@ -7,6 +7,5 @@ Build it in a seperate directory:
   make
 
 Run it with specific settings:
-  cp ../src/params.txt .
   vi params.txt
   ./src/box

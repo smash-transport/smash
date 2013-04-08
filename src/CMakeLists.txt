@@ -11,5 +11,8 @@ configure_file (
 )
 include_directories("${PROJECT_BINARY_DIR}/src")
 
+# directly copy params file to build directory
+file(COPY params.txt DESTINATION ..)
+
 # link with gsl
 target_link_libraries(box gsl gslcblas)
