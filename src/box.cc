@@ -96,8 +96,8 @@ static int Evolve(ParticleData *particles, int &number, const box &box) {
 
     /* propagate all particles */
     for (int i = 0; i < number; i++) {
-      distance.set_FourVector(1.0, particles[i].velocity_x(),
-        particles[i].velocity_y(), particles[i].velocity_z());
+      distance.set_FourVector(1.0, particles[i].velocity_z(),
+        particles[i].velocity_x(), particles[i].velocity_y());
       distance *= box.eps();
       printd("Particle %d motion: %g %g %g %g\n", particles[i].id(),
          distance.x0(), distance.x1(), distance.x2(), distance.x3());
