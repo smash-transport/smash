@@ -138,8 +138,11 @@ void check_collision(ParticleData *particle,
 
     /* check for minimal collision time */
     if (particle[id].collision_time() > 0
-          && time_collision > particle[id].collision_time())
+          && time_collision > particle[id].collision_time()) {
+      printd("%g Not minimal particle %d <-> %d\n", particle[id].x().x0(), id,
+        i);
       continue;
+    }
 
     /* just collided with this particle */
     if (particle[id].collision_time() == 0
@@ -155,7 +158,9 @@ void check_collision(ParticleData *particle,
       printd("Not colliding particle %d <-> %d\n", id, not_id);
       /* unset collision partner */
       particle[not_id].set_collision(0, 0);
-      /* XXX: remove from the list!? */
+      /* remove any of those partners from the list */
+      collision_list->remove(particle[id]);
+      collision_list->remove(particle[not_id]);
     }
 
     /* setup collision partners */
@@ -163,7 +168,7 @@ void check_collision(ParticleData *particle,
     printd("t_coll particle %d <-> %d: %g \n", id, i, time_collision);
     particle[id].set_collision(time_collision, i);
     particle[i].set_collision(time_collision, id);
-    /* XXX: check if not already in the list */
+    /* add to collision list */
     collision_list->push_back(particle[id]);
   }
 }
