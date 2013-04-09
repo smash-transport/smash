@@ -158,8 +158,8 @@ void check_collision(ParticleData *particle,
     if (unlikely(particle[id].collision_time() > 0)) {
       int not_id = particle[id].collision_id();
       printd("Not colliding particle %d <-> %d\n", id, not_id);
-      /* unset collision partner */
-      particle[not_id].set_collision(0, 0);
+      /* unset collision partner to zero time and unexisting id */
+      particle[not_id].set_collision(0, -1);
       /* remove any of those partners from the list */
       collision_list->remove(particle[id]);
       collision_list->remove(particle[not_id]);
@@ -193,7 +193,7 @@ void collide_particles(ParticleData *particle,
       &velocity_com);
     write_oscar(particle[p->id()], particle[p->collision_id()], -1);
 
-    /* unset collision time for both particles */
+    /* unset collision time for both particles + keep id */
     particle[p->collision_id()].set_collision_time(0);
     particle[p->id()].set_collision_time(0);
   }
