@@ -50,7 +50,9 @@ static double sample_momenta(box *box, ParticleType pi) {
   probability_max = 2 * density_integrand(momentum_average, box->temperature(),
     pi.mass());
 
-  /* random momenta and random probability need to be below the distribution */
+  /* sample by rejection method: (see numerical recipes for more efficient)
+   * random momenta and random probability need to be below the distribution
+   */
   while (probability_random > probability) {
     momentum_radial = (momentum_max - momentum_min) * drand48() + momentum_min;
     momentum_radial = sqrt(momentum_radial * momentum_radial

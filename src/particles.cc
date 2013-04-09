@@ -121,7 +121,9 @@ void check_collision(ParticleData *particle,
   std::list<ParticleData> *collision_list, box box, int id, int number) {
   double distance_squared, time_collision;
 
-  /* check which particles interact */
+  /* check which particles interact:
+   * This processes all particles above the certain id.
+   */
   for (int i = id + 1; i < number; i++) {
     /* XXX: only check particles within nearest neighbour cells - size
      * according to cross_section */
