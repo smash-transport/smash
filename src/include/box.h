@@ -7,27 +7,31 @@
 #ifndef SRC_INCLUDE_BOX_H_
 #define SRC_INCLUDE_BOX_H_
 
+#include <stdint.h>
+
 class box {
   public:
     /* default constructor with improbable values */
     box(): steps_(0) {}
     /* member funtions */
-    void inline set(const int STEPS, const int UPDATE,
-      const float A, const float EPS, const float T, const float sigma);
+    void inline set(const float A, const float EPS, int64_t RANDOMSEED,
+      const float sigma, const int STEPS, const float T, const int UPDATE);
     float inline a() const;
     void inline set_a(const float &A);
-    float inline eps() const;
-    void inline set_eps(const float &EPS);
-    int inline steps() const;
-    void inline set_steps(const int &STEPS);
-    int inline update() const;
-    void inline set_update(const int &UPDATE);
-    float inline temperature() const;
-    void inline set_temperature(const float &T);
     float inline cross_section() const;
     void inline set_cross_section(const float &sigma);
     float inline energy_initial() const;
     void inline set_energy_initial(const float &energy);
+    float inline eps() const;
+    void inline set_eps(const float &EPS);
+    float inline temperature() const;
+    void inline set_temperature(const float &T);
+    int64_t inline seed() const;
+    void inline set_seed(const int64_t &RANDOMSEED);
+    int inline steps() const;
+    void inline set_steps(const int &STEPS);
+    int inline update() const;
+    void inline set_update(const int &UPDATE);
 
   private:
     /* number of steps */
@@ -44,16 +48,19 @@ class box {
     float cross_section_;
     /* initial total energy of the box */
     float energy_initial_;
+    /* initial seed for random generator */
+    int64_t seed_;
 };
 
-void inline box::set(const int STEPS, const int UPDATE, const float A,
-      const float EPS, const float T, const float sigma) {
+void inline box::set(const float A, const float EPS, const int64_t RANDOMSEED,
+      const float sigma, const int STEPS, const float T, const int UPDATE) {
+  a_ = A;
+  cross_section_ = sigma;
+  eps_ = EPS;
+  seed_ = RANDOMSEED;
   steps_ = STEPS;
   update_ = UPDATE;
-  a_ = A;
-  eps_ = EPS;
   temperature_ = T;
-  cross_section_ = sigma;
 }
 
 float inline box::a(void) const {
@@ -112,6 +119,14 @@ void inline box::set_energy_initial(const float &energy) {
   energy_initial_ = energy;
 }
 
+int64_t inline box::seed(void) const {
+  return seed_;
+}
+
+void inline box::set_seed(const int64_t &randomseed) {
+  seed_ = randomseed;
+}
+
 /* support for gcc branch prediction */
 #ifdef __GNUC__
 #define likely(x)       __builtin_expect((x), 1)
@@ -120,9 +135,5 @@ void inline box::set_energy_initial(const float &energy) {
 #define likely(x)       (x)
 #define unlikely(x)     (x)
 #endif
-
-/*XXX: get rid of those globals */
-/* Default random seed */
-extern unsigned int seedp;
 
 #endif  // SRC_INCLUDE_BOX_H_

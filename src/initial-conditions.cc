@@ -10,6 +10,7 @@
 #include "include/initial-conditions.h"
 
 #include <stdio.h>
+#include <stdint.h>
 #include <gsl/gsl_sf_bessel.h>
 
 #include "include/box.h"
@@ -22,9 +23,10 @@
 /* Set default IC for the box */
 void init_box(box *box) {
   int steps = 10000, update = 10;
+  int64_t seed = 1;
   float A = 10.0, EPS = 0.01, temperature = 0.3, sigma = 10.0;
 
-  box->set(steps, update, A, EPS, temperature, sigma);
+  box->set(A, EPS, seed, sigma, steps, temperature, update);
 }
 
 /* density_integrand - Maxwell-Boltzmann distribution */
@@ -50,13 +52,12 @@ static double sample_momenta(box *box, ParticleType pi) {
 
   /* random momenta and random probability need to be below the distribution */
   while (probability_random > probability) {
-    momentum_radial = (momentum_max - momentum_min) * rand_r(&seedp) / RAND_MAX
-      + momentum_min;
+    momentum_radial = (momentum_max - momentum_min) * drand48() + momentum_min;
     momentum_radial = sqrt(momentum_radial * momentum_radial
       - pi.mass() * pi.mass());
     probability = density_integrand(momentum_radial, box->temperature(),
       pi.mass());
-    probability_random = probability_max * rand_r(&seedp) / RAND_MAX;
+    probability_random = probability_max * drand48();
   }
 
   return momentum_radial;
@@ -70,6 +71,9 @@ ParticleData* initial_conditions(ParticleData *particles, int &number,
   FourVector momentum_total(0, 0, 0, 0);
   ParticleType pi("pi", 0.13957);
   ParticleType pi0("pi0", 0.134977);
+
+  /* initialize random seed */
+  srand48(box->seed());
 
   /* XXX: move to proper startup */
   printd("Pi^± mass: %g [GeV]\n", pi.mass());
@@ -85,7 +89,6 @@ ParticleData* initial_conditions(ParticleData *particles, int &number,
     / 2 / M_PI / M_PI / hbarc / hbarc / hbarc;
   /* cast while reflecting probability of extra particle */
   number = box->a() * box->a() * box->a() * number_density;
-  srand48(time(NULL));
   if (box->a() * box->a() * box->a() * number_density - number > drand48())
     number++;
   printf("IC number density %.6g [fm^-3]\n", number_density);
@@ -105,8 +108,8 @@ ParticleData* initial_conditions(ParticleData *particles, int &number,
       /* poor last guy just sits around */
       particles[i].set_momentum(pi.mass(), 0, 0, 0);
     } else if (!(i % 2)) {
-      phi =  2 * M_PI * rand_r(&seedp) / RAND_MAX;
-      theta = M_PI * rand_r(&seedp) / RAND_MAX;
+      phi =  2 * M_PI * drand48();
+      theta = M_PI * drand48();
       printd("Particle %d radial momenta %g phi %g theta %g\n", i,
         momentum_radial, phi, theta);
       particles[i].set_momentum(pi.mass(),
@@ -123,9 +126,9 @@ ParticleData* initial_conditions(ParticleData *particles, int &number,
 
     /* ramdom position in the box */
     time_start = 1.0;
-    x_pos = 1.0 * rand_r(&seedp) / RAND_MAX * box->a();
-    y_pos = 1.0 * rand_r(&seedp) / RAND_MAX * box->a();
-    z_pos = 1.0 * rand_r(&seedp) / RAND_MAX * box->a();
+    x_pos = drand48() * box->a();
+    y_pos = drand48() * box->a();
+    z_pos = drand48() * box->a();
     particles[i].set_position(time_start, z_pos, x_pos, y_pos);
 
     /* no collision yet to happen */

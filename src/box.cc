@@ -27,9 +27,6 @@
 
 char *progname;
 
-/* Default random seed */
-unsigned int seedp = 1;
-
 static void usage(int rc) {
   printf("\nUsage: %s [option]\n\n", progname);
   printf("Calculate transport box\n"
@@ -132,6 +129,7 @@ int main(int argc, char *argv[]) {
     { "eps",        required_argument,      0, 'e' },
     { "help",       no_argument,            0, 'h' },
     { "length",     required_argument,      0, 'l' },
+    { "random",     required_argument,      0, 'r' },
     { "steps",      required_argument,      0, 's' },
     { "temperature", required_argument,     0, 'T' },
     { "update",     required_argument,      0, 'u' },
@@ -154,7 +152,7 @@ int main(int argc, char *argv[]) {
   process_params(cube, path);
 
   /* parse the command line options, they override all previous */
-  while ((opt = getopt_long(argc, argv, "e:hl:s:T:u:V", longopts,
+  while ((opt = getopt_long(argc, argv, "e:hl:r:s:T:u:V", longopts,
     NULL)) != -1) {
     switch (opt) {
     case 'e':
@@ -165,6 +163,9 @@ int main(int argc, char *argv[]) {
       break;
     case 'l':
       cube->set_a(atof(optarg));
+      break;
+    case 'r':
+      cube->set_seed(abs(atol(optarg)));
       break;
     case 's':
       cube->set_steps(abs(atoi(optarg)));

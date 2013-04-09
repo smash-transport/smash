@@ -9,6 +9,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <ctime>
 
 #include "include/param-reader.h"
 #include "include/box.h"
@@ -56,6 +57,14 @@ void process_params(box *box, char *path) {
       box->set_steps(abs(atoi(value)));
       continue;
     }
+    if (strcmp(key, "RANDOMSEED") == 0) {
+      /* negative seed means random startup value */
+      if (atol(value) > 0)
+        box->set_seed(atol(value));
+      else
+        box->set_seed(time(NULL));
+      continue;
+    }
     if (strcmp(key, "UPDATE") == 0) {
       box->set_update(abs(atoi(value)));
       continue;
@@ -71,12 +80,12 @@ void process_params(box *box, char *path) {
       box->set_eps(atof(value));
       continue;
     }
-    if (strcmp(key, "TEMPERATURE") == 0) {
-      box->set_temperature(atof(value));
-      continue;
-    }
     if (strcmp(key, "SIGMA") == 0) {
       box->set_cross_section(atof(value));
+      continue;
+    }
+    if (strcmp(key, "TEMPERATURE") == 0) {
+      box->set_temperature(atof(value));
       continue;
     }
   }

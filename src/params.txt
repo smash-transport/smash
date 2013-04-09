@@ -12,6 +12,9 @@ STEPS		10000
 // how many steps before recording measurables
 UPDATE          100
 
+// initial random seed (negative for time)
+RANDOMSEED	1
+
 // initialization temperature
 TEMPERATURE	0.2
 
