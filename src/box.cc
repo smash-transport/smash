@@ -38,6 +38,7 @@ static void usage(int rc) {
          "  -l, --length         length of the box in fermi\n"
          "  -s, --steps          number of steps\n"
          "  -T, --temperature    initial temperature\n"
+         "  -u, --update         output measurements each nth steps\n"
          "  -V, --version\n\n");
   exit(rc);
 }
@@ -128,11 +129,12 @@ int main(int argc, char *argv[]) {
   box *cube = new box;
 
   struct option longopts[] = {
-    { "eps",        no_argument,            0, 'e' },
+    { "eps",        required_argument,      0, 'e' },
     { "help",       no_argument,            0, 'h' },
-    { "length",     no_argument,            0, 'l' },
-    { "steps",      no_argument,            0, 's' },
-    { "temperature", no_argument,           0, 'T' },
+    { "length",     required_argument,      0, 'l' },
+    { "steps",      required_argument,      0, 's' },
+    { "temperature", required_argument,     0, 'T' },
+    { "update",     required_argument,      0, 'u' },
     { "version",    no_argument,            0, 'V' },
     { NULL,         0, 0, 0 }
   };
@@ -152,7 +154,8 @@ int main(int argc, char *argv[]) {
   process_params(cube, path);
 
   /* parse the command line options, they override all previous */
-  while ((opt = getopt_long(argc, argv, "e:hl:s:T:V", longopts, NULL)) != -1) {
+  while ((opt = getopt_long(argc, argv, "e:hl:s:T:u:V", longopts,
+    NULL)) != -1) {
     switch (opt) {
     case 'e':
       cube->set_eps(atof(optarg));
@@ -168,6 +171,9 @@ int main(int argc, char *argv[]) {
       break;
     case 'T':
       cube->set_temperature(atof(optarg));
+      break;
+    case 'u':
+      cube->set_update(abs(atoi(optarg)));
       break;
     case 'V':
       printf("%s (%d)\n", progname, VERSION_MAJOR);
