@@ -116,6 +116,8 @@ static int Evolve(ParticleData *particles, int &number, const box &box) {
       write_vtk(particles, number);
     }
   }
+
+  print_tail(scatterings_total * 2 / (particles[0].x().x0() - 1.0) / number);
   return 0;
 }
 
@@ -196,6 +198,7 @@ int main(int argc, char *argv[]) {
   /* Compute stuff */
   rc = Evolve(particles, number, *cube);
 
+  /* tear down */
   delete [] particles;
   delete cube;
   free(path);

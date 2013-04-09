@@ -38,7 +38,7 @@ void print_startup(const box &box) {
   printf("Random number seed: %li \n", box.seed());
 }
 
-/* print_startup - console output on startup */
+/* print_header - title for each row */
 void print_header(void) {
   print_line();
   printf("        Time        <Etot>    <Ediff>      <ptot>        <sigma>\n");
@@ -76,6 +76,12 @@ void print_measurements(const ParticleData *particles, const int &number,
     printf("%13g%13g%13g%13g%13g\n", time, momentum_total.x0(),
           box.energy_initial() - momentum_total.x0(),
           sqrt(-1 * momentum_total.DotThree()), 0.0);
+}
+
+/* print_tail - output at the end of the simulation */
+void print_tail(const double &scattering_rate) {
+  print_line();
+  printf("Final scattering rate: %g\n", scattering_rate);
 }
 
 /* printd_momenta - print debug data of the specific particle */
