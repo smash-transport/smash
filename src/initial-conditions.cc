@@ -133,8 +133,8 @@ ParticleData* initial_conditions(ParticleData *particles, int &number,
     z_pos = drand48() * box->a();
     particles[i].set_position(time_start, z_pos, x_pos, y_pos);
 
-    /* no collision yet to happen */
-    particles[i].set_collision(0, 0);
+    /* no collision yet hence zero time and unexisting id */
+    particles[i].set_collision(0, -1);
 
     /* IC: debug checks */
     printd_momenta(particles[i]);
