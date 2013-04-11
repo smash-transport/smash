@@ -20,3 +20,6 @@ TEMPERATURE	0.2
 
 // elastic cross section
 SIGMA		10.0
+
+// number of test particle
+TESTPARTICLE	1

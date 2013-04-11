@@ -144,10 +144,7 @@ int main(int argc, char *argv[]) {
   if ((p = strrchr(progname, '/')) != NULL)
     progname = p + 1;
 
-  /* set default box configuration */
-  init_box(cube);
-
-  /* Read config file overrides default */
+  /* Read config file overrides box constructor defaults */
   int len = 3;
   path = reinterpret_cast<char *>(malloc(len));
   snprintf(path, len, "./");

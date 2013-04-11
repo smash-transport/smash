@@ -20,15 +20,6 @@
 #include "include/random.h"
 #include "include/outputroutines.h"
 
-/* Set default IC for the box */
-void init_box(box *box) {
-  int steps = 10000, update = 10;
-  int64_t seed = 1;
-  float A = 10.0, EPS = 0.01, temperature = 0.3, sigma = 10.0;
-
-  box->set(A, EPS, seed, sigma, steps, temperature, update);
-}
-
 /* density_integrand - Maxwell-Boltzmann distribution */
 static double inline density_integrand(double momentum, double temp,
   double mass) {
@@ -90,7 +81,8 @@ ParticleData* initial_conditions(ParticleData *particles, int &number,
     * gsl_sf_bessel_Knu(2, pi.mass() / box->temperature())
     / 2 / M_PI / M_PI / hbarc / hbarc / hbarc;
   /* cast while reflecting probability of extra particle */
-  number = box->a() * box->a() * box->a() * number_density;
+  number = box->a() * box->a() * box->a() * number_density
+    * box->testparticle();
   if (box->a() * box->a() * box->a() * number_density - number > drand48())
     number++;
   printf("IC number density %.6g [fm^-3]\n", number_density);
@@ -140,6 +132,13 @@ ParticleData* initial_conditions(ParticleData *particles, int &number,
     printd_momenta(particles[i]);
     printd_position(particles[i]);
   }
+  /* reducing cross section according to number of test particle */
+  if (box->testparticle() > 1) {
+    printf("IC test particle: %i\n", box->testparticle());
+    box->set_cross_section(box->cross_section() / box->testparticle());
+    printf("Elastic cross section: %g [mb]\n", box->cross_section());
+  }
+
   /* allows to check energy conservation */
   printf("IC total energy: %g [GeV]\n", momentum_total.x0());
   box->set_energy_initial(momentum_total.x0());

@@ -11,11 +11,11 @@
 
 class box {
   public:
-    /* default constructor with improbable values */
-    box(): steps_(0) {}
+    /* default constructor with probable values */
+    box(): steps_(10000), update_(100), a_(10.0), eps_(0.001),
+      temperature_(0.1), cross_section_(10.0), energy_initial_(0),
+      seed_(1), testparticle_(1) {}
     /* member funtions */
-    void inline set(const float A, const float EPS, int64_t RANDOMSEED,
-      const float sigma, const int STEPS, const float T, const int UPDATE);
     float inline a() const;
     void inline set_a(const float &A);
     float inline cross_section() const;
@@ -26,6 +26,8 @@ class box {
     void inline set_eps(const float &EPS);
     float inline temperature() const;
     void inline set_temperature(const float &T);
+    int inline testparticle() const;
+    void inline set_testparticle(const int &TESTPARTICLE);
     int64_t inline seed() const;
     void inline set_seed(const int64_t &RANDOMSEED);
     int inline steps() const;
@@ -50,18 +52,9 @@ class box {
     float energy_initial_;
     /* initial seed for random generator */
     int64_t seed_;
+    /* number of test particle */
+    int testparticle_;
 };
-
-void inline box::set(const float A, const float EPS, const int64_t RANDOMSEED,
-      const float sigma, const int STEPS, const float T, const int UPDATE) {
-  a_ = A;
-  cross_section_ = sigma;
-  eps_ = EPS;
-  seed_ = RANDOMSEED;
-  steps_ = STEPS;
-  update_ = UPDATE;
-  temperature_ = T;
-}
 
 float inline box::a(void) const {
   return a_;
@@ -85,6 +78,14 @@ int inline box::steps(void) const {
 
 void inline box::set_steps(const int &STEPS) {
   steps_ = STEPS;
+}
+
+int inline box::testparticle(void) const {
+  return testparticle_;
+}
+
+void inline box::set_testparticle(const int &TESTPARTICLE) {
+  testparticle_ = TESTPARTICLE;
 }
 
 int inline box::update(void) const {

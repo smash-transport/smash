@@ -9,7 +9,6 @@
 class ParticleData;
 class box;
 
-void init_box(box *box);
 ParticleData* initial_conditions(ParticleData *particles, int &number,
   box *box);
 
