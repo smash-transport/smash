@@ -163,7 +163,7 @@ void write_oscar(const ParticleData &particle1,
   fclose(fp);
 }
 
-/* write_vtk - VTK file describing particle postion */
+/* write_vtk - VTK file describing particle position */
 void write_vtk(const ParticleData *particles, const int number) {
   FILE *fp;
   char filename[256];
