@@ -82,9 +82,8 @@ static int Evolve(ParticleData *particles, int &number, const box &box) {
   print_measurements(particles, number, scatterings_total, box);
 
   for (int steps = 0; steps < box.steps(); steps++) {
-    /* fill collision table */
-    for (int i = 0; i < number; i++)
-      check_collision(particles, &collision_list, box, i, number);
+    /* fill collision table by cells */
+    check_collision(particles, &collision_list, box, number);
 
     /* particle interactions */
     if (!collision_list.empty()) {

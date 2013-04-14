@@ -11,6 +11,7 @@
 
 #include <cstdio>
 #include <list>
+#include <vector>
 
 #include "include/FourVector.h"
 #include "include/ParticleData.h"
@@ -116,62 +117,145 @@ static void momenta_exchange(ParticleData *particle1, ParticleData *particle2) {
   particle2->set_momentum(momentum_copy);
 }
 
-/* check_collision - check if a collision can happen betwenn particles */
-void check_collision(ParticleData *particle,
-  std::list<ParticleData> *collision_list, box box, int id, int number) {
+/* check_collision_criteria - check if a collision happens between particles */
+static void check_collision_criteria(ParticleData *particle,
+  std::list<ParticleData> *collision_list, box box, int id, int id_other) {
   double distance_squared, time_collision;
 
-  /* check which particles interact:
-   * This processes all particles above the certain id.
-   */
-  for (int i = id + 1; i < number; i++) {
-    /* XXX: only check particles within nearest neighbour cells - size
-     * according to cross_section */
-    distance_squared = particle_distance(&particle[id], &particle[i]);
+  /* criteria according to cross_section */
+  distance_squared = particle_distance(&particle[id], &particle[id_other]);
 
-    /* particles are far apart */
-    if (distance_squared >= box.cross_section() * fm2_mb / M_PI)
-      continue;
+  /* particles are far apart */
+  if (distance_squared >= box.cross_section() * fm2_mb / M_PI)
+    return;
 
-    /* check according timestep: positive and smaller */
-    time_collision = collision_time(&particle[id], &particle[i]);
-    if (time_collision < 0 || time_collision >= box.eps())
-      continue;
+  /* check according timestep: positive and smaller */
+  time_collision = collision_time(&particle[id], &particle[id_other]);
+  if (time_collision < 0 || time_collision >= box.eps())
+    return;
 
-    /* check for minimal collision time */
-    if (particle[id].collision_time() > 0
-          && time_collision > particle[id].collision_time()) {
-      printd("%g Not minimal particle %d <-> %d\n", particle[id].x().x0(), id,
-        i);
-      continue;
+  /* check for minimal collision time */
+  if (particle[id].collision_time() > 0
+        && time_collision > particle[id].collision_time()) {
+    printd("%g Not minimal particle %d <-> %d\n", particle[id].x().x0(), id,
+        id_other);
+    return;
+  }
+
+  /* just collided with this particle */
+  if (particle[id].collision_time() == 0
+      && id_other == particle[id].collision_id()) {
+    printd("%g Skipping particle %d <-> %d\n", particle[id].x().x0(), id,
+        id_other);
+    return;
+  }
+
+  /* handle minimal collision time */
+  if (unlikely(particle[id].collision_time() > 0)) {
+    int not_id = particle[id].collision_id();
+    printd("Not colliding particle %d <-> %d\n", id, not_id);
+    /* unset collision partner to zero time and unexisting id */
+    particle[not_id].set_collision(0, -1);
+    /* remove any of those partners from the list */
+    collision_list->remove(particle[id]);
+    collision_list->remove(particle[not_id]);
+    /* XXX: keep track of multiple possible collision partners */
+  }
+
+  /* setup collision partners */
+  printd("distance particle %d <-> %d: %g \n", id, id_other, distance_squared);
+  printd("t_coll particle %d <-> %d: %g \n", id, id_other, time_collision);
+  particle[id].set_collision(time_collision, id_other);
+  particle[id_other].set_collision(time_collision, id);
+  /* add to collision list */
+  collision_list->push_back(particle[id]);
+}
+
+/* check_collision - check if a collision can happen betwenn particles */
+void check_collision(ParticleData *particle,
+  std::list<ParticleData> *collision_list, box box, int number) {
+  std::vector<std::vector<std::vector<std::vector<int> > > > grid;
+  int N;
+  int x, y, z;
+
+  /* calculate approximate grid size */
+  N = box.a() / (box.cross_section() * fm2_mb);
+
+  /* For small boxes no point in splitting up in grids */
+  if (unlikely(N < 4)) {
+    for (int id = 0; id < number; id++)
+      for (int id_other = id + 1; id_other < number; id_other++)
+        check_collision_criteria(particle, collision_list, box, id, id_other);
+    return;
+  }
+
+  /* allocate grid */
+  grid.resize(N);
+  for (int i = 0; i < N; i++) {
+    grid[i].resize(N);
+    for (int j = 0; j < N; j++)
+      grid[i][j].resize(N);
+  }
+
+  /* populate grid */
+  for (int i = 0; i < number; i++) {
+    /* XXX: function - map particle position to grid number */
+    z = round(particle[i].x().x1() / box.a() * (N - 1));
+    x = round(particle[i].x().x2() / box.a() * (N - 1));
+    y = round(particle[i].x().x3() / box.a() * (N - 1));
+    printd_position(particle[i]);
+    printd("grid cell %i: %i %i %i\n", N, z, x, y);
+    grid[z][x][y].push_back(i);
+  }
+
+  /* semi optimised nearest neighbour search */
+  for (int id = 0; id < number; id++) {
+    /* XXX: function - map particle position to grid number */
+    z = round(particle[id].x().x1() / box.a() * (N - 1));
+    x = round(particle[id].x().x2() / box.a() * (N - 1));
+    y = round(particle[id].x().x3() / box.a() * (N - 1));
+    /* check all neighbour grids */
+    printd("particle id %i grid %i: %i %i %i\n", id, N, z, x, y);
+    int sz, sy, sx;
+    for (int cz = 0; cz < 3; cz++) {
+      if (cz == 0)
+        sz = sm(z, N);
+      else if (cz == 2)
+        sz = sp(z, N);
+      else
+        sz = z;
+      for (int cy = 0; cy < 3; cy++) {
+        if (cy == 0)
+          sy = sm(y, N);
+        else if (cy == 2)
+          sy = sp(y, N);
+        else
+          sy = y;
+        for (int cx = 0; cx < 3; cx++) {
+          if (cx == 0)
+            sx = sm(x, N);
+          else if (cx == 2)
+            sx = sp(x, N);
+          else
+            sx = x;
+          /* empty grid cell */
+          if (grid[sz][sx][sy].empty())
+	    continue;
+	  for (std::vector<int>::iterator id_other = grid[sz][sx][sy].begin();
+               id_other != grid[sz][sx][sy].end(); ++id_other) {
+	   /* only check against particles above current id
+	    * to avoid double counting
+	    */
+	   if (*id_other <= id)
+             continue; 
+
+          printd("grid cell particle %i <-> %i\n", id, *id_other);
+	  check_collision_criteria(particle, collision_list, box, id,
+            *id_other);
+          }
+        }
+      }
     }
-
-    /* just collided with this particle */
-    if (particle[id].collision_time() == 0
-        && i == particle[id].collision_id()) {
-      printd("%g Skipping particle %d <-> %d\n", particle[id].x().x0(), id,
-        i);
-      continue;
-    }
-
-    /* handle minimal collision time */
-    if (unlikely(particle[id].collision_time() > 0)) {
-      int not_id = particle[id].collision_id();
-      printd("Not colliding particle %d <-> %d\n", id, not_id);
-      /* unset collision partner to zero time and unexisting id */
-      particle[not_id].set_collision(0, -1);
-      /* remove any of those partners from the list */
-      collision_list->remove(particle[id]);
-      collision_list->remove(particle[not_id]);
-    }
-
-    /* setup collision partners */
-    printd("distance particle %d <-> %d: %g \n", id, i, distance_squared);
-    printd("t_coll particle %d <-> %d: %g \n", id, i, time_collision);
-    particle[id].set_collision(time_collision, i);
-    particle[i].set_collision(time_collision, id);
-    /* add to collision list */
-    collision_list->push_back(particle[id]);
   }
 }
 
