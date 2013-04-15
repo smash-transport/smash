@@ -198,14 +198,14 @@ void check_collision(ParticleData *particle,
   }
 
   /* populate grid */
-  for (int i = 0; i < number; i++) {
+  for (int id = 0; id < number; id++) {
     /* XXX: function - map particle position to grid number */
-    z = round(particle[i].x().x1() / box.a() * (N - 1));
-    x = round(particle[i].x().x2() / box.a() * (N - 1));
-    y = round(particle[i].x().x3() / box.a() * (N - 1));
-    printd_position(particle[i]);
+    z = round(particle[id].x().x1() / box.a() * (N - 1));
+    x = round(particle[id].x().x2() / box.a() * (N - 1));
+    y = round(particle[id].x().x3() / box.a() * (N - 1));
+    printd_position(particle[id]);
     printd("grid cell %i: %i %i %i\n", N, z, x, y);
-    grid[z][x][y].push_back(i);
+    grid[z][x][y].push_back(id);
   }
 
   /* semi optimised nearest neighbour search */
@@ -215,7 +215,6 @@ void check_collision(ParticleData *particle,
     x = round(particle[id].x().x2() / box.a() * (N - 1));
     y = round(particle[id].x().x3() / box.a() * (N - 1));
     /* check all neighbour grids */
-    printd("particle id %i grid %i: %i %i %i\n", id, N, z, x, y);
     int sz, sy, sx;
     for (int cz = 0; cz < 3; cz++) {
       if (cz == 0)
@@ -240,18 +239,19 @@ void check_collision(ParticleData *particle,
             sx = x;
           /* empty grid cell */
           if (grid[sz][sx][sy].empty())
-	    continue;
-	  for (std::vector<int>::iterator id_other = grid[sz][sx][sy].begin();
+            continue;
+          /* grid cell particle list */
+          for (std::vector<int>::iterator id_other = grid[sz][sx][sy].begin();
                id_other != grid[sz][sx][sy].end(); ++id_other) {
-	   /* only check against particles above current id
-	    * to avoid double counting
-	    */
-	   if (*id_other <= id)
-             continue; 
+	    /* only check against particles above current id
+	     * to avoid double counting
+	     */
+            if (*id_other <= id)
+              continue;
 
-          printd("grid cell particle %i <-> %i\n", id, *id_other);
-	  check_collision_criteria(particle, collision_list, box, id,
-            *id_other);
+            printd("grid cell particle %i <-> %i\n", id, *id_other);
+            check_collision_criteria(particle, collision_list, box, id,
+              *id_other);
           }
         }
       }
