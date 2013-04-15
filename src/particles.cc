@@ -208,7 +208,9 @@ void check_collision(ParticleData *particle,
     grid[z][x][y].push_back(id);
   }
 
-  /* semi optimised nearest neighbour search */
+  /* semi optimised nearest neighbour search:
+   * http://en.wikipedia.org/wiki/Cell_lists
+   */
   for (int id = 0; id < number; id++) {
     /* XXX: function - map particle position to grid number */
     z = round(particle[id].x().x1() / box.a() * (N - 1));
