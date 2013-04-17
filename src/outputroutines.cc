@@ -134,7 +134,7 @@ void write_oscar_header(void) {
 void write_oscar(const ParticleData &particle1,
   const ParticleData &particle2, int flag) {
   /* XXX: generalise particle types */
-  ParticleType pi("pi", 0.13957);
+  ParticleType pi("pi", 0.13957, 211);
   FourVector momentum, position;
   FILE *fp;
 

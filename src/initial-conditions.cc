@@ -62,14 +62,16 @@ ParticleData* initial_conditions(ParticleData *particles, int &number,
   double x_pos, y_pos, z_pos, time_start, number_density;
   double phi, theta, momentum_radial;
   FourVector momentum_total(0, 0, 0, 0);
-  ParticleType pi("pi", 0.13957);
-  ParticleType pi0("pi0", 0.134977);
+  /* XXX: use nosql table for values */
+  ParticleType piplus("pi+", 0.13957, 211);
+  ParticleType piminus("pi-", 0.13957, -211);
+  ParticleType pi0("pi0", 0.134977, 111);
 
   /* initialize random seed */
   srand48(box->seed());
 
   /* XXX: move to proper startup */
-  printd("Pi^± mass: %g [GeV]\n", pi.mass());
+  printd("Pi^± mass: %g [GeV]\n", piplus.mass());
   printd("Pi^0 mass: %g [GeV]\n", pi0.mass());
 
   /* 
@@ -77,8 +79,8 @@ ParticleData* initial_conditions(ParticleData *particles, int &number,
    * (assumes Bose-Einstein):
    * Volume m^2 T BesselK[2, m/T] / (2\pi^2)
    */
-  number_density = pi.mass() * pi.mass() * box->temperature()
-    * gsl_sf_bessel_Knu(2, pi.mass() / box->temperature())
+  number_density = piplus.mass() * piplus.mass() * box->temperature()
+    * gsl_sf_bessel_Knu(2, piplus.mass() / box->temperature())
     / 2 / M_PI / M_PI / hbarc / hbarc / hbarc;
   /* cast while reflecting probability of extra particle */
   number = box->a() * box->a() * box->a() * number_density
@@ -86,7 +88,7 @@ ParticleData* initial_conditions(ParticleData *particles, int &number,
   if (box->a() * box->a() * box->a() * number_density - number > drand48())
     number++;
   printf("IC number density %.6g [fm^-3]\n", number_density);
-  printf("IC %d number of %s\n", number, pi.name().c_str());
+  printf("IC %d number of %s\n", number, piplus.name().c_str());
 
   /* Set random IC:
    * particles at random position in the box with thermal momentum
@@ -96,22 +98,22 @@ ParticleData* initial_conditions(ParticleData *particles, int &number,
     particles[i].set_id(i);
 
     /* thermal momentum according Maxwell-Boltzmann distribution */
-    momentum_radial = sample_momenta(box, pi);
+    momentum_radial = sample_momenta(box, piplus);
     /* back to back pair creation with random momenta direction */
     if (unlikely(i == number - 1 && !(i % 2))) {
       /* poor last guy just sits around */
-      particles[i].set_momentum(pi.mass(), 0, 0, 0);
+      particles[i].set_momentum(piplus.mass(), 0, 0, 0);
     } else if (!(i % 2)) {
       phi =  2 * M_PI * drand48();
       theta = M_PI * drand48();
       printd("Particle %d radial momenta %g phi %g theta %g\n", i,
         momentum_radial, phi, theta);
-      particles[i].set_momentum(pi.mass(),
+      particles[i].set_momentum(piplus.mass(),
         momentum_radial * cos(phi) * sin(theta),
         momentum_radial * sin(phi) * sin(theta),
         momentum_radial * cos(theta));
     } else {
-      particles[i].set_momentum(pi.mass(),
+      particles[i].set_momentum(piplus.mass(),
         - particles[i - 1].momentum().x1(),
         - particles[i - 1].momentum().x2(),
         - particles[i - 1].momentum().x3());
