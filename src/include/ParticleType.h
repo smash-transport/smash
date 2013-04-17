@@ -14,9 +14,9 @@ class ParticleType {
       isospin_(100), pdgcode_(-1) {}
     /* Explicit constructor */
     ParticleType(std::string n, double m, int id) : name_(n), mass_(m),
-      pdgcode_(id) {}
+      lifetime_(0), isospin_(1), pdgcode_(id) {}
     /* set data */
-    void inline set(const std::string n, const double m, const int id);
+    void inline set(const std::string &n, const double &m, const int &id);
     /* access data */
     std::string inline name(void) const;
     double inline mass(void) const;
@@ -31,8 +31,8 @@ class ParticleType {
     int pdgcode_;
 };
 
-void inline ParticleType::set(const std::string NAME, const double MASS,
-  const int ID) {
+void inline ParticleType::set(const std::string &NAME, const double &MASS,
+  const int &ID) {
   name_ = NAME;
   mass_ = MASS;
   pdgcode_ = ID;
