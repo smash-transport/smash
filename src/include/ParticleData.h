@@ -32,7 +32,6 @@ class ParticleData {
   void inline set_position(const FourVector &position);
   void inline set_position(const double &x0, const double &x3,
                            const double &x1, const double &x2);
-  void inline add_position(const FourVector &position);
   /* get velocities */
   double inline velocity_x(void) { return momentum().x2() / momentum().x0(); }
   double inline velocity_y(void) { return momentum().x3() / momentum().x0(); }
@@ -108,10 +107,6 @@ void inline ParticleData::set_position(const FourVector &pos) {
 void inline ParticleData::set_position(const double &x0, const double &x3,
                           const double &x1, const double &x2) {
   x_.set_FourVector(x0, x3, x1, x2);
-}
-
-void inline ParticleData::add_position(const FourVector &pos) {
-  x_ += pos;
 }
 
 bool inline ParticleData::operator==(const ParticleData &a) {
