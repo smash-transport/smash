@@ -76,7 +76,7 @@ static FourVector boundary_condition(FourVector position, const box &box) {
 static int Evolve(ParticleData *particles, ParticleType *particle_type,
   int &number, const box &box) {
   FourVector distance, position;
-  std::list<ParticleData> collision_list;
+  std::list<int> collision_list;
   size_t scatterings_total = 0;
 
   /* startup values */

@@ -134,7 +134,7 @@ static void momenta_exchange(ParticleData *particle1, ParticleData *particle2) {
 
 /* check_collision_criteria - check if a collision happens between particles */
 static void check_collision_criteria(ParticleData *particle,
-  std::list<ParticleData> *collision_list, box box, int id, int id_other) {
+  std::list<int> *collision_list, box box, int id, int id_other) {
   double distance_squared, time_collision;
 
   /* criteria according to cross_section */
@@ -173,8 +173,8 @@ static void check_collision_criteria(ParticleData *particle,
     /* unset collision partner to zero time and unexisting id */
     particle[not_id].set_collision(0, -1);
     /* remove any of those partners from the list */
-    collision_list->remove(particle[id]);
-    collision_list->remove(particle[not_id]);
+    collision_list->remove(id);
+    collision_list->remove(not_id);
     /* XXX: keep track of multiple possible collision partners */
   }
 
@@ -184,12 +184,12 @@ static void check_collision_criteria(ParticleData *particle,
   particle[id].set_collision(time_collision, id_other);
   particle[id_other].set_collision(time_collision, id);
   /* add to collision list */
-  collision_list->push_back(particle[id]);
+  collision_list->push_back(id);
 }
 
 /* check_collision - check if a collision can happen betwenn particles */
 void check_collision(ParticleData *particle,
-  std::list<ParticleData> *collision_list, box box, int number) {
+  std::list<int> *collision_list, box box, int number) {
   std::vector<std::vector<std::vector<std::vector<int> > > > grid;
   int N;
   int x, y, z;
@@ -279,25 +279,26 @@ void check_collision(ParticleData *particle,
 
 /* colliding_particle - particle interaction */
 void collide_particles(ParticleData *particle,
-  std::list<ParticleData> *collision_list) {
+  std::list<int> *collision_list) {
   FourVector velocity_com;
 
   /* collide: 2 <-> 2 soft momenta exchange */
-  for (std::list<ParticleData>::iterator p = collision_list->begin();
-    p != collision_list->end(); p++) {
-    printd("particle id colliding %d with %d\n", p->id(), p->collision_id());
-    write_oscar(particle[p->id()], particle[p->collision_id()], 1);
+  for (std::list<int>::iterator id = collision_list->begin();
+    id != collision_list->end(); id++) {
+    int id_other = particle[*id].collision_id();
+    printd("particle id colliding %d with %d\n", *id, id_other);
+    write_oscar(particle[*id], particle[id_other], 1);
 
     /* exchange in center of momenta */
-    boost_COM(&particle[p->id()], &particle[p->collision_id()], &velocity_com);
-    momenta_exchange(&particle[p->id()], &particle[p->collision_id()]);
-    boost_from_COM(&particle[p->id()], &particle[p->collision_id()],
+    boost_COM(&particle[*id], &particle[id_other], &velocity_com);
+    momenta_exchange(&particle[*id], &particle[id_other]);
+    boost_from_COM(&particle[*id], &particle[id_other],
       &velocity_com);
-    write_oscar(particle[p->id()], particle[p->collision_id()], -1);
+    write_oscar(particle[*id], particle[id_other], -1);
 
     /* unset collision time for both particles + keep id */
-    particle[p->collision_id()].set_collision_time(0);
-    particle[p->id()].set_collision_time(0);
+    particle[*id].set_collision_time(0);
+    particle[id_other].set_collision_time(0);
   }
   /* empty the collision table */
   collision_list->clear();

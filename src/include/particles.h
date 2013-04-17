@@ -14,10 +14,10 @@ class box;
 
 /* populates collision list if collision applies */
 void check_collision(ParticleData *particle,
-  std::list<ParticleData> *collision_list, box box, int number);
+  std::list<int> *collision_list, box box, int number);
 
 /* does collisions according to collision table */
 void collide_particles(ParticleData *particle,
-  std::list<ParticleData> *collision_list);
+  std::list<int> *collision_list);
 
 #endif  // SRC_INCLUDE_PARTICLES_H_
