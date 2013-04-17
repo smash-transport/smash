@@ -73,17 +73,24 @@ static void boost_from_COM(ParticleData *particle1, ParticleData *particle2,
 
 /* particle_distance - measure distance between two particles */
 static double particle_distance(ParticleData *particle_orig1,
-  ParticleData *particle_orig2) {
+  ParticleData *particle_orig2, box box) {
   ParticleData particle1 = *particle_orig1, particle2 = *particle_orig2;
   FourVector velocity_com, position_diff, momentum_diff;
   double distance_squared;
 
-  /* XXX: allow Kodama + UrQMD distance criteria */
-  /* arXiv:nucl-th/9803035 (3.27): in center of momemtum frame
+  /* UrQMD distance criteria:
+   * arXiv:nucl-th/9803035 (3.27): in center of momemtum frame
    * d^2_{coll} = (x1 - x2)^2 - ((x1 - x2) . (v1 - v2))^2 / (v1 - v2)^2
    */
   boost_COM(&particle1, &particle2, &velocity_com);
   position_diff = particle1.x() - particle2.x();
+  /* check for a periodic boundary cross */
+  if (position_diff.x1() > box.a() / 2)
+    position_diff.set_x1(box.a() - position_diff.x1());
+  if (position_diff.x2() > box.a() / 2)
+    position_diff.set_x2(box.a() - position_diff.x2());
+  if (position_diff.x3() > box.a() / 2)
+    position_diff.set_x3(box.a() - position_diff.x3());
   momentum_diff = particle1.momentum() - particle2.momentum();
   distance_squared = - position_diff.DotThree(position_diff)
     + position_diff.DotThree(momentum_diff)
@@ -94,13 +101,21 @@ static double particle_distance(ParticleData *particle_orig1,
 
 /* time_collision - measure collision time of two particles */
 static double collision_time(ParticleData *particle1,
-  ParticleData *particle2) {
+  ParticleData *particle2, box box) {
   FourVector position_diff, velocity_diff;
   double time;
 
-  /* XXX: allow both Kodama + UrQMD distance criteria */
-  /* arXiv:1203.4418 (5.15): t_{coll} = - (x1 - x2) . (v1 - v2) / (v1 - v2)^2 */
+  /* UrQMD distance criteria
+   * arXiv:1203.4418 (5.15): t_{coll} = - (x1 - x2) . (v1 - v2) / (v1 - v2)^2
+   */
   position_diff = particle1->x() - particle2->x();
+  /* check for a periodic boundary cross */
+  if (position_diff.x1() > box.a() / 2)
+    position_diff.set_x1(box.a() - position_diff.x1());
+  if (position_diff.x2() > box.a() / 2)
+    position_diff.set_x2(box.a() - position_diff.x2());
+  if (position_diff.x3() > box.a() / 2)
+    position_diff.set_x3(box.a() - position_diff.x3());
   velocity_diff = particle1->momentum() / particle1->momentum().x0()
     - particle2->momentum() / particle2->momentum().x0();
   time = - position_diff.DotThree(velocity_diff)
@@ -123,14 +138,15 @@ static void check_collision_criteria(ParticleData *particle,
   double distance_squared, time_collision;
 
   /* criteria according to cross_section */
-  distance_squared = particle_distance(&particle[id], &particle[id_other]);
+  distance_squared = particle_distance(&particle[id], &particle[id_other],
+    box);
 
   /* particles are far apart */
   if (distance_squared >= box.cross_section() * fm2_mb / M_PI)
     return;
 
   /* check according timestep: positive and smaller */
-  time_collision = collision_time(&particle[id], &particle[id_other]);
+  time_collision = collision_time(&particle[id], &particle[id_other], box);
   if (time_collision < 0 || time_collision >= box.eps())
     return;
 
