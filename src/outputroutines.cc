@@ -168,7 +168,8 @@ void write_vtk(const ParticleData *particles, const int number) {
   FILE *fp;
   char filename[256];
 
-  sprintf(filename, "data/pos_%5f.vtk", particles[0].x().x0() - 1.0);
+  snprintf(filename, sizeof(filename), "data/pos_%.5f.vtk",
+    particles[0].x().x0() - 1.0);
   fp = fopen(filename, "w");
   /* Legacy VTK file format */
   fprintf(fp, "# vtk DataFile Version 2.0\n");
