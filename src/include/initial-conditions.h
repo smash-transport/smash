@@ -7,9 +7,10 @@
 
 /* forward declarations */
 class ParticleData;
+class ParticleType;
 class box;
 
-ParticleData* initial_conditions(ParticleData *particles, int &number,
-  box *box);
+ParticleData* initial_conditions(ParticleData *particles,
+  ParticleType *particle_type, int &number, box *box);
 
 #endif  // SRC_INCLUDE_INITIAL_CONDITIONS_H_

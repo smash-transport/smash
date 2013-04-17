@@ -73,7 +73,8 @@ static FourVector boundary_condition(FourVector position, const box &box) {
 }
 
 /* Evolve - the core of the box, stepping forward in time */
-static int Evolve(ParticleData *particles, int &number, const box &box) {
+static int Evolve(ParticleData *particles, ParticleType *particle_type,
+  int &number, const box &box) {
   FourVector distance, position;
   std::list<ParticleData> collision_list;
   size_t scatterings_total = 0;
@@ -125,6 +126,7 @@ int main(int argc, char *argv[]) {
   char *p, *path;
   int opt, rc, number = 0;
   ParticleData *particles = NULL;
+  ParticleType *particle_types = NULL;
   box *cube = new box;
 
   struct option longopts[] = {
@@ -193,14 +195,15 @@ int main(int argc, char *argv[]) {
   write_oscar_header();
 
   /* Initialize box */
-  particles = initial_conditions(particles, number, cube);
+  particles = initial_conditions(particles, particle_types, number, cube);
   write_particles(particles, number);
 
   /* Compute stuff */
-  rc = Evolve(particles, number, *cube);
+  rc = Evolve(particles, particle_types, number, *cube);
 
   /* tear down */
   delete [] particles;
+  delete [] particle_types;
   delete cube;
   free(path);
   return rc;

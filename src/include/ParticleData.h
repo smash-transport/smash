@@ -32,6 +32,8 @@ class ParticleData {
   void inline set_position(const FourVector &position);
   void inline set_position(const double &x0, const double &x3,
                            const double &x1, const double &x2);
+  int inline pdgcode(void) const;
+  void inline set_pdgcode(const int &pdgcode);
   /* get velocities */
   double inline velocity_x(void) { return momentum().x2() / momentum().x0(); }
   double inline velocity_y(void) { return momentum().x3() / momentum().x0(); }
@@ -50,6 +52,8 @@ class ParticleData {
     FourVector momentum_;
     /* position in space */
     FourVector x_;
+    /* particle type */
+    int pdgcode_;
 };
 
 int inline ParticleData::id(void) const {
@@ -107,6 +111,14 @@ void inline ParticleData::set_position(const FourVector &pos) {
 void inline ParticleData::set_position(const double &x0, const double &x3,
                           const double &x1, const double &x2) {
   x_.set_FourVector(x0, x3, x1, x2);
+}
+
+int inline ParticleData::pdgcode(void) const {
+  return pdgcode_;
+}
+
+void inline ParticleData::set_pdgcode(const int &pdg_id) {
+  pdgcode_ = pdg_id;
 }
 
 bool inline ParticleData::operator==(const ParticleData &a) {

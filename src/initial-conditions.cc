@@ -28,18 +28,18 @@ static double inline density_integrand(double momentum, double temp,
 }
 
 /* sample_momenta - return thermal momenta */
-static double sample_momenta(box *box, ParticleType pi) {
+static double sample_momenta(box *box, ParticleType type) {
   double momentum_radial, momentum_average, momentum_min, momentum_max;
   double probability = 0, probability_max, probability_random = 1;
 
   /* massless particles peak would be at <E>=3T */
   momentum_average = sqrt((3 * box->temperature()) * (3 * box->temperature())
-    - pi.mass() * pi.mass());
-  momentum_min = pi.mass();
+    - type.mass() * type.mass());
+  momentum_min = type.mass();
   momentum_max = 50.0 * box->temperature();
   /* double the massless peak value to be above maximum of the distribution */
   probability_max = 2 * density_integrand(momentum_average, box->temperature(),
-    pi.mass());
+    type.mass());
 
   /* sample by rejection method: (see numerical recipes for more efficient)
    * random momenta and random probability need to be below the distribution
@@ -47,9 +47,9 @@ static double sample_momenta(box *box, ParticleType pi) {
   while (probability_random > probability) {
     momentum_radial = (momentum_max - momentum_min) * drand48() + momentum_min;
     momentum_radial = sqrt(momentum_radial * momentum_radial
-      - pi.mass() * pi.mass());
+      - type.mass() * type.mass());
     probability = density_integrand(momentum_radial, box->temperature(),
-      pi.mass());
+      type.mass());
     probability_random = probability_max * drand48();
   }
 
@@ -57,83 +57,106 @@ static double sample_momenta(box *box, ParticleType pi) {
 }
 
 /* initial_conditions - sets partilce data for @particles */
-ParticleData* initial_conditions(ParticleData *particles, int &number,
-      box *box) {
+ParticleData* initial_conditions(ParticleData *particles,
+  ParticleType *type, int &number, box *box) {
   double x_pos, y_pos, z_pos, time_start, number_density;
-  double phi, theta, momentum_radial;
+  double phi, theta, momentum_radial, number_density_total = 0;
   FourVector momentum_total(0, 0, 0, 0);
-  /* XXX: use nosql table for values */
-  ParticleType piplus("pi+", 0.13957, 211);
-  ParticleType piminus("pi-", 0.13957, -211);
-  ParticleType pi0("pi0", 0.134977, 111);
+  int number_total = 0;
+
+  /* XXX: use nosql table for particle type values */
+  type = new ParticleType[3];
+  type[0].set("pi+", 0.13957, 211);
+  type[1].set("pi-", 0.13957, -211);
+  type[2].set("pi0", 0.134977, 111);
 
   /* initialize random seed */
   srand48(box->seed());
 
   /* XXX: move to proper startup */
-  printd("Pi^± mass: %g [GeV]\n", piplus.mass());
-  printd("Pi^0 mass: %g [GeV]\n", pi0.mass());
+  printd("Pi^± mass: %g [GeV]\n", type[0].mass());
+  printd("Pi^0 mass: %g [GeV]\n", type[1].mass());
 
-  /* 
-   * The particle number depends on distribution function
-   * (assumes Bose-Einstein):
-   * Volume m^2 T BesselK[2, m/T] / (2\pi^2)
-   */
-  number_density = piplus.mass() * piplus.mass() * box->temperature()
-    * gsl_sf_bessel_Knu(2, piplus.mass() / box->temperature())
-    / 2 / M_PI / M_PI / hbarc / hbarc / hbarc;
-  /* cast while reflecting probability of extra particle */
-  number = box->a() * box->a() * box->a() * number_density
-    * box->testparticle();
-  if (box->a() * box->a() * box->a() * number_density - number > drand48())
-    number++;
-  printf("IC number density %.6g [fm^-3]\n", number_density);
-  printf("IC %d number of %s\n", number, piplus.name().c_str());
+  for (int i = 0; i < 3; i++) {
+    /* 
+     * The particle number depends on distribution function
+     * (assumes Bose-Einstein):
+     * Volume m^2 T BesselK[2, m/T] / (2\pi^2)
+     */
+    number_density = type[i].mass() * type[i].mass() * box->temperature()
+      * gsl_sf_bessel_Knu(2, type[i].mass() / box->temperature())
+      / 2 / M_PI / M_PI / hbarc / hbarc / hbarc;
+    /* cast while reflecting probability of extra particle */
+    number = box->a() * box->a() * box->a() * number_density
+      * box->testparticle();
+    if (box->a() * box->a() * box->a() * number_density - number > drand48())
+      number++;
+    printf("IC number density %.6g [fm^-3]\n", number_density);
+    printf("IC %d number of %s\n", number, type[i].name().c_str());
+    number_density_total += number_density;
 
-  /* Set random IC:
-   * particles at random position in the box with thermal momentum
-   */
-  particles = new ParticleData[number];
-  for (int i = 0; i < number; i++) {
-    particles[i].set_id(i);
-
-    /* thermal momentum according Maxwell-Boltzmann distribution */
-    momentum_radial = sample_momenta(box, piplus);
-    /* back to back pair creation with random momenta direction */
-    if (unlikely(i == number - 1 && !(i % 2))) {
-      /* poor last guy just sits around */
-      particles[i].set_momentum(piplus.mass(), 0, 0, 0);
-    } else if (!(i % 2)) {
-      phi =  2 * M_PI * drand48();
-      theta = M_PI * drand48();
-      printd("Particle %d radial momenta %g phi %g theta %g\n", i,
-        momentum_radial, phi, theta);
-      particles[i].set_momentum(piplus.mass(),
-        momentum_radial * cos(phi) * sin(theta),
-        momentum_radial * sin(phi) * sin(theta),
-        momentum_radial * cos(theta));
+    /* Set random IC:
+     * particles at random position in the box with thermal momentum
+     */
+    if (!particles) {
+      particles = new ParticleData[number];
     } else {
-      particles[i].set_momentum(piplus.mass(),
-        - particles[i - 1].momentum().x1(),
-        - particles[i - 1].momentum().x2(),
-        - particles[i - 1].momentum().x3());
+      /* XXX: hack realloc, maybe better to use resize from vector class */
+      ParticleData *particles_tmp = new ParticleData[number_total + number];
+      for (int id = 0; id < number_total; id++)
+        particles_tmp[id] = particles[id];
+      delete[] particles;
+      particles = particles_tmp;
     }
-    momentum_total += particles[i].momentum();
+    for (int id = 0; id < number; id++) {
+      /* set id and particle type */
+      int id_real = id + number_total;
+      particles[id_real].set_id(id_real);
+      particles[id_real].set_pdgcode(type[i].pdgcode());
 
-    /* ramdom position in the box */
-    time_start = 1.0;
-    x_pos = drand48() * box->a();
-    y_pos = drand48() * box->a();
-    z_pos = drand48() * box->a();
-    particles[i].set_position(time_start, z_pos, x_pos, y_pos);
+      /* thermal momentum according Maxwell-Boltzmann distribution */
+      momentum_radial = sample_momenta(box, type[i]);
+      /* back to back pair creation with random momenta direction */
+      if (unlikely(id == number - 1 && !(id % 2))) {
+        /* poor last guy just sits around */
+        particles[id_real].set_momentum(type[i].mass(), 0, 0, 0);
+      } else if (!(id % 2)) {
+        phi =  2 * M_PI * drand48();
+        theta = M_PI * drand48();
+        printd("Particle %d radial momenta %g phi %g theta %g\n", id_real,
+          momentum_radial, phi, theta);
+        particles[id_real].set_momentum(type[i].mass(),
+          momentum_radial * cos(phi) * sin(theta),
+          momentum_radial * sin(phi) * sin(theta),
+          momentum_radial * cos(theta));
+      } else {
+        particles[id_real].set_momentum(type[i].mass(),
+          - particles[id_real - 1].momentum().x1(),
+          - particles[id_real - 1].momentum().x2(),
+          - particles[id_real - 1].momentum().x3());
+      }
+      momentum_total += particles[id_real].momentum();
 
-    /* no collision yet hence zero time and unexisting id */
-    particles[i].set_collision(0, -1);
+      /* ramdom position in the box */
+      time_start = 1.0;
+      x_pos = drand48() * box->a();
+      y_pos = drand48() * box->a();
+      z_pos = drand48() * box->a();
+      particles[id_real].set_position(time_start, z_pos, x_pos, y_pos);
 
-    /* IC: debug checks */
-    printd_momenta(particles[i]);
-    printd_position(particles[i]);
+      /* no collision yet hence zero time and unexisting id */
+      particles[id_real].set_collision(0, -1);
+
+      /* IC: debug checks */
+      printd_momenta(particles[id_real]);
+      printd_position(particles[id_real]);
+    }
+    number_total += number;
   }
+  printf("IC total number density %.6g [fm^-3]\n", number_density_total);
+  printf("IC contains %i particles\n", number_total);
+  /* loop over all particles */
+  number = number_total;
   /* reducing cross section according to number of test particle */
   if (box->testparticle() > 1) {
     printf("IC test particle: %i\n", box->testparticle());
