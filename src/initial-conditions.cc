@@ -17,7 +17,6 @@
 #include "include/constants.h"
 #include "include/ParticleData.h"
 #include "include/ParticleType.h"
-#include "include/random.h"
 #include "include/outputroutines.h"
 
 /* density_integrand - Maxwell-Boltzmann distribution */
