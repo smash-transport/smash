@@ -92,6 +92,10 @@ static double particle_distance(ParticleData *particle_orig1,
   if (position_diff.x3() > box.a() / 2)
     position_diff.set_x3(box.a() - position_diff.x3());
   momentum_diff = particle1.momentum() - particle2.momentum();
+  /* zero momentum leads to infite distance */
+  if (momentum_diff.x1() == 0 || momentum_diff.x2() == 0
+      || momentum_diff.x3() == 0)
+    return  - position_diff.DotThree(position_diff);
   distance_squared = - position_diff.DotThree(position_diff)
     + position_diff.DotThree(momentum_diff)
       * position_diff.DotThree(momentum_diff)
