@@ -198,7 +198,7 @@ void check_collision(ParticleData *particle,
   N = box.a() / (box.cross_section() * fm2_mb);
 
   /* For small boxes no point in splitting up in grids */
-  if (unlikely(N < 4)) {
+  if (unlikely(N < 4 || number < 10)) {
     for (int id = 0; id < number; id++)
       for (int id_other = id + 1; id_other < number; id_other++)
         check_collision_criteria(particle, collision_list, box, id, id_other);
