@@ -58,8 +58,7 @@ static double sample_momenta(box *box, ParticleType type) {
 /* initial_conditions - sets partilce data for @particles */
 ParticleData* initial_conditions(ParticleData *particles,
   ParticleType *type, int &number, box *box) {
-  double x_pos, y_pos, z_pos, time_start, number_density;
-  double phi, theta, momentum_radial, number_density_total = 0;
+  double phi, theta, momentum_radial, number_density, number_density_total = 0;
   FourVector momentum_total(0, 0, 0, 0);
   int number_total = 0;
 
@@ -107,48 +106,47 @@ ParticleData* initial_conditions(ParticleData *particles,
       delete[] particles;
       particles = particles_tmp;
     }
-    for (int id = 0; id < number; id++) {
+    for (int id = number_total; id < number_total + number; id++) {
+      double x_pos, y_pos, z_pos, time_start;
       /* set id and particle type */
-      int id_real = id + number_total;
-      particles[id_real].set_id(id_real);
-      particles[id_real].set_pdgcode(type[i].pdgcode());
+      particles[id].set_id(id);
 
-      /* thermal momentum according Maxwell-Boltzmann distribution */
-      momentum_radial = sample_momenta(box, type[i]);
       /* back to back pair creation with random momenta direction */
-      if (unlikely(id == number - 1 && !(id % 2))) {
+      if (unlikely(id == number - 1 && !(id % 2) && i == 2)) {
         /* poor last guy just sits around */
-        particles[id_real].set_momentum(type[i].mass(), 0, 0, 0);
+        particles[id].set_momentum(type[i].mass(), 0, 0, 0);
       } else if (!(id % 2)) {
+        /* thermal momentum according Maxwell-Boltzmann distribution */
+        momentum_radial = sample_momenta(box, type[i]);
         phi =  2 * M_PI * drand48();
         theta = M_PI * drand48();
-        printd("Particle %d radial momenta %g phi %g theta %g\n", id_real,
+        printd("Particle %d radial momenta %g phi %g theta %g\n", id,
           momentum_radial, phi, theta);
-        particles[id_real].set_momentum(type[i].mass(),
+        particles[id].set_momentum(type[i].mass(),
           momentum_radial * cos(phi) * sin(theta),
           momentum_radial * sin(phi) * sin(theta),
           momentum_radial * cos(theta));
       } else {
-        particles[id_real].set_momentum(type[i].mass(),
-          - particles[id_real - 1].momentum().x1(),
-          - particles[id_real - 1].momentum().x2(),
-          - particles[id_real - 1].momentum().x3());
+        particles[id].set_momentum(type[i].mass(),
+          - particles[id - 1].momentum().x1(),
+          - particles[id - 1].momentum().x2(),
+          - particles[id - 1].momentum().x3());
       }
-      momentum_total += particles[id_real].momentum();
+      momentum_total += particles[id].momentum();
 
       /* ramdom position in the box */
       time_start = 1.0;
       x_pos = drand48() * box->a();
       y_pos = drand48() * box->a();
       z_pos = drand48() * box->a();
-      particles[id_real].set_position(time_start, z_pos, x_pos, y_pos);
+      particles[id].set_position(time_start, z_pos, x_pos, y_pos);
 
       /* no collision yet hence zero time and unexisting id */
-      particles[id_real].set_collision(0, -1);
+      particles[id].set_collision(0, -1);
 
       /* IC: debug checks */
-      printd_momenta(particles[id_real]);
-      printd_position(particles[id_real]);
+      printd_momenta(particles[id]);
+      printd_position(particles[id]);
     }
     number_total += number;
   }
