@@ -203,7 +203,7 @@ void check_collision(ParticleData *particle,
 
   /* For small boxes no point in splitting up in grids */
   if (unlikely(N < 4 || number < 10)) {
-    for (int id = 0; id < number; id++)
+    for (int id = 0; id < number - 1; id++)
       for (int id_other = id + 1; id_other < number; id_other++)
         check_collision_criteria(particle, collision_list, box, id, id_other);
     return;
@@ -231,7 +231,7 @@ void check_collision(ParticleData *particle,
   /* semi optimised nearest neighbour search:
    * http://en.wikipedia.org/wiki/Cell_lists
    */
-  for (int id = 0; id < number; id++) {
+  for (int id = 0; id < number - 1; id++) {
     /* XXX: function - map particle position to grid number */
     z = round(particle[id].x().x1() / box.a() * (N - 1));
     x = round(particle[id].x().x2() / box.a() * (N - 1));
