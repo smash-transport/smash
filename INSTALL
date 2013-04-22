@@ -1,4 +1,4 @@
-Quick instructions how to build dash.
+Quick instructions how to build mash.
 
 Build it in a seperate directory:
   mkdir build
@@ -9,3 +9,8 @@ Build it in a seperate directory:
 Run it with specific settings:
   vi params.txt
   ./src/box
+
+Tarball mash:
+  version=$(awk '/VERSION_/{print $2}' ../CMakeLists.txt); \
+  version="${version%)}"
+  git archive --format=tar.gz --prefix=mash-$version/ HEAD > mash-$version.tar.gz
