@@ -195,6 +195,7 @@ int main(int argc, char *argv[]) {
   write_oscar_header();
 
   /* Initialize box */
+  particle_types = initial_particles(particle_types);
   particles = initial_conditions(particles, particle_types, number, cube);
   write_particles(particles, number);
 

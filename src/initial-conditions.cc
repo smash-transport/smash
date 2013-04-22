@@ -55,27 +55,31 @@ static double sample_momenta(box *box, ParticleType type) {
   return momentum_radial;
 }
 
-/* initial_conditions - sets partilce data for @particles */
-ParticleData* initial_conditions(ParticleData *particles,
-  ParticleType *type, int &number, box *box) {
-  double phi, theta, momentum_radial, number_density, number_density_total = 0;
-  FourVector momentum_total(0, 0, 0, 0);
-  int number_total = 0;
-
+/* initial_conditions - sets particle type */
+ParticleType* initial_particles(ParticleType *type) {
   /* XXX: use nosql table for particle type values */
   type = new ParticleType[3];
   type[0].set("pi+", 0.13957, 211);
   type[1].set("pi-", 0.13957, -211);
   type[2].set("pi0", 0.134977, 111);
 
+  return type;
+}
+
+
+/* initial_conditions - sets particle data for @particles */
+ParticleData* initial_conditions(ParticleData *particles,
+  ParticleType *type, int &number, box *box) {
+  double phi, theta, momentum_radial, number_density, number_density_total = 0;
+  FourVector momentum_total(0, 0, 0, 0);
+  int number_total = 0;
+
   /* initialize random seed */
   srand48(box->seed());
 
-  /* XXX: move to proper startup */
-  printd("Pi^± mass: %g [GeV]\n", type[0].mass());
-  printd("Pi^0 mass: %g [GeV]\n", type[1].mass());
-
+  /* loop over all the particle types */
   for (int i = 0; i < 3; i++) {
+    printd("%s mass: %g [GeV]\n", type[i].name().c_str(), type[i].mass());
     /* 
      * The particle number depends on distribution function
      * (assumes Bose-Einstein):
