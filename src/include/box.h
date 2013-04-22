@@ -24,6 +24,8 @@ class box {
     void inline set_energy_initial(const float &energy);
     float inline eps() const;
     void inline set_eps(const float &EPS);
+    float inline number_density_initial() const;
+    void inline set_number_density_inital(const float &number_density);
     float inline temperature() const;
     void inline set_temperature(const float &T);
     int inline testparticle() const;
@@ -50,6 +52,8 @@ class box {
     float cross_section_;
     /* initial total energy of the box */
     float energy_initial_;
+    /* initial number density of the box */
+    float number_density_initial_;
     /* initial seed for random generator */
     int64_t seed_;
     /* number of test particle */
@@ -118,6 +122,14 @@ float inline box::energy_initial(void) const {
 
 void inline box::set_energy_initial(const float &energy) {
   energy_initial_ = energy;
+}
+
+float inline box::number_density_initial(void) const {
+  return number_density_initial_;
+}
+
+void inline box::set_number_density_inital(const float &number_density) {
+  number_density_initial_ = number_density;
 }
 
 int64_t inline box::seed(void) const {

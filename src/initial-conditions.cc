@@ -164,6 +164,7 @@ ParticleData* initial_conditions(ParticleData *particles,
   /* allows to check energy conservation */
   printf("IC total energy: %g [GeV]\n", momentum_total.x0());
   box->set_energy_initial(momentum_total.x0());
+  box->set_number_density_inital(number_density_total);
   print_header();
 
   return particles;
