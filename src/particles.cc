@@ -75,7 +75,7 @@ static void boost_from_COM(ParticleData *particle1, ParticleData *particle2,
 static double particle_distance(ParticleData *particle_orig1,
   ParticleData *particle_orig2, box box) {
   ParticleData particle1 = *particle_orig1, particle2 = *particle_orig2;
-  FourVector velocity_com, position_diff, momentum_diff;
+  FourVector velocity_com;
   double distance_squared;
 
   /* UrQMD distance criteria:
@@ -83,7 +83,7 @@ static double particle_distance(ParticleData *particle_orig1,
    * d^2_{coll} = (x1 - x2)^2 - ((x1 - x2) . (v1 - v2))^2 / (v1 - v2)^2
    */
   boost_COM(&particle1, &particle2, &velocity_com);
-  position_diff = particle1.x() - particle2.x();
+  FourVector position_diff = particle1.x() - particle2.x();
   /* check for a periodic boundary cross */
   if (position_diff.x1() > box.a() / 2)
     position_diff.set_x1(box.a() - position_diff.x1());
@@ -91,7 +91,7 @@ static double particle_distance(ParticleData *particle_orig1,
     position_diff.set_x2(box.a() - position_diff.x2());
   if (position_diff.x3() > box.a() / 2)
     position_diff.set_x3(box.a() - position_diff.x3());
-  momentum_diff = particle1.momentum() - particle2.momentum();
+  FourVector momentum_diff = particle1.momentum() - particle2.momentum();
   /* zero momentum leads to infite distance */
   if (momentum_diff.x1() == 0 || momentum_diff.x2() == 0
       || momentum_diff.x3() == 0)
@@ -106,13 +106,12 @@ static double particle_distance(ParticleData *particle_orig1,
 /* time_collision - measure collision time of two particles */
 static double collision_time(ParticleData *particle1,
   ParticleData *particle2, box box) {
-  FourVector position_diff, velocity_diff;
   double time;
 
   /* UrQMD distance criteria
    * arXiv:1203.4418 (5.15): t_{coll} = - (x1 - x2) . (v1 - v2) / (v1 - v2)^2
    */
-  position_diff = particle1->x() - particle2->x();
+  FourVector position_diff = particle1->x() - particle2->x();
   /* check for a periodic boundary cross */
   if (position_diff.x1() > box.a() / 2)
     position_diff.set_x1(box.a() - position_diff.x1());
@@ -120,7 +119,7 @@ static double collision_time(ParticleData *particle1,
     position_diff.set_x2(box.a() - position_diff.x2());
   if (position_diff.x3() > box.a() / 2)
     position_diff.set_x3(box.a() - position_diff.x3());
-  velocity_diff = particle1->momentum() / particle1->momentum().x0()
+  FourVector velocity_diff = particle1->momentum() / particle1->momentum().x0()
     - particle2->momentum() / particle2->momentum().x0();
   time = - position_diff.DotThree(velocity_diff)
            / velocity_diff.DotThree(velocity_diff);
@@ -129,9 +128,7 @@ static double collision_time(ParticleData *particle1,
 
 /* momenta_exchange - soft scattering */
 static void momenta_exchange(ParticleData *particle1, ParticleData *particle2) {
-  FourVector momentum_copy;
-
-  momentum_copy = particle1->momentum();
+  FourVector momentum_copy = particle1->momentum();
   particle1->set_momentum(particle2->momentum());
   particle2->set_momentum(momentum_copy);
 }
