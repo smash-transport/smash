@@ -195,9 +195,8 @@ void check_collision(ParticleData *particle,
   int N;
   int x, y, z;
 
-  /* calculate approximate grid size according to mean free path */
-  N = round(box.a() * (sqrt(2) * box.number_density_initial()
-    * box.cross_section() * fm2_mb));
+  /* calculate approximate grid size according to double interaction length */
+  N = round(box.a() / sqrt(box.cross_section() * fm2_mb / M_PI) / 2);
 
   /* For small boxes no point in splitting up in grids */
   if (unlikely(N < 4 || number < 10)) {
