@@ -70,7 +70,7 @@ ParticleType* initial_particles(ParticleType *type) {
 /* initial_conditions - sets particle data for @particles */
 ParticleData* initial_conditions(ParticleData *particles,
   ParticleType *type, int &number, box *box) {
-  double phi, theta, momentum_radial, number_density, number_density_total = 0;
+  double phi, theta, momentum_radial, number_density_total = 0;
   FourVector momentum_total(0, 0, 0, 0);
   int number_total = 0;
 
@@ -85,7 +85,7 @@ ParticleData* initial_conditions(ParticleData *particles,
      * (assumes Bose-Einstein):
      * Volume m^2 T BesselK[2, m/T] / (2\pi^2)
      */
-    number_density = type[i].mass() * type[i].mass() * box->temperature()
+    double number_density = type[i].mass() * type[i].mass() * box->temperature()
       * gsl_sf_bessel_Knu(2, type[i].mass() / box->temperature())
       / 2 / M_PI / M_PI / hbarc / hbarc / hbarc;
     /* cast while reflecting probability of extra particle */
