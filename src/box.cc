@@ -190,6 +190,7 @@ int main(int argc, char *argv[]) {
   }
 
   /* Output IC values */
+  printf("%s (%d)\n", progname, VERSION_MAJOR);
   print_startup(*cube);
   mkdir_data();
   write_oscar_header();
