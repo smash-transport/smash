@@ -116,7 +116,7 @@ ParticleData* initial_conditions(ParticleData *particles,
       particles[id].set_id(id);
 
       /* back to back pair creation with random momenta direction */
-      if (unlikely(id == number - 1 && !(id % 2) && i == 2)) {
+      if (unlikely(id == number + number_total - 1 && !(id % 2) && i == 2)) {
         /* poor last guy just sits around */
         particles[id].set_momentum(type[i].mass(), 0, 0, 0);
       } else if (!(id % 2)) {
