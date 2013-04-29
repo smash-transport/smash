@@ -15,4 +15,4 @@ include_directories("${PROJECT_BINARY_DIR}/src")
 file(COPY params.txt DESTINATION ..)
 
 # link with gsl
-target_link_libraries(box gsl gslcblas)
+target_link_libraries(box gsl gslcblas rt)

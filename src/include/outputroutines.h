@@ -18,7 +18,7 @@ void print_startup(const box &box);
 void print_header(void);
 void print_measurements(const ParticleData *particle,
   const int &num, const size_t &scatterings_total, const box &box);
-void print_tail(const double &scattering_rate);
+void print_tail(const box &box, const double &scattering_rate);
 
 /* data directory */
 void mkdir_data(void);

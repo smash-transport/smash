@@ -8,13 +8,14 @@
 #define SRC_INCLUDE_BOX_H_
 
 #include <stdint.h>
+#include <time.h>
 
 class box {
   public:
     /* default constructor with probable values */
     box(): steps_(10000), update_(100), a_(10.0), eps_(0.001),
       temperature_(0.1), cross_section_(10.0), energy_initial_(0),
-      seed_(1), testparticle_(1) {}
+      seed_(1), testparticle_(1), time_start_(set_timer_start()) {}
     /* member funtions */
     float inline a() const;
     void inline set_a(const float &A);
@@ -36,6 +37,8 @@ class box {
     void inline set_steps(const int &STEPS);
     int inline update() const;
     void inline set_update(const int &UPDATE);
+    timespec inline time_start() const;
+    timespec inline set_timer_start();
 
   private:
     /* number of steps */
@@ -58,6 +61,8 @@ class box {
     int64_t seed_;
     /* number of test particle */
     int testparticle_;
+    /* starting time of the simulation */
+    timespec time_start_;
 };
 
 float inline box::a(void) const {
@@ -138,6 +143,16 @@ int64_t inline box::seed(void) const {
 
 void inline box::set_seed(const int64_t &randomseed) {
   seed_ = randomseed;
+}
+
+timespec inline box::time_start(void) const {
+  return time_start_;
+}
+
+timespec inline box::set_timer_start(void) {
+  timespec time;
+  clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &time);
+  return time;
 }
 
 /* convenience routines for periodic grids */

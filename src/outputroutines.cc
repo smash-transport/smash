@@ -20,9 +20,9 @@
 
 /* print_line - output a visible seperator */
 static void print_line(void) {
-  int field_width = 13;
+  int field_width = 70;
 
-  for (int i = 0; i < 5 * field_width; i++)
+  for (int i = 0; i < field_width; i++)
     printf("-");
   printf("\n");
 }
@@ -41,7 +41,7 @@ void print_startup(const box &box) {
 /* print_header - title for each row */
 void print_header(void) {
   print_line();
-  printf("        Time        <Etot>    <Ediff>      <ptot>        <sigma>\n");
+  printf(" Time    <Etot>    <Ediff>      <ptot>       <sigma>     <timing>\n");
   print_line();
 }
 
@@ -58,29 +58,40 @@ void mkdir_data(void) {
   fprintf(stderr, "mkdir 'data' failed.\n");
 }
 
+/* measure_timediff - time the simulation used */
+static double measure_timediff(const box &box) {
+  timespec now;
+  clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &now);
+  return (now.tv_sec + now.tv_nsec / 10.0E9
+    - box.time_start().tv_sec -   box.time_start().tv_nsec / 10.0E9);
+}
+
 /* print_measurements - console output during simulation */
 void print_measurements(const ParticleData *particles, const int &number,
   const size_t &scatterings_total, const box &box) {
   FourVector momentum_total(0, 0, 0, 0);
   /* use the time from the first particle - startup time */
   double time = particles[0].x().x0() - 1.0;
+  /* calculate elapsed time */
+  double elapsed = measure_timediff(box);
 
   for (int i = 0; i < number; i++)
     momentum_total += particles[i].momentum();
   if (likely(time > 0))
-    printf("%13g%13g%13g%13g%13g\n", time, momentum_total.x0(),
+    printf("%5g%10g%13g%13g%13g%13g\n", time, momentum_total.x0(),
           box.energy_initial() - momentum_total.x0(),
           sqrt(-1 * momentum_total.DotThree()),
-          scatterings_total * 2 / (number * time));
+          scatterings_total * 2 / (number * time), elapsed);
   else
-    printf("%13g%13g%13g%13g%13g\n", time, momentum_total.x0(),
+    printf("%5g%10g%13g%13g%13g%13g\n", time, momentum_total.x0(),
           box.energy_initial() - momentum_total.x0(),
-          sqrt(-1 * momentum_total.DotThree()), 0.0);
+          sqrt(-1 * momentum_total.DotThree()), 0.0, elapsed);
 }
 
 /* print_tail - output at the end of the simulation */
-void print_tail(const double &scattering_rate) {
+void print_tail(const box &box, const double &scattering_rate) {
   print_line();
+  printf("Time real: %g\n", measure_timediff(box));
   printf("Final scattering rate: %g\n", scattering_rate);
 }
 

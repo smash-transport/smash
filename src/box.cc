@@ -118,7 +118,8 @@ static int Evolve(ParticleData *particles, ParticleType *particle_type,
   }
 
   if (likely(box.steps() > 0))
-    print_tail(scatterings_total * 2 / (particles[0].x().x0() - 1.0) / number);
+    print_tail(box,
+      scatterings_total * 2 / (particles[0].x().x0() - 1.0) / number);
   return 0;
 }
 
