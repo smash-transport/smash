@@ -78,24 +78,41 @@ static double particle_distance(ParticleData *particle_orig1,
   FourVector velocity_com;
   double distance_squared;
 
-  /* UrQMD distance criteria:
-   * arXiv:nucl-th/9803035 (3.27): in center of momemtum frame
-   * d^2_{coll} = (x1 - x2)^2 - ((x1 - x2) . (v1 - v2))^2 / (v1 - v2)^2
-   */
+  /* boost particles and box in center of momenta frame */
+  FourVector box_com(particle1.x().x0(), box.a(), box.a(), box.a());
   boost_COM(&particle1, &particle2, &velocity_com);
+  box_com = box_com.LorentzBoost(box_com, velocity_com);
   FourVector position_diff = particle1.x() - particle2.x();
+  printd("Particle %d <-> %d position prediff: %g %g %g %g [fm]\n",
+    particle1.id(), particle2.id(), position_diff.x0(), position_diff.x1(),
+    position_diff.x2(), position_diff.x3());
+
   /* check for a periodic boundary cross */
-  if (position_diff.x1() > box.a() / 2)
-    position_diff.set_x1(box.a() - position_diff.x1());
-  if (position_diff.x2() > box.a() / 2)
-    position_diff.set_x2(box.a() - position_diff.x2());
-  if (position_diff.x3() > box.a() / 2)
-    position_diff.set_x3(box.a() - position_diff.x3());
+  if (position_diff.x1() > box_com.x1() / 2)
+    position_diff.set_x1(box_com.x1() - position_diff.x1());
+  if (position_diff.x1() < -box_com.x1() / 2)
+    position_diff.set_x1(box_com.x1() + position_diff.x1());
+  if (position_diff.x2() > box_com.x2() / 2)
+    position_diff.set_x2(box_com.x2() - position_diff.x2());
+  if (position_diff.x2() < -box_com.x2() / 2)
+    position_diff.set_x2(box_com.x2() + position_diff.x2());
+  if (position_diff.x3() > box_com.x3() / 2)
+    position_diff.set_x3(box_com.x3() - position_diff.x3());
+  if (position_diff.x3() < -box_com.x3() / 2)
+    position_diff.set_x3(box_com.x3() + position_diff.x3());
+  printd("Particle %d <-> %d position boundary diff: %g %g %g %g [fm]\n",
+    particle1.id(), particle2.id(), position_diff.x0(), position_diff.x1(),
+    position_diff.x2(), position_diff.x3());
+
   FourVector momentum_diff = particle1.momentum() - particle2.momentum();
   /* zero momentum leads to infite distance */
   if (momentum_diff.x1() == 0 || momentum_diff.x2() == 0
       || momentum_diff.x3() == 0)
     return  - position_diff.DotThree(position_diff);
+  /* UrQMD distance criteria:
+   * arXiv:nucl-th/9803035 (3.27): in center of momemtum frame
+   * d^2_{coll} = (x1 - x2)^2 - ((x1 - x2) . (v1 - v2))^2 / (v1 - v2)^2
+   */
   distance_squared = - position_diff.DotThree(position_diff)
     + position_diff.DotThree(momentum_diff)
       * position_diff.DotThree(momentum_diff)
