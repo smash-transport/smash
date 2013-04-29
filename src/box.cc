@@ -146,6 +146,7 @@ int main(int argc, char *argv[]) {
   progname = argv[0];
   if ((p = strrchr(progname, '/')) != NULL)
     progname = p + 1;
+  printf("%s (%d)\n", progname, VERSION_MAJOR);
 
   /* Read config file overrides box constructor defaults */
   int len = 3;
@@ -183,7 +184,6 @@ int main(int argc, char *argv[]) {
       cube->set_update(abs(atoi(optarg)));
       break;
     case 'V':
-      printf("%s (%d)\n", progname, VERSION_MAJOR);
       exit(EXIT_SUCCESS);
     default:
       usage(EXIT_FAILURE);
@@ -191,7 +191,6 @@ int main(int argc, char *argv[]) {
   }
 
   /* Output IC values */
-  printf("%s (%d)\n", progname, VERSION_MAJOR);
   print_startup(*cube);
   mkdir_data();
   write_oscar_header();
