@@ -304,7 +304,8 @@ void collide_particles(ParticleData *particle,
   for (std::list<int>::iterator id = collision_list->begin();
     id != collision_list->end(); ++id) {
     int id_other = particle[*id].collision_id();
-    printd("particle id colliding %d with %d\n", *id, id_other);
+    printd("particle colliding %d<->%d %g\n", *id, id_other,
+      particle[*id].x().x0());
     write_oscar(particle[*id], particle[id_other], 1);
 
     /* exchange in center of momenta */
