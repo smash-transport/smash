@@ -79,28 +79,9 @@ static double particle_distance(ParticleData *particle_orig1,
   double distance_squared;
 
   /* boost particles and box in center of momenta frame */
-  FourVector box_com(particle1.x().x0(), box.a(), box.a(), box.a());
   boost_COM(&particle1, &particle2, &velocity_com);
-  box_com = box_com.LorentzBoost(box_com, velocity_com);
   FourVector position_diff = particle1.x() - particle2.x();
   printd("Particle %d<->%d position diff: %g %g %g %g [fm]\n",
-    particle1.id(), particle2.id(), position_diff.x0(), position_diff.x1(),
-    position_diff.x2(), position_diff.x3());
-
-  /* check for a periodic boundary cross */
-  if (position_diff.x1() > box_com.x1() / 2)
-    position_diff.set_x1(box_com.x1() - position_diff.x1());
-  if (position_diff.x1() < -box_com.x1() / 2)
-    position_diff.set_x1(box_com.x1() + position_diff.x1());
-  if (position_diff.x2() > box_com.x2() / 2)
-    position_diff.set_x2(box_com.x2() - position_diff.x2());
-  if (position_diff.x2() < -box_com.x2() / 2)
-    position_diff.set_x2(box_com.x2() + position_diff.x2());
-  if (position_diff.x3() > box_com.x3() / 2)
-    position_diff.set_x3(box_com.x3() - position_diff.x3());
-  if (position_diff.x3() < -box_com.x3() / 2)
-    position_diff.set_x3(box_com.x3() + position_diff.x3());
-  printd("Particle %d<->%d boundary diff: %g %g %g %g [fm]\n",
     particle1.id(), particle2.id(), position_diff.x0(), position_diff.x1(),
     position_diff.x2(), position_diff.x3());
 
@@ -159,11 +140,9 @@ static void check_collision_criteria(ParticleData *particle,
   std::list<int> *collision_list, box box, int id, int id_other) {
   double distance_squared, time_collision;
 
-  /* criteria according to cross_section */
+  /* distance criteria according to cross_section */
   distance_squared = particle_distance(&particle[id], &particle[id_other],
     box);
-
-  /* particles are far apart */
   if (distance_squared >= box.cross_section() * fm2_mb / M_PI)
     return;
 
@@ -223,6 +202,8 @@ void check_collision(ParticleData *particle,
   if (unlikely(N < 4 || number < 10)) {
     for (int id = 0; id < number - 1; id++)
       for (int id_other = id + 1; id_other < number; id_other++)
+        /* XXX: skip particles that are far apart */
+        /* XXX: apply periodic boundary condition */
         check_collision_criteria(particle, collision_list, box, id, id_other);
     return;
   }
@@ -256,6 +237,7 @@ void check_collision(ParticleData *particle,
     y = round(particle[id].x().x3() / box.a() * (N - 1));
     /* check all neighbour grids */
     int sz, sy, sx;
+    /* XXX: apply periodic boundary condition for particle positions */
     for (int cz = 0; cz < 3; cz++) {
       if (cz == 0)
         sz = sm(z, N);
