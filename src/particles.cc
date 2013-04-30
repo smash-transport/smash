@@ -73,12 +73,12 @@ static void boost_from_COM(ParticleData *particle1, ParticleData *particle2,
 
 /* particle_distance - measure distance between two particles */
 static double particle_distance(ParticleData *particle_orig1,
-  ParticleData *particle_orig2, box box) {
+  ParticleData *particle_orig2) {
   ParticleData particle1 = *particle_orig1, particle2 = *particle_orig2;
   FourVector velocity_com;
   double distance_squared;
 
-  /* boost particles and box in center of momenta frame */
+  /* boost particles in center of momenta frame */
   boost_COM(&particle1, &particle2, &velocity_com);
   FourVector position_diff = particle1.x() - particle2.x();
   printd("Particle %d<->%d position diff: %g %g %g %g [fm]\n",
@@ -141,8 +141,7 @@ static void check_collision_criteria(ParticleData *particle,
   double distance_squared, time_collision;
 
   /* distance criteria according to cross_section */
-  distance_squared = particle_distance(&particle[id], &particle[id_other],
-    box);
+  distance_squared = particle_distance(&particle[id], &particle[id_other]);
   if (distance_squared >= box.cross_section() * fm2_mb / M_PI)
     return;
 
