@@ -229,35 +229,47 @@ void check_collision(ParticleData *particle,
   /* semi optimised nearest neighbour search:
    * http://en.wikipedia.org/wiki/Cell_lists
    */
+  FourVector mirror;
   for (int id = 0; id < number - 1; id++) {
     /* XXX: function - map particle position to grid number */
     z = round(particle[id].x().x1() / box.a() * (N - 1));
     x = round(particle[id].x().x2() / box.a() * (N - 1));
     y = round(particle[id].x().x3() / box.a() * (N - 1));
     /* check all neighbour grids */
-    int sz, sy, sx;
-    /* XXX: apply periodic boundary condition for particle positions */
-    for (int cz = 0; cz < 3; cz++) {
-      if (cz == 0)
-        sz = sm(z, N);
-      else if (cz == 2)
-        sz = sp(z, N);
-      else
-        sz = z;
-      for (int cy = 0; cy < 3; cy++) {
-        if (cy == 0)
-          sy = sm(y, N);
-        else if (cy == 2)
-          sy = sp(y, N);
-        else
-          sy = y;
-        for (int cx = 0; cx < 3; cx++) {
-          if (cx == 0)
-            sx = sm(x, N);
-          else if (cx == 2)
-            sx = sp(x, N);
-          else
-            sx = x;
+    for (int cz = -1; cz < 2; cz++) {
+      int sz = cz + z;
+      /* apply periodic boundary condition for particle positions */
+      if (sz < 0) {
+        sz = N - 1;
+        mirror.set_x1(-box.a());
+      } else if (sz > N - 1) {
+        sz = 0;
+        mirror.set_x1(box.a());
+      } else {
+        mirror.set_x1(0);
+      }
+      for (int cx = -1; cx <  2; cx++) {
+        int sx = cx + x;
+        if (sx < 0) {
+          sx = N - 1;
+          mirror.set_x2(-box.a());
+        } else if (sx > N - 1) {
+          sx = 0;
+          mirror.set_x2(box.a());
+        } else {
+          mirror.set_x2(0);
+        }
+        for (int cy = -1; cy < 2; cy++) {
+          int sy = cy + y;
+          if (sy < 0) {
+            sy = N - 1;
+            mirror.set_x3(-box.a());
+          } else if (sy > N - 1) {
+            sy = 0;
+            mirror.set_x3(box.a());
+          } else {
+            mirror.set_x3(0);
+          }
           /* empty grid cell */
           if (grid[sz][sx][sy].empty())
             continue;
@@ -270,9 +282,12 @@ void check_collision(ParticleData *particle,
             if (*id_other <= id)
               continue;
 
+            /* apply eventual boundary before and restore after */
+            particle[*id_other].set_position(particle[*id_other].x() + mirror);
             printd("grid cell particle %i <-> %i\n", id, *id_other);
             check_collision_criteria(particle, collision_list, box, id,
               *id_other);
+            particle[*id_other].set_position(particle[*id_other].x() - mirror);
           }
         }
       }

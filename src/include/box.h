@@ -155,23 +155,6 @@ timespec inline box::set_timer_start(void) {
   return time;
 }
 
-/* convenience routines for periodic grids */
-/* sm - site minus one */
-inline int sm(int s, int num) {
-  if (s != 0)
-    return s - 1;
-  else
-    return num - 1;
-}
-
-/* sp - site plus one */
-inline int sp(int s, int num) {
-  if (s != num - 1)
-    return s + 1;
-  else
-    return 0;
-}
-
 /* support for gcc branch prediction */
 #ifdef __GNUC__
 #define likely(x)       __builtin_expect((x), 1)
