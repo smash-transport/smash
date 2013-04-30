@@ -199,11 +199,19 @@ void check_collision(ParticleData *particle,
 
   /* For small boxes no point in splitting up in grids */
   if (unlikely(N < 4 || number < 10)) {
+    FourVector distance;
+    double radial_interaction = sqrt(box.cross_section() * fm2_mb * M_1_PI) * 2;
     for (int id = 0; id < number - 1; id++)
-      for (int id_other = id + 1; id_other < number; id_other++)
-        /* XXX: skip particles that are far apart */
+      for (int id_other = id + 1; id_other < number; id_other++) {
         /* XXX: apply periodic boundary condition */
+        distance = particle[id].x() - particle[id_other].x();
+        /* skip particles that are double interaction radius length away */
+        if (distance.x1() > radial_interaction
+            || distance.x2() > radial_interaction
+            || distance.x3() > radial_interaction)
+            continue;
         check_collision_criteria(particle, collision_list, box, id, id_other);
+      }
     return;
   }
 
