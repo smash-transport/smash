@@ -142,7 +142,7 @@ static void check_collision_criteria(ParticleData *particle,
 
   /* distance criteria according to cross_section */
   distance_squared = particle_distance(&particle[id], &particle[id_other]);
-  if (distance_squared >= box.cross_section() * fm2_mb / M_PI)
+  if (distance_squared >= box.cross_section() * fm2_mb * M_1_PI)
     return;
 
   /* check according timestep: positive and smaller */
@@ -195,7 +195,7 @@ void check_collision(ParticleData *particle,
   int x, y, z;
 
   /* calculate approximate grid size according to double interaction length */
-  N = round(box.a() / sqrt(box.cross_section() * fm2_mb / M_PI) / 2);
+  N = round(box.a() / sqrt(box.cross_section() * fm2_mb * M_1_PI) * 0.5);
 
   /* For small boxes no point in splitting up in grids */
   if (unlikely(N < 4 || number < 10)) {

@@ -87,7 +87,7 @@ ParticleData* initial_conditions(ParticleData *particles,
      */
     double number_density = type[i].mass() * type[i].mass() * box->temperature()
       * gsl_sf_bessel_Knu(2, type[i].mass() / box->temperature())
-      / 2 / M_PI / M_PI / hbarc / hbarc / hbarc;
+      * 0.5 * M_1_PI * M_1_PI / hbarc / hbarc / hbarc;
     /* cast while reflecting probability of extra particle */
     number = box->a() * box->a() * box->a() * number_density
       * box->testparticle();
