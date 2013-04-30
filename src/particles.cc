@@ -123,24 +123,28 @@ static double particle_distance(ParticleData *particle_orig1,
 /* time_collision - measure collision time of two particles */
 static double collision_time(ParticleData *particle1,
   ParticleData *particle2, box box) {
-  double time;
+  /* check for a periodic boundary cross in computational frame */
+  FourVector position_diff = particle1->x() - particle2->x();
+  if (position_diff.x1() > box.a() * 0.5)
+    position_diff.set_x1(box.a() - position_diff.x1());
+  if (position_diff.x1() < -box.a() * 0.5)
+    position_diff.set_x1(box.a() + position_diff.x1());
+  if (position_diff.x2() > box.a() * 0.5)
+    position_diff.set_x2(box.a() - position_diff.x2());
+  if (position_diff.x2() < -box.a() * 0.5)
+    position_diff.set_x2(box.a() + position_diff.x2());
+  if (position_diff.x3() > box.a() * 0.5)
+    position_diff.set_x3(box.a() - position_diff.x3());
+  if (position_diff.x3() < -box.a() * 0.5)
+    position_diff.set_x3(box.a() + position_diff.x3());
 
   /* UrQMD distance criteria
    * arXiv:1203.4418 (5.15): t_{coll} = - (x1 - x2) . (v1 - v2) / (v1 - v2)^2
    */
-  FourVector position_diff = particle1->x() - particle2->x();
-  /* check for a periodic boundary cross */
-  if (position_diff.x1() > box.a() / 2)
-    position_diff.set_x1(box.a() - position_diff.x1());
-  if (position_diff.x2() > box.a() / 2)
-    position_diff.set_x2(box.a() - position_diff.x2());
-  if (position_diff.x3() > box.a() / 2)
-    position_diff.set_x3(box.a() - position_diff.x3());
   FourVector velocity_diff = particle1->momentum() / particle1->momentum().x0()
     - particle2->momentum() / particle2->momentum().x0();
-  time = - position_diff.DotThree(velocity_diff)
+  return - position_diff.DotThree(velocity_diff)
            / velocity_diff.DotThree(velocity_diff);
-  return time;
 }
 
 /* momenta_exchange - soft scattering */
