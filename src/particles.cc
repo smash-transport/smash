@@ -103,25 +103,11 @@ static double particle_distance(ParticleData *particle_orig1,
 
 /* time_collision - measure collision time of two particles */
 static double collision_time(ParticleData *particle1,
-  ParticleData *particle2, box box) {
-  /* check for a periodic boundary cross in computational frame */
-  FourVector position_diff = particle1->x() - particle2->x();
-  if (position_diff.x1() > box.a() * 0.5)
-    position_diff.set_x1(box.a() - position_diff.x1());
-  if (position_diff.x1() < -box.a() * 0.5)
-    position_diff.set_x1(box.a() + position_diff.x1());
-  if (position_diff.x2() > box.a() * 0.5)
-    position_diff.set_x2(box.a() - position_diff.x2());
-  if (position_diff.x2() < -box.a() * 0.5)
-    position_diff.set_x2(box.a() + position_diff.x2());
-  if (position_diff.x3() > box.a() * 0.5)
-    position_diff.set_x3(box.a() - position_diff.x3());
-  if (position_diff.x3() < -box.a() * 0.5)
-    position_diff.set_x3(box.a() + position_diff.x3());
-
+  ParticleData *particle2) {
   /* UrQMD distance criteria
    * arXiv:1203.4418 (5.15): t_{coll} = - (x1 - x2) . (v1 - v2) / (v1 - v2)^2
    */
+  FourVector position_diff = particle1->x() - particle2->x();
   FourVector velocity_diff = particle1->momentum() / particle1->momentum().x0()
     - particle2->momentum() / particle2->momentum().x0();
   return - position_diff.DotThree(velocity_diff)
@@ -146,7 +132,7 @@ static void check_collision_criteria(ParticleData *particle,
     return;
 
   /* check according timestep: positive and smaller */
-  time_collision = collision_time(&particle[id], &particle[id_other], box);
+  time_collision = collision_time(&particle[id], &particle[id_other]);
   if (time_collision < 0 || time_collision >= box.eps())
     return;
 
