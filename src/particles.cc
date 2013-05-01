@@ -223,7 +223,7 @@ void check_collision(ParticleData *particle,
   /* semi optimised nearest neighbour search:
    * http://en.wikipedia.org/wiki/Cell_lists
    */
-  FourVector mirror;
+  FourVector shift;
   for (int id = 0; id < number - 1; id++) {
     /* XXX: function - map particle position to grid number */
     z = round(particle[id].x().x1() / box.a() * (N - 1));
@@ -235,34 +235,34 @@ void check_collision(ParticleData *particle,
       /* apply periodic boundary condition for particle positions */
       if (sz < 0) {
         sz = N - 1;
-        mirror.set_x1(-box.a());
+        shift.set_x1(-box.a());
       } else if (sz > N - 1) {
         sz = 0;
-        mirror.set_x1(box.a());
+        shift.set_x1(box.a());
       } else {
-        mirror.set_x1(0);
+        shift.set_x1(0);
       }
       for (int cx = -1; cx <  2; cx++) {
         int sx = cx + x;
         if (sx < 0) {
           sx = N - 1;
-          mirror.set_x2(-box.a());
+          shift.set_x2(-box.a());
         } else if (sx > N - 1) {
           sx = 0;
-          mirror.set_x2(box.a());
+          shift.set_x2(box.a());
         } else {
-          mirror.set_x2(0);
+          shift.set_x2(0);
         }
         for (int cy = -1; cy < 2; cy++) {
           int sy = cy + y;
           if (sy < 0) {
             sy = N - 1;
-            mirror.set_x3(-box.a());
+            shift.set_x3(-box.a());
           } else if (sy > N - 1) {
             sy = 0;
-            mirror.set_x3(box.a());
+            shift.set_x3(box.a());
           } else {
-            mirror.set_x3(0);
+            shift.set_x3(0);
           }
           /* empty grid cell */
           if (grid[sz][sx][sy].empty())
@@ -277,11 +277,11 @@ void check_collision(ParticleData *particle,
               continue;
 
             /* apply eventual boundary before and restore after */
-            particle[*id_other].set_position(particle[*id_other].x() + mirror);
+            particle[*id_other].set_position(particle[*id_other].x() + shift);
             printd("grid cell particle %i <-> %i\n", id, *id_other);
             check_collision_criteria(particle, collision_list, box, id,
               *id_other);
-            particle[*id_other].set_position(particle[*id_other].x() - mirror);
+            particle[*id_other].set_position(particle[*id_other].x() - shift);
           }
         }
       }
