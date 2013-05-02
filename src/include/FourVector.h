@@ -36,6 +36,10 @@ class FourVector {
     FourVector LorentzBoost(FourVector a, FourVector b);
 
     /* overloaded operators */
+    bool inline operator==(const FourVector &a);
+    bool inline operator!=(const FourVector &a);
+    bool inline operator==(const double &a);
+    bool inline operator!=(const double &a);
     FourVector inline operator+=(const FourVector &a);
     FourVector inline operator-=(const FourVector &a);
     FourVector inline operator*=(const double &a);
@@ -83,6 +87,26 @@ void inline FourVector::set_FourVector(const double t, const double z,
   x1_ = z;
   x2_ = x;
   x3_ = y;
+}
+
+/* all four vector components are equal */
+bool inline FourVector::operator==(const FourVector &a) {
+  return (x0_ == a.x0_) && (x1_ == a.x1_) && (x2_ == a.x2_) && (x3_ == a.x3_);
+}
+
+/* use == operator for the inverse */
+bool inline FourVector::operator!=(const FourVector &a) {
+  return !(*this == a);
+}
+
+/* all vector components are equal to that number */
+bool inline FourVector::operator==(const double &a) {
+  return (x0_ == a) && (x1_ == a) && (x2_ == a) && (x3_ == a);
+}
+
+/* use == operator for the inverse */
+bool inline FourVector::operator!=(const double &a) {
+  return !(*this == a);
 }
 
 FourVector inline FourVector::operator+=(const FourVector &a) {
