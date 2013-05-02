@@ -36,14 +36,14 @@ class FourVector {
     FourVector LorentzBoost(FourVector a, FourVector b);
 
     /* overloaded operators */
-    bool inline operator==(const FourVector &a);
-    bool inline operator!=(const FourVector &a);
+    bool inline operator==(const FourVector &a) const;
+    bool inline operator!=(const FourVector &a) const;
     bool inline operator<(const FourVector &a) const;
     bool inline operator>(const FourVector &a) const;
     bool inline operator<=(const FourVector &a) const;
     bool inline operator>=(const FourVector &a) const;
-    bool inline operator==(const double &a);
-    bool inline operator!=(const double &a);
+    bool inline operator==(const double &a) const;
+    bool inline operator!=(const double &a) const;
     bool inline operator<(const double &a) const;
     bool inline operator>(const double &a) const;
     bool inline operator<=(const double &a) const;
@@ -98,12 +98,12 @@ void inline FourVector::set_FourVector(const double t, const double z,
 }
 
 /* all four vector components are equal */
-bool inline FourVector::operator==(const FourVector &a) {
+bool inline FourVector::operator==(const FourVector &a) const {
   return (x0_ == a.x0_) && (x1_ == a.x1_) && (x2_ == a.x2_) && (x3_ == a.x3_);
 }
 
 /* use == operator for the inverse */
-bool inline FourVector::operator!=(const FourVector &a) {
+bool inline FourVector::operator!=(const FourVector &a) const {
   return !(*this == a);
 }
 
@@ -128,12 +128,12 @@ bool inline FourVector::operator>=(const FourVector &a) const {
 }
 
 /* all vector components are equal to that number */
-bool inline FourVector::operator==(const double &a) {
+bool inline FourVector::operator==(const double &a) const {
   return (x0_ == a) && (x1_ == a) && (x2_ == a) && (x3_ == a);
 }
 
 /* use == operator for the inverse */
-bool inline FourVector::operator!=(const double &a) {
+bool inline FourVector::operator!=(const double &a) const {
   return !(*this == a);
 }
 
@@ -149,14 +149,15 @@ bool inline FourVector::operator>(const double &a) const {
 
 /* all vector components are less equal that number */
 bool inline FourVector::operator<=(const double &a) const {
-  return !(*this < a);
+  return !(*this > a);
 }
 
 /* all vector components are greater equal that number */
 bool inline FourVector::operator>=(const double &a) const {
-  return !(*this > a);
+  return !(*this < a);
 }
 
+/* assignement addition */
 FourVector inline FourVector::operator+=(const FourVector &a) {
   this->x0_ += a.x0_;
   this->x1_ += a.x1_;
@@ -165,11 +166,13 @@ FourVector inline FourVector::operator+=(const FourVector &a) {
   return *this;
 }
 
+/* addition uses += */
 inline FourVector operator+(FourVector a, const FourVector &b) {
   a += b;
   return a;
 }
 
+/* assignement subtraction */
 FourVector inline FourVector::operator-=(const FourVector &a) {
   this->x0_ -= a.x0_;
   this->x1_ -= a.x1_;
@@ -178,11 +181,13 @@ FourVector inline FourVector::operator-=(const FourVector &a) {
   return *this;
 }
 
+/* subtraction uses -= */
 inline FourVector operator-(FourVector a, const FourVector &b) {
   a -= b;
   return a;
 }
 
+/* assignement factor multiplication */
 FourVector inline FourVector::operator*=(const double &a) {
   this->x0_ *= a;
   this->x1_ *= a;
@@ -191,11 +196,13 @@ FourVector inline FourVector::operator*=(const double &a) {
   return *this;
 }
 
+/* factor multiplication uses *= */
 inline FourVector operator*(FourVector a, const double &b) {
   a *= b;
   return a;
 }
 
+/* assignement factor division */
 FourVector inline FourVector::operator/=(const double &a) {
   this->x0_ /= a;
   this->x1_ /= a;
@@ -204,6 +211,7 @@ FourVector inline FourVector::operator/=(const double &a) {
   return *this;
 }
 
+/* factor division uses /= */
 inline FourVector operator/(FourVector a, const double &b) {
   a /= b;
   return a;
