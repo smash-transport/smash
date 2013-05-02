@@ -93,9 +93,7 @@ static void check_collision(ParticleData *particle,
         /* XXX: apply periodic boundary condition */
         distance = particle[id].x() - particle[id_other].x();
         /* skip particles that are double interaction radius length away */
-        if (distance.x1() > radial_interaction
-            || distance.x2() > radial_interaction
-            || distance.x3() > radial_interaction)
+        if (distance > radial_interaction)
             continue;
         check_collision_criteria(particle, collision_list, box, id, id_other);
       }
