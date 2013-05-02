@@ -38,8 +38,16 @@ class FourVector {
     /* overloaded operators */
     bool inline operator==(const FourVector &a);
     bool inline operator!=(const FourVector &a);
+    bool inline operator<(const FourVector &a) const;
+    bool inline operator>(const FourVector &a) const;
+    bool inline operator<=(const FourVector &a) const;
+    bool inline operator>=(const FourVector &a) const;
     bool inline operator==(const double &a);
     bool inline operator!=(const double &a);
+    bool inline operator<(const double &a) const;
+    bool inline operator>(const double &a) const;
+    bool inline operator<=(const double &a) const;
+    bool inline operator>=(const double &a) const;
     FourVector inline operator+=(const FourVector &a);
     FourVector inline operator-=(const FourVector &a);
     FourVector inline operator*=(const double &a);
@@ -99,6 +107,26 @@ bool inline FourVector::operator!=(const FourVector &a) {
   return !(*this == a);
 }
 
+/* all four vector components are below comparison vector */
+bool inline FourVector::operator<(const FourVector &a) const {
+  return (x0_ < a.x0_) && (x1_ < a.x1_) && (x2_ < a.x2_) && (x3_ < a.x3_);
+}
+
+/* use < operator for the inverse by switching arguments */
+bool inline FourVector::operator>(const FourVector &a) const {
+  return a < *this;
+}
+
+/* use > operator for less equal */
+bool inline FourVector::operator<=(const FourVector &a) const {
+  return !(*this > a);
+}
+
+/* use < operator for greater equal */
+bool inline FourVector::operator>=(const FourVector &a) const {
+  return !(*this < a);
+}
+
 /* all vector components are equal to that number */
 bool inline FourVector::operator==(const double &a) {
   return (x0_ == a) && (x1_ == a) && (x2_ == a) && (x3_ == a);
@@ -107,6 +135,26 @@ bool inline FourVector::operator==(const double &a) {
 /* use == operator for the inverse */
 bool inline FourVector::operator!=(const double &a) {
   return !(*this == a);
+}
+
+/* all vector components are below that number */
+bool inline FourVector::operator<(const double &a) const {
+  return (x0_ < a) && (x1_ < a) && (x2_ < a) && (x3_ < a);
+}
+
+/* all vector components are above that number */
+bool inline FourVector::operator>(const double &a) const {
+  return (x0_ > a) && (x1_ > a) && (x2_ > a) && (x3_ > a);
+}
+
+/* all vector components are less equal that number */
+bool inline FourVector::operator<=(const double &a) const {
+  return !(*this < a);
+}
+
+/* all vector components are greater equal that number */
+bool inline FourVector::operator>=(const double &a) const {
+  return !(*this > a);
 }
 
 FourVector inline FourVector::operator+=(const FourVector &a) {
