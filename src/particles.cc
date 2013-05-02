@@ -276,17 +276,22 @@ void check_collision(ParticleData *particle,
             if (*id_other <= id)
               continue;
 
-            /* apply eventual boundary before and restore after */
-            particle[*id_other].set_position(particle[*id_other].x() + shift);
             printd("grid cell particle %i <-> %i\n", id, *id_other);
-            check_collision_criteria(particle, collision_list, box, id,
-              *id_other);
-            particle[*id_other].set_position(particle[*id_other].x() - shift);
-          }
-        }
-      }
-    }
-  }
+            if (shift == 0) {
+              check_collision_criteria(particle, collision_list, box, id,
+                *id_other);
+            } else {
+              /* apply eventual boundary before and restore after */
+              particle[*id_other].set_position(particle[*id_other].x() + shift);
+              check_collision_criteria(particle, collision_list, box, id,
+                *id_other);
+              particle[*id_other].set_position(particle[*id_other].x() - shift);
+            }
+          } /* grid particles loop */
+        } /* grid sy */
+      } /* grid sx */
+    } /* grid sz */
+  } /* outer particle loop */
 }
 
 /* colliding_particle - particle interaction */
