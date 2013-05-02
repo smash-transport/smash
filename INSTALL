@@ -8,7 +8,7 @@ Build it in a seperate directory:
 
 Run it with specific settings:
   vi params.txt
-  ./src/box
+  ./mash
 
 Tarball mash:
   version=$(awk '/VERSION_/{print $2}' ../CMakeLists.txt); \

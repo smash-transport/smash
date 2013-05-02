@@ -1,11 +1,11 @@
 # The name of our project
-project(box) 
+project(mash) 
 
 # Minimum cmake version this is tested on
 cmake_minimum_required(VERSION 2.8)
 
 # The current version number
-set(VERSION_MAJOR 29042013)
+set(VERSION_MAJOR 20130402)
 
 # Set the relevant generic g++ flags (optimisation + warnings)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -march=native")
@@ -13,6 +13,9 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W -Wall -Wextra -Wmissing-declarations 
 
 # enable debug preprocessor variable
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
+
+# have binary in the build directory
+SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR})
 
 # subdirectories where the code is
 add_subdirectory(src) 

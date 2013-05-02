@@ -1,5 +1,5 @@
 # list the source files
-add_executable(box box.cc fourvector.cc initial-conditions.cc param-reader.cc
+add_executable(mash box.cc fourvector.cc initial-conditions.cc param-reader.cc
 	particles.cc outputroutines.cc)
 
 # configure a header file to pass some of the CMake settings
@@ -15,4 +15,4 @@ include_directories("${PROJECT_BINARY_DIR}/src")
 file(COPY params.txt DESTINATION ..)
 
 # link with gsl
-target_link_libraries(box gsl gslcblas rt)
+target_link_libraries(mash gsl gslcblas rt)
