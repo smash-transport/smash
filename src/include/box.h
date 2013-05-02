@@ -15,7 +15,8 @@ class box {
     /* default constructor with probable values */
     box(): steps_(10000), update_(100), a_(10.0), eps_(0.001),
       temperature_(0.1), cross_section_(10.0), energy_initial_(0),
-      seed_(1), testparticle_(1), time_start_(set_timer_start()) {}
+      number_density_initial_(0), seed_(1), testparticle_(1),
+      time_start_(set_timer_start()) {}
     /* member funtions */
     float inline a() const;
     void inline set_a(const float &A);
