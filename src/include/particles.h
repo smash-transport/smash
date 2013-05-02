@@ -13,8 +13,8 @@ class ParticleData;
 class box;
 
 /* populates collision list if collision applies */
-void check_collision(ParticleData *particle,
-  std::list<int> *collision_list, box box, int number);
+void check_collision_criteria(ParticleData *particle,
+  std::list<int> *collision_list, box box, int id, int id_other);
 
 /* does collisions according to collision table */
 void collide_particles(ParticleData *particle,

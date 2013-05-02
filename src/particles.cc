@@ -11,7 +11,6 @@
 
 #include <cstdio>
 #include <list>
-#include <vector>
 
 #include "include/FourVector.h"
 #include "include/ParticleData.h"
@@ -122,7 +121,7 @@ static void momenta_exchange(ParticleData *particle1, ParticleData *particle2) {
 }
 
 /* check_collision_criteria - check if a collision happens between particles */
-static void check_collision_criteria(ParticleData *particle,
+void check_collision_criteria(ParticleData *particle,
   std::list<int> *collision_list, box box, int id, int id_other) {
   double distance_squared, time_collision;
 
@@ -171,128 +170,6 @@ static void check_collision_criteria(ParticleData *particle,
   particle[id_other].set_collision(time_collision, id);
   /* add to collision list */
   collision_list->push_back(id);
-}
-
-/* check_collision - check if a collision can happen betwenn particles */
-void check_collision(ParticleData *particle,
-  std::list<int> *collision_list, box box, int number) {
-  std::vector<std::vector<std::vector<std::vector<int> > > > grid;
-  int N;
-  int x, y, z;
-
-  /* calculate approximate grid size according to double interaction length */
-  N = round(box.a() / sqrt(box.cross_section() * fm2_mb * M_1_PI) * 0.5);
-
-  /* For small boxes no point in splitting up in grids */
-  if (unlikely(N < 4 || number < 10)) {
-    FourVector distance;
-    double radial_interaction = sqrt(box.cross_section() * fm2_mb * M_1_PI) * 2;
-    for (int id = 0; id < number - 1; id++)
-      for (int id_other = id + 1; id_other < number; id_other++) {
-        /* XXX: apply periodic boundary condition */
-        distance = particle[id].x() - particle[id_other].x();
-        /* skip particles that are double interaction radius length away */
-        if (distance.x1() > radial_interaction
-            || distance.x2() > radial_interaction
-            || distance.x3() > radial_interaction)
-            continue;
-        check_collision_criteria(particle, collision_list, box, id, id_other);
-      }
-    return;
-  }
-
-  /* allocate grid */
-  grid.resize(N);
-  for (int i = 0; i < N; i++) {
-    grid[i].resize(N);
-    for (int j = 0; j < N; j++)
-      grid[i][j].resize(N);
-  }
-
-  /* populate grid */
-  for (int id = 0; id < number; id++) {
-    /* XXX: function - map particle position to grid number */
-    z = round(particle[id].x().x1() / box.a() * (N - 1));
-    x = round(particle[id].x().x2() / box.a() * (N - 1));
-    y = round(particle[id].x().x3() / box.a() * (N - 1));
-    printd_position(particle[id]);
-    printd("grid cell %i: %i %i %i of %i\n", id, z, x, y, N);
-    grid[z][x][y].push_back(id);
-  }
-
-  /* semi optimised nearest neighbour search:
-   * http://en.wikipedia.org/wiki/Cell_lists
-   */
-  FourVector shift;
-  for (int id = 0; id < number - 1; id++) {
-    /* XXX: function - map particle position to grid number */
-    z = round(particle[id].x().x1() / box.a() * (N - 1));
-    x = round(particle[id].x().x2() / box.a() * (N - 1));
-    y = round(particle[id].x().x3() / box.a() * (N - 1));
-    printd("grid cell %i: %i %i %i of %i\n", id, z, x, y, N);
-    /* check all neighbour grids */
-    for (int cz = -1; cz < 2; cz++) {
-      int sz = cz + z;
-      /* apply periodic boundary condition for particle positions */
-      if (sz < 0) {
-        sz = N - 1;
-        shift.set_x1(-box.a());
-      } else if (sz > N - 1) {
-        sz = 0;
-        shift.set_x1(box.a());
-      } else {
-        shift.set_x1(0);
-      }
-      for (int cx = -1; cx <  2; cx++) {
-        int sx = cx + x;
-        if (sx < 0) {
-          sx = N - 1;
-          shift.set_x2(-box.a());
-        } else if (sx > N - 1) {
-          sx = 0;
-          shift.set_x2(box.a());
-        } else {
-          shift.set_x2(0);
-        }
-        for (int cy = -1; cy < 2; cy++) {
-          int sy = cy + y;
-          if (sy < 0) {
-            sy = N - 1;
-            shift.set_x3(-box.a());
-          } else if (sy > N - 1) {
-            sy = 0;
-            shift.set_x3(box.a());
-          } else {
-            shift.set_x3(0);
-          }
-          /* empty grid cell */
-          if (grid[sz][sx][sy].empty())
-            continue;
-          /* grid cell particle list */
-          for (std::vector<int>::iterator id_other = grid[sz][sx][sy].begin();
-               id_other != grid[sz][sx][sy].end(); ++id_other) {
-	    /* only check against particles above current id
-	     * to avoid double counting
-	     */
-            if (*id_other <= id)
-              continue;
-
-            printd("grid cell particle %i <-> %i\n", id, *id_other);
-            if (shift == 0) {
-              check_collision_criteria(particle, collision_list, box, id,
-                *id_other);
-            } else {
-              /* apply eventual boundary before and restore after */
-              particle[*id_other].set_position(particle[*id_other].x() + shift);
-              check_collision_criteria(particle, collision_list, box, id,
-                *id_other);
-              particle[*id_other].set_position(particle[*id_other].x() - shift);
-            }
-          } /* grid particles loop */
-        } /* grid sy */
-      } /* grid sx */
-    } /* grid sz */
-  } /* outer particle loop */
 }
 
 /* colliding_particle - particle interaction */
