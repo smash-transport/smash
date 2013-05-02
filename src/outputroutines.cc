@@ -90,9 +90,20 @@ void print_measurements(const ParticleData *particles, const int &number,
 
 /* print_tail - output at the end of the simulation */
 void print_tail(const box &box, const double &scattering_rate) {
+  double time = measure_timediff(box);
   print_line();
-  printf("Time real: %g\n", measure_timediff(box));
-  printf("Final scattering rate: %g\n", scattering_rate);
+  /* print finishing time in human readable way:
+   * time < 10 min => seconds
+   * 10 min < time < 3 h => minutes
+   * time > 3h => hours
+   */
+  if (time < 600)
+    printf("Time real: %g [s]\n", time);
+  else if (time < 10800)
+    printf("Time real: %g [min]\n", time / 60);
+  else
+    printf("Time real: %g [h]\n", time / 3600);
+  printf("Final scattering rate: %g [fm-1]\n", scattering_rate);
 }
 
 /* printd_momenta - print debug data of the specific particle */
