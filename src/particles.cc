@@ -216,7 +216,7 @@ void check_collision(ParticleData *particle,
     x = round(particle[id].x().x2() / box.a() * (N - 1));
     y = round(particle[id].x().x3() / box.a() * (N - 1));
     printd_position(particle[id]);
-    printd("grid cell %i: %i %i %i\n", N, z, x, y);
+    printd("grid cell %i: %i %i %i of %i\n", id, z, x, y, N);
     grid[z][x][y].push_back(id);
   }
 
@@ -229,6 +229,7 @@ void check_collision(ParticleData *particle,
     z = round(particle[id].x().x1() / box.a() * (N - 1));
     x = round(particle[id].x().x2() / box.a() * (N - 1));
     y = round(particle[id].x().x3() / box.a() * (N - 1));
+    printd("grid cell %i: %i %i %i of %i\n", id, z, x, y, N);
     /* check all neighbour grids */
     for (int cz = -1; cz < 2; cz++) {
       int sz = cz + z;
