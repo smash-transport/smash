@@ -41,4 +41,7 @@ void write_oscar(const ParticleData &particle1, const ParticleData &particle2,
   int flag);
 void write_vtk(const ParticleData *particles, int number);
 
+/* timing measure */
+double measure_timediff(const box &box);
+
 #endif  // SRC_INCLUDE_OUTPUTROUTINES_H_

@@ -59,7 +59,7 @@ void mkdir_data(void) {
 }
 
 /* measure_timediff - time the simulation used */
-static double measure_timediff(const box &box) {
+double measure_timediff(const box &box) {
   timespec now;
   clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &now);
   return (now.tv_sec + now.tv_nsec / 10.0E9
