@@ -32,12 +32,12 @@ static void boost_COM(ParticleData *particle1, ParticleData *particle2,
   velocity->set_x3((momentum1.x3() + momentum2.x3()) / cms_energy);
 
   // Boost the momenta into CMS frame
-  momentum1 = momentum1.LorentzBoost(momentum1, *velocity);
-  momentum2 = momentum2.LorentzBoost(momentum2, *velocity);
+  momentum1 = momentum1.LorentzBoost(*velocity);
+  momentum2 = momentum2.LorentzBoost(*velocity);
 
   // Boost the positions into CMS frame
-  position1 = position1.LorentzBoost(position1, *velocity);
-  position2 = position2.LorentzBoost(position2, *velocity);
+  position1 = position1.LorentzBoost(*velocity);
+  position2 = position2.LorentzBoost(*velocity);
 
   particle1->set_momentum(momentum1);
   particle1->set_position(position1);
@@ -57,12 +57,12 @@ static void boost_from_COM(ParticleData *particle1, ParticleData *particle2,
   velocity.set_x0(1);
 
   /* Boost the momenta back to lab frame */
-  momentum1 = momentum1.LorentzBoost(momentum1, velocity);
-  momentum2 = momentum2.LorentzBoost(momentum2, velocity);
+  momentum1 = momentum1.LorentzBoost(velocity);
+  momentum2 = momentum2.LorentzBoost(velocity);
 
   /* Boost the positions back to lab frame */
-  position1 = position1.LorentzBoost(position1, velocity);
-  position2 = position2.LorentzBoost(position2, velocity);
+  position1 = position1.LorentzBoost(velocity);
+  position2 = position2.LorentzBoost(velocity);
 
   particle1->set_momentum(momentum1);
   particle1->set_position(position1);

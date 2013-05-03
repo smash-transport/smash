@@ -27,13 +27,13 @@ class FourVector {
     void inline set_FourVector(const double t, const double z, const double x,
       const double y);
     /* inlined operations */
-    double inline Dot(const FourVector &a);
-    double inline Dot();
+    double inline Dot(const FourVector &a) const;
+    double inline Dot() const;
     double inline DotThree(const FourVector &a);
     double inline DotThree();
     double inline DiffThree(const FourVector &a);
     /* operations */
-    FourVector LorentzBoost(FourVector a, FourVector b);
+    FourVector LorentzBoost(const FourVector &b) const;
 
     /* overloaded operators */
     bool inline operator==(const FourVector &a) const;
@@ -217,11 +217,11 @@ inline FourVector operator/(FourVector a, const double &b) {
   return a;
 }
 
-double inline FourVector::Dot(const FourVector &a) {
+double inline FourVector::Dot(const FourVector &a) const {
   return x0_ * a.x0_ - x1_ * a.x1_ - x2_ * a.x2_ - x3_ * a.x3_;
 }
 
-double inline FourVector::Dot() {
+double inline FourVector::Dot() const {
   return x0_ * x0_ - x1_ * x1_ - x2_ * x2_ - x3_ * x3_;
 }
 
