@@ -13,7 +13,7 @@
 class ParticleData {
   public:
   /* Use improbable values for default constructor */
-  ParticleData() :id_(-1), collision_id_(-1) {}
+  ParticleData() :id_(-1), collision_id_(-1), collision_time_(0.0) {}
   void inline set(const int &id, const double &momenta_l,
                   const double &momenta_t);
   int id(void) const;
