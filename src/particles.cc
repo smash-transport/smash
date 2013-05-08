@@ -54,7 +54,7 @@ static void boost_from_COM(ParticleData *particle1, ParticleData *particle2,
 
   /* To boost back set 1 + velocity */
   velocity *= -1;
-  velocity.set_x0(1);
+  velocity.set_x0(1.0);
 
   /* Boost the momenta back to lab frame */
   momentum1 = momentum1.LorentzBoost(velocity);
@@ -156,7 +156,7 @@ void check_collision_criteria(ParticleData *particle,
     int not_id = particle[id].collision_id();
     printd("Not colliding particle %d <-> %d\n", id, not_id);
     /* unset collision partner to zero time and unexisting id */
-    particle[not_id].set_collision(0, -1);
+    particle[not_id].set_collision(0.0, -1);
     /* remove any of those partners from the list */
     collision_list->remove(id);
     collision_list->remove(not_id);
@@ -193,8 +193,8 @@ void collide_particles(ParticleData *particle,
     write_oscar(particle[*id], particle[id_other], -1);
 
     /* unset collision time for both particles + keep id */
-    particle[*id].set_collision_time(0);
-    particle[id_other].set_collision_time(0);
+    particle[*id].set_collision_time(0.0);
+    particle[id_other].set_collision_time(0.0);
   }
   /* empty the collision table */
   collision_list->clear();
