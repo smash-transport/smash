@@ -29,9 +29,9 @@ class FourVector {
     /* inlined operations */
     double inline Dot(const FourVector &a) const;
     double inline Dot() const;
-    double inline DotThree(const FourVector &a);
-    double inline DotThree();
-    double inline DiffThree(const FourVector &a);
+    double inline DotThree(const FourVector &a) const;
+    double inline DotThree() const;
+    double inline DiffThree(const FourVector &a) const;
     /* operations */
     FourVector LorentzBoost(const FourVector &b) const;
 
@@ -225,15 +225,15 @@ double inline FourVector::Dot() const {
   return x0_ * x0_ - x1_ * x1_ - x2_ * x2_ - x3_ * x3_;
 }
 
-double inline FourVector::DotThree(const FourVector &a) {
+double inline FourVector::DotThree(const FourVector &a) const {
   return - x1_ * a.x1_ - x2_ * a.x2_ - x3_ * a.x3_;
 }
 
-double inline FourVector::DotThree() {
+double inline FourVector::DotThree() const {
   return - x1_ * x1_ - x2_ * x2_ - x3_ * x3_;
 }
 
-double inline FourVector::DiffThree(const FourVector &a) {
+double inline FourVector::DiffThree(const FourVector &a) const {
   return x1_ - a.x1_ + x2_ - a.x2_ + x3_ - a.x3_;
 }
 
