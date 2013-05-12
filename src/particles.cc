@@ -115,10 +115,35 @@ static double collision_time(ParticleData *particle1,
 }
 
 /* momenta_exchange - soft scattering */
-static void momenta_exchange(ParticleData *particle1, ParticleData *particle2) {
-  FourVector momentum_copy = particle1->momentum();
-  particle1->set_momentum(particle2->momentum());
-  particle2->set_momentum(momentum_copy);
+static void momenta_exchange(ParticleData *particle1, ParticleData *particle2,
+  const float &particle1_mass, const float &particle2_mass) {
+  double phi, theta;
+  /* center of momentum hence equal for both particles */
+  double momentum_radial = sqrt(particle1->momentum().x0()
+    * particle1->momentum().x0() - particle1_mass * particle1_mass);
+  printd("center of momenta 1: %g %g %g %g \n", particle1->momentum().x0(),
+    particle1->momentum().x1(), particle1->momentum().x2(),
+    particle1->momentum().x3());
+  printd("center of momenta 2: %g %g %g %g \n", particle2->momentum().x0(),
+    particle2->momentum().x1(), particle2->momentum().x2(),
+    particle2->momentum().x3());
+
+  /* particle exchange momenta and scatter to random direction */
+  phi =  2 * M_PI * drand48();
+  theta = M_PI * drand48();
+  particle1->set_momentum(particle1_mass,
+     momentum_radial * cos(phi) * sin(theta),
+     momentum_radial * sin(phi) * sin(theta), momentum_radial * cos(theta));
+  particle2->set_momentum(particle2_mass,
+     -momentum_radial * cos(phi) * sin(theta),
+     -momentum_radial * sin(phi) * sin(theta), -momentum_radial * cos(theta));
+
+  printd("exchanged momenta 1: %g %g %g %g \n", particle1->momentum().x0(),
+    particle1->momentum().x1(), particle1->momentum().x2(),
+    particle1->momentum().x3());
+  printd("exchanged momenta 2: %g %g %g %g \n", particle2->momentum().x0(),
+    particle2->momentum().x1(), particle2->momentum().x2(),
+    particle2->momentum().x3());
 }
 
 /* check_collision_criteria - check if a collision happens between particles */
@@ -188,14 +213,27 @@ void collide_particles(ParticleData *particle, ParticleType *type,
       particle[*id].x().x0());
     write_oscar(particle[*id], particle[id_other], type[(*map_type)[*id]],
       type[(*map_type)[id_other]], 1);
+    printd("particle 1 momenta before: %g %g %g %g\n",
+      particle[*id].momentum().x0(), particle[*id].momentum().x1(),
+      particle[*id].momentum().x2(), particle[*id].momentum().x3());
+    printd("particle 2 momenta before: %g %g %g %g\n",
+      particle[id_other].momentum().x0(), particle[id_other].momentum().x1(),
+      particle[id_other].momentum().x2(), particle[id_other].momentum().x3());
 
     /* exchange in center of momenta */
     boost_COM(&particle[*id], &particle[id_other], &velocity_com);
-    momenta_exchange(&particle[*id], &particle[id_other]);
+    momenta_exchange(&particle[*id], &particle[id_other],
+      type[(*map_type)[*id]].mass(), type[(*map_type)[id_other]].mass());
     boost_from_COM(&particle[*id], &particle[id_other],
       &velocity_com);
     write_oscar(particle[*id], particle[id_other], type[(*map_type)[*id]],
       type[(*map_type)[id_other]], -1);
+    printd("particle 1 momenta after: %g %g %g %g\n",
+      particle[*id].momentum().x0(), particle[*id].momentum().x1(),
+      particle[*id].momentum().x2(), particle[*id].momentum().x3());
+    printd("particle 2 momenta after: %g %g %g %g\n",
+      particle[id_other].momentum().x0(), particle[id_other].momentum().x1(),
+      particle[id_other].momentum().x2(), particle[id_other].momentum().x3());
 
     /* unset collision time for both particles + keep id */
     particle[*id].set_collision_time(0.0);
