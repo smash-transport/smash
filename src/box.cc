@@ -14,6 +14,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <list>
+#include <map>
 #include <vector>
 
 #include "include/ParticleData.h"
@@ -196,7 +197,7 @@ static void check_collision(ParticleData *particle,
 
 /* Evolve - the core of the box, stepping forward in time */
 static int Evolve(ParticleData *particles, ParticleType *particle_type,
-  int &number, const box &box) {
+  std::map<int, int> *map_type, int &number, const box &box) {
   FourVector distance, position;
   std::list<int> collision_list;
   size_t scatterings_total = 0;
@@ -211,7 +212,7 @@ static int Evolve(ParticleData *particles, ParticleType *particle_type,
     /* particle interactions */
     if (!collision_list.empty()) {
       scatterings_total += collision_list.size();
-      collide_particles(particles, &collision_list);
+      collide_particles(particles, particle_type, map_type, &collision_list);
     }
 
     /* propagate all particles */
@@ -251,6 +252,7 @@ int main(int argc, char *argv[]) {
   ParticleData *particles = NULL;
   ParticleType *particle_types = NULL;
   box *cube = new box;
+  std::map<int, int> map_type;
 
   struct option longopts[] = {
     { "eps",        required_argument,      0, 'e' },
@@ -319,11 +321,12 @@ int main(int argc, char *argv[]) {
 
   /* Initialize box */
   particle_types = initial_particles(particle_types);
-  particles = initial_conditions(particles, particle_types, number, cube);
+  particles = initial_conditions(particles, particle_types, &map_type, number,
+    cube);
   write_particles(particles, number);
 
   /* Compute stuff */
-  rc = Evolve(particles, particle_types, number, *cube);
+  rc = Evolve(particles, particle_types, &map_type, number, *cube);
 
   /* tear down */
   delete [] particles;

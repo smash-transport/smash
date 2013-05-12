@@ -154,9 +154,8 @@ void write_oscar_header(void) {
 
 /* write_oscar - OSCAR file */
 void write_oscar(const ParticleData &particle1,
-  const ParticleData &particle2, int flag) {
-  /* XXX: generalise particle types */
-  ParticleType pi("pi", 0.13957, 211);
+  const ParticleData &particle2, const ParticleType &type1,
+  const ParticleType &type2, int flag) {
   FourVector momentum, position;
   FILE *fp;
 
@@ -174,13 +173,13 @@ void write_oscar(const ParticleData &particle1,
   fprintf(fp, "%i %i %i %g %g %g %g %g %g %g %g %g \n",
               particle1.id(), 0, 0,
               momentum.x1(), momentum.x2(), momentum.x3(), momentum.x0(),
-              pi.mass(), position.x1(), position.x2(), position.x3(),
+              type1.mass(), position.x1(), position.x2(), position.x3(),
               position.x0());
   momentum = particle2.momentum(), position = particle2.x();
   fprintf(fp, "%i %i %i %g %g %g %g %g %g %g %g %g \n",
               particle2.id(), 0, 0,
               momentum.x1(), momentum.x2(), momentum.x3(), momentum.x0(),
-              pi.mass(), position.x1(), position.x2(), position.x3(),
+              type2.mass(), position.x1(), position.x2(), position.x3(),
               position.x0());
   fclose(fp);
 }

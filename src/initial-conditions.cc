@@ -69,7 +69,7 @@ ParticleType* initial_particles(ParticleType *type) {
 
 /* initial_conditions - sets particle data for @particles */
 ParticleData* initial_conditions(ParticleData *particles,
-  ParticleType *type, int &number, box *box) {
+  ParticleType *type, std::map<int, int> *map_type, int &number, box *box) {
   double phi, theta, momentum_radial, number_density_total = 0;
   FourVector momentum_total(0, 0, 0, 0);
   int number_total = 0;
@@ -114,6 +114,7 @@ ParticleData* initial_conditions(ParticleData *particles,
       double x_pos, y_pos, z_pos, time_start;
       /* set id and particle type */
       particles[id].set_id(id);
+      (*map_type)[id] = i;
 
       /* back to back pair creation with random momenta direction */
       if (unlikely(id == number + number_total - 1 && !(id % 2) && i == 2)) {

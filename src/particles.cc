@@ -14,6 +14,7 @@
 
 #include "include/FourVector.h"
 #include "include/ParticleData.h"
+#include "include/ParticleType.h"
 #include "include/constants.h"
 #include "include/box.h"
 #include "include/outputroutines.h"
@@ -173,24 +174,28 @@ void check_collision_criteria(ParticleData *particle,
 }
 
 /* colliding_particle - particle interaction */
-void collide_particles(ParticleData *particle,
-  std::list<int> *collision_list) {
+void collide_particles(ParticleData *particle, ParticleType *type,
+  std::map<int, int> *map_type, std::list<int> *collision_list) {
   FourVector velocity_com;
 
   /* collide: 2 <-> 2 soft momenta exchange */
   for (std::list<int>::iterator id = collision_list->begin();
     id != collision_list->end(); ++id) {
     int id_other = particle[*id].collision_id();
-    printd("particle colliding %d<->%d %g\n", *id, id_other,
+    printd("particle types %s<->%s colliding %d<->%d %g\n",
+      type[(*map_type)[*id]].name().c_str(),
+      type[(*map_type)[id_other]].name().c_str(), *id, id_other,
       particle[*id].x().x0());
-    write_oscar(particle[*id], particle[id_other], 1);
+    write_oscar(particle[*id], particle[id_other], type[(*map_type)[*id]],
+      type[(*map_type)[id_other]], 1);
 
     /* exchange in center of momenta */
     boost_COM(&particle[*id], &particle[id_other], &velocity_com);
     momenta_exchange(&particle[*id], &particle[id_other]);
     boost_from_COM(&particle[*id], &particle[id_other],
       &velocity_com);
-    write_oscar(particle[*id], particle[id_other], -1);
+    write_oscar(particle[*id], particle[id_other], type[(*map_type)[*id]],
+      type[(*map_type)[id_other]], -1);
 
     /* unset collision time for both particles + keep id */
     particle[*id].set_collision_time(0.0);
