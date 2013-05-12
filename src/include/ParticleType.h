@@ -10,35 +10,35 @@
 class ParticleType {
   public:
     /* Use improbable values for default constructor */
-    ParticleType() : name_("unknown"), mass_(-1), lifetime_(-1),
-      isospin_(100), pdgcode_(-1) {}
+    ParticleType() : mass_(-1), lifetime_(-1), isospin_(100), pdgcode_(-1),
+      name_("unknown") {}
     /* Explicit constructor */
-    ParticleType(std::string n, double m, int id) : name_(n), mass_(m),
-      lifetime_(0), isospin_(1), pdgcode_(id) {}
+    ParticleType(std::string n, float m, int id) : mass_(m), lifetime_(0),
+      isospin_(1), pdgcode_(id), name_(n) {}
     /* set data */
-    void inline set(const std::string &n, const double &m, const int &id);
+    void inline set(const std::string &n, const float &m, const int &id);
     /* access data */
     std::string inline name(void) const;
-    double inline mass(void) const;
+    float inline mass(void) const;
     int inline pdgcode(void) const;
 
   private:
     /* Data of the particle type */
-    std::string name_;
-    double mass_;
-    double lifetime_;
+    float mass_;
+    float lifetime_;
     float isospin_;
     int pdgcode_;
+    std::string name_;
 };
 
-void inline ParticleType::set(const std::string &NAME, const double &MASS,
+void inline ParticleType::set(const std::string &NAME, const float &MASS,
   const int &ID) {
-  name_ = NAME;
   mass_ = MASS;
   pdgcode_ = ID;
+  name_ = NAME;
 }
 
-double inline ParticleType::mass(void) const {
+float inline ParticleType::mass(void) const {
   return mass_;
 }
 
