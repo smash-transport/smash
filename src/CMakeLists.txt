@@ -18,6 +18,11 @@ file(COPY params.txt DESTINATION ..)
 target_link_libraries(mash gsl gslcblas rt)
 
 # tests:
-# verify that the binary runs
+# verify that the binary has a cli help
 add_test(mash_help ${PROJECT_BINARY_DIR}/mash -h)
+# verify that the binary runs
 add_test(mash_run ${PROJECT_BINARY_DIR}/mash )
+# verify that default run has no mem leaks
+set(CTEST_MEMORYCHECK_COMMAND valgrind )
+set(CTEST_MEMORYCHECK_COMMAND_OPTIONS "-v" )
+add_test(memcheck ${CTEST_MEMORYCHECK_COMMAND} ${CTEST_MEMORYCHECK_COMMAND_OPTIONS} ${PROJECT_BINARY_DIR}/mash )
