@@ -17,5 +17,8 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
 # have binary in the build directory
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR})
 
+# have tests run
+enable_testing()
+
 # subdirectories where the code is
 add_subdirectory(src) 

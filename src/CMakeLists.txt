@@ -16,3 +16,8 @@ file(COPY params.txt DESTINATION ..)
 
 # link with gsl
 target_link_libraries(mash gsl gslcblas rt)
+
+# tests:
+# verify that the binary runs
+add_test(mash_help ${PROJECT_BINARY_DIR}/mash -h)
+add_test(mash_run ${PROJECT_BINARY_DIR}/mash )
