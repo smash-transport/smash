@@ -9,6 +9,9 @@
 
 #include <stdint.h>
 #include <time.h>
+#include <cmath>
+
+#include "../include/constants.h"
 
 class box {
   public:
@@ -40,6 +43,7 @@ class box {
     void inline set_update(const int &UPDATE);
     timespec inline time_start() const;
     timespec inline set_timer_start();
+    int inline grid_number() const;
 
   private:
     /* number of steps */
@@ -154,6 +158,11 @@ timespec inline box::set_timer_start(void) {
   timespec time;
   clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &time);
   return time;
+}
+
+/* calculate approximate grid size according to double interaction length */
+int inline box::grid_number(void) const {
+  return round(this->a() / sqrt(this->cross_section() * fm2_mb * M_1_PI) * 0.5);
 }
 
 /* support for gcc branch prediction */

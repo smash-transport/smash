@@ -166,6 +166,10 @@ ParticleData* initial_conditions(ParticleData *particles,
     printf("Elastic cross section: %g [mb]\n", box->cross_section());
   }
 
+  /* Display on startup if pseudo grid is used */
+  if (box->grid_number() > 4 && number > 10)
+    printf("Simulation with pseudo grid: %d^3\n", box->grid_number());
+
   /* allows to check energy conservation */
   printf("IC total energy: %g [GeV]\n", momentum_total.x0());
   box->set_energy_initial(momentum_total.x0());
