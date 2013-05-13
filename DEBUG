@@ -6,3 +6,10 @@
 
 * Change c++ compiler:
   cmake ../ -DCMAKE_CXX_COMPILER=$HOME/lib/bin/g++
+
+* mash binary is regularly checked by:
+  valgrind -v ./mash
+  
+* mash src is checked by:
+  cpplint.py *cc include/*h
+  cppcheck --enable=all -I include/ .

@@ -1,4 +1,5 @@
 Quick instructions how to build mash.
+mash is known to compile and work on gcc > 4.6 and clang > 3.0.
 
 Build it in a seperate directory:
   mkdir build
@@ -11,6 +12,6 @@ Run it with specific settings:
   ./mash
 
 Tarball mash:
-  version=$(awk '/VERSION_/{print $2}' ../CMakeLists.txt); \
+  version=$(awk '/VERSION_/{print $2}' CMakeLists.txt); \
   version="${version%)}"
   git archive --format=tar.gz --prefix=mash-$version/ HEAD > mash-$version.tar.gz
