@@ -68,11 +68,11 @@ ParticleType* initial_particles(ParticleType *type) {
 
 
 /* initial_conditions - sets particle data for @particles */
-ParticleData* initial_conditions(ParticleData *particles,
-  ParticleType *type, std::map<int, int> *map_type, int &number, box *box) {
+void initial_conditions(std::vector<ParticleData> *particles,
+  ParticleType *type, std::map<int, int> *map_type, box *box) {
   double phi, theta, momentum_radial, number_density_total = 0;
   FourVector momentum_total(0, 0, 0, 0);
-  int number_total = 0;
+  size_t number_total = 0, number = 0;
 
   /* initialize random seed */
   srand48(box->seed());
@@ -94,69 +94,61 @@ ParticleData* initial_conditions(ParticleData *particles,
     if (box->a() * box->a() * box->a() * number_density - number > drand48())
       number++;
     printf("IC number density %.6g [fm^-3]\n", number_density);
-    printf("IC %d number of %s\n", number, type[i].name().c_str());
+    printf("IC %lu number of %s\n", number, type[i].name().c_str());
     number_density_total += number_density;
 
     /* Set random IC:
      * particles at random position in the box with thermal momentum
      */
-    if (!particles) {
-      particles = new ParticleData[number];
-    } else {
-      /* XXX: hack realloc, maybe better to use resize from vector class */
-      ParticleData *particles_tmp = new ParticleData[number_total + number];
-      for (int id = 0; id < number_total; id++)
-        particles_tmp[id] = particles[id];
-      delete[] particles;
-      particles = particles_tmp;
-    }
-    for (int id = number_total; id < number_total + number; id++) {
+    /* allocate the particles */
+    (*particles).resize(number + number_total);
+    for (size_t id = number_total; id < number_total + number; id++) {
       double x_pos, y_pos, z_pos, time_start;
       /* set id and particle type */
-      particles[id].set_id(id);
+      (*particles)[id].set_id(id);
       (*map_type)[id] = i;
 
       /* back to back pair creation with random momenta direction */
       if (unlikely(id == number + number_total - 1 && !(id % 2) && i == 2)) {
         /* poor last guy just sits around */
-        particles[id].set_momentum(type[i].mass(), 0, 0, 0);
+        (*particles)[id].set_momentum(type[i].mass(), 0, 0, 0);
       } else if (!(id % 2)) {
         /* thermal momentum according Maxwell-Boltzmann distribution */
         momentum_radial = sample_momenta(box, type[i]);
         phi =  2 * M_PI * drand48();
         theta = M_PI * drand48();
-        printd("Particle %d radial momenta %g phi %g theta %g\n", id,
+        printd("Particle %lu radial momenta %g phi %g theta %g\n", id,
           momentum_radial, phi, theta);
-        particles[id].set_momentum(type[i].mass(),
+        (*particles)[id].set_momentum(type[i].mass(),
           momentum_radial * cos(phi) * sin(theta),
           momentum_radial * sin(phi) * sin(theta),
           momentum_radial * cos(theta));
       } else {
-        particles[id].set_momentum(type[i].mass(),
-          - particles[id - 1].momentum().x1(),
-          - particles[id - 1].momentum().x2(),
-          - particles[id - 1].momentum().x3());
+        (*particles)[id].set_momentum(type[i].mass(),
+          - (*particles)[id - 1].momentum().x1(),
+          - (*particles)[id - 1].momentum().x2(),
+          - (*particles)[id - 1].momentum().x3());
       }
-      momentum_total += particles[id].momentum();
+      momentum_total += (*particles)[id].momentum();
 
       /* ramdom position in the box */
       time_start = 1.0;
       x_pos = drand48() * box->a();
       y_pos = drand48() * box->a();
       z_pos = drand48() * box->a();
-      particles[id].set_position(time_start, z_pos, x_pos, y_pos);
+      (*particles)[id].set_position(time_start, z_pos, x_pos, y_pos);
 
       /* no collision yet hence zero time and unexisting id */
-      particles[id].set_collision(0, -1);
+      (*particles)[id].set_collision(0, -1);
 
       /* IC: debug checks */
-      printd_momenta(particles[id]);
-      printd_position(particles[id]);
+      printd_momenta((*particles)[id]);
+      printd_position((*particles)[id]);
     }
     number_total += number;
   }
   printf("IC total number density %.6g [fm^-3]\n", number_density_total);
-  printf("IC contains %i particles\n", number_total);
+  printf("IC contains %lu particles\n", number_total);
   /* loop over all particles */
   number = number_total;
   /* reducing cross section according to number of test particle */
@@ -175,6 +167,4 @@ ParticleData* initial_conditions(ParticleData *particles,
   box->set_energy_initial(momentum_total.x0());
   box->set_number_density_inital(number_density_total);
   print_header();
-
-  return particles;
 }

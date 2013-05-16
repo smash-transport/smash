@@ -10,16 +10,18 @@
 
 #include <list>
 #include <map>
+#include <vector>
+
 class ParticleData;
 class ParticleType;
 class box;
 
 /* populates collision list if collision applies */
-void check_collision_criteria(ParticleData *particle,
+void check_collision_criteria(std::vector<ParticleData> *particle,
   std::list<int> *collision_list, box box, int id, int id_other);
 
 /* does collisions according to collision table */
-void collide_particles(ParticleData *particle, ParticleType *type,
+void collide_particles(std::vector<ParticleData> *particle, ParticleType *type,
   std::map<int, int> *map_type, std::list<int> *collision_list);
 
 #endif  // SRC_INCLUDE_PARTICLES_H_

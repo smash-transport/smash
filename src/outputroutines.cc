@@ -67,7 +67,7 @@ double measure_timediff(const box &box) {
 }
 
 /* print_measurements - console output during simulation */
-void print_measurements(const ParticleData *particles, const int &number,
+void print_measurements(const std::vector<ParticleData> &particles,
   const size_t &scatterings_total, const box &box) {
   FourVector momentum_total(0, 0, 0, 0);
   /* use the time from the first particle - startup time */
@@ -75,13 +75,13 @@ void print_measurements(const ParticleData *particles, const int &number,
   /* calculate elapsed time */
   double elapsed = measure_timediff(box);
 
-  for (int i = 0; i < number; i++)
+  for (size_t i = 0; i < particles.size(); i++)
     momentum_total += particles[i].momentum();
   if (likely(time > 0))
     printf("%5g%10g%13g%13g%13g%13g\n", time, momentum_total.x0(),
           box.energy_initial() - momentum_total.x0(),
           sqrt(-1 * momentum_total.DotThree()),
-          scatterings_total * 2 / (number * time), elapsed);
+          scatterings_total * 2 / (particles.size() * time), elapsed);
   else
     printf("%5g%10g%13g%13g%13g%13g\n", time, momentum_total.x0(),
           box.energy_initial() - momentum_total.x0(),
@@ -121,18 +121,18 @@ void printd_position(const ParticleData &particle) {
 }
 
 /* write_particles - writes out data of the specific particles */
-void write_particles(ParticleData *particles, const int number) {
+void write_particles(const std::vector<ParticleData> &particles) {
   FILE *fp;
 
   fp = fopen("data/momenta.dat", "a");
-  for (int i = 0; i < number; i++) {
+  for (size_t i = 0; i < particles.size(); i++) {
      fprintf(fp, "%g %g %g %g\n", particles[i].momentum().x0(),
        particles[i].momentum().x1(),  particles[i].momentum().x2(),
        particles[i].momentum().x3());
   }
   fclose(fp);
   fp = fopen("data/position.dat", "a");
-  for (int i = 0; i < number; i++) {
+  for (size_t i = 0; i < particles.size(); i++) {
      fprintf(fp, "%g %g %g %g\n", particles[i].x().x0(),
        particles[i].x().x1(),  particles[i].x().x2(),
        particles[i].x().x3());
@@ -185,7 +185,7 @@ void write_oscar(const ParticleData &particle1,
 }
 
 /* write_vtk - VTK file describing particle position */
-void write_vtk(const ParticleData *particles, const int number) {
+void write_vtk(const std::vector<ParticleData> &particles) {
   FILE *fp;
   char filename[256];
 
@@ -198,14 +198,14 @@ void write_vtk(const ParticleData *particles, const int number) {
   fprintf(fp, "ASCII\n");
   /* Unstructured data sets are composed of points, lines, polygons, .. */
   fprintf(fp, "DATASET UNSTRUCTURED_GRID\n");
-  fprintf(fp, "POINTS %d double\n", number);
-  for (int i = 0; i < number; i++)
+  fprintf(fp, "POINTS %lu double\n", particles.size());
+  for (size_t i = 0; i < particles.size(); i++)
     fprintf(fp, "%g %g %g\n", particles[i].x().x1(), particles[i].x().x2(),
       particles[i].x().x3());
-  fprintf(fp, "POINT_DATA %d\n", number);
+  fprintf(fp, "POINT_DATA %lu\n", particles.size());
   fprintf(fp, "SCALARS momenta_x double 1\n");
   fprintf(fp, "LOOKUP_TABLE default\n");
-  for (int i = 0; i < number; i++)
+  for (size_t i = 0; i < particles.size(); i++)
     fprintf(fp, "%g\n", particles[i].momentum().x1());
   fclose(fp);
 }

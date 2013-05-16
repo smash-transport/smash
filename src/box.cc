@@ -76,21 +76,21 @@ static FourVector boundary_condition(FourVector position, const box &box) {
 }
 
 /* check_collision - check if a collision can happen betwenn particles */
-static void check_collision(ParticleData *particle,
-  std::list<int> *collision_list, box box, int number) {
-  std::vector<std::vector<std::vector<std::vector<int> > > > grid;
+static void check_collision(std::vector<ParticleData> *particle,
+  std::list<int> *collision_list, box box) {
+  std::vector<std::vector<std::vector<std::vector<unsigned int> > > > grid;
   int N;
   int x, y, z;
 
   /* For small boxes no point in splitting up in grids */
   N = box.grid_number();
-  if (unlikely(N < 4 || number < 10)) {
+  if (unlikely(N < 4 || particle->size() < 10)) {
     FourVector distance;
     double radial_interaction = sqrt(box.cross_section() * fm2_mb * M_1_PI) * 2;
-    for (int id = 0; id < number - 1; id++)
-      for (int id_other = id + 1; id_other < number; id_other++) {
+    for (size_t id = 0; id < particle->size() - 1; id++)
+      for (size_t id_other = id + 1; id_other < particle->size(); id_other++) {
         /* XXX: apply periodic boundary condition */
-        distance = particle[id].x() - particle[id_other].x();
+        distance = (*particle)[id].x() - (*particle)[id_other].x();
         /* skip particles that are double interaction radius length away */
         if (distance > radial_interaction)
             continue;
@@ -108,13 +108,13 @@ static void check_collision(ParticleData *particle,
   }
 
   /* populate grid */
-  for (int id = 0; id < number; id++) {
+  for (size_t id = 0; id < particle->size(); id++) {
     /* XXX: function - map particle position to grid number */
-    z = round(particle[id].x().x1() / box.a() * (N - 1));
-    x = round(particle[id].x().x2() / box.a() * (N - 1));
-    y = round(particle[id].x().x3() / box.a() * (N - 1));
-    printd_position(particle[id]);
-    printd("grid cell %i: %i %i %i of %i\n", id, z, x, y, N);
+    z = round((*particle)[id].x().x1() / box.a() * (N - 1));
+    x = round((*particle)[id].x().x2() / box.a() * (N - 1));
+    y = round((*particle)[id].x().x3() / box.a() * (N - 1));
+    printd_position((*particle)[id]);
+    printd("grid cell %lu: %i %i %i of %i\n", id, z, x, y, N);
     grid[z][x][y].push_back(id);
   }
 
@@ -122,12 +122,12 @@ static void check_collision(ParticleData *particle,
    * http://en.wikipedia.org/wiki/Cell_lists
    */
   FourVector shift;
-  for (int id = 0; id < number - 1; id++) {
+  for (size_t id = 0; id < particle->size() - 1; id++) {
     /* XXX: function - map particle position to grid number */
-    z = round(particle[id].x().x1() / box.a() * (N - 1));
-    x = round(particle[id].x().x2() / box.a() * (N - 1));
-    y = round(particle[id].x().x3() / box.a() * (N - 1));
-    printd("grid cell %i: %i %i %i of %i\n", id, z, x, y, N);
+    z = round((*particle)[id].x().x1() / box.a() * (N - 1));
+    x = round((*particle)[id].x().x2() / box.a() * (N - 1));
+    y = round((*particle)[id].x().x3() / box.a() * (N - 1));
+    printd("grid cell %lu: %i %i %i of %i\n", id, z, x, y, N);
     /* check all neighbour grids */
     for (int cz = -1; cz < 2; cz++) {
       int sz = cz + z;
@@ -167,24 +167,27 @@ static void check_collision(ParticleData *particle,
           if (grid[sz][sx][sy].empty())
             continue;
           /* grid cell particle list */
-          for (std::vector<int>::iterator id_other = grid[sz][sx][sy].begin();
-               id_other != grid[sz][sx][sy].end(); ++id_other) {
+          for (std::vector<unsigned int>::iterator id_other
+               = grid[sz][sx][sy].begin(); id_other != grid[sz][sx][sy].end();
+               ++id_other) {
 	    /* only check against particles above current id
 	     * to avoid double counting
 	     */
             if (*id_other <= id)
               continue;
 
-            printd("grid cell particle %i <-> %i\n", id, *id_other);
+            printd("grid cell particle %lu <-> %i\n", id, *id_other);
             if (shift == 0) {
               check_collision_criteria(particle, collision_list, box, id,
                 *id_other);
             } else {
               /* apply eventual boundary before and restore after */
-              particle[*id_other].set_position(particle[*id_other].x() + shift);
+              (*particle)[*id_other].set_position((*particle)[*id_other].x()
+                + shift);
               check_collision_criteria(particle, collision_list, box, id,
                 *id_other);
-              particle[*id_other].set_position(particle[*id_other].x() - shift);
+              (*particle)[*id_other].set_position((*particle)[*id_other].x()
+                - shift);
             }
           } /* grid particles loop */
         } /* grid sy */
@@ -194,18 +197,18 @@ static void check_collision(ParticleData *particle,
 }
 
 /* Evolve - the core of the box, stepping forward in time */
-static int Evolve(ParticleData *particles, ParticleType *particle_type,
-  std::map<int, int> *map_type, int &number, const box &box) {
+static int Evolve(std::vector<ParticleData> *particles,
+  ParticleType *particle_type, std::map<int, int> *map_type, const box &box) {
   FourVector distance, position;
   std::list<int> collision_list;
   size_t scatterings_total = 0;
 
   /* startup values */
-  print_measurements(particles, number, scatterings_total, box);
+  print_measurements(*particles, scatterings_total, box);
 
   for (int steps = 0; steps < box.steps(); steps++) {
     /* fill collision table by cells */
-    check_collision(particles, &collision_list, box, number);
+    check_collision(particles, &collision_list, box);
 
     /* particle interactions */
     if (!collision_list.empty()) {
@@ -214,40 +217,40 @@ static int Evolve(ParticleData *particles, ParticleType *particle_type,
     }
 
     /* propagate all particles */
-    for (int i = 0; i < number; i++) {
-      distance.set_FourVector(1.0, particles[i].velocity_z(),
-        particles[i].velocity_x(), particles[i].velocity_y());
+    for (size_t i = 0; i < particles->size(); i++) {
+      distance.set_FourVector(1.0, (*particles)[i].velocity_z(),
+        (*particles)[i].velocity_x(), (*particles)[i].velocity_y());
       distance *= box.eps();
-      printd("Particle %d motion: %g %g %g %g\n", particles[i].id(),
+      printd("Particle %d motion: %g %g %g %g\n", (*particles)[i].id(),
          distance.x0(), distance.x1(), distance.x2(), distance.x3());
 
       /* treat the box boundaries */
-      position = particles[i].x();
+      position = (*particles)[i].x();
       position += distance;
       position = boundary_condition(position, box);
-      particles[i].set_position(position);
-      printd_position(particles[i]);
+      (*particles)[i].set_position(position);
+      printd_position((*particles)[i]);
     }
 
     /* physics output during the run */
     if (steps > 0 && (steps + 1) % box.update() == 0) {
-      print_measurements(particles, number, scatterings_total, box);
+      print_measurements(*particles, scatterings_total, box);
       /* save evolution data */
-      write_particles(particles, number);
-      write_vtk(particles, number);
+      write_particles(*particles);
+      write_vtk(*particles);
     }
   }
 
   if (likely(box.steps() > 0))
-    print_tail(box,
-      scatterings_total * 2 / (particles[0].x().x0() - 1.0) / number);
+    print_tail(box, scatterings_total * 2
+      / ((*particles)[0].x().x0() - 1.0) / particles->size());
   return 0;
 }
 
 int main(int argc, char *argv[]) {
   char *p, *path;
-  int opt, rc, number = 0;
-  ParticleData *particles = NULL;
+  int opt, rc;
+  std::vector<ParticleData> particles;
   ParticleType *particle_types = NULL;
   box *cube = new box;
   std::map<int, int> map_type;
@@ -319,15 +322,14 @@ int main(int argc, char *argv[]) {
 
   /* Initialize box */
   particle_types = initial_particles(particle_types);
-  particles = initial_conditions(particles, particle_types, &map_type, number,
-    cube);
-  write_particles(particles, number);
+  initial_conditions(&particles, particle_types, &map_type, cube);
+  write_particles(particles);
 
   /* Compute stuff */
-  rc = Evolve(particles, particle_types, &map_type, number, *cube);
+  rc = Evolve(&particles, particle_types, &map_type, *cube);
 
   /* tear down */
-  delete [] particles;
+  particles.clear();
   delete [] particle_types;
   delete cube;
   free(path);
