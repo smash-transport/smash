@@ -8,20 +8,26 @@
 #ifndef SRC_INCLUDE_PARTICLES_H_
 #define SRC_INCLUDE_PARTICLES_H_
 
-#include <list>
-#include <map>
-#include <vector>
-
+/* necessary forward declarations */
 class ParticleData;
-class ParticleType;
-class box;
+class FourVector;
 
-/* populates collision list if collision applies */
-void check_collision_criteria(std::vector<ParticleData> *particle,
-  std::list<int> *collision_list, box box, int id, int id_other);
+/* boost_COM - boost to center of momentum */
+void boost_COM(ParticleData *particle1, ParticleData *particle2,
+  FourVector *velocity);
 
-/* does collisions according to collision table */
-void collide_particles(std::vector<ParticleData> *particle, ParticleType *type,
-  std::map<int, int> *map_type, std::list<int> *collision_list);
+/* boost_from_COM - boost back from center of momentum */
+void boost_from_COM(ParticleData *particle1, ParticleData *particle2,
+  FourVector *velocity_orig);
 
+/* particle_distance - measure distance between two particles */
+double particle_distance(ParticleData *particle_orig1,
+  ParticleData *particle_orig2);
+
+/* time_collision - measure collision time of two particles */
+double collision_time(ParticleData *particle1, ParticleData *particle2);
+
+/* momenta_exchange - soft scattering */
+void momenta_exchange(ParticleData *particle1, ParticleData *particle2,
+  const float &particle1_mass, const float &particle2_mass);
 #endif  // SRC_INCLUDE_PARTICLES_H_

@@ -19,10 +19,10 @@
 
 #include "include/ParticleData.h"
 #include "include/ParticleType.h"
+#include "include/collisions.h"
 #include "include/constants.h"
 #include "include/initial-conditions.h"
 #include "include/param-reader.h"
-#include "include/particles.h"
 #include "include/outputroutines.h"
 
 /* build dependent variables */

@@ -1,6 +1,6 @@
 # list the source files
-add_executable(mash box.cc fourvector.cc initial-conditions.cc param-reader.cc
-	particles.cc outputroutines.cc)
+add_executable(mash box.cc collisions.cc fourvector.cc initial-conditions.cc
+	param-reader.cc particles.cc outputroutines.cc)
 
 # configure a header file to pass some of the CMake settings
 # to the source code
