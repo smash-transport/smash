@@ -23,7 +23,7 @@
 static void boost_COM(ParticleData *particle1, ParticleData *particle2,
   FourVector *velocity) {
   FourVector momentum1(particle1->momentum()), momentum2(particle2->momentum());
-  FourVector position1(particle1->x()), position2(particle2->x());
+  FourVector position1(particle1->position()), position2(particle2->position());
   double cms_energy = momentum1.x0() + momentum2.x0();
 
   // CMS 4-velocity
@@ -50,7 +50,7 @@ static void boost_COM(ParticleData *particle1, ParticleData *particle2,
 static void boost_from_COM(ParticleData *particle1, ParticleData *particle2,
   FourVector *velocity_orig) {
   FourVector momentum1(particle1->momentum()), momentum2(particle2->momentum());
-  FourVector position1(particle1->x()), position2(particle2->x());
+  FourVector position1(particle1->position()), position2(particle2->position());
   FourVector velocity = *velocity_orig;
 
   /* To boost back set 1 + velocity */
@@ -80,7 +80,7 @@ static double particle_distance(ParticleData *particle_orig1,
 
   /* boost particles in center of momenta frame */
   boost_COM(&particle1, &particle2, &velocity_com);
-  FourVector position_diff = particle1.x() - particle2.x();
+  FourVector position_diff = particle1.position() - particle2.position();
   printd("Particle %d<->%d position diff: %g %g %g %g [fm]\n",
     particle1.id(), particle2.id(), position_diff.x0(), position_diff.x1(),
     position_diff.x2(), position_diff.x3());
@@ -107,7 +107,7 @@ static double collision_time(ParticleData *particle1,
   /* UrQMD distance criteria
    * arXiv:1203.4418 (5.15): t_{coll} = - (x1 - x2) . (v1 - v2) / (v1 - v2)^2
    */
-  FourVector position_diff = particle1->x() - particle2->x();
+  FourVector position_diff = particle1->position() - particle2->position();
   FourVector velocity_diff = particle1->momentum() / particle1->momentum().x0()
     - particle2->momentum() / particle2->momentum().x0();
   return - position_diff.DotThree(velocity_diff)
@@ -165,16 +165,16 @@ void check_collision_criteria(std::vector<ParticleData> *particle,
   /* check for minimal collision time */
   if ((*particle)[id].collision_time() > 0
         && time_collision > (*particle)[id].collision_time()) {
-    printd("%g Not minimal particle %d <-> %d\n", (*particle)[id].x().x0(), id,
-        id_other);
+    printd("%g Not minimal particle %d <-> %d\n",
+        (*particle)[id].position().x0(), id, id_other);
     return;
   }
 
   /* just collided with this particle */
   if ((*particle)[id].collision_time() == 0
       && id_other == (*particle)[id].collision_id()) {
-    printd("%g Skipping particle %d <-> %d\n", (*particle)[id].x().x0(), id,
-        id_other);
+    printd("%g Skipping particle %d <-> %d\n",
+        (*particle)[id].position().x0(), id, id_other);
     return;
   }
 
@@ -211,7 +211,7 @@ void collide_particles(std::vector<ParticleData> *particle, ParticleType *type,
     printd("particle types %s<->%s colliding %d<->%d %g\n",
       type[(*map_type)[*id]].name().c_str(),
       type[(*map_type)[id_other]].name().c_str(), *id, id_other,
-      (*particle)[*id].x().x0());
+      (*particle)[*id].position().x0());
     write_oscar((*particle)[*id], (*particle)[id_other], type[(*map_type)[*id]],
       type[(*map_type)[id_other]], 1);
     printd("particle 1 momenta before: %g %g %g %g\n",

@@ -71,7 +71,7 @@ void print_measurements(const std::vector<ParticleData> &particles,
   const size_t &scatterings_total, const box &box) {
   FourVector momentum_total(0, 0, 0, 0);
   /* use the time from the first particle - startup time */
-  double time = particles[0].x().x0() - 1.0;
+  double time = particles[0].position().x0() - 1.0;
   /* calculate elapsed time */
   double elapsed = measure_timediff(box);
 
@@ -116,8 +116,8 @@ void printd_momenta(const ParticleData &particle) {
 /* printd_position - print debug data of the specific particle */
 void printd_position(const ParticleData &particle) {
   printd("Particle %d position: %g %g %g %g [fm]\n", particle.id(),
-      particle.x().x0(), particle.x().x1(), particle.x().x2(),
-      particle.x().x3());
+      particle.position().x0(), particle.position().x1(),
+      particle.position().x2(), particle.position().x3());
 }
 
 /* write_particles - writes out data of the specific particles */
@@ -133,9 +133,9 @@ void write_particles(const std::vector<ParticleData> &particles) {
   fclose(fp);
   fp = fopen("data/position.dat", "a");
   for (size_t i = 0; i < particles.size(); i++) {
-     fprintf(fp, "%g %g %g %g\n", particles[i].x().x0(),
-       particles[i].x().x1(),  particles[i].x().x2(),
-       particles[i].x().x3());
+     fprintf(fp, "%g %g %g %g\n", particles[i].position().x0(),
+       particles[i].position().x1(), particles[i].position().x2(),
+       particles[i].position().x3());
   }
   fclose(fp);
 }
@@ -169,13 +169,13 @@ void write_oscar(const ParticleData &particle1,
   else if (flag == 1)
     fprintf(fp, "%i %i \n", 2, 2);
   /* particle_index, particle_pdgcode, ?, momenta, mass position */
-  momentum = particle1.momentum(), position = particle1.x();
+  momentum = particle1.momentum(), position = particle1.position();
   fprintf(fp, "%i %i %i %g %g %g %g %g %g %g %g %g \n",
               particle1.id(), 0, 0,
               momentum.x1(), momentum.x2(), momentum.x3(), momentum.x0(),
               type1.mass(), position.x1(), position.x2(), position.x3(),
               position.x0());
-  momentum = particle2.momentum(), position = particle2.x();
+  momentum = particle2.momentum(), position = particle2.position();
   fprintf(fp, "%i %i %i %g %g %g %g %g %g %g %g %g \n",
               particle2.id(), 0, 0,
               momentum.x1(), momentum.x2(), momentum.x3(), momentum.x0(),
@@ -190,7 +190,7 @@ void write_vtk(const std::vector<ParticleData> &particles) {
   char filename[256];
 
   snprintf(filename, sizeof(filename), "data/pos_%.5f.vtk",
-    particles[0].x().x0() - 1.0);
+    particles[0].position().x0() - 1.0);
   fp = fopen(filename, "w");
   /* Legacy VTK file format */
   fprintf(fp, "# vtk DataFile Version 2.0\n");
@@ -200,8 +200,8 @@ void write_vtk(const std::vector<ParticleData> &particles) {
   fprintf(fp, "DATASET UNSTRUCTURED_GRID\n");
   fprintf(fp, "POINTS %lu double\n", particles.size());
   for (size_t i = 0; i < particles.size(); i++)
-    fprintf(fp, "%g %g %g\n", particles[i].x().x1(), particles[i].x().x2(),
-      particles[i].x().x3());
+    fprintf(fp, "%g %g %g\n", particles[i].position().x1(),
+      particles[i].position().x2(), particles[i].position().x3());
   fprintf(fp, "POINT_DATA %lu\n", particles.size());
   fprintf(fp, "SCALARS momenta_x double 1\n");
   fprintf(fp, "LOOKUP_TABLE default\n");

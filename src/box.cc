@@ -90,7 +90,8 @@ static void check_collision(std::vector<ParticleData> *particle,
     for (size_t id = 0; id < particle->size() - 1; id++)
       for (size_t id_other = id + 1; id_other < particle->size(); id_other++) {
         /* XXX: apply periodic boundary condition */
-        distance = (*particle)[id].x() - (*particle)[id_other].x();
+        distance = (*particle)[id].position()
+          - (*particle)[id_other].position();
         /* skip particles that are double interaction radius length away */
         if (distance > radial_interaction)
             continue;
@@ -110,9 +111,9 @@ static void check_collision(std::vector<ParticleData> *particle,
   /* populate grid */
   for (size_t id = 0; id < particle->size(); id++) {
     /* XXX: function - map particle position to grid number */
-    z = round((*particle)[id].x().x1() / box.a() * (N - 1));
-    x = round((*particle)[id].x().x2() / box.a() * (N - 1));
-    y = round((*particle)[id].x().x3() / box.a() * (N - 1));
+    z = round((*particle)[id].position().x1() / box.a() * (N - 1));
+    x = round((*particle)[id].position().x2() / box.a() * (N - 1));
+    y = round((*particle)[id].position().x3() / box.a() * (N - 1));
     printd_position((*particle)[id]);
     printd("grid cell %lu: %i %i %i of %i\n", id, z, x, y, N);
     grid[z][x][y].push_back(id);
@@ -124,9 +125,9 @@ static void check_collision(std::vector<ParticleData> *particle,
   FourVector shift;
   for (size_t id = 0; id < particle->size() - 1; id++) {
     /* XXX: function - map particle position to grid number */
-    z = round((*particle)[id].x().x1() / box.a() * (N - 1));
-    x = round((*particle)[id].x().x2() / box.a() * (N - 1));
-    y = round((*particle)[id].x().x3() / box.a() * (N - 1));
+    z = round((*particle)[id].position().x1() / box.a() * (N - 1));
+    x = round((*particle)[id].position().x2() / box.a() * (N - 1));
+    y = round((*particle)[id].position().x3() / box.a() * (N - 1));
     printd("grid cell %lu: %i %i %i of %i\n", id, z, x, y, N);
     /* check all neighbour grids */
     for (int cz = -1; cz < 2; cz++) {
@@ -182,12 +183,12 @@ static void check_collision(std::vector<ParticleData> *particle,
                 *id_other);
             } else {
               /* apply eventual boundary before and restore after */
-              (*particle)[*id_other].set_position((*particle)[*id_other].x()
-                + shift);
+              (*particle)[*id_other].set_position(
+                (*particle)[*id_other].position() + shift);
               check_collision_criteria(particle, collision_list, box, id,
                 *id_other);
-              (*particle)[*id_other].set_position((*particle)[*id_other].x()
-                - shift);
+              (*particle)[*id_other].set_position(
+                (*particle)[*id_other].position() - shift);
             }
           } /* grid particles loop */
         } /* grid sy */
@@ -225,7 +226,7 @@ static int Evolve(std::vector<ParticleData> *particles,
          distance.x0(), distance.x1(), distance.x2(), distance.x3());
 
       /* treat the box boundaries */
-      position = (*particles)[i].x();
+      position = (*particles)[i].position();
       position += distance;
       position = boundary_condition(position, box);
       (*particles)[i].set_position(position);
@@ -243,7 +244,7 @@ static int Evolve(std::vector<ParticleData> *particles,
 
   if (likely(box.steps() > 0))
     print_tail(box, scatterings_total * 2
-      / ((*particles)[0].x().x0() - 1.0) / particles->size());
+      / ((*particles)[0].position().x0() - 1.0) / particles->size());
   return 0;
 }
 

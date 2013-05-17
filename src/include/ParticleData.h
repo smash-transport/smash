@@ -28,7 +28,7 @@ class ParticleData {
   void inline set_momentum(const FourVector &momentum_vector);
   void inline set_momentum(const double &mass, const double &px,
                            const double &py, const double &pz);
-  FourVector inline x(void) const;
+  FourVector inline position(void) const;
   void inline set_position(const FourVector &position);
   void inline set_position(const double &x0, const double &x3,
                            const double &x1, const double &x2);
@@ -49,7 +49,7 @@ class ParticleData {
     /* momenta of the particle */
     FourVector momentum_;
     /* position in space */
-    FourVector x_;
+    FourVector position_;
 };
 
 int inline ParticleData::id(void) const {
@@ -96,17 +96,19 @@ void inline ParticleData::set_momentum(const double &mass, const double &px,
                            px, py, pz);
 }
 
-FourVector inline ParticleData::x(void) const {
-  return x_;
+/* particle position in Minkowski space */
+FourVector inline ParticleData::position(void) const {
+  return position_;
 }
 
+/* set the particle position */
 void inline ParticleData::set_position(const FourVector &pos) {
-  x_ = pos;
+  position_ = pos;
 }
 
 void inline ParticleData::set_position(const double &x0, const double &x3,
                           const double &x1, const double &x2) {
-  x_.set_FourVector(x0, x3, x1, x2);
+  position_.set_FourVector(x0, x3, x1, x2);
 }
 
 bool inline ParticleData::operator==(const ParticleData &a) {
