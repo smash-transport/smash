@@ -29,8 +29,8 @@ static void print_line(void) {
 
 /* print_startup - console output on startup */
 void print_startup(const box &box) {
-  float A = box.a();
-  printf("Size of the box: %g x %g x %g [fm]\n", A, A, A);
+  printf("Size of the box: %g x %g x %g [fm]\n", box.length(), box.length(),
+    box.length());
   printf("Initial temperature: %g [GeV]\n", box.temperature());
   printf("Elastic cross section: %g [mb]\n", box.cross_section());
   printf("Using temporal stepsize: %g [GeV]\n", box.eps());

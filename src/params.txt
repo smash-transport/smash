@@ -1,7 +1,7 @@
 // Sample params.txt file
 
 // Cube size
-A		10.0
+LENGTH		10.0
 
 // temporal grid spacing
 EPS		0.001

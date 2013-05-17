@@ -16,13 +16,13 @@
 class box {
   public:
     /* default constructor with probable values */
-    box(): steps_(10000), update_(100), a_(10.0), eps_(0.001),
+    box(): steps_(10000), update_(100), length_(10.0), eps_(0.001),
       temperature_(0.1), cross_section_(10.0), energy_initial_(0),
       number_density_initial_(0), seed_(1), testparticle_(1),
       time_start_(set_timer_start()) {}
     /* member funtions */
-    float inline a() const;
-    void inline set_a(const float &A);
+    float inline length() const;
+    void inline set_length(const float &LENGTH);
     float inline cross_section() const;
     void inline set_cross_section(const float &sigma);
     float inline energy_initial() const;
@@ -51,7 +51,7 @@ class box {
     /* number of steps before giving measurables */
     int update_;
     /* Cube edge length */
-    float a_;
+    float length_;
     /* temporal time step */
     float eps_;
     /* Temperature of the Boltzmann distribution for thermal initialization */
@@ -70,12 +70,14 @@ class box {
     timespec time_start_;
 };
 
-float inline box::a(void) const {
-  return a_;
+/* return the edge length */
+float inline box::length(void) const {
+  return length_;
 }
 
-void inline box::set_a(const float &A) {
-  a_ = A;
+/* set the edge length */
+void inline box::set_length(const float &LENGTH) {
+  length_ = LENGTH;
 }
 
 float inline box::eps(void) const {
@@ -162,7 +164,8 @@ timespec inline box::set_timer_start(void) {
 
 /* calculate approximate grid size according to double interaction length */
 int inline box::grid_number(void) const {
-  return round(this->a() / sqrt(this->cross_section() * fm2_mb * M_1_PI) * 0.5);
+  return round(this->length() / sqrt(this->cross_section() * fm2_mb * M_1_PI)
+    * 0.5);
 }
 
 /* support for gcc branch prediction */

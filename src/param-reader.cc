@@ -76,8 +76,8 @@ void process_params(box *box, char *path) {
 
 
     /* double or float values */
-    if (strcmp(key, "A") == 0) {
-      box->set_a(atof(value));
+    if (strcmp(key, "LENGTH") == 0) {
+      box->set_length(atof(value));
       continue;
     }
     if (strcmp(key, "EPS") == 0) {

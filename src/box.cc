@@ -47,28 +47,28 @@ static void usage(int rc) {
 static FourVector boundary_condition(FourVector position, const box &box) {
   /* Check positivity and box size */
   if (position.x1() > 0 && position.x2() > 0 && position.x3() > 0
-      && position.x1() < box.a() && position.x2() < box.a()
-      && position.x3() < box.a())
+      && position.x1() < box.length() && position.x2() < box.length()
+      && position.x3() < box.length())
     goto out;
 
   /* Enforce periodic boundary condition */
   if (position.x1() < 0)
-    position.set_x1(position.x1() + box.a());
+    position.set_x1(position.x1() + box.length());
 
   if (position.x2() < 0)
-    position.set_x2(position.x2() + box.a());
+    position.set_x2(position.x2() + box.length());
 
   if (position.x3() < 0)
-    position.set_x3(position.x3() + box.a());
+    position.set_x3(position.x3() + box.length());
 
-  if (position.x1() > box.a())
-    position.set_x1(position.x1() - box.a());
+  if (position.x1() > box.length())
+    position.set_x1(position.x1() - box.length());
 
-  if (position.x2() > box.a())
-    position.set_x2(position.x2() - box.a());
+  if (position.x2() > box.length())
+    position.set_x2(position.x2() - box.length());
 
-  if (position.x3() > box.a())
-    position.set_x3(position.x3() - box.a());
+  if (position.x3() > box.length())
+    position.set_x3(position.x3() - box.length());
 
  out:
     return position;
@@ -110,9 +110,9 @@ static void check_collision(std::vector<ParticleData> *particle,
   /* populate grid */
   for (size_t id = 0; id < particle->size(); id++) {
     /* XXX: function - map particle position to grid number */
-    z = round((*particle)[id].position().x1() / box.a() * (N - 1));
-    x = round((*particle)[id].position().x2() / box.a() * (N - 1));
-    y = round((*particle)[id].position().x3() / box.a() * (N - 1));
+    z = round((*particle)[id].position().x1() / box.length() * (N - 1));
+    x = round((*particle)[id].position().x2() / box.length() * (N - 1));
+    y = round((*particle)[id].position().x3() / box.length() * (N - 1));
     printd_position((*particle)[id]);
     printd("grid cell %lu: %i %i %i of %i\n", id, z, x, y, N);
     grid[z][x][y].push_back(id);
@@ -124,9 +124,9 @@ static void check_collision(std::vector<ParticleData> *particle,
   FourVector shift;
   for (size_t id = 0; id < particle->size() - 1; id++) {
     /* XXX: function - map particle position to grid number */
-    z = round((*particle)[id].position().x1() / box.a() * (N - 1));
-    x = round((*particle)[id].position().x2() / box.a() * (N - 1));
-    y = round((*particle)[id].position().x3() / box.a() * (N - 1));
+    z = round((*particle)[id].position().x1() / box.length() * (N - 1));
+    x = round((*particle)[id].position().x2() / box.length() * (N - 1));
+    y = round((*particle)[id].position().x3() / box.length() * (N - 1));
     printd("grid cell %lu: %i %i %i of %i\n", id, z, x, y, N);
     /* check all neighbour grids */
     for (int cz = -1; cz < 2; cz++) {
@@ -134,10 +134,10 @@ static void check_collision(std::vector<ParticleData> *particle,
       /* apply periodic boundary condition for particle positions */
       if (sz < 0) {
         sz = N - 1;
-        shift.set_x1(-box.a());
+        shift.set_x1(-box.length());
       } else if (sz > N - 1) {
         sz = 0;
-        shift.set_x1(box.a());
+        shift.set_x1(box.length());
       } else {
         shift.set_x1(0);
       }
@@ -145,10 +145,10 @@ static void check_collision(std::vector<ParticleData> *particle,
         int sx = cx + x;
         if (sx < 0) {
           sx = N - 1;
-          shift.set_x2(-box.a());
+          shift.set_x2(-box.length());
         } else if (sx > N - 1) {
           sx = 0;
-          shift.set_x2(box.a());
+          shift.set_x2(box.length());
         } else {
           shift.set_x2(0);
         }
@@ -156,10 +156,10 @@ static void check_collision(std::vector<ParticleData> *particle,
           int sy = cy + y;
           if (sy < 0) {
             sy = N - 1;
-            shift.set_x3(-box.a());
+            shift.set_x3(-box.length());
           } else if (sy > N - 1) {
             sy = 0;
-            shift.set_x3(box.a());
+            shift.set_x3(box.length());
           } else {
             shift.set_x3(0);
           }
@@ -290,7 +290,7 @@ int main(int argc, char *argv[]) {
       usage(EXIT_SUCCESS);
       break;
     case 'l':
-      cube->set_a(atof(optarg));
+      cube->set_length(atof(optarg));
       break;
     case 'r':
       /* negative seed is for time */

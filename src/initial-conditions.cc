@@ -89,9 +89,10 @@ void initial_conditions(std::vector<ParticleData> *particles,
       * gsl_sf_bessel_Knu(2, type[i].mass() / box->temperature())
       * 0.5 * M_1_PI * M_1_PI / hbarc / hbarc / hbarc;
     /* cast while reflecting probability of extra particle */
-    number = box->a() * box->a() * box->a() * number_density
+    number = box->length() * box->length() * box->length() * number_density
       * box->testparticle();
-    if (box->a() * box->a() * box->a() * number_density - number > drand48())
+    if (box->length() * box->length() * box->length() * number_density - number
+      > drand48())
       number++;
     printf("IC number density %.6g [fm^-3]\n", number_density);
     printf("IC %lu number of %s\n", number, type[i].name().c_str());
@@ -133,9 +134,9 @@ void initial_conditions(std::vector<ParticleData> *particles,
 
       /* ramdom position in the box */
       time_start = 1.0;
-      x_pos = drand48() * box->a();
-      y_pos = drand48() * box->a();
-      z_pos = drand48() * box->a();
+      x_pos = drand48() * box->length();
+      y_pos = drand48() * box->length();
+      z_pos = drand48() * box->length();
       (*particles)[id].set_position(time_start, x_pos, y_pos, z_pos);
 
       /* no collision yet hence zero time and unexisting id */
