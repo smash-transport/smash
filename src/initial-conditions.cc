@@ -136,7 +136,7 @@ void initial_conditions(std::vector<ParticleData> *particles,
       x_pos = drand48() * box->a();
       y_pos = drand48() * box->a();
       z_pos = drand48() * box->a();
-      (*particles)[id].set_position(time_start, z_pos, x_pos, y_pos);
+      (*particles)[id].set_position(time_start, x_pos, y_pos, z_pos);
 
       /* no collision yet hence zero time and unexisting id */
       (*particles)[id].set_collision(0, -1);
