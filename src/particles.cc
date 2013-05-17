@@ -90,9 +90,13 @@ static double particle_distance(ParticleData *particle_orig1,
   if (momentum_diff.x1() == 0 || momentum_diff.x2() == 0
       || momentum_diff.x3() == 0)
     return  - position_diff.DotThree(position_diff);
-  /* UrQMD distance criteria:
+  /* UrQMD squared distance criteria:
    * arXiv:nucl-th/9803035 (3.27): in center of momemtum frame
-   * d^2_{coll} = (x1 - x2)^2 - ((x1 - x2) . (v1 - v2))^2 / (v1 - v2)^2
+   * position of particle a: x_a
+   * position of particle b: x_b
+   * velocity of particle a: v_a
+   * velocity of particle b: v_b
+   * d^2_{coll} = (x_a - x_b)^2 - ((x_a - x_a) . (v_a - v_b))^2 / (v_a - v_b)^2
    */
   distance_squared = - position_diff.DotThree(position_diff)
     + position_diff.DotThree(momentum_diff)
@@ -104,8 +108,13 @@ static double particle_distance(ParticleData *particle_orig1,
 /* time_collision - measure collision time of two particles */
 static double collision_time(ParticleData *particle1,
   ParticleData *particle2) {
-  /* UrQMD distance criteria
-   * arXiv:1203.4418 (5.15): t_{coll} = - (x1 - x2) . (v1 - v2) / (v1 - v2)^2
+  /* UrQMD collision time
+   * arXiv:1203.4418 (5.15): in computational frame
+   * position of particle a: x_a
+   * position of particle b: x_b
+   * momentum of particle a: p_a
+   * momentum of particle b: p_b
+   * t_{coll} = - (x_a - x_b) . (p_a - p_b) / (p_a - p_b)^2
    */
   FourVector position_diff = particle1->position() - particle2->position();
   FourVector velocity_diff = particle1->momentum() / particle1->momentum().x0()
