@@ -51,7 +51,6 @@ static FourVector boundary_condition(FourVector position, const box &box) {
       && position.x3() < box.a())
     goto out;
 
-  /* XXX: add hard wall conditions too */
   /* Enforce periodic boundary condition */
   if (position.x1() < 0)
     position.set_x1(position.x1() + box.a());
