@@ -9,6 +9,8 @@
  */
 #include "include/collisions.h"
 
+#include <cstdio>
+
 #include "include/ParticleData.h"
 #include "include/ParticleType.h"
 #include "include/box.h"
