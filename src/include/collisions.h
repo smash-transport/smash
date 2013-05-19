@@ -17,7 +17,7 @@ class ParticleType;
 class box;
 
 /* populates collision list if collision applies */
-void check_collision_criteria(std::vector<ParticleData> *particle,
+void collision_criteria_geometry(std::vector<ParticleData> *particle,
   std::list<int> *collision_list, box box, int id, int id_other);
 
 /* does collisions according to collision table */

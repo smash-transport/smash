@@ -16,8 +16,10 @@
 #include "include/outputroutines.h"
 #include "include/particles.h"
 
-/* check_collision_criteria - check if a collision happens between particles */
-void check_collision_criteria(std::vector<ParticleData> *particle,
+/* collision_criteria_geometry - check by geomatrical method if a collision
+ *                               happens between particles
+ */
+void collision_criteria_geometry(std::vector<ParticleData> *particle,
   std::list<int> *collision_list, box box, int id, int id_other) {
   double distance_squared, time_collision;
 

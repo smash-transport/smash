@@ -74,8 +74,8 @@ static FourVector boundary_condition(FourVector position, const box &box) {
     return position;
 }
 
-/* check_collision - check if a collision can happen betwenn particles */
-static void check_collision(std::vector<ParticleData> *particle,
+/* check_collision_geometry - check if a collision happens between particles */
+static void check_collision_geometry(std::vector<ParticleData> *particle,
   std::list<int> *collision_list, box box) {
   std::vector<std::vector<std::vector<std::vector<unsigned int> > > > grid;
   int N;
@@ -94,7 +94,8 @@ static void check_collision(std::vector<ParticleData> *particle,
         /* skip particles that are double interaction radius length away */
         if (distance > radial_interaction)
             continue;
-        check_collision_criteria(particle, collision_list, box, id, id_other);
+        collision_criteria_geometry(particle, collision_list, box, id,
+          id_other);
       }
     return;
   }
@@ -178,13 +179,13 @@ static void check_collision(std::vector<ParticleData> *particle,
 
             printd("grid cell particle %lu <-> %i\n", id, *id_other);
             if (shift == 0) {
-              check_collision_criteria(particle, collision_list, box, id,
+              collision_criteria_geometry(particle, collision_list, box, id,
                 *id_other);
             } else {
               /* apply eventual boundary before and restore after */
               (*particle)[*id_other].set_position(
                 (*particle)[*id_other].position() + shift);
-              check_collision_criteria(particle, collision_list, box, id,
+              collision_criteria_geometry(particle, collision_list, box, id,
                 *id_other);
               (*particle)[*id_other].set_position(
                 (*particle)[*id_other].position() - shift);
@@ -208,7 +209,7 @@ static int Evolve(std::vector<ParticleData> *particles,
 
   for (int steps = 0; steps < box.steps(); steps++) {
     /* fill collision table by cells */
-    check_collision(particles, &collision_list, box);
+    check_collision_geometry(particles, &collision_list, box);
 
     /* particle interactions */
     if (!collision_list.empty()) {
