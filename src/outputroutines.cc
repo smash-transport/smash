@@ -107,14 +107,14 @@ void print_tail(const box &box, const double &scattering_rate) {
 }
 
 /* printd_momenta - print debug data of the specific particle */
-void printd_momenta(const ParticleData &particle) {
+void printd_momenta(const ParticleData &particle __attribute__((unused))) {
   printd("Particle %d momenta: %g %g %g %g [GeV]\n", particle.id(),
       particle.momentum().x0(), particle.momentum().x1(),
       particle.momentum().x2(), particle.momentum().x3());
 }
 
 /* printd_position - print debug data of the specific particle */
-void printd_position(const ParticleData &particle) {
+void printd_position(const ParticleData &particle __attribute__((unused))) {
   printd("Particle %d position: %g %g %g %g [fm]\n", particle.id(),
       particle.position().x0(), particle.position().x1(),
       particle.position().x2(), particle.position().x3());
