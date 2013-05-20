@@ -16,15 +16,20 @@
 class box {
   public:
     /* default constructor with probable values */
-    box(): steps_(10000), update_(100), length_(10.0), eps_(0.001),
+    box(): steps_(10000), update_(100), testparticle_(1),
+      initial_condition_(1), length_(10.0), eps_(0.001),
       temperature_(0.1), cross_section_(10.0), energy_initial_(0),
-      number_density_initial_(0), seed_(1), testparticle_(1),
+      number_density_initial_(0), seed_(1),
       time_start_(set_timer_start()) {}
     /* member funtions */
     float inline length() const;
     void inline set_length(const float &LENGTH);
     float inline cross_section() const;
     void inline set_cross_section(const float &sigma);
+    int inline testparticle() const;
+    void inline set_testparticle(const int &TESTPARTICLE);
+    int inline initial_condition() const;
+    void inline set_initial_condition(const int &INITIAL_CONDITION);
     float inline energy_initial() const;
     void inline set_energy_initial(const float &energy);
     float inline eps() const;
@@ -33,8 +38,6 @@ class box {
     void inline set_number_density_inital(const float &number_density);
     float inline temperature() const;
     void inline set_temperature(const float &T);
-    int inline testparticle() const;
-    void inline set_testparticle(const int &TESTPARTICLE);
     int64_t inline seed() const;
     void inline set_seed(const int64_t &RANDOMSEED);
     int inline steps() const;
@@ -50,6 +53,10 @@ class box {
     int steps_;
     /* number of steps before giving measurables */
     int update_;
+    /* number of test particle */
+    int testparticle_;
+    /* initial condition */
+    int initial_condition_;
     /* Cube edge length */
     float length_;
     /* temporal time step */
@@ -64,8 +71,6 @@ class box {
     float number_density_initial_;
     /* initial seed for random generator */
     int64_t seed_;
-    /* number of test particle */
-    int testparticle_;
     /* starting time of the simulation */
     timespec time_start_;
 };
@@ -102,6 +107,16 @@ int inline box::testparticle(void) const {
 
 void inline box::set_testparticle(const int &TESTPARTICLE) {
   testparticle_ = TESTPARTICLE;
+}
+
+/* return the used initial condition */
+int inline box::initial_condition(void) const {
+  return initial_condition_;
+}
+
+/* set the initial condition */
+void inline box::set_initial_condition(const int &INITIAL_CONDITION) {
+  initial_condition_ = INITIAL_CONDITION;
 }
 
 int inline box::update(void) const {

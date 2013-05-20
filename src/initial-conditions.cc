@@ -150,6 +150,7 @@ void initial_conditions(std::vector<ParticleData> *particles,
   }
   printf("IC total number density %.6g [fm^-3]\n", number_density_total);
   printf("IC contains %lu particles\n", number_total);
+  printf("IC type %d\n", box->initial_condition());
   /* loop over all particles */
   number = number_total;
   /* reducing cross section according to number of test particle */

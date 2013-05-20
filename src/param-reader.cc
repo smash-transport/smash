@@ -73,6 +73,10 @@ void process_params(box *box, char *path) {
       box->set_testparticle(abs(atoi(value)));
       continue;
     }
+    if (strcmp(key, "INITIAL_CONDITION") == 0) {
+      box->set_initial_condition(abs(atoi(value)));
+      continue;
+    }
 
 
     /* double or float values */
