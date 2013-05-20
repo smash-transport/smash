@@ -13,7 +13,7 @@ class ParticleType {
     ParticleType() : mass_(-1), lifetime_(-1), isospin_(100), pdgcode_(-1),
       name_("unknown") {}
     /* Explicit constructor */
-    ParticleType(std::string n, float m, int id) : mass_(m), lifetime_(0),
+    ParticleType(std::string n, float m, int id) : mass_(m), lifetime_(-1),
       isospin_(1), pdgcode_(id), name_(n) {}
     /* set data */
     void inline set(const std::string &n, const float &m, const int &id);
