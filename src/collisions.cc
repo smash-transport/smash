@@ -103,7 +103,7 @@ void collide_particles(std::vector<ParticleData> *particle, ParticleType *type,
     boost_COM(&(*particle)[*id], &(*particle)[id_other], &velocity_com);
     momenta_exchange(&(*particle)[*id], &(*particle)[id_other],
       type[(*map_type)[*id]].mass(), type[(*map_type)[id_other]].mass());
-    boost_from_COM(&(*particle)[*id], &(*particle)[id_other],
+    boost_back_COM(&(*particle)[*id], &(*particle)[id_other],
       &velocity_com);
     write_oscar((*particle)[*id], (*particle)[id_other], type[(*map_type)[*id]],
       type[(*map_type)[id_other]], -1);

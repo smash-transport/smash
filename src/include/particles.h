@@ -17,7 +17,7 @@ void boost_COM(ParticleData *particle1, ParticleData *particle2,
   FourVector *velocity);
 
 /* boost_from_COM - boost back from center of momentum */
-void boost_from_COM(ParticleData *particle1, ParticleData *particle2,
+void boost_back_COM(ParticleData *particle1, ParticleData *particle2,
   FourVector *velocity_orig);
 
 /* particle_distance - measure distance between two particles */

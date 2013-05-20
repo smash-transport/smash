@@ -45,8 +45,8 @@ void boost_COM(ParticleData *particle1, ParticleData *particle2,
   particle2->set_position(position2);
 }
 
-/* boost_from_COM - boost back from center of momentum */
-void boost_from_COM(ParticleData *particle1, ParticleData *particle2,
+/* boost_back_COM - boost back from center of momentum */
+void boost_back_COM(ParticleData *particle1, ParticleData *particle2,
   FourVector *velocity_orig) {
   FourVector momentum1(particle1->momentum()), momentum2(particle2->momentum());
   FourVector position1(particle1->position()), position2(particle2->position());
