@@ -84,7 +84,7 @@ void collide_particles(std::vector<ParticleData> *particle, ParticleType *type,
   for (std::list<int>::iterator id = collision_list->begin();
     id != collision_list->end(); ++id) {
     int id_other = (*particle)[*id].collision_id();
-    printd("particle types %s<->%s colliding %d<->%d %g\n",
+    printd("particle types %s<->%s colliding %d<->%d time %g\n",
       type[(*map_type)[*id]].name().c_str(),
       type[(*map_type)[id_other]].name().c_str(), *id, id_other,
       (*particle)[*id].position().x0());
