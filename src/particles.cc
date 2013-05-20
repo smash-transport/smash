@@ -121,11 +121,13 @@ double collision_time(ParticleData *particle1, ParticleData *particle2) {
    * momentum of particle b: p_b
    * t_{coll} = - (x_a - x_b) . (p_a - p_b) / (p_a - p_b)^2
    */
-  FourVector position_diff = particle1->position() - particle2->position();
-  FourVector velocity_diff = particle1->momentum() / particle1->momentum().x0()
+  FourVector position_difference = particle1->position()
+    - particle2->position();
+  FourVector velocity_difference = particle1->momentum()
+    / particle1->momentum().x0()
     - particle2->momentum() / particle2->momentum().x0();
-  return - position_diff.DotThree(velocity_diff)
-           / velocity_diff.DotThree(velocity_diff);
+  return - position_difference.DotThree(velocity_difference)
+           / velocity_difference.DotThree(velocity_difference);
 }
 
 /* momenta_exchange - soft scattering */
