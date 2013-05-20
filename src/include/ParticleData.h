@@ -1,6 +1,8 @@
 /*
  *    Copyright (c) 2012-2013
  *      maximilian attems <attems@fias.uni-frankfurt.de>
+ *      Jussi Auvinen <auvinen@fias.uni-frankfurt.de>
+ *
  *    GNU General Public License (GPLv3)
  */
 #ifndef SRC_INCLUDE_PARTICLEDATA_H_
