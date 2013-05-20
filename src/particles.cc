@@ -70,25 +70,33 @@ void boost_from_COM(ParticleData *particle1, ParticleData *particle2,
   particle2->set_position(position2);
 }
 
-/* particle_distance - measure distance between two particles */
+/* particle_distance - measure distance between two particles
+ *                     in center of momentum
+ */
 double particle_distance(ParticleData *particle_orig1,
   ParticleData *particle_orig2) {
+  /* Copy the particles in order to boost them and to forget the copy */
   ParticleData particle1 = *particle_orig1, particle2 = *particle_orig2;
   FourVector velocity_com;
-  double distance_squared;
 
   /* boost particles in center of momenta frame */
   boost_COM(&particle1, &particle2, &velocity_com);
-  FourVector position_diff = particle1.position() - particle2.position();
-  printd("Particle %d<->%d position diff: %g %g %g %g [fm]\n",
-    particle1.id(), particle2.id(), position_diff.x0(), position_diff.x1(),
-    position_diff.x2(), position_diff.x3());
+  FourVector position_difference = particle1.position() - particle2.position();
+  printd("Particle %d<->%d position difference: %g %g %g %g [fm]\n",
+    particle1.id(), particle2.id(), position_difference.x0(),
+    position_difference.x1(), position_difference.x2(),
+    position_difference.x3());
 
-  FourVector momentum_diff = particle1.momentum() - particle2.momentum();
+  FourVector momentum_difference = particle1.momentum() - particle2.momentum();
+  printd("Particle %d<->%d momentum difference: %g %g %g %g [fm]\n",
+    particle1.id(), particle2.id(), momentum_difference.x0(),
+    momentum_difference.x1(), momentum_difference.x2(),
+    momentum_difference.x3());
   /* zero momentum leads to infite distance */
-  if (momentum_diff.x1() == 0 || momentum_diff.x2() == 0
-      || momentum_diff.x3() == 0)
-    return  - position_diff.DotThree(position_diff);
+  if (momentum_difference.x1() == 0 || momentum_difference.x2() == 0
+      || momentum_difference.x3() == 0)
+    return  - position_difference.DotThree(position_difference);
+
   /* UrQMD squared distance criteria:
    * arXiv:nucl-th/9803035 (3.27): in center of momemtum frame
    * position of particle a: x_a
@@ -97,11 +105,10 @@ double particle_distance(ParticleData *particle_orig1,
    * velocity of particle b: v_b
    * d^2_{coll} = (x_a - x_b)^2 - ((x_a - x_a) . (v_a - v_b))^2 / (v_a - v_b)^2
    */
-  distance_squared = - position_diff.DotThree(position_diff)
-    + position_diff.DotThree(momentum_diff)
-      * position_diff.DotThree(momentum_diff)
-      / momentum_diff.DotThree(momentum_diff);
-  return distance_squared;
+  return - position_difference.DotThree(position_difference)
+    + position_difference.DotThree(momentum_difference)
+      * position_difference.DotThree(momentum_difference)
+      / momentum_difference.DotThree(momentum_difference);
 }
 
 /* time_collision - measure collision time of two particles */
