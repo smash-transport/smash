@@ -15,13 +15,13 @@
 class ParticleData {
   public:
   /* Use improbable values for default constructor */
-  ParticleData() :id_(-1), partner_id_(-1), collision_time_(0.0) {}
+  ParticleData() :id_(-1), id_partner_(-1), collision_time_(0.0) {}
   void inline set(const int &id, const double &momenta_l,
                   const double &momenta_t);
   int id(void) const;
   void inline set_id(const int &id);
-  int partner_id(void) const;
-  void inline set_partner_id(const int &other_id);
+  int id_partner(void) const;
+  void inline set_id_partner(const int &id_b);
   double collision_time(void) const;
   void inline set_collision_time(const double &collision_time);
   void inline set_collision(const double &collision_time,
@@ -45,7 +45,7 @@ class ParticleData {
     /* Each particle has a unique identifier */
     int id_;
     /* Next particle we'd collide against */
-    int partner_id_;
+    int id_partner_;
     /* collision time */
     double collision_time_;
     /* momenta of the particle: x0, x1, x2, x3 as E, px, py, pz */
@@ -63,13 +63,13 @@ void inline ParticleData::set_id(const int &i) {
 }
 
 /* look up the id of the collision partner */
-int inline ParticleData::partner_id(void) const {
-  return partner_id_;
+int inline ParticleData::id_partner(void) const {
+  return id_partner_;
 }
 
 /* set the id of the collision partner */
-void inline ParticleData::set_partner_id(const int &other_id) {
-  partner_id_ = other_id;
+void inline ParticleData::set_id_partner(const int &id_b) {
+  id_partner_ = id_b;
 }
 
 double inline ParticleData::collision_time(void) const {
@@ -82,9 +82,9 @@ void inline ParticleData::set_collision_time(const double &collision_t) {
 
 /* set collision data */
 void inline ParticleData::set_collision(const double &collision_t,
-  const int &other_id) {
+  const int &id_b) {
   collision_time_ = collision_t;
-  partner_id_ = other_id;
+  id_partner_ = id_b;
 }
 
 FourVector inline ParticleData::momentum(void) const {
