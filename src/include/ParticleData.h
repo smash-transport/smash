@@ -15,13 +15,13 @@
 class ParticleData {
   public:
   /* Use improbable values for default constructor */
-  ParticleData() :id_(-1), collision_id_(-1), collision_time_(0.0) {}
+  ParticleData() :id_(-1), partner_id_(-1), collision_time_(0.0) {}
   void inline set(const int &id, const double &momenta_l,
                   const double &momenta_t);
   int id(void) const;
   void inline set_id(const int &id);
-  int collision_id(void) const;
-  void inline set_collision_id(const int &collision_id);
+  int partner_id(void) const;
+  void inline set_partner_id(const int &other_id);
   double collision_time(void) const;
   void inline set_collision_time(const double &collision_time);
   void inline set_collision(const double &collision_time,
@@ -45,7 +45,7 @@ class ParticleData {
     /* Each particle has a unique identifier */
     int id_;
     /* Next particle we'd collide against */
-    int collision_id_;
+    int partner_id_;
     /* collision time */
     double collision_time_;
     /* momenta of the particle: x0, x1, x2, x3 as E, px, py, pz */
@@ -62,12 +62,14 @@ void inline ParticleData::set_id(const int &i) {
   id_ = i;
 }
 
-int inline ParticleData::collision_id(void) const {
-  return collision_id_;
+/* look up the id of the collision partner */
+int inline ParticleData::partner_id(void) const {
+  return partner_id_;
 }
 
-void inline ParticleData::set_collision_id(const int &collision_i) {
-  collision_id_ = collision_i;
+/* set the id of the collision partner */
+void inline ParticleData::set_partner_id(const int &other_id) {
+  partner_id_ = other_id;
 }
 
 double inline ParticleData::collision_time(void) const {
@@ -78,10 +80,11 @@ void inline ParticleData::set_collision_time(const double &collision_t) {
   collision_time_ = collision_t;
 }
 
+/* set collision data */
 void inline ParticleData::set_collision(const double &collision_t,
-  const int &collision_i) {
+  const int &other_id) {
   collision_time_ = collision_t;
-  collision_id_ = collision_i;
+  partner_id_ = other_id;
 }
 
 FourVector inline ParticleData::momentum(void) const {

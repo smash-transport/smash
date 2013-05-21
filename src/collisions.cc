@@ -46,7 +46,7 @@ void collision_criteria_geometry(std::vector<ParticleData> *particle,
 
   /* just collided with this particle */
   if ((*particle)[id].collision_time() == 0
-      && id_other == (*particle)[id].collision_id()) {
+      && id_other == (*particle)[id].partner_id()) {
     printd("%g Skipping particle %d <-> %d\n",
         (*particle)[id].position().x0(), id, id_other);
     return;
@@ -54,7 +54,7 @@ void collision_criteria_geometry(std::vector<ParticleData> *particle,
 
   /* handle minimal collision time */
   if (unlikely((*particle)[id].collision_time() > 0)) {
-    int not_id = (*particle)[id].collision_id();
+    int not_id = (*particle)[id].partner_id();
     printd("Not colliding particle %d <-> %d\n", id, not_id);
     /* unset collision partner to zero time and unexisting id */
     (*particle)[not_id].set_collision(0.0, -1);
@@ -83,7 +83,7 @@ void collide_particles(std::vector<ParticleData> *particle, ParticleType *type,
   /* collide: 2 <-> 2 soft momenta exchange */
   for (std::list<int>::iterator id = collision_list->begin();
     id != collision_list->end(); ++id) {
-    int id_other = (*particle)[*id].collision_id();
+    int id_other = (*particle)[*id].partner_id();
     printd("particle types %s<->%s colliding %d<->%d time %g\n",
       type[(*map_type)[*id]].name().c_str(),
       type[(*map_type)[id_other]].name().c_str(), *id, id_other,
