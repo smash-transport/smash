@@ -22,57 +22,58 @@
  *                               happens between particles
  */
 void collision_criteria_geometry(std::vector<ParticleData> *particle,
-  std::list<int> *collision_list, box box, int id, int id_other) {
-  double distance_squared, time_collision;
-
+  std::list<int> *collision_list, box box, int id_a, int id_b) {
+  {
   /* distance criteria according to cross_section */
-  distance_squared = particle_distance(&(*particle)[id],
-    &(*particle)[id_other]);
+  double const distance_squared = particle_distance(&(*particle)[id_a],
+    &(*particle)[id_b]);
   if (distance_squared >= box.cross_section() * fm2_mb * M_1_PI)
     return;
+  }
 
   /* check according timestep: positive and smaller */
-  time_collision = collision_time(&(*particle)[id], &(*particle)[id_other]);
+  double const time_collision = collision_time(&(*particle)[id_a],
+    &(*particle)[id_b]);
   if (time_collision < 0 || time_collision >= box.eps())
     return;
 
   /* check for minimal collision time */
-  if ((*particle)[id].collision_time() > 0
-        && time_collision > (*particle)[id].collision_time()) {
+  if ((*particle)[id_a].collision_time() > 0
+        && time_collision > (*particle)[id_a].collision_time()) {
     printd("%g Not minimal particle %d <-> %d\n",
-        (*particle)[id].position().x0(), id, id_other);
+        (*particle)[id].position().x0(), id_a, id_b);
     return;
   }
 
   /* just collided with this particle */
-  if ((*particle)[id].collision_time() == 0
-      && id_other == (*particle)[id].partner_id()) {
+  if ((*particle)[id_a].collision_time() == 0
+      && id_b == (*particle)[id_a].partner_id()) {
     printd("%g Skipping particle %d <-> %d\n",
-        (*particle)[id].position().x0(), id, id_other);
+        (*particle)[id].position().x0(), id_a, id_b);
     return;
   }
 
   /* handle minimal collision time */
-  if (unlikely((*particle)[id].collision_time() > 0)) {
-    int not_id = (*particle)[id].partner_id();
-    printd("Not colliding particle %d <-> %d\n", id, not_id);
+  if (unlikely((*particle)[id_a].collision_time() > 0)) {
+    int id_not = (*particle)[id_a].partner_id();
+    printd("Not colliding particle %d <-> %d\n", id_a, id_not);
     /* unset collision partner to zero time and unexisting id */
-    (*particle)[not_id].set_collision(0.0, -1);
+    (*particle)[id_not].set_collision(0.0, -1);
     /* remove any of those partners from the list */
-    collision_list->remove(id);
-    collision_list->remove(not_id);
+    collision_list->remove(id_a);
+    collision_list->remove(id_not);
     /* XXX: keep track of multiple possible collision partners */
   }
 
   /* setup collision partners */
-  printd("distance squared particle %d <-> %d: %g \n", id, id_other,
+  printd("distance squared particle %d <-> %d: %g \n", id_a, id_b,
     distance_squared);
-  printd("collision time particle %d <-> %d: %g \n", id, id_other,
+  printd("collision time particle %d <-> %d: %g \n", id_a, id_b,
     time_collision);
-  (*particle)[id].set_collision(time_collision, id_other);
-  (*particle)[id_other].set_collision(time_collision, id);
+  (*particle)[id_b].set_collision(time_collision, id_b);
+  (*particle)[id_a].set_collision(time_collision, id_a);
   /* add to collision list */
-  collision_list->push_back(id);
+  collision_list->push_back(id_a);
 }
 
 /* colliding_particle - particle interaction */
