@@ -70,8 +70,8 @@ void collision_criteria_geometry(std::vector<ParticleData> *particle,
   /* setup collision partners */
   printd("collision time particle %d <-> %d: %g \n", id_a, id_b,
     time_collision);
-  (*particle)[id_b].set_collision(time_collision, id_b);
-  (*particle)[id_a].set_collision(time_collision, id_a);
+  (*particle)[id_a].set_collision(time_collision, id_b);
+  (*particle)[id_b].set_collision(time_collision, id_a);
   /* add to collision list */
   collision_list->push_back(id_a);
 }
