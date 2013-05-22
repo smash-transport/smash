@@ -15,17 +15,21 @@
 class ParticleData {
   public:
   /* Use improbable values for default constructor */
-  ParticleData() :id_(-1), id_partner_(-1), collision_time_(0.0) {}
+  ParticleData() :id_(-1), id_partner_(-1), id_event_(-1),
+    collision_time_(0.0) {}
   void inline set(const int &id, const double &momenta_l,
                   const double &momenta_t);
   int id(void) const;
   void inline set_id(const int &id);
   int id_partner(void) const;
   void inline set_id_partner(const int &id_b);
+  int id_event(void) const;
+  void inline set_id_event(const int &id);
   double collision_time(void) const;
   void inline set_collision_time(const double &collision_time);
   void inline set_collision(const double &collision_time,
     const int &collision_id);
+  void inline set_collision_past(const int &process_id);
   FourVector inline momentum(void) const;
   void inline set_momentum(const FourVector &momentum_vector);
   void inline set_momentum(const double &mass, const double &px,
@@ -46,6 +50,8 @@ class ParticleData {
     int id_;
     /* Next particle we'd collide against */
     int id_partner_;
+    /* counter of the last collision/decay */
+    int id_event_;
     /* collision time */
     double collision_time_;
     /* momenta of the particle: x0, x1, x2, x3 as E, px, py, pz */
@@ -72,6 +78,16 @@ void inline ParticleData::set_id_partner(const int &id_b) {
   id_partner_ = id_b;
 }
 
+/* look up the id of the collision event */
+int inline ParticleData::id_event(void) const {
+  return id_event_;
+}
+
+/* set the id of the collision event */
+void inline ParticleData::set_id_event(const int &event_id) {
+  id_event_ = event_id;
+}
+
 double inline ParticleData::collision_time(void) const {
   return collision_time_;
 }
@@ -80,11 +96,18 @@ void inline ParticleData::set_collision_time(const double &collision_t) {
   collision_time_ = collision_t;
 }
 
-/* set collision data */
+/* set possible collision data */
 void inline ParticleData::set_collision(const double &collision_t,
   const int &id_b) {
   collision_time_ = collision_t;
   id_partner_ = id_b;
+}
+
+/* set happended collision data */
+void inline ParticleData::set_collision_past(const int &id_counter) {
+  collision_time_ = 0.0;
+  id_event_ = id_counter;
+  id_partner_ = -1;
 }
 
 FourVector inline ParticleData::momentum(void) const {

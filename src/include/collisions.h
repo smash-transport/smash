@@ -8,6 +8,7 @@
 #ifndef SRC_INCLUDE_COLLISIONS_H_
 #define SRC_INCLUDE_COLLISIONS_H_
 
+#include <cstdlib>
 #include <list>
 #include <map>
 #include <vector>
@@ -21,7 +22,8 @@ void collision_criteria_geometry(std::vector<ParticleData> *particle,
   std::list<int> *collision_list, box box, int id, int id_other);
 
 /* does collisions according to collision table */
-void collide_particles(std::vector<ParticleData> *particle, ParticleType *type,
-  std::map<int, int> *map_type, std::list<int> *collision_list);
+size_t collide_particles(std::vector<ParticleData> *particle,
+  ParticleType *type, std::map<int, int> *map_type,
+  std::list<int> *collision_list, size_t id_event);
 
 #endif  // SRC_INCLUDE_COLLISIONS_H_

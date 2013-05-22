@@ -23,6 +23,14 @@
  */
 void collision_criteria_geometry(std::vector<ParticleData> *particle,
   std::list<int> *collision_list, box box, int id_a, int id_b) {
+  /* just collided with this particle */
+  if ((*particle)[id_a].id_event() >= 0
+      && (*particle)[id_a].id_event() == (*particle)[id_b].id_event()) {
+    printd("%g Skipping just collided particle %d <-> %d\n",
+        (*particle)[id_a].position().x0(), id_a, id_b);
+    return;
+  }
+
   {
   /* distance criteria according to cross_section */
   double const distance_squared = particle_distance(&(*particle)[id_a],
@@ -43,14 +51,6 @@ void collision_criteria_geometry(std::vector<ParticleData> *particle,
   if ((*particle)[id_a].collision_time() > 0
         && time_collision > (*particle)[id_a].collision_time()) {
     printd("%g Not minimal particle %d <-> %d\n",
-        (*particle)[id_a].position().x0(), id_a, id_b);
-    return;
-  }
-
-  /* just collided with this particle */
-  if ((*particle)[id_a].collision_time() == 0
-      && id_b == (*particle)[id_a].id_partner()) {
-    printd("%g Skipping particle %d <-> %d\n",
         (*particle)[id_a].position().x0(), id_a, id_b);
     return;
   }
@@ -77,8 +77,9 @@ void collision_criteria_geometry(std::vector<ParticleData> *particle,
 }
 
 /* colliding_particle - particle interaction */
-void collide_particles(std::vector<ParticleData> *particle, ParticleType *type,
-  std::map<int, int> *map_type, std::list<int> *collision_list) {
+size_t collide_particles(std::vector<ParticleData> *particle,
+  ParticleType *type, std::map<int, int> *map_type,
+  std::list<int> *collision_list, size_t id_event) {
   FourVector velocity_CM;
 
   /* collide: 2 <-> 2 soft momenta exchange */
@@ -115,10 +116,13 @@ void collide_particles(std::vector<ParticleData> *particle, ParticleType *type,
       (*particle)[id_b].momentum().x0(), (*particle)[id_b].momentum().x1(),
       (*particle)[id_b].momentum().x2(), (*particle)[id_b].momentum().x3());
 
-    /* unset collision time for both particles + keep id */
-    (*particle)[id_a].set_collision_time(0.0);
-    (*particle)[id_b].set_collision_time(0.0);
+    /* unset collision time for both particles + keep id + unset partner */
+    (*particle)[id_a].set_collision_past(id_event);
+    (*particle)[id_b].set_collision_past(id_event);
+    id_event++;
   }
   /* empty the collision table */
   collision_list->clear();
+  /* return how many processes we handled */
+  return id_event;
 }
