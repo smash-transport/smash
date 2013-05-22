@@ -11,6 +11,9 @@ Run it with specific settings:
   vi params.txt
   ./mash
 
+Run and compile the various tests:
+  make check
+
 Tarball mash:
   version=$(awk '/VERSION_/{print $2}' CMakeLists.txt); \
   version="${version%)}"

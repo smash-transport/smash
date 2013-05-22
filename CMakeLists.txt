@@ -20,5 +20,8 @@ SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR})
 # have tests run
 enable_testing()
 
+# have tests compiled for check target
+add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND})
+
 # subdirectories where the code is
 add_subdirectory(src) 
