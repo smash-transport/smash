@@ -79,7 +79,7 @@ void collision_criteria_geometry(std::vector<ParticleData> *particle,
 /* colliding_particle - particle interaction */
 void collide_particles(std::vector<ParticleData> *particle, ParticleType *type,
   std::map<int, int> *map_type, std::list<int> *collision_list) {
-  FourVector velocity_com;
+  FourVector velocity_CM;
 
   /* collide: 2 <-> 2 soft momenta exchange */
   for (std::list<int>::iterator id = collision_list->begin();
@@ -101,11 +101,11 @@ void collide_particles(std::vector<ParticleData> *particle, ParticleType *type,
       (*particle)[id_b].momentum().x2(), (*particle)[id_b].momentum().x3());
 
     /* exchange in center of momenta */
-    boost_COM(&(*particle)[id_a], &(*particle)[id_b], &velocity_com);
+    boost_CM(&(*particle)[id_a], &(*particle)[id_b], &velocity_CM);
     momenta_exchange(&(*particle)[id_a], &(*particle)[id_b],
       type[(*map_type)[id_a]].mass(), type[(*map_type)[id_b]].mass());
-    boost_back_COM(&(*particle)[id_a], &(*particle)[id_b],
-      &velocity_com);
+    boost_back_CM(&(*particle)[id_a], &(*particle)[id_b],
+      &velocity_CM);
     write_oscar((*particle)[id_a], (*particle)[id_b], type[(*map_type)[id_a]],
       type[(*map_type)[id_b]], -1);
     printd("particle 1 momenta after: %g %g %g %g\n",

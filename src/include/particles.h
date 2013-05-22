@@ -12,12 +12,12 @@
 class ParticleData;
 class FourVector;
 
-/* boost_COM - boost to center of momentum */
-void boost_COM(ParticleData *particle1, ParticleData *particle2,
+/* boost_CM - boost to center of momentum */
+void boost_CM(ParticleData *particle1, ParticleData *particle2,
   FourVector *velocity);
 
-/* boost_from_COM - boost back from center of momentum */
-void boost_back_COM(ParticleData *particle1, ParticleData *particle2,
+/* boost_from_CM - boost back from center of momentum */
+void boost_back_CM(ParticleData *particle1, ParticleData *particle2,
   FourVector *velocity_orig);
 
 /* particle_distance - measure distance between two particles */

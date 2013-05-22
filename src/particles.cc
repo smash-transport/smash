@@ -18,8 +18,8 @@
 #include "include/box.h"
 #include "include/outputroutines.h"
 
-/* boost_COM - boost to center of momentum */
-void boost_COM(ParticleData *particle1, ParticleData *particle2,
+/* boost_CM - boost to center of momentum */
+void boost_CM(ParticleData *particle1, ParticleData *particle2,
   FourVector *velocity) {
   FourVector momentum1(particle1->momentum()), momentum2(particle2->momentum());
   FourVector position1(particle1->position()), position2(particle2->position());
@@ -45,8 +45,8 @@ void boost_COM(ParticleData *particle1, ParticleData *particle2,
   particle2->set_position(position2);
 }
 
-/* boost_back_COM - boost back from center of momentum */
-void boost_back_COM(ParticleData *particle1, ParticleData *particle2,
+/* boost_back_CM - boost back from center of momentum */
+void boost_back_CM(ParticleData *particle1, ParticleData *particle2,
   FourVector *velocity_orig) {
   FourVector momentum1(particle1->momentum()), momentum2(particle2->momentum());
   FourVector position1(particle1->position()), position2(particle2->position());
@@ -77,10 +77,10 @@ double particle_distance(ParticleData *particle_orig1,
   ParticleData *particle_orig2) {
   /* Copy the particles in order to boost them and to forget the copy */
   ParticleData particle1 = *particle_orig1, particle2 = *particle_orig2;
-  FourVector velocity_com;
+  FourVector velocity_CM;
 
   /* boost particles in center of momenta frame */
-  boost_COM(&particle1, &particle2, &velocity_com);
+  boost_CM(&particle1, &particle2, &velocity_CM);
   FourVector position_difference = particle1.position() - particle2.position();
   printd("Particle %d<->%d position difference: %g %g %g %g [fm]\n",
     particle1.id(), particle2.id(), position_difference.x0(),
