@@ -133,10 +133,7 @@ double collision_time(ParticleData *particle1, ParticleData *particle2) {
 /* momenta_exchange - soft scattering */
 void momenta_exchange(ParticleData *particle1, ParticleData *particle2,
   const float &particle1_mass, const float &particle2_mass) {
-  double phi, theta;
-  /* center of momentum hence equal for both particles */
-  double momentum_radial = sqrt(particle1->momentum().x0()
-    * particle1->momentum().x0() - particle1_mass * particle1_mass);
+  /* debug output */
   printd("center of momenta 1: %g %g %g %g \n", particle1->momentum().x0(),
     particle1->momentum().x1(), particle1->momentum().x2(),
     particle1->momentum().x3());
@@ -144,16 +141,25 @@ void momenta_exchange(ParticleData *particle1, ParticleData *particle2,
     particle2->momentum().x1(), particle2->momentum().x2(),
     particle2->momentum().x3());
 
+  /* center of momentum hence this is equal for both particles */
+  const double momentum_radial = sqrt(particle1->momentum().x0()
+    * particle1->momentum().x0() - particle1_mass * particle1_mass);
   /* particle exchange momenta and scatter to random direction */
-  phi =  2 * M_PI * drand48();
-  theta = M_PI * drand48();
-  particle1->set_momentum(particle1_mass,
-     momentum_radial * cos(phi) * sin(theta),
-     momentum_radial * sin(phi) * sin(theta), momentum_radial * cos(theta));
-  particle2->set_momentum(particle2_mass,
-     -momentum_radial * cos(phi) * sin(theta),
-     -momentum_radial * sin(phi) * sin(theta), -momentum_radial * cos(theta));
+  const double phi =  2 * M_PI * drand48();
+  const double sin_theta = drand48();
+  const double cos_theta = sqrt(1 - sin_theta * sin_theta);
+  const FourVector momentum1(sqrt(particle1_mass * particle1_mass
+    + momentum_radial * momentum_radial),
+     momentum_radial * cos(phi) * sin_theta,
+     momentum_radial * sin(phi) * sin_theta, momentum_radial * cos_theta);
+  particle1->set_momentum(momentum1);
+  const FourVector momentum2(sqrt(particle2_mass * particle2_mass
+    + momentum_radial * momentum_radial),
+    - momentum_radial * cos(phi) * sin_theta,
+    - momentum_radial * sin(phi) * sin_theta, -momentum_radial * cos_theta);
+  particle2->set_momentum(momentum2);
 
+  /* debug output */
   printd("exchanged momenta 1: %g %g %g %g \n", particle1->momentum().x0(),
     particle1->momentum().x1(), particle1->momentum().x2(),
     particle1->momentum().x3());
