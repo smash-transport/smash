@@ -84,42 +84,40 @@ void collide_particles(std::vector<ParticleData> *particle, ParticleType *type,
   /* collide: 2 <-> 2 soft momenta exchange */
   for (std::list<int>::iterator id = collision_list->begin();
     id != collision_list->end(); ++id) {
-    int id_other = (*particle)[*id].id_partner();
+    /* relevant particle id's for the collision */
+    int id_a = *id;
+    int id_b = (*particle)[*id].id_partner();
     printd("particle types %s<->%s colliding %d<->%d time %g\n",
-      type[(*map_type)[*id]].name().c_str(),
-      type[(*map_type)[id_other]].name().c_str(), *id, id_other,
-      (*particle)[*id].position().x0());
-    write_oscar((*particle)[*id], (*particle)[id_other], type[(*map_type)[*id]],
-      type[(*map_type)[id_other]], 1);
+      type[(*map_type)[id_a]].name().c_str(),
+      type[(*map_type)[id_b]].name().c_str(), id_a, id_b,
+      (*particle)[id_a].position().x0());
+    write_oscar((*particle)[id_a], (*particle)[id_b], type[(*map_type)[id_a]],
+      type[(*map_type)[id_b]], 1);
     printd("particle 1 momenta before: %g %g %g %g\n",
-      (*particle)[*id].momentum().x0(), (*particle)[*id].momentum().x1(),
-      (*particle)[*id].momentum().x2(), (*particle)[*id].momentum().x3());
+      (*particle)[id_a].momentum().x0(), (*particle)[id_a].momentum().x1(),
+      (*particle)[id_a].momentum().x2(), (*particle)[id_a].momentum().x3());
     printd("particle 2 momenta before: %g %g %g %g\n",
-      (*particle)[id_other].momentum().x0(),
-      (*particle)[id_other].momentum().x1(),
-      (*particle)[id_other].momentum().x2(),
-      (*particle)[id_other].momentum().x3());
+      (*particle)[id_b].momentum().x0(), (*particle)[id_b].momentum().x1(),
+      (*particle)[id_b].momentum().x2(), (*particle)[id_b].momentum().x3());
 
     /* exchange in center of momenta */
-    boost_COM(&(*particle)[*id], &(*particle)[id_other], &velocity_com);
-    momenta_exchange(&(*particle)[*id], &(*particle)[id_other],
-      type[(*map_type)[*id]].mass(), type[(*map_type)[id_other]].mass());
-    boost_back_COM(&(*particle)[*id], &(*particle)[id_other],
+    boost_COM(&(*particle)[id_a], &(*particle)[id_b], &velocity_com);
+    momenta_exchange(&(*particle)[id_a], &(*particle)[id_b],
+      type[(*map_type)[id_a]].mass(), type[(*map_type)[id_b]].mass());
+    boost_back_COM(&(*particle)[id_a], &(*particle)[id_b],
       &velocity_com);
-    write_oscar((*particle)[*id], (*particle)[id_other], type[(*map_type)[*id]],
-      type[(*map_type)[id_other]], -1);
+    write_oscar((*particle)[id_a], (*particle)[id_b], type[(*map_type)[id_a]],
+      type[(*map_type)[id_b]], -1);
     printd("particle 1 momenta after: %g %g %g %g\n",
-      (*particle)[*id].momentum().x0(), (*particle)[*id].momentum().x1(),
-      (*particle)[*id].momentum().x2(), (*particle)[*id].momentum().x3());
+      (*particle)[id_a].momentum().x0(), (*particle)[id_a].momentum().x1(),
+      (*particle)[id_a].momentum().x2(), (*particle)[id_a].momentum().x3());
     printd("particle 2 momenta after: %g %g %g %g\n",
-      (*particle)[id_other].momentum().x0(),
-      (*particle)[id_other].momentum().x1(),
-      (*particle)[id_other].momentum().x2(),
-      (*particle)[id_other].momentum().x3());
+      (*particle)[id_b].momentum().x0(), (*particle)[id_b].momentum().x1(),
+      (*particle)[id_b].momentum().x2(), (*particle)[id_b].momentum().x3());
 
     /* unset collision time for both particles + keep id */
-    (*particle)[*id].set_collision_time(0.0);
-    (*particle)[id_other].set_collision_time(0.0);
+    (*particle)[id_a].set_collision_time(0.0);
+    (*particle)[id_b].set_collision_time(0.0);
   }
   /* empty the collision table */
   collision_list->clear();
