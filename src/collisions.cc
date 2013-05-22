@@ -29,6 +29,8 @@ void collision_criteria_geometry(std::vector<ParticleData> *particle,
     &(*particle)[id_b]);
   if (distance_squared >= box.cross_section() * fm2_mb * M_1_PI)
     return;
+  printd("distance squared particle %d <-> %d: %g \n", id_a, id_b,
+    distance_squared);
   }
 
   /* check according timestep: positive and smaller */
@@ -41,7 +43,7 @@ void collision_criteria_geometry(std::vector<ParticleData> *particle,
   if ((*particle)[id_a].collision_time() > 0
         && time_collision > (*particle)[id_a].collision_time()) {
     printd("%g Not minimal particle %d <-> %d\n",
-        (*particle)[id].position().x0(), id_a, id_b);
+        (*particle)[id_a].position().x0(), id_a, id_b);
     return;
   }
 
@@ -49,7 +51,7 @@ void collision_criteria_geometry(std::vector<ParticleData> *particle,
   if ((*particle)[id_a].collision_time() == 0
       && id_b == (*particle)[id_a].id_partner()) {
     printd("%g Skipping particle %d <-> %d\n",
-        (*particle)[id].position().x0(), id_a, id_b);
+        (*particle)[id_a].position().x0(), id_a, id_b);
     return;
   }
 
@@ -66,8 +68,6 @@ void collision_criteria_geometry(std::vector<ParticleData> *particle,
   }
 
   /* setup collision partners */
-  printd("distance squared particle %d <-> %d: %g \n", id_a, id_b,
-    distance_squared);
   printd("collision time particle %d <-> %d: %g \n", id_a, id_b,
     time_collision);
   (*particle)[id_b].set_collision(time_collision, id_b);
