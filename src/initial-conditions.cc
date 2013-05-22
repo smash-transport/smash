@@ -70,7 +70,7 @@ ParticleType* initial_particles(ParticleType *type) {
 /* initial_conditions - sets particle data for @particles */
 void initial_conditions(std::vector<ParticleData> *particles,
   ParticleType *type, std::map<int, int> *map_type, box *box) {
-  double phi, theta, momentum_radial, number_density_total = 0;
+  double phi, cos_theta, sin_theta, momentum_radial, number_density_total = 0;
   FourVector momentum_total(0, 0, 0, 0);
   size_t number_total = 0, number = 0;
 
@@ -117,13 +117,14 @@ void initial_conditions(std::vector<ParticleData> *particles,
         /* thermal momentum according Maxwell-Boltzmann distribution */
         momentum_radial = sample_momenta(box, type[i]);
         phi =  2 * M_PI * drand48();
-        theta = M_PI * drand48();
-        printd("Particle %lu radial momenta %g phi %g theta %g\n", id,
-          momentum_radial, phi, theta);
+        sin_theta = drand48();
+	cos_theta = sqrt(1 - sin_theta * sin_theta);
+        printd("Particle %lu radial momenta %g phi %g cos_theta %g\n", id,
+          momentum_radial, phi, cos_theta);
         (*particles)[id].set_momentum(type[i].mass(),
-          momentum_radial * cos(phi) * sin(theta),
-          momentum_radial * sin(phi) * sin(theta),
-          momentum_radial * cos(theta));
+          momentum_radial * cos(phi) * sin_theta,
+          momentum_radial * sin(phi) * sin_theta,
+          momentum_radial * cos_theta);
       } else {
         (*particles)[id].set_momentum(type[i].mass(),
           - (*particles)[id - 1].momentum().x1(),
