@@ -213,7 +213,7 @@ static int Evolve(std::vector<ParticleData> *particles,
 
     /* particle interactions */
     if (!collision_list.empty()) 
-      scatterings_total += collide_particles(particles, particle_type,
+      scatterings_total = collide_particles(particles, particle_type,
         map_type, &collision_list, scatterings_total);
 
     /* propagate all particles */
