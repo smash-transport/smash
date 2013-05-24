@@ -26,8 +26,8 @@ void collision_criteria_geometry(std::vector<ParticleData> *particle,
   /* just collided with this particle */
   if ((*particle)[id_a].id_event() >= 0
       && (*particle)[id_a].id_event() == (*particle)[id_b].id_event()) {
-    printd("%g Skipping just collided particle %d <-> %d\n",
-        (*particle)[id_a].position().x0(), id_a, id_b);
+    printd("Skipping collided particle %d <-> %d at time %g\n",
+        id_a, id_b, (*particle)[id_a].position().x0());
     return;
   }
 
@@ -88,8 +88,8 @@ size_t collide_particles(std::vector<ParticleData> *particle,
     /* relevant particle id's for the collision */
     int id_a = *id;
     int id_b = (*particle)[*id].id_partner();
-    printd("particle types %s<->%s colliding %d<->%d time %g\n",
-      type[(*map_type)[id_a]].name().c_str(),
+    printd("Event %lu particle %s<->%s colliding %d<->%d time %g\n",
+      id_event, type[(*map_type)[id_a]].name().c_str(),
       type[(*map_type)[id_b]].name().c_str(), id_a, id_b,
       (*particle)[id_a].position().x0());
     write_oscar((*particle)[id_a], (*particle)[id_b], type[(*map_type)[id_a]],
