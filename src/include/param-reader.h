@@ -7,10 +7,11 @@
 
 /* forward declaration */
 class box;
+class Parameters;
 
 extern const char *sep;
 
 /* read params file parameters */
-void process_params(box *box, char *paramfile);
+void process_params(box *box, Parameters *parameters, char *paramfile);
 
 #endif  // SRC_INCLUDE_PARAM_READER_H_

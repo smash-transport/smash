@@ -13,11 +13,12 @@
 
 /* forward declarations */
 class box;
+class Parameters;
 class ParticleData;
 class ParticleType;
 
 /* console output */
-void print_startup(const box &box);
+void print_startup(const box &box, const Parameters &parameters);
 void print_header(void);
 void print_measurements(const std::vector<ParticleData> &particle,
   const size_t &scatterings_total, const box &box);

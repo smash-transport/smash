@@ -16,24 +16,17 @@
 class box {
   public:
     /* default constructor with probable values */
-    box(): steps_(10000), update_(100), testparticle_(1),
-      initial_condition_(1), length_(10.0), eps_(0.001),
-      temperature_(0.1), cross_section_(10.0), energy_initial_(0),
+    box(): steps_(10000), initial_condition_(1), length_(10.0),
+      temperature_(0.1), energy_initial_(0),
       number_density_initial_(0), seed_(1),
       time_start_(set_timer_start()) {}
     /* member funtions */
     float inline length() const;
     void inline set_length(const float &LENGTH);
-    float inline cross_section() const;
-    void inline set_cross_section(const float &sigma);
-    int inline testparticle() const;
-    void inline set_testparticle(const int &TESTPARTICLE);
     int inline initial_condition() const;
     void inline set_initial_condition(const int &INITIAL_CONDITION);
     float inline energy_initial() const;
     void inline set_energy_initial(const float &energy);
-    float inline eps() const;
-    void inline set_eps(const float &EPS);
     float inline number_density_initial() const;
     void inline set_number_density_inital(const float &number_density);
     float inline temperature() const;
@@ -42,29 +35,18 @@ class box {
     void inline set_seed(const int64_t &RANDOMSEED);
     int inline steps() const;
     void inline set_steps(const int &STEPS);
-    int inline update() const;
-    void inline set_update(const int &UPDATE);
     timespec inline time_start() const;
     timespec inline set_timer_start();
-    int inline grid_number() const;
 
   private:
     /* number of steps */
     int steps_;
-    /* number of steps before giving measurables */
-    int update_;
-    /* number of test particle */
-    int testparticle_;
     /* initial condition */
     int initial_condition_;
     /* Cube edge length */
     float length_;
-    /* temporal time step */
-    float eps_;
     /* Temperature of the Boltzmann distribution for thermal initialization */
     float temperature_;
-    /* cross section of the elastic scattering */
-    float cross_section_;
     /* initial total energy of the box */
     float energy_initial_;
     /* initial number density of the box */
@@ -85,28 +67,12 @@ void inline box::set_length(const float &LENGTH) {
   length_ = LENGTH;
 }
 
-float inline box::eps(void) const {
-  return eps_;
-}
-
-void inline box::set_eps(const float &EPS) {
-  eps_ = EPS;
-}
-
 int inline box::steps(void) const {
   return steps_;
 }
 
 void inline box::set_steps(const int &STEPS) {
   steps_ = STEPS;
-}
-
-int inline box::testparticle(void) const {
-  return testparticle_;
-}
-
-void inline box::set_testparticle(const int &TESTPARTICLE) {
-  testparticle_ = TESTPARTICLE;
 }
 
 /* return the used initial condition */
@@ -119,28 +85,12 @@ void inline box::set_initial_condition(const int &INITIAL_CONDITION) {
   initial_condition_ = INITIAL_CONDITION;
 }
 
-int inline box::update(void) const {
-  return update_;
-}
-
-void inline box::set_update(const int &UPDATE) {
-  update_ = UPDATE;
-}
-
 float inline box::temperature(void) const {
   return temperature_;
 }
 
 void inline box::set_temperature(const float &T) {
   temperature_ = T;
-}
-
-float inline box::cross_section(void) const {
-  return cross_section_;
-}
-
-void inline box::set_cross_section(const float &sigma) {
-  cross_section_ = sigma;
 }
 
 float inline box::energy_initial(void) const {
@@ -175,12 +125,6 @@ timespec inline box::set_timer_start(void) {
   timespec time;
   clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &time);
   return time;
-}
-
-/* calculate approximate grid size according to double interaction length */
-int inline box::grid_number(void) const {
-  return round(this->length() / sqrt(this->cross_section() * fm2_mb * M_1_PI)
-    * 0.5);
 }
 
 /* support for gcc branch prediction */

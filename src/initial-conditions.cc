@@ -15,6 +15,7 @@
 
 #include "include/box.h"
 #include "include/constants.h"
+#include "include/Parameters.h"
 #include "include/ParticleData.h"
 #include "include/ParticleType.h"
 #include "include/outputroutines.h"
@@ -69,7 +70,8 @@ ParticleType* initial_particles(ParticleType *type) {
 
 /* initial_conditions - sets particle data for @particles */
 void initial_conditions(std::vector<ParticleData> *particles,
-  ParticleType *type, std::map<int, int> *map_type, box *box) {
+  ParticleType *type, std::map<int, int> *map_type,
+  Parameters *parameters, box *box) {
   double phi, cos_theta, sin_theta, momentum_radial, number_density_total = 0;
   FourVector momentum_total(0, 0, 0, 0);
   size_t number_total = 0, number = 0;
@@ -90,7 +92,7 @@ void initial_conditions(std::vector<ParticleData> *particles,
       * 0.5 * M_1_PI * M_1_PI / hbarc / hbarc / hbarc;
     /* cast while reflecting probability of extra particle */
     number = box->length() * box->length() * box->length() * number_density
-      * box->testparticle();
+      * parameters->testparticles();
     if (box->length() * box->length() * box->length() * number_density - number
       > drand48())
       number++;
@@ -117,8 +119,13 @@ void initial_conditions(std::vector<ParticleData> *particles,
         /* thermal momentum according Maxwell-Boltzmann distribution */
         momentum_radial = sample_momenta(box, type[i]);
         phi =  2 * M_PI * drand48();
-        sin_theta = drand48();
-        cos_theta = sqrt(1 - sin_theta * sin_theta);
+        if (box->initial_condition() != 2) {
+          sin_theta = drand48();
+          cos_theta = sqrt(1 - sin_theta * sin_theta);
+        } else {
+          sin_theta = 1;
+          cos_theta = 0;
+        }
         printd("Particle %lu radial momenta %g phi %g cos_theta %g\n", id,
           momentum_radial, phi, cos_theta);
         (*particles)[id].set_momentum(type[i].mass(),
@@ -155,15 +162,18 @@ void initial_conditions(std::vector<ParticleData> *particles,
   /* loop over all particles */
   number = number_total;
   /* reducing cross section according to number of test particle */
-  if (box->testparticle() > 1) {
-    printf("IC test particle: %i\n", box->testparticle());
-    box->set_cross_section(box->cross_section() / box->testparticle());
-    printf("Elastic cross section: %g [mb]\n", box->cross_section());
+  if (parameters->testparticles() > 1) {
+    printf("IC test particle: %i\n", parameters->testparticles());
+    parameters->set_cross_section(parameters->cross_section()
+                                  / parameters->testparticles());
+    printf("Elastic cross section: %g [mb]\n", parameters->cross_section());
   }
 
   /* Display on startup if pseudo grid is used */
-  if (box->grid_number() > 4 && number > 10)
-    printf("Simulation with pseudo grid: %d^3\n", box->grid_number());
+  int const grid_number = round(box->length()
+              / sqrt(parameters->cross_section() * fm2_mb * M_1_PI) * 0.5);
+  if (grid_number > 4 && number > 10)
+    printf("Simulation with pseudo grid: %d^3\n", grid_number);
 
   /* allows to check energy conservation */
   printf("IC total energy: %g [GeV]\n", momentum_total.x0());

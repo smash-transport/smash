@@ -23,6 +23,7 @@
 #include "include/constants.h"
 #include "include/initial-conditions.h"
 #include "include/param-reader.h"
+#include "include/Parameters.h"
 #include "include/outputroutines.h"
 
 /* build dependent variables */
@@ -76,16 +77,20 @@ static FourVector boundary_condition(FourVector position, const box &box) {
 
 /* check_collision_geometry - check if a collision happens between particles */
 static void check_collision_geometry(std::vector<ParticleData> *particle,
-  std::list<int> *collision_list, box box) {
+  std::list<int> *collision_list, Parameters const &parameters,
+  box const &box) {
   std::vector<std::vector<std::vector<std::vector<unsigned int> > > > grid;
   int N;
   int x, y, z;
 
   /* For small boxes no point in splitting up in grids */
-  N = box.grid_number();
+  /* calculate approximate grid size according to double interaction length */
+  N = round(box.length()
+            / sqrt(parameters.cross_section() * fm2_mb * M_1_PI) * 0.5);
   if (unlikely(N < 4 || particle->size() < 10)) {
     FourVector distance;
-    double radial_interaction = sqrt(box.cross_section() * fm2_mb * M_1_PI) * 2;
+    double radial_interaction = sqrt(parameters.cross_section() * fm2_mb
+                                     * M_1_PI) * 2;
     for (size_t id = 0; id < particle->size() - 1; id++)
       for (size_t id_other = id + 1; id_other < particle->size(); id_other++) {
         /* XXX: apply periodic boundary condition */
@@ -94,7 +99,7 @@ static void check_collision_geometry(std::vector<ParticleData> *particle,
         /* skip particles that are double interaction radius length away */
         if (distance > radial_interaction)
             continue;
-        collision_criteria_geometry(particle, collision_list, box, id,
+        collision_criteria_geometry(particle, collision_list, parameters, id,
           id_other);
       }
     return;
@@ -179,14 +184,14 @@ static void check_collision_geometry(std::vector<ParticleData> *particle,
 
             printd("grid cell particle %lu <-> %i\n", id, *id_other);
             if (shift == 0) {
-              collision_criteria_geometry(particle, collision_list, box, id,
-                *id_other);
+              collision_criteria_geometry(particle, collision_list, parameters,
+                id, *id_other);
             } else {
               /* apply eventual boundary before and restore after */
               (*particle)[*id_other].set_position(
                 (*particle)[*id_other].position() + shift);
-              collision_criteria_geometry(particle, collision_list, box, id,
-                *id_other);
+              collision_criteria_geometry(particle, collision_list, parameters,
+                id, *id_other);
               (*particle)[*id_other].set_position(
                 (*particle)[*id_other].position() - shift);
             }
@@ -199,7 +204,8 @@ static void check_collision_geometry(std::vector<ParticleData> *particle,
 
 /* Evolve - the core of the box, stepping forward in time */
 static int Evolve(std::vector<ParticleData> *particles,
-  ParticleType *particle_type, std::map<int, int> *map_type, const box &box) {
+  ParticleType *particle_type, std::map<int, int> *map_type,
+  const Parameters parameters, const box &box) {
   FourVector distance, position;
   std::list<int> collision_list;
   size_t scatterings_total = 0;
@@ -209,7 +215,7 @@ static int Evolve(std::vector<ParticleData> *particles,
 
   for (int steps = 0; steps < box.steps(); steps++) {
     /* fill collision table by cells */
-    check_collision_geometry(particles, &collision_list, box);
+    check_collision_geometry(particles, &collision_list, parameters, box);
 
     /* particle interactions */
     if (!collision_list.empty())
@@ -220,7 +226,7 @@ static int Evolve(std::vector<ParticleData> *particles,
     for (size_t i = 0; i < particles->size(); i++) {
       distance.set_FourVector(1.0, (*particles)[i].velocity_x(),
         (*particles)[i].velocity_y(), (*particles)[i].velocity_z());
-      distance *= box.eps();
+      distance *= parameters.eps();
       printd("Particle %d motion: %g %g %g %g\n", (*particles)[i].id(),
          distance.x0(), distance.x1(), distance.x2(), distance.x3());
 
@@ -233,7 +239,7 @@ static int Evolve(std::vector<ParticleData> *particles,
     }
 
     /* physics output during the run */
-    if (steps > 0 && (steps + 1) % box.update() == 0) {
+    if (steps > 0 && (steps + 1) % parameters.output_interval() == 0) {
       print_measurements(*particles, scatterings_total, box);
       /* save evolution data */
       write_particles(*particles);
@@ -253,16 +259,17 @@ int main(int argc, char *argv[]) {
   std::vector<ParticleData> particles;
   ParticleType *particle_types = NULL;
   box *cube = new box;
+  Parameters *parameters = new Parameters;
   std::map<int, int> map_type;
 
   struct option longopts[] = {
     { "eps",        required_argument,      0, 'e' },
     { "help",       no_argument,            0, 'h' },
     { "length",     required_argument,      0, 'l' },
+    { "output-interval", required_argument,      0, 'O' },
     { "random",     required_argument,      0, 'r' },
     { "steps",      required_argument,      0, 's' },
     { "temperature", required_argument,     0, 'T' },
-    { "update",     required_argument,      0, 'u' },
     { "version",    no_argument,            0, 'V' },
     { NULL,         0, 0, 0 }
   };
@@ -277,20 +284,23 @@ int main(int argc, char *argv[]) {
   int len = 3;
   path = reinterpret_cast<char *>(malloc(len));
   snprintf(path, len, "./");
-  process_params(cube, path);
+  process_params(cube, parameters, path);
 
   /* parse the command line options, they override all previous */
-  while ((opt = getopt_long(argc, argv, "e:hl:r:s:T:u:V", longopts,
+  while ((opt = getopt_long(argc, argv, "e:hl:O:r:s:T:V", longopts,
     NULL)) != -1) {
     switch (opt) {
     case 'e':
-      cube->set_eps(atof(optarg));
+      parameters->set_eps(atof(optarg));
       break;
     case 'h':
       usage(EXIT_SUCCESS);
       break;
     case 'l':
       cube->set_length(atof(optarg));
+      break;
+    case 'O':
+      parameters->set_output_interval(abs(atoi(optarg)));
       break;
     case 'r':
       /* negative seed is for time */
@@ -305,9 +315,6 @@ int main(int argc, char *argv[]) {
     case 'T':
       cube->set_temperature(atof(optarg));
       break;
-    case 'u':
-      cube->set_update(abs(atoi(optarg)));
-      break;
     case 'V':
       exit(EXIT_SUCCESS);
     default:
@@ -316,22 +323,23 @@ int main(int argc, char *argv[]) {
   }
 
   /* Output IC values */
-  print_startup(*cube);
+  print_startup(*cube, *parameters);
   mkdir_data();
   write_oscar_header();
 
   /* Initialize box */
   particle_types = initial_particles(particle_types);
-  initial_conditions(&particles, particle_types, &map_type, cube);
+  initial_conditions(&particles, particle_types, &map_type, parameters, cube);
   write_particles(particles);
 
   /* Compute stuff */
-  rc = Evolve(&particles, particle_types, &map_type, *cube);
+  rc = Evolve(&particles, particle_types, &map_type, *parameters, *cube);
 
   /* tear down */
   particles.clear();
   delete [] particle_types;
   delete cube;
+  delete parameters;
   free(path);
   return rc;
 }

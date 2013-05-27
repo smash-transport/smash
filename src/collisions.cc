@@ -11,10 +11,11 @@
 
 #include <cstdio>
 
+#include "include/Parameters.h"
 #include "include/ParticleData.h"
 #include "include/ParticleType.h"
-#include "include/box.h"
 #include "include/constants.h"
+#include "include/macros.h"
 #include "include/outputroutines.h"
 #include "include/particles.h"
 
@@ -22,7 +23,8 @@
  *                               happens between particles
  */
 void collision_criteria_geometry(std::vector<ParticleData> *particle,
-  std::list<int> *collision_list, box box, int id_a, int id_b) {
+  std::list<int> *collision_list, Parameters const &parameters, int id_a,
+  int id_b) {
   /* just collided with this particle */
   if ((*particle)[id_a].id_event() >= 0
       && (*particle)[id_a].id_event() == (*particle)[id_b].id_event()) {
@@ -35,7 +37,7 @@ void collision_criteria_geometry(std::vector<ParticleData> *particle,
   /* distance criteria according to cross_section */
   double const distance_squared = particle_distance(&(*particle)[id_a],
     &(*particle)[id_b]);
-  if (distance_squared >= box.cross_section() * fm2_mb * M_1_PI)
+  if (distance_squared >= parameters.cross_section() * fm2_mb * M_1_PI)
     return;
   printd("distance squared particle %d <-> %d: %g \n", id_a, id_b,
     distance_squared);
@@ -44,7 +46,7 @@ void collision_criteria_geometry(std::vector<ParticleData> *particle,
   /* check according timestep: positive and smaller */
   double const time_collision = collision_time(&(*particle)[id_a],
     &(*particle)[id_b]);
-  if (time_collision < 0 || time_collision >= box.eps())
+  if (time_collision < 0 || time_collision >= parameters.eps())
     return;
 
   /* check for minimal collision time */

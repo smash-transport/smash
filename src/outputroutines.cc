@@ -15,6 +15,7 @@
 
 #include "include/box.h"
 #include "include/FourVector.h"
+#include "include/Parameters.h"
 #include "include/ParticleData.h"
 #include "include/ParticleType.h"
 
@@ -28,12 +29,12 @@ static void print_line(void) {
 }
 
 /* print_startup - console output on startup */
-void print_startup(const box &box) {
+void print_startup(const box &box, const Parameters &parameters) {
   printf("Size of the box: %g x %g x %g [fm]\n", box.length(), box.length(),
     box.length());
   printf("Initial temperature: %g [GeV]\n", box.temperature());
-  printf("Elastic cross section: %g [mb]\n", box.cross_section());
-  printf("Using temporal stepsize: %g [GeV]\n", box.eps());
+  printf("Elastic cross section: %g [mb]\n", parameters.cross_section());
+  printf("Using temporal stepsize: %g [GeV]\n", parameters.eps());
   printf("Maximum number of steps: %i \n", box.steps());
   printf("Random number seed: %li \n", box.seed());
 }
@@ -123,8 +124,11 @@ void printd_position(const ParticleData &particle __attribute__((unused))) {
 /* write_particles - writes out data of the specific particles */
 void write_particles(const std::vector<ParticleData> &particles) {
   FILE *fp;
+  char filename[256];
 
-  fp = fopen("data/momenta.dat", "a");
+  snprintf(filename, sizeof(filename), "data/momenta_%.5f.dat",
+    particles[0].position().x0() - 1.0);
+  fp = fopen(filename, "a");
   for (size_t i = 0; i < particles.size(); i++) {
      fprintf(fp, "%g %g %g %g\n", particles[i].momentum().x0(),
        particles[i].momentum().x1(),  particles[i].momentum().x2(),

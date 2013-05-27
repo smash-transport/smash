@@ -13,6 +13,7 @@
 
 #include "include/param-reader.h"
 #include "include/box.h"
+#include "include/Parameters.h"
 
 /* FIXME: hardcoded length cap */
 #define FILELEN 256
@@ -21,7 +22,7 @@
 const char *sep = " \t\n";
 
 /* process_params - read in params */
-void process_params(box *box, char *path) {
+void process_params(box *box, Parameters *parameters, char *path) {
   char *line = NULL, *saveptr = NULL, params[FILELEN];
   size_t len = 0;
   ssize_t read;
@@ -66,11 +67,11 @@ void process_params(box *box, char *path) {
       continue;
     }
     if (strcmp(key, "UPDATE") == 0) {
-      box->set_update(abs(atoi(value)));
+      parameters->set_output_interval(abs(atoi(value)));
       continue;
     }
-    if (strcmp(key, "TESTPARTICLE") == 0) {
-      box->set_testparticle(abs(atoi(value)));
+    if (strcmp(key, "TESTPARTICLES") == 0) {
+      parameters->set_testparticles(abs(atoi(value)));
       continue;
     }
     if (strcmp(key, "INITIAL_CONDITION") == 0) {
@@ -85,11 +86,11 @@ void process_params(box *box, char *path) {
       continue;
     }
     if (strcmp(key, "EPS") == 0) {
-      box->set_eps(atof(value));
+      parameters->set_eps(atof(value));
       continue;
     }
     if (strcmp(key, "SIGMA") == 0) {
-      box->set_cross_section(atof(value));
+      parameters->set_cross_section(atof(value));
       continue;
     }
     if (strcmp(key, "TEMPERATURE") == 0) {

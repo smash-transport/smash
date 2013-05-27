@@ -13,13 +13,13 @@
 #include <map>
 #include <vector>
 
+class Parameters;
 class ParticleData;
 class ParticleType;
-class box;
 
 /* populates collision list if collision applies */
 void collision_criteria_geometry(std::vector<ParticleData> *particle,
-  std::list<int> *collision_list, box box, int id, int id_other);
+  std::list<int> *collision_list, Parameters const &para, int id, int id_other);
 
 /* does collisions according to collision table */
 size_t collide_particles(std::vector<ParticleData> *particle,
