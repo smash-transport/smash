@@ -22,9 +22,11 @@
 #include "include/collisions.h"
 #include "include/constants.h"
 #include "include/initial-conditions.h"
+#include "include/macros.h"
 #include "include/param-reader.h"
 #include "include/Parameters.h"
 #include "include/outputroutines.h"
+#include "include/propagation.h"
 
 /* build dependent variables */
 #include "include/Config.h"
@@ -45,7 +47,7 @@ static void usage(int rc) {
 }
 
 /* boundary_condition - enforce specific type of boundaries */
-static FourVector boundary_condition(FourVector position, const box &box) {
+FourVector boundary_condition(FourVector position, const box &box) {
   /* Check positivity and box size */
   if (position.x1() > 0 && position.x2() > 0 && position.x3() > 0
       && position.x1() < box.length() && position.x2() < box.length()
@@ -206,7 +208,6 @@ static void check_collision_geometry(std::vector<ParticleData> *particle,
 static int Evolve(std::vector<ParticleData> *particles,
   ParticleType *particle_type, std::map<int, int> *map_type,
   const Parameters parameters, const box &box) {
-  FourVector distance, position;
   std::list<int> collision_list;
   size_t scatterings_total = 0;
 
@@ -223,20 +224,7 @@ static int Evolve(std::vector<ParticleData> *particles,
         map_type, &collision_list, scatterings_total);
 
     /* propagate all particles */
-    for (size_t i = 0; i < particles->size(); i++) {
-      distance.set_FourVector(1.0, (*particles)[i].velocity_x(),
-        (*particles)[i].velocity_y(), (*particles)[i].velocity_z());
-      distance *= parameters.eps();
-      printd("Particle %d motion: %g %g %g %g\n", (*particles)[i].id(),
-         distance.x0(), distance.x1(), distance.x2(), distance.x3());
-
-      /* treat the box boundaries */
-      position = (*particles)[i].position();
-      position += distance;
-      position = boundary_condition(position, box);
-      (*particles)[i].set_position(position);
-      printd_position((*particles)[i]);
-    }
+    propagate_particles(particles, parameters, box);
 
     /* physics output during the run */
     if (steps > 0 && (steps + 1) % parameters.output_interval() == 0) {

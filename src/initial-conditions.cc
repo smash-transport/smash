@@ -15,6 +15,7 @@
 
 #include "include/box.h"
 #include "include/constants.h"
+#include "include/macros.h"
 #include "include/Parameters.h"
 #include "include/ParticleData.h"
 #include "include/ParticleType.h"
