@@ -26,8 +26,8 @@ void collision_criteria_geometry(std::vector<ParticleData> *particle,
   std::list<int> *collision_list, Parameters const &parameters, int id_a,
   int id_b) {
   /* just collided with this particle */
-  if ((*particle)[id_a].id_event() >= 0
-      && (*particle)[id_a].id_event() == (*particle)[id_b].id_event()) {
+  if ((*particle)[id_a].id_process() >= 0
+      && (*particle)[id_a].id_process() == (*particle)[id_b].id_process()) {
     printd("Skipping collided particle %d <-> %d at time %g\n",
         id_a, id_b, (*particle)[id_a].position().x0());
     return;
@@ -81,7 +81,7 @@ void collision_criteria_geometry(std::vector<ParticleData> *particle,
 /* colliding_particle - particle interaction */
 size_t collide_particles(std::vector<ParticleData> *particle,
   ParticleType *type, std::map<int, int> *map_type,
-  std::list<int> *collision_list, size_t id_event) {
+  std::list<int> *collision_list, size_t id_process) {
   FourVector velocity_CM;
 
   /* collide: 2 <-> 2 soft momenta exchange */
@@ -90,8 +90,8 @@ size_t collide_particles(std::vector<ParticleData> *particle,
     /* relevant particle id's for the collision */
     int id_a = *id;
     int id_b = (*particle)[*id].id_partner();
-    printd("Event %lu particle %s<->%s colliding %d<->%d time %g\n",
-      id_event, type[(*map_type)[id_a]].name().c_str(),
+    printd("Process %lu particle %s<->%s colliding %d<->%d time %g\n",
+      id_process, type[(*map_type)[id_a]].name().c_str(),
       type[(*map_type)[id_b]].name().c_str(), id_a, id_b,
       (*particle)[id_a].position().x0());
     write_oscar((*particle)[id_a], (*particle)[id_b], type[(*map_type)[id_a]],
@@ -119,12 +119,12 @@ size_t collide_particles(std::vector<ParticleData> *particle,
       (*particle)[id_b].momentum().x2(), (*particle)[id_b].momentum().x3());
 
     /* unset collision time for both particles + keep id + unset partner */
-    (*particle)[id_a].set_collision_past(id_event);
-    (*particle)[id_b].set_collision_past(id_event);
-    id_event++;
+    (*particle)[id_a].set_collision_past(id_process);
+    (*particle)[id_b].set_collision_past(id_process);
+    id_process++;
   }
   /* empty the collision table */
   collision_list->clear();
   /* return how many processes we handled */
-  return id_event;
+  return id_process;
 }
