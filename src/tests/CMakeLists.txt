@@ -2,6 +2,11 @@ add_executable(fourvector EXCLUDE_FROM_ALL fourvector.cc)
 add_dependencies(check fourvector)
 
 # tests:
+
+# test source code to be clean, requires cpplint in the path
+file(GLOB source "../*.cc" "../include/*.h" "*.cc")
+add_test(cclint cpplint.py ${source})
+
 # some fourvector operations tests
 add_test(fourvector ${PROJECT_BINARY_DIR}/fourvector)
 
