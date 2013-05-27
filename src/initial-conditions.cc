@@ -118,7 +118,7 @@ void initial_conditions(std::vector<ParticleData> *particles,
         momentum_radial = sample_momenta(box, type[i]);
         phi =  2 * M_PI * drand48();
         sin_theta = drand48();
-	cos_theta = sqrt(1 - sin_theta * sin_theta);
+        cos_theta = sqrt(1 - sin_theta * sin_theta);
         printd("Particle %lu radial momenta %g phi %g cos_theta %g\n", id,
           momentum_radial, phi, cos_theta);
         (*particles)[id].set_momentum(type[i].mass(),

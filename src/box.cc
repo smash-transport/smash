@@ -212,7 +212,7 @@ static int Evolve(std::vector<ParticleData> *particles,
     check_collision_geometry(particles, &collision_list, box);
 
     /* particle interactions */
-    if (!collision_list.empty()) 
+    if (!collision_list.empty())
       scatterings_total = collide_particles(particles, particle_type,
         map_type, &collision_list, scatterings_total);
 
