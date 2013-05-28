@@ -1,5 +1,6 @@
 add_executable(fourvector EXCLUDE_FROM_ALL fourvector.cc)
-add_dependencies(check fourvector)
+add_executable(particles EXCLUDE_FROM_ALL particles.cc ../particles.cc ../fourvector.cc)
+add_dependencies(check fourvector particles)
 
 # tests:
 
@@ -9,6 +10,9 @@ add_test(cclint cpplint.py ${source})
 
 # some fourvector operations tests
 add_test(fourvector ${PROJECT_BINARY_DIR}/fourvector)
+
+# some particles operations tests
+add_test(particles ${PROJECT_BINARY_DIR}/particles)
 
 # verify that the binary has a cli help
 add_test(mash_help ${PROJECT_BINARY_DIR}/mash -h)
