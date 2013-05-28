@@ -7,7 +7,6 @@
  *    GNU General Public License (GPLv3)
  *
  */
-#include "include/Box.h"
 
 #include <getopt.h>
 #include <cstdio>
@@ -17,6 +16,7 @@
 #include <map>
 #include <vector>
 
+#include "include/Box.h"
 #include "include/ParticleData.h"
 #include "include/ParticleType.h"
 #include "include/collisions.h"
