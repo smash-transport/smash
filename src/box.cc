@@ -7,7 +7,7 @@
  *    GNU General Public License (GPLv3)
  *
  */
-#include "include/box.h"
+#include "include/Box.h"
 
 #include <getopt.h>
 #include <cstdio>
@@ -47,7 +47,7 @@ static void usage(int rc) {
 }
 
 /* boundary_condition - enforce specific type of boundaries */
-FourVector boundary_condition(FourVector position, const box &box) {
+FourVector boundary_condition(FourVector position, const Box &box) {
   /* Check positivity and box size */
   if (position.x1() > 0 && position.x2() > 0 && position.x3() > 0
       && position.x1() < box.length() && position.x2() < box.length()
@@ -80,7 +80,7 @@ FourVector boundary_condition(FourVector position, const box &box) {
 /* check_collision_geometry - check if a collision happens between particles */
 static void check_collision_geometry(std::vector<ParticleData> *particle,
   std::list<int> *collision_list, Parameters const &parameters,
-  box const &box) {
+  Box const &box) {
   std::vector<std::vector<std::vector<std::vector<unsigned int> > > > grid;
   int N;
   int x, y, z;
@@ -207,7 +207,7 @@ static void check_collision_geometry(std::vector<ParticleData> *particle,
 /* Evolve - the core of the box, stepping forward in time */
 static int Evolve(std::vector<ParticleData> *particles,
   ParticleType *particle_type, std::map<int, int> *map_type,
-  const Parameters parameters, const box &box) {
+  const Parameters parameters, const Box &box) {
   std::list<int> collision_list;
   size_t scatterings_total = 0;
 
@@ -246,7 +246,7 @@ int main(int argc, char *argv[]) {
   int opt, rc;
   std::vector<ParticleData> particles;
   ParticleType *particle_types = NULL;
-  box *cube = new box;
+  Box *cube = new Box;
   Parameters *parameters = new Parameters;
   std::map<int, int> map_type;
 

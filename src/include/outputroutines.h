@@ -12,17 +12,17 @@
 #include <vector>
 
 /* forward declarations */
-class box;
+class Box;
 class Parameters;
 class ParticleData;
 class ParticleType;
 
 /* console output */
-void print_startup(const box &box, const Parameters &parameters);
+void print_startup(const Box &box, const Parameters &parameters);
 void print_header(void);
 void print_measurements(const std::vector<ParticleData> &particle,
-  const size_t &scatterings_total, const box &box);
-void print_tail(const box &box, const double &scattering_rate);
+  const size_t &scatterings_total, const Box &box);
+void print_tail(const Box &box, const double &scattering_rate);
 
 /* data directory */
 void mkdir_data(void);
@@ -46,6 +46,6 @@ void write_oscar(const ParticleData &particle1, const ParticleData &particle2,
 void write_vtk(const std::vector<ParticleData> &particles);
 
 /* timing measure */
-double measure_timediff(const box &box);
+double measure_timediff(const Box &box);
 
 #endif  // SRC_INCLUDE_OUTPUTROUTINES_H_

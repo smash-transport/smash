@@ -16,10 +16,10 @@ class FourVector;
 
 #include "../include/constants.h"
 
-class box {
+class Box {
   public:
     /* default constructor with probable values */
-    box(): steps_(10000), initial_condition_(1), length_(10.0),
+    Box(): steps_(10000), initial_condition_(1), length_(10.0),
       temperature_(0.1), energy_initial_(0),
       number_density_initial_(0), seed_(1),
       time_start_(set_timer_start()) {}
@@ -61,75 +61,75 @@ class box {
 };
 
 /* return the edge length */
-float inline box::length(void) const {
+float inline Box::length(void) const {
   return length_;
 }
 
 /* set the edge length */
-void inline box::set_length(const float &LENGTH) {
+void inline Box::set_length(const float &LENGTH) {
   length_ = LENGTH;
 }
 
-int inline box::steps(void) const {
+int inline Box::steps(void) const {
   return steps_;
 }
 
-void inline box::set_steps(const int &STEPS) {
+void inline Box::set_steps(const int &STEPS) {
   steps_ = STEPS;
 }
 
 /* return the used initial condition */
-int inline box::initial_condition(void) const {
+int inline Box::initial_condition(void) const {
   return initial_condition_;
 }
 
 /* set the initial condition */
-void inline box::set_initial_condition(const int &INITIAL_CONDITION) {
+void inline Box::set_initial_condition(const int &INITIAL_CONDITION) {
   initial_condition_ = INITIAL_CONDITION;
 }
 
-float inline box::temperature(void) const {
+float inline Box::temperature(void) const {
   return temperature_;
 }
 
-void inline box::set_temperature(const float &T) {
+void inline Box::set_temperature(const float &T) {
   temperature_ = T;
 }
 
-float inline box::energy_initial(void) const {
+float inline Box::energy_initial(void) const {
   return energy_initial_;
 }
 
-void inline box::set_energy_initial(const float &energy) {
+void inline Box::set_energy_initial(const float &energy) {
   energy_initial_ = energy;
 }
 
-float inline box::number_density_initial(void) const {
+float inline Box::number_density_initial(void) const {
   return number_density_initial_;
 }
 
-void inline box::set_number_density_inital(const float &number_density) {
+void inline Box::set_number_density_inital(const float &number_density) {
   number_density_initial_ = number_density;
 }
 
-int64_t inline box::seed(void) const {
+int64_t inline Box::seed(void) const {
   return seed_;
 }
 
-void inline box::set_seed(const int64_t &randomseed) {
+void inline Box::set_seed(const int64_t &randomseed) {
   seed_ = randomseed;
 }
 
-timespec inline box::time_start(void) const {
+timespec inline Box::time_start(void) const {
   return time_start_;
 }
 
-timespec inline box::set_timer_start(void) {
+timespec inline Box::set_timer_start(void) {
   timespec time;
   clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &time);
   return time;
 }
 
-FourVector boundary_condition(FourVector position, const box &box);
+FourVector boundary_condition(FourVector position, const Box &box);
 
 #endif  // SRC_INCLUDE_BOX_H_

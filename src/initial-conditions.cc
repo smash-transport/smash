@@ -13,7 +13,7 @@
 #include <stdint.h>
 #include <gsl/gsl_sf_bessel.h>
 
-#include "include/box.h"
+#include "include/Box.h"
 #include "include/constants.h"
 #include "include/macros.h"
 #include "include/Parameters.h"
@@ -29,7 +29,7 @@ static double inline density_integrand(double momentum, double temp,
 }
 
 /* sample_momenta - return thermal momenta */
-static double sample_momenta(box *box, ParticleType type) {
+static double sample_momenta(Box *box, ParticleType type) {
   double momentum_radial, momentum_average, momentum_min, momentum_max;
   double probability = 0, probability_max, probability_random = 1;
 
@@ -72,7 +72,7 @@ ParticleType* initial_particles(ParticleType *type) {
 /* initial_conditions - sets particle data for @particles */
 void initial_conditions(std::vector<ParticleData> *particles,
   ParticleType *type, std::map<int, int> *map_type,
-  Parameters *parameters, box *box) {
+  Parameters *parameters, Box *box) {
   double phi, cos_theta, sin_theta, momentum_radial, number_density_total = 0;
   FourVector momentum_total(0, 0, 0, 0);
   size_t number_total = 0, number = 0;

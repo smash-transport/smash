@@ -11,12 +11,11 @@
 
 #include <cstdio>
 
+#include "include/constants.h"
 #include "include/FourVector.h"
+#include "include/outputroutines.h"
 #include "include/ParticleData.h"
 #include "include/ParticleType.h"
-#include "include/constants.h"
-#include "include/box.h"
-#include "include/outputroutines.h"
 
 /* boost_CM - boost to center of momentum */
 void boost_CM(ParticleData *particle1, ParticleData *particle2,

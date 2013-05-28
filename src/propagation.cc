@@ -11,14 +11,14 @@
 
 #include <vector>
 
-#include "include/box.h"
+#include "include/Box.h"
 #include "include/Parameters.h"
 #include "include/ParticleData.h"
 #include "include/outputroutines.h"
 
 /* propagate all particles */
 void propagate_particles(std::vector<ParticleData> *particles,
-  Parameters const &parameters, box const &box) {
+  Parameters const &parameters, Box const &box) {
     FourVector distance, position;
 
     for (size_t i = 0; i < particles->size(); i++) {

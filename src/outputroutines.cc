@@ -13,7 +13,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-#include "include/box.h"
+#include "include/Box.h"
 #include "include/FourVector.h"
 #include "include/macros.h"
 #include "include/Parameters.h"
@@ -30,7 +30,7 @@ static void print_line(void) {
 }
 
 /* print_startup - console output on startup */
-void print_startup(const box &box, const Parameters &parameters) {
+void print_startup(const Box &box, const Parameters &parameters) {
   printf("Size of the box: %g x %g x %g [fm]\n", box.length(), box.length(),
     box.length());
   printf("Initial temperature: %g [GeV]\n", box.temperature());
@@ -61,7 +61,7 @@ void mkdir_data(void) {
 }
 
 /* measure_timediff - time the simulation used */
-double measure_timediff(const box &box) {
+double measure_timediff(const Box &box) {
   timespec now;
   clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &now);
   return (now.tv_sec + now.tv_nsec / 10.0E9
@@ -70,7 +70,7 @@ double measure_timediff(const box &box) {
 
 /* print_measurements - console output during simulation */
 void print_measurements(const std::vector<ParticleData> &particles,
-  const size_t &scatterings_total, const box &box) {
+  const size_t &scatterings_total, const Box &box) {
   FourVector momentum_total(0, 0, 0, 0);
   /* use the time from the first particle - startup time */
   double time = particles[0].position().x0() - 1.0;
@@ -91,7 +91,7 @@ void print_measurements(const std::vector<ParticleData> &particles,
 }
 
 /* print_tail - output at the end of the simulation */
-void print_tail(const box &box, const double &scattering_rate) {
+void print_tail(const Box &box, const double &scattering_rate) {
   double time = measure_timediff(box);
   print_line();
   /* print finishing time in human readable way:

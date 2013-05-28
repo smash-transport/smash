@@ -12,7 +12,7 @@
 #include <ctime>
 
 #include "include/param-reader.h"
-#include "include/box.h"
+#include "include/Box.h"
 #include "include/Parameters.h"
 
 /* FIXME: hardcoded length cap */
@@ -22,7 +22,7 @@
 const char *sep = " \t\n";
 
 /* process_params - read in params */
-void process_params(box *box, Parameters *parameters, char *path) {
+void process_params(Box *box, Parameters *parameters, char *path) {
   char *line = NULL, *saveptr = NULL, params[FILELEN];
   size_t len = 0;
   ssize_t read;

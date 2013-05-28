@@ -10,11 +10,11 @@
 
 #include <vector>
 
-class box;
+class Box;
 class Parameters;
 class ParticleData;
 
 void propagate_particles(std::vector<ParticleData> *particles,
-  Parameters const &parameters, box const &box);
+  Parameters const &parameters, Box const &box);
 
 #endif  // SRC_INCLUDE_PROPAGATION_H_

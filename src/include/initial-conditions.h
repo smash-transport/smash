@@ -9,7 +9,7 @@
 #include <vector>
 
 /* forward declarations */
-class box;
+class Box;
 class Parameters;
 class ParticleData;
 class ParticleType;
@@ -18,6 +18,6 @@ class ParticleType;
 ParticleType* initial_particles(ParticleType *type);
 void initial_conditions(std::vector<ParticleData> *particles,
   ParticleType *particle_type, std::map<int, int> *map_type,
-  Parameters *parameters, box *box);
+  Parameters *parameters, Box *box);
 
 #endif  // SRC_INCLUDE_INITIAL_CONDITIONS_H_
