@@ -9,6 +9,7 @@
  */
 #include "include/propagation.h"
 
+#include <cstdio>
 #include <vector>
 
 #include "include/Box.h"
