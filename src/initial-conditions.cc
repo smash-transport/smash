@@ -84,13 +84,16 @@ void initial_conditions(std::vector<ParticleData> *particles,
       } else if (!(id % 2)) {
         /* thermal momentum according Maxwell-Boltzmann distribution */
         momentum_radial = sample_momenta(box, type[i]);
-        phi =  2 * M_PI * drand48();
+        /* phi in the range from [0, 2 * pi) */
+        phi =  2.0 * M_PI * drand48();
         if (box->initial_condition() != 2) {
-          sin_theta = drand48();
-          cos_theta = sqrt(1 - sin_theta * sin_theta);
+	  /* cos(theta) in the range from [-1.0, 1.0) */
+          cos_theta = -1.0 + 2.0 * drand48();
+          sin_theta = sqrt(1.0 - cos_theta * cos_theta);
         } else {
-          sin_theta = 1;
-          cos_theta = 0;
+	  /* IC == 2 momenta in the plane */
+          cos_theta = 0.0;
+          sin_theta = 1.0;
         }
         printd("Particle %lu radial momenta %g phi %g cos_theta %g\n", id,
           momentum_radial, phi, cos_theta);
