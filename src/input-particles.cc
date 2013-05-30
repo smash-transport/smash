@@ -42,6 +42,8 @@ void input_particles(std::vector<ParticleType> *type, char *path) {
   printf("Processing %s/particles.txt.\n", path);
 
   while ((read = getline(&line, &len, fp)) != -1) {
+   dprintf("Retrieved particles.txt line of length %zu :\n", read);
+   dprintf("%s", line);
     /* Skip comments and blank lines */
     if (line[0] == '#' || line[0] == '\n' || line[0] == '\t' || line[0] == '/')
       continue;
