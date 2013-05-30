@@ -40,7 +40,7 @@ void initial_conditions(std::vector<ParticleData> *particles,
   size_t number_total = 0, number = 0;
 
   /* initialize random seed */
-  srand48(box->seed());
+  srand48(parameters->seed());
 
   /* loop over all the particle types */
   for (size_t i = 0; i < (*type).size(); i++) {

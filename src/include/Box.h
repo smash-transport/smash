@@ -21,8 +21,7 @@ class Box {
     /* default constructor with probable values */
     Box(): steps_(10000), initial_condition_(1), length_(10.0),
       temperature_(0.1), energy_initial_(0),
-      number_density_initial_(0), seed_(1),
-      time_start_(set_timer_start()) {}
+      number_density_initial_(0), time_start_(set_timer_start()) {}
     /* member funtions */
     float inline length() const;
     void inline set_length(const float &LENGTH);
@@ -34,8 +33,6 @@ class Box {
     void inline set_number_density_inital(const float &number_density);
     float inline temperature() const;
     void inline set_temperature(const float &T);
-    int64_t inline seed() const;
-    void inline set_seed(const int64_t &RANDOMSEED);
     int inline steps() const;
     void inline set_steps(const int &STEPS);
     timespec inline time_start() const;
@@ -54,8 +51,6 @@ class Box {
     float energy_initial_;
     /* initial number density of the box */
     float number_density_initial_;
-    /* initial seed for random generator */
-    int64_t seed_;
     /* starting time of the simulation */
     timespec time_start_;
 };
@@ -110,14 +105,6 @@ float inline Box::number_density_initial(void) const {
 
 void inline Box::set_number_density_inital(const float &number_density) {
   number_density_initial_ = number_density;
-}
-
-int64_t inline Box::seed(void) const {
-  return seed_;
-}
-
-void inline Box::set_seed(const int64_t &randomseed) {
-  seed_ = randomseed;
 }
 
 timespec inline Box::time_start(void) const {

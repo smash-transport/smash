@@ -37,7 +37,7 @@ void print_startup(const Box &box, const Parameters &parameters) {
   printf("Elastic cross section: %g [mb]\n", parameters.cross_section());
   printf("Using temporal stepsize: %g [GeV]\n", parameters.eps());
   printf("Maximum number of steps: %i \n", box.steps());
-  printf("Random number seed: %li \n", box.seed());
+  printf("Random number seed: %li \n", parameters.seed());
 }
 
 /* print_header - title for each row */

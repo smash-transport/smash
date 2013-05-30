@@ -14,7 +14,7 @@ class Parameters {
   public:
     /* default constructor with probable values */
     Parameters(): output_interval_(100), testparticles_(1), eps_(0.001),
-      cross_section_(10.0) {}
+      cross_section_(10.0), seed_(1) {}
     /* member funtions */
     int inline output_interval() const;
     void inline set_output_interval(const int &UPDATE);
@@ -24,6 +24,8 @@ class Parameters {
     void inline set_eps(const float &EPS);
     float inline cross_section() const;
     void inline set_cross_section(const float &sigma);
+    int64_t inline seed() const;
+    void inline set_seed(const int64_t &RANDOMSEED);
 
   private:
     /* number of steps before giving measurables */
@@ -34,6 +36,8 @@ class Parameters {
     float eps_;
     /* cross section of the elastic scattering */
     float cross_section_;
+    /* initial seed for random generator */
+    int64_t seed_;
 };
 
 /* return the number on whihc interval output will be shown */
@@ -77,5 +81,17 @@ float inline Parameters::cross_section(void) const {
 void inline Parameters::set_cross_section(const float &sigma) {
   cross_section_ = sigma;
 }
+
+/* return the random seed */
+int64_t inline Parameters::seed(void) const {
+  return seed_;
+}
+
+/* set the seed */
+void inline Parameters::set_seed(const int64_t &randomseed) {
+  seed_ = randomseed;
+}
+
+
 
 #endif  // SRC_INCLUDE_PARAMETERS_H_

@@ -295,9 +295,9 @@ int main(int argc, char *argv[]) {
     case 'r':
       /* negative seed is for time */
       if (atol(optarg) > 0)
-        cube->set_seed(atol(optarg));
+        parameters->set_seed(atol(optarg));
       else
-        cube->set_seed(time(NULL));
+        parameters->set_seed(time(NULL));
       break;
     case 's':
       cube->set_steps(abs(atoi(optarg)));

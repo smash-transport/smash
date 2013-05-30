@@ -61,9 +61,9 @@ void process_params(Box *box, Parameters *parameters, char *path) {
     if (strcmp(key, "RANDOMSEED") == 0) {
       /* negative seed means random startup value */
       if (atol(value) > 0)
-        box->set_seed(atol(value));
+        parameters->set_seed(atol(value));
       else
-        box->set_seed(time(NULL));
+        parameters->set_seed(time(NULL));
       continue;
     }
     if (strcmp(key, "UPDATE") == 0) {
