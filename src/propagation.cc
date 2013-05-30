@@ -23,9 +23,11 @@ void propagate_particles(std::vector<ParticleData> *particles,
     FourVector distance, position;
 
     for (size_t i = 0; i < particles->size(); i++) {
-      distance.set_FourVector(1.0, (*particles)[i].velocity_x(),
-        (*particles)[i].velocity_y(), (*particles)[i].velocity_z());
-      distance *= parameters.eps();
+      /* propagation for this time step */
+      distance.set_FourVector(parameters.eps(),
+        (*particles)[i].velocity_x() * parameters.eps(),
+        (*particles)[i].velocity_y() * parameters.eps(),
+        (*particles)[i].velocity_z() * parameters.eps());
       printd("Particle %d motion: %g %g %g %g\n", (*particles)[i].id(),
          distance.x0(), distance.x1(), distance.x2(), distance.x3());
 
