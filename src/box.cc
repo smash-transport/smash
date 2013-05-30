@@ -208,7 +208,7 @@ static void check_collision_geometry(std::vector<ParticleData> *particle,
 /* Evolve - the core of the box, stepping forward in time */
 static int Evolve(std::vector<ParticleData> *particles,
   std::vector<ParticleType> *particle_type, std::map<int, int> *map_type,
-  const Parameters parameters, const Box &box) {
+  const Parameters &parameters, const Box &box) {
   std::list<int> collision_list;
   size_t scatterings_total = 0;
 
