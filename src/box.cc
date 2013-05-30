@@ -21,6 +21,7 @@
 #include "include/ParticleType.h"
 #include "include/collisions.h"
 #include "include/constants.h"
+#include "include/input-particles.h"
 #include "include/initial-conditions.h"
 #include "include/macros.h"
 #include "include/param-reader.h"
@@ -206,7 +207,7 @@ static void check_collision_geometry(std::vector<ParticleData> *particle,
 
 /* Evolve - the core of the box, stepping forward in time */
 static int Evolve(std::vector<ParticleData> *particles,
-  ParticleType *particle_type, std::map<int, int> *map_type,
+  std::vector<ParticleType> *particle_type, std::map<int, int> *map_type,
   const Parameters parameters, const Box &box) {
   std::list<int> collision_list;
   size_t scatterings_total = 0;
@@ -245,7 +246,7 @@ int main(int argc, char *argv[]) {
   char *p, *path;
   int opt, rc;
   std::vector<ParticleData> particles;
-  ParticleType *particle_types = NULL;
+  std::vector<ParticleType> particle_types;
   Box *cube = new Box;
   Parameters *parameters = new Parameters;
   std::map<int, int> map_type;
@@ -271,6 +272,7 @@ int main(int argc, char *argv[]) {
   /* Read config file overrides box constructor defaults */
   int len = 3;
   path = reinterpret_cast<char *>(malloc(len));
+  /* XXX: make path configurable */
   snprintf(path, len, "./");
   process_params(cube, parameters, path);
 
@@ -316,16 +318,16 @@ int main(int argc, char *argv[]) {
   write_oscar_header();
 
   /* Initialize box */
-  particle_types = initial_particles(particle_types);
-  initial_conditions(&particles, particle_types, &map_type, parameters, cube);
+  input_particles(&particle_types, path);
+  initial_conditions(&particles, &particle_types, &map_type, parameters, cube);
   write_particles(particles);
 
   /* Compute stuff */
-  rc = Evolve(&particles, particle_types, &map_type, *parameters, *cube);
+  rc = Evolve(&particles, &particle_types, &map_type, *parameters, *cube);
 
   /* tear down */
   particles.clear();
-  delete [] particle_types;
+  particle_types.clear();
   delete cube;
   delete parameters;
   free(path);

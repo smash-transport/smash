@@ -80,7 +80,7 @@ void collision_criteria_geometry(std::vector<ParticleData> *particle,
 
 /* colliding_particle - particle interaction */
 size_t collide_particles(std::vector<ParticleData> *particle,
-  ParticleType *type, std::map<int, int> *map_type,
+  std::vector<ParticleType> *type, std::map<int, int> *map_type,
   std::list<int> *collision_list, size_t id_process) {
   FourVector velocity_CM;
 
@@ -91,11 +91,11 @@ size_t collide_particles(std::vector<ParticleData> *particle,
     int id_a = *id;
     int id_b = (*particle)[*id].id_partner();
     printd("Process %lu particle %s<->%s colliding %d<->%d time %g\n",
-      id_process, type[(*map_type)[id_a]].name().c_str(),
-      type[(*map_type)[id_b]].name().c_str(), id_a, id_b,
+      id_process, (*type)[(*map_type)[id_a]].name().c_str(),
+      (*type)[(*map_type)[id_b]].name().c_str(), id_a, id_b,
       (*particle)[id_a].position().x0());
-    write_oscar((*particle)[id_a], (*particle)[id_b], type[(*map_type)[id_a]],
-      type[(*map_type)[id_b]], 1);
+    write_oscar((*particle)[id_a], (*particle)[id_b],
+      (*type)[(*map_type)[id_a]], (*type)[(*map_type)[id_b]], 1);
     printd("particle 1 momenta before: %g %g %g %g\n",
       (*particle)[id_a].momentum().x0(), (*particle)[id_a].momentum().x1(),
       (*particle)[id_a].momentum().x2(), (*particle)[id_a].momentum().x3());
@@ -106,11 +106,11 @@ size_t collide_particles(std::vector<ParticleData> *particle,
     /* exchange in center of momenta */
     boost_CM(&(*particle)[id_a], &(*particle)[id_b], &velocity_CM);
     momenta_exchange(&(*particle)[id_a], &(*particle)[id_b],
-      type[(*map_type)[id_a]].mass(), type[(*map_type)[id_b]].mass());
+      (*type)[(*map_type)[id_a]].mass(), (*type)[(*map_type)[id_b]].mass());
     boost_back_CM(&(*particle)[id_a], &(*particle)[id_b],
       &velocity_CM);
-    write_oscar((*particle)[id_a], (*particle)[id_b], type[(*map_type)[id_a]],
-      type[(*map_type)[id_b]], -1);
+    write_oscar((*particle)[id_a], (*particle)[id_b],
+      (*type)[(*map_type)[id_a]], (*type)[(*map_type)[id_b]], -1);
     printd("particle 1 momenta after: %g %g %g %g\n",
       (*particle)[id_a].momentum().x0(), (*particle)[id_a].momentum().x1(),
       (*particle)[id_a].momentum().x2(), (*particle)[id_a].momentum().x3());

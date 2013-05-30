@@ -23,20 +23,17 @@
 #include "include/outputroutines.h"
 
 /* initial_conditions - sets particle type */
-ParticleType* initial_particles(ParticleType *type) {
+void initial_particles(std::vector<ParticleType> *type) {
   /* XXX: use nosql table for particle type values */
-  type = new ParticleType[3];
-  type[0].set("pi+", 0.13957, 211);
-  type[1].set("pi-", 0.13957, -211);
-  type[2].set("pi0", 0.134977, 111);
-
-  return type;
+  (*type).resize(3);
+  (*type)[0].set("pi+", 0.13957, 211);
+  (*type)[1].set("pi-", 0.13957, -211);
+  (*type)[2].set("pi0", 0.134977, 111);
 }
-
 
 /* initial_conditions - sets particle data for @particles */
 void initial_conditions(std::vector<ParticleData> *particles,
-  ParticleType *type, std::map<int, int> *map_type,
+  std::vector<ParticleType> *type, std::map<int, int> *map_type,
   Parameters *parameters, Box *box) {
   double phi, cos_theta, sin_theta, momentum_radial, number_density_total = 0;
   FourVector momentum_total(0, 0, 0, 0);
@@ -46,15 +43,16 @@ void initial_conditions(std::vector<ParticleData> *particles,
   srand48(box->seed());
 
   /* loop over all the particle types */
-  for (int i = 0; i < 3; i++) {
-    printd("%s mass: %g [GeV]\n", type[i].name().c_str(), type[i].mass());
+  for (size_t i = 0; i < (*type).size(); i++) {
+    printd("%s mass: %g [GeV]\n", (*type)[i].name().c_str(), (*type)[i].mass());
     /* 
      * The particle number depends on distribution function
      * (assumes Bose-Einstein):
      * Volume m^2 T BesselK[2, m/T] / (2\pi^2)
      */
-    double number_density = type[i].mass() * type[i].mass() * box->temperature()
-      * gsl_sf_bessel_Knu(2, type[i].mass() / box->temperature())
+    double number_density = (*type)[i].mass() * (*type)[i].mass()
+      * box->temperature()
+      * gsl_sf_bessel_Knu(2, (*type)[i].mass() / box->temperature())
       * 0.5 * M_1_PI * M_1_PI / hbarc / hbarc / hbarc;
     /* cast while reflecting probability of extra particle */
     number = box->length() * box->length() * box->length() * number_density
@@ -63,7 +61,7 @@ void initial_conditions(std::vector<ParticleData> *particles,
       > drand48())
       number++;
     printf("IC number density %.6g [fm^-3]\n", number_density);
-    printf("IC %lu number of %s\n", number, type[i].name().c_str());
+    printf("IC %lu number of %s\n", number, (*type)[i].name().c_str());
     number_density_total += number_density;
 
     /* Set random IC:
@@ -80,29 +78,29 @@ void initial_conditions(std::vector<ParticleData> *particles,
       /* back to back pair creation with random momenta direction */
       if (unlikely(id == number + number_total - 1 && !(id % 2) && i == 2)) {
         /* poor last guy just sits around */
-        (*particles)[id].set_momentum(type[i].mass(), 0, 0, 0);
+        (*particles)[id].set_momentum((*type)[i].mass(), 0, 0, 0);
       } else if (!(id % 2)) {
         /* thermal momentum according Maxwell-Boltzmann distribution */
-        momentum_radial = sample_momenta(box, type[i]);
+        momentum_radial = sample_momenta(box, (*type)[i]);
         /* phi in the range from [0, 2 * pi) */
         phi =  2.0 * M_PI * drand48();
         if (box->initial_condition() != 2) {
-	  /* cos(theta) in the range from [-1.0, 1.0) */
+          /* cos(theta) in the range from [-1.0, 1.0) */
           cos_theta = -1.0 + 2.0 * drand48();
           sin_theta = sqrt(1.0 - cos_theta * cos_theta);
         } else {
-	  /* IC == 2 momenta in the plane */
+          /* IC == 2 momenta in the plane */
           cos_theta = 0.0;
           sin_theta = 1.0;
         }
         printd("Particle %lu radial momenta %g phi %g cos_theta %g\n", id,
           momentum_radial, phi, cos_theta);
-        (*particles)[id].set_momentum(type[i].mass(),
+        (*particles)[id].set_momentum((*type)[i].mass(),
           momentum_radial * cos(phi) * sin_theta,
           momentum_radial * sin(phi) * sin_theta,
           momentum_radial * cos_theta);
       } else {
-        (*particles)[id].set_momentum(type[i].mass(),
+        (*particles)[id].set_momentum((*type)[i].mass(),
           - (*particles)[id - 1].momentum().x1(),
           - (*particles)[id - 1].momentum().x2(),
           - (*particles)[id - 1].momentum().x3());

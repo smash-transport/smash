@@ -15,9 +15,9 @@ class ParticleData;
 class ParticleType;
 
 /* initialisation functions */
-ParticleType* initial_particles(ParticleType *type);
+void initial_particles(std::vector<ParticleType> *type);
 void initial_conditions(std::vector<ParticleData> *particles,
-  ParticleType *particle_type, std::map<int, int> *map_type,
+  std::vector <ParticleType> *particle_type, std::map<int, int> *map_type,
   Parameters *parameters, Box *box);
 
 #endif  // SRC_INCLUDE_INITIAL_CONDITIONS_H_

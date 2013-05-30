@@ -15,7 +15,7 @@
 #include "include/Box.h"
 #include "include/Parameters.h"
 
-/* FIXME: hardcoded length cap */
+/* XXX: hardcoded length cap */
 #define FILELEN 256
 
 /* space separation between items */

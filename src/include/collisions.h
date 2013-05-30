@@ -23,7 +23,7 @@ void collision_criteria_geometry(std::vector<ParticleData> *particle,
 
 /* does collisions according to collision table */
 size_t collide_particles(std::vector<ParticleData> *particle,
-  ParticleType *type, std::map<int, int> *map_type,
+  std::vector<ParticleType> *type, std::map<int, int> *map_type,
   std::list<int> *collision_list, size_t id_event);
 
 #endif  // SRC_INCLUDE_COLLISIONS_H_
