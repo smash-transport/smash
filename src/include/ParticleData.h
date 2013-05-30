@@ -103,7 +103,7 @@ void inline ParticleData::set_collision(const double &collision_t,
   id_partner_ = id_b;
 }
 
-/* set happended collision data */
+/* set happened collision data */
 void inline ParticleData::set_collision_past(const int &id_counter) {
   collision_time_ = 0.0;
   id_process_ = id_counter;

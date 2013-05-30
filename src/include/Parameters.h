@@ -40,7 +40,7 @@ class Parameters {
     int64_t seed_;
 };
 
-/* return the number on whihc interval output will be shown */
+/* return the number on which interval output will be shown */
 int inline Parameters::output_interval(void) const {
   return output_interval_;
 }
