@@ -14,6 +14,7 @@
 #include "include/param-reader.h"
 #include "include/Box.h"
 #include "include/Parameters.h"
+#include "include/outputroutines.h"
 
 /* XXX: hardcoded length cap */
 #define FILELEN 256
@@ -42,8 +43,8 @@ void process_params(Box *box, Parameters *parameters, char *path) {
   printf("Processing %s/params.txt.\n", path);
 
   while ((read = getline(&line, &len, fp)) != -1) {
-    dprintf("Retrieved params.txt line of length %zu :\n", read);
-    dprintf("%s", line);
+    printd("Retrieved params.txt line of length %zu :\n", read);
+    printd("%s", line);
     /* Skip comments and blank lines */
     if (line[0] == '#' || line[0] == '\n' || line[0] == '\t' || line[0] == '/')
       continue;
