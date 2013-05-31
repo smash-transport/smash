@@ -129,14 +129,16 @@ void write_particles(const std::vector<ParticleData> &particles) {
 
   snprintf(filename, sizeof(filename), "data/momenta_%.5f.dat",
     particles[0].position().x0() - 1.0);
-  fp = fopen(filename, "a");
+  fp = fopen(filename, "w");
   for (size_t i = 0; i < particles.size(); i++) {
      fprintf(fp, "%g %g %g %g\n", particles[i].momentum().x0(),
        particles[i].momentum().x1(),  particles[i].momentum().x2(),
        particles[i].momentum().x3());
   }
   fclose(fp);
-  fp = fopen("data/position.dat", "a");
+  snprintf(filename, sizeof(filename), "data/position_%.5f.dat",
+    particles[0].position().x0() - 1.0);
+  fp = fopen(filename, "w");
   for (size_t i = 0; i < particles.size(); i++) {
      fprintf(fp, "%g %g %g %g\n", particles[i].position().x0(),
        particles[i].position().x1(), particles[i].position().x2(),
