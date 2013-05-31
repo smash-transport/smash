@@ -155,10 +155,14 @@ void momenta_exchange(ParticleData *particle1, ParticleData *particle2,
   /* center of momentum hence this is equal for both particles */
   const double momentum_radial = sqrt(particle1->momentum().x0()
     * particle1->momentum().x0() - particle1_mass * particle1_mass);
+  printd("Particle 1: momentum %g mass %g \n", particle1->momentum().x0(),
+    particle1_mass);
   /* particle exchange momenta and scatter to random direction */
   const double phi =  2.0 * M_PI * drand48();
   const double cos_theta = -1.0 + 2.0 * drand48();
   const double sin_theta = sqrt(1.0 - cos_theta * cos_theta);
+  printd("Random momentum: %g %g %g %g \n", momentum_radial, phi, cos_theta,
+    sin_theta);
   const FourVector momentum1(sqrt(particle1_mass * particle1_mass
     + momentum_radial * momentum_radial),
      momentum_radial * cos(phi) * sin_theta,
