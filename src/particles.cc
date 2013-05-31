@@ -122,9 +122,21 @@ double collision_time(ParticleData *particle1, ParticleData *particle2) {
    */
   FourVector position_difference = particle1->position()
     - particle2->position();
+  printd("Particle %d<->%d position difference: %g %g %g %g [fm]\n",
+    particle1->id(), particle2->id(), position_difference.x0(),
+    position_difference.x1(), position_difference.x2(),
+    position_difference.x3());
   FourVector velocity_difference = particle1->momentum()
     / particle1->momentum().x0()
     - particle2->momentum() / particle2->momentum().x0();
+  printd("Particle %d<->%d velocity difference: %g %g %g %g [fm]\n",
+    particle1->id(), particle2->id(), velocity_difference.x0(),
+    velocity_difference.x1(), velocity_difference.x2(),
+    velocity_difference.x3());
+  /* zero momentum leads to infite distance, particles are not approaching */
+  if (velocity_difference.x1() == 0.0 || velocity_difference.x2() == 0.0
+      || velocity_difference.x3() == 0.0)
+    return -1.0;
   return - position_difference.DotThree(velocity_difference)
            / velocity_difference.DotThree(velocity_difference);
 }
