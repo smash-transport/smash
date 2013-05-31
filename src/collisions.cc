@@ -49,24 +49,45 @@ void collision_criteria_geometry(std::vector<ParticleData> *particle,
   if (time_collision < 0 || time_collision >= parameters.eps())
     return;
 
-  /* check for minimal collision time */
-  if ((*particle)[id_a].collision_time() > 0
-        && time_collision > (*particle)[id_a].collision_time()) {
+  /* check for minimal collision time both particles */
+  if (((*particle)[id_a].collision_time() > 0
+        && time_collision > (*particle)[id_a].collision_time())
+      || ((*particle)[id_b].collision_time() > 0
+        && time_collision > (*particle)[id_b].collision_time())) {
     printd("%g Not minimal particle %d <-> %d\n",
         (*particle)[id_a].position().x0(), id_a, id_b);
     return;
   }
 
-  /* handle minimal collision time */
+  /* handle minimal collision time of both particles */
+  /* XXX: keep track of multiple possible collision partners */
   if (unlikely((*particle)[id_a].collision_time() > 0)) {
     int id_not = (*particle)[id_a].id_partner();
     printd("Not colliding particle %d <-> %d\n", id_a, id_not);
     /* unset collision partner to zero time and unexisting id */
     (*particle)[id_not].set_collision(0.0, -1);
     /* remove any of those partners from the list */
-    collision_list->remove(id_a);
-    collision_list->remove(id_not);
-    /* XXX: keep track of multiple possible collision partners */
+    if (id_a < id_not) {
+      printd("Removing particle %d from collision list\n", id_a);
+      collision_list->remove(id_a);
+    } else {
+      printd("Removing particle %d from collision list\n", id_not);
+      collision_list->remove(id_not);
+    }
+  }
+  if (unlikely((*particle)[id_b].collision_time() > 0)) {
+    int id_not = (*particle)[id_b].id_partner();
+    printd("Not colliding particle %d <-> %d\n", id_b, id_not);
+    /* unset collision partner to zero time and unexisting id */
+    (*particle)[id_not].set_collision(0.0, -1);
+    /* remove any of those partners from the list */
+    if (id_b < id_not) {
+      printd("Removing particle %d from collision list\n", id_b);
+      collision_list->remove(id_b);
+    } else {
+      printd("Removing particle %d from collision list\n", id_not);
+      collision_list->remove(id_not);
+    }
   }
 
   /* setup collision partners */
@@ -84,12 +105,13 @@ size_t collide_particles(std::vector<ParticleData> *particle,
   std::list<int> *collision_list, size_t id_process) {
   FourVector velocity_CM;
 
+  /* XXX: print debug output of collision list */
   /* collide: 2 <-> 2 soft momenta exchange */
   for (std::list<int>::iterator id = collision_list->begin();
     id != collision_list->end(); ++id) {
     /* relevant particle id's for the collision */
     int id_a = *id;
-    int id_b = (*particle)[*id].id_partner();
+    int id_b = (*particle)[id_a].id_partner();
     printd("Process %lu particle %s<->%s colliding %d<->%d time %g\n",
       id_process, (*type)[(*map_type)[id_a]].name().c_str(),
       (*type)[(*map_type)[id_b]].name().c_str(), id_a, id_b,
