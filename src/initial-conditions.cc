@@ -84,19 +84,15 @@ void initial_conditions(std::vector<ParticleData> *particles,
         if (box->initial_condition() != 2) {
           /* thermal momentum according Maxwell-Boltzmann distribution */
           momentum_radial = sample_momenta(box, (*type)[i]);
-          /* phi in the range from [0, 2 * pi) */
-          phi = 2.0 * M_PI * drand48();
-          /* cos(theta) in the range from [-1.0, 1.0) */
-          cos_theta = -1.0 + 2.0 * drand48();
-          sin_theta = sqrt(1.0 - cos_theta * cos_theta);
         } else {
           /* IC == 2 initial thermal momentum is the average 3T */
           momentum_radial = 3.0 * box->temperature();
-          /* IC == 2 all momenta in the x-direction */
-          phi = 0.0;
-          cos_theta = 0.0;
-          sin_theta = 1.0;
         }
+        /* phi in the range from [0, 2 * pi) */
+        phi = 2.0 * M_PI * drand48();
+        /* cos(theta) in the range from [-1.0, 1.0) */
+        cos_theta = -1.0 + 2.0 * drand48();
+        sin_theta = sqrt(1.0 - cos_theta * cos_theta);
         printd("Particle %lu radial momenta %g phi %g cos_theta %g\n", id,
           momentum_radial, phi, cos_theta);
         (*particles)[id].set_momentum((*type)[i].mass(),
