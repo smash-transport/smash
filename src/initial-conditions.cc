@@ -76,20 +76,24 @@ void initial_conditions(std::vector<ParticleData> *particles,
       (*map_type)[id] = i;
 
       /* back to back pair creation with random momenta direction */
-      if (unlikely(id == number + number_total - 1 && !(id % 2) && i == 2)) {
+      if (unlikely(id == number + number_total - 1 && !(id % 2) && i == 2
+                   && box->initial_condition() != 2)) {
         /* poor last guy just sits around */
         (*particles)[id].set_momentum((*type)[i].mass(), 0, 0, 0);
-      } else if (!(id % 2)) {
-        /* thermal momentum according Maxwell-Boltzmann distribution */
-        momentum_radial = sample_momenta(box, (*type)[i]);
-        /* phi in the range from [0, 2 * pi) */
-        phi =  2.0 * M_PI * drand48();
+      } else if (!(id % 2) || box->initial_condition() == 2) {
         if (box->initial_condition() != 2) {
+          /* thermal momentum according Maxwell-Boltzmann distribution */
+          momentum_radial = sample_momenta(box, (*type)[i]);
+          /* phi in the range from [0, 2 * pi) */
+          phi = 2.0 * M_PI * drand48();
           /* cos(theta) in the range from [-1.0, 1.0) */
           cos_theta = -1.0 + 2.0 * drand48();
           sin_theta = sqrt(1.0 - cos_theta * cos_theta);
         } else {
-          /* IC == 2 momenta in the plane */
+          /* IC == 2 initial thermal momentum is the average 3T */
+          momentum_radial = 3.0 * box->temperature();
+          /* IC == 2 all momenta in the x-direction */
+          phi = 0.0;
           cos_theta = 0.0;
           sin_theta = 1.0;
         }
@@ -99,7 +103,7 @@ void initial_conditions(std::vector<ParticleData> *particles,
           momentum_radial * cos(phi) * sin_theta,
           momentum_radial * sin(phi) * sin_theta,
           momentum_radial * cos_theta);
-      } else {
+      } else if (box->initial_condition() != 2) {
         (*particles)[id].set_momentum((*type)[i].mass(),
           - (*particles)[id - 1].momentum().x1(),
           - (*particles)[id - 1].momentum().x2(),
