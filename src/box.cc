@@ -210,10 +210,12 @@ static int Evolve(std::vector<ParticleData> *particles,
   std::vector<ParticleType> *particle_type, std::map<int, int> *map_type,
   const Parameters &parameters, const Box &box) {
   std::list<int> collision_list;
-  size_t scatterings_total = 0;
+  size_t scatterings_total = 0, previous_scatterings_total = 0,
+    scatterings_this_interval = 0;
 
   /* startup values */
-  print_measurements(*particles, scatterings_total, box);
+  print_measurements(*particles, scatterings_total,
+                     scatterings_this_interval, box);
 
   for (int steps = 0; steps < box.steps(); steps++) {
     /* fill collision table by cells */
@@ -229,7 +231,13 @@ static int Evolve(std::vector<ParticleData> *particles,
 
     /* physics output during the run */
     if (steps > 0 && (steps + 1) % parameters.output_interval() == 0) {
-      print_measurements(*particles, scatterings_total, box);
+      scatterings_this_interval = scatterings_total
+        - previous_scatterings_total;
+
+      previous_scatterings_total = scatterings_total;
+
+      print_measurements(*particles, scatterings_total,
+                         scatterings_this_interval, box);
       /* save evolution data */
       write_particles(*particles);
       write_vtk(*particles);

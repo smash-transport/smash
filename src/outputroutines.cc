@@ -22,7 +22,7 @@
 
 /* print_line - output a visible seperator */
 static void print_line(void) {
-  int field_width = 70;
+  int field_width = 80;
 
   for (int i = 0; i < field_width; i++)
     printf("-");
@@ -43,7 +43,8 @@ void print_startup(const Box &box, const Parameters &parameters) {
 /* print_header - title for each row */
 void print_header(void) {
   print_line();
-  printf(" Time    <Etot>    <Ediff>      <ptot>       <sigma>     <timing>\n");
+  printf(" Time    <Etot>    <Ediff>        <ptot>     <scattrate>"
+         "    <scatt>    <timing>\n");
   print_line();
 }
 
@@ -70,7 +71,9 @@ double measure_timediff(const Box &box) {
 
 /* print_measurements - console output during simulation */
 void print_measurements(const std::vector<ParticleData> &particles,
-  const size_t &scatterings_total, const Box &box) {
+                        const size_t &scatterings_total,
+                        const size_t &scatterings_this_interval,
+                        const Box &box) {
   FourVector momentum_total(0, 0, 0, 0);
   /* use the time from the first particle - startup time */
   double time = particles[0].position().x0() - 1.0;
@@ -80,14 +83,15 @@ void print_measurements(const std::vector<ParticleData> &particles,
   for (size_t i = 0; i < particles.size(); i++)
     momentum_total += particles[i].momentum();
   if (likely(time > 0))
-    printf("%5g%10g%13g%13g%13g%13g\n", time, momentum_total.x0(),
-          box.energy_initial() - momentum_total.x0(),
-          sqrt(-1 * momentum_total.DotThree()),
-          scatterings_total * 2 / (particles.size() * time), elapsed);
+    printf("%5g%10g%13g%13g%13g%13zu%13g\n", time, momentum_total.x0(),
+           box.energy_initial() - momentum_total.x0(),
+           sqrt(-1 * momentum_total.DotThree()),
+           scatterings_total * 2 / (particles.size() * time),
+           scatterings_this_interval, elapsed);
   else
-    printf("%5g%10g%13g%13g%13g%13g\n", time, momentum_total.x0(),
+    printf("%5g%10g%13g%13g%13g%13i%13g\n", time, momentum_total.x0(),
           box.energy_initial() - momentum_total.x0(),
-          sqrt(-1 * momentum_total.DotThree()), 0.0, elapsed);
+           sqrt(-1 * momentum_total.DotThree()), 0.0, 0, elapsed);
 }
 
 /* print_tail - output at the end of the simulation */

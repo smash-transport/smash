@@ -45,7 +45,7 @@ void initial_conditions(std::vector<ParticleData> *particles,
   /* loop over all the particle types */
   for (size_t i = 0; i < (*type).size(); i++) {
     printd("%s mass: %g [GeV]\n", (*type)[i].name().c_str(), (*type)[i].mass());
-    /* 
+    /*
      * The particle number depends on distribution function
      * (assumes Bose-Einstein):
      * Volume m^2 T BesselK[2, m/T] / (2\pi^2)

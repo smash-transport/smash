@@ -21,7 +21,9 @@ class ParticleType;
 void print_startup(const Box &box, const Parameters &parameters);
 void print_header(void);
 void print_measurements(const std::vector<ParticleData> &particle,
-  const size_t &scatterings_total, const Box &box);
+                        const size_t &scatterings_total,
+                        const size_t &scatterings_this_interval,
+                        const Box &box);
 void print_tail(const Box &box, const double &scattering_rate);
 
 /* data directory */
