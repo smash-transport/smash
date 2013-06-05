@@ -58,14 +58,23 @@ void input_particles(std::vector<ParticleType> *type, char *path) {
     characters = strtok_r(NULL, sep, &saveptr);
     if (characters == NULL)
       continue;
-    float pdgcode = atof(characters);
+    int pdgcode = atoi(characters);
+    characters = strtok_r(NULL, sep, &saveptr);
+    if (characters == NULL)
+      continue;
+    int isospin = atoi(characters);
+    characters = strtok_r(NULL, sep, &saveptr);
+    if (characters == NULL)
+      continue;
+    int charge = atoi(characters);
 
     /* Have a new particle type */
     (*type).resize(type_number + 1);
-    printd("Setting particle type %s mass %g pdgcode %g\n", particle_name,
-      mass, pdgcode);
+    printd("Setting particle type %s mass %g pdgcode %i"
+           " isospin %i charge %i \n", particle_name,
+           mass, pdgcode, isospin, charge);
     std::string name(particle_name);
-    (*type)[type_number].set(name, mass, pdgcode);
+    (*type)[type_number].set(name, mass, pdgcode, isospin, charge);
     type_number++;
   }
   free(line);
