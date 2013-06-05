@@ -44,6 +44,11 @@ void initial_conditions(std::vector<ParticleData> *particles,
 
   /* loop over all the particle types */
   for (size_t i = 0; i < (*type).size(); i++) {
+
+    /* Particles with width > 0 (resonances) do not exist in the beginning */
+    if ((*type)[i].width() > 0.0)
+      continue;
+
     printd("%s mass: %g [GeV]\n", (*type)[i].name().c_str(), (*type)[i].mass());
     /*
      * The particle number depends on distribution function
