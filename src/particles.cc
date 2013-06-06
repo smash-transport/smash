@@ -182,3 +182,20 @@ void momenta_exchange(ParticleData *particle1, ParticleData *particle2,
     particle2->momentum().x1(), particle2->momentum().x2(),
     particle2->momentum().x3());
 }
+
+/* resonance_cross_section - energy-dependent cross section
+ * for producing a resonance
+ */
+
+double resonance_cross_section(ParticleData *particle1, ParticleData *particle2,
+  ParticleType *type_particle1, ParticleType *type_particle2) {
+
+  /* Mandelstam s = (p_a + p_b)^2 = square of CMS energy */
+  const double mandelstam_s =
+       ( (*particle1).momentum() + (*particle2).momentum()).Dot(
+         (*particle1).momentum() + (*particle2).momentum() );
+
+  double cross_section = 1.0;
+
+  return cross_section;
+}

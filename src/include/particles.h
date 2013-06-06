@@ -30,4 +30,8 @@ double collision_time(ParticleData *particle1, ParticleData *particle2);
 /* momenta_exchange - soft scattering */
 void momenta_exchange(ParticleData *particle1, ParticleData *particle2,
   const float &particle1_mass, const float &particle2_mass);
+
+double resonance_cross_section(ParticleData *particle1, ParticleData *particle2,
+  ParticleType *type_particle1, ParticleType *type_particle2);
+
 #endif  // SRC_INCLUDE_PARTICLES_H_

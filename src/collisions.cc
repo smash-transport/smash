@@ -23,7 +23,8 @@
  *                               happens between particles
  */
 void collision_criteria_geometry(std::vector<ParticleData> *particle,
-  std::list<int> *collision_list, Parameters const &parameters, int id_a,
+  std::vector<ParticleType> *particle_type, std::map<int, int> *map_type,
+  std::list<int> *collision_list, const Parameters &parameters, int id_a,
   int id_b) {
   /* just collided with this particle */
   if ((*particle)[id_a].id_process() >= 0
@@ -34,17 +35,22 @@ void collision_criteria_geometry(std::vector<ParticleData> *particle,
   }
 
   {
-  /* distance criteria according to cross_section */
-  double const distance_squared = particle_distance(&(*particle)[id_a],
-    &(*particle)[id_b]);
-  if (distance_squared >= parameters.cross_section() * fm2_mb * M_1_PI)
-    return;
-  printd("distance squared particle %d <-> %d: %g \n", id_a, id_b,
-    distance_squared);
+    /* Total cross section is elastic + resonance production  */
+    const double total_cross_section = parameters.cross_section()
+    + resonance_cross_section(&(*particle)[id_a], &(*particle)[id_b],
+    &(*particle_type)[(*map_type)[id_a]], &(*particle_type)[(*map_type)[id_b]]);
+
+    /* distance criteria according to cross_section */
+    const double distance_squared = particle_distance(&(*particle)[id_a],
+                                     &(*particle)[id_b]);
+    if (distance_squared >= total_cross_section * fm2_mb * M_1_PI)
+      return;
+    printd("distance squared particle %d <-> %d: %g \n", id_a, id_b,
+           distance_squared);
   }
 
   /* check according timestep: positive and smaller */
-  double const time_collision = collision_time(&(*particle)[id_a],
+  const double time_collision = collision_time(&(*particle)[id_a],
     &(*particle)[id_b]);
   if (time_collision < 0 || time_collision >= parameters.eps())
     return;
