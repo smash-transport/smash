@@ -244,3 +244,17 @@ double resonance_cross_section(ParticleData *particle1, ParticleData *particle2,
   return proportionality * breit_wigner(mandelstam_s,
           resonance_mass, resonance_width) / mandelstam_s;
 }
+
+/* 1->2 resonance decay process */
+void resonance_decay(std::vector<ParticleData> *particle,
+  std::vector<ParticleType> *type, std::map<int, int> *map_type,
+  int *particle_id) {
+
+}
+
+/* 2->1 resonance formation process */
+void resonance_formation(std::vector<ParticleData> *particle,
+  std::vector<ParticleType> *type, std::map<int, int> *map_type,
+  int *particle_id) {
+
+}

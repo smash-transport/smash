@@ -120,7 +120,7 @@ void initial_conditions(std::vector<ParticleData> *particles,
       (*particles)[id].set_position(time_start, x_pos, y_pos, z_pos);
 
       /* no collision yet hence zero time and unexisting id */
-      (*particles)[id].set_collision(0, -1);
+      (*particles)[id].set_collision(-1, 0, -1);
 
       /* IC: debug checks */
       printd_momenta((*particles)[id]);

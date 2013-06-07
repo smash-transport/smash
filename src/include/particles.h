@@ -8,6 +8,7 @@
 #ifndef SRC_INCLUDE_PARTICLES_H_
 #define SRC_INCLUDE_PARTICLES_H_
 
+#include <map>
 #include <vector>
 
 /* necessary forward declarations */
@@ -34,8 +35,21 @@ double collision_time(ParticleData *particle1, ParticleData *particle2);
 void momenta_exchange(ParticleData *particle1, ParticleData *particle2,
   const float &particle1_mass, const float &particle2_mass);
 
+/* resonance_cross_section - energy-dependent cross section
+ * for producing a resonance
+ */
 double resonance_cross_section(ParticleData *particle1, ParticleData *particle2,
   ParticleType *type_particle1, ParticleType *type_particle2,
   std::vector<ParticleType> *type_list);
+
+/* 1->2 resonance decay process */
+void resonance_decay(std::vector<ParticleData> *particle,
+  std::vector<ParticleType> *type, std::map<int, int> *map_type,
+  int *particle_id);
+
+/* 2->1 resonance formation process */
+void resonance_formation(std::vector<ParticleData> *particle,
+  std::vector<ParticleType> *type, std::map<int, int> *map_type,
+  int *particle_id);
 
 #endif  // SRC_INCLUDE_PARTICLES_H_
