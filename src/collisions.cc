@@ -129,23 +129,27 @@ size_t collide_particles(std::vector<ParticleData> *particle,
     id != collision_list->end(); ++id) {
     /* relevant particle id's for the collision */
     int id_a = *id;
-    int id_b = (*particle)[id_a].id_partner();
+    int id_b = 0;
     int interaction_type = (*particle)[id_a].process_type();
-    printd("Process %lu type %i particle %s<->%s colliding %d<->%d time %g\n",
-      id_process, interaction_type, (*type)[(*map_type)[id_a]].name().c_str(),
-      (*type)[(*map_type)[id_b]].name().c_str(), id_a, id_b,
-      (*particle)[id_a].position().x0());
-    write_oscar((*particle)[id_a], (*particle)[id_b],
-      (*type)[(*map_type)[id_a]], (*type)[(*map_type)[id_b]], 1);
-    printd("particle 1 momenta before: %g %g %g %g\n",
-      (*particle)[id_a].momentum().x0(), (*particle)[id_a].momentum().x1(),
-      (*particle)[id_a].momentum().x2(), (*particle)[id_a].momentum().x3());
-    printd("particle 2 momenta before: %g %g %g %g\n",
-      (*particle)[id_b].momentum().x0(), (*particle)[id_b].momentum().x1(),
-      (*particle)[id_b].momentum().x2(), (*particle)[id_b].momentum().x3());
+    if (interaction_type < 2) {
+      id_b = (*particle)[id_a].id_partner();
+      printd("Process %lu type %i particle %s<->%s colliding %d<->%d time %g\n",
+        id_process, interaction_type, (*type)[(*map_type)[id_a]].name().c_str(),
+             (*type)[(*map_type)[id_b]].name().c_str(), id_a, id_b,
+             (*particle)[id_a].position().x0());
+      write_oscar((*particle)[id_a], (*particle)[id_b],
+                  (*type)[(*map_type)[id_a]], (*type)[(*map_type)[id_b]], 1);
+      printd("particle 1 momenta before: %g %g %g %g\n",
+          (*particle)[id_a].momentum().x0(), (*particle)[id_a].momentum().x1(),
+          (*particle)[id_a].momentum().x2(), (*particle)[id_a].momentum().x3());
+      printd("particle 2 momenta before: %g %g %g %g\n",
+          (*particle)[id_b].momentum().x0(), (*particle)[id_b].momentum().x1(),
+          (*particle)[id_b].momentum().x2(), (*particle)[id_b].momentum().x3());
 
-    /* processes computed in the center of momenta */
-    boost_CM(&(*particle)[id_a], &(*particle)[id_b], &velocity_CM);
+      /* processes computed in the center of momenta */
+      boost_CM(&(*particle)[id_a], &(*particle)[id_b], &velocity_CM);
+    }
+
     if (interaction_type == 0) {
       /* 2->2 elastic scattering*/
       printd("Process: Elastic collision.\n");
@@ -154,27 +158,31 @@ size_t collide_particles(std::vector<ParticleData> *particle,
     } else if (interaction_type == 1) {
       /* 2->1 resonance formation */
       printd("Process: Resonance formation.\n");
-      resonance_formation(particle, type, map_type, &id_a);
+      resonance_formation(particle, type, map_type, &id_a, &id_b);
     } else if (interaction_type == 2) {
       /* 1->2 resonance decay */
       printd("Process: Resonance decay.\n");
+      /* XXX: Need to boost to rest frame */
       resonance_decay(particle, type, map_type, &id_a);
+      /* XXX: Boost the new particles to computational frame */
     } else
        printf("Warning: Unspecified process type, nothing done.\n");
-    boost_back_CM(&(*particle)[id_a], &(*particle)[id_b],
-      &velocity_CM);
-    write_oscar((*particle)[id_a], (*particle)[id_b],
-      (*type)[(*map_type)[id_a]], (*type)[(*map_type)[id_b]], -1);
-    printd("particle 1 momenta after: %g %g %g %g\n",
-      (*particle)[id_a].momentum().x0(), (*particle)[id_a].momentum().x1(),
-      (*particle)[id_a].momentum().x2(), (*particle)[id_a].momentum().x3());
-    printd("particle 2 momenta after: %g %g %g %g\n",
-      (*particle)[id_b].momentum().x0(), (*particle)[id_b].momentum().x1(),
-      (*particle)[id_b].momentum().x2(), (*particle)[id_b].momentum().x3());
 
-    /* unset collision time for both particles + keep id + unset partner */
+    if (interaction_type < 2) {
+      boost_back_CM(&(*particle)[id_a], &(*particle)[id_b],
+       &velocity_CM);
+      write_oscar((*particle)[id_a], (*particle)[id_b],
+       (*type)[(*map_type)[id_a]], (*type)[(*map_type)[id_b]], -1);
+      printd("particle 1 momenta after: %g %g %g %g\n",
+       (*particle)[id_a].momentum().x0(), (*particle)[id_a].momentum().x1(),
+       (*particle)[id_a].momentum().x2(), (*particle)[id_a].momentum().x3());
+      printd("particle 2 momenta after: %g %g %g %g\n",
+       (*particle)[id_b].momentum().x0(), (*particle)[id_b].momentum().x1(),
+       (*particle)[id_b].momentum().x2(), (*particle)[id_b].momentum().x3());
+      /* unset collision time for both particles + keep id + unset partner */
+      (*particle)[id_b].set_collision_past(id_process);
+    }
     (*particle)[id_a].set_collision_past(id_process);
-    (*particle)[id_b].set_collision_past(id_process);
     id_process++;
   }
   /* empty the collision table */

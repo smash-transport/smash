@@ -43,13 +43,13 @@ double resonance_cross_section(ParticleData *particle1, ParticleData *particle2,
   std::vector<ParticleType> *type_list);
 
 /* 1->2 resonance decay process */
-void resonance_decay(std::vector<ParticleData> *particle,
-  std::vector<ParticleType> *type, std::map<int, int> *map_type,
+void resonance_decay(std::vector<ParticleData> *particles,
+  std::vector<ParticleType> *types, std::map<int, int> *map_type,
   int *particle_id);
 
 /* 2->1 resonance formation process */
-void resonance_formation(std::vector<ParticleData> *particle,
-  std::vector<ParticleType> *type, std::map<int, int> *map_type,
-  int *particle_id);
+void resonance_formation(std::vector<ParticleData> *particles,
+  std::vector<ParticleType> *types, std::map<int, int> *map_type,
+                         int *particle_id, int *other_id);
 
 #endif  // SRC_INCLUDE_PARTICLES_H_
