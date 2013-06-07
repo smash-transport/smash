@@ -26,9 +26,9 @@
 void initial_particles(std::vector<ParticleType> *type) {
   /* XXX: use nosql table for particle type values */
   (*type).resize(3);
-  (*type)[0].set("pi+", 0.13957, 211);
-  (*type)[1].set("pi-", 0.13957, -211);
-  (*type)[2].set("pi0", 0.134977, 111);
+  (*type)[0].set("pi+", 0.13957, -1.0, 211, 1, 1);
+  (*type)[1].set("pi-", 0.13957, -1.0, -211, 1, -1);
+  (*type)[2].set("pi0", 0.134977, -1.0, 111, 1, 0);
 }
 
 /* initial_conditions - sets particle data for @particles */
@@ -44,6 +44,11 @@ void initial_conditions(std::vector<ParticleData> *particles,
 
   /* loop over all the particle types */
   for (size_t i = 0; i < (*type).size(); i++) {
+
+    /* Particles with width > 0 (resonances) do not exist in the beginning */
+    if ((*type)[i].width() > 0.0)
+      continue;
+
     printd("%s mass: %g [GeV]\n", (*type)[i].name().c_str(), (*type)[i].mass());
     /*
      * The particle number depends on distribution function
@@ -115,7 +120,7 @@ void initial_conditions(std::vector<ParticleData> *particles,
       (*particles)[id].set_position(time_start, x_pos, y_pos, z_pos);
 
       /* no collision yet hence zero time and unexisting id */
-      (*particles)[id].set_collision(0, -1);
+      (*particles)[id].set_collision(-1, 0, -1);
 
       /* IC: debug checks */
       printd_momenta((*particles)[id]);

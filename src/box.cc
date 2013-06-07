@@ -80,6 +80,7 @@ FourVector boundary_condition(FourVector position, const Box &box) {
 
 /* check_collision_geometry - check if a collision happens between particles */
 static void check_collision_geometry(std::vector<ParticleData> *particle,
+  std::vector<ParticleType> *particle_type, std::map<int, int> *map_type,
   std::list<int> *collision_list, Parameters const &parameters,
   Box const &box) {
   std::vector<std::vector<std::vector<std::vector<unsigned int> > > > grid;
@@ -102,8 +103,8 @@ static void check_collision_geometry(std::vector<ParticleData> *particle,
         /* skip particles that are double interaction radius length away */
         if (distance > radial_interaction)
             continue;
-        collision_criteria_geometry(particle, collision_list, parameters, id,
-          id_other);
+        collision_criteria_geometry(particle, particle_type, map_type,
+                              collision_list, parameters, id, id_other);
       }
     return;
   }
@@ -132,6 +133,11 @@ static void check_collision_geometry(std::vector<ParticleData> *particle,
    */
   FourVector shift;
   for (size_t id = 0; id < particle->size() - 1; id++) {
+
+    /* Don't bother with resonances */
+    if ((*particle_type)[(*map_type)[id]].width() > 0.0)
+      continue;
+
     /* XXX: function - map particle position to grid number */
     z = round((*particle)[id].position().x1() / box.length() * (N - 1));
     x = round((*particle)[id].position().x2() / box.length() * (N - 1));
@@ -187,14 +193,14 @@ static void check_collision_geometry(std::vector<ParticleData> *particle,
 
             printd("grid cell particle %lu <-> %i\n", id, *id_other);
             if (shift == 0) {
-              collision_criteria_geometry(particle, collision_list, parameters,
-                id, *id_other);
+              collision_criteria_geometry(particle, particle_type, map_type,
+                                   collision_list, parameters, id, *id_other);
             } else {
               /* apply eventual boundary before and restore after */
               (*particle)[*id_other].set_position(
                 (*particle)[*id_other].position() + shift);
-              collision_criteria_geometry(particle, collision_list, parameters,
-                id, *id_other);
+              collision_criteria_geometry(particle, particle_type, map_type,
+                                   collision_list, parameters, id, *id_other);
               (*particle)[*id_other].set_position(
                 (*particle)[*id_other].position() - shift);
             }
@@ -219,7 +225,8 @@ static int Evolve(std::vector<ParticleData> *particles,
 
   for (int steps = 0; steps < box.steps(); steps++) {
     /* fill collision table by cells */
-    check_collision_geometry(particles, &collision_list, parameters, box);
+    check_collision_geometry(particles, particle_type, map_type,
+                                &collision_list, parameters, box);
 
     /* particle interactions */
     if (!collision_list.empty())

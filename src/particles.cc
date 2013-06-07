@@ -10,8 +10,10 @@
 #include "include/particles.h"
 
 #include <cstdio>
+#include <cstring>
 
 #include "include/constants.h"
+#include "include/distributions.h"
 #include "include/FourVector.h"
 #include "include/outputroutines.h"
 #include "include/ParticleData.h"
@@ -181,4 +183,78 @@ void momenta_exchange(ParticleData *particle1, ParticleData *particle2,
   printd("exchanged momenta 2: %g %g %g %g \n", particle2->momentum().x0(),
     particle2->momentum().x1(), particle2->momentum().x2(),
     particle2->momentum().x3());
+}
+
+/* resonance_cross_section - energy-dependent cross section
+ * for producing a resonance
+ */
+
+double resonance_cross_section(ParticleData *particle1, ParticleData *particle2,
+  ParticleType *type_particle1, ParticleType *type_particle2,
+  std::vector<ParticleType> *type_list) {
+
+  const int charge1 = (*type_particle1).charge(),
+    charge2 = (*type_particle2).charge();
+
+  /* Total charge defines the type of resonance */
+  /* We have no resonances with charge > 1 */
+  if (abs(charge1 + charge2) > 1)
+    return 0.0;
+
+  std::string resonance_name;
+  if (charge1 + charge2 == 1)
+    resonance_name = "rho+";
+  else if (charge1 + charge2 == -1)
+    resonance_name = "rho-";
+  else
+    resonance_name = "rho0";
+
+  /* Find the width and mass of the desired resonance */
+  float resonance_width = -1.0, resonance_mass = 0.0;
+  size_t type_index = 0;
+  while (resonance_width < 0 && type_index < (*type_list).size()) {
+    if (strcmp((*type_list)[type_index].name().c_str(),
+               resonance_name.c_str()) == 0) {
+      resonance_width = (*type_list)[type_index].width();
+      resonance_mass = (*type_list)[type_index].mass();
+      printd("Found resonance %s with mass %f and width %f.\n",
+             resonance_name.c_str(), resonance_mass, resonance_width);
+      printd("Original pions: %s %s Charges: %i %i \n",
+             (*type_particle1).name().c_str(), (*type_particle2).name().c_str(),
+             (*type_particle1).charge(), (*type_particle2).charge());
+    }
+    type_index++;
+  }
+
+  /* If there was no such resonance in the list, return 0 */
+  if (resonance_width < 0.0)
+    return 0.0;
+
+  /* Mandelstam s = (p_a + p_b)^2 = square of CMS energy */
+  const double mandelstam_s =
+       ( (*particle1).momentum() + (*particle2).momentum()).Dot(
+         (*particle1).momentum() + (*particle2).momentum() );
+
+  /* XXX: Arbitrary proportionality constant */
+  const double proportionality = 10.0;
+
+  /* Calculate resonance production cross section
+   * using the Breit-Wigner distribution as probability amplitude
+   */
+  return proportionality * breit_wigner(mandelstam_s,
+          resonance_mass, resonance_width) / mandelstam_s;
+}
+
+/* 1->2 resonance decay process */
+void resonance_decay(std::vector<ParticleData> *particle,
+  std::vector<ParticleType> *type, std::map<int, int> *map_type,
+  int *particle_id) {
+
+}
+
+/* 2->1 resonance formation process */
+void resonance_formation(std::vector<ParticleData> *particle,
+  std::vector<ParticleType> *type, std::map<int, int> *map_type,
+  int *particle_id) {
+
 }

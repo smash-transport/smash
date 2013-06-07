@@ -11,6 +11,12 @@
 class Box;
 class ParticleType;
 
+/* Breit-Wigner distribution for calculating resonance
+ * production probability
+ */
+double breit_wigner(double mandelstam_s, float resonance_mass,
+                          float resonance_width);
+
 /* density_integrand - Maxwell-Boltzmann distribution */
 double inline density_integrand(double momentum, double temp, double mass);
 

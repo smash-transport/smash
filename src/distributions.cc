@@ -18,6 +18,18 @@
 #include "include/macros.h"
 #include "include/ParticleType.h"
 
+/* Breit-Wigner distribution for calculating resonance
+ * production probability
+ */
+double breit_wigner(const double mandelstam_s, const float resonance_mass,
+                    const float resonance_width) {
+
+  return mandelstam_s * resonance_width * resonance_width
+          / ((mandelstam_s - resonance_mass * resonance_mass)
+             * (mandelstam_s - resonance_mass * resonance_mass)
+             + mandelstam_s * resonance_width * resonance_width);
+}
+
 /* density_integrand - Maxwell-Boltzmann distribution */
 double inline density_integrand(double momentum, double temp, double mass) {
   return 4 * M_PI * momentum * momentum
