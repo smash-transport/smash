@@ -133,6 +133,11 @@ static void check_collision_geometry(std::vector<ParticleData> *particle,
    */
   FourVector shift;
   for (size_t id = 0; id < particle->size() - 1; id++) {
+
+    /* Don't bother with resonances */
+    if ((*particle_type)[(*map_type)[id]].width() > 0.0)
+      continue;
+
     /* XXX: function - map particle position to grid number */
     z = round((*particle)[id].position().x1() / box.length() * (N - 1));
     x = round((*particle)[id].position().x2() / box.length() * (N - 1));

@@ -11,6 +11,7 @@
 /* necessary forward declarations */
 class ParticleData;
 class FourVector;
+class ParticleType;
 
 /* boost_CM - boost to center of momentum */
 void boost_CM(ParticleData *particle1, ParticleData *particle2,

@@ -10,6 +10,7 @@
 #include "include/particles.h"
 
 #include <cstdio>
+#include <cstring>
 
 #include "include/constants.h"
 #include "include/FourVector.h"
@@ -189,6 +190,21 @@ void momenta_exchange(ParticleData *particle1, ParticleData *particle2,
 
 double resonance_cross_section(ParticleData *particle1, ParticleData *particle2,
   ParticleType *type_particle1, ParticleType *type_particle2) {
+
+  const int charge1 = (*type_particle1).charge(),
+    charge2 = (*type_particle2).charge();
+
+  /* We have no resonances with charge > 1 */
+  if (abs(charge1 + charge2) > 0)
+    return 0.0;
+
+  std::string resonance_name;
+  if (charge1 + charge2 == 1)
+    resonance_name = "rho+";
+  else if (charge1 + charge2 == -1)
+    resonance_name = "rho-";
+  else
+    resonance_name = "rho0";
 
   /* Mandelstam s = (p_a + p_b)^2 = square of CMS energy */
   const double mandelstam_s =
