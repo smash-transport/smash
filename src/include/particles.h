@@ -8,6 +8,8 @@
 #ifndef SRC_INCLUDE_PARTICLES_H_
 #define SRC_INCLUDE_PARTICLES_H_
 
+#include <vector>
+
 /* necessary forward declarations */
 class ParticleData;
 class FourVector;
@@ -33,6 +35,7 @@ void momenta_exchange(ParticleData *particle1, ParticleData *particle2,
   const float &particle1_mass, const float &particle2_mass);
 
 double resonance_cross_section(ParticleData *particle1, ParticleData *particle2,
-  ParticleType *type_particle1, ParticleType *type_particle2);
+  ParticleType *type_particle1, ParticleType *type_particle2,
+  std::vector<ParticleType> *type_list);
 
 #endif  // SRC_INCLUDE_PARTICLES_H_

@@ -189,7 +189,8 @@ void momenta_exchange(ParticleData *particle1, ParticleData *particle2,
  */
 
 double resonance_cross_section(ParticleData *particle1, ParticleData *particle2,
-  ParticleType *type_particle1, ParticleType *type_particle2) {
+  ParticleType *type_particle1, ParticleType *type_particle2,
+  std::vector<ParticleType> *type_list) {
 
   const int charge1 = (*type_particle1).charge(),
     charge2 = (*type_particle2).charge();
@@ -198,6 +199,7 @@ double resonance_cross_section(ParticleData *particle1, ParticleData *particle2,
   if (abs(charge1 + charge2) > 0)
     return 0.0;
 
+  /* Otherwise, total charge defines the type of resonance */
   std::string resonance_name;
   if (charge1 + charge2 == 1)
     resonance_name = "rho+";
@@ -205,6 +207,22 @@ double resonance_cross_section(ParticleData *particle1, ParticleData *particle2,
     resonance_name = "rho-";
   else
     resonance_name = "rho0";
+
+  /* Find the width and mass of the desired resonance */
+  float resonance_width = -1.0, resonance_mass = 0.0;
+  size_t type_index = 0;
+  while (resonance_width < 0 && type_index < (*type_list).size()) {
+    if (strcmp((*type_list)[type_index].name().c_str(),
+               resonance_name.c_str()) == 0) {
+      resonance_width = (*type_list)[type_index].width();
+      resonance_mass = (*type_list)[type_index].mass();
+    }
+    type_index++;
+  }
+
+  /* If there was no such resonance in the list, return 0 */
+  if (resonance_width < 0.0)
+    return 0.0;
 
   /* Mandelstam s = (p_a + p_b)^2 = square of CMS energy */
   const double mandelstam_s =
