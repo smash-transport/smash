@@ -198,7 +198,7 @@ double resonance_cross_section(ParticleData *particle1, ParticleData *particle2,
 
   /* Total charge defines the type of resonance */
   /* We have no resonances with charge > 1 */
-  if (abs(charge1 + charge2) > 0)
+  if (abs(charge1 + charge2) > 1)
     return 0.0;
 
   std::string resonance_name;
@@ -217,6 +217,11 @@ double resonance_cross_section(ParticleData *particle1, ParticleData *particle2,
                resonance_name.c_str()) == 0) {
       resonance_width = (*type_list)[type_index].width();
       resonance_mass = (*type_list)[type_index].mass();
+      printd("Found resonance %s with mass %f and width %f.\n",
+             resonance_name.c_str(), resonance_mass, resonance_width);
+      printd("Original pions: %s %s Charges: %i %i \n",
+             (*type_particle1).name().c_str(), (*type_particle2).name().c_str(),
+             (*type_particle1).charge(), (*type_particle2).charge());
     }
     type_index++;
   }
