@@ -23,6 +23,12 @@ void propagate_particles(std::vector<ParticleData> *particles,
     FourVector distance, position;
 
     for (size_t i = 0; i < particles->size(); i++) {
+      /* The particle has formed a resonance or has decayed
+       * and is not active anymore
+       */
+      if ((*particles)[i].process_type() > 0)
+        continue;
+
       /* propagation for this time step */
       distance.set_FourVector(parameters.eps(),
         (*particles)[i].velocity_x() * parameters.eps(),
