@@ -19,13 +19,14 @@
 #include "include/outputroutines.h"
 #include "include/particles.h"
 
-/* collision_criteria_geometry - check by geomatrical method if a collision
+/* collision_criteria_geometry - check by geometrical method if a collision
  *                               happens between particles
  */
 void collision_criteria_geometry(std::vector<ParticleData> *particle,
   std::vector<ParticleType> *particle_type, std::map<int, int> *map_type,
   std::list<int> *collision_list, const Parameters &parameters, int id_a,
   int id_b) {
+
   /* just collided with this particle */
   if ((*particle)[id_a].id_process() >= 0
       && (*particle)[id_a].id_process() == (*particle)[id_b].id_process()) {
@@ -145,17 +146,20 @@ size_t collide_particles(std::vector<ParticleData> *particle,
 
     /* processes computed in the center of momenta */
     boost_CM(&(*particle)[id_a], &(*particle)[id_b], &velocity_CM);
-    /* 2->2 elastic scattering*/
-    if (interaction_type == 0)
+    if (interaction_type == 0) {
+      /* 2->2 elastic scattering*/
+      printd("Process: Elastic collision.\n");
       momenta_exchange(&(*particle)[id_a], &(*particle)[id_b],
        (*type)[(*map_type)[id_a]].mass(), (*type)[(*map_type)[id_b]].mass());
-    /* 2->1 resonance formation */
-    else if (interaction_type == 1)
-       resonance_formation(particle, type, map_type, &id_a);
-    /* 1->2 resonance decay */
-    else if (interaction_type == 2)
-       resonance_decay(particle, type, map_type, &id_a);
-    else
+    } else if (interaction_type == 1) {
+      /* 2->1 resonance formation */
+      printd("Process: Resonance formation.\n");
+      resonance_formation(particle, type, map_type, &id_a);
+    } else if (interaction_type == 2) {
+      /* 1->2 resonance decay */
+      printd("Process: Resonance decay.\n");
+      resonance_decay(particle, type, map_type, &id_a);
+    } else
        printf("Warning: Unspecified process type, nothing done.\n");
     boost_back_CM(&(*particle)[id_a], &(*particle)[id_b],
       &velocity_CM);
