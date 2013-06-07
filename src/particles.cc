@@ -13,6 +13,7 @@
 #include <cstring>
 
 #include "include/constants.h"
+#include "include/distributions.h"
 #include "include/FourVector.h"
 #include "include/outputroutines.h"
 #include "include/ParticleData.h"
@@ -195,11 +196,11 @@ double resonance_cross_section(ParticleData *particle1, ParticleData *particle2,
   const int charge1 = (*type_particle1).charge(),
     charge2 = (*type_particle2).charge();
 
+  /* Total charge defines the type of resonance */
   /* We have no resonances with charge > 1 */
   if (abs(charge1 + charge2) > 0)
     return 0.0;
 
-  /* Otherwise, total charge defines the type of resonance */
   std::string resonance_name;
   if (charge1 + charge2 == 1)
     resonance_name = "rho+";
@@ -229,7 +230,12 @@ double resonance_cross_section(ParticleData *particle1, ParticleData *particle2,
        ( (*particle1).momentum() + (*particle2).momentum()).Dot(
          (*particle1).momentum() + (*particle2).momentum() );
 
-  double cross_section = 1.0;
+  /* XXX: Arbitrary proportionality constant */
+  const double proportionality = 10.0;
 
-  return cross_section;
+  /* Calculate resonance production cross section
+   * using the Breit-Wigner distribution as probability amplitude
+   */
+  return proportionality * breit_wigner(mandelstam_s,
+          resonance_mass, resonance_width) / mandelstam_s;
 }
