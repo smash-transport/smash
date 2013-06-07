@@ -74,14 +74,22 @@ void print_measurements(const std::vector<ParticleData> &particles,
                         const size_t &scatterings_total,
                         const size_t &scatterings_this_interval,
                         const Box &box) {
+
   FourVector momentum_total(0, 0, 0, 0);
-  /* use the time from the first particle - startup time */
-  double time = particles[0].position().x0() - 1.0;
   /* calculate elapsed time */
   double elapsed = measure_timediff(box);
+  double time = 0.0;
 
-  for (size_t i = 0; i < particles.size(); i++)
+  for (size_t i = 0; i < particles.size(); i++) {
+    /* The particle has formed a resonance or has decayed
+     * and is not active anymore
+     */
+    if (particles[i].process_type() > 0)
+      continue;
     momentum_total += particles[i].momentum();
+    /* use the time from the last active particle - startup time */
+    time = particles[i].position().x0() - 1.0;
+  }
   if (likely(time > 0))
     printf("%5g%10g%13g%13g%13g%13zu%13g\n", time, momentum_total.x0(),
            box.energy_initial() - momentum_total.x0(),
