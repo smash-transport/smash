@@ -96,9 +96,12 @@ static void check_collision_geometry(std::vector<ParticleData> *particle,
     double radial_interaction = sqrt(parameters.cross_section() * fm2_mb
                                      * M_1_PI) * 2;
     for (size_t id = 0; id < particle->size() - 1; id++) {
-      /* Don't bother with resonances */
-      if ((*particle_type)[(*map_type)[id]].width() > 0.0)
-        continue;
+      /* Check resonances for decays first */
+      if ((*particle_type)[(*map_type)[id]].width() > 0.0) {
+        if (does_decay(particle, particle_type, map_type, collision_list,
+            parameters, id))
+          continue;
+      }
 
       /* The particle has formed a resonance or has decayed
        * and is not active anymore
@@ -107,9 +110,12 @@ static void check_collision_geometry(std::vector<ParticleData> *particle,
         continue;
 
       for (size_t id_other = id + 1; id_other < particle->size(); id_other++) {
-        /* Don't bother with resonances here either*/
-        if ((*particle_type)[(*map_type)[id_other]].width() > 0.0)
-          continue;
+        /* Check resonances for decays here too*/
+        if ((*particle_type)[(*map_type)[id_other]].width() > 0.0) {
+            if (does_decay(particle, particle_type, map_type, collision_list,
+                parameters, id_other))
+              continue;
+        }
 
         /* The other particle has formed a resonance or has decayed
          * and is not active anymore
@@ -155,10 +161,12 @@ static void check_collision_geometry(std::vector<ParticleData> *particle,
   FourVector shift;
   for (size_t id = 0; id < particle->size() - 1; id++) {
 
-    /* Don't bother with resonances */
-    if ((*particle_type)[(*map_type)[id]].width() > 0.0)
-      continue;
-
+    /* Check resonances for decay */
+    if ((*particle_type)[(*map_type)[id]].width() > 0.0) {
+      if (does_decay(particle, particle_type, map_type, collision_list,
+          parameters, id))
+        continue;
+    }
     /* The other particle has formed a resonance or has decayed
      * and is not active anymore
      */
@@ -218,9 +226,12 @@ static void check_collision_geometry(std::vector<ParticleData> *particle,
             if (*id_other <= id)
               continue;
 
-            /* Don't bother with resonances here either*/
-            if ((*particle_type)[(*map_type)[*id_other]].width() > 0.0)
-              continue;
+            /* Check resonances for decay */
+            if ((*particle_type)[(*map_type)[*id_other]].width() > 0.0) {
+              if (does_decay(particle, particle_type, map_type, collision_list,
+                 parameters, id))
+                continue;
+            }
 
             /* The other particle has formed a resonance or has decayed
              * and is not active anymore

@@ -17,6 +17,11 @@ class Parameters;
 class ParticleData;
 class ParticleType;
 
+/* does_decay - does a resonance decay on this timestep? */
+bool does_decay(std::vector<ParticleData> *particle,
+  std::vector<ParticleType> *particle_type, std::map<int, int> *map_type,
+  std::list<int> *collision_list, const Parameters &parameters, int id_res);
+
 /* populates collision list if collision applies */
 void collision_criteria_geometry(std::vector<ParticleData> *particle,
   std::vector<ParticleType> *type, std::map<int, int> *map_type,

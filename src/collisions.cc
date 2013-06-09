@@ -20,6 +20,27 @@
 #include "include/outputroutines.h"
 #include "include/particles.h"
 
+/* does_decay - does a resonance decay on this timestep? */
+bool does_decay(std::vector<ParticleData> *particle,
+  std::vector<ParticleType> *particle_type, std::map<int, int> *map_type,
+  std::list<int> *collision_list, const Parameters &parameters, int id_res) {
+
+  /* Exponential decay. Average lifetime = 1 / width */
+  if (drand48() > exp(-(*particle)[id_res].lifetime() * hbarc
+                      / (*particle_type)[(*map_type)[id_res]].width())) {
+
+    /* Time is up! Set the particle to decay at this timestep */
+    (*particle)[id_res].set_collision(2, 0.0, -1);
+    collision_list->push_back(id_res);
+    return true;
+  } else {
+    /* Particle lives at least one more timestep */
+    (*particle)[id_res].set_lifetime((*particle)[id_res].lifetime()
+                                     + parameters.eps());
+    return false;
+  }
+}
+
 /* collision_criteria_geometry - check by geometrical method if a collision
  *                               happens between particles
  */
