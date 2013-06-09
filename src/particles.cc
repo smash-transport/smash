@@ -337,8 +337,8 @@ size_t resonance_formation(std::vector<ParticleData> *particles,
 
   /* Add a new particle */
   size_t old_size = (*particles).size();
-  size_t new_id = old_size + 1;
-  (*particles).resize(new_id);
+  size_t new_id = old_size;
+  (*particles).resize(old_size + 1);
   (*particles)[new_id].set_id(new_id);
 
   /* Which resonance is formed */
@@ -359,8 +359,8 @@ size_t resonance_formation(std::vector<ParticleData> *particles,
   while (not_found && type_index < (*types).size()) {
     if (strcmp((*types)[type_index].name().c_str(),
                resonance_name.c_str()) == 0) {
-      printf("Found resonance %s.\n", resonance_name.c_str());
-      printf("Parent particles: %s %s \n",
+      printd("Found resonance %s.\n", resonance_name.c_str());
+      printd("Parent particles: %s %s \n",
              (*types)[(*map_type)[*particle_id]].name().c_str(),
              (*types)[(*map_type)[*other_id]].name().c_str());
       (*map_type)[new_id] = type_index;
@@ -380,7 +380,7 @@ size_t resonance_formation(std::vector<ParticleData> *particles,
   FourVector resonance_momentum(energy, 0.0, 0.0, 0.0);
   (*particles)[new_id].set_momentum(resonance_momentum);
 
-  printf("Momentum of the new particle: %g %g %g %g \n",
+  printd("Momentum of the new particle: %g %g %g %g \n",
     (*particles)[new_id].momentum().x0(), (*particles)[new_id].momentum().x1(),
     (*particles)[new_id].momentum().x2(), (*particles)[new_id].momentum().x3());
 
@@ -390,8 +390,9 @@ size_t resonance_formation(std::vector<ParticleData> *particles,
   /* No collision yet */
   (*particles)[new_id].set_collision(-1, 0, -1);
 
-  printf("Created %s with ID %lu \n",
-   (*types)[(*map_type)[new_id]].name().c_str(), new_id);
+  printd("Created %s with ID %i \n",
+         (*types)[(*map_type)[new_id]].name().c_str(),
+         (*particles)[new_id].id());
 
   return new_id;
 }
