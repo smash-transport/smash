@@ -246,15 +246,152 @@ double resonance_cross_section(ParticleData *particle1, ParticleData *particle2,
 }
 
 /* 1->2 resonance decay process */
-void resonance_decay(std::vector<ParticleData> *particle,
-  std::vector<ParticleType> *type, std::map<int, int> *map_type,
+size_t resonance_decay(std::vector<ParticleData> *particles,
+  std::vector<ParticleType> *types, std::map<int, int> *map_type,
   int *particle_id) {
 
+  /* Add two new particles */
+  size_t old_size = (*particles).size();
+  size_t new_id_a = old_size, new_id_b = old_size + 1;
+  (*particles).resize(old_size + 2);
+  (*particles)[new_id_a].set_id(new_id_a);
+  (*particles)[new_id_b].set_id(new_id_b);
+
+  const int charge = (*types)[(*map_type)[*particle_id]].charge();
+
+  std::string name_a, name_b;
+  if (charge == 0) {
+    name_a = "pi+";
+    name_b = "pi-";
+  } else if ( charge == 1 ) {
+    name_a = "pi+";
+    name_b = "pi0";
+  } else if ( charge == -1 ) {
+    name_a = "pi-";
+    name_b = "pi0";
+  }
+
+  /* Find the desired particle types */
+  bool not_found_a = true, not_found_b = true;
+  size_t type_index = 0;
+  while ( (not_found_a || not_found_b) && type_index < (*types).size()) {
+    if (strcmp((*types)[type_index].name().c_str(),
+               name_a.c_str()) == 0) {
+      printd("Found particle %s.\n", name_a.c_str());
+      (*map_type)[new_id_a] = type_index;
+      not_found_a = false;
+    }
+    if (strcmp((*types)[type_index].name().c_str(),
+               name_b.c_str()) == 0) {
+      printd("Found particle %s.\n", name_b.c_str());
+      (*map_type)[new_id_b] = type_index;
+      not_found_b = false;
+    }
+    type_index++;
+  }
+
+  const double total_energy = ((*particles)[*particle_id]).momentum().x0();
+  double mass_a = (*types)[(*map_type)[new_id_a]].mass(),
+    mass_b = (*types)[(*map_type)[new_id_b]].mass();
+  double energy_a = (total_energy * total_energy
+                     + mass_a * mass_a + mass_b * mass_b)
+                    / (2.0 * total_energy);
+
+  double momentum_radial = sqrt(energy_a * energy_a - mass_a * mass_a);
+  /* phi in the range from [0, 2 * pi) */
+  double phi = 2.0 * M_PI * drand48();
+  /* cos(theta) in the range from [-1.0, 1.0) */
+  double cos_theta = -1.0 + 2.0 * drand48();
+  double sin_theta = sqrt(1.0 - cos_theta * cos_theta);
+  printd("Particle %lu radial momenta %g phi %g cos_theta %g\n", new_id_a,
+         momentum_radial, phi, cos_theta);
+  (*particles)[new_id_a].set_momentum(mass_a,
+      momentum_radial * cos(phi) * sin_theta,
+      momentum_radial * sin(phi) * sin_theta,
+      momentum_radial * cos_theta);
+  (*particles)[new_id_b].set_momentum(mass_b,
+    - (*particles)[new_id_a].momentum().x1(),
+    - (*particles)[new_id_a].momentum().x2(),
+    - (*particles)[new_id_a].momentum().x3());
+
+  /* Both decay products begin from the same point */
+  FourVector decay_point = (*particles)[*particle_id].position();
+  (*particles)[new_id_a].set_position(decay_point);
+  (*particles)[new_id_b].set_position(decay_point);
+
+  /* No collision yet */
+  (*particles)[new_id_a].set_collision(-1, 0, -1);
+  (*particles)[new_id_b].set_collision(-1, 0, -1);
+
+  printf("Created %s and %s with IDs %lu and %lu \n",
+   (*types)[(*map_type)[new_id_a]].name().c_str(),
+   (*types)[(*map_type)[new_id_b]].name().c_str(), new_id_a, new_id_b);
+
+  return new_id_a;
 }
 
 /* 2->1 resonance formation process */
-void resonance_formation(std::vector<ParticleData> *particle,
-  std::vector<ParticleType> *type, std::map<int, int> *map_type,
-  int *particle_id) {
+size_t resonance_formation(std::vector<ParticleData> *particles,
+  std::vector<ParticleType> *types, std::map<int, int> *map_type,
+                         int *particle_id, int *other_id) {
 
+  /* Add a new particle */
+  size_t old_size = (*particles).size();
+  size_t new_id = old_size + 1;
+  (*particles).resize(new_id);
+  (*particles)[new_id].set_id(new_id);
+
+  /* Which resonance is formed */
+  const int charge1 = (*types)[(*map_type)[*particle_id]].charge(),
+    charge2 = (*types)[(*map_type)[*other_id]].charge();
+
+  std::string resonance_name;
+  if (charge1 + charge2 == 1)
+    resonance_name = "rho+";
+  else if (charge1 + charge2 == -1)
+    resonance_name = "rho-";
+  else
+    resonance_name = "rho0";
+
+  /* Find the desired resonance */
+  bool not_found = true;
+  size_t type_index = 0;
+  while (not_found && type_index < (*types).size()) {
+    if (strcmp((*types)[type_index].name().c_str(),
+               resonance_name.c_str()) == 0) {
+      printf("Found resonance %s.\n", resonance_name.c_str());
+      printf("Parent particles: %s %s \n",
+             (*types)[(*map_type)[*particle_id]].name().c_str(),
+             (*types)[(*map_type)[*other_id]].name().c_str());
+      (*map_type)[new_id] = type_index;
+      not_found = false;
+    }
+    type_index++;
+  }
+  /* Center-of-momentum frame of initial particles
+   * is the rest frame of the resonance
+   */
+  const double energy = (*particles)[*particle_id].momentum().x0()
+    + (*particles)[*other_id].momentum().x0();
+  /* We use fourvector to set 4-momentum, as setting it
+   * with doubles requires that particle is on
+   * mass shell, which is not generally true for resonances
+   */
+  FourVector resonance_momentum(energy, 0.0, 0.0, 0.0);
+  (*particles)[new_id].set_momentum(resonance_momentum);
+
+  printf("Momentum of the new particle: %g %g %g %g \n",
+    (*particles)[new_id].momentum().x0(), (*particles)[new_id].momentum().x1(),
+    (*particles)[new_id].momentum().x2(), (*particles)[new_id].momentum().x3());
+
+  /* The real position should be between parents in the computational frame! */
+  (*particles)[new_id].set_position(1.0, 0.0, 0.0, 0.0);
+
+  /* No collision yet */
+  (*particles)[new_id].set_collision(-1, 0, -1);
+
+  printf("Created %s with ID %lu \n",
+   (*types)[(*map_type)[new_id]].name().c_str(), new_id);
+
+  return new_id;
 }
