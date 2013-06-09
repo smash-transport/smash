@@ -100,6 +100,12 @@ static void check_collision_geometry(std::vector<ParticleData> *particle,
       if ((*particle_type)[(*map_type)[id]].width() > 0.0)
         continue;
 
+      /* The particle has formed a resonance or has decayed
+       * and is not active anymore
+       */
+      if ((*particle)[id].process_type() > 0)
+        continue;
+
       for (size_t id_other = id + 1; id_other < particle->size(); id_other++) {
         /* Don't bother with resonances here either*/
         if ((*particle_type)[(*map_type)[id_other]].width() > 0.0)
@@ -116,7 +122,7 @@ static void check_collision_geometry(std::vector<ParticleData> *particle,
           - (*particle)[id_other].position();
         /* skip particles that are double interaction radius length away */
         if (distance > radial_interaction)
-            continue;
+           continue;
         collision_criteria_geometry(particle, particle_type, map_type,
                               collision_list, parameters, id, id_other);
       }
@@ -151,6 +157,12 @@ static void check_collision_geometry(std::vector<ParticleData> *particle,
 
     /* Don't bother with resonances */
     if ((*particle_type)[(*map_type)[id]].width() > 0.0)
+      continue;
+
+    /* The other particle has formed a resonance or has decayed
+     * and is not active anymore
+     */
+    if ((*particle)[id].process_type() > 0)
       continue;
 
     /* XXX: function - map particle position to grid number */
