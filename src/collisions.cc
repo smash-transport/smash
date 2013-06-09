@@ -181,7 +181,7 @@ size_t collide_particles(std::vector<ParticleData> *particle,
     } else if (interaction_type == 1) {
 
       /* 2->1 resonance formation */
-      printf("Process: Resonance formation.\n");
+      printd("Process: Resonance formation.\n");
       size_t id_new = resonance_formation(particle, type, map_type,
                                           &id_a, &id_b);
       /* Boost the new particle to computational frame */
@@ -213,14 +213,14 @@ size_t collide_particles(std::vector<ParticleData> *particle,
        *  (*type)[(*map_type)[id_a]], (*type)[(*map_type)[id_b]], -1);
        */
 
-      printf("Resonance %s with ID %lu \n",
+      printd("Resonance %s with ID %lu \n",
        (*type)[(*map_type)[id_new]].name().c_str(), id_new);
 
-      printf("has momentum in comp frame: %g %g %g %g\n",
+      printd("has momentum in comp frame: %g %g %g %g\n",
       (*particle)[id_new].momentum().x0(), (*particle)[id_new].momentum().x1(),
       (*particle)[id_new].momentum().x2(), (*particle)[id_new].momentum().x3());
 
-      printf("and position in comp frame: %g %g %g %g\n",
+      printd("and position in comp frame: %g %g %g %g\n",
       (*particle)[id_new].position().x0(), (*particle)[id_new].position().x1(),
       (*particle)[id_new].position().x2(), (*particle)[id_new].position().x3());
 
@@ -273,7 +273,7 @@ size_t collide_particles(std::vector<ParticleData> *particle,
   }
   /* empty the collision table */
   collision_list->clear();
-  printf("Collision list done.\n");
+  printd("Collision list done.\n");
 
   /* return how many processes we have handled so far*/
   return id_process;
