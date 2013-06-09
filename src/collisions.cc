@@ -20,6 +20,41 @@
 #include "include/outputroutines.h"
 #include "include/particles.h"
 
+/* does_decay - does a resonance decay on this timestep? */
+bool does_decay(std::vector<ParticleData> *particle,
+  std::vector<ParticleType> *particle_type, std::map<int, int> *map_type,
+  std::list<int> *collision_list, const Parameters &parameters, int id_res) {
+
+  /* Exponential decay. Average lifetime = 1 / width */
+  if (drand48() > exp(-(*particle)[id_res].lifetime() * hbarc
+                      / (*particle_type)[(*map_type)[id_res]].width())) {
+
+    /* Time is up! Set the particle to decay at this timestep */
+    (*particle)[id_res].set_collision(2, 0.0, -1);
+    collision_list->push_back(id_res);
+    return true;
+  } else {
+
+    /* local rest frame velocity */
+    FourVector velocity_lrf;
+    velocity_lrf.set_x0(1.0);
+    velocity_lrf.set_x1((*particle)[id_res].momentum().x1()
+                        / (*particle)[id_res].momentum().x0());
+    velocity_lrf.set_x2((*particle)[id_res].momentum().x2()
+                         / (*particle)[id_res].momentum().x0());
+    velocity_lrf.set_x3((*particle)[id_res].momentum().x3()
+                        / (*particle)[id_res].momentum().x0());
+
+    /* The clock goes slower in the rest frame of the resonance */
+    double inverse_gamma = velocity_lrf.Dot(velocity_lrf);
+
+    /* Particle lives at least one more timestep */
+    (*particle)[id_res].set_lifetime((*particle)[id_res].lifetime()
+                                     + parameters.eps() * inverse_gamma);
+    return false;
+  }
+}
+
 /* collision_criteria_geometry - check by geometrical method if a collision
  *                               happens between particles
  */
@@ -227,7 +262,10 @@ size_t collide_particles(std::vector<ParticleData> *particle,
     } else if (interaction_type == 2) {
 
       /* 1->2 resonance decay */
-      printf("Process: Resonance decay.\n");
+      printd("Process: Resonance decay.\n");
+      printd("Resonance momenta before decay: %g %g %g %g\n",
+          (*particle)[id_a].momentum().x0(), (*particle)[id_a].momentum().x1(),
+          (*particle)[id_a].momentum().x2(), (*particle)[id_a].momentum().x3());
       /* boost to rest frame */
       velocity_CM.set_x0(1.0);
       velocity_CM.set_x1((*particle)[id_a].momentum().x1()
@@ -240,10 +278,39 @@ size_t collide_particles(std::vector<ParticleData> *particle,
           (*particle)[id_a].momentum().LorentzBoost(velocity_CM));
       (*particle)[id_a].set_position(
           (*particle)[id_a].position().LorentzBoost(velocity_CM));
+
+      printd("Boosted resonance momenta before decay: %g %g %g %g\n",
+          (*particle)[id_a].momentum().x0(), (*particle)[id_a].momentum().x1(),
+          (*particle)[id_a].momentum().x2(), (*particle)[id_a].momentum().x3());
+
       size_t id_new_a = resonance_decay(particle, type, map_type, &id_a);
       size_t id_new_b = id_new_a + 1;
+
+      printd("particle 1 momenta in lrf: %g %g %g %g\n",
+             (*particle)[id_new_a].momentum().x0(),
+             (*particle)[id_new_a].momentum().x1(),
+             (*particle)[id_new_a].momentum().x2(),
+             (*particle)[id_new_a].momentum().x3());
+      printd("particle 2 momenta in lrf: %g %g %g %g\n",
+             (*particle)[id_new_b].momentum().x0(),
+             (*particle)[id_new_b].momentum().x1(),
+             (*particle)[id_new_b].momentum().x2(),
+             (*particle)[id_new_b].momentum().x3());
+
       boost_back_CM(&(*particle)[id_new_a], &(*particle)[id_new_b],
        &velocity_CM);
+
+      printd("particle 1 momenta in comp: %g %g %g %g\n",
+             (*particle)[id_new_a].momentum().x0(),
+             (*particle)[id_new_a].momentum().x1(),
+             (*particle)[id_new_a].momentum().x2(),
+             (*particle)[id_new_a].momentum().x3());
+      printd("particle 2 momenta in comp: %g %g %g %g\n",
+             (*particle)[id_new_b].momentum().x0(),
+             (*particle)[id_new_b].momentum().x1(),
+             (*particle)[id_new_b].momentum().x2(),
+             (*particle)[id_new_b].momentum().x3());
+
       final_momentum += (*particle)[id_new_a].momentum();
       final_momentum += (*particle)[id_new_b].momentum();
 
@@ -259,16 +326,16 @@ size_t collide_particles(std::vector<ParticleData> *particle,
     momentum_difference += initial_momentum;
     momentum_difference -= final_momentum;
     if (fabs(momentum_difference.x0()) > numerical_tolerance)
-      printf("Warning: Energy conservation violated by %g",
+      printf("Warning: Energy conservation violated by %g\n",
              momentum_difference.x0());
     if (fabs(momentum_difference.x1()) > numerical_tolerance)
-      printf("Warning: x-momentum conservation violated by %g",
+      printf("Warning: x-momentum conservation violated by %g\n",
              momentum_difference.x1());
     if (fabs(momentum_difference.x2()) > numerical_tolerance)
-      printf("Warning: y-momentum conservation violated by %g",
+      printf("Warning: y-momentum conservation violated by %g\n",
              momentum_difference.x2());
     if (fabs(momentum_difference.x3()) > numerical_tolerance)
-      printf("Warning: z-momentum conservation violated by %g",
+      printf("Warning: z-momentum conservation violated by %g\n",
              momentum_difference.x3());
   }
   /* empty the collision table */

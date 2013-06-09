@@ -96,9 +96,6 @@ static void check_collision_geometry(std::vector<ParticleData> *particle,
     double radial_interaction = sqrt(parameters.cross_section() * fm2_mb
                                      * M_1_PI) * 2;
     for (size_t id = 0; id < particle->size() - 1; id++) {
-      /* Don't bother with resonances */
-      if ((*particle_type)[(*map_type)[id]].width() > 0.0)
-        continue;
 
       /* The particle has formed a resonance or has decayed
        * and is not active anymore
@@ -106,16 +103,26 @@ static void check_collision_geometry(std::vector<ParticleData> *particle,
       if ((*particle)[id].process_type() > 0)
         continue;
 
-      for (size_t id_other = id + 1; id_other < particle->size(); id_other++) {
-        /* Don't bother with resonances here either*/
-        if ((*particle_type)[(*map_type)[id_other]].width() > 0.0)
+      /* Check resonances for decays first */
+      if ((*particle_type)[(*map_type)[id]].width() > 0.0) {
+        if (does_decay(particle, particle_type, map_type, collision_list,
+            parameters, id))
           continue;
+      }
 
+      for (size_t id_other = id + 1; id_other < particle->size(); id_other++) {
         /* The other particle has formed a resonance or has decayed
          * and is not active anymore
          */
         if ((*particle)[id_other].process_type() > 0)
           continue;
+
+        /* Check resonances for decays here too */
+        if ((*particle_type)[(*map_type)[id_other]].width() > 0.0) {
+            if (does_decay(particle, particle_type, map_type, collision_list,
+                parameters, id_other))
+              continue;
+        }
 
         /* XXX: apply periodic boundary condition */
         distance = (*particle)[id].position()
@@ -137,7 +144,6 @@ static void check_collision_geometry(std::vector<ParticleData> *particle,
     for (int j = 0; j < N; j++)
       grid[i][j].resize(N);
   }
-
   /* populate grid */
   for (size_t id = 0; id < particle->size(); id++) {
     /* XXX: function - map particle position to grid number */
@@ -146,30 +152,50 @@ static void check_collision_geometry(std::vector<ParticleData> *particle,
     y = round((*particle)[id].position().x3() / box.length() * (N - 1));
     printd_position((*particle)[id]);
     printd("grid cell %lu: %i %i %i of %i\n", id, z, x, y, N);
+    if (unlikely(z>=N || x>=N || y>=N)) {
+      printf("Particle position: %g %g %g \n", (*particle)[id].position().x1(),
+             (*particle)[id].position().x2(), (*particle)[id].position().x3());
+      double coord_time = (*particle)[id].position().x0();
+      double coord[3];
+      coord[0] = (*particle)[id].position().x1();
+      coord[1] = (*particle)[id].position().x2();
+      coord[2] = (*particle)[id].position().x3();
+      for (int coordi = 0; coordi < 3; coordi++) {
+        if (coord[coordi] > box.length())
+          coord[coordi] -= box.length();
+      }
+      (*particle)[id].set_position(coord_time, coord[0], coord[1], coord[2]);
+      z = round((*particle)[id].position().x1() / box.length() * (N - 1));
+      x = round((*particle)[id].position().x2() / box.length() * (N - 1));
+      y = round((*particle)[id].position().x3() / box.length() * (N - 1));
+    }
     grid[z][x][y].push_back(id);
   }
-
   /* semi optimised nearest neighbour search:
    * http://en.wikipedia.org/wiki/Cell_lists
    */
   FourVector shift;
   for (size_t id = 0; id < particle->size() - 1; id++) {
 
-    /* Don't bother with resonances */
-    if ((*particle_type)[(*map_type)[id]].width() > 0.0)
-      continue;
-
-    /* The other particle has formed a resonance or has decayed
+    /* The particle has formed a resonance or has decayed
      * and is not active anymore
      */
     if ((*particle)[id].process_type() > 0)
       continue;
 
+    /* Check resonances for decay */
+    if ((*particle_type)[(*map_type)[id]].width() > 0.0) {
+      if (does_decay(particle, particle_type, map_type, collision_list,
+          parameters, id))
+        continue;
+    }
+
     /* XXX: function - map particle position to grid number */
     z = round((*particle)[id].position().x1() / box.length() * (N - 1));
     x = round((*particle)[id].position().x2() / box.length() * (N - 1));
     y = round((*particle)[id].position().x3() / box.length() * (N - 1));
-    printd("grid cell %lu: %i %i %i of %i\n", id, z, x, y, N);
+    if (unlikely(z>=N || x>=N || y>=N))
+      printf("grid cell %lu: %i %i %i of %i\n", id, z, x, y, N);
     /* check all neighbour grids */
     for (int cz = -1; cz < 2; cz++) {
       int sz = cz + z;
@@ -218,15 +244,18 @@ static void check_collision_geometry(std::vector<ParticleData> *particle,
             if (*id_other <= id)
               continue;
 
-            /* Don't bother with resonances here either*/
-            if ((*particle_type)[(*map_type)[*id_other]].width() > 0.0)
-              continue;
-
             /* The other particle has formed a resonance or has decayed
              * and is not active anymore
              */
             if ((*particle)[*id_other].process_type() > 0)
               continue;
+
+            /* Check resonances for decay */
+            if ((*particle_type)[(*map_type)[*id_other]].width() > 0.0) {
+              if (does_decay(particle, particle_type, map_type, collision_list,
+                 parameters, *id_other))
+                continue;
+            }
 
             printd("grid cell particle %lu <-> %i\n", id, *id_other);
             if (shift == 0) {
@@ -261,6 +290,7 @@ static int Evolve(std::vector<ParticleData> *particles,
                      scatterings_this_interval, box);
 
   for (int steps = 0; steps < box.steps(); steps++) {
+
     /* fill collision table by cells */
     check_collision_geometry(particles, particle_type, map_type,
                                 &collision_list, parameters, box);
