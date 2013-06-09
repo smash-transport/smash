@@ -294,7 +294,7 @@ size_t resonance_decay(std::vector<ParticleData> *particles,
   double mass_a = (*types)[(*map_type)[new_id_a]].mass(),
     mass_b = (*types)[(*map_type)[new_id_b]].mass();
   double energy_a = (total_energy * total_energy
-                     + mass_a * mass_a + mass_b * mass_b)
+                     + mass_a * mass_a - mass_b * mass_b)
                     / (2.0 * total_energy);
 
   double momentum_radial = sqrt(energy_a * energy_a - mass_a * mass_a);
