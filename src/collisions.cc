@@ -10,6 +10,7 @@
 #include "include/collisions.h"
 
 #include <cstdio>
+#include <cmath>
 
 #include "include/Parameters.h"
 #include "include/ParticleData.h"
@@ -131,8 +132,11 @@ size_t collide_particles(std::vector<ParticleData> *particle,
     int id_a = *id;
     int id_b = 0;
     int interaction_type = (*particle)[id_a].process_type();
+    FourVector initial_momentum, final_momentum;
+    initial_momentum += (*particle)[id_a].momentum();
     if (interaction_type < 2) {
       id_b = (*particle)[id_a].id_partner();
+      initial_momentum += (*particle)[id_b].momentum();
       printd("Process %lu type %i particle %s<->%s colliding %d<->%d time %g\n",
         id_process, interaction_type, (*type)[(*map_type)[id_a]].name().c_str(),
              (*type)[(*map_type)[id_b]].name().c_str(), id_a, id_b,
@@ -157,10 +161,27 @@ size_t collide_particles(std::vector<ParticleData> *particle,
       momenta_exchange(&(*particle)[id_a], &(*particle)[id_b],
        (*type)[(*map_type)[id_a]].mass(), (*type)[(*map_type)[id_b]].mass());
 
+      boost_back_CM(&(*particle)[id_a], &(*particle)[id_b],
+       &velocity_CM);
+      write_oscar((*particle)[id_a], (*particle)[id_b],
+       (*type)[(*map_type)[id_a]], (*type)[(*map_type)[id_b]], -1);
+      printd("particle 1 momenta after: %g %g %g %g\n",
+       (*particle)[id_a].momentum().x0(), (*particle)[id_a].momentum().x1(),
+       (*particle)[id_a].momentum().x2(), (*particle)[id_a].momentum().x3());
+      printd("particle 2 momenta after: %g %g %g %g\n",
+       (*particle)[id_b].momentum().x0(), (*particle)[id_b].momentum().x1(),
+       (*particle)[id_b].momentum().x2(), (*particle)[id_b].momentum().x3());
+
+      final_momentum += (*particle)[id_a].momentum();
+      final_momentum += (*particle)[id_b].momentum();
+
+      /* unset collision time for both particles + keep id + unset partner */
+      (*particle)[id_b].set_collision_past(id_process);
+
     } else if (interaction_type == 1) {
 
       /* 2->1 resonance formation */
-      printd("Process: Resonance formation.\n");
+      printf("Process: Resonance formation.\n");
       size_t id_new = resonance_formation(particle, type, map_type,
                                           &id_a, &id_b);
       /* Boost the new particle to computational frame */
@@ -169,6 +190,14 @@ size_t collide_particles(std::vector<ParticleData> *particle,
                                      -velocity_CM.x3());
       (*particle)[id_new].set_momentum(
           (*particle)[id_new].momentum().LorentzBoost(neg_velocity_CM));
+
+      final_momentum += (*particle)[id_new].momentum();
+
+      boost_back_CM(&(*particle)[id_a], &(*particle)[id_b],
+       &velocity_CM);
+
+      /* unset collision time for particles + keep id + unset partner */
+      (*particle)[id_b].set_collision_past(id_process);
 
       /* The starting point of resonance is between the two initial particles */
       /* x_middle = x_a + (x_b - x_a) / 2 */
@@ -179,10 +208,26 @@ size_t collide_particles(std::vector<ParticleData> *particle,
       middle_point += (*particle)[id_a].position();
       (*particle)[id_new].set_position(middle_point);
 
+      /* XXX: We need oscar output for 2->1 process:
+       * write_oscar((*particle)[id_new],
+       *  (*type)[(*map_type)[id_a]], (*type)[(*map_type)[id_b]], -1);
+       */
+
+      printf("Resonance %s with ID %lu \n",
+       (*type)[(*map_type)[id_new]].name().c_str(), id_new);
+
+      printf("has momentum in comp frame: %g %g %g %g\n",
+      (*particle)[id_new].momentum().x0(), (*particle)[id_new].momentum().x1(),
+      (*particle)[id_new].momentum().x2(), (*particle)[id_new].momentum().x3());
+
+      printf("and position in comp frame: %g %g %g %g\n",
+      (*particle)[id_new].position().x0(), (*particle)[id_new].position().x1(),
+      (*particle)[id_new].position().x2(), (*particle)[id_new].position().x3());
+
     } else if (interaction_type == 2) {
 
       /* 1->2 resonance decay */
-      printd("Process: Resonance decay.\n");
+      printf("Process: Resonance decay.\n");
       /* boost to rest frame */
       velocity_CM.set_x0(1.0);
       velocity_CM.set_x1((*particle)[id_a].momentum().x1()
@@ -195,33 +240,41 @@ size_t collide_particles(std::vector<ParticleData> *particle,
           (*particle)[id_a].momentum().LorentzBoost(velocity_CM));
       (*particle)[id_a].set_position(
           (*particle)[id_a].position().LorentzBoost(velocity_CM));
-      size_t new_id_a = resonance_decay(particle, type, map_type, &id_a);
-      size_t new_id_b = new_id_a + 1;
-      boost_back_CM(&(*particle)[new_id_a], &(*particle)[new_id_b],
+      size_t id_new_a = resonance_decay(particle, type, map_type, &id_a);
+      size_t id_new_b = id_new_a + 1;
+      boost_back_CM(&(*particle)[id_new_a], &(*particle)[id_new_b],
        &velocity_CM);
+      final_momentum += (*particle)[id_new_a].momentum();
+      final_momentum += (*particle)[id_new_b].momentum();
 
     } else
        printf("Warning: Unspecified process type, nothing done.\n");
 
-    if (interaction_type < 2) {
-      boost_back_CM(&(*particle)[id_a], &(*particle)[id_b],
-       &velocity_CM);
-      write_oscar((*particle)[id_a], (*particle)[id_b],
-       (*type)[(*map_type)[id_a]], (*type)[(*map_type)[id_b]], -1);
-      printd("particle 1 momenta after: %g %g %g %g\n",
-       (*particle)[id_a].momentum().x0(), (*particle)[id_a].momentum().x1(),
-       (*particle)[id_a].momentum().x2(), (*particle)[id_a].momentum().x3());
-      printd("particle 2 momenta after: %g %g %g %g\n",
-       (*particle)[id_b].momentum().x0(), (*particle)[id_b].momentum().x1(),
-       (*particle)[id_b].momentum().x2(), (*particle)[id_b].momentum().x3());
-      /* unset collision time for both particles + keep id + unset partner */
-      (*particle)[id_b].set_collision_past(id_process);
-    }
+    /* unset collision time for particles + keep id + unset partner */
     (*particle)[id_a].set_collision_past(id_process);
     id_process++;
+
+    double numerical_tolerance = 1.0e-7;
+    FourVector momentum_difference;
+    momentum_difference += initial_momentum;
+    momentum_difference -= final_momentum;
+    if (fabs(momentum_difference.x0()) > numerical_tolerance)
+      printf("Warning: Energy conservation violated by %g",
+             momentum_difference.x0());
+    if (fabs(momentum_difference.x1()) > numerical_tolerance)
+      printf("Warning: x-momentum conservation violated by %g",
+             momentum_difference.x1());
+    if (fabs(momentum_difference.x2()) > numerical_tolerance)
+      printf("Warning: y-momentum conservation violated by %g",
+             momentum_difference.x2());
+    if (fabs(momentum_difference.x3()) > numerical_tolerance)
+      printf("Warning: z-momentum conservation violated by %g",
+             momentum_difference.x3());
   }
   /* empty the collision table */
   collision_list->clear();
-  /* return how many processes we handled */
+  printf("Collision list done.\n");
+
+  /* return how many processes we have handled so far*/
   return id_process;
 }

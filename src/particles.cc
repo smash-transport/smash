@@ -323,6 +323,10 @@ size_t resonance_decay(std::vector<ParticleData> *particles,
   (*particles)[new_id_a].set_collision(-1, 0, -1);
   (*particles)[new_id_b].set_collision(-1, 0, -1);
 
+  printf("Created %s and %s with IDs %lu and %lu \n",
+   (*types)[(*map_type)[new_id_a]].name().c_str(),
+   (*types)[(*map_type)[new_id_b]].name().c_str(), new_id_a, new_id_b);
+
   return new_id_a;
 }
 
@@ -355,7 +359,10 @@ size_t resonance_formation(std::vector<ParticleData> *particles,
   while (not_found && type_index < (*types).size()) {
     if (strcmp((*types)[type_index].name().c_str(),
                resonance_name.c_str()) == 0) {
-      printd("Found resonance %s.\n", resonance_name.c_str());
+      printf("Found resonance %s.\n", resonance_name.c_str());
+      printf("Parent particles: %s %s \n",
+             (*types)[(*map_type)[*particle_id]].name().c_str(),
+             (*types)[(*map_type)[*other_id]].name().c_str());
       (*map_type)[new_id] = type_index;
       not_found = false;
     }
@@ -366,15 +373,25 @@ size_t resonance_formation(std::vector<ParticleData> *particles,
    */
   const double energy = (*particles)[*particle_id].momentum().x0()
     + (*particles)[*other_id].momentum().x0();
-  /* Not necessarily on mass shell! */
+  /* We use fourvector to set 4-momentum, as setting it
+   * with doubles requires that particle is on
+   * mass shell, which is not generally true for resonances
+   */
   FourVector resonance_momentum(energy, 0.0, 0.0, 0.0);
   (*particles)[new_id].set_momentum(resonance_momentum);
 
-  /* Fix the position in the computational frame! */
+  printf("Momentum of the new particle: %g %g %g %g \n",
+    (*particles)[new_id].momentum().x0(), (*particles)[new_id].momentum().x1(),
+    (*particles)[new_id].momentum().x2(), (*particles)[new_id].momentum().x3());
+
+  /* The real position should be between parents in the computational frame! */
   (*particles)[new_id].set_position(1.0, 0.0, 0.0, 0.0);
 
   /* No collision yet */
   (*particles)[new_id].set_collision(-1, 0, -1);
+
+  printf("Created %s with ID %lu \n",
+   (*types)[(*map_type)[new_id]].name().c_str(), new_id);
 
   return new_id;
 }
