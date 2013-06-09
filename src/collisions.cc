@@ -151,20 +151,55 @@ size_t collide_particles(std::vector<ParticleData> *particle,
     }
 
     if (interaction_type == 0) {
+
       /* 2->2 elastic scattering*/
       printd("Process: Elastic collision.\n");
       momenta_exchange(&(*particle)[id_a], &(*particle)[id_b],
        (*type)[(*map_type)[id_a]].mass(), (*type)[(*map_type)[id_b]].mass());
+
     } else if (interaction_type == 1) {
+
       /* 2->1 resonance formation */
       printd("Process: Resonance formation.\n");
-      resonance_formation(particle, type, map_type, &id_a, &id_b);
+      size_t id_new = resonance_formation(particle, type, map_type,
+                                          &id_a, &id_b);
+      /* Boost the new particle to computational frame */
+      FourVector neg_velocity_CM;
+      neg_velocity_CM.set_FourVector(1.0, -velocity_CM.x1(), -velocity_CM.x2(),
+                                     -velocity_CM.x3());
+      (*particle)[id_new].set_momentum(
+          (*particle)[id_new].momentum().LorentzBoost(neg_velocity_CM));
+
+      /* The starting point of resonance is between the two initial particles */
+      /* x_middle = x_a + (x_b - x_a) / 2 */
+      FourVector middle_point;
+      middle_point += (*particle)[id_b].position();
+      middle_point -= (*particle)[id_a].position();
+      middle_point /= 2.0;
+      middle_point += (*particle)[id_a].position();
+      (*particle)[id_new].set_position(middle_point);
+
     } else if (interaction_type == 2) {
+
       /* 1->2 resonance decay */
       printd("Process: Resonance decay.\n");
-      /* XXX: Need to boost to rest frame */
-      resonance_decay(particle, type, map_type, &id_a);
-      /* XXX: Boost the new particles to computational frame */
+      /* boost to rest frame */
+      velocity_CM.set_x0(1.0);
+      velocity_CM.set_x1((*particle)[id_a].momentum().x1()
+                         / (*particle)[id_a].momentum().x0());
+      velocity_CM.set_x2((*particle)[id_a].momentum().x2()
+                         / (*particle)[id_a].momentum().x0());
+      velocity_CM.set_x3((*particle)[id_a].momentum().x3()
+                         / (*particle)[id_a].momentum().x0());
+      (*particle)[id_a].set_momentum(
+          (*particle)[id_a].momentum().LorentzBoost(velocity_CM));
+      (*particle)[id_a].set_position(
+          (*particle)[id_a].position().LorentzBoost(velocity_CM));
+      size_t new_id_a = resonance_decay(particle, type, map_type, &id_a);
+      size_t new_id_b = new_id_a + 1;
+      boost_back_CM(&(*particle)[new_id_a], &(*particle)[new_id_b],
+       &velocity_CM);
+
     } else
        printf("Warning: Unspecified process type, nothing done.\n");
 

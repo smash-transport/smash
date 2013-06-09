@@ -246,7 +246,7 @@ double resonance_cross_section(ParticleData *particle1, ParticleData *particle2,
 }
 
 /* 1->2 resonance decay process */
-void resonance_decay(std::vector<ParticleData> *particles,
+size_t resonance_decay(std::vector<ParticleData> *particles,
   std::vector<ParticleType> *types, std::map<int, int> *map_type,
   int *particle_id) {
 
@@ -322,10 +322,12 @@ void resonance_decay(std::vector<ParticleData> *particles,
   /* No collision yet */
   (*particles)[new_id_a].set_collision(-1, 0, -1);
   (*particles)[new_id_b].set_collision(-1, 0, -1);
+
+  return new_id_a;
 }
 
 /* 2->1 resonance formation process */
-void resonance_formation(std::vector<ParticleData> *particles,
+size_t resonance_formation(std::vector<ParticleData> *particles,
   std::vector<ParticleType> *types, std::map<int, int> *map_type,
                          int *particle_id, int *other_id) {
 
@@ -368,10 +370,11 @@ void resonance_formation(std::vector<ParticleData> *particles,
   FourVector resonance_momentum(energy, 0.0, 0.0, 0.0);
   (*particles)[new_id].set_momentum(resonance_momentum);
 
-  /* Fix position in the computational frame! */
+  /* Fix the position in the computational frame! */
   (*particles)[new_id].set_position(1.0, 0.0, 0.0, 0.0);
 
   /* No collision yet */
   (*particles)[new_id].set_collision(-1, 0, -1);
 
+  return new_id;
 }
