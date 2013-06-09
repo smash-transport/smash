@@ -323,7 +323,7 @@ size_t resonance_decay(std::vector<ParticleData> *particles,
   (*particles)[new_id_a].set_collision(-1, 0, -1);
   (*particles)[new_id_b].set_collision(-1, 0, -1);
 
-  printf("Created %s and %s with IDs %lu and %lu \n",
+  printd("Created %s and %s with IDs %lu and %lu \n",
    (*types)[(*map_type)[new_id_a]].name().c_str(),
    (*types)[(*map_type)[new_id_b]].name().c_str(), new_id_a, new_id_b);
 

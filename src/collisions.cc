@@ -248,7 +248,7 @@ size_t collide_particles(std::vector<ParticleData> *particle,
        *  (*type)[(*map_type)[id_a]], (*type)[(*map_type)[id_b]], -1);
        */
 
-      printf("Resonance %s with ID %lu \n",
+      printd("Resonance %s with ID %lu \n",
        (*type)[(*map_type)[id_new]].name().c_str(), id_new);
 
       printd("has momentum in comp frame: %g %g %g %g\n",
@@ -262,7 +262,7 @@ size_t collide_particles(std::vector<ParticleData> *particle,
     } else if (interaction_type == 2) {
 
       /* 1->2 resonance decay */
-      printf("Process: Resonance decay.\n");
+      printd("Process: Resonance decay.\n");
       printd("Resonance momenta before decay: %g %g %g %g\n",
           (*particle)[id_a].momentum().x0(), (*particle)[id_a].momentum().x1(),
           (*particle)[id_a].momentum().x2(), (*particle)[id_a].momentum().x3());
