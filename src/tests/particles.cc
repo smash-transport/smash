@@ -18,11 +18,18 @@ int main() {
 
   /* check return of particle distance of null momenta particles */
   double distance_squared = particle_distance(&particle_a, &particle_b);
-  if (distance_squared < 0)
+  if (distance_squared < 0.0)
     return -1;
   /* XXX: does this test NaN?? */
-  if (distance_squared > 1000)
+  if (distance_squared > 1000.0)
     return -2;
+
+  /* check collision_time for parallel momenta => impossible collision */
+  particle_a.set_momentum(0.1, 0.3, -0.1, 0.2);
+  particle_b.set_momentum(0.1, 0.3, -0.1, 0.2);
+  double time = collision_time(&particle_a, &particle_b);
+  if (time >= 0.0)
+    return -3;
 
   return 0;
 }
