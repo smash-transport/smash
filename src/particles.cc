@@ -192,7 +192,6 @@ void momenta_exchange(ParticleData *particle1, ParticleData *particle2,
 double resonance_cross_section(ParticleData *particle1, ParticleData *particle2,
   ParticleType *type_particle1, ParticleType *type_particle2,
   std::vector<ParticleType> *type_list) {
-
   const int charge1 = (*type_particle1).charge(),
     charge2 = (*type_particle2).charge();
 
@@ -249,7 +248,6 @@ double resonance_cross_section(ParticleData *particle1, ParticleData *particle2,
 size_t resonance_decay(std::vector<ParticleData> *particles,
   std::vector<ParticleType> *types, std::map<int, int> *map_type,
   int *particle_id) {
-
   /* Add two new particles */
   size_t old_size = (*particles).size();
   size_t new_id_a = old_size, new_id_b = old_size + 1;
@@ -274,7 +272,7 @@ size_t resonance_decay(std::vector<ParticleData> *particles,
   /* Find the desired particle types */
   bool not_found_a = true, not_found_b = true;
   size_t type_index = 0;
-  while ( (not_found_a || not_found_b) && type_index < (*types).size()) {
+  while ( (not_found_a || not_found_b) && type_index < (*types).size() ) {
     if (strcmp((*types)[type_index].name().c_str(),
                name_a.c_str()) == 0) {
       printd("Found particle %s.\n", name_a.c_str());
@@ -324,8 +322,8 @@ size_t resonance_decay(std::vector<ParticleData> *particles,
   (*particles)[new_id_b].set_collision(-1, 0, -1);
 
   printd("Created %s and %s with IDs %lu and %lu \n",
-   (*types)[(*map_type)[new_id_a]].name().c_str(),
-   (*types)[(*map_type)[new_id_b]].name().c_str(), new_id_a, new_id_b);
+  (*types)[(*map_type)[new_id_a]].name().c_str(),
+  (*types)[(*map_type)[new_id_b]].name().c_str(), new_id_a, new_id_b);
 
   return new_id_a;
 }
@@ -334,7 +332,6 @@ size_t resonance_decay(std::vector<ParticleData> *particles,
 size_t resonance_formation(std::vector<ParticleData> *particles,
   std::vector<ParticleType> *types, std::map<int, int> *map_type,
                          int *particle_id, int *other_id) {
-
   /* Add a new particle */
   size_t old_size = (*particles).size();
   size_t new_id = old_size;

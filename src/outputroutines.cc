@@ -74,7 +74,6 @@ void print_measurements(const std::vector<ParticleData> &particles,
                         const size_t &scatterings_total,
                         const size_t &scatterings_this_interval,
                         const Box &box) {
-
   FourVector momentum_total(0, 0, 0, 0);
   /* calculate elapsed time */
   double elapsed = measure_timediff(box);

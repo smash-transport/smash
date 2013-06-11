@@ -24,17 +24,14 @@
 bool does_decay(std::vector<ParticleData> *particle,
   std::vector<ParticleType> *particle_type, std::map<int, int> *map_type,
   std::list<int> *collision_list, const Parameters &parameters, int id_res) {
-
   /* Exponential decay. Average lifetime = 1 / width */
   if (drand48() > exp(-(*particle)[id_res].lifetime() * hbarc
                       / (*particle_type)[(*map_type)[id_res]].width())) {
-
     /* Time is up! Set the particle to decay at this timestep */
     (*particle)[id_res].set_collision(2, 0.0, -1);
     collision_list->push_back(id_res);
     return true;
   } else {
-
     /* local rest frame velocity */
     FourVector velocity_lrf;
     velocity_lrf.set_x0(1.0);
@@ -62,7 +59,6 @@ void collision_criteria_geometry(std::vector<ParticleData> *particle,
   std::vector<ParticleType> *particle_type, std::map<int, int> *map_type,
   std::list<int> *collision_list, const Parameters &parameters, int id_a,
   int id_b) {
-
   /* just collided with this particle */
   if ((*particle)[id_a].id_process() >= 0
       && (*particle)[id_a].id_process() == (*particle)[id_b].id_process()) {
@@ -73,8 +69,8 @@ void collision_criteria_geometry(std::vector<ParticleData> *particle,
 
   /* Resonance production cross section */
   const double resonance_xsection = resonance_cross_section(
-   &(*particle)[id_a], &(*particle)[id_b], &(*particle_type)[(*map_type)[id_a]],
-   &(*particle_type)[(*map_type)[id_b]], particle_type);
+  &(*particle)[id_a], &(*particle)[id_b], &(*particle_type)[(*map_type)[id_a]],
+  &(*particle_type)[(*map_type)[id_b]], particle_type);
 
   /* Total cross section is elastic + resonance production  */
   const double total_cross_section = parameters.cross_section()
@@ -190,7 +186,6 @@ size_t collide_particles(std::vector<ParticleData> *particle,
     }
 
     if (interaction_type == 0) {
-
       /* 2->2 elastic scattering*/
       printd("Process: Elastic collision.\n");
       momenta_exchange(&(*particle)[id_a], &(*particle)[id_b],
@@ -214,7 +209,6 @@ size_t collide_particles(std::vector<ParticleData> *particle,
       (*particle)[id_b].set_collision_past(id_process);
 
     } else if (interaction_type == 1) {
-
       /* 2->1 resonance formation */
       printd("Process: Resonance formation.\n");
       size_t id_new = resonance_formation(particle, type, map_type,
@@ -258,9 +252,7 @@ size_t collide_particles(std::vector<ParticleData> *particle,
       printd("and position in comp frame: %g %g %g %g\n",
       (*particle)[id_new].position().x0(), (*particle)[id_new].position().x1(),
       (*particle)[id_new].position().x2(), (*particle)[id_new].position().x3());
-
     } else if (interaction_type == 2) {
-
       /* 1->2 resonance decay */
       printd("Process: Resonance decay.\n");
       printd("Resonance momenta before decay: %g %g %g %g\n",
@@ -313,9 +305,9 @@ size_t collide_particles(std::vector<ParticleData> *particle,
 
       final_momentum += (*particle)[id_new_a].momentum();
       final_momentum += (*particle)[id_new_b].momentum();
-
-    } else
+    } else {
        printf("Warning: Unspecified process type, nothing done.\n");
+    }
 
     /* unset collision time for particles + keep id + unset partner */
     (*particle)[id_a].set_collision_past(id_process);

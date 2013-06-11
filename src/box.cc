@@ -96,7 +96,6 @@ static void check_collision_geometry(std::vector<ParticleData> *particle,
     double radial_interaction = sqrt(parameters.cross_section() * fm2_mb
                                      * M_1_PI) * 2;
     for (size_t id = 0; id < particle->size() - 1; id++) {
-
       /* The particle has formed a resonance or has decayed
        * and is not active anymore
        */
@@ -152,7 +151,7 @@ static void check_collision_geometry(std::vector<ParticleData> *particle,
     y = round((*particle)[id].position().x3() / box.length() * (N - 1));
     printd_position((*particle)[id]);
     printd("grid cell %lu: %i %i %i of %i\n", id, z, x, y, N);
-    if (unlikely(z>=N || x>=N || y>=N)) {
+    if (unlikely(z >= N || x >= N || y >= N)) {
       printf("Particle position: %g %g %g \n", (*particle)[id].position().x1(),
              (*particle)[id].position().x2(), (*particle)[id].position().x3());
       double coord_time = (*particle)[id].position().x0();
@@ -176,7 +175,6 @@ static void check_collision_geometry(std::vector<ParticleData> *particle,
    */
   FourVector shift;
   for (size_t id = 0; id < particle->size() - 1; id++) {
-
     /* The particle has formed a resonance or has decayed
      * and is not active anymore
      */
@@ -194,7 +192,7 @@ static void check_collision_geometry(std::vector<ParticleData> *particle,
     z = round((*particle)[id].position().x1() / box.length() * (N - 1));
     x = round((*particle)[id].position().x2() / box.length() * (N - 1));
     y = round((*particle)[id].position().x3() / box.length() * (N - 1));
-    if (unlikely(z>=N || x>=N || y>=N))
+    if (unlikely(z >= N || x >= N || y >= N))
       printf("grid cell %lu: %i %i %i of %i\n", id, z, x, y, N);
     /* check all neighbour grids */
     for (int cz = -1; cz < 2; cz++) {
@@ -290,7 +288,6 @@ static int Evolve(std::vector<ParticleData> *particles,
                      scatterings_this_interval, box);
 
   for (int steps = 0; steps < box.steps(); steps++) {
-
     /* fill collision table by cells */
     check_collision_geometry(particles, particle_type, map_type,
                                 &collision_list, parameters, box);
