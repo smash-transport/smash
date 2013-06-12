@@ -79,15 +79,16 @@ void print_measurements(const std::vector<ParticleData> &particles,
   double elapsed = measure_timediff(box);
   double time = 0.0;
 
-  for (size_t i = 0; i < particles.size(); i++) {
+  for (std::vector<ParticleData>::const_iterator i = particles.begin();
+       i != particles.end(); ++i) {
     /* The particle has formed a resonance or has decayed
      * and is not active anymore
      */
-    if (particles[i].process_type() > 0)
+    if (i->process_type() > 0)
       continue;
-    momentum_total += particles[i].momentum();
+    momentum_total += i->momentum();
     /* use the time from the last active particle - startup time */
-    time = particles[i].position().x0() - 1.0;
+    time = i->position().x0() - 1.0;
   }
   if (likely(time > 0))
     printf("%5g%10g%13g%13g%13g%13zu%13g\n", time, momentum_total.x0(),
@@ -141,19 +142,19 @@ void write_particles(const std::vector<ParticleData> &particles) {
   snprintf(filename, sizeof(filename), "data/momenta_%.5f.dat",
     particles[0].position().x0() - 1.0);
   fp = fopen(filename, "w");
-  for (size_t i = 0; i < particles.size(); i++) {
-     fprintf(fp, "%g %g %g %g\n", particles[i].momentum().x0(),
-       particles[i].momentum().x1(),  particles[i].momentum().x2(),
-       particles[i].momentum().x3());
+  for (std::vector<ParticleData>::const_iterator i = particles.begin();
+       i != particles.end(); ++i) {
+     fprintf(fp, "%g %g %g %g\n", i->momentum().x0(), i->momentum().x1(),
+       i->momentum().x2(), i->momentum().x3());
   }
   fclose(fp);
   snprintf(filename, sizeof(filename), "data/position_%.5f.dat",
     particles[0].position().x0() - 1.0);
   fp = fopen(filename, "w");
-  for (size_t i = 0; i < particles.size(); i++) {
-     fprintf(fp, "%g %g %g %g\n", particles[i].position().x0(),
-       particles[i].position().x1(), particles[i].position().x2(),
-       particles[i].position().x3());
+  for (std::vector<ParticleData>::const_iterator i = particles.begin();
+       i != particles.end(); ++i) {
+     fprintf(fp, "%g %g %g %g\n", i->position().x0(), i->position().x1(),
+       i->position().x2(), i->position().x3());
   }
   fclose(fp);
 }
@@ -217,13 +218,15 @@ void write_vtk(const std::vector<ParticleData> &particles) {
   /* Unstructured data sets are composed of points, lines, polygons, .. */
   fprintf(fp, "DATASET UNSTRUCTURED_GRID\n");
   fprintf(fp, "POINTS %lu double\n", particles.size());
-  for (size_t i = 0; i < particles.size(); i++)
-    fprintf(fp, "%g %g %g\n", particles[i].position().x1(),
-      particles[i].position().x2(), particles[i].position().x3());
+  for (std::vector<ParticleData>::const_iterator i = particles.begin();
+       i != particles.end(); ++i)
+    fprintf(fp, "%g %g %g\n", i->position().x1(), i->position().x2(),
+            i->position().x3());
   fprintf(fp, "POINT_DATA %lu\n", particles.size());
   fprintf(fp, "SCALARS momenta_x double 1\n");
   fprintf(fp, "LOOKUP_TABLE default\n");
-  for (size_t i = 0; i < particles.size(); i++)
-    fprintf(fp, "%g\n", particles[i].momentum().x1());
+  for (std::vector<ParticleData>::const_iterator i = particles.begin();
+       i != particles.end(); ++i)
+    fprintf(fp, "%g\n", i->momentum().x1());
   fclose(fp);
 }
