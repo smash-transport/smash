@@ -16,7 +16,7 @@ class ParticleData {
   public:
   /* Use improbable values for default constructor */
   ParticleData() :id_(-1), id_partner_(-1), id_process_(-1),
-    collision_time_(0.0), process_type_(-1), lifetime_(-1) {}
+    collision_time_(0.0), process_type_(-1) {}
   void inline set(const int &id, const double &momenta_l,
                   const double &momenta_t);
   int id(void) const;
@@ -27,8 +27,6 @@ class ParticleData {
   void inline set_id_process(const int &id);
   double collision_time(void) const;
   int process_type(void) const;
-  double lifetime(void) const;
-  void inline set_lifetime(const double &time);
   void inline set_collision_time(const double &collision_time);
   void inline set_collision(const int &process_type,
                             const double &collision_time,
@@ -64,8 +62,6 @@ class ParticleData {
     FourVector momentum_;
     /* position in space: x0, x1, x2, x3 as t, x, y, z */
     FourVector position_;
-    /* particle lifetime */
-    double lifetime_;
 };
 
 int inline ParticleData::id(void) const {
@@ -102,14 +98,6 @@ double inline ParticleData::collision_time(void) const {
 
 int inline ParticleData::process_type(void) const {
   return process_type_;
-}
-
-double inline ParticleData::lifetime(void) const {
-  return lifetime_;
-}
-
-void inline ParticleData::set_lifetime(const double &time) {
-  lifetime_ = time;
 }
 
 void inline ParticleData::set_collision_time(const double &collision_t) {

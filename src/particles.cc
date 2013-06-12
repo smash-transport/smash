@@ -368,9 +368,6 @@ size_t resonance_formation(std::vector<ParticleData> *particles,
     type_index++;
   }
 
-  /* Initialize the timer for unstable particle */
-  (*particles)[new_id].set_lifetime(0.0);
-
   /* Center-of-momentum frame of initial particles
    * is the rest frame of the resonance
    */
