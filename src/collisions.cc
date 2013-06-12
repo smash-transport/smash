@@ -62,8 +62,9 @@ void collision_criteria_geometry(std::vector<ParticleData> *particle,
   /* just collided with this particle */
   if ((*particle)[id_a].id_process() >= 0
       && (*particle)[id_a].id_process() == (*particle)[id_b].id_process()) {
-    printd("Skipping collided particle %d <-> %d at time %g\n",
-        id_a, id_b, (*particle)[id_a].position().x0());
+    printd("Skipping collided particle %d <-> %d at time %g due process %d\n",
+        id_a, id_b, (*particle)[id_a].position().x0(),
+	(*particle)[id_a].id_process());
     return;
   }
 
