@@ -7,6 +7,8 @@
 #ifndef SRC_INCLUDE_FOURVECTOR_H_
 #define SRC_INCLUDE_FOURVECTOR_H_
 
+#include <cmath>
+
 class FourVector {
   public:
     /* default constructor */
@@ -99,7 +101,8 @@ void inline FourVector::set_FourVector(const double t, const double z,
 
 /* all four vector components are equal */
 bool inline FourVector::operator==(const FourVector &a) const {
-  return (x0_ == a.x0_) && (x1_ == a.x1_) && (x2_ == a.x2_) && (x3_ == a.x3_);
+  return fabs(x0_ - a.x0_) < 1e-12 && fabs(x1_ - a.x1_) < 1e-12
+    && fabs(x2_ - a.x2_) < 1e-12 && fabs(x3_ - a.x3_) < 1e-12;
 }
 
 /* use == operator for the inverse */
@@ -129,7 +132,8 @@ bool inline FourVector::operator>=(const FourVector &a) const {
 
 /* all vector components are equal to that number */
 bool inline FourVector::operator==(const double &a) const {
-  return (x0_ == a) && (x1_ == a) && (x2_ == a) && (x3_ == a);
+  return fabs(x0_ - a) < 1e-12 && fabs(x1_ - a) < 1e-12
+    && fabs(x2_ - a) < 1e-12 && fabs(x3_ - a) < 1e-12;
 }
 
 /* use == operator for the inverse */
