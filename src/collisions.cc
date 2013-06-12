@@ -24,7 +24,6 @@
 bool does_decay(std::vector<ParticleData> *particle,
   std::vector<ParticleType> *particle_type, std::map<int, int> *map_type,
   std::list<int> *collision_list, const Parameters &parameters, int id_res) {
-
   /* local rest frame velocity */
   FourVector velocity_lrf;
   velocity_lrf.set_x0(1.0);
@@ -69,7 +68,7 @@ void collision_criteria_geometry(std::vector<ParticleData> *particle,
       && (*particle)[id_a].id_process() == (*particle)[id_b].id_process()) {
     printd("Skipping collided particle %d <-> %d at time %g due process %d\n",
         id_a, id_b, (*particle)[id_a].position().x0(),
-	(*particle)[id_a].id_process());
+        (*particle)[id_a].id_process());
     return;
   }
 
