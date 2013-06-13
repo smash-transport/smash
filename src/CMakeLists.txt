@@ -14,6 +14,7 @@ include_directories("${PROJECT_BINARY_DIR}/src")
 
 # directly copy params file to build directory
 file(COPY params.txt DESTINATION ..)
+file(COPY particles.txt DESTINATION ..)
 
 # link with gsl
 target_link_libraries(mash gsl gslcblas rt)
