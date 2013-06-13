@@ -45,9 +45,10 @@ class ParticleData {
   double inline velocity_y(void) { return momentum().x2() / momentum().x0(); }
   double inline velocity_z(void) { return momentum().x3() / momentum().x0(); }
   /* overloaded operators */
-  bool inline operator==(const ParticleData &a);
-  bool inline operator<(const ParticleData &a);
-  bool inline operator==(int id_a);
+  bool inline operator==(const ParticleData &a) const;
+  bool inline operator<(const ParticleData &a) const;
+  bool inline operator==(int id_a) const;
+  bool inline operator<(int id_a) const;
 
   private:
     /* Each particle has a unique identifier */
@@ -154,18 +155,23 @@ void inline ParticleData::set_position(const double &x0, const double &x3,
 }
 
 /* check if the particles are identical */
-bool inline ParticleData::operator==(const ParticleData &a) {
+bool inline ParticleData::operator==(const ParticleData &a) const {
   return this->id_ == a.id_;
 }
 
 /* sort particles along their id */
-bool inline ParticleData::operator<(const ParticleData &a) {
+bool inline ParticleData::operator<(const ParticleData &a) const {
   return this->id_ < a.id_;
 }
 
 /* check if the particles are identical to a given id */
-bool inline ParticleData::operator==(int id_a) {
+bool inline ParticleData::operator==(int id_a) const {
   return this->id_ == id_a;
+}
+
+/* sort particles along to given id */
+bool inline ParticleData::operator<(int id_a) const {
+  return this->id_ < id_a;
 }
 
 #endif  // SRC_INCLUDE_PARTICLEDATA_H_
