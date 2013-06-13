@@ -1,0 +1,15 @@
+* Debug build:
+  cmake -DCMAKE_BUILD_TYPE=Debug ../
+
+* Find cmake build errors (best debugged with full compiler output):
+  make VERBOSE=1
+
+* Change c++ compiler:
+  cmake ../ -DCMAKE_CXX_COMPILER=$HOME/lib/bin/g++
+
+* mash binary is regularly checked by:
+  valgrind -v ./mash
+  
+* mash src is checked by:
+  cpplint.py *cc include/*h
+  cppcheck --enable=all -I include/ .
