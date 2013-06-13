@@ -47,6 +47,7 @@ class ParticleData {
   /* overloaded operators */
   bool inline operator==(const ParticleData &a);
   bool inline operator<(const ParticleData &a);
+  bool inline operator==(int id_a);
 
   private:
     /* Each particle has a unique identifier */
@@ -160,6 +161,11 @@ bool inline ParticleData::operator==(const ParticleData &a) {
 /* sort particles along their id */
 bool inline ParticleData::operator<(const ParticleData &a) {
   return this->id_ < a.id_;
+}
+
+/* check if the particles are identical to a given id */
+bool inline ParticleData::operator==(int id_a) {
+  return this->id_ == id_a;
 }
 
 #endif  // SRC_INCLUDE_PARTICLEDATA_H_
