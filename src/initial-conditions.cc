@@ -42,6 +42,11 @@ void initial_conditions(std::vector<ParticleData> *particles,
   /* initialize random seed */
   srand48(parameters->seed());
 
+  if ((*type).empty()) {
+    fprintf(stderr, "E: No particle types\n");
+    exit(EXIT_FAILURE);
+  }
+
   /* loop over all the particle types */
   for (size_t i = 0; i < (*type).size(); i++) {
     /* Particles with width > 0 (resonances) do not exist in the beginning */
