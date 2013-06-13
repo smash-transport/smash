@@ -106,8 +106,8 @@ static void check_collision_geometry(std::vector<ParticleData> *particle,
 
       /* Check resonances for decays first */
       if ((*particle_type)[(*map_type)[i->id()]].width() > 0.0) {
-        if (does_decay(particle, particle_type, map_type, collision_list,
-            parameters, i->id()))
+        if (does_decay(&(*i), &(*particle_type)[(*map_type)[i->id()]],
+                       collision_list, parameters))
           continue;
       }
 
@@ -121,8 +121,8 @@ static void check_collision_geometry(std::vector<ParticleData> *particle,
 
         /* Check resonances for decays here too */
         if ((*particle_type)[(*map_type)[j->id()]].width() > 0.0) {
-            if (does_decay(particle, particle_type, map_type, collision_list,
-                parameters, j->id()))
+          if (does_decay(&(*j), &(*particle_type)[(*map_type)[j->id()]],
+                         collision_list, parameters))
               continue;
         }
 
@@ -187,8 +187,8 @@ static void check_collision_geometry(std::vector<ParticleData> *particle,
 
     /* Check resonances for decay */
     if ((*particle_type)[(*map_type)[i->id()]].width() > 0.0) {
-      if (does_decay(particle, particle_type, map_type, collision_list,
-          parameters, i->id()))
+        if (does_decay(&(*i), &(*particle_type)[(*map_type)[i->id()]],
+                       collision_list, parameters))
         continue;
     }
 
@@ -254,8 +254,9 @@ static void check_collision_geometry(std::vector<ParticleData> *particle,
 
             /* Check resonances for decay */
             if ((*particle_type)[(*map_type)[*id_other]].width() > 0.0) {
-              if (does_decay(particle, particle_type, map_type, collision_list,
-                 parameters, *id_other))
+              if (does_decay(&(*particle)[*id_other],
+                             &(*particle_type)[(*map_type)[*id_other]],
+                             collision_list, parameters))
                 continue;
             }
 
