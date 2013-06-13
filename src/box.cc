@@ -21,6 +21,7 @@
 #include "include/ParticleType.h"
 #include "include/collisions.h"
 #include "include/constants.h"
+#include "include/decays.h"
 #include "include/input-particles.h"
 #include "include/initial-conditions.h"
 #include "include/macros.h"
