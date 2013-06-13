@@ -68,9 +68,11 @@ void input_particles(std::vector<ParticleType> *type, char *path) {
       continue;
     int isospin = atoi(characters);
     characters = strtok_r(NULL, sep, &saveptr);
-    if (characters == NULL)
-      continue;
-    int charge = atoi(characters);
+    int charge;
+    if (characters != NULL)
+      charge = atoi(characters);
+    else
+      charge = 0;
 
     /* Have a new particle type */
     (*type).resize(type_number + 1);
