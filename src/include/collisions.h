@@ -18,12 +18,12 @@ class ParticleData;
 class ParticleType;
 
 /* populates collision list if collision applies */
-void collision_criteria_geometry(std::vector<ParticleData> *particle,
+void collision_criteria_geometry(std::map<int, ParticleData> *particle,
   std::vector<ParticleType> *type, std::map<int, int> *map_type,
   std::list<int> *collision_list, Parameters const &para, int id, int id_other);
 
 /* does collisions according to collision table */
-size_t collide_particles(std::vector<ParticleData> *particle,
+size_t collide_particles(std::map<int, ParticleData> *particle,
   std::vector<ParticleType> *type, std::map<int, int> *map_type,
   std::list<int> *collision_list, size_t id_event);
 

@@ -80,7 +80,7 @@ FourVector boundary_condition(FourVector position, const Box &box) {
 }
 
 /* check_collision_geometry - check if a collision happens between particles */
-static void check_collision_geometry(std::vector<ParticleData> *particle,
+static void check_collision_geometry(std::map<int, ParticleData> *particle,
   std::vector<ParticleType> *particle_type, std::map<int, int> *map_type,
   std::list<int> *collision_list, Parameters const &parameters,
   Box const &box) {
@@ -96,43 +96,47 @@ static void check_collision_geometry(std::vector<ParticleData> *particle,
     FourVector distance;
     double radial_interaction = sqrt(parameters.cross_section() * fm2_mb
                                      * M_1_PI) * 2;
-    for (std::vector<ParticleData>::iterator i = particle->begin();
-         i < particle->end() - 1; ++i) {
+    for (std::map<int, ParticleData>::iterator i = particle->begin();
+         i != particle->end(); ++i) {
       /* The particle has formed a resonance or has decayed
        * and is not active anymore
        */
-      if (i->process_type() > 0)
+      if (i->second.process_type() > 0)
         continue;
 
       /* Check resonances for decays first */
-      if ((*particle_type)[(*map_type)[i->id()]].width() > 0.0) {
-        if (does_decay(&(*i), &(*particle_type)[(*map_type)[i->id()]],
+      if ((*particle_type)[(*map_type)[i->first]].width() > 0.0) {
+        if (does_decay(&(i->second),
+                       &(*particle_type)[(*map_type)[i->first]],
                        collision_list, parameters))
           continue;
       }
 
-    for (std::vector<ParticleData>::iterator j = i + 1; j != particle->end();
+      for (std::map<int, ParticleData>::iterator j; j != particle->end();
          ++j) {
+	/* exclude check on same particle */
+	if (i->first != j->first)
+          continue;
         /* The other particle has formed a resonance or has decayed
          * and is not active anymore
          */
-        if (j->process_type() > 0)
+        if (j->second.process_type() > 0)
           continue;
 
         /* Check resonances for decays here too */
-        if ((*particle_type)[(*map_type)[j->id()]].width() > 0.0) {
-          if (does_decay(&(*j), &(*particle_type)[(*map_type)[j->id()]],
+        if ((*particle_type)[(*map_type)[j->first]].width() > 0.0) {
+          if (does_decay(&(j->second), &(*particle_type)[(*map_type)[j->first]],
                          collision_list, parameters))
               continue;
         }
 
         /* XXX: apply periodic boundary condition */
-        distance = i->position() - j->position();
+        distance = i->second.position() - j->second.position();
         /* skip particles that are double interaction radius length away */
         if (distance > radial_interaction)
            continue;
         collision_criteria_geometry(particle, particle_type, map_type,
-                              collision_list, parameters, i->id(), j->id());
+                              collision_list, parameters, i->first, j->first);
       }
     }
     return;
@@ -146,58 +150,58 @@ static void check_collision_geometry(std::vector<ParticleData> *particle,
       grid[i][j].resize(N);
   }
   /* populate grid */
-    for (std::vector<ParticleData>::iterator i = particle->begin();
+  for (std::map<int, ParticleData>::iterator i = particle->begin();
          i != particle->end(); ++i) {
     /* XXX: function - map particle position to grid number */
-    z = round(i->position().x1() / box.length() * (N - 1));
-    x = round(i->position().x2() / box.length() * (N - 1));
-    y = round(i->position().x3() / box.length() * (N - 1));
-    printd_position(*i);
-    printd("grid cell %i: %i %i %i of %i\n", i->id(), z, x, y, N);
+    z = round(i->second.position().x1() / box.length() * (N - 1));
+    x = round(i->second.position().x2() / box.length() * (N - 1));
+    y = round(i->second.position().x3() / box.length() * (N - 1));
+    printd_position(i->second);
+    printd("grid cell %i: %i %i %i of %i\n", i->first, z, x, y, N);
     if (unlikely(z >= N || x >= N || y >= N)) {
-      printf("Particle position: %g %g %g \n", i->position().x1(),
-             i->position().x2(), i->position().x3());
-      double coord_time = i->position().x0();
+      printf("Particle position: %g %g %g \n", i->second.position().x1(),
+             i->second.position().x2(), i->second.position().x3());
+      double coord_time = i->second.position().x0();
       double coord[3];
-      coord[0] = i->position().x1();
-      coord[1] = i->position().x2();
-      coord[2] = i->position().x3();
+      coord[0] = i->second.position().x1();
+      coord[1] = i->second.position().x2();
+      coord[2] = i->second.position().x3();
       for (int coordi = 0; coordi < 3; coordi++) {
         if (coord[coordi] > box.length())
           coord[coordi] -= box.length();
       }
-      i->set_position(coord_time, coord[0], coord[1], coord[2]);
-      z = round(i->position().x1() / box.length() * (N - 1));
-      x = round(i->position().x2() / box.length() * (N - 1));
-      y = round(i->position().x3() / box.length() * (N - 1));
+      i->second.set_position(coord_time, coord[0], coord[1], coord[2]);
+      z = round(i->second.position().x1() / box.length() * (N - 1));
+      x = round(i->second.position().x2() / box.length() * (N - 1));
+      y = round(i->second.position().x3() / box.length() * (N - 1));
     }
-    grid[z][x][y].push_back(i->id());
+    grid[z][x][y].push_back(i->first);
   }
   /* semi optimised nearest neighbour search:
    * http://en.wikipedia.org/wiki/Cell_lists
    */
   FourVector shift;
-  for (std::vector<ParticleData>::iterator i = particle->begin();
-       i < particle->end() - 1; ++i) {
+  for (std::map<int, ParticleData>::iterator i = particle->begin();
+       i != particle->end(); ++i) {
     /* The particle has formed a resonance or has decayed
      * and is not active anymore
      */
-    if (i->process_type() > 0)
+    if (i->second.process_type() > 0)
       continue;
 
     /* Check resonances for decay */
-    if ((*particle_type)[(*map_type)[i->id()]].width() > 0.0) {
-        if (does_decay(&(*i), &(*particle_type)[(*map_type)[i->id()]],
+    if ((*particle_type)[(*map_type)[i->first]].width() > 0.0) {
+        if (does_decay(&(i->second), &(*particle_type)[(*map_type)[i->first]],
                        collision_list, parameters))
         continue;
     }
 
     /* XXX: function - map particle position to grid number */
-    z = round(i->position().x1() / box.length() * (N - 1));
-    x = round(i->position().x2() / box.length() * (N - 1));
-    y = round(i->position().x3() / box.length() * (N - 1));
+    z = round(i->second.position().x1() / box.length() * (N - 1));
+    x = round(i->second.position().x2() / box.length() * (N - 1));
+    y = round(i->second.position().x3() / box.length() * (N - 1));
     if (unlikely(z >= N || x >= N || y >= N))
-      printf("grid cell %i: %i %i %i of %i\n", i->id(), z, x, y, N);
+      printf("grid cell %i: %i %i %i of %i\n", i->first, z, x, y, N);
     /* check all neighbour grids */
     for (int cz = -1; cz < 2; cz++) {
       int sz = cz + z;
@@ -243,7 +247,7 @@ static void check_collision_geometry(std::vector<ParticleData> *particle,
 	    /* only check against particles above current id
 	     * to avoid double counting
 	     */
-            if (*id_other <= i->id())
+            if (*id_other <= i->first)
               continue;
 
             /* The other particle has formed a resonance or has decayed
@@ -254,22 +258,22 @@ static void check_collision_geometry(std::vector<ParticleData> *particle,
 
             /* Check resonances for decay */
             if ((*particle_type)[(*map_type)[*id_other]].width() > 0.0) {
-              if (does_decay(&(*particle)[*id_other],
+              if (does_decay(&((*particle)[*id_other]),
                              &(*particle_type)[(*map_type)[*id_other]],
                              collision_list, parameters))
                 continue;
             }
 
-            printd("grid cell particle %i <-> %i\n", i->id(), *id_other);
+            printd("grid cell particle %i <-> %i\n", i->first, *id_other);
             if (shift == 0) {
               collision_criteria_geometry(particle, particle_type, map_type,
-                             collision_list, parameters, i->id(), *id_other);
+                             collision_list, parameters, i->first, *id_other);
             } else {
               /* apply eventual boundary before and restore after */
               (*particle)[*id_other].set_position(
                 (*particle)[*id_other].position() + shift);
               collision_criteria_geometry(particle, particle_type, map_type,
-                              collision_list, parameters, i->id(), *id_other);
+                              collision_list, parameters, i->first, *id_other);
               (*particle)[*id_other].set_position(
                 (*particle)[*id_other].position() - shift);
             }
@@ -281,7 +285,7 @@ static void check_collision_geometry(std::vector<ParticleData> *particle,
 }
 
 /* Evolve - the core of the box, stepping forward in time */
-static int Evolve(std::vector<ParticleData> *particles,
+static int Evolve(std::map<int, ParticleData> *particles,
   std::vector<ParticleType> *particle_type, std::map<int, int> *map_type,
   const Parameters &parameters, const Box &box) {
   std::list<int> collision_list;
@@ -322,14 +326,14 @@ static int Evolve(std::vector<ParticleData> *particles,
 
   if (likely(box.steps() > 0))
     print_tail(box, scatterings_total * 2
-      / ((*particles)[0].position().x0() - 1.0) / particles->size());
+     / ((*particles)[0].position().x0() - 1.0) / particles->size());
   return 0;
 }
 
 int main(int argc, char *argv[]) {
   char *p, *path;
   int opt, rc;
-  std::vector<ParticleData> particles;
+  std::map<int, ParticleData> particles;
   std::vector<ParticleType> particle_types;
   Box *cube = new Box;
   Parameters *parameters = new Parameters;

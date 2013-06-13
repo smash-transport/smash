@@ -45,12 +45,12 @@ double resonance_cross_section(ParticleData *particle1, ParticleData *particle2,
   std::vector<ParticleType> *type_list);
 
 /* 1->2 resonance decay process */
-size_t resonance_decay(std::vector<ParticleData> *particles,
+size_t resonance_decay(std::map<int, ParticleData> *particles,
   std::vector<ParticleType> *types, std::map<int, int> *map_type,
   int *particle_id);
 
 /* 2->1 resonance formation process */
-size_t resonance_formation(std::vector<ParticleData> *particles,
+size_t resonance_formation(std::map<int, ParticleData> *particles,
   std::vector<ParticleType> *types, std::map<int, int> *map_type,
                          int *particle_id, int *other_id);
 

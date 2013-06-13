@@ -10,7 +10,7 @@
 #include "include/propagation.h"
 
 #include <cstdio>
-#include <vector>
+#include <map>
 
 #include "include/Box.h"
 #include "include/Parameters.h"
@@ -18,31 +18,31 @@
 #include "include/outputroutines.h"
 
 /* propagate all particles */
-void propagate_particles(std::vector<ParticleData> *particles,
+void propagate_particles(std::map<int, ParticleData> *particles,
   Parameters const &parameters, Box const &box) {
     FourVector distance, position;
 
-    for (std::vector<ParticleData>::iterator i = particles->begin();
+    for (std::map<int, ParticleData>::iterator i = particles->begin();
          i != particles->end(); ++i) {
       /* The particle has formed a resonance or has decayed
        * and is not active anymore
        */
-      if (i->process_type() > 0)
+      if (i->second.process_type() > 0)
         continue;
 
       /* propagation for this time step */
       distance.set_FourVector(parameters.eps(),
-        i->velocity_x() * parameters.eps(),
-        i->velocity_y() * parameters.eps(),
-        i->velocity_z() * parameters.eps());
-      printd("Particle %d motion: %g %g %g %g\n", i->id(),
+        i->second.velocity_x() * parameters.eps(),
+        i->second.velocity_y() * parameters.eps(),
+        i->second.velocity_z() * parameters.eps());
+      printd("Particle %d motion: %g %g %g %g\n", i->first,
          distance.x0(), distance.x1(), distance.x2(), distance.x3());
 
       /* treat the box boundaries */
-      position = i->position();
+      position = i->second.position();
       position += distance;
       position = boundary_condition(position, box);
-      i->set_position(position);
-      printd_position(*i);
+      i->second.set_position(position);
+      printd_position(i->second);
     }
 }

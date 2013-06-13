@@ -11,6 +11,8 @@
 
 #include <cstdio>
 #include <cstring>
+#include <map>
+#include <vector>
 
 #include "include/constants.h"
 #include "include/distributions.h"
@@ -247,16 +249,19 @@ double resonance_cross_section(ParticleData *particle1, ParticleData *particle2,
 }
 
 /* 1->2 resonance decay process */
-size_t resonance_decay(std::vector<ParticleData> *particles,
+size_t resonance_decay(std::map<int, ParticleData> *particles,
   std::vector<ParticleType> *types, std::map<int, int> *map_type,
   int *particle_id) {
   /* Add two new particles */
-  size_t old_size = (*particles).size();
-  size_t new_id_a = old_size, new_id_b = old_size + 1;
-  (*particles).resize(old_size + 2);
+  size_t new_id_a = (*particles).size();
+  size_t new_id_b = new_id_a + 1;
+  {
+  ParticleData new_particle_a, new_particle_b;
+  (*particles)[new_id_a] = new_particle_a;
   (*particles)[new_id_a].set_id(new_id_a);
+  (*particles)[new_id_b] = new_particle_b;
   (*particles)[new_id_b].set_id(new_id_b);
-
+  }
   const int charge = (*types)[(*map_type)[*particle_id]].charge();
 
   std::string name_a, name_b;
@@ -331,15 +336,16 @@ size_t resonance_decay(std::vector<ParticleData> *particles,
 }
 
 /* 2->1 resonance formation process */
-size_t resonance_formation(std::vector<ParticleData> *particles,
+size_t resonance_formation(std::map<int, ParticleData> *particles,
   std::vector<ParticleType> *types, std::map<int, int> *map_type,
                          int *particle_id, int *other_id) {
   /* Add a new particle */
-  size_t old_size = (*particles).size();
-  size_t new_id = old_size;
-  (*particles).resize(old_size + 1);
+  size_t new_id = (*particles).size();
+  {
+  ParticleData new_particle;
+  (*particles)[new_id] = new_particle;
   (*particles)[new_id].set_id(new_id);
-
+  }
   /* Which resonance is formed */
   const int charge1 = (*types)[(*map_type)[*particle_id]].charge(),
     charge2 = (*types)[(*map_type)[*other_id]].charge();

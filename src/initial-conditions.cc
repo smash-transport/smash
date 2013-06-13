@@ -32,7 +32,7 @@ void initial_particles(std::vector<ParticleType> *type) {
 }
 
 /* initial_conditions - sets particle data for @particles */
-void initial_conditions(std::vector<ParticleData> *particles,
+void initial_conditions(std::map<int, ParticleData> *particles,
   std::vector<ParticleType> *type, std::map<int, int> *map_type,
   Parameters *parameters, Box *box) {
   double phi, cos_theta, sin_theta, momentum_radial, number_density_total = 0;
@@ -77,9 +77,15 @@ void initial_conditions(std::vector<ParticleData> *particles,
      * particles at random position in the box with thermal momentum
      */
     /* allocate the particles */
-    (*particles).resize(number + number_total);
     for (size_t id = number_total; id < number_total + number; id++) {
       double x_pos, y_pos, z_pos, time_start;
+      /* ID uniqueness check */
+      if (unlikely(particles->count(id) > 0))
+        continue;
+
+      ParticleData new_particle;
+      (*particles)[id] = new_particle;
+
       /* set id and particle type */
       (*particles)[id].set_id(id);
       (*map_type)[id] = i;

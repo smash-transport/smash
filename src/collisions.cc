@@ -11,6 +11,9 @@
 
 #include <cstdio>
 #include <cmath>
+#include <list>
+#include <map>
+#include <vector>
 
 #include "include/Parameters.h"
 #include "include/ParticleData.h"
@@ -23,7 +26,7 @@
 /* collision_criteria_geometry - check by geometrical method if a collision
  *                               happens between particles
  */
-void collision_criteria_geometry(std::vector<ParticleData> *particle,
+void collision_criteria_geometry(std::map<int, ParticleData> *particle,
   std::vector<ParticleType> *particle_type, std::map<int, int> *map_type,
   std::list<int> *collision_list, const Parameters &parameters, int id_a,
   int id_b) {
@@ -119,7 +122,7 @@ void collision_criteria_geometry(std::vector<ParticleData> *particle,
 }
 
 /* colliding_particle - particle interaction */
-size_t collide_particles(std::vector<ParticleData> *particle,
+size_t collide_particles(std::map<int, ParticleData> *particle,
   std::vector<ParticleType> *type, std::map<int, int> *map_type,
   std::list<int> *collision_list, size_t id_process) {
   FourVector velocity_CM;

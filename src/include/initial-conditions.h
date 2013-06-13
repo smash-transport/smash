@@ -16,7 +16,7 @@ class ParticleType;
 
 /* initialisation functions */
 void initial_particles(std::vector<ParticleType> *type);
-void initial_conditions(std::vector<ParticleData> *particles,
+void initial_conditions(std::map<int, ParticleData> *particles,
   std::vector <ParticleType> *particle_type, std::map<int, int> *map_type,
   Parameters *parameters, Box *box);
 
