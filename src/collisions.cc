@@ -94,11 +94,11 @@ void collision_criteria_geometry(std::vector<ParticleData> *particle,
   /* check according timestep: positive and smaller */
   const double time_collision = collision_time(&(*particle)[id_a],
     &(*particle)[id_b]);
-  if (time_collision < 0 || time_collision >= parameters.eps())
+  if (time_collision < 0.0 || time_collision >= parameters.eps())
     return;
 
   /* check for minimal collision time both particles */
-  if (((*particle)[id_a].collision_time() > 0
+  if (((*particle)[id_a].collision_time() > 0.0
         && time_collision > (*particle)[id_a].collision_time())
       || ((*particle)[id_b].collision_time() > 0
         && time_collision > (*particle)[id_b].collision_time())) {
@@ -109,7 +109,7 @@ void collision_criteria_geometry(std::vector<ParticleData> *particle,
 
   /* handle minimal collision time of both particles */
   /* XXX: keep track of multiple possible collision partners */
-  if (unlikely((*particle)[id_a].collision_time() > 0)) {
+  if (unlikely((*particle)[id_a].collision_time() > 0.0)) {
     int id_not = (*particle)[id_a].id_partner();
     printd("Not colliding particle %d <-> %d\n", id_a, id_not);
     /* unset collision partner to zero time and unexisting id */
@@ -123,7 +123,7 @@ void collision_criteria_geometry(std::vector<ParticleData> *particle,
       collision_list->remove(id_not);
     }
   }
-  if (unlikely((*particle)[id_b].collision_time() > 0)) {
+  if (unlikely((*particle)[id_b].collision_time() > 0.0)) {
     int id_not = (*particle)[id_b].id_partner();
     printd("Not colliding particle %d <-> %d\n", id_b, id_not);
     /* unset collision partner to zero time and unexisting id */
