@@ -1,5 +1,5 @@
 # list the source files
-add_executable(mash box.cc collisions.cc distributions.cc
+add_executable(mash box.cc collisions.cc decays.cc distributions.cc
 	fourvector.cc initial-conditions.cc input-particles.cc
 	param-reader.cc particles.cc propagation.cc outputroutines.cc)
 
