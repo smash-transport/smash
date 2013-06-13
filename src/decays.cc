@@ -46,7 +46,6 @@ bool does_decay(std::vector<ParticleData> *particle,
     (*particle)[id_res].set_collision(2, 0.0, -1);
     collision_list->push_back(id_res);
     return true;
-  } else {
-    return false;
-  }
+  } 
+  return false;
 }
