@@ -124,7 +124,7 @@ void collision_criteria_geometry(std::map<int, ParticleData> *particle,
 /* colliding_particle - particle interaction */
 size_t collide_particles(std::map<int, ParticleData> *particle,
   std::vector<ParticleType> *type, std::map<int, int> *map_type,
-  std::list<int> *collision_list, size_t id_process) {
+  std::list<int> *collision_list, size_t id_process, size_t *largest_id) {
   FourVector velocity_CM;
 
   /* XXX: print debug output of collision list */
@@ -185,7 +185,7 @@ size_t collide_particles(std::map<int, ParticleData> *particle,
       /* 2->1 resonance formation */
       printd("Process: Resonance formation.\n");
       size_t id_new = resonance_formation(particle, type, map_type,
-                                          &id_a, &id_b);
+                                          &id_a, &id_b, largest_id);
       /* Boost the new particle to computational frame */
       FourVector neg_velocity_CM;
       neg_velocity_CM.set_FourVector(1.0, -velocity_CM.x1(), -velocity_CM.x2(),
@@ -252,7 +252,8 @@ size_t collide_particles(std::map<int, ParticleData> *particle,
           (*particle)[id_a].momentum().x0(), (*particle)[id_a].momentum().x1(),
           (*particle)[id_a].momentum().x2(), (*particle)[id_a].momentum().x3());
 
-      size_t id_new_a = resonance_decay(particle, type, map_type, &id_a);
+      size_t id_new_a = resonance_decay(particle, type, map_type, &id_a,
+                                        largest_id);
       size_t id_new_b = id_new_a + 1;
 
       printd("particle 1 momenta in lrf: %g %g %g %g\n",

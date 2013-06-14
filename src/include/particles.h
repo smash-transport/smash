@@ -47,11 +47,11 @@ double resonance_cross_section(ParticleData *particle1, ParticleData *particle2,
 /* 1->2 resonance decay process */
 size_t resonance_decay(std::map<int, ParticleData> *particles,
   std::vector<ParticleType> *types, std::map<int, int> *map_type,
-  int *particle_id);
+  int *particle_id, size_t *largest_id);
 
 /* 2->1 resonance formation process */
 size_t resonance_formation(std::map<int, ParticleData> *particles,
   std::vector<ParticleType> *types, std::map<int, int> *map_type,
-                         int *particle_id, int *other_id);
+  int *particle_id, int *other_id, size_t *largest_id);
 
 #endif  // SRC_INCLUDE_PARTICLES_H_

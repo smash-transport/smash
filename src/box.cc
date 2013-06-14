@@ -102,7 +102,8 @@ static void check_collision_geometry(std::map<int, ParticleData> *particle,
        * and is not active anymore
        */
       if (i->second.process_type() > 0)
-        continue;
+        printf("Attention: i %i has process type %i \n", i->first,
+               i->second.process_type());
 
       /* Check resonances for decays first */
       if ((*particle_type)[(*map_type)[i->first]].width() > 0.0) {
@@ -121,7 +122,8 @@ static void check_collision_geometry(std::map<int, ParticleData> *particle,
          * and is not active anymore
          */
         if (j->second.process_type() > 0)
-          continue;
+          printf("Attention: j %i has process type %i \n", j->first,
+               j->second.process_type());
 
         /* Check resonances for decays here too */
         if ((*particle_type)[(*map_type)[j->first]].width() > 0.0) {
@@ -187,7 +189,8 @@ static void check_collision_geometry(std::map<int, ParticleData> *particle,
      * and is not active anymore
      */
     if (i->second.process_type() > 0)
-      continue;
+      printf("Attention: i %i has process type %i \n", i->first,
+             i->second.process_type());
 
     /* Check resonances for decay */
     if ((*particle_type)[(*map_type)[i->first]].width() > 0.0) {
@@ -254,7 +257,8 @@ static void check_collision_geometry(std::map<int, ParticleData> *particle,
              * and is not active anymore
              */
             if ((*particle)[*id_other].process_type() > 0)
-              continue;
+              printf("Attention: j %i has process type %i \n", *id_other,
+               (*particle)[*id_other].process_type());
 
             /* Check resonances for decay */
             if ((*particle_type)[(*map_type)[*id_other]].width() > 0.0) {
@@ -287,7 +291,7 @@ static void check_collision_geometry(std::map<int, ParticleData> *particle,
 /* Evolve - the core of the box, stepping forward in time */
 static int Evolve(std::map<int, ParticleData> *particles,
   std::vector<ParticleType> *particle_type, std::map<int, int> *map_type,
-  const Parameters &parameters, const Box &box) {
+  const Parameters &parameters, const Box &box, size_t *largest_id) {
   std::list<int> collision_list;
   size_t scatterings_total = 0, previous_scatterings_total = 0,
     scatterings_this_interval = 0;
@@ -304,7 +308,7 @@ static int Evolve(std::map<int, ParticleData> *particles,
     /* particle interactions */
     if (!collision_list.empty())
       scatterings_total = collide_particles(particles, particle_type,
-        map_type, &collision_list, scatterings_total);
+        map_type, &collision_list, scatterings_total, largest_id);
 
     /* propagate all particles */
     propagate_particles(particles, parameters, box);
@@ -338,6 +342,7 @@ int main(int argc, char *argv[]) {
   Box *cube = new Box;
   Parameters *parameters = new Parameters;
   std::map<int, int> map_type;
+  size_t largest_id = 0;
 
   struct option longopts[] = {
     { "eps",        required_argument,      0, 'e' },
@@ -407,11 +412,13 @@ int main(int argc, char *argv[]) {
 
   /* Initialize box */
   input_particles(&particle_types, path);
-  initial_conditions(&particles, &particle_types, &map_type, parameters, cube);
+  initial_conditions(&particles, &particle_types, &map_type, parameters, cube,
+                     &largest_id);
   write_particles(particles);
 
   /* Compute stuff */
-  rc = Evolve(&particles, &particle_types, &map_type, *parameters, *cube);
+  rc = Evolve(&particles, &particle_types, &map_type, *parameters, *cube,
+              &largest_id);
 
   /* tear down */
   particles.clear();
