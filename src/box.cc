@@ -152,6 +152,9 @@ static void check_collision_geometry(std::map<int, ParticleData> *particle,
   /* populate grid */
   for (std::map<int, ParticleData>::iterator i = particle->begin();
          i != particle->end(); ++i) {
+    /* skip decayed particles */
+    if (i->second.process_type() > 0)
+      continue;
     /* XXX: function - map particle position to grid number */
     z = round(i->second.position().x1() / box.length() * (N - 1));
     x = round(i->second.position().x2() / box.length() * (N - 1));
