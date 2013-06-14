@@ -114,8 +114,8 @@ static void check_collision_geometry(std::map<int, ParticleData> *particle,
 
       for (std::map<int, ParticleData>::iterator j; j != particle->end();
          ++j) {
-	/* exclude check on same particle */
-	if (i->first != j->first)
+        /* exclude check on same particle */
+        if (i->first != j->first)
           continue;
         /* The other particle has formed a resonance or has decayed
          * and is not active anymore
@@ -244,9 +244,9 @@ static void check_collision_geometry(std::map<int, ParticleData> *particle,
           for (std::vector<int>::iterator id_other
                = grid[sz][sx][sy].begin(); id_other != grid[sz][sx][sy].end();
                ++id_other) {
-	    /* only check against particles above current id
-	     * to avoid double counting
-	     */
+            /* only check against particles above current id
+             * to avoid double counting
+             */
             if (*id_other <= i->first)
               continue;
 

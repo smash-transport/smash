@@ -198,9 +198,6 @@ size_t collide_particles(std::map<int, ParticleData> *particle,
       boost_back_CM(&(*particle)[id_a], &(*particle)[id_b],
        &velocity_CM);
 
-      /* unset collision time for particles + keep id + unset partner */
-      (*particle)[id_b].set_collision_past(id_process);
-
       /* The starting point of resonance is between the two initial particles */
       /* x_middle = x_a + (x_b - x_a) / 2 */
       FourVector middle_point;
