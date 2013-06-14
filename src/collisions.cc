@@ -178,6 +178,7 @@ size_t collide_particles(std::map<int, ParticleData> *particle,
       final_momentum += (*particle)[id_b].momentum();
 
       /* unset collision time for both particles + keep id + unset partner */
+      (*particle)[id_a].set_collision_past(id_process);
       (*particle)[id_b].set_collision_past(id_process);
 
     } else if (interaction_type == 1) {
@@ -224,6 +225,13 @@ size_t collide_particles(std::map<int, ParticleData> *particle,
       printd("and position in comp frame: %g %g %g %g\n",
       (*particle)[id_new].position().x0(), (*particle)[id_new].position().x1(),
       (*particle)[id_new].position().x2(), (*particle)[id_new].position().x3());
+
+      /* unset collision time for particles + keep id + unset partner */
+      (*particle)[id_new].set_collision_past(id_process);
+
+      /* Remove the initial particles */
+      particle->erase(id_a);
+      particle->erase(id_b);
     } else if (interaction_type == 2) {
       /* 1->2 resonance decay */
       printd("Process: Resonance decay.\n");
@@ -277,12 +285,15 @@ size_t collide_particles(std::map<int, ParticleData> *particle,
 
       final_momentum += (*particle)[id_new_a].momentum();
       final_momentum += (*particle)[id_new_b].momentum();
+
+      particle->erase(id_a);
+
+      /* unset collision time for both particles + keep id + unset partner */
+      (*particle)[id_new_a].set_collision_past(id_process);
+      (*particle)[id_new_b].set_collision_past(id_process);
     } else {
        printf("Warning: Unspecified process type, nothing done.\n");
     }
-
-    /* unset collision time for particles + keep id + unset partner */
-    (*particle)[id_a].set_collision_past(id_process);
     id_process++;
 
     double numerical_tolerance = 1.0e-7;
