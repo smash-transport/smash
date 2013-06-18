@@ -182,7 +182,7 @@ size_t collide_particles(std::map<int, ParticleData> *particle,
 
     } else if (interaction_type == 1) {
       /* 2->1 resonance formation */
-      printd("Process: Resonance formation.\n");
+      printd("Process: Resonance formation. ");
       size_t id_new = resonance_formation(particle, type, map_type,
                                           &id_a, &id_b, largest_id);
       /* Boost the new particle to computational frame */
@@ -228,9 +228,11 @@ size_t collide_particles(std::map<int, ParticleData> *particle,
       /* Remove the initial particles */
       particle->erase(id_a);
       particle->erase(id_b);
+
+      printd("Particle map has now %zu elements. \n", particle->size());
     } else if (interaction_type == 2) {
       /* 1->2 resonance decay */
-      printd("Process: Resonance decay.\n");
+      printd("Process: Resonance decay. ");
       printd("Resonance momenta before decay: %g %g %g %g\n",
           (*particle)[id_a].momentum().x0(), (*particle)[id_a].momentum().x1(),
           (*particle)[id_a].momentum().x2(), (*particle)[id_a].momentum().x3());
@@ -284,12 +286,15 @@ size_t collide_particles(std::map<int, ParticleData> *particle,
       final_momentum += (*particle)[id_new_b].momentum();
 
       particle->erase(id_a);
+      printd("ID %i has decayed and removed from the list.\n", id_a);
 
       /* unset collision time for both particles + keep id + unset partner */
       (*particle)[id_new_a].set_collision_past(id_process);
       (*particle)[id_new_b].set_collision_past(id_process);
+      printd("Particle map has now %zu elements. \n", particle->size());
     } else {
-       printf("Warning: Unspecified process type, nothing done.\n");
+      printd("Warning: ID %i (%s) has unspecified process type %i.\n",
+             id_a, (*type)[(*map_type)[id_a]].name().c_str(), interaction_type);
     }
     id_process++;
 
