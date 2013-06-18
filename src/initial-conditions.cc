@@ -86,7 +86,7 @@ void initial_conditions(std::map<int, ParticleData> *particles,
       ParticleData new_particle;
       (*particles)[id] = new_particle;
       /* Whenever a particle is created, bump the largest ID */
-      largest_id++;
+      (*largest_id)++;
 
       /* set id and particle type */
       (*particles)[id].set_id(id);
