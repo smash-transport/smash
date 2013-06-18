@@ -302,7 +302,7 @@ static int Evolve(std::map<int, ParticleData> *particles,
 
   if (likely(box.steps() > 0))
     print_tail(box, scatterings_total * 2
-     / ((*particles)[0].position().x0() - 1.0) / particles->size());
+     / (particles->begin()->second.position().x0() - 1.0) / particles->size());
   return 0;
 }
 
