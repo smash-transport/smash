@@ -98,39 +98,18 @@ static void check_collision_geometry(std::map<int, ParticleData> *particle,
                                      * M_1_PI) * 2;
     for (std::map<int, ParticleData>::iterator i = particle->begin();
          i != particle->end(); ++i) {
-      /* The particle has formed a resonance or has decayed
-       * and is not active anymore
-       */
-      if (i->second.process_type() > 1)
-        printf("Attention: i %i has process type %i \n", i->first,
-               i->second.process_type());
-
-      /* Check resonances for decays first */
-      if ((*particle_type)[(*map_type)[i->first]].width() > 0.0) {
-        if (does_decay(&(i->second),
-                       &(*particle_type)[(*map_type)[i->first]],
-                       collision_list, parameters))
-          continue;
-      }
+      /* The particle is set to decay at this time step */
+      if (i->second.process_type() == 2)
+        continue;
 
       for (std::map<int, ParticleData>::iterator j; j != particle->end();
          ++j) {
         /* exclude check on same particle */
         if (i->first != j->first)
           continue;
-        /* The other particle has formed a resonance or has decayed
-         * and is not active anymore
-         */
-        if (j->second.process_type() > 1)
-          printf("Attention: j %i has process type %i \n", j->first,
-               j->second.process_type());
-
-        /* Check resonances for decays here too */
-        if ((*particle_type)[(*map_type)[j->first]].width() > 0.0) {
-          if (does_decay(&(j->second), &(*particle_type)[(*map_type)[j->first]],
-                         collision_list, parameters))
-              continue;
-        }
+        /* The other particle is already set to decay at this time step */
+        if (j->second.process_type() == 2)
+          continue;
 
         /* XXX: apply periodic boundary condition */
         distance = i->second.position() - j->second.position();
@@ -188,19 +167,9 @@ static void check_collision_geometry(std::map<int, ParticleData> *particle,
   FourVector shift;
   for (std::map<int, ParticleData>::iterator i = particle->begin();
        i != particle->end(); ++i) {
-    /* The particle has formed a resonance or has decayed
-     * and is not active anymore
-     */
-    if (i->second.process_type() > 1)
-      printf("Attention: i %i has process type %i \n", i->first,
-             i->second.process_type());
-
-    /* Check resonances for decay */
-    if ((*particle_type)[(*map_type)[i->first]].width() > 0.0) {
-        if (does_decay(&(i->second), &(*particle_type)[(*map_type)[i->first]],
-                       collision_list, parameters))
-        continue;
-    }
+    /* The particle is set to decay at this time step */
+    if (i->second.process_type() == 2)
+      continue;
 
     /* XXX: function - map particle position to grid number */
     z = round(i->second.position().x1() / box.length() * (N - 1));
@@ -256,20 +225,11 @@ static void check_collision_geometry(std::map<int, ParticleData> *particle,
             if (*id_other <= i->first)
               continue;
 
-            /* The other particle has formed a resonance or has decayed
+            /* The other particle set to decay at this time step
              * and is not active anymore
              */
-            if ((*particle)[*id_other].process_type() > 1)
-              printf("Attention: j %i has process type %i \n", *id_other,
-               (*particle)[*id_other].process_type());
-
-            /* Check resonances for decay */
-            if ((*particle_type)[(*map_type)[*id_other]].width() > 0.0) {
-              if (does_decay(&((*particle)[*id_other]),
-                             &(*particle_type)[(*map_type)[*id_other]],
-                             collision_list, parameters))
-                continue;
-            }
+            if ((*particle)[*id_other].process_type() == 2)
+              continue;
 
             printd("grid cell particle %i <-> %i\n", i->first, *id_other);
             if (shift == 0) {
@@ -304,6 +264,15 @@ static int Evolve(std::map<int, ParticleData> *particles,
                      scatterings_this_interval, box);
 
   for (int steps = 0; steps < box.steps(); steps++) {
+    /* Check resonances for decays */
+    for (std::map<int, ParticleData>::iterator i = particles->begin();
+         i != particles->end(); ++i) {
+      if ((*particle_type)[(*map_type)[i->first]].width() > 0.0) {
+        does_decay(&(i->second), &(*particle_type)[(*map_type)[i->first]],
+                   &collision_list, parameters);
+      }
+    }
+
     /* fill collision table by cells */
     check_collision_geometry(particles, particle_type, map_type,
                                 &collision_list, parameters, box);
@@ -417,6 +386,9 @@ int main(int argc, char *argv[]) {
   input_particles(&particle_types, path);
   initial_conditions(&particles, &particle_types, &map_type, parameters, cube,
                      &largest_id);
+
+  printf("Largest ID after initial setup is %zu.\n", largest_id);
+
   write_particles(particles);
 
   /* Compute stuff */
