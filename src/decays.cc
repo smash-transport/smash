@@ -8,6 +8,8 @@
  *
  */
 
+#include <cmath>
+
 #include "include/decays.h"
 
 #include "include/Parameters.h"
@@ -29,7 +31,7 @@ bool does_decay(ParticleData *particle, ParticleType *particle_type,
                       / particle->momentum().x0());
 
   /* The clock goes slower in the rest frame of the resonance */
-  double inverse_gamma = velocity_lrf.Dot(velocity_lrf);
+  double inverse_gamma = sqrt(velocity_lrf.Dot(velocity_lrf));
   double resonance_frame_timestep = parameters.eps() * inverse_gamma;
 
   /* Exponential decay. Average lifetime t_avr = 1 / width
