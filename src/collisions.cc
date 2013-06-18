@@ -124,7 +124,7 @@ void collision_criteria_geometry(std::map<int, ParticleData> *particle,
 /* colliding_particle - particle interaction */
 size_t collide_particles(std::map<int, ParticleData> *particle,
   std::vector<ParticleType> *type, std::map<int, int> *map_type,
-  std::list<int> *collision_list, size_t id_process) {
+  std::list<int> *collision_list, size_t id_process, size_t *largest_id) {
   FourVector velocity_CM;
 
   /* XXX: print debug output of collision list */
@@ -160,8 +160,7 @@ size_t collide_particles(std::map<int, ParticleData> *particle,
     if (interaction_type == 0) {
       /* 2->2 elastic scattering*/
       printd("Process: Elastic collision.\n");
-      momenta_exchange(&(*particle)[id_a], &(*particle)[id_b],
-       (*type)[(*map_type)[id_a]].mass(), (*type)[(*map_type)[id_b]].mass());
+      momenta_exchange(&(*particle)[id_a], &(*particle)[id_b]);
 
       boost_back_CM(&(*particle)[id_a], &(*particle)[id_b],
        &velocity_CM);
@@ -178,13 +177,14 @@ size_t collide_particles(std::map<int, ParticleData> *particle,
       final_momentum += (*particle)[id_b].momentum();
 
       /* unset collision time for both particles + keep id + unset partner */
+      (*particle)[id_a].set_collision_past(id_process);
       (*particle)[id_b].set_collision_past(id_process);
 
     } else if (interaction_type == 1) {
       /* 2->1 resonance formation */
       printd("Process: Resonance formation.\n");
       size_t id_new = resonance_formation(particle, type, map_type,
-                                          &id_a, &id_b);
+                                          &id_a, &id_b, largest_id);
       /* Boost the new particle to computational frame */
       FourVector neg_velocity_CM;
       neg_velocity_CM.set_FourVector(1.0, -velocity_CM.x1(), -velocity_CM.x2(),
@@ -196,9 +196,6 @@ size_t collide_particles(std::map<int, ParticleData> *particle,
 
       boost_back_CM(&(*particle)[id_a], &(*particle)[id_b],
        &velocity_CM);
-
-      /* unset collision time for particles + keep id + unset partner */
-      (*particle)[id_b].set_collision_past(id_process);
 
       /* The starting point of resonance is between the two initial particles */
       /* x_middle = x_a + (x_b - x_a) / 2 */
@@ -224,6 +221,13 @@ size_t collide_particles(std::map<int, ParticleData> *particle,
       printd("and position in comp frame: %g %g %g %g\n",
       (*particle)[id_new].position().x0(), (*particle)[id_new].position().x1(),
       (*particle)[id_new].position().x2(), (*particle)[id_new].position().x3());
+
+      /* unset collision time for particles + keep id + unset partner */
+      (*particle)[id_new].set_collision_past(id_process);
+
+      /* Remove the initial particles */
+      particle->erase(id_a);
+      particle->erase(id_b);
     } else if (interaction_type == 2) {
       /* 1->2 resonance decay */
       printd("Process: Resonance decay.\n");
@@ -247,7 +251,8 @@ size_t collide_particles(std::map<int, ParticleData> *particle,
           (*particle)[id_a].momentum().x0(), (*particle)[id_a].momentum().x1(),
           (*particle)[id_a].momentum().x2(), (*particle)[id_a].momentum().x3());
 
-      size_t id_new_a = resonance_decay(particle, type, map_type, &id_a);
+      size_t id_new_a = resonance_decay(particle, type, map_type, &id_a,
+                                        largest_id);
       size_t id_new_b = id_new_a + 1;
 
       printd("particle 1 momenta in lrf: %g %g %g %g\n",
@@ -277,30 +282,38 @@ size_t collide_particles(std::map<int, ParticleData> *particle,
 
       final_momentum += (*particle)[id_new_a].momentum();
       final_momentum += (*particle)[id_new_b].momentum();
+
+      particle->erase(id_a);
+
+      /* unset collision time for both particles + keep id + unset partner */
+      (*particle)[id_new_a].set_collision_past(id_process);
+      (*particle)[id_new_b].set_collision_past(id_process);
     } else {
        printf("Warning: Unspecified process type, nothing done.\n");
     }
-
-    /* unset collision time for particles + keep id + unset partner */
-    (*particle)[id_a].set_collision_past(id_process);
     id_process++;
 
     double numerical_tolerance = 1.0e-7;
     FourVector momentum_difference;
     momentum_difference += initial_momentum;
     momentum_difference -= final_momentum;
-    if (fabs(momentum_difference.x0()) > numerical_tolerance)
-      printf("Warning: Energy conservation violated by %g\n",
-             momentum_difference.x0());
+    if (fabs(momentum_difference.x0()) > numerical_tolerance) {
+      printf("Process %lu type %i particle %s<->%s colliding %d<->%d time %g\n",
+        id_process, interaction_type, (*type)[(*map_type)[id_a]].name().c_str(),
+             (*type)[(*map_type)[id_b]].name().c_str(), id_a, id_b,
+             (*particle)[id_a].position().x0());
+      printf("Warning: Interaction type %i E conservation violation %g\n",
+             interaction_type, momentum_difference.x0());
+    }
     if (fabs(momentum_difference.x1()) > numerical_tolerance)
-      printf("Warning: x-momentum conservation violated by %g\n",
-             momentum_difference.x1());
+      printf("Warning: Interaction type %i px conservation violation %g\n",
+             interaction_type, momentum_difference.x1());
     if (fabs(momentum_difference.x2()) > numerical_tolerance)
-      printf("Warning: y-momentum conservation violated by %g\n",
-             momentum_difference.x2());
+      printf("Warning: Interaction type %i py conservation violation %g\n",
+             interaction_type, momentum_difference.x2());
     if (fabs(momentum_difference.x3()) > numerical_tolerance)
-      printf("Warning: z-momentum conservation violated by %g\n",
-             momentum_difference.x3());
+      printf("Warning: Interaction type %i pz conservation violation %g\n",
+             interaction_type, momentum_difference.x3());
   }
   /* empty the collision table */
   collision_list->clear();

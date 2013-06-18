@@ -141,7 +141,7 @@ void write_particles(const std::map<int, ParticleData> &particles) {
   char filename[256];
 
   snprintf(filename, sizeof(filename), "data/momenta_%.5f.dat",
-           particles.at(0).position().x0() - 1.0);
+           particles.begin()->second.position().x0() - 1.0);
   fp = fopen(filename, "w");
   for (std::map<int, ParticleData>::const_iterator i = particles.begin();
        i != particles.end(); ++i) {
@@ -151,7 +151,7 @@ void write_particles(const std::map<int, ParticleData> &particles) {
   }
   fclose(fp);
   snprintf(filename, sizeof(filename), "data/position_%.5f.dat",
-           particles.at(0).position().x0() - 1.0);
+           particles.begin()->second.position().x0() - 1.0);
   fp = fopen(filename, "w");
   for (std::map<int, ParticleData>::const_iterator i = particles.begin();
        i != particles.end(); ++i) {
@@ -212,7 +212,7 @@ void write_vtk(const std::map<int, ParticleData> &particles) {
   char filename[256];
 
   snprintf(filename, sizeof(filename), "data/pos_%.5f.vtk",
-           particles.at(0).position().x0() - 1.0);
+           particles.begin()->second.position().x0() - 1.0);
   fp = fopen(filename, "w");
   /* Legacy VTK file format */
   fprintf(fp, "# vtk DataFile Version 2.0\n");
