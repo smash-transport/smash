@@ -34,8 +34,7 @@ double particle_distance(ParticleData *particle_orig1,
 double collision_time(ParticleData *particle1, ParticleData *particle2);
 
 /* momenta_exchange - soft scattering */
-void momenta_exchange(ParticleData *particle1, ParticleData *particle2,
-  const float &particle1_mass, const float &particle2_mass);
+void momenta_exchange(ParticleData *particle1, ParticleData *particle2);
 
 /* resonance_cross_section - energy-dependent cross section
  * for producing a resonance

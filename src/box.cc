@@ -101,7 +101,7 @@ static void check_collision_geometry(std::map<int, ParticleData> *particle,
       /* The particle has formed a resonance or has decayed
        * and is not active anymore
        */
-      if (i->second.process_type() > 0)
+      if (i->second.process_type() > 1)
         printf("Attention: i %i has process type %i \n", i->first,
                i->second.process_type());
 
@@ -121,7 +121,7 @@ static void check_collision_geometry(std::map<int, ParticleData> *particle,
         /* The other particle has formed a resonance or has decayed
          * and is not active anymore
          */
-        if (j->second.process_type() > 0)
+        if (j->second.process_type() > 1)
           printf("Attention: j %i has process type %i \n", j->first,
                j->second.process_type());
 
@@ -188,7 +188,7 @@ static void check_collision_geometry(std::map<int, ParticleData> *particle,
     /* The particle has formed a resonance or has decayed
      * and is not active anymore
      */
-    if (i->second.process_type() > 0)
+    if (i->second.process_type() > 1)
       printf("Attention: i %i has process type %i \n", i->first,
              i->second.process_type());
 
@@ -256,7 +256,7 @@ static void check_collision_geometry(std::map<int, ParticleData> *particle,
             /* The other particle has formed a resonance or has decayed
              * and is not active anymore
              */
-            if ((*particle)[*id_other].process_type() > 0)
+            if ((*particle)[*id_other].process_type() > 1)
               printf("Attention: j %i has process type %i \n", *id_other,
                (*particle)[*id_other].process_type());
 

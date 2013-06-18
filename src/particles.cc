@@ -148,8 +148,7 @@ double collision_time(ParticleData *particle1, ParticleData *particle2) {
 }
 
 /* momenta_exchange - soft scattering */
-void momenta_exchange(ParticleData *particle1, ParticleData *particle2,
-  const float &particle1_mass, const float &particle2_mass) {
+void momenta_exchange(ParticleData *particle1, ParticleData *particle2) {
   /* debug output */
   printd("center of momenta 1: %g %g %g %g \n", particle1->momentum().x0(),
     particle1->momentum().x1(), particle1->momentum().x2(),
@@ -159,23 +158,27 @@ void momenta_exchange(ParticleData *particle1, ParticleData *particle2,
     particle2->momentum().x3());
 
   /* center of momentum hence this is equal for both particles */
-  const double momentum_radial = sqrt(particle1->momentum().x0()
-    * particle1->momentum().x0() - particle1_mass * particle1_mass);
-  printd("Particle 1: momentum %g mass %g \n", particle1->momentum().x0(),
-    particle1_mass);
+  const double momentum_radial = sqrt(particle1->momentum().x1()
+    * particle1->momentum().x1() + particle1->momentum().x2() *
+    particle1->momentum().x2() + particle1->momentum().x3() *
+    particle1->momentum().x3());
+
   /* particle exchange momenta and scatter to random direction */
   const double phi =  2.0 * M_PI * drand48();
   const double cos_theta = -1.0 + 2.0 * drand48();
   const double sin_theta = sqrt(1.0 - cos_theta * cos_theta);
   printd("Random momentum: %g %g %g %g \n", momentum_radial, phi, cos_theta,
     sin_theta);
-  const FourVector momentum1(sqrt(particle1_mass * particle1_mass
-    + momentum_radial * momentum_radial),
+
+  /* Only direction of 3-momentum, not magnitude, changes in CM frame,
+   * thus particle energies remain the same (Lorentz boost will change them for
+   * computational frame, however)
+   */
+  const FourVector momentum1(particle1->momentum().x0(),
      momentum_radial * cos(phi) * sin_theta,
      momentum_radial * sin(phi) * sin_theta, momentum_radial * cos_theta);
   particle1->set_momentum(momentum1);
-  const FourVector momentum2(sqrt(particle2_mass * particle2_mass
-    + momentum_radial * momentum_radial),
+  const FourVector momentum2(particle2->momentum().x0(),
     - momentum_radial * cos(phi) * sin_theta,
     - momentum_radial * sin(phi) * sin_theta, -momentum_radial * cos_theta);
   particle2->set_momentum(momentum2);

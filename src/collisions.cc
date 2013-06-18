@@ -160,8 +160,7 @@ size_t collide_particles(std::map<int, ParticleData> *particle,
     if (interaction_type == 0) {
       /* 2->2 elastic scattering*/
       printd("Process: Elastic collision.\n");
-      momenta_exchange(&(*particle)[id_a], &(*particle)[id_b],
-       (*type)[(*map_type)[id_a]].mass(), (*type)[(*map_type)[id_b]].mass());
+      momenta_exchange(&(*particle)[id_a], &(*particle)[id_b]);
 
       boost_back_CM(&(*particle)[id_a], &(*particle)[id_b],
        &velocity_CM);
@@ -298,18 +297,23 @@ size_t collide_particles(std::map<int, ParticleData> *particle,
     FourVector momentum_difference;
     momentum_difference += initial_momentum;
     momentum_difference -= final_momentum;
-    if (fabs(momentum_difference.x0()) > numerical_tolerance)
-      printf("Warning: Energy conservation violated by %g\n",
-             momentum_difference.x0());
+    if (fabs(momentum_difference.x0()) > numerical_tolerance) {
+      printf("Process %lu type %i particle %s<->%s colliding %d<->%d time %g\n",
+        id_process, interaction_type, (*type)[(*map_type)[id_a]].name().c_str(),
+             (*type)[(*map_type)[id_b]].name().c_str(), id_a, id_b,
+             (*particle)[id_a].position().x0());
+      printf("Warning: Interaction type %i E conservation violation %g\n",
+             interaction_type, momentum_difference.x0());
+    }
     if (fabs(momentum_difference.x1()) > numerical_tolerance)
-      printf("Warning: x-momentum conservation violated by %g\n",
-             momentum_difference.x1());
+      printf("Warning: Interaction type %i px conservation violation %g\n",
+             interaction_type, momentum_difference.x1());
     if (fabs(momentum_difference.x2()) > numerical_tolerance)
-      printf("Warning: y-momentum conservation violated by %g\n",
-             momentum_difference.x2());
+      printf("Warning: Interaction type %i py conservation violation %g\n",
+             interaction_type, momentum_difference.x2());
     if (fabs(momentum_difference.x3()) > numerical_tolerance)
-      printf("Warning: z-momentum conservation violated by %g\n",
-             momentum_difference.x3());
+      printf("Warning: Interaction type %i pz conservation violation %g\n",
+             interaction_type, momentum_difference.x3());
   }
   /* empty the collision table */
   collision_list->clear();
