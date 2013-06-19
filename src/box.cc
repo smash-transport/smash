@@ -98,17 +98,11 @@ static void check_collision_geometry(std::map<int, ParticleData> *particle,
                                      * M_1_PI) * 2;
     for (std::map<int, ParticleData>::iterator i = particle->begin();
          i != particle->end(); ++i) {
-      /* The particle is set to decay at this time step */
-      if (i->second.process_type() == 2)
-        continue;
 
       for (std::map<int, ParticleData>::iterator j; j != particle->end();
          ++j) {
         /* exclude check on same particle */
         if (i->first != j->first)
-          continue;
-        /* The other particle is already set to decay at this time step */
-        if (j->second.process_type() == 2)
           continue;
 
         /* XXX: apply periodic boundary condition */
@@ -167,9 +161,6 @@ static void check_collision_geometry(std::map<int, ParticleData> *particle,
   FourVector shift;
   for (std::map<int, ParticleData>::iterator i = particle->begin();
        i != particle->end(); ++i) {
-    /* The particle is set to decay at this time step */
-    if (i->second.process_type() == 2)
-      continue;
 
     /* XXX: function - map particle position to grid number */
     z = round(i->second.position().x1() / box.length() * (N - 1));
@@ -223,12 +214,6 @@ static void check_collision_geometry(std::map<int, ParticleData> *particle,
              * to avoid double counting
              */
             if (*id_other <= i->first)
-              continue;
-
-            /* The other particle set to decay at this time step
-             * and is not active anymore
-             */
-            if ((*particle)[*id_other].process_type() == 2)
               continue;
 
             printd("grid cell particle %i <-> %i\n", i->first, *id_other);
