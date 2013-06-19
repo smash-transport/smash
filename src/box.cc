@@ -237,7 +237,7 @@ static void check_collision_geometry(std::map<int, ParticleData> *particle,
 /* Evolve - the core of the box, stepping forward in time */
 static int Evolve(std::map<int, ParticleData> *particles,
   std::vector<ParticleType> *particle_type, std::map<int, int> *map_type,
-  const Parameters &parameters, const Box &box, size_t *largest_id) {
+  const Parameters &parameters, const Box &box, int *largest_id) {
   std::list<int> collision_list, decay_list;
   size_t interactions_total = 0, previous_interactions_total = 0,
     interactions_this_interval = 0;
@@ -302,7 +302,7 @@ int main(int argc, char *argv[]) {
   Box *cube = new Box;
   Parameters *parameters = new Parameters;
   std::map<int, int> map_type;
-  size_t largest_id = 0;
+  int largest_id = -1;
 
   struct option longopts[] = {
     { "eps",        required_argument,      0, 'e' },
@@ -375,7 +375,7 @@ int main(int argc, char *argv[]) {
   initial_conditions(&particles, &particle_types, &map_type, parameters, cube,
                      &largest_id);
 
-  printf("Largest ID after initial setup is %zu.\n", largest_id);
+  printf("Largest ID after initial setup is %i.\n", largest_id);
 
   print_header();
   write_particles(particles);

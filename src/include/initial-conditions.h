@@ -20,6 +20,6 @@ class ParticleType;
 void initial_particles(std::vector<ParticleType> *type);
 void initial_conditions(std::map<int, ParticleData> *particles,
   std::vector <ParticleType> *particle_type, std::map<int, int> *map_type,
-  Parameters *parameters, Box *box, size_t *largest_id);
+  Parameters *parameters, Box *box, int *largest_id);
 
 #endif  // SRC_INCLUDE_INITIAL_CONDITIONS_H_

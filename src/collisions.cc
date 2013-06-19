@@ -124,7 +124,7 @@ void collision_criteria_geometry(std::map<int, ParticleData> *particle,
 /* colliding_particle - particle interaction */
 size_t collide_particles(std::map<int, ParticleData> *particle,
   std::vector<ParticleType> *type, std::map<int, int> *map_type,
-  std::list<int> *collision_list, size_t id_process, size_t *largest_id) {
+  std::list<int> *collision_list, size_t id_process, int *largest_id) {
   FourVector velocity_CM;
 
   /* XXX: print debug output of collision list */

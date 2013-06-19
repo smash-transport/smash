@@ -34,7 +34,7 @@ void initial_particles(std::vector<ParticleType> *type) {
 /* initial_conditions - sets particle data for @particles */
 void initial_conditions(std::map<int, ParticleData> *particles,
   std::vector<ParticleType> *type, std::map<int, int> *map_type,
-  Parameters *parameters, Box *box, size_t *largest_id) {
+  Parameters *parameters, Box *box, int *largest_id) {
   double phi, cos_theta, sin_theta, momentum_radial, number_density_total = 0;
   FourVector momentum_total(0, 0, 0, 0);
   size_t number_total = 0, number = 0;

@@ -63,7 +63,7 @@ bool does_decay(ParticleData *particle, ParticleType *particle_type,
 /* colliding_particle - particle interaction */
 size_t decay_particles(std::map<int, ParticleData> *particle,
   std::vector<ParticleType> *type, std::map<int, int> *map_type,
-  std::list<int> *decay_list, size_t id_process, size_t *largest_id) {
+  std::list<int> *decay_list, size_t id_process, int *largest_id) {
   FourVector velocity_CM;
 
   for (std::list<int>::iterator id = decay_list->begin();
