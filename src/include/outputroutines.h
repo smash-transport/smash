@@ -44,7 +44,7 @@ void printd_momenta(const ParticleData &particle);
 void write_particles(const std::map<int, ParticleData> &particles);
 void write_oscar_header(void);
 void write_oscar(const ParticleData &particle_data,
- const ParticleType &particle_type, const int initial, const int final);
+  const ParticleType &particle_type, const int initial, const int final);
 void write_oscar(const ParticleData &particle_data,
                  const ParticleType &particle_type);
 void write_vtk(const std::map<int, ParticleData> &particles);

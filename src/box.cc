@@ -98,7 +98,6 @@ static void check_collision_geometry(std::map<int, ParticleData> *particle,
                                      * M_1_PI) * 2;
     for (std::map<int, ParticleData>::iterator i = particle->begin();
          i != particle->end(); ++i) {
-
       for (std::map<int, ParticleData>::iterator j; j != particle->end();
          ++j) {
         /* exclude check on same particle */
@@ -161,7 +160,6 @@ static void check_collision_geometry(std::map<int, ParticleData> *particle,
   FourVector shift;
   for (std::map<int, ParticleData>::iterator i = particle->begin();
        i != particle->end(); ++i) {
-
     /* XXX: function - map particle position to grid number */
     z = round(i->second.position().x1() / box.length() * (N - 1));
     x = round(i->second.position().x2() / box.length() * (N - 1));
@@ -379,6 +377,7 @@ int main(int argc, char *argv[]) {
 
   printf("Largest ID after initial setup is %zu.\n", largest_id);
 
+  print_header();
   write_particles(particles);
 
   /* Compute stuff */
