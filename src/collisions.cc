@@ -144,9 +144,7 @@ size_t collide_particles(std::map<int, ParticleData> *particle,
       id_process, interaction_type, (*type)[(*map_type)[id_a]].name().c_str(),
            (*type)[(*map_type)[id_b]].name().c_str(), id_a, id_b,
            (*particle)[id_a].position().x0());
-    write_oscar((*particle)[id_a], (*particle)[id_b],
-                (*type)[(*map_type)[id_a]], (*type)[(*map_type)[id_b]], 1);
-    printd("particle 1 momenta before: %g %g %g %g\n",
+     printd("particle 1 momenta before: %g %g %g %g\n",
         (*particle)[id_a].momentum().x0(), (*particle)[id_a].momentum().x1(),
         (*particle)[id_a].momentum().x2(), (*particle)[id_a].momentum().x3());
     printd("particle 2 momenta before: %g %g %g %g\n",
@@ -159,12 +157,16 @@ size_t collide_particles(std::map<int, ParticleData> *particle,
     if (interaction_type == 0) {
       /* 2->2 elastic scattering*/
       printd("Process: Elastic collision.\n");
+      write_oscar((*particle)[id_a], (*type)[(*map_type)[id_a]], 2, 2);
+      write_oscar((*particle)[id_b], (*type)[(*map_type)[id_b]]);
       momenta_exchange(&(*particle)[id_a], &(*particle)[id_b]);
 
       boost_back_CM(&(*particle)[id_a], &(*particle)[id_b],
        &velocity_CM);
-      write_oscar((*particle)[id_a], (*particle)[id_b],
-       (*type)[(*map_type)[id_a]], (*type)[(*map_type)[id_b]], -1);
+
+      write_oscar((*particle)[id_a], (*type)[(*map_type)[id_a]]);
+      write_oscar((*particle)[id_b], (*type)[(*map_type)[id_b]]);
+
       printd("particle 1 momenta after: %g %g %g %g\n",
        (*particle)[id_a].momentum().x0(), (*particle)[id_a].momentum().x1(),
        (*particle)[id_a].momentum().x2(), (*particle)[id_a].momentum().x3());
@@ -182,6 +184,8 @@ size_t collide_particles(std::map<int, ParticleData> *particle,
     } else if (interaction_type == 1) {
       /* 2->1 resonance formation */
       printd("Process: Resonance formation. ");
+      write_oscar((*particle)[id_a], (*type)[(*map_type)[id_a]], 2, 1);
+      write_oscar((*particle)[id_b], (*type)[(*map_type)[id_b]]);
       size_t id_new = resonance_formation(particle, type, map_type,
                                           &id_a, &id_b, largest_id);
       /* Boost the new particle to computational frame */
@@ -205,10 +209,7 @@ size_t collide_particles(std::map<int, ParticleData> *particle,
       middle_point += (*particle)[id_a].position();
       (*particle)[id_new].set_position(middle_point);
 
-      /* XXX: need oscar output for 2->1 process
-      write_oscar((*particle)[id_new],
-                  (*type)[(*map_type)[id_a]], (*type)[(*map_type)[id_b]], -1);
-      */
+      write_oscar((*particle)[id_new], (*type)[(*map_type)[id_new]]);
 
       printd("Resonance %s with ID %lu \n",
        (*type)[(*map_type)[id_new]].name().c_str(), id_new);

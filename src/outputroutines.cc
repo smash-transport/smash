@@ -166,41 +166,56 @@ void write_oscar_header(void) {
 
   fp = fopen("data/collision.dat", "w");
   fprintf(fp, "# OSC1999A\n");
-  fprintf(fp, "# Elastic scattering history\n");
-  fprintf(fp, "# Pionbox \n");
+  fprintf(fp, "# Interaction history\n");
+  fprintf(fp, "# mash \n");
   fprintf(fp, "# \n");
   fclose(fp);
 }
 
 /* write_oscar - OSCAR file */
-void write_oscar(const ParticleData &particle1,
-  const ParticleData &particle2, const ParticleType &type1,
-  const ParticleType &type2, int flag) {
-  FourVector momentum, position;
+/* Use this for the first particle in a process */
+void write_oscar(const ParticleData &particle_data,
+                 const ParticleType &particle_type,
+                 const int initial, const int final) {
   FILE *fp;
-
   fp = fopen("data/collision.dat", "a");
-  /* flag adds OSCAR line prefix with the meanings:
-   * particle creation -> 0 0
-   * particle 2<-> collision -> 2 2
+  /* OSCAR line prefix : initial final
+   * particle creation: 0 1
+   * particle 2<->2 collision: 2 2
+   * resonance formation: 2 1
+   * resonance decay: 1 2
+   * etc.
    */
-  if (flag == 0)
-    fprintf(fp, "%i %i \n", 0, 0);
-  else if (flag == 1)
-    fprintf(fp, "%i %i \n", 2, 2);
+  if (initial > 0 || final > 0)
+    fprintf(fp, "%i %i \n", initial, final);
+
   /* particle_index, particle_pdgcode, ?, momenta, mass position */
-  momentum = particle1.momentum(), position = particle1.position();
+  FourVector momentum = particle_data.momentum(),
+    position = particle_data.position();
   fprintf(fp, "%i %i %i %g %g %g %g %g %g %g %g %g \n",
-              particle1.id(), 0, 0,
-              momentum.x1(), momentum.x2(), momentum.x3(), momentum.x0(),
-              type1.mass(), position.x1(), position.x2(), position.x3(),
-              position.x0());
-  momentum = particle2.momentum(), position = particle2.position();
+          particle_data.id(), particle_type.pdgcode(), 0,
+          momentum.x1(), momentum.x2(), momentum.x3(), momentum.x0(),
+          particle_type.mass(), position.x1(), position.x2(), position.x3(),
+          position.x0());
+
+  fclose(fp);
+}
+
+/* write_oscar - use this for the other particles in same process */
+void write_oscar(const ParticleData &particle_data,
+                 const ParticleType &particle_type) {
+  FILE *fp;
+  fp = fopen("data/collision.dat", "a");
+
+  /* particle_index, particle_pdgcode, ?, momenta, mass position */
+  FourVector momentum = particle_data.momentum(),
+    position = particle_data.position();
   fprintf(fp, "%i %i %i %g %g %g %g %g %g %g %g %g \n",
-              particle2.id(), 0, 0,
-              momentum.x1(), momentum.x2(), momentum.x3(), momentum.x0(),
-              type2.mass(), position.x1(), position.x2(), position.x3(),
-              position.x0());
+          particle_data.id(), particle_type.pdgcode(), 0,
+          momentum.x1(), momentum.x2(), momentum.x3(), momentum.x0(),
+          particle_type.mass(), position.x1(), position.x2(), position.x3(),
+          position.x0());
+
   fclose(fp);
 }
 
