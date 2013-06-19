@@ -196,7 +196,7 @@ void write_oscar(const ParticleData &particle_data,
           particle_data.id(), particle_type.pdgcode(), 0,
           momentum.x1(), momentum.x2(), momentum.x3(), momentum.x0(),
           particle_type.mass(), position.x1(), position.x2(), position.x3(),
-          position.x0());
+          position.x0() - 1.0);
 
   fclose(fp);
 }
@@ -214,7 +214,7 @@ void write_oscar(const ParticleData &particle_data,
           particle_data.id(), particle_type.pdgcode(), 0,
           momentum.x1(), momentum.x2(), momentum.x3(), momentum.x0(),
           particle_type.mass(), position.x1(), position.x2(), position.x3(),
-          position.x0());
+          position.x0() - 1.0);
 
   fclose(fp);
 }
