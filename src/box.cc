@@ -255,13 +255,13 @@ static void check_collision_geometry(std::map<int, ParticleData> *particle,
 static int Evolve(std::map<int, ParticleData> *particles,
   std::vector<ParticleType> *particle_type, std::map<int, int> *map_type,
   const Parameters &parameters, const Box &box, size_t *largest_id) {
-  std::list<int> collision_list;
-  size_t scatterings_total = 0, previous_scatterings_total = 0,
-    scatterings_this_interval = 0;
+  std::list<int> collision_list, decay_list;
+  size_t interactions_total = 0, previous_interactions_total = 0,
+    interactions_this_interval = 0;
 
   /* startup values */
-  print_measurements(*particles, scatterings_total,
-                     scatterings_this_interval, box);
+  print_measurements(*particles, interactions_total,
+                     interactions_this_interval, box);
 
   for (int steps = 0; steps < box.steps(); steps++) {
     /* Check resonances for decays */
@@ -269,9 +269,14 @@ static int Evolve(std::map<int, ParticleData> *particles,
          i != particles->end(); ++i) {
       if ((*particle_type)[(*map_type)[i->first]].width() > 0.0) {
         does_decay(&(i->second), &(*particle_type)[(*map_type)[i->first]],
-                   &collision_list, parameters);
+                   &decay_list, parameters);
       }
     }
+
+    /* Do the decays */
+    interactions_total = decay_particles(particles, particle_type,
+        map_type, &decay_list, interactions_total, largest_id);
+
 
     /* fill collision table by cells */
     check_collision_geometry(particles, particle_type, map_type,
@@ -279,21 +284,21 @@ static int Evolve(std::map<int, ParticleData> *particles,
 
     /* particle interactions */
     if (!collision_list.empty())
-      scatterings_total = collide_particles(particles, particle_type,
-        map_type, &collision_list, scatterings_total, largest_id);
+      interactions_total = collide_particles(particles, particle_type,
+        map_type, &collision_list, interactions_total, largest_id);
 
     /* propagate all particles */
     propagate_particles(particles, parameters, box);
 
     /* physics output during the run */
     if (steps > 0 && (steps + 1) % parameters.output_interval() == 0) {
-      scatterings_this_interval = scatterings_total
-        - previous_scatterings_total;
+      interactions_this_interval = interactions_total
+        - previous_interactions_total;
 
-      previous_scatterings_total = scatterings_total;
+      previous_interactions_total = interactions_total;
 
-      print_measurements(*particles, scatterings_total,
-                         scatterings_this_interval, box);
+      print_measurements(*particles, interactions_total,
+                         interactions_this_interval, box);
       /* save evolution data */
       write_particles(*particles);
       write_vtk(*particles);
@@ -301,7 +306,7 @@ static int Evolve(std::map<int, ParticleData> *particles,
   }
 
   if (likely(box.steps() > 0))
-    print_tail(box, scatterings_total * 2
+    print_tail(box, interactions_total * 2
      / (particles->begin()->second.position().x0() - 1.0) / particles->size());
   return 0;
 }
