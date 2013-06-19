@@ -11,14 +11,17 @@
 
 #include <cstdio>
 #include <map>
+#include <vector>
 
 #include "include/Box.h"
 #include "include/Parameters.h"
 #include "include/ParticleData.h"
+#include "include/ParticleType.h"
 #include "include/outputroutines.h"
 
 /* propagate all particles */
 void propagate_particles(std::map<int, ParticleData> *particles,
+  std::vector<ParticleType> *particle_type, std::map<int, int> *map_type,
   Parameters const &parameters, Box const &box) {
     FourVector distance, position;
 
@@ -39,10 +42,17 @@ void propagate_particles(std::map<int, ParticleData> *particles,
          distance.x0(), distance.x1(), distance.x2(), distance.x3());
 
       /* treat the box boundaries */
+      bool wall_hit = false;
       position = i->second.position();
       position += distance;
-      position = boundary_condition(position, box);
+      position = boundary_condition(position, box, &wall_hit);
+      if (wall_hit)
+        write_oscar((*particles)[i->first],
+                    (*particle_type)[(*map_type)[i->first]], 1, 1);
       i->second.set_position(position);
+      if (wall_hit)
+        write_oscar((*particles)[i->first],
+                    (*particle_type)[(*map_type)[i->first]]);
       printd_position(i->second);
     }
 }

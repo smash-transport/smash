@@ -117,6 +117,7 @@ timespec inline Box::set_timer_start(void) {
   return time;
 }
 
-FourVector boundary_condition(FourVector position, const Box &box);
+FourVector boundary_condition(FourVector position, const Box &box,
+                              bool *boundary_hit);
 
 #endif  // SRC_INCLUDE_BOX_H_

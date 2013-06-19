@@ -49,12 +49,15 @@ static void usage(int rc) {
 }
 
 /* boundary_condition - enforce specific type of boundaries */
-FourVector boundary_condition(FourVector position, const Box &box) {
+FourVector boundary_condition(FourVector position, const Box &box,
+                              bool *boundary_hit) {
   /* Check positivity and box size */
   if (position.x1() > 0 && position.x2() > 0 && position.x3() > 0
       && position.x1() < box.length() && position.x2() < box.length()
       && position.x3() < box.length())
     goto out;
+
+  *boundary_hit = true;
 
   /* Enforce periodic boundary condition */
   if (position.x1() < 0)
@@ -271,7 +274,7 @@ static int Evolve(std::map<int, ParticleData> *particles,
         map_type, &collision_list, interactions_total, largest_id);
 
     /* propagate all particles */
-    propagate_particles(particles, parameters, box);
+    propagate_particles(particles, particle_type, map_type, parameters, box);
 
     /* physics output during the run */
     if (steps > 0 && (steps + 1) % parameters.output_interval() == 0) {
