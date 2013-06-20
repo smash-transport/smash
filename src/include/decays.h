@@ -23,6 +23,6 @@ bool does_decay(ParticleData *particle, ParticleType *particle_type,
 
 size_t decay_particles(std::map<int, ParticleData> *particle,
   std::vector<ParticleType> *type, std::map<int, int> *map_type,
-  std::list<int> *decay_list, size_t id_process, int *largest_id);
+  std::list<int> *decay_list, size_t id_process, int *id_max);
 
 #endif  // SRC_INCLUDE_DECAYS_H_

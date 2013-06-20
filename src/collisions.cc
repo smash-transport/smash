@@ -124,7 +124,7 @@ void collision_criteria_geometry(std::map<int, ParticleData> *particle,
 /* colliding_particle - particle interaction */
 size_t collide_particles(std::map<int, ParticleData> *particle,
   std::vector<ParticleType> *type, std::map<int, int> *map_type,
-  std::list<int> *collision_list, size_t id_process, int *largest_id) {
+  std::list<int> *collision_list, size_t id_process, int *id_max) {
   FourVector velocity_CM;
 
   /* XXX: print debug output of collision list */
@@ -191,7 +191,7 @@ size_t collide_particles(std::map<int, ParticleData> *particle,
       boost_CM(&(*particle)[id_a], &(*particle)[id_b], &velocity_CM);
 
       size_t id_new = resonance_formation(particle, type, map_type,
-                                          &id_a, &id_b, largest_id);
+                                          &id_a, &id_b, id_max);
       /* Boost the new particle to computational frame */
       FourVector neg_velocity_CM;
       neg_velocity_CM.set_FourVector(1.0, -velocity_CM.x1(), -velocity_CM.x2(),

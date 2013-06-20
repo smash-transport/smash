@@ -34,7 +34,7 @@ void initial_particles(std::vector<ParticleType> *type) {
 /* initial_conditions - sets particle data for @particles */
 void initial_conditions(std::map<int, ParticleData> *particles,
   std::vector<ParticleType> *type, std::map<int, int> *map_type,
-  Parameters *parameters, Box *box, int *largest_id) {
+  Parameters *parameters, Box *box, int *id_max) {
   double phi, cos_theta, sin_theta, momentum_radial, number_density_total = 0;
   FourVector momentum_total(0, 0, 0, 0);
   size_t number_total = 0, number = 0;
@@ -85,8 +85,8 @@ void initial_conditions(std::map<int, ParticleData> *particles,
 
       ParticleData new_particle;
       (*particles)[id] = new_particle;
-      /* Whenever a particle is created, bump the largest ID */
-      (*largest_id)++;
+      /* Whenever a particle is created, bump the highest ID */
+      (*id_max)++;
 
       /* set id and particle type */
       (*particles)[id].set_id(id);
@@ -152,6 +152,7 @@ void initial_conditions(std::map<int, ParticleData> *particles,
                                   / parameters->testparticles());
     printf("Elastic cross section: %g [mb]\n", parameters->cross_section());
   }
+  printf("Maximum id after initial setup is %i.\n", *id_max);
 
   /* Display on startup if pseudo grid is used */
   int const grid_number = round(box->length()

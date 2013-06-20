@@ -240,7 +240,7 @@ static void check_collision_geometry(std::map<int, ParticleData> *particle,
 /* Evolve - the core of the box, stepping forward in time */
 static int Evolve(std::map<int, ParticleData> *particles,
   std::vector<ParticleType> *particle_type, std::map<int, int> *map_type,
-  const Parameters &parameters, const Box &box, int *largest_id) {
+  const Parameters &parameters, const Box &box, int *id_max) {
   std::list<int> collision_list, decay_list;
   size_t interactions_total = 0, previous_interactions_total = 0,
     interactions_this_interval = 0;
@@ -261,7 +261,7 @@ static int Evolve(std::map<int, ParticleData> *particles,
 
     /* Do the decays */
     interactions_total = decay_particles(particles, particle_type,
-        map_type, &decay_list, interactions_total, largest_id);
+        map_type, &decay_list, interactions_total, id_max);
 
 
     /* fill collision table by cells */
@@ -271,7 +271,7 @@ static int Evolve(std::map<int, ParticleData> *particles,
     /* particle interactions */
     if (!collision_list.empty())
       interactions_total = collide_particles(particles, particle_type,
-        map_type, &collision_list, interactions_total, largest_id);
+        map_type, &collision_list, interactions_total, id_max);
 
     /* propagate all particles */
     propagate_particles(particles, particle_type, map_type, parameters, box);
@@ -305,7 +305,7 @@ int main(int argc, char *argv[]) {
   Box *cube = new Box;
   Parameters *parameters = new Parameters;
   std::map<int, int> map_type;
-  int largest_id = -1;
+  int id_max = -1;
 
   struct option longopts[] = {
     { "eps",        required_argument,      0, 'e' },
@@ -376,16 +376,14 @@ int main(int argc, char *argv[]) {
   /* Initialize box */
   input_particles(&particle_types, path);
   initial_conditions(&particles, &particle_types, &map_type, parameters, cube,
-                     &largest_id);
-
-  printf("Largest ID after initial setup is %i.\n", largest_id);
+                     &id_max);
 
   print_header();
   write_particles(particles);
 
   /* Compute stuff */
   rc = Evolve(&particles, &particle_types, &map_type, *parameters, *cube,
-              &largest_id);
+              &id_max);
 
   /* tear down */
   particles.clear();
