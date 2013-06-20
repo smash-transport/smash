@@ -202,6 +202,10 @@ double resonance_cross_section(ParticleData *particle1, ParticleData *particle2,
   const int charge1 = (*type_particle1).charge(),
     charge2 = (*type_particle2).charge();
 
+  /* Resonances do not form resonances */
+  if (type_particle1->width() > 0.0 || type_particle2->width() > 0.0)
+    return 0.0;
+
   /* Total charge defines the type of resonance */
   /* We have no resonances with charge > 1 */
   if (abs(charge1 + charge2) > 1)
