@@ -79,26 +79,24 @@ void print_measurements(const std::map<int, ParticleData> &particles,
   /* calculate elapsed time */
   double elapsed = measure_timediff(box);
   double time = 0.0;
-  int current_particle_total = 0;
 
   for (std::map<int, ParticleData>::const_iterator i = particles.begin();
        i != particles.end(); ++i) {
     momentum_total += i->second.momentum();
     /* use the time from the last active particle - startup time */
     time = i->second.position().x0() - 1.0;
-    current_particle_total++;
   }
   if (likely(time > 0))
-    printf("%5g%10g%13g%13g%13g%10zu%13g%10i\n", time, momentum_total.x0(),
+    printf("%5g%10g%13g%13g%13g%10zu%13g%10zu\n", time, momentum_total.x0(),
            box.energy_initial() - momentum_total.x0(),
            sqrt(-1 * momentum_total.DotThree()),
            scatterings_total * 2 / (particles.size() * time),
-           scatterings_this_interval, elapsed, current_particle_total);
+           scatterings_this_interval, elapsed, particles.size());
   else
-    printf("%5g%10g%13g%13g%13g%10i%13g%10i\n", time, momentum_total.x0(),
+    printf("%5g%10g%13g%13g%13g%10i%13g%10zu\n", time, momentum_total.x0(),
           box.energy_initial() - momentum_total.x0(),
            sqrt(-1 * momentum_total.DotThree()), 0.0, 0, elapsed,
-           current_particle_total);
+           particles.size());
 }
 
 /* print_tail - output at the end of the simulation */
