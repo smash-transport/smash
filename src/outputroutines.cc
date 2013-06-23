@@ -44,8 +44,8 @@ void print_startup(const Box &box, const Parameters &parameters) {
 /* print_header - title for each row */
 void print_header(void) {
   print_line();
-  printf(" Time    <Etot>    <Ediff>        <ptot>     <scattrate>"
-         "  <scatt>    <timing>   <particles>\n");
+  printf(" Time    <Ediff>       <ptot>    <scattrate>"
+         "  <scatt>   <particles>  <timing>\n");
   print_line();
 }
 
@@ -87,16 +87,16 @@ void print_measurements(const std::map<int, ParticleData> &particles,
     time = i->second.position().x0() - 1.0;
   }
   if (likely(time > 0))
-    printf("%5g%10g%13g%13g%13g%10zu%13g%10zu\n", time, momentum_total.x0(),
+    printf("%5g%13g%13g%13g%10zu%10zu%13g\n", time,
            box.energy_initial() - momentum_total.x0(),
            sqrt(-1 * momentum_total.DotThree()),
            scatterings_total * 2 / (particles.size() * time),
-           scatterings_this_interval, elapsed, particles.size());
+           scatterings_this_interval, particles.size(), elapsed);
   else
-    printf("%5g%10g%13g%13g%13g%10i%13g%10zu\n", time, momentum_total.x0(),
+    printf("%5g%13g%13g%13g%10i%10zu%13g\n", time,
           box.energy_initial() - momentum_total.x0(),
-           sqrt(-1 * momentum_total.DotThree()), 0.0, 0, elapsed,
-           particles.size());
+           sqrt(-1 * momentum_total.DotThree()), 0.0, 0,
+           particles.size(), elapsed);
 }
 
 /* print_tail - output at the end of the simulation */
