@@ -21,6 +21,8 @@ class ParticleType;
 void print_startup(const Box &box, const Parameters &parameters);
 void print_header(void);
 void print_measurements(const std::map<int, ParticleData> &particle,
+                        const std::vector<ParticleType> &particle_types,
+                        std::map<int, int> &map_type,
                         const size_t &scatterings_total,
                         const size_t &scatterings_this_interval,
                         const Box &box);

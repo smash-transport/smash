@@ -240,13 +240,14 @@ static void check_collision_geometry(std::map<int, ParticleData> *particle,
 /* Evolve - the core of the box, stepping forward in time */
 static int Evolve(std::map<int, ParticleData> *particles,
   std::vector<ParticleType> *particle_type, std::map<int, int> *map_type,
-  const Parameters &parameters, const Box &box, int *id_max) {
+                  const Parameters &parameters, const Box &box, int *id_max,
+                  int *resonances, int *decays) {
   std::list<int> collision_list, decay_list;
   size_t interactions_total = 0, previous_interactions_total = 0,
     interactions_this_interval = 0;
 
   /* startup values */
-  print_measurements(*particles, interactions_total,
+  print_measurements(*particles, *particle_type, *map_type, interactions_total,
                      interactions_this_interval, box);
 
   for (int steps = 0; steps < box.steps(); steps++) {
@@ -259,10 +260,11 @@ static int Evolve(std::map<int, ParticleData> *particles,
       }
     }
 
+    (*decays) += decay_list.size();
+
     /* Do the decays */
     interactions_total = decay_particles(particles, particle_type,
         map_type, &decay_list, interactions_total, id_max);
-
 
     /* fill collision table by cells */
     check_collision_geometry(particles, particle_type, map_type,
@@ -271,7 +273,7 @@ static int Evolve(std::map<int, ParticleData> *particles,
     /* particle interactions */
     if (!collision_list.empty())
       interactions_total = collide_particles(particles, particle_type,
-        map_type, &collision_list, interactions_total, id_max);
+      map_type, &collision_list, interactions_total, id_max, resonances);
 
     /* propagate all particles */
     propagate_particles(particles, particle_type, map_type, parameters, box);
@@ -283,8 +285,9 @@ static int Evolve(std::map<int, ParticleData> *particles,
 
       previous_interactions_total = interactions_total;
 
-      print_measurements(*particles, interactions_total,
-                         interactions_this_interval, box);
+      print_measurements(*particles, *particle_type, *map_type,
+                         interactions_total, interactions_this_interval, box);
+      printf("Resonances: %i Decays: %i \n", *resonances, *decays);
       /* save evolution data */
       write_particles(*particles);
       write_vtk(*particles);
@@ -305,7 +308,7 @@ int main(int argc, char *argv[]) {
   Box *cube = new Box;
   Parameters *parameters = new Parameters;
   std::map<int, int> map_type;
-  int id_max = -1;
+  int id_max = -1, resonances = 0, decays = 0;
 
   struct option longopts[] = {
     { "eps",        required_argument,      0, 'e' },
@@ -383,7 +386,7 @@ int main(int argc, char *argv[]) {
 
   /* Compute stuff */
   rc = Evolve(&particles, &particle_types, &map_type, *parameters, *cube,
-              &id_max);
+              &id_max, &resonances, &decays);
 
   /* tear down */
   particles.clear();
