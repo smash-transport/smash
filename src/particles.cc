@@ -240,19 +240,38 @@ double resonance_cross_section(ParticleData *particle1, ParticleData *particle2,
   if (resonance_width < 0.0)
     return 0.0;
 
+  /* XXX: Calculate isospin Clebsch-Gordan coefficient */
+  const double clebsch_gordan_isospin = 10;
+
+  /* Calculate spin factor */
+  const double spinfactor = (2 * (*type_list)[type_index].spin() + 1)
+    / ((2 * type_particle1->spin() + 1) * (2 * type_particle2->spin() + 1));
+
+  /* Symmetry factor If initial state particles are identical,
+   *  multiply by two. */
+  int symmetryfactor = 1;
+  if (type_particle1->pdgcode() == type_particle2->pdgcode())
+    symmetryfactor = 2;
+
   /* Mandelstam s = (p_a + p_b)^2 = square of CMS energy */
   const double mandelstam_s =
        ( (*particle1).momentum() + (*particle2).momentum()).Dot(
          (*particle1).momentum() + (*particle2).momentum() );
 
-  /* XXX: Arbitrary proportionality constant */
-  const double proportionality = 10.0;
+  /* CM momentum */
+  const double momentum_cm
+    = sqrt((particle1->momentum().Dot(particle2->momentum())
+            * particle1->momentum().Dot(particle2->momentum())
+            - type_particle1->mass() * type_particle1->mass()
+            * type_particle1->mass() * type_particle2->mass()) / mandelstam_s);
+
 
   /* Calculate resonance production cross section
    * using the Breit-Wigner distribution as probability amplitude
    */
-  return proportionality * breit_wigner(mandelstam_s,
-          resonance_mass, resonance_width) / mandelstam_s;
+  return clebsch_gordan_isospin * spinfactor * symmetryfactor
+         * 4.0 * M_PI / (momentum_cm * momentum_cm)
+         * breit_wigner(mandelstam_s, resonance_mass, resonance_width);
 }
 
 /* 1->2 resonance decay process */
