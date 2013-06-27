@@ -68,19 +68,21 @@ void input_particles(std::vector<ParticleType> *type, char *path) {
       continue;
     int isospin = atoi(characters);
     characters = strtok_r(NULL, sep, &saveptr);
-    int charge;
-    if (characters != NULL)
-      charge = atoi(characters);
-    else
-      charge = 0;
+    if (characters == NULL)
+      continue;
+    int charge = atoi(characters);
+    characters = strtok_r(NULL, sep, &saveptr);
+    if (characters == NULL)
+      continue;
+    int spin = atoi(characters);
 
     /* Have a new particle type */
     (*type).resize(type_number + 1);
     printf("Setting particle type %s mass %g width %g"
-           " pdgcode %i isospin %i charge %i \n", particle_name,
-           mass, width, pdgcode, isospin, charge);
+           " pdgcode %i isospin %i charge %i spin %i\n", particle_name,
+           mass, width, pdgcode, isospin, charge, spin);
     std::string name(particle_name);
-    (*type)[type_number].set(name, mass, width, pdgcode, isospin, charge);
+    (*type)[type_number].set(name, mass, width, pdgcode, isospin, charge, spin);
     type_number++;
   }
   free(line);
