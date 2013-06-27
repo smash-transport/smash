@@ -13,7 +13,6 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <map>
-#include <vector>
 
 #include "include/Box.h"
 #include "include/FourVector.h"
@@ -73,8 +72,6 @@ double measure_timediff(const Box &box) {
 
 /* print_measurements - console output during simulation */
 void print_measurements(const std::map<int, ParticleData> &particles,
-                        const std::vector<ParticleType> &particle_types,
-                        std::map<int, int> &map_type,
                         const size_t &scatterings_total,
                         const size_t &scatterings_this_interval,
                         const Box &box) {
@@ -82,33 +79,24 @@ void print_measurements(const std::map<int, ParticleData> &particles,
   /* calculate elapsed time */
   double elapsed = measure_timediff(box);
   double time = 0.0;
-  int resonance_addition = 0;
 
   for (std::map<int, ParticleData>::const_iterator i = particles.begin();
        i != particles.end(); ++i) {
     momentum_total += i->second.momentum();
     /* use the time from the last active particle - startup time */
     time = i->second.position().x0() - 1.0;
-    /* Resonances considered as two particles */
-    int id = i->first;
-    int typesid = map_type[id];
-    if (particle_types[typesid].width() > 0.0) {
-      resonance_addition++;
-    }
   }
   if (likely(time > 0))
     printf("%5g%13g%13g%13g%10zu%10zu%13g\n", time,
            box.energy_initial() - momentum_total.x0(),
            sqrt(-1 * momentum_total.DotThree()),
            scatterings_total * 2 / (particles.size() * time),
-           scatterings_this_interval, particles.size() + resonance_addition,
-           elapsed);
+           scatterings_this_interval, particles.size(), elapsed);
   else
     printf("%5g%13g%13g%13g%10i%10zu%13g\n", time,
           box.energy_initial() - momentum_total.x0(),
            sqrt(-1 * momentum_total.DotThree()), 0.0, 0,
-           particles.size() + resonance_addition,
-           elapsed);
+           particles.size(), elapsed);
 }
 
 /* print_tail - output at the end of the simulation */

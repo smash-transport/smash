@@ -247,7 +247,7 @@ static int Evolve(std::map<int, ParticleData> *particles,
     interactions_this_interval = 0;
 
   /* startup values */
-  print_measurements(*particles, *particle_type, *map_type, interactions_total,
+  print_measurements(*particles, interactions_total,
                      interactions_this_interval, box);
 
   for (int steps = 0; steps < box.steps(); steps++) {
@@ -285,9 +285,9 @@ static int Evolve(std::map<int, ParticleData> *particles,
 
       previous_interactions_total = interactions_total;
 
-      print_measurements(*particles, *particle_type, *map_type,
-                         interactions_total, interactions_this_interval, box);
-      printf("Resonances: %i Decays: %i \n", *resonances, *decays);
+      print_measurements(*particles, interactions_total,
+                         interactions_this_interval, box);
+      printd("Resonances: %i Decays: %i \n", *resonances, *decays);
       /* save evolution data */
       write_particles(*particles);
       write_vtk(*particles);
