@@ -294,9 +294,16 @@ static int Evolve(std::map<int, ParticleData> *particles,
     }
   }
 
-  if (likely(box.steps() > 0))
-    print_tail(box, interactions_total * 2
-     / (particles->begin()->second.position().x0() - 1.0) / particles->size());
+  /* Guard against evolution */
+  if (likely(box.steps() > 0)) {
+    /* if there are not particles no interactions happened */
+    if (likely(!particles->empty()))
+      print_tail(box, interactions_total * 2
+                 / (particles->begin()->second.position().x0() - 1.0)
+                 / particles->size());
+    else
+      print_tail(box, 0);
+  }
   return 0;
 }
 
