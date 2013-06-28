@@ -14,8 +14,6 @@ class FourVector;
 #include <time.h>
 #include <cmath>
 
-#include "../include/constants.h"
-
 class Box {
   public:
     /* default constructor with probable values */
@@ -65,10 +63,12 @@ void inline Box::set_length(const float &LENGTH) {
   length_ = LENGTH;
 }
 
+/* return the number of steps */
 int inline Box::steps(void) const {
   return steps_;
 }
 
+/* set the number of steps */
 void inline Box::set_steps(const int &STEPS) {
   steps_ = STEPS;
 }
@@ -83,40 +83,49 @@ void inline Box::set_initial_condition(const int &INITIAL_CONDITION) {
   initial_condition_ = INITIAL_CONDITION;
 }
 
+/* return the used IC temperature */
 float inline Box::temperature(void) const {
   return temperature_;
 }
 
+/* set the IC temperature */
 void inline Box::set_temperature(const float &T) {
   temperature_ = T;
 }
 
+/* return the IC total energy */
 float inline Box::energy_initial(void) const {
   return energy_initial_;
 }
 
+/* set the IC total energy */
 void inline Box::set_energy_initial(const float &energy) {
   energy_initial_ = energy;
 }
 
+/* return the IC number density */
 float inline Box::number_density_initial(void) const {
   return number_density_initial_;
 }
 
+/* set the IC number density */
 void inline Box::set_number_density_inital(const float &number_density) {
   number_density_initial_ = number_density;
 }
 
+/* return when the timer started */
 timespec inline Box::time_start(void) const {
   return time_start_;
 }
 
+/* set the timer to the actual time in nanoseconds precision */
 timespec inline Box::set_timer_start(void) {
   timespec time;
   clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &time);
   return time;
 }
 
+/* enforce periodic boundary conditions */
 FourVector boundary_condition(FourVector position, const Box &box,
                               bool *boundary_hit);
 
