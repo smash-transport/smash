@@ -25,4 +25,4 @@ TEMPERATURE	0.2
 SIGMA		10.0
 
 // number of test particle
-TESTPARTICLE	1
+TESTPARTICLES	1
