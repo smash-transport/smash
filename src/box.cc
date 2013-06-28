@@ -349,7 +349,12 @@ int main(int argc, char *argv[]) {
       cube->set_length(atof(optarg));
       break;
     case 'O':
-      parameters->set_output_interval(abs(atoi(optarg)));
+      {
+      /* guard output_interval to be positive and greater null */
+      int output_interval = abs(atoi(optarg));
+      if (output_interval > 0)
+        parameters->set_output_interval(output_interval);
+      }
       break;
     case 'r':
       /* negative seed is for time */
