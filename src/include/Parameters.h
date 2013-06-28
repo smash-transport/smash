@@ -8,8 +8,6 @@
 #ifndef SRC_INCLUDE_PARAMETERS_H_
 #define SRC_INCLUDE_PARAMETERS_H_
 
-#include "../include/constants.h"
-
 class Parameters {
   public:
     /* default constructor with probable values */
@@ -91,7 +89,5 @@ int64_t inline Parameters::seed(void) const {
 void inline Parameters::set_seed(const int64_t &randomseed) {
   seed_ = randomseed;
 }
-
-
 
 #endif  // SRC_INCLUDE_PARAMETERS_H_
