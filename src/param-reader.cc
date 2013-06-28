@@ -85,19 +85,19 @@ void process_params(Box *box, Parameters *parameters, char *path) {
 
     /* double or float values */
     if (strcmp(key, "LENGTH") == 0) {
-      box->set_length(atof(value));
+      box->set_length(fabs(atof(value)));
       continue;
     }
     if (strcmp(key, "EPS") == 0) {
-      parameters->set_eps(atof(value));
+      parameters->set_eps(fabs(atof(value)));
       continue;
     }
     if (strcmp(key, "SIGMA") == 0) {
-      parameters->set_cross_section(atof(value));
+      parameters->set_cross_section(fabs(atof(value)));
       continue;
     }
     if (strcmp(key, "TEMPERATURE") == 0) {
-      box->set_temperature(atof(value));
+      box->set_temperature(fabs(atof(value)));
       continue;
     }
   }
