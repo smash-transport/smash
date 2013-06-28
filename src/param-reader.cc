@@ -100,6 +100,9 @@ void process_params(Box *box, Parameters *parameters, char *path) {
       box->set_temperature(fabs(atof(value)));
       continue;
     }
+
+    /* unknown value */
+    fprintf(stderr, "E: unknown param %s set to %s\n", key, value);
   }
   free(line);
   fclose(fp);
