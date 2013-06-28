@@ -340,13 +340,13 @@ int main(int argc, char *argv[]) {
     NULL)) != -1) {
     switch (opt) {
     case 'e':
-      parameters->set_eps(atof(optarg));
+      parameters->set_eps(fabs(atof(optarg)));
       break;
     case 'h':
       usage(EXIT_SUCCESS);
       break;
     case 'l':
-      cube->set_length(atof(optarg));
+      cube->set_length(fabs(atof(optarg)));
       break;
     case 'O':
       {
@@ -367,7 +367,7 @@ int main(int argc, char *argv[]) {
       cube->set_steps(abs(atoi(optarg)));
       break;
     case 'T':
-      cube->set_temperature(atof(optarg));
+      cube->set_temperature(fabs(atof(optarg)));
       break;
     case 'V':
       exit(EXIT_SUCCESS);
