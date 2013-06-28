@@ -41,6 +41,7 @@ static void usage(int rc) {
          "  -e, --eps            time step\n"
          "  -h, --help           usage information\n"
          "  -l, --length         length of the box in fermi\n"
+         "  -O, --output-interval          step interval between measurements\n"
          "  -s, --steps          number of steps\n"
          "  -T, --temperature    initial temperature\n"
          "  -u, --update         output measurements each nth steps\n"
