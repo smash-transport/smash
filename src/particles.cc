@@ -263,7 +263,7 @@ double resonance_cross_section(ParticleData *particle1, ParticleData *particle2,
     = sqrt((particle1->momentum().Dot(particle2->momentum())
             * particle1->momentum().Dot(particle2->momentum())
             - type_particle1->mass() * type_particle1->mass()
-            * type_particle1->mass() * type_particle2->mass()) / mandelstam_s);
+            * type_particle2->mass() * type_particle2->mass()) / mandelstam_s);
 
 
   /* Calculate resonance production cross section
