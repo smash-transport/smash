@@ -17,6 +17,7 @@
 #include "include/constants.h"
 #include "include/distributions.h"
 #include "include/FourVector.h"
+#include "include/macros.h"
 #include "include/outputroutines.h"
 #include "include/ParticleData.h"
 #include "include/ParticleType.h"
@@ -249,7 +250,7 @@ double resonance_cross_section(ParticleData *particle1, ParticleData *particle2,
   /* Symmetry factor If initial state particles are identical,
    *  multiply by two. */
   int symmetryfactor = 1;
-  if (type_particle1->pdgcode() == type_particle2->pdgcode())
+  if (unlikely(type_particle1->pdgcode() == type_particle2->pdgcode()))
     symmetryfactor = 2;
 
   /* Mandelstam s = (p_a + p_b)^2 = square of CMS energy */
@@ -258,18 +259,18 @@ double resonance_cross_section(ParticleData *particle1, ParticleData *particle2,
          (*particle1).momentum() + (*particle2).momentum() );
 
   /* CM momentum */
-  const double momentum_cm
-    = sqrt((particle1->momentum().Dot(particle2->momentum())
-            * particle1->momentum().Dot(particle2->momentum())
-            - type_particle1->mass() * type_particle1->mass()
-            * type_particle2->mass() * type_particle2->mass()) / mandelstam_s);
+  const double cm_momentum_squared
+    = (particle1->momentum().Dot(particle2->momentum())
+       * particle1->momentum().Dot(particle2->momentum())
+       - type_particle1->mass() * type_particle1->mass()
+       * type_particle2->mass() * type_particle2->mass()) / mandelstam_s;
 
 
   /* Calculate resonance production cross section
    * using the Breit-Wigner distribution as probability amplitude
    */
   return clebsch_gordan_isospin * spinfactor * symmetryfactor
-         * 4.0 * M_PI / (momentum_cm * momentum_cm)
+         * 4.0 * M_PI / cm_momentum_squared
          * breit_wigner(mandelstam_s, resonance_mass, resonance_width);
 }
 
