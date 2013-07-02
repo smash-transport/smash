@@ -149,24 +149,23 @@ size_t decay_particles(std::map<int, ParticleData> *particle,
 
     id_process++;
 
-    double numerical_tolerance = 1.0e-7;
     FourVector momentum_difference;
     momentum_difference += initial_momentum;
     momentum_difference -= final_momentum;
-    if (fabs(momentum_difference.x0()) > numerical_tolerance) {
+    if (fabs(momentum_difference.x0()) > really_small) {
       printf("Process %lu type %i particle %s decay to %zu and %zu time %g\n",
         id_process, interaction_type, (*type)[(*map_type)[id_a]].name().c_str(),
              id_new_a, id_new_b, (*particle)[id_a].position().x0());
       printf("Warning: Interaction type %i E conservation violation %g\n",
              interaction_type, momentum_difference.x0());
     }
-    if (fabs(momentum_difference.x1()) > numerical_tolerance)
+    if (fabs(momentum_difference.x1()) > really_small)
       printf("Warning: Interaction type %i px conservation violation %g\n",
              interaction_type, momentum_difference.x1());
-    if (fabs(momentum_difference.x2()) > numerical_tolerance)
+    if (fabs(momentum_difference.x2()) > really_small)
       printf("Warning: Interaction type %i py conservation violation %g\n",
              interaction_type, momentum_difference.x2());
-    if (fabs(momentum_difference.x3()) > numerical_tolerance)
+    if (fabs(momentum_difference.x3()) > really_small)
       printf("Warning: Interaction type %i pz conservation violation %g\n",
              interaction_type, momentum_difference.x3());
   } /* end for std::list<int>::iterator id = decay_list->begin() */

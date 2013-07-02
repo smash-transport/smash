@@ -243,6 +243,10 @@ double resonance_cross_section(ParticleData *particle1, ParticleData *particle2,
   /* XXX: Calculate isospin Clebsch-Gordan coefficient */
   const double clebsch_gordan_isospin = 10;
 
+  /* If Clebsch-Gordan coefficient is zero, don't bother with the rest */
+  if (clebsch_gordan_isospin < really_small)
+    return 0.0;
+
   /* Calculate spin factor */
   const double spinfactor = (2 * (*type_list)[type_index].spin() + 1)
     / ((2 * type_particle1->spin() + 1) * (2 * type_particle2->spin() + 1));
