@@ -87,7 +87,7 @@ FourVector boundary_condition(FourVector position, const Box &box,
 static void check_collision_geometry(std::map<int, ParticleData> *particle,
   std::vector<ParticleType> *particle_type, std::map<int, int> *map_type,
   std::list<int> *collision_list, Parameters const &parameters,
-  Box const &box) {
+  Box const &box, size_t *rejection_conflict) {
   std::vector<std::vector<std::vector<std::vector<int> > > > grid;
   int N;
   int x, y, z;
@@ -114,7 +114,7 @@ static void check_collision_geometry(std::map<int, ParticleData> *particle,
         if (distance > radial_interaction)
            continue;
         collision_criteria_geometry(particle, particle_type, map_type,
-                              collision_list, parameters, i->first, j->first);
+          collision_list, parameters, i->first, j->first, rejection_conflict);
       }
     }
     return;
@@ -221,13 +221,15 @@ static void check_collision_geometry(std::map<int, ParticleData> *particle,
             printd("grid cell particle %i <-> %i\n", i->first, *id_other);
             if (shift == 0) {
               collision_criteria_geometry(particle, particle_type, map_type,
-                             collision_list, parameters, i->first, *id_other);
+                collision_list, parameters, i->first, *id_other,
+                rejection_conflict);
             } else {
               /* apply eventual boundary before and restore after */
               (*particle)[*id_other].set_position(
                 (*particle)[*id_other].position() + shift);
               collision_criteria_geometry(particle, particle_type, map_type,
-                              collision_list, parameters, i->first, *id_other);
+                collision_list, parameters, i->first, *id_other,
+                rejection_conflict);
               (*particle)[*id_other].set_position(
                 (*particle)[*id_other].position() - shift);
             }
@@ -246,6 +248,7 @@ static int Evolve(std::map<int, ParticleData> *particles,
   std::list<int> collision_list, decay_list;
   size_t interactions_total = 0, previous_interactions_total = 0,
     interactions_this_interval = 0;
+  size_t rejection_conflict = 0;
 
   /* startup values */
   print_measurements(*particles, interactions_total,
@@ -269,7 +272,7 @@ static int Evolve(std::map<int, ParticleData> *particles,
 
     /* fill collision table by cells */
     check_collision_geometry(particles, particle_type, map_type,
-                                &collision_list, parameters, box);
+      &collision_list, parameters, box, &rejection_conflict);
 
     /* particle interactions */
     if (!collision_list.empty())
@@ -289,6 +292,7 @@ static int Evolve(std::map<int, ParticleData> *particles,
       print_measurements(*particles, interactions_total,
                          interactions_this_interval, box);
       printd("Resonances: %i Decays: %i \n", *resonances, *decays);
+      printd("Ignored collisions %lu\n", rejection_conflict);
       /* save evolution data */
       write_particles(*particles);
       write_vtk(*particles);

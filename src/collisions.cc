@@ -29,7 +29,7 @@
 void collision_criteria_geometry(std::map<int, ParticleData> *particle,
   std::vector<ParticleType> *particle_type, std::map<int, int> *map_type,
   std::list<int> *collision_list, const Parameters &parameters, int id_a,
-  int id_b) {
+  int id_b, size_t *rejection_conflict) {
   /* just collided with this particle */
   if ((*particle)[id_a].id_process() >= 0
       && (*particle)[id_a].id_process() == (*particle)[id_b].id_process()) {
@@ -75,7 +75,6 @@ void collision_criteria_geometry(std::map<int, ParticleData> *particle,
   }
 
   /* handle minimal collision time of both particles */
-  /* XXX: keep track of multiple possible collision partners */
   if (unlikely((*particle)[id_a].collision_time() > 0.0)) {
     int id_not = (*particle)[id_a].id_partner();
     printd("Not colliding particle %d <-> %d\n", id_a, id_not);
@@ -89,6 +88,8 @@ void collision_criteria_geometry(std::map<int, ParticleData> *particle,
       printd("Removing particle %d from collision list\n", id_not);
       collision_list->remove(id_not);
     }
+    /* collect statistics of multiple possible collision partner */
+    (*rejection_conflict)++;
   }
   if (unlikely((*particle)[id_b].collision_time() > 0.0)) {
     int id_not = (*particle)[id_b].id_partner();
@@ -103,6 +104,8 @@ void collision_criteria_geometry(std::map<int, ParticleData> *particle,
       printd("Removing particle %d from collision list\n", id_not);
       collision_list->remove(id_not);
     }
+    /* collect statistics of multiple possible collision partner */
+    (*rejection_conflict)++;
   }
 
   /* If resonance formation probability is high enough, do that,
