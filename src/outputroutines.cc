@@ -131,6 +131,27 @@ void printd_position(const ParticleData &particle __attribute__((unused))) {
       particle.position().x2(), particle.position().x3());
 }
 
+/* write_particles - writes out data of the specific particles
+ *                   and also add output related to collisons and decays
+ */
+void write_particles(const std::map<int, ParticleData> &particles,
+  int decays, int resonances, const size_t &rejection_conflict) {
+  FILE *fp;
+  char filename[256];
+
+  snprintf(filename, sizeof(filename), "data/decays.dat");
+  fp = fopen(filename, "a");
+  fprintf(fp, "%d %d\n", decays, resonances);
+  fclose(fp);
+  snprintf(filename, sizeof(filename), "data/collisions.dat");
+  fp = fopen(filename, "a");
+  fprintf(fp, "%lu\n", rejection_conflict);
+  fclose(fp);
+
+  /* write actual data output */
+  write_particles(particles);
+}
+
 /* write_particles - writes out data of the specific particles */
 void write_particles(const std::map<int, ParticleData> &particles) {
   FILE *fp;
