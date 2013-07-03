@@ -235,7 +235,9 @@ size_t collide_particles(std::map<int, ParticleData> *particle,
 
       /* Remove the initial particles */
       particle->erase(id_a);
+      map_type->erase(id_a);
       particle->erase(id_b);
+      map_type->erase(id_b);
 
       printd("Particle map has now %zu elements. \n", particle->size());
     } else {
@@ -244,11 +246,10 @@ size_t collide_particles(std::map<int, ParticleData> *particle,
     } /* end if (interaction_type == 0) */
     id_process++;
 
-    double numerical_tolerance = 1.0e-7;
     FourVector momentum_difference;
     momentum_difference += initial_momentum;
     momentum_difference -= final_momentum;
-    if (fabs(momentum_difference.x0()) > numerical_tolerance) {
+    if (fabs(momentum_difference.x0()) > really_small) {
       printf("Process %lu type %i particle %s<->%s colliding %d<->%d time %g\n",
         id_process, interaction_type, (*type)[(*map_type)[id_a]].name().c_str(),
              (*type)[(*map_type)[id_b]].name().c_str(), id_a, id_b,
@@ -256,13 +257,13 @@ size_t collide_particles(std::map<int, ParticleData> *particle,
       printf("Warning: Interaction type %i E conservation violation %g\n",
              interaction_type, momentum_difference.x0());
     }
-    if (fabs(momentum_difference.x1()) > numerical_tolerance)
+    if (fabs(momentum_difference.x1()) > really_small)
       printf("Warning: Interaction type %i px conservation violation %g\n",
              interaction_type, momentum_difference.x1());
-    if (fabs(momentum_difference.x2()) > numerical_tolerance)
+    if (fabs(momentum_difference.x2()) > really_small)
       printf("Warning: Interaction type %i py conservation violation %g\n",
              interaction_type, momentum_difference.x2());
-    if (fabs(momentum_difference.x3()) > numerical_tolerance)
+    if (fabs(momentum_difference.x3()) > really_small)
       printf("Warning: Interaction type %i pz conservation violation %g\n",
              interaction_type, momentum_difference.x3());
   } /* end for std::list<int>::iterator id = collision_list->begin() */

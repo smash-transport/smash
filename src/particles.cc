@@ -17,6 +17,7 @@
 #include "include/constants.h"
 #include "include/distributions.h"
 #include "include/FourVector.h"
+#include "include/macros.h"
 #include "include/outputroutines.h"
 #include "include/ParticleData.h"
 #include "include/ParticleType.h"
@@ -211,25 +212,24 @@ double resonance_cross_section(ParticleData *particle1, ParticleData *particle2,
   if (abs(charge1 + charge2) > 1)
     return 0.0;
 
-  std::string resonance_name;
+  int type_resonance;
   if (charge1 + charge2 == 1)
-    resonance_name = "rho+";
+    type_resonance = 213;
   else if (charge1 + charge2 == -1)
-    resonance_name = "rho-";
+    type_resonance = -213;
   else
-    resonance_name = "rho0";
+    type_resonance = 113;
 
   /* Find the width and mass of the desired resonance */
   float resonance_width = -1.0, resonance_mass = 0.0;
   size_t type_index = 0;
   while (resonance_width < 0 && type_index < (*type_list).size()) {
-    if (strcmp((*type_list)[type_index].name().c_str(),
-               resonance_name.c_str()) == 0) {
+    if ((*type_list)[type_index].pdgcode() == type_resonance) {
       resonance_width = (*type_list)[type_index].width();
       resonance_mass = (*type_list)[type_index].mass();
-      printd("Found resonance %s with mass %f and width %f.\n",
-             resonance_name.c_str(), resonance_mass, resonance_width);
-      printd("Original pions: %s %s Charges: %i %i \n",
+      printd("Found resonance %i with mass %f and width %f.\n",
+             type_resonance, resonance_mass, resonance_width);
+      printd("Original particles: %s %s Charges: %i %i \n",
              (*type_particle1).name().c_str(), (*type_particle2).name().c_str(),
              (*type_particle1).charge(), (*type_particle2).charge());
     }
@@ -243,6 +243,10 @@ double resonance_cross_section(ParticleData *particle1, ParticleData *particle2,
   /* XXX: Calculate isospin Clebsch-Gordan coefficient */
   const double clebsch_gordan_isospin = 10;
 
+  /* If Clebsch-Gordan coefficient is zero, don't bother with the rest */
+  if (clebsch_gordan_isospin < really_small)
+    return 0.0;
+
   /* Calculate spin factor */
   const double spinfactor = (2 * (*type_list)[type_index].spin() + 1)
     / ((2 * type_particle1->spin() + 1) * (2 * type_particle2->spin() + 1));
@@ -250,7 +254,7 @@ double resonance_cross_section(ParticleData *particle1, ParticleData *particle2,
   /* Symmetry factor If initial state particles are identical,
    *  multiply by two. */
   int symmetryfactor = 1;
-  if (type_particle1->pdgcode() == type_particle2->pdgcode())
+  if (unlikely(type_particle1->pdgcode() == type_particle2->pdgcode()))
     symmetryfactor = 2;
 
   /* Mandelstam s = (p_a + p_b)^2 = square of CMS energy */
@@ -259,18 +263,18 @@ double resonance_cross_section(ParticleData *particle1, ParticleData *particle2,
          (*particle1).momentum() + (*particle2).momentum() );
 
   /* CM momentum */
-  const double momentum_cm
-    = sqrt((particle1->momentum().Dot(particle2->momentum())
-            * particle1->momentum().Dot(particle2->momentum())
-            - type_particle1->mass() * type_particle1->mass()
-            * type_particle2->mass() * type_particle2->mass()) / mandelstam_s);
+  const double cm_momentum_squared
+    = (particle1->momentum().Dot(particle2->momentum())
+       * particle1->momentum().Dot(particle2->momentum())
+       - type_particle1->mass() * type_particle1->mass()
+       * type_particle2->mass() * type_particle2->mass()) / mandelstam_s;
 
 
   /* Calculate resonance production cross section
    * using the Breit-Wigner distribution as probability amplitude
    */
   return clebsch_gordan_isospin * spinfactor * symmetryfactor
-         * 4.0 * M_PI / (momentum_cm * momentum_cm)
+         * 4.0 * M_PI / cm_momentum_squared
          * breit_wigner(mandelstam_s, resonance_mass, resonance_width);
 }
 
@@ -292,31 +296,29 @@ size_t resonance_decay(std::map<int, ParticleData> *particles,
   }
   const int charge = (*types)[(*map_type)[*particle_id]].charge();
 
-  std::string name_a, name_b;
+  int type_a = 0, type_b = 0;
   if (charge == 0) {
-    name_a = "pi+";
-    name_b = "pi-";
+    type_a = 211;
+    type_b = -211;
   } else if ( charge == 1 ) {
-    name_a = "pi+";
-    name_b = "pi0";
+    type_a = 211;
+    type_b = 111;
   } else if ( charge == -1 ) {
-    name_a = "pi-";
-    name_b = "pi0";
+    type_a = -211;
+    type_b = 111;
   }
 
   /* Find the desired particle types */
   bool not_found_a = true, not_found_b = true;
   size_t type_index = 0;
   while ( (not_found_a || not_found_b) && type_index < (*types).size() ) {
-    if (strcmp((*types)[type_index].name().c_str(),
-               name_a.c_str()) == 0) {
-      printd("Found particle %s.\n", name_a.c_str());
+    if ((*types)[type_index].pdgcode() == type_a) {
+      printd("Found particle %i.\n", type_a);
       (*map_type)[new_id_a] = type_index;
       not_found_a = false;
     }
-    if (strcmp((*types)[type_index].name().c_str(),
-               name_b.c_str()) == 0) {
-      printd("Found particle %s.\n", name_b.c_str());
+    if ((*types)[type_index].pdgcode() == type_b) {
+      printd("Found particle %i.\n", type_b);
       (*map_type)[new_id_b] = type_index;
       not_found_b = false;
     }
@@ -379,21 +381,20 @@ size_t resonance_formation(std::map<int, ParticleData> *particles,
   const int charge1 = (*types)[(*map_type)[*particle_id]].charge(),
     charge2 = (*types)[(*map_type)[*other_id]].charge();
 
-  std::string resonance_name;
+  int type_resonance;
   if (charge1 + charge2 == 1)
-    resonance_name = "rho+";
+    type_resonance = 213;
   else if (charge1 + charge2 == -1)
-    resonance_name = "rho-";
+    type_resonance = -213;
   else
-    resonance_name = "rho0";
+    type_resonance = 113;
 
   /* Find the desired resonance */
   bool not_found = true;
   size_t type_index = 0;
   while (not_found && type_index < (*types).size()) {
-    if (strcmp((*types)[type_index].name().c_str(),
-               resonance_name.c_str()) == 0) {
-      printd("Found resonance %s.\n", resonance_name.c_str());
+    if ((*types)[type_index].pdgcode() == type_resonance) {
+      printd("Found resonance %i.\n", type_resonance);
       printd("Parent particles: %s %s \n",
              (*types)[(*map_type)[*particle_id]].name().c_str(),
              (*types)[(*map_type)[*other_id]].name().c_str());
