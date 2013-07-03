@@ -232,7 +232,9 @@ size_t collide_particles(std::map<int, ParticleData> *particle,
 
       /* Remove the initial particles */
       particle->erase(id_a);
+      map_type->erase(id_a);
       particle->erase(id_b);
+      map_type->erase(id_b);
 
       printd("Particle map has now %zu elements. \n", particle->size());
     } else {

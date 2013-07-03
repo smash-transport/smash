@@ -140,6 +140,7 @@ size_t decay_particles(std::map<int, ParticleData> *particle,
     final_momentum += (*particle)[id_new_b].momentum();
 
     particle->erase(id_a);
+    map_type->erase(id_a);
     printd("ID %i has decayed and removed from the list.\n", id_a);
 
     /* unset collision time for both particles + keep id + unset partner */
