@@ -97,9 +97,9 @@ double particle_distance(ParticleData *particle_orig1,
     momentum_difference.x1(), momentum_difference.x2(),
     momentum_difference.x3());
   /* zero momentum leads to infite distance */
-  if (fabs(momentum_difference.x1()) < 1e-12
-      || fabs(momentum_difference.x2()) < 1e-12
-      || fabs(momentum_difference.x3()) < 1e-12)
+  if (fabs(momentum_difference.x1()) < really_small
+      && fabs(momentum_difference.x2()) < really_small
+      && fabs(momentum_difference.x3()) < really_small)
     return  - position_difference.DotThree(position_difference);
 
   /* UrQMD squared distance criteria:
@@ -140,9 +140,9 @@ double collision_time(ParticleData *particle1, ParticleData *particle2) {
     velocity_difference.x1(), velocity_difference.x2(),
     velocity_difference.x3());
   /* zero momentum leads to infite distance, particles are not approaching */
-  if (fabs(velocity_difference.x1()) < 1e-12
-      || fabs(velocity_difference.x2()) < 1e-12
-      || fabs(velocity_difference.x3()) < 1e-12)
+  if (fabs(velocity_difference.x1()) < really_small
+      && fabs(velocity_difference.x2()) < really_small
+      && fabs(velocity_difference.x3()) < really_small)
     return -1.0;
   return - position_difference.DotThree(velocity_difference)
            / velocity_difference.DotThree(velocity_difference);
