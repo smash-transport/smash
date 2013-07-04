@@ -27,6 +27,6 @@ void collision_criteria_geometry(std::map<int, ParticleData> *particle,
 size_t collide_particles(std::map<int, ParticleData> *particle,
   std::vector<ParticleType> *type, std::map<int, int> *map_type,
   std::list<int> *collision_list, size_t id_event, int *largest_id,
-  int *resfrm);
+  int *resonance_formations);
 
 #endif  // SRC_INCLUDE_COLLISIONS_H_
