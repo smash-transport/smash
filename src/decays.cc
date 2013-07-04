@@ -64,7 +64,7 @@ bool does_decay(ParticleData *particle, ParticleType *particle_type,
 /* colliding_particle - particle interaction */
 size_t decay_particles(std::map<int, ParticleData> *particle,
   std::vector<ParticleType> *type, std::map<int, int> *map_type,
-  std::list<int> *decay_list, size_t id_process, int *largest_id) {
+  std::list<int> *decay_list, size_t id_process, int *id_max) {
   FourVector velocity_CM;
 
   for (std::list<int>::iterator id = decay_list->begin();
@@ -106,7 +106,7 @@ size_t decay_particles(std::map<int, ParticleData> *particle,
         (*particle)[id_a].momentum().x2(), (*particle)[id_a].momentum().x3());
 
     size_t id_new_a = resonance_decay(particle, type, map_type, &id_a,
-                                        largest_id);
+                                        id_max);
     size_t id_new_b = id_new_a + 1;
 
     printd("particle 1 momenta in lrf: %g %g %g %g\n",
