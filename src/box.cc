@@ -267,7 +267,8 @@ static int Evolve(std::map<int, ParticleData> *particles,
     (*decays) += decay_list.size();
 
     /* Do the decays */
-    interactions_total = decay_particles(particles, particle_type,
+    if (!decay_list.empty())
+      interactions_total = decay_particles(particles, particle_type,
         map_type, &decay_list, interactions_total, id_max);
 
     /* fill collision table by cells */
