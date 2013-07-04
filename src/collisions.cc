@@ -22,6 +22,7 @@
 #include "include/macros.h"
 #include "include/outputroutines.h"
 #include "include/particles.h"
+#include "include/resonances.h"
 
 /* collision_criteria_geometry - check by geometrical method if a collision
  *                               happens between particles
@@ -128,7 +129,7 @@ void collision_criteria_geometry(std::map<int, ParticleData> *particle,
 size_t collide_particles(std::map<int, ParticleData> *particle,
   std::vector<ParticleType> *type, std::map<int, int> *map_type,
   std::list<int> *collision_list, size_t id_process, int *id_max,
-   int *resonance_formations) {
+  int *resonance_formations) {
   FourVector velocity_CM;
 
   /* XXX: print debug output of collision list */

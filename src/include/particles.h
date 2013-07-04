@@ -36,21 +36,4 @@ double collision_time(ParticleData *particle1, ParticleData *particle2);
 /* momenta_exchange - soft scattering */
 void momenta_exchange(ParticleData *particle1, ParticleData *particle2);
 
-/* resonance_cross_section - energy-dependent cross section
- * for producing a resonance
- */
-double resonance_cross_section(ParticleData *particle1, ParticleData *particle2,
-  ParticleType *type_particle1, ParticleType *type_particle2,
-  std::vector<ParticleType> *type_list);
-
-/* 1->2 resonance decay process */
-size_t resonance_decay(std::map<int, ParticleData> *particles,
-  std::vector<ParticleType> *types, std::map<int, int> *map_type,
-  int *particle_id, int *id_max);
-
-/* 2->1 resonance formation process */
-size_t resonance_formation(std::map<int, ParticleData> *particles,
-  std::vector<ParticleType> *types, std::map<int, int> *map_type,
-  int *particle_id, int *other_id, int *id_max);
-
 #endif  // SRC_INCLUDE_PARTICLES_H_

@@ -24,6 +24,7 @@
 #include "include/macros.h"
 #include "include/outputroutines.h"
 #include "include/particles.h"
+#include "include/resonances.h"
 
 /* does_decay - does a resonance decay on this timestep? */
 bool does_decay(ParticleData *particle, ParticleType *particle_type,
