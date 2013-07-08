@@ -44,7 +44,6 @@ static void usage(int rc) {
          "  -O, --output-interval          step interval between measurements\n"
          "  -s, --steps          number of steps\n"
          "  -T, --temperature    initial temperature\n"
-         "  -u, --update         output measurements each nth steps\n"
          "  -V, --version\n\n");
   exit(rc);
 }
