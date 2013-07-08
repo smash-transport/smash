@@ -264,12 +264,12 @@ static int Evolve(std::map<int, ParticleData> *particles,
       }
     }
 
-    (*decays) += decay_list.size();
-
     /* Do the decays */
-    if (!decay_list.empty())
+    if (!decay_list.empty()) {
       interactions_total = decay_particles(particles, particle_type,
         map_type, &decay_list, interactions_total, id_max);
+      (*decays) += decay_list.size();
+    }
 
     /* fill collision table by cells */
     check_collision_geometry(particles, particle_type, map_type,
