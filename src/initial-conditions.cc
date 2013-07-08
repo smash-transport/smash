@@ -93,11 +93,10 @@ void initial_conditions(std::map<int, ParticleData> *particles,
       (*map_type)[id] = i;
 
       /* back to back pair creation with random momenta direction */
-      if (unlikely(id == number + number_total - 1 && !(id % 2) && i == 2
-                   && box->initial_condition() != 2)) {
+      if (unlikely(id == number + number_total - 1 && !(id % 2) && i == 2)) {
         /* poor last guy just sits around */
         (*particles)[id].set_momentum((*type)[i].mass(), 0, 0, 0);
-      } else if (!(id % 2) || box->initial_condition() == 2) {
+      } else if (!(id % 2)) {
         if (box->initial_condition() != 2) {
           /* thermal momentum according Maxwell-Boltzmann distribution */
           momentum_radial = sample_momenta(box, (*type)[i]);
@@ -116,7 +115,7 @@ void initial_conditions(std::map<int, ParticleData> *particles,
           momentum_radial * cos(phi) * sin_theta,
           momentum_radial * sin(phi) * sin_theta,
           momentum_radial * cos_theta);
-      } else if (box->initial_condition() != 2) {
+      } else {
         (*particles)[id].set_momentum((*type)[i].mass(),
           - (*particles)[id - 1].momentum().x1(),
           - (*particles)[id - 1].momentum().x2(),
