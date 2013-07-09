@@ -42,6 +42,7 @@ static void usage(int rc) {
          "  -h, --help           usage information\n"
          "  -l, --length         length of the box in fermi\n"
          "  -O, --output-interval          step interval between measurements\n"
+         "  -r, --random         random number seed\n"
          "  -s, --sigma          cross section in mbarn\n"
          "  -S, --steps          number of steps\n"
          "  -T, --temperature    initial temperature\n"
