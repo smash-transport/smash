@@ -130,33 +130,17 @@ static void check_collision_geometry(std::map<int, ParticleData> *particle,
   /* populate grid */
   for (std::map<int, ParticleData>::iterator i = particle->begin();
          i != particle->end(); ++i) {
-    /* skip decayed particles */
-    if (i->second.process_type() > 0)
-      continue;
     /* XXX: function - map particle position to grid number */
-    z = round(i->second.position().x1() / box.length() * (N - 1));
-    x = round(i->second.position().x2() / box.length() * (N - 1));
-    y = round(i->second.position().x3() / box.length() * (N - 1));
+    x = round(i->second.position().x1() / box.length() * (N - 1));
+    y = round(i->second.position().x2() / box.length() * (N - 1));
+    z = round(i->second.position().x3() / box.length() * (N - 1));
     printd_position(i->second);
-    printd("grid cell %i: %i %i %i of %i\n", i->first, z, x, y, N);
-    if (unlikely(z >= N || x >= N || y >= N)) {
-      printf("Particle position: %g %g %g \n", i->second.position().x1(),
-             i->second.position().x2(), i->second.position().x3());
-      double coord_time = i->second.position().x0();
-      double coord[3];
-      coord[0] = i->second.position().x1();
-      coord[1] = i->second.position().x2();
-      coord[2] = i->second.position().x3();
-      for (int coordi = 0; coordi < 3; coordi++) {
-        if (coord[coordi] > box.length())
-          coord[coordi] -= box.length();
-      }
-      i->second.set_position(coord_time, coord[0], coord[1], coord[2]);
-      z = round(i->second.position().x1() / box.length() * (N - 1));
-      x = round(i->second.position().x2() / box.length() * (N - 1));
-      y = round(i->second.position().x3() / box.length() * (N - 1));
-    }
-    grid[z][x][y].push_back(i->first);
+    printd("grid cell %i: %i %i %i of %i\n", i->first, x, y, z, N);
+    if (unlikely(x >= N || x >= N || z >= N))
+      printf("W: Particle outside the box: %g %g %g \n",
+             i->second.position().x1(), i->second.position().x2(),
+             i->second.position().x3());
+    grid[x][y][z].push_back(i->first);
   }
   /* semi optimised nearest neighbour search:
    * http://en.wikipedia.org/wiki/Cell_lists
@@ -165,52 +149,52 @@ static void check_collision_geometry(std::map<int, ParticleData> *particle,
   for (std::map<int, ParticleData>::iterator i = particle->begin();
        i != particle->end(); ++i) {
     /* XXX: function - map particle position to grid number */
-    z = round(i->second.position().x1() / box.length() * (N - 1));
-    x = round(i->second.position().x2() / box.length() * (N - 1));
-    y = round(i->second.position().x3() / box.length() * (N - 1));
-    if (unlikely(z >= N || x >= N || y >= N))
-      printf("grid cell %i: %i %i %i of %i\n", i->first, z, x, y, N);
+    x = round(i->second.position().x1() / box.length() * (N - 1));
+    y = round(i->second.position().x2() / box.length() * (N - 1));
+    z = round(i->second.position().x3() / box.length() * (N - 1));
+    if (unlikely(x >= N || y >= N || z >= N))
+      printf("grid cell %i: %i %i %i of %i\n", i->first, x, y, z, N);
     /* check all neighbour grids */
-    for (int cz = -1; cz < 2; cz++) {
-      int sz = cz + z;
+    for (int cx = -1; cx < 2; cx++) {
+      int sx = cx + x;
       /* apply periodic boundary condition for particle positions */
-      if (sz < 0) {
-        sz = N - 1;
+      if (sx < 0) {
+        sx = N - 1;
         shift.set_x1(-box.length());
-      } else if (sz > N - 1) {
-        sz = 0;
+      } else if (sx > N - 1) {
+        sx = 0;
         shift.set_x1(box.length());
       } else {
         shift.set_x1(0);
       }
-      for (int cx = -1; cx <  2; cx++) {
-        int sx = cx + x;
-        if (sx < 0) {
-          sx = N - 1;
+      for (int cy = -1; cy <  2; cy++) {
+        int sy = cy + y;
+        if (sy < 0) {
+          sy = N - 1;
           shift.set_x2(-box.length());
-        } else if (sx > N - 1) {
-          sx = 0;
+        } else if (sy > N - 1) {
+          sy = 0;
           shift.set_x2(box.length());
         } else {
           shift.set_x2(0);
         }
-        for (int cy = -1; cy < 2; cy++) {
-          int sy = cy + y;
-          if (sy < 0) {
-            sy = N - 1;
+        for (int cz = -1; cz < 2; cz++) {
+          int sz = cz + z;
+          if (sz < 0) {
+            sz = N - 1;
             shift.set_x3(-box.length());
-          } else if (sy > N - 1) {
-            sy = 0;
+          } else if (sz > N - 1) {
+            sz = 0;
             shift.set_x3(box.length());
           } else {
             shift.set_x3(0);
           }
           /* empty grid cell */
-          if (grid[sz][sx][sy].empty())
+          if (grid[sx][sy][sz].empty())
             continue;
           /* grid cell particle list */
           for (std::vector<int>::iterator id_other
-               = grid[sz][sx][sy].begin(); id_other != grid[sz][sx][sy].end();
+               = grid[sx][sy][sz].begin(); id_other != grid[sx][sy][sz].end();
                ++id_other) {
             /* only check against particles above current id
              * to avoid double counting
@@ -234,9 +218,9 @@ static void check_collision_geometry(std::map<int, ParticleData> *particle,
                 (*particle)[*id_other].position() - shift);
             }
           } /* grid particles loop */
-        } /* grid sy */
-      } /* grid sx */
-    } /* grid sz */
+        } /* grid sz */
+      } /* grid sy */
+    } /* grid sx */
   } /* outer particle loop */
 }
 
