@@ -39,6 +39,7 @@ void mkdir_data(void);
 /* console debug output */
 void printd_position(const ParticleData &particle);
 void printd_momenta(const ParticleData &particle);
+void printd_momenta(const char *message, const ParticleData &particle);
 
 /* output data files */
 void write_particles(const std::map<int, ParticleData> &particles);
