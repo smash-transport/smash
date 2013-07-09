@@ -42,7 +42,8 @@ static void usage(int rc) {
          "  -h, --help           usage information\n"
          "  -l, --length         length of the box in fermi\n"
          "  -O, --output-interval          step interval between measurements\n"
-         "  -s, --steps          number of steps\n"
+         "  -s, --sigma          cross section in mbarn\n"
+         "  -S, --steps          number of steps\n"
          "  -T, --temperature    initial temperature\n"
          "  -V, --version\n\n");
   exit(rc);
@@ -329,7 +330,8 @@ int main(int argc, char *argv[]) {
     { "length",     required_argument,      0, 'l' },
     { "output-interval", required_argument,      0, 'O' },
     { "random",     required_argument,      0, 'r' },
-    { "steps",      required_argument,      0, 's' },
+    { "sigma",      required_argument,      0, 's' },
+    { "steps",      required_argument,      0, 'S' },
     { "temperature", required_argument,     0, 'T' },
     { "version",    no_argument,            0, 'V' },
     { NULL,         0, 0, 0 }
@@ -349,7 +351,7 @@ int main(int argc, char *argv[]) {
   process_params(cube, parameters, path);
 
   /* parse the command line options, they override all previous */
-  while ((opt = getopt_long(argc, argv, "e:hl:O:r:s:T:V", longopts,
+  while ((opt = getopt_long(argc, argv, "e:hl:O:r:s:S:T:V", longopts,
     NULL)) != -1) {
     switch (opt) {
     case 'e':
@@ -377,6 +379,9 @@ int main(int argc, char *argv[]) {
         parameters->set_seed(time(NULL));
       break;
     case 's':
+      parameters->set_cross_section(fabs(atof(optarg)));
+      break;
+    case 'S':
       cube->set_steps(abs(atoi(optarg)));
       break;
     case 'T':
