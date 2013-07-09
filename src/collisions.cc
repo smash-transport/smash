@@ -149,12 +149,8 @@ size_t collide_particles(std::map<int, ParticleData> *particle,
       id_process, interaction_type, (*type)[(*map_type)[id_a]].name().c_str(),
            (*type)[(*map_type)[id_b]].name().c_str(), id_a, id_b,
            (*particle)[id_a].position().x0());
-    printd("particle 1 momenta before: %g %g %g %g\n",
-        (*particle)[id_a].momentum().x0(), (*particle)[id_a].momentum().x1(),
-        (*particle)[id_a].momentum().x2(), (*particle)[id_a].momentum().x3());
-    printd("particle 2 momenta before: %g %g %g %g\n",
-        (*particle)[id_b].momentum().x0(), (*particle)[id_b].momentum().x1(),
-        (*particle)[id_b].momentum().x2(), (*particle)[id_b].momentum().x3());
+    printd_momenta("particle 1 momenta before", (*particle)[id_a]);
+    printd_momenta("particle 2 momenta before", (*particle)[id_b]);
 
     if (interaction_type == 0) {
       /* 2->2 elastic scattering*/
@@ -173,12 +169,8 @@ size_t collide_particles(std::map<int, ParticleData> *particle,
       write_oscar((*particle)[id_a], (*type)[(*map_type)[id_a]]);
       write_oscar((*particle)[id_b], (*type)[(*map_type)[id_b]]);
 
-      printd("particle 1 momenta after: %g %g %g %g\n",
-       (*particle)[id_a].momentum().x0(), (*particle)[id_a].momentum().x1(),
-       (*particle)[id_a].momentum().x2(), (*particle)[id_a].momentum().x3());
-      printd("particle 2 momenta after: %g %g %g %g\n",
-       (*particle)[id_b].momentum().x0(), (*particle)[id_b].momentum().x1(),
-       (*particle)[id_b].momentum().x2(), (*particle)[id_b].momentum().x3());
+      printd_momenta("particle 1 momenta after", (*particle)[id_a]);
+      printd_momenta("particle 2 momenta after", (*particle)[id_b]);
 
       final_momentum += (*particle)[id_a].momentum();
       final_momentum += (*particle)[id_b].momentum();
@@ -223,10 +215,7 @@ size_t collide_particles(std::map<int, ParticleData> *particle,
 
       printd("Resonance %s with ID %lu \n",
        (*type)[(*map_type)[id_new]].name().c_str(), id_new);
-
-      printd("has momentum in comp frame: %g %g %g %g\n",
-      (*particle)[id_new].momentum().x0(), (*particle)[id_new].momentum().x1(),
-      (*particle)[id_new].momentum().x2(), (*particle)[id_new].momentum().x3());
+      printd_momenta("momentum in comp frame", (*particle)[id_new]);
 
       printd("and position in comp frame: %g %g %g %g\n",
       (*particle)[id_new].position().x0(), (*particle)[id_new].position().x1(),

@@ -101,24 +101,14 @@ size_t decay_particles(std::map<int, ParticleData> *particle,
     (*particle)[id_a].set_position(
         (*particle)[id_a].position().LorentzBoost(velocity_CM));
 
-    printd("Boosted resonance momenta before decay: %g %g %g %g\n",
-        (*particle)[id_a].momentum().x0(), (*particle)[id_a].momentum().x1(),
-        (*particle)[id_a].momentum().x2(), (*particle)[id_a].momentum().x3());
+    printd_momenta("Boosted resonance momenta before decay",
+                   (*particle)[id_a]);
 
-    size_t id_new_a = resonance_decay(particle, type, map_type, &id_a,
-                                        id_max);
+    size_t id_new_a = resonance_decay(particle, type, map_type, &id_a, id_max);
     size_t id_new_b = id_new_a + 1;
 
-    printd("particle 1 momenta in lrf: %g %g %g %g\n",
-           (*particle)[id_new_a].momentum().x0(),
-           (*particle)[id_new_a].momentum().x1(),
-           (*particle)[id_new_a].momentum().x2(),
-           (*particle)[id_new_a].momentum().x3());
-    printd("particle 2 momenta in lrf: %g %g %g %g\n",
-           (*particle)[id_new_b].momentum().x0(),
-           (*particle)[id_new_b].momentum().x1(),
-           (*particle)[id_new_b].momentum().x2(),
-           (*particle)[id_new_b].momentum().x3());
+    printd_momenta("particle 1 momenta in lrf", (*particle)[id_new_a]);
+    printd_momenta("particle 2 momenta in lrf", (*particle)[id_new_b]);
 
     boost_back_CM(&(*particle)[id_new_a], &(*particle)[id_new_b],
                   &velocity_CM);
@@ -126,16 +116,8 @@ size_t decay_particles(std::map<int, ParticleData> *particle,
     write_oscar((*particle)[id_new_a], (*type)[(*map_type)[id_new_a]]);
     write_oscar((*particle)[id_new_b], (*type)[(*map_type)[id_new_b]]);
 
-    printd("particle 1 momenta in comp: %g %g %g %g\n",
-           (*particle)[id_new_a].momentum().x0(),
-           (*particle)[id_new_a].momentum().x1(),
-           (*particle)[id_new_a].momentum().x2(),
-           (*particle)[id_new_a].momentum().x3());
-    printd("particle 2 momenta in comp: %g %g %g %g\n",
-           (*particle)[id_new_b].momentum().x0(),
-           (*particle)[id_new_b].momentum().x1(),
-           (*particle)[id_new_b].momentum().x2(),
-           (*particle)[id_new_b].momentum().x3());
+    printd_momenta("particle 1 momenta in comp", (*particle)[id_new_a]);
+    printd_momenta("particle 2 momenta in comp", (*particle)[id_new_b]);
 
     final_momentum += (*particle)[id_new_a].momentum();
     final_momentum += (*particle)[id_new_b].momentum();
