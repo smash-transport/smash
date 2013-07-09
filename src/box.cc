@@ -101,10 +101,10 @@ static void check_collision_geometry(std::map<int, ParticleData> *particle,
                                      * M_1_PI) * 2;
     for (std::map<int, ParticleData>::iterator i = particle->begin();
          i != particle->end(); ++i) {
-      for (std::map<int, ParticleData>::iterator j; j != particle->end();
-         ++j) {
-        /* exclude check on same particle */
-        if (i->first != j->first)
+      for (std::map<int, ParticleData>::iterator j = particle->begin();
+           j != particle->end(); ++j) {
+        /* exclude check on same particle and double counting */
+        if (i->first >= j->first)
           continue;
 
         /* XXX: apply periodic boundary condition */
