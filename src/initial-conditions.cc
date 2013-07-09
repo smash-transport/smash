@@ -156,8 +156,11 @@ void initial_conditions(std::map<int, ParticleData> *particles,
   /* Display on startup if pseudo grid is used */
   int const grid_number = round(box->length()
               / sqrt(parameters->cross_section() * fm2_mb * M_1_PI) * 0.5);
-  if (grid_number > 4 && number > 10)
+  /* pseudo grid not used for 3^3 or extremely small particle numbers */
+  if (grid_number >= 4 && number > 10)
     printf("Simulation with pseudo grid: %d^3\n", grid_number);
+  else
+    printf("W: Not using pseudo grid: %d^3\n", grid_number);
 
   /* allows to check energy conservation */
   printf("IC total energy: %g [GeV]\n", momentum_total.x0());
