@@ -151,12 +151,8 @@ double collision_time(ParticleData *particle1, ParticleData *particle2) {
 /* momenta_exchange - soft scattering */
 void momenta_exchange(ParticleData *particle1, ParticleData *particle2) {
   /* debug output */
-  printd("center of momenta 1: %g %g %g %g \n", particle1->momentum().x0(),
-    particle1->momentum().x1(), particle1->momentum().x2(),
-    particle1->momentum().x3());
-  printd("center of momenta 2: %g %g %g %g \n", particle2->momentum().x0(),
-    particle2->momentum().x1(), particle2->momentum().x2(),
-    particle2->momentum().x3());
+  printd_momenta("center of momenta 1", *particle1);
+  printd_momenta("center of momenta 2", *particle2);
 
   /* center of momentum hence this is equal for both particles */
   const double momentum_radial = sqrt(particle1->momentum().x1()
@@ -185,10 +181,6 @@ void momenta_exchange(ParticleData *particle1, ParticleData *particle2) {
   particle2->set_momentum(momentum2);
 
   /* debug output */
-  printd("exchanged momenta 1: %g %g %g %g \n", particle1->momentum().x0(),
-    particle1->momentum().x1(), particle1->momentum().x2(),
-    particle1->momentum().x3());
-  printd("exchanged momenta 2: %g %g %g %g \n", particle2->momentum().x0(),
-    particle2->momentum().x1(), particle2->momentum().x2(),
-    particle2->momentum().x3());
+  printd_momenta("exchanged momenta 1", *particle1);
+  printd_momenta("exchanged momenta 2", *particle2);
 }

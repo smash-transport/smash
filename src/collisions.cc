@@ -216,10 +216,7 @@ size_t collide_particles(std::map<int, ParticleData> *particle,
       printd("Resonance %s with ID %lu \n",
        (*type)[(*map_type)[id_new]].name().c_str(), id_new);
       printd_momenta("momentum in comp frame", (*particle)[id_new]);
-
-      printd("and position in comp frame: %g %g %g %g\n",
-      (*particle)[id_new].position().x0(), (*particle)[id_new].position().x1(),
-      (*particle)[id_new].position().x2(), (*particle)[id_new].position().x3());
+      printd_position("position in comp frame", (*particle)[id_new]);
 
       /* unset collision time for particles + keep id + unset partner */
       (*particle)[id_new].set_collision_past(id_process);

@@ -83,10 +83,7 @@ size_t decay_particles(std::map<int, ParticleData> *particle,
     /* 1->2 resonance decay */
     printd("Process: Resonance decay. ");
     write_oscar((*particle)[id_a], (*type)[(*map_type)[id_a]], 1, 2);
-
-    printd("Resonance momenta before decay: %g %g %g %g\n",
-         (*particle)[id_a].momentum().x0(), (*particle)[id_a].momentum().x1(),
-         (*particle)[id_a].momentum().x2(), (*particle)[id_a].momentum().x3());
+    printd_momenta("Resonance momenta before decay", (*particle)[id_a]);
 
     /* boost to rest frame */
     velocity_CM.set_x0(1.0);

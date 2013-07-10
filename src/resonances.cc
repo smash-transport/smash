@@ -245,10 +245,7 @@ size_t resonance_formation(std::map<int, ParticleData> *particles,
    */
   FourVector resonance_momentum(energy, 0.0, 0.0, 0.0);
   (*particles)[new_id].set_momentum(resonance_momentum);
-
-  printd("Momentum of the new particle: %g %g %g %g \n",
-    (*particles)[new_id].momentum().x0(), (*particles)[new_id].momentum().x1(),
-    (*particles)[new_id].momentum().x2(), (*particles)[new_id].momentum().x3());
+  printd_momenta("Momentum of the new particle", (*particles)[new_id]);
 
   /* The real position should be between parents in the computational frame! */
   (*particles)[new_id].set_position(1.0, 0.0, 0.0, 0.0);
