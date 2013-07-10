@@ -280,7 +280,8 @@ static int Evolve(std::map<int, ParticleData> *particles,
       printd("Resonances: %i Decays: %i\n", *resonances, *decays);
       printd("Ignored collisions %lu\n", rejection_conflict);
       /* save evolution data */
-      write_particles(*particles, *resonances, *decays, rejection_conflict);
+      write_measurements(*particles, interactions_total,
+        interactions_this_interval, *resonances, *decays, rejection_conflict);
       write_vtk(*particles);
     }
   }
