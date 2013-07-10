@@ -1,5 +1,5 @@
 add_executable(fourvector EXCLUDE_FROM_ALL fourvector.cc)
-add_executable(particles EXCLUDE_FROM_ALL particles.cc ../particles.cc ../fourvector.cc ../distributions.cc)
+add_executable(particles EXCLUDE_FROM_ALL particles.cc ../particles.cc ../fourvector.cc ../distributions.cc ../outputroutines.cc)
 add_dependencies(check fourvector particles)
 
 # tests:
