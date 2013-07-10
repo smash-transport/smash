@@ -25,7 +25,7 @@ set(CTEST_MASH_COMMAND_OPTIONS "-S 500")
 add_test(mash_steps ${PROJECT_BINARY_DIR}/mash ${CTEST_MASH_COMMAND_OPTIONS})
 
 # verify that binary copes with negative temperature
-set(CTEST_MASH_COMMAND_OPTIONS "-T -0.1")
+set(CTEST_MASH_COMMAND_OPTIONS "-T -0.1 -S 500")
 add_test(mash_neg_temp ${PROJECT_BINARY_DIR}/mash ${CTEST_MASH_COMMAND_OPTIONS})
 
 # verify that binary copes with negative and abismall box
@@ -33,7 +33,7 @@ set(CTEST_MASH_COMMAND_OPTIONS "-l -0.1")
 add_test(mash_neg_l ${PROJECT_BINARY_DIR}/mash ${CTEST_MASH_COMMAND_OPTIONS})
 
 # verify that binary copes with huge cross section
-set(CTEST_MASH_COMMAND_OPTIONS "-s 160 -S 1000")
+set(CTEST_MASH_COMMAND_OPTIONS "-s 160 -S 500")
 add_test(mash_huge_sigma ${PROJECT_BINARY_DIR}/mash ${CTEST_MASH_COMMAND_OPTIONS})
 
 # verify that binary copes with bizarre crash input
