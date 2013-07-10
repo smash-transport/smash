@@ -117,10 +117,10 @@ void print_tail(const Box &box, const double &scattering_rate) {
   printf("Final scattering rate: %g [fm-1]\n", scattering_rate);
 }
 
-/* printd_momenta - print debug data of the specific particle */
-void printd_momenta(const char *string __attribute__((unused)),
+/* printd_momenta - print debug data of the specific particle with message */
+void printd_momenta(const char *message __attribute__((unused)),
   const ParticleData &particle __attribute__((unused))) {
-  printd("%s: %g %g %g %g [GeV]\n", string,
+  printd("%s: %g %g %g %g [GeV]\n", message,
       particle.momentum().x0(), particle.momentum().x1(),
       particle.momentum().x2(), particle.momentum().x3());
 }
@@ -130,6 +130,14 @@ void printd_momenta(const ParticleData &particle __attribute__((unused))) {
   printd("Particle %d momenta: %g %g %g %g [GeV]\n", particle.id(),
       particle.momentum().x0(), particle.momentum().x1(),
       particle.momentum().x2(), particle.momentum().x3());
+}
+
+/* printd_position - print debug data of the specific particle with message */
+void printd_position(const char *message __attribute__((unused)),
+  const ParticleData &particle __attribute__((unused))) {
+  printd("%s: %g %g %g %g [fm]\n", message,
+      particle.position().x0(), particle.position().x1(),
+      particle.position().x2(), particle.position().x3());
 }
 
 /* printd_position - print debug data of the specific particle */
