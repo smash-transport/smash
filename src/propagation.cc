@@ -27,12 +27,6 @@ void propagate_particles(std::map<int, ParticleData> *particles,
 
     for (std::map<int, ParticleData>::iterator i = particles->begin();
          i != particles->end(); ++i) {
-      /* The particle has formed a resonance or has decayed
-       * and is not active anymore
-       */
-      if (i->second.process_type() > 0)
-        continue;
-
       /* propagation for this time step */
       distance.set_FourVector(parameters.eps(),
         i->second.velocity_x() * parameters.eps(),
