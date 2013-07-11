@@ -1,7 +1,7 @@
 # list the source files
 set(smash_src collisions.cc decays.cc distributions.cc
 	fourvector.cc initial-conditions.cc input-particles.cc
-	param-reader.cc particles.cc propagation.cc outputroutines.cc
+	outputroutines.cc param-reader.cc particles.cc propagation.cc 
         resonances.cc)
 add_executable(mash box.cc ${smash_src})
 
