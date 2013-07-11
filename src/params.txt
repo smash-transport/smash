@@ -13,6 +13,11 @@ STEPS		10000
 UPDATE          100
 
 // initial condition
+//
+// 1:  random position box + thermal momenta
+// 2:  random position box + peaked momenta
+// 3:  random position sphere + thermal momenta
+//
 INITIAL_CONDITION	1
 
 // initial random seed (negative for time)

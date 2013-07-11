@@ -78,7 +78,7 @@ void initial_conditions(std::map<int, ParticleData> *particles,
      */
     /* allocate the particles */
     for (size_t id = number_total; id < number_total + number; id++) {
-      double x_pos, y_pos, z_pos, time_start;
+      double x, y, z, time_start;
       /* ID uniqueness check */
       if (unlikely(particles->count(id) > 0))
         continue;
@@ -123,12 +123,27 @@ void initial_conditions(std::map<int, ParticleData> *particles,
       }
       momentum_total += (*particles)[id].momentum();
 
-      /* ramdom position in the box */
       time_start = 1.0;
-      x_pos = drand48() * box->length();
-      y_pos = drand48() * box->length();
-      z_pos = drand48() * box->length();
-      (*particles)[id].set_position(time_start, x_pos, y_pos, z_pos);
+      /* ramdom position in a quadratic box */
+      if (box->initial_condition() != 3) {
+        x = drand48() * box->length();
+        y = drand48() * box->length();
+        z = drand48() * box->length();
+      /* ramdom position in a sphere
+       * box length here has the meaning of the sphere radius
+       */
+      } else {
+        x = -box->length() + 2.0 * drand48() * box->length();
+        y = -box->length() + 2.0 * drand48() * box->length();
+        z = -box->length() + 2.0 * drand48() * box->length();
+        /* sampling points inside of the sphere, rejected if outside */
+        while (sqrt(x * x + y * y + z * z) > box->length()) {
+          x = -box->length() + 2.0 * drand48() * box->length();
+          y = -box->length() + 2.0 * drand48() * box->length();
+          z = -box->length() + 2.0 * drand48() * box->length();
+        }
+      }
+      (*particles)[id].set_position(time_start, x, y, z);
 
       /* no collision yet hence zero time and unexisting id */
       (*particles)[id].set_collision(-1, 0, -1);
