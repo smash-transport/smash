@@ -1,8 +1,9 @@
 # list the source files
-add_executable(mash box.cc collisions.cc decays.cc distributions.cc
+set(smash_src collisions.cc decays.cc distributions.cc
 	fourvector.cc initial-conditions.cc input-particles.cc
 	param-reader.cc particles.cc propagation.cc outputroutines.cc
         resonances.cc)
+add_executable(mash box.cc ${smash_src})
 
 # configure a header file to pass some of the CMake settings
 # to the source code
