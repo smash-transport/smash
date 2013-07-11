@@ -235,6 +235,14 @@ static int Evolve(std::map<int, ParticleData> *particles,
     interactions_this_interval = 0;
   size_t rejection_conflict = 0;
 
+  /* fixup positions on startup, particles need to be *inside* the box */
+  for (std::map<int, ParticleData>::iterator i = particles->begin();
+       i != particles->end(); ++i) {
+    bool boundary_hit = false;
+    i->second.set_position(boundary_condition(i->second.position(), box,
+                           &boundary_hit));
+  }
+
   /* startup values */
   print_measurements(*particles, interactions_total,
                      interactions_this_interval, box);
