@@ -50,7 +50,11 @@ static void usage(int rc) {
   exit(rc);
 }
 
-/* boundary_condition - enforce specific type of boundaries */
+/* boundary_condition - enforce specific type of boundaries
+ *
+ * This assumes that the particle is at most one box length
+ * away from the boundary to shift it in.
+ */
 FourVector boundary_condition(FourVector position, const Box &box,
                               bool *boundary_hit) {
   /* Check positivity and box size */
