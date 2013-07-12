@@ -88,7 +88,7 @@ static void check_collision_geometry(std::map<int, ParticleData> *particle,
     y = round((a + i->second.position().x2()) / (N - 1));
     z = round((a + i->second.position().x3()) / (N - 1));
     printd_position(i->second);
-    printd("grid cell %i: %i %i %i of %i\n", i->first, x, y, z, N);
+    printd("grid cell particle %i: %i %i %i of %i\n", i->first, x, y, z, N);
     grid[x][y][z].push_back(i->first);
   }
 
@@ -103,7 +103,7 @@ static void check_collision_geometry(std::map<int, ParticleData> *particle,
     y = round((a + i->second.position().x2()) / (N - 1));
     z = round((a + i->second.position().x3()) / (N - 1));
     if (unlikely(x >= N || y >= N || z >= N))
-      printf("grid cell %i: %i %i %i of %i\n", i->first, x, y, z, N);
+      printf("grid cell particle %i: %i %i %i of %i\n", i->first, x, y, z, N);
     /* check all neighbour grids */
     for (int cx = -1; cx < 2; cx++) {
       int sx = cx + x;
