@@ -158,12 +158,13 @@ void write_measurements(const std::map<int, ParticleData> &particles,
 
   snprintf(filename, sizeof(filename), "data/decays.dat");
   fp = fopen(filename, "a");
-  fprintf(fp, "%d %d\n", decays, resonances);
+  fprintf(fp, "%g\t%d\t%d\n", particles.begin()->second.position().x0(),
+                            decays, resonances);
   fclose(fp);
   snprintf(filename, sizeof(filename), "data/collisions.dat");
   fp = fopen(filename, "a");
-  fprintf(fp, "%d\t%d\t%lu\n", interactions_total, interactions_this_interval,
-    rejection_conflict);
+  fprintf(fp, "%g\t%d\t%d\t%lu\n", particles.begin()->second.position().x0(),
+          interactions_total, interactions_this_interval, rejection_conflict);
   fclose(fp);
 
   /* write actual data output */
