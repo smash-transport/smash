@@ -71,7 +71,28 @@ static void check_collision_geometry(std::map<int, ParticleData> *particle,
   /* calculate approximate grid size according to double interaction length */
   N = round(2.0 * a / sqrt(parameters.cross_section() * fm2_mb * M_1_PI) * 0.5);
 
-  /* XXX check if pseudo grid too small and use usual stuff without */
+  /* for small boxes not possible to split upo */
+  if (unlikely(N < 4 || particle->size() < 10)) {
+    FourVector distance;
+    double radial_interaction = sqrt(parameters.cross_section() * fm2_mb
+                                     * M_1_PI) * 2;
+    for (std::map<int, ParticleData>::iterator i = particle->begin();
+         i != particle->end(); ++i) {
+      for (std::map<int, ParticleData>::iterator j = particle->begin();
+           j != particle->end(); ++j) {
+        /* exclude check on same particle and double counting */
+        if (i->first >= j->first)
+          continue;
+        distance = i->second.position() - j->second.position();
+        /* skip particles that are double interaction radius length away */
+        if (distance > radial_interaction)
+           continue;
+        collision_criteria_geometry(particle, particle_type, map_type,
+          collision_list, parameters, i->first, j->first, rejection_conflict);
+      }
+    }
+    return;
+  }
 
   /* allocate grid */
   grid.resize(N);
