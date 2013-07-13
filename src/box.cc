@@ -141,7 +141,7 @@ static void check_collision_geometry(std::map<int, ParticleData> *particle,
     z = round(i->second.position().x3() / box.length() * (N - 1));
     printd_position(i->second);
     printd("grid cell particle %i: %i %i %i of %i\n", i->first, x, y, z, N);
-    if (unlikely(x >= N || x >= N || z >= N))
+    if (unlikely(x >= N || y >= N || z >= N))
       printf("W: Particle outside the box: %g %g %g \n",
              i->second.position().x1(), i->second.position().x2(),
              i->second.position().x3());
