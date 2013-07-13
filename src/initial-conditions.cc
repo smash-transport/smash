@@ -63,12 +63,23 @@ void initial_conditions(std::map<int, ParticleData> *particles,
       * box->temperature()
       * gsl_sf_bessel_Knu(2, (*type)[i].mass() / box->temperature())
       * 0.5 * M_1_PI * M_1_PI / hbarc / hbarc / hbarc;
-    /* cast while reflecting probability of extra particle */
-    number = box->length() * box->length() * box->length() * number_density
-      * parameters->testparticles();
-    if (box->length() * box->length() * box->length() * number_density - number
-      > drand48())
-      number++;
+
+    /* particle number depending on IC geometry either sphere or box */
+    if (unlikely(box->initial_condition() == 3)) {
+      /* cast while reflecting probability of extra particle */
+      number = 4.0 / 3.0 * M_PI * box->length() * box->length() * box->length()
+        * number_density * parameters->testparticles();
+      if (4.0 / 3.0 * M_PI * box->length() * box->length() * box->length()
+        * number_density - number > drand48())
+        number++;
+    } else {
+      /* cast while reflecting probability of extra particle */
+      number = box->length() * box->length() * box->length() * number_density
+        * parameters->testparticles();
+      if (box->length() * box->length() * box->length() * number_density
+        - number > drand48())
+        number++;
+    }
     printf("IC number density %.6g [fm^-3]\n", number_density);
     printf("IC %lu number of %s\n", number, (*type)[i].name().c_str());
     number_density_total += number_density;
