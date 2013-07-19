@@ -100,7 +100,7 @@ double resonance_cross_section(ParticleData *particle1, ParticleData *particle2,
                     isospin_z1, isospin_z2, isospin_z_resonance);
 
   /* If Clebsch-Gordan coefficient is zero, don't bother with the rest */
-  if (abs(clebsch_gordan_isospin) < really_small)
+  if (fabs(clebsch_gordan_isospin) < really_small)
     return 0.0;
 
   /* Calculate spin factor */
