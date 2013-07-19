@@ -15,6 +15,7 @@
 #include <map>
 #include <vector>
 
+#include "include/ClebschGordan.h"
 #include "include/constants.h"
 #include "include/distributions.h"
 #include "include/FourVector.h"
@@ -32,6 +33,8 @@ double resonance_cross_section(ParticleData *particle1, ParticleData *particle2,
   std::vector<ParticleType> *type_list) {
   const int charge1 = (*type_particle1).charge(),
     charge2 = (*type_particle2).charge();
+  int isospin_z1 = charge1 * (*type_particle1).isospin(),
+    isospin_z2 = charge2 * (*type_particle2).isospin();
 
   /* Resonances do not form resonances */
   if (type_particle1->width() > 0.0 || type_particle2->width() > 0.0)
@@ -43,38 +46,61 @@ double resonance_cross_section(ParticleData *particle1, ParticleData *particle2,
     return 0.0;
 
   int type_resonance;
-  if (charge1 + charge2 == 1)
+  if (charge1 + charge2 == 1) {
     type_resonance = 213;
-  else if (charge1 + charge2 == -1)
+  } else if (charge1 + charge2 == -1) {
     type_resonance = -213;
-  else
+  } else {
     type_resonance = 113;
+  }
 
   /* Find the width and mass of the desired resonance */
   float resonance_width = -1.0, resonance_mass = 0.0;
+  int isospin_z_resonance = 0;
   size_t type_index = 0;
   while (resonance_width < 0 && type_index < (*type_list).size()) {
     if ((*type_list)[type_index].pdgcode() == type_resonance) {
       resonance_width = (*type_list)[type_index].width();
       resonance_mass = (*type_list)[type_index].mass();
+      isospin_z_resonance = (*type_list)[type_index].charge()
+        * (*type_list)[type_index].isospin();
       printd("Found resonance %i with mass %f and width %f.\n",
              type_resonance, resonance_mass, resonance_width);
       printd("Original particles: %s %s Charges: %i %i \n",
              (*type_particle1).name().c_str(), (*type_particle2).name().c_str(),
              (*type_particle1).charge(), (*type_particle2).charge());
+    } else {
+      type_index++;
     }
-    type_index++;
   }
 
   /* If there was no such resonance in the list, return 0 */
   if (resonance_width < 0.0)
     return 0.0;
 
-  /* XXX: Calculate isospin Clebsch-Gordan coefficient */
-  const double clebsch_gordan_isospin = 10;
+  /* Calculate isospin Clebsch-Gordan coefficient
+   * Note that the calculation assumes that isospin values
+   * have been multiplied by two
+   * (which is what we'll most likely want to do once fermions are in)
+   */
+  double clebsch_gordan_isospin = 0.0;
+  {
+  ClebschGordan cgfactor;
+  clebsch_gordan_isospin
+    = cgfactor((*type_particle1).isospin() * 2,
+                          (*type_particle2).isospin() * 2,
+                    (*type_list)[type_index].isospin() * 2,
+                    isospin_z1 * 2, isospin_z2 * 2, isospin_z_resonance * 2);
+  }
+
+  printd("CG: %g I1: %i I2: %i IR: %i iz1: %i iz2: %i izR: %i \n",
+         clebsch_gordan_isospin,
+         (*type_particle1).isospin(), (*type_particle2).isospin(),
+                    (*type_list)[type_index].isospin(),
+                    isospin_z1, isospin_z2, isospin_z_resonance);
 
   /* If Clebsch-Gordan coefficient is zero, don't bother with the rest */
-  if (clebsch_gordan_isospin < really_small)
+  if (abs(clebsch_gordan_isospin) < really_small)
     return 0.0;
 
   /* Calculate spin factor */
@@ -103,7 +129,8 @@ double resonance_cross_section(ParticleData *particle1, ParticleData *particle2,
   /* Calculate resonance production cross section
    * using the Breit-Wigner distribution as probability amplitude
    */
-  return clebsch_gordan_isospin * spinfactor * symmetryfactor
+  return clebsch_gordan_isospin * clebsch_gordan_isospin
+         * spinfactor * symmetryfactor
          * 4.0 * M_PI / cm_momentum_squared
          * breit_wigner(mandelstam_s, resonance_mass, resonance_width);
 }
@@ -168,8 +195,12 @@ size_t resonance_decay(std::map<int, ParticleData> *particles,
   /* cos(theta) in the range from [-1.0, 1.0) */
   double cos_theta = -1.0 + 2.0 * drand48();
   double sin_theta = sqrt(1.0 - cos_theta * cos_theta);
-  printd("Particle %lu radial momenta %g phi %g cos_theta %g\n", new_id_a,
+  if (energy_a  < mass_a || abs(cos_theta) > 1) {
+    printf("Particle %lu radial momenta %g phi %g cos_theta %g\n", new_id_a,
          momentum_radial, phi, cos_theta);
+    printf("Etot: %g m_a: %g m_b %g E_a: %g", total_energy, mass_a, mass_b,
+           energy_a);
+  }
   (*particles)[new_id_a].set_momentum(mass_a,
       momentum_radial * cos(phi) * sin_theta,
       momentum_radial * sin(phi) * sin_theta,
@@ -245,7 +276,10 @@ size_t resonance_formation(std::map<int, ParticleData> *particles,
    */
   FourVector resonance_momentum(energy, 0.0, 0.0, 0.0);
   (*particles)[new_id].set_momentum(resonance_momentum);
-  printd_momenta("Momentum of the new particle", (*particles)[new_id]);
+
+  printd("Momentum of the new particle: %g %g %g %g \n",
+    (*particles)[new_id].momentum().x0(), (*particles)[new_id].momentum().x1(),
+    (*particles)[new_id].momentum().x2(), (*particles)[new_id].momentum().x3());
 
   /* The real position should be between parents in the computational frame! */
   (*particles)[new_id].set_position(1.0, 0.0, 0.0, 0.0);
