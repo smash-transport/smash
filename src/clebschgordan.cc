@@ -29,7 +29,7 @@ ClebschGordan::ClebschGordan() : flmax(4 * 50 + 2) {
 }
 
 ClebschGordan::~ClebschGordan() {
-  delete fl;
+  delete[] fl;
 }
 
 double ClebschGordan::operator()(int j1, int j2, int j3, int m1, int m2,
