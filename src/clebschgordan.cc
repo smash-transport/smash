@@ -14,7 +14,7 @@
 
 #include <math.h>
 #include <stdlib.h>
-#include <algorithm>    // std::min
+#include <algorithm>
 
 #include "include/ClebschGordan.h"
 
@@ -32,16 +32,24 @@ ClebschGordan::~ClebschGordan() {
   delete[] fl;
 }
 
+/* ClebschGordan - we calculate funky coefficients */
 double ClebschGordan::operator()(int j1, int j2, int j3, int m1, int m2,
                                  int m3) {
-  if (j1 < 0 || j2 < 0 || j3 < 0) return 0.0;
-  if (abs(m1) > j1 || abs(m2) > j2 || abs(m3) > j3) return 0.0;
-  if (j3 > j1 + j2 || j3 < abs(j1 - j2) ) return 0.0;
-  if (m1 + m2 != m3) return 0.0;
-  if ( ((j1 + j2 + j3) % 2) != 0 ) return 0.0;
-  if ( ((j1 + m1) % 2) != 0 || ((j2 + m2) % 2) != 0 || ((j3 + m3) % 2) != 0 )
+  /* XXX: document what is happening */
+  if (j1 < 0 || j2 < 0 || j3 < 0)
     return 0.0;
-  if (j1 == 0 || j2 == 0) return 1.0;
+  if (abs(m1) > j1 || abs(m2) > j2 || abs(m3) > j3)
+    return 0.0;
+  if (j3 > j1 + j2 || j3 < abs(j1 - j2))
+    return 0.0;
+  if (m1 + m2 != m3)
+    return 0.0;
+  if (((j1 + j2 + j3) % 2) != 0)
+    return 0.0;
+  if (((j1 + m1) % 2) != 0 || ((j2 + m2) % 2) != 0 || ((j3 + m3) % 2) != 0)
+    return 0.0;
+  if (j1 == 0 || j2 == 0)
+    return 1.0;
 
   return pow(-1, (j1 - j2 + m3) / 2) * sqrt(static_cast<double>(j3 + 1))
     * f3j(j1, j2, j3, m1, m2, -m3);
@@ -50,6 +58,7 @@ double ClebschGordan::operator()(int j1, int j2, int j3, int m1, int m2,
 double ClebschGordan::f3j(int j1, int j2, int j3, int m1, int m2, int m3) {
   int mtri[10];
 
+  /* XXX: c and c++ start to count at zero */
   mtri[1] = (j1 + j2 - j3) / 2;
   mtri[2] = (j1 - j2 + j3) / 2;
   mtri[3] = (-j1 + j2 + j3) / 2;
@@ -75,8 +84,7 @@ double ClebschGordan::f3j(int j1, int j2, int j3, int m1, int m2, int m3) {
   min5 = (j3 - j1 - m2) / 2 + kmin;
 
 
-  //     sum series in double precision
-
+  /* sum series in double precision */
   double uk = 1.0e-10;
   double s = 1.0e-10;
   int ncut = 0;
@@ -95,8 +103,7 @@ double ClebschGordan::f3j(int j1, int j2, int j3, int m1, int m2, int m3) {
     }
   }
 
-  //     calculate delta functions
-
+  /* calculate delta functions */
   double delog = 0.0;
   for (unsigned int i = 1; i < 10; i++) delog += fl[mtri[i] + 1];
 
@@ -117,7 +124,8 @@ double ClebschGordan::f3j(int j1, int j2, int j3, int m1, int m2, int m3) {
     r = exp(plog) * s;
   }
   num = kmin + (j1 - j2 - m3) / 2;
-  if ( (num % 2) != 0) r = -r;
+  if ((num % 2) != 0)
+    r = -r;
 
   return r;
 }
@@ -125,7 +133,8 @@ double ClebschGordan::f3j(int j1, int j2, int j3, int m1, int m2, int m3) {
 bool ClebschGordan::MayBranch(int j1, int j2, int j3) {
   for (int m1 = -j1; m1 <= j1; m1 += 2) {
     for (int m2 = -j2; m2 <= j2; m2 += 2) {
-      if (this->operator()(j1, j2, j3, m1, m2, m1+m2) > 0) return true;
+      if (this->operator()(j1, j2, j3, m1, m2, m1+m2) > 0)
+        return true;
     }
   }
   return false;
