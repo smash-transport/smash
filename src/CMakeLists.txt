@@ -1,8 +1,11 @@
 # list the source files
-add_executable(mash box.cc collisions.cc clebschgordan.cc decays.cc distributions.cc
+set(smash_src collisions.cc clebschgordan.cc decays.cc distributions.cc
 	fourvector.cc initial-conditions.cc input-particles.cc
 	param-reader.cc particles.cc propagation.cc outputroutines.cc
         resonances.cc)
+
+add_executable(mash box.cc ${smash_src})
+add_executable(sphere sphere.cc ${smash_src})
  
 # configure a header file to pass some of the CMake settings
 # to the source code
@@ -19,6 +22,7 @@ file(COPY particles.txt DESTINATION ..)
 
 # link with gsl
 target_link_libraries(mash gsl gslcblas rt)
+target_link_libraries(sphere gsl gslcblas rt)
 
 # tests:
 add_subdirectory(tests)
