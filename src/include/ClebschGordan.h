@@ -24,6 +24,7 @@ class ClebschGordan {
 
  public:
   ClebschGordan();
+  ClebschGordan(const ClebschGordan& original);
   ~ClebschGordan();
 
   /* Calculate the Clebsch-Gordan coefficient */

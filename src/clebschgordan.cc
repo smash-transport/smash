@@ -30,6 +30,12 @@ ClebschGordan::ClebschGordan() : factorial_log_max(4 * 50 + 2) {
   }
 }
 
+ClebschGordan::ClebschGordan(const ClebschGordan& original) {
+  factorial_log_max = original.factorial_log_max;
+  factorial_log = new double[factorial_log_max + 1];
+  *factorial_log = *(original.factorial_log);
+}
+
 ClebschGordan::~ClebschGordan() {
   delete[] factorial_log;
 }
@@ -105,11 +111,11 @@ double ClebschGordan::f3j(int j1, int j2, int j3, int m1, int m2, int m3) {
   int k_spinfactor5 = (j3 - j1 - m2) / 2 + kmin;
 
   /* sum series in double precision */
-  double sumterm_k = 1.0e-10;
   double sum = 1.0e-10;
   int ncut = 0;
   kmax -= kmin;
   if (kmax > 0) {
+    double sumterm_k = 1.0e-10;
     for (int k = 1; k <= kmax; k++) {
       sumterm_k = -sumterm_k * (static_cast<double>((k_spinfactor1 - k)
                   * (k_spinfactor2 - k) * (k_spinfactor3 - k)))
