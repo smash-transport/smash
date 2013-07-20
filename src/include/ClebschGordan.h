@@ -17,15 +17,18 @@
 
 class ClebschGordan {
  protected:
-  unsigned int flmax;
-  double * fl;
+  unsigned int factorial_log_max;
+  double * factorial_log;
+  /* Wigner 3j symbol <j1 m1 j2 m2 | j3 m3> */
   double f3j(int j1, int j2, int j3, int m1, int m2, int m3);
 
  public:
   ClebschGordan();
   ~ClebschGordan();
 
+  /* Calculate the Clebsch-Gordan coefficient */
   double operator()(int j1, int j2, int j3, int m1, int m2, int m3);
+  /* Check if it's possible to combine j1 and j2 to j3 */
   bool MayBranch(int j1, int j2, int j3);
 };
 
