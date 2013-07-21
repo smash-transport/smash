@@ -9,6 +9,7 @@
  * Copyright (c) 2013
  *    Kai Gallmeister <gallmei@th.physik.uni-frankfurt.de>
  *    Jussi Auvinen <auvinen@fias.uni-frankfurt.de>
+ *    maximilian attems <attems@fias.uni-frankfurt.de>
  *  GNU General Public License (GPLv3)
  */
 
@@ -116,6 +117,7 @@ double ClebschGordan::f3j(int j1, int j2, int j3, int m1, int m2, int m3) {
   kmax -= kmin;
   if (kmax > 0) {
     double sumterm_k = 1.0e-10;
+    /* Sum is from 1 to kmax; k = 0 is accounted for in sum_min_log below */
     for (int k = 1; k <= kmax; k++) {
       sumterm_k = -sumterm_k * (static_cast<double>((k_spinfactor1 - k)
                   * (k_spinfactor2 - k) * (k_spinfactor3 - k)))
