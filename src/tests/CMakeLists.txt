@@ -1,7 +1,8 @@
 # test sources
 add_executable(fourvector EXCLUDE_FROM_ALL fourvector.cc)
 add_executable(particles EXCLUDE_FROM_ALL particles.cc ../particles.cc ../fourvector.cc ../distributions.cc ../outputroutines.cc)
-add_dependencies(check fourvector particles)
+add_executable(clebschgordan EXCLUDE_FROM_ALL clebschgordan.cc ../clebschgordan.cc)
+add_dependencies(check fourvector particles clebschgordan)
 
 # link flags: rt needed for old glibc
 target_link_libraries(particles gsl gslcblas rt)
@@ -18,6 +19,9 @@ add_test(fourvector ${PROJECT_BINARY_DIR}/fourvector)
 
 # some particles operations tests
 add_test(particles ${PROJECT_BINARY_DIR}/particles)
+
+# clebsch-gordan coefficient tests
+add_test(clebschgordan ${PROJECT_BINARY_DIR}/clebschgordan)
 
 # verify that the binary has a cli help
 add_test(mash_help ${PROJECT_BINARY_DIR}/mash -h)
