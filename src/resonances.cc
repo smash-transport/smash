@@ -132,7 +132,8 @@ double resonance_cross_section(ParticleData *particle1, ParticleData *particle2,
   return clebsch_gordan_isospin * clebsch_gordan_isospin
          * spinfactor * symmetryfactor
          * 4.0 * M_PI / cm_momentum_squared
-         * breit_wigner(mandelstam_s, resonance_mass, resonance_width);
+         * breit_wigner(mandelstam_s, resonance_mass, resonance_width)
+         * hbarc * hbarc / fm2_mb;
 }
 
 /* 1->2 resonance decay process */
