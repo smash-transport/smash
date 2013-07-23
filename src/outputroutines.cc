@@ -13,6 +13,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <map>
+#include <vector>
 
 #include "include/Box.h"
 #include "include/FourVector.h"
@@ -147,10 +148,37 @@ void printd_position(const ParticleData &particle __attribute__((unused))) {
       particle.position().x2(), particle.position().x3());
 }
 
+/* write_measurements_header - create new files
+ *  (erase old content if file exists) and write
+ * the headers for decays.dat, collisions.dat
+ * and particletypes.dat
+ */
+void write_measurements_header(const size_t &particletypes) {
+  FILE *fp;
+  char filename[256];
+  snprintf(filename, sizeof(filename), "data/decays.dat");
+  fp = fopen(filename, "w");
+  fprintf(fp, " Time       Decays     Resonances\n");
+  fclose(fp);
+  snprintf(filename, sizeof(filename), "data/collisions.dat");
+  fp = fopen(filename, "w");
+  fprintf(fp, " Time     Actions_tot   Actions_ival     Rejections\n");
+  fclose(fp);
+  snprintf(filename, sizeof(filename), "data/particletypes.dat");
+  fp = fopen(filename, "w");
+  fprintf(fp, " Time       ");
+  for (size_t i = 0; i < particletypes; i++) {
+    fprintf(fp, " N_type%zu     ", i);
+  }
+  fprintf(fp, "\n");
+  fclose(fp);
+}
+
 /* write_measurements - writes out data of the specific particles
  *                   and also add output related to collisons and decays
  */
 void write_measurements(const std::map<int, ParticleData> &particles,
+  std::map<int, int> &map_type, const size_t &particletypes,
   int interactions_total, int interactions_this_interval, int decays,
   int resonances, const size_t &rejection_conflict) {
   FILE *fp;
@@ -158,13 +186,31 @@ void write_measurements(const std::map<int, ParticleData> &particles,
 
   snprintf(filename, sizeof(filename), "data/decays.dat");
   fp = fopen(filename, "a");
-  fprintf(fp, "%g\t%d\t%d\n", particles.begin()->second.position().x0(),
+  fprintf(fp, "%5g%13d%13d\n", particles.begin()->second.position().x0() - 1,
                             decays, resonances);
   fclose(fp);
   snprintf(filename, sizeof(filename), "data/collisions.dat");
   fp = fopen(filename, "a");
-  fprintf(fp, "%g\t%d\t%d\t%lu\n", particles.begin()->second.position().x0(),
+  fprintf(fp, "%5g%13d%13d%13lu\n",
+          particles.begin()->second.position().x0() - 1,
           interactions_total, interactions_this_interval, rejection_conflict);
+  fclose(fp);
+  /* Vector containing info how many particles of each type we have*/
+  std::vector<size_t> type_numbers;
+  /* Number of elements = particle types, initialize each amount to 0*/
+  type_numbers.assign(particletypes, 0);
+
+  for (std::map<int, ParticleData>::const_iterator i = particles.begin();
+       i != particles.end(); ++i) {
+      type_numbers[map_type[i->first]]++;
+  }
+  snprintf(filename, sizeof(filename), "data/particletypes.dat");
+  fp = fopen(filename, "a");
+  fprintf(fp, "%5g", particles.begin()->second.position().x0() - 1.0);
+  for (size_t i = 0; i < particletypes; i++) {
+    fprintf(fp, "%13zu", type_numbers[i]);
+  }
+  fprintf(fp, "\n");
   fclose(fp);
 
   /* write actual data output */

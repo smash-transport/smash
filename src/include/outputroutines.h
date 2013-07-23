@@ -44,7 +44,9 @@ void printd_momenta(const char *message, const ParticleData &particle);
 
 /* output data files */
 void write_particles(const std::map<int, ParticleData> &particles);
+void write_measurements_header(const size_t &particletypes);
 void write_measurements(const std::map<int, ParticleData> &particles,
+  std::map<int, int> &map_type, const size_t &particletypes,
   int interactions_total, int interactions_this_interval, int decays,
   int resonances, const size_t &rejection_conflict);
 void write_oscar_header(void);
