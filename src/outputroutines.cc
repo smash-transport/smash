@@ -153,7 +153,8 @@ void printd_position(const ParticleData &particle __attribute__((unused))) {
  * the headers for decays.dat, collisions.dat
  * and particletypes.dat
  */
-void write_measurements_header(const size_t &particletypes) {
+void write_measurements_header(
+  const std::vector<ParticleType> &particletypes) {
   FILE *fp;
   char filename[256];
   snprintf(filename, sizeof(filename), "data/decays.dat");
@@ -166,9 +167,10 @@ void write_measurements_header(const size_t &particletypes) {
   fclose(fp);
   snprintf(filename, sizeof(filename), "data/particletypes.dat");
   fp = fopen(filename, "w");
-  fprintf(fp, " Time       ");
-  for (size_t i = 0; i < particletypes; i++) {
-    fprintf(fp, " N_type%zu     ", i);
+  fprintf(fp, " Time ");
+  for (std::vector<ParticleType>::const_iterator i = particletypes.begin();
+   i != particletypes.end(); ++i) {
+    fprintf(fp, " %11s ", i->name().c_str());
   }
   fprintf(fp, "\n");
   fclose(fp);
@@ -178,7 +180,7 @@ void write_measurements_header(const size_t &particletypes) {
  *                   and also add output related to collisons and decays
  */
 void write_measurements(const std::map<int, ParticleData> &particles,
-  std::map<int, int> &map_type, const size_t &particletypes,
+  const std::vector<ParticleType> &particletypes, std::map<int, int> &map_type,
   int interactions_total, int interactions_this_interval, int decays,
   int resonances, const size_t &rejection_conflict) {
   FILE *fp;
@@ -198,7 +200,7 @@ void write_measurements(const std::map<int, ParticleData> &particles,
   /* Vector containing info how many particles of each type we have*/
   std::vector<size_t> type_numbers;
   /* Number of elements = particle types, initialize each amount to 0*/
-  type_numbers.assign(particletypes, 0);
+  type_numbers.assign(particletypes.size(), 0);
 
   for (std::map<int, ParticleData>::const_iterator i = particles.begin();
        i != particles.end(); ++i) {
@@ -207,18 +209,20 @@ void write_measurements(const std::map<int, ParticleData> &particles,
   snprintf(filename, sizeof(filename), "data/particletypes.dat");
   fp = fopen(filename, "a");
   fprintf(fp, "%5g", particles.begin()->second.position().x0() - 1.0);
-  for (size_t i = 0; i < particletypes; i++) {
+  for (size_t i = 0; i < particletypes.size(); i++) {
     fprintf(fp, "%13zu", type_numbers[i]);
   }
   fprintf(fp, "\n");
   fclose(fp);
 
   /* write actual data output */
-  write_particles(particles);
+  write_particles(particles, particletypes, map_type);
 }
 
 /* write_particles - writes out data of the specific particles */
-void write_particles(const std::map<int, ParticleData> &particles) {
+void write_particles(const std::map<int, ParticleData> &particles,
+  const std::vector<ParticleType> &particletypes,
+  std::map<int, int> &map_type) {
   FILE *fp;
   char filename[256];
 
@@ -227,9 +231,11 @@ void write_particles(const std::map<int, ParticleData> &particles) {
   fp = fopen(filename, "w");
   for (std::map<int, ParticleData>::const_iterator i = particles.begin();
        i != particles.end(); ++i) {
-     fprintf(fp, "%g %g %g %g\n", i->second.momentum().x0(),
+     fprintf(fp, "%g %g %g %g %i %i\n", i->second.momentum().x0(),
              i->second.momentum().x1(), i->second.momentum().x2(),
-             i->second.momentum().x3());
+             i->second.momentum().x3(),
+             i->second.id(),
+             particletypes[map_type[i->first]].pdgcode());
   }
   fclose(fp);
   snprintf(filename, sizeof(filename), "data/position_%.5f.dat",
@@ -237,9 +243,11 @@ void write_particles(const std::map<int, ParticleData> &particles) {
   fp = fopen(filename, "w");
   for (std::map<int, ParticleData>::const_iterator i = particles.begin();
        i != particles.end(); ++i) {
-     fprintf(fp, "%g %g %g %g\n", i->second.position().x0(),
+     fprintf(fp, "%g %g %g %g %i %i\n", i->second.position().x0(),
              i->second.position().x1(), i->second.position().x2(),
-             i->second.position().x3());
+             i->second.position().x3(),
+             i->second.id(),
+             particletypes[map_type[i->first]].pdgcode());
   }
   fclose(fp);
 }

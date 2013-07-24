@@ -217,7 +217,7 @@ static int Evolve(std::map<int, ParticleData> *particles,
       printd("Resonances: %i Decays: %i\n", *resonances, *decays);
       printd("Ignored collisions %lu\n", rejection_conflict);
       /* save evolution data */
-      write_measurements(*particles, *map_type, particle_type->size(),
+      write_measurements(*particles, *particle_type, *map_type,
         interactions_total, interactions_this_interval,
         *resonances, *decays, rejection_conflict);
       write_vtk(*particles);
@@ -324,9 +324,9 @@ int main(int argc, char *argv[]) {
   initial_conditions(&particles, &particle_types, &map_type, parameters, cube,
                      &id_max);
 
-  write_measurements_header(particle_types.size());
+  write_measurements_header(particle_types);
   print_header();
-  write_particles(particles);
+  write_particles(particles, particle_types, map_type);
 
   /* Compute stuff */
   rc = Evolve(&particles, &particle_types, &map_type, *parameters, *cube,
