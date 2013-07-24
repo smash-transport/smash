@@ -9,13 +9,14 @@
  */
 #include "include/resonances.h"
 
+#include <cmath>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <map>
 #include <vector>
+#include <gsl/gsl_sf_coupling.h>
 
-#include "include/ClebschGordan.h"
 #include "include/constants.h"
 #include "include/distributions.h"
 #include "include/FourVector.h"
@@ -79,19 +80,17 @@ double resonance_cross_section(ParticleData *particle1, ParticleData *particle2,
     return 0.0;
 
   /* Calculate isospin Clebsch-Gordan coefficient
+   * (-1)^(j1 - j2 + m3) * sqrt(2 * j3 + 1) * [Wigner 3J symbol]
    * Note that the calculation assumes that isospin values
    * have been multiplied by two
    * (which is what we'll most likely want to do once fermions are in)
    */
-  double clebsch_gordan_isospin = 0.0;
-  {
-  ClebschGordan cgfactor;
-  clebsch_gordan_isospin
-    = cgfactor((*type_particle1).isospin() * 2,
-                          (*type_particle2).isospin() * 2,
-                    (*type_list)[type_index].isospin() * 2,
-                    isospin_z1 * 2, isospin_z2 * 2, isospin_z_resonance * 2);
-  }
+  double clebsch_gordan_isospin = pow(-1, (*type_particle1).isospin()
+             - (*type_particle2).isospin() + isospin_z_resonance)
+    * sqrt(2 * (*type_list)[type_index].isospin() + 1)
+    * gsl_sf_coupling_3j((*type_particle1).isospin() * 2,
+       (*type_particle2).isospin() * 2, (*type_list)[type_index].isospin() * 2,
+       isospin_z1 * 2, isospin_z2 * 2, -isospin_z_resonance * 2);
 
   printd("CG: %g I1: %i I2: %i IR: %i iz1: %i iz2: %i izR: %i \n",
          clebsch_gordan_isospin,
