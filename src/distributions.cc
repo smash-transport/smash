@@ -40,9 +40,15 @@ double sample_momenta(Box *box, ParticleType type) {
   double momentum_radial, momentum_average, momentum_min, momentum_max;
   double probability = 0, probability_max, probability_random = 1;
 
-  /* massless particles peak would be at <E>=3T */
-  momentum_average = sqrt((3 * box->temperature()) * (3 * box->temperature())
+  /* Maxwell-Boltzmann average E <E>=3T + m * K_1(m/T) / K_2(m/T) */
+  momentum_average = sqrt((3 * box->temperature()
+    + type.mass() * gsl_sf_bessel_K1(type.mass() / box->temperature())
+                  / gsl_sf_bessel_Kn(2, type.mass() / box->temperature()))
+    * (3 * box->temperature()
+    + type.mass() * gsl_sf_bessel_K1(type.mass() / box->temperature())
+                  / gsl_sf_bessel_Kn(2, type.mass() / box->temperature()))
     - type.mass() * type.mass());
+
   momentum_min = type.mass();
   momentum_max = 50.0 * box->temperature();
   /* double the massless peak value to be above maximum of the distribution */
