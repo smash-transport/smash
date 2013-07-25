@@ -9,13 +9,13 @@
  */
 #include "include/resonances.h"
 
+#include <gsl/gsl_sf_coupling.h>
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <map>
 #include <vector>
-#include <gsl/gsl_sf_coupling.h>
 
 #include "include/constants.h"
 #include "include/distributions.h"

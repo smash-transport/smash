@@ -169,7 +169,7 @@ void write_measurements_header(
   fp = fopen(filename, "w");
   fprintf(fp, " Time ");
   for (std::vector<ParticleType>::const_iterator i = particletypes.begin();
-   i != particletypes.end(); ++i) {
+    i != particletypes.end(); ++i) {
     fprintf(fp, " %11s ", i->name().c_str());
   }
   fprintf(fp, "\n");
