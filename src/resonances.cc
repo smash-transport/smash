@@ -34,18 +34,16 @@ double resonance_cross_section(ParticleData *particle1, ParticleData *particle2,
   std::vector<ParticleType> *type_list) {
   const int charge1 = (*type_particle1).charge(),
     charge2 = (*type_particle2).charge();
-  int isospin_z1 = charge1 * (*type_particle1).isospin(),
-    isospin_z2 = charge2 * (*type_particle2).isospin();
+  int isospin_z1 = abs(charge1) > 0
+                   ? charge1 / abs(charge1) * (*type_particle1).isospin() : 0;
+  int isospin_z2 = abs(charge2) > 0
+                   ? charge2 / abs(charge2) * (*type_particle2).isospin() : 0;
 
   /* Resonances do not form resonances */
   if (type_particle1->width() > 0.0 || type_particle2->width() > 0.0)
     return 0.0;
 
   /* Total charge defines the type of resonance */
-  /* We have no resonances with charge > 1 */
-  if (abs(charge1 + charge2) > 1)
-    return 0.0;
-
   int type_resonance;
   if (charge1 + charge2 == 1) {
     type_resonance = 213;
@@ -83,28 +81,27 @@ double resonance_cross_section(ParticleData *particle1, ParticleData *particle2,
    * (-1)^(j1 - j2 + m3) * sqrt(2 * j3 + 1) * [Wigner 3J symbol]
    * Note that the calculation assumes that isospin values
    * have been multiplied by two
-   * (which is what we'll most likely want to do once fermions are in)
    */
-  double clebsch_gordan_isospin = pow(-1, (*type_particle1).isospin()
-             - (*type_particle2).isospin() + isospin_z_resonance)
-    * sqrt(2 * (*type_list)[type_index].isospin() + 1)
-    * gsl_sf_coupling_3j((*type_particle1).isospin() * 2,
-       (*type_particle2).isospin() * 2, (*type_list)[type_index].isospin() * 2,
-       isospin_z1 * 2, isospin_z2 * 2, -isospin_z_resonance * 2);
+    double clebsch_gordan_isospin = pow(-1, (*type_particle1).isospin() / 2.0
+      - (*type_particle2).isospin() / 2.0 + isospin_z_resonance / 2.0)
+      * sqrt((*type_list)[type_index].isospin() + 1)
+      * gsl_sf_coupling_3j((*type_particle1).isospin(),
+       (*type_particle2).isospin(), (*type_list)[type_index].isospin(),
+       isospin_z1, isospin_z2, -isospin_z_resonance);
 
   printd("CG: %g I1: %i I2: %i IR: %i iz1: %i iz2: %i izR: %i \n",
          clebsch_gordan_isospin,
-         (*type_particle1).isospin(), (*type_particle2).isospin(),
-                    (*type_list)[type_index].isospin(),
-                    isospin_z1, isospin_z2, isospin_z_resonance);
+         (*type_particle1).isospin() / 2, (*type_particle2).isospin() / 2,
+                    (*type_list)[type_index].isospin() / 2,
+                    isospin_z1 / 2, isospin_z2 / 2, isospin_z_resonance / 2);
 
   /* If Clebsch-Gordan coefficient is zero, don't bother with the rest */
   if (fabs(clebsch_gordan_isospin) < really_small)
     return 0.0;
 
   /* Calculate spin factor */
-  const double spinfactor = (2 * (*type_list)[type_index].spin() + 1)
-    / ((2 * type_particle1->spin() + 1) * (2 * type_particle2->spin() + 1));
+  const double spinfactor = ((*type_list)[type_index].spin() + 1)
+    / ((type_particle1->spin() + 1) * (type_particle2->spin() + 1));
 
   /* Symmetry factor If initial state particles are identical,
    *  multiply by two. */

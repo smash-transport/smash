@@ -28,8 +28,10 @@ class ParticleType {
     float inline mass(void) const;
     float inline width(void) const;
     int inline pdgcode(void) const;
+    /* Isospin is 2 * particle data book value */
     int inline isospin(void) const;
     int inline charge(void) const;
+    /* Spin is 2 * particle data book value */
     int inline spin(void) const;
 
   private:
