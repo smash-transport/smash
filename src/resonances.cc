@@ -162,18 +162,52 @@ size_t resonance_decay(std::map<int, ParticleData> *particles,
   (*particles)[new_id_b] = new_particle_b;
   (*particles)[new_id_b].set_id(new_id_b);
   }
-  const int charge = (*types)[(*map_type)[*particle_id]].charge();
 
+  const int charge = (*types)[(*map_type)[*particle_id]].charge();
   int type_a = 0, type_b = 0;
-  if (charge == 0) {
-    type_a = 211;
-    type_b = -211;
-  } else if ( charge == 1 ) {
-    type_a = 211;
-    type_b = 111;
-  } else if ( charge == -1 ) {
-    type_a = -211;
-    type_b = 111;
+  /* XXX: Can the hardcoding of decay channels be avoided? */
+  if ((*types)[(*map_type)[*particle_id]].isospin() % 2 == 0) {
+    /* meson resonance decays into pions */
+    if (charge == 0) {
+      type_a = 211;
+      type_b = -211;
+    } else if (charge == 1) {
+      type_a = 211;
+      type_b = 111;
+    } else if (charge == -1) {
+      type_a = -211;
+      type_b = 111;
+    }
+  } else if ((*types)[(*map_type)[*particle_id]].pdgcode() > 0) {
+    /* Baryon resonance decays into pion and baryon */
+    if (charge == 0) {
+      type_a = 2212;
+      type_b = -211;
+    } else if (charge == 1) {
+      type_a = 2112;
+      type_b = 211;
+    } else if (charge == -1) {
+      type_a = 2112;
+      type_b = -211;
+    } else if (charge == 2) {
+      type_a = 2212;
+      type_b = 211;
+    }
+  } else {
+    /* Antibaryon resonance decays into pion and antibaryon */
+    if (charge == 0) {
+      type_a = -2212;
+      type_b = 211;
+    } else if (charge == 1) {
+      type_a = -2112;
+      type_b = 211;
+    } else if (charge == -1) {
+      type_a = -2112;
+      type_b = -211;
+    } else if (charge == -2) {
+      type_a = -2212;
+      type_b = -211;
+    }
   }
 
   /* Find the desired particle types */
