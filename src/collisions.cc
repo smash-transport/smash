@@ -41,7 +41,7 @@ void collision_criteria_geometry(std::map<int, ParticleData> *particle,
   }
 
   /* Resonance production cross section */
-  const std::map<int, double> resonance_xsections = resonance_cross_section(
+  std::map<int, double> resonance_xsections = resonance_cross_section(
   &(*particle)[id_a], &(*particle)[id_b], &(*particle_type)[(*map_type)[id_a]],
   &(*particle_type)[(*map_type)[id_b]], particle_type);
 
@@ -113,8 +113,20 @@ void collision_criteria_geometry(std::map<int, ParticleData> *particle,
    * otherwise do elastic collision
    */
   int interaction_type = 0;
-  if (drand48() < resonance_xsections.at(0) / total_cross_section)
-    interaction_type = 1;
+  if (resonance_xsections.at(0) > really_small) {
+    double random_interaction = drand48();
+    double interaction_probability = 0.0;
+    std::map<int, double>::iterator resonances
+                            = resonance_xsections.begin();
+    while (interaction_type == 0 && resonances != resonance_xsections.end()) {
+      if (resonances->first != 0) {
+        interaction_probability += resonances->second / total_cross_section;
+        if (random_interaction < interaction_probability)
+          interaction_type = resonances->first;
+      }
+      resonances++;
+    }
+  }
 
   /* setup collision partners */
   printd("collision time particle %d <-> %d: %g \n", id_a, id_b,
@@ -123,6 +135,7 @@ void collision_criteria_geometry(std::map<int, ParticleData> *particle,
   (*particle)[id_b].set_collision(interaction_type, time_collision, id_a);
   /* add to collision list */
   collision_list->push_back(id_a);
+  resonance_xsections.clear();
 }
 
 /* colliding_particle - particle interaction */
@@ -179,8 +192,8 @@ size_t collide_particles(std::map<int, ParticleData> *particle,
       (*particle)[id_a].set_collision_past(id_process);
       (*particle)[id_b].set_collision_past(id_process);
 
-    } else if (interaction_type == 1) {
-      /* 2->1 resonance formation */
+    } else if (abs(interaction_type) > 99) {
+      /* 2->1 resonance formation, resonance PDG code = interaction_type */
       (*resonance_formations)++;
       printd("Process: Resonance formation. ");
       write_oscar((*particle)[id_a], (*type)[(*map_type)[id_a]], 2, 1);
@@ -189,7 +202,7 @@ size_t collide_particles(std::map<int, ParticleData> *particle,
       boost_CM(&(*particle)[id_a], &(*particle)[id_b], &velocity_CM);
 
       size_t id_new = resonance_formation(particle, type, map_type,
-                                          &id_a, &id_b, id_max);
+                             &id_a, &id_b, interaction_type, id_max);
       /* Boost the new particle to computational frame */
       FourVector neg_velocity_CM;
       neg_velocity_CM.set_FourVector(1.0, -velocity_CM.x1(), -velocity_CM.x2(),

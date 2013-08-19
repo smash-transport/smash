@@ -229,7 +229,7 @@ size_t resonance_decay(std::map<int, ParticleData> *particles,
 /* 2->1 resonance formation process */
 size_t resonance_formation(std::map<int, ParticleData> *particles,
   std::vector<ParticleType> *types, std::map<int, int> *map_type,
-  int *particle_id, int *other_id, int *id_max) {
+  int *particle_id, int *other_id, int type_resonance, int *id_max) {
   /* Add a new particle */
   size_t new_id = *id_max + 1;
   (*id_max)++;
@@ -238,22 +238,10 @@ size_t resonance_formation(std::map<int, ParticleData> *particles,
   (*particles)[new_id] = new_particle;
   (*particles)[new_id].set_id(new_id);
   }
-  /* Which resonance is formed */
-  const int charge1 = (*types)[(*map_type)[*particle_id]].charge(),
-    charge2 = (*types)[(*map_type)[*other_id]].charge();
-
-  int type_resonance;
-  if (charge1 + charge2 == 1)
-    type_resonance = 213;
-  else if (charge1 + charge2 == -1)
-    type_resonance = -213;
-  else
-    type_resonance = 113;
-
   /* Find the desired resonance */
   bool not_found = true;
   size_t type_index = 0;
-  while (not_found && type_index < (*types).size()) {
+  while (not_found && type_index < types->size()) {
     if ((*types)[type_index].pdgcode() == type_resonance) {
       printd("Found resonance %i.\n", type_resonance);
       printd("Parent particles: %s %s \n",

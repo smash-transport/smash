@@ -33,6 +33,6 @@ size_t resonance_decay(std::map<int, ParticleData> *particles,
 /* 2->1 resonance formation process */
 size_t resonance_formation(std::map<int, ParticleData> *particles,
   std::vector<ParticleType> *types, std::map<int, int> *map_type,
-  int *particle_id, int *other_id, int *id_max);
+  int *particle_id, int *other_id, int resonance_type, int *id_max);
 
 #endif  // SRC_INCLUDE_RESONANCES_H_
