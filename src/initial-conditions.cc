@@ -47,11 +47,21 @@ void initial_conditions(std::map<int, ParticleData> *particles,
     exit(EXIT_FAILURE);
   }
 
+  /* Let's check how many non-resonances we have */
+  unsigned int non_resonances = 0;
+  for (size_t i = 0; i < (*type).size(); i++) {
+    if ((*type)[i].width() < 0.0)
+      non_resonances++;
+  }
+
   /* loop over all the particle types */
   for (size_t i = 0; i < (*type).size(); i++) {
     /* Particles with width > 0 (resonances) do not exist in the beginning */
     if ((*type)[i].width() > 0.0)
       continue;
+
+    /* Number of non-resonances left */
+    non_resonances--;
 
     printd("%s mass: %g [GeV]\n", (*type)[i].name().c_str(), (*type)[i].mass());
     /*
@@ -105,7 +115,7 @@ void initial_conditions(std::map<int, ParticleData> *particles,
 
       /* back to back pair creation with random momenta direction */
       if (unlikely(id == number + number_total - 1 && !(id % 2)
-          && i == (*type).size() - 1)) {
+          && non_resonances == 0)) {
         /* poor last guy just sits around */
         (*particles)[id].set_momentum((*type)[i].mass(), 0, 0, 0);
       } else if (!(id % 2)) {
