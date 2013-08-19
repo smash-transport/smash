@@ -28,80 +28,24 @@
 /* resonance_cross_section - energy-dependent cross section
  * for producing a resonance
  */
-
-double resonance_cross_section(ParticleData *particle1, ParticleData *particle2,
+std::map<int, double> resonance_cross_section(
+  ParticleData *particle1, ParticleData *particle2,
   ParticleType *type_particle1, ParticleType *type_particle2,
   std::vector<ParticleType> *type_list) {
   const int charge1 = (*type_particle1).charge(),
     charge2 = (*type_particle2).charge();
-  int isospin_z1 = abs(charge1) > 0
+  const int isospin_z1 = abs(charge1) > 0
                    ? charge1 / abs(charge1) * (*type_particle1).isospin() : 0;
-  int isospin_z2 = abs(charge2) > 0
+  const int isospin_z2 = abs(charge2) > 0
                    ? charge2 / abs(charge2) * (*type_particle2).isospin() : 0;
+  std::map<int, double> possible_resonances;
+
+  /* key 0 refers to total resonance production cross section */
+  possible_resonances[0] = 0.0;
 
   /* Resonances do not form resonances */
   if (type_particle1->width() > 0.0 || type_particle2->width() > 0.0)
-    return 0.0;
-
-  /* Total charge defines the type of resonance */
-  int type_resonance;
-  if (charge1 + charge2 == 1) {
-    type_resonance = 213;
-  } else if (charge1 + charge2 == -1) {
-    type_resonance = -213;
-  } else {
-    type_resonance = 113;
-  }
-
-  /* Find the width and mass of the desired resonance */
-  float resonance_width = -1.0, resonance_mass = 0.0;
-  int isospin_z_resonance = 0;
-  size_t type_index = 0;
-  while (resonance_width < 0 && type_index < (*type_list).size()) {
-    if ((*type_list)[type_index].pdgcode() == type_resonance) {
-      resonance_width = (*type_list)[type_index].width();
-      resonance_mass = (*type_list)[type_index].mass();
-      isospin_z_resonance = (*type_list)[type_index].charge()
-        * (*type_list)[type_index].isospin();
-      printd("Found resonance %i with mass %f and width %f.\n",
-             type_resonance, resonance_mass, resonance_width);
-      printd("Original particles: %s %s Charges: %i %i \n",
-             (*type_particle1).name().c_str(), (*type_particle2).name().c_str(),
-             (*type_particle1).charge(), (*type_particle2).charge());
-    } else {
-      type_index++;
-    }
-  }
-
-  /* If there was no such resonance in the list, return 0 */
-  if (resonance_width < 0.0)
-    return 0.0;
-
-  /* Calculate isospin Clebsch-Gordan coefficient
-   * (-1)^(j1 - j2 + m3) * sqrt(2 * j3 + 1) * [Wigner 3J symbol]
-   * Note that the calculation assumes that isospin values
-   * have been multiplied by two
-   */
-    double clebsch_gordan_isospin = pow(-1, (*type_particle1).isospin() / 2.0
-      - (*type_particle2).isospin() / 2.0 + isospin_z_resonance / 2.0)
-      * sqrt((*type_list)[type_index].isospin() + 1)
-      * gsl_sf_coupling_3j((*type_particle1).isospin(),
-       (*type_particle2).isospin(), (*type_list)[type_index].isospin(),
-       isospin_z1, isospin_z2, -isospin_z_resonance);
-
-  printd("CG: %g I1: %i I2: %i IR: %i iz1: %i iz2: %i izR: %i \n",
-         clebsch_gordan_isospin,
-         (*type_particle1).isospin() / 2, (*type_particle2).isospin() / 2,
-                    (*type_list)[type_index].isospin() / 2,
-                    isospin_z1 / 2, isospin_z2 / 2, isospin_z_resonance / 2);
-
-  /* If Clebsch-Gordan coefficient is zero, don't bother with the rest */
-  if (fabs(clebsch_gordan_isospin) < really_small)
-    return 0.0;
-
-  /* Calculate spin factor */
-  const double spinfactor = ((*type_list)[type_index].spin() + 1)
-    / ((type_particle1->spin() + 1) * (type_particle2->spin() + 1));
+    return possible_resonances;
 
   /* Symmetry factor If initial state particles are identical,
    *  multiply by two. */
@@ -121,15 +65,74 @@ double resonance_cross_section(ParticleData *particle1, ParticleData *particle2,
        - type_particle1->mass() * type_particle1->mass()
        * type_particle2->mass() * type_particle2->mass()) / mandelstam_s;
 
+  /* Find all the possible resonances */
+  size_t type_index = 0;
+  for (std::vector<ParticleType>::iterator type_resonance = type_list->begin();
+       type_resonance != type_list->end(); ++type_resonance) {
+    /* Not a resonance, go to next type of particle */
+    if (type_resonance->width() < 0.0)
+      continue;
 
-  /* Calculate resonance production cross section
-   * using the Breit-Wigner distribution as probability amplitude
-   */
-  return clebsch_gordan_isospin * clebsch_gordan_isospin
+    /* Check for charge conservation */
+    if (type_resonance->charge() != charge1 + charge2)
+      continue;
+
+    float resonance_width = type_resonance->width();
+    float resonance_mass = type_resonance->mass();
+    int isospin_z_resonance = 0;
+    if (type_resonance->charge() != 0)
+      isospin_z_resonance = type_resonance->charge()
+                            / abs(type_resonance->charge())
+                            * type_resonance->isospin();
+
+    /* Calculate isospin Clebsch-Gordan coefficient
+     * (-1)^(j1 - j2 + m3) * sqrt(2 * j3 + 1) * [Wigner 3J symbol]
+     * Note that the calculation assumes that isospin values
+     * have been multiplied by two
+     */
+    double clebsch_gordan_isospin = pow(-1, type_particle1->isospin() / 2.0
+      - type_particle2->isospin() / 2.0 + isospin_z_resonance / 2.0)
+      * sqrt(type_resonance->isospin() + 1)
+      * gsl_sf_coupling_3j(type_particle1->isospin(),
+       type_particle2->isospin(), type_resonance->isospin(),
+       isospin_z1, isospin_z2, -isospin_z_resonance);
+
+    printd("CG: %g I1: %i I2: %i IR: %i iz1: %i iz2: %i izR: %i \n",
+         clebsch_gordan_isospin,
+         (*type_particle1).isospin() / 2, (*type_particle2).isospin() / 2,
+                    (*type_list)[type_index].isospin() / 2,
+                    isospin_z1 / 2, isospin_z2 / 2, isospin_z_resonance / 2);
+
+    /* If Clebsch-Gordan coefficient is zero, don't bother with the rest */
+    if (fabs(clebsch_gordan_isospin) < really_small)
+      continue;
+
+    printd("Found resonance %i with mass %f and width %f.\n",
+             type_resonance->pdgcode(), resonance_mass, resonance_width);
+    printd("Original particles: %s %s Charges: %i %i \n",
+             (*type_particle1).name().c_str(), (*type_particle2).name().c_str(),
+             (*type_particle1).charge(), (*type_particle2).charge());
+
+    /* Calculate spin factor */
+    const double spinfactor = ((*type_list)[type_index].spin() + 1)
+      / ((type_particle1->spin() + 1) * (type_particle2->spin() + 1));
+
+    /* Calculate resonance production cross section
+     * using the Breit-Wigner distribution as probability amplitude
+     */
+    double resonance_xsection =  clebsch_gordan_isospin * clebsch_gordan_isospin
          * spinfactor * symmetryfactor
          * 4.0 * M_PI / cm_momentum_squared
          * breit_wigner(mandelstam_s, resonance_mass, resonance_width)
          * hbarc * hbarc / fm2_mb;
+
+    /* If cross section is non-negligible, add resonance to the list */
+    if (resonance_xsection > really_small) {
+      possible_resonances[type_resonance->pdgcode()] = resonance_xsection;
+      possible_resonances[0] += resonance_xsection;
+    }
+  }
+  return possible_resonances;
 }
 
 /* 1->2 resonance decay process */

@@ -41,13 +41,13 @@ void collision_criteria_geometry(std::map<int, ParticleData> *particle,
   }
 
   /* Resonance production cross section */
-  const double resonance_xsection = resonance_cross_section(
+  const std::map<int, double> resonance_xsections = resonance_cross_section(
   &(*particle)[id_a], &(*particle)[id_b], &(*particle_type)[(*map_type)[id_a]],
   &(*particle_type)[(*map_type)[id_b]], particle_type);
 
   /* Total cross section is elastic + resonance production  */
   const double total_cross_section = parameters.cross_section()
-    + resonance_xsection;
+    + resonance_xsections.at(0);
 
   {
     /* distance criteria according to cross_section */
@@ -113,7 +113,7 @@ void collision_criteria_geometry(std::map<int, ParticleData> *particle,
    * otherwise do elastic collision
    */
   int interaction_type = 0;
-  if (drand48() < resonance_xsection / total_cross_section)
+  if (drand48() < resonance_xsections.at(0) / total_cross_section)
     interaction_type = 1;
 
   /* setup collision partners */

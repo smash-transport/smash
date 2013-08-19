@@ -20,7 +20,8 @@ class ParticleType;
 /* resonance_cross_section - energy-dependent cross section
  * for producing a resonance
  */
-double resonance_cross_section(ParticleData *particle1, ParticleData *particle2,
+std::map<int, double> resonance_cross_section(
+  ParticleData *particle1, ParticleData *particle2,
   ParticleType *type_particle1, ParticleType *type_particle2,
   std::vector<ParticleType> *type_list);
 
