@@ -16,7 +16,7 @@ int main() {
    *  0: j1, 1: j2, 2: j3, 3: m1, 4: m2, 5: m3
   */
   int spins[7][6];
-  double correct_coefficient[7], cgresult = 0.0;
+  double correct_coefficient[7];
   const double tolerance = 1e-6;
   ClebschGordan cgfactor;
 
@@ -77,7 +77,7 @@ int main() {
   correct_coefficient[6] = 1 / sqrt(6.0);
 
   for (int i = 0; i < 7; i++) {
-    cgresult = cgfactor(spins[i][0], spins[i][1], spins[i][2],
+    double cgresult = cgfactor(spins[i][0], spins[i][1], spins[i][2],
                         spins[i][3], spins[i][4], spins[i][5]);
     if (fabs(cgresult - correct_coefficient[i]) > tolerance)
       return -i;
