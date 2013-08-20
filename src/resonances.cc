@@ -99,12 +99,12 @@ std::map<int, double> resonance_cross_section(
        * (and non-antiparticle for baryon)
        */
       if (type_particle1->spin() % 2 != 0
-          && !(std::signbit(type_particle1->pdgcode())
-          && std::signbit(type_resonance->pdgcode()))) {
+          && (std::signbit(type_particle1->pdgcode())
+          != std::signbit(type_resonance->pdgcode()))) {
         continue;
       } else if (type_particle2->spin() % 2 != 0
-          && !(std::signbit(type_particle2->pdgcode())
-          && std::signbit(type_resonance->pdgcode()))) {
+          && (std::signbit(type_particle2->pdgcode())
+          != std::signbit(type_resonance->pdgcode()))) {
         continue;
       }
     }
