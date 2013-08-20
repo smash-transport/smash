@@ -21,8 +21,8 @@ file(COPY params.txt DESTINATION ..)
 file(COPY particles.txt DESTINATION ..)
 
 # link with gsl
-target_link_libraries(mash gsl gslcblas rt)
-target_link_libraries(sphere gsl gslcblas rt)
+target_link_libraries(mash gsl gslcblas)
+target_link_libraries(sphere gsl gslcblas)
 
 # tests:
 add_subdirectory(tests)
