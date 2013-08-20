@@ -21,6 +21,7 @@
 #include "include/Parameters.h"
 #include "include/ParticleData.h"
 #include "include/ParticleType.h"
+#include "include/time.h"
 
 /* print_line - output a visible seperator */
 static void print_line(void) {
@@ -66,7 +67,7 @@ void mkdir_data(void) {
 /* measure_timediff - time the simulation used */
 double measure_timediff(const Box &box) {
   timespec now;
-  clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &now);
+  clock_gettime(&now);
   return (now.tv_sec + now.tv_nsec / 10.0E9
     - box.time_start().tv_sec -   box.time_start().tv_nsec / 10.0E9);
 }

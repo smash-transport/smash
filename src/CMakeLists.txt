@@ -2,7 +2,7 @@
 set(smash_src collisions.cc clebschgordan.cc decays.cc distributions.cc
 	fourvector.cc initial-conditions.cc input-particles.cc
 	param-reader.cc particles.cc propagation.cc outputroutines.cc
-        resonances.cc)
+        resonances.cc time.cc)
 
 add_executable(mash box.cc ${smash_src})
 add_executable(sphere sphere.cc ${smash_src})

@@ -14,6 +14,8 @@ class FourVector;
 #include <time.h>
 #include <cmath>
 
+#include "../include/time.h"
+
 class Box {
   public:
     /* default constructor with probable values */
@@ -121,7 +123,7 @@ timespec inline Box::time_start(void) const {
 /* set the timer to the actual time in nanoseconds precision */
 timespec inline Box::set_timer_start(void) {
   timespec time;
-  clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &time);
+  clock_gettime(&time);
   return time;
 }
 
