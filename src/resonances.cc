@@ -123,7 +123,7 @@ std::map<int, double> resonance_cross_section(
        type_particle2->isospin(), type_resonance->isospin(),
        isospin_z1, isospin_z2, -isospin_z_resonance);
     double clebsch_gordan_isospin = 0.0;
-    if (wigner_3j > really_small)
+    if (fabs(wigner_3j) > really_small)
       clebsch_gordan_isospin = pow(-1, type_particle1->isospin() / 2.0
       - type_particle2->isospin() / 2.0 + isospin_z_resonance / 2.0)
       * sqrt(type_resonance->isospin() + 1) * wigner_3j;
