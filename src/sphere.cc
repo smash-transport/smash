@@ -42,6 +42,7 @@ static void usage(int rc) {
          "  -h, --help           usage information\n"
          "  -O, --output-interval          step interval between measurements\n"
          "  -r, --radius         initial radius in fermi\n"
+         "  -R, --random         random number seed\n"
          "  -s, --sigma          cross section in mbarn\n"
          "  -S, --steps          number of steps\n"
          "  -T, --temperature    initial temperature\n"
@@ -252,7 +253,8 @@ int main(int argc, char *argv[]) {
     { "eps",        required_argument,      0, 'e' },
     { "help",       no_argument,            0, 'h' },
     { "output-interval", required_argument,      0, 'O' },
-    { "random",     required_argument,      0, 'r' },
+    { "radial",     required_argument,      0, 'r' },
+    { "random",     required_argument,      0, 'R' },
     { "sigma",      required_argument,      0, 's' },
     { "steps",      required_argument,      0, 'S' },
     { "temperature", required_argument,     0, 'T' },
@@ -274,7 +276,7 @@ int main(int argc, char *argv[]) {
   process_params(cube, parameters, path);
 
   /* parse the command line options, they override all previous */
-  while ((opt = getopt_long(argc, argv, "e:hl:O:r:s:S:T:V", longopts,
+  while ((opt = getopt_long(argc, argv, "e:hl:O:r:R:s:S:T:V", longopts,
     NULL)) != -1) {
     switch (opt) {
     case 'e':
@@ -292,6 +294,9 @@ int main(int argc, char *argv[]) {
       }
       break;
     case 'r':
+      cube->set_length(abs(atoi(optarg)));
+      break;
+    case 'R':
       /* negative seed is for time */
       if (atol(optarg) > 0)
         parameters->set_seed(atol(optarg));
