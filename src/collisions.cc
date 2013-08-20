@@ -124,7 +124,7 @@ void collision_criteria_geometry(std::map<int, ParticleData> *particle,
         if (random_interaction < interaction_probability)
           interaction_type = resonances->first;
       }
-      resonances++;
+      ++resonances;
     }
   }
 
