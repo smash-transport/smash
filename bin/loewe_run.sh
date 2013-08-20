@@ -53,4 +53,4 @@ cd $path
 export OMP_NUM_THREADS=1
 
 # start programm
-srun ./mash -r ${SLURM_JOB_ID}
+srun ./mash -R ${SLURM_JOB_ID}
