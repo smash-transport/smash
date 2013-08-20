@@ -1,3 +1,5 @@
+include(CheckLibraryExists)
+
 # list the source files
 set(smash_src collisions.cc clebschgordan.cc decays.cc distributions.cc
 	fourvector.cc initial-conditions.cc input-particles.cc
@@ -20,9 +22,16 @@ include_directories("${PROJECT_BINARY_DIR}/src")
 file(COPY params.txt DESTINATION ..)
 file(COPY particles.txt DESTINATION ..)
 
-# link with gsl
-target_link_libraries(mash gsl gslcblas)
-target_link_libraries(sphere gsl gslcblas)
+
+# link with gsl and maybe rt
+CHECK_LIBRARY_EXISTS(rt clock_gettime "time.h" HAVE_CLOCK_GETTIME)
+if(HAVE_CLOCK_GETTIME)
+  target_link_libraries(mash gsl gslcblas rt)
+  target_link_libraries(sphere gsl gslcblas rt)
+else(HAVE_CLOCK_GETTIME)
+  target_link_libraries(mash gsl gslcblas)
+  target_link_libraries(sphere gsl gslcblas)
+endif(HAVE_CLOCK_GETTIME)
 
 # tests:
 add_subdirectory(tests)
