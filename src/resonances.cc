@@ -79,7 +79,6 @@ std::map<int, double> resonance_cross_section(
        * type_particle2->mass() * type_particle2->mass()) / mandelstam_s;
 
   /* Find all the possible resonances */
-  size_t type_index = 0;
   for (std::vector<ParticleType>::iterator type_resonance = type_list->begin();
        type_resonance != type_list->end(); ++type_resonance) {
     /* Not a resonance, go to next type of particle */
@@ -140,7 +139,7 @@ std::map<int, double> resonance_cross_section(
       continue;
 
     /* Calculate spin factor */
-    const double spinfactor = ((*type_list)[type_index].spin() + 1)
+    const double spinfactor = (type_resonance->spin() + 1)
       / ((type_particle1->spin() + 1) * (type_particle2->spin() + 1));
 
     float resonance_width = type_resonance->width();
