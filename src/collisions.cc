@@ -15,6 +15,7 @@
 #include <map>
 #include <vector>
 
+#include "include/CollisionData.h"
 #include "include/Parameters.h"
 #include "include/ParticleData.h"
 #include "include/ParticleType.h"
