@@ -1,11 +1,18 @@
+include(CheckLibraryExists)
+
 # test sources
 add_executable(fourvector EXCLUDE_FROM_ALL fourvector.cc)
 add_executable(particles EXCLUDE_FROM_ALL particles.cc ../particles.cc ../fourvector.cc ../distributions.cc ../outputroutines.cc ../time.cc)
 add_executable(clebschgordan EXCLUDE_FROM_ALL clebschgordan.cc ../clebschgordan.cc)
 add_dependencies(check fourvector particles clebschgordan)
 
-# link flags: rt needed for old glibc
-target_link_libraries(particles gsl gslcblas rt)
+# link flags: rt may be needed for old glibc
+CHECK_LIBRARY_EXISTS(rt clock_gettime "time.h" HAVE_CLOCK_GETTIME)
+if(HAVE_CLOCK_GETTIME)
+  target_link_libraries(particles gsl gslcblas rt)
+else(HAVE_CLOCK_GETTIME)
+  target_link_libraries(particles gsl gslcblas)
+endif(HAVE_CLOCK_GETTIME)
 
 
 # tests:
