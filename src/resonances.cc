@@ -60,10 +60,9 @@ std::map<int, double> resonance_cross_section(
   if (type_particle1->spin() % 2 != 0 && type_particle2->spin() % 2 != 0)
     return possible_resonances;
 
-  /* Symmetry factor If initial state particles are identical,
-   *  multiply by two. */
+  /* Isospin symmetry factor */
   int symmetryfactor = 1;
-  if (unlikely(type_particle1->pdgcode() == type_particle2->pdgcode()))
+  if (type_particle1->isospin() == type_particle2->isospin())
     symmetryfactor = 2;
 
   /* Mandelstam s = (p_a + p_b)^2 = square of CMS energy */
