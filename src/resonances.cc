@@ -185,7 +185,10 @@ size_t resonance_decay(std::map<int, ParticleData> *particles,
   }
 
   const int charge = (*types)[(*map_type)[*particle_id]].charge();
-  int type_a = 0, type_b = 0;
+  const double total_energy = ((*particles)[*particle_id]).momentum().x0();
+  int type_a = 0, type_b = 0, type_index_a = -1, type_index_b = -1;
+  bool not_found_a = true, not_found_b = true;
+  size_t type_index = 0;
   /* XXX: Can the hardcoding of decay channels be avoided? */
   if ((*types)[(*map_type)[*particle_id]].spin() % 2 == 0) {
     /* meson resonance decays into pions */
@@ -204,9 +207,50 @@ size_t resonance_decay(std::map<int, ParticleData> *particles,
     if (charge == 0) {
       type_a = 2212;
       type_b = -211;
+      while ( (not_found_a || not_found_b) && type_index < (*types).size() ) {
+	if ((*types)[type_index].pdgcode() == type_a) {
+	  type_index_a = type_index;
+	  not_found_a = false;
+	}
+	if ((*types)[type_index].pdgcode() == type_b) {
+	  type_index_b = type_index;
+	  not_found_b = false;
+	}
+	type_index++;
+      }
+      /* If there's not enough energy, use the lighter combination */
+      if (unlikely((*types)[type_index_a].mass()
+                   + (*types)[type_index_b].mass()
+                   > total_energy)) {
+        type_a = 2112;
+        type_b = 111;
+	not_found_a = true;
+	not_found_b = true;
+	type_index = 0;
+      }
     } else if (charge == 1) {
       type_a = 2112;
       type_b = 211;
+      while ( (not_found_a || not_found_b) && type_index < (*types).size() ) {
+        if ((*types)[type_index].pdgcode() == type_a) {
+          type_index_a = type_index;
+          not_found_a = false;
+        }
+        if ((*types)[type_index].pdgcode() == type_b) {
+          type_index_b = type_index;
+          not_found_b = false;
+        }
+        type_index++;
+      }
+      if (unlikely((*types)[type_index_a].mass()
+                   + (*types)[type_index_b].mass()
+                   > total_energy)) {
+        type_a = 2212;
+        type_b = 111;
+	not_found_a = true;
+	not_found_b = true;
+	type_index = 0;
+      }
     } else if (charge == -1) {
       type_a = 2112;
       type_b = -211;
@@ -219,12 +263,52 @@ size_t resonance_decay(std::map<int, ParticleData> *particles,
     if (charge == 0) {
       type_a = -2212;
       type_b = 211;
+      while ( (not_found_a || not_found_b) && type_index < (*types).size() ) {
+        if ((*types)[type_index].pdgcode() == type_a) {
+          type_index_a = type_index;
+          not_found_a = false;
+        }
+        if ((*types)[type_index].pdgcode() == type_b) {
+          type_index_b = type_index;
+          not_found_b = false;
+        }
+        type_index++;
+      }
+      if (unlikely((*types)[type_index_a].mass()
+                   + (*types)[type_index_b].mass()
+                   > total_energy)) {
+        type_a = -2112;
+        type_b = 111;
+	not_found_a = true;
+	not_found_b = true;
+	type_index = 0;
+      }
     } else if (charge == 1) {
       type_a = -2112;
       type_b = 211;
     } else if (charge == -1) {
       type_a = -2112;
       type_b = -211;
+      while ( (not_found_a || not_found_b) && type_index < (*types).size() ) {
+        if ((*types)[type_index].pdgcode() == type_a) {
+          type_index_a = type_index;
+          not_found_a = false;
+        }
+        if ((*types)[type_index].pdgcode() == type_b) {
+          type_index_b = type_index;
+          not_found_b = false;
+        }
+        type_index++;
+      }
+      if (unlikely((*types)[type_index_a].mass()
+                   + (*types)[type_index_b].mass()
+                   > total_energy)) {
+        type_a = -2212;
+        type_b = 111;
+	not_found_a = true;
+	not_found_b = true;
+	type_index = 0;
+      }
     } else if (charge == -2) {
       type_a = -2212;
       type_b = -211;
@@ -232,8 +316,6 @@ size_t resonance_decay(std::map<int, ParticleData> *particles,
   }
 
   /* Find the desired particle types */
-  bool not_found_a = true, not_found_b = true;
-  size_t type_index = 0;
   while ( (not_found_a || not_found_b) && type_index < (*types).size() ) {
     if ((*types)[type_index].pdgcode() == type_a) {
       printd("Found particle %i.\n", type_a);
@@ -248,7 +330,6 @@ size_t resonance_decay(std::map<int, ParticleData> *particles,
     type_index++;
   }
 
-  const double total_energy = ((*particles)[*particle_id]).momentum().x0();
   double mass_a = (*types)[(*map_type)[new_id_a]].mass(),
     mass_b = (*types)[(*map_type)[new_id_b]].mass();
   double energy_a = (total_energy * total_energy
