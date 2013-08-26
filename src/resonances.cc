@@ -208,15 +208,15 @@ size_t resonance_decay(std::map<int, ParticleData> *particles,
       type_a = 2212;
       type_b = -211;
       while ( (not_found_a || not_found_b) && type_index < (*types).size() ) {
-	if ((*types)[type_index].pdgcode() == type_a) {
-	  type_index_a = type_index;
-	  not_found_a = false;
-	}
-	if ((*types)[type_index].pdgcode() == type_b) {
-	  type_index_b = type_index;
-	  not_found_b = false;
-	}
-	type_index++;
+        if ((*types)[type_index].pdgcode() == type_a) {
+          type_index_a = type_index;
+          not_found_a = false;
+        }
+        if ((*types)[type_index].pdgcode() == type_b) {
+          type_index_b = type_index;
+          not_found_b = false;
+        }
+        type_index++;
       }
       /* If there's not enough energy, use the lighter combination */
       if (unlikely((*types)[type_index_a].mass()
@@ -224,9 +224,9 @@ size_t resonance_decay(std::map<int, ParticleData> *particles,
                    > total_energy)) {
         type_a = 2112;
         type_b = 111;
-	not_found_a = true;
-	not_found_b = true;
-	type_index = 0;
+        not_found_a = true;
+        not_found_b = true;
+        type_index = 0;
       }
     } else if (charge == 1) {
       type_a = 2112;
@@ -247,9 +247,9 @@ size_t resonance_decay(std::map<int, ParticleData> *particles,
                    > total_energy)) {
         type_a = 2212;
         type_b = 111;
-	not_found_a = true;
-	not_found_b = true;
-	type_index = 0;
+        not_found_a = true;
+        not_found_b = true;
+        type_index = 0;
       }
     } else if (charge == -1) {
       type_a = 2112;
@@ -279,9 +279,9 @@ size_t resonance_decay(std::map<int, ParticleData> *particles,
                    > total_energy)) {
         type_a = -2112;
         type_b = 111;
-	not_found_a = true;
-	not_found_b = true;
-	type_index = 0;
+        not_found_a = true;
+        not_found_b = true;
+        type_index = 0;
       }
     } else if (charge == 1) {
       type_a = -2112;
@@ -305,9 +305,9 @@ size_t resonance_decay(std::map<int, ParticleData> *particles,
                    > total_energy)) {
         type_a = -2212;
         type_b = 111;
-	not_found_a = true;
-	not_found_b = true;
-	type_index = 0;
+        not_found_a = true;
+        not_found_b = true;
+        type_index = 0;
       }
     } else if (charge == -2) {
       type_a = -2212;
