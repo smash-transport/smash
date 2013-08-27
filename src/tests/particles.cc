@@ -4,7 +4,7 @@
  *      Jussi Auvinen <auvinen@fias.uni-frankfurt.de>
  *    GNU General Public License (GPLv3)
  */
-#include "../include/particles.h"
+#include "../include/Particles.h"
 #include "../include/ParticleData.h"
 
 int main() {
@@ -27,7 +27,7 @@ int main() {
   /* check collision_time for parallel momenta => impossible collision */
   particle_a.set_momentum(0.1, 0.3, -0.1, 0.2);
   particle_b.set_momentum(0.1, 0.3, -0.1, 0.2);
-  double time = collision_time(&particle_a, &particle_b);
+  double time = collision_time(particle_a, particle_b);
   if (time >= 0.0)
     return -3;
 

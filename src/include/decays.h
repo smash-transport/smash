@@ -13,16 +13,15 @@
 #include <map>
 #include <vector>
 
+#include "../include/Particles.h"
+
 class Parameters;
-class ParticleData;
-class ParticleType;
 
 /* does_decay - does a resonance decay on this timestep? */
-bool does_decay(ParticleData *particle, ParticleType *particle_type,
-                std::list<int> *decay_list, const Parameters &parameters);
+void check_decays(Particles *particles, std::list<int> *decay_list,
+                  const Parameters &parameters);
 
-size_t decay_particles(std::map<int, ParticleData> *particle,
-  std::vector<ParticleType> *type, std::map<int, int> *map_type,
-  std::list<int> *decay_list, size_t id_process, int *id_max);
+size_t decay_particles(Particles *particles, std::list<int> *decay_list,
+                       size_t id_process);
 
 #endif  // SRC_INCLUDE_DECAYS_H_

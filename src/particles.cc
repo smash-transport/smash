@@ -7,8 +7,6 @@
  *    GNU General Public License (GPLv3)
  *
  */
-#include "include/particles.h"
-
 #include <cstdio>
 #include <cstring>
 #include <map>
@@ -21,6 +19,7 @@
 #include "include/outputroutines.h"
 #include "include/ParticleData.h"
 #include "include/ParticleType.h"
+#include "include/Particles.h"
 
 /* boost_CM - boost to center of momentum */
 void boost_CM(ParticleData *particle1, ParticleData *particle2,
@@ -117,7 +116,8 @@ double particle_distance(ParticleData *particle_orig1,
 }
 
 /* time_collision - measure collision time of two particles */
-double collision_time(ParticleData *particle1, ParticleData *particle2) {
+double collision_time(const ParticleData &particle1,
+  const ParticleData &particle2) {
   /* UrQMD collision time
    * arXiv:1203.4418 (5.15): in computational frame
    * position of particle a: x_a
@@ -126,17 +126,17 @@ double collision_time(ParticleData *particle1, ParticleData *particle2) {
    * momentum of particle b: p_b
    * t_{coll} = - (x_a - x_b) . (p_a - p_b) / (p_a - p_b)^2
    */
-  FourVector position_difference = particle1->position()
-    - particle2->position();
+  FourVector position_difference = particle1.position()
+    - particle2.position();
   printd("Particle %d<->%d position difference: %g %g %g %g [fm]\n",
-    particle1->id(), particle2->id(), position_difference.x0(),
+    particle1.id(), particle2.id(), position_difference.x0(),
     position_difference.x1(), position_difference.x2(),
     position_difference.x3());
-  FourVector velocity_difference = particle1->momentum()
-    / particle1->momentum().x0()
-    - particle2->momentum() / particle2->momentum().x0();
+  FourVector velocity_difference = particle1.momentum()
+    / particle1.momentum().x0()
+    - particle2.momentum() / particle2.momentum().x0();
   printd("Particle %d<->%d velocity difference: %g %g %g %g [fm]\n",
-    particle1->id(), particle2->id(), velocity_difference.x0(),
+    particle1.id(), particle2.id(), velocity_difference.x0(),
     velocity_difference.x1(), velocity_difference.x2(),
     velocity_difference.x3());
   /* zero momentum leads to infite distance, particles are not approaching */
