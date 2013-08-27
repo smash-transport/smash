@@ -394,7 +394,8 @@ int main(int argc, char *argv[]) {
   }
 
   /* Output IC values */
-  print_startup(*cube, *parameters);
+  print_startup(*parameters);
+  print_startup(*cube);
   mkdir_data();
   write_oscar_header();
 

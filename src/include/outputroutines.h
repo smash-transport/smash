@@ -18,7 +18,8 @@ class ParticleData;
 class ParticleType;
 
 /* console output */
-void print_startup(const Box &box, const Parameters &parameters);
+void print_startup(const Parameters &parameters);
+void print_startup(const Box &box);
 void print_header(void);
 void print_measurements(const std::map<int, ParticleData> &particle,
                         const size_t &scatterings_total,
