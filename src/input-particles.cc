@@ -92,8 +92,8 @@ void input_particles(std::vector<ParticleType> *type, char *path) {
     printf("Setting particle type %s isospin %i charge %i spin %i\n",
            particle_name, isospin, charge, spin);
     std::string name(particle_name);
-    ParticleType type(name, mass, width, pdgcode, isospin, charge, spin);
-    (*type)[type_number].push_back(type);
+    ParticleType new_type(name, mass, width, pdgcode, isospin, charge, spin);
+    type->push_back(new_type);
   }
   free(line);
   fclose(fp);
