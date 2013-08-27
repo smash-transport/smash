@@ -21,8 +21,7 @@ class ParticleType {
                  isospin_(isosp), charge_(ch), spin_(sp) {}
     /* set data */
     void inline set(const std::string &n, const float &m, const float &w,
-                    const int &id, const int &isosp, const int &ch,
-                    const int &sp);
+                    int id, int isosp, int ch, int sp);
     /* access data */
     std::string inline name(void) const;
     float inline mass(void) const;
@@ -46,8 +45,7 @@ class ParticleType {
 };
 
 void inline ParticleType::set(const std::string &NAME, const float &MASS,
-     const float &WIDTH, const int &ID, const int &ISOSPIN, const int &CHARGE,
-     const int &SPIN) {
+     const float &WIDTH, int ID, int ISOSPIN, int CHARGE, int SPIN) {
   mass_ = MASS;
   width_ = WIDTH;
   pdgcode_ = ID;
