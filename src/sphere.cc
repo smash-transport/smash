@@ -37,7 +37,7 @@ char *progname;
 
 static void usage(int rc) {
   printf("\nUsage: %s [option]\n\n", progname);
-  printf("Calculate transport box\n"
+  printf("Calculate expanding sphere\n"
          "  -e, --eps            time step\n"
          "  -h, --help           usage information\n"
          "  -O, --output-interval          step interval between measurements\n"
