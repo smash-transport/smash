@@ -11,13 +11,15 @@
 class Parameters {
   public:
     /* default constructor with probable values */
-    Parameters(): steps_(10000), output_interval_(100), testparticles_(1),
-      eps_(0.001), cross_section_(10.0), seed_(1) {}
+    Parameters(): steps_(10000), output_interval_(100), initial_condition_(1),
+      testparticles_(1), eps_(0.001), cross_section_(10.0), seed_(1) {}
     /* member funtions */
     int inline steps() const;
     void inline set_steps(const int &STEPS);
     int inline output_interval() const;
     void inline set_output_interval(const int &UPDATE);
+    int inline initial_condition() const;
+    void inline set_initial_condition(const int &INITIAL_CONDITION);
     int inline testparticles() const;
     void inline set_testparticles(const int &TESTPARTICLES);
     float inline eps() const;
@@ -32,6 +34,8 @@ class Parameters {
     int steps_;
     /* number of steps before giving measurables */
     int output_interval_;
+    /* initial condition */
+    int initial_condition_;
     /* number of test particle */
     int testparticles_;
     /* temporal time step */
@@ -61,6 +65,17 @@ int inline Parameters::output_interval(void) const {
 void inline Parameters::set_output_interval(const int &update) {
   output_interval_ = update;
 }
+
+/* return the used initial condition */
+int inline Parameters::initial_condition(void) const {
+  return initial_condition_;
+}
+
+/* set the initial condition */
+void inline Parameters::set_initial_condition(const int &INITIAL_CONDITION) {
+  initial_condition_ = INITIAL_CONDITION;
+}
+
 
 /* return the number of testparticles:
  * if equal to one a "testparticle" corresponds to a real particle

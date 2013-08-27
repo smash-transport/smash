@@ -75,7 +75,7 @@ void initial_conditions(std::map<int, ParticleData> *particles,
       * 0.5 * M_1_PI * M_1_PI / hbarc / hbarc / hbarc;
 
     /* particle number depending on IC geometry either sphere or box */
-    if (unlikely(box->initial_condition() == 3)) {
+    if (unlikely(parameters->initial_condition() == 3)) {
       /* cast while reflecting probability of extra particle */
       number = 4.0 / 3.0 * M_PI * box->length() * box->length() * box->length()
         * number_density * parameters->testparticles();
@@ -119,7 +119,7 @@ void initial_conditions(std::map<int, ParticleData> *particles,
         /* poor last guy just sits around */
         (*particles)[id].set_momentum((*type)[i].mass(), 0, 0, 0);
       } else if (!(id % 2)) {
-        if (box->initial_condition() != 2) {
+        if (parameters->initial_condition() != 2) {
           /* thermal momentum according Maxwell-Boltzmann distribution */
           momentum_radial = sample_momenta(box, (*type)[i]);
         } else {
@@ -147,7 +147,7 @@ void initial_conditions(std::map<int, ParticleData> *particles,
 
       time_start = 1.0;
       /* ramdom position in a quadratic box */
-      if (box->initial_condition() != 3) {
+      if (parameters->initial_condition() != 3) {
         x = drand48() * box->length();
         y = drand48() * box->length();
         z = drand48() * box->length();
@@ -178,7 +178,6 @@ void initial_conditions(std::map<int, ParticleData> *particles,
   }
   printf("IC total number density %.6g [fm^-3]\n", number_density_total);
   printf("IC contains %lu particles\n", number_total);
-  printf("IC type %d\n", box->initial_condition());
   /* loop over all particles */
   number = number_total;
   /* reducing cross section according to number of test particle */

@@ -78,7 +78,7 @@ void process_params(Box *box, Parameters *parameters, char *path) {
       continue;
     }
     if (strcmp(key, "INITIAL_CONDITION") == 0) {
-      box->set_initial_condition(abs(atoi(value)));
+      parameters->set_initial_condition(abs(atoi(value)));
       continue;
     }
 

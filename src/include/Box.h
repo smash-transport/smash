@@ -19,14 +19,11 @@ class FourVector;
 class Box {
   public:
     /* default constructor with probable values */
-    Box(): initial_condition_(1), length_(10.0),
-      temperature_(0.1), energy_initial_(0),
+    Box(): length_(10.0), temperature_(0.1), energy_initial_(0),
       number_density_initial_(0), time_start_(set_timer_start()) {}
     /* member funtions */
     float inline length() const;
     void inline set_length(const float &LENGTH);
-    int inline initial_condition() const;
-    void inline set_initial_condition(const int &INITIAL_CONDITION);
     float inline energy_initial() const;
     void inline set_energy_initial(const float &energy);
     float inline number_density_initial() const;
@@ -37,8 +34,6 @@ class Box {
     timespec inline set_timer_start();
 
   private:
-    /* initial condition */
-    int initial_condition_;
     /* Cube edge length */
     float length_;
     /* Temperature of the Boltzmann distribution for thermal initialization */
@@ -59,16 +54,6 @@ float inline Box::length(void) const {
 /* set the edge length */
 void inline Box::set_length(const float &LENGTH) {
   length_ = LENGTH;
-}
-
-/* return the used initial condition */
-int inline Box::initial_condition(void) const {
-  return initial_condition_;
-}
-
-/* set the initial condition */
-void inline Box::set_initial_condition(const int &INITIAL_CONDITION) {
-  initial_condition_ = INITIAL_CONDITION;
 }
 
 /* return the used IC temperature */
