@@ -19,7 +19,7 @@ class FourVector;
 class Box {
   public:
     /* default constructor with probable values */
-    Box(): steps_(10000), initial_condition_(1), length_(10.0),
+    Box(): initial_condition_(1), length_(10.0),
       temperature_(0.1), energy_initial_(0),
       number_density_initial_(0), time_start_(set_timer_start()) {}
     /* member funtions */
@@ -33,14 +33,10 @@ class Box {
     void inline set_number_density_inital(const float &number_density);
     float inline temperature() const;
     void inline set_temperature(const float &T);
-    int inline steps() const;
-    void inline set_steps(const int &STEPS);
     timespec inline time_start() const;
     timespec inline set_timer_start();
 
   private:
-    /* number of steps */
-    int steps_;
     /* initial condition */
     int initial_condition_;
     /* Cube edge length */
@@ -63,16 +59,6 @@ float inline Box::length(void) const {
 /* set the edge length */
 void inline Box::set_length(const float &LENGTH) {
   length_ = LENGTH;
-}
-
-/* return the number of steps */
-int inline Box::steps(void) const {
-  return steps_;
-}
-
-/* set the number of steps */
-void inline Box::set_steps(const int &STEPS) {
-  steps_ = STEPS;
 }
 
 /* return the used initial condition */

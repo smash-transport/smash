@@ -251,7 +251,7 @@ static int Evolve(std::map<int, ParticleData> *particles,
   print_measurements(*particles, interactions_total,
                      interactions_this_interval, box);
 
-  for (int steps = 0; steps < box.steps(); steps++) {
+  for (int steps = 0; steps < parameters.steps(); steps++) {
     /* Check resonances for decays */
     for (std::map<int, ParticleData>::iterator i = particles->begin();
          i != particles->end(); ++i) {
@@ -300,7 +300,7 @@ static int Evolve(std::map<int, ParticleData> *particles,
   }
 
   /* Guard against evolution */
-  if (likely(box.steps() > 0)) {
+  if (likely(parameters.steps() > 0)) {
     /* if there are not particles no interactions happened */
     if (likely(!particles->empty()))
       print_tail(box, interactions_total * 2
@@ -381,7 +381,7 @@ int main(int argc, char *argv[]) {
       parameters->set_cross_section(fabs(atof(optarg)));
       break;
     case 'S':
-      cube->set_steps(abs(atoi(optarg)));
+      parameters->set_steps(abs(atoi(optarg)));
       break;
     case 'T':
       cube->set_temperature(fabs(atof(optarg)));

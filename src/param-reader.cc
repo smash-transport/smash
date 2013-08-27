@@ -58,7 +58,7 @@ void process_params(Box *box, Parameters *parameters, char *path) {
 
     /* integer values */
     if (strcmp(key, "STEPS") == 0) {
-      box->set_steps(abs(atoi(value)));
+      parameters->set_steps(abs(atoi(value)));
       continue;
     }
     if (strcmp(key, "RANDOMSEED") == 0) {

@@ -39,7 +39,7 @@ void print_startup(const Box &box, const Parameters &parameters) {
   printf("Initial temperature: %g [GeV]\n", box.temperature());
   printf("Elastic cross section: %g [mb]\n", parameters.cross_section());
   printf("Using temporal stepsize: %g [GeV]\n", parameters.eps());
-  printf("Maximum number of steps: %i \n", box.steps());
+  printf("Maximum number of steps: %i \n", parameters.steps());
   printf("Random number seed: %li \n", parameters.seed());
 }
 

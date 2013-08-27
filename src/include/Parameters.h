@@ -11,9 +11,11 @@
 class Parameters {
   public:
     /* default constructor with probable values */
-    Parameters(): output_interval_(100), testparticles_(1), eps_(0.001),
-      cross_section_(10.0), seed_(1) {}
+    Parameters(): steps_(10000), output_interval_(100), testparticles_(1),
+      eps_(0.001), cross_section_(10.0), seed_(1) {}
     /* member funtions */
+    int inline steps() const;
+    void inline set_steps(const int &STEPS);
     int inline output_interval() const;
     void inline set_output_interval(const int &UPDATE);
     int inline testparticles() const;
@@ -26,6 +28,8 @@ class Parameters {
     void inline set_seed(const int64_t &RANDOMSEED);
 
   private:
+    /* number of steps */
+    int steps_;
     /* number of steps before giving measurables */
     int output_interval_;
     /* number of test particle */
@@ -37,6 +41,16 @@ class Parameters {
     /* initial seed for random generator */
     int64_t seed_;
 };
+
+/* return the number of steps */
+int inline Parameters::steps(void) const {
+  return steps_;
+}
+
+/* set the number of steps */
+void inline Parameters::set_steps(const int &STEPS) {
+  steps_ = STEPS;
+}
 
 /* return the number on which interval output will be shown */
 int inline Parameters::output_interval(void) const {
