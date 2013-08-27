@@ -23,7 +23,7 @@
 /* input_particles - read in particle types */
 void input_particles(std::vector<ParticleType> *type, char *path) {
   char *line = NULL, *saveptr = NULL, *characters, input_particles[FILELEN];
-  size_t len = 0, type_number = 0;
+  size_t len = 0;
   ssize_t read;
   FILE *fp;
 
@@ -87,14 +87,13 @@ void input_particles(std::vector<ParticleType> *type, char *path) {
     printd("spin: %d\n", spin);
 
     /* Have a new particle type */
-    (*type).resize(type_number + 1);
     printf("Setting particle type %s mass %g width %g pdgcode %i\n",
            particle_name, mass, width, pdgcode);
     printf("Setting particle type %s isospin %i charge %i spin %i\n",
            particle_name, isospin, charge, spin);
     std::string name(particle_name);
-    (*type)[type_number].set(name, mass, width, pdgcode, isospin, charge, spin);
-    type_number++;
+    ParticleType type(name, mass, width, pdgcode, isospin, charge, spin);
+    (*type)[type_number].push_back(type);
   }
   free(line);
   fclose(fp);

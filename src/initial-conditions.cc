@@ -25,10 +25,12 @@
 /* initial_conditions - sets particle type */
 void initial_particles(std::vector<ParticleType> *type) {
   /* XXX: use nosql table for particle type values */
-  (*type).resize(3);
-  (*type)[0].set("pi+", 0.13957, -1.0, 211, 1, 1, 0);
-  (*type)[1].set("pi-", 0.13957, -1.0, -211, 1, -1, 0);
-  (*type)[2].set("pi0", 0.134977, -1.0, 111, 1, 0, 0);
+  ParticleType piplus("pi+", 0.13957, -1.0, 211, 1, 1, 0);
+  (*type).push_back(piplus);
+  ParticleType piminus("pi-", 0.13957, -1.0, -211, 1, -1, 0);
+  (*type).push_back(piminus);
+  ParticleType pi0("pi0", 0.134977, -1.0, 111, 1, 0, 0);
+  (*type).push_back(pi0);
 }
 
 /* initial_conditions - sets particle data for @particles */
