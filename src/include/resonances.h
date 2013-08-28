@@ -21,8 +21,8 @@ class ParticleType;
  * for producing a resonance
  */
 std::map<int, double> resonance_cross_section(
-  ParticleData *particle1, ParticleData *particle2,
-  ParticleType *type_particle1, ParticleType *type_particle2,
+  const ParticleData &particle1, const ParticleData &particle2,
+  const ParticleType &type_particle1, const ParticleType &type_particle2,
   std::vector<ParticleType> *type_list);
 
 /* 1->2 resonance decay process */

@@ -29,53 +29,53 @@
  * for producing a resonance
  */
 std::map<int, double> resonance_cross_section(
-  ParticleData *particle1, ParticleData *particle2,
-  ParticleType *type_particle1, ParticleType *type_particle2,
+  const ParticleData &particle1, const ParticleData &particle2,
+  const ParticleType &type_particle1, const ParticleType &type_particle2,
   std::vector<ParticleType> *type_list) {
-  const int charge1 = (*type_particle1).charge(),
-    charge2 = (*type_particle2).charge();
+  const int charge1 = type_particle1.charge(),
+    charge2 = type_particle2.charge();
 
   /* Isospin z-component based on Gell-Mann–Nishijima formula
    * 2 * Iz = 2 * charge - (baryon number + strangeness + charm)
    * XXX: Strangeness and charm ignored for now!
    */
-  const int isospin_z1 = type_particle1->spin() % 2 == 0
+  const int isospin_z1 = type_particle1.spin() % 2 == 0
                          ? charge1 * 2
-                         : charge1 * 2 - type_particle1->pdgcode()
-                                       / abs(type_particle1->pdgcode());
-  const int isospin_z2 = type_particle2->spin() % 2 == 0
+                         : charge1 * 2 - type_particle1.pdgcode()
+                                       / abs(type_particle1.pdgcode());
+  const int isospin_z2 = type_particle2.spin() % 2 == 0
                          ? charge2 * 2
-                         : charge2 * 2 - type_particle2->pdgcode()
-                                       / abs(type_particle2->pdgcode());
+                         : charge2 * 2 - type_particle2.pdgcode()
+                                       / abs(type_particle2.pdgcode());
   std::map<int, double> possible_resonances;
 
   /* key 0 refers to total resonance production cross section */
   possible_resonances[0] = 0.0;
 
   /* Resonances do not form resonances */
-  if (type_particle1->width() > 0.0 || type_particle2->width() > 0.0)
+  if (type_particle1.width() > 0.0 || type_particle2.width() > 0.0)
     return possible_resonances;
 
   /* No baryon-baryon interactions for now */
-  if (type_particle1->spin() % 2 != 0 && type_particle2->spin() % 2 != 0)
+  if (type_particle1.spin() % 2 != 0 && type_particle2.spin() % 2 != 0)
     return possible_resonances;
 
   /* Isospin symmetry factor */
   int symmetryfactor = 1;
-  if (type_particle1->isospin() == type_particle2->isospin())
+  if (type_particle1.isospin() == type_particle2.isospin())
     symmetryfactor = 2;
 
   /* Mandelstam s = (p_a + p_b)^2 = square of CMS energy */
   const double mandelstam_s =
-       ( (*particle1).momentum() + (*particle2).momentum()).Dot(
-         (*particle1).momentum() + (*particle2).momentum() );
+       (particle1.momentum() + particle2.momentum()).Dot(
+         particle1.momentum() + particle2.momentum());
 
   /* CM momentum */
   const double cm_momentum_squared
-    = (particle1->momentum().Dot(particle2->momentum())
-       * particle1->momentum().Dot(particle2->momentum())
-       - type_particle1->mass() * type_particle1->mass()
-       * type_particle2->mass() * type_particle2->mass()) / mandelstam_s;
+    = (particle1.momentum().Dot(particle2.momentum())
+       * particle1.momentum().Dot(particle2.momentum())
+       - type_particle1.mass() * type_particle1.mass()
+       * type_particle2.mass() * type_particle2.mass()) / mandelstam_s;
 
   /* Find all the possible resonances */
   for (std::vector<ParticleType>::iterator type_resonance = type_list->begin();
@@ -89,7 +89,7 @@ std::map<int, double> resonance_cross_section(
       continue;
 
     /* Check for baryon number conservation */
-    if (type_particle1->spin() % 2 != 0 || type_particle2->spin() % 2 != 0) {
+    if (type_particle1.spin() % 2 != 0 || type_particle2.spin() % 2 != 0) {
       /* Step 1: We must have fermion */
       if (type_resonance->spin() % 2 == 0) {
         continue;
@@ -97,12 +97,12 @@ std::map<int, double> resonance_cross_section(
       /* Step 2: We must have antiparticle for antibaryon
        * (and non-antiparticle for baryon)
        */
-      if (type_particle1->spin() % 2 != 0
-          && (std::signbit(type_particle1->pdgcode())
+      if (type_particle1.spin() % 2 != 0
+          && (std::signbit(type_particle1.pdgcode())
           != std::signbit(type_resonance->pdgcode()))) {
         continue;
-      } else if (type_particle2->spin() % 2 != 0
-          && (std::signbit(type_particle2->pdgcode())
+      } else if (type_particle2.spin() % 2 != 0
+          && (std::signbit(type_particle2.pdgcode())
           != std::signbit(type_resonance->pdgcode()))) {
         continue;
       }
@@ -118,18 +118,18 @@ std::map<int, double> resonance_cross_section(
      * Note that the calculation assumes that isospin values
      * have been multiplied by two
      */
-    double wigner_3j =  gsl_sf_coupling_3j(type_particle1->isospin(),
-       type_particle2->isospin(), type_resonance->isospin(),
+    double wigner_3j =  gsl_sf_coupling_3j(type_particle1.isospin(),
+       type_particle2.isospin(), type_resonance->isospin(),
        isospin_z1, isospin_z2, -isospin_z_resonance);
     double clebsch_gordan_isospin = 0.0;
     if (fabs(wigner_3j) > really_small)
-      clebsch_gordan_isospin = pow(-1, type_particle1->isospin() / 2.0
-      - type_particle2->isospin() / 2.0 + isospin_z_resonance / 2.0)
+      clebsch_gordan_isospin = pow(-1, type_particle1.isospin() / 2.0
+      - type_particle2.isospin() / 2.0 + isospin_z_resonance / 2.0)
       * sqrt(type_resonance->isospin() + 1) * wigner_3j;
 
     printd("CG: %g I1: %i I2: %i IR: %i iz1: %i iz2: %i izR: %i \n",
          clebsch_gordan_isospin,
-         type_particle1->isospin(), type_particle2->isospin(),
+         type_particle1.isospin(), type_particle2.isospin(),
          type_resonance->isospin(),
          isospin_z1, isospin_z2, isospin_z_resonance);
 
@@ -139,7 +139,7 @@ std::map<int, double> resonance_cross_section(
 
     /* Calculate spin factor */
     const double spinfactor = (type_resonance->spin() + 1)
-      / ((type_particle1->spin() + 1) * (type_particle2->spin() + 1));
+      / ((type_particle1.spin() + 1) * (type_particle2.spin() + 1));
 
     float resonance_width = type_resonance->width();
     float resonance_mass = type_resonance->mass();
@@ -160,8 +160,8 @@ std::map<int, double> resonance_cross_section(
              type_resonance->pdgcode(), type_resonance->name().c_str(),
              resonance_mass, resonance_width);
       printd("Original particles: %s %s Charges: %i %i \n",
-             type_particle1->name().c_str(), type_particle2->name().c_str(),
-             type_particle1->charge(), type_particle2->charge());
+             type_particle1.name().c_str(), type_particle2.name().c_str(),
+             type_particle1.charge(), type_particle2.charge());
     }
   }
   return possible_resonances;
