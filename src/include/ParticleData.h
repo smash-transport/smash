@@ -15,23 +15,23 @@
 class ParticleData {
   public:
   /* Use improbable values for default constructor */
-  ParticleData() :id_(-1), id_partner_(-1), id_process_(-1),
+  ParticleData() :id_(-1), pdgcode_(-1), id_partner_(-1), id_process_(-1),
     collision_time_(0.0), process_type_(-1) {}
-  void inline set(const int &id, const double &momenta_l,
-                  const double &momenta_t);
+  void inline set(int id, const double &momenta_l, const double &momenta_t);
   int id(void) const;
-  void inline set_id(const int &id);
+  void inline set_id(int id);
+  int pdgcode(void) const;
+  void inline set_pdgcode(int pdgcode);
   int id_partner(void) const;
-  void inline set_id_partner(const int &id_b);
+  void inline set_id_partner(int id_b);
   int id_process(void) const;
-  void inline set_id_process(const int &id);
+  void inline set_id_process(int id);
   double collision_time(void) const;
   int process_type(void) const;
   void inline set_collision_time(const double &collision_time);
-  void inline set_collision(const int &process_type,
-                            const double &collision_time,
-                            const int &collision_id);
-  void inline set_collision_past(const int &process_id);
+  void inline set_collision(int process_type, const double &collision_time,
+                            int collision_id);
+  void inline set_collision_past(int process_id);
   FourVector inline momentum(void) const;
   void inline set_momentum(const FourVector &momentum_vector);
   void inline set_momentum(const double &mass, const double &px,
@@ -53,6 +53,8 @@ class ParticleData {
   private:
     /* Each particle has a unique identifier */
     int id_;
+    /* pdg id of the particle */
+    int pdgcode_;
     /* Next particle we'd collide against */
     int id_partner_;
     /* counter of the last collision/decay */
@@ -67,12 +69,24 @@ class ParticleData {
     FourVector position_;
 };
 
+/* look up the id of the particle */
 int inline ParticleData::id(void) const {
   return id_;
 }
 
-void inline ParticleData::set_id(const int &i) {
+/* set id of the particle */
+void inline ParticleData::set_id(int i) {
   id_ = i;
+}
+
+/* look up the pdgcode of the particle */
+int inline ParticleData::pdgcode(void) const {
+  return pdgcode_;
+}
+
+/* set id of the particle */
+void inline ParticleData::set_pdgcode(int i) {
+  pdgcode_ = i;
 }
 
 /* look up the id of the collision partner */
@@ -81,7 +95,7 @@ int inline ParticleData::id_partner(void) const {
 }
 
 /* set the id of the collision partner */
-void inline ParticleData::set_id_partner(const int &id_b) {
+void inline ParticleData::set_id_partner(int id_b) {
   id_partner_ = id_b;
 }
 
@@ -91,7 +105,7 @@ int inline ParticleData::id_process(void) const {
 }
 
 /* set the id of the collision process */
-void inline ParticleData::set_id_process(const int &process_id) {
+void inline ParticleData::set_id_process(int process_id) {
   id_process_ = process_id;
 }
 
@@ -108,15 +122,15 @@ void inline ParticleData::set_collision_time(const double &collision_t) {
 }
 
 /* set possible collision data */
-void inline ParticleData::set_collision(const int &proc_type,
-  const double &collision_t, const int &id_b) {
+void inline ParticleData::set_collision(int proc_type,
+  const double &collision_t, int id_b) {
   process_type_ = proc_type;
   collision_time_ = collision_t;
   id_partner_ = id_b;
 }
 
 /* set happened collision data */
-void inline ParticleData::set_collision_past(const int &id_counter) {
+void inline ParticleData::set_collision_past(int id_counter) {
   collision_time_ = 0.0;
   id_process_ = id_counter;
   id_partner_ = -1;
