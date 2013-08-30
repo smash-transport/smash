@@ -51,30 +51,32 @@ void initial_conditions(Particles *particles, Parameters *parameters,
 
   /* Let's check how many non-resonances we have */
   unsigned int non_resonances = 0;
-  for (size_t i = 0; i < particles->types().size(); i++) {
-    if (particles->types()[i].width() < 0.0)
+  printd("IC has %lu particle types\n", particles->types().size());
+  for (std::map<int, ParticleType>::const_iterator i = particles->types().begin();
+       i != particles->types().end(); ++i) {
+    if (i->second.width() < 0.0)
       non_resonances++;
   }
 
   /* loop over all the particle types */
-  for (size_t i = 0; i < particles->types().size(); i++) {
+  for (std::map<int, ParticleType>::const_iterator i = particles->types().begin();
+       i != particles->types().end(); ++i) {
     /* Particles with width > 0 (resonances) do not exist in the beginning */
-    if (particles->types()[i].width() > 0.0)
+    if (i->second.width() > 0.0)
       continue;
 
     /* Number of non-resonances left */
     non_resonances--;
 
-    printd("%s mass: %g [GeV]\n", particles->types()[i].name().c_str(),
-           particles->types()[i].mass());
+    printd("%s mass: %g [GeV]\n", i->second.name().c_str(), i->second.mass());
     /*
      * The particle number depends on distribution function
      * (assumes Bose-Einstein):
      * Volume m^2 T BesselK[2, m/T] / (2\pi^2)
      */
-    double number_density = particles->types()[i].mass()
-      * particles->types()[i].mass() * box->temperature()
-      * gsl_sf_bessel_Knu(2, particles->types()[i].mass() / box->temperature())
+    double number_density = i->second.mass()
+      * i->second.mass() * box->temperature()
+      * gsl_sf_bessel_Knu(2, i->second.mass() / box->temperature())
       * 0.5 * M_1_PI * M_1_PI / hbarc / hbarc / hbarc;
 
     /* particle number depending on IC geometry either sphere or box */
@@ -94,8 +96,7 @@ void initial_conditions(Particles *particles, Parameters *parameters,
         number++;
     }
     printf("IC number density %.6g [fm^-3]\n", number_density);
-    printf("IC %lu number of %s\n", number,
-           particles->types()[i].name().c_str());
+    printf("IC %lu number of %s\n", number, i->second.name().c_str());
     number_density_total += number_density;
 
     /* Set random IC:
@@ -115,11 +116,11 @@ void initial_conditions(Particles *particles, Parameters *parameters,
       if (unlikely(id == number + number_total - 1 && !(id % 2)
           && non_resonances == 0)) {
         /* poor last guy just sits around */
-        particles->data(id).set_momentum(particles->types()[i].mass(), 0, 0, 0);
+        particles->data(id).set_momentum(i->second.mass(), 0, 0, 0);
       } else if (!(id % 2)) {
         if (parameters->initial_condition() != 2) {
           /* thermal momentum according Maxwell-Boltzmann distribution */
-          momentum_radial = sample_momenta(box, particles->types()[i]);
+          momentum_radial = sample_momenta(*box, i->second);
         } else {
           /* IC == 2 initial thermal momentum is the average 3T */
           momentum_radial = 3.0 * box->temperature();
@@ -131,12 +132,12 @@ void initial_conditions(Particles *particles, Parameters *parameters,
         sin_theta = sqrt(1.0 - cos_theta * cos_theta);
         printd("Particle %lu radial momenta %g phi %g cos_theta %g\n", id,
           momentum_radial, phi, cos_theta);
-        particles->data(id).set_momentum(particles->types()[i].mass(),
+        particles->data(id).set_momentum(i->second.mass(),
           momentum_radial * cos(phi) * sin_theta,
           momentum_radial * sin(phi) * sin_theta,
           momentum_radial * cos_theta);
       } else {
-        particles->data(id).set_momentum(particles->types()[i].mass(),
+        particles->data(id).set_momentum(i->second.mass(),
           - particles->data(id - 1).momentum().x1(),
           - particles->data(id - 1).momentum().x2(),
           - particles->data(id - 1).momentum().x3());

@@ -97,5 +97,6 @@ void input_particles(Particles *particles, char *path) {
   }
   free(line);
   fclose(fp);
+  printd("Finished reading particles.txt\n");
   return;
 }

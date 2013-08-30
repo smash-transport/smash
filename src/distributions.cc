@@ -36,23 +36,23 @@ double inline density_integrand(double momentum, double temp, double mass) {
 }
 
 /* sample_momenta - return thermal momenta */
-double sample_momenta(Box *box, ParticleType type) {
+double sample_momenta(const Box &box, const ParticleType &type) {
   double momentum_radial, momentum_average, momentum_min, momentum_max;
   double probability = 0, probability_max, probability_random = 1;
 
   /* Maxwell-Boltzmann average E <E>=3T + m * K_1(m/T) / K_2(m/T) */
-  momentum_average = sqrt((3 * box->temperature()
-    + type.mass() * gsl_sf_bessel_K1(type.mass() / box->temperature())
-                  / gsl_sf_bessel_Kn(2, type.mass() / box->temperature()))
-    * (3 * box->temperature()
-    + type.mass() * gsl_sf_bessel_K1(type.mass() / box->temperature())
-                  / gsl_sf_bessel_Kn(2, type.mass() / box->temperature()))
+  momentum_average = sqrt((3 * box.temperature()
+    + type.mass() * gsl_sf_bessel_K1(type.mass() / box.temperature())
+                  / gsl_sf_bessel_Kn(2, type.mass() / box.temperature()))
+    * (3 * box.temperature()
+    + type.mass() * gsl_sf_bessel_K1(type.mass() / box.temperature())
+                  / gsl_sf_bessel_Kn(2, type.mass() / box.temperature()))
     - type.mass() * type.mass());
 
   momentum_min = type.mass();
-  momentum_max = 50.0 * box->temperature();
+  momentum_max = 50.0 * box.temperature();
   /* double the massless peak value to be above maximum of the distribution */
-  probability_max = 2 * density_integrand(momentum_average, box->temperature(),
+  probability_max = 2 * density_integrand(momentum_average, box.temperature(),
     type.mass());
 
   /* sample by rejection method: (see numerical recipes for more efficient)
@@ -62,7 +62,7 @@ double sample_momenta(Box *box, ParticleType type) {
     momentum_radial = (momentum_max - momentum_min) * drand48() + momentum_min;
     momentum_radial = sqrt(momentum_radial * momentum_radial
       - type.mass() * type.mass());
-    probability = density_integrand(momentum_radial, box->temperature(),
+    probability = density_integrand(momentum_radial, box.temperature(),
       type.mass());
     probability_random = probability_max * drand48();
   }

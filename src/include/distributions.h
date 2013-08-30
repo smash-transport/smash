@@ -21,6 +21,6 @@ double breit_wigner(double mandelstam_s, float resonance_mass,
 double inline density_integrand(double momentum, double temp, double mass);
 
 /* sample_momenta - return thermal momenta */
-double sample_momenta(Box *box, ParticleType type);
+double sample_momenta(const Box &box, const ParticleType &type);
 
 #endif  // SRC_INCLUDE_DISTRIBUTIONS_H_
