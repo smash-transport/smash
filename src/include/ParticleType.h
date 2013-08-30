@@ -20,18 +20,18 @@ class ParticleType {
                  int ch, int sp) : name_(n), mass_(m), width_(w), pdgcode_(id),
                  isospin_(isosp), charge_(ch), spin_(sp) {}
     /* set data */
-    void inline set(const std::string &n, const float &m, const float &w,
+    inline void set(const std::string &n, const float &m, const float &w,
                     int id, int isosp, int ch, int sp);
     /* access data */
-    std::string inline name(void) const;
-    float inline mass(void) const;
-    float inline width(void) const;
-    int inline pdgcode(void) const;
+    inline std::string name(void) const;
+    inline float mass(void) const;
+    inline float width(void) const;
+    inline int pdgcode(void) const;
     /* Isospin is 2 * particle data book value */
-    int inline isospin(void) const;
-    int inline charge(void) const;
+    inline int isospin(void) const;
+    inline int charge(void) const;
     /* Spin is 2 * particle data book value */
-    int inline spin(void) const;
+    inline int spin(void) const;
 
   private:
     /* Data of the particle type */
@@ -44,7 +44,7 @@ class ParticleType {
     int spin_;
 };
 
-void inline ParticleType::set(const std::string &NAME, const float &MASS,
+inline void ParticleType::set(const std::string &NAME, const float &MASS,
      const float &WIDTH, int ID, int ISOSPIN, int CHARGE, int SPIN) {
   mass_ = MASS;
   width_ = WIDTH;
@@ -55,31 +55,31 @@ void inline ParticleType::set(const std::string &NAME, const float &MASS,
   spin_ = SPIN;
 }
 
-int inline ParticleType::charge(void) const {
+inline int ParticleType::charge(void) const {
   return charge_;
 }
 
-int inline ParticleType::isospin(void) const {
+inline int ParticleType::isospin(void) const {
   return isospin_;
 }
 
-float inline ParticleType::mass(void) const {
+inline float ParticleType::mass(void) const {
   return mass_;
 }
 
-std::string inline ParticleType::name(void) const {
+inline std::string ParticleType::name(void) const {
   return name_;
 }
 
-int inline ParticleType::pdgcode(void) const {
+inline int ParticleType::pdgcode(void) const {
   return pdgcode_;
 }
 
-int inline ParticleType::spin(void) const {
+inline int ParticleType::spin(void) const {
   return spin_;
 }
 
-float inline ParticleType::width(void) const {
+inline float ParticleType::width(void) const {
   return width_;
 }
 
