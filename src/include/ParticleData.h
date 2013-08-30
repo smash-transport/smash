@@ -17,6 +17,8 @@ class ParticleData {
   /* Use improbable values for default constructor */
   ParticleData() :id_(-1), pdgcode_(-1), id_partner_(-1), id_process_(-1),
     collision_time_(0.0), process_type_(-1) {}
+  ParticleData(int i) :id_(i), pdgcode_(-1), id_partner_(-1), id_process_(-1),
+    collision_time_(0.0), process_type_(-1) {}
   void inline set(int id, const double &momenta_l, const double &momenta_t);
   int id(void) const;
   void inline set_id(int id);
