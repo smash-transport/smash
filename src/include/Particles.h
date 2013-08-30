@@ -24,8 +24,10 @@ class Particles {
   /* pass out the specific data of a particle as needed all across board */
   inline ParticleData data(int id);
   inline ParticleData * data_pointer(int id);
-  /* pass out the type of a particle */
+  /* pass out the type of a specific particle */
   inline ParticleType type(int id);
+  /* pass out the specific type */
+  inline ParticleType particle_type(int id);
   /* inserts new data or type */
   inline void add_data(void);
   inline int new_data(void);
@@ -57,16 +59,24 @@ inline std::map<int, ParticleType> Particles::types(void) const {
   return types_;
 }
 
+/* return the data of a specific particle */
 inline ParticleData Particles::data(int particle_id) {
   return data_[particle_id];
 }
 
+/* return the pointer to the data of a specific particle */
 inline ParticleData* Particles::data_pointer(int particle_id) {
   return &data_[particle_id];
 }
 
+/* return the type of a specific particle */
 inline ParticleType Particles::type(int particle_id) {
   return types_[data_[particle_id].pdgcode()];
+}
+
+/* return a specific type */
+inline ParticleType Particles::particle_type(int type_id) {
+  return types_[type_id];
 }
 
 /* add a new particle data */
@@ -88,8 +98,8 @@ inline int Particles::new_data(void) {
 
 
 /* add a new particle type */
-inline void Particles::add_type(ParticleType const &particle_type, int pdg) {
-  types_.insert(std::pair<int, ParticleType>(pdg, particle_type));
+inline void Particles::add_type(ParticleType const &TYPE, int pdg) {
+  types_.insert(std::pair<int, ParticleType>(pdg, TYPE));
 }
 
 /* remove a particle */
