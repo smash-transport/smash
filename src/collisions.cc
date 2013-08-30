@@ -157,8 +157,8 @@ size_t collide_particles(Particles *particles, std::list<int> *collision_list,
     FourVector final_momentum;
 
     printd("Process %lu type %i particle %s<->%s colliding %d<->%d time %g\n",
-      id_process, interaction_type, (*type)[(*map_type)[id_a]].name().c_str(),
-           (*type)[(*map_type)[id_b]].name().c_str(), id_a, id_b,
+      id_process, interaction_type, particles->type(id_a).name().c_str(),
+           particles->type(id_a).name().c_str(), id_a, id_b,
            particles->data(id_a).position().x0());
     printd_momenta("particle 1 momenta before", particles->data(id_a));
     printd_momenta("particle 2 momenta before", particles->data(id_b));
@@ -224,7 +224,7 @@ size_t collide_particles(Particles *particles, std::list<int> *collision_list,
       write_oscar(particles->data(id_new), particles->type(id_new));
 
       printd("Resonance %s with ID %lu \n",
-       (*type)[(*map_type)[id_new]].name().c_str(), id_new);
+        particles->type(id_new).name().c_str(), id_new);
       printd_momenta("momentum in comp frame", particles->data(id_new));
       printd_position("position in comp frame", particles->data(id_new));
 
@@ -235,10 +235,10 @@ size_t collide_particles(Particles *particles, std::list<int> *collision_list,
       particles->remove(id_a);
       particles->remove(id_b);
 
-      printd("Particle map has now %zu elements. \n", particle->size());
+      printd("Particle map has now %zu elements. \n", particles->size());
     } else {
       printd("Warning: ID %i (%s) has unspecified process type %i.\n",
-             id_a, (*type)[(*map_type)[id_a]].name().c_str(), interaction_type);
+             id_a, particles->type(id_a).name().c_str(), interaction_type);
     } /* end if (interaction_type == 0) */
     id_process++;
 

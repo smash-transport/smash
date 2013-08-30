@@ -126,7 +126,7 @@ size_t decay_particles(Particles *particles, std::list<int> *decay_list,
     /* unset collision time for both particles + keep id + unset partner */
     particles->data(id_new_a).set_collision_past(id_process);
     particles->data(id_new_b).set_collision_past(id_process);
-    printd("Particle map has now %zu elements. \n", particle->size());
+    printd("Particle map has now %zu elements. \n", particles->size());
 
     id_process++;
 

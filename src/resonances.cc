@@ -158,7 +158,7 @@ std::map<int, double> resonance_cross_section(
       possible_resonances[type_resonance.pdgcode()] = resonance_xsection;
       possible_resonances[0] += resonance_xsection;
       printd("Found resonance %i (%s) with mass %f and width %f.\n",
-             type_resonance->pdgcode(), type_resonance->name().c_str(),
+             type_resonance.pdgcode(), type_resonance.name().c_str(),
              resonance_mass, resonance_width);
       printd("Original particles: %s %s Charges: %i %i \n",
              type_particle1.name().c_str(), type_particle2.name().c_str(),
@@ -286,8 +286,8 @@ int resonance_decay(Particles *particles, int particle_id) {
   particles->data()[new_id_b].set_collision(-1, 0, -1);
 
   printd("Created %s and %s with IDs %d and %d \n",
-    (*types)[(*map_type)[new_id_a]].name().c_str(),
-    (*types)[(*map_type)[new_id_b]].name().c_str(), new_id_a, new_id_b);
+    particles->type(new_id_a).name().c_str(),
+    particles->type(new_id_b).name().c_str(), new_id_a, new_id_b);
 
   return new_id_a;
 }
@@ -323,9 +323,8 @@ int resonance_formation(Particles *particles, int particle_id, int other_id,
   /* No collision yet */
   particles->data()[new_id].set_collision(-1, 0, -1);
 
-  printd("Created %s with ID %i \n",
-         (*types)[(*map_type)[new_id]].name().c_str(),
-         (*particles)[new_id].id());
+  printd("Created %s with ID %i \n", particles->type(new_id).name().c_str(),
+         particles->data(new_id).id());
 
   return new_id;
 }
