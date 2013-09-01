@@ -17,6 +17,7 @@
 #include "include/constants.h"
 #include "include/macros.h"
 #include "include/ParticleType.h"
+#include "include/outputroutines.h"
 
 /* Breit-Wigner distribution for calculating resonance
  * production probability
@@ -40,6 +41,8 @@ double sample_momenta(const Box &box, const ParticleType &type) {
   double momentum_radial, momentum_average, momentum_min, momentum_max;
   double probability = 0, probability_max, probability_random = 1;
 
+  printd("Sample momenta with mass %g and T %g\n", type.mass(),
+    box.temperature());
   /* Maxwell-Boltzmann average E <E>=3T + m * K_1(m/T) / K_2(m/T) */
   momentum_average = sqrt((3 * box.temperature()
     + type.mass() * gsl_sf_bessel_K1(type.mass() / box.temperature())
