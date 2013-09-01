@@ -18,7 +18,8 @@ double breit_wigner(double mandelstam_s, float resonance_mass,
                           float resonance_width);
 
 /* density_integrand - Maxwell-Boltzmann distribution */
-double inline density_integrand(double momentum, double temp, double mass);
+double inline density_integrand(const double &momentum, const double &temp,
+  const double &mass);
 
 /* sample_momenta - return thermal momenta */
 double sample_momenta(const Box &box, const ParticleType &type);

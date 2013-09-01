@@ -31,7 +31,8 @@ double breit_wigner(const double mandelstam_s, const float resonance_mass,
 }
 
 /* density_integrand - Maxwell-Boltzmann distribution */
-double inline density_integrand(double momentum, double temp, double mass) {
+double inline density_integrand(const double &momentum, const double &temp,
+  const double &mass) {
   return 4 * M_PI * momentum * momentum
     * exp(- sqrt(momentum * momentum + mass * mass) / temp);
 }
