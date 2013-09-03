@@ -19,8 +19,8 @@ class FourVector;
 class Box {
   public:
     /* default constructor with probable values */
-    Box(): length_(10.0), temperature_(0.1), energy_initial_(0),
-      number_density_initial_(0), time_start_(set_timer_start()) {}
+    Box(): length_(10.0f), temperature_(0.1f), energy_initial_(0.0f),
+      number_density_initial_(0.0f), time_start_(set_timer_start()) {}
     /* member funtions */
     float inline length() const;
     void inline set_length(const float &LENGTH);

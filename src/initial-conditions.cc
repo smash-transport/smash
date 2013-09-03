@@ -26,11 +26,11 @@
 /* initial_conditions - sets particle type */
 void initial_particles(Particles *particles) {
   /* XXX: use nosql table for particle type values */
-  ParticleType piplus("pi+", 0.13957, -1.0, 211, 1, 1, 0);
+  ParticleType piplus("pi+", 0.13957f, -1.0, 211, 1, 1, 0);
   particles->add_type(piplus, 211);
-  ParticleType piminus("pi-", 0.13957, -1.0, -211, 1, -1, 0);
+  ParticleType piminus("pi-", 0.13957f, -1.0, -211, 1, -1, 0);
   particles->add_type(piminus, -211);
-  ParticleType pi0("pi0", 0.134977, -1.0, 111, 1, 0, 0);
+  ParticleType pi0("pi0", 0.134977f, -1.0, 111, 1, 0, 0);
   particles->add_type(pi0, 111);
 }
 

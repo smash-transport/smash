@@ -12,7 +12,7 @@ class Parameters {
   public:
     /* default constructor with probable values */
     Parameters(): steps_(10000), output_interval_(100), initial_condition_(1),
-      testparticles_(1), eps_(0.001), cross_section_(10.0), seed_(1) {}
+      testparticles_(1), eps_(0.001f), cross_section_(10.0f), seed_(1) {}
     /* member funtions */
     int inline steps() const;
     void inline set_steps(const int &STEPS);
