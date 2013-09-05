@@ -17,7 +17,7 @@
 // A macro to disallow the copy constructor and operator= functions
 // This should be used in the private: declarations for a class
 #define DISALLOW_COPY_AND_ASSIGN(TypeName) \
-	  TypeName(const TypeName&);       \
+  TypeName(const TypeName&);               \
   void operator=(const TypeName&)
 
 class Particles {
@@ -51,18 +51,19 @@ class Particles {
   inline std::map<int, ParticleData>::const_iterator cend(void) const;
 
   private:
-    DISALLOW_COPY_AND_ASSIGN(Particles);
     /* Highest id of a given particle */
     int id_max_;
     /* dynamic data of the particles a map between it's id and data */
     std::map<int, ParticleData> data_;
     /* a map between pdg and correspoding static data of the particles */
     std::map<int, ParticleType> types_;
+    /* google style recommendation */
+    DISALLOW_COPY_AND_ASSIGN(Particles);
 };
 
 /* returns the particle types */
 inline const std::map<int, ParticleType> & Particles::types(void) const {
- return types_;
+  return types_;
 }
 
 /* return the data of a specific particle */
@@ -124,7 +125,7 @@ inline std::map<int, ParticleData>::const_iterator Particles::cbegin() const {
   return data_.begin();
 }
 
-inline std::map<int, ParticleData>::iterator Particles::end(){
+inline std::map<int, ParticleData>::iterator Particles::end() {
   return data_.end();
 }
 inline std::map<int, ParticleData>::const_iterator Particles::cend() const {

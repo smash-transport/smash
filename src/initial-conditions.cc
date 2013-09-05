@@ -52,15 +52,15 @@ void initial_conditions(Particles *particles, Parameters *parameters,
   /* Let's check how many non-resonances we have */
   unsigned int non_resonances = 0;
   printd("IC has %lu particle types\n", particles->types().size());
-  for (std::map<int, ParticleType>::const_iterator i = particles->types().begin();
-       i != particles->types().end(); ++i) {
+  for (std::map<int, ParticleType>::const_iterator
+       i = particles->types().begin(); i != particles->types().end(); ++i) {
     if (i->second.width() < 0.0)
       non_resonances++;
   }
 
   /* loop over all the particle types */
-  for (std::map<int, ParticleType>::const_iterator i = particles->types().begin();
-       i != particles->types().end(); ++i) {
+  for (std::map<int, ParticleType>::const_iterator
+       i = particles->types().begin(); i != particles->types().end(); ++i) {
     /* Particles with width > 0 (resonances) do not exist in the beginning */
     if (i->second.width() > 0.0)
       continue;

@@ -173,8 +173,9 @@ void write_measurements_header(const Particles &particletypes) {
   snprintf(filename, sizeof(filename), "data/particletypes.dat");
   fp = fopen(filename, "w");
   fprintf(fp, " Time ");
-  for (std::map<int, ParticleType>::const_iterator i = particletypes.types().begin();
-    i != particletypes.types().end(); ++i) {
+  for (std::map<int, ParticleType>::const_iterator
+       i = particletypes.types().begin(); i != particletypes.types().end();
+       ++i) {
     fprintf(fp, " %11s ", i->second.name().c_str());
   }
   fprintf(fp, "\n");
