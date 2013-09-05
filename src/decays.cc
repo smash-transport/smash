@@ -134,7 +134,7 @@ size_t decay_particles(Particles *particles, std::list<int> *decay_list,
     momentum_difference += initial_momentum;
     momentum_difference -= final_momentum;
     if (fabs(momentum_difference.x0()) > really_small) {
-      printf("Process %lu type %i particle %s decay to %zu and %zu time %g\n",
+      printf("Process %zu type %i particle %s decay to %zu and %zu time %g\n",
         id_process, interaction_type, particles->type(id_a).name().c_str(),
              id_new_a, id_new_b, particles->data(id_a).position().x0());
       printf("Warning: Interaction type %i E conservation violation %g\n",

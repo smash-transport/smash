@@ -156,7 +156,7 @@ size_t collide_particles(Particles *particles, std::list<int> *collision_list,
       + particles->data(id_b).momentum());
     FourVector final_momentum;
 
-    printd("Process %lu type %i particle %s<->%s colliding %d<->%d time %g\n",
+    printd("Process %zu type %i particle %s<->%s colliding %d<->%d time %g\n",
       id_process, interaction_type, particles->type(id_a).name().c_str(),
            particles->type(id_a).name().c_str(), id_a, id_b,
            particles->data(id_a).position().x0());
@@ -223,7 +223,7 @@ size_t collide_particles(Particles *particles, std::list<int> *collision_list,
 
       write_oscar(particles->data(id_new), particles->type(id_new));
 
-      printd("Resonance %s with ID %lu \n",
+      printd("Resonance %s with ID %zu \n",
         particles->type(id_new).name().c_str(), id_new);
       printd_momenta("momentum in comp frame", particles->data(id_new));
       printd_position("position in comp frame", particles->data(id_new));
@@ -246,7 +246,7 @@ size_t collide_particles(Particles *particles, std::list<int> *collision_list,
     momentum_difference += initial_momentum;
     momentum_difference -= final_momentum;
     if (fabs(momentum_difference.x0()) > really_small) {
-      printf("Process %lu type %i particle %s<->%s colliding %d<->%d time %g\n",
+      printf("Process %zu type %i particle %s<->%s colliding %d<->%d time %g\n",
         id_process, interaction_type, particles->type(id_a).name().c_str(),
              particles->type(id_b).name().c_str(), id_a, id_b,
              particles->data(id_a).position().x0());

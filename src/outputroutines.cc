@@ -197,7 +197,7 @@ void write_measurements(const Particles &particles,
   fclose(fp);
   snprintf(filename, sizeof(filename), "data/collisions.dat");
   fp = fopen(filename, "a");
-  fprintf(fp, "%5g%13d%13d%13lu\n", particles.time(),
+  fprintf(fp, "%5g%13d%13d%13zu\n", particles.time(),
           interactions_total, interactions_this_interval, rejection_conflict);
   fclose(fp);
 
@@ -325,12 +325,12 @@ void write_vtk(const std::map<int, ParticleData> &particles) {
   fprintf(fp, "ASCII\n");
   /* Unstructured data sets are composed of points, lines, polygons, .. */
   fprintf(fp, "DATASET UNSTRUCTURED_GRID\n");
-  fprintf(fp, "POINTS %lu double\n", particles.size());
+  fprintf(fp, "POINTS %zu double\n", particles.size());
   for (std::map<int, ParticleData>::const_iterator i = particles.begin();
        i != particles.end(); ++i)
     fprintf(fp, "%g %g %g\n", i->second.position().x1(),
             i->second.position().x2(), i->second.position().x3());
-  fprintf(fp, "POINT_DATA %lu\n", particles.size());
+  fprintf(fp, "POINT_DATA %zu\n", particles.size());
   fprintf(fp, "SCALARS momenta_x double 1\n");
   fprintf(fp, "LOOKUP_TABLE default\n");
   for (std::map<int, ParticleData>::const_iterator i = particles.begin();
