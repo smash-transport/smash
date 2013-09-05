@@ -8,7 +8,6 @@
 #define SRC_INCLUDE_OUTPUTROUTINES_H_
 
 #include <cstdlib>
-#include <map>
 
 #include "../include/Particles.h"
 
@@ -46,8 +45,7 @@ void printd_momenta(const char *message, const ParticleData &particle);
 
 /* output data files */
 void write_particles(const Particles &particles);
-void write_measurements_header(
-  const std::map<int, ParticleType> &particletypes);
+void write_measurements_header(const Particles &particles);
 void write_measurements(const Particles &particles,
   int interactions_total, int interactions_this_interval, int decays,
   int resonances, const size_t &rejection_conflict);
@@ -56,7 +54,7 @@ void write_oscar(const ParticleData &particle_data,
                  const ParticleType &particle_type, int initial, int final);
 void write_oscar(const ParticleData &particle_data,
                  const ParticleType &particle_type);
-void write_vtk(const std::map<int, ParticleData> &particles);
+void write_vtk(const Particles &particles);
 
 /* timing measure */
 double measure_timediff(const Box &box);

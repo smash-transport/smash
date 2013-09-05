@@ -14,13 +14,17 @@
 #include "../include/ParticleData.h"
 #include "../include/ParticleType.h"
 
+// A macro to disallow the copy constructor and operator= functions
+// This should be used in the private: declarations for a class
+#define DISALLOW_COPY_AND_ASSIGN(TypeName) \
+	  TypeName(const TypeName&);       \
+  void operator=(const TypeName&)
+
 class Particles {
   public:
   /* Use improbable values for default constructor */
   Particles() :id_max_(-1) {}
-  /* direct access to both data and types */
-  inline std::map<int, ParticleData> data(void) const;
-  inline std::map<int, ParticleType> types(void) const;
+  inline std::map<int, ParticleType> const & types(void) const;
   /* pass out the specific data of a particle as needed all across board */
   inline ParticleData data(int id);
   inline ParticleData * data_pointer(int id);
@@ -29,18 +33,25 @@ class Particles {
   /* pass out the specific type */
   inline ParticleType particle_type(int id);
   /* inserts new data or type */
-  inline void add_data(void);
-  inline int new_data(void);
-  inline void add_data(const ParticleData &particle_data);
+  inline int add_data(void);
+  inline int add_data(const ParticleData &particle_data);
   inline void add_type(const ParticleType &particle_type, int pdg_code);
   /* remove the particle */
   inline void remove(int id);
-  /* return number of particles */
+  /* map methods that directly apply on the ParticleData */
   inline size_t size(void) const;
+  inline bool empty(void) const;
+  inline size_t count(int i) const;
   /* return time of the computanional frame */
   inline double time(void) const;
+  /* iterators */
+  inline std::map<int, ParticleData>::iterator begin(void);
+  inline std::map<int, ParticleData>::iterator end(void);
+  inline std::map<int, ParticleData>::const_iterator cbegin(void) const;
+  inline std::map<int, ParticleData>::const_iterator cend(void) const;
 
   private:
+    DISALLOW_COPY_AND_ASSIGN(Particles);
     /* Highest id of a given particle */
     int id_max_;
     /* dynamic data of the particles a map between it's id and data */
@@ -49,14 +60,9 @@ class Particles {
     std::map<int, ParticleType> types_;
 };
 
-/* returns the particle data */
-inline std::map<int, ParticleData> Particles::data(void) const {
-  return data_;
-}
-
 /* returns the particle types */
-inline std::map<int, ParticleType> Particles::types(void) const {
-  return types_;
+inline const std::map<int, ParticleType> & Particles::types(void) const {
+ return types_;
 }
 
 /* return the data of a specific particle */
@@ -80,19 +86,12 @@ inline ParticleType Particles::particle_type(int type_id) {
 }
 
 /* add a new particle data */
-inline void Particles::add_data(ParticleData const &particle_data) {
+inline int Particles::add_data(ParticleData const &particle_data) {
   id_max_++;
   data_.insert(std::pair<int, ParticleData>(id_max_, particle_data));
+  return id_max_;
 }
-inline void Particles::add_data(void) {
-  id_max_++;
-  ParticleData new_particle(id_max_);
-  data_.insert(std::pair<int, ParticleData>(id_max_, new_particle));
-}
-inline int Particles::new_data(void) {
-  id_max_++;
-  ParticleData new_particle(id_max_);
-  data_.insert(std::pair<int, ParticleData>(id_max_, new_particle));
+inline int Particles::add_data() {
   return id_max_;
 }
 
@@ -110,6 +109,30 @@ inline void Particles::remove(int id) {
 /* total number of particles */
 inline size_t Particles::size() const {
   return data_.size();
+}
+
+/* check if we have particles */
+inline bool Particles::empty() const {
+  return data_.empty();
+}
+
+inline std::map<int, ParticleData>::iterator Particles::begin() {
+  return data_.begin();
+}
+
+inline std::map<int, ParticleData>::const_iterator Particles::cbegin() const {
+  return data_.begin();
+}
+
+inline std::map<int, ParticleData>::iterator Particles::end(){
+  return data_.end();
+}
+inline std::map<int, ParticleData>::const_iterator Particles::cend() const {
+  return data_.end();
+}
+
+inline size_t Particles::count(int i) const {
+  return data_.count(i);
 }
 
 /* return computation time which is reduced by the start up time */

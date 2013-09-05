@@ -87,8 +87,8 @@ void print_measurements(const Particles &particles,
   double elapsed = measure_timediff(box);
   double time = 0.0;
 
-  for (std::map<int, ParticleData>::const_iterator i = particles.data().begin();
-       i != particles.data().end(); ++i) {
+  for (std::map<int, ParticleData>::const_iterator i = particles.cbegin();
+       i != particles.cend(); ++i) {
     momentum_total += i->second.momentum();
     /* use the time from the last active particle - startup time */
     time = i->second.position().x0() - 1.0;
@@ -159,8 +159,7 @@ void printd_position(const ParticleData &particle __attribute__((unused))) {
  * the headers for decays.dat, collisions.dat
  * and particletypes.dat
  */
-void write_measurements_header(
-  const std::map<int, ParticleType> &particletypes) {
+void write_measurements_header(const Particles &particletypes) {
   FILE *fp;
   char filename[256];
   snprintf(filename, sizeof(filename), "data/decays.dat");
@@ -174,8 +173,8 @@ void write_measurements_header(
   snprintf(filename, sizeof(filename), "data/particletypes.dat");
   fp = fopen(filename, "w");
   fprintf(fp, " Time ");
-  for (std::map<int, ParticleType>::const_iterator i = particletypes.begin();
-    i != particletypes.end(); ++i) {
+  for (std::map<int, ParticleType>::const_iterator i = particletypes.types().begin();
+    i != particletypes.types().end(); ++i) {
     fprintf(fp, " %11s ", i->second.name().c_str());
   }
   fprintf(fp, "\n");
@@ -206,8 +205,8 @@ void write_measurements(const Particles &particles,
   std::map<int, size_t> type_numbers;
   /* XXX: Number of elements = particle types, initialize each amount to 0 */
 
-  for (std::map<int, ParticleData>::const_iterator i = particles.data().begin();
-       i != particles.data().end(); ++i) {
+  for (std::map<int, ParticleData>::const_iterator i = particles.cbegin();
+       i != particles.cend(); ++i) {
       type_numbers[i->second.pdgcode()]++;
   }
   snprintf(filename, sizeof(filename), "data/particletypes.dat");
@@ -233,8 +232,8 @@ void write_particles(const Particles &particles) {
   snprintf(filename, sizeof(filename), "data/momenta_%.5f.dat",
            particles.time());
   fp = fopen(filename, "w");
-  for (std::map<int, ParticleData>::const_iterator i = particles.data().begin();
-       i != particles.data().end(); ++i) {
+  for (std::map<int, ParticleData>::const_iterator i = particles.cbegin();
+       i != particles.cend(); ++i) {
      fprintf(fp, "%g %g %g %g %i %i\n", i->second.momentum().x0(),
              i->second.momentum().x1(), i->second.momentum().x2(),
              i->second.momentum().x3(), i->second.id(), i->second.pdgcode());
@@ -243,8 +242,8 @@ void write_particles(const Particles &particles) {
   snprintf(filename, sizeof(filename), "data/position_%.5f.dat",
            particles.time());
   fp = fopen(filename, "w");
-  for (std::map<int, ParticleData>::const_iterator i = particles.data().begin();
-       i != particles.data().end(); ++i) {
+  for (std::map<int, ParticleData>::const_iterator i = particles.cbegin();
+       i != particles.cend(); ++i) {
      fprintf(fp, "%g %g %g %g %i %i\n", i->second.position().x0(),
              i->second.position().x1(), i->second.position().x2(),
              i->second.position().x3(), i->second.id(), i->second.pdgcode());
@@ -312,12 +311,12 @@ void write_oscar(const ParticleData &particle_data,
 }
 
 /* write_vtk - VTK file describing particle position */
-void write_vtk(const std::map<int, ParticleData> &particles) {
+void write_vtk(const Particles &particles) {
   FILE *fp;
   char filename[256];
 
   snprintf(filename, sizeof(filename), "data/pos_%.5f.vtk",
-           particles.begin()->second.position().x0() - 1.0);
+           particles.cbegin()->second.position().x0() - 1.0);
   fp = fopen(filename, "w");
   /* Legacy VTK file format */
   fprintf(fp, "# vtk DataFile Version 2.0\n");
@@ -326,15 +325,15 @@ void write_vtk(const std::map<int, ParticleData> &particles) {
   /* Unstructured data sets are composed of points, lines, polygons, .. */
   fprintf(fp, "DATASET UNSTRUCTURED_GRID\n");
   fprintf(fp, "POINTS %zu double\n", particles.size());
-  for (std::map<int, ParticleData>::const_iterator i = particles.begin();
-       i != particles.end(); ++i)
+  for (std::map<int, ParticleData>::const_iterator i = particles.cbegin();
+       i != particles.cend(); ++i)
     fprintf(fp, "%g %g %g\n", i->second.position().x1(),
             i->second.position().x2(), i->second.position().x3());
   fprintf(fp, "POINT_DATA %zu\n", particles.size());
   fprintf(fp, "SCALARS momenta_x double 1\n");
   fprintf(fp, "LOOKUP_TABLE default\n");
-  for (std::map<int, ParticleData>::const_iterator i = particles.begin();
-       i != particles.end(); ++i)
+  for (std::map<int, ParticleData>::const_iterator i = particles.cbegin();
+       i != particles.cend(); ++i)
     fprintf(fp, "%g\n", i->second.momentum().x1());
   fclose(fp);
 }

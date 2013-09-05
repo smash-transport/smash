@@ -206,10 +206,10 @@ size_t collide_particles(Particles *particles, std::list<int> *collision_list,
       FourVector neg_velocity_CM;
       neg_velocity_CM.set_FourVector(1.0, -velocity_CM.x1(), -velocity_CM.x2(),
                                      -velocity_CM.x3());
-      particles->data()[id_new].set_momentum(
-        particles->data()[id_new].momentum().LorentzBoost(neg_velocity_CM));
+      particles->data(id_new).set_momentum(
+        particles->data(id_new).momentum().LorentzBoost(neg_velocity_CM));
 
-      final_momentum = particles->data()[id_new].momentum();
+      final_momentum = particles->data(id_new).momentum();
 
       boost_back_CM(particles->data_pointer(id_a),
                     particles->data_pointer(id_b), &velocity_CM);

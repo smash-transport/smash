@@ -25,8 +25,8 @@ void propagate_particles(Particles *particles,
   Parameters const &parameters, Box const &box) {
     FourVector distance, position;
 
-    for (std::map<int, ParticleData>::iterator i = particles->data().begin();
-         i != particles->data().end(); ++i) {
+    for (std::map<int, ParticleData>::iterator i = particles->begin();
+         i != particles->end(); ++i) {
       /* propagation for this time step */
       distance.set_FourVector(parameters.eps(),
         i->second.velocity_x() * parameters.eps(),
@@ -41,11 +41,11 @@ void propagate_particles(Particles *particles,
       position += distance;
       position = boundary_condition(position, box, &wall_hit);
       if (wall_hit)
-        write_oscar(particles->data()[i->first], particles->type(i->first),
+        write_oscar(particles->data(i->first), particles->type(i->first),
                     1, 1);
       i->second.set_position(position);
       if (wall_hit)
-        write_oscar(particles->data()[i->first], particles->type(i->first));
+        write_oscar(particles->data(i->first), particles->type(i->first));
       printd_position(i->second);
     }
 }

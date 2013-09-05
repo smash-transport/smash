@@ -96,27 +96,25 @@ void initial_conditions(Particles *particles, Parameters *parameters,
         number++;
     }
     printf("IC number density %.6g [fm^-3]\n", number_density);
-    printf("IC %lu number of %s\n", number, i->second.name().c_str());
+    printf("IC %zu number of %s\n", number, i->second.name().c_str());
     number_density_total += number_density;
 
     /* Set random IC:
      * particles at random position in the box with thermal momentum
      */
     /* allocate the particles */
+    ParticleData particle_new;
     for (size_t id = number_total; id < number_total + number; id++) {
       double x, y, z, time_start;
       /* ID uniqueness check */
-      if (unlikely(particles->data().count(id) > 0))
+      if (unlikely(particles->count(id) > 0))
         continue;
-
-      /* create new particle id is enhanced in the class itself */
-      particles->add_data();
 
       /* back to back pair creation with random momenta direction */
       if (unlikely(id == number + number_total - 1 && !(id % 2)
           && non_resonances == 0)) {
         /* poor last guy just sits around */
-        particles->data(id).set_momentum(i->second.mass(), 0, 0, 0);
+        particle_new.set_momentum(i->second.mass(), 0, 0, 0);
       } else if (!(id % 2)) {
         if (parameters->initial_condition() != 2) {
           /* thermal momentum according Maxwell-Boltzmann distribution */
@@ -130,19 +128,19 @@ void initial_conditions(Particles *particles, Parameters *parameters,
         /* cos(theta) in the range from [-1.0, 1.0) */
         cos_theta = -1.0 + 2.0 * drand48();
         sin_theta = sqrt(1.0 - cos_theta * cos_theta);
-        printd("Particle %lu radial momenta %g phi %g cos_theta %g\n", id,
+        printd("Particle %zu radial momenta %g phi %g cos_theta %g\n", id,
           momentum_radial, phi, cos_theta);
-        particles->data(id).set_momentum(i->second.mass(),
+        particle_new.set_momentum(i->second.mass(),
           momentum_radial * cos(phi) * sin_theta,
           momentum_radial * sin(phi) * sin_theta,
           momentum_radial * cos_theta);
       } else {
-        particles->data(id).set_momentum(i->second.mass(),
+        particle_new.set_momentum(i->second.mass(),
           - particles->data(id - 1).momentum().x1(),
           - particles->data(id - 1).momentum().x2(),
           - particles->data(id - 1).momentum().x3());
       }
-      momentum_total += particles->data(id).momentum();
+      momentum_total += particle_new.momentum();
 
       time_start = 1.0;
       /* ramdom position in a quadratic box */
@@ -164,10 +162,14 @@ void initial_conditions(Particles *particles, Parameters *parameters,
           z = -box->length() + 2.0 * drand48() * box->length();
         }
       }
-      particles->data(id).set_position(time_start, x, y, z);
+      particle_new.set_position(time_start, x, y, z);
 
-      /* no collision yet hence zero time and unexisting id */
-      particles->data(id).set_collision(-1, 0, -1);
+      /* no collision yet hence zero time and set id */
+      particle_new.set_collision(-1, 0, -1);
+      particle_new.set_id(id);
+
+      /* create new particle id is enhanced in the class itself */
+      particles->add_data(particle_new);
 
       /* IC: debug checks */
       printd_momenta(particles->data(id));

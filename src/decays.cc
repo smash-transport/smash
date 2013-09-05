@@ -32,8 +32,8 @@ void check_decays(Particles *particles, std::list<int> *decay_list,
   FourVector velocity_lrf;
   velocity_lrf.set_x0(1.0);
 
-  for (std::map<int, ParticleData>::iterator i = particles->data().begin();
-       i != particles->data().end(); ++i) {
+  for (std::map<int, ParticleData>::iterator i = particles->begin();
+       i != particles->end(); ++i) {
     /* particle doesn't decay */
     if (particles->type(i->first).width() < 0.0)
       continue;

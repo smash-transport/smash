@@ -77,10 +77,10 @@ static void check_collision_geometry(Particles *particles,
     FourVector distance;
     double radial_interaction = sqrt(parameters.cross_section() * fm2_mb
                                      * M_1_PI) * 2;
-    for (std::map<int, ParticleData>::iterator i = particles->data().begin();
-         i != particles->data().end(); ++i) {
-      for (std::map<int, ParticleData>::iterator j = particles->data().begin();
-           j != particles->data().end(); ++j) {
+    for (std::map<int, ParticleData>::iterator i = particles->begin();
+         i != particles->end(); ++i) {
+      for (std::map<int, ParticleData>::iterator j = particles->begin();
+           j != particles->end(); ++j) {
         /* exclude check on same particle and double counting */
         if (i->first >= j->first)
           continue;
@@ -103,8 +103,8 @@ static void check_collision_geometry(Particles *particles,
       grid[i][j].resize(N);
   }
   /* populate grid */
-  for (std::map<int, ParticleData>::iterator i = particles->data().begin();
-         i != particles->data().end(); ++i) {
+  for (std::map<int, ParticleData>::iterator i = particles->begin();
+         i != particles->end(); ++i) {
     /* XXX: function - map particle position to grid number */
     x = round((a + i->second.position().x1()) / (N - 1));
     y = round((a + i->second.position().x2()) / (N - 1));
@@ -118,8 +118,8 @@ static void check_collision_geometry(Particles *particles,
    * http://en.wikipedia.org/wiki/Cell_lists
    */
   FourVector shift;
-  for (std::map<int, ParticleData>::iterator i = particles->data().begin();
-       i != particles->data().end(); ++i) {
+  for (std::map<int, ParticleData>::iterator i = particles->begin();
+       i != particles->end(); ++i) {
     /* XXX: function - map particle position to grid number */
     x = round((a + i->second.position().x1()) / (N - 1));
     y = round((a + i->second.position().x2()) / (N - 1));
@@ -212,14 +212,14 @@ static int Evolve(Particles *particles,
       /* save evolution data */
       write_measurements(*particles, interactions_total,
         interactions_this_interval, *resonances, *decays, rejection_conflict);
-      write_vtk(particles->data());
+      write_vtk(*particles);
     }
   }
 
   /* Guard against evolution */
   if (likely(parameters.steps() > 0)) {
     /* if there are not particles no interactions happened */
-    if (likely(!particles->data().empty()))
+    if (likely(!particles->empty()))
       print_tail(box, interactions_total * 2
                  / particles->time() / particles->size());
     else
@@ -316,7 +316,7 @@ int main(int argc, char *argv[]) {
   input_particles(&particles, path);
   initial_conditions(&particles, parameters, cube);
 
-  write_measurements_header(particles.types());
+  write_measurements_header(particles);
   print_header();
   write_particles(particles);
 
