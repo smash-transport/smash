@@ -130,8 +130,8 @@ void collision_criteria_geometry(Particles *particles,
   }
 
   /* setup collision partners */
-  printd("collision time particle %d <-> %d: %g \n", id_a, id_b,
-    time_collision);
+  printd("collision type %d particle %d <-> %d time: %g\n", interaction_type,
+     id_a, id_b, time_collision);
   particles->data(id_a).set_collision(interaction_type, time_collision, id_b);
   particles->data(id_b).set_collision(interaction_type, time_collision, id_a);
   /* add to collision list */
