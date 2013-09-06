@@ -8,16 +8,12 @@
 #ifndef SRC_INCLUDE_PROPAGATION_H_
 #define SRC_INCLUDE_PROPAGATION_H_
 
-#include <map>
-#include <vector>
 
 class Box;
 class Parameters;
-class ParticleData;
-class ParticleType;
+class Particles;
 
-void propagate_particles(std::map<int, ParticleData> *particles,
-  std::vector<ParticleType> *particle_type, std::map<int, int> *map_type,
-  Parameters const &parameters, Box const &box);
+void propagate_particles(Particles *particles, Parameters const &parameters,
+                         Box const &box);
 
 #endif  // SRC_INCLUDE_PROPAGATION_H_

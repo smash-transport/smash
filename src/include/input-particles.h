@@ -8,11 +8,11 @@
 #include <vector>
 
 /* forward declarations */
-class ParticleType;
+class Particles;
 
 extern const char *sep;
 
 /* read input file particle types */
-void input_particles(std::vector<ParticleType> *type, char *path);
+void input_particles(Particles *particles, char *path);
 
 #endif  // SRC_INCLUDE_INPUT_PARTICLES_H_

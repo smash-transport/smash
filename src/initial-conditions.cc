@@ -18,25 +18,25 @@
 #include "include/distributions.h"
 #include "include/macros.h"
 #include "include/Parameters.h"
+#include "include/Particles.h"
 #include "include/ParticleData.h"
 #include "include/ParticleType.h"
 #include "include/outputroutines.h"
 
 /* initial_conditions - sets particle type */
-void initial_particles(std::vector<ParticleType> *type) {
+void initial_particles(Particles *particles) {
   /* XXX: use nosql table for particle type values */
-  ParticleType piplus("pi+", 0.13957, -1.0, 211, 1, 1, 0);
-  (*type).push_back(piplus);
-  ParticleType piminus("pi-", 0.13957, -1.0, -211, 1, -1, 0);
-  (*type).push_back(piminus);
-  ParticleType pi0("pi0", 0.134977, -1.0, 111, 1, 0, 0);
-  (*type).push_back(pi0);
+  ParticleType piplus("pi+", 0.13957f, -1.0, 211, 1, 1, 0);
+  particles->add_type(piplus, 211);
+  ParticleType piminus("pi-", 0.13957f, -1.0, -211, 1, -1, 0);
+  particles->add_type(piminus, -211);
+  ParticleType pi0("pi0", 0.134977f, -1.0, 111, 1, 0, 0);
+  particles->add_type(pi0, 111);
 }
 
 /* initial_conditions - sets particle data for @particles */
-void initial_conditions(std::map<int, ParticleData> *particles,
-  std::vector<ParticleType> *type, std::map<int, int> *map_type,
-  Parameters *parameters, Box *box, int *id_max) {
+void initial_conditions(Particles *particles, Parameters *parameters,
+  Box *box) {
   double phi, cos_theta, sin_theta, momentum_radial, number_density_total = 0;
   FourVector momentum_total(0, 0, 0, 0);
   size_t number_total = 0, number = 0;
@@ -44,36 +44,39 @@ void initial_conditions(std::map<int, ParticleData> *particles,
   /* initialize random seed */
   srand48(parameters->seed());
 
-  if ((*type).empty()) {
+  if (particles->types_empty()) {
     fprintf(stderr, "E: No particle types\n");
     exit(EXIT_FAILURE);
   }
 
   /* Let's check how many non-resonances we have */
   unsigned int non_resonances = 0;
-  for (size_t i = 0; i < (*type).size(); i++) {
-    if ((*type)[i].width() < 0.0)
+  printd("IC has %zu particle types\n", particles->types_size());
+  for (std::map<int, ParticleType>::const_iterator
+       i = particles->types_cbegin(); i != particles->types_cend(); ++i) {
+    if (i->second.width() < 0.0)
       non_resonances++;
   }
 
   /* loop over all the particle types */
-  for (size_t i = 0; i < (*type).size(); i++) {
+  for (std::map<int, ParticleType>::const_iterator
+       i = particles->types_cbegin(); i != particles->types_cend(); ++i) {
     /* Particles with width > 0 (resonances) do not exist in the beginning */
-    if ((*type)[i].width() > 0.0)
+    if (i->second.width() > 0.0)
       continue;
 
     /* Number of non-resonances left */
     non_resonances--;
 
-    printd("%s mass: %g [GeV]\n", (*type)[i].name().c_str(), (*type)[i].mass());
+    printd("%s mass: %g [GeV]\n", i->second.name().c_str(), i->second.mass());
     /*
      * The particle number depends on distribution function
      * (assumes Bose-Einstein):
      * Volume m^2 T BesselK[2, m/T] / (2\pi^2)
      */
-    double number_density = (*type)[i].mass() * (*type)[i].mass()
-      * box->temperature()
-      * gsl_sf_bessel_Knu(2, (*type)[i].mass() / box->temperature())
+    double number_density = i->second.mass()
+      * i->second.mass() * box->temperature()
+      * gsl_sf_bessel_Knu(2, i->second.mass() / box->temperature())
       * 0.5 * M_1_PI * M_1_PI / hbarc / hbarc / hbarc;
 
     /* particle number depending on IC geometry either sphere or box */
@@ -93,37 +96,29 @@ void initial_conditions(std::map<int, ParticleData> *particles,
         number++;
     }
     printf("IC number density %.6g [fm^-3]\n", number_density);
-    printf("IC %lu number of %s\n", number, (*type)[i].name().c_str());
+    printf("IC %zu number of %s\n", number, i->second.name().c_str());
     number_density_total += number_density;
 
     /* Set random IC:
      * particles at random position in the box with thermal momentum
      */
     /* allocate the particles */
+    ParticleData particle_new;
     for (size_t id = number_total; id < number_total + number; id++) {
       double x, y, z, time_start;
       /* ID uniqueness check */
       if (unlikely(particles->count(id) > 0))
         continue;
 
-      ParticleData new_particle;
-      (*particles)[id] = new_particle;
-      /* Whenever a particle is created, bump the highest ID */
-      (*id_max)++;
-
-      /* set id and particle type */
-      (*particles)[id].set_id(id);
-      (*map_type)[id] = i;
-
       /* back to back pair creation with random momenta direction */
       if (unlikely(id == number + number_total - 1 && !(id % 2)
           && non_resonances == 0)) {
         /* poor last guy just sits around */
-        (*particles)[id].set_momentum((*type)[i].mass(), 0, 0, 0);
+        particle_new.set_momentum(i->second.mass(), 0, 0, 0);
       } else if (!(id % 2)) {
         if (parameters->initial_condition() != 2) {
           /* thermal momentum according Maxwell-Boltzmann distribution */
-          momentum_radial = sample_momenta(box, (*type)[i]);
+          momentum_radial = sample_momenta(*box, i->second);
         } else {
           /* IC == 2 initial thermal momentum is the average 3T */
           momentum_radial = 3.0 * box->temperature();
@@ -133,19 +128,19 @@ void initial_conditions(std::map<int, ParticleData> *particles,
         /* cos(theta) in the range from [-1.0, 1.0) */
         cos_theta = -1.0 + 2.0 * drand48();
         sin_theta = sqrt(1.0 - cos_theta * cos_theta);
-        printd("Particle %lu radial momenta %g phi %g cos_theta %g\n", id,
+        printd("Particle %zu radial momenta %g phi %g cos_theta %g\n", id,
           momentum_radial, phi, cos_theta);
-        (*particles)[id].set_momentum((*type)[i].mass(),
+        particle_new.set_momentum(i->second.mass(),
           momentum_radial * cos(phi) * sin_theta,
           momentum_radial * sin(phi) * sin_theta,
           momentum_radial * cos_theta);
       } else {
-        (*particles)[id].set_momentum((*type)[i].mass(),
-          - (*particles)[id - 1].momentum().x1(),
-          - (*particles)[id - 1].momentum().x2(),
-          - (*particles)[id - 1].momentum().x3());
+        particle_new.set_momentum(i->second.mass(),
+          - particles->data(id - 1).momentum().x1(),
+          - particles->data(id - 1).momentum().x2(),
+          - particles->data(id - 1).momentum().x3());
       }
-      momentum_total += (*particles)[id].momentum();
+      momentum_total += particle_new.momentum();
 
       time_start = 1.0;
       /* ramdom position in a quadratic box */
@@ -167,19 +162,23 @@ void initial_conditions(std::map<int, ParticleData> *particles,
           z = -box->length() + 2.0 * drand48() * box->length();
         }
       }
-      (*particles)[id].set_position(time_start, x, y, z);
+      particle_new.set_position(time_start, x, y, z);
 
-      /* no collision yet hence zero time and unexisting id */
-      (*particles)[id].set_collision(-1, 0, -1);
+      /* no collision yet hence zero time and set id */
+      particle_new.set_collision(-1, 0, -1);
+      particle_new.set_id(id);
+
+      /* create new particle id is enhanced in the class itself */
+      particles->add_data(particle_new);
 
       /* IC: debug checks */
-      printd_momenta((*particles)[id]);
-      printd_position((*particles)[id]);
+      printd_momenta(particles->data(id));
+      printd_position(particles->data(id));
     }
     number_total += number;
   }
   printf("IC total number density %.6g [fm^-3]\n", number_density_total);
-  printf("IC contains %lu particles\n", number_total);
+  printf("IC contains %zu particles\n", number_total);
   /* loop over all particles */
   number = number_total;
   /* reducing cross section according to number of test particle */
@@ -189,7 +188,6 @@ void initial_conditions(std::map<int, ParticleData> *particles,
                                   / parameters->testparticles());
     printf("Elastic cross section: %g [mb]\n", parameters->cross_section());
   }
-  printf("Maximum id after initial setup is %i.\n", *id_max);
 
   /* Display on startup if pseudo grid is used */
   int const grid_number = round(box->length()

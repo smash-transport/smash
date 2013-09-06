@@ -8,8 +8,8 @@
 #define SRC_INCLUDE_OUTPUTROUTINES_H_
 
 #include <cstdlib>
-#include <map>
-#include <vector>
+
+#include "../include/Particles.h"
 
 /* forward declarations */
 class Box;
@@ -21,7 +21,7 @@ class ParticleType;
 void print_startup(const Parameters &parameters);
 void print_startup(const Box &box);
 void print_header(void);
-void print_measurements(const std::map<int, ParticleData> &particle,
+void print_measurements(const Particles &particles,
                         const size_t &scatterings_total,
                         const size_t &scatterings_this_interval,
                         const Box &box);
@@ -44,22 +44,17 @@ void printd_momenta(const ParticleData &particle);
 void printd_momenta(const char *message, const ParticleData &particle);
 
 /* output data files */
-void write_particles(const std::map<int, ParticleData> &particles,
-  const std::vector<ParticleType> &particletypes,
-  std::map<int, int> &map_type);
-void write_measurements_header(
-  const std::vector<ParticleType> &particletypes);
-void write_measurements(const std::map<int, ParticleData> &particles,
-  const std::vector<ParticleType> &particletypes,
-  std::map<int, int> &map_type,
+void write_particles(const Particles &particles);
+void write_measurements_header(const Particles &particles);
+void write_measurements(const Particles &particles,
   int interactions_total, int interactions_this_interval, int decays,
   int resonances, const size_t &rejection_conflict);
 void write_oscar_header(void);
 void write_oscar(const ParticleData &particle_data,
-  const ParticleType &particle_type, const int initial, const int final);
+                 const ParticleType &particle_type, int initial, int final);
 void write_oscar(const ParticleData &particle_data,
                  const ParticleType &particle_type);
-void write_vtk(const std::map<int, ParticleData> &particles);
+void write_vtk(const Particles &particles);
 
 /* timing measure */
 double measure_timediff(const Box &box);

@@ -17,6 +17,7 @@
 #include <vector>
 
 #include "include/Box.h"
+#include "include/Particles.h"
 #include "include/ParticleData.h"
 #include "include/ParticleType.h"
 #include "include/collisions.h"
@@ -59,28 +60,27 @@ FourVector boundary_condition(FourVector position,
 }
 
 /* check_collision_geometry - check if a collision happens between particles */
-static void check_collision_geometry(std::map<int, ParticleData> *particle,
-  std::vector<ParticleType> *particle_type, std::map<int, int> *map_type,
+static void check_collision_geometry(Particles *particles,
   std::list<int> *collision_list, Parameters const &parameters,
   Box const &box, size_t *rejection_conflict) {
   std::vector<std::vector<std::vector<std::vector<int> > > > grid;
   int N, x, y, z;
 
   /* the maximal radial propagation for light particle */
-  int a = box.length() + particle->begin()->second.position().x0();
+  int a = box.length() + particles->time();
   /* For small boxes no point in splitting up in grids */
   /* calculate approximate grid size according to double interaction length */
   N = round(2.0 * a / sqrt(parameters.cross_section() * fm2_mb * M_1_PI) * 0.5);
 
   /* for small boxes not possible to split upo */
-  if (unlikely(N < 4 || particle->size() < 10)) {
+  if (unlikely(N < 4 || particles->size() < 10)) {
     FourVector distance;
     double radial_interaction = sqrt(parameters.cross_section() * fm2_mb
                                      * M_1_PI) * 2;
-    for (std::map<int, ParticleData>::iterator i = particle->begin();
-         i != particle->end(); ++i) {
-      for (std::map<int, ParticleData>::iterator j = particle->begin();
-           j != particle->end(); ++j) {
+    for (std::map<int, ParticleData>::iterator i = particles->begin();
+         i != particles->end(); ++i) {
+      for (std::map<int, ParticleData>::iterator j = particles->begin();
+           j != particles->end(); ++j) {
         /* exclude check on same particle and double counting */
         if (i->first >= j->first)
           continue;
@@ -88,8 +88,8 @@ static void check_collision_geometry(std::map<int, ParticleData> *particle,
         /* skip particles that are double interaction radius length away */
         if (distance > radial_interaction)
            continue;
-        collision_criteria_geometry(particle, particle_type, map_type,
-          collision_list, parameters, i->first, j->first, rejection_conflict);
+        collision_criteria_geometry(particles, collision_list, parameters,
+          i->first, j->first, rejection_conflict);
       }
     }
     return;
@@ -103,8 +103,8 @@ static void check_collision_geometry(std::map<int, ParticleData> *particle,
       grid[i][j].resize(N);
   }
   /* populate grid */
-  for (std::map<int, ParticleData>::iterator i = particle->begin();
-         i != particle->end(); ++i) {
+  for (std::map<int, ParticleData>::iterator i = particles->begin();
+         i != particles->end(); ++i) {
     /* XXX: function - map particle position to grid number */
     x = round((a + i->second.position().x1()) / (N - 1));
     y = round((a + i->second.position().x2()) / (N - 1));
@@ -118,8 +118,8 @@ static void check_collision_geometry(std::map<int, ParticleData> *particle,
    * http://en.wikipedia.org/wiki/Cell_lists
    */
   FourVector shift;
-  for (std::map<int, ParticleData>::iterator i = particle->begin();
-       i != particle->end(); ++i) {
+  for (std::map<int, ParticleData>::iterator i = particles->begin();
+       i != particles->end(); ++i) {
     /* XXX: function - map particle position to grid number */
     x = round((a + i->second.position().x1()) / (N - 1));
     y = round((a + i->second.position().x2()) / (N - 1));
@@ -152,8 +152,8 @@ static void check_collision_geometry(std::map<int, ParticleData> *particle,
               continue;
 
             printd("grid cell particle %i <-> %i\n", i->first, *id_b);
-            collision_criteria_geometry(particle, particle_type, map_type,
-              collision_list, parameters, i->first, *id_b, rejection_conflict);
+            collision_criteria_geometry(particles, collision_list, parameters,
+              i->first, *id_b, rejection_conflict);
           } /* grid particles loop */
         } /* grid sy */
       } /* grid sx */
@@ -163,9 +163,8 @@ static void check_collision_geometry(std::map<int, ParticleData> *particle,
 
 
 /* Evolve - the core of the box, stepping forward in time */
-static int Evolve(std::map<int, ParticleData> *particles,
-  std::vector<ParticleType> *particle_type, std::map<int, int> *map_type,
-                  const Parameters &parameters, const Box &box, int *id_max,
+static int Evolve(Particles *particles,
+                  const Parameters &parameters, const Box &box,
                   int *resonances, int *decays) {
   std::list<int> collision_list, decay_list;
   size_t interactions_total = 0, previous_interactions_total = 0,
@@ -178,33 +177,26 @@ static int Evolve(std::map<int, ParticleData> *particles,
 
   for (int steps = 0; steps < parameters.steps(); steps++) {
     /* Check resonances for decays */
-    for (std::map<int, ParticleData>::iterator i = particles->begin();
-         i != particles->end(); ++i) {
-      if ((*particle_type)[(*map_type)[i->first]].width() > 0.0) {
-        does_decay(&(i->second), &(*particle_type)[(*map_type)[i->first]],
-                   &decay_list, parameters);
-      }
-    }
-
+    check_decays(particles, &decay_list, parameters);
 
     /* Do the decays */
     if (!decay_list.empty()) {
-      interactions_total = decay_particles(particles, particle_type,
-        map_type, &decay_list, interactions_total, id_max);
       (*decays) += decay_list.size();
+      interactions_total = decay_particles(particles, &decay_list,
+        interactions_total);
     }
 
     /* fill collision table by cells */
-    check_collision_geometry(particles, particle_type, map_type,
-      &collision_list, parameters, box, &rejection_conflict);
+    check_collision_geometry(particles, &collision_list, parameters, box,
+      &rejection_conflict);
 
     /* particle interactions */
     if (!collision_list.empty())
-      interactions_total = collide_particles(particles, particle_type,
-      map_type, &collision_list, interactions_total, id_max, resonances);
+      interactions_total = collide_particles(particles, &collision_list,
+        interactions_total, resonances);
 
     /* propagate all particles */
-    propagate_particles(particles, particle_type, map_type, parameters, box);
+    propagate_particles(particles, parameters, box);
 
     /* physics output during the run */
     if (steps > 0 && (steps + 1) % parameters.output_interval() == 0) {
@@ -216,11 +208,10 @@ static int Evolve(std::map<int, ParticleData> *particles,
       print_measurements(*particles, interactions_total,
                          interactions_this_interval, box);
       printd("Resonances: %i Decays: %i\n", *resonances, *decays);
-      printd("Ignored collisions %lu\n", rejection_conflict);
+      printd("Ignored collisions %zu\n", rejection_conflict);
       /* save evolution data */
-      write_measurements(*particles, *particle_type, *map_type,
-        interactions_total, interactions_this_interval,
-        *resonances, *decays, rejection_conflict);
+      write_measurements(*particles, interactions_total,
+        interactions_this_interval, *resonances, *decays, rejection_conflict);
       write_vtk(*particles);
     }
   }
@@ -230,11 +221,10 @@ static int Evolve(std::map<int, ParticleData> *particles,
     /* if there are not particles no interactions happened */
     if (likely(!particles->empty()))
       print_tail(box, interactions_total * 2
-                 / (particles->begin()->second.position().x0() - 1.0)
-                 / particles->size());
+                 / particles->time() / particles->size());
     else
       print_tail(box, 0);
-    printf("Total ignored collisions: %lu\n", rejection_conflict);
+    printf("Total ignored collisions: %zu\n", rejection_conflict);
   }
   return 0;
 }
@@ -242,12 +232,10 @@ static int Evolve(std::map<int, ParticleData> *particles,
 int main(int argc, char *argv[]) {
   char *p, *path;
   int opt, rc;
-  std::map<int, ParticleData> particles;
-  std::vector<ParticleType> particle_types;
+  Particles particles;
   Box *cube = new Box;
   Parameters *parameters = new Parameters;
-  std::map<int, int> map_type;
-  int id_max = -1, resonances = 0, decays = 0;
+  int resonances = 0, decays = 0;
 
   struct option longopts[] = {
     { "eps",        required_argument,      0, 'e' },
@@ -325,21 +313,18 @@ int main(int argc, char *argv[]) {
   write_oscar_header();
 
   /* Initialize box */
-  input_particles(&particle_types, path);
-  initial_conditions(&particles, &particle_types, &map_type, parameters, cube,
-                     &id_max);
+  input_particles(&particles, path);
+  initial_conditions(&particles, parameters, cube);
 
-  write_measurements_header(particle_types);
+  write_measurements_header(particles);
   print_header();
-  write_particles(particles, particle_types, map_type);
+  write_particles(particles);
 
   /* Compute stuff */
-  rc = Evolve(&particles, &particle_types, &map_type, *parameters, *cube,
-              &id_max, &resonances, &decays);
+  rc = Evolve(&particles, *parameters, *cube, &resonances, &decays);
 
   /* tear down */
-  particles.clear();
-  particle_types.clear();
+  // XXX: particles.clear();
   delete cube;
   delete parameters;
   free(path);

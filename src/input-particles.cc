@@ -14,14 +14,14 @@
 
 #include "include/input-particles.h"
 #include "include/initial-conditions.h"
-#include "include/ParticleType.h"
+#include "include/Particles.h"
 #include "include/outputroutines.h"
 
 /* XXX: hardcoded length cap */
 #define FILELEN 256
 
 /* input_particles - read in particle types */
-void input_particles(std::vector<ParticleType> *type, char *path) {
+void input_particles(Particles *particles, char *path) {
   char *line = NULL, *saveptr = NULL, *characters, input_particles[FILELEN];
   size_t len = 0;
   ssize_t read;
@@ -35,7 +35,7 @@ void input_particles(std::vector<ParticleType> *type, char *path) {
   if (!fp) {
     fprintf(stderr, "W: No particles.txt at %s path.\n", path);
     /* use just pions in that case */
-    initial_particles(type);
+    initial_particles(particles);
     return;
   }
 
@@ -93,9 +93,10 @@ void input_particles(std::vector<ParticleType> *type, char *path) {
            particle_name, isospin, charge, spin);
     std::string name(particle_name);
     ParticleType new_type(name, mass, width, pdgcode, isospin, charge, spin);
-    type->push_back(new_type);
+    particles->add_type(new_type, pdgcode);
   }
   free(line);
   fclose(fp);
+  printd("Finished reading particles.txt\n");
   return;
 }

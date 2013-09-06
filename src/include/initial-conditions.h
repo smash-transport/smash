@@ -13,13 +13,11 @@
 /* forward declarations */
 class Box;
 class Parameters;
-class ParticleData;
-class ParticleType;
+class Particles;
 
 /* initialisation functions */
-void initial_particles(std::vector<ParticleType> *type);
-void initial_conditions(std::map<int, ParticleData> *particles,
-  std::vector <ParticleType> *particle_type, std::map<int, int> *map_type,
-  Parameters *parameters, Box *box, int *id_max);
+void initial_particles(Particles *particles);
+void initial_conditions(Particles *particles,
+  Parameters *parameters, Box *box);
 
 #endif  // SRC_INCLUDE_INITIAL_CONDITIONS_H_

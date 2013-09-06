@@ -13,20 +13,17 @@
 #include <map>
 #include <vector>
 
+#include "../include/Particles.h"
+
 class Parameters;
-class ParticleData;
-class ParticleType;
 
 /* populates collision list if collision applies */
-void collision_criteria_geometry(std::map<int, ParticleData> *particle,
-  std::vector<ParticleType> *type, std::map<int, int> *map_type,
+void collision_criteria_geometry(Particles *particles,
   std::list<int> *collision_list, Parameters const &para, int id_a,
   int id_b, size_t *rejection_conflict);
 
 /* does collisions according to collision table */
-size_t collide_particles(std::map<int, ParticleData> *particle,
-  std::vector<ParticleType> *type, std::map<int, int> *map_type,
-  std::list<int> *collision_list, size_t id_event, int *id_max,
-  int *resonance_formations);
+size_t collide_particles(Particles *particles, std::list<int> *collision_list,
+                         size_t id_event, int *resonance_formations);
 
 #endif  // SRC_INCLUDE_COLLISIONS_H_
