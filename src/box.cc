@@ -213,11 +213,11 @@ static void check_collision_geometry(Particles *particles,
                 parameters, i->first, *id_other, rejection_conflict);
             } else {
               /* apply eventual boundary before and restore after */
-              particles->data(*id_other).set_position(
+              particles->data_pointer(*id_other)->set_position(
                 particles->data(*id_other).position() + shift);
               collision_criteria_geometry(particles, collision_list,
                 parameters, i->first, *id_other, rejection_conflict);
-              particles->data(*id_other).set_position(
+              particles->data_pointer(*id_other)->set_position(
                 particles->data(*id_other).position() - shift);
             }
           } /* grid particles loop */

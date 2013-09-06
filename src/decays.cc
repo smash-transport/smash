@@ -94,9 +94,9 @@ size_t decay_particles(Particles *particles, std::list<int> *decay_list,
                        / particles->data(id_a).momentum().x0());
     velocity_CM.set_x3(particles->data(id_a).momentum().x3()
                        / particles->data(id_a).momentum().x0());
-    particles->data(id_a).set_momentum(
+    particles->data_pointer(id_a)->set_momentum(
         particles->data(id_a).momentum().LorentzBoost(velocity_CM));
-    particles->data(id_a).set_position(
+    particles->data_pointer(id_a)->set_position(
         particles->data(id_a).position().LorentzBoost(velocity_CM));
 
     printd_momenta("Boosted resonance momenta before decay",
@@ -124,8 +124,8 @@ size_t decay_particles(Particles *particles, std::list<int> *decay_list,
     printd("ID %i has decayed and removed from the list.\n", id_a);
 
     /* unset collision time for both particles + keep id + unset partner */
-    particles->data(id_new_a).set_collision_past(id_process);
-    particles->data(id_new_b).set_collision_past(id_process);
+    particles->data_pointer(id_new_a)->set_collision_past(id_process);
+    particles->data_pointer(id_new_b)->set_collision_past(id_process);
     printd("Particle map has now %zu elements. \n", particles->size());
 
     id_process++;

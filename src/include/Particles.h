@@ -25,7 +25,7 @@ class Particles {
   /* Use improbable values for default constructor */
   Particles() :id_max_(-1) {}
   /* pass out the specific data of a particle as needed all across board */
-  inline ParticleData data(int id);
+  inline const ParticleData &data(int id);
   inline ParticleData * data_pointer(int id);
   /* pass out the type of a specific particle */
   inline ParticleType type(int id);
@@ -66,7 +66,7 @@ class Particles {
 };
 
 /* return the data of a specific particle */
-inline ParticleData Particles::data(int particle_id) {
+inline const ParticleData &Particles::data(int particle_id) {
   return data_[particle_id];
 }
 

@@ -81,7 +81,7 @@ void collision_criteria_geometry(Particles *particles,
     int id_not = particles->data(id_a).id_partner();
     printd("Not colliding particle %d <-> %d\n", id_a, id_not);
     /* unset collision partner to zero time and unexisting id */
-    particles->data(id_not).set_collision(-1, 0.0, -1);
+    particles->data_pointer(id_not)->set_collision(-1, 0.0, -1);
     /* remove any of those partners from the list */
     if (id_a < id_not) {
       printd("Removing particle %d from collision list\n", id_a);
@@ -97,7 +97,7 @@ void collision_criteria_geometry(Particles *particles,
     int id_not = particles->data(id_b).id_partner();
     printd("Not colliding particle %d <-> %d\n", id_b, id_not);
     /* unset collision partner to zero time and unexisting id */
-    particles->data(id_not).set_collision(-1, 0.0, -1);
+    particles->data_pointer(id_not)->set_collision(-1, 0.0, -1);
     /* remove any of those partners from the list */
     if (id_b < id_not) {
       printd("Removing particle %d from collision list\n", id_b);
@@ -132,8 +132,15 @@ void collision_criteria_geometry(Particles *particles,
   /* setup collision partners */
   printd("collision type %d particle %d <-> %d time: %g\n", interaction_type,
      id_a, id_b, time_collision);
-  particles->data(id_a).set_collision(interaction_type, time_collision, id_b);
-  particles->data(id_b).set_collision(interaction_type, time_collision, id_a);
+  particles->data_pointer(id_a)->set_collision(interaction_type,
+                                               time_collision, id_b);
+  particles->data_pointer(id_b)->set_collision(interaction_type,
+                                               time_collision, id_a);
+  printd("collision type %d particle %d <-> %d time: %g\n",
+         particles->data(id_a).process_type(),
+         particles->data(id_a).id_partner(),
+         particles->data(id_b).id_partner(),
+         particles->data(id_a).collision_time());
   /* add to collision list */
   collision_list->push_back(id_a);
   resonance_xsections.clear();
@@ -187,8 +194,8 @@ size_t collide_particles(Particles *particles, std::list<int> *collision_list,
       + particles->data(id_b).momentum();
 
       /* unset collision time for both particles + keep id + unset partner */
-      particles->data(id_a).set_collision_past(id_process);
-      particles->data(id_a).set_collision_past(id_process);
+      particles->data_pointer(id_a)->set_collision_past(id_process);
+      particles->data_pointer(id_a)->set_collision_past(id_process);
 
     } else if (abs(interaction_type) > 99) {
       /* 2->1 resonance formation, resonance PDG code = interaction_type */
@@ -206,7 +213,7 @@ size_t collide_particles(Particles *particles, std::list<int> *collision_list,
       FourVector neg_velocity_CM;
       neg_velocity_CM.set_FourVector(1.0, -velocity_CM.x1(), -velocity_CM.x2(),
                                      -velocity_CM.x3());
-      particles->data(id_new).set_momentum(
+      particles->data_pointer(id_new)->set_momentum(
         particles->data(id_new).momentum().LorentzBoost(neg_velocity_CM));
 
       final_momentum = particles->data(id_new).momentum();
@@ -219,7 +226,7 @@ size_t collide_particles(Particles *particles, std::list<int> *collision_list,
       FourVector middle_point = particles->data(id_a).position()
         + (particles->data(id_b).position() - particles->data(id_a).position())
         / 2.0;
-      particles->data(id_new).set_position(middle_point);
+      particles->data_pointer(id_new)->set_position(middle_point);
 
       write_oscar(particles->data(id_new), particles->type(id_new));
 
@@ -229,7 +236,7 @@ size_t collide_particles(Particles *particles, std::list<int> *collision_list,
       printd_position("position in comp frame", particles->data(id_new));
 
       /* unset collision time for particles + keep id + unset partner */
-      particles->data(id_new).set_collision_past(id_process);
+      particles->data_pointer(id_new)->set_collision_past(id_process);
 
       /* Remove the initial particles */
       particles->remove(id_a);
