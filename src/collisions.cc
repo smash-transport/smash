@@ -44,7 +44,7 @@ void collision_criteria_geometry(Particles *particles,
   /* Resonance production cross section */
   std::map<int, double> resonance_xsections = resonance_cross_section(
   particles->data(id_a), particles->data(id_b), particles->type(id_a),
-  particles->type(id_b), particles->types());
+  particles->type(id_b), *particles);
 
   /* Total cross section is elastic + resonance production  */
   const double total_cross_section = parameters.cross_section()

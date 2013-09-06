@@ -24,7 +24,6 @@ class Particles {
   public:
   /* Use improbable values for default constructor */
   Particles() :id_max_(-1) {}
-  inline std::map<int, ParticleType> const & types(void) const;
   /* pass out the specific data of a particle as needed all across board */
   inline ParticleData data(int id);
   inline ParticleData * data_pointer(int id);
@@ -42,6 +41,9 @@ class Particles {
   inline size_t size(void) const;
   inline bool empty(void) const;
   inline size_t count(int i) const;
+  /* map methods that directly apply on the ParticleType */
+  inline size_t types_size(void) const;
+  inline bool types_empty(void) const;
   /* return time of the computanional frame */
   inline double time(void) const;
   /* iterators */
@@ -49,6 +51,8 @@ class Particles {
   inline std::map<int, ParticleData>::iterator end(void);
   inline std::map<int, ParticleData>::const_iterator cbegin(void) const;
   inline std::map<int, ParticleData>::const_iterator cend(void) const;
+  inline std::map<int, ParticleType>::const_iterator types_cbegin(void) const;
+  inline std::map<int, ParticleType>::const_iterator types_cend(void) const;
 
   private:
     /* Highest id of a given particle */
@@ -60,11 +64,6 @@ class Particles {
     /* google style recommendation */
     DISALLOW_COPY_AND_ASSIGN(Particles);
 };
-
-/* returns the particle types */
-inline const std::map<int, ParticleType> & Particles::types(void) const {
-  return types_;
-}
 
 /* return the data of a specific particle */
 inline ParticleData Particles::data(int particle_id) {
@@ -117,19 +116,41 @@ inline bool Particles::empty() const {
   return data_.empty();
 }
 
-inline std::map<int, ParticleData>::iterator Particles::begin() {
-  return data_.begin();
+/* total number particle types */
+inline size_t Particles::types_size() const {
+  return types_.size();
 }
 
-inline std::map<int, ParticleData>::const_iterator Particles::cbegin() const {
+/* check if we have particle types */
+inline bool Particles::types_empty() const {
+  return types_.empty();
+}
+
+inline std::map<int, ParticleData>::iterator Particles::begin() {
   return data_.begin();
 }
 
 inline std::map<int, ParticleData>::iterator Particles::end() {
   return data_.end();
 }
+
+inline std::map<int, ParticleData>::const_iterator Particles::cbegin() const {
+  return data_.begin();
+}
+
 inline std::map<int, ParticleData>::const_iterator Particles::cend() const {
   return data_.end();
+}
+
+/* we only provide const ParticleType iterators as this shouldn't change */
+inline std::map<int, ParticleType>::const_iterator Particles::types_cbegin()
+  const {
+  return types_.begin();
+}
+
+inline std::map<int, ParticleType>::const_iterator Particles::types_cend()
+  const {
+  return types_.end();
 }
 
 inline size_t Particles::count(int i) const {

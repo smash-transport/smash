@@ -44,23 +44,23 @@ void initial_conditions(Particles *particles, Parameters *parameters,
   /* initialize random seed */
   srand48(parameters->seed());
 
-  if (particles->types().empty()) {
+  if (particles->types_empty()) {
     fprintf(stderr, "E: No particle types\n");
     exit(EXIT_FAILURE);
   }
 
   /* Let's check how many non-resonances we have */
   unsigned int non_resonances = 0;
-  printd("IC has %lu particle types\n", particles->types().size());
+  printd("IC has %lu particle types\n", particles->types_size());
   for (std::map<int, ParticleType>::const_iterator
-       i = particles->types().begin(); i != particles->types().end(); ++i) {
+       i = particles->types_cbegin(); i != particles->types_cend(); ++i) {
     if (i->second.width() < 0.0)
       non_resonances++;
   }
 
   /* loop over all the particle types */
   for (std::map<int, ParticleType>::const_iterator
-       i = particles->types().begin(); i != particles->types().end(); ++i) {
+       i = particles->types_cbegin(); i != particles->types_cend(); ++i) {
     /* Particles with width > 0 (resonances) do not exist in the beginning */
     if (i->second.width() > 0.0)
       continue;

@@ -42,11 +42,11 @@ int main() {
   Particles particles;
   ParticleType piplus("pi+", 0.13957, -1.0, 211, 1, 1, 0);
   particles.add_type(piplus, 211);
-  if (particles.types().size() != 1)
+  if (particles.types_size() != 1)
     return -4;
   size_t type_size = 0;
   for (std::map<int, ParticleType>::const_iterator
-       i = particles.types().begin(); i != particles.types().end(); ++i) {
+       i = particles.types_cbegin(); i != particles.types_cend(); ++i) {
     printd("pdg %d mass: %g [GeV]\n", i->first, i->second.mass());
     type_size++;
   }
@@ -54,15 +54,16 @@ int main() {
     return -5;
   type_size = 0;
   ParticleType piminus("pi-", 0.13957, -1.0, -211, 1, -1, 0);
+  particles.add_type(piminus, -211);
   for (std::map<int, ParticleType>::const_iterator
-       i = particles.types().begin(); i != particles.types().end(); ++i) {
+       i = particles.types_cbegin(); i != particles.types_cend(); ++i) {
     printd("pdg %d mass: %g [GeV]\n", i->first, i->second.mass());
     type_size++;
   }
   if (type_size != 2)
     return -6;
   particles.add_type(piminus, -211);
-  if (particles.types().size() != 2)
+  if (particles.types_size() != 2)
     return -7;
   particles.add_data(particle_a);
   if (particles.size() != 1)
