@@ -118,7 +118,8 @@ void initial_conditions(Particles *particles, Parameters *parameters,
       } else if (!(id % 2)) {
         if (parameters->initial_condition() != 2) {
           /* thermal momentum according Maxwell-Boltzmann distribution */
-          momentum_radial = sample_momenta(*box, i->second);
+          momentum_radial = sample_momenta(box->temperature(),
+                                           i->second.mass());
         } else {
           /* IC == 2 initial thermal momentum is the average 3T */
           momentum_radial = 3.0 * box->temperature();

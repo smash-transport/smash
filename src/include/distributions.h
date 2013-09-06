@@ -8,7 +8,6 @@
 #ifndef SRC_INCLUDE_DISTRIBUTIONS_H_
 #define SRC_INCLUDE_DISTRIBUTIONS_H_
 
-class Box;
 class ParticleType;
 
 /* Breit-Wigner distribution for calculating resonance
@@ -22,6 +21,6 @@ double inline density_integrand(const double &momentum, const double &temp,
   const double &mass);
 
 /* sample_momenta - return thermal momenta */
-double sample_momenta(const Box &box, const ParticleType &type);
+double sample_momenta(const double &temp, const double &mass);
 
 #endif  // SRC_INCLUDE_DISTRIBUTIONS_H_
