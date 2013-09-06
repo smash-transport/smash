@@ -30,20 +30,27 @@ int main() {
   /* XXX: does this test NaN?? */
   if (distance_squared > 1000.0)
     return -2;
+  particle_a.set_momentum(0.1, 10.0, 9.0, 8.0);
+  particle_b.set_momentum(0.1, -10.0, -90.0, -80.0);
+  distance_squared = particle_distance(&particle_a, &particle_b);
+  if (distance_squared < 0.0)
+    return -3;
 
   /* check collision_time for parallel momenta => impossible collision */
   particle_a.set_momentum(0.1, 0.3, -0.1, 0.2);
   particle_b.set_momentum(0.1, 0.3, -0.1, 0.2);
   double time = collision_time(particle_a, particle_b);
   if (time >= 0.0)
-    return -3;
+    return -4;
 
+  particle_a.set_momentum(0.1, 10.0, 9.0, 8.0);
+  particle_b.set_momentum(0.1, -10.0, -90.0, -80.0);
   /* now check the Particles class itself */
   Particles particles;
   ParticleType piplus("pi+", 0.13957, -1.0, 211, 1, 1, 0);
   particles.add_type(piplus, 211);
   if (particles.types_size() != 1)
-    return -4;
+    return -5;
   size_t type_size = 0;
   for (std::map<int, ParticleType>::const_iterator
        i = particles.types_cbegin(); i != particles.types_cend(); ++i) {
@@ -51,7 +58,7 @@ int main() {
     type_size++;
   }
   if (type_size != 1)
-    return -5;
+    return -6;
   type_size = 0;
   ParticleType piminus("pi-", 0.13957, -1.0, -211, 1, -1, 0);
   particles.add_type(piminus, -211);
@@ -61,22 +68,25 @@ int main() {
     type_size++;
   }
   if (type_size != 2)
-    return -6;
+    return -7;
   particles.add_type(piminus, -211);
   if (particles.types_size() != 2)
-    return -7;
+    return -8;
   particles.add_data(particle_a);
   if (particles.size() != 1)
-    return -8;
+    return -9;
   particles.add_data(particle_b);
   if (particles.size() != 2)
-    return -9;
+    return -10;
+  printd_position(particle_a);
+  printd_position(particle_b);
   double distance_squared_2 = particle_distance(particles.data_pointer(0),
     particles.data_pointer(1));
+  printd("%g versus %g\n", distance_squared, distance_squared_2);
   if (distance_squared_2 < 0.0)
-    return -10;
-  if (distance_squared_2 - distance_squared < really_small)
     return -11;
+  if (distance_squared_2 - distance_squared > really_small)
+    return -12;
 
   return 0;
 }
