@@ -10,16 +10,16 @@
 #include "include/collisions.h"
 
 #include <cstdio>
+#include <cstdlib>
 #include <cmath>
 #include <list>
 #include <map>
-#include <vector>
 
 #include "include/CollisionData.h"
+#include "include/FourVector.h"
 #include "include/Parameters.h"
 #include "include/Particles.h"
 #include "include/ParticleData.h"
-#include "include/ParticleType.h"
 #include "include/constants.h"
 #include "include/macros.h"
 #include "include/outputroutines.h"

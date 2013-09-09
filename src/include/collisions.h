@@ -8,10 +8,7 @@
 #ifndef SRC_INCLUDE_COLLISIONS_H_
 #define SRC_INCLUDE_COLLISIONS_H_
 
-#include <cstdlib>
 #include <list>
-#include <map>
-#include <vector>
 
 #include "../include/Particles.h"
 

@@ -9,13 +9,11 @@
  */
 #include "include/distributions.h"
 
-#include <stdio.h>
-#include <stdint.h>
 #include <gsl/gsl_sf_bessel.h>
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
 
-#include "include/constants.h"
-#include "include/macros.h"
-#include "include/ParticleType.h"
 #include "include/outputroutines.h"
 
 /* Breit-Wigner distribution for calculating resonance

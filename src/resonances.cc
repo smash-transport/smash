@@ -13,15 +13,14 @@
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
-#include <cstring>
 #include <map>
-#include <vector>
 
 #include "include/constants.h"
 #include "include/distributions.h"
 #include "include/FourVector.h"
 #include "include/macros.h"
 #include "include/outputroutines.h"
+#include "include/Particles.h"
 #include "include/ParticleData.h"
 #include "include/ParticleType.h"
 

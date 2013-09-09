@@ -11,13 +11,12 @@
 
 #include <cstdio>
 #include <map>
-#include <vector>
 
 #include "include/Box.h"
+#include "include/FourVector.h"
 #include "include/Parameters.h"
 #include "include/Particles.h"
 #include "include/ParticleData.h"
-#include "include/ParticleType.h"
 #include "include/outputroutines.h"
 
 /* propagate all particles */

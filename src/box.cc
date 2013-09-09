@@ -9,6 +9,7 @@
  */
 
 #include <getopt.h>
+#include <cmath>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -17,9 +18,9 @@
 #include <vector>
 
 #include "include/Box.h"
+#include "include/FourVector.h"
 #include "include/Particles.h"
 #include "include/ParticleData.h"
-#include "include/ParticleType.h"
 #include "include/collisions.h"
 #include "include/constants.h"
 #include "include/decays.h"

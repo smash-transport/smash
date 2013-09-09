@@ -9,10 +9,10 @@
  */
 
 #include <cstdio>
+#include <cstdlib>
 #include <cmath>
 #include <list>
 #include <map>
-#include <vector>
 
 #include "include/decays.h"
 
@@ -22,7 +22,6 @@
 #include "include/Particles.h"
 #include "include/constants.h"
 #include "include/FourVector.h"
-#include "include/macros.h"
 #include "include/outputroutines.h"
 #include "include/resonances.h"
 

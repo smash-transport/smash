@@ -9,13 +9,16 @@
  */
 #include "include/initial-conditions.h"
 
-#include <stdio.h>
-#include <stdint.h>
 #include <gsl/gsl_sf_bessel.h>
+#include <cstdio>
+#include <cstdlib>
+#include <map>
+#include <string>
 
 #include "include/Box.h"
 #include "include/constants.h"
 #include "include/distributions.h"
+#include "include/FourVector.h"
 #include "include/macros.h"
 #include "include/Parameters.h"
 #include "include/Particles.h"

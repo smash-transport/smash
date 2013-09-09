@@ -13,9 +13,9 @@
  *  GNU General Public License (GPLv3)
  */
 
-#include <math.h>
-#include <stdlib.h>
 #include <algorithm>
+#include <cmath>
+#include <cstdlib>
 
 #include "include/ClebschGordan.h"
 

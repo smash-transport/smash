@@ -8,7 +8,6 @@
 #ifndef SRC_INCLUDE_RESONANCES_H_
 #define SRC_INCLUDE_RESONANCES_H_
 
-#include <cstdio>
 #include <map>
 
 /* necessary forward declarations */

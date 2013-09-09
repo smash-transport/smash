@@ -7,8 +7,10 @@
  *    GNU General Public License (GPLv3)
  *
  */
+#include <cmath>
 #include <cstdio>
 #include <cstring>
+#include <cstdlib>
 #include <map>
 #include <vector>
 

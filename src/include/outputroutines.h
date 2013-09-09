@@ -7,8 +7,6 @@
 #ifndef SRC_INCLUDE_OUTPUTROUTINES_H_
 #define SRC_INCLUDE_OUTPUTROUTINES_H_
 
-#include <cstdlib>
-
 #include "../include/Particles.h"
 
 /* forward declarations */

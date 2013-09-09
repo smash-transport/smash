@@ -8,8 +8,6 @@
 #ifndef SRC_INCLUDE_DISTRIBUTIONS_H_
 #define SRC_INCLUDE_DISTRIBUTIONS_H_
 
-class ParticleType;
-
 /* Breit-Wigner distribution for calculating resonance
  * production probability
  */

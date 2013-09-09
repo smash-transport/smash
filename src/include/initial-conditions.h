@@ -5,11 +5,6 @@
 #ifndef SRC_INCLUDE_INITIAL_CONDITIONS_H_
 #define SRC_INCLUDE_INITIAL_CONDITIONS_H_
 
-#include <cstdio>
-
-#include <map>
-#include <vector>
-
 /* forward declarations */
 class Box;
 class Parameters;

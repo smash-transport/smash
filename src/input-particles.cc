@@ -10,7 +10,6 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <vector>
 
 #include "include/input-particles.h"
 #include "include/initial-conditions.h"

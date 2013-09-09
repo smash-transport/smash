@@ -9,16 +9,17 @@
  */
 #include "include/outputroutines.h"
 
-#include <stdio.h>
 #include <sys/stat.h>
-#include <sys/types.h>
+#include <cstdio>
+#include <ctime>
 #include <map>
-#include <vector>
+#include <string>
 
 #include "include/Box.h"
 #include "include/FourVector.h"
 #include "include/macros.h"
 #include "include/Parameters.h"
+#include "include/Particles.h"
 #include "include/ParticleData.h"
 #include "include/ParticleType.h"
 #include "include/time.h"
