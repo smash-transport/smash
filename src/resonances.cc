@@ -169,10 +169,6 @@ std::map<int, double> resonance_cross_section(
 
 /* 1->2 resonance decay process */
 int resonance_decay(Particles *particles, int particle_id) {
-  /* Add two new particles */
-  int new_id_a = particles->add_data();
-  int new_id_b = particles->add_data();
-
   const int charge = particles->type(particle_id).charge();
   const double total_energy = particles->data(particle_id).momentum().x0();
   int type_a = 0, type_b = 0;
@@ -195,8 +191,8 @@ int resonance_decay(Particles *particles, int particle_id) {
       type_a = 2212;
       type_b = -211;
       /* If there's not enough energy, use the lighter combination */
-      if (unlikely(particles->type(type_a).mass()
-                   + particles->type(type_b).mass()
+      if (unlikely(particles->particle_type(type_a).mass()
+                   + particles->particle_type(type_b).mass()
                    > total_energy)) {
         type_a = 2112;
         type_b = 111;
@@ -204,8 +200,8 @@ int resonance_decay(Particles *particles, int particle_id) {
     } else if (charge == 1) {
       type_a = 2112;
       type_b = 211;
-      if (unlikely(particles->type(type_a).mass()
-                   + particles->type(type_b).mass()
+      if (unlikely(particles->particle_type(type_a).mass()
+                   + particles->particle_type(type_b).mass()
                    > total_energy)) {
         type_a = 2212;
         type_b = 111;
@@ -222,8 +218,8 @@ int resonance_decay(Particles *particles, int particle_id) {
     if (charge == 0) {
       type_a = -2212;
       type_b = 211;
-      if (unlikely(particles->type(type_a).mass()
-                   + particles->type(type_b).mass()
+      if (unlikely(particles->particle_type(type_a).mass()
+                   + particles->particle_type(type_b).mass()
                    > total_energy)) {
         type_a = -2112;
         type_b = 111;
@@ -234,8 +230,8 @@ int resonance_decay(Particles *particles, int particle_id) {
     } else if (charge == -1) {
       type_a = -2112;
       type_b = -211;
-      if (unlikely(particles->type(type_a).mass()
-                   + particles->type(type_b).mass()
+      if (unlikely(particles->particle_type(type_a).mass()
+                   + particles->particle_type(type_b).mass()
                    > total_energy)) {
         type_a = -2212;
         type_b = 111;
@@ -245,11 +241,13 @@ int resonance_decay(Particles *particles, int particle_id) {
       type_b = -211;
     }
   }
-  particles->data_pointer(new_id_a)->set_pdgcode(type_a);
-  particles->data_pointer(new_id_b)->set_pdgcode(type_b);
+  /* Add two new particles */
+  ParticleData new_particle_a, new_particle_b;
+  new_particle_a.set_pdgcode(type_a);
+  new_particle_b.set_pdgcode(type_b);
 
-  double mass_a = particles->type(new_id_a).mass(),
-    mass_b = particles->type(new_id_b).mass();
+  double mass_a = particles->particle_type(type_a).mass(),
+    mass_b = particles->particle_type(type_b).mass();
   double energy_a = (total_energy * total_energy
                      + mass_a * mass_a - mass_b * mass_b)
                     / (2.0 * total_energy);
@@ -261,28 +259,37 @@ int resonance_decay(Particles *particles, int particle_id) {
   double cos_theta = -1.0 + 2.0 * drand48();
   double sin_theta = sqrt(1.0 - cos_theta * cos_theta);
   if (energy_a  < mass_a || abs(cos_theta) > 1) {
-    printf("Particle %d radial momenta %g phi %g cos_theta %g\n", new_id_a,
+    printf("Particle %d radial momenta %g phi %g cos_theta %g\n", type_a,
          momentum_radial, phi, cos_theta);
     printf("Etot: %g m_a: %g m_b %g E_a: %g", total_energy, mass_a, mass_b,
            energy_a);
   }
-  particles->data_pointer(new_id_a)->set_momentum(mass_a,
+  new_particle_a.set_momentum(mass_a,
       momentum_radial * cos(phi) * sin_theta,
       momentum_radial * sin(phi) * sin_theta,
       momentum_radial * cos_theta);
-  particles->data_pointer(new_id_b)->set_momentum(mass_b,
-    - particles->data(new_id_a).momentum().x1(),
-    - particles->data(new_id_a).momentum().x2(),
-    - particles->data(new_id_a).momentum().x3());
+  new_particle_b.set_momentum(mass_b,
+    - new_particle_a.momentum().x1(),
+    - new_particle_a.momentum().x2(),
+    - new_particle_a.momentum().x3());
 
   /* Both decay products begin from the same point */
   FourVector decay_point = particles->data(particle_id).position();
-  particles->data_pointer(new_id_a)->set_position(decay_point);
-  particles->data_pointer(new_id_b)->set_position(decay_point);
+  new_particle_a.set_position(decay_point);
+  new_particle_b.set_position(decay_point);
 
   /* No collision yet */
-  particles->data_pointer(new_id_a)->set_collision(-1, 0, -1);
-  particles->data_pointer(new_id_b)->set_collision(-1, 0, -1);
+  new_particle_a.set_collision(-1, 0, -1);
+  new_particle_b.set_collision(-1, 0, -1);
+
+  /* Assign IDs to new particles */
+  int new_id_a = particles->id_max() + 1;
+  int new_id_b = new_id_a + 1;
+  new_particle_a.set_id(new_id_a);
+  new_particle_b.set_id(new_id_b);
+
+  particles->add_data(new_particle_a);
+  particles->add_data(new_particle_b);
 
   printd("Created %s and %s with IDs %d and %d \n",
     particles->type(new_id_a).name().c_str(),
@@ -295,8 +302,8 @@ int resonance_decay(Particles *particles, int particle_id) {
 int resonance_formation(Particles *particles, int particle_id, int other_id,
   int pdg_resonance) {
   /* Add a new particle */
-  int new_id = particles->add_data();
-  particles->data_pointer(new_id)->set_pdgcode(pdg_resonance);
+  ParticleData resonance;
+  resonance.set_pdgcode(pdg_resonance);
 
   /* Center-of-momentum frame of initial particles
    * is the rest frame of the resonance
@@ -308,22 +315,24 @@ int resonance_formation(Particles *particles, int particle_id, int other_id,
    * mass shell, which is not generally true for resonances
    */
   FourVector resonance_momentum(energy, 0.0, 0.0, 0.0);
-  particles->data_pointer(new_id)->set_momentum(resonance_momentum);
+  resonance.set_momentum(resonance_momentum);
 
   printd("Momentum of the new particle: %g %g %g %g \n",
-    particles->data(new_id).momentum().x0(),
-    particles->data(new_id).momentum().x1(),
-    particles->data(new_id).momentum().x2(),
-    particles->data(new_id).momentum().x3());
+    resonance.momentum().x0(),
+    resonance.momentum().x1(),
+    resonance.momentum().x2(),
+    resonance.momentum().x3());
 
   /* The real position should be between parents in the computational frame! */
-  particles->data_pointer(new_id)->set_position(1.0, 0.0, 0.0, 0.0);
+  resonance.set_position(1.0, 0.0, 0.0, 0.0);
 
   /* No collision yet */
-  particles->data_pointer(new_id)->set_collision(-1, 0, -1);
-
+  resonance.set_collision(-1, 0, -1);
+  int new_id = particles->id_max() + 1;
+  resonance.set_id(new_id);
+  particles->add_data(resonance);
   printd("Created %s with ID %i \n", particles->type(new_id).name().c_str(),
-         particles->data(new_id).id());
+         new_id);
 
   return new_id;
 }
