@@ -168,9 +168,10 @@ void initial_conditions(Particles *particles, Parameters *parameters,
       }
       particle_new.set_position(time_start, x, y, z);
 
-      /* no collision yet hence zero time and set id */
+      /* no collision yet hence zero time and set id and pdg code */
       particle_new.set_collision(-1, 0, -1);
       particle_new.set_id(id);
+      particle_new.set_pdgcode(i->first);
 
       /* create new particle id is enhanced in the class itself */
       particles->add_data(particle_new);
