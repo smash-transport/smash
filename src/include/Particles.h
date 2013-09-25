@@ -32,7 +32,7 @@ class Particles {
   /* pass out the specific type */
   inline ParticleType particle_type(int id);
   /* inserts new data or type */
-  inline int add_data(void);
+  inline int id_max(void);
   inline int add_data(const ParticleData &particle_data);
   inline void add_type(const ParticleType &particle_type, int pdg_code);
   /* remove the particle */
@@ -91,7 +91,7 @@ inline int Particles::add_data(ParticleData const &particle_data) {
   data_.insert(std::pair<int, ParticleData>(id_max_, particle_data));
   return id_max_;
 }
-inline int Particles::add_data() {
+inline int Particles::id_max() {
   return id_max_;
 }
 
