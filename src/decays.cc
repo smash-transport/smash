@@ -119,9 +119,6 @@ size_t decay_particles(Particles *particles, std::list<int> *decay_list,
     FourVector final_momentum(particles->data(id_new_a).momentum()
       + particles->data(id_new_b).momentum());
 
-    particles->remove(id_a);
-    printd("ID %i has decayed and removed from the list.\n", id_a);
-
     /* unset collision time for both particles + keep id + unset partner */
     particles->data_pointer(id_new_a)->set_collision_past(id_process);
     particles->data_pointer(id_new_b)->set_collision_past(id_process);
@@ -148,6 +145,9 @@ size_t decay_particles(Particles *particles, std::list<int> *decay_list,
     if (fabs(momentum_difference.x3()) > really_small)
       printf("Warning: Interaction type %i pz conservation violation %g\n",
              interaction_type, momentum_difference.x3());
+
+    particles->remove(id_a);
+    printd("ID %i has decayed and removed from the list.\n", id_a);
   } /* end for std::list<int>::iterator id = decay_list->begin() */
   /* empty the decay table */
   decay_list->clear();
