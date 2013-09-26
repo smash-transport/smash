@@ -10,9 +10,9 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <utility>
 #include <vector>
 
+#include "include/DecayModes.h"
 #include "include/input-decaymodes.h"
 #include "include/Particles.h"
 #include "include/outputroutines.h"
@@ -43,8 +43,7 @@ void input_decaymodes(Particles *particles, char *path) {
   ssize_t characters_read;
   const char mode_separator = ';';
   std::vector<int> decay_particles;
-  std::pair<std::vector<int>, float> decay_mode;
-  std::vector< std::pair<std::vector<int>, float> > decay_modes;
+  DecayModes decay_modes;
   while ((characters_read = getline(&line, &line_size, file)) != -1) {
     printf("Retrieved decaymodes.txt line of length %li:\n", characters_read);
     /* Skip comments and blank lines */
@@ -81,13 +80,12 @@ void input_decaymodes(Particles *particles, char *path) {
         printf("characters: %s \n", characters);
         float ratio = atof(characters);
         printf("ratio: %f\n", ratio);
-        decay_mode = std::make_pair(decay_particles, ratio);
-        decay_modes.push_back(decay_mode);
+        decay_modes.add_decay_mode(decay_particles, ratio);
       }
       characters = strtok_r(NULL, &mode_separator, &line_position);
       printf("characters: %s \n", characters);
     }
-    //particles->add_decay_modes(pdgcode, decay_modes);
+    particles->add_decaymodes(pdgcode, decay_modes);
   }
   free(line);
   fclose(file);

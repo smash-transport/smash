@@ -8,12 +8,8 @@
 #ifndef SRC_INCLUDE_INPUT_DECAYMODES_H_
 #define SRC_INCLUDE_INPUT_DECAYMODES_H_
 
-#include <vector>
-
 /* forward declarations */
 class Particles;
-
-extern const char *separator;
 
 /* read input file particle types */
 void input_decaymodes(Particles *particles, char *path);
