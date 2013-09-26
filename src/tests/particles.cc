@@ -97,7 +97,7 @@ int main() {
   if (particles.count(1) != 1)
     return -14;
 
-  /* check useage particle data */
+  /* check usage particle data */
   double distance_squared_2 = particle_distance(particles.data_pointer(0),
     particles.data_pointer(1));
   printd("%g versus %g\n", distance_squared, distance_squared_2);
