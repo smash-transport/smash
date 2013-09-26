@@ -2,9 +2,9 @@ include(CheckLibraryExists)
 
 # list the source files
 set(smash_src collisions.cc clebschgordan.cc decays.cc distributions.cc
-	fourvector.cc initial-conditions.cc input-particles.cc
-	param-reader.cc particles.cc propagation.cc outputroutines.cc
-        resonances.cc time.cc)
+	fourvector.cc initial-conditions.cc input-decaymodes.cc
+        input-particles.cc param-reader.cc particles.cc propagation.cc
+        outputroutines.cc resonances.cc time.cc)
 
 add_executable(mash box.cc ${smash_src})
 add_executable(sphere sphere.cc ${smash_src})
@@ -21,7 +21,7 @@ include_directories("${PROJECT_BINARY_DIR}/src")
 # directly copy params file to build directory
 file(COPY params.txt DESTINATION ..)
 file(COPY particles.txt DESTINATION ..)
-
+file(COPY decaymodes.txt DESTINATION ..)
 
 # link with gsl and maybe rt
 CHECK_LIBRARY_EXISTS(rt clock_gettime "time.h" HAVE_CLOCK_GETTIME)

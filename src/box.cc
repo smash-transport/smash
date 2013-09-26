@@ -24,6 +24,7 @@
 #include "include/collisions.h"
 #include "include/constants.h"
 #include "include/decays.h"
+#include "include/input-decaymodes.h"
 #include "include/input-particles.h"
 #include "include/initial-conditions.h"
 #include "include/macros.h"
@@ -389,6 +390,7 @@ int main(int argc, char *argv[]) {
   /* Initialize box */
   input_particles(particles, path);
   initial_conditions(particles, parameters, cube);
+  input_decaymodes(particles, path);
 
   write_measurements_header(*particles);
   print_header();
