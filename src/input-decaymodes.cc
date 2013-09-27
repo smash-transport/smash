@@ -80,12 +80,14 @@ void input_decaymodes(Particles *particles, char *path) {
         printf("characters: %s \n", characters);
         float ratio = atof(characters);
         printf("ratio: %f\n", ratio);
-        decay_modes.add_decay_mode(decay_particles, ratio);
+        decay_modes.add_mode(decay_particles, ratio);
+        decay_particles.clear();
       }
       characters = strtok_r(NULL, &mode_separator, &line_position);
       printf("characters: %s \n", characters);
     }
-    particles->add_decaymodes(pdgcode, decay_modes);
+    particles->add_decaymodes(decay_modes, pdgcode);
+    decay_modes.clear();
   }
   free(line);
   fclose(file);
