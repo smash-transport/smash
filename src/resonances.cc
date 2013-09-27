@@ -179,11 +179,10 @@ int resonance_decay(Particles *particles, int particle_id) {
   double random_mode = drand48();
   bool use_other_mode = false;
   std::pair<std::vector<int>, float> decay_mode;
-  for (std::vector< std::pair<std::vector<int>, float> >::iterator modes
-         = decaymodes.begin(), modes != decaymodes.end(); ++modes) {
-
+  for (std::vector< std::pair<std::vector<int>, float> >::const_iterator mode
+         = decaymodes.begin(); mode != decaymodes.end(); ++mode) {
     if (random_mode < mode->second || use_other_mode) {
-      if ( (mode->first).size() != 2) {
+      if ( (mode->first).size() != 2 ) {
         printf("Warning: Not a 1->2 process! Number of decay particles: %zu \n",
                (mode->first).size());
       } else {
