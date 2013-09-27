@@ -176,9 +176,11 @@ int resonance_decay(Particles *particles, int particle_id) {
   const double total_energy = particles->data(particle_id).momentum().x0();
   int type_a = 0, type_b = 0;
 
+  /* Ratios of decay channels should add to 1; pick a random number
+   * between 0 and 1 to select the decay mode to be used
+   */
   double random_mode = drand48();
   bool use_other_mode = false;
-  std::pair<std::vector<int>, float> decay_mode;
   for (std::vector< std::pair<std::vector<int>, float> >::const_iterator mode
          = decaymodes.begin(); mode != decaymodes.end(); ++mode) {
     if (random_mode < mode->second || use_other_mode) {
@@ -188,6 +190,12 @@ int resonance_decay(Particles *particles, int particle_id) {
       } else {
         type_a = (mode->first)[0];
         type_b = (mode->first)[1];
+        /* If we don't have enough energy for this decay, pick another
+         * among the remaining ones
+         * (Note that this is why there's "emergency channels"
+         * with probability 0 at the end of some lines
+         * in the decay mode input file)
+         */
         if (unlikely(particles->particle_type(type_a).mass()
                      + particles->particle_type(type_b).mass()
                      > total_energy))

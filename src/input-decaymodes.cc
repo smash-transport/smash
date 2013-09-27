@@ -49,44 +49,59 @@ void input_decaymodes(Particles *particles, char *path) {
     /* Skip comments and blank lines */
     if (line[0] == '#' || line[0] == '\n' || line[0] == '\t'
         || line[0] == '/') {
-      printf("Skipping line: %s", line);
+      printd("Skipping line: %s", line);
       continue;
     }
-    printf("line: %s", line);
+    printd("line: %s", line);
 
+     /* First item in a line should be the PDG code */
     characters = strtok_r(line, " ", &line_position);
     if (characters == NULL)
       continue;
     int pdgcode = atoi(characters);
-    printf("pdgcode: %d\n", pdgcode);
+    printd("pdgcode: %d\n", pdgcode);
+    /* Second item should be the particle name */
     char *particle_name = strtok_r(NULL, " ", &line_position);
     if (particle_name == NULL)
       continue;
-    printf("particle name: %s\n", particle_name);
+    printd("particle name: %s\n", particle_name);
+    /* Rest of the line should contain the decay modes.
+     * the list of decay particles (PDG codes) is marked with special separator
+     * at the beginning and end of the list
+     */
     characters = strtok_r(NULL, &mode_separator, &line_position);
-    printf("characters: %s \n", characters);
+    printd("characters: %s \n", characters);
     while (characters != NULL) {
       if (strlen(characters) > 2) {
+         /* Read in the decay particle PDG codes for this mode */
         pdgs = strtok_r(characters, " ", &list_position);
-        printf("pdgs: %s \n", pdgs);
+        printd("pdgs: %s \n", pdgs);
         while (pdgs != NULL) {
           int decay_particle = atoi(pdgs);
-          printf("decay particle: %i \n", decay_particle);
+          printd("decay particle: %i \n", decay_particle);
           decay_particles.push_back(decay_particle);
           pdgs = strtok_r(NULL, " ", &list_position);
-          printf("pdgs: %s \n", pdgs);
+          printd("pdgs: %s \n", pdgs);
         }
+        /* Finished reading the particles; this should be
+         * followed by the ratio of this decay mode
+         * among all the possible modes
+         */
         characters = strtok_r(NULL, " ", &line_position);
-        printf("characters: %s \n", characters);
+        printd("characters: %s \n", characters);
         float ratio = atof(characters);
-        printf("ratio: %f\n", ratio);
+        printd("ratio: %f\n", ratio);
+        /* Add mode to the list of possible decays for this particle */
         decay_modes.add_mode(decay_particles, ratio);
+        /* Clean the particle list for the next mode */
         decay_particles.clear();
       }
       characters = strtok_r(NULL, &mode_separator, &line_position);
-      printf("characters: %s \n", characters);
+      printd("characters: %s \n", characters);
     }
+    /* Add the list of decay modes for this particle type */
     particles->add_decaymodes(decay_modes, pdgcode);
+    /* Clean up the list for the next particle type */
     decay_modes.clear();
   }
   free(line);
