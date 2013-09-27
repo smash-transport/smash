@@ -38,7 +38,7 @@ class Particles {
   inline int id_max(void);
   inline int add_data(const ParticleData &particle_data);
   inline void add_type(const ParticleType &particle_type, int pdg);
-  inline void add_decaymodes(const DecayModes &decay_modes, int pdg);
+  inline void add_decaymodes(const DecayModes &new_decay_modes, int pdg);
   /* remove the particle */
   inline void remove(int id);
   /* map methods that directly apply on the ParticleData */
@@ -66,7 +66,7 @@ class Particles {
     /* a map between pdg and correspoding static data of the particles */
     std::map<int, ParticleType> types_;
     /* a map between pdg and corresponding decay modes */
-    std::map<int, DecayModes> decaymodes_;
+    std::map<int, DecayModes> all_decay_modes_;
     /* google style recommendation */
     DISALLOW_COPY_AND_ASSIGN(Particles);
 };
@@ -93,7 +93,7 @@ inline ParticleType Particles::particle_type(int type_id) {
 
 /* return the decay modes of specific type */
 inline DecayModes Particles::decay_modes(int pdg) {
-  return decay_modes_[pdg];
+  return all_decay_modes_[pdg];
 }
 
 /* add a new particle data */
@@ -112,9 +112,9 @@ inline void Particles::add_type(ParticleType const &TYPE, int pdg) {
 }
 
 /* add decay modes for a particle type */
-inline void Particles::add_decaymodes(const DecayModes &decay_modes,
+inline void Particles::add_decaymodes(const DecayModes &new_decay_modes,
                                       int pdg) {
-  decaymodes_.insert(std::pair<int, DecayMode>(pdg, decay_modes));
+  all_decay_modes_.insert(std::pair<int, DecayModes>(pdg, new_decay_modes));
 }
 
 /* remove a particle */
