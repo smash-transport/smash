@@ -13,19 +13,33 @@
 
 class DecayModes {
  public:
-  /* pass out the decay modes */
+  /* Add a decay mode */
+  inline void add_mode(std::vector<int> particles, float ratio);
+  /* Remove all modes */
+  inline void clear(void);
+  /* Pass out the decay modes */
   inline std::vector< std::pair<std::vector<int>, float> >
-    decay_modes(void) const;
+    decay_mode_list(void) const;
  private:
   /* Vector of decay modes.
    * Each mode consists of a vector of the pdg codes of decay products
    * and a ratio of this decay mode with respect to total
    */
   std::vector< std::pair<std::vector<int>, float> > decay_modes_;
+};
+
+inline void DecayModes::add_mode(std::vector<int> particles, float ratio) {
+  std::pair<std::vector<int>, float> decay_mode
+    = std::make_pair(particles, ratio);
+  decay_modes_.push_back(decay_mode);
+}
+
+inline void DecayModes::clear(void) {
+  decay_modes_.clear();
 }
 
 inline std::vector< std::pair<std::vector<int>, float> >
-  decay_modes(void) const {
+  DecayModes::decay_mode_list(void) const {
   return decay_modes_;
 }
 
