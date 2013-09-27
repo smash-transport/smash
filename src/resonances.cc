@@ -16,6 +16,7 @@
 #include <map>
 
 #include "include/constants.h"
+#include "include/DecayModes.h"
 #include "include/distributions.h"
 #include "include/FourVector.h"
 #include "include/macros.h"
@@ -169,78 +170,40 @@ std::map<int, double> resonance_cross_section(
 
 /* 1->2 resonance decay process */
 int resonance_decay(Particles *particles, int particle_id) {
-  const int charge = particles->type(particle_id).charge();
+  const int pdgcode = particles->type(particle_id).pdgcode();
+  const std::vector< std::pair<std::vector<int>, float> > decaymodes
+    = (particles->decay_modes(pdgcode)).decay_mode_list();
   const double total_energy = particles->data(particle_id).momentum().x0();
   int type_a = 0, type_b = 0;
-  /* XXX: Can the hardcoding of decay channels be avoided? */
-  if (particles->type(particle_id).spin() % 2 == 0) {
-    /* meson resonance decays into pions */
-    if (charge == 0) {
-      type_a = 211;
-      type_b = -211;
-    } else if (charge == 1) {
-      type_a = 211;
-      type_b = 111;
-    } else if (charge == -1) {
-      type_a = -211;
-      type_b = 111;
-    }
-  } else if (particles->data(particle_id).pdgcode() > 0) {
-    /* Baryon resonance decays into pion and baryon */
-    if (charge == 0) {
-      type_a = 2212;
-      type_b = -211;
-      /* If there's not enough energy, use the lighter combination */
-      if (unlikely(particles->particle_type(type_a).mass()
-                   + particles->particle_type(type_b).mass()
-                   > total_energy)) {
-        type_a = 2112;
-        type_b = 111;
+
+  /* Ratios of decay channels should add to 1; pick a random number
+   * between 0 and 1 to select the decay mode to be used
+   */
+  double random_mode = drand48();
+  bool use_other_mode = false;
+  for (std::vector< std::pair<std::vector<int>, float> >::const_iterator mode
+         = decaymodes.begin(); mode != decaymodes.end(); ++mode) {
+    if (random_mode < mode->second || use_other_mode) {
+      if ( (mode->first).size() != 2 ) {
+        printf("Warning: Not a 1->2 process! Number of decay particles: %zu \n",
+               (mode->first).size());
+      } else {
+        type_a = (mode->first)[0];
+        type_b = (mode->first)[1];
+        /* If we don't have enough energy for this decay, pick another
+         * among the remaining ones
+         * (Note that this is why there's "emergency channels"
+         * with probability 0 at the end of some lines
+         * in the decay mode input file)
+         */
+        if (unlikely(particles->particle_type(type_a).mass()
+                     + particles->particle_type(type_b).mass()
+                     > total_energy))
+          use_other_mode = true;
       }
-    } else if (charge == 1) {
-      type_a = 2112;
-      type_b = 211;
-      if (unlikely(particles->particle_type(type_a).mass()
-                   + particles->particle_type(type_b).mass()
-                   > total_energy)) {
-        type_a = 2212;
-        type_b = 111;
-      }
-    } else if (charge == -1) {
-      type_a = 2112;
-      type_b = -211;
-    } else if (charge == 2) {
-      type_a = 2212;
-      type_b = 211;
-    }
-  } else {
-    /* Antibaryon resonance decays into pion and antibaryon */
-    if (charge == 0) {
-      type_a = -2212;
-      type_b = 211;
-      if (unlikely(particles->particle_type(type_a).mass()
-                   + particles->particle_type(type_b).mass()
-                   > total_energy)) {
-        type_a = -2112;
-        type_b = 111;
-      }
-    } else if (charge == 1) {
-      type_a = -2112;
-      type_b = 211;
-    } else if (charge == -1) {
-      type_a = -2112;
-      type_b = -211;
-      if (unlikely(particles->particle_type(type_a).mass()
-                   + particles->particle_type(type_b).mass()
-                   > total_energy)) {
-        type_a = -2212;
-        type_b = 111;
-      }
-    } else if (charge == -2) {
-      type_a = -2212;
-      type_b = -211;
     }
   }
+
   /* Add two new particles */
   ParticleData new_particle_a, new_particle_b;
   new_particle_a.set_pdgcode(type_a);
