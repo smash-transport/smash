@@ -34,19 +34,18 @@ std::map<int, double> resonance_cross_section(
   const Particles &particles) {
   const int charge1 = type_particle1.charge(),
     charge2 = type_particle2.charge();
-
+  const int pdgcode1 = type_particle1.pdgcode(),
+    pdgcode2 = type_particle2.pdgcode();
   /* Isospin z-component based on Gell-Mann–Nishijima formula
    * 2 * Iz = 2 * charge - (baryon number + strangeness + charm)
    * XXX: Strangeness and charm ignored for now!
    */
   const int isospin_z1 = type_particle1.spin() % 2 == 0
                          ? charge1 * 2
-                         : charge1 * 2 - type_particle1.pdgcode()
-                                       / abs(type_particle1.pdgcode());
+                         : charge1 * 2 - pdgcode1 / abs(pdgcode1);
   const int isospin_z2 = type_particle2.spin() % 2 == 0
                          ? charge2 * 2
-                         : charge2 * 2 - type_particle2.pdgcode()
-                                       / abs(type_particle2.pdgcode());
+                         : charge2 * 2 - pdgcode2 / abs(pdgcode2);
   std::map<int, double> possible_resonances;
 
   /* key 0 refers to total resonance production cross section */
@@ -60,10 +59,34 @@ std::map<int, double> resonance_cross_section(
   if (type_particle1.spin() % 2 != 0 && type_particle2.spin() % 2 != 0)
     return possible_resonances;
 
-  /* Isospin symmetry factor */
+  /* Isospin symmetry factor, by default 1 */
   int symmetryfactor = 1;
-  if (type_particle1.isospin() == type_particle2.isospin())
-    symmetryfactor = 2;
+  /* Do the particles have the same isospin value? */
+  if (type_particle1.isospin() == type_particle2.isospin()) {
+    /* Do they have the same spin? */
+    if (type_particle1.spin() == type_particle2.spin()) {
+      /* Are their PDG codes of same length? */
+      int abs_pdg1 = abs(pdgcode1), digits1 = 0;
+      while (abs_pdg1) {
+        abs_pdg1 /= 10;
+        digits1++;
+      }
+      int abs_pdg2 = abs(pdgcode2), digits2 = 0;
+      while (abs_pdg2) {
+        abs_pdg2 /= 10;
+        digits2++;
+      }
+      if (digits1 == digits2) {
+        /* If baryons, do they have the same baryon number? */
+        if (type_particle1.spin() % 2 == 0 ||
+            std::signbit(pdgcode1) == std::signbit(pdgcode2)) {
+          /* Ok, particles are in the same isospin multiplet,
+             apply symmetry factor */
+          symmetryfactor = 2;
+        }
+      }
+    }
+  }
 
   /* Mandelstam s = (p_a + p_b)^2 = square of CMS energy */
   const double mandelstam_s =
@@ -99,11 +122,11 @@ std::map<int, double> resonance_cross_section(
        * (and non-antiparticle for baryon)
        */
       if (type_particle1.spin() % 2 != 0
-          && (std::signbit(type_particle1.pdgcode())
-          != std::signbit(type_resonance.pdgcode()))) {
+          && (std::signbit(pdgcode1)
+              != std::signbit(type_resonance.pdgcode()))) {
         continue;
       } else if (type_particle2.spin() % 2 != 0
-          && (std::signbit(type_particle2.pdgcode())
+          && (std::signbit(pdgcode2)
           != std::signbit(type_resonance.pdgcode()))) {
         continue;
       }
