@@ -37,39 +37,6 @@ void CrossSections::compute_kinematics(const Particles *particles,
                 / (2 * sqrt(squared_mass_b)));
 }
 
-float CrossSections::elastic(const Particles *particles, int id_a, int id_b)
- const {
-  const int spin_a = particles->type(id_a).spin(),
-    spin_b = particles->type(id_b).spin();
-  /* For now, the meson-meson and meson-baryon elastic cross sections
-   * are simply given by the cross section parameter
-   */
-  if (spin_a % 2 == 0 || spin_b % 2 == 0)
-    return elastic_parameter_;
-
-  /* For baryon-baryon, we have to check the parametrized cross sections */
-  /* pp-scattering */
-  if (particles->type(id_a).pdgcode() == particles->type(id_b).pdgcode()) {
-    size_t i = 0;
-    while (p_lab_ < (pp_elastic_[i])[0])
-      i++;
-    return parametrization_(pp_elastic_[i]);
-  /* ppbar-scattering */
-  } else if (abs(particles->type(id_a).pdgcode())
-          == abs(particles->type(id_b).pdgcode())) {
-    size_t i = 0;
-    while (p_lab_ < (ppbar_elastic_[i])[0])
-      i++;
-    return parametrization_(ppbar_elastic_[i]);
-  /* pn-scattering */
-  } else {
-    size_t i = 0;
-    while (p_lab_ < (pn_elastic_[i])[0])
-      i++;
-    return parametrization_(pn_elastic_[i]);
-  }
-}
-
 float CrossSections::parametrization_(const std::vector<float> parameters) {
   switch (parameters.size() - 1) {
   case 1:
@@ -116,5 +83,92 @@ float CrossSections::parametrization_(const std::vector<float> parameters) {
     break;
   default:
     return 0.0;
+  }
+}
+
+float CrossSections::elastic(const Particles *particles, int id_a, int id_b)
+ const {
+  const int spin_a = particles->type(id_a).spin(),
+    spin_b = particles->type(id_b).spin();
+  /* For now, the meson-meson and meson-baryon elastic cross sections
+   * are simply given by the cross section parameter
+   */
+  if (spin_a % 2 == 0 || spin_b % 2 == 0)
+    return elastic_parameter_;
+
+  /* For baryon-baryon, we have to check the parametrized cross sections */
+  /* pp-scattering */
+  if (particles->type(id_a).pdgcode() == particles->type(id_b).pdgcode()) {
+    size_t i = 0;
+    while (p_lab_ < (pp_elastic_[i])[0])
+      i++;
+    return parametrization_(pp_elastic_[i]);
+  /* ppbar-scattering */
+  } else if (abs(particles->type(id_a).pdgcode())
+          == abs(particles->type(id_b).pdgcode())) {
+    size_t i = 0;
+    while (p_lab_ < (ppbar_elastic_[i])[0])
+      i++;
+    return parametrization_(ppbar_elastic_[i]);
+  /* pn-scattering */
+  } else {
+    size_t i = 0;
+    while (p_lab_ < (pn_elastic_[i])[0])
+      i++;
+    return parametrization_(pn_elastic_[i]);
+  }
+}
+
+float CrossSections::annihilation(const Particles *particles,
+                                  int id_a, int id_b) const {
+  const int spin_a = particles->type(id_a).spin(),
+    spin_b = particles->type(id_b).spin();
+  /* For now, the meson-meson and meson-baryon
+   * annihilation cross sections are zero
+   */
+  if (spin_a % 2 == 0 || spin_b % 2 == 0)
+    return 0.0;
+
+  /* For baryon-baryon, we have to check the parametrized cross sections */
+  if (particles->type(id_a).pdgcode() == -(particles->type(id_b).pdgcode())) {
+    size_t i = 0;
+    while (p_lab_ < (ppbar_annihilation_[i])[0])
+      i++;
+    return parametrization_(ppbar_annihilation_[i]);
+  } else {
+    return 0.0;
+  }
+}
+
+float CrossSections::total(const Particles *particles, int id_a, int id_b)
+ const {
+  const int spin_a = particles->type(id_a).spin(),
+    spin_b = particles->type(id_b).spin();
+  /* For now, the meson-meson and meson-baryon
+   *  "total" cross section is just zero
+   */
+  if (spin_a % 2 == 0 || spin_b % 2 == 0)
+    return 0.0;
+
+  /* For baryon-baryon, we have to check the parametrized cross sections */
+  /* pp-scattering */
+  if (particles->type(id_a).pdgcode() == particles->type(id_b).pdgcode()) {
+    size_t i = 0;
+    while (p_lab_ < (pp_total_[i])[0])
+      i++;
+    return parametrization_(pp_total_[i]);
+  /* ppbar-scattering */
+  } else if (abs(particles->type(id_a).pdgcode())
+          == abs(particles->type(id_b).pdgcode())) {
+    size_t i = 0;
+    while (p_lab_ < (ppbar_total_[i])[0])
+      i++;
+    return parametrization_(ppbar_total_[i]);
+  /* pn-scattering */
+  } else {
+    size_t i = 0;
+    while (p_lab_ < (pn_total_[i])[0])
+      i++;
+    return parametrization_(pn_total_[i]);
   }
 }
