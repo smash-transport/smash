@@ -6,7 +6,7 @@
 # A + B*(abs(p+b))^k + C*(p+c)^m [7 parameters]
 # A + B*(p-b)*exp(-C*p) [4 parameters]
 # A * p^n * exp[-B*(log(p))^2] [3 parameters]
-# A + B*mass/(mandelstam s - 4*mass^2) [2 parameters]
+# A + B*mass_a/(mandelstam s - 2*mass_a^2 - 2*mass_b^2) [2 parameters]
 # A [1 parameter]
 # Sources:
 # J. Cugnon, D. L'Hote, J. Vandermeulen,
