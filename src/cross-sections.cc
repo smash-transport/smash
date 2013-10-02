@@ -7,13 +7,12 @@
  *    GNU General Public License (GPLv3)
  *
  */
-#include "include/CrossSections.h"
-
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
 #include <vector>
 
+#include "include/CrossSections.h"
 #include "include/constants.h"
 #include "include/FourVector.h"
 #include "include/macros.h"
@@ -23,8 +22,8 @@
 #include "include/ParticleType.h"
 
 void CrossSections::compute_kinematics(Particles *particles,
- int id_a, int id_b) {
-   /* Mandelstam s = (p_a + p_b)^2 = square of CMS energy */
+  int id_a, int id_b) {
+  /* Mandelstam s = (p_a + p_b)^2 = square of CMS energy */
   mandelstam_s_ =
     (particles->data(id_a).momentum() + particles->data(id_b).momentum()).Dot(
      particles->data(id_a).momentum() + particles->data(id_b).momentum());
@@ -72,8 +71,8 @@ float CrossSections::parametrization_(std::vector<float> parameters) const {
   case 8:
     /* A + B*{C + c*exp[-D*(p+d)^m]}^n */
     return parameters[1] + parameters[2]
-      * pow( parameters[3] + parameters[4] * exp(-parameters[5]
-             * pow(p_lab_ + parameters[6], parameters[7])), parameters[8]);
+      * pow(parameters[3] + parameters[4] * exp(-parameters[5]
+            * pow(p_lab_ + parameters[6], parameters[7])), parameters[8]);
     break;
   case 10:
     /* A + B*(abs(p+b))^k + C*(p+c)^m + D*(p+d)^n */
@@ -88,7 +87,7 @@ float CrossSections::parametrization_(std::vector<float> parameters) const {
 }
 
 float CrossSections::elastic(Particles *particles, int id_a, int id_b)
- const {
+  const {
   const int spin_a = particles->type(id_a).spin(),
     spin_b = particles->type(id_b).spin();
   /* For now, the meson-meson and meson-baryon elastic cross sections
@@ -142,7 +141,7 @@ float CrossSections::annihilation(Particles *particles,
 }
 
 float CrossSections::total(Particles *particles, int id_a, int id_b)
- const {
+  const {
   const int spin_a = particles->type(id_a).spin(),
     spin_b = particles->type(id_b).spin();
   /* For now, the meson-meson and meson-baryon

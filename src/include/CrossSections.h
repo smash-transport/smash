@@ -29,6 +29,7 @@ class CrossSections {
   float elastic(Particles *particles, int id_a, int id_b) const;
   float annihilation(Particles *particles, int id_a, int id_b) const;
   float total(Particles *particles, int id_a, int id_b) const;
+
  private:
   /* Elastic cross section parameter */
   float elastic_parameter_;

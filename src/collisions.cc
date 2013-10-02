@@ -50,8 +50,8 @@ void collision_criteria_geometry(Particles *particles,
   /* Total cross section is elastic + resonance production  */
   /* (Ignore annihilation and total for now) */
   const double total_cross_section
-   = cross_sections->elastic(particles, id_a, id_b)
-     + resonance_xsections.at(0);
+    = cross_sections->elastic(particles, id_a, id_b)
+      + resonance_xsections.at(0);
 
   {
     /* distance criteria according to cross_section */

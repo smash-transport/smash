@@ -235,7 +235,7 @@ static void check_collision_geometry(Particles *particles,
 
 /* Evolve - the core of the box, stepping forward in time */
 static int Evolve(Particles *particles, CrossSections *cross_sections,
- const Parameters &parameters, const Box &box) {
+  const Parameters &parameters, const Box &box) {
   std::list<int> collision_list, decay_list;
   size_t interactions_total = 0, previous_interactions_total = 0,
     interactions_this_interval = 0;
