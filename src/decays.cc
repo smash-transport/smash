@@ -16,7 +16,7 @@
 
 #include "include/decays.h"
 
-#include "include/Parameters.h"
+#include "include/Laboratory.h"
 #include "include/ParticleData.h"
 #include "include/ParticleType.h"
 #include "include/Particles.h"
@@ -27,7 +27,7 @@
 
 /* check_decays - does a resonance decay on this timestep? */
 void check_decays(Particles *particles, std::list<int> *decay_list,
-  const Parameters &parameters) {
+  const Laboratory &parameters) {
   FourVector velocity_lrf;
   velocity_lrf.set_x0(1.0);
 

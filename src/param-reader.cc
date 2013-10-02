@@ -13,7 +13,7 @@
 
 #include "include/param-reader.h"
 #include "include/Box.h"
-#include "include/Parameters.h"
+#include "include/Laboratory.h"
 #include "include/outputroutines.h"
 
 /* XXX: hardcoded length cap */
@@ -23,7 +23,7 @@
 const char *sep = " \t\n";
 
 /* process_params - read in params */
-void process_params(Box *box, Parameters *parameters, char *path) {
+void process_params(Box *box, Laboratory *parameters, char *path) {
   char *line = NULL, *saveptr = NULL, params[FILELEN];
   size_t len = 0;
   ssize_t read;

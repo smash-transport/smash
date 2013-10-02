@@ -11,12 +11,12 @@
 
 /* forward declarations */
 class Box;
-class Parameters;
+class Laboratory;
 class ParticleData;
 class ParticleType;
 
 /* console output */
-void print_startup(const Parameters &parameters);
+void print_startup(const Laboratory &parameters);
 void print_startup(const Box &box);
 void print_header(void);
 void print_measurements(const Particles &particles,
