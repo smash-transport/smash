@@ -28,7 +28,7 @@ void input_cross_sections(CrossSections *cross_sections, char *path) {
   /* Looking for cross section parameter list
    * If none exists, we'll use default values.
    */
-  snprintf(input_cross_sections, strlen(path) + 16,
+  snprintf(input_cross_sections, strlen(path) + 20,
            "%s/cross-sections.txt", path);
   file = fopen(input_cross_sections, "r");
   if (!file) {
@@ -62,13 +62,13 @@ void input_cross_sections(CrossSections *cross_sections, char *path) {
       continue;
     float p_lab_min = atof(characters);
     parameters_values.push_back(p_lab_min);
-    printd("p_lab: %d\n", p_lab_min);
+    printd("p_lab: %g\n", p_lab_min);
     /* Rest of the line should contain the parameter values */
     characters = strtok_r(NULL, " ", &line_position);
     printd("characters: %s \n", characters);
     while (characters != NULL) {
       float parameter_value = atof(characters);
-      printd("parameter value: %d \n", parameter_value);
+      printd("parameter value: %g \n", parameter_value);
       parameters_values.push_back(parameter_value);
       characters = strtok_r(NULL, " ", &line_position);
       printd("characters: %s \n", characters);

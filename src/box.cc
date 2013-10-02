@@ -18,12 +18,14 @@
 #include <vector>
 
 #include "include/Box.h"
+#include "include/CrossSections.h"
 #include "include/FourVector.h"
 #include "include/Particles.h"
 #include "include/ParticleData.h"
 #include "include/collisions.h"
 #include "include/constants.h"
 #include "include/decays.h"
+#include "include/input-cross-sections.h"
 #include "include/input-decaymodes.h"
 #include "include/input-particles.h"
 #include "include/initial-conditions.h"
@@ -391,6 +393,8 @@ int main(int argc, char *argv[]) {
   input_particles(particles, path);
   initial_conditions(particles, parameters, cube);
   input_decaymodes(particles, path);
+  CrossSections *cross_sections = new CrossSections;
+  input_cross_sections(cross_sections, path);
 
   write_measurements_header(*particles);
   print_header();
