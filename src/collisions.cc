@@ -42,6 +42,8 @@ void collision_criteria_geometry(Particles *particles,
     return;
   }
 
+  /* Compute kinematic quantities needed for cross section calculations  */
+  cross_sections->compute_kinematics(particles, id_a, id_b);
   /* Resonance production cross section */
   std::map<int, double> resonance_xsections = resonance_cross_section(
   particles->data(id_a), particles->data(id_b), particles->type(id_a),

@@ -14,6 +14,9 @@
 
 class CrossSections {
  public:
+  /* Default constructor */
+  CrossSections() : elastic_parameter_(0.0), squared_mass_a_(-1.0),
+                    squared_mass_b_(-1.0), mandelstam_s_(-1.0), p_lab_(-1.0) {}
   /* Add the values to be used in parametrizations */
   inline void add_elastic_parameter(const float parameter);
   inline void add_pp_elastic(std::vector<float> parameters);
