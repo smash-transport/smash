@@ -7,12 +7,12 @@
 
 /* forward declarations */
 class Box;
-class Parameters;
+class Laboratory;
 class Particles;
 
 /* initialisation functions */
 void initial_particles(Particles *particles);
 void initial_conditions(Particles *particles,
-  Parameters *parameters, Box *box);
+  Laboratory *parameters, Box *box);
 
 #endif  // SRC_INCLUDE_INITIAL_CONDITIONS_H_

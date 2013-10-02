@@ -17,7 +17,7 @@
 
 #include "include/CollisionData.h"
 #include "include/FourVector.h"
-#include "include/Parameters.h"
+#include "include/Laboratory.h"
 #include "include/Particles.h"
 #include "include/ParticleData.h"
 #include "include/constants.h"
@@ -29,7 +29,7 @@
  *                               happens between particles
  */
 void collision_criteria_geometry(Particles *particles,
-  std::list<int> *collision_list, const Parameters &parameters, int id_a,
+  std::list<int> *collision_list, const Laboratory &parameters, int id_a,
   int id_b, size_t *rejection_conflict) {
   /* just collided with this particle */
   if (particles->data(id_a).id_process() >= 0

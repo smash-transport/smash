@@ -19,8 +19,8 @@
 #include "include/constants.h"
 #include "include/distributions.h"
 #include "include/FourVector.h"
+#include "include/Laboratory.h"
 #include "include/macros.h"
-#include "include/Parameters.h"
 #include "include/Particles.h"
 #include "include/ParticleData.h"
 #include "include/ParticleType.h"
@@ -38,7 +38,7 @@ void initial_particles(Particles *particles) {
 }
 
 /* initial_conditions - sets particle data for @particles */
-void initial_conditions(Particles *particles, Parameters *parameters,
+void initial_conditions(Particles *particles, Laboratory *parameters,
   Box *box) {
   double phi, cos_theta, sin_theta, momentum_radial, number_density_total = 0;
   FourVector momentum_total(0, 0, 0, 0);

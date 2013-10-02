@@ -5,13 +5,13 @@
  *
  *    GNU General Public License (GPLv3)
  */
-#ifndef SRC_INCLUDE_PARAMETERS_H_
-#define SRC_INCLUDE_PARAMETERS_H_
+#ifndef SRC_INCLUDE_LABORATORY_H_
+#define SRC_INCLUDE_LABORATORY_H_
 
-class Parameters {
+class Laboratory {
   public:
     /* default constructor with probable values */
-    Parameters(): steps_(10000), output_interval_(100), initial_condition_(1),
+    Laboratory(): steps_(10000), output_interval_(100), initial_condition_(1),
       testparticles_(1), eps_(0.001f), cross_section_(10.0f), seed_(1) {}
     /* member funtions */
     int inline steps() const;
@@ -47,32 +47,32 @@ class Parameters {
 };
 
 /* return the number of steps */
-int inline Parameters::steps(void) const {
+int inline Laboratory::steps(void) const {
   return steps_;
 }
 
 /* set the number of steps */
-void inline Parameters::set_steps(const int &STEPS) {
+void inline Laboratory::set_steps(const int &STEPS) {
   steps_ = STEPS;
 }
 
 /* return the number on which interval output will be shown */
-int inline Parameters::output_interval(void) const {
+int inline Laboratory::output_interval(void) const {
   return output_interval_;
 }
 
 /* set when to output physics */
-void inline Parameters::set_output_interval(const int &update) {
+void inline Laboratory::set_output_interval(const int &update) {
   output_interval_ = update;
 }
 
 /* return the used initial condition */
-int inline Parameters::initial_condition(void) const {
+int inline Laboratory::initial_condition(void) const {
   return initial_condition_;
 }
 
 /* set the initial condition */
-void inline Parameters::set_initial_condition(const int &INITIAL_CONDITION) {
+void inline Laboratory::set_initial_condition(const int &INITIAL_CONDITION) {
   initial_condition_ = INITIAL_CONDITION;
 }
 
@@ -80,43 +80,43 @@ void inline Parameters::set_initial_condition(const int &INITIAL_CONDITION) {
 /* return the number of testparticles:
  * if equal to one a "testparticle" corresponds to a real particle
  */
-int inline Parameters::testparticles(void) const {
+int inline Laboratory::testparticles(void) const {
   return testparticles_;
 }
 
 /* set the number of test particles */
-void inline Parameters::set_testparticles(const int &TESTPARTICLES) {
+void inline Laboratory::set_testparticles(const int &TESTPARTICLES) {
   testparticles_ = TESTPARTICLES;
 }
 
 /* return the time step in use */
-float inline Parameters::eps(void) const {
+float inline Laboratory::eps(void) const {
   return eps_;
 }
 
 /* set the time step */
-void inline Parameters::set_eps(const float &EPS) {
+void inline Laboratory::set_eps(const float &EPS) {
   eps_ = EPS;
 }
 
 /* return the cross section */
-float inline Parameters::cross_section(void) const {
+float inline Laboratory::cross_section(void) const {
   return cross_section_;
 }
 
 /* set the cross section */
-void inline Parameters::set_cross_section(const float &sigma) {
+void inline Laboratory::set_cross_section(const float &sigma) {
   cross_section_ = sigma;
 }
 
 /* return the random seed */
-int64_t inline Parameters::seed(void) const {
+int64_t inline Laboratory::seed(void) const {
   return seed_;
 }
 
 /* set the seed */
-void inline Parameters::set_seed(const int64_t &randomseed) {
+void inline Laboratory::set_seed(const int64_t &randomseed) {
   seed_ = randomseed;
 }
 
-#endif  // SRC_INCLUDE_PARAMETERS_H_
+#endif  // SRC_INCLUDE_LABORATORY_H_

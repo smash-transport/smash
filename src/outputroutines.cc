@@ -17,8 +17,8 @@
 
 #include "include/Box.h"
 #include "include/FourVector.h"
+#include "include/Laboratory.h"
 #include "include/macros.h"
-#include "include/Parameters.h"
 #include "include/Particles.h"
 #include "include/ParticleData.h"
 #include "include/ParticleType.h"
@@ -34,7 +34,7 @@ static void print_line(void) {
 }
 
 /* print_startup - console output on startup of general parameters */
-void print_startup(const Parameters &parameters) {
+void print_startup(const Laboratory &parameters) {
   printf("Elastic cross section: %g [mb]\n", parameters.cross_section());
   printf("Using temporal stepsize: %g [GeV]\n", parameters.eps());
   printf("Maximum number of steps: %i \n", parameters.steps());

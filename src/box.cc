@@ -27,9 +27,9 @@
 #include "include/input-decaymodes.h"
 #include "include/input-particles.h"
 #include "include/initial-conditions.h"
+#include "include/Laboratory.h"
 #include "include/macros.h"
 #include "include/param-reader.h"
-#include "include/Parameters.h"
 #include "include/outputroutines.h"
 #include "include/propagation.h"
 
@@ -93,7 +93,7 @@ FourVector boundary_condition(FourVector position, const Box &box,
 
 /* check_collision_geometry - check if a collision happens between particles */
 static void check_collision_geometry(Particles *particles,
-  std::list<int> *collision_list, Parameters const &parameters,
+  std::list<int> *collision_list, Laboratory const &parameters,
   Box const &box, size_t *rejection_conflict) {
   std::vector<std::vector<std::vector<std::vector<int> > > > grid;
   int N;
@@ -230,7 +230,7 @@ static void check_collision_geometry(Particles *particles,
 }
 
 /* Evolve - the core of the box, stepping forward in time */
-static int Evolve(Particles *particles, const Parameters &parameters,
+static int Evolve(Particles *particles, const Laboratory &parameters,
   const Box &box) {
   std::list<int> collision_list, decay_list;
   size_t interactions_total = 0, previous_interactions_total = 0,
@@ -309,7 +309,7 @@ int main(int argc, char *argv[]) {
   int opt, rc;
   Particles *particles = new Particles;
   Box *cube = new Box;
-  Parameters *parameters = new Parameters;
+  Laboratory *parameters = new Laboratory;
 
   struct option longopts[] = {
     { "eps",        required_argument,      0, 'e' },

@@ -14,14 +14,14 @@
 
 #include "include/Box.h"
 #include "include/FourVector.h"
-#include "include/Parameters.h"
+#include "include/Laboratory.h"
 #include "include/Particles.h"
 #include "include/ParticleData.h"
 #include "include/outputroutines.h"
 
 /* propagate all particles */
 void propagate_particles(Particles *particles,
-  Parameters const &parameters, Box const &box) {
+  Laboratory const &parameters, Box const &box) {
     FourVector distance, position;
 
     for (std::map<int, ParticleData>::iterator i = particles->begin();

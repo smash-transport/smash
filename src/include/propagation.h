@@ -10,10 +10,10 @@
 
 
 class Box;
-class Parameters;
+class Laboratory;
 class Particles;
 
-void propagate_particles(Particles *particles, Parameters const &parameters,
+void propagate_particles(Particles *particles, Laboratory const &parameters,
                          Box const &box);
 
 #endif  // SRC_INCLUDE_PROPAGATION_H_
