@@ -67,9 +67,11 @@ void input_cross_sections(CrossSections *cross_sections, char *path) {
     characters = strtok_r(NULL, " ", &line_position);
     printd("characters: %s \n", characters);
     while (characters != NULL) {
-      float parameter_value = atof(characters);
-      printd("parameter value: %g \n", parameter_value);
-      parameters_values.push_back(parameter_value);
+      if (strlen(characters) > 2) {
+        float parameter_value = atof(characters);
+        printd("parameter value: %g \n", parameter_value);
+        parameters_values.push_back(parameter_value);
+      }
       characters = strtok_r(NULL, " ", &line_position);
       printd("characters: %s \n", characters);
     }

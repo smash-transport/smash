@@ -15,7 +15,6 @@
 #include "include/CrossSections.h"
 #include "include/constants.h"
 #include "include/FourVector.h"
-#include "include/macros.h"
 #include "include/outputroutines.h"
 #include "include/Particles.h"
 #include "include/ParticleData.h"
