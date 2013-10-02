@@ -47,7 +47,7 @@ void input_cross_sections(CrossSections *cross_sections, char *path) {
     pn_total = true, ppbar_elastic = true, ppbar_annihilation = true,
     ppbar_total = true;
   while ((characters_read = getline(&line, &line_size, file)) != -1) {
-    printf("Retrieved cross-sections.txt line of length %li:\n",
+    printd("Retrieved cross-sections.txt line of length %li:\n",
            characters_read);
     /* Skip comments and blank lines */
     if (line[0] == '#' || line[0] == '\n' || line[0] == '\t'
