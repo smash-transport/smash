@@ -29,8 +29,9 @@
  *                               happens between particles
  */
 void collision_criteria_geometry(Particles *particles,
-  std::list<int> *collision_list, const Parameters &parameters, int id_a,
-  int id_b, size_t *rejection_conflict) {
+  CrossSections *cross_sections, std::list<int> *collision_list,
+  const Parameters &parameters, int id_a, int id_b,
+  size_t *rejection_conflict) {
   /* just collided with this particle */
   if (particles->data(id_a).id_process() >= 0
       && particles->data(id_a).id_process()
@@ -47,8 +48,10 @@ void collision_criteria_geometry(Particles *particles,
   particles->type(id_b), *particles);
 
   /* Total cross section is elastic + resonance production  */
-  const double total_cross_section = parameters.cross_section()
-    + resonance_xsections.at(0);
+  /* (Ignore annihilation and total for now) */
+  const double total_cross_section
+   = cross_sections->elastic(particles, id_a, id_b)
+     + resonance_xsections.at(0);
 
   {
     /* distance criteria according to cross_section */

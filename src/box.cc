@@ -95,8 +95,8 @@ FourVector boundary_condition(FourVector position, const Box &box,
 
 /* check_collision_geometry - check if a collision happens between particles */
 static void check_collision_geometry(Particles *particles,
-  std::list<int> *collision_list, Parameters const &parameters,
-  Box const &box, size_t *rejection_conflict) {
+  CrossSections *cross_sections, std::list<int> *collision_list,
+  Parameters const &parameters, Box const &box, size_t *rejection_conflict) {
   std::vector<std::vector<std::vector<std::vector<int> > > > grid;
   int N;
   int x, y, z;
@@ -122,8 +122,8 @@ static void check_collision_geometry(Particles *particles,
         /* skip particles that are double interaction radius length away */
         if (distance > radial_interaction)
            continue;
-        collision_criteria_geometry(particles, collision_list, parameters,
-          i->first, j->first, rejection_conflict);
+        collision_criteria_geometry(particles, cross_sections, collision_list,
+         parameters, i->first, j->first, rejection_conflict);
       }
     }
     return;
@@ -213,14 +213,16 @@ static void check_collision_geometry(Particles *particles,
 
             printd("grid cell particle %i <-> %i\n", i->first, *id_other);
             if (shift == 0) {
-              collision_criteria_geometry(particles, collision_list,
-                parameters, i->first, *id_other, rejection_conflict);
+              collision_criteria_geometry(particles, cross_sections,
+                collision_list, parameters, i->first, *id_other,
+                rejection_conflict);
             } else {
               /* apply eventual boundary before and restore after */
               particles->data_pointer(*id_other)->set_position(
                 particles->data(*id_other).position() + shift);
-              collision_criteria_geometry(particles, collision_list,
-                parameters, i->first, *id_other, rejection_conflict);
+              collision_criteria_geometry(particles, cross_sections,
+                collision_list, parameters, i->first, *id_other,
+                rejection_conflict);
               particles->data_pointer(*id_other)->set_position(
                 particles->data(*id_other).position() - shift);
             }
@@ -232,8 +234,8 @@ static void check_collision_geometry(Particles *particles,
 }
 
 /* Evolve - the core of the box, stepping forward in time */
-static int Evolve(Particles *particles, const Parameters &parameters,
-  const Box &box) {
+static int Evolve(Particles *particles, CrossSections *cross_sections,
+ const Parameters &parameters, const Box &box) {
   std::list<int> collision_list, decay_list;
   size_t interactions_total = 0, previous_interactions_total = 0,
     interactions_this_interval = 0;
@@ -264,7 +266,7 @@ static int Evolve(Particles *particles, const Parameters &parameters,
     }
 
     /* fill collision table by cells */
-    check_collision_geometry(particles,
+    check_collision_geometry(particles, cross_sections,
       &collision_list, parameters, box, &rejection_conflict);
 
     /* particle interactions */
@@ -394,6 +396,7 @@ int main(int argc, char *argv[]) {
   initial_conditions(particles, parameters, cube);
   input_decaymodes(particles, path);
   CrossSections *cross_sections = new CrossSections;
+  cross_sections->add_elastic_parameter(parameters->cross_section());
   input_cross_sections(cross_sections, path);
 
   write_measurements_header(*particles);
@@ -401,10 +404,11 @@ int main(int argc, char *argv[]) {
   write_particles(*particles);
 
   /* Compute stuff */
-  rc = Evolve(particles, *parameters, *cube);
+  rc = Evolve(particles, cross_sections, *parameters, *cube);
 
   /* tear down */
   delete particles;
+  delete cross_sections;
   delete cube;
   delete parameters;
   free(path);
