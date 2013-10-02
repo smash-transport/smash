@@ -24,11 +24,11 @@ class CrossSections {
   inline void add_ppbar_annihilation(std::vector<float> parameters);
   inline void add_ppbar_total(std::vector<float> parameters);
   /* Compute kinematics */
-  void compute_kinematics(const Particles *particles, int id_a, int id_b);
+  void compute_kinematics(Particles *particles, int id_a, int id_b);
   /* Return cross sections */
-  float elastic(const Particles *particles, int id_a, int id_b) const;
-  float annihilation(const Particles *particles, int id_a, int id_b) const;
-  float total(const Particles *particles, int id_a, int id_b) const;
+  float elastic(Particles *particles, int id_a, int id_b) const;
+  float annihilation(Particles *particles, int id_a, int id_b) const;
+  float total(Particles *particles, int id_a, int id_b) const;
  private:
   /* Elastic cross section parameter */
   float elastic_parameter_;
@@ -41,7 +41,7 @@ class CrossSections {
   /* "Beam" momentum */
   double p_lab_;
   /* Member containing the parametrizations */
-  float parametrization_(const std::vector<float> parameters);
+  float parametrization_(std::vector<float> parameters) const;
   /* Values to be used in parametrizations */
   std::vector< std::vector<float> > pp_elastic_;
   std::vector< std::vector<float> > pp_total_;
@@ -51,9 +51,6 @@ class CrossSections {
   std::vector< std::vector<float> > ppbar_annihilation_;
   std::vector< std::vector<float> > ppbar_total_;
 };
-
-/* Member containing the parametrizations */
-float CrossSections::parametrization_(const std::vector<float> parameters);
 
 /* Add the values to be used in parametrizations */
 inline void CrossSections::add_elastic_parameter(const float parameter) {
@@ -88,18 +85,5 @@ inline void CrossSections::add_ppbar_annihilation(
 inline void CrossSections::add_ppbar_total(std::vector<float> parameters) {
   ppbar_total_.push_back(parameters);
 }
-
-/* Compute kinematics */
-void compute_kinematics(const Particles *particles, int id_a, int id_b);
-
-/* Return cross sections */
-float CrossSections::elastic(const Particles *particles, int id_a, int id_b)
- const;
-
-float CrossSections::annihilation(const Particles *particles,
- int id_a, int id_b) const;
-
-float CrossSections::total(const Particles *particles,
- int id_a, int id_b) const;
 
 #endif  // SRC_INCLUDE_CROSSSECTIONS_H_

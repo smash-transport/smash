@@ -16,14 +16,12 @@
 #include "include/constants.h"
 #include "include/input-cross-sections.h"
 #include "include/outputroutines.h"
-#include "include/Particles.h"
 
 /* XXX: hardcoded length cap */
 #define FILELEN 256
 
 /* input_cross_sections - read cross section parametrizations */
-void input_cross_sections(CrossSections *cross_sections,
-                          Particles *particles, char *path) {
+void input_cross_sections(CrossSections *cross_sections, char *path) {
   char input_cross_sections[FILELEN];
   FILE *file;
 
@@ -40,8 +38,8 @@ void input_cross_sections(CrossSections *cross_sections,
 
   printf("Processing %s/cross-sections.txt.\n", path);
 
-  char *line = NULL, *line_position = NULL, *list_position = NULL;
-  char *characters, *pdgs;
+  char *line = NULL, *line_position = NULL;
+  char *characters;
   size_t line_size = 0;
   ssize_t characters_read;
   std::vector<float> parameters_values;

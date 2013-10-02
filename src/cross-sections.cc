@@ -11,6 +11,7 @@
 
 #include <cmath>
 #include <cstdio>
+#include <cstdlib>
 #include <vector>
 
 #include "include/constants.h"
@@ -21,7 +22,7 @@
 #include "include/ParticleData.h"
 #include "include/ParticleType.h"
 
-void CrossSections::compute_kinematics(const Particles *particles,
+void CrossSections::compute_kinematics(Particles *particles,
  int id_a, int id_b) {
    /* Mandelstam s = (p_a + p_b)^2 = square of CMS energy */
   mandelstam_s_ =
@@ -33,11 +34,11 @@ void CrossSections::compute_kinematics(const Particles *particles,
   squared_mass_b_
     = particles->data(id_b).momentum().Dot(particles->data(id_b).momentum());
   /* Beam momentum (assuming particle A as "beam") */
-  p_lab_ = sqrt((mandelstam_s - squared_mass_a - squared_mass_b)
-                / (2 * sqrt(squared_mass_b)));
+  p_lab_ = sqrt((mandelstam_s_ - squared_mass_a_ - squared_mass_b_)
+                / (2 * sqrt(squared_mass_b_)));
 }
 
-float CrossSections::parametrization_(const std::vector<float> parameters) {
+float CrossSections::parametrization_(std::vector<float> parameters) const {
   switch (parameters.size() - 1) {
   case 1:
     /* just a constant */
@@ -86,7 +87,7 @@ float CrossSections::parametrization_(const std::vector<float> parameters) {
   }
 }
 
-float CrossSections::elastic(const Particles *particles, int id_a, int id_b)
+float CrossSections::elastic(Particles *particles, int id_a, int id_b)
  const {
   const int spin_a = particles->type(id_a).spin(),
     spin_b = particles->type(id_b).spin();
@@ -119,7 +120,7 @@ float CrossSections::elastic(const Particles *particles, int id_a, int id_b)
   }
 }
 
-float CrossSections::annihilation(const Particles *particles,
+float CrossSections::annihilation(Particles *particles,
                                   int id_a, int id_b) const {
   const int spin_a = particles->type(id_a).spin(),
     spin_b = particles->type(id_b).spin();
@@ -140,7 +141,7 @@ float CrossSections::annihilation(const Particles *particles,
   }
 }
 
-float CrossSections::total(const Particles *particles, int id_a, int id_b)
+float CrossSections::total(Particles *particles, int id_a, int id_b)
  const {
   const int spin_a = particles->type(id_a).spin(),
     spin_b = particles->type(id_b).spin();

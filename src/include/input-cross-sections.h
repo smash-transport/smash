@@ -12,7 +12,6 @@
 class Particles;
 
 /* read cross section parametrizations */
-void input_cross_sections(CrossSections *cross_sections,
- Particles *particles, char *path);
+void input_cross_sections(CrossSections *cross_sections, char *path);
 
 #endif  // SRC_INCLUDE_INPUT_CROSS_SECTIONS_H_
