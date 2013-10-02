@@ -20,12 +20,14 @@
 #include <vector>
 
 #include "include/Box.h"
+#include "include/CrossSections.h"
 #include "include/FourVector.h"
 #include "include/Particles.h"
 #include "include/ParticleData.h"
 #include "include/collisions.h"
 #include "include/constants.h"
 #include "include/decays.h"
+#include "include/input-cross-sections.h"
 #include "include/input-particles.h"
 #include "include/initial-conditions.h"
 #include "include/macros.h"
@@ -64,8 +66,8 @@ FourVector boundary_condition(FourVector position,
 
 /* check_collision_geometry - check if a collision happens between particles */
 static void check_collision_geometry(Particles *particles,
-  std::list<int> *collision_list, Parameters const &parameters,
-  Box const &box, size_t *rejection_conflict) {
+  CrossSections *cross_sections, std::list<int> *collision_list,
+  Parameters const &parameters, Box const &box, size_t *rejection_conflict) {
   std::vector<std::vector<std::vector<std::vector<int> > > > grid;
   int N, x, y, z;
 
@@ -91,8 +93,8 @@ static void check_collision_geometry(Particles *particles,
         /* skip particles that are double interaction radius length away */
         if (distance > radial_interaction)
            continue;
-        collision_criteria_geometry(particles, collision_list, parameters,
-          i->first, j->first, rejection_conflict);
+        collision_criteria_geometry(particles, cross_sections, collision_list,
+          parameters, i->first, j->first, rejection_conflict);
       }
     }
     return;
@@ -155,8 +157,8 @@ static void check_collision_geometry(Particles *particles,
               continue;
 
             printd("grid cell particle %i <-> %i\n", i->first, *id_b);
-            collision_criteria_geometry(particles, collision_list, parameters,
-              i->first, *id_b, rejection_conflict);
+            collision_criteria_geometry(particles, cross_sections,
+              collision_list, parameters, i->first, *id_b, rejection_conflict);
           } /* grid particles loop */
         } /* grid sy */
       } /* grid sx */
@@ -166,7 +168,7 @@ static void check_collision_geometry(Particles *particles,
 
 
 /* Evolve - the core of the box, stepping forward in time */
-static int Evolve(Particles *particles,
+static int Evolve(Particles *particles, CrossSections *cross_sections,
                   const Parameters &parameters, const Box &box,
                   int *resonances, int *decays) {
   std::list<int> collision_list, decay_list;
@@ -190,8 +192,8 @@ static int Evolve(Particles *particles,
     }
 
     /* fill collision table by cells */
-    check_collision_geometry(particles, &collision_list, parameters, box,
-      &rejection_conflict);
+    check_collision_geometry(particles, cross_sections, &collision_list,
+      parameters, box, &rejection_conflict);
 
     /* particle interactions */
     if (!collision_list.empty())
@@ -318,17 +320,22 @@ int main(int argc, char *argv[]) {
   /* Initialize box */
   input_particles(&particles, path);
   initial_conditions(&particles, parameters, cube);
+  CrossSections *cross_sections = new CrossSections;
+  cross_sections->add_elastic_parameter(parameters->cross_section());
+  input_cross_sections(cross_sections, path);
 
   write_measurements_header(particles);
   print_header();
   write_particles(particles);
 
   /* Compute stuff */
-  rc = Evolve(&particles, *parameters, *cube, &resonances, &decays);
+  rc = Evolve(&particles, cross_sections, *parameters,
+         *cube, &resonances, &decays);
 
   /* tear down */
   // XXX: particles.clear();
   delete cube;
+  delete cross_sections;
   delete parameters;
   free(path);
   return rc;
