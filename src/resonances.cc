@@ -203,30 +203,30 @@ int resonance_decay(Particles *particles, int particle_id) {
    * between 0 and 1 to select the decay mode to be used
    */
   double random_mode = drand48();
-  bool use_other_mode = false;
+  double cumulated_probability = 0.0;
   for (std::vector< std::pair<std::vector<int>, float> >::const_iterator mode
          = decaymodes.begin(); mode != decaymodes.end(); ++mode) {
-    if (random_mode < mode->second || use_other_mode) {
+    cumulated_probability += mode->second;
+    if (random_mode < cumulated_probability) {
       if ( (mode->first).size() != 2 ) {
         printf("Warning: Not a 1->2 process! Number of decay particles: %zu \n",
                (mode->first).size());
+        printf("Decay particles: ");
+        for (size_t i = 0; i < (mode->first).size(); i++) {
+          printf("%i ", (mode->first)[i]);
+        }
+        printf("\n");
       } else {
         type_a = (mode->first)[0];
         type_b = (mode->first)[1];
-        /* If we don't have enough energy for this decay, pick another
-         * among the remaining ones
-         * (Note that this is why there's "emergency channels"
-         * with probability 0 at the end of some lines
-         * in the decay mode input file)
-         */
-        if (unlikely(particles->particle_type(type_a).mass()
-                     + particles->particle_type(type_b).mass()
-                     > total_energy))
-          use_other_mode = true;
-      }
+        if (abs(type_a) < 100 || abs(type_b) < 100)
+          printf("Warning: decay products A: %i B: %i\n", type_a, type_b);
+     }
     }
   }
 
+  if (abs(type_a) < 100 || abs(type_b) < 100)
+    printf("Warning: decay products A: %i B: %i\n", type_a, type_b);
   /* Add two new particles */
   ParticleData new_particle_a, new_particle_b;
   new_particle_a.set_pdgcode(type_a);
@@ -239,6 +239,8 @@ int resonance_decay(Particles *particles, int particle_id) {
                     / (2.0 * total_energy);
 
   double momentum_radial = sqrt(energy_a * energy_a - mass_a * mass_a);
+  if (momentum_radial < 0.0)
+    printf("Warning: radial momenta %g \n", momentum_radial);
   /* phi in the range from [0, 2 * pi) */
   double phi = 2.0 * M_PI * drand48();
   /* cos(theta) in the range from [-1.0, 1.0) */
