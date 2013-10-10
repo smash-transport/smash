@@ -7,11 +7,13 @@
  *    GNU General Public License (GPLv3)
  *
  */
+#include <cmath>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <vector>
 
+#include "include/constants.h"
 #include "include/DecayModes.h"
 #include "include/input-decaymodes.h"
 #include "include/Particles.h"
@@ -97,6 +99,11 @@ void input_decaymodes(Particles *particles, char *path) {
       modes--;
       /* Check if this was the last mode */
       if (modes == 0) {
+        /* Check if ratios add to 1 */
+        if (fabs(ratio_sum - 1.0) > really_small) {
+          /* They didn't; renormalize */
+          decay_modes.renormalize(ratio_sum);
+        }
         /* Add the list of decay modes for this particle type */
         particles->add_decaymodes(decay_modes, pdgcode);
         /* Clean up the list for the next particle type */
