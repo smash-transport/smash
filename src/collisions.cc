@@ -202,7 +202,7 @@ size_t collide_particles(Particles *particles, std::list<int> *collision_list,
 
       /* unset collision time for both particles + keep id + unset partner */
       particles->data_pointer(id_a)->set_collision_past(id_process);
-      particles->data_pointer(id_a)->set_collision_past(id_process);
+      particles->data_pointer(id_b)->set_collision_past(id_process);
 
     } else if (abs(interaction_type) > 99) {
       /* 2->1 resonance formation, resonance PDG code = interaction_type */
