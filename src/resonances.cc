@@ -191,42 +191,8 @@ std::map<int, double> resonance_cross_section(
   return possible_resonances;
 }
 
-/* 1->2 resonance decay process */
-int resonance_decay(Particles *particles, int particle_id) {
-  const int pdgcode = particles->type(particle_id).pdgcode();
-  const std::vector< std::pair<std::vector<int>, float> > decaymodes
-    = (particles->decay_modes(pdgcode)).decay_mode_list();
-  const double total_energy = particles->data(particle_id).momentum().x0();
-  int type_a = 0, type_b = 0;
-
-  /* Ratios of decay channels should add to 1; pick a random number
-   * between 0 and 1 to select the decay mode to be used
-   */
-  double random_mode = drand48();
-  double cumulated_probability = 0.0;
-  for (std::vector< std::pair<std::vector<int>, float> >::const_iterator mode
-         = decaymodes.begin(); mode != decaymodes.end(); ++mode) {
-    cumulated_probability += mode->second;
-    if (random_mode < cumulated_probability) {
-      if ( (mode->first).size() != 2 ) {
-        printf("Warning: Not a 1->2 process! Number of decay particles: %zu \n",
-               (mode->first).size());
-        printf("Decay particles: ");
-        for (size_t i = 0; i < (mode->first).size(); i++) {
-          printf("%i ", (mode->first)[i]);
-        }
-        printf("\n");
-      } else {
-        type_a = (mode->first)[0];
-        type_b = (mode->first)[1];
-        if (abs(type_a) < 100 || abs(type_b) < 100)
-          printf("Warning: decay products A: %i B: %i\n", type_a, type_b);
-     }
-    }
-  }
-
-  if (abs(type_a) < 100 || abs(type_b) < 100)
-    printf("Warning: decay products A: %i B: %i\n", type_a, type_b);
+/* 1->2 process kinematics */
+int one_to_two(Particles *particles, int resonance_id, int type_a, int type_b) {
   /* Add two new particles */
   ParticleData new_particle_a, new_particle_b;
   new_particle_a.set_pdgcode(type_a);
@@ -234,9 +200,10 @@ int resonance_decay(Particles *particles, int particle_id) {
 
   double mass_a = particles->particle_type(type_a).mass(),
     mass_b = particles->particle_type(type_b).mass();
+  const double total_energy = particles->data(resonance_id).momentum().x0();
   double energy_a = (total_energy * total_energy
-                     + mass_a * mass_a - mass_b * mass_b)
-                    / (2.0 * total_energy);
+                       + mass_a * mass_a - mass_b * mass_b)
+    / (2.0 * total_energy);
 
   double momentum_radial = sqrt(energy_a * energy_a - mass_a * mass_a);
   if (momentum_radial < 0.0)
@@ -248,21 +215,21 @@ int resonance_decay(Particles *particles, int particle_id) {
   double sin_theta = sqrt(1.0 - cos_theta * cos_theta);
   if (energy_a  < mass_a || abs(cos_theta) > 1) {
     printf("Particle %d radial momenta %g phi %g cos_theta %g\n", type_a,
-         momentum_radial, phi, cos_theta);
+           momentum_radial, phi, cos_theta);
     printf("Etot: %g m_a: %g m_b %g E_a: %g", total_energy, mass_a, mass_b,
            energy_a);
   }
   new_particle_a.set_momentum(mass_a,
-      momentum_radial * cos(phi) * sin_theta,
-      momentum_radial * sin(phi) * sin_theta,
-      momentum_radial * cos_theta);
+                              momentum_radial * cos(phi) * sin_theta,
+                              momentum_radial * sin(phi) * sin_theta,
+                              momentum_radial * cos_theta);
   new_particle_b.set_momentum(mass_b,
-    - new_particle_a.momentum().x1(),
-    - new_particle_a.momentum().x2(),
-    - new_particle_a.momentum().x3());
+                              - new_particle_a.momentum().x1(),
+                              - new_particle_a.momentum().x2(),
+                              - new_particle_a.momentum().x3());
 
   /* Both decay products begin from the same point */
-  FourVector decay_point = particles->data(particle_id).position();
+  FourVector decay_point = particles->data(resonance_id).position();
   new_particle_a.set_position(decay_point);
   new_particle_b.set_position(decay_point);
 
@@ -280,9 +247,64 @@ int resonance_decay(Particles *particles, int particle_id) {
   particles->add_data(new_particle_b);
 
   printd("Created %s and %s with IDs %d and %d \n",
-    particles->type(new_id_a).name().c_str(),
-    particles->type(new_id_b).name().c_str(), new_id_a, new_id_b);
+         particles->type(new_id_a).name().c_str(),
+         particles->type(new_id_b).name().c_str(), new_id_a, new_id_b);
 
+  return new_id_a;
+}
+
+/* 1->3 process kinematics */
+int one_to_three(Particles *particles, int resonance_id,
+                 int type_a, int type_b, int type_c) {
+  return 0;
+}
+
+/* Resonance decay process */
+int resonance_decay(Particles *particles, int particle_id) {
+  const int pdgcode = particles->type(particle_id).pdgcode();
+  const std::vector< std::pair<std::vector<int>, float> > decaymodes
+    = (particles->decay_modes(pdgcode)).decay_mode_list();
+  int type_a = 0, type_b = 0, type_c = 0, new_id_a = -1;
+
+  /* Ratios of decay channels should add to 1; pick a random number
+   * between 0 and 1 to select the decay mode to be used
+   */
+  double random_mode = drand48();
+  double cumulated_probability = 0.0;
+  size_t decay_particles = 0;
+  for (std::vector< std::pair<std::vector<int>, float> >::const_iterator mode
+         = decaymodes.begin(); mode != decaymodes.end(); ++mode) {
+    cumulated_probability += mode->second;
+    if (random_mode < cumulated_probability) {
+      decay_particles = (mode->first).size();
+      if ( decay_particles > 3 ) {
+        printf("Warning: Not a 1->2 or 1->3 process!\n");
+        printf("Number of decay particles: %zu \n", decay_particles);
+        printf("Decay particles: ");
+        for (size_t i = 0; i < decay_particles; i++) {
+          printf("%i ", (mode->first)[i]);
+        }
+        printf("\n");
+      } else if (decay_particles == 2) {
+        type_a = (mode->first)[0];
+        type_b = (mode->first)[1];
+        if (abs(type_a) < 100 || abs(type_b) < 100)
+          printf("Warning: decay products A: %i B: %i\n", type_a, type_b);
+      } else if (decay_particles == 3) {
+        type_a = (mode->first)[0];
+        type_b = (mode->first)[1];
+        type_c = (mode->first)[2];
+        if (abs(type_a) < 100 || abs(type_b) < 100 || abs(type_c) < 100)
+          printf("Warning: decay products A: %i B: %i C: %i\n",
+                 type_a, type_b, type_c);
+      }
+    }
+  }
+  if (decay_particles == 2) {
+    new_id_a = one_to_two(particles, particle_id, type_a, type_b);
+  } else if (decay_particles == 3) {
+    new_id_a = one_to_three(particles, particle_id, type_a, type_b, type_c);
+  }
   return new_id_a;
 }
 

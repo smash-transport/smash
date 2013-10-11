@@ -23,7 +23,14 @@ std::map<int, double> resonance_cross_section(
   const ParticleType &type_particle1, const ParticleType &type_particle2,
   const Particles &particles);
 
-/* 1->2 resonance decay process */
+/* 1->2 process kinematics */
+int one_to_two(Particles *particles, int resonance_id, int type_a, int type_b);
+
+/* 1->3 process kinematics */
+int one_to_three(Particles *particles, int resonance_id,
+                 int type_a, int type_b, int type_c);
+
+/* resonance decay process */
 int resonance_decay(Particles *particles, int particle_id);
 
 /* 2->1 resonance formation process */
