@@ -16,6 +16,7 @@
 #include "include/constants.h"
 #include "include/FourVector.h"
 #include "include/outputroutines.h"
+#include "include/parametrizations.h"
 #include "include/Particles.h"
 #include "include/ParticleData.h"
 #include "include/ParticleType.h"
@@ -98,23 +99,14 @@ float CrossSections::elastic(Particles *particles, int id_a, int id_b)
   /* For baryon-baryon, we have to check the parametrized cross sections */
   /* pp-scattering */
   if (particles->type(id_a).pdgcode() == particles->type(id_b).pdgcode()) {
-    size_t i = 0;
-    while (p_lab_ < (pp_elastic_[i])[0])
-      i++;
-    return parametrization_(pp_elastic_[i]);
+    return pp_elastic(p_lab_, mandelstam_s_, sqrt(squared_mass_a_));
   /* ppbar-scattering */
   } else if (abs(particles->type(id_a).pdgcode())
           == abs(particles->type(id_b).pdgcode())) {
-    size_t i = 0;
-    while (p_lab_ < (ppbar_elastic_[i])[0])
-      i++;
-    return parametrization_(ppbar_elastic_[i]);
-  /* pn-scattering */
+    return ppbar_elastic(p_lab_);
+  /* np-scattering */
   } else {
-    size_t i = 0;
-    while (p_lab_ < (pn_elastic_[i])[0])
-      i++;
-    return parametrization_(pn_elastic_[i]);
+    return np_elastic(p_lab_, mandelstam_s_, sqrt(squared_mass_a_));
   }
 }
 
@@ -152,22 +144,13 @@ float CrossSections::total(Particles *particles, int id_a, int id_b)
   /* For baryon-baryon, we have to check the parametrized cross sections */
   /* pp-scattering */
   if (particles->type(id_a).pdgcode() == particles->type(id_b).pdgcode()) {
-    size_t i = 0;
-    while (p_lab_ < (pp_total_[i])[0])
-      i++;
-    return parametrization_(pp_total_[i]);
+    return pp_total(p_lab_);
   /* ppbar-scattering */
   } else if (abs(particles->type(id_a).pdgcode())
           == abs(particles->type(id_b).pdgcode())) {
-    size_t i = 0;
-    while (p_lab_ < (ppbar_total_[i])[0])
-      i++;
-    return parametrization_(ppbar_total_[i]);
-  /* pn-scattering */
+    return ppbar_total(p_lab_);
+  /* np-scattering */
   } else {
-    size_t i = 0;
-    while (p_lab_ < (pn_total_[i])[0])
-      i++;
-    return parametrization_(pn_total_[i]);
+    return np_total(p_lab_);
   }
 }

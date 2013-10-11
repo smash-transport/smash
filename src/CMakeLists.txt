@@ -4,7 +4,8 @@ include(CheckLibraryExists)
 set(smash_src clebschgordan.cc collisions.cc cross-sections.cc
         decays.cc distributions.cc fourvector.cc
 	initial-conditions.cc input-cross-sections.cc input-decaymodes.cc
-        input-particles.cc param-reader.cc particles.cc propagation.cc
+        input-particles.cc param-reader.cc parametrizations.cc
+        particles.cc propagation.cc
         outputroutines.cc resonances.cc time.cc)
 
 add_executable(mash box.cc ${smash_src})
