@@ -3,7 +3,7 @@ include(CheckLibraryExists)
 # list the source files
 set(smash_src clebschgordan.cc collisions.cc cross-sections.cc
         decays.cc distributions.cc fourvector.cc
-	initial-conditions.cc input-cross-sections.cc input-decaymodes.cc
+	initial-conditions.cc input-decaymodes.cc
         input-particles.cc param-reader.cc parametrizations.cc
         particles.cc propagation.cc
         outputroutines.cc resonances.cc time.cc)
@@ -24,7 +24,6 @@ include_directories("${PROJECT_BINARY_DIR}/src")
 file(COPY params.txt DESTINATION ..)
 file(COPY particles.txt DESTINATION ..)
 file(COPY decaymodes.txt DESTINATION ..)
-file(COPY cross-sections.txt DESTINATION ..)
 
 # link with gsl and maybe rt
 CHECK_LIBRARY_EXISTS(rt clock_gettime "time.h" HAVE_CLOCK_GETTIME)
