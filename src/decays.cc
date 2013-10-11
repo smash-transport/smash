@@ -101,6 +101,7 @@ size_t decay_particles(Particles *particles, std::list<int> *decay_list,
     printd_momenta("Boosted resonance momenta before decay",
                    particles->data(id_a));
 
+    size_t old_max_id = particles->id_max();
     size_t id_new_a = resonance_decay(particles, id_a);
     size_t id_new_b = id_new_a + 1;
 
@@ -113,11 +114,28 @@ size_t decay_particles(Particles *particles, std::list<int> *decay_list,
     write_oscar(particles->data(id_new_a), particles->type(id_new_a));
     write_oscar(particles->data(id_new_b), particles->type(id_new_b));
 
+    size_t new_particles = particles->id_max() - old_max_id;
+    if (new_particles == 3) {
+      size_t id_new_c = id_new_b + 1;
+      FourVector momentum_c(particles->data(id_new_c).momentum());
+      FourVector position_c(particles->data(id_new_c).position());
+      /* Boost the momenta back to lab frame */
+      momentum_c = momentum_c.LorentzBoost(velocity_CM);
+      /* Boost the positions back to lab frame */
+      position_c = position_c.LorentzBoost(velocity_CM);
+
+      particles->data_pointer(id_new_c)->set_momentum(momentum_c);
+      particles->data_pointer(id_new_c)->set_position(position_c);
+      write_oscar(particles->data(id_new_c), particles->type(id_new_c));
+    }
+
     printd_momenta("particle 1 momenta in comp", particles->data(id_new_a));
     printd_momenta("particle 2 momenta in comp", particles->data(id_new_b));
 
     FourVector final_momentum(particles->data(id_new_a).momentum()
       + particles->data(id_new_b).momentum());
+    if (new_particles == 3)
+      final_momentum += particles->data(id_new_b + 1).momentum();
 
     /* unset collision time for both particles + keep id + unset partner */
     particles->data_pointer(id_new_a)->set_collision_past(id_process);

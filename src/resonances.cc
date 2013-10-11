@@ -256,7 +256,137 @@ int one_to_two(Particles *particles, int resonance_id, int type_a, int type_b) {
 /* 1->3 process kinematics */
 int one_to_three(Particles *particles, int resonance_id,
                  int type_a, int type_b, int type_c) {
-  return 0;
+  /* Add three new particles */
+  ParticleData new_particle_a, new_particle_b, new_particle_c;
+  new_particle_a.set_pdgcode(type_a);
+  new_particle_b.set_pdgcode(type_b);
+  new_particle_c.set_pdgcode(type_c);
+
+  const double mass_a = particles->particle_type(type_a).mass(),
+    mass_b = particles->particle_type(type_b).mass(),
+    mass_c = particles->particle_type(type_c).mass(),
+    mass_resonance = particles->type(resonance_id).mass();
+
+  /* mandelstam-s limits for pairs ab and bc */
+  double s_ab_max = (mass_resonance - mass_c) * (mass_resonance - mass_c);
+  double s_ab_min = (mass_a + mass_b) * (mass_a + mass_b);
+  double s_bc_max = (mass_resonance - mass_a) * (mass_resonance - mass_a);
+  double s_bc_min = (mass_b + mass_c) * (mass_b + mass_c);
+
+  /* randomly pick values for s_ab and s_bc
+   * until the pair is within the Dalitz plot */
+  double dalitz_bc_max = 0.0, dalitz_bc_min = 1.0;
+  double s_ab = 0.0, s_bc = 0.5;
+  while (s_bc > dalitz_bc_max || s_bc < dalitz_bc_min) {
+    s_ab = (s_ab_max - s_ab_min) * drand48() + s_ab_min;
+    s_bc = (s_bc_max - s_bc_min) * drand48() + s_bc_min;
+    double e_b_rest = sqrt((s_ab - mass_a * mass_a + mass_b * mass_b)
+                           / (2 * sqrt(s_ab)));
+    double e_c_rest = sqrt((mass_resonance * mass_resonance - s_ab
+                            - mass_c * mass_c) / (2 * sqrt(s_ab)));
+    dalitz_bc_max = (e_b_rest + e_c_rest) * (e_b_rest + e_c_rest)
+      - (sqrt(e_b_rest * e_b_rest - mass_b * mass_b)
+         - sqrt(e_c_rest * e_c_rest - mass_c * mass_c))
+      * (sqrt(e_b_rest * e_b_rest - mass_b * mass_b)
+         - sqrt(e_c_rest * e_c_rest - mass_c * mass_c));
+    dalitz_bc_min = (e_b_rest + e_c_rest) * (e_b_rest + e_c_rest)
+      - (sqrt(e_b_rest * e_b_rest - mass_b * mass_b)
+         + sqrt(e_c_rest * e_c_rest - mass_c * mass_c))
+      * (sqrt(e_b_rest * e_b_rest - mass_b * mass_b)
+         + sqrt(e_c_rest * e_c_rest - mass_c * mass_c));
+  }
+
+  /* Compute energy and momentum magnitude */
+  const double momentum_c
+    = sqrt((mass_resonance * mass_resonance
+            - (sqrt(s_ab) + mass_c) * (sqrt(s_ab) + mass_c))
+         * (mass_resonance * mass_resonance
+            - (sqrt(s_ab) - mass_c) * (sqrt(s_ab) - mass_c)))
+        / (2 * mass_resonance);
+  const double energy_c = sqrt(mass_c * mass_c + momentum_c * momentum_c);
+  const double momentum_a
+    = sqrt((mass_resonance * mass_resonance
+            - (sqrt(s_bc) + mass_a) * (sqrt(s_bc) + mass_a))
+         * (mass_resonance * mass_resonance
+            - (sqrt(s_bc) - mass_a) * (sqrt(s_bc) - mass_a)))
+        / (2 * mass_resonance);
+  const double energy_a = sqrt(mass_a * mass_a + momentum_c * momentum_c);
+  const double total_energy = particles->data(resonance_id).momentum().x0();
+  const double energy_b = total_energy - energy_a - energy_c;
+  const double momentum_b = sqrt(energy_b * energy_b - mass_b * mass_b);
+
+  /* momentum_a direction is random */
+  /* phi in the range from [0, 2 * pi) */
+  /* This is the angle of the plane of the three decay particles */
+  double phi = 2.0 * M_PI * drand48();
+  /* cos(theta) in the range from [-1.0, 1.0) */
+  double cos_theta_a = -1.0 + 2.0 * drand48();
+  double sin_theta_a = sqrt(1.0 - cos_theta_a * cos_theta_a);
+  if (energy_a  < mass_a || abs(cos_theta_a) > 1) {
+    printf("Particle %d radial momenta %g phi %g cos_theta %g\n", type_a,
+           momentum_a, phi, cos_theta_a);
+    printf("Etot: %g m_a: %g m_b %g E_a: %g", total_energy, mass_a, mass_b,
+           energy_a);
+  }
+  new_particle_a.set_momentum(mass_a,
+                              momentum_a * cos(phi) * sin_theta_a,
+                              momentum_a * sin(phi) * sin_theta_a,
+                              momentum_a * cos_theta_a);
+
+  /* Angle between a and b */
+  double cos_theta_ab = (energy_a * energy_b - 0.5 *(s_ab - mass_a * mass_a
+                         - mass_b * mass_b)) / (momentum_a * momentum_b);
+  double sin_theta_ab = sqrt(1.0 - cos_theta_ab * cos_theta_ab);
+  /* b angle is sum of a angle and ab angle */
+  double cos_theta_b = cos_theta_a * cos_theta_ab - sin_theta_a * sin_theta_ab;
+  double sin_theta_b = sqrt(1.0 - cos_theta_b * cos_theta_b);
+  new_particle_b.set_momentum(mass_b,
+                              momentum_b * cos(phi) * sin_theta_b,
+                              momentum_b * sin(phi) * sin_theta_b,
+                              momentum_b * cos_theta_b);
+
+  /* Angle between b and c */
+  double cos_theta_bc = (energy_b * energy_c - 0.5 *(s_bc - mass_b * mass_b
+                         - mass_c * mass_c)) / (momentum_b * momentum_c);
+  double sin_theta_bc = sqrt(1.0 - cos_theta_bc * cos_theta_bc);
+  /* c angle is sum of b angle and bc angle */
+  double cos_theta_c = cos_theta_b * cos_theta_bc - sin_theta_b * sin_theta_bc;
+  double sin_theta_c = sqrt(1.0 - cos_theta_c * cos_theta_c);
+  new_particle_c.set_momentum(mass_c,
+                              momentum_c * cos(phi) * sin_theta_c,
+                              momentum_c * sin(phi) * sin_theta_c,
+                              momentum_c * cos_theta_c);
+
+  /* All decay products begin from the same point */
+  FourVector decay_point = particles->data(resonance_id).position();
+  new_particle_a.set_position(decay_point);
+  new_particle_b.set_position(decay_point);
+  new_particle_c.set_position(decay_point);
+
+  /* No collision yet */
+  new_particle_a.set_collision(-1, 0, -1);
+  new_particle_b.set_collision(-1, 0, -1);
+  new_particle_c.set_collision(-1, 0, -1);
+
+  /* Assign IDs to new particles */
+  int new_id_a = particles->id_max() + 1;
+  int new_id_b = new_id_a + 1;
+  int new_id_c = new_id_b + 1;
+  new_particle_a.set_id(new_id_a);
+  new_particle_b.set_id(new_id_b);
+  new_particle_c.set_id(new_id_c);
+
+  particles->add_data(new_particle_a);
+  particles->add_data(new_particle_b);
+  particles->add_data(new_particle_c);
+
+  printd("Created %s %s %s with IDs %d %d %d \n",
+         particles->type(new_id_a).name().c_str(),
+         particles->type(new_id_b).name().c_str(),
+         particles->type(new_id_c).name().c_str(),
+         new_id_a, new_id_b, new_id_c);
+
+  return new_id_a;
 }
 
 /* Resonance decay process */
