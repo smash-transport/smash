@@ -10,10 +10,12 @@
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
+#include <vector>
 
 #include "include/param-reader.h"
 #include "include/Box.h"
 #include "include/Laboratory.h"
+#include "include/Parameters.h"
 #include "include/outputroutines.h"
 
 /* XXX: hardcoded length cap */
@@ -22,8 +24,8 @@
 /* space separation between items */
 const char *sep = " \t\n";
 
-/* process_params - read in params */
-void process_params(Box *box, Laboratory *parameters, char *path) {
+/* process_params - read in all params into vetor */
+void process_params(char *path, std::vector<Parameters> *configuration) {
   char *line = NULL, *saveptr = NULL, params[FILELEN];
   size_t len = 0;
   ssize_t read;
@@ -56,6 +58,22 @@ void process_params(Box *box, Laboratory *parameters, char *path) {
     if (value == NULL)
       continue;
 
+    Parameters parameter(key, value);
+    configuration->push_back(parameter);
+    printd("%s %s\n", configuration->back().key(),
+           configruation->back().value());
+  }
+  free(line);
+  fclose(fp);
+}
+
+void assign_params(std::vector<Parameters> *configuration,
+  Laboratory *parameters) {
+  for (std::vector<Parameters>::iterator i = configuration->begin();
+       i != configuration->end(); ++i) {
+    char *key = i->key();
+    char *value = i->value();
+
     /* integer values */
     if (strcmp(key, "STEPS") == 0) {
       parameters->set_steps(abs(atoi(value)));
@@ -84,10 +102,6 @@ void process_params(Box *box, Laboratory *parameters, char *path) {
 
 
     /* double or float values */
-    if (strcmp(key, "LENGTH") == 0) {
-      box->set_length(fabs(atof(value)));
-      continue;
-    }
     if (strcmp(key, "EPS") == 0) {
       parameters->set_eps(fabs(atof(value)));
       continue;
@@ -96,14 +110,23 @@ void process_params(Box *box, Laboratory *parameters, char *path) {
       parameters->set_cross_section(fabs(atof(value)));
       continue;
     }
+  }
+}
+
+void assign_params(std::vector<Parameters> *configuration, Box *box) {
+  for (std::vector<Parameters>::iterator i = configuration->begin();
+       i != configuration->end(); ++i) {
+    char *key = i->key();
+    char *value = i->value();
+
+    /* double or float values */
+    if (strcmp(key, "LENGTH") == 0) {
+      box->set_length(fabs(atof(value)));
+      continue;
+    }
     if (strcmp(key, "TEMPERATURE") == 0) {
       box->set_temperature(fabs(atof(value)));
       continue;
     }
-
-    /* unknown value */
-    fprintf(stderr, "E: unknown param %s set to %s\n", key, value);
   }
-  free(line);
-  fclose(fp);
 }
