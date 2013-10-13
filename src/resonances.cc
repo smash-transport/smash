@@ -262,10 +262,11 @@ int one_to_three(Particles *particles, int resonance_id,
   new_particle_b.set_pdgcode(type_b);
   new_particle_c.set_pdgcode(type_c);
 
+  FourVector momentum_resonance = particles->data(resonance_id).momentum();
   const double mass_a = particles->particle_type(type_a).mass(),
     mass_b = particles->particle_type(type_b).mass(),
     mass_c = particles->particle_type(type_c).mass(),
-    mass_resonance = particles->type(resonance_id).mass();
+    mass_resonance = sqrt(momentum_resonance.Dot(momentum_resonance));
 
   /* mandelstam-s limits for pairs ab and bc */
   double s_ab_max = (mass_resonance - mass_c) * (mass_resonance - mass_c);
@@ -273,17 +274,21 @@ int one_to_three(Particles *particles, int resonance_id,
   double s_bc_max = (mass_resonance - mass_a) * (mass_resonance - mass_a);
   double s_bc_min = (mass_b + mass_c) * (mass_b + mass_c);
 
+  printd("s_ab limits: %g %g \n", s_ab_min, s_ab_max);
+  printd("s_bc limits: %g %g \n", s_bc_min, s_bc_max);
+
   /* randomly pick values for s_ab and s_bc
    * until the pair is within the Dalitz plot */
   double dalitz_bc_max = 0.0, dalitz_bc_min = 1.0;
   double s_ab = 0.0, s_bc = 0.5;
+  double e_b_rest = 0.0, e_c_rest = 0.0;
   while (s_bc > dalitz_bc_max || s_bc < dalitz_bc_min) {
     s_ab = (s_ab_max - s_ab_min) * drand48() + s_ab_min;
     s_bc = (s_bc_max - s_bc_min) * drand48() + s_bc_min;
-    double e_b_rest = sqrt((s_ab - mass_a * mass_a + mass_b * mass_b)
-                           / (2 * sqrt(s_ab)));
-    double e_c_rest = sqrt((mass_resonance * mass_resonance - s_ab
-                            - mass_c * mass_c) / (2 * sqrt(s_ab)));
+    e_b_rest = (s_ab - mass_a * mass_a + mass_b * mass_b)
+                           / (2 * sqrt(s_ab));
+    e_c_rest = (mass_resonance * mass_resonance - s_ab
+                            - mass_c * mass_c) / (2 * sqrt(s_ab));
     dalitz_bc_max = (e_b_rest + e_c_rest) * (e_b_rest + e_c_rest)
       - (sqrt(e_b_rest * e_b_rest - mass_b * mass_b)
          - sqrt(e_c_rest * e_c_rest - mass_c * mass_c))
@@ -296,24 +301,25 @@ int one_to_three(Particles *particles, int resonance_id,
          + sqrt(e_c_rest * e_c_rest - mass_c * mass_c));
   }
 
+  printd("s_ab: %g eb_rest: %g ec_rest: %g \n", s_ab, e_b_rest, e_c_rest);
+  printd("s_bc: %g min: %g max: %g\n", s_bc, dalitz_bc_min, dalitz_bc_max);
+
   /* Compute energy and momentum magnitude */
-  const double momentum_c
-    = sqrt((mass_resonance * mass_resonance
-            - (sqrt(s_ab) + mass_c) * (sqrt(s_ab) + mass_c))
-         * (mass_resonance * mass_resonance
-            - (sqrt(s_ab) - mass_c) * (sqrt(s_ab) - mass_c)))
-        / (2 * mass_resonance);
-  const double energy_c = sqrt(mass_c * mass_c + momentum_c * momentum_c);
-  const double momentum_a
-    = sqrt((mass_resonance * mass_resonance
-            - (sqrt(s_bc) + mass_a) * (sqrt(s_bc) + mass_a))
-         * (mass_resonance * mass_resonance
-            - (sqrt(s_bc) - mass_a) * (sqrt(s_bc) - mass_a)))
-        / (2 * mass_resonance);
-  const double energy_a = sqrt(mass_a * mass_a + momentum_c * momentum_c);
-  const double total_energy = particles->data(resonance_id).momentum().x0();
-  const double energy_b = total_energy - energy_a - energy_c;
+  const double energy_a = (mass_resonance * mass_resonance + mass_a * mass_a
+                           - s_bc) / (2 * mass_resonance);
+  const double energy_c = (mass_resonance * mass_resonance + mass_c * mass_c
+                           - s_ab) / (2 * mass_resonance);
+  const double energy_b = (s_ab + s_bc - mass_a * mass_a - mass_c * mass_c)
+                           / (2 * mass_resonance);
+  const double momentum_a = sqrt(energy_a * energy_a - mass_a * mass_a);
+  const double momentum_c = sqrt(energy_c * energy_c - mass_c * mass_c);
   const double momentum_b = sqrt(energy_b * energy_b - mass_b * mass_b);
+
+  const double total_energy = momentum_resonance.x0();
+  if (fabs(energy_a + energy_b + energy_c - total_energy) > really_small)
+    printf("1->3 warning: Ea + Eb + Ec: %g Total E: %g",
+           energy_a + energy_b + energy_c, total_energy);
+  printd("Calculating the angles...\n");
 
   /* momentum_a direction is random */
   /* phi in the range from [0, 2 * pi) */
@@ -322,40 +328,52 @@ int one_to_three(Particles *particles, int resonance_id,
   /* cos(theta) in the range from [-1.0, 1.0) */
   double cos_theta_a = -1.0 + 2.0 * drand48();
   double sin_theta_a = sqrt(1.0 - cos_theta_a * cos_theta_a);
-  if (energy_a  < mass_a || abs(cos_theta_a) > 1) {
-    printf("Particle %d radial momenta %g phi %g cos_theta %g\n", type_a,
-           momentum_a, phi, cos_theta_a);
-    printf("Etot: %g m_a: %g m_b %g E_a: %g", total_energy, mass_a, mass_b,
-           energy_a);
-  }
   new_particle_a.set_momentum(mass_a,
                               momentum_a * cos(phi) * sin_theta_a,
                               momentum_a * sin(phi) * sin_theta_a,
                               momentum_a * cos_theta_a);
 
   /* Angle between a and b */
-  double cos_theta_ab = (energy_a * energy_b - 0.5 *(s_ab - mass_a * mass_a
-                         - mass_b * mass_b)) / (momentum_a * momentum_b);
-  double sin_theta_ab = sqrt(1.0 - cos_theta_ab * cos_theta_ab);
+  double theta_ab = acos((energy_a * energy_b - 0.5 * (s_ab - mass_a * mass_a
+                          - mass_b * mass_b)) / (momentum_a * momentum_b));
+  printd("theta_ab: %g Ea: %g Eb: %g sab: %g pa: %g pb: %g\n",
+         theta_ab, energy_a, energy_b, s_ab, momentum_a, momentum_b);
   /* b angle is sum of a angle and ab angle */
-  double cos_theta_b = cos_theta_a * cos_theta_ab - sin_theta_a * sin_theta_ab;
-  double sin_theta_b = sqrt(1.0 - cos_theta_b * cos_theta_b);
+  double theta_b = theta_ab + acos(cos_theta_a);
   new_particle_b.set_momentum(mass_b,
-                              momentum_b * cos(phi) * sin_theta_b,
-                              momentum_b * sin(phi) * sin_theta_b,
-                              momentum_b * cos_theta_b);
+                              momentum_b * cos(phi) * sin(theta_b),
+                              momentum_b * sin(phi) * sin(theta_b),
+                              momentum_b * cos(theta_b));
 
   /* Angle between b and c */
-  double cos_theta_bc = (energy_b * energy_c - 0.5 *(s_bc - mass_b * mass_b
-                         - mass_c * mass_c)) / (momentum_b * momentum_c);
-  double sin_theta_bc = sqrt(1.0 - cos_theta_bc * cos_theta_bc);
+  double theta_bc = acos((energy_b * energy_c - 0.5 *(s_bc - mass_b * mass_b
+                         - mass_c * mass_c)) / (momentum_b * momentum_c));
+  printd("theta_bc: %g Eb: %g Ec: %g sbc: %g pb: %g pc: %g\n",
+         theta_bc, energy_b, energy_c, s_bc, momentum_b, momentum_c);
   /* c angle is sum of b angle and bc angle */
-  double cos_theta_c = cos_theta_b * cos_theta_bc - sin_theta_b * sin_theta_bc;
-  double sin_theta_c = sqrt(1.0 - cos_theta_c * cos_theta_c);
+  double theta_c = theta_bc + theta_b;
   new_particle_c.set_momentum(mass_c,
-                              momentum_c * cos(phi) * sin_theta_c,
-                              momentum_c * sin(phi) * sin_theta_c,
-                              momentum_c * cos_theta_c);
+                              momentum_c * cos(phi) * sin(theta_c),
+                              momentum_c * sin(phi) * sin(theta_c),
+                              momentum_c * cos(theta_c));
+
+  /* Momentum check */
+  double energy = new_particle_a.momentum().x0()
+    + new_particle_b.momentum().x0() + new_particle_c.momentum().x0();
+  double px = new_particle_a.momentum().x1() + new_particle_b.momentum().x1()
+    + new_particle_c.momentum().x1();
+  double py = new_particle_a.momentum().x2() + new_particle_b.momentum().x2()
+    + new_particle_c.momentum().x2();
+  double pz = new_particle_a.momentum().x3() + new_particle_b.momentum().x3()
+    + new_particle_c.momentum().x3();
+
+  if (fabs(energy - total_energy) > really_small)
+    printf("1->3 energy not conserved! Before: %g After: %g",
+           total_energy, energy);
+
+  if (px > really_small || py > really_small || pz > really_small)
+    printf("1->3 momentum check failed. Total momentum: %g %g %g\n",
+           px, py, pz);
 
   /* All decay products begin from the same point */
   FourVector decay_point = particles->data(resonance_id).position();
@@ -385,6 +403,15 @@ int one_to_three(Particles *particles, int resonance_id,
          particles->type(new_id_b).name().c_str(),
          particles->type(new_id_c).name().c_str(),
          new_id_a, new_id_b, new_id_c);
+
+  printd("p0: %g %g %g \n", new_particle_a.momentum().x0(),
+         new_particle_b.momentum().x0(), new_particle_c.momentum().x0());
+  printd("p1: %g %g %g \n", new_particle_a.momentum().x1(),
+         new_particle_b.momentum().x1(), new_particle_c.momentum().x1());
+  printd("p2: %g %g %g \n", new_particle_a.momentum().x2(),
+         new_particle_b.momentum().x2(), new_particle_c.momentum().x2());
+  printd("p3: %g %g %g \n", new_particle_a.momentum().x3(),
+         new_particle_b.momentum().x3(), new_particle_c.momentum().x3());
 
   return new_id_a;
 }
@@ -433,6 +460,7 @@ int resonance_decay(Particles *particles, int particle_id) {
   if (decay_particles == 2) {
     new_id_a = one_to_two(particles, particle_id, type_a, type_b);
   } else if (decay_particles == 3) {
+    printd("Note: Doing 1->3 decay!\n");
     new_id_a = one_to_three(particles, particle_id, type_a, type_b, type_c);
   }
   return new_id_a;

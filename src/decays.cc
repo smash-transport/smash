@@ -63,7 +63,7 @@ void check_decays(Particles *particles, std::list<int> *decay_list,
 
 
 
-/* colliding_particle - particle interaction */
+/* 1->2 and 1->3 decay processes */
 size_t decay_particles(Particles *particles, std::list<int> *decay_list,
   size_t id_process) {
   FourVector velocity_CM;
@@ -115,14 +115,18 @@ size_t decay_particles(Particles *particles, std::list<int> *decay_list,
     write_oscar(particles->data(id_new_b), particles->type(id_new_b));
 
     size_t new_particles = particles->id_max() - old_max_id;
+    int id_new_c = -1;
     if (new_particles == 3) {
-      size_t id_new_c = id_new_b + 1;
+      id_new_c = id_new_b + 1;
+      FourVector velocity = velocity_CM;
+      velocity *= -1;
+      velocity.set_x0(1.0);
       FourVector momentum_c(particles->data(id_new_c).momentum());
       FourVector position_c(particles->data(id_new_c).position());
       /* Boost the momenta back to lab frame */
-      momentum_c = momentum_c.LorentzBoost(velocity_CM);
+      momentum_c = momentum_c.LorentzBoost(velocity);
       /* Boost the positions back to lab frame */
-      position_c = position_c.LorentzBoost(velocity_CM);
+      position_c = position_c.LorentzBoost(velocity);
 
       particles->data_pointer(id_new_c)->set_momentum(momentum_c);
       particles->data_pointer(id_new_c)->set_position(position_c);
@@ -148,9 +152,14 @@ size_t decay_particles(Particles *particles, std::list<int> *decay_list,
     momentum_difference += initial_momentum;
     momentum_difference -= final_momentum;
     if (fabs(momentum_difference.x0()) > really_small) {
-      printf("Process %zu type %i particle %s decay to %zu and %zu time %g\n",
+      printf("Process %zu type %i particle %s decay to %s and %s ",
         id_process, interaction_type, particles->type(id_a).name().c_str(),
-             id_new_a, id_new_b, particles->data(id_a).position().x0());
+             particles->type(id_new_a).name().c_str(),
+             particles->type(id_new_b).name().c_str());
+      if (new_particles == 3) {
+        printf("and %s ", particles->type(id_new_c).name().c_str());
+      }
+      printf("time %g\n", particles->data(id_a).position().x0());
       printf("Warning: Interaction type %i E conservation violation %g\n",
              interaction_type, momentum_difference.x0());
     }
