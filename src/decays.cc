@@ -138,12 +138,14 @@ size_t decay_particles(Particles *particles, std::list<int> *decay_list,
 
     FourVector final_momentum(particles->data(id_new_a).momentum()
       + particles->data(id_new_b).momentum());
-    if (new_particles == 3)
-      final_momentum += particles->data(id_new_b + 1).momentum();
 
     /* unset collision time for both particles + keep id + unset partner */
     particles->data_pointer(id_new_a)->set_collision_past(id_process);
     particles->data_pointer(id_new_b)->set_collision_past(id_process);
+    if (new_particles == 3) {
+      final_momentum += particles->data(id_new_c).momentum();
+      particles->data_pointer(id_new_c)->set_collision_past(id_process);
+    }
     printd("Particle map has now %zu elements. \n", particles->size());
 
     id_process++;
