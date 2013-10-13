@@ -281,13 +281,12 @@ int one_to_three(Particles *particles, int resonance_id,
    * until the pair is within the Dalitz plot */
   double dalitz_bc_max = 0.0, dalitz_bc_min = 1.0;
   double s_ab = 0.0, s_bc = 0.5;
-  double e_b_rest = 0.0, e_c_rest = 0.0;
   while (s_bc > dalitz_bc_max || s_bc < dalitz_bc_min) {
     s_ab = (s_ab_max - s_ab_min) * drand48() + s_ab_min;
     s_bc = (s_bc_max - s_bc_min) * drand48() + s_bc_min;
-    e_b_rest = (s_ab - mass_a * mass_a + mass_b * mass_b)
+    double e_b_rest = (s_ab - mass_a * mass_a + mass_b * mass_b)
                            / (2 * sqrt(s_ab));
-    e_c_rest = (mass_resonance * mass_resonance - s_ab
+    double e_c_rest = (mass_resonance * mass_resonance - s_ab
                             - mass_c * mass_c) / (2 * sqrt(s_ab));
     dalitz_bc_max = (e_b_rest + e_c_rest) * (e_b_rest + e_c_rest)
       - (sqrt(e_b_rest * e_b_rest - mass_b * mass_b)
@@ -301,8 +300,8 @@ int one_to_three(Particles *particles, int resonance_id,
          + sqrt(e_c_rest * e_c_rest - mass_c * mass_c));
   }
 
-  printd("s_ab: %g eb_rest: %g ec_rest: %g \n", s_ab, e_b_rest, e_c_rest);
-  printd("s_bc: %g min: %g max: %g\n", s_bc, dalitz_bc_min, dalitz_bc_max);
+  printd("s_ab: %g s_bc: %g min: %g max: %g\n",
+         s_ab, s_bc, dalitz_bc_min, dalitz_bc_max);
 
   /* Compute energy and momentum magnitude */
   const double energy_a = (mass_resonance * mass_resonance + mass_a * mass_a
