@@ -102,6 +102,7 @@ void input_decaymodes(Particles *particles, char *path) {
         /* Check if ratios add to 1 */
         if (fabs(ratio_sum - 1.0) > really_small) {
           /* They didn't; renormalize */
+          printf("Particle %i:\n", pdgcode);
           decay_modes.renormalize(ratio_sum);
         }
         /* Add the list of decay modes for this particle type */
