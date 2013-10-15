@@ -5,7 +5,7 @@
 #ifndef SRC_INCLUDE_PARAM_READER_H_
 #define SRC_INCLUDE_PARAM_READER_H_
 
-#include <vector>
+#include <list>
 
 /* forward declaration */
 class Box;
@@ -15,9 +15,8 @@ class Parameters;
 extern const char *sep;
 
 /* read params file parameters */
-void process_params(char *paramfile, std::vector<Parameters> *configuration);
-void assign_params(std::vector<Parameters> *configuration,
-  Laboratory *lab);
-void assign_params(std::vector<Parameters> *configuration, Box *box);
+void process_params(char *paramfile, std::list<Parameters> *configuration);
+void assign_params(std::list<Parameters> *configuration, Laboratory *lab);
+void assign_params(std::list<Parameters> *configuration, Box *box);
 
 #endif  // SRC_INCLUDE_PARAM_READER_H_

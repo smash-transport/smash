@@ -336,7 +336,7 @@ int main(int argc, char *argv[]) {
   printf("%s (%d)\n", progname, VERSION_MAJOR);
 
   /* Read config file overrides box constructor defaults */
-  std::vector<Parameters> configuration;
+  std::list<Parameters> configuration;
   int len = 3;
   path = reinterpret_cast<char *>(malloc(len));
   /* XXX: make path configurable */

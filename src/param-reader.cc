@@ -10,7 +10,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
-#include <vector>
+#include <list>
 
 #include "include/param-reader.h"
 #include "include/Box.h"
@@ -25,7 +25,7 @@
 const char *sep = " \t\n";
 
 /* process_params - read in all params into vetor */
-void process_params(char *path, std::vector<Parameters> *configuration) {
+void process_params(char *path, std::list<Parameters> *configuration) {
   char *line = NULL, *saveptr = NULL, params[FILELEN];
   size_t len = 0;
   ssize_t read;
@@ -61,23 +61,26 @@ void process_params(char *path, std::vector<Parameters> *configuration) {
     Parameters parameter(key, value);
     configuration->push_back(parameter);
     printd("%s %s\n", configuration->back().key(),
-           configruation->back().value());
+           configuration->back().value());
   }
   free(line);
   fclose(fp);
+  printd("Read all params.txt.\n");
 }
 
-void assign_params(std::vector<Parameters> *configuration,
+void assign_params(std::list<Parameters> *configuration,
   Laboratory *parameters) {
-  for (std::vector<Parameters>::iterator i = configuration->begin();
+  bool match = false;
+  for (std::list<Parameters>::iterator i = configuration->begin();
        i != configuration->end(); ++i) {
     char *key = i->key();
     char *value = i->value();
+    printd("%s %s\n", key, value);
 
     /* integer values */
     if (strcmp(key, "STEPS") == 0) {
       parameters->set_steps(abs(atoi(value)));
-      continue;
+      match = true;
     }
     if (strcmp(key, "RANDOMSEED") == 0) {
       /* negative seed means random startup value */
@@ -85,48 +88,61 @@ void assign_params(std::vector<Parameters> *configuration,
         parameters->set_seed(atol(value));
       else
         parameters->set_seed(time(NULL));
-      continue;
+      match = true;
     }
     if (strcmp(key, "UPDATE") == 0) {
       parameters->set_output_interval(abs(atoi(value)));
-      continue;
+      match = true;
     }
     if (strcmp(key, "TESTPARTICLES") == 0) {
       parameters->set_testparticles(abs(atoi(value)));
-      continue;
+      match = true;
     }
     if (strcmp(key, "INITIAL_CONDITION") == 0) {
       parameters->set_initial_condition(abs(atoi(value)));
-      continue;
+      match = true;
     }
 
 
     /* double or float values */
     if (strcmp(key, "EPS") == 0) {
       parameters->set_eps(fabs(atof(value)));
-      continue;
+      match = true;
     }
     if (strcmp(key, "SIGMA") == 0) {
       parameters->set_cross_section(fabs(atof(value)));
-      continue;
+      match = true;
+    }
+
+    /* remove processed entry */
+    if (match) {
+      i = configuration->erase(i);
+      match = false;
     }
   }
 }
 
-void assign_params(std::vector<Parameters> *configuration, Box *box) {
-  for (std::vector<Parameters>::iterator i = configuration->begin();
+void assign_params(std::list<Parameters> *configuration, Box *box) {
+  bool match = false;
+  for (std::list<Parameters>::iterator i = configuration->begin();
        i != configuration->end(); ++i) {
     char *key = i->key();
     char *value = i->value();
+    printd("%s %s\n", key, value);
 
     /* double or float values */
     if (strcmp(key, "LENGTH") == 0) {
       box->set_length(fabs(atof(value)));
-      continue;
+      match = true;
     }
     if (strcmp(key, "TEMPERATURE") == 0) {
       box->set_temperature(fabs(atof(value)));
-      continue;
+      match = true;
+    }
+    /* remove processed entry */
+    if (match) {
+      i = configuration->erase(i);
+      match = false;
     }
   }
 }
