@@ -102,6 +102,10 @@ void assign_params(std::list<Parameters> *configuration,
       parameters->set_initial_condition(abs(atoi(value)));
       match = true;
     }
+    if (strcmp(key, "MODUS") == 0) {
+      parameters->set_modus(abs(atoi(value)));
+      match = true;
+    }
 
 
     /* double or float values */
