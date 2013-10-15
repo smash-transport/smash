@@ -71,11 +71,11 @@ void process_params(char *path, std::list<Parameters> *configuration) {
 void assign_params(std::list<Parameters> *configuration,
   Laboratory *parameters) {
   bool match = false;
-  for (std::list<Parameters>::iterator i = configuration->begin();
-       i != configuration->end(); ++i) {
+  std::list<Parameters>::iterator i = configuration->begin();
+  while (i != configuration->end()) {
     char *key = i->key();
     char *value = i->value();
-    printd("%s %s\n", key, value);
+    printf("checking %s %s\n", key, value);
 
     /* integer values */
     if (strcmp(key, "STEPS") == 0) {
@@ -116,16 +116,19 @@ void assign_params(std::list<Parameters> *configuration,
 
     /* remove processed entry */
     if (match) {
+      printf("erasing %s %s\n", key, value);
       i = configuration->erase(i);
       match = false;
+    } else {
+      ++i;
     }
   }
 }
 
 void assign_params(std::list<Parameters> *configuration, Box *box) {
   bool match = false;
-  for (std::list<Parameters>::iterator i = configuration->begin();
-       i != configuration->end(); ++i) {
+  std::list<Parameters>::iterator i = configuration->begin();
+  while (i != configuration->end()) {
     char *key = i->key();
     char *value = i->value();
     printd("%s %s\n", key, value);
@@ -143,6 +146,8 @@ void assign_params(std::list<Parameters> *configuration, Box *box) {
     if (match) {
       i = configuration->erase(i);
       match = false;
+    } else {
+      ++i;
     }
   }
 }

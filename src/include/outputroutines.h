@@ -7,11 +7,14 @@
 #ifndef SRC_INCLUDE_OUTPUTROUTINES_H_
 #define SRC_INCLUDE_OUTPUTROUTINES_H_
 
+#include <list>
+
 #include "../include/Particles.h"
 
 /* forward declarations */
 class Box;
 class Laboratory;
+class Parameters;
 class ParticleData;
 class ParticleType;
 
@@ -24,6 +27,7 @@ void print_measurements(const Particles &particles,
                         const size_t &scatterings_this_interval,
                         const Box &box);
 void print_tail(const Box &box, const double &scattering_rate);
+void warn_wrong_params(std::list<Parameters> *configuration);
 
 /* data directory */
 void mkdir_data(void);

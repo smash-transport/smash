@@ -12,6 +12,7 @@
 #include <sys/stat.h>
 #include <cstdio>
 #include <ctime>
+#include <list>
 #include <map>
 #include <string>
 
@@ -19,6 +20,7 @@
 #include "include/FourVector.h"
 #include "include/Laboratory.h"
 #include "include/macros.h"
+#include "include/Parameters.h"
 #include "include/Particles.h"
 #include "include/ParticleData.h"
 #include "include/ParticleType.h"
@@ -31,6 +33,21 @@ static void print_line(void) {
   for (int i = 0; i < field_width; i++)
     printf("-");
   printf("\n");
+}
+
+/* warn_wrong_params - warn about unassigned parameters */
+void warn_wrong_params(std::list<Parameters> *configuration) {
+  if (configuration->empty())
+    return;
+
+  for (std::list<Parameters>::iterator i = configuration->begin();
+       i != configuration->end(); ++i) {
+    char *key = i->key();
+    char *value = i->value();
+    printf("W: Unused parameter %s with %s\n", key, value);
+  }
+  /* Remove as we warned about them and can't do something */
+  configuration->clear();
 }
 
 /* print_startup - console output on startup of general parameters */

@@ -7,10 +7,11 @@
 
 #include <list>
 
+#include "../include/Parameters.h"
+
 /* forward declaration */
 class Box;
 class Laboratory;
-class Parameters;
 
 extern const char *sep;
 

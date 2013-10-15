@@ -263,11 +263,15 @@ int main(int argc, char *argv[]) {
   printf("%s (%d)\n", progname, VERSION_MAJOR);
 
   /* Read config file overrides box constructor defaults */
+  std::list<Parameters> configuration;
   int len = 3;
   path = reinterpret_cast<char *>(malloc(len));
   /* XXX: make path configurable */
   snprintf(path, len, "./");
-  process_params(cube, parameters, path);
+  process_params(path, &configuration);
+  assign_params(&configuration, cube);
+  assign_params(&configuration, parameters);
+  warn_wrong_params(&configuration);
 
   /* parse the command line options, they override all previous */
   while ((opt = getopt_long(argc, argv, "e:hl:O:r:R:s:S:T:V", longopts,
