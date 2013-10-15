@@ -271,9 +271,11 @@ static int Evolve(Particles *particles, CrossSections *cross_sections,
       &collision_list, parameters, box, &rejection_conflict);
 
     /* particle interactions */
-    if (!collision_list.empty())
+    if (!collision_list.empty()) {
+      printd_list(collision_list);
       interactions_total = collide_particles(particles, &collision_list,
         interactions_total, &resonances);
+    }
 
     /* propagate all particles */
     propagate_particles(particles, parameters, box);
