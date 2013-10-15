@@ -11,8 +11,15 @@
 class Laboratory {
   public:
     /* default constructor with probable values */
-    Laboratory(): steps_(10000), output_interval_(100), initial_condition_(1),
-      testparticles_(1), eps_(0.001f), cross_section_(10.0f), seed_(1) {}
+    Laboratory(): steps_(10000), output_interval_(100), modus_(1),
+      initial_condition_(1), testparticles_(1), eps_(0.001f),
+      cross_section_(10.0f), seed_(1) {}
+    /* useful constructur for subclasses */
+    Laboratory(const Laboratory &lab): steps_(lab.steps_),
+      output_interval_(lab.output_interval_), modus_(lab.modus_),
+      initial_condition_(lab.initial_condition_),
+      testparticles_(lab.testparticles_), eps_(lab.eps_),
+      cross_section_(lab.cross_section_), seed_(lab.seed_) {}
     /* member funtions */
     inline int steps() const;
     inline void set_steps(const int &STEPS);

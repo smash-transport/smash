@@ -12,6 +12,7 @@ STEPS		10000
 // how many steps before recording measurables
 UPDATE          100
 
+// Modus Operandi of smash:
 // 
 // 1:		box
 // 2:		sphere
