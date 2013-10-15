@@ -12,6 +12,12 @@ STEPS		10000
 // how many steps before recording measurables
 UPDATE          100
 
+// 
+// 1:		box
+// 2:		sphere
+// 
+MODUS		1
+
 // initial condition
 //
 // 1:  random position box + thermal momenta
