@@ -44,9 +44,6 @@ void initial_conditions(Particles *particles, Laboratory *parameters,
   FourVector momentum_total(0, 0, 0, 0);
   size_t number_total = 0, number = 0;
 
-  /* initialize random seed */
-  srand48(parameters->seed());
-
   if (particles->types_empty()) {
     fprintf(stderr, "E: No particle types\n");
     exit(EXIT_FAILURE);

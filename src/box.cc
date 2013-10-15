@@ -396,6 +396,9 @@ int main(int argc, char *argv[]) {
   mkdir_data();
   write_oscar_header();
 
+  /* initialize random seed */
+  srand48(parameters->seed());
+
   /* Initialize box */
   input_particles(particles, path);
   initial_conditions(particles, parameters, cube);
