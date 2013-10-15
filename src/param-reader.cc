@@ -75,7 +75,7 @@ void assign_params(std::list<Parameters> *configuration,
   while (i != configuration->end()) {
     char *key = i->key();
     char *value = i->value();
-    printf("checking %s %s\n", key, value);
+    printd("checking %s %s\n", key, value);
 
     /* integer values */
     if (strcmp(key, "STEPS") == 0) {
@@ -120,7 +120,7 @@ void assign_params(std::list<Parameters> *configuration,
 
     /* remove processed entry */
     if (match) {
-      printf("erasing %s %s\n", key, value);
+      printd("erasing %s %s\n", key, value);
       i = configuration->erase(i);
       match = false;
     } else {
