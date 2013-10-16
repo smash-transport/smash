@@ -8,8 +8,7 @@ set(smash_src clebschgordan.cc collisions.cc cross-sections.cc
         particles.cc propagation.cc
         outputroutines.cc resonances.cc time.cc)
 
-add_executable(mash box.cc ${smash_src})
-add_executable(sphere sphere.cc ${smash_src})
+add_executable(smash smash.cc ${smash_src})
  
 # configure a header file to pass some of the CMake settings
 # to the source code
@@ -30,11 +29,9 @@ file(COPY decaymodes.txt DESTINATION ..)
 # link with gsl and maybe rt
 CHECK_LIBRARY_EXISTS(rt clock_gettime "time.h" HAVE_CLOCK_GETTIME)
 if(HAVE_CLOCK_GETTIME)
-  target_link_libraries(mash gsl gslcblas rt)
-  target_link_libraries(sphere gsl gslcblas rt)
+  target_link_libraries(smash gsl gslcblas rt)
 else(HAVE_CLOCK_GETTIME)
-  target_link_libraries(mash gsl gslcblas)
-  target_link_libraries(sphere gsl gslcblas)
+  target_link_libraries(smash gsl gslcblas)
 endif(HAVE_CLOCK_GETTIME)
 
 # tests:
