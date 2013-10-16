@@ -13,6 +13,6 @@ class Particles;
 /* initialisation functions */
 void initial_particles(Particles *particles);
 void initial_conditions(Particles *particles,
-  Laboratory *parameters, Box *box);
+  const Laboratory &parameters, Box *box);
 
 #endif  // SRC_INCLUDE_INITIAL_CONDITIONS_H_

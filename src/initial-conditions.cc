@@ -38,7 +38,7 @@ void initial_particles(Particles *particles) {
 }
 
 /* initial_conditions - sets particle data for @particles */
-void initial_conditions(Particles *particles, Laboratory *parameters,
+void initial_conditions(Particles *particles, const Laboratory &parameters,
   Box *box) {
   double phi, cos_theta, sin_theta, momentum_radial, number_density_total = 0;
   FourVector momentum_total(0, 0, 0, 0);
@@ -80,17 +80,17 @@ void initial_conditions(Particles *particles, Laboratory *parameters,
       * 0.5 * M_1_PI * M_1_PI / hbarc / hbarc / hbarc;
 
     /* particle number depending on IC geometry either sphere or box */
-    if (unlikely(parameters->initial_condition() == 3)) {
+    if (unlikely(parameters.initial_condition() == 3)) {
       /* cast while reflecting probability of extra particle */
       number = 4.0 / 3.0 * M_PI * box->length() * box->length() * box->length()
-        * number_density * parameters->testparticles();
+        * number_density * parameters.testparticles();
       if (4.0 / 3.0 * M_PI * box->length() * box->length() * box->length()
         * number_density - number > drand48())
         number++;
     } else {
       /* cast while reflecting probability of extra particle */
       number = box->length() * box->length() * box->length() * number_density
-        * parameters->testparticles();
+        * parameters.testparticles();
       if (box->length() * box->length() * box->length() * number_density
         - number > drand48())
         number++;
@@ -116,7 +116,7 @@ void initial_conditions(Particles *particles, Laboratory *parameters,
         /* poor last guy just sits around */
         particle_new.set_momentum(i->second.mass(), 0, 0, 0);
       } else if (!(id % 2)) {
-        if (parameters->initial_condition() != 2) {
+        if (parameters.initial_condition() != 2) {
           /* thermal momentum according Maxwell-Boltzmann distribution */
           momentum_radial = sample_momenta(box->temperature(),
                                            i->second.mass());
@@ -145,7 +145,7 @@ void initial_conditions(Particles *particles, Laboratory *parameters,
 
       time_start = 1.0;
       /* ramdom position in a quadratic box */
-      if (parameters->initial_condition() != 3) {
+      if (parameters.initial_condition() != 3) {
         x = drand48() * box->length();
         y = drand48() * box->length();
         z = drand48() * box->length();
@@ -183,17 +183,10 @@ void initial_conditions(Particles *particles, Laboratory *parameters,
   printf("IC contains %zu particles\n", number_total);
   /* loop over all particles */
   number = number_total;
-  /* reducing cross section according to number of test particle */
-  if (parameters->testparticles() > 1) {
-    printf("IC test particle: %i\n", parameters->testparticles());
-    parameters->set_cross_section(parameters->cross_section()
-                                  / parameters->testparticles());
-    printf("Elastic cross section: %g [mb]\n", parameters->cross_section());
-  }
 
   /* Display on startup if pseudo grid is used */
   int const grid_number = round(box->length()
-              / sqrt(parameters->cross_section() * fm2_mb * M_1_PI) * 0.5);
+              / sqrt(parameters.cross_section() * fm2_mb * M_1_PI) * 0.5);
   /* pseudo grid not used for 3^3 or extremely small particle numbers */
   if (grid_number >= 4 && number > 10)
     printf("Simulation with pseudo grid: %d^3\n", grid_number);

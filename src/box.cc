@@ -311,11 +311,41 @@ static int Evolve(Particles *particles, CrossSections *cross_sections,
   return 0;
 }
 
+/* start up a box and run it */
+static int evolve_box(const Laboratory &parameters, char *path) {
+  /* Read Box config file parameters */
+  Box *cube = new Box;
+  process_box_config(cube, path);
+
+  /* Initialize box */
+  print_startup(*cube);
+  Particles *particles = new Particles;
+  input_particles(particles, path);
+  initial_conditions(particles, parameters, cube);
+  input_decaymodes(particles, path);
+  CrossSections *cross_sections = new CrossSections;
+  cross_sections->add_elastic_parameter(parameters.cross_section());
+
+  /* record IC startup */
+  write_measurements_header(*particles);
+  print_header();
+  write_particles(*particles);
+
+  /* Compute stuff */
+  int rc = Evolve(particles, cross_sections, parameters, *cube);
+
+  /* tear down */
+  delete particles;
+  delete cross_sections;
+  delete cube;
+
+  return rc;
+}
+
+/* main - do command line parsing and hence decides modus */
 int main(int argc, char *argv[]) {
   char *p, *path;
-  int opt, rc;
-  Particles *particles = new Particles;
-  Box *cube = new Box;
+  int opt, rc = 0;
 
   struct option longopts[] = {
     { "eps",        required_argument,      0, 'e' },
@@ -393,29 +423,19 @@ int main(int argc, char *argv[]) {
   /* initialize random seed */
   srand48(parameters->seed());
 
-  /* Read Box config file parameters */
-  process_box_config(cube, path);
+  /* reducing cross section according to number of test particle */
+  if (parameters->testparticles() > 1) {
+    printf("IC test particle: %i\n", parameters->testparticles());
+    parameters->set_cross_section(parameters->cross_section()
+                                 / parameters->testparticles());
+    printf("Elastic cross section: %g [mb]\n", parameters->cross_section());
+  }
 
-  /* Initialize box */
-  print_startup(*cube);
-  input_particles(particles, path);
-  initial_conditions(particles, parameters, cube);
-  input_decaymodes(particles, path);
-  CrossSections *cross_sections = new CrossSections;
-  cross_sections->add_elastic_parameter(parameters->cross_section());
+  /* modus operandi */
+  if (parameters->modus() == 1)
+    rc = evolve_box(*parameters, path);
 
-  write_measurements_header(*particles);
-  print_header();
-  write_particles(*particles);
-
-  /* Compute stuff */
-  rc = Evolve(particles, cross_sections, *parameters, *cube);
-
-  /* tear down */
-  delete particles;
-  delete cross_sections;
-  delete cube;
-  delete parameters;
   free(path);
+  delete parameters;
   return rc;
 }

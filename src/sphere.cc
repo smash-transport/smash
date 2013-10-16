@@ -320,7 +320,7 @@ int main(int argc, char *argv[]) {
 
   /* Initialize box */
   input_particles(&particles, path);
-  initial_conditions(&particles, parameters, cube);
+  initial_conditions(&particles, *parameters, cube);
   input_decaymodes(&particles, path);
   CrossSections *cross_sections = new CrossSections;
   cross_sections->add_elastic_parameter(parameters->cross_section());
