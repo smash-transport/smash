@@ -187,6 +187,7 @@ void process_laboratory_config(Laboratory *parameters, char *path) {
   process_params(config_path, &configuration);
   assign_params(&configuration, parameters);
   warn_wrong_params(&configuration);
+  free(config_path);
 }
 
 /* process_box_config - configuration handling */
@@ -198,6 +199,7 @@ void process_box_config(Box *cube, char *path) {
   process_params(config_path, &configuration);
   assign_params(&configuration, cube);
   warn_wrong_params(&configuration);
+  free(config_path);
 }
 
 /* process_sphere_config - configuration handling */
@@ -209,4 +211,5 @@ void process_sphere_config(Sphere *ball, char *path) {
   process_params(config_path, &configuration);
   assign_params(&configuration, ball);
   warn_wrong_params(&configuration);
+  free(config_path);
 }
