@@ -23,6 +23,7 @@
 #include "include/Parameters.h"
 #include "include/Particles.h"
 #include "include/ParticleData.h"
+#include "include/Sphere.h"
 #include "include/collisions.h"
 #include "include/constants.h"
 #include "include/decays.h"
@@ -45,12 +46,11 @@ static void usage(int rc) {
   printf("Calculate transport box\n"
          "  -e, --eps            time step\n"
          "  -h, --help           usage information\n"
-         "  -l, --length         length of the box in fermi\n"
+         "  -m, --modus          modus of laboratory\n"
          "  -O, --output-interval          step interval between measurements\n"
          "  -R, --random         random number seed\n"
          "  -s, --sigma          cross section in mbarn\n"
          "  -S, --steps          number of steps\n"
-         "  -T, --temperature    initial temperature\n"
          "  -V, --version\n\n");
   exit(rc);
 }
@@ -321,12 +321,11 @@ int main(int argc, char *argv[]) {
   struct option longopts[] = {
     { "eps",        required_argument,      0, 'e' },
     { "help",       no_argument,            0, 'h' },
-    { "length",     required_argument,      0, 'l' },
+    { "modus",      required_argument,      0, 'm' },
     { "output-interval", required_argument,      0, 'O' },
     { "random",     required_argument,      0, 'R' },
     { "sigma",      required_argument,      0, 's' },
     { "steps",      required_argument,      0, 'S' },
-    { "temperature", required_argument,     0, 'T' },
     { "version",    no_argument,            0, 'V' },
     { NULL,         0, 0, 0 }
   };
@@ -344,12 +343,12 @@ int main(int argc, char *argv[]) {
   /* XXX: make path configurable */
   snprintf(path, len, "./");
   process_params(path, &configuration);
-  assign_params(&configuration, cube);
   assign_params(&configuration, parameters);
+  assign_params(&configuration, cube);
   warn_wrong_params(&configuration);
 
   /* parse the command line options, they override all previous */
-  while ((opt = getopt_long(argc, argv, "e:hl:O:R:s:S:T:V", longopts,
+  while ((opt = getopt_long(argc, argv, "e:hm:O:R:s:S:V", longopts,
     NULL)) != -1) {
     switch (opt) {
     case 'e':
@@ -358,8 +357,8 @@ int main(int argc, char *argv[]) {
     case 'h':
       usage(EXIT_SUCCESS);
       break;
-    case 'l':
-      cube->set_length(fabs(atof(optarg)));
+    case 'm':
+      parameters->set_modus(fabs(atoi(optarg)));
       break;
     case 'O':
       {
@@ -381,9 +380,6 @@ int main(int argc, char *argv[]) {
       break;
     case 'S':
       parameters->set_steps(abs(atoi(optarg)));
-      break;
-    case 'T':
-      cube->set_temperature(fabs(atof(optarg)));
       break;
     case 'V':
       exit(EXIT_SUCCESS);
