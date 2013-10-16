@@ -22,7 +22,8 @@
 const char *sep = " \t\n";
 
 /* process_params - read in all params into list of key value paris */
-static void process_params(char *file_path, std::list<Parameters> *configuration) {
+static void process_params(char *file_path,
+  std::list<Parameters> *configuration) {
   char *line = NULL, *saveptr = NULL;
   size_t len = 0;
   ssize_t read;
