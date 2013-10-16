@@ -107,10 +107,13 @@ inline int Particles::add_data(ParticleData const &particle_data) {
 
 /* create a bunch of particles */
 inline void Particles::create(size_t number, int pdgcode) {
+  ParticleData particle;
+  /* fixed pdgcode and no collision yet */
+  particle.set_pdgcode(pdgcode);
+  particle.set_collision(-1, 0, -1);
   for (size_t i = 0; i < number; i++) {
-    ParticleData particle;
-    particle.set_pdgcode(pdgcode);
-    particle.set_id(id_max_++);
+    id_max_++;
+    particle.set_id(id_max_);
     data_.insert(std::pair<int, ParticleData>(id_max_, particle));
   }
 }
