@@ -43,25 +43,12 @@ void initial_conditions(Particles *particles, Box *box) {
   FourVector momentum_total(0, 0, 0, 0);
   size_t number_total = 0, number = 0;
 
-  /* Let's check how many non-resonances we have */
-  unsigned int non_resonances = 0;
-  printd("IC has %zu particle types\n", particles->types_size());
-  for (std::map<int, ParticleType>::const_iterator
-       i = particles->types_cbegin(); i != particles->types_cend(); ++i) {
-    if (i->second.width() < 0.0)
-      non_resonances++;
-  }
-
   /* loop over all the particle types */
   for (std::map<int, ParticleType>::const_iterator
        i = particles->types_cbegin(); i != particles->types_cend(); ++i) {
     /* Particles with width > 0 (resonances) do not exist in the beginning */
     if (i->second.width() > 0.0)
       continue;
-
-    /* Number of non-resonances left */
-    non_resonances--;
-
     printd("%s mass: %g [GeV]\n", i->second.name().c_str(), i->second.mass());
 
     /* bose einstein distribution funtion */
@@ -78,78 +65,64 @@ void initial_conditions(Particles *particles, Box *box) {
     printf("IC number density %.6g [fm^-3]\n", number_density);
     printf("IC %zu number of %s\n", number, i->second.name().c_str());
     number_density_total += number_density;
-
-    /* Set random IC:
-     * particles at random position in the box with thermal momentum
-     */
-    /* allocate the particles */
-    ParticleData particle_new;
-    for (size_t id = number_total; id < number_total + number; id++) {
-      double x, y, z, time_start;
-      /* ID uniqueness check */
-      if (unlikely(particles->count(id) > 0))
-        continue;
-
-      /* back to back pair creation with random momenta direction */
-      if (unlikely(id == number + number_total - 1 && !(id % 2)
-          && non_resonances == 0)) {
-        /* poor last guy just sits around */
-        particle_new.set_momentum(i->second.mass(), 0, 0, 0);
-      } else if (!(id % 2)) {
-        if (box->initial_condition() != 2) {
-          /* thermal momentum according Maxwell-Boltzmann distribution */
-          momentum_radial = sample_momenta(box->temperature(),
-                                           i->second.mass());
-        } else {
-          /* IC == 2 initial thermal momentum is the average 3T */
-          momentum_radial = 3.0 * box->temperature();
-        }
-        /* phi in the range from [0, 2 * pi) */
-        phi = 2.0 * M_PI * drand48();
-        /* cos(theta) in the range from [-1.0, 1.0) */
-        cos_theta = -1.0 + 2.0 * drand48();
-        sin_theta = sqrt(1.0 - cos_theta * cos_theta);
-        printd("Particle %zu radial momenta %g phi %g cos_theta %g\n", id,
-          momentum_radial, phi, cos_theta);
-        particle_new.set_momentum(i->second.mass(),
-          momentum_radial * cos(phi) * sin_theta,
-          momentum_radial * sin(phi) * sin_theta,
-          momentum_radial * cos_theta);
-      } else {
-        particle_new.set_momentum(i->second.mass(),
-          - particles->data(id - 1).momentum().x1(),
-          - particles->data(id - 1).momentum().x2(),
-          - particles->data(id - 1).momentum().x3());
-      }
-      momentum_total += particle_new.momentum();
-
-      time_start = 1.0;
-      /* ramdom position in a quadratic box */
-      x = drand48() * box->length();
-      y = drand48() * box->length();
-      z = drand48() * box->length();
-      particle_new.set_position(time_start, x, y, z);
-
-      /* no collision yet hence zero time and set id and pdg code */
-      particle_new.set_collision(-1, 0, -1);
-      particle_new.set_id(id);
-      particle_new.set_pdgcode(i->first);
-
-      /* create new particle id is enhanced in the class itself */
-      particles->add_data(particle_new);
-
-      /* IC: debug checks */
-      printd_momenta(particles->data(id));
-      printd_position(particles->data(id));
-    }
+    /* create bunch of particles */
+    printf("IC creating %zu particles\n", number);
+    particles->create(number, i->second.pdgcode());
     number_total += number;
   }
   printf("IC total number density %.6g [fm^-3]\n", number_density_total);
   printf("IC contains %zu particles\n", number_total);
-  /* loop over all particles */
-  number = number_total;
+
+  /* Set paricles IC: */
+  for (std::map<int, ParticleData>::iterator i = particles->begin();
+       i != particles->end(); ++i) {
+    double x, y, z, time_start;
+    /* back to back pair creation with random momenta direction */
+    if (unlikely(i->first == particles->id_max() && !(i->first % 2))) {
+      /* poor last guy just sits around */
+      i->second.set_momentum(particles->type(i->first).mass(), 0, 0, 0);
+    } else if (!(i->first % 2)) {
+      if (box->initial_condition() != 2) {
+        /* thermal momentum according Maxwell-Boltzmann distribution */
+        momentum_radial = sample_momenta(box->temperature(),
+                                         particles->type(i->first).mass());
+      } else {
+        /* IC == 2 initial thermal momentum is the average 3T */
+        momentum_radial = 3.0 * box->temperature();
+      }
+      /* phi in the range from [0, 2 * pi) */
+      phi = 2.0 * M_PI * drand48();
+      /* cos(theta) in the range from [-1.0, 1.0) */
+      cos_theta = -1.0 + 2.0 * drand48();
+      sin_theta = sqrt(1.0 - cos_theta * cos_theta);
+      printd("Particle %zu radial momenta %g phi %g cos_theta %g\n", i->first,
+          momentum_radial, phi, cos_theta);
+      i->second.set_momentum(particles->type(i->first).mass(),
+          momentum_radial * cos(phi) * sin_theta,
+          momentum_radial * sin(phi) * sin_theta,
+          momentum_radial * cos_theta);
+    } else {
+      i->second.set_momentum(particles->type(i->first).mass(),
+          - particles->data(i->first - 1).momentum().x1(),
+          - particles->data(i->first - 1).momentum().x2(),
+          - particles->data(i->first - 1).momentum().x3());
+    }
+    momentum_total += i->second.momentum();
+
+    time_start = 1.0;
+    /* ramdom position in a quadratic box */
+    x = drand48() * box->length();
+    y = drand48() * box->length();
+    z = drand48() * box->length();
+    i->second.set_position(time_start, x, y, z);
+
+    /* IC: debug checks */
+    printd_momenta(i->second);
+    printd_position(i->second);
+  }
 
   /* Display on startup if pseudo grid is used */
+  number = number_total;
   int const grid_number = round(box->length()
               / sqrt(box->cross_section() * fm2_mb * M_1_PI) * 0.5);
   /* pseudo grid not used for 3^3 or extremely small particle numbers */
@@ -176,11 +149,12 @@ void initial_conditions(Particles *particles, Sphere *ball) {
     /* Particles with width > 0 (resonances) do not exist in the beginning */
     if (i->second.width() > 0.0)
       continue;
-    printd("%s mass: %g [GeV]\n", i->second.name().c_str(), i->second.mass());
+    printd("%s mass: %g [GeV]\n", i->second.name().c_str(),
+           particles->type(i->first).mass());
 
     /* bose einstein distribution funtion with temperature 0.3 GeV */
-    double number_density = number_density_bose(i->second.mass(),
-      0.3);
+    double number_density = number_density_bose(
+                            particles->type(i->first).mass(), 0.3);
     printf("IC number density %.6g [fm^-3]\n", number_density);
 
     /* cast while reflecting probability of extra particle */
