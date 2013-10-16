@@ -9,10 +9,11 @@
 class Box;
 class Laboratory;
 class Particles;
+class Sphere;
 
 /* initialisation functions */
 void initial_particles(Particles *particles);
-void initial_conditions(Particles *particles,
-  const Laboratory &parameters, Box *box);
+void initial_conditions(Particles *particles, Box *box);
+void initial_conditions(Particles *particles, Sphere *ball);
 
 #endif  // SRC_INCLUDE_INITIAL_CONDITIONS_H_

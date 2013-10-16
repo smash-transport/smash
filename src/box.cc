@@ -314,14 +314,14 @@ static int Evolve(Particles *particles, CrossSections *cross_sections,
 /* start up a box and run it */
 static int evolve_box(const Laboratory &parameters, char *path) {
   /* Read Box config file parameters */
-	  Box *cube = new Box(parameters);
+  Box *cube = new Box(parameters);
   process_box_config(cube, path);
 
   /* Initialize box */
   print_startup(*cube);
   Particles *particles = new Particles;
   input_particles(particles, path);
-  initial_conditions(particles, parameters, cube);
+  initial_conditions(particles, cube);
   input_decaymodes(particles, path);
   CrossSections *cross_sections = new CrossSections;
   cross_sections->add_elastic_parameter(parameters.cross_section());
@@ -340,6 +340,24 @@ static int evolve_box(const Laboratory &parameters, char *path) {
   delete cube;
 
   return rc;
+}
+
+/* start up a sphere and run it */
+static int evolve_sphere(const Laboratory &parameters, char *path) {
+  /* Read sphere config file parameters */
+  Sphere *ball = new Sphere(parameters);
+  process_sphere_config(ball, path);
+
+  /* Initialize box */
+  print_startup(*ball);
+  Particles *particles = new Particles;
+  input_particles(particles, path);
+  initial_conditions(particles, ball);
+  input_decaymodes(particles, path);
+  CrossSections *cross_sections = new CrossSections;
+  cross_sections->add_elastic_parameter(parameters.cross_section());
+
+  return 0;
 }
 
 /* main - do command line parsing and hence decides modus */
@@ -434,6 +452,8 @@ int main(int argc, char *argv[]) {
   /* modus operandi */
   if (parameters->modus() == 1)
     rc = evolve_box(*parameters, path);
+  else if (parameters->modus() == 2)
+    rc = evolve_sphere(*parameters, path);
 
   free(path);
   delete parameters;
