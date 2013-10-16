@@ -316,7 +316,6 @@ int main(int argc, char *argv[]) {
   int opt, rc;
   Particles *particles = new Particles;
   Box *cube = new Box;
-  Laboratory *parameters = new Laboratory;
 
   struct option longopts[] = {
     { "eps",        required_argument,      0, 'e' },
@@ -336,16 +335,14 @@ int main(int argc, char *argv[]) {
     progname = p + 1;
   printf("%s (%d)\n", progname, VERSION_MAJOR);
 
-  /* Read config file overrides box constructor defaults */
-  std::list<Parameters> configuration;
-  int len = 3;
-  path = reinterpret_cast<char *>(malloc(len));
   /* XXX: make path configurable */
+  size_t len = strlen("./") + 1;
+  path = reinterpret_cast<char *>(malloc(len));
   snprintf(path, len, "./");
-  process_params(path, &configuration);
-  assign_params(&configuration, parameters);
-  assign_params(&configuration, cube);
-  warn_wrong_params(&configuration);
+
+  /* Read Laboratory config file parameters */
+  Laboratory *parameters = new Laboratory;
+  process_laboratory_config(parameters, path);
 
   /* parse the command line options, they override all previous */
   while ((opt = getopt_long(argc, argv, "e:hm:O:R:s:S:V", longopts,
@@ -390,14 +387,17 @@ int main(int argc, char *argv[]) {
 
   /* Output IC values */
   print_startup(*parameters);
-  print_startup(*cube);
   mkdir_data();
   write_oscar_header();
 
   /* initialize random seed */
   srand48(parameters->seed());
 
+  /* Read Box config file parameters */
+  process_box_config(cube, path);
+
   /* Initialize box */
+  print_startup(*cube);
   input_particles(particles, path);
   initial_conditions(particles, parameters, cube);
   input_decaymodes(particles, path);

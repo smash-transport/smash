@@ -1,7 +1,4 @@
-// Sample params.txt file
-
-// Cube size
-LENGTH		10.0
+// Sample config_laboratory.txt file
 
 // temporal grid spacing
 EPS		0.001
@@ -29,9 +26,6 @@ INITIAL_CONDITION	1
 
 // initial random seed (negative for time)
 RANDOMSEED	1
-
-// initialization temperature
-TEMPERATURE	0.2
 
 // elastic cross section
 SIGMA		10.0

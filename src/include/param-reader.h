@@ -16,8 +16,7 @@ class Laboratory;
 extern const char *sep;
 
 /* read params file parameters */
-void process_params(char *paramfile, std::list<Parameters> *configuration);
-void assign_params(std::list<Parameters> *configuration, Laboratory *lab);
-void assign_params(std::list<Parameters> *configuration, Box *box);
+void process_laboratory_config(Laboratory *parameters, char *path);
+void process_box_config(Box *cube, char *path);
 
 #endif  // SRC_INCLUDE_PARAM_READER_H_

@@ -18,15 +18,12 @@
 #include "include/Parameters.h"
 #include "include/outputroutines.h"
 
-/* XXX: hardcoded length cap */
-#define FILELEN 256
-
 /* space separation between items */
 const char *sep = " \t\n";
 
-/* process_params - read in all params into vetor */
-void process_params(char *path, std::list<Parameters> *configuration) {
-  char *line = NULL, *saveptr = NULL, params[FILELEN];
+/* process_params - read in all params into list of key value paris */
+static void process_params(char *file_path, std::list<Parameters> *configuration) {
+  char *line = NULL, *saveptr = NULL;
   size_t len = 0;
   ssize_t read;
   char *key, *value;
@@ -35,17 +32,16 @@ void process_params(char *path, std::list<Parameters> *configuration) {
   /* Looking for parameters in config file
    * If none exists, we'll use default values.
    */
-  snprintf(params, strlen(path) + 12, "%s/params.txt", path);
-  fp = fopen(params, "r");
+  fp = fopen(file_path, "r");
   if (!fp) {
-    fprintf(stderr, "W: No params.txt at %s path.\n", path);
+    fprintf(stderr, "W: No config at %s path.\n", file_path);
     return;
   }
 
-  printf("Processing %s/params.txt.\n", path);
+  printf("Processing config %s.\n", file_path);
 
   while ((read = getline(&line, &len, fp)) != -1) {
-    printd("Retrieved params.txt line of length %li :\n", read);
+    printd("Retrieved %s line of length %li :\n", file_path, read);
     printd("%s", line);
     /* Skip comments and blank lines */
     if (line[0] == '#' || line[0] == '\n' || line[0] == '\t' || line[0] == '/')
@@ -65,17 +61,17 @@ void process_params(char *path, std::list<Parameters> *configuration) {
   }
   free(line);
   fclose(fp);
-  printd("Read all params.txt.\n");
+  printd("Read all %s.\n", file_path);
 }
 
-void assign_params(std::list<Parameters> *configuration,
+static void assign_params(std::list<Parameters> *configuration,
   Laboratory *parameters) {
   bool match = false;
   std::list<Parameters>::iterator i = configuration->begin();
   while (i != configuration->end()) {
     char *key = i->key();
     char *value = i->value();
-    printd("checking %s %s\n", key, value);
+    printd("Looking for match %s %s\n", key, value);
 
     /* integer values */
     if (strcmp(key, "STEPS") == 0) {
@@ -120,7 +116,7 @@ void assign_params(std::list<Parameters> *configuration,
 
     /* remove processed entry */
     if (match) {
-      printd("erasing %s %s\n", key, value);
+      printd("Erasing %s %s\n", key, value);
       i = configuration->erase(i);
       match = false;
     } else {
@@ -129,7 +125,7 @@ void assign_params(std::list<Parameters> *configuration,
   }
 }
 
-void assign_params(std::list<Parameters> *configuration, Box *box) {
+static void assign_params(std::list<Parameters> *configuration, Box *box) {
   bool match = false;
   std::list<Parameters>::iterator i = configuration->begin();
   while (i != configuration->end()) {
@@ -154,4 +150,26 @@ void assign_params(std::list<Parameters> *configuration, Box *box) {
       ++i;
     }
   }
+}
+
+/* process_laboratory_config - configuration handling */
+void process_laboratory_config(Laboratory *parameters, char *path) {
+  std::list<Parameters> configuration;
+  size_t len = strlen("./config_laboratory.txt") + strlen(path) + 1;
+  char *config_path = reinterpret_cast<char *>(malloc(len));
+  snprintf(config_path, len, "%s/config_laboratory.txt", path);
+  process_params(config_path, &configuration);
+  assign_params(&configuration, parameters);
+  warn_wrong_params(&configuration);
+}
+
+/* process_box_config - configuration handling */
+void process_box_config(Box *cube, char *path) {
+  std::list<Parameters> configuration;
+  size_t len = strlen("./config_box.txt") + strlen(path) + 1;
+  char *config_path = reinterpret_cast<char *>(malloc(len));
+  snprintf(config_path, len, "%s/config_box.txt", path);
+  process_params(config_path, &configuration);
+  assign_params(&configuration, cube);
+  warn_wrong_params(&configuration);
 }
