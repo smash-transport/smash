@@ -1,0 +1,8 @@
+// Sample config_box.txt file
+
+// Cube size
+LENGTH		10.0
+
+// initialization temperature
+TEMPERATURE	0.2
+
