@@ -179,7 +179,7 @@ static void assign_params(std::list<Parameters> *configuration, Sphere *ball) {
 }
 
 /* process_laboratory_config - configuration handling */
-void process_laboratory_config(Laboratory *parameters, char *path) {
+void process_config_laboratory(Laboratory *parameters, char *path) {
   std::list<Parameters> configuration;
   size_t len = strlen("./config_laboratory.txt") + strlen(path) + 1;
   char *config_path = reinterpret_cast<char *>(malloc(len));
@@ -191,7 +191,7 @@ void process_laboratory_config(Laboratory *parameters, char *path) {
 }
 
 /* process_box_config - configuration handling */
-void process_box_config(Box *cube, char *path) {
+void process_config_box(Box *cube, char *path) {
   std::list<Parameters> configuration;
   size_t len = strlen("./config_box.txt") + strlen(path) + 1;
   char *config_path = reinterpret_cast<char *>(malloc(len));
@@ -203,7 +203,7 @@ void process_box_config(Box *cube, char *path) {
 }
 
 /* process_sphere_config - configuration handling */
-void process_sphere_config(Sphere *ball, char *path) {
+void process_config_sphere(Sphere *ball, char *path) {
   std::list<Parameters> configuration;
   size_t len = strlen("./config_sphere.txt") + strlen(path) + 1;
   char *config_path = reinterpret_cast<char *>(malloc(len));

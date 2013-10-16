@@ -315,7 +315,7 @@ static int Evolve(Particles *particles, CrossSections *cross_sections,
 static int evolve_box(const Laboratory &parameters, char *path) {
   /* Read Box config file parameters */
   Box *cube = new Box(parameters);
-  process_box_config(cube, path);
+  process_config_box(cube, path);
 
   /* Initialize box */
   print_startup(*cube);
@@ -346,7 +346,7 @@ static int evolve_box(const Laboratory &parameters, char *path) {
 static int evolve_sphere(const Laboratory &parameters, char *path) {
   /* Read sphere config file parameters */
   Sphere *ball = new Sphere(parameters);
-  process_sphere_config(ball, path);
+  process_config_sphere(ball, path);
 
   /* Initialize box */
   print_startup(*ball);
@@ -403,7 +403,7 @@ int main(int argc, char *argv[]) {
 
   /* Read Laboratory config file parameters */
   Laboratory *parameters = new Laboratory;
-  process_laboratory_config(parameters, path);
+  process_config_laboratory(parameters, path);
 
   /* parse the command line options, they override all previous */
   while ((opt = getopt_long(argc, argv, "e:hm:O:R:s:S:V", longopts,
