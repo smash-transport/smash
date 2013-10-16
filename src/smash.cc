@@ -357,6 +357,19 @@ static int evolve_sphere(const Laboratory &parameters, char *path) {
   CrossSections *cross_sections = new CrossSections;
   cross_sections->add_elastic_parameter(parameters.cross_section());
 
+  /* Compute stuff */
+  //int rc = Evolve(particles, cross_sections, parameters, *ball);
+
+  /* record IC startup */
+  write_measurements_header(*particles);
+  print_header();
+  write_particles(*particles);
+
+
+  /* tear down */
+  delete particles;
+  delete cross_sections;
+  delete ball;
   return 0;
 }
 
