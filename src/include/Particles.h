@@ -39,6 +39,8 @@ class Particles {
   inline int add_data(const ParticleData &particle_data);
   inline void add_type(const ParticleType &particle_type, int pdg);
   inline void add_decaymodes(const DecayModes &new_decay_modes, int pdg);
+  /* add a range of particles */
+  inline void create(size_t number, int pdg);
   /* remove the particle */
   inline void remove(int id);
   /* map methods that directly apply on the ParticleData */
@@ -102,6 +104,18 @@ inline int Particles::add_data(ParticleData const &particle_data) {
   data_.insert(std::pair<int, ParticleData>(id_max_, particle_data));
   return id_max_;
 }
+
+/* create a bunch of particles */
+inline void Particles::create(size_t number, int pdgcode) {
+  for (size_t i = 0; i < number; i++) {
+    ParticleData particle;
+    particle.set_pdgcode(pdgcode);
+    particle.set_id(id_max_++);
+    data_.insert(std::pair<int, ParticleData>(id_max_, particle));
+  }
+}
+
+/* return the highest used id */
 inline int Particles::id_max() {
   return id_max_;
 }
