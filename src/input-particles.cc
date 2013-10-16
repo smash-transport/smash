@@ -97,5 +97,12 @@ void input_particles(Particles *particles, char *path) {
   free(line);
   fclose(fp);
   printd("Finished reading particles.txt\n");
+
+  if (particles->types_empty()) {
+    fprintf(stderr, "W: Empty particles.txt at %s path.\n", path);
+    /* use just pions in that case */
+    initial_particles(particles);
+  }
+
   return;
 }
