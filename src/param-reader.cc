@@ -16,6 +16,7 @@
 #include "include/Box.h"
 #include "include/Laboratory.h"
 #include "include/Parameters.h"
+#include "include/Sphere.h"
 #include "include/outputroutines.h"
 
 /* space separation between items */
@@ -153,6 +154,30 @@ static void assign_params(std::list<Parameters> *configuration, Box *box) {
   }
 }
 
+static void assign_params(std::list<Parameters> *configuration, Sphere *ball) {
+  bool match = false;
+  std::list<Parameters>::iterator i = configuration->begin();
+  while (i != configuration->end()) {
+    char *key = i->key();
+    char *value = i->value();
+    printd("%s %s\n", key, value);
+
+    /* double or float values */
+    if (strcmp(key, "RADIUS") == 0) {
+      ball->set_radius(fabs(atof(value)));
+      match = true;
+    }
+
+    /* remove processed entry */
+    if (match) {
+      i = configuration->erase(i);
+      match = false;
+    } else {
+      ++i;
+    }
+  }
+}
+
 /* process_laboratory_config - configuration handling */
 void process_laboratory_config(Laboratory *parameters, char *path) {
   std::list<Parameters> configuration;
@@ -172,5 +197,16 @@ void process_box_config(Box *cube, char *path) {
   snprintf(config_path, len, "%s/config_box.txt", path);
   process_params(config_path, &configuration);
   assign_params(&configuration, cube);
+  warn_wrong_params(&configuration);
+}
+
+/* process_sphere_config - configuration handling */
+void process_sphere_config(Sphere *ball, char *path) {
+  std::list<Parameters> configuration;
+  size_t len = strlen("./config_sphere.txt") + strlen(path) + 1;
+  char *config_path = reinterpret_cast<char *>(malloc(len));
+  snprintf(config_path, len, "%s/config_sphere.txt", path);
+  process_params(config_path, &configuration);
+  assign_params(&configuration, ball);
   warn_wrong_params(&configuration);
 }

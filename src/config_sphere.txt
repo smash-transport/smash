@@ -1,0 +1,5 @@
+// Sample config_sphere.txt file
+
+// Sphere size
+RADIUS		5.0
+

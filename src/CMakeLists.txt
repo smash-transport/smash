@@ -23,6 +23,7 @@ include_directories("${PROJECT_BINARY_DIR}/src")
 # directly copy config files to build directory
 file(COPY config_box.txt DESTINATION ..)
 file(COPY config_laboratory.txt DESTINATION ..)
+file(COPY config_sphere.txt DESTINATION ..)
 file(COPY particles.txt DESTINATION ..)
 file(COPY decaymodes.txt DESTINATION ..)
 
