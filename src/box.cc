@@ -314,7 +314,7 @@ static int Evolve(Particles *particles, CrossSections *cross_sections,
 /* start up a box and run it */
 static int evolve_box(const Laboratory &parameters, char *path) {
   /* Read Box config file parameters */
-  Box *cube = new Box;
+	  Box *cube = new Box(parameters);
   process_box_config(cube, path);
 
   /* Initialize box */
