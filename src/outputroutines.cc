@@ -19,11 +19,12 @@
 #include "include/Box.h"
 #include "include/FourVector.h"
 #include "include/Laboratory.h"
-#include "include/macros.h"
 #include "include/Parameters.h"
 #include "include/Particles.h"
 #include "include/ParticleData.h"
 #include "include/ParticleType.h"
+#include "include/Sphere.h"
+#include "include/macros.h"
 #include "include/time.h"
 
 /* print_line - output a visible seperator */
@@ -64,6 +65,11 @@ void print_startup(const Box &box) {
   printf("Size of the box: %g x %g x %g [fm]\n", box.length(), box.length(),
     box.length());
   printf("Initial temperature: %g [GeV]\n", box.temperature());
+}
+
+/* print_startup - console output on startup of sphere specific parameters */
+void print_startup(const Sphere &ball) {
+  printf("Volume of the sphere: 4 * pi * %g^2 [fm]\n", ball.radius());
 }
 
 /* print_header - title for each row */

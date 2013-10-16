@@ -17,10 +17,12 @@ class Laboratory;
 class Parameters;
 class ParticleData;
 class ParticleType;
+class Sphere;
 
 /* console output */
 void print_startup(const Laboratory &parameters);
 void print_startup(const Box &box);
+void print_startup(const Sphere &ball);
 void print_header(void);
 void print_measurements(const Particles &particles,
                         const size_t &scatterings_total,
