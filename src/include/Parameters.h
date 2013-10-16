@@ -9,11 +9,16 @@
 #define SRC_INCLUDE_PARAMETERS_H_
 
 #include <cstring>
+#include <cstdlib>
 
 class Parameters {
   public:
     /* default constructor */
     Parameters(char *k, char *v): key_(strdup(k)), value_(strdup(v)) {}
+    /* copy constructor */
+    Parameters(const Parameters &p): key_(strdup(p.key_)), value_(strdup(p.value_)) {}
+    /* destructor */
+    ~Parameters() {if(key_) { free(key_);} if(value_) { free(value_) ;}}
     /* accessors */
     inline void set_key(char *key_string);
     inline char *key(void) const;
