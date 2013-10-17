@@ -9,7 +9,6 @@
  */
 #include <cmath>
 #include <cstdio>
-#include <cstring>
 #include <cstdlib>
 
 #include "include/constants.h"
@@ -18,7 +17,6 @@
 #include "include/macros.h"
 #include "include/outputroutines.h"
 #include "include/ParticleData.h"
-#include "include/ParticleType.h"
 #include "include/Particles.h"
 
 /* boost_CM - boost to center of momentum */
