@@ -7,9 +7,6 @@
 #ifndef SRC_INCLUDE_BOX_H_
 #define SRC_INCLUDE_BOX_H_
 
-/* forward declarations */
-class FourVector;
-
 #include <stdint.h>
 #include <time.h>
 #include <cmath>
@@ -102,9 +99,5 @@ timespec inline Box::set_timer_start(void) {
   clock_gettime(&time);
   return time;
 }
-
-/* enforce periodic boundary conditions */
-FourVector boundary_condition(FourVector position, const Box &box,
-                              bool *boundary_hit);
 
 #endif  // SRC_INCLUDE_BOX_H_

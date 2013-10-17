@@ -48,3 +48,41 @@ void propagate_particles(Particles *particles,
       printd_position(i->second);
     }
 }
+
+/* boundary_condition - enforce specific type of boundaries
+ *
+ * This assumes that the particle is at most one box length
+ * away from the boundary to shift it in.
+ */
+FourVector boundary_condition(FourVector position, const Box &box,
+                              bool *boundary_hit) {
+  /* Check positivity and box size */
+  if (position.x1() > 0 && position.x2() > 0 && position.x3() > 0
+      && position.x1() < box.length() && position.x2() < box.length()
+      && position.x3() < box.length())
+    goto out;
+
+  *boundary_hit = true;
+
+  /* Enforce periodic boundary condition */
+  if (position.x1() < 0)
+    position.set_x1(position.x1() + box.length());
+
+  if (position.x2() < 0)
+    position.set_x2(position.x2() + box.length());
+
+  if (position.x3() < 0)
+    position.set_x3(position.x3() + box.length());
+
+  if (position.x1() > box.length())
+    position.set_x1(position.x1() - box.length());
+
+  if (position.x2() > box.length())
+    position.set_x2(position.x2() - box.length());
+
+  if (position.x3() > box.length())
+    position.set_x3(position.x3() - box.length());
+
+ out:
+    return position;
+}
