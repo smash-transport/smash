@@ -12,7 +12,7 @@
 class FourVector {
   public:
     /* default constructor */
-    FourVector(): x0_(0), x1_(0), x2_(0), x3_(0) {}
+    FourVector(): x0_(0.0), x1_(0.0), x2_(0.0), x3_(0.0) {}
     /* useful constructor */
     FourVector(double y0, double y1, double y2, double y3): x0_(y0),
       x1_(y1), x2_(y2), x3_(y3) {}
