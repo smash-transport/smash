@@ -26,7 +26,7 @@ class Sphere : public Laboratory {
       time_start_(set_timer_start()) {}
     /* member funtions */
     float inline radius() const;
-    void inline set_radius(const float &RADIUS);
+    void inline set_radius(float RADIUS);
     timespec inline time_start() const;
     timespec inline set_timer_start();
 
@@ -43,7 +43,7 @@ float inline Sphere::radius(void) const {
 }
 
 /* set the edge length */
-void inline Sphere::set_radius(const float &RADIUS) {
+void inline Sphere::set_radius(float RADIUS) {
   radius_ = RADIUS;
 }
 

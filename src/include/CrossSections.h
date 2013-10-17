@@ -16,7 +16,7 @@ class CrossSections {
   CrossSections() : elastic_parameter_(0.0), squared_mass_a_(-1.0),
                     squared_mass_b_(-1.0), mandelstam_s_(-1.0), p_lab_(-1.0) {}
   /* Fixed elastic cross section value */
-  inline void add_elastic_parameter(const float parameter);
+  inline void add_elastic_parameter(float parameter);
   /* Compute kinematics */
   void compute_kinematics(Particles *particles, int id_a, int id_b);
   /* Return cross sections */
@@ -37,7 +37,7 @@ class CrossSections {
 };
 
 /* Fixed elastic cross section value */
-inline void CrossSections::add_elastic_parameter(const float parameter) {
+inline void CrossSections::add_elastic_parameter(float parameter) {
   elastic_parameter_ = parameter;
 }
 

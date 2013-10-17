@@ -17,7 +17,7 @@ class DecayModes {
   /* Add a decay mode */
   inline void add_mode(std::vector<int> particles, float ratio);
   /* Make sure ratios add to 1 */
-  inline void renormalize(const float renormalization_constant);
+  inline void renormalize(float renormalization_constant);
   /* Remove all modes */
   inline void clear(void);
   /* Pass out the decay modes */
@@ -39,7 +39,7 @@ inline void DecayModes::add_mode(std::vector<int> particles, float ratio) {
 }
 
 /* Make sure ratios add to 1 */
-inline void DecayModes::renormalize(const float renormalization_constant) {
+inline void DecayModes::renormalize(float renormalization_constant) {
   printf("Renormalizing decay modes with %g \n", renormalization_constant);
   float new_sum = 0.0;
   for (std::vector< std::pair<std::vector<int>, float> >::iterator mode

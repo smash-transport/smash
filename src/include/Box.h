@@ -28,13 +28,13 @@ class Box : public Laboratory {
       time_start_(set_timer_start()) {}
     /* member funtions */
     float inline length() const;
-    void inline set_length(const float &LENGTH);
+    void inline set_length(float LENGTH);
     float inline energy_initial() const;
-    void inline set_energy_initial(const float &energy);
+    void inline set_energy_initial(float energy);
     float inline number_density_initial() const;
-    void inline set_number_density_inital(const float &number_density);
+    void inline set_number_density_inital(float number_density);
     float inline temperature() const;
-    void inline set_temperature(const float &T);
+    void inline set_temperature(float T);
     timespec inline time_start() const;
     timespec inline set_timer_start();
 
@@ -57,7 +57,7 @@ float inline Box::length(void) const {
 }
 
 /* set the edge length */
-void inline Box::set_length(const float &LENGTH) {
+void inline Box::set_length(float LENGTH) {
   length_ = LENGTH;
 }
 
@@ -67,7 +67,7 @@ float inline Box::temperature(void) const {
 }
 
 /* set the IC temperature */
-void inline Box::set_temperature(const float &T) {
+void inline Box::set_temperature(float T) {
   temperature_ = T;
 }
 
@@ -77,7 +77,7 @@ float inline Box::energy_initial(void) const {
 }
 
 /* set the IC total energy */
-void inline Box::set_energy_initial(const float &energy) {
+void inline Box::set_energy_initial(float energy) {
   energy_initial_ = energy;
 }
 
@@ -87,7 +87,7 @@ float inline Box::number_density_initial(void) const {
 }
 
 /* set the IC number density */
-void inline Box::set_number_density_inital(const float &number_density) {
+void inline Box::set_number_density_inital(float number_density) {
   number_density_initial_ = number_density;
 }
 

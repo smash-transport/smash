@@ -32,9 +32,9 @@ class Laboratory {
     inline int testparticles() const;
     inline void set_testparticles(const int &TESTPARTICLES);
     inline float eps() const;
-    inline void set_eps(const float &EPS);
+    inline void set_eps(float EPS);
     inline float cross_section() const;
-    inline void set_cross_section(const float &sigma);
+    inline void set_cross_section(float sigma);
     inline int64_t seed() const;
     inline void set_seed(const int64_t &RANDOMSEED);
 
@@ -116,7 +116,7 @@ inline float Laboratory::eps(void) const {
 }
 
 /* set the time step */
-inline void Laboratory::set_eps(const float &EPS) {
+inline void Laboratory::set_eps(float EPS) {
   eps_ = EPS;
 }
 
@@ -126,7 +126,7 @@ inline float Laboratory::cross_section(void) const {
 }
 
 /* set the cross section */
-inline void Laboratory::set_cross_section(const float &sigma) {
+inline void Laboratory::set_cross_section(float sigma) {
   cross_section_ = sigma;
 }
 
