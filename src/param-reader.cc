@@ -96,10 +96,6 @@ static void assign_params(std::list<Parameters> *configuration,
       parameters->set_testparticles(abs(atoi(value)));
       match = true;
     }
-    if (strcmp(key, "INITIAL_CONDITION") == 0) {
-      parameters->set_initial_condition(abs(atoi(value)));
-      match = true;
-    }
     if (strcmp(key, "MODUS") == 0) {
       parameters->set_modus(abs(atoi(value)));
       match = true;
@@ -142,6 +138,11 @@ static void assign_params(std::list<Parameters> *configuration, Box *box) {
     }
     if (strcmp(key, "TEMPERATURE") == 0) {
       box->set_temperature(fabs(atof(value)));
+      match = true;
+    }
+    /* int values */
+    if (strcmp(key, "INITIAL_CONDITION") == 0) {
+      box->set_initial_condition(abs(atoi(value)));
       match = true;
     }
     /* remove processed entry */

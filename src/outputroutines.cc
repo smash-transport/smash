@@ -57,7 +57,6 @@ void print_startup(const Laboratory &parameters) {
   printf("Using temporal stepsize: %g [GeV]\n", parameters.eps());
   printf("Maximum number of steps: %i \n", parameters.steps());
   printf("Random number seed: %li \n", parameters.seed());
-  printf("IC type %d\n", parameters.initial_condition());
 }
 
 /* print_startup - console output on startup of box specific parameters */
@@ -65,6 +64,7 @@ void print_startup(const Box &box) {
   printf("Size of the box: %g x %g x %g [fm]\n", box.length(), box.length(),
     box.length());
   printf("Initial temperature: %g [GeV]\n", box.temperature());
+  printf("IC type %d\n", box.initial_condition());
 }
 
 /* print_startup - console output on startup of sphere specific parameters */

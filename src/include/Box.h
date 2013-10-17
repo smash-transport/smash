@@ -24,6 +24,8 @@ class Box : public Laboratory {
       temperature_(0.1f), energy_initial_(0.0f), number_density_initial_(0.0f),
       time_start_(set_timer_start()) {}
     /* member funtions */
+    inline int initial_condition() const;
+    inline void set_initial_condition(const int &INITIAL_CONDITION);
     float inline length() const;
     void inline set_length(float LENGTH);
     float inline energy_initial() const;
@@ -36,6 +38,8 @@ class Box : public Laboratory {
     timespec inline set_timer_start();
 
   private:
+    /* initial condition */
+    int initial_condition_;
     /* Cube edge length */
     float length_;
     /* Temperature of the Boltzmann distribution for thermal initialization */
@@ -47,6 +51,16 @@ class Box : public Laboratory {
     /* starting time of the simulation */
     timespec time_start_;
 };
+
+/* return the used initial condition */
+inline int Box::initial_condition(void) const {
+  return initial_condition_;
+}
+
+/* set the initial condition */
+inline void Box::set_initial_condition(const int &INITIAL_CONDITION) {
+  initial_condition_ = INITIAL_CONDITION;
+}
 
 /* return the edge length */
 float inline Box::length(void) const {
