@@ -165,9 +165,9 @@ inline void ParticleData::set_position(const FourVector &pos) {
 }
 
 /* set the particle position by components */
-inline void ParticleData::set_position(const double &x0, const double &x3,
-                          const double &x1, const double &x2) {
-  position_.set_FourVector(x0, x3, x1, x2);
+inline void ParticleData::set_position(const double &x0, const double &x1,
+                          const double &x2, const double &x3) {
+  position_.set_FourVector(x0, x1, x2, x3);
 }
 
 /* check if the particles are identical */
