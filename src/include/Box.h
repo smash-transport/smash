@@ -17,12 +17,13 @@
 class Box : public Laboratory {
   public:
     /* default constructor with probable values */
-    Box(): length_(10.0f), temperature_(0.1f), energy_initial_(0.0f),
-      number_density_initial_(0.0f), time_start_(set_timer_start()) {}
-    /* useful constructor with explicit values for laboratory */
-    explicit Box(Laboratory lab): Laboratory(lab), length_(10.0f),
-      temperature_(0.1f), energy_initial_(0.0f), number_density_initial_(0.0f),
+    Box(): initial_condition_(1), length_(10.0f), temperature_(0.1f),
+      energy_initial_(0.0f), number_density_initial_(0.0f),
       time_start_(set_timer_start()) {}
+    /* useful constructor with explicit values for laboratory */
+    explicit Box(Laboratory lab): Laboratory(lab), initial_condition_(1),
+      length_(10.0f), temperature_(0.1f), energy_initial_(0.0f),
+      number_density_initial_(0.0f), time_start_(set_timer_start()) {}
     /* member funtions */
     inline int initial_condition() const;
     inline void set_initial_condition(const int &INITIAL_CONDITION);
