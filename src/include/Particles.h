@@ -89,8 +89,8 @@ inline ParticleType Particles::type(int particle_id) {
 }
 
 /* return a specific type */
-inline ParticleType Particles::particle_type(int type_id) {
-  return types_[type_id];
+inline ParticleType Particles::particle_type(int pdgcode) {
+  return types_[pdgcode];
 }
 
 /* return the decay modes of specific type */
