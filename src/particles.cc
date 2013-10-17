@@ -11,8 +11,6 @@
 #include <cstdio>
 #include <cstring>
 #include <cstdlib>
-#include <map>
-#include <vector>
 
 #include "include/constants.h"
 #include "include/distributions.h"
