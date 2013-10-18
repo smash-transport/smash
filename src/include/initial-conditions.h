@@ -12,7 +12,6 @@ class Particles;
 class Sphere;
 
 /* initialisation functions */
-void initial_particles(Particles *particles);
 void initial_conditions(Particles *particles, Box *box);
 void initial_conditions(Particles *particles, Sphere *ball);
 

@@ -26,17 +26,6 @@
 #include "include/outputroutines.h"
 #include "include/Sphere.h"
 
-/* initial_conditions - sets particle type */
-void initial_particles(Particles *particles) {
-  /* XXX: use nosql table for particle type values */
-  ParticleType piplus("pi+", 0.13957f, -1.0, 211, 1, 1, 0);
-  particles->add_type(piplus, 211);
-  ParticleType piminus("pi-", 0.13957f, -1.0, -211, 1, -1, 0);
-  particles->add_type(piminus, -211);
-  ParticleType pi0("pi0", 0.134977f, -1.0, 111, 1, 0, 0);
-  particles->add_type(pi0, 111);
-}
-
 /* initial_conditions - sets particle data for @particles */
 void initial_conditions(Particles *particles, Box *box) {
   double phi, cos_theta, sin_theta, momentum_radial, number_density_total = 0;

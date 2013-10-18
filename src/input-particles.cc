@@ -32,10 +32,8 @@ void input_particles(Particles *particles, char *path) {
   snprintf(input_particles, strlen(path) + 15, "%s/particles.txt", path);
   fp = fopen(input_particles, "r");
   if (!fp) {
-    fprintf(stderr, "W: No particles.txt at %s path.\n", path);
-    /* use just pions in that case */
-    initial_particles(particles);
-    return;
+    fprintf(stderr, "E: No particles.txt at %s path.\n", path);
+    exit(EXIT_FAILURE);
   }
 
   printf("Processing %s/particles.txt.\n", path);
@@ -99,9 +97,9 @@ void input_particles(Particles *particles, char *path) {
   printd("Finished reading particles.txt\n");
 
   if (particles->types_empty()) {
-    fprintf(stderr, "W: Empty particles.txt at %s path.\n", path);
-    /* use just pions in that case */
-    initial_particles(particles);
+    fprintf(stderr, "E: Empty particles.txt at %s path.\n", path);
+    fprintf(stderr, "E: No particle types.\n");
+    exit(EXIT_FAILURE);
   }
 
   return;
