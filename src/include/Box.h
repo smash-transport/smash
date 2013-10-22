@@ -11,7 +11,9 @@
 #include <time.h>
 #include <cmath>
 
+#include "../include/CrossSections.h"
 #include "../include/Laboratory.h"
+#include "../include/Particles.h"
 #include "../include/time.h"
 
 class Box : public Laboratory {
@@ -24,19 +26,23 @@ class Box : public Laboratory {
     explicit Box(Laboratory lab): Laboratory(lab), initial_condition_(1),
       length_(10.0f), temperature_(0.1f), energy_initial_(0.0f),
       number_density_initial_(0.0f), time_start_(set_timer_start()) {}
-    /* member funtions */
+    /* access member funtions */
     inline int initial_condition() const;
-    inline void set_initial_condition(const int &INITIAL_CONDITION);
-    float inline length() const;
-    void inline set_length(float LENGTH);
-    float inline energy_initial() const;
-    void inline set_energy_initial(float energy);
-    float inline number_density_initial() const;
-    void inline set_number_density_inital(float number_density);
-    float inline temperature() const;
-    void inline set_temperature(float T);
-    timespec inline time_start() const;
-    timespec inline set_timer_start();
+    inline void set_initial_condition(int INITIAL_CONDITION);
+    inline float length() const;
+    inline void set_length(float LENGTH);
+    inline float energy_initial() const;
+    inline void set_energy_initial(float energy);
+    inline float number_density_initial() const;
+    inline void set_number_density_inital(float number_density);
+    inline float temperature() const;
+    inline void set_temperature(float T);
+    inline timespec time_start() const;
+    inline timespec set_timer_start();
+    /* special class funtions */
+    virtual int evolve(Particles *particles, CrossSections *cross_sections);
+    virtual void process_config(char *path);
+    virtual void initial_conditions(Particles *particles);
 
   private:
     /* initial condition */
@@ -59,7 +65,7 @@ inline int Box::initial_condition(void) const {
 }
 
 /* set the initial condition */
-inline void Box::set_initial_condition(const int &INITIAL_CONDITION) {
+inline void Box::set_initial_condition(int INITIAL_CONDITION) {
   initial_condition_ = INITIAL_CONDITION;
 }
 

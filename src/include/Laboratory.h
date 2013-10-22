@@ -8,6 +8,10 @@
 #ifndef SRC_INCLUDE_LABORATORY_H_
 #define SRC_INCLUDE_LABORATORY_H_
 
+/* forward declartions */
+class Particles;
+class CrossSections;
+
 class Laboratory {
   public:
     /* default constructor with probable values */
@@ -18,21 +22,26 @@ class Laboratory {
       output_interval_(lab.output_interval_), modus_(lab.modus_),
       testparticles_(lab.testparticles_), eps_(lab.eps_),
       cross_section_(lab.cross_section_), seed_(lab.seed_) {}
-    /* member funtions */
+    /* member access funtions */
     inline int steps() const;
-    inline void set_steps(const int &STEPS);
+    inline void set_steps(int STEPS);
     inline int output_interval() const;
-    inline void set_output_interval(const int &UPDATE);
+    inline void set_output_interval(int UPDATE);
     inline int modus() const;
-    inline void set_modus(const int &MODUS);
+    inline void set_modus(int MODUS);
     inline int testparticles() const;
-    inline void set_testparticles(const int &TESTPARTICLES);
+    inline void set_testparticles(int TESTPARTICLES);
     inline float eps() const;
     inline void set_eps(float EPS);
     inline float cross_section() const;
     inline void set_cross_section(float sigma);
     inline int64_t seed() const;
     inline void set_seed(const int64_t &RANDOMSEED);
+    /* special funtion should be called by specific subclass */
+    int evolve(Particles *p __attribute__((unused)),
+      CrossSections *c __attribute__((unused))) { return -1; }
+    void process_config(char *path __attribute__((unused))) { return ; }
+    void initial_conditions(Particles *p __attribute__((unused))) { return; }
 
   private:
     /* number of steps */
@@ -57,7 +66,7 @@ inline int Laboratory::steps(void) const {
 }
 
 /* set the number of steps */
-inline void Laboratory::set_steps(const int &STEPS) {
+inline void Laboratory::set_steps(int STEPS) {
   steps_ = STEPS;
 }
 
@@ -67,7 +76,7 @@ inline int Laboratory::output_interval(void) const {
 }
 
 /* set when to output physics */
-inline void Laboratory::set_output_interval(const int &update) {
+inline void Laboratory::set_output_interval(int update) {
   output_interval_ = update;
 }
 
@@ -77,7 +86,7 @@ inline int Laboratory::modus(void) const {
 }
 
 /* set the modus */
-inline void Laboratory::set_modus(const int &MODUS) {
+inline void Laboratory::set_modus(int MODUS) {
   modus_ = MODUS;
 }
 
@@ -89,7 +98,7 @@ inline int Laboratory::testparticles(void) const {
 }
 
 /* set the number of test particles */
-inline void Laboratory::set_testparticles(const int &TESTPARTICLES) {
+inline void Laboratory::set_testparticles(int TESTPARTICLES) {
   testparticles_ = TESTPARTICLES;
 }
 

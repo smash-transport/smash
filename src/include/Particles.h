@@ -29,7 +29,7 @@ class Particles {
   inline const ParticleData &data(int id);
   inline ParticleData * data_pointer(int id);
   /* pass out the type of a specific particle */
-  inline ParticleType type(int id);
+  ParticleType type(int id);
   /* pass out the specific type */
   inline ParticleType particle_type(int id);
   /* pass out decay modes of this particle type */

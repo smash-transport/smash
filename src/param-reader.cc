@@ -193,25 +193,25 @@ void process_config_laboratory(Laboratory *parameters, char *path) {
 }
 
 /* process_box_config - configuration handling */
-void process_config_box(Box *cube, char *path) {
+void Box::process_config(char *path) {
   std::list<Parameters> configuration;
   size_t len = strlen("./config_box.txt") + strlen(path) + 1;
   char *config_path = reinterpret_cast<char *>(malloc(len));
   snprintf(config_path, len, "%s/config_box.txt", path);
   process_params(config_path, &configuration);
-  assign_params(&configuration, cube);
+  assign_params(&configuration, this);
   warn_wrong_params(&configuration);
   free(config_path);
 }
 
 /* process_sphere_config - configuration handling */
-void process_config_sphere(Sphere *ball, char *path) {
+void Sphere::process_config(char *path) {
   std::list<Parameters> configuration;
   size_t len = strlen("./config_sphere.txt") + strlen(path) + 1;
   char *config_path = reinterpret_cast<char *>(malloc(len));
   snprintf(config_path, len, "%s/config_sphere.txt", path);
   process_params(config_path, &configuration);
-  assign_params(&configuration, ball);
+  assign_params(&configuration, this);
   warn_wrong_params(&configuration);
   free(config_path);
 }

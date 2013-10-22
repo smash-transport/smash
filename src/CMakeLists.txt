@@ -1,7 +1,7 @@
 include(CheckLibraryExists)
 
 # list the source files
-set(smash_src clebschgordan.cc collisions.cc cross-sections.cc
+set(smash_src box.cc clebschgordan.cc collisions.cc cross-sections.cc
         decays.cc distributions.cc fourvector.cc
 	initial-conditions.cc input-decaymodes.cc
         input-particles.cc param-reader.cc parametrizations.cc

@@ -25,10 +25,14 @@ class Sphere : public Laboratory {
     explicit Sphere(Laboratory lab): Laboratory(lab), radius_(10.0f),
       time_start_(set_timer_start()) {}
     /* member funtions */
-    float inline radius() const;
-    void inline set_radius(float RADIUS);
-    timespec inline time_start() const;
-    timespec inline set_timer_start();
+    inline float radius() const;
+    inline void set_radius(float RADIUS);
+    inline timespec time_start() const;
+    inline timespec set_timer_start();
+    /* special class funtions */
+    //virtual int evolve(Particles *particles, CrossSections *cross_sections);
+    virtual void process_config(char *path);
+    //virtual void initial_conditions(Particles *particles);
 
   private:
     /* Sphere radius length */

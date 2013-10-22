@@ -20,17 +20,16 @@
 #include "include/outputroutines.h"
 
 /* propagate all particles */
-void propagate_particles(Particles *particles,
-  Laboratory const &parameters, Box const &box) {
+void propagate_particles(Particles *particles, Box const &box) {
     FourVector distance, position;
 
     for (std::map<int, ParticleData>::iterator i = particles->begin();
          i != particles->end(); ++i) {
       /* propagation for this time step */
-      distance.set_FourVector(parameters.eps(),
-        i->second.velocity_x() * parameters.eps(),
-        i->second.velocity_y() * parameters.eps(),
-        i->second.velocity_z() * parameters.eps());
+      distance.set_FourVector(box.eps(),
+        i->second.velocity_x() * box.eps(),
+        i->second.velocity_y() * box.eps(),
+        i->second.velocity_z() * box.eps());
       printd("Particle %d motion: %g %g %g %g\n", i->first,
          distance.x0(), distance.x1(), distance.x2(), distance.x3());
 
