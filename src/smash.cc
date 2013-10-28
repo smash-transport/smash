@@ -255,7 +255,7 @@ static int Evolve(Particles *particles, CrossSections *cross_sections,
       printd("Ignored collisions %zu\n", rejection_conflict);
       /* save evolution data */
       write_measurements(*particles, interactions_total,
-        interactions_this_interval, resonances, decays, rejection_conflict);
+        interactions_this_interval, decays, resonances, rejection_conflict);
       write_vtk(*particles);
     }
   }
