@@ -289,7 +289,7 @@ static int evolve_box(const Laboratory &parameters, char *path) {
   cross_sections->add_elastic_parameter(parameters.cross_section());
 
   /* record IC startup */
-  write_measurements_header(*particles);
+  write_measurements_header();
   print_header();
   write_particles(*particles);
 
@@ -323,7 +323,7 @@ static int evolve_sphere(const Laboratory &parameters, char *path) {
   int rc = Evolve(particles, cross_sections, parameters, *ball); */
 
   /* record IC startup */
-  write_measurements_header(*particles);
+  write_measurements_header();
   print_header();
   write_particles(*particles);
 

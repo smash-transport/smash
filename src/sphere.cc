@@ -325,7 +325,7 @@ int main(int argc, char *argv[]) {
   CrossSections *cross_sections = new CrossSections;
   cross_sections->add_elastic_parameter(parameters->cross_section());
 
-  write_measurements_header(particles);
+  write_measurements_header();
   print_header();
   write_particles(particles);
 

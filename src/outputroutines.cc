@@ -181,9 +181,8 @@ void printd_position(const ParticleData &particle __attribute__((unused))) {
 /* write_measurements_header - create new files
  *  (erase old content if file exists) and write
  * the headers for decays.dat, collisions.dat
- * and particletypes.dat
  */
-void write_measurements_header(const Particles &particletypes) {
+void write_measurements_header() {
   FILE *fp;
   char filename[256];
   snprintf(filename, sizeof(filename), "data/decays.dat");
@@ -193,16 +192,6 @@ void write_measurements_header(const Particles &particletypes) {
   snprintf(filename, sizeof(filename), "data/collisions.dat");
   fp = fopen(filename, "w");
   fprintf(fp, " Time     Actions_tot   Actions_ival     Rejections\n");
-  fclose(fp);
-  snprintf(filename, sizeof(filename), "data/particletypes.dat");
-  fp = fopen(filename, "w");
-  fprintf(fp, " Time ");
-  for (std::map<int, ParticleType>::const_iterator
-       i = particletypes.types_cbegin(); i != particletypes.types_cend();
-       ++i) {
-    fprintf(fp, " %11s ", i->second.name().c_str());
-  }
-  fprintf(fp, "\n");
   fclose(fp);
 }
 
@@ -224,26 +213,6 @@ void write_measurements(const Particles &particles,
   fprintf(fp, "%5g%13d%13d%13zu\n", particles.time(),
           interactions_total, interactions_this_interval, rejection_conflict);
   fclose(fp);
-
-  /* output of how many particles of each type are present */
-  {
-  std::map<int, size_t> type_numbers;
-  /* XXX: Number of elements = particle types, initialize each amount to 0 */
-
-  for (std::map<int, ParticleData>::const_iterator i = particles.cbegin();
-       i != particles.cend(); ++i) {
-      type_numbers[i->second.pdgcode()]++;
-  }
-  snprintf(filename, sizeof(filename), "data/particletypes.dat");
-  fp = fopen(filename, "a");
-  fprintf(fp, "%5g", particles.time());
-  for (std::map<int, size_t>::const_iterator i = type_numbers.begin();
-       i != type_numbers.end(); ++i) {
-    fprintf(fp, "%13zu", i->second);
-  }
-  fprintf(fp, "\n");
-  fclose(fp);
-  }
 
   /* write actual data output */
   write_particles(particles);
