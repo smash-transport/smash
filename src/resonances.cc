@@ -31,7 +31,7 @@
 std::map<int, double> resonance_cross_section(
   const ParticleData &particle1, const ParticleData &particle2,
   const ParticleType &type_particle1, const ParticleType &type_particle2,
-  const Particles &particles) {
+  Particles *particles) {
   const int charge1 = type_particle1.charge(),
     charge2 = type_particle2.charge();
   const int pdgcode1 = type_particle1.pdgcode(),
@@ -102,7 +102,7 @@ std::map<int, double> resonance_cross_section(
 
   /* Find all the possible resonances */
   for (std::map<int, ParticleType>::const_iterator
-       i = particles.types_cbegin(); i != particles.types_cend(); ++i) {
+       i = particles->types_cbegin(); i != particles->types_cend(); ++i) {
        ParticleType type_resonance = i->second;
     /* Not a resonance, go to next type of particle */
     if (type_resonance.width() < 0.0)
@@ -159,6 +159,31 @@ std::map<int, double> resonance_cross_section(
 
     /* If Clebsch-Gordan coefficient is zero, don't bother with the rest */
     if (fabs(clebsch_gordan_isospin) < really_small)
+      continue;
+
+    /* Check the decay modes of this resonance for 1->3 decays */
+    const std::vector< std::pair<std::vector<int>, float> > decaymodes
+      = (particles->decay_modes(type_resonance.pdgcode())).decay_mode_list();
+    bool not_enough_energy = false;
+    for (std::vector< std::pair<std::vector<int>, float> >::const_iterator mode
+         = decaymodes.begin(); mode != decaymodes.end(); ++mode) {
+      size_t decay_particles = (mode->first).size();
+      if ( decay_particles > 3 ) {
+        printf("Warning: Not a 1->2 or 1->3 process!\n");
+        printf("Number of decay particles: %zu \n", decay_particles);
+      } else if (decay_particles == 3) {
+        /* There must be enough energy to produce all three particles */
+        const float mass_a
+          = (particles->particle_type((mode->first)[0])).mass();
+        const float mass_b
+          = (particles->particle_type((mode->first)[1])).mass();
+        const float mass_c
+          = (particles->particle_type((mode->first)[2])).mass();
+        if (sqrt(mandelstam_s) < mass_a + mass_b + mass_c)
+          not_enough_energy = true;
+      }
+    }
+    if (not_enough_energy)
       continue;
 
     /* Calculate spin factor */

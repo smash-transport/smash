@@ -21,7 +21,7 @@ class ParticleType;
 std::map<int, double> resonance_cross_section(
   const ParticleData &particle1, const ParticleData &particle2,
   const ParticleType &type_particle1, const ParticleType &type_particle2,
-  const Particles &particles);
+  Particles *particles);
 
 /* 1->2 process kinematics */
 int one_to_two(Particles *particles, int resonance_id, int type_a, int type_b);
