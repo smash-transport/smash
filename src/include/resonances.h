@@ -15,6 +15,13 @@ class Particles;
 class ParticleData;
 class ParticleType;
 
+/* calculate_minimum_mass
+ * - calculate the minimum rest energy the resonance must have
+ * to be able to decay through any of its decay channels
+ * NB: This function assumes stable decay products!
+ */
+float calculate_minimum_mass(Particles *particles, int pdgcode);
+
 /* resonance_cross_section - energy-dependent cross section
  * for producing a resonance
  */

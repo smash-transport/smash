@@ -25,6 +25,33 @@
 #include "include/ParticleData.h"
 #include "include/ParticleType.h"
 
+/* calculate_minimum_mass
+ * - calculate the minimum rest energy the resonance must have
+ * to be able to decay through any of its decay channels
+ * NB: This function assumes stable decay products!
+ */
+float calculate_minimum_mass(Particles *particles, int pdgcode) {
+  /* If the particle happens to be stable, just return the mass */
+  if ((particles->particle_type(pdgcode)).width() < 0.0)
+    return (particles->particle_type(pdgcode)).mass();
+  /* Otherwise, let's find the highest mass value needed in any decay mode */
+  float minimum_mass = 0.0;
+  const std::vector< std::pair<std::vector<int>, float> > decaymodes
+    = (particles->decay_modes(pdgcode)).decay_mode_list();
+  for (std::vector< std::pair<std::vector<int>, float> >::const_iterator
+         mode = decaymodes.begin(); mode != decaymodes.end(); ++mode) {
+    size_t decay_particles = (mode->first).size();
+    float total_mass = 0.0;
+    for (size_t i = 0; i < decay_particles; i++) {
+      /* Stable decay products assumed; for resonances the mass can be lower! */
+      total_mass += particles->particle_type((mode->first)[i]).mass();
+    }
+    if (total_mass > minimum_mass)
+      minimum_mass = total_mass;
+  }
+  return minimum_mass;
+}
+
 /* resonance_cross_section - energy-dependent cross section
  * for producing a resonance
  */
@@ -161,7 +188,7 @@ std::map<int, double> resonance_cross_section(
     if (fabs(clebsch_gordan_isospin) < really_small)
       continue;
 
-    /* Check the decay modes of this resonance for 1->3 decays */
+    /* Check the decay modes of this resonance */
     const std::vector< std::pair<std::vector<int>, float> > decaymodes
       = (particles->decay_modes(type_resonance.pdgcode())).decay_mode_list();
     bool not_enough_energy = false;
@@ -171,14 +198,14 @@ std::map<int, double> resonance_cross_section(
       if ( decay_particles > 3 ) {
         printf("Warning: Not a 1->2 or 1->3 process!\n");
         printf("Number of decay particles: %zu \n", decay_particles);
-      } else if (decay_particles == 3) {
-        /* There must be enough energy to produce all three particles */
-        const float mass_a
-          = (particles->particle_type((mode->first)[0])).mass();
-        const float mass_b
-          = (particles->particle_type((mode->first)[1])).mass();
-        const float mass_c
-          = (particles->particle_type((mode->first)[2])).mass();
+      } else {
+        /* There must be enough energy to produce all decay products */
+        float mass_a, mass_b, mass_c = 0.0;
+        mass_a = calculate_minimum_mass(particles, (mode->first)[0]);
+        mass_b = calculate_minimum_mass(particles, (mode->first)[1]);
+        if (decay_particles == 3) {
+          mass_c = calculate_minimum_mass(particles, (mode->first)[2]);
+        }
         if (sqrt(mandelstam_s) < mass_a + mass_b + mass_c)
           not_enough_energy = true;
       }
