@@ -4,6 +4,12 @@ add_executable(particles EXCLUDE_FROM_ALL particles.cc ../particles.cc ../fourve
 add_executable(clebschgordan EXCLUDE_FROM_ALL clebschgordan.cc ../clebschgordan.cc)
 add_dependencies(check fourvector particles clebschgordan)
 
+file(COPY ../config_box.txt DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY ../config_laboratory.txt DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY ../config_sphere.txt DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY ../particles.txt DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY ../decaymodes.txt DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
 # link flags: rt may be needed for old glibc
 if(HAVE_CLOCK_GETTIME)
   target_link_libraries(particles gsl gslcblas rt)
