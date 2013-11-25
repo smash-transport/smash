@@ -263,9 +263,13 @@ void write_particles(const Particles &particles) {
 
 /* write_oscar_header - OSCAR header format */
 void write_oscar_header(void) {
-  FILE *fp;
+  FILE *fp = NULL;
 
   fp = fopen("data/collision.dat", "w");
+  if (!fp) {
+    fprintf(stderr, "E: can't write to %s\n", filename);
+    exit(EXIT_FAILURE);
+  }
   fprintf(fp, "# OSC1999A\n");
   fprintf(fp, "# Interaction history\n");
   fprintf(fp, "# mash \n");
