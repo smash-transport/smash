@@ -183,14 +183,22 @@ void printd_position(const ParticleData &particle __attribute__((unused))) {
  * the headers for decays.dat, collisions.dat
  */
 void write_measurements_header() {
-  FILE *fp;
+  FILE *fp = NULL;
   char filename[256];
   snprintf(filename, sizeof(filename), "data/decays.dat");
   fp = fopen(filename, "w");
+  if (!fp) {
+    fprintf(stderr, "E: can't write to %s\n", filename);
+    exit(EXIT_FAILURE);
+  }
   fprintf(fp, " Time       Decays     Resonances\n");
   fclose(fp);
   snprintf(filename, sizeof(filename), "data/collisions.dat");
   fp = fopen(filename, "w");
+  if (!fp) {
+    fprintf(stderr, "E: can't write to %s\n", filename);
+    exit(EXIT_FAILURE);
+  }
   fprintf(fp, " Time     Actions_tot   Actions_ival     Rejections\n");
   fclose(fp);
 }
