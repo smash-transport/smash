@@ -209,7 +209,7 @@ void write_measurements_header() {
 void write_measurements(const Particles &particles,
   int interactions_total, int interactions_this_interval, int decays,
   int resonances, const size_t &rejection_conflict) {
-  FILE *fp;
+  FILE *fp = NULL;
   char filename[256];
 
   snprintf(filename, sizeof(filename), "data/decays.dat");
@@ -236,7 +236,7 @@ void printd_list(std::list<int> &collision_list) {
 
 /* write_particles - writes out data of the specific particles */
 void write_particles(const Particles &particles) {
-  FILE *fp;
+  FILE *fp = NULL;
   char filename[256];
 
   snprintf(filename, sizeof(filename), "data/momenta_%.5f.dat",
@@ -282,7 +282,7 @@ void write_oscar_header(void) {
 void write_oscar(const ParticleData &particle_data,
                  const ParticleType &particle_type,
                  const int initial, const int final) {
-  FILE *fp;
+  FILE *fp = NULL;
   fp = fopen("data/collision.dat", "a");
   /* OSCAR line prefix : initial final
    * particle creation: 0 1
@@ -309,7 +309,7 @@ void write_oscar(const ParticleData &particle_data,
 /* write_oscar - use this for the other particles in same process */
 void write_oscar(const ParticleData &particle_data,
                  const ParticleType &particle_type) {
-  FILE *fp;
+  FILE *fp = NULL;
   fp = fopen("data/collision.dat", "a");
 
   /* particle_index, particle_pdgcode, ?, momenta, mass position */
@@ -326,7 +326,7 @@ void write_oscar(const ParticleData &particle_data,
 
 /* write_vtk - VTK file describing particle position */
 void write_vtk(const Particles &particles) {
-  FILE *fp;
+  FILE *fp = NULL;
   char filename[256];
 
   snprintf(filename, sizeof(filename), "data/pos_%.5f.vtk",
