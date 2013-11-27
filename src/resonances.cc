@@ -134,7 +134,21 @@ std::map<int, double> resonance_cross_section(
       printd("Found resonance %i (%s) with mass %f and width %f.\n",
              type_resonance.pdgcode(), type_resonance.name().c_str(),
              type_resonance.mass(), type_resonance.width());
-      printd("Original particles: %s %s Charges: %i %i \n",
+      printd("2->1 with original particles: %s %s Charges: %i %i \n",
+             type_particle1.name().c_str(), type_particle2.name().c_str(),
+             type_particle1.charge(), type_particle2.charge());
+    }
+    /* Same procedure for possible 2->2 resonance formation processes */
+    resonance_xsection
+       = symmetryfactor * two_to_two_formation(particles, type_particle1,
+         type_particle2, type_resonance, mandelstam_s, cm_momentum_squared);
+    if (resonance_xsection > really_small) {
+      possible_resonances[type_resonance.pdgcode()] = resonance_xsection;
+      possible_resonances[0] += resonance_xsection;
+      printd("Found resonance %i (%s) with mass %f and width %f.\n",
+             type_resonance.pdgcode(), type_resonance.name().c_str(),
+             type_resonance.mass(), type_resonance.width());
+      printd("2->2 with original particles: %s %s Charges: %i %i \n",
              type_particle1.name().c_str(), type_particle2.name().c_str(),
              type_particle1.charge(), type_particle2.charge());
     }
@@ -142,23 +156,10 @@ std::map<int, double> resonance_cross_section(
   return possible_resonances;
 }
 
+/* two_to_one_formation -- only the resonance in the final state */
 double two_to_one_formation(Particles *particles, ParticleType type_particle1,
   ParticleType type_particle2, ParticleType type_resonance,
   double mandelstam_s, double cm_momentum_squared) {
-
-  /* Isospin z-component based on Gell-Mann–Nishijima formula
-   * 2 * Iz = 2 * charge - (baryon number + strangeness + charm)
-   * XXX: Strangeness and charm ignored for now!
-   */
-  const int isospin_z1 = type_particle1.spin() % 2 == 0
-    ? type_particle1.charge() * 2
-    : type_particle1.charge() * 2 - type_particle1.pdgcode()
-                                    / abs(type_particle1.pdgcode());
-  const int isospin_z2 = type_particle2.spin() % 2 == 0
-    ? type_particle2.charge() * 2
-    : type_particle2.charge() * 2 - type_particle2.pdgcode()
-                                    / abs(type_particle2.pdgcode());
-
   /* Check for charge conservation */
   if (type_resonance.charge() != type_particle1.charge()
                                  + type_particle2.charge())
@@ -184,6 +185,18 @@ double two_to_one_formation(Particles *particles, ParticleType type_particle1,
     }
   }
 
+  /* Isospin z-component based on Gell-Mann–Nishijima formula
+   * 2 * Iz = 2 * charge - (baryon number + strangeness + charm)
+   * XXX: Strangeness and charm ignored for now!
+   */
+  const int isospin_z1 = type_particle1.spin() % 2 == 0
+    ? type_particle1.charge() * 2
+    : type_particle1.charge() * 2 - type_particle1.pdgcode()
+                                    / abs(type_particle1.pdgcode());
+  const int isospin_z2 = type_particle2.spin() % 2 == 0
+    ? type_particle2.charge() * 2
+    : type_particle2.charge() * 2 - type_particle2.pdgcode()
+                                    / abs(type_particle2.pdgcode());
   int isospin_z_resonance = (type_resonance.spin()) % 2 == 0
     ? type_resonance.charge() * 2
     : type_resonance.charge() * 2 - type_resonance.pdgcode()
@@ -241,7 +254,6 @@ double two_to_one_formation(Particles *particles, ParticleType type_particle1,
   /* Calculate spin factor */
   const double spinfactor = (type_resonance.spin() + 1)
     / ((type_particle1.spin() + 1) * (type_particle2.spin() + 1));
-
   float resonance_width = type_resonance.width();
   float resonance_mass = type_resonance.mass();
   /* Calculate resonance production cross section
@@ -251,6 +263,173 @@ double two_to_one_formation(Particles *particles, ParticleType type_particle1,
          * 4.0 * M_PI / cm_momentum_squared
          * breit_wigner(mandelstam_s, resonance_mass, resonance_width)
          * hbarc * hbarc / fm2_mb;
+}
+
+/* two_to_two_formation -- resonance and another particle in final state */
+double two_to_two_formation(Particles *particles, ParticleType type_particle1,
+  ParticleType type_particle2, ParticleType type_resonance,
+  double mandelstam_s, double cm_momentum_squared) {
+  /* If we have two baryons in the beginning, we must have fermion resonance */
+  if (type_particle1.spin() % 2 != 0 && type_particle2.spin() % 2 != 0
+      && type_particle1.pdgcode() != -type_particle2.pdgcode()
+      && type_resonance.spin() % 2 == 0)
+    return 0.0;
+
+  /* Isospin z-component based on Gell-Mann–Nishijima formula
+   * 2 * Iz = 2 * charge - (baryon number + strangeness + charm)
+   * XXX: Strangeness and charm ignored for now!
+   */
+  const int isospin_z1 = type_particle1.spin() % 2 == 0
+    ? type_particle1.charge() * 2
+    : type_particle1.charge() * 2 - type_particle1.pdgcode()
+                                    / abs(type_particle1.pdgcode());
+  const int isospin_z2 = type_particle2.spin() % 2 == 0
+    ? type_particle2.charge() * 2
+    : type_particle2.charge() * 2 - type_particle2.pdgcode()
+                                    / abs(type_particle2.pdgcode());
+
+  int isospin_z_resonance = (type_resonance.spin()) % 2 == 0
+    ? type_resonance.charge() * 2
+    : type_resonance.charge() * 2 - type_resonance.pdgcode()
+                                    / abs(type_resonance.pdgcode());
+
+  /* Compute initial total combined isospin range */
+  int initial_total_maximum
+    = type_particle1.isospin() + type_particle2.isospin();
+  int initial_total_minimum
+    = abs(type_particle1.isospin() - type_particle2.isospin());
+  /* Loop over particle types to find allowed combinations */
+  for (std::map<int, ParticleType>::const_iterator
+       type_i = particles->types_cbegin(); type_i != particles->types_cend();
+        ++type_i) {
+    /* We are interested only stable particles here */
+    if (type_i->second.width() > 0.0)
+      continue;
+
+    /* Check for charge conservation */
+    if (type_resonance.charge() + type_i->second.charge()
+        != type_particle1.charge() + type_particle2.charge())
+      continue;
+
+    /* Check for baryon number conservation */
+    int initial_baryon_number = 0;
+    if (type_particle1.spin() % 2 != 0) {
+      initial_baryon_number += type_particle1.pdgcode()
+                               / abs(type_particle1.pdgcode());
+    }
+    if (type_particle2.spin() % 2 != 0) {
+      initial_baryon_number += type_particle2.pdgcode()
+                               / abs(type_particle2.pdgcode());
+    }
+    int final_baryon_number = 0;
+    if (type_resonance.spin() % 2 != 0) {
+      final_baryon_number += type_resonance.pdgcode()
+                               / abs(type_resonance.pdgcode());
+    }
+    if (type_i->second.spin() % 2 != 0) {
+      final_baryon_number += type_i->second.pdgcode()
+                               / abs(type_i->second.pdgcode());
+    }
+    if (final_baryon_number != initial_baryon_number)
+      continue;
+
+    /* Compute total isospin range with given initial and final particles */
+    int isospin_maximum = std::min(type_resonance.isospin()
+      + type_i->second.isospin(), initial_total_maximum);
+    int isospin_minimum = std::max(abs(type_resonance.isospin()
+      - type_i->second.isospin()), initial_total_minimum);
+
+    int isospin_z_i = (type_i->second.spin()) % 2 == 0
+    ? type_i->second.charge() * 2
+    : type_i->second.charge() * 2 - type_i->second.pdgcode()
+       / abs(type_i->second.pdgcode());
+    int isospin_z_final = isospin_z_resonance + isospin_z_i;
+
+    int isospin_final = isospin_maximum;
+    double clebsch_gordan_isospin = 0.0;
+    while (isospin_final >= isospin_minimum) {
+      if (abs(isospin_z_final) > isospin_final)
+        break;
+      /* Calculate isospin Clebsch-Gordan coefficient combinations
+       * (-1)^(j1 - j2 + m3) * sqrt(2 * j3 + 1) * [Wigner 3J symbol]
+       * Note that the calculation assumes that isospin values
+       * have been multiplied by two
+       */
+      double wigner_3j =  gsl_sf_coupling_3j(type_particle1.isospin(),
+        type_particle2.isospin(), isospin_final,
+        isospin_z1, isospin_z2, -isospin_z_final);
+      if (fabs(wigner_3j) > really_small)
+        clebsch_gordan_isospin += pow(-1, type_particle1.isospin() / 2.0
+        - type_particle2.isospin() / 2.0 + isospin_z_final / 2.0)
+        * sqrt(isospin_final + 1) * wigner_3j;
+
+      printd("CG: %g I1: %i I2: %i IR: %i iz1: %i iz2: %i izR: %i \n",
+         clebsch_gordan_isospin,
+         type_particle1.isospin(), type_particle2.isospin(),
+         isospin_final,
+         isospin_z1, isospin_z2, isospin_z_final);
+      /* isospin is multiplied by 2,
+       *  so we must also decrease it by increments of 2
+       */
+      isospin_final = isospin_final - 2;
+    }
+    /* If Clebsch-Gordan coefficient is zero, don't bother with the rest */
+    if (fabs(clebsch_gordan_isospin) < really_small)
+      continue;
+
+    /* Check the decay modes of this resonance */
+    const std::vector< std::pair<std::vector<int>, float> > decaymodes
+      = (particles->decay_modes(type_resonance.pdgcode())).decay_mode_list();
+    bool not_enough_energy = false;
+    for (std::vector< std::pair<std::vector<int>, float> >::const_iterator mode
+         = decaymodes.begin(); mode != decaymodes.end(); ++mode) {
+      size_t decay_particles = (mode->first).size();
+      if ( decay_particles > 3 ) {
+        printf("Warning: Not a 1->2 or 1->3 process!\n");
+        printf("Number of decay particles: %zu \n", decay_particles);
+      } else {
+        /* There must be enough energy to produce all decay products */
+        float mass_a, mass_b, mass_c = 0.0;
+        mass_a = calculate_minimum_mass(particles, (mode->first)[0]);
+        mass_b = calculate_minimum_mass(particles, (mode->first)[1]);
+        if (decay_particles == 3) {
+          mass_c = calculate_minimum_mass(particles, (mode->first)[2]);
+        }
+        if (sqrt(mandelstam_s) < mass_a + mass_b + mass_c
+                                 + type_i->second.mass())
+          not_enough_energy = true;
+      }
+    }
+    if (not_enough_energy)
+      continue;
+
+    /* Calculate spin factor */
+    int spin_total_maximum
+      = type_resonance.spin() + type_i->second.spin();
+    int spin_total_minimum
+      = abs(type_resonance.spin() - type_i->second.spin());
+    int spin_total = spin_total_maximum;
+    double spinfactor = (spin_total + 1)
+      / ((type_particle1.spin() + 1) * (type_particle2.spin() + 1));
+    while (spin_total >=  spin_total_minimum) {
+      spinfactor += (spin_total + 1)
+        / ((type_particle1.spin() + 1) * (type_particle2.spin() + 1));
+      /* spin is multiplied by 2,
+       * so it must be decreased in increments of 2
+       */
+      spin_total = spin_total - 2;
+    }
+    float resonance_width = type_resonance.width();
+    float resonance_mass = type_resonance.mass();
+    /* Calculate resonance production cross section
+     * using the Breit-Wigner distribution as probability amplitude
+     */
+    double xsection = clebsch_gordan_isospin * clebsch_gordan_isospin
+         * spinfactor * 4.0 * M_PI / cm_momentum_squared
+         * breit_wigner(mandelstam_s, resonance_mass, resonance_width)
+         * hbarc * hbarc / fm2_mb;
+  }
+  return 0.0;
 }
 
 /* 2->1 resonance formation process */

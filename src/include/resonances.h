@@ -30,7 +30,13 @@ std::map<int, double> resonance_cross_section(
   const ParticleType &type_particle1, const ParticleType &type_particle2,
   Particles *particles);
 
+/* two_to_one_formation -- only the resonance in the final state */
 double two_to_one_formation(Particles *particles, ParticleType type_particle1,
+  ParticleType type_particle2, ParticleType type_resonance,
+  double mandelstam_s, double cm_momentum_squared);
+
+/* two_to_two_formation -- resonance and another particle in final state */
+double two_to_two_formation(Particles *particles, ParticleType type_particle1,
   ParticleType type_particle2, ParticleType type_resonance,
   double mandelstam_s, double cm_momentum_squared);
 
