@@ -267,7 +267,7 @@ void write_oscar_header(void) {
 
   fp = fopen("data/collision.dat", "w");
   if (!fp) {
-    fprintf(stderr, "E: can't write to %s\n", filename);
+    fprintf(stderr, "E: can't write to collision.dat\n");
     exit(EXIT_FAILURE);
   }
   fprintf(fp, "# OSC1999A\n");
