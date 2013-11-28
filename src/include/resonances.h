@@ -40,6 +40,9 @@ double two_to_two_formation(Particles *particles, ParticleType type_particle1,
   ParticleType type_particle2, ParticleType type_resonance,
   double mandelstam_s, double cm_momentum_squared);
 
+/* Integral for Breit-Wigner integration with GSL routine */
+double breit_wigner_integrand(double mandelstam_s, void * parameters);
+
 /* 2->1 resonance formation process */
 int resonance_formation(Particles *particles, int particle_id, int other_id,
   int resonance_type);

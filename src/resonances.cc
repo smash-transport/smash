@@ -9,6 +9,7 @@
  */
 #include "include/resonances.h"
 
+#include <gsl/gsl_integration.h>
 #include <gsl/gsl_sf_coupling.h>
 #include <cmath>
 #include <cstdio>
@@ -380,6 +381,7 @@ double two_to_two_formation(Particles *particles, ParticleType type_particle1,
     const std::vector< std::pair<std::vector<int>, float> > decaymodes
       = (particles->decay_modes(type_resonance.pdgcode())).decay_mode_list();
     bool not_enough_energy = false;
+    double minimum_mass = 0.0;
     for (std::vector< std::pair<std::vector<int>, float> >::const_iterator mode
          = decaymodes.begin(); mode != decaymodes.end(); ++mode) {
       size_t decay_particles = (mode->first).size();
@@ -395,8 +397,11 @@ double two_to_two_formation(Particles *particles, ParticleType type_particle1,
           mass_c = calculate_minimum_mass(particles, (mode->first)[2]);
         }
         if (sqrt(mandelstam_s) < mass_a + mass_b + mass_c
-                                 + type_i->second.mass())
+                                 + type_i->second.mass()) {
           not_enough_energy = true;
+        } else if (minimum_mass < mass_a + mass_b + mass_c) {
+          minimum_mass = mass_a + mass_b + mass_c;
+        }
       }
     }
     if (not_enough_energy)
@@ -418,17 +423,77 @@ double two_to_two_formation(Particles *particles, ParticleType type_particle1,
        */
       spin_total = spin_total - 2;
     }
-    float resonance_width = type_resonance.width();
-    float resonance_mass = type_resonance.mass();
     /* Calculate resonance production cross section
      * using the Breit-Wigner distribution as probability amplitude
+     * Integrate over the allowed resonance mass range
      */
+    gsl_integration_workspace *workspace
+      = gsl_integration_workspace_alloc(1000);
+    double resonance_integral, integral_error;
+    float parameter_array[4];
+    parameter_array[0] = type_resonance.width();
+    parameter_array[1] = type_resonance.mass();
+    parameter_array[2] = type_i->second.mass();
+    parameter_array[3] = mandelstam_s;
+    gsl_function integrand;
+    integrand.function = &breit_wigner_integrand;
+    integrand.params = &parameter_array[0];
+    size_t subintervals_max = 100;
+    int gauss_points = 2;
+    double accuracy_absolute = 1.0e-6;
+    double accuracy_relative = 1.0e-4;
+    double lower_limit = minimum_mass * minimum_mass;
+    double upper_limit = (sqrt(mandelstam_s) - type_i->second.mass())
+                       * (sqrt(mandelstam_s) - type_i->second.mass());
+    printd("Process: %s %s -> %s %s\n", type_particle1.name().c_str(),
+     type_particle2.name().c_str(), type_i->second.name().c_str(),
+     type_resonance.name().c_str());
+    printd("Limits: %g %g \n", lower_limit, upper_limit);
+
+    gsl_integration_qag(&integrand, lower_limit, upper_limit,
+                        accuracy_absolute, accuracy_relative,
+                        subintervals_max, gauss_points, workspace,
+                        &resonance_integral, &integral_error);
+
+    gsl_integration_workspace_free(workspace);
+
+    printd("Integral value: %g Error: %g \n", resonance_integral,
+      integral_error);
+
     double xsection = clebsch_gordan_isospin * clebsch_gordan_isospin
-         * spinfactor * 4.0 * M_PI / cm_momentum_squared
-         * breit_wigner(mandelstam_s, resonance_mass, resonance_width)
+         * spinfactor
+         / (64 * M_PI * M_PI)
+         / mandelstam_s
+         / sqrt(cm_momentum_squared)
+         * resonance_integral
          * hbarc * hbarc / fm2_mb;
   }
   return 0.0;
+}
+
+/* Integral for Breit-Wigner integration with GSL routine */
+double breit_wigner_integrand(double resonance_mass_square, void * parameters) {
+  float *integrand_parameters = reinterpret_cast<float *>(parameters);
+  float resonance_pole_mass = integrand_parameters[0];
+  float resonance_width = integrand_parameters[1];
+  float stable_mass = integrand_parameters[2];
+  float mandelstam_s = integrand_parameters[3];
+  float resonance_mass = sqrt(resonance_mass_square);
+
+  /* center-of-mass momentum of final state particles */
+  double cm_momentum_final
+    = sqrt((mandelstam_s - (stable_mass + resonance_mass)
+                         * (stable_mass + resonance_mass))
+         * (mandelstam_s - (stable_mass - resonance_mass)
+                         * (stable_mass - resonance_mass)))
+      / (2 * sqrt(mandelstam_s));
+
+  /* Breit-Wigner will be integrated over M^2
+   * (called mandelstam_s in breit_wigner)
+   * Divide by M^2 here
+   */
+  return breit_wigner(resonance_mass_square, resonance_pole_mass,
+    resonance_width) / resonance_mass_square * cm_momentum_final;
 }
 
 /* 2->1 resonance formation process */
