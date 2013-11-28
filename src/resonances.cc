@@ -68,10 +68,6 @@ std::map<int, double> resonance_cross_section(
   if (type_particle1.width() > 0.0 || type_particle2.width() > 0.0)
     return possible_resonances;
 
-  /* No baryon-baryon interactions for now */
-  if (type_particle1.spin() % 2 != 0 && type_particle2.spin() % 2 != 0)
-    return possible_resonances;
-
   /* Isospin symmetry factor, by default 1 */
   int symmetryfactor = 1;
   /* Do the particles have the same isospin value? */
@@ -139,18 +135,21 @@ std::map<int, double> resonance_cross_section(
              type_particle1.charge(), type_particle2.charge());
     }
     /* Same procedure for possible 2->2 resonance formation processes */
-    resonance_xsection
-       = symmetryfactor * two_to_two_formation(particles, type_particle1,
-         type_particle2, type_resonance, mandelstam_s, cm_momentum_squared);
-    if (resonance_xsection > really_small) {
-      possible_resonances[type_resonance.pdgcode()] = resonance_xsection;
-      possible_resonances[0] += resonance_xsection;
-      printd("Found resonance %i (%s) with mass %f and width %f.\n",
-             type_resonance.pdgcode(), type_resonance.name().c_str(),
-             type_resonance.mass(), type_resonance.width());
-      printd("2->2 with original particles: %s %s Charges: %i %i \n",
-             type_particle1.name().c_str(), type_particle2.name().c_str(),
-             type_particle1.charge(), type_particle2.charge());
+    /* XXX: For now, we allow this only for baryon-baryon interactions */
+    if (type_particle1.spin() % 2 != 0 && type_particle2.spin() % 2 != 0) {
+      resonance_xsection
+         = symmetryfactor * two_to_two_formation(particles, type_particle1,
+           type_particle2, type_resonance, mandelstam_s, cm_momentum_squared);
+      if (resonance_xsection > really_small) {
+        possible_resonances[type_resonance.pdgcode()] = resonance_xsection;
+        possible_resonances[0] += resonance_xsection;
+        printd("Found resonance %i (%s) with mass %f and width %f.\n",
+               type_resonance.pdgcode(), type_resonance.name().c_str(),
+               type_resonance.mass(), type_resonance.width());
+        printd("2->2 with original particles: %s %s Charges: %i %i \n",
+               type_particle1.name().c_str(), type_particle2.name().c_str(),
+               type_particle1.charge(), type_particle2.charge());
+      }
     }
   }
   return possible_resonances;
