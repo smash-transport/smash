@@ -496,8 +496,8 @@ size_t two_to_two_formation(Particles *particles, ParticleType type_particle1,
 /* Integral for Breit-Wigner integration with GSL routine */
 double breit_wigner_integrand(double resonance_mass_square, void * parameters) {
   float *integrand_parameters = reinterpret_cast<float *>(parameters);
-  float resonance_pole_mass = integrand_parameters[0];
-  float resonance_width = integrand_parameters[1];
+  float resonance_width = integrand_parameters[0];
+  float resonance_pole_mass = integrand_parameters[1];
   float stable_mass = integrand_parameters[2];
   float mandelstam_s = integrand_parameters[3];
   float resonance_mass = sqrt(resonance_mass_square);
@@ -518,42 +518,127 @@ double breit_wigner_integrand(double resonance_mass_square, void * parameters) {
     resonance_width) / resonance_mass_square * cm_momentum_final;
 }
 
-/* 2->1 resonance formation process */
+/* Resonance formation kinematics */
 int resonance_formation(Particles *particles, int particle_id, int other_id,
                         std::vector<int> produced_particles) {
-  int pdg_resonance = produced_particles.at(0);
-  /* Add a new particle */
+  if (produced_particles.empty()) {
+    printf("resonance_formation:\n");
+    printf("Warning: No final state particles found!\n");
+    printf("Resonance formation canceled. Returning -1.\n");
+    return -1;
+  }
+  /* Template for a new particle */
   ParticleData resonance;
-  resonance.set_pdgcode(pdg_resonance);
 
-  /* Center-of-momentum frame of initial particles
-   * is the rest frame of the resonance
-   */
-  const double energy = particles->data(particle_id).momentum().x0()
+  const double cms_energy = particles->data(particle_id).momentum().x0()
     + particles->data(other_id).momentum().x0();
-  /* We use fourvector to set 4-momentum, as setting it
-   * with doubles requires that particle is on
-   * mass shell, which is not generally true for resonances
-   */
-  FourVector resonance_momentum(energy, 0.0, 0.0, 0.0);
-  resonance.set_momentum(resonance_momentum);
 
-  printd("Momentum of the new particle: %g %g %g %g \n",
-    resonance.momentum().x0(),
-    resonance.momentum().x1(),
-    resonance.momentum().x2(),
-    resonance.momentum().x3());
+  int new_id = -1;
+  if (produced_particles.size() == 1) {
+    resonance.set_pdgcode(produced_particles.at(0));
+    /* Center-of-momentum frame of initial particles
+     * is the rest frame of the resonance
+     *
+     * We use fourvector to set 4-momentum, as setting it
+     * with doubles requires that particle is on
+     * mass shell, which is not generally true for resonances
+     */
+    FourVector resonance_momentum(cms_energy, 0.0, 0.0, 0.0);
+    resonance.set_momentum(resonance_momentum);
 
-  /* The real position should be between parents in the computational frame! */
-  resonance.set_position(1.0, 0.0, 0.0, 0.0);
+    printd("Momentum of the new particle: %g %g %g %g \n",
+      resonance.momentum().x0(),
+      resonance.momentum().x1(),
+      resonance.momentum().x2(),
+      resonance.momentum().x3());
 
-  /* No collision yet */
-  resonance.set_collision(-1, 0, -1);
-  int new_id = particles->id_max() + 1;
-  resonance.set_id(new_id);
-  particles->add_data(resonance);
-  printd("Created %s with ID %i \n", particles->type(new_id).name().c_str(),
+    /* Initialize position */
+    resonance.set_position(1.0, 0.0, 0.0, 0.0);
+    new_id = particles->id_max() + 1;
+    resonance.set_id(new_id);
+    particles->add_data(resonance);
+    printd("Created %s with ID %i \n", particles->type(new_id).name().c_str(),
          new_id);
+  } else if (produced_particles.size() == 2) {
+    /* 2 particles in final state. Need another particle template */
+    /* XXX: For now, it is assumed that the other particle is stable! */
+    ParticleData stable_product;
+    if ((particles->particle_type(produced_particles.at(0))).width() > 0) {
+      resonance.set_pdgcode(produced_particles.at(0));
+      stable_product.set_pdgcode(produced_particles.at(1));
+    } else {
+      stable_product.set_pdgcode(produced_particles.at(0));
+      resonance.set_pdgcode(produced_particles.at(1));
+    }
+    /* Resonance mass needs to be sampled */
+    /* First, find the minimum mass of this resonance */
+    double minimum_mass
+      = calculate_minimum_mass(particles, resonance.pdgcode());
+    /* Define Breit-Wigner parameters */
+    float mass_stable
+      = (particles->particle_type(stable_product.pdgcode())).mass();
+    float parameter_array[4];
+    parameter_array[0]
+      = (particles->particle_type(resonance.pdgcode())).width();
+    parameter_array[1]
+      = (particles->particle_type(resonance.pdgcode())).mass();
+    parameter_array[2] = mass_stable;
+    parameter_array[3] = cms_energy * cms_energy;
 
+    /* sample resonance mass from Breit-Wigner */
+    double mass_resonance = 0.0, random_number = 1.0;
+    double breit_wigner_max = breit_wigner_integrand(
+      parameter_array[1] * parameter_array[1], &parameter_array);
+    double breit_wigner_value = 0.0;
+    while (random_number > breit_wigner_value) {
+      random_number = breit_wigner_max * drand48();
+      mass_resonance = (cms_energy - mass_stable - minimum_mass) * drand48()
+                       + minimum_mass;
+    }
+
+    double energy_resonance = (cms_energy * cms_energy
+      + mass_resonance * mass_resonance - mass_stable * mass_stable)
+      / (2.0 * cms_energy);
+
+    double momentum_radial = sqrt(cms_energy * cms_energy
+      - mass_resonance * mass_resonance);
+    if (momentum_radial < 0.0)
+      printf("Warning: radial momenta %g \n", momentum_radial);
+    /* phi in the range from [0, 2 * pi) */
+    double phi = 2.0 * M_PI * drand48();
+    /* cos(theta) in the range from [-1.0, 1.0) */
+    double cos_theta = -1.0 + 2.0 * drand48();
+    double sin_theta = sqrt(1.0 - cos_theta * cos_theta);
+    if (energy_resonance  < mass_resonance || abs(cos_theta) > 1) {
+      printf("Particle %d radial momenta %g phi %g cos_theta %g\n",
+             resonance.pdgcode(), momentum_radial, phi, cos_theta);
+      printf("Etot: %g m_a: %g m_b %g E_a: %g", cms_energy,
+             mass_resonance, mass_stable, energy_resonance);
+    }
+    resonance.set_momentum(mass_resonance,
+                           momentum_radial * cos(phi) * sin_theta,
+                           momentum_radial * sin(phi) * sin_theta,
+                           momentum_radial * cos_theta);
+    stable_product.set_momentum(mass_stable,
+                                - resonance.momentum().x1(),
+                                - resonance.momentum().x2(),
+                                - resonance.momentum().x3());
+    /* Initialize positions */
+    resonance.set_position(1.0, 0.0, 0.0, 0.0);
+    stable_product.set_position(1.0, 0.0, 0.0, 0.0);
+    /* Assign IDs to new particles */
+    new_id = particles->id_max() + 1;
+    int new_id_stable = new_id + 1;
+    resonance.set_id(new_id);
+    stable_product.set_id(new_id_stable);
+    particles->add_data(resonance);
+    particles->add_data(stable_product);
+  } else {
+    printf("resonance_formation:\n");
+    printf("Warning: %zu particles in final state!\n",
+           produced_particles.size());
+    printf("Resonance formation canceled. Returning -1.\n");
+    return -1;
+  }
   return new_id;
 }
