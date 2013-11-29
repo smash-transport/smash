@@ -213,7 +213,9 @@ size_t collide_particles(Particles *particles, std::list<int> *collision_list,
       /* resonance formation */
       (*resonance_formations)++;
       printd("Process: Resonance formation. ");
-      write_oscar(particles->data(id_a), particles->type(id_a), 2, 1);
+      size_t new_particles = (particles->data(id_a).final_state()).size();
+      write_oscar(particles->data(id_a), particles->type(id_a), 2,
+                  new_particles);
       write_oscar(particles->data(id_b), particles->type(id_b));
       /* processes computed in the center of momenta */
       boost_CM(particles->data_pointer(id_a), particles->data_pointer(id_b),
@@ -221,34 +223,39 @@ size_t collide_particles(Particles *particles, std::list<int> *collision_list,
 
       size_t id_new = resonance_formation(particles, id_a, id_b,
         particles->data(id_a).final_state());
-      /* Boost the new particle to computational frame */
-      FourVector neg_velocity_CM;
-      neg_velocity_CM.set_FourVector(1.0, -velocity_CM.x1(), -velocity_CM.x2(),
-                                     -velocity_CM.x3());
-      particles->data_pointer(id_new)->set_momentum(
-        particles->data(id_new).momentum().LorentzBoost(neg_velocity_CM));
-
-      final_momentum = particles->data(id_new).momentum();
 
       boost_back_CM(particles->data_pointer(id_a),
                     particles->data_pointer(id_b), &velocity_CM);
 
-      /* The starting point of resonance is between the two initial particles */
-      /* x_middle = x_a + (x_b - x_a) / 2 */
-      FourVector middle_point = particles->data(id_a).position()
-        + (particles->data(id_b).position() - particles->data(id_a).position())
-        / 2.0;
-      particles->data_pointer(id_new)->set_position(middle_point);
+      /* Boost the new particle to computational frame */
+      FourVector neg_velocity_CM;
+      neg_velocity_CM.set_FourVector(1.0, -velocity_CM.x1(),
+        -velocity_CM.x2(), -velocity_CM.x3());
 
-      write_oscar(particles->data(id_new), particles->type(id_new));
+      for (size_t id_value = id_new; id_value < id_new + new_particles;
+           id_value++) {
+        particles->data_pointer(id_value)->set_momentum(
+          particles->data(id_value).momentum().LorentzBoost(neg_velocity_CM));
+        final_momentum += particles->data(id_value).momentum();
 
-      printd("Resonance %s with ID %zu \n",
-        particles->type(id_new).name().c_str(), id_new);
-      printd_momenta("momentum in comp frame", particles->data(id_new));
-      printd_position("position in comp frame", particles->data(id_new));
+        /* The starting point of resonance is between
+         * the two initial particles
+         * x_middle = x_a + (x_b - x_a) / 2
+         */
+        FourVector middle_point = particles->data(id_a).position()
+          + (particles->data(id_b).position()
+              - particles->data(id_a).position())
+          / 2.0;
+        particles->data_pointer(id_value)->set_position(middle_point);
+        write_oscar(particles->data(id_value), particles->type(id_value));
+        /* unset collision time for particles + keep id + unset partner */
+        particles->data_pointer(id_value)->set_collision_past(id_process);
 
-      /* unset collision time for particles + keep id + unset partner */
-      particles->data_pointer(id_new)->set_collision_past(id_process);
+        printd("Resonance %s with ID %zu \n",
+          particles->type(id_new).name().c_str(), id_new);
+        printd_momenta("momentum in comp frame", particles->data(id_new));
+        printd_position("position in comp frame", particles->data(id_new));
+      }
 
       /* Remove the initial particles */
       particles->remove(id_a);
@@ -256,7 +263,7 @@ size_t collide_particles(Particles *particles, std::list<int> *collision_list,
 
       printd("Particle map has now %zu elements. \n", particles->size());
     } else {
-      printd("Warning: ID %i (%s) has unspecified process type %i.\n",
+      printf("Warning: ID %i (%s) has unspecified process type %i.\n",
              id_a, particles->type(id_a).name().c_str(), interaction_type);
     } /* end if (interaction_type == 0) */
     id_process++;
