@@ -8,6 +8,7 @@
 #ifndef SRC_INCLUDE_RESONANCES_H_
 #define SRC_INCLUDE_RESONANCES_H_
 
+#include <cstdio>
 #include <map>
 #include <utility>
 #include <vector>
@@ -38,7 +39,7 @@ double two_to_one_formation(Particles *particles, ParticleType type_particle1,
   double mandelstam_s, double cm_momentum_squared);
 
 /* two_to_two_formation -- resonance and another particle in final state */
-double two_to_two_formation(Particles *particles, ParticleType type_particle1,
+size_t two_to_two_formation(Particles *particles, ParticleType type_particle1,
   ParticleType type_particle2, ParticleType type_resonance,
   double mandelstam_s, double cm_momentum_squared, double symmetryfactor,
   std::vector< std::pair<std::vector<int>, double> > *process_list);

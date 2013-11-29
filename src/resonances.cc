@@ -148,17 +148,15 @@ std::vector< std::pair<std::vector<int>, double> > resonance_cross_section(
     /* Same procedure for possible 2->2 resonance formation processes */
     /* XXX: For now, we allow this only for baryon-baryon interactions */
     if (type_particle1.spin() % 2 != 0 && type_particle2.spin() % 2 != 0) {
-      resonance_xsection
+      size_t two_to_two_processes
          = two_to_two_formation(particles, type_particle1,
            type_particle2, type_resonance, mandelstam_s, cm_momentum_squared,
            symmetryfactor, &resonance_process_list);
-      if (resonance_xsection > really_small) {
-        (resonance_process_list.at(0)).second += resonance_xsection;
-
-        printd("Found resonance %i (%s) with mass %f and width %f.\n",
-               type_resonance.pdgcode(), type_resonance.name().c_str(),
-               type_resonance.mass(), type_resonance.width());
-        printf("2->2 with original particles: %s %s Charges: %i %i \n",
+      if (two_to_two_processes > 0) {
+        printd("Found %zu 2->2 processes for resonance %i (%s).\n",
+               two_to_two_processes,
+               type_resonance.pdgcode(), type_resonance.name().c_str());
+        printd("2->2 with original particles: %s %s Charges: %i %i \n",
                type_particle1.name().c_str(), type_particle2.name().c_str(),
                type_particle1.charge(), type_particle2.charge());
       }
@@ -277,10 +275,11 @@ double two_to_one_formation(Particles *particles, ParticleType type_particle1,
 }
 
 /* two_to_two_formation -- resonance and another particle in final state */
-double two_to_two_formation(Particles *particles, ParticleType type_particle1,
+size_t two_to_two_formation(Particles *particles, ParticleType type_particle1,
   ParticleType type_particle2, ParticleType type_resonance,
   double mandelstam_s, double cm_momentum_squared, double symmetryfactor,
   std::vector< std::pair<std::vector<int>, double> > *process_list) {
+  size_t number_of_processes = 0;
   /* If we have two baryons in the beginning, we must have fermion resonance */
   if (type_particle1.spin() % 2 != 0 && type_particle2.spin() % 2 != 0
       && type_particle1.pdgcode() != -type_particle2.pdgcode()
@@ -488,9 +487,10 @@ double two_to_two_formation(Particles *particles, ParticleType type_particle1,
         = std::make_pair(final_state_particles, xsection);
       process_list->push_back(process);
       (process_list->at(0)).second += xsection;
+      number_of_processes++;
     }
   }
-  return 0.0;
+  return number_of_processes;
 }
 
 /* Integral for Breit-Wigner integration with GSL routine */
