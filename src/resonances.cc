@@ -57,18 +57,22 @@ float calculate_minimum_mass(Particles *particles, int pdgcode) {
 /* resonance_cross_section - energy-dependent cross section
  * for producing a resonance
  */
-std::map<int, double> resonance_cross_section(
+std::vector< std::pair<std::vector<int>, double> > resonance_cross_section(
   const ParticleData &particle1, const ParticleData &particle2,
   const ParticleType &type_particle1, const ParticleType &type_particle2,
   Particles *particles) {
-  std::map<int, double> possible_resonances;
+  std::vector< std::pair<std::vector<int>, double> > resonance_process_list;
+  std::vector<int> final_state_particles;
 
-  /* key 0 refers to total resonance production cross section */
-  possible_resonances[0] = 0.0;
+  /* first item refers to total resonance production cross section */
+  final_state_particles.push_back(0);
+  std::pair<std::vector<int>, double> resonance_process
+    = std::make_pair(final_state_particles, 0.0);
+  resonance_process_list.push_back(resonance_process);
 
   /* Resonances do not form resonances */
   if (type_particle1.width() > 0.0 || type_particle2.width() > 0.0)
-    return possible_resonances;
+    return resonance_process_list;
 
   /* Isospin symmetry factor, by default 1 */
   int symmetryfactor = 1;
@@ -127,8 +131,13 @@ std::map<int, double> resonance_cross_section(
 
     /* If cross section is non-negligible, add resonance to the list */
     if (resonance_xsection > really_small) {
-      possible_resonances[type_resonance.pdgcode()] = resonance_xsection;
-      possible_resonances[0] += resonance_xsection;
+      final_state_particles.clear();
+      final_state_particles.push_back(type_resonance.pdgcode());
+      resonance_process = std::make_pair(final_state_particles,
+                                         resonance_xsection);
+      resonance_process_list.push_back(resonance_process);
+      (resonance_process_list.at(0)).second += resonance_xsection;
+
       printd("Found resonance %i (%s) with mass %f and width %f.\n",
              type_resonance.pdgcode(), type_resonance.name().c_str(),
              type_resonance.mass(), type_resonance.width());
@@ -140,21 +149,22 @@ std::map<int, double> resonance_cross_section(
     /* XXX: For now, we allow this only for baryon-baryon interactions */
     if (type_particle1.spin() % 2 != 0 && type_particle2.spin() % 2 != 0) {
       resonance_xsection
-         = symmetryfactor * two_to_two_formation(particles, type_particle1,
-           type_particle2, type_resonance, mandelstam_s, cm_momentum_squared);
+         = two_to_two_formation(particles, type_particle1,
+           type_particle2, type_resonance, mandelstam_s, cm_momentum_squared,
+           symmetryfactor, &resonance_process_list);
       if (resonance_xsection > really_small) {
-        possible_resonances[type_resonance.pdgcode()] = resonance_xsection;
-        possible_resonances[0] += resonance_xsection;
+        (resonance_process_list.at(0)).second += resonance_xsection;
+
         printd("Found resonance %i (%s) with mass %f and width %f.\n",
                type_resonance.pdgcode(), type_resonance.name().c_str(),
                type_resonance.mass(), type_resonance.width());
-        printd("2->2 with original particles: %s %s Charges: %i %i \n",
+        printf("2->2 with original particles: %s %s Charges: %i %i \n",
                type_particle1.name().c_str(), type_particle2.name().c_str(),
                type_particle1.charge(), type_particle2.charge());
       }
     }
   }
-  return possible_resonances;
+  return resonance_process_list;
 }
 
 /* two_to_one_formation -- only the resonance in the final state */
@@ -269,7 +279,8 @@ double two_to_one_formation(Particles *particles, ParticleType type_particle1,
 /* two_to_two_formation -- resonance and another particle in final state */
 double two_to_two_formation(Particles *particles, ParticleType type_particle1,
   ParticleType type_particle2, ParticleType type_resonance,
-  double mandelstam_s, double cm_momentum_squared) {
+  double mandelstam_s, double cm_momentum_squared, double symmetryfactor,
+  std::vector< std::pair<std::vector<int>, double> > *process_list) {
   /* If we have two baryons in the beginning, we must have fermion resonance */
   if (type_particle1.spin() % 2 != 0 && type_particle2.spin() % 2 != 0
       && type_particle1.pdgcode() != -type_particle2.pdgcode()
@@ -462,12 +473,22 @@ double two_to_two_formation(Particles *particles, ParticleType type_particle1,
       integral_error);
 
     double xsection = clebsch_gordan_isospin * clebsch_gordan_isospin
-         * spinfactor
+         * spinfactor * symmetryfactor
          / (64 * M_PI * M_PI)
          / mandelstam_s
          / sqrt(cm_momentum_squared)
          * resonance_integral
          * hbarc * hbarc / fm2_mb;
+
+    if (xsection > really_small) {
+      std::vector<int> final_state_particles;
+      final_state_particles.push_back(type_resonance.pdgcode());
+      final_state_particles.push_back(type_i->second.pdgcode());
+      std::pair<std::vector<int>, double> process
+        = std::make_pair(final_state_particles, xsection);
+      process_list->push_back(process);
+      (process_list->at(0)).second += xsection;
+    }
   }
   return 0.0;
 }
