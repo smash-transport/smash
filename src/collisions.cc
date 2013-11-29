@@ -204,8 +204,8 @@ size_t collide_particles(Particles *particles, std::list<int> *collision_list,
       particles->data_pointer(id_a)->set_collision_past(id_process);
       particles->data_pointer(id_b)->set_collision_past(id_process);
 
-    } else if (abs(interaction_type) > 99) {
-      /* 2->1 resonance formation, resonance PDG code = interaction_type */
+    } else if (interaction_type == 1) {
+      /* resonance formation */
       (*resonance_formations)++;
       printd("Process: Resonance formation. ");
       write_oscar(particles->data(id_a), particles->type(id_a), 2, 1);

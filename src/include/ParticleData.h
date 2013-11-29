@@ -63,7 +63,11 @@ class ParticleData {
     int id_process_;
     /* collision time */
     double collision_time_;
-    /* Type of interaction. 0: 2->2, 2: 1->2 >99 ( = PDG code): 2->1 */
+    /* Type of interaction.
+     * 0: elastic collision,
+     * 1: resonance formation,
+     * 2: decay
+     */
     int process_type_;
     /* momenta of the particle: x0, x1, x2, x3 as E, px, py, pz */
     FourVector momentum_;
