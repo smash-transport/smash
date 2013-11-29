@@ -14,6 +14,7 @@
 #include <cmath>
 #include <list>
 #include <map>
+#include <vector>
 
 #include "include/CollisionData.h"
 #include "include/FourVector.h"
@@ -121,6 +122,7 @@ void collision_criteria_geometry(Particles *particles,
    * otherwise do elastic collision
    */
   int interaction_type = 0;
+  std::vector<int> final_particles;
   if (resonance_xsections.at(0) > really_small) {
     double random_interaction = drand48();
     double interaction_probability = 0.0;
@@ -129,8 +131,10 @@ void collision_criteria_geometry(Particles *particles,
     while (interaction_type == 0 && resonances != resonance_xsections.end()) {
       if (resonances->first != 0) {
         interaction_probability += resonances->second / total_cross_section;
-        if (random_interaction < interaction_probability)
-          interaction_type = resonances->first;
+        if (random_interaction < interaction_probability) {
+          interaction_type = 1;
+          final_particles.push_back(resonances->first);
+        }
       }
       ++resonances;
     }
@@ -140,9 +144,9 @@ void collision_criteria_geometry(Particles *particles,
   printd("collision type %d particle %d <-> %d time: %g\n", interaction_type,
      id_a, id_b, time_collision);
   particles->data_pointer(id_a)->set_collision(interaction_type,
-                                               time_collision, id_b);
+                                   time_collision, id_b, final_particles);
   particles->data_pointer(id_b)->set_collision(interaction_type,
-                                               time_collision, id_a);
+                                   time_collision, id_a, final_particles);
   printd("collision type %d particle %d <-> %d time: %g\n",
          particles->data(id_a).process_type(),
          particles->data(id_a).id_partner(),
@@ -215,7 +219,7 @@ size_t collide_particles(Particles *particles, std::list<int> *collision_list,
                &velocity_CM);
 
       size_t id_new = resonance_formation(particles, id_a, id_b,
-        interaction_type);
+        particles->data(id_a).final_state());
       /* Boost the new particle to computational frame */
       FourVector neg_velocity_CM;
       neg_velocity_CM.set_FourVector(1.0, -velocity_CM.x1(), -velocity_CM.x2(),

@@ -9,6 +9,7 @@
 #define SRC_INCLUDE_RESONANCES_H_
 
 #include <map>
+#include <vector>
 
 /* necessary forward declarations */
 class Particles;
@@ -45,6 +46,6 @@ double breit_wigner_integrand(double mandelstam_s, void * parameters);
 
 /* 2->1 resonance formation process */
 int resonance_formation(Particles *particles, int particle_id, int other_id,
-  int resonance_type);
+  std::vector<int> produced_particles);
 
 #endif  // SRC_INCLUDE_RESONANCES_H_

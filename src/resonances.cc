@@ -15,6 +15,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <map>
+#include <vector>
 
 #include "include/constants.h"
 #include "include/DecayModes.h"
@@ -498,7 +499,8 @@ double breit_wigner_integrand(double resonance_mass_square, void * parameters) {
 
 /* 2->1 resonance formation process */
 int resonance_formation(Particles *particles, int particle_id, int other_id,
-  int pdg_resonance) {
+                        std::vector<int> produced_particles) {
+  int pdg_resonance = produced_particles.at(0);
   /* Add a new particle */
   ParticleData resonance;
   resonance.set_pdgcode(pdg_resonance);
