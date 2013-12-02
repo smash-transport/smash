@@ -82,7 +82,7 @@ int main(int argc, char *argv[]) {
       usage(EXIT_SUCCESS);
       break;
     case 'm':
-      const char modus=fabs(atoi(optarg));
+      const char*16 modus=optarg;
       break;
     case 'V':
       exit(EXIT_SUCCESS);
