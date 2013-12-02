@@ -83,6 +83,8 @@ int main(int argc, char *argv[]) {
       break;
     case 'm':
       const int modus=fabs(atoi(optarg));
+  printf("Modus read in:%i\n", modus);
+
       break;
     case 'V':
       exit(EXIT_SUCCESS);
@@ -91,7 +93,6 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  printf("Modus read in:%s\n", modus);
 
   auto experiment = Experiment::create(modus);
 
