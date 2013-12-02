@@ -280,10 +280,6 @@ int one_to_two(Particles *particles, int resonance_id, int type_a, int type_b) {
   new_particle_a.set_position(decay_point);
   new_particle_b.set_position(decay_point);
 
-  /* No collision yet */
-  new_particle_a.set_collision(-1, 0, -1);
-  new_particle_b.set_collision(-1, 0, -1);
-
   /* Assign IDs to new particles */
   int new_id_a = particles->id_max() + 1;
   int new_id_b = new_id_a + 1;
@@ -426,11 +422,6 @@ int one_to_three(Particles *particles, int resonance_id,
   new_particle_a.set_position(decay_point);
   new_particle_b.set_position(decay_point);
   new_particle_c.set_position(decay_point);
-
-  /* No collision yet */
-  new_particle_a.set_collision(-1, 0, -1);
-  new_particle_b.set_collision(-1, 0, -1);
-  new_particle_c.set_collision(-1, 0, -1);
 
   /* Assign IDs to new particles */
   int new_id_a = particles->id_max() + 1;
