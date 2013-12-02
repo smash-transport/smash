@@ -214,4 +214,8 @@ double collision_time(const ParticleData &particle1,
 /* momenta_exchange - soft scattering */
 void momenta_exchange(ParticleData *particle1, ParticleData *particle2);
 
+/* Sample final state momenta in general 2->2 process */
+void sample_cms_momenta(ParticleData *particle1, ParticleData *particle2,
+  const double cms_energy, const double mass1, const double mass2);
+
 #endif  // SRC_INCLUDE_PARTICLES_H_
