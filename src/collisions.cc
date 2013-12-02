@@ -272,10 +272,7 @@ size_t collide_particles(Particles *particles, std::list<int> *collision_list,
     momentum_difference += initial_momentum;
     momentum_difference -= final_momentum;
     if (fabs(momentum_difference.x0()) > really_small) {
-      printf("Process %zu type %i particle %s<->%s colliding %d<->%d time %g\n",
-        id_process, interaction_type, particles->type(id_a).name().c_str(),
-             particles->type(id_b).name().c_str(), id_a, id_b,
-             particles->data(id_a).position().x0());
+      printf("Process %zu type %i\n", id_process, interaction_type);
       printf("Warning: Interaction type %i E conservation violation %g\n",
              interaction_type, momentum_difference.x0());
     }
