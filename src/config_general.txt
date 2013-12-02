@@ -5,7 +5,7 @@
 // 1:		box
 // 2:		sphere
 //
-MODUS		1
+MODUS		Box
 
 // temporal grid spacing
 EPS		0.001
