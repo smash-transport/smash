@@ -47,6 +47,10 @@ size_t two_to_two_formation(Particles *particles, ParticleType type_particle1,
 /* Integral for Breit-Wigner integration with GSL routine */
 double breit_wigner_integrand(double mandelstam_s, void * parameters);
 
+/* Resonance mass sampling for 2-particle final state */
+double sample_resonance_mass(Particles *particles, int pdg_resonance,
+  int pdg_stable, double cms_energy);
+
 /* 2->1 resonance formation process */
 int resonance_formation(Particles *particles, int particle_id, int other_id,
   std::vector<int> produced_particles);

@@ -249,6 +249,14 @@ int one_to_two(Particles *particles, int resonance_id, int type_a, int type_b) {
     mass_b = particles->particle_type(type_b).mass();
   const double total_energy = particles->data(resonance_id).momentum().x0();
 
+  /* If one of the particles is resonance, sample its mass */
+  /* XXX: Other particle assumed stable! */
+  if ((particles->particle_type(type_a)).width() > 0) {
+    mass_a = sample_resonance_mass(particles, type_a, type_b, total_energy);
+  } else if ((particles->particle_type(type_b)).width() > 0) {
+    mass_b = sample_resonance_mass(particles, type_b, type_a, total_energy);
+  }
+
   /* Sample the momenta */
   sample_cms_momenta(&new_particle_a, &new_particle_b, total_energy,
                      mass_a, mass_b);

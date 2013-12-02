@@ -518,6 +518,39 @@ double breit_wigner_integrand(double resonance_mass_square, void * parameters) {
     resonance_width) / resonance_mass_square * cm_momentum_final;
 }
 
+/* Resonance mass sampling for 2-particle final state */
+double sample_resonance_mass(Particles *particles, int pdg_resonance,
+  int pdg_stable, double cms_energy) {
+  /* First, find the minimum mass of this resonance */
+  double minimum_mass
+    = calculate_minimum_mass(particles, pdg_resonance);
+  /* Define Breit-Wigner parameters */
+  float mass_stable
+    = (particles->particle_type(pdg_stable)).mass();
+  float parameter_array[4];
+  parameter_array[0]
+    = (particles->particle_type(pdg_resonance)).width();
+  parameter_array[1]
+    = (particles->particle_type(pdg_resonance)).mass();
+  parameter_array[2] = mass_stable;
+  parameter_array[3] = cms_energy * cms_energy;
+
+  /* sample resonance mass from Breit-Wigner */
+  double mass_resonance = 0.0, random_number = 1.0;
+  double breit_wigner_max = breit_wigner_integrand(
+    parameter_array[1] * parameter_array[1], &parameter_array);
+  double breit_wigner_value = 0.0;
+  while (random_number > breit_wigner_value) {
+    random_number = breit_wigner_max * drand48();
+    mass_resonance = (cms_energy - mass_stable - minimum_mass) * drand48()
+                     + minimum_mass;
+    breit_wigner_value
+      = breit_wigner_integrand(mass_resonance * mass_resonance,
+                               &parameter_array);
+  }
+  return mass_resonance;
+}
+
 /* Resonance formation kinematics */
 int resonance_formation(Particles *particles, int particle_id, int other_id,
                         std::vector<int> produced_particles) {
@@ -570,34 +603,11 @@ int resonance_formation(Particles *particles, int particle_id, int other_id,
       stable_product.set_pdgcode(produced_particles.at(0));
       resonance.set_pdgcode(produced_particles.at(1));
     }
-    /* Resonance mass needs to be sampled */
-    /* First, find the minimum mass of this resonance */
-    double minimum_mass
-      = calculate_minimum_mass(particles, resonance.pdgcode());
-    /* Define Breit-Wigner parameters */
     float mass_stable
       = (particles->particle_type(stable_product.pdgcode())).mass();
-    float parameter_array[4];
-    parameter_array[0]
-      = (particles->particle_type(resonance.pdgcode())).width();
-    parameter_array[1]
-      = (particles->particle_type(resonance.pdgcode())).mass();
-    parameter_array[2] = mass_stable;
-    parameter_array[3] = cms_energy * cms_energy;
-
-    /* sample resonance mass from Breit-Wigner */
-    double mass_resonance = 0.0, random_number = 1.0;
-    double breit_wigner_max = breit_wigner_integrand(
-      parameter_array[1] * parameter_array[1], &parameter_array);
-    double breit_wigner_value = 0.0;
-    while (random_number > breit_wigner_value) {
-      random_number = breit_wigner_max * drand48();
-      mass_resonance = (cms_energy - mass_stable - minimum_mass) * drand48()
-                       + minimum_mass;
-      breit_wigner_value
-        = breit_wigner_integrand(mass_resonance * mass_resonance,
-                                 &parameter_array);
-    }
+    /* Sample resonance mass */
+    double mass_resonance = sample_resonance_mass(particles,
+      resonance.pdgcode(), stable_product.pdgcode(), cms_energy);
 
     /* Sample the particle momenta */
     sample_cms_momenta(&resonance, &stable_product, cms_energy, mass_resonance,
