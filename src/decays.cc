@@ -248,32 +248,10 @@ int one_to_two(Particles *particles, int resonance_id, int type_a, int type_b) {
   double mass_a = particles->particle_type(type_a).mass(),
     mass_b = particles->particle_type(type_b).mass();
   const double total_energy = particles->data(resonance_id).momentum().x0();
-  double energy_a = (total_energy * total_energy
-                       + mass_a * mass_a - mass_b * mass_b)
-    / (2.0 * total_energy);
 
-  double momentum_radial = sqrt(energy_a * energy_a - mass_a * mass_a);
-  if (momentum_radial < 0.0)
-    printf("Warning: radial momenta %g \n", momentum_radial);
-  /* phi in the range from [0, 2 * pi) */
-  double phi = 2.0 * M_PI * drand48();
-  /* cos(theta) in the range from [-1.0, 1.0) */
-  double cos_theta = -1.0 + 2.0 * drand48();
-  double sin_theta = sqrt(1.0 - cos_theta * cos_theta);
-  if (energy_a  < mass_a || abs(cos_theta) > 1) {
-    printf("Particle %d radial momenta %g phi %g cos_theta %g\n", type_a,
-           momentum_radial, phi, cos_theta);
-    printf("Etot: %g m_a: %g m_b %g E_a: %g", total_energy, mass_a, mass_b,
-           energy_a);
-  }
-  new_particle_a.set_momentum(mass_a,
-                              momentum_radial * cos(phi) * sin_theta,
-                              momentum_radial * sin(phi) * sin_theta,
-                              momentum_radial * cos_theta);
-  new_particle_b.set_momentum(mass_b,
-                              - new_particle_a.momentum().x1(),
-                              - new_particle_a.momentum().x2(),
-                              - new_particle_a.momentum().x3());
+  /* Sample the momenta */
+  sample_cms_momenta(&new_particle_a, &new_particle_b, total_energy,
+                     mass_a, mass_b);
 
   /* Both decay products begin from the same point */
   FourVector decay_point = particles->data(resonance_id).position();

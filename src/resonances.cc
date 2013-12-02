@@ -599,38 +599,10 @@ int resonance_formation(Particles *particles, int particle_id, int other_id,
                                  &parameter_array);
     }
 
-    double energy_resonance = (cms_energy * cms_energy
-      + mass_resonance * mass_resonance - mass_stable * mass_stable)
-      / (2.0 * cms_energy);
+    /* Sample the particle momenta */
+    sample_cms_momenta(&resonance, &stable_product, cms_energy, mass_resonance,
+                       mass_stable);
 
-    double momentum_radial = sqrt(energy_resonance * energy_resonance
-      - mass_resonance * mass_resonance);
-    if (!(momentum_radial > 0.0))
-      printf("Warning: radial momenta %g \n", momentum_radial);
-    /* phi in the range from [0, 2 * pi) */
-    double phi = 2.0 * M_PI * drand48();
-    /* cos(theta) in the range from [-1.0, 1.0) */
-    double cos_theta = -1.0 + 2.0 * drand48();
-    double sin_theta = sqrt(1.0 - cos_theta * cos_theta);
-    if (!(energy_resonance  > mass_resonance) || !(abs(cos_theta) < 1)) {
-      printf("Particle %d radial momenta %g phi %g cos_theta %g\n",
-             resonance.pdgcode(), momentum_radial, phi, cos_theta);
-      printf("Etot: %g m_a: %g m_b %g E_a: %g\n", cms_energy,
-             mass_resonance, mass_stable, energy_resonance);
-    }
-    /* We use fourvector to set 4-momentum, as setting it
-     * with doubles requires that particle is on
-     * mass shell, which is not generally true for resonances
-     */
-    FourVector resonance_momentum(energy_resonance,
-                                  momentum_radial * cos(phi) * sin_theta,
-                                  momentum_radial * sin(phi) * sin_theta,
-                                  momentum_radial * cos_theta);
-    resonance.set_momentum(resonance_momentum);
-    stable_product.set_momentum(mass_stable,
-                                - resonance.momentum().x1(),
-                                - resonance.momentum().x2(),
-                                - resonance.momentum().x3());
     /* Initialize positions */
     resonance.set_position(1.0, 0.0, 0.0, 0.0);
     stable_product.set_position(1.0, 0.0, 0.0, 0.0);
@@ -641,16 +613,6 @@ int resonance_formation(Particles *particles, int particle_id, int other_id,
     stable_product.set_id(new_id_stable);
     particles->add_data(resonance);
     particles->add_data(stable_product);
-
-    printd("p0: %g %g \n", resonance.momentum().x0(),
-         stable_product.momentum().x0());
-    printd("p1: %g %g \n", resonance.momentum().x1(),
-         stable_product.momentum().x1());
-    printd("p2: %g %g \n", resonance.momentum().x2(),
-           stable_product.momentum().x2());
-    printd("p3: %g %g \n", resonance.momentum().x3(),
-         stable_product.momentum().x3());
-
   } else {
     printf("resonance_formation:\n");
     printf("Warning: %zu particles in final state!\n",
