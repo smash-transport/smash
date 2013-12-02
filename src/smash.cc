@@ -44,13 +44,8 @@ char *progname;
 static void usage(int rc) {
   printf("\nUsage: %s [option]\n\n", progname);
   printf("Calculate transport box\n"
-         "  -e, --eps            time step\n"
          "  -h, --help           usage information\n"
          "  -m, --modus          modus of laboratory\n"
-         "  -O, --output-interval          step interval between measurements\n"
-         "  -R, --random         random number seed\n"
-         "  -s, --sigma          cross section in mbarn\n"
-         "  -S, --steps          number of steps\n"
          "  -V, --version\n\n");
   exit(rc);
 }
@@ -61,13 +56,8 @@ int main(int argc, char *argv[]) {
   int opt, rc = 0;
 
   struct option longopts[] = {
-    { "eps",        required_argument,      0, 'e' },
     { "help",       no_argument,            0, 'h' },
     { "modus",      required_argument,      0, 'm' },
-    { "output-interval", required_argument,      0, 'O' },
-    { "random",     required_argument,      0, 'R' },
-    { "sigma",      required_argument,      0, 's' },
-    { "steps",      required_argument,      0, 'S' },
     { "version",    no_argument,            0, 'V' },
     { NULL,         0, 0, 0 }
   };
@@ -82,44 +72,17 @@ int main(int argc, char *argv[]) {
   size_t len = strlen("./") + 1;
   path = reinterpret_cast<char *>(malloc(len));
   snprintf(path, len, "./");
-
-  /* Read Laboratory config file parameters */
-  Laboratory *lab = new Laboratory();
-  process_config_laboratory(lab, path);
-
-  /* parse the command line options, they override all previous */
-  while ((opt = getopt_long(argc, argv, "e:hm:O:R:s:S:V", longopts,
+ 
+  try
+  {
+    while ((opt = getopt_long(argc, argv, "hm:V", longopts,
     NULL)) != -1) {
     switch (opt) {
-    case 'e':
-      lab->set_eps(fabs(atof(optarg)));
-      break;
     case 'h':
       usage(EXIT_SUCCESS);
       break;
     case 'm':
-      lab->set_modus(fabs(atoi(optarg)));
-      break;
-    case 'O':
-      {
-      /* guard output_interval to be positive and greater null */
-      int output_interval = abs(atoi(optarg));
-      if (output_interval > 0)
-        lab->set_output_interval(output_interval);
-      }
-      break;
-    case 'R':
-      /* negative seed is for time */
-      if (atol(optarg) > 0)
-        lab->set_seed(atol(optarg));
-      else
-        lab->set_seed(time(NULL));
-      break;
-    case 's':
-      lab->set_cross_section(fabs(atof(optarg)));
-      break;
-    case 'S':
-      lab->set_steps(abs(atoi(optarg)));
+      const char modus=fabs(atoi(optarg));
       break;
     case 'V':
       exit(EXIT_SUCCESS);
@@ -128,6 +91,15 @@ int main(int argc, char *argv[]) {
     }
   }
 
+  printf("Modus read in:%s\n", modus);
+
+  auto experiment = Experiment::create(modus);
+
+  /* Read general config file parameters */
+  process_general_config(path);
+  experiment->assign_general_params(); 
+  experiment->config_specific_params();
+    
   /* Output IC values */
   print_startup(*lab);
   mkdir_data();
@@ -177,4 +149,13 @@ int main(int argc, char *argv[]) {
   delete particles;
   delete cross_sections;
   return rc;
+
+  }
+  catch (std::string message)
+  {
+    std::cerr << "Exception caught: " << message << std::endl;
+    return 1;
+  }
+  return 0;
+
 }
