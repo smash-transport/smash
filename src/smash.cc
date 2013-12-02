@@ -82,7 +82,7 @@ int main(int argc, char *argv[]) {
       usage(EXIT_SUCCESS);
       break;
     case 'm':
-      const char*16 modus=optarg;
+      const char modus[20]=optarg;
       break;
     case 'V':
       exit(EXIT_SUCCESS);
@@ -91,7 +91,7 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  printf("Modus read in:%s\n", modus);
+  printf("Modus read in:%s\n", modus[20]);
 
   auto experiment = Experiment::create(modus);
 
