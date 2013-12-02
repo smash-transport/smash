@@ -1,11 +1,4 @@
-// Sample config_laboratory.txt file
-
-// Modus Operandi of smash:
-//
-// 1:		box
-// 2:		sphere
-//
-MODUS		Box
+// Sample config_general.txt file
 
 // temporal grid spacing
 EPS		0.001
