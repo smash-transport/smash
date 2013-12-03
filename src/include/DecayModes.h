@@ -36,7 +36,7 @@ class DecayModes {
 inline void DecayModes::add_mode(std::vector<int> particles, float ratio) {
   ProcessBranch branch;
   branch.add_particles(particles);
-  branch.add_ratio(ratio);
+  branch.add_weight(ratio);
   decay_modes_.push_back(branch);
 }
 
@@ -50,8 +50,8 @@ inline void DecayModes::renormalize(float renormalization_constant) {
   float new_sum = 0.0;
   for (std::vector<ProcessBranch>::iterator mode
          = decay_modes_.begin(); mode != decay_modes_.end(); ++mode) {
-    mode->add_ratio(mode->ratio() / renormalization_constant);
-    new_sum += mode->ratio();
+    mode->add_weight(mode->weight() / renormalization_constant);
+    new_sum += mode->weight();
   }
   printf("After renormalization sum of ratios is %g. \n", new_sum);
 }

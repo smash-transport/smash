@@ -13,22 +13,24 @@
 class ProcessBranch {
  public:
   /* Default constructor */
-  ProcessBranch() :branch_ratio_(-1.0) {}
+  ProcessBranch() :branch_weight_(-1.0) {}
   /* Add a particle to the list */
   inline void add_particle(int particle_pdg);
   /* Add the complete particle list */
   inline void add_particles(std::vector<int> particle_pdgs);
   /* Add branch ratio */
-  inline void add_ratio(double ratio);
+  inline void add_weight(double process_weight);
+  /* Add to the ratio of this branch */
+  inline void change_weight(double additional_weight);
   /* Remove all modes */
   inline void clear(void);
   /* Pass the particle list */
-  inline std::vector<int> particle_list(void);
+  inline std::vector<int> particle_list(void) const;
   /* Pass the branch ratio */
-  inline double ratio(void);
+  inline double weight(void) const;
  private:
   std::vector<int> particle_list_;
-  double branch_ratio_;
+  double branch_weight_;
 };
 
 /* Add a particle to the list */
@@ -42,24 +44,29 @@ inline void ProcessBranch::add_particles(std::vector<int> particle_pdgs) {
 }
 
 /* Add the ratio of this branch */
-inline void ProcessBranch::add_ratio(double ratio) {
-  branch_ratio_ = ratio;
+inline void ProcessBranch::add_weight(double process_weight) {
+  branch_weight_ = process_weight;
+}
+
+/* Add to the ratio of this branch */
+inline void ProcessBranch::change_weight(double additional_weight) {
+  branch_weight_ += additional_weight;
 }
 
 /* Remove all modes */
 inline void ProcessBranch::clear(void) {
   particle_list_.clear();
-  branch_ratio_ = -1.0;
+  branch_weight_ = -1.0;
 }
 
 /* Pass the particle list */
-inline std::vector<int> ProcessBranch::particle_list(void) {
+inline std::vector<int> ProcessBranch::particle_list(void) const {
   return particle_list_;
 }
 
 /* Pass the branch ratio */
-inline double ProcessBranch::ratio(void) {
-  return branch_ratio_;
+inline double ProcessBranch::weight(void) const {
+  return branch_weight_;
 }
 
 #endif  // SRC_INCLUDE_PROCESSBRANCH_H_
