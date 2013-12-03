@@ -12,6 +12,8 @@
 
 class ProcessBranch {
  public:
+  /* Default constructor */
+  ProcessBranch() :branch_ratio_(-1.0) {}
   /* Add a particle to the list */
   inline void add_particle(int particle_pdg);
   /* Add the complete particle list */
