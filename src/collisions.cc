@@ -22,6 +22,7 @@
 #include "include/Laboratory.h"
 #include "include/Particles.h"
 #include "include/ParticleData.h"
+#include "include/ProcessBranch.h"
 #include "include/constants.h"
 #include "include/macros.h"
 #include "include/outputroutines.h"
@@ -47,7 +48,7 @@ void collision_criteria_geometry(Particles *particles,
   /* Compute kinematic quantities needed for cross section calculations  */
   cross_sections->compute_kinematics(particles, id_a, id_b);
   /* Resonance production cross section */
-  std::vector< std::pair<std::vector<int>, double> > resonance_xsections
+  std::vector<ProcessBranch> resonance_xsections
     = resonance_cross_section(particles->data(id_a), particles->data(id_b),
       particles->type(id_a), particles->type(id_b), particles);
 
@@ -55,7 +56,7 @@ void collision_criteria_geometry(Particles *particles,
   /* (Ignore annihilation and total for now) */
   const double total_cross_section
     = cross_sections->elastic(particles, id_a, id_b)
-      + resonance_xsections.at(0).second;
+    + resonance_xsections.at(0).weight();
 
   {
     /* distance criteria according to cross_section */
@@ -124,17 +125,18 @@ void collision_criteria_geometry(Particles *particles,
    */
   int interaction_type = 0;
   std::vector<int> final_particles;
-  if ((resonance_xsections.at(0)).second > really_small) {
+  if ((resonance_xsections.at(0)).weight() > really_small) {
     double random_interaction = drand48();
     double interaction_probability = 0.0;
-    std::vector< std::pair<std::vector<int>, double> >::iterator resonances
+    std::vector<ProcessBranch>::iterator resonances
       = resonance_xsections.begin();
     while (interaction_type == 0 && resonances != resonance_xsections.end()) {
-      if ((resonances->first).size() > 1 || (resonances->first).at(0) != 0) {
-        interaction_probability += resonances->second / total_cross_section;
+      if ((resonances->particle_list()).size() > 1
+          || (resonances->particle_list()).at(0) != 0) {
+        interaction_probability += resonances->weight() / total_cross_section;
         if (random_interaction < interaction_probability) {
           interaction_type = 1;
-          final_particles = resonances->first;
+          final_particles = resonances->particle_list();
         }
       }
       ++resonances;

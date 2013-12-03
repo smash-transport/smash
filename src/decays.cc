@@ -190,7 +190,7 @@ size_t decay_particles(Particles *particles, std::list<int> *decay_list,
 /* Resonance decay process */
 int resonance_decay(Particles *particles, int particle_id) {
   const int pdgcode = particles->type(particle_id).pdgcode();
-  const std::vector< std::pair<std::vector<int>, float> > decaymodes
+  std::vector<ProcessBranch> decaymodes
     = (particles->decay_modes(pdgcode)).decay_mode_list();
   int type_a = 0, type_b = 0, type_c = 0, new_id_a = -1;
 
@@ -200,28 +200,28 @@ int resonance_decay(Particles *particles, int particle_id) {
   double random_mode = drand48();
   double cumulated_probability = 0.0;
   size_t decay_particles = 0;
-  for (std::vector< std::pair<std::vector<int>, float> >::const_iterator mode
+  for (std::vector<ProcessBranch>::iterator mode
          = decaymodes.begin(); mode != decaymodes.end(); ++mode) {
-    cumulated_probability += mode->second;
+    cumulated_probability += mode->weight();
     if (random_mode < cumulated_probability) {
-      decay_particles = (mode->first).size();
+      decay_particles = (mode->particle_list()).size();
       if ( decay_particles > 3 ) {
         printf("Warning: Not a 1->2 or 1->3 process!\n");
         printf("Number of decay particles: %zu \n", decay_particles);
         printf("Decay particles: ");
         for (size_t i = 0; i < decay_particles; i++) {
-          printf("%i ", (mode->first)[i]);
+          printf("%i ", (mode->particle_list())[i]);
         }
         printf("\n");
       } else if (decay_particles == 2) {
-        type_a = (mode->first)[0];
-        type_b = (mode->first)[1];
+        type_a = (mode->particle_list())[0];
+        type_b = (mode->particle_list())[1];
         if (abs(type_a) < 100 || abs(type_b) < 100)
           printf("Warning: decay products A: %i B: %i\n", type_a, type_b);
       } else if (decay_particles == 3) {
-        type_a = (mode->first)[0];
-        type_b = (mode->first)[1];
-        type_c = (mode->first)[2];
+        type_a = (mode->particle_list())[0];
+        type_b = (mode->particle_list())[1];
+        type_c = (mode->particle_list())[2];
         if (abs(type_a) < 100 || abs(type_b) < 100 || abs(type_c) < 100)
           printf("Warning: decay products A: %i B: %i C: %i\n",
                  type_a, type_b, type_c);

@@ -26,6 +26,7 @@
 #include "include/Particles.h"
 #include "include/ParticleData.h"
 #include "include/ParticleType.h"
+#include "include/ProcessBranch.h"
 
 /* calculate_minimum_mass
  * - calculate the minimum rest energy the resonance must have
@@ -38,15 +39,15 @@ float calculate_minimum_mass(Particles *particles, int pdgcode) {
     return (particles->particle_type(pdgcode)).mass();
   /* Otherwise, let's find the highest mass value needed in any decay mode */
   float minimum_mass = 0.0;
-  const std::vector< std::pair<std::vector<int>, float> > decaymodes
+  const std::vector<ProcessBranch> decaymodes
     = (particles->decay_modes(pdgcode)).decay_mode_list();
-  for (std::vector< std::pair<std::vector<int>, float> >::const_iterator
-         mode = decaymodes.begin(); mode != decaymodes.end(); ++mode) {
-    size_t decay_particles = (mode->first).size();
+  for (std::vector<ProcessBranch>::const_iterator mode = decaymodes.begin();
+       mode != decaymodes.end(); ++mode) {
+    size_t decay_particles = (mode->particle_list()).size();
     float total_mass = 0.0;
     for (size_t i = 0; i < decay_particles; i++) {
       /* Stable decay products assumed; for resonances the mass can be lower! */
-      total_mass += particles->particle_type((mode->first)[i]).mass();
+      total_mass += particles->particle_type((mode->particle_list())[i]).mass();
     }
     if (total_mass > minimum_mass)
       minimum_mass = total_mass;
@@ -57,17 +58,16 @@ float calculate_minimum_mass(Particles *particles, int pdgcode) {
 /* resonance_cross_section - energy-dependent cross section
  * for producing a resonance
  */
-std::vector< std::pair<std::vector<int>, double> > resonance_cross_section(
+std::vector<ProcessBranch> resonance_cross_section(
   const ParticleData &particle1, const ParticleData &particle2,
   const ParticleType &type_particle1, const ParticleType &type_particle2,
   Particles *particles) {
-  std::vector< std::pair<std::vector<int>, double> > resonance_process_list;
-  std::vector<int> final_state_particles;
+  std::vector<ProcessBranch> resonance_process_list;
 
   /* first item refers to total resonance production cross section */
-  final_state_particles.push_back(0);
-  std::pair<std::vector<int>, double> resonance_process
-    = std::make_pair(final_state_particles, 0.0);
+  ProcessBranch resonance_process;
+  resonance_process.add_particle(0);
+  resonance_process.add_weight(0.0);
   resonance_process_list.push_back(resonance_process);
 
   /* Resonances do not form resonances */
@@ -131,12 +131,11 @@ std::vector< std::pair<std::vector<int>, double> > resonance_cross_section(
 
     /* If cross section is non-negligible, add resonance to the list */
     if (resonance_xsection > really_small) {
-      final_state_particles.clear();
-      final_state_particles.push_back(type_resonance.pdgcode());
-      resonance_process = std::make_pair(final_state_particles,
-                                         resonance_xsection);
+      resonance_process.clear();
+      resonance_process.add_particle(type_resonance.pdgcode());
+      resonance_process.add_weight(resonance_xsection);
       resonance_process_list.push_back(resonance_process);
-      (resonance_process_list.at(0)).second += resonance_xsection;
+      (resonance_process_list.at(0)).change_weight(resonance_xsection);
 
       printd("Found resonance %i (%s) with mass %f and width %f.\n",
              type_resonance.pdgcode(), type_resonance.name().c_str(),
@@ -236,22 +235,22 @@ double two_to_one_formation(Particles *particles, ParticleType type_particle1,
     return 0.0;
 
   /* Check the decay modes of this resonance */
-  const std::vector< std::pair<std::vector<int>, float> > decaymodes
+  std::vector<ProcessBranch> decaymodes
     = (particles->decay_modes(type_resonance.pdgcode())).decay_mode_list();
   bool not_enough_energy = false;
-  for (std::vector< std::pair<std::vector<int>, float> >::const_iterator mode
+  for (std::vector<ProcessBranch>::iterator mode
        = decaymodes.begin(); mode != decaymodes.end(); ++mode) {
-    size_t decay_particles = (mode->first).size();
+    size_t decay_particles = (mode->particle_list()).size();
     if ( decay_particles > 3 ) {
       printf("Warning: Not a 1->2 or 1->3 process!\n");
       printf("Number of decay particles: %zu \n", decay_particles);
     } else {
       /* There must be enough energy to produce all decay products */
       float mass_a, mass_b, mass_c = 0.0;
-      mass_a = calculate_minimum_mass(particles, (mode->first)[0]);
-      mass_b = calculate_minimum_mass(particles, (mode->first)[1]);
+      mass_a = calculate_minimum_mass(particles, (mode->particle_list())[0]);
+      mass_b = calculate_minimum_mass(particles, (mode->particle_list())[1]);
       if (decay_particles == 3) {
-        mass_c = calculate_minimum_mass(particles, (mode->first)[2]);
+        mass_c = calculate_minimum_mass(particles, (mode->particle_list())[2]);
       }
       if (sqrt(mandelstam_s) < mass_a + mass_b + mass_c)
         not_enough_energy = true;
@@ -278,7 +277,7 @@ double two_to_one_formation(Particles *particles, ParticleType type_particle1,
 size_t two_to_two_formation(Particles *particles, ParticleType type_particle1,
   ParticleType type_particle2, ParticleType type_resonance,
   double mandelstam_s, double cm_momentum_squared, double symmetryfactor,
-  std::vector< std::pair<std::vector<int>, double> > *process_list) {
+  std::vector<ProcessBranch> *process_list) {
   size_t number_of_processes = 0;
   /* If we have two baryons in the beginning, we must have fermion resonance */
   if (type_particle1.spin() % 2 != 0 && type_particle2.spin() % 2 != 0
@@ -389,23 +388,24 @@ size_t two_to_two_formation(Particles *particles, ParticleType type_particle1,
       continue;
 
     /* Check the decay modes of this resonance */
-    const std::vector< std::pair<std::vector<int>, float> > decaymodes
+    std::vector<ProcessBranch> decaymodes
       = (particles->decay_modes(type_resonance.pdgcode())).decay_mode_list();
     bool not_enough_energy = false;
     double minimum_mass = 0.0;
-    for (std::vector< std::pair<std::vector<int>, float> >::const_iterator mode
+    for (std::vector<ProcessBranch >::iterator mode
          = decaymodes.begin(); mode != decaymodes.end(); ++mode) {
-      size_t decay_particles = (mode->first).size();
+      size_t decay_particles = (mode->particle_list()).size();
       if ( decay_particles > 3 ) {
         printf("Warning: Not a 1->2 or 1->3 process!\n");
         printf("Number of decay particles: %zu \n", decay_particles);
       } else {
         /* There must be enough energy to produce all decay products */
         float mass_a, mass_b, mass_c = 0.0;
-        mass_a = calculate_minimum_mass(particles, (mode->first)[0]);
-        mass_b = calculate_minimum_mass(particles, (mode->first)[1]);
+        mass_a = calculate_minimum_mass(particles, (mode->particle_list())[0]);
+        mass_b = calculate_minimum_mass(particles, (mode->particle_list())[1]);
         if (decay_particles == 3) {
-          mass_c = calculate_minimum_mass(particles, (mode->first)[2]);
+          mass_c = calculate_minimum_mass(particles,
+                     (mode->particle_list())[2]);
         }
         if (sqrt(mandelstam_s) < mass_a + mass_b + mass_c
                                  + type_i->second.mass()) {
@@ -480,13 +480,12 @@ size_t two_to_two_formation(Particles *particles, ParticleType type_particle1,
          * hbarc * hbarc / fm2_mb;
 
     if (xsection > really_small) {
-      std::vector<int> final_state_particles;
-      final_state_particles.push_back(type_resonance.pdgcode());
-      final_state_particles.push_back(type_i->second.pdgcode());
-      std::pair<std::vector<int>, double> process
-        = std::make_pair(final_state_particles, xsection);
-      process_list->push_back(process);
-      (process_list->at(0)).second += xsection;
+      ProcessBranch final_state;
+      final_state.add_particle(type_resonance.pdgcode());
+      final_state.add_particle(type_i->second.pdgcode());
+      final_state.add_weight(xsection);
+      process_list->push_back(final_state);
+      (process_list->at(0)).change_weight(xsection);
       number_of_processes++;
     }
   }
