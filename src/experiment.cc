@@ -10,7 +10,8 @@
 
 #include "Experiment.h"
 #include "BoundaryConditions.h"
-
+#include "Parameters.h"
+#include "param-reader.h"
 
 std::unique_ptr<Experiment> Experiment::create(const std::int &BoundaryConditions)
 {
@@ -24,9 +25,13 @@ std::unique_ptr<Experiment> Experiment::create(const std::int &BoundaryCondition
   }
 }
 
-template <typename BoundaryConditions>
-void ExperimentImplementation<BoundaryConditions>::run()
+template <typename Modus>
+void ExperimentImplementation<Modus>::config()
 {
-    data = BoundaryConditions::propagate(data);
- }
+    process_config(Parameters, char *path);
+    new BoundaryConditions bc(Parameters);
+    assign_params_general;
+    assign_params_specific;
+    
+}
 

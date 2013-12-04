@@ -8,7 +8,7 @@
 #ifndef SRC_INCLUDE_EXPERIMENT_H_
 #define SRC_INCLUDE_EXPERIMENT_H_
 
-
+#include Parameters.h
 
 class Experiment
 {
@@ -21,7 +21,7 @@ template <typename Modus> class ExperimentImplementation : public Experiment
 public:
   virtual void run();
 private:
-    BoundaryConditions bc;
+    BoundaryConditions bc(Parameters);
     Particles,...
 
 };

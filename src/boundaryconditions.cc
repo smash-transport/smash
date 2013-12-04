@@ -7,8 +7,7 @@
  *
  */
 
-static void assign_params(std::list<Parameters> *configuration,
-                          Laboratory *parameters) {
+static void assign_params(std::list<Parameters> *configuration) {
     bool match = false;
     std::list<Parameters>::iterator i = configuration->begin();
     while (i != configuration->end()) {
