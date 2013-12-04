@@ -493,8 +493,8 @@ size_t two_to_two_formation(Particles *particles, ParticleType type_particle1,
   return number_of_processes;
 }
 
-/* Integral for Breit-Wigner integration with GSL routine */
-double breit_wigner_integrand(double resonance_mass_square, void * parameters) {
+/* Integrand for Breit-Wigner integration with GSL routine */
+double breit_wigner_integrand(double resonance_mass_square, void *parameters) {
   float *integrand_parameters = reinterpret_cast<float *>(parameters);
   float resonance_width = integrand_parameters[0];
   float resonance_pole_mass = integrand_parameters[1];
@@ -503,19 +503,24 @@ double breit_wigner_integrand(double resonance_mass_square, void * parameters) {
   float resonance_mass = sqrt(resonance_mass_square);
 
   /* center-of-mass momentum of final state particles */
-  double cm_momentum_final
-    = sqrt((mandelstam_s - (stable_mass + resonance_mass)
-                         * (stable_mass + resonance_mass))
-         * (mandelstam_s - (stable_mass - resonance_mass)
-                         * (stable_mass - resonance_mass)))
-      / (2 * sqrt(mandelstam_s));
+  if (mandelstam_s - (stable_mass + resonance_mass)
+      * (stable_mass + resonance_mass) > 0.0) {
+    double cm_momentum_final
+      = sqrt((mandelstam_s - (stable_mass + resonance_mass)
+              * (stable_mass + resonance_mass))
+             * (mandelstam_s - (stable_mass - resonance_mass)
+                * (stable_mass - resonance_mass))
+             / (4 * mandelstam_s));
 
-  /* Breit-Wigner will be integrated over M^2
-   * (called mandelstam_s in breit_wigner)
-   * Divide by M^2 here
-   */
-  return breit_wigner(resonance_mass_square, resonance_pole_mass,
-    resonance_width) / resonance_mass_square * cm_momentum_final;
+    /* Breit-Wigner will be integrated over M^2
+     * (called mandelstam_s in breit_wigner)
+     * Divide by M^2 here
+     */
+    return breit_wigner(resonance_mass_square, resonance_pole_mass,
+             resonance_width) / resonance_mass_square * cm_momentum_final;
+  } else {
+    return 0.0;
+  }
 }
 
 /* Resonance mass sampling for 2-particle final state */
