@@ -191,7 +191,7 @@ size_t decay_particles(Particles *particles, std::list<int> *decay_list,
 int resonance_decay(Particles *particles, int particle_id) {
   const int pdgcode = particles->type(particle_id).pdgcode();
   const std::vector<ProcessBranch> decaymodes
-    = (particles->decay_modes(pdgcode)).decay_mode_list();
+    = particles->decay_modes(pdgcode).decay_mode_list();
   int type_a = 0, type_b = 0, type_c = 0, new_id_a = -1;
 
   /* Ratios of decay channels should add to 1; pick a random number
@@ -204,24 +204,24 @@ int resonance_decay(Particles *particles, int particle_id) {
          = decaymodes.begin(); mode != decaymodes.end(); ++mode) {
     cumulated_probability += mode->weight();
     if (random_mode < cumulated_probability) {
-      decay_particles = (mode->particle_list()).size();
+      decay_particles = mode->particle_list().size();
       if ( decay_particles > 3 ) {
         printf("Warning: Not a 1->2 or 1->3 process!\n");
         printf("Number of decay particles: %zu \n", decay_particles);
         printf("Decay particles: ");
         for (size_t i = 0; i < decay_particles; i++) {
-          printf("%i ", (mode->particle_list())[i]);
+          printf("%i ", mode->particle_list().at(i));
         }
         printf("\n");
       } else if (decay_particles == 2) {
-        type_a = (mode->particle_list())[0];
-        type_b = (mode->particle_list())[1];
+        type_a = mode->particle_list().at(0);
+        type_b = mode->particle_list().at(1);
         if (abs(type_a) < 100 || abs(type_b) < 100)
           printf("Warning: decay products A: %i B: %i\n", type_a, type_b);
       } else if (decay_particles == 3) {
-        type_a = (mode->particle_list())[0];
-        type_b = (mode->particle_list())[1];
-        type_c = (mode->particle_list())[2];
+        type_a = mode->particle_list().at(0);
+        type_b = mode->particle_list().at(1);
+        type_c = mode->particle_list().at(2);
         if (abs(type_a) < 100 || abs(type_b) < 100 || abs(type_c) < 100)
           printf("Warning: decay products A: %i B: %i C: %i\n",
                  type_a, type_b, type_c);
@@ -251,9 +251,9 @@ int one_to_two(Particles *particles, int resonance_id, int type_a, int type_b) {
 
   /* If one of the particles is resonance, sample its mass */
   /* XXX: Other particle assumed stable! */
-  if ((particles->particle_type(type_a)).width() > 0) {
+  if (particles->particle_type(type_a).width() > 0) {
     mass_a = sample_resonance_mass(particles, type_a, type_b, total_energy);
-  } else if ((particles->particle_type(type_b)).width() > 0) {
+  } else if (particles->particle_type(type_b).width() > 0) {
     mass_b = sample_resonance_mass(particles, type_b, type_a, total_energy);
   }
 

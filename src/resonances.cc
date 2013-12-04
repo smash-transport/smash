@@ -35,19 +35,20 @@
  */
 float calculate_minimum_mass(Particles *particles, int pdgcode) {
   /* If the particle happens to be stable, just return the mass */
-  if ((particles->particle_type(pdgcode)).width() < 0.0)
-    return (particles->particle_type(pdgcode)).mass();
+  if (particles->particle_type(pdgcode).width() < 0.0)
+    return particles->particle_type(pdgcode).mass();
   /* Otherwise, let's find the highest mass value needed in any decay mode */
   float minimum_mass = 0.0;
   const std::vector<ProcessBranch> decaymodes
-    = (particles->decay_modes(pdgcode)).decay_mode_list();
+    = particles->decay_modes(pdgcode).decay_mode_list();
   for (std::vector<ProcessBranch>::const_iterator mode = decaymodes.begin();
        mode != decaymodes.end(); ++mode) {
-    size_t decay_particles = (mode->particle_list()).size();
+    size_t decay_particles = mode->particle_list().size();
     float total_mass = 0.0;
     for (size_t i = 0; i < decay_particles; i++) {
       /* Stable decay products assumed; for resonances the mass can be lower! */
-      total_mass += particles->particle_type((mode->particle_list())[i]).mass();
+      total_mass
+        += particles->particle_type(mode->particle_list().at(i)).mass();
     }
     if (total_mass > minimum_mass)
       minimum_mass = total_mass;
@@ -135,7 +136,7 @@ std::vector<ProcessBranch> resonance_cross_section(
       resonance_process.add_particle(type_resonance.pdgcode());
       resonance_process.add_weight(resonance_xsection);
       resonance_process_list.push_back(resonance_process);
-      (resonance_process_list.at(0)).change_weight(resonance_xsection);
+      resonance_process_list.at(0).change_weight(resonance_xsection);
 
       printd("Found resonance %i (%s) with mass %f and width %f.\n",
              type_resonance.pdgcode(), type_resonance.name().c_str(),
@@ -236,21 +237,21 @@ double two_to_one_formation(Particles *particles, ParticleType type_particle1,
 
   /* Check the decay modes of this resonance */
   const std::vector<ProcessBranch> decaymodes
-    = (particles->decay_modes(type_resonance.pdgcode())).decay_mode_list();
+    = particles->decay_modes(type_resonance.pdgcode()).decay_mode_list();
   bool not_enough_energy = false;
   for (std::vector<ProcessBranch>::const_iterator mode
        = decaymodes.begin(); mode != decaymodes.end(); ++mode) {
-    size_t decay_particles = (mode->particle_list()).size();
+    size_t decay_particles = mode->particle_list().size();
     if ( decay_particles > 3 ) {
       printf("Warning: Not a 1->2 or 1->3 process!\n");
       printf("Number of decay particles: %zu \n", decay_particles);
     } else {
       /* There must be enough energy to produce all decay products */
       float mass_a, mass_b, mass_c = 0.0;
-      mass_a = calculate_minimum_mass(particles, (mode->particle_list())[0]);
-      mass_b = calculate_minimum_mass(particles, (mode->particle_list())[1]);
+      mass_a = calculate_minimum_mass(particles, mode->particle_list().at(0));
+      mass_b = calculate_minimum_mass(particles, mode->particle_list().at(1));
       if (decay_particles == 3) {
-        mass_c = calculate_minimum_mass(particles, (mode->particle_list())[2]);
+        mass_c = calculate_minimum_mass(particles, mode->particle_list().at(2));
       }
       if (sqrt(mandelstam_s) < mass_a + mass_b + mass_c)
         not_enough_energy = true;
@@ -389,23 +390,23 @@ size_t two_to_two_formation(Particles *particles, ParticleType type_particle1,
 
     /* Check the decay modes of this resonance */
     const std::vector<ProcessBranch> decaymodes
-      = (particles->decay_modes(type_resonance.pdgcode())).decay_mode_list();
+      = particles->decay_modes(type_resonance.pdgcode()).decay_mode_list();
     bool not_enough_energy = false;
     double minimum_mass = 0.0;
     for (std::vector<ProcessBranch >::const_iterator mode
          = decaymodes.begin(); mode != decaymodes.end(); ++mode) {
-      size_t decay_particles = (mode->particle_list()).size();
+      size_t decay_particles = mode->particle_list().size();
       if ( decay_particles > 3 ) {
         printf("Warning: Not a 1->2 or 1->3 process!\n");
         printf("Number of decay particles: %zu \n", decay_particles);
       } else {
         /* There must be enough energy to produce all decay products */
         float mass_a, mass_b, mass_c = 0.0;
-        mass_a = calculate_minimum_mass(particles, (mode->particle_list())[0]);
-        mass_b = calculate_minimum_mass(particles, (mode->particle_list())[1]);
+        mass_a = calculate_minimum_mass(particles, mode->particle_list().at(0));
+        mass_b = calculate_minimum_mass(particles, mode->particle_list().at(1));
         if (decay_particles == 3) {
           mass_c = calculate_minimum_mass(particles,
-                     (mode->particle_list())[2]);
+                     mode->particle_list().at(2));
         }
         if (sqrt(mandelstam_s) < mass_a + mass_b + mass_c
                                  + type_i->second.mass()) {
@@ -485,7 +486,7 @@ size_t two_to_two_formation(Particles *particles, ParticleType type_particle1,
       final_state.add_particle(type_i->second.pdgcode());
       final_state.add_weight(xsection);
       process_list->push_back(final_state);
-      (process_list->at(0)).change_weight(xsection);
+      process_list->at(0).change_weight(xsection);
       number_of_processes++;
     }
   }
@@ -525,12 +526,12 @@ double sample_resonance_mass(Particles *particles, int pdg_resonance,
     = calculate_minimum_mass(particles, pdg_resonance);
   /* Define Breit-Wigner parameters */
   float mass_stable
-    = (particles->particle_type(pdg_stable)).mass();
+    = particles->particle_type(pdg_stable).mass();
   float parameter_array[4];
   parameter_array[0]
-    = (particles->particle_type(pdg_resonance)).width();
+    = particles->particle_type(pdg_resonance).width();
   parameter_array[1]
-    = (particles->particle_type(pdg_resonance)).mass();
+    = particles->particle_type(pdg_resonance).mass();
   parameter_array[2] = mass_stable;
   parameter_array[3] = cms_energy * cms_energy;
 
@@ -595,7 +596,7 @@ int resonance_formation(Particles *particles, int particle_id, int other_id,
     /* 2 particles in final state. Need another particle template */
     /* XXX: For now, it is assumed that the other particle is stable! */
     ParticleData stable_product;
-    if ((particles->particle_type(produced_particles.at(0))).width() > 0) {
+    if (particles->particle_type(produced_particles.at(0)).width() > 0) {
       resonance.set_pdgcode(produced_particles.at(0));
       stable_product.set_pdgcode(produced_particles.at(1));
     } else {
@@ -603,7 +604,7 @@ int resonance_formation(Particles *particles, int particle_id, int other_id,
       resonance.set_pdgcode(produced_particles.at(1));
     }
     float mass_stable
-      = (particles->particle_type(stable_product.pdgcode())).mass();
+      = particles->particle_type(stable_product.pdgcode()).mass();
     /* Sample resonance mass */
     double mass_resonance = sample_resonance_mass(particles,
       resonance.pdgcode(), stable_product.pdgcode(), cms_energy);
