@@ -39,6 +39,7 @@ public:
       CrossSections *c __attribute__((unused))) { return -1; }
     void process_config_general(char *path __attribute__((unused))) { return ; }
     void initial_conditions(Particles *p __attribute__((unused))) { return; }
+    
   private:
     /* number of steps */
     int steps_;

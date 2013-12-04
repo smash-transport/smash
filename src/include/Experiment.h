@@ -13,11 +13,17 @@
 class Experiment
 {
 public:
- 
-template <typename BoundaryConditions> class ExperimentImplementation : public Experiment
+    virtual void run();
+};
+
+template <typename Modus> class ExperimentImplementation : public Experiment
 {
 public:
   virtual void run();
+private:
+    BoundaryConditions bc;
+    Particles,...
+
 };
 
 #endif  // SRC_INCLUDE_Experiment_H_
