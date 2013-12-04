@@ -96,11 +96,9 @@ int main(int argc, char *argv[]) {
 
   auto experiment = Experiment::create(modus);
 
-  /* Read general config file parameters */
-  process_general_config(path);
-  experiment->assign_general_params(); 
-  experiment->config_specific_params();
-    
+      experiment->config;
+
+      
   /* Output IC values */
   print_startup(*lab);
   mkdir_data();

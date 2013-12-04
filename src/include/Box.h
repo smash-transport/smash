@@ -39,6 +39,7 @@ public:
     /* special class funtions */
     virtual int evolve(Particles *particles, CrossSections *cross_sections);
     virtual void process_config(char *path);
+    virtual void assign_params_specific(Parameters *configuration);
     virtual void initial_conditions(Particles *particles);
 
   private:

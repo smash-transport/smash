@@ -40,6 +40,32 @@
 /* build dependent variables */
 #include "include/Config.h"
 
+
+static void assign_params(std::list<Parameters> *configuration, Sphere *ball) {
+    bool match = false;
+    std::list<Parameters>::iterator i = configuration->begin();
+    while (i != configuration->end()) {
+        char *key = i->key();
+        char *value = i->value();
+        printd("%s %s\n", key, value);
+        
+        /* double or float values */
+        if (strcmp(key, "RADIUS") == 0) {
+            ball->set_radius(fabs(atof(value)));
+            match = true;
+        }
+        
+        /* remove processed entry */
+        if (match) {
+            i = configuration->erase(i);
+            match = false;
+        } else {
+            ++i;
+        }
+    }
+}
+
+
 /* boundary_condition - enforce specific type of boundaries */
 FourVector boundary_condition(FourVector position,
   const Sphere &sphere __attribute__((unused)), bool *boundary_hit) {

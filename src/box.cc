@@ -19,6 +19,42 @@
 #include "include/param-reader.h"
 #include "include/propagation.h"
 
+
+
+static void assign_params_specific(std::list<Parameters> *configuration) {
+    bool match = false;
+    std::list<Parameters>::iterator i = configuration->begin();
+    while (i != configuration->end()) {
+        char *key = i->key();
+        char *value = i->value();
+        printd("%s %s\n", key, value);
+        
+        /* double or float values */
+        if (strcmp(key, "LENGTH") == 0) {
+            length = (fabs(atof(value)));
+            match = true;
+        }
+        if (strcmp(key, "TEMPERATURE") == 0) {
+            temperature = (fabs(atof(value)));
+            match = true;
+        }
+        /* int values */
+        if (strcmp(key, "INITIAL_CONDITION") == 0) {
+            initial_condition = (abs(atoi(value)));
+            match = true;
+        }
+        /* remove processed entry */
+        if (match) {
+            i = configuration->erase(i);
+            match = false;
+        } else {
+            ++i;
+        }
+    }
+}
+
+
+
 /* check_collision_geometry - check if a collision happens between particles */
 static void check_collision_geometry(Particles *particles,
   CrossSections *cross_sections,
