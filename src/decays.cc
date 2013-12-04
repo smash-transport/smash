@@ -190,7 +190,7 @@ size_t decay_particles(Particles *particles, std::list<int> *decay_list,
 /* Resonance decay process */
 int resonance_decay(Particles *particles, int particle_id) {
   const int pdgcode = particles->type(particle_id).pdgcode();
-  std::vector<ProcessBranch> decaymodes
+  const std::vector<ProcessBranch> decaymodes
     = (particles->decay_modes(pdgcode)).decay_mode_list();
   int type_a = 0, type_b = 0, type_c = 0, new_id_a = -1;
 
@@ -200,7 +200,7 @@ int resonance_decay(Particles *particles, int particle_id) {
   double random_mode = drand48();
   double cumulated_probability = 0.0;
   size_t decay_particles = 0;
-  for (std::vector<ProcessBranch>::iterator mode
+  for (std::vector<ProcessBranch>::const_iterator mode
          = decaymodes.begin(); mode != decaymodes.end(); ++mode) {
     cumulated_probability += mode->weight();
     if (random_mode < cumulated_probability) {

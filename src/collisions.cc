@@ -128,7 +128,7 @@ void collision_criteria_geometry(Particles *particles,
   if ((resonance_xsections.at(0)).weight() > really_small) {
     double random_interaction = drand48();
     double interaction_probability = 0.0;
-    std::vector<ProcessBranch>::iterator resonances
+    std::vector<ProcessBranch>::const_iterator resonances
       = resonance_xsections.begin();
     while (interaction_type == 0 && resonances != resonance_xsections.end()) {
       if ((resonances->particle_list()).size() > 1

@@ -235,10 +235,10 @@ double two_to_one_formation(Particles *particles, ParticleType type_particle1,
     return 0.0;
 
   /* Check the decay modes of this resonance */
-  std::vector<ProcessBranch> decaymodes
+  const std::vector<ProcessBranch> decaymodes
     = (particles->decay_modes(type_resonance.pdgcode())).decay_mode_list();
   bool not_enough_energy = false;
-  for (std::vector<ProcessBranch>::iterator mode
+  for (std::vector<ProcessBranch>::const_iterator mode
        = decaymodes.begin(); mode != decaymodes.end(); ++mode) {
     size_t decay_particles = (mode->particle_list()).size();
     if ( decay_particles > 3 ) {
@@ -388,11 +388,11 @@ size_t two_to_two_formation(Particles *particles, ParticleType type_particle1,
       continue;
 
     /* Check the decay modes of this resonance */
-    std::vector<ProcessBranch> decaymodes
+    const std::vector<ProcessBranch> decaymodes
       = (particles->decay_modes(type_resonance.pdgcode())).decay_mode_list();
     bool not_enough_energy = false;
     double minimum_mass = 0.0;
-    for (std::vector<ProcessBranch >::iterator mode
+    for (std::vector<ProcessBranch >::const_iterator mode
          = decaymodes.begin(); mode != decaymodes.end(); ++mode) {
       size_t decay_particles = (mode->particle_list()).size();
       if ( decay_particles > 3 ) {
