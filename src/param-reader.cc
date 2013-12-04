@@ -14,10 +14,7 @@
 #include <list>
 
 #include "include/param-reader.h"
-#include "include/Box.h"
-#include "include/Laboratory.h"
 #include "include/Parameters.h"
-#include "include/Sphere.h"
 #include "include/outputroutines.h"
 
 /* space separation between items */
