@@ -330,7 +330,7 @@ void write_vtk(const Particles &particles) {
   char filename[256];
 
   snprintf(filename, sizeof(filename), "data/pos_0.%05i.vtk",
-           (int)((particles.cbegin()->second.position().x0() - 1.0) * 10));
+    static_cast<int>((particles.cbegin()->second.position().x0() - 1.0) * 10));
   fp = fopen(filename, "w");
   /* Legacy VTK file format */
   fprintf(fp, "# vtk DataFile Version 2.0\n");
