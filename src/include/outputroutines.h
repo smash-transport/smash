@@ -46,7 +46,7 @@ void printd_position(const ParticleData &particle);
 void printd_position(const char *message, const ParticleData &particle);
 void printd_momenta(const ParticleData &particle);
 void printd_momenta(const char *message, const ParticleData &particle);
-void printd_list(std::list<int> &collision_list);
+void printd_list(std::list<int> collision_list);
 
 /* output data files */
 void write_particles(const Particles &particles);
