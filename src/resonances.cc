@@ -126,6 +126,10 @@ std::vector<ProcessBranch> resonance_cross_section(
     if (type_resonance.width() < 0.0)
       continue;
 
+    /* No decay channels found, ignore */
+    if (particles->decay_modes(type_resonance.pdgcode()).empty())
+      continue;
+
     double resonance_xsection
       = symmetryfactor * two_to_one_formation(particles, type_particle1,
         type_particle2, type_resonance, mandelstam_s, cm_momentum_squared);

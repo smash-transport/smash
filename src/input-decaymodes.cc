@@ -17,6 +17,7 @@
 #include "include/DecayModes.h"
 #include "include/input-decaymodes.h"
 #include "include/Particles.h"
+#include "include/ParticleType.h"
 #include "include/outputroutines.h"
 
 /* XXX: hardcoded length cap */
@@ -47,6 +48,7 @@ void input_decaymodes(Particles *particles, char *path) {
   DecayModes decay_modes;
   int modes = 0, pdgcode = 0;
   float ratio_sum = 0.0;
+  bool unknown_particle = true;
   while ((characters_read = getline(&line, &line_size, file)) != -1) {
     printd("Retrieved decaymodes.txt line of length %li:\n", characters_read);
     /* Skip comments and blank lines */
@@ -64,6 +66,17 @@ void input_decaymodes(Particles *particles, char *path) {
         continue;
       pdgcode = atoi(characters);
       printd("pdgcode: %d\n", pdgcode);
+      /* Check if SMASH knows this particle */
+      unknown_particle = true;
+      std::map<int, ParticleType>::const_iterator type_i
+          = particles->types_cbegin();
+      while (type_i != particles->types_cend()) {
+        if (type_i->second.pdgcode() == pdgcode) {
+            unknown_particle = false;
+            break;
+        }
+        ++type_i;
+      }
       /* Second item should be the number of decay modes */
       characters = strtok_r(NULL, " ", &line_position);
       if (characters == NULL)
@@ -72,13 +85,23 @@ void input_decaymodes(Particles *particles, char *path) {
       /* Initialize the sum of the ratios */
       ratio_sum = 0.0;
       printd("Number of modes: %i\n", modes);
+      if (unknown_particle) {
+        printf("Warning: Could not find particle %i in the list!\n",
+               pdgcode);
+        printf("Can't add decay modes for particle %i.\n", pdgcode);
+        printf("The following mode information will be ignored.\n");
+        continue;
+      }
     } else {
+      if (unknown_particle) {
+        modes--;
+        continue;
+      }
       /* Reading the list of the decay modes */
       characters = strtok_r(line, " ", &line_position);
       /* First number should be the ratio for this mode */
       float ratio = atof(characters);
       printd("Ratio: %g \n", ratio);
-      ratio_sum += ratio;
       /* Read in the decay particle PDG codes for this mode */
       pdgs = strtok_r(NULL, " ", &line_position);
       printd("pdgs: %s \n", pdgs);
@@ -91,24 +114,54 @@ void input_decaymodes(Particles *particles, char *path) {
         pdgs = strtok_r(NULL, " ", &line_position);
         printd("pdgs: %s \n", pdgs);
       }
-      /* Add mode to the list of possible decays for this particle */
-      decay_modes.add_mode(decay_particles, ratio);
+      /* Check that the particles in the decay mode are known */
+      bool unknown_decay = false;
+      for (std::vector<int>::const_iterator decay_pdg
+           = decay_particles.begin(); decay_pdg != decay_particles.end();
+           ++decay_pdg) {
+        bool not_found = true;
+        std::map<int, ParticleType>::const_iterator type_i
+          = particles->types_cbegin();
+        while (type_i != particles->types_cend()) {
+          if (type_i->second.pdgcode() == *decay_pdg) {
+            not_found = false;
+            break;
+          }
+          ++type_i;
+        }
+        if (not_found) {
+          unknown_decay = true;
+          printf("Warning: Could not find particle %i in the list!\n",
+                 *decay_pdg);
+          printf("Can't add this decay mode for particle %i.\n", pdgcode);
+        }
+      }
+      if (!unknown_decay) {
+        /* Add mode to the list of possible decays for this particle */
+        decay_modes.add_mode(decay_particles, ratio);
+        ratio_sum += ratio;
+      }
       /* Clean the particle list for the next mode */
       decay_particles.clear();
       /* Number of modes remaining decreases by one */
       modes--;
       /* Check if this was the last mode */
       if (modes == 0) {
-        /* Check if ratios add to 1 */
-        if (fabs(ratio_sum - 1.0) > really_small) {
-          /* They didn't; renormalize */
-          printf("Particle %i:\n", pdgcode);
-          decay_modes.renormalize(ratio_sum);
+        if (decay_modes.empty()) {
+          printf("Warning: No decay modes found for particle %i.\n",
+                 pdgcode);
+        } else {
+          /* Check if ratios add to 1 */
+          if (fabs(ratio_sum - 1.0) > really_small) {
+            /* They didn't; renormalize */
+            printf("Particle %i:\n", pdgcode);
+            decay_modes.renormalize(ratio_sum);
+          }
+          /* Add the list of decay modes for this particle type */
+          particles->add_decaymodes(decay_modes, pdgcode);
+          /* Clean up the list for the next particle type */
+          decay_modes.clear();
         }
-        /* Add the list of decay modes for this particle type */
-        particles->add_decaymodes(decay_modes, pdgcode);
-        /* Clean up the list for the next particle type */
-        decay_modes.clear();
       }
     }
   }
