@@ -30,7 +30,7 @@ static void process_params(char *file_path,
   size_t len = 0;
   ssize_t read;
   char *key, *value;
-  FILE *fp;
+  FILE *fp = NULL;
 
   /* Looking for parameters in config file
    * If none exists, we'll use default values.

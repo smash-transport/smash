@@ -24,7 +24,7 @@ void input_particles(Particles *particles, char *path) {
   char *line = NULL, *saveptr = NULL, *characters, input_particles[FILELEN];
   size_t len = 0;
   ssize_t read;
-  FILE *fp;
+  FILE *fp = NULL;
 
   /* Looking for parameters in config file
    * If none exists, we'll use default values.

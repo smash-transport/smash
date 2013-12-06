@@ -26,7 +26,7 @@
 /* input_decaymodes - read in particle decay modes */
 void input_decaymodes(Particles *particles, char *path) {
   char input_decaymodes[FILELEN];
-  FILE *file;
+  FILE *file = NULL;
 
   /* Looking for decay mode list
    * If none exists, we'll use default values.
