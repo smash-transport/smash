@@ -78,11 +78,11 @@ size_t decay_particles(Particles *particles, std::list<int> *decay_list,
       printf("Decays warning: ID %i (%s) has process type %i.\n",
            id_a, particles->type(id_a).name().c_str(), interaction_type);
 
-    FourVector initial_momentum(particles->data(id_a).momentum());
+    /* Save a copy of the initial state */
+    ParticleData initial_data = particles->data(id_a);
+    ParticleType initial_type = particles->type(id_a);
 
-    /* 1->2 resonance decay */
     printd("Process: Resonance decay. ");
-    write_oscar(particles->data(id_a), particles->type(id_a), 1, 2);
     printd_momenta("Resonance momenta before decay", particles->data(id_a));
 
     /* boost to rest frame */
@@ -101,8 +101,11 @@ size_t decay_particles(Particles *particles, std::list<int> *decay_list,
     printd_momenta("Boosted resonance momenta before decay",
                    particles->data(id_a));
 
+    /* Save the highest id before decay */
     size_t old_max_id = particles->id_max();
+    /* Do the decay; this returns the smallest new id */
     size_t id_new_a = resonance_decay(particles, id_a);
+    /* There's going to be at least 2 new particles */
     size_t id_new_b = id_new_a + 1;
 
     printd_momenta("particle 1 momenta in lrf", particles->data(id_new_a));
@@ -111,10 +114,15 @@ size_t decay_particles(Particles *particles, std::list<int> *decay_list,
     boost_back_CM(particles->data_pointer(id_new_a),
                   particles->data_pointer(id_new_b), &velocity_CM);
 
+    /* How many new particles we have exactly */
+    size_t new_particles = particles->id_max() - old_max_id;
+    /* Write the process type (1->N) and initial state oscar output */
+    write_oscar(initial_data, initial_type, 1, new_particles);
+    /* Write the first 2 final state particles, which are always there */
     write_oscar(particles->data(id_new_a), particles->type(id_new_a));
     write_oscar(particles->data(id_new_b), particles->type(id_new_b));
 
-    size_t new_particles = particles->id_max() - old_max_id;
+    /* Check for the possible third final state particle */
     int id_new_c = -1;
     if (new_particles == 3) {
       id_new_c = id_new_b + 1;
@@ -125,9 +133,9 @@ size_t decay_particles(Particles *particles, std::list<int> *decay_list,
       FourVector position_c(particles->data(id_new_c).position());
       /* Boost the momenta back to lab frame */
       momentum_c = momentum_c.LorentzBoost(velocity);
-      /* Boost the positions back to lab frame */
+      /* Boost the position back to lab frame */
       position_c = position_c.LorentzBoost(velocity);
-
+      /* Write the oscar output for this particle */
       particles->data_pointer(id_new_c)->set_momentum(momentum_c);
       particles->data_pointer(id_new_c)->set_position(position_c);
       write_oscar(particles->data(id_new_c), particles->type(id_new_c));
@@ -150,8 +158,9 @@ size_t decay_particles(Particles *particles, std::list<int> *decay_list,
 
     id_process++;
 
+    /* Check momentum conservation */
     FourVector momentum_difference;
-    momentum_difference += initial_momentum;
+    momentum_difference += initial_data.momentum();
     momentum_difference -= final_momentum;
     if (fabs(momentum_difference.x0()) > really_small) {
       printf("Process %zu type %i particle %s decay to %s and %s ",
@@ -161,7 +170,7 @@ size_t decay_particles(Particles *particles, std::list<int> *decay_list,
       if (new_particles == 3) {
         printf("and %s ", particles->type(id_new_c).name().c_str());
       }
-      printf("time %g\n", particles->data(id_a).position().x0());
+      printf("time %g\n", initial_data.position().x0());
       printf("Warning: Interaction type %i E conservation violation %g\n",
              interaction_type, momentum_difference.x0());
     }
@@ -175,6 +184,7 @@ size_t decay_particles(Particles *particles, std::list<int> *decay_list,
       printf("Warning: Interaction type %i pz conservation violation %g\n",
              interaction_type, momentum_difference.x3());
 
+    /* Remove decayed particle */
     particles->remove(id_a);
     printd("ID %i has decayed and removed from the list.\n", id_a);
   } /* end for std::list<int>::iterator id = decay_list->begin() */
