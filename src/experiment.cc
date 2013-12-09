@@ -8,30 +8,30 @@
  */
 
 
-#include "Experiment.h"
-#include "BoundaryConditions.h"
-#include "Parameters.h"
-#include "param-reader.h"
+#include "include/Experiment.h"
+#include "include/BoundaryConditions.h"
+#include "include/Parameters.h"
+#include "include/param-reader.h"
 
-std::unique_ptr<Experiment> Experiment::create(const std::int &BoundaryConditions)
+std::unique_ptr<Experiment> Experiment::create(const std::int &modus)
 {
   typedef std::unique_ptr<Experiment> ExperimentPointer;
-  if (boundaryConditions == 1) {
+  if (modus == 1) {
     return ExperimentPointer{new ExperimentImplementation<BoxBoundaryConditions>};
-  } else if (boundaryConditions == 2) {
+  } else if (modus == 2) {
     return ExperimentPointer{new ExperimentImplementation<SphereBoundaryConditions>};
   } else {
     throw std::string("Invalid boundaryCondition requested from Experiment::create.");
   }
 }
 
-template <typename Modus>
-void ExperimentImplementation<Modus>::config()
+template <typename BoundaryConditions>
+void ExperimentImplementation<BoundaryConditions>::config()
 {
     process_config(Parameters, char *path);
-    new BoundaryConditions bc(Parameters);
-    assign_params_general;
-    assign_params_specific;
+    new BoundaryConditions bc;
+    bc->assign_params_general(Parameters);
+    bc->assign_params_specific(Parameters);
     
 }
 

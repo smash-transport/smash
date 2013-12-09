@@ -7,7 +7,10 @@
  *
  */
 
-static void assign_params_general(std::list<Parameters> *configuration) {
+#include "include/BoundaryConditions.h"
+#include "include/outputroutines.h"
+
+void BoundaryConditions::assign_params_general(std::list<Parameters> *configuration) {
     bool match = false;
     std::list<Parameters>::iterator i = configuration->begin();
     while (i != configuration->end()) {

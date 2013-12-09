@@ -20,8 +20,7 @@
 #include "include/propagation.h"
 
 
-
-static void assign_params_specific(std::list<Parameters> *configuration) {
+void BoxBoundaryConditions::assign_params_specific(std::list<Parameters> *configuration) {
     bool match = false;
     std::list<Parameters>::iterator i = configuration->begin();
     while (i != configuration->end()) {
