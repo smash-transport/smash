@@ -55,9 +55,9 @@ void BoxBoundaryConditions::assign_params_specific(std::list<Parameters> *config
 
 
 /* check_collision_geometry - check if a collision happens between particles */
-static void check_collision_geometry(Particles *particles,
+void BoxBoundaryConditions::check_collision_geometry(Particles *particles,
   CrossSections *cross_sections,
-  std::list<int> *collision_list, Box const &box,
+  std::list<int> *collision_list, BoxBoundaryConditions const &box,
   size_t *rejection_conflict) {
   std::vector<std::vector<std::vector<std::vector<int> > > > grid;
   int N;
@@ -65,11 +65,11 @@ static void check_collision_geometry(Particles *particles,
 
   /* For small boxes no point in splitting up in grids */
   /* calculate approximate grid size according to double interaction length */
-  N = round(box.length()
-            / sqrt(box.cross_section() * fm2_mb * M_1_PI) * 0.5);
+  N = round(box.length
+            / sqrt(box.cross_section * fm2_mb * M_1_PI) * 0.5);
   if (unlikely(N < 4 || particles->size() < 10)) {
     FourVector distance;
-    double radial_interaction = sqrt(box.cross_section() * fm2_mb
+    double radial_interaction = sqrt(box.cross_section * fm2_mb
                                      * M_1_PI) * 2;
     for (std::map<int, ParticleData>::iterator i = particles->begin();
          i != particles->end(); ++i) {
@@ -102,9 +102,9 @@ static void check_collision_geometry(Particles *particles,
   for (std::map<int, ParticleData>::iterator i = particles->begin();
          i != particles->end(); ++i) {
     /* XXX: function - map particle position to grid number */
-    x = round(i->second.position().x1() / box.length() * (N - 1));
-    y = round(i->second.position().x2() / box.length() * (N - 1));
-    z = round(i->second.position().x3() / box.length() * (N - 1));
+    x = round(i->second.position().x1() / box.length * (N - 1));
+    y = round(i->second.position().x2() / box.length * (N - 1));
+    z = round(i->second.position().x3() / box.length * (N - 1));
     printd_position(i->second);
     printd("grid cell particle %i: %i %i %i of %i\n", i->first, x, y, z, N);
     if (unlikely(x >= N || y >= N || z >= N))
@@ -120,9 +120,9 @@ static void check_collision_geometry(Particles *particles,
   for (std::map<int, ParticleData>::iterator i = particles->begin();
        i != particles->end(); ++i) {
     /* XXX: function - map particle position to grid number */
-    x = round(i->second.position().x1() / box.length() * (N - 1));
-    y = round(i->second.position().x2() / box.length() * (N - 1));
-    z = round(i->second.position().x3() / box.length() * (N - 1));
+    x = round(i->second.position().x1() / box.length * (N - 1));
+    y = round(i->second.position().x2() / box.length * (N - 1));
+    z = round(i->second.position().x3() / box.length * (N - 1));
     if (unlikely(x >= N || y >= N || z >= N))
       printf("grid cell particle %i: %i %i %i of %i\n", i->first, x, y, z, N);
     /* check all neighbour grids */
@@ -131,10 +131,10 @@ static void check_collision_geometry(Particles *particles,
       /* apply periodic boundary condition for particle positions */
       if (sx < 0) {
         sx = N - 1;
-        shift.set_x1(-box.length());
+        shift.set_x1(-box.length);
       } else if (sx > N - 1) {
         sx = 0;
-        shift.set_x1(box.length());
+        shift.set_x1(box.length);
       } else {
         shift.set_x1(0);
       }
@@ -142,10 +142,10 @@ static void check_collision_geometry(Particles *particles,
         int sy = cy + y;
         if (sy < 0) {
           sy = N - 1;
-          shift.set_x2(-box.length());
+          shift.set_x2(-box.length);
         } else if (sy > N - 1) {
           sy = 0;
-          shift.set_x2(box.length());
+          shift.set_x2(box.length);
         } else {
           shift.set_x2(0);
         }
@@ -153,10 +153,10 @@ static void check_collision_geometry(Particles *particles,
           int sz = cz + z;
           if (sz < 0) {
             sz = N - 1;
-            shift.set_x3(-box.length());
+            shift.set_x3(-box.length);
           } else if (sz > N - 1) {
             sz = 0;
-            shift.set_x3(box.length());
+            shift.set_x3(box.length);
           } else {
             shift.set_x3(0);
           }
@@ -196,7 +196,7 @@ static void check_collision_geometry(Particles *particles,
 }
 
 /* evolve - the core of the box, stepping forward in time */
-int Box::evolve(Particles *particles, CrossSections *cross_sections) {
+int BoxBoundaryConditions::evolve(Particles *particles, CrossSections *cross_sections) {
   std::list<int> collision_list, decay_list;
   size_t interactions_total = 0, previous_interactions_total = 0,
     interactions_this_interval = 0;
@@ -215,7 +215,7 @@ int Box::evolve(Particles *particles, CrossSections *cross_sections) {
   print_measurements(*particles, interactions_total,
                      interactions_this_interval, *this);
 
-  for (int step = 0; step < this->steps(); step++) {
+  for (int step = 0; step < this->steps; step++) {
     /* Check resonances for decays */
     check_decays(particles, &decay_list, *this);
 
@@ -241,7 +241,7 @@ int Box::evolve(Particles *particles, CrossSections *cross_sections) {
     propagate_particles(particles, *this);
 
     /* physics output during the run */
-    if (step > 0 && (step + 1) % this->output_interval() == 0) {
+    if (step > 0 && (step + 1) % this->output_interval == 0) {
       interactions_this_interval = interactions_total
         - previous_interactions_total;
 
@@ -259,7 +259,7 @@ int Box::evolve(Particles *particles, CrossSections *cross_sections) {
   }
 
   /* Guard against evolution */
-  if (likely(this->steps() > 0)) {
+  if (likely(this->steps > 0)) {
     /* if there are not particles no interactions happened */
     if (likely(!particles->empty()))
       print_tail(*this, interactions_total * 2

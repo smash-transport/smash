@@ -12,23 +12,23 @@
 #include "../include/Particles.h"
 
 /* forward declarations */
-class Box;
-class Laboratory;
+class BoxBoundaryConditions;
+class Experiment;
 class Parameters;
 class ParticleData;
 class ParticleType;
 class Sphere;
 
 /* console output */
-void print_startup(const Laboratory &parameters);
-void print_startup(const Box &box);
+void print_startup(const Experiment &parameters);
+void print_startup(const BoxBoundaryConditions &box);
 void print_startup(const Sphere &ball);
 void print_header(void);
 void print_measurements(const Particles &particles,
                         const size_t &scatterings_total,
                         const size_t &scatterings_this_interval,
-                        const Box &box);
-void print_tail(const Box &box, const double &scattering_rate);
+                        const BoxBoundaryConditions &box);
+void print_tail(const BoxBoundaryConditions &box, const double &scattering_rate);
 void warn_wrong_params(std::list<Parameters> *configuration);
 
 /* data directory */
@@ -62,6 +62,6 @@ void write_oscar(const ParticleData &particle_data,
 void write_vtk(const Particles &particles);
 
 /* timing measure */
-double measure_timediff(const Box &box);
+double measure_timediff(const BoxBoundaryConditions &box);
 
 #endif  // SRC_INCLUDE_OUTPUTROUTINES_H_

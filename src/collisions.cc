@@ -17,9 +17,9 @@
 
 #include "include/CollisionData.h"
 #include "include/FourVector.h"
-#include "include/Laboratory.h"
 #include "include/Particles.h"
 #include "include/ParticleData.h"
+#include "include/BoundaryConditions.h"
 #include "include/constants.h"
 #include "include/macros.h"
 #include "include/outputroutines.h"
@@ -30,7 +30,7 @@
  */
 void collision_criteria_geometry(Particles *particles,
   CrossSections *cross_sections,
-  std::list<int> *collision_list, const Laboratory &parameters, int id_a,
+  std::list<int> *collision_list, const BoundaryConditions &parameters, int id_a,
   int id_b, size_t *rejection_conflict) {
   /* just collided with this particle */
   if (particles->data(id_a).id_process() >= 0
@@ -68,7 +68,7 @@ void collision_criteria_geometry(Particles *particles,
   /* check according timestep: positive and smaller */
   const double time_collision = collision_time(particles->data(id_a),
     particles->data(id_b));
-  if (time_collision < 0.0 || time_collision >= parameters.eps())
+  if (time_collision < 0.0 || time_collision >= parameters.eps)
     return;
 
   /* check for minimal collision time both particles */

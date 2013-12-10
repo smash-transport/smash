@@ -29,6 +29,7 @@ public:
     virtual int evolve(Particles *particles, CrossSections *cross_sections);
     virtual void assign_params_specific(std::list<Parameters> *configuration);
     virtual void initial_conditions(Particles *particles);
+    virtual void check_collision_geometry(Particles *particles, CrossSections *cross_sections, std::list<int> *collision_list, BoxBoundaryConditions const &box, size_t *rejection_conflict);
     inline timespec set_timer_start();
   private:
     /* initial condition */
