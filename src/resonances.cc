@@ -243,6 +243,7 @@ double two_to_one_formation(Particles *particles, ParticleType type_particle1,
   const std::vector<ProcessBranch> decaymodes
     = particles->decay_modes(type_resonance.pdgcode()).decay_mode_list();
   bool not_enough_energy = false;
+  double branching_ratio = 1.0;
   for (std::vector<ProcessBranch>::const_iterator mode
        = decaymodes.begin(); mode != decaymodes.end(); ++mode) {
     size_t decay_particles = mode->particle_list().size();
@@ -259,6 +260,18 @@ double two_to_one_formation(Particles *particles, ParticleType type_particle1,
       }
       if (sqrt(mandelstam_s) < mass_a + mass_b + mass_c)
         not_enough_energy = true;
+      /* If initial state is also a possible final state,
+       * weigh the cross section with the ratio of this branch
+       * XXX: For now, assuming only 2-particle initial states
+       */
+      if (decay_particles == 2
+          && ((mode->particle_list().at(0) == type_particle1.pdgcode()
+               && mode->particle_list().at(1) == type_particle2.pdgcode())
+              || (mode->particle_list().at(0) == type_particle2.pdgcode()
+                  && mode->particle_list().at(1) == type_particle1.pdgcode())
+             )
+         )
+        branching_ratio = mode->weight();
     }
   }
   if (not_enough_energy)
@@ -275,6 +288,7 @@ double two_to_one_formation(Particles *particles, ParticleType type_particle1,
   return clebsch_gordan_isospin * clebsch_gordan_isospin * spinfactor
          * 4.0 * M_PI / cm_momentum_squared
          * breit_wigner(mandelstam_s, resonance_mass, resonance_width)
+         * branching_ratio
          * hbarc * hbarc / fm2_mb;
 }
 
