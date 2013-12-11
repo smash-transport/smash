@@ -495,6 +495,8 @@ size_t two_to_two_formation(Particles *particles, ParticleType type_particle1,
          / (64 * M_PI * M_PI)
          / mandelstam_s
          / sqrt(cm_momentum_squared)
+         /* XXX: Assuming uniform angular distribution */
+         * 4 * M_PI
          * resonance_integral
          * hbarc * hbarc / fm2_mb;
 
