@@ -445,12 +445,13 @@ size_t two_to_two_formation(Particles *particles, ParticleType type_particle1,
     int spin_total = spin_total_maximum;
     double spinfactor = (spin_total + 1)
       / ((type_particle1.spin() + 1) * (type_particle2.spin() + 1));
+    /* spin is multiplied by 2,
+     * so it must be decreased in increments of 2
+     */
+    spin_total = spin_total - 2;
     while (spin_total >=  spin_total_minimum) {
       spinfactor += (spin_total + 1)
         / ((type_particle1.spin() + 1) * (type_particle2.spin() + 1));
-      /* spin is multiplied by 2,
-       * so it must be decreased in increments of 2
-       */
       spin_total = spin_total - 2;
     }
     /* Calculate resonance production cross section
