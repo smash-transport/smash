@@ -8,19 +8,20 @@
 #ifndef SRC_INCLUDE_EXPERIMENT_H_
 #define SRC_INCLUDE_EXPERIMENT_H_
 
+#include <memory>
 #include "../include/Parameters.h"
 
 class Experiment
 {
 public:
     static std::unique_ptr<Experiment> create(const int &modus);
-    virtual void config();
+    virtual void config(char *path);
 };
 
 template <typename Modus> class ExperimentImplementation : public Experiment
 {
 public:
-    virtual void config();
+    virtual void config(char *path);
 //private:
 //    BoundaryConditions bc(Parameters);
 //    Particles,...

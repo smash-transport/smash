@@ -18,7 +18,6 @@
 #include "include/constants.h"
 #include "include/distributions.h"
 #include "include/FourVector.h"
-#include "include/Laboratory.h"
 #include "include/macros.h"
 #include "include/Particles.h"
 #include "include/ParticleData.h"
@@ -27,7 +26,7 @@
 #include "include/Sphere.h"
 
 /* initial_conditions - sets particle data for @particles */
-void Box::initial_conditions(Particles *particles) {
+void BoxBoundaryConditions::initial_conditions(Particles *particles) {
   double phi, cos_theta, sin_theta, momentum_radial, number_density_total = 0;
   FourVector momentum_total(0, 0, 0, 0);
   size_t number_total = 0, number = 0;
@@ -42,12 +41,12 @@ void Box::initial_conditions(Particles *particles) {
 
     /* bose einstein distribution funtion */
     double number_density = number_density_bose(i->second.mass(),
-      this->temperature());
+      this->temperature);
 
     /* cast while reflecting probability of extra particle */
-    number = this->length() * this->length() * this->length() * number_density
-        * this->testparticles();
-    if (this->length() * this->length() * this->length() * number_density
+    number = this->length * this->length * this->length * number_density
+        * this->testparticles;
+    if (this->length * this->length * this->length * number_density
         - number > drand48())
       number++;
 
@@ -71,13 +70,13 @@ void Box::initial_conditions(Particles *particles) {
       /* poor last guy just sits around */
       i->second.set_momentum(particles->type(i->first).mass(), 0, 0, 0);
     } else if (!(i->first % 2)) {
-      if (this->initial_condition() != 2) {
+      if (this->initial_condition != 2) {
         /* thermal momentum according Maxwell-Boltzmann distribution */
-        momentum_radial = sample_momenta(this->temperature(),
+        momentum_radial = sample_momenta(this->temperature,
                                          particles->type(i->first).mass());
       } else {
         /* IC == 2 initial thermal momentum is the average 3T */
-        momentum_radial = 3.0 * this->temperature();
+        momentum_radial = 3.0 * this->temperature;
       }
       /* phi in the range from [0, 2 * pi) */
       phi = 2.0 * M_PI * drand48();
@@ -100,9 +99,9 @@ void Box::initial_conditions(Particles *particles) {
 
     time_start = 1.0;
     /* ramdom position in a quadratic box */
-    x = drand48() * this->length();
-    y = drand48() * this->length();
-    z = drand48() * this->length();
+    x = drand48() * this->length;
+    y = drand48() * this->length;
+    z = drand48() * this->length;
     i->second.set_position(time_start, x, y, z);
 
     /* IC: debug checks */
@@ -112,8 +111,8 @@ void Box::initial_conditions(Particles *particles) {
 
   /* Display on startup if pseudo grid is used */
   number = number_total;
-  int const grid_number = round(this->length()
-              / sqrt(this->cross_section() * fm2_mb * M_1_PI) * 0.5);
+  int const grid_number = round(this->length
+              / sqrt(this->cross_section * fm2_mb * M_1_PI) * 0.5);
   /* pseudo grid not used for 3^3 or extremely small particle numbers */
   if (grid_number >= 4 && number > 10)
     printf("Simulation with pseudo grid: %d^3\n", grid_number);
@@ -122,12 +121,12 @@ void Box::initial_conditions(Particles *particles) {
 
   /* allows to check energy conservation */
   printf("IC total energy: %g [GeV]\n", momentum_total.x0());
-  this->set_energy_initial(momentum_total.x0());
-  this->set_number_density_inital(number_density_total);
+  energy_initial = momentum_total.x0();
+  number_density_initial = number_density_total;
 }
 
 /* initial_conditions - sets particle data for @particles */
-void initial_conditions(Particles *particles, Sphere *ball) {
+void SphereBoundaryConditions::initial_conditions(Particles *particles) {
   size_t number_total = 0;
   double time_start = 1.0;
   FourVector momentum_total(0, 0, 0, 0);
@@ -145,9 +144,9 @@ void initial_conditions(Particles *particles, Sphere *ball) {
     printf("IC number density %.6g [fm^-3]\n", number_density);
 
     /* cast while reflecting probability of extra particle */
-    size_t number = 4.0 / 3.0 * M_PI * ball->radius() * ball->radius()
-      * ball->radius() * number_density * ball->testparticles();
-    if (4.0 / 3.0 * M_PI * ball->radius() * ball->radius() * ball->radius()
+    size_t number = 4.0 / 3.0 * M_PI * radius * radius
+      * radius * number_density * testparticles;
+    if (4.0 / 3.0 * M_PI * radius * radius * radius
         * number_density - number > drand48())
         number++;
 
@@ -191,14 +190,14 @@ void initial_conditions(Particles *particles, Sphere *ball) {
     /* ramdom position in a sphere
      * box length here has the meaning of the sphere radius
      */
-    x = -ball->radius() + 2.0 * drand48() * ball->radius();
-    y = -ball->radius() + 2.0 * drand48() * ball->radius();
-    z = -ball->radius() + 2.0 * drand48() * ball->radius();
+    x = -radius + 2.0 * drand48() * radius;
+    y = -radius + 2.0 * drand48() * radius;
+    z = -radius + 2.0 * drand48() * radius;
     /* sampling points inside of the sphere, rejected if outside */
-    while (sqrt(x * x + y * y + z * z) > ball->radius()) {
-      x = -ball->radius() + 2.0 * drand48() * ball->radius();
-      y = -ball->radius() + 2.0 * drand48() * ball->radius();
-      z = -ball->radius() + 2.0 * drand48() * ball->radius();
+    while (sqrt(x * x + y * y + z * z) > radius) {
+      x = -radius + 2.0 * drand48() * radius;
+      y = -radius + 2.0 * drand48() * radius;
+      z = -radius + 2.0 * drand48() * radius;
     }
     i->second.set_position(time_start, x, y, z);
     /* IC: debug checks */

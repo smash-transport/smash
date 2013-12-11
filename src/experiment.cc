@@ -7,13 +7,16 @@
  *
  */
 
+#include <list>
 
 #include "include/Experiment.h"
 #include "include/BoundaryConditions.h"
 #include "include/Parameters.h"
 #include "include/param-reader.h"
+#include "include/Box.h"
+#include "include/Sphere.h"
 
-std::unique_ptr<Experiment> Experiment::create(const std::int &modus)
+std::unique_ptr<Experiment> Experiment::create(const int &modus)
 {
   typedef std::unique_ptr<Experiment> ExperimentPointer;
   if (modus == 1) {
@@ -26,12 +29,13 @@ std::unique_ptr<Experiment> Experiment::create(const std::int &modus)
 }
 
 template <typename BoundaryConditions>
-void ExperimentImplementation<BoundaryConditions>::config()
+void ExperimentImplementation<BoundaryConditions>::config(char *path)
 {
-    process_config(Parameters, char *path);
-    new BoundaryConditions bc;
-    bc->assign_params_general(Parameters);
-    bc->assign_params_specific(Parameters);
+    std::list<Parameters> configuration;
+    process_config(&configuration, path);
+    BoundaryConditions bc;
+    bc.assign_params_general(&configuration);
+    bc.assign_params_specific(&configuration);
     
 }
 

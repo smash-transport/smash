@@ -81,7 +81,7 @@ int main(int argc, char *argv[]) {
 
       auto experiment = Experiment::create(modus);
       
-      experiment->config();
+      experiment->config(path);
 
   
       

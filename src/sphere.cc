@@ -41,7 +41,7 @@
 #include "include/Config.h"
 
 
-static void assign_params(std::list<Parameters> *configuration, Sphere *ball) {
+void SphereBoundaryConditions::assign_params_specific(std::list<Parameters> *configuration) {
     bool match = false;
     std::list<Parameters>::iterator i = configuration->begin();
     while (i != configuration->end()) {
@@ -51,7 +51,7 @@ static void assign_params(std::list<Parameters> *configuration, Sphere *ball) {
         
         /* double or float values */
         if (strcmp(key, "RADIUS") == 0) {
-            ball->set_radius(fabs(atof(value)));
+            radius = (fabs(atof(value)));
             match = true;
         }
         
@@ -68,22 +68,22 @@ static void assign_params(std::list<Parameters> *configuration, Sphere *ball) {
 
 /* boundary_condition - enforce specific type of boundaries */
 FourVector boundary_condition(FourVector position,
-  const Sphere &sphere __attribute__((unused)), bool *boundary_hit) {
+  const SphereBoundaryConditions &sphere __attribute__((unused)), bool *boundary_hit) {
   /* no boundary */
   *boundary_hit = false;
   return position;
 }
 
 /* check_collision_geometry - check if a collision happens between particles */
-static void check_collision_geometry(Particles *particles,
+void SphereBoundaryConditions::check_collision_geometry(Particles *particles,
   CrossSections *cross_sections,
-  std::list<int> *collision_list, Laboratory const &parameters,
-  Box const &box, size_t *rejection_conflict) {
+  std::list<int> *collision_list, BoundaryConditions const &parameters,
+  BoxBoundaryConditions const &box, size_t *rejection_conflict) {
   std::vector<std::vector<std::vector<std::vector<int> > > > grid;
   int N, x, y, z;
 
   /* the maximal radial propagation for light particle */
-  int a = box.length() + particles->time();
+  int a = box.length + particles->time();
   /* For small boxes no point in splitting up in grids */
   /* calculate approximate grid size according to double interaction length */
   N = round(2.0 * a / sqrt(parameters.cross_section() * fm2_mb * M_1_PI) * 0.5);
@@ -179,8 +179,7 @@ static void check_collision_geometry(Particles *particles,
 
 
 /* Evolve - the core of the box, stepping forward in time */
-static int Evolve(Particles *particles, CrossSections *cross_sections,
-                  const Laboratory &lab, int *resonances, int *decays) {
+int SphereBoundaryConditions::Evolve(Particles *particles, CrossSections *cross_sections, int *resonances, int *decays) {
   std::list<int> collision_list, decay_list;
   size_t interactions_total = 0, previous_interactions_total = 0,
     interactions_this_interval = 0;
@@ -232,7 +231,7 @@ static int Evolve(Particles *particles, CrossSections *cross_sections,
   }
 
   /* Guard against evolution */
-  if (likely(parameters.steps() > 0)) {
+  if (likely(parameters.steps > 0)) {
     /* if there are not particles no interactions happened */
     if (likely(!particles->empty()))
       print_tail(lab, interactions_total * 2
@@ -245,32 +244,32 @@ static int Evolve(Particles *particles, CrossSections *cross_sections,
 }
 
 /* start up a sphere and run it */
-int Sphere::evolve(const Laboratory &lab, char *path) {
-  /* Read sphere config file parameters */
-  Sphere *ball = new Sphere(lab);
-  process_config_sphere(ball, path);
+//int Sphere::evolve(const Laboratory &lab, char *path) {
+//  /* Read sphere config file parameters */
+//  Sphere *ball = new Sphere(lab);
+//  process_config_sphere(ball, path);
 
   /* Initialize box */
-  print_startup(*ball);
-  Particles *particles = new Particles;
-  input_particles(particles, path);
-  initial_conditions(particles, ball);
-  input_decaymodes(particles, path);
-  CrossSections *cross_sections = new CrossSections;
-  cross_sections->add_elastic_parameter(lab.cross_section());
+//  print_startup(*ball);
+//  Particles *particles = new Particles;
+//  input_particles(particles, path);
+//  initial_conditions(particles, ball);
+ // input_decaymodes(particles, path);
+//  CrossSections *cross_sections = new CrossSections;
+//  cross_sections->add_elastic_parameter(lab.cross_section());
 
   /* Compute stuff */
-  int rc = Evolve(particles, cross_sections, lab);
+//  int rc = Evolve(particles, cross_sections, lab);
 
   /* record IC startup */
-  write_measurements_header(*particles);
-  print_header();
-  write_particles(*particles);
+//  write_measurements_header(*particles);
+//  print_header();
+//  write_particles(*particles);
 
 
   /* tear down */
-  delete particles;
-  delete cross_sections;
-  delete ball;
-  return rc;
-}
+//  delete particles;
+ // delete cross_sections;
+ // delete ball;
+//  return rc;
+//}

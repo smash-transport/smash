@@ -12,6 +12,6 @@
 extern const char *sep;
 
 /* read params file parameters */
-void process_config(Parameters, char *path);
+void process_config(std::list<Parameters> *configuration, char *path);
 
 #endif  // SRC_INCLUDE_PARAM_READER_H_

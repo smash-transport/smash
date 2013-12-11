@@ -24,7 +24,7 @@ class BoxBoundaryConditions : public BoundaryConditions
 public:
   /* default constructor with probable values */
     BoxBoundaryConditions(): initial_condition(1), length(10.0f), temperature(0.1f),energy_initial(0.0f), number_density_initial(0.0f),
-      time_start(set_timer_start()) {}
+      timer_start(set_timer_start()) {}
     /* special class funtions */
     virtual int evolve(Particles *particles, CrossSections *cross_sections);
     virtual void assign_params_specific(std::list<Parameters> *configuration);
@@ -43,7 +43,7 @@ public:
     /* initial number density of the box */
     float number_density_initial;
     /* starting time of the simulation */
-    timespec time_start;
+    timespec timer_start;
 };
 
     /* set the timer to the actual time in nanoseconds precision */
