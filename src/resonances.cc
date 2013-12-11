@@ -284,6 +284,7 @@ double two_to_one_formation(Particles *particles, ParticleType type_particle1,
   float resonance_mass = type_resonance.mass();
   /* Calculate resonance production cross section
    * using the Breit-Wigner distribution as probability amplitude
+   * See Eq. (176) in Buss et al., Physics Reports 512, 1 (2012)
    */
   return clebsch_gordan_isospin * clebsch_gordan_isospin * spinfactor
          * 4.0 * M_PI / cm_momentum_squared
@@ -491,6 +492,10 @@ size_t two_to_two_formation(Particles *particles, ParticleType type_particle1,
     printd("Integral value: %g Error: %g \n", resonance_integral,
       integral_error);
 
+    /* Cross section for 2->2 process with resonance in final state.
+     * Based on the general differential form in
+     * Buss et al., Physics Reports 512, 1 (2012), Eq. (D.28)
+     */
     double xsection = clebsch_gordan_isospin * clebsch_gordan_isospin
          * spinfactor * symmetryfactor
          / (64 * M_PI * M_PI)
