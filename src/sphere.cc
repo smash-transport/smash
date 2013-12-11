@@ -67,12 +67,12 @@ void SphereBoundaryConditions::assign_params_specific(std::list<Parameters> *con
 
 
 /* boundary_condition - enforce specific type of boundaries */
-FourVector boundary_condition(FourVector position,
-  const SphereBoundaryConditions &sphere __attribute__((unused)), bool *boundary_hit) {
+//FourVector boundary_condition(FourVector position,
+//  const SphereBoundaryConditions &sphere __attribute__((unused)), bool *boundary_hit) {
   /* no boundary */
-  *boundary_hit = false;
-  return position;
-}
+//  *boundary_hit = false;
+//  return position;
+//}
 
 /* check_collision_geometry - check if a collision happens between particles */
 void SphereBoundaryConditions::check_collision_geometry(Particles *particles,

@@ -30,6 +30,7 @@ class SphereBoundaryConditions : public BoundaryConditions
     virtual int evolve(Particles *particles, CrossSections *cross_sections);
     virtual void assign_params_specific(std::list<Parameters> *configuration);
     virtual void initial_conditions(Particles *particles);
+//    virtual FourVector boundary_condition(FourVector position);
     inline timespec set_timer_start();
   private:
     /* Sphere radius length */
@@ -48,6 +49,6 @@ timespec inline SphereBoundaryConditions::set_timer_start(void) {
 }
 
 /* enforce periodic boundary conditions */
-FourVector boundary_condition(FourVector position, const SphereBoundaryConditions &sphere);
+//FourVector SphereBoundaryConditions::boundary_condition(FourVector position);
 
 #endif  // SRC_INCLUDE_SPHERE_H_
