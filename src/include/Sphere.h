@@ -14,7 +14,9 @@ class FourVector;
 #include <time.h>
 #include <cmath>
 
+#include "../include/CrossSections.h"
 #include "../include/BoundaryConditions.h"
+#include "../include/Particles.h"
 #include "../include/time.h"
 #include "../include/Parameters.h"
 
@@ -24,12 +26,11 @@ class SphereBoundaryConditions : public BoundaryConditions
     /* default constructor with probable values */
     SphereBoundaryConditions(): radius(10.0f), timer_start(set_timer_start()) {}
     /* member funtions */
-    inline timespec set_timer_start();
     /* special class funtions */
     virtual int evolve(Particles *particles, CrossSections *cross_sections);
     virtual void assign_params_specific(std::list<Parameters> *configuration);
     virtual void initial_conditions(Particles *particles);
-
+    inline timespec set_timer_start();
   private:
     /* Sphere radius length */
     float radius;

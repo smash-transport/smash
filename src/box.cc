@@ -207,13 +207,13 @@ int BoxBoundaryConditions::evolve(Particles *particles, CrossSections *cross_sec
   for (std::map<int, ParticleData>::iterator i = particles->begin();
        i != particles->end(); ++i) {
     bool boundary_hit = false;
-    i->second.set_position(boundary_condition(i->second.position(), *this,
+    i->second.set_position(boundary_condition(i->second.position(),
                            &boundary_hit));
   }
 
   /* startup values */
-  print_measurements(*particles, interactions_total,
-                     interactions_this_interval, *this);
+//  print_measurements(*particles, interactions_total,
+//                     interactions_this_interval, *this);
 
   for (int step = 0; step < this->steps; step++) {
     /* Check resonances for decays */
@@ -238,7 +238,7 @@ int BoxBoundaryConditions::evolve(Particles *particles, CrossSections *cross_sec
     }
 
     /* propagate all particles */
-    propagate_particles(particles, *this);
+    propagate_particles(particles);
 
     /* physics output during the run */
     if (step > 0 && (step + 1) % this->output_interval == 0) {
@@ -247,8 +247,8 @@ int BoxBoundaryConditions::evolve(Particles *particles, CrossSections *cross_sec
 
       previous_interactions_total = interactions_total;
 
-      print_measurements(*particles, interactions_total,
-                         interactions_this_interval, *this);
+//      print_measurements(*particles, interactions_total,
+ //                        interactions_this_interval, *this);
       printd("Resonances: %i Decays: %i\n", resonances, decays);
       printd("Ignored collisions %zu\n", rejection_conflict);
       /* save evolution data */
@@ -259,14 +259,14 @@ int BoxBoundaryConditions::evolve(Particles *particles, CrossSections *cross_sec
   }
 
   /* Guard against evolution */
-  if (likely(this->steps > 0)) {
+//  if (likely(this->steps > 0)) {
     /* if there are not particles no interactions happened */
-    if (likely(!particles->empty()))
-      print_tail(*this, interactions_total * 2
-                 / particles->time() / particles->size());
-    else
-      print_tail(*this, 0);
-    printf("Total ignored collisions: %zu\n", rejection_conflict);
-  }
+//    if (likely(!particles->empty()))
+//      print_tail(*this, interactions_total * 2
+//                 / particles->time() / particles->size());
+//    else
+//      print_tail(*this, 0);
+//    printf("Total ignored collisions: %zu\n", rejection_conflict);
+//  }
   return 0;
 }

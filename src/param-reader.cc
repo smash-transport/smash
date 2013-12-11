@@ -65,12 +65,12 @@ static void process_params(char *file_path,
 }
 
 /* process_config - configuration handling */
-void process_config(*configuration, *path) {
+void process_config(std::list<Parameters> *configuration, char *path) {
 //    std::list<Parameters> configuration;
     size_t len = strlen("./config_*.txt") + strlen(path) + 1;
     char *config_path = reinterpret_cast<char *>(malloc(len));
     snprintf(config_path, len, "%s/config*.txt", path);
-    process_params(config_path, &configuration);
-    warn_wrong_params(&configuration);
+    process_params(config_path, configuration);
+    warn_wrong_params(configuration);
     free(config_path);
 }

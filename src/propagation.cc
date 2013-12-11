@@ -14,22 +14,21 @@
 
 #include "include/Box.h"
 #include "include/FourVector.h"
-#include "include/Laboratory.h"
 #include "include/Particles.h"
 #include "include/ParticleData.h"
 #include "include/outputroutines.h"
 
 /* propagate all particles */
-void propagate_particles(Particles *particles, Box const &box) {
+void BoxBoundaryConditions::propagate_particles(Particles *particles) {
     FourVector distance, position;
 
     for (std::map<int, ParticleData>::iterator i = particles->begin();
          i != particles->end(); ++i) {
       /* propagation for this time step */
-      distance.set_FourVector(box.eps(),
-        i->second.velocity_x() * box.eps(),
-        i->second.velocity_y() * box.eps(),
-        i->second.velocity_z() * box.eps());
+      distance.set_FourVector(eps,
+        i->second.velocity_x() * eps,
+        i->second.velocity_y() * eps,
+        i->second.velocity_z() * eps);
       printd("Particle %d motion: %g %g %g %g\n", i->first,
          distance.x0(), distance.x1(), distance.x2(), distance.x3());
 
@@ -37,7 +36,7 @@ void propagate_particles(Particles *particles, Box const &box) {
       bool wall_hit = false;
       position = i->second.position();
       position += distance;
-      position = boundary_condition(position, box, &wall_hit);
+      position = boundary_condition(position, &wall_hit);
       if (wall_hit)
         write_oscar(particles->data(i->first), particles->type(i->first),
                     1, 1);
@@ -53,34 +52,33 @@ void propagate_particles(Particles *particles, Box const &box) {
  * This assumes that the particle is at most one box length
  * away from the boundary to shift it in.
  */
-FourVector boundary_condition(FourVector position, const Box &box,
-                              bool *boundary_hit) {
+FourVector BoxBoundaryConditions::boundary_condition(FourVector position, bool *boundary_hit) {
   /* Check positivity and box size */
   if (position.x1() > 0 && position.x2() > 0 && position.x3() > 0
-      && position.x1() < box.length() && position.x2() < box.length()
-      && position.x3() < box.length())
+      && position.x1() < length && position.x2() < length
+      && position.x3() < length)
     goto out;
 
   *boundary_hit = true;
 
   /* Enforce periodic boundary condition */
   if (position.x1() < 0)
-    position.set_x1(position.x1() + box.length());
+    position.set_x1(position.x1() + length);
 
   if (position.x2() < 0)
-    position.set_x2(position.x2() + box.length());
+    position.set_x2(position.x2() + length);
 
   if (position.x3() < 0)
-    position.set_x3(position.x3() + box.length());
+    position.set_x3(position.x3() + length);
 
-  if (position.x1() > box.length())
-    position.set_x1(position.x1() - box.length());
+  if (position.x1() > length)
+    position.set_x1(position.x1() - length);
 
-  if (position.x2() > box.length())
-    position.set_x2(position.x2() - box.length());
+  if (position.x2() > length)
+    position.set_x2(position.x2() - length);
 
-  if (position.x3() > box.length())
-    position.set_x3(position.x3() - box.length());
+  if (position.x3() > length)
+    position.set_x3(position.x3() - length);
 
  out:
     return position;

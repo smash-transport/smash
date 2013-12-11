@@ -28,9 +28,9 @@ public:
    BoundaryConditions(): steps(10000), output_interval(100), testparticles(1),
    eps(0.001f), cross_section(10.0f), seed(1) {}
     /* special funtion should be called by specific subclass */
-    int evolve(Particles *p __attribute__((unused)),
+    virtual int evolve(Particles *p __attribute__((unused)),
       CrossSections *c __attribute__((unused))) { return -1; }
-    void initial_conditions(Particles *p __attribute__((unused))) { return; }
+    virtual void initial_conditions(Particles *p __attribute__((unused))) { return; }
     virtual void assign_params_general(std::list<Parameters> *configuration);
   public:
     /* number of steps */

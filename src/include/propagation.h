@@ -13,10 +13,9 @@ class BoxBoundaryConditions;
 class Particles;
 class FourVector;
 
-void propagate_particles(Particles *particles, BoxBoundaryConditions const &box);
+void propagate_particles(Particles *particles);
 
 /* enforce periodic boundary conditions */
-FourVector boundary_condition(FourVector position, const BoxBoundaryConditions &box,
-                              bool *boundary_hit);
+FourVector boundary_condition(FourVector position, bool *boundary_hit);
 
 #endif  // SRC_INCLUDE_PROPAGATION_H_

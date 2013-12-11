@@ -16,9 +16,9 @@
 #include <map>
 #include <string>
 
+#include "include/BoundaryConditions.h"
 #include "include/Box.h"
 #include "include/FourVector.h"
-#include "include/Laboratory.h"
 #include "include/Parameters.h"
 #include "include/Particles.h"
 #include "include/ParticleData.h"
@@ -52,25 +52,25 @@ void warn_wrong_params(std::list<Parameters> *configuration) {
 }
 
 /* print_startup - console output on startup of general parameters */
-void print_startup(const Laboratory &parameters) {
-  printf("Elastic cross section: %g [mb]\n", parameters.cross_section());
-  printf("Using temporal stepsize: %g [GeV]\n", parameters.eps());
-  printf("Maximum number of steps: %i \n", parameters.steps());
-  printf("Random number seed: %li \n", parameters.seed());
+void print_startup(BoundaryConditions &parameters) {
+  printf("Elastic cross section: %g [mb]\n", parameters.cross_section);
+  printf("Using temporal stepsize: %g [GeV]\n", parameters.eps);
+  printf("Maximum number of steps: %i \n", parameters.steps);
+  printf("Random number seed: %lli \n", parameters.seed);
 }
 
 /* print_startup - console output on startup of box specific parameters */
-void print_startup(const Box &box) {
-  printf("Size of the box: %g x %g x %g [fm]\n", box.length(), box.length(),
-    box.length());
-  printf("Initial temperature: %g [GeV]\n", box.temperature());
-  printf("IC type %d\n", box.initial_condition());
-}
+//void print_startup(const BoxBoundaryConditions &box) {
+//  printf("Size of the box: %g x %g x %g [fm]\n", box.length, box.length,
+//    box.length);
+//  printf("Initial temperature: %g [GeV]\n", box.temperature);
+//  printf("IC type %d\n", box.initial_condition);
+//}
 
 /* print_startup - console output on startup of sphere specific parameters */
-void print_startup(const Sphere &ball) {
-  printf("Volume of the sphere: 4 * pi * %g^2 [fm]\n", ball.radius());
-}
+//void print_startup(const SphereBoundaryConditions &ball) {
+ // printf("Volume of the sphere: 4 * pi * %g^2 [fm]\n", ball.radius);
+//}
 
 /* print_header - title for each row */
 void print_header(void) {
@@ -94,59 +94,59 @@ void mkdir_data(void) {
 }
 
 /* measure_timediff - time the simulation used */
-double measure_timediff(const Box &box) {
-  timespec now;
-  clock_gettime(&now);
-  return (now.tv_sec + now.tv_nsec / 10.0E9
-    - box.time_start().tv_sec -   box.time_start().tv_nsec / 10.0E9);
-}
+//double measure_timediff(const Box &box) {
+//  timespec now;
+//  clock_gettime(&now);
+//  return (now.tv_sec + now.tv_nsec / 10.0E9
+//    - box.time_start().tv_sec -   box.time_start().tv_nsec / 10.0E9);
+//}
 
 /* print_measurements - console output during simulation */
-void print_measurements(const Particles &particles,
-                        const size_t &scatterings_total,
-                        const size_t &scatterings_this_interval,
-                        const Box &box) {
-  FourVector momentum_total(0, 0, 0, 0);
+//void print_measurements(const Particles &particles,
+//                        const size_t &scatterings_total,
+//                       const size_t &scatterings_this_interval,
+//                        const Box &box) {
+//  FourVector momentum_total(0, 0, 0, 0);
   /* calculate elapsed time */
-  double elapsed = measure_timediff(box);
-  double time = 0.0;
+//  double elapsed = measure_timediff(box);
+// double time = 0.0;
 
-  for (std::map<int, ParticleData>::const_iterator i = particles.cbegin();
-       i != particles.cend(); ++i) {
-    momentum_total += i->second.momentum();
+//  for (std::map<int, ParticleData>::const_iterator i = particles.cbegin();
+//       i != particles.cend(); ++i) {
+//    momentum_total += i->second.momentum();
     /* use the time from the last active particle - startup time */
-    time = i->second.position().x0() - 1.0;
-  }
-  if (likely(time > 0))
-    printf("%5g%13g%13g%13g%10zu%10zu%13g\n", time,
-           box.energy_initial() - momentum_total.x0(),
-           sqrt(-1 * momentum_total.DotThree()),
-           scatterings_total * 2 / (particles.size() * time),
-           scatterings_this_interval, particles.size(), elapsed);
-  else
-    printf("%5g%13g%13g%13g%10i%10zu%13g\n", time,
-          box.energy_initial() - momentum_total.x0(),
-           sqrt(-1 * momentum_total.DotThree()), 0.0, 0,
-           particles.size(), elapsed);
-}
+//    time = i->second.position().x0() - 1.0;
+//  }
+//  if (likely(time > 0))
+//    printf("%5g%13g%13g%13g%10zu%10zu%13g\n", time,
+//           box.energy_initial() - momentum_total.x0(),
+//           sqrt(-1 * momentum_total.DotThree()),
+//           scatterings_total * 2 / (particles.size() * time),
+//           scatterings_this_interval, particles.size(), elapsed);
+//  else
+//    printf("%5g%13g%13g%13g%10i%10zu%13g\n", time,
+//          box.energy_initial() - momentum_total.x0(),
+//           sqrt(-1 * momentum_total.DotThree()), 0.0, 0,
+//           particles.size(), elapsed);
+//}
 
 /* print_tail - output at the end of the simulation */
-void print_tail(const Box &box, const double &scattering_rate) {
-  double time = measure_timediff(box);
-  print_line();
+//void print_tail(const Box &box, const double &scattering_rate) {
+//  double time = measure_timediff(box);
+//  print_line();
   /* print finishing time in human readable way:
    * time < 10 min => seconds
    * 10 min < time < 3 h => minutes
    * time > 3h => hours
    */
-  if (time < 600)
-    printf("Time real: %g [s]\n", time);
-  else if (time < 10800)
-    printf("Time real: %g [min]\n", time / 60);
-  else
-    printf("Time real: %g [h]\n", time / 3600);
-  printf("Final scattering rate: %g [fm-1]\n", scattering_rate);
-}
+//  if (time < 600)
+//    printf("Time real: %g [s]\n", time);
+//  else if (time < 10800)
+//    printf("Time real: %g [min]\n", time / 60);
+//  else
+//    printf("Time real: %g [h]\n", time / 3600);
+//  printf("Final scattering rate: %g [fm-1]\n", scattering_rate);
+//}
 
 /* printd_momenta - print debug data of the specific particle with message */
 void printd_momenta(const char *message __attribute__((unused)),
