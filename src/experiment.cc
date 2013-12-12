@@ -30,6 +30,8 @@ std::unique_ptr<Experiment> Experiment::create(const int &modus)
   }
 }
 
+
+
 template <typename BoundaryConditions>
 void ExperimentImplementation<BoundaryConditions>::config(char *path)
 {

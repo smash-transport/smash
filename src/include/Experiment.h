@@ -15,7 +15,7 @@ class Experiment
 {
 public:
     static std::unique_ptr<Experiment> create(const int &modus);
-    virtual void config(char *path);
+    virtual void config(char *path) = 0;
 };
 
 template <typename Modus> class ExperimentImplementation : public Experiment
