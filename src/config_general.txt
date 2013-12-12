@@ -1,7 +1,7 @@
 // Sample config_general.txt file
 
 // temporal grid spacing
-EPS		0.001
+EPS		0.1
 
 // maximum of steps to take
 STEPS		10000
@@ -17,3 +17,20 @@ SIGMA		10.0
 
 // number of test particle
 TESTPARTICLES	1
+
+
+// Sample config_box.txt file
+
+// Cube size
+LENGTH		10.0
+
+// initialization temperature
+TEMPERATURE	0.2
+
+// initial condition
+//
+// 1:  random position box + thermal momenta
+// 2:  random position box + peaked momenta
+//
+INITIAL_CONDITION	1
+

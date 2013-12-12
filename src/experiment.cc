@@ -14,6 +14,7 @@
 #include "include/Parameters.h"
 #include "include/param-reader.h"
 #include "include/Box.h"
+#include "include/outputroutines.h"
 //#include "include/Sphere.h"
 
 std::unique_ptr<Experiment> Experiment::create(const int &modus)
@@ -40,6 +41,8 @@ void ExperimentImplementation<BoundaryConditions>::config(char *path)
     BoundaryConditions bc;
     bc.assign_params_general(&configuration);
     bc.assign_params_specific(&configuration);
+    warn_wrong_params(&configuration);
+    print_startup(bc);
     
 }
 
