@@ -28,6 +28,7 @@ public:
     /* special class funtions */
     virtual int evolve(Particles *particles, CrossSections *cross_sections);
     virtual void assign_params_specific(std::list<Parameters> *configuration);
+    virtual void print_startup();
     virtual void initial_conditions(Particles *particles);
     virtual void propagate_particles(Particles *particles);
     virtual FourVector boundary_condition(FourVector position, bool *boundary_hit);

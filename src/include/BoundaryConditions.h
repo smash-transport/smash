@@ -32,6 +32,7 @@ public:
       CrossSections *c __attribute__((unused))) { return -1; }
     virtual void initial_conditions(Particles *p __attribute__((unused))) { return; }
     virtual void assign_params_general(std::list<Parameters> *configuration);
+    virtual void print_startup();
   public:
     /* number of steps */
     int steps;

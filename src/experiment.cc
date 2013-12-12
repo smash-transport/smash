@@ -42,7 +42,7 @@ void ExperimentImplementation<BoundaryConditions>::config(char *path)
     bc.assign_params_general(&configuration);
     bc.assign_params_specific(&configuration);
     warn_wrong_params(&configuration);
-    print_startup(bc);
+    bc.print_startup();
     
 }
 

@@ -54,6 +54,20 @@ void BoxBoundaryConditions::assign_params_specific(std::list<Parameters> *config
 
 
 
+/* print_startup - console output on startup of box specific parameters */
+void BoxBoundaryConditions::print_startup() {
+    printf("Elastic cross section: %g [mb]\n", cross_section);
+    printf("Using temporal stepsize: %g [GeV]\n", eps);
+    printf("Maximum number of steps: %i \n", steps);
+    printf("Random number seed: %lli \n", seed);
+
+ printf("Size of the box: %g x %g x %g [fm]\n", length, length,length);
+    printf("Initial temperature: %g [GeV]\n", temperature);
+  printf("IC type %d\n", initial_condition);
+}
+
+
+
 /* check_collision_geometry - check if a collision happens between particles */
 void BoxBoundaryConditions::check_collision_geometry(Particles *particles,
   CrossSections *cross_sections,

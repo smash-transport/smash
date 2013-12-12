@@ -61,4 +61,14 @@ void BoundaryConditions::assign_params_general(std::list<Parameters> *configurat
     }
 }
 
+/* print_startup - console output on startup of general parameters */
+void BoundaryConditions::print_startup() {
+    printf("Elastic cross section: %g [mb]\n", cross_section);
+    printf("Using temporal stepsize: %g [GeV]\n", eps);
+    printf("Maximum number of steps: %i \n", steps);
+    printf("Random number seed: %lli \n", seed);
+}
+
+
+
 
