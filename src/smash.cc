@@ -78,10 +78,37 @@ int main(int argc, char *argv[]) {
     }
     }
 
+// read in config file
+    
+    std::list<Parameters> configuration;
+    process_config(&configuration, path);
 
-      auto experiment = Experiment::create(modus);
+    bool match = false;
+    std::list<Parameters>::iterator i = configuration.begin();
+    while (i != configuration.end()) {
+        char *key = i->key();
+        char *value = i->value();
+        printd("Looking for match %s %s\n", key, value);
+        
+        /* integer values */
+        if (strcmp(key, "MODUS") == 0) {
+            modus = (abs(atoi(value)));
+            match = true;
+        }
+        /* remove processed entry */
+        if (match) {
+            printd("Erasing %s %s\n", key, value);
+            i = configuration.erase(i);
+            match = false;
+        } else {
+            ++i;
+        }
+    }
+
+
+    auto experiment = Experiment::create(modus);
       
-      experiment->config(path);
+    experiment->config(configuration);
 
   
       

@@ -66,20 +66,9 @@ static void process_params(char *file_path,
 
 /* process_config - configuration handling */
 void process_config(std::list<Parameters> *configuration, char *path) {
-// restructure as a loop??? 
     size_t len = strlen("./config_general.txt") + strlen(path) + 1;
     char *config_path = reinterpret_cast<char *>(malloc(len));
     snprintf(config_path, len, "%s/config_general.txt", path);
     process_params(config_path, configuration);
     free(config_path);
-//    len = strlen("./config_box.txt") + strlen(path) + 1;
-//   *config_path = *reinterpret_cast<char *>(malloc(len));
-//    snprintf(config_path, len, "%s/config_box.txt", path);
-//    process_params(config_path, configuration);
-//    free(config_path);
-//    len = strlen("./config_sphere.txt") + strlen(path) + 1;
-//    *config_path = *reinterpret_cast<char *>(malloc(len));
-//    snprintf(config_path, len, "%s/config_sphere.txt", path);
-//    process_params(config_path, configuration);
-//    free(config_path);
 }

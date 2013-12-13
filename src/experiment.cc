@@ -34,10 +34,8 @@ std::unique_ptr<Experiment> Experiment::create(const int &modus)
 
 
 template <typename BoundaryConditions>
-void ExperimentImplementation<BoundaryConditions>::config(char *path)
+void ExperimentImplementation<BoundaryConditions>::config(std::list<Parameters> configuration)
 {
-    std::list<Parameters> configuration;
-    process_config(&configuration, path);
     BoundaryConditions bc;
     bc.assign_params_general(&configuration);
     bc.assign_params_specific(&configuration);

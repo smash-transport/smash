@@ -1,5 +1,8 @@
 // Sample config_general.txt file
 
+//Modus decision
+MODUS		1
+
 // temporal grid spacing
 EPS		0.1
 
@@ -33,4 +36,10 @@ TEMPERATURE	0.2
 // 2:  random position box + peaked momenta
 //
 INITIAL_CONDITION	1
+
+// Sample config_sphere.txt file
+
+// Sphere size
+RADIUS		5.0
+
 
