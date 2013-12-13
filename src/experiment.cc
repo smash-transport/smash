@@ -37,8 +37,7 @@ template <typename BoundaryConditions>
 void ExperimentImplementation<BoundaryConditions>::config(std::list<Parameters> configuration)
 {
     BoundaryConditions bc;
-    bc.assign_params_general(&configuration);
-    bc.assign_params_specific(&configuration);
+    bc.assign_params(&configuration);
     warn_wrong_params(&configuration);
     bc.print_startup();
     

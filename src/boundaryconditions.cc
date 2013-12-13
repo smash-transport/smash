@@ -10,7 +10,7 @@
 #include "include/BoundaryConditions.h"
 #include "include/outputroutines.h"
 
-void BoundaryConditions::assign_params_general(std::list<Parameters> *configuration) {
+void BoundaryConditions::assign_params(std::list<Parameters> *configuration) {
     bool match = false;
     std::list<Parameters>::iterator i = configuration->begin();
     while (i != configuration->end()) {
@@ -63,8 +63,8 @@ void BoundaryConditions::assign_params_general(std::list<Parameters> *configurat
 
 /* print_startup - console output on startup of general parameters */
 void BoundaryConditions::print_startup() {
-    printf("Elastic cross section: %g [mb]\n", cross_section);
-    printf("Using temporal stepsize: %g [GeV]\n", eps);
+    printf("Elastic cross section: %g mb\n", cross_section);
+    printf("Using temporal stepsize: %g fm/c\n", eps);
     printf("Maximum number of steps: %i \n", steps);
     printf("Random number seed: %lli \n", seed);
 }

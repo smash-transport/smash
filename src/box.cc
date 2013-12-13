@@ -20,7 +20,9 @@
 #include "include/propagation.h"
 
 
-void BoxBoundaryConditions::assign_params_specific(std::list<Parameters> *configuration) {
+void BoxBoundaryConditions::assign_params(std::list<Parameters> *configuration) {
+
+    BoundaryConditions::assign_params(configuration);
     bool match = false;
     std::list<Parameters>::iterator i = configuration->begin();
     while (i != configuration->end()) {
@@ -56,14 +58,10 @@ void BoxBoundaryConditions::assign_params_specific(std::list<Parameters> *config
 
 /* print_startup - console output on startup of box specific parameters */
 void BoxBoundaryConditions::print_startup() {
-    printf("Elastic cross section: %g [mb]\n", cross_section);
-    printf("Using temporal stepsize: %g [GeV]\n", eps);
-    printf("Maximum number of steps: %i \n", steps);
-    printf("Random number seed: %lli \n", seed);
-
- printf("Size of the box: %g x %g x %g [fm]\n", length, length,length);
-    printf("Initial temperature: %g [GeV]\n", temperature);
-  printf("IC type %d\n", initial_condition);
+    BoundaryConditions::print_startup();
+    printf("Size of the box: %g x %g x %g fm\n", length, length,length);
+    printf("Initial temperature: %g GeV\n", temperature);
+    printf("IC type %d\n", initial_condition);
 }
 
 
