@@ -36,10 +36,17 @@ std::unique_ptr<Experiment> Experiment::create(char *modus)
 template <typename BoundaryConditions>
 void ExperimentImplementation<BoundaryConditions>::config(std::list<Parameters> configuration)
 {
-    BoundaryConditions bc;
     bc.assign_params(&configuration);
     warn_wrong_params(&configuration);
     bc.print_startup();
     
 }
+
+//void ExperimentImplementation<BoundaryConditions>::initialize()
+//{
+//    BoundaryConditions bc;
+//    bc.initial_conditions;
+//    bc.print_initial();
+    
+//}
 

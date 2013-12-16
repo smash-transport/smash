@@ -11,7 +11,7 @@
 #include <memory>
 #include <list>
 #include "../include/Parameters.h"
-
+#include "../include/BoundaryConditions.h"
 class Experiment
 {
 public:
@@ -19,12 +19,13 @@ public:
     virtual void config(std::list<Parameters> configuration) = 0;
 };
 
-template <typename Modus> class ExperimentImplementation : public Experiment
+template <typename BoundaryConditions> class ExperimentImplementation : public Experiment
 {
 public:
     virtual void config(std::list<Parameters> configuration);
-//private:
-//    BoundaryConditions bc(Parameters);
+    
+private:
+    BoundaryConditions bc;
 //    Particles,...
 
 };
