@@ -12,22 +12,25 @@
 #include <list>
 #include "../include/Parameters.h"
 #include "../include/BoundaryConditions.h"
+#include "../include/Particles.h"
+
 class Experiment
 {
 public:
     static std::unique_ptr<Experiment> create(char *modus);
     virtual void config(std::list<Parameters> configuration) = 0;
+    virtual void initialize()=0;
 };
 
 template <typename BoundaryConditions> class ExperimentImplementation : public Experiment
 {
 public:
     virtual void config(std::list<Parameters> configuration);
-    
+    virtual void initialize();
 private:
     BoundaryConditions bc;
-//    Particles,...
-
+    Particles *particles;
+    CrossSections *cross_sections;
 };
 
 #endif  // SRC_INCLUDE_Experiment_H_

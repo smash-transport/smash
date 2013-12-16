@@ -277,7 +277,7 @@ void write_oscar_header(void) {
   fp = fopen("data/collision.dat", "w");
   fprintf(fp, "# OSC1999A\n");
   fprintf(fp, "# Interaction history\n");
-  fprintf(fp, "# mash \n");
+  fprintf(fp, "# smash \n");
   fprintf(fp, "# \n");
   fclose(fp);
 }

@@ -68,7 +68,7 @@ int main(int argc, char *argv[]) {
       usage(EXIT_SUCCESS);
       break;
     case 'm':
-      modus=optarg;
+      modus = optarg;
       printf("Modus read in: %s \n", modus);
 
       break;
@@ -82,7 +82,7 @@ int main(int argc, char *argv[]) {
 // read in config file
     
     std::list<Parameters> configuration;
-//    process_config(&configuration, path);
+    process_config(&configuration, path);
 
     bool match = false;
     std::list<Parameters>::iterator i = configuration.begin();
@@ -93,9 +93,8 @@ int main(int argc, char *argv[]) {
         
         /* integer values */
         if (strcmp(key, "MODUS") == 0) {
-            modus = value;
+            sprintf(modus,value);
             match = true;
-            printf("Modus1 %s \n",modus);
         }
         /* remove processed entry */
         if (match) {
@@ -105,8 +104,6 @@ int main(int argc, char *argv[]) {
         } else {
             ++i;
         }
-        printf("Modus2 %s \n",modus);
-        
     }
 
     printf("Modus for this calculation: %s \n", modus);
@@ -115,41 +112,13 @@ int main(int argc, char *argv[]) {
       
     experiment->config(configuration);
 
-    
-      
- /* Output IC values */
-//  print_startup(*lab);
-//  mkdir_data();
-//  write_oscar_header();
+    mkdir_data();
+    write_oscar_header();
 
-  /* initialize random seed */
-//  srand48(lab->seed());
-
-  /* reducing cross section according to number of test particle */
-//  if (lab->testparticles() > 1) {
-//   printf("IC test particle: %i\n", lab->testparticles());
-//    lab->set_cross_section(lab->cross_section() / lab->testparticles());
-//    printf("Elastic cross section: %g [mb]\n", lab->cross_section());
-//  }
-
-  /* modus operandi */
-//  if (lab->modus() == 1) {
-//    Box *box = new Box(*lab);
-//    lab = box;
-//  } else if (lab->modus() == 2) {
-//    Sphere *ball = new Sphere(*lab);
-//    lab = ball;
-//  }
-
-  /* read specific config files */
-//  lab->process_config(path);
+ 
 
   /* initiate particles */
 //  Particles *particles = new Particles;
-//  input_particles(particles, path);
-//  input_decaymodes(particles, path);
-//  CrossSections *cross_sections = new CrossSections;
-//  cross_sections->add_elastic_parameter(lab->cross_section());
 //  lab->initial_conditions(particles);
 
   /* record IC startup */

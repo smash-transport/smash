@@ -39,14 +39,25 @@ void ExperimentImplementation<BoundaryConditions>::config(std::list<Parameters> 
     bc.assign_params(&configuration);
     warn_wrong_params(&configuration);
     bc.print_startup();
-    
+/* reducing cross section according to number of test particle */
+    if (bc.testparticles > 1) {
+      printf("IC test particle: %i\n", bc.testparticles);
+      bc.cross_section = bc.cross_section / bc.testparticles;
+      printf("Elastic cross section: %g mb\n", bc.cross_section);
+    }
 }
 
-//void ExperimentImplementation<BoundaryConditions>::initialize()
-//{
-//    BoundaryConditions bc;
-//    bc.initial_conditions;
+template <typename BoundaryConditions>
+void ExperimentImplementation<BoundaryConditions>::initialize()
+{
+    srand48(bc.seed);
+//    input_particles(particles, path);
+//    input_decaymodes(particles, path);
+//    CrossSections *cross_sections = new CrossSections;
+ //   cross_sections->add_elastic_parameter(lab->cross_section());
+    //
+//      bc.initial_conditions;
 //    bc.print_initial();
     
-//}
+}
 
