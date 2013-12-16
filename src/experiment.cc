@@ -17,10 +17,10 @@
 #include "include/outputroutines.h"
 //#include "include/Sphere.h"
 
-std::unique_ptr<Experiment> Experiment::create(const int &modus)
+std::unique_ptr<Experiment> Experiment::create(char *modus)
 {
   typedef std::unique_ptr<Experiment> ExperimentPointer;
-  if (modus == 1) {
+  if (strcmp(modus,"Box") == 0) {
     return ExperimentPointer{new ExperimentImplementation<BoxBoundaryConditions>};
   }
 //  else if (modus == 2) {

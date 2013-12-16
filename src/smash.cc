@@ -36,11 +36,12 @@ static void usage(int rc) {
   exit(rc);
 }
 
+
 /* main - do command line parsing and hence decides modus */
 int main(int argc, char *argv[]) {
   char *p, *path;
   int opt, rc = 0;
-  int modus;
+  char *modus;
     
   struct option longopts[] = {
     { "help",       no_argument,            0, 'h' },
@@ -67,8 +68,8 @@ int main(int argc, char *argv[]) {
       usage(EXIT_SUCCESS);
       break;
     case 'm':
-      modus=fabs(atoi(optarg));
-      printf("Modus read in:%i\n", modus);
+      modus=optarg;
+      printf("Modus read in: %s \n", modus);
 
       break;
     case 'V':
@@ -81,7 +82,7 @@ int main(int argc, char *argv[]) {
 // read in config file
     
     std::list<Parameters> configuration;
-    process_config(&configuration, path);
+//    process_config(&configuration, path);
 
     bool match = false;
     std::list<Parameters>::iterator i = configuration.begin();
@@ -92,8 +93,9 @@ int main(int argc, char *argv[]) {
         
         /* integer values */
         if (strcmp(key, "MODUS") == 0) {
-            modus = (abs(atoi(value)));
+            modus = value;
             match = true;
+            printf("Modus1 %s \n",modus);
         }
         /* remove processed entry */
         if (match) {
@@ -103,14 +105,17 @@ int main(int argc, char *argv[]) {
         } else {
             ++i;
         }
+        printf("Modus2 %s \n",modus);
+        
     }
 
-
+    printf("Modus for this calculation: %s \n", modus);
+    
     auto experiment = Experiment::create(modus);
       
     experiment->config(configuration);
 
-  
+    
       
  /* Output IC values */
 //  print_startup(*lab);

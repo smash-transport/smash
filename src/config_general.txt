@@ -1,7 +1,7 @@
 // Sample config_general.txt file
 
 //Modus decision
-MODUS		1
+MODUS		Box
 
 // temporal grid spacing
 EPS		0.1

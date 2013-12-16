@@ -15,7 +15,7 @@
 class Experiment
 {
 public:
-    static std::unique_ptr<Experiment> create(const int &modus);
+    static std::unique_ptr<Experiment> create(char *modus);
     virtual void config(std::list<Parameters> configuration) = 0;
 };
 
