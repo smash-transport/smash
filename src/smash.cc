@@ -41,7 +41,7 @@ static void usage(int rc) {
 int main(int argc, char *argv[]) {
   char *p, *path;
   int opt, rc = 0;
-  char *modus;
+  char modus[20];
     
   struct option longopts[] = {
     { "help",       no_argument,            0, 'h' },
@@ -68,7 +68,7 @@ int main(int argc, char *argv[]) {
       usage(EXIT_SUCCESS);
       break;
     case 'm':
-      modus = optarg;
+      strncpy(modus,optarg, sizeof(modus));
       printf("Modus read in: %s \n", modus);
 
       break;
@@ -93,7 +93,7 @@ int main(int argc, char *argv[]) {
         
         /* integer values */
         if (strcmp(key, "MODUS") == 0) {
-            sprintf(modus,value);
+            strncpy(modus,value, sizeof(&modus));
             match = true;
         }
         /* remove processed entry */
