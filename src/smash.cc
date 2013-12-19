@@ -124,6 +124,8 @@ int main(int argc, char *argv[]) {
 
     mkdir_data();
     write_oscar_header();
+    
+    experiment->initialize(path);
 
  
 

@@ -15,6 +15,10 @@
 #include "include/param-reader.h"
 #include "include/Box.h"
 #include "include/outputroutines.h"
+#include "include/input-particles.h"
+#include "include/input-decaymodes.h"
+#include "include/CrossSections.h"
+
 //#include "include/Sphere.h"
 
 std::unique_ptr<Experiment> Experiment::create(char *modus)
@@ -48,13 +52,12 @@ void ExperimentImplementation<BoundaryConditions>::config(std::list<Parameters> 
 }
 
 template <typename BoundaryConditions>
-void ExperimentImplementation<BoundaryConditions>::initialize()
+void ExperimentImplementation<BoundaryConditions>::initialize(char *path)
 {
     srand48(bc.seed);
-//    input_particles(particles, path);
-//    input_decaymodes(particles, path);
-//    CrossSections *cross_sections = new CrossSections;
- //   cross_sections->add_elastic_parameter(lab->cross_section());
+    input_particles(particles, path);
+    input_decaymodes(particles, path);
+    cross_sections->add_elastic_parameter(bc.cross_section);
     //
 //      bc.initial_conditions;
 //    bc.print_initial();
