@@ -17,13 +17,11 @@
 #include <string>
 
 #include "include/BoundaryConditions.h"
-#include "include/Box.h"
 #include "include/FourVector.h"
 #include "include/Parameters.h"
 #include "include/Particles.h"
 #include "include/ParticleData.h"
 #include "include/ParticleType.h"
-#include "include/Sphere.h"
 #include "include/macros.h"
 #include "include/time.h"
 
@@ -51,12 +49,6 @@ void warn_wrong_params(std::list<Parameters> *configuration) {
   configuration->clear();
 }
 
-
-
-/* print_startup - console output on startup of sphere specific parameters */
-//void print_startup(const SphereBoundaryConditions &ball) {
- // printf("Volume of the sphere: 4 * pi * %g^2 [fm]\n", ball.radius);
-//}
 
 /* print_header - title for each row */
 void print_header(void) {

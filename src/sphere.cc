@@ -66,6 +66,12 @@ void SphereBoundaryConditions::assign_params_specific(std::list<Parameters> *con
 }
 
 
+/* print_startup - console output on startup of sphere specific parameters */
+//void print_startup(const SphereBoundaryConditions &ball) {
+// printf("Volume of the sphere: 4 * pi * %g^2 [fm]\n", ball.radius);
+//}
+
+
 /* initial_conditions - sets particle data for @particles */
 void SphereBoundaryConditions::initial_conditions(Particles *particles) {
     size_t number_total = 0;

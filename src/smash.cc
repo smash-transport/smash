@@ -127,18 +127,6 @@ int main(int argc, char *argv[]) {
     
     experiment->initialize(path);
 
- 
-
-  /* initiate particles */
-//  Particles *particles = new Particles;
-//  lab->initial_conditions(particles);
-
-  /* record IC startup */
-//  print_startup(*lab);
-//  write_measurements_header(*particles);
-//  print_header();
-//  write_particles(*particles);
-
   /* the time evolution of the relevant subsystem */
 //  rc = lab->evolve(particles, cross_sections);
 
