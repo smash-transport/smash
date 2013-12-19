@@ -61,24 +61,6 @@ int main(int argc, char *argv[]) {
   path = reinterpret_cast<char *>(malloc(len));
   snprintf(path, len, "./");
 
-    while ((opt = getopt_long(argc, argv, "hm:V", longopts,
-    NULL)) != -1) {
-    switch (opt) {
-    case 'h':
-      usage(EXIT_SUCCESS);
-      break;
-    case 'm':
-      strncpy(modus,optarg, sizeof(modus));
-      printf("Modus read in: %s \n", modus);
-
-      break;
-    case 'V':
-      exit(EXIT_SUCCESS);
-    default:
-      usage(EXIT_FAILURE);
-    }
-    }
-
 // read in config file
     
     std::list<Parameters> configuration;
@@ -103,6 +85,34 @@ int main(int argc, char *argv[]) {
             match = false;
         } else {
             ++i;
+        }
+    }
+
+    
+    while ((opt = getopt_long(argc, argv, "hm:V", longopts,
+                              NULL)) != -1) {
+        switch (opt) {
+            case 'h':
+                usage(EXIT_SUCCESS);
+                break;
+            case 'm':
+                strncpy(modus,optarg, sizeof(modus));
+                printf("Modus read in: %s \n", modus);
+                break;
+                //    case 'R':
+                /* negative seed is for time */
+                //      if (atol(optarg) > 0)
+                //         lab->set_seed(atol(optarg));
+                //      else
+                //         lab->set_seed(time(NULL));
+                //      break;
+                //    case 'S':
+                //            lab->set_steps(abs(atoi(optarg)));
+                //      break;
+            case 'V':
+                exit(EXIT_SUCCESS);
+            default:
+                usage(EXIT_FAILURE);
         }
     }
 
