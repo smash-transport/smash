@@ -4,7 +4,7 @@ include(CheckLibraryExists)
 set(smash_src boundaryconditions.cc box.cc clebschgordan.cc collisions.cc 
         cross-sections.cc
         decays.cc distributions.cc experiment.cc fourvector.cc
-	initial-conditions.cc input-decaymodes.cc
+        input-decaymodes.cc
         input-particles.cc param-reader.cc parametrizations.cc
         particles.cc propagation.cc
         outputroutines.cc resonances.cc time.cc)

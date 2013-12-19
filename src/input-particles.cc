@@ -12,7 +12,6 @@
 #include <cstring>
 
 #include "include/input-particles.h"
-#include "include/initial-conditions.h"
 #include "include/Particles.h"
 #include "include/outputroutines.h"
 

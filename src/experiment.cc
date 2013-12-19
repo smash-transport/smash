@@ -58,9 +58,6 @@ void ExperimentImplementation<BoundaryConditions>::initialize(char *path)
     input_particles(particles, path);
     input_decaymodes(particles, path);
     cross_sections->add_elastic_parameter(bc.cross_section);
-    //
-//      bc.initial_conditions;
-//    bc.print_initial();
-    
+    bc.initial_conditions(particles);
 }
 

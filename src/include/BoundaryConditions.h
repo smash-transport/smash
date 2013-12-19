@@ -30,9 +30,9 @@ public:
     /* special funtion should be called by specific subclass */
     virtual int evolve(Particles *p __attribute__((unused)),
       CrossSections *c __attribute__((unused))) { return -1; }
-    virtual void initial_conditions(Particles *p __attribute__((unused))) { return; }
     virtual void assign_params(std::list<Parameters> *configuration);
     virtual void print_startup();
+    virtual void initial_conditions(Particles *p __attribute__((unused))) { return; }
   public:
     /* number of steps */
     int steps;
