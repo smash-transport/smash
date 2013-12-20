@@ -71,10 +71,6 @@ std::vector<ProcessBranch> resonance_cross_section(
   resonance_process.add_weight(0.0);
   resonance_process_list.push_back(resonance_process);
 
-  /* Resonances do not form resonances */
-  if (type_particle1.width() > 0.0 || type_particle2.width() > 0.0)
-    return resonance_process_list;
-
   /* Isospin symmetry factor, by default 1 */
   int symmetryfactor = 1;
   /* Do the particles have the same isospin value? */
@@ -124,6 +120,13 @@ std::vector<ProcessBranch> resonance_cross_section(
 
     /* Not a resonance, go to next type of particle */
     if (type_resonance.width() < 0.0)
+      continue;
+
+    /* Same resonance as in the beginning, ignore */
+    if ((type_particle1.width() > 0.0
+         && type_resonance.pdgcode() == type_particle1.pdgcode())
+        || (type_particle2.width() > 0.0
+            && type_resonance.pdgcode() == type_particle2.pdgcode()))
       continue;
 
     /* No decay channels found, ignore */
