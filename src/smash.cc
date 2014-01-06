@@ -131,9 +131,8 @@ int main(int argc, char *argv[]) {
 //  rc = lab->evolve(particles, cross_sections);
 
   /* tear down */
-//  free(path);
-//  delete particles;
-//  delete cross_sections;
+    free(path);
+    experiment->end();
  return rc;
       
  

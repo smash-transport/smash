@@ -65,8 +65,16 @@ void ExperimentImplementation<BoundaryConditions>::initialize(char *path)
 }
 
 template <typename BoundaryConditions>
-void ExperimentImplementation<BoundaryConditions>::end(char *path)
+void ExperimentImplementation<BoundaryConditions>::run()
 {
-    
+    return;
 }
+
+
+template <typename BoundaryConditions>
+void ExperimentImplementation<BoundaryConditions>::end()
+{
+    delete particles;
+    delete cross_sections;
 }
+
