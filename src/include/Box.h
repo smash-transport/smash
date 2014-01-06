@@ -26,13 +26,13 @@ public:
     BoxBoundaryConditions(): initial_condition(1), length(10.0f), temperature(0.1f),energy_initial(0.0f), number_density_initial(0.0f),
       timer_start(set_timer_start()) {}
     /* special class funtions */
-    virtual int evolve(Particles *particles, CrossSections *cross_sections);
     virtual void assign_params(std::list<Parameters> *configuration);
     virtual void print_startup();
     virtual void initial_conditions(Particles *particles);
-    virtual void propagate_particles(Particles *particles);
+    virtual int prepare_evolution(Particles *particles);
+    virtual void propagate(Particles *particles);
     virtual FourVector boundary_condition(FourVector position, bool *boundary_hit);
-    virtual void check_collision_geometry(Particles *particles, CrossSections *cross_sections, std::list<int> *collision_list, BoxBoundaryConditions const &box, size_t *rejection_conflict);
+    virtual void check_collision_geometry(Particles *particles, CrossSections *cross_sections, std::list<int> *collision_list, size_t *rejection_conflict);
     inline timespec set_timer_start();
   private:
     /* initial condition */

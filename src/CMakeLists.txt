@@ -6,7 +6,7 @@ set(smash_src boundaryconditions.cc box.cc clebschgordan.cc collisions.cc
         decays.cc distributions.cc experiment.cc fourvector.cc
         input-decaymodes.cc
         input-particles.cc param-reader.cc parametrizations.cc
-        particles.cc propagation.cc
+        particles.cc
         outputroutines.cc resonances.cc time.cc)
 
 add_executable(smash smash.cc ${smash_src})

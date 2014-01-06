@@ -128,8 +128,8 @@ int main(int argc, char *argv[]) {
     experiment->initialize(path);
 
   /* the time evolution of the relevant subsystem */
-//  rc = lab->evolve(particles, cross_sections);
-
+    experiment->run();
+    
   /* tear down */
     free(path);
     experiment->end();

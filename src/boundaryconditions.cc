@@ -1,7 +1,7 @@
 /*
  *
- *    Copyright (c) 2012
- *      maximilian attems <attems@fias.uni-frankfurt.de>
+ *    Copyright (c) 2013-2014
+ *      Hannah Petersen <petersen@fias.uni-frankfurt.de>
  *
  *    GNU General Public License (GPLv3)
  *
@@ -69,6 +69,32 @@ void BoundaryConditions::print_startup() {
     printf("Random number seed: %lli \n", seed);
 }
 
+void BoundaryConditions::propagate(Particles *particles){
+    FourVector distance, position;
+    
+    for (std::map<int, ParticleData>::iterator i = particles->begin();
+         i != particles->end(); ++i) {
+        /* propagation for this time step */
+        distance.set_FourVector(eps,
+                                i->second.velocity_x() * eps,
+                                i->second.velocity_y() * eps,
+                                i->second.velocity_z() * eps);
+        printd("Particle %d motion: %g %g %g %g\n", i->first,
+               distance.x0(), distance.x1(), distance.x2(), distance.x3());
+    }
+}
+
+int BoundaryConditions::prepare_evolution(Particles *particles){
+    
+    return 0;
+}
+
+FourVector BoundaryConditions::boundary_condition(FourVector position, bool *boundary_hit) {
+}
+
+// XXX needs to be implemented in general form
+void BoundaryConditions::check_collision_geometry(Particles *particles,
+                                                  CrossSections *cross_sections, std::list<int> *collision_list, size_t *rejection_conflict){
 
 
-
+}

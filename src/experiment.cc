@@ -7,13 +7,17 @@
  *
  */
 
+#include <map>
 #include <list>
+
 
 #include "include/Experiment.h"
 #include "include/BoundaryConditions.h"
+#include "include/collisions.h"
 #include "include/Parameters.h"
 #include "include/param-reader.h"
 #include "include/Box.h"
+#include "include/decays.h"
 #include "include/outputroutines.h"
 #include "include/input-particles.h"
 #include "include/input-decaymodes.h"
@@ -67,7 +71,68 @@ void ExperimentImplementation<BoundaryConditions>::initialize(char *path)
 template <typename BoundaryConditions>
 void ExperimentImplementation<BoundaryConditions>::run()
 {
-    return;
+    bc.prepare_evolution(particles);
+    
+    std::list<int> collision_list, decay_list;
+    size_t interactions_total = 0, previous_interactions_total = 0,
+    interactions_this_interval = 0;
+    size_t rejection_conflict = 0;
+    int resonances = 0, decays = 0;
+
+//XX needs to be implemented
+//    bc.print_measurements();
+    
+    for (int step = 0; step < bc.steps; step++) {
+        /* Check resonances for decays */
+        check_decays(particles, &decay_list, bc);
+        
+        /* Do the decays */
+        if (!decay_list.empty()) {
+            decays += decay_list.size();
+            interactions_total = decay_particles(particles,
+                                                 &decay_list, interactions_total);
+        }
+        
+        /* fill collision table by cells */
+        bc.check_collision_geometry(particles, cross_sections,
+                                 &collision_list, &rejection_conflict);
+        
+        /* particle interactions */
+        if (!collision_list.empty()) {
+            printd_list(collision_list);
+            interactions_total = collide_particles(particles, &collision_list,
+                                                   interactions_total, &resonances);
+        }
+
+        bc.propagate(particles);
+        
+        /* physics output during the run */
+        if (step > 0 && (step + 1) % bc.output_interval == 0) {
+            interactions_this_interval = interactions_total
+            - previous_interactions_total;
+            
+            previous_interactions_total = interactions_total;
+            
+            //      print_measurements(*particles, interactions_total,
+            //                        interactions_this_interval, *this);
+            printd("Resonances: %i Decays: %i\n", resonances, decays);
+            printd("Ignored collisions %zu\n", rejection_conflict);
+            /* save evolution data */
+            write_measurements(*particles, interactions_total,
+                               interactions_this_interval, resonances, decays, rejection_conflict);
+            write_vtk(*particles);
+        }
+        /* Guard against evolution */
+//        if (likely(bc.steps > 0)) {
+        /* if there are no particles no interactions happened */
+//            if (likely(!particles->empty())){
+//            print_tail(*this, interactions_total * 2
+//                        / particles->time() / particles->size());
+//                else{
+//             print_tail(*this, 0);
+//        printf("Total ignored collisions: %zu\n", rejection_conflict);
+//        }
+    }
 }
 
 

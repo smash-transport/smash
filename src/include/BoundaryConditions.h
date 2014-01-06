@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2012-2013
+ *    Copyright (c) 2013-2014
  *      Hannah Petersen <petersen@fias.uni-frankfurt.de>
  *      
  *    GNU General Public License (GPLv3)
@@ -16,6 +16,7 @@
 #include <cmath>
 #include <list>
 #include "../include/Parameters.h"
+#include "../include/Particles.h"
 
 /* forward declartions */
 class Particles;
@@ -28,12 +29,15 @@ public:
    BoundaryConditions(): steps(10000), output_interval(100), testparticles(1),
    eps(0.001f), cross_section(10.0f), seed(1) {}
     /* special funtion should be called by specific subclass */
-    virtual int evolve(Particles *p __attribute__((unused)),
-      CrossSections *c __attribute__((unused))) { return -1; }
     virtual void assign_params(std::list<Parameters> *configuration);
     virtual void print_startup();
     virtual void initial_conditions(Particles *p __attribute__((unused))) { return; }
-  public:
+    virtual int prepare_evolution(Particles *particles);
+    virtual void check_collision_geometry(Particles *particles, CrossSections *cross_sections, std::list<int> *collision_list, size_t *rejection_conflict);
+    virtual void propagate(Particles *particles);
+    virtual FourVector boundary_condition(FourVector position, bool *boundary_hit);
+    
+ public:
     /* number of steps */
     int steps;
     /* number of steps before giving measurables */
