@@ -64,3 +64,9 @@ void ExperimentImplementation<BoundaryConditions>::initialize(char *path)
     write_particles(*particles);
 }
 
+template <typename BoundaryConditions>
+void ExperimentImplementation<BoundaryConditions>::end(char *path)
+{
+    
+}
+}
