@@ -69,6 +69,15 @@ void BoundaryConditions::print_startup() {
     printf("Random number seed: %lli \n", seed);
 }
 
+float BoundaryConditions::energy_total(Particles *particles) {
+    float energy_total = 0.0;
+    for (std::map<int, ParticleData>::iterator i = particles->begin();
+         i != particles->end(); ++i) {
+         energy_total += i->second.momentum().x0();
+     }
+    return energy_total;
+}
+
 void BoundaryConditions::propagate(Particles *particles){
     FourVector distance, position;
     

@@ -159,7 +159,6 @@ void BoxBoundaryConditions::initial_conditions(Particles *particles) {
     
     /* allows to check energy conservation */
     printf("IC total energy: %g [GeV]\n", momentum_total.x0());
-    energy_initial = momentum_total.x0();
     number_density_initial = number_density_total;
 }
 
@@ -384,11 +383,6 @@ int BoxBoundaryConditions::prepare_evolution(Particles *particles) {
         i->second.set_position(boundary_condition(i->second.position(),
                                                   &boundary_hit));
     }
-  
-    /* startup values */
-//    print_measurements(*particles, interactions_total,
-//                       interactions_this_interval, *this);
-    
     return 0;
     
 }

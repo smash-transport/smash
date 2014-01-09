@@ -1,8 +1,9 @@
 /*
  *
- *    Copyright (c) 2012-2013
+ *    Copyright (c) 2012-2014
  *      maximilian attems <attems@fias.uni-frankfurt.de>
  *      Jussi Auvinen <auvinen@fias.uni-frankfurt.de>
+ *      Hannah Petersen <petersen@fias.uni-frankfurt.de>
  *
  *    GNU General Public License (GPLv3)
  *
@@ -80,33 +81,43 @@ void mkdir_data(void) {
 //}
 
 /* print_measurements - console output during simulation */
-//void print_measurements(const Particles &particles,
-//                        const size_t &scatterings_total,
-//                       const size_t &scatterings_this_interval,
-//                        const Box &box) {
-//  FourVector momentum_total(0, 0, 0, 0);
+void print_measurements(const Particles &particles,
+                        const size_t &scatterings_total,
+                        const size_t &scatterings_this_interval, float energy_ini) {
+  FourVector momentum_total(0, 0, 0, 0);
   /* calculate elapsed time */
 //  double elapsed = measure_timediff(box);
-// double time = 0.0;
+  double time = 0.0;
 
-//  for (std::map<int, ParticleData>::const_iterator i = particles.cbegin();
-//       i != particles.cend(); ++i) {
-//    momentum_total += i->second.momentum();
+  for (std::map<int, ParticleData>::const_iterator i = particles.cbegin();
+       i != particles.cend(); ++i) {
+      momentum_total += i->second.momentum();
     /* use the time from the last active particle - startup time */
-//    time = i->second.position().x0() - 1.0;
-//  }
-//  if (likely(time > 0))
-//    printf("%5g%13g%13g%13g%10zu%10zu%13g\n", time,
-//           box.energy_initial() - momentum_total.x0(),
-//           sqrt(-1 * momentum_total.DotThree()),
-//           scatterings_total * 2 / (particles.size() * time),
-//           scatterings_this_interval, particles.size(), elapsed);
-//  else
+    time = i->second.position().x0() - 1.0;
+  }
+
+  if (likely(time > 0))
+//      printf("%5g%13g%13g%13g%10zu%10zu%13g\n", time,
+//             bc.energy_initial - momentum_total.x0(),
+//             sqrt(-1 * momentum_total.DotThree()),
+//             scatterings_total * 2 / (particles.size() * time),
+//             scatterings_this_interval, particles.size(), elapsed);
+    printf("%5g%13g%13g%13g%10zu%10zu\n", time,
+           energy_ini - momentum_total.x0(),
+           sqrt(-1 * momentum_total.DotThree()),
+           scatterings_total * 2 / (particles.size() * time),
+           scatterings_this_interval, particles.size());
+  else
+      printf("%5g%13g%13g%13g%10i%10zu\n", time,
+             energy_ini - momentum_total.x0(),
+             sqrt(-1 * momentum_total.DotThree()), 0.0, 0,
+             particles.size());
 //    printf("%5g%13g%13g%13g%10i%10zu%13g\n", time,
-//          box.energy_initial() - momentum_total.x0(),
+//           bc.energy_initial - momentum_total.x0(),
 //           sqrt(-1 * momentum_total.DotThree()), 0.0, 0,
 //           particles.size(), elapsed);
-//}
+}
+
 
 /* print_tail - output at the end of the simulation */
 //void print_tail(const Box &box, const double &scattering_rate) {
@@ -323,28 +334,39 @@ void write_oscar(const ParticleData &particle_data,
 
 /* write_vtk - VTK file describing particle position */
 void write_vtk(const Particles &particles) {
-  FILE *fp;
-  char filename[256];
-
-  snprintf(filename, sizeof(filename), "data/pos_%.5f.vtk",
-           particles.cbegin()->second.position().x0() - 1.0);
-  fp = fopen(filename, "w");
-  /* Legacy VTK file format */
-  fprintf(fp, "# vtk DataFile Version 2.0\n");
-  fprintf(fp, "Generated from molecular-offset data\n");
-  fprintf(fp, "ASCII\n");
-  /* Unstructured data sets are composed of points, lines, polygons, .. */
-  fprintf(fp, "DATASET UNSTRUCTURED_GRID\n");
-  fprintf(fp, "POINTS %zu double\n", particles.size());
-  for (std::map<int, ParticleData>::const_iterator i = particles.cbegin();
-       i != particles.cend(); ++i)
-    fprintf(fp, "%g %g %g\n", i->second.position().x1(),
-            i->second.position().x2(), i->second.position().x3());
-  fprintf(fp, "POINT_DATA %zu\n", particles.size());
-  fprintf(fp, "SCALARS momenta_x double 1\n");
-  fprintf(fp, "LOOKUP_TABLE default\n");
-  for (std::map<int, ParticleData>::const_iterator i = particles.cbegin();
-       i != particles.cend(); ++i)
-    fprintf(fp, "%g\n", i->second.momentum().x1());
-  fclose(fp);
+    FILE *fp = NULL;
+    char filename[256];
+    
+    snprintf(filename, sizeof(filename), "data/pos_0.%05i.vtk",
+             static_cast<int>((particles.cbegin()->second.position().x0() - 1.0) * 10));
+    fp = fopen(filename, "w");
+    /* Legacy VTK file format */
+    fprintf(fp, "# vtk DataFile Version 2.0\n");
+    fprintf(fp, "Generated from molecular-offset data\n");
+    fprintf(fp, "ASCII\n");
+    /* Unstructured data sets are composed of points, lines, polygons, .. */
+    fprintf(fp, "DATASET UNSTRUCTURED_GRID\n");
+    fprintf(fp, "POINTS %zu double\n", particles.size());
+    for (std::map<int, ParticleData>::const_iterator i = particles.cbegin();
+         i != particles.cend(); ++i)
+        fprintf(fp, "%g %g %g\n", i->second.position().x1(),
+                i->second.position().x2(), i->second.position().x3());
+    fprintf(fp, "CELLS %zu %zu\n", particles.size(), particles.size() * 2);
+    for (size_t point_index = 0; point_index < particles.size(); point_index++)
+        fprintf(fp, "1 %zu\n", point_index);
+    fprintf(fp, "CELL_TYPES %zu\n", particles.size());
+    for (size_t point_index = 0; point_index < particles.size(); point_index++)
+        fprintf(fp, "1\n");
+    fprintf(fp, "POINT_DATA %zu\n", particles.size());
+    fprintf(fp, "SCALARS pdg_codes int 1\n");
+    fprintf(fp, "LOOKUP_TABLE default\n");
+    for (std::map<int, ParticleData>::const_iterator i = particles.cbegin();
+         i != particles.cend(); ++i)
+        fprintf(fp, "%i\n", i->second.pdgcode());
+    fprintf(fp, "VECTORS momentum double\n");
+    for (std::map<int, ParticleData>::const_iterator i = particles.cbegin();
+         i != particles.cend(); ++i)
+        fprintf(fp, "%g %g %g\n", i->second.momentum().x1(),
+                i->second.momentum().x2(), i->second.momentum().x3());
+    fclose(fp);
 }

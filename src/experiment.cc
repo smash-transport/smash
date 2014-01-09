@@ -63,6 +63,7 @@ void ExperimentImplementation<BoundaryConditions>::initialize(char *path)
     input_decaymodes(particles, path);
     cross_sections->add_elastic_parameter(bc.cross_section);
     bc.initial_conditions(particles);
+    bc.energy_initial = bc.energy_total(particles);
     write_measurements_header(*particles);
     print_header();
     write_particles(*particles);
@@ -78,9 +79,9 @@ void ExperimentImplementation<BoundaryConditions>::run()
     interactions_this_interval = 0;
     size_t rejection_conflict = 0;
     int resonances = 0, decays = 0;
-
-//XX needs to be implemented
-//    bc.print_measurements();
+    
+    print_measurements(*particles, interactions_total,
+                       interactions_this_interval, bc.energy_initial);
     
     for (int step = 0; step < bc.steps; step++) {
         /* Check resonances for decays */
@@ -113,8 +114,8 @@ void ExperimentImplementation<BoundaryConditions>::run()
             
             previous_interactions_total = interactions_total;
             
-            //      print_measurements(*particles, interactions_total,
-            //                        interactions_this_interval, *this);
+            print_measurements(*particles, interactions_total,
+                              interactions_this_interval, bc.energy_initial);
             printd("Resonances: %i Decays: %i\n", resonances, decays);
             printd("Ignored collisions %zu\n", rejection_conflict);
             /* save evolution data */

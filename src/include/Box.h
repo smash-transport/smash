@@ -23,7 +23,7 @@ class BoxBoundaryConditions : public BoundaryConditions
 {
 public:
   /* default constructor with probable values */
-    BoxBoundaryConditions(): initial_condition(1), length(10.0f), temperature(0.1f),energy_initial(0.0f), number_density_initial(0.0f),
+    BoxBoundaryConditions(): initial_condition(1), length(10.0f), temperature(0.1f), number_density_initial(0.0f),
       timer_start(set_timer_start()) {}
     /* special class funtions */
     virtual void assign_params(std::list<Parameters> *configuration);
@@ -41,9 +41,7 @@ public:
     float length;
     /* Temperature of the Boltzmann distribution for thermal initialization */
     float temperature;
-    /* initial total energy of the box */
-    float energy_initial;
-    /* initial number density of the box */
+   /* initial number density of the box */
     float number_density_initial;
     /* starting time of the simulation */
     timespec timer_start;
