@@ -127,12 +127,14 @@ void ExperimentImplementation<BoundaryConditions>::run()
 //        if (likely(bc.steps > 0)) {
         /* if there are no particles no interactions happened */
 //            if (likely(!particles->empty())){
-//            print_tail(*this, interactions_total * 2
+//            print_tail(bc.time_start, interactions_total * 2
 //                        / particles->time() / particles->size());
-//                else{
-//             print_tail(*this, 0);
-//        printf("Total ignored collisions: %zu\n", rejection_conflict);
-//        }
+//            else{
+//             print_tail(bc.time_start, 0);
+//             printf("Total ignored collisions: %zu\n", rejection_conflict);
+//            }
+//            }}
+
     }
 }
 
