@@ -17,7 +17,6 @@ void BoundaryConditions::assign_params(std::list<Parameters> *configuration) {
         char *key = i->key();
         char *value = i->value();
         printd("Looking for match %s %s\n", key, value);
-        
         /* integer values */
         if (strcmp(key, "STEPS") == 0) {
             steps = (abs(atoi(value)));
@@ -39,7 +38,6 @@ void BoundaryConditions::assign_params(std::list<Parameters> *configuration) {
             testparticles = (abs(atoi(value)));
             match = true;
         }
-        
         /* double or float values */
         if (strcmp(key, "EPS") == 0) {
             eps = (fabs(atof(value)));
@@ -49,7 +47,6 @@ void BoundaryConditions::assign_params(std::list<Parameters> *configuration) {
             cross_section = (fabs(atof(value)));
             match = true;
         }
-        
         /* remove processed entry */
         if (match) {
             printd("Erasing %s %s\n", key, value);
@@ -78,9 +75,8 @@ float BoundaryConditions::energy_total(Particles *particles) {
     return energy_total;
 }
 
-void BoundaryConditions::propagate(Particles *particles){
+void BoundaryConditions::propagate(Particles *particles) {
     FourVector distance, position;
-    
     for (std::map<int, ParticleData>::iterator i = particles->begin();
          i != particles->end(); ++i) {
         /* propagation for this time step */
@@ -93,17 +89,16 @@ void BoundaryConditions::propagate(Particles *particles){
     }
 }
 
-int BoundaryConditions::prepare_evolution(Particles *particles){
-    
+int BoundaryConditions::prepare_evolution(Particles *particles) {
     return 0;
 }
 
-FourVector BoundaryConditions::boundary_condition(FourVector position, bool *boundary_hit) {
+FourVector BoundaryConditions::boundary_condition(FourVector position,
+                                                  bool *boundary_hit) {
 }
 
 // XXX needs to be implemented in general form
 void BoundaryConditions::check_collision_geometry(Particles *particles,
-                                                  CrossSections *cross_sections, std::list<int> *collision_list, size_t *rejection_conflict){
-
-
+       CrossSections *cross_sections, std::list<int> *collision_list,
+       size_t *rejection_conflict) {
 }

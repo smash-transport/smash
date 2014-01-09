@@ -19,8 +19,8 @@
 #include "include/param-reader.h"
 
 
-void BoxBoundaryConditions::assign_params(std::list<Parameters> *configuration) {
-
+void BoxBoundaryConditions::assign_params(std::list<Parameters>
+                                          *configuration) {
     BoundaryConditions::assign_params(configuration);
     bool match = false;
     std::list<Parameters>::iterator i = configuration->begin();
@@ -28,7 +28,6 @@ void BoxBoundaryConditions::assign_params(std::list<Parameters> *configuration) 
         char *key = i->key();
         char *value = i->value();
         printd("%s %s\n", key, value);
-        
         /* double or float values */
         if (strcmp(key, "LENGTH") == 0) {
             length = (fabs(atof(value)));
@@ -54,11 +53,10 @@ void BoxBoundaryConditions::assign_params(std::list<Parameters> *configuration) 
 }
 
 
-
 /* print_startup - console output on startup of box specific parameters */
 void BoxBoundaryConditions::print_startup() {
     BoundaryConditions::print_startup();
-    printf("Size of the box: %g x %g x %g fm\n", length, length,length);
+    printf("Size of the box: %g x %g x %g fm\n", length, length, length);
     printf("Initial temperature: %g GeV\n", temperature);
     printf("IC type %d\n", initial_condition);
 }
@@ -68,26 +66,22 @@ void BoxBoundaryConditions::initial_conditions(Particles *particles) {
     double phi, cos_theta, sin_theta, momentum_radial, number_density_total = 0;
     FourVector momentum_total(0, 0, 0, 0);
     size_t number_total = 0, number = 0;
-    
     /* loop over all the particle types */
     for (std::map<int, ParticleType>::const_iterator
          i = particles->types_cbegin(); i != particles->types_cend(); ++i) {
-        /* Particles with width > 0 (resonances) do not exist in the beginning */
+    /* Particles with width > 0 (resonances) do not exist in the beginning */
         if (i->second.width() > 0.0)
             continue;
         printd("%s mass: %g [GeV]\n", i->second.name().c_str(), i->second.mass());
-        
         /* bose einstein distribution funtion */
         double number_density = number_density_bose(i->second.mass(),
                                                     this->temperature);
-        
         /* cast while reflecting probability of extra particle */
         number = this->length * this->length * this->length * number_density
         * this->testparticles;
         if (this->length * this->length * this->length * number_density
             - number > drand48())
             number++;
-        
         printf("IC number density %.6g [fm^-3]\n", number_density);
         printf("IC %zu number of %s\n", number, i->second.name().c_str());
         number_density_total += number_density;
@@ -98,7 +92,6 @@ void BoxBoundaryConditions::initial_conditions(Particles *particles) {
     }
     printf("IC total number density %.6g [fm^-3]\n", number_density_total);
     printf("IC contains %zu particles\n", number_total);
-    
     /* Set paricles IC: */
     for (std::map<int, ParticleData>::iterator i = particles->begin();
          i != particles->end(); ++i) {
@@ -146,7 +139,6 @@ void BoxBoundaryConditions::initial_conditions(Particles *particles) {
         printd_momenta(i->second);
         printd_position(i->second);
     }
-    
     /* Display on startup if pseudo grid is used */
     number = number_total;
     int const grid_number = round(this->length
@@ -156,7 +148,6 @@ void BoxBoundaryConditions::initial_conditions(Particles *particles) {
         printf("Simulation with pseudo grid: %d^3\n", grid_number);
     else
         printf("W: Not using pseudo grid: %d^3\n", grid_number);
-    
     /* allows to check energy conservation */
     printf("IC total energy: %g [GeV]\n", momentum_total.x0());
     number_density_initial = number_density_total;
