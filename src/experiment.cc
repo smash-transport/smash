@@ -81,7 +81,7 @@ void ExperimentImplementation<BoundaryConditions>::run()
     int resonances = 0, decays = 0;
     
     print_measurements(*particles, interactions_total,
-                       interactions_this_interval, bc.energy_initial);
+                       interactions_this_interval, bc.energy_initial, bc.time_start);
     
     for (int step = 0; step < bc.steps; step++) {
         /* Check resonances for decays */
@@ -115,7 +115,7 @@ void ExperimentImplementation<BoundaryConditions>::run()
             previous_interactions_total = interactions_total;
             
             print_measurements(*particles, interactions_total,
-                              interactions_this_interval, bc.energy_initial);
+                              interactions_this_interval, bc.energy_initial, bc.time_start);
             printd("Resonances: %i Decays: %i\n", resonances, decays);
             printd("Ignored collisions %zu\n", rejection_conflict);
             /* save evolution data */

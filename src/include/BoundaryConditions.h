@@ -31,7 +31,7 @@ public:
  /* default constructor with probable values */
    BoundaryConditions(): steps(10000), output_interval(100), testparticles(1),
    eps(0.001f), cross_section(10.0f), seed(1), energy_initial(0.0f),
-    timer_start(set_timer_start()) {}
+    time_start(set_timer_start()) {}
     /* special funtion should be called by specific subclass */
     virtual void assign_params(std::list<Parameters> *configuration);
     virtual void print_startup();
@@ -58,7 +58,7 @@ public:
     /* initial total energy of the system */
     float energy_initial;
     /* starting time of the simulation */
-    timespec timer_start;
+    timespec time_start;
  };
 
 

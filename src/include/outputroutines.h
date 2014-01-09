@@ -23,7 +23,7 @@ void print_startup(BoundaryConditions &parameters);
 void print_header(void);
 void print_measurements(const Particles &particles,
                         const size_t &scatterings_total,
-                        const size_t &scatterings_this_interval, float energy_ini);
+                        const size_t &scatterings_this_interval, float energy_ini, timespec time_start);
 void print_tail(const BoundaryConditions &box, const double &scattering_rate);
 void warn_wrong_params(std::list<Parameters> *configuration);
 

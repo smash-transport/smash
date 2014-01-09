@@ -73,20 +73,20 @@ void mkdir_data(void) {
 }
 
 /* measure_timediff - time the simulation used */
-//double measure_timediff(const Box &box) {
-//  timespec now;
-//  clock_gettime(&now);
-//  return (now.tv_sec + now.tv_nsec / 10.0E9
-//    - box.time_start().tv_sec -   box.time_start().tv_nsec / 10.0E9);
-//}
+double measure_timediff(const timespec time_start) {
+  timespec now;
+  clock_gettime(&now);
+  return (now.tv_sec + now.tv_nsec / 10.0E9
+    - time_start.tv_sec -   time_start.tv_nsec / 10.0E9);
+}
 
 /* print_measurements - console output during simulation */
 void print_measurements(const Particles &particles,
                         const size_t &scatterings_total,
-                        const size_t &scatterings_this_interval, float energy_ini) {
+                        const size_t &scatterings_this_interval, float energy_ini, timespec time_start) {
   FourVector momentum_total(0, 0, 0, 0);
   /* calculate elapsed time */
-//  double elapsed = measure_timediff(box);
+  double elapsed = measure_timediff(time_start);
   double time = 0.0;
 
   for (std::map<int, ParticleData>::const_iterator i = particles.cbegin();
@@ -97,25 +97,16 @@ void print_measurements(const Particles &particles,
   }
 
   if (likely(time > 0))
-//      printf("%5g%13g%13g%13g%10zu%10zu%13g\n", time,
-//             bc.energy_initial - momentum_total.x0(),
-//             sqrt(-1 * momentum_total.DotThree()),
-//             scatterings_total * 2 / (particles.size() * time),
-//             scatterings_this_interval, particles.size(), elapsed);
-    printf("%5g%13g%13g%13g%10zu%10zu\n", time,
+    printf("%5g%13g%13g%13g%10zu%10zu%13g\n", time,
            energy_ini - momentum_total.x0(),
            sqrt(-1 * momentum_total.DotThree()),
            scatterings_total * 2 / (particles.size() * time),
-           scatterings_this_interval, particles.size());
+           scatterings_this_interval, particles.size(), elapsed);
   else
-      printf("%5g%13g%13g%13g%10i%10zu\n", time,
+      printf("%5g%13g%13g%13g%10i%10zu%13g\n", time,
              energy_ini - momentum_total.x0(),
              sqrt(-1 * momentum_total.DotThree()), 0.0, 0,
-             particles.size());
-//    printf("%5g%13g%13g%13g%10i%10zu%13g\n", time,
-//           bc.energy_initial - momentum_total.x0(),
-//           sqrt(-1 * momentum_total.DotThree()), 0.0, 0,
-//           particles.size(), elapsed);
+             particles.size(), elapsed);
 }
 
 
