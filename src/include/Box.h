@@ -8,14 +8,12 @@
 #define SRC_INCLUDE_BOX_H_
 
 #include <stdint.h>
-#include <time.h>
 #include <cmath>
 #include <list>
 
 #include "../include/CrossSections.h"
 #include "../include/BoundaryConditions.h"
 #include "../include/Particles.h"
-#include "../include/time.h"
 #include "../include/Parameters.h"
 
 
@@ -23,8 +21,7 @@ class BoxBoundaryConditions : public BoundaryConditions
 {
 public:
   /* default constructor with probable values */
-    BoxBoundaryConditions(): initial_condition(1), length(10.0f), temperature(0.1f), number_density_initial(0.0f),
-      timer_start(set_timer_start()) {}
+    BoxBoundaryConditions(): initial_condition(1), length(10.0f), temperature(0.1f), number_density_initial(0.0f) {}
     /* special class funtions */
     virtual void assign_params(std::list<Parameters> *configuration);
     virtual void print_startup();
@@ -33,7 +30,7 @@ public:
     virtual void propagate(Particles *particles);
     virtual FourVector boundary_condition(FourVector position, bool *boundary_hit);
     virtual void check_collision_geometry(Particles *particles, CrossSections *cross_sections, std::list<int> *collision_list, size_t *rejection_conflict);
-    inline timespec set_timer_start();
+    
   private:
     /* initial condition */
     int initial_condition;
@@ -43,16 +40,8 @@ public:
     float temperature;
    /* initial number density of the box */
     float number_density_initial;
-    /* starting time of the simulation */
-    timespec timer_start;
+   
 };
-
-    /* set the timer to the actual time in nanoseconds precision */
-    timespec inline BoxBoundaryConditions::set_timer_start(void) {
-        timespec time;
-        clock_gettime(&time);
-        return time;
-    }
 
 
 
