@@ -65,18 +65,22 @@ void Modus::print_startup() {
     printf("Elastic cross section: %g mb\n", cross_section);
     printf("Using temporal stepsize: %g fm/c\n", eps);
     printf("Maximum number of steps: %i \n", steps);
-    printf("Random number seed: %lli \n", seed);
+    printf("Random number seed: %li \n", seed);
 }
 
+/* calculates the total energy in the system from zero component of 
+ * all momenta of particles
+ * XXX should be expanded to all quantum numbers of interest */
 float Modus::energy_total(Particles *particles) {
-    float energy_total = 0.0;
+    float energy_sum = 0.0;
     for (std::map<int, ParticleData>::iterator i = particles->begin();
          i != particles->end(); ++i) {
-         energy_total += i->second.momentum().x0();
+         energy_sum += i->second.momentum().x0();
      }
-    return energy_total;
+    return energy_sum;
 }
 
+/*general propagation routine */
 void Modus::propagate(Particles *particles) {
     FourVector distance, position;
     for (std::map<int, ParticleData>::iterator i = particles->begin();
@@ -91,6 +95,7 @@ void Modus::propagate(Particles *particles) {
     }
 }
 
+/*empty methods are needed in Boxmodus */
 int Modus::sanity_check(Particles *particles __attribute__((unused))) {
     return 0;
 }
