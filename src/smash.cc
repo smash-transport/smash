@@ -41,7 +41,7 @@ static void usage(int rc) {
 int main(int argc, char *argv[]) {
   char *p, *path;
   int opt, rc = 0;
-  char modus[20];
+  char modus_chooser[20];
     
   struct option longopts[] = {
     { "help",       no_argument,            0, 'h' },
@@ -75,7 +75,7 @@ int main(int argc, char *argv[]) {
         
         /* integer values */
         if (strcmp(key, "MODUS") == 0) {
-            strncpy(modus,value, sizeof(&modus));
+            strncpy(modus_chooser,value, sizeof(&modus_chooser));
             match = true;
         }
         /* remove processed entry */
@@ -96,8 +96,8 @@ int main(int argc, char *argv[]) {
                 usage(EXIT_SUCCESS);
                 break;
             case 'm':
-                strncpy(modus,optarg, sizeof(modus));
-                printf("Modus read in: %s \n", modus);
+                strncpy(modus_chooser,optarg, sizeof(modus_chooser));
+                printf("Modus read in: %s \n", modus_chooser);
                 break;
                 //    case 'R':
                 /* negative seed is for time */
@@ -116,9 +116,9 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    printf("Modus for this calculation: %s \n", modus);
+    printf("Modus for this calculation: %s \n", modus_chooser);
     
-    auto experiment = Experiment::create(modus);
+    auto experiment = Experiment::create(modus_chooser);
       
     experiment->config(configuration);
 

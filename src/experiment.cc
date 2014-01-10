@@ -25,10 +25,11 @@
 
 //#include "include/Sphere.h"
 
-std::unique_ptr<Experiment> Experiment::create(char *modus)
+/* Experiment carries everything that is needed for the evolution */
+std::unique_ptr<Experiment> Experiment::create(char *modus_chooser)
 {
   typedef std::unique_ptr<Experiment> ExperimentPointer;
-  if (strcmp(modus,"Box") == 0) {
+  if (strcmp(modus_chooser,"Box") == 0) {
     return ExperimentPointer{new ExperimentImplementation<BoxBoundaryConditions>};
   }
 //  else if (modus == 2) {
