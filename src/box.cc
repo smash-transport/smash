@@ -17,7 +17,7 @@
 #include "include/macros.h"
 #include "include/outputroutines.h"
 #include "include/param-reader.h"
-
+#include "include/angles.h"
 
 void BoxBoundaryConditions::assign_params(std::list<Parameters>
                                           *configuration) {
@@ -63,7 +63,8 @@ void BoxBoundaryConditions::print_startup() {
 
 /* initial_conditions - sets particle data for @particles */
 void BoxBoundaryConditions::initial_conditions(Particles *particles) {
-    double phi, cos_theta, sin_theta, momentum_radial, number_density_total = 0;
+    double momentum_radial, number_density_total = 0;
+    angles phitheta;
     FourVector momentum_total(0, 0, 0, 0);
     size_t number_total = 0, number = 0;
     /* loop over all the particle types */
@@ -109,17 +110,13 @@ void BoxBoundaryConditions::initial_conditions(Particles *particles) {
                 /* IC == 2 initial thermal momentum is the average 3T */
                 momentum_radial = 3.0 * this->temperature;
             }
-            /* phi in the range from [0, 2 * pi) */
-            phi = 2.0 * M_PI * drand48();
-            /* cos(theta) in the range from [-1.0, 1.0) */
-            cos_theta = -1.0 + 2.0 * drand48();
-            sin_theta = sqrt(1.0 - cos_theta * cos_theta);
+            phitheta.distribute_isotropously();
             printd("Particle %zu radial momenta %g phi %g cos_theta %g\n", i->first,
-                   momentum_radial, phi, cos_theta);
+                   momentum_radial, phitheta.phi(), phitheta.costheta());
             i->second.set_momentum(particles->type(i->first).mass(),
-                                   momentum_radial * cos(phi) * sin_theta,
-                                   momentum_radial * sin(phi) * sin_theta,
-                                   momentum_radial * cos_theta);
+                                   momentum_radial * phitheta.x(),
+                                   momentum_radial * phitheta.y(),
+                                   momentum_radial * phitheta.z());
         } else {
             i->second.set_momentum(particles->type(i->first).mass(),
                                    - particles->data(i->first - 1).momentum().x1(),

@@ -105,7 +105,8 @@ void SphereBoundaryConditions::initial_conditions(Particles *particles) {
     printf("IC contains %zu particles\n", number_total);
     
     /* now set position and momentum of the particles */
-    double momentum_radial, phi, cos_theta, sin_theta;
+    double momentum_radial;
+    angles phitheta = angles();
     for (std::map<int, ParticleData>::iterator i = particles->begin();
          i != particles->end(); ++i) {
         if (unlikely(i->first == particles->id_max() && !(i->first % 2))) {
@@ -114,17 +115,13 @@ void SphereBoundaryConditions::initial_conditions(Particles *particles) {
         } else if (!(i->first % 2)) {
             /* thermal momentum according Maxwell-Boltzmann distribution */
             momentum_radial = sample_momenta(0.3, particles->type(i->first).mass());
-            /* phi in the range from [0, 2 * pi) */
-            phi = 2.0 * M_PI * drand48();
-            /* cos(theta) in the range from [-1.0, 1.0) */
-            cos_theta = -1.0 + 2.0 * drand48();
-            sin_theta = sqrt(1.0 - cos_theta * cos_theta);
+            phitheta = angles().distribute_isotropously();
             printd("Particle %d radial momenta %g phi %g cos_theta %g\n", i->first,
-                   momentum_radial, phi, cos_theta);
+                   momentum_radial, phitheta.phi(), phitheta.costheta());
             i->second.set_momentum(particles->type(i->first).mass(),
-                                   momentum_radial * cos(phi) * sin_theta,
-                                   momentum_radial * sin(phi) * sin_theta,
-                                   momentum_radial * cos_theta);
+                                   momentum_radial * phitheta.x(),
+                                   momentum_radial * phitheta.y(),
+                                   momentum_radial * phitheta.z());
         } else {
             i->second.set_momentum(particles->type(i->first).mass(),
                                    - particles->data(i->first - 1).momentum().x1(),
