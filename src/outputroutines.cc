@@ -17,7 +17,7 @@
 #include <map>
 #include <string>
 
-#include "include/BoundaryConditions.h"
+#include "include/Modus.h"
 #include "include/FourVector.h"
 #include "include/Parameters.h"
 #include "include/Particles.h"

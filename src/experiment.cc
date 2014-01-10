@@ -11,7 +11,7 @@
 #include <list>
 
 #include "include/Experiment.h"
-#include "include/BoundaryConditions.h"
+#include "include/Modus.h"
 #include "include/collisions.h"
 #include "include/Parameters.h"
 #include "include/param-reader.h"
@@ -30,10 +30,10 @@ std::unique_ptr<Experiment> Experiment::create(char *modus_chooser)
 {
   typedef std::unique_ptr<Experiment> ExperimentPointer;
   if (strcmp(modus_chooser,"Box") == 0) {
-    return ExperimentPointer{new ExperimentImplementation<BoxBoundaryConditions>};
+    return ExperimentPointer{new ExperimentImplementation<BoxModus>};
   }
 //  else if (modus == 2) {
-//    return ExperimentPointer{new ExperimentImplementation<SphereBoundaryConditions>};
+//    return ExperimentPointer{new ExperimentImplementation<SphereModus>};
 //  }
     else {
     throw std::string("Invalid boundaryCondition requested from Experiment::create.");
@@ -42,8 +42,8 @@ std::unique_ptr<Experiment> Experiment::create(char *modus_chooser)
 
 
 
-template <typename BoundaryConditions>
-void ExperimentImplementation<BoundaryConditions>::config(std::list<Parameters> configuration)
+template <typename Modus>
+void ExperimentImplementation<Modus>::config(std::list<Parameters> configuration)
 {
     bc.assign_params(&configuration);
     warn_wrong_params(&configuration);
@@ -56,8 +56,8 @@ void ExperimentImplementation<BoundaryConditions>::config(std::list<Parameters> 
     }
 }
 
-template <typename BoundaryConditions>
-void ExperimentImplementation<BoundaryConditions>::initialize(char *path)
+template <typename Modus>
+void ExperimentImplementation<Modus>::initialize(char *path)
 {
     srand48(bc.seed);
     input_particles(particles, path);
@@ -70,8 +70,8 @@ void ExperimentImplementation<BoundaryConditions>::initialize(char *path)
     write_particles(*particles);
 }
 
-template <typename BoundaryConditions>
-void ExperimentImplementation<BoundaryConditions>::run()
+template <typename Modus>
+void ExperimentImplementation<Modus>::run()
 {
     bc.prepare_evolution(particles);
     
@@ -139,8 +139,8 @@ void ExperimentImplementation<BoundaryConditions>::run()
 }
 
 
-template <typename BoundaryConditions>
-void ExperimentImplementation<BoundaryConditions>::end()
+template <typename Modus>
+void ExperimentImplementation<Modus>::end()
 {
     delete particles;
     delete cross_sections;

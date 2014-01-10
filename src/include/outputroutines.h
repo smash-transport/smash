@@ -12,14 +12,14 @@
 #include "../include/Particles.h"
 
 /* forward declarations */
-class BoundaryConditions;
+class Modus;
 class Experiment;
 class Parameters;
 class ParticleData;
 class ParticleType;
 
 /* console output */
-void print_startup(BoundaryConditions &parameters);
+void print_startup(Modus &parameters);
 void print_header(void);
 void print_measurements(const Particles &particles,
                         const size_t &scatterings_total,
@@ -58,6 +58,6 @@ void write_oscar(const ParticleData &particle_data,
 void write_vtk(const Particles &particles);
 
 /* timing measure */
-double measure_timediff(const BoundaryConditions &box);
+double measure_timediff(const timespec time_start);
 
 #endif  // SRC_INCLUDE_OUTPUTROUTINES_H_

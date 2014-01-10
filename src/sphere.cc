@@ -41,7 +41,7 @@
 #include "include/Config.h"
 
 
-void SphereBoundaryConditions::assign_params_specific(std::list<Parameters> *configuration) {
+void SphereModus::assign_params_specific(std::list<Parameters> *configuration) {
     bool match = false;
     std::list<Parameters>::iterator i = configuration->begin();
     while (i != configuration->end()) {
@@ -67,13 +67,13 @@ void SphereBoundaryConditions::assign_params_specific(std::list<Parameters> *con
 
 
 /* print_startup - console output on startup of sphere specific parameters */
-//void print_startup(const SphereBoundaryConditions &ball) {
+//void print_startup(const SphereModus &ball) {
 // printf("Volume of the sphere: 4 * pi * %g^2 [fm]\n", ball.radius);
 //}
 
 
 /* initial_conditions - sets particle data for @particles */
-void SphereBoundaryConditions::initial_conditions(Particles *particles) {
+void SphereModus::initial_conditions(Particles *particles) {
     size_t number_total = 0;
     double time_start = 1.0;
     FourVector momentum_total(0, 0, 0, 0);
@@ -156,17 +156,17 @@ void SphereBoundaryConditions::initial_conditions(Particles *particles) {
 
 /* boundary_condition - enforce specific type of boundaries */
 //FourVector boundary_condition(FourVector position,
-//  const SphereBoundaryConditions &sphere __attribute__((unused)), bool *boundary_hit) {
+//  const SphereModus &sphere __attribute__((unused)), bool *boundary_hit) {
   /* no boundary */
 //  *boundary_hit = false;
 //  return position;
 //}
 
 /* check_collision_geometry - check if a collision happens between particles */
-void SphereBoundaryConditions::check_collision_geometry(Particles *particles,
+void SphereModus::check_collision_geometry(Particles *particles,
   CrossSections *cross_sections,
-  std::list<int> *collision_list, BoundaryConditions const &parameters,
-  BoxBoundaryConditions const &box, size_t *rejection_conflict) {
+  std::list<int> *collision_list, Modus const &parameters,
+  BoxModus const &box, size_t *rejection_conflict) {
   std::vector<std::vector<std::vector<std::vector<int> > > > grid;
   int N, x, y, z;
 
@@ -267,7 +267,7 @@ void SphereBoundaryConditions::check_collision_geometry(Particles *particles,
 
 
 /* Evolve - the core of the box, stepping forward in time */
-int SphereBoundaryConditions::Evolve(Particles *particles, CrossSections *cross_sections, int *resonances, int *decays) {
+int SphereModus::Evolve(Particles *particles, CrossSections *cross_sections, int *resonances, int *decays) {
   std::list<int> collision_list, decay_list;
   size_t interactions_total = 0, previous_interactions_total = 0,
     interactions_this_interval = 0;

@@ -19,7 +19,7 @@
 #include "include/FourVector.h"
 #include "include/Particles.h"
 #include "include/ParticleData.h"
-#include "include/BoundaryConditions.h"
+#include "include/Modus.h"
 #include "include/constants.h"
 #include "include/macros.h"
 #include "include/outputroutines.h"
@@ -30,7 +30,7 @@
  */
 void collision_criteria_geometry(Particles *particles,
   CrossSections *cross_sections,
-  std::list<int> *collision_list, const BoundaryConditions &parameters, int id_a,
+  std::list<int> *collision_list, const Modus &parameters, int id_a,
   int id_b, size_t *rejection_conflict) {
   /* just collided with this particle */
   if (particles->data(id_a).id_process() >= 0

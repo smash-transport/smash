@@ -12,16 +12,16 @@
 #include <list>
 
 #include "../include/CrossSections.h"
-#include "../include/BoundaryConditions.h"
+#include "../include/Modus.h"
 #include "../include/Particles.h"
 #include "../include/Parameters.h"
 
 
-class BoxBoundaryConditions : public BoundaryConditions
+class BoxModus : public Modus
 {
 public:
   /* default constructor with probable values */
-    BoxBoundaryConditions(): initial_condition(1), length(10.0f), temperature(0.1f), number_density_initial(0.0f) {}
+    BoxModus(): initial_condition(1), length(10.0f), temperature(0.1f), number_density_initial(0.0f) {}
     /* special class funtions */
     virtual void assign_params(std::list<Parameters> *configuration);
     virtual void print_startup();

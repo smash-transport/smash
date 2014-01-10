@@ -19,9 +19,9 @@
 #include "include/param-reader.h"
 
 
-void BoxBoundaryConditions::assign_params(std::list<Parameters>
+void BoxModus::assign_params(std::list<Parameters>
                                           *configuration) {
-    BoundaryConditions::assign_params(configuration);
+    Modus::assign_params(configuration);
     bool match = false;
     std::list<Parameters>::iterator i = configuration->begin();
     while (i != configuration->end()) {
@@ -54,15 +54,15 @@ void BoxBoundaryConditions::assign_params(std::list<Parameters>
 
 
 /* print_startup - console output on startup of box specific parameters */
-void BoxBoundaryConditions::print_startup() {
-    BoundaryConditions::print_startup();
+void BoxModus::print_startup() {
+    Modus::print_startup();
     printf("Size of the box: %g x %g x %g fm\n", length, length, length);
     printf("Initial temperature: %g GeV\n", temperature);
     printf("IC type %d\n", initial_condition);
 }
 
 /* initial_conditions - sets particle data for @particles */
-void BoxBoundaryConditions::initial_conditions(Particles *particles) {
+void BoxModus::initial_conditions(Particles *particles) {
     double phi, cos_theta, sin_theta, momentum_radial, number_density_total = 0;
     FourVector momentum_total(0, 0, 0, 0);
     size_t number_total = 0, number = 0;
@@ -155,7 +155,7 @@ void BoxBoundaryConditions::initial_conditions(Particles *particles) {
 
 
 /* check_collision_geometry - check if a collision happens between particles */
-void BoxBoundaryConditions::check_collision_geometry(Particles *particles,
+void BoxModus::check_collision_geometry(Particles *particles,
   CrossSections *cross_sections,
   std::list<int> *collision_list,
   size_t *rejection_conflict) {
@@ -170,7 +170,7 @@ void BoxBoundaryConditions::check_collision_geometry(Particles *particles,
   if (unlikely(N < 4 || particles->size() < 10)) {
       
       /* XXX: apply periodic boundary condition */
-      BoundaryConditions::check_collision_geometry(particles,
+      Modus::check_collision_geometry(particles,
       cross_sections, collision_list, rejection_conflict);
     return;
   }
@@ -280,7 +280,7 @@ void BoxBoundaryConditions::check_collision_geometry(Particles *particles,
 }
 
 /* propagate all particles */
-void BoxBoundaryConditions::propagate(Particles *particles) {
+void BoxModus::propagate(Particles *particles) {
     FourVector distance, position;
     
     for (std::map<int, ParticleData>::iterator i = particles->begin();
@@ -315,7 +315,7 @@ void BoxBoundaryConditions::propagate(Particles *particles) {
  * This assumes that the particle is at most one box length
  * away from the boundary to shift it in.
  */
-FourVector BoxBoundaryConditions::boundary_condition(FourVector position, bool *boundary_hit) {
+FourVector BoxModus::boundary_condition(FourVector position, bool *boundary_hit) {
     /* Check positivity and box size */
     if (position.x1() > 0 && position.x2() > 0 && position.x3() > 0
         && position.x1() < length && position.x2() < length
@@ -349,7 +349,7 @@ out:
 
 
 /* evolve - the core of the box, stepping forward in time */
-int BoxBoundaryConditions::prepare_evolution(Particles *particles) {
+int BoxModus::prepare_evolution(Particles *particles) {
     
     /* fixup positions on startup, particles need to be *inside* the box */
     for (std::map<int, ParticleData>::iterator i = particles->begin();

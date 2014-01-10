@@ -15,16 +15,16 @@ class FourVector;
 #include <cmath>
 
 #include "../include/CrossSections.h"
-#include "../include/BoundaryConditions.h"
+#include "../include/Modus.h"
 #include "../include/Particles.h"
 #include "../include/time.h"
 #include "../include/Parameters.h"
 
-class SphereBoundaryConditions : public BoundaryConditions
+class SphereModus : public Modus
 {
   public:
     /* default constructor with probable values */
-    SphereBoundaryConditions(): radius(10.0f), timer_start(set_timer_start()) {}
+    SphereModus(): radius(10.0f), timer_start(set_timer_start()) {}
     /* member funtions */
     /* special class funtions */
     virtual int evolve(Particles *particles, CrossSections *cross_sections);
@@ -42,13 +42,13 @@ class SphereBoundaryConditions : public BoundaryConditions
 
 
 /* set the timer to the actual time in nanoseconds precision */
-timespec inline SphereBoundaryConditions::set_timer_start(void) {
+timespec inline SphereModus::set_timer_start(void) {
   timespec time;
   clock_gettime(&time);
   return time;
 }
 
 /* enforce periodic boundary conditions */
-//FourVector SphereBoundaryConditions::boundary_condition(FourVector position);
+//FourVector SphereModus::boundary_condition(FourVector position);
 
 #endif  // SRC_INCLUDE_SPHERE_H_

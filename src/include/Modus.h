@@ -8,8 +8,8 @@
  */
  
  
-#ifndef BOUNDARYCONDITIONS_H
-#define BOUNDARYCONDITIONS_H
+#ifndef Modus_H
+#define Modus_H
 
 #include <stdint.h>
 #include <time.h>
@@ -25,11 +25,11 @@
 class Particles;
 class CrossSections;
 
-class BoundaryConditions
+class Modus
 {
 public:
  /* default constructor with probable values */
-   BoundaryConditions(): steps(10000), output_interval(100), testparticles(1),
+   Modus(): steps(10000), output_interval(100), testparticles(1),
    eps(0.001f), cross_section(10.0f), seed(1), energy_initial(0.0f),
     time_start(set_timer_start()) {}
     /* special funtion should be called by specific subclass */
@@ -63,11 +63,11 @@ public:
 
 
 /* set the timer to the actual time in nanoseconds precision */
-timespec inline BoundaryConditions::set_timer_start(void) {
+timespec inline Modus::set_timer_start(void) {
     timespec time;
     clock_gettime(&time);
     return time;
 }
 
 
-#endif // BOUNDARYCONDITIONS_H
+#endif // Modus_H

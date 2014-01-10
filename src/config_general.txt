@@ -4,13 +4,13 @@
 MODUS		Box
 
 // temporal grid spacing
-EPS		0.1
+EPS		0.01
 
 // maximum of steps to take
-STEPS		10000
+STEPS		1000
 
 // how many steps before recording measurables
-UPDATE          100
+UPDATE          10
 
 // initial random seed (negative for time)
 RANDOMSEED	1

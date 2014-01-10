@@ -7,12 +7,12 @@
  *
  */
 
-#include "include/BoundaryConditions.h"
 #include "include/collisions.h"
 #include "include/constants.h"
+#include "include/Modus.h"
 #include "include/outputroutines.h"
 
-void BoundaryConditions::assign_params(std::list<Parameters> *configuration) {
+void Modus::assign_params(std::list<Parameters> *configuration) {
     bool match = false;
     std::list<Parameters>::iterator i = configuration->begin();
     while (i != configuration->end()) {
@@ -61,14 +61,14 @@ void BoundaryConditions::assign_params(std::list<Parameters> *configuration) {
 }
 
 /* print_startup - console output on startup of general parameters */
-void BoundaryConditions::print_startup() {
+void Modus::print_startup() {
     printf("Elastic cross section: %g mb\n", cross_section);
     printf("Using temporal stepsize: %g fm/c\n", eps);
     printf("Maximum number of steps: %i \n", steps);
     printf("Random number seed: %lli \n", seed);
 }
 
-float BoundaryConditions::energy_total(Particles *particles) {
+float Modus::energy_total(Particles *particles) {
     float energy_total = 0.0;
     for (std::map<int, ParticleData>::iterator i = particles->begin();
          i != particles->end(); ++i) {
@@ -77,7 +77,7 @@ float BoundaryConditions::energy_total(Particles *particles) {
     return energy_total;
 }
 
-void BoundaryConditions::propagate(Particles *particles) {
+void Modus::propagate(Particles *particles) {
     FourVector distance, position;
     for (std::map<int, ParticleData>::iterator i = particles->begin();
          i != particles->end(); ++i) {
@@ -91,16 +91,16 @@ void BoundaryConditions::propagate(Particles *particles) {
     }
 }
 
-int BoundaryConditions::prepare_evolution(Particles *particles __attribute__((unused))) {
+int Modus::prepare_evolution(Particles *particles __attribute__((unused))) {
     return 0;
 }
 
-FourVector BoundaryConditions::boundary_condition(FourVector position, bool *boundary_hit __attribute__((unused))) {
+FourVector Modus::boundary_condition(FourVector position, bool *boundary_hit __attribute__((unused))) {
     return position;
 }
 
 // check particle pairs for collision
-void BoundaryConditions::check_collision_geometry(Particles *particles,
+void Modus::check_collision_geometry(Particles *particles,
        CrossSections *cross_sections, std::list<int> *collision_list,
        size_t *rejection_conflict) {
     FourVector distance;

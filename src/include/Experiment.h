@@ -10,7 +10,7 @@
 #include <memory>
 #include <list>
 #include "../include/Parameters.h"
-#include "../include/BoundaryConditions.h"
+#include "../include/Modus.h"
 #include "../include/Particles.h"
 #include "../include/CrossSections.h"
 
@@ -24,7 +24,7 @@ public:
     virtual void end()=0;
 };
 
-template <typename BoundaryConditions> class ExperimentImplementation : public Experiment
+template <typename Modus> class ExperimentImplementation : public Experiment
 {
 public:
     virtual void config(std::list<Parameters> configuration);
@@ -33,7 +33,7 @@ public:
     virtual void end();
     
 private:
-    BoundaryConditions bc;
+    Modus bc;
     Particles *particles = new Particles;
     CrossSections *cross_sections = new CrossSections;
 };
