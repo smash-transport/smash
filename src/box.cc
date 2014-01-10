@@ -97,7 +97,7 @@ void BoxModus::initial_conditions(Particles *particles) {
     /* Set paricles IC: */
     for (std::map<int, ParticleData>::iterator i = particles->begin();
          i != particles->end(); ++i) {
-        double x, y, z, time_start;
+        double x, y, z, time_begin;
         /* back to back pair creation with random momenta direction */
         if (unlikely(i->first == particles->id_max() && !(i->first % 2))) {
             /* poor last guy just sits around */
@@ -130,12 +130,12 @@ void BoxModus::initial_conditions(Particles *particles) {
         }
         momentum_total += i->second.momentum();
         
-        time_start = 1.0;
+        time_begin = 1.0;
         /* ramdom position in a quadratic box */
         x = drand48() * this->length;
         y = drand48() * this->length;
         z = drand48() * this->length;
-        i->second.set_position(time_start, x, y, z);
+        i->second.set_position(time_begin, x, y, z);
         
         /* IC: debug checks */
         printd_momenta(i->second);
