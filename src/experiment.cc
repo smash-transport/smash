@@ -123,19 +123,18 @@ void ExperimentImplementation<BoundaryConditions>::run()
                                interactions_this_interval, resonances, decays, rejection_conflict);
             write_vtk(*particles);
         }
-        /* Guard against evolution */
-//        if (likely(bc.steps > 0)) {
-        /* if there are no particles no interactions happened */
-//            if (likely(!particles->empty())){
-//            print_tail(bc.time_start, interactions_total * 2
-//                        / particles->time() / particles->size());
-//            else{
-//             print_tail(bc.time_start, 0);
-//             printf("Total ignored collisions: %zu\n", rejection_conflict);
-//            }
-//            }}
-
     }
+        /* Guard against evolution */
+        if (likely(bc.steps > 0)) {
+        /* if there are no particles no interactions happened */
+            if (likely(!particles->empty())) {
+             print_tail(bc.time_start, interactions_total * 2
+                        / particles->time() / particles->size());
+            } else {
+             print_tail(bc.time_start, 0);
+             printf("Total ignored collisions: %zu\n", rejection_conflict);
+            }
+        }
 }
 
 
