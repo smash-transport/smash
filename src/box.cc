@@ -168,26 +168,10 @@ void BoxBoundaryConditions::check_collision_geometry(Particles *particles,
   N = round(length
             / sqrt(cross_section * fm2_mb * M_1_PI) * 0.5);
   if (unlikely(N < 4 || particles->size() < 10)) {
-    FourVector distance;
-    double radial_interaction = sqrt(cross_section * fm2_mb
-                                     * M_1_PI) * 2;
-    for (std::map<int, ParticleData>::iterator i = particles->begin();
-         i != particles->end(); ++i) {
-      for (std::map<int, ParticleData>::iterator j = particles->begin();
-           j != particles->end(); ++j) {
-        /* exclude check on same particle and double counting */
-        if (i->first >= j->first)
-          continue;
-
-        /* XXX: apply periodic boundary condition */
-        distance = i->second.position() - j->second.position();
-        /* skip particles that are double interaction radius length away */
-        if (distance > radial_interaction)
-           continue;
-        collision_criteria_geometry(particles, cross_sections, collision_list, *this,
-         i->first, j->first, rejection_conflict);
-      }
-    }
+      
+      /* XXX: apply periodic boundary condition */
+      BoundaryConditions::check_collision_geometry(particles,
+      cross_sections, collision_list, rejection_conflict);
     return;
   }
 

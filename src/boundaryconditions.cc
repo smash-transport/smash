@@ -8,6 +8,8 @@
  */
 
 #include "include/BoundaryConditions.h"
+#include "include/collisions.h"
+#include "include/constants.h"
 #include "include/outputroutines.h"
 
 void BoundaryConditions::assign_params(std::list<Parameters> *configuration) {
@@ -89,16 +91,37 @@ void BoundaryConditions::propagate(Particles *particles) {
     }
 }
 
-int BoundaryConditions::prepare_evolution(Particles *particles) {
+int BoundaryConditions::prepare_evolution(Particles *particles __attribute__((unused))) {
     return 0;
 }
 
-FourVector BoundaryConditions::boundary_condition(FourVector position,
-                                                  bool *boundary_hit) {
+FourVector BoundaryConditions::boundary_condition(FourVector position, bool *boundary_hit __attribute__((unused))) {
+    return position;
 }
 
-// XXX needs to be implemented in general form
+// check particle pairs for collision
 void BoundaryConditions::check_collision_geometry(Particles *particles,
        CrossSections *cross_sections, std::list<int> *collision_list,
        size_t *rejection_conflict) {
+    FourVector distance;
+    double radial_interaction = sqrt(cross_section * fm2_mb
+                                     * M_1_PI) * 2;
+    for (std::map<int, ParticleData>::iterator i = particles->begin();
+         i != particles->end(); ++i) {
+        for (std::map<int, ParticleData>::iterator j = particles->begin();
+             j != particles->end(); ++j) {
+            /* exclude check on same particle and double counting */
+            if (i->first >= j->first)
+                continue;
+            distance = i->second.position() - j->second.position();
+            /* skip particles that are double interaction radius length away */
+            if (distance > radial_interaction)
+                continue;
+            collision_criteria_geometry(particles, cross_sections, collision_list, *this,
+                                        i->first, j->first, rejection_conflict);
+        }
+    }
 }
+
+
+
