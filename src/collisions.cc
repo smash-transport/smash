@@ -17,9 +17,9 @@
 
 #include "include/CollisionData.h"
 #include "include/FourVector.h"
+#include "include/Modus.h"
 #include "include/Particles.h"
 #include "include/ParticleData.h"
-#include "include/Modus.h"
 #include "include/constants.h"
 #include "include/macros.h"
 #include "include/outputroutines.h"

@@ -17,8 +17,8 @@
 #include <map>
 #include <string>
 
-#include "include/Modus.h"
 #include "include/FourVector.h"
+#include "include/Modus.h"
 #include "include/Parameters.h"
 #include "include/Particles.h"
 #include "include/ParticleData.h"

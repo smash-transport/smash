@@ -1,9 +1,10 @@
 /*
  *
- *    Copyright (c) 2012-2013
+ *    Copyright (c) 2012-2014
  *      maximilian attems <attems@fias.uni-frankfurt.de>
  *      Jussi Auvinen <auvinen@fias.uni-frankfurt.de>
- *
+ *		Hannah Petersen <petersen@fias.uni-frankfurt.de>
+ * 
  *    GNU General Public License (GPLv3)
  *
  */
@@ -17,11 +18,13 @@
 #include <map>
 #include <vector>
 
+
+#include "include/Experiment.h"
 #include "include/Parameters.h"
 #include "include/macros.h"
-#include "include/param-reader.h"
 #include "include/outputroutines.h"
-#include "include/Experiment.h"
+#include "include/param-reader.h"
+
 /* build dependent variables */
 #include "include/Config.h"
 
@@ -120,7 +123,7 @@ int main(int argc, char *argv[]) {
     
     auto experiment = Experiment::create(modus_chooser);
       
-    experiment->config(configuration);
+    experiment->configure(configuration);
 
     mkdir_data();
     write_oscar_header();
@@ -128,7 +131,7 @@ int main(int argc, char *argv[]) {
     experiment->initialize(path);
 
   /* the time evolution of the relevant subsystem */
-    experiment->run();
+    experiment->run_time_evolution();
     
   /* tear down */
     free(path);

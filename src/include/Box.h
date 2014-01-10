@@ -1,7 +1,8 @@
 /*
- *    Copyright (c) 2012-2013
+ *    Copyright (c) 2012-2014
  *      maximilian attems <attems@fias.uni-frankfurt.de>
  *      Jussi Auvinen <auvinen@fias.uni-frankfurt.de>
+ *		Hannah Petersen <petersen@fias.uni-frankfurt.de>
  *    GNU General Public License (GPLv3)
  */
 #ifndef SRC_INCLUDE_BOX_H_

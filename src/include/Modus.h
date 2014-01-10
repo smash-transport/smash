@@ -21,7 +21,7 @@
 #include "../include/Particles.h"
 #include "../include/time.h"
 
-/* forward declartions */
+/* forward declarations */
 class Particles;
 class CrossSections;
 

@@ -7,9 +7,9 @@
  *
  */
 
+#include "include/Modus.h"
 #include "include/collisions.h"
 #include "include/constants.h"
-#include "include/Modus.h"
 #include "include/outputroutines.h"
 
 void Modus::assign_params(std::list<Parameters> *configuration) {

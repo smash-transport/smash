@@ -10,18 +10,20 @@
 #include <map>
 #include <list>
 
-#include "include/Experiment.h"
-#include "include/Modus.h"
-#include "include/collisions.h"
-#include "include/Parameters.h"
-#include "include/param-reader.h"
 #include "include/Box.h"
+#include "include/Experiment.h"
+#include "include/CrossSections.h"
+#include "include/Modus.h"
+#include "include/Parameters.h"
+#include "include/collisions.h"
 #include "include/decays.h"
-#include "include/outputroutines.h"
 #include "include/input-particles.h"
 #include "include/input-decaymodes.h"
-#include "include/CrossSections.h"
 #include "include/macros.h"
+#include "include/outputroutines.h"
+#include "include/param-reader.h"
+
+
 
 //#include "include/Sphere.h"
 
@@ -41,9 +43,9 @@ std::unique_ptr<Experiment> Experiment::create(char *modus_chooser)
 }
 
 
-
+/*This method reads the parameters in */
 template <typename Modus>
-void ExperimentImplementation<Modus>::config(std::list<Parameters> configuration)
+void ExperimentImplementation<Modus>::configure(std::list<Parameters> configuration)
 {
     bc.assign_params(&configuration);
     warn_wrong_params(&configuration);
@@ -56,6 +58,8 @@ void ExperimentImplementation<Modus>::config(std::list<Parameters> configuration
     }
 }
 
+/* This method reads the particle type and cross section information
+ * and does the initialization of the system (fill the particles map)*/
 template <typename Modus>
 void ExperimentImplementation<Modus>::initialize(char *path)
 {
@@ -70,8 +74,10 @@ void ExperimentImplementation<Modus>::initialize(char *path)
     write_particles(*particles);
 }
 
+/*This is the loop over timesteps, carrying out collisions and decays 
+ * and propagating particles */
 template <typename Modus>
-void ExperimentImplementation<Modus>::run()
+void ExperimentImplementation<Modus>::run_time_evolution()
 {
     bc.sanity_check(particles);
     
@@ -138,7 +144,7 @@ void ExperimentImplementation<Modus>::run()
         }
 }
 
-
+/* Tear down of everything */
 template <typename Modus>
 void ExperimentImplementation<Modus>::end()
 {
