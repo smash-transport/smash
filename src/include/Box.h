@@ -26,7 +26,7 @@ public:
     virtual void assign_params(std::list<Parameters> *configuration);
     virtual void print_startup();
     virtual void initial_conditions(Particles *particles);
-    virtual int prepare_evolution(Particles *particles);
+    virtual int sanity_check(Particles *particles);
     virtual void propagate(Particles *particles);
     virtual FourVector boundary_condition(FourVector position, bool *boundary_hit);
     virtual void check_collision_geometry(Particles *particles, CrossSections *cross_sections, std::list<int> *collision_list, size_t *rejection_conflict);

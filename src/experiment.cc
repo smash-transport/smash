@@ -73,7 +73,7 @@ void ExperimentImplementation<Modus>::initialize(char *path)
 template <typename Modus>
 void ExperimentImplementation<Modus>::run()
 {
-    bc.prepare_evolution(particles);
+    bc.sanity_check(particles);
     
     std::list<int> collision_list, decay_list;
     size_t interactions_total = 0, previous_interactions_total = 0,

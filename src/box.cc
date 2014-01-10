@@ -349,7 +349,7 @@ out:
 
 
 /* evolve - the core of the box, stepping forward in time */
-int BoxModus::prepare_evolution(Particles *particles) {
+int BoxModus::sanity_check(Particles *particles) {
     
     /* fixup positions on startup, particles need to be *inside* the box */
     for (std::map<int, ParticleData>::iterator i = particles->begin();

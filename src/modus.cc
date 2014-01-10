@@ -91,7 +91,7 @@ void Modus::propagate(Particles *particles) {
     }
 }
 
-int Modus::prepare_evolution(Particles *particles __attribute__((unused))) {
+int Modus::sanity_check(Particles *particles __attribute__((unused))) {
     return 0;
 }
 

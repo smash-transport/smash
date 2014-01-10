@@ -37,7 +37,7 @@ public:
     virtual void print_startup();
     virtual void initial_conditions(Particles *p __attribute__((unused))) { return; }
     virtual float energy_total(Particles *particles);
-    virtual int prepare_evolution(Particles *particles);
+    virtual int sanity_check(Particles *particles __attribute__((unused)));
     virtual void check_collision_geometry(Particles *particles, CrossSections *cross_sections, std::list<int> *collision_list, size_t *rejection_conflict);
     virtual void propagate(Particles *particles);
     virtual FourVector boundary_condition(FourVector position, bool *boundary_hit);
