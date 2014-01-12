@@ -65,7 +65,7 @@ void Modus::print_startup() {
     printf("Elastic cross section: %g mb\n", cross_section);
     printf("Using temporal stepsize: %g fm/c\n", eps);
     printf("Maximum number of steps: %i \n", steps);
-    printf("Random number seed: %li \n", seed);
+    printf("Random number seed: %lli \n", seed);
 }
 
 /* calculates the total energy in the system from zero component of 
@@ -100,7 +100,8 @@ int Modus::sanity_check(Particles *particles __attribute__((unused))) {
     return 0;
 }
 
-FourVector Modus::boundary_condition(FourVector position, bool *boundary_hit __attribute__((unused))) {
+FourVector Modus::boundary_condition(FourVector position,
+                  bool *boundary_hit __attribute__((unused))) {
     return position;
 }
 
@@ -122,7 +123,8 @@ void Modus::check_collision_geometry(Particles *particles,
             /* skip particles that are double interaction radius length away */
             if (distance > radial_interaction)
                 continue;
-            collision_criteria_geometry(particles, cross_sections, collision_list, *this,
+            collision_criteria_geometry(particles, cross_sections,
+                                        collision_list, *this,
                                         i->first, j->first, rejection_conflict);
         }
     }

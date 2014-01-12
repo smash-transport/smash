@@ -18,30 +18,32 @@
 #include "../include/Parameters.h"
 
 
-class BoxModus : public Modus
-{
-public:
+class BoxModus : public Modus {
+ public:
   /* default constructor with probable values */
-    BoxModus(): initial_condition(1), length(10.0f), temperature(0.1f), number_density_initial(0.0f) {}
+    BoxModus(): initial_condition(1), length(10.0f), temperature(0.1f),
+                number_density_initial(0.0f) {}
     /* special class funtions */
     virtual void assign_params(std::list<Parameters> *configuration);
     virtual void print_startup();
     virtual void initial_conditions(Particles *particles);
     virtual int sanity_check(Particles *particles);
     virtual void propagate(Particles *particles);
-    virtual FourVector boundary_condition(FourVector position, bool *boundary_hit);
-    virtual void check_collision_geometry(Particles *particles, CrossSections *cross_sections, std::list<int> *collision_list, size_t *rejection_conflict);
-    
-  private:
+    virtual FourVector boundary_condition(FourVector position,
+                                          bool *boundary_hit);
+    virtual void check_collision_geometry(Particles *particles,
+                  CrossSections *cross_sections, std::list<int> *collision_list,
+                  size_t *rejection_conflict);
+
+ private:
     /* initial condition */
     int initial_condition;
     /* Cube edge length */
     float length;
     /* Temperature of the Boltzmann distribution for thermal initialization */
     float temperature;
-   /* initial number density of the box */
+    /* initial number density of the box */
     float number_density_initial;
-   
 };
 
 

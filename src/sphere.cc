@@ -48,13 +48,11 @@ void SphereModus::assign_params_specific(std::list<Parameters> *configuration) {
         char *key = i->key();
         char *value = i->value();
         printd("%s %s\n", key, value);
-        
         /* double or float values */
         if (strcmp(key, "RADIUS") == 0) {
             radius = (fabs(atof(value)));
             match = true;
         }
-        
         /* remove processed entry */
         if (match) {
             i = configuration->erase(i);
@@ -67,9 +65,9 @@ void SphereModus::assign_params_specific(std::list<Parameters> *configuration) {
 
 
 /* print_startup - console output on startup of sphere specific parameters */
-//void print_startup(const SphereModus &ball) {
-// printf("Volume of the sphere: 4 * pi * %g^2 [fm]\n", ball.radius);
-//}
+/* void print_startup(const SphereModus &ball) {
+   /* printf("Volume of the sphere: 4 * pi * %g^2 [fm]\n", ball.radius);
+   /* }
 
 
 /* initial_conditions - sets particle data for @particles */
@@ -77,33 +75,29 @@ void SphereModus::initial_conditions(Particles *particles) {
     size_t number_total = 0;
     double time_start = 1.0;
     FourVector momentum_total(0, 0, 0, 0);
-    
     /* loop over all the particle types creating each particles */
     for (std::map<int, ParticleType>::const_iterator
          i = particles->types_cbegin(); i != particles->types_cend(); ++i) {
-        /* Particles with width > 0 (resonances) do not exist in the beginning */
+      /* Particles with width > 0 (resonances) do not exist in the beginning */
         if (i->second.width() > 0.0)
             continue;
-        printd("%s mass: %g [GeV]\n", i->second.name().c_str(), i->second.mass());
-        
+        printd("%s mass: %g [GeV]\n", i->second.name().c_str(),
+                                      i->second.mass());
         /* bose einstein distribution funtion with temperature 0.3 GeV */
         double number_density = number_density_bose(i->second.mass(), 0.3);
         printf("IC number density %.6g [fm^-3]\n", number_density);
-        
         /* cast while reflecting probability of extra particle */
         size_t number = 4.0 / 3.0 * M_PI * radius * radius
         * radius * number_density * testparticles;
         if (4.0 / 3.0 * M_PI * radius * radius * radius
             * number_density - number > drand48())
             number++;
-        
         /* create bunch of particles */
         printf("IC creating %zu particles\n", number);
         particles->create(number, i->second.pdgcode());
         number_total += number;
     }
     printf("IC contains %zu particles\n", number_total);
-    
     /* now set position and momentum of the particles */
     double momentum_radial, phi, cos_theta, sin_theta;
     for (std::map<int, ParticleData>::iterator i = particles->begin();
@@ -113,26 +107,26 @@ void SphereModus::initial_conditions(Particles *particles) {
             i->second.set_momentum(particles->type(i->first).mass(), 0, 0, 0);
         } else if (!(i->first % 2)) {
             /* thermal momentum according Maxwell-Boltzmann distribution */
-            momentum_radial = sample_momenta(0.3, particles->type(i->first).mass());
+            momentum_radial = sample_momenta(0.3,
+                              particles->type(i->first).mass());
             /* phi in the range from [0, 2 * pi) */
             phi = 2.0 * M_PI * drand48();
             /* cos(theta) in the range from [-1.0, 1.0) */
             cos_theta = -1.0 + 2.0 * drand48();
             sin_theta = sqrt(1.0 - cos_theta * cos_theta);
-            printd("Particle %d radial momenta %g phi %g cos_theta %g\n", i->first,
-                   momentum_radial, phi, cos_theta);
+            printd("Particle %d radial momenta %g phi %g cos_theta %g\n",
+                   i->first, momentum_radial, phi, cos_theta);
             i->second.set_momentum(particles->type(i->first).mass(),
                                    momentum_radial * cos(phi) * sin_theta,
                                    momentum_radial * sin(phi) * sin_theta,
                                    momentum_radial * cos_theta);
         } else {
             i->second.set_momentum(particles->type(i->first).mass(),
-                                   - particles->data(i->first - 1).momentum().x1(),
-                                   - particles->data(i->first - 1).momentum().x2(),
-                                   - particles->data(i->first - 1).momentum().x3());
+                               - particles->data(i->first - 1).momentum().x1(),
+                               - particles->data(i->first - 1).momentum().x2(),
+                               - particles->data(i->first - 1).momentum().x3());
         }
         momentum_total += i->second.momentum();
-        
         double x, y, z;
         /* ramdom position in a sphere
          * box length here has the meaning of the sphere radius
@@ -155,12 +149,12 @@ void SphereModus::initial_conditions(Particles *particles) {
 }
 
 /* boundary_condition - enforce specific type of boundaries */
-//FourVector boundary_condition(FourVector position,
+// FourVector boundary_condition(FourVector position,
 //  const SphereModus &sphere __attribute__((unused)), bool *boundary_hit) {
   /* no boundary */
 //  *boundary_hit = false;
 //  return position;
-//}
+// }
 
 /* check_collision_geometry - check if a collision happens between particles */
 void SphereModus::check_collision_geometry(Particles *particles,
@@ -169,13 +163,11 @@ void SphereModus::check_collision_geometry(Particles *particles,
   BoxModus const &box, size_t *rejection_conflict) {
   std::vector<std::vector<std::vector<std::vector<int> > > > grid;
   int N, x, y, z;
-
   /* the maximal radial propagation for light particle */
   int a = box.length + particles->time();
   /* For small boxes no point in splitting up in grids */
   /* calculate approximate grid size according to double interaction length */
   N = round(2.0 * a / sqrt(parameters.cross_section() * fm2_mb * M_1_PI) * 0.5);
-
   /* for small boxes not possible to split upo */
   if (unlikely(N < 4 || particles->size() < 10)) {
     FourVector distance;
@@ -198,7 +190,6 @@ void SphereModus::check_collision_geometry(Particles *particles,
     }
     return;
   }
-
   /* allocate grid */
   grid.resize(N);
   for (int i = 0; i < N; i++) {
@@ -217,7 +208,6 @@ void SphereModus::check_collision_geometry(Particles *particles,
     printd("grid cell particle %i: %i %i %i of %i\n", i->first, x, y, z, N);
     grid[x][y][z].push_back(i->first);
   }
-
   /* semi optimised nearest neighbour search:
    * http://en.wikipedia.org/wiki/Cell_lists
    */
@@ -254,7 +244,6 @@ void SphereModus::check_collision_geometry(Particles *particles,
              */
             if (*id_b <= i->first)
               continue;
-
             printd("grid cell particle %i <-> %i\n", i->first, *id_b);
             collision_criteria_geometry(particles, cross_sections,
               collision_list, parameters, i->first, *id_b, rejection_conflict);
@@ -267,46 +256,38 @@ void SphereModus::check_collision_geometry(Particles *particles,
 
 
 /* Evolve - the core of the box, stepping forward in time */
-int SphereModus::Evolve(Particles *particles, CrossSections *cross_sections, int *resonances, int *decays) {
+int SphereModus::Evolve(Particles *particles, CrossSections *cross_sections,
+                        int *resonances, int *decays) {
   std::list<int> collision_list, decay_list;
   size_t interactions_total = 0, previous_interactions_total = 0,
     interactions_this_interval = 0;
   size_t rejection_conflict = 0;
-
   /* startup values */
   print_measurements(*particles, interactions_total,
                      interactions_this_interval, ball);
-
   for (int steps = 0; steps < parameters.steps(); steps++) {
     /* Check resonances for decays */
     check_decays(particles, &decay_list, parameters);
-
     /* Do the decays */
     if (!decay_list.empty()) {
       (*decays) += decay_list.size();
       interactions_total = decay_particles(particles, &decay_list,
         interactions_total);
     }
-
     /* fill collision table by cells */
     check_collision_geometry(particles, cross_sections, &collision_list,
       parameters, lab, &rejection_conflict);
-
     /* particle interactions */
     if (!collision_list.empty())
       interactions_total = collide_particles(particles, &collision_list,
         interactions_total, resonances);
-
     /* propagate all particles */
     propagate_particles(particles, parameters, lab);
-
     /* physics output during the run */
     if (steps > 0 && (steps + 1) % parameters.output_interval() == 0) {
       interactions_this_interval = interactions_total
         - previous_interactions_total;
-
       previous_interactions_total = interactions_total;
-
       print_measurements(*particles, interactions_total,
                          interactions_this_interval, lab);
       printd("Resonances: %i Decays: %i\n", *resonances, *decays);
@@ -317,7 +298,6 @@ int SphereModus::Evolve(Particles *particles, CrossSections *cross_sections, int
       write_vtk(*particles);
     }
   }
-
   /* Guard against evolution */
   if (likely(parameters.steps > 0)) {
     /* if there are not particles no interactions happened */
@@ -332,32 +312,28 @@ int SphereModus::Evolve(Particles *particles, CrossSections *cross_sections, int
 }
 
 /* start up a sphere and run it */
-//int Sphere::evolve(const Laboratory &lab, char *path) {
+// int Sphere::evolve(const Laboratory &lab, char *path) {
 //  /* Read sphere config file parameters */
 //  Sphere *ball = new Sphere(lab);
 //  process_config_sphere(ball, path);
-
   /* Initialize box */
 //  print_startup(*ball);
 //  Particles *particles = new Particles;
 //  input_particles(particles, path);
 //  initial_conditions(particles, ball);
- // input_decaymodes(particles, path);
+// input_decaymodes(particles, path);
 //  CrossSections *cross_sections = new CrossSections;
 //  cross_sections->add_elastic_parameter(lab.cross_section());
-
   /* Compute stuff */
 //  int rc = Evolve(particles, cross_sections, lab);
-
   /* record IC startup */
 //  write_measurements_header(*particles);
 //  print_header();
 //  write_particles(*particles);
-
-
   /* tear down */
 //  delete particles;
- // delete cross_sections;
- // delete ball;
+// delete cross_sections;
+// delete ball;
 //  return rc;
-//}
+// }
+

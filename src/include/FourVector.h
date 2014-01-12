@@ -10,7 +10,7 @@
 #include <cmath>
 
 class FourVector {
-  public:
+ public:
     /* default constructor */
     FourVector(): x0_(0.0), x1_(0.0), x2_(0.0), x3_(0.0) {}
     /* useful constructor */
@@ -55,7 +55,7 @@ class FourVector {
     FourVector inline operator*=(const double &a);
     FourVector inline operator/=(const double &a);
 
-  private:
+ private:
     double x0_, x1_, x2_, x3_;
 };
 

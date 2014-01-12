@@ -13,6 +13,7 @@ class FourVector;
 #include <stdint.h>
 #include <time.h>
 #include <cmath>
+#include <list>
 
 #include "../include/CrossSections.h"
 #include "../include/Modus.h"
@@ -20,9 +21,8 @@ class FourVector;
 #include "../include/time.h"
 #include "../include/Parameters.h"
 
-class SphereModus : public Modus
-{
-  public:
+class SphereModus : public Modus {
+ public:
     /* default constructor with probable values */
     SphereModus(): radius(10.0f), timer_start(set_timer_start()) {}
     /* member funtions */
@@ -32,7 +32,8 @@ class SphereModus : public Modus
     virtual void initial_conditions(Particles *particles);
 //    virtual FourVector boundary_condition(FourVector position);
     inline timespec set_timer_start();
-  private:
+
+ private:
     /* Sphere radius length */
     float radius;
     /* starting time of the simulation */
@@ -49,6 +50,6 @@ timespec inline SphereModus::set_timer_start(void) {
 }
 
 /* enforce periodic boundary conditions */
-//FourVector SphereModus::boundary_condition(FourVector position);
+// FourVector SphereModus::boundary_condition(FourVector position);
 
 #endif  // SRC_INCLUDE_SPHERE_H_

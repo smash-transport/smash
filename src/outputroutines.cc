@@ -83,7 +83,8 @@ double measure_timediff(const timespec time_start) {
 /* print_measurements - console output during simulation */
 void print_measurements(const Particles &particles,
                         const size_t &scatterings_total,
-                        const size_t &scatterings_this_interval, float energy_ini, timespec time_start) {
+                        const size_t &scatterings_this_interval,
+                        float energy_ini, timespec time_start) {
   FourVector momentum_total(0, 0, 0, 0);
   /* calculate elapsed time */
   double elapsed = measure_timediff(time_start);
@@ -327,9 +328,9 @@ void write_oscar(const ParticleData &particle_data,
 void write_vtk(const Particles &particles) {
     FILE *fp = NULL;
     char filename[256];
-    
     snprintf(filename, sizeof(filename), "data/pos_0.%05i.vtk",
-             static_cast<int>((particles.cbegin()->second.position().x0() - 1.0) * 10));
+             static_cast<int>((particles.cbegin()->second.position().x0()
+             - 1.0) * 10));
     fp = fopen(filename, "w");
     /* Legacy VTK file format */
     fprintf(fp, "# vtk DataFile Version 2.0\n");

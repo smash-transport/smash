@@ -45,40 +45,33 @@ int main(int argc, char *argv[]) {
   char *p, *path;
   int opt, rc = 0;
   char modus_chooser[20];
-    
   struct option longopts[] = {
     { "help",       no_argument,            0, 'h' },
     { "modus",      required_argument,      0, 'm' },
     { "version",    no_argument,            0, 'V' },
     { NULL,         0, 0, 0 }
   };
-
   /* strip any path to progname */
   progname = argv[0];
   if ((p = strrchr(progname, '/')) != NULL)
     progname = p + 1;
   printf("%s (%d)\n", progname, VERSION_MAJOR);
-
   /* XXX: make path configurable */
   size_t len = strlen("./") + 1;
   path = reinterpret_cast<char *>(malloc(len));
   snprintf(path, len, "./");
-
 // read in config file
-    
     std::list<Parameters> configuration;
     process_config(&configuration, path);
-
     bool match = false;
     std::list<Parameters>::iterator i = configuration.begin();
     while (i != configuration.end()) {
         char *key = i->key();
         char *value = i->value();
         printd("Looking for match %s %s\n", key, value);
-        
         /* integer values */
         if (strcmp(key, "MODUS") == 0) {
-            strncpy(modus_chooser,value, sizeof(&modus_chooser));
+            strncpy(modus_chooser, value, sizeof(&modus_chooser));
             match = true;
         }
         /* remove processed entry */
@@ -90,8 +83,6 @@ int main(int argc, char *argv[]) {
             ++i;
         }
     }
-
-    
     while ((opt = getopt_long(argc, argv, "hm:V", longopts,
                               NULL)) != -1) {
         switch (opt) {
@@ -99,7 +90,7 @@ int main(int argc, char *argv[]) {
                 usage(EXIT_SUCCESS);
                 break;
             case 'm':
-                strncpy(modus_chooser,optarg, sizeof(modus_chooser));
+                strncpy(modus_chooser, optarg, sizeof(modus_chooser));
                 printf("Modus read in: %s \n", modus_chooser);
                 break;
                 //    case 'R':
@@ -118,25 +109,17 @@ int main(int argc, char *argv[]) {
                 usage(EXIT_FAILURE);
         }
     }
-
     printf("Modus for this calculation: %s \n", modus_chooser);
-    
     auto experiment = Experiment::create(modus_chooser);
-      
     experiment->configure(configuration);
-
     mkdir_data();
     write_oscar_header();
-    
     experiment->initialize(path);
-
   /* the time evolution of the relevant subsystem */
     experiment->run_time_evolution();
-    
   /* tear down */
     free(path);
     experiment->end();
- return rc;
-      
- 
+    return rc;
 }
+
