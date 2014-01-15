@@ -28,7 +28,7 @@ class Modus {
     Modus(): steps(10000), output_interval(100), testparticles(1),
         eps(0.001f), cross_section(10.0f), seed(1), energy_initial(0.0f),
         time_start(set_timer_start()) {}
-    /* special funtion should be called by specific subclass */
+    /* special function should be called by specific subclass */
     virtual void assign_params(std::list<Parameters> *configuration);
     virtual void print_startup();
     virtual void initial_conditions(Particles *p __attribute__((unused))) {

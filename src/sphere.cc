@@ -83,7 +83,7 @@ void SphereModus::initial_conditions(Particles *particles) {
             continue;
         printd("%s mass: %g [GeV]\n", i->second.name().c_str(),
                                       i->second.mass());
-        /* bose einstein distribution funtion with temperature 0.3 GeV */
+        /* bose einstein distribution function with temperature 0.3 GeV */
         double number_density = number_density_bose(i->second.mass(), 0.3);
         printf("IC number density %.6g [fm^-3]\n", number_density);
         /* cast while reflecting probability of extra particle */

@@ -76,7 +76,7 @@ void BoxModus::initial_conditions(Particles *particles) {
             continue;
         printd("%s mass: %g [GeV]\n", i->second.name().c_str(),
                i->second.mass());
-        /* bose einstein distribution funtion */
+        /* bose einstein distribution function */
         double number_density = number_density_bose(i->second.mass(),
                                                     this->temperature);
         /* cast while reflecting probability of extra particle */
