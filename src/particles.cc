@@ -18,7 +18,7 @@
 #include "include/outputroutines.h"
 #include "include/ParticleData.h"
 #include "include/Particles.h"
-#include "include/angles.h"
+#include "include/Angles.h"
 
 /* boost_CM - boost to center of momentum */
 void boost_CM(ParticleData *particle1, ParticleData *particle2,
@@ -160,7 +160,7 @@ void momenta_exchange(ParticleData *particle1, ParticleData *particle2) {
     particle1->momentum().x3());
 
   /* particle exchange momenta and scatter to random direction */
-  angles phitheta;
+  Angles phitheta;
   phitheta.distribute_isotropously();
   printd("Random momentum: %g %g %g %g \n", momentum_radial, phitheta.phi(),
         phitheta.costheta(), phitheta.sintheta());

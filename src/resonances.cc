@@ -24,7 +24,7 @@
 #include "include/Particles.h"
 #include "include/ParticleData.h"
 #include "include/ParticleType.h"
-#include "include/angles.h"
+#include "include/Angles.h"
 
 /* resonance_cross_section - energy-dependent cross section
  * for producing a resonance
@@ -209,7 +209,7 @@ int one_to_two(Particles *particles, int resonance_id, int type_a, int type_b) {
   double momentum_radial = sqrt(energy_a * energy_a - mass_a * mass_a);
   if (momentum_radial < 0.0)
     printf("Warning: radial momenta %g \n", momentum_radial);
-  angles phitheta;
+  Angles phitheta;
   phitheta.distribute_isotropously();
   if (energy_a  < mass_a || abs(phitheta.costheta()) > 1) {
     printf("Particle %d radial momenta %g phi %g cos_theta %g\n", type_a,
@@ -319,7 +319,7 @@ int one_to_three(Particles *particles, int resonance_id,
   printd("Calculating the angles...\n");
 
   /* momentum_a direction is random */
-  angles phitheta;
+  Angles phitheta;
   phitheta.distribute_isotropously();
   /* This is the angle of the plane of the three decay particles */
   new_particle_a.set_momentum(mass_a,

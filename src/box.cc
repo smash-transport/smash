@@ -19,7 +19,7 @@
 #include "include/macros.h"
 #include "include/outputroutines.h"
 #include "include/param-reader.h"
-#include "include/angles.h"
+#include "include/Angles.h"
 
 void BoxModus::assign_params(std::list<Parameters>
                                           *configuration) {
@@ -66,7 +66,7 @@ void BoxModus::print_startup() {
 /* initial_conditions - sets particle data for @particles */
 void BoxBoundaryConditions::initial_conditions(Particles *particles) {
     double momentum_radial, number_density_total = 0;
-    angles phitheta;
+    Angles phitheta;
     FourVector momentum_total(0, 0, 0, 0);
     size_t number_total = 0, number = 0;
     /* loop over all the particle types */

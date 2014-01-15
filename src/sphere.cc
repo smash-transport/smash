@@ -100,7 +100,7 @@ void SphereModus::initial_conditions(Particles *particles) {
     printf("IC contains %zu particles\n", number_total);
     /* now set position and momentum of the particles */
     double momentum_radial;
-    angles phitheta = angles();
+    Angles phitheta = Angles();
     for (std::map<int, ParticleData>::iterator i = particles->begin();
          i != particles->end(); ++i) {
         if (unlikely(i->first == particles->id_max() && !(i->first % 2))) {
@@ -110,7 +110,7 @@ void SphereModus::initial_conditions(Particles *particles) {
             /* thermal momentum according Maxwell-Boltzmann distribution */
             momentum_radial = sample_momenta(0.3,
                               particles->type(i->first).mass());
-            phitheta = angles().distribute_isotropously();
+            phitheta = Angles().distribute_isotropously();
             printd("Particle %d radial momenta %g phi %g cos_theta %g\n",
                    i->first, momentum_radial, phitheta.phi(),
                    phitheta.costheta());

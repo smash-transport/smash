@@ -14,9 +14,9 @@
 #include <cmath>
 
 
-class angles {
+class Angles {
  public:
-  angles();
+  Angles();
   // get new angles:
   void distribute_isotropously();
   // update angles:
@@ -44,15 +44,15 @@ class angles {
   double costheta_;
 };
 
-inline angles::angles() {}
+inline Angles::Angles() {}
 
-void inline angles::distribute_isotropously() {
+void inline Angles::distribute_isotropously() {
   // isotropous distribution: phi in [0, 2pi) and cos(theta) in [-1,1]
   phi_ = 2.0 * M_PI * drand48();
   costheta_ = -1.0 + 2.0 * drand48();
 }
 
-void inline angles::set_phi(const double& newphi) {
+void inline Angles::set_phi(const double& newphi) {
   phi_ = newphi;
   // check if phi is in 0 .. 2pi. If not, we simply transform it
   // there by subtracting/adding 2pi as often as needed.
@@ -60,7 +60,7 @@ void inline angles::set_phi(const double& newphi) {
     phi_ -= 2*M_PI*floor(phi_/2*M_PI);
   }
 }
-void inline angles::set_cos(const double& newcos) {
+void inline Angles::set_cos(const double& newcos) {
   costheta_ = newcos;
   // check if costheta_ is in -1..1. If not, well. Error handling here
   // is a lot harder than in the above. Still, I will silently do the
@@ -70,20 +70,20 @@ void inline angles::set_cos(const double& newcos) {
     costheta_ -= 2.0*floor((costheta_+1)/2);
   }
 }
-void inline angles::set_theta(const double& newtheta) {
+void inline Angles::set_theta(const double& newtheta) {
   // no error handling necessary, because this gives a sensible answer
   // for every real number.
   set_cos(cos(newtheta));
 }
 
-double inline angles::costheta() const { return costheta_; }
-double inline angles::phi() const { return phi_; }
-double inline angles::sintheta() const {
+double inline Angles::costheta() const { return costheta_; }
+double inline Angles::phi() const { return phi_; }
+double inline Angles::sintheta() const {
   return sqrt(1.0 - costheta_*costheta_);
 }
-double inline angles::x() const { return costheta_*cos(phi_); }
-double inline angles::y() const { return costheta_*sin(phi_); }
-double inline angles::z() const { return sintheta(); }
-double inline angles::theta() const { return acos(costheta_); }
+double inline Angles::x() const { return costheta_*cos(phi_); }
+double inline Angles::y() const { return costheta_*sin(phi_); }
+double inline Angles::z() const { return sintheta(); }
+double inline Angles::theta() const { return acos(costheta_); }
 
 #endif  // SRC_INCLUDE_ANGLES_H_
