@@ -64,7 +64,7 @@ void BoxModus::print_startup() {
 }
 
 /* initial_conditions - sets particle data for @particles */
-void BoxBoundaryConditions::initial_conditions(Particles *particles) {
+void BoxModus::initial_conditions(Particles *particles) {
     double momentum_radial, number_density_total = 0;
     Angles phitheta;
     FourVector momentum_total(0, 0, 0, 0);

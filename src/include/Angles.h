@@ -88,8 +88,8 @@ double inline Angles::phi() const { return phi_; }
 double inline Angles::sintheta() const {
   return sqrt(1.0 - costheta_*costheta_);
 }
-double inline Angles::x() const { return sintheta_()*cos(phi_); }
-double inline Angles::y() const { return sintheta_()*sin(phi_); }
+double inline Angles::x() const { return sintheta()*cos(phi_); }
+double inline Angles::y() const { return sintheta()*sin(phi_); }
 double inline Angles::z() const { return costheta_; }
 double inline Angles::theta() const { return acos(costheta_); }
 
