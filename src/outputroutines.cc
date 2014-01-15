@@ -230,10 +230,10 @@ void write_measurements(const Particles &particles,
   write_particles(particles);
 }
 
-void printd_list(std::list<int> &collision_list) {
+void printd_list(const std::list<int> &collision_list) {
   printd("Collision list contains:");
-  for (std::list<int>::iterator id = collision_list.begin();
-       id != collision_list.end(); ++id)
+  for (std::list<int>::const_iterator id = collision_list.cbegin();
+       id != collision_list.cend(); ++id)
          printd(" particle %d", *id);
   printd("\n");
 }
