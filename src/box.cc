@@ -1,7 +1,9 @@
 /*
- *    Copyright (c) 2013
+ *    Copyright (c) 2013-14
  *      maximilian attems <attems@fias.uni-frankfurt.de>
  *      Jussi Auvinen <auvinen@fias.uni-frankfurt.de>
+ *      Hannah Petersen <petersen@fias.uni-frankfurt.de> 
+ * 
  *    GNU General Public License (GPLv3)
  */
 
@@ -19,9 +21,9 @@
 #include "include/param-reader.h"
 #include "include/angles.h"
 
-void BoxBoundaryConditions::assign_params(std::list<Parameters>
+void BoxModus::assign_params(std::list<Parameters>
                                           *configuration) {
-    BoundaryConditions::assign_params(configuration);
+    Modus::assign_params(configuration);
     bool match = false;
     std::list<Parameters>::iterator i = configuration->begin();
     while (i != configuration->end()) {
@@ -54,8 +56,8 @@ void BoxBoundaryConditions::assign_params(std::list<Parameters>
 
 
 /* print_startup - console output on startup of box specific parameters */
-void BoxBoundaryConditions::print_startup() {
-    BoundaryConditions::print_startup();
+void BoxModus::print_startup() {
+    Modus::print_startup();
     printf("Size of the box: %g x %g x %g fm\n", length, length, length);
     printf("Initial temperature: %g GeV\n", temperature);
     printf("IC type %d\n", initial_condition);
@@ -73,7 +75,8 @@ void BoxBoundaryConditions::initial_conditions(Particles *particles) {
     /* Particles with width > 0 (resonances) do not exist in the beginning */
         if (i->second.width() > 0.0)
             continue;
-        printd("%s mass: %g [GeV]\n", i->second.name().c_str(), i->second.mass());
+        printd("%s mass: %g [GeV]\n", i->second.name().c_str(),
+               i->second.mass());
         /* bose einstein distribution funtion */
         double number_density = number_density_bose(i->second.mass(),
                                                     this->temperature);
@@ -96,7 +99,7 @@ void BoxBoundaryConditions::initial_conditions(Particles *particles) {
     /* Set paricles IC: */
     for (std::map<int, ParticleData>::iterator i = particles->begin();
          i != particles->end(); ++i) {
-        double x, y, z, time_start;
+        double x, y, z, time_begin;
         /* back to back pair creation with random momenta direction */
         if (unlikely(i->first == particles->id_max() && !(i->first % 2))) {
             /* poor last guy just sits around */
@@ -105,33 +108,32 @@ void BoxBoundaryConditions::initial_conditions(Particles *particles) {
             if (this->initial_condition != 2) {
                 /* thermal momentum according Maxwell-Boltzmann distribution */
                 momentum_radial = sample_momenta(this->temperature,
-                                                 particles->type(i->first).mass());
+                                       particles->type(i->first).mass());
             } else {
                 /* IC == 2 initial thermal momentum is the average 3T */
                 momentum_radial = 3.0 * this->temperature;
             }
             phitheta.distribute_isotropously();
-            printd("Particle %zu radial momenta %g phi %g cos_theta %g\n", i->first,
-                   momentum_radial, phitheta.phi(), phitheta.costheta());
+            printd("Particle %zu radial momenta %g phi %g cos_theta %g\n",
+                   i->first, momentum_radial, phitheta.phi(),
+                   phitheta.costheta());
             i->second.set_momentum(particles->type(i->first).mass(),
                                    momentum_radial * phitheta.x(),
                                    momentum_radial * phitheta.y(),
                                    momentum_radial * phitheta.z());
         } else {
             i->second.set_momentum(particles->type(i->first).mass(),
-                                   - particles->data(i->first - 1).momentum().x1(),
-                                   - particles->data(i->first - 1).momentum().x2(),
-                                   - particles->data(i->first - 1).momentum().x3());
+                               - particles->data(i->first - 1).momentum().x1(),
+                               - particles->data(i->first - 1).momentum().x2(),
+                               - particles->data(i->first - 1).momentum().x3());
         }
         momentum_total += i->second.momentum();
-        
-        time_start = 1.0;
+        time_begin = 1.0;
         /* ramdom position in a quadratic box */
         x = drand48() * this->length;
         y = drand48() * this->length;
         z = drand48() * this->length;
-        i->second.set_position(time_start, x, y, z);
-        
+        i->second.set_position(time_begin, x, y, z);
         /* IC: debug checks */
         printd_momenta(i->second);
         printd_position(i->second);
@@ -139,7 +141,7 @@ void BoxBoundaryConditions::initial_conditions(Particles *particles) {
     /* Display on startup if pseudo grid is used */
     number = number_total;
     int const grid_number = round(this->length
-                                  / sqrt(this->cross_section * fm2_mb * M_1_PI) * 0.5);
+                           / sqrt(this->cross_section * fm2_mb * M_1_PI) * 0.5);
     /* pseudo grid not used for 3^3 or extremely small particle numbers */
     if (grid_number >= 4 && number > 10)
         printf("Simulation with pseudo grid: %d^3\n", grid_number);
@@ -150,9 +152,8 @@ void BoxBoundaryConditions::initial_conditions(Particles *particles) {
     number_density_initial = number_density_total;
 }
 
-
 /* check_collision_geometry - check if a collision happens between particles */
-void BoxBoundaryConditions::check_collision_geometry(Particles *particles,
+void BoxModus::check_collision_geometry(Particles *particles,
   CrossSections *cross_sections,
   std::list<int> *collision_list,
   size_t *rejection_conflict) {
@@ -165,29 +166,11 @@ void BoxBoundaryConditions::check_collision_geometry(Particles *particles,
   N = round(length
             / sqrt(cross_section * fm2_mb * M_1_PI) * 0.5);
   if (unlikely(N < 4 || particles->size() < 10)) {
-    FourVector distance;
-    double radial_interaction = sqrt(cross_section * fm2_mb
-                                     * M_1_PI) * 2;
-    for (std::map<int, ParticleData>::iterator i = particles->begin();
-         i != particles->end(); ++i) {
-      for (std::map<int, ParticleData>::iterator j = particles->begin();
-           j != particles->end(); ++j) {
-        /* exclude check on same particle and double counting */
-        if (i->first >= j->first)
-          continue;
-
-        /* XXX: apply periodic boundary condition */
-        distance = i->second.position() - j->second.position();
-        /* skip particles that are double interaction radius length away */
-        if (distance > radial_interaction)
-           continue;
-        collision_criteria_geometry(particles, cross_sections, collision_list, *this,
-         i->first, j->first, rejection_conflict);
-      }
-    }
+      /* XXX: apply periodic boundary condition */
+      Modus::check_collision_geometry(particles,
+      cross_sections, collision_list, rejection_conflict);
     return;
   }
-
   /* allocate grid */
   grid.resize(N);
   for (int i = 0; i < N; i++) {
@@ -269,7 +252,6 @@ void BoxBoundaryConditions::check_collision_geometry(Particles *particles,
              */
             if (*id_other <= i->first)
               continue;
-
             printd("grid cell particle %i <-> %i\n", i->first, *id_other);
             if (shift == 0) {
               collision_criteria_geometry(particles, cross_sections,
@@ -293,10 +275,9 @@ void BoxBoundaryConditions::check_collision_geometry(Particles *particles,
 }
 
 /* propagate all particles */
-void BoxBoundaryConditions::propagate(Particles *particles) {
+void BoxModus::propagate(Particles *particles) {
     FourVector distance, position;
-    
-    for (std::map<int, ParticleData>::iterator i = particles->begin();
+        for (std::map<int, ParticleData>::iterator i = particles->begin();
          i != particles->end(); ++i) {
         /* propagation for this time step */
         distance.set_FourVector(eps,
@@ -305,9 +286,7 @@ void BoxBoundaryConditions::propagate(Particles *particles) {
                                 i->second.velocity_z() * eps);
         printd("Particle %d motion: %g %g %g %g\n", i->first,
                distance.x0(), distance.x1(), distance.x2(), distance.x3());
-    
-    
-    /* treat the box boundaries */
+/* treat the box boundaries */
     bool wall_hit = false;
     position = i->second.position();
     position += distance;
@@ -322,48 +301,39 @@ void BoxBoundaryConditions::propagate(Particles *particles) {
     }
 }
 
-
 /* boundary_condition - enforce specific type of boundaries
  *
  * This assumes that the particle is at most one box length
  * away from the boundary to shift it in.
  */
-FourVector BoxBoundaryConditions::boundary_condition(FourVector position, bool *boundary_hit) {
+FourVector BoxModus::boundary_condition(FourVector position,
+                                        bool *boundary_hit) {
     /* Check positivity and box size */
     if (position.x1() > 0 && position.x2() > 0 && position.x3() > 0
         && position.x1() < length && position.x2() < length
         && position.x3() < length)
         goto out;
-    
     *boundary_hit = true;
-    
     /* Enforce periodic boundary condition */
     if (position.x1() < 0)
         position.set_x1(position.x1() + length);
-    
     if (position.x2() < 0)
         position.set_x2(position.x2() + length);
-    
     if (position.x3() < 0)
         position.set_x3(position.x3() + length);
-    
     if (position.x1() > length)
         position.set_x1(position.x1() - length);
-    
     if (position.x2() > length)
         position.set_x2(position.x2() - length);
-    
     if (position.x3() > length)
         position.set_x3(position.x3() - length);
-    
 out:
     return position;
 }
 
 
 /* evolve - the core of the box, stepping forward in time */
-int BoxBoundaryConditions::prepare_evolution(Particles *particles) {
-    
+int BoxModus::sanity_check(Particles *particles) {
     /* fixup positions on startup, particles need to be *inside* the box */
     for (std::map<int, ParticleData>::iterator i = particles->begin();
          i != particles->end(); ++i) {
@@ -372,7 +342,6 @@ int BoxBoundaryConditions::prepare_evolution(Particles *particles) {
                                                   &boundary_hit));
     }
     return 0;
-    
 }
 
 

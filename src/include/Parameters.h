@@ -12,7 +12,7 @@
 #include <cstdlib>
 
 class Parameters {
-  public:
+ public:
     /* default constructor */
     Parameters(char *k, char *v): key_(strdup(k)), value_(strdup(v)) {}
     /* copy constructor */
@@ -32,7 +32,7 @@ class Parameters {
     inline void set_value(char *value_string);
     inline char *value(void) const;
 
-  private:
+ private:
     char *key_;
     char *value_;
 };

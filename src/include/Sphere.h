@@ -13,18 +13,18 @@ class FourVector;
 #include <stdint.h>
 #include <time.h>
 #include <cmath>
+#include <list>
 
 #include "../include/CrossSections.h"
-#include "../include/BoundaryConditions.h"
+#include "../include/Modus.h"
 #include "../include/Particles.h"
 #include "../include/time.h"
 #include "../include/Parameters.h"
 
-class SphereBoundaryConditions : public BoundaryConditions
-{
-  public:
+class SphereModus : public Modus {
+ public:
     /* default constructor with probable values */
-    SphereBoundaryConditions(): radius(10.0f), timer_start(set_timer_start()) {}
+    SphereModus(): radius(10.0f), timer_start(set_timer_start()) {}
     /* member funtions */
     /* special class funtions */
     virtual int evolve(Particles *particles, CrossSections *cross_sections);
@@ -32,7 +32,8 @@ class SphereBoundaryConditions : public BoundaryConditions
     virtual void initial_conditions(Particles *particles);
 //    virtual FourVector boundary_condition(FourVector position);
     inline timespec set_timer_start();
-  private:
+
+ private:
     /* Sphere radius length */
     float radius;
     /* starting time of the simulation */
@@ -42,13 +43,13 @@ class SphereBoundaryConditions : public BoundaryConditions
 
 
 /* set the timer to the actual time in nanoseconds precision */
-timespec inline SphereBoundaryConditions::set_timer_start(void) {
+timespec inline SphereModus::set_timer_start(void) {
   timespec time;
   clock_gettime(&time);
   return time;
 }
 
 /* enforce periodic boundary conditions */
-//FourVector SphereBoundaryConditions::boundary_condition(FourVector position);
+// FourVector SphereModus::boundary_condition(FourVector position);
 
 #endif  // SRC_INCLUDE_SPHERE_H_

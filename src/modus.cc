@@ -7,10 +7,12 @@
  *
  */
 
-#include "include/BoundaryConditions.h"
+#include "include/Modus.h"
+#include "include/collisions.h"
+#include "include/constants.h"
 #include "include/outputroutines.h"
 
-void BoundaryConditions::assign_params(std::list<Parameters> *configuration) {
+void Modus::assign_params(std::list<Parameters> *configuration) {
     bool match = false;
     std::list<Parameters>::iterator i = configuration->begin();
     while (i != configuration->end()) {
@@ -59,23 +61,27 @@ void BoundaryConditions::assign_params(std::list<Parameters> *configuration) {
 }
 
 /* print_startup - console output on startup of general parameters */
-void BoundaryConditions::print_startup() {
+void Modus::print_startup() {
     printf("Elastic cross section: %g mb\n", cross_section);
     printf("Using temporal stepsize: %g fm/c\n", eps);
     printf("Maximum number of steps: %i \n", steps);
     printf("Random number seed: %lli \n", seed);
 }
 
-float BoundaryConditions::energy_total(Particles *particles) {
-    float energy_total = 0.0;
+/* calculates the total energy in the system from zero component of 
+ * all momenta of particles
+ * XXX should be expanded to all quantum numbers of interest */
+float Modus::energy_total(Particles *particles) {
+    float energy_sum = 0.0;
     for (std::map<int, ParticleData>::iterator i = particles->begin();
          i != particles->end(); ++i) {
-         energy_total += i->second.momentum().x0();
+         energy_sum += i->second.momentum().x0();
      }
-    return energy_total;
+    return energy_sum;
 }
 
-void BoundaryConditions::propagate(Particles *particles) {
+/*general propagation routine */
+void Modus::propagate(Particles *particles) {
     FourVector distance, position;
     for (std::map<int, ParticleData>::iterator i = particles->begin();
          i != particles->end(); ++i) {
@@ -89,16 +95,40 @@ void BoundaryConditions::propagate(Particles *particles) {
     }
 }
 
-int BoundaryConditions::prepare_evolution(Particles *particles) {
+/*empty methods are needed in Boxmodus */
+int Modus::sanity_check(Particles *particles __attribute__((unused))) {
     return 0;
 }
 
-FourVector BoundaryConditions::boundary_condition(FourVector position,
-                                                  bool *boundary_hit) {
+FourVector Modus::boundary_condition(FourVector position,
+                  bool *boundary_hit __attribute__((unused))) {
+    return position;
 }
 
-// XXX needs to be implemented in general form
-void BoundaryConditions::check_collision_geometry(Particles *particles,
+// check particle pairs for collision
+void Modus::check_collision_geometry(Particles *particles,
        CrossSections *cross_sections, std::list<int> *collision_list,
        size_t *rejection_conflict) {
+    FourVector distance;
+    double radial_interaction = sqrt(cross_section * fm2_mb
+                                     * M_1_PI) * 2;
+    for (std::map<int, ParticleData>::iterator i = particles->begin();
+         i != particles->end(); ++i) {
+        for (std::map<int, ParticleData>::iterator j = particles->begin();
+             j != particles->end(); ++j) {
+            /* exclude check on same particle and double counting */
+            if (i->first >= j->first)
+                continue;
+            distance = i->second.position() - j->second.position();
+            /* skip particles that are double interaction radius length away */
+            if (distance > radial_interaction)
+                continue;
+            collision_criteria_geometry(particles, cross_sections,
+                                        collision_list, *this,
+                                        i->first, j->first, rejection_conflict);
+        }
+    }
 }
+
+
+

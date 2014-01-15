@@ -9,34 +9,33 @@
 
 #include <memory>
 #include <list>
-#include "../include/Parameters.h"
-#include "../include/BoundaryConditions.h"
-#include "../include/Particles.h"
-#include "../include/CrossSections.h"
 
-class Experiment
-{
-public:
-    static std::unique_ptr<Experiment> create(char *modus);
-    virtual void config(std::list<Parameters> configuration) = 0;
+#include "../include/CrossSections.h"
+#include "../include/Modus.h"
+#include "../include/Parameters.h"
+#include "../include/Particles.h"
+
+class Experiment {
+ public:
+    static std::unique_ptr<Experiment> create(char *modus_chooser);
+    virtual void configure(std::list<Parameters> configuration) = 0;
     virtual void initialize(char *path)=0;
-    virtual void run()=0;
+    virtual void run_time_evolution()=0;
     virtual void end()=0;
 };
 
-template <typename BoundaryConditions> class ExperimentImplementation : public Experiment
-{
-public:
-    virtual void config(std::list<Parameters> configuration);
+template <typename Modus> class ExperimentImplementation : public Experiment {
+ public:
+    virtual void configure(std::list<Parameters> configuration);
     virtual void initialize(char *path);
-    virtual void run();
+    virtual void run_time_evolution();
     virtual void end();
-    
-private:
-    BoundaryConditions bc;
+
+ private:
+    Modus bc;
     Particles *particles = new Particles;
     CrossSections *cross_sections = new CrossSections;
 };
 
-#endif  // SRC_INCLUDE_Experiment_H_
+#endif  // SRC_INCLUDE_EXPERIMENT_H_
 
