@@ -409,7 +409,8 @@ int one_to_three(Particles *particles, int resonance_id,
     printf("1->3 energy not conserved! Before: %g After: %g",
            total_energy, energy);
 
-  if (px > really_small || py > really_small || pz > really_small)
+  if (fabs(px) > really_small || fabs(py) > really_small
+      || fabs(pz) > really_small)
     printf("1->3 momentum check failed. Total momentum: %g %g %g\n",
            px, py, pz);
 
