@@ -44,7 +44,7 @@ class Angles {
   double costheta_;
 };
 
-inline Angles::Angles() {}
+inline Angles::Angles() : phi_(0), costheta_(0) {}
 
 void inline Angles::distribute_isotropously() {
   // isotropous distribution: phi in [0, 2pi) and cos(theta) in [-1,1]
@@ -56,8 +56,10 @@ void inline Angles::set_phi(const double& newphi) {
   phi_ = newphi;
   // check if phi is in 0 .. 2pi. If not, we simply transform it
   // there by subtracting/adding 2pi as often as needed.
+  // floor(phi/(2pi) is the number of (2pi)s that we need to subtract
+  // (why use a loop if one statement can do it?)
   if (phi_ < 0 || phi_ >= 2*M_PI) {
-    phi_ -= 2*M_PI*floor(phi_/2*M_PI);
+    phi_ -= 2*M_PI*floor(phi_/(2*M_PI));
   }
 }
 void inline Angles::set_cos(const double& newcos) {
