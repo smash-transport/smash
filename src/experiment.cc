@@ -2,7 +2,7 @@
  *
  *    Copyright (c) 2012-2013
  *      Hannah Petersen <petersen@fias.uni-frankfurt.de>
- *      
+ *
  *    GNU General Public License (GPLv3)
  *
  */
@@ -29,12 +29,10 @@
 std::unique_ptr<Experiment> Experiment::create(char *modus_chooser) {
   typedef std::unique_ptr<Experiment> ExperimentPointer;
   if (strcmp(modus_chooser, "Box") == 0) {
-    return ExperimentPointer{new ExperimentImplementation<BoxModus>};
-  }
-//  else if (modus == 2) {
+    return ExperimentPointer {new ExperimentImplementation<BoxModus>};
+// } else if (modus == 2) {
 //    return ExperimentPointer{new ExperimentImplementation<SphereModus>};
-//  }
-    else {
+  } else {
     throw std::string("Invalid Modus requested from Experiment::create.");
   }
 }

@@ -17,6 +17,7 @@
 
 class Experiment {
  public:
+    Experiment() {}
     static std::unique_ptr<Experiment> create(char *modus_chooser);
     virtual void configure(std::list<Parameters> configuration) = 0;
     virtual void initialize(char *path)=0;

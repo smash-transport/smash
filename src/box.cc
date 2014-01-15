@@ -329,7 +329,7 @@ FourVector BoxModus::boundary_condition(FourVector position,
         position.set_x2(position.x2() - length);
     if (position.x3() > length)
         position.set_x3(position.x3() - length);
-out:
+  out:
     return position;
 }
 
