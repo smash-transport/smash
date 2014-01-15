@@ -44,19 +44,6 @@ add_test(mash_steps ${PROJECT_BINARY_DIR}/smash ${CTEST_MASH_COMMAND_OPTIONS})
 set(CTEST_MASH_COMMAND_OPTIONS "-S 500 -m 2")
 add_test(sphere_steps ${PROJECT_BINARY_DIR}/smash ${CTEST_MASH_COMMAND_OPTIONS})
 
-# XXX: verify that binary copes with negative temperature
-# XXX: verify that binary copes with negative and abismall box
-
-# verify that binary copes with huge cross section
-set(CTEST_MASH_COMMAND_OPTIONS "-s 160 -S 500")
-add_test(mash_huge_sigma ${PROJECT_BINARY_DIR}/smash ${CTEST_MASH_COMMAND_OPTIONS})
-set(CTEST_MASH_COMMAND_OPTIONS "-s 160 -S 500 -m 2")
-add_test(sphere_huge_sigma ${PROJECT_BINARY_DIR}/smash ${CTEST_MASH_COMMAND_OPTIONS})
-
-# verify that binary copes with bizarre crash input
-set(CTEST_MASH_COMMAND_OPTIONS "-O [51200]")
-add_test(mash_crash ${PROJECT_BINARY_DIR}/smash ${CTEST_MASH_COMMAND_OPTIONS})
-
 # verify that default run has no mem leaks
 set(CTEST_MEMORYCHECK_COMMAND valgrind )
 set(CTEST_MEMORYCHECK_COMMAND_OPTIONS "-v")
