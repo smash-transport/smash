@@ -11,7 +11,7 @@
 #include <string>
 
 class ParticleType {
-  public:
+ public:
     /* Use improbable values for default constructor */
     ParticleType() : name_("unknown"), mass_(-1), width_(-1), pdgcode_(-1),
                      isospin_(100), charge_(100), spin_(100) {}
@@ -33,7 +33,7 @@ class ParticleType {
     /* Spin is 2 * particle data book value */
     inline int spin(void) const;
 
-  private:
+ private:
     /* Data of the particle type */
     std::string name_;
     float mass_;

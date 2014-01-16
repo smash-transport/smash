@@ -14,7 +14,7 @@
 #include "../include/FourVector.h"
 
 class ParticleData {
-  public:
+ public:
   /* Use improbable values for default constructor */
   ParticleData() :id_(-1), pdgcode_(-1), id_partner_(-1), id_process_(-1),
     collision_time_(0.0), process_type_(-1) {}
@@ -56,7 +56,7 @@ class ParticleData {
   inline bool operator==(int id_a) const;
   inline bool operator<(int id_a) const;
 
-  private:
+ private:
     /* Each particle has a unique identifier */
     int id_;
     /* pdg id of the particle */
@@ -222,3 +222,4 @@ inline bool ParticleData::operator<(int id_a) const {
 }
 
 #endif  // SRC_INCLUDE_PARTICLEDATA_H_
+

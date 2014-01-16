@@ -1,8 +1,9 @@
 /*
  *
- *    Copyright (c) 2012-2013
+ *    Copyright (c) 2012-2014
  *      maximilian attems <attems@fias.uni-frankfurt.de>
  *      Jussi Auvinen <auvinen@fias.uni-frankfurt.de>
+ *      Hannah Petersen <petersen@fias.uni-frankfurt.de>
  *
  *    GNU General Public License (GPLv3)
  *
@@ -16,14 +17,12 @@
 #include <map>
 #include <string>
 
-#include "include/Box.h"
 #include "include/FourVector.h"
-#include "include/Laboratory.h"
+#include "include/Modus.h"
 #include "include/Parameters.h"
 #include "include/Particles.h"
 #include "include/ParticleData.h"
 #include "include/ParticleType.h"
-#include "include/Sphere.h"
 #include "include/macros.h"
 #include "include/time.h"
 
@@ -51,26 +50,6 @@ void warn_wrong_params(std::list<Parameters> *configuration) {
   configuration->clear();
 }
 
-/* print_startup - console output on startup of general parameters */
-void print_startup(const Laboratory &parameters) {
-  printf("Elastic cross section: %g [mb]\n", parameters.cross_section());
-  printf("Using temporal stepsize: %g [GeV]\n", parameters.eps());
-  printf("Maximum number of steps: %i \n", parameters.steps());
-  printf("Random number seed: %li \n", parameters.seed());
-}
-
-/* print_startup - console output on startup of box specific parameters */
-void print_startup(const Box &box) {
-  printf("Size of the box: %g x %g x %g [fm]\n", box.length(), box.length(),
-    box.length());
-  printf("Initial temperature: %g [GeV]\n", box.temperature());
-  printf("IC type %d\n", box.initial_condition());
-}
-
-/* print_startup - console output on startup of sphere specific parameters */
-void print_startup(const Sphere &ball) {
-  printf("Volume of the sphere: 4 * pi * %g^2 [fm]\n", ball.radius());
-}
 
 /* print_header - title for each row */
 void print_header(void) {
@@ -94,45 +73,47 @@ void mkdir_data(void) {
 }
 
 /* measure_timediff - time the simulation used */
-double measure_timediff(const Box &box) {
+double measure_timediff(const timespec time_start) {
   timespec now;
   clock_gettime(&now);
   return (now.tv_sec + now.tv_nsec / 10.0E9
-    - box.time_start().tv_sec -   box.time_start().tv_nsec / 10.0E9);
+    - time_start.tv_sec -   time_start.tv_nsec / 10.0E9);
 }
 
 /* print_measurements - console output during simulation */
 void print_measurements(const Particles &particles,
                         const size_t &scatterings_total,
                         const size_t &scatterings_this_interval,
-                        const Box &box) {
+                        float energy_ini, timespec time_start) {
   FourVector momentum_total(0, 0, 0, 0);
   /* calculate elapsed time */
-  double elapsed = measure_timediff(box);
+  double elapsed = measure_timediff(time_start);
   double time = 0.0;
 
   for (std::map<int, ParticleData>::const_iterator i = particles.cbegin();
        i != particles.cend(); ++i) {
-    momentum_total += i->second.momentum();
+      momentum_total += i->second.momentum();
     /* use the time from the last active particle - startup time */
     time = i->second.position().x0() - 1.0;
   }
+
   if (likely(time > 0))
     printf("%5g%13g%13g%13g%10zu%10zu%13g\n", time,
-           box.energy_initial() - momentum_total.x0(),
+           energy_ini - momentum_total.x0(),
            sqrt(-1 * momentum_total.DotThree()),
            scatterings_total * 2 / (particles.size() * time),
            scatterings_this_interval, particles.size(), elapsed);
   else
-    printf("%5g%13g%13g%13g%10i%10zu%13g\n", time,
-          box.energy_initial() - momentum_total.x0(),
-           sqrt(-1 * momentum_total.DotThree()), 0.0, 0,
-           particles.size(), elapsed);
+      printf("%5g%13g%13g%13g%10i%10zu%13g\n", time,
+             energy_ini - momentum_total.x0(),
+             sqrt(-1 * momentum_total.DotThree()), 0.0, 0,
+             particles.size(), elapsed);
 }
 
+
 /* print_tail - output at the end of the simulation */
-void print_tail(const Box &box, const double &scattering_rate) {
-  double time = measure_timediff(box);
+void print_tail(const timespec time_start, const double &scattering_rate) {
+  double time = measure_timediff(time_start);
   print_line();
   /* print finishing time in human readable way:
    * time < 10 min => seconds
@@ -181,25 +162,28 @@ void printd_position(const ParticleData &particle __attribute__((unused))) {
 /* write_measurements_header - create new files
  *  (erase old content if file exists) and write
  * the headers for decays.dat, collisions.dat
+ * and particletypes.dat
  */
-void write_measurements_header() {
-  FILE *fp = NULL;
+void write_measurements_header(const Particles &particletypes) {
+  FILE *fp;
   char filename[256];
   snprintf(filename, sizeof(filename), "data/decays.dat");
   fp = fopen(filename, "w");
-  if (!fp) {
-    fprintf(stderr, "E: can't write to %s\n", filename);
-    exit(EXIT_FAILURE);
-  }
   fprintf(fp, " Time       Decays     Resonances\n");
   fclose(fp);
   snprintf(filename, sizeof(filename), "data/collisions.dat");
   fp = fopen(filename, "w");
-  if (!fp) {
-    fprintf(stderr, "E: can't write to %s\n", filename);
-    exit(EXIT_FAILURE);
-  }
   fprintf(fp, " Time     Actions_tot   Actions_ival     Rejections\n");
+  fclose(fp);
+  snprintf(filename, sizeof(filename), "data/particletypes.dat");
+  fp = fopen(filename, "w");
+  fprintf(fp, " Time ");
+  for (std::map<int, ParticleType>::const_iterator
+       i = particletypes.types_cbegin(); i != particletypes.types_cend();
+       ++i) {
+    fprintf(fp, " %11s ", i->second.name().c_str());
+  }
+  fprintf(fp, "\n");
   fclose(fp);
 }
 
@@ -209,7 +193,7 @@ void write_measurements_header() {
 void write_measurements(const Particles &particles,
   int interactions_total, int interactions_this_interval, int decays,
   int resonances, const size_t &rejection_conflict) {
-  FILE *fp = NULL;
+  FILE *fp;
   char filename[256];
 
   snprintf(filename, sizeof(filename), "data/decays.dat");
@@ -222,21 +206,41 @@ void write_measurements(const Particles &particles,
           interactions_total, interactions_this_interval, rejection_conflict);
   fclose(fp);
 
+  /* output of how many particles of each type are present */
+  {
+  std::map<int, size_t> type_numbers;
+  /* XXX: Number of elements = particle types, initialize each amount to 0 */
+
+  for (std::map<int, ParticleData>::const_iterator i = particles.cbegin();
+       i != particles.cend(); ++i) {
+      type_numbers[i->second.pdgcode()]++;
+  }
+  snprintf(filename, sizeof(filename), "data/particletypes.dat");
+  fp = fopen(filename, "a");
+  fprintf(fp, "%5g", particles.time());
+  for (std::map<int, size_t>::const_iterator i = type_numbers.begin();
+       i != type_numbers.end(); ++i) {
+    fprintf(fp, "%13zu", i->second);
+  }
+  fprintf(fp, "\n");
+  fclose(fp);
+  }
+
   /* write actual data output */
   write_particles(particles);
 }
 
-void printd_list(std::list<int> collision_list) {
+void printd_list(const std::list<int> &collision_list) {
   printd("Collision list contains:");
-  for (std::list<int>::iterator id = collision_list.begin();
-       id != collision_list.end(); ++id)
+  for (std::list<int>::const_iterator id = collision_list.cbegin();
+       id != collision_list.cend(); ++id)
          printd(" particle %d", *id);
   printd("\n");
 }
 
 /* write_particles - writes out data of the specific particles */
 void write_particles(const Particles &particles) {
-  FILE *fp = NULL;
+  FILE *fp;
   char filename[256];
 
   snprintf(filename, sizeof(filename), "data/momenta_%.5f.dat",
@@ -263,16 +267,12 @@ void write_particles(const Particles &particles) {
 
 /* write_oscar_header - OSCAR header format */
 void write_oscar_header(void) {
-  FILE *fp = NULL;
+  FILE *fp;
 
   fp = fopen("data/collision.dat", "w");
-  if (!fp) {
-    fprintf(stderr, "E: can't write to collision.dat\n");
-    exit(EXIT_FAILURE);
-  }
   fprintf(fp, "# OSC1999A\n");
   fprintf(fp, "# Interaction history\n");
-  fprintf(fp, "# mash \n");
+  fprintf(fp, "# smash \n");
   fprintf(fp, "# \n");
   fclose(fp);
 }
@@ -282,7 +282,7 @@ void write_oscar_header(void) {
 void write_oscar(const ParticleData &particle_data,
                  const ParticleType &particle_type,
                  const int initial, const int final) {
-  FILE *fp = NULL;
+  FILE *fp;
   fp = fopen("data/collision.dat", "a");
   /* OSCAR line prefix : initial final
    * particle creation: 0 1
@@ -309,7 +309,7 @@ void write_oscar(const ParticleData &particle_data,
 /* write_oscar - use this for the other particles in same process */
 void write_oscar(const ParticleData &particle_data,
                  const ParticleType &particle_type) {
-  FILE *fp = NULL;
+  FILE *fp;
   fp = fopen("data/collision.dat", "a");
 
   /* particle_index, particle_pdgcode, ?, momenta, mass position */
@@ -326,39 +326,39 @@ void write_oscar(const ParticleData &particle_data,
 
 /* write_vtk - VTK file describing particle position */
 void write_vtk(const Particles &particles) {
-  FILE *fp = NULL;
-  char filename[256];
-
-  snprintf(filename, sizeof(filename), "data/pos_0.%05i.vtk",
-    static_cast<int>((particles.cbegin()->second.position().x0() - 1.0) * 10));
-  fp = fopen(filename, "w");
-  /* Legacy VTK file format */
-  fprintf(fp, "# vtk DataFile Version 2.0\n");
-  fprintf(fp, "Generated from molecular-offset data\n");
-  fprintf(fp, "ASCII\n");
-  /* Unstructured data sets are composed of points, lines, polygons, .. */
-  fprintf(fp, "DATASET UNSTRUCTURED_GRID\n");
-  fprintf(fp, "POINTS %zu double\n", particles.size());
-  for (std::map<int, ParticleData>::const_iterator i = particles.cbegin();
-       i != particles.cend(); ++i)
-    fprintf(fp, "%g %g %g\n", i->second.position().x1(),
-            i->second.position().x2(), i->second.position().x3());
-  fprintf(fp, "CELLS %zu %zu\n", particles.size(), particles.size() * 2);
-  for (size_t point_index = 0; point_index < particles.size(); point_index++)
-    fprintf(fp, "1 %zu\n", point_index);
-  fprintf(fp, "CELL_TYPES %zu\n", particles.size());
-  for (size_t point_index = 0; point_index < particles.size(); point_index++)
-    fprintf(fp, "1\n");
-  fprintf(fp, "POINT_DATA %zu\n", particles.size());
-  fprintf(fp, "SCALARS pdg_codes int 1\n");
-  fprintf(fp, "LOOKUP_TABLE default\n");
-  for (std::map<int, ParticleData>::const_iterator i = particles.cbegin();
-       i != particles.cend(); ++i)
-    fprintf(fp, "%i\n", i->second.pdgcode());
-  fprintf(fp, "VECTORS momentum double\n");
-  for (std::map<int, ParticleData>::const_iterator i = particles.cbegin();
-       i != particles.cend(); ++i)
-    fprintf(fp, "%g %g %g\n", i->second.momentum().x1(),
-            i->second.momentum().x2(), i->second.momentum().x3());
-  fclose(fp);
+    FILE *fp = NULL;
+    char filename[256];
+    snprintf(filename, sizeof(filename), "data/pos_0.%05i.vtk",
+             static_cast<int>((particles.cbegin()->second.position().x0()
+             - 1.0) * 10));
+    fp = fopen(filename, "w");
+    /* Legacy VTK file format */
+    fprintf(fp, "# vtk DataFile Version 2.0\n");
+    fprintf(fp, "Generated from molecular-offset data\n");
+    fprintf(fp, "ASCII\n");
+    /* Unstructured data sets are composed of points, lines, polygons, .. */
+    fprintf(fp, "DATASET UNSTRUCTURED_GRID\n");
+    fprintf(fp, "POINTS %zu double\n", particles.size());
+    for (std::map<int, ParticleData>::const_iterator i = particles.cbegin();
+         i != particles.cend(); ++i)
+        fprintf(fp, "%g %g %g\n", i->second.position().x1(),
+                i->second.position().x2(), i->second.position().x3());
+    fprintf(fp, "CELLS %zu %zu\n", particles.size(), particles.size() * 2);
+    for (size_t point_index = 0; point_index < particles.size(); point_index++)
+        fprintf(fp, "1 %zu\n", point_index);
+    fprintf(fp, "CELL_TYPES %zu\n", particles.size());
+    for (size_t point_index = 0; point_index < particles.size(); point_index++)
+        fprintf(fp, "1\n");
+    fprintf(fp, "POINT_DATA %zu\n", particles.size());
+    fprintf(fp, "SCALARS pdg_codes int 1\n");
+    fprintf(fp, "LOOKUP_TABLE default\n");
+    for (std::map<int, ParticleData>::const_iterator i = particles.cbegin();
+         i != particles.cend(); ++i)
+        fprintf(fp, "%i\n", i->second.pdgcode());
+    fprintf(fp, "VECTORS momentum double\n");
+    for (std::map<int, ParticleData>::const_iterator i = particles.cbegin();
+         i != particles.cend(); ++i)
+        fprintf(fp, "%g %g %g\n", i->second.momentum().x1(),
+                i->second.momentum().x2(), i->second.momentum().x3());
+    fclose(fp);
 }

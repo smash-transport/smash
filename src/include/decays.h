@@ -15,11 +15,11 @@
 
 #include "../include/Particles.h"
 
-class Laboratory;
+class Modus;
 
 /* does_decay - does a resonance decay on this timestep? */
 void check_decays(Particles *particles, std::list<int> *decay_list,
-                  const Laboratory &parameters);
+                  const Modus &parameters);
 
 size_t decay_particles(Particles *particles, std::list<int> *decay_list,
                        size_t id_process);

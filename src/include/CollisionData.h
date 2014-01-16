@@ -14,7 +14,7 @@
 #include "../include/FourVector.h"
 
 class CollisionData {
-  public:
+ public:
   /* Use improbable values for default constructor */
   CollisionData() :process_type_(-1), collision_time_(0.0) {}
   int process_type(void) const;
@@ -25,7 +25,7 @@ class CollisionData {
   void inline set_collision_past(void);
   int id_partner(int i) const;
 
-  private:
+ private:
     /* Type of interaction. 0: 2->2, 2: 1->2 >99 ( = PDG code): 2->1 */
     int process_type_;
     /* collision time */

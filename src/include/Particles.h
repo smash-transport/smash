@@ -22,14 +22,14 @@
   void operator=(const TypeName&)
 
 class Particles {
-  public:
+ public:
   /* Use improbable values for default constructor */
   Particles() :id_max_(-1) {}
   /* pass out the specific data of a particle as needed all across board */
   inline const ParticleData &data(int id);
   inline ParticleData * data_pointer(int id);
   /* pass out the type of a specific particle */
-  inline ParticleType type(int id);
+  ParticleType type(int id);
   /* pass out the specific type */
   inline ParticleType particle_type(int id);
   /* pass out decay modes of this particle type */
@@ -60,7 +60,7 @@ class Particles {
   inline std::map<int, ParticleType>::const_iterator types_cbegin(void) const;
   inline std::map<int, ParticleType>::const_iterator types_cend(void) const;
 
-  private:
+ private:
     /* Highest id of a given particle */
     int id_max_;
     /* dynamic data of the particles a map between it's id and data */

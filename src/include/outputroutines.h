@@ -12,25 +12,21 @@
 #include "../include/Particles.h"
 
 /* forward declarations */
-class Box;
-class Laboratory;
+class Modus;
+class Experiment;
 class Parameters;
 class ParticleData;
 class ParticleType;
-class Sphere;
 
 /* console output */
-void print_startup(const Laboratory &parameters);
-void print_startup(const Box &box);
-void print_startup(const Sphere &ball);
+void print_startup(const Modus &parameters);
 void print_header(void);
 void print_measurements(const Particles &particles,
                         const size_t &scatterings_total,
                         const size_t &scatterings_this_interval,
-                        const Box &box);
-void print_tail(const Box &box, const double &scattering_rate);
+                        float energy_ini, timespec time_start);
+void print_tail(const timespec time_start, const double &scattering_rate);
 void warn_wrong_params(std::list<Parameters> *configuration);
-
 /* data directory */
 void mkdir_data(void);
 
@@ -46,11 +42,11 @@ void printd_position(const ParticleData &particle);
 void printd_position(const char *message, const ParticleData &particle);
 void printd_momenta(const ParticleData &particle);
 void printd_momenta(const char *message, const ParticleData &particle);
-void printd_list(std::list<int> collision_list);
+void printd_list(const std::list<int> &collision_list);
 
 /* output data files */
 void write_particles(const Particles &particles);
-void write_measurements_header(void);
+void write_measurements_header(const Particles &particles);
 void write_measurements(const Particles &particles,
   int interactions_total, int interactions_this_interval, int decays,
   int resonances, const size_t &rejection_conflict);
@@ -62,6 +58,6 @@ void write_oscar(const ParticleData &particle_data,
 void write_vtk(const Particles &particles);
 
 /* timing measure */
-double measure_timediff(const Box &box);
+double measure_timediff(const timespec time_start);
 
 #endif  // SRC_INCLUDE_OUTPUTROUTINES_H_

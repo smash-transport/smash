@@ -17,7 +17,7 @@
 
 #include "include/decays.h"
 
-#include "include/Laboratory.h"
+#include "include/Modus.h"
 #include "include/ParticleData.h"
 #include "include/ParticleType.h"
 #include "include/Particles.h"
@@ -28,7 +28,7 @@
 
 /* check_decays - does a resonance decay on this timestep? */
 void check_decays(Particles *particles, std::list<int> *decay_list,
-  const Laboratory &parameters) {
+  const Modus &parameters) {
   FourVector velocity_lrf;
   velocity_lrf.set_x0(1.0);
 
@@ -44,7 +44,7 @@ void check_decays(Particles *particles, std::list<int> *decay_list,
 
     /* The clock goes slower in the rest frame of the resonance */
     double inverse_gamma = sqrt(velocity_lrf.Dot(velocity_lrf));
-    double resonance_frame_timestep = parameters.eps() * inverse_gamma;
+    double resonance_frame_timestep = parameters.eps * inverse_gamma;
 
     /* Exponential decay. Average lifetime t_avr = 1 / width
      * t / t_avr = width * t (remember GeV-fm conversion)

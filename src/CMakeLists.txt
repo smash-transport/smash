@@ -1,11 +1,12 @@
 include(CheckLibraryExists)
 
 # list the source files
-set(smash_src clebschgordan.cc collisions.cc cross-sections.cc
-        decays.cc distributions.cc fourvector.cc
-	initial-conditions.cc input-decaymodes.cc
-        input-particles.cc param-reader.cc parametrizations.cc
-        particles.cc propagation.cc
+set(smash_src box.cc clebschgordan.cc collisions.cc 
+        cross-sections.cc
+        decays.cc distributions.cc experiment.cc fourvector.cc
+        input-decaymodes.cc
+        input-particles.cc modus.cc param-reader.cc parametrizations.cc
+        particles.cc
         outputroutines.cc resonances.cc time.cc)
 
 add_executable(smash smash.cc ${smash_src})
@@ -20,9 +21,7 @@ configure_file (
 include_directories("${PROJECT_BINARY_DIR}/src")
 
 # directly copy config files to build directory
-file(COPY config_box.txt DESTINATION ..)
-file(COPY config_laboratory.txt DESTINATION ..)
-file(COPY config_sphere.txt DESTINATION ..)
+file(COPY config_general.txt DESTINATION ..)
 file(COPY particles.txt DESTINATION ..)
 file(COPY decaymodes.txt DESTINATION ..)
 
