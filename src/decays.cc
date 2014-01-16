@@ -17,6 +17,7 @@
 
 #include "include/decays.h"
 
+#include "include/Angles.h"
 #include "include/Modus.h"
 #include "include/ParticleData.h"
 #include "include/ParticleType.h"
@@ -360,16 +361,13 @@ int one_to_three(Particles *particles, int resonance_id,
   printd("Calculating the angles...\n");
 
   /* momentum_a direction is random */
-  /* phi in the range from [0, 2 * pi) */
+  Angles phitheta;
+  phitheta.distribute_isotropously();
   /* This is the angle of the plane of the three decay particles */
-  double phi = 2.0 * M_PI * drand48();
-  /* cos(theta) in the range from [-1.0, 1.0) */
-  double cos_theta_a = -1.0 + 2.0 * drand48();
-  double sin_theta_a = sqrt(1.0 - cos_theta_a * cos_theta_a);
   new_particle_a.set_momentum(mass_a,
-                              momentum_a * cos(phi) * sin_theta_a,
-                              momentum_a * sin(phi) * sin_theta_a,
-                              momentum_a * cos_theta_a);
+                              momentum_a * phitheta.x(),
+                              momentum_a * phitheta.y(),
+                              momentum_a * phitheta.z());
 
   /* Angle between a and b */
   double theta_ab = acos((energy_a * energy_b - 0.5 * (s_ab - mass_a * mass_a
@@ -377,11 +375,18 @@ int one_to_three(Particles *particles, int resonance_id,
   printd("theta_ab: %g Ea: %g Eb: %g sab: %g pa: %g pb: %g\n",
          theta_ab, energy_a, energy_b, s_ab, momentum_a, momentum_b);
   /* b angle is sum of a angle and ab angle */
-  double theta_b = theta_ab + acos(cos_theta_a);
+  double theta_b = theta_ab + phitheta.theta();
+  /* If b angle is not in the range [-Pi, Pi], put it there */
+  if (theta_b < -M_PI || theta_b > M_PI)
+    theta_b -= 2 * M_PI * floor((theta_b + M_PI) / (2 * M_PI));
+  /* If b angle is negative, we need to modify phi */
+  if (theta_b < 0.0)
+    phitheta.set_phi(phitheta.phi() + M_PI);
+  phitheta.set_theta(theta_b);
   new_particle_b.set_momentum(mass_b,
-                              momentum_b * cos(phi) * sin(theta_b),
-                              momentum_b * sin(phi) * sin(theta_b),
-                              momentum_b * cos(theta_b));
+                              momentum_b * phitheta.x(),
+                              momentum_b * phitheta.y(),
+                              momentum_b * phitheta.z());
 
   /* Angle between b and c */
   double theta_bc = acos((energy_b * energy_c - 0.5 *(s_bc - mass_b * mass_b
@@ -390,10 +395,17 @@ int one_to_three(Particles *particles, int resonance_id,
          theta_bc, energy_b, energy_c, s_bc, momentum_b, momentum_c);
   /* c angle is sum of b angle and bc angle */
   double theta_c = theta_bc + theta_b;
+  /* If c angle is not in the range [-Pi, Pi], put it there */
+  if (theta_c < -M_PI || theta_c > M_PI)
+    theta_c -= 2 * M_PI * floor((theta_c + M_PI)/ (2 * M_PI));
+  /* If c angle has different sign than b angle, we need to modify phi */
+  if (theta_b * theta_c < 0.0)
+    phitheta.set_phi(phitheta.phi() + M_PI);
+  phitheta.set_theta(theta_c);
   new_particle_c.set_momentum(mass_c,
-                              momentum_c * cos(phi) * sin(theta_c),
-                              momentum_c * sin(phi) * sin(theta_c),
-                              momentum_c * cos(theta_c));
+                              momentum_c * phitheta.x(),
+                              momentum_c * phitheta.y(),
+                              momentum_c * phitheta.z());
 
   /* Momentum check */
   double energy = new_particle_a.momentum().x0()
@@ -406,7 +418,7 @@ int one_to_three(Particles *particles, int resonance_id,
     + new_particle_c.momentum().x3();
 
   if (fabs(energy - total_energy) > really_small)
-    printf("1->3 energy not conserved! Before: %g After: %g",
+    printf("1->3 energy not conserved! Before: %g After: %g\n",
            total_energy, energy);
 
   if (fabs(px) > really_small || fabs(py) > really_small
