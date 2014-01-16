@@ -18,6 +18,7 @@
 #include "include/outputroutines.h"
 #include "include/ParticleData.h"
 #include "include/Particles.h"
+#include "include/Angles.h"
 
 /* boost_CM - boost to center of momentum */
 void boost_CM(ParticleData *particle1, ParticleData *particle2,
@@ -160,23 +161,24 @@ void momenta_exchange(ParticleData *particle1, ParticleData *particle2) {
 
   /* particle exchange momenta and scatter to random direction */
   /* XXX: Should be sampled from differential cross section of this process */
-  const double phi =  2.0 * M_PI * drand48();
-  const double cos_theta = -1.0 + 2.0 * drand48();
-  const double sin_theta = sqrt(1.0 - cos_theta * cos_theta);
-  printd("Random momentum: %g %g %g %g \n", momentum_radial, phi, cos_theta,
-    sin_theta);
+  Angles phitheta;
+  phitheta.distribute_isotropously();
+  printd("Random momentum: %g %g %g %g \n", momentum_radial, phitheta.phi(),
+        phitheta.costheta(), phitheta.sintheta());
 
   /* Only direction of 3-momentum, not magnitude, changes in CM frame,
    * thus particle energies remain the same (Lorentz boost will change them for
    * computational frame, however)
    */
   const FourVector momentum1(particle1->momentum().x0(),
-     momentum_radial * cos(phi) * sin_theta,
-     momentum_radial * sin(phi) * sin_theta, momentum_radial * cos_theta);
+     momentum_radial * phitheta.x(),
+     momentum_radial * phitheta.y(),
+     momentum_radial * phitheta.z());
   particle1->set_momentum(momentum1);
   const FourVector momentum2(particle2->momentum().x0(),
-    - momentum_radial * cos(phi) * sin_theta,
-    - momentum_radial * sin(phi) * sin_theta, -momentum_radial * cos_theta);
+    - momentum_radial * phitheta.x(),
+    - momentum_radial * phitheta.y(),
+    - momentum_radial * phitheta.z());
   particle2->set_momentum(momentum2);
 
   /* debug output */
