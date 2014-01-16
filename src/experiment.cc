@@ -135,4 +135,3 @@ void ExperimentImplementation<Modus>::end() {
     delete particles;
     delete cross_sections;
 }
-

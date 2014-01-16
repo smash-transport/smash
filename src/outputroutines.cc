@@ -40,8 +40,7 @@ void warn_wrong_params(std::list<Parameters> *configuration) {
   if (configuration->empty())
     return;
 
-  for (std::list<Parameters>::iterator i = configuration->begin();
-       i != configuration->end(); ++i) {
+  for (auto i = configuration->begin(); i != configuration->end(); ++i) {
     char *key = i->key();
     char *value = i->value();
     printf("W: Unused parameter %s with %s\n", key, value);
@@ -90,8 +89,7 @@ void print_measurements(const Particles &particles,
   double elapsed = measure_timediff(time_start);
   double time = 0.0;
 
-  for (std::map<int, ParticleData>::const_iterator i = particles.cbegin();
-       i != particles.cend(); ++i) {
+  for (auto i = particles.cbegin(); i != particles.cend(); ++i) {
       momentum_total += i->second.momentum();
     /* use the time from the last active particle - startup time */
     time = i->second.position().x0() - 1.0;
@@ -178,8 +176,7 @@ void write_measurements_header(const Particles &particletypes) {
   snprintf(filename, sizeof(filename), "data/particletypes.dat");
   fp = fopen(filename, "w");
   fprintf(fp, " Time ");
-  for (std::map<int, ParticleType>::const_iterator
-       i = particletypes.types_cbegin(); i != particletypes.types_cend();
+  for (auto i = particletypes.types_cbegin(); i != particletypes.types_cend();
        ++i) {
     fprintf(fp, " %11s ", i->second.name().c_str());
   }
@@ -211,15 +208,13 @@ void write_measurements(const Particles &particles,
   std::map<int, size_t> type_numbers;
   /* XXX: Number of elements = particle types, initialize each amount to 0 */
 
-  for (std::map<int, ParticleData>::const_iterator i = particles.cbegin();
-       i != particles.cend(); ++i) {
+  for (auto i = particles.cbegin(); i != particles.cend(); ++i) {
       type_numbers[i->second.pdgcode()]++;
   }
   snprintf(filename, sizeof(filename), "data/particletypes.dat");
   fp = fopen(filename, "a");
   fprintf(fp, "%5g", particles.time());
-  for (std::map<int, size_t>::const_iterator i = type_numbers.begin();
-       i != type_numbers.end(); ++i) {
+  for (auto i = type_numbers.begin(); i != type_numbers.end(); ++i) {
     fprintf(fp, "%13zu", i->second);
   }
   fprintf(fp, "\n");
@@ -246,8 +241,7 @@ void write_particles(const Particles &particles) {
   snprintf(filename, sizeof(filename), "data/momenta_%.5f.dat",
            particles.time());
   fp = fopen(filename, "w");
-  for (std::map<int, ParticleData>::const_iterator i = particles.cbegin();
-       i != particles.cend(); ++i) {
+  for (auto i = particles.cbegin(); i != particles.cend(); ++i) {
      fprintf(fp, "%g %g %g %g %i %i\n", i->second.momentum().x0(),
              i->second.momentum().x1(), i->second.momentum().x2(),
              i->second.momentum().x3(), i->second.id(), i->second.pdgcode());
@@ -256,7 +250,7 @@ void write_particles(const Particles &particles) {
   snprintf(filename, sizeof(filename), "data/position_%.5f.dat",
            particles.time());
   fp = fopen(filename, "w");
-  for (std::map<int, ParticleData>::const_iterator i = particles.cbegin();
+  for (auto i = particles.cbegin();
        i != particles.cend(); ++i) {
      fprintf(fp, "%g %g %g %g %i %i\n", i->second.position().x0(),
              i->second.position().x1(), i->second.position().x2(),
@@ -339,8 +333,7 @@ void write_vtk(const Particles &particles) {
     /* Unstructured data sets are composed of points, lines, polygons, .. */
     fprintf(fp, "DATASET UNSTRUCTURED_GRID\n");
     fprintf(fp, "POINTS %zu double\n", particles.size());
-    for (std::map<int, ParticleData>::const_iterator i = particles.cbegin();
-         i != particles.cend(); ++i)
+    for (auto i = particles.cbegin(); i != particles.cend(); ++i)
         fprintf(fp, "%g %g %g\n", i->second.position().x1(),
                 i->second.position().x2(), i->second.position().x3());
     fprintf(fp, "CELLS %zu %zu\n", particles.size(), particles.size() * 2);
@@ -352,12 +345,10 @@ void write_vtk(const Particles &particles) {
     fprintf(fp, "POINT_DATA %zu\n", particles.size());
     fprintf(fp, "SCALARS pdg_codes int 1\n");
     fprintf(fp, "LOOKUP_TABLE default\n");
-    for (std::map<int, ParticleData>::const_iterator i = particles.cbegin();
-         i != particles.cend(); ++i)
+    for (auto i = particles.cbegin(); i != particles.cend(); ++i)
         fprintf(fp, "%i\n", i->second.pdgcode());
     fprintf(fp, "VECTORS momentum double\n");
-    for (std::map<int, ParticleData>::const_iterator i = particles.cbegin();
-         i != particles.cend(); ++i)
+    for (auto i = particles.cbegin(); i != particles.cend(); ++i)
         fprintf(fp, "%g %g %g\n", i->second.momentum().x1(),
                 i->second.momentum().x2(), i->second.momentum().x3());
     fclose(fp);

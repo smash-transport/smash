@@ -76,8 +76,8 @@ void SphereModus::initial_conditions(Particles *particles) {
     double time_start = 1.0;
     FourVector momentum_total(0, 0, 0, 0);
     /* loop over all the particle types creating each particles */
-    for (std::map<int, ParticleType>::const_iterator
-         i = particles->types_cbegin(); i != particles->types_cend(); ++i) {
+    for (auto i = particles->types_cbegin(); i != particles->types_cend();
+         ++i) {
       /* Particles with width > 0 (resonances) do not exist in the beginning */
         if (i->second.width() > 0.0)
             continue;
@@ -100,8 +100,7 @@ void SphereModus::initial_conditions(Particles *particles) {
     printf("IC contains %zu particles\n", number_total);
     /* now set position and momentum of the particles */
     double momentum_radial, phi, cos_theta, sin_theta;
-    for (std::map<int, ParticleData>::iterator i = particles->begin();
-         i != particles->end(); ++i) {
+    for (auto i = particles->begin(); i != particles->end(); ++i) {
         if (unlikely(i->first == particles->id_max() && !(i->first % 2))) {
             /* poor last guy just sits around */
             i->second.set_momentum(particles->type(i->first).mass(), 0, 0, 0);
@@ -173,10 +172,8 @@ void SphereModus::check_collision_geometry(Particles *particles,
     FourVector distance;
     double radial_interaction = sqrt(parameters.cross_section() * fm2_mb
                                      * M_1_PI) * 2;
-    for (std::map<int, ParticleData>::iterator i = particles->begin();
-         i != particles->end(); ++i) {
-      for (std::map<int, ParticleData>::iterator j = particles->begin();
-           j != particles->end(); ++j) {
+    for (auto i = particles->begin(); i != particles->end(); ++i) {
+      for (auto j = particles->begin(); j != particles->end(); ++j) {
         /* exclude check on same particle and double counting */
         if (i->first >= j->first)
           continue;
@@ -198,8 +195,7 @@ void SphereModus::check_collision_geometry(Particles *particles,
       grid[i][j].resize(N);
   }
   /* populate grid */
-  for (std::map<int, ParticleData>::iterator i = particles->begin();
-         i != particles->end(); ++i) {
+  for (auto i = particles->begin(); i != particles->end(); ++i) {
     /* XXX: function - map particle position to grid number */
     x = round((a + i->second.position().x1()) / (N - 1));
     y = round((a + i->second.position().x2()) / (N - 1));
@@ -212,8 +208,7 @@ void SphereModus::check_collision_geometry(Particles *particles,
    * http://en.wikipedia.org/wiki/Cell_lists
    */
   FourVector shift;
-  for (std::map<int, ParticleData>::iterator i = particles->begin();
-       i != particles->end(); ++i) {
+  for (auto i = particles->begin(); i != particles->end(); ++i) {
     /* XXX: function - map particle position to grid number */
     x = round((a + i->second.position().x1()) / (N - 1));
     y = round((a + i->second.position().x2()) / (N - 1));
@@ -237,7 +232,7 @@ void SphereModus::check_collision_geometry(Particles *particles,
           if (grid[sx][sy][sz].empty())
             continue;
           /* grid cell particle list */
-          for (std::vector<int>::iterator id_b = grid[sx][sy][sz].begin();
+          for (auto id_b = grid[sx][sy][sz].begin();
                id_b != grid[sx][sy][sz].end(); ++id_b) {
             /* only check against particles above current id
              * to avoid double counting

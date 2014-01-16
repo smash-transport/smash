@@ -160,8 +160,7 @@ size_t collide_particles(Particles *particles, std::list<int> *collision_list,
 
   /* XXX: print debug output of collision list */
   /* collide: 2 <-> 2 soft momenta exchange */
-  for (std::list<int>::iterator id = collision_list->begin();
-    id != collision_list->end(); ++id) {
+  for (auto id = collision_list->begin(); id != collision_list->end(); ++id) {
     /* relevant particle id's for the collision */
     int id_a = *id;
     int id_b = particles->data(id_a).id_partner();

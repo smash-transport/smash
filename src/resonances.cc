@@ -101,8 +101,7 @@ std::map<int, double> resonance_cross_section(
        * type_particle2.mass() * type_particle2.mass()) / mandelstam_s;
 
   /* Find all the possible resonances */
-  for (std::map<int, ParticleType>::const_iterator
-       i = particles.types_cbegin(); i != particles.types_cend(); ++i) {
+  for (auto i = particles.types_cbegin(); i != particles.types_cend(); ++i) {
        ParticleType type_resonance = i->second;
     /* Not a resonance, go to next type of particle */
     if (type_resonance.width() < 0.0)

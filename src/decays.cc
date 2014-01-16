@@ -32,8 +32,7 @@ void check_decays(Particles *particles, std::list<int> *decay_list,
   FourVector velocity_lrf;
   velocity_lrf.set_x0(1.0);
 
-  for (std::map<int, ParticleData>::iterator i = particles->begin();
-       i != particles->end(); ++i) {
+  for (auto i = particles->begin(); i != particles->end(); ++i) {
     /* particle doesn't decay */
     if (particles->type(i->first).width() < 0.0)
       continue;
@@ -69,8 +68,7 @@ size_t decay_particles(Particles *particles, std::list<int> *decay_list,
   size_t id_process) {
   FourVector velocity_CM;
 
-  for (std::list<int>::iterator id = decay_list->begin();
-    id != decay_list->end(); ++id) {
+  for (auto id = decay_list->begin(); id != decay_list->end(); ++id) {
     /* relevant particle id's for the collision */
     int id_a = *id;
     int interaction_type = particles->data(id_a).process_type();
@@ -178,7 +176,7 @@ size_t decay_particles(Particles *particles, std::list<int> *decay_list,
 
     particles->remove(id_a);
     printd("ID %i has decayed and removed from the list.\n", id_a);
-  } /* end for std::list<int>::iterator id = decay_list->begin() */
+  }
   /* empty the decay table */
   decay_list->clear();
   printd("Decay list done.\n");

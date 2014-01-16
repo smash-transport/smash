@@ -69,8 +69,8 @@ void BoxModus::initial_conditions(Particles *particles) {
     FourVector momentum_total(0, 0, 0, 0);
     size_t number_total = 0, number = 0;
     /* loop over all the particle types */
-    for (std::map<int, ParticleType>::const_iterator
-         i = particles->types_cbegin(); i != particles->types_cend(); ++i) {
+    for (auto i = particles->types_cbegin(); i != particles->types_cend();
+         ++i) {
     /* Particles with width > 0 (resonances) do not exist in the beginning */
         if (i->second.width() > 0.0)
             continue;
@@ -96,8 +96,7 @@ void BoxModus::initial_conditions(Particles *particles) {
     printf("IC total number density %.6g [fm^-3]\n", number_density_total);
     printf("IC contains %zu particles\n", number_total);
     /* Set paricles IC: */
-    for (std::map<int, ParticleData>::iterator i = particles->begin();
-         i != particles->end(); ++i) {
+    for (auto i = particles->begin(); i != particles->end(); ++i) {
         double x, y, z, time_begin;
         /* back to back pair creation with random momenta direction */
         if (unlikely(i->first == particles->id_max() && !(i->first % 2))) {
@@ -181,8 +180,7 @@ void BoxModus::check_collision_geometry(Particles *particles,
       grid[i][j].resize(N);
   }
   /* populate grid */
-  for (std::map<int, ParticleData>::iterator i = particles->begin();
-         i != particles->end(); ++i) {
+  for (auto i = particles->begin(); i != particles->end(); ++i) {
     /* XXX: function - map particle position to grid number */
     x = round(i->second.position().x1() / length * (N - 1));
     y = round(i->second.position().x2() / length * (N - 1));
@@ -199,8 +197,7 @@ void BoxModus::check_collision_geometry(Particles *particles,
    * http://en.wikipedia.org/wiki/Cell_lists
    */
   FourVector shift;
-  for (std::map<int, ParticleData>::iterator i = particles->begin();
-       i != particles->end(); ++i) {
+  for (auto i = particles->begin(); i != particles->end(); ++i) {
     /* XXX: function - map particle position to grid number */
     x = round(i->second.position().x1() / length * (N - 1));
     y = round(i->second.position().x2() / length * (N - 1));
@@ -246,9 +243,8 @@ void BoxModus::check_collision_geometry(Particles *particles,
           if (grid[sx][sy][sz].empty())
             continue;
           /* grid cell particle list */
-          for (std::vector<int>::iterator id_other
-               = grid[sx][sy][sz].begin(); id_other != grid[sx][sy][sz].end();
-               ++id_other) {
+          for (auto id_other = grid[sx][sy][sz].begin();
+               id_other != grid[sx][sy][sz].end(); ++id_other) {
             /* only check against particles above current id
              * to avoid double counting
              */
@@ -279,8 +275,7 @@ void BoxModus::check_collision_geometry(Particles *particles,
 /* propagate all particles */
 void BoxModus::propagate(Particles *particles) {
     FourVector distance, position;
-        for (std::map<int, ParticleData>::iterator i = particles->begin();
-         i != particles->end(); ++i) {
+        for (auto i = particles->begin(); i != particles->end(); ++i) {
         /* propagation for this time step */
         distance.set_FourVector(eps,
                                 i->second.velocity_x() * eps,
@@ -337,14 +332,10 @@ FourVector BoxModus::boundary_condition(FourVector position,
 /* evolve - the core of the box, stepping forward in time */
 int BoxModus::sanity_check(Particles *particles) {
     /* fixup positions on startup, particles need to be *inside* the box */
-    for (std::map<int, ParticleData>::iterator i = particles->begin();
-         i != particles->end(); ++i) {
+    for (auto i = particles->begin(); i != particles->end(); ++i) {
         bool boundary_hit = false;
         i->second.set_position(boundary_condition(i->second.position(),
                                                   &boundary_hit));
     }
     return 0;
 }
-
-
-
