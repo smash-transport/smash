@@ -117,7 +117,7 @@ void BoxModus::initial_conditions(Particles *particles) {
             /* cos(theta) in the range from [-1.0, 1.0) */
             cos_theta = -1.0 + 2.0 * drand48();
             sin_theta = sqrt(1.0 - cos_theta * cos_theta);
-            printd("Particle %zu radial momenta %g phi %g cos_theta %g\n",
+            printd("Particle %i radial momenta %g phi %g cos_theta %g\n",
                    i->first, momentum_radial, phi, cos_theta);
             i->second.set_momentum(particles->type(i->first).mass(),
                                    momentum_radial * cos(phi) * sin_theta,

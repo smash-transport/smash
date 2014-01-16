@@ -6,6 +6,7 @@
  *    GNU General Public License (GPLv3)
  *
  */
+#include <cinttypes>
 
 #include "include/Modus.h"
 #include "include/collisions.h"
@@ -65,7 +66,7 @@ void Modus::print_startup() {
     printf("Elastic cross section: %g mb\n", cross_section);
     printf("Using temporal stepsize: %g fm/c\n", eps);
     printf("Maximum number of steps: %i \n", steps);
-    printf("Random number seed: %lli \n", seed);
+    printf("Random number seed: %" PRId64 "\n", seed);
 }
 
 /* calculates the total energy in the system from zero component of 
