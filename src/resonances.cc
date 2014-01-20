@@ -464,16 +464,14 @@ size_t two_to_two_formation(Particles *particles, ParticleType type_particle1,
     /* Calculate resonance production cross section
      * using the Breit-Wigner distribution as probability amplitude
      * Integrate over the allowed resonance mass range
-     * Note: Integration over mass^2!
      */
     std::vector<double> integrand_parameters;
     integrand_parameters.push_back(type_resonance.width());
     integrand_parameters.push_back(type_resonance.mass());
     integrand_parameters.push_back(type_i->second.mass());
     integrand_parameters.push_back(mandelstam_s);
-    double lower_limit = minimum_mass * minimum_mass;
-    double upper_limit = (sqrt(mandelstam_s) - type_i->second.mass())
-      * (sqrt(mandelstam_s) - type_i->second.mass());
+    double lower_limit = minimum_mass;
+    double upper_limit = (sqrt(mandelstam_s) - type_i->second.mass());
     printd("Process: %s %s -> %s %s\n", type_particle1.name().c_str(),
      type_particle2.name().c_str(), type_i->second.name().c_str(),
      type_resonance.name().c_str());
@@ -555,11 +553,12 @@ double spectral_function(double resonance_mass, double resonance_pole,
    */
   return breit_wigner(resonance_mass * resonance_mass,
                       resonance_pole, resonance_width)
-    / M_PI / resonance_mass / resonance_width;
+         / M_PI / resonance_mass / resonance_width;
 }
 
-/* Spectral function integrand for GSL routine integration */
-double spectral_function_integrand(double resonance_mass, void *parameters) {
+/* Spectral function integrand for GSL integration */
+double spectral_function_integrand(double resonance_mass,
+                                   void *parameters) {
   float *integrand_parameters = reinterpret_cast<float *>(parameters);
   float resonance_width = integrand_parameters[0];
   float resonance_pole_mass = integrand_parameters[1];
@@ -578,9 +577,12 @@ double spectral_function_integrand(double resonance_mass, void *parameters) {
 
     /* Integrand is the spectral function weighted by the
      * CM momentum of final state
+     * In addition, dm^2 = 2*m*dm
      */
     return spectral_function(resonance_mass, resonance_pole_mass,
-                             resonance_width) * cm_momentum_final;
+                             resonance_width)
+           * cm_momentum_final
+           * 2 * resonance_mass;
   } else {
     return 0.0;
   }
@@ -592,7 +594,7 @@ double sample_resonance_mass(Particles *particles, int pdg_resonance,
   /* First, find the minimum mass of this resonance */
   double minimum_mass
     = calculate_minimum_mass(particles, pdg_resonance);
-  /* Define Breit-Wigner parameters */
+  /* Define distribution parameters */
   float mass_stable
     = particles->particle_type(pdg_stable).mass();
   float parameter_array[4];
@@ -603,18 +605,19 @@ double sample_resonance_mass(Particles *particles, int pdg_resonance,
   parameter_array[2] = mass_stable;
   parameter_array[3] = cms_energy * cms_energy;
 
-  /* sample resonance mass from Breit-Wigner */
+  /* sample resonance mass from the distribution
+   * used for calculating the cross section
+   */
   double mass_resonance = 0.0, random_number = 1.0;
-  double breit_wigner_max = breit_wigner_integrand(
-    parameter_array[1] * parameter_array[1], &parameter_array);
-  double breit_wigner_value = 0.0;
-  while (random_number > breit_wigner_value) {
-    random_number = breit_wigner_max * drand48();
+  double distribution_max
+    = spectral_function_integrand(parameter_array[1], &parameter_array);
+  double distribution_value = 0.0;
+  while (random_number > distribution_value) {
+    random_number = distribution_max * drand48();
     mass_resonance = (cms_energy - mass_stable - minimum_mass) * drand48()
                      + minimum_mass;
-    breit_wigner_value
-      = breit_wigner_integrand(mass_resonance * mass_resonance,
-                               &parameter_array);
+    distribution_value
+      = spectral_function_integrand(mass_resonance, &parameter_array);
   }
   return mass_resonance;
 }
