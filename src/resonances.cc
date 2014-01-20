@@ -505,6 +505,7 @@ size_t two_to_two_formation(Particles *particles, ParticleType type_particle1,
       process_list->push_back(final_state);
       process_list->at(0).change_weight(xsection);
       number_of_processes++;
+      /*
       printf("Process: %s %s -> %s %s\n", type_particle1.name().c_str(),
              type_particle2.name().c_str(), type_i->second.name().c_str(),
              type_resonance.name().c_str());
@@ -514,6 +515,7 @@ size_t two_to_two_formation(Particles *particles, ParticleType type_particle1,
       printf("Limits: %g %g \n", lower_limit, upper_limit);
       printf("CG: %g spin: %g symmetry: %g\n", clebsch_gordan_isospin,
              spinfactor, symmetryfactor);
+      */
     }
   }
   return number_of_processes;
@@ -527,11 +529,8 @@ void quadrature_1d(double (*integrand_function)(double, void*),
   gsl_integration_workspace *workspace
     = gsl_integration_workspace_alloc(1000);
   gsl_function integrand;
-  float parameter_array[parameters->size()];
-  for (size_t i = 0; i < parameters->size(); i++)
-    parameter_array[i] = parameters->at(i);
   integrand.function = integrand_function;
-  integrand.params = &parameter_array[0];
+  integrand.params = parameters;
   size_t subintervals_max = 500;
   int gauss_points = 2;
   double accuracy_absolute = 1.0e-6;
@@ -559,11 +558,12 @@ double spectral_function(double resonance_mass, double resonance_pole,
 /* Spectral function integrand for GSL integration */
 double spectral_function_integrand(double resonance_mass,
                                    void *parameters) {
-  float *integrand_parameters = reinterpret_cast<float *>(parameters);
-  float resonance_width = integrand_parameters[0];
-  float resonance_pole_mass = integrand_parameters[1];
-  float stable_mass = integrand_parameters[2];
-  float mandelstam_s = integrand_parameters[3];
+  std::vector<double> *integrand_parameters
+    = reinterpret_cast<std::vector<double> *>(parameters);
+  double resonance_width = integrand_parameters->at(0);
+  double resonance_pole_mass = integrand_parameters->at(1);
+  double stable_mass = integrand_parameters->at(2);
+  double mandelstam_s = integrand_parameters->at(3);
 
   /* center-of-mass momentum of final state particles */
   if (mandelstam_s - (stable_mass + resonance_mass)
@@ -597,27 +597,25 @@ double sample_resonance_mass(Particles *particles, int pdg_resonance,
   /* Define distribution parameters */
   float mass_stable
     = particles->particle_type(pdg_stable).mass();
-  float parameter_array[4];
-  parameter_array[0]
-    = particles->particle_type(pdg_resonance).width();
-  parameter_array[1]
-    = particles->particle_type(pdg_resonance).mass();
-  parameter_array[2] = mass_stable;
-  parameter_array[3] = cms_energy * cms_energy;
+  std::vector<double> parameters;
+  parameters.push_back(particles->particle_type(pdg_resonance).width());
+  parameters.push_back(particles->particle_type(pdg_resonance).mass());
+  parameters.push_back(mass_stable);
+  parameters.push_back(cms_energy * cms_energy);
 
   /* sample resonance mass from the distribution
    * used for calculating the cross section
    */
   double mass_resonance = 0.0, random_number = 1.0;
   double distribution_max
-    = spectral_function_integrand(parameter_array[1], &parameter_array);
+    = spectral_function_integrand(parameters.at(0), &parameters);
   double distribution_value = 0.0;
   while (random_number > distribution_value) {
     random_number = distribution_max * drand48();
     mass_resonance = (cms_energy - mass_stable - minimum_mass) * drand48()
                      + minimum_mass;
     distribution_value
-      = spectral_function_integrand(mass_resonance, &parameter_array);
+      = spectral_function_integrand(mass_resonance, &parameters);
   }
   return mass_resonance;
 }
