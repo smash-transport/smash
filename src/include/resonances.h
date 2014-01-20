@@ -43,8 +43,18 @@ size_t two_to_two_formation(Particles *particles, ParticleType type_particle1,
   double mandelstam_s, double cm_momentum_squared, double symmetryfactor,
   std::vector<ProcessBranch> *process_list);
 
-/* Integral for Breit-Wigner integration with GSL routine */
-double breit_wigner_integrand(double mandelstam_s, void * parameters);
+/* Function for 1-dimensional GSL integration  */
+void quadrature_1d(double (*integrand_function)(double, void*),
+                   std::vector<double> *parameters,
+                   double lower_limit, double upper_limit,
+                   double *integral_value, double *integral_error);
+
+/* Spectral function of the resonance */
+double spectral_function(double resonance_mass, double resonance_pole,
+                         double resonance_width);
+
+/* Spectral function integrand for GSL integration */
+double spectral_function_integrand(double mandelstam_s, void * parameters);
 
 /* Resonance mass sampling for 2-particle final state */
 double sample_resonance_mass(Particles *particles, int pdg_resonance,
