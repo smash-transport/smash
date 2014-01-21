@@ -506,17 +506,6 @@ size_t two_to_two_formation(Particles *particles, ParticleType type_particle1,
       process_list->push_back(final_state);
       process_list->at(0).change_weight(xsection);
       number_of_processes++;
-      /*
-      printf("Process: %s %s -> %s %s\n", type_particle1.name().c_str(),
-             type_particle2.name().c_str(), type_i->second.name().c_str(),
-             type_resonance.name().c_str());
-      printf("Cross section: %g Sqrt(s): %g\n", xsection, sqrt(mandelstam_s));
-      printf("Integral value: %g Error: %g \n", resonance_integral,
-             integral_error);
-      printf("Limits: %g %g \n", lower_limit, upper_limit);
-      printf("CG: %g spin: %g symmetry: %g\n", clebsch_gordan_isospin,
-             spinfactor, symmetryfactor);
-      */
     }
   }
   return number_of_processes;
@@ -532,7 +521,7 @@ void quadrature_1d(double (*integrand_function)(double, void*),
   gsl_function integrand;
   integrand.function = integrand_function;
   integrand.params = parameters;
-  size_t subintervals_max = 500;
+  size_t subintervals_max = 100;
   int gauss_points = 2;
   double accuracy_absolute = 1.0e-6;
   double accuracy_relative = 1.0e-4;
