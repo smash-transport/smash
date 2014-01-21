@@ -2,7 +2,7 @@
  *
  *    Copyright (c) 2013-2014
  *      Hannah Petersen <petersen@fias.uni-frankfurt.de>
- *      
+ *
  *    GNU General Public License (GPLv3)
  *
  */
@@ -28,6 +28,10 @@ class Modus {
     Modus(): steps(10000), output_interval(100), testparticles(1),
         eps(0.001f), cross_section(10.0f), seed(1), energy_initial(0.0f),
         time_start(set_timer_start()) {}
+    /* Virtual base class destructor
+     * to avoid undefined behavior when destroying derived objects
+     */
+    virtual ~Modus() {}
     /* special function should be called by specific subclass */
     virtual void assign_params(std::list<Parameters> *configuration);
     virtual void print_startup();
@@ -35,9 +39,9 @@ class Modus {
        return; }
     virtual float energy_total(Particles *particles);
     virtual int sanity_check(Particles *particles __attribute__((unused)));
-    virtual void check_collision_geometry(Particles *particles, CrossSections
-                              *cross_sections, std::list<int> *collision_list,
-                              size_t *rejection_conflict);
+    virtual void check_collision_geometry(Particles *particles,
+      CrossSections *cross_sections, std::list<int> *collision_list,
+      size_t *rejection_conflict);
     virtual void propagate(Particles *particles);
     virtual FourVector boundary_condition(FourVector position,
                                           bool *boundary_hit);
@@ -71,4 +75,3 @@ timespec inline Modus::set_timer_start(void) {
 }
 
 #endif  // SRC_INCLUDE_MODUS_H_
-

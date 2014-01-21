@@ -1,7 +1,7 @@
 /*
  *    Copyright (c) 2013-2014
  *      Hannah Petersen <petersen@fias.uni-frankfurt.de>
- *      
+ *
  *    GNU General Public License (GPLv3)
  */
 #ifndef SRC_INCLUDE_EXPERIMENT_H_
@@ -18,11 +18,15 @@
 class Experiment {
  public:
     Experiment() {}
+    /* Virtual base class destructor
+     * to avoid undefined behavior when destroying derived objects
+     */
+    virtual ~Experiment() {}
     static std::unique_ptr<Experiment> create(char *modus_chooser);
     virtual void configure(std::list<Parameters> configuration) = 0;
-    virtual void initialize(char *path)=0;
-    virtual void run_time_evolution()=0;
-    virtual void end()=0;
+    virtual void initialize(char *path) = 0;
+    virtual void run_time_evolution() = 0;
+    virtual void end() = 0;
 };
 
 template <typename Modus> class ExperimentImplementation : public Experiment {
@@ -39,4 +43,3 @@ template <typename Modus> class ExperimentImplementation : public Experiment {
 };
 
 #endif  // SRC_INCLUDE_EXPERIMENT_H_
-

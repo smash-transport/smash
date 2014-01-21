@@ -29,22 +29,22 @@
 std::unique_ptr<Experiment> Experiment::create(char *modus_chooser) {
   typedef std::unique_ptr<Experiment> ExperimentPointer;
   if (strcmp(modus_chooser, "Box") == 0) {
-    return ExperimentPointer {new ExperimentImplementation<BoxModus>};
+    return ExperimentPointer(new ExperimentImplementation<BoxModus>);
 // } else if (modus == 2) {
-//    return ExperimentPointer{new ExperimentImplementation<SphereModus>};
+//    return ExperimentPointer(new ExperimentImplementation<SphereModus>);
   } else {
     throw std::string("Invalid Modus requested from Experiment::create.");
   }
 }
 
-/*This method reads the parameters in */
+/* This method reads the parameters in */
 template <typename Modus>
 void ExperimentImplementation<Modus>::configure(std::list<Parameters>
                                                 configuration) {
     bc.assign_params(&configuration);
     warn_wrong_params(&configuration);
     bc.print_startup();
-/* reducing cross section according to number of test particle */
+    /* reducing cross section according to number of test particle */
     if (bc.testparticles > 1) {
       printf("IC test particle: %i\n", bc.testparticles);
       bc.cross_section = bc.cross_section / bc.testparticles;
@@ -53,7 +53,8 @@ void ExperimentImplementation<Modus>::configure(std::list<Parameters>
 }
 
 /* This method reads the particle type and cross section information
- * and does the initialization of the system (fill the particles map)*/
+ * and does the initialization of the system (fill the particles map)
+ */
 template <typename Modus>
 void ExperimentImplementation<Modus>::initialize(char *path) {
     srand48(bc.seed);
@@ -67,8 +68,9 @@ void ExperimentImplementation<Modus>::initialize(char *path) {
     write_particles(*particles);
 }
 
-/*This is the loop over timesteps, carrying out collisions and decays 
- * and propagating particles */
+/* This is the loop over timesteps, carrying out collisions and decays
+ * and propagating particles
+ */
 template <typename Modus>
 void ExperimentImplementation<Modus>::run_time_evolution() {
     bc.sanity_check(particles);
@@ -118,7 +120,7 @@ void ExperimentImplementation<Modus>::run_time_evolution() {
     }
         /* Guard against evolution */
         if (likely(bc.steps > 0)) {
-        /* if there are no particles no interactions happened */
+            /* if there are no particles no interactions happened */
             if (likely(!particles->empty())) {
              print_tail(bc.time_start, interactions_total * 2
                         / particles->time() / particles->size());
@@ -129,10 +131,9 @@ void ExperimentImplementation<Modus>::run_time_evolution() {
         }
 }
 
-/* Tear down of everything */
+/* Tear down everything */
 template <typename Modus>
 void ExperimentImplementation<Modus>::end() {
     delete particles;
     delete cross_sections;
 }
-
