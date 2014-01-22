@@ -37,9 +37,9 @@ template <typename Modus> class ExperimentImplementation : public Experiment {
     virtual void end();
 
  private:
-    Modus bc;
-    Particles *particles = new Particles;
-    CrossSections *cross_sections = new CrossSections;
+    Modus bc_;
+    Particles *particles_ = new Particles;
+    CrossSections *cross_sections_ = new CrossSections;
 };
 
 #endif  // SRC_INCLUDE_EXPERIMENT_H_

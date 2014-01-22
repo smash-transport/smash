@@ -21,8 +21,8 @@
 class BoxModus : public Modus {
  public:
   /* default constructor with probable values */
-    BoxModus(): initial_condition(1), length(10.0f), temperature(0.1f),
-                number_density_initial(0.0f) {}
+    BoxModus(): initial_condition_(1), length_(10.0f), temperature_(0.1f),
+                number_density_initial_(0.0f) {}
     /* special class funtions */
     virtual void assign_params(std::list<Parameters> *configuration);
     virtual void print_startup();
@@ -37,13 +37,13 @@ class BoxModus : public Modus {
 
  private:
     /* initial condition */
-    int initial_condition;
+    int initial_condition_;
     /* Cube edge length */
-    float length;
+    float length_;
     /* Temperature of the Boltzmann distribution for thermal initialization */
-    float temperature;
+    float temperature_;
     /* initial number density of the box */
-    float number_density_initial;
+    float number_density_initial_;
 };
 
 

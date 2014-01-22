@@ -24,7 +24,7 @@ class FourVector;
 class SphereModus : public Modus {
  public:
     /* default constructor with probable values */
-    SphereModus(): radius(10.0f), timer_start(set_timer_start()) {}
+    SphereModus(): radius_(10.0f), timer_start_(set_timer_start()) {}
     /* member funtions */
     /* special class funtions */
     virtual int evolve(Particles *particles, CrossSections *cross_sections);
@@ -35,9 +35,9 @@ class SphereModus : public Modus {
 
  private:
     /* Sphere radius length */
-    float radius;
+    float radius_;
     /* starting time of the simulation */
-    timespec timer_start;
+    timespec timer_start_;
 };
 
 

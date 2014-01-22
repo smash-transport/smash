@@ -50,7 +50,7 @@ void SphereModus::assign_params_specific(std::list<Parameters> *configuration) {
         printd("%s %s\n", key, value);
         /* double or float values */
         if (strcmp(key, "RADIUS") == 0) {
-            radius = (fabs(atof(value)));
+            radius_ = (fabs(atof(value)));
             match = true;
         }
         /* remove processed entry */
@@ -87,9 +87,9 @@ void SphereModus::initial_conditions(Particles *particles) {
         double number_density = number_density_bose(i->second.mass(), 0.3);
         printf("IC number density %.6g [fm^-3]\n", number_density);
         /* cast while reflecting probability of extra particle */
-        size_t number = 4.0 / 3.0 * M_PI * radius * radius
-        * radius * number_density * testparticles;
-        if (4.0 / 3.0 * M_PI * radius * radius * radius
+        size_t number = 4.0 / 3.0 * M_PI * radius_ * radius_
+        * radius_ * number_density * testparticles;
+        if (4.0 / 3.0 * M_PI * radius_ * radius_ * radius_
             * number_density - number > drand48())
             number++;
         /* create bunch of particles */
@@ -128,14 +128,14 @@ void SphereModus::initial_conditions(Particles *particles) {
         /* ramdom position in a sphere
          * box length here has the meaning of the sphere radius
          */
-        x = -radius + 2.0 * drand48() * radius;
-        y = -radius + 2.0 * drand48() * radius;
-        z = -radius + 2.0 * drand48() * radius;
+        x = -radius_ + 2.0 * drand48() * radius_;
+        y = -radius_ + 2.0 * drand48() * radius_;
+        z = -radius_ + 2.0 * drand48() * radius_;
         /* sampling points inside of the sphere, rejected if outside */
-        while (sqrt(x * x + y * y + z * z) > radius) {
-            x = -radius + 2.0 * drand48() * radius;
-            y = -radius + 2.0 * drand48() * radius;
-            z = -radius + 2.0 * drand48() * radius;
+        while (sqrt(x * x + y * y + z * z) > radius_) {
+            x = -radius_ + 2.0 * drand48() * radius_;
+            y = -radius_ + 2.0 * drand48() * radius_;
+            z = -radius_ + 2.0 * drand48() * radius_;
         }
         i->second.set_position(time_start, x, y, z);
         /* IC: debug checks */

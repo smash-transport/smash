@@ -2,8 +2,8 @@
  *    Copyright (c) 2013-14
  *      maximilian attems <attems@fias.uni-frankfurt.de>
  *      Jussi Auvinen <auvinen@fias.uni-frankfurt.de>
- *      Hannah Petersen <petersen@fias.uni-frankfurt.de> 
- * 
+ *      Hannah Petersen <petersen@fias.uni-frankfurt.de>
+ *
  *    GNU General Public License (GPLv3)
  */
 
@@ -32,16 +32,16 @@ void BoxModus::assign_params(std::list<Parameters>
         printd("%s %s\n", key, value);
         /* double or float values */
         if (strcmp(key, "LENGTH") == 0) {
-            length = (fabs(atof(value)));
+            length_ = (fabs(atof(value)));
             match = true;
         }
         if (strcmp(key, "TEMPERATURE") == 0) {
-            temperature = (fabs(atof(value)));
+            temperature_ = (fabs(atof(value)));
             match = true;
         }
         /* int values */
         if (strcmp(key, "INITIAL_CONDITION") == 0) {
-            initial_condition = (abs(atoi(value)));
+            initial_condition_ = (abs(atoi(value)));
             match = true;
         }
         /* remove processed entry */
@@ -58,9 +58,9 @@ void BoxModus::assign_params(std::list<Parameters>
 /* print_startup - console output on startup of box specific parameters */
 void BoxModus::print_startup() {
     Modus::print_startup();
-    printf("Size of the box: %g x %g x %g fm\n", length, length, length);
-    printf("Initial temperature: %g GeV\n", temperature);
-    printf("IC type %d\n", initial_condition);
+    printf("Size of the box: %g x %g x %g fm\n", length_, length_, length_);
+    printf("Initial temperature: %g GeV\n", temperature_);
+    printf("IC type %d\n", initial_condition_);
 }
 
 /* initial_conditions - sets particle data for @particles */
@@ -79,11 +79,11 @@ void BoxModus::initial_conditions(Particles *particles) {
                i->second.mass());
         /* bose einstein distribution function */
         double number_density = number_density_bose(i->second.mass(),
-                                                    this->temperature);
+                                                    this->temperature_);
         /* cast while reflecting probability of extra particle */
-        number = this->length * this->length * this->length * number_density
+        number = this->length_ * this->length_ * this->length_ * number_density
         * this->testparticles;
-        if (this->length * this->length * this->length * number_density
+        if (this->length_ * this->length_ * this->length_ * number_density
             - number > drand48())
             number++;
         printf("IC number density %.6g [fm^-3]\n", number_density);
@@ -104,13 +104,13 @@ void BoxModus::initial_conditions(Particles *particles) {
             /* poor last guy just sits around */
             i->second.set_momentum(particles->type(i->first).mass(), 0, 0, 0);
         } else if (!(i->first % 2)) {
-            if (this->initial_condition != 2) {
+            if (this->initial_condition_ != 2) {
                 /* thermal momentum according Maxwell-Boltzmann distribution */
-                momentum_radial = sample_momenta(this->temperature,
+                momentum_radial = sample_momenta(this->temperature_,
                                        particles->type(i->first).mass());
             } else {
                 /* IC == 2 initial thermal momentum is the average 3T */
-                momentum_radial = 3.0 * this->temperature;
+                momentum_radial = 3.0 * this->temperature_;
             }
             phitheta.distribute_isotropously();
             printd("Particle %zu radial momenta %g phi %g cos_theta %g\n",
@@ -129,9 +129,9 @@ void BoxModus::initial_conditions(Particles *particles) {
         momentum_total += i->second.momentum();
         time_begin = 1.0;
         /* ramdom position in a quadratic box */
-        x = drand48() * this->length;
-        y = drand48() * this->length;
-        z = drand48() * this->length;
+        x = drand48() * this->length_;
+        y = drand48() * this->length_;
+        z = drand48() * this->length_;
         i->second.set_position(time_begin, x, y, z);
         /* IC: debug checks */
         printd_momenta(i->second);
@@ -139,7 +139,7 @@ void BoxModus::initial_conditions(Particles *particles) {
     }
     /* Display on startup if pseudo grid is used */
     number = number_total;
-    int const grid_number = round(this->length
+    int const grid_number = round(this->length_
                            / sqrt(this->cross_section * fm2_mb * M_1_PI) * 0.5);
     /* pseudo grid not used for 3^3 or extremely small particle numbers */
     if (grid_number >= 4 && number > 10)
@@ -148,7 +148,7 @@ void BoxModus::initial_conditions(Particles *particles) {
         printf("W: Not using pseudo grid: %d^3\n", grid_number);
     /* allows to check energy conservation */
     printf("IC total energy: %g [GeV]\n", momentum_total.x0());
-    number_density_initial = number_density_total;
+    number_density_initial_ = number_density_total;
 }
 
 /* check_collision_geometry - check if a collision happens between particles */
@@ -162,7 +162,7 @@ void BoxModus::check_collision_geometry(Particles *particles,
 
   /* For small boxes no point in splitting up in grids */
   /* calculate approximate grid size according to double interaction length */
-  N = round(length
+  N = round(length_
             / sqrt(cross_section * fm2_mb * M_1_PI) * 0.5);
   if (unlikely(N < 4 || particles->size() < 10)) {
       /* XXX: apply periodic boundary condition */
@@ -180,9 +180,9 @@ void BoxModus::check_collision_geometry(Particles *particles,
   /* populate grid */
   for (auto i = particles->begin(); i != particles->end(); ++i) {
     /* XXX: function - map particle position to grid number */
-    x = round(i->second.position().x1() / length * (N - 1));
-    y = round(i->second.position().x2() / length * (N - 1));
-    z = round(i->second.position().x3() / length * (N - 1));
+    x = round(i->second.position().x1() / length_ * (N - 1));
+    y = round(i->second.position().x2() / length_ * (N - 1));
+    z = round(i->second.position().x3() / length_ * (N - 1));
     printd_position(i->second);
     printd("grid cell particle %i: %i %i %i of %i\n", i->first, x, y, z, N);
     if (unlikely(x >= N || y >= N || z >= N))
@@ -197,9 +197,9 @@ void BoxModus::check_collision_geometry(Particles *particles,
   FourVector shift;
   for (auto i = particles->begin(); i != particles->end(); ++i) {
     /* XXX: function - map particle position to grid number */
-    x = round(i->second.position().x1() / length * (N - 1));
-    y = round(i->second.position().x2() / length * (N - 1));
-    z = round(i->second.position().x3() / length * (N - 1));
+    x = round(i->second.position().x1() / length_ * (N - 1));
+    y = round(i->second.position().x2() / length_ * (N - 1));
+    z = round(i->second.position().x3() / length_ * (N - 1));
     if (unlikely(x >= N || y >= N || z >= N))
       printf("grid cell particle %i: %i %i %i of %i\n", i->first, x, y, z, N);
     /* check all neighbour grids */
@@ -208,10 +208,10 @@ void BoxModus::check_collision_geometry(Particles *particles,
       /* apply periodic boundary condition for particle positions */
       if (sx < 0) {
         sx = N - 1;
-        shift.set_x1(-length);
+        shift.set_x1(-length_);
       } else if (sx > N - 1) {
         sx = 0;
-        shift.set_x1(length);
+        shift.set_x1(length_);
       } else {
         shift.set_x1(0);
       }
@@ -219,10 +219,10 @@ void BoxModus::check_collision_geometry(Particles *particles,
         int sy = cy + y;
         if (sy < 0) {
           sy = N - 1;
-          shift.set_x2(-length);
+          shift.set_x2(-length_);
         } else if (sy > N - 1) {
           sy = 0;
-          shift.set_x2(length);
+          shift.set_x2(length_);
         } else {
           shift.set_x2(0);
         }
@@ -230,10 +230,10 @@ void BoxModus::check_collision_geometry(Particles *particles,
           int sz = cz + z;
           if (sz < 0) {
             sz = N - 1;
-            shift.set_x3(-length);
+            shift.set_x3(-length_);
           } else if (sz > N - 1) {
             sz = 0;
-            shift.set_x3(length);
+            shift.set_x3(length_);
           } else {
             shift.set_x3(0);
           }
@@ -305,23 +305,23 @@ FourVector BoxModus::boundary_condition(FourVector position,
                                         bool *boundary_hit) {
     /* Check positivity and box size */
     if (position.x1() > 0 && position.x2() > 0 && position.x3() > 0
-        && position.x1() < length && position.x2() < length
-        && position.x3() < length)
+        && position.x1() < length_ && position.x2() < length_
+        && position.x3() < length_)
         goto out;
     *boundary_hit = true;
     /* Enforce periodic boundary condition */
     if (position.x1() < 0)
-        position.set_x1(position.x1() + length);
+        position.set_x1(position.x1() + length_);
     if (position.x2() < 0)
-        position.set_x2(position.x2() + length);
+        position.set_x2(position.x2() + length_);
     if (position.x3() < 0)
-        position.set_x3(position.x3() + length);
-    if (position.x1() > length)
-        position.set_x1(position.x1() - length);
-    if (position.x2() > length)
-        position.set_x2(position.x2() - length);
-    if (position.x3() > length)
-        position.set_x3(position.x3() - length);
+        position.set_x3(position.x3() + length_);
+    if (position.x1() > length_)
+        position.set_x1(position.x1() - length_);
+    if (position.x2() > length_)
+        position.set_x2(position.x2() - length_);
+    if (position.x3() > length_)
+        position.set_x3(position.x3() - length_);
   out:
     return position;
 }
