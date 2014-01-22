@@ -74,8 +74,7 @@ void Modus::print_startup() {
  * XXX should be expanded to all quantum numbers of interest */
 float Modus::energy_total(Particles *particles) {
     float energy_sum = 0.0;
-    for (std::map<int, ParticleData>::iterator i = particles->begin();
-         i != particles->end(); ++i) {
+    for (auto i = particles->begin(); i != particles->end(); ++i) {
          energy_sum += i->second.momentum().x0();
      }
     return energy_sum;
@@ -84,8 +83,7 @@ float Modus::energy_total(Particles *particles) {
 /*general propagation routine */
 void Modus::propagate(Particles *particles) {
     FourVector distance, position;
-    for (std::map<int, ParticleData>::iterator i = particles->begin();
-         i != particles->end(); ++i) {
+    for (auto i = particles->begin(); i != particles->end(); ++i) {
         /* propagation for this time step */
         distance.set_FourVector(eps,
                                 i->second.velocity_x() * eps,
@@ -113,10 +111,8 @@ void Modus::check_collision_geometry(Particles *particles,
     FourVector distance;
     double radial_interaction = sqrt(cross_section * fm2_mb
                                      * M_1_PI) * 2;
-    for (std::map<int, ParticleData>::iterator i = particles->begin();
-         i != particles->end(); ++i) {
-        for (std::map<int, ParticleData>::iterator j = particles->begin();
-             j != particles->end(); ++j) {
+    for (auto i = particles->begin(); i != particles->end(); ++i) {
+        for (auto j = particles->begin(); j != particles->end(); ++j) {
             /* exclude check on same particle and double counting */
             if (i->first >= j->first)
                 continue;
@@ -130,6 +126,3 @@ void Modus::check_collision_geometry(Particles *particles,
         }
     }
 }
-
-
-

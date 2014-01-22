@@ -29,6 +29,6 @@ int clock_gettime(struct timespec* time) {
 #else
 /* POSIX Linux and BSD clock_gettime() */
 int clock_gettime(struct timespec* time) {
-  return clock_gettime(CLOCK_PROCESS_CPUTIME_ID, time);
+  return clock_gettime(CLOCK_REALTIME, time);
 }
 #endif
