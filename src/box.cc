@@ -251,14 +251,14 @@ void BoxModus::check_collision_geometry(Particles *particles,
             printd("grid cell particle %i <-> %i\n", i->first, *id_other);
             if (shift == 0) {
               collision_criteria_geometry(particles, cross_sections,
-                collision_list, *this, i->first, *id_other,
+                collision_list, this->eps, i->first, *id_other,
                 rejection_conflict);
             } else {
               /* apply eventual boundary before and restore after */
               particles->data_pointer(*id_other)->set_position(
                 particles->data(*id_other).position() + shift);
               collision_criteria_geometry(particles, cross_sections,
-                collision_list, *this, i->first, *id_other,
+                collision_list, this->eps, i->first, *id_other,
                 rejection_conflict);
               particles->data_pointer(*id_other)->set_position(
                 particles->data(*id_other).position() - shift);

@@ -84,7 +84,7 @@ void ExperimentImplementation<Modus>::run_time_evolution() {
                        bc_.time_start);
     for (int step = 0; step < bc_.steps; step++) {
         /* Check resonances for decays */
-        check_decays(particles_, &decay_list, bc_);
+        check_decays(particles_, &decay_list, bc_.eps);
         /* Do the decays */
         if (!decay_list.empty()) {
             decays += decay_list.size();

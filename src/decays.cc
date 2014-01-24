@@ -29,7 +29,7 @@
 
 /* check_decays - does a resonance decay on this timestep? */
 void check_decays(Particles *particles, std::list<int> *decay_list,
-  const Modus &parameters) {
+  const float timestep) {
   FourVector velocity_lrf;
   velocity_lrf.set_x0(1.0);
 
@@ -44,7 +44,7 @@ void check_decays(Particles *particles, std::list<int> *decay_list,
 
     /* The clock goes slower in the rest frame of the resonance */
     double inverse_gamma = sqrt(velocity_lrf.Dot(velocity_lrf));
-    double resonance_frame_timestep = parameters.eps * inverse_gamma;
+    double resonance_frame_timestep = timestep * inverse_gamma;
 
     /* Exponential decay. Average lifetime t_avr = 1 / width
      * t / t_avr = width * t (remember GeV-fm conversion)

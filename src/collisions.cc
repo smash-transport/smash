@@ -33,7 +33,7 @@
  */
 void collision_criteria_geometry(Particles *particles,
   CrossSections *cross_sections,
-  std::list<int> *collision_list, const Modus &parameters, int id_a,
+  std::list<int> *collision_list, const float timestep, int id_a,
   int id_b, size_t *rejection_conflict) {
   /* just collided with this particle */
   if (particles->data(id_a).id_process() >= 0
@@ -71,7 +71,7 @@ void collision_criteria_geometry(Particles *particles,
   /* check according timestep: positive and smaller */
   const double time_collision = collision_time(particles->data(id_a),
     particles->data(id_b));
-  if (time_collision < 0.0 || time_collision >= parameters.eps)
+  if (time_collision < 0.0 || time_collision >= timestep)
     return;
 
   /* check for minimal collision time both particles */

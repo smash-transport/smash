@@ -69,7 +69,7 @@ void Modus::print_startup() {
     printf("Random number seed: %" PRId64 "\n", seed);
 }
 
-/* calculates the total energy in the system from zero component of 
+/* calculates the total energy in the system from zero component of
  * all momenta of particles
  * XXX should be expanded to all quantum numbers of interest */
 float Modus::energy_total(Particles *particles) {
@@ -121,7 +121,7 @@ void Modus::check_collision_geometry(Particles *particles,
             if (distance > radial_interaction)
                 continue;
             collision_criteria_geometry(particles, cross_sections,
-                                        collision_list, *this,
+                                        collision_list, this->eps,
                                         i->first, j->first, rejection_conflict);
         }
     }

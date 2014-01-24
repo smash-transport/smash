@@ -18,7 +18,7 @@ class Modus;
 /* populates collision list if collision applies */
 void collision_criteria_geometry(Particles *particles,
   CrossSections *cross_sections,
-  std::list<int> *collision_list, Modus const &para, int id_a,
+  std::list<int> *collision_list, const float timestep, int id_a,
   int id_b, size_t *rejection_conflict);
 
 /* does collisions according to collision table */
