@@ -27,10 +27,10 @@ class SphereModus : public Modus {
     SphereModus(): radius_(10.0f), timer_start_(set_timer_start()) {}
     /* member funtions */
     /* special class funtions */
-    virtual int evolve(Particles *particles, CrossSections *cross_sections);
-    virtual void assign_params_specific(std::list<Parameters> *configuration);
-    virtual void initial_conditions(Particles *particles);
-//    virtual FourVector boundary_condition(FourVector position);
+    int evolve(Particles *particles, CrossSections *cross_sections);
+    void assign_params_specific(std::list<Parameters> *configuration);
+    void initial_conditions(Particles *particles);
+//     FourVector boundary_condition(FourVector position);
     inline timespec set_timer_start();
 
  private:

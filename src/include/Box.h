@@ -24,14 +24,14 @@ class BoxModus : public Modus {
     BoxModus(): initial_condition_(1), length_(10.0f), temperature_(0.1f),
                 number_density_initial_(0.0f) {}
     /* special class funtions */
-    virtual void assign_params(std::list<Parameters> *configuration);
-    virtual void print_startup();
-    virtual void initial_conditions(Particles *particles);
-    virtual int sanity_check(Particles *particles);
-    virtual void propagate(Particles *particles);
-    virtual FourVector boundary_condition(FourVector position,
-                                          bool *boundary_hit);
-    virtual void check_collision_geometry(Particles *particles,
+    void assign_params(std::list<Parameters> *configuration);
+    void print_startup();
+    void initial_conditions(Particles *particles);
+    int sanity_check(Particles *particles);
+    void propagate(Particles *particles);
+    FourVector boundary_condition(FourVector position,
+                                  bool *boundary_hit);
+    void check_collision_geometry(Particles *particles,
                   CrossSections *cross_sections, std::list<int> *collision_list,
                   size_t *rejection_conflict);
 
