@@ -172,8 +172,9 @@ std::vector<ProcessBranch> resonance_cross_section(
 }
 
 /* two_to_one_formation -- only the resonance in the final state */
-double two_to_one_formation(Particles *particles, ParticleType type_particle1,
-  ParticleType type_particle2, ParticleType type_resonance,
+double two_to_one_formation(Particles *particles,
+  const ParticleType &type_particle1,
+  const ParticleType &type_particle2, const ParticleType &type_resonance,
   double mandelstam_s, double cm_momentum_squared) {
   /* Check for charge conservation */
   if (type_resonance.charge() != type_particle1.charge()
@@ -300,8 +301,9 @@ double two_to_one_formation(Particles *particles, ParticleType type_particle1,
 }
 
 /* two_to_two_formation -- resonance and another particle in final state */
-size_t two_to_two_formation(Particles *particles, ParticleType type_particle1,
-  ParticleType type_particle2, ParticleType type_resonance,
+size_t two_to_two_formation(Particles *particles,
+  const ParticleType &type_particle1,
+  const ParticleType &type_particle2, const ParticleType &type_resonance,
   double mandelstam_s, double cm_momentum_squared, double symmetryfactor,
   std::vector<ProcessBranch> *process_list) {
   size_t number_of_processes = 0;
