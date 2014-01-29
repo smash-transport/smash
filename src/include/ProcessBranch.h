@@ -19,7 +19,7 @@ class ProcessBranch {
   /* Add the complete particle list */
   inline void add_particles(std::vector<int> particle_pdgs);
   /* Add branch ratio */
-  inline void add_weight(double process_weight);
+  inline void set_weight(double process_weight);
   /* Add to the ratio of this branch */
   inline void change_weight(double additional_weight);
   /* Remove all modes */
@@ -44,7 +44,7 @@ inline void ProcessBranch::add_particles(std::vector<int> particle_pdgs) {
 }
 
 /* Add the ratio of this branch */
-inline void ProcessBranch::add_weight(double process_weight) {
+inline void ProcessBranch::set_weight(double process_weight) {
   branch_weight_ = process_weight;
 }
 

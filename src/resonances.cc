@@ -68,7 +68,7 @@ std::vector<ProcessBranch> resonance_cross_section(
   /* first item refers to total resonance production cross section */
   ProcessBranch resonance_process;
   resonance_process.add_particle(0);
-  resonance_process.add_weight(0.0);
+  resonance_process.set_weight(0.0);
   resonance_process_list.push_back(resonance_process);
 
   /* Isospin symmetry factor, by default 1 */
@@ -140,7 +140,7 @@ std::vector<ProcessBranch> resonance_cross_section(
     if (resonance_xsection > really_small) {
       resonance_process.clear();
       resonance_process.add_particle(type_resonance.pdgcode());
-      resonance_process.add_weight(resonance_xsection);
+      resonance_process.set_weight(resonance_xsection);
       resonance_process_list.push_back(resonance_process);
       resonance_process_list.at(0).change_weight(resonance_xsection);
 
@@ -503,7 +503,7 @@ size_t two_to_two_formation(Particles *particles,
       ProcessBranch final_state;
       final_state.add_particle(type_resonance.pdgcode());
       final_state.add_particle(type_i->second.pdgcode());
-      final_state.add_weight(xsection);
+      final_state.set_weight(xsection);
       process_list->push_back(final_state);
       process_list->at(0).change_weight(xsection);
       number_of_processes++;
