@@ -28,6 +28,10 @@ class Angles {
   // costheta is actually stored inside the object, so we don't name the
   // functions to indicate the internals.
   void set_theta(const double& theta);
+  // this adds a certain angle to theta and takes care that it doesn't
+  // go out of scope and that a possible switch of phi's direction is
+  // handled appropriately
+  void add_to_theta(const double& delta);
   // get elements:
   double phi() const;
   double costheta() const;
@@ -83,6 +87,36 @@ void inline Angles::set_theta(const double& newtheta) {
   // no error handling necessary, because this gives a sensible answer
   // for every real number.
   set_costheta(cos(newtheta));
+}
+
+void inline Angles::add_to_theta(const double& delta) {
+  if (delta < -M_PI || delta > M_PI) {
+    char errormsg[50];
+    snprintf(errormsg, sizeof(errormsg),
+             "Cannot advance polar angle by %g",
+             delta);
+    throw(errormsg);
+  }
+  double theta_plus_delta = delta + theta();
+  // if sum is not in [0, PI], force it to be there:
+  // "upper" overflow: 
+  // theta + delta + the_new_angle = 2*M_PI
+  if (theta_plus_delta > M_PI) {
+    set_theta(2.0*M_PI - theta_plus_delta);
+    // set_phi takes care that phi_ is in [0 .. 2*M_PI]
+    set_phi(phi() + M_PI);
+  }
+  // "lower" overflow:
+  // theta + delta switches sign
+  else if (theta_plus_delta < 0) {
+    set_theta(-theta_plus_delta);
+    set_phi(phi() + M_PI);
+  }
+  // no overflow: set theta, do not touch phi:
+  else {
+    set_theta(theta_plus_delta);
+  }
+  return;
 }
 
 double inline Angles::costheta() const { return costheta_; }
