@@ -57,14 +57,28 @@ void ExperimentImplementation<Modus>::configure(std::list<Parameters>
  */
 template <typename Modus>
 void ExperimentImplementation<Modus>::initialize(char *path) {
+    /* Ensure safe allocation */
+    delete particles_;
+    delete cross_sections_;
+    /* Allocate private pointer members */
+    particles_ = new Particles;
+    cross_sections_ = new CrossSections;
+    /* Set the seed for the random number generator */
     srand48(bc_.seed);
+    /* Read in particle types used in the simulation */
     input_particles(particles_, path);
+    /* Read in the particle decay modes */
     input_decaymodes(particles_, path);
+    /* Set the default elastic collision cross section */
     cross_sections_->add_elastic_parameter(bc_.cross_section);
+    /* Sample particles according to the initial conditions */
     bc_.initial_conditions(particles_);
+    /* Save the initial energy in the system for energy conservation checks */
     bc_.energy_initial = bc_.energy_total(particles_);
+    /* Print output headers */
     write_measurements_header(*particles_);
     print_header();
+    /* Write out the initial momenta and positions of the particles */
     write_particles(*particles_);
 }
 

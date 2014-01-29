@@ -31,6 +31,7 @@ class Experiment {
 
 template <typename Modus> class ExperimentImplementation : public Experiment {
  public:
+    ExperimentImplementation(): particles_(nullptr), cross_sections_(nullptr) {}
     virtual void configure(std::list<Parameters> configuration);
     virtual void initialize(char *path);
     virtual void run_time_evolution();
@@ -38,8 +39,8 @@ template <typename Modus> class ExperimentImplementation : public Experiment {
 
  private:
     Modus bc_;
-    Particles *particles_ = new Particles;
-    CrossSections *cross_sections_ = new CrossSections;
+    Particles *particles_;
+    CrossSections *cross_sections_;
 };
 
 #endif  // SRC_INCLUDE_EXPERIMENT_H_
