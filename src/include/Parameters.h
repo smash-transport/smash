@@ -42,6 +42,9 @@ inline char *Parameters::key(void) const {
 }
 
 inline void Parameters::set_key(char *key_string) {
+  if (key_) {
+    free(key_);
+  }
   key_ = strdup(key_string);
 }
 
@@ -50,6 +53,9 @@ inline char *Parameters::value(void) const {
 }
 
 inline void Parameters::set_value(char *value_string) {
+  if (value_) {
+    free(value_);
+  }
   value_ = strdup(value_string);
 }
 
