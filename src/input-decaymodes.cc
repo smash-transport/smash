@@ -53,7 +53,7 @@ void input_decaymodes(Particles *particles, char *path) {
     printd("Retrieved decaymodes.txt line of length %li:\n", characters_read);
     /* Skip comments and blank lines */
     if (line[0] == '#' || line[0] == '\n' || line[0] == '\t'
-        || line[0] == '/') {
+        || line[0] == '/' || characters_read == 0) {
       printd("Skipping line: %s", line);
       continue;
     }

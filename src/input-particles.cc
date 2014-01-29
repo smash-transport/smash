@@ -41,7 +41,7 @@ void input_particles(Particles *particles, char *path) {
     printd("Retrieved particles.txt line of length %li:\n", read);
     /* Skip comments and blank lines */
     if (line[0] == '#' || line[0] == '\n' || line[0] == '\t'
-        || line[0] == '/') {
+        || line[0] == '/' || read == 0) {
       printd("Skipping line: %s", line);
       continue;
     }

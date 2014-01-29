@@ -44,7 +44,8 @@ static void process_params(char *file_path,
     printd("Retrieved %s line of length %li :\n", file_path, read);
     printd("%s", line);
     /* Skip comments and blank lines */
-    if (line[0] == '#' || line[0] == '\n' || line[0] == '\t' || line[0] == '/')
+    if (line[0] == '#' || line[0] == '\n' || line[0] == '\t' || line[0] == '/'
+        || read == 0)
       continue;
 
     key = strtok_r(line, sep, &saveptr);
