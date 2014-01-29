@@ -109,7 +109,7 @@ void SphereModus::initial_conditions(Particles *particles) {
             /* thermal momentum according Maxwell-Boltzmann distribution */
             momentum_radial = sample_momenta(0.3,
                               particles->type(i->first).mass());
-            phitheta = Angles().distribute_isotropously();
+            phitheta = Angles().distribute_isotropically();
             printd("Particle %d radial momenta %g phi %g cos_theta %g\n",
                    i->first, momentum_radial, phitheta.phi(),
                    phitheta.costheta());

@@ -360,7 +360,7 @@ int one_to_three(Particles *particles, int resonance_id,
 
   /* momentum_a direction is random */
   Angles phitheta;
-  phitheta.distribute_isotropously();
+  phitheta.distribute_isotropically();
   /* This is the angle of the plane of the three decay particles */
   new_particle_a.set_momentum(mass_a,
                               momentum_a * phitheta.x(),
