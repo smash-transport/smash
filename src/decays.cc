@@ -372,7 +372,7 @@ int one_to_three(Particles *particles, int resonance_id,
                           - mass_b * mass_b)) / (momentum_a * momentum_b));
   printd("theta_ab: %g Ea: %g Eb: %g sab: %g pa: %g pb: %g\n",
          theta_ab, energy_a, energy_b, s_ab, momentum_a, momentum_b);
-  phitheta.add_to_theta(theta_ab);
+  bool phi_has_changed = phitheta.add_to_theta(theta_ab);
   new_particle_b.set_momentum(mass_b,
                               momentum_b * phitheta.x(),
                               momentum_b * phitheta.y(),
@@ -383,7 +383,10 @@ int one_to_three(Particles *particles, int resonance_id,
                          - mass_c * mass_c)) / (momentum_b * momentum_c));
   printd("theta_bc: %g Eb: %g Ec: %g sbc: %g pb: %g pc: %g\n",
          theta_bc, energy_b, energy_c, s_bc, momentum_b, momentum_c);
-  phitheta.add_to_theta(theta_bc);
+  // if phi has changed during the last adding, we must now subtract the
+  // angle. See wiki.
+  double direction = phi_has_changed ? -1.0 : 1.0;
+  phitheta.add_to_theta(phi_has_changed * theta_bc);
   new_particle_c.set_momentum(mass_c,
                               momentum_c * phitheta.x(),
                               momentum_c * phitheta.y(),
