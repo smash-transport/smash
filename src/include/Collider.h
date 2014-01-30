@@ -25,13 +25,6 @@ class ColliderModus : public Modus {
     void assign_params(std::list<Parameters> *configuration);
     void print_startup();
     void initial_conditions(Particles *particles);
-    int sanity_check(Particles *particles);
-    void propagate(Particles *particles);
-    FourVector boundary_condition(FourVector position,
-                                  bool *boundary_hit);
-    void check_collision_geometry(Particles *particles,
-                  CrossSections *cross_sections, std::list<int> *collision_list,
-                  size_t *rejection_conflict);
 
  private:
     /* Projectile particle */
