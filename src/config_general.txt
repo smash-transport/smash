@@ -42,4 +42,13 @@ INITIAL_CONDITION	1
 // Sphere size
 RADIUS		5.0
 
+// Sample config_collider.txt file
 
+// Projectile particle
+PROJECTILE     p
+
+// Target particle
+TARGET    p 
+
+// center-of-mass energy in GeV
+SQRTS     1.0

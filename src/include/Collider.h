@@ -9,6 +9,7 @@
 #include <stdint.h>
 #include <cmath>
 #include <list>
+#include <string>
 
 #include "../include/CrossSections.h"
 #include "../include/Modus.h"
@@ -19,7 +20,7 @@
 class ColliderModus : public Modus {
  public:
   /* default constructor with probable values */
- ColliderModus(): projectile_("unknown"), target_("unknown"), sqrts_(1.0f) {}
+  // ColliderModus(): projectile_[25](), target_('proton'), sqrts_(1.0f) {}
     /* special class funtions */
     void assign_params(std::list<Parameters> *configuration);
     void print_startup();
@@ -34,9 +35,9 @@ class ColliderModus : public Modus {
 
  private:
     /* Projectile particle */
-    std:string projectile_;
+    char projectile_[25];
     /* Target particle */
-    std:string target_;
+    char target_[25];
     /* Center-of-mass energy of the collision */
     float sqrts_;
 };

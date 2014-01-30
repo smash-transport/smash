@@ -1,13 +1,11 @@
 /*
- *    Copyright (c) 2013-14
- *      maximilian attems <attems@fias.uni-frankfurt.de>
- *      Jussi Auvinen <auvinen@fias.uni-frankfurt.de>
+ *    Copyright (c) 2014
  *      Hannah Petersen <petersen@fias.uni-frankfurt.de>
  *
  *    GNU General Public License (GPLv3)
  */
 
-#include "include/Box.h"
+#include "include/Collider.h"
 #include "include/CrossSections.h"
 #include "include/Particles.h"
 #include "include/constants.h"
@@ -21,7 +19,7 @@
 #include "include/param-reader.h"
 #include "include/Angles.h"
 
-void BoxModus::assign_params(std::list<Parameters>
+void ColliderModus::assign_params(std::list<Parameters>
                                           *configuration) {
     Modus::assign_params(configuration);
     bool match = false;
@@ -30,18 +28,18 @@ void BoxModus::assign_params(std::list<Parameters>
         char *key = i->key();
         char *value = i->value();
         printd("%s %s\n", key, value);
-        /* double or float values */
-        if (strcmp(key, "LENGTH") == 0) {
-            length_ = (fabs(atof(value)));
+        /* string values */
+        if (strcmp(key, "PROJECTILE") == 0) {
+          strncpy(projectile_, value, sizeof(&projectile_));
             match = true;
         }
-        if (strcmp(key, "TEMPERATURE") == 0) {
-            temperature_ = (fabs(atof(value)));
+        if (strcmp(key, "TARGET") == 0) {
+          strncpy(target_, value, sizeof(&target_));
             match = true;
         }
-        /* int values */
-        if (strcmp(key, "INITIAL_CONDITION") == 0) {
-            initial_condition_ = (abs(atoi(value)));
+        /* float values */
+        if (strcmp(key, "SQRTS") == 0) {
+            sqrts_ = (fabs(atof(value)));
             match = true;
         }
         /* remove processed entry */
@@ -56,15 +54,15 @@ void BoxModus::assign_params(std::list<Parameters>
 
 
 /* print_startup - console output on startup of box specific parameters */
-void BoxModus::print_startup() {
+void ColliderModus::print_startup() {
     Modus::print_startup();
-    printf("Size of the box: %g x %g x %g fm\n", length_, length_, length_);
-    printf("Initial temperature: %g GeV\n", temperature_);
-    printf("IC type %d\n", initial_condition_);
+    printf("Projectile name: %s \n", projectile_);
+    printf("Target name: %s \n", target_);
+    printf("Center-of-mass energy %f GeV\n", sqrts_);
 }
 
 /* initial_conditions - sets particle data for @particles */
-void BoxModus::initial_conditions(Particles *particles) {
+void ColliderModus::initial_conditions(Particles *particles) {
     double momentum_radial, number_density_total = 0;
     Angles phitheta;
     FourVector momentum_total(0, 0, 0, 0);
@@ -152,7 +150,7 @@ void BoxModus::initial_conditions(Particles *particles) {
 }
 
 /* check_collision_geometry - check if a collision happens between particles */
-void BoxModus::check_collision_geometry(Particles *particles,
+void ColliderModus::check_collision_geometry(Particles *particles,
   CrossSections *cross_sections,
   std::list<int> *collision_list,
   size_t *rejection_conflict) {
@@ -271,7 +269,7 @@ void BoxModus::check_collision_geometry(Particles *particles,
 }
 
 /* propagate all particles */
-void BoxModus::propagate(Particles *particles) {
+void ColliderModus::propagate(Particles *particles) {
     FourVector distance, position;
         for (auto i = particles->begin(); i != particles->end(); ++i) {
         /* propagation for this time step */
@@ -301,7 +299,7 @@ void BoxModus::propagate(Particles *particles) {
  * This assumes that the particle is at most one box length
  * away from the boundary to shift it in.
  */
-FourVector BoxModus::boundary_condition(FourVector position,
+FourVector ColliderModus::boundary_condition(FourVector position,
                                         bool *boundary_hit) {
     /* Check positivity and box size */
     if (position.x1() > 0 && position.x2() > 0 && position.x3() > 0
@@ -327,13 +325,13 @@ FourVector BoxModus::boundary_condition(FourVector position,
 }
 
 
-/* evolve - the core of the box, stepping forward in time */
-int BoxModus::sanity_check(Particles *particles) {
-    /* fixup positions on startup, particles need to be *inside* the box */
-    for (auto i = particles->begin(); i != particles->end(); ++i) {
-        bool boundary_hit = false;
-        i->second.set_position(boundary_condition(i->second.position(),
-                                                  &boundary_hit));
-    }
-    return 0;
-}
+
+
+
+
+
+
+
+
+
+
