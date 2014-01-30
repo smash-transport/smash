@@ -12,6 +12,7 @@
 
 #include "include/Box.h"
 #include "include/Experiment.h"
+#include "include/Collider.h"
 #include "include/CrossSections.h"
 #include "include/Modus.h"
 #include "include/Parameters.h"
@@ -30,8 +31,8 @@ std::unique_ptr<Experiment> Experiment::create(char *modus_chooser) {
   typedef std::unique_ptr<Experiment> ExperimentPointer;
   if (strcmp(modus_chooser, "Box") == 0) {
     return ExperimentPointer(new ExperimentImplementation<BoxModus>);
-// } else if (modus == 2) {
-//    return ExperimentPointer(new ExperimentImplementation<SphereModus>);
+  } else if (strcmp(modus_chooser, "Collider") == 0) {
+    return ExperimentPointer(new ExperimentImplementation<ColliderModus>);
   } else {
     throw std::string("Invalid Modus requested from Experiment::create.");
   }

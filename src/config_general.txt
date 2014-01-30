@@ -1,7 +1,7 @@
 // Sample config_general.txt file
 
 //Modus decision
-MODUS		Box
+MODUS		Collider
 
 // temporal grid spacing
 EPS		0.01
