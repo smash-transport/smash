@@ -112,7 +112,7 @@ void BoxModus::initial_conditions(Particles *particles) {
                 /* IC == 2 initial thermal momentum is the average 3T */
                 momentum_radial = 3.0 * this->temperature_;
             }
-            phitheta.distribute_isotropously();
+            phitheta.distribute_isotropically();
             printd("Particle %zu radial momenta %g phi %g cos_theta %g\n",
                    i->first, momentum_radial, phitheta.phi(),
                    phitheta.costheta());

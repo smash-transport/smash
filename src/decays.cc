@@ -360,7 +360,7 @@ int one_to_three(Particles *particles, int resonance_id,
 
   /* momentum_a direction is random */
   Angles phitheta;
-  phitheta.distribute_isotropously();
+  phitheta.distribute_isotropically();
   /* This is the angle of the plane of the three decay particles */
   new_particle_a.set_momentum(mass_a,
                               momentum_a * phitheta.x(),
@@ -372,15 +372,7 @@ int one_to_three(Particles *particles, int resonance_id,
                           - mass_b * mass_b)) / (momentum_a * momentum_b));
   printd("theta_ab: %g Ea: %g Eb: %g sab: %g pa: %g pb: %g\n",
          theta_ab, energy_a, energy_b, s_ab, momentum_a, momentum_b);
-  /* b angle is sum of a angle and ab angle */
-  double theta_b = theta_ab + phitheta.theta();
-  /* If b angle is not in the range [-Pi, Pi], put it there */
-  if (theta_b < -M_PI || theta_b > M_PI)
-    theta_b -= 2 * M_PI * floor((theta_b + M_PI) / (2 * M_PI));
-  /* If b angle is negative, we need to modify phi */
-  if (theta_b < 0.0)
-    phitheta.set_phi(phitheta.phi() + M_PI);
-  phitheta.set_theta(theta_b);
+  bool phi_has_changed = phitheta.add_to_theta(theta_ab);
   new_particle_b.set_momentum(mass_b,
                               momentum_b * phitheta.x(),
                               momentum_b * phitheta.y(),
@@ -391,15 +383,10 @@ int one_to_three(Particles *particles, int resonance_id,
                          - mass_c * mass_c)) / (momentum_b * momentum_c));
   printd("theta_bc: %g Eb: %g Ec: %g sbc: %g pb: %g pc: %g\n",
          theta_bc, energy_b, energy_c, s_bc, momentum_b, momentum_c);
-  /* c angle is sum of b angle and bc angle */
-  double theta_c = theta_bc + theta_b;
-  /* If c angle is not in the range [-Pi, Pi], put it there */
-  if (theta_c < -M_PI || theta_c > M_PI)
-    theta_c -= 2 * M_PI * floor((theta_c + M_PI)/ (2 * M_PI));
-  /* If c angle has different sign than b angle, we need to modify phi */
-  if (theta_b * theta_c < 0.0)
-    phitheta.set_phi(phitheta.phi() + M_PI);
-  phitheta.set_theta(theta_c);
+  // if phi has changed during the last adding, we must now subtract the
+  // angle. See wiki.
+  double direction = phi_has_changed ? -1.0 : 1.0;
+  phitheta.add_to_theta(phi_has_changed * theta_bc);
   new_particle_c.set_momentum(mass_c,
                               momentum_c * phitheta.x(),
                               momentum_c * phitheta.y(),

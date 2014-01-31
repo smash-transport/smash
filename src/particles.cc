@@ -164,7 +164,7 @@ void momenta_exchange(ParticleData *particle1, ParticleData *particle2) {
    * of this process
    */
   Angles phitheta;
-  phitheta.distribute_isotropously();
+  phitheta.distribute_isotropically();
   printd("Random momentum: %g %g %g %g \n", momentum_radial, phitheta.phi(),
         phitheta.costheta(), phitheta.sintheta());
 
@@ -199,7 +199,7 @@ void sample_cms_momenta(ParticleData *particle1, ParticleData *particle2,
      * of this process
      */
     Angles phitheta;
-    phitheta.distribute_isotropously();
+    phitheta.distribute_isotropically();
     if (!(energy1  > mass1)) {
       printf("Particle %d radial momenta %g phi %g cos_theta %g\n",
              particle1->pdgcode(), momentum_radial, phitheta.phi(),
