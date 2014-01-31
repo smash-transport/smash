@@ -1,10 +1,8 @@
 /*
  *    Copyright (c) 2013-14
- *      maximilian attems <attems@fias.uni-frankfurt.de>
- *      Jussi Auvinen <auvinen@fias.uni-frankfurt.de>
- *      Hannah Petersen <petersen@fias.uni-frankfurt.de>
- *
- *    GNU General Public License (GPLv3)
+ *      SMASH Team
+ * 
+ *    GNU General Public License (GPLv3 or later)
  */
 
 #include "include/Box.h"

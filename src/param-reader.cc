@@ -1,9 +1,9 @@
 /*
  *
  *    Copyright (c) 2012
- *      maximilian attems <attems@fias.uni-frankfurt.de>
- *
- *    GNU General Public License (GPLv3)
+ *      SMASH Team
+ * 
+ *    GNU General Public License (GPLv3 or later)
  *
  */
 #include <cmath>

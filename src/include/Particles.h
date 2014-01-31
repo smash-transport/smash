@@ -1,9 +1,8 @@
 /*
  *    Copyright (c) 2012-2013
- *      maximilian attems <attems@fias.uni-frankfurt.de>
- *      Jussi Auvinen <auvinen@fias.uni-frankfurt.de>
+ *      SMASH Team
  *
- *    GNU General Public License (GPLv3)
+ *    GNU General Public License (GPLv3 or later)
  */
 #ifndef SRC_INCLUDE_PARTICLES_H_
 #define SRC_INCLUDE_PARTICLES_H_
@@ -102,6 +101,7 @@ inline DecayModes Particles::decay_modes(int pdg) {
 inline int Particles::add_data(ParticleData const &particle_data) {
   id_max_++;
   data_.insert(std::pair<int, ParticleData>(id_max_, particle_data));
+  data_[id_max_].set_id(id_max_);
   return id_max_;
 }
 

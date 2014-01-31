@@ -1,10 +1,9 @@
 /*
  *
  *    Copyright (c) 2013
- *      maximilian attems <attems@fias.uni-frankfurt.de>
- *      Jussi Auvinen <auvinen@fias.uni-frankfurt.de>
+ *      SMASH Team
  *
- *    GNU General Public License (GPLv3)
+ *    GNU General Public License (GPLv3 or later)
  *
  */
 #include "include/resonances.h"
@@ -626,7 +625,6 @@ int resonance_formation(Particles *particles, int particle_id, int other_id,
   const double cms_energy = particles->data(particle_id).momentum().x0()
     + particles->data(other_id).momentum().x0();
 
-  int new_id = -1;
   if (produced_particles.size() == 1) {
     resonance.set_pdgcode(produced_particles.at(0));
     /* Center-of-momentum frame of initial particles
@@ -647,11 +645,7 @@ int resonance_formation(Particles *particles, int particle_id, int other_id,
 
     /* Initialize position */
     resonance.set_position(1.0, 0.0, 0.0, 0.0);
-    new_id = particles->id_max() + 1;
-    resonance.set_id(new_id);
     particles->add_data(resonance);
-    printd("Created %s with ID %i \n", particles->type(new_id).name().c_str(),
-         new_id);
   } else if (produced_particles.size() == 2) {
     /* 2 particles in final state. Need another particle template */
     /* XXX: For now, it is assumed that the other particle is stable! */
@@ -676,11 +670,6 @@ int resonance_formation(Particles *particles, int particle_id, int other_id,
     /* Initialize positions */
     resonance.set_position(1.0, 0.0, 0.0, 0.0);
     stable_product.set_position(1.0, 0.0, 0.0, 0.0);
-    /* Assign IDs to new particles */
-    new_id = particles->id_max() + 1;
-    int new_id_stable = new_id + 1;
-    resonance.set_id(new_id);
-    stable_product.set_id(new_id_stable);
     particles->add_data(resonance);
     particles->add_data(stable_product);
   } else {
@@ -690,5 +679,5 @@ int resonance_formation(Particles *particles, int particle_id, int other_id,
     printf("Resonance formation canceled. Returning -1.\n");
     return -1;
   }
-  return new_id;
+  return particles->id_max();
 }

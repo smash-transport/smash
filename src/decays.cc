@@ -1,10 +1,9 @@
 /*
  *
  *    Copyright (c) 2013
- *      maximilian attems <attems@fias.uni-frankfurt.de>
- *      Jussi Auvinen <auvinen@fias.uni-frankfurt.de>
+ *      SMASH Team
  *
- *    GNU General Public License (GPLv3)
+ *    GNU General Public License (GPLv3 or later)
  *
  */
 
@@ -275,20 +274,11 @@ int one_to_two(Particles *particles, int resonance_id, int type_a, int type_b) {
   new_particle_a.set_position(decay_point);
   new_particle_b.set_position(decay_point);
 
-  /* Assign IDs to new particles */
-  int new_id_a = particles->id_max() + 1;
-  int new_id_b = new_id_a + 1;
-  new_particle_a.set_id(new_id_a);
-  new_particle_b.set_id(new_id_b);
-
   particles->add_data(new_particle_a);
   particles->add_data(new_particle_b);
 
-  printd("Created %s and %s with IDs %d and %d \n",
-         particles->type(new_id_a).name().c_str(),
-         particles->type(new_id_b).name().c_str(), new_id_a, new_id_b);
-
-  return new_id_a;
+  /* 2 new particles created; return the id of the first one */
+  return particles->id_max() - 1;
 }
 
 /* 1->3 process kinematics */
@@ -417,23 +407,9 @@ int one_to_three(Particles *particles, int resonance_id,
   new_particle_b.set_position(decay_point);
   new_particle_c.set_position(decay_point);
 
-  /* Assign IDs to new particles */
-  int new_id_a = particles->id_max() + 1;
-  int new_id_b = new_id_a + 1;
-  int new_id_c = new_id_b + 1;
-  new_particle_a.set_id(new_id_a);
-  new_particle_b.set_id(new_id_b);
-  new_particle_c.set_id(new_id_c);
-
   particles->add_data(new_particle_a);
   particles->add_data(new_particle_b);
   particles->add_data(new_particle_c);
-
-  printd("Created %s %s %s with IDs %d %d %d \n",
-         particles->type(new_id_a).name().c_str(),
-         particles->type(new_id_b).name().c_str(),
-         particles->type(new_id_c).name().c_str(),
-         new_id_a, new_id_b, new_id_c);
 
   printd("p0: %g %g %g \n", new_particle_a.momentum().x0(),
          new_particle_b.momentum().x0(), new_particle_c.momentum().x0());
@@ -444,5 +420,6 @@ int one_to_three(Particles *particles, int resonance_id,
   printd("p3: %g %g %g \n", new_particle_a.momentum().x3(),
          new_particle_b.momentum().x3(), new_particle_c.momentum().x3());
 
-  return new_id_a;
+  /* 3 new particles created; return the id of the first one */
+  return particles->id_max() - 2;
 }

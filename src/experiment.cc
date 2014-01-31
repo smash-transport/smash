@@ -1,9 +1,9 @@
 /*
  *
  *    Copyright (c) 2012-2013
- *      Hannah Petersen <petersen@fias.uni-frankfurt.de>
- *
- *    GNU General Public License (GPLv3)
+ *      SMASH Team
+ * 
+ *    GNU General Public License (GPLv3 or later)
  *
  */
 
