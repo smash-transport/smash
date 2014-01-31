@@ -12,7 +12,8 @@
 #define SRC_INCLUDE_ANGLES_H_
 
 #include <cmath>
-
+#include <cstdio>
+#include <cstdlib>
 
 class Angles {
  public:

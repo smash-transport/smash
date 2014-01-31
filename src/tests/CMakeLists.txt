@@ -1,8 +1,9 @@
 # test sources
 add_executable(fourvector EXCLUDE_FROM_ALL fourvector.cc)
+add_executable(angles EXCLUDE_FROM_ALL angles.cc)
 add_executable(particles EXCLUDE_FROM_ALL particles.cc ../particles.cc ../fourvector.cc ../distributions.cc ../outputroutines.cc ../time.cc)
 add_executable(clebschgordan EXCLUDE_FROM_ALL clebschgordan.cc ../clebschgordan.cc)
-add_dependencies(check fourvector particles clebschgordan)
+add_dependencies(check fourvector particles clebschgordan angles)
 
 file(COPY ../config_general.txt DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ../particles.txt DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
@@ -24,6 +25,9 @@ add_test(cclint cpplint.py ${source})
 
 # some fourvector operations tests
 add_test(fourvector ${PROJECT_BINARY_DIR}/fourvector)
+
+# some angle operations tests
+add_test(angles ${PROJECT_BINARY_DIR}/angles)
 
 # some particles operations tests
 add_test(particles ${PROJECT_BINARY_DIR}/particles)
