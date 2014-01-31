@@ -45,10 +45,10 @@ RADIUS		5.0
 // Sample config_collider.txt file
 
 // Projectile particle
-PROJECTILE     p
+PROJECTILE     2212
 
 // Target particle
-TARGET    p 
+TARGET    2212
 
 // center-of-mass energy in GeV
 SQRTS     1.0

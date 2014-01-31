@@ -28,13 +28,13 @@ void ColliderModus::assign_params(std::list<Parameters>
         char *key = i->key();
         char *value = i->value();
         printd("%s %s\n", key, value);
-        /* string values */
+        /* integer values */
         if (strcmp(key, "PROJECTILE") == 0) {
-          strncpy(projectile_, value, sizeof(&projectile_));
+          projectile_ = abs(atoi(value));
             match = true;
         }
         if (strcmp(key, "TARGET") == 0) {
-          strncpy(target_, value, sizeof(&target_));
+          target_ = abs(atoi(value));
             match = true;
         }
         /* float values */
@@ -56,30 +56,33 @@ void ColliderModus::assign_params(std::list<Parameters>
 /* print_startup - console output on startup of box specific parameters */
 void ColliderModus::print_startup() {
     Modus::print_startup();
-    printf("Projectile name: %s \n", projectile_);
-    printf("Target name: %s \n", target_);
-    printf("Center-of-mass energy %f GeV\n", sqrts_);
+    printf("Projectile PDG ID: %d \n", projectile_);
+    printf("Target PDG ID: %d \n", target_);
+    printf("Center-of-mass energy %10.3f GeV\n", sqrts_);
 }
 
 /* initial_conditions - sets particle data for @particles */
 void ColliderModus::initial_conditions(Particles *particles) {
   /* velocity of particles */
-  float beta;
+  double cms_beta, cms_gamma;
 
-  
+  particles->create(1,projectile_);
+  particles->create(1,target_);
 
+  for(auto i = particles->begin(); i !=particles->end(); i++){
+    //    print(i->first.pdgcode);
+    /*    cms_gamma = sqrts_ / i->first.mass();
+    cms_beta = sqrt(sqrts_*sqrts_-i->first.mass()*i->first.mass() / sqrts);
+    if(i = 0){
+     i->second.set_position(0.0,0.0,0.0,-1.0);
+     i->second.set_momentum(i->first.mass(), 0.0, 0.0, cms_gamma * cms_beta
+                         * i->first.mass());
+    }
+    elsif (i = 1){
+     i->second.set_position(0.0,0.0,0.0,1.0);
+     i->second.set_momentum(i->first.mass(), 0.0, 0.0, cms_gamma *cms_beta
+                            * i->first.mass());
+
+                            }*/
+  }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
