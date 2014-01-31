@@ -36,6 +36,9 @@ class Angles {
   // is added later: If phi has changed, the next addition should be
   // given in opposite direction, i.e., -delta.
   bool add_to_theta(const double& delta);
+  // if direction is true, delta will be reversed (see comment on
+  // add_to_theta(double) )
+  bool add_to_theta(const double& delta, const bool& reverse);
   // get elements:
   double phi() const;
   double costheta() const;
@@ -123,6 +126,15 @@ bool inline Angles::add_to_theta(const double& delta) {
     set_theta(theta_plus_delta);
   }
   return false; // meaning "we did NOT change phi"
+}
+bool inline Angles::add_to_theta(const double& delta, const bool& reverse) {
+  double plusminus_one = reverse ? -1.0 : +1.0;
+  bool this_reverse = add_to_theta(plusminus_one*delta);
+  // if we had to reverse first time and now reverse again OR if we
+  // didn't reverse in either part, we do not reverse in total.
+  // else: if we reverse in one, but not the other part, we reverse in
+  // total.
+  return this_reverse ^ reverse;
 }
 
 double inline Angles::costheta() const { return costheta_; }

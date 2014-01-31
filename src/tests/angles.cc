@@ -136,11 +136,11 @@ int main() {
     // in one step is forbidden; we'll check that later)
     sign = dir.add_to_theta(2.0 * M_PI / 3.0);
     // other direction because of pole-crossing:
-    bool sign2 = dir.add_to_theta((sign ? -1.0 : +1.0) * 2.0 * M_PI / 3.0);
+    bool sign2 = dir.add_to_theta(2.0 * M_PI / 3.0, sign);
     // phi stays the same (two changes)
     if (fabs(current_phi - dir.phi()) >= EPS)
       return 39;
-    if (! (sign2 && sign))
+    if (sign2 && !sign)
       return 39;
     // theta is now 30 degrees:
     if (fabs(dir.theta() - M_PI / 6.0) >= EPS)
@@ -158,7 +158,15 @@ int main() {
       return 41;
   }
 
-  // that's all, folks!
+  // we can also wildly add things to theta and see if the boolean
+  // really corresponds to a change in phi:
+  for (int c = 0; c < NUMBER_OF_TRIES; c++) {
+    double current_phi = dir.phi();
+    if (dir.add_to_theta(M_PI * drand48())
+        && fabs(current_phi - dir.phi()) < EPS)
+      return 42;
+  }
 
+  // that's all, folks!
   return 0;
 }
