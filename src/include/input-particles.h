@@ -1,6 +1,9 @@
 /*
- *    Copyright (c) 2012 maximilian attems <attems@fias.uni-frankfurt.de>
- *    GNU General Public License (GPLv3)
+ *    Copyright (c) 2012 
+ *      SMASH Team
+ * 
+ *    GNU General Public License (GPLv3 or later)
+ * 
  */
 #ifndef SRC_INCLUDE_INPUT_PARTICLES_H_
 #define SRC_INCLUDE_INPUT_PARTICLES_H_

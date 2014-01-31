@@ -7,9 +7,9 @@
  * http://archive.org/details/fortranprogramsf409casw
  *
  * Copyright (c) 2013
- *    Kai Gallmeister <gallmei@th.physik.uni-frankfurt.de>
- *    Jussi Auvinen <auvinen@fias.uni-frankfurt.de>
- *  GNU General Public License (GPLv3)
+ *      SMASH Team
+ * 
+ *    GNU General Public License (GPLv3 or later)
  */
 
 #ifndef SRC_INCLUDE_CLEBSCHGORDAN_H_

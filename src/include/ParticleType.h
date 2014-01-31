@@ -1,9 +1,8 @@
 /*
  *    Copyright (c) 2012-2013
- *      maximilian attems <attems@fias.uni-frankfurt.de>
- *      Jussi Auvinen <auvinen@fias.uni-frankfurt.de>
- *
- *    GNU General Public License (GPLv3)
+ *      SMASH Team
+ * 
+ *    GNU General Public License (GPLv3 or later)
  */
 #ifndef SRC_INCLUDE_PARTICLETYPE_H_
 #define SRC_INCLUDE_PARTICLETYPE_H_

@@ -1,9 +1,9 @@
 /*
  *
  *    Copyright (c) 2013-2014
- *      Hannah Petersen <petersen@fias.uni-frankfurt.de>
- *
- *    GNU General Public License (GPLv3)
+ *      SMASH Team
+ * 
+ *    GNU General Public License (GPLv3 or later)
  *
  */
 #include <cinttypes>

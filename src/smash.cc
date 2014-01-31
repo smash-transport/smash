@@ -1,11 +1,9 @@
 /*
  *
  *    Copyright (c) 2012-2014
- *      maximilian attems <attems@fias.uni-frankfurt.de>
- *      Jussi Auvinen <auvinen@fias.uni-frankfurt.de>
- *		Hannah Petersen <petersen@fias.uni-frankfurt.de>
+ *      SMASH Team
  * 
- *    GNU General Public License (GPLv3)
+ *    GNU General Public License (GPLv3 or later)
  *
  */
 

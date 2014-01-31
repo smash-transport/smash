@@ -1,7 +1,8 @@
 /*
  *    Copyright (c) 2014
- *      Hannah Petersen <petersen@fias.uni-frankfurt.de>
- *    GNU General Public License (GPLv3)
+ *      SMASH Team
+ * 
+ *    GNU General Public License (GPLv3 or later)
  */
 #ifndef SRC_INCLUDE_COLLIDER_H_
 #define SRC_INCLUDE_COLLIDER_H_

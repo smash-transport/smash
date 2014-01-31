@@ -1,9 +1,9 @@
 /*
  *
  *    Copyright (c) 2014
- *      Bjørn Bäuchle <baeuchle@fias.uni-frankfurt.de>
- *
- *    GNU General Public License (GPLv3)
+ *      SMASH Team
+ * 
+ *    GNU General Public License (GPLv3 or later)
  *
  */
 
