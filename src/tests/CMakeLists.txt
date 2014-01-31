@@ -1,10 +1,11 @@
 # test sources
 add_executable(fourvector EXCLUDE_FROM_ALL fourvector.cc)
+add_executable(lorentzboost EXCLUDE_FROM_ALL lorentzboost.cc ../fourvector.cc)
 add_executable(angles EXCLUDE_FROM_ALL angles.cc)
 add_executable(angles_distribution EXCLUDE_FROM_ALL angles_distribution.cc)
 add_executable(particles EXCLUDE_FROM_ALL particles.cc ../particles.cc ../fourvector.cc ../distributions.cc ../outputroutines.cc ../time.cc)
 add_executable(clebschgordan EXCLUDE_FROM_ALL clebschgordan.cc ../clebschgordan.cc)
-add_dependencies(check fourvector particles clebschgordan angles
+add_dependencies(check fourvector lorentzboost particles clebschgordan angles
 angles_distribution)
 
 file(COPY ../config_general.txt DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
@@ -27,6 +28,9 @@ add_test(cclint cpplint.py ${source})
 
 # some fourvector operations tests
 add_test(fourvector ${PROJECT_BINARY_DIR}/fourvector)
+
+# Lorentz boost tests
+add_test(lorentzboost ${PROJECT_BINARY_DIR}/lorentzboost)
 
 # some angle operations tests
 add_test(angles ${PROJECT_BINARY_DIR}/angles)

@@ -1,7 +1,7 @@
 /*
  *    Copyright (c) 2012-2013
  *      SMASH Team
- * 
+ *
  *    GNU General Public License (GPLv3 or later)
  */
 #include <cmath>
