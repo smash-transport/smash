@@ -2,7 +2,7 @@
  *
  *    Copyright (c) 2014
  *      SMASH Team
- * 
+ *
  *    GNU General Public License (GPLv3 or later)
  *
  */
@@ -42,7 +42,7 @@ int main() {
                    + dir.z()*dir.z();
     if (fabs(xyz_one - 1.0) >= EPS)
       return 3;
-    
+
     // compare cos(theta) and costheta:
     if (fabs(cos(dir.theta()) - dir.costheta()) >= EPS)
       return 4;
@@ -62,8 +62,8 @@ int main() {
       return 6;
     }
     // set theta in [(2*n-1)*pi .. 2*n*pi]
-    //dir.set_theta(2.0 * M_PI * m - .7);
-    //if (fabs(dir.theta() - .7) >= EPS)
+    // dir.set_theta(2.0 * M_PI * m - .7);
+    // if (fabs(dir.theta() - .7) >= EPS)
     //  return 6;
   }
   for (double newcos = -8.0; newcos < 8.0; newcos += .2) {
@@ -76,7 +76,7 @@ int main() {
       caught = true;
     }
     // if I don't catch an expression although newcos is outside range:
-    if (! caught && (newcos < -1 || newcos > 1))
+    if (!caught && (newcos < -1 || newcos > 1))
       return 7;
     // if I catch an exception although newcos is inside rande:
     if (caught && (newcos >= -1 && newcos <= 1))
@@ -118,12 +118,11 @@ int main() {
     if (current_phi < M_PI) {
       if (fabs(current_phi + M_PI - dir.phi()) >= EPS)
         return 35;
-    }
-    else {
+    } else {
       if (fabs(current_phi - M_PI - dir.phi()) >= EPS)
         return 35;
     }
-    if (! sign)
+    if (!sign)
       return 35;
     if (fabs(dir.theta() - 5.0 * M_PI / 6.0) >= EPS)
       return 36;
@@ -159,7 +158,7 @@ int main() {
     } catch(...) {
       caught = true;
     }
-    if (! caught)
+    if (!caught)
       return 41;
   }
 
