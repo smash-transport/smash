@@ -91,6 +91,9 @@ void Modus::propagate(Particles *particles) {
                                 i->second.velocity_z() * eps);
         printd("Particle %d motion: %g %g %g %g\n", i->first,
                distance.x0(), distance.x1(), distance.x2(), distance.x3());
+        position = i->second.position();
+        position += distance;
+        i->second.set_position(position);
     }
 }
 
