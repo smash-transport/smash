@@ -53,6 +53,12 @@ void ExperimentImplementation<Modus>::configure(std::list<Parameters>
     }
 }
 
+/* This allows command line arguments to override default. */
+template <typename Modus>
+void ExperimentImplementation<Modus>::commandline_arg(int steps) {
+  bc_.steps = steps;
+}
+
 /* This method reads the particle type and cross section information
  * and does the initialization of the system (fill the particles map)
  */

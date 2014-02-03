@@ -25,6 +25,7 @@ class Experiment {
     virtual ~Experiment() {}
     static std::unique_ptr<Experiment> create(std::string modus_chooser);
     virtual void configure(std::list<Parameters> configuration) = 0;
+    virtual void commandline_arg(int steps) = 0;
     virtual void initialize(char *path) = 0;
     virtual void run_time_evolution() = 0;
     virtual void end() = 0;
@@ -34,6 +35,7 @@ template <typename Modus> class ExperimentImplementation : public Experiment {
  public:
     ExperimentImplementation(): particles_(nullptr), cross_sections_(nullptr) {}
     virtual void configure(std::list<Parameters> configuration);
+    virtual void commandline_arg(int steps);
     virtual void initialize(char *path);
     virtual void run_time_evolution();
     virtual void end();

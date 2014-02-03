@@ -33,7 +33,8 @@ static void usage(int rc) {
   printf("Calculate transport box\n"
          "  -h, --help           usage information\n"
          "  -m, --modus          modus of laboratory\n"
-         "  -V, --version\n\n");
+         "  -s, --steps          number of steps\n"
+         "  -v, --version\n\n");
   exit(rc);
 }
 
@@ -42,11 +43,12 @@ static void usage(int rc) {
 int main(int argc, char *argv[]) {
   char *p, *path;
   int opt, rc = 0;
-  int nevents = 0;
+  int steps = 0, nevents = 0;
   struct option longopts[] = {
     { "help",       no_argument,            0, 'h' },
     { "modus",      required_argument,      0, 'm' },
-    { "version",    no_argument,            0, 'V' },
+    { "steps",      required_argument,      0, 's' },
+    { "version",    no_argument,            0, 'v' },
     { NULL,         0, 0, 0 }
   };
 
@@ -89,7 +91,7 @@ int main(int argc, char *argv[]) {
     }
   }
   /* check for overriding command line arguments */
-  while ((opt = getopt_long(argc, argv, "hm:V", longopts,
+  while ((opt = getopt_long(argc, argv, "hm:s:v", longopts,
                               NULL)) != -1) {
     switch (opt) {
       case 'h':
@@ -99,17 +101,17 @@ int main(int argc, char *argv[]) {
         modus_chooser = optarg;
         printf("Modus set: %s\n", modus_chooser.c_str());
         break;
-//    case 'R':
+//    case 'r':
 /* negative seed is for time */
 //      if (atol(optarg) > 0)
 //         lab->set_seed(atol(optarg));
 //      else
 //         lab->set_seed(time(NULL));
 //      break;
-//    case 'S':
-//            lab->set_steps(abs(atoi(optarg)));
-//      break;
-      case 'V':
+      case 's':
+        steps = abs(atoi(optarg));
+        break;
+      case 'v':
         exit(EXIT_SUCCESS);
       default:
         usage(EXIT_FAILURE);
@@ -119,16 +121,19 @@ int main(int argc, char *argv[]) {
   auto experiment = Experiment::create(modus_chooser);
   experiment->configure(configuration);
   mkdir_data();
+  /* overriden arguments */
+  if (steps > 0)
+    experiment->commandline_arg(steps);
 
   for (int j = 1; j < nevents; j++) {
     write_oscar_header();
     experiment->initialize(path);
-  /* the time evolution of the relevant subsystem */
+    /* the time evolution of the relevant subsystem */
     experiment->run_time_evolution();
   }
 
   /* tear down */
-    free(path);
-    experiment->end();
-    return rc;
+  free(path);
+  experiment->end();
+  return rc;
 }
