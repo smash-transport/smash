@@ -64,7 +64,7 @@ int main(int argc, char *argv[]) {
   std::list<Parameters> configuration;
   process_config(&configuration, path);
   bool match = false;
-  char modus_chooser[20];
+  std::string modus_chooser;
   std::list<Parameters>::iterator i = configuration.begin();
   while (i != configuration.end()) {
     char *key = i->key();
@@ -72,7 +72,7 @@ int main(int argc, char *argv[]) {
     printd("Looking for match %s %s\n", key, value);
     /* integer values */
     if (strcmp(key, "MODUS") == 0) {
-      strncpy(modus_chooser, value, 9);
+      modus_chooser = value;
       match = true;
     }
     if (strcmp(key, "NEVENTS") == 0) {
@@ -96,8 +96,8 @@ int main(int argc, char *argv[]) {
         usage(EXIT_SUCCESS);
         break;
       case 'm':
-        strncpy(modus_chooser, optarg, sizeof(modus_chooser));
-        printf("Modus read in: %s \n", modus_chooser);
+        modus_chooser = optarg;
+        printf("Modus set: %s\n", modus_chooser.c_str());
         break;
 //    case 'R':
 /* negative seed is for time */
@@ -115,7 +115,7 @@ int main(int argc, char *argv[]) {
         usage(EXIT_FAILURE);
     }
   }
-  printf("Modus for this calculation: %s \n", modus_chooser);
+  printf("Modus for this calculation: %s\n", modus_chooser.c_str());
   auto experiment = Experiment::create(modus_chooser);
   experiment->configure(configuration);
   mkdir_data();

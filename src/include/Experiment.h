@@ -22,7 +22,7 @@ class Experiment {
      * to avoid undefined behavior when destroying derived objects
      */
     virtual ~Experiment() {}
-    static std::unique_ptr<Experiment> create(char *modus_chooser);
+    static std::unique_ptr<Experiment> create(std::string modus_chooser);
     virtual void configure(std::list<Parameters> configuration) = 0;
     virtual void initialize(char *path) = 0;
     virtual void run_time_evolution() = 0;
