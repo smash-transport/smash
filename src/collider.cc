@@ -75,10 +75,10 @@ void ColliderModus::initial_conditions(Particles *particles) {
     cms_gamma = sqrts_ / mass;
     cms_beta = sqrt(sqrts_ * sqrts_ - mass * mass / sqrts_);
     if (i->first == 0) {
-     i->second.set_position(0.0, 0.0, 0.0, -1.0);
+     i->second.set_position(1.0, 0.0, 0.0, -1.0);
      i->second.set_momentum(mass, 0.0, 0.0, cms_gamma * cms_beta * mass);
     } else if (i->first == 1) {
-     i->second.set_position(0.0, 0.0, 0.0, 1.0);
+     i->second.set_position(1.0, 0.0, 0.0, 1.0);
      i->second.set_momentum(mass, 0.0, 0.0, - cms_gamma *cms_beta * mass);
     }
   }
