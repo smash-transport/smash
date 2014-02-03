@@ -22,23 +22,31 @@
 class Particles;
 class CrossSections;
 
+/*
+ * This is only a base class for actual Modus classes. The class will never be
+ * used polymorphically, therefore it never needs virtual functions.
+ *
+ * Consider that there never are and never will be objects of type ModusDefault.
+ *
+ * This class is empty per default. You can add a function if you have a
+ * function that is different in at least two subclasses and equal in at least
+ * two subclasses.  Code that common to all goes into ExperimentImplementation.
+ */
 class ModusDefault {
  public:
     /* default constructor with probable values */
     ModusDefault(): steps(10000), output_interval(100), testparticles(1),
         eps(0.001f), cross_section(10.0f), seed(1), energy_initial(0.0f),
     time_start(set_timer_start()) {}
-    /* Virtual base class destructor
-     * to avoid undefined behavior when destroying derived objects
-     */
-    virtual ~ModusDefault() {}
+
+    // never needs a virtual destructor
+
     /* special function should be called by specific subclass */
     void assign_params(std::list<Parameters> *configuration);
     void print_startup();
-    void initial_conditions(Particles *p __attribute__((unused))) {
-       return; }
+    void initial_conditions(Particles *) { return; }
     float energy_total(Particles *particles);
-    int sanity_check(Particles *particles __attribute__((unused)));
+    int sanity_check(Particles *particles);
     void check_collision_geometry(Particles *particles,
       CrossSections *cross_sections, std::list<int> *collision_list,
       size_t *rejection_conflict);
