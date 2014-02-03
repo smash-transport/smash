@@ -42,6 +42,7 @@ static void usage(int rc) {
 int main(int argc, char *argv[]) {
   char *p, *path;
   int opt, rc = 0;
+  int nevents = 0;
   char modus_chooser[20];
   struct option longopts[] = {
     { "help",       no_argument,            0, 'h' },
@@ -69,7 +70,11 @@ int main(int argc, char *argv[]) {
         printd("Looking for match %s %s\n", key, value);
         /* integer values */
         if (strcmp(key, "MODUS") == 0) {
-            strncpy(modus_chooser, value, sizeof(&modus_chooser));
+            strncpy(modus_chooser, value, 9);
+            match = true;
+        }
+        if (strcmp(key, "NEVENTS") == 0) {
+            nevents = abs(atoi(value));
             match = true;
         }
         /* remove processed entry */
@@ -111,10 +116,12 @@ int main(int argc, char *argv[]) {
     auto experiment = Experiment::create(modus_chooser);
     experiment->configure(configuration);
     mkdir_data();
+  for (int j = 1; j < nevents; j++) {
     write_oscar_header();
     experiment->initialize(path);
   /* the time evolution of the relevant subsystem */
     experiment->run_time_evolution();
+  }
   /* tear down */
     free(path);
     experiment->end();
