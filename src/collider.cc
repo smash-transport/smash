@@ -66,23 +66,20 @@ void ColliderModus::initial_conditions(Particles *particles) {
   /* velocity of particles */
   double cms_beta, cms_gamma;
 
-  particles->create(1,projectile_);
-  particles->create(1,target_);
+  particles->create(1, projectile_);
+  particles->create(1, target_);
 
-  for(auto i = particles->begin(); i !=particles->end(); i++){
-    //    print(i->first.pdgcode);
-    /*    cms_gamma = sqrts_ / i->first.mass();
-    cms_beta = sqrt(sqrts_*sqrts_-i->first.mass()*i->first.mass() / sqrts);
-    if(i = 0){
-     i->second.set_position(0.0,0.0,0.0,-1.0);
-     i->second.set_momentum(i->first.mass(), 0.0, 0.0, cms_gamma * cms_beta
-                         * i->first.mass());
+  for (auto i = particles->begin(); i !=particles->end(); i++) {
+    float mass = particles->type(i->first).mass();
+    printf("id %d pdgcode %d mass %f\n", i->first, i->second.pdgcode(), mass);
+    cms_gamma = sqrts_ / mass;
+    cms_beta = sqrt(sqrts_ * sqrts_ - mass * mass / sqrts_);
+    if (i->first == 0) {
+     i->second.set_position(0.0, 0.0, 0.0, -1.0);
+     i->second.set_momentum(mass, 0.0, 0.0, cms_gamma * cms_beta * mass);
+    } else if (i->first == 1) {
+     i->second.set_position(0.0, 0.0, 0.0, 1.0);
+     i->second.set_momentum(mass, 0.0, 0.0, cms_gamma *cms_beta * mass);
     }
-    elsif (i = 1){
-     i->second.set_position(0.0,0.0,0.0,1.0);
-     i->second.set_momentum(i->first.mass(), 0.0, 0.0, cms_gamma *cms_beta
-                            * i->first.mass());
-
-                            }*/
   }
 }

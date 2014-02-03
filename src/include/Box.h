@@ -45,6 +45,4 @@ class BoxModus : public Modus {
     float number_density_initial_;
 };
 
-
-
 #endif  // SRC_INCLUDE_BOX_H_
