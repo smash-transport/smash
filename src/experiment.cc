@@ -27,11 +27,11 @@
 /* #include "include/SphereModus.h" */
 
 /* ExperimentBase carries everything that is needed for the evolution */
-std::unique_ptr<ExperimentBase> ExperimentBase::create(char *modus_chooser) {
+std::unique_ptr<ExperimentBase> ExperimentBase::create(std::string modus_chooser) {
   typedef std::unique_ptr<ExperimentBase> ExperimentPointer;
-  if (strcmp(modus_chooser, "Box") == 0) {
+  if (modus_chooser.compare("Box") == 0) {
     return ExperimentPointer(new Experiment<BoxModus>);
-  } else if (strcmp(modus_chooser, "Collider") == 0) {
+  } else if (modus_chooser.compare("Collider") == 0) {
     return ExperimentPointer(new Experiment<ColliderModus>);
   } else {
     throw std::string("Invalid ModusDefault requested from ExperimentBase::create.");
@@ -51,6 +51,12 @@ void Experiment<ModusDefault>::configure(std::list<Parameters>
       bc_.cross_section = bc_.cross_section / bc_.testparticles;
       printf("Elastic cross section: %g mb\n", bc_.cross_section);
     }
+}
+
+/* This allows command line arguments to override default. */
+template <typename Modus>
+void Experiment<Modus>::commandline_arg(int steps) {
+  bc_.steps = steps;
 }
 
 /* This method reads the particle type and cross section information
