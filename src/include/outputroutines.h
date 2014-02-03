@@ -13,7 +13,6 @@
 
 /* forward declarations */
 class ModusDefault;
-class Experiment;
 class Parameters;
 class ParticleData;
 class ParticleType;

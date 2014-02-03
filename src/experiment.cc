@@ -26,21 +26,21 @@
 
 /* #include "include/SphereModus.h" */
 
-/* Experiment carries everything that is needed for the evolution */
-std::unique_ptr<Experiment> Experiment::create(char *modus_chooser) {
-  typedef std::unique_ptr<Experiment> ExperimentPointer;
+/* ExperimentBase carries everything that is needed for the evolution */
+std::unique_ptr<ExperimentBase> ExperimentBase::create(char *modus_chooser) {
+  typedef std::unique_ptr<ExperimentBase> ExperimentPointer;
   if (strcmp(modus_chooser, "Box") == 0) {
-    return ExperimentPointer(new ExperimentImplementation<BoxModus>);
+    return ExperimentPointer(new Experiment<BoxModus>);
   } else if (strcmp(modus_chooser, "Collider") == 0) {
-    return ExperimentPointer(new ExperimentImplementation<ColliderModus>);
+    return ExperimentPointer(new Experiment<ColliderModus>);
   } else {
-    throw std::string("Invalid ModusDefault requested from Experiment::create.");
+    throw std::string("Invalid ModusDefault requested from ExperimentBase::create.");
   }
 }
 
 /* This method reads the parameters in */
 template <typename ModusDefault>
-void ExperimentImplementation<ModusDefault>::configure(std::list<Parameters>
+void Experiment<ModusDefault>::configure(std::list<Parameters>
                                                 configuration) {
     bc_.assign_params(&configuration);
     warn_wrong_params(&configuration);
@@ -57,7 +57,7 @@ void ExperimentImplementation<ModusDefault>::configure(std::list<Parameters>
  * and does the initialization of the system (fill the particles map)
  */
 template <typename ModusDefault>
-void ExperimentImplementation<ModusDefault>::initialize(char *path) {
+void Experiment<ModusDefault>::initialize(char *path) {
     /* Ensure safe allocation */
     delete particles_;
     delete cross_sections_;
@@ -87,7 +87,7 @@ void ExperimentImplementation<ModusDefault>::initialize(char *path) {
  * and propagating particles
  */
 template <typename ModusDefault>
-void ExperimentImplementation<ModusDefault>::run_time_evolution() {
+void Experiment<ModusDefault>::run_time_evolution() {
     bc_.sanity_check(particles_);
     std::list<int> collision_list, decay_list;
     size_t interactions_total = 0, previous_interactions_total = 0,
@@ -148,7 +148,7 @@ void ExperimentImplementation<ModusDefault>::run_time_evolution() {
 
 /* Tear down everything */
 template <typename ModusDefault>
-void ExperimentImplementation<ModusDefault>::end() {
+void Experiment<ModusDefault>::end() {
     delete particles_;
     delete cross_sections_;
 }

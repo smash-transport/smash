@@ -113,7 +113,7 @@ int main(int argc, char *argv[]) {
         }
     }
     printf("Modus for this calculation: %s \n", modus_chooser);
-    auto experiment = Experiment::create(modus_chooser);
+    auto experiment = ExperimentBase::create(modus_chooser);
     experiment->configure(configuration);
     mkdir_data();
   for (int j = 1; j < nevents; j++) {
