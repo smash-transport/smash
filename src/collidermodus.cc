@@ -5,7 +5,7 @@
  *    GNU General Public License (GPLv3 or later)
  */
 
-#include "include/Collider.h"
+#include "include/ColliderModus.h"
 #include "include/CrossSections.h"
 #include "include/Particles.h"
 #include "include/constants.h"

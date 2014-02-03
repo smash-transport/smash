@@ -5,7 +5,7 @@
  *    GNU General Public License (GPLv3 or later)
  */
 
-#include "include/Box.h"
+#include "include/BoxModus.h"
 #include "include/CrossSections.h"
 #include "include/Particles.h"
 #include "include/constants.h"

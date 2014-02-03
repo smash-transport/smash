@@ -10,9 +10,9 @@
 #include <map>
 #include <list>
 
-#include "include/Box.h"
+#include "include/BoxModus.h"
 #include "include/Experiment.h"
-#include "include/Collider.h"
+#include "include/ColliderModus.h"
 #include "include/CrossSections.h"
 #include "include/ModusDefault.h"
 #include "include/Parameters.h"
@@ -24,7 +24,7 @@
 #include "include/outputroutines.h"
 #include "include/param-reader.h"
 
-/* #include "include/Sphere.h" */
+/* #include "include/SphereModus.h" */
 
 /* Experiment carries everything that is needed for the evolution */
 std::unique_ptr<Experiment> Experiment::create(char *modus_chooser) {
