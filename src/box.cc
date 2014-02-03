@@ -111,7 +111,7 @@ void BoxModus::initial_conditions(Particles *particles) {
                 momentum_radial = 3.0 * this->temperature_;
             }
             phitheta.distribute_isotropically();
-            printd("Particle %zu radial momenta %g phi %g cos_theta %g\n",
+            printd("Particle %d radial momenta %g phi %g cos_theta %g\n",
                    i->first, momentum_radial, phitheta.phi(),
                    phitheta.costheta());
             i->second.set_momentum(particles->type(i->first).mass(),
