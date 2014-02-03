@@ -9,6 +9,7 @@
 
 #include <memory>
 #include <list>
+#include <string>
 
 #include "../include/CrossSections.h"
 #include "../include/Modus.h"
