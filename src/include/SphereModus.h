@@ -16,12 +16,12 @@ class FourVector;
 #include <list>
 
 #include "../include/CrossSections.h"
-#include "../include/Modus.h"
+#include "../include/ModusDefault.h"
 #include "../include/Particles.h"
 #include "../include/time.h"
 #include "../include/Parameters.h"
 
-class SphereModus : public Modus {
+class SphereModus : public ModusDefault {
  public:
     /* default constructor with probable values */
     SphereModus(): radius_(10.0f), timer_start_(set_timer_start()) {}

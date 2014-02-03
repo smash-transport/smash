@@ -155,7 +155,7 @@ void SphereModus::initial_conditions(Particles *particles) {
 /* check_collision_geometry - check if a collision happens between particles */
 void SphereModus::check_collision_geometry(Particles *particles,
   CrossSections *cross_sections,
-  std::list<int> *collision_list, Modus const &parameters,
+  std::list<int> *collision_list, ModusDefault const &parameters,
   BoxModus const &box, size_t *rejection_conflict) {
   std::vector<std::vector<std::vector<std::vector<int> > > > grid;
   int N, x, y, z;

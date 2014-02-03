@@ -17,7 +17,7 @@
 #include "include/decays.h"
 
 #include "include/Angles.h"
-#include "include/Modus.h"
+#include "include/ModusDefault.h"
 #include "include/ParticleData.h"
 #include "include/ParticleType.h"
 #include "include/Particles.h"

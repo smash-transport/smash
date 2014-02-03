@@ -12,12 +12,12 @@
 #include <list>
 
 #include "../include/CrossSections.h"
-#include "../include/Modus.h"
+#include "../include/ModusDefault.h"
 #include "../include/Particles.h"
 #include "../include/Parameters.h"
 
 
-class BoxModus : public Modus {
+class BoxModus : public ModusDefault {
  public:
   /* default constructor with probable values */
     BoxModus(): initial_condition_(1), length_(10.0f), temperature_(0.1f),

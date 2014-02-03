@@ -22,16 +22,16 @@
 class Particles;
 class CrossSections;
 
-class Modus {
+class ModusDefault {
  public:
     /* default constructor with probable values */
-    Modus(): steps(10000), output_interval(100), testparticles(1),
+    ModusDefault(): steps(10000), output_interval(100), testparticles(1),
         eps(0.001f), cross_section(10.0f), seed(1), energy_initial(0.0f),
     time_start(set_timer_start()) {}
     /* Virtual base class destructor
      * to avoid undefined behavior when destroying derived objects
      */
-    virtual ~Modus() {}
+    virtual ~ModusDefault() {}
     /* special function should be called by specific subclass */
     void assign_params(std::list<Parameters> *configuration);
     void print_startup();
@@ -68,7 +68,7 @@ class Modus {
 
 
 /* set the timer to the actual time in nanoseconds precision */
-timespec inline Modus::set_timer_start(void) {
+timespec inline ModusDefault::set_timer_start(void) {
     timespec time;
     clock_gettime(&time);
     return time;

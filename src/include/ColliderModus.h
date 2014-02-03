@@ -13,12 +13,12 @@
 #include <string>
 
 #include "../include/CrossSections.h"
-#include "../include/Modus.h"
+#include "../include/ModusDefault.h"
 #include "../include/Particles.h"
 #include "../include/Parameters.h"
 
 
-class ColliderModus : public Modus {
+class ColliderModus : public ModusDefault {
  public:
   /* default constructor with probable values */
   ColliderModus(): projectile_(2212), target_(2212), sqrts_(1.0f) {}

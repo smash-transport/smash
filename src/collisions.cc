@@ -18,7 +18,7 @@
 
 #include "include/CollisionData.h"
 #include "include/FourVector.h"
-#include "include/Modus.h"
+#include "include/ModusDefault.h"
 #include "include/Particles.h"
 #include "include/ParticleData.h"
 #include "include/ProcessBranch.h"

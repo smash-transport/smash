@@ -21,7 +21,7 @@
 
 void ColliderModus::assign_params(std::list<Parameters>
                                           *configuration) {
-    Modus::assign_params(configuration);
+    ModusDefault::assign_params(configuration);
     bool match = false;
     std::list<Parameters>::iterator i = configuration->begin();
     while (i != configuration->end()) {
@@ -55,7 +55,7 @@ void ColliderModus::assign_params(std::list<Parameters>
 
 /* print_startup - console output on startup of box specific parameters */
 void ColliderModus::print_startup() {
-    Modus::print_startup();
+    ModusDefault::print_startup();
     printf("Projectile PDG ID: %d \n", projectile_);
     printf("Target PDG ID: %d \n", target_);
     printf("Center-of-mass energy %10.3f GeV\n", sqrts_);

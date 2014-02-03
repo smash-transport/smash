@@ -12,7 +12,7 @@
 #include "../include/CrossSections.h"
 #include "../include/Particles.h"
 
-class Modus;
+class ModusDefault;
 
 /* populates collision list if collision applies */
 void collision_criteria_geometry(Particles *particles,

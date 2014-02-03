@@ -8,12 +8,12 @@
  */
 #include <cinttypes>
 
-#include "include/Modus.h"
+#include "include/ModusDefault.h"
 #include "include/collisions.h"
 #include "include/constants.h"
 #include "include/outputroutines.h"
 
-void Modus::assign_params(std::list<Parameters> *configuration) {
+void ModusDefault::assign_params(std::list<Parameters> *configuration) {
     bool match = false;
     std::list<Parameters>::iterator i = configuration->begin();
     while (i != configuration->end()) {
@@ -62,7 +62,7 @@ void Modus::assign_params(std::list<Parameters> *configuration) {
 }
 
 /* print_startup - console output on startup of general parameters */
-void Modus::print_startup() {
+void ModusDefault::print_startup() {
     printf("Elastic cross section: %g mb\n", cross_section);
     printf("Using temporal stepsize: %g fm/c\n", eps);
     printf("Maximum number of steps: %i \n", steps);
@@ -72,7 +72,7 @@ void Modus::print_startup() {
 /* calculates the total energy in the system from zero component of
  * all momenta of particles
  * XXX should be expanded to all quantum numbers of interest */
-float Modus::energy_total(Particles *particles) {
+float ModusDefault::energy_total(Particles *particles) {
     float energy_sum = 0.0;
     for (auto i = particles->begin(); i != particles->end(); ++i) {
          energy_sum += i->second.momentum().x0();
@@ -81,7 +81,7 @@ float Modus::energy_total(Particles *particles) {
 }
 
 /*general propagation routine */
-void Modus::propagate(Particles *particles) {
+void ModusDefault::propagate(Particles *particles) {
     FourVector distance, position;
     for (auto i = particles->begin(); i != particles->end(); ++i) {
         /* propagation for this time step */
@@ -98,17 +98,17 @@ void Modus::propagate(Particles *particles) {
 }
 
 /*empty methods are needed in Boxmodus */
-int Modus::sanity_check(Particles *particles __attribute__((unused))) {
+int ModusDefault::sanity_check(Particles *particles __attribute__((unused))) {
     return 0;
 }
 
-FourVector Modus::boundary_condition(FourVector position,
+FourVector ModusDefault::boundary_condition(FourVector position,
                   bool *boundary_hit __attribute__((unused))) {
     return position;
 }
 
 // check particle pairs for collision
-void Modus::check_collision_geometry(Particles *particles,
+void ModusDefault::check_collision_geometry(Particles *particles,
        CrossSections *cross_sections, std::list<int> *collision_list,
        size_t *rejection_conflict) {
     FourVector distance;

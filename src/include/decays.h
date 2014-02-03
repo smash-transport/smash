@@ -14,7 +14,7 @@
 
 #include "../include/Particles.h"
 
-class Modus;
+class ModusDefault;
 
 /* does_decay - does a resonance decay on this timestep? */
 void check_decays(Particles *particles, std::list<int> *decay_list,

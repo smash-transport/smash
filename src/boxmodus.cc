@@ -21,7 +21,7 @@
 
 void BoxModus::assign_params(std::list<Parameters>
                                           *configuration) {
-    Modus::assign_params(configuration);
+    ModusDefault::assign_params(configuration);
     bool match = false;
     std::list<Parameters>::iterator i = configuration->begin();
     while (i != configuration->end()) {
@@ -55,7 +55,7 @@ void BoxModus::assign_params(std::list<Parameters>
 
 /* print_startup - console output on startup of box specific parameters */
 void BoxModus::print_startup() {
-    Modus::print_startup();
+    ModusDefault::print_startup();
     printf("Size of the box: %g x %g x %g fm\n", length_, length_, length_);
     printf("Initial temperature: %g GeV\n", temperature_);
     printf("IC type %d\n", initial_condition_);
@@ -164,7 +164,7 @@ void BoxModus::check_collision_geometry(Particles *particles,
             / sqrt(cross_section * fm2_mb * M_1_PI) * 0.5);
   if (unlikely(N < 4 || particles->size() < 10)) {
       /* XXX: apply periodic boundary condition */
-      Modus::check_collision_geometry(particles,
+      ModusDefault::check_collision_geometry(particles,
       cross_sections, collision_list, rejection_conflict);
     return;
   }

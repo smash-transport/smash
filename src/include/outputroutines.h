@@ -12,14 +12,14 @@
 #include "../include/Particles.h"
 
 /* forward declarations */
-class Modus;
+class ModusDefault;
 class Experiment;
 class Parameters;
 class ParticleData;
 class ParticleType;
 
 /* console output */
-void print_startup(const Modus &parameters);
+void print_startup(const ModusDefault &parameters);
 void print_header(void);
 void print_measurements(const Particles &particles,
                         const size_t &scatterings_total,

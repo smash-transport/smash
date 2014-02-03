@@ -16,7 +16,7 @@
 #include <string>
 
 #include "include/FourVector.h"
-#include "include/Modus.h"
+#include "include/ModusDefault.h"
 #include "include/Parameters.h"
 #include "include/Particles.h"
 #include "include/ParticleData.h"

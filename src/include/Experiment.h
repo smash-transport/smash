@@ -11,7 +11,7 @@
 #include <list>
 
 #include "../include/CrossSections.h"
-#include "../include/Modus.h"
+#include "../include/ModusDefault.h"
 #include "../include/Parameters.h"
 #include "../include/Particles.h"
 
@@ -29,7 +29,7 @@ class Experiment {
     virtual void end() = 0;
 };
 
-template <typename Modus> class ExperimentImplementation : public Experiment {
+template <typename ModusDefault> class ExperimentImplementation : public Experiment {
  public:
     ExperimentImplementation(): particles_(nullptr), cross_sections_(nullptr) {}
     virtual void configure(std::list<Parameters> configuration);
@@ -38,7 +38,7 @@ template <typename Modus> class ExperimentImplementation : public Experiment {
     virtual void end();
 
  private:
-    Modus bc_;
+    ModusDefault bc_;
     Particles *particles_;
     CrossSections *cross_sections_;
 };

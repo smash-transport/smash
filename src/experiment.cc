@@ -14,7 +14,7 @@
 #include "include/Experiment.h"
 #include "include/Collider.h"
 #include "include/CrossSections.h"
-#include "include/Modus.h"
+#include "include/ModusDefault.h"
 #include "include/Parameters.h"
 #include "include/collisions.h"
 #include "include/decays.h"
@@ -34,13 +34,13 @@ std::unique_ptr<Experiment> Experiment::create(char *modus_chooser) {
   } else if (strcmp(modus_chooser, "Collider") == 0) {
     return ExperimentPointer(new ExperimentImplementation<ColliderModus>);
   } else {
-    throw std::string("Invalid Modus requested from Experiment::create.");
+    throw std::string("Invalid ModusDefault requested from Experiment::create.");
   }
 }
 
 /* This method reads the parameters in */
-template <typename Modus>
-void ExperimentImplementation<Modus>::configure(std::list<Parameters>
+template <typename ModusDefault>
+void ExperimentImplementation<ModusDefault>::configure(std::list<Parameters>
                                                 configuration) {
     bc_.assign_params(&configuration);
     warn_wrong_params(&configuration);
@@ -56,8 +56,8 @@ void ExperimentImplementation<Modus>::configure(std::list<Parameters>
 /* This method reads the particle type and cross section information
  * and does the initialization of the system (fill the particles map)
  */
-template <typename Modus>
-void ExperimentImplementation<Modus>::initialize(char *path) {
+template <typename ModusDefault>
+void ExperimentImplementation<ModusDefault>::initialize(char *path) {
     /* Ensure safe allocation */
     delete particles_;
     delete cross_sections_;
@@ -86,8 +86,8 @@ void ExperimentImplementation<Modus>::initialize(char *path) {
 /* This is the loop over timesteps, carrying out collisions and decays
  * and propagating particles
  */
-template <typename Modus>
-void ExperimentImplementation<Modus>::run_time_evolution() {
+template <typename ModusDefault>
+void ExperimentImplementation<ModusDefault>::run_time_evolution() {
     bc_.sanity_check(particles_);
     std::list<int> collision_list, decay_list;
     size_t interactions_total = 0, previous_interactions_total = 0,
@@ -147,8 +147,8 @@ void ExperimentImplementation<Modus>::run_time_evolution() {
 }
 
 /* Tear down everything */
-template <typename Modus>
-void ExperimentImplementation<Modus>::end() {
+template <typename ModusDefault>
+void ExperimentImplementation<ModusDefault>::end() {
     delete particles_;
     delete cross_sections_;
 }
