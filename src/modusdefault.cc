@@ -39,7 +39,8 @@ void ModusDefault::check_collision_geometry(
 }
 
 /*general propagation routine */
-void ModusDefault::propagate(Particles *particles, const ExperimentParameters &parameters) {
+void ModusDefault::propagate(Particles *particles,
+  const ExperimentParameters &parameters) {
     FourVector distance, position;
     for (auto i = particles->begin(); i != particles->end(); ++i) {
         /* propagation for this time step */

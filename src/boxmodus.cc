@@ -138,7 +138,7 @@ void BoxModus::initial_conditions(
     /* Display on startup if pseudo grid is used */
     number = number_total;
     int const grid_number = round(this->length_
-                           / sqrt(parameters.cross_section * fm2_mb * M_1_PI) * 0.5);
+               / sqrt(parameters.cross_section * fm2_mb * M_1_PI) * 0.5);
     /* pseudo grid not used for 3^3 or extremely small particle numbers */
     if (grid_number >= 4 && number > 10)
         printf("Simulation with pseudo grid: %d^3\n", grid_number);
@@ -281,7 +281,8 @@ void BoxModus::check_collision_geometry(
 }
 
 /* propagate all particles */
-void BoxModus::propagate(Particles *particles, const ExperimentParameters &parameters) {
+void BoxModus::propagate(Particles *particles,
+                         const ExperimentParameters &parameters) {
     FourVector distance, position;
         for (auto i = particles->begin(); i != particles->end(); ++i) {
         /* propagation for this time step */

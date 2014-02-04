@@ -7,9 +7,10 @@
  *
  */
 
+
+#include <cinttypes>
 #include <map>
 #include <list>
-#include <cinttypes>
 
 #include "include/BoxModus.h"
 #include "include/Experiment.h"
@@ -29,14 +30,15 @@
 /* #include "include/SphereModus.h" */
 
 /* ExperimentBase carries everything that is needed for the evolution */
-std::unique_ptr<ExperimentBase> ExperimentBase::create(std::string modus_chooser, int nevents) {
+std::unique_ptr<ExperimentBase> ExperimentBase::create(
+                   std::string modus_chooser, int nevents) {
   typedef std::unique_ptr<ExperimentBase> ExperimentPointer;
   if (modus_chooser.compare("Box") == 0) {
     return ExperimentPointer(new Experiment<BoxModus>(nevents));
   } else if (modus_chooser.compare("Collider") == 0) {
     return ExperimentPointer(new Experiment<ColliderModus>(nevents));
   } else {
-    throw std::string("Invalid ModusDefault requested from ExperimentBase::create.");
+    throw std::string("Invalid ModusDefault from ExperimentBase::create.");
   }
 }
 
@@ -50,7 +52,8 @@ void Experiment<Modus>::configure(std::list<Parameters>
     /* reducing cross section according to number of test particle */
     if (parameters_.testparticles > 1) {
       printf("IC test particle: %i\n", parameters_.testparticles);
-      parameters_.cross_section = parameters_.cross_section / parameters_.testparticles;
+      parameters_.cross_section = parameters_.cross_section
+        / parameters_.testparticles;
       printf("Elastic cross section: %g mb\n", parameters_.cross_section);
     }
 }
@@ -116,7 +119,7 @@ void Experiment<Modus>::run_time_evolution() {
         }
         /* fill collision table by cells */
         modus_.check_collision_geometry(particles_, cross_sections_,
-                                 &collision_list, &rejection_conflict, parameters_);
+                           &collision_list, &rejection_conflict, parameters_);
         /* particle interactions */
         if (!collision_list.empty()) {
             printd_list(collision_list);
@@ -156,7 +159,7 @@ void Experiment<Modus>::run_time_evolution() {
 
 template<typename Modus>
 void Experiment<Modus>::assign_params(std::list<Parameters> *configuration) {
-    modus_.assign_params(configuration); // TODO: fold into constructor
+    modus_.assign_params(configuration);  // XXX: fold into constructor
 
     bool match = false;
     std::list<Parameters>::iterator i = configuration->begin();

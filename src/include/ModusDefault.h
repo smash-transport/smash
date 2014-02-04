@@ -12,7 +12,7 @@
 #include <stdint.h>
 #include <list>
 
-#include "Particles.h"
+#include "../include/Particles.h"
 
 /* forward declarations */
 class Particles;
@@ -39,7 +39,7 @@ class ModusDefault {
   /**
    * Only needed for BoxModus. The default for all the other modi does nothing.
    */
-  int sanity_check(Particles *) { return 0; }
+  int sanity_check(Particles *p) { return 0; }
 
   void check_collision_geometry(Particles *particles,
                                 CrossSections *cross_sections,
@@ -50,4 +50,4 @@ class ModusDefault {
   void propagate(Particles *particles, const ExperimentParameters &parameters);
 };
 
-#endif // SRC_INCLUDE_MODUSDEFAULT_H_
+#endif  // SRC_INCLUDE_MODUSDEFAULT_H_

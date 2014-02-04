@@ -4,8 +4,8 @@
  * 
  *    GNU General Public License (GPLv3 or later)
  */
-#ifndef SRC_INCLUDE_SPHERE_H_
-#define SRC_INCLUDE_SPHERE_H_
+#ifndef SRC_INCLUDE_SPHEREMODUS_H_
+#define SRC_INCLUDE_SPHEREMODUS_H_
 
 /* forward declarations */
 class FourVector;
@@ -52,4 +52,4 @@ timespec inline SphereModus::set_timer_start(void) {
 /* enforce periodic boundary conditions */
 // FourVector SphereModus::boundary_condition(FourVector position);
 
-#endif  // SRC_INCLUDE_SPHERE_H_
+#endif  // SRC_INCLUDE_SPHEREMODUS_H_

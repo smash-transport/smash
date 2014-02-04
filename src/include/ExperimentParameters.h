@@ -17,4 +17,4 @@ struct ExperimentParameters {
   float cross_section = 10.0f;
 };
 
-#endif // SRC_INCLUDE_EXPERIMENTPARAMETERS_H_
+#endif  // SRC_INCLUDE_EXPERIMENTPARAMETERS_H_

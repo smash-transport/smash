@@ -16,8 +16,7 @@
 #include "../include/ModusDefault.h"
 #include "../include/Parameters.h"
 #include "../include/Particles.h"
-
-#include "outputroutines.h"
+#include "../include/outputroutines.h"
 
 class ExperimentBase {
  public:
@@ -30,7 +29,8 @@ class ExperimentBase {
     virtual void configure(std::list<Parameters> configuration) = 0;
     virtual void commandline_arg(int steps) = 0;
 
-    static std::unique_ptr<ExperimentBase> create(std::string modus_chooser, int nevents);
+    static std::unique_ptr<ExperimentBase> create(std::string modus_chooser,
+      int nevents);
 
     virtual void run(std::string path) = 0;
 };

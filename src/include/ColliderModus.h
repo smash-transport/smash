@@ -4,8 +4,8 @@
  * 
  *    GNU General Public License (GPLv3 or later)
  */
-#ifndef SRC_INCLUDE_COLLIDER_H_
-#define SRC_INCLUDE_COLLIDER_H_
+#ifndef SRC_INCLUDE_COLLIDERMODUS_H_
+#define SRC_INCLUDE_COLLIDERMODUS_H_
 
 #include <stdint.h>
 #include <cmath>
@@ -25,8 +25,10 @@ class ColliderModus : public ModusDefault {
   ColliderModus() = default;
 
     /* special class funtions */
-    void assign_params(std::list<Parameters> *configuration); // TODO -> ctor
-    void print_startup(); // TODO: needs to be discoverable from an outside "printer"
+    // XXX: -> ctor
+    void assign_params(std::list<Parameters> *configuration);
+    // XXX: needs to be discoverable from an outside "printer"
+    void print_startup();
 
     void initial_conditions(Particles *particles,
                             const ExperimentParameters &parameters);
@@ -45,4 +47,4 @@ class ColliderModus : public ModusDefault {
     float sqrts_ = 1.f;
 };
 
-#endif  // SRC_INCLUDE_COLLIDER_H_
+#endif  // SRC_INCLUDE_COLLIDERMODUS_H_

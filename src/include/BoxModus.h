@@ -4,8 +4,8 @@
  * 
  *    GNU General Public License (GPLv3 or later)
  */
-#ifndef SRC_INCLUDE_BOX_H_
-#define SRC_INCLUDE_BOX_H_
+#ifndef SRC_INCLUDE_BOXMODUS_H_
+#define SRC_INCLUDE_BOXMODUS_H_
 
 #include <stdint.h>
 #include <cmath>
@@ -24,9 +24,10 @@ class BoxModus : public ModusDefault {
     BoxModus() = default;
 
     /* special class funtions */
-    void assign_params(std::list<Parameters> *configuration); // TODO -> ctor
-
-    void print_startup(); // TODO: needs to be discoverable from an outside "printer"
+    // XXX: -> ctor
+    void assign_params(std::list<Parameters> *configuration);
+    // XXX: needs to be discoverable from an outside "printer"
+    void print_startup();
 
     void initial_conditions(Particles *particles,
                             const ExperimentParameters &parameters);
@@ -56,4 +57,4 @@ class BoxModus : public ModusDefault {
     float number_density_initial_ = 0.f;
 };
 
-#endif  // SRC_INCLUDE_BOX_H_
+#endif  // SRC_INCLUDE_BOXMODUS_H_
