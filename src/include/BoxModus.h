@@ -21,12 +21,13 @@ class ExperimentParameters;
 
 class BoxModus : public ModusDefault {
  public:
-  /* default constructor with probable values */
-    BoxModus(): initial_condition_(1), length_(10.0f), temperature_(0.1f),
-                number_density_initial_(0.0f) {}
+    BoxModus() = default;
+
     /* special class funtions */
-    void assign_params(std::list<Parameters> *configuration);
-    void print_startup();
+    void assign_params(std::list<Parameters> *configuration); // TODO -> ctor
+
+    void print_startup(); // TODO: needs to be discoverable from an outside "printer"
+
     void initial_conditions(Particles *particles,
                             const ExperimentParameters &parameters);
     int sanity_check(Particles *particles);
@@ -41,13 +42,13 @@ class BoxModus : public ModusDefault {
 
  private:
     /* initial condition */
-    int initial_condition_;
+    int initial_condition_ = 1;
     /* Cube edge length */
-    float length_;
+    float length_ = 10.f;
     /* Temperature of the Boltzmann distribution for thermal initialization */
-    float temperature_;
+    float temperature_ = 0.1f;
     /* initial number density of the box */
-    float number_density_initial_;
+    float number_density_initial_ = 0.f;
 };
 
 #endif  // SRC_INCLUDE_BOX_H_
