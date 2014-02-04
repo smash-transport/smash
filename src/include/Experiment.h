@@ -69,13 +69,13 @@ template <typename Modus> class Experiment : public ExperimentBase {
     /* number of steps */
     int steps_ = 10000;
     /* number of steps before giving measurables */
-    int output_interval = 100;
-    /* initial seed for random generator */
-    int64_t seed = 1;
+    int output_interval_ = 100;
+    /* initial seed_ for random generator */
+    int64_t seed_ = 1;
     /* initial total energy of the system */
-    float energy_initial = 0.f;
+    float energy_initial_ = 0.f;
     /* starting time of the simulation */
-    timespec time_start = set_timer_start();
+    timespec time_start_ = set_timer_start();
 };
 
 #endif  // SRC_INCLUDE_EXPERIMENT_H_

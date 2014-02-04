@@ -72,8 +72,8 @@ void Experiment<Modus>::initialize(const char *path) {
     /* Allocate private pointer members */
     particles_ = new Particles;
     cross_sections_ = new CrossSections;
-    /* Set the seed for the random number generator */
-    srand48(seed);
+    /* Set the seed_ for the random number generator */
+    srand48(seed_);
     /* Read in particle types used in the simulation */
     input_particles(particles_, path);
     /* Read in the particle decay modes */
@@ -83,7 +83,7 @@ void Experiment<Modus>::initialize(const char *path) {
     /* Sample particles according to the initial conditions */
     modus_.initial_conditions(particles_, parameters_);
     /* Save the initial energy in the system for energy conservation checks */
-    energy_initial = energy_total(particles_);
+    energy_initial_ = energy_total(particles_);
     /* Print output headers */
     write_measurements_header(*particles_);
     print_header();
@@ -103,8 +103,8 @@ void Experiment<Modus>::run_time_evolution() {
     size_t rejection_conflict = 0;
     int resonances = 0, decays = 0;
     print_measurements(*particles_, interactions_total,
-                       interactions_this_interval, energy_initial,
-                       time_start);
+                       interactions_this_interval, energy_initial_,
+                       time_start_);
     for (int step = 0; step < steps_; step++) {
         /* Check resonances for decays */
         check_decays(particles_, &decay_list, parameters_.eps);
@@ -125,13 +125,13 @@ void Experiment<Modus>::run_time_evolution() {
         }
         modus_.propagate(particles_, parameters_);
         /* physics output during the run */
-        if (step > 0 && (step + 1) % output_interval == 0) {
+        if (step > 0 && (step + 1) % output_interval_ == 0) {
             interactions_this_interval = interactions_total
             - previous_interactions_total;
             previous_interactions_total = interactions_total;
             print_measurements(*particles_, interactions_total,
-                              interactions_this_interval, energy_initial,
-                              time_start);
+                              interactions_this_interval, energy_initial_,
+                              time_start_);
             printd("Resonances: %i Decays: %i\n", resonances, decays);
             printd("Ignored collisions %zu\n", rejection_conflict);
             /* save evolution data */
@@ -145,10 +145,10 @@ void Experiment<Modus>::run_time_evolution() {
         if (likely(steps_ > 0)) {
             /* if there are no particles no interactions happened */
             if (likely(!particles_->empty())) {
-             print_tail(time_start, interactions_total * 2
+             print_tail(time_start_, interactions_total * 2
                         / particles_->time() / particles_->size());
             } else {
-             print_tail(time_start, 0);
+             print_tail(time_start_, 0);
              printf("Total ignored collisions: %zu\n", rejection_conflict);
             }
         }
@@ -170,15 +170,15 @@ void Experiment<Modus>::assign_params(std::list<Parameters> *configuration) {
             match = true;
         }
         if (strcmp(key, "RANDOMSEED") == 0) {
-            /* negative seed means random startup value */
+            /* negative seed_ means random startup value */
             if (atol(value) > 0)
-                seed = (atol(value));
+                seed_ = (atol(value));
             else
-                seed = (time(NULL));
+                seed_ = (time(NULL));
             match = true;
         }
         if (strcmp(key, "UPDATE") == 0) {
-            output_interval = (abs(atoi(value)));
+            output_interval_ = (abs(atoi(value)));
             match = true;
         }
         if (strcmp(key, "TESTPARTICLES") == 0) {
@@ -211,7 +211,7 @@ void Experiment<Modus>::print_startup() {
     printf("Elastic cross section: %g mb\n", parameters_.cross_section);
     printf("Using temporal stepsize: %g fm/c\n", parameters_.eps);
     printf("Maximum number of steps: %i \n", steps_);
-    printf("Random number seed: %" PRId64 "\n", seed);
+    printf("Random number seed: %" PRId64 "\n", seed_);
     modus_.print_startup();
 }
 
