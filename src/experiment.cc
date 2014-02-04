@@ -39,8 +39,8 @@ std::unique_ptr<ExperimentBase> ExperimentBase::create(std::string modus_chooser
 }
 
 /* This method reads the parameters in */
-template <typename ModusDefault>
-void Experiment<ModusDefault>::configure(std::list<Parameters>
+template <typename Modus>
+void Experiment<Modus>::configure(std::list<Parameters>
                                                 configuration) {
     bc_.assign_params(&configuration);
     warn_wrong_params(&configuration);
@@ -62,8 +62,8 @@ void Experiment<Modus>::commandline_arg(int steps) {
 /* This method reads the particle type and cross section information
  * and does the initialization of the system (fill the particles map)
  */
-template <typename ModusDefault>
-void Experiment<ModusDefault>::initialize(const char *path) {
+template <typename Modus>
+void Experiment<Modus>::initialize(const char *path) {
     /* Ensure safe allocation */
     delete particles_;
     delete cross_sections_;
@@ -92,8 +92,8 @@ void Experiment<ModusDefault>::initialize(const char *path) {
 /* This is the loop over timesteps, carrying out collisions and decays
  * and propagating particles
  */
-template <typename ModusDefault>
-void Experiment<ModusDefault>::run_time_evolution() {
+template <typename Modus>
+void Experiment<Modus>::run_time_evolution() {
     bc_.sanity_check(particles_);
     std::list<int> collision_list, decay_list;
     size_t interactions_total = 0, previous_interactions_total = 0,
