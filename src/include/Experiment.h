@@ -49,11 +49,12 @@ template <typename Modus> class Experiment : public ExperimentBase {
     virtual void run(std::string path) override;
 
  private:
-    Modus bc_;
+    Modus modus_;
     Particles *particles_;
     CrossSections *cross_sections_;
 
     int nevents_;
+
 };
 
 #endif  // SRC_INCLUDE_EXPERIMENT_H_

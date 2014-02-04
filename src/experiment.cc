@@ -42,21 +42,21 @@ std::unique_ptr<ExperimentBase> ExperimentBase::create(std::string modus_chooser
 template <typename Modus>
 void Experiment<Modus>::configure(std::list<Parameters>
                                                 configuration) {
-    bc_.assign_params(&configuration);
+    modus_.assign_params(&configuration);
     warn_wrong_params(&configuration);
-    bc_.print_startup();
+    modus_.print_startup();
     /* reducing cross section according to number of test particle */
-    if (bc_.testparticles > 1) {
-      printf("IC test particle: %i\n", bc_.testparticles);
-      bc_.cross_section = bc_.cross_section / bc_.testparticles;
-      printf("Elastic cross section: %g mb\n", bc_.cross_section);
+    if (modus_.testparticles > 1) {
+      printf("IC test particle: %i\n", modus_.testparticles);
+      modus_.cross_section = modus_.cross_section / modus_.testparticles;
+      printf("Elastic cross section: %g mb\n", modus_.cross_section);
     }
 }
 
 /* This allows command line arguments to override default. */
 template <typename Modus>
 void Experiment<Modus>::commandline_arg(int steps) {
-  bc_.steps = steps;
+  modus_.steps = steps;
 }
 
 /* This method reads the particle type and cross section information
@@ -71,17 +71,17 @@ void Experiment<Modus>::initialize(const char *path) {
     particles_ = new Particles;
     cross_sections_ = new CrossSections;
     /* Set the seed for the random number generator */
-    srand48(bc_.seed);
+    srand48(modus_.seed);
     /* Read in particle types used in the simulation */
     input_particles(particles_, path);
     /* Read in the particle decay modes */
     input_decaymodes(particles_, path);
     /* Set the default elastic collision cross section */
-    cross_sections_->add_elastic_parameter(bc_.cross_section);
+    cross_sections_->add_elastic_parameter(modus_.cross_section);
     /* Sample particles according to the initial conditions */
-    bc_.initial_conditions(particles_);
+    modus_.initial_conditions(particles_);
     /* Save the initial energy in the system for energy conservation checks */
-    bc_.energy_initial = bc_.energy_total(particles_);
+    modus_.energy_initial = modus_.energy_total(particles_);
     /* Print output headers */
     write_measurements_header(*particles_);
     print_header();
@@ -94,18 +94,18 @@ void Experiment<Modus>::initialize(const char *path) {
  */
 template <typename Modus>
 void Experiment<Modus>::run_time_evolution() {
-    bc_.sanity_check(particles_);
+    modus_.sanity_check(particles_);
     std::list<int> collision_list, decay_list;
     size_t interactions_total = 0, previous_interactions_total = 0,
     interactions_this_interval = 0;
     size_t rejection_conflict = 0;
     int resonances = 0, decays = 0;
     print_measurements(*particles_, interactions_total,
-                       interactions_this_interval, bc_.energy_initial,
-                       bc_.time_start);
-    for (int step = 0; step < bc_.steps; step++) {
+                       interactions_this_interval, modus_.energy_initial,
+                       modus_.time_start);
+    for (int step = 0; step < modus_.steps; step++) {
         /* Check resonances for decays */
-        check_decays(particles_, &decay_list, bc_.eps);
+        check_decays(particles_, &decay_list, modus_.eps);
         /* Do the decays */
         if (!decay_list.empty()) {
             decays += decay_list.size();
@@ -113,7 +113,7 @@ void Experiment<Modus>::run_time_evolution() {
                                        &decay_list, interactions_total);
         }
         /* fill collision table by cells */
-        bc_.check_collision_geometry(particles_, cross_sections_,
+        modus_.check_collision_geometry(particles_, cross_sections_,
                                  &collision_list, &rejection_conflict);
         /* particle interactions */
         if (!collision_list.empty()) {
@@ -121,15 +121,15 @@ void Experiment<Modus>::run_time_evolution() {
             interactions_total = collide_particles(particles_, &collision_list,
                                              interactions_total, &resonances);
         }
-        bc_.propagate(particles_);
+        modus_.propagate(particles_);
         /* physics output during the run */
-        if (step > 0 && (step + 1) % bc_.output_interval == 0) {
+        if (step > 0 && (step + 1) % modus_.output_interval == 0) {
             interactions_this_interval = interactions_total
             - previous_interactions_total;
             previous_interactions_total = interactions_total;
             print_measurements(*particles_, interactions_total,
-                              interactions_this_interval, bc_.energy_initial,
-                              bc_.time_start);
+                              interactions_this_interval, modus_.energy_initial,
+                              modus_.time_start);
             printd("Resonances: %i Decays: %i\n", resonances, decays);
             printd("Ignored collisions %zu\n", rejection_conflict);
             /* save evolution data */
@@ -140,13 +140,13 @@ void Experiment<Modus>::run_time_evolution() {
         }
     }
         /* Guard against evolution */
-        if (likely(bc_.steps > 0)) {
+        if (likely(modus_.steps > 0)) {
             /* if there are no particles no interactions happened */
             if (likely(!particles_->empty())) {
-             print_tail(bc_.time_start, interactions_total * 2
+             print_tail(modus_.time_start, interactions_total * 2
                         / particles_->time() / particles_->size());
             } else {
-             print_tail(bc_.time_start, 0);
+             print_tail(modus_.time_start, 0);
              printf("Total ignored collisions: %zu\n", rejection_conflict);
             }
         }
