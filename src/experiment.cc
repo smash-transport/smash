@@ -27,12 +27,12 @@
 /* #include "include/SphereModus.h" */
 
 /* ExperimentBase carries everything that is needed for the evolution */
-std::unique_ptr<ExperimentBase> ExperimentBase::create(std::string modus_chooser) {
+std::unique_ptr<ExperimentBase> ExperimentBase::create(std::string modus_chooser, int nevents) {
   typedef std::unique_ptr<ExperimentBase> ExperimentPointer;
   if (modus_chooser.compare("Box") == 0) {
-    return ExperimentPointer(new Experiment<BoxModus>);
+    return ExperimentPointer(new Experiment<BoxModus>(nevents));
   } else if (modus_chooser.compare("Collider") == 0) {
-    return ExperimentPointer(new Experiment<ColliderModus>);
+    return ExperimentPointer(new Experiment<ColliderModus>(nevents));
   } else {
     throw std::string("Invalid ModusDefault requested from ExperimentBase::create.");
   }
@@ -63,7 +63,7 @@ void Experiment<Modus>::commandline_arg(int steps) {
  * and does the initialization of the system (fill the particles map)
  */
 template <typename ModusDefault>
-void Experiment<ModusDefault>::initialize(char *path) {
+void Experiment<ModusDefault>::initialize(const char *path) {
     /* Ensure safe allocation */
     delete particles_;
     delete cross_sections_;
@@ -153,8 +153,19 @@ void Experiment<ModusDefault>::run_time_evolution() {
 }
 
 /* Tear down everything */
-template <typename ModusDefault>
-void Experiment<ModusDefault>::end() {
+template <typename Modus>
+void Experiment<Modus>::end() {
     delete particles_;
     delete cross_sections_;
+}
+
+template <typename Modus>
+void Experiment<Modus>::run(std::string path) {
+  for (int j = 1; j < nevents_; j++) {
+    write_oscar_header();
+    initialize(path.c_str());
+    /* the time evolution of the relevant subsystem */
+    run_time_evolution();
+  }
+  end();
 }

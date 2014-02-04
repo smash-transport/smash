@@ -16,6 +16,6 @@ class Particles;
 extern const char *sep;
 
 /* read input file particle types */
-void input_particles(Particles *particles, char *path);
+void input_particles(Particles *particles, const char *path);
 
 #endif  // SRC_INCLUDE_INPUT_PARTICLES_H_

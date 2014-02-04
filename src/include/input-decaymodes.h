@@ -11,6 +11,6 @@
 class Particles;
 
 /* read input file particle types */
-void input_decaymodes(Particles *particles, char *path);
+void input_decaymodes(Particles *particles, const char *path);
 
 #endif  // SRC_INCLUDE_INPUT_DECAYMODES_H_

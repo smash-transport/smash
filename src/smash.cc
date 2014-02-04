@@ -118,22 +118,16 @@ int main(int argc, char *argv[]) {
     }
   }
   printf("Modus for this calculation: %s\n", modus_chooser.c_str());
-  auto experiment = ExperimentBase::create(modus_chooser);
+  auto experiment = ExperimentBase::create(modus_chooser, nevents);
   experiment->configure(configuration);
   mkdir_data();
   /* overriden arguments */
   if (steps > 0)
     experiment->commandline_arg(steps);
 
-  for (int j = 1; j < nevents; j++) {
-    write_oscar_header();
-    experiment->initialize(path);
-    /* the time evolution of the relevant subsystem */
-    experiment->run_time_evolution();
-  }
+  experiment->run(path);
 
   /* tear down */
   free(path);
-  experiment->end();
   return rc;
 }

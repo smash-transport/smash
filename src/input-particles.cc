@@ -18,7 +18,7 @@
 #define FILELEN 256
 
 /* input_particles - read in particle types */
-void input_particles(Particles *particles, char *path) {
+void input_particles(Particles *particles, const char *path) {
   char *line = NULL, *saveptr = NULL, *characters, input_particles[FILELEN];
   size_t len = 0;
   ssize_t read;

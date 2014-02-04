@@ -23,7 +23,7 @@
 #define FILELEN 256
 
 /* input_decaymodes - read in particle decay modes */
-void input_decaymodes(Particles *particles, char *path) {
+void input_decaymodes(Particles *particles, const char *path) {
   char input_decaymodes[FILELEN];
   FILE *file = NULL;
 
