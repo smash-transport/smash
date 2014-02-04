@@ -31,10 +31,6 @@ class ExperimentBase {
 
     static std::unique_ptr<ExperimentBase> create(std::string modus_chooser, int nevents);
 
-    virtual void initialize(const char *path) = 0;
-    virtual void run_time_evolution() = 0;
-    virtual void end() = 0;
-
     virtual void run(std::string path) = 0;
 };
 
@@ -43,11 +39,12 @@ template <typename Modus> class Experiment : public ExperimentBase {
   Experiment(int nevents)
       : particles_(nullptr), cross_sections_(nullptr), nevents_(nevents) {}
 
-    virtual void configure(std::list<Parameters> configuration);
-    virtual void commandline_arg(int steps);
-    virtual void initialize(const char *path);
-    virtual void run_time_evolution();
-    virtual void end();
+    virtual void configure(std::list<Parameters> configuration) override;
+    virtual void commandline_arg(int steps) override;
+
+    void initialize(const char *path);
+    void run_time_evolution();
+    void end();
 
     virtual void run(std::string path) override;
 

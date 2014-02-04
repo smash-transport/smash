@@ -34,4 +34,7 @@ else(HAVE_CLOCK_GETTIME)
 endif(HAVE_CLOCK_GETTIME)
 
 # tests:
-add_subdirectory(tests)
+include (CTest)
+if(BUILD_TESTING)
+   add_subdirectory(tests)
+endif()
