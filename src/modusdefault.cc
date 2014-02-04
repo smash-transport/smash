@@ -11,84 +11,18 @@
 #include "include/ModusDefault.h"
 #include "include/collisions.h"
 #include "include/constants.h"
+#include "include/Experiment.h"
 #include "include/outputroutines.h"
 
-void ModusDefault::assign_params(std::list<Parameters> *configuration) {
-    bool match = false;
-    std::list<Parameters>::iterator i = configuration->begin();
-    while (i != configuration->end()) {
-        char *key = i->key();
-        char *value = i->value();
-        printd("Looking for match %s %s\n", key, value);
-        /* integer values */
-        if (strcmp(key, "STEPS") == 0) {
-            steps = (abs(atoi(value)));
-            match = true;
-        }
-        if (strcmp(key, "RANDOMSEED") == 0) {
-            /* negative seed means random startup value */
-            if (atol(value) > 0)
-                seed = (atol(value));
-            else
-                seed = (time(NULL));
-            match = true;
-        }
-        if (strcmp(key, "UPDATE") == 0) {
-            output_interval = (abs(atoi(value)));
-            match = true;
-        }
-        if (strcmp(key, "TESTPARTICLES") == 0) {
-            testparticles = (abs(atoi(value)));
-            match = true;
-        }
-        /* double or float values */
-        if (strcmp(key, "EPS") == 0) {
-            eps = (fabs(atof(value)));
-            match = true;
-        }
-        if (strcmp(key, "SIGMA") == 0) {
-            cross_section = (fabs(atof(value)));
-            match = true;
-        }
-        /* remove processed entry */
-        if (match) {
-            printd("Erasing %s %s\n", key, value);
-            i = configuration->erase(i);
-            match = false;
-        } else {
-            ++i;
-        }
-    }
-}
-
-/* print_startup - console output on startup of general parameters */
-void ModusDefault::print_startup() {
-    printf("Elastic cross section: %g mb\n", cross_section);
-    printf("Using temporal stepsize: %g fm/c\n", eps);
-    printf("Maximum number of steps: %i \n", steps);
-    printf("Random number seed: %" PRId64 "\n", seed);
-}
-
-/* calculates the total energy in the system from zero component of
- * all momenta of particles
- * XXX should be expanded to all quantum numbers of interest */
-float ModusDefault::energy_total(Particles *particles) {
-    float energy_sum = 0.0;
-    for (auto i = particles->begin(); i != particles->end(); ++i) {
-         energy_sum += i->second.momentum().x0();
-     }
-    return energy_sum;
-}
-
 /*general propagation routine */
-void ModusDefault::propagate(Particles *particles) {
+void ModusDefault::propagate(Particles *particles, const ExperimentParameters &parameters) {
     FourVector distance, position;
     for (auto i = particles->begin(); i != particles->end(); ++i) {
         /* propagation for this time step */
-        distance.set_FourVector(eps,
-                                i->second.velocity_x() * eps,
-                                i->second.velocity_y() * eps,
-                                i->second.velocity_z() * eps);
+        distance.set_FourVector(parameters.eps,
+                                i->second.velocity_x() * parameters.eps,
+                                i->second.velocity_y() * parameters.eps,
+                                i->second.velocity_z() * parameters.eps);
         printd("Particle %d motion: %g %g %g %g\n", i->first,
                distance.x0(), distance.x1(), distance.x2(), distance.x3());
         position = i->second.position();
@@ -97,22 +31,13 @@ void ModusDefault::propagate(Particles *particles) {
     }
 }
 
-/*empty methods are needed in Boxmodus */
-int ModusDefault::sanity_check(Particles *particles __attribute__((unused))) {
-    return 0;
-}
-
-FourVector ModusDefault::boundary_condition(FourVector position,
-                  bool *boundary_hit __attribute__((unused))) {
-    return position;
-}
-
 // check particle pairs for collision
-void ModusDefault::check_collision_geometry(Particles *particles,
-       CrossSections *cross_sections, std::list<int> *collision_list,
-       size_t *rejection_conflict) {
+void ModusDefault::check_collision_geometry(
+    Particles *particles, CrossSections *cross_sections,
+    std::list<int> *collision_list, size_t *rejection_conflict,
+    const ExperimentParameters &parameters) {
     FourVector distance;
-    double radial_interaction = sqrt(cross_section * fm2_mb
+    double radial_interaction = sqrt(parameters.cross_section * fm2_mb
                                      * M_1_PI) * 2;
     for (auto i = particles->begin(); i != particles->end(); ++i) {
         for (auto j = particles->begin(); j != particles->end(); ++j) {
@@ -124,7 +49,7 @@ void ModusDefault::check_collision_geometry(Particles *particles,
             if (distance > radial_interaction)
                 continue;
             collision_criteria_geometry(particles, cross_sections,
-                                        collision_list, this->eps,
+                                        collision_list, parameters.eps,
                                         i->first, j->first, rejection_conflict);
         }
     }

@@ -21,7 +21,6 @@
 
 void BoxModus::assign_params(std::list<Parameters>
                                           *configuration) {
-    ModusDefault::assign_params(configuration);
     bool match = false;
     std::list<Parameters>::iterator i = configuration->begin();
     while (i != configuration->end()) {
@@ -55,14 +54,14 @@ void BoxModus::assign_params(std::list<Parameters>
 
 /* print_startup - console output on startup of box specific parameters */
 void BoxModus::print_startup() {
-    ModusDefault::print_startup();
     printf("Size of the box: %g x %g x %g fm\n", length_, length_, length_);
     printf("Initial temperature: %g GeV\n", temperature_);
     printf("IC type %d\n", initial_condition_);
 }
 
 /* initial_conditions - sets particle data for @particles */
-void BoxModus::initial_conditions(Particles *particles) {
+void BoxModus::initial_conditions(
+    Particles *particles, const ExperimentParameters &parameters) {
     double momentum_radial, number_density_total = 0;
     Angles phitheta;
     FourVector momentum_total(0, 0, 0, 0);
@@ -79,8 +78,8 @@ void BoxModus::initial_conditions(Particles *particles) {
         double number_density = number_density_bose(i->second.mass(),
                                                     this->temperature_);
         /* cast while reflecting probability of extra particle */
-        number = this->length_ * this->length_ * this->length_ * number_density
-        * this->testparticles;
+        number = this->length_ * this->length_ * this->length_ *
+                 number_density * parameters.testparticles;
         if (this->length_ * this->length_ * this->length_ * number_density
             - number > drand48())
             number++;
@@ -138,7 +137,7 @@ void BoxModus::initial_conditions(Particles *particles) {
     /* Display on startup if pseudo grid is used */
     number = number_total;
     int const grid_number = round(this->length_
-                           / sqrt(this->cross_section * fm2_mb * M_1_PI) * 0.5);
+                           / sqrt(parameters.cross_section * fm2_mb * M_1_PI) * 0.5);
     /* pseudo grid not used for 3^3 or extremely small particle numbers */
     if (grid_number >= 4 && number > 10)
         printf("Simulation with pseudo grid: %d^3\n", grid_number);
@@ -150,10 +149,10 @@ void BoxModus::initial_conditions(Particles *particles) {
 }
 
 /* check_collision_geometry - check if a collision happens between particles */
-void BoxModus::check_collision_geometry(Particles *particles,
-  CrossSections *cross_sections,
-  std::list<int> *collision_list,
-  size_t *rejection_conflict) {
+void BoxModus::check_collision_geometry(
+    Particles *particles, CrossSections *cross_sections,
+    std::list<int> *collision_list, size_t *rejection_conflict,
+    const ExperimentParameters &parameters) {
   std::vector<std::vector<std::vector<std::vector<int> > > > grid;
   int N;
   int x, y, z;
@@ -161,11 +160,12 @@ void BoxModus::check_collision_geometry(Particles *particles,
   /* For small boxes no point in splitting up in grids */
   /* calculate approximate grid size according to double interaction length */
   N = round(length_
-            / sqrt(cross_section * fm2_mb * M_1_PI) * 0.5);
+            / sqrt(parameters.cross_section * fm2_mb * M_1_PI) * 0.5);
   if (unlikely(N < 4 || particles->size() < 10)) {
-      /* XXX: apply periodic boundary condition */
-      ModusDefault::check_collision_geometry(particles,
-      cross_sections, collision_list, rejection_conflict);
+    /* XXX: apply periodic boundary condition */
+    ModusDefault::check_collision_geometry(particles, cross_sections,
+                                           collision_list, rejection_conflict,
+                                           parameters);
     return;
   }
   /* allocate grid */
@@ -249,14 +249,14 @@ void BoxModus::check_collision_geometry(Particles *particles,
             printd("grid cell particle %i <-> %i\n", i->first, *id_other);
             if (shift == 0) {
               collision_criteria_geometry(particles, cross_sections,
-                collision_list, this->eps, i->first, *id_other,
+                collision_list, parameters.eps, i->first, *id_other,
                 rejection_conflict);
             } else {
               /* apply eventual boundary before and restore after */
               particles->data_pointer(*id_other)->set_position(
                 particles->data(*id_other).position() + shift);
               collision_criteria_geometry(particles, cross_sections,
-                collision_list, this->eps, i->first, *id_other,
+                collision_list, parameters.eps, i->first, *id_other,
                 rejection_conflict);
               particles->data_pointer(*id_other)->set_position(
                 particles->data(*id_other).position() - shift);
@@ -269,14 +269,14 @@ void BoxModus::check_collision_geometry(Particles *particles,
 }
 
 /* propagate all particles */
-void BoxModus::propagate(Particles *particles) {
+void BoxModus::propagate(Particles *particles, const ExperimentParameters &parameters) {
     FourVector distance, position;
         for (auto i = particles->begin(); i != particles->end(); ++i) {
         /* propagation for this time step */
-        distance.set_FourVector(eps,
-                                i->second.velocity_x() * eps,
-                                i->second.velocity_y() * eps,
-                                i->second.velocity_z() * eps);
+        distance.set_FourVector(parameters.eps,
+                                i->second.velocity_x() * parameters.eps,
+                                i->second.velocity_y() * parameters.eps,
+                                i->second.velocity_z() * parameters.eps);
         printd("Particle %d motion: %g %g %g %g\n", i->first,
                distance.x0(), distance.x1(), distance.x2(), distance.x3());
 /* treat the box boundaries */

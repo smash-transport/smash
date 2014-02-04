@@ -9,6 +9,7 @@
 
 #include <map>
 #include <list>
+#include <cinttypes>
 
 #include "include/BoxModus.h"
 #include "include/Experiment.h"
@@ -23,6 +24,7 @@
 #include "include/macros.h"
 #include "include/outputroutines.h"
 #include "include/param-reader.h"
+#include "include/time.h"
 
 /* #include "include/SphereModus.h" */
 
@@ -42,21 +44,21 @@ std::unique_ptr<ExperimentBase> ExperimentBase::create(std::string modus_chooser
 template <typename Modus>
 void Experiment<Modus>::configure(std::list<Parameters>
                                                 configuration) {
-    modus_.assign_params(&configuration);
+    assign_params(&configuration);
     warn_wrong_params(&configuration);
-    modus_.print_startup();
+    print_startup();
     /* reducing cross section according to number of test particle */
-    if (modus_.testparticles > 1) {
-      printf("IC test particle: %i\n", modus_.testparticles);
-      modus_.cross_section = modus_.cross_section / modus_.testparticles;
-      printf("Elastic cross section: %g mb\n", modus_.cross_section);
+    if (parameters_.testparticles > 1) {
+      printf("IC test particle: %i\n", parameters_.testparticles);
+      parameters_.cross_section = parameters_.cross_section / parameters_.testparticles;
+      printf("Elastic cross section: %g mb\n", parameters_.cross_section);
     }
 }
 
 /* This allows command line arguments to override default. */
 template <typename Modus>
 void Experiment<Modus>::commandline_arg(int steps) {
-  modus_.steps = steps;
+  steps_ = steps;
 }
 
 /* This method reads the particle type and cross section information
@@ -71,17 +73,17 @@ void Experiment<Modus>::initialize(const char *path) {
     particles_ = new Particles;
     cross_sections_ = new CrossSections;
     /* Set the seed for the random number generator */
-    srand48(modus_.seed);
+    srand48(seed);
     /* Read in particle types used in the simulation */
     input_particles(particles_, path);
     /* Read in the particle decay modes */
     input_decaymodes(particles_, path);
     /* Set the default elastic collision cross section */
-    cross_sections_->add_elastic_parameter(modus_.cross_section);
+    cross_sections_->add_elastic_parameter(parameters_.cross_section);
     /* Sample particles according to the initial conditions */
-    modus_.initial_conditions(particles_);
+    modus_.initial_conditions(particles_, parameters_);
     /* Save the initial energy in the system for energy conservation checks */
-    modus_.energy_initial = modus_.energy_total(particles_);
+    energy_initial = energy_total(particles_);
     /* Print output headers */
     write_measurements_header(*particles_);
     print_header();
@@ -101,11 +103,11 @@ void Experiment<Modus>::run_time_evolution() {
     size_t rejection_conflict = 0;
     int resonances = 0, decays = 0;
     print_measurements(*particles_, interactions_total,
-                       interactions_this_interval, modus_.energy_initial,
-                       modus_.time_start);
-    for (int step = 0; step < modus_.steps; step++) {
+                       interactions_this_interval, energy_initial,
+                       time_start);
+    for (int step = 0; step < steps_; step++) {
         /* Check resonances for decays */
-        check_decays(particles_, &decay_list, modus_.eps);
+        check_decays(particles_, &decay_list, parameters_.eps);
         /* Do the decays */
         if (!decay_list.empty()) {
             decays += decay_list.size();
@@ -114,22 +116,22 @@ void Experiment<Modus>::run_time_evolution() {
         }
         /* fill collision table by cells */
         modus_.check_collision_geometry(particles_, cross_sections_,
-                                 &collision_list, &rejection_conflict);
+                                 &collision_list, &rejection_conflict, parameters_);
         /* particle interactions */
         if (!collision_list.empty()) {
             printd_list(collision_list);
             interactions_total = collide_particles(particles_, &collision_list,
                                              interactions_total, &resonances);
         }
-        modus_.propagate(particles_);
+        modus_.propagate(particles_, parameters_);
         /* physics output during the run */
-        if (step > 0 && (step + 1) % modus_.output_interval == 0) {
+        if (step > 0 && (step + 1) % output_interval == 0) {
             interactions_this_interval = interactions_total
             - previous_interactions_total;
             previous_interactions_total = interactions_total;
             print_measurements(*particles_, interactions_total,
-                              interactions_this_interval, modus_.energy_initial,
-                              modus_.time_start);
+                              interactions_this_interval, energy_initial,
+                              time_start);
             printd("Resonances: %i Decays: %i\n", resonances, decays);
             printd("Ignored collisions %zu\n", rejection_conflict);
             /* save evolution data */
@@ -140,16 +142,97 @@ void Experiment<Modus>::run_time_evolution() {
         }
     }
         /* Guard against evolution */
-        if (likely(modus_.steps > 0)) {
+        if (likely(steps_ > 0)) {
             /* if there are no particles no interactions happened */
             if (likely(!particles_->empty())) {
-             print_tail(modus_.time_start, interactions_total * 2
+             print_tail(time_start, interactions_total * 2
                         / particles_->time() / particles_->size());
             } else {
-             print_tail(modus_.time_start, 0);
+             print_tail(time_start, 0);
              printf("Total ignored collisions: %zu\n", rejection_conflict);
             }
         }
+}
+
+template<typename Modus>
+void Experiment<Modus>::assign_params(std::list<Parameters> *configuration) {
+    modus_.assign_params(configuration); // TODO: fold into constructor
+
+    bool match = false;
+    std::list<Parameters>::iterator i = configuration->begin();
+    while (i != configuration->end()) {
+        char *key = i->key();
+        char *value = i->value();
+        printd("Looking for match %s %s\n", key, value);
+        /* integer values */
+        if (strcmp(key, "STEPS") == 0) {
+            steps_ = (abs(atoi(value)));
+            match = true;
+        }
+        if (strcmp(key, "RANDOMSEED") == 0) {
+            /* negative seed means random startup value */
+            if (atol(value) > 0)
+                seed = (atol(value));
+            else
+                seed = (time(NULL));
+            match = true;
+        }
+        if (strcmp(key, "UPDATE") == 0) {
+            output_interval = (abs(atoi(value)));
+            match = true;
+        }
+        if (strcmp(key, "TESTPARTICLES") == 0) {
+            parameters_.testparticles = (abs(atoi(value)));
+            match = true;
+        }
+        /* double or float values */
+        if (strcmp(key, "EPS") == 0) {
+            parameters_.eps = (fabs(atof(value)));
+            match = true;
+        }
+        if (strcmp(key, "SIGMA") == 0) {
+            parameters_.cross_section = (fabs(atof(value)));
+            match = true;
+        }
+        /* remove processed entry */
+        if (match) {
+            printd("Erasing %s %s\n", key, value);
+            i = configuration->erase(i);
+            match = false;
+        } else {
+            ++i;
+        }
+    }
+}
+
+/* print_startup - console output on startup of general parameters */
+template <typename Modus>
+void Experiment<Modus>::print_startup() {
+    printf("Elastic cross section: %g mb\n", parameters_.cross_section);
+    printf("Using temporal stepsize: %g fm/c\n", parameters_.eps);
+    printf("Maximum number of steps: %i \n", steps_);
+    printf("Random number seed: %" PRId64 "\n", seed);
+    modus_.print_startup();
+}
+
+/* calculates the total energy in the system from zero component of
+ * all momenta of particles
+ * XXX should be expanded to all quantum numbers of interest */
+template <typename Modus>
+float Experiment<Modus>::energy_total(Particles *particles) {
+    float energy_sum = 0.0;
+    for (auto i = particles->begin(); i != particles->end(); ++i) {
+         energy_sum += i->second.momentum().x0();
+     }
+    return energy_sum;
+}
+
+/* set the timer to the actual time in nanoseconds precision */
+template <typename Modus>
+timespec inline Experiment<Modus>::set_timer_start(void) {
+    timespec time;
+    clock_gettime(&time);
+    return time;
 }
 
 /* Tear down everything */

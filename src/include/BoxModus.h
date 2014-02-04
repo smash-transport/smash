@@ -12,10 +12,12 @@
 #include <list>
 
 #include "../include/CrossSections.h"
+#include "Experiment.h"
 #include "../include/ModusDefault.h"
 #include "../include/Particles.h"
 #include "../include/Parameters.h"
 
+class BoxModus;
 
 class BoxModus : public ModusDefault {
  public:
@@ -25,14 +27,17 @@ class BoxModus : public ModusDefault {
     /* special class funtions */
     void assign_params(std::list<Parameters> *configuration);
     void print_startup();
-    void initial_conditions(Particles *particles);
+    void initial_conditions(Particles *particles,
+                            const ExperimentParameters &parameters);
     int sanity_check(Particles *particles);
-    void propagate(Particles *particles);
+    void propagate(Particles *particles, const ExperimentParameters &parameters);
     FourVector boundary_condition(FourVector position,
                                   bool *boundary_hit);
     void check_collision_geometry(Particles *particles,
-                  CrossSections *cross_sections, std::list<int> *collision_list,
-                  size_t *rejection_conflict);
+                                  CrossSections *cross_sections,
+                                  std::list<int> *collision_list,
+                                  size_t *rejection_conflict,
+                                  const ExperimentParameters &parameters);
 
  private:
     /* initial condition */

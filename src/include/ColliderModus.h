@@ -25,7 +25,7 @@ class ColliderModus : public ModusDefault {
     /* special class funtions */
     void assign_params(std::list<Parameters> *configuration);
     void print_startup();
-    void initial_conditions(Particles *particles);
+    void initial_conditions(Particles *particles, const ExperimentParameters &parameters);
 
  private:
     /* Projectile particle PDG ID*/

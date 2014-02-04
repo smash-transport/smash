@@ -6,21 +6,18 @@
  *    GNU General Public License (GPLv3 or later)
  *
  */
-#ifndef SRC_INCLUDE_MODUS_H_
-#define SRC_INCLUDE_MODUS_H_
+#ifndef SRC_INCLUDE_MODUSDEFAULT_H_
+#define SRC_INCLUDE_MODUSDEFAULT_H_
 
 #include <stdint.h>
-#include <time.h>
-#include <cmath>
 #include <list>
 
-#include "../include/Parameters.h"
-#include "../include/Particles.h"
-#include "../include/time.h"
+#include "Particles.h"
 
 /* forward declarations */
 class Particles;
 class CrossSections;
+class ExperimentParameters;
 
 /*
  * This is only a base class for actual Modus classes. The class will never be
@@ -34,52 +31,27 @@ class CrossSections;
  */
 class ModusDefault {
  public:
-    /* default constructor with probable values */
-    ModusDefault(): steps(10000), output_interval(100), testparticles(1),
-        eps(0.001f), cross_section(10.0f), seed(1), energy_initial(0.0f),
-    time_start(set_timer_start()) {}
+  // never needs a virtual destructor
 
-    // never needs a virtual destructor
+  /**
+   * Only needed for BoxModus. The default for all the other modi does nothing.
+   */
+  int sanity_check(Particles *) { return 0; }
 
-    /* special function should be called by specific subclass */
-    void assign_params(std::list<Parameters> *configuration);
-    void print_startup();
-    void initial_conditions(Particles *) { return; }
-    float energy_total(Particles *particles);
-    int sanity_check(Particles *particles);
-    void check_collision_geometry(Particles *particles,
-      CrossSections *cross_sections, std::list<int> *collision_list,
-      size_t *rejection_conflict);
-    void propagate(Particles *particles);
-    FourVector boundary_condition(FourVector position,
-                                          bool *boundary_hit);
-    inline timespec set_timer_start();
+  FourVector boundary_condition(FourVector position, bool * /*boundary_hit*/) {
+    return position;
+  }
 
- public:
-    /* number of steps */
-    int steps;
-    /* number of steps before giving measurables */
-    int output_interval;
-    /* number of test particle */
-    int testparticles;
-    /* temporal time step */
-    float eps;
-    /* cross section of the elastic scattering */
-    float cross_section;
-    /* initial seed for random generator */
-    int64_t seed;
-    /* initial total energy of the system */
-    float energy_initial;
-    /* starting time of the simulation */
-    timespec time_start;
+  // Missing functions for concrete Modus implementations:
+  // void initial_conditions(Particles *particles);
+
+  void propagate(Particles *particles, const ExperimentParameters &parameters);
+
+  void check_collision_geometry(Particles *particles,
+                                CrossSections *cross_sections,
+                                std::list<int> *collision_list,
+                                size_t *rejection_conflict,
+                                const ExperimentParameters &parameters);
 };
 
-
-/* set the timer to the actual time in nanoseconds precision */
-timespec inline ModusDefault::set_timer_start(void) {
-    timespec time;
-    clock_gettime(&time);
-    return time;
-}
-
-#endif  // SRC_INCLUDE_MODUS_H_
+#endif // SRC_INCLUDE_MODUSDEFAULT_H_
