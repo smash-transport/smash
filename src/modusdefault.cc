@@ -14,23 +14,6 @@
 #include "include/Experiment.h"
 #include "include/outputroutines.h"
 
-/*general propagation routine */
-void ModusDefault::propagate(Particles *particles, const ExperimentParameters &parameters) {
-    FourVector distance, position;
-    for (auto i = particles->begin(); i != particles->end(); ++i) {
-        /* propagation for this time step */
-        distance.set_FourVector(parameters.eps,
-                                i->second.velocity_x() * parameters.eps,
-                                i->second.velocity_y() * parameters.eps,
-                                i->second.velocity_z() * parameters.eps);
-        printd("Particle %d motion: %g %g %g %g\n", i->first,
-               distance.x0(), distance.x1(), distance.x2(), distance.x3());
-        position = i->second.position();
-        position += distance;
-        i->second.set_position(position);
-    }
-}
-
 // check particle pairs for collision
 void ModusDefault::check_collision_geometry(
     Particles *particles, CrossSections *cross_sections,
@@ -52,5 +35,22 @@ void ModusDefault::check_collision_geometry(
                                         collision_list, parameters.eps,
                                         i->first, j->first, rejection_conflict);
         }
+    }
+}
+
+/*general propagation routine */
+void ModusDefault::propagate(Particles *particles, const ExperimentParameters &parameters) {
+    FourVector distance, position;
+    for (auto i = particles->begin(); i != particles->end(); ++i) {
+        /* propagation for this time step */
+        distance.set_FourVector(parameters.eps,
+                                i->second.velocity_x() * parameters.eps,
+                                i->second.velocity_y() * parameters.eps,
+                                i->second.velocity_z() * parameters.eps);
+        printd("Particle %d motion: %g %g %g %g\n", i->first,
+               distance.x0(), distance.x1(), distance.x2(), distance.x3());
+        position = i->second.position();
+        position += distance;
+        i->second.set_position(position);
     }
 }

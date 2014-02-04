@@ -22,21 +22,27 @@ class ExperimentParameters;
 class ColliderModus : public ModusDefault {
  public:
   /* default constructor with probable values */
-  ColliderModus(): projectile_(2212), target_(2212), sqrts_(1.0f) {}
+  ColliderModus() = default;
+
     /* special class funtions */
-    void assign_params(std::list<Parameters> *configuration);
-    void print_startup();
-    void initial_conditions(Particles *particles, const ExperimentParameters &parameters);
+    void assign_params(std::list<Parameters> *configuration); // TODO -> ctor
+    void print_startup(); // TODO: needs to be discoverable from an outside "printer"
+
+    void initial_conditions(Particles *particles,
+                            const ExperimentParameters &parameters);
+
+    // in ModusDefault:
+    // * sanity_check
+    // * check_collision_geometry
+    // * propagate
 
  private:
     /* Projectile particle PDG ID*/
-    int projectile_;
+    int projectile_ = 2212;
     /* Target particle PDG ID*/
-    int target_;
+    int target_ = 2212;
     /* Center-of-mass energy of the collision */
-    float sqrts_;
+    float sqrts_ = 1.f;
 };
-
-
 
 #endif  // SRC_INCLUDE_COLLIDER_H_

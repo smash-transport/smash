@@ -33,25 +33,21 @@ class ModusDefault {
  public:
   // never needs a virtual destructor
 
+  // Missing functions for concrete Modus implementations:
+  // void initial_conditions(Particles *particles);
+
   /**
    * Only needed for BoxModus. The default for all the other modi does nothing.
    */
   int sanity_check(Particles *) { return 0; }
-
-  FourVector boundary_condition(FourVector position, bool * /*boundary_hit*/) {
-    return position;
-  }
-
-  // Missing functions for concrete Modus implementations:
-  // void initial_conditions(Particles *particles);
-
-  void propagate(Particles *particles, const ExperimentParameters &parameters);
 
   void check_collision_geometry(Particles *particles,
                                 CrossSections *cross_sections,
                                 std::list<int> *collision_list,
                                 size_t *rejection_conflict,
                                 const ExperimentParameters &parameters);
+
+  void propagate(Particles *particles, const ExperimentParameters &parameters);
 };
 
 #endif // SRC_INCLUDE_MODUSDEFAULT_H_

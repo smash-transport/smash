@@ -149,6 +149,17 @@ void BoxModus::initial_conditions(
     number_density_initial_ = number_density_total;
 }
 
+/* evolve - the core of the box, stepping forward in time */
+int BoxModus::sanity_check(Particles *particles) {
+    /* fixup positions on startup, particles need to be *inside* the box */
+    for (auto i = particles->begin(); i != particles->end(); ++i) {
+        bool boundary_hit = false;
+        i->second.set_position(boundary_condition(i->second.position(),
+                                                  &boundary_hit));
+    }
+    return 0;
+}
+
 /* check_collision_geometry - check if a collision happens between particles */
 void BoxModus::check_collision_geometry(
     Particles *particles, CrossSections *cross_sections,
@@ -323,16 +334,4 @@ FourVector BoxModus::boundary_condition(FourVector position,
         position.set_x3(position.x3() - length_);
   out:
     return position;
-}
-
-
-/* evolve - the core of the box, stepping forward in time */
-int BoxModus::sanity_check(Particles *particles) {
-    /* fixup positions on startup, particles need to be *inside* the box */
-    for (auto i = particles->begin(); i != particles->end(); ++i) {
-        bool boundary_hit = false;
-        i->second.set_position(boundary_condition(i->second.position(),
-                                                  &boundary_hit));
-    }
-    return 0;
 }

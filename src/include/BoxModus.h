@@ -30,17 +30,22 @@ class BoxModus : public ModusDefault {
 
     void initial_conditions(Particles *particles,
                             const ExperimentParameters &parameters);
+
     int sanity_check(Particles *particles);
-    void propagate(Particles *particles, const ExperimentParameters &parameters);
-    FourVector boundary_condition(FourVector position,
-                                  bool *boundary_hit);
+
     void check_collision_geometry(Particles *particles,
                                   CrossSections *cross_sections,
                                   std::list<int> *collision_list,
                                   size_t *rejection_conflict,
                                   const ExperimentParameters &parameters);
 
+    void propagate(Particles *particles,
+                   const ExperimentParameters &parameters);
+
  private:
+    FourVector boundary_condition(FourVector position,
+                                  bool *boundary_hit);
+
     /* initial condition */
     int initial_condition_ = 1;
     /* Cube edge length */
