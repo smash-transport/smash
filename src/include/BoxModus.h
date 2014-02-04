@@ -12,12 +12,12 @@
 #include <list>
 
 #include "../include/CrossSections.h"
-#include "Experiment.h"
 #include "../include/ModusDefault.h"
 #include "../include/Particles.h"
 #include "../include/Parameters.h"
 
 class BoxModus;
+class ExperimentParameters;
 
 class BoxModus : public ModusDefault {
  public:

@@ -17,6 +17,7 @@
 #include "../include/Particles.h"
 #include "../include/Parameters.h"
 
+class ExperimentParameters;
 
 class ColliderModus : public ModusDefault {
  public:

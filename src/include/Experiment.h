@@ -12,6 +12,7 @@
 #include <string>
 
 #include "../include/CrossSections.h"
+#include "../include/ExperimentParameters.h"
 #include "../include/ModusDefault.h"
 #include "../include/Parameters.h"
 #include "../include/Particles.h"
@@ -32,15 +33,6 @@ class ExperimentBase {
     static std::unique_ptr<ExperimentBase> create(std::string modus_chooser, int nevents);
 
     virtual void run(std::string path) = 0;
-};
-
-struct ExperimentParameters {
-  /* number of test particle */
-  int testparticles = 1;
-  /* temporal time step */
-  float eps = 0.001f;
-  /* cross section of the elastic scattering */
-  float cross_section = 10.0f;
 };
 
 template <typename Modus> class Experiment : public ExperimentBase {

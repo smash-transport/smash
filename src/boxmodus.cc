@@ -7,6 +7,7 @@
 
 #include "include/BoxModus.h"
 #include "include/CrossSections.h"
+#include "include/ExperimentParameters.h"
 #include "include/Particles.h"
 #include "include/constants.h"
 #include "include/collisions.h"
