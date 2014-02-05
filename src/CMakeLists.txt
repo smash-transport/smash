@@ -1,5 +1,13 @@
 include(CheckLibraryExists)
 
+# find GSL
+find_path(GSL_INCLUDES gsl/gsl_sf_bessel.h)
+find_library(GSL_LIBRARY gsl)
+find_library(GSL_CBLAS_LIBRARY gslcblas)
+
+# set up include paths
+include_directories("${GSL_INCLUDES}")
+
 # list the source files
 set(smash_src boxmodus.cc clebschgordan.cc collisions.cc collidermodus.cc
         cross-sections.cc
@@ -28,9 +36,9 @@ file(COPY decaymodes.txt DESTINATION ..)
 # link with gsl and maybe rt
 CHECK_LIBRARY_EXISTS(rt clock_gettime "time.h" HAVE_CLOCK_GETTIME)
 if(HAVE_CLOCK_GETTIME)
-  target_link_libraries(smash gsl gslcblas rt)
+  target_link_libraries(smash ${GSL_LIBRARY} ${GSL_CBLAS_LIBRARY} rt)
 else(HAVE_CLOCK_GETTIME)
-  target_link_libraries(smash gsl gslcblas)
+  target_link_libraries(smash ${GSL_LIBRARY} ${GSL_CBLAS_LIBRARY})
 endif(HAVE_CLOCK_GETTIME)
 
 # tests:
