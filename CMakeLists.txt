@@ -9,6 +9,9 @@ endif()
 # Minimum cmake version this is tested on
 cmake_minimum_required(VERSION 2.8)
 
+# Tell cmake where to find our modules
+set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
+
 # The current version number
 set(VERSION_MAJOR 20140124)
 
