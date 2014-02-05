@@ -2,7 +2,7 @@
  *
  *    Copyright (c) 2013
  *      SMASH Team
- * 
+ *
  *    GNU General Public License (GPLv3 or later)
  *
  */
@@ -188,40 +188,41 @@ void momenta_exchange(ParticleData *particle1, ParticleData *particle2) {
 }
 
 void sample_cms_momenta(ParticleData *particle1, ParticleData *particle2,
-  const double cms_energy, const double mass1, const double mass2) {
-    double energy1 = (cms_energy * cms_energy + mass1 * mass1 - mass2 * mass2)
-                    / (2.0 * cms_energy);
-    double momentum_radial = sqrt(energy1 * energy1 - mass1 * mass1);
-    if (!(momentum_radial > 0.0))
-      printf("Warning: radial momenta %g \n", momentum_radial);
-    /* XXX: Angles should be sampled from differential cross section
-     * of this process
-     */
-    Angles phitheta;
-    phitheta.distribute_isotropically();
-    if (!(energy1  > mass1)) {
-      printf("Particle %d radial momenta %g phi %g cos_theta %g\n",
-             particle1->pdgcode(), momentum_radial, phitheta.phi(),
-             phitheta.costheta());
-      printf("Etot: %g m_a: %g m_b %g E_a: %g\n", cms_energy,
-             mass1, mass2, energy1);
-    }
-    /* We use fourvector to set 4-momentum, as setting it
-     * with doubles requires that particle uses its
-     * pole mass, which is not generally true for resonances
-     */
-    FourVector momentum1(energy1, momentum_radial * phitheta.x(),
-      momentum_radial * phitheta.y(), momentum_radial * phitheta.z());
-    particle1->set_momentum(momentum1);
+                        const double cms_energy, const double mass1,
+                        const double mass2) {
+  double energy1 = (cms_energy * cms_energy + mass1 * mass1 - mass2 * mass2) /
+                   (2.0 * cms_energy);
+  double momentum_radial = sqrt(energy1 * energy1 - mass1 * mass1);
+  if (!(momentum_radial > 0.0))
+    printf("Warning: radial momenta %g \n", momentum_radial);
+  /* XXX: Angles should be sampled from differential cross section
+   * of this process
+   */
+  Angles phitheta;
+  phitheta.distribute_isotropically();
+  if (!(energy1 > mass1)) {
+    printf("Particle %d radial momenta %g phi %g cos_theta %g\n",
+           particle1->pdgcode(), momentum_radial, phitheta.phi(),
+           phitheta.costheta());
+    printf("Etot: %g m_a: %g m_b %g E_a: %g\n", cms_energy, mass1, mass2,
+           energy1);
+  }
+  /* We use fourvector to set 4-momentum, as setting it
+   * with doubles requires that particle uses its
+   * pole mass, which is not generally true for resonances
+   */
+  FourVector momentum1(energy1, momentum_radial * phitheta.x(),
+                       momentum_radial * phitheta.y(),
+                       momentum_radial * phitheta.z());
+  particle1->set_momentum(momentum1);
 
-    FourVector momentum2(cms_energy - energy1,
-      -momentum_radial * phitheta.x(),
-      -momentum_radial * phitheta.y(),
-      -momentum_radial * phitheta.z());
-    particle2->set_momentum(momentum2);
+  FourVector momentum2(cms_energy - energy1, -momentum_radial * phitheta.x(),
+                       -momentum_radial * phitheta.y(),
+                       -momentum_radial * phitheta.z());
+  particle2->set_momentum(momentum2);
 
-    printd("p0: %g %g \n", momentum1.x0(), momentum2.x0());
-    printd("p1: %g %g \n", momentum1.x1(), momentum2.x1());
-    printd("p2: %g %g \n", momentum1.x2(), momentum2.x2());
-    printd("p3: %g %g \n", momentum1.x3(), momentum2.x3());
+  printd("p0: %g %g \n", momentum1.x0(), momentum2.x0());
+  printd("p1: %g %g \n", momentum1.x1(), momentum2.x1());
+  printd("p2: %g %g \n", momentum1.x2(), momentum2.x2());
+  printd("p3: %g %g \n", momentum1.x3(), momentum2.x3());
 }

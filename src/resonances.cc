@@ -59,9 +59,9 @@ float calculate_minimum_mass(Particles *particles, int pdgcode) {
  * for producing a resonance
  */
 std::vector<ProcessBranch> resonance_cross_section(
-  const ParticleData &particle1, const ParticleData &particle2,
-  const ParticleType &type_particle1, const ParticleType &type_particle2,
-  Particles *particles) {
+    const ParticleData &particle1, const ParticleData &particle2,
+    const ParticleType &type_particle1, const ParticleType &type_particle2,
+    Particles *particles) {
   std::vector<ProcessBranch> resonance_process_list;
 
   /* first item refers to total resonance production cross section */
@@ -114,7 +114,7 @@ std::vector<ProcessBranch> resonance_cross_section(
 
   /* Find all the possible resonances */
   for (auto i = particles->types_cbegin(); i != particles->types_cend(); ++i) {
-       ParticleType type_resonance = i->second;
+    ParticleType type_resonance = i->second;
 
     /* Not a resonance, go to next type of particle */
     if (type_resonance.width() < 0.0)

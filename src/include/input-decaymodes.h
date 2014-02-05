@@ -1,7 +1,7 @@
 /*
  *    Copyright (c) 2013
  *      SMASH Team
- * 
+ *
  *    GNU General Public License (GPLv3 or later)
  */
 #ifndef SRC_INCLUDE_INPUT_DECAYMODES_H_

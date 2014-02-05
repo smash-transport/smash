@@ -2,7 +2,7 @@
  *
  *    Copyright (c) 2012-2014
  *      SMASH Team
- * 
+ *
  *    GNU General Public License (GPLv3 or later)
  *
  */
@@ -88,7 +88,7 @@ void print_measurements(const Particles &particles,
   double time = 0.0;
 
   for (auto i = particles.cbegin(); i != particles.cend(); ++i) {
-      momentum_total += i->second.momentum();
+    momentum_total += i->second.momentum();
     /* use the time from the last active particle - startup time */
     time = i->second.position().x0() - 1.0;
   }
@@ -100,12 +100,11 @@ void print_measurements(const Particles &particles,
            scatterings_total * 2 / (particles.size() * time),
            scatterings_this_interval, particles.size(), elapsed);
   else
-      printf("%5g%13g%13g%13g%10i%10zu%13g\n", time,
-             energy_ini - momentum_total.x0(),
-             sqrt(-1 * momentum_total.DotThree()), 0.0, 0,
-             particles.size(), elapsed);
+    printf("%5g%13g%13g%13g%10i%10zu%13g\n", time,
+           energy_ini - momentum_total.x0(),
+           sqrt(-1 * momentum_total.DotThree()), 0.0, 0, particles.size(),
+           elapsed);
 }
-
 
 /* print_tail - output at the end of the simulation */
 void print_tail(const timespec time_start, const double &scattering_rate) {
@@ -227,7 +226,7 @@ void printd_list(const std::list<int> &collision_list) {
   printd("Collision list contains:");
   for (std::list<int>::const_iterator id = collision_list.cbegin();
        id != collision_list.cend(); ++id)
-         printd(" particle %d", *id);
+    printd(" particle %d", *id);
   printd("\n");
 }
 
@@ -240,19 +239,18 @@ void write_particles(const Particles &particles) {
            particles.time());
   fp = fopen(filename, "w");
   for (auto i = particles.cbegin(); i != particles.cend(); ++i) {
-     fprintf(fp, "%g %g %g %g %i %i\n", i->second.momentum().x0(),
-             i->second.momentum().x1(), i->second.momentum().x2(),
-             i->second.momentum().x3(), i->second.id(), i->second.pdgcode());
+    fprintf(fp, "%g %g %g %g %i %i\n", i->second.momentum().x0(),
+            i->second.momentum().x1(), i->second.momentum().x2(),
+            i->second.momentum().x3(), i->second.id(), i->second.pdgcode());
   }
   fclose(fp);
   snprintf(filename, sizeof(filename), "data/position_%.5f.dat",
            particles.time());
   fp = fopen(filename, "w");
-  for (auto i = particles.cbegin();
-       i != particles.cend(); ++i) {
-     fprintf(fp, "%g %g %g %g %i %i\n", i->second.position().x0(),
-             i->second.position().x1(), i->second.position().x2(),
-             i->second.position().x3(), i->second.id(), i->second.pdgcode());
+  for (auto i = particles.cbegin(); i != particles.cend(); ++i) {
+    fprintf(fp, "%g %g %g %g %i %i\n", i->second.position().x0(),
+            i->second.position().x1(), i->second.position().x2(),
+            i->second.position().x3(), i->second.id(), i->second.pdgcode());
   }
   fclose(fp);
 }
@@ -306,48 +304,47 @@ void write_oscar(const ParticleData &particle_data,
 
   /* particle_index, particle_pdgcode, ?, momenta, mass position */
   FourVector momentum = particle_data.momentum(),
-    position = particle_data.position();
-  fprintf(fp, "%i %i %i %g %g %g %g %g %g %g %g %g \n",
-          particle_data.id(), particle_type.pdgcode(), 0,
-          momentum.x1(), momentum.x2(), momentum.x3(), momentum.x0(),
-          particle_type.mass(), position.x1(), position.x2(), position.x3(),
-          position.x0() - 1.0);
+             position = particle_data.position();
+  fprintf(fp, "%i %i %i %g %g %g %g %g %g %g %g %g \n", particle_data.id(),
+          particle_type.pdgcode(), 0, momentum.x1(), momentum.x2(),
+          momentum.x3(), momentum.x0(), particle_type.mass(), position.x1(),
+          position.x2(), position.x3(), position.x0() - 1.0);
 
   fclose(fp);
 }
 
 /* write_vtk - VTK file describing particle position */
 void write_vtk(const Particles &particles) {
-    FILE *fp = NULL;
-    char filename[256];
-    snprintf(filename, sizeof(filename), "data/pos_0.%05i.vtk",
-             static_cast<int>((particles.cbegin()->second.position().x0()
-             - 1.0) * 10));
-    fp = fopen(filename, "w");
-    /* Legacy VTK file format */
-    fprintf(fp, "# vtk DataFile Version 2.0\n");
-    fprintf(fp, "Generated from molecular-offset data\n");
-    fprintf(fp, "ASCII\n");
-    /* Unstructured data sets are composed of points, lines, polygons, .. */
-    fprintf(fp, "DATASET UNSTRUCTURED_GRID\n");
-    fprintf(fp, "POINTS %zu double\n", particles.size());
-    for (auto i = particles.cbegin(); i != particles.cend(); ++i)
-        fprintf(fp, "%g %g %g\n", i->second.position().x1(),
-                i->second.position().x2(), i->second.position().x3());
-    fprintf(fp, "CELLS %zu %zu\n", particles.size(), particles.size() * 2);
-    for (size_t point_index = 0; point_index < particles.size(); point_index++)
-        fprintf(fp, "1 %zu\n", point_index);
-    fprintf(fp, "CELL_TYPES %zu\n", particles.size());
-    for (size_t point_index = 0; point_index < particles.size(); point_index++)
-        fprintf(fp, "1\n");
-    fprintf(fp, "POINT_DATA %zu\n", particles.size());
-    fprintf(fp, "SCALARS pdg_codes int 1\n");
-    fprintf(fp, "LOOKUP_TABLE default\n");
-    for (auto i = particles.cbegin(); i != particles.cend(); ++i)
-        fprintf(fp, "%i\n", i->second.pdgcode());
-    fprintf(fp, "VECTORS momentum double\n");
-    for (auto i = particles.cbegin(); i != particles.cend(); ++i)
-        fprintf(fp, "%g %g %g\n", i->second.momentum().x1(),
-                i->second.momentum().x2(), i->second.momentum().x3());
-    fclose(fp);
+  FILE *fp = NULL;
+  char filename[256];
+  snprintf(filename, sizeof(filename), "data/pos_0.%05i.vtk",
+           static_cast<int>((particles.cbegin()->second.position().x0() - 1.0) *
+                            10));
+  fp = fopen(filename, "w");
+  /* Legacy VTK file format */
+  fprintf(fp, "# vtk DataFile Version 2.0\n");
+  fprintf(fp, "Generated from molecular-offset data\n");
+  fprintf(fp, "ASCII\n");
+  /* Unstructured data sets are composed of points, lines, polygons, .. */
+  fprintf(fp, "DATASET UNSTRUCTURED_GRID\n");
+  fprintf(fp, "POINTS %zu double\n", particles.size());
+  for (auto i = particles.cbegin(); i != particles.cend(); ++i)
+    fprintf(fp, "%g %g %g\n", i->second.position().x1(),
+            i->second.position().x2(), i->second.position().x3());
+  fprintf(fp, "CELLS %zu %zu\n", particles.size(), particles.size() * 2);
+  for (size_t point_index = 0; point_index < particles.size(); point_index++)
+    fprintf(fp, "1 %zu\n", point_index);
+  fprintf(fp, "CELL_TYPES %zu\n", particles.size());
+  for (size_t point_index = 0; point_index < particles.size(); point_index++)
+    fprintf(fp, "1\n");
+  fprintf(fp, "POINT_DATA %zu\n", particles.size());
+  fprintf(fp, "SCALARS pdg_codes int 1\n");
+  fprintf(fp, "LOOKUP_TABLE default\n");
+  for (auto i = particles.cbegin(); i != particles.cend(); ++i)
+    fprintf(fp, "%i\n", i->second.pdgcode());
+  fprintf(fp, "VECTORS momentum double\n");
+  for (auto i = particles.cbegin(); i != particles.cend(); ++i)
+    fprintf(fp, "%g %g %g\n", i->second.momentum().x1(),
+            i->second.momentum().x2(), i->second.momentum().x3());
+  fclose(fp);
 }

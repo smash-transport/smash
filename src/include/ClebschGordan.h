@@ -8,7 +8,7 @@
  *
  * Copyright (c) 2013
  *      SMASH Team
- * 
+ *
  *    GNU General Public License (GPLv3 or later)
  */
 
@@ -18,7 +18,7 @@
 class ClebschGordan {
  protected:
   unsigned int factorial_log_max;
-  double * factorial_log;
+  double* factorial_log;
   /* Wigner 3j symbol <j1 m1 j2 m2 | j3 m3> */
   double f3j(int j1, int j2, int j3, int m1, int m2, int m3);
 

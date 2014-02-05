@@ -60,16 +60,16 @@ class Particles {
   inline std::map<int, ParticleType>::const_iterator types_cend(void) const;
 
  private:
-    /* Highest id of a given particle */
-    int id_max_;
-    /* dynamic data of the particles a map between it's id and data */
-    std::map<int, ParticleData> data_;
-    /* a map between pdg and correspoding static data of the particles */
-    std::map<int, ParticleType> types_;
-    /* a map between pdg and corresponding decay modes */
-    std::map<int, DecayModes> all_decay_modes_;
-    /* google style recommendation */
-    DISALLOW_COPY_AND_ASSIGN(Particles);
+  /* Highest id of a given particle */
+  int id_max_;
+  /* dynamic data of the particles a map between it's id and data */
+  std::map<int, ParticleData> data_;
+  /* a map between pdg and correspoding static data of the particles */
+  std::map<int, ParticleType> types_;
+  /* a map between pdg and corresponding decay modes */
+  std::map<int, DecayModes> all_decay_modes_;
+  /* google style recommendation */
+  DISALLOW_COPY_AND_ASSIGN(Particles);
 };
 
 /* return the data of a specific particle */

@@ -1,7 +1,7 @@
 /*
  *    Copyright (c) 2013
  *      SMASH Team
- * 
+ *
  *    GNU General Public License (GPLv3 or later)
  */
 #ifndef SRC_INCLUDE_DECAYMODES_H_
@@ -26,6 +26,7 @@ class DecayModes {
   inline bool empty(void);
   /* Pass out the decay modes */
   inline std::vector<ProcessBranch> decay_mode_list(void) const;
+
  private:
   /* Vector of decay modes.
    * Each mode consists of a vector of the pdg codes of decay products

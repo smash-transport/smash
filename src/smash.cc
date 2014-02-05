@@ -2,7 +2,7 @@
  *
  *    Copyright (c) 2012-2014
  *      SMASH Team
- * 
+ *
  *    GNU General Public License (GPLv3 or later)
  *
  */
@@ -15,7 +15,6 @@
 #include <list>
 #include <map>
 #include <vector>
-
 
 #include "include/Experiment.h"
 #include "include/Parameters.h"

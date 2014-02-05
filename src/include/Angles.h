@@ -7,7 +7,6 @@
  *
  */
 
-
 #ifndef SRC_INCLUDE_ANGLES_H_
 #define SRC_INCLUDE_ANGLES_H_
 

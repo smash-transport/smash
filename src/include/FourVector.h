@@ -1,7 +1,7 @@
 /*
  *    Copyright (c) 2012-2013
  *      SMASH Team
- * 
+ *
  *    GNU General Public License (GPLv3 or later)
  */
 #ifndef SRC_INCLUDE_FOURVECTOR_H_
@@ -11,52 +11,52 @@
 
 class FourVector {
  public:
-    /* default constructor */
-    FourVector(): x0_(0.0), x1_(0.0), x2_(0.0), x3_(0.0) {}
-    /* useful constructor */
-    FourVector(double y0, double y1, double y2, double y3): x0_(y0),
-      x1_(y1), x2_(y2), x3_(y3) {}
-    /* t, z, x_\perp */
-    double inline x0(void) const;
-    void inline set_x0(double t);
-    double inline x1(void) const;
-    void inline set_x1(double z);
-    double inline x2(void) const;
-    void inline set_x2(double x);
-    double inline x3(void) const;
-    void inline set_x3(double y);
-    /* set all four values */
-    void inline set_FourVector(const double t, const double z, const double x,
-      const double y);
-    /* inlined operations */
-    double inline Dot(const FourVector &a) const;
-    double inline Dot() const;
-    double inline DotThree(const FourVector &a) const;
-    double inline DotThree() const;
-    double inline DiffThree(const FourVector &a) const;
-    /* operations */
-    FourVector LorentzBoost(const FourVector &b) const;
+  /* default constructor */
+  FourVector() : x0_(0.0), x1_(0.0), x2_(0.0), x3_(0.0) {}
+  /* useful constructor */
+  FourVector(double y0, double y1, double y2, double y3)
+      : x0_(y0), x1_(y1), x2_(y2), x3_(y3) {}
+  /* t, z, x_\perp */
+  double inline x0(void) const;
+  void inline set_x0(double t);
+  double inline x1(void) const;
+  void inline set_x1(double z);
+  double inline x2(void) const;
+  void inline set_x2(double x);
+  double inline x3(void) const;
+  void inline set_x3(double y);
+  /* set all four values */
+  void inline set_FourVector(const double t, const double z, const double x,
+                             const double y);
+  /* inlined operations */
+  double inline Dot(const FourVector &a) const;
+  double inline Dot() const;
+  double inline DotThree(const FourVector &a) const;
+  double inline DotThree() const;
+  double inline DiffThree(const FourVector &a) const;
+  /* operations */
+  FourVector LorentzBoost(const FourVector &b) const;
 
-    /* overloaded operators */
-    bool inline operator==(const FourVector &a) const;
-    bool inline operator!=(const FourVector &a) const;
-    bool inline operator<(const FourVector &a) const;
-    bool inline operator>(const FourVector &a) const;
-    bool inline operator<=(const FourVector &a) const;
-    bool inline operator>=(const FourVector &a) const;
-    bool inline operator==(const double &a) const;
-    bool inline operator!=(const double &a) const;
-    bool inline operator<(const double &a) const;
-    bool inline operator>(const double &a) const;
-    bool inline operator<=(const double &a) const;
-    bool inline operator>=(const double &a) const;
-    FourVector inline operator+=(const FourVector &a);
-    FourVector inline operator-=(const FourVector &a);
-    FourVector inline operator*=(const double &a);
-    FourVector inline operator/=(const double &a);
+  /* overloaded operators */
+  bool inline operator==(const FourVector &a) const;
+  bool inline operator!=(const FourVector &a) const;
+  bool inline operator<(const FourVector &a) const;
+  bool inline operator>(const FourVector &a) const;
+  bool inline operator<=(const FourVector &a) const;
+  bool inline operator>=(const FourVector &a) const;
+  bool inline operator==(const double &a) const;
+  bool inline operator!=(const double &a) const;
+  bool inline operator<(const double &a) const;
+  bool inline operator>(const double &a) const;
+  bool inline operator<=(const double &a) const;
+  bool inline operator>=(const double &a) const;
+  FourVector inline operator+=(const FourVector &a);
+  FourVector inline operator-=(const FourVector &a);
+  FourVector inline operator*=(const double &a);
+  FourVector inline operator/=(const double &a);
 
  private:
-    double x0_, x1_, x2_, x3_;
+  double x0_, x1_, x2_, x3_;
 };
 
 double inline FourVector::x0(void) const {

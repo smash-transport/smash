@@ -1,7 +1,7 @@
 /*
  *    Copyright (c) 2013
  *      SMASH Team
- * 
+ *
  *    GNU General Public License (GPLv3 or later)
  */
 #ifndef SRC_INCLUDE_PROCESSBRANCH_H_
@@ -12,7 +12,7 @@
 class ProcessBranch {
  public:
   /* Default constructor */
-  ProcessBranch() :branch_weight_(-1.0) {}
+  ProcessBranch() : branch_weight_(-1.0) {}
   /* Add a particle to the list */
   inline void add_particle(int particle_pdg);
   /* Add the complete particle list */
@@ -27,6 +27,7 @@ class ProcessBranch {
   inline std::vector<int> particle_list(void) const;
   /* Pass the branch ratio */
   inline double weight(void) const;
+
  private:
   std::vector<int> particle_list_;
   double branch_weight_;

@@ -2,7 +2,7 @@
  *
  *    Copyright (c) 2012
  *      SMASH Team
- * 
+ *
  *    GNU General Public License (GPLv3 or later)
  *
  */
@@ -22,7 +22,7 @@ const char *sep = " \t\n";
 
 /* process_params - read in all params into list of key value paris */
 static void process_params(char *file_path,
-  std::list<Parameters> *configuration) {
+                           std::list<Parameters> *configuration) {
   char *line = NULL, *saveptr = NULL;
   size_t len = 0;
   ssize_t read;
@@ -67,9 +67,9 @@ static void process_params(char *file_path,
 
 /* process_config - configuration handling */
 void process_config(std::list<Parameters> *configuration, char *path) {
-    size_t len = strlen("./config_general.txt") + strlen(path) + 1;
-    char *config_path = reinterpret_cast<char *>(malloc(len));
-    snprintf(config_path, len, "%s/config_general.txt", path);
-    process_params(config_path, configuration);
-    free(config_path);
+  size_t len = strlen("./config_general.txt") + strlen(path) + 1;
+  char *config_path = reinterpret_cast<char *>(malloc(len));
+  snprintf(config_path, len, "%s/config_general.txt", path);
+  process_params(config_path, configuration);
+  free(config_path);
 }

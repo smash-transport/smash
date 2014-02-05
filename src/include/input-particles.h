@@ -1,9 +1,9 @@
 /*
- *    Copyright (c) 2012 
+ *    Copyright (c) 2012
  *      SMASH Team
- * 
+ *
  *    GNU General Public License (GPLv3 or later)
- * 
+ *
  */
 #ifndef SRC_INCLUDE_INPUT_PARTICLES_H_
 #define SRC_INCLUDE_INPUT_PARTICLES_H_

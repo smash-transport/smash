@@ -1,16 +1,15 @@
 /*
- *    Copyright (c) 2012 
+ *    Copyright (c) 2012
  *      SMASH Team
- * 
+ *
  *    GNU General Public License (GPLv3 or later)
- *  */
+ */
 #ifndef SRC_INCLUDE_PARAM_READER_H_
 #define SRC_INCLUDE_PARAM_READER_H_
 
 #include <list>
 
 #include "../include/Parameters.h"
-
 
 extern const char *sep;
 

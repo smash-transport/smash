@@ -1,7 +1,7 @@
 /*
  *    Copyright (c) 2012-2013
  *      SMASH Team
- * 
+ *
  *    GNU General Public License (GPLv3 or later)
  */
 #ifndef SRC_INCLUDE_PARTICLEDATA_H_
@@ -56,28 +56,28 @@ class ParticleData {
   inline bool operator<(int id_a) const;
 
  private:
-    /* Each particle has a unique identifier */
-    int id_;
-    /* pdg id of the particle */
-    int pdgcode_;
-    /* Next particle we'd collide against */
-    int id_partner_;
-    /* counter of the last collision/decay */
-    int id_process_;
-    /* collision time */
-    double collision_time_;
-    /* Type of interaction.
-     * 0: elastic collision,
-     * 1: resonance formation,
-     * 2: decay
-     */
-    int process_type_;
-    /* PDG codes of final state particles */
-    std::vector<int> final_state_;
-    /* momenta of the particle: x0, x1, x2, x3 as E, px, py, pz */
-    FourVector momentum_;
-    /* position in space: x0, x1, x2, x3 as t, x, y, z */
-    FourVector position_;
+  /* Each particle has a unique identifier */
+  int id_;
+  /* pdg id of the particle */
+  int pdgcode_;
+  /* Next particle we'd collide against */
+  int id_partner_;
+  /* counter of the last collision/decay */
+  int id_process_;
+  /* collision time */
+  double collision_time_;
+  /* Type of interaction.
+   * 0: elastic collision,
+   * 1: resonance formation,
+   * 2: decay
+   */
+  int process_type_;
+  /* PDG codes of final state particles */
+  std::vector<int> final_state_;
+  /* momenta of the particle: x0, x1, x2, x3 as E, px, py, pz */
+  FourVector momentum_;
+  /* position in space: x0, x1, x2, x3 as t, x, y, z */
+  FourVector position_;
 };
 
 /* look up the id of the particle */
