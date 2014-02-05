@@ -1,7 +1,7 @@
 /*
  *    Copyright (c) 2014
  *      SMASH Team
- * 
+ *
  *    GNU General Public License (GPLv3 or later)
  */
 #ifndef SRC_INCLUDE_COLLIDERMODUS_H_
@@ -24,27 +24,27 @@ class ColliderModus : public ModusDefault {
   /* default constructor with probable values */
   ColliderModus() = default;
 
-    /* special class funtions */
-    // XXX: -> ctor
-    void assign_params(std::list<Parameters> *configuration);
-    // XXX: needs to be discoverable from an outside "printer"
-    void print_startup();
+  /* special class funtions */
+  void assign_params(
+      std::list<Parameters> *configuration);  // TODO(mkretz) -> ctor
+  void print_startup();  // TODO(mkretz): needs to be discoverable from an
+                         // outside "printer"
 
-    void initial_conditions(Particles *particles,
-                            const ExperimentParameters &parameters);
+  void initial_conditions(Particles *particles,
+                          const ExperimentParameters &parameters);
 
-    // in ModusDefault:
-    // * sanity_check
-    // * check_collision_geometry
-    // * propagate
+  // in ModusDefault:
+  // * sanity_check
+  // * check_collision_geometry
+  // * propagate
 
  private:
-    /* Projectile particle PDG ID*/
-    int projectile_ = 2212;
-    /* Target particle PDG ID*/
-    int target_ = 2212;
-    /* Center-of-mass energy of the collision */
-    float sqrts_ = 1.f;
+  /* Projectile particle PDG ID*/
+  int projectile_ = 2212;
+  /* Target particle PDG ID*/
+  int target_ = 2212;
+  /* Center-of-mass energy of the collision */
+  float sqrts_ = 1.f;
 };
 
 #endif  // SRC_INCLUDE_COLLIDERMODUS_H_

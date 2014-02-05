@@ -1,8 +1,7 @@
-
 /*
  *    Copyright (c) 2013-2014
  *      SMASH Team
- * 
+ *
  *    GNU General Public License (GPLv3 or later)
  */
 #ifndef SRC_INCLUDE_EXPERIMENTPARAMETERS_H_

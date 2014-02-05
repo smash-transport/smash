@@ -2,7 +2,7 @@
  *
  *    Copyright (c) 2013
  *      SMASH Team
- * 
+ *
  *    GNU General Public License (GPLv3 or later)
  *
  */
@@ -39,29 +39,27 @@
 /* build dependent variables */
 #include "include/Config.h"
 
-
 void SphereModus::assign_params_specific(std::list<Parameters> *configuration) {
-    bool match = false;
-    std::list<Parameters>::iterator i = configuration->begin();
-    while (i != configuration->end()) {
-        char *key = i->key();
-        char *value = i->value();
-        printd("%s %s\n", key, value);
-        /* double or float values */
-        if (strcmp(key, "RADIUS") == 0) {
-            radius_ = (fabs(atof(value)));
-            match = true;
-        }
-        /* remove processed entry */
-        if (match) {
-            i = configuration->erase(i);
-            match = false;
-        } else {
-            ++i;
-        }
+  bool match = false;
+  std::list<Parameters>::iterator i = configuration->begin();
+  while (i != configuration->end()) {
+    char *key = i->key();
+    char *value = i->value();
+    printd("%s %s\n", key, value);
+    /* double or float values */
+    if (strcmp(key, "RADIUS") == 0) {
+      radius_ = (fabs(atof(value)));
+      match = true;
     }
+    /* remove processed entry */
+    if (match) {
+      i = configuration->erase(i);
+      match = false;
+    } else {
+      ++i;
+    }
+  }
 }
-
 
 /* print_startup - console output on startup of sphere specific parameters */
 /* void print_startup(const SphereModus &ball) {
@@ -71,77 +69,72 @@ void SphereModus::assign_params_specific(std::list<Parameters> *configuration) {
 
 /* initial_conditions - sets particle data for @particles */
 void SphereModus::initial_conditions(Particles *particles) {
-    size_t number_total = 0;
-    double time_start = 1.0;
-    FourVector momentum_total(0, 0, 0, 0);
-    /* loop over all the particle types creating each particles */
-    for (auto i = particles->types_cbegin(); i != particles->types_cend();
-         ++i) {
-      /* Particles with width > 0 (resonances) do not exist in the beginning */
-        if (i->second.width() > 0.0)
-            continue;
-        printd("%s mass: %g [GeV]\n", i->second.name().c_str(),
-                                      i->second.mass());
-        /* bose einstein distribution function with temperature 0.3 GeV */
-        double number_density = number_density_bose(i->second.mass(), 0.3);
-        printf("IC number density %.6g [fm^-3]\n", number_density);
-        /* cast while reflecting probability of extra particle */
-        size_t number = 4.0 / 3.0 * M_PI * radius_ * radius_
-        * radius_ * number_density * testparticles;
-        if (4.0 / 3.0 * M_PI * radius_ * radius_ * radius_
-            * number_density - number > drand48())
-            number++;
-        /* create bunch of particles */
-        printf("IC creating %zu particles\n", number);
-        particles->create(number, i->second.pdgcode());
-        number_total += number;
+  size_t number_total = 0;
+  double time_start = 1.0;
+  FourVector momentum_total(0, 0, 0, 0);
+  /* loop over all the particle types creating each particles */
+  for (auto i = particles->types_cbegin(); i != particles->types_cend(); ++i) {
+    /* Particles with width > 0 (resonances) do not exist in the beginning */
+    if (i->second.width() > 0.0) continue;
+    printd("%s mass: %g [GeV]\n", i->second.name().c_str(), i->second.mass());
+    /* bose einstein distribution function with temperature 0.3 GeV */
+    double number_density = number_density_bose(i->second.mass(), 0.3);
+    printf("IC number density %.6g [fm^-3]\n", number_density);
+    /* cast while reflecting probability of extra particle */
+    size_t number = 4.0 / 3.0 * M_PI * radius_ * radius_ * radius_ *
+                    number_density * testparticles;
+    if (4.0 / 3.0 * M_PI * radius_ * radius_ * radius_ * number_density -
+            number >
+        drand48())
+      number++;
+    /* create bunch of particles */
+    printf("IC creating %zu particles\n", number);
+    particles->create(number, i->second.pdgcode());
+    number_total += number;
+  }
+  printf("IC contains %zu particles\n", number_total);
+  /* now set position and momentum of the particles */
+  double momentum_radial;
+  Angles phitheta = Angles();
+  for (auto i = particles->begin(); i != particles->end(); ++i) {
+    if (unlikely(i->first == particles->id_max() && !(i->first % 2))) {
+      /* poor last guy just sits around */
+      i->second.set_momentum(particles->type(i->first).mass(), 0, 0, 0);
+    } else if (!(i->first % 2)) {
+      /* thermal momentum according Maxwell-Boltzmann distribution */
+      momentum_radial = sample_momenta(0.3, particles->type(i->first).mass());
+      phitheta = Angles().distribute_isotropically();
+      printd("Particle %d radial momenta %g phi %g cos_theta %g\n", i->first,
+             momentum_radial, phitheta.phi(), phitheta.costheta());
+      i->second.set_momentum(
+          particles->type(i->first).mass(), momentum_radial * phitheta.x(),
+          momentum_radial * phitheta.y(), momentum_radial * phitheta.z());
+    } else {
+      i->second.set_momentum(particles->type(i->first).mass(),
+                             -particles->data(i->first - 1).momentum().x1(),
+                             -particles->data(i->first - 1).momentum().x2(),
+                             -particles->data(i->first - 1).momentum().x3());
     }
-    printf("IC contains %zu particles\n", number_total);
-    /* now set position and momentum of the particles */
-    double momentum_radial;
-    Angles phitheta = Angles();
-    for (auto i = particles->begin(); i != particles->end(); ++i) {
-        if (unlikely(i->first == particles->id_max() && !(i->first % 2))) {
-            /* poor last guy just sits around */
-            i->second.set_momentum(particles->type(i->first).mass(), 0, 0, 0);
-        } else if (!(i->first % 2)) {
-            /* thermal momentum according Maxwell-Boltzmann distribution */
-            momentum_radial = sample_momenta(0.3,
-                              particles->type(i->first).mass());
-            phitheta = Angles().distribute_isotropically();
-            printd("Particle %d radial momenta %g phi %g cos_theta %g\n",
-                   i->first, momentum_radial, phitheta.phi(),
-                   phitheta.costheta());
-            i->second.set_momentum(particles->type(i->first).mass(),
-                                   momentum_radial * phitheta.x(),
-                                   momentum_radial * phitheta.y(),
-                                   momentum_radial * phitheta.z());
-        } else {
-            i->second.set_momentum(particles->type(i->first).mass(),
-                               - particles->data(i->first - 1).momentum().x1(),
-                               - particles->data(i->first - 1).momentum().x2(),
-                               - particles->data(i->first - 1).momentum().x3());
-        }
-        momentum_total += i->second.momentum();
-        double x, y, z;
-        /* ramdom position in a sphere
-         * box length here has the meaning of the sphere radius
-         */
-        x = -radius_ + 2.0 * drand48() * radius_;
-        y = -radius_ + 2.0 * drand48() * radius_;
-        z = -radius_ + 2.0 * drand48() * radius_;
-        /* sampling points inside of the sphere, rejected if outside */
-        while (sqrt(x * x + y * y + z * z) > radius_) {
-            x = -radius_ + 2.0 * drand48() * radius_;
-            y = -radius_ + 2.0 * drand48() * radius_;
-            z = -radius_ + 2.0 * drand48() * radius_;
-        }
-        i->second.set_position(time_start, x, y, z);
-        /* IC: debug checks */
-        printd_momenta(i->second);
-        printd_position(i->second);
+    momentum_total += i->second.momentum();
+    double x, y, z;
+    /* ramdom position in a sphere
+     * box length here has the meaning of the sphere radius
+     */
+    x = -radius_ + 2.0 * drand48() * radius_;
+    y = -radius_ + 2.0 * drand48() * radius_;
+    z = -radius_ + 2.0 * drand48() * radius_;
+    /* sampling points inside of the sphere, rejected if outside */
+    while (sqrt(x * x + y * y + z * z) > radius_) {
+      x = -radius_ + 2.0 * drand48() * radius_;
+      y = -radius_ + 2.0 * drand48() * radius_;
+      z = -radius_ + 2.0 * drand48() * radius_;
     }
-    printf("IC total energy: %g [GeV]\n", momentum_total.x0());
+    i->second.set_position(time_start, x, y, z);
+    /* IC: debug checks */
+    printd_momenta(i->second);
+    printd_position(i->second);
+  }
+  printf("IC total energy: %g [GeV]\n", momentum_total.x0());
 }
 
 /* boundary_condition - enforce specific type of boundaries */

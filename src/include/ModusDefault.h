@@ -2,7 +2,7 @@
  *
  *    Copyright (c) 2013-2014
  *      SMASH Team
- * 
+ *
  *    GNU General Public License (GPLv3 or later)
  *
  */
@@ -39,7 +39,7 @@ class ModusDefault {
   /**
    * Only needed for BoxModus. The default for all the other modi does nothing.
    */
-  int sanity_check(Particles *p __attribute((unused))) { return 0; }
+  int sanity_check(Particles * /*p*/) { return 0; }
 
   void check_collision_geometry(Particles *particles,
                                 CrossSections *cross_sections,
