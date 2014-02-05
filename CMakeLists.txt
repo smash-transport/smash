@@ -22,7 +22,7 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR})
 
 # have tests run
-enable_testing()
+include(CTest)
 
 # have tests compiled for check target
 add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND})
