@@ -10,7 +10,7 @@ set(smash_src boxmodus.cc clebschgordan.cc collisions.cc collidermodus.cc
         outputroutines.cc resonances.cc time.cc)
 
 add_executable(smash smash.cc ${smash_src})
- 
+
 # configure a header file to pass some of the CMake settings
 # to the source code
 # FIXME: hardcoded path

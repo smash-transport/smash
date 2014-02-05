@@ -1,5 +1,5 @@
 # The name of our project
-project(mash) 
+project(mash)
 
 # Minimum cmake version this is tested on
 cmake_minimum_required(VERSION 2.8)
@@ -12,7 +12,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -march=native")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W -Wall -Wextra -Wmissing-declarations -Wpointer-arith -Wshadow -Wuninitialized -Winit-self -Winline -Wfloat-equal -Wundef -Wcast-align -Wformat=2 -std=c++11")
 
 # use C++ 11 standard
-#set(CMAKE_CXX_FLAGS “${CMAKE_CXX_FLAGS} “) 
+#set(CMAKE_CXX_FLAGS “${CMAKE_CXX_FLAGS} “)
 #add_definitions()
 
 # enable debug preprocessor variable
@@ -28,4 +28,4 @@ enable_testing()
 add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND})
 
 # subdirectories where the code is
-add_subdirectory(src) 
+add_subdirectory(src)
