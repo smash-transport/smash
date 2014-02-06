@@ -29,11 +29,14 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
 # have binary in the build directory
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR})
 
-# have tests run
+# enable standard CTest
+# tests are enabled/disabled with the BUILD_TESTING switch to cmake
 include(CTest)
 
-# have tests compiled for check target
-add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND})
+# tests are run with make test/ctest. Leave the check target in for a little while to tell where it went.
+add_custom_target(check
+   COMMENT "'make check' is deprecated. Use 'make test' or call ctest. The latter also supports running tests in parallel with -j"
+   )
 
 # subdirectories where the code is
 add_subdirectory(src)

@@ -1,12 +1,10 @@
 # test sources
-add_executable(fourvector EXCLUDE_FROM_ALL fourvector.cc)
-add_executable(lorentzboost EXCLUDE_FROM_ALL lorentzboost.cc ../fourvector.cc)
-add_executable(angles EXCLUDE_FROM_ALL angles.cc)
-add_executable(angles_distribution EXCLUDE_FROM_ALL angles_distribution.cc)
-add_executable(particles EXCLUDE_FROM_ALL particles.cc ../particles.cc ../fourvector.cc ../distributions.cc ../outputroutines.cc ../time.cc)
-add_executable(clebschgordan EXCLUDE_FROM_ALL clebschgordan.cc ../clebschgordan.cc)
-add_dependencies(check fourvector lorentzboost particles clebschgordan angles
-angles_distribution smash)
+add_executable(fourvector fourvector.cc)
+add_executable(lorentzboost lorentzboost.cc ../fourvector.cc)
+add_executable(angles angles.cc)
+add_executable(angles_distribution angles_distribution.cc)
+add_executable(particles particles.cc ../particles.cc ../fourvector.cc ../distributions.cc ../outputroutines.cc ../time.cc)
+add_executable(clebschgordan clebschgordan.cc ../clebschgordan.cc)
 
 file(COPY ../config_general.txt DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ../particles.txt DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
