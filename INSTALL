@@ -12,8 +12,8 @@ Run it with specific settings:
   vi config_general.txt
   ./smash
 
-Run and compile the various tests:
-  make check
+Run the various tests:
+  make test
 
 Tarball mash:
   ./bin/smash_tarball
