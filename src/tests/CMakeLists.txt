@@ -6,7 +6,7 @@ add_executable(angles_distribution EXCLUDE_FROM_ALL angles_distribution.cc)
 add_executable(particles EXCLUDE_FROM_ALL particles.cc ../particles.cc ../fourvector.cc ../distributions.cc ../outputroutines.cc ../time.cc)
 add_executable(clebschgordan EXCLUDE_FROM_ALL clebschgordan.cc ../clebschgordan.cc)
 add_dependencies(check fourvector lorentzboost particles clebschgordan angles
-angles_distribution)
+angles_distribution smash)
 
 file(COPY ../config_general.txt DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ../particles.txt DESTINATION ${CMAKE_CURRENT_BINARY_DIR})

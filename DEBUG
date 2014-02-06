@@ -7,9 +7,9 @@
 * Change c++ compiler:
   cmake ../ -DCMAKE_CXX_COMPILER=$HOME/lib/bin/g++
 
-* mash binary is regularly checked by:
-  valgrind -v ./mash
+* smash binary is regularly checked by:
+  valgrind -v ./smash
   
-* mash src is checked by:
+* smash src is checked by:
   cpplint.py *cc include/*h
   cppcheck --enable=all -I include/ .

@@ -22,7 +22,7 @@ SIGMA		10.0
 TESTPARTICLES	1
 
 // number of events
-NEVENTS 10
+NEVENTS 1
 
 
 // Sample config_box.txt file
