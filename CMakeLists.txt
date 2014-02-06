@@ -1,5 +1,5 @@
 # The name of our project
-project(mash) 
+project(smash) 
 
 # Minimum cmake version this is tested on
 cmake_minimum_required(VERSION 2.8)
