@@ -15,8 +15,24 @@ set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 # The current version number
 set(VERSION_MAJOR 20140124)
 
+# Set the default for CMAKE_BUILD_TYPE to Release, otherwise we get something
+# which is none of the options.
+if(NOT CMAKE_BUILD_TYPE)
+   # Change RelWithDebInfo below to Release for SMASH releases
+   set(CMAKE_BUILD_TYPE RelWithDebInfo CACHE STRING
+      "Choose the type of build, options are: None(CMAKE_CXX_FLAGS or CMAKE_C_FLAGS used) Debug Release RelWithDebInfo MinSizeRel."
+      FORCE)
+endif(NOT CMAKE_BUILD_TYPE)
+
+# RelWithDebInfo normally uses "-O2 -g -DNDEBUG" but we want -O3 and keep
+# assertions enabled.
+set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O3 -g" CACHE
+   STRING "Flags used by the compiler during Release with Debug Info builds." FORCE)
+set(CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}" CACHE
+   STRING "Flags used by the compiler during Release with Debug Info builds." FORCE)
+
 # Set the relevant generic g++ flags (optimisation + warnings)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -march=native")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W -Wall -Wextra -Wmissing-declarations -Wpointer-arith -Wshadow -Wuninitialized -Winit-self -Winline -Wfloat-equal -Wundef -Wcast-align -Wformat=2 -std=c++11")
 
 # use C++ 11 standard
