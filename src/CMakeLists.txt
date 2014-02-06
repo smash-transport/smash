@@ -1,12 +1,18 @@
 include(CheckLibraryExists)
 
-# find GSL
-find_path(GSL_INCLUDES gsl/gsl_sf_bessel.h)
-find_library(GSL_LIBRARY gsl)
-find_library(GSL_CBLAS_LIBRARY gslcblas)
+find_package(GSL REQUIRED)
 
 # set up include paths
 include_directories("${CMAKE_CURRENT_BINARY_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}" "${GSL_INCLUDES}")
+
+# set default libraries for linking
+set(SMASH_LIBRARIES ${GSL_LIBRARY} ${GSL_CBLAS_LIBRARY})
+
+# if clock_gettime is in rt link against it
+CHECK_LIBRARY_EXISTS(rt clock_gettime "time.h" HAVE_CLOCK_GETTIME)
+if(HAVE_CLOCK_GETTIME)
+   list(APPEND SMASH_LIBRARIES rt)
+endif()
 
 # list the source files
 set(smash_src boxmodus.cc clebschgordan.cc collisions.cc collidermodus.cc
@@ -31,13 +37,7 @@ file(COPY config_general.txt DESTINATION ..)
 file(COPY particles.txt DESTINATION ..)
 file(COPY decaymodes.txt DESTINATION ..)
 
-# link with gsl and maybe rt
-CHECK_LIBRARY_EXISTS(rt clock_gettime "time.h" HAVE_CLOCK_GETTIME)
-if(HAVE_CLOCK_GETTIME)
-  target_link_libraries(smash ${GSL_LIBRARY} ${GSL_CBLAS_LIBRARY} rt)
-else(HAVE_CLOCK_GETTIME)
-  target_link_libraries(smash ${GSL_LIBRARY} ${GSL_CBLAS_LIBRARY})
-endif(HAVE_CLOCK_GETTIME)
+target_link_libraries(smash ${SMASH_LIBRARIES})
 
 # tests:
 if(BUILD_TESTING)
