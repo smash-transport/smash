@@ -72,7 +72,9 @@ void BoxModus::initial_conditions(Particles *particles,
   /* loop over all the particle types */
   for (auto i = particles->types_cbegin(); i != particles->types_cend(); ++i) {
     /* Particles with width > 0 (resonances) do not exist in the beginning */
-    if (i->second.width() > 0.0) continue;
+    if (i->second.width() > 0.0) {
+      continue;
+    }
     printd("%s mass: %g [GeV]\n", i->second.name().c_str(), i->second.mass());
     /* bose einstein distribution function */
     double number_density =
@@ -81,8 +83,7 @@ void BoxModus::initial_conditions(Particles *particles,
     number = this->length_ * this->length_ * this->length_ * number_density *
              parameters.testparticles;
     if (this->length_ * this->length_ * this->length_ * number_density -
-            number >
-        drand48())
+            number > drand48())
       number++;
     printf("IC number density %.6g [fm^-3]\n", number_density);
     printf("IC %zu number of %s\n", number, i->second.name().c_str());
@@ -245,14 +246,18 @@ void BoxModus::check_collision_geometry(
             shift.set_x3(0);
           }
           /* empty grid cell */
-          if (grid[sx][sy][sz].empty()) continue;
+          if (grid[sx][sy][sz].empty()) {
+            continue;
+          }
           /* grid cell particle list */
           for (auto id_other = grid[sx][sy][sz].begin();
                id_other != grid[sx][sy][sz].end(); ++id_other) {
             /* only check against particles above current id
              * to avoid double counting
              */
-            if (*id_other <= i->first) continue;
+            if (*id_other <= i->first) {
+              continue;
+            }
             printd("grid cell particle %i <-> %i\n", i->first, *id_other);
             if (shift == 0) {
               collision_criteria_geometry(
@@ -315,12 +320,24 @@ FourVector BoxModus::boundary_condition(FourVector position,
     goto out;
   *boundary_hit = true;
   /* Enforce periodic boundary condition */
-  if (position.x1() < 0) position.set_x1(position.x1() + length_);
-  if (position.x2() < 0) position.set_x2(position.x2() + length_);
-  if (position.x3() < 0) position.set_x3(position.x3() + length_);
-  if (position.x1() > length_) position.set_x1(position.x1() - length_);
-  if (position.x2() > length_) position.set_x2(position.x2() - length_);
-  if (position.x3() > length_) position.set_x3(position.x3() - length_);
+  if (position.x1() < 0) {
+    position.set_x1(position.x1() + length_);
+  }
+  if (position.x2() < 0) {
+    position.set_x2(position.x2() + length_);
+  }
+  if (position.x3() < 0) {
+    position.set_x3(position.x3() + length_);
+  }
+  if (position.x1() > length_) {
+    position.set_x1(position.x1() - length_);
+  }
+  if (position.x2() > length_) {
+    position.set_x2(position.x2() - length_);
+  }
+  if (position.x3() > length_) {
+    position.set_x3(position.x3() - length_);
+  }
 out:
   return position;
 }
