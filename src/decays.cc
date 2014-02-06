@@ -10,20 +10,21 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cmath>
-#include <cstring>
 #include <list>
 #include <map>
+#include <string>
+#include <utility>
+#include <vector>
 
 #include "include/decays.h"
 
 #include "include/Angles.h"
-#include "include/ModusDefault.h"
-#include "include/ParticleData.h"
-#include "include/ParticleType.h"
-#include "include/Particles.h"
 #include "include/constants.h"
 #include "include/FourVector.h"
 #include "include/outputroutines.h"
+#include "include/ParticleData.h"
+#include "include/Particles.h"
+#include "include/ParticleType.h"
 #include "include/resonances.h"
 
 /* check_decays - does a resonance decay on this timestep? */

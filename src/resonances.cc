@@ -8,12 +8,15 @@
  */
 #include "include/resonances.h"
 
-#include <gsl/gsl_integration.h>
-#include <gsl/gsl_sf_coupling.h>
+#include <algorithm>
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
+#include <gsl/gsl_integration.h>
+#include <gsl/gsl_math.h>
+#include <gsl/gsl_sf_coupling.h>
 #include <map>
+#include <utility>
 #include <vector>
 
 #include "include/constants.h"

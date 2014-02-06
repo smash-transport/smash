@@ -7,7 +7,7 @@
 #ifndef SRC_INCLUDE_COLLISIONDATA_H_
 #define SRC_INCLUDE_COLLISIONDATA_H_
 
-#include <math.h>
+#include <cmath>
 #include <vector>
 
 #include "include/FourVector.h"

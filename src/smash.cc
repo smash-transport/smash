@@ -8,13 +8,10 @@
  */
 
 #include <getopt.h>
-#include <cmath>
 #include <cstdio>
 #include <cstdlib>
-#include <cstring>
 #include <list>
-#include <map>
-#include <vector>
+#include <string>
 
 #include "include/Experiment.h"
 #include "include/Parameters.h"

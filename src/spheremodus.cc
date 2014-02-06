@@ -7,32 +7,23 @@
  *
  */
 
-#include <getopt.h>
 #include <cmath>
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <ctime>
-#include <list>
-#include <map>
-#include <utility>
-#include <vector>
 
 #include "include/Box.h"
-#include "include/CrossSections.h"
-#include "include/FourVector.h"
-#include "include/Particles.h"
-#include "include/ParticleData.h"
 #include "include/collisions.h"
 #include "include/constants.h"
+#include "include/CrossSections.h"
 #include "include/decays.h"
+#include "include/FourVector.h"
+#include "include/initial-conditions.h"
 #include "include/input-decaymodes.h"
 #include "include/input-particles.h"
-#include "include/initial-conditions.h"
-#include "include/macros.h"
-#include "include/param-reader.h"
 #include "include/Laboratory.h"
+#include "include/macros.h"
 #include "include/outputroutines.h"
+#include "include/param-reader.h"
+#include "include/ParticleData.h"
+#include "include/Particles.h"
 #include "include/propagation.h"
 #include "include/Sphere.h"
 

@@ -4,21 +4,25 @@
  *
  *    GNU General Public License (GPLv3 or later)
  */
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <list>
+#include <map>
+#include <utility>
+#include <vector>
 
+#include "include/Angles.h"
 #include "include/BoxModus.h"
-#include "include/CrossSections.h"
-#include "include/ExperimentParameters.h"
-#include "include/Particles.h"
-#include "include/constants.h"
 #include "include/collisions.h"
-#include "include/decays.h"
+#include "include/constants.h"
+#include "include/CrossSections.h"
 #include "include/distributions.h"
-#include "include/input-decaymodes.h"
-#include "include/input-particles.h"
+#include "include/ExperimentParameters.h"
 #include "include/macros.h"
 #include "include/outputroutines.h"
-#include "include/param-reader.h"
-#include "include/Angles.h"
+#include "include/Parameters.h"
+#include "include/Particles.h"
 
 void BoxModus::assign_params(std::list<Parameters> *configuration) {
   bool match = false;
