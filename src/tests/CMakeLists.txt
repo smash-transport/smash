@@ -50,32 +50,31 @@ smash_add_test(mash_help smash smash -h)
 smash_add_test(mash_run smash smash)
 
 # verify that the binary can run a box calculation
-set(CTEST_SMASH_OPTIONS -m Box)
-smash_add_test(box_run smash smash ${CTEST_SMASH_OPTIONS})
+smash_add_test(box_run smash smash -m Box)
+
 # verify that the binary can do Collider
-set(CTEST_SMASH_OPTIONS -m Collider)
-smash_add_test(collider_run smash smash ${CTEST_SMASH_OPTIONS})
+smash_add_test(collider_run smash smash -m Collider)
+
 # verify that the binary can do sphere
-#set(CTEST_SMASH_OPTIONS -m Sphere)
-#smash_add_test(sphere_run smash smash ${CTEST_MASH_OPTIONS})
+#smash_add_test(sphere_run smash smash -m Sphere)
 
 # verify that binary runs certain number of steps
-set(CTEST_SMASH_OPTIONS -s 500 -m Box)
-smash_add_test(box_steps smash smash ${CTEST_SMASH_OPTIONS})
-set(CTEST_SMASH_OPTIONS -s 500 -m Collider)
-smash_add_test(collider_steps smash smash ${CTEST_SMASH_OPTIONS})
-#set(CTEST_MASH_COMMAND_OPTIONS -S 500 -m Sphere)
-#smash_add_test(sphere_steps smash smash ${CTEST_MASH_COMMAND_OPTIONS})
+smash_add_test(box_steps smash smash -s 500 -m Box)
+smash_add_test(collider_steps smash smash -s 500 -m Collider)
+#smash_add_test(sphere_steps smash smash -s 500 -m Sphere)
 
 # verify that default run has no mem leaks
 set(CTEST_MEMORYCHECK_COMMAND valgrind )
 set(CTEST_MEMORYCHECK_COMMAND_OPTIONS "-v")
-set(CTEST_SMASH_OPTIONS -s 500 -m Box)
-smash_add_test(memcheck_box smash ${CTEST_MEMORYCHECK_COMMAND} ${CTEST_MEMORYCHECK_COMMAND_OPTIONS} ${PROJECT_BINARY_DIR}/smash ${CTEST_SMASH_OPTIONS})
-set(CTEST_SMASH_OPTIONS -s 500 -m Collider)
-smash_add_test(memcheck_collider smash ${CTEST_MEMORYCHECK_COMMAND} ${CTEST_MEMORYCHECK_COMMAND_OPTIONS} ${PROJECT_BINARY_DIR}/smash ${CTEST_SMASH_OPTIONS})
-#set(CTEST_SMASH_OPTIONS -S 500 -m Sphere)
-#smash_add_test(memcheck_sphere smash ${CTEST_MEMORYCHECK_COMMAND} ${CTEST_MEMORYCHECK_COMMAND_OPTIONS} ${PROJECT_BINARY_DIR}/smash ${CTEST_SMASH_OPTIONS})
+smash_add_test(memcheck_box smash ${CTEST_MEMORYCHECK_COMMAND}
+   ${CTEST_MEMORYCHECK_COMMAND_OPTIONS}
+   ${PROJECT_BINARY_DIR}/smash -s 500 -m Box)
+smash_add_test(memcheck_collider smash ${CTEST_MEMORYCHECK_COMMAND}
+   ${CTEST_MEMORYCHECK_COMMAND_OPTIONS}
+   ${PROJECT_BINARY_DIR}/smash -s 500 -m Collider)
+#smash_add_test(memcheck_sphere smash ${CTEST_MEMORYCHECK_COMMAND}
+#   ${CTEST_MEMORYCHECK_COMMAND_OPTIONS}
+#   ${PROJECT_BINARY_DIR}/smash -s 500 -m Sphere)
 
 if(HAVE_ADDRESS_SANITIZER)
    smash_add_test(asan_box      smash_asan smash_asan -s 500 -m Box)
