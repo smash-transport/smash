@@ -17,7 +17,7 @@
 #include "include/Parameters.h"
 
 class BoxModus;
-class ExperimentParameters;
+struct ExperimentParameters;
 
 class BoxModus : public ModusDefault {
  public:
