@@ -31,6 +31,8 @@ SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR})
 
 # enable standard CTest
 # tests are enabled/disabled with the BUILD_TESTING switch to cmake
+# uncomment the next line to default BUILD_TESTING to OFF
+#option(BUILD_TESTING "Build the testing tree." OFF)
 include(CTest)
 
 # tests are run with make test/ctest. Leave the check target in for a little while to tell where it went.
