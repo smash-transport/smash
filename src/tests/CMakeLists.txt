@@ -66,6 +66,7 @@ smash_add_test(collider_steps smash smash -s 500 -m Collider)
 # verify that default run has no mem leaks
 find_program(CTEST_MEMORYCHECK_COMMAND valgrind)
 if(CTEST_MEMORYCHECK_COMMAND)
+   message(STATUS "valgrind found at ${CTEST_MEMORYCHECK_COMMAND}")
    set(CTEST_MEMORYCHECK_COMMAND_OPTIONS "-v")
    smash_add_test(memcheck_box smash ${CTEST_MEMORYCHECK_COMMAND}
       ${CTEST_MEMORYCHECK_COMMAND_OPTIONS}
@@ -76,6 +77,8 @@ if(CTEST_MEMORYCHECK_COMMAND)
 #  smash_add_test(memcheck_sphere smash ${CTEST_MEMORYCHECK_COMMAND}
 #     ${CTEST_MEMORYCHECK_COMMAND_OPTIONS}
 #     ${PROJECT_BINARY_DIR}/smash -s 500 -m Sphere)
+else()
+   message(STATUS "valgrind not found. Memcheck tests are disabled!")
 endif()
 
 if(HAVE_ADDRESS_SANITIZER)
