@@ -1,4 +1,5 @@
 include(CheckLibraryExists)
+include(AddCompilerFlag)
 
 find_package(GSL REQUIRED)
 
@@ -41,5 +42,22 @@ target_link_libraries(smash ${SMASH_LIBRARIES})
 
 # tests:
 if(BUILD_TESTING)
+   set(ASAN_FLAG -fsanitize=address)
+   set(_tmp "${CMAKE_REQUIRED_FLAGS}")
+   set(CMAKE_REQUIRED_FLAGS ${ASAN_FLAG}) # AddCompilerFlag only adds the
+                                                # flag for compilation - it's
+                                                # also required with the link
+                                                # command, though
+   AddCompilerFlag(${ASAN_FLAG} CXX_RESULT HAVE_ADDRESS_SANITIZER)
+   set(CMAKE_REQUIRED_FLAGS "${_tmp}")
+   if(HAVE_ADDRESS_SANITIZER)
+      add_executable(smash_asan smash.cc ${smash_src})
+      set_target_properties(smash_asan PROPERTIES
+         COMPILE_FLAGS ${ASAN_FLAG}
+         LINK_FLAGS ${ASAN_FLAG}
+         )
+      target_link_libraries(smash_asan ${SMASH_LIBRARIES})
+   endif()
+
    add_subdirectory(tests)
 endif()
