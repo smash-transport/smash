@@ -9,7 +9,7 @@
 
 #include <list>
 
-#include "../include/Parameters.h"
+#include "include/Parameters.h"
 
 extern const char *sep;
 

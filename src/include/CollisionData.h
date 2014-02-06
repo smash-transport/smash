@@ -10,7 +10,7 @@
 #include <math.h>
 #include <vector>
 
-#include "../include/FourVector.h"
+#include "include/FourVector.h"
 
 class CollisionData {
  public:

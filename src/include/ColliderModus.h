@@ -12,10 +12,10 @@
 #include <list>
 #include <string>
 
-#include "../include/CrossSections.h"
-#include "../include/ModusDefault.h"
-#include "../include/Particles.h"
-#include "../include/Parameters.h"
+#include "include/CrossSections.h"
+#include "include/ModusDefault.h"
+#include "include/Particles.h"
+#include "include/Parameters.h"
 
 class ExperimentParameters;
 

@@ -12,7 +12,7 @@
 #include <stdint.h>
 #include <list>
 
-#include "../include/Particles.h"
+#include "include/Particles.h"
 
 /* forward declarations */
 class Particles;

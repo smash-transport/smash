@@ -10,8 +10,8 @@
 #include <cstdio>
 #include <vector>
 
-#include "../include/constants.h"
-#include "../include/ProcessBranch.h"
+#include "include/constants.h"
+#include "include/ProcessBranch.h"
 
 class DecayModes {
  public:

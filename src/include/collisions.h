@@ -9,8 +9,8 @@
 
 #include <list>
 
-#include "../include/CrossSections.h"
-#include "../include/Particles.h"
+#include "include/CrossSections.h"
+#include "include/Particles.h"
 
 class ModusDefault;
 
