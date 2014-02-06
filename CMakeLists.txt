@@ -1,5 +1,5 @@
 # The name of our project
-project(mash)
+project(smash)
 
 # Fail if cmake is called in the source directory
 if(CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
