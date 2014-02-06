@@ -14,6 +14,8 @@ target_link_libraries(particles ${SMASH_LIBRARIES})
 
 
 # tests:
+
+# Helper macro that adds a run_<name> target
 macro(smash_add_test name depends)
    add_test(NAME ${name} COMMAND ${ARGN})
    add_custom_target(run_${name}
