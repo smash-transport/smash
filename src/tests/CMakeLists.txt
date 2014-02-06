@@ -64,17 +64,19 @@ smash_add_test(collider_steps smash smash -s 500 -m Collider)
 #smash_add_test(sphere_steps smash smash -s 500 -m Sphere)
 
 # verify that default run has no mem leaks
-set(CTEST_MEMORYCHECK_COMMAND valgrind )
-set(CTEST_MEMORYCHECK_COMMAND_OPTIONS "-v")
-smash_add_test(memcheck_box smash ${CTEST_MEMORYCHECK_COMMAND}
-   ${CTEST_MEMORYCHECK_COMMAND_OPTIONS}
-   ${PROJECT_BINARY_DIR}/smash -s 500 -m Box)
-smash_add_test(memcheck_collider smash ${CTEST_MEMORYCHECK_COMMAND}
-   ${CTEST_MEMORYCHECK_COMMAND_OPTIONS}
-   ${PROJECT_BINARY_DIR}/smash -s 500 -m Collider)
-#smash_add_test(memcheck_sphere smash ${CTEST_MEMORYCHECK_COMMAND}
-#   ${CTEST_MEMORYCHECK_COMMAND_OPTIONS}
-#   ${PROJECT_BINARY_DIR}/smash -s 500 -m Sphere)
+find_program(CTEST_MEMORYCHECK_COMMAND valgrind)
+if(CTEST_MEMORYCHECK_COMMAND)
+   set(CTEST_MEMORYCHECK_COMMAND_OPTIONS "-v")
+   smash_add_test(memcheck_box smash ${CTEST_MEMORYCHECK_COMMAND}
+      ${CTEST_MEMORYCHECK_COMMAND_OPTIONS}
+      ${PROJECT_BINARY_DIR}/smash -s 500 -m Box)
+   smash_add_test(memcheck_collider smash ${CTEST_MEMORYCHECK_COMMAND}
+      ${CTEST_MEMORYCHECK_COMMAND_OPTIONS}
+      ${PROJECT_BINARY_DIR}/smash -s 500 -m Collider)
+#  smash_add_test(memcheck_sphere smash ${CTEST_MEMORYCHECK_COMMAND}
+#     ${CTEST_MEMORYCHECK_COMMAND_OPTIONS}
+#     ${PROJECT_BINARY_DIR}/smash -s 500 -m Sphere)
+endif()
 
 if(HAVE_ADDRESS_SANITIZER)
    smash_add_test(asan_box      smash_asan smash_asan -s 500 -m Box)
