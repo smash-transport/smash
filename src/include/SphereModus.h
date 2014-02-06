@@ -15,11 +15,11 @@ class FourVector;
 #include <cmath>
 #include <list>
 
-#include "../include/CrossSections.h"
-#include "../include/ModusDefault.h"
-#include "../include/Particles.h"
-#include "../include/time.h"
-#include "../include/Parameters.h"
+#include "include/CrossSections.h"
+#include "include/ModusDefault.h"
+#include "include/Particles.h"
+#include "include/time.h"
+#include "include/Parameters.h"
 
 class SphereModus : public ModusDefault {
  public:

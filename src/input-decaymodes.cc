@@ -6,7 +6,6 @@
  *    GNU General Public License (GPLv3 or later)
  *
  */
-#include <cmath>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>

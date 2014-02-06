@@ -12,12 +12,12 @@
 #include <stdint.h>
 #include <list>
 
-#include "../include/Particles.h"
+#include "include/Particles.h"
 
 /* forward declarations */
 class Particles;
 class CrossSections;
-class ExperimentParameters;
+struct ExperimentParameters;
 
 /*
  * This is only a base class for actual Modus classes. The class will never be

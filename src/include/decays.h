@@ -12,7 +12,7 @@
 #include <map>
 #include <vector>
 
-#include "../include/Particles.h"
+#include "include/Particles.h"
 
 class ModusDefault;
 

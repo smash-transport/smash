@@ -8,23 +8,20 @@
  */
 #include "include/collisions.h"
 
+#include <cmath>
 #include <cstdio>
 #include <cstdlib>
-#include <cmath>
 #include <list>
-#include <map>
-#include <utility>
 #include <vector>
 
 #include "include/CollisionData.h"
-#include "include/FourVector.h"
-#include "include/ModusDefault.h"
-#include "include/Particles.h"
-#include "include/ParticleData.h"
-#include "include/ProcessBranch.h"
 #include "include/constants.h"
+#include "include/CrossSections.h"
+#include "include/FourVector.h"
 #include "include/macros.h"
 #include "include/outputroutines.h"
+#include "include/Particles.h"
+#include "include/ProcessBranch.h"
 #include "include/resonances.h"
 
 /* collision_criteria_geometry - check by geometrical method if a collision

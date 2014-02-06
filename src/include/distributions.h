@@ -10,7 +10,7 @@
 #include <gsl/gsl_sf_bessel.h>
 #include <cmath>
 
-#include "../include/constants.h"
+#include "include/constants.h"
 
 /* Breit-Wigner distribution for calculating resonance
  * production probability

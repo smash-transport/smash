@@ -8,15 +8,14 @@
  */
 #include <cmath>
 #include <cstdio>
-#include <cstdlib>
 
-#include "include/CrossSections.h"
 #include "include/constants.h"
+#include "include/CrossSections.h"
 #include "include/FourVector.h"
 #include "include/outputroutines.h"
 #include "include/parametrizations.h"
-#include "include/Particles.h"
 #include "include/ParticleData.h"
+#include "include/Particles.h"
 #include "include/ParticleType.h"
 
 void CrossSections::compute_kinematics(Particles *particles,

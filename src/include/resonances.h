@@ -7,7 +7,7 @@
 #ifndef SRC_INCLUDE_RESONANCES_H_
 #define SRC_INCLUDE_RESONANCES_H_
 
-#include <cstdio>
+#include <cstddef>
 #include <vector>
 
 /* necessary forward declarations */
