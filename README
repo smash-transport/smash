@@ -1,5 +1,4 @@
 This is the repository for the development of a new transport approach
-for the dynamical description of heavy ion reactions. 
+for the dynamical description of heavy ion reactions: SMASH.
 
-mash is the box implementation of pion gas at various temperatures.
 See INSTALL on how to compile it and DEBUG for development hints.

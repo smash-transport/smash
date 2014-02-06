@@ -1,5 +1,6 @@
-Quick instructions how to build mash.
-mash is known to compile and work on gcc > 4.6 and clang > 3.0.
+Quick instructions how to build smash.
+SMASH is known to compile and work on gcc >= 4.8 and clang >= 3.2,
+as it uses c++11 features. It also needs the GNU Scientific Library.
 
 Build it in a seperate directory:
   mkdir build
@@ -8,8 +9,8 @@ Build it in a seperate directory:
   make
 
 Run it with specific settings:
-  vi params.txt
-  ./mash
+  vi config_general.txt
+  ./smash
 
 Run and compile the various tests:
   make check
