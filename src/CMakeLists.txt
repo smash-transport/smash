@@ -6,7 +6,7 @@ find_library(GSL_LIBRARY gsl)
 find_library(GSL_CBLAS_LIBRARY gslcblas)
 
 # set up include paths
-include_directories("${GSL_INCLUDES}")
+include_directories("${CMAKE_CURRENT_BINARY_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}" "${GSL_INCLUDES}")
 
 # list the source files
 set(smash_src boxmodus.cc clebschgordan.cc collisions.cc collidermodus.cc
@@ -26,7 +26,6 @@ configure_file (
   "${PROJECT_SOURCE_DIR}/src/include/Config.h.in"
   "${PROJECT_BINARY_DIR}/src/include/Config.h"
 )
-include_directories("${PROJECT_BINARY_DIR}/src")
 
 # directly copy config files to build directory
 file(COPY config_general.txt DESTINATION ..)
