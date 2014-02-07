@@ -18,6 +18,13 @@
 #include "include/parameters.h"
 #include "include/particles.h"
 
+/**
+ * Non-template interface to Experiment<Modus>.
+ *
+ * This class allows to call into the public interface of Experiment<Modus>
+ * without the need to know the specific `Modus`. The interface is meant for
+ * `main()` to set up the experiment and then run takes over.
+ */
 class ExperimentBase {
  public:
   ExperimentBase() = default;
@@ -35,6 +42,30 @@ class ExperimentBase {
   virtual void run(std::string path) = 0;
 };
 
+/**
+ * The main class, where the simulation of an experiment is executed.
+ *
+ * The Experiment class is owns all data (maybe indirectly) relevant for the
+ * execution of the experiment simulation. The experiment can be conducted in
+ * different running modi. Since the abstraction of these differences should not
+ * incur any overhead, the design is built around the Policy pattern.
+ *
+ * The Policy pattern was defined by Andrei Alexandrescu in his book "Modern C++
+ * Design: Generic Programming and Design Patterns Applied". Addison-Wesley:
+ * > A policy defines a class interface or a class template interface.
+ * > The interface consists of one or all of the following: inner type
+ * > definitions, member functions, and member variables.
+ * The policy pattern can also be understood as a compile-time variant of the
+ * strategy pattern.
+ *
+ * The \p Modus template parameter defines the "policy" of the Experiment class.
+ * It determines several aspects of the experiment execution *at compile time*.
+ * The original strategy pattern would select these differences *at run time*,
+ * thus incurring an overhead. This overhead becomes severe in cases where calls
+ * to strategy/policy functions are done very frequently. Using the policy
+ * pattern, the compiler can fully optimize: It creates a new instance of all
+ * functions in Experiment for all different Modus types.
+ */
 template <typename Modus>
 class Experiment : public ExperimentBase {
  public:
