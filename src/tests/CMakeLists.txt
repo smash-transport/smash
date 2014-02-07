@@ -27,8 +27,14 @@ macro(smash_add_test name depends)
 endmacro()
 
 # test source code to be clean, requires cpplint in the path
-file(GLOB source "../*.cc" "../include/*.h" "*.cc")
-add_test(cclint cpplint.py ${source})
+find_program(CPPLINT cpplint.py)
+if(CPPLINT)
+   message(STATUS "cpplint.py found at ${CPPLINT}")
+   file(GLOB source "../*.cc" "../include/*.h" "*.cc")
+   add_test(cclint ${CPPLINT} ${source})
+else()
+   message(WARNING "cpplint.py was not found. The cclint test will be disabled.\nDownload from: http://google-styleguide.googlecode.com/svn/trunk/cpplint/cpplint.py")
+endif()
 
 # some fourvector operations tests
 smash_add_test(fourvector fourvector fourvector)
