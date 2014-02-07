@@ -34,9 +34,19 @@ configure_file (
 )
 
 # directly copy config files to build directory
-file(COPY config_general.txt DESTINATION ..)
-file(COPY particles.txt DESTINATION ..)
-file(COPY decaymodes.txt DESTINATION ..)
+macro(copy_at_make)
+   foreach(filename ${ARGN})
+      add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/${filename}
+         COMMAND ${CMAKE_COMMAND} -E copy
+         ${CMAKE_CURRENT_SOURCE_DIR}/${filename}
+         ${PROJECT_BINARY_DIR}/${filename}
+         DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${filename}
+         COMMENT "Copy ${filename} to ${PROJECT_BINARY_DIR}"
+         VERBATIM)
+      add_custom_target(copy_${filename} ALL DEPENDS ${PROJECT_BINARY_DIR}/${filename})
+   endforeach()
+endmacro()
+copy_at_make(config_general.txt particles.txt decaymodes.txt)
 
 target_link_libraries(smash ${SMASH_LIBRARIES})
 
