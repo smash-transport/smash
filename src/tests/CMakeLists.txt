@@ -1,30 +1,90 @@
-add_executable(fourvector EXCLUDE_FROM_ALL fourvector.cc)
-add_executable(particles EXCLUDE_FROM_ALL particles.cc ../particles.cc ../fourvector.cc)
-add_dependencies(check fourvector particles)
+# test sources
+add_executable(fourvector fourvector.cc)
+add_executable(lorentzboost lorentzboost.cc ../fourvector.cc)
+add_executable(angles angles.cc)
+add_executable(angles_distribution angles_distribution.cc)
+add_executable(particles particles.cc ../particles.cc ../fourvector.cc ../distributions.cc ../outputroutines.cc ../time.cc)
+add_executable(clebschgordan clebschgordan.cc ../clebschgordan.cc)
+
+file(COPY ../config_general.txt DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY ../particles.txt DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY ../decaymodes.txt DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
+target_link_libraries(particles ${SMASH_LIBRARIES})
+
 
 # tests:
+
+# Helper macro that adds a run_<name> target
+macro(smash_add_test name depends)
+   add_test(NAME ${name} COMMAND ${ARGN})
+   add_custom_target(run_${name}
+      COMMAND ${ARGN}
+      DEPENDS ${depends}
+      COMMENT "Executing test ${name}"
+      VERBATIM
+      )
+endmacro()
 
 # test source code to be clean, requires cpplint in the path
 file(GLOB source "../*.cc" "../include/*.h" "*.cc")
 add_test(cclint cpplint.py ${source})
 
 # some fourvector operations tests
-add_test(fourvector ${PROJECT_BINARY_DIR}/fourvector)
+smash_add_test(fourvector fourvector fourvector)
+
+# Lorentz boost tests
+smash_add_test(lorentzboost lorentzboost lorentzboost)
+
+# some angle operations tests
+smash_add_test(angles angles angles)
 
 # some particles operations tests
-add_test(particles ${PROJECT_BINARY_DIR}/particles)
+smash_add_test(particles particles particles)
+
+# clebsch-gordan coefficient tests
+smash_add_test(clebschgordan clebschgordan clebschgordan)
 
 # verify that the binary has a cli help
-add_test(mash_help ${PROJECT_BINARY_DIR}/mash -h)
+smash_add_test(mash_help smash smash -h)
 
 # verify that the binary runs
-add_test(mash_run ${PROJECT_BINARY_DIR}/mash)
+smash_add_test(mash_run smash smash)
+
+# verify that the binary can run a box calculation
+smash_add_test(box_run smash smash -m Box)
+
+# verify that the binary can do Collider
+smash_add_test(collider_run smash smash -m Collider)
+
+# verify that the binary can do sphere
+#smash_add_test(sphere_run smash smash -m Sphere)
 
 # verify that binary runs certain number of steps
-set(CTEST_MASH_COMMAND_OPTIONS "-s 500")
-add_test(mash_steps ${PROJECT_BINARY_DIR}/mash ${CTEST_MASH_COMMAND_OPTIONS})
+smash_add_test(box_steps smash smash -s 500 -m Box)
+smash_add_test(collider_steps smash smash -s 500 -m Collider)
+#smash_add_test(sphere_steps smash smash -s 500 -m Sphere)
 
 # verify that default run has no mem leaks
-set(CTEST_MEMORYCHECK_COMMAND valgrind )
-set(CTEST_MEMORYCHECK_COMMAND_OPTIONS "-v")
-add_test(memcheck ${CTEST_MEMORYCHECK_COMMAND} ${CTEST_MEMORYCHECK_COMMAND_OPTIONS} ${PROJECT_BINARY_DIR}/mash ${CTEST_MASH_COMMAND_OPTIONS})
+find_program(CTEST_MEMORYCHECK_COMMAND valgrind)
+if(CTEST_MEMORYCHECK_COMMAND)
+   message(STATUS "valgrind found at ${CTEST_MEMORYCHECK_COMMAND}")
+   set(CTEST_MEMORYCHECK_COMMAND_OPTIONS "-v")
+   smash_add_test(memcheck_box smash ${CTEST_MEMORYCHECK_COMMAND}
+      ${CTEST_MEMORYCHECK_COMMAND_OPTIONS}
+      ${PROJECT_BINARY_DIR}/smash -s 500 -m Box)
+   smash_add_test(memcheck_collider smash ${CTEST_MEMORYCHECK_COMMAND}
+      ${CTEST_MEMORYCHECK_COMMAND_OPTIONS}
+      ${PROJECT_BINARY_DIR}/smash -s 500 -m Collider)
+#  smash_add_test(memcheck_sphere smash ${CTEST_MEMORYCHECK_COMMAND}
+#     ${CTEST_MEMORYCHECK_COMMAND_OPTIONS}
+#     ${PROJECT_BINARY_DIR}/smash -s 500 -m Sphere)
+else()
+   message(STATUS "valgrind not found. Memcheck tests are disabled!")
+endif()
+
+if(HAVE_ADDRESS_SANITIZER)
+   smash_add_test(asan_box      smash_asan smash_asan -s 500 -m Box)
+   smash_add_test(asan_collider smash_asan smash_asan -s 500 -m Collider)
+   #smash_add_test(asan_sphere   smash_asan smash_asan -s 500 -m Sphere)
+endif()

@@ -1,20 +1,39 @@
 /*
  *    Copyright (c) 2013
- *      maximilian attems <attems@fias.uni-frankfurt.de>
- *      Jussi Auvinen <auvinen@fias.uni-frankfurt.de>
+ *      SMASH Team
  *
- *    GNU General Public License (GPLv3)
+ *    GNU General Public License (GPLv3 or later)
  */
 #ifndef SRC_INCLUDE_DISTRIBUTIONS_H_
 #define SRC_INCLUDE_DISTRIBUTIONS_H_
 
-class Box;
-class ParticleType;
+#include <gsl/gsl_sf_bessel.h>
+#include <cmath>
+
+#include "include/constants.h"
+
+/* Breit-Wigner distribution for calculating resonance
+ * production probability
+ */
+double breit_wigner(double mandelstam_s, float resonance_mass,
+                          float resonance_width);
 
 /* density_integrand - Maxwell-Boltzmann distribution */
-double inline density_integrand(double momentum, double temp, double mass);
+double inline density_integrand(const double &momentum, const double &temp,
+  const double &mass);
 
 /* sample_momenta - return thermal momenta */
-double sample_momenta(Box *box, ParticleType type);
+double sample_momenta(const double &temp, const double &mass);
+
+/* return number density for given mass and temperature */
+inline double number_density_bose(double mass, double temperature) {
+  /*
+   * The particle number depends on distribution function
+   * (assumes Bose-Einstein):
+   * Volume m^2 T BesselK[2, m/T] / (2\pi^2)
+   */
+  return mass * mass * temperature * gsl_sf_bessel_Knu(2, mass / temperature)
+    * 0.5 * M_1_PI * M_1_PI / hbarc / hbarc / hbarc;
+}
 
 #endif  // SRC_INCLUDE_DISTRIBUTIONS_H_

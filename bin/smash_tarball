@@ -1,0 +1,6 @@
+#!/bin/sh
+# do a tarball with current version of HEAD
+set -eu
+version=$(awk '/VERSION_/{print $2}' CMakeLists.txt)
+version="${version%)}"
+git archive --format=tar.gz --prefix=smash-$version/ HEAD > smash-$version.tar.gz

@@ -1,21 +1,22 @@
 /*
  *
  *    Copyright (c) 2013
- *      maximilian attems <attems@fias.uni-frankfurt.de>
- *      Jussi Auvinen <auvinen@fias.uni-frankfurt.de>
+ *      SMASH Team
  *
- *    GNU General Public License (GPLv3)
+ *    GNU General Public License (GPLv3 or later)
  *
  */
-#include "include/particles.h"
-
+#include <cmath>
 #include <cstdio>
 
+#include "include/angles.h"
 #include "include/constants.h"
-#include "include/FourVector.h"
+#include "include/distributions.h"
+#include "include/fourvector.h"
+#include "include/macros.h"
 #include "include/outputroutines.h"
-#include "include/ParticleData.h"
-#include "include/ParticleType.h"
+#include "include/particledata.h"
+#include "include/particles.h"
 
 /* boost_CM - boost to center of momentum */
 void boost_CM(ParticleData *particle1, ParticleData *particle2,
@@ -92,8 +93,9 @@ double particle_distance(ParticleData *particle_orig1,
     momentum_difference.x1(), momentum_difference.x2(),
     momentum_difference.x3());
   /* zero momentum leads to infite distance */
-  if (momentum_difference.x1() == 0 || momentum_difference.x2() == 0
-      || momentum_difference.x3() == 0)
+  if (fabs(momentum_difference.x1()) < really_small
+      && fabs(momentum_difference.x2()) < really_small
+      && fabs(momentum_difference.x3()) < really_small)
     return  - position_difference.DotThree(position_difference);
 
   /* UrQMD squared distance criteria:
@@ -111,7 +113,8 @@ double particle_distance(ParticleData *particle_orig1,
 }
 
 /* time_collision - measure collision time of two particles */
-double collision_time(ParticleData *particle1, ParticleData *particle2) {
+double collision_time(const ParticleData &particle1,
+  const ParticleData &particle2) {
   /* UrQMD collision time
    * arXiv:1203.4418 (5.15): in computational frame
    * position of particle a: x_a
@@ -120,65 +123,105 @@ double collision_time(ParticleData *particle1, ParticleData *particle2) {
    * momentum of particle b: p_b
    * t_{coll} = - (x_a - x_b) . (p_a - p_b) / (p_a - p_b)^2
    */
-  FourVector position_difference = particle1->position()
-    - particle2->position();
+  FourVector position_difference = particle1.position()
+    - particle2.position();
   printd("Particle %d<->%d position difference: %g %g %g %g [fm]\n",
-    particle1->id(), particle2->id(), position_difference.x0(),
+    particle1.id(), particle2.id(), position_difference.x0(),
     position_difference.x1(), position_difference.x2(),
     position_difference.x3());
-  FourVector velocity_difference = particle1->momentum()
-    / particle1->momentum().x0()
-    - particle2->momentum() / particle2->momentum().x0();
+  FourVector velocity_difference = particle1.momentum()
+    / particle1.momentum().x0()
+    - particle2.momentum() / particle2.momentum().x0();
   printd("Particle %d<->%d velocity difference: %g %g %g %g [fm]\n",
-    particle1->id(), particle2->id(), velocity_difference.x0(),
+    particle1.id(), particle2.id(), velocity_difference.x0(),
     velocity_difference.x1(), velocity_difference.x2(),
     velocity_difference.x3());
   /* zero momentum leads to infite distance, particles are not approaching */
-  if (velocity_difference.x1() == 0.0 || velocity_difference.x2() == 0.0
-      || velocity_difference.x3() == 0.0)
+  if (fabs(velocity_difference.x1()) < really_small
+      && fabs(velocity_difference.x2()) < really_small
+      && fabs(velocity_difference.x3()) < really_small)
     return -1.0;
   return - position_difference.DotThree(velocity_difference)
            / velocity_difference.DotThree(velocity_difference);
 }
 
 /* momenta_exchange - soft scattering */
-void momenta_exchange(ParticleData *particle1, ParticleData *particle2,
-  const float &particle1_mass, const float &particle2_mass) {
+void momenta_exchange(ParticleData *particle1, ParticleData *particle2) {
   /* debug output */
-  printd("center of momenta 1: %g %g %g %g \n", particle1->momentum().x0(),
-    particle1->momentum().x1(), particle1->momentum().x2(),
-    particle1->momentum().x3());
-  printd("center of momenta 2: %g %g %g %g \n", particle2->momentum().x0(),
-    particle2->momentum().x1(), particle2->momentum().x2(),
-    particle2->momentum().x3());
+  printd_momenta("center of momenta 1", *particle1);
+  printd_momenta("center of momenta 2", *particle2);
 
   /* center of momentum hence this is equal for both particles */
-  const double momentum_radial = sqrt(particle1->momentum().x0()
-    * particle1->momentum().x0() - particle1_mass * particle1_mass);
-  printd("Particle 1: momentum %g mass %g \n", particle1->momentum().x0(),
-    particle1_mass);
+  const double momentum_radial = sqrt(particle1->momentum().x1()
+    * particle1->momentum().x1() + particle1->momentum().x2() *
+    particle1->momentum().x2() + particle1->momentum().x3() *
+    particle1->momentum().x3());
+
   /* particle exchange momenta and scatter to random direction */
-  const double phi =  2.0 * M_PI * drand48();
-  const double cos_theta = -1.0 + 2.0 * drand48();
-  const double sin_theta = sqrt(1.0 - cos_theta * cos_theta);
-  printd("Random momentum: %g %g %g %g \n", momentum_radial, phi, cos_theta,
-    sin_theta);
-  const FourVector momentum1(sqrt(particle1_mass * particle1_mass
-    + momentum_radial * momentum_radial),
-     momentum_radial * cos(phi) * sin_theta,
-     momentum_radial * sin(phi) * sin_theta, momentum_radial * cos_theta);
+  /* XXX: Angles should be sampled from differential cross section
+   * of this process
+   */
+  Angles phitheta;
+  phitheta.distribute_isotropically();
+  printd("Random momentum: %g %g %g %g \n", momentum_radial, phitheta.phi(),
+        phitheta.costheta(), phitheta.sintheta());
+
+  /* Only direction of 3-momentum, not magnitude, changes in CM frame,
+   * thus particle energies remain the same (Lorentz boost will change them for
+   * computational frame, however)
+   */
+  const FourVector momentum1(particle1->momentum().x0(),
+     momentum_radial * phitheta.x(),
+     momentum_radial * phitheta.y(),
+     momentum_radial * phitheta.z());
   particle1->set_momentum(momentum1);
-  const FourVector momentum2(sqrt(particle2_mass * particle2_mass
-    + momentum_radial * momentum_radial),
-    - momentum_radial * cos(phi) * sin_theta,
-    - momentum_radial * sin(phi) * sin_theta, -momentum_radial * cos_theta);
+  const FourVector momentum2(particle2->momentum().x0(),
+    - momentum_radial * phitheta.x(),
+    - momentum_radial * phitheta.y(),
+    - momentum_radial * phitheta.z());
   particle2->set_momentum(momentum2);
 
   /* debug output */
-  printd("exchanged momenta 1: %g %g %g %g \n", particle1->momentum().x0(),
-    particle1->momentum().x1(), particle1->momentum().x2(),
-    particle1->momentum().x3());
-  printd("exchanged momenta 2: %g %g %g %g \n", particle2->momentum().x0(),
-    particle2->momentum().x1(), particle2->momentum().x2(),
-    particle2->momentum().x3());
+  printd_momenta("exchanged momenta 1", *particle1);
+  printd_momenta("exchanged momenta 2", *particle2);
+}
+
+void sample_cms_momenta(ParticleData *particle1, ParticleData *particle2,
+                        const double cms_energy, const double mass1,
+                        const double mass2) {
+  double energy1 = (cms_energy * cms_energy + mass1 * mass1 - mass2 * mass2) /
+                   (2.0 * cms_energy);
+  double momentum_radial = sqrt(energy1 * energy1 - mass1 * mass1);
+  if (!(momentum_radial > 0.0))
+    printf("Warning: radial momenta %g \n", momentum_radial);
+  /* XXX: Angles should be sampled from differential cross section
+   * of this process
+   */
+  Angles phitheta;
+  phitheta.distribute_isotropically();
+  if (!(energy1 > mass1)) {
+    printf("Particle %d radial momenta %g phi %g cos_theta %g\n",
+           particle1->pdgcode(), momentum_radial, phitheta.phi(),
+           phitheta.costheta());
+    printf("Etot: %g m_a: %g m_b %g E_a: %g\n", cms_energy, mass1, mass2,
+           energy1);
+  }
+  /* We use fourvector to set 4-momentum, as setting it
+   * with doubles requires that particle uses its
+   * pole mass, which is not generally true for resonances
+   */
+  FourVector momentum1(energy1, momentum_radial * phitheta.x(),
+                       momentum_radial * phitheta.y(),
+                       momentum_radial * phitheta.z());
+  particle1->set_momentum(momentum1);
+
+  FourVector momentum2(cms_energy - energy1, -momentum_radial * phitheta.x(),
+                       -momentum_radial * phitheta.y(),
+                       -momentum_radial * phitheta.z());
+  particle2->set_momentum(momentum2);
+
+  printd("p0: %g %g \n", momentum1.x0(), momentum2.x0());
+  printd("p1: %g %g \n", momentum1.x1(), momentum2.x1());
+  printd("p2: %g %g \n", momentum1.x2(), momentum2.x2());
+  printd("p3: %g %g \n", momentum1.x3(), momentum2.x3());
 }

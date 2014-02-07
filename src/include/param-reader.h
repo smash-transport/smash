@@ -1,17 +1,19 @@
 /*
- *    Copyright (c) 2012 maximilian attems <attems@fias.uni-frankfurt.de>
- *    GNU General Public License (GPLv3)
+ *    Copyright (c) 2012
+ *      SMASH Team
+ *
+ *    GNU General Public License (GPLv3 or later)
  */
 #ifndef SRC_INCLUDE_PARAM_READER_H_
 #define SRC_INCLUDE_PARAM_READER_H_
 
-/* forward declaration */
-class Box;
-class Parameters;
+#include <list>
+
+#include "include/parameters.h"
 
 extern const char *sep;
 
 /* read params file parameters */
-void process_params(Box *box, Parameters *parameters, char *paramfile);
+void process_config(std::list<Parameters> *configuration, char *path);
 
 #endif  // SRC_INCLUDE_PARAM_READER_H_

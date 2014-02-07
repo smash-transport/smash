@@ -1,29 +1,25 @@
 /*
  *    Copyright (c) 2013
- *      maximilian attems <attems@fias.uni-frankfurt.de>
- *      Jussi Auvinen <auvinen@fias.uni-frankfurt.de>
+ *      SMASH Team
  *
- *    GNU General Public License (GPLv3)
+ *    GNU General Public License (GPLv3 or later)
  */
 #ifndef SRC_INCLUDE_COLLISIONS_H_
 #define SRC_INCLUDE_COLLISIONS_H_
 
-#include <cstdlib>
 #include <list>
-#include <map>
-#include <vector>
 
-class Parameters;
-class ParticleData;
-class ParticleType;
+#include "include/crosssections.h"
+#include "include/particles.h"
 
 /* populates collision list if collision applies */
-void collision_criteria_geometry(std::vector<ParticleData> *particle,
-  std::list<int> *collision_list, Parameters const &para, int id, int id_other);
+void collision_criteria_geometry(Particles *particles,
+  CrossSections *cross_sections,
+  std::list<int> *collision_list, const float timestep, int id_a,
+  int id_b, size_t *rejection_conflict);
 
 /* does collisions according to collision table */
-size_t collide_particles(std::vector<ParticleData> *particle,
-  std::vector<ParticleType> *type, std::map<int, int> *map_type,
-  std::list<int> *collision_list, size_t id_event);
+size_t collide_particles(Particles *particles, std::list<int> *collision_list,
+                         size_t id_event, int *resonance_formations);
 
 #endif  // SRC_INCLUDE_COLLISIONS_H_
