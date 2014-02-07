@@ -10,9 +10,9 @@
 #include <map>
 #include <utility>
 
-#include "include/DecayModes.h"
-#include "include/ParticleData.h"
-#include "include/ParticleType.h"
+#include "include/decaymodes.h"
+#include "include/particledata.h"
+#include "include/particletype.h"
 
 // A macro to disallow the copy constructor and operator= functions
 // This should be used in the private: declarations for a class

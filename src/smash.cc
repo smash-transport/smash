@@ -13,14 +13,14 @@
 #include <list>
 #include <string>
 
-#include "include/Experiment.h"
-#include "include/Parameters.h"
+#include "include/experiment.h"
+#include "include/parameters.h"
 #include "include/macros.h"
 #include "include/outputroutines.h"
 #include "include/param-reader.h"
 
 /* build dependent variables */
-#include "include/Config.h"
+#include "include/config.h"
 
 char *progname;
 

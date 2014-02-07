@@ -7,7 +7,7 @@
  *
  */
 
-#include "../include/Angles.h"
+#include "include/angles.h"
 
 // tests distributions for the angles.
 

@@ -7,7 +7,7 @@
 
 #include <cmath>
 
-#include "../include/ClebschGordan.h"
+#include "include/clebschgordan.h"
 
 int main() {
   /* spins are two times the actual values,

@@ -29,8 +29,8 @@ add_executable(smash smash.cc ${smash_src})
 # configure a header file to pass some of the CMake settings
 # to the source code
 configure_file (
-  "${CMAKE_CURRENT_SOURCE_DIR}/include/Config.h.in"
-  "${CMAKE_CURRENT_BINARY_DIR}/include/Config.h"
+  "${CMAKE_CURRENT_SOURCE_DIR}/include/config.h.in"
+  "${CMAKE_CURRENT_BINARY_DIR}/include/config.h"
 )
 
 # directly copy config files to build directory

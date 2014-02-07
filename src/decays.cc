@@ -18,13 +18,13 @@
 
 #include "include/decays.h"
 
-#include "include/Angles.h"
+#include "include/angles.h"
 #include "include/constants.h"
-#include "include/FourVector.h"
+#include "include/fourvector.h"
 #include "include/outputroutines.h"
-#include "include/ParticleData.h"
-#include "include/Particles.h"
-#include "include/ParticleType.h"
+#include "include/particledata.h"
+#include "include/particles.h"
+#include "include/particletype.h"
 #include "include/resonances.h"
 
 /* check_decays - does a resonance decay on this timestep? */

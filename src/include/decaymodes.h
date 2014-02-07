@@ -11,7 +11,7 @@
 #include <vector>
 
 #include "include/constants.h"
-#include "include/ProcessBranch.h"
+#include "include/processbranch.h"
 
 class DecayModes {
  public:

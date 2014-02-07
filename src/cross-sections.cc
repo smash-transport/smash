@@ -10,13 +10,13 @@
 #include <cstdio>
 
 #include "include/constants.h"
-#include "include/CrossSections.h"
-#include "include/FourVector.h"
+#include "include/crosssections.h"
+#include "include/fourvector.h"
 #include "include/outputroutines.h"
 #include "include/parametrizations.h"
-#include "include/ParticleData.h"
-#include "include/Particles.h"
-#include "include/ParticleType.h"
+#include "include/particledata.h"
+#include "include/particles.h"
+#include "include/particletype.h"
 
 void CrossSections::compute_kinematics(Particles *particles,
   int id_a, int id_b) {

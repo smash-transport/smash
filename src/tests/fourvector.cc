@@ -4,7 +4,7 @@
  *      Jussi Auvinen <auvinen@fias.uni-frankfurt.de>
  *    GNU General Public License (GPLv3)
  */
-#include "../include/FourVector.h"
+#include "include/fourvector.h"
 
 int main() {
   FourVector a(0.12, 0.06, 0.003, -0.15), b(0.06, 0.03, 0.0015, -0.075);

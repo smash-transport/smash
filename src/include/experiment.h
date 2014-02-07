@@ -11,12 +11,12 @@
 #include <list>
 #include <string>
 
-#include "include/CrossSections.h"
-#include "include/ExperimentParameters.h"
-#include "include/ModusDefault.h"
+#include "include/crosssections.h"
+#include "include/experimentparameters.h"
+#include "include/modusdefault.h"
 #include "include/outputroutines.h"
-#include "include/Parameters.h"
-#include "include/Particles.h"
+#include "include/parameters.h"
+#include "include/particles.h"
 
 class ExperimentBase {
  public:

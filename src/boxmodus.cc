@@ -12,17 +12,17 @@
 #include <utility>
 #include <vector>
 
-#include "include/Angles.h"
-#include "include/BoxModus.h"
+#include "include/angles.h"
+#include "include/boxmodus.h"
 #include "include/collisions.h"
 #include "include/constants.h"
-#include "include/CrossSections.h"
+#include "include/crosssections.h"
 #include "include/distributions.h"
-#include "include/ExperimentParameters.h"
+#include "include/experimentparameters.h"
 #include "include/macros.h"
 #include "include/outputroutines.h"
-#include "include/Parameters.h"
-#include "include/Particles.h"
+#include "include/parameters.h"
+#include "include/particles.h"
 
 void BoxModus::assign_params(std::list<Parameters> *configuration) {
   bool match = false;

@@ -11,10 +11,10 @@
 #include <cmath>
 #include <list>
 
-#include "include/CrossSections.h"
-#include "include/ModusDefault.h"
-#include "include/Particles.h"
-#include "include/Parameters.h"
+#include "include/crosssections.h"
+#include "include/modusdefault.h"
+#include "include/particles.h"
+#include "include/parameters.h"
 
 class BoxModus;
 struct ExperimentParameters;

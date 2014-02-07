@@ -9,10 +9,10 @@
 #include <cinttypes>
 #include <list>
 
-#include "include/ModusDefault.h"
+#include "include/modusdefault.h"
 #include "include/collisions.h"
 #include "include/constants.h"
-#include "include/Experiment.h"
+#include "include/experiment.h"
 #include "include/outputroutines.h"
 
 // check particle pairs for collision

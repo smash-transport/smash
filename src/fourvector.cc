@@ -6,7 +6,7 @@
  */
 #include <cmath>
 
-#include "include/FourVector.h"
+#include "include/fourvector.h"
 
 /* LorentzBoost - This is equivalent to -velocity Boost from ROOT */
 FourVector FourVector::LorentzBoost(const FourVector &velocity) const {
