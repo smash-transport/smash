@@ -8,10 +8,10 @@
 #include <cstdlib>
 #include <list>
 
-#include "include/ColliderModus.h"
-#include "include/ExperimentParameters.h"
+#include "include/collidermodus.h"
+#include "include/experimentparameters.h"
 #include "include/outputroutines.h"
-#include "include/Parameters.h"
+#include "include/parameters.h"
 
 void ColliderModus::assign_params(std::list<Parameters> *configuration) {
   bool match = false;

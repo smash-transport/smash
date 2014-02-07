@@ -10,7 +10,7 @@
 #include <cmath>
 #include <vector>
 
-#include "include/FourVector.h"
+#include "include/fourvector.h"
 
 class CollisionData {
  public:

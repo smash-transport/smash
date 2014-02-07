@@ -14,19 +14,19 @@
 #include <list>
 #include <string>
 
-#include "include/BoxModus.h"
-#include "include/ColliderModus.h"
+#include "include/boxmodus.h"
+#include "include/collidermodus.h"
 #include "include/collisions.h"
 #include "include/decays.h"
-#include "include/Experiment.h"
+#include "include/experiment.h"
 #include "include/input-decaymodes.h"
 #include "include/input-particles.h"
 #include "include/macros.h"
 #include "include/outputroutines.h"
-#include "include/Parameters.h"
+#include "include/parameters.h"
 #include "include/time.h"
 
-/* #include "include/SphereModus.h" */
+/* #include "include/spheremodus.h" */
 
 /* ExperimentBase carries everything that is needed for the evolution */
 std::unique_ptr<ExperimentBase> ExperimentBase::create(
@@ -246,7 +246,7 @@ void Experiment<Modus>::end() {
 
 template <typename Modus>
 void Experiment<Modus>::run(std::string path) {
-  for (int j = 1; j < nevents_; j++) {
+  for (int j = 0; j < nevents_; j++) {
     write_oscar_header();
     initialize(path.c_str());
     /* the time evolution of the relevant subsystem */

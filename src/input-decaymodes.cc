@@ -12,10 +12,10 @@
 #include <vector>
 
 #include "include/constants.h"
-#include "include/DecayModes.h"
+#include "include/decaymodes.h"
 #include "include/input-decaymodes.h"
-#include "include/Particles.h"
-#include "include/ParticleType.h"
+#include "include/particles.h"
+#include "include/particletype.h"
 #include "include/outputroutines.h"
 
 /* XXX: hardcoded length cap */

@@ -7,7 +7,7 @@
  *
  */
 
-#include "../include/Angles.h"
+#include "include/angles.h"
 
 int main() {
   static const double EPS = 1e-7;

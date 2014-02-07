@@ -6,10 +6,10 @@
  */
 #include <cstdio>
 
-#include "../include/Particles.h"
-#include "../include/constants.h"
-#include "../include/ParticleData.h"
-#include "../include/outputroutines.h"
+#include "include/particles.h"
+#include "include/constants.h"
+#include "include/particledata.h"
+#include "include/outputroutines.h"
 
 int main() {
   /* checks for geometric distance criteria */

@@ -11,7 +11,7 @@
 #include <cstring>
 
 #include "include/input-particles.h"
-#include "include/Particles.h"
+#include "include/particles.h"
 #include "include/outputroutines.h"
 
 /* XXX: hardcoded length cap */

@@ -11,7 +11,7 @@
 #include <list>
 
 #include "include/param-reader.h"
-#include "include/Parameters.h"
+#include "include/parameters.h"
 #include "include/outputroutines.h"
 
 /* space separation between items */

@@ -4,7 +4,7 @@
  *
  *    GNU General Public License (GPLv3 or later)
  */
-#include "../include/FourVector.h"
+#include "include/fourvector.h"
 
 int main() {
   FourVector p(4, 1, 2, 3);

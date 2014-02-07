@@ -16,7 +16,7 @@
 #include <cmath>
 #include <cstdlib>
 
-#include "include/ClebschGordan.h"
+#include "include/clebschgordan.h"
 
 ClebschGordan::ClebschGordan() : factorial_log_max(4 * 50 + 2) {
   /* factorial log = log[(N-1)!] */

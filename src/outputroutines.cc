@@ -16,11 +16,11 @@
 #include <string>
 #include <utility>
 
-#include "include/FourVector.h"
-#include "include/Parameters.h"
-#include "include/Particles.h"
-#include "include/ParticleData.h"
-#include "include/ParticleType.h"
+#include "include/fourvector.h"
+#include "include/parameters.h"
+#include "include/particles.h"
+#include "include/particledata.h"
+#include "include/particletype.h"
 #include "include/macros.h"
 #include "include/time.h"
 

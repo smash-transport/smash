@@ -20,15 +20,15 @@
 #include <vector>
 
 #include "include/constants.h"
-#include "include/DecayModes.h"
+#include "include/decaymodes.h"
 #include "include/distributions.h"
-#include "include/FourVector.h"
+#include "include/fourvector.h"
 #include "include/macros.h"
 #include "include/outputroutines.h"
-#include "include/Particles.h"
-#include "include/ParticleData.h"
-#include "include/ParticleType.h"
-#include "include/ProcessBranch.h"
+#include "include/particles.h"
+#include "include/particledata.h"
+#include "include/particletype.h"
+#include "include/processbranch.h"
 
 /* calculate_minimum_mass
  * - calculate the minimum rest energy the resonance must have

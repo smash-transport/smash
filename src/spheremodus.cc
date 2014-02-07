@@ -9,26 +9,26 @@
 
 #include <cmath>
 
-#include "include/Box.h"
+#include "include/box.h"
 #include "include/collisions.h"
 #include "include/constants.h"
-#include "include/CrossSections.h"
+#include "include/crosssections.h"
 #include "include/decays.h"
-#include "include/FourVector.h"
+#include "include/fourvector.h"
 #include "include/initial-conditions.h"
 #include "include/input-decaymodes.h"
 #include "include/input-particles.h"
-#include "include/Laboratory.h"
+#include "include/laboratory.h"
 #include "include/macros.h"
 #include "include/outputroutines.h"
 #include "include/param-reader.h"
-#include "include/ParticleData.h"
-#include "include/Particles.h"
+#include "include/particledata.h"
+#include "include/particles.h"
 #include "include/propagation.h"
-#include "include/Sphere.h"
+#include "include/sphere.h"
 
 /* build dependent variables */
-#include "include/Config.h"
+#include "include/config.h"
 
 void SphereModus::assign_params_specific(std::list<Parameters> *configuration) {
   bool match = false;
