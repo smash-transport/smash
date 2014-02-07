@@ -246,7 +246,7 @@ void Experiment<Modus>::end() {
 
 template <typename Modus>
 void Experiment<Modus>::run(std::string path) {
-  for (int j = 1; j < nevents_; j++) {
+  for (int j = 0; j < nevents_; j++) {
     write_oscar_header();
     initialize(path.c_str());
     /* the time evolution of the relevant subsystem */
