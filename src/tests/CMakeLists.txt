@@ -26,8 +26,14 @@ macro(smash_add_test name depends)
 endmacro()
 
 # test source code to be clean, requires cpplint in the path
-file(GLOB source "../*.cc" "../include/*.h" "*.cc")
-add_test(cclint cpplint.py ${source})
+find_program(CPPLINT cpplint.py)
+if(CPPLINT)
+   message(STATUS "cpplint.py found at ${CPPLINT}")
+   file(GLOB source "../*.cc" "../include/*.h" "*.cc")
+   add_test(cclint ${CPPLINT} ${source})
+else()
+   message(WARNING "cpplint.py was not found. The cclint test will be disabled.\nDownload from: http://google-styleguide.googlecode.com/svn/trunk/cpplint/cpplint.py")
+endif()
 
 # some fourvector operations tests
 smash_add_test(fourvector fourvector fourvector)
@@ -60,9 +66,9 @@ smash_add_test(collider_run smash smash -m Collider)
 #smash_add_test(sphere_run smash smash -m Sphere)
 
 # verify that binary runs certain number of steps
-smash_add_test(box_steps smash smash -s 500 -m Box)
-smash_add_test(collider_steps smash smash -s 500 -m Collider)
-#smash_add_test(sphere_steps smash smash -s 500 -m Sphere)
+smash_add_test(box_steps smash smash -s 20 -m Box)
+smash_add_test(collider_steps smash smash -s 20 -m Collider)
+#smash_add_test(sphere_steps smash smash -s 20 -m Sphere)
 
 # verify that default run has no mem leaks
 find_program(CTEST_MEMORYCHECK_COMMAND valgrind)
@@ -71,13 +77,13 @@ if(CTEST_MEMORYCHECK_COMMAND)
    set(CTEST_MEMORYCHECK_COMMAND_OPTIONS "-v")
    smash_add_test(memcheck_box smash ${CTEST_MEMORYCHECK_COMMAND}
       ${CTEST_MEMORYCHECK_COMMAND_OPTIONS}
-      ${PROJECT_BINARY_DIR}/smash -s 500 -m Box)
+      ${PROJECT_BINARY_DIR}/smash -s 10 -m Box)
    smash_add_test(memcheck_collider smash ${CTEST_MEMORYCHECK_COMMAND}
       ${CTEST_MEMORYCHECK_COMMAND_OPTIONS}
-      ${PROJECT_BINARY_DIR}/smash -s 500 -m Collider)
+      ${PROJECT_BINARY_DIR}/smash -s 50 -m Collider)
 #  smash_add_test(memcheck_sphere smash ${CTEST_MEMORYCHECK_COMMAND}
 #     ${CTEST_MEMORYCHECK_COMMAND_OPTIONS}
-#     ${PROJECT_BINARY_DIR}/smash -s 500 -m Sphere)
+#     ${PROJECT_BINARY_DIR}/smash -s 50 -m Sphere)
 else()
    message(STATUS "valgrind not found. Memcheck tests are disabled!")
 endif()
