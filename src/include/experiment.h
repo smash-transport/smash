@@ -9,6 +9,7 @@
 
 #include <memory>
 #include <list>
+#include <stdexcept>
 #include <string>
 
 #include "include/crosssections.h"
@@ -40,6 +41,10 @@ class ExperimentBase {
                                                 int nevents);
 
   virtual void run(std::string path) = 0;
+
+  struct InvalidModusRequest : public std::invalid_argument {
+    using std::invalid_argument::invalid_argument;
+  };
 };
 
 /**

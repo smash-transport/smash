@@ -114,14 +114,22 @@ int main(int argc, char *argv[]) {
     }
   }
   printf("Modus for this calculation: %s\n", modus_chooser.c_str());
-  auto experiment = ExperimentBase::create(modus_chooser, nevents);
-  experiment->configure(configuration);
-  mkdir_data();
-  /* overriden arguments */
-  if (steps > 0)
-    experiment->commandline_arg(steps);
 
-  experiment->run(path);
+  try {
+    auto experiment = ExperimentBase::create(modus_chooser, nevents);
+    experiment->configure(configuration);
+    mkdir_data();
+    /* overriden arguments */
+    if (steps > 0) {
+      experiment->commandline_arg(steps);
+    }
+
+    experiment->run(path);
+  }
+  catch(std::exception &e) {
+    printf("SMASH failed with the following error:\n%s\n", e.what());
+    rc = EXIT_FAILURE;
+  }
 
   /* tear down */
   free(path);
