@@ -27,7 +27,7 @@ macro(smash_add_test name depends)
 endmacro()
 
 macro(smash_add_unittest name)
-   add_executable(${name} ${name}.cpp)
+   add_executable(${name} ${name}.cc)
    smash_add_test(${name} ${name} ${name})
 endmacro()
 
