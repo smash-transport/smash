@@ -28,6 +28,11 @@ endmacro()
 
 macro(smash_add_unittest name)
    add_executable(${name} ${name}.cc)
+   set_target_properties(${name} PROPERTIES
+      COMPILE_FLAGS ${ASAN_FLAG}
+      LINK_FLAGS ${ASAN_FLAG}
+      )
+   target_link_libraries(${name} smash_lib ${SMASH_LIBRARIES})
    smash_add_test(${name} ${name} ${name})
 endmacro()
 
@@ -47,6 +52,8 @@ if(CPPLINT)
 else()
    message(WARNING "cpplint.py was not found. The cclint test will be disabled.\nDownload from: http://google-styleguide.googlecode.com/svn/trunk/cpplint/cpplint.py")
 endif()
+
+smash_add_unittest(experiment)
 
 # some fourvector operations tests
 smash_add_test(fourvector fourvector fourvector)
