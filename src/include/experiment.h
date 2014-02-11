@@ -29,8 +29,9 @@
 class ExperimentBase {
  public:
   ExperimentBase() = default;
-  /* Virtual base class destructor
-   * to avoid undefined behavior when destroying derived objects
+  /**
+   * The virtual destructor avoids undefined behavior when destroying derived
+   * objects.
    */
   virtual ~ExperimentBase() {}
 
@@ -62,6 +63,10 @@ class ExperimentBase {
 
   virtual void run(std::string path) = 0;
 
+  /**
+   * Exception class that is thrown if an invalid modus is requested from the
+   * Experiment factory.
+   */
   struct InvalidModusRequest : public std::invalid_argument {
     using std::invalid_argument::invalid_argument;
   };
@@ -93,16 +98,26 @@ class ExperimentBase {
  */
 template <typename Modus>
 class Experiment : public ExperimentBase {
- public:
-  explicit Experiment(int nevents)
-      : particles_(nullptr), cross_sections_(nullptr), nevents_(nevents) {}
+  friend class ExperimentBase;
 
+ public:
   virtual void configure(std::list<Parameters> configuration) override;
   virtual void commandline_arg(int steps) override;
 
   virtual void run(std::string path) override;
 
  private:
+  /**
+   * Create a new Experiment.
+   *
+   * This constructor is only called from the ExperimentBase::create factory
+   * method.
+   *
+   * \param nevents XXX
+   */
+  explicit Experiment(int nevents) : nevents_(nevents) {
+  }
+
   void initialize(const char *path);
   void run_time_evolution();
   void end();
@@ -120,11 +135,37 @@ class Experiment : public ExperimentBase {
    * and contains modus-specific function implementations.
    */
   Modus modus_;
-  Particles *particles_;
-  CrossSections *cross_sections_;
 
-  int nevents_;
+  /**
+   * Pointer to the particles interacting in the experiment.
+   *
+   * \todo Why is this a pointer?
+   * \todo If this needs to be a pointer, why not a unique_ptr?
+   */
+  Particles *particles_ = nullptr;
 
+  /**
+   * Pointer to ?
+   *
+   * \todo CrossSections needs a rename?
+   * \todo Why is this a pointer?
+   * \todo If this needs to be a pointer, why not a unique_ptr?
+   */
+  CrossSections *cross_sections_ = nullptr;
+
+  /**
+   * Number of events.
+   *
+   * \todo Explain what event means
+   * \todo What does the number of events imply for the experiment?
+   */
+  int nevents_ = 0;
+
+  /**
+   * Struct of several member variables.
+   * These variables are combined into a struct for efficient input to functions
+   * outside of this class.
+   */
   ExperimentParameters parameters_;
 
   /// number of steps
