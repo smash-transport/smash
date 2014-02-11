@@ -19,16 +19,16 @@
 #ifndef SRC_TESTS_UNITTEST_H_
 #define SRC_TESTS_UNITTEST_H_
 
+#include <cmath>
+#include <cstdlib>
+#include <cstring>
+#include <iomanip>
 #include <iostream>
 #include <sstream>
 #include <string>
-#include <iomanip>
-#include <cstdlib>
-#include <cstring>
-#include <cmath>
-#include <vector>
 #include <tuple>
 #include <typeinfo>
+#include <vector>
 
 #if defined(__GNUC__) && !defined(_WIN32) && defined(_GLIBCXX_OSTREAM)
 #define HACK_OSTREAM_FOR_TTY 1
