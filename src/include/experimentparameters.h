@@ -8,11 +8,11 @@
 #define SRC_INCLUDE_EXPERIMENTPARAMETERS_H_
 
 struct ExperimentParameters {
-  /* number of test particle */
+  /// number of test particle
   int testparticles = 1;
-  /* temporal time step */
+  /// temporal time step
   float eps = 0.001f;
-  /* cross section of the elastic scattering */
+  /// cross section of the elastic scattering
   float cross_section = 10.0f;
 };
 
