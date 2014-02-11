@@ -37,7 +37,6 @@ std::unique_ptr<ExperimentBase> ExperimentBase::create(
   } else if (modus_chooser.compare("Collider") == 0) {
     return ExperimentPointer(new Experiment<ColliderModus>(nevents));
   } else {
-
     throw InvalidModusRequest("Invalid Modus (" + modus_chooser +
                               ") requested from ExperimentBase::create.");
   }
