@@ -58,3 +58,4 @@ add_custom_target(check
 
 # subdirectories where the code is
 add_subdirectory(src)
+add_subdirectory(doc)
