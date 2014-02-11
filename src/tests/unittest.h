@@ -19,8 +19,6 @@
 #ifndef SRC_TESTS_UNITTEST_H_
 #define SRC_TESTS_UNITTEST_H_
 
-#include "tests/assert.h"
-
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -41,6 +39,7 @@
 #include <ext/stdio_sync_filebuf.h>
 #endif
 
+#include "tests/assert.h"
 #include "tests/macros.h"
 #include "tests/ulp.h"
 
@@ -613,7 +612,7 @@ inline std::string typeToString<signed char>() {
 typedef tuple<TestFunction, std::string> TestData;
 vector<TestData> g_allTests;
 
-void runAll() {
+static void runAll() {
   for (const auto &data : g_allTests) {
     global_unit_test_object_.runTestInt(get<0>(data), get<1>(data).c_str());
   }
