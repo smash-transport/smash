@@ -7,6 +7,13 @@
 #ifndef SRC_INCLUDE_EXPERIMENTPARAMETERS_H_
 #define SRC_INCLUDE_EXPERIMENTPARAMETERS_H_
 
+/**
+ * Helper structure for Experiment.
+ *
+ * Experiment has one member of this struct. In essence the members of this
+ * struct are members of Experiment, but combined in one structure for easier
+ * function argument passing.
+ */
 struct ExperimentParameters {
   /// number of test particle
   int testparticles = 1;
