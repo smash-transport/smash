@@ -22,6 +22,7 @@
 #include <cmath>
 #include <cstdlib>
 #include <cstring>
+#include <functional>
 #include <iomanip>
 #include <iostream>
 #include <sstream>
@@ -95,7 +96,7 @@ static inline void printPass() {
 
 class UnitTestFailure {};
 
-typedef void (*TestFunction)(void);
+using TestFunction = std::function<void(void)>;
 
 class UnitTester {  // {{{1
  public:
@@ -195,6 +196,15 @@ void UnitTester::runTestInt(TestFunction fun, const char *name) {  // {{{1
     fun();
   }
   catch (UnitTestFailure) {
+  }
+  catch (std::exception &e) {
+    std::cout << _unittest_fail() << "┍ " << name << " threw an unexpected exception:\n";
+    std::cout << _unittest_fail() << "│ " << e.what() << '\n';
+    global_unit_test_object_.status = false;
+  }
+  catch (...) {
+    std::cout << _unittest_fail() << "┍ " << name << " threw an unexpected exception, of unknown type\n";
+    global_unit_test_object_.status = false;
   }
   if (global_unit_test_object_.expect_failure) {
     if (!global_unit_test_object_.status) {
@@ -618,11 +628,32 @@ static void runAll() {
   }
 }
 // class Test {{{2
-template <typename T>
+template <typename T, typename Exception = void>
 class Test {
  public:
   Test(TestFunction fun, std::string name) {
-    name += '<' + typeToString<T>() + '>';
+    if (!std::is_same<T, void>()) {
+      name += '<' + typeToString<T>() + '>';
+    }
+    auto wrapper = [=]() {
+      try {
+        fun();
+      }
+      catch (Exception &e) {
+        return;
+      }
+      FAIL();
+    };
+    g_allTests.emplace_back(wrapper, name);
+  }
+};
+template <typename T>
+class Test<T, void> {
+ public:
+  Test(TestFunction fun, std::string name) {
+    if (!std::is_same<T, void>()) {
+      name += '<' + typeToString<T>() + '>';
+    }
     g_allTests.emplace_back(fun, name);
   }
 };
@@ -675,6 +706,12 @@ UnitTest::Test2<F, Typelist...> hackTypelist(void (*)(Typelist...));
   void fun__();                                                 \
   static UnitTest::Test<void> test_##fun__##__(&fun__, #fun__); \
   void fun__()
+
+#define TEST_CATCH(fun__, exception__)                                       \
+  void fun__();                                                              \
+  static UnitTest::Test<void, exception__> test_##fun__##__(&fun__, #fun__); \
+  void fun__()
+
 // main {{{1
 int main(int argc, char **argv) {
   UnitTest::initTest(argc, argv);
