@@ -37,6 +37,26 @@ class ExperimentBase {
   virtual void configure(std::list<Parameters> configuration) = 0;
   virtual void commandline_arg(int steps) = 0;
 
+  /**
+   * Factory method that creates a new Experiment<Modus>.
+   *
+   * This functions will create a new Experiment object. The Modus template
+   * argument is determined by the \p modus_chooser argument. All remaining
+   * arguments are forwarded to the Experiment constructor.
+   *
+   * \param modus_chooser A string with one of the following values:
+   *                      * Box
+   *                      * Collider
+   *                      If the value of the string does not match any of the
+   *                      above, the function will throw an exception.
+   * \param nevents See Experiment::Experiment.
+   *
+   * \return An owning pointer to the Experiment object, using the
+   *         ExperimentBase interface.
+   *
+   * \throws InvalidModusRequest This exception is thrown if the \p
+   *         modus_chooser string does not contain a valid string.
+   */
   static std::unique_ptr<ExperimentBase> create(std::string modus_chooser,
                                                 int nevents);
 
@@ -95,6 +115,10 @@ class Experiment : public ExperimentBase {
 
   inline timespec set_timer_start();
 
+  /**
+   * Instance of the Modus template parameter. May store modus-specific data
+   * and contains modus-specific function implementations.
+   */
   Modus modus_;
   Particles *particles_;
   CrossSections *cross_sections_;
