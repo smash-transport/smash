@@ -22,11 +22,11 @@ void ColliderModus::assign_params(std::list<Parameters> *configuration) {
     printd("%s %s\n", key, value);
     /* integer values */
     if (strcmp(key, "PROJECTILE") == 0) {
-      projectile_ = abs(atoi(value));
+      projectile_ = atoi(value);
       match = true;
     }
     if (strcmp(key, "TARGET") == 0) {
-      target_ = abs(atoi(value));
+      target_ = atoi(value);
       match = true;
     }
     /* float values */
