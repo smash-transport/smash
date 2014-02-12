@@ -22,16 +22,17 @@
 
 class Particles {
  public:
-  /* Use improbable values for default constructor */
+  /// Use improbable values for default constructor
   Particles() :id_max_(-1) {}
-  /* pass out the specific data of a particle as needed all across board */
+  /// pass out the specific data of a particle according to it's id
   inline const ParticleData &data(int id);
+  /// pass out the specific datapointer of a particle according to it's id
   inline ParticleData * data_pointer(int id);
-  /* pass out the type of a specific particle */
+  /// pass out the type of a specific particle given it's id
   ParticleType type(int id);
-  /* pass out the specific type */
-  inline ParticleType particle_type(int id);
-  /* pass out decay modes of this particle type */
+  /// pass out the type for a specific pdgcode
+  inline ParticleType particle_type(int pdgcode);
+  /// pass out decay modes of this particle type
   inline DecayModes decay_modes(int pdg);
   /* inserts new data or type or decay modes */
   inline int id_max(void);
@@ -60,15 +61,15 @@ class Particles {
   inline std::map<int, ParticleType>::const_iterator types_cend(void) const;
 
  private:
-  /* Highest id of a given particle */
+  /// Highest id of a given particle
   int id_max_;
-  /* dynamic data of the particles a map between it's id and data */
+  /// dynamic data of the particles a map between it's id and data
   std::map<int, ParticleData> data_;
-  /* a map between pdg and correspoding static data of the particles */
+  /// a map between pdg and correspoding static data of the particles
   std::map<int, ParticleType> types_;
-  /* a map between pdg and corresponding decay modes */
+  /// a map between pdg and corresponding decay modes
   std::map<int, DecayModes> all_decay_modes_;
-  /* google style recommendation */
+  /// google style recommendation
   DISALLOW_COPY_AND_ASSIGN(Particles);
 };
 
