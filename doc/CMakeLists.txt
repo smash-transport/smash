@@ -14,7 +14,7 @@ if(DOXYGEN)
       @ONLY
       )
 
-   add_custom_target(dox ${DOXYGEN} Doxyfile
+   add_custom_target(doc ${DOXYGEN} Doxyfile
       WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
       COMMENT "Building Doxygen Code Documentation"
       VERBATIM
