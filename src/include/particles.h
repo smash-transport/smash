@@ -29,7 +29,7 @@ class Particles {
   /// pass out the specific datapointer of a particle according to it's id
   inline ParticleData * data_pointer(int id);
   /// pass out the type of a specific particle given it's id
-  ParticleType type(int id);
+  inline ParticleType type(int id);
   /// pass out the type for a specific pdgcode
   inline ParticleType particle_type(int pdgcode);
   /// pass out decay modes of this particle type
