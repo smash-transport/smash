@@ -6,7 +6,7 @@ add_executable(angles_distribution angles_distribution.cc)
 add_executable(particles particles.cc ../particles.cc ../fourvector.cc ../distributions.cc ../outputroutines.cc ../time.cc)
 add_executable(clebschgordan clebschgordan.cc ../clebschgordan.cc)
 
-file(COPY ../config_general.txt DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY ../config_general.yaml DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ../particles.txt DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ../decaymodes.txt DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
@@ -53,6 +53,10 @@ else()
    message(WARNING "cpplint.py was not found. The cclint test will be disabled.\nDownload from: http://google-styleguide.googlecode.com/svn/trunk/cpplint/cpplint.py")
 endif()
 
+add_definitions("-DTEST_CONFIG_PATH=\"${PROJECT_SOURCE_DIR}/src\"")
+add_definitions("-DBUILD_TESTS")
+
+smash_add_unittest(configuration)
 smash_add_unittest(experiment)
 
 # some fourvector operations tests
