@@ -198,12 +198,14 @@ void UnitTester::runTestInt(TestFunction fun, const char *name) {  // {{{1
   catch (UnitTestFailure) {
   }
   catch (std::exception &e) {
-    std::cout << _unittest_fail() << "┍ " << name << " threw an unexpected exception:\n";
+    std::cout << _unittest_fail() << "┍ " << name
+              << " threw an unexpected exception:\n";
     std::cout << _unittest_fail() << "│ " << e.what() << '\n';
     global_unit_test_object_.status = false;
   }
   catch (...) {
-    std::cout << _unittest_fail() << "┍ " << name << " threw an unexpected exception, of unknown type\n";
+    std::cout << _unittest_fail() << "┍ " << name
+              << " threw an unexpected exception, of unknown type\n";
     global_unit_test_object_.status = false;
   }
   if (global_unit_test_object_.expect_failure) {
