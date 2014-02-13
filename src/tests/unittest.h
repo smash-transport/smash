@@ -644,7 +644,7 @@ class Test {
       catch (Exception &e) {
         return;
       }
-      FAIL();
+      FAIL() << "Test was expected to throw, but it didn't";
     };
     g_allTests.emplace_back(wrapper, name);
   }
