@@ -684,5 +684,6 @@ int resonance_formation(Particles *particles, int particle_id, int other_id,
     printf("Resonance formation canceled. Returning -1.\n");
     return -1;
   }
-  return particles->id_max();
+  /* Return the id of the first new particle */
+  return particles->id_max() - produced_particles.size() + 1;
 }
