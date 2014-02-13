@@ -38,3 +38,20 @@ TEST(check_config_collider_contents) {
   COMPARE(collider["SQRTS"     ].as<double     >(), 1.0);
 }
 
+TEST(test_take) {
+  Configuration conf(TEST_CONFIG_PATH);
+  double d = conf.take({"Sphere", "RADIUS"});
+  COMPARE(d, 5.);
+}
+
+TEST_CATCH(take_incorrect_type, Configuration::IncorrectTypeInAssignment) {
+  Configuration conf(TEST_CONFIG_PATH);
+  int i = conf.take({"Sphere", "RADIUS"});
+  COMPARE(i, 5);
+}
+
+TEST(take_always_converts_to_string) {
+  Configuration conf(TEST_CONFIG_PATH);
+  std::string s = conf.take({"Sphere", "RADIUS"});
+  COMPARE(s, "5.0");
+}
