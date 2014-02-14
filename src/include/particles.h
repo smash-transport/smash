@@ -51,6 +51,8 @@ class Particles {
   inline void add_decaymodes(const DecayModes &new_decay_modes, int pdg);
   /// add a range of particles
   inline void create(size_t number, int pdg);
+  /* add one particle and return pointer to it */
+  inline ParticleData& create(const int pdg);
   /// remove a specific particle
   inline void remove(int id);
   /// size() of the ParticleData map
@@ -130,6 +132,18 @@ inline void Particles::create(size_t number, int pdgcode) {
     particle.set_id(id_max_);
     data_.insert(std::pair<int, ParticleData>(id_max_, particle));
   }
+}
+
+/* create a bunch of particles */
+inline ParticleData& Particles::create(int pdgcode) {
+  ParticleData particle;
+  /* fixed pdgcode and no collision yet */
+  particle.set_pdgcode(pdgcode);
+  particle.set_collision(-1, 0, -1);
+  id_max_++;
+  particle.set_id(id_max_);
+  data_.insert(std::pair<int, ParticleData>(id_max_, particle));
+  return data_[id_max_];
 }
 
 /* return the highest used id */
