@@ -87,7 +87,6 @@ void Experiment<Modus>::initialize(const char *path) {
   /* Save the initial energy in the system for energy conservation checks */
   energy_initial_ = energy_total(particles_);
   /* Print output headers */
-  write_measurements_header(*particles_);
   print_header();
   /* Write out the initial momenta and positions of the particles */
   write_particles(*particles_);
@@ -137,9 +136,7 @@ void Experiment<Modus>::run_time_evolution() {
       printd("Resonances: %i Decays: %i\n", resonances, decays);
       printd("Ignored collisions %zu\n", rejection_conflict);
       /* save evolution data */
-      write_measurements(*particles_, interactions_total,
-                         interactions_this_interval, resonances, decays,
-                         rejection_conflict);
+      write_particles(*particles_);
       write_vtk(*particles_);
     }
   }

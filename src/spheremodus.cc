@@ -269,8 +269,7 @@ int SphereModus::Evolve(Particles *particles, CrossSections *cross_sections,
       printd("Resonances: %i Decays: %i\n", *resonances, *decays);
       printd("Ignored collisions %zu\n", rejection_conflict);
       /* save evolution data */
-      write_measurements(*particles, interactions_total,
-        interactions_this_interval, *resonances, *decays, rejection_conflict);
+      write_particles(*particles);
       write_vtk(*particles);
     }
   }

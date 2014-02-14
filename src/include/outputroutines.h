@@ -45,10 +45,6 @@ void printd_list(const std::list<int> &collision_list);
 
 /* output data files */
 void write_particles(const Particles &particles);
-void write_measurements_header(const Particles &particles);
-void write_measurements(const Particles &particles,
-  int interactions_total, int interactions_this_interval, int decays,
-  int resonances, const size_t &rejection_conflict);
 void write_oscar_header(void);
 void write_oscar(const ParticleData &particle_data,
                  const ParticleType &particle_type, int initial, int final);
