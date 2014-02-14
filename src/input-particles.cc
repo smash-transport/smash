@@ -17,6 +17,8 @@
 /* XXX: hardcoded length cap */
 #define FILELEN 256
 
+static const char *sep = " \t\n";
+
 /* input_particles - read in particle types */
 void input_particles(Particles *particles, const char *path) {
   char *line = NULL, *saveptr = NULL, *characters, input_particles[FILELEN];

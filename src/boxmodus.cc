@@ -15,6 +15,7 @@
 #include "include/angles.h"
 #include "include/boxmodus.h"
 #include "include/collisions.h"
+#include "include/configuration.h"
 #include "include/constants.h"
 #include "include/crosssections.h"
 #include "include/distributions.h"
@@ -24,35 +25,10 @@
 #include "include/parameters.h"
 #include "include/particles.h"
 
-void BoxModus::assign_params(std::list<Parameters> *configuration) {
-  bool match = false;
-  std::list<Parameters>::iterator i = configuration->begin();
-  while (i != configuration->end()) {
-    char *key = i->key();
-    char *value = i->value();
-    printd("%s %s\n", key, value);
-    /* double or float values */
-    if (strcmp(key, "LENGTH") == 0) {
-      length_ = (fabs(atof(value)));
-      match = true;
-    }
-    if (strcmp(key, "TEMPERATURE") == 0) {
-      temperature_ = (fabs(atof(value)));
-      match = true;
-    }
-    /* int values */
-    if (strcmp(key, "INITIAL_CONDITION") == 0) {
-      initial_condition_ = (abs(atoi(value)));
-      match = true;
-    }
-    /* remove processed entry */
-    if (match) {
-      i = configuration->erase(i);
-      match = false;
-    } else {
-      ++i;
-    }
-  }
+BoxModus::BoxModus(Configuration &config)
+    : initial_condition_(config.take({"Box", "INITIAL_CONDITION"})),
+      length_           (config.take({"Box", "LENGTH"})),
+      temperature_      (config.take({"Box", "TEMPERATURE"})) {
 }
 
 /* print_startup - console output on startup of box specific parameters */

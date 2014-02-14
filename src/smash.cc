@@ -13,11 +13,13 @@
 #include <list>
 #include <string>
 
+#include <boost/filesystem.hpp>
+
+#include "include/configuration.h"
 #include "include/experiment.h"
 #include "include/parameters.h"
 #include "include/macros.h"
 #include "include/outputroutines.h"
-#include "include/param-reader.h"
 
 /* build dependent variables */
 #include "include/config.h"
@@ -39,7 +41,6 @@ static void usage(int rc) {
 int main(int argc, char *argv[]) {
   char *p, *path;
   int opt, rc = 0;
-  int steps = 0, nevents = 0;
   struct option longopts[] = {
     { "help",       no_argument,            0, 'h' },
     { "modus",      required_argument,      0, 'm' },
@@ -59,33 +60,8 @@ int main(int argc, char *argv[]) {
   snprintf(path, len, "./");
 
   /* read in config file */
-  std::list<Parameters> configuration;
-  process_config(&configuration, path);
-  bool match = false;
-  std::string modus_chooser;
-  std::list<Parameters>::iterator i = configuration.begin();
-  while (i != configuration.end()) {
-    char *key = i->key();
-    char *value = i->value();
-    printd("Looking for match %s %s\n", key, value);
-    /* integer values */
-    if (strcmp(key, "MODUS") == 0) {
-      modus_chooser = value;
-      match = true;
-    }
-    if (strcmp(key, "NEVENTS") == 0) {
-      nevents = abs(atoi(value));
-      match = true;
-    }
-    /* remove processed entry */
-    if (match) {
-      printd("Erasing %s %s\n", key, value);
-      i = configuration.erase(i);
-      match = false;
-    } else {
-      ++i;
-    }
-  }
+  Configuration configuration(path);
+
   /* check for overriding command line arguments */
   while ((opt = getopt_long(argc, argv, "hm:s:v", longopts,
                               NULL)) != -1) {
@@ -94,8 +70,7 @@ int main(int argc, char *argv[]) {
         usage(EXIT_SUCCESS);
         break;
       case 'm':
-        modus_chooser = optarg;
-        printf("Modus set: %s\n", modus_chooser.c_str());
+        configuration["General"]["MODUS"] = std::string(optarg);
         break;
 //    case 'r':
 /* negative seed is for time */
@@ -105,7 +80,7 @@ int main(int argc, char *argv[]) {
 //         lab->set_seed(time(NULL));
 //      break;
       case 's':
-        steps = abs(atoi(optarg));
+        configuration["General"]["STEPS"] = abs(atoi(optarg));
         break;
       case 'v':
         exit(EXIT_SUCCESS);
@@ -113,17 +88,14 @@ int main(int argc, char *argv[]) {
         usage(EXIT_FAILURE);
     }
   }
-  printf("Modus for this calculation: %s\n", modus_chooser.c_str());
 
   try {
-    auto experiment = ExperimentBase::create(modus_chooser, nevents);
-    experiment->configure(configuration);
     mkdir_data();
-    /* overriden arguments */
-    if (steps > 0) {
-      experiment->commandline_arg(steps);
+    auto experiment = ExperimentBase::create(configuration);
+    const std::string report = configuration.unused_values_report();
+    if (!report.empty()) {
+      printf("The following configuration values were not used:\n%s\n", report.c_str());
     }
-
     experiment->run(path);
   }
   catch(std::exception &e) {

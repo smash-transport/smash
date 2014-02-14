@@ -35,7 +35,7 @@ set(smash_src boxmodus.cc clebschgordan.cc collisions.cc collidermodus.cc
         cross-sections.cc
         decays.cc distributions.cc experiment.cc fourvector.cc
         input-decaymodes.cc
-        input-particles.cc modusdefault.cc param-reader.cc parametrizations.cc
+        input-particles.cc modusdefault.cc parametrizations.cc
         particles.cc
         outputroutines.cc resonances.cc time.cc)
 

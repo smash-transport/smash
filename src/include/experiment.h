@@ -18,6 +18,7 @@
 #include "include/outputroutines.h"
 #include "include/parameters.h"
 #include "include/particles.h"
+class Configuration;
 
 /**
  * Non-template interface to Experiment<Modus>.
@@ -34,9 +35,6 @@ class ExperimentBase {
    * objects.
    */
   virtual ~ExperimentBase() {}
-
-  virtual void configure(std::list<Parameters> configuration) = 0;
-  virtual void commandline_arg(int steps) = 0;
 
   /**
    * Factory method that creates a new Experiment<Modus>.
@@ -58,8 +56,7 @@ class ExperimentBase {
    * \throws InvalidModusRequest This exception is thrown if the \p
    *         modus_chooser string does not contain a valid string.
    */
-  static std::unique_ptr<ExperimentBase> create(std::string modus_chooser,
-                                                int nevents);
+  static std::unique_ptr<ExperimentBase> create(Configuration &config);
 
   virtual void run(std::string path) = 0;
 
@@ -101,9 +98,6 @@ class Experiment : public ExperimentBase {
   friend class ExperimentBase;
 
  public:
-  virtual void configure(std::list<Parameters> configuration) override;
-  virtual void commandline_arg(int steps) override;
-
   virtual void run(std::string path) override;
 
  private:
@@ -115,14 +109,11 @@ class Experiment : public ExperimentBase {
    *
    * \param nevents XXX
    */
-  explicit Experiment(int nevents) : nevents_(nevents) {
-  }
+  explicit Experiment(Configuration &config);
 
   void initialize(const char *path);
   void run_time_evolution();
   void end();
-
-  void assign_params(std::list<Parameters> *configuration);
 
   void print_startup();
 

@@ -24,11 +24,10 @@ class FourVector;
 class SphereModus : public ModusDefault {
  public:
   /* default constructor with probable values */
-  SphereModus() : radius_(10.0f), timer_start_(set_timer_start()) {}
+  SphereModus(Configuration &config);
   /* member funtions */
   /* special class funtions */
   int evolve(Particles *particles, CrossSections *cross_sections);
-  void assign_params_specific(std::list<Parameters> *configuration);
   void initial_conditions(Particles *particles);
   //     FourVector boundary_condition(FourVector position);
   inline timespec set_timer_start();
