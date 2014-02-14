@@ -85,13 +85,25 @@ class Configuration {
   /**
    * The default interface for SMASH to read configuration values.
    *
-   * \param group
-   * \param key
+   * The function returns the value at the specified \p keys and removes it from
+   * the Configuration object. Therefore, a subsequent call to take or has_value
+   * with the same \p keys returns an undefined value / \c false.
+   * By removing the value, the Configuration object keeps track which settings
+   * were never read.
+   *
+   * \param keys You can pass an arbitrary number of keys inside curly braces,
+   *             following the nesting structure in the config file. Example:
+                 \verbatim
+     Group:
+         Key: Value
+                 \endverbatim
+   *             Call \code string value = config.take({"Group", "Key"});
+   *             \endcode to read the value.
    *
    * \return A proxy object that converts to the correct type automatically on
    *         assignment.
    */
-  Value take(std::initializer_list<const char *> keys) const;
+  Value take(std::initializer_list<const char *> keys);
 
   /**
    * Returns the object behind the requested \p key.
@@ -110,5 +122,12 @@ class Configuration {
   decltype(config_general_[""]) operator[](const char *key) const {
     return config_general_[key];
   }
+
+  bool has_value(std::initializer_list<const char *> keys) const;
+
+  /**
+   * Returns a string listing the key/value pairs that have not been taken yet.
+   */
+  std::string unused_values_report() const;
 };
 #endif  // SRC_INCLUDE_CONFIGURATION_H_
