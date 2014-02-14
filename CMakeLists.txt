@@ -51,11 +51,6 @@ SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR})
 #option(BUILD_TESTING "Build the testing tree." OFF)
 include(CTest)
 
-# tests are run with make test/ctest. Leave the check target in for a little while to tell where it went.
-add_custom_target(check
-   COMMENT "'make check' is deprecated. Use 'make test' or call ctest. The latter also supports running tests in parallel with -j"
-   )
-
 # subdirectories where the code is
 add_subdirectory(src)
 add_subdirectory(doc)
