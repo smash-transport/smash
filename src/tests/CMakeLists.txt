@@ -39,13 +39,13 @@ endmacro()
 # test source code to be clean, requires cpplint in the path
 find_program(CPPLINT cpplint.py)
 if(CPPLINT)
+   set(CPPLINT_ARGS --filter=-build/include_order */*.cc */*/*.cc */*/*.h)
    message(STATUS "cpplint.py found at ${CPPLINT}")
-   #file(GLOB source "../*.cc" "../include/*.h" "*.cc")
-   add_test(NAME cclint COMMAND ${CPPLINT} */*.cc */*/*.h
+   add_test(NAME cclint COMMAND ${CPPLINT} ${CPPLINT_ARGS}
       WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
       )
    add_custom_target(run_cclint
-      COMMAND ${CPPLINT} */*.cc */*/*.cc */*/*.h
+      COMMAND ${CPPLINT} ${CPPLINT_ARGS}
       WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
       COMMENT "Executing test cclint"
       )
