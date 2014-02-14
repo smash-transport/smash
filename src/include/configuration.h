@@ -123,6 +123,9 @@ class Configuration {
     return config_general_[key];
   }
 
+  /**
+   * Returns whether there is a value behind the requested \p keys.
+   */
   bool has_value(std::initializer_list<const char *> keys) const;
 
   /**
