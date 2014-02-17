@@ -22,6 +22,7 @@ set(smash_src boxmodus.cc clebschgordan.cc collisions.cc collidermodus.cc
         input-decaymodes.cc
         input-particles.cc modusdefault.cc
         nucleusmodus.cc
+        nucleus.cc
         param-reader.cc parametrizations.cc
         particles.cc
         outputroutines.cc resonances.cc time.cc)

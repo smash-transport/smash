@@ -4,8 +4,8 @@
  *
  *    GNU General Public License (GPLv3 or later)
  */
-#ifndef SRC_INCLUDE_COLLIDERMODUS_H_
-#define SRC_INCLUDE_COLLIDERMODUS_H_
+#ifndef SRC_INCLUDE_NUCLEUSMODUS_H_
+#define SRC_INCLUDE_NUCLEUSMODUS_H_
 
 #include <stdint.h>
 #include <cmath>
@@ -14,6 +14,7 @@
 
 #include "include/crosssections.h"
 #include "include/modusdefault.h"
+#include "include/nucleus.h"
 #include "include/particles.h"
 #include "include/parameters.h"
 
@@ -33,24 +34,20 @@ class NucleusModus : public ModusDefault {
   void initial_conditions(Particles *particles,
                           const ExperimentParameters &parameters);
 
-  float nuclear_radius(const int &A) const;
-  float woods_saxon(const float &radius);
- 
   // in ModusDefault:
   // * sanity_check
   // * check_collision_geometry
   // * propagate
 
  private:
-  // Projectile and target particles PDG ID
-  std::vector<int> projectile_;
-  std::vector<int> target_;
+  Nucleus projectile_;
+  Nucleus target_;
   // Center-of-mass energy of the collision
   float sqrts_ = 1.f;
   // initial separation of nuclei from origin
   float initial_displacement_ = 1.1;
   // steepness of woods-saxon distribution
-  float steepness = .545;
+  float steepness_ = .545;
 };
 
-#endif  // SRC_INCLUDE_COLLIDERMODUS_H_
+#endif  // SRC_INCLUDE_NUCLEUSMODUS_H_

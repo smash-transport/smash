@@ -36,9 +36,9 @@ class Particles {
   /// pass out the specific datapointer of a particle according to it's id
   inline ParticleData * data_pointer(int id);
   /// pass out the type of a specific particle given it's id
-  inline ParticleType type(int id);
+  inline ParticleType type(const int id) const;
   /// pass out the type for a specific pdgcode
-  inline ParticleType particle_type(int pdgcode);
+  inline ParticleType particle_type(const int pdgcode) const;
   /// pass out decay modes of this particle type
   inline DecayModes decay_modes(int pdg);
   /// return the highest used id
@@ -99,13 +99,13 @@ inline ParticleData* Particles::data_pointer(int particle_id) {
 }
 
 /* return the type of a specific particle */
-inline ParticleType Particles::type(int particle_id) {
-  return types_[data_[particle_id].pdgcode()];
+inline ParticleType Particles::type(const int particle_id) const {
+  return types_.at(data_.at(particle_id).pdgcode());
 }
 
 /* return a specific type */
-inline ParticleType Particles::particle_type(int pdgcode) {
-  return types_[pdgcode];
+inline ParticleType Particles::particle_type(const int pdgcode) const {
+  return types_.at(pdgcode);
 }
 
 /* return the decay modes of specific type */
