@@ -201,6 +201,31 @@ void write_oscar_header(void) {
   fclose(fp);
 }
 
+/**
+ *  write_oscar_event_block
+ *  - writes the initial and final particle information of an event
+ */
+void write_oscar_event_block(Particles *particles,
+                             size_t initial, size_t final, int event_id) {
+  FILE *fp;
+  fp = fopen("data/collision.dat", "a");
+  /* OSCAR line prefix : initial particles; final particles; event id
+   * First block of an event: initial = 0, final = number of particles
+   * Vice versa for the last block
+   */
+  fprintf(fp, "%zu %zu %i\n", initial, final, event_id);
+  for (auto i = particles->cbegin(); i != particles->cend(); ++i) {
+    fprintf(fp, "%i %i %i %g %g %g %g %g %g %g %g %g \n",
+            i->first, i->second.pdgcode(), 0,
+            i->second.momentum().x1(), i->second.momentum().x2(),
+            i->second.momentum().x3(), i->second.momentum().x0(),
+            particles->type(i->first).mass(),
+            i->second.position().x1(), i->second.position().x2(),
+            i->second.position().x3(), i->second.position().x0() - 1.0);
+  }
+  fclose(fp);
+}
+
 /* write_oscar - OSCAR file */
 /* Use this for the first particle in a process */
 void write_oscar(const ParticleData &particle_data,
