@@ -58,7 +58,7 @@
  *
  * TEST(test_name) {
  *   int test = 1 + 1;
- *   COMPARE(test, 2);
+ *   COMPARE(test, 2) << "more details";
  *   VERIFY(1 > 0);
  * }
  * \endcode
@@ -68,15 +68,27 @@
  * would be:
    \verbatim
     FAIL: ┍ at /home/mkretz/src/smash/src/tests/testfile.cc:5 (0x40451f):
-    FAIL: │ test (3) == 2 (2) -> false
+    FAIL: │ test (3) == 2 (2) -> false more details
     FAIL: ┕ test_name
 
     Testing done. 0 tests passed. 1 tests failed.
    \endverbatim
  * Let's take a look at what this tells us.
  * 1. The test macro that failed was in testfile.cc in line 5.
+ * 2. If you want to look at the disassembly, the failure was at 0x40451f.
+ * 3. The COMPARE macro compared the expression `test` against the expression
+ *    `2`. It shows that `test` had a value of `3` while `2` had a value of `2`
+ *    (what a surprise). Since the values are not equal `test == 2` returns \c
+ *    false.
+ * 4. The COMPARE, FUZZY_COMPARE, VERIFY, and FAIL macros can be used as
+ *    streams. The output will only appear on failure and will be printed right
+ *    after the normal output of the macro.
+ * 5. Finally the name of the failed test (the name specified inside the TEST()
+ *    macro) is printed.
+ * 6. At the end of the run, a summary of the test results is shown. This may be
+ *    important when there are many TEST functions.
  *
- * Otherwise, you'd see:
+ * If the test passed you'll see:
    \verbatim
     PASS: test_name
 
