@@ -26,9 +26,9 @@ TEST(set_angles) {
 }
 
 TEST(accessors_and_relations) {
-  static const int NUMBER_OF_TRIES = 1000000;
+  constexpr int kNumberOfTries = 1000000;
   // second: check accessors and the relations between them:
-  for (int c = 0; c < NUMBER_OF_TRIES; c++) {
+  for (int c = 0; c < kNumberOfTries; c++) {
     dir.distribute_isotropically();
     // sintheta**2 + costheta**2 = 1
     UnitTest::setFuzzyness<double>(1);
@@ -44,16 +44,16 @@ TEST(accessors_and_relations) {
     // compare cos(theta) and costheta:
     UnitTest::setFuzzyness<double>(1024);
     FUZZY_COMPARE( cos(dir.theta()),dir.costheta()) << " (trial #" << c
-                                          << " of " << NUMBER_OF_TRIES << ")";
+                                          << " of " << kNumberOfTries << ")";
     FUZZY_COMPARE(dir.theta(),acos(dir.costheta())) << " (trial #" << c
-                                          << " of " << NUMBER_OF_TRIES << ")";
+                                          << " of " << kNumberOfTries << ")";
   }
 }
 
 TEST(unusual_set_phi) {
-  static const int MIN_M = -6;
-  static const int MAX_M = 12;
-  for (int m = MIN_M; m < MAX_M; m++) {
+  constexpr int kMinM = -6;
+  constexpr int kMaxM = 12;
+  for (int m = kMinM; m < kMaxM; m++) {
     // set phi outside [0..2pi]
     dir.set_phi(2.0 * M_PI * m + .5);
     FUZZY_COMPARE(dir.phi(),.5) << " (m = " << m << ")";
@@ -62,9 +62,9 @@ TEST(unusual_set_phi) {
 
 TEST(unusual_set_theta_even) {
   UnitTest::setFuzzyness<double>(48);
-  static const int MIN_M = -6;
-  static const int MAX_M = 12;
-  for (int m = MIN_M; m < MAX_M; m++) {
+  constexpr int kMinM = -6;
+  constexpr int kMaxM = 12;
+  for (int m = kMinM; m < kMaxM; m++) {
     // set theta in [2*n*pi .. (2*n+1)*pi]
     dir.set_theta(2.0 * M_PI * m + .7);
     FUZZY_COMPARE(dir.theta(),.7) << " (m = " << m << ")";
@@ -72,9 +72,9 @@ TEST(unusual_set_theta_even) {
 }
 TEST(unusual_set_theta_odd) {
   UnitTest::setFuzzyness<double>(48);
-  static const int MIN_M = -6;
-  static const int MAX_M = 12;
-  for (int m = MIN_M; m < MAX_M; m++) {
+  constexpr int kMinM = -6;
+  constexpr int kMaxM = 12;
+  for (int m = kMinM; m < kMaxM; m++) {
     // set theta in [(2*n-1)*pi .. 2*n*pi]
     dir.set_theta(2.0 * M_PI * m - .7);
     FUZZY_COMPARE(dir.theta(),.7) << " (m = " << m << ")";
