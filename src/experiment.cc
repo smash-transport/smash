@@ -87,7 +87,6 @@ void Experiment<Modus>::initialize(const char *path) {
   /* Save the initial energy in the system for energy conservation checks */
   energy_initial_ = energy_total(particles_);
   /* Print output headers */
-  write_measurements_header(*particles_);
   print_header();
   /* Write out the initial momenta and positions of the particles */
   write_particles(*particles_);
@@ -137,9 +136,7 @@ void Experiment<Modus>::run_time_evolution() {
       printd("Resonances: %i Decays: %i\n", resonances, decays);
       printd("Ignored collisions %zu\n", rejection_conflict);
       /* save evolution data */
-      write_measurements(*particles_, interactions_total,
-                         interactions_this_interval, resonances, decays,
-                         rejection_conflict);
+      write_particles(*particles_);
       write_vtk(*particles_);
     }
   }
@@ -246,11 +243,16 @@ void Experiment<Modus>::end() {
 
 template <typename Modus>
 void Experiment<Modus>::run(std::string path) {
+  /* Write the header of OSCAR data output file */
+  write_oscar_header();
   for (int j = 0; j < nevents_; j++) {
-    write_oscar_header();
     initialize(path.c_str());
+    /* Write the initial data block of the event */
+    write_oscar_event_block(particles_, 0, particles_->size(), j + 1);
     /* the time evolution of the relevant subsystem */
     run_time_evolution();
+    /* Write the final data block of the event */
+    write_oscar_event_block(particles_, particles_->size(), 0, j + 1);
   }
   end();
 }
