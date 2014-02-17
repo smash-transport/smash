@@ -487,19 +487,21 @@ size_t two_to_two_formation(Particles *particles,
     printd("Integral value: %g Error: %g \n", resonance_integral,
       integral_error);
 
+    /* matrix element squared over 16pi (in mb GeV^2)
+     * (uniform angular distribution assumed)
+     */
+    double matrix_element = 180;
+
     /* Cross section for 2->2 process with resonance in final state.
      * Based on the general differential form in
      * Buss et al., Physics Reports 512, 1 (2012), Eq. (D.28)
      */
     double xsection = clebsch_gordan_isospin * clebsch_gordan_isospin
                       * spinfactor * symmetryfactor
-                      / (64 * M_PI * M_PI)
+                      * matrix_element
                       / mandelstam_s
                       / sqrt(cm_momentum_squared)
-                      /* XXX: Assuming uniform angular distribution */
-                      * 4 * M_PI
-                      * resonance_integral
-                      * hbarc * hbarc / fm2_mb;
+                      * resonance_integral;
 
     if (xsection > really_small) {
       ProcessBranch final_state;
@@ -682,5 +684,6 @@ int resonance_formation(Particles *particles, int particle_id, int other_id,
     printf("Resonance formation canceled. Returning -1.\n");
     return -1;
   }
-  return particles->id_max();
+  /* Return the id of the first new particle */
+  return particles->id_max() - produced_particles.size() + 1;
 }

@@ -20,36 +20,50 @@
   TypeName(const TypeName&);               \
   void operator=(const TypeName&)
 
+/**
+ * Particles contains both the available particle list and the types
+ *
+ * The particle data contains the current particle list, which
+ * has the changing attributes of a particle.
+ * The particle type lists the static property of a certain particle.
+ */
 class Particles {
  public:
-  /* Use improbable values for default constructor */
+  /// Use improbable values for default constructor
   Particles() :id_max_(-1) {}
-  /* pass out the specific data of a particle as needed all across board */
+  /// pass out the specific data of a particle according to it's id
   inline const ParticleData &data(int id);
+  /// pass out the specific datapointer of a particle according to it's id
   inline ParticleData * data_pointer(int id);
-  /* pass out the type of a specific particle */
-  ParticleType type(int id);
-  /* pass out the specific type */
-  inline ParticleType particle_type(int id);
-  /* pass out decay modes of this particle type */
+  /// pass out the type of a specific particle given it's id
+  inline ParticleType type(int id);
+  /// pass out the type for a specific pdgcode
+  inline ParticleType particle_type(int pdgcode);
+  /// pass out decay modes of this particle type
   inline DecayModes decay_modes(int pdg);
-  /* inserts new data or type or decay modes */
+  /// return the highest used id
   inline int id_max(void);
+  /// inserts a new particle
   inline int add_data(const ParticleData &particle_data);
+  /// inserts a new particle type
   inline void add_type(const ParticleType &particle_type, int pdg);
+  // XXX(Jussi): mention what it does
   inline void add_decaymodes(const DecayModes &new_decay_modes, int pdg);
-  /* add a range of particles */
+  /// add a range of particles
   inline void create(size_t number, int pdg);
-  /* remove the particle */
+  /// remove a specific particle
   inline void remove(int id);
-  /* map methods that directly apply on the ParticleData */
+  /// size() of the ParticleData map
   inline size_t size(void) const;
+  /// empty() check of the ParticleData map
   inline bool empty(void) const;
+  /// count() check of the ParticleData map
   inline size_t count(int i) const;
-  /* map methods that directly apply on the ParticleType */
+  /// size() check of the ParticleType map
   inline size_t types_size(void) const;
+  /// empty() check of the ParticleType map
   inline bool types_empty(void) const;
-  /* return time of the computational frame */
+  /// return time of the computational frame
   inline double time(void) const;
   /* iterators */
   inline std::map<int, ParticleData>::iterator begin(void);
@@ -60,15 +74,15 @@ class Particles {
   inline std::map<int, ParticleType>::const_iterator types_cend(void) const;
 
  private:
-  /* Highest id of a given particle */
+  /// Highest id of a given particle
   int id_max_;
-  /* dynamic data of the particles a map between its id and data */
+  /// dynamic data of the particles a map between its id and data
   std::map<int, ParticleData> data_;
-  /* a map between pdg and correspoding static data of the particles */
+  /// a map between pdg and correspoding static data of the particles
   std::map<int, ParticleType> types_;
-  /* a map between pdg and corresponding decay modes */
+  /// a map between pdg and corresponding decay modes
   std::map<int, DecayModes> all_decay_modes_;
-  /* google style recommendation */
+  /// google style recommendation
   DISALLOW_COPY_AND_ASSIGN(Particles);
 };
 

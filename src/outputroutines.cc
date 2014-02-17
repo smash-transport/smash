@@ -154,74 +154,6 @@ void printd_position(const ParticleData &particle __attribute__((unused))) {
       particle.position().x2(), particle.position().x3());
 }
 
-/* write_measurements_header - create new files
- *  (erase old content if file exists) and write
- * the headers for decays.dat, collisions.dat
- * and particletypes.dat
- */
-void write_measurements_header(const Particles &particletypes) {
-  FILE *fp;
-  char filename[256];
-  snprintf(filename, sizeof(filename), "data/decays.dat");
-  fp = fopen(filename, "w");
-  fprintf(fp, " Time       Decays     Resonances\n");
-  fclose(fp);
-  snprintf(filename, sizeof(filename), "data/collisions.dat");
-  fp = fopen(filename, "w");
-  fprintf(fp, " Time     Actions_tot   Actions_ival     Rejections\n");
-  fclose(fp);
-  snprintf(filename, sizeof(filename), "data/particletypes.dat");
-  fp = fopen(filename, "w");
-  fprintf(fp, " Time ");
-  for (auto i = particletypes.types_cbegin(); i != particletypes.types_cend();
-       ++i) {
-    fprintf(fp, " %11s ", i->second.name().c_str());
-  }
-  fprintf(fp, "\n");
-  fclose(fp);
-}
-
-/* write_measurements - writes out data of the specific particles
- *                   and also add output related to collisons and decays
- */
-void write_measurements(const Particles &particles,
-  int interactions_total, int interactions_this_interval, int decays,
-  int resonances, const size_t &rejection_conflict) {
-  FILE *fp;
-  char filename[256];
-
-  snprintf(filename, sizeof(filename), "data/decays.dat");
-  fp = fopen(filename, "a");
-  fprintf(fp, "%5g%13d%13d\n", particles.time(), decays, resonances);
-  fclose(fp);
-  snprintf(filename, sizeof(filename), "data/collisions.dat");
-  fp = fopen(filename, "a");
-  fprintf(fp, "%5g%13d%13d%13zu\n", particles.time(),
-          interactions_total, interactions_this_interval, rejection_conflict);
-  fclose(fp);
-
-  /* output of how many particles of each type are present */
-  {
-  std::map<int, size_t> type_numbers;
-  /* XXX: Number of elements = particle types, initialize each amount to 0 */
-
-  for (auto i = particles.cbegin(); i != particles.cend(); ++i) {
-      type_numbers[i->second.pdgcode()]++;
-  }
-  snprintf(filename, sizeof(filename), "data/particletypes.dat");
-  fp = fopen(filename, "a");
-  fprintf(fp, "%5g", particles.time());
-  for (auto i = type_numbers.begin(); i != type_numbers.end(); ++i) {
-    fprintf(fp, "%13zu", i->second);
-  }
-  fprintf(fp, "\n");
-  fclose(fp);
-  }
-
-  /* write actual data output */
-  write_particles(particles);
-}
-
 void printd_list(const std::list<int> &collision_list) {
   printd("Collision list contains:");
   for (std::list<int>::const_iterator id = collision_list.cbegin();
@@ -230,7 +162,9 @@ void printd_list(const std::list<int> &collision_list) {
   printd("\n");
 }
 
-/* write_particles - writes out data of the specific particles */
+/**
+ *  write_particles - writes out data of the specific particles
+ */
 void write_particles(const Particles &particles) {
   FILE *fp;
   char filename[256];
@@ -264,6 +198,31 @@ void write_oscar_header(void) {
   fprintf(fp, "# Interaction history\n");
   fprintf(fp, "# smash \n");
   fprintf(fp, "# \n");
+  fclose(fp);
+}
+
+/**
+ *  write_oscar_event_block
+ *  - writes the initial and final particle information of an event
+ */
+void write_oscar_event_block(Particles *particles,
+                             size_t initial, size_t final, int event_id) {
+  FILE *fp;
+  fp = fopen("data/collision.dat", "a");
+  /* OSCAR line prefix : initial particles; final particles; event id
+   * First block of an event: initial = 0, final = number of particles
+   * Vice versa for the last block
+   */
+  fprintf(fp, "%zu %zu %i\n", initial, final, event_id);
+  for (auto i = particles->cbegin(); i != particles->cend(); ++i) {
+    fprintf(fp, "%i %i %i %g %g %g %g %g %g %g %g %g \n",
+            i->first, i->second.pdgcode(), 0,
+            i->second.momentum().x1(), i->second.momentum().x2(),
+            i->second.momentum().x3(), i->second.momentum().x0(),
+            particles->type(i->first).mass(),
+            i->second.position().x1(), i->second.position().x2(),
+            i->second.position().x3(), i->second.position().x0() - 1.0);
+  }
   fclose(fp);
 }
 

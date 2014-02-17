@@ -44,6 +44,144 @@
 #include "tests/macros.h"
 #include "tests/ulp.h"
 
+#ifdef DOXYGEN
+/**
+ * \defgroup unittest Unit Testing
+ * @{
+ *
+ * In SMASH we use a unit testing framework that was originally developed for
+ * the [Vc library](http://code.compeng.uni-frankfurt.de/projects/vc). It
+ * simplifies test creation to the bare minimum. The following code suffices to
+ * run a test:
+ * \code
+ * #include "tests/unittest.h"
+ *
+ * TEST(test_name) {
+ *   int test = 1 + 1;
+ *   COMPARE(test, 2) << "more details";
+ *   VERIFY(1 > 0);
+ * }
+ * \endcode
+ * This creates one test function (called "test_name"). This function is called
+ * without any further code and executes to checks. If, for some reason, the
+ * compiler would determine that test needs to have the value 3, then the output
+ * would be:
+   \verbatim
+    FAIL: ┍ at /home/mkretz/src/smash/src/tests/testfile.cc:5 (0x40451f):
+    FAIL: │ test (3) == 2 (2) -> false more details
+    FAIL: ┕ test_name
+
+    Testing done. 0 tests passed. 1 tests failed.
+   \endverbatim
+ * Let's take a look at what this tells us.
+ * 1. The test macro that failed was in testfile.cc in line 5.
+ * 2. If you want to look at the disassembly, the failure was at 0x40451f.
+ * 3. The COMPARE macro compared the expression `test` against the expression
+ *    `2`. It shows that `test` had a value of `3` while `2` had a value of `2`
+ *    (what a surprise). Since the values are not equal `test == 2` returns \c
+ *    false.
+ * 4. The COMPARE, FUZZY_COMPARE, VERIFY, and FAIL macros can be used as
+ *    streams. The output will only appear on failure and will be printed right
+ *    after the normal output of the macro.
+ * 5. Finally the name of the failed test (the name specified inside the TEST()
+ *    macro) is printed.
+ * 6. At the end of the run, a summary of the test results is shown. This may be
+ *    important when there are many TEST functions.
+ *
+ * If the test passed you'll see:
+   \verbatim
+    PASS: test_name
+
+    Testing done. 1 tests passed. 0 tests failed.
+   \endverbatim
+ *
+ * You can compile tests with the \c smash_add_unittest macro. You only need to
+ * pass it the name of the \c .cc file (without the file extension). So, if your
+ * test code above was saved in tests/testfile.cc, then you'd add the line
+ * \code
+ * smash_add_unittest(testfile)
+ * \endcode
+ * to the \c CMakeLists.txt .
+ * You will then get two new targets that you can build with make: \c testfile
+ * and \c run_testtest . The latter can be used to build and run a test quickly
+ * in "code - compile - test" cycles in test-driven development.
+ */
+
+/**
+ * \brief Defines a test function.
+ *
+ * Consider this to expand to `void
+ * function_name()`. The function_name will also be the name that appears in the
+ * output after PASS/FAIL.
+ */
+#define TEST(function_name)
+
+/**
+ * \brief Same as above, but expects the code to throw an exception of type \p
+ * ExceptionType.
+ *
+ * If the code does not throw (or throws a different exception),
+ * the test is considered failed.
+ */
+#define TEST_CATCH(function_name, ExceptionType)
+
+/**
+ * \brief Tests that should be tested with several types as template parameter
+ * can use this macro.
+ *
+ * Your test function then has this signature: `template <typename
+ * T> void function_name()`.
+ */
+#define TEST_BEGIN(T, function_name, typelist)
+
+/**
+ * \brief Test functions created with TEST_BEGIN need to end with TEST_END.
+ */
+#define TEST_END
+
+/**
+ * \brief Verifies that \p condition is \c true.
+ */
+#define VERIFY(condition)
+
+/**
+ * \brief Verifies that \p a is equal to \p b.
+ */
+#define COMPARE(a, b)
+
+/**
+ * \brief Verifies that \p a is equal to \p b within a pre-defined distance in
+ * units of least precision (ULP).
+ *
+ * If the test fails it will print the distance in ULP between \p a and \p b as
+ * well as the maximum allowed distance. Often this difference is not visible in
+ * the value because the conversion of a double/float to a string needs to round
+ * the value to a sensible length.
+ *
+ * The allowed distance can be modified by calling:
+ * \code
+ * UnitTest::setFuzzyness<float>(4);
+ * UnitTest::setFuzzyness<double>(7);
+ * \endcode
+ */
+#define FUZZY_COMPARE(a, b)
+
+/**
+ * \brief Call this to fail a test.
+ */
+#define FAIL()
+
+/**
+ * \brief Wrap code that should fail an assertion with this macro.
+ */
+#define EXPECT_ASSERT_FAILURE(code)
+
+/**
+ * @}
+ */
+
+#else
+
 namespace UnitTest {
 
 using std::vector;
@@ -721,6 +859,7 @@ int main(int argc, char **argv) {
   return UnitTest::global_unit_test_object_.finalize();
 }
 // }}}1
+#endif  // DOXYGEN
 #endif  // SRC_TESTS_UNITTEST_H_
 
 // vim: foldmethod=marker sw=2
