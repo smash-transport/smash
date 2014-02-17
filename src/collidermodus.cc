@@ -61,8 +61,8 @@ void ColliderModus::initial_conditions(Particles *particles,
     float mass = particles->type(i->first).mass();
     printf("id %d pdgcode %d mass %f\n", i->first, i->second.pdgcode(), mass);
     /* velocity of particles */
-    double cms_gamma = sqrts_ / mass;
-    double cms_beta = sqrt(sqrts_ * sqrts_ - mass * mass / sqrts_);
+    double cms_gamma = sqrts_ / 2 / mass;
+    double cms_beta = sqrt(sqrts_ * sqrts_ - 4 * mass * mass) / sqrts_;
     // Sample impact parameter
     double impact_parameter = drand48() * 5.0;
     if (i->first == 0) {
