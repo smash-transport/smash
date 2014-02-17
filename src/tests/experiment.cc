@@ -10,15 +10,24 @@
 #include "tests/unittest.h"
 
 #include "include/experiment.h"
+#include "include/configuration.h"
+
+#include <boost/filesystem.hpp>
 
 TEST(create_box) {
-  VERIFY(!!ExperimentBase::create("Box", 0));
+  Configuration conf(TEST_CONFIG_PATH);
+  conf["General"]["MODUS"] = "Box";
+  VERIFY(!!ExperimentBase::create(conf));
 }
 
 TEST(create_collider) {
-  VERIFY(!!ExperimentBase::create("Collider", 0));
+  Configuration conf(TEST_CONFIG_PATH);
+  conf["General"]["MODUS"] = "Collider";
+  VERIFY(!!ExperimentBase::create(conf));
 }
 
 TEST_CATCH(create_invalid, ExperimentBase::InvalidModusRequest) {
-  ExperimentBase::create("Invalid", 0);
+  Configuration conf(TEST_CONFIG_PATH);
+  conf["General"]["MODUS"] = "Invalid";
+  ExperimentBase::create(conf);
 }
