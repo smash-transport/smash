@@ -243,11 +243,16 @@ void Experiment<Modus>::end() {
 
 template <typename Modus>
 void Experiment<Modus>::run(std::string path) {
+  /* Write the header of OSCAR data output file */
+  write_oscar_header();
   for (int j = 0; j < nevents_; j++) {
-    write_oscar_header();
     initialize(path.c_str());
+    /* Write the initial data block of the event */
+    write_oscar_event_block(particles_, 0, particles_->size(), j + 1);
     /* the time evolution of the relevant subsystem */
     run_time_evolution();
+    /* Write the final data block of the event */
+    write_oscar_event_block(particles_, particles_->size(), 0, j + 1);
   }
   end();
 }
