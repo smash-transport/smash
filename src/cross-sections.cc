@@ -49,8 +49,8 @@ float CrossSections::elastic(Particles *particles, int id_a, int id_b)
   if (particles->type(id_a).pdgcode() == particles->type(id_b).pdgcode()) {
     return pp_elastic(p_lab_, mandelstam_s_, sqrt(squared_mass_a_));
   /* ppbar-scattering */
-  } else if (abs(particles->type(id_a).pdgcode())
-          == abs(particles->type(id_b).pdgcode())) {
+  } else if (std::abs(particles->type(id_a).pdgcode())
+          == std::abs(particles->type(id_b).pdgcode())) {
     return ppbar_elastic(p_lab_);
   /* np-scattering */
   } else {
@@ -73,8 +73,8 @@ float CrossSections::total(Particles *particles, int id_a, int id_b)
   if (particles->type(id_a).pdgcode() == particles->type(id_b).pdgcode()) {
     return pp_total(p_lab_);
   /* ppbar-scattering */
-  } else if (abs(particles->type(id_a).pdgcode())
-          == abs(particles->type(id_b).pdgcode())) {
+  } else if (std::abs(particles->type(id_a).pdgcode())
+          == std::abs(particles->type(id_b).pdgcode())) {
     return ppbar_total(p_lab_);
   /* np-scattering */
   } else {
