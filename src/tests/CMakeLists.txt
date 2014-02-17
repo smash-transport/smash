@@ -1,3 +1,6 @@
+# remove -Winline for test code
+string(REPLACE "-Winline " "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+
 # test sources
 add_executable(fourvector fourvector.cc)
 add_executable(lorentzboost lorentzboost.cc ../fourvector.cc)
