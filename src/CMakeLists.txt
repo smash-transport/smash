@@ -61,12 +61,19 @@ if(BUILD_TESTING)
    AddCompilerFlag(${ASAN_FLAG} CXX_RESULT HAVE_ADDRESS_SANITIZER)
    set(CMAKE_REQUIRED_FLAGS "${_tmp}")
    if(HAVE_ADDRESS_SANITIZER)
-      add_executable(smash_asan smash.cc ${smash_src})
+      add_library(smash_lib STATIC ${smash_src})
+      set_target_properties(smash_lib PROPERTIES
+         COMPILE_FLAGS ${ASAN_FLAG}
+         LINK_FLAGS ${ASAN_FLAG}
+         )
+
+      add_executable(smash_asan smash.cc)
       set_target_properties(smash_asan PROPERTIES
          COMPILE_FLAGS ${ASAN_FLAG}
          LINK_FLAGS ${ASAN_FLAG}
          )
-      target_link_libraries(smash_asan ${SMASH_LIBRARIES})
+      target_link_libraries(smash_asan smash_lib ${SMASH_LIBRARIES})
+
    endif()
 
    add_subdirectory(tests)

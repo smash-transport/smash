@@ -4,7 +4,6 @@ string(REPLACE "-Winline " "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 # test sources
 add_executable(fourvector fourvector.cc)
 add_executable(lorentzboost lorentzboost.cc ../fourvector.cc)
-add_executable(angles angles.cc)
 add_executable(angles_distribution angles_distribution.cc)
 add_executable(particles particles.cc ../particles.cc ../fourvector.cc ../distributions.cc ../outputroutines.cc ../time.cc)
 add_executable(clebschgordan clebschgordan.cc ../clebschgordan.cc)
@@ -15,9 +14,9 @@ file(COPY ../decaymodes.txt DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 target_link_libraries(particles ${SMASH_LIBRARIES})
 
+string(REPLACE " -Wfloat-equal" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 
 # tests:
-
 # Helper macro that adds a run_<name> target
 macro(smash_add_test name depends)
    add_test(NAME ${name} COMMAND ${ARGN})
@@ -29,15 +28,37 @@ macro(smash_add_test name depends)
       )
 endmacro()
 
+macro(smash_add_unittest name)
+   add_executable(${name} ${name}.cc)
+   set_target_properties(${name} PROPERTIES
+      COMPILE_FLAGS ${ASAN_FLAG}
+      LINK_FLAGS ${ASAN_FLAG}
+      )
+   target_link_libraries(${name} smash_lib ${SMASH_LIBRARIES})
+   smash_add_test(${name} ${name} ${name})
+endmacro()
+
 # test source code to be clean, requires cpplint in the path
 find_program(CPPLINT cpplint.py)
 if(CPPLINT)
    message(STATUS "cpplint.py found at ${CPPLINT}")
-   file(GLOB source "../*.cc" "../include/*.h" "*.cc")
-   add_test(cclint ${CPPLINT} ${source})
+   #file(GLOB source "../*.cc" "../include/*.h" "*.cc")
+   add_test(NAME cclint COMMAND ${CPPLINT} */*.cc */*/*.h
+      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+      )
+   add_custom_target(run_cclint
+      COMMAND ${CPPLINT} */*.cc */*/*.cc */*/*.h
+      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+      COMMENT "Executing test cclint"
+      )
 else()
    message(WARNING "cpplint.py was not found. The cclint test will be disabled.\nDownload from: http://google-styleguide.googlecode.com/svn/trunk/cpplint/cpplint.py")
 endif()
+
+smash_add_unittest(experiment)
+
+# some angle operations tests
+smash_add_unittest(angles)
 
 # some fourvector operations tests
 smash_add_test(fourvector fourvector fourvector)
@@ -45,8 +66,6 @@ smash_add_test(fourvector fourvector fourvector)
 # Lorentz boost tests
 smash_add_test(lorentzboost lorentzboost lorentzboost)
 
-# some angle operations tests
-smash_add_test(angles angles angles)
 
 # some particles operations tests
 smash_add_test(particles particles particles)

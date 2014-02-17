@@ -76,7 +76,7 @@ class Particles {
  private:
   /// Highest id of a given particle
   int id_max_;
-  /// dynamic data of the particles a map between it's id and data
+  /// dynamic data of the particles a map between its id and data
   std::map<int, ParticleData> data_;
   /// a map between pdg and correspoding static data of the particles
   std::map<int, ParticleType> types_;
