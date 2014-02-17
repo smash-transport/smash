@@ -1,7 +1,9 @@
+# remove -Winline for test code
+string(REPLACE "-Winline " "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+
 # test sources
 add_executable(fourvector fourvector.cc)
 add_executable(lorentzboost lorentzboost.cc ../fourvector.cc)
-add_executable(angles angles.cc)
 add_executable(angles_distribution angles_distribution.cc)
 add_executable(particles particles.cc ../particles.cc ../fourvector.cc ../distributions.cc ../outputroutines.cc ../time.cc)
 add_executable(clebschgordan clebschgordan.cc ../clebschgordan.cc)
@@ -59,14 +61,15 @@ add_definitions("-DBUILD_TESTS")
 smash_add_unittest(configuration)
 smash_add_unittest(experiment)
 
+# some angle operations tests
+smash_add_unittest(angles)
+
 # some fourvector operations tests
 smash_add_test(fourvector fourvector fourvector)
 
 # Lorentz boost tests
 smash_add_test(lorentzboost lorentzboost lorentzboost)
 
-# some angle operations tests
-smash_add_test(angles angles angles)
 
 # some particles operations tests
 smash_add_test(particles particles particles)
