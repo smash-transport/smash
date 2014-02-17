@@ -15,11 +15,13 @@
 
 #include <yaml-cpp/yaml.h>
 
+#ifndef DOXYGEN
 namespace boost {
 namespace filesystem {
 class path;
 }  // namespace filesystem
 }  // namespace boost
+#endif
 
 /**
  * Interface to the SMASH configuration files.
