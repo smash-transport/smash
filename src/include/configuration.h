@@ -106,22 +106,33 @@ class Configuration {
   Value take(std::initializer_list<const char *> keys);
 
   /**
-   * Returns the object behind the requested \p key.
+   * The default interface for SMASH to read configuration values.
    *
-   * You don't need to care about the return type of this function. Capture the
-   * return value in a variable by using \c auto.
-   * You can either call \c as<T>() with a specific type to convert the object
-   * into a known value type, or you can use subsequent bracket operator calls
-   * to get deeper in the configuration hierarchy.
+   * The function returns the value at the specified \p keys but does not remove it from
+   * the Configuration object. Semantically, this means the value was not used.
    *
-   * \return An opaque object where you can call operator[](const char *) or
-   * as<T>().
+   * \param keys You can pass an arbitrary number of keys inside curly braces,
+   *             following the nesting structure in the config file.
+   *
+   * \return A proxy object that converts to the correct type automatically on
+   *         assignment.
+   */
+  Value read(std::initializer_list<const char *> keys) const;
+
+  /**
+   * Access to the YAML::Node behind the requested \p keys.
+   *
+   * If you want to read a value use the \ref read function above. Use the
+   * subscript operator if you want to assign a new value. The YAML::Node class
+   * will automatically convert the data you assign to a string representation
+   * suitable for the YAML file.
+   *
+   * \return An opaque object that can be assigned to.
    *
    * \see take
+   * \see read
    */
-  decltype(config_general_[""]) operator[](const char *key) const {
-    return config_general_[key];
-  }
+  YAML::Node operator[](std::initializer_list<const char *> keys);
 
   /**
    * Returns whether there is a value behind the requested \p keys.
