@@ -58,8 +58,10 @@ void ColliderModus::initial_conditions(Particles *particles,
   particles->create(1, projectile_);
   /* Pointer to "projectile" data */
   ParticleData *data_projectile = particles->data_pointer(particles->id_max());
-  float mass = particles->particle_type(data_projectile->pdgcode()).mass();
-  printf("projectile pdgcode %d mass %f\n", data_projectile->pdgcode(), mass);
+  float mass_projectile
+    = particles->particle_type(data_projectile->pdgcode()).mass();
+  printf("projectile pdgcode %d mass %f\n", data_projectile->pdgcode(),
+         mass_projectile);
   /* Create "target" particle */
   particles->create(1, target_);
   /* Pointer to "target" data */
@@ -68,14 +70,19 @@ void ColliderModus::initial_conditions(Particles *particles,
     = particles->particle_type(data_target->pdgcode()).mass();
   printf("target pdgcode %d mass %f\n", data_target->pdgcode(),
          mass_target);
-  /* velocity of particles (equal masses assumed) */
-  double cms_gamma = sqrts_ / 2 / mass;
-  double cms_beta = sqrt(sqrts_ * sqrts_ - 4 * mass * mass) / sqrts_;
-  // Sample impact parameter
+  /* Projectile energy in CMS */
+  double cms_energy_projectile = (sqrts_ * sqrts_
+                                  + mass_projectile * mass_projectile
+                                  - mass_target * mass_target)
+                                 / (2 * sqrts_);
+  /* CMS momentum, same in magnitude for both */
+  double cms_momentum = sqrt(cms_energy_projectile * cms_energy_projectile
+                             - mass_projectile * mass_projectile);
+  /* Sample impact parameter */
   double impact_parameter = drand48() * 5.0;
   /* Set positions and momenta */
   data_projectile->set_position(1.0, impact_parameter, 0.0, -1.0);
-  data_projectile->set_momentum(mass, 0.0, 0.0, cms_gamma * cms_beta * mass);
+  data_projectile->set_momentum(mass_projectile, 0.0, 0.0, cms_momentum);
   data_target->set_position(1.0, 0.0, 0.0, 1.0);
-  data_target->set_momentum(mass, 0.0, 0.0, -cms_gamma * cms_beta * mass);
+  data_target->set_momentum(mass_target, 0.0, 0.0, -cms_momentum);
 }
