@@ -16,17 +16,15 @@
 #include "include/modusdefault.h"
 #include "include/particles.h"
 #include "include/parameters.h"
+class Configuration;
 
 struct ExperimentParameters;
 
 class ColliderModus : public ModusDefault {
  public:
   /* default constructor with probable values */
-  ColliderModus() = default;
+  ColliderModus(Configuration &config);
 
-  /* special class funtions */
-  void assign_params(
-      std::list<Parameters> *configuration);  // TODO(mkretz) -> ctor
   void print_startup();  // TODO(mkretz): needs to be discoverable from an
                          // outside "printer"
 

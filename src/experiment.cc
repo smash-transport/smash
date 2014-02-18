@@ -15,6 +15,7 @@
 #include <string>
 
 #include "include/boxmodus.h"
+#include "include/configuration.h"
 #include "include/collidermodus.h"
 #include "include/collisions.h"
 #include "include/decays.h"
@@ -29,25 +30,36 @@
 /* #include "include/spheremodus.h" */
 
 /* ExperimentBase carries everything that is needed for the evolution */
-std::unique_ptr<ExperimentBase> ExperimentBase::create(
-    std::string modus_chooser, int nevents) {
+std::unique_ptr<ExperimentBase> ExperimentBase::create(Configuration &config) {
+  const std::string modus_chooser = config.take({"General", "MODUS"});
+  printf("Modus for this calculation: %s\n", modus_chooser.c_str());
+
   typedef std::unique_ptr<ExperimentBase> ExperimentPointer;
   if (modus_chooser.compare("Box") == 0) {
-    return ExperimentPointer(new Experiment<BoxModus>(nevents));
+    return ExperimentPointer(new Experiment<BoxModus>(config));
   } else if (modus_chooser.compare("Collider") == 0) {
-    return ExperimentPointer(new Experiment<ColliderModus>(nevents));
+    return ExperimentPointer(new Experiment<ColliderModus>(config));
   } else {
     throw InvalidModusRequest("Invalid Modus (" + modus_chooser +
                               ") requested from ExperimentBase::create.");
   }
 }
 
-/* This method reads the parameters in */
 template <typename Modus>
-void Experiment<Modus>::configure(std::list<Parameters> configuration) {
-  assign_params(&configuration);
-  warn_wrong_params(&configuration);
+Experiment<Modus>::Experiment(Configuration &config)
+    : modus_(config),
+      nevents_        (config.take({"General", "NEVENTS"})),
+      steps_          (config.take({"General", "STEPS"})),
+      output_interval_(config.take({"General", "UPDATE"})),
+      seed_           (config.take({"General", "RANDOMSEED"})) {
+  if (seed_ < 0) {
+    seed_ = time(nullptr);
+  }
+  parameters_.testparticles = config.take({"General", "TESTPARTICLES"});
+  parameters_.eps           = config.take({"General", "EPS"});
+  parameters_.cross_section = config.take({"General", "SIGMA"});
   print_startup();
+
   /* reducing cross section according to number of test particle */
   if (parameters_.testparticles > 1) {
     printf("IC test particle: %i\n", parameters_.testparticles);
@@ -55,12 +67,6 @@ void Experiment<Modus>::configure(std::list<Parameters> configuration) {
         parameters_.cross_section / parameters_.testparticles;
     printf("Elastic cross section: %g mb\n", parameters_.cross_section);
   }
-}
-
-/* This allows command line arguments to override default. */
-template <typename Modus>
-void Experiment<Modus>::commandline_arg(int steps) {
-  steps_ = steps;
 }
 
 /* This method reads the particle type and cross section information
@@ -153,57 +159,6 @@ void Experiment<Modus>::run_time_evolution() {
   }
 }
 
-template <typename Modus>
-void Experiment<Modus>::assign_params(std::list<Parameters> *configuration) {
-  modus_.assign_params(configuration);  // TODO(mkretz): fold into constructor
-
-  bool match = false;
-  std::list<Parameters>::iterator i = configuration->begin();
-  while (i != configuration->end()) {
-    char *key = i->key();
-    char *value = i->value();
-    printd("Looking for match %s %s\n", key, value);
-    /* integer values */
-    if (strcmp(key, "STEPS") == 0) {
-      steps_ = (abs(atoi(value)));
-      match = true;
-    }
-    if (strcmp(key, "RANDOMSEED") == 0) {
-      /* negative seed_ means random startup value */
-      if (atol(value) > 0)
-        seed_ = (atol(value));
-      else
-        seed_ = (time(NULL));
-      match = true;
-    }
-    if (strcmp(key, "UPDATE") == 0) {
-      output_interval_ = (abs(atoi(value)));
-      match = true;
-    }
-    if (strcmp(key, "TESTPARTICLES") == 0) {
-      parameters_.testparticles = (abs(atoi(value)));
-      match = true;
-    }
-    /* double or float values */
-    if (strcmp(key, "EPS") == 0) {
-      parameters_.eps = (fabs(atof(value)));
-      match = true;
-    }
-    if (strcmp(key, "SIGMA") == 0) {
-      parameters_.cross_section = (fabs(atof(value)));
-      match = true;
-    }
-    /* remove processed entry */
-    if (match) {
-      printd("Erasing %s %s\n", key, value);
-      i = configuration->erase(i);
-      match = false;
-    } else {
-      ++i;
-    }
-  }
-}
-
 /* print_startup - console output on startup of general parameters */
 template <typename Modus>
 void Experiment<Modus>::print_startup() {
@@ -243,11 +198,16 @@ void Experiment<Modus>::end() {
 
 template <typename Modus>
 void Experiment<Modus>::run(std::string path) {
+  /* Write the header of OSCAR data output file */
+  write_oscar_header();
   for (int j = 0; j < nevents_; j++) {
-    write_oscar_header();
     initialize(path.c_str());
+    /* Write the initial data block of the event */
+    write_oscar_event_block(particles_, 0, particles_->size(), j + 1);
     /* the time evolution of the relevant subsystem */
     run_time_evolution();
+    /* Write the final data block of the event */
+    write_oscar_event_block(particles_, particles_->size(), 0, j + 1);
   }
   end();
 }

@@ -46,6 +46,8 @@ void printd_list(const std::list<int> &collision_list);
 /* output data files */
 void write_particles(const Particles &particles);
 void write_oscar_header(void);
+void write_oscar_event_block(Particles *particles,
+                             size_t initial, size_t final, int event_id);
 void write_oscar(const ParticleData &particle_data,
                  const ParticleType &particle_type, int initial, int final);
 void write_oscar(const ParticleData &particle_data,

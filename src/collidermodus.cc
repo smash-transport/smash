@@ -9,39 +9,15 @@
 #include <list>
 
 #include "include/collidermodus.h"
+#include "include/configuration.h"
 #include "include/experimentparameters.h"
 #include "include/outputroutines.h"
 #include "include/parameters.h"
 
-void ColliderModus::assign_params(std::list<Parameters> *configuration) {
-  bool match = false;
-  std::list<Parameters>::iterator i = configuration->begin();
-  while (i != configuration->end()) {
-    char *key = i->key();
-    char *value = i->value();
-    printd("%s %s\n", key, value);
-    /* integer values */
-    if (strcmp(key, "PROJECTILE") == 0) {
-      projectile_ = atoi(value);
-      match = true;
-    }
-    if (strcmp(key, "TARGET") == 0) {
-      target_ = atoi(value);
-      match = true;
-    }
-    /* float values */
-    if (strcmp(key, "SQRTS") == 0) {
-      sqrts_ = (fabs(atof(value)));
-      match = true;
-    }
-    /* remove processed entry */
-    if (match) {
-      i = configuration->erase(i);
-      match = false;
-    } else {
-      ++i;
-    }
-  }
+ColliderModus::ColliderModus(Configuration &config)
+    : projectile_(config.take({"Collider", "PROJECTILE"})),
+      target_    (config.take({"Collider", "TARGET"})),
+      sqrts_     (config.take({"Collider", "SQRTS"})) {
 }
 
 /* print_startup - console output on startup of box specific parameters */

@@ -13,8 +13,6 @@
 /* forward declarations */
 class Particles;
 
-extern const char *sep;
-
 /* read input file particle types */
 void input_particles(Particles *particles, const char *path);
 

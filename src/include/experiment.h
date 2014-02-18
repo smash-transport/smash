@@ -18,6 +18,7 @@
 #include "include/outputroutines.h"
 #include "include/parameters.h"
 #include "include/particles.h"
+class Configuration;
 
 /**
  * Non-template interface to Experiment<Modus>.
@@ -35,31 +36,23 @@ class ExperimentBase {
    */
   virtual ~ExperimentBase() {}
 
-  virtual void configure(std::list<Parameters> configuration) = 0;
-  virtual void commandline_arg(int steps) = 0;
-
   /**
-   * Factory method that creates a new Experiment<Modus>.
+   * Factory method that creates and initializes a new Experiment<Modus>.
    *
-   * This functions will create a new Experiment object. The Modus template
-   * argument is determined by the \p modus_chooser argument. All remaining
-   * arguments are forwarded to the Experiment constructor.
+   * This function creates a new Experiment object. The Modus template
+   * argument is determined by the \p config argument.
    *
-   * \param modus_chooser A string with one of the following values:
-   *                      * Box
-   *                      * Collider
-   *                      If the value of the string does not match any of the
-   *                      above, the function will throw an exception.
-   * \param nevents See Experiment::Experiment.
+   * \param config The configuration object that sets all initial conditions of
+   *               the experiment.
    *
    * \return An owning pointer to the Experiment object, using the
    *         ExperimentBase interface.
    *
    * \throws InvalidModusRequest This exception is thrown if the \p
-   *         modus_chooser string does not contain a valid string.
+   *         Modus string in the \p config object does not contain a valid
+   *         string.
    */
-  static std::unique_ptr<ExperimentBase> create(std::string modus_chooser,
-                                                int nevents);
+  static std::unique_ptr<ExperimentBase> create(Configuration &config);
 
   virtual void run(std::string path) = 0;
 
@@ -101,9 +94,6 @@ class Experiment : public ExperimentBase {
   friend class ExperimentBase;
 
  public:
-  virtual void configure(std::list<Parameters> configuration) override;
-  virtual void commandline_arg(int steps) override;
-
   virtual void run(std::string path) override;
 
  private:
@@ -113,16 +103,19 @@ class Experiment : public ExperimentBase {
    * This constructor is only called from the ExperimentBase::create factory
    * method.
    *
-   * \param nevents XXX
+   * \param config  The Configuration object contains all initial setup of the
+   *                experiment. It is forwarded to the constructors of member
+   *                variables as needed.
+   *                Note that the object is passed by non-const reference. This
+   *                is only necessary for bookkeeping: Values are not only read,
+   *                but actually taken out of the object. Thus, all values that
+   *                remain were not used.
    */
-  explicit Experiment(int nevents) : nevents_(nevents) {
-  }
+  explicit Experiment(Configuration &config);
 
   void initialize(const char *path);
   void run_time_evolution();
   void end();
-
-  void assign_params(std::list<Parameters> *configuration);
 
   void print_startup();
 
