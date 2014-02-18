@@ -46,20 +46,20 @@ YAML::Node remove_empty_maps(YAML::Node root) {
 }
 }  // unnamed namespace
 
-Configuration::Configuration(const bf::path &path) {
-  const auto file_path = path / "config_general.yaml";
-  assert(bf::exists(file_path));
-  config_general_ = YAML::LoadFile(file_path.native());
+Configuration::Configuration(const bf::path &path)
+    : Configuration(path, "config_general.yaml") {
 }
 
-YAML::Node Configuration::operator[](std::initializer_list<const char *> keys) {
-  return find_node_at(config_general_, keys);
+Configuration::Configuration(const bf::path &path, const std::string &filename) {
+  const auto file_path = path / filename;
+  assert(bf::exists(file_path));
+  root_node_ = YAML::LoadFile(file_path.native());
 }
 
 Configuration::Value Configuration::take(
     std::initializer_list<const char *> keys) {
   assert(keys.size() > 0);
-  auto node = config_general_;
+  auto node = root_node_;
   auto keyIt = begin(keys);
   std::size_t i = 0;
   for (; i < keys.size() - 1; ++i, ++keyIt) {
@@ -76,15 +76,15 @@ Configuration::Value Configuration::take(
 
 Configuration::Value Configuration::read(
     std::initializer_list<const char *> keys) const {
-  return {find_node_at(config_general_, keys)};
+  return {find_node_at(root_node_, keys)};
 }
 
 bool Configuration::has_value(std::initializer_list<const char *> keys) const {
-  return find_node_at(config_general_, keys).IsDefined();
+  return find_node_at(root_node_, keys).IsDefined();
 }
 
 std::string Configuration::unused_values_report() const {
   std::stringstream s;
-  s << remove_empty_maps(config_general_);
+  s << remove_empty_maps(root_node_);
   return s.str();
 }

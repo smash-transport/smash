@@ -27,10 +27,6 @@ class path;
  * Interface to the SMASH configuration files.
  */
 class Configuration {
-  /// the general_config.yaml contents - fully parsed
-  YAML::Node config_general_;  // this needs to be on top for decltype in
-                               // operator[] to compile.
-
  public:
   /// Thrown when the types in the config file and C++ don't match.
   struct IncorrectTypeInAssignment : public std::runtime_error {
@@ -46,10 +42,10 @@ class Configuration {
    */
   class Value {
     /// a YAML leaf node
-    const YAML::Node &node_;
+    const YAML::Node node_;
 
    public:
-    Value(YAML::Node n) : node_(n) {
+    Value(const YAML::Node &n) : node_(n) {
       assert(n.IsScalar() || n.IsSequence() || n.IsMap());
     }
 
@@ -78,11 +74,27 @@ class Configuration {
   };
 
   /**
-   * Read config files from the specified \p path.
+   * Reads config_general.yaml from the specified \p path.
    *
    * \param path The directory where the SMASH config files are located.
    */
   explicit Configuration(const boost::filesystem::path &path);
+
+  /**
+   * Reads a YAML config file from the specified \p path.
+   *
+   * \param path The directory where the SMASH config files are located.
+   * \param filename The filename (without path) of the YAML config file, in
+   *                 case you don't want the default "config_general.yaml".
+   */
+  explicit Configuration(const boost::filesystem::path &path,
+                         const std::string &filename);
+
+  Configuration(const Configuration &) = delete;
+  Configuration &operator=(const Configuration &) = delete;
+
+  Configuration(Configuration &&) = default;
+  Configuration &operator=(Configuration &&) = default;
 
   /**
    * The default interface for SMASH to read configuration values.
@@ -134,7 +146,16 @@ class Configuration {
    * \see take
    * \see read
    */
-  YAML::Node operator[](std::initializer_list<const char *> keys);
+  template <typename T>
+  Configuration operator[](T &&key) {
+    return root_node_[std::forward<T>(key)];
+  }
+
+  template <typename T>
+  Configuration &operator=(T &&value) {
+    root_node_ = std::forward<T>(value);
+    return *this;
+  }
 
   /**
    * Returns whether there is a value behind the requested \p keys.
@@ -145,5 +166,13 @@ class Configuration {
    * Returns a string listing the key/value pairs that have not been taken yet.
    */
   std::string unused_values_report() const;
+
+ private:
+  /// Creates a subobject that has its root node at the given node.
+  Configuration(const YAML::Node &node) : root_node_(node) {
+  }
+
+  /// the general_config.yaml contents - fully parsed
+  YAML::Node root_node_;
 };
 #endif  // SRC_INCLUDE_CONFIGURATION_H_
