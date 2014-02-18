@@ -10,52 +10,12 @@
 
 #include "include/nucleusmodus.h"
 #include "include/angles.h"
+#include "include/configuration.h"
 #include "include/experimentparameters.h"
 #include "include/outputroutines.h"
-#include "include/parameters.h"
 
-void NucleusModus::assign_params(std::list<Parameters> *configuration) {
-  bool match = false;
-  std::list<Parameters>::iterator i = configuration->begin();
-  while (i != configuration->end()) {
-    char *key = i->key();
-    char *value = i->value();
-    printd("%s %s\n", key, value);
-    /* integer values */
-    if (strcmp(key, "PROJECTILE") == 0) {
-      // projectile_.add_particle(atoi(value));
-      match = true;
-    }
-    if (strcmp(key, "TARGET") == 0) {
-      // target_.push_back(atoi(value));
-      match = true;
-    }
-    /* float values */
-    if (strcmp(key, "SQRTS") == 0) {
-      sqrts_ = (fabs(atof(value)));
-      match = true;
-    }
-    /* remove processed entry */
-    if (match) {
-      i = configuration->erase(i);
-      match = false;
-    } else {
-      ++i;
-    }
-  }
-}
-
-/* print_startup - console output on startup of box specific parameters */
-void NucleusModus::print_startup() {
-//  for (std::vector<int>::iterator p = projectile_.begin();
-//                       p != projectile_.end(); p++) {
-//    printf("Particle in projectile: %d\n", *p);
-//  }
-//  for (std::vector<int>::iterator t = target_.begin();
-//                       t != target_.end(); t++) {
-//    printf("Particle in target: %d\n", *t);
-//  }
-//  printf("Center-of-mass energy %10.3f GeV\n", sqrts_);
+NucleusModus::NucleusModus(Configuration &config)
+    : sqrt_s_NN_(config.take({"Nucleus", "SQRTSNN"})) {
 }
 
 /* initial_conditions - sets particle data for @particles */
@@ -82,22 +42,13 @@ void NucleusModus::initial_conditions(Particles *particles,
   //    Second, boost nuclei
   //    Third, shift them so that they barely touch each other
   //    Fourth, set the time when they /will/ touch to 0.0.
-  //
-  // NUMERICS:
-  //
-  //    Maybe there should be a new class "Nucleus" that carries the
-  //    parameters of that nucleus like particle list (not the particles
-  //    themselves, but the information "5 protons, 7 Lambdas, 2
-  //    neutrons"), mass and initial displacement (as well as initial
-  //    velocity). This would only be needed here, though, so it is not
-  //    clear if there is a benefit from a new class.
-  float sqrt_s_NN = 24.f;
-  float mass_projec = projectile_.get_mass();
-  float mass_target = target_.get_mass();
-  float mass_proton = particles->particle_type(2212).mass();
-  float total_mandelstam_s = (sqrt_s_NN - 2.0*mass_proton*mass_proton)
+  float mass_projec = projectile_.mass();
+  float mass_target = target_.mass();
+  float mass_1 = particles->particle_type(pdg_sNN_1_).mass();
+  float mass_2 = particles->particle_type(pdg_sNN_2_).mass();
+  float total_mandelstam_s = (sqrt_s_NN_ - mass_1*mass_1 - mass_2*mass_2)
                              * mass_projec*mass_target
-                             / (mass_proton*mass_proton)
+                             / (mass_1*mass_2)
                            + mass_projec*mass_projec + mass_target*mass_target;
   float velocity_squared = (total_mandelstam_s - (mass_projec+mass_target))
                          / (total_mandelstam_s - (mass_projec-mass_target));

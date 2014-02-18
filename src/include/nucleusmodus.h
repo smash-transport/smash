@@ -12,6 +12,7 @@
 #include <list>
 #include <string>
 
+#include "include/configuration.h"
 #include "include/crosssections.h"
 #include "include/modusdefault.h"
 #include "include/nucleus.h"
@@ -23,31 +24,24 @@ struct ExperimentParameters;
 class NucleusModus : public ModusDefault {
  public:
   /* default constructor with probable values */
-  NucleusModus() = default;
-
-  /* special class funtions */
-  void assign_params(
-      std::list<Parameters> *configuration);  // TODO(mkretz) -> ctor
-  void print_startup();  // TODO(mkretz): needs to be discoverable from an
-                         // outside "printer"
+  NucleusModus(Configuration& config);
 
   void initial_conditions(Particles *particles,
                           const ExperimentParameters &parameters);
 
-  // in ModusDefault:
-  // * sanity_check
-  // * check_collision_geometry
-  // * propagate
-
  private:
   Nucleus projectile_;
   Nucleus target_;
-  // Center-of-mass energy of the collision
-  float sqrts_ = 1.f;
-  // initial separation of nuclei from origin
-  float initial_displacement_ = 1.1;
-  // steepness of woods-saxon distribution
-  float steepness_ = .545;
+  /// Center-of-mass energy of the individual nucleon-nucleon collisions.
+  /// Note that sqrt(s_pp) != sqrt(s_nn) [i.e., sqrt(s) depends on the
+  /// masses of the pair of particles we are looking at), therefore, we
+  /// also need to specify which particle pair this really refers to.
+  /// That is done with pdg_sNN_1_ and pdg_sNN_2_.
+  float sqrt_s_NN_ = 1.f;
+  /// PDG code of the first particle in the pair that defines sqrt(s_NN)
+  int pdg_sNN_1_ = 2212;
+  /// PDG code of the second particle in the pair that defines sqrt(s_NN)
+  int pdg_sNN_2_ = 2212;
 };
 
 #endif  // SRC_INCLUDE_NUCLEUSMODUS_H_

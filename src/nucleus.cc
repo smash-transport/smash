@@ -8,22 +8,21 @@
 #include "include/nucleus.h"
 #include "include/angles.h"
 
-float Nucleus::get_mass() const {
-  float mass = 0.f;
+float Nucleus::mass() const {
+  float total_mass = 0.f;
   for (std::map<int, ParticleData>::const_iterator i = cbegin();
        i != cend(); i++) {
-    mass += particle_type(i->second.pdgcode()).mass();
+    total_mass += particle_type(i->second.pdgcode()).mass();
   }
-  return mass;
+  return total_mass;
 }
 
+/// Nuclear radius is calculated with the proton radius times the third
+/// power of the number of nucleons.
 float inline Nucleus::nuclear_radius() const {
   return proton_radius_*pow(size(), 1./3.);
 }
 
-/* returns a length r with a relative probability of $$\frac{dN}{dr} =
- * \frac{r^2}{\exp\left(\frac{r-R}{d}\right) + 1}$$ where $d$ is a class
- * parameter and $R$ is the function parameter ''radius''. */
 float Nucleus::distribution_nucleons() const {
   float radius_scaled = nuclear_radius()/softness_;
   float prob_range1 = 1.0;
@@ -53,10 +52,17 @@ float Nucleus::distribution_nucleons() const {
 
 void Nucleus::arrange_nucleons() {
   for (auto i = begin(); i != end(); i++) {
+    // get radial position of current nucleon:
     float r = distribution_nucleons();
+    // get solid angle for current nucleon:
     Angles dir;
     dir.distribute_isotropically();
-    i->second.set_position(0.0, r*dir.x(), r*dir.y(), r*dir.z());
+    double z = r*dir.z();
+    // set position of current nucleon:
+    i->second.set_position(0.0, r*dir.x(), r*dir.y(), z);
+    // update maximal and minimal z values
+    z_max_ = (z > z_max_) ? z : z_max_;
+    z_min_ = (z > z_min_) ? z : z_min_;
   }
 }
 
@@ -79,7 +85,11 @@ void Nucleus::boost(const double& beta_squared) {
     this_momentum.LorentzBoost(u_mu);
     i->second.set_momentum(this_momentum);
   }
-  // we also need to update max_z_:
-  max_z_ *= one_over_gamma;
+  // we also need to update z_max_:
+  z_max_ *= one_over_gamma;
+  return;
+}
+
+void Nucleus::add_particle(const int pdgcode) {
   return;
 }
