@@ -122,7 +122,8 @@ class Configuration {
   Value take(std::initializer_list<const char *> keys);
 
   /**
-   * The default interface for SMASH to read configuration values.
+   * Additional interface for SMASH to read configuration values without
+   * removing them.
    *
    * The function returns the value at the specified \p keys but does not remove it from
    * the Configuration object. Semantically, this means the value was not used.
