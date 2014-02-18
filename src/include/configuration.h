@@ -42,10 +42,10 @@ class Configuration {
    */
   class Value {
     /// a YAML leaf node
-    const YAML::Node &node_;
+    const YAML::Node node_;
 
    public:
-    Value(YAML::Node n) : node_(n) {
+    Value(const YAML::Node &n) : node_(n) {
       assert(n.IsScalar() || n.IsSequence() || n.IsMap());
     }
 
