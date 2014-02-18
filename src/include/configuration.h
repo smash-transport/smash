@@ -90,6 +90,12 @@ class Configuration {
   explicit Configuration(const boost::filesystem::path &path,
                          const std::string &filename);
 
+  Configuration(const Configuration &) = delete;
+  Configuration &operator=(const Configuration &) = delete;
+
+  Configuration(Configuration &&) = default;
+  Configuration &operator=(Configuration &&) = default;
+
   /**
    * The default interface for SMASH to read configuration values.
    *
