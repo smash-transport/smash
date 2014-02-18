@@ -29,10 +29,11 @@ char *progname;
 static void usage(int rc) {
   printf("\nUsage: %s [option]\n\n", progname);
   printf("Calculate transport box\n"
-         "  -h, --help           usage information\n"
-         "  -c, --config <YAML>  specify config value overrides\n"
-         "  -m, --modus <modus>  shortcut for -c 'General: { MODUS: <modus> }'\n"
-         "  -s, --steps <steps>  shortcut for -c 'General: { STEPS: <modus> }'\n"
+         "  -h, --help              usage information\n"
+         "  -i, --inputfile <file>  path to input configuration file\n"
+         "  -c, --config <YAML>     specify config value overrides\n"
+         "  -m, --modus <modus>     shortcut for -c 'General: { MODUS: <modus> }'\n"
+         "  -s, --steps <steps>     shortcut for -c 'General: { STEPS: <modus> }'\n"
          "  -v, --version\n\n");
   exit(rc);
 }
@@ -43,8 +44,9 @@ int main(int argc, char *argv[]) {
   char *p, *path;
   int opt, rc = 0;
   struct option longopts[] = {
-    { "help",       no_argument,            0, 'h' },
     { "config",     required_argument,      0, 'c' },
+    { "help",       no_argument,            0, 'h' },
+    { "inputfile",  required_argument,      0, 'i' },
     { "modus",      required_argument,      0, 'm' },
     { "steps",      required_argument,      0, 's' },
     { "version",    no_argument,            0, 'v' },
@@ -66,9 +68,16 @@ int main(int argc, char *argv[]) {
     Configuration configuration(path);
 
     /* check for overriding command line arguments */
-    while ((opt = getopt_long(argc, argv, "hc:m:s:v", longopts,
+    while ((opt = getopt_long(argc, argv, "c:hi:m:s:v", longopts,
                               nullptr)) != -1) {
       switch (opt) {
+        case 'c':
+          configuration.merge_yaml(optarg);
+          break;
+        case 'i': {
+          const boost::filesystem::path file(optarg);
+          configuration = Configuration(file.parent_path(), file.filename());
+        } break;
         case 'h':
           usage(EXIT_SUCCESS);
           break;
@@ -77,9 +86,6 @@ int main(int argc, char *argv[]) {
           break;
         case 's':
           configuration["General"]["STEPS"] = abs(atoi(optarg));
-          break;
-        case 'c':
-          configuration.merge_yaml(optarg);
           break;
         case 'v':
           exit(EXIT_SUCCESS);

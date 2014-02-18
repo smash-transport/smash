@@ -88,7 +88,7 @@ class Configuration {
    *                 case you don't want the default "config_general.yaml".
    */
   explicit Configuration(const boost::filesystem::path &path,
-                         const std::string &filename);
+                         const boost::filesystem::path &filename);
 
   Configuration(const Configuration &) = delete;
   Configuration &operator=(const Configuration &) = delete;
