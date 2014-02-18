@@ -19,23 +19,22 @@ TEST(create_object) {
 TEST(check_config_general_contents) {
   Configuration conf(TEST_CONFIG_PATH);
 
-  const auto general = conf["General"];
-  COMPARE(general["MODUS"        ].as<std::string>(), "Collider");
-  COMPARE(general["EPS"          ].as<double     >(), 0.01);
-  COMPARE(general["STEPS"        ].as<int        >(), 1000);
-  COMPARE(general["UPDATE"       ].as<int        >(), 10);
-  COMPARE(general["RANDOMSEED"   ].as<int        >(), 1);
-  COMPARE(general["SIGMA"        ].as<double     >(), 10.0);
-  COMPARE(general["TESTPARTICLES"].as<int        >(), 1);
-  COMPARE(general["NEVENTS"      ].as<int        >(), 1);
+  std::string modus = conf.read({"General", "MODUS"        });
+  COMPARE(modus, "Collider");
+  COMPARE(double(conf.read({"General", "EPS"          })), 0.01);
+  COMPARE(int   (conf.read({"General", "STEPS"        })), 1000);
+  COMPARE(int   (conf.read({"General", "UPDATE"       })), 10);
+  COMPARE(int   (conf.read({"General", "RANDOMSEED"   })), 1);
+  COMPARE(double(conf.read({"General", "SIGMA"        })), 10.0);
+  COMPARE(int   (conf.read({"General", "TESTPARTICLES"})), 1);
+  COMPARE(int   (conf.read({"General", "NEVENTS"      })), 1);
 }
 
 TEST(check_config_collider_contents) {
   Configuration conf(TEST_CONFIG_PATH);
-  const auto collider = conf["Collider"];
-  COMPARE(collider["PROJECTILE"].as<int        >(), 211);
-  COMPARE(collider["TARGET"    ].as<int        >(), -211);
-  COMPARE(collider["SQRTS"     ].as<double     >(), 1.0);
+  COMPARE(int   (conf.read({"Collider", "PROJECTILE"})), 211);
+  COMPARE(int   (conf.read({"Collider", "TARGET"    })), -211);
+  COMPARE(double(conf.read({"Collider", "SQRTS"     })), 1.0);
 }
 
 TEST(test_take) {
@@ -113,4 +112,36 @@ TEST(check_unused_report) {
   conf.take({"Collider", "TARGET"});
   reference = "{}";
   COMPARE(conf.unused_values_report(), reference);
+}
+
+TEST(test_config_read) {
+  Configuration conf(TEST_CONFIG_PATH);
+  int nevents = conf.read({"General", "NEVENTS"});
+  COMPARE(nevents, 1);
+  nevents = conf.read({"General", "NEVENTS"});
+  COMPARE(nevents, 1);
+  nevents = conf.take({"General", "NEVENTS"});
+  COMPARE(nevents, 1);
+}
+
+TEST(test_sub_config_objects) {
+  Configuration conf(TEST_CONFIG_PATH);
+  Configuration general = conf["General"];
+  const Configuration box = conf["Box"];
+  VERIFY(general.has_value({"NEVENTS"}));
+  int nevents = general.read({"NEVENTS"});
+  VERIFY(general.has_value({"NEVENTS"}));
+  COMPARE(nevents, 1);
+  nevents = general.take({"NEVENTS"});
+  VERIFY(!general.has_value({"NEVENTS"}));
+  COMPARE(nevents, 1);
+  COMPARE(double(box.read({"LENGTH"})), 10.);
+}
+
+TEST(check_setting_new_value) {
+  Configuration conf(TEST_CONFIG_PATH);
+  VERIFY(!conf.has_value({"Test"}));
+  conf["Test"] = 1.;
+  VERIFY(conf.has_value({"Test"}));
+  COMPARE(double(conf.read({"Test"})), 1.);
 }

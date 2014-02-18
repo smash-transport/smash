@@ -146,7 +146,16 @@ class Configuration {
    * \see take
    * \see read
    */
-  YAML::Node operator[](std::initializer_list<const char *> keys);
+  template <typename T>
+  Configuration operator[](T &&key) {
+    return root_node_[std::forward<T>(key)];
+  }
+
+  template <typename T>
+  Configuration &operator=(T &&value) {
+    root_node_ = std::forward<T>(value);
+    return *this;
+  }
 
   /**
    * Returns whether there is a value behind the requested \p keys.
@@ -159,6 +168,10 @@ class Configuration {
   std::string unused_values_report() const;
 
  private:
+  /// Creates a subobject that has its root node at the given node.
+  Configuration(const YAML::Node &node) : root_node_(node) {
+  }
+
   /// the general_config.yaml contents - fully parsed
   YAML::Node root_node_;
 };
