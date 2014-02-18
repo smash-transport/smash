@@ -22,7 +22,7 @@ set(SMASH_LIBRARIES
    ${GSL_LIBRARY}
    ${GSL_CBLAS_LIBRARY}
    ${Boost_LIBRARIES}
-   ${YAML_LIBRARIES}
+   ${YAML_LDFLAGS}
    )
 
 # if clock_gettime is in rt link against it
