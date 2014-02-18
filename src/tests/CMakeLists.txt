@@ -60,6 +60,7 @@ endif()
 add_definitions("-DTEST_CONFIG_PATH=\"${PROJECT_SOURCE_DIR}/src\"")
 add_definitions("-DBUILD_TESTS")
 
+smash_add_unittest(yamltest)
 smash_add_unittest(configuration)
 smash_add_unittest(experiment)
 
