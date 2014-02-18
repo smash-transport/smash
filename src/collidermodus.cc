@@ -54,23 +54,28 @@ void ColliderModus::print_startup() {
 /* initial_conditions - sets particle data for @particles */
 void ColliderModus::initial_conditions(Particles *particles,
                                        const ExperimentParameters &) {
+  /* Create "projectile" particle */
   particles->create(1, projectile_);
+  /* Pointer to "projectile" data */
+  ParticleData *data_projectile = particles->data_pointer(particles->id_max());
+  float mass = particles->particle_type(data_projectile->pdgcode()).mass();
+  printf("projectile pdgcode %d mass %f\n", data_projectile->pdgcode(), mass);
+  /* Create "target" particle */
   particles->create(1, target_);
-
-  for (auto i = particles->begin(); i != particles->end(); i++) {
-    float mass = particles->type(i->first).mass();
-    printf("id %d pdgcode %d mass %f\n", i->first, i->second.pdgcode(), mass);
-    /* velocity of particles */
-    double cms_gamma = sqrts_ / 2 / mass;
-    double cms_beta = sqrt(sqrts_ * sqrts_ - 4 * mass * mass) / sqrts_;
-    // Sample impact parameter
-    double impact_parameter = drand48() * 5.0;
-    if (i->first == 0) {
-      i->second.set_position(1.0, impact_parameter, 0.0, -1.0);
-      i->second.set_momentum(mass, 0.0, 0.0, cms_gamma * cms_beta * mass);
-    } else if (i->first == 1) {
-      i->second.set_position(1.0, 0.0, 0.0, 1.0);
-      i->second.set_momentum(mass, 0.0, 0.0, -cms_gamma * cms_beta * mass);
-    }
-  }
+  /* Pointer to "target" data */
+  ParticleData *data_target = particles->data_pointer(particles->id_max());
+  float mass_target
+    = particles->particle_type(data_target->pdgcode()).mass();
+  printf("target pdgcode %d mass %f\n", data_target->pdgcode(),
+         mass_target);
+  /* velocity of particles (equal masses assumed) */
+  double cms_gamma = sqrts_ / 2 / mass;
+  double cms_beta = sqrt(sqrts_ * sqrts_ - 4 * mass * mass) / sqrts_;
+  // Sample impact parameter
+  double impact_parameter = drand48() * 5.0;
+  /* Set positions and momenta */
+  data_projectile->set_position(1.0, impact_parameter, 0.0, -1.0);
+  data_projectile->set_momentum(mass, 0.0, 0.0, cms_gamma * cms_beta * mass);
+  data_target->set_position(1.0, 0.0, 0.0, 1.0);
+  data_target->set_momentum(mass, 0.0, 0.0, -cms_gamma * cms_beta * mass);
 }
