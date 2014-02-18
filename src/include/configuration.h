@@ -96,6 +96,8 @@ class Configuration {
   Configuration(Configuration &&) = default;
   Configuration &operator=(Configuration &&) = default;
 
+  void merge_yaml(const std::string &yaml);
+
   /**
    * The default interface for SMASH to read configuration values.
    *

@@ -30,8 +30,9 @@ static void usage(int rc) {
   printf("\nUsage: %s [option]\n\n", progname);
   printf("Calculate transport box\n"
          "  -h, --help           usage information\n"
-         "  -m, --modus          modus of laboratory\n"
-         "  -s, --steps          number of steps\n"
+         "  -c, --config <YAML>  specify config value overrides\n"
+         "  -m, --modus <modus>  shortcut for -c 'General: { MODUS: <modus> }'\n"
+         "  -s, --steps <steps>  shortcut for -c 'General: { STEPS: <modus> }'\n"
          "  -v, --version\n\n");
   exit(rc);
 }
@@ -43,6 +44,7 @@ int main(int argc, char *argv[]) {
   int opt, rc = 0;
   struct option longopts[] = {
     { "help",       no_argument,            0, 'h' },
+    { "config",     required_argument,      0, 'c' },
     { "modus",      required_argument,      0, 'm' },
     { "steps",      required_argument,      0, 's' },
     { "version",    no_argument,            0, 'v' },
@@ -59,37 +61,36 @@ int main(int argc, char *argv[]) {
   path = reinterpret_cast<char *>(malloc(len));
   snprintf(path, len, "./");
 
-  /* read in config file */
-  Configuration configuration(path);
-
-  /* check for overriding command line arguments */
-  while ((opt = getopt_long(argc, argv, "hm:s:v", longopts,
-                              NULL)) != -1) {
-    switch (opt) {
-      case 'h':
-        usage(EXIT_SUCCESS);
-        break;
-      case 'm':
-        configuration["General"]["MODUS"] = std::string(optarg);
-        break;
-//    case 'r':
-/* negative seed is for time */
-//      if (atol(optarg) > 0)
-//         lab->set_seed(atol(optarg));
-//      else
-//         lab->set_seed(time(NULL));
-//      break;
-      case 's':
-        configuration["General"]["STEPS"] = abs(atoi(optarg));
-        break;
-      case 'v':
-        exit(EXIT_SUCCESS);
-      default:
-        usage(EXIT_FAILURE);
-    }
-  }
-
   try {
+    /* read in config file */
+    Configuration configuration(path);
+
+    /* check for overriding command line arguments */
+    while ((opt = getopt_long(argc, argv, "hc:m:s:v", longopts,
+                              nullptr)) != -1) {
+      switch (opt) {
+        case 'h':
+          usage(EXIT_SUCCESS);
+          break;
+        case 'm':
+          configuration["General"]["MODUS"] = std::string(optarg);
+          break;
+        case 's':
+          configuration["General"]["STEPS"] = abs(atoi(optarg));
+          break;
+        case 'c':
+          configuration.merge_yaml(optarg);
+          break;
+        case 'v':
+          exit(EXIT_SUCCESS);
+        default:
+          usage(EXIT_FAILURE);
+      }
+    }
+
+    // TODO(mkretz): this needs to go into a file in the output
+    printf("Configuration:\n%s\n", configuration.unused_values_report().c_str());
+
     mkdir_data();
     auto experiment = ExperimentBase::create(configuration);
     const std::string report = configuration.unused_values_report();

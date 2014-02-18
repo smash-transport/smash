@@ -60,6 +60,7 @@ endif()
 add_definitions("-DTEST_CONFIG_PATH=\"${PROJECT_SOURCE_DIR}/src\"")
 add_definitions("-DBUILD_TESTS")
 
+smash_add_unittest(yamltest)
 smash_add_unittest(configuration)
 smash_add_unittest(experiment)
 
@@ -106,7 +107,7 @@ if(CTEST_MEMORYCHECK_COMMAND)
    set(CTEST_MEMORYCHECK_COMMAND_OPTIONS "-v")
    smash_add_test(memcheck_box smash ${CTEST_MEMORYCHECK_COMMAND}
       ${CTEST_MEMORYCHECK_COMMAND_OPTIONS}
-      ${PROJECT_BINARY_DIR}/smash -s 10 -m Box)
+      ${PROJECT_BINARY_DIR}/smash -c "General: {STEPS: 10, MODUS: Box}")
    smash_add_test(memcheck_collider smash ${CTEST_MEMORYCHECK_COMMAND}
       ${CTEST_MEMORYCHECK_COMMAND_OPTIONS}
       ${PROJECT_BINARY_DIR}/smash -s 50 -m Collider)
@@ -118,7 +119,7 @@ else()
 endif()
 
 if(HAVE_ADDRESS_SANITIZER)
-   smash_add_test(asan_box      smash_asan smash_asan -s 500 -m Box)
+   smash_add_test(asan_box      smash_asan smash_asan -c "General: {STEPS: 50,MODUS: Box}")
    smash_add_test(asan_collider smash_asan smash_asan -s 500 -m Collider)
    #smash_add_test(asan_sphere   smash_asan smash_asan -s 500 -m Sphere)
 endif()

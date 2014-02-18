@@ -44,6 +44,17 @@ YAML::Node remove_empty_maps(YAML::Node root) {
   }
   return root;
 }
+
+YAML::Node operator|=(YAML::Node a, const YAML::Node &b) {
+  if (b.IsMap()) {
+    for (auto n0 : b) {
+      a[n0.first.Scalar()] |= n0.second;
+    }
+  } else {
+    a = b;
+  }
+  return a;
+}
 }  // unnamed namespace
 
 Configuration::Configuration(const bf::path &path)
@@ -54,6 +65,10 @@ Configuration::Configuration(const bf::path &path, const std::string &filename) 
   const auto file_path = path / filename;
   assert(bf::exists(file_path));
   root_node_ = YAML::LoadFile(file_path.native());
+}
+
+void Configuration::merge_yaml(const std::string &yaml) {
+  root_node_ |= YAML::Load(yaml);
 }
 
 Configuration::Value Configuration::take(
