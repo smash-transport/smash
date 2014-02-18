@@ -145,3 +145,12 @@ TEST(check_setting_new_value) {
   VERIFY(conf.has_value({"Test"}));
   COMPARE(double(conf.read({"Test"})), 1.);
 }
+
+TEST(merge_override) {
+  Configuration conf(TEST_CONFIG_PATH);
+  COMPARE(int(conf.read({"General", "STEPS"  })), 1000);
+  COMPARE(int(conf.read({"General", "NEVENTS"})), 1);
+  conf.merge_yaml("General: { NEVENTS: 2 }");
+  COMPARE(int(conf.read({"General", "STEPS"  })), 1000);
+  COMPARE(int(conf.read({"General", "NEVENTS"})), 2);
+}
