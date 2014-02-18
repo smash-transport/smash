@@ -27,10 +27,6 @@ class path;
  * Interface to the SMASH configuration files.
  */
 class Configuration {
-  /// the general_config.yaml contents - fully parsed
-  YAML::Node config_general_;  // this needs to be on top for decltype in
-                               // operator[] to compile.
-
  public:
   /// Thrown when the types in the config file and C++ don't match.
   struct IncorrectTypeInAssignment : public std::runtime_error {
@@ -155,5 +151,9 @@ class Configuration {
    * Returns a string listing the key/value pairs that have not been taken yet.
    */
   std::string unused_values_report() const;
+
+ private:
+  /// the general_config.yaml contents - fully parsed
+  YAML::Node root_node_;
 };
 #endif  // SRC_INCLUDE_CONFIGURATION_H_
