@@ -46,14 +46,14 @@ YAML::Node remove_empty_maps(YAML::Node root) {
 }
 }  // unnamed namespace
 
-Configuration::Configuration(const bf::path &path) {
-  const auto file_path = path / "config_general.yaml";
-  assert(bf::exists(file_path));
-  config_general_ = YAML::LoadFile(file_path.native());
+Configuration::Configuration(const bf::path &path)
+    : Configuration(path, "config_general.yaml") {
 }
 
-YAML::Node Configuration::operator[](std::initializer_list<const char *> keys) {
-  return find_node_at(config_general_, keys);
+Configuration::Configuration(const bf::path &path, const std::string &filename) {
+  const auto file_path = path / filename;
+  assert(bf::exists(file_path));
+  config_general_ = YAML::LoadFile(file_path.native());
 }
 
 Configuration::Value Configuration::take(

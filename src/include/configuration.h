@@ -78,11 +78,21 @@ class Configuration {
   };
 
   /**
-   * Read config files from the specified \p path.
+   * Reads config_general.yaml from the specified \p path.
    *
    * \param path The directory where the SMASH config files are located.
    */
   explicit Configuration(const boost::filesystem::path &path);
+
+  /**
+   * Reads a YAML config file from the specified \p path.
+   *
+   * \param path The directory where the SMASH config files are located.
+   * \param filename The filename (without path) of the YAML config file, in
+   *                 case you don't want the default "config_general.yaml".
+   */
+  explicit Configuration(const boost::filesystem::path &path,
+                         const std::string &filename);
 
   /**
    * The default interface for SMASH to read configuration values.
