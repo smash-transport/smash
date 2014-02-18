@@ -62,7 +62,7 @@ void Nucleus::arrange_nucleons() {
     i->second.set_position(0.0, r*dir.x(), r*dir.y(), z);
     // update maximal and minimal z values
     z_max_ = (z > z_max_) ? z : z_max_;
-    z_min_ = (z > z_min_) ? z : z_min_;
+    z_min_ = (z < z_min_) ? z : z_min_;
   }
 }
 
@@ -90,6 +90,21 @@ void Nucleus::boost(const double& beta_squared) {
   return;
 }
 
-void Nucleus::add_particle(const int pdgcode) {
-  return;
+void Nucleus::fill_from_list(std::map<int, int>& particle_list) {
+  for (auto n = particle_list.begin(); n != particle_list.end(); n++) {
+    for (int i = 1; i < n->second; i++) {
+      create(n->first);
+    }
+  }
+}
+
+void Nucleus::set_softness(const float& soft) {
+  softness_ = soft;
+}
+
+void Nucleus::auto_set_masses(const Particles *particles) {
+  for (auto p = begin(); p != end(); p++) {
+    p->second.set_momentum(
+      particles->particle_type(p->second.pdgcode()).mass(), 0.0, 0.0, 0.0);
+  }
 }

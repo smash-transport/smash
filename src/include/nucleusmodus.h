@@ -37,11 +37,16 @@ class NucleusModus : public ModusDefault {
   /// masses of the pair of particles we are looking at), therefore, we
   /// also need to specify which particle pair this really refers to.
   /// That is done with pdg_sNN_1_ and pdg_sNN_2_.
-  float sqrt_s_NN_ = 1.f;
+  float sqrt_s_NN_;
   /// PDG code of the first particle in the pair that defines sqrt(s_NN)
   int pdg_sNN_1_ = 2212;
   /// PDG code of the second particle in the pair that defines sqrt(s_NN)
   int pdg_sNN_2_ = 2212;
+  /// impact paramter: Actual value that is used.
+  float impact_ = 0.f;
+  /// samples the impact parameter from a minimum and maximum number
+  /// quadratically (if s) or linearly (if !s)
+  void sample_impact(const bool s, float min, float max);
 };
 
 #endif  // SRC_INCLUDE_NUCLEUSMODUS_H_

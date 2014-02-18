@@ -56,19 +56,17 @@ Nucleus:
     # Definitions for the projectile:
     # Deuteron
     Projectile:
-        ADD_PARTICLE: 2212
-        ADD_PARTICLE: 2112
+        PARTICLES: {2212: 1, 2112: 1}
         # very hard Woods-Saxon distribution.
         SOFTNESS: .001
     # Definitions for the target:
     # Lead
     Target:
-        ADD_PARTICLES: 2212 82
-        ADD_PARTICLES: 2112 126
+        PARTICLES: {2212: 82, 2112: 126}
 
     # what sqrt(s_NN) to use:
     SQRTSNN: 200
     # which subsystem "NN" in sqrt(s_NN) refers to
     # (two PDG IDs). The default is proton-proton; let's set it to
     # neutron-neutron.
-    SQRTS_N: 2112 2112
+    SQRTS_N: [2112 2112]

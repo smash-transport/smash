@@ -7,7 +7,7 @@
 #ifndef SRC_INCLUDE_NUCLEUS_H_
 #define SRC_INCLUDE_NUCLEUS_H_
 
-#include<vector>
+#include<map>
 
 #include "include/particles.h"
 
@@ -34,6 +34,19 @@ class Nucleus : public Particles {
   void boost(const double& beta_squared);
   /// Adds a particle to the nucleus
   void add_particle(const int pdgcode);
+  /**
+   * Adds particles from a map PDG_ID => Number_of_particles_with_that_PDG_ID
+   * to the nucleus.
+   *
+   * If the map is, e.g., [2212: 6, 2112: 7] initializes C-13 (6 protons
+   * and 7 neutrons). The particles are only created, no position or
+   * momenta are yet assigned. */
+  void fill_from_list(std::map<int, int>& particle_list);
+  /// sets the softness of the nucleus (\see softness_).
+  void set_softness(const float& soft);
+  /// sets the masses of all nucleons automatically from the PDG info in
+  // particles.
+  void auto_set_masses(const Particles *particles);
 
  private:
   /** softness of Woods-Saxon-distribution in this nucleus im fm
