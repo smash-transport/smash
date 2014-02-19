@@ -20,6 +20,14 @@
 #include "include/particles.h"
 class Configuration;
 
+#ifndef DOXYGEN
+namespace boost {
+namespace filesystem {
+class path;
+}  // namespace filesystem
+}  // namespace boost
+#endif
+
 /**
  * Non-template interface to Experiment<Modus>.
  *
@@ -54,7 +62,7 @@ class ExperimentBase {
    */
   static std::unique_ptr<ExperimentBase> create(Configuration &config);
 
-  virtual void run(std::string path) = 0;
+  virtual void run(const boost::filesystem::path &path) = 0;
 
   /**
    * Exception class that is thrown if an invalid modus is requested from the
@@ -94,7 +102,7 @@ class Experiment : public ExperimentBase {
   friend class ExperimentBase;
 
  public:
-  virtual void run(std::string path) override;
+  virtual void run(const boost::filesystem::path &path) override;
 
  private:
   /**

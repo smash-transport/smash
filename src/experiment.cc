@@ -27,7 +27,11 @@
 #include "include/parameters.h"
 #include "include/time.h"
 
+#include <boost/filesystem.hpp>
+
 /* #include "include/spheremodus.h" */
+
+namespace bf = boost::filesystem;
 
 /* ExperimentBase carries everything that is needed for the evolution */
 std::unique_ptr<ExperimentBase> ExperimentBase::create(Configuration &config) {
@@ -197,11 +201,11 @@ void Experiment<Modus>::end() {
 }
 
 template <typename Modus>
-void Experiment<Modus>::run(std::string path) {
+void Experiment<Modus>::run(const bf::path &path) {
   /* Write the header of OSCAR data output file */
   write_oscar_header();
   for (int j = 0; j < nevents_; j++) {
-    initialize(path.c_str());
+    initialize(path.native().c_str());
     /* Write the initial data block of the event */
     write_oscar_event_block(particles_, 0, particles_->size(), j + 1);
     /* the time evolution of the relevant subsystem */
