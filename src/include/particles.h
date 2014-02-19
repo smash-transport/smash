@@ -43,11 +43,11 @@ class Particles {
   inline DecayModes decay_modes(int pdg);
   /// return the highest used id
   inline int id_max(void);
-  /// inserts a new particle
+  /// inserts a new particle and returns its id
   inline int add_data(const ParticleData &particle_data);
   /// inserts a new particle type
   inline void add_type(const ParticleType &particle_type, int pdg);
-  // XXX(Jussi): mention what it does
+  /// adds decay modes for a particle type
   inline void add_decaymodes(const DecayModes &new_decay_modes, int pdg);
   /// add a range of particles
   inline void create(size_t number, int pdg);
@@ -57,8 +57,8 @@ class Particles {
   inline size_t size(void) const;
   /// empty() check of the ParticleData map
   inline bool empty(void) const;
-  /// count() check of the ParticleData map
-  inline size_t count(int i) const;
+  /// check the existence of an element in the ParticleData map
+  inline size_t count(int id) const;
   /// size() check of the ParticleType map
   inline size_t types_size(void) const;
   /// empty() check of the ParticleType map
@@ -111,7 +111,7 @@ inline DecayModes Particles::decay_modes(int pdg) {
   return all_decay_modes_[pdg];
 }
 
-/* add a new particle data */
+/* add a new particle data and return the id of the new particle */
 inline int Particles::add_data(ParticleData const &particle_data) {
   id_max_++;
   data_.insert(std::pair<int, ParticleData>(id_max_, particle_data));
@@ -200,8 +200,9 @@ inline std::map<int, ParticleType>::const_iterator Particles::types_cend()
   return types_.end();
 }
 
-inline size_t Particles::count(int i) const {
-  return data_.count(i);
+/* check the existence of an element in the ParticleData map */
+inline size_t Particles::count(int id) const {
+  return data_.count(id);
 }
 
 /* return computation time which is reduced by the start up time */
