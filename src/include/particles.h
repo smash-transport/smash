@@ -88,34 +88,34 @@ class Particles {
 
 /* return the data of a specific particle */
 inline const ParticleData &Particles::data(int particle_id) {
-  return data_[particle_id];
+  return data_.at(particle_id);
 }
 
 /* return the pointer to the data of a specific particle */
 inline ParticleData* Particles::data_pointer(int particle_id) {
-  return &data_[particle_id];
+  return &data_.at(particle_id);
 }
 
 /* return the type of a specific particle */
 inline ParticleType Particles::type(int particle_id) {
-  return types_[data_[particle_id].pdgcode()];
+  return types_.at(data_.at(particle_id).pdgcode());
 }
 
 /* return a specific type */
 inline ParticleType Particles::particle_type(int pdgcode) {
-  return types_[pdgcode];
+  return types_.at(pdgcode);
 }
 
 /* return the decay modes of specific type */
 inline DecayModes Particles::decay_modes(int pdg) {
-  return all_decay_modes_[pdg];
+  return all_decay_modes_.at(pdg);
 }
 
 /* add a new particle data and return the id of the new particle */
 inline int Particles::add_data(ParticleData const &particle_data) {
   id_max_++;
   data_.insert(std::pair<int, ParticleData>(id_max_, particle_data));
-  data_[id_max_].set_id(id_max_);
+  data_.at(id_max_).set_id(id_max_);
   return id_max_;
 }
 
