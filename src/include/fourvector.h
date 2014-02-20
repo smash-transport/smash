@@ -9,25 +9,37 @@
 
 #include <cmath>
 
+/**
+ * The FourVector class holds relevant values in Minkowski spacetime
+ * with (+, −, −, −) metric signature.
+ *
+ * The overloaded operators are build according to Andrew Koenig
+ * recommendations where  the compound assignment operators is used as a
+ * base for their non-compound counterparts. This means that the
+ * operator + is implemented in terms of +=. The operator+ returns
+ * a copy of it's result. + and friends are non-members, while
+ * the compound assignment counterparts, changing the left
+ * argument, are a member of the FourVector class.
+ */
 class FourVector {
  public:
-  /* default constructor */
+  /// default constructor nulls the fourvector components
   FourVector() : x0_(0.0), x1_(0.0), x2_(0.0), x3_(0.0) {}
-  /* useful constructor */
+  /// copy constructor
   FourVector(double y0, double y1, double y2, double y3)
       : x0_(y0), x1_(y1), x2_(y2), x3_(y3) {}
-  /* t, z, x_\perp */
+  /* t, x_\perp, z */
   double inline x0(void) const;
   void inline set_x0(double t);
   double inline x1(void) const;
-  void inline set_x1(double z);
+  void inline set_x1(double x);
   double inline x2(void) const;
-  void inline set_x2(double x);
+  void inline set_x2(double y);
   double inline x3(void) const;
-  void inline set_x3(double y);
+  void inline set_x3(double z);
   /* set all four values */
-  void inline set_FourVector(const double t, const double z, const double x,
-                             const double y);
+  void inline set_FourVector(const double t, const double x, const double y,
+                             const double z);
   /* inlined operations */
   double inline Dot(const FourVector &a) const;
   double inline Dot() const;
@@ -99,69 +111,69 @@ void inline FourVector::set_FourVector(const double t, const double z,
   x3_ = y;
 }
 
-/* all four vector components are equal */
+/// check if all four vector components are equal
 bool inline FourVector::operator==(const FourVector &a) const {
   return fabs(x0_ - a.x0_) < 1e-12 && fabs(x1_ - a.x1_) < 1e-12
     && fabs(x2_ - a.x2_) < 1e-12 && fabs(x3_ - a.x3_) < 1e-12;
 }
 
-/* use == operator for the inverse */
+/// use == operator for the inverse != check
 bool inline FourVector::operator!=(const FourVector &a) const {
   return !(*this == a);
 }
 
-/* all four vector components are below comparison vector */
+/// all four vector components are below comparison vector
 bool inline FourVector::operator<(const FourVector &a) const {
   return (x0_ < a.x0_) && (x1_ < a.x1_) && (x2_ < a.x2_) && (x3_ < a.x3_);
 }
 
-/* use < operator for the inverse by switching arguments */
+/// use < operator for the inverse by switching arguments
 bool inline FourVector::operator>(const FourVector &a) const {
   return a < *this;
 }
 
-/* use > operator for less equal */
+/// use > operator for less equal
 bool inline FourVector::operator<=(const FourVector &a) const {
   return !(*this > a);
 }
 
-/* use < operator for greater equal */
+/// use < operator for greater equal
 bool inline FourVector::operator>=(const FourVector &a) const {
   return !(*this < a);
 }
 
-/* all vector components are equal to that number */
+/// all vector components are equal to that number
 bool inline FourVector::operator==(const double &a) const {
   return fabs(x0_ - a) < 1e-12 && fabs(x1_ - a) < 1e-12
     && fabs(x2_ - a) < 1e-12 && fabs(x3_ - a) < 1e-12;
 }
 
-/* use == operator for the inverse */
+/// use == operator for the inverse !=
 bool inline FourVector::operator!=(const double &a) const {
   return !(*this == a);
 }
 
-/* all vector components are below that number */
+/// all vector components are below that number
 bool inline FourVector::operator<(const double &a) const {
   return (x0_ < a) && (x1_ < a) && (x2_ < a) && (x3_ < a);
 }
 
-/* all vector components are above that number */
+/// all vector components are above that number
 bool inline FourVector::operator>(const double &a) const {
   return (x0_ > a) && (x1_ > a) && (x2_ > a) && (x3_ > a);
 }
 
-/* all vector components are less equal that number */
+/// all vector components are less equal that number
 bool inline FourVector::operator<=(const double &a) const {
   return !(*this > a);
 }
 
-/* all vector components are greater equal that number */
+/// all vector components are greater equal that number
 bool inline FourVector::operator>=(const double &a) const {
   return !(*this < a);
 }
 
-/* assignement addition */
+/// += assignement addition
 FourVector inline FourVector::operator+=(const FourVector &a) {
   this->x0_ += a.x0_;
   this->x1_ += a.x1_;
@@ -170,13 +182,13 @@ FourVector inline FourVector::operator+=(const FourVector &a) {
   return *this;
 }
 
-/* addition uses += */
+/// addition +operator uses +=
 inline FourVector operator+(FourVector a, const FourVector &b) {
   a += b;
   return a;
 }
 
-/* assignement subtraction */
+/// -= assignement subtraction
 FourVector inline FourVector::operator-=(const FourVector &a) {
   this->x0_ -= a.x0_;
   this->x1_ -= a.x1_;
@@ -185,13 +197,13 @@ FourVector inline FourVector::operator-=(const FourVector &a) {
   return *this;
 }
 
-/* subtraction uses -= */
+/// subtraction operator- uses -=
 inline FourVector operator-(FourVector a, const FourVector &b) {
   a -= b;
   return a;
 }
 
-/* assignement factor multiplication */
+/// assignement factor multiplication
 FourVector inline FourVector::operator*=(const double &a) {
   this->x0_ *= a;
   this->x1_ *= a;
@@ -200,13 +212,13 @@ FourVector inline FourVector::operator*=(const double &a) {
   return *this;
 }
 
-/* factor multiplication uses *= */
+/// factor multiplication uses *=
 inline FourVector operator*(FourVector a, const double &b) {
   a *= b;
   return a;
 }
 
-/* assignement factor division */
+/// assignement factor division
 FourVector inline FourVector::operator/=(const double &a) {
   this->x0_ /= a;
   this->x1_ /= a;
@@ -215,7 +227,7 @@ FourVector inline FourVector::operator/=(const double &a) {
   return *this;
 }
 
-/* factor division uses /= */
+/// factor division uses /=
 inline FourVector operator/(FourVector a, const double &b) {
   a /= b;
   return a;
