@@ -14,51 +14,137 @@
 #include <cstdio>
 #include <cstdlib>
 
+/** Angles provides a common interface for generating directions: i.e.,
+ * two angles that should be interpreted as azimuthal and polar angles.
+ *
+ * Usage:
+ * ------
+ * \code
+ * #include "Angles.h" 
+ *
+ * Angles direction;
+ *
+ * direction.distribute_isotropously();
+ * double azimuthal_angle = direction.phi();
+ * double cosine_of_polar_angle = direction.costheta();
+ * double x_projection_of_vector = direction.x();
+ * direction.set_phi(0);
+ * double new_azimuthal_angle = direction.phi();
+ * // new_azimuthal_angle == 0.
+ * \endcode
+ *
+ * Internals
+ * ---------
+ *
+ * The object internally stores the azimuthal angle \f$\varphi\f$ and
+ * the cosine of the polar angle \f$\cos\vartheta\f$. Nobody should rely
+ * on this never changing, though; the interface user should be totally
+ * oblivious to this.
+ *
+ * Possible future improvements
+ * ----------------------------
+ *
+ * More distributions need to be implemented once there is a physics
+ * case to use them.
+ **/
+
 class Angles {
  public:
+  /// Standard initializer, points in x-direction.
   Angles();
-  /* get new angles: */
+  /** populate the object with a new direction
+   *
+   * the direction is taken randomly from a homogeneous distribution,
+   * i.e., each point on a unit sphere is equally likely.
+   **/
   void distribute_isotropically();
-  /* update angles: */
+  /** update azimuthal angle
+   *
+   * sets the azimuthal angle and leaves the polar angle untouched.
+   *
+   * @param phi any real number to set the azimuthal angle \f$\varphi\f$
+   * to.
+   **/
   void set_phi(const double& phi);
-  /* set cos(theta) (preferred): */
+  /** update polar angle from its cosine.
+   *
+   * sets the polar angle and leaves the azimuthal angle untouched.
+   * This is the preferred way of setting the polar information.
+   *
+   * @param cos cosine of the polar angle \f$\cos\vartheta\f$. Must be
+   * in range [-1 .. 1], else an Exception is thrown.
+   *
+   **/
   void set_costheta(const double& cos);
-  /* set theta (if you only have the angle, not the cosine)
+  /** update polar angle from itself
+   *
+   * sets the polar angle and leaves the azimuthal angle untouched.
    * In the interface (public functions) we don't specify if theta or
    * costheta is actually stored inside the object, so we don't name the
    * functions to indicate the internals.
+   *
+   * In the current implementation, costheta is stored inside the
+   * object. Don't convert the angle to and from cosine, use the
+   * set-function for the thing you have at hand. Accepts any real
+   * number.
+   *
+   * @param theta any real number to set the polar angle \f$\vartheta\f$
+   * to.
    */
   void set_theta(const double& theta);
-  /* this adds a certain angle to theta and takes care that it doesn't
-   * go out of scope and that a possible switch of phi's direction is
-   * handled appropriately
-   * Returns whether phi was changed. This is necessary if another angle
-   * is added later: If phi has changed, the next addition should be
-   * given in opposite direction, i.e., -delta.
-   */
+  /** advance polar angle
+   *
+   * polar angle is advanced. A positive addition means that we go
+   * towards the southpole.
+   *
+   * \see add_to_theta(const double& delta, const bool& reverse)
+   *
+   * @param delta angle increment
+   * @return true if pole has been crossed.
+   **/
   bool add_to_theta(const double& delta);
-  /* if direction is true, delta will be reversed (see comment on
-   * add_to_theta(double) )
-   */
+  /** advance polar angle 
+   *
+   * polar angle is advanced. When crossing a pole, azimuthal angle is
+   * changed by 180 degrees.
+   *
+   * @param delta angle increment. Must not be outside [\f$-\pi\f$ ..
+   * \f$\pi\f$].
+   * @param reverse if true, we start in the "far" hemisphere, meaning a
+   * positive delta will shift the object towards the north pole.
+   *
+   * @return returns true if we end up in the far hemisphere, false if
+   * we end up in the original hemisphere.
+   **/
   bool add_to_theta(const double& delta, const bool& reverse);
-  /* get elements: */
+  /// get azimuthal angle
   double phi() const;
+  /// get cosine of polar angle
   double costheta() const;
-  /* sqrt(1-costheta**2) */
+  /// get sine of polar angle
   double sintheta() const;
-  /* x, y and z together give a normalized three vector which, thus,
-   * has to be multiplied by its length.
-   */
+  /** get x projection of the direction
+   *
+   * \f$x = \sin\vartheta \cos\varphi\f$
+   **/
   double x() const;
+  /** get y projection of the direction
+   *
+   * \f$y = \sin\vartheta \sin\varphi\f$
+   **/
   double y() const;
+  /** get z projection of the direction
+   *
+   * \f$z = \cos\vartheta\f$
+   **/
   double z() const;
-  /* in case we really need the polar angle instead of just the cosine,
-   * we can return acos(costheta).
-   */
+  /// returns the polar angle
   double theta() const;
 
  private:
+  /// azimuthal angle \f$\varphi\f$
   double phi_;
+  /// cosine of polar angle \f$\cos\varphi\f$
   double costheta_;
 };
 
