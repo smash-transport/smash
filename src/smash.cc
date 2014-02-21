@@ -71,6 +71,22 @@ bf::path default_output_path() {
   return p2;
 }
 
+void ensure_path_is_valid(const bf::path &path) {
+  if (bf::exists(path)) {
+    if (!bf::is_directory(path)) {
+      throw OutputDirectoryExists("The given path (" + path.native() +
+                                  ") exists, but it is not a directory.");
+    }
+  } else {
+    if (!bf::create_directory(path)) {
+      throw OutputDirectoryExists(
+          "Race condition detected: The directory " + path.native() +
+          " did not exist a few cycles ago, but was created in the meantime by "
+          "a different process.");
+    }
+  }
+}
+
 }  // unnamed namespace
 
 /* main - do command line parsing and hence decides modus */
@@ -92,7 +108,6 @@ int main(int argc, char *argv[]) {
 
   try {
     bf::path output_path = default_output_path();
-    printd("output path: %s\n", output_path.native().c_str());
 
     /* read in config file */
     Configuration configuration(".");
@@ -119,7 +134,8 @@ int main(int argc, char *argv[]) {
           configuration["General"]["STEPS"] = abs(atoi(optarg));
           break;
         case 'o':
-          // TODO(mkretz)
+          output_path = optarg;
+          ensure_path_is_valid(output_path);
           break;
         case 'v':
           exit(EXIT_SUCCESS);
@@ -127,6 +143,8 @@ int main(int argc, char *argv[]) {
           usage(EXIT_FAILURE, progname);
       }
     }
+
+    printd("output path: %s\n", output_path.native().c_str());
 
     // keep a copy of the configuration that was used in the output directory
     bf::ofstream(output_path / "config.yaml")
