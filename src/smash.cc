@@ -75,7 +75,7 @@ bf::path default_output_path() {
 
 /* main - do command line parsing and hence decides modus */
 int main(int argc, char *argv[]) {
-  struct option longopts[] = {
+  constexpr option longopts[] = {
     { "config",     required_argument,      0, 'c' },
     { "help",       no_argument,            0, 'h' },
     { "inputfile",  required_argument,      0, 'i' },
