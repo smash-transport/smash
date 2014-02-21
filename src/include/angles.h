@@ -20,7 +20,7 @@
  * Usage:
  * ------
  * \code
- * #include "Angles.h" 
+ * #include "Angles.h"
  *
  * Angles direction;
  *
@@ -103,7 +103,7 @@ class Angles {
    * @return true if pole has been crossed.
    **/
   bool add_to_theta(const double& delta);
-  /** advance polar angle 
+  /** advance polar angle
    *
    * polar angle is advanced. When crossing a pole, azimuthal angle is
    * changed by 180 degrees.
