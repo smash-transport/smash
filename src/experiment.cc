@@ -49,28 +49,38 @@ std::unique_ptr<ExperimentBase> ExperimentBase::create(Configuration &config) {
   }
 }
 
+namespace {
+ExperimentParameters create_experiment_parameters(Configuration &config) {
+  const int testparticles = config.take({"General", "TESTPARTICLES"});
+  float cross_section = config.take({"General", "SIGMA"});
+
+  /* reducing cross section according to number of test particle */
+  if (testparticles > 1) {
+    printf("IC test particle: %i\n", testparticles);
+    cross_section /= testparticles;
+    printf("Elastic cross section: %g mb\n", cross_section);
+  }
+
+  return {config.take({"General", "EPS"}), cross_section, testparticles};
+}
+}
+
 template <typename Modus>
 Experiment<Modus>::Experiment(Configuration &config)
     : modus_(config),
-      nevents_        (config.take({"General", "NEVENTS"})),
-      steps_          (config.take({"General", "STEPS"})),
+      parameters_(create_experiment_parameters(config)),
+      cross_sections_(parameters_.cross_section),
+      nevents_(config.take({"General", "NEVENTS"})),
+      steps_(config.take({"General", "STEPS"})),
       output_interval_(config.take({"General", "UPDATE"})),
-      seed_           (config.take({"General", "RANDOMSEED"})) {
+      seed_(config.take({"General", "RANDOMSEED"})) {
   if (seed_ < 0) {
     seed_ = time(nullptr);
   }
-  parameters_.testparticles = config.take({"General", "TESTPARTICLES"});
-  parameters_.eps           = config.take({"General", "EPS"});
-  parameters_.cross_section = config.take({"General", "SIGMA"});
   print_startup();
 
-  /* reducing cross section according to number of test particle */
-  if (parameters_.testparticles > 1) {
-    printf("IC test particle: %i\n", parameters_.testparticles);
-    parameters_.cross_section =
-        parameters_.cross_section / parameters_.testparticles;
-    printf("Elastic cross section: %g mb\n", parameters_.cross_section);
-  }
+  /* Set the seed_ for the random number generator */
+  srand48(seed_);
 }
 
 /* This method reads the particle type and cross section information
@@ -78,20 +88,16 @@ Experiment<Modus>::Experiment(Configuration &config)
  */
 template <typename Modus>
 void Experiment<Modus>::initialize(const char *path) {
+  cross_sections_.reset();
+
   /* Ensure safe allocation */
   delete particles_;
-  delete cross_sections_;
   /* Allocate private pointer members */
   particles_ = new Particles;
-  cross_sections_ = new CrossSections;
-  /* Set the seed_ for the random number generator */
-  srand48(seed_);
   /* Read in particle types used in the simulation */
   input_particles(particles_, path);
   /* Read in the particle decay modes */
   input_decaymodes(particles_, path);
-  /* Set the default elastic collision cross section */
-  cross_sections_->add_elastic_parameter(parameters_.cross_section);
   /* Sample particles according to the initial conditions */
   modus_.initial_conditions(particles_, parameters_);
   /* Save the initial energy in the system for energy conservation checks */
@@ -125,7 +131,7 @@ void Experiment<Modus>::run_time_evolution() {
           decay_particles(particles_, &decay_list, interactions_total);
     }
     /* fill collision table by cells */
-    modus_.check_collision_geometry(particles_, cross_sections_,
+    modus_.check_collision_geometry(particles_, &cross_sections_,
                                     &collision_list, &rejection_conflict,
                                     parameters_);
     /* particle interactions */
@@ -197,7 +203,6 @@ timespec inline Experiment<Modus>::set_timer_start(void) {
 template <typename Modus>
 void Experiment<Modus>::end() {
   delete particles_;
-  delete cross_sections_;
 }
 
 template <typename Modus>

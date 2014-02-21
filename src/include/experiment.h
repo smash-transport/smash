@@ -146,13 +146,20 @@ class Experiment : public ExperimentBase {
   Particles *particles_ = nullptr;
 
   /**
+   * Struct of several member variables.
+   * These variables are combined into a struct for efficient input to functions
+   * outside of this class.
+   */
+  ExperimentParameters parameters_;
+
+  /**
    * Pointer to ?
    *
    * \todo CrossSections needs a rename?
    * \todo Why is this a pointer?
    * \todo If this needs to be a pointer, why not a unique_ptr?
    */
-  CrossSections *cross_sections_ = nullptr;
+  CrossSections cross_sections_;
 
   /**
    * Number of events.
@@ -162,18 +169,13 @@ class Experiment : public ExperimentBase {
    */
   int nevents_ = 0;
 
-  /**
-   * Struct of several member variables.
-   * These variables are combined into a struct for efficient input to functions
-   * outside of this class.
-   */
-  ExperimentParameters parameters_;
-
   /// number of steps
   int steps_ = 10000;
   /// number of steps before giving measurables
   int output_interval_ = 100;
   /// initial seed_ for random generator
+  /// \todo Why is it a member? It's read, then used for seeding and
+  ///       then never needed again, no?
   int64_t seed_ = 1;
   /// initial total energy of the system
   float energy_initial_ = 0.f;
