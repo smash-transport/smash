@@ -118,7 +118,6 @@ void Experiment<Modus>::run_time_evolution() {
   size_t interactions_total = 0, previous_interactions_total = 0,
          interactions_this_interval = 0;
   size_t rejection_conflict = 0;
-  int resonances = 0, decays = 0;
   print_measurements(*particles_, interactions_total,
                      interactions_this_interval, energy_initial_, time_start_);
   for (int step = 0; step < steps_; step++) {
@@ -126,7 +125,6 @@ void Experiment<Modus>::run_time_evolution() {
     check_decays(particles_, &decay_list, parameters_.eps);
     /* Do the decays */
     if (!decay_list.empty()) {
-      decays += decay_list.size();
       interactions_total =
           decay_particles(particles_, &decay_list, interactions_total);
     }
@@ -138,7 +136,7 @@ void Experiment<Modus>::run_time_evolution() {
     if (!collision_list.empty()) {
       printd_list(collision_list);
       interactions_total = collide_particles(particles_, &collision_list,
-                                             interactions_total, &resonances);
+                                             interactions_total);
     }
     modus_.propagate(particles_, parameters_);
     /* physics output during the run */
@@ -149,7 +147,6 @@ void Experiment<Modus>::run_time_evolution() {
       print_measurements(*particles_, interactions_total,
                          interactions_this_interval, energy_initial_,
                          time_start_);
-      printd("Resonances: %i Decays: %i\n", resonances, decays);
       printd("Ignored collisions %zu\n", rejection_conflict);
       /* save evolution data */
       write_particles(*particles_);

@@ -275,11 +275,11 @@ int one_to_two(Particles *particles, int resonance_id, int type_a, int type_b) {
   new_particle_a.set_position(decay_point);
   new_particle_b.set_position(decay_point);
 
-  particles->add_data(new_particle_a);
+  int id_first_new = particles->add_data(new_particle_a);
   particles->add_data(new_particle_b);
 
   /* 2 new particles created; return the id of the first one */
-  return particles->id_max() - 1;
+  return id_first_new;
 }
 
 /* 1->3 process kinematics */
@@ -407,7 +407,7 @@ int one_to_three(Particles *particles, int resonance_id,
   new_particle_b.set_position(decay_point);
   new_particle_c.set_position(decay_point);
 
-  particles->add_data(new_particle_a);
+  int id_first_new = particles->add_data(new_particle_a);
   particles->add_data(new_particle_b);
   particles->add_data(new_particle_c);
 
@@ -421,5 +421,5 @@ int one_to_three(Particles *particles, int resonance_id,
          new_particle_b.momentum().x3(), new_particle_c.momentum().x3());
 
   /* 3 new particles created; return the id of the first one */
-  return particles->id_max() - 2;
+  return id_first_new;
 }

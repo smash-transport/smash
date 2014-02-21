@@ -31,23 +31,23 @@ class Particles {
  public:
   /// Use improbable values for default constructor
   Particles() :id_max_(-1) {}
-  /// pass out the specific data of a particle according to it's id
+  /// Return the specific data of a particle according to its id
   inline const ParticleData &data(int id);
-  /// pass out the specific datapointer of a particle according to it's id
+  /// Return the specific datapointer of a particle according to its id
   inline ParticleData * data_pointer(int id);
-  /// pass out the type of a specific particle given it's id
+  /// Return the type of a specific particle given its id
   inline ParticleType type(int id);
-  /// pass out the type for a specific pdgcode
+  /// Return the type for a specific pdgcode
   inline ParticleType particle_type(int pdgcode);
-  /// pass out decay modes of this particle type
+  /// Return decay modes of this particle type
   inline DecayModes decay_modes(int pdg);
   /// return the highest used id
   inline int id_max(void);
-  /// inserts a new particle
+  /// inserts a new particle and returns its id
   inline int add_data(const ParticleData &particle_data);
   /// inserts a new particle type
   inline void add_type(const ParticleType &particle_type, int pdg);
-  // XXX(Jussi): mention what it does
+  /// adds decay modes for a particle type
   inline void add_decaymodes(const DecayModes &new_decay_modes, int pdg);
   /// add a range of particles
   inline void create(size_t number, int pdg);
@@ -57,8 +57,8 @@ class Particles {
   inline size_t size(void) const;
   /// empty() check of the ParticleData map
   inline bool empty(void) const;
-  /// count() check of the ParticleData map
-  inline size_t count(int i) const;
+  /// check the existence of an element in the ParticleData map
+  inline size_t count(int id) const;
   /// size() check of the ParticleType map
   inline size_t types_size(void) const;
   /// empty() check of the ParticleType map
@@ -76,9 +76,19 @@ class Particles {
  private:
   /// Highest id of a given particle
   int id_max_;
-  /// dynamic data of the particles a map between its id and data
+  /**
+   * dynamic data of the particles a map between its id and data
+   *
+   * A map structure is used as particles decay and hence this
+   * a swiss cheese over the runtime of SMASH. Also we want direct
+   * lookup of the corresponding particle id with its data.
+   */
   std::map<int, ParticleData> data_;
-  /// a map between pdg and correspoding static data of the particles
+  /**
+   * a map between pdg and correspoding static data of the particles
+   *
+   * PDG ids are scattered in a large range of values, hence it is a map.
+   */
   std::map<int, ParticleType> types_;
   /// a map between pdg and corresponding decay modes
   std::map<int, DecayModes> all_decay_modes_;
@@ -88,34 +98,34 @@ class Particles {
 
 /* return the data of a specific particle */
 inline const ParticleData &Particles::data(int particle_id) {
-  return data_[particle_id];
+  return data_.at(particle_id);
 }
 
 /* return the pointer to the data of a specific particle */
 inline ParticleData* Particles::data_pointer(int particle_id) {
-  return &data_[particle_id];
+  return &data_.at(particle_id);
 }
 
 /* return the type of a specific particle */
 inline ParticleType Particles::type(int particle_id) {
-  return types_[data_[particle_id].pdgcode()];
+  return types_.at(data_.at(particle_id).pdgcode());
 }
 
 /* return a specific type */
 inline ParticleType Particles::particle_type(int pdgcode) {
-  return types_[pdgcode];
+  return types_.at(pdgcode);
 }
 
 /* return the decay modes of specific type */
 inline DecayModes Particles::decay_modes(int pdg) {
-  return all_decay_modes_[pdg];
+  return all_decay_modes_.at(pdg);
 }
 
-/* add a new particle data */
+/* add a new particle data and return the id of the new particle */
 inline int Particles::add_data(ParticleData const &particle_data) {
   id_max_++;
   data_.insert(std::pair<int, ParticleData>(id_max_, particle_data));
-  data_[id_max_].set_id(id_max_);
+  data_.at(id_max_).set_id(id_max_);
   return id_max_;
 }
 
@@ -200,8 +210,9 @@ inline std::map<int, ParticleType>::const_iterator Particles::types_cend()
   return types_.end();
 }
 
-inline size_t Particles::count(int i) const {
-  return data_.count(i);
+/* check the existence of an element in the ParticleData map */
+inline size_t Particles::count(int id) const {
+  return data_.count(id);
 }
 
 /* return computation time which is reduced by the start up time */

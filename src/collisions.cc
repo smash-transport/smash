@@ -158,7 +158,7 @@ void collision_criteria_geometry(Particles *particles,
 
 /* colliding_particle - particle interaction */
 size_t collide_particles(Particles *particles, std::list<int> *collision_list,
-  size_t id_process, int *resonance_formations) {
+  size_t id_process) {
   FourVector velocity_CM;
 
   /* XXX: print debug output of collision list */
@@ -208,7 +208,6 @@ size_t collide_particles(Particles *particles, std::list<int> *collision_list,
 
     } else if (interaction_type == 1) {
       /* resonance formation */
-      (*resonance_formations)++;
       printd("Process: Resonance formation. ");
       size_t new_particles = (particles->data(id_a).final_state()).size();
       write_oscar(particles->data(id_a), particles->type(id_a), 2,
