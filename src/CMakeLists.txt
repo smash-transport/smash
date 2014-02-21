@@ -52,19 +52,28 @@ configure_file (
 )
 
 # directly copy config files to build directory
+configure_file(config_general.yaml ${PROJECT_BINARY_DIR}/config_general.yaml COPYONLY)
 macro(copy_at_make)
    foreach(filename ${ARGN})
-      add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/${filename}
-         COMMAND ${CMAKE_COMMAND} -E copy
+      configure_file(
          ${CMAKE_CURRENT_SOURCE_DIR}/${filename}
          ${PROJECT_BINARY_DIR}/${filename}
+         COPYONLY)
+      add_custom_command(
+         OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${filename}.h
+         COMMAND ${CMAKE_COMMAND}
+         -D INPUT_FILE=${CMAKE_CURRENT_SOURCE_DIR}/${filename}
+         -D OUTPUT_FILE=${CMAKE_CURRENT_BINARY_DIR}/${filename}.h
+         -D NAME=data
+         -P ${PROJECT_SOURCE_DIR}/cmake/copy_file_contents_to_string.cmake
          DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${filename}
-         COMMENT "Copy ${filename} to ${PROJECT_BINARY_DIR}"
+         COMMENT "Convert ${CMAKE_CURRENT_SOURCE_DIR}/${filename} to ${CMAKE_CURRENT_BINARY_DIR}/${filename}.h"
          VERBATIM)
-      add_custom_target(copy_${filename} ALL DEPENDS ${PROJECT_BINARY_DIR}/${filename})
+      add_custom_target(copy_${filename} ALL DEPENDS
+         ${CMAKE_CURRENT_BINARY_DIR}/${filename}.h)
    endforeach()
 endmacro()
-copy_at_make(config_general.yaml particles.txt decaymodes.txt)
+copy_at_make(particles.txt decaymodes.txt)
 
 target_link_libraries(smash ${SMASH_LIBRARIES})
 
