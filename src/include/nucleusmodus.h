@@ -30,26 +30,61 @@ class NucleusModus : public ModusDefault {
                           const ExperimentParameters &parameters);
 
  private:
+  /** Projectile.
+   *
+   * The object that comes from negative z-values at positive x-values
+   * with positive velocity.
+   **/
   Nucleus projectile_;
+  /** Target.
+   *
+   * The object that comes from positive z-values at negative x-values
+   * with negative velocity. In fixed target experiments, the target is
+   * at rest.
+   **/
   Nucleus target_;
-  /// Center-of-mass energy of the individual nucleon-nucleon collisions.
-  /// Note that sqrt(s_pp) != sqrt(s_nn) [i.e., sqrt(s) depends on the
-  /// masses of the pair of particles we are looking at), therefore, we
-  /// also need to specify which particle pair this really refers to.
-  /// That is done with pdg_sNN_1_ and pdg_sNN_2_.
+  /** Center-of-mass energy of the individual nucleon-nucleon
+   * collisions.
+   *
+   * Note that \f$\sqrt{s}\f$ is different for neutron-neutron and
+   * proton-proton collisions (because of the different masses).
+   * Therefore, pdg_sNN_1_ and pdg_sNN_2_ are needed to specify which
+   * two particles' collisions have this \f$\sqrt{s}\f$. (They each
+   * specify the PDG code of the particle species that we want to use
+   * for the definition of \f$\sqrt{s}\f$).
+   **/
   float sqrt_s_NN_;
-  /// PDG code of the first particle in the pair that defines sqrt(s_NN)
+  /// \see sqrt_s_NN_
   int pdg_sNN_1_ = 2212;
-  /// PDG code of the second particle in the pair that defines sqrt(s_NN)
+  /// \see sqrt_s_NN_
   int pdg_sNN_2_ = 2212;
-  /// impact paramter: Actual value that is used.
+  /** impact paramter
+   *
+   * The nuclei projectile_ and target_ will be shifted along the x axis
+   * so that their centers move on antiparallel lines that are this
+   * distance apart from each other.
+   **/
   float impact_ = 0.f;
-  /// samples the impact parameter from a minimum and maximum number
-  /// quadratically (if s) or linearly (if !s)
-  void sample_impact(const bool s, float min, float max);
-  /// initial z displacement of nuclei: each nucleus is shifted so that
-  /// the outermost particle on the side facing the other nucleus is at
-  /// +- this value.
+  /** sample impact parameter
+   *
+   * sets the impact parameter to a value between min and max.
+   *
+   * @param s if true, use quadratic sampling (probability for a given
+   * impact parameter \f$dP(b)\f$ is proportional to \f$b\f$: \f$dP(b) =
+   * b\cdot db\f$), else every \f$b\f$ has same probability.
+   * @param min minimum value for impact parameter
+   * @param max maximum value for impact parameter
+   *
+   * Note that max less than min also works fine.
+   *
+   **/
+  void sample_impact(const bool s, const float min, const float max);
+  /** initial z displacement of nuclei
+   *
+   * each nucleus is shifted so that
+   * the outermost particle on the side facing the other nucleus is at
+   * \f$\pm\f$ this value.
+   **/
   double initial_z_displacement = 1.0;
 };
 

@@ -23,16 +23,26 @@ class Nucleus : public Particles {
   float mass() const;
   /// returns the radius of the nucleus
   float nuclear_radius() const;
-  /** returns a length with a probability distribution according to a
-   * Woods-Saxon distribution suitable for this nucleus.
-   * $$\frac{dN}{dr} = \frac{r^2}{\exp\left(\frac{r-R}{d}\right) + 1}$$
-   * where $d$ is the softness_ parameter and $R$ is nuclear_radius(). */
+  /** returns a Woods-Saxon distributed length 
+   *
+   * the distribution of return values from this function is according
+   * to a Woods-Saxon distribution suitable for this nucleus.
+   * \f$\frac{dN}{dr} = \frac{r^2}{\exp\left(\frac{r-R}{d}\right) +
+   * 1}\f$ where \f$d\f$ is the softness_ parameter and \f$R\f$ is
+   * nuclear_radius(). */
   float distribution_nucleons() const;
   /// sets the positions of the nuclei inside nucleus A.
   void arrange_nucleons();
-  /// Boosts the nuclei (no shifting yet!)
+  /**
+   * Boosts the nuclei so that the nucleons have the appropriate
+   * momentum.
+   *
+   * @param beta_squared velocity used for boosting, interpreted as z-value.
+   **/
   void boost(const double& beta_squared);
-  /// Adds a particle to the nucleus
+  /** Adds a particle to the nucleus
+   *
+   * @param pdgcode PDG code of the particle. */
   void add_particle(const int pdgcode);
   /**
    * Adds particles from a map PDG_ID => Number_of_particles_with_that_PDG_ID
@@ -42,23 +52,35 @@ class Nucleus : public Particles {
    * and 7 neutrons). The particles are only created, no position or
    * momenta are yet assigned. */
   void fill_from_list(const std::map<int, int>& particle_list);
-  /// sets the softness of the nucleus (\see softness_).
-  void set_softness(const float& soft);
-  /// sets the masses of all nucleons automatically from the PDG info in
-  // particles.
-  void auto_set_masses(const Particles *particles);
-  /// shifts the nucleus to correct impact parameter and z displacement.
+  /// sets the softness of the nucleus
   ///
-  /// is_projectile switches if the projectile is shifted to -z_max_ or
-  /// -z_min_ (the projetcile is shifted to -z_max_, so that the
-  /// particle at highest z is at z = 0, and the target is shifted to
-  /// -z_min_, so that the leftmost particle is at z = 0.
-  //
-  /// initial_z_displacement is the additional shift in z direction, so
-  /// that two nuclei do not touch each other at the beginning.
-  //
-  /// x_offset is the shift in x-direction (for impact parameter
-  /// setting).
+  /// \see softness_.
+  void set_softness(const float& soft);
+  /**
+   * sets the masses of all nucleons automatically from the PDG info in
+   * particles.
+   *
+   * @param particles is an object of Particles which has all the PDG
+   * types read in.
+   **/
+  void auto_set_masses(const Particles *particles);
+  /**
+   * shifts the nucleus to correct impact parameter and z displacement.
+   *
+   * @param is_projectile switches if the projectile is shifted to
+   * -z_max_ or -z_min_ (the projetcile is shifted to -z_max_, so that
+   *  the particle at highest z is at z = 0, and the target is shifted
+   *  to -z_min_, so that the leftmost particle is at z = 0.
+   *
+   * @param initial_z_displacement is the additional shift in z
+   * direction, so that two nuclei do not touch each other at the
+   * beginning.
+   *
+   * @param x_offset is the shift in x-direction (for impact parameter
+   * setting).
+   *
+   * @param simulation_time set the time of each particle to this value.
+   **/
   void shift(const bool is_projectile,
              const double& initial_z_displacement,
              const double& x_offset,
@@ -68,18 +90,24 @@ class Nucleus : public Particles {
 
  private:
   /** softness of Woods-Saxon-distribution in this nucleus im fm
-   * (for softness_ == 0, we obtain a hard sphere (but don't do that; we
-   * don't want to divide by zero). */
+   * (for softness_ == 0, we obtain a hard sphere. */
   float softness_ = .545f;
-  /** single-proton-radius */
+  /** single-proton-radius 
+   *
+   * \see nuclear_radius
+   * */
   float proton_radius_ = 1.2f;
-  /// z (beam direction-) coordinate of the outermost particle
+  /// z (beam direction-) coordinate of the outermost particle (highest
+  /// z)
   float z_max_ = 0.f;
-  /// z (beam direction-) coordinate of the outermost particle
+  /// z (beam direction-) coordinate of the outermost particle (lowest
+  /// z)
   float z_min_ = 0.f;
-  /// z (beam direction-) coordinate of the outermost particle
+  /// x (impact parameter direction-) coordinate of the outermost
+  /// particle (highest x)
   float x_max_ = 0.f;
-  /// z (beam direction-) coordinate of the outermost particle
+  /// x (impact parameter direction-) coordinate of the outermost
+  /// particle (lowest x)
   float x_min_ = 0.f;
 };
 

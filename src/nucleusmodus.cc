@@ -107,7 +107,8 @@ void NucleusModus::initial_conditions(Particles *particles,
   target_.copy_particles(particles);
 }
 
-void NucleusModus::sample_impact(const bool s, float min, float max) {
+void NucleusModus::sample_impact(const bool s, const float min,
+                                               const float max) {
   // chi is the random number
   double chi = drand48();
   if (s) {

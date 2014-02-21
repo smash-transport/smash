@@ -18,12 +18,16 @@ float Nucleus::mass() const {
 }
 
 /// Nuclear radius is calculated with the proton radius times the third
-/// power of the number of nucleons.
+/// root of the number of nucleons.
 float inline Nucleus::nuclear_radius() const {
   return proton_radius_*pow(size(), 1./3.);
 }
 
 float Nucleus::distribution_nucleons() const {
+  // softness_ zero or negative? Use hard sphere.
+  if (softness_ < std::numeric_limits<float>::min()) {
+    return nuclear_radius()*(pow(drand48(), 1./3.));
+  }
   float radius_scaled = nuclear_radius()/softness_;
   float prob_range1 = 1.0;
   float prob_range2 = 3. / radius_scaled;
