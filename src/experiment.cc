@@ -21,13 +21,13 @@
 #include "include/decays.h"
 #include "include/experiment.h"
 #include "include/input-decaymodes.h"
-#include "include/input-particles.h"
 #include "include/macros.h"
 #include "include/outputroutines.h"
 #include "include/parameters.h"
 #include "include/time.h"
 
 #include <boost/filesystem.hpp>
+#include <boost/filesystem/fstream.hpp>
 
 /* #include "include/spheremodus.h" */
 
@@ -87,7 +87,7 @@ Experiment<Modus>::Experiment(Configuration &config)
  * and does the initialization of the system (fill the particles map)
  */
 template <typename Modus>
-void Experiment<Modus>::initialize(const char *path) {
+void Experiment<Modus>::initialize(const bf::path &path) {
   cross_sections_.reset();
 
   /* Ensure safe allocation */
@@ -95,9 +95,13 @@ void Experiment<Modus>::initialize(const char *path) {
   /* Allocate private pointer members */
   particles_ = new Particles;
   /* Read in particle types used in the simulation */
-  input_particles(particles_, path);
+  bf::ifstream particles_file(path / "particles.txt");
+  if (!particles_file.is_open()) {
+    throw std::runtime_error((path / "particles.txt").native() + " not found");
+  }
+  particles_->load(particles_file);
   /* Read in the particle decay modes */
-  input_decaymodes(particles_, path);
+  input_decaymodes(particles_, path.native().c_str());
   /* Sample particles according to the initial conditions */
   modus_.initial_conditions(particles_, parameters_);
   /* Save the initial energy in the system for energy conservation checks */
@@ -207,7 +211,7 @@ void Experiment<Modus>::run(const bf::path &path) {
   /* Write the header of OSCAR data output file */
   write_oscar_header();
   for (int j = 0; j < nevents_; j++) {
-    initialize(path.native().c_str());
+    initialize(path);
     /* Write the initial data block of the event */
     write_oscar_event_block(particles_, 0, particles_->size(), j + 1);
     /* the time evolution of the relevant subsystem */

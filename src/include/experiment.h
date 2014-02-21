@@ -121,7 +121,7 @@ class Experiment : public ExperimentBase {
    */
   explicit Experiment(Configuration &config);
 
-  void initialize(const char *path);
+  void initialize(const boost::filesystem::path &path);
   void run_time_evolution();
   void end();
 

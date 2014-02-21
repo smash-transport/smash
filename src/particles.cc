@@ -8,6 +8,8 @@
  */
 #include <cmath>
 #include <cstdio>
+#include <iostream>
+#include <sstream>
 
 #include "include/angles.h"
 #include "include/constants.h"
@@ -224,4 +226,42 @@ void sample_cms_momenta(ParticleData *particle1, ParticleData *particle2,
   printd("p1: %g %g \n", momentum1.x1(), momentum2.x1());
   printd("p2: %g %g \n", momentum1.x2(), momentum2.x2());
   printd("p3: %g %g \n", momentum1.x3(), momentum2.x3());
+}
+
+void Particles::load(std::istream &input) {
+  using namespace std;
+  string line;
+  int line_number = 0;
+  while (getline(input, line)) {
+    ++line_number;
+    const auto hash_pos = line.find('#');
+    if (hash_pos != string::npos) {
+      // found a comment, remove it from the line and look further
+      line = line.substr(0, hash_pos);
+    }
+    if (line.find_first_not_of(" \t") == string::npos) {
+      // only whitespace (or nothing) on this line. Next, please.
+      continue;
+    }
+    istringstream lineinput(line);
+
+    string name;
+    float mass, width;
+    int pdgcode, isospin, charge, spin;
+    lineinput >> name >> mass >> width >> pdgcode >> isospin >> charge >> spin;
+
+    if (lineinput.fail()) {
+      throw LoadFailure(
+          "While loading the Particle data:\nFailed to convert the input "
+          "string to the expected data types.\nParse error on line " +
+          to_string(line_number) + ": \"" + line + '"');
+    }
+
+    printf("Setting particle type %s mass %g width %g pdgcode %i\n",
+           name.c_str(), mass, width, pdgcode);
+    printf("Setting particle type %s isospin %i charge %i spin %i\n",
+           name.c_str(), isospin, charge, spin);
+
+    add_type({name, mass, width, pdgcode, isospin, charge, spin}, pdgcode);
+  }
 }

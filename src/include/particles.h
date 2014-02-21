@@ -7,6 +7,7 @@
 #ifndef SRC_INCLUDE_PARTICLES_H_
 #define SRC_INCLUDE_PARTICLES_H_
 
+#include <iosfwd>
 #include <map>
 #include <utility>
 
@@ -72,6 +73,11 @@ class Particles {
   inline std::map<int, ParticleData>::const_iterator cend(void) const;
   inline std::map<int, ParticleType>::const_iterator types_cbegin(void) const;
   inline std::map<int, ParticleType>::const_iterator types_cend(void) const;
+
+  struct LoadFailure : public std::runtime_error {
+    using std::runtime_error::runtime_error;
+  };
+  void load(std::istream &input);
 
  private:
   /// Highest id of a given particle
