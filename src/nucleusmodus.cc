@@ -105,9 +105,6 @@ void NucleusModus::initial_conditions(Particles *particles,
   // now, put the particles in the nuclei into particles.
   projectile_.copy_particles(particles);
   target_.copy_particles(particles);
-  // now, we should set the time to -initial_z_displacement/velocity.
-  // Then, 
-
 }
 
 void NucleusModus::sample_impact(const bool s, float min, float max) {

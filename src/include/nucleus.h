@@ -41,7 +41,7 @@ class Nucleus : public Particles {
    * If the map is, e.g., [2212: 6, 2112: 7] initializes C-13 (6 protons
    * and 7 neutrons). The particles are only created, no position or
    * momenta are yet assigned. */
-  void fill_from_list(std::map<int, int>& particle_list);
+  void fill_from_list(const std::map<int, int>& particle_list);
   /// sets the softness of the nucleus (\see softness_).
   void set_softness(const float& soft);
   /// sets the masses of all nucleons automatically from the PDG info in

@@ -17,6 +17,7 @@
 #include "include/particles.h"
 #include "include/particletype.h"
 #include "include/outputroutines.h"
+#include <stdexcept>
 
 /* XXX: hardcoded length cap */
 #define FILELEN 256
@@ -32,8 +33,7 @@ void input_decaymodes(Particles *particles, const char *path) {
   snprintf(input_decaymodes, strlen(path) + 16, "%s/decaymodes.txt", path);
   file = fopen(input_decaymodes, "r");
   if (!file) {
-    fprintf(stderr, "W: No decaymodes.txt at %s path.\n", path);
-    return;
+    throw std::runtime_error(std::string(input_decaymodes) + " not found.");
   }
 
   printf("Processing %s/decaymodes.txt.\n", path);

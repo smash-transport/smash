@@ -88,7 +88,7 @@ class Configuration {
    *                 case you don't want the default "config_general.yaml".
    */
   explicit Configuration(const boost::filesystem::path &path,
-                         const std::string &filename);
+                         const boost::filesystem::path &filename);
 
   Configuration(const Configuration &) = delete;
   Configuration &operator=(const Configuration &) = delete;
@@ -122,7 +122,8 @@ class Configuration {
   Value take(std::initializer_list<const char *> keys);
 
   /**
-   * The default interface for SMASH to read configuration values.
+   * Additional interface for SMASH to read configuration values without
+   * removing them.
    *
    * The function returns the value at the specified \p keys but does not remove it from
    * the Configuration object. Semantically, this means the value was not used.

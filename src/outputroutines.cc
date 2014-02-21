@@ -57,18 +57,6 @@ void print_header(void) {
 }
 
 
-/* mkdir_data - directory for data files */
-void mkdir_data(void) {
-  int ret;
-
-  ret = mkdir("data", 0751);
-  if (ret == 0) {
-    printf("dir 'data' successfully created.\n");
-    return;
-  }
-  fprintf(stderr, "mkdir 'data' failed.\n");
-}
-
 /* measure_timediff - time the simulation used */
 double measure_timediff(const timespec time_start) {
   timespec now;

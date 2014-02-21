@@ -94,8 +94,8 @@ void Nucleus::boost(const double& beta_squared) {
   return;
 }
 
-void Nucleus::fill_from_list(std::map<int, int>& particle_list) {
-  for (auto n = particle_list.begin(); n != particle_list.end(); n++) {
+void Nucleus::fill_from_list(const std::map<int, int>& particle_list) {
+  for (auto n = particle_list.cbegin(); n != particle_list.cend(); n++) {
     for (int i = 1; i < n->second; i++) {
       create(n->first);
     }

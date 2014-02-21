@@ -92,6 +92,7 @@ TEST(check_unused_report) {
   conf.take({"Box", "LENGTH"});
   conf.take({"Box", "TEMPERATURE"});
   conf.take({"Box", "INITIAL_CONDITION"});
+  conf.take({"Nucleus"});
   reference =
       "Collider:\n  SQRTS: 1.0\n  TARGET: -211\n  PROJECTILE: 211\nSphere:\n  "
       "RADIUS: 5.0";

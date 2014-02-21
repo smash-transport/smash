@@ -13,6 +13,7 @@
 #include "include/input-particles.h"
 #include "include/particles.h"
 #include "include/outputroutines.h"
+#include <stdexcept>
 
 /* XXX: hardcoded length cap */
 #define FILELEN 256
@@ -32,8 +33,7 @@ void input_particles(Particles *particles, const char *path) {
   snprintf(input_particles, strlen(path) + 15, "%s/particles.txt", path);
   fp = fopen(input_particles, "r");
   if (!fp) {
-    fprintf(stderr, "E: No particles.txt at %s path.\n", path);
-    exit(EXIT_FAILURE);
+    throw std::runtime_error(std::string(input_particles) + " not found.");
   }
 
   printf("Processing %s/particles.txt.\n", path);

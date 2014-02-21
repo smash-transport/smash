@@ -61,7 +61,7 @@ Configuration::Configuration(const bf::path &path)
     : Configuration(path, "config_general.yaml") {
 }
 
-Configuration::Configuration(const bf::path &path, const std::string &filename) {
+Configuration::Configuration(const bf::path &path, const bf::path &filename) {
   const auto file_path = path / filename;
   assert(bf::exists(file_path));
   root_node_ = YAML::LoadFile(file_path.native());

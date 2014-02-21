@@ -630,6 +630,7 @@ int resonance_formation(Particles *particles, int particle_id, int other_id,
   const double cms_energy = particles->data(particle_id).momentum().x0()
     + particles->data(other_id).momentum().x0();
 
+  int id_first_new = -1;
   if (produced_particles.size() == 1) {
     resonance.set_pdgcode(produced_particles.at(0));
     /* Center-of-momentum frame of initial particles
@@ -650,7 +651,7 @@ int resonance_formation(Particles *particles, int particle_id, int other_id,
 
     /* Initialize position */
     resonance.set_position(1.0, 0.0, 0.0, 0.0);
-    particles->add_data(resonance);
+    id_first_new = particles->add_data(resonance);
   } else if (produced_particles.size() == 2) {
     /* 2 particles in final state. Need another particle template */
     /* XXX: For now, it is assumed that the other particle is stable! */
@@ -675,7 +676,7 @@ int resonance_formation(Particles *particles, int particle_id, int other_id,
     /* Initialize positions */
     resonance.set_position(1.0, 0.0, 0.0, 0.0);
     stable_product.set_position(1.0, 0.0, 0.0, 0.0);
-    particles->add_data(resonance);
+    id_first_new = particles->add_data(resonance);
     particles->add_data(stable_product);
   } else {
     printf("resonance_formation:\n");
@@ -685,5 +686,5 @@ int resonance_formation(Particles *particles, int particle_id, int other_id,
     return -1;
   }
   /* Return the id of the first new particle */
-  return particles->id_max() - produced_particles.size() + 1;
+  return id_first_new;
 }
