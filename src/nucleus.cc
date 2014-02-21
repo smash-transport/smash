@@ -5,6 +5,8 @@
  *    GNU General Public License (GPLv3 or later)
  */
 
+#include <limits>
+
 #include "include/nucleus.h"
 #include "include/angles.h"
 
