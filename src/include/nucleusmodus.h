@@ -47,6 +47,10 @@ class NucleusModus : public ModusDefault {
   /// samples the impact parameter from a minimum and maximum number
   /// quadratically (if s) or linearly (if !s)
   void sample_impact(const bool s, float min, float max);
+  /// initial z displacement of nuclei: each nucleus is shifted so that
+  /// the outermost particle on the side facing the other nucleus is at
+  /// +- this value.
+  double initial_z_displacement = 1.0;
 };
 
 #endif  // SRC_INCLUDE_NUCLEUSMODUS_H_

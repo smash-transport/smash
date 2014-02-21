@@ -66,33 +66,19 @@ NucleusModus::NucleusModus(Configuration &config)
 /* initial_conditions - sets particle data for @particles */
 void NucleusModus::initial_conditions(Particles *particles,
                                        const ExperimentParameters &) {
-  // PHYSICS:
-  //    First, calculate the masses of both nuclei MA and MB.
-  //    Second: gamma*beta = sqrt( s-(MA+MB)**2 )/sqrt(4*MA*MB)
-  //    Third: Get momenta from p_i = +-gamma*beta*mass_i
+  // WHAT'S MISSING:
   //
-  //    That is if a sqrt(s)_total is given and we want calculations to
-  //    happen in frame of equal velocity.
-  //
-  //    if sqrt(s)_(ij) is given (i and j being the indices of two
-  //    particles), then
-  //    s_tot = (s_ij - mi**2 - mj**2) * MA*MB/(mi*mj) + MA**2 + MB**2.
-  //
-  //    One could also think of defining sqrt(s)_NN as the collision of
-  //    two particles whose mass is mA = MA/NA, where NA is the number
-  //    of particles in nucleus A, and correspondingly for mB.
-  //
-  //    Momenta/positions
-  //    First, initialize nuclei at (0,0,0) at rest
-  //    Second, boost nuclei
-  //    Third, shift them so that they barely touch each other
-  //    Fourth, set the time when they /will/ touch to 0.0.
+  // Nuclei can be non-spherical. If they are, then they may be randomly
+  // aligned. Excentricities and angles should be configurable.
   projectile_.auto_set_masses(particles);
   target_.auto_set_masses(particles);
   float mass_projec = projectile_.mass();
   float mass_target = target_.mass();
   float mass_1 = particles->particle_type(pdg_sNN_1_).mass();
   float mass_2 = particles->particle_type(pdg_sNN_2_).mass();
+  if (sqrt_s_NN_ < (mass_1 + mass_2)*(mass_1 + mass_2)) {
+    throw "Error in input: sqrt(s_NN) is smaller than masses.";
+  }
   float total_mandelstam_s = (sqrt_s_NN_ - mass_1*mass_1 - mass_2*mass_2)
                              * mass_projec*mass_target
                              / (mass_1*mass_2)
@@ -106,10 +92,22 @@ void NucleusModus::initial_conditions(Particles *particles,
   // direction!
   projectile_.boost(velocity_squared);
   target_.boost(-velocity_squared);
-  // shift the nuclei along the z-axis so that they barely touch and
-  // along the x-axis to get the right impact parameter:
-  // projectile_.shift(projectile_.z_max_, impact_/2.0);
-  // target_.shift(target_.z_min_, impact_/2.0);
+  // shift the nuclei along the z-axis so that they are 2*1 fm apart
+  // touch and along the x-axis to get the right impact parameter.
+  // Projectile hits at positive x.
+  // Also, it sets the time of the particles to
+  // -initial_z_displacement/sqrt(velocity_squared).
+  double simulation_time = -initial_z_displacement/sqrt(velocity_squared);
+  projectile_.shift(true, -initial_z_displacement, +impact_/2.0
+                                                 , simulation_time);
+  target_.shift(false,    +initial_z_displacement, -impact_/2.0
+                                                 , simulation_time);
+  // now, put the particles in the nuclei into particles.
+  projectile_.copy_particles(particles);
+  target_.copy_particles(particles);
+  // now, we should set the time to -initial_z_displacement/velocity.
+  // Then, 
+
 }
 
 void NucleusModus::sample_impact(const bool s, float min, float max) {

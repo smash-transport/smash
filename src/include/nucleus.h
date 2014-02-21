@@ -47,6 +47,24 @@ class Nucleus : public Particles {
   /// sets the masses of all nucleons automatically from the PDG info in
   // particles.
   void auto_set_masses(const Particles *particles);
+  /// shifts the nucleus to correct impact parameter and z displacement.
+  ///
+  /// is_projectile switches if the projectile is shifted to -z_max_ or
+  /// -z_min_ (the projetcile is shifted to -z_max_, so that the
+  /// particle at highest z is at z = 0, and the target is shifted to
+  /// -z_min_, so that the leftmost particle is at z = 0.
+  //
+  /// initial_z_displacement is the additional shift in z direction, so
+  /// that two nuclei do not touch each other at the beginning.
+  //
+  /// x_offset is the shift in x-direction (for impact parameter
+  /// setting).
+  void shift(const bool is_projectile,
+             const double& initial_z_displacement,
+             const double& x_offset,
+             const double& simulation_time);
+  /// copies the particles from this nucleus into the particle list.
+  void copy_particles(Particles* particles);
 
  private:
   /** softness of Woods-Saxon-distribution in this nucleus im fm
@@ -59,6 +77,10 @@ class Nucleus : public Particles {
   float z_max_ = 0.f;
   /// z (beam direction-) coordinate of the outermost particle
   float z_min_ = 0.f;
+  /// z (beam direction-) coordinate of the outermost particle
+  float x_max_ = 0.f;
+  /// z (beam direction-) coordinate of the outermost particle
+  float x_min_ = 0.f;
 };
 
 #endif  // SRC_INCLUDE_NUCLEUS_H_

@@ -58,11 +58,15 @@ void Nucleus::arrange_nucleons() {
     Angles dir;
     dir.distribute_isotropically();
     double z = r*dir.z();
+    double x = r*dir.x();
     // set position of current nucleon:
-    i->second.set_position(0.0, r*dir.x(), r*dir.y(), z);
+    i->second.set_position(0.0, x, r*dir.y(), z);
     // update maximal and minimal z values
     z_max_ = (z > z_max_) ? z : z_max_;
     z_min_ = (z < z_min_) ? z : z_min_;
+    // update maximal and minimal x values
+    x_max_ = (x > x_max_) ? x : x_max_;
+    x_min_ = (x < x_min_) ? x : x_min_;
   }
 }
 
@@ -106,5 +110,30 @@ void Nucleus::auto_set_masses(const Particles *particles) {
   for (auto p = begin(); p != end(); p++) {
     p->second.set_momentum(
       particles->particle_type(p->second.pdgcode()).mass(), 0.0, 0.0, 0.0);
+  }
+}
+
+void Nucleus::shift(const bool is_projectile,
+                    const double& initial_z_displacement,
+                    const double& x_offset,
+                    const double& simulation_time) {
+  // amount to shift z value. If is_projectile, we shift to -z_max_,
+  // else we shift to -z_min_ (z_min_ itself should be negative).
+  double z_offset = is_projectile ? -z_max_ : -z_min_;
+  // now, the nuclei would touch. We want them to be a little apart, so
+  // we need a bigger offset.
+  z_offset += initial_z_displacement;
+  for (auto i = begin(); i != end(); i++) {
+    FourVector this_position = i->second.position();
+    this_position.set_x3(this_position.x3() + z_offset);
+    this_position.set_x1(this_position.x1() + x_offset);
+    this_position.set_x0(simulation_time);
+    i->second.set_position(this_position);
+  }
+}
+
+void Nucleus::copy_particles(Particles* particles) {
+  for (auto p = begin(); p != end(); p++) {
+    particles->add_data(p->second);
   }
 }
