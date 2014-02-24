@@ -16,18 +16,18 @@
 
 TEST(create_box) {
   Configuration conf(TEST_CONFIG_PATH);
-  conf[{"General", "MODUS"}] = "Box";
+  conf["General"]["MODUS"] = "Box";
   VERIFY(!!ExperimentBase::create(conf));
 }
 
 TEST(create_collider) {
   Configuration conf(TEST_CONFIG_PATH);
-  conf[{"General", "MODUS"}] = "Collider";
+  conf["General"]["MODUS"] = "Collider";
   VERIFY(!!ExperimentBase::create(conf));
 }
 
 TEST_CATCH(create_invalid, ExperimentBase::InvalidModusRequest) {
   Configuration conf(TEST_CONFIG_PATH);
-  conf[{"General", "MODUS"}] = "Invalid";
+  conf["General"]["MODUS"] = "Invalid";
   ExperimentBase::create(conf);
 }
