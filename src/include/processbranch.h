@@ -40,7 +40,7 @@ inline void ProcessBranch::add_particle(int particle_pdg) {
 
 /* Add the complete particle list */
 inline void ProcessBranch::set_particles(std::vector<int> particle_pdgs) {
-  particle_list_ = particle_pdgs;
+  particle_list_ = std::move(particle_pdgs);
 }
 
 /* Add the ratio of this branch */
