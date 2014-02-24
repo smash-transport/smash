@@ -48,7 +48,7 @@ inline void DecayModes::add_mode(std::vector<int> particles, float ratio) {
         "than 2 branches. This is an invalid input.");
   }
   ProcessBranch branch;
-  branch.add_particles(particles);
+  branch.set_particles(particles);
   branch.set_weight(ratio);
   decay_modes_.push_back(branch);
 }
