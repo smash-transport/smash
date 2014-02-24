@@ -27,11 +27,14 @@
 #include "include/time.h"
 
 #include <boost/filesystem.hpp>
-#include <boost/filesystem/fstream.hpp>
 
 /* #include "include/spheremodus.h" */
 
 namespace bf = boost::filesystem;
+
+namespace particles_txt {
+#include "particles.txt.h"
+}  // namespace particles_txt
 
 /* ExperimentBase carries everything that is needed for the evolution */
 std::unique_ptr<ExperimentBase> ExperimentBase::create(Configuration &config) {
@@ -95,10 +98,7 @@ void Experiment<Modus>::initialize(const bf::path &path) {
   /* Allocate private pointer members */
   particles_ = new Particles;
   /* Read in particle types used in the simulation */
-  bf::ifstream particles_file(path / "particles.txt");
-  if (!particles_file.is_open()) {
-    throw std::runtime_error((path / "particles.txt").native() + " not found");
-  }
+  std::istringstream particles_file(particles_txt::data);
   particles_->load(particles_file);
   /* Read in the particle decay modes */
   input_decaymodes(particles_, path.native().c_str());
