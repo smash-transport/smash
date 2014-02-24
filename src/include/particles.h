@@ -77,7 +77,7 @@ class Particles {
   struct LoadFailure : public std::runtime_error {
     using std::runtime_error::runtime_error;
   };
-  void load(std::istream &input);
+  void load_particle_types(std::istream &input);
 
  private:
   /// Highest id of a given particle

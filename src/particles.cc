@@ -228,7 +228,7 @@ void sample_cms_momenta(ParticleData *particle1, ParticleData *particle2,
   printd("p3: %g %g \n", momentum1.x3(), momentum2.x3());
 }
 
-void Particles::load(std::istream &input) {
+void Particles::load_particle_types(std::istream &input) {
   using namespace std;
   string line;
   int line_number = 0;

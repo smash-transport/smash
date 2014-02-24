@@ -99,7 +99,7 @@ void Experiment<Modus>::initialize(const bf::path &path) {
   particles_ = new Particles;
   /* Read in particle types used in the simulation */
   std::istringstream particles_file(particles_txt::data);
-  particles_->load(particles_file);
+  particles_->load_particle_types(particles_file);
   /* Read in the particle decay modes */
   input_decaymodes(particles_, path.native().c_str());
   /* Sample particles according to the initial conditions */
