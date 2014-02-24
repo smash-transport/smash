@@ -98,13 +98,13 @@ TEST(everything) {
 TEST_CATCH(load_from_incorrect_string, Particles::LoadFailure) {
   Particles p;
   std::istringstream input("Hallo Welt! (wave)");
-  p.load(input);
+  p.load_particle_types(input);
 }
 
 TEST(load_one_particle_no_extra_whitespace) {
   Particles p;
   std::istringstream input1("pi0 0.1350 -1.0 111 2 0 0");
-  p.load(input1);
+  p.load_particle_types(input1);
   COMPARE(p.types_size(), 1);
   int count = 0;
   std::for_each(p.types_cbegin(), p.types_cend(),
@@ -124,7 +124,7 @@ TEST(load_one_particle_no_extra_whitespace) {
 TEST(load_one_particle_with_whitespace) {
   Particles p;
   std::istringstream input("\t\n\t  pi0  0.1350 \t -1.0 111\t2 0 0 \n ");
-  p.load(input);
+  p.load_particle_types(input);
   COMPARE(p.types_size(), 1);
   int count = 0;
   std::for_each(p.types_cbegin(), p.types_cend(),
@@ -144,7 +144,7 @@ TEST(load_one_particle_with_whitespace) {
 TEST_CATCH(load_one_particle_with_incorrect_newline, Particles::LoadFailure) {
   Particles p;
   std::istringstream input("pi0 0.1350\n-1.0 111 2 0 0");
-  p.load(input);
+  p.load_particle_types(input);
 }
 
 TEST(load_only_comments) {
@@ -153,14 +153,14 @@ TEST(load_only_comments) {
       "# Hello\n"
       "  # Will you ignore me? #### sldfkjsdf\n"
       "\t\t  \t # yes?");
-  p.load(input);
+  p.load_particle_types(input);
   COMPARE(p.types_size(), 0);
 }
 
 TEST(load_one_particle_with_comment) {
   Particles p;
   std::istringstream input("pi0 0.1350  -1.0 111 2 0 0 # This is pi0. Swell.");
-  p.load(input);
+  p.load_particle_types(input);
   COMPARE(p.types_size(), 1);
   int count = 0;
   std::for_each(p.types_cbegin(), p.types_cend(),
@@ -177,8 +177,7 @@ TEST(load_one_particle_with_comment) {
   COMPARE(count, 1);
 }
 
-TEST(load_many_particles) {
-  Particles p;
+static void load_all_particle_types(Particles &p) {
   std::istringstream input(
       "# NAME MASS[GEV] WIDTH[GEV] PDG ISOSPIN CHARGE SPIN\n"
       "pi0 0.1350 -1.0 111 2 0 0\n"
@@ -201,7 +200,12 @@ TEST(load_many_particles) {
       "Deltabar+ 1.232 0.117 -2214 3 -1 3\n"
       "Deltabar0 1.232 0.117 -2114 3 0 3\n"
       "Deltabar- 1.232 0.117 -1114 3 1 3\n");
-  p.load(input);
+  p.load_particle_types(input);
+}
+
+TEST(load_many_particles) {
+  Particles p;
+  load_all_particle_types(p);
   COMPARE(p.types_size(), 20);
   ParticleType type = p.particle_type(-1114);
   COMPARE(type.mass(), 1.232f);
@@ -218,4 +222,77 @@ TEST(load_many_particles) {
   COMPARE(type.isospin(), 1);
   COMPARE(type.charge(), 0);
   COMPARE(type.spin(), 1);
+}
+
+TEST_CATCH(load_decaymodes_missing_pdg, Particles::ReferencedParticleNotFound) {
+  Particles p;
+  std::istringstream decays_input(
+      "113 \n"
+      );
+  p.load_decaymodes(decays_input);
+}
+
+TEST_CATCH(load_decaymodes_no_decays, Particles::MissingDecays) {
+  Particles p;
+  load_all_particle_types(p);
+  std::istringstream decays_input(
+      "113 # rho0\n"
+      );
+  p.load_decaymodes(decays_input);
+}
+
+TEST_CATCH(load_decaymodes_incorrect_start, Particles::ParseError) {
+  Particles p;
+  load_all_particle_types(p);
+  std::istringstream decays_input(
+      "113. # rho0\n"
+      );
+  p.load_decaymodes(decays_input);
+}
+
+TEST(load_decaymodes_two_channels) {
+  Particles p;
+  load_all_particle_types(p);
+  std::istringstream decays_input(
+      " 113\t# rho0\n"
+      "\n"
+      " 1.0\t211 -211\t# pi+ pi- \n"
+      " \n"
+      "\n"
+      "223	# omega\n"
+      "0.33 111 113	# pi0 rho0\n"
+      "\n"
+      "0.33 211 -213	# pi+ rho-\n"
+      "0.33 -211 213	# pi- rho+\n"
+      );
+  p.load_decaymodes(decays_input);
+
+  {
+    const auto &rho0 = p.decay_modes(113);
+    VERIFY(!rho0.empty());
+    const auto &modelist = rho0.decay_mode_list();
+    COMPARE(modelist.size(), 1);
+    COMPARE(modelist[0].weight(), 1.);
+    COMPARE(modelist[0].particle_list().size(), 2);
+    COMPARE(modelist[0].particle_list()[0], 211);
+    COMPARE(modelist[0].particle_list()[1], -211);
+  }
+  {
+    const auto &omega = p.decay_modes(223);
+    VERIFY(!omega.empty());
+    const auto &modelist = omega.decay_mode_list();
+    COMPARE(modelist.size(), 3);
+    FUZZY_COMPARE(float(modelist[0].weight()), 1.f/3.f);
+    FUZZY_COMPARE(float(modelist[1].weight()), 1.f/3.f);
+    FUZZY_COMPARE(float(modelist[2].weight()), 1.f/3.f);
+    COMPARE(modelist[0].particle_list().size(), 2);
+    COMPARE(modelist[0].particle_list()[0], 111);
+    COMPARE(modelist[0].particle_list()[1], 113);
+    COMPARE(modelist[1].particle_list().size(), 2);
+    COMPARE(modelist[1].particle_list()[0], 211);
+    COMPARE(modelist[1].particle_list()[1], -213);
+    COMPARE(modelist[2].particle_list().size(), 2);
+    COMPARE(modelist[2].particle_list()[0], -211);
+    COMPARE(modelist[2].particle_list()[1], 213);
+  }
 }

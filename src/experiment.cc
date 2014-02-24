@@ -20,7 +20,6 @@
 #include "include/collisions.h"
 #include "include/decays.h"
 #include "include/experiment.h"
-#include "include/input-decaymodes.h"
 #include "include/macros.h"
 #include "include/outputroutines.h"
 #include "include/parameters.h"
@@ -35,6 +34,9 @@ namespace bf = boost::filesystem;
 namespace particles_txt {
 #include "particles.txt.h"
 }  // namespace particles_txt
+namespace decaymodes_txt {
+#include "decaymodes.txt.h"
+}  // namespace decaymodes_txt
 
 /* ExperimentBase carries everything that is needed for the evolution */
 std::unique_ptr<ExperimentBase> ExperimentBase::create(Configuration &config) {
@@ -90,18 +92,29 @@ Experiment<Modus>::Experiment(Configuration &config)
  * and does the initialization of the system (fill the particles map)
  */
 template <typename Modus>
-void Experiment<Modus>::initialize(const bf::path &path) {
+void Experiment<Modus>::initialize(const bf::path &/*path*/) {
   cross_sections_.reset();
 
   /* Ensure safe allocation */
   delete particles_;
   /* Allocate private pointer members */
   particles_ = new Particles;
-  /* Read in particle types used in the simulation */
-  std::istringstream particles_file(particles_txt::data);
+
+  // initialize possible types and decay modes
+  std::istringstream particles_file(particles_txt::data);  // TODO(mkretz)
+                                                           // depending on
+                                                           // cmdline params,
+                                                           // use a file instead
   particles_->load_particle_types(particles_file);
-  /* Read in the particle decay modes */
-  input_decaymodes(particles_, path.native().c_str());
+  std::istringstream decaymodes_file(decaymodes_txt::data);  // TODO(mkretz)
+                                                             // depending on
+                                                             // cmdline params,
+                                                             // use a file
+                                                             // instead
+  particles_->load_decaymodes(decaymodes_file);
+  // TODO(mkretz) write particles_file and decaymodes_file contents to output
+  // dir
+
   /* Sample particles according to the initial conditions */
   modus_.initial_conditions(particles_, parameters_);
   /* Save the initial energy in the system for energy conservation checks */

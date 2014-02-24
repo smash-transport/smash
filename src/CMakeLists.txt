@@ -36,7 +36,6 @@ set(smash_src boxmodus.cc clebschgordan.cc collisions.cc collidermodus.cc
         configuration.cc
         cross-sections.cc
         decays.cc distributions.cc experiment.cc fourvector.cc
-        input-decaymodes.cc
         modusdefault.cc
         parametrizations.cc
         particles.cc

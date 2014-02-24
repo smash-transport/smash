@@ -66,6 +66,17 @@ class Particles {
   inline bool types_empty(void) const;
   /// return time of the computational frame
   inline double time(void) const;
+
+  /** Check whether a particle type with the given \p pdg code is known.
+   *
+   * \param pdg The pdg code of the particle in question.
+   * \return \c true  If a ParticleType of the given \p pdg code is registered.
+   * \return \c false otherwise.
+   */
+  bool is_particle_type_registered(int pdgcode) const {
+    return types_.count(pdgcode) == 1;
+  }
+
   /* iterators */
   inline std::map<int, ParticleData>::iterator begin(void);
   inline std::map<int, ParticleData>::iterator end(void);
@@ -77,7 +88,17 @@ class Particles {
   struct LoadFailure : public std::runtime_error {
     using std::runtime_error::runtime_error;
   };
+  struct ReferencedParticleNotFound : public LoadFailure {
+    using LoadFailure::LoadFailure;
+  };
+  struct MissingDecays : public LoadFailure {
+    using LoadFailure::LoadFailure;
+  };
+  struct ParseError : public LoadFailure {
+    using LoadFailure::LoadFailure;
+  };
   void load_particle_types(std::istream &input);
+  void load_decaymodes(std::istream &input);
 
  private:
   /// Highest id of a given particle
