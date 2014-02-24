@@ -61,6 +61,7 @@ smash_add_unittest(yamltest)
 smash_add_unittest(configuration)
 smash_add_unittest(experiment)
 smash_add_unittest(particles)
+smash_add_unittest(decaymodes)
 
 # some angle operations tests
 smash_add_unittest(angles)

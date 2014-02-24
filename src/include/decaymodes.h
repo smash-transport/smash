@@ -12,6 +12,7 @@
 
 #include "include/constants.h"
 #include "include/processbranch.h"
+#include <stdexcept>
 
 class DecayModes {
  public:
@@ -27,6 +28,10 @@ class DecayModes {
   /* Pass out the decay modes */
   inline std::vector<ProcessBranch> decay_mode_list(void) const;
 
+  struct InvalidDecay : public std::invalid_argument {
+    using std::invalid_argument::invalid_argument;
+  };
+
  private:
   /* Vector of decay modes.
    * Each mode consists of a vector of the pdg codes of decay products
@@ -37,6 +42,11 @@ class DecayModes {
 
 /* Add a decay mode */
 inline void DecayModes::add_mode(std::vector<int> particles, float ratio) {
+  if (particles.size() < 2) {
+    throw InvalidDecay(
+        "DecayModes::add_mode was instructed to add a decay mode with less "
+        "than 2 branches. This is an invalid input.");
+  }
   ProcessBranch branch;
   branch.add_particles(particles);
   branch.set_weight(ratio);
