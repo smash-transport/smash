@@ -20,7 +20,8 @@ namespace bf = boost::filesystem;
 
 // internal helper functions
 namespace {
-YAML::Node find_node_at(YAML::Node node, std::initializer_list<const char *> keys) {
+YAML::Node find_node_at(YAML::Node node,
+                        std::initializer_list<const char *> keys) {
   assert(keys.size() > 0);
   for (auto key : keys) {
     // see comment in take on Node::reset

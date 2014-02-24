@@ -261,25 +261,24 @@ std::string build_error_string(std::string message, const Line &line) {/*{{{*/
  * \param input an lvalue reference to an input stream
  */
 std::vector<Line> line_parser(std::istream &input) {/*{{{*/
-  using namespace std;
-  vector<Line> lines;
+  std::vector<Line> lines;
   lines.reserve(50);
 
-  string line;
+  std::string line;
   int line_number = 0;
-  while (getline(input, line)) {
+  while (std::getline(input, line)) {
     ++line_number;
     const auto hash_pos = line.find('#');
-    if (hash_pos != string::npos) {
+    if (hash_pos != std::string::npos) {
       // found a comment, remove it from the line and look further
       line = line.substr(0, hash_pos);
     }
-    if (line.find_first_not_of(" \t") == string::npos) {
+    if (line.find_first_not_of(" \t") == std::string::npos) {
       // only whitespace (or nothing) on this line. Next, please.
       continue;
     }
     lines.emplace_back(line_number, std::move(line));
-    line = string();
+    line = std::string();
   }
   return std::move(lines);
 }/*}}}*/
@@ -328,7 +327,7 @@ void Particles::load_decaymodes(std::istream &input) {
   float ratio_sum = 0.0;
 
   const auto end_of_decaymodes = [&]() {
-    if (pdgcode == NotAParticle) { // at the start of the file
+    if (pdgcode == NotAParticle) {  // at the start of the file
       return;
     }
     if (decay_modes_to_add.empty()) {

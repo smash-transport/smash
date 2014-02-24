@@ -86,7 +86,8 @@ inline bool DecayModes::empty(void) const {
 }
 
 /* Pass out the decay modes */
-inline const std::vector<ProcessBranch> &DecayModes::decay_mode_list(void) const {
+inline const std::vector<ProcessBranch> &DecayModes::decay_mode_list(void)
+    const {
   return decay_modes_;
 }
 

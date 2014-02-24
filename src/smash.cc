@@ -153,7 +153,8 @@ int main(int argc, char *argv[]) {
     auto experiment = ExperimentBase::create(configuration);
     const std::string report = configuration.unused_values_report();
     if (!report.empty()) {
-      printf("The following configuration values were not used:\n%s\n", report.c_str());
+      printf("The following configuration values were not used:\n%s\n",
+             report.c_str());
     }
     experiment->run(output_path);
   }

@@ -24,7 +24,7 @@ class FourVector;
 class SphereModus : public ModusDefault {
  public:
   /* default constructor with probable values */
-  SphereModus(Configuration &config);
+  explicit SphereModus(Configuration &config);
   /* member funtions */
   /* special class funtions */
   int evolve(Particles *particles, CrossSections *cross_sections);

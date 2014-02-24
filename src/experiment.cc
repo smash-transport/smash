@@ -68,7 +68,7 @@ ExperimentParameters create_experiment_parameters(Configuration &config) {
 
   return {config.take({"General", "EPS"}), cross_section, testparticles};
 }
-}
+}  // unnamed namespace
 
 template <typename Modus>
 Experiment<Modus>::Experiment(Configuration &config)
