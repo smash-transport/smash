@@ -26,7 +26,7 @@ class DecayModes {
   /* Check if empty */
   inline bool empty(void) const;
   /* Pass out the decay modes */
-  inline std::vector<ProcessBranch> decay_mode_list(void) const;
+  inline const std::vector<ProcessBranch> &decay_mode_list(void) const;
 
   struct InvalidDecay : public std::invalid_argument {
     using std::invalid_argument::invalid_argument;
@@ -86,7 +86,7 @@ inline bool DecayModes::empty(void) const {
 }
 
 /* Pass out the decay modes */
-inline std::vector<ProcessBranch> DecayModes::decay_mode_list(void) const {
+inline const std::vector<ProcessBranch> &DecayModes::decay_mode_list(void) const {
   return decay_modes_;
 }
 
