@@ -52,12 +52,14 @@ configure_file (
 
 # directly copy config files to build directory
 configure_file(config_general.yaml ${PROJECT_BINARY_DIR}/config_general.yaml COPYONLY)
+set(generated_headers)
 macro(copy_at_make)
    foreach(filename ${ARGN})
       configure_file(
          ${CMAKE_CURRENT_SOURCE_DIR}/${filename}
          ${PROJECT_BINARY_DIR}/${filename}
          COPYONLY)
+      list(APPEND generated_headers "${CMAKE_CURRENT_BINARY_DIR}/${filename}.h")
       add_custom_command(
          OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${filename}.h
          COMMAND ${CMAKE_COMMAND}
@@ -73,6 +75,8 @@ macro(copy_at_make)
    endforeach()
 endmacro()
 copy_at_make(particles.txt decaymodes.txt)
+
+set_source_files_properties(experiment.cc PROPERTIES OBJECT_DEPENDS "${generated_headers}")
 
 target_link_libraries(smash ${SMASH_LIBRARIES})
 
