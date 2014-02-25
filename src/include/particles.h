@@ -46,10 +46,6 @@ class Particles {
   inline int id_max(void);
   /// inserts a new particle and returns its id
   inline int add_data(const ParticleData &particle_data);
-  /// inserts a new particle type
-  inline void add_type(const ParticleType &particle_type, int pdg);
-  /// adds decay modes for a particle type
-  inline void add_decaymodes(const DecayModes &new_decay_modes, int pdg);
   /// add a range of particles
   inline void create(size_t number, int pdg);
   /// remove a specific particle
@@ -101,6 +97,11 @@ class Particles {
   void load_decaymodes(std::istream &input);
 
  private:
+  /// inserts a new particle type
+  inline void add_type(const ParticleType &particle_type, int pdg);
+  /// adds decay modes for a particle type
+  inline void add_decaymodes(const DecayModes &new_decay_modes, int pdg);
+
   /// Highest id of a given particle
   int id_max_;
   /**
