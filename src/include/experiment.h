@@ -138,12 +138,9 @@ class Experiment : public ExperimentBase {
   Modus modus_;
 
   /**
-   * Pointer to the particles interacting in the experiment.
-   *
-   * \todo Why is this a pointer?
-   * \todo If this needs to be a pointer, why not a unique_ptr?
+   * The particles interacting in the experiment.
    */
-  Particles *particles_ = nullptr;
+  Particles particles_;
 
   /**
    * Struct of several member variables.

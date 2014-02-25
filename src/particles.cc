@@ -416,3 +416,8 @@ void Particles::load_decaymodes(const std::string &input) {
   }
   end_of_decaymodes();
 }
+
+void Particles::reset() {
+  id_max_ = -1;
+  data_.clear();
+}

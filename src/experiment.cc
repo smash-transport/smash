@@ -31,13 +31,6 @@
 
 namespace bf = boost::filesystem;
 
-namespace particles_txt {
-#include "particles.txt.h"
-}  // namespace particles_txt
-namespace decaymodes_txt {
-#include "decaymodes.txt.h"
-}  // namespace decaymodes_txt
-
 /* ExperimentBase carries everything that is needed for the evolution */
 std::unique_ptr<ExperimentBase> ExperimentBase::create(Configuration &config) {
   const std::string modus_chooser = config.take({"General", "MODUS"});
@@ -73,6 +66,7 @@ ExperimentParameters create_experiment_parameters(Configuration &config) {
 template <typename Modus>
 Experiment<Modus>::Experiment(Configuration &config)
     : modus_(config),
+      particles_{config.take({"particles"}), config.take({"decaymodes"})},
       parameters_(create_experiment_parameters(config)),
       cross_sections_(parameters_.cross_section),
       nevents_(config.take({"General", "NEVENTS"})),
@@ -94,21 +88,16 @@ Experiment<Modus>::Experiment(Configuration &config)
 template <typename Modus>
 void Experiment<Modus>::initialize(const bf::path &/*path*/) {
   cross_sections_.reset();
-
-  /* Ensure safe allocation */
-  delete particles_;
-
-  // initialize possible types and decay modes
-  particles_ = new Particles(particles_txt::data, decaymodes_txt::data);
+  particles_.reset();
 
   /* Sample particles according to the initial conditions */
-  modus_.initial_conditions(particles_, parameters_);
+  modus_.initial_conditions(&particles_, parameters_);
   /* Save the initial energy in the system for energy conservation checks */
-  energy_initial_ = energy_total(particles_);
+  energy_initial_ = energy_total(&particles_);
   /* Print output headers */
   print_header();
   /* Write out the initial momenta and positions of the particles */
-  write_particles(*particles_);
+  write_particles(particles_);
 }
 
 /* This is the loop over timesteps, carrying out collisions and decays
@@ -116,52 +105,52 @@ void Experiment<Modus>::initialize(const bf::path &/*path*/) {
  */
 template <typename Modus>
 void Experiment<Modus>::run_time_evolution() {
-  modus_.sanity_check(particles_);
+  modus_.sanity_check(&particles_);
   std::list<int> collision_list, decay_list;
   size_t interactions_total = 0, previous_interactions_total = 0,
          interactions_this_interval = 0;
   size_t rejection_conflict = 0;
-  print_measurements(*particles_, interactions_total,
+  print_measurements(particles_, interactions_total,
                      interactions_this_interval, energy_initial_, time_start_);
   for (int step = 0; step < steps_; step++) {
     /* Check resonances for decays */
-    check_decays(particles_, &decay_list, parameters_.eps);
+    check_decays(&particles_, &decay_list, parameters_.eps);
     /* Do the decays */
     if (!decay_list.empty()) {
       interactions_total =
-          decay_particles(particles_, &decay_list, interactions_total);
+          decay_particles(&particles_, &decay_list, interactions_total);
     }
     /* fill collision table by cells */
-    modus_.check_collision_geometry(particles_, &cross_sections_,
+    modus_.check_collision_geometry(&particles_, &cross_sections_,
                                     &collision_list, &rejection_conflict,
                                     parameters_);
     /* particle interactions */
     if (!collision_list.empty()) {
       printd_list(collision_list);
-      interactions_total = collide_particles(particles_, &collision_list,
+      interactions_total = collide_particles(&particles_, &collision_list,
                                              interactions_total);
     }
-    modus_.propagate(particles_, parameters_);
+    modus_.propagate(&particles_, parameters_);
     /* physics output during the run */
     if (step > 0 && (step + 1) % output_interval_ == 0) {
       interactions_this_interval =
           interactions_total - previous_interactions_total;
       previous_interactions_total = interactions_total;
-      print_measurements(*particles_, interactions_total,
+      print_measurements(particles_, interactions_total,
                          interactions_this_interval, energy_initial_,
                          time_start_);
       printd("Ignored collisions %zu\n", rejection_conflict);
       /* save evolution data */
-      write_particles(*particles_);
-      write_vtk(*particles_);
+      write_particles(particles_);
+      write_vtk(particles_);
     }
   }
   /* Guard against evolution */
   if (likely(steps_ > 0)) {
     /* if there are no particles no interactions happened */
-    if (likely(!particles_->empty())) {
-      print_tail(time_start_, interactions_total * 2 / particles_->time() /
-                                  particles_->size());
+    if (likely(!particles_.empty())) {
+      print_tail(time_start_, interactions_total * 2 / particles_.time() /
+                                  particles_.size());
     } else {
       print_tail(time_start_, 0);
       printf("Total ignored collisions: %zu\n", rejection_conflict);
@@ -202,7 +191,6 @@ timespec inline Experiment<Modus>::set_timer_start(void) {
 /* Tear down everything */
 template <typename Modus>
 void Experiment<Modus>::end() {
-  delete particles_;
 }
 
 template <typename Modus>
@@ -212,11 +200,11 @@ void Experiment<Modus>::run(const bf::path &path) {
   for (int j = 0; j < nevents_; j++) {
     initialize(path);
     /* Write the initial data block of the event */
-    write_oscar_event_block(particles_, 0, particles_->size(), j + 1);
+    write_oscar_event_block(&particles_, 0, particles_.size(), j + 1);
     /* the time evolution of the relevant subsystem */
     run_time_evolution();
     /* Write the final data block of the event */
-    write_oscar_event_block(particles_, particles_->size(), 0, j + 1);
+    write_oscar_event_block(&particles_, particles_.size(), 0, j + 1);
   }
   end();
 }

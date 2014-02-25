@@ -97,6 +97,11 @@ class Particles {
     using LoadFailure::LoadFailure;
   };
 
+  /** Reset member data to the state the object had when the constructor
+   * returned.
+   */
+  void reset();
+
  private:
   void load_particle_types(const std::string &input);
   void load_decaymodes(const std::string &input);
