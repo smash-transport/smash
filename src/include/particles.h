@@ -7,8 +7,8 @@
 #ifndef SRC_INCLUDE_PARTICLES_H_
 #define SRC_INCLUDE_PARTICLES_H_
 
-#include <iosfwd>
 #include <map>
+#include <string>
 #include <utility>
 
 #include "include/decaymodes.h"
