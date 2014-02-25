@@ -229,6 +229,17 @@ void sample_cms_momenta(ParticleData *particle1, ParticleData *particle2,
   printd("p3: %g %g \n", momentum1.x3(), momentum2.x3());
 }
 
+/* add a new particle type */
+inline void Particles::add_type(ParticleType const &TYPE, int pdg) {
+  types_.insert(std::pair<int, ParticleType>(pdg, TYPE));
+}
+
+/* add decay modes for a particle type */
+inline void Particles::add_decaymodes(const DecayModes &new_decay_modes,
+                                      int pdg) {
+  all_decay_modes_.insert(std::pair<int, DecayModes>(pdg, new_decay_modes));
+}
+
 namespace {/*{{{*/
 std::string trim(const std::string &s) {
   const auto begin = s.find_first_not_of(" \t\n\r");
