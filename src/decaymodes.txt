@@ -8,48 +8,48 @@
 # A line with a single integer (or end of file) marks the end of the list of
 # possible decays
 
-113	# rho0
-1.0 211 -211	# pi+ pi-
+113                 # rho0
+1.0 211 -211        # pi+ pi-
 
-213	# rho+
-1.0 211 111	# pi+ pi0
+213                 # rho+
+1.0 211 111         # pi+ pi0
 
--213	# rho-
-1.0 -211 111	# pi- pi0
+-213                # rho-
+1.0 -211 111        # pi- pi0
 
-221	# eta
-0.33 111 111 111	# pi0 pi0 pi0
-0.23 211 -211 111	# pi+ pi- pi0
+221                 # eta
+0.33 111 111 111    # pi0 pi0 pi0
+0.23 211 -211 111   # pi+ pi- pi0
 
-223	# omega
-0.33 111 113	# pi0 rho0
-0.33 211 -213	# pi+ rho-
-0.33 -211 213	# pi- rho+
+223                 # omega
+0.33 111 113        # pi0 rho0
+0.33 211 -213       # pi+ rho-
+0.33 -211 213       # pi- rho+
 
-2224	# delta++
-1.0 2212 211	# p pi+
+2224                # delta++
+1.0 2212 211        # p pi+
 
-2214	# delta+
-0.67 2212 111	# p pi0
-0.33 2112 211	# n pi+
+2214                # delta+
+0.67 2212 111       # p pi0
+0.33 2112 211       # n pi+
 
-2114	# delta0
-0.67 2112 111	# n pi0
-0.33 2212 -211	# p pi-
+2114                # delta0
+0.67 2112 111       # n pi0
+0.33 2212 -211      # p pi-
 
-1114	# delta-
-1.0 2112 -211	# n pi-
+1114                # delta-
+1.0 2112 -211       # n pi-
 
--2224	# deltabar++
-1.0 -2212 -211	# pbar pi-
+-2224               # deltabar++
+1.0 -2212 -211      # pbar pi-
 
--2214	# deltabar+
-0.67 -2212 111	# pbar pi0
-0.33 -2112 -211	# nbar pi-
+-2214               # deltabar+
+0.67 -2212 111      # pbar pi0
+0.33 -2112 -211     # nbar pi-
 
--2114	# deltabar0
-0.67 -2112 111	# nbar pi0
-0.33 -2212 211	# pbar pi+
+-2114               # deltabar0
+0.67 -2112 111      # nbar pi0
+0.33 -2212 211      # pbar pi+
 
--1114	# deltabar-
-1.0 -2112 211	# nbar pi+
+-1114               # deltabar-
+1.0 -2112 211       # nbar pi+
