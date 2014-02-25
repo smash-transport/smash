@@ -110,6 +110,18 @@ Configuration::Value Configuration::read(
   return {find_node_at(root_node_, keys)};
 }
 
+void Configuration::remove_all_but(const std::string &key) {
+  std::vector<std::string> to_remove;
+  for (auto i : root_node_) {
+    if (i.first.Scalar() != key) {
+      to_remove.push_back(i.first.Scalar());
+    }
+  }
+  for (auto i : to_remove) {
+    root_node_.remove(i);
+  }
+}
+
 bool Configuration::has_value(std::initializer_list<const char *> keys) const {
   return find_node_at(root_node_, keys).IsDefined();
 }

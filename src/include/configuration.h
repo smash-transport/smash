@@ -137,6 +137,13 @@ class Configuration {
   Value read(std::initializer_list<const char *> keys) const;
 
   /**
+   * Removes all entries in the map except for \p key.
+   *
+   * \param key The key of the map entry to keep.
+   */
+  void remove_all_but(const std::string &key);
+
+  /**
    * Access to the YAML::Node behind the requested \p keys.
    *
    * If you want to read a value use the \ref read function above. Use the

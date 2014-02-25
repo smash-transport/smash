@@ -36,6 +36,9 @@ std::unique_ptr<ExperimentBase> ExperimentBase::create(Configuration &config) {
   const std::string modus_chooser = config.take({"General", "MODUS"});
   printf("Modus for this calculation: %s\n", modus_chooser.c_str());
 
+  // remove config maps of unused Modi
+  config["Modi"].remove_all_but(modus_chooser);
+
   typedef std::unique_ptr<ExperimentBase> ExperimentPointer;
   if (modus_chooser.compare("Box") == 0) {
     return ExperimentPointer(new Experiment<BoxModus>(config));
@@ -65,7 +68,7 @@ ExperimentParameters create_experiment_parameters(Configuration &config) {
 
 template <typename Modus>
 Experiment<Modus>::Experiment(Configuration &config)
-    : modus_(config),
+    : modus_(config["Modi"]),
       particles_{config.take({"particles"}), config.take({"decaymodes"})},
       parameters_(create_experiment_parameters(config)),
       cross_sections_(parameters_.cross_section),
