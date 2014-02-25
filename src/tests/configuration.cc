@@ -81,6 +81,8 @@ TEST(take_removes_entry) {
 TEST(check_unused_report) {
   std::string reference;
   Configuration conf(TEST_CONFIG_PATH);
+  conf.take({"particles"});
+  conf.take({"decaymodes"});
   conf.take({"General", "MODUS"});
   conf.take({"General", "EPS"});
   conf.take({"General", "STEPS"});
