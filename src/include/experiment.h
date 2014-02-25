@@ -150,11 +150,9 @@ class Experiment : public ExperimentBase {
   ExperimentParameters parameters_;
 
   /**
-   * Pointer to ?
+   * ?
    *
    * \todo CrossSections needs a rename?
-   * \todo Why is this a pointer?
-   * \todo If this needs to be a pointer, why not a unique_ptr?
    */
   CrossSections cross_sections_;
 
