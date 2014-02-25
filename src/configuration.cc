@@ -56,6 +56,14 @@ YAML::Node operator|=(YAML::Node a, const YAML::Node &b) {
   }
   return a;
 }
+
+namespace particles_txt {
+#include "particles.txt.h"
+}  // namespace particles_txt
+namespace decaymodes_txt {
+#include "decaymodes.txt.h"
+}  // namespace decaymodes_txt
+
 }  // unnamed namespace
 
 Configuration::Configuration(const bf::path &path)
@@ -66,6 +74,13 @@ Configuration::Configuration(const bf::path &path, const bf::path &filename) {
   const auto file_path = path / filename;
   assert(bf::exists(file_path));
   root_node_ = YAML::LoadFile(file_path.native());
+
+  if (!root_node_["decaymodes"].IsDefined()) {
+    root_node_["decaymodes"] = decaymodes_txt::data;
+  }
+  if (!root_node_["particles"].IsDefined()) {
+    root_node_["particles"] = particles_txt::data;
+  }
 }
 
 void Configuration::merge_yaml(const std::string &yaml) {

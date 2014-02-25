@@ -98,13 +98,6 @@ std::string read_all(std::istream &input) {
           std::istreambuf_iterator<char>{}};
 }
 
-namespace particles_txt {
-#include "particles.txt.h"
-}  // namespace particles_txt
-namespace decaymodes_txt {
-#include "decaymodes.txt.h"
-}  // namespace decaymodes_txt
-
 }  // unnamed namespace
 
 /* main - do command line parsing and hence decides modus */
@@ -131,8 +124,6 @@ int main(int argc, char *argv[]) {
 
     /* read in config file */
     Configuration configuration(".");
-    configuration["decaymodes"] = decaymodes_txt::data;
-    configuration["particles"] = particles_txt::data;
 
     /* check for overriding command line arguments */
     int opt;
@@ -149,12 +140,6 @@ int main(int argc, char *argv[]) {
         case 'i': {
           const boost::filesystem::path file(optarg);
           configuration = Configuration(file.parent_path(), file.filename());
-          if (!configuration.has_value({"decaymodes"})) {
-            configuration["decaymodes"] = decaymodes_txt::data;
-          }
-          if (!configuration.has_value({"particles"})) {
-            configuration["particles"] = particles_txt::data;
-          }
         } break;
         case 'h':
           usage(EXIT_SUCCESS, progname);
