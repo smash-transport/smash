@@ -170,6 +170,13 @@ class Configuration {
    */
   std::string unused_values_report() const;
 
+  /**
+   * Returns a YAML string of the current tree.
+   *
+   * This differs from the above in that it does not remove empty maps.
+   */
+  std::string to_string() const;
+
  private:
   /// Creates a subobject that has its root node at the given node.
   Configuration(const YAML::Node &node) : root_node_(node) {

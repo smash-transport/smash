@@ -147,8 +147,7 @@ int main(int argc, char *argv[]) {
     printd("output path: %s\n", output_path.native().c_str());
 
     // keep a copy of the configuration that was used in the output directory
-    bf::ofstream(output_path / "config.yaml")
-        << configuration.unused_values_report();
+    bf::ofstream(output_path / "config.yaml") << configuration.to_string();
 
     auto experiment = ExperimentBase::create(configuration);
     const std::string report = configuration.unused_values_report();

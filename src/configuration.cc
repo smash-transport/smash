@@ -104,3 +104,9 @@ std::string Configuration::unused_values_report() const {
   s << remove_empty_maps(root_node_);
   return s.str();
 }
+
+std::string Configuration::to_string() const {
+  std::stringstream s;
+  s << root_node_;
+  return s.str();
+}
