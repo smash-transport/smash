@@ -25,6 +25,30 @@ class path;
 
 /**
  * Interface to the SMASH configuration files.
+ *
+ * The configuration is created from a YAML file and then stores a nested map of
+ * maps (normally a tree, but YAML allows it to be cyclic - even though we don't
+ * want that feature).
+ *
+ * Typical usage in SMASH needs to read the value once. In that case use the
+ * Configuration::take function:
+ * \code
+ * double sigma = config.take({"General", "SIGMA"});
+ * \endcode
+ * Note the curly braces in the function call. It's a std::initializer_list of
+ * strings. This allows an arbitrary nesting depth in all via the same function.
+ * But as a consequence the keys must all be given as constant strings at
+ * compile time.
+ *
+ * If you need to access configuration values from a run-time string you can use
+ * Configuration::operator[]. This returns a Configuration object that
+ * references the respective sub-tree.
+ *
+ * By taking values (instead of just reading), the configuration object should
+ * be empty at the end of initialization. If the object is not empty then SMASH
+ * will print a warning (using Configuration::unused_values_report). This can be
+ * important for the user to discover typos in his configuration file (or
+ * command line parameters).
  */
 class Configuration {
  public:
@@ -41,14 +65,21 @@ class Configuration {
    * by users of Configuration.
    */
   class Value {
+    friend class Configuration;
+
     /// a YAML leaf node
     const YAML::Node node_;
 
-   public:
+    /** Constructs the Value wrapper from a YAML::Node.
+     *
+     * \note This constructor must be implicit, otherwise it's impossible to
+     * return an rvalue Value object - because the copy constructor is deleted.
+     */
     Value(const YAML::Node &n) : node_(n) {
       assert(n.IsScalar() || n.IsSequence() || n.IsMap());
     }
 
+   public:
     /// if you want to copy this you're doing it wrong
     Value(const Value &) = delete;
     /// if you want to copy this you're doing it wrong
@@ -90,12 +121,26 @@ class Configuration {
   explicit Configuration(const boost::filesystem::path &path,
                          const boost::filesystem::path &filename);
 
+  /// if you want to copy this you're doing it wrong
   Configuration(const Configuration &) = delete;
+  /// if you want to copy this you're doing it wrong
   Configuration &operator=(const Configuration &) = delete;
 
+  /// moving is fine
   Configuration(Configuration &&) = default;
+  /// moving is fine
   Configuration &operator=(Configuration &&) = default;
 
+  /**
+   * Merge the configuration in \p yaml into the existing tree.
+   *
+   * The function parses the string in \p yaml into its internal tree
+   * representation. Then it merges the nodes from the new tree into the
+   * existing tree.
+   * The merge resolves conflicts by taking the value from \p yaml.
+   *
+   * \param yaml A string with YAML (or JSON) content that is to be merged.
+   */
   void merge_yaml(const std::string &yaml);
 
   /**
@@ -161,6 +206,13 @@ class Configuration {
     return root_node_[std::forward<T>(key)];
   }
 
+  /**
+   * Assignment overwrites the value of the current YAML node.
+   *
+   * \param value An arbitrary value that yaml-cpp can convert into YAML
+   * representation. Any builtin type, strings, maps, and vectors can be used
+   * here.
+   */
   template <typename T>
   Configuration &operator=(T &&value) {
     root_node_ = std::forward<T>(value);
@@ -185,7 +237,12 @@ class Configuration {
   std::string to_string() const;
 
  private:
-  /// Creates a subobject that has its root node at the given node.
+  /** Creates a subobject that has its root node at the given node.
+   *
+   * \note This constructor is not explicit because it can be called only from
+   * inside Configuration and by making it explicit a return would require the
+   * copy constructor.
+   */
   Configuration(const YAML::Node &node) : root_node_(node) {
   }
 
