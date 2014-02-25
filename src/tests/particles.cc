@@ -46,36 +46,17 @@ TEST(everything) {
   VERIFY(!(distance_squared < 0.0));
 
   /* now check the Particles class itself */
-  Particles particles;
-  /* check addition of particle types */
-  ParticleType piplus("pi+", 0.13957, -1.0, 211, 1, 1, 0);
-  particles.add_type(piplus, 211);
-  VERIFY(!(particles.types_size() != 1));
-  size_t type_size = 0;
-  for (std::map<int, ParticleType>::const_iterator
-       i = particles.types_cbegin(); i != particles.types_cend(); ++i) {
-    printd("pdg %d mass: %g [GeV]\n", i->first, i->second.mass());
-    type_size++;
-  }
-  VERIFY(!(type_size != 1));
-  type_size = 0;
-  ParticleType piminus("pi-", 0.13957, -1.0, -211, 1, -1, 0);
-  particles.add_type(piminus, -211);
-  for (std::map<int, ParticleType>::const_iterator
-       i = particles.types_cbegin(); i != particles.types_cend(); ++i) {
-    printd("pdg %d mass: %g [GeV]\n", i->first, i->second.mass());
-    type_size++;
-  }
-  VERIFY(!(type_size != 2));
-  particles.add_type(piminus, -211);
-  VERIFY(!(particles.types_size() != 2));
+  const std::string pis(
+      "pi+ 0.13957 -1.0 211 1 1 0\n"
+      "pi- 0.13957 -1.0 -211 1 -1 0\n");
+  Particles particles(pis, {});
 
   /* check addition of particles */
   particles.add_data(particle_a);
   VERIFY(!(particles.size() != 1));
   particles.add_data(particle_b);
   VERIFY(!(particles.size() != 2));
-  type_size = 0;
+  int type_size = 0;
   for (std::map<int, ParticleData>::const_iterator
        i = particles.cbegin(); i != particles.cend(); ++i) {
     printd("id %d: pdg %d\n", i->first, i->second.pdgcode());
@@ -96,15 +77,13 @@ TEST(everything) {
 }
 
 TEST_CATCH(load_from_incorrect_string, Particles::LoadFailure) {
-  Particles p;
-  std::istringstream input("Hallo Welt! (wave)");
-  p.load_particle_types(input);
+  const std::string parts("Hallo Welt! (wave)");
+  Particles p(parts, {});
 }
 
 TEST(load_one_particle_no_extra_whitespace) {
-  Particles p;
-  std::istringstream input1("pi0 0.1350 -1.0 111 2 0 0");
-  p.load_particle_types(input1);
+  const std::string parts("pi0 0.1350 -1.0 111 2 0 0");
+  Particles p(parts, {});
   COMPARE(p.types_size(), 1);
   int count = 0;
   std::for_each(p.types_cbegin(), p.types_cend(),
@@ -122,9 +101,8 @@ TEST(load_one_particle_no_extra_whitespace) {
 }
 
 TEST(load_one_particle_with_whitespace) {
-  Particles p;
-  std::istringstream input("\t\n\t  pi0  0.1350 \t -1.0 111\t2 0 0 \n ");
-  p.load_particle_types(input);
+  const std::string parts("\t\n\t  pi0  0.1350 \t -1.0 111\t2 0 0 \n ");
+  Particles p(parts, {});
   COMPARE(p.types_size(), 1);
   int count = 0;
   std::for_each(p.types_cbegin(), p.types_cend(),
@@ -142,25 +120,22 @@ TEST(load_one_particle_with_whitespace) {
 }
 
 TEST_CATCH(load_one_particle_with_incorrect_newline, Particles::LoadFailure) {
-  Particles p;
-  std::istringstream input("pi0 0.1350\n-1.0 111 2 0 0");
-  p.load_particle_types(input);
+  const std::string parts("pi0 0.1350\n-1.0 111 2 0 0");
+  Particles p(parts, {});
 }
 
 TEST(load_only_comments) {
-  Particles p;
-  std::istringstream input(
+  const std::string parts(
       "# Hello\n"
       "  # Will you ignore me? #### sldfkjsdf\n"
       "\t\t  \t # yes?");
-  p.load_particle_types(input);
+  Particles p(parts, {});
   COMPARE(p.types_size(), 0);
 }
 
 TEST(load_one_particle_with_comment) {
-  Particles p;
-  std::istringstream input("pi0 0.1350  -1.0 111 2 0 0 # This is pi0. Swell.");
-  p.load_particle_types(input);
+  const std::string parts("pi0 0.1350  -1.0 111 2 0 0 # This is pi0. Swell.");
+  Particles p(parts, {});
   COMPARE(p.types_size(), 1);
   int count = 0;
   std::for_each(p.types_cbegin(), p.types_cend(),
@@ -177,35 +152,12 @@ TEST(load_one_particle_with_comment) {
   COMPARE(count, 1);
 }
 
-static void load_all_particle_types(Particles &p) {
-  std::istringstream input(
-      "# NAME MASS[GEV] WIDTH[GEV] PDG ISOSPIN CHARGE SPIN\n"
-      "pi0 0.1350 -1.0 111 2 0 0\n"
-      "pi+ 0.1396 -1.0 211 2 1 0\n"
-      "pi- 0.1396 -1.0 -211 2 -1 0\n"
-      "rho0 0.7755 0.149 113 2 0 2\n"
-      "rho+ 0.7755 0.149 213 2 1 2\n"
-      "rho- 0.7755 0.149 -213 2 -1 2\n"
-      "eta 0.5479 1.0e-6 221 0 0 0\n"
-      "omega 0.7827 0.0085 223 0 0 2\n"
-      "p 0.9383 -1.0 2212 1 1 1\n"
-      "pbar 0.9383 -1.0 -2212 1 -1 1\n"
-      "n 0.9396 -1.0 2112 1 0 1\n"
-      "nbar 0.9396 -1.0 -2112 1 0 1\n"
-      "Delta++ 1.232 0.117 2224 3 2 3\n"
-      "Delta+ 1.232 0.117 2214 3 1 3\n"
-      "Delta0 1.232 0.117 2114 3 0 3\n"
-      "Delta- 1.232 0.117 1114 3 -1 3\n"
-      "Deltabar++ 1.232 0.117 -2224 3 -2 3\n"
-      "Deltabar+ 1.232 0.117 -2214 3 -1 3\n"
-      "Deltabar0 1.232 0.117 -2114 3 0 3\n"
-      "Deltabar- 1.232 0.117 -1114 3 1 3\n");
-  p.load_particle_types(input);
-}
+namespace particles_txt {
+#include "particles.txt.h"
+}  // namespace particles_txt
 
 TEST(load_many_particles) {
-  Particles p;
-  load_all_particle_types(p);
+  Particles p(particles_txt::data, {});
   COMPARE(p.types_size(), 20);
   ParticleType type = p.particle_type(-1114);
   COMPARE(type.mass(), 1.232f);
@@ -225,35 +177,28 @@ TEST(load_many_particles) {
 }
 
 TEST_CATCH(load_decaymodes_missing_pdg, Particles::ReferencedParticleNotFound) {
-  Particles p;
-  std::istringstream decays_input(
+  const std::string decays_input(
       "113 \n"
       );
-  p.load_decaymodes(decays_input);
+  Particles p({}, decays_input);
 }
 
 TEST_CATCH(load_decaymodes_no_decays, Particles::MissingDecays) {
-  Particles p;
-  load_all_particle_types(p);
-  std::istringstream decays_input(
+  const std::string decays_input(
       "113 # rho0\n"
       );
-  p.load_decaymodes(decays_input);
+  Particles p(particles_txt::data, decays_input);
 }
 
 TEST_CATCH(load_decaymodes_incorrect_start, Particles::ParseError) {
-  Particles p;
-  load_all_particle_types(p);
-  std::istringstream decays_input(
+  const std::string decays_input(
       "113. # rho0\n"
       );
-  p.load_decaymodes(decays_input);
+  Particles p(particles_txt::data, decays_input);
 }
 
 TEST(load_decaymodes_two_channels) {
-  Particles p;
-  load_all_particle_types(p);
-  std::istringstream decays_input(
+  const std::string decays_input(
       " 113\t# rho0\n"
       "\n"
       " 1.0\t211 -211\t# pi+ pi- \n"
@@ -265,7 +210,7 @@ TEST(load_decaymodes_two_channels) {
       "0.33 211 -213	# pi+ rho-\n"
       "0.33 -211 213	# pi- rho+\n"
       );
-  p.load_decaymodes(decays_input);
+  Particles p(particles_txt::data, decays_input);
 
   {
     const auto &rho0 = p.decay_modes(113);

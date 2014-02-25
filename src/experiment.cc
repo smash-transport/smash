@@ -97,23 +97,9 @@ void Experiment<Modus>::initialize(const bf::path &/*path*/) {
 
   /* Ensure safe allocation */
   delete particles_;
-  /* Allocate private pointer members */
-  particles_ = new Particles;
 
   // initialize possible types and decay modes
-  std::istringstream particles_file(particles_txt::data);  // TODO(mkretz)
-                                                           // depending on
-                                                           // cmdline params,
-                                                           // use a file instead
-  particles_->load_particle_types(particles_file);
-  std::istringstream decaymodes_file(decaymodes_txt::data);  // TODO(mkretz)
-                                                             // depending on
-                                                             // cmdline params,
-                                                             // use a file
-                                                             // instead
-  particles_->load_decaymodes(decaymodes_file);
-  // TODO(mkretz) write particles_file and decaymodes_file contents to output
-  // dir
+  particles_ = new Particles(particles_txt::data, decaymodes_txt::data);
 
   /* Sample particles according to the initial conditions */
   modus_.initial_conditions(particles_, parameters_);

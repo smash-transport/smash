@@ -31,7 +31,10 @@
 class Particles {
  public:
   /// Use improbable values for default constructor
-  Particles() :id_max_(-1) {}
+  Particles(const std::string &particles, const std::string &decaymodes) {
+    load_particle_types(particles);
+    load_decaymodes(decaymodes);
+  }
   /// Return the specific data of a particle according to its id
   inline const ParticleData &data(int id);
   /// Return the specific datapointer of a particle according to its id
@@ -93,17 +96,17 @@ class Particles {
   struct ParseError : public LoadFailure {
     using LoadFailure::LoadFailure;
   };
-  void load_particle_types(std::istream &input);
-  void load_decaymodes(std::istream &input);
 
  private:
+  void load_particle_types(const std::string &input);
+  void load_decaymodes(const std::string &input);
   /// inserts a new particle type
   inline void add_type(const ParticleType &particle_type, int pdg);
   /// adds decay modes for a particle type
   inline void add_decaymodes(const DecayModes &new_decay_modes, int pdg);
 
   /// Highest id of a given particle
-  int id_max_;
+  int id_max_ = -1;
   /**
    * dynamic data of the particles a map between its id and data
    *

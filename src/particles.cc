@@ -260,13 +260,14 @@ std::string build_error_string(std::string message, const Line &line) {/*{{{*/
  *
  * \param input an lvalue reference to an input stream
  */
-std::vector<Line> line_parser(std::istream &input) {/*{{{*/
+std::vector<Line> line_parser(const std::string &input) {/*{{{*/
+  std::istringstream input_stream(input);
   std::vector<Line> lines;
   lines.reserve(50);
 
   std::string line;
   int line_number = 0;
-  while (std::getline(input, line)) {
+  while (std::getline(input_stream, line)) {
     ++line_number;
     const auto hash_pos = line.find('#');
     if (hash_pos != std::string::npos) {
@@ -297,7 +298,7 @@ void ensure_all_read(std::istream &input, const Line &line) {/*{{{*/
 constexpr int NotAParticle = 0;
 }  // unnamed namespace/*}}}*/
 
-void Particles::load_particle_types(std::istream &input) {/*{{{*/
+void Particles::load_particle_types(const std::string &input) {/*{{{*/
   for (const Line &line : line_parser(input)) {
     std::istringstream lineinput(line.text);
     std::string name;
@@ -321,7 +322,7 @@ void Particles::load_particle_types(std::istream &input) {/*{{{*/
   }
 }/*}}}*/
 
-void Particles::load_decaymodes(std::istream &input) {
+void Particles::load_decaymodes(const std::string &input) {
   int pdgcode = NotAParticle;
   DecayModes decay_modes_to_add;
   float ratio_sum = 0.0;
