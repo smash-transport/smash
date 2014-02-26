@@ -15,49 +15,50 @@
 #include "include/experimentparameters.h"
 #include "include/outputroutines.h"
 
-NucleusModus::NucleusModus(Configuration &config)
-    : sqrt_s_NN_(config.take({"Nucleus", "SQRTSNN"})) {
-  std::vector<int> sqrts_n = config.take({"Nucleus", "SQRTS_N"});
+NucleusModus::NucleusModus(Configuration modi) {
+  Configuration modus_cfg = modi["Nucleus"];
+  sqrt_s_NN_ = modus_cfg.take({"SQRTSNN"});
+  std::vector<int> sqrts_n = modus_cfg.take({"SQRTS_N"});
   pdg_sNN_1_ = sqrts_n[0];
   pdg_sNN_2_ = sqrts_n[1];
   // fill nuclei with particles
-  std::map<int, int> pro = config.take({"Nucleus", "Projectile", "PARTICLES"});
+  std::map<int, int> pro = modus_cfg.take({"Projectile", "PARTICLES"});
   projectile_.fill_from_list(pro);
-  std::map<int, int> tar = config.take({"Nucleus", "Target", "PARTICLES"});
+  std::map<int, int> tar = modus_cfg.take({"Target", "PARTICLES"});
   target_.fill_from_list(tar);
   // set softness of the nuclei if given (else take the default value)
-  if (config.has_value({"Nucleus", "Projectile", "SOFTNESS"})) {
+  if (modus_cfg.has_value({"Projectile", "SOFTNESS"})) {
     projectile_.set_softness(static_cast<float>(
-                config.take({"Nucleus", "Projectile", "SOFTNESS"})));
+                modus_cfg.take({"Projectile", "SOFTNESS"})));
   }
-  if (config.has_value({"Nucleus", "Target", "SOFTNESS"})) {
+  if (modus_cfg.has_value({"Target", "SOFTNESS"})) {
     target_.set_softness(static_cast<float>(
-                config.take({"Nucleus", "Target", "SOFTNESS"})));
+                modus_cfg.take({"Target", "SOFTNESS"})));
   }
 
   // Impact paramter setting: Either "VALUE", "RANGE" or "MAX".
-  if (config.has_value({"Nucleus", "Impact", "VALUE"})) {
-    impact_ = config.take({"Nucleus", "Impact", "VALUE"});
+  if (modus_cfg.has_value({"Impact", "VALUE"})) {
+    impact_ = modus_cfg.take({"Impact", "VALUE"});
   } else {
     bool sampling_quadratically = true;
     float min = 0.0;
     float max = 0.0;
     // if not value, we need to take a look at the sampling:
-    if (config.has_value({"Nucleus", "Impact", "SAMPLE"})) {
-      std::string sampling_method = config.take({"Nucleus",
+    if (modus_cfg.has_value({"Impact", "SAMPLE"})) {
+      std::string sampling_method = modus_cfg.take({"Nucleus",
                                                  "IMPACT", "SAMPLE"});
       if (sampling_method.compare(0, 6, "linear") == 0) {
         sampling_quadratically = false;
       }
     }
-    if (config.has_value({"Nucleus", "Impact", "RANGE"})) {
-       std::vector<float> range = config.take({"Nucleus", "Impact", "RANGE"});
+    if (modus_cfg.has_value({"Impact", "RANGE"})) {
+       std::vector<float> range = modus_cfg.take({"Impact", "RANGE"});
        min = range.at(0);
        max = range.at(1);
     }
-    if (config.has_value({"Nucleus", "Impact", "MAX"})) {
+    if (modus_cfg.has_value({"Impact", "MAX"})) {
        min = 0.0;
-       max = config.take({"Nucleus", "Impact", "MAX"});
+       max = modus_cfg.take({"Impact", "MAX"});
     }
     sample_impact(sampling_quadratically, min, max);
   }

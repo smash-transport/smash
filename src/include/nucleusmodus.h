@@ -23,8 +23,12 @@ struct ExperimentParameters;
 
 class NucleusModus : public ModusDefault {
  public:
-  /* default constructor with probable values */
-  NucleusModus(Configuration& config);
+  /** Constructor
+   *
+   * Takes all there is to take from the (truncated!) configuration
+   * object (only contains configuration for this modus).
+   **/
+  NucleusModus(Configuration& modi_config);
 
   void initial_conditions(Particles *particles,
                           const ExperimentParameters &parameters);

@@ -137,6 +137,13 @@ class Configuration {
   Value read(std::initializer_list<const char *> keys) const;
 
   /**
+   * Removes all entries in the map except for \p key.
+   *
+   * \param key The key of the map entry to keep.
+   */
+  void remove_all_but(const std::string &key);
+
+  /**
    * Access to the YAML::Node behind the requested \p keys.
    *
    * If you want to read a value use the \ref read function above. Use the
@@ -169,6 +176,13 @@ class Configuration {
    * Returns a string listing the key/value pairs that have not been taken yet.
    */
   std::string unused_values_report() const;
+
+  /**
+   * Returns a YAML string of the current tree.
+   *
+   * This differs from the above in that it does not remove empty maps.
+   */
+  std::string to_string() const;
 
  private:
   /// Creates a subobject that has its root node at the given node.

@@ -29,7 +29,7 @@
 /* build dependent variables */
 #include "include/config.h"
 
-SphereModus::SphereModus(Configuration &config)
+SphereModus::SphereModus(Configuration config)
     : radius_(config.take({"Sphere", "RADIUS"})),
       timer_start_(set_timer_start()) {
 }

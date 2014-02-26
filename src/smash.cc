@@ -10,6 +10,7 @@
 #include <getopt.h>
 #include <cstdio>
 #include <cstdlib>
+#include <iterator>
 #include <list>
 #include <stdexcept>
 #include <string>
@@ -33,11 +34,16 @@ void usage(int rc, const std::string &progname) {
   printf("\nUsage: %s [option]\n\n", progname.c_str());
   printf("Calculate transport box\n"
          "  -h, --help              usage information\n"
+         "\n"
          "  -i, --inputfile <file>  path to input configuration file\n"
+         "  -d, --decaymodes <file> override default decay modes from file\n"
+         "  -p, --particles <file>  override default particles from file\n"
+         "\n"
          "  -c, --config <YAML>     specify config value overrides\n"
          "  -m, --modus <modus>     shortcut for -c 'General: { MODUS: <modus> }'\n"
+         "  -s, --steps <steps>     shortcut for -c 'General: { STEPS: <steps> }'\n"
+         "\n"
          "  -o, --output <dir>      output directory (default: $PWD/data/<runid>)\n"
-         "  -s, --steps <steps>     shortcut for -c 'General: { STEPS: <modus> }'\n"
          "  -v, --version\n\n");
   exit(rc);
 }
@@ -87,15 +93,22 @@ void ensure_path_is_valid(const bf::path &path) {
   }
 }
 
+std::string read_all(std::istream &input) {
+  return {std::istreambuf_iterator<char>{input},
+          std::istreambuf_iterator<char>{}};
+}
+
 }  // unnamed namespace
 
 /* main - do command line parsing and hence decides modus */
 int main(int argc, char *argv[]) {
   constexpr option longopts[] = {
     { "config",     required_argument,      0, 'c' },
+    { "decaymodes", required_argument,      0, 'd' },
     { "help",       no_argument,            0, 'h' },
     { "inputfile",  required_argument,      0, 'i' },
     { "modus",      required_argument,      0, 'm' },
+    { "particles",  required_argument,      0, 'p' },
     { "steps",      required_argument,      0, 's' },
     { "output",     required_argument,      0, 'o' },
     { "version",    no_argument,            0, 'v' },
@@ -114,12 +127,16 @@ int main(int argc, char *argv[]) {
 
     /* check for overriding command line arguments */
     int opt;
-    while ((opt = getopt_long(argc, argv, "c:hi:m:s:o:v", longopts,
+    while ((opt = getopt_long(argc, argv, "c:d:hi:m:p:s:o:v", longopts,
                               nullptr)) != -1) {
       switch (opt) {
         case 'c':
           configuration.merge_yaml(optarg);
           break;
+        case 'd': {
+          bf::ifstream file{optarg};
+          configuration["decaymodes"] = read_all(file);
+        } break;
         case 'i': {
           const boost::filesystem::path file(optarg);
           configuration = Configuration(file.parent_path(), file.filename());
@@ -130,6 +147,10 @@ int main(int argc, char *argv[]) {
         case 'm':
           configuration["General"]["MODUS"] = std::string(optarg);
           break;
+        case 'p': {
+          bf::ifstream file{optarg};
+          configuration["particles"] = read_all(file);
+        } break;
         case 's':
           configuration["General"]["STEPS"] = abs(atoi(optarg));
           break;
@@ -147,13 +168,14 @@ int main(int argc, char *argv[]) {
     printd("output path: %s\n", output_path.native().c_str());
 
     // keep a copy of the configuration that was used in the output directory
-    bf::ofstream(output_path / "config.yaml")
-        << configuration.unused_values_report();
+    bf::ofstream(output_path / "config.yaml") << configuration.to_string()
+                                              << '\n';
 
     auto experiment = ExperimentBase::create(configuration);
     const std::string report = configuration.unused_values_report();
-    if (!report.empty()) {
-      printf("The following configuration values were not used:\n%s\n", report.c_str());
+    if (report != "{}") {
+      printf("The following configuration values were not used:\n%s\n",
+             report.c_str());
     }
     experiment->run(output_path);
   }

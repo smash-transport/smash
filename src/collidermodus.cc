@@ -14,7 +14,7 @@
 #include "include/outputroutines.h"
 #include "include/parameters.h"
 
-ColliderModus::ColliderModus(Configuration &config)
+ColliderModus::ColliderModus(Configuration config)
     : projectile_(config.take({"Collider", "PROJECTILE"})),
       target_    (config.take({"Collider", "TARGET"})),
       sqrts_     (config.take({"Collider", "SQRTS"})) {
