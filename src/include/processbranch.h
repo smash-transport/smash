@@ -18,15 +18,15 @@ class ProcessBranch {
   /* Add the complete particle list */
   inline void set_particles(std::vector<int> particle_pdgs);
   /* Add branch ratio */
-  inline void set_weight(double process_weight);
+  inline void set_weight(float process_weight);
   /* Add to the ratio of this branch */
-  inline void change_weight(double additional_weight);
+  inline void change_weight(float additional_weight);
   /* Remove all modes */
   inline void clear(void);
   /* Pass the particle list */
   inline std::vector<int> particle_list(void) const;
   /* Pass the branch ratio */
-  inline double weight(void) const;
+  inline float weight(void) const;
 
  private:
   /**
@@ -38,11 +38,8 @@ class ProcessBranch {
    * that of size_t/void*. (I was obviously talking about 64bit here...)
    */
   std::vector<int> particle_list_;
-  /**
-   * \todo This value is initialized from a single-precision float. Why is it a
-   * double then?
-   */
-  double branch_weight_;
+  /* Weight of the branch, typically a cross section */
+  float branch_weight_;
 };
 
 /* Add a particle to the list */
@@ -56,12 +53,12 @@ inline void ProcessBranch::set_particles(std::vector<int> particle_pdgs) {
 }
 
 /* Add the ratio of this branch */
-inline void ProcessBranch::set_weight(double process_weight) {
+inline void ProcessBranch::set_weight(float process_weight) {
   branch_weight_ = process_weight;
 }
 
 /* Add to the ratio of this branch */
-inline void ProcessBranch::change_weight(double additional_weight) {
+inline void ProcessBranch::change_weight(float additional_weight) {
   branch_weight_ += additional_weight;
 }
 
@@ -77,7 +74,7 @@ inline std::vector<int> ProcessBranch::particle_list(void) const {
 }
 
 /* Pass the branch ratio */
-inline double ProcessBranch::weight(void) const {
+inline float ProcessBranch::weight(void) const {
   return branch_weight_;
 }
 
