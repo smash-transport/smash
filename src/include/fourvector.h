@@ -46,7 +46,38 @@ class FourVector {
   double inline DotThree(const FourVector &a) const;
   double inline DotThree() const;
   double inline DiffThree(const FourVector &a) const;
-  /* operations */
+  /**
+   * \f[
+   * \vec{u} = (1, \vec{v}) = (1, v_1, v_2, v_3)\\
+   * \vec{u}^2 = 1 - v_1^2 - v_2^2 - v_3^2
+   * \f]
+   * \f{eqnarray*}{
+   * \gamma&=&\sqrt{1 - \vec{v}^2}\\
+   *       &=&\sqrt{1 - v_1^2 - v_2^2 - v_3^2}\\
+   *       &=&\sqrt{\vec{u}^2}
+   * \f}
+   *
+   * Lorentz boost for a four-vector:
+   * \f[
+   * \vec{x} = (x_0, x_1, x_2, x_3) = (x_0, \vec{r})
+   * \f]
+   * and velocity
+   * \f[
+   * \vec{u} = (1, v_1, v_2, v_3) = (1, \vec{v})
+   * \f]
+   * (\f$\vec{r}\f$ and \f$\vec{v}\f$ 3-vectors):
+   * \f{eqnarray*}{
+   * x'_0&=&\gamma \cdot (x_0 - \vec{r}\cdot\vec{v})\\
+   *     &=&\gamma \cdot (x_0 - x_1 \cdot v_1 - x_2 \cdot v_2 - x_3 \cdot v_3)\\
+   *     &=&\gamma \cdot (\vec{x}\cdot\vec{u})
+   * \f}
+   * For i = 1, 2, 3:
+   * \f{eqnarray*}{
+   * x'_i&=&x_i + v_i \cdot (\frac{\gamma - 1}{\vec{v}^2} \cdot \vec{r}\cdot\vec{v} - \gamma \cdot x_0)\\
+   *     &=&x_i + v_i \cdot (\frac{\gamma^2}{\gamma + 1} \cdot \vec{r}\cdot\vec{v} - \gamma \cdot x_0)\\
+   *     &=&x_i - \gamma \cdot v_i \cdot (\frac{\gamma}{\gamma + 1} \vec{x}\cdot\vec{u} + \frac{x_0}{\gamma + 1})
+   * \f}
+   */
   FourVector LorentzBoost(const FourVector &b) const;
 
   /* overloaded operators */
