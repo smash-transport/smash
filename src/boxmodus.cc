@@ -290,7 +290,7 @@ void BoxModus::propagate(Particles *particles,
 FourVector BoxModus::boundary_condition(FourVector position,
                                         bool *boundary_hit) {
   /* Check positivity and box size */
-  if (position.x1() > 0 && position.x2() > 0 && position.x3() > 0 &&
+  if (position.x1() >= 0 && position.x2() >= 0 && position.x3() >= 0 &&
       position.x1() < length_ && position.x2() < length_ &&
       position.x3() < length_) {
     return position;
@@ -306,13 +306,13 @@ FourVector BoxModus::boundary_condition(FourVector position,
   if (position.x3() < 0) {
     position.set_x3(position.x3() + length_);
   }
-  if (position.x1() > length_) {
+  if (position.x1() >= length_) {
     position.set_x1(position.x1() - length_);
   }
-  if (position.x2() > length_) {
+  if (position.x2() >= length_) {
     position.set_x2(position.x2() - length_);
   }
-  if (position.x3() > length_) {
+  if (position.x3() >= length_) {
     position.set_x3(position.x3() - length_);
   }
   return position;
