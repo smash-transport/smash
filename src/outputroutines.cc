@@ -9,6 +9,7 @@
 #include "include/outputroutines.h"
 
 #include <sys/stat.h>
+#include <cmath>
 #include <cstdio>
 #include <ctime>
 #include <list>
@@ -207,7 +208,7 @@ void write_oscar_event_block(Particles *particles,
             i->first, i->second.pdgcode(), 0,
             i->second.momentum().x1(), i->second.momentum().x2(),
             i->second.momentum().x3(), i->second.momentum().x0(),
-            particles->type(i->first).mass(),
+            sqrt(i->second.momentum().Dot(i->second.momentum())),
             i->second.position().x1(), i->second.position().x2(),
             i->second.position().x3(), i->second.position().x0() - 1.0);
   }
@@ -234,10 +235,11 @@ void write_oscar(const ParticleData &particle_data,
   /* particle_index, particle_pdgcode, ?, momenta, mass position */
   FourVector momentum = particle_data.momentum(),
     position = particle_data.position();
+  float mass = sqrt(momentum.Dot(momentum));
   fprintf(fp, "%i %i %i %g %g %g %g %g %g %g %g %g \n",
           particle_data.id(), particle_type.pdgcode(), 0,
           momentum.x1(), momentum.x2(), momentum.x3(), momentum.x0(),
-          particle_type.mass(), position.x1(), position.x2(), position.x3(),
+          mass, position.x1(), position.x2(), position.x3(),
           position.x0() - 1.0);
 
   fclose(fp);
@@ -252,9 +254,10 @@ void write_oscar(const ParticleData &particle_data,
   /* particle_index, particle_pdgcode, ?, momenta, mass position */
   FourVector momentum = particle_data.momentum(),
              position = particle_data.position();
+  float mass = sqrt(momentum.Dot(momentum));
   fprintf(fp, "%i %i %i %g %g %g %g %g %g %g %g %g \n", particle_data.id(),
           particle_type.pdgcode(), 0, momentum.x1(), momentum.x2(),
-          momentum.x3(), momentum.x0(), particle_type.mass(), position.x1(),
+          momentum.x3(), momentum.x0(), mass, position.x1(),
           position.x2(), position.x3(), position.x0() - 1.0);
 
   fclose(fp);
