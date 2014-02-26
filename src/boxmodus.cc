@@ -292,8 +292,9 @@ FourVector BoxModus::boundary_condition(FourVector position,
   /* Check positivity and box size */
   if (position.x1() > 0 && position.x2() > 0 && position.x3() > 0 &&
       position.x1() < length_ && position.x2() < length_ &&
-      position.x3() < length_)
-    goto out;
+      position.x3() < length_) {
+    return position;
+  }
   *boundary_hit = true;
   /* Enforce periodic boundary condition */
   if (position.x1() < 0) {
@@ -314,6 +315,5 @@ FourVector BoxModus::boundary_condition(FourVector position,
   if (position.x3() > length_) {
     position.set_x3(position.x3() - length_);
   }
-out:
   return position;
 }
