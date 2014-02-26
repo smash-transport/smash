@@ -10,19 +10,14 @@
 #include "include/nucleus.h"
 #include "include/angles.h"
 
+Nucleus::Nucleus() {}
+
 float Nucleus::mass() const {
   float total_mass = 0.f;
-  for (std::map<int, ParticleData>::const_iterator i = cbegin();
-       i != cend(); i++) {
-    total_mass += particle_type(i->second.pdgcode()).mass();
+  for (auto i = cbegin(); i != cend(); i++) {
+    total_mass += sqrt(i->momentum().Dot());
   }
   return total_mass;
-}
-
-/// Nuclear radius is calculated with the proton radius times the third
-/// root of the number of nucleons.
-float inline Nucleus::nuclear_radius() const {
-  return proton_radius_*pow(size(), 1./3.);
 }
 
 float Nucleus::distribution_nucleons() const {
@@ -66,7 +61,7 @@ void Nucleus::arrange_nucleons() {
     double z = r*dir.z();
     double x = r*dir.x();
     // set position of current nucleon:
-    i->second.set_position(0.0, x, r*dir.y(), z);
+    i->set_position(0.0, x, r*dir.y(), z);
     // update maximal and minimal z values
     z_max_ = (z > z_max_) ? z : z_max_;
     z_min_ = (z < z_min_) ? z : z_min_;
@@ -77,24 +72,29 @@ void Nucleus::arrange_nucleons() {
 }
 
 void Nucleus::boost(const double& beta_squared) {
-  double one_over_gamma = sqrt(1.0 - beta_squared);
-  double gamma = 1.0/one_over_gamma;
-  double gammabeta = sqrt(beta_squared)*gamma;
-  FourVector u_mu(gamma, 0.0, 0.0, gammabeta);
+  double sign = beta_squared >= 0 ? 1 : -1;
+  double beta_squared_abs = std::abs(beta_squared);
+  double one_over_gamma = sqrt(1.0 - beta_squared_abs);
+  //double gamma = 1.0/one_over_gamma;
+  //double gammabeta = sign*sqrt(beta_squared_abs)*gamma;
+  FourVector u_mu(1, 0.0, 0.0, sign*sqrt(beta_squared_abs));
   for (auto i = begin(); i != end(); i++) {
     // a real Lorentz Transformation would leave the particles at
     // different times here, which we would then have to propagate back
     // to equal times. Since we know the result, we can simply multiply
     // the z-value with 1/gamma.
-    FourVector this_position = i->second.position();
+    FourVector this_position = i->position();
     this_position.set_x3(this_position.x3() * one_over_gamma);
-    i->second.set_position(this_position);
+    i->set_position(this_position);
     // for momenta, though, we CAN do normal Lorentz Boosts, since we
     // *do* want to transform the zero-component (i.e., the energy).
-    FourVector this_momentum = i->second.momentum();
-    this_momentum.LorentzBoost(u_mu);
-    i->second.set_momentum(this_momentum);
+    FourVector this_momentum = i->momentum();
+    this_momentum = this_momentum.LorentzBoost(u_mu);
+    i->set_momentum(this_momentum);
   }
+  printf("Velocity vector: %12e %12e %12e %12e\n",
+         u_mu.x0(), u_mu.x1(), u_mu.x2(), u_mu.x3()
+        );
   // we also need to update z_max_:
   z_max_ *= one_over_gamma;
   return;
@@ -102,8 +102,11 @@ void Nucleus::boost(const double& beta_squared) {
 
 void Nucleus::fill_from_list(const std::map<int, int>& particle_list) {
   for (auto n = particle_list.cbegin(); n != particle_list.cend(); n++) {
-    for (int i = 1; i < n->second; i++) {
-      create(n->first);
+    for (int i = 0; i < n->second; i++) {
+      // append particle to list
+      particles.push_back({});
+      // set this particle's PDG code.
+      particles.back().set_pdgcode(n->first);
     }
   }
 }
@@ -112,10 +115,10 @@ void Nucleus::set_softness(const float& soft) {
   softness_ = soft;
 }
 
-void Nucleus::auto_set_masses(const Particles *particles) {
+void Nucleus::auto_set_masses(const Particles *external_particles) {
   for (auto p = begin(); p != end(); p++) {
-    p->second.set_momentum(
-      particles->particle_type(p->second.pdgcode()).mass(), 0.0, 0.0, 0.0);
+    p->set_momentum(
+      external_particles->particle_type(p->pdgcode()).mass(), 0.0, 0.0, 0.0);
   }
 }
 
@@ -130,16 +133,16 @@ void Nucleus::shift(const bool is_projectile,
   // we need a bigger offset.
   z_offset += initial_z_displacement;
   for (auto i = begin(); i != end(); i++) {
-    FourVector this_position = i->second.position();
+    FourVector this_position = i->position();
     this_position.set_x3(this_position.x3() + z_offset);
     this_position.set_x1(this_position.x1() + x_offset);
     this_position.set_x0(simulation_time);
-    i->second.set_position(this_position);
+    i->set_position(this_position);
   }
 }
 
-void Nucleus::copy_particles(Particles* particles) {
+void Nucleus::copy_particles(Particles* external_particles) {
   for (auto p = begin(); p != end(); p++) {
-    particles->add_data(p->second);
+    external_particles->add_data(*p);
   }
 }

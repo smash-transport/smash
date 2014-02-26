@@ -1,6 +1,6 @@
 General:
     # Modus decision
-    MODUS:         Collider
+    MODUS:         Nucleus
 
     # temporal grid spacing
     EPS:           0.01
@@ -64,8 +64,8 @@ Modi:
             PARTICLES: {2212: 82, 2112: 126}
     
         # what sqrt(s_NN) to use:
-        SQRTSNN: 200
+        SQRTSNN: 2
         # which subsystem "NN" in sqrt(s_NN) refers to
         # (two PDG IDs). The default is proton-proton; let's set it to
         # neutron-neutron.
-        SQRTS_N: [2112 2112]
+        SQRTS_N: [2112, 2112]

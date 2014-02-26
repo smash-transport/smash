@@ -8,7 +8,8 @@
 #define SRC_INCLUDE_NUCLEUS_H_
 
 #include<map>
-
+#include<vector>
+#include "include/particledata.h"
 #include "include/particles.h"
 
 /// A Nucleus is a collection of Particles (ParticleData thingys) that
@@ -17,12 +18,21 @@
 /// This class inherits from Particles, which is the collection of all
 /// particles in the simulation and contains special functions for the
 /// initialization of nuclei.
-class Nucleus : public Particles {
+class Nucleus {
  public:
+  Nucleus();
+
   /// returns the mass of the nucleus
   float mass() const;
-  /// returns the radius of the nucleus
-  float nuclear_radius() const;
+  /** returns the radius of the nucleus
+   *
+   * Nuclear radius is calculated with the proton radius times the third
+   * root of the number of nucleons.
+   **/
+  inline float nuclear_radius() const {
+    return proton_radius_*pow(size(), 1./3.);
+  }
+
   /** returns a Woods-Saxon distributed length 
    *
    * the distribution of return values from this function is according
@@ -109,6 +119,28 @@ class Nucleus : public Particles {
   /// x (impact parameter direction-) coordinate of the outermost
   /// particle (lowest x)
   float x_min_ = 0.f;
+  /// particles associated with this nucleus.
+  std::vector<ParticleData> particles;
+  /// for iterators over the particle list:
+  inline std::vector<ParticleData>::iterator begin() {
+    return particles.begin();
+  }
+  /// for iterators over the particle list:
+  inline std::vector<ParticleData>::iterator end() {
+    return particles.end();
+  }
+  /// for iterators over the particle list:
+  inline std::vector<ParticleData>::const_iterator cbegin() const {
+    return particles.cbegin();
+  }
+  /// for iterators over the particle list:
+  inline std::vector<ParticleData>::const_iterator cend() const {
+    return particles.cend();
+  }
+  /// Number of particles in the list:
+  inline size_t size() const {
+    return particles.size();
+  }
 };
 
 #endif  // SRC_INCLUDE_NUCLEUS_H_

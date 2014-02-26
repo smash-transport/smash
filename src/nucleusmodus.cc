@@ -15,8 +15,8 @@
 #include "include/experimentparameters.h"
 #include "include/outputroutines.h"
 
-NucleusModus::NucleusModus(Configuration modi) {
-  Configuration modus_cfg = modi["Nucleus"];
+NucleusModus::NucleusModus(Configuration modus_config) {
+  Configuration modus_cfg = modus_config["Nucleus"];
   sqrt_s_NN_ = modus_cfg.take({"SQRTSNN"});
   std::vector<int> sqrts_n = modus_cfg.take({"SQRTS_N"});
   pdg_sNN_1_ = sqrts_n[0];
@@ -64,6 +64,13 @@ NucleusModus::NucleusModus(Configuration modi) {
   }
 }
 
+void NucleusModus::print_startup() {
+  printf("Nucleus initialized:\n");
+  printf("sqrt_s_NN = %g GeV (pairs of %d and %d)\n", sqrt_s_NN_,
+                                                      pdg_sNN_1_, pdg_sNN_2_);
+  printf("Impact parameter: %g fm\n", impact_);
+}
+
 /* initial_conditions - sets particle data for @particles */
 void NucleusModus::initial_conditions(Particles *particles,
                                        const ExperimentParameters &) {
@@ -75,24 +82,31 @@ void NucleusModus::initial_conditions(Particles *particles,
   target_.auto_set_masses(particles);
   float mass_projec = projectile_.mass();
   float mass_target = target_.mass();
+  printf("Masses of Nuclei: %g GeV %g GeV\n", projectile_.mass(), target_.mass());
+  printf("Radii of Nuclei: %g fm %g fm\n", projectile_.nuclear_radius(), target_.nuclear_radius());
   float mass_1 = particles->particle_type(pdg_sNN_1_).mass();
   float mass_2 = particles->particle_type(pdg_sNN_2_).mass();
-  if (sqrt_s_NN_ < (mass_1 + mass_2)*(mass_1 + mass_2)) {
+  double s_NN = sqrt_s_NN_*sqrt_s_NN_;
+  if (s_NN < (mass_1 + mass_2)*(mass_1 + mass_2)) {
     throw "Error in input: sqrt(s_NN) is smaller than masses.";
   }
-  float total_mandelstam_s = (sqrt_s_NN_ - mass_1*mass_1 - mass_2*mass_2)
+  float total_mandelstam_s = (s_NN - mass_1*mass_1 - mass_2*mass_2)
                              * mass_projec*mass_target
                              / (mass_1*mass_2)
                            + mass_projec*mass_projec + mass_target*mass_target;
+  printf("Total mandelstam s: %g GeV^2\n", total_mandelstam_s);
   float velocity_squared = (total_mandelstam_s - (mass_projec+mass_target))
                          / (total_mandelstam_s - (mass_projec-mass_target));
+  printf("Velocity (squared): %g c^2 (1-beta^2: %g)\n", velocity_squared, 1-velocity_squared);
   // populate the nuclei with appropriately distributed nucleons
   projectile_.arrange_nucleons();
   target_.arrange_nucleons();
   // boost the nuclei to the appropriate velocity (target is in opposite
   // direction!
-  projectile_.boost(velocity_squared);
-  target_.boost(-velocity_squared);
+  projectile_.boost(-velocity_squared);
+  //TODO(baeuchle): Don't do that. Here, I pass the sign basically
+  //independent of the number. Bad boy programmer.
+  target_.boost(velocity_squared);
   // shift the nuclei along the z-axis so that they are 2*1 fm apart
   // touch and along the x-axis to get the right impact parameter.
   // Projectile hits at positive x.

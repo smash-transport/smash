@@ -13,7 +13,6 @@
 #include <string>
 
 #include "include/configuration.h"
-#include "include/crosssections.h"
 #include "include/modusdefault.h"
 #include "include/nucleus.h"
 #include "include/particles.h"
@@ -28,7 +27,9 @@ class NucleusModus : public ModusDefault {
    * Takes all there is to take from the (truncated!) configuration
    * object (only contains configuration for this modus).
    **/
-  NucleusModus(Configuration& modi_config);
+  explicit NucleusModus(Configuration modus_config);
+
+  void print_startup();
 
   void initial_conditions(Particles *particles,
                           const ExperimentParameters &parameters);

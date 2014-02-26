@@ -101,6 +101,7 @@ TEST(check_unused_report) {
   modi.take({"Box", "TEMPERATURE"});
   modi.take({"Box", "INITIAL_CONDITION"});
   modi.take({"Nucleus"});
+  //conf.take({"Modi", "Nucleus"});
   reference =
       "Modi:\n  Collider:\n    SQRTS: 1.0\n    TARGET: -211\n    PROJECTILE: "
       "211\n  Sphere:\n    RADIUS: 5.0";
