@@ -22,7 +22,7 @@ struct ExperimentParameters;
 
 class BoxModus : public ModusDefault {
  public:
-  explicit BoxModus(Configuration config);
+  explicit BoxModus(Configuration modus_config);
 
   void print_startup();  // TODO(mkretz): needs to be discoverable from an
                          // outside "printer"

@@ -14,10 +14,10 @@
 #include "include/outputroutines.h"
 #include "include/parameters.h"
 
-ColliderModus::ColliderModus(Configuration config)
-    : projectile_(config.take({"Collider", "PROJECTILE"})),
-      target_    (config.take({"Collider", "TARGET"})),
-      sqrts_     (config.take({"Collider", "SQRTS"})) {
+ColliderModus::ColliderModus(Configuration modus_config)
+    : projectile_(modus_config.take({"Collider", "PROJECTILE"})),
+      target_    (modus_config.take({"Collider", "TARGET"})),
+      sqrts_     (modus_config.take({"Collider", "SQRTS"})) {
 }
 
 /* print_startup - console output on startup of box specific parameters */
