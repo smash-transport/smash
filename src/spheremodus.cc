@@ -21,7 +21,6 @@
 #include "include/laboratory.h"
 #include "include/macros.h"
 #include "include/outputroutines.h"
-#include "include/param-reader.h"
 #include "include/particledata.h"
 #include "include/particles.h"
 #include "include/propagation.h"
@@ -30,26 +29,9 @@
 /* build dependent variables */
 #include "include/config.h"
 
-void SphereModus::assign_params_specific(std::list<Parameters> *configuration) {
-  bool match = false;
-  std::list<Parameters>::iterator i = configuration->begin();
-  while (i != configuration->end()) {
-    char *key = i->key();
-    char *value = i->value();
-    printd("%s %s\n", key, value);
-    /* double or float values */
-    if (strcmp(key, "RADIUS") == 0) {
-      radius_ = (fabs(atof(value)));
-      match = true;
-    }
-    /* remove processed entry */
-    if (match) {
-      i = configuration->erase(i);
-      match = false;
-    } else {
-      ++i;
-    }
-  }
+SphereModus::SphereModus(Configuration modus_config)
+    : radius_(modus_config.take({"Sphere", "RADIUS"})),
+      timer_start_(set_timer_start()) {
 }
 
 /* print_startup - console output on startup of sphere specific parameters */

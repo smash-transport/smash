@@ -15,12 +15,12 @@
  * function argument passing.
  */
 struct ExperimentParameters {
-  /// number of test particle
-  int testparticles = 1;
   /// temporal time step
-  double eps = 0.001;
+  const double eps;
   /// cross section of the elastic scattering
-  float cross_section = 10.0f;
+  const float cross_section;
+  /// number of test particle
+  int testparticles;
 };
 
 #endif  // SRC_INCLUDE_EXPERIMENTPARAMETERS_H_

@@ -26,8 +26,6 @@ void print_measurements(const Particles &particles,
                         float energy_ini, timespec time_start);
 void print_tail(const timespec time_start, const double &scattering_rate);
 void warn_wrong_params(std::list<Parameters> *configuration);
-/* data directory */
-void mkdir_data(void);
 
 /* Compile time debug info */
 #ifdef DEBUG

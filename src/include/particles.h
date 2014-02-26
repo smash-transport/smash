@@ -8,6 +8,7 @@
 #define SRC_INCLUDE_PARTICLES_H_
 
 #include <map>
+#include <string>
 #include <utility>
 
 #include "include/decaymodes.h"
@@ -30,7 +31,10 @@
 class Particles {
  public:
   /// Use improbable values for default constructor
-  Particles() :id_max_(-1) {}
+  Particles(const std::string &particles, const std::string &decaymodes) {
+    load_particle_types(particles);
+    load_decaymodes(decaymodes);
+  }
   /// Return the specific data of a particle according to its id
   inline const ParticleData &data(int id);
   /// Return the specific datapointer of a particle according to its id
@@ -45,10 +49,6 @@ class Particles {
   inline int id_max(void);
   /// inserts a new particle and returns its id
   inline int add_data(const ParticleData &particle_data);
-  /// inserts a new particle type
-  inline void add_type(const ParticleType &particle_type, int pdg);
-  /// adds decay modes for a particle type
-  inline void add_decaymodes(const DecayModes &new_decay_modes, int pdg);
   /// add a range of particles
   inline void create(size_t number, int pdg);
   /// remove a specific particle
@@ -65,6 +65,17 @@ class Particles {
   inline bool types_empty(void) const;
   /// return time of the computational frame
   inline double time(void) const;
+
+  /** Check whether a particle type with the given \p pdg code is known.
+   *
+   * \param pdg The pdg code of the particle in question.
+   * \return \c true  If a ParticleType of the given \p pdg code is registered.
+   * \return \c false otherwise.
+   */
+  bool is_particle_type_registered(int pdgcode) const {
+    return types_.count(pdgcode) == 1;
+  }
+
   /* iterators */
   inline std::map<int, ParticleData>::iterator begin(void);
   inline std::map<int, ParticleData>::iterator end(void);
@@ -73,9 +84,34 @@ class Particles {
   inline std::map<int, ParticleType>::const_iterator types_cbegin(void) const;
   inline std::map<int, ParticleType>::const_iterator types_cend(void) const;
 
+  struct LoadFailure : public std::runtime_error {
+    using std::runtime_error::runtime_error;
+  };
+  struct ReferencedParticleNotFound : public LoadFailure {
+    using LoadFailure::LoadFailure;
+  };
+  struct MissingDecays : public LoadFailure {
+    using LoadFailure::LoadFailure;
+  };
+  struct ParseError : public LoadFailure {
+    using LoadFailure::LoadFailure;
+  };
+
+  /** Reset member data to the state the object had when the constructor
+   * returned.
+   */
+  void reset();
+
  private:
+  void load_particle_types(const std::string &input);
+  void load_decaymodes(const std::string &input);
+  /// inserts a new particle type
+  inline void add_type(const ParticleType &particle_type, int pdg);
+  /// adds decay modes for a particle type
+  inline void add_decaymodes(const DecayModes &new_decay_modes, int pdg);
+
   /// Highest id of a given particle
-  int id_max_;
+  int id_max_ = -1;
   /**
    * dynamic data of the particles a map between its id and data
    *
@@ -145,17 +181,6 @@ inline void Particles::create(size_t number, int pdgcode) {
 /* return the highest used id */
 inline int Particles::id_max() {
   return id_max_;
-}
-
-/* add a new particle type */
-inline void Particles::add_type(ParticleType const &TYPE, int pdg) {
-  types_.insert(std::pair<int, ParticleType>(pdg, TYPE));
-}
-
-/* add decay modes for a particle type */
-inline void Particles::add_decaymodes(const DecayModes &new_decay_modes,
-                                      int pdg) {
-  all_decay_modes_.insert(std::pair<int, DecayModes>(pdg, new_decay_modes));
 }
 
 /* remove a particle */

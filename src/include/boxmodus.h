@@ -17,15 +17,12 @@
 #include "include/parameters.h"
 
 class BoxModus;
+class Configuration;
 struct ExperimentParameters;
 
 class BoxModus : public ModusDefault {
  public:
-  BoxModus() = default;
-
-  /* special class funtions */
-  void assign_params(
-      std::list<Parameters> *configuration);  // TODO(mkretz) -> ctor
+  explicit BoxModus(Configuration modus_config);
 
   void print_startup();  // TODO(mkretz): needs to be discoverable from an
                          // outside "printer"
