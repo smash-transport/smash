@@ -69,13 +69,14 @@ class Configuration {
 
     /// a YAML leaf node
     const YAML::Node node_;
+    const char *const key_;
 
     /** Constructs the Value wrapper from a YAML::Node.
      *
      * \note This constructor must be implicit, otherwise it's impossible to
      * return an rvalue Value object - because the copy constructor is deleted.
      */
-    Value(const YAML::Node &n) : node_(n) {
+    Value(const YAML::Node &n, const char *key) : node_(n), key_(key) {
       assert(n.IsScalar() || n.IsSequence() || n.IsMap());
     }
 
@@ -99,7 +100,8 @@ class Configuration {
       }
       catch (YAML::TypedBadConversion<T> &e) {
         throw IncorrectTypeInAssignment(
-            "The value cannot be converted to the requested type.");
+            "The value for key \"" + std::string(key_) +
+            "\" cannot be converted to the requested type.");
       }
     }
   };
