@@ -104,6 +104,27 @@ class Configuration {
             "\" cannot be converted to the requested type.");
       }
     }
+
+    template <typename T>
+    operator std::vector<T>() {
+      try {
+        return node_.as<std::vector<T>>();
+      }
+      catch (YAML::TypedBadConversion<T> &e) {
+        throw IncorrectTypeInAssignment(
+            "One of the values in the sequence for key \"" + std::string(key_) +
+            "\" failed to convert to the requested type. E.g. [1 2] is a "
+            "sequence of one string \"1 2\" and [1, 2] is a sequence of two "
+            "integers. Often there is just a comma missing in the config "
+            "file.");
+      }
+      catch (YAML::TypedBadConversion<std::vector<T>> &e) {
+        throw IncorrectTypeInAssignment(
+            "The value for key \"" + std::string(key_) +
+            "\" cannot be converted to the requested type. A sequence was "
+            "expected but apparently not found.");
+      }
+    }
   };
 
   /**
