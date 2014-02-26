@@ -204,7 +204,7 @@ int resonance_decay(Particles *particles, int particle_id) {
     = particles->decay_modes(pdgcode).decay_mode_list();
   /* Get the first decay mode and its branching ratio */
   std::vector<ProcessBranch>::const_iterator mode = decaymodes.begin();
-  double cumulated_probability = mode->weight();
+  float cumulated_probability = mode->weight();
   /* Ratios of decay channels should add to 1; pick a random number
    * between 0 and 1 to select the decay mode to be used
    */
