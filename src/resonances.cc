@@ -134,7 +134,7 @@ std::vector<ProcessBranch> resonance_cross_section(
     if (particles->decay_modes(type_resonance.pdgcode()).empty())
       continue;
 
-    double resonance_xsection
+    float resonance_xsection
       = symmetryfactor * two_to_one_formation(particles, type_particle1,
         type_particle2, type_resonance, mandelstam_s, cm_momentum_squared);
 
@@ -496,7 +496,7 @@ size_t two_to_two_formation(Particles *particles,
      * Based on the general differential form in
      * Buss et al., Physics Reports 512, 1 (2012), Eq. (D.28)
      */
-    double xsection = clebsch_gordan_isospin * clebsch_gordan_isospin
+    float xsection = clebsch_gordan_isospin * clebsch_gordan_isospin
                       * spinfactor * symmetryfactor
                       * matrix_element
                       / mandelstam_s

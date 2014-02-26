@@ -50,7 +50,7 @@ void collision_criteria_geometry(Particles *particles,
 
   /* Total cross section is elastic + resonance production  */
   /* (Ignore annihilation and total for now) */
-  const double total_cross_section
+  const float total_cross_section
     = cross_sections->elastic(particles, id_a, id_b)
     + resonance_xsections.at(0).weight();
 
@@ -123,7 +123,7 @@ void collision_criteria_geometry(Particles *particles,
   std::vector<int> final_particles;
   if (resonance_xsections.at(0).weight() > really_small) {
     double random_interaction = drand48();
-    double interaction_probability = 0.0;
+    float interaction_probability = 0.0;
     std::vector<ProcessBranch>::const_iterator resonances
       = resonance_xsections.begin();
     while (interaction_type == 0 && resonances != resonance_xsections.end()) {
