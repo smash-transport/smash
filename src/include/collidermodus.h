@@ -23,7 +23,7 @@ struct ExperimentParameters;
 class ColliderModus : public ModusDefault {
  public:
   /* default constructor with probable values */
-  explicit ColliderModus(Configuration config);
+  explicit ColliderModus(Configuration modus_config);
 
   void print_startup();  // TODO(mkretz): needs to be discoverable from an
                          // outside "printer"

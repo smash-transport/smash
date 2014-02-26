@@ -25,10 +25,10 @@
 #include "include/parameters.h"
 #include "include/particles.h"
 
-BoxModus::BoxModus(Configuration config)
-    : initial_condition_(config.take({"Box", "INITIAL_CONDITION"})),
-      length_           (config.take({"Box", "LENGTH"})),
-      temperature_      (config.take({"Box", "TEMPERATURE"})) {
+BoxModus::BoxModus(Configuration modus_config)
+    : initial_condition_(modus_config.take({"Box", "INITIAL_CONDITION"})),
+      length_           (modus_config.take({"Box", "LENGTH"})),
+      temperature_      (modus_config.take({"Box", "TEMPERATURE"})) {
 }
 
 /* print_startup - console output on startup of box specific parameters */
