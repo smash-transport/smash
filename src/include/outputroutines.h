@@ -57,7 +57,6 @@ void write_oscar_event_block(Particles *particles,
  */
 void write_oscar(const ParticleData &particle_data,
                  const ParticleType &particle_type, int initial = 0, int final = 0);
-void write_vtk(const Particles &particles);
 
 /* timing measure */
 double measure_timediff(const timespec time_start);

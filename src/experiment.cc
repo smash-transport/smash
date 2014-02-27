@@ -15,15 +15,16 @@
 #include <string>
 
 #include "include/boxmodus.h"
-#include "include/configuration.h"
 #include "include/collidermodus.h"
 #include "include/collisions.h"
+#include "include/configuration.h"
 #include "include/decays.h"
 #include "include/experiment.h"
 #include "include/macros.h"
 #include "include/outputroutines.h"
 #include "include/parameters.h"
 #include "include/time.h"
+#include "include/vtkoutput.h"
 
 #include <boost/filesystem.hpp>
 
@@ -145,7 +146,9 @@ void Experiment<Modus>::run_time_evolution() {
       printd("Ignored collisions %zu\n", rejection_conflict);
       /* save evolution data */
       write_particles(particles_);
-      write_vtk(particles_);
+      for (auto &output : outputs_) {
+        output->write_state(particles_);
+      }
     }
   }
   /* Guard against evolution */
@@ -198,6 +201,8 @@ void Experiment<Modus>::end() {
 
 template <typename Modus>
 void Experiment<Modus>::run(const bf::path &path) {
+  outputs_.emplace_back(new Smash::VtkOutput(path));
+
   /* Write the header of OSCAR data output file */
   write_oscar_header();
   for (int j = 0; j < nevents_; j++) {

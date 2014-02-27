@@ -39,7 +39,11 @@ set(smash_src boxmodus.cc clebschgordan.cc collisions.cc collidermodus.cc
         modusdefault.cc
         parametrizations.cc
         particles.cc
-        outputroutines.cc resonances.cc time.cc)
+        outputroutines.cc
+        resonances.cc
+        time.cc
+        vtkoutput.cc
+        )
 
 add_executable(smash smash.cc ${smash_src})
 

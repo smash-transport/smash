@@ -241,39 +241,3 @@ void write_oscar(const ParticleData &particle_data,
 
   fclose(fp);
 }
-
-/* write_vtk - VTK file describing particle position */
-void write_vtk(const Particles &particles) {
-  FILE *fp = NULL;
-  char filename[256];
-  snprintf(filename, sizeof(filename), "data/pos_0.%05i.vtk",
-           static_cast<int>((particles.cbegin()->second.position().x0() - 1.0) *
-                            10));
-  fp = fopen(filename, "w");
-  /* Legacy VTK file format */
-  fprintf(fp, "# vtk DataFile Version 2.0\n");
-  fprintf(fp, "Generated from molecular-offset data\n");
-  fprintf(fp, "ASCII\n");
-  /* Unstructured data sets are composed of points, lines, polygons, .. */
-  fprintf(fp, "DATASET UNSTRUCTURED_GRID\n");
-  fprintf(fp, "POINTS %zu double\n", particles.size());
-  for (auto i = particles.cbegin(); i != particles.cend(); ++i)
-    fprintf(fp, "%g %g %g\n", i->second.position().x1(),
-            i->second.position().x2(), i->second.position().x3());
-  fprintf(fp, "CELLS %zu %zu\n", particles.size(), particles.size() * 2);
-  for (size_t point_index = 0; point_index < particles.size(); point_index++)
-    fprintf(fp, "1 %zu\n", point_index);
-  fprintf(fp, "CELL_TYPES %zu\n", particles.size());
-  for (size_t point_index = 0; point_index < particles.size(); point_index++)
-    fprintf(fp, "1\n");
-  fprintf(fp, "POINT_DATA %zu\n", particles.size());
-  fprintf(fp, "SCALARS pdg_codes int 1\n");
-  fprintf(fp, "LOOKUP_TABLE default\n");
-  for (auto i = particles.cbegin(); i != particles.cend(); ++i)
-    fprintf(fp, "%i\n", i->second.pdgcode());
-  fprintf(fp, "VECTORS momentum double\n");
-  for (auto i = particles.cbegin(); i != particles.cend(); ++i)
-    fprintf(fp, "%g %g %g\n", i->second.momentum().x1(),
-            i->second.momentum().x2(), i->second.momentum().x3());
-  fclose(fp);
-}
