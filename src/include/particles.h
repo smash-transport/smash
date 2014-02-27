@@ -79,6 +79,9 @@ class Particles {
   /* iterators */
   inline std::map<int, ParticleData>::iterator begin(void);
   inline std::map<int, ParticleData>::iterator end(void);
+  inline std::map<int, ParticleData>::const_iterator begin() const { return data_.begin(); }
+  inline std::map<int, ParticleData>::const_iterator end() const { return data_.end(); }
+
   inline std::map<int, ParticleData>::const_iterator cbegin(void) const;
   inline std::map<int, ParticleData>::const_iterator cend(void) const;
   inline std::map<int, ParticleType>::const_iterator types_cbegin(void) const;

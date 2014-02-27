@@ -102,12 +102,12 @@ Configuration::Value Configuration::take(
   }
   const auto r = node[*keyIt];
   node.remove(*keyIt);
-  return {r};
+  return {r, keys.begin()[keys.size() - 1]};
 }
 
 Configuration::Value Configuration::read(
     std::initializer_list<const char *> keys) const {
-  return {find_node_at(root_node_, keys)};
+  return {find_node_at(root_node_, keys), keys.begin()[keys.size() - 1]};
 }
 
 void Configuration::remove_all_but(const std::string &key) {

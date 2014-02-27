@@ -151,33 +151,6 @@ void printd_list(const std::list<int> &collision_list) {
   printd("\n");
 }
 
-/**
- *  write_particles - writes out data of the specific particles
- */
-void write_particles(const Particles &particles) {
-  FILE *fp;
-  char filename[256];
-
-  snprintf(filename, sizeof(filename), "data/momenta_%.5f.dat",
-           particles.time());
-  fp = fopen(filename, "w");
-  for (auto i = particles.cbegin(); i != particles.cend(); ++i) {
-    fprintf(fp, "%g %g %g %g %i %i\n", i->second.momentum().x0(),
-            i->second.momentum().x1(), i->second.momentum().x2(),
-            i->second.momentum().x3(), i->second.id(), i->second.pdgcode());
-  }
-  fclose(fp);
-  snprintf(filename, sizeof(filename), "data/position_%.5f.dat",
-           particles.time());
-  fp = fopen(filename, "w");
-  for (auto i = particles.cbegin(); i != particles.cend(); ++i) {
-    fprintf(fp, "%g %g %g %g %i %i\n", i->second.position().x0(),
-            i->second.position().x1(), i->second.position().x2(),
-            i->second.position().x3(), i->second.id(), i->second.pdgcode());
-  }
-  fclose(fp);
-}
-
 /* write_oscar_header - OSCAR header format */
 void write_oscar_header(void) {
   FILE *fp;
@@ -234,25 +207,6 @@ void write_oscar(const ParticleData &particle_data,
 
   /* particle_index, particle_pdgcode, ?, momenta, mass position */
   FourVector momentum = particle_data.momentum(),
-    position = particle_data.position();
-  float mass = sqrt(momentum.Dot(momentum));
-  fprintf(fp, "%i %i %i %g %g %g %g %g %g %g %g %g \n",
-          particle_data.id(), particle_type.pdgcode(), 0,
-          momentum.x1(), momentum.x2(), momentum.x3(), momentum.x0(),
-          mass, position.x1(), position.x2(), position.x3(),
-          position.x0() - 1.0);
-
-  fclose(fp);
-}
-
-/* write_oscar - use this for the other particles in same process */
-void write_oscar(const ParticleData &particle_data,
-                 const ParticleType &particle_type) {
-  FILE *fp;
-  fp = fopen("data/collision.dat", "a");
-
-  /* particle_index, particle_pdgcode, ?, momenta, mass position */
-  FourVector momentum = particle_data.momentum(),
              position = particle_data.position();
   float mass = sqrt(momentum.Dot(momentum));
   fprintf(fp, "%i %i %i %g %g %g %g %g %g %g %g %g \n", particle_data.id(),
@@ -260,41 +214,5 @@ void write_oscar(const ParticleData &particle_data,
           momentum.x3(), momentum.x0(), mass, position.x1(),
           position.x2(), position.x3(), position.x0() - 1.0);
 
-  fclose(fp);
-}
-
-/* write_vtk - VTK file describing particle position */
-void write_vtk(const Particles &particles) {
-  FILE *fp = NULL;
-  char filename[256];
-  snprintf(filename, sizeof(filename), "data/pos_0.%05i.vtk",
-           static_cast<int>((particles.cbegin()->second.position().x0() - 1.0) *
-                            10));
-  fp = fopen(filename, "w");
-  /* Legacy VTK file format */
-  fprintf(fp, "# vtk DataFile Version 2.0\n");
-  fprintf(fp, "Generated from molecular-offset data\n");
-  fprintf(fp, "ASCII\n");
-  /* Unstructured data sets are composed of points, lines, polygons, .. */
-  fprintf(fp, "DATASET UNSTRUCTURED_GRID\n");
-  fprintf(fp, "POINTS %zu double\n", particles.size());
-  for (auto i = particles.cbegin(); i != particles.cend(); ++i)
-    fprintf(fp, "%g %g %g\n", i->second.position().x1(),
-            i->second.position().x2(), i->second.position().x3());
-  fprintf(fp, "CELLS %zu %zu\n", particles.size(), particles.size() * 2);
-  for (size_t point_index = 0; point_index < particles.size(); point_index++)
-    fprintf(fp, "1 %zu\n", point_index);
-  fprintf(fp, "CELL_TYPES %zu\n", particles.size());
-  for (size_t point_index = 0; point_index < particles.size(); point_index++)
-    fprintf(fp, "1\n");
-  fprintf(fp, "POINT_DATA %zu\n", particles.size());
-  fprintf(fp, "SCALARS pdg_codes int 1\n");
-  fprintf(fp, "LOOKUP_TABLE default\n");
-  for (auto i = particles.cbegin(); i != particles.cend(); ++i)
-    fprintf(fp, "%i\n", i->second.pdgcode());
-  fprintf(fp, "VECTORS momentum double\n");
-  for (auto i = particles.cbegin(); i != particles.cend(); ++i)
-    fprintf(fp, "%g %g %g\n", i->second.momentum().x1(),
-            i->second.momentum().x2(), i->second.momentum().x3());
   fclose(fp);
 }

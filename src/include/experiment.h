@@ -7,10 +7,11 @@
 #ifndef SRC_INCLUDE_EXPERIMENT_H_
 #define SRC_INCLUDE_EXPERIMENT_H_
 
-#include <memory>
 #include <list>
+#include <memory>
 #include <stdexcept>
 #include <string>
+#include <vector>
 
 #include "include/crosssections.h"
 #include "include/experimentparameters.h"
@@ -18,6 +19,7 @@
 #include "include/outputroutines.h"
 #include "include/parameters.h"
 #include "include/particles.h"
+#include "outputinterface.h"
 class Configuration;
 
 #ifndef DOXYGEN
@@ -141,6 +143,12 @@ class Experiment : public ExperimentBase {
    * The particles interacting in the experiment.
    */
   Particles particles_;
+
+  /**
+   * A list of output formaters. They will be called to write the state of the
+   * particles to file.
+   */
+  std::vector<std::unique_ptr<Smash::OutputInterface>> outputs_;
 
   /**
    * Struct of several member variables.
