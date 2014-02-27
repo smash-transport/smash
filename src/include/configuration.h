@@ -69,13 +69,14 @@ class Configuration {
 
     /// a YAML leaf node
     const YAML::Node node_;
+    const char *const key_;
 
     /** Constructs the Value wrapper from a YAML::Node.
      *
      * \note This constructor must be implicit, otherwise it's impossible to
      * return an rvalue Value object - because the copy constructor is deleted.
      */
-    Value(const YAML::Node &n) : node_(n) {
+    Value(const YAML::Node &n, const char *key) : node_(n), key_(key) {
       assert(n.IsScalar() || n.IsSequence() || n.IsMap());
     }
 
@@ -99,7 +100,29 @@ class Configuration {
       }
       catch (YAML::TypedBadConversion<T> &e) {
         throw IncorrectTypeInAssignment(
-            "The value cannot be converted to the requested type.");
+            "The value for key \"" + std::string(key_) +
+            "\" cannot be converted to the requested type.");
+      }
+    }
+
+    template <typename T>
+    operator std::vector<T>() {
+      try {
+        return node_.as<std::vector<T>>();
+      }
+      catch (YAML::TypedBadConversion<T> &e) {
+        throw IncorrectTypeInAssignment(
+            "One of the values in the sequence for key \"" + std::string(key_) +
+            "\" failed to convert to the requested type. E.g. [1 2] is a "
+            "sequence of one string \"1 2\" and [1, 2] is a sequence of two "
+            "integers. Often there is just a comma missing in the config "
+            "file.");
+      }
+      catch (YAML::TypedBadConversion<std::vector<T>> &e) {
+        throw IncorrectTypeInAssignment(
+            "The value for key \"" + std::string(key_) +
+            "\" cannot be converted to the requested type. A sequence was "
+            "expected but apparently not found.");
       }
     }
   };

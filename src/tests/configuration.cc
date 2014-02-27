@@ -172,3 +172,9 @@ TEST(remove_all_but) {
   conf.remove_all_but("Modi");
   COMPARE(conf.to_string(), "Modi:\n  Sphere:\n    RADIUS: 5.0");
 }
+
+TEST_CATCH(failed_sequence_conversion, Configuration::IncorrectTypeInAssignment) {
+  Configuration conf(TEST_CONFIG_PATH);
+  conf.merge_yaml("{test: [123 456]}");
+  std::vector<int> x = conf.read({"test"});
+}

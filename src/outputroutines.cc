@@ -234,25 +234,6 @@ void write_oscar(const ParticleData &particle_data,
 
   /* particle_index, particle_pdgcode, ?, momenta, mass position */
   FourVector momentum = particle_data.momentum(),
-    position = particle_data.position();
-  float mass = sqrt(momentum.Dot(momentum));
-  fprintf(fp, "%i %i %i %g %g %g %g %g %g %g %g %g \n",
-          particle_data.id(), particle_type.pdgcode(), 0,
-          momentum.x1(), momentum.x2(), momentum.x3(), momentum.x0(),
-          mass, position.x1(), position.x2(), position.x3(),
-          position.x0() - 1.0);
-
-  fclose(fp);
-}
-
-/* write_oscar - use this for the other particles in same process */
-void write_oscar(const ParticleData &particle_data,
-                 const ParticleType &particle_type) {
-  FILE *fp;
-  fp = fopen("data/collision.dat", "a");
-
-  /* particle_index, particle_pdgcode, ?, momenta, mass position */
-  FourVector momentum = particle_data.momentum(),
              position = particle_data.position();
   float mass = sqrt(momentum.Dot(momentum));
   fprintf(fp, "%i %i %i %g %g %g %g %g %g %g %g %g \n", particle_data.id(),
