@@ -36,18 +36,18 @@ class ParticleData {
   inline void set_id_process(int id);
   inline double collision_time(void) const;
   inline int process_type(void) const;
-  inline std::vector<int> final_state(void) const;
+  inline const std::vector<int> &final_state(void) const;
   inline void set_collision_time(const double &collision_time);
   inline void set_collision(int process_type, const double &collision_time,
                             int collision_id);
   inline void set_collision(int process_type, const double &collision_time,
                 int collision_id, std::vector<int> product_particles);
   inline void set_collision_past(int process_id);
-  inline FourVector momentum(void) const;
+  inline const FourVector &momentum(void) const;
   inline void set_momentum(const FourVector &momentum_vector);
   inline void set_momentum(const double &mass, const double &px,
                            const double &py, const double &pz);
-  inline FourVector position(void) const;
+  inline const FourVector &position(void) const;
   inline void set_position(const FourVector &position);
   inline void set_position(const double &x0, const double &x1,
                            const double &x2, const double &x3);
@@ -140,7 +140,7 @@ inline int ParticleData::process_type(void) const {
 }
 
 /// return final state
-inline std::vector<int> ParticleData::final_state(void) const {
+inline const std::vector<int> &ParticleData::final_state(void) const {
   return final_state_;
 }
 
@@ -182,7 +182,7 @@ inline void ParticleData::set_collision_past(int id_counter) {
 }
 
 /// return the particle four momentum
-inline FourVector ParticleData::momentum(void) const {
+inline const FourVector &ParticleData::momentum(void) const {
   return momentum_;
 }
 
@@ -199,7 +199,7 @@ inline void ParticleData::set_momentum(const double &mass, const double &px,
 }
 
 /// particle position in Minkowski space
-inline FourVector ParticleData::position(void) const {
+inline const FourVector &ParticleData::position(void) const {
   return position_;
 }
 
