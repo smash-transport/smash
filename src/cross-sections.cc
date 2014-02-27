@@ -31,7 +31,9 @@ void CrossSections::compute_kinematics(Particles *particles,
     = particles->data(id_b).momentum().Dot(particles->data(id_b).momentum());
   /* Beam momentum (assuming particle A as "beam") */
   p_lab_ = sqrt((mandelstam_s_ - squared_mass_a_ - squared_mass_b_)
-                / (2 * sqrt(squared_mass_b_)));
+                * (mandelstam_s_ - squared_mass_a_ - squared_mass_b_)
+                - 4 * squared_mass_a_ * squared_mass_b_)
+           / (2 * sqrt(squared_mass_b_));
 }
 
 float CrossSections::elastic(Particles *particles, int id_a, int id_b)
