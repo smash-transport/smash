@@ -58,7 +58,9 @@ struct OutputDirectoryOutOfIds : public std::runtime_error {
 
 bf::path default_output_path() {
   const bf::path p = bf::absolute("data");
-  bf::create_directory(p);
+  if (!bf::exists(p)) {
+    return p / "0";
+  }
   bf::path p2;
   for (int id = 0; id < std::numeric_limits<int>::max(); ++id) {
     p2 = p / std::to_string(id);
@@ -68,12 +70,6 @@ bf::path default_output_path() {
   }
   if (p == p2) {
     throw OutputDirectoryOutOfIds("no unique data subdir ID left");
-  }
-  if (!bf::create_directory(p2)) {
-    throw OutputDirectoryExists(
-        "Race condition detected: The directory " + p2.native() +
-        " did not exist a few cycles ago, but was created in the meantime by a "
-        "different process.");
   }
   return p2;
 }
@@ -85,7 +81,7 @@ void ensure_path_is_valid(const bf::path &path) {
                                   ") exists, but it is not a directory.");
     }
   } else {
-    if (!bf::create_directory(path)) {
+    if (!bf::create_directories(path)) {
       throw OutputDirectoryExists(
           "Race condition detected: The directory " + path.native() +
           " did not exist a few cycles ago, but was created in the meantime by "
@@ -162,7 +158,6 @@ int main(int argc, char *argv[]) {
           break;
         case 'o':
           output_path = optarg;
-          ensure_path_is_valid(output_path);
           break;
         case 'v':
           exit(EXIT_SUCCESS);
@@ -171,6 +166,7 @@ int main(int argc, char *argv[]) {
       }
     }
 
+    ensure_path_is_valid(output_path);
     printd("output path: %s\n", output_path.native().c_str());
 
     if (!force_overwrite && bf::exists(output_path / "config.yaml")) {
