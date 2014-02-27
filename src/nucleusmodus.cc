@@ -45,8 +45,7 @@ NucleusModus::NucleusModus(Configuration modus_config) {
     float max = 0.0;
     // if not value, we need to take a look at the sampling:
     if (modus_cfg.has_value({"Impact", "SAMPLE"})) {
-      std::string sampling_method = modus_cfg.take({"Nucleus",
-                                                 "IMPACT", "SAMPLE"});
+      std::string sampling_method = modus_cfg.take({"IMPACT", "SAMPLE"});
       if (sampling_method.compare(0, 6, "linear") == 0) {
         sampling_quadratically = false;
       }
@@ -62,6 +61,12 @@ NucleusModus::NucleusModus(Configuration modus_config) {
     }
     sample_impact(sampling_quadratically, min, max);
   }
+  if (modus_cfg.has_value({"INITIAL_DISTANCE"})) {
+    initial_z_displacement_ = modus_cfg.take({"INITIAL_DISTANCE"});
+    // the displacement is half the distance (both nuclei are shifted
+    // initial_z_displacement_ away from origin)
+    initial_z_displacement_ /= 2.0;
+  }
 }
 
 void NucleusModus::print_startup() {
@@ -69,6 +74,7 @@ void NucleusModus::print_startup() {
   printf("sqrt_s_NN = %g GeV (pairs of %d and %d)\n", sqrt_s_NN_,
                                                       pdg_sNN_1_, pdg_sNN_2_);
   printf("Impact parameter: %g fm\n", impact_);
+  printf("Initial distance betw nuclei: %g fm\n", 2.0*initial_z_displacement_);
 }
 
 /* initial_conditions - sets particle data for @particles */
@@ -94,29 +100,27 @@ void NucleusModus::initial_conditions(Particles *particles,
                              * mass_projec*mass_target
                              / (mass_1*mass_2)
                            + mass_projec*mass_projec + mass_target*mass_target;
-  printf("Total mandelstam s: %g GeV^2\n", total_mandelstam_s);
-  float velocity_squared = (total_mandelstam_s - (mass_projec+mass_target))
-                         / (total_mandelstam_s - (mass_projec-mass_target));
-  printf("Velocity (squared): %g c^2 (1-beta^2: %g)\n", velocity_squared, 1-velocity_squared);
+  float velocity_squared = (total_mandelstam_s - (mass_projec + mass_target)
+                                               * (mass_projec + mass_target))
+                         / (total_mandelstam_s - (mass_projec - mass_target)
+                                               * (mass_projec - mass_target));
   // populate the nuclei with appropriately distributed nucleons
   projectile_.arrange_nucleons();
   target_.arrange_nucleons();
   // boost the nuclei to the appropriate velocity (target is in opposite
   // direction!
-  projectile_.boost(-velocity_squared);
-  //TODO(baeuchle): Don't do that. Here, I pass the sign basically
-  //independent of the number. Bad boy programmer.
-  target_.boost(velocity_squared);
+  projectile_.boost(velocity_squared);
+  target_.boost(-velocity_squared);
   // shift the nuclei along the z-axis so that they are 2*1 fm apart
   // touch and along the x-axis to get the right impact parameter.
   // Projectile hits at positive x.
   // Also, it sets the time of the particles to
-  // -initial_z_displacement/sqrt(velocity_squared).
-  double simulation_time = -initial_z_displacement/sqrt(velocity_squared);
-  projectile_.shift(true, -initial_z_displacement, +impact_/2.0
-                                                 , simulation_time);
-  target_.shift(false,    +initial_z_displacement, -impact_/2.0
-                                                 , simulation_time);
+  // -initial_z_displacement_/sqrt(velocity_squared).
+  double simulation_time = -initial_z_displacement_/sqrt(velocity_squared);
+  projectile_.shift(true, -initial_z_displacement_, +impact_/2.0
+                                                  , simulation_time);
+  target_.shift(false,    +initial_z_displacement_, -impact_/2.0
+                                                  , simulation_time);
   // now, put the particles in the nuclei into particles.
   projectile_.copy_particles(particles);
   target_.copy_particles(particles);

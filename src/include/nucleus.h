@@ -45,11 +45,14 @@ class Nucleus {
   void arrange_nucleons();
   /**
    * Boosts the nuclei so that the nucleons have the appropriate
-   * momentum.
+   * momentum and the nuclei are lorentz-contracted.
    *
-   * @param beta_squared velocity used for boosting, interpreted as z-value.
+   * @param beta_squared_with_sign velocity used for boosting,
+   * interpreted as z-value. Note that the sign of this variable is used
+   * to determine the sign of the velocity, i.e., \f$\beta_z =
+   * \mathop{sign}(\beta^2)\cdot\sqrt{|\beta^2|}\f$. 
    **/
-  void boost(const double& beta_squared);
+  void boost(const double& beta_squared_with_sign);
   /** Adds a particle to the nucleus
    *
    * @param pdgcode PDG code of the particle. */
