@@ -7,6 +7,7 @@
 #ifndef SRC_INCLUDE_FOURVECTOR_H_
 #define SRC_INCLUDE_FOURVECTOR_H_
 
+#include <array>
 #include <cmath>
 
 /**
@@ -24,10 +25,11 @@
 class FourVector {
  public:
   /// default constructor nulls the fourvector components
-  FourVector() : x0_(0.0), x1_(0.0), x2_(0.0), x3_(0.0) {}
+  FourVector() : x_{0., 0., 0., 0.} {
+  }
   /// copy constructor
-  FourVector(double y0, double y1, double y2, double y3)
-      : x0_(y0), x1_(y1), x2_(y2), x3_(y3) {}
+  FourVector(double y0, double y1, double y2, double y3) : x_{y0, y1, y2, y3} {
+  }
   /* t, x_\perp, z */
   double inline x0(void) const;
   void inline set_x0(double t);
@@ -102,54 +104,77 @@ class FourVector {
   FourVector inline operator*=(const double &a);
   FourVector inline operator/=(const double &a);
 
+  using iterator = std::array<double, 4>::iterator;
+  using const_iterator = std::array<double, 4>::const_iterator;
+
+  /**
+   * Returns an iterator starting at the 0th component.
+   *
+   * The iterator implements the RandomIterator concept. Thus, you can simply
+   * write `begin() + 1` to get an iterator that points to the 1st component.
+   */
+  iterator begin() { return x_.begin(); };
+
+  /**
+   * Returns an iterator pointing after the 4th component.
+   */
+  iterator end() { return x_.end(); };
+
+  /// const overload of the above
+  const_iterator begin() const { return x_.begin(); };
+  /// const overload of the above
+  const_iterator end() const { return x_.end(); };
+
+  /// \see begin
+  const_iterator cbegin() const { return x_.cbegin(); };
+  /// \see end
+  const_iterator cend() const { return x_.cend(); };
+
  private:
-  double x0_, x1_, x2_, x3_;
+  std::array<double, 4> x_;
 };
 
 double inline FourVector::x0(void) const {
-  return x0_;
+  return x_[0];
 }
 
 void inline FourVector::set_x0(const double t) {
-  x0_ = t;
+  x_[0] = t;
 }
 
 double inline FourVector::x1(void) const {
-  return x1_;
+  return x_[1];
 }
 
 void inline FourVector::set_x1(const double z) {
-  x1_ = z;
+  x_[1] = z;
 }
 
 double inline FourVector::x2(void) const {
-  return x2_;
+  return x_[2];
 }
 
 void inline FourVector::set_x2(const double x) {
-  x2_ = x;
+  x_[2] = x;
 }
 
 double inline FourVector::x3(void) const {
-  return x3_;
+  return x_[3];
 }
 
 void inline FourVector::set_x3(const double y) {
-  x3_ = y;
+  x_[3] = y;
 }
 
 void inline FourVector::set_FourVector(const double t, const double z,
                                        const double x, const double y) {
-  x0_ = t;
-  x1_ = z;
-  x2_ = x;
-  x3_ = y;
+  x_ = {t, z, x, y};
 }
 
 /// check if all four vector components are equal
 bool inline FourVector::operator==(const FourVector &a) const {
-  return fabs(x0_ - a.x0_) < 1e-12 && fabs(x1_ - a.x1_) < 1e-12
-    && fabs(x2_ - a.x2_) < 1e-12 && fabs(x3_ - a.x3_) < 1e-12;
+  return fabs(x_[0] - a.x_[0]) < 1e-12 && fabs(x_[1] - a.x_[1]) < 1e-12
+    && fabs(x_[2] - a.x_[2]) < 1e-12 && fabs(x_[3] - a.x_[3]) < 1e-12;
 }
 
 /// use == operator for the inverse != check
@@ -159,7 +184,7 @@ bool inline FourVector::operator!=(const FourVector &a) const {
 
 /// all four vector components are below comparison vector
 bool inline FourVector::operator<(const FourVector &a) const {
-  return (x0_ < a.x0_) && (x1_ < a.x1_) && (x2_ < a.x2_) && (x3_ < a.x3_);
+  return (x_[0] < a.x_[0]) && (x_[1] < a.x_[1]) && (x_[2] < a.x_[2]) && (x_[3] < a.x_[3]);
 }
 
 /// use < operator for the inverse by switching arguments
@@ -179,8 +204,8 @@ bool inline FourVector::operator>=(const FourVector &a) const {
 
 /// all vector components are equal to that number
 bool inline FourVector::operator==(const double &a) const {
-  return fabs(x0_ - a) < 1e-12 && fabs(x1_ - a) < 1e-12
-    && fabs(x2_ - a) < 1e-12 && fabs(x3_ - a) < 1e-12;
+  return fabs(x_[0] - a) < 1e-12 && fabs(x_[1] - a) < 1e-12
+    && fabs(x_[2] - a) < 1e-12 && fabs(x_[3] - a) < 1e-12;
 }
 
 /// use == operator for the inverse !=
@@ -190,12 +215,12 @@ bool inline FourVector::operator!=(const double &a) const {
 
 /// all vector components are below that number
 bool inline FourVector::operator<(const double &a) const {
-  return (x0_ < a) && (x1_ < a) && (x2_ < a) && (x3_ < a);
+  return (x_[0] < a) && (x_[1] < a) && (x_[2] < a) && (x_[3] < a);
 }
 
 /// all vector components are above that number
 bool inline FourVector::operator>(const double &a) const {
-  return (x0_ > a) && (x1_ > a) && (x2_ > a) && (x3_ > a);
+  return (x_[0] > a) && (x_[1] > a) && (x_[2] > a) && (x_[3] > a);
 }
 
 /// all vector components are less equal that number
@@ -210,10 +235,10 @@ bool inline FourVector::operator>=(const double &a) const {
 
 /// += assignement addition
 FourVector inline FourVector::operator+=(const FourVector &a) {
-  this->x0_ += a.x0_;
-  this->x1_ += a.x1_;
-  this->x2_ += a.x2_;
-  this->x3_ += a.x3_;
+  this->x_[0] += a.x_[0];
+  this->x_[1] += a.x_[1];
+  this->x_[2] += a.x_[2];
+  this->x_[3] += a.x_[3];
   return *this;
 }
 
@@ -225,10 +250,10 @@ inline FourVector operator+(FourVector a, const FourVector &b) {
 
 /// -= assignement subtraction
 FourVector inline FourVector::operator-=(const FourVector &a) {
-  this->x0_ -= a.x0_;
-  this->x1_ -= a.x1_;
-  this->x2_ -= a.x2_;
-  this->x3_ -= a.x3_;
+  this->x_[0] -= a.x_[0];
+  this->x_[1] -= a.x_[1];
+  this->x_[2] -= a.x_[2];
+  this->x_[3] -= a.x_[3];
   return *this;
 }
 
@@ -240,10 +265,10 @@ inline FourVector operator-(FourVector a, const FourVector &b) {
 
 /// assignement factor multiplication
 FourVector inline FourVector::operator*=(const double &a) {
-  this->x0_ *= a;
-  this->x1_ *= a;
-  this->x2_ *= a;
-  this->x3_ *= a;
+  this->x_[0] *= a;
+  this->x_[1] *= a;
+  this->x_[2] *= a;
+  this->x_[3] *= a;
   return *this;
 }
 
@@ -255,10 +280,10 @@ inline FourVector operator*(FourVector a, const double &b) {
 
 /// assignement factor division
 FourVector inline FourVector::operator/=(const double &a) {
-  this->x0_ /= a;
-  this->x1_ /= a;
-  this->x2_ /= a;
-  this->x3_ /= a;
+  this->x_[0] /= a;
+  this->x_[1] /= a;
+  this->x_[2] /= a;
+  this->x_[3] /= a;
   return *this;
 }
 
@@ -269,23 +294,23 @@ inline FourVector operator/(FourVector a, const double &b) {
 }
 
 double inline FourVector::Dot(const FourVector &a) const {
-  return x0_ * a.x0_ - x1_ * a.x1_ - x2_ * a.x2_ - x3_ * a.x3_;
+  return x_[0] * a.x_[0] - x_[1] * a.x_[1] - x_[2] * a.x_[2] - x_[3] * a.x_[3];
 }
 
 double inline FourVector::Dot() const {
-  return x0_ * x0_ - x1_ * x1_ - x2_ * x2_ - x3_ * x3_;
+  return x_[0] * x_[0] - x_[1] * x_[1] - x_[2] * x_[2] - x_[3] * x_[3];
 }
 
 double inline FourVector::DotThree(const FourVector &a) const {
-  return - x1_ * a.x1_ - x2_ * a.x2_ - x3_ * a.x3_;
+  return - x_[1] * a.x_[1] - x_[2] * a.x_[2] - x_[3] * a.x_[3];
 }
 
 double inline FourVector::DotThree() const {
-  return - x1_ * x1_ - x2_ * x2_ - x3_ * x3_;
+  return - x_[1] * x_[1] - x_[2] * x_[2] - x_[3] * x_[3];
 }
 
 double inline FourVector::DiffThree(const FourVector &a) const {
-  return x1_ - a.x1_ + x2_ - a.x2_ + x3_ - a.x3_;
+  return x_[1] - a.x_[1] + x_[2] - a.x_[2] + x_[3] - a.x_[3];
 }
 
 #endif  // SRC_INCLUDE_FOURVECTOR_H_
