@@ -75,25 +75,27 @@ smash_add_test(lorentzboost lorentzboost lorentzboost)
 # clebsch-gordan coefficient tests
 smash_add_test(clebschgordan clebschgordan clebschgordan)
 
+set(SMASH_OPTIONS -o "${PROJECT_BINARY_DIR}/test_output" -f)
+
 # verify that the binary has a cli help
 smash_add_test(mash_help smash smash -h)
 
 # verify that the binary runs
-smash_add_test(mash_run smash smash)
+smash_add_test(mash_run smash smash ${SMASH_OPTIONS})
 
 # verify that the binary can run a box calculation
-smash_add_test(box_run smash smash -m Box)
+smash_add_test(box_run smash smash -m Box ${SMASH_OPTIONS})
 
 # verify that the binary can do Collider
-smash_add_test(collider_run smash smash -m Collider)
+smash_add_test(collider_run smash smash -m Collider ${SMASH_OPTIONS})
 
 # verify that the binary can do sphere
-#smash_add_test(sphere_run smash smash -m Sphere)
+#smash_add_test(sphere_run smash smash -m Sphere ${SMASH_OPTIONS})
 
 # verify that binary runs certain number of steps
-smash_add_test(box_steps smash smash -s 20 -m Box)
-smash_add_test(collider_steps smash smash -s 20 -m Collider)
-#smash_add_test(sphere_steps smash smash -s 20 -m Sphere)
+smash_add_test(box_steps smash smash -s 20 -m Box ${SMASH_OPTIONS})
+smash_add_test(collider_steps smash smash -s 20 -m Collider ${SMASH_OPTIONS})
+#smash_add_test(sphere_steps smash smash -s 20 -m Sphere ${SMASH_OPTIONS})
 
 # verify that default run has no mem leaks
 find_program(CTEST_MEMORYCHECK_COMMAND valgrind)
@@ -102,19 +104,19 @@ if(CTEST_MEMORYCHECK_COMMAND)
    set(CTEST_MEMORYCHECK_COMMAND_OPTIONS "-v")
    smash_add_test(memcheck_box smash ${CTEST_MEMORYCHECK_COMMAND}
       ${CTEST_MEMORYCHECK_COMMAND_OPTIONS}
-      ${PROJECT_BINARY_DIR}/smash -c "General: {STEPS: 10, MODUS: Box}")
+      ${PROJECT_BINARY_DIR}/smash -c "General: {STEPS: 10, MODUS: Box}" ${SMASH_OPTIONS})
    smash_add_test(memcheck_collider smash ${CTEST_MEMORYCHECK_COMMAND}
       ${CTEST_MEMORYCHECK_COMMAND_OPTIONS}
-      ${PROJECT_BINARY_DIR}/smash -s 50 -m Collider)
+      ${PROJECT_BINARY_DIR}/smash -s 50 -m Collider ${SMASH_OPTIONS})
 #  smash_add_test(memcheck_sphere smash ${CTEST_MEMORYCHECK_COMMAND}
 #     ${CTEST_MEMORYCHECK_COMMAND_OPTIONS}
-#     ${PROJECT_BINARY_DIR}/smash -s 50 -m Sphere)
+#     ${PROJECT_BINARY_DIR}/smash -s 50 -m Sphere ${SMASH_OPTIONS})
 else()
    message(STATUS "valgrind not found. Memcheck tests are disabled!")
 endif()
 
 if(HAVE_ADDRESS_SANITIZER)
-   smash_add_test(asan_box      smash_asan smash_asan -c "General: {STEPS: 50,MODUS: Box}")
-   smash_add_test(asan_collider smash_asan smash_asan -s 500 -m Collider)
-   #smash_add_test(asan_sphere   smash_asan smash_asan -s 500 -m Sphere)
+   smash_add_test(asan_box      smash_asan smash_asan -c "General: {STEPS: 50,MODUS: Box}" ${SMASH_OPTIONS})
+   smash_add_test(asan_collider smash_asan smash_asan -s 500 -m Collider ${SMASH_OPTIONS})
+   #smash_add_test(asan_sphere   smash_asan smash_asan -s 500 -m Sphere ${SMASH_OPTIONS})
 endif()
