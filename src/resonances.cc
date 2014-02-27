@@ -448,23 +448,6 @@ size_t two_to_two_formation(Particles *particles,
     if (not_enough_energy)
       continue;
 
-    /* Calculate spin factor */
-    int spin_total_maximum
-      = type_resonance.spin() + type_i->second.spin();
-    int spin_total_minimum
-      = abs(type_resonance.spin() - type_i->second.spin());
-    int spin_total = spin_total_maximum;
-    double spinfactor = (spin_total + 1)
-      / ((type_particle1.spin() + 1) * (type_particle2.spin() + 1));
-    /* spin is multiplied by 2,
-     * so it must be decreased in increments of 2
-     */
-    spin_total = spin_total - 2;
-    while (spin_total >=  spin_total_minimum) {
-      spinfactor += (spin_total + 1)
-        / ((type_particle1.spin() + 1) * (type_particle2.spin() + 1));
-      spin_total = spin_total - 2;
-    }
     /* Calculate resonance production cross section
      * using the Breit-Wigner distribution as probability amplitude
      * Integrate over the allowed resonance mass range
@@ -497,7 +480,7 @@ size_t two_to_two_formation(Particles *particles,
      * Buss et al., Physics Reports 512, 1 (2012), Eq. (D.28)
      */
     float xsection = clebsch_gordan_isospin * clebsch_gordan_isospin
-                      * spinfactor * symmetryfactor
+                      * symmetryfactor
                       * matrix_element
                       / mandelstam_s
                       / sqrt(cm_momentum_squared)
