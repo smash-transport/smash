@@ -127,7 +127,7 @@ class Experiment : public ExperimentBase {
   void run_time_evolution();
   void end();
 
-  void print_startup();
+  void print_startup(int64_t seed);
 
   float energy_total(Particles *particles);
 

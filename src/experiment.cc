@@ -83,7 +83,7 @@ Experiment<Modus>::Experiment(Configuration &config)
   }
   srand48(seed_);
 
-  print_startup();
+  print_startup(seed_);
 }
 
 /* This method reads the particle type and cross section information
@@ -167,11 +167,11 @@ void Experiment<Modus>::run_time_evolution() {
 
 /* print_startup - console output on startup of general parameters */
 template <typename Modus>
-void Experiment<Modus>::print_startup() {
+void Experiment<Modus>::print_startup(int64_t seed) {
   printf("Elastic cross section: %g mb\n", parameters_.cross_section);
   printf("Using temporal stepsize: %g fm/c\n", parameters_.eps);
   printf("Maximum number of steps: %i \n", steps_);
-  printf("Random number seed: %" PRId64 "\n", seed_);
+  printf("Random number seed: %" PRId64 "\n", seed);
   modus_.print_startup();
 }
 
