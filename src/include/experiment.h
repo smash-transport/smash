@@ -176,10 +176,6 @@ class Experiment : public ExperimentBase {
   int steps_ = 10000;
   /// number of steps before giving measurables
   int output_interval_ = 100;
-  /// initial seed_ for random generator
-  /// \todo Why is it a member? It's read, then used for seeding and
-  ///       then never needed again, no?
-  int64_t seed_ = 1;
   /// initial total energy of the system
   float energy_initial_ = 0.f;
   /// starting time of the simulation

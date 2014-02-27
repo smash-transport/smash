@@ -76,15 +76,14 @@ Experiment<Modus>::Experiment(Configuration &config)
       cross_sections_(parameters_.cross_section),
       nevents_(config.take({"General", "NEVENTS"})),
       steps_(config.take({"General", "STEPS"})),
-      output_interval_(config.take({"General", "UPDATE"})),
-      seed_(config.take({"General", "RANDOMSEED"})) {
+      output_interval_(config.take({"General", "UPDATE"})){
+  int64_t seed_ = config.take({"General", "RANDOMSEED"});
   if (seed_ < 0) {
     seed_ = time(nullptr);
   }
-  print_startup();
-
-  /* Set the seed_ for the random number generator */
   srand48(seed_);
+
+  print_startup();
 }
 
 /* This method reads the particle type and cross section information
