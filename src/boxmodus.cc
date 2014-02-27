@@ -274,11 +274,13 @@ void BoxModus::propagate(Particles *particles,
     position += distance;
     bool wall_hit = Smash::enforce_periodic_boundaries(position.begin() + 1,
                                                 position.end(), length_);
-    if (wall_hit)
-      write_oscar(particles->data(i->first), particles->type(i->first), 1, 1);
+    if (wall_hit) {
+      write_oscar(i->second, particles->type(i->first), 1, 1);
+    }
     i->second.set_position(position);
-    if (wall_hit)
-      write_oscar(particles->data(i->first), particles->type(i->first));
+    if (wall_hit) {
+      write_oscar(i->second, particles->type(i->first));
+    }
     printd_position(i->second);
   }
 }
