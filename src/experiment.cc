@@ -23,6 +23,7 @@
 #include "include/macros.h"
 #include "include/outputroutines.h"
 #include "include/parameters.h"
+#include "include/particlesoutput.h"
 #include "include/time.h"
 #include "include/vtkoutput.h"
 
@@ -101,7 +102,9 @@ void Experiment<Modus>::initialize(const bf::path &/*path*/) {
   /* Print output headers */
   print_header();
   /* Write out the initial momenta and positions of the particles */
-  write_particles(particles_);
+  for (auto &output : outputs_) {
+    output->write_state(particles_);
+  }
 }
 
 /* This is the loop over timesteps, carrying out collisions and decays
@@ -145,7 +148,6 @@ void Experiment<Modus>::run_time_evolution() {
                          time_start_);
       printd("Ignored collisions %zu\n", rejection_conflict);
       /* save evolution data */
-      write_particles(particles_);
       for (auto &output : outputs_) {
         output->write_state(particles_);
       }
@@ -201,6 +203,7 @@ void Experiment<Modus>::end() {
 
 template <typename Modus>
 void Experiment<Modus>::run(const bf::path &path) {
+  outputs_.emplace_back(new Smash::ParticlesOutput(path));
   outputs_.emplace_back(new Smash::VtkOutput(path));
 
   /* Write the header of OSCAR data output file */

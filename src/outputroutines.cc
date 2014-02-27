@@ -150,33 +150,6 @@ void printd_list(const std::list<int> &collision_list) {
   printd("\n");
 }
 
-/**
- *  write_particles - writes out data of the specific particles
- */
-void write_particles(const Particles &particles) {
-  FILE *fp;
-  char filename[256];
-
-  snprintf(filename, sizeof(filename), "data/momenta_%.5f.dat",
-           particles.time());
-  fp = fopen(filename, "w");
-  for (auto i = particles.cbegin(); i != particles.cend(); ++i) {
-    fprintf(fp, "%g %g %g %g %i %i\n", i->second.momentum().x0(),
-            i->second.momentum().x1(), i->second.momentum().x2(),
-            i->second.momentum().x3(), i->second.id(), i->second.pdgcode());
-  }
-  fclose(fp);
-  snprintf(filename, sizeof(filename), "data/position_%.5f.dat",
-           particles.time());
-  fp = fopen(filename, "w");
-  for (auto i = particles.cbegin(); i != particles.cend(); ++i) {
-    fprintf(fp, "%g %g %g %g %i %i\n", i->second.position().x0(),
-            i->second.position().x1(), i->second.position().x2(),
-            i->second.position().x3(), i->second.id(), i->second.pdgcode());
-  }
-  fclose(fp);
-}
-
 /* write_oscar_header - OSCAR header format */
 void write_oscar_header(void) {
   FILE *fp;

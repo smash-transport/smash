@@ -37,9 +37,10 @@ set(smash_src boxmodus.cc clebschgordan.cc collisions.cc collidermodus.cc
         cross-sections.cc
         decays.cc distributions.cc experiment.cc fourvector.cc
         modusdefault.cc
+        outputroutines.cc
         parametrizations.cc
         particles.cc
-        outputroutines.cc
+        particlesoutput.cc
         resonances.cc
         time.cc
         vtkoutput.cc
