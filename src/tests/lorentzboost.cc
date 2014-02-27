@@ -4,32 +4,25 @@
  *
  *    GNU General Public License (GPLv3 or later)
  */
+
+#include "tests/unittest.h"
 #include "include/fourvector.h"
 
-int main() {
-  FourVector p(4, 1, 2, 3);
+FourVector p(4, 1, 2, 3);
+
+TEST(boost_to_rest) {
   FourVector v(1.0, 0.25, 0.5, 0.75);
   FourVector p_boosted = p.LorentzBoost(v);
-  const double tolerance = 1.0e-6;
-
-  /* Check that the scalar product remains invariant */
-  if (fabs(p_boosted.Dot(p_boosted) - p.Dot(p)) > tolerance)
-    return -1;
-
-  /* Check that the boost gives stationary vector */
-  if (p_boosted.x1() > tolerance || p_boosted.x2() > tolerance
-      || p_boosted.x3() > tolerance)
-    return -2;
-
-  /* Check that the return boost returns the original vector */
+  FUZZY_COMPARE(p_boosted.Dot(),p.Dot());
+  // space-like components should have been boosted to zero:
+  FUZZY_COMPARE(p_boosted.x1(),0.0);
+  FUZZY_COMPARE(p_boosted.x2(),0.0);
+  FUZZY_COMPARE(p_boosted.x3(),0.0);
+  UnitTest::setFuzzyness<double>(2);
+  // boost back and compare with original vector:
   FourVector v_neg(1, -v.x1(), -v.x2(), -v.x3());
   FourVector p_returned = p_boosted.LorentzBoost(v_neg);
-
-  if (fabs(p_returned.x0() - p.x0()) > tolerance
-      || fabs(p_returned.x1() - p.x1()) > tolerance
-      || fabs(p_returned.x2() - p.x2()) > tolerance
-      || fabs(p_returned.x3() - p.x3()) > tolerance)
-    return -3;
-
-  return 0;
+  FUZZY_COMPARE(p.x1(), p_returned.x1());
+  FUZZY_COMPARE(p.x2(), p_returned.x2());
+  FUZZY_COMPARE(p.x3(), p_returned.x3());
 }
