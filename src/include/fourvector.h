@@ -173,8 +173,10 @@ void inline FourVector::set_FourVector(const double t, const double z,
 
 /// check if all four vector components are equal
 bool inline FourVector::operator==(const FourVector &a) const {
-  return fabs(x_[0] - a.x_[0]) < 1e-12 && fabs(x_[1] - a.x_[1]) < 1e-12
-    && fabs(x_[2] - a.x_[2]) < 1e-12 && fabs(x_[3] - a.x_[3]) < 1e-12;
+  return std::abs(x_[0] - a.x_[0]) < 1e-12 &&
+         std::abs(x_[1] - a.x_[1]) < 1e-12 &&
+         std::abs(x_[2] - a.x_[2]) < 1e-12 &&
+         std::abs(x_[3] - a.x_[3]) < 1e-12;
 }
 
 /// use == operator for the inverse != check
@@ -204,8 +206,8 @@ bool inline FourVector::operator>=(const FourVector &a) const {
 
 /// all vector components are equal to that number
 bool inline FourVector::operator==(const double &a) const {
-  return fabs(x_[0] - a) < 1e-12 && fabs(x_[1] - a) < 1e-12
-    && fabs(x_[2] - a) < 1e-12 && fabs(x_[3] - a) < 1e-12;
+  return std::abs(x_[0] - a) < 1e-12 && std::abs(x_[1] - a) < 1e-12 &&
+         std::abs(x_[2] - a) < 1e-12 && std::abs(x_[3] - a) < 1e-12;
 }
 
 /// use == operator for the inverse !=
