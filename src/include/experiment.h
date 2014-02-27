@@ -125,7 +125,6 @@ class Experiment : public ExperimentBase {
 
   void initialize(const boost::filesystem::path &path);
   void run_time_evolution();
-  void end();
 
   void print_startup(int64_t seed);
 

@@ -195,11 +195,6 @@ timespec inline Experiment<Modus>::set_timer_start(void) {
   return time;
 }
 
-/* Tear down everything */
-template <typename Modus>
-void Experiment<Modus>::end() {
-}
-
 template <typename Modus>
 void Experiment<Modus>::run(const bf::path &path) {
   outputs_.emplace_back(new Smash::ParticlesOutput(path));
@@ -216,5 +211,4 @@ void Experiment<Modus>::run(const bf::path &path) {
     /* Write the final data block of the event */
     write_oscar_event_block(&particles_, particles_.size(), 0, j + 1);
   }
-  end();
 }
