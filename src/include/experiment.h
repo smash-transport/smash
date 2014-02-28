@@ -18,7 +18,6 @@
 #include "include/outputroutines.h"
 #include "include/parameters.h"
 #include "include/particles.h"
-class Configuration;
 
 #ifndef DOXYGEN
 namespace boost {
@@ -27,6 +26,9 @@ class path;
 }  // namespace filesystem
 }  // namespace boost
 #endif
+
+namespace Smash {
+class Configuration;
 
 /**
  * Non-template interface to Experiment<Modus>.
@@ -177,5 +179,7 @@ class Experiment : public ExperimentBase {
   /// starting time of the simulation
   timespec time_start_ = set_timer_start();
 };
+
+}  // namespace Smash
 
 #endif  // SRC_INCLUDE_EXPERIMENT_H_

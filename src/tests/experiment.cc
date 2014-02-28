@@ -14,6 +14,8 @@
 
 #include <boost/filesystem.hpp>
 
+using namespace Smash;
+
 TEST(create_box) {
   Configuration conf(TEST_CONFIG_PATH);
   conf["General"]["MODUS"] = "Box";

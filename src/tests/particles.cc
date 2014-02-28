@@ -15,6 +15,8 @@
 #include "include/outputroutines.h"
 #include <algorithm>
 
+using namespace Smash;
+
 TEST(everything) {
   /* checks for geometric distance criteria */
   ParticleData particle_a, particle_b;

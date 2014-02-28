@@ -10,6 +10,8 @@
 #include <cstring>
 #include <cstdlib>
 
+namespace Smash {
+
 class Parameters {
  public:
   /* default constructor */
@@ -58,5 +60,7 @@ inline void Parameters::set_value(char *value_string) {
   }
   value_ = strdup(value_string);
 }
+
+}  // namespace Smash
 
 #endif  // SRC_INCLUDE_PARAMETERS_H_

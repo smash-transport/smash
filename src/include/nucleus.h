@@ -12,6 +12,8 @@
 #include "include/particledata.h"
 #include "include/particles.h"
 
+namespace Smash {
+
 /// A Nucleus is a collection of Particles (ParticleData thingys) that
 /// are initialized before the beginning of the simulation and all have
 /// the same velocity (and spatial proximity).
@@ -145,5 +147,7 @@ class Nucleus {
     return particles.cend();
   }
 };
+
+}  // namespace Smash
 
 #endif  // SRC_INCLUDE_NUCLEUS_H_

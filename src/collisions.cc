@@ -24,6 +24,8 @@
 #include "include/processbranch.h"
 #include "include/resonances.h"
 
+namespace Smash {
+
 /* collision_criteria_geometry - check by geometrical method if a collision
  *                               happens between particles
  */
@@ -289,3 +291,5 @@ size_t collide_particles(Particles *particles, std::list<int> *collision_list,
   /* return how many processes we have handled so far*/
   return id_process;
 }
+
+}  // namespace Smash

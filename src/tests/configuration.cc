@@ -12,6 +12,8 @@
 
 #include <boost/filesystem.hpp>
 
+using namespace Smash;
+
 TEST(create_object) {
   Configuration conf(TEST_CONFIG_PATH);
 }

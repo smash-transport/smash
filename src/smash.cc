@@ -27,6 +27,8 @@
 /* build dependent variables */
 #include "include/config.h"
 
+namespace Smash {
+
 namespace bf = boost::filesystem;
 
 namespace {
@@ -100,8 +102,11 @@ std::string read_all(std::istream &input) {
 
 }  // unnamed namespace
 
+}  // namespace Smash
+
 /* main - do command line parsing and hence decides modus */
 int main(int argc, char *argv[]) {
+  using namespace Smash;
   constexpr option longopts[] = {
     { "config",     required_argument,      0, 'c' },
     { "decaymodes", required_argument,      0, 'd' },

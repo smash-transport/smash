@@ -16,8 +16,10 @@
 #include "include/modusdefault.h"
 #include "include/particles.h"
 #include "include/parameters.h"
-class Configuration;
 
+namespace Smash {
+
+class Configuration;
 struct ExperimentParameters;
 
 class ColliderModus : public ModusDefault {
@@ -44,5 +46,7 @@ class ColliderModus : public ModusDefault {
   /* Center-of-mass energy of the collision */
   float sqrts_ = 1.f;
 };
+
+}  // namespace Smash
 
 #endif  // SRC_INCLUDE_COLLIDERMODUS_H_

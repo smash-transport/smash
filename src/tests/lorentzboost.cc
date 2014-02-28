@@ -8,6 +8,8 @@
 #include "tests/unittest.h"
 #include "include/fourvector.h"
 
+using namespace Smash;
+
 FourVector p(4, 1, 2, 3);
 
 TEST(boost_to_rest) {

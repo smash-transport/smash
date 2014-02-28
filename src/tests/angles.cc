@@ -10,6 +10,8 @@
 #include "tests/unittest.h"
 #include "include/angles.h"
 
+using namespace Smash;
+
 Angles dir;
 
 TEST(set_angles) {

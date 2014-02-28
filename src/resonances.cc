@@ -30,6 +30,8 @@
 #include "include/particletype.h"
 #include "include/processbranch.h"
 
+namespace Smash {
+
 /* calculate_minimum_mass
  * - calculate the minimum rest energy the resonance must have
  * to be able to decay through any of its decay channels
@@ -671,3 +673,5 @@ int resonance_formation(Particles *particles, int particle_id, int other_id,
   /* Return the id of the first new particle */
   return id_first_new;
 }
+
+}  // namespace Smash

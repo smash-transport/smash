@@ -29,6 +29,8 @@
 /* build dependent variables */
 #include "include/config.h"
 
+namespace Smash {
+
 SphereModus::SphereModus(Configuration modus_config)
     : radius_(modus_config.take({"Sphere", "RADIUS"})),
       timer_start_(set_timer_start()) {
@@ -294,3 +296,5 @@ int SphereModus::Evolve(Particles *particles, CrossSections *cross_sections,
 //  return rc;
 // }
 
+
+}  // namespace Smash

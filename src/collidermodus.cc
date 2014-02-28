@@ -14,6 +14,8 @@
 #include "include/outputroutines.h"
 #include "include/parameters.h"
 
+namespace Smash {
+
 ColliderModus::ColliderModus(Configuration modus_config)
     : projectile_(modus_config.take({"Collider", "PROJECTILE"})),
       target_    (modus_config.take({"Collider", "TARGET"})),
@@ -62,3 +64,5 @@ void ColliderModus::initial_conditions(Particles *particles,
   data_target->set_position(1.0, 0.0, 0.0, 1.0);
   data_target->set_momentum(mass_target, 0.0, 0.0, -cms_momentum);
 }
+
+}  // namespace Smash

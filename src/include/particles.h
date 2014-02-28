@@ -15,6 +15,8 @@
 #include "include/particledata.h"
 #include "include/particletype.h"
 
+namespace Smash {
+
 // A macro to disallow the copy constructor and operator= functions
 // This should be used in the private: declarations for a class
 #define DISALLOW_COPY_AND_ASSIGN(TypeName) \
@@ -281,5 +283,7 @@ void momenta_exchange(ParticleData *particle1, ParticleData *particle2);
 /* Sample final state momenta in general 2->2 process */
 void sample_cms_momenta(ParticleData *particle1, ParticleData *particle2,
   const double cms_energy, const double mass1, const double mass2);
+
+}  // namespace Smash
 
 #endif  // SRC_INCLUDE_PARTICLES_H_

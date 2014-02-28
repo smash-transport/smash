@@ -12,6 +12,8 @@
 
 #include "include/constants.h"
 
+namespace Smash {
+
 /* Breit-Wigner distribution for calculating resonance
  * production probability
  */
@@ -35,5 +37,7 @@ inline double number_density_bose(double mass, double temperature) {
   return mass * mass * temperature * gsl_sf_bessel_Knu(2, mass / temperature)
     * 0.5 * M_1_PI * M_1_PI / hbarc / hbarc / hbarc;
 }
+
+}  // namespace Smash
 
 #endif  // SRC_INCLUDE_DISTRIBUTIONS_H_

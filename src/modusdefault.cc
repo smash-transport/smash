@@ -15,6 +15,8 @@
 #include "include/experiment.h"
 #include "include/outputroutines.h"
 
+namespace Smash {
+
 // check particle pairs for collision
 void ModusDefault::check_collision_geometry(
     Particles *particles, CrossSections *cross_sections,
@@ -54,3 +56,5 @@ void ModusDefault::propagate(Particles *particles,
     i->second.set_position(position);
   }
 }
+
+}  // namespace Smash

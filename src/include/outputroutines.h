@@ -11,6 +11,8 @@
 
 #include "include/particles.h"
 
+namespace Smash {
+
 /* forward declarations */
 class ModusDefault;
 class Parameters;
@@ -61,5 +63,7 @@ void write_vtk(const Particles &particles);
 
 /* timing measure */
 double measure_timediff(const timespec time_start);
+
+}  // namespace Smash
 
 #endif  // SRC_INCLUDE_OUTPUTROUTINES_H_

@@ -10,6 +10,8 @@
 #include <cstddef>
 #include <vector>
 
+namespace Smash {
+
 /* necessary forward declarations */
 class Particles;
 class ParticleData;
@@ -64,5 +66,7 @@ double sample_resonance_mass(Particles *particles, int pdg_resonance,
 /* 2->1 resonance formation process */
 int resonance_formation(Particles *particles, int particle_id, int other_id,
   std::vector<int> produced_particles);
+
+}  // namespace Smash
 
 #endif  // SRC_INCLUDE_RESONANCES_H_

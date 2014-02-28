@@ -12,6 +12,8 @@
 
 #include "include/fourvector.h"
 
+namespace Smash {
+
 /**
  * ParticleData contains the dynamic information of a certain particle
  *
@@ -234,5 +236,6 @@ inline bool ParticleData::operator<(int id_a) const {
   return this->id_ < id_a;
 }
 
-#endif  // SRC_INCLUDE_PARTICLEDATA_H_
+}  // namespace Smash
 
+#endif  // SRC_INCLUDE_PARTICLEDATA_H_

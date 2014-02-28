@@ -14,6 +14,8 @@
 
 #include "include/particles.h"
 
+namespace Smash {
+
 /* forward declarations */
 class Particles;
 class CrossSections;
@@ -58,5 +60,7 @@ class ModusDefault {
    */
   void propagate(Particles *particles, const ExperimentParameters &parameters);
 };
+
+}  // namespace Smash
 
 #endif  // SRC_INCLUDE_MODUSDEFAULT_H_

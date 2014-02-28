@@ -21,6 +21,8 @@
 #include "include/particles.h"
 #include <assert.h>
 
+namespace Smash {
+
 /* boost_CM - boost to center of momentum */
 void boost_CM(ParticleData *particle1, ParticleData *particle2,
   FourVector *velocity) {
@@ -421,3 +423,5 @@ void Particles::reset() {
   id_max_ = -1;
   data_.clear();
 }
+
+}  // namespace Smash

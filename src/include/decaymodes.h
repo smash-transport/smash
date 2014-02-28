@@ -14,6 +14,8 @@
 #include "include/processbranch.h"
 #include <stdexcept>
 
+namespace Smash {
+
 class DecayModes {
  public:
   /* Add a decay mode */
@@ -90,5 +92,7 @@ inline const std::vector<ProcessBranch> &DecayModes::decay_mode_list(void)
     const {
   return decay_modes_;
 }
+
+}  // namespace Smash
 
 #endif  // SRC_INCLUDE_DECAYMODES_H_

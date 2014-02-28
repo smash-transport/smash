@@ -7,6 +7,8 @@
 #ifndef SRC_INCLUDE_EXPERIMENTPARAMETERS_H_
 #define SRC_INCLUDE_EXPERIMENTPARAMETERS_H_
 
+namespace Smash {
+
 /**
  * Helper structure for Experiment.
  *
@@ -22,5 +24,7 @@ struct ExperimentParameters {
   /// number of test particle
   int testparticles;
 };
+
+}  // namespace Smash
 
 #endif  // SRC_INCLUDE_EXPERIMENTPARAMETERS_H_

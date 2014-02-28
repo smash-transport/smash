@@ -10,6 +10,8 @@
 #include "include/nucleus.h"
 #include "include/angles.h"
 
+namespace Smash {
+
 Nucleus::Nucleus() {}
 
 float Nucleus::mass() const {
@@ -157,3 +159,5 @@ void Nucleus::copy_particles(Particles* external_particles) {
     external_particles->add_data(*p);
   }
 }
+
+}  // namespace Smash

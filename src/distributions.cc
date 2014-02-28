@@ -15,6 +15,8 @@
 
 #include "include/outputroutines.h"
 
+namespace Smash {
+
 /* Breit-Wigner distribution for calculating resonance
  * production probability
  */
@@ -63,3 +65,5 @@ double sample_momenta(const double &temperature, const double &mass) {
 
   return momentum_radial;
 }
+
+}  // namespace Smash

@@ -16,6 +16,8 @@
 #include <boost/filesystem.hpp>
 #include <yaml-cpp/yaml.h>
 
+namespace Smash {
+
 namespace bf = boost::filesystem;
 
 // internal helper functions
@@ -137,3 +139,5 @@ std::string Configuration::to_string() const {
   s << root_node_;
   return s.str();
 }
+
+}  // namespace Smash

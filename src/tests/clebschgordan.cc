@@ -9,6 +9,8 @@
 
 #include "include/clebschgordan.h"
 
+using namespace Smash;
+
 int main() {
   /* spins are two times the actual values,
    * so j = 1 for spin-1/2 particle, 2 for spin-1 particle, etc.

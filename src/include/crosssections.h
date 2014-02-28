@@ -9,6 +9,8 @@
 
 #include "include/particles.h"
 
+namespace Smash {
+
 class CrossSections {
  public:
   /* Default constructor */
@@ -41,5 +43,7 @@ class CrossSections {
   /* "Beam" momentum */
   double p_lab_ = -1.0;
 };
+
+}  // namespace Smash
 
 #endif  // SRC_INCLUDE_CROSSSECTIONS_H_

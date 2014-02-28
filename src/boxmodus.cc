@@ -26,6 +26,8 @@
 #include "include/parameters.h"
 #include "include/particles.h"
 
+namespace Smash {
+
 BoxModus::BoxModus(Configuration modus_config)
     : initial_condition_(modus_config.take({"Box", "INITIAL_CONDITION"})),
       length_           (modus_config.take({"Box", "LENGTH"})),
@@ -284,3 +286,5 @@ void BoxModus::propagate(Particles *particles,
     printd_position(i->second);
   }
 }
+
+}  // namespace Smash

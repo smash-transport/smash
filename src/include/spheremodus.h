@@ -7,9 +7,6 @@
 #ifndef SRC_INCLUDE_SPHEREMODUS_H_
 #define SRC_INCLUDE_SPHEREMODUS_H_
 
-/* forward declarations */
-class FourVector;
-
 #include <stdint.h>
 #include <time.h>
 #include <cmath>
@@ -20,6 +17,11 @@ class FourVector;
 #include "include/particles.h"
 #include "include/time.h"
 #include "include/parameters.h"
+
+namespace Smash {
+
+/* forward declarations */
+class FourVector;
 
 class SphereModus : public ModusDefault {
  public:
@@ -48,5 +50,7 @@ timespec inline SphereModus::set_timer_start(void) {
 
 /* enforce periodic boundary conditions */
 // FourVector SphereModus::boundary_condition(FourVector position);
+
+}  // namespace Smash
 
 #endif  // SRC_INCLUDE_SPHEREMODUS_H_

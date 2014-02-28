@@ -12,6 +12,8 @@
 #include "include/crosssections.h"
 #include "include/particles.h"
 
+namespace Smash {
+
 /* populates collision list if collision applies */
 void collision_criteria_geometry(Particles *particles,
   CrossSections *cross_sections,
@@ -21,5 +23,7 @@ void collision_criteria_geometry(Particles *particles,
 /* does collisions according to collision table */
 size_t collide_particles(Particles *particles, std::list<int> *collision_list,
                          size_t id_event);
+
+}  // namespace Smash
 
 #endif  // SRC_INCLUDE_COLLISIONS_H_

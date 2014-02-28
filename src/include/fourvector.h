@@ -10,6 +10,8 @@
 #include <array>
 #include <cmath>
 
+namespace Smash {
+
 /**
  * The FourVector class holds relevant values in Minkowski spacetime
  * with (+, −, −, −) metric signature.
@@ -314,5 +316,7 @@ double inline FourVector::DotThree() const {
 double inline FourVector::DiffThree(const FourVector &a) const {
   return x_[1] - a.x_[1] + x_[2] - a.x_[2] + x_[3] - a.x_[3];
 }
+
+}  // namespace Smash
 
 #endif  // SRC_INCLUDE_FOURVECTOR_H_

@@ -14,6 +14,8 @@
 
 #include "include/time.h"
 
+namespace Smash {
+
 #ifdef __MACH__
 /* clock_gettime is not implemented use gettimeofday() */
 int clock_gettime(struct timespec* time) {
@@ -32,3 +34,5 @@ int clock_gettime(struct timespec* time) {
   return clock_gettime(CLOCK_REALTIME, time);
 }
 #endif
+
+}  // namespace Smash

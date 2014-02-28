@@ -27,6 +27,8 @@
 #include "include/particletype.h"
 #include "include/resonances.h"
 
+namespace Smash {
+
 /* check_decays - does a resonance decay on this timestep? */
 void check_decays(Particles *particles, std::list<int> *decay_list,
   const float timestep) {
@@ -423,3 +425,5 @@ int one_to_three(Particles *particles, int resonance_id,
   /* 3 new particles created; return the id of the first one */
   return id_first_new;
 }
+
+}  // namespace Smash

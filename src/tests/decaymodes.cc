@@ -11,6 +11,8 @@
 
 #include "include/decaymodes.h"
 
+using namespace Smash;
+
 TEST_CATCH(add_no_particles, DecayModes::InvalidDecay) {
   DecayModes m;
   m.add_mode({}, 1.f);

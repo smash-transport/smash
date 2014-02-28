@@ -9,6 +9,10 @@
 
 #include <time.h>
 
+namespace Smash {
+
 int clock_gettime(struct timespec *time);
+
+}  // namespace Smash
 
 #endif  // SRC_INCLUDE_TIME_H_

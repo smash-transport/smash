@@ -15,6 +15,8 @@
 #include "include/experimentparameters.h"
 #include "include/outputroutines.h"
 
+namespace Smash {
+
 NucleusModus::NucleusModus(Configuration modus_config) {
   Configuration modus_cfg = modus_config["Nucleus"];
   sqrt_s_NN_ = modus_cfg.take({"SQRTSNN"});
@@ -162,3 +164,5 @@ void NucleusModus::sample_impact(const bool s, const float min,
     impact_ = min + chi * (max - min);
   }
 }
+
+}  // namespace Smash

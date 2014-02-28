@@ -9,6 +9,8 @@
 
 #include <vector>
 
+namespace Smash {
+
 class ProcessBranch {
  public:
   /* Default constructor */
@@ -77,5 +79,7 @@ inline std::vector<int> ProcessBranch::particle_list(void) const {
 inline float ProcessBranch::weight(void) const {
   return branch_weight_;
 }
+
+}  // namespace Smash
 
 #endif  // SRC_INCLUDE_PROCESSBRANCH_H_

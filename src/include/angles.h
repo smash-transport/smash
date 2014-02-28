@@ -14,6 +14,8 @@
 #include <cstdio>
 #include <cstdlib>
 
+namespace Smash {
+
 /** Angles provides a common interface for generating directions: i.e.,
  * two angles that should be interpreted as azimuthal and polar angles.
  *
@@ -238,5 +240,7 @@ double inline Angles::x() const { return sintheta()*cos(phi_); }
 double inline Angles::y() const { return sintheta()*sin(phi_); }
 double inline Angles::z() const { return costheta_; }
 double inline Angles::theta() const { return acos(costheta_); }
+
+}  // namespace Smash
 
 #endif  // SRC_INCLUDE_ANGLES_H_

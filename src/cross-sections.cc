@@ -18,6 +18,8 @@
 #include "include/particles.h"
 #include "include/particletype.h"
 
+namespace Smash {
+
 void CrossSections::compute_kinematics(Particles *particles,
   int id_a, int id_b) {
   /* Mandelstam s = (p_a + p_b)^2 = square of CMS energy */
@@ -83,3 +85,5 @@ float CrossSections::total(Particles *particles, int id_a, int id_b)
     return np_total(p_lab_);
   }
 }
+
+}  // namespace Smash

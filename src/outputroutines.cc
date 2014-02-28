@@ -25,6 +25,8 @@
 #include "include/macros.h"
 #include "include/time.h"
 
+namespace Smash {
+
 /* print_line - output a visible seperator */
 static void print_line(void) {
   int field_width = 80;
@@ -279,3 +281,5 @@ void write_vtk(const Particles &particles) {
             i->second.momentum().x2(), i->second.momentum().x3());
   fclose(fp);
 }
+
+}  // namespace Smash

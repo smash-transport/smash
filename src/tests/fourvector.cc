@@ -6,6 +6,8 @@
  */
 #include "include/fourvector.h"
 
+using namespace Smash;
+
 int main() {
   FourVector a(0.12, 0.06, 0.003, -0.15), b(0.06, 0.03, 0.0015, -0.075);
   FourVector a2(0.12, 0.06, 0.003, -0.15), b2(0.06, 0.03, 0.0015, -0.075);

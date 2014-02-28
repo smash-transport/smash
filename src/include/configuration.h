@@ -23,6 +23,8 @@ class path;
 }  // namespace boost
 #endif
 
+namespace Smash {
+
 /**
  * Interface to the SMASH configuration files.
  *
@@ -272,4 +274,7 @@ class Configuration {
   /// the general_config.yaml contents - fully parsed
   YAML::Node root_node_;
 };
+
+}  // namespace Smash
+
 #endif  // SRC_INCLUDE_CONFIGURATION_H_

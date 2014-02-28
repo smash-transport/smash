@@ -18,6 +18,8 @@
 #include "include/particles.h"
 #include "include/parameters.h"
 
+namespace Smash {
+
 struct ExperimentParameters;
 
 /** NucleusModus: Provides a modus for colliding nuclei.
@@ -166,5 +168,7 @@ class NucleusModus : public ModusDefault {
    **/
   double initial_z_displacement_ = 1.0;
 };
+
+}  // namespace Smash
 
 #endif  // SRC_INCLUDE_NUCLEUSMODUS_H_

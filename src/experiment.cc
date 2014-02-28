@@ -30,6 +30,8 @@
 
 /* #include "include/spheremodus.h" */
 
+namespace Smash {
+
 namespace bf = boost::filesystem;
 
 /* ExperimentBase carries everything that is needed for the evolution */
@@ -214,3 +216,5 @@ void Experiment<Modus>::run(const bf::path &path) {
   }
   end();
 }
+
+}  // namespace Smash

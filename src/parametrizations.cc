@@ -10,6 +10,8 @@
 
 #include "include/parametrizations.h"
 
+namespace Smash {
+
 /* pp elastic cross section parametrization */
 /* Source: O. Buss et al., Physics Reports 512, 1 (2012) */
 float pp_elastic(double p_lab, double mandelstam_s, float nucleon_mass) {
@@ -113,3 +115,5 @@ float ppbar_total(double p_lab) {
       - 1.2 * log(p_lab);
   }
 }
+
+}  // namespace Smash

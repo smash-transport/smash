@@ -9,6 +9,8 @@
 
 #include <string>
 
+namespace Smash {
+
 /**
  * Particle type contains the static properties of a particle
  *
@@ -110,5 +112,7 @@ inline int ParticleType::spin(void) const {
 inline float ParticleType::width(void) const {
   return width_;
 }
+
+}  // namespace Smash
 
 #endif  // SRC_INCLUDE_PARTICLETYPE_H_

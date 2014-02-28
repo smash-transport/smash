@@ -16,6 +16,8 @@
 #include "include/particles.h"
 #include "include/parameters.h"
 
+namespace Smash {
+
 class BoxModus;
 class Configuration;
 struct ExperimentParameters;
@@ -50,5 +52,7 @@ class BoxModus : public ModusDefault {
   /* initial number density of the box */
   float number_density_initial_ = 0.f;
 };
+
+}  // namespace Smash
 
 #endif  // SRC_INCLUDE_BOXMODUS_H_

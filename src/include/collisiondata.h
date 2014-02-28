@@ -12,6 +12,8 @@
 
 #include "include/fourvector.h"
 
+namespace Smash {
+
 class CollisionData {
  public:
   /* Use improbable values for default constructor */
@@ -68,5 +70,7 @@ void inline CollisionData::set_collision_past() {
   id_partner_.clear();
   process_type_ = -1;
 }
+
+}  // namespace Smash
 
 #endif  // SRC_INCLUDE_COLLISIONDATA_H_
