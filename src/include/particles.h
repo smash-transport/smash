@@ -36,17 +36,17 @@ class Particles {
     load_decaymodes(decaymodes);
   }
   /// Return the specific data of a particle according to its id
-  inline const ParticleData &data(int id);
+  inline const ParticleData &data(int id) const;
   /// Return the specific datapointer of a particle according to its id
   inline ParticleData * data_pointer(int id);
   /// Return the type of a specific particle given its id
-  inline ParticleType type(int id);
+  inline const ParticleType &type(int id) const;
   /// Return the type for a specific pdgcode
-  inline ParticleType particle_type(int pdgcode);
+  inline const ParticleType &particle_type(int pdgcode) const;
   /// Return decay modes of this particle type
-  inline DecayModes decay_modes(int pdg);
+  inline const DecayModes &decay_modes(int pdg) const;
   /// return the highest used id
-  inline int id_max(void);
+  inline int id_max(void) const;
   /// inserts a new particle and returns its id
   inline int add_data(const ParticleData &particle_data);
   /// add a range of particles
@@ -136,7 +136,7 @@ class Particles {
 };
 
 /* return the data of a specific particle */
-inline const ParticleData &Particles::data(int particle_id) {
+inline const ParticleData &Particles::data(int particle_id) const {
   return data_.at(particle_id);
 }
 
@@ -146,17 +146,17 @@ inline ParticleData* Particles::data_pointer(int particle_id) {
 }
 
 /* return the type of a specific particle */
-inline ParticleType Particles::type(int particle_id) {
+inline const ParticleType &Particles::type(int particle_id) const {
   return types_.at(data_.at(particle_id).pdgcode());
 }
 
 /* return a specific type */
-inline ParticleType Particles::particle_type(int pdgcode) {
+inline const ParticleType &Particles::particle_type(int pdgcode) const {
   return types_.at(pdgcode);
 }
 
 /* return the decay modes of specific type */
-inline DecayModes Particles::decay_modes(int pdg) {
+inline const DecayModes &Particles::decay_modes(int pdg) const {
   return all_decay_modes_.at(pdg);
 }
 
@@ -182,7 +182,7 @@ inline void Particles::create(size_t number, int pdgcode) {
 }
 
 /* return the highest used id */
-inline int Particles::id_max() {
+inline int Particles::id_max() const {
   return id_max_;
 }
 
