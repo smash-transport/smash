@@ -11,6 +11,7 @@
 #define SRC_INCLUDE_FILEDELETER_H_
 
 #include <cstdio>
+#include <cstring>
 #include <memory>
 #include <stdexcept>
 
