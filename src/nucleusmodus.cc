@@ -75,6 +75,10 @@ void NucleusModus::print_startup() {
                                                       pdg_sNN_1_, pdg_sNN_2_);
   printf("Impact parameter: %g fm\n", impact_);
   printf("Initial distance betw nuclei: %g fm\n", 2.0*initial_z_displacement_);
+  printf("Projectile has been initialized with %d particles\n",
+                                                           projectile_.size());
+  printf("Target     has been initialized with %d particles\n",
+                                                               target_.size());
 }
 
 /* initial_conditions - sets particle data for @particles */
