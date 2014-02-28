@@ -90,6 +90,11 @@ struct ExperimentParameters;
  * \li `MAX:` Like `RANGE: [0.0, MAX]`. Note that if both `RANGE` and
  * `MAX` are specified, `MAX` takes precedence.
  *
+ * Note that there are no safeguards to prevent you from specifying
+ * negative impact parameters. The value chosen here is simply the
+ * x-component of \f$\vec b\f$. The result will be that the projectile
+ * and target will have switched position in x.
+ *
  * `INITIAL_DISTANCE:` The initial distance of the two nuclei. That
  * means \f$z_{\rm min}^{\rm target} - z_{\rm max}^{\rm projectile}\f$.
  **/
