@@ -132,7 +132,7 @@ int BoxModus::sanity_check(Particles *particles) {
   /* fixup positions on startup, particles need to be *inside* the box */
   for (auto i = particles->begin(); i != particles->end(); ++i) {
     FourVector p = i->second.position();
-    Smash::enforce_periodic_boundaries(p.begin() + 1, p.end(), length_);
+    enforce_periodic_boundaries(p.begin() + 1, p.end(), length_);
     i->second.set_position(p);
   }
   return 0;
@@ -274,7 +274,7 @@ void BoxModus::propagate(Particles *particles,
     /* treat the box boundaries */
     position = i->second.position();
     position += distance;
-    bool wall_hit = Smash::enforce_periodic_boundaries(position.begin() + 1,
+    bool wall_hit = enforce_periodic_boundaries(position.begin() + 1,
                                                 position.end(), length_);
     if (wall_hit) {
       write_oscar(i->second, particles->type(i->first), 1, 1);

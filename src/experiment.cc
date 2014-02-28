@@ -202,8 +202,8 @@ timespec inline Experiment<Modus>::set_timer_start(void) {
 
 template <typename Modus>
 void Experiment<Modus>::run(const bf::path &path) {
-  outputs_.emplace_back(new Smash::ParticlesOutput(path));
-  outputs_.emplace_back(new Smash::VtkOutput(path));
+  outputs_.emplace_back(new ParticlesOutput(path));
+  outputs_.emplace_back(new VtkOutput(path));
 
   /* Write the header of OSCAR data output file */
   write_oscar_header();
