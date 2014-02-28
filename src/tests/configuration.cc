@@ -176,3 +176,10 @@ TEST_CATCH(failed_sequence_conversion, Configuration::IncorrectTypeInAssignment)
   conf.merge_yaml("{test: [123 456]}");
   std::vector<int> x = conf.read({"test"});
 }
+
+TEST_CATCH(incorrect_indent, Configuration::ParseError) {
+  Configuration conf(TEST_CONFIG_PATH);
+  conf.merge_yaml("General:\n foo: 1\n  test: 1\n");
+  int x = conf.read({"General", "test"});
+  COMPARE(x, 1);
+}

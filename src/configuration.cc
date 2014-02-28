@@ -73,7 +73,18 @@ Configuration::Configuration(const bf::path &path)
 Configuration::Configuration(const bf::path &path, const bf::path &filename) {
   const auto file_path = path / filename;
   assert(bf::exists(file_path));
-  root_node_ = YAML::LoadFile(file_path.native());
+  try {
+    root_node_ = YAML::LoadFile(file_path.native());
+  }
+  catch (YAML::ParserException &e) {
+    if (e.msg == "illegal map value" || e.msg == "end of map not found") {
+      const auto line = std::to_string(e.mark.line + 1);
+      throw ParseError("YAML parse error at\n" + file_path.native() + ':' +
+                       line + ": " + e.msg +
+                       " (check that the indentation of map keys matches)");
+    }
+    throw;
+  }
 
   if (!root_node_["decaymodes"].IsDefined()) {
     root_node_["decaymodes"] = decaymodes_txt::data;
@@ -84,7 +95,18 @@ Configuration::Configuration(const bf::path &path, const bf::path &filename) {
 }
 
 void Configuration::merge_yaml(const std::string &yaml) {
-  root_node_ |= YAML::Load(yaml);
+  try {
+    root_node_ |= YAML::Load(yaml);
+  }
+  catch (YAML::ParserException &e) {
+    if (e.msg == "illegal map value" || e.msg == "end of map not found") {
+      const auto line = std::to_string(e.mark.line + 1);
+      throw ParseError("YAML parse error in:\n" + yaml + "\nat line " + line +
+                       ": " + e.msg +
+                       " (check that the indentation of map keys matches)");
+    }
+    throw;
+  }
 }
 
 Configuration::Value Configuration::take(

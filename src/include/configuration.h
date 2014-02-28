@@ -57,6 +57,11 @@ class Configuration {
     using std::runtime_error::runtime_error;
   };
 
+  /// Thrown for YAML parse errors
+  struct ParseError : public std::runtime_error {
+    using std::runtime_error::runtime_error;
+  };
+
   /**
    * Return type of Configuration::take that automatically determines the target
    * type.
