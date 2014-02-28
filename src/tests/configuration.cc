@@ -100,6 +100,8 @@ TEST(check_unused_report) {
   modi.take({"Box", "LENGTH"});
   modi.take({"Box", "TEMPERATURE"});
   modi.take({"Box", "INITIAL_CONDITION"});
+  modi.take({"Nucleus"});
+  //conf.take({"Modi", "Nucleus"});
   reference =
       "Modi:\n  Collider:\n    SQRTS: 1.0\n    TARGET: -211\n    PROJECTILE: "
       "211\n  Sphere:\n    RADIUS: 5.0";
@@ -169,4 +171,10 @@ TEST(remove_all_but) {
   modi.remove_all_but("Sphere");
   conf.remove_all_but("Modi");
   COMPARE(conf.to_string(), "Modi:\n  Sphere:\n    RADIUS: 5.0");
+}
+
+TEST_CATCH(failed_sequence_conversion, Configuration::IncorrectTypeInAssignment) {
+  Configuration conf(TEST_CONFIG_PATH);
+  conf.merge_yaml("{test: [123 456]}");
+  std::vector<int> x = conf.read({"test"});
 }

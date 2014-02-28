@@ -1,6 +1,6 @@
 General:
     # Modus decision
-    MODUS:         Collider
+    MODUS:         Nucleus
 
     # temporal grid spacing
     EPS:           0.01
@@ -22,7 +22,6 @@ General:
 
     # number of events
     NEVENTS:       1
-
 
 Modi:
     Box:
@@ -52,3 +51,21 @@ Modi:
 
         # center-of-mass energy in GeV
         SQRTS: 1.0
+    Nucleus:
+        # Definitions for the projectile:
+        # Deuteron
+        Projectile:
+            PARTICLES: {2212: 1, 2112: 1}
+            # very hard Woods-Saxon distribution.
+            SOFTNESS: .001
+        # Definitions for the target:
+        # Lead
+        Target:
+            PARTICLES: {2212: 82, 2112: 126}
+    
+        # what sqrt(s_NN) to use:
+        SQRTSNN: 2
+        # which subsystem "NN" in sqrt(s_NN) refers to
+        # (two PDG IDs). The default is proton-proton; let's set it to
+        # neutron-neutron.
+        SQRTS_N: [2112, 2112]

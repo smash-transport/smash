@@ -21,6 +21,7 @@
 #include "include/decays.h"
 #include "include/experiment.h"
 #include "include/macros.h"
+#include "include/nucleusmodus.h"
 #include "include/outputroutines.h"
 #include "include/parameters.h"
 #include "include/time.h"
@@ -44,6 +45,8 @@ std::unique_ptr<ExperimentBase> ExperimentBase::create(Configuration &config) {
     return ExperimentPointer(new Experiment<BoxModus>(config));
   } else if (modus_chooser.compare("Collider") == 0) {
     return ExperimentPointer(new Experiment<ColliderModus>(config));
+  } else if (modus_chooser.compare("Nucleus") == 0) {
+    return ExperimentPointer(new Experiment<NucleusModus>(config));
   } else {
     throw InvalidModusRequest("Invalid Modus (" + modus_chooser +
                               ") requested from ExperimentBase::create.");

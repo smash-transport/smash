@@ -12,6 +12,7 @@
 #include <utility>
 #include <vector>
 
+#include "include/algorithms.h"
 #include "include/angles.h"
 #include "include/boxmodus.h"
 #include "include/collisions.h"
@@ -128,9 +129,9 @@ void BoxModus::initial_conditions(Particles *particles,
 int BoxModus::sanity_check(Particles *particles) {
   /* fixup positions on startup, particles need to be *inside* the box */
   for (auto i = particles->begin(); i != particles->end(); ++i) {
-    bool boundary_hit = false;
-    i->second.set_position(
-        boundary_condition(i->second.position(), &boundary_hit));
+    FourVector p = i->second.position();
+    Smash::enforce_periodic_boundaries(p.begin() + 1, p.end(), length_);
+    i->second.set_position(p);
   }
   return 0;
 }
@@ -269,51 +270,17 @@ void BoxModus::propagate(Particles *particles,
     printd("Particle %d motion: %g %g %g %g\n", i->first, distance.x0(),
            distance.x1(), distance.x2(), distance.x3());
     /* treat the box boundaries */
-    bool wall_hit = false;
     position = i->second.position();
     position += distance;
-    position = boundary_condition(position, &wall_hit);
-    if (wall_hit)
-      write_oscar(particles->data(i->first), particles->type(i->first), 1, 1);
+    bool wall_hit = Smash::enforce_periodic_boundaries(position.begin() + 1,
+                                                position.end(), length_);
+    if (wall_hit) {
+      write_oscar(i->second, particles->type(i->first), 1, 1);
+    }
     i->second.set_position(position);
-    if (wall_hit)
-      write_oscar(particles->data(i->first), particles->type(i->first));
+    if (wall_hit) {
+      write_oscar(i->second, particles->type(i->first));
+    }
     printd_position(i->second);
   }
-}
-
-/* boundary_condition - enforce specific type of boundaries
- *
- * This assumes that the particle is at most one box length
- * away from the boundary to shift it in.
- */
-FourVector BoxModus::boundary_condition(FourVector position,
-                                        bool *boundary_hit) {
-  /* Check positivity and box size */
-  if (position.x1() > 0 && position.x2() > 0 && position.x3() > 0 &&
-      position.x1() < length_ && position.x2() < length_ &&
-      position.x3() < length_)
-    goto out;
-  *boundary_hit = true;
-  /* Enforce periodic boundary condition */
-  if (position.x1() < 0) {
-    position.set_x1(position.x1() + length_);
-  }
-  if (position.x2() < 0) {
-    position.set_x2(position.x2() + length_);
-  }
-  if (position.x3() < 0) {
-    position.set_x3(position.x3() + length_);
-  }
-  if (position.x1() > length_) {
-    position.set_x1(position.x1() - length_);
-  }
-  if (position.x2() > length_) {
-    position.set_x2(position.x2() - length_);
-  }
-  if (position.x3() > length_) {
-    position.set_x3(position.x3() - length_);
-  }
-out:
-  return position;
 }

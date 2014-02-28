@@ -41,8 +41,6 @@ class BoxModus : public ModusDefault {
   void propagate(Particles *particles, const ExperimentParameters &parameters);
 
  private:
-  FourVector boundary_condition(FourVector position, bool *boundary_hit);
-
   /* initial condition */
   int initial_condition_ = 1;
   /* Cube edge length */

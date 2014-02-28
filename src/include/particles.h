@@ -40,9 +40,9 @@ class Particles {
   /// Return the specific datapointer of a particle according to its id
   inline ParticleData * data_pointer(int id);
   /// Return the type of a specific particle given its id
-  inline ParticleType type(int id);
+  inline ParticleType type(const int id) const;
   /// Return the type for a specific pdgcode
-  inline ParticleType particle_type(int pdgcode);
+  inline ParticleType particle_type(const int pdgcode) const;
   /// Return decay modes of this particle type
   inline DecayModes decay_modes(int pdg);
   /// return the highest used id
@@ -51,6 +51,8 @@ class Particles {
   inline int add_data(const ParticleData &particle_data);
   /// add a range of particles
   inline void create(size_t number, int pdg);
+  /* add one particle and return pointer to it */
+  inline ParticleData& create(const int pdg);
   /// remove a specific particle
   inline void remove(int id);
   /// size() of the ParticleData map
@@ -143,12 +145,12 @@ inline ParticleData* Particles::data_pointer(int particle_id) {
 }
 
 /* return the type of a specific particle */
-inline ParticleType Particles::type(int particle_id) {
+inline ParticleType Particles::type(const int particle_id) const {
   return types_.at(data_.at(particle_id).pdgcode());
 }
 
 /* return a specific type */
-inline ParticleType Particles::particle_type(int pdgcode) {
+inline ParticleType Particles::particle_type(const int pdgcode) const {
   return types_.at(pdgcode);
 }
 
@@ -176,6 +178,18 @@ inline void Particles::create(size_t number, int pdgcode) {
     particle.set_id(id_max_);
     data_.insert(std::pair<int, ParticleData>(id_max_, particle));
   }
+}
+
+/* create a bunch of particles */
+inline ParticleData& Particles::create(int pdgcode) {
+  ParticleData particle;
+  /* fixed pdgcode and no collision yet */
+  particle.set_pdgcode(pdgcode);
+  particle.set_collision(-1, 0, -1);
+  id_max_++;
+  particle.set_id(id_max_);
+  data_.insert(std::pair<int, ParticleData>(id_max_, particle));
+  return data_[id_max_];
 }
 
 /* return the highest used id */

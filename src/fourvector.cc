@@ -14,9 +14,9 @@ FourVector FourVector::LorentzBoost(const FourVector &velocity) const {
    * u.u = 1 - v_1^2 - v_2^2 - v_3^2
    */
   double velocity_squared = velocity.Dot(velocity);
-  /* Lorentz gamma = sqrt(1 - v^2)
-   *               = sqrt(1 - v_1^2 - v_2^2 - v_3^2)
-   *               = sqrt(u.u)
+  /* Lorentz gamma = 1/sqrt(1 - v^2)
+   *               = 1/sqrt(1 - v_1^2 - v_2^2 - v_3^2)
+   *               = 1/sqrt(u.u)
    */
   double gamma = velocity_squared > 0 ? 1.0 / std::sqrt(velocity_squared) : 0;
 

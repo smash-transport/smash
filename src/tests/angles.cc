@@ -14,15 +14,15 @@ Angles dir;
 
 TEST(set_angles) {
   dir.set_phi(.5);
-  FUZZY_COMPARE(dir.phi(),.5);
+  FUZZY_COMPARE(dir.phi(), .5);
   dir.set_phi(4*M_PI);
-  FUZZY_COMPARE(dir.phi(),0.0);
+  FUZZY_COMPARE(dir.phi(), 0.0);
   dir.set_costheta(.3);
-  FUZZY_COMPARE(dir.costheta(),0.3);
+  FUZZY_COMPARE(dir.costheta(), 0.3);
   dir.set_theta(.3);
   // for cos(acos()), we need greater leniency
   UnitTest::setFuzzyness<double>(3);
-  FUZZY_COMPARE(dir.theta(),0.3);
+  FUZZY_COMPARE(dir.theta(), 0.3);
 }
 
 TEST(accessors_and_relations) {
@@ -39,13 +39,13 @@ TEST(accessors_and_relations) {
                    + dir.y()*dir.y()
                    + dir.z()*dir.z();
     UnitTest::setFuzzyness<double>(3);
-    FUZZY_COMPARE(xyz_one,1.0);
+    FUZZY_COMPARE(xyz_one, 1.0);
 
     // compare cos(theta) and costheta:
     UnitTest::setFuzzyness<double>(1024);
-    FUZZY_COMPARE( cos(dir.theta()),dir.costheta()) << " (trial #" << c
+    FUZZY_COMPARE(cos(dir.theta()), dir.costheta()) << " (trial #" << c
                                           << " of " << kNumberOfTries << ")";
-    FUZZY_COMPARE(dir.theta(),acos(dir.costheta())) << " (trial #" << c
+    FUZZY_COMPARE(dir.theta(), acos(dir.costheta())) << " (trial #" << c
                                           << " of " << kNumberOfTries << ")";
   }
 }
@@ -56,7 +56,7 @@ TEST(unusual_set_phi) {
   for (int m = kMinM; m < kMaxM; m++) {
     // set phi outside [0..2pi]
     dir.set_phi(2.0 * M_PI * m + .5);
-    FUZZY_COMPARE(dir.phi(),.5) << " (m = " << m << ")";
+    FUZZY_COMPARE(dir.phi(), .5) << " (m = " << m << ")";
   }
 }
 
@@ -67,7 +67,7 @@ TEST(unusual_set_theta_even) {
   for (int m = kMinM; m < kMaxM; m++) {
     // set theta in [2*n*pi .. (2*n+1)*pi]
     dir.set_theta(2.0 * M_PI * m + .7);
-    FUZZY_COMPARE(dir.theta(),.7) << " (m = " << m << ")";
+    FUZZY_COMPARE(dir.theta(), .7) << " (m = " << m << ")";
   }
 }
 TEST(unusual_set_theta_odd) {
@@ -77,7 +77,7 @@ TEST(unusual_set_theta_odd) {
   for (int m = kMinM; m < kMaxM; m++) {
     // set theta in [(2*n-1)*pi .. 2*n*pi]
     dir.set_theta(2.0 * M_PI * m - .7);
-    FUZZY_COMPARE(dir.theta(),.7) << " (m = " << m << ")";
+    FUZZY_COMPARE(dir.theta(), .7) << " (m = " << m << ")";
   }
 }
 
@@ -95,9 +95,8 @@ TEST(catch_invalid_cosine) {
     // check that I caught an exception if I gave an invalid number:
     if (invalid_input) {
       VERIFY(caught) << " (tried to set cos(theta) to " << newcos << ")";
-    }
+    } else {
     // check that I did not catch an exception for valid input:
-    else {
       VERIFY(!caught) << " (tried to set cos(theta) to " << newcos << ")";
     }
   }
@@ -107,26 +106,26 @@ TEST(setting_costheta_does_not_change_phi) {
   dir.set_phi(3.0);
   double old_phi = dir.phi();
   dir.set_costheta(.2);
-  FUZZY_COMPARE(old_phi,dir.phi());
+  FUZZY_COMPARE(old_phi, dir.phi());
 }
 
 TEST(setting_theta_does_not_change_phi) {
   dir.set_phi(3.0);
   double old_phi = dir.phi();
   dir.set_theta(.2);
-  FUZZY_COMPARE(old_phi,dir.phi());
+  FUZZY_COMPARE(old_phi, dir.phi());
 }
 
 TEST(setting_phi_does_not_change_costheta) {
   double old_costheta = dir.costheta();
   dir.set_phi(.4);
-  FUZZY_COMPARE(old_costheta,dir.costheta());
+  FUZZY_COMPARE(old_costheta, dir.costheta());
 }
 
 TEST(setting_phi_does_not_change_z) {
   double old_z = dir.z();
   dir.set_phi(.4);
-  FUZZY_COMPARE(old_z,dir.z());
+  FUZZY_COMPARE(old_z, dir.z());
 }
 
 TEST(add_theta) {
@@ -138,30 +137,30 @@ TEST(add_theta) {
     dir.set_theta(0.0);
     bool sign = dir.add_to_theta(M_PI / 2.0);
     // phi shouldn't have changed:
-    FUZZY_COMPARE(current_phi,dir.phi()) << " (phi = " << current_phi << ")";
+    FUZZY_COMPARE(current_phi, dir.phi()) << " (phi = " << current_phi << ")";
     // the sign shouldn't have changed.
     VERIFY(!sign) << " (phi = " << current_phi << ")";
     // theta, though, should have changed.
-    FUZZY_COMPARE(dir.theta(),M_PI / 2.0) << " (phi = " << current_phi << ")";
+    FUZZY_COMPARE(dir.theta(), M_PI / 2.0) << " (phi = " << current_phi << ")";
     // 90+120 degrees: phi changed, theta is at 150 degrees
     sign = dir.add_to_theta(2.0 * M_PI / 3.0);
     if (current_phi < M_PI) {
-      FUZZY_COMPARE(current_phi,dir.phi() - M_PI) << " (phi = " << current_phi
+      FUZZY_COMPARE(current_phi, dir.phi() - M_PI) << " (phi = " << current_phi
                                                                 << ")";
     } else {
-      FUZZY_COMPARE(current_phi,dir.phi() + M_PI) << " (phi = " << current_phi
+      FUZZY_COMPARE(current_phi, dir.phi() + M_PI) << " (phi = " << current_phi
                                                                 << ")";
     }
     VERIFY(sign) << " (phi = " << current_phi << ")";
-    FUZZY_COMPARE(dir.theta(),5.0 * M_PI / 6.0) << " (phi = " << current_phi
+    FUZZY_COMPARE(dir.theta(), 5.0 * M_PI / 6.0) << " (phi = " << current_phi
                                                               << ")";
     // go back over the (south) pole: +60 degrees
     sign = dir.add_to_theta(M_PI / 3.0);
     // phi is back to original;
-    FUZZY_COMPARE(current_phi,dir.phi()) << " (phi = " << current_phi << ")";
+    FUZZY_COMPARE(current_phi, dir.phi()) << " (phi = " << current_phi << ")";
     VERIFY(sign) << " (phi = " << current_phi << ")";
     // theta is the same as before (150+60 = 210 equiv 150)
-    FUZZY_COMPARE(dir.theta(),5.0 * M_PI / 6.0) << " (phi = " << current_phi
+    FUZZY_COMPARE(dir.theta(), 5.0 * M_PI / 6.0) << " (phi = " << current_phi
                                                               << ")";
     // go over two poles: +120 + 120 (going over more than 180 degrees
     // in one step is forbidden; we'll check that later)
@@ -177,12 +176,12 @@ TEST(add_theta) {
     // semi circle between north- and south pole (mind the direction!)
     VERIFY(!sign2) << " (phi = " << current_phi << ")";
     // phi stays the same (two changes)
-    FUZZY_COMPARE(current_phi,dir.phi()) << " (phi = " << current_phi << ")";
+    FUZZY_COMPARE(current_phi, dir.phi()) << " (phi = " << current_phi << ")";
     // theta is now 30 degrees:
-    FUZZY_COMPARE(dir.theta(),M_PI / 6.0) << " (phi = " << current_phi << ")";
+    FUZZY_COMPARE(dir.theta(), M_PI / 6.0) << " (phi = " << current_phi << ")";
   }
 }
 
-TEST_CATCH(set_theta_too_far,char*) {
+TEST_CATCH(set_theta_too_far, char*) {
   dir.add_to_theta(M_PI * 1.1);
 }
