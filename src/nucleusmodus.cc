@@ -26,14 +26,14 @@ NucleusModus::NucleusModus(Configuration modus_config) {
   projectile_.fill_from_list(pro);
   std::map<int, int> tar = modus_cfg.take({"Target", "PARTICLES"});
   target_.fill_from_list(tar);
-  // set softness of the nuclei if given (else take the default value)
-  if (modus_cfg.has_value({"Projectile", "SOFTNESS"})) {
-    projectile_.set_softness(static_cast<float>(
-                modus_cfg.take({"Projectile", "SOFTNESS"})));
+  // set diffusiveness of the nuclei if given (else take the default value)
+  if (modus_cfg.has_value({"Projectile", "DIFFUSIVENESS"})) {
+    projectile_.set_diffusiveness(static_cast<float>(
+                modus_cfg.take({"Projectile", "DIFFUSIVENESS"})));
   }
-  if (modus_cfg.has_value({"Target", "SOFTNESS"})) {
-    target_.set_softness(static_cast<float>(
-                modus_cfg.take({"Target", "SOFTNESS"})));
+  if (modus_cfg.has_value({"Target", "DIFFUSIVENESS"})) {
+    target_.set_diffusiveness(static_cast<float>(
+                modus_cfg.take({"Target", "DIFFUSIVENESS"})));
   }
 
   // Impact paramter setting: Either "VALUE", "RANGE" or "MAX".

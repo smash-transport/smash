@@ -21,11 +21,11 @@ float Nucleus::mass() const {
 }
 
 float Nucleus::distribution_nucleons() const {
-  // softness_ zero or negative? Use hard sphere.
-  if (softness_ < std::numeric_limits<float>::min()) {
+  // diffusiveness_ zero or negative? Use hard sphere.
+  if (diffusiveness_ < std::numeric_limits<float>::min()) {
     return nuclear_radius()*(pow(drand48(), 1./3.));
   }
-  float radius_scaled = nuclear_radius()/softness_;
+  float radius_scaled = nuclear_radius()/diffusiveness_;
   float prob_range1 = 1.0;
   float prob_range2 = 3. / radius_scaled;
   float prob_range3 = 2. * prob_range2 / radius_scaled;
@@ -47,7 +47,7 @@ float Nucleus::distribution_nucleons() const {
     }
   } while (drand48() > 1./(1. + exp(-fabs(t)) ) );
   float position_scaled = t + radius_scaled;
-  float position = position_scaled * softness_;
+  float position = position_scaled * diffusiveness_;
   return position;
 }
 
@@ -122,8 +122,8 @@ void Nucleus::fill_from_list(const std::map<int, int>& particle_list) {
   }
 }
 
-void Nucleus::set_softness(const float& soft) {
-  softness_ = soft;
+void Nucleus::set_diffusiveness(const float& diffuse) {
+  diffusiveness_ = diffuse;
 }
 
 void Nucleus::auto_set_masses(const Particles *external_particles) {

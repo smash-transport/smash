@@ -71,8 +71,8 @@ struct ExperimentParameters;
  * lead-208 nucleus (82 protons and 126 neutrons = 208 nucleons), and
  * `PARTICLES: {2212: 1, 2112: 1, 3122: 1}` for Hyper-Triton (one
  * proton, one neutron and one Lambda).
- * \li `SOFTNESS:` The softness used in the Woods-Saxon distribution
- * for this nucleus.
+ * \li `DIFFUSIVENESS:` The diffusiveness used in the Woods-Saxon
+ * distribution for this nucleus.
  * 0 means a hard sphere.
  *
  * `Impact:` A section for the impact parameter (= distance of the two
