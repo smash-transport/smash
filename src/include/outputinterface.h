@@ -10,9 +10,8 @@
 #ifndef SRC_INCLUDE_OUTPUTINTERFACE_H_
 #define SRC_INCLUDE_OUTPUTINTERFACE_H_
 
-class Particles;
-
 namespace Smash {
+class Particles;
 
 class OutputInterface {
  public:

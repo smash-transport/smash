@@ -12,9 +12,10 @@
 
 #include "outputinterface.h"
 #include <boost/filesystem.hpp>
-class Particles;
 
 namespace Smash {
+class Particles;
+
 class ParticlesOutput : public OutputInterface {
  public:
   ParticlesOutput(boost::filesystem::path path);
