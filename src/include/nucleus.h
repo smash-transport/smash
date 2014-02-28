@@ -100,6 +100,10 @@ class Nucleus {
              const double& simulation_time);
   /// copies the particles from this nucleus into the particle list.
   void copy_particles(Particles* particles);
+  /// Number of particles in the nucleus:
+  inline size_t size() const {
+    return particles.size();
+  }
 
  private:
   /** softness of Woods-Saxon-distribution in this nucleus im fm
@@ -139,10 +143,6 @@ class Nucleus {
   /// for iterators over the particle list:
   inline std::vector<ParticleData>::const_iterator cend() const {
     return particles.cend();
-  }
-  /// Number of particles in the list:
-  inline size_t size() const {
-    return particles.size();
   }
 };
 
