@@ -80,11 +80,10 @@ struct ExperimentParameters;
  *
  * \li `VALUE: `fixed value for the impact parameter. No other \a
  * Impact: directive is looked at.
- * \li `SAMPLE:` if `linear`, use linear sampling of the impact
- * parameter (\f$dP(b) = db\f$). If else, use quadratical input sampling
- * (the physical case, where the probability of an input parameter range
- * is proportional to the area corresponding to that range, \f$dP(b) =
- * b\cdot db\f$).
+ * \li `SAMPLE:` if `uniform`, use uniform sampling of the impact
+ * parameter (\f$dP(b) = db\f$). If else, use areal input sampling
+ * (the probability of an input parameter range is proportional to the
+ * area corresponding to that range, \f$dP(b) = b\cdot db\f$).
  * \li `RANGE:` A vector of minimal and maximal impact parameters
  * between which b should be chosen. (The order of these is not
  * important.)
