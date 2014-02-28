@@ -319,16 +319,7 @@ size_t two_to_two_formation(Particles *particles,
    * 2 * Iz = 2 * charge - (baryon number + strangeness + charm)
    * XXX: Strangeness and charm ignored for now!
    */
-  const int isospin_z1 = type_particle1.spin() % 2 == 0
-    ? type_particle1.charge() * 2
-    : type_particle1.charge() * 2 - type_particle1.pdgcode()
-                                    / abs(type_particle1.pdgcode());
-  const int isospin_z2 = type_particle2.spin() % 2 == 0
-    ? type_particle2.charge() * 2
-    : type_particle2.charge() * 2 - type_particle2.pdgcode()
-                                    / abs(type_particle2.pdgcode());
-
-  int isospin_z_resonance = (type_resonance.spin()) % 2 == 0
+  const int isospin_z_resonance = (type_resonance.spin()) % 2 == 0
     ? type_resonance.charge() * 2
     : type_resonance.charge() * 2 - type_resonance.pdgcode()
                                     / abs(type_resonance.pdgcode());
@@ -395,19 +386,19 @@ size_t two_to_two_formation(Particles *particles,
        * Note that the calculation assumes that isospin values
        * have been multiplied by two
        */
-      double wigner_3j =  gsl_sf_coupling_3j(type_particle1.isospin(),
-        type_particle2.isospin(), isospin_final,
-        isospin_z1, isospin_z2, -isospin_z_final);
+      double wigner_3j =  gsl_sf_coupling_3j(type_resonance.isospin(),
+        type_i->second.isospin(), isospin_final,
+        isospin_z_resonance, isospin_z_i, -isospin_z_final);
       if (fabs(wigner_3j) > really_small)
-        clebsch_gordan_isospin += pow(-1, type_particle1.isospin() / 2.0
-        - type_particle2.isospin() / 2.0 + isospin_z_final / 2.0)
+        clebsch_gordan_isospin += pow(-1, type_resonance.isospin() / 2.0
+        - type_i->second.isospin() / 2.0 + isospin_z_final / 2.0)
         * sqrt(isospin_final + 1) * wigner_3j;
 
       printd("CG: %g I1: %i I2: %i IR: %i iz1: %i iz2: %i izR: %i \n",
          clebsch_gordan_isospin,
-         type_particle1.isospin(), type_particle2.isospin(),
+         type_resonance.isospin(), type_i->second.isospin(),
          isospin_final,
-         isospin_z1, isospin_z2, isospin_z_final);
+         isospin_z_resonance, isospin_z_i, isospin_z_final);
       /* isospin is multiplied by 2,
        *  so we must also decrease it by increments of 2
        */
