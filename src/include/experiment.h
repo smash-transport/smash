@@ -7,10 +7,11 @@
 #ifndef SRC_INCLUDE_EXPERIMENT_H_
 #define SRC_INCLUDE_EXPERIMENT_H_
 
-#include <memory>
 #include <list>
+#include <memory>
 #include <stdexcept>
 #include <string>
+#include <vector>
 
 #include "include/crosssections.h"
 #include "include/experimentparameters.h"
@@ -18,6 +19,7 @@
 #include "include/outputroutines.h"
 #include "include/parameters.h"
 #include "include/particles.h"
+#include "outputinterface.h"
 
 #ifndef DOXYGEN
 namespace boost {
@@ -125,9 +127,8 @@ class Experiment : public ExperimentBase {
 
   void initialize(const boost::filesystem::path &path);
   void run_time_evolution();
-  void end();
 
-  void print_startup();
+  void print_startup(int64_t seed);
 
   float energy_total(Particles *particles);
 
@@ -143,6 +144,12 @@ class Experiment : public ExperimentBase {
    * The particles interacting in the experiment.
    */
   Particles particles_;
+
+  /**
+   * A list of output formaters. They will be called to write the state of the
+   * particles to file.
+   */
+  std::vector<std::unique_ptr<Smash::OutputInterface>> outputs_;
 
   /**
    * Struct of several member variables.
@@ -170,10 +177,6 @@ class Experiment : public ExperimentBase {
   int steps_ = 10000;
   /// number of steps before giving measurables
   int output_interval_ = 100;
-  /// initial seed_ for random generator
-  /// \todo Why is it a member? It's read, then used for seeding and
-  ///       then never needed again, no?
-  int64_t seed_ = 1;
   /// initial total energy of the system
   float energy_initial_ = 0.f;
   /// starting time of the simulation

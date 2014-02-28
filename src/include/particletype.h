@@ -59,6 +59,8 @@ class ParticleType {
 
  private:
   /// name of the particle
+  /// \todo This variable is only used for debug output. Maybe `ifdef` it out
+  ///       for non-debug builds to save the memory?
   std::string name_;
   /// mass of the particle
   float mass_;
@@ -66,11 +68,20 @@ class ParticleType {
   float width_;
   /// pdgcode of the particle
   int pdgcode_;
-  /// isospin of the particle
+  /** isospin of the particle
+   *
+   * \todo What is the possible range of values?
+   */
   int isospin_;
-  /// charge of the particle
+  /** charge of the particle
+   *
+   * \todo What is the possible range of values?
+   */
   int charge_;
-  /// spin of the particle
+  /** spin of the particle
+   *
+   * \todo What is the possible range of values?
+   */
   int spin_;
 };
 

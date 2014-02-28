@@ -15,16 +15,18 @@
 #include <string>
 
 #include "include/boxmodus.h"
-#include "include/configuration.h"
 #include "include/collidermodus.h"
 #include "include/collisions.h"
+#include "include/configuration.h"
 #include "include/decays.h"
 #include "include/experiment.h"
 #include "include/macros.h"
 #include "include/nucleusmodus.h"
 #include "include/outputroutines.h"
 #include "include/parameters.h"
+#include "include/particlesoutput.h"
 #include "include/time.h"
+#include "include/vtkoutput.h"
 
 #include <boost/filesystem.hpp>
 
@@ -79,15 +81,14 @@ Experiment<Modus>::Experiment(Configuration &config)
       cross_sections_(parameters_.cross_section),
       nevents_(config.take({"General", "NEVENTS"})),
       steps_(config.take({"General", "STEPS"})),
-      output_interval_(config.take({"General", "UPDATE"})),
-      seed_(config.take({"General", "RANDOMSEED"})) {
+      output_interval_(config.take({"General", "UPDATE"})){
+  int64_t seed_ = config.take({"General", "RANDOMSEED"});
   if (seed_ < 0) {
     seed_ = time(nullptr);
   }
-  print_startup();
-
-  /* Set the seed_ for the random number generator */
   srand48(seed_);
+
+  print_startup(seed_);
 }
 
 /* This method reads the particle type and cross section information
@@ -105,7 +106,9 @@ void Experiment<Modus>::initialize(const bf::path &/*path*/) {
   /* Print output headers */
   print_header();
   /* Write out the initial momenta and positions of the particles */
-  write_particles(particles_);
+  for (auto &output : outputs_) {
+    output->write_state(particles_);
+  }
 }
 
 /* This is the loop over timesteps, carrying out collisions and decays
@@ -149,8 +152,9 @@ void Experiment<Modus>::run_time_evolution() {
                          time_start_);
       printd("Ignored collisions %zu\n", rejection_conflict);
       /* save evolution data */
-      write_particles(particles_);
-      write_vtk(particles_);
+      for (auto &output : outputs_) {
+        output->write_state(particles_);
+      }
     }
   }
   /* Guard against evolution */
@@ -168,11 +172,11 @@ void Experiment<Modus>::run_time_evolution() {
 
 /* print_startup - console output on startup of general parameters */
 template <typename Modus>
-void Experiment<Modus>::print_startup() {
+void Experiment<Modus>::print_startup(int64_t seed) {
   printf("Elastic cross section: %g mb\n", parameters_.cross_section);
   printf("Using temporal stepsize: %g fm/c\n", parameters_.eps);
   printf("Maximum number of steps: %i \n", steps_);
-  printf("Random number seed: %" PRId64 "\n", seed_);
+  printf("Random number seed: %" PRId64 "\n", seed);
   modus_.print_startup();
 }
 
@@ -196,13 +200,11 @@ timespec inline Experiment<Modus>::set_timer_start(void) {
   return time;
 }
 
-/* Tear down everything */
-template <typename Modus>
-void Experiment<Modus>::end() {
-}
-
 template <typename Modus>
 void Experiment<Modus>::run(const bf::path &path) {
+  outputs_.emplace_back(new Smash::ParticlesOutput(path));
+  outputs_.emplace_back(new Smash::VtkOutput(path));
+
   /* Write the header of OSCAR data output file */
   write_oscar_header();
   for (int j = 0; j < nevents_; j++) {
@@ -214,7 +216,6 @@ void Experiment<Modus>::run(const bf::path &path) {
     /* Write the final data block of the event */
     write_oscar_event_block(&particles_, particles_.size(), 0, j + 1);
   }
-  end();
 }
 
 }  // namespace Smash

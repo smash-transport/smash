@@ -46,6 +46,7 @@ void usage(int rc, const std::string &progname) {
          "  -s, --steps <steps>     shortcut for -c 'General: { STEPS: <steps> }'\n"
          "\n"
          "  -o, --output <dir>      output directory (default: $PWD/data/<runid>)\n"
+         "  -f, --force             force overwriting files in the output directory\n"
          "  -v, --version\n\n");
   exit(rc);
 }
@@ -59,7 +60,9 @@ struct OutputDirectoryOutOfIds : public std::runtime_error {
 
 bf::path default_output_path() {
   const bf::path p = bf::absolute("data");
-  bf::create_directory(p);
+  if (!bf::exists(p)) {
+    return p / "0";
+  }
   bf::path p2;
   for (int id = 0; id < std::numeric_limits<int>::max(); ++id) {
     p2 = p / std::to_string(id);
@@ -69,12 +72,6 @@ bf::path default_output_path() {
   }
   if (p == p2) {
     throw OutputDirectoryOutOfIds("no unique data subdir ID left");
-  }
-  if (!bf::create_directory(p2)) {
-    throw OutputDirectoryExists(
-        "Race condition detected: The directory " + p2.native() +
-        " did not exist a few cycles ago, but was created in the meantime by a "
-        "different process.");
   }
   return p2;
 }
@@ -86,7 +83,7 @@ void ensure_path_is_valid(const bf::path &path) {
                                   ") exists, but it is not a directory.");
     }
   } else {
-    if (!bf::create_directory(path)) {
+    if (!bf::create_directories(path)) {
       throw OutputDirectoryExists(
           "Race condition detected: The directory " + path.native() +
           " did not exist a few cycles ago, but was created in the meantime by "
@@ -110,6 +107,7 @@ int main(int argc, char *argv[]) {
   constexpr option longopts[] = {
     { "config",     required_argument,      0, 'c' },
     { "decaymodes", required_argument,      0, 'd' },
+    { "force",      no_argument,            0, 'f' },
     { "help",       no_argument,            0, 'h' },
     { "inputfile",  required_argument,      0, 'i' },
     { "modus",      required_argument,      0, 'm' },
@@ -125,6 +123,7 @@ int main(int argc, char *argv[]) {
   printf("%s (%d)\n", progname.c_str(), VERSION_MAJOR);
 
   try {
+    bool force_overwrite = false;
     bf::path output_path = default_output_path();
 
     /* read in config file */
@@ -132,7 +131,7 @@ int main(int argc, char *argv[]) {
 
     /* check for overriding command line arguments */
     int opt;
-    while ((opt = getopt_long(argc, argv, "c:d:hi:m:p:s:o:v", longopts,
+    while ((opt = getopt_long(argc, argv, "c:d:fhi:m:p:s:o:v", longopts,
                               nullptr)) != -1) {
       switch (opt) {
         case 'c':
@@ -142,6 +141,9 @@ int main(int argc, char *argv[]) {
           bf::ifstream file{optarg};
           configuration["decaymodes"] = read_all(file);
         } break;
+        case 'f':
+          force_overwrite = true;
+          break;
         case 'i': {
           const boost::filesystem::path file(optarg);
           configuration = Configuration(file.parent_path(), file.filename());
@@ -161,7 +163,6 @@ int main(int argc, char *argv[]) {
           break;
         case 'o':
           output_path = optarg;
-          ensure_path_is_valid(output_path);
           break;
         case 'v':
           exit(EXIT_SUCCESS);
@@ -170,7 +171,14 @@ int main(int argc, char *argv[]) {
       }
     }
 
+    ensure_path_is_valid(output_path);
     printd("output path: %s\n", output_path.native().c_str());
+
+    if (!force_overwrite && bf::exists(output_path / "config.yaml")) {
+      throw std::runtime_error(
+          "Output directory would get overwritten. Select a different output "
+          "directory, clean up, or tell SMASH to ignore existing files.");
+    }
 
     // keep a copy of the configuration that was used in the output directory
     bf::ofstream(output_path / "config.yaml") << configuration.to_string()
