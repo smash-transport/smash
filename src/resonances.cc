@@ -159,7 +159,7 @@ std::vector<ProcessBranch> resonance_cross_section(
       size_t two_to_two_processes
          = two_to_two_formation(particles, type_particle1,
            type_particle2, type_resonance, mandelstam_s, cm_momentum_squared,
-           symmetryfactor, &resonance_process_list);
+           &resonance_process_list);
       if (two_to_two_processes > 0) {
         printd("Found %zu 2->2 processes for resonance %i (%s).\n",
                two_to_two_processes,
@@ -306,7 +306,7 @@ double two_to_one_formation(Particles *particles,
 size_t two_to_two_formation(Particles *particles,
   const ParticleType &type_particle1,
   const ParticleType &type_particle2, const ParticleType &type_resonance,
-  double mandelstam_s, double cm_momentum_squared, double symmetryfactor,
+  double mandelstam_s, double cm_momentum_squared,
   std::vector<ProcessBranch> *process_list) {
   size_t number_of_processes = 0;
   /* If we have two baryons in the beginning, we must have fermion resonance */
@@ -480,7 +480,6 @@ size_t two_to_two_formation(Particles *particles,
      * Buss et al., Physics Reports 512, 1 (2012), Eq. (D.28)
      */
     float xsection = clebsch_gordan_isospin * clebsch_gordan_isospin
-                      * symmetryfactor
                       * matrix_element
                       / mandelstam_s
                       / sqrt(cm_momentum_squared)
