@@ -52,11 +52,6 @@ struct ExperimentParameters;
  * default behaviour). The important part here is which mass is used for
  * the calculation \f$\sqrt{s_{\rm NN}} \rightarrow \beta\f$.
  *
- * \todo It should be possible to say something like "take the average
- * mass of a particle in the nuclei". Maybe even "take the average mass
- * of a particle in this nucleus" (and specify the other one). This can
- * be done, e.g., by using a unknown or otherwise invalid PDG code.
- *
  * `Projectile:` Section for projectile nucleus. The projectile will
  * start at \f$z < 0\f$ and fly in positive \f$z\f$-direction, at \f$x
  * \ge 0\f$.
