@@ -20,6 +20,150 @@ float Nucleus::mass() const {
   return total_mass;
 }
 
+/**************************************************************************//**
+ *
+ * Woods-Saxon-distribution
+ * ========================
+ *
+ * The distribution
+ * ----------------
+ * 
+ *
+ * Nucleons in nuclei are distributed according to a
+ * Woods-Saxon-distribution[citation needed]
+ *
+ * \f[\frac{dN}{d^3r} = \frac{\rho_0}{\exp\left(\frac{r-r_0}{d}\right)
+ * +1}.\f]
+ *
+ * This distribution is obviously spherically symmetric, hence we can
+ * rewrite \f$d^3r = 4\pi r^2 dr\f$ and obtain
+ *
+ * \f[\frac{dN}{4\pi\rho_0dr} =
+ * \frac{r^2}{\exp\left(\frac{r-r_0}{d}\right) + 1}.\f]
+ *
+ * Let us rewrite that in units of \f$d\f$ (that's the diffusiveness)
+ * and drop any constraints on normalization (since in the end we only
+ * care about relative probabilities: we create as many nuclei as we
+ * need). Now, \f$p(B)\f$ is the un-normalized probability to obtain a
+ * point at \f$r = Bd\f$ (with \f$R = r_0/d\f$):
+ *
+ * \f[p(B) = \frac{B^2}{\exp(B-R) + 1}.\f]
+ *
+ * Splitting it up in two regimes
+ * ------------------------------
+ *
+ * We shift the distribution so that \f$B-R\f$ is 0 at \f$t = 0\f$: \f$t
+ * = B-R\f$:
+ *
+ * \f[p^{(1)}(t)= \frac{(t+R)^2}{\exp(t)+1}\f]
+ *
+ * and observe
+ *
+ * \f[\frac{1}{\exp(x)+1} = \frac{e^{-x}e^x}{e^{-x}e^{x}+e^{-x}} =
+ * \frac{e^{-x}}{e^{-x}+1}.\f]
+ *
+ * The distribution function can now be split into two cases. For
+ * negative t (first case), \f$-|t| = t\f$, and for positive t (second
+ * case), \f$-|t| = -t\f$:
+ *
+ * \f[p^{(1)}(t) = \frac{1}{e^{-|t|}+1} \cdot (t+R)^2\begin{cases}
+ * 1 & R \le t < 0 \\
+ * e^{-t} & t \ge 0
+ * \end{cases}.\f]
+ *
+ * Apart from the first term, all that remains here can easily and
+ * exactly be generated from unrejected uniform random numbers (see
+ * below). The first term itself - \f$(1+e^{-|t|})^{-1}\f$ - is a number
+ * between 1/2 and 1.?
+ *
+ * If we now have a variable $t$ distributed according to
+ * \f$p^{(2)}(t)\f$ and reject \f$t\f$ with a probability
+ * \f$p^{(rej)}(t) = (1+e^{-|t|})^{-1}\f$, the resulting distribution is
+ * \f$p^{(combined)}(t) = p^{(2)}(t) \cdot p^{(rej)}(t)\f$. Hence, what
+ * we need to generate is (the tilde \f$\tilde p\f$ means that this is
+ * normalized):
+ *
+ * \f[\tilde{p}^{(2)}(t) = \frac{1}{1+3/R+6/R^2+6/R^3} \cdot \begin{cases}
+ * \frac{3}{R^3} (t+R)^2 & R \le t < 0 \\
+ * e^{-x} \left( \frac{3}{R}+\frac{6}{R^2}t+\frac{6}{R^3}t^2 \right) & t
+ * \ge 0 \end{cases}.\f]
+ *
+ * Four parts inside the rejection
+ * -------------------------------
+ *
+ * Let \f$c_1 = 1+3/R+6/R^2+6/R^3\f$. The above means:
+ *
+ * \f[\mbox{Choose: } \begin{cases}
+ * \tilde p^{({\rm I})} = \frac{3}{R^3}(t+R)^2 \Theta(-t) \Theta(t+R) \\
+ * \tilde p^{({\rm II})}= e^{-t}\Theta(t) \\
+ * \tilde p^{({\rm III})}=e^{-t}\Theta(t) t \\
+ * \tilde p^{({\rm IV})} =e^{-t}\Theta(t) \frac{1}{2} t^2
+ * \end{cases} \mbox{ with a probability of }\begin{cases}
+ * \frac{1}{c_1} \cdot 1 \\
+ * \frac{1}{c_1} \cdot \frac{3}{R} \\
+ * \frac{1}{c_1} \cdot \frac{6}{R^2} \\
+ * \frac{1}{c_1} \cdot \frac{6}{R^3}
+ * \end{cases}.\]
+ *
+ * Let us see how those are generated. \f$\chi_i\f$ are uniformly
+ * distributed numbers between 0 and 1.
+ *
+ * \f[p(\chi_i) = \Theta(\chi_i)\Theta(1-\chi_i)\f]
+ *
+ * For simple distributions (only one \f$\chi\f$ involved), we invert
+ * \f$t(\chi)\f$, derive it w.r.t. \f$t\f$ and normalize.
+ *
+ * ### Case I: \f$p^{({\rm I})}\f$
+ *
+ * Simply from one random number:
+ *
+ * \f[t = R\left( \sqrt[ 3 ]{\chi} - 1 \right)\f]
+ * \f[\tilde p^{({\rm I})} = \frac{3}{R^3}(t+R)^2 \mbox{ for } -R \le t
+ * \le 0\f]
+ *
+ * ### Case II: \f$p^{({\rm II})}\f$
+ *
+ * Again, from one only:
+ *
+ * \f[t = -\log(\chi)\f]
+ * \f[p(t) = \frac{d\chi}{dt}\f]
+ * \f[p^{({\rm II})} = e^{-t} \mbox{ for } t > 0\f]
+ *
+ * ### Case III: \f$p^{({\rm III})}\f$
+ *
+ * Here, we need two variables:
+ *
+ * \f[t = -\log{\chi_1} -\log{\chi_2}\f]
+ *
+ * \f$p^{({\rm III})}\f$ is now the folding of \f$p^{({\rm II})}\f$ with itself[1]:
+ *
+ * \f[p^{({\rm III})} = \int_{-\infty}^{\infty} d\tau e^{-\tau} e^{-(t-\tau)}
+ * \Theta(\tau) \Theta(t-\tau) = t e^{-t} \mbox{ for } t > 0\f]
+ *
+ * ### Case IV: \f$p^{({\rm IV})}\f$
+ *
+ * Three variables needed:
+ *
+ * \f[t = -\log{\chi_1} -\log{\chi_2} -\log{\chi_3}\f]
+ *
+ * \f$p^{({\rm IV})}\f$ is now the folding of \f$p^{({\rm II})}\f$ with
+ * \f$p^{({\rm III})}\f$:
+ *
+ * \f[p^{({\rm IV})} = \int_{ - \infty}^{\infty} d\tau e^{- \tau} \left(
+ * t - \tau \right) e^{ - (t - \tau)} \Theta(\tau) \Theta(t - \tau) =
+ * \frac{1}{2} t^2 e^{ -t} \mbox{ for } t > 0\f]
+ *
+ * [1]: This is [the probability to find a \f$\tau\f$] times [the
+ * probability to find the value \f$\tau_2 = t-\tau\f$ that added to
+ * \f$\tau\f$ yields \f$t\f$], integrated over all possible combinations
+ * that have that property.
+ *
+ * From the beginning
+ * ------------------
+ *
+ *  So, the algorithm needs to do all this from the end:
+ *
+ **/
 float Nucleus::distribution_nucleons() const {
   // diffusiveness_ zero or negative? Use hard sphere.
   if (diffusiveness_ < std::numeric_limits<float>::min()) {
@@ -32,6 +176,7 @@ float Nucleus::distribution_nucleons() const {
   float prob_range4 = 1. * prob_range3 / radius_scaled;
   float all_ranges = prob_range1 + prob_range2 + prob_range3 + prob_range4;
   float t;
+  /// \li Decide which branch \f$\tilde p^{({\rm I - IV})}\f$ to go into
   do {
     float which_range = drand48() * all_ranges - prob_range1;
     if (which_range < 0.0) {
@@ -45,10 +190,19 @@ float Nucleus::distribution_nucleons() const {
         }
       }
     }
+    /** \li Generate \f$t\f$ from the distribution in the respective
+     * branches
+     * \li \a reject that number with a probability
+     * \f$1-(1+\exp(-|t|))^{-1}\f$ (the efficiency of this should be
+     * \f$\gg \frac{1}{2}\f$)
+     **/
   } while (drand48() > 1./(1. + exp(-fabs(t)) ) );
+  /// \li shift and rescale \f$t\f$ to \f$r = d\cdot t + r_0\f$
   float position_scaled = t + radius_scaled;
   float position = position_scaled * diffusiveness_;
   return position;
+  /// \li (choose direction; this is done outside of this routine,
+  /// though).
 }
 
 void Nucleus::arrange_nucleons() {
