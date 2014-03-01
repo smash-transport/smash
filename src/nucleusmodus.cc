@@ -36,7 +36,7 @@ NucleusModus::NucleusModus(Configuration modus_config) {
                 modus_cfg.take({"Target", "DIFFUSIVENESS"})));
   }
 
-  // Impact paramter setting: Either "VALUE", "RANGE" or "MAX".
+  // Impact parameter setting: Either "VALUE", "RANGE" or "MAX".
   if (modus_cfg.has_value({"Impact", "VALUE"})) {
     impact_ = modus_cfg.take({"Impact", "VALUE"});
   } else {

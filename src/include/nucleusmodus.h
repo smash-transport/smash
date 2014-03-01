@@ -141,7 +141,7 @@ class NucleusModus : public ModusDefault {
   int pdg_sNN_1_ = 2212;
   /// \see sqrt_s_NN_
   int pdg_sNN_2_ = 2212;
-  /** impact paramter
+  /** impact parameter
    *
    * The nuclei projectile_ and target_ will be shifted along the x axis
    * so that their centers move on antiparallel lines that are this
