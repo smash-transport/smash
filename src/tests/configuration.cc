@@ -22,7 +22,7 @@ TEST(check_config_general_contents) {
   Configuration conf(TEST_CONFIG_PATH);
 
   std::string modus = conf.read({"General", "MODUS"        });
-  COMPARE(modus, "Collider");
+  COMPARE(modus, "Nucleus");
   COMPARE(double(conf.read({"General", "EPS"          })), 0.01);
   COMPARE(int   (conf.read({"General", "STEPS"        })), 1000);
   COMPARE(int   (conf.read({"General", "UPDATE"       })), 10);
@@ -103,22 +103,38 @@ TEST(check_unused_report) {
   modi.take({"Box", "TEMPERATURE"});
   modi.take({"Box", "INITIAL_CONDITION"});
   modi.take({"Nucleus"});
-  //conf.take({"Modi", "Nucleus"});
   reference =
-      "Modi:\n  Collider:\n    SQRTS: 1.0\n    TARGET: -211\n    PROJECTILE: "
-      "211\n  Sphere:\n    RADIUS: 5.0";
+      "Modi:\n"
+      "  Collider:\n"
+      "    TARGET: -211\n"
+      "    PROJECTILE: 211\n"
+      "    SQRTS: 1.0\n"
+      "  Sphere:\n"
+      "    RADIUS: 5.0";
   COMPARE(conf.unused_values_report(), reference);
 
   modi.take({"Sphere", "RADIUS"});
-  reference = "Modi:\n  Collider:\n    SQRTS: 1.0\n    TARGET: -211\n    PROJECTILE: 211";
+  reference =
+      "Modi:\n"
+      "  Collider:\n"
+      "    TARGET: -211\n"
+      "    PROJECTILE: 211\n"
+      "    SQRTS: 1.0";
   COMPARE(conf.unused_values_report(), reference);
 
   modi.take({"Collider", "PROJECTILE"});
-  reference = "Modi:\n  Collider:\n    SQRTS: 1.0\n    TARGET: -211";
+  reference =
+      "Modi:\n"
+      "  Collider:\n"
+      "    TARGET: -211\n"
+      "    SQRTS: 1.0";
   COMPARE(conf.unused_values_report(), reference);
 
   modi.take({"Collider", "SQRTS"});
-  reference = "Modi:\n  Collider:\n    TARGET: -211";
+  reference =
+      "Modi:\n"
+      "  Collider:\n"
+      "    TARGET: -211";
   COMPARE(conf.unused_values_report(), reference);
 
   modi.take({"Collider", "TARGET"});
