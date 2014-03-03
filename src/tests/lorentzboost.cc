@@ -7,24 +7,92 @@
 
 #include "tests/unittest.h"
 #include "include/fourvector.h"
+#include "include/angles.h"
 
 using namespace Smash;
 
-FourVector p(4, 1, 2, 3);
+static const double kEPS = 1e-10;
+Angles dir;
 
-TEST(boost_to_rest) {
-  FourVector v(1.0, 0.25, 0.5, 0.75);
-  FourVector p_boosted = p.LorentzBoost(v);
-  FUZZY_COMPARE(p_boosted.Dot(),p.Dot());
-  // space-like components should have been boosted to zero:
-  FUZZY_COMPARE(p_boosted.x1(),0.0);
-  FUZZY_COMPARE(p_boosted.x2(),0.0);
-  FUZZY_COMPARE(p_boosted.x3(),0.0);
-  UnitTest::setFuzzyness<double>(2);
-  // boost back and compare with original vector:
-  FourVector v_neg(1, -v.x1(), -v.x2(), -v.x3());
-  FourVector p_returned = p_boosted.LorentzBoost(v_neg);
-  FUZZY_COMPARE(p.x1(), p_returned.x1());
-  FUZZY_COMPARE(p.x2(), p_returned.x2());
-  FUZZY_COMPARE(p.x3(), p_returned.x3());
+FourVector random_velocity();
+FourVector random_velocity() {
+  dir.distribute_isotropically();
+  double beta = drand48();
+  // velocity-"vector" is not normalized (that's how LorentzBoost
+  // works):
+  return FourVector(1.0, beta*dir.x(), beta*dir.y(), beta*dir.z());
+}
+
+// here, we boost a velocity vector with itself.
+TEST(self_boost) {
+  for(int i = 0; i < 1000000; i++) {
+    FourVector velocity = random_velocity();
+    // u_mu is a real four-vector.
+    double gamma = 1.0/sqrt(velocity.Dot());
+    FourVector u_mu = velocity*gamma;
+    FourVector boosted = u_mu.LorentzBoost(velocity);
+    FUZZY_COMPARE(boosted.x0(),1.0) << " at loop " << i;
+    VERIFY(std::abs(boosted.x1() - 0.0) < kEPS) << " at loop " << i;
+    VERIFY(std::abs(boosted.x2() - 0.0) < kEPS) << " at loop " << i;
+    VERIFY(std::abs(boosted.x3() - 0.0) < kEPS) << " at loop " << i;
+  }
+}
+
+// try to keep the invariants invariant
+// 1. "length" of a four-vector
+TEST(keep_invariant_length) {
+  UnitTest::setFuzzyness<double>(32);
+  for(int i = 0; i < 1000; i++) {
+    FourVector velocity = random_velocity();
+    for(int j = 0; j < 1000; j++) {
+      FourVector a( 2.0*drand48()-1.0
+                  , 2.0*drand48()-1.0
+                  , 2.0*drand48()-1.0
+                  , 2.0*drand48()-1.0 );
+      FourVector A = a.LorentzBoost(velocity);
+      FUZZY_COMPARE(a.Dot(), A.Dot());
+    }
+  }
+}
+
+// 2. scalar product between two four-vectors
+TEST(keep_invariant_angle) {
+  UnitTest::setFuzzyness<double>(64);
+  for(int i = 0; i < 1000; i++) {
+    FourVector velocity = random_velocity();
+    for(int j = 0; j < 1000; j++) {
+      FourVector a( 2.0*drand48()-1.0
+                  , 2.0*drand48()-1.0
+                  , 2.0*drand48()-1.0
+                  , 2.0*drand48()-1.0 );
+      FourVector b( 2.0*drand48()-1.0
+                  , 2.0*drand48()-1.0
+                  , 2.0*drand48()-1.0
+                  , 2.0*drand48()-1.0 );
+      FourVector A = a.LorentzBoost(velocity);
+      FourVector B = b.LorentzBoost(velocity);
+      FUZZY_COMPARE(a.Dot(b), A.Dot(B));
+    }
+  }
+}
+
+// Lorentz transformation and back should get the same vector:
+TEST(back_and_forth) {
+  UnitTest::setFuzzyness<double>(64);
+  for(int i = 0; i < 1000; i++) {
+    FourVector velocity = random_velocity();
+    FourVector back(1, -velocity.x1(), -velocity.x2(), -velocity.x3());
+    for(int j = 0; j < 1000; j++) {
+      FourVector a( 2.0*drand48()-1.0
+                  , 2.0*drand48()-1.0
+                  , 2.0*drand48()-1.0
+                  , 2.0*drand48()-1.0 );
+      FourVector forward  = a.LorentzBoost(velocity);
+      FourVector backward = forward.LorentzBoost(back);
+      FUZZY_COMPARE(backward.x0(),a.x0());
+      FUZZY_COMPARE(backward.x1(),a.x1());
+      FUZZY_COMPARE(backward.x2(),a.x2());
+      FUZZY_COMPARE(backward.x3(),a.x3());
+    }
+  }
 }
