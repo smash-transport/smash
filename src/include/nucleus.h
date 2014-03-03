@@ -40,7 +40,7 @@ class Nucleus {
    * the distribution of return values from this function is according
    * to a Woods-Saxon distribution suitable for this nucleus.
    * \f$\frac{dN}{dr} = \frac{r^2}{\exp\left(\frac{r-R}{d}\right) +
-   * 1}\f$ where \f$d\f$ is the softness_ parameter and \f$R\f$ is
+   * 1}\f$ where \f$d\f$ is the diffusiveness_ parameter and \f$R\f$ is
    * nuclear_radius(). */
   float distribution_nucleons() const;
   /// sets the positions of the nuclei inside nucleus A.
@@ -67,10 +67,10 @@ class Nucleus {
    * and 7 neutrons). The particles are only created, no position or
    * momenta are yet assigned. */
   void fill_from_list(const std::map<int, int>& particle_list);
-  /// sets the softness of the nucleus
+  /// sets the diffusiveness of the nucleus
   ///
-  /// \see softness_.
-  void set_softness(const float& soft);
+  /// \see diffusiveness_.
+  void set_diffusiveness(const float& soft);
   /**
    * sets the masses of all nucleons automatically from the PDG info in
    * particles.
@@ -108,9 +108,9 @@ class Nucleus {
   }
 
  private:
-  /** softness of Woods-Saxon-distribution in this nucleus im fm
-   * (for softness_ == 0, we obtain a hard sphere. */
-  float softness_ = .545f;
+  /** diffusiveness of Woods-Saxon-distribution in this nucleus im fm
+   * (for diffusiveness_ == 0, we obtain a hard sphere. */
+  float diffusiveness_ = .545f;
   /** single-proton-radius 
    *
    * \see nuclear_radius

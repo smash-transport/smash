@@ -73,8 +73,8 @@ struct ExperimentParameters;
  * lead-208 nucleus (82 protons and 126 neutrons = 208 nucleons), and
  * `PARTICLES: {2212: 1, 2112: 1, 3122: 1}` for Hyper-Triton (one
  * proton, one neutron and one Lambda).
- * \li `SOFTNESS:` The softness used in the Woods-Saxon distribution
- * for this nucleus.
+ * \li `DIFFUSIVENESS:` The diffusiveness used in the Woods-Saxon
+ * distribution for this nucleus.
  * 0 means a hard sphere.
  *
  * `Impact:` A section for the impact parameter (= distance of the two
@@ -82,16 +82,20 @@ struct ExperimentParameters;
  *
  * \li `VALUE: `fixed value for the impact parameter. No other \a
  * Impact: directive is looked at.
- * \li `SAMPLE:` if `linear`, use linear sampling of the impact
- * parameter (\f$dP(b) = db\f$). If else, use quadratical input sampling
- * (the physical case, where the probability of an input parameter range
- * is proportional to the area corresponding to that range, \f$dP(b) =
- * b\cdot db\f$).
+ * \li `SAMPLE:` if `uniform`, use uniform sampling of the impact
+ * parameter (\f$dP(b) = db\f$). If else, use areal input sampling
+ * (the probability of an input parameter range is proportional to the
+ * area corresponding to that range, \f$dP(b) = b\cdot db\f$).
  * \li `RANGE:` A vector of minimal and maximal impact parameters
  * between which b should be chosen. (The order of these is not
  * important.)
  * \li `MAX:` Like `RANGE: [0.0, MAX]`. Note that if both `RANGE` and
  * `MAX` are specified, `MAX` takes precedence.
+ *
+ * Note that there are no safeguards to prevent you from specifying
+ * negative impact parameters. The value chosen here is simply the
+ * x-component of \f$\vec b\f$. The result will be that the projectile
+ * and target will have switched position in x.
  *
  * `INITIAL_DISTANCE:` The initial distance of the two nuclei. That
  * means \f$z_{\rm min}^{\rm target} - z_{\rm max}^{\rm projectile}\f$.
@@ -139,7 +143,7 @@ class NucleusModus : public ModusDefault {
   int pdg_sNN_1_ = 2212;
   /// \see sqrt_s_NN_
   int pdg_sNN_2_ = 2212;
-  /** impact paramter
+  /** impact parameter
    *
    * The nuclei projectile_ and target_ will be shifted along the x axis
    * so that their centers move on antiparallel lines that are this
