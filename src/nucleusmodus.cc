@@ -17,7 +17,8 @@
 
 namespace Smash {
 
-NucleusModus::NucleusModus(Configuration modus_config) {
+NucleusModus::NucleusModus(Configuration modus_config,
+                           const ExperimentParameters &) {
   Configuration modus_cfg = modus_config["Nucleus"];
   sqrt_s_NN_ = modus_cfg.take({"SQRTSNN"});
   std::vector<int> sqrts_n = modus_cfg.take({"SQRTS_N"});
@@ -94,15 +95,17 @@ void NucleusModus::initial_conditions(Particles *particles,
   target_.auto_set_masses(particles);
   float mass_projec = projectile_.mass();
   float mass_target = target_.mass();
-  printf("Masses of Nuclei: %g GeV %g GeV\n", projectile_.mass(), target_.mass());
-  printf("Radii of Nuclei: %g fm %g fm\n", projectile_.nuclear_radius(), target_.nuclear_radius());
+  printf("Masses of Nuclei: %g GeV %g GeV\n", projectile_.mass(),
+                                              target_.mass());
+  printf("Radii of Nuclei: %g fm %g fm\n", projectile_.nuclear_radius(),
+                                           target_.nuclear_radius());
   float mass_1, mass_2;
   // set the masses used in sqrt_sNN. mass1 corresponds to the
   // projectile.
   if (pdg_sNN_1_ != 0) {
     // If PDG Code is given, use mass of this particle type.
     mass_1 = particles->particle_type(pdg_sNN_1_).mass();
-  } else if(projectile_.size() > 0) {
+  } else if (projectile_.size() > 0) {
     // else, use average mass of a particle in that nucleus
     mass_1 = projectile_.mass()/projectile_.size();
   } else {
@@ -111,7 +114,7 @@ void NucleusModus::initial_conditions(Particles *particles,
   // same logic for mass2 and target as for projectile directly above.
   if (pdg_sNN_2_ != 0) {
     mass_2 = particles->particle_type(pdg_sNN_2_).mass();
-  } else if(target_.size() > 0) {
+  } else if (target_.size() > 0) {
     mass_2 = target_.mass()/target_.size();
   } else {
     throw "Target nucleus empty!\n";
