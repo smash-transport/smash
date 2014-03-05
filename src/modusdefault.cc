@@ -24,14 +24,18 @@ void ModusDefault::check_collision_geometry(
     const ExperimentParameters &parameters) {
   FourVector distance;
   double radial_interaction =
-      sqrt(parameters.cross_section * fm2_mb * M_1_PI) * 2;
+      parameters.cross_section * fm2_mb * M_1_PI * 4;
   for (auto i = particles->begin(); i != particles->end(); ++i) {
     for (auto j = particles->begin(); j != particles->end(); ++j) {
       /* exclude check on same particle and double counting */
       if (i->first >= j->first) continue;
       distance = i->second.position() - j->second.position();
-      /* skip particles that are double interaction radius length away */
-      if (distance > radial_interaction) continue;
+      /* skip particles that are double interaction radius length away
+       * (3-product gives negative values
+       * with the chosen sign convention for the metric)
+       */
+      if (-distance.DotThree() > radial_interaction)
+        continue;
       collision_criteria_geometry(particles, cross_sections, collision_list,
                                   parameters.eps, i->first, j->first,
                                   rejection_conflict);
