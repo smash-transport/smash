@@ -23,7 +23,7 @@ void ModusDefault::check_collision_geometry(
     std::list<int> *collision_list, size_t *rejection_conflict,
     const ExperimentParameters &parameters) {
   FourVector distance;
-  double radial_interaction =
+  double neighborhood_radius_squared =
       parameters.cross_section * fm2_mb * M_1_PI * 4;
   for (auto i = particles->begin(); i != particles->end(); ++i) {
     for (auto j = particles->begin(); j != particles->end(); ++j) {
@@ -34,7 +34,7 @@ void ModusDefault::check_collision_geometry(
        * (3-product gives negative values
        * with the chosen sign convention for the metric)
        */
-      if (-distance.DotThree() > radial_interaction)
+      if (-distance.DotThree() > neighborhood_radius_squared)
         continue;
       collision_criteria_geometry(particles, cross_sections, collision_list,
                                   parameters.eps, i->first, j->first,
