@@ -36,21 +36,6 @@ static void print_line(void) {
   printf("\n");
 }
 
-/* warn_wrong_params - warn about unassigned parameters */
-void warn_wrong_params(std::list<Parameters> *configuration) {
-  if (configuration->empty())
-    return;
-
-  for (auto i = configuration->begin(); i != configuration->end(); ++i) {
-    char *key = i->key();
-    char *value = i->value();
-    printf("W: Unused parameter %s with %s\n", key, value);
-  }
-  /* Remove as we warned about them and can't do something */
-  configuration->clear();
-}
-
-
 /* print_header - title for each row */
 void print_header(void) {
   print_line();
