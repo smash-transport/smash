@@ -18,7 +18,7 @@
 namespace Smash {
 
 NucleusModus::NucleusModus(Configuration modus_config,
-                           const ExperimentParameters &) {
+                           const ExperimentParameters &params) {
   Configuration modus_cfg = modus_config["Nucleus"];
   sqrt_s_NN_ = modus_cfg.take({"SQRTSNN"});
   std::vector<int> sqrts_n = modus_cfg.take({"SQRTS_N"});
@@ -26,9 +26,9 @@ NucleusModus::NucleusModus(Configuration modus_config,
   pdg_sNN_2_ = sqrts_n[1];
   // fill nuclei with particles
   std::map<int, int> pro = modus_cfg.take({"Projectile", "PARTICLES"});
-  projectile_.fill_from_list(pro);
+  projectile_.fill_from_list(pro, params.testparticles);
   std::map<int, int> tar = modus_cfg.take({"Target", "PARTICLES"});
-  target_.fill_from_list(tar);
+  target_.fill_from_list(tar, params.testparticles);
   // set diffusiveness of the nuclei if given (else take the default value)
   if (modus_cfg.has_value({"Projectile", "DIFFUSIVENESS"})) {
     projectile_.set_diffusiveness(static_cast<float>(
@@ -78,10 +78,14 @@ void NucleusModus::print_startup() {
                                                       pdg_sNN_1_, pdg_sNN_2_);
   printf("Impact parameter: %g fm\n", impact_);
   printf("Initial distance betw nuclei: %g fm\n", 2.0*initial_z_displacement_);
-  printf("Projectile has been initialized with %lu particles\n",
-                                                           projectile_.size());
-  printf("Target     has been initialized with %lu particles\n",
-                                                               target_.size());
+  printf("Projectile has been initialized with %lu particles "
+                                             "(%lu test particles)\n",
+                                             projectile_.number_of_particles(),
+                                             projectile_.size());
+  printf("Target     has been initialized with %lu particles "
+                                             "(%lu test particles)\n",
+                                                 target_.number_of_particles(),
+                                                 target_.size());
 }
 
 /* initial_conditions - sets particle data for @particles */

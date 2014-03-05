@@ -19,7 +19,7 @@ float Nucleus::mass() const {
   for (auto i = cbegin(); i != cend(); i++) {
     total_mass += sqrt(i->momentum().Dot());
   }
-  return total_mass;
+  return total_mass/(testparticles_+0.0);
 }
 
 /**************************************************************************//**
@@ -236,7 +236,7 @@ void Nucleus::boost(const double& beta_squared_with_sign) {
   /*double gamma = 1.0/one_over_gamma;
     double gammabeta = sign*sqrt(beta_squared)*gamma;
    */
-  //despite the type name and the interface, the lorentz-boost does NOT
+  // despite the type name and the interface, the lorentz-boost does NOT
   // take a FourVector in the physical sense, i.e., one that has
   // u_mu*u^mu=1.
   // We are talking about a /passive/ lorentz transformation here, as
@@ -267,13 +267,15 @@ void Nucleus::boost(const double& beta_squared_with_sign) {
   return;
 }
 
-void Nucleus::fill_from_list(const std::map<int, int>& particle_list) {
+void Nucleus::fill_from_list(const std::map<int, int>& particle_list,
+                             const int testparticles) {
+  testparticles_ = testparticles;
   for (auto n = particle_list.cbegin(); n != particle_list.cend(); n++) {
-    for (int i = 0; i < n->second; i++) {
+    for (int i = 0; i < n->second*testparticles_; i++) {
       // append particle to list
-      particles.push_back({});
+      particles_.push_back({});
       // set this particle's PDG code.
-      particles.back().set_pdgcode(n->first);
+      particles_.back().set_pdgcode(n->first);
     }
   }
 }
