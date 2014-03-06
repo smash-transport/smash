@@ -169,26 +169,26 @@ float Nucleus::mass() const {
 float Nucleus::distribution_nucleons() const {
   // diffusiveness_ zero or negative? Use hard sphere.
   if (diffusiveness_ < std::numeric_limits<float>::min()) {
-    return nuclear_radius()*(pow(drand48(), 1./3.));
+    return nuclear_radius()*(pow(rng.uniform(0.0,1.0), 1./3.));
   }
   float radius_scaled = nuclear_radius()/diffusiveness_;
   float prob_range1 = 1.0;
   float prob_range2 = 3. / radius_scaled;
   float prob_range3 = 2. * prob_range2 / radius_scaled;
   float prob_range4 = 1. * prob_range3 / radius_scaled;
-  float all_ranges = prob_range1 + prob_range2 + prob_range3 + prob_range4;
+  float ranges234 = prob_range2 + prob_range3 + prob_range4;
   float t;
   /// \li Decide which branch \f$\tilde p^{({\rm I - IV})}\f$ to go into
   do {
-    float which_range = drand48() * all_ranges - prob_range1;
+    float which_range = rng.uniform(-prob_range1, ranges234);
     if (which_range < 0.0) {
-      t = radius_scaled * (pow(drand48(), 1./3.) - 1.);
+      t = radius_scaled * (pow(rng.canonical(), 1./3.) - 1.);
     } else {
-      t = -log(drand48());
+      t = rng.exponential();
       if (which_range >= prob_range2) {
-        t += -log(drand48());
+        t += rng.exponential();
         if (which_range >= prob_range2 + prob_range3) {
-          t += -log(drand48());
+          t += rng.exponential();
         }
       }
     }
@@ -198,7 +198,7 @@ float Nucleus::distribution_nucleons() const {
      * \f$1-(1+\exp(-|t|))^{-1}\f$ (the efficiency of this should be
      * \f$\gg \frac{1}{2}\f$)
      **/
-  } while (drand48() > 1./(1. + exp(-fabs(t)) ) );
+  } while (rng.canonical() > 1./(1. + exp(-fabs(t)) ) );
   /// \li shift and rescale \f$t\f$ to \f$r = d\cdot t + r_0\f$
   float position_scaled = t + radius_scaled;
   float position = position_scaled * diffusiveness_;

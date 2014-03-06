@@ -14,6 +14,7 @@
 #include <cstdlib>
 
 #include "include/outputroutines.h"
+#include "include/random.h"
 
 namespace Smash {
 
@@ -57,10 +58,10 @@ double sample_momenta(const double &temperature, const double &mass) {
    * random momenta and random probability need to be below the distribution
    */
   while (probability_random > probability) {
-    momentum_radial = (momentum_max - momentum_min) * drand48() + momentum_min;
+    momentum_radial = rng.uniform(momentum_min, momentum_max);
     momentum_radial = sqrt(momentum_radial * momentum_radial - mass * mass);
     probability = density_integrand(momentum_radial, temperature, mass);
-    probability_random = probability_max * drand48();
+    probability_random = rng.uniform(0.0, probability_max);
   }
 
   return momentum_radial;

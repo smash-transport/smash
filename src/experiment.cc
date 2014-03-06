@@ -25,6 +25,7 @@
 #include "include/outputroutines.h"
 #include "include/parameters.h"
 #include "include/particlesoutput.h"
+#include "include/random.h"
 #include "include/time.h"
 #include "include/vtkoutput.h"
 
@@ -86,7 +87,7 @@ Experiment<Modus>::Experiment(Configuration &config)
   if (seed_ < 0) {
     seed_ = time(nullptr);
   }
-  srand48(seed_);
+  rng.seed(seed_);
 
   print_startup(seed_);
 }

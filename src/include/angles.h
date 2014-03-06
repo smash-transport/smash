@@ -13,6 +13,7 @@
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
+#include "include/random.h"
 
 namespace Smash {
 
@@ -154,8 +155,8 @@ inline Angles::Angles() : phi_(0), costheta_(0) {}
 
 void inline Angles::distribute_isotropically() {
   /* isotropic distribution: phi in [0, 2pi) and cos(theta) in [-1,1] */
-  phi_ = 2.0 * M_PI * drand48();
-  costheta_ = -1.0 + 2.0 * drand48();
+  phi_ = rng.phi_like();
+  costheta_ = rng.cos_like();
 }
 
 void inline Angles::set_phi(const double& newphi) {

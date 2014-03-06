@@ -25,6 +25,7 @@
 #include "include/outputroutines.h"
 #include "include/parameters.h"
 #include "include/particles.h"
+#include "include/random.h"
 
 namespace Smash {
 
@@ -62,7 +63,7 @@ void BoxModus::initial_conditions(Particles *particles,
     number = this->length_ * this->length_ * this->length_ * number_density *
              parameters.testparticles;
     if (this->length_ * this->length_ * this->length_ * number_density -
-            number > drand48())
+            number > rng.canonical())
       number++;
     printf("IC number density %.6g [fm^-3]\n", number_density);
     printf("IC %zu number of %s\n", number, i->second.name().c_str());
@@ -74,6 +75,7 @@ void BoxModus::initial_conditions(Particles *particles,
   }
   printf("IC total number density %.6g [fm^-3]\n", number_density_total);
   printf("IC contains %zu particles\n", number_total);
+  rng.set_uniform(0.0, this->length_);
   /* Set paricles IC: */
   for (auto i = particles->begin(); i != particles->end(); ++i) {
     double x, y, z, time_begin;
@@ -105,9 +107,9 @@ void BoxModus::initial_conditions(Particles *particles,
     momentum_total += i->second.momentum();
     time_begin = 1.0;
     /* ramdom position in a quadratic box */
-    x = drand48() * this->length_;
-    y = drand48() * this->length_;
-    z = drand48() * this->length_;
+    x = rng.uniform();
+    y = rng.uniform();
+    z = rng.uniform();
     i->second.set_position(time_begin, x, y, z);
     /* IC: debug checks */
     printd_momenta(i->second);

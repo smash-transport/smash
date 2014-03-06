@@ -23,6 +23,7 @@
 #include "include/particles.h"
 #include "include/processbranch.h"
 #include "include/resonances.h"
+#include "include/random.h"
 
 namespace Smash {
 
@@ -124,7 +125,7 @@ void collision_criteria_geometry(Particles *particles,
   int interaction_type = 0;
   std::vector<int> final_particles;
   if (resonance_xsections.at(0).weight() > really_small) {
-    double random_interaction = drand48();
+    double random_interaction = rng.canonical();
     float interaction_probability = 0.0;
     std::vector<ProcessBranch>::const_iterator resonances
       = resonance_xsections.begin();

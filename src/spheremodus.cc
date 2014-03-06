@@ -24,6 +24,7 @@
 #include "include/particledata.h"
 #include "include/particles.h"
 #include "include/propagation.h"
+#include "include/random.h"
 #include "include/sphere.h"
 
 /* build dependent variables */
@@ -60,7 +61,7 @@ void SphereModus::initial_conditions(Particles *particles) {
                     number_density * testparticles;
     if (4.0 / 3.0 * M_PI * radius_ * radius_ * radius_ * number_density -
             number >
-        drand48())
+        rng.canoncial())
       number++;
     /* create bunch of particles */
     printf("IC creating %zu particles\n", number);
@@ -71,6 +72,7 @@ void SphereModus::initial_conditions(Particles *particles) {
   /* now set position and momentum of the particles */
   double momentum_radial;
   Angles phitheta = Angles();
+  rng.set_uniform(-radius_, +radius_);
   for (auto i = particles->begin(); i != particles->end(); ++i) {
     if (unlikely(i->first == particles->id_max() && !(i->first % 2))) {
       /* poor last guy just sits around */
@@ -95,14 +97,14 @@ void SphereModus::initial_conditions(Particles *particles) {
     /* ramdom position in a sphere
      * box length here has the meaning of the sphere radius
      */
-    x = -radius_ + 2.0 * drand48() * radius_;
-    y = -radius_ + 2.0 * drand48() * radius_;
-    z = -radius_ + 2.0 * drand48() * radius_;
+    x = rng.uniform();
+    y = rng.uniform();
+    z = rng.uniform();
     /* sampling points inside of the sphere, rejected if outside */
     while (sqrt(x * x + y * y + z * z) > radius_) {
-      x = -radius_ + 2.0 * drand48() * radius_;
-      y = -radius_ + 2.0 * drand48() * radius_;
-      z = -radius_ + 2.0 * drand48() * radius_;
+      x = rng.uniform();
+      y = rng.uniform();
+      z = rng.uniform();
     }
     i->second.set_position(time_start, x, y, z);
     /* IC: debug checks */

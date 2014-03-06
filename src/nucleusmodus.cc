@@ -14,6 +14,7 @@
 #include "include/configuration.h"
 #include "include/experimentparameters.h"
 #include "include/outputroutines.h"
+#include "include/random.h"
 
 namespace Smash {
 
@@ -159,16 +160,14 @@ void NucleusModus::initial_conditions(Particles *particles,
 
 void NucleusModus::sample_impact(const bool s, const float min,
                                                const float max) {
-  // chi is the random number
-  double chi = drand48();
   if (s) {
     // quadratic sampling: Note that for min > max, this still yields
-    // the correct distribution (only that chi = 0 then is the upper
-    // end, not the lower).
-    impact_ = sqrt(min*min + chi * (max*max - min*min));
+    // the correct distribution (only that canonical() = 0 then is the
+    // upper end, not the lower).
+    impact_ = sqrt(min*min + rng.canonical() * (max*max - min*min));
   } else {
     // linear sampling. Still, min > max works fine.
-    impact_ = min + chi * (max - min);
+    impact_ = rng.uniform(min, max);
   }
 }
 

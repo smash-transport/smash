@@ -29,6 +29,7 @@
 #include "include/particledata.h"
 #include "include/particletype.h"
 #include "include/processbranch.h"
+#include "include/random.h"
 
 namespace Smash {
 
@@ -581,9 +582,8 @@ double sample_resonance_mass(Particles *particles, int pdg_resonance,
     = spectral_function_integrand(parameters.at(0), &parameters);
   double distribution_value = 0.0;
   while (random_number > distribution_value) {
-    random_number = distribution_max * drand48();
-    mass_resonance = (cms_energy - mass_stable - minimum_mass) * drand48()
-                     + minimum_mass;
+    random_number = rng.uniform(0.0, distribution_max);
+    mass_resonance = rng.uniform(minimum_mass, cms_energy - mass_stable);
     distribution_value
       = spectral_function_integrand(mass_resonance, &parameters);
   }
