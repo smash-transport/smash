@@ -56,13 +56,11 @@ void SphereModus::initial_conditions(Particles *particles) {
     /* bose einstein distribution function with temperature 0.3 GeV */
     double number_density = number_density_bose(i->second.mass(), 0.3);
     printf("IC number density %.6g [fm^-3]\n", number_density);
-    /* cast while reflecting probability of extra particle */
-    size_t number = 4.0 / 3.0 * M_PI * radius_ * radius_ * radius_ *
-                    number_density * testparticles;
-    if (4.0 / 3.0 * M_PI * radius_ * radius_ * radius_ * number_density -
-            number >
-        rng.canoncial())
-      number++;
+    double real_number = 4.0 / 3.0 * M_PI * radius_ * radius_ * radius_ *
+                         number_density * testparticles;
+    size_t int_number = static_cast<size_t>(real_number);
+    if (real_number - int_number > rng.canoncial())
+      ++number;
     /* create bunch of particles */
     printf("IC creating %zu particles\n", number);
     particles->create(number, i->second.pdgcode());
