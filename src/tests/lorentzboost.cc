@@ -10,6 +10,9 @@
 #include "include/angles.h"
 
 using namespace Smash;
+namespace Smash {
+rng_dist rng;
+} // namespace Smash
 
 static const double kEPS = 1e-10;
 Angles dir;
