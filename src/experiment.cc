@@ -35,6 +35,8 @@
 
 namespace Smash {
 
+rng_dist rng;
+
 namespace bf = boost::filesystem;
 
 /* ExperimentBase carries everything that is needed for the evolution */

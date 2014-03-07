@@ -86,7 +86,7 @@ class rng_dist {
   std::uniform_real_distribution<double> exponential_;
 };
 
-rng_dist rng;
+extern rng_dist rng;
 
 }  // namespace Smash
 
