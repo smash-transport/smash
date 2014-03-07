@@ -13,6 +13,10 @@
 
 using namespace Smash;
 
+namespace Smash {
+rng_dist rng;
+} // namespace Smash
+
 int main() {
   // histograms in 1 degree steps:
   int phi_histo[360] = {0};

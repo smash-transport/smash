@@ -316,4 +316,13 @@ void Nucleus::copy_particles(Particles* external_particles) {
   }
 }
 
+FourVector Nucleus::center() const {
+  FourVector centerpoint(0.0,0.0,0.0,0.0);
+  for (auto p = cbegin(); p != cend(); p++) {
+    centerpoint += p->position();
+  }
+  centerpoint /= size();
+  return centerpoint;
+}
+
 }  // namespace Smash

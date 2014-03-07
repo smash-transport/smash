@@ -117,11 +117,13 @@ class Nucleus {
     // if size() is not a multiple of testparticles_, this will throw an
     // error.
     if (nop * testparticles_ != particles_.size()) {
-      throw "Number of test particles and test particles"
+      std::string error = "Number of test particles and test particles"
             "per particle are incompatible";
+      throw error;
     }
     return nop;
   }
+  FourVector center() const;
 
  private:
   /** diffusiveness of Woods-Saxon-distribution in this nucleus im fm

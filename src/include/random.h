@@ -23,7 +23,7 @@ namespace Smash {
 class rng_dist {
  public:
   rng_dist() 
-     : engine_(1),
+     : engine_(time(nullptr)),
        cos_like_(-1.0, 1.0),
        phi_like_(0.0, 2 * M_PI),
        uniform_(0.0, 1.0),
