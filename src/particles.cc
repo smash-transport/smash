@@ -8,6 +8,8 @@
  */
 #include <cmath>
 #include <cstdio>
+#include <iostream>
+#include <sstream>
 
 #include "include/angles.h"
 #include "include/constants.h"
@@ -17,6 +19,9 @@
 #include "include/outputroutines.h"
 #include "include/particledata.h"
 #include "include/particles.h"
+#include <assert.h>
+
+namespace Smash {
 
 /* boost_CM - boost to center of momentum */
 void boost_CM(ParticleData *particle1, ParticleData *particle2,
@@ -225,3 +230,198 @@ void sample_cms_momenta(ParticleData *particle1, ParticleData *particle2,
   printd("p2: %g %g \n", momentum1.x2(), momentum2.x2());
   printd("p3: %g %g \n", momentum1.x3(), momentum2.x3());
 }
+
+/* add a new particle type */
+inline void Particles::add_type(ParticleType const &TYPE, int pdg) {
+  types_.insert(std::pair<int, ParticleType>(pdg, TYPE));
+}
+
+/* add decay modes for a particle type */
+inline void Particles::add_decaymodes(const DecayModes &new_decay_modes,
+                                      int pdg) {
+  all_decay_modes_.insert(std::pair<int, DecayModes>(pdg, new_decay_modes));
+}
+
+namespace {/*{{{*/
+std::string trim(const std::string &s) {
+  const auto begin = s.find_first_not_of(" \t\n\r");
+  if (begin == std::string::npos) {
+    return {};
+  }
+  const auto end = s.find_last_not_of(" \t\n\r");
+  return s.substr(begin, end - begin);
+}
+struct Line {/*{{{*/
+  Line() = default;
+  Line(int n, std::string &&t) : number(n), text(std::move(t)) {
+  }
+  int number;
+  std::string text;
+};/*}}}*/
+
+std::string build_error_string(std::string message, const Line &line) {/*{{{*/
+  return message + " (on line " + std::to_string(line.number) + ": \"" +
+         line.text + "\")";
+}/*}}}*/
+
+/**
+ * Helper function for parsing particles.txt and decaymodes.txt.
+ *
+ * This function goes through an input stream line by line and removes
+ * comments and empty lines. The remaining lines will be returned as a vector
+ * of strings and linenumber pairs (Line).
+ *
+ * \param input an lvalue reference to an input stream
+ */
+std::vector<Line> line_parser(const std::string &input) {/*{{{*/
+  std::istringstream input_stream(input);
+  std::vector<Line> lines;
+  lines.reserve(50);
+
+  std::string line;
+  int line_number = 0;
+  while (std::getline(input_stream, line)) {
+    ++line_number;
+    const auto hash_pos = line.find('#');
+    if (hash_pos != std::string::npos) {
+      // found a comment, remove it from the line and look further
+      line = line.substr(0, hash_pos);
+    }
+    if (line.find_first_not_of(" \t") == std::string::npos) {
+      // only whitespace (or nothing) on this line. Next, please.
+      continue;
+    }
+    lines.emplace_back(line_number, std::move(line));
+    line = std::string();
+  }
+  return std::move(lines);
+}/*}}}*/
+
+void ensure_all_read(std::istream &input, const Line &line) {/*{{{*/
+  std::string tmp;
+  input >> tmp;
+  if (!input.eof()) {
+    throw Particles::LoadFailure(
+        build_error_string("While loading the Particle data:\nGarbage (" + tmp +
+                               ") at the remainder of the line.",
+                           line));
+  }
+}/*}}}*/
+
+constexpr int NotAParticle = 0;
+}  // unnamed namespace/*}}}*/
+
+void Particles::load_particle_types(const std::string &input) {/*{{{*/
+  for (const Line &line : line_parser(input)) {
+    std::istringstream lineinput(line.text);
+    std::string name;
+    float mass, width;
+    int pdgcode, isospin, charge, spin;
+    lineinput >> name >> mass >> width >> pdgcode >> isospin >> charge >> spin;
+    if (lineinput.fail()) {
+      throw LoadFailure(build_error_string(
+          "While loading the Particle data:\nFailed to convert the input "
+          "string to the expected data types.",
+          line));
+    }
+    ensure_all_read(lineinput, line);
+
+    printd("Setting particle type %s mass %g width %g pdgcode %i\n",
+           name.c_str(), mass, width, pdgcode);
+    printd("Setting particle type %s isospin %i charge %i spin %i\n",
+           name.c_str(), isospin, charge, spin);
+
+    add_type({name, mass, width, pdgcode, isospin, charge, spin}, pdgcode);
+  }
+}/*}}}*/
+
+void Particles::load_decaymodes(const std::string &input) {
+  int pdgcode = NotAParticle;
+  DecayModes decay_modes_to_add;
+  float ratio_sum = 0.0;
+
+  const auto end_of_decaymodes = [&]() {
+    if (pdgcode == NotAParticle) {  // at the start of the file
+      return;
+    }
+    if (decay_modes_to_add.empty()) {
+      throw MissingDecays("No decay modes found for particle " +
+                          std::to_string(pdgcode));
+    }
+    // XXX: why not just unconditionally call renormalize? (mkretz)
+    /* Check if ratios add to 1 */
+    if (fabs(ratio_sum - 1.0) > really_small) {
+      /* They didn't; renormalize */
+      printf("Particle %i:\n", pdgcode);
+      decay_modes_to_add.renormalize(ratio_sum);
+    }
+    /* Add the list of decay modes for this particle type */
+    this->add_decaymodes(decay_modes_to_add, pdgcode);
+    /* Clean up the list for the next particle type */
+    decay_modes_to_add.clear();
+    ratio_sum = 0.0;
+  };
+
+  for (const Line &line : line_parser(input)) {
+    const auto trimmed = trim(line.text);
+    assert(!trimmed.empty());  // trim(line.text) is never empty - else
+                               // line_parser is broken
+    // if (trimmed.find_first_not_of("-0123456789") ==
+    if (trimmed.find_first_of(" \t") ==
+        std::string::npos) {  // a single record on one line signifies a new
+                              // decay mode section
+      end_of_decaymodes();
+      std::size_t pos = 0;
+      pdgcode = std::stoi(line.text, &pos);
+      if (!is_particle_type_registered(pdgcode)) {
+        throw ReferencedParticleNotFound(build_error_string(
+            "Inconsistency: The particle with PDG id " +
+                std::to_string(pdgcode) +
+                " was not registered through particles.txt, but "
+                "decaymodes.txt referenced it.",
+            line));
+      } else if (pos <= trimmed.size()) {
+        throw ParseError(build_error_string(
+            "Parse error: A PDG code (signed integer value) was expected.",
+            line));
+      }
+      assert(pdgcode != NotAParticle);  // special value for start of file
+    } else {
+      std::istringstream lineinput(line.text);
+      std::vector<int> decay_particles;
+      decay_particles.reserve(4);
+      float ratio;
+      lineinput >> ratio;
+
+      int pdg;
+      lineinput >> pdg;
+      while (lineinput) {
+        if (!is_particle_type_registered(pdg)) {
+          throw ReferencedParticleNotFound(build_error_string(
+              "Inconsistency: The particle with PDG id " +
+                  std::to_string(pdgcode) +
+                  " was not registered through particles.txt, but "
+                  "decaymodes.txt referenced it.",
+              line));
+        }
+        decay_particles.push_back(pdg);
+        lineinput >> pdg;
+      }
+      if (lineinput.fail() && !lineinput.eof()) {
+        throw LoadFailure(
+            build_error_string("Parse error: expected an integer", line));
+      }
+      decay_particles.shrink_to_fit();
+      decay_modes_to_add.add_mode(std::move(decay_particles), ratio);
+      ratio_sum += ratio;
+    }
+  }
+  end_of_decaymodes();
+}
+
+void Particles::reset() {
+  id_max_ = -1;
+  data_.clear();
+}
+
+}  // namespace Smash

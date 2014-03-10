@@ -1,0 +1,7 @@
+file(STRINGS "${INPUT_FILE}" TEXT)
+set(output "// This file was generated from ${INPUT_FILE}. Do not modify.\n")
+set(output "${output}const char ${NAME}[] =")
+foreach(line ${TEXT})
+   set(output "${output}\n  \"${line}\\n\"")
+endforeach()
+file(WRITE "${OUTPUT_FILE}" "${output};\n")

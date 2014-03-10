@@ -14,6 +14,8 @@
 
 #include "include/particles.h"
 
+namespace Smash {
+
 class ModusDefault;
 
 /* does_decay - does a resonance decay on this timestep? */
@@ -32,5 +34,7 @@ int one_to_two(Particles *particles, int resonance_id, int type_a, int type_b);
 /* 1->3 process kinematics */
 int one_to_three(Particles *particles, int resonance_id,
                  int type_a, int type_b, int type_c);
+
+}  // namespace Smash
 
 #endif  // SRC_INCLUDE_DECAYS_H_

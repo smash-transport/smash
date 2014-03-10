@@ -7,13 +7,24 @@
 #ifndef SRC_INCLUDE_EXPERIMENTPARAMETERS_H_
 #define SRC_INCLUDE_EXPERIMENTPARAMETERS_H_
 
+namespace Smash {
+
+/**
+ * Helper structure for Experiment.
+ *
+ * Experiment has one member of this struct. In essence the members of this
+ * struct are members of Experiment, but combined in one structure for easier
+ * function argument passing.
+ */
 struct ExperimentParameters {
-  /* number of test particle */
-  int testparticles = 1;
-  /* temporal time step */
-  float eps = 0.001f;
-  /* cross section of the elastic scattering */
-  float cross_section = 10.0f;
+  /// temporal time step
+  const double eps;
+  /// cross section of the elastic scattering
+  const float cross_section;
+  /// number of test particle
+  int testparticles;
 };
+
+}  // namespace Smash
 
 #endif  // SRC_INCLUDE_EXPERIMENTPARAMETERS_H_

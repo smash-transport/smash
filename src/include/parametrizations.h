@@ -9,6 +9,8 @@
 #ifndef SRC_INCLUDE_PARAMETRIZATIONS_H_
 #define SRC_INCLUDE_PARAMETRIZATIONS_H_
 
+namespace Smash {
+
 /* pp elastic cross section parametrization */
 float pp_elastic(double p_lab, double mandelstam_s, float nucleon_mass);
 
@@ -26,5 +28,7 @@ float ppbar_elastic(double p_lab);
 
 /* ppbar total cross section parametrization */
 float ppbar_total(double p_lab);
+
+}  // namespace Smash
 
 #endif  // SRC_INCLUDE_PARAMETRIZATIONS_H_

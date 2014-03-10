@@ -30,6 +30,8 @@
 #include "include/particletype.h"
 #include "include/processbranch.h"
 
+namespace Smash {
+
 /* calculate_minimum_mass
  * - calculate the minimum rest energy the resonance must have
  * to be able to decay through any of its decay channels
@@ -134,7 +136,7 @@ std::vector<ProcessBranch> resonance_cross_section(
     if (particles->decay_modes(type_resonance.pdgcode()).empty())
       continue;
 
-    double resonance_xsection
+    float resonance_xsection
       = symmetryfactor * two_to_one_formation(particles, type_particle1,
         type_particle2, type_resonance, mandelstam_s, cm_momentum_squared);
 
@@ -159,7 +161,7 @@ std::vector<ProcessBranch> resonance_cross_section(
       size_t two_to_two_processes
          = two_to_two_formation(particles, type_particle1,
            type_particle2, type_resonance, mandelstam_s, cm_momentum_squared,
-           symmetryfactor, &resonance_process_list);
+           &resonance_process_list);
       if (two_to_two_processes > 0) {
         printd("Found %zu 2->2 processes for resonance %i (%s).\n",
                two_to_two_processes,
@@ -306,7 +308,7 @@ double two_to_one_formation(Particles *particles,
 size_t two_to_two_formation(Particles *particles,
   const ParticleType &type_particle1,
   const ParticleType &type_particle2, const ParticleType &type_resonance,
-  double mandelstam_s, double cm_momentum_squared, double symmetryfactor,
+  double mandelstam_s, double cm_momentum_squared,
   std::vector<ProcessBranch> *process_list) {
   size_t number_of_processes = 0;
   /* If we have two baryons in the beginning, we must have fermion resonance */
@@ -319,16 +321,7 @@ size_t two_to_two_formation(Particles *particles,
    * 2 * Iz = 2 * charge - (baryon number + strangeness + charm)
    * XXX: Strangeness and charm ignored for now!
    */
-  const int isospin_z1 = type_particle1.spin() % 2 == 0
-    ? type_particle1.charge() * 2
-    : type_particle1.charge() * 2 - type_particle1.pdgcode()
-                                    / abs(type_particle1.pdgcode());
-  const int isospin_z2 = type_particle2.spin() % 2 == 0
-    ? type_particle2.charge() * 2
-    : type_particle2.charge() * 2 - type_particle2.pdgcode()
-                                    / abs(type_particle2.pdgcode());
-
-  int isospin_z_resonance = (type_resonance.spin()) % 2 == 0
+  const int isospin_z_resonance = (type_resonance.spin()) % 2 == 0
     ? type_resonance.charge() * 2
     : type_resonance.charge() * 2 - type_resonance.pdgcode()
                                     / abs(type_resonance.pdgcode());
@@ -395,19 +388,19 @@ size_t two_to_two_formation(Particles *particles,
        * Note that the calculation assumes that isospin values
        * have been multiplied by two
        */
-      double wigner_3j =  gsl_sf_coupling_3j(type_particle1.isospin(),
-        type_particle2.isospin(), isospin_final,
-        isospin_z1, isospin_z2, -isospin_z_final);
+      double wigner_3j =  gsl_sf_coupling_3j(type_resonance.isospin(),
+        type_i->second.isospin(), isospin_final,
+        isospin_z_resonance, isospin_z_i, -isospin_z_final);
       if (fabs(wigner_3j) > really_small)
-        clebsch_gordan_isospin += pow(-1, type_particle1.isospin() / 2.0
-        - type_particle2.isospin() / 2.0 + isospin_z_final / 2.0)
+        clebsch_gordan_isospin += pow(-1, type_resonance.isospin() / 2.0
+        - type_i->second.isospin() / 2.0 + isospin_z_final / 2.0)
         * sqrt(isospin_final + 1) * wigner_3j;
 
       printd("CG: %g I1: %i I2: %i IR: %i iz1: %i iz2: %i izR: %i \n",
          clebsch_gordan_isospin,
-         type_particle1.isospin(), type_particle2.isospin(),
+         type_resonance.isospin(), type_i->second.isospin(),
          isospin_final,
-         isospin_z1, isospin_z2, isospin_z_final);
+         isospin_z_resonance, isospin_z_i, isospin_z_final);
       /* isospin is multiplied by 2,
        *  so we must also decrease it by increments of 2
        */
@@ -448,23 +441,6 @@ size_t two_to_two_formation(Particles *particles,
     if (not_enough_energy)
       continue;
 
-    /* Calculate spin factor */
-    int spin_total_maximum
-      = type_resonance.spin() + type_i->second.spin();
-    int spin_total_minimum
-      = abs(type_resonance.spin() - type_i->second.spin());
-    int spin_total = spin_total_maximum;
-    double spinfactor = (spin_total + 1)
-      / ((type_particle1.spin() + 1) * (type_particle2.spin() + 1));
-    /* spin is multiplied by 2,
-     * so it must be decreased in increments of 2
-     */
-    spin_total = spin_total - 2;
-    while (spin_total >=  spin_total_minimum) {
-      spinfactor += (spin_total + 1)
-        / ((type_particle1.spin() + 1) * (type_particle2.spin() + 1));
-      spin_total = spin_total - 2;
-    }
     /* Calculate resonance production cross section
      * using the Breit-Wigner distribution as probability amplitude
      * Integrate over the allowed resonance mass range
@@ -487,19 +463,20 @@ size_t two_to_two_formation(Particles *particles,
     printd("Integral value: %g Error: %g \n", resonance_integral,
       integral_error);
 
+    /* matrix element squared over 16pi (in mb GeV^2)
+     * (uniform angular distribution assumed)
+     */
+    double matrix_element = 180;
+
     /* Cross section for 2->2 process with resonance in final state.
      * Based on the general differential form in
      * Buss et al., Physics Reports 512, 1 (2012), Eq. (D.28)
      */
-    double xsection = clebsch_gordan_isospin * clebsch_gordan_isospin
-                      * spinfactor * symmetryfactor
-                      / (64 * M_PI * M_PI)
+    float xsection = clebsch_gordan_isospin * clebsch_gordan_isospin
+                      * matrix_element
                       / mandelstam_s
                       / sqrt(cm_momentum_squared)
-                      /* XXX: Assuming uniform angular distribution */
-                      * 4 * M_PI
-                      * resonance_integral
-                      * hbarc * hbarc / fm2_mb;
+                      * resonance_integral;
 
     if (xsection > really_small) {
       ProcessBranch final_state;
@@ -628,6 +605,7 @@ int resonance_formation(Particles *particles, int particle_id, int other_id,
   const double cms_energy = particles->data(particle_id).momentum().x0()
     + particles->data(other_id).momentum().x0();
 
+  int id_first_new = -1;
   if (produced_particles.size() == 1) {
     resonance.set_pdgcode(produced_particles.at(0));
     /* Center-of-momentum frame of initial particles
@@ -648,7 +626,7 @@ int resonance_formation(Particles *particles, int particle_id, int other_id,
 
     /* Initialize position */
     resonance.set_position(1.0, 0.0, 0.0, 0.0);
-    particles->add_data(resonance);
+    id_first_new = particles->add_data(resonance);
   } else if (produced_particles.size() == 2) {
     /* 2 particles in final state. Need another particle template */
     /* XXX: For now, it is assumed that the other particle is stable! */
@@ -673,7 +651,7 @@ int resonance_formation(Particles *particles, int particle_id, int other_id,
     /* Initialize positions */
     resonance.set_position(1.0, 0.0, 0.0, 0.0);
     stable_product.set_position(1.0, 0.0, 0.0, 0.0);
-    particles->add_data(resonance);
+    id_first_new = particles->add_data(resonance);
     particles->add_data(stable_product);
   } else {
     printf("resonance_formation:\n");
@@ -682,5 +660,8 @@ int resonance_formation(Particles *particles, int particle_id, int other_id,
     printf("Resonance formation canceled. Returning -1.\n");
     return -1;
   }
-  return particles->id_max();
+  /* Return the id of the first new particle */
+  return id_first_new;
 }
+
+}  // namespace Smash

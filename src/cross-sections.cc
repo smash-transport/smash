@@ -18,6 +18,8 @@
 #include "include/particles.h"
 #include "include/particletype.h"
 
+namespace Smash {
+
 void CrossSections::compute_kinematics(Particles *particles,
   int id_a, int id_b) {
   /* Mandelstam s = (p_a + p_b)^2 = square of CMS energy */
@@ -31,7 +33,9 @@ void CrossSections::compute_kinematics(Particles *particles,
     = particles->data(id_b).momentum().Dot(particles->data(id_b).momentum());
   /* Beam momentum (assuming particle A as "beam") */
   p_lab_ = sqrt((mandelstam_s_ - squared_mass_a_ - squared_mass_b_)
-                / (2 * sqrt(squared_mass_b_)));
+                * (mandelstam_s_ - squared_mass_a_ - squared_mass_b_)
+                - 4 * squared_mass_a_ * squared_mass_b_)
+           / (2 * sqrt(squared_mass_b_));
 }
 
 float CrossSections::elastic(Particles *particles, int id_a, int id_b)
@@ -49,8 +53,8 @@ float CrossSections::elastic(Particles *particles, int id_a, int id_b)
   if (particles->type(id_a).pdgcode() == particles->type(id_b).pdgcode()) {
     return pp_elastic(p_lab_, mandelstam_s_, sqrt(squared_mass_a_));
   /* ppbar-scattering */
-  } else if (abs(particles->type(id_a).pdgcode())
-          == abs(particles->type(id_b).pdgcode())) {
+  } else if (std::abs(particles->type(id_a).pdgcode())
+          == std::abs(particles->type(id_b).pdgcode())) {
     return ppbar_elastic(p_lab_);
   /* np-scattering */
   } else {
@@ -73,11 +77,13 @@ float CrossSections::total(Particles *particles, int id_a, int id_b)
   if (particles->type(id_a).pdgcode() == particles->type(id_b).pdgcode()) {
     return pp_total(p_lab_);
   /* ppbar-scattering */
-  } else if (abs(particles->type(id_a).pdgcode())
-          == abs(particles->type(id_b).pdgcode())) {
+  } else if (std::abs(particles->type(id_a).pdgcode())
+          == std::abs(particles->type(id_b).pdgcode())) {
     return ppbar_total(p_lab_);
   /* np-scattering */
   } else {
     return np_total(p_lab_);
   }
 }
+
+}  // namespace Smash

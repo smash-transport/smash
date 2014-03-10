@@ -24,6 +24,8 @@
 #include "include/processbranch.h"
 #include "include/resonances.h"
 
+namespace Smash {
+
 /* collision_criteria_geometry - check by geometrical method if a collision
  *                               happens between particles
  */
@@ -50,7 +52,7 @@ void collision_criteria_geometry(Particles *particles,
 
   /* Total cross section is elastic + resonance production  */
   /* (Ignore annihilation and total for now) */
-  const double total_cross_section
+  const float total_cross_section
     = cross_sections->elastic(particles, id_a, id_b)
     + resonance_xsections.at(0).weight();
 
@@ -123,7 +125,7 @@ void collision_criteria_geometry(Particles *particles,
   std::vector<int> final_particles;
   if (resonance_xsections.at(0).weight() > really_small) {
     double random_interaction = drand48();
-    double interaction_probability = 0.0;
+    float interaction_probability = 0.0;
     std::vector<ProcessBranch>::const_iterator resonances
       = resonance_xsections.begin();
     while (interaction_type == 0 && resonances != resonance_xsections.end()) {
@@ -158,7 +160,7 @@ void collision_criteria_geometry(Particles *particles,
 
 /* colliding_particle - particle interaction */
 size_t collide_particles(Particles *particles, std::list<int> *collision_list,
-  size_t id_process, int *resonance_formations) {
+  size_t id_process) {
   FourVector velocity_CM;
 
   /* XXX: print debug output of collision list */
@@ -208,7 +210,6 @@ size_t collide_particles(Particles *particles, std::list<int> *collision_list,
 
     } else if (interaction_type == 1) {
       /* resonance formation */
-      (*resonance_formations)++;
       printd("Process: Resonance formation. ");
       size_t new_particles = (particles->data(id_a).final_state()).size();
       write_oscar(particles->data(id_a), particles->type(id_a), 2,
@@ -290,3 +291,5 @@ size_t collide_particles(Particles *particles, std::list<int> *collision_list,
   /* return how many processes we have handled so far*/
   return id_process;
 }
+
+}  // namespace Smash

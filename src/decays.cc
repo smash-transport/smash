@@ -27,6 +27,8 @@
 #include "include/particletype.h"
 #include "include/resonances.h"
 
+namespace Smash {
+
 /* check_decays - does a resonance decay on this timestep? */
 void check_decays(Particles *particles, std::list<int> *decay_list,
   const float timestep) {
@@ -204,7 +206,7 @@ int resonance_decay(Particles *particles, int particle_id) {
     = particles->decay_modes(pdgcode).decay_mode_list();
   /* Get the first decay mode and its branching ratio */
   std::vector<ProcessBranch>::const_iterator mode = decaymodes.begin();
-  double cumulated_probability = mode->weight();
+  float cumulated_probability = mode->weight();
   /* Ratios of decay channels should add to 1; pick a random number
    * between 0 and 1 to select the decay mode to be used
    */
@@ -275,11 +277,11 @@ int one_to_two(Particles *particles, int resonance_id, int type_a, int type_b) {
   new_particle_a.set_position(decay_point);
   new_particle_b.set_position(decay_point);
 
-  particles->add_data(new_particle_a);
+  int id_first_new = particles->add_data(new_particle_a);
   particles->add_data(new_particle_b);
 
   /* 2 new particles created; return the id of the first one */
-  return particles->id_max() - 1;
+  return id_first_new;
 }
 
 /* 1->3 process kinematics */
@@ -407,7 +409,7 @@ int one_to_three(Particles *particles, int resonance_id,
   new_particle_b.set_position(decay_point);
   new_particle_c.set_position(decay_point);
 
-  particles->add_data(new_particle_a);
+  int id_first_new = particles->add_data(new_particle_a);
   particles->add_data(new_particle_b);
   particles->add_data(new_particle_c);
 
@@ -421,5 +423,7 @@ int one_to_three(Particles *particles, int resonance_id,
          new_particle_b.momentum().x3(), new_particle_c.momentum().x3());
 
   /* 3 new particles created; return the id of the first one */
-  return particles->id_max() - 2;
+  return id_first_new;
 }
+
+}  // namespace Smash

@@ -10,6 +10,8 @@
 #include <cstddef>
 #include <vector>
 
+namespace Smash {
+
 /* necessary forward declarations */
 class Particles;
 class ParticleData;
@@ -41,7 +43,7 @@ double two_to_one_formation(Particles *particles,
 size_t two_to_two_formation(Particles *particles,
   const ParticleType &type_particle1,
   const ParticleType &type_particle2, const ParticleType &type_resonance,
-  double mandelstam_s, double cm_momentum_squared, double symmetryfactor,
+  double mandelstam_s, double cm_momentum_squared,
   std::vector<ProcessBranch> *process_list);
 
 /* Function for 1-dimensional GSL integration  */
@@ -64,5 +66,7 @@ double sample_resonance_mass(Particles *particles, int pdg_resonance,
 /* 2->1 resonance formation process */
 int resonance_formation(Particles *particles, int particle_id, int other_id,
   std::vector<int> produced_particles);
+
+}  // namespace Smash
 
 #endif  // SRC_INCLUDE_RESONANCES_H_

@@ -15,6 +15,7 @@
 #ifndef SRC_INCLUDE_CLEBSCHGORDAN_H_
 #define SRC_INCLUDE_CLEBSCHGORDAN_H_
 
+namespace Smash {
 class ClebschGordan {
  protected:
   unsigned int factorial_log_max;
@@ -32,5 +33,6 @@ class ClebschGordan {
   /* Check if it's possible to combine j1 and j2 to j3 */
   bool MayBranch(int j1, int j2, int j3);
 };
+}  // namespace Smash
 
 #endif  // SRC_INCLUDE_CLEBSCHGORDAN_H_

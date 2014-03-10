@@ -16,16 +16,15 @@
 #include "include/particles.h"
 #include "include/parameters.h"
 
+namespace Smash {
+
 class BoxModus;
+class Configuration;
 struct ExperimentParameters;
 
 class BoxModus : public ModusDefault {
  public:
-  BoxModus() = default;
-
-  /* special class funtions */
-  void assign_params(
-      std::list<Parameters> *configuration);  // TODO(mkretz) -> ctor
+  explicit BoxModus(Configuration modus_config);
 
   void print_startup();  // TODO(mkretz): needs to be discoverable from an
                          // outside "printer"
@@ -44,8 +43,6 @@ class BoxModus : public ModusDefault {
   void propagate(Particles *particles, const ExperimentParameters &parameters);
 
  private:
-  FourVector boundary_condition(FourVector position, bool *boundary_hit);
-
   /* initial condition */
   int initial_condition_ = 1;
   /* Cube edge length */
@@ -55,5 +52,7 @@ class BoxModus : public ModusDefault {
   /* initial number density of the box */
   float number_density_initial_ = 0.f;
 };
+
+}  // namespace Smash
 
 #endif  // SRC_INCLUDE_BOXMODUS_H_

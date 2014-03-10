@@ -18,6 +18,8 @@
 
 #include "include/clebschgordan.h"
 
+namespace Smash {
+
 ClebschGordan::ClebschGordan() : factorial_log_max(4 * 50 + 2) {
   /* factorial log = log[(N-1)!] */
   factorial_log = new double[factorial_log_max + 1];
@@ -175,3 +177,5 @@ bool ClebschGordan::MayBranch(int j1, int j2, int j3) {
   }
   return false;
 }
+
+}  // namespace Smash

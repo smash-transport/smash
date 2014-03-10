@@ -1,0 +1,71 @@
+General:
+    # Modus decision
+    MODUS:         Nucleus
+
+    # temporal grid spacing
+    EPS:           0.01
+
+    # maximum of steps to take
+    STEPS:         1000
+
+    # how many steps before recording measurables
+    UPDATE:        10
+
+    # initial random seed (negative for time)
+    RANDOMSEED:    1
+
+    # elastic cross section
+    SIGMA:         10.0
+
+    # number of test particle
+    TESTPARTICLES: 1
+
+    # number of events
+    NEVENTS:       1
+
+Modi:
+    Box:
+        # Cube size
+        LENGTH: 10.0
+
+        # initialization temperature
+        TEMPERATURE: 0.2
+
+        # initial condition
+        #
+        # 1:  random position box + thermal momenta
+        # 2:  random position box + peaked momenta
+        #
+        INITIAL_CONDITION: 1
+
+    Sphere:
+        # Sphere size
+        RADIUS: 5.0
+
+    Collider:
+        # Projectile particle
+        PROJECTILE: 211
+
+        # Target particle
+        TARGET: -211
+
+        # center-of-mass energy in GeV
+        SQRTS: 1.0
+    Nucleus:
+        # Definitions for the projectile:
+        # Deuteron
+        Projectile:
+            PARTICLES: {2212: 1, 2112: 1}
+            # very hard Woods-Saxon distribution.
+            SOFTNESS: .001
+        # Definitions for the target:
+        # Lead
+        Target:
+            PARTICLES: {2212: 82, 2112: 126}
+    
+        # what sqrt(s_NN) to use:
+        SQRTSNN: 2
+        # which subsystem "NN" in sqrt(s_NN) refers to
+        # (two PDG IDs). The default is proton-proton; let's set it to
+        # neutron-neutron.
+        SQRTS_N: [2112, 2112]

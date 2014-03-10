@@ -14,20 +14,25 @@
 
 #include "include/particles.h"
 
+namespace Smash {
+
 /* forward declarations */
 class Particles;
 class CrossSections;
 struct ExperimentParameters;
 
-/*
- * This is only a base class for actual Modus classes. The class will never be
- * used polymorphically, therefore it never needs virtual functions.
+/**
+ * Baseclass for Modus classes that provides default function implementations.
  *
- * Consider that there never are and never will be objects of type ModusDefault.
+ * This is only a base class for actual Modus classes. Meaning there will never
+ * be objects, references, or pointers to ModusDefault. Therefore, it does not
+ * have - and will never need any virtual functions.
  *
- * This class is empty per default. You can add a function if you have a
- * function that is different in at least two subclasses and equal in at least
- * two subclasses.  Code that common to all goes into ExperimentImplementation.
+ * The rules for adding functions to this class are as follows:
+ * - This class is empty per default.
+ * - You can add a function if you have a function that is different in at least
+ *   two subclasses and equal in at least two subclasses.
+ * - Code that is common to all goes into ExperimentImplementation.
  */
 class ModusDefault {
  public:
@@ -41,13 +46,21 @@ class ModusDefault {
    */
   int sanity_check(Particles * /*p*/) { return 0; }
 
+  /**
+   * XXX: document what it does in general
+   */
   void check_collision_geometry(Particles *particles,
                                 CrossSections *cross_sections,
                                 std::list<int> *collision_list,
                                 size_t *rejection_conflict,
                                 const ExperimentParameters &parameters);
 
+  /**
+   * XXX: document what it does in general
+   */
   void propagate(Particles *particles, const ExperimentParameters &parameters);
 };
+
+}  // namespace Smash
 
 #endif  // SRC_INCLUDE_MODUSDEFAULT_H_

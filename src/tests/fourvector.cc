@@ -1,46 +1,53 @@
 /*
- *    Copyright (c) 2013
- *      maximilian attems <attems@fias.uni-frankfurt.de>
- *      Jussi Auvinen <auvinen@fias.uni-frankfurt.de>
- *    GNU General Public License (GPLv3)
+ *
+ *    Copyright (c) 2013-2014
+ *      SMASH Team
+ *
+ *    GNU General Public License (GPLv3 or later)
+ *
  */
 #include "include/fourvector.h"
+#include "tests/unittest.h"
 
-int main() {
-  FourVector a(0.12, 0.06, 0.003, -0.15), b(0.06, 0.03, 0.0015, -0.075);
-  FourVector a2(0.12, 0.06, 0.003, -0.15), b2(0.06, 0.03, 0.0015, -0.075);
-  FourVector c(0.1, 0.6, 0.3, -0.15), d(0.01, 0.06, 0.0015, -0.75);
+using namespace Smash;
 
-  /* check equality - the vectors are different */
-  if (a == b)
-    return -1;
+FourVector A(0.12, 0.06, 0.003, -0.15), B(0.06, 0.03, 0.0015, -0.075);
+FourVector A2(0.12, 0.06, 0.003, -0.15), B2(0.06, 0.03, 0.0015, -0.075);
+FourVector c(0.1, 0.6, 0.3, -0.15), d(0.01, 0.06, 0.0015, -0.75);
 
-  /* check equality - the vectors are the same */
-  if (!(a == a2 && b == b2))
-    return -2;
+/* check equality - the vectors are different */
+TEST(equality_different) {
+  VERIFY(!(A == B));
+  VERIFY(A != B);
+}
 
+/* check equality - the vectors Are the same */
+TEST(equality_equal) {
+  VERIFY(  A == A2);
+  VERIFY(!(A != A2));
+  VERIFY(  B == B2);
+  VERIFY(!(B != B2));
+}
+
+TEST(comparisons) {
   /* check smaller equal */
-  if (c <= d)
-    return -3;
+  VERIFY(!(c <= d));
+  /* check Bigger */
+  VERIFY((c > d));
+}
 
-  /* check bigger */
-  if (!(c > d))
-    return -4;
-
+TEST(assignment) {
   /* check assignment */
-  FourVector f = a;
-  if (!(f == a))
-    return -5;
+  FourVector f = A;
+  VERIFY(f == A);
+}
 
-  /* check addition! */
-  FourVector g = b + b;
-  if (a != g)
-    return -6;
+TEST(addition) {
+  FourVector g = B + B;
+  VERIFY(A == g);
+}
 
-  /* check division */
-  a /= 2;
-  if (a != b)
-    return -7;
-
-  return 0;
+TEST(division) {
+  A /= 2;
+  VERIFY(A == B);
 }

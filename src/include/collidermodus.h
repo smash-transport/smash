@@ -17,16 +17,16 @@
 #include "include/particles.h"
 #include "include/parameters.h"
 
+namespace Smash {
+
+class Configuration;
 struct ExperimentParameters;
 
 class ColliderModus : public ModusDefault {
  public:
   /* default constructor with probable values */
-  ColliderModus() = default;
+  explicit ColliderModus(Configuration modus_config);
 
-  /* special class funtions */
-  void assign_params(
-      std::list<Parameters> *configuration);  // TODO(mkretz) -> ctor
   void print_startup();  // TODO(mkretz): needs to be discoverable from an
                          // outside "printer"
 
@@ -46,5 +46,7 @@ class ColliderModus : public ModusDefault {
   /* Center-of-mass energy of the collision */
   float sqrts_ = 1.f;
 };
+
+}  // namespace Smash
 
 #endif  // SRC_INCLUDE_COLLIDERMODUS_H_
