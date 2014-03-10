@@ -40,10 +40,11 @@ void check_decays(Particles *particles, std::list<int> *decay_list,
  * Boost to the resonance rest frame, do the decay,
  * boost back the product particles and remove the decayed particle
  * from the active particles data structure.
+ *
+ * \return The number of processes recorded so far in the simulation.
  */
 size_t decay_particles(Particles *particles, std::list<int> *decay_list,
                        size_t id_process);
-
 
 /// Given a resonance, select one of its decay modes and do the decay
 int resonance_decay(Particles *particles, int particle_id);
@@ -54,6 +55,8 @@ int resonance_decay(Particles *particles, int particle_id);
  * Given a resonance and the types of decay product particles,
  * sample the momenta and position of the products and add them
  * to the active particles data structure.
+ *
+ * \return The ID of the first new particle.
  */
 int one_to_two(Particles *particles, int resonance_id, int type_a, int type_b);
 
@@ -63,6 +66,8 @@ int one_to_two(Particles *particles, int resonance_id, int type_a, int type_b);
  * Given a resonance and the types of decay product particles,
  * sample the momenta and position of the products and add them
  * to the active particles data structure.
+ *
+ * \return The ID of the first new particle.
  */
 int one_to_three(Particles *particles, int resonance_id,
                  int type_a, int type_b, int type_c);
