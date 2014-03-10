@@ -29,7 +29,7 @@ class ProcessBranch;
  *
  * Calculate the minimum rest energy the resonance must have
  * to be able to decay through any of its decay channels.
- * NB: This function assumes stable decay products!
+ * **NB: This function assumes stable decay products!**
  */
 float calculate_minimum_mass(Particles *particles, int pdgcode);
 
@@ -80,7 +80,7 @@ double spectral_function_integrand(double mandelstam_s, void * parameters);
 
 /**
  * Resonance mass sampling for 2-particle final state
- * with one resonance and one stable particle.
+ * with *one resonance* and one *stable* particle.
  */
 double sample_resonance_mass(Particles *particles, int pdg_resonance,
   int pdg_stable, double cms_energy);
