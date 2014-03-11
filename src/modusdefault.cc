@@ -28,14 +28,17 @@ void ModusDefault::check_collision_geometry(
   for (auto i = particles->begin(); i != particles->end(); ++i) {
     for (auto j = particles->begin(); j != particles->end(); ++j) {
       /* exclude check on same particle and double counting */
-      if (i->first >= j->first) continue;
+      if (i->first >= j->first) {
+        continue;
+      }
       distance = i->second.position() - j->second.position();
       /* skip particles that are double interaction radius length away
        * (3-product gives negative values
        * with the chosen sign convention for the metric)
        */
-      if (-distance.DotThree() > neighborhood_radius_squared)
+      if (-distance.DotThree() > neighborhood_radius_squared) {
         continue;
+      }
       collision_criteria_geometry(particles, cross_sections, collision_list,
                                   parameters.eps, i->first, j->first,
                                   rejection_conflict);
