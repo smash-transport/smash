@@ -184,11 +184,11 @@ float Nucleus::distribution_nucleons() const {
     if (which_range < 0.0) {
       t = radius_scaled * (pow(rng.canonical(), 1./3.) - 1.);
     } else {
-      t = rng.exponential();
+      t = -log(rng.uniform(0.0,1.0));
       if (which_range >= prob_range2) {
-        t += rng.exponential();
+        t -= log(rng.uniform(0.0,1.0));
         if (which_range >= prob_range2 + prob_range3) {
-          t += rng.exponential();
+          t -= log(rng.uniform(0.0,1.0));
         }
       }
     }
@@ -205,6 +205,10 @@ float Nucleus::distribution_nucleons() const {
   return position;
   /// \li (choose direction; this is done outside of this routine,
   /// though).
+}
+
+float Nucleus::woods_saxon(const float& r) {
+  return r*r/(exp((r-nuclear_radius())/diffusiveness_)+1);
 }
 
 void Nucleus::arrange_nucleons() {

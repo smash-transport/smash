@@ -58,6 +58,7 @@ TEST(nuclear_radius) {
   FUZZY_COMPARE(lead.nuclear_radius(), static_cast<float>(1.2f*pow(208,1./3.)));
 }
 
+// check that center is at (0/0/0):
 TEST(center) {
   Nucleus lead;
   constexpr int N_TEST = 100000;
@@ -156,4 +157,45 @@ TEST(shift_z) {
   FUZZY_COMPARE(postcenter.x1(), precenter.x1());
   FUZZY_COMPARE(postcenter.x2(), precenter.x2());
   FUZZY_COMPARE(postcenter.x3(), precenter.x3()-lead.nuclear_radius()+4.0);
+}
+
+// test the woods-saxon distribution at various discrete points:
+TEST(woods_saxon) {
+  // this is where we store the distribution.
+  std::map<int, int> histogram {};
+  // binning width for the distribution:
+  constexpr float dx = 0.01;
+  // the nucleus. Fill it from list with 1 testparticle.
+  Nucleus projectile;
+  projectile.fill_from_list(list, 1);
+  float R = projectile.nuclear_radius();
+  // this is the number of times we access the distribution.
+  constexpr int N_TEST = 10000000;
+  // fill the histogram
+  for (int i = 0; i < N_TEST; i++) {
+    float radius = projectile.distribution_nucleons();
+    int bin = radius/dx;
+    ++histogram[bin];
+  }
+  // We'll compare to relative values (I don't know what the integral
+  // is)
+  float value_at_radius = histogram.at(R/dx);
+  float expected_at_radius =
+                           projectile.woods_saxon(R);
+  // we'll probe at these values:
+  float probes[9] = { 1.0, 5.0, 7.2, 8.0, 8.5, .5f*R, 1.1f*R, 1.2f*R, 1.3f*R };
+  // now do probe these values:
+  for (int i = 0; i < 9; ++i) {
+    // value we have simulated:
+    float value = histogram.at(probes[i]/dx)/value_at_radius;
+    // value we have expected:
+    float expec = projectile.woods_saxon(probes[i])/expected_at_radius;
+    // standard error we expect the histogram to have is 1/sqrt(N); we
+    // give 3 sigma "space".
+    float margin = 3.0/sqrt(value);
+    VERIFY(std::abs(value - expec) < margin) << " x = " << probes[i]
+            << ": simulated: " << value
+            << " vs. calculated: " << expec
+            << " (allowed distance: " << margin << ")";
+  }
 }
