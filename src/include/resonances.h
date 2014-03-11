@@ -29,12 +29,13 @@ class ProcessBranch;
  *
  * Calculate the minimum rest energy the resonance must have
  * to be able to decay through any of its decay channels.
+ * (In other words, find the largest sum of final state particle masses)
  * **NB: This function assumes stable decay products!**
  */
 float calculate_minimum_mass(Particles *particles, int pdgcode);
 
 /**
- * Find all resonances and their production cross sections.
+ * Find all possible resonances and their production cross sections.
  *
  * Given two particles, create a list of possible resonance
  * production processes and their cross sections.
@@ -53,6 +54,13 @@ std::vector<ProcessBranch> resonance_cross_section(
 /**
  * Given two initial particles and a resonance,
  * compute the 2-to-1 resonance production cross section.
+ *
+ * Checks are processed in the following order:
+ * 1. Charge conservation
+ * 2. Baryon number conservation
+ * 3. Clebsch-Gordan
+ * 4. Enough energy for any decay channel to happen
+ * 5. Detailed balance (reverse process exists)
  */
 double two_to_one_formation(Particles *particles,
   const ParticleType &type_particle1,
@@ -63,6 +71,12 @@ double two_to_one_formation(Particles *particles,
  * Given two initial particles and a resonance,
  * compute cross sections for all possible 2-to-2 processes
  * with that resonance in the final state.
+ *
+ * Checks are processed in the following order:
+ * 1. Charge conservation
+ * 2. Baryon number conservation
+ * 3. Clebsch-Gordan
+ * 4. Enough energy for any decay channel to happen
  *
  * \return The number of possible processes. Also adds elements
  * to the process_list.
