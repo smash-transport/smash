@@ -21,8 +21,9 @@
 namespace Smash {
 
 /**
- * Check if two particles collide in this time step,
- * based on the geometrical interpretation of the cross section.
+ * Takes two particles and checks if they collide in this time step,
+ * based on the geometrical interpretation of the cross section,
+ * assigning an interaction for them in case of a positive check.
  *
  * Calculates the total cross section (elastic + resonance formation)
  * \f$\sigma_{tot}\f$ for the collision of the given two particles.
@@ -37,21 +38,23 @@ namespace Smash {
  * in this time step before the collision;
  * in other words, the collision time is a minimum for both particles.
  *
- * If all conditions are fulfilled, the interaction is randomly assigned based
- * on how large ratio of the total cross section each process represents.
+ * If all conditions are fulfilled, the specific interaction is randomly chosen
+ * from the available interactions based on how large ratio of the total cross
+ * section each process represents.
  *
  * The two particles are then assigned to collide with each other
  * at the determined time, with determined final state particles.
- * First particle is added to the collision list.
+ * Both particles carry this information in their data structures,
+ * while only the first particle is added to the collision list.
  *
- * \param particles Particles in the simulation.
- * \param cross_sections Parametrizations of (elastic) cross sections.
- * \param collision_list List of particles assigned for collision
+ * \param[in] particles Particles in the simulation.
+ * \param[in] cross_sections Parametrizations of (elastic) cross sections.
+ * \param[in,out] collision_list List of particles assigned for collision
  * in this time step.
- * \param timestep Time step size in the simulation.
- * \param id_a ID of the first particle of the pair to be checked.
- * \param id_b ID of the second particle of the pair to be checked.
- * \param rejection_conflict Counter of how many times a collision
+ * \param[in] timestep Time step size in the simulation.
+ * \param[in] id_a ID of the first particle of the pair to be checked.
+ * \param[in] id_b ID of the second particle of the pair to be checked.
+ * \param[in,out] rejection_conflict Counter of how many times a collision
  * had to be rejected because a particle had an interaction
  * earlier within this time step.
  */
@@ -72,6 +75,11 @@ void collision_criteria_geometry(Particles *particles,
  * particles are then boosted back to the computational frame. In the case of
  * resonance formation, the initial particles are removed from
  * the active particles data structure.
+ *
+ * \param[in,out] particles Particles in the simulation.
+ * \param[in] collision_list List of interactions happening in this time step.
+ * \param[in] id_event Last interaction ID added in the simulation so far;
+ * indicates the number of processed events.
  *
  * \return The number of interactions processed in the simulation so far.
  */
