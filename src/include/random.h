@@ -56,13 +56,14 @@ class rng_dist {
     return uniform();
   }
   double canonical() {
-    return std::generate_canonical<double,52>(engine_);
+    set_uniform(0.0,1.0);
+    return uniform();
   }
   void set_uniform(const double& a, const double& b) {
     uniform_.param(std::uniform_real_distribution<>::param_type(a,b));
   }
   double exponential() {
-    return exponential_(engine_);
+    return -log(canonical());
   }
 
  private:
@@ -80,8 +81,6 @@ class rng_dist {
   std::uniform_real_distribution<double> uniform_;
   /** provides uniform random numbers between 0.0 and 1.0
    **/
-  //std::generate_canonical<double,52> canonical_;
-  //std::uniform_real_distribution<double> canonical_;
   /** provides exponential random numbers (\f$P(t) = \exp{-t}\f$) **/
   std::uniform_real_distribution<double> exponential_;
 };
