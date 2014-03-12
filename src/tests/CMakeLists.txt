@@ -68,6 +68,7 @@ smash_add_unittest(decaymodes)
 smash_add_unittest(angles)
 smash_add_unittest(nucleus)
 smash_add_unittest(woods-saxon)
+smash_add_unittest(random)
 
 # some fourvector operations tests
 smash_add_test(fourvector fourvector fourvector)
