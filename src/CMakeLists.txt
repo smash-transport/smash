@@ -50,6 +50,7 @@ set(smash_src
         processbranch.cc
         random.cc
         resonances.cc
+        rootoutput.cc
         scatteraction.cc
         scatteractionsfinder.cc
         vtkoutput.cc
