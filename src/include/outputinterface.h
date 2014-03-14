@@ -17,7 +17,14 @@ class OutputInterface {
  public:
   virtual ~OutputInterface() = default;
 
-  virtual void write_state(const Particles &particles) = 0;
+  virtual void at_runstart() = 0;
+  virtual void at_eventstart(const Particles &particles, const int evt_num) = 0;
+  virtual void at_eventend(const Particles &particles, const int evt_num) = 0;
+  //virtual void at_collision(const Collisions &collisions) = 0;
+  virtual void at_outtime(const Particles &particles, const int timestep) = 0;
+  virtual void at_runend() = 0;
+  virtual void at_crash() = 0;
+
 };
 
 }  // namespace Smash

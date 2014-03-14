@@ -20,8 +20,8 @@
 #include "include/experiment.h"
 #include "include/macros.h"
 #include "include/nucleusmodus.h"
+#include "include/oscaroutput.h"
 #include "include/outputroutines.h"
-#include "include/particlesoutput.h"
 #include "include/random.h"
 #include "include/vtkoutput.h"
 
@@ -102,10 +102,6 @@ void Experiment<Modus>::initialize(const bf::path &/*path*/) {
   energy_initial_ = energy_total(&particles_);
   /* Print output headers */
   print_header();
-  /* Write out the initial momenta and positions of the particles */
-  for (auto &output : outputs_) {
-    output->write_state(particles_);
-  }
 }
 
 
@@ -156,7 +152,7 @@ void Experiment<Modus>::run_time_evolution() {
                          time_start_);
       /* save evolution data */
       for (auto &output : outputs_) {
-        output->write_state(particles_);
+        output->at_outtime(particles_, step);
       }
     }
   }
@@ -196,19 +192,41 @@ float Experiment<Modus>::energy_total(Particles *particles) {
 
 template <typename Modus>
 void Experiment<Modus>::run(const bf::path &path) {
-  outputs_.emplace_back(new ParticlesOutput(path));
+  outputs_.emplace_back(new OscarOutput(path));
   outputs_.emplace_back(new VtkOutput(path));
 
   /* Write the header of OSCAR data output file */
-  write_oscar_header();
+  //write_oscar_header();
+
+  /* Output at run start */
+  for (auto &output : outputs_) {
+    output->at_runstart();
+  }
+
   for (int j = 0; j < nevents_; j++) {
     initialize(path);
+
+    /* Output at event start */
+    for (auto &output : outputs_) {
+      output->at_eventstart(particles_, j);
+    }
+
     /* Write the initial data block of the event */
-    write_oscar_event_block(&particles_, 0, particles_.size(), j + 1);
+    //write_oscar_event_block(&particles_, 0, particles_.size(), j + 1);
     /* the time evolution of the relevant subsystem */
     run_time_evolution();
     /* Write the final data block of the event */
-    write_oscar_event_block(&particles_, particles_.size(), 0, j + 1);
+    //write_oscar_event_block(&particles_, particles_.size(), 0, j + 1);
+
+    /* Output at event end */
+    for (auto &output : outputs_) {
+      output->at_eventend(particles_, j);
+    }
+  }
+
+  /* Output at run end */
+  for (auto &output : outputs_) {
+    output->at_runend();
   }
 }
 

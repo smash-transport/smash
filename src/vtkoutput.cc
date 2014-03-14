@@ -21,7 +21,14 @@ VtkOutput::VtkOutput(boost::filesystem::path path)
 VtkOutput::~VtkOutput() {
 }
 
-void VtkOutput::write_state(const Particles &particles) {
+void VtkOutput::at_runstart(){}
+void VtkOutput::at_eventstart(const Particles &particles, const int evt_num){}
+void VtkOutput::at_eventend(const Particles &particles, const int evt_num){}
+//void VtkOutput::at_collision(const Collisions &collisions){}
+void VtkOutput::at_runend(){}
+void VtkOutput::at_crash(){}
+
+void VtkOutput::at_outtime(const Particles &particles, const int timestep) {
   char filename[32];
   snprintf(
       filename, sizeof(filename), "pos_0.%05i.vtk",

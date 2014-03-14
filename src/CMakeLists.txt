@@ -40,10 +40,10 @@ set(smash_src
         modusdefault.cc
         nucleus.cc
         nucleusmodus.cc
+        oscaroutput.cc
         outputroutines.cc
         parametrizations.cc
         particles.cc
-        particlesoutput.cc
         pdgcode.cc
         random.cc
         resonances.cc
