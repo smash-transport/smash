@@ -32,7 +32,7 @@ class Nucleus {
    * root of the number of nucleons.
    **/
   inline float nuclear_radius() const {
-    return proton_radius_*pow(size(), 1./3.);
+    return proton_radius_*pow(number_of_particles(), 1./3.);
   }
 
   /** returns a Woods-Saxon distributed length 
@@ -65,8 +65,13 @@ class Nucleus {
    *
    * If the map is, e.g., [2212: 6, 2112: 7] initializes C-13 (6 protons
    * and 7 neutrons). The particles are only created, no position or
-   * momenta are yet assigned. */
-  void fill_from_list(const std::map<int, int>& particle_list);
+   * momenta are yet assigned.
+   *
+   * \param testparticles Number of test particles to use.
+   *
+   **/
+  void fill_from_list(const std::map<int, int>& particle_list,
+                      const int testparticles);
   /// sets the diffusiveness of the nucleus
   ///
   /// \see diffusiveness_.
@@ -102,9 +107,20 @@ class Nucleus {
              const double& simulation_time);
   /// copies the particles from this nucleus into the particle list.
   void copy_particles(Particles* particles);
-  /// Number of particles in the nucleus:
+  /// Number of numerical (=test-)particles in the nucleus:
   inline size_t size() const {
-    return particles.size();
+    return particles_.size();
+  }
+  /// Number of physical particles in the nucleus:
+  inline size_t number_of_particles() const {
+    int nop = particles_.size()/testparticles_;
+    // if size() is not a multiple of testparticles_, this will throw an
+    // error.
+    if (nop * testparticles_ != particles_.size()) {
+      throw "Number of test particles and test particles"
+            "per particle are incompatible";
+    }
+    return nop;
   }
 
  private:
@@ -128,23 +144,25 @@ class Nucleus {
   /// x (impact parameter direction-) coordinate of the outermost
   /// particle (lowest x)
   float x_min_ = 0.f;
+  /// Number of testparticles per physical particle
+  size_t testparticles_ = 1;
   /// particles associated with this nucleus.
-  std::vector<ParticleData> particles;
+  std::vector<ParticleData> particles_;
   /// for iterators over the particle list:
   inline std::vector<ParticleData>::iterator begin() {
-    return particles.begin();
+    return particles_.begin();
   }
   /// for iterators over the particle list:
   inline std::vector<ParticleData>::iterator end() {
-    return particles.end();
+    return particles_.end();
   }
   /// for iterators over the particle list:
   inline std::vector<ParticleData>::const_iterator cbegin() const {
-    return particles.cbegin();
+    return particles_.cbegin();
   }
   /// for iterators over the particle list:
   inline std::vector<ParticleData>::const_iterator cend() const {
-    return particles.cend();
+    return particles_.cend();
   }
 };
 
