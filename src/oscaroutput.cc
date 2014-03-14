@@ -9,36 +9,30 @@
 
 #include "include/oscaroutput.h"
 #include "include/particles.h"
-#include "include/filedeleter.h"
-#include <memory>
+#include "include/outputroutines.h"
 
 namespace Smash {
 
 OscarOutput::OscarOutput(boost::filesystem::path path)
-    : base_path_(std::move(path)) {
+    : base_path_(std::move(path)) {}
+
+OscarOutput::~OscarOutput() {}
+
+void OscarOutput::at_runstart() { write_oscar_header(); }
+
+void OscarOutput::at_eventstart(const Particles &particles, const int evt_num) {
+  write_oscar_event_block(&particles, 0, particles.size(), evt_num + 1);
 }
 
-OscarOutput::~OscarOutput() {
+void OscarOutput::at_eventend(const Particles &particles, const int evt_num) {
+  write_oscar_event_block(&particles, particles.size(), 0, evt_num + 1);
 }
 
+// void OscarOutput::at_collision(const Collisions &collisions){}
 
-void OscarOutput::at_runstart(){
-}
+void OscarOutput::at_runend() {}
 
-void OscarOutput::at_eventstart(const Particles &particles, const int evt_num){
-}
-
-void OscarOutput::at_eventend(const Particles &particles, const int evt_num){
-}
-
-//void OscarOutput::at_collision(const Collisions &collisions){}
-
-void OscarOutput::at_runend(){
-}
-
-void OscarOutput::at_crash(){
-}
-
+void OscarOutput::at_crash() {}
 
 void OscarOutput::at_outtime(const Particles &particles, const int timestep) {
   /*

@@ -148,7 +148,7 @@ void write_oscar_header(void) {
  *  write_oscar_event_block
  *  - writes the initial and final particle information of an event
  */
-void write_oscar_event_block(Particles *particles,
+void write_oscar_event_block(const Particles *particles,
                              size_t initial, size_t final, int event_id) {
   FILE *fp;
   fp = fopen("data/collision.dat", "a");
