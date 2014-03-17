@@ -17,9 +17,6 @@ namespace Smash {
 /// A Nucleus is a collection of Particles (ParticleData thingys) that
 /// are initialized before the beginning of the simulation and all have
 /// the same velocity (and spatial proximity).
-/// This class inherits from Particles, which is the collection of all
-/// particles in the simulation and contains special functions for the
-/// initialization of nuclei.
 class Nucleus {
  public:
   Nucleus();
