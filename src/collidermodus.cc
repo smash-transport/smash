@@ -12,7 +12,6 @@
 #include "include/configuration.h"
 #include "include/experimentparameters.h"
 #include "include/outputroutines.h"
-#include "include/parameters.h"
 
 namespace Smash {
 

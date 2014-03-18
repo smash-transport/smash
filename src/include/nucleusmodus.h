@@ -16,7 +16,6 @@
 #include "include/modusdefault.h"
 #include "include/nucleus.h"
 #include "include/particles.h"
-#include "include/parameters.h"
 
 namespace Smash {
 

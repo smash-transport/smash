@@ -18,7 +18,6 @@
 #include <utility>
 
 #include "include/fourvector.h"
-#include "include/parameters.h"
 #include "include/particles.h"
 #include "include/particledata.h"
 #include "include/particletype.h"
