@@ -196,11 +196,8 @@ void inline Angles::set_theta(const double& newtheta) {
 
 bool inline Angles::add_to_theta(const double& delta) {
   if (delta < -M_PI || delta > M_PI) {
-    char errormsg[50];
-    snprintf(errormsg, sizeof(errormsg),
-             "Cannot advance polar angle by %g",
-             delta);
-    throw(errormsg);
+    throw InvalidTheta("Cannot advance polar angle by " +
+                       std::to_string(delta));
   }
   double theta_plus_delta = delta + theta();
   /* if sum is not in [0, PI], force it to be there:

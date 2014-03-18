@@ -188,6 +188,6 @@ TEST_CATCH(set_invalid_theta, Angles::InvalidTheta) {
   dir.set_costheta(2.);
 }
 
-TEST_CATCH(set_theta_too_far, char*) {
+TEST_CATCH(set_theta_too_far, Angles::InvalidTheta) {
   dir.add_to_theta(M_PI * 1.1);
 }
