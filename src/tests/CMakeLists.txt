@@ -7,7 +7,7 @@ add_executable(lorentzboost lorentzboost.cc ../fourvector.cc)
 add_executable(angles_distribution angles_distribution.cc)
 add_executable(clebschgordan clebschgordan.cc ../clebschgordan.cc)
 
-file(COPY ../config_general.yaml DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY ../config.yaml DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ../particles.txt DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ../decaymodes.txt DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 

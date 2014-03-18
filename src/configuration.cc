@@ -71,7 +71,7 @@ namespace decaymodes_txt {
 }  // unnamed namespace
 
 Configuration::Configuration(const bf::path &path)
-    : Configuration(path, "config_general.yaml") {
+    : Configuration(path, "config.yaml") {
 }
 
 Configuration::Configuration(const bf::path &path, const bf::path &filename) {
