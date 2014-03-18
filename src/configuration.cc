@@ -59,12 +59,14 @@ YAML::Node operator|=(YAML::Node a, const YAML::Node &b) {
   return a;
 }
 
+#ifndef DOXYGEN
 namespace particles_txt {
 #include "particles.txt.h"
 }  // namespace particles_txt
 namespace decaymodes_txt {
 #include "decaymodes.txt.h"
 }  // namespace decaymodes_txt
+#endif
 
 }  // unnamed namespace
 
