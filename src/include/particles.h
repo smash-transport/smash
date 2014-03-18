@@ -17,18 +17,18 @@
 
 namespace Smash {
 
-// A macro to disallow the copy constructor and operator= functions
-// This should be used in the private: declarations for a class
-#define DISALLOW_COPY_AND_ASSIGN(TypeName) \
-  TypeName(const TypeName&);               \
-  void operator=(const TypeName&)
-
 /**
- * Particles contains both the available particle list and the types
+ * The Particles class abstracts the storage and manipulation of particles.
  *
- * The particle data contains the current particle list, which
- * has the changing attributes of a particle.
- * The particle type lists the static property of a certain particle.
+ * There should be only one Particles object per Experiment. This object stores
+ * the data about all existing particles in the experiment (ParticleData). Each
+ * particle is of a predefined type (ParticleType). The types are immutable and
+ * need not be copied into each ParticleData object. The type information can
+ * easily be retrieved via the PDG code.
+ *
+ * \note
+ * The Particles object cannot be copied, because it does not make sense
+ * semantically. Move semantics make sense and can be implemented when needed.
  */
 class Particles {
  public:
@@ -37,6 +37,12 @@ class Particles {
     load_particle_types(particles);
     load_decaymodes(decaymodes);
   }
+
+  /// Cannot be copied
+  Particles(const Particles &) = delete;
+  /// Cannot be copied
+  Particles &operator=(const Particles &) = delete;
+
   /// Return the specific data of a particle according to its id
   inline const ParticleData &data(int id) const;
   /// Return the specific datapointer of a particle according to its id
@@ -135,8 +141,6 @@ class Particles {
   std::map<int, ParticleType> types_;
   /// a map between pdg and corresponding decay modes
   std::map<int, DecayModes> all_decay_modes_;
-  /// google style recommendation
-  DISALLOW_COPY_AND_ASSIGN(Particles);
 };
 
 /* return the data of a specific particle */
