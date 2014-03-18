@@ -11,6 +11,7 @@
 #include<vector>
 #include "include/particledata.h"
 #include "include/particles.h"
+#include <stdexcept>
 
 namespace Smash {
 
@@ -114,8 +115,9 @@ class Nucleus {
     // if size() is not a multiple of testparticles_, this will throw an
     // error.
     if (nop * testparticles_ != particles_.size()) {
-      throw "Number of test particles and test particles"
-            "per particle are incompatible";
+      throw std::logic_error(
+          "Number of test particles and test particles per particle are "
+          "incompatible");
     }
     return nop;
   }
