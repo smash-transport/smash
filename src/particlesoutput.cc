@@ -29,7 +29,8 @@ void ParticlesOutput::write_state(const Particles &particles) {
   std::unique_ptr<FILE> momenta_file{
       fopen((base_path_ / filename).native().c_str(), "w")};
   for (auto i = particles.cbegin(); i != particles.cend(); ++i) {
-    fprintf(momenta_file.get(), "%g %g %g %g %i %i\n", i->second.momentum().x0(),
+    fprintf(momenta_file.get(), "%g %g %g %g %i %i\n",
+            i->second.momentum().x0(),
             i->second.momentum().x1(), i->second.momentum().x2(),
             i->second.momentum().x3(), i->second.id(), i->second.pdgcode());
   }
@@ -38,7 +39,8 @@ void ParticlesOutput::write_state(const Particles &particles) {
   std::unique_ptr<FILE> position_file{
       fopen((base_path_ / filename).native().c_str(), "w")};
   for (auto i = particles.cbegin(); i != particles.cend(); ++i) {
-    fprintf(position_file.get(), "%g %g %g %g %i %i\n", i->second.position().x0(),
+    fprintf(position_file.get(), "%g %g %g %g %i %i\n",
+            i->second.position().x0(),
             i->second.position().x1(), i->second.position().x2(),
             i->second.position().x3(), i->second.id(), i->second.pdgcode());
   }

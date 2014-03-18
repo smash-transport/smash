@@ -12,11 +12,11 @@
 #include "include/configuration.h"
 #include "include/experimentparameters.h"
 #include "include/outputroutines.h"
-#include "include/parameters.h"
 
 namespace Smash {
 
-ColliderModus::ColliderModus(Configuration modus_config)
+ColliderModus::ColliderModus(Configuration modus_config,
+                             const ExperimentParameters &)
     : projectile_(modus_config.take({"Collider", "PROJECTILE"})),
       target_    (modus_config.take({"Collider", "TARGET"})),
       sqrts_     (modus_config.take({"Collider", "SQRTS"})) {

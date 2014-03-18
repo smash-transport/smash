@@ -23,7 +23,6 @@
 #include "include/macros.h"
 #include "include/nucleusmodus.h"
 #include "include/outputroutines.h"
-#include "include/parameters.h"
 #include "include/particlesoutput.h"
 #include "include/time.h"
 #include "include/vtkoutput.h"
@@ -75,13 +74,13 @@ ExperimentParameters create_experiment_parameters(Configuration &config) {
 
 template <typename Modus>
 Experiment<Modus>::Experiment(Configuration &config)
-    : modus_(config["Modi"]),
+    : parameters_(create_experiment_parameters(config)),
+      modus_(config["Modi"], parameters_),
       particles_{config.take({"particles"}), config.take({"decaymodes"})},
-      parameters_(create_experiment_parameters(config)),
       cross_sections_(parameters_.cross_section),
       nevents_(config.take({"General", "NEVENTS"})),
       steps_(config.take({"General", "STEPS"})),
-      output_interval_(config.take({"General", "UPDATE"})){
+      output_interval_(config.take({"General", "UPDATE"})) {
   int64_t seed_ = config.take({"General", "RANDOMSEED"});
   if (seed_ < 0) {
     seed_ = time(nullptr);

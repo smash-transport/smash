@@ -23,12 +23,11 @@
 #include "include/experimentparameters.h"
 #include "include/macros.h"
 #include "include/outputroutines.h"
-#include "include/parameters.h"
 #include "include/particles.h"
 
 namespace Smash {
 
-BoxModus::BoxModus(Configuration modus_config)
+BoxModus::BoxModus(Configuration modus_config, const ExperimentParameters &)
     : initial_condition_(modus_config.take({"Box", "INITIAL_CONDITION"})),
       length_           (modus_config.take({"Box", "LENGTH"})),
       temperature_      (modus_config.take({"Box", "TEMPERATURE"})) {

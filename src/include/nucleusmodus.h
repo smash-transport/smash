@@ -16,7 +16,6 @@
 #include "include/modusdefault.h"
 #include "include/nucleus.h"
 #include "include/particles.h"
-#include "include/parameters.h"
 
 namespace Smash {
 
@@ -102,7 +101,8 @@ class NucleusModus : public ModusDefault {
    * Takes all there is to take from the (truncated!) configuration
    * object (only contains configuration for this modus).
    **/
-  explicit NucleusModus(Configuration modus_config);
+  explicit NucleusModus(Configuration modus_config,
+           const ExperimentParameters &parameters);
 
   void print_startup();
 

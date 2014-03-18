@@ -15,7 +15,6 @@
 #include "include/crosssections.h"
 #include "include/modusdefault.h"
 #include "include/particles.h"
-#include "include/parameters.h"
 
 namespace Smash {
 
@@ -25,7 +24,8 @@ struct ExperimentParameters;
 class ColliderModus : public ModusDefault {
  public:
   /* default constructor with probable values */
-  explicit ColliderModus(Configuration modus_config);
+  explicit ColliderModus(Configuration modus_config,
+           const ExperimentParameters &parameters);
 
   void print_startup();  // TODO(mkretz): needs to be discoverable from an
                          // outside "printer"
