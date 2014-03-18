@@ -145,26 +145,56 @@
 #define VERIFY(condition)
 
 /**
- * \brief Verifies that \p a is equal to \p b.
+ * \brief Verifies that \p test_value is equal to \p reference.
  */
-#define COMPARE(a, b)
+#define COMPARE(test_value, reference)
 
 /**
- * \brief Verifies that \p a is equal to \p b within a pre-defined distance in
- * units of least precision (ULP).
+ * \brief Verifies that \p test_value is equal to \p reference within a
+ * pre-defined distance in units of least precision (ulp).
  *
- * If the test fails it will print the distance in ULP between \p a and \p b as
- * well as the maximum allowed distance. Often this difference is not visible in
- * the value because the conversion of a double/float to a string needs to round
- * the value to a sensible length.
+ * If the test fails it will print the distance in ulp between \p test_value and
+ * \p reference as well as the maximum allowed distance. Often this difference
+ * is not visible in the value because the conversion of a double/float to a
+ * string needs to round the value to a sensible length.
  *
  * The allowed distance can be modified by calling:
  * \code
  * UnitTest::setFuzzyness<float>(4);
  * UnitTest::setFuzzyness<double>(7);
  * \endcode
+ *
+ * ### ulp
+ * Unit of least precision are a unit that is derived from the the least
+ * significant bit in the mantissa of a floating-point value. Consider a
+ * single-precision number (23 mantissa bits) with exponent \f$e\f$. Then 1
+ * ulp is \f$2^{e-23}\f$. Thus, \f$\log_2(u)\f$ signifies the the number
+ * incorrect mantissa bits (with \f$u\f$ the distance in ulp).
+ *
+ * If \p test_value and \p reference have a different exponent the meaning of
+ * ulp depends on the variable. The FUZZY_COMPARE code always uses \p reference
+ * to determine the magnitude of 1 ulp.
+ *
+ * Example:
+ * The value `1.f` is `0x3f800000` in binary. The value
+ * `1.00000011920928955078125f` with binary representation `0x3f800001`
+ * therefore has a distance of 1 ulp.
+ * A positive distance means the \p test_value is larger than the \p reference.
+ * A negative distance means the \p test_value is smaller than the \p reference.
+ * * `FUZZY_COMPARE(1.00000011920928955078125f, 1.f)` will show a distance of 1
+ * * `FUZZY_COMPARE(1.f, 1.00000011920928955078125f)` will show a distance of -1
+ *
+ * The value `0.999999940395355224609375f` with binary representation
+ * `0x3f7fffff` has a smaller exponent than `1.f`:
+ * * `FUZZY_COMPARE(0.999999940395355224609375f, 1.f)` will show a distance of
+ * -0.5
+ * * `FUZZY_COMPARE(1.f, 0.999999940395355224609375f)` will show a distance of 1
+ *
+ * ### Comparing to 0
+ * Distance to 0 is implemented as comparing to `std::numeric_limits<T>::min()`
+ * instead and adding 1 to the resulting distance.
  */
-#define FUZZY_COMPARE(a, b)
+#define FUZZY_COMPARE(test_value, reference)
 
 /**
  * \brief Call this to fail a test.
