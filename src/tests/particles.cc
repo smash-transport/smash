@@ -247,42 +247,42 @@ TEST(load_decaymodes_two_channels) {
   }
 }
 
+template <typename T>
+void check_particle_data_iteration(T *p) {
+  int count = 0;
+  for (auto &data : p->data()) {
+    const int id = data.id();
+    const ParticleData &data2 = p->data(id);
+    COMPARE(&data, &data2);
+    ++count;
+  }
+  COMPARE(count, p->size());
+}
+
+template <typename T>
+void check_particle_type_iteration(T *p) {
+  int count = 0;
+  for (const auto &type : p->types()) {
+    const int pdg = type.pdgcode();
+    const ParticleType &type2 = p->particle_type(pdg);
+    COMPARE(&type, &type2);
+    ++count;
+  }
+  COMPARE(count, p->types_size());
+}
+
 TEST(iterate_particle_data) {
   Particles p(particles_txt::data, decaymodes_txt::data);
-  int count = 0;
-  for (auto &data : p.data()) {
-    const int id = data.id();
-    const ParticleData &data2 = p.data(id);
-    COMPARE(&data, &data2);
-    ++count;
-  }
-  COMPARE(count, 0);
-
-  count = 0;
-  for (const auto &type : p.types()) {
-    const int pdg = type.pdgcode();
-    const ParticleType &type2 = p.particle_type(pdg);
-    COMPARE(&type, &type2);
-    ++count;
-  }
-  COMPARE(count, p.types_size());
-
   const Particles *p2 = &p;
-  count = 0;
-  for (auto &data : p2->data()) {
-    const int id = data.id();
-    const ParticleData &data2 = p2->data(id);
-    COMPARE(&data, &data2);
-    ++count;
-  }
-  COMPARE(count, 0);
+  check_particle_type_iteration(&p);
+  check_particle_type_iteration(p2);
 
-  count = 0;
-  for (const auto &type : p2->types()) {
-    const int pdg = type.pdgcode();
-    const ParticleType &type2 = p2->particle_type(pdg);
-    COMPARE(&type, &type2);
-    ++count;
-  }
-  COMPARE(count, p2->types_size());
+  check_particle_data_iteration(&p);
+  check_particle_data_iteration(p2);
+  p.create(211);
+  check_particle_data_iteration(&p);
+  check_particle_data_iteration(p2);
+  p.create(-211);
+  check_particle_data_iteration(&p);
+  check_particle_data_iteration(p2);
 }
