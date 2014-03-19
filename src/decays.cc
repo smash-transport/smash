@@ -56,7 +56,7 @@ void check_decays(Particles *particles, std::list<int> *decay_list,
      * = (1 - width * Delta_t)^(t / Delta_t)
      * -> exp(-width * t) when Delta_t -> 0
      */
-    if (Random::canonical<double>() < resonance_frame_timestep
+    if (Random::canonical() < resonance_frame_timestep
                         * particles->type(i->first).width() / hbarc) {
       /* Time is up! Set the particle to decay at this timestep */
       i->second.set_collision(2, 0.0, -1);
@@ -211,7 +211,7 @@ int resonance_decay(Particles *particles, int particle_id) {
   /* Ratios of decay channels should add to 1; pick a random number
    * between 0 and 1 to select the decay mode to be used
    */
-  double random_mode = Random::canonical<double>();
+  double random_mode = Random::canonical();
   /* Keep adding to the probability until it exceeds the random value */
   while (random_mode > cumulated_probability &&  mode != decaymodes.end()) {
     cumulated_probability += mode->weight();

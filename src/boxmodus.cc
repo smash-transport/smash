@@ -77,9 +77,8 @@ void BoxModus::initial_conditions(Particles *particles,
   }
   printf("IC total number density %.6g [fm^-3]\n", number_density_total);
   printf("IC contains %zu particles\n", number_total);
-  Random::uniform_dist<double> uniform_length =
-      Random::make_uniform_distribution(0.0,
-                                        static_cast<double>(this->length_));
+  auto uniform_length = Random::make_uniform_distribution(0.0,
+                                         static_cast<double>(this->length_));
   /* Set paricles IC: */
   for (auto i = particles->begin(); i != particles->end(); ++i) {
     double x, y, z, time_begin;
