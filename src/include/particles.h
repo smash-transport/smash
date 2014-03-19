@@ -20,32 +20,49 @@ namespace Smash {
 
 /**
  * Adapter class for making iterations over particle data and types easier to
- * use
+ * use.
+ *
+ * This is an implementation detail and need not be understood for use of the
+ * Particles class.
  */
 template <typename T>
 class MapIterationAdapter {
+  /// the type T::begin() returns
   using map_iterator = decltype(std::declval<T &>().begin());
+  /// the value type of T (with const added if T is const)
   using mapped_type = typename std::conditional<std::is_const<T>::value,
                                                 const typename T::mapped_type,
                                                 typename T::mapped_type>::type;
  public:
   MapIterationAdapter(T *map) : map_(map) {}
 
+  /**
+   * Adapter class that modifies the normal map iterator to return only the
+   * value instead of the key/value pair.
+   */
   class iterator : public map_iterator {
    public:
     iterator(map_iterator it) : map_iterator(it) {}
 
+    /**
+     * overwritten dereference operator to return only the value instead of the
+     * key/value pair.
+     */
     mapped_type &operator*() { return map_iterator::operator*().second; }
+    /// const overload of the above
     const mapped_type &operator*() const { return map_iterator::operator*().second; }
   };
 
+  /// returns an adapted iterator to the begin iterator of the map
   iterator begin() const { return map_->begin(); }
+  /// returns an adapted iterator to the end iterator of the map
   iterator end() const { return map_->end(); }
 
   // const_iterator cbegin() const { return map_.cbegin(); }
   // const_iterator cend() const { return map_.cend(); }
 
  private:
+  /// points to the map the adapter class wraps; needed for calls to begin/end
   T *map_;
 };
 
@@ -79,10 +96,41 @@ class Particles {
   /// Cannot be copied
   Particles &operator=(const Particles &) = delete;
 
+  /**
+   * Use the returned object for iterating over all ParticleData objects.
+   *
+   * You can use this object for use with range-based for:
+   * \code
+   * for (ParticleData &data : particles->data()) {
+   *   ...
+   * }
+   * \endcode
+   *
+   * \returns Opaque object that provides begin/end functions for iteration of
+   * all ParticleData objects.
+   */
   MapIterationAdapter<ParticleDataMap> data() { return &data_; }
+  /// const overload of the above
   MapIterationAdapter<const ParticleDataMap> data() const { return &data_; }
 
+  /**
+   * Use returned object for iterating over all ParticleType objects.
+   *
+   * You can use this object for use with range-based for:
+   * \code
+   * for (const ParticleType &type : particles->types()) {
+   *   ...
+   * }
+   * \endcode
+   *
+   * \returns Opaque object that provides begin/end functions for iteration of
+   * all ParticleType objects.
+   */
   MapIterationAdapter<const ParticleTypeMap> types() const { return &types_; }
+
+  // Iterating the DecayModes map would be easy, but not useful.
+  // MapIterationAdapter<const DecayModesMap> decay_modes() const { return
+  // &decay_modes_; }
 
   /// Return the specific data of a particle according to its id
   inline const ParticleData &data(int id) const;
