@@ -59,11 +59,8 @@ TEST(everything) {
   particles.add_data(particle_b);
   VERIFY(!(particles.size() != 2));
   int type_size = 0;
-  for (std::map<int, ParticleData>::const_iterator
-       i = particles.cbegin(); i != particles.cend(); ++i) {
-    printd("id %d: pdg %d\n", i->first, i->second.pdgcode());
-    /* check that id and and own id are the same */
-    VERIFY(!(i->first != i->second.id()));
+  for (const ParticleData &data : particles.data()) {
+    printd("id %d: pdg %d\n", data.id(), data.pdgcode());
     type_size++;
   }
   VERIFY(!(type_size != 2));

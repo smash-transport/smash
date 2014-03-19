@@ -142,7 +142,7 @@ void SphereModus::check_collision_geometry(Particles *particles,
         /* exclude check on same particle and double counting */
         if (data.id() >= data2.id())
           continue;
-        distance = data.position() - j->second.position();
+        distance = data.position() - data2.position();
         /* skip particles that are double interaction radius length away */
         if (distance > radial_interaction)
            continue;
