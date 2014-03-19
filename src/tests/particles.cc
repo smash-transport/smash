@@ -277,3 +277,32 @@ TEST(iterate_particle_data) {
   check_particle_data_iteration(&p);
   check_particle_data_iteration(p2);
 }
+
+TEST(erase_particle) {
+  Particles p(particles_txt::data, decaymodes_txt::data);
+  p.create(211);
+  p.create(-211);
+  p.create(111);
+  COMPARE(p.size(), 3);
+  COMPARE(p.count(0), 1);
+  COMPARE(p.count(1), 1);
+  COMPARE(p.count(2), 1);
+  COMPARE(p.count(3), 0);
+  COMPARE(p.data(1).pdgcode(), -211);
+
+  p.remove(0);
+  COMPARE(p.size(), 2);
+  COMPARE(p.count(0), 0);
+  COMPARE(p.count(1), 1);
+  COMPARE(p.count(2), 1);
+  COMPARE(p.count(3), 0);
+  COMPARE(p.data(1).pdgcode(), -211);
+
+  p.remove(2);
+  COMPARE(p.size(), 1);
+  COMPARE(p.count(0), 0);
+  COMPARE(p.count(1), 1);
+  COMPARE(p.count(2), 0);
+  COMPARE(p.count(3), 0);
+  COMPARE(p.data(1).pdgcode(), -211);
+}
