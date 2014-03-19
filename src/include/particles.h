@@ -19,54 +19,6 @@
 namespace Smash {
 
 /**
- * Adapter class for making iterations over particle data and types easier to
- * use.
- *
- * This is an implementation detail and need not be understood for use of the
- * Particles class.
- */
-template <typename T>
-class MapIterationAdapter {
-  /// the type T::begin() returns
-  using map_iterator = decltype(std::declval<T &>().begin());
-  /// the value type of T (with const added if T is const)
-  using mapped_type = typename std::conditional<std::is_const<T>::value,
-                                                const typename T::mapped_type,
-                                                typename T::mapped_type>::type;
- public:
-  MapIterationAdapter(T *map) : map_(map) {}
-
-  /**
-   * Adapter class that modifies the normal map iterator to return only the
-   * value instead of the key/value pair.
-   */
-  class iterator : public map_iterator {
-   public:
-    iterator(map_iterator it) : map_iterator(it) {}
-
-    /**
-     * overwritten dereference operator to return only the value instead of the
-     * key/value pair.
-     */
-    mapped_type &operator*() { return map_iterator::operator*().second; }
-    /// const overload of the above
-    const mapped_type &operator*() const { return map_iterator::operator*().second; }
-  };
-
-  /// returns an adapted iterator to the begin iterator of the map
-  iterator begin() const { return map_->begin(); }
-  /// returns an adapted iterator to the end iterator of the map
-  iterator end() const { return map_->end(); }
-
-  // const_iterator cbegin() const { return map_.cbegin(); }
-  // const_iterator cend() const { return map_.cend(); }
-
- private:
-  /// points to the map the adapter class wraps; needed for calls to begin/end
-  T *map_;
-};
-
-/**
  * The Particles class abstracts the storage and manipulation of particles.
  *
  * There should be only one Particles object per Experiment. This object stores
@@ -80,6 +32,59 @@ class MapIterationAdapter {
  * semantically. Move semantics make sense and can be implemented when needed.
  */
 class Particles {
+  /**
+   * Adapter class for making iterations over particle data and types easier to
+   * use.
+   *
+   * This is an implementation detail and need not be understood for use of the
+   * Particles class.
+   */
+  template <typename T>
+  class MapIterationAdapter {
+    /// the type T::begin() returns
+    using map_iterator = decltype(std::declval<T &>().begin());
+    /// the value type of T (with const added if T is const)
+    using mapped_type = typename std::conditional<
+        std::is_const<T>::value, const typename T::mapped_type,
+        typename T::mapped_type>::type;
+
+   public:
+    MapIterationAdapter(T *map) : map_(map) {}  // NOLINT(runtime/explicit)
+
+    /**
+     * Adapter class that modifies the normal map iterator to return only the
+     * value instead of the key/value pair.
+     */
+    class iterator : public map_iterator {
+     public:
+      iterator(map_iterator it)  // NOLINT(runtime/explicit)
+          : map_iterator(it) {}
+
+      /**
+       * overwritten dereference operator to return only the value instead of
+       * the
+       * key/value pair.
+       */
+      mapped_type &operator*() { return map_iterator::operator*().second; }
+      /// const overload of the above
+      const mapped_type &operator*() const {
+        return map_iterator::operator*().second;
+      }
+    };
+
+    /// returns an adapted iterator to the begin iterator of the map
+    iterator begin() const { return map_->begin(); }
+    /// returns an adapted iterator to the end iterator of the map
+    iterator end() const { return map_->end(); }
+
+    // const_iterator cbegin() const { return map_.cbegin(); }
+    // const_iterator cend() const { return map_.cend(); }
+
+   private:
+    /// points to the map the adapter class wraps; needed for calls to begin/end
+    T *map_;
+  };
+
   using ParticleDataMap = std::map<int, ParticleData>;
   using ParticleTypeMap = std::map<int, ParticleType>;
   using DecayModesMap = std::map<int, DecayModes>;
