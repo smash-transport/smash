@@ -165,15 +165,15 @@
  * \endcode
  *
  * ### ulp
- * Unit of least precision are a unit that is derived from the the least
+ * Unit of least precision is a unit that is derived from the the least
  * significant bit in the mantissa of a floating-point value. Consider a
  * single-precision number (23 mantissa bits) with exponent \f$e\f$. Then 1
  * ulp is \f$2^{e-23}\f$. Thus, \f$\log_2(u)\f$ signifies the the number
  * incorrect mantissa bits (with \f$u\f$ the distance in ulp).
  *
  * If \p test_value and \p reference have a different exponent the meaning of
- * ulp depends on the variable. The FUZZY_COMPARE code always uses \p reference
- * to determine the magnitude of 1 ulp.
+ * ulp depends on the variable you look at. The FUZZY_COMPARE code always uses
+ * \p reference to determine the magnitude of 1 ulp.
  *
  * Example:
  * The value `1.f` is `0x3f800000` in binary. The value
