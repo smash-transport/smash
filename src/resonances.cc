@@ -120,19 +120,22 @@ std::vector<ProcessBranch> resonance_cross_section(
   /* Find all the possible resonances */
   for (const ParticleType &type_resonance : particles->types()) {
     /* Not a resonance, go to next type of particle */
-    if (type_resonance.width() < 0.0)
+    if (type_resonance.width() < 0.0) {
       continue;
+    }
 
     /* Same resonance as in the beginning, ignore */
     if ((type_particle1.width() > 0.0
          && type_resonance.pdgcode() == type_particle1.pdgcode())
         || (type_particle2.width() > 0.0
-            && type_resonance.pdgcode() == type_particle2.pdgcode()))
+            && type_resonance.pdgcode() == type_particle2.pdgcode())) {
       continue;
+    }
 
     /* No decay channels found, ignore */
-    if (particles->decay_modes(type_resonance.pdgcode()).empty())
+    if (particles->decay_modes(type_resonance.pdgcode()).empty()) {
       continue;
+    }
 
     float resonance_xsection
       = symmetryfactor * two_to_one_formation(particles, type_particle1,
@@ -332,13 +335,15 @@ size_t two_to_two_formation(Particles *particles,
   /* Loop over particle types to find allowed combinations */
   for (const ParticleType &second_type : particles->types()) {
     /* We are interested only stable particles here */
-    if (second_type.width() > 0.0)
+    if (second_type.width() > 0.0) {
       continue;
+    }
 
     /* Check for charge conservation */
     if (type_resonance.charge() + second_type.charge()
-        != type_particle1.charge() + type_particle2.charge())
+        != type_particle1.charge() + type_particle2.charge()) {
       continue;
+    }
 
     /* Check for baryon number conservation */
     int initial_baryon_number = 0;
@@ -359,8 +364,9 @@ size_t two_to_two_formation(Particles *particles,
       final_baryon_number += second_type.pdgcode()
                                / abs(second_type.pdgcode());
     }
-    if (final_baryon_number != initial_baryon_number)
+    if (final_baryon_number != initial_baryon_number) {
       continue;
+    }
 
     /* Compute total isospin range with given initial and final particles */
     int isospin_maximum = std::min(type_resonance.isospin()
@@ -377,8 +383,9 @@ size_t two_to_two_formation(Particles *particles,
     int isospin_final = isospin_maximum;
     double clebsch_gordan_isospin = 0.0;
     while (isospin_final >= isospin_minimum) {
-      if (abs(isospin_z_final) > isospin_final)
+      if (abs(isospin_z_final) > isospin_final) {
         break;
+      }
       /* Calculate isospin Clebsch-Gordan coefficient combinations
        * (-1)^(j1 - j2 + m3) * sqrt(2 * j3 + 1) * [Wigner 3J symbol]
        * Note that the calculation assumes that isospin values
@@ -387,11 +394,12 @@ size_t two_to_two_formation(Particles *particles,
       double wigner_3j =  gsl_sf_coupling_3j(type_resonance.isospin(),
         second_type.isospin(), isospin_final,
         isospin_z_resonance, isospin_z_i, -isospin_z_final);
-      if (fabs(wigner_3j) > really_small)
+      if (fabs(wigner_3j) > really_small) {
         clebsch_gordan_isospin +=
             pow(-1, type_resonance.isospin() / 2.0 -
                         second_type.isospin() / 2.0 + isospin_z_final / 2.0) *
             sqrt(isospin_final + 1) * wigner_3j;
+      }
 
       printd("CG: %g I1: %i I2: %i IR: %i iz1: %i iz2: %i izR: %i \n",
          clebsch_gordan_isospin,
@@ -404,8 +412,9 @@ size_t two_to_two_formation(Particles *particles,
       isospin_final = isospin_final - 2;
     }
     /* If Clebsch-Gordan coefficient is zero, don't bother with the rest */
-    if (fabs(clebsch_gordan_isospin) < really_small)
+    if (fabs(clebsch_gordan_isospin) < really_small) {
       continue;
+    }
 
     /* Check the decay modes of this resonance */
     const std::vector<ProcessBranch> decaymodes
@@ -435,8 +444,9 @@ size_t two_to_two_formation(Particles *particles,
         }
       }
     }
-    if (not_enough_energy)
+    if (not_enough_energy) {
       continue;
+    }
 
     /* Calculate resonance production cross section
      * using the Breit-Wigner distribution as probability amplitude

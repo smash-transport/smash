@@ -61,8 +61,9 @@ void BoxModus::initial_conditions(Particles *particles,
     number = this->length_ * this->length_ * this->length_ * number_density *
              parameters.testparticles;
     if (this->length_ * this->length_ * this->length_ * number_density -
-            number > drand48())
+            number > drand48()) {
       number++;
+    }
     printf("IC number density %.6g [fm^-3]\n", number_density);
     printf("IC %zu number of %s\n", number, type.name().c_str());
     number_density_total += number_density;
