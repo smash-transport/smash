@@ -141,7 +141,12 @@ class Particles {
   inline const ParticleData &data(int id) const;
   /// Return the specific datapointer of a particle according to its id
   inline ParticleData * data_pointer(int id);
-  /// Return the type of a specific particle given its id
+  /**
+   * Return the type of a specific particle given its id
+   *
+   * \warning This function has a high cost. Prefer to call \ref particle_type
+   *          instead.
+   */
   inline const ParticleType &type(int id) const;
   /// Return the type for a specific pdgcode
   inline const ParticleType &particle_type(int pdgcode) const;
