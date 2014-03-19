@@ -185,8 +185,8 @@ void Experiment<Modus>::print_startup(int64_t seed) {
 template <typename Modus>
 float Experiment<Modus>::energy_total(Particles *particles) {
   float energy_sum = 0.0;
-  for (auto i = particles->begin(); i != particles->end(); ++i) {
-    energy_sum += i->second.momentum().x0();
+  for (const ParticleData &data : particles->data()) {
+    energy_sum += data.momentum().x0();
   }
   return energy_sum;
 }

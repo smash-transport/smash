@@ -75,43 +75,43 @@ void BoxModus::initial_conditions(Particles *particles,
   printf("IC total number density %.6g [fm^-3]\n", number_density_total);
   printf("IC contains %zu particles\n", number_total);
   /* Set paricles IC: */
-  for (auto i = particles->begin(); i != particles->end(); ++i) {
+  for (ParticleData &data : particles->data()) {
     double x, y, z, time_begin;
     /* back to back pair creation with random momenta direction */
-    if (unlikely(i->first == particles->id_max() && !(i->first % 2))) {
+    if (unlikely(data.id() == particles->id_max() && !(data.id() % 2))) {
       /* poor last guy just sits around */
-      i->second.set_momentum(particles->type(i->first).mass(), 0, 0, 0);
-    } else if (!(i->first % 2)) {
+      data.set_momentum(particles->particle_type(data.pdgcode()).mass(), 0, 0, 0);
+    } else if (!(data.id() % 2)) {
       if (this->initial_condition_ != 2) {
         /* thermal momentum according Maxwell-Boltzmann distribution */
         momentum_radial = sample_momenta(this->temperature_,
-                                         particles->type(i->first).mass());
+                                         particles->particle_type(data.pdgcode()).mass());
       } else {
         /* IC == 2 initial thermal momentum is the average 3T */
         momentum_radial = 3.0 * this->temperature_;
       }
       phitheta.distribute_isotropically();
-      printd("Particle %d radial momenta %g phi %g cos_theta %g\n", i->first,
+      printd("Particle %d radial momenta %g phi %g cos_theta %g\n", data.id(),
              momentum_radial, phitheta.phi(), phitheta.costheta());
-      i->second.set_momentum(
-          particles->type(i->first).mass(), momentum_radial * phitheta.x(),
+      data.set_momentum(
+          particles->particle_type(data.pdgcode()).mass(), momentum_radial * phitheta.x(),
           momentum_radial * phitheta.y(), momentum_radial * phitheta.z());
     } else {
-      i->second.set_momentum(particles->type(i->first).mass(),
-                             -particles->data(i->first - 1).momentum().x1(),
-                             -particles->data(i->first - 1).momentum().x2(),
-                             -particles->data(i->first - 1).momentum().x3());
+      data.set_momentum(particles->particle_type(data.pdgcode()).mass(),
+                             -particles->data(data.id() - 1).momentum().x1(),
+                             -particles->data(data.id() - 1).momentum().x2(),
+                             -particles->data(data.id() - 1).momentum().x3());
     }
-    momentum_total += i->second.momentum();
+    momentum_total += data.momentum();
     time_begin = 1.0;
     /* ramdom position in a quadratic box */
     x = drand48() * this->length_;
     y = drand48() * this->length_;
     z = drand48() * this->length_;
-    i->second.set_position(time_begin, x, y, z);
+    data.set_position(time_begin, x, y, z);
     /* IC: debug checks */
-    printd_momenta(i->second);
-    printd_position(i->second);
+    printd_momenta(data);
+    printd_position(data);
   }
   /* Display on startup if pseudo grid is used */
   number = number_total;
@@ -130,10 +130,10 @@ void BoxModus::initial_conditions(Particles *particles,
 /* evolve - the core of the box, stepping forward in time */
 int BoxModus::sanity_check(Particles *particles) {
   /* fixup positions on startup, particles need to be *inside* the box */
-  for (auto i = particles->begin(); i != particles->end(); ++i) {
-    FourVector p = i->second.position();
+  for (ParticleData &data : particles->data()) {
+    FourVector p = data.position();
     enforce_periodic_boundaries(p.begin() + 1, p.end(), length_);
-    i->second.set_position(p);
+    data.set_position(p);
   }
   return 0;
 }
@@ -165,30 +165,30 @@ void BoxModus::check_collision_geometry(
       grid[i][j].resize(N);
   }
   /* populate grid */
-  for (auto i = particles->begin(); i != particles->end(); ++i) {
+  for (const ParticleData &data : particles->data()) {
     /* XXX: function - map particle position to grid number */
-    x = round(i->second.position().x1() / length_ * (N - 1));
-    y = round(i->second.position().x2() / length_ * (N - 1));
-    z = round(i->second.position().x3() / length_ * (N - 1));
-    printd_position(i->second);
-    printd("grid cell particle %i: %i %i %i of %i\n", i->first, x, y, z, N);
+    x = round(data.position().x1() / length_ * (N - 1));
+    y = round(data.position().x2() / length_ * (N - 1));
+    z = round(data.position().x3() / length_ * (N - 1));
+    printd_position(data);
+    printd("grid cell particle %i: %i %i %i of %i\n", data.id(), x, y, z, N);
     if (unlikely(x >= N || y >= N || z >= N))
       printf("W: Particle outside the box: %g %g %g \n",
-             i->second.position().x1(), i->second.position().x2(),
-             i->second.position().x3());
-    grid[x][y][z].push_back(i->first);
+             data.position().x1(), data.position().x2(),
+             data.position().x3());
+    grid[x][y][z].push_back(data.id());
   }
   /* semi optimised nearest neighbour search:
    * http://en.wikipedia.org/wiki/Cell_lists
    */
   FourVector shift;
-  for (auto i = particles->begin(); i != particles->end(); ++i) {
+  for (const ParticleData &data : particles->data()) {
     /* XXX: function - map particle position to grid number */
-    x = round(i->second.position().x1() / length_ * (N - 1));
-    y = round(i->second.position().x2() / length_ * (N - 1));
-    z = round(i->second.position().x3() / length_ * (N - 1));
+    x = round(data.position().x1() / length_ * (N - 1));
+    y = round(data.position().x2() / length_ * (N - 1));
+    z = round(data.position().x3() / length_ * (N - 1));
     if (unlikely(x >= N || y >= N || z >= N))
-      printf("grid cell particle %i: %i %i %i of %i\n", i->first, x, y, z, N);
+      printf("grid cell particle %i: %i %i %i of %i\n", data.id(), x, y, z, N);
     /* check all neighbour grids */
     for (int cx = -1; cx < 2; cx++) {
       int sx = cx + x;
@@ -234,21 +234,21 @@ void BoxModus::check_collision_geometry(
             /* only check against particles above current id
              * to avoid double counting
              */
-            if (*id_other <= i->first) {
+            if (*id_other <= data.id()) {
               continue;
             }
-            printd("grid cell particle %i <-> %i\n", i->first, *id_other);
+            printd("grid cell particle %i <-> %i\n", data.id(), *id_other);
             if (shift == 0) {
               collision_criteria_geometry(
                   particles, cross_sections, collision_list, parameters.eps,
-                  i->first, *id_other, rejection_conflict);
+                  data.id(), *id_other, rejection_conflict);
             } else {
               /* apply eventual boundary before and restore after */
               particles->data_pointer(*id_other)
                   ->set_position(particles->data(*id_other).position() + shift);
               collision_criteria_geometry(
                   particles, cross_sections, collision_list, parameters.eps,
-                  i->first, *id_other, rejection_conflict);
+                  data.id(), *id_other, rejection_conflict);
               particles->data_pointer(*id_other)
                   ->set_position(particles->data(*id_other).position() - shift);
             }
@@ -263,27 +263,27 @@ void BoxModus::check_collision_geometry(
 void BoxModus::propagate(Particles *particles,
                          const ExperimentParameters &parameters) {
   FourVector distance, position;
-  for (auto i = particles->begin(); i != particles->end(); ++i) {
+  for (ParticleData &data : particles->data()) {
     /* propagation for this time step */
     distance.set_FourVector(parameters.eps,
-                            i->second.velocity_x() * parameters.eps,
-                            i->second.velocity_y() * parameters.eps,
-                            i->second.velocity_z() * parameters.eps);
-    printd("Particle %d motion: %g %g %g %g\n", i->first, distance.x0(),
+                            data.velocity_x() * parameters.eps,
+                            data.velocity_y() * parameters.eps,
+                            data.velocity_z() * parameters.eps);
+    printd("Particle %d motion: %g %g %g %g\n", data.id(), distance.x0(),
            distance.x1(), distance.x2(), distance.x3());
     /* treat the box boundaries */
-    position = i->second.position();
+    position = data.position();
     position += distance;
     bool wall_hit = enforce_periodic_boundaries(position.begin() + 1,
                                                 position.end(), length_);
     if (wall_hit) {
-      write_oscar(i->second, particles->type(i->first), 1, 1);
+      write_oscar(data, particles->particle_type(data.pdgcode()), 1, 1);
     }
-    i->second.set_position(position);
+    data.set_position(position);
     if (wall_hit) {
-      write_oscar(i->second, particles->type(i->first));
+      write_oscar(data, particles->particle_type(data.pdgcode()));
     }
-    printd_position(i->second);
+    printd_position(data);
   }
 }
 

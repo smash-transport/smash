@@ -50,10 +50,10 @@ void SphereModus::initial_conditions(Particles *particles) {
   /* loop over all the particle types creating each particles */
   for (auto i = particles->types_cbegin(); i != particles->types_cend(); ++i) {
     /* Particles with width > 0 (resonances) do not exist in the beginning */
-    if (i->second.width() > 0.0) continue;
-    printd("%s mass: %g [GeV]\n", i->second.name().c_str(), i->second.mass());
+    if (data.width() > 0.0) continue;
+    printd("%s mass: %g [GeV]\n", data.name().c_str(), data.mass());
     /* bose einstein distribution function with temperature 0.3 GeV */
-    double number_density = number_density_bose(i->second.mass(), 0.3);
+    double number_density = number_density_bose(data.mass(), 0.3);
     printf("IC number density %.6g [fm^-3]\n", number_density);
     /* cast while reflecting probability of extra particle */
     size_t number = 4.0 / 3.0 * M_PI * radius_ * radius_ * radius_ *
@@ -64,33 +64,33 @@ void SphereModus::initial_conditions(Particles *particles) {
       number++;
     /* create bunch of particles */
     printf("IC creating %zu particles\n", number);
-    particles->create(number, i->second.pdgcode());
+    particles->create(number, data.pdgcode());
     number_total += number;
   }
   printf("IC contains %zu particles\n", number_total);
   /* now set position and momentum of the particles */
   double momentum_radial;
   Angles phitheta = Angles();
-  for (auto i = particles->begin(); i != particles->end(); ++i) {
-    if (unlikely(i->first == particles->id_max() && !(i->first % 2))) {
+  for (ParticleData &data : particles->data()) {
+    if (unlikely(data.id() == particles->id_max() && !(data.id() % 2))) {
       /* poor last guy just sits around */
-      i->second.set_momentum(particles->type(i->first).mass(), 0, 0, 0);
-    } else if (!(i->first % 2)) {
+      data.set_momentum(particles->particle_type(data.pdgcode()).mass(), 0, 0, 0);
+    } else if (!(data.id() % 2)) {
       /* thermal momentum according Maxwell-Boltzmann distribution */
-      momentum_radial = sample_momenta(0.3, particles->type(i->first).mass());
+      momentum_radial = sample_momenta(0.3, particles->particle_type(data.pdgcode()).mass());
       phitheta = Angles().distribute_isotropically();
-      printd("Particle %d radial momenta %g phi %g cos_theta %g\n", i->first,
+      printd("Particle %d radial momenta %g phi %g cos_theta %g\n", data.id(),
              momentum_radial, phitheta.phi(), phitheta.costheta());
-      i->second.set_momentum(
-          particles->type(i->first).mass(), momentum_radial * phitheta.x(),
+      data.set_momentum(
+          particles->particle_type(data.pdgcode()).mass(), momentum_radial * phitheta.x(),
           momentum_radial * phitheta.y(), momentum_radial * phitheta.z());
     } else {
-      i->second.set_momentum(particles->type(i->first).mass(),
-                             -particles->data(i->first - 1).momentum().x1(),
-                             -particles->data(i->first - 1).momentum().x2(),
-                             -particles->data(i->first - 1).momentum().x3());
+      data.set_momentum(particles->particle_type(data.pdgcode()).mass(),
+                             -particles->data(data.id() - 1).momentum().x1(),
+                             -particles->data(data.id() - 1).momentum().x2(),
+                             -particles->data(data.id() - 1).momentum().x3());
     }
-    momentum_total += i->second.momentum();
+    momentum_total += data.momentum();
     double x, y, z;
     /* ramdom position in a sphere
      * box length here has the meaning of the sphere radius
@@ -104,10 +104,10 @@ void SphereModus::initial_conditions(Particles *particles) {
       y = -radius_ + 2.0 * drand48() * radius_;
       z = -radius_ + 2.0 * drand48() * radius_;
     }
-    i->second.set_position(time_start, x, y, z);
+    data.set_position(time_start, x, y, z);
     /* IC: debug checks */
-    printd_momenta(i->second);
-    printd_position(i->second);
+    printd_momenta(data);
+    printd_position(data);
   }
   printf("IC total energy: %g [GeV]\n", momentum_total.x0());
 }
@@ -137,17 +137,17 @@ void SphereModus::check_collision_geometry(Particles *particles,
     FourVector distance;
     double radial_interaction = sqrt(parameters.cross_section() * fm2_mb
                                      * M_1_PI) * 2;
-    for (auto i = particles->begin(); i != particles->end(); ++i) {
-      for (auto j = particles->begin(); j != particles->end(); ++j) {
+  for (const ParticleData &data : particles->data()) {
+    for (const ParticleData &data2 : particles->data()) {
         /* exclude check on same particle and double counting */
-        if (i->first >= j->first)
+        if (data.id() >= data2.id())
           continue;
-        distance = i->second.position() - j->second.position();
+        distance = data.position() - j->second.position();
         /* skip particles that are double interaction radius length away */
         if (distance > radial_interaction)
            continue;
         collision_criteria_geometry(particles, cross_sections, collision_list,
-          parameters, i->first, j->first, rejection_conflict);
+          parameters, data.id(), data2.id(), rejection_conflict);
       }
     }
     return;
@@ -160,26 +160,26 @@ void SphereModus::check_collision_geometry(Particles *particles,
       grid[i][j].resize(N);
   }
   /* populate grid */
-  for (auto i = particles->begin(); i != particles->end(); ++i) {
+  for (const ParticleData &data : particles->data()) {
     /* XXX: function - map particle position to grid number */
-    x = round((a + i->second.position().x1()) / (N - 1));
-    y = round((a + i->second.position().x2()) / (N - 1));
-    z = round((a + i->second.position().x3()) / (N - 1));
-    printd_position(i->second);
-    printd("grid cell particle %i: %i %i %i of %i\n", i->first, x, y, z, N);
-    grid[x][y][z].push_back(i->first);
+    x = round((a + data.position().x1()) / (N - 1));
+    y = round((a + data.position().x2()) / (N - 1));
+    z = round((a + data.position().x3()) / (N - 1));
+    printd_position(data);
+    printd("grid cell particle %i: %i %i %i of %i\n", data.id(), x, y, z, N);
+    grid[x][y][z].push_back(data.id());
   }
   /* semi optimised nearest neighbour search:
    * http://en.wikipedia.org/wiki/Cell_lists
    */
   FourVector shift;
-  for (auto i = particles->begin(); i != particles->end(); ++i) {
+  for (const ParticleData &data : particles->data()) {
     /* XXX: function - map particle position to grid number */
-    x = round((a + i->second.position().x1()) / (N - 1));
-    y = round((a + i->second.position().x2()) / (N - 1));
-    z = round((a + i->second.position().x3()) / (N - 1));
+    x = round((a + data.position().x1()) / (N - 1));
+    y = round((a + data.position().x2()) / (N - 1));
+    z = round((a + data.position().x3()) / (N - 1));
     if (unlikely(x >= N || y >= N || z >= N))
-      printf("grid cell particle %i: %i %i %i of %i\n", i->first, x, y, z, N);
+      printf("grid cell particle %i: %i %i %i of %i\n", data.id(), x, y, z, N);
     /* check all neighbour grids */
     for (int cx = -1; cx < 2; cx++) {
       int sx = cx + x;
@@ -202,11 +202,11 @@ void SphereModus::check_collision_geometry(Particles *particles,
             /* only check against particles above current id
              * to avoid double counting
              */
-            if (*id_b <= i->first)
+            if (*id_b <= data.id())
               continue;
-            printd("grid cell particle %i <-> %i\n", i->first, *id_b);
+            printd("grid cell particle %i <-> %i\n", data.id(), *id_b);
             collision_criteria_geometry(particles, cross_sections,
-              collision_list, parameters, i->first, *id_b, rejection_conflict);
+              collision_list, parameters, data.id(), *id_b, rejection_conflict);
           } /* grid particles loop */
         } /* grid sy */
       } /* grid sx */
