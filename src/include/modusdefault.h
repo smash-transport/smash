@@ -9,6 +9,7 @@
 #ifndef SRC_INCLUDE_MODUSDEFAULT_H_
 #define SRC_INCLUDE_MODUSDEFAULT_H_
 
+#include <stdexcept>
 #include <stdint.h>
 #include <list>
 
@@ -59,6 +60,13 @@ class ModusDefault {
    * XXX: document what it does in general
    */
   void propagate(Particles *particles, const ExperimentParameters &parameters);
+
+  /** BadInput is an error to throw if the configuration options are invalid.
+   *
+   **/
+  struct BadInput : public std::invalid_argument {
+    using std::invalid_argument::invalid_argument;
+  };
 };
 
 }  // namespace Smash

@@ -8,6 +8,7 @@
 #define SRC_INCLUDE_NUCLEUS_H_
 
 #include<map>
+#include<stdexcept>
 #include<vector>
 #include "include/particledata.h"
 #include "include/particles.h"
@@ -114,11 +115,15 @@ class Nucleus {
     // if size() is not a multiple of testparticles_, this will throw an
     // error.
     if (nop * testparticles_ != particles_.size()) {
-      throw "Number of test particles and test particles"
-            "per particle are incompatible";
+      throw TestparticleConfusion("Number of test particles and test particles"
+            "per particle are incompatible");
     }
     return nop;
   }
+
+  struct TestparticleConfusion : public std::length_error {
+    using std::length_error::length_error;
+  };
 
  private:
   /** diffusiveness of Woods-Saxon-distribution in this nucleus im fm

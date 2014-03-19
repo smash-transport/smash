@@ -113,7 +113,7 @@ void NucleusModus::initial_conditions(Particles *particles,
     // else, use average mass of a particle in that nucleus
     mass_1 = projectile_.mass()/projectile_.size();
   } else {
-    throw "Projectile nucleus empty!\n";
+    throw NucleusEmpty("Projectile nucleus is empty!");
   }
   // same logic for mass2 and target as for projectile directly above.
   if (pdg_sNN_2_ != 0) {
@@ -121,11 +121,11 @@ void NucleusModus::initial_conditions(Particles *particles,
   } else if (target_.size() > 0) {
     mass_2 = target_.mass()/target_.size();
   } else {
-    throw "Target nucleus empty!\n";
+    throw NucleusEmpty("Target nucleus is empty!");
   }
   double s_NN = sqrt_s_NN_*sqrt_s_NN_;
   if (s_NN < (mass_1 + mass_2)*(mass_1 + mass_2)) {
-    throw "Error in input: sqrt(s_NN) is smaller than masses.";
+    throw InvalidEnergy("Error in input: sqrt(s_NN) is smaller than masses.");
   }
   float total_mandelstam_s = (s_NN - mass_1*mass_1 - mass_2*mass_2)
                              * mass_projec*mass_target

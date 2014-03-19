@@ -9,6 +9,7 @@
 
 #include <stdint.h>
 #include <cmath>
+#include <stdexcept>
 #include <list>
 #include <string>
 
@@ -110,6 +111,13 @@ class NucleusModus : public ModusDefault {
   void initial_conditions(Particles *particles,
                           const ExperimentParameters &parameters);
 
+  struct NucleusEmpty : public ModusDefault::BadInput {
+    using ModusDefault::BadInput::BadInput;
+  };
+  struct InvalidEnergy : public ModusDefault::BadInput {
+    using ModusDefault::BadInput::BadInput;
+  };
+ 
  private:
   /** Projectile.
    *
