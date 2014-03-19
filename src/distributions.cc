@@ -58,10 +58,10 @@ double sample_momenta(const double &temperature, const double &mass) {
    * random momenta and random probability need to be below the distribution
    */
   while (probability_random > probability) {
-    momentum_radial = random_uniform(momentum_min, momentum_max);
+    momentum_radial = Random::uniform(momentum_min, momentum_max);
     momentum_radial = sqrt(momentum_radial * momentum_radial - mass * mass);
     probability = density_integrand(momentum_radial, temperature, mass);
-    probability_random = random_uniform(0.0, probability_max);
+    probability_random = Random::uniform(0.0, probability_max);
   }
 
   return momentum_radial;

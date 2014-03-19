@@ -26,7 +26,7 @@ TEST(exponential) {
   std::map<int, int> hist {};
   constexpr float dx = 0.10;
   for (int i = 0; i < N_TEST; i++) {
-    double chi = random_exponential<double>();
+    double chi = Random::exponential();
     ++hist[chi/dx];
   }
   int diffbad[sigmabins] = {0};
@@ -72,8 +72,8 @@ TEST(x_exponential) {
   std::map<int, int> hist {};
   constexpr float dx = 0.10;
   for (int i = 0; i < N_TEST; i++) {
-    double chi = random_exponential<double>();
-    chi += random_exponential<double>();
+    double chi = Random::exponential();
+    chi += Random::exponential();
     ++hist[chi/dx];
   }
   int diffbad[sigmabins] = {0};
@@ -111,9 +111,9 @@ TEST(xsquared_exponential) {
   std::map<int, int> hist {};
   constexpr float dx = 0.10;
   for (int i = 0; i < N_TEST; i++) {
-    double chi = random_exponential<double>();
-    chi += random_exponential<double>();
-    chi += random_exponential<double>();
+    double chi  = Random::exponential();
+           chi += Random::exponential();
+           chi += Random::exponential();
     ++hist[chi/dx];
   }
   int diffbad[sigmabins] = {0};
@@ -154,7 +154,7 @@ TEST(canonical) {
   std::map<int, int> hist {};
   constexpr float dx = 0.001;
   for (int i = 0; i < N_TEST; i++) {
-    double chi = random_uniform(0.0, 1.0);
+    double chi = Random::canonical();
     ++hist[chi/dx];
   }
   int diffbad[sigmabins] = {0};
@@ -188,7 +188,7 @@ TEST(canonical) {
 TEST(uniform) {
   std::map<int, int> hist {};
   constexpr float dx = 0.01;
-  auto random_4_6 = make_uniform_distribution(-4.0,6.0);
+  auto random_4_6 = Random::make_uniform_distribution(-4.0,6.0);
   for (int i = 0; i < N_TEST; i++) {
     double chi = random_4_6();
     ++hist[floor(chi/dx)];
@@ -224,7 +224,7 @@ TEST(uniform) {
 TEST(cos_like) {
   std::map<int, int> hist {};
   constexpr float dx = 0.01;
-  auto cos_like = make_uniform_distribution(-1.0, +1.0);
+  auto cos_like = Random::make_uniform_distribution(-1.0, +1.0);
   for (int i = 0; i < N_TEST; i++) {
     double chi = cos_like();
     ++hist[floor(chi/dx)];
@@ -260,7 +260,7 @@ TEST(cos_like) {
 TEST(phi_like) {
   std::map<int, int> hist {};
   constexpr float dx = 2.0 * M_PI / 10000.0;
-  auto phi_like = make_uniform_distribution(0.0, 2 * M_PI);
+  auto phi_like = Random::make_uniform_distribution(0.0, 2 * M_PI);
   for (int i = 0; i < N_TEST; i++) {
     double chi = phi_like();
     ++hist[floor(chi/dx)];

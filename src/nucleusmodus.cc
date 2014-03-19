@@ -162,12 +162,12 @@ void NucleusModus::sample_impact(const bool s, const float min,
                                                const float max) {
   if (s) {
     // quadratic sampling: Note that for min > max, this still yields
-    // the correct distribution (only that random_uniform() = 0 then is the
+    // the correct distribution (only that canonical() = 0 then is the
     // upper end, not the lower).
-    impact_ = sqrt(min*min + random_uniform(0.0, 1.0) * (max*max - min*min));
+    impact_ = sqrt(min*min + Random::canonical() * (max*max - min*min));
   } else {
     // linear sampling. Still, min > max works fine.
-    impact_ = random_uniform(min, max);
+    impact_ = Random::uniform(min, max);
   }
 }
 

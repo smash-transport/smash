@@ -155,8 +155,8 @@ inline Angles::Angles() : phi_(0), costheta_(0) {}
 
 void inline Angles::distribute_isotropically() {
   /* isotropic distribution: phi in [0, 2pi) and cos(theta) in [-1,1] */
-  phi_ = random_uniform(0.0, 2.0 * M_PI);
-  costheta_ = random_uniform(-1.0, 1.0);
+  phi_ = Random::uniform(0.0, 2.0 * M_PI);
+  costheta_ = Random::uniform(-1.0, 1.0);
 }
 
 void inline Angles::set_phi(const double& newphi) {

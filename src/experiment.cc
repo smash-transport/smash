@@ -87,7 +87,7 @@ Experiment<Modus>::Experiment(Configuration &config)
   if (seed_ < 0) {
     seed_ = time(nullptr);
   }
-  set_random_seed(seed_);
+  Random::set_seed(seed_);
 
   print_startup(seed_);
 }

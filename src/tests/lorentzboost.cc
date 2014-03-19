@@ -13,12 +13,12 @@ using namespace Smash;
 
 static const double kEPS = 1e-10;
 Angles dir;
-auto cos_like = make_uniform_distribution(-1.0, +1.0);
+auto cos_like = Random::make_uniform_distribution(-1.0, +1.0);
 
 FourVector random_velocity();
 FourVector random_velocity() {
   dir.distribute_isotropically();
-  double beta = random_uniform(0.0,1.0);
+  double beta = Random::canonical();
   // velocity-"vector" is not normalized (that's how LorentzBoost
   // works):
   return FourVector(1.0, beta*dir.x(), beta*dir.y(), beta*dir.z());

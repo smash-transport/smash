@@ -11,5 +11,5 @@
 #include "include/random.h"
 
 namespace Smash {
-/*thread_local*/ RandomEngine random_engine;
+/*thread_local*/ Random::Engine Random::engine;
 }  // namespace Smash

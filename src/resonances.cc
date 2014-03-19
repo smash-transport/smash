@@ -582,8 +582,8 @@ double sample_resonance_mass(Particles *particles, int pdg_resonance,
     = spectral_function_integrand(parameters.at(0), &parameters);
   double distribution_value = 0.0;
   while (random_number > distribution_value) {
-    random_number = random_uniform(0.0, distribution_max);
-    mass_resonance = random_uniform(minimum_mass, cms_energy - mass_stable);
+    random_number = Random::uniform(0.0, distribution_max);
+    mass_resonance = Random::uniform(minimum_mass, cms_energy - mass_stable);
     distribution_value
       = spectral_function_integrand(mass_resonance, &parameters);
   }

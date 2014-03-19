@@ -56,7 +56,7 @@ void check_decays(Particles *particles, std::list<int> *decay_list,
      * = (1 - width * Delta_t)^(t / Delta_t)
      * -> exp(-width * t) when Delta_t -> 0
      */
-    if (random_uniform(0.0, 1.0) < resonance_frame_timestep
+    if (Random::canonical<double>() < resonance_frame_timestep
                         * particles->type(i->first).width() / hbarc) {
       /* Time is up! Set the particle to decay at this timestep */
       i->second.set_collision(2, 0.0, -1);
@@ -211,7 +211,7 @@ int resonance_decay(Particles *particles, int particle_id) {
   /* Ratios of decay channels should add to 1; pick a random number
    * between 0 and 1 to select the decay mode to be used
    */
-  double random_mode = random_uniform(0.0, 1.0);
+  double random_mode = Random::canonical<double>();
   /* Keep adding to the probability until it exceeds the random value */
   while (random_mode > cumulated_probability &&  mode != decaymodes.end()) {
     cumulated_probability += mode->weight();
@@ -314,8 +314,8 @@ int one_to_three(Particles *particles, int resonance_id,
   double dalitz_bc_max = 0.0, dalitz_bc_min = 1.0;
   double s_ab = 0.0, s_bc = 0.5;
   while (s_bc > dalitz_bc_max || s_bc < dalitz_bc_min) {
-    s_ab = random_uniform(s_ab_min, s_ab_max);
-    s_bc = random_uniform(s_bc_min, s_bc_max);
+    s_ab = Random::uniform(s_ab_min, s_ab_max);
+    s_bc = Random::uniform(s_bc_min, s_bc_max);
     double e_b_rest = (s_ab - mass_a * mass_a + mass_b * mass_b)
                            / (2 * sqrt(s_ab));
     double e_c_rest = (mass_resonance * mass_resonance - s_ab

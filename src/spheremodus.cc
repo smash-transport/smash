@@ -59,7 +59,7 @@ void SphereModus::initial_conditions(Particles *particles) {
     double real_number = 4.0 / 3.0 * M_PI * radius_ * radius_ * radius_ *
                          number_density * testparticles;
     size_t int_number = static_cast<size_t>(real_number);
-    if (real_number - int_number > random_uniform())
+    if (real_number - int_number > Random::canonical())
       ++number;
     /* create bunch of particles */
     printf("IC creating %zu particles\n", number);
