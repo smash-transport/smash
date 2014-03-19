@@ -72,6 +72,11 @@ class Particles {
       const mapped_type &operator*() const {
         return map_iterator::operator*().second;
       }
+
+      mapped_type *operator->() { return &map_iterator::operator*().second; }
+      const mapped_type *operator->() const {
+        return &map_iterator::operator*().second;
+      }
     };
 
     /**
@@ -89,6 +94,10 @@ class Particles {
        */
       const mapped_type &operator*() const {
         return const_map_iterator::operator*().second;
+      }
+
+      const mapped_type *operator->() const {
+        return &const_map_iterator::operator*().second;
       }
     };
 
