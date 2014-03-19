@@ -7,6 +7,7 @@
 #ifndef SRC_INCLUDE_PARTICLES_H_
 #define SRC_INCLUDE_PARTICLES_H_
 
+#include <iterator>
 #include <map>
 #include <string>
 #include <utility>
@@ -16,6 +17,37 @@
 #include "include/particletype.h"
 
 namespace Smash {
+
+/**
+ * Adapter class for making iterations over particle data and types easier to
+ * use
+ */
+template <typename T>
+class MapIterationAdapter {
+  using map_iterator = decltype(std::declval<T &>().begin());
+  using mapped_type = typename std::conditional<std::is_const<T>::value,
+                                                const typename T::mapped_type,
+                                                typename T::mapped_type>::type;
+ public:
+  MapIterationAdapter(T *map) : map_(map) {}
+
+  class iterator : public map_iterator {
+   public:
+    iterator(map_iterator it) : map_iterator(it) {}
+
+    mapped_type &operator*() { return map_iterator::operator*().second; }
+    const mapped_type &operator*() const { return map_iterator::operator*().second; }
+  };
+
+  iterator begin() const { return map_->begin(); }
+  iterator end() const { return map_->end(); }
+
+  // const_iterator cbegin() const { return map_.cbegin(); }
+  // const_iterator cend() const { return map_.cend(); }
+
+ private:
+  T *map_;
+};
 
 /**
  * The Particles class abstracts the storage and manipulation of particles.
@@ -31,6 +63,10 @@ namespace Smash {
  * semantically. Move semantics make sense and can be implemented when needed.
  */
 class Particles {
+  using ParticleDataMap = std::map<int, ParticleData>;
+  using ParticleTypeMap = std::map<int, ParticleType>;
+  using DecayModesMap = std::map<int, DecayModes>;
+
  public:
   /// Use improbable values for default constructor
   Particles(const std::string &particles, const std::string &decaymodes) {
@@ -42,6 +78,11 @@ class Particles {
   Particles(const Particles &) = delete;
   /// Cannot be copied
   Particles &operator=(const Particles &) = delete;
+
+  MapIterationAdapter<ParticleDataMap> data() { return &data_; }
+  MapIterationAdapter<const ParticleDataMap> data() const { return &data_; }
+
+  MapIterationAdapter<const ParticleTypeMap> types() const { return &types_; }
 
   /// Return the specific data of a particle according to its id
   inline const ParticleData &data(int id) const;
@@ -132,15 +173,15 @@ class Particles {
    * a swiss cheese over the runtime of SMASH. Also we want direct
    * lookup of the corresponding particle id with its data.
    */
-  std::map<int, ParticleData> data_;
+  ParticleDataMap data_;
   /**
    * a map between pdg and correspoding static data of the particles
    *
    * PDG ids are scattered in a large range of values, hence it is a map.
    */
-  std::map<int, ParticleType> types_;
+  ParticleTypeMap types_;
   /// a map between pdg and corresponding decay modes
-  std::map<int, DecayModes> all_decay_modes_;
+  DecayModesMap all_decay_modes_;
 };
 
 /* return the data of a specific particle */

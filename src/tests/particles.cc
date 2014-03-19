@@ -157,6 +157,9 @@ TEST(load_one_particle_with_comment) {
 namespace particles_txt {
 #include "particles.txt.h"
 }  // namespace particles_txt
+namespace decaymodes_txt {
+#include "decaymodes.txt.h"
+}  // namespace decaymodes_txt
 
 TEST(load_many_particles) {
   Particles p(particles_txt::data, {});
@@ -242,4 +245,22 @@ TEST(load_decaymodes_two_channels) {
     COMPARE(modelist[2].particle_list()[0], -211);
     COMPARE(modelist[2].particle_list()[1], 213);
   }
+}
+
+TEST(iterate_particle_data) {
+  Particles p(particles_txt::data, decaymodes_txt::data);
+  int count = 0;
+  for (auto &data : p.data()) {
+    ++count;
+  }
+  COMPARE(count, 0);
+
+  count = 0;
+  for (const auto &type : p.types()) {
+    const int pdg = type.pdgcode();
+    const ParticleType &type2 = p.particle_type(pdg);
+    COMPARE(&type, &type2);
+    ++count;
+  }
+  COMPARE(count, p.types_size());
 }
