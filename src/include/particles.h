@@ -216,8 +216,6 @@ class Particles {
 
   inline std::map<int, ParticleData>::const_iterator cbegin(void) const;
   inline std::map<int, ParticleData>::const_iterator cend(void) const;
-  inline std::map<int, ParticleType>::const_iterator types_cbegin(void) const;
-  inline std::map<int, ParticleType>::const_iterator types_cend(void) const;
 
   struct LoadFailure : public std::runtime_error {
     using std::runtime_error::runtime_error;
@@ -367,17 +365,6 @@ inline std::map<int, ParticleData>::const_iterator Particles::cbegin() const {
 
 inline std::map<int, ParticleData>::const_iterator Particles::cend() const {
   return data_.end();
-}
-
-/* we only provide const ParticleType iterators as this shouldn't change */
-inline std::map<int, ParticleType>::const_iterator Particles::types_cbegin()
-  const {
-  return types_.begin();
-}
-
-inline std::map<int, ParticleType>::const_iterator Particles::types_cend()
-  const {
-  return types_.end();
 }
 
 /* check the existence of an element in the ParticleData map */

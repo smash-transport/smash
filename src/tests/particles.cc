@@ -88,17 +88,15 @@ TEST(load_one_particle_no_extra_whitespace) {
   Particles p(parts, {});
   COMPARE(p.types_size(), 1);
   int count = 0;
-  std::for_each(p.types_cbegin(), p.types_cend(),
-                [&count](std::pair<int, ParticleType> i) {
+  for (const auto &type : p.types()) {
     ++count;
-    const ParticleType &type = i.second;
     COMPARE(type.mass(), 0.135f);
     COMPARE(type.width(), -1.f);
     COMPARE(type.pdgcode(), 111);
     COMPARE(type.isospin(), 2);
     COMPARE(type.charge(), 0);
     COMPARE(type.spin(), 0);
-  });
+  }
   COMPARE(count, 1);
 }
 
@@ -107,17 +105,15 @@ TEST(load_one_particle_with_whitespace) {
   Particles p(parts, {});
   COMPARE(p.types_size(), 1);
   int count = 0;
-  std::for_each(p.types_cbegin(), p.types_cend(),
-                [&count](std::pair<int, ParticleType> i) {
+  for (const auto &type : p.types()) {
     ++count;
-    const ParticleType &type = i.second;
     COMPARE(type.mass(), 0.135f);
     COMPARE(type.width(), -1.f);
     COMPARE(type.pdgcode(), 111);
     COMPARE(type.isospin(), 2);
     COMPARE(type.charge(), 0);
     COMPARE(type.spin(), 0);
-  });
+  }
   COMPARE(count, 1);
 }
 
@@ -140,17 +136,15 @@ TEST(load_one_particle_with_comment) {
   Particles p(parts, {});
   COMPARE(p.types_size(), 1);
   int count = 0;
-  std::for_each(p.types_cbegin(), p.types_cend(),
-                [&count](std::pair<int, ParticleType> i) {
+  for (const auto &type : p.types()) {
     ++count;
-    const ParticleType &type = i.second;
     COMPARE(type.mass(), 0.135f);
     COMPARE(type.width(), -1.f);
     COMPARE(type.pdgcode(), 111);
     COMPARE(type.isospin(), 2);
     COMPARE(type.charge(), 0);
     COMPARE(type.spin(), 0);
-  });
+  }
   COMPARE(count, 1);
 }
 

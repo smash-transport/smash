@@ -48,15 +48,15 @@ void BoxModus::initial_conditions(Particles *particles,
   FourVector momentum_total(0, 0, 0, 0);
   size_t number_total = 0, number = 0;
   /* loop over all the particle types */
-  for (auto i = particles->types_cbegin(); i != particles->types_cend(); ++i) {
+  for (const ParticleType &type : particles->types()) {
     /* Particles with width > 0 (resonances) do not exist in the beginning */
-    if (i->second.width() > 0.0) {
+    if (type.width() > 0.0) {
       continue;
     }
-    printd("%s mass: %g [GeV]\n", i->second.name().c_str(), i->second.mass());
+    printd("%s mass: %g [GeV]\n", type.name().c_str(), type.mass());
     /* bose einstein distribution function */
     double number_density =
-        number_density_bose(i->second.mass(), this->temperature_);
+        number_density_bose(type.mass(), this->temperature_);
     /* cast while reflecting probability of extra particle */
     number = this->length_ * this->length_ * this->length_ * number_density *
              parameters.testparticles;
@@ -64,11 +64,11 @@ void BoxModus::initial_conditions(Particles *particles,
             number > drand48())
       number++;
     printf("IC number density %.6g [fm^-3]\n", number_density);
-    printf("IC %zu number of %s\n", number, i->second.name().c_str());
+    printf("IC %zu number of %s\n", number, type.name().c_str());
     number_density_total += number_density;
     /* create bunch of particles */
     printf("IC creating %zu particles\n", number);
-    particles->create(number, i->second.pdgcode());
+    particles->create(number, type.pdgcode());
     number_total += number;
   }
   printf("IC total number density %.6g [fm^-3]\n", number_density_total);

@@ -118,9 +118,7 @@ std::vector<ProcessBranch> resonance_cross_section(
        * type_particle2.mass() * type_particle2.mass()) / mandelstam_s;
 
   /* Find all the possible resonances */
-  for (auto i = particles->types_cbegin(); i != particles->types_cend(); ++i) {
-    ParticleType type_resonance = i->second;
-
+  for (const ParticleType &type_resonance : particles->types()) {
     /* Not a resonance, go to next type of particle */
     if (type_resonance.width() < 0.0)
       continue;
@@ -332,15 +330,13 @@ size_t two_to_two_formation(Particles *particles,
   int initial_total_minimum
     = abs(type_particle1.isospin() - type_particle2.isospin());
   /* Loop over particle types to find allowed combinations */
-  for (std::map<int, ParticleType>::const_iterator
-       type_i = particles->types_cbegin(); type_i != particles->types_cend();
-        ++type_i) {
+  for (const ParticleType &second_type : particles->types()) {
     /* We are interested only stable particles here */
-    if (type_i->second.width() > 0.0)
+    if (second_type.width() > 0.0)
       continue;
 
     /* Check for charge conservation */
-    if (type_resonance.charge() + type_i->second.charge()
+    if (type_resonance.charge() + second_type.charge()
         != type_particle1.charge() + type_particle2.charge())
       continue;
 
@@ -359,23 +355,23 @@ size_t two_to_two_formation(Particles *particles,
       final_baryon_number += type_resonance.pdgcode()
                                / abs(type_resonance.pdgcode());
     }
-    if (type_i->second.spin() % 2 != 0) {
-      final_baryon_number += type_i->second.pdgcode()
-                               / abs(type_i->second.pdgcode());
+    if (second_type.spin() % 2 != 0) {
+      final_baryon_number += second_type.pdgcode()
+                               / abs(second_type.pdgcode());
     }
     if (final_baryon_number != initial_baryon_number)
       continue;
 
     /* Compute total isospin range with given initial and final particles */
     int isospin_maximum = std::min(type_resonance.isospin()
-      + type_i->second.isospin(), initial_total_maximum);
+      + second_type.isospin(), initial_total_maximum);
     int isospin_minimum = std::max(abs(type_resonance.isospin()
-      - type_i->second.isospin()), initial_total_minimum);
+      - second_type.isospin()), initial_total_minimum);
 
-    int isospin_z_i = (type_i->second.spin()) % 2 == 0
-    ? type_i->second.charge() * 2
-    : type_i->second.charge() * 2 - type_i->second.pdgcode()
-       / abs(type_i->second.pdgcode());
+    int isospin_z_i = (second_type.spin()) % 2 == 0
+    ? second_type.charge() * 2
+    : second_type.charge() * 2 - second_type.pdgcode()
+       / abs(second_type.pdgcode());
     int isospin_z_final = isospin_z_resonance + isospin_z_i;
 
     int isospin_final = isospin_maximum;
@@ -389,16 +385,17 @@ size_t two_to_two_formation(Particles *particles,
        * have been multiplied by two
        */
       double wigner_3j =  gsl_sf_coupling_3j(type_resonance.isospin(),
-        type_i->second.isospin(), isospin_final,
+        second_type.isospin(), isospin_final,
         isospin_z_resonance, isospin_z_i, -isospin_z_final);
       if (fabs(wigner_3j) > really_small)
-        clebsch_gordan_isospin += pow(-1, type_resonance.isospin() / 2.0
-        - type_i->second.isospin() / 2.0 + isospin_z_final / 2.0)
-        * sqrt(isospin_final + 1) * wigner_3j;
+        clebsch_gordan_isospin +=
+            pow(-1, type_resonance.isospin() / 2.0 -
+                        second_type.isospin() / 2.0 + isospin_z_final / 2.0) *
+            sqrt(isospin_final + 1) * wigner_3j;
 
       printd("CG: %g I1: %i I2: %i IR: %i iz1: %i iz2: %i izR: %i \n",
          clebsch_gordan_isospin,
-         type_resonance.isospin(), type_i->second.isospin(),
+         type_resonance.isospin(), second_type.isospin(),
          isospin_final,
          isospin_z_resonance, isospin_z_i, isospin_z_final);
       /* isospin is multiplied by 2,
@@ -431,7 +428,7 @@ size_t two_to_two_formation(Particles *particles,
                      mode->particle_list().at(2));
         }
         if (sqrt(mandelstam_s) < mass_a + mass_b + mass_c
-                                 + type_i->second.mass()) {
+                                 + second_type.mass()) {
           not_enough_energy = true;
         } else if (minimum_mass < mass_a + mass_b + mass_c) {
           minimum_mass = mass_a + mass_b + mass_c;
@@ -448,12 +445,12 @@ size_t two_to_two_formation(Particles *particles,
     std::vector<double> integrand_parameters;
     integrand_parameters.push_back(type_resonance.width());
     integrand_parameters.push_back(type_resonance.mass());
-    integrand_parameters.push_back(type_i->second.mass());
+    integrand_parameters.push_back(second_type.mass());
     integrand_parameters.push_back(mandelstam_s);
     double lower_limit = minimum_mass;
-    double upper_limit = (sqrt(mandelstam_s) - type_i->second.mass());
+    double upper_limit = (sqrt(mandelstam_s) - second_type.mass());
     printd("Process: %s %s -> %s %s\n", type_particle1.name().c_str(),
-     type_particle2.name().c_str(), type_i->second.name().c_str(),
+     type_particle2.name().c_str(), second_type.name().c_str(),
      type_resonance.name().c_str());
     printd("Limits: %g %g \n", lower_limit, upper_limit);
     double resonance_integral, integral_error;
@@ -481,7 +478,7 @@ size_t two_to_two_formation(Particles *particles,
     if (xsection > really_small) {
       ProcessBranch final_state;
       final_state.add_particle(type_resonance.pdgcode());
-      final_state.add_particle(type_i->second.pdgcode());
+      final_state.add_particle(second_type.pdgcode());
       final_state.set_weight(xsection);
       process_list->push_back(final_state);
       process_list->at(0).change_weight(xsection);
