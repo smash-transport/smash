@@ -43,6 +43,7 @@ set(smash_src boxmodus.cc clebschgordan.cc collisions.cc collidermodus.cc
         parametrizations.cc
         particles.cc
         particlesoutput.cc
+        random.cc
         resonances.cc
         time.cc
         vtkoutput.cc

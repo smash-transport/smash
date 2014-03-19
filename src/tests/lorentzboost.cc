@@ -10,17 +10,15 @@
 #include "include/angles.h"
 
 using namespace Smash;
-namespace Smash {
-rng_dist rng;
-} // namespace Smash
 
 static const double kEPS = 1e-10;
 Angles dir;
+auto cos_like = make_uniform_distribution(-1.0, +1.0);
 
 FourVector random_velocity();
 FourVector random_velocity() {
   dir.distribute_isotropically();
-  double beta = rng.uniform(0.0,1.0);
+  double beta = random_uniform(0.0,1.0);
   // velocity-"vector" is not normalized (that's how LorentzBoost
   // works):
   return FourVector(1.0, beta*dir.x(), beta*dir.y(), beta*dir.z());
@@ -48,10 +46,10 @@ TEST(keep_invariant_length) {
   for(int i = 0; i < 1000; i++) {
     FourVector velocity = random_velocity();
     for(int j = 0; j < 1000; j++) {
-      FourVector a( rng.cos_like()
-                  , rng.cos_like()
-                  , rng.cos_like()
-                  , rng.cos_like());
+      FourVector a( cos_like()
+                  , cos_like()
+                  , cos_like()
+                  , cos_like());
       FourVector A = a.LorentzBoost(velocity);
       FUZZY_COMPARE(a.Dot(), A.Dot());
     }
@@ -64,14 +62,14 @@ TEST(keep_invariant_angle) {
   for(int i = 0; i < 1000; i++) {
     FourVector velocity = random_velocity();
     for(int j = 0; j < 1000; j++) {
-      FourVector a( rng.cos_like()
-                  , rng.cos_like()
-                  , rng.cos_like()
-                  , rng.cos_like());
-      FourVector b( rng.cos_like()
-                  , rng.cos_like()
-                  , rng.cos_like()
-                  , rng.cos_like());
+      FourVector a( cos_like()
+                  , cos_like()
+                  , cos_like()
+                  , cos_like());
+      FourVector b( cos_like()
+                  , cos_like()
+                  , cos_like()
+                  , cos_like());
       FourVector A = a.LorentzBoost(velocity);
       FourVector B = b.LorentzBoost(velocity);
       FUZZY_COMPARE(a.Dot(b), A.Dot(B));
@@ -86,10 +84,10 @@ TEST(back_and_forth) {
     FourVector velocity = random_velocity();
     FourVector back(1, -velocity.x1(), -velocity.x2(), -velocity.x3());
     for(int j = 0; j < 1000; j++) {
-      FourVector a( rng.cos_like()
-                  , rng.cos_like()
-                  , rng.cos_like()
-                  , rng.cos_like());
+      FourVector a( cos_like()
+                  , cos_like()
+                  , cos_like()
+                  , cos_like());
       FourVector forward  = a.LorentzBoost(velocity);
       FourVector backward = forward.LorentzBoost(back);
       FUZZY_COMPARE(backward.x0(),a.x0());

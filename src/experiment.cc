@@ -35,8 +35,6 @@
 
 namespace Smash {
 
-rng_dist rng;
-
 namespace bf = boost::filesystem;
 
 /* ExperimentBase carries everything that is needed for the evolution */
@@ -89,7 +87,7 @@ Experiment<Modus>::Experiment(Configuration &config)
   if (seed_ < 0) {
     seed_ = time(nullptr);
   }
-  rng.seed(seed_);
+  set_random_seed(seed_);
 
   print_startup(seed_);
 }

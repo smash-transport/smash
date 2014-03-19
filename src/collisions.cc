@@ -125,7 +125,7 @@ void collision_criteria_geometry(Particles *particles,
   int interaction_type = 0;
   std::vector<int> final_particles;
   if (resonance_xsections.at(0).weight() > really_small) {
-    double random_interaction = rng.canonical();
+    double random_interaction = random_uniform(0.0, 1.0);
     float interaction_probability = 0.0;
     std::vector<ProcessBranch>::const_iterator resonances
       = resonance_xsections.begin();

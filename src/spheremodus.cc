@@ -59,7 +59,7 @@ void SphereModus::initial_conditions(Particles *particles) {
     double real_number = 4.0 / 3.0 * M_PI * radius_ * radius_ * radius_ *
                          number_density * testparticles;
     size_t int_number = static_cast<size_t>(real_number);
-    if (real_number - int_number > rng.canoncial())
+    if (real_number - int_number > random_uniform())
       ++number;
     /* create bunch of particles */
     printf("IC creating %zu particles\n", number);
@@ -70,7 +70,7 @@ void SphereModus::initial_conditions(Particles *particles) {
   /* now set position and momentum of the particles */
   double momentum_radial;
   Angles phitheta = Angles();
-  rng.set_uniform(-radius_, +radius_);
+  auto uniform_radius = make_uniform_distribution(-radius_, +radius_);
   for (auto i = particles->begin(); i != particles->end(); ++i) {
     if (unlikely(i->first == particles->id_max() && !(i->first % 2))) {
       /* poor last guy just sits around */
@@ -95,14 +95,14 @@ void SphereModus::initial_conditions(Particles *particles) {
     /* ramdom position in a sphere
      * box length here has the meaning of the sphere radius
      */
-    x = rng.uniform();
-    y = rng.uniform();
-    z = rng.uniform();
+    x = uniform_radius();
+    y = uniform_radius();
+    z = uniform_radius();
     /* sampling points inside of the sphere, rejected if outside */
     while (sqrt(x * x + y * y + z * z) > radius_) {
-      x = rng.uniform();
-      y = rng.uniform();
-      z = rng.uniform();
+      x = uniform_radius();
+      y = uniform_radius();
+      z = uniform_radius();
     }
     i->second.set_position(time_start, x, y, z);
     /* IC: debug checks */

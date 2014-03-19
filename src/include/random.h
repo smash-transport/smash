@@ -14,78 +14,33 @@
 
 namespace Smash {
 
+using RandomEngine = std::ranlux48;
+extern /*thread_local*/ RandomEngine random_engine;
 
-/**
- * \todo{Random number generator is a global object at the moment. This
- * needs to be revised for multi-threading}
- *
- **/
-class rng_dist {
+template <typename T> class uniform_dist {
  public:
-  rng_dist() 
-     : engine_(time(nullptr)),
-       cos_like_(-1.0, 1.0),
-       phi_like_(0.0, 2 * M_PI),
-       uniform_(0.0, 1.0),
-       // canonical_(0.0, 1.0),
-       exponential_(1.0) {
+  uniform_dist(T min, T max)
+    : distribution(min, max) {
   }
-  rng_dist(int use_seed) 
-     : engine_(use_seed),
-       cos_like_(-1.0, 1.0),
-       phi_like_(0.0, 2 * M_PI),
-       uniform_(0.0, 1.0),
-       // canonical_(0.0, 1.0),
-       exponential_(1.0) {
+  T operator ()() {
+    return distribution(random_engine);
   }
-
-  void seed(int use_seed) {
-    engine_.seed(use_seed);
-  }
-  double phi_like() {
-    return phi_like_(engine_);
-  }
-  double cos_like() {
-    return cos_like_(engine_);
-  }
-  double uniform() {
-    return uniform_(engine_);
-  }
-  double uniform(const double& a, const double& b) {
-    set_uniform(a,b);
-    return uniform();
-  }
-  double canonical() {
-    set_uniform(0.0,1.0);
-    return uniform();
-  }
-  void set_uniform(const double& a, const double& b) {
-    uniform_.param(std::uniform_real_distribution<>::param_type(a,b));
-  }
-  double exponential() {
-    return -log(canonical());
-  }
-
- private:
-  /** The random number engine used in SMASH. **/
-  std::ranlux48 engine_;
-  /** provides cosine-like random numbers (uniform distribution in
-   * [-1..1) )
-   **/
-  std::uniform_real_distribution<double> cos_like_;
-  /** provides phi-like random numbers (uniform distribution in
-   * [0..2*pi) )
-   **/
-  std::uniform_real_distribution<double> phi_like_;
-  /** provides uniform random numbers **/
-  std::uniform_real_distribution<double> uniform_;
-  /** provides uniform random numbers between 0.0 and 1.0
-   **/
-  /** provides exponential random numbers (\f$P(t) = \exp{-t}\f$) **/
-  std::uniform_real_distribution<double> exponential_;
+  std::uniform_real_distribution<T> distribution;
 };
 
-extern rng_dist rng;
+template <typename T> void set_random_seed(T seed) {
+  random_engine.seed(seed);
+}
+template <typename T> T random_uniform(T min, T max) {
+  return std::uniform_real_distribution<T>(min, max)(random_engine);
+}
+template <typename T>
+uniform_dist<T> make_uniform_distribution(T min, T max) {
+  return uniform_dist<T>(min, max);
+}
+template <typename T> T random_exponential() {
+  return std::exponential_distribution<T>(1)(random_engine);
+}
 
 }  // namespace Smash
 

@@ -3,9 +3,9 @@ string(REPLACE "-Winline " "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 
 # test sources
 add_executable(fourvector fourvector.cc)
-add_executable(lorentzboost lorentzboost.cc ../fourvector.cc)
-add_executable(angles_distribution angles_distribution.cc)
-add_executable(angles_zero angles_zero.cc)
+add_executable(lorentzboost lorentzboost.cc ../fourvector.cc ../random.cc)
+add_executable(angles_distribution angles_distribution.cc ../random.cc)
+add_executable(angles_zero angles_zero.cc ../random.cc)
 add_executable(clebschgordan clebschgordan.cc ../clebschgordan.cc)
 
 file(COPY ../config_general.yaml DESTINATION ${CMAKE_CURRENT_BINARY_DIR})

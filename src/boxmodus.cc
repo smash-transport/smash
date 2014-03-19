@@ -65,7 +65,7 @@ void BoxModus::initial_conditions(Particles *particles,
     size_t int_number = static_cast<size_t>(real_number);
     // decide if we have an extra particle: the probability for that is
     // equal to the fractional part of the number.
-    if (real_number - int_number > rng.canonical())
+    if (real_number - int_number > random_uniform(0.0, 1.0))
       int_number++;
     printf("IC number density %.6g [fm^-3]\n", number_density);
     printf("IC %zu number of %s\n", int_number, i->second.name().c_str());
@@ -77,7 +77,7 @@ void BoxModus::initial_conditions(Particles *particles,
   }
   printf("IC total number density %.6g [fm^-3]\n", number_density_total);
   printf("IC contains %zu particles\n", number_total);
-  rng.set_uniform(0.0, this->length_);
+  auto uniform_length = make_uniform_distribution(0.0, 1.0*this->length_);
   /* Set paricles IC: */
   for (auto i = particles->begin(); i != particles->end(); ++i) {
     double x, y, z, time_begin;
@@ -109,9 +109,9 @@ void BoxModus::initial_conditions(Particles *particles,
     momentum_total += i->second.momentum();
     time_begin = 1.0;
     /* ramdom position in a quadratic box */
-    x = rng.uniform();
-    y = rng.uniform();
-    z = rng.uniform();
+    x = uniform_length();
+    y = uniform_length();
+    z = uniform_length();
     i->second.set_position(time_begin, x, y, z);
     /* IC: debug checks */
     printd_momenta(i->second);
