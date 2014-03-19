@@ -293,7 +293,7 @@ inline const DecayModes &Particles::decay_modes(int pdg) const {
 /* add a new particle data and return the id of the new particle */
 inline int Particles::add_data(ParticleData const &particle_data) {
   id_max_++;
-  data_.insert(std::pair<int, ParticleData>(id_max_, particle_data));
+  data_.insert(std::make_pair(id_max_, particle_data));
   data_.at(id_max_).set_id(id_max_);
   return id_max_;
 }
@@ -307,7 +307,7 @@ inline void Particles::create(size_t number, int pdgcode) {
   for (size_t i = 0; i < number; i++) {
     id_max_++;
     particle.set_id(id_max_);
-    data_.insert(std::pair<int, ParticleData>(id_max_, particle));
+    data_.insert(std::make_pair(id_max_, particle));
   }
 }
 
@@ -319,7 +319,7 @@ inline ParticleData& Particles::create(int pdgcode) {
   particle.set_collision(-1, 0, -1);
   id_max_++;
   particle.set_id(id_max_);
-  data_.insert(std::pair<int, ParticleData>(id_max_, particle));
+  data_.insert(std::make_pair(id_max_, particle));
   return data_[id_max_];
 }
 
