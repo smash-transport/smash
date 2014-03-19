@@ -23,7 +23,6 @@
 #include "include/macros.h"
 #include "include/nucleusmodus.h"
 #include "include/outputroutines.h"
-#include "include/parameters.h"
 #include "include/particlesoutput.h"
 #include "include/time.h"
 #include "include/vtkoutput.h"

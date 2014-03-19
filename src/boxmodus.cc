@@ -23,7 +23,6 @@
 #include "include/experimentparameters.h"
 #include "include/macros.h"
 #include "include/outputroutines.h"
-#include "include/parameters.h"
 #include "include/particles.h"
 
 namespace Smash {

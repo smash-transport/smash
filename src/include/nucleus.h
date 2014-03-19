@@ -12,6 +12,7 @@
 #include<vector>
 #include "include/particledata.h"
 #include "include/particles.h"
+#include <stdexcept>
 
 namespace Smash {
 

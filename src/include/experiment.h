@@ -17,7 +17,6 @@
 #include "include/experimentparameters.h"
 #include "include/modusdefault.h"
 #include "include/outputroutines.h"
-#include "include/parameters.h"
 #include "include/particles.h"
 #include "outputinterface.h"
 
