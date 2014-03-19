@@ -43,6 +43,8 @@ class Particles {
   class MapIterationAdapter {
     /// the type T::begin() returns
     using map_iterator = decltype(std::declval<T &>().begin());
+    /// the type T::cbegin() returns
+    using const_map_iterator = decltype(std::declval<T &>().cbegin());
     /// the value type of T (with const added if T is const)
     using mapped_type = typename std::conditional<
         std::is_const<T>::value, const typename T::mapped_type,
@@ -72,13 +74,34 @@ class Particles {
       }
     };
 
+    /**
+     * Adapter class that modifies the normal map const_iterator to return only
+     * the value instead of the key/value pair.
+     */
+    class const_iterator : public const_map_iterator {
+     public:
+      const_iterator(const_map_iterator it)  // NOLINT(runtime/explicit)
+          : const_map_iterator(it) {}
+
+      /**
+       * overwritten dereference operator to return only the value instead of
+       * the key/value pair.
+       */
+      const mapped_type &operator*() const {
+        return const_map_iterator::operator*().second;
+      }
+    };
+
+
     /// returns an adapted iterator to the begin iterator of the map
     iterator begin() const { return map_->begin(); }
     /// returns an adapted iterator to the end iterator of the map
     iterator end() const { return map_->end(); }
 
-    // const_iterator cbegin() const { return map_.cbegin(); }
-    // const_iterator cend() const { return map_.cend(); }
+    /// returns an adapted iterator to the begin iterator of the map
+    const_iterator cbegin() const { return map_.cbegin(); }
+    /// returns an adapted iterator to the end iterator of the map
+    const_iterator cend() const { return map_.cend(); }
 
    private:
     /// points to the map the adapter class wraps; needed for calls to begin/end
