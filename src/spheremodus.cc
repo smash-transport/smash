@@ -70,7 +70,7 @@ void SphereModus::initial_conditions(Particles *particles) {
   /* now set position and momentum of the particles */
   double momentum_radial;
   Angles phitheta = Angles();
-  auto uniform_radius = make_uniform_distribution(-radius_, +radius_);
+  auto uniform_radius = Random::make_uniform_distribution(-radius_, +radius_);
   for (auto i = particles->begin(); i != particles->end(); ++i) {
     if (unlikely(i->first == particles->id_max() && !(i->first % 2))) {
       /* poor last guy just sits around */
