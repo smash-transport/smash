@@ -32,10 +32,16 @@ float Nucleus::mass() const {
  * 
  *
  * Nucleons in nuclei are distributed according to a
- * Woods-Saxon-distribution[citation needed]
+ * Woods-Saxon-distribution[See Phys. Rev. 95, 577 (1954)]
  *
  * \f[\frac{dN}{d^3r} = \frac{\rho_0}{\exp\left(\frac{r-r_0}{d}\right)
- * +1}.\f]
+ * +1},\f]
+ *
+ * where \f$d\f$ is the \em diffuseness of the nucleus. For \f$d=0\f$,
+ * the nucleus is a hard sphere.  \f$\rho_0\f$ and \f$r_0\f$ are, in
+ * this limit, the nuclear ground state density and 
+ * nuclear radius, respectively. For small \f$d\f$, this is still
+ * approximately true.
  *
  * This distribution is obviously spherically symmetric, hence we can
  * rewrite \f$d^3r = 4\pi r^2 dr\f$ and obtain
@@ -61,15 +67,16 @@ float Nucleus::mass() const {
  *
  * and observe
  *
- * \f[\frac{1}{\exp(x)+1} = \frac{e^{-x}e^x}{e^{-x}e^{x}+e^{-x}} =
+ * \f[\frac{1}{\exp(x)+1} = \frac{e^{-x}}{e^{-x}e^{x}+e^{-x}} =
  * \frac{e^{-x}}{e^{-x}+1}.\f]
  *
  * The distribution function can now be split into two cases. For
  * negative t (first case), \f$-|t| = t\f$, and for positive t (second
  * case), \f$-|t| = -t\f$:
  *
- * \f[p^{(1)}(t) = \frac{1}{e^{-|t|}+1} \cdot (t+R)^2\begin{cases}
- * 1 & R \le t < 0 \\
+ * \f[p^{(1)}(t) = \frac{1}{e^{-|t|}+1} \cdot (t+R)^2 \cdot
+ * \begin{cases}
+ * 1 & -R \le t < 0 \\
  * e^{-t} & t \ge 0
  * \end{cases}.\f]
  *
@@ -78,12 +85,12 @@ float Nucleus::mass() const {
  * below). The first term itself - \f$(1+e^{-|t|})^{-1}\f$ - is a number
  * between 1/2 and 1.?
  *
- * If we now have a variable $t$ distributed according to
- * \f$p^{(2)}(t)\f$ and reject \f$t\f$ with a probability
- * \f$p^{(rej)}(t) = (1+e^{-|t|})^{-1}\f$, the resulting distribution is
- * \f$p^{(combined)}(t) = p^{(2)}(t) \cdot p^{(rej)}(t)\f$. Hence, what
- * we need to generate is (the tilde \f$\tilde p\f$ means that this is
- * normalized):
+ * If we now have a variable \f$t\f$ distributed according to the
+ * remainder, \f$p^{(2)}(t)\f$, and reject \f$t\f$ with a probability
+ * \f$p^{(rej)}(t) = 1 - p^{(survive)}(t) = 1 - (1+e^{-|t|})^{-1}\f$,
+ * the resulting distribution is \f$p^{(combined)}(t) = p^{(2)}(t) \cdot
+ * p^{(survive)}(t)\f$. Hence, we need to generate is (the tilde
+ * \f$\tilde p\f$ means that this is normalized):
  *
  * \f[\tilde{p}^{(2)}(t) = \frac{1}{1+3/R+6/R^2+6/R^3} \cdot \begin{cases}
  * \frac{3}{R^3} (t+R)^2 & R \le t < 0 \\
