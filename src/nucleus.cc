@@ -83,19 +83,21 @@ float Nucleus::mass() const {
  * Apart from the first term, all that remains here can easily and
  * exactly be generated from unrejected uniform random numbers (see
  * below). The first term itself - \f$(1+e^{-|t|})^{-1}\f$ - is a number
- * between 1/2 and 1.?
+ * between 1/2 and 1.
  *
  * If we now have a variable \f$t\f$ distributed according to the
  * remainder, \f$p^{(2)}(t)\f$, and reject \f$t\f$ with a probability
  * \f$p^{(rej)}(t) = 1 - p^{(survive)}(t) = 1 - (1+e^{-|t|})^{-1}\f$,
  * the resulting distribution is \f$p^{(combined)}(t) = p^{(2)}(t) \cdot
- * p^{(survive)}(t)\f$. Hence, we need to generate is (the tilde
- * \f$\tilde p\f$ means that this is normalized):
+ * p^{(survive)}(t)\f$. Hence, we need to generate \f$p^{(2)}(t)\f$,
+ * which we can normalize to
  *
  * \f[\tilde{p}^{(2)}(t) = \frac{1}{1+3/R+6/R^2+6/R^3} \cdot \begin{cases}
- * \frac{3}{R^3} (t+R)^2 & R \le t < 0 \\
- * e^{-x} \left( \frac{3}{R}+\frac{6}{R^2}t+\frac{6}{R^3}t^2 \right) & t
- * \ge 0 \end{cases}.\f]
+ * \frac{3}{R^3} (t+R)^2 & -R \le t < 0 \\
+ * e^{-t} \left( \frac{3}{R}+\frac{6}{R^2}t+\frac{6}{R^3}\frac{1}{2}t^2 \right)
+ * & t \ge 0 \end{cases}.\f]
+ *  
+ * (the tilde \f$\tilde{p}\f$ means that this is normalized).
  *
  * Four parts inside the rejection
  * -------------------------------
