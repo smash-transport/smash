@@ -15,6 +15,8 @@
 #include "include/crosssections.h"
 #include "include/modusdefault.h"
 #include "include/particles.h"
+#include "include/parameters.h"
+#include "include/random.h"
 
 namespace Smash {
 

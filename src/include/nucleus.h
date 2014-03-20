@@ -10,9 +10,11 @@
 #include<map>
 #include<stdexcept>
 #include<vector>
+#include "include/fourvector.h"
 #include "include/particledata.h"
 #include "include/particles.h"
 #include <stdexcept>
+#include "include/random.h"
 
 namespace Smash {
 
@@ -42,6 +44,12 @@ class Nucleus {
    * 1}\f$ where \f$d\f$ is the diffusiveness_ parameter and \f$R\f$ is
    * nuclear_radius(). */
   float distribution_nucleons() const;
+  /** returns the Woods-Saxon distribution directly
+   *
+   * @param x the position at which to evaluate the function
+   * @return the 
+   **/
+  float woods_saxon(const float& x);
   /// sets the positions of the nuclei inside nucleus A.
   void arrange_nucleons();
   /**
@@ -121,6 +129,13 @@ class Nucleus {
     }
     return nop;
   }
+  FourVector center() const;
+  void align_center() {
+    FourVector centerpoint = center();
+    for (auto p = particles_.begin(); p != particles_.end(); ++p) {
+      p->set_position(p->position()-centerpoint);
+    }
+  }
 
   struct TestparticleConfusion : public std::length_error {
     using std::length_error::length_error;
@@ -151,6 +166,7 @@ class Nucleus {
   size_t testparticles_ = 1;
   /// particles associated with this nucleus.
   std::vector<ParticleData> particles_;
+ public:
   /// for iterators over the particle list:
   inline std::vector<ParticleData>::iterator begin() {
     return particles_.begin();

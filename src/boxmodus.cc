@@ -24,6 +24,7 @@
 #include "include/macros.h"
 #include "include/outputroutines.h"
 #include "include/particles.h"
+#include "include/random.h"
 
 namespace Smash {
 
@@ -46,7 +47,7 @@ void BoxModus::initial_conditions(Particles *particles,
   double momentum_radial, number_density_total = 0;
   Angles phitheta;
   FourVector momentum_total(0, 0, 0, 0);
-  size_t number_total = 0, number = 0;
+  size_t number_total = 0;
   /* loop over all the particle types */
   for (auto i = particles->types_cbegin(); i != particles->types_cend(); ++i) {
     /* Particles with width > 0 (resonances) do not exist in the beginning */
@@ -57,22 +58,26 @@ void BoxModus::initial_conditions(Particles *particles,
     /* bose einstein distribution function */
     double number_density =
         number_density_bose(i->second.mass(), this->temperature_);
-    /* cast while reflecting probability of extra particle */
-    number = this->length_ * this->length_ * this->length_ * number_density *
-             parameters.testparticles;
-    if (this->length_ * this->length_ * this->length_ * number_density -
-            number > drand48())
-      number++;
+    // calculate the expected of particles in the box
+    double real_number = this->length_ * this->length_ * this->length_ *
+                         number_density * parameters.testparticles;
+    size_t int_number = static_cast<size_t>(real_number);
+    // decide if we have an extra particle: the probability for that is
+    // equal to the fractional part of the number.
+    if (real_number - int_number > Random::canonical())
+      int_number++;
     printf("IC number density %.6g [fm^-3]\n", number_density);
-    printf("IC %zu number of %s\n", number, i->second.name().c_str());
+    printf("IC %zu number of %s\n", int_number, i->second.name().c_str());
     number_density_total += number_density;
     /* create bunch of particles */
-    printf("IC creating %zu particles\n", number);
-    particles->create(number, i->second.pdgcode());
-    number_total += number;
+    printf("IC creating %zu particles\n", int_number);
+    particles->create(int_number, i->second.pdgcode());
+    number_total += int_number;
   }
   printf("IC total number density %.6g [fm^-3]\n", number_density_total);
   printf("IC contains %zu particles\n", number_total);
+  auto uniform_length = Random::make_uniform_distribution(0.0,
+                                         static_cast<double>(this->length_));
   /* Set paricles IC: */
   for (auto i = particles->begin(); i != particles->end(); ++i) {
     double x, y, z, time_begin;
@@ -104,16 +109,16 @@ void BoxModus::initial_conditions(Particles *particles,
     momentum_total += i->second.momentum();
     time_begin = 1.0;
     /* ramdom position in a quadratic box */
-    x = drand48() * this->length_;
-    y = drand48() * this->length_;
-    z = drand48() * this->length_;
+    x = uniform_length();
+    y = uniform_length();
+    z = uniform_length();
     i->second.set_position(time_begin, x, y, z);
     /* IC: debug checks */
     printd_momenta(i->second);
     printd_position(i->second);
   }
   /* Display on startup if pseudo grid is used */
-  number = number_total;
+  size_t number = number_total;
   int const grid_number = round(
       this->length_ / sqrt(parameters.cross_section * fm2_mb * M_1_PI) * 0.5);
   /* pseudo grid not used for 3^3 or extremely small particle numbers */

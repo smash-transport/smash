@@ -57,7 +57,7 @@ void ColliderModus::initial_conditions(Particles *particles,
   double cms_momentum = sqrt(cms_energy_projectile * cms_energy_projectile
                              - mass_projectile * mass_projectile);
   /* Sample impact parameter */
-  double impact_parameter = drand48() * 5.0;
+  double impact_parameter = Random::uniform(0.0, 5.0);
   /* Set positions and momenta */
   data_projectile->set_position(1.0, impact_parameter, 0.0, -1.0);
   data_projectile->set_momentum(mass_projectile, 0.0, 0.0, cms_momentum);

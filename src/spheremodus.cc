@@ -24,6 +24,7 @@
 #include "include/particledata.h"
 #include "include/particles.h"
 #include "include/propagation.h"
+#include "include/random.h"
 #include "include/sphere.h"
 
 /* build dependent variables */
@@ -55,13 +56,11 @@ void SphereModus::initial_conditions(Particles *particles) {
     /* bose einstein distribution function with temperature 0.3 GeV */
     double number_density = number_density_bose(i->second.mass(), 0.3);
     printf("IC number density %.6g [fm^-3]\n", number_density);
-    /* cast while reflecting probability of extra particle */
-    size_t number = 4.0 / 3.0 * M_PI * radius_ * radius_ * radius_ *
-                    number_density * testparticles;
-    if (4.0 / 3.0 * M_PI * radius_ * radius_ * radius_ * number_density -
-            number >
-        drand48())
-      number++;
+    double real_number = 4.0 / 3.0 * M_PI * radius_ * radius_ * radius_ *
+                         number_density * testparticles;
+    size_t int_number = static_cast<size_t>(real_number);
+    if (real_number - int_number > Random::canonical())
+      ++number;
     /* create bunch of particles */
     printf("IC creating %zu particles\n", number);
     particles->create(number, i->second.pdgcode());
@@ -71,6 +70,7 @@ void SphereModus::initial_conditions(Particles *particles) {
   /* now set position and momentum of the particles */
   double momentum_radial;
   Angles phitheta = Angles();
+  auto uniform_radius = make_uniform_distribution(-radius_, +radius_);
   for (auto i = particles->begin(); i != particles->end(); ++i) {
     if (unlikely(i->first == particles->id_max() && !(i->first % 2))) {
       /* poor last guy just sits around */
@@ -95,14 +95,14 @@ void SphereModus::initial_conditions(Particles *particles) {
     /* ramdom position in a sphere
      * box length here has the meaning of the sphere radius
      */
-    x = -radius_ + 2.0 * drand48() * radius_;
-    y = -radius_ + 2.0 * drand48() * radius_;
-    z = -radius_ + 2.0 * drand48() * radius_;
+    x = uniform_radius();
+    y = uniform_radius();
+    z = uniform_radius();
     /* sampling points inside of the sphere, rejected if outside */
     while (sqrt(x * x + y * y + z * z) > radius_) {
-      x = -radius_ + 2.0 * drand48() * radius_;
-      y = -radius_ + 2.0 * drand48() * radius_;
-      z = -radius_ + 2.0 * drand48() * radius_;
+      x = uniform_radius();
+      y = uniform_radius();
+      z = uniform_radius();
     }
     i->second.set_position(time_start, x, y, z);
     /* IC: debug checks */
