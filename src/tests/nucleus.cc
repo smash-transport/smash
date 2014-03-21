@@ -40,7 +40,7 @@ TEST(initialize_testparticles_multiple) {
   COMPARE(lead.size(), 416*N_TEST);
 }
 
-TEST_CATCH(initialize_testparticles_wrong, std::string) {
+TEST_CATCH(initialize_testparticles_wrong, Nucleus::TestparticleConfusion) {
   Nucleus lead;
   constexpr int N_TEST = 10;
   lead.fill_from_list(list, 1);
@@ -61,7 +61,7 @@ TEST(nuclear_radius) {
 // check that center is at (0/0/0):
 TEST(center) {
   Nucleus lead;
-  constexpr int N_TEST = 100000;
+  constexpr int N_TEST = 20000;
   lead.fill_from_list(list, N_TEST);
   lead.arrange_nucleons();
   FourVector middle = lead.center();
@@ -89,7 +89,7 @@ TEST(center) {
 
 TEST(center_hard_sphere) {
   Nucleus lead;
-  constexpr int N_TEST = 100000;
+  constexpr int N_TEST = 20000;
   lead.fill_from_list(list, N_TEST);
   lead.set_diffusiveness(0.0);
   lead.arrange_nucleons();
