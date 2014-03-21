@@ -150,6 +150,35 @@
 #define COMPARE(test_value, reference)
 
 /**
+ * \brief Verifies that the difference between \p test_value and \p reference is
+ * smaller than \p allowed_difference.
+ *
+ * If the test fails the output will show the actual difference between \p
+ * test_value and \p reference. If this value is positive \p test_value is too
+ * large. If it is negative \p test_value is too small.
+ */
+#define COMPARE_ABSOLUTE_ERROR(test_value, reference, allowed_difference)
+
+/**
+ * \brief Verifies that the difference between \p test_value and \p reference is
+ * smaller than `allowed_relative_difference * reference`.
+ *
+ * If the test fails the output will show the actual difference between \p
+ * test_value and \p reference. If this value is positive \p test_value is too
+ * large. If it is negative \p test_value is too small.
+ *
+ * The following example tests that `a` is no more than 1% different from `b`:
+ * \code
+ * COMPARE_ABSOLUTE_ERROR(a, b, 0.01);
+ * \endcode
+ *
+ * \note This test macro still works even if \p reference is set to 0. It will
+ * then compare the difference against `allowed_relative_difference * <smallest
+ * positive normalized value of reference type>`.
+ */
+#define COMPARE_RELATIVE_ERROR(test_value, reference, allowed_relative_difference)
+
+/**
  * \brief Verifies that \p test_value is equal to \p reference within a
  * pre-defined distance in units of least precision (ulp).
  *
@@ -468,8 +497,11 @@ class _UnitTest_Compare {  // {{{1
       error *= b;
     } else if (b < 0) {
       error *= -b;
+    } else if (std::is_floating_point<T>::value) {
+      // if the reference value is 0 then use the smallest normalized number
+      error *= std::numeric_limits<T>::min();
     } else {
-      return true; // failure
+      // error *= 1;  // the smallest non-zero positive number is 1...
     }
     if (a > b) { // don't use abs(a - b) because it doesn't work for unsigned integers
       return a - b > error;
@@ -581,12 +613,6 @@ class _UnitTest_Compare {  // {{{1
       printFirst();
       printPosition(_file, _line);
       print(":\n");
-      if (b == 0) {
-        print(
-            "relative difference does not work if the reference value is set "
-            "to 0. Please fix the test.");
-        return;
-      }
       print(_a);
       print(" (");
       print(std::setprecision(10));
