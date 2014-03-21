@@ -484,7 +484,8 @@ inline double unittest_fuzzynessHelper<double>(const double &) {
 class _UnitTest_Compare {  // {{{1
   template <typename T, typename ET>
   static bool absoluteErrorTest(const T &a, const T &b, ET error) {
-    if (a > b) { // don't use abs(a - b) because it doesn't work for unsigned integers
+    if (a > b) {  // don't use abs(a - b) because it doesn't work for unsigned
+                  // integers
       return a - b > error;
     } else {
       return b - a > error;
@@ -503,7 +504,8 @@ class _UnitTest_Compare {  // {{{1
     } else {
       // error *= 1;  // the smallest non-zero positive number is 1...
     }
-    if (a > b) { // don't use abs(a - b) because it doesn't work for unsigned integers
+    if (a > b) {  // don't use abs(a - b) because it doesn't work for unsigned
+                  // integers
       return a - b > error;
     } else {
       return b - a > error;
