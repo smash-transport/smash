@@ -453,8 +453,35 @@ inline double unittest_fuzzynessHelper<double>(const double &) {
 }
 
 class _UnitTest_Compare {  // {{{1
+  template <typename T, typename ET>
+  static bool absoluteErrorTest(const T &a, const T &b, ET error) {
+    if (a > b) { // don't use abs(a - b) because it doesn't work for unsigned integers
+      return a - b > error;
+    } else {
+      return b - a > error;
+    }
+  }
+
+  template <typename T, typename ET>
+  static bool relativeErrorTest(const T &a, const T &b, ET error) {
+    if (b > 0) {
+      error *= b;
+    } else if (b < 0) {
+      error *= -b;
+    } else {
+      return true; // failure
+    }
+    if (a > b) { // don't use abs(a - b) because it doesn't work for unsigned integers
+      return a - b > error;
+    } else {
+      return b - a > error;
+    }
+  }
+
  public:
-  enum OptionFuzzy { Fuzzy };
+  struct Fuzzy {};
+  struct AbsoluteError {};
+  struct RelativeError {};
 
   // Normal Compare ctor {{{2
   template <typename T1, typename T2>
@@ -484,7 +511,7 @@ class _UnitTest_Compare {  // {{{1
   template <typename T>
   ALWAYS_INLINE _UnitTest_Compare(const T &a, const T &b, const char *_a,
                                   const char *_b, const char *_file, int _line,
-                                  OptionFuzzy)
+                                  Fuzzy)
       : m_ip(getIp()), m_failed(!unittest_fuzzyCompareHelper(a, b)) {
     if (IS_UNLIKELY(m_failed)) {
       printFirst();
@@ -506,6 +533,86 @@ class _UnitTest_Compare {  // {{{1
     }
   }
 
+  // Absolute Error Compare ctor {{{2
+  template <typename T, typename ET>
+  ALWAYS_INLINE _UnitTest_Compare(const T &a, const T &b, const char *_a,
+                                  const char *_b, const char *_file, int _line,
+                                  AbsoluteError, ET error)
+      : m_ip(getIp()), m_failed(absoluteErrorTest(a, b, error)) {
+    if (IS_UNLIKELY(m_failed)) {
+      printFirst();
+      printPosition(_file, _line);
+      print(":\n");
+      print(_a);
+      print(" (");
+      print(std::setprecision(10));
+      print(a);
+      print(") ≈ ");
+      print(_b);
+      print(" (");
+      print(std::setprecision(10));
+      print(b);
+      print(std::setprecision(6));
+      print(") -> ");
+      print(a == b);
+      print("\ndifference: ");
+      if (a > b) {
+        print(a - b);
+      } else {
+        print('-');
+        print(b - a);
+      }
+      print(", allowed difference: ±");
+      print(error);
+      print("\ndistance: ");
+      print(ulpDiffToReferenceSigned(a, b));
+      print(" ulp");
+    }
+  }
+
+
+  // Relative Error Compare ctor {{{2
+  template <typename T, typename ET>
+  ALWAYS_INLINE _UnitTest_Compare(const T &a, const T &b, const char *_a,
+                                  const char *_b, const char *_file, int _line,
+                                  RelativeError, ET error)
+      : m_ip(getIp()), m_failed(relativeErrorTest(a, b, error)) {
+    if (IS_UNLIKELY(m_failed)) {
+      printFirst();
+      printPosition(_file, _line);
+      print(":\n");
+      if (b == 0) {
+        print(
+            "relative difference does not work if the reference value is set "
+            "to 0. Please fix the test.");
+        return;
+      }
+      print(_a);
+      print(" (");
+      print(std::setprecision(10));
+      print(a);
+      print(") ≈ ");
+      print(_b);
+      print(" (");
+      print(std::setprecision(10));
+      print(b);
+      print(std::setprecision(6));
+      print(") -> ");
+      print(a == b);
+      print("\ndifference: ");
+      if (a > b) {
+        print(a - b);
+      } else {
+        print('-');
+        print(b - a);
+      }
+      print(", allowed difference: ±");
+      print(error * (b > 0 ? b : -b));
+      print("\ndistance: ");
+      print(ulpDiffToReferenceSigned(a, b));
+      print(" ulp");
+    }
+  }
   // VERIFY ctor {{{2
   ALWAYS_INLINE _UnitTest_Compare(bool good, const char *cond,
                                   const char *_file, int _line)
@@ -639,8 +746,9 @@ class _UnitTest_Compare {  // {{{1
   static inline void printFuzzyInfoImpl(T a, T b, double fuzzyness) {
     print("\ndistance: ");
     print(ulpDiffToReferenceSigned(a, b));
-    print(", allowed distance: ");
+    print(" ulp, allowed distance: ±");
     print(fuzzyness);
+    print(" ulp");
   }
   // member variables {{{2
   const size_t m_ip;
@@ -659,9 +767,21 @@ inline void _UnitTest_Compare::printFuzzyInfo(double a, double b) {
 // FUZZY_COMPARE {{{1
 // Workaround for clang: The "<< ' '" is only added to silence the warnings
 // about unused return values.
-#define FUZZY_COMPARE(a, b)                                       \
-  UnitTest::_UnitTest_Compare(a, b, #a, #b, __FILE__, __LINE__,   \
-                              UnitTest::_UnitTest_Compare::Fuzzy) \
+#define FUZZY_COMPARE(a, b)                                         \
+  UnitTest::_UnitTest_Compare(a, b, #a, #b, __FILE__, __LINE__,     \
+                              UnitTest::_UnitTest_Compare::Fuzzy()) \
+      << ' '
+// COMPARE_ABSOLUTE_ERROR {{{1
+#define COMPARE_ABSOLUTE_ERROR(a__, b__, error__)                           \
+  UnitTest::_UnitTest_Compare(a__, b__, #a__, #b__, __FILE__, __LINE__,     \
+                              UnitTest::_UnitTest_Compare::AbsoluteError(), \
+                              error__)                                      \
+      << ' '
+// COMPARE_RELATIVE_ERROR {{{1
+#define COMPARE_RELATIVE_ERROR(a__, b__, error__)                           \
+  UnitTest::_UnitTest_Compare(a__, b__, #a__, #b__, __FILE__, __LINE__,     \
+                              UnitTest::_UnitTest_Compare::RelativeError(), \
+                              error__)                                      \
       << ' '
 // COMPARE {{{1
 #define COMPARE(a, b) \
