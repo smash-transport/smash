@@ -53,8 +53,8 @@ void SphereModus::initial_conditions(Particles *particles) {
     /* Particles with width > 0 (resonances) do not exist in the beginning */
     if (data.width() > 0.0) continue;
     printd("%s mass: %g [GeV]\n", data.name().c_str(), data.mass());
-    /* bose einstein distribution function with temperature 0.3 GeV */
-    double number_density = number_density_bose(data.mass(), 0.3);
+    /* Maxwell-Boltzmann statistics with temperature 0.3 GeV */
+    double number_density = number_density_maxwellboltzmann(data.mass(), 0.3);
     printf("IC number density %.6g [fm^-3]\n", number_density);
     double real_number = 4.0 / 3.0 * M_PI * radius_ * radius_ * radius_ *
                          number_density * testparticles;

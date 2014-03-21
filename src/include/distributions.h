@@ -28,10 +28,10 @@ double inline density_integrand(const double &momentum, const double &temp,
 double sample_momenta(const double &temp, const double &mass);
 
 /* return number density for given mass and temperature */
-inline double number_density_bose(double mass, double temperature) {
+inline double number_density_maxwellboltzmann(double mass, double temperature) {
   /*
    * The particle number depends on distribution function
-   * (assumes Bose-Einstein):
+   * (assumes Maxwell-Boltzmann):
    * Volume m^2 T BesselK[2, m/T] / (2\pi^2)
    */
   return mass * mass * temperature * gsl_sf_bessel_Knu(2, mass / temperature)

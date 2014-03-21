@@ -55,9 +55,9 @@ void BoxModus::initial_conditions(Particles *particles,
       continue;
     }
     printd("%s mass: %g [GeV]\n", type.name().c_str(), type.mass());
-    /* bose einstein distribution function */
+    /* Particle densities according to Maxwell-Boltzmann statistics */
     double number_density =
-        number_density_bose(type.mass(), this->temperature_);
+        number_density_maxwellboltzmann(type.mass(), this->temperature_);
     // calculate the expected of particles in the box
     double real_number = this->length_ * this->length_ * this->length_ *
                          number_density * parameters.testparticles;
