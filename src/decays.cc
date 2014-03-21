@@ -36,14 +36,14 @@ void check_decays(Particles *particles, std::list<int> *decay_list,
   FourVector velocity_lrf;
   velocity_lrf.set_x0(1.0);
 
-  for (auto i = particles->begin(); i != particles->end(); ++i) {
+  for (ParticleData &data : particles->data()) {
     /* particle doesn't decay */
-    if (particles->type(i->first).width() < 0.0)
+    if (particles->particle_type(data.pdgcode()).width() < 0.0)
       continue;
     /* local rest frame velocity */
-    velocity_lrf.set_x1(i->second.momentum().x1() / i->second.momentum().x0());
-    velocity_lrf.set_x2(i->second.momentum().x2() / i->second.momentum().x0());
-    velocity_lrf.set_x3(i->second.momentum().x3() / i->second.momentum().x0());
+    velocity_lrf.set_x1(data.momentum().x1() / data.momentum().x0());
+    velocity_lrf.set_x2(data.momentum().x2() / data.momentum().x0());
+    velocity_lrf.set_x3(data.momentum().x3() / data.momentum().x0());
 
     /* The clock goes slower in the rest frame of the resonance */
     double inverse_gamma = sqrt(velocity_lrf.Dot(velocity_lrf));
@@ -56,11 +56,12 @@ void check_decays(Particles *particles, std::list<int> *decay_list,
      * = (1 - width * Delta_t)^(t / Delta_t)
      * -> exp(-width * t) when Delta_t -> 0
      */
-    if (Random::canonical() < resonance_frame_timestep
-                        * particles->type(i->first).width() / hbarc) {
+    if (Random::canonical() <
+        resonance_frame_timestep *
+            particles->particle_type(data.pdgcode()).width() / hbarc) {
       /* Time is up! Set the particle to decay at this timestep */
-      i->second.set_collision(2, 0.0, -1);
-      decay_list->push_back(i->first);
+      data.set_collision(2, 0.0, -1);
+      decay_list->push_back(data.id());
     }
   }
 }
