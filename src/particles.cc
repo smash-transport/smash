@@ -233,13 +233,13 @@ void sample_cms_momenta(ParticleData *particle1, ParticleData *particle2,
 
 /* add a new particle type */
 inline void Particles::add_type(ParticleType const &TYPE, int pdg) {
-  types_.insert(std::pair<int, ParticleType>(pdg, TYPE));
+  types_.insert(std::make_pair(pdg, TYPE));
 }
 
 /* add decay modes for a particle type */
 inline void Particles::add_decaymodes(const DecayModes &new_decay_modes,
                                       int pdg) {
-  all_decay_modes_.insert(std::pair<int, DecayModes>(pdg, new_decay_modes));
+  all_decay_modes_.insert(std::make_pair(pdg, new_decay_modes));
 }
 
 namespace {/*{{{*/

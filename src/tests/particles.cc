@@ -59,11 +59,8 @@ TEST(everything) {
   particles.add_data(particle_b);
   VERIFY(!(particles.size() != 2));
   int type_size = 0;
-  for (std::map<int, ParticleData>::const_iterator
-       i = particles.cbegin(); i != particles.cend(); ++i) {
-    printd("id %d: pdg %d\n", i->first, i->second.pdgcode());
-    /* check that id and and own id are the same */
-    VERIFY(!(i->first != i->second.id()));
+  for (const ParticleData &data : particles.data()) {
+    printd("id %d: pdg %d\n", data.id(), data.pdgcode());
     type_size++;
   }
   VERIFY(!(type_size != 2));
@@ -88,17 +85,15 @@ TEST(load_one_particle_no_extra_whitespace) {
   Particles p(parts, {});
   COMPARE(p.types_size(), 1);
   int count = 0;
-  std::for_each(p.types_cbegin(), p.types_cend(),
-                [&count](std::pair<int, ParticleType> i) {
+  for (const auto &type : p.types()) {
     ++count;
-    const ParticleType &type = i.second;
     COMPARE(type.mass(), 0.135f);
     COMPARE(type.width(), -1.f);
     COMPARE(type.pdgcode(), 111);
     COMPARE(type.isospin(), 2);
     COMPARE(type.charge(), 0);
     COMPARE(type.spin(), 0);
-  });
+  }
   COMPARE(count, 1);
 }
 
@@ -107,17 +102,15 @@ TEST(load_one_particle_with_whitespace) {
   Particles p(parts, {});
   COMPARE(p.types_size(), 1);
   int count = 0;
-  std::for_each(p.types_cbegin(), p.types_cend(),
-                [&count](std::pair<int, ParticleType> i) {
+  for (const auto &type : p.types()) {
     ++count;
-    const ParticleType &type = i.second;
     COMPARE(type.mass(), 0.135f);
     COMPARE(type.width(), -1.f);
     COMPARE(type.pdgcode(), 111);
     COMPARE(type.isospin(), 2);
     COMPARE(type.charge(), 0);
     COMPARE(type.spin(), 0);
-  });
+  }
   COMPARE(count, 1);
 }
 
@@ -140,23 +133,24 @@ TEST(load_one_particle_with_comment) {
   Particles p(parts, {});
   COMPARE(p.types_size(), 1);
   int count = 0;
-  std::for_each(p.types_cbegin(), p.types_cend(),
-                [&count](std::pair<int, ParticleType> i) {
+  for (const auto &type : p.types()) {
     ++count;
-    const ParticleType &type = i.second;
     COMPARE(type.mass(), 0.135f);
     COMPARE(type.width(), -1.f);
     COMPARE(type.pdgcode(), 111);
     COMPARE(type.isospin(), 2);
     COMPARE(type.charge(), 0);
     COMPARE(type.spin(), 0);
-  });
+  }
   COMPARE(count, 1);
 }
 
 namespace particles_txt {
 #include "particles.txt.h"
 }  // namespace particles_txt
+namespace decaymodes_txt {
+#include "decaymodes.txt.h"
+}  // namespace decaymodes_txt
 
 TEST(load_many_particles) {
   Particles p(particles_txt::data, {});
@@ -242,4 +236,73 @@ TEST(load_decaymodes_two_channels) {
     COMPARE(modelist[2].particle_list()[0], -211);
     COMPARE(modelist[2].particle_list()[1], 213);
   }
+}
+
+template <typename T>
+void check_particle_data_iteration(T *p) {
+  int count = 0;
+  for (auto &data : p->data()) {
+    const int id = data.id();
+    const ParticleData &data2 = p->data(id);
+    COMPARE(&data, &data2);
+    ++count;
+  }
+  COMPARE(count, p->size());
+}
+
+template <typename T>
+void check_particle_type_iteration(T *p) {
+  int count = 0;
+  for (const auto &type : p->types()) {
+    const int pdg = type.pdgcode();
+    const ParticleType &type2 = p->particle_type(pdg);
+    COMPARE(&type, &type2);
+    ++count;
+  }
+  COMPARE(count, p->types_size());
+}
+
+TEST(iterate_particle_data) {
+  Particles p(particles_txt::data, decaymodes_txt::data);
+  const Particles *p2 = &p;
+  check_particle_type_iteration(&p);
+  check_particle_type_iteration(p2);
+
+  check_particle_data_iteration(&p);
+  check_particle_data_iteration(p2);
+  p.create(211);
+  check_particle_data_iteration(&p);
+  check_particle_data_iteration(p2);
+  p.create(-211);
+  check_particle_data_iteration(&p);
+  check_particle_data_iteration(p2);
+}
+
+TEST(erase_particle) {
+  Particles p(particles_txt::data, decaymodes_txt::data);
+  p.create(211);
+  p.create(-211);
+  p.create(111);
+  COMPARE(p.size(), 3);
+  COMPARE(p.count(0), 1);
+  COMPARE(p.count(1), 1);
+  COMPARE(p.count(2), 1);
+  COMPARE(p.count(3), 0);
+  COMPARE(p.data(1).pdgcode(), -211);
+
+  p.remove(0);
+  COMPARE(p.size(), 2);
+  COMPARE(p.count(0), 0);
+  COMPARE(p.count(1), 1);
+  COMPARE(p.count(2), 1);
+  COMPARE(p.count(3), 0);
+  COMPARE(p.data(1).pdgcode(), -211);
+
+  p.remove(2);
+  COMPARE(p.size(), 1);
+  COMPARE(p.count(0), 0);
+  COMPARE(p.count(1), 1);
+  COMPARE(p.count(2), 0);
+  COMPARE(p.count(3), 0);
+  COMPARE(p.data(1).pdgcode(), -211);
 }

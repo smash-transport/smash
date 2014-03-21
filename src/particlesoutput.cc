@@ -28,21 +28,21 @@ void ParticlesOutput::write_state(const Particles &particles) {
            particles.time());
   std::unique_ptr<FILE> momenta_file{
       fopen((base_path_ / filename).native().c_str(), "w")};
-  for (auto i = particles.cbegin(); i != particles.cend(); ++i) {
+  for (const ParticleData &data : particles.data()) {
     fprintf(momenta_file.get(), "%g %g %g %g %i %i\n",
-            i->second.momentum().x0(),
-            i->second.momentum().x1(), i->second.momentum().x2(),
-            i->second.momentum().x3(), i->second.id(), i->second.pdgcode());
+            data.momentum().x0(),
+            data.momentum().x1(), data.momentum().x2(),
+            data.momentum().x3(), data.id(), data.pdgcode());
   }
   snprintf(filename, sizeof(filename), "position_%.5f.dat",
            particles.time());
   std::unique_ptr<FILE> position_file{
       fopen((base_path_ / filename).native().c_str(), "w")};
-  for (auto i = particles.cbegin(); i != particles.cend(); ++i) {
+  for (const ParticleData &data : particles.data()) {
     fprintf(position_file.get(), "%g %g %g %g %i %i\n",
-            i->second.position().x0(),
-            i->second.position().x1(), i->second.position().x2(),
-            i->second.position().x3(), i->second.id(), i->second.pdgcode());
+            data.position().x0(),
+            data.position().x1(), data.position().x2(),
+            data.position().x3(), data.id(), data.pdgcode());
   }
 }
 

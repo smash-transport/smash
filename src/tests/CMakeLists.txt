@@ -79,7 +79,9 @@ smash_add_test(lorentzboost lorentzboost lorentzboost)
 # clebsch-gordan coefficient tests
 smash_add_test(clebschgordan clebschgordan clebschgordan)
 
-set(SMASH_OPTIONS -o "${PROJECT_BINARY_DIR}/test_output" -f)
+# for now -o has to be "data", because OSCAR output still expects to output to
+# $PWD/data. In the future we want to use "${PROJECT_BINARY_DIR}/test_output"
+set(SMASH_OPTIONS -o "data" -f)
 
 # verify that the binary has a cli help
 smash_add_test(mash_help smash smash -h)

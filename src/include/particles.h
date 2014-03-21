@@ -7,6 +7,7 @@
 #ifndef SRC_INCLUDE_PARTICLES_H_
 #define SRC_INCLUDE_PARTICLES_H_
 
+#include <iterator>
 #include <map>
 #include <string>
 #include <utility>
@@ -17,31 +18,167 @@
 
 namespace Smash {
 
-// A macro to disallow the copy constructor and operator= functions
-// This should be used in the private: declarations for a class
-#define DISALLOW_COPY_AND_ASSIGN(TypeName) \
-  TypeName(const TypeName&);               \
-  void operator=(const TypeName&)
-
 /**
- * Particles contains both the available particle list and the types
+ * The Particles class abstracts the storage and manipulation of particles.
  *
- * The particle data contains the current particle list, which
- * has the changing attributes of a particle.
- * The particle type lists the static property of a certain particle.
+ * There should be only one Particles object per Experiment. This object stores
+ * the data about all existing particles in the experiment (ParticleData). Each
+ * particle is of a predefined type (ParticleType). The types are immutable and
+ * need not be copied into each ParticleData object. The type information can
+ * easily be retrieved via the PDG code.
+ *
+ * \note
+ * The Particles object cannot be copied, because it does not make sense
+ * semantically. Move semantics make sense and can be implemented when needed.
  */
 class Particles {
+  /**
+   * Adapter class for making iterations over particle data and types easier to
+   * use.
+   *
+   * This is an implementation detail and need not be understood for use of the
+   * Particles class.
+   */
+  template <typename T>
+  class MapIterationAdapter {
+    /// the type T::begin() returns
+    using map_iterator = decltype(std::declval<T &>().begin());
+    /// the type T::cbegin() returns
+    using const_map_iterator = decltype(std::declval<T &>().cbegin());
+    /// the value type of T (with const added if T is const)
+    using mapped_type = typename std::conditional<
+        std::is_const<T>::value, const typename T::mapped_type,
+        typename T::mapped_type>::type;
+
+   public:
+    MapIterationAdapter(T *map) : map_(map) {}  // NOLINT(runtime/explicit)
+
+    /**
+     * Adapter class that modifies the normal map iterator to return only the
+     * value instead of the key/value pair.
+     */
+    class iterator : public map_iterator {
+     public:
+      iterator(map_iterator it)  // NOLINT(runtime/explicit)
+          : map_iterator(it) {}
+
+      /**
+       * overwritten dereference operator to return only the value instead of
+       * the
+       * key/value pair.
+       */
+      mapped_type &operator*() { return map_iterator::operator*().second; }
+      /// const overload of the above
+      const mapped_type &operator*() const {
+        return map_iterator::operator*().second;
+      }
+
+      mapped_type *operator->() { return &map_iterator::operator*().second; }
+      const mapped_type *operator->() const {
+        return &map_iterator::operator*().second;
+      }
+    };
+
+    /**
+     * Adapter class that modifies the normal map const_iterator to return only
+     * the value instead of the key/value pair.
+     */
+    class const_iterator : public const_map_iterator {
+     public:
+      const_iterator(const_map_iterator it)  // NOLINT(runtime/explicit)
+          : const_map_iterator(it) {}
+
+      /**
+       * overwritten dereference operator to return only the value instead of
+       * the key/value pair.
+       */
+      const mapped_type &operator*() const {
+        return const_map_iterator::operator*().second;
+      }
+
+      const mapped_type *operator->() const {
+        return &const_map_iterator::operator*().second;
+      }
+    };
+
+
+    /// returns an adapted iterator to the begin iterator of the map
+    iterator begin() const { return map_->begin(); }
+    /// returns an adapted iterator to the end iterator of the map
+    iterator end() const { return map_->end(); }
+
+    /// returns an adapted iterator to the begin iterator of the map
+    const_iterator cbegin() const { return map_.cbegin(); }
+    /// returns an adapted iterator to the end iterator of the map
+    const_iterator cend() const { return map_.cend(); }
+
+   private:
+    /// points to the map the adapter class wraps; needed for calls to begin/end
+    T *map_;
+  };
+
+  using ParticleDataMap = std::map<int, ParticleData>;
+  using ParticleTypeMap = std::map<int, ParticleType>;
+  using DecayModesMap = std::map<int, DecayModes>;
+
  public:
   /// Use improbable values for default constructor
   Particles(const std::string &particles, const std::string &decaymodes) {
     load_particle_types(particles);
     load_decaymodes(decaymodes);
   }
+
+  /// Cannot be copied
+  Particles(const Particles &) = delete;
+  /// Cannot be copied
+  Particles &operator=(const Particles &) = delete;
+
+  /**
+   * Use the returned object for iterating over all ParticleData objects.
+   *
+   * You can use this object for use with range-based for:
+   * \code
+   * for (ParticleData &data : particles->data()) {
+   *   ...
+   * }
+   * \endcode
+   *
+   * \returns Opaque object that provides begin/end functions for iteration of
+   * all ParticleData objects.
+   */
+  MapIterationAdapter<ParticleDataMap> data() { return &data_; }
+  /// const overload of the above
+  MapIterationAdapter<const ParticleDataMap> data() const { return &data_; }
+
+  /**
+   * Use returned object for iterating over all ParticleType objects.
+   *
+   * You can use this object for use with range-based for:
+   * \code
+   * for (const ParticleType &type : particles->types()) {
+   *   ...
+   * }
+   * \endcode
+   *
+   * \returns Opaque object that provides begin/end functions for iteration of
+   * all ParticleType objects.
+   */
+  MapIterationAdapter<const ParticleTypeMap> types() const { return &types_; }
+
+  // Iterating the DecayModes map would be easy, but not useful.
+  // MapIterationAdapter<const DecayModesMap> decay_modes() const { return
+  // &decay_modes_; }
+
   /// Return the specific data of a particle according to its id
   inline const ParticleData &data(int id) const;
   /// Return the specific datapointer of a particle according to its id
   inline ParticleData * data_pointer(int id);
-  /// Return the type of a specific particle given its id
+  /**
+   * Return the type of a specific particle given its id
+   *
+   * \warning This function has a high cost. Prefer to call \ref particle_type
+   *          instead.
+   */
   inline const ParticleType &type(int id) const;
   /// Return the type for a specific pdgcode
   inline const ParticleType &particle_type(int pdgcode) const;
@@ -80,17 +217,6 @@ class Particles {
     return types_.count(pdgcode) == 1;
   }
 
-  /* iterators */
-  inline std::map<int, ParticleData>::iterator begin(void);
-  inline std::map<int, ParticleData>::iterator end(void);
-  inline std::map<int, ParticleData>::const_iterator begin() const { return data_.begin(); }
-  inline std::map<int, ParticleData>::const_iterator end() const { return data_.end(); }
-
-  inline std::map<int, ParticleData>::const_iterator cbegin(void) const;
-  inline std::map<int, ParticleData>::const_iterator cend(void) const;
-  inline std::map<int, ParticleType>::const_iterator types_cbegin(void) const;
-  inline std::map<int, ParticleType>::const_iterator types_cend(void) const;
-
   struct LoadFailure : public std::runtime_error {
     using std::runtime_error::runtime_error;
   };
@@ -126,17 +252,15 @@ class Particles {
    * a swiss cheese over the runtime of SMASH. Also we want direct
    * lookup of the corresponding particle id with its data.
    */
-  std::map<int, ParticleData> data_;
+  ParticleDataMap data_;
   /**
    * a map between pdg and correspoding static data of the particles
    *
    * PDG ids are scattered in a large range of values, hence it is a map.
    */
-  std::map<int, ParticleType> types_;
+  ParticleTypeMap types_;
   /// a map between pdg and corresponding decay modes
-  std::map<int, DecayModes> all_decay_modes_;
-  /// google style recommendation
-  DISALLOW_COPY_AND_ASSIGN(Particles);
+  DecayModesMap all_decay_modes_;
 };
 
 /* return the data of a specific particle */
@@ -167,7 +291,7 @@ inline const DecayModes &Particles::decay_modes(int pdg) const {
 /* add a new particle data and return the id of the new particle */
 inline int Particles::add_data(ParticleData const &particle_data) {
   id_max_++;
-  data_.insert(std::pair<int, ParticleData>(id_max_, particle_data));
+  data_.insert(std::make_pair(id_max_, particle_data));
   data_.at(id_max_).set_id(id_max_);
   return id_max_;
 }
@@ -181,7 +305,7 @@ inline void Particles::create(size_t number, int pdgcode) {
   for (size_t i = 0; i < number; i++) {
     id_max_++;
     particle.set_id(id_max_);
-    data_.insert(std::pair<int, ParticleData>(id_max_, particle));
+    data_.insert(std::make_pair(id_max_, particle));
   }
 }
 
@@ -193,7 +317,7 @@ inline ParticleData& Particles::create(int pdgcode) {
   particle.set_collision(-1, 0, -1);
   id_max_++;
   particle.set_id(id_max_);
-  data_.insert(std::pair<int, ParticleData>(id_max_, particle));
+  data_.insert(std::make_pair(id_max_, particle));
   return data_[id_max_];
 }
 
@@ -225,33 +349,6 @@ inline size_t Particles::types_size() const {
 /* check if we have particle types */
 inline bool Particles::types_empty() const {
   return types_.empty();
-}
-
-inline std::map<int, ParticleData>::iterator Particles::begin() {
-  return data_.begin();
-}
-
-inline std::map<int, ParticleData>::iterator Particles::end() {
-  return data_.end();
-}
-
-inline std::map<int, ParticleData>::const_iterator Particles::cbegin() const {
-  return data_.begin();
-}
-
-inline std::map<int, ParticleData>::const_iterator Particles::cend() const {
-  return data_.end();
-}
-
-/* we only provide const ParticleType iterators as this shouldn't change */
-inline std::map<int, ParticleType>::const_iterator Particles::types_cbegin()
-  const {
-  return types_.begin();
-}
-
-inline std::map<int, ParticleType>::const_iterator Particles::types_cend()
-  const {
-  return types_.end();
 }
 
 /* check the existence of an element in the ParticleData map */

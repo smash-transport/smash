@@ -25,13 +25,13 @@ void ModusDefault::check_collision_geometry(
   FourVector distance;
   double neighborhood_radius_squared =
       parameters.cross_section * fm2_mb * M_1_PI * 4;
-  for (auto i = particles->begin(); i != particles->end(); ++i) {
-    for (auto j = particles->begin(); j != particles->end(); ++j) {
+  for (const ParticleData &data : particles->data()) {
+    for (const ParticleData &data2 : particles->data()) {
       /* exclude check on same particle and double counting */
-      if (i->first >= j->first) {
+      if (data.id() >= data2.id()) {
         continue;
       }
-      distance = i->second.position() - j->second.position();
+      distance = data.position() - data2.position();
       /* skip particles that are double interaction radius length away
        * (3-product gives negative values
        * with the chosen sign convention for the metric)
@@ -40,7 +40,7 @@ void ModusDefault::check_collision_geometry(
         continue;
       }
       collision_criteria_geometry(particles, cross_sections, collision_list,
-                                  parameters.eps, i->first, j->first,
+                                  parameters.eps, data.id(), data2.id(),
                                   rejection_conflict);
     }
   }
@@ -50,17 +50,17 @@ void ModusDefault::check_collision_geometry(
 void ModusDefault::propagate(Particles *particles,
                              const ExperimentParameters &parameters) {
   FourVector distance, position;
-  for (auto i = particles->begin(); i != particles->end(); ++i) {
+  for (ParticleData &data : particles->data()) {
     /* propagation for this time step */
     distance.set_FourVector(parameters.eps,
-                            i->second.velocity_x() * parameters.eps,
-                            i->second.velocity_y() * parameters.eps,
-                            i->second.velocity_z() * parameters.eps);
-    printd("Particle %d motion: %g %g %g %g\n", i->first, distance.x0(),
+                            data.velocity_x() * parameters.eps,
+                            data.velocity_y() * parameters.eps,
+                            data.velocity_z() * parameters.eps);
+    printd("Particle %d motion: %g %g %g %g\n", data.id(), distance.x0(),
            distance.x1(), distance.x2(), distance.x3());
-    position = i->second.position();
+    position = data.position();
     position += distance;
-    i->second.set_position(position);
+    data.set_position(position);
   }
 }
 
