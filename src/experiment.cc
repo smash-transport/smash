@@ -27,7 +27,9 @@
 #include "include/outputroutines.h"
 #include "include/particlesoutput.h"
 #include "include/random.h"
-#include "include/rootoutput.h"
+#ifdef SMASH_USE_ROOT
+#  include "include/rootoutput.h"
+#endif
 #include "include/vtkoutput.h"
 
 #include <boost/filesystem.hpp>
@@ -227,7 +229,9 @@ void Experiment<Modus>::run(const bf::path &path) {
   outputs_.emplace_back(new OscarOutput(path));
   outputs_.emplace_back(new ParticlesOutput(path));
   outputs_.emplace_back(new VtkOutput(path));
+#ifdef SMASH_USE_ROOT
   outputs_.emplace_back(new RootOutput(path));
+#endif
 
   for (int j = 0; j < nevents_; j++) {
     initialize(path);
