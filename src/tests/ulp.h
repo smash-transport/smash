@@ -58,7 +58,7 @@ static T ulpDiffToReference(T val, T ref) {
 
 template <typename T>
 static T ulpDiffToReferenceSigned(T val, T ref) {
-  return ulpDiffToReference(val, ref) * (val - ref < 0 ? -1 : 1);
+  return ulpDiffToReference(val, ref) * (val < ref ? -1 : 1);
 }
 
 #endif  // SRC_TESTS_ULP_H_
