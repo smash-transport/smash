@@ -34,7 +34,8 @@ void OscarOutput::at_runend() {}
 
 void OscarOutput::at_crash() {}
 
-void OscarOutput::at_outtime(const Particles &particles, const int timestep) {
+void OscarOutput::at_outtime(const Particles &particles, const int evt_num,
+                             const int timestep) {
   /*
   char filename[64];
 

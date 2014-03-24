@@ -28,11 +28,9 @@ void VtkOutput::at_eventend(const Particles &particles, const int evt_num){}
 void VtkOutput::at_runend(){}
 void VtkOutput::at_crash(){}
 
-void VtkOutput::at_outtime(const Particles &particles, const int timestep) {
+void VtkOutput::at_outtime(const Particles &particles, const int evt_num, const int timestep) {
   char filename[32];
-  snprintf(
-      filename, sizeof(filename), "pos_0.%05i.vtk",
-      static_cast<int>((particles.data().begin()->position().x0() - 1.0) * 10));
+  snprintf(filename, sizeof(filename), "pos_0.%07i.vtk",timestep);
   std::unique_ptr<std::FILE> file_{
       fopen((base_path_ / filename).native().c_str(), "w")};
 

@@ -108,7 +108,7 @@ void Experiment<Modus>::initialize(const bf::path &/*path*/) {
 /* This is the loop over timesteps, carrying out collisions and decays
  * and propagating particles. */
 template <typename Modus>
-void Experiment<Modus>::run_time_evolution() {
+void Experiment<Modus>::run_time_evolution(const int evt_num) {
   modus_.sanity_check(&particles_);
   size_t interactions_total = 0, previous_interactions_total = 0,
          interactions_this_interval = 0;
@@ -152,7 +152,7 @@ void Experiment<Modus>::run_time_evolution() {
                          time_start_);
       /* save evolution data */
       for (auto &output : outputs_) {
-        output->at_outtime(particles_, step);
+        output->at_outtime(particles_, evt_num, step);
       }
     }
   }
@@ -214,7 +214,7 @@ void Experiment<Modus>::run(const bf::path &path) {
     /* Write the initial data block of the event */
     //write_oscar_event_block(&particles_, 0, particles_.size(), j + 1);
     /* the time evolution of the relevant subsystem */
-    run_time_evolution();
+    run_time_evolution(j);
     /* Write the final data block of the event */
     //write_oscar_event_block(&particles_, particles_.size(), 0, j + 1);
 

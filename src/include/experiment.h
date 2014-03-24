@@ -136,7 +136,7 @@ class Experiment : public ExperimentBase {
   explicit Experiment(Configuration &config);
 
   void initialize(const boost::filesystem::path &path);
-  void run_time_evolution();
+  void run_time_evolution(const int evt_num);
 
   void print_startup(int64_t seed);
 
