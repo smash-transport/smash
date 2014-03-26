@@ -70,6 +70,7 @@ set(smash_src
 if(USE_ROOT)
    set(smash_src ${smash_src}
       rootoutput.cc
+      Tmnoutput.cc
       )
 endif()
 
