@@ -23,19 +23,17 @@ class RootOutput : public OutputInterface {
   RootOutput(boost::filesystem::path path);
   ~RootOutput();
 
-  void at_runstart() override;
-  void at_eventstart(const Particles &particles, const int evt_num) override;
-  void at_eventend(const Particles &particles, const int evt_num) override;
-  //void at_collision(const Collisions &collisions) override;
-  void at_outtime(const Particles &particles, const int evt_num, const int timestep) override;
-  void at_runend() override;
-  void at_crash() override;
-  void particles_to_tree(const char* treename, const char* treedescr, const Particles &particles, const int evt_num);
+  void at_eventstart(const Particles &particles, const int event_number) override;
+  void at_eventend(const Particles &particles, const int event_number) override;
+  void before_collision() override;
+  void after_collision() override;
+  void after_Nth_timestep(const Particles &particles, const int event_number, const int timestep) override;
 
  private:
    const boost::filesystem::path base_path_;
-   std::unique_ptr<TFile> root_out_file;
+   std::unique_ptr<TFile> root_out_file_;
    std::vector<std::unique_ptr<TTree>> tree_list_;
+   void particles_to_tree(const char* treename, const char* treedescr, const Particles &particles, const int event_number);
 };
 }  // namespace Smash
 

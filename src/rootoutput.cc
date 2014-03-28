@@ -16,77 +16,80 @@
 
 namespace Smash {
 
+/**
+ * RootOuput constructor. Creates file smash_run.root in run directory.
+ */
 RootOutput::RootOutput(boost::filesystem::path path)
     : base_path_(std::move(path)),
-      root_out_file(
+      root_out_file_(
           new TFile((base_path_ / "smash_run.root").native().c_str(), "NEW")) {}
 
+/**
+ * RootOutput destructor. Writes root objects (here TTrees) to file and closes it.
+ */
 RootOutput::~RootOutput() {
- root_out_file->Write();
- root_out_file->Close();
+  root_out_file_->Write();
+  root_out_file_->Close();
 }
 
-
-void RootOutput::at_runstart(){
+/**
+ * Writes to tree "at_eventstart".
+ */
+void RootOutput::at_eventstart(const Particles &particles, const int event_number) {
+  particles_to_tree("at_eventstart","Initial particles", particles, event_number);
 }
 
-
-void RootOutput::at_eventstart(const Particles &particles, const int evt_num){
- particles_to_tree("at_eventstart","Initial particles", particles, evt_num);
+void RootOutput::before_collision() {
 }
 
-
-//void RootOutput::at_collision(const Collisions &collisions){}
-
-
-void RootOutput::at_outtime(const Particles &particles, const int evt_num, const int timestep){
- char treename[32], treedescr[64];
- snprintf(treename, sizeof(treename), "at_tstep_%07i",timestep);
- snprintf(treedescr, sizeof(treedescr), "Particles after timestep %i",timestep);
- particles_to_tree(treename,treedescr, particles, evt_num);
+void RootOutput::after_collision() {
 }
 
-
-void RootOutput::at_eventend(const Particles &particles, const int evt_num){
- particles_to_tree("at_eventend","Final particles", particles, evt_num);
+/**
+ * Writes to tree "at_tstep_N", where N is timestep number counting from 1.
+ */
+void RootOutput::after_Nth_timestep(const Particles &particles, const int event_number, const int timestep) {
+  char treename[32], treedescr[64];
+  snprintf(treename, sizeof(treename), "at_tstep_%07i", timestep + 1);
+  snprintf(treedescr, sizeof(treedescr), "Particles after timestep %i", timestep + 1);
+  particles_to_tree(treename, treedescr, particles, event_number);
 }
 
-void RootOutput::at_runend(){
+/**
+ * Writes to tree "at_eventend".
+ */
+void RootOutput::at_eventend(const Particles &particles, const int event_number) {
+  particles_to_tree("at_eventend","Final particles", particles, event_number);
 }
 
-void RootOutput::at_crash(){
- root_out_file->Write();
- root_out_file->Close();
-}
+/**
+ * Writes particles to a tree defined by treename.
+ */
+void RootOutput::particles_to_tree(const char* treename, const char* treedescr, const Particles &particles, const int event_number) {
 
-
-void RootOutput::particles_to_tree(const char* treename, const char* treedescr, const Particles &particles, const int evt_num){
-
-  TTree *curr_tree = (TTree*)root_out_file->Get(treename);
+  TTree *curr_tree = (TTree*)root_out_file_->Get(treename);
   if (curr_tree == NULL) {
     tree_list_.emplace_back(curr_tree = new TTree(treename, treedescr));
   }
 
-   double p0,px,py,pz;
-   double t,x,y,z;
-   int    id, pdgcode, ev;
+  double p0,px,py,pz;
+  double x,y,z;
+  int    id, pdgcode, ev;
 
- curr_tree->Branch("p0",&p0,"p0/D");
- curr_tree->Branch("px",&px,"px/D");
- curr_tree->Branch("py",&py,"py/D");
- curr_tree->Branch("pz",&pz,"pz/D");
+  curr_tree->Branch("p0",&p0,"p0/D");
+  curr_tree->Branch("px",&px,"px/D");
+  curr_tree->Branch("py",&py,"py/D");
+  curr_tree->Branch("pz",&pz,"pz/D");
 
- curr_tree->Branch("x",&x,"x/D");
- curr_tree->Branch("y",&y,"y/D");
- curr_tree->Branch("z",&z,"z/D");
+  curr_tree->Branch("x",&x,"x/D");
+  curr_tree->Branch("y",&y,"y/D");
+  curr_tree->Branch("z",&z,"z/D");
 
- curr_tree->Branch("pdgcode",&pdgcode,"pdgcode/I");
- curr_tree->Branch("id",&id,"id/I");
- curr_tree->Branch("ev",&ev,"ev/I");
+  curr_tree->Branch("pdgcode",&pdgcode,"pdgcode/I");
+  curr_tree->Branch("id",&id,"id/I");
+  curr_tree->Branch("ev",&ev,"ev/I");
 
-
- for (const auto &p : particles) {
-
+  for (const auto &p : particles) {
     x = p.second.position().x1();
     y = p.second.position().x2();
     z = p.second.position().x3();
@@ -99,14 +102,11 @@ void RootOutput::particles_to_tree(const char* treename, const char* treedescr, 
     pdgcode = p.second.pdgcode();
     id = p.second.id();
 
-    ev = evt_num;
+    ev = event_number;
 
     curr_tree->Fill();
- }
+  }
 
 }
-
-
-
 
 }  // namespace Smash
