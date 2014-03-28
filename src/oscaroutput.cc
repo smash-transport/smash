@@ -14,28 +14,31 @@
 namespace Smash {
 
 OscarOutput::OscarOutput(boost::filesystem::path path)
-    : base_path_(std::move(path)) {}
+    : base_path_(std::move(path)) {
+  write_oscar_header();
+}
 
 OscarOutput::~OscarOutput() {}
 
-void OscarOutput::at_runstart() { write_oscar_header(); }
-
-void OscarOutput::at_eventstart(const Particles &particles, const int evt_num) {
-  write_oscar_event_block(&particles, 0, particles.size(), evt_num + 1);
+void OscarOutput::at_eventstart(const Particles &particles,
+                                const int event_number) {
+  /* Write the initial data block of the event */
+  write_oscar_event_block(&particles, 0, particles.size(), event_number + 1);
 }
 
-void OscarOutput::at_eventend(const Particles &particles, const int evt_num) {
-  write_oscar_event_block(&particles, particles.size(), 0, evt_num + 1);
+void OscarOutput::at_eventend(const Particles &particles,
+                              const int event_number) {
+  /* Write the final data block of the event */
+  write_oscar_event_block(&particles, particles.size(), 0, event_number + 1);
 }
 
-// void OscarOutput::at_collision(const Collisions &collisions){}
+void OscarOutput::before_collision() {}
 
-void OscarOutput::at_runend() {}
+void OscarOutput::after_collision() {}
 
-void OscarOutput::at_crash() {}
-
-void OscarOutput::at_outtime(const Particles &particles, const int evt_num,
-                             const int timestep) {
+void OscarOutput::after_Nth_timestep(const Particles & /*particles*/,
+                                     const int /*event_number*/,
+                                     const int /*timestep*/) {
   /*
   char filename[64];
 

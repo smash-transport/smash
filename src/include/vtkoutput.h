@@ -21,13 +21,11 @@ class VtkOutput : public OutputInterface {
    VtkOutput(boost::filesystem::path path);
    ~VtkOutput();
 
-   void at_runstart() override;
-   void at_eventstart(const Particles &particles, const int evt_num) override;
-   void at_eventend(const Particles &particles, const int evt_num) override;
-   // void at_collision(const Collisions &collisions) override;
-   void at_outtime(const Particles &particles, const int evt_num, const int timestep) override;
-   void at_runend() override;
-   void at_crash() override;
+   void at_eventstart(const Particles &particles, const int event_number) override;
+   void at_eventend(const Particles &particles, const int event_number) override;
+   void after_collision() override;
+   void before_collision() override;
+   void after_Nth_timestep(const Particles &particles, const int event_number, const int timestep) override;
 
 
  private:

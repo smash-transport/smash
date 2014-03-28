@@ -152,7 +152,7 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
                          time_start_);
       /* save evolution data */
       for (auto &output : outputs_) {
-        output->at_outtime(particles_, evt_num, step);
+        output->after_Nth_timestep(particles_, evt_num, step);
       }
     }
   }
@@ -195,14 +195,6 @@ void Experiment<Modus>::run(const bf::path &path) {
   outputs_.emplace_back(new OscarOutput(path));
   outputs_.emplace_back(new VtkOutput(path));
 
-  /* Write the header of OSCAR data output file */
-  //write_oscar_header();
-
-  /* Output at run start */
-  for (auto &output : outputs_) {
-    output->at_runstart();
-  }
-
   for (int j = 0; j < nevents_; j++) {
     initialize(path);
 
@@ -211,22 +203,13 @@ void Experiment<Modus>::run(const bf::path &path) {
       output->at_eventstart(particles_, j);
     }
 
-    /* Write the initial data block of the event */
-    //write_oscar_event_block(&particles_, 0, particles_.size(), j + 1);
     /* the time evolution of the relevant subsystem */
     run_time_evolution(j);
-    /* Write the final data block of the event */
-    //write_oscar_event_block(&particles_, particles_.size(), 0, j + 1);
 
     /* Output at event end */
     for (auto &output : outputs_) {
       output->at_eventend(particles_, j);
     }
-  }
-
-  /* Output at run end */
-  for (auto &output : outputs_) {
-    output->at_runend();
   }
 }
 

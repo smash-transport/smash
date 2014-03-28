@@ -13,17 +13,41 @@
 namespace Smash {
 class Particles;
 
+/**
+ * \brief Abstraction of generic output
+ * Any output should inherit this class. It provides virtual methods that will be called at predefined moments:
+ * 1) At event start and event end
+ * 2) After every N'th timestep
+ * 3) Before and after collision
+ */
 class OutputInterface {
  public:
   virtual ~OutputInterface() = default;
 
-  virtual void at_runstart() = 0;
-  virtual void at_eventstart(const Particles &particles, const int evt_num) = 0;
-  virtual void at_eventend(const Particles &particles, const int evt_num) = 0;
-  //virtual void at_collision(const Collisions &collisions) = 0;
-  virtual void at_outtime(const Particles &particles, const int evt_num, const int timestep) = 0;
-  virtual void at_runend() = 0;
-  virtual void at_crash() = 0;
+  /**
+   * Output launched at event start after initialization, when particles are generated, but not yet propagated.
+   */
+  virtual void at_eventstart(const Particles &, const int) = 0;
+
+  /**
+   * Output launched at event end. Event end is determined by maximal timestep option.
+   */
+  virtual void at_eventend(const Particles &, const int ) = 0;
+
+  /**
+   *Output before any collision or decay should be added when Collision class is set up.
+   */
+  virtual void before_collision() = 0;
+
+  /**
+   *Output after any collision or decay should be added when Collision class is set up.
+   */
+  virtual void after_collision() = 0;
+
+  /**
+   * Output launched after every N'th timestep. N is controlled by an option.
+   */
+  virtual void after_Nth_timestep(const Particles &, const int, const int) = 0;
 
 };
 
