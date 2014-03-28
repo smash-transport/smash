@@ -34,11 +34,8 @@ class RootOutput : public OutputInterface {
 
  private:
    const boost::filesystem::path base_path_;
-   TFile* root_out_file;
-   TTree* curr_tree;
-   double p0,px,py,pz;
-   double t,x,y,z;
-   int    id, pdgcode, ev;
+   std::unique_ptr<TFile> root_out_file;
+   std::vector<std::unique_ptr<TTree>> tree_list_;
 };
 }  // namespace Smash
 

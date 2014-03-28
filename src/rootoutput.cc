@@ -17,15 +17,17 @@
 namespace Smash {
 
 RootOutput::RootOutput(boost::filesystem::path path)
-    : base_path_(std::move(path)) {
-}
+    : base_path_(std::move(path)),
+      root_out_file(
+          new TFile((base_path_ / "smash_run.root").native().c_str(), "NEW")) {}
 
 RootOutput::~RootOutput() {
+ root_out_file->Write();
+ root_out_file->Close();
 }
 
 
 void RootOutput::at_runstart(){
- root_out_file = new TFile( (base_path_ / "smash_run.root").native().c_str(),"NEW");
 }
 
 
@@ -50,8 +52,6 @@ void RootOutput::at_eventend(const Particles &particles, const int evt_num){
 }
 
 void RootOutput::at_runend(){
- root_out_file->Write();
- root_out_file->Close();
 }
 
 void RootOutput::at_crash(){
@@ -62,10 +62,14 @@ void RootOutput::at_crash(){
 
 void RootOutput::particles_to_tree(const char* treename, const char* treedescr, const Particles &particles, const int evt_num){
 
- curr_tree = (TTree*)root_out_file->Get(treename);
- if (curr_tree == NULL){
-   curr_tree = new TTree(treename, treedescr);
- }
+  TTree *curr_tree = (TTree*)root_out_file->Get(treename);
+  if (curr_tree == NULL) {
+    tree_list_.emplace_back(curr_tree = new TTree(treename, treedescr));
+  }
+
+   double p0,px,py,pz;
+   double t,x,y,z;
+   int    id, pdgcode, ev;
 
  curr_tree->Branch("p0",&p0,"p0/D");
  curr_tree->Branch("px",&px,"px/D");
