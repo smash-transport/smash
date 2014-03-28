@@ -21,16 +21,22 @@ VtkOutput::VtkOutput(boost::filesystem::path path)
 VtkOutput::~VtkOutput() {
 }
 
-void VtkOutput::at_runstart(){}
-void VtkOutput::at_eventstart(const Particles &particles, const int evt_num){}
-void VtkOutput::at_eventend(const Particles &particles, const int evt_num){}
-//void VtkOutput::at_collision(const Collisions &collisions){}
-void VtkOutput::at_runend(){}
-void VtkOutput::at_crash(){}
+void VtkOutput::at_eventstart(const Particles &/*particles*/, const int /*event_number*/) {
+}
 
-void VtkOutput::at_outtime(const Particles &particles, const int evt_num, const int timestep) {
+void VtkOutput::at_eventend(const Particles &/*particles*/, const int /*event_number*/) {
+}
+
+void VtkOutput::before_collision() {
+}
+
+void VtkOutput::after_collision() {
+}
+
+void VtkOutput::after_Nth_timestep(const Particles &particles, const int event_number, const int timestep) {
   char filename[32];
-  snprintf(filename, sizeof(filename), "pos_0.%07i.vtk",timestep);
+  snprintf(filename, sizeof(filename), "pos_ev%05i_tstep%07i.vtk", event_number,
+           timestep + 1);
   std::unique_ptr<std::FILE> file_{
       fopen((base_path_ / filename).native().c_str(), "w")};
 
