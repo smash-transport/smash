@@ -10,13 +10,17 @@
 #ifndef SRC_INCLUDE_SCATTERACTIONSFINDER_H_
 #define SRC_INCLUDE_SCATTERACTIONSFINDER_H_
 
+#include <vector>
+
 #include "actionfinderfactory.h"
 
 namespace Smash {
 
 class ScatterActionsFinder : public ActionFinderFactory {
  public:
-  std::vector<ActionPtr> find_possible_actions(const ParticleList &)
+  std::vector<ActionPtr> find_possible_actions(Particles *particles,
+					       CrossSections *cross_sections,
+					       const ExperimentParameters &parameters)
       const override;
 
  private:

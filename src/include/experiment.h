@@ -20,6 +20,7 @@
 #include "include/parameters.h"
 #include "include/particles.h"
 #include "outputinterface.h"
+#include "scatteractionsfinder.h"
 
 #ifndef DOXYGEN
 namespace boost {
@@ -164,6 +165,8 @@ class Experiment : public ExperimentBase {
    * \todo CrossSections needs a rename?
    */
   CrossSections cross_sections_;
+
+  ScatterActionsFinder scatter_finder_;
 
   /**
    * Number of events.

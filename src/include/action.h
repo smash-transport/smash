@@ -10,11 +10,16 @@
 #ifndef SRC_INCLUDE_ACTION_H_
 #define SRC_INCLUDE_ACTION_H_
 
+#include <vector>
+#include <memory>
+
+#include "particledata.h"
+
 namespace Smash {
 
 class Action {
  public:
-  Action(const ParticleList &ingoing_particles_ids, float time_of_execution);
+  Action(const std::vector<int> &in_part, float time_of_execution, int interaction_type, const std::vector<int> &out_part);
   virtual ~Action();
 
   /**
@@ -24,9 +29,18 @@ class Action {
     return time_of_execution_ < rhs.time_of_execution_;
   }
 
+  /* Return the first and second incoming particle.  */
+  int in1() const;
+  int in2() const;
+
+  int process_type(void) const;
+  const std::vector<int> &final_state(void) const;
+
  private:
-  ParticleList ingoing_particles_ids_;
+  std::vector<int> ingoing_particles_;
   float time_of_execution_;
+  int interaction_type_;
+  std::vector<int> outgoing_particles_;
 };
 
 using ActionPtr = std::unique_ptr<Action>;

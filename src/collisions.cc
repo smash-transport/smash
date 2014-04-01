@@ -159,17 +159,17 @@ void collision_criteria_geometry(Particles *particles,
 }
 
 /* colliding_particle - particle interaction */
-size_t collide_particles(Particles *particles, std::list<int> *collision_list,
+size_t collide_particles(Particles *particles, std::vector<ActionPtr> &collision_list,
   size_t id_process) {
   FourVector velocity_CM;
 
   /* XXX: print debug output of collision list */
   /* collide: 2 <-> 2 soft momenta exchange */
-  for (auto id = collision_list->begin(); id != collision_list->end(); ++id) {
+  for (std::vector<ActionPtr>::iterator act = collision_list.begin(); act != collision_list.end(); ++act) {
     /* relevant particle id's for the collision */
-    int id_a = *id;
-    int id_b = particles->data(id_a).id_partner();
-    int interaction_type = particles->data(id_a).process_type();
+    int id_a = (*act)->in1();
+    int id_b = (*act)->in2();
+    int interaction_type = (*act)->process_type();
     FourVector initial_momentum(particles->data(id_a).momentum()
       + particles->data(id_b).momentum());
     FourVector final_momentum;
@@ -211,7 +211,7 @@ size_t collide_particles(Particles *particles, std::list<int> *collision_list,
     } else if (interaction_type == 1) {
       /* resonance formation */
       printd("Process: Resonance formation. ");
-      size_t new_particles = (particles->data(id_a).final_state()).size();
+      size_t new_particles = ((*act)->final_state()).size();
       write_oscar(particles->data(id_a), particles->type(id_a), 2,
                   new_particles);
       write_oscar(particles->data(id_b), particles->type(id_b));
@@ -220,7 +220,7 @@ size_t collide_particles(Particles *particles, std::list<int> *collision_list,
                &velocity_CM);
 
       size_t id_new = resonance_formation(particles, id_a, id_b,
-        particles->data(id_a).final_state());
+        (*act)->final_state());
 
       boost_back_CM(particles->data_pointer(id_a),
                     particles->data_pointer(id_b), &velocity_CM);
@@ -285,7 +285,7 @@ size_t collide_particles(Particles *particles, std::list<int> *collision_list,
              interaction_type, momentum_difference.x3());
   } /* end for std::list<int>::iterator id = collision_list->begin() */
   /* empty the collision table */
-  collision_list->clear();
+  collision_list.clear();
   printd("Collision list done.\n");
 
   /* return how many processes we have handled so far*/

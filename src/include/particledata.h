@@ -38,7 +38,7 @@ class ParticleData {
   inline void set_id_process(int id);
   inline double collision_time(void) const;
   inline int process_type(void) const;
-  inline const std::vector<int> &final_state(void) const;
+//   inline const std::vector<int> &final_state(void) const;
   inline void set_collision_time(const double &collision_time);
   inline void set_collision(int process_type, const double &collision_time,
                             int collision_id);
@@ -142,9 +142,9 @@ inline int ParticleData::process_type(void) const {
 }
 
 /// return final state
-inline const std::vector<int> &ParticleData::final_state(void) const {
-  return final_state_;
-}
+// inline const std::vector<int> &ParticleData::final_state(void) const {
+//   return final_state_;
+// }
 
 /// set possible collision time
 inline void ParticleData::set_collision_time(const double &collision_t) {

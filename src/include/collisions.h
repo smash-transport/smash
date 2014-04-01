@@ -11,6 +11,7 @@
 
 #include "include/crosssections.h"
 #include "include/particles.h"
+#include "action.h"
 
 namespace Smash {
 
@@ -21,7 +22,7 @@ void collision_criteria_geometry(Particles *particles,
   int id_b, size_t *rejection_conflict);
 
 /* does collisions according to collision table */
-size_t collide_particles(Particles *particles, std::list<int> *collision_list,
+size_t collide_particles(Particles *particles, std::vector<ActionPtr> &collision_list,
                          size_t id_event);
 
 }  // namespace Smash

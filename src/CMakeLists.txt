@@ -32,7 +32,7 @@ if(HAVE_CLOCK_GETTIME)
 endif()
 
 # list the source files
-set(smash_src boxmodus.cc clebschgordan.cc collisions.cc collidermodus.cc
+set(smash_src action.cc boxmodus.cc clebschgordan.cc collisions.cc collidermodus.cc
         configuration.cc
         cross-sections.cc
         decays.cc distributions.cc experiment.cc fourvector.cc
@@ -44,6 +44,7 @@ set(smash_src boxmodus.cc clebschgordan.cc collisions.cc collidermodus.cc
         particles.cc
         particlesoutput.cc
         resonances.cc
+        scatteractionsfinder.cc
         time.cc
         vtkoutput.cc
         )

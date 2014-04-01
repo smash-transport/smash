@@ -117,7 +117,8 @@ void Experiment<Modus>::initialize(const bf::path &/*path*/) {
 template <typename Modus>
 void Experiment<Modus>::run_time_evolution() {
   modus_.sanity_check(&particles_);
-  std::list<int> collision_list, decay_list;
+  std::list<int> decay_list;
+  std::vector<ActionPtr> scatter_actions;
   size_t interactions_total = 0, previous_interactions_total = 0,
          interactions_this_interval = 0;
   size_t rejection_conflict = 0;
@@ -131,14 +132,13 @@ void Experiment<Modus>::run_time_evolution() {
       interactions_total =
           decay_particles(&particles_, &decay_list, interactions_total);
     }
-    /* fill collision table by cells */
-    modus_.check_collision_geometry(&particles_, &cross_sections_,
-                                    &collision_list, &rejection_conflict,
-                                    parameters_);
-    /* particle interactions */
-    if (!collision_list.empty()) {
-      printd_list(collision_list);
-      interactions_total = collide_particles(&particles_, &collision_list,
+    /* Find possible collisions. */
+    scatter_actions = scatter_finder_.find_possible_actions(&particles_,
+							    &cross_sections_,
+							    parameters_);
+    /* Perform collisions. */
+    if (!scatter_actions.empty()) {
+      interactions_total = collide_particles(&particles_, scatter_actions,
                                              interactions_total);
     }
     modus_.propagate(&particles_, parameters_);
