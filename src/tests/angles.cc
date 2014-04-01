@@ -13,6 +13,7 @@
 using namespace Smash;
 
 Angles dir;
+constexpr double accuracy = 1e-10;
 
 TEST(set_angles) {
   dir.set_phi(.5);
@@ -28,27 +29,25 @@ TEST(set_angles) {
 }
 
 TEST(accessors_and_relations) {
-  constexpr int kNumberOfTries = 1000000;
+  constexpr int NumberOfTries = 1000000;
   // second: check accessors and the relations between them:
-  for (int c = 0; c < kNumberOfTries; c++) {
+  for (int c = 0; c < NumberOfTries; c++) {
     dir.distribute_isotropically();
     // sintheta**2 + costheta**2 = 1
-    UnitTest::setFuzzyness<double>(1);
-    FUZZY_COMPARE(dir.sintheta()*dir.sintheta()
-                     + dir.costheta()*dir.costheta(), 1.0);
+    COMPARE_ABSOLUTE_ERROR(dir.sintheta()*dir.sintheta()
+                         + dir.costheta()*dir.costheta(),
+                           1.0, accuracy);
     // x**2 + y**2 + z**2 = 1
     double xyz_one = dir.x()*dir.x()
                    + dir.y()*dir.y()
                    + dir.z()*dir.z();
-    UnitTest::setFuzzyness<double>(3);
-    FUZZY_COMPARE(xyz_one, 1.0);
+    COMPARE_ABSOLUTE_ERROR(xyz_one, 1.0, accuracy);
 
     // compare cos(theta) and costheta:
-    UnitTest::setFuzzyness<double>(1024);
-    FUZZY_COMPARE(cos(dir.theta()), dir.costheta()) << " (trial #" << c
-                                          << " of " << kNumberOfTries << ")";
-    FUZZY_COMPARE(dir.theta(), acos(dir.costheta())) << " (trial #" << c
-                                          << " of " << kNumberOfTries << ")";
+    COMPARE_RELATIVE_ERROR(cos(dir.theta()), dir.costheta(), accuracy)
+                        << " (trial #" << c << " of " << NumberOfTries << ")";
+    COMPARE_RELATIVE_ERROR(dir.theta(), acos(dir.costheta()), accuracy)
+                        << " (trial #" << c << " of " << NumberOfTries << ")";
   }
 }
 
@@ -63,7 +62,7 @@ TEST(unusual_set_phi) {
 }
 
 TEST(unusual_set_theta_even) {
-  UnitTest::setFuzzyness<double>(48);
+  UnitTest::setFuzzyness<double>(64);
   constexpr int kMinM = -6;
   constexpr int kMaxM = 12;
   for (int m = kMinM; m < kMaxM; m++) {
@@ -73,7 +72,7 @@ TEST(unusual_set_theta_even) {
   }
 }
 TEST(unusual_set_theta_odd) {
-  UnitTest::setFuzzyness<double>(48);
+  UnitTest::setFuzzyness<double>(128);
   constexpr int kMinM = -6;
   constexpr int kMaxM = 12;
   for (int m = kMinM; m < kMaxM; m++) {
