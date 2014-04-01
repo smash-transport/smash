@@ -117,25 +117,23 @@ void Experiment<Modus>::initialize(const bf::path &/*path*/) {
 template <typename Modus>
 void Experiment<Modus>::run_time_evolution() {
   modus_.sanity_check(&particles_);
-  std::list<int> decay_list;
-  std::vector<ActionPtr> scatter_actions;
+  std::vector<ActionPtr> decay_actions, scatter_actions;
   size_t interactions_total = 0, previous_interactions_total = 0,
          interactions_this_interval = 0;
   size_t rejection_conflict = 0;
   print_measurements(particles_, interactions_total,
                      interactions_this_interval, energy_initial_, time_start_);
   for (int step = 0; step < steps_; step++) {
-    /* Check resonances for decays */
-    check_decays(&particles_, &decay_list, parameters_.eps);
-    /* Do the decays */
-    if (!decay_list.empty()) {
+    /* Find possible decays. */
+    decay_actions = decay_finder_.find_possible_actions(&particles_, parameters_);
+    /* Perform decays. */
+    if (!decay_actions.empty()) {
       interactions_total =
-          decay_particles(&particles_, &decay_list, interactions_total);
+          decay_particles(&particles_, decay_actions, interactions_total);
     }
     /* Find possible collisions. */
     scatter_actions = scatter_finder_.find_possible_actions(&particles_,
-							    &cross_sections_,
-							    parameters_);
+						parameters_, &cross_sections_);
     /* Perform collisions. */
     if (!scatter_actions.empty()) {
       interactions_total = collide_particles(&particles_, scatter_actions,

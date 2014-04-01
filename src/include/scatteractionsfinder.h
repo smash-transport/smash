@@ -19,8 +19,8 @@ namespace Smash {
 class ScatterActionsFinder : public ActionFinderFactory {
  public:
   std::vector<ActionPtr> find_possible_actions(Particles *particles,
-					       CrossSections *cross_sections,
-					       const ExperimentParameters &parameters)
+					       const ExperimentParameters &parameters,
+					       CrossSections *cross_sections = NULL)
       const override;
 
  private:

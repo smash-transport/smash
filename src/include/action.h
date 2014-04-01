@@ -19,6 +19,7 @@ namespace Smash {
 
 class Action {
  public:
+  Action(const std::vector<int> &in_part, float time_of_execution, int interaction_type);
   Action(const std::vector<int> &in_part, float time_of_execution, int interaction_type, const std::vector<int> &out_part);
   virtual ~Action();
 

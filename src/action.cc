@@ -12,6 +12,11 @@
 namespace Smash {
 
 Action::Action(const std::vector<int> &in_part, float time_of_execution,
+	       int interaction_type)
+    : ingoing_particles_(in_part), time_of_execution_(time_of_execution),
+      interaction_type_(interaction_type) {}
+
+Action::Action(const std::vector<int> &in_part, float time_of_execution,
 	       int interaction_type, const std::vector<int> &out_part)
     : ingoing_particles_(in_part), time_of_execution_(time_of_execution),
       interaction_type_(interaction_type), outgoing_particles_(out_part) {}

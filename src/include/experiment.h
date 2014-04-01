@@ -20,6 +20,7 @@
 #include "include/parameters.h"
 #include "include/particles.h"
 #include "outputinterface.h"
+#include "decayactionsfinder.h"
 #include "scatteractionsfinder.h"
 
 #ifndef DOXYGEN
@@ -166,6 +167,7 @@ class Experiment : public ExperimentBase {
    */
   CrossSections cross_sections_;
 
+  DecayActionsFinder decay_finder_;
   ScatterActionsFinder scatter_finder_;
 
   /**

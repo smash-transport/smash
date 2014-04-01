@@ -29,50 +29,14 @@
 
 namespace Smash {
 
-/* check_decays - does a resonance decay on this timestep? */
-void check_decays(Particles *particles, std::list<int> *decay_list,
-  const float timestep) {
-  FourVector velocity_lrf;
-  velocity_lrf.set_x0(1.0);
-
-  for (auto i = particles->begin(); i != particles->end(); ++i) {
-    /* particle doesn't decay */
-    if (particles->type(i->first).width() < 0.0)
-      continue;
-    /* local rest frame velocity */
-    velocity_lrf.set_x1(i->second.momentum().x1() / i->second.momentum().x0());
-    velocity_lrf.set_x2(i->second.momentum().x2() / i->second.momentum().x0());
-    velocity_lrf.set_x3(i->second.momentum().x3() / i->second.momentum().x0());
-
-    /* The clock goes slower in the rest frame of the resonance */
-    double inverse_gamma = sqrt(velocity_lrf.Dot(velocity_lrf));
-    double resonance_frame_timestep = timestep * inverse_gamma;
-
-    /* Exponential decay. Average lifetime t_avr = 1 / width
-     * t / t_avr = width * t (remember GeV-fm conversion)
-     * P(decay at Delta_t) = width * Delta_t
-     * P(alive after n steps) = (1 - width * Delta_t)^n
-     * = (1 - width * Delta_t)^(t / Delta_t)
-     * -> exp(-width * t) when Delta_t -> 0
-     */
-    if (drand48() < resonance_frame_timestep
-                    * particles->type(i->first).width() / hbarc) {
-      /* Time is up! Set the particle to decay at this timestep */
-      i->second.set_collision(2, 0.0, -1);
-      decay_list->push_back(i->first);
-    }
-  }
-}
-
-
 /* 1->2 and 1->3 decay processes */
-size_t decay_particles(Particles *particles, std::list<int> *decay_list,
+size_t decay_particles(Particles *particles, std::vector<ActionPtr> &decay_list,
   size_t id_process) {
   FourVector velocity_CM;
 
-  for (auto id = decay_list->begin(); id != decay_list->end(); ++id) {
+  for (auto act = decay_list.begin(); act != decay_list.end(); ++act) {
     /* relevant particle id's for the collision */
-    int id_a = *id;
+    int id_a = (*act)->in1();
     int interaction_type = particles->data(id_a).process_type();
 
     if (interaction_type != 2)
@@ -190,7 +154,7 @@ size_t decay_particles(Particles *particles, std::list<int> *decay_list,
     printd("ID %i has decayed and removed from the list.\n", id_a);
   }
   /* empty the decay table */
-  decay_list->clear();
+  decay_list.clear();
   printd("Decay list done.\n");
 
   /* return how many processes we have handled so far*/

@@ -15,9 +15,10 @@
 
 namespace Smash {
 
-std::vector<ActionPtr> ScatterActionsFinder::find_possible_actions(Particles *particles,
-					    CrossSections *cross_sections,
-					    const ExperimentParameters &parameters) const
+std::vector<ActionPtr>
+ScatterActionsFinder::find_possible_actions (Particles *particles,
+					const ExperimentParameters &parameters,
+					CrossSections *cross_sections) const
 {
   std::vector<ActionPtr> actions;
   FourVector distance;

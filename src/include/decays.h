@@ -13,16 +13,13 @@
 #include <vector>
 
 #include "include/particles.h"
+#include "action.h"
 
 namespace Smash {
 
 class ModusDefault;
 
-/* does_decay - does a resonance decay on this timestep? */
-void check_decays(Particles *particles, std::list<int> *decay_list,
-                  const float timestep);
-
-size_t decay_particles(Particles *particles, std::list<int> *decay_list,
+size_t decay_particles(Particles *particles, std::vector<ActionPtr> &decay_list,
                        size_t id_process);
 
 /* resonance decay process */

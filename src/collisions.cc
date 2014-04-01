@@ -165,7 +165,7 @@ size_t collide_particles(Particles *particles, std::vector<ActionPtr> &collision
 
   /* XXX: print debug output of collision list */
   /* collide: 2 <-> 2 soft momenta exchange */
-  for (std::vector<ActionPtr>::iterator act = collision_list.begin(); act != collision_list.end(); ++act) {
+  for (auto act = collision_list.begin(); act != collision_list.end(); ++act) {
     /* relevant particle id's for the collision */
     int id_a = (*act)->in1();
     int id_b = (*act)->in2();
