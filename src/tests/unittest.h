@@ -627,14 +627,23 @@ class _UnitTest_Compare {  // {{{1
       print(std::setprecision(6));
       print(") -> ");
       print(a == b);
-      print("\ndifference: ");
+      print("\nrelative difference: ");
+      if (a > b) {
+        print((a - b) / (b > 0 ? b : -b));
+      } else {
+        print('-');
+        print((b - a) / (b > 0 ? b : -b));
+      }
+      print(", allowed: ±");
+      print(error);
+      print("\nabsolute difference: ");
       if (a > b) {
         print(a - b);
       } else {
         print('-');
         print(b - a);
       }
-      print(", allowed difference: ±");
+      print(", allowed: ±");
       print(error * (b > 0 ? b : -b));
       print("\ndistance: ");
       print(ulpDiffToReferenceSigned(a, b));
