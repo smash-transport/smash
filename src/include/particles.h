@@ -169,9 +169,17 @@ class Particles {
   // MapIterationAdapter<const DecayModesMap> decay_modes() const { return
   // &decay_modes_; }
 
-  /// Return the specific data of a particle according to its id
+  /**
+   * Return the specific data of a particle according to its id
+   *
+   * \throws std::out_of_range If there is no particle with the given \p id.
+   */
   inline const ParticleData &data(int id) const;
-  /// Return the specific datapointer of a particle according to its id
+  /**
+   * Return the specific datapointer of a particle according to its id
+   *
+   * \throws std::out_of_range If there is no particle with the given \p id.
+   */
   inline ParticleData * data_pointer(int id);
   /**
    * Return the type of a specific particle given its id
@@ -180,7 +188,11 @@ class Particles {
    *          instead.
    */
   inline const ParticleType &type(int id) const;
-  /// Return the type for a specific pdgcode
+  /**
+   * Return the type for a specific pdgcode
+   *
+   * \throws std::out_of_range If there is no type with the given \p pdgcode.
+   */
   inline const ParticleType &particle_type(int pdgcode) const;
   /// Return decay modes of this particle type
   inline const DecayModes &decay_modes(int pdg) const;
