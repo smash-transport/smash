@@ -211,7 +211,7 @@ class Particles {
   /// empty() check of the ParticleData map
   inline bool empty(void) const;
   /// check the existence of an element in the ParticleData map
-  inline size_t count(int id) const;
+  inline bool has_data(int id) const;
   /// size() check of the ParticleType map
   inline size_t types_size(void) const;
   /// empty() check of the ParticleType map
@@ -226,7 +226,7 @@ class Particles {
    * \return \c false otherwise.
    */
   bool is_particle_type_registered(int pdgcode) const {
-    return types_.count(pdgcode) == 1;
+    return types_.find(pdgcode) != types_.end();
   }
 
   struct LoadFailure : public std::runtime_error {
@@ -364,8 +364,8 @@ inline bool Particles::types_empty() const {
 }
 
 /* check the existence of an element in the ParticleData map */
-inline size_t Particles::count(int id) const {
-  return data_.count(id);
+inline bool Particles::has_data(int id) const {
+  return data_.find(id) != data_.end();
 }
 
 /* return computation time which is reduced by the start up time */

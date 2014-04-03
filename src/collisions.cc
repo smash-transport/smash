@@ -88,7 +88,7 @@ void collision_criteria_geometry(Particles *particles,
     int id_not = particles->data(id_a).id_partner();
     printd("Not colliding particle %d <-> %d\n", id_a, id_not);
     /* unset collision partner to zero time and unexisting id */
-    if (particles->count(id_not) > 0)
+    if (particles->has_data(id_not) > 0)
       particles->data_pointer(id_not)->set_collision(-1, 0.0, -1);
     /* remove any of those partners from the list */
     if (id_a < id_not) {
@@ -105,7 +105,7 @@ void collision_criteria_geometry(Particles *particles,
     int id_not = particles->data(id_b).id_partner();
     printd("Not colliding particle %d <-> %d\n", id_b, id_not);
     /* unset collision partner to zero time and unexisting id */
-    if (particles->count(id_not) > 0)
+    if (particles->has_data(id_not) > 0)
       particles->data_pointer(id_not)->set_collision(-1, 0.0, -1);
     /* remove any of those partners from the list */
     if (id_b < id_not) {
