@@ -65,7 +65,7 @@ TEST(everything) {
   }
   VERIFY(!(type_size != 2));
   VERIFY(!(particles.empty()));
-  VERIFY(!(particles.has_data(1) != 1));
+  VERIFY(particles.has_data(1));
 
   /* check usage particle data */
   double distance_squared_2 = particle_distance(particles.data_pointer(0),
@@ -284,25 +284,25 @@ TEST(erase_particle) {
   p.create(-211);
   p.create(111);
   COMPARE(p.size(), 3);
-  COMPARE(p.has_data(0), 1);
-  COMPARE(p.has_data(1), 1);
-  COMPARE(p.has_data(2), 1);
-  COMPARE(p.has_data(3), 0);
+  VERIFY(p.has_data(0));
+  VERIFY(p.has_data(1));
+  VERIFY(p.has_data(2));
+  VERIFY(!p.has_data(3));
   COMPARE(p.data(1).pdgcode(), -211);
 
   p.remove(0);
   COMPARE(p.size(), 2);
-  COMPARE(p.has_data(0), 0);
-  COMPARE(p.has_data(1), 1);
-  COMPARE(p.has_data(2), 1);
-  COMPARE(p.has_data(3), 0);
+  VERIFY(!p.has_data(0));
+  VERIFY(p.has_data(1));
+  VERIFY(p.has_data(2));
+  VERIFY(!p.has_data(3));
   COMPARE(p.data(1).pdgcode(), -211);
 
   p.remove(2);
   COMPARE(p.size(), 1);
-  COMPARE(p.has_data(0), 0);
-  COMPARE(p.has_data(1), 1);
-  COMPARE(p.has_data(2), 0);
-  COMPARE(p.has_data(3), 0);
+  VERIFY(!p.has_data(0));
+  VERIFY(p.has_data(1));
+  VERIFY(!p.has_data(2));
+  VERIFY(!p.has_data(3));
   COMPARE(p.data(1).pdgcode(), -211);
 }
