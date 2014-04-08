@@ -66,6 +66,7 @@ smash_add_unittest(decaymodes)
 
 # some angle operations tests
 smash_add_unittest(angles)
+smash_add_unittest(pdgcode)
 smash_add_unittest(nucleus)
 smash_add_unittest(woods-saxon)
 smash_add_unittest(random)
