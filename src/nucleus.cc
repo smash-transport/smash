@@ -19,7 +19,7 @@ float Nucleus::mass() const {
   for (auto i = cbegin(); i != cend(); i++) {
     total_mass += sqrt(i->momentum().Dot());
   }
-  return total_mass;
+  return total_mass/(testparticles_+0.0);
 }
 
 /**************************************************************************//**
@@ -32,10 +32,16 @@ float Nucleus::mass() const {
  * 
  *
  * Nucleons in nuclei are distributed according to a
- * Woods-Saxon-distribution[citation needed]
+ * Woods-Saxon-distribution[See Phys. Rev. 95, 577 (1954)]
  *
  * \f[\frac{dN}{d^3r} = \frac{\rho_0}{\exp\left(\frac{r-r_0}{d}\right)
- * +1}.\f]
+ * +1},\f]
+ *
+ * where \f$d\f$ is the \em diffuseness of the nucleus. For \f$d=0\f$,
+ * the nucleus is a hard sphere.  \f$\rho_0\f$ and \f$r_0\f$ are, in
+ * this limit, the nuclear ground state density and 
+ * nuclear radius, respectively. For small \f$d\f$, this is still
+ * approximately true.
  *
  * This distribution is obviously spherically symmetric, hence we can
  * rewrite \f$d^3r = 4\pi r^2 dr\f$ and obtain
@@ -61,34 +67,37 @@ float Nucleus::mass() const {
  *
  * and observe
  *
- * \f[\frac{1}{\exp(x)+1} = \frac{e^{-x}e^x}{e^{-x}e^{x}+e^{-x}} =
+ * \f[\frac{1}{\exp(x)+1} = \frac{e^{-x}}{e^{-x}e^{x}+e^{-x}} =
  * \frac{e^{-x}}{e^{-x}+1}.\f]
  *
  * The distribution function can now be split into two cases. For
  * negative t (first case), \f$-|t| = t\f$, and for positive t (second
  * case), \f$-|t| = -t\f$:
  *
- * \f[p^{(1)}(t) = \frac{1}{e^{-|t|}+1} \cdot (t+R)^2\begin{cases}
- * 1 & R \le t < 0 \\
+ * \f[p^{(1)}(t) = \frac{1}{e^{-|t|}+1} \cdot (t+R)^2 \cdot
+ * \begin{cases}
+ * 1 & -R \le t < 0 \\
  * e^{-t} & t \ge 0
  * \end{cases}.\f]
  *
  * Apart from the first term, all that remains here can easily and
  * exactly be generated from unrejected uniform random numbers (see
  * below). The first term itself - \f$(1+e^{-|t|})^{-1}\f$ - is a number
- * between 1/2 and 1.?
+ * between 1/2 and 1.
  *
- * If we now have a variable $t$ distributed according to
- * \f$p^{(2)}(t)\f$ and reject \f$t\f$ with a probability
- * \f$p^{(rej)}(t) = (1+e^{-|t|})^{-1}\f$, the resulting distribution is
- * \f$p^{(combined)}(t) = p^{(2)}(t) \cdot p^{(rej)}(t)\f$. Hence, what
- * we need to generate is (the tilde \f$\tilde p\f$ means that this is
- * normalized):
+ * If we now have a variable \f$t\f$ distributed according to the
+ * remainder, \f$p^{(2)}(t)\f$, and reject \f$t\f$ with a probability
+ * \f$p^{(rej)}(t) = 1 - p^{(survive)}(t) = 1 - (1+e^{-|t|})^{-1}\f$,
+ * the resulting distribution is \f$p^{(combined)}(t) = p^{(2)}(t) \cdot
+ * p^{(survive)}(t)\f$. Hence, we need to generate \f$p^{(2)}(t)\f$,
+ * which we can normalize to
  *
  * \f[\tilde{p}^{(2)}(t) = \frac{1}{1+3/R+6/R^2+6/R^3} \cdot \begin{cases}
- * \frac{3}{R^3} (t+R)^2 & R \le t < 0 \\
- * e^{-x} \left( \frac{3}{R}+\frac{6}{R^2}t+\frac{6}{R^3}t^2 \right) & t
- * \ge 0 \end{cases}.\f]
+ * \frac{3}{R^3} (t+R)^2 & -R \le t < 0 \\
+ * e^{-t} \left( \frac{3}{R}+\frac{6}{R^2}t+\frac{6}{R^3}\frac{1}{2}t^2 \right)
+ * & t \ge 0 \end{cases}.\f]
+ *  
+ * (the tilde \f$\tilde{p}\f$ means that this is normalized).
  *
  * Four parts inside the rejection
  * -------------------------------
@@ -169,26 +178,26 @@ float Nucleus::mass() const {
 float Nucleus::distribution_nucleons() const {
   // diffusiveness_ zero or negative? Use hard sphere.
   if (diffusiveness_ < std::numeric_limits<float>::min()) {
-    return nuclear_radius()*(pow(drand48(), 1./3.));
+    return nuclear_radius()*(pow(Random::canonical(), 1./3.));
   }
   float radius_scaled = nuclear_radius()/diffusiveness_;
   float prob_range1 = 1.0;
   float prob_range2 = 3. / radius_scaled;
   float prob_range3 = 2. * prob_range2 / radius_scaled;
   float prob_range4 = 1. * prob_range3 / radius_scaled;
-  float all_ranges = prob_range1 + prob_range2 + prob_range3 + prob_range4;
+  float ranges234 = prob_range2 + prob_range3 + prob_range4;
   float t;
   /// \li Decide which branch \f$\tilde p^{({\rm I - IV})}\f$ to go into
   do {
-    float which_range = drand48() * all_ranges - prob_range1;
+    float which_range = Random::uniform(-prob_range1, ranges234);
     if (which_range < 0.0) {
-      t = radius_scaled * (pow(drand48(), 1./3.) - 1.);
+      t = radius_scaled * (pow(Random::canonical(), 1./3.) - 1.);
     } else {
-      t = -log(drand48());
+      t = -log(Random::canonical());
       if (which_range >= prob_range2) {
-        t += -log(drand48());
+        t -= log(Random::canonical());
         if (which_range >= prob_range2 + prob_range3) {
-          t += -log(drand48());
+          t -= log(Random::canonical());
         }
       }
     }
@@ -198,13 +207,17 @@ float Nucleus::distribution_nucleons() const {
      * \f$1-(1+\exp(-|t|))^{-1}\f$ (the efficiency of this should be
      * \f$\gg \frac{1}{2}\f$)
      **/
-  } while (drand48() > 1./(1. + exp(-fabs(t)) ) );
+  } while (Random::canonical() > 1./(1. + exp(-fabs(t)) ) );
   /// \li shift and rescale \f$t\f$ to \f$r = d\cdot t + r_0\f$
   float position_scaled = t + radius_scaled;
   float position = position_scaled * diffusiveness_;
   return position;
   /// \li (choose direction; this is done outside of this routine,
   /// though).
+}
+
+float Nucleus::woods_saxon(const float& r) {
+  return r*r/(exp((r-nuclear_radius())/diffusiveness_)+1);
 }
 
 void Nucleus::arrange_nucleons() {
@@ -236,7 +249,7 @@ void Nucleus::boost(const double& beta_squared_with_sign) {
   /*double gamma = 1.0/one_over_gamma;
     double gammabeta = sign*sqrt(beta_squared)*gamma;
    */
-  //despite the type name and the interface, the lorentz-boost does NOT
+  // despite the type name and the interface, the lorentz-boost does NOT
   // take a FourVector in the physical sense, i.e., one that has
   // u_mu*u^mu=1.
   // We are talking about a /passive/ lorentz transformation here, as
@@ -267,13 +280,15 @@ void Nucleus::boost(const double& beta_squared_with_sign) {
   return;
 }
 
-void Nucleus::fill_from_list(const std::map<int, int>& particle_list) {
+void Nucleus::fill_from_list(const std::map<int, int>& particle_list,
+                             const int testparticles) {
+  testparticles_ = testparticles;
   for (auto n = particle_list.cbegin(); n != particle_list.cend(); n++) {
-    for (int i = 0; i < n->second; i++) {
+    for (int i = 0; i < n->second*testparticles_; i++) {
       // append particle to list
-      particles.push_back({});
+      particles_.push_back({});
       // set this particle's PDG code.
-      particles.back().set_pdgcode(n->first);
+      particles_.back().set_pdgcode(n->first);
     }
   }
 }
@@ -312,6 +327,15 @@ void Nucleus::copy_particles(Particles* external_particles) {
   for (auto p = begin(); p != end(); p++) {
     external_particles->add_data(*p);
   }
+}
+
+FourVector Nucleus::center() const {
+  FourVector centerpoint(0.0,0.0,0.0,0.0);
+  for (auto p = cbegin(); p != cend(); p++) {
+    centerpoint += p->position();
+  }
+  centerpoint /= size();
+  return centerpoint;
 }
 
 }  // namespace Smash

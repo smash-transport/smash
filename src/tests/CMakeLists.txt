@@ -3,11 +3,12 @@ string(REPLACE "-Winline " "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 
 # test sources
 add_executable(fourvector fourvector.cc)
-add_executable(lorentzboost lorentzboost.cc ../fourvector.cc)
-add_executable(angles_distribution angles_distribution.cc)
+add_executable(lorentzboost lorentzboost.cc ../fourvector.cc ../random.cc)
+add_executable(angles_distribution angles_distribution.cc ../random.cc)
+add_executable(angles_zero angles_zero.cc ../random.cc)
 add_executable(clebschgordan clebschgordan.cc ../clebschgordan.cc)
 
-file(COPY ../config_general.yaml DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY ../config.yaml DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ../particles.txt DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ../decaymodes.txt DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
@@ -65,6 +66,9 @@ smash_add_unittest(decaymodes)
 
 # some angle operations tests
 smash_add_unittest(angles)
+smash_add_unittest(nucleus)
+smash_add_unittest(woods-saxon)
+smash_add_unittest(random)
 
 # some fourvector operations tests
 smash_add_test(fourvector fourvector fourvector)
@@ -75,7 +79,9 @@ smash_add_test(lorentzboost lorentzboost lorentzboost)
 # clebsch-gordan coefficient tests
 smash_add_test(clebschgordan clebschgordan clebschgordan)
 
-set(SMASH_OPTIONS -o "${PROJECT_BINARY_DIR}/test_output" -f)
+# for now -o has to be "data", because OSCAR output still expects to output to
+# $PWD/data. In the future we want to use "${PROJECT_BINARY_DIR}/test_output"
+set(SMASH_OPTIONS -o "data" -f)
 
 # verify that the binary has a cli help
 smash_add_test(mash_help smash smash -h)
@@ -118,5 +124,6 @@ endif()
 if(HAVE_ADDRESS_SANITIZER)
    smash_add_test(asan_box      smash_asan smash_asan -c "General: {STEPS: 50,MODUS: Box}" ${SMASH_OPTIONS})
    smash_add_test(asan_collider smash_asan smash_asan -s 500 -m Collider ${SMASH_OPTIONS})
+   smash_add_test(asan_nucleus  smash_asan smash_asan -s 500 -m Nucleus ${SMASH_OPTIONS})
    #smash_add_test(asan_sphere   smash_asan smash_asan -s 500 -m Sphere ${SMASH_OPTIONS})
 endif()

@@ -24,13 +24,15 @@ ScatterActionsFinder::find_possible_actions (Particles *particles,
   FourVector distance;
   double neighborhood_radius_squared = parameters.cross_section * fm2_mb * M_1_PI * 4;
 
-  for (auto i = particles->begin(); i != particles->end(); ++i) {
-    for (auto j = particles->begin(); j != particles->end(); ++j) {
+  for (const auto &p1 : particles->data()) {
+    for (const auto &p2 : particles->data()) {
       int id_a, id_b;
       std::vector<int> in_part;
+      id_a = p1.id();
+      id_b = p2.id();
       /* exclude check on same particle and double counting */
-      if (i->first >= j->first) continue;
-      distance = i->second.position() - j->second.position();
+      if (id_a >= id_b) continue;
+      distance = p1.position() - p2.position();
       /* skip particles that are double interaction radius length away
        * (3-product gives negative values
        * with the chosen sign convention for the metric)
@@ -38,8 +40,6 @@ ScatterActionsFinder::find_possible_actions (Particles *particles,
       if (-distance.DotThree() > neighborhood_radius_squared)
         continue;
 
-      id_a = i->first;
-      id_b = j->first;
       /* just collided with this particle */
       if (particles->data(id_a).id_process() >= 0
 	  && particles->data(id_a).id_process()

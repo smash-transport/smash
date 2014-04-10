@@ -18,16 +18,16 @@ std::vector<ActionPtr> DecayActionsFinder::find_possible_actions(Particles *part
   FourVector velocity_lrf;
   velocity_lrf.set_x0(1.0);
 
-  for (auto i = particles->begin(); i != particles->end(); ++i) {
+  for (const auto &p : particles->data()) {
     std::vector<int> in_part;
-    int id = i->first;
+    int id = p.pdgcode();
     /* particle doesn't decay */
     if (particles->type(id).width() < 0.0)
       continue;
     /* local rest frame velocity */
-    velocity_lrf.set_x1(i->second.momentum().x1() / i->second.momentum().x0());
-    velocity_lrf.set_x2(i->second.momentum().x2() / i->second.momentum().x0());
-    velocity_lrf.set_x3(i->second.momentum().x3() / i->second.momentum().x0());
+    velocity_lrf.set_x1(p.momentum().x1() / p.momentum().x0());
+    velocity_lrf.set_x2(p.momentum().x2() / p.momentum().x0());
+    velocity_lrf.set_x3(p.momentum().x3() / p.momentum().x0());
 
     /* The clock goes slower in the rest frame of the resonance */
     double inverse_gamma = sqrt(velocity_lrf.Dot(velocity_lrf));

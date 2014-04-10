@@ -17,7 +17,6 @@
 #include "include/experimentparameters.h"
 #include "include/modusdefault.h"
 #include "include/outputroutines.h"
-#include "include/parameters.h"
 #include "include/particles.h"
 #include "outputinterface.h"
 #include "decayactionsfinder.h"
@@ -137,6 +136,13 @@ class Experiment : public ExperimentBase {
   inline timespec set_timer_start();
 
   /**
+   * Struct of several member variables.
+   * These variables are combined into a struct for efficient input to functions
+   * outside of this class.
+   */
+  ExperimentParameters parameters_;
+
+  /**
    * Instance of the Modus template parameter. May store modus-specific data
    * and contains modus-specific function implementations.
    */
@@ -152,13 +158,6 @@ class Experiment : public ExperimentBase {
    * particles to file.
    */
   std::vector<std::unique_ptr<Smash::OutputInterface>> outputs_;
-
-  /**
-   * Struct of several member variables.
-   * These variables are combined into a struct for efficient input to functions
-   * outside of this class.
-   */
-  ExperimentParameters parameters_;
 
   /**
    * ?

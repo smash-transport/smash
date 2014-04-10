@@ -11,13 +11,14 @@
 
 using namespace Smash;
 
-static const double kEPS = 1e-10;
+constexpr double accuracy = 4e-9;
 Angles dir;
+auto cos_like = Random::make_uniform_distribution(-1.0, +1.0);
 
 FourVector random_velocity();
 FourVector random_velocity() {
   dir.distribute_isotropically();
-  double beta = drand48();
+  double beta = Random::canonical();
   // velocity-"vector" is not normalized (that's how LorentzBoost
   // works):
   return FourVector(1.0, beta*dir.x(), beta*dir.y(), beta*dir.z());
@@ -31,68 +32,71 @@ TEST(self_boost) {
     double gamma = 1.0/sqrt(velocity.Dot());
     FourVector u_mu = velocity*gamma;
     FourVector boosted = u_mu.LorentzBoost(velocity);
-    FUZZY_COMPARE(boosted.x0(),1.0) << " at loop " << i;
-    VERIFY(std::abs(boosted.x1() - 0.0) < kEPS) << " at loop " << i;
-    VERIFY(std::abs(boosted.x2() - 0.0) < kEPS) << " at loop " << i;
-    VERIFY(std::abs(boosted.x3() - 0.0) < kEPS) << " at loop " << i;
+    COMPARE_ABSOLUTE_ERROR(boosted.x0(), 1.0, accuracy) << " at loop " << i;
+    COMPARE_ABSOLUTE_ERROR(boosted.x1(), 0.0, accuracy) << " at loop " << i;
+    COMPARE_ABSOLUTE_ERROR(boosted.x2(), 0.0, accuracy) << " at loop " << i;
+    COMPARE_ABSOLUTE_ERROR(boosted.x3(), 0.0, accuracy) << " at loop " << i;
   }
 }
 
 // try to keep the invariants invariant
 // 1. "length" of a four-vector
 TEST(keep_invariant_length) {
-  UnitTest::setFuzzyness<double>(32);
   for(int i = 0; i < 1000; i++) {
     FourVector velocity = random_velocity();
     for(int j = 0; j < 1000; j++) {
-      FourVector a( 2.0*drand48()-1.0
-                  , 2.0*drand48()-1.0
-                  , 2.0*drand48()-1.0
-                  , 2.0*drand48()-1.0 );
+      FourVector a( cos_like()
+                  , cos_like()
+                  , cos_like()
+                  , cos_like());
       FourVector A = a.LorentzBoost(velocity);
-      FUZZY_COMPARE(a.Dot(), A.Dot());
+      COMPARE_RELATIVE_ERROR(a.Dot(), A.Dot(), accuracy) << " at loop " << i
+                                                                << "*" << j;
     }
   }
 }
 
 // 2. scalar product between two four-vectors
 TEST(keep_invariant_angle) {
-  UnitTest::setFuzzyness<double>(64);
   for(int i = 0; i < 1000; i++) {
     FourVector velocity = random_velocity();
     for(int j = 0; j < 1000; j++) {
-      FourVector a( 2.0*drand48()-1.0
-                  , 2.0*drand48()-1.0
-                  , 2.0*drand48()-1.0
-                  , 2.0*drand48()-1.0 );
-      FourVector b( 2.0*drand48()-1.0
-                  , 2.0*drand48()-1.0
-                  , 2.0*drand48()-1.0
-                  , 2.0*drand48()-1.0 );
+      FourVector a( cos_like()
+                  , cos_like()
+                  , cos_like()
+                  , cos_like());
+      FourVector b( cos_like()
+                  , cos_like()
+                  , cos_like()
+                  , cos_like());
       FourVector A = a.LorentzBoost(velocity);
       FourVector B = b.LorentzBoost(velocity);
-      FUZZY_COMPARE(a.Dot(b), A.Dot(B));
+      COMPARE_RELATIVE_ERROR(a.Dot(b), A.Dot(B), accuracy) << " at loop " << i
+                                                                << "*" << j;
     }
   }
 }
 
 // Lorentz transformation and back should get the same vector:
 TEST(back_and_forth) {
-  UnitTest::setFuzzyness<double>(64);
   for(int i = 0; i < 1000; i++) {
     FourVector velocity = random_velocity();
     FourVector back(1, -velocity.x1(), -velocity.x2(), -velocity.x3());
     for(int j = 0; j < 1000; j++) {
-      FourVector a( 2.0*drand48()-1.0
-                  , 2.0*drand48()-1.0
-                  , 2.0*drand48()-1.0
-                  , 2.0*drand48()-1.0 );
+      FourVector a( cos_like()
+                  , cos_like()
+                  , cos_like()
+                  , cos_like());
       FourVector forward  = a.LorentzBoost(velocity);
       FourVector backward = forward.LorentzBoost(back);
-      FUZZY_COMPARE(backward.x0(),a.x0());
-      FUZZY_COMPARE(backward.x1(),a.x1());
-      FUZZY_COMPARE(backward.x2(),a.x2());
-      FUZZY_COMPARE(backward.x3(),a.x3());
+      COMPARE_RELATIVE_ERROR(backward.x0(), a.x0(), accuracy) << " at loop "
+                                                        << i << "*" << j;
+      COMPARE_RELATIVE_ERROR(backward.x1(), a.x1(), accuracy) << " at loop "
+                                                        << i << "*" << j;
+      COMPARE_RELATIVE_ERROR(backward.x2(), a.x2(), accuracy) << " at loop "
+                                                        << i << "*" << j;
+      COMPARE_RELATIVE_ERROR(backward.x3(), a.x3(), accuracy) << " at loop "
+                                                        << i << "*" << j;
     }
   }
 }

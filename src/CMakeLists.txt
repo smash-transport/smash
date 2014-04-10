@@ -43,6 +43,7 @@ set(smash_src action.cc boxmodus.cc
         parametrizations.cc
         particles.cc
         particlesoutput.cc
+        random.cc
         resonances.cc
         scatteractionsfinder.cc
         time.cc
@@ -59,7 +60,7 @@ configure_file (
 )
 
 # directly copy config files to build directory
-configure_file(config_general.yaml ${PROJECT_BINARY_DIR}/config_general.yaml COPYONLY)
+configure_file(config.yaml ${PROJECT_BINARY_DIR}/config.yaml COPYONLY)
 set(generated_headers)
 macro(copy_at_make)
    foreach(filename ${ARGN})

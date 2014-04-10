@@ -18,7 +18,6 @@
 #include <utility>
 
 #include "include/fourvector.h"
-#include "include/parameters.h"
 #include "include/particles.h"
 #include "include/particledata.h"
 #include "include/particletype.h"
@@ -63,10 +62,10 @@ void print_measurements(const Particles &particles,
   double elapsed = measure_timediff(time_start);
   double time = 0.0;
 
-  for (auto i = particles.cbegin(); i != particles.cend(); ++i) {
-    momentum_total += i->second.momentum();
+  for (const ParticleData &data : particles.data()) {
+    momentum_total += data.momentum();
     /* use the time from the last active particle - startup time */
-    time = i->second.position().x0() - 1.0;
+    time = data.position().x0() - 1.0;
   }
 
   if (likely(time > 0))
@@ -163,14 +162,14 @@ void write_oscar_event_block(Particles *particles,
    * Vice versa for the last block
    */
   fprintf(fp, "%zu %zu %i\n", initial, final, event_id);
-  for (auto i = particles->cbegin(); i != particles->cend(); ++i) {
+  for (const ParticleData &data : particles->data()) {
     fprintf(fp, "%i %i %i %g %g %g %g %g %g %g %g %g \n",
-            i->first, i->second.pdgcode(), 0,
-            i->second.momentum().x1(), i->second.momentum().x2(),
-            i->second.momentum().x3(), i->second.momentum().x0(),
-            sqrt(i->second.momentum().Dot(i->second.momentum())),
-            i->second.position().x1(), i->second.position().x2(),
-            i->second.position().x3(), i->second.position().x0() - 1.0);
+            data.id(), data.pdgcode(), 0,
+            data.momentum().x1(), data.momentum().x2(),
+            data.momentum().x3(), data.momentum().x0(),
+            sqrt(data.momentum().Dot(data.momentum())),
+            data.position().x1(), data.position().x2(),
+            data.position().x3(), data.position().x0() - 1.0);
   }
   fclose(fp);
 }

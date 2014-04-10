@@ -59,17 +59,19 @@ YAML::Node operator|=(YAML::Node a, const YAML::Node &b) {
   return a;
 }
 
+#ifndef DOXYGEN
 namespace particles_txt {
 #include "particles.txt.h"
 }  // namespace particles_txt
 namespace decaymodes_txt {
 #include "decaymodes.txt.h"
 }  // namespace decaymodes_txt
+#endif
 
 }  // unnamed namespace
 
 Configuration::Configuration(const bf::path &path)
-    : Configuration(path, "config_general.yaml") {
+    : Configuration(path, "config.yaml") {
 }
 
 Configuration::Configuration(const bf::path &path, const bf::path &filename) {

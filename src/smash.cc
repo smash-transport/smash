@@ -20,7 +20,6 @@
 
 #include "include/configuration.h"
 #include "include/experiment.h"
-#include "include/parameters.h"
 #include "include/macros.h"
 #include "include/outputroutines.h"
 

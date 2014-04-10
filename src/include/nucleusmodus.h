@@ -9,6 +9,7 @@
 
 #include <stdint.h>
 #include <cmath>
+#include <stdexcept>
 #include <list>
 #include <string>
 
@@ -16,7 +17,6 @@
 #include "include/modusdefault.h"
 #include "include/nucleus.h"
 #include "include/particles.h"
-#include "include/parameters.h"
 
 namespace Smash {
 
@@ -102,13 +102,21 @@ class NucleusModus : public ModusDefault {
    * Takes all there is to take from the (truncated!) configuration
    * object (only contains configuration for this modus).
    **/
-  explicit NucleusModus(Configuration modus_config);
+  explicit NucleusModus(Configuration modus_config,
+           const ExperimentParameters &parameters);
 
   void print_startup();
 
   void initial_conditions(Particles *particles,
                           const ExperimentParameters &parameters);
 
+  struct NucleusEmpty : public ModusDefault::BadInput {
+    using ModusDefault::BadInput::BadInput;
+  };
+  struct InvalidEnergy : public ModusDefault::BadInput {
+    using ModusDefault::BadInput::BadInput;
+  };
+ 
  private:
   /** Projectile.
    *

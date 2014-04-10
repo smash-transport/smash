@@ -23,8 +23,8 @@
 #include "include/macros.h"
 #include "include/nucleusmodus.h"
 #include "include/outputroutines.h"
-#include "include/parameters.h"
 #include "include/particlesoutput.h"
+#include "include/random.h"
 #include "include/time.h"
 #include "include/vtkoutput.h"
 
@@ -75,18 +75,18 @@ ExperimentParameters create_experiment_parameters(Configuration &config) {
 
 template <typename Modus>
 Experiment<Modus>::Experiment(Configuration &config)
-    : modus_(config["Modi"]),
+    : parameters_(create_experiment_parameters(config)),
+      modus_(config["Modi"], parameters_),
       particles_{config.take({"particles"}), config.take({"decaymodes"})},
-      parameters_(create_experiment_parameters(config)),
       cross_sections_(parameters_.cross_section),
       nevents_(config.take({"General", "NEVENTS"})),
       steps_(config.take({"General", "STEPS"})),
-      output_interval_(config.take({"General", "UPDATE"})){
+      output_interval_(config.take({"General", "UPDATE"})) {
   int64_t seed_ = config.take({"General", "RANDOMSEED"});
   if (seed_ < 0) {
     seed_ = time(nullptr);
   }
-  srand48(seed_);
+  Random::set_seed(seed_);
 
   print_startup(seed_);
 }
@@ -184,8 +184,8 @@ void Experiment<Modus>::print_startup(int64_t seed) {
 template <typename Modus>
 float Experiment<Modus>::energy_total(Particles *particles) {
   float energy_sum = 0.0;
-  for (auto i = particles->begin(); i != particles->end(); ++i) {
-    energy_sum += i->second.momentum().x0();
+  for (const ParticleData &data : particles->data()) {
+    energy_sum += data.momentum().x0();
   }
   return energy_sum;
 }

@@ -25,7 +25,7 @@ void VtkOutput::write_state(const Particles &particles) {
   char filename[32];
   snprintf(
       filename, sizeof(filename), "pos_0.%05i.vtk",
-      static_cast<int>((particles.begin()->second.position().x0() - 1.0) * 10));
+      static_cast<int>((particles.data().begin()->position().x0() - 1.0) * 10));
   std::unique_ptr<std::FILE> file_{
       fopen((base_path_ / filename).native().c_str(), "w")};
 
@@ -37,9 +37,9 @@ void VtkOutput::write_state(const Particles &particles) {
   /* Unstructured data sets are composed of points, lines, polygons, .. */
   fprintf(file_.get(), "DATASET UNSTRUCTURED_GRID\n");
   fprintf(file_.get(), "POINTS %zu double\n", particles.size());
-  for (const auto &p : particles) {
-    fprintf(file_.get(), "%g %g %g\n", p.second.position().x1(),
-            p.second.position().x2(), p.second.position().x3());
+  for (const auto &p : particles.data()) {
+    fprintf(file_.get(), "%g %g %g\n", p.position().x1(),
+            p.position().x2(), p.position().x3());
   }
   fprintf(file_.get(), "CELLS %zu %zu\n", particles.size(), particles.size() * 2);
   for (size_t point_index = 0; point_index < particles.size(); point_index++) {
@@ -52,13 +52,13 @@ void VtkOutput::write_state(const Particles &particles) {
   fprintf(file_.get(), "POINT_DATA %zu\n", particles.size());
   fprintf(file_.get(), "SCALARS pdg_codes int 1\n");
   fprintf(file_.get(), "LOOKUP_TABLE default\n");
-  for (const auto &p : particles) {
-    fprintf(file_.get(), "%i\n", p.second.pdgcode());
+  for (const auto &p : particles.data()) {
+    fprintf(file_.get(), "%i\n", p.pdgcode());
   }
   fprintf(file_.get(), "VECTORS momentum double\n");
-  for (const auto &p : particles) {
-    fprintf(file_.get(), "%g %g %g\n", p.second.momentum().x1(),
-            p.second.momentum().x2(), p.second.momentum().x3());
+  for (const auto &p : particles.data()) {
+    fprintf(file_.get(), "%g %g %g\n", p.momentum().x1(),
+            p.momentum().x2(), p.momentum().x3());
   }
 }
 

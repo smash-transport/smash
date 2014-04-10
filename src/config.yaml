@@ -57,7 +57,7 @@ Modi:
         Projectile:
             PARTICLES: {2212: 1, 2112: 1}
             # very hard Woods-Saxon distribution.
-            SOFTNESS: .001
+            DIFFUSIVENESS: .001
         # Definitions for the target:
         # Lead
         Target:

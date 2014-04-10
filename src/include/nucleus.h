@@ -8,18 +8,19 @@
 #define SRC_INCLUDE_NUCLEUS_H_
 
 #include<map>
+#include<stdexcept>
 #include<vector>
+#include "include/fourvector.h"
 #include "include/particledata.h"
 #include "include/particles.h"
+#include <stdexcept>
+#include "include/random.h"
 
 namespace Smash {
 
 /// A Nucleus is a collection of Particles (ParticleData thingys) that
 /// are initialized before the beginning of the simulation and all have
 /// the same velocity (and spatial proximity).
-/// This class inherits from Particles, which is the collection of all
-/// particles in the simulation and contains special functions for the
-/// initialization of nuclei.
 class Nucleus {
  public:
   Nucleus();
@@ -32,7 +33,7 @@ class Nucleus {
    * root of the number of nucleons.
    **/
   inline float nuclear_radius() const {
-    return proton_radius_*pow(size(), 1./3.);
+    return proton_radius_*pow(number_of_particles(), 1./3.);
   }
 
   /** returns a Woods-Saxon distributed length 
@@ -43,6 +44,12 @@ class Nucleus {
    * 1}\f$ where \f$d\f$ is the diffusiveness_ parameter and \f$R\f$ is
    * nuclear_radius(). */
   float distribution_nucleons() const;
+  /** returns the Woods-Saxon distribution directly
+   *
+   * @param x the position at which to evaluate the function
+   * @return the 
+   **/
+  float woods_saxon(const float& x);
   /// sets the positions of the nuclei inside nucleus A.
   void arrange_nucleons();
   /**
@@ -65,8 +72,13 @@ class Nucleus {
    *
    * If the map is, e.g., [2212: 6, 2112: 7] initializes C-13 (6 protons
    * and 7 neutrons). The particles are only created, no position or
-   * momenta are yet assigned. */
-  void fill_from_list(const std::map<int, int>& particle_list);
+   * momenta are yet assigned.
+   *
+   * \param testparticles Number of test particles to use.
+   *
+   **/
+  void fill_from_list(const std::map<int, int>& particle_list,
+                      const int testparticles);
   /// sets the diffusiveness of the nucleus
   ///
   /// \see diffusiveness_.
@@ -102,10 +114,32 @@ class Nucleus {
              const double& simulation_time);
   /// copies the particles from this nucleus into the particle list.
   void copy_particles(Particles* particles);
-  /// Number of particles in the nucleus:
+  /// Number of numerical (=test-)particles in the nucleus:
   inline size_t size() const {
-    return particles.size();
+    return particles_.size();
   }
+  /// Number of physical particles in the nucleus:
+  inline size_t number_of_particles() const {
+    int nop = particles_.size()/testparticles_;
+    // if size() is not a multiple of testparticles_, this will throw an
+    // error.
+    if (nop * testparticles_ != particles_.size()) {
+      throw TestparticleConfusion("Number of test particles and test particles"
+            "per particle are incompatible");
+    }
+    return nop;
+  }
+  FourVector center() const;
+  void align_center() {
+    FourVector centerpoint = center();
+    for (auto p = particles_.begin(); p != particles_.end(); ++p) {
+      p->set_position(p->position()-centerpoint);
+    }
+  }
+
+  struct TestparticleConfusion : public std::length_error {
+    using std::length_error::length_error;
+  };
 
  private:
   /** diffusiveness of Woods-Saxon-distribution in this nucleus im fm
@@ -128,23 +162,26 @@ class Nucleus {
   /// x (impact parameter direction-) coordinate of the outermost
   /// particle (lowest x)
   float x_min_ = 0.f;
+  /// Number of testparticles per physical particle
+  size_t testparticles_ = 1;
   /// particles associated with this nucleus.
-  std::vector<ParticleData> particles;
+  std::vector<ParticleData> particles_;
+ public:
   /// for iterators over the particle list:
   inline std::vector<ParticleData>::iterator begin() {
-    return particles.begin();
+    return particles_.begin();
   }
   /// for iterators over the particle list:
   inline std::vector<ParticleData>::iterator end() {
-    return particles.end();
+    return particles_.end();
   }
   /// for iterators over the particle list:
   inline std::vector<ParticleData>::const_iterator cbegin() const {
-    return particles.cbegin();
+    return particles_.cbegin();
   }
   /// for iterators over the particle list:
   inline std::vector<ParticleData>::const_iterator cend() const {
-    return particles.cend();
+    return particles_.cend();
   }
 };
 

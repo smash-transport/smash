@@ -25,9 +25,11 @@
 #include "include/particledata.h"
 #include "include/particles.h"
 #include "include/particletype.h"
+#include "include/random.h"
 #include "include/resonances.h"
 
 namespace Smash {
+
 
 /* 1->2 and 1->3 decay processes */
 size_t decay_particles(Particles *particles, std::vector<ActionPtr> &decay_list,
@@ -174,7 +176,7 @@ int resonance_decay(Particles *particles, int particle_id) {
   /* Ratios of decay channels should add to 1; pick a random number
    * between 0 and 1 to select the decay mode to be used
    */
-  double random_mode = drand48();
+  double random_mode = Random::canonical();
   /* Keep adding to the probability until it exceeds the random value */
   while (random_mode > cumulated_probability &&  mode != decaymodes.end()) {
     cumulated_probability += mode->weight();
@@ -277,8 +279,8 @@ int one_to_three(Particles *particles, int resonance_id,
   double dalitz_bc_max = 0.0, dalitz_bc_min = 1.0;
   double s_ab = 0.0, s_bc = 0.5;
   while (s_bc > dalitz_bc_max || s_bc < dalitz_bc_min) {
-    s_ab = (s_ab_max - s_ab_min) * drand48() + s_ab_min;
-    s_bc = (s_bc_max - s_bc_min) * drand48() + s_bc_min;
+    s_ab = Random::uniform(s_ab_min, s_ab_max);
+    s_bc = Random::uniform(s_bc_min, s_bc_max);
     double e_b_rest = (s_ab - mass_a * mass_a + mass_b * mass_b)
                            / (2 * sqrt(s_ab));
     double e_c_rest = (mass_resonance * mass_resonance - s_ab

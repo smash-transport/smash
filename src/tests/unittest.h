@@ -145,26 +145,85 @@
 #define VERIFY(condition)
 
 /**
- * \brief Verifies that \p a is equal to \p b.
+ * \brief Verifies that \p test_value is equal to \p reference.
  */
-#define COMPARE(a, b)
+#define COMPARE(test_value, reference)
 
 /**
- * \brief Verifies that \p a is equal to \p b within a pre-defined distance in
- * units of least precision (ULP).
+ * \brief Verifies that the difference between \p test_value and \p reference is
+ * smaller than \p allowed_difference.
  *
- * If the test fails it will print the distance in ULP between \p a and \p b as
- * well as the maximum allowed distance. Often this difference is not visible in
- * the value because the conversion of a double/float to a string needs to round
- * the value to a sensible length.
+ * If the test fails the output will show the actual difference between \p
+ * test_value and \p reference. If this value is positive \p test_value is too
+ * large. If it is negative \p test_value is too small.
+ */
+#define COMPARE_ABSOLUTE_ERROR(test_value, reference, allowed_difference)
+
+/**
+ * \brief Verifies that the difference between \p test_value and \p reference is
+ * smaller than `allowed_relative_difference * reference`.
+ *
+ * If the test fails the output will show the actual difference between \p
+ * test_value and \p reference. If this value is positive \p test_value is too
+ * large. If it is negative \p test_value is too small.
+ *
+ * The following example tests that `a` is no more than 1% different from `b`:
+ * \code
+ * COMPARE_ABSOLUTE_ERROR(a, b, 0.01);
+ * \endcode
+ *
+ * \note This test macro still works even if \p reference is set to 0. It will
+ * then compare the difference against `allowed_relative_difference * <smallest
+ * positive normalized value of reference type>`.
+ */
+#define COMPARE_RELATIVE_ERROR(test_value, reference, allowed_relative_difference)
+
+/**
+ * \brief Verifies that \p test_value is equal to \p reference within a
+ * pre-defined distance in units of least precision (ulp).
+ *
+ * If the test fails it will print the distance in ulp between \p test_value and
+ * \p reference as well as the maximum allowed distance. Often this difference
+ * is not visible in the value because the conversion of a double/float to a
+ * string needs to round the value to a sensible length.
  *
  * The allowed distance can be modified by calling:
  * \code
  * UnitTest::setFuzzyness<float>(4);
  * UnitTest::setFuzzyness<double>(7);
  * \endcode
+ *
+ * ### ulp
+ * Unit of least precision is a unit that is derived from the the least
+ * significant bit in the mantissa of a floating-point value. Consider a
+ * single-precision number (23 mantissa bits) with exponent \f$e\f$. Then 1
+ * ulp is \f$2^{e-23}\f$. Thus, \f$\log_2(u)\f$ signifies the the number
+ * incorrect mantissa bits (with \f$u\f$ the distance in ulp).
+ *
+ * If \p test_value and \p reference have a different exponent the meaning of
+ * ulp depends on the variable you look at. The FUZZY_COMPARE code always uses
+ * \p reference to determine the magnitude of 1 ulp.
+ *
+ * Example:
+ * The value `1.f` is `0x3f800000` in binary. The value
+ * `1.00000011920928955078125f` with binary representation `0x3f800001`
+ * therefore has a distance of 1 ulp.
+ * A positive distance means the \p test_value is larger than the \p reference.
+ * A negative distance means the \p test_value is smaller than the \p reference.
+ * * `FUZZY_COMPARE(1.00000011920928955078125f, 1.f)` will show a distance of 1
+ * * `FUZZY_COMPARE(1.f, 1.00000011920928955078125f)` will show a distance of -1
+ *
+ * The value `0.999999940395355224609375f` with binary representation
+ * `0x3f7fffff` has a smaller exponent than `1.f`:
+ * * `FUZZY_COMPARE(0.999999940395355224609375f, 1.f)` will show a distance of
+ * -0.5
+ * * `FUZZY_COMPARE(1.f, 0.999999940395355224609375f)` will show a distance of 1
+ *
+ * ### Comparing to 0
+ * Distance to 0 is implemented as comparing to `std::numeric_limits<T>::min()`
+ * instead and adding 1 to the resulting distance.
  */
-#define FUZZY_COMPARE(a, b)
+#define FUZZY_COMPARE(test_value, reference)
 
 /**
  * \brief Call this to fail a test.
@@ -423,8 +482,40 @@ inline double unittest_fuzzynessHelper<double>(const double &) {
 }
 
 class _UnitTest_Compare {  // {{{1
+  template <typename T, typename ET>
+  static bool absoluteErrorTest(const T &a, const T &b, ET error) {
+    if (a > b) {  // don't use abs(a - b) because it doesn't work for unsigned
+                  // integers
+      return a - b > error;
+    } else {
+      return b - a > error;
+    }
+  }
+
+  template <typename T, typename ET>
+  static bool relativeErrorTest(const T &a, const T &b, ET error) {
+    if (b > 0) {
+      error *= b;
+    } else if (b < 0) {
+      error *= -b;
+    } else if (std::is_floating_point<T>::value) {
+      // if the reference value is 0 then use the smallest normalized number
+      error *= std::numeric_limits<T>::min();
+    } else {
+      // error *= 1;  // the smallest non-zero positive number is 1...
+    }
+    if (a > b) {  // don't use abs(a - b) because it doesn't work for unsigned
+                  // integers
+      return a - b > error;
+    } else {
+      return b - a > error;
+    }
+  }
+
  public:
-  enum OptionFuzzy { Fuzzy };
+  struct Fuzzy {};
+  struct AbsoluteError {};
+  struct RelativeError {};
 
   // Normal Compare ctor {{{2
   template <typename T1, typename T2>
@@ -454,7 +545,7 @@ class _UnitTest_Compare {  // {{{1
   template <typename T>
   ALWAYS_INLINE _UnitTest_Compare(const T &a, const T &b, const char *_a,
                                   const char *_b, const char *_file, int _line,
-                                  OptionFuzzy)
+                                  Fuzzy)
       : m_ip(getIp()), m_failed(!unittest_fuzzyCompareHelper(a, b)) {
     if (IS_UNLIKELY(m_failed)) {
       printFirst();
@@ -476,6 +567,89 @@ class _UnitTest_Compare {  // {{{1
     }
   }
 
+  // Absolute Error Compare ctor {{{2
+  template <typename T, typename ET>
+  ALWAYS_INLINE _UnitTest_Compare(const T &a, const T &b, const char *_a,
+                                  const char *_b, const char *_file, int _line,
+                                  AbsoluteError, ET error)
+      : m_ip(getIp()), m_failed(absoluteErrorTest(a, b, error)) {
+    if (IS_UNLIKELY(m_failed)) {
+      printFirst();
+      printPosition(_file, _line);
+      print(":\n");
+      print(_a);
+      print(" (");
+      print(std::setprecision(10));
+      print(a);
+      print(") ≈ ");
+      print(_b);
+      print(" (");
+      print(std::setprecision(10));
+      print(b);
+      print(std::setprecision(6));
+      print(") -> ");
+      print(a == b);
+      print("\ndifference: ");
+      if (a > b) {
+        print(a - b);
+      } else {
+        print('-');
+        print(b - a);
+      }
+      print(", allowed difference: ±");
+      print(error);
+      print("\ndistance: ");
+      print(ulpDiffToReferenceSigned(a, b));
+      print(" ulp");
+    }
+  }
+
+
+  // Relative Error Compare ctor {{{2
+  template <typename T, typename ET>
+  ALWAYS_INLINE _UnitTest_Compare(const T &a, const T &b, const char *_a,
+                                  const char *_b, const char *_file, int _line,
+                                  RelativeError, ET error)
+      : m_ip(getIp()), m_failed(relativeErrorTest(a, b, error)) {
+    if (IS_UNLIKELY(m_failed)) {
+      printFirst();
+      printPosition(_file, _line);
+      print(":\n");
+      print(_a);
+      print(" (");
+      print(std::setprecision(10));
+      print(a);
+      print(") ≈ ");
+      print(_b);
+      print(" (");
+      print(std::setprecision(10));
+      print(b);
+      print(std::setprecision(6));
+      print(") -> ");
+      print(a == b);
+      print("\nrelative difference: ");
+      if (a > b) {
+        print((a - b) / (b > 0 ? b : -b));
+      } else {
+        print('-');
+        print((b - a) / (b > 0 ? b : -b));
+      }
+      print(", allowed: ±");
+      print(error);
+      print("\nabsolute difference: ");
+      if (a > b) {
+        print(a - b);
+      } else {
+        print('-');
+        print(b - a);
+      }
+      print(", allowed: ±");
+      print(error * (b > 0 ? b : -b));
+      print("\ndistance: ");
+      print(ulpDiffToReferenceSigned(a, b));
+      print(" ulp");
+    }
+  }
   // VERIFY ctor {{{2
   ALWAYS_INLINE _UnitTest_Compare(bool good, const char *cond,
                                   const char *_file, int _line)
@@ -609,8 +783,9 @@ class _UnitTest_Compare {  // {{{1
   static inline void printFuzzyInfoImpl(T a, T b, double fuzzyness) {
     print("\ndistance: ");
     print(ulpDiffToReferenceSigned(a, b));
-    print(", allowed distance: ");
+    print(" ulp, allowed distance: ±");
     print(fuzzyness);
+    print(" ulp");
   }
   // member variables {{{2
   const size_t m_ip;
@@ -629,9 +804,21 @@ inline void _UnitTest_Compare::printFuzzyInfo(double a, double b) {
 // FUZZY_COMPARE {{{1
 // Workaround for clang: The "<< ' '" is only added to silence the warnings
 // about unused return values.
-#define FUZZY_COMPARE(a, b)                                       \
-  UnitTest::_UnitTest_Compare(a, b, #a, #b, __FILE__, __LINE__,   \
-                              UnitTest::_UnitTest_Compare::Fuzzy) \
+#define FUZZY_COMPARE(a, b)                                         \
+  UnitTest::_UnitTest_Compare(a, b, #a, #b, __FILE__, __LINE__,     \
+                              UnitTest::_UnitTest_Compare::Fuzzy()) \
+      << ' '
+// COMPARE_ABSOLUTE_ERROR {{{1
+#define COMPARE_ABSOLUTE_ERROR(a__, b__, error__)                           \
+  UnitTest::_UnitTest_Compare(a__, b__, #a__, #b__, __FILE__, __LINE__,     \
+                              UnitTest::_UnitTest_Compare::AbsoluteError(), \
+                              error__)                                      \
+      << ' '
+// COMPARE_RELATIVE_ERROR {{{1
+#define COMPARE_RELATIVE_ERROR(a__, b__, error__)                           \
+  UnitTest::_UnitTest_Compare(a__, b__, #a__, #b__, __FILE__, __LINE__,     \
+                              UnitTest::_UnitTest_Compare::RelativeError(), \
+                              error__)                                      \
       << ' '
 // COMPARE {{{1
 #define COMPARE(a, b) \
