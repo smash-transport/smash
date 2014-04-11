@@ -274,8 +274,8 @@ class Configuration {
    * inside Configuration and by making it explicit a return would require the
    * copy constructor.
    */
-  Configuration(const YAML::Node &node) : root_node_(node) {
-  }
+  Configuration(const YAML::Node &node)  // NOLINT(runtime/explicit) : see above
+      : root_node_(node) {}
 
   /// the general_config.yaml contents - fully parsed
   YAML::Node root_node_;
