@@ -177,7 +177,8 @@
  * then compare the difference against `allowed_relative_difference * <smallest
  * positive normalized value of reference type>`.
  */
-#define COMPARE_RELATIVE_ERROR(test_value, reference, allowed_relative_difference)
+#define COMPARE_RELATIVE_ERROR(test_value, reference, \
+                               allowed_relative_difference)
 
 /**
  * \brief Verifies that \p test_value is equal to \p reference within a
@@ -902,20 +903,26 @@ template <>
 inline std::string typeToString<float>() {
   return " float";
 }
+/* NOLINT(runtime/int):
+ * The warning is disabled here because this code is not about using integers
+ * but about recognizing integer types. And the following types are the
+ * different builtin types. It doesn't make sense to check for aliased types
+ * here.
+ */
 template <>
-inline std::string typeToString<long long>() {
+inline std::string typeToString<long long>() {  // NOLINT(runtime/int)
   return " long long";
 }
 template <>
-inline std::string typeToString<unsigned long long>() {
+inline std::string typeToString<unsigned long long>() {  // NOLINT(runtime/int)
   return "ulong long";
 }
 template <>
-inline std::string typeToString<long>() {
+inline std::string typeToString<long>() {  // NOLINT(runtime/int)
   return "  long";
 }
 template <>
-inline std::string typeToString<unsigned long>() {
+inline std::string typeToString<unsigned long>() {  // NOLINT(runtime/int)
   return " ulong";
 }
 template <>
@@ -927,11 +934,11 @@ inline std::string typeToString<unsigned int>() {
   return "  uint";
 }
 template <>
-inline std::string typeToString<short>() {
+inline std::string typeToString<short>() {  // NOLINT(runtime/int)
   return " short";
 }
 template <>
-inline std::string typeToString<unsigned short>() {
+inline std::string typeToString<unsigned short>() {  // NOLINT(runtime/int)
   return "ushort";
 }
 template <>
@@ -971,7 +978,7 @@ class Test {
         return;
       }
       FAIL() << "Test was expected to throw, but it didn't";
-    };
+    };  // NOLINT(readability/braces) : this is a false positive
     g_allTests.emplace_back(wrapper, name);
   }
 };
