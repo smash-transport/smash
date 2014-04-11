@@ -115,22 +115,22 @@ class FourVector {
    * The iterator implements the RandomIterator concept. Thus, you can simply
    * write `begin() + 1` to get an iterator that points to the 1st component.
    */
-  iterator begin() { return x_.begin(); };
+  iterator begin() { return x_.begin(); }
 
   /**
    * Returns an iterator pointing after the 4th component.
    */
-  iterator end() { return x_.end(); };
+  iterator end() { return x_.end(); }
 
   /// const overload of the above
-  const_iterator begin() const { return x_.begin(); };
+  const_iterator begin() const { return x_.begin(); }
   /// const overload of the above
-  const_iterator end() const { return x_.end(); };
+  const_iterator end() const { return x_.end(); }
 
   /// \see begin
-  const_iterator cbegin() const { return x_.cbegin(); };
+  const_iterator cbegin() const { return x_.cbegin(); }
   /// \see end
-  const_iterator cend() const { return x_.cend(); };
+  const_iterator cend() const { return x_.cend(); }
 
  private:
   std::array<double, 4> x_;
