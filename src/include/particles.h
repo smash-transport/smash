@@ -122,11 +122,18 @@ class Particles {
   using DecayModesMap = std::map<int, DecayModes>;
 
  public:
-  /// Use improbable values for default constructor
-  Particles(const std::string &particles, const std::string &decaymodes) {
-    load_particle_types(particles);
-    load_decaymodes(decaymodes);
-  }
+  /**
+   * Set up the Particles object.
+   *
+   * This initializes all the members. The object is ready for usage right after
+   * construction.
+   *
+   * \param particles A string that contains the definition of ParticleTypes to
+   *                  be created.
+   * \param decaymodes A string that contains the definition of possible
+   *                   DecayModes.
+   */
+  Particles(const std::string &particles, const std::string &decaymodes);
 
   /// Cannot be copied
   Particles(const Particles &) = delete;
@@ -248,12 +255,16 @@ class Particles {
   void reset();
 
  private:
-  void load_particle_types(const std::string &input);
-  void load_decaymodes(const std::string &input);
-  /// inserts a new particle type
-  inline void add_type(const ParticleType &particle_type, int pdg);
-  /// adds decay modes for a particle type
-  inline void add_decaymodes(const DecayModes &new_decay_modes, int pdg);
+  /// Returns the ParticleData map as described in the \p input string.
+  static ParticleTypeMap load_particle_types(const std::string &input);
+  /**
+   * Returns the DecayModes map as described in the \p input string.
+   *
+   * It does sanity checking - that the particles it talks about are in the
+   * ParticleType map - and therefore needs access to the previously created
+   * types_ map.
+   */
+  DecayModesMap load_decaymodes(const std::string &input);
 
   /// Highest id of a given particle
   int id_max_ = -1;
@@ -270,9 +281,9 @@ class Particles {
    *
    * PDG ids are scattered in a large range of values, hence it is a map.
    */
-  ParticleTypeMap types_;
+  const ParticleTypeMap types_;
   /// a map between pdg and corresponding decay modes
-  DecayModesMap all_decay_modes_;
+  const DecayModesMap all_decay_modes_;
 };
 
 /* return the data of a specific particle */
