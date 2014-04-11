@@ -170,12 +170,12 @@ class Experiment : public ExperimentBase {
    * \todo Explain what event means
    * \todo What does the number of events imply for the experiment?
    */
-  int nevents_ = 0;
+  const int nevents_;
 
   /// number of steps
-  int steps_ = 10000;
+  const int steps_;
   /// number of steps before giving measurables
-  int output_interval_ = 100;
+  const int output_interval_;
   /// initial total energy of the system
   float energy_initial_ = 0.f;
   /// starting time of the simulation
