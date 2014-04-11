@@ -248,8 +248,12 @@ TEST(charge) {
 }
 
 TEST_CATCH(set_invalid_code, PDGCode::InvalidPDGCode) {
-  PDGCode validparticle(211);
+  PDGCode invalidparticle(211);
 }
 TEST_CATCH(set_invalid_code_hex, PDGCode::InvalidPDGCode) {
   PDGCode invalidparticle(0xfedcba98);
+}
+TEST(initialize_from_string) {
+  PDGCode validparticle("+211");
+  COMPARE(validparticle.dump(), 0x211);
 }

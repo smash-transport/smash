@@ -11,7 +11,7 @@
 #define SRC_INCLUDE_PDGCODE_H_
 
 #include <cstdio>
-// #include <istringstream>
+#include <iostream>
 #include <stdexcept>
 #include <string>
 
@@ -28,11 +28,18 @@ namespace Smash {
  * // needs to be filled.
  * \endcode
  *
+ * This class is simpy a collection of smart accessors to a 32 bit long
+ * bitfield.
+ *
+ * The content is stored in hexadecimal digits, i.e., '545' is
+ * interpreted as '0x221', which is what an eta-meson has (that 545 is
+ * also its approximate mass in MeV is, I promise, a complete
+ * coincidence).
  **/
 
 class PDGCode {
  public:
-  /// thrown for invalid values for theta
+  /// thrown for invalid inputs
   struct InvalidPDGCode : public std::invalid_argument {
     using std::invalid_argument::invalid_argument;
   };
@@ -44,47 +51,23 @@ class PDGCode {
    * The string is interpreted as a hexadecimal number, i.e., @211@ is
    * interpreted as @0x211 = 529_{10}@.
    */
-  // PDGCode(std::stringstream codestring) {
-  //   codestring >> std::hex >> pdgcode_;
-  // }
+  PDGCode(const std::string& codestring) {
+    set_from_string(codestring);
+  }
+  /** receive a signed integer and process it into a PDG Code. The sign
+   * is taken as antiparticle boolean, while the absolute value of the
+   * integer is used as hexdigits.
+   */
   PDGCode(const int codenumber) {
-    unsigned int abscode = std::abs(codenumber);
     antiparticle_ = codenumber < 0;
-    set_fields(abscode);
-    int test = test_code();
-    if (test > 0) {
-      throw InvalidPDGCode("Invalid digits in PDG Code " + std::to_string(code()));
-     // throw InvalidPDGCode(std::string("Invalid digits in PDG Code ")
-     //                    + code() + std::string(" they need to be Hex-encoded!"));
-    }
+    set_fields(static_cast<unsigned int>(std::abs(codenumber)));
   }
-  PDGCode(unsigned int abscode) {
+  /** receive an unsigned integer and process it into a PDG Code. The
+   *  first bit is taken and used as antiparticle boolean.
+   */
+  PDGCode(const unsigned int abscode) {
+    antiparticle_ = (abscode >> 31);
     set_fields(abscode);
-    abscode >>= 31;
-    antiparticle_ = abscode;
-    int test = test_code();
-    if (test > 0) {
-      throw InvalidPDGCode("Invalid digits in PDG Code " + std::to_string(code()));
-     // throw InvalidPDGCode(std::string("Invalid digits in PDG Code ")
-     //                    + code() + std::string(" they need to be Hex-encoded!"));
-    }
-  }
-
-  inline void set_fields(unsigned int& abscode) {
-    constexpr unsigned int bitmask = 0xf;
-    n_J_ = abscode & bitmask;
-    abscode >>= 4;
-    n_q3_ = abscode & bitmask;
-    abscode >>= 4;
-    n_q2_ = abscode & bitmask;
-    abscode >>= 4;
-    n_q1_ = abscode & bitmask;
-    abscode >>= 4;
-    n_L_  = abscode & bitmask;
-    abscode >>= 4;
-    n_R_  = abscode & bitmask;
-    abscode >>= 4;
-    n_    = abscode & bitmask;
   }
 
   /** Checks the integer for hex digits that are > 9.
@@ -93,9 +76,9 @@ class PDGCode {
    * something went wrong - maybe some user of this class forgot to
    * prefix the input with '0x' and thus passed 221 instead of 0x221.
    *
-   * \return fail a bitmask indicating the offending digits. In the
-   * above example, 221 = 0xd3, the second-to-last-digit is the
-   * offending one, to the return value is 0b10 = 0x2 = 2.
+   * \return a bitmask indicating the offending digits. In the above
+   * example, 221 = 0xd3, the second-to-last-digit is the offending one,
+   * to the return value is 0b10 = 0x2 = 2.
    *
    **/
   inline int test_code() {
@@ -110,6 +93,7 @@ class PDGCode {
     return fail;
   }
 
+  /** Dumps the bitfield into an unsigned integer. */
   inline unsigned int dump() const {
     return (antiparticle_ << 31)
          | (n_    << 24)
@@ -121,6 +105,7 @@ class PDGCode {
          | (n_J_); 
   }
 
+  /** Returns a signed integer with the PDG code in hexadecimal. */
   inline int code() const {
     return (antiparticle_ ? -1 : 1)
          * ( (n_    << 24)
@@ -132,39 +117,52 @@ class PDGCode {
            | (n_J_)); 
   }
 
-  /// returns true if this is a baryon OR antibaryon!.
-  /// returns true if \f$n_{q_1} \ne 0\f$ and \f$n_{q_2} \ne 0\f$.
+  /// returns true if this is a baryon, antibaryon or meson.
   inline bool is_hadron() const {
     return (n_q3_ != 0 && n_q2_ != 0);
   }
-  /// returns true if this is a meson.
+  /// returns the baryon number of the particle.
   inline int baryon_number() const {
     if (! is_hadron() || n_q1_ == 0)
       return  0;
     return antiparticle_sign();
   }
-  /// returns twice the isospin-3 component.
+  /** returns twice the isospin-3 component.
+   *
+   * This is calculated from the sum of heavy_quarkness of up and
+   * down.
+   */
   inline int isospin3() const {
     // heavy_quarkness(2) is the number of u quarks,
     // heavy_quarkness(1) is minus the number of d quarks.
     return heavy_quarkness(2)+heavy_quarkness(1);
   }
+  /// returns the net number of \f$\bar s\f$ quarks.
   inline int strangeness() const {
     return heavy_quarkness(3);
   }
+  /// returns the net number of \f$c\f$ quarks
   inline int charmness() const {
     return heavy_quarkness(4);
   }
+  /// returns the net number of \f$\bar b\f$ quarks
   inline int bottomness() const {
     return heavy_quarkness(5);
   }
-  /** this looks for the quantum number associated with quark number
-   * quark.
+  /** returns the net number of (anti)quarks with given number
    *
    * Despite the name, it is also applicable to light quarks.
    *
+   * \param quark PDG Code of quark: (1..8) = (d,u,s,c,b,t,b',t')
+   * \return for u,c,t,t' quarks, it returns the net number of quarks (#quarks -
+   * #antiquarks), while for d,s,b,b', it returns the net number of
+   * antiquarks (#antiquarks - #quarks).
+   *
    **/
   int heavy_quarkness(const int quark) const {
+    // input sanitization: Only quark numbers 1 through 8 are allowed.
+    if (quark < 1 || quark > 8)
+      return 0;
     // non-hadrons and those that have none of this quark type: 0.
     if (! is_hadron() || (n_q1_ != quark && n_q2_ != quark && n_q3_ != quark))
       return 0;
@@ -194,6 +192,13 @@ class PDGCode {
       return -1*antiparticle_sign();
     return antiparticle_sign();
   }
+  /** Returns the charge of the particle.
+   *
+   * The charge is calculated from the quark content (for hadrons) or
+   * basically tabellized; currently leptons, neutrinos and the standard
+   * model gauge bosons are known; unknown particles return a charge of
+   * 0.
+   **/
   int charge() const {
     if (is_hadron()) {
       // this will accumulate 3*charge
@@ -220,42 +225,150 @@ class PDGCode {
     // default (this includes all other Bosons) is 0.
     return 0;
   }
+  /// returns -1 for antiparticles and +1 for particles.
   inline int antiparticle_sign() const {
     return (antiparticle_ ? -1 : +1);
   }
 
+  /// istream >> PDGCode assigns the PDG Code from an istream.
+  friend std::istream& operator>>(std::istream& is, PDGCode& code);
+
  private:
-  /** The PDG code we're dealing with here.
-   *
-   * Everything else in this class is simpy smart accessors to this
-   * bitfield.
-   *
-   * The number is interpreted with hexadecimal digits, i.e., '545' is
-   * interpreted as '0x221', which is what an eta-meson has (that 545 is
-   * also its approximate mass in MeV is, I promise, a complete
-   * coincidence).
-   *
-   * These digits are stored in the bit fields.
+  /// first bit: stores the sign.
+  bool antiparticle_  : 1,
+  // we don't use these bits.
+                      : 3;
+  /// first field: "counter"
+  std::uint32_t n_    : 4;
+  /// "radial excitation"
+  std::uint32_t n_R_  : 4;
+  /// "angular momentum"
+  std::uint32_t n_L_  : 4;
+  /// first quark field. 0 for mesons.
+  std::uint32_t n_q1_ : 4;
+  /// second quark field
+  std::uint32_t n_q2_ : 4;
+  /// third quark field
+  std::uint32_t n_q3_ : 4;
+  /// spin quantum number \f$n_J = 2 J + 1\f$.
+  std::uint32_t n_J_  : 4;
+
+  /** extract digits from a character. */
+  inline std::uint32_t get_digit_from_char(const char inp) const {
+    // atoi's behaviour for invalid input is undefined. I don't like
+    // that.
+
+    // this checks if the first four digits are 0011 (as they should be
+    // for ASCII digits).
+    if ((inp & 0xf0) ^ 0x30) {
+      throw InvalidPDGCode("Invalid character " + std::to_string(inp)
+                         + " found.\n");
+    }
+    // the last four digits are the number; they should not be > 9
+    // (i.e., one of [:;<=>?])
+    if ((inp & 0x0f) > 9) {
+      throw InvalidPDGCode("Invalid digit " + std::to_string(inp)
+                         + " found.\n");
+    }
+    // now that we've checked that the first bits are correct and the
+    // last bits are a number, we can return the last bits.
+    return (inp & 0x0f);
+  }
+
+  // takes a string and sets the fields.
+  inline void set_from_string(const std::string& codestring) {
+    antiparticle_ = false;
+    n_ = n_R_ = n_L_ = n_q1_ = n_q2_ = n_q3_ = n_J_ = 0;
+    if (codestring.size() < 1) {
+      throw InvalidPDGCode("Empty string does not contain PDG Code\n");
+    }
+    int c = 0;
+    // look at current character; if it is a + or minus sign, read it
+    // and advance to next char.
+    if (codestring[c] == '-') {
+      antiparticle_ = true;
+      c++;
+    } else if (codestring[c] == '+') {
+      antiparticle_ = false;
+      c++;
+    }
+    // save if the first character was a sign:
+    unsigned int sign = c;
+    // codestring shouldn't be longer than 7 + sign.
+    if (codestring.size() > 7+sign) {
+      throw InvalidPDGCode("String \"" + codestring +
+                           "\" too long for PDG Code\n");
+    }
+    // codestring has 7 digits? 7th from last goes in n_.
+    if (codestring.size() > 6+sign) {
+      n_ = get_digit_from_char(codestring[c++]);
+    }
+    // it has 6 or 7 digits? 6th from last is n_R_.
+    if (codestring.size() > 5+sign) {
+      n_R_ = get_digit_from_char(codestring[c++]);
+    }
+    // 5th from last is n_L_.
+    if (codestring.size() > 4+sign) {
+      n_L_ = get_digit_from_char(codestring[c++]);
+    }
+    // 4th from last is n_q1_.
+    if (codestring.size() > 3+sign) {
+      n_q1_ = get_digit_from_char(codestring[c++]);
+    }
+    // 3rd from last is n_q2_.
+    if (codestring.size() > 2+sign) {
+      n_q2_ = get_digit_from_char(codestring[c++]);
+    }
+    // next to last is n_q1_.
+    if (codestring.size() > 1+sign) {
+      n_q1_ = get_digit_from_char(codestring[c++]);
+    }
+    // last digit is the spin degeneracy.
+    if (codestring.size() > sign) {
+      n_J_ = get_digit_from_char(codestring[c++]);
+    } else {
+      throw InvalidPDGCode("String \"" + codestring +
+                 "\" only consists of a sign, that is no valid PDG Code\n");
+    }
+  }
+
+  /** Sets the bitfield from an unsigned integer. Usually called from
+   * the constructors.
    **/
-   /// first bit: stores the sign.
-   bool antiparticle_  : 1,
-   // we don't use these bits.
-                       : 3;
-   /// first field: "counter"
-   std::uint32_t n_    : 4;
-   /// "radial excitation"
-   std::uint32_t n_R_  : 4;
-   /// "angular momentum"
-   std::uint32_t n_L_  : 4;
-   /// first quark field. 0 for mesons.
-   std::uint32_t n_q1_ : 4;
-   /// second quark field
-   std::uint32_t n_q2_ : 4;
-   /// third quark field
-   std::uint32_t n_q3_ : 4;
-   /// spin quantum number \f$n_J = 2 J + 1\f$.
-   std::uint32_t n_J_  : 4;
+  inline void set_fields(unsigned int abscode) {
+    constexpr unsigned int bitmask = 0xf;
+    n_J_ = abscode & bitmask;
+    abscode >>= 4;
+    n_q3_ = abscode & bitmask;
+    abscode >>= 4;
+    n_q2_ = abscode & bitmask;
+    abscode >>= 4;
+    n_q1_ = abscode & bitmask;
+    abscode >>= 4;
+    n_L_  = abscode & bitmask;
+    abscode >>= 4;
+    n_R_  = abscode & bitmask;
+    abscode >>= 4;
+    n_    = abscode & bitmask;
+    int test = test_code();
+    if (test > 0) {
+      throw InvalidPDGCode("Invalid digits " + std::to_string(test) + 
+                           " in PDG Code " + std::to_string(code()));
+    }
+  }
 };
+
+std::istream& operator>>(std::istream& is, PDGCode& code) {
+  // TODO(baeuchle): I'd like to read until I find an invalid character.
+  // How do I do that?
+  try {
+    // code.set_from_string(/* temp_string_i_have_read */);
+  }
+  catch( PDGCode::InvalidPDGCode ) {
+    is.setstate(std::ios::failbit);
+  }
+  return is;
+}
 
 } // namespace SMASH
 
