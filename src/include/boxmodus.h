@@ -44,11 +44,11 @@ class BoxModus : public ModusDefault {
 
  private:
   /* initial condition */
-  int initial_condition_ = 1;
+  const int initial_condition_;
   /* Cube edge length */
-  float length_ = 10.f;
+  const float length_;
   /* Temperature of the Boltzmann distribution for thermal initialization */
-  float temperature_ = 0.1f;
+  const float temperature_;
   /* initial number density of the box */
   float number_density_initial_ = 0.f;
 };
