@@ -72,9 +72,9 @@ std::vector<ProcessBranch> resonance_cross_section(
 
   /* first item refers to total resonance production cross section */
   ProcessBranch resonance_process;
-  resonance_process.add_particle(0);
-  resonance_process.set_weight(0.0);
-  resonance_process_list.push_back(resonance_process);
+//   resonance_process.add_particle(0);
+//   resonance_process.set_weight(0.0);
+//   resonance_process_list.push_back(resonance_process);
 
   /* Isospin symmetry factor, by default 1 */
   int symmetryfactor = 1;
@@ -148,7 +148,7 @@ std::vector<ProcessBranch> resonance_cross_section(
       resonance_process.add_particle(type_resonance.pdgcode());
       resonance_process.set_weight(resonance_xsection);
       resonance_process_list.push_back(resonance_process);
-      resonance_process_list.at(0).change_weight(resonance_xsection);
+//       resonance_process_list.at(0).change_weight(resonance_xsection);
 
       printd("Found resonance %i (%s) with mass %f and width %f.\n",
              type_resonance.pdgcode(), type_resonance.name().c_str(),
