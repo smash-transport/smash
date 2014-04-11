@@ -87,7 +87,7 @@ TEST(take_removes_entry) {
 
 TEST(check_unused_report) {
   std::string reference;
-  Configuration conf(TEST_CONFIG_PATH);
+  Configuration conf(boost::filesystem::path{TEST_CONFIG_PATH} / "tests");
   Configuration modi = conf["Modi"];
   conf.take({"particles"});
   conf.take({"decaymodes"});
@@ -103,39 +103,80 @@ TEST(check_unused_report) {
   modi.take({"Box", "TEMPERATURE"});
   modi.take({"Box", "INITIAL_CONDITION"});
   modi.take({"Nucleus"});
-  reference =
-      "Modi:\n"
-      "  Collider:\n"
-      "    TARGET: -211\n"
-      "    PROJECTILE: 211\n"
-      "    SQRTS: 1.0\n"
-      "  Sphere:\n"
-      "    RADIUS: 5.0";
-  COMPARE(conf.unused_values_report(), reference);
+  {
+    std::istringstream unused(conf.unused_values_report());
+    std::string line;
+    getline(unused, line);
+    COMPARE(line, "Modi:");
+    getline(unused, line);
+    if (line == "  Collider:") {
+      for (int i = 0; i < 3; ++i) {
+        getline(unused, line);
+        VERIFY(line == "    TARGET: -211" || line == "    PROJECTILE: 211" ||
+               line == "    SQRTS: 1.0");
+      }
+      getline(unused, line);
+      COMPARE(line, "  Sphere:");
+      getline(unused, line);
+      COMPARE(line, "    RADIUS: 5.0");
+    } else {
+      COMPARE(line, "  Sphere:");
+      getline(unused, line);
+      COMPARE(line, "    RADIUS: 5.0");
+      getline(unused, line);
+      COMPARE(line, "  Collider:");
+      for (int i = 0; i < 3; ++i) {
+        getline(unused, line);
+        VERIFY(line == "    TARGET: -211" || line == "    PROJECTILE: 211" ||
+               line == "    SQRTS: 1.0");
+      }
+    }
+    VERIFY(unused.eof());
+  }
 
   modi.take({"Sphere", "RADIUS"});
-  reference =
-      "Modi:\n"
-      "  Collider:\n"
-      "    TARGET: -211\n"
-      "    PROJECTILE: 211\n"
-      "    SQRTS: 1.0";
-  COMPARE(conf.unused_values_report(), reference);
+  {
+    std::istringstream unused(conf.unused_values_report());
+    std::string line;
+    getline(unused, line);
+    COMPARE(line, "Modi:");
+    getline(unused, line);
+    COMPARE(line, "  Collider:");
+    for (int i = 0; i < 3; ++i) {
+      getline(unused, line);
+      VERIFY(line == "    TARGET: -211" || line == "    PROJECTILE: 211" ||
+             line == "    SQRTS: 1.0");
+    }
+    VERIFY(unused.eof());
+  }
 
   modi.take({"Collider", "PROJECTILE"});
-  reference =
-      "Modi:\n"
-      "  Collider:\n"
-      "    TARGET: -211\n"
-      "    SQRTS: 1.0";
-  COMPARE(conf.unused_values_report(), reference);
+  {
+    std::istringstream unused(conf.unused_values_report());
+    std::string line;
+    getline(unused, line);
+    COMPARE(line, "Modi:");
+    getline(unused, line);
+    COMPARE(line, "  Collider:");
+    for (int i = 0; i < 2; ++i) {
+      getline(unused, line);
+      VERIFY(line == "    TARGET: -211" || line == "    SQRTS: 1.0");
+    }
+    VERIFY(unused.eof());
+  }
 
   modi.take({"Collider", "SQRTS"});
-  reference =
-      "Modi:\n"
-      "  Collider:\n"
-      "    TARGET: -211";
-  COMPARE(conf.unused_values_report(), reference);
+  {
+    std::istringstream unused(conf.unused_values_report());
+    std::string line;
+    getline(unused, line);
+    COMPARE(line, "Modi:");
+    getline(unused, line);
+    COMPARE(line, "  Collider:");
+    getline(unused, line);
+    VERIFY(line == "    TARGET: -211");
+    VERIFY(unused.eof());
+  }
 
   modi.take({"Collider", "TARGET"});
   reference = "{}";
