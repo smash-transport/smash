@@ -20,7 +20,7 @@ class ScatterActionsFinder : public ActionFinderFactory {
  public:
   std::vector<ActionPtr> find_possible_actions(Particles *particles,
 					       const ExperimentParameters &parameters,
-					       CrossSections *cross_sections = NULL)
+					       CrossSections *cross_sections = nullptr)
       const override;
 
  private:

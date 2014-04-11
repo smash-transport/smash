@@ -165,7 +165,7 @@ ScatterActionsFinder::find_possible_actions (Particles *particles,
       /* add to collision list */
       in_part.push_back(id_a);
       in_part.push_back(id_b);
-      actions.push_back(ActionPtr(new Action(in_part, time_collision, interaction_type, final_particles)));
+      actions.emplace_back(new Action(in_part, time_collision, interaction_type, final_particles));
       resonance_xsections.clear();
     }
   }

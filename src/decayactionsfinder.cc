@@ -44,7 +44,7 @@ std::vector<ActionPtr> DecayActionsFinder::find_possible_actions(Particles *part
                     * particles->type(id).width() / hbarc) {
       /* Time is up! Set the particle to decay at this timestep */
       in_part.push_back(id);
-      actions.push_back(ActionPtr(new Action(in_part,0.,2)));
+      actions.emplace_back(new Action(in_part,0.,2));
     }
   }
 
