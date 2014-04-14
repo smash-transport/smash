@@ -146,6 +146,31 @@ TEST(isospin3) {
   COMPARE(  xi_cc_bar.isospin3(), -1);
   COMPARE(   omega_bc.isospin3(),  0);
 }
+// TEST(isospin_total) {
+//   COMPARE(   electron.isospin_total(),  0);
+//   COMPARE(     antimu.isospin_total(),  0);
+//   COMPARE(     photon.isospin_total(),  0);
+//   COMPARE(       pion.isospin_total(), +2);
+//   COMPARE(       kaon.isospin_total(),  1);
+//   COMPARE(     kminus.isospin_total(),  1);
+//   COMPARE(     dminus.isospin_total(),  1);
+//   COMPARE(     bnulls.isospin_total(),  0);
+//   COMPARE(     bPcbar.isospin_total(),  0);
+//   COMPARE(     eta_pr.isospin_total(),  0);
+//   COMPARE(      j_psi.isospin_total(),  0);
+//   COMPARE(     proton.isospin_total(),  1);
+//   COMPARE(  antidelta.isospin_total(),  3);
+//   COMPARE(      sigma.isospin_total(), +2);
+//   COMPARE(     lambda.isospin_total(),  0);
+//   COMPARE(     antixi.isospin_total(), +1);
+//   COMPARE(  omega_bar.isospin_total(),  0);
+//   COMPARE(   lambda_c.isospin_total(),  0);
+//   COMPARE(sigma_c_bar.isospin_total(), +2);
+//   COMPARE(       xi_c.isospin_total(), +1);
+//   COMPARE(omega_c_bar.isospin_total(),  0);
+//   COMPARE(  xi_cc_bar.isospin_total(), +1);
+//   COMPARE(   omega_bc.isospin_total(),  0);
+// }
 TEST(strangeness) {
   COMPARE(   electron.strangeness(),  0);
   COMPARE(     antimu.strangeness(),  0);
@@ -254,6 +279,67 @@ TEST_CATCH(set_invalid_code_hex, PDGCode::InvalidPDGCode) {
   PDGCode invalidparticle(0xfedcba98);
 }
 TEST(initialize_from_string) {
-  PDGCode validparticle("+211");
-  COMPARE(validparticle.dump(), 0x211);
+  PDGCode particle1("+1234567");
+  COMPARE(particle1.dump(), 0x1234567);
+  PDGCode particle2("-211");
+  COMPARE(particle2.dump(), 0x80000211);
+  PDGCode particle3("1234");
+  COMPARE(particle3.dump(), 0x1234);
+}
+TEST_CATCH(empty_string, PDGCode::InvalidPDGCode) {
+ PDGCode particle("");
+}
+TEST_CATCH(long_string, PDGCode::InvalidPDGCode) {
+ PDGCode particle("+12345678");
+}
+TEST_CATCH(plus_string, PDGCode::InvalidPDGCode) {
+ PDGCode particle("+");
+}
+TEST_CATCH(minus_string, PDGCode::InvalidPDGCode) {
+ PDGCode particle("-");
+}
+// this tests characters with bitmasks 0x3. (of which digits are a
+// subset)
+TEST_CATCH(invalid_characters, PDGCode::InvalidPDGCode) {
+ PDGCode particle("abcdef");
+}
+// this is for the other characters.
+TEST_CATCH(invalid_digits_colon, PDGCode::InvalidPDGCode) {
+ PDGCode particle(":");
+}
+TEST_CATCH(invalid_digits_semi, PDGCode::InvalidPDGCode) {
+ PDGCode particle(";");
+}
+TEST_CATCH(invalid_digits_less, PDGCode::InvalidPDGCode) {
+ PDGCode particle("<");
+}
+TEST_CATCH(invalid_digits_equal, PDGCode::InvalidPDGCode) {
+ PDGCode particle("=");
+}
+TEST_CATCH(invalid_digits_greater, PDGCode::InvalidPDGCode) {
+ PDGCode particle(">");
+}
+TEST_CATCH(invalid_digits_question, PDGCode::InvalidPDGCode) {
+ PDGCode particle("?");
+}
+TEST(stream) {
+  PDGCode particle1;
+  std::istringstream sourcestream("1234567 +123 -214");
+  sourcestream >> particle1;
+  COMPARE(particle1.dump(), 0x1234567);
+  sourcestream >> particle1;
+  COMPARE(particle1.dump(), 0x123);
+  sourcestream >> particle1;
+  COMPARE(particle1.dump(), 0x80000214);
+}
+TEST(stream_fail) {
+  PDGCode particle1;
+  std::istringstream sourcestream("1234567 abcdefg");
+  sourcestream >> particle1;
+  sourcestream >> particle1;
+}
+TEST(stream_fail_colon_etc) {
+  PDGCode particle1;
+  std::istringstream sourcestream(":;<=>?");
+  sourcestream >> particle1;
 }

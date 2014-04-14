@@ -45,7 +45,12 @@ class PDGCode {
   };
 
   /// Standard initializer
-  //PDGCode() {}
+  PDGCode() {
+    try {
+      set_fields(0xffffffffu);
+    } catch (PDGCode::InvalidPDGCode) {
+    }
+  }
   /** Initialize using a string
    *
    * The string is interpreted as a hexadecimal number, i.e., @211@ is
@@ -137,6 +142,17 @@ class PDGCode {
     // heavy_quarkness(1) is minus the number of d quarks.
     return heavy_quarkness(2)+heavy_quarkness(1);
   }
+// TODO(baeuchle) This code needs special cases for things like η, p vs. Δ, Λ (vs. Σ)
+//  /** returns twice the isospin vector length.
+//   *
+//   * This returns e.g. 2 for all pions and 3 for all Deltas. It is
+//   * always positive.
+//   */
+//  inline unsigned int isospin_total() const {
+//    // heavy_quarkness(2) is the number of u quarks,
+//    // heavy_quarkness(1) is minus the number of d quarks.
+//    return std::abs(heavy_quarkness(2))+std::abs(heavy_quarkness(1));
+//  }
   /// returns the net number of \f$\bar s\f$ quarks.
   inline int strangeness() const {
     return heavy_quarkness(3);
@@ -201,7 +217,9 @@ class PDGCode {
    **/
   int charge() const {
     if (is_hadron()) {
-      // this will accumulate 3*charge
+      // Q will accumulate 3*charge (please excuse the upper case. I
+      // want to distinguish this from q which might be interpreted as
+      // shorthand for "quark".)
       int Q = 0;
       // this loops over d,u,s,c,b,t,b',t' quarks (the latter three can
       // be safely ignored, but I don't think this will be a bottle
@@ -224,6 +242,14 @@ class PDGCode {
       return antiparticle_sign();
     // default (this includes all other Bosons) is 0.
     return 0;
+  }
+  /** Returns twice the spin of a particle **/
+  inline unsigned int spin() const {
+    return n_J_-1;
+  }
+  /** Returns the spin degeneracy \f$2s + 1\f$ of a particle **/
+  inline unsigned int spin_degeneracy() const {
+    return n_J_;
   }
   /// returns -1 for antiparticles and +1 for particles.
   inline int antiparticle_sign() const {
@@ -279,7 +305,8 @@ class PDGCode {
   inline void set_from_string(const std::string& codestring) {
     antiparticle_ = false;
     n_ = n_R_ = n_L_ = n_q1_ = n_q2_ = n_q3_ = n_J_ = 0;
-    if (codestring.size() < 1) {
+    size_t length = codestring.size();
+    if (length < 1) {
       throw InvalidPDGCode("Empty string does not contain PDG Code\n");
     }
     int c = 0;
@@ -295,36 +322,36 @@ class PDGCode {
     // save if the first character was a sign:
     unsigned int sign = c;
     // codestring shouldn't be longer than 7 + sign.
-    if (codestring.size() > 7+sign) {
+    if (length > 7+sign) {
       throw InvalidPDGCode("String \"" + codestring +
                            "\" too long for PDG Code\n");
     }
     // codestring has 7 digits? 7th from last goes in n_.
-    if (codestring.size() > 6+sign) {
+    if (length > 6+sign) {
       n_ = get_digit_from_char(codestring[c++]);
     }
     // it has 6 or 7 digits? 6th from last is n_R_.
-    if (codestring.size() > 5+sign) {
+    if (length > 5+sign) {
       n_R_ = get_digit_from_char(codestring[c++]);
     }
     // 5th from last is n_L_.
-    if (codestring.size() > 4+sign) {
+    if (length > 4+sign) {
       n_L_ = get_digit_from_char(codestring[c++]);
     }
     // 4th from last is n_q1_.
-    if (codestring.size() > 3+sign) {
+    if (length > 3+sign) {
       n_q1_ = get_digit_from_char(codestring[c++]);
     }
     // 3rd from last is n_q2_.
-    if (codestring.size() > 2+sign) {
+    if (length > 2+sign) {
       n_q2_ = get_digit_from_char(codestring[c++]);
     }
-    // next to last is n_q1_.
-    if (codestring.size() > 1+sign) {
-      n_q1_ = get_digit_from_char(codestring[c++]);
+    // next to last is n_q3_.
+    if (length > 1+sign) {
+      n_q3_ = get_digit_from_char(codestring[c++]);
     }
     // last digit is the spin degeneracy.
-    if (codestring.size() > sign) {
+    if (length > sign) {
       n_J_ = get_digit_from_char(codestring[c++]);
     } else {
       throw InvalidPDGCode("String \"" + codestring +
@@ -359,12 +386,33 @@ class PDGCode {
 };
 
 std::istream& operator>>(std::istream& is, PDGCode& code) {
-  // TODO(baeuchle): I'd like to read until I find an invalid character.
-  // How do I do that?
-  try {
-    // code.set_from_string(/* temp_string_i_have_read */);
+  std::string codestring("");
+  // discard any whitespace at beginning:
+  while (is.peek() == ' ') {
+    is.get();
   }
-  catch( PDGCode::InvalidPDGCode ) {
+  // read sign if there is one:
+  if (is.peek() == '+' || is.peek() == '-') {
+    codestring += is.get();
+  }
+  // read a maximum of 7 characters
+  for (int c = 0; c < 7; c++) {
+    // look into the string. Is it a valid character?
+    try {
+      code.get_digit_from_char(is.peek());
+    } catch (PDGCode::InvalidPDGCode) {
+      // if not, end the loop.
+      break;
+    }
+    // read one character from is:
+    // char * s = new char[1];
+    // is.read(s, 1);
+    codestring += is.get();
+  }
+  try {
+    // set the fields from the string:
+    code.set_from_string(codestring);
+  } catch (PDGCode::InvalidPDGCode) {
     is.setstate(std::ios::failbit);
   }
   return is;
