@@ -45,7 +45,7 @@ class ExperimentBase {
    * The virtual destructor avoids undefined behavior when destroying derived
    * objects.
    */
-  virtual ~ExperimentBase() {}
+  virtual ~ExperimentBase() = default;
 
   /**
    * Factory method that creates and initializes a new Experiment<Modus>.
@@ -65,6 +65,14 @@ class ExperimentBase {
    */
   static std::unique_ptr<ExperimentBase> create(Configuration &config);
 
+  /**
+   * Runs the experiment.
+   *
+   * The constructor does the setup of the experiment. The run function executes
+   * the complete experiment.
+   *
+   * \param path The path where output files will be written to.
+   */
   virtual void run(const boost::filesystem::path &path) = 0;
 
   /**
