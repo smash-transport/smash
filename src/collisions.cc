@@ -123,7 +123,7 @@ void collision_criteria_geometry(Particles *particles,
    * otherwise do elastic collision
    */
   int interaction_type = 0;
-  std::vector<int> final_particles;
+  std::vector<PdgCode> final_particles;
   if (resonance_xsections.at(0).weight() > really_small) {
     double random_interaction = Random::canonical();
     float interaction_probability = 0.0;

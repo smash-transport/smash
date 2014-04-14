@@ -25,6 +25,7 @@
 #include "include/particledata.h"
 #include "include/particles.h"
 #include "include/particletype.h"
+#include "include/pdgcode.h"
 #include "include/random.h"
 #include "include/resonances.h"
 
@@ -202,7 +203,7 @@ size_t decay_particles(Particles *particles, std::list<int> *decay_list,
 
 /* Resonance decay process */
 int resonance_decay(Particles *particles, int particle_id) {
-  const int pdgcode = particles->type(particle_id).pdgcode();
+  const PdgCode pdgcode = particles->type(particle_id).pdgcode();
   /* Get the decay modes of this resonance */
   const std::vector<ProcessBranch> decaymodes
     = particles->decay_modes(pdgcode).decay_mode_list();
@@ -220,29 +221,30 @@ int resonance_decay(Particles *particles, int particle_id) {
   }
   /* We found our decay branch, get the decay product pdgs and do the decay */
   size_t decay_particles = mode->particle_list().size();
-  int type_a = 0, type_b = 0, new_id_a = -1;
+  PdgCode type_a(0xffffffff), type_b(0xffffffff);
+  int new_id_a = -1;
   if (decay_particles > 3) {
     printf("Warning: Not a 1->2 or 1->3 process!\n");
     printf("Number of decay particles: %zu \n", decay_particles);
     printf("Decay particles: ");
     for (size_t i = 0; i < decay_particles; i++) {
-      printf("%i ", mode->particle_list().at(i));
+      printf("%x ", mode->particle_list().at(i).code());
     }
     printf("\n");
   } else if (decay_particles == 2) {
     type_a = mode->particle_list().at(0);
     type_b = mode->particle_list().at(1);
-    if (abs(type_a) < 100 || abs(type_b) < 100) {
-      printf("Warning: decay products A: %i B: %i\n", type_a, type_b);
+    if (! (type_a.is_hadron() && type_b.is_hadron())) {
+      printf("Warning: decay products A: %x B: %x\n", type_a.code(), type_b.code());
     }
     new_id_a = one_to_two(particles, particle_id, type_a, type_b);
   } else if (decay_particles == 3) {
     type_a = mode->particle_list().at(0);
     type_b = mode->particle_list().at(1);
-    int type_c = mode->particle_list().at(2);
-    if (abs(type_a) < 100 || abs(type_b) < 100 || abs(type_c) < 100) {
-      printf("Warning: decay products A: %i B: %i C: %i\n",
-             type_a, type_b, type_c);
+    PdgCode type_c = mode->particle_list().at(2);
+    if (! (type_a.is_hadron() && type_b.is_hadron() && type_c.is_hadron())) {
+      printf("Warning: decay products A: %x B: %x C: %x\n",
+             type_a.code(), type_b.code(), type_c.code());
     }
     printd("Note: Doing 1->3 decay!\n");
     new_id_a = one_to_three(particles, particle_id, type_a, type_b, type_c);
@@ -252,7 +254,7 @@ int resonance_decay(Particles *particles, int particle_id) {
 
 
 /* 1->2 process kinematics */
-int one_to_two(Particles *particles, int resonance_id, int type_a, int type_b) {
+int one_to_two(Particles *particles, int resonance_id, PdgCode type_a, PdgCode type_b) {
   /* Add two new particles */
   ParticleData new_particle_a, new_particle_b;
   new_particle_a.set_pdgcode(type_a);
@@ -288,7 +290,7 @@ int one_to_two(Particles *particles, int resonance_id, int type_a, int type_b) {
 
 /* 1->3 process kinematics */
 int one_to_three(Particles *particles, int resonance_id,
-                 int type_a, int type_b, int type_c) {
+                 PdgCode type_a, PdgCode type_b, PdgCode type_c) {
   /* Add three new particles */
   ParticleData new_particle_a, new_particle_b, new_particle_c;
   new_particle_a.set_pdgcode(type_a);

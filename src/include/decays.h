@@ -88,7 +88,7 @@ int resonance_decay(Particles *particles, int particle_id);
  *
  * \return The ID of the first new particle.
  */
-int one_to_two(Particles *particles, int resonance_id, int type_a, int type_b);
+int one_to_two(Particles *particles, int resonance_id, PdgCode type_a, PdgCode type_b);
 
 /**
  * Kinematics of a 1-to-3 decay process.
@@ -106,7 +106,7 @@ int one_to_two(Particles *particles, int resonance_id, int type_a, int type_b);
  * \return The ID of the first new particle.
  */
 int one_to_three(Particles *particles, int resonance_id,
-                 int type_a, int type_b, int type_c);
+                 PdgCode type_a, PdgCode type_b, PdgCode type_c);
 
 }  // namespace Smash
 

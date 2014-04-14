@@ -38,7 +38,7 @@ void ColliderModus::initial_conditions(Particles *particles,
   ParticleData *data_projectile = particles->data_pointer(particles->id_max());
   float mass_projectile
     = particles->particle_type(data_projectile->pdgcode()).mass();
-  printf("projectile pdgcode %d mass %f\n", data_projectile->pdgcode(),
+  printf("projectile pdgcode %x mass %f\n", data_projectile->pdgcode().code(),
          mass_projectile);
   /* Create "target" particle */
   particles->create(1, target_);
@@ -46,7 +46,7 @@ void ColliderModus::initial_conditions(Particles *particles,
   ParticleData *data_target = particles->data_pointer(particles->id_max());
   float mass_target
     = particles->particle_type(data_target->pdgcode()).mass();
-  printf("target pdgcode %d mass %f\n", data_target->pdgcode(),
+  printf("target pdgcode %x mass %f\n", data_target->pdgcode().code(),
          mass_target);
   /* Projectile energy in CMS */
   double cms_energy_projectile = (sqrts_ * sqrts_

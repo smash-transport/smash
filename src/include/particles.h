@@ -15,6 +15,7 @@
 #include "include/decaymodes.h"
 #include "include/particledata.h"
 #include "include/particletype.h"
+#include "include/pdgcode.h"
 
 namespace Smash {
 
@@ -118,8 +119,8 @@ class Particles {
   };
 
   using ParticleDataMap = std::map<int, ParticleData>;
-  using ParticleTypeMap = std::map<int, ParticleType>;
-  using DecayModesMap = std::map<int, DecayModes>;
+  using ParticleTypeMap = std::map<PdgCode, ParticleType>;
+  using DecayModesMap = std::map<PdgCode, DecayModes>;
 
  public:
   /// Use improbable values for default constructor
@@ -193,17 +194,17 @@ class Particles {
    *
    * \throws std::out_of_range If there is no type with the given \p pdgcode.
    */
-  inline const ParticleType &particle_type(int pdgcode) const;
+  inline const ParticleType &particle_type(PdgCode pdgcode) const;
   /// Return decay modes of this particle type
-  inline const DecayModes &decay_modes(int pdg) const;
+  inline const DecayModes &decay_modes(PdgCode pdg) const;
   /// return the highest used id
   inline int id_max(void) const;
   /// inserts a new particle and returns its id
   inline int add_data(const ParticleData &particle_data);
   /// add a range of particles
-  inline void create(size_t number, int pdg);
+  inline void create(size_t number, PdgCode pdg);
   /* add one particle and return pointer to it */
-  inline ParticleData& create(const int pdg);
+  inline ParticleData& create(const PdgCode pdg);
   /// remove a specific particle
   inline void remove(int id);
   /// size() of the ParticleData map
@@ -225,7 +226,7 @@ class Particles {
    * \return \c true  If a ParticleType of the given \p pdg code is registered.
    * \return \c false otherwise.
    */
-  bool is_particle_type_registered(int pdgcode) const {
+  bool is_particle_type_registered(PdgCode pdgcode) const {
     return types_.find(pdgcode) != types_.end();
   }
 
@@ -251,9 +252,9 @@ class Particles {
   void load_particle_types(const std::string &input);
   void load_decaymodes(const std::string &input);
   /// inserts a new particle type
-  inline void add_type(const ParticleType &particle_type, int pdg);
+  inline void add_type(const ParticleType &particle_type, PdgCode pdg);
   /// adds decay modes for a particle type
-  inline void add_decaymodes(const DecayModes &new_decay_modes, int pdg);
+  inline void add_decaymodes(const DecayModes &new_decay_modes, PdgCode pdg);
 
   /// Highest id of a given particle
   int id_max_ = -1;
@@ -291,12 +292,12 @@ inline const ParticleType &Particles::type(int particle_id) const {
 }
 
 /* return a specific type */
-inline const ParticleType &Particles::particle_type(int pdgcode) const {
+inline const ParticleType &Particles::particle_type(PdgCode pdgcode) const {
   return types_.at(pdgcode);
 }
 
 /* return the decay modes of specific type */
-inline const DecayModes &Particles::decay_modes(int pdg) const {
+inline const DecayModes &Particles::decay_modes(PdgCode pdg) const {
   return all_decay_modes_.at(pdg);
 }
 
@@ -309,7 +310,7 @@ inline int Particles::add_data(ParticleData const &particle_data) {
 }
 
 /* create a bunch of particles */
-inline void Particles::create(size_t number, int pdgcode) {
+inline void Particles::create(size_t number, PdgCode pdgcode) {
   ParticleData particle;
   /* fixed pdgcode and no collision yet */
   particle.set_pdgcode(pdgcode);
@@ -322,7 +323,7 @@ inline void Particles::create(size_t number, int pdgcode) {
 }
 
 /* create a bunch of particles */
-inline ParticleData& Particles::create(int pdgcode) {
+inline ParticleData& Particles::create(PdgCode pdgcode) {
   ParticleData particle;
   /* fixed pdgcode and no collision yet */
   particle.set_pdgcode(pdgcode);

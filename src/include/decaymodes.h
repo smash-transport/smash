@@ -11,6 +11,7 @@
 #include <vector>
 
 #include "include/constants.h"
+#include "include/pdgcode.h"
 #include "include/processbranch.h"
 #include <stdexcept>
 
@@ -19,7 +20,7 @@ namespace Smash {
 class DecayModes {
  public:
   /* Add a decay mode */
-  inline void add_mode(std::vector<int> particles, float ratio);
+  inline void add_mode(std::vector<PdgCode> particles, float ratio);
   inline void add_mode(ProcessBranch mode);
   /* Make sure ratios add to 1 */
   inline void renormalize(float renormalization_constant);
@@ -43,7 +44,7 @@ class DecayModes {
 };
 
 /* Add a decay mode */
-inline void DecayModes::add_mode(std::vector<int> particles, float ratio) {
+inline void DecayModes::add_mode(std::vector<PdgCode> particles, float ratio) {
   if (particles.size() < 2) {
     throw InvalidDecay(
         "DecayModes::add_mode was instructed to add a decay mode with less "

@@ -11,6 +11,7 @@
 #include <vector>
 
 #include "include/fourvector.h"
+#include "include/pdgcode.h"
 
 namespace Smash {
 
@@ -23,27 +24,27 @@ namespace Smash {
 class ParticleData {
  public:
   /// Use improbable values for default constructor
-  ParticleData() :id_(-1), pdgcode_(-1), id_partner_(-1), id_process_(-1),
+  ParticleData() :id_(-1), pdgcode_(0xffffffff), id_partner_(-1), id_process_(-1),
     collision_time_(0.0), process_type_(-1) {}
   /// Use improbable values for constructor
-  explicit ParticleData(int i) :id_(i), pdgcode_(-1), id_partner_(-1),
+  explicit ParticleData(int i) :id_(i), pdgcode_(0xffffffff), id_partner_(-1),
     id_process_(-1), collision_time_(0.0), process_type_(-1) {}
   inline int id(void) const;
   inline void set_id(int id);
-  inline int pdgcode(void) const;
-  inline void set_pdgcode(int pdgcode);
+  inline PdgCode pdgcode(void) const;
+  inline void set_pdgcode(PdgCode pdgcode);
   inline int id_partner(void) const;
   inline void set_id_partner(int id_b);
   inline int id_process(void) const;
   inline void set_id_process(int id);
   inline double collision_time(void) const;
   inline int process_type(void) const;
-  inline const std::vector<int> &final_state(void) const;
+  inline const std::vector<PdgCode> &final_state(void) const;
   inline void set_collision_time(const double &collision_time);
   inline void set_collision(int process_type, const double &collision_time,
                             int collision_id);
   inline void set_collision(int process_type, const double &collision_time,
-                int collision_id, std::vector<int> product_particles);
+                int collision_id, std::vector<PdgCode> product_particles);
   inline void set_collision_past(int process_id);
   inline const FourVector &momentum(void) const;
   inline void set_momentum(const FourVector &momentum_vector);
@@ -69,7 +70,7 @@ class ParticleData {
   /// Each particle has a unique identifier
   int id_;
   /// pdg id of the particle
-  int pdgcode_;
+  PdgCode pdgcode_;
   /// Next particle we'd collide against
   int id_partner_;
   /// counter of the last collision/decay
@@ -84,7 +85,7 @@ class ParticleData {
    */
   int process_type_;
   /// PDG codes of final state particles
-  std::vector<int> final_state_;
+  std::vector<PdgCode> final_state_;
   /// momenta of the particle: x0, x1, x2, x3 as E, px, py, pz
   FourVector momentum_;
   /// position in space: x0, x1, x2, x3 as t, x, y, z
@@ -102,12 +103,12 @@ inline void ParticleData::set_id(int i) {
 }
 
 /// look up the pdgcode of the particle
-inline int ParticleData::pdgcode(void) const {
+inline PdgCode ParticleData::pdgcode(void) const {
   return pdgcode_;
 }
 
 /// set id of the particle
-inline void ParticleData::set_pdgcode(int i) {
+inline void ParticleData::set_pdgcode(PdgCode i) {
   pdgcode_ = i;
 }
 
@@ -142,7 +143,7 @@ inline int ParticleData::process_type(void) const {
 }
 
 /// return final state
-inline const std::vector<int> &ParticleData::final_state(void) const {
+inline const std::vector<PdgCode> &ParticleData::final_state(void) const {
   return final_state_;
 }
 
@@ -163,7 +164,7 @@ inline void ParticleData::set_collision(int proc_type,
 
 /// set possible collision data with custom final state
 inline void ParticleData::set_collision(int proc_type,
-  const double &collision_t, int id_b, std::vector<int> product_particles) {
+  const double &collision_t, int id_b, std::vector<PdgCode> product_particles) {
   process_type_ = proc_type;
   collision_time_ = collision_t;
   id_partner_ = id_b;

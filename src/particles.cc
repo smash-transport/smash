@@ -19,6 +19,7 @@
 #include "include/outputroutines.h"
 #include "include/particledata.h"
 #include "include/particles.h"
+#include "include/pdgcode.h"
 #include <assert.h>
 
 namespace Smash {
@@ -205,8 +206,8 @@ void sample_cms_momenta(ParticleData *particle1, ParticleData *particle2,
   Angles phitheta;
   phitheta.distribute_isotropically();
   if (!(energy1 > mass1)) {
-    printf("Particle %d radial momenta %g phi %g cos_theta %g\n",
-           particle1->pdgcode(), momentum_radial, phitheta.phi(),
+    printf("Particle %x radial momenta %g phi %g cos_theta %g\n",
+           particle1->pdgcode().code(), momentum_radial, phitheta.phi(),
            phitheta.costheta());
     printf("Etot: %g m_a: %g m_b %g E_a: %g\n", cms_energy, mass1, mass2,
            energy1);
@@ -232,13 +233,13 @@ void sample_cms_momenta(ParticleData *particle1, ParticleData *particle2,
 }
 
 /* add a new particle type */
-inline void Particles::add_type(ParticleType const &TYPE, int pdg) {
+inline void Particles::add_type(ParticleType const &TYPE, const PdgCode pdg) {
   types_.insert(std::make_pair(pdg, TYPE));
 }
 
 /* add decay modes for a particle type */
 inline void Particles::add_decaymodes(const DecayModes &new_decay_modes,
-                                      int pdg) {
+                                      PdgCode pdg) {
   all_decay_modes_.insert(std::make_pair(pdg, new_decay_modes));
 }
 
@@ -308,7 +309,7 @@ void ensure_all_read(std::istream &input, const Line &line) {/*{{{*/
   }
 }/*}}}*/
 
-constexpr int NotAParticle = 0;
+PdgCode NotAParticle = PdgCode(0xffffffff);
 }  // unnamed namespace/*}}}*/
 
 void Particles::load_particle_types(const std::string &input) {/*{{{*/
@@ -316,7 +317,8 @@ void Particles::load_particle_types(const std::string &input) {/*{{{*/
     std::istringstream lineinput(line.text);
     std::string name;
     float mass, width;
-    int pdgcode, isospin, charge, spin;
+    PdgCode pdgcode;
+    int isospin, charge, spin;
     lineinput >> name >> mass >> width >> pdgcode >> isospin >> charge >> spin;
     if (lineinput.fail()) {
       throw LoadFailure(build_error_string(
@@ -326,8 +328,8 @@ void Particles::load_particle_types(const std::string &input) {/*{{{*/
     }
     ensure_all_read(lineinput, line);
 
-    printd("Setting particle type %s mass %g width %g pdgcode %i\n",
-           name.c_str(), mass, width, pdgcode);
+    printd("Setting particle type %s mass %g width %g pdgcode %x\n",
+           name.c_str(), mass, width, pdgcode.code());
     printd("Setting particle type %s isospin %i charge %i spin %i\n",
            name.c_str(), isospin, charge, spin);
 
@@ -336,7 +338,7 @@ void Particles::load_particle_types(const std::string &input) {/*{{{*/
 }/*}}}*/
 
 void Particles::load_decaymodes(const std::string &input) {
-  int pdgcode = NotAParticle;
+  PdgCode pdgcode = NotAParticle;
   DecayModes decay_modes_to_add;
   float ratio_sum = 0.0;
 
@@ -346,13 +348,13 @@ void Particles::load_decaymodes(const std::string &input) {
     }
     if (decay_modes_to_add.empty()) {
       throw MissingDecays("No decay modes found for particle " +
-                          std::to_string(pdgcode));
+                          pdgcode.string());
     }
     // XXX: why not just unconditionally call renormalize? (mkretz)
     /* Check if ratios add to 1 */
     if (fabs(ratio_sum - 1.0) > really_small) {
       /* They didn't; renormalize */
-      printf("Particle %i:\n", pdgcode);
+      printf("Particle %x:\n", pdgcode.code());
       decay_modes_to_add.renormalize(ratio_sum);
     }
     /* Add the list of decay modes for this particle type */
@@ -372,11 +374,12 @@ void Particles::load_decaymodes(const std::string &input) {
                               // decay mode section
       end_of_decaymodes();
       std::size_t pos = 0;
-      pdgcode = std::stoi(line.text, &pos);
+      // TODO(baeuchle) I'm not sure what this is supposed to do.
+      pdgcode = PdgCode(std::stoi(line.text, &pos));
       if (!is_particle_type_registered(pdgcode)) {
         throw ReferencedParticleNotFound(build_error_string(
             "Inconsistency: The particle with PDG id " +
-                std::to_string(pdgcode) +
+                pdgcode.string() +
                 " was not registered through particles.txt, but "
                 "decaymodes.txt referenced it.",
             line));
@@ -388,18 +391,18 @@ void Particles::load_decaymodes(const std::string &input) {
       assert(pdgcode != NotAParticle);  // special value for start of file
     } else {
       std::istringstream lineinput(line.text);
-      std::vector<int> decay_particles;
+      std::vector<PdgCode> decay_particles;
       decay_particles.reserve(4);
       float ratio;
       lineinput >> ratio;
 
-      int pdg;
+      PdgCode pdg;
       lineinput >> pdg;
       while (lineinput) {
         if (!is_particle_type_registered(pdg)) {
           throw ReferencedParticleNotFound(build_error_string(
               "Inconsistency: The particle with PDG id " +
-                  std::to_string(pdgcode) +
+                  pdg.string() +
                   " was not registered through particles.txt, but "
                   "decaymodes.txt referenced it.",
               line));

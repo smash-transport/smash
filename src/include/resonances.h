@@ -15,6 +15,7 @@
 
 #include <cstddef>
 #include <vector>
+#include "include/pdgcode.h"
 
 namespace Smash {
 
@@ -39,7 +40,7 @@ class ProcessBranch;
  * to be available for the resonance.
  *
  */
-float calculate_minimum_mass(Particles *particles, int pdgcode);
+float calculate_minimum_mass(Particles *particles, PdgCode pdgcode);
 
 /**
  * Find all resonances that can be produced in a collision of the two
@@ -180,8 +181,8 @@ double spectral_function_integrand(double resonance_mass, void * parameters);
  *
  * \return The mass of the resonance particle.
  */
-double sample_resonance_mass(Particles *particles, int pdg_resonance,
-  int pdg_stable, double cms_energy);
+double sample_resonance_mass(Particles *particles, PdgCode pdg_resonance,
+  PdgCode pdg_stable, double cms_energy);
 
 /**
  * Resonance formation process.
@@ -197,7 +198,7 @@ double sample_resonance_mass(Particles *particles, int pdg_resonance,
  * \return ID of the (first) new particle.
  */
 int resonance_formation(Particles *particles, int particle_id, int other_id,
-  std::vector<int> produced_particles);
+  std::vector<PdgCode> produced_particles);
 
 }  // namespace Smash
 

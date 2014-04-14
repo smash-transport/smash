@@ -26,9 +26,9 @@ class ProcessBranch {
   /// Default constructor
   ProcessBranch() : branch_weight_(-1.0) {}
   /// Add one particle to the list
-  inline void add_particle(int particle_pdg);
+  inline void add_particle(PdgCode particle_pdg);
   /// Add a complete list of particles
-  inline void set_particles(std::vector<int> particle_pdgs);
+  inline void set_particles(std::vector<PdgCode> particle_pdgs);
   /// Set the weight of the branch,
   /// i.e. how probable it is compared to other branches
   inline void set_weight(float process_weight);
@@ -37,7 +37,7 @@ class ProcessBranch {
   /// Clear all information from the branch
   inline void clear(void);
   /// Return the particle list
-  inline std::vector<int> particle_list(void) const;
+  inline std::vector<PdgCode> particle_list(void) const;
   /// Return the branch weight
   inline float weight(void) const;
 
@@ -52,18 +52,18 @@ class ProcessBranch {
    * which is somewhere on the heap. Also the alignment of ints is only half
    * that of size_t/void*. (I was obviously talking about 64bit here...)
    */
-  std::vector<int> particle_list_;
+  std::vector<PdgCode> particle_list_;
   /// Weight of the branch, typically a cross section or a branching ratio
   float branch_weight_;
 };
 
 /// Add one particle to the list
-inline void ProcessBranch::add_particle(int particle_pdg) {
+inline void ProcessBranch::add_particle(PdgCode particle_pdg) {
   particle_list_.push_back(particle_pdg);
 }
 
 /// Add a complete list of particles
-inline void ProcessBranch::set_particles(std::vector<int> particle_pdgs) {
+inline void ProcessBranch::set_particles(std::vector<PdgCode> particle_pdgs) {
   particle_list_ = std::move(particle_pdgs);
 }
 
@@ -85,7 +85,7 @@ inline void ProcessBranch::clear(void) {
 }
 
 /// Return the particle list
-inline std::vector<int> ProcessBranch::particle_list(void) const {
+inline std::vector<PdgCode> ProcessBranch::particle_list(void) const {
   return particle_list_;
 }
 
