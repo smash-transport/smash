@@ -232,16 +232,10 @@ void sample_cms_momenta(ParticleData *particle1, ParticleData *particle2,
   printd("p3: %g %g \n", momentum1.x3(), momentum2.x3());
 }
 
-/* add a new particle type */
-inline void Particles::add_type(ParticleType const &TYPE, const PdgCode pdg) {
-  types_.insert(std::make_pair(pdg, TYPE));
-}
-
-/* add decay modes for a particle type */
-inline void Particles::add_decaymodes(const DecayModes &new_decay_modes,
-                                      PdgCode pdg) {
-  all_decay_modes_.insert(std::make_pair(pdg, new_decay_modes));
-}
+Particles::Particles(const std::string &particles,
+                     const std::string &decaymodes)
+    : types_(load_particle_types(particles)),
+      all_decay_modes_(load_decaymodes(decaymodes)) {}
 
 namespace {/*{{{*/
 std::string trim(const std::string &s) {
@@ -312,7 +306,9 @@ void ensure_all_read(std::istream &input, const Line &line) {/*{{{*/
 PdgCode NotAParticle = PdgCode(0xffffffff);
 }  // unnamed namespace/*}}}*/
 
-void Particles::load_particle_types(const std::string &input) {/*{{{*/
+Particles::ParticleTypeMap Particles::load_particle_types(  //{{{
+    const std::string &input) {
+  Particles::ParticleTypeMap types;
   for (const Line &line : line_parser(input)) {
     std::istringstream lineinput(line.text);
     std::string name;
@@ -333,11 +329,15 @@ void Particles::load_particle_types(const std::string &input) {/*{{{*/
     printd("Setting particle type %s isospin %i charge %i spin %i\n",
            name.c_str(), isospin, charge, spin);
 
-    add_type({name, mass, width, pdgcode, isospin, charge, spin}, pdgcode);
+    types.insert(std::make_pair(
+        pdgcode,
+        ParticleType{name, mass, width, pdgcode, isospin, charge, spin}));
   }
+  return std::move(types);
 }/*}}}*/
 
-void Particles::load_decaymodes(const std::string &input) {
+Particles::DecayModesMap Particles::load_decaymodes(const std::string &input) {
+  Particles::DecayModesMap decaymodes;
   PdgCode pdgcode = NotAParticle;
   DecayModes decay_modes_to_add;
   float ratio_sum = 0.0;
@@ -358,7 +358,7 @@ void Particles::load_decaymodes(const std::string &input) {
       decay_modes_to_add.renormalize(ratio_sum);
     }
     /* Add the list of decay modes for this particle type */
-    this->add_decaymodes(decay_modes_to_add, pdgcode);
+    decaymodes.insert(std::make_pair(pdgcode, decay_modes_to_add));
     /* Clean up the list for the next particle type */
     decay_modes_to_add.clear();
     ratio_sum = 0.0;
@@ -420,6 +420,7 @@ void Particles::load_decaymodes(const std::string &input) {
     }
   }
   end_of_decaymodes();
+  return std::move(decaymodes);
 }
 
 void Particles::reset() {
