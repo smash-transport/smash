@@ -399,7 +399,7 @@ Particles::DecayModesMap Particles::load_decaymodes(const std::string &input) {
         if (!is_particle_type_registered(pdg)) {
           throw ReferencedParticleNotFound(build_error_string(
               "Inconsistency: The particle with PDG id " +
-                  std::to_string(pdgcode) +
+                  std::to_string(pdg) +
                   " was not registered through particles.txt, but "
                   "decaymodes.txt referenced it.",
               line));
