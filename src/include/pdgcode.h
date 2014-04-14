@@ -256,8 +256,34 @@ class PdgCode {
     return (antiparticle_ ? -1 : +1);
   }
 
+  /** sorts PDG Codes according to their numeric value.
+   *
+   * This is used by std::map
+   */
+  inline bool operator<(const PdgCode rhs) const {
+    return (code() < rhs.code());
+  }
+  /// returns if the codes are equal
+  inline bool operator==(const PdgCode rhs) const {
+    return (code() == rhs.code());
+  }
+  /// returns if the codes are not equal.
+  inline bool operator!=(const PdgCode rhs) const {
+    return ! (*this == rhs);
+  }
+  /// returns if the code of rhs is the inverse of this one.
+  inline bool is_antiparticle_of(const PdgCode rhs) const {
+    return code() == -rhs.code();
+  }
+
   /// istream >> PdgCode assigns the PDG Code from an istream.
   friend std::istream& operator>>(std::istream& is, PdgCode& code);
+  /// returns a C++ string from the PDG Code.
+  inline std::string string() const {
+    char hexstring[8];
+    sprintf(hexstring, "%x", code());
+    return std::string(hexstring);
+  }
 
  private:
   /// first bit: stores the sign.
@@ -278,6 +304,8 @@ class PdgCode {
   std::uint32_t n_q3_ : 4;
   /// spin quantum number \f$n_J = 2 J + 1\f$.
   std::uint32_t n_J_  : 4;
+
+  // constexpr PdgCode NotAParticle(0xffffffff);
 
   /** extract digits from a character. */
   inline std::uint32_t get_digit_from_char(const char inp) const {
@@ -385,38 +413,7 @@ class PdgCode {
   }
 };
 
-std::istream& operator>>(std::istream& is, PdgCode& code) {
-  std::string codestring("");
-  // discard any whitespace at beginning:
-  while (is.peek() == ' ') {
-    is.get();
-  }
-  // read sign if there is one:
-  if (is.peek() == '+' || is.peek() == '-') {
-    codestring += is.get();
-  }
-  // read a maximum of 7 characters
-  for (int c = 0; c < 7; c++) {
-    // look into the string. Is it a valid character?
-    try {
-      code.get_digit_from_char(is.peek());
-    } catch (PdgCode::InvalidPdgCode) {
-      // if not, end the loop.
-      break;
-    }
-    // read one character from is:
-    // char * s = new char[1];
-    // is.read(s, 1);
-    codestring += is.get();
-  }
-  try {
-    // set the fields from the string:
-    code.set_from_string(codestring);
-  } catch (PdgCode::InvalidPdgCode) {
-    is.setstate(std::ios::failbit);
-  }
-  return is;
-}
+std::istream& operator>>(std::istream& is, PdgCode& code);
 
 } // namespace SMASH
 

@@ -300,10 +300,6 @@ TEST_CATCH(minus_string, PdgCode::InvalidPdgCode) {
 }
 // this tests characters with bitmasks 0x3. (of which digits are a
 // subset)
-TEST_CATCH(invalid_characters, PdgCode::InvalidPdgCode) {
- PdgCode particle("abcdef");
-}
-// this is for the other characters.
 TEST_CATCH(invalid_digits_colon, PdgCode::InvalidPdgCode) {
  PdgCode particle(":");
 }
@@ -321,6 +317,10 @@ TEST_CATCH(invalid_digits_greater, PdgCode::InvalidPdgCode) {
 }
 TEST_CATCH(invalid_digits_question, PdgCode::InvalidPdgCode) {
  PdgCode particle("?");
+}
+// this is for the other characters.
+TEST_CATCH(invalid_characters, PdgCode::InvalidPdgCode) {
+ PdgCode particle("abcdef");
 }
 TEST(stream) {
   PdgCode particle1;
@@ -342,4 +342,14 @@ TEST(stream_fail_colon_etc) {
   PdgCode particle1;
   std::istringstream sourcestream(":;<=>?");
   sourcestream >> particle1;
+}
+TEST(equal) {
+  VERIFY(pion != eta_pr);
+  PdgCode pion2(0x211);
+  VERIFY(pion == pion2);
+  VERIFY(pion2 < omega_bc);
+}
+TEST(antiparticle) {
+  PdgCode antipion(-0x211);
+  VERIFY(pion.is_antiparticle_of(antipion));
 }
