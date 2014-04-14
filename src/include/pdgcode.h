@@ -17,7 +17,7 @@
 
 namespace Smash {
 
-/** PDGCode stores a Particle Data Group Particle Numbering Scheme
+/** PdgCode stores a Particle Data Group Particle Numbering Scheme
  * particle type number.
  *
  * Usage:
@@ -37,18 +37,18 @@ namespace Smash {
  * coincidence).
  **/
 
-class PDGCode {
+class PdgCode {
  public:
   /// thrown for invalid inputs
-  struct InvalidPDGCode : public std::invalid_argument {
+  struct InvalidPdgCode : public std::invalid_argument {
     using std::invalid_argument::invalid_argument;
   };
 
   /// Standard initializer
-  PDGCode() {
+  PdgCode() {
     try {
       set_fields(0xffffffffu);
-    } catch (PDGCode::InvalidPDGCode) {
+    } catch (PdgCode::InvalidPdgCode) {
     }
   }
   /** Initialize using a string
@@ -56,21 +56,21 @@ class PDGCode {
    * The string is interpreted as a hexadecimal number, i.e., @211@ is
    * interpreted as @0x211 = 529_{10}@.
    */
-  PDGCode(const std::string& codestring) {
+  PdgCode(const std::string& codestring) {
     set_from_string(codestring);
   }
   /** receive a signed integer and process it into a PDG Code. The sign
    * is taken as antiparticle boolean, while the absolute value of the
    * integer is used as hexdigits.
    */
-  PDGCode(const int codenumber) {
+  PdgCode(const int codenumber) {
     antiparticle_ = codenumber < 0;
     set_fields(static_cast<unsigned int>(std::abs(codenumber)));
   }
   /** receive an unsigned integer and process it into a PDG Code. The
    *  first bit is taken and used as antiparticle boolean.
    */
-  PDGCode(const unsigned int abscode) {
+  PdgCode(const unsigned int abscode) {
     antiparticle_ = (abscode >> 31);
     set_fields(abscode);
   }
@@ -256,8 +256,8 @@ class PDGCode {
     return (antiparticle_ ? -1 : +1);
   }
 
-  /// istream >> PDGCode assigns the PDG Code from an istream.
-  friend std::istream& operator>>(std::istream& is, PDGCode& code);
+  /// istream >> PdgCode assigns the PDG Code from an istream.
+  friend std::istream& operator>>(std::istream& is, PdgCode& code);
 
  private:
   /// first bit: stores the sign.
@@ -287,13 +287,13 @@ class PDGCode {
     // this checks if the first four digits are 0011 (as they should be
     // for ASCII digits).
     if ((inp & 0xf0) ^ 0x30) {
-      throw InvalidPDGCode("Invalid character " + std::to_string(inp)
+      throw InvalidPdgCode("Invalid character " + std::to_string(inp)
                          + " found.\n");
     }
     // the last four digits are the number; they should not be > 9
     // (i.e., one of [:;<=>?])
     if ((inp & 0x0f) > 9) {
-      throw InvalidPDGCode("Invalid digit " + std::to_string(inp)
+      throw InvalidPdgCode("Invalid digit " + std::to_string(inp)
                          + " found.\n");
     }
     // now that we've checked that the first bits are correct and the
@@ -307,7 +307,7 @@ class PDGCode {
     n_ = n_R_ = n_L_ = n_q1_ = n_q2_ = n_q3_ = n_J_ = 0;
     size_t length = codestring.size();
     if (length < 1) {
-      throw InvalidPDGCode("Empty string does not contain PDG Code\n");
+      throw InvalidPdgCode("Empty string does not contain PDG Code\n");
     }
     int c = 0;
     // look at current character; if it is a + or minus sign, read it
@@ -323,7 +323,7 @@ class PDGCode {
     unsigned int sign = c;
     // codestring shouldn't be longer than 7 + sign.
     if (length > 7+sign) {
-      throw InvalidPDGCode("String \"" + codestring +
+      throw InvalidPdgCode("String \"" + codestring +
                            "\" too long for PDG Code\n");
     }
     // codestring has 7 digits? 7th from last goes in n_.
@@ -354,7 +354,7 @@ class PDGCode {
     if (length > sign) {
       n_J_ = get_digit_from_char(codestring[c++]);
     } else {
-      throw InvalidPDGCode("String \"" + codestring +
+      throw InvalidPdgCode("String \"" + codestring +
                  "\" only consists of a sign, that is no valid PDG Code\n");
     }
   }
@@ -379,13 +379,13 @@ class PDGCode {
     n_    = abscode & bitmask;
     int test = test_code();
     if (test > 0) {
-      throw InvalidPDGCode("Invalid digits " + std::to_string(test) + 
+      throw InvalidPdgCode("Invalid digits " + std::to_string(test) + 
                            " in PDG Code " + std::to_string(code()));
     }
   }
 };
 
-std::istream& operator>>(std::istream& is, PDGCode& code) {
+std::istream& operator>>(std::istream& is, PdgCode& code) {
   std::string codestring("");
   // discard any whitespace at beginning:
   while (is.peek() == ' ') {
@@ -400,7 +400,7 @@ std::istream& operator>>(std::istream& is, PDGCode& code) {
     // look into the string. Is it a valid character?
     try {
       code.get_digit_from_char(is.peek());
-    } catch (PDGCode::InvalidPDGCode) {
+    } catch (PdgCode::InvalidPdgCode) {
       // if not, end the loop.
       break;
     }
@@ -412,7 +412,7 @@ std::istream& operator>>(std::istream& is, PDGCode& code) {
   try {
     // set the fields from the string:
     code.set_from_string(codestring);
-  } catch (PDGCode::InvalidPDGCode) {
+  } catch (PdgCode::InvalidPdgCode) {
     is.setstate(std::ios::failbit);
   }
   return is;
