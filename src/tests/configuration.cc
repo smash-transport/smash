@@ -85,6 +85,29 @@ TEST(take_removes_entry) {
   VERIFY(!modi.has_value({"Sphere", "RADIUS"}));
 }
 
+// Sorry, but I have to put this in the std namespace, otherwise it doesn't
+// compile. That's because the << operator is called from inside the UnitTest
+// namespace and all involved types are in the std namespace.
+namespace std {
+static ostream &operator<<(ostream &s, const vector<string> &v) {
+  s << '{';
+  for (const auto x : v) {
+    s << x << ", ";  // I'm too lazy to get the commas right
+  }
+  return s << '}';
+}
+}  // namespace std
+
+static void expect_lines(std::vector<std::string> expected, std::istream &stream) {
+  std::string line;
+  while (!expected.empty()) {
+    getline(stream, line);
+    const auto pos = find(expected.begin(), expected.end(), line);
+    VERIFY(pos != expected.end()) << line << " was not in " << expected;
+    expected.erase(pos);
+  }
+}
+
 TEST(check_unused_report) {
   std::string reference;
   Configuration conf(boost::filesystem::path{TEST_CONFIG_PATH} / "tests");
@@ -110,11 +133,9 @@ TEST(check_unused_report) {
     COMPARE(line, "Modi:");
     getline(unused, line);
     if (line == "  Collider:") {
-      for (int i = 0; i < 3; ++i) {
-        getline(unused, line);
-        VERIFY(line == "    TARGET: -211" || line == "    PROJECTILE: 211" ||
-               line == "    SQRTS: 1.0");
-      }
+      expect_lines(
+          {"    TARGET: -211", "    PROJECTILE: 211", "    SQRTS: 1.0"},
+          unused);
       getline(unused, line);
       COMPARE(line, "  Sphere:");
       getline(unused, line);
@@ -125,11 +146,9 @@ TEST(check_unused_report) {
       COMPARE(line, "    RADIUS: 5.0");
       getline(unused, line);
       COMPARE(line, "  Collider:");
-      for (int i = 0; i < 3; ++i) {
-        getline(unused, line);
-        VERIFY(line == "    TARGET: -211" || line == "    PROJECTILE: 211" ||
-               line == "    SQRTS: 1.0");
-      }
+      expect_lines(
+          {"    TARGET: -211", "    PROJECTILE: 211", "    SQRTS: 1.0"},
+          unused);
     }
     VERIFY(unused.eof());
   }
@@ -142,11 +161,8 @@ TEST(check_unused_report) {
     COMPARE(line, "Modi:");
     getline(unused, line);
     COMPARE(line, "  Collider:");
-    for (int i = 0; i < 3; ++i) {
-      getline(unused, line);
-      VERIFY(line == "    TARGET: -211" || line == "    PROJECTILE: 211" ||
-             line == "    SQRTS: 1.0");
-    }
+    expect_lines({"    TARGET: -211", "    PROJECTILE: 211", "    SQRTS: 1.0"},
+                 unused);
     VERIFY(unused.eof());
   }
 
@@ -158,10 +174,7 @@ TEST(check_unused_report) {
     COMPARE(line, "Modi:");
     getline(unused, line);
     COMPARE(line, "  Collider:");
-    for (int i = 0; i < 2; ++i) {
-      getline(unused, line);
-      VERIFY(line == "    TARGET: -211" || line == "    SQRTS: 1.0");
-    }
+    expect_lines({"    TARGET: -211", "    SQRTS: 1.0"}, unused);
     VERIFY(unused.eof());
   }
 
@@ -174,7 +187,7 @@ TEST(check_unused_report) {
     getline(unused, line);
     COMPARE(line, "  Collider:");
     getline(unused, line);
-    VERIFY(line == "    TARGET: -211");
+    COMPARE(line, "    TARGET: -211");
     VERIFY(unused.eof());
   }
 
