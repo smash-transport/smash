@@ -67,6 +67,9 @@ TEST(write_codes) {
   printf("bar Ξ_cc:  %8x 0x%08x\n",   xi_cc_bar.code(),   xi_cc_bar.dump());
   printf("Ω_bc:      %8x 0x%08x\n",    omega_bc.code(),    omega_bc.dump());
 }
+TEST(size) {
+  COMPARE(sizeof(PdgCode),sizeof(std::uint32_t));
+}
 TEST(code) {
   COMPARE( electron.code(),  0x11);
   COMPARE(   antimu.code(),  0xffffffed);
@@ -146,31 +149,33 @@ TEST(isospin3) {
   COMPARE(  xi_cc_bar.isospin3(), -1);
   COMPARE(   omega_bc.isospin3(),  0);
 }
-// TEST(isospin_total) {
-//   COMPARE(   electron.isospin_total(),  0);
-//   COMPARE(     antimu.isospin_total(),  0);
-//   COMPARE(     photon.isospin_total(),  0);
-//   COMPARE(       pion.isospin_total(), +2);
-//   COMPARE(       kaon.isospin_total(),  1);
-//   COMPARE(     kminus.isospin_total(),  1);
-//   COMPARE(     dminus.isospin_total(),  1);
-//   COMPARE(     bnulls.isospin_total(),  0);
-//   COMPARE(     bPcbar.isospin_total(),  0);
-//   COMPARE(     eta_pr.isospin_total(),  0);
-//   COMPARE(      j_psi.isospin_total(),  0);
-//   COMPARE(     proton.isospin_total(),  1);
-//   COMPARE(  antidelta.isospin_total(),  3);
-//   COMPARE(      sigma.isospin_total(), +2);
-//   COMPARE(     lambda.isospin_total(),  0);
-//   COMPARE(     antixi.isospin_total(), +1);
-//   COMPARE(  omega_bar.isospin_total(),  0);
-//   COMPARE(   lambda_c.isospin_total(),  0);
-//   COMPARE(sigma_c_bar.isospin_total(), +2);
-//   COMPARE(       xi_c.isospin_total(), +1);
-//   COMPARE(omega_c_bar.isospin_total(),  0);
-//   COMPARE(  xi_cc_bar.isospin_total(), +1);
-//   COMPARE(   omega_bc.isospin_total(),  0);
-// }
+TEST(isospin_total) {
+  PdgCode eta(0x221);
+  COMPARE(   electron.isospin_total(),  0);
+  COMPARE(     antimu.isospin_total(),  0);
+  COMPARE(     photon.isospin_total(),  0);
+  COMPARE(       pion.isospin_total(), +2);
+  COMPARE(        eta.isospin_total(),  0);
+  COMPARE(       kaon.isospin_total(),  1);
+  COMPARE(     kminus.isospin_total(),  1);
+  COMPARE(     dminus.isospin_total(),  1);
+  COMPARE(     bnulls.isospin_total(),  0);
+  COMPARE(     bPcbar.isospin_total(),  0);
+  COMPARE(     eta_pr.isospin_total(),  0);
+  COMPARE(      j_psi.isospin_total(),  0);
+  COMPARE(     proton.isospin_total(),  1);
+  COMPARE(  antidelta.isospin_total(),  3);
+  COMPARE(      sigma.isospin_total(), +2);
+  COMPARE(     lambda.isospin_total(),  0);
+  COMPARE(     antixi.isospin_total(), +1);
+  COMPARE(  omega_bar.isospin_total(),  0);
+  COMPARE(   lambda_c.isospin_total(),  0);
+  COMPARE(sigma_c_bar.isospin_total(), +2);
+  COMPARE(       xi_c.isospin_total(), +1);
+  COMPARE(omega_c_bar.isospin_total(),  0);
+  COMPARE(  xi_cc_bar.isospin_total(), +1);
+  COMPARE(   omega_bc.isospin_total(),  0);
+}
 TEST(strangeness) {
   COMPARE(   electron.strangeness(),  0);
   COMPARE(     antimu.strangeness(),  0);
@@ -270,6 +275,87 @@ TEST(charge) {
   COMPARE(omega_c_bar.charge(),  0);
   COMPARE(  xi_cc_bar.charge(), -2);
   COMPARE(   omega_bc.charge(),  0);
+}
+TEST(quarks) {
+  COMPARE(   electron.quarks(), 0x0000);
+  COMPARE(     antimu.quarks(), 0x0000);
+  COMPARE(     photon.quarks(), 0x0000);
+  COMPARE(       pion.quarks(), 0x0210);
+  COMPARE(       kaon.quarks(), 0x0310);
+  COMPARE(     kminus.quarks(), 0x0320);
+  COMPARE(     dminus.quarks(), 0x0410);
+  COMPARE(     bnulls.quarks(), 0x0530);
+  COMPARE(     bPcbar.quarks(), 0x0540);
+  COMPARE(     eta_pr.quarks(), 0x0330);
+  COMPARE(      j_psi.quarks(), 0x0440);
+  COMPARE(     proton.quarks(), 0x2210);
+  COMPARE(  antidelta.quarks(), 0x2220);
+  COMPARE(      sigma.quarks(), 0x3220);
+  COMPARE(     lambda.quarks(), 0x3120);
+  COMPARE(     antixi.quarks(), 0x3310);
+  COMPARE(  omega_bar.quarks(), 0x3330);
+  COMPARE(   lambda_c.quarks(), 0x4120);
+  COMPARE(sigma_c_bar.quarks(), 0x4110);
+  COMPARE(       xi_c.quarks(), 0x4320);
+  COMPARE(omega_c_bar.quarks(), 0x4330);
+  COMPARE(  xi_cc_bar.quarks(), 0x4420);
+  COMPARE(   omega_bc.quarks(), 0x5430);
+}
+TEST(multiplett) {
+  COMPARE(   electron.multiplett(),  0x0);
+  COMPARE(     antimu.multiplett(),  0x0);
+  COMPARE(     photon.multiplett(),  0x0);
+  COMPARE(       pion.multiplett(),  0x1);
+  COMPARE(       kaon.multiplett(),  0x1);
+  COMPARE(     kminus.multiplett(),  0x1);
+  COMPARE(     dminus.multiplett(),  0x1);
+  COMPARE(     bnulls.multiplett(),  0x1);
+  COMPARE(     bPcbar.multiplett(),  0x1);
+  COMPARE(     eta_pr.multiplett(),  0x1);
+  COMPARE(      j_psi.multiplett(),  0x3);
+  COMPARE(     proton.multiplett(),  0x1002);
+  COMPARE(  antidelta.multiplett(), -0x1004);
+  COMPARE(      sigma.multiplett(),  0x1002);
+  COMPARE(     lambda.multiplett(),  0x1002);
+  COMPARE(     antixi.multiplett(), -0x1002);
+  COMPARE(  omega_bar.multiplett(), -0x1004);
+  COMPARE(   lambda_c.multiplett(),  0x1002);
+  COMPARE(sigma_c_bar.multiplett(), -0x1004);
+  COMPARE(       xi_c.multiplett(),  0x1002);
+  COMPARE(omega_c_bar.multiplett(), -0x1002);
+  COMPARE(  xi_cc_bar.multiplett(), -0x1002);
+  COMPARE(   omega_bc.multiplett(),  0x1002);
+}
+TEST(iso_multiplett) {
+  PdgCode pinull(0x111);
+  PdgCode rhominus(-0x213);
+  PdgCode omega(0x223);
+  COMPARE(   electron.iso_multiplett(),  0x0000);
+  COMPARE(     antimu.iso_multiplett(),  0x0000);
+  COMPARE(     photon.iso_multiplett(),  0x0000);
+  COMPARE(       pion.iso_multiplett(),  0x0111);
+  COMPARE(     pinull.iso_multiplett(),  0x0111);
+  COMPARE(   rhominus.iso_multiplett(),  0x0113);
+  COMPARE(      omega.iso_multiplett(),  0x0223);
+  COMPARE(       kaon.iso_multiplett(),  0x0311);
+  COMPARE(     kminus.iso_multiplett(), -0x0311);
+  COMPARE(     dminus.iso_multiplett(), -0x0411);
+  COMPARE(     bnulls.iso_multiplett(),  0x0531);
+  COMPARE(     bPcbar.iso_multiplett(), -0x0541);
+  COMPARE(     eta_pr.iso_multiplett(),  0x0331);
+  COMPARE(      j_psi.iso_multiplett(),  0x0443);
+  COMPARE(     proton.iso_multiplett(),  0x1112);
+  COMPARE(  antidelta.iso_multiplett(), -0x1114);
+  COMPARE(      sigma.iso_multiplett(),  0x3112);
+  COMPARE(     lambda.iso_multiplett(),  0x3122);
+  COMPARE(     antixi.iso_multiplett(), -0x3312);
+  COMPARE(  omega_bar.iso_multiplett(), -0x3334);
+  COMPARE(   lambda_c.iso_multiplett(),  0x4122);
+  COMPARE(sigma_c_bar.iso_multiplett(), -0x4114);
+  COMPARE(       xi_c.iso_multiplett(),  0x4312);
+  COMPARE(omega_c_bar.iso_multiplett(), -0x4332);
+  COMPARE(  xi_cc_bar.iso_multiplett(), -0x4412);
+  COMPARE(   omega_bc.iso_multiplett(),  0x5432);
 }
 
 TEST_CATCH(set_invalid_code, PdgCode::InvalidPdgCode) {

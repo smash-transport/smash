@@ -229,7 +229,7 @@ class Particles {
 
   /** Check whether a particle type with the given \p pdg code is known.
    *
-   * \param pdg The pdg code of the particle in question.
+   * \param pdgcode The pdg code of the particle in question.
    * \return \c true  If a ParticleType of the given \p pdg code is registered.
    * \return \c false otherwise.
    */

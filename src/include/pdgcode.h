@@ -44,6 +44,11 @@ class PdgCode {
     using std::invalid_argument::invalid_argument;
   };
 
+  /****************************************************************************
+   *                                                                          *
+   * First, the constructors                                                  *
+   *                                                                          *
+   ****************************************************************************/
   /// Standard initializer
   PdgCode() {
     try {
@@ -53,8 +58,8 @@ class PdgCode {
   }
   /** Initialize using a string
    *
-   * The string is interpreted as a hexadecimal number, i.e., @211@ is
-   * interpreted as @0x211 = 529_{10}@.
+   * The string is interpreted as a hexadecimal number, i.e., \c 211 is
+   * interpreted as \c 0x211 = \f$529_{10}\f$.
    */
   PdgCode(const std::string& codestring) {
     set_from_string(codestring);
@@ -75,6 +80,11 @@ class PdgCode {
     set_fields(abscode);
   }
 
+  /****************************************************************************
+   *                                                                          *
+   * test function and export functions                                       *
+   *                                                                          *
+   ****************************************************************************/
   /** Checks the integer for hex digits that are > 9.
    *
    * If one of the hex digits is not also a valid decimal digit,
@@ -112,7 +122,7 @@ class PdgCode {
 
   /** Returns a signed integer with the PDG code in hexadecimal. */
   inline int code() const {
-    return (antiparticle_ ? -1 : 1)
+    return antiparticle_sign()
          * ( (n_    << 24)
            | (n_R_  << 20)
            | (n_L_  << 16)
@@ -122,6 +132,18 @@ class PdgCode {
            | (n_J_)); 
   }
 
+  /// returns a C++ string from the PDG Code.
+  inline std::string string() const {
+    char hexstring[8];
+    sprintf(hexstring, "%x", code());
+    return std::string(hexstring);
+  }
+
+  /****************************************************************************
+   *                                                                          *
+   * accessors of various properties                                          *
+   *                                                                          *
+   ****************************************************************************/
   /// returns true if this is a baryon, antibaryon or meson.
   inline bool is_hadron() const {
     return (n_q3_ != 0 && n_q2_ != 0);
@@ -142,17 +164,60 @@ class PdgCode {
     // heavy_quarkness(1) is minus the number of d quarks.
     return heavy_quarkness(2)+heavy_quarkness(1);
   }
-// TODO(baeuchle) This code needs special cases for things like η, p vs. Δ, Λ (vs. Σ)
-//  /** returns twice the isospin vector length.
-//   *
-//   * This returns e.g. 2 for all pions and 3 for all Deltas. It is
-//   * always positive.
-//   */
-//  inline unsigned int isospin_total() const {
-//    // heavy_quarkness(2) is the number of u quarks,
-//    // heavy_quarkness(1) is minus the number of d quarks.
-//    return std::abs(heavy_quarkness(2))+std::abs(heavy_quarkness(1));
-//  }
+  /** returns twice the isospin vector length.
+   *
+   * This returns e.g. 2 for all pions and 3 for all Deltas. It is
+   * always positive.
+   */
+  inline unsigned int isospin_total() const {
+    if (!is_hadron()) return 0;
+    // η mesons (and ω and stuff):
+    if (quarks() == 0x220) {
+      return 0;
+    }
+    int number_of_u_or_d_quarks = 0;
+    if (n_q3_ == 2 || n_q3_ == 1) number_of_u_or_d_quarks++;
+    if (n_q2_ == 2 || n_q2_ == 1) number_of_u_or_d_quarks++;
+    if (n_q1_ == 2 || n_q1_ == 1) number_of_u_or_d_quarks++;
+    // Δ and N distinction. I don't know any smart algorithm for this; I am
+    // confident that special casing is the only way to do that.
+    if (number_of_u_or_d_quarks == 3) {
+      int multi = std::abs(multiplett());
+      // first the most common ones: p/n and Δ
+      if (multi == 0x1002) return 1;
+      if (multi == 0x1004) return 3;
+      // now the resonances:
+      if (multi == 0x101002
+       || multi == 0x121002
+       || multi == 0x201002
+       || multi == 0x211002
+       || multi == 0x101004
+       || multi == 0x111004
+       || multi == 0x201004
+       || multi == 0x211004
+       || multi == 0x101006
+       || multi == 0x201006
+         ) return 1;
+      if (multi == 0x111002
+       || multi == 0x221002
+       || multi == 0x121004
+       || multi == 0x221004
+       || multi == 0x211006
+       || multi == 0x201008
+         ) return 3;
+      throw InvalidPdgCode(
+            "Unknown Nucleon or Delta resonance, cannot determine isospin: "
+            + string());
+    }
+    // special case: Λ. We know already that not three quarks are up or down,
+    // so we need to find where the third is:
+    // 312, 412, 512 are Λ, as is 213. And, well, while this is not yet part of
+    // the standard, I'll throw in 214 and 215 as well.
+    if ((quarks() & 0x0fff) == 0x0120 || (quarks() & 0xff0f) == 0x2100) {
+      return 0;
+    }
+    return number_of_u_or_d_quarks;
+  }
   /// returns the net number of \f$\bar s\f$ quarks.
   inline int strangeness() const {
     return heavy_quarkness(3);
@@ -170,9 +235,10 @@ class PdgCode {
    * Despite the name, it is also applicable to light quarks.
    *
    * \param quark PDG Code of quark: (1..8) = (d,u,s,c,b,t,b',t')
-   * \return for u,c,t,t' quarks, it returns the net number of quarks (#quarks -
-   * #antiquarks), while for d,s,b,b', it returns the net number of
-   * antiquarks (#antiquarks - #quarks).
+   * \return for u,c,t,t' quarks, it returns the net number of quarks
+   * (\#quarks - \#antiquarks), while for d,s,b,b', it returns the net
+   * number of
+   * antiquarks (\#antiquarks - \#quarks).
    *
    **/
   int heavy_quarkness(const int quark) const {
@@ -255,7 +321,94 @@ class PdgCode {
   inline int antiparticle_sign() const {
     return (antiparticle_ ? -1 : +1);
   }
+  /// returns an integer with only the quark numbers set.
+  inline int quarks() const {
+    if (! is_hadron()) {
+      return 0;
+    }
+    return (n_q1_ << 12)
+         | (n_q2_ <<  8)
+         | (n_q3_ <<  4);
+  }
+  /** Returns an identifier for the SU(N) multiplett of this PDG Code.
+   *
+   * This can be used to compare if two particles are in the same SU(N)
+   * multiplett, i.e., p, Λ, Σ and \f$\Xi_{cb}\f$ are in the same
+   * multiplett, as are Δ, Ω, \f$\Omega_{ccc}\f$ and ρ, ω,
+   * \f$D^\ast_s\f$.
+   *
+   * The antiparticle sign is ignored for mesons: Both \f$K^+\f$ and
+   * \f$K^-\f$ are in the same multiplett; the same applies for charmed
+   * and anti-charmed mesons.
+   *
+   * For baryons (and anti-baryons), the first quark number is set to 1
+   * (while usually, all quark fields are 0).
+   */
+  inline int multiplett() const {
+    if (! is_hadron()) {
+      return 0;
+    }
+    // first, take the dump and take out all quarks.
+    int multiplett_code = (dump() & 0x0fff000f);
+    // if the quarks are pi+ -like, don't return the sign (for pi0, we don't
+    // have the sign anyhow)
+    if (baryon_number() == 0) {
+      return multiplett_code;
+    }
+    // else, return the sign and set the n_q1_ digit to the baryon number.
+    return antiparticle_sign() *
+                  (multiplett_code | ((baryon_number() & 1) << 12));
+  }
+  /** Returns an identifier for the Isospin-multiplett of this PDG Code.
+   *
+   * This can be used to compare if two particles are in the same
+   * isospin multiplett.  For non-hadrons, this returns 0, and for
+   * hadrons, it returns the PDG Code of the similar particle that has
+   * all up quarks replaced with down quarks.
+   *
+   * To distinguish η mesons from \f$\pi^0\f$ and Λ from \f$\Sigma^0\f$, Isopin
+   * = 0 states return the complete code.
+   *
+   * The antiparticle sign is ignored for pi-like mesons, so that \f$\pi^+\f$
+   * and \f$\pi^-\f$ are in the same multiplett. The sign is used for all other
+   * mesons and baryons, so that \f$K^-\f$ and \f$K^+\f$ are not in the same
+   * multiplett, and neither \f$p\f$ and \f$\bar p\f$.
+   *
+   */
+  inline int iso_multiplett() const {
+    if (! is_hadron()) {
+      return 0;
+    }
+    // the η meson is NOT in the same multiplett as the π, and Λ and Σ.
+    // We return the complete code for the I=0 state.
+    if (isospin_total() == 0) {
+      return code();
+    }
+    // this is the code with all u quarks changed to d quarks. Note that it
+    // doesn't matter that we change e.g. a proton to an (ddd)-state, because
+    // we can distinguish nucleons and Δ resonances by the other numbers in the
+    // new scheme (it's gotta be good for something!)
+    int multiplett_code = ( (n_    << 24)
+                          | (n_R_  << 20)
+                          | (n_L_  << 16)
+                          | ((n_q1_ == 2 ? 1 : n_q1_) << 12)
+                          | ((n_q2_ == 2 ? 1 : n_q2_) <<  8)
+                          | ((n_q3_ == 2 ? 1 : n_q3_) <<  4)
+                          | (n_J_));
+    // if we have pion-like particles, return the above code (discard
+    // antiparticle_sign)
+    if ((multiplett_code & 0x0000fff0) == 0x110) {
+      return multiplett_code;
+    }
+    // else, the sign is important!
+    return antiparticle_sign()*multiplett_code;
+  }
 
+  /****************************************************************************
+   *                                                                          *
+   * operations with more than one PDG Code                                   *
+   *                                                                          *
+   ****************************************************************************/
   /** sorts PDG Codes according to their numeric value.
    *
    * This is used by std::map
@@ -278,13 +431,6 @@ class PdgCode {
 
   /// istream >> PdgCode assigns the PDG Code from an istream.
   friend std::istream& operator>>(std::istream& is, PdgCode& code);
-  /// returns a C++ string from the PDG Code.
-  inline std::string string() const {
-    char hexstring[8];
-    sprintf(hexstring, "%x", code());
-    return std::string(hexstring);
-  }
-
  private:
   /// first bit: stores the sign.
   bool antiparticle_  : 1,
@@ -411,6 +557,7 @@ class PdgCode {
                            " in PDG Code " + std::to_string(code()));
     }
   }
+
 };
 
 std::istream& operator>>(std::istream& is, PdgCode& code);
