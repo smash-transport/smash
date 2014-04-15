@@ -138,7 +138,7 @@ ScatterActionsFinder::find_possible_actions (Particles *particles,
       act->decide();
 
       /* setup collision partners */
-      printd("collision type %d particle %d <-> %d time: %g\n", interaction_type,
+      printd("collision type %d particle %d <-> %d time: %g\n", act->process_type(),
 	id_a, id_b, time_collision);
       particles->data_pointer(id_a)->set_collision_time(time_collision);
       particles->data_pointer(id_a)->set_collision_time(time_collision);
