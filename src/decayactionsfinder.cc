@@ -20,9 +20,10 @@ std::vector<ActionPtr> DecayActionsFinder::find_possible_actions(Particles *part
 
   for (const auto &p : particles->data()) {
     std::vector<int> in_part;
-    int id = p.pdgcode();
+    int id = p.id();
+    float width = particles->type(id).width();
     /* particle doesn't decay */
-    if (particles->type(id).width() < 0.0)
+    if (width < 0.0)
       continue;
     /* local rest frame velocity */
     velocity_lrf.set_x1(p.momentum().x1() / p.momentum().x0());
@@ -40,8 +41,7 @@ std::vector<ActionPtr> DecayActionsFinder::find_possible_actions(Particles *part
      * = (1 - width * Delta_t)^(t / Delta_t)
      * -> exp(-width * t) when Delta_t -> 0
      */
-    if (drand48() < resonance_frame_timestep
-                    * particles->type(id).width() / hbarc) {
+    if (drand48() < resonance_frame_timestep * width / hbarc) {
       /* Time is up! Set the particle to decay at this timestep */
       in_part.push_back(id);
       actions.emplace_back(new Action(in_part,0.,2));
