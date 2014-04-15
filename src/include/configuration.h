@@ -24,6 +24,23 @@ class path;
 }  // namespace boost
 #endif
 
+namespace YAML {
+template <typename T>
+struct convert {
+  static Node encode(const T &x) {
+    return Node{static_cast<std::string>(x)};
+  }
+  static bool decode(const Node &node, T &x) {
+    if (!node.IsScalar()) {
+      return false;
+    } else {
+      x = static_cast<T>(node.Scalar());
+      return true;
+    }
+  }
+};
+}  // namespace YAML
+
 namespace Smash {
 
 /**
