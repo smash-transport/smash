@@ -12,6 +12,7 @@
 
 #include <stdexcept>
 #include <string>
+#include <vector>
 
 #include <yaml-cpp/yaml.h>
 
@@ -22,6 +23,23 @@ class path;
 }  // namespace filesystem
 }  // namespace boost
 #endif
+
+namespace YAML {
+template <typename T>
+struct convert {
+  static Node encode(const T &x) {
+    return Node{static_cast<std::string>(x)};
+  }
+  static bool decode(const Node &node, T &x) {
+    if (!node.IsScalar()) {
+      return false;
+    } else {
+      x = static_cast<T>(node.Scalar());
+      return true;
+    }
+  }
+};
+}  // namespace YAML
 
 namespace Smash {
 
@@ -273,8 +291,8 @@ class Configuration {
    * inside Configuration and by making it explicit a return would require the
    * copy constructor.
    */
-  Configuration(const YAML::Node &node) : root_node_(node) {
-  }
+  Configuration(const YAML::Node &node)  // NOLINT(runtime/explicit) : see above
+      : root_node_(node) {}
 
   /// the general_config.yaml contents - fully parsed
   YAML::Node root_node_;

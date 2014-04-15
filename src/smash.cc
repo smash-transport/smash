@@ -91,7 +91,17 @@ void ensure_path_is_valid(const bf::path &path) {
   }
 }
 
-std::string read_all(std::istream &input) {
+/**
+ * Utility function to read a complete input stream (e.g. file) into one string.
+ *
+ * \param input The input stream. Since it reads until EOF und thus "uses up the
+ * whole input stream" the function takes an rvalue reference to the stream
+ * object (just pass a temporary).
+ *
+ * \note There's no slicing here: the actual istream object is a temporary that
+ * is not destroyed until read_all returns.
+ */
+std::string read_all(std::istream &&input) {
   return {std::istreambuf_iterator<char>{input},
           std::istreambuf_iterator<char>{}};
 }
@@ -137,8 +147,7 @@ int main(int argc, char *argv[]) {
           configuration.merge_yaml(optarg);
           break;
         case 'd': {
-          bf::ifstream file{optarg};
-          configuration["decaymodes"] = read_all(file);
+          configuration["decaymodes"] = read_all(bf::ifstream{optarg});
         } break;
         case 'f':
           force_overwrite = true;
@@ -154,8 +163,7 @@ int main(int argc, char *argv[]) {
           configuration["General"]["MODUS"] = std::string(optarg);
           break;
         case 'p': {
-          bf::ifstream file{optarg};
-          configuration["particles"] = read_all(file);
+          configuration["particles"] = read_all(bf::ifstream{optarg});
         } break;
         case 's':
           configuration["General"]["STEPS"] = abs(atoi(optarg));

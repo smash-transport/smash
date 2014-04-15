@@ -41,11 +41,11 @@ class ColliderModus : public ModusDefault {
 
  private:
   /* Projectile particle PDG ID*/
-  int projectile_ = 2212;
+  const int projectile_;
   /* Target particle PDG ID*/
-  int target_ = 2212;
+  const int target_;
   /* Center-of-mass energy of the collision */
-  float sqrts_ = 1.f;
+  const float sqrts_;
 };
 
 }  // namespace Smash
