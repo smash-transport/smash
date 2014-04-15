@@ -20,6 +20,24 @@ namespace Smash {
  * 2. The weight of this state, i.e. how probable this outcome is
  * compared to other possible outcomes. Depending on context,
  * this can be either a cross section or a branching ratio.
+ *
+ * For example, create a list of decay modes for \f$\Delta^+\f$ resonance:
+ * \code
+ * std::vector<ProcessBranch> deltaplus_decay_modes;
+ * ProcessBranch branch;
+ * // Adding particle codes one by one
+ * branch.add_particles(2212);
+ * branch.add_particles(111)
+ * branch.set_weight(2);
+ * deltaplus_decay_modes.push_back(branch);
+ * // Using already existing particle list
+ * std::vector<int> particle_list(2112, 211);
+ * // set_particles erases the previous list
+ * branch.set_particles(particle_list);
+ * // set_weight erases the previous weight
+ * branch.set_weight(1);
+ * deltaplus_decay_modes.push_back(branch);
+ * \endcode
  */
 class ProcessBranch {
  public:
@@ -27,12 +45,20 @@ class ProcessBranch {
   ProcessBranch() : branch_weight_(-1.0) {}
   /// Add one particle to the list
   inline void add_particle(int particle_pdg);
-  /// Add a complete list of particles
+  /**
+   * Create a particle list.
+   * This will remove any previously added particles,
+   * but more members can be added to list afterwards
+   * with add_particle(int)
+   */
   inline void set_particles(std::vector<int> particle_pdgs);
-  /// Set the weight of the branch,
-  /// i.e. how probable it is compared to other branches
+  /**
+   * Set the weight of the branch.
+   * In other words, how probable this branch is
+   * compared to other branches
+   */
   inline void set_weight(float process_weight);
-  /// Modify the weight of the branch
+  /// Change the weight of the branch by the given amount
   inline void change_weight(float additional_weight);
   /// Clear all information from the branch
   inline void clear(void);
@@ -62,18 +88,26 @@ inline void ProcessBranch::add_particle(int particle_pdg) {
   particle_list_.push_back(particle_pdg);
 }
 
-/// Add a complete list of particles
+/**
+ * Create a particle list.
+ * This will remove any previously added particles,
+ * but more members can be added to list afterwards
+ * with add_particle(int)
+ */
 inline void ProcessBranch::set_particles(std::vector<int> particle_pdgs) {
   particle_list_ = std::move(particle_pdgs);
 }
 
-/// Set the weight of the branch,
-/// i.e. how probable it is compared to other branches
+/**
+ * Set the weight of the branch.
+ * In other words, how probable this branch is
+ * compared to other branches
+ */
 inline void ProcessBranch::set_weight(float process_weight) {
   branch_weight_ = process_weight;
 }
 
-/// Modify the weight of the branch
+/// Change the weight of the branch by the given amount
 inline void ProcessBranch::change_weight(float additional_weight) {
   branch_weight_ += additional_weight;
 }
