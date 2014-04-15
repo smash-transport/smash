@@ -295,7 +295,7 @@ static inline void printPass() {
 
 class UnitTestFailure {};
 
-using TestFunction = std::function<void(void)>;
+using TestFunction = void (*)(void);
 
 class UnitTester {  // {{{1
  public:
@@ -963,27 +963,29 @@ static void runAll() {
   }
 }
 // class Test {{{2
-template <typename T, typename Exception = void>
-class Test {
+template <typename T, typename Exception = void, typename TestImpl = void>
+class Test : TestImpl {
+ private:
+  static void wrapper() {
+    try {
+      TestImpl::test_function();
+    }
+    catch (Exception &e) {
+      return;
+    }
+    FAIL() << "Test was expected to throw, but it didn't";
+  }
+
  public:
-  Test(TestFunction fun, std::string name) {
+  Test(std::string name) {
     if (!std::is_same<T, void>()) {
       name += '<' + typeToString<T>() + '>';
     }
-    auto wrapper = [=]() {
-      try {
-        fun();
-      }
-      catch (Exception &e) {
-        return;
-      }
-      FAIL() << "Test was expected to throw, but it didn't";
-    };  // NOLINT(readability/braces) : this is a false positive
     g_allTests.emplace_back(wrapper, name);
   }
 };
 template <typename T>
-class Test<T, void> {
+class Test<T, void, void> {
  public:
   Test(TestFunction fun, std::string name) {
     if (!std::is_same<T, void>()) {
@@ -1042,10 +1044,12 @@ UnitTest::Test2<F, Typelist...> hackTypelist(void (*)(Typelist...));
   static UnitTest::Test<void> test_##fun__##__(&fun__, #fun__); \
   void fun__()
 
-#define TEST_CATCH(fun__, exception__)                                       \
-  void fun__();                                                              \
-  static UnitTest::Test<void, exception__> test_##fun__##__(&fun__, #fun__); \
-  void fun__()
+#define TEST_CATCH(fun__, exception__)                                      \
+  struct fun__ {                                                            \
+    static void test_function();                                            \
+  };                                                                        \
+  static UnitTest::Test<void, exception__, fun__> test_##fun__##__(#fun__); \
+  void fun__::test_function()
 
 // main {{{1
 int main(int argc, char **argv) {
