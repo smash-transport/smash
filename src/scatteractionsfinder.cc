@@ -82,7 +82,8 @@ ScatterActionsFinder::find_possible_actions (Particles *particles,
 
       /* Add elastic process.  */
       ProcessBranch el;
-      el.set_particles(in_part);
+      el.add_particle(particles->data(id_a).pdgcode());
+      el.add_particle(particles->data(id_b).pdgcode());
       el.set_weight(cross_sections->elastic(particles, id_a, id_b));
       act->add_process(el);
 
