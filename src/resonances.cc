@@ -78,32 +78,11 @@ std::vector<ProcessBranch> resonance_cross_section(
 
   /* Isospin symmetry factor, by default 1 */
   int symmetryfactor = 1;
-  /* Do the particles have the same isospin value? */
-  if (type_particle1.isospin() == type_particle2.isospin()) {
-    /* Do they have the same spin? */
-    if (type_particle1.spin() == type_particle2.spin()) {
-      /* Are their PDG codes of same length? */
-      int abs_pdg1 = abs(type_particle1.pdgcode().code()), digits1 = 0;
-      while (abs_pdg1) {
-        abs_pdg1 <<= 4;
-        digits1++;
-      }
-      int abs_pdg2 = abs(type_particle2.pdgcode().code()), digits2 = 0;
-      while (abs_pdg2) {
-        abs_pdg2 <<= 4;
-        digits2++;
-      }
-      if (digits1 == digits2) {
-        /* If baryons, do they have the same baryon number? */
-        if (type_particle1.pdgcode().baryon_number() == 0 ||
-            type_particle1.pdgcode().baryon_number() ==
-            type_particle2.pdgcode().baryon_number()) {
-          /* Ok, particles are in the same isospin multiplet,
-             apply symmetry factor */
-          symmetryfactor = 2;
-        }
-      }
-    }
+  // the isospin symmetry factor is 2 if both particles are in the same
+  // isospin multiplett:
+  if (type_particle1.pdgcode().iso_multiplett()
+   == type_particle2.pdgcode().iso_multiplett()) {
+    symmetryfactor = 2;
   }
 
   /* Mandelstam s = (p_a + p_b)^2 = square of CMS energy */
