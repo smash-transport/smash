@@ -13,7 +13,7 @@ namespace Smash {
 std::istream& operator>>(std::istream& is, PdgCode& code) {
   std::string codestring("");
   // discard any whitespace at beginning:
-  while (is.peek() == ' ') {
+  while (is.peek() == ' ' || is.peek() == '\t') {
     is.get();
   }
   // read sign if there is one:
@@ -39,6 +39,10 @@ std::istream& operator>>(std::istream& is, PdgCode& code) {
     code.set_from_string(codestring);
   } catch (PdgCode::InvalidPdgCode) {
     is.setstate(std::ios::failbit);
+  }
+  // get as much whitespace as possible:
+  while (is.peek() == ' ' || is.peek() == '\t') {
+    is.get();
   }
   return is;
 }
