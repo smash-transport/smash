@@ -17,6 +17,7 @@
 #include "include/modusdefault.h"
 #include "include/nucleus.h"
 #include "include/particles.h"
+#include "include/pdgcode.h"
 
 namespace Smash {
 
@@ -143,9 +144,9 @@ class NucleusModus : public ModusDefault {
    **/
   float sqrt_s_NN_;
   /// \see sqrt_s_NN_
-  int pdg_sNN_1_ = 2212;
+  PdgCode pdg_sNN_1_ = PdgCode(0x2212);
   /// \see sqrt_s_NN_
-  int pdg_sNN_2_ = 2212;
+  PdgCode pdg_sNN_2_ = PdgCode(0x2212);
   /** impact parameter
    *
    * The nuclei projectile_ and target_ will be shifted along the x axis

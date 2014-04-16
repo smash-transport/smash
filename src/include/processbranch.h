@@ -26,12 +26,12 @@ namespace Smash {
  * std::vector<ProcessBranch> deltaplus_decay_modes;
  * ProcessBranch branch;
  * // Adding particle codes one by one
- * branch.add_particles(2212);
- * branch.add_particles(111)
+ * branch.add_particles(0x2212);
+ * branch.add_particles(0x111)
  * branch.set_weight(2);
  * deltaplus_decay_modes.push_back(branch);
  * // Using already existing particle list
- * std::vector<int> particle_list(2112, 211);
+ * std::vector<PdgCode> particle_list(0x2112, 0x211);
  * // set_particles erases the previous list
  * branch.set_particles(particle_list);
  * // set_weight erases the previous weight

@@ -68,7 +68,7 @@ TEST(write_codes) {
   printf("Ω_bc:      %8x 0x%08x\n",    omega_bc.code(),    omega_bc.dump());
 }
 TEST(size) {
-  COMPARE(sizeof(PdgCode),sizeof(std::uint32_t));
+  COMPARE(sizeof(PdgCode), sizeof(std::uint32_t));
 }
 TEST(code) {
   COMPARE( electron.code(),  0x11);
@@ -373,40 +373,40 @@ TEST(initialize_from_string) {
   COMPARE(particle3.dump(), 0x1234);
 }
 TEST_CATCH(empty_string, PdgCode::InvalidPdgCode) {
- PdgCode particle("");
+  PdgCode particle("");
 }
 TEST_CATCH(long_string, PdgCode::InvalidPdgCode) {
- PdgCode particle("+12345678");
+  PdgCode particle("+12345678");
 }
 TEST_CATCH(plus_string, PdgCode::InvalidPdgCode) {
- PdgCode particle("+");
+  PdgCode particle("+");
 }
 TEST_CATCH(minus_string, PdgCode::InvalidPdgCode) {
- PdgCode particle("-");
+  PdgCode particle("-");
 }
 // this tests characters with bitmasks 0x3. (of which digits are a
 // subset)
 TEST_CATCH(invalid_digits_colon, PdgCode::InvalidPdgCode) {
- PdgCode particle(":");
+  PdgCode particle(":");
 }
 TEST_CATCH(invalid_digits_semi, PdgCode::InvalidPdgCode) {
- PdgCode particle(";");
+  PdgCode particle(";");
 }
 TEST_CATCH(invalid_digits_less, PdgCode::InvalidPdgCode) {
- PdgCode particle("<");
+  PdgCode particle("<");
 }
 TEST_CATCH(invalid_digits_equal, PdgCode::InvalidPdgCode) {
- PdgCode particle("=");
+  PdgCode particle("=");
 }
 TEST_CATCH(invalid_digits_greater, PdgCode::InvalidPdgCode) {
- PdgCode particle(">");
+  PdgCode particle(">");
 }
 TEST_CATCH(invalid_digits_question, PdgCode::InvalidPdgCode) {
- PdgCode particle("?");
+  PdgCode particle("?");
 }
 // this is for the other characters.
 TEST_CATCH(invalid_characters, PdgCode::InvalidPdgCode) {
- PdgCode particle("abcdef");
+  PdgCode particle("abcdef");
 }
 TEST(stream) {
   PdgCode particle1;

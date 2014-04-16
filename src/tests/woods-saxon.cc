@@ -9,13 +9,15 @@
 #include "tests/unittest.h"
 
 #include <map>
+#include <string>
 #include "include/nucleus.h"
+#include "include/pdgcode.h"
 
 using namespace Smash;
 
 // we'll have equal particle tyoes for now so that center() ==
 // center_of_mass (which is not yet implemented).
-std::map<int, int> list = {{2212, 208}};
+std::map<PdgCode, int> list = {{0x2212, 208}};
 
 constexpr bool PRINT = false;
 

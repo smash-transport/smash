@@ -131,7 +131,7 @@ void collision_criteria_geometry(Particles *particles,
       = resonance_xsections.begin();
     while (interaction_type == 0 && resonances != resonance_xsections.end()) {
       if (resonances->particle_list().size() > 1
-          || resonances->particle_list().at(0) != 0) {
+          || resonances->particle_list().at(0) != PdgCode::invalid()) {
         interaction_probability += resonances->weight() / total_cross_section;
         if (random_interaction < interaction_probability) {
           interaction_type = 1;

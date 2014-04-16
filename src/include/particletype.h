@@ -26,7 +26,7 @@ class ParticleType {
       : name_("unknown"),
         mass_(-1),
         width_(-1),
-        pdgcode_(0xffffffff),
+        pdgcode_(0x0),
         isospin_(100),
         charge_(100),
         spin_(100) {}

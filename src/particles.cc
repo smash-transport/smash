@@ -302,8 +302,6 @@ void ensure_all_read(std::istream &input, const Line &line) {/*{{{*/
                            line));
   }
 }/*}}}*/
-
-PdgCode NotAParticle = PdgCode(0xffffffff);
 }  // unnamed namespace/*}}}*/
 
 Particles::ParticleTypeMap Particles::load_particle_types(  //{{{
@@ -338,12 +336,12 @@ Particles::ParticleTypeMap Particles::load_particle_types(  //{{{
 
 Particles::DecayModesMap Particles::load_decaymodes(const std::string &input) {
   Particles::DecayModesMap decaymodes;
-  PdgCode pdgcode = NotAParticle;
+  PdgCode pdgcode = PdgCode::invalid();
   DecayModes decay_modes_to_add;
   float ratio_sum = 0.0;
 
   const auto end_of_decaymodes = [&]() {
-    if (pdgcode == NotAParticle) {  // at the start of the file
+    if (pdgcode == PdgCode::invalid()) {  // at the start of the file
       return;
     }
     if (decay_modes_to_add.empty()) {
@@ -373,9 +371,7 @@ Particles::DecayModesMap Particles::load_decaymodes(const std::string &input) {
         std::string::npos) {  // a single record on one line signifies a new
                               // decay mode section
       end_of_decaymodes();
-      std::size_t pos = 0;
-      // TODO(baeuchle) I'm not sure what this is supposed to do.
-      pdgcode = PdgCode(std::stoi(line.text, &pos));
+      pdgcode = PdgCode(trim(line.text));
       if (!is_particle_type_registered(pdgcode)) {
         throw ReferencedParticleNotFound(build_error_string(
             "Inconsistency: The particle with PDG id " +
@@ -383,12 +379,8 @@ Particles::DecayModesMap Particles::load_decaymodes(const std::string &input) {
                 " was not registered through particles.txt, but "
                 "decaymodes.txt referenced it.",
             line));
-      } else if (pos <= trimmed.size()) {
-        throw ParseError(build_error_string(
-            "Parse error: A PDG code (signed integer value) was expected.",
-            line));
       }
-      assert(pdgcode != NotAParticle);  // special value for start of file
+      assert(pdgcode != PdgCode::invalid());  // special value for start of file
     } else {
       std::istringstream lineinput(line.text);
       std::vector<PdgCode> decay_particles;
@@ -410,9 +402,10 @@ Particles::DecayModesMap Particles::load_decaymodes(const std::string &input) {
         decay_particles.push_back(pdg);
         lineinput >> pdg;
       }
+      decay_particles.push_back(pdg);
       if (lineinput.fail() && !lineinput.eof()) {
         throw LoadFailure(
-            build_error_string("Parse error: expected an integer", line));
+            build_error_string("Parse error: expected a PdgCode ", line));
       }
       decay_particles.shrink_to_fit();
       decay_modes_to_add.add_mode(std::move(decay_particles), ratio);

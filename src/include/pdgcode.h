@@ -52,7 +52,7 @@ class PdgCode {
   /// Standard initializer
   PdgCode() {
     try {
-      set_fields(0xffffffffu);
+      set_fields(0x0);
     } catch (PdgCode::InvalidPdgCode) {
     }
   }
@@ -68,14 +68,14 @@ class PdgCode {
    * is taken as antiparticle boolean, while the absolute value of the
    * integer is used as hexdigits.
    */
-  PdgCode(const int codenumber) {
+  PdgCode(const std::int32_t codenumber) {
     antiparticle_ = codenumber < 0;
-    set_fields(static_cast<unsigned int>(std::abs(codenumber)));
+    set_fields(static_cast<std::uint32_t>(std::abs(codenumber)));
   }
   /** receive an unsigned integer and process it into a PDG Code. The
    *  first bit is taken and used as antiparticle boolean.
    */
-  PdgCode(const unsigned int abscode) {
+  PdgCode(const std::uint32_t abscode) {
     antiparticle_ = (abscode >> 31);
     set_fields(abscode);
   }
@@ -97,19 +97,21 @@ class PdgCode {
    *
    **/
   inline int test_code() {
+    // 0x8fffffff is valid, meaning "invalid particle".
+    if (dump() == 0x8fffffff) { return 0; }
     int fail = 0;
-    if (n_    > 9) fail |= 1<<6;
-    if (n_R_  > 9) fail |= 1<<5;
-    if (n_L_  > 9) fail |= 1<<4;
-    if (n_q1_ > 9) fail |= 1<<3;
-    if (n_q2_ > 9) fail |= 1<<2;
-    if (n_q3_ > 9) fail |= 1<<1;
-    if (n_J_  > 9) fail |= 1;
+    if (n_    > 9) { fail |= 1<<6; }
+    if (n_R_  > 9) { fail |= 1<<5; }
+    if (n_L_  > 9) { fail |= 1<<4; }
+    if (n_q1_ > 9) { fail |= 1<<3; }
+    if (n_q2_ > 9) { fail |= 1<<2; }
+    if (n_q3_ > 9) { fail |= 1<<1; }
+    if (n_J_  > 9) { fail |= 1; }
     return fail;
   }
 
   /** Dumps the bitfield into an unsigned integer. */
-  inline unsigned int dump() const {
+  inline std::uint32_t dump() const {
     return (antiparticle_ << 31)
          | (n_    << 24)
          | (n_R_  << 20)
@@ -117,11 +119,11 @@ class PdgCode {
          | (n_q1_ << 12)
          | (n_q2_ <<  8)
          | (n_q3_ <<  4)
-         | (n_J_); 
+         | (n_J_);
   }
 
   /** Returns a signed integer with the PDG code in hexadecimal. */
-  inline int code() const {
+  inline std::int32_t code() const {
     return antiparticle_sign()
          * ( (n_    << 24)
            | (n_R_  << 20)
@@ -129,13 +131,13 @@ class PdgCode {
            | (n_q1_ << 12)
            | (n_q2_ <<  8)
            | (n_q3_ <<  4)
-           | (n_J_)); 
+           | (n_J_));
   }
 
   /// returns a C++ string from the PDG Code.
   inline std::string string() const {
     char hexstring[8];
-    sprintf(hexstring, "%x", code());
+    snprintf(hexstring, 8, "%x", code());
     return std::string(hexstring);
   }
 
@@ -150,8 +152,9 @@ class PdgCode {
   }
   /// returns the baryon number of the particle.
   inline int baryon_number() const {
-    if (! is_hadron() || n_q1_ == 0)
+    if (! is_hadron() || n_q1_ == 0) {
       return  0;
+    }
     return antiparticle_sign();
   }
   /** returns twice the isospin-3 component.
@@ -170,22 +173,21 @@ class PdgCode {
    * always positive.
    */
   inline unsigned int isospin_total() const {
-    if (!is_hadron()) return 0;
-    // η mesons (and ω and stuff):
-    if (quarks() == 0x220) {
+    // non-hadrons and η mesons (and ω and stuff):
+    if (!is_hadron() || quarks() == 0x220) {
       return 0;
     }
     int number_of_u_or_d_quarks = 0;
-    if (n_q3_ == 2 || n_q3_ == 1) number_of_u_or_d_quarks++;
-    if (n_q2_ == 2 || n_q2_ == 1) number_of_u_or_d_quarks++;
-    if (n_q1_ == 2 || n_q1_ == 1) number_of_u_or_d_quarks++;
+    if (n_q3_ == 2 || n_q3_ == 1) { number_of_u_or_d_quarks++; }
+    if (n_q2_ == 2 || n_q2_ == 1) { number_of_u_or_d_quarks++; }
+    if (n_q1_ == 2 || n_q1_ == 1) { number_of_u_or_d_quarks++; }
     // Δ and N distinction. I don't know any smart algorithm for this; I am
     // confident that special casing is the only way to do that.
     if (number_of_u_or_d_quarks == 3) {
-      int multi = std::abs(multiplett());
+      std::int32_t multi = std::abs(multiplett());
       // first the most common ones: p/n and Δ
-      if (multi == 0x1002) return 1;
-      if (multi == 0x1004) return 3;
+      if (multi == 0x1002) { return 1; }
+      if (multi == 0x1004) { return 3; }
       // now the resonances:
       if (multi == 0x101002
        || multi == 0x121002
@@ -197,14 +199,14 @@ class PdgCode {
        || multi == 0x211004
        || multi == 0x101006
        || multi == 0x201006
-         ) return 1;
+         ) { return 1; }
       if (multi == 0x111002
        || multi == 0x221002
        || multi == 0x121004
        || multi == 0x221004
        || multi == 0x211006
        || multi == 0x201008
-         ) return 3;
+         ) { return 3; }
       throw InvalidPdgCode(
             "Unknown Nucleon or Delta resonance, cannot determine isospin: "
             + string());
@@ -243,11 +245,16 @@ class PdgCode {
    **/
   int heavy_quarkness(const int quark) const {
     // input sanitization: Only quark numbers 1 through 8 are allowed.
-    if (quark < 1 || quark > 8)
-      return 0;
+    if (quark < 1 || quark > 8) {
+      throw std::invalid_argument(std::string("PdgCode::heavy_quarkness(): ")
+                   + std::string("Quark number must be in [1..8], received ")
+                   + std::to_string(quark));
+    }
     // non-hadrons and those that have none of this quark type: 0.
-    if (! is_hadron() || (n_q1_ != quark && n_q2_ != quark && n_q3_ != quark))
+    if (! is_hadron() ||
+          (n_q1_ != quark && n_q2_ != quark && n_q3_ != quark)) {
       return 0;
+    }
     // baryons: count quarks.
     if (baryon_number() != 0) {
       // u,s,b quarks get negative *ness; d,c,t have positive *ness:
@@ -258,8 +265,9 @@ class PdgCode {
     }
     // mesons.
     // quarkonium state? Not open heavy-quarkness.
-    if (n_q3_ == quark && n_q2_ == quark)
+    if (n_q3_ == quark && n_q2_ == quark) {
       return 0;
+    }
     // this has covered all the easy stuff
     // get the "other" quark. (We know this must exist, since they are
     // not both the right one and one of them is the right one).
@@ -270,8 +278,9 @@ class PdgCode {
     }
     // ours is the lighter: If the heavier quark has the same SIGN, we
     // get a -1, else +1.
-    if (otherquark%2 == quark%2)
+    if (otherquark%2 == quark%2) {
       return -1*antiparticle_sign();
+    }
     return antiparticle_sign();
   }
   /** Returns the charge of the particle.
@@ -301,11 +310,13 @@ class PdgCode {
     // non-hadron:
     // Leptons: 11, 13, 15, 17 are e, μ, τ, τ' and have a charge -1,
     // while    12, 14, 16, 18 are the neutrinos that have no charge.
-    if (n_q3_ == 1)
+    if (n_q3_ == 1) {
       return -1*(n_J_%2)*antiparticle_sign();
+    }
     // Bosons: 24 is the W+, all else is uncharged.
-    if (n_q3_ == 2 && n_J_ == 4)
+    if (n_q3_ == 2 && n_J_ == 4) {
       return antiparticle_sign();
+    }
     // default (this includes all other Bosons) is 0.
     return 0;
   }
@@ -322,7 +333,7 @@ class PdgCode {
     return (antiparticle_ ? -1 : +1);
   }
   /// returns an integer with only the quark numbers set.
-  inline int quarks() const {
+  inline std::int32_t quarks() const {
     if (! is_hadron()) {
       return 0;
     }
@@ -344,12 +355,12 @@ class PdgCode {
    * For baryons (and anti-baryons), the first quark number is set to 1
    * (while usually, all quark fields are 0).
    */
-  inline int multiplett() const {
+  inline std::int32_t multiplett() const {
     if (! is_hadron()) {
       return 0;
     }
     // first, take the dump and take out all quarks.
-    int multiplett_code = (dump() & 0x0fff000f);
+    std::int32_t multiplett_code = (dump() & 0x0fff000f);
     // if the quarks are pi+ -like, don't return the sign (for pi0, we don't
     // have the sign anyhow)
     if (baryon_number() == 0) {
@@ -375,7 +386,7 @@ class PdgCode {
    * multiplett, and neither \f$p\f$ and \f$\bar p\f$.
    *
    */
-  inline int iso_multiplett() const {
+  inline std::int32_t iso_multiplett() const {
     if (! is_hadron()) {
       return 0;
     }
@@ -388,7 +399,7 @@ class PdgCode {
     // doesn't matter that we change e.g. a proton to an (ddd)-state, because
     // we can distinguish nucleons and Δ resonances by the other numbers in the
     // new scheme (it's gotta be good for something!)
-    int multiplett_code = ( (n_    << 24)
+    std::int32_t multiplett_code = ( (n_    << 24)
                           | (n_R_  << 20)
                           | (n_L_  << 16)
                           | ((n_q1_ == 2 ? 1 : n_q1_) << 12)
@@ -431,6 +442,9 @@ class PdgCode {
 
   /// istream >> PdgCode assigns the PDG Code from an istream.
   friend std::istream& operator>>(std::istream& is, PdgCode& code);
+
+  static PdgCode invalid() { return PdgCode(0x0); }
+
  private:
   /// first bit: stores the sign.
   bool antiparticle_  : 1,
@@ -450,8 +464,6 @@ class PdgCode {
   std::uint32_t n_q3_ : 4;
   /// spin quantum number \f$n_J = 2 J + 1\f$.
   std::uint32_t n_J_  : 4;
-
-  // constexpr PdgCode NotAParticle(0xffffffff);
 
   /** extract digits from a character. */
   inline std::uint32_t get_digit_from_char(const char inp) const {
@@ -536,8 +548,8 @@ class PdgCode {
   /** Sets the bitfield from an unsigned integer. Usually called from
    * the constructors.
    **/
-  inline void set_fields(unsigned int abscode) {
-    constexpr unsigned int bitmask = 0xf;
+  inline void set_fields(std::uint32_t abscode) {
+    constexpr std::int32_t bitmask = 0xf;
     n_J_ = abscode & bitmask;
     abscode >>= 4;
     n_q3_ = abscode & bitmask;
@@ -553,7 +565,7 @@ class PdgCode {
     n_    = abscode & bitmask;
     int test = test_code();
     if (test > 0) {
-      throw InvalidPdgCode("Invalid digits " + std::to_string(test) + 
+      throw InvalidPdgCode("Invalid digits " + std::to_string(test) +
                            " in PDG Code " + std::to_string(code()));
     }
   }
@@ -562,6 +574,6 @@ class PdgCode {
 
 std::istream& operator>>(std::istream& is, PdgCode& code);
 
-} // namespace SMASH
+}  // namespace SMASH
 
 #endif  // SRC_INCLUDE_PDGCODE_H_

@@ -221,7 +221,7 @@ int resonance_decay(Particles *particles, int particle_id) {
   }
   /* We found our decay branch, get the decay product pdgs and do the decay */
   size_t decay_particles = mode->particle_list().size();
-  PdgCode type_a(0xffffffff), type_b(0xffffffff);
+  PdgCode type_a(0x0), type_b(0x0);
   int new_id_a = -1;
   if (decay_particles > 3) {
     printf("Warning: Not a 1->2 or 1->3 process!\n");

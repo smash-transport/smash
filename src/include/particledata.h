@@ -24,10 +24,11 @@ namespace Smash {
 class ParticleData {
  public:
   /// Use improbable values for default constructor
-  ParticleData() :id_(-1), pdgcode_(0xffffffff), id_partner_(-1), id_process_(-1),
-    collision_time_(0.0), process_type_(-1) {}
+  ParticleData() :id_(-1), pdgcode_(0x0), id_partner_(-1), id_process_(-1),
+    collision_time_(0.0), process_type_(-1) {
+    }
   /// Use improbable values for constructor
-  explicit ParticleData(int i) :id_(i), pdgcode_(0xffffffff), id_partner_(-1),
+  explicit ParticleData(int i) :id_(i), pdgcode_(0x0), id_partner_(-1),
     id_process_(-1), collision_time_(0.0), process_type_(-1) {}
   inline int id(void) const;
   inline void set_id(int id);

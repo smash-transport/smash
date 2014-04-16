@@ -10,10 +10,11 @@
 
 #include <map>
 #include "include/nucleus.h"
+#include "include/pdgcode.h"
 
 using namespace Smash;
 
-std::map<int, int> list = {{2212, 82}, {2112, 126}};
+std::map<PdgCode, int> list = {{0x2212, 82}, {0x2112, 126}};
 
 TEST(initialize_realparticles) {
   Nucleus lead;

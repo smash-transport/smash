@@ -17,15 +17,15 @@ namespace Smash {
 
 ColliderModus::ColliderModus(Configuration modus_config,
                              const ExperimentParameters &)
-    : projectile_(modus_config.take({"Collider", "PROJECTILE"})),
-      target_    (modus_config.take({"Collider", "TARGET"})),
-      sqrts_     (modus_config.take({"Collider", "SQRTS"})) {
+    : sqrts_     (modus_config.take({"Collider", "SQRTS"})) {
+  projectile_ = modus_config.take({"Collider", "PROJECTILE"});
+  target_     = modus_config.take({"Collider", "TARGET"});
 }
 
 /* print_startup - console output on startup of box specific parameters */
 void ColliderModus::print_startup() {
-  printf("Projectile PDG ID: %d \n", projectile_);
-  printf("Target PDG ID: %d \n", target_);
+  printf("Projectile PDG ID: %x \n", projectile_.code());
+  printf("Target PDG ID: %x \n", target_.code());
   printf("Center-of-mass energy %10.3f GeV\n", sqrts_);
 }
 

@@ -156,7 +156,7 @@ namespace decaymodes_txt {
 TEST(load_many_particles) {
   Particles p(particles_txt::data, {});
   COMPARE(p.types_size(), 20);
-  ParticleType type = p.particle_type(-1114);
+  ParticleType type = p.particle_type(-0x1114);
   COMPARE(type.mass(), 1.232f);
   COMPARE(type.width(), .117f);
   COMPARE(type.pdgcode().dump(), 0x80001114);
@@ -164,7 +164,7 @@ TEST(load_many_particles) {
   COMPARE(type.charge(), 1);
   COMPARE(type.spin(), 3);
 
-  type = p.particle_type(2112);
+  type = p.particle_type(0x2112);
   COMPARE(type.mass(), .9396f);
   COMPARE(type.width(), -1.f);
   COMPARE(type.pdgcode().dump(), 0x2112);
@@ -187,7 +187,7 @@ TEST_CATCH(load_decaymodes_no_decays, Particles::MissingDecays) {
   Particles p(particles_txt::data, decays_input);
 }
 
-TEST_CATCH(load_decaymodes_incorrect_start, Particles::ParseError) {
+TEST_CATCH(load_decaymodes_incorrect_start, PdgCode::InvalidPdgCode) {
   const std::string decays_input(
       "113. # rho0\n"
       );
@@ -210,7 +210,7 @@ TEST(load_decaymodes_two_channels) {
   Particles p(particles_txt::data, decays_input);
 
   {
-    const auto &rho0 = p.decay_modes(113);
+    const auto &rho0 = p.decay_modes(0x113);
     VERIFY(!rho0.empty());
     const auto &modelist = rho0.decay_mode_list();
     COMPARE(modelist.size(), 1);
@@ -220,7 +220,7 @@ TEST(load_decaymodes_two_channels) {
     COMPARE(modelist[0].particle_list()[1].dump(), 0x80000211);
   }
   {
-    const auto &omega = p.decay_modes(223);
+    const auto &omega = p.decay_modes(0x223);
     VERIFY(!omega.empty());
     const auto &modelist = omega.decay_mode_list();
     COMPARE(modelist.size(), 3);
@@ -271,19 +271,19 @@ TEST(iterate_particle_data) {
 
   check_particle_data_iteration(&p);
   check_particle_data_iteration(p2);
-  p.create(211);
+  p.create(0x211);
   check_particle_data_iteration(&p);
   check_particle_data_iteration(p2);
-  p.create(-211);
+  p.create(-0x211);
   check_particle_data_iteration(&p);
   check_particle_data_iteration(p2);
 }
 
 TEST(erase_particle) {
   Particles p(particles_txt::data, decaymodes_txt::data);
-  p.create(211);
-  p.create(-211);
-  p.create(111);
+  p.create(0x211);
+  p.create(-0x211);
+  p.create(0x111);
   COMPARE(p.size(), 3);
   VERIFY(p.has_data(0));
   VERIFY(p.has_data(1));

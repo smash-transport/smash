@@ -9,11 +9,12 @@
 
 #include<map>
 #include<stdexcept>
+#include<string>
 #include<vector>
 #include "include/fourvector.h"
 #include "include/particledata.h"
 #include "include/particles.h"
-#include <stdexcept>
+#include "include/pdgcode.h"
 #include "include/random.h"
 
 namespace Smash {
@@ -77,7 +78,7 @@ class Nucleus {
    * \param testparticles Number of test particles to use.
    *
    **/
-  void fill_from_list(const std::map<int, int>& particle_list,
+  void fill_from_list(const std::map<PdgCode, int>& particle_list,
                       const int testparticles);
   /// sets the diffusiveness of the nucleus
   ///
