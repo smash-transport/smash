@@ -34,7 +34,7 @@ TEST(woods_saxon) {
   // binning width for the distribution:
   constexpr float dx = 0.05;
   // this is the number of nuclei we create.
-  constexpr int N_TEST = 1000000;
+  constexpr int N_TEST = 10000;
   for (int i = 0; i < N_TEST; i++) {
     // initialize nucleus.
     Nucleus projectile;
@@ -103,11 +103,11 @@ TEST(woods_saxon) {
       for (int unit = 0; unit < sigmabins - 1; ++unit) {
         totalbad += diffbad[unit];
         double fraction = (totalbad + 0.0) / (total + 0.0);
-        VERIFY(fraction > allowed[unit]) << " too few entries have less than "
-                  << unit+1 << " sigma deviation ("
+        VERIFY(fraction > allowed[unit]) << "\ntoo few entries have less than "
+                  << unit+1 << " sigma deviation\n("
                   << totalbad << "/" << total << "=" << fraction
                   << ", required minimal fraction: " << allowed[unit]
-                  << " at component " << name[c];
+                  << ")\nat component " << name[c];
       }
     }
   }
