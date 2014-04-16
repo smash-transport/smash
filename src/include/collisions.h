@@ -64,29 +64,6 @@ void collision_criteria_geometry(Particles *particles,
   std::list<int> *collision_list, const float timestep, int id_a,
   int id_b, size_t *rejection_conflict);
 
-/**
- * Processes the collision list.
- *
- * Collision list consists of particle IDs. Each of these particles
- * has been assigned a collision partner, a type of interaction with
- * the collision partner, and the types of the particles in the final state.
- *
- * The pair of colliding particles is boosted to the center-of-momentum frame
- * where they either have elastic scattering or form a resonance. Final state
- * particles are then boosted back to the computational frame. In the case of
- * resonance formation, the initial particles are removed from
- * the active particles data structure.
- *
- * \param[in,out] particles Particles in the simulation.
- * \param[in] collision_list List of interactions happening in this time step.
- * \param[in] id_event Last interaction ID added in the simulation so far;
- * indicates the number of processed events.
- *
- * \return The number of interactions processed in the simulation so far.
- */
-size_t collide_particles(Particles *particles, std::vector<ActionPtr> &collision_list,
-                         size_t id_event);
-
 }  // namespace Smash
 
 #endif  // SRC_INCLUDE_COLLISIONS_H_

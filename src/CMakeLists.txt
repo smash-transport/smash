@@ -45,7 +45,7 @@ set(smash_src action.cc boxmodus.cc
         particlesoutput.cc
         random.cc
         resonances.cc
-        scatteractionsfinder.cc
+        scatteraction.cc scatteractionsfinder.cc
         time.cc
         vtkoutput.cc
         )

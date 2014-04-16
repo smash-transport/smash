@@ -16,7 +16,6 @@
 
 #include "include/boxmodus.h"
 #include "include/collidermodus.h"
-#include "include/collisions.h"
 #include "include/configuration.h"
 #include "include/experiment.h"
 #include "include/macros.h"
@@ -140,8 +139,10 @@ void Experiment<Modus>::run_time_evolution() {
 						parameters_, &cross_sections_);
     /* (2.b) Perform collisions. */
     if (!scatter_actions.empty()) {
-      interactions_total = collide_particles(&particles_, scatter_actions,
-                                             interactions_total);
+      for (auto act = scatter_actions.begin(); act != scatter_actions.end(); ++act)
+	(*act)->perform (&particles_, interactions_total);
+      scatter_actions.clear();
+      printd("Collision list done.\n");
     }
 
     /* (3) Do propagation. */
