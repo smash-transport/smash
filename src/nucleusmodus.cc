@@ -23,7 +23,7 @@ NucleusModus::NucleusModus(Configuration modus_config,
                            const ExperimentParameters &params) {
   Configuration modus_cfg = modus_config["Nucleus"];
   sqrt_s_NN_ = modus_cfg.take({"SQRTSNN"});
-  std::vector<int> sqrts_n = modus_cfg.take({"SQRTS_N"});
+  std::vector<PdgCode> sqrts_n = modus_cfg.take({"SQRTS_N"});
   pdg_sNN_1_ = sqrts_n[0];
   pdg_sNN_2_ = sqrts_n[1];
   // fill nuclei with particles
