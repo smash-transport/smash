@@ -81,12 +81,10 @@ ScatterActionsFinder::find_possible_actions (Particles *particles,
       act->add_processes(resonance_xsections);
 
       /* Add elastic process.  */
-      ProcessBranch el;
-      el.add_particle(particles->data(id_a).pdgcode());
-      el.add_particle(particles->data(id_b).pdgcode());
-      el.set_weight(cross_sections->elastic(particles, id_a, id_b));
-      el.set_type(0);
-      act->add_process(el);
+      act->add_process(ProcessBranch(particles->data(id_a).pdgcode(),
+				     particles->data(id_b).pdgcode(),
+				     cross_sections->elastic(particles,
+							     id_a, id_b), 0));
 
       {
 	/* distance criteria according to cross_section */

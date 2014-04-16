@@ -51,7 +51,7 @@ float Action::weight(void) const
   return total_weight_;
 }
 
-void Action::add_process (ProcessBranch &p)
+void Action::add_process (ProcessBranch p)
 {
   subprocesses_.push_back(p);
   total_weight_ += p.weight();

@@ -39,7 +39,7 @@ size_t decay_particles(Particles *particles, std::vector<ActionPtr> &decay_list,
   for (auto act = decay_list.begin(); act != decay_list.end(); ++act) {
     /* relevant particle id's for the collision */
     int id_a = (*act)->in1();
-    int interaction_type = particles->data(id_a).process_type();
+    int interaction_type = (*act)->process_type();
 
     if (interaction_type != 2)
       printf("Decays warning: ID %i (%s) has process type %i.\n",

@@ -70,12 +70,6 @@ std::vector<ProcessBranch> resonance_cross_section(
     Particles *particles) {
   std::vector<ProcessBranch> resonance_process_list;
 
-  /* first item refers to total resonance production cross section */
-  ProcessBranch resonance_process;
-//   resonance_process.add_particle(0);
-//   resonance_process.set_weight(0.0);
-//   resonance_process_list.push_back(resonance_process);
-
   /* Isospin symmetry factor, by default 1 */
   int symmetryfactor = 1;
   /* Do the particles have the same isospin value? */
@@ -144,12 +138,8 @@ std::vector<ProcessBranch> resonance_cross_section(
 
     /* If cross section is non-negligible, add resonance to the list */
     if (resonance_xsection > really_small) {
-      resonance_process.clear();
-      resonance_process.add_particle(type_resonance.pdgcode());
-      resonance_process.set_weight(resonance_xsection);
-      resonance_process.set_type(1);
-      resonance_process_list.push_back(resonance_process);
-//       resonance_process_list.at(0).change_weight(resonance_xsection);
+      resonance_process_list.push_back(ProcessBranch(type_resonance.pdgcode(),
+						     resonance_xsection,1));
 
       printd("Found resonance %i (%s) with mass %f and width %f.\n",
              type_resonance.pdgcode(), type_resonance.name().c_str(),
@@ -488,12 +478,8 @@ size_t two_to_two_formation(Particles *particles,
                       * resonance_integral;
 
     if (xsection > really_small) {
-      ProcessBranch final_state;
-      final_state.add_particle(type_resonance.pdgcode());
-      final_state.add_particle(second_type.pdgcode());
-      final_state.set_weight(xsection);
-      process_list->push_back(final_state);
-      process_list->at(0).change_weight(xsection);
+      process_list->push_back(ProcessBranch(type_resonance.pdgcode(),
+					    second_type.pdgcode(),xsection,1));
       number_of_processes++;
     }
   }

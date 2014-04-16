@@ -43,6 +43,10 @@ class ProcessBranch {
  public:
   /// Default constructor
   ProcessBranch() : branch_weight_(-1.0) {}
+  // Constructor with 1 particle
+  inline ProcessBranch (int p, float w, int t);
+  // Constructor with 2 particles
+  inline ProcessBranch (int p1, int p2, float w, int t);
   /// Add one particle to the list
   inline void add_particle(int particle_pdg);
   /**
@@ -59,7 +63,7 @@ class ProcessBranch {
    */
   inline void set_weight(float process_weight);
   /// Change the weight of the branch by the given amount
-  inline void change_weight(float additional_weight);
+//   inline void change_weight(float additional_weight);
   /// Set the type of interaction
   inline void set_type(int t);
   /// Clear all information from the branch
@@ -89,6 +93,17 @@ class ProcessBranch {
   int interaction_type_;
 };
 
+// Constructor with 1 particle
+ProcessBranch::ProcessBranch (int p, float w, int t) : branch_weight_(w), interaction_type_(t) {
+  this->add_particle (p);
+}
+
+// Constructor with 2 particles
+ProcessBranch::ProcessBranch (int p1, int p2, float w, int t) : branch_weight_(w), interaction_type_(t) {
+  this->add_particle (p1);
+  this->add_particle (p2);
+}
+
 /// Add one particle to the list
 inline void ProcessBranch::add_particle(int particle_pdg) {
   particle_list_.push_back(particle_pdg);
@@ -114,9 +129,9 @@ inline void ProcessBranch::set_weight(float process_weight) {
 }
 
 /// Change the weight of the branch by the given amount
-inline void ProcessBranch::change_weight(float additional_weight) {
-  branch_weight_ += additional_weight;
-}
+// inline void ProcessBranch::change_weight(float additional_weight) {
+//   branch_weight_ += additional_weight;
+// }
 
 /// Set the type of interaction.
 inline void ProcessBranch::set_type (int t) {

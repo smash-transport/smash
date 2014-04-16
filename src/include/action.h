@@ -40,7 +40,7 @@ class Action {
   float weight(void) const;
 
   /* These functions add new subprocesses.  */
-  void add_process (ProcessBranch &p);
+  void add_process (ProcessBranch p);
   void add_processes (std::vector<ProcessBranch> &pv);
   
   /* Decide for a particular subprocess via Monte-Carlo.  */
