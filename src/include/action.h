@@ -13,7 +13,7 @@
 #include <vector>
 #include <memory>
 
-#include "particledata.h"
+#include "particles.h"
 #include "processbranch.h"
 
 namespace Smash {
@@ -42,9 +42,12 @@ class Action {
   /* These functions add new subprocesses.  */
   void add_process (ProcessBranch p);
   void add_processes (std::vector<ProcessBranch> &pv);
-  
+
   /* Decide for a particular subprocess via Monte-Carlo.  */
   void decide ();
+
+  /* Actually perform the action, e.g. carry out a decay or scattering.  */
+  virtual void perform (Particles *particles, size_t &id_process) = 0;
 
  private:
   std::vector<int> ingoing_particles_;
@@ -54,6 +57,21 @@ class Action {
   int interaction_type_;
   std::vector<int> outgoing_particles_;
 };
+
+
+class DecayAction : public Action {
+ public:
+  DecayAction (const std::vector<int> &in_part, float time_of_execution, int interaction_type);
+  void perform (Particles *particles, size_t &id_process);
+};
+
+
+class ScatterAction : public Action {
+ public:
+  ScatterAction (const std::vector<int> &in_part, float time_of_execution);
+  void perform (Particles *particles, size_t &id_process);
+};
+
 
 using ActionPtr = std::unique_ptr<Action>;
 

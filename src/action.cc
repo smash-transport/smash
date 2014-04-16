@@ -91,4 +91,14 @@ void Action::decide ()
     }
 }
 
+
+ScatterAction::ScatterAction(const std::vector<int> &in_part,
+			     float time_of_execution)
+    : Action(in_part, time_of_execution) {}
+
+
+void ScatterAction::perform (Particles *particles, size_t &id_process)
+{
+}
+
 }  // namespace Smash

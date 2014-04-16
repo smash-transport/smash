@@ -18,7 +18,6 @@
 #include "include/collidermodus.h"
 #include "include/collisions.h"
 #include "include/configuration.h"
-#include "include/decays.h"
 #include "include/experiment.h"
 #include "include/macros.h"
 #include "include/nucleusmodus.h"
@@ -123,24 +122,32 @@ void Experiment<Modus>::run_time_evolution() {
   size_t rejection_conflict = 0;
   print_measurements(particles_, interactions_total,
                      interactions_this_interval, energy_initial_, time_start_);
+
   for (int step = 0; step < steps_; step++) {
-    /* Find possible decays. */
+
+    /* (1.a) Find possible decays. */
     decay_actions = decay_finder_.find_possible_actions(&particles_, parameters_);
-    /* Perform decays. */
+    /* (1.b) Perform decays. */
     if (!decay_actions.empty()) {
-      interactions_total =
-          decay_particles(&particles_, decay_actions, interactions_total);
+      for (auto act = decay_actions.begin(); act != decay_actions.end(); ++act)
+	(*act)->perform (&particles_, interactions_total);
+      decay_actions.clear();
+      printd("Decay list done.\n");
     }
-    /* Find possible collisions. */
+
+    /* (2.a) Find possible collisions. */
     scatter_actions = scatter_finder_.find_possible_actions(&particles_,
 						parameters_, &cross_sections_);
-    /* Perform collisions. */
+    /* (2.b) Perform collisions. */
     if (!scatter_actions.empty()) {
       interactions_total = collide_particles(&particles_, scatter_actions,
                                              interactions_total);
     }
+
+    /* (3) Do propagation. */
     modus_.propagate(&particles_, parameters_);
-    /* physics output during the run */
+
+    /* (4) Physics output during the run. */
     if (step > 0 && (step + 1) % output_interval_ == 0) {
       interactions_this_interval =
           interactions_total - previous_interactions_total;

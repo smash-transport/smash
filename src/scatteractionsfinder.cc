@@ -69,7 +69,7 @@ ScatterActionsFinder::find_possible_actions (Particles *particles,
 
       in_part.push_back(id_a);
       in_part.push_back(id_b);
-      act = ActionPtr(new Action(in_part, time_collision));
+      act = ActionPtr(new ScatterAction(in_part, time_collision));
 
       /* Compute kinematic quantities needed for cross section calculations  */
       cross_sections->compute_kinematics(particles, id_a, id_b);
