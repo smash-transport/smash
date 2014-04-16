@@ -2,11 +2,12 @@
 string(REPLACE "-Winline " "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 
 # test sources
-add_executable(fourvector fourvector.cc)
-add_executable(lorentzboost lorentzboost.cc ../fourvector.cc ../random.cc)
 add_executable(angles_distribution angles_distribution.cc ../random.cc)
 add_executable(angles_zero angles_zero.cc ../random.cc)
 add_executable(clebschgordan clebschgordan.cc ../clebschgordan.cc)
+add_executable(fourvector fourvector.cc)
+add_executable(lorentzboost lorentzboost.cc ../fourvector.cc ../random.cc)
+add_executable(pdgcode pdgcode.cc ../pdgcode.cc)
 
 file(COPY ../config.yaml DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ../particles.txt DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
@@ -66,12 +67,11 @@ smash_add_unittest(decaymodes)
 
 # some angle operations tests
 smash_add_unittest(angles)
-smash_add_unittest(pdgcode)
 smash_add_unittest(nucleus)
 smash_add_unittest(woods-saxon)
 smash_add_unittest(random)
 
-# some fourvector operations tests
+smash_add_test(pdgcode pdgcode pdgcode)
 smash_add_test(fourvector fourvector fourvector)
 
 # Lorentz boost tests

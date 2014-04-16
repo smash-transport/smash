@@ -41,6 +41,7 @@ class ColliderModus : public ModusDefault {
 
  private:
   /* Projectile particle PDG ID*/
+  //TODO(mkretz): Matthias wants to fix this back to const.
   PdgCode projectile_;
   /* Target particle PDG ID*/
   PdgCode target_;
