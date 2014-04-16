@@ -147,6 +147,7 @@ std::vector<ProcessBranch> resonance_cross_section(
       resonance_process.clear();
       resonance_process.add_particle(type_resonance.pdgcode());
       resonance_process.set_weight(resonance_xsection);
+      resonance_process.set_type(1);
       resonance_process_list.push_back(resonance_process);
 //       resonance_process_list.at(0).change_weight(resonance_xsection);
 

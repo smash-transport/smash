@@ -82,7 +82,7 @@ void Action::decide ()
 	      interaction_probability += proc->weight() / total_weight_;
 	      if (random_interaction < interaction_probability)
 		{
-		  interaction_type_ = 1;
+		  interaction_type_ = proc->type();
 		  outgoing_particles_ = proc->particle_list();
 		}
 	    }

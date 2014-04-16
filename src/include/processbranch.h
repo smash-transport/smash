@@ -60,12 +60,16 @@ class ProcessBranch {
   inline void set_weight(float process_weight);
   /// Change the weight of the branch by the given amount
   inline void change_weight(float additional_weight);
+  /// Set the type of interaction
+  inline void set_type(int t);
   /// Clear all information from the branch
   inline void clear(void);
   /// Return the particle list
   inline std::vector<int> particle_list(void) const;
   /// Return the branch weight
   inline float weight(void) const;
+  /// Return the type of interaction
+  inline int type(void) const;
 
  private:
   /**
@@ -81,6 +85,8 @@ class ProcessBranch {
   std::vector<int> particle_list_;
   /// Weight of the branch, typically a cross section or a branching ratio
   float branch_weight_;
+  /// Type of interaction
+  int interaction_type_;
 };
 
 /// Add one particle to the list
@@ -112,6 +118,11 @@ inline void ProcessBranch::change_weight(float additional_weight) {
   branch_weight_ += additional_weight;
 }
 
+/// Set the type of interaction.
+inline void ProcessBranch::set_type (int t) {
+  interaction_type_ = t;
+}
+
 /// Clear all information from the branch
 inline void ProcessBranch::clear(void) {
   particle_list_.clear();
@@ -126,6 +137,11 @@ inline std::vector<int> ProcessBranch::particle_list(void) const {
 /// Return the branch weight
 inline float ProcessBranch::weight(void) const {
   return branch_weight_;
+}
+
+/// Return the type of interaction
+inline int ProcessBranch::type (void) const {
+  return interaction_type_;
 }
 
 }  // namespace Smash
