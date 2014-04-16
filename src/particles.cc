@@ -244,7 +244,7 @@ std::string trim(const std::string &s) {
     return {};
   }
   const auto end = s.find_last_not_of(" \t\n\r");
-  return s.substr(begin, end - begin);
+  return s.substr(begin, end - begin + 1);
 }
 struct Line {/*{{{*/
   Line() = default;
