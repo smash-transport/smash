@@ -79,7 +79,8 @@ class PdgCode {
    *  first bit is taken and used as antiparticle boolean.
    */
   PdgCode(const std::uint32_t abscode) {
-    antiparticle_ = (abscode >> 31);
+    // use the first bit for the antiparticle_ boolean.
+    antiparticle_ = ((abscode & 0x80000000u) != 0);
     set_fields(abscode);
   }
 
@@ -115,7 +116,7 @@ class PdgCode {
 
   /** Dumps the bitfield into an unsigned integer. */
   inline std::uint32_t dump() const {
-    return (static_cast<std::uint32_t>(antiparticle_) << 31)
+    return (antiparticle_ ? (1u << 31) : 0)
          | (n_    << 24)
          | (n_R_  << 20)
          | (n_L_  << 16)
