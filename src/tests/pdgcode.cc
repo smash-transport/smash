@@ -277,29 +277,29 @@ TEST(charge) {
   COMPARE(   omega_bc.charge(),  0);
 }
 TEST(quarks) {
-  COMPARE(   electron.quarks(), 0x0000);
-  COMPARE(     antimu.quarks(), 0x0000);
-  COMPARE(     photon.quarks(), 0x0000);
-  COMPARE(       pion.quarks(), 0x0210);
-  COMPARE(       kaon.quarks(), 0x0310);
-  COMPARE(     kminus.quarks(), 0x0320);
-  COMPARE(     dminus.quarks(), 0x0410);
-  COMPARE(     bnulls.quarks(), 0x0530);
-  COMPARE(     bPcbar.quarks(), 0x0540);
-  COMPARE(     eta_pr.quarks(), 0x0330);
-  COMPARE(      j_psi.quarks(), 0x0440);
-  COMPARE(     proton.quarks(), 0x2210);
-  COMPARE(  antidelta.quarks(), 0x2220);
-  COMPARE(      sigma.quarks(), 0x3220);
-  COMPARE(     lambda.quarks(), 0x3120);
-  COMPARE(     antixi.quarks(), 0x3310);
-  COMPARE(  omega_bar.quarks(), 0x3330);
-  COMPARE(   lambda_c.quarks(), 0x4120);
-  COMPARE(sigma_c_bar.quarks(), 0x4110);
-  COMPARE(       xi_c.quarks(), 0x4320);
-  COMPARE(omega_c_bar.quarks(), 0x4330);
-  COMPARE(  xi_cc_bar.quarks(), 0x4420);
-  COMPARE(   omega_bc.quarks(), 0x5430);
+  COMPARE(   electron.quarks(), 0x000);
+  COMPARE(     antimu.quarks(), 0x000);
+  COMPARE(     photon.quarks(), 0x000);
+  COMPARE(       pion.quarks(), 0x021);
+  COMPARE(       kaon.quarks(), 0x031);
+  COMPARE(     kminus.quarks(), 0x032);
+  COMPARE(     dminus.quarks(), 0x041);
+  COMPARE(     bnulls.quarks(), 0x053);
+  COMPARE(     bPcbar.quarks(), 0x054);
+  COMPARE(     eta_pr.quarks(), 0x033);
+  COMPARE(      j_psi.quarks(), 0x044);
+  COMPARE(     proton.quarks(), 0x221);
+  COMPARE(  antidelta.quarks(), 0x222);
+  COMPARE(      sigma.quarks(), 0x322);
+  COMPARE(     lambda.quarks(), 0x312);
+  COMPARE(     antixi.quarks(), 0x331);
+  COMPARE(  omega_bar.quarks(), 0x333);
+  COMPARE(   lambda_c.quarks(), 0x412);
+  COMPARE(sigma_c_bar.quarks(), 0x411);
+  COMPARE(       xi_c.quarks(), 0x432);
+  COMPARE(omega_c_bar.quarks(), 0x433);
+  COMPARE(  xi_cc_bar.quarks(), 0x442);
+  COMPARE(   omega_bc.quarks(), 0x543);
 }
 TEST(multiplett) {
   COMPARE(   electron.multiplett(),  0x0);
@@ -313,18 +313,18 @@ TEST(multiplett) {
   COMPARE(     bPcbar.multiplett(),  0x1);
   COMPARE(     eta_pr.multiplett(),  0x1);
   COMPARE(      j_psi.multiplett(),  0x3);
-  COMPARE(     proton.multiplett(),  0x1002);
-  COMPARE(  antidelta.multiplett(), -0x1004);
-  COMPARE(      sigma.multiplett(),  0x1002);
-  COMPARE(     lambda.multiplett(),  0x1002);
-  COMPARE(     antixi.multiplett(), -0x1002);
-  COMPARE(  omega_bar.multiplett(), -0x1004);
-  COMPARE(   lambda_c.multiplett(),  0x1002);
-  COMPARE(sigma_c_bar.multiplett(), -0x1004);
-  COMPARE(       xi_c.multiplett(),  0x1002);
-  COMPARE(omega_c_bar.multiplett(), -0x1002);
-  COMPARE(  xi_cc_bar.multiplett(), -0x1002);
-  COMPARE(   omega_bc.multiplett(),  0x1002);
+  COMPARE(     proton.multiplett(),  0x10002);
+  COMPARE(  antidelta.multiplett(), -0x10004);
+  COMPARE(      sigma.multiplett(),  0x10002);
+  COMPARE(     lambda.multiplett(),  0x10002);
+  COMPARE(     antixi.multiplett(), -0x10002);
+  COMPARE(  omega_bar.multiplett(), -0x10004);
+  COMPARE(   lambda_c.multiplett(),  0x10002);
+  COMPARE(sigma_c_bar.multiplett(), -0x10004);
+  COMPARE(       xi_c.multiplett(),  0x10002);
+  COMPARE(omega_c_bar.multiplett(), -0x10002);
+  COMPARE(  xi_cc_bar.multiplett(), -0x10002);
+  COMPARE(   omega_bc.multiplett(),  0x10002);
 }
 TEST(iso_multiplett) {
   PdgCode pinull(0x111);
@@ -410,8 +410,15 @@ TEST_CATCH(invalid_characters, PdgCode::InvalidPdgCode) {
 }
 TEST(stream) {
   PdgCode particle1;
-  std::istringstream sourcestream("1234567 +123 -214");
+  std::istringstream sourcestream("-1234567 +1234567 1234567 +123 -214");
   sourcestream >> particle1;
+  COMPARE(particle1.code(), -0x1234567);
+  COMPARE(particle1.dump(), 0x81234567);
+  sourcestream >> particle1;
+  COMPARE(particle1.code(), 0x1234567);
+  COMPARE(particle1.dump(), 0x1234567);
+  sourcestream >> particle1;
+  COMPARE(particle1.code(), 0x1234567);
   COMPARE(particle1.dump(), 0x1234567);
   sourcestream >> particle1;
   COMPARE(particle1.dump(), 0x123);

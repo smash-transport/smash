@@ -49,38 +49,38 @@ std::istream& operator>>(std::istream& is, PdgCode& code) {
 
 unsigned int PdgCode::isospin_total() const {
   // non-hadrons and η mesons (and ω and stuff):
-  if (!is_hadron() || quarks() == 0x220) {
+  if (!is_hadron() || quarks() == 0x22) {
     return 0;
   }
   int number_of_u_or_d_quarks = 0;
-  if (n_q3_ == 2 || n_q3_ == 1) { number_of_u_or_d_quarks++; }
-  if (n_q2_ == 2 || n_q2_ == 1) { number_of_u_or_d_quarks++; }
-  if (n_q1_ == 2 || n_q1_ == 1) { number_of_u_or_d_quarks++; }
+  if (digits_.n_q3_ == 2 || digits_.n_q3_ == 1) { number_of_u_or_d_quarks++; }
+  if (digits_.n_q2_ == 2 || digits_.n_q2_ == 1) { number_of_u_or_d_quarks++; }
+  if (digits_.n_q1_ == 2 || digits_.n_q1_ == 1) { number_of_u_or_d_quarks++; }
   // Δ and N distinction. I don't know any smart algorithm for this; I am
   // confident that special casing is the only way to do that.
   if (number_of_u_or_d_quarks == 3) {
     std::int32_t multi = std::abs(multiplett());
     // first the most common ones: p/n and Δ
-    if (multi == 0x1002) { return 1; }
-    if (multi == 0x1004) { return 3; }
+    if (multi == 0x10002) { return 1; }
+    if (multi == 0x10004) { return 3; }
     // now the resonances:
-    if (multi == 0x101002
-     || multi == 0x121002
-     || multi == 0x201002
-     || multi == 0x211002
-     || multi == 0x101004
-     || multi == 0x111004
-     || multi == 0x201004
-     || multi == 0x211004
-     || multi == 0x101006
-     || multi == 0x201006
+    if (multi == 0x10102
+     || multi == 0x10122
+     || multi == 0x10202
+     || multi == 0x10212
+     || multi == 0x10104
+     || multi == 0x10114
+     || multi == 0x10204
+     || multi == 0x10214
+     || multi == 0x10106
+     || multi == 0x10206
        ) { return 1; }
-    if (multi == 0x111002
-     || multi == 0x221002
-     || multi == 0x121004
-     || multi == 0x221004
-     || multi == 0x211006
-     || multi == 0x201008
+    if (multi == 0x10112
+     || multi == 0x10222
+     || multi == 0x10124
+     || multi == 0x10224
+     || multi == 0x10216
+     || multi == 0x10208
        ) { return 3; }
     throw InvalidPdgCode(
           "Unknown Nucleon or Delta resonance, cannot determine isospin: "
@@ -90,7 +90,7 @@ unsigned int PdgCode::isospin_total() const {
   // so we need to find where the third is:
   // 312, 412, 512 are Λ, as is 213. And, well, while this is not yet part of
   // the standard, I'll throw in 214 and 215 as well.
-  if ((quarks() & 0x0fff) == 0x0120 || (quarks() & 0xff0f) == 0x2100) {
+  if ((quarks() & 0x0ff) == 0x012 || (quarks() & 0xff0) == 0x210) {
     return 0;
   }
   return number_of_u_or_d_quarks;
@@ -105,7 +105,8 @@ int PdgCode::heavy_quarkness(const int quark) const {
   }
   // non-hadrons and those that have none of this quark type: 0.
   if (! is_hadron() ||
-        (n_q1_ != quark && n_q2_ != quark && n_q3_ != quark)) {
+        (digits_.n_q1_ != quark && digits_.n_q2_ != quark
+                                && digits_.n_q3_ != quark)) {
     return 0;
   }
   // baryons: count quarks.
@@ -114,17 +115,18 @@ int PdgCode::heavy_quarkness(const int quark) const {
     int sign = (quark%2 == 0) ? +1 : -1;
     // and for anti-baryons, the sign changes:
     sign *= antiparticle_sign();
-    return sign*((n_q1_ == quark) + (n_q2_ == quark) + (n_q3_ == quark));
+    return sign*((digits_.n_q1_ == quark) + (digits_.n_q2_ == quark)
+                                          + (digits_.n_q3_ == quark));
   }
   // mesons.
   // quarkonium state? Not open heavy-quarkness.
-  if (n_q3_ == quark && n_q2_ == quark) {
+  if (digits_.n_q3_ == quark && digits_.n_q2_ == quark) {
     return 0;
   }
   // this has covered all the easy stuff
   // get the "other" quark. (We know this must exist, since they are
   // not both the right one and one of them is the right one).
-  int otherquark = (n_q2_ == quark) ? n_q3_ : n_q2_;
+  int otherquark = (digits_.n_q2_ == quark) ? digits_.n_q3_ : digits_.n_q2_;
   // "our" quark is the heavier one: 1 for particles
   if (otherquark < quark) {
     return antiparticle_sign();
