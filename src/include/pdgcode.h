@@ -216,7 +216,10 @@ class PdgCode {
       return -1*(digits_.n_J_%2)*antiparticle_sign();
     }
     // Bosons: 24 is the W+, all else is uncharged.
-    if (digits_.n_q3_ == 2 && digits_.n_J_ == 4) {
+    // we ignore the first digits so that this also finds strange gauge
+    // boson "resonances" (in particular, \f$\tilde \chi_1^+\f$ with PDG
+    // Code 1000024).
+    if ((dump_ & 0x0000ffff) == 0x24) {
       return antiparticle_sign();
     }
     // default (this includes all other Bosons) is 0.
