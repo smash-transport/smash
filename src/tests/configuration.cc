@@ -85,9 +85,32 @@ TEST(take_removes_entry) {
   VERIFY(!modi.has_value({"Sphere", "RADIUS"}));
 }
 
+// Sorry, but I have to put this in the std namespace, otherwise it doesn't
+// compile. That's because the << operator is called from inside the UnitTest
+// namespace and all involved types are in the std namespace.
+namespace std {
+static ostream &operator<<(ostream &s, const vector<string> &v) {
+  s << '{';
+  for (const auto x : v) {
+    s << x << ", ";  // I'm too lazy to get the commas right
+  }
+  return s << '}';
+}
+}  // namespace std
+
+static void expect_lines(std::vector<std::string> expected, std::istream &stream) {
+  std::string line;
+  while (!expected.empty()) {
+    getline(stream, line);
+    const auto pos = find(expected.begin(), expected.end(), line);
+    VERIFY(pos != expected.end()) << line << " was not in " << expected;
+    expected.erase(pos);
+  }
+}
+
 TEST(check_unused_report) {
   std::string reference;
-  Configuration conf(TEST_CONFIG_PATH);
+  Configuration conf(boost::filesystem::path{TEST_CONFIG_PATH} / "tests");
   Configuration modi = conf["Modi"];
   conf.take({"particles"});
   conf.take({"decaymodes"});
@@ -103,39 +126,70 @@ TEST(check_unused_report) {
   modi.take({"Box", "TEMPERATURE"});
   modi.take({"Box", "INITIAL_CONDITION"});
   modi.take({"Nucleus"});
-  reference =
-      "Modi:\n"
-      "  Collider:\n"
-      "    TARGET: -211\n"
-      "    PROJECTILE: 211\n"
-      "    SQRTS: 1.0\n"
-      "  Sphere:\n"
-      "    RADIUS: 5.0";
-  COMPARE(conf.unused_values_report(), reference);
+  {
+    std::istringstream unused(conf.unused_values_report());
+    std::string line;
+    getline(unused, line);
+    COMPARE(line, "Modi:");
+    getline(unused, line);
+    if (line == "  Collider:") {
+      expect_lines(
+          {"    TARGET: -211", "    PROJECTILE: 211", "    SQRTS: 1.0"},
+          unused);
+      getline(unused, line);
+      COMPARE(line, "  Sphere:");
+      getline(unused, line);
+      COMPARE(line, "    RADIUS: 5.0");
+    } else {
+      COMPARE(line, "  Sphere:");
+      getline(unused, line);
+      COMPARE(line, "    RADIUS: 5.0");
+      getline(unused, line);
+      COMPARE(line, "  Collider:");
+      expect_lines(
+          {"    TARGET: -211", "    PROJECTILE: 211", "    SQRTS: 1.0"},
+          unused);
+    }
+    VERIFY(unused.eof());
+  }
 
   modi.take({"Sphere", "RADIUS"});
-  reference =
-      "Modi:\n"
-      "  Collider:\n"
-      "    TARGET: -211\n"
-      "    PROJECTILE: 211\n"
-      "    SQRTS: 1.0";
-  COMPARE(conf.unused_values_report(), reference);
+  {
+    std::istringstream unused(conf.unused_values_report());
+    std::string line;
+    getline(unused, line);
+    COMPARE(line, "Modi:");
+    getline(unused, line);
+    COMPARE(line, "  Collider:");
+    expect_lines({"    TARGET: -211", "    PROJECTILE: 211", "    SQRTS: 1.0"},
+                 unused);
+    VERIFY(unused.eof());
+  }
 
   modi.take({"Collider", "PROJECTILE"});
-  reference =
-      "Modi:\n"
-      "  Collider:\n"
-      "    TARGET: -211\n"
-      "    SQRTS: 1.0";
-  COMPARE(conf.unused_values_report(), reference);
+  {
+    std::istringstream unused(conf.unused_values_report());
+    std::string line;
+    getline(unused, line);
+    COMPARE(line, "Modi:");
+    getline(unused, line);
+    COMPARE(line, "  Collider:");
+    expect_lines({"    TARGET: -211", "    SQRTS: 1.0"}, unused);
+    VERIFY(unused.eof());
+  }
 
   modi.take({"Collider", "SQRTS"});
-  reference =
-      "Modi:\n"
-      "  Collider:\n"
-      "    TARGET: -211";
-  COMPARE(conf.unused_values_report(), reference);
+  {
+    std::istringstream unused(conf.unused_values_report());
+    std::string line;
+    getline(unused, line);
+    COMPARE(line, "Modi:");
+    getline(unused, line);
+    COMPARE(line, "  Collider:");
+    getline(unused, line);
+    COMPARE(line, "    TARGET: -211");
+    VERIFY(unused.eof());
+  }
 
   modi.take({"Collider", "TARGET"});
   reference = "{}";
