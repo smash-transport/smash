@@ -98,8 +98,6 @@ class PdgCode {
    *
    **/
   inline int test_code() {
-    // 0x8fffffff is valid, meaning "invalid particle".
-    if (dump() == 0x8fffffff) { return 0; }
     int fail = 0;
     if (digits_.n_    > 9) { fail |= 1<<6; }
     if (digits_.n_R_  > 9) { fail |= 1<<5; }
@@ -205,15 +203,15 @@ class PdgCode {
         // the appropriate sign is already in heavy_quarkness; now
         // u,c,t,t' quarks have charge = 2/3 e, while d,s,b,b' quarks
         // have -1/3 e.
-        Q += (i%2 == 0 ? 2 : 1)*heavy_quarkness(i);
+        Q += (i % 2 == 0 ? 2 : 1) * heavy_quarkness(i);
       }
-      return Q/3;
+      return Q / 3;
     }
     // non-hadron:
     // Leptons: 11, 13, 15, 17 are e, μ, τ, τ' and have a charge -1,
     // while    12, 14, 16, 18 are the neutrinos that have no charge.
     if (digits_.n_q3_ == 1) {
-      return -1*(digits_.n_J_%2)*antiparticle_sign();
+      return -1 * (digits_.n_J_ % 2) * antiparticle_sign();
     }
     // Bosons: 24 is the W+, all else is uncharged.
     // we ignore the first digits so that this also finds strange gauge
@@ -227,7 +225,7 @@ class PdgCode {
   }
   /** Returns twice the spin of a particle **/
   inline unsigned int spin() const {
-    return digits_.n_J_-1;
+    return digits_.n_J_ - 1;
   }
   /** Returns the spin degeneracy \f$2s + 1\f$ of a particle **/
   inline unsigned int spin_degeneracy() const {
@@ -345,6 +343,10 @@ class PdgCode {
   /// istream >> PdgCode assigns the PDG Code from an istream.
   friend std::istream& operator>>(std::istream& is, PdgCode& code);
 
+  /** PdgCode 0x0 is guaranteed not to be valid by the PDG standard, but
+   * it passes all tests here, so we can use it to show some code is not
+   * yet set.
+   */
   static PdgCode invalid() { return PdgCode(0x0); }
 
  private:
@@ -359,7 +361,7 @@ class PdgCode {
     /** the single digits collection of the code. Here, every PDG code
      * digits is directly accessible. */
     struct {
-#if defined(__GNUC__) || defined(__x86_64__)
+#if defined(__GNUC__) || defined(__x86_64__) || defined(DOXYGEN)
       /// spin quantum number \f$n_J = 2 J + 1\f$.
       std::uint32_t n_J_  : 4;
       /// third quark field
@@ -376,7 +378,7 @@ class PdgCode {
       std::uint32_t n_    : 4, :3;
       /// first bit: stores the sign.
       bool antiparticle_  : 1;
-#else
+#else  // reverse ordering
       bool antiparticle_  : 1, :3;
       std::uint32_t n_    : 4;
       std::uint32_t n_R_  : 4;
@@ -387,8 +389,9 @@ class PdgCode {
       std::uint32_t n_J_  : 4;
 #endif  // __GNUC__ or __x86_64__
     } digits_;
-    // the bitfield dumped into a single integer. Please note that the
-    // 2nd, 3rd and 4th highest bits are possibly undefined.
+    /** the bitfield dumped into a single integer. Please note that the
+     * 2nd, 3rd and 4th highest bits are possibly undefined.
+     **/
     std::uint32_t dump_;
     /** chunk collection: here, the chunks with \f$nn_Rn_L\f$ and
      * \f$n_{q_1}n_{q_2}n_{q_3}\f$ are directly accessible.
@@ -398,7 +401,7 @@ class PdgCode {
       std::uint32_t             :  4;
       /// the quark digits n_q{1,2,3}_
       std::uint32_t quarks_     : 12;
-      // the excitation digits n_, n_R_, n_L_
+      /// the excitation digits n_, n_R_, n_L_
       std::uint32_t excitation_ : 12, : 4;
 #else
       std::uint32_t : 4, excitation_ : 12;
@@ -429,10 +432,11 @@ class PdgCode {
     return (inp & 0x0f);
   }
 
-  // takes a string and sets the fields.
+  /// takes a string and sets the fields.
   inline void set_from_string(const std::string& codestring) {
     digits_.antiparticle_ = false;
-    digits_.n_ = digits_.n_R_ = digits_.n_L_ = digits_.n_q1_ = digits_.n_q2_ = digits_.n_q3_ = digits_.n_J_ = 0;
+    digits_.n_ = digits_.n_R_ = digits_.n_L_ = digits_.n_q1_ = digits_.n_q2_ =
+                                digits_.n_q3_ = digits_.n_J_ = 0;
     size_t length = codestring.size();
     if (length < 1) {
       throw InvalidPdgCode("Empty string does not contain PDG Code\n");
@@ -442,40 +446,41 @@ class PdgCode {
     // and advance to next char.
     if (codestring[c] == '-') {
       digits_.antiparticle_ = true;
-      c++;
+      ++c;
     } else if (codestring[c] == '+') {
       digits_.antiparticle_ = false;
-      c++;
+      ++c;
     }
     // save if the first character was a sign:
     unsigned int sign = c;
     // codestring shouldn't be longer than 7 + sign.
-    if (length > 7+sign) {
+    if (length > 7 + sign) {
       throw InvalidPdgCode("String \"" + codestring +
                            "\" too long for PDG Code\n");
     }
+    // please note that in what follows, we actually need c++, not ++c.
     // codestring has 7 digits? 7th from last goes in n_.
-    if (length > 6+sign) {
+    if (length > 6 + sign) {
       digits_.n_ = get_digit_from_char(codestring[c++]);
     }
     // it has 6 or 7 digits? 6th from last is n_R_.
-    if (length > 5+sign) {
+    if (length > 5 + sign) {
       digits_.n_R_ = get_digit_from_char(codestring[c++]);
     }
     // 5th from last is n_L_.
-    if (length > 4+sign) {
+    if (length > 4 + sign) {
       digits_.n_L_ = get_digit_from_char(codestring[c++]);
     }
     // 4th from last is n_q1_.
-    if (length > 3+sign) {
+    if (length > 3 + sign) {
       digits_.n_q1_ = get_digit_from_char(codestring[c++]);
     }
     // 3rd from last is n_q2_.
-    if (length > 2+sign) {
+    if (length > 2 + sign) {
       digits_.n_q2_ = get_digit_from_char(codestring[c++]);
     }
     // next to last is n_q3_.
-    if (length > 1+sign) {
+    if (length > 1 + sign) {
       digits_.n_q3_ = get_digit_from_char(codestring[c++]);
     }
     // last digit is the spin degeneracy.
@@ -491,7 +496,7 @@ class PdgCode {
    * the constructors.
    **/
   inline void set_fields(std::uint32_t abscode) {
-    // dump_ = overwrites antiparticle_, but this needs to have been set
+    // "dump_ =" overwrites antiparticle_, but this needs to have been set
     // already, so we carry it around the assignment.
     bool ap = digits_.antiparticle_;
     dump_ = abscode & 0x0fffffff;

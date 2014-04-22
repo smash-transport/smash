@@ -21,7 +21,7 @@ std::istream& operator>>(std::istream& is, PdgCode& code) {
     codestring += is.get();
   }
   // read a maximum of 7 characters
-  for (int c = 0; c < 7; c++) {
+  for (int c = 0; c < 7; ++c) {
     // look into the string. Is it a valid character?
     try {
       code.get_digit_from_char(is.peek());
@@ -53,9 +53,9 @@ unsigned int PdgCode::isospin_total() const {
     return 0;
   }
   int number_of_u_or_d_quarks = 0;
-  if (digits_.n_q3_ == 2 || digits_.n_q3_ == 1) { number_of_u_or_d_quarks++; }
-  if (digits_.n_q2_ == 2 || digits_.n_q2_ == 1) { number_of_u_or_d_quarks++; }
-  if (digits_.n_q1_ == 2 || digits_.n_q1_ == 1) { number_of_u_or_d_quarks++; }
+  if (digits_.n_q3_ == 2 || digits_.n_q3_ == 1) { ++number_of_u_or_d_quarks; }
+  if (digits_.n_q2_ == 2 || digits_.n_q2_ == 1) { ++number_of_u_or_d_quarks; }
+  if (digits_.n_q1_ == 2 || digits_.n_q1_ == 1) { ++number_of_u_or_d_quarks; }
   // Δ and N distinction. I don't know any smart algorithm for this; I am
   // confident that special casing is the only way to do that.
   if (number_of_u_or_d_quarks == 3) {
@@ -111,8 +111,8 @@ int PdgCode::heavy_quarkness(const int quark) const {
   }
   // baryons: count quarks.
   if (baryon_number() != 0) {
-    // u,s,b quarks get negative *ness; d,c,t have positive *ness:
-    int sign = (quark%2 == 0) ? +1 : -1;
+    // d,s,b quarks get negative *ness; u,c,t have positive *ness:
+    int sign = (quark % 2 == 0) ? +1 : -1;
     // and for anti-baryons, the sign changes:
     sign *= antiparticle_sign();
     return sign*((digits_.n_q1_ == quark) + (digits_.n_q2_ == quark)
@@ -133,8 +133,8 @@ int PdgCode::heavy_quarkness(const int quark) const {
   }
   // ours is the lighter: If the heavier quark has the same SIGN, we
   // get a -1, else +1.
-  if (otherquark%2 == quark%2) {
-    return -1*antiparticle_sign();
+  if (otherquark % 2 == quark %  2) {
+    return -1 * antiparticle_sign();
   }
   return antiparticle_sign();
 }
