@@ -75,6 +75,7 @@ class Nucleus {
    * and 7 neutrons). The particles are only created, no position or
    * momenta are yet assigned.
    *
+   * \param particle_list The particles that are added.
    * \param testparticles Number of test particles to use.
    *
    **/
