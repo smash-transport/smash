@@ -25,7 +25,21 @@ namespace Smash {
  * \code
  * #include "include/pdgcode.h"
  *
- * // needs to be filled.
+ * // initalize with an integer: make sure it is hex-encoded!
+ * PdgCode pi_plus(0x211);
+ * // initalize from a string:
+ * PdgCode pi_minus("-211");
+ * // initialize default:
+ * PdgCode other_particle();
+ * // this is true:
+ * if (other_particle == PdgCode::invalid()) {
+ *   printf("Invalid particle! Please enter PDG Code: ");
+ *   // fill from stringstream:
+ *   std::cin >> other_particle;
+ * }
+ * if (pi_plus.multiplett() == other_particle.multiplett()) {
+ *   printf("The other particle is a 0^-- meson.\n");
+ * }
  * \endcode
  *
  * This class is simpy a collection of smart accessors to a 32 bit long
@@ -35,6 +49,20 @@ namespace Smash {
  * interpreted as '0x221', which is what an eta-meson has (that 545 is
  * also its approximate mass in MeV is, I promise, a complete
  * coincidence).
+ *
+ * Limitations:
+ * ------------
+ *
+ * The code is tuned to non-colored objects at the moment. That means
+ * that neither Diquarks nor Quarks are easily useable with this class;
+ * the behaviour of functions baryon_number, charge, is_hadron etc. is
+ * undefined. (This is mostly because these things are not well-defined,
+ * and/or because the charge and baryon number is not an integer anymore.)
+ *
+ * Also, tetra- and pentaquarks as well as compound objects (small or
+ * large nuclei) cannot be represented; that, though, is a problem of
+ * the PDG Numbering Scheme rather than of this class.
+ *
  **/
 
 class PdgCode {
