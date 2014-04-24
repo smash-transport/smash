@@ -122,7 +122,8 @@ TEST(shift_zero) {
   UnitTest::setFuzzyness<double>(10);
   FUZZY_COMPARE(postcenter.x1(), precenter.x1());
   FUZZY_COMPARE(postcenter.x2(), precenter.x2());
-  FUZZY_COMPARE(postcenter.x3(), precenter.x3()-lead.nuclear_radius());
+  COMPARE_RELATIVE_ERROR(postcenter.x3(), precenter.x3()-lead.nuclear_radius(),
+                         0.2);
 }
 
 TEST(shift_x) {
@@ -135,10 +136,11 @@ TEST(shift_x) {
   // shift only in x.
   lead.shift(true, 0, 4.0, 0.0);
   FourVector postcenter = lead.center();
-  UnitTest::setFuzzyness<double>(10);
+  UnitTest::setFuzzyness<double>(150);
   FUZZY_COMPARE(postcenter.x1(), precenter.x1()+4.0);
   FUZZY_COMPARE(postcenter.x2(), precenter.x2());
-  FUZZY_COMPARE(postcenter.x3(), precenter.x3()-lead.nuclear_radius());
+  COMPARE_RELATIVE_ERROR(postcenter.x3(), precenter.x3()-lead.nuclear_radius(),
+                        0.2);
 }
 
 TEST(shift_z) {
@@ -156,7 +158,8 @@ TEST(shift_z) {
   UnitTest::setFuzzyness<double>(10);
   FUZZY_COMPARE(postcenter.x1(), precenter.x1());
   FUZZY_COMPARE(postcenter.x2(), precenter.x2());
-  FUZZY_COMPARE(postcenter.x3(), precenter.x3()-lead.nuclear_radius()+4.0);
+  COMPARE_RELATIVE_ERROR(postcenter.x3(),
+      precenter.x3() - lead.nuclear_radius() + 4.0, 0.2);
 }
 
 // test the woods-saxon distribution at various discrete points:
