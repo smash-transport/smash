@@ -50,43 +50,51 @@ class FourVector {
   double inline DotThree(const FourVector &a) const;
   double inline DotThree() const;
   double inline DiffThree(const FourVector &a) const;
-  /**
+  /** Returns the FourVector boosted with velocity.
+   *
+   * The current FourVector is not changed.
+   *
+   * \param velocity (\f$w^{"\mu"}\f$) is not a physical FourVector, but
+   * a collection of 1 for the time-like component and \f$\vec v\f$ for
+   * the space-like components. In other words, it is \f$\gamma^{-1}
+   * u^\mu\f$ with \f$u^\mu\f$ being the physical Four-Velocity.
+   *
+   * Algorithmic
+   * -----------
+   *
+   * (Note: \f$\vec a\f$ is a Three-Vector, \f$a^\mu\f$ is a Four-Vector
+   * and \f$a^{"\mu"}\f$ is a Pseudo-Four-Vector object.)
+   *
+   * The gamma factor \f$\gamma = 1/\sqrt{1-(v_1^2+v_2^2+v_3^2)}\f$
+   * needed in the boost can be calculated from velocity as the
+   * "invariant square" of a physical FourVector:
+   *
    * \f[
-   * \vec{u} = (1, \vec{v}) = (1, v_1, v_2, v_3)\\
-   * \vec{u}^2 = 1 - v_1^2 - v_2^2 - v_3^2
+   * w^{"\mu"} = (1, \vec{v}) = (1, v_1, v_2, v_3)\\
+   * w^{"\mu"} w_{"\mu"} = 1 - v_1^2 - v_2^2 - v_3^2\\
+   * = \gamma^{-2}
    * \f]
    *
+   * The time-like component of a Lorentz-boosted FourVector \f$x^\mu =
+   * (x_0, x_1, x_2, x_3) = (x_0, \vec{r})\f$ with velocity \f$\vec v\f$
+   * is
+   *
    * \f{eqnarray*}{
-   * \gamma&=&\frac{1}{\sqrt{1 - \vec{v}^2}}\\
-   *       &=&\frac{1}{\sqrt{1 - v_1^2 - v_2^2 - v_3^2}}\\
-   *       &=&\frac{1}{\sqrt{\vec{u}^2}}
+   * x^\prime_0&=&\gamma \cdot (x_0 - \vec{r}\cdot\vec{v})\\
+   *     &=&\gamma \cdot (x_0 \cdot 1 - x_1 \cdot v_1 - x_2 \cdot v_2 - x_3 \cdot v_3)\\
+   *     &=&\gamma \cdot (x^\mu \cdot w_{"\mu"}),
    * \f}
    *
-   * Lorentz boost for a four-vector:
-   * \f[
-   * \vec{x} = (x_0, x_1, x_2, x_3) = (x_0, \vec{r})
-   * \f]
-   *
-   * and velocity
-   * \f[
-   * \vec{u} = (1, v_1, v_2, v_3) = (1, \vec{v})
-   * \f]
-   *
-   * (\f$\vec{r}\f$ and \f$\vec{v}\f$ 3-vectors):
+   * and the space-like components i = 1, 2, 3 are:
    * \f{eqnarray*}{
-   * x'_0&=&\gamma \cdot (x_0 - \vec{r}\cdot\vec{v})\\
-   *     &=&\gamma \cdot (x_0 - x_1 \cdot v_1 - x_2 \cdot v_2 - x_3 \cdot v_3)\\
-   *     &=&\gamma \cdot (\vec{x}\cdot\vec{u})
-   * \f}
-   *
-   * For i = 1, 2, 3:
-   * \f{eqnarray*}{
-   * x'_i&=&x_i + v_i \cdot (\frac{\gamma - 1}{\vec{v}^2} \cdot \vec{r}\cdot\vec{v} - \gamma \cdot x_0)\\
+   * x^\prime_i&=&x_i + v_i \cdot (\frac{\gamma - 1}{\vec{v}^2} \cdot \vec{r}\cdot\vec{v} - \gamma \cdot x_0)\\
    *     &=&x_i + v_i \cdot (\frac{\gamma^2}{\gamma + 1} \cdot \vec{r}\cdot\vec{v} - \gamma \cdot x_0)\\
-   *     &=&x_i - \gamma \cdot v_i \cdot (\frac{\gamma}{\gamma + 1} \vec{x}\cdot\vec{u} + \frac{x_0}{\gamma + 1})
+   *     &=&x_i - v_i \cdot \gamma \cdot (\frac{\gamma}{\gamma + 1} x^\mu\cdot w_{"\mu"} + \frac{x_0}{\gamma + 1})\\
+   *     &=&x_i - v_i \cdot \frac{\gamma}{\gamma + 1} \cdot (\gamma x^\mu\cdot w_{"\mu"} + x_0) \\
+   *     &=&x_i - v_i \cdot \frac{\gamma}{\gamma + 1} \cdot (x^\prime_0 + x_0)
    * \f}
    */
-  FourVector LorentzBoost(const FourVector &b) const;
+  FourVector LorentzBoost(const FourVector &velocity) const;
 
   /* overloaded operators */
   bool inline operator==(const FourVector &a) const;
