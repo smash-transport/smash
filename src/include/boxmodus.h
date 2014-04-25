@@ -34,12 +34,6 @@ class BoxModus : public ModusDefault {
 
   int sanity_check(Particles *particles);
 
-  void check_collision_geometry(Particles *particles,
-                                CrossSections *cross_sections,
-                                std::list<int> *collision_list,
-                                size_t *rejection_conflict,
-                                const ExperimentParameters &parameters);
-
   void propagate(Particles *particles, const ExperimentParameters &parameters);
 
  private:

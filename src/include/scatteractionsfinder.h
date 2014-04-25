@@ -16,6 +16,8 @@
 
 namespace Smash {
 
+/* A simple scatter finder:
+ * Just loops through all particles and checks each pair for a collision.  */
 class ScatterActionsFinder : public ActionFinderFactory {
  public:
   /* Check for a single pair of particles (id_a, id_b) if a collision will happen
@@ -33,6 +35,9 @@ class ScatterActionsFinder : public ActionFinderFactory {
  private:
 };
 
+
+/* An advanced scatter finder:
+ * Sets up a grid and sorts the particles into grid cells. */
 class GridScatterFinder : public ScatterActionsFinder {
  public:
   GridScatterFinder (float length);

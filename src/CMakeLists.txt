@@ -33,7 +33,7 @@ endif()
 
 # list the source files
 set(smash_src action.cc boxmodus.cc
-        clebschgordan.cc collisions.cc collidermodus.cc configuration.cc cross-sections.cc
+        clebschgordan.cc collidermodus.cc configuration.cc cross-sections.cc
         decayaction.cc decayactionsfinder.cc distributions.cc
         experiment.cc fourvector.cc
         modusdefault.cc

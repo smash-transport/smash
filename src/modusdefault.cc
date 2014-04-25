@@ -10,41 +10,11 @@
 #include <list>
 
 #include "include/modusdefault.h"
-#include "include/collisions.h"
 #include "include/constants.h"
 #include "include/experiment.h"
 #include "include/outputroutines.h"
 
 namespace Smash {
-
-// check particle pairs for collision
-void ModusDefault::check_collision_geometry(
-    Particles *particles, CrossSections *cross_sections,
-    std::list<int> *collision_list, size_t *rejection_conflict,
-    const ExperimentParameters &parameters) {
-  FourVector distance;
-  double neighborhood_radius_squared =
-      parameters.cross_section * fm2_mb * M_1_PI * 4;
-  for (const ParticleData &data : particles->data()) {
-    for (const ParticleData &data2 : particles->data()) {
-      /* exclude check on same particle and double counting */
-      if (data.id() >= data2.id()) {
-        continue;
-      }
-      distance = data.position() - data2.position();
-      /* skip particles that are double interaction radius length away
-       * (3-product gives negative values
-       * with the chosen sign convention for the metric)
-       */
-      if (-distance.DotThree() > neighborhood_radius_squared) {
-        continue;
-      }
-      collision_criteria_geometry(particles, cross_sections, collision_list,
-                                  parameters.eps, data.id(), data2.id(),
-                                  rejection_conflict);
-    }
-  }
-}
 
 /*general propagation routine */
 void ModusDefault::propagate(Particles *particles,

@@ -50,15 +50,6 @@ class ModusDefault {
   /**
    * XXX: document what it does in general
    */
-  void check_collision_geometry(Particles *particles,
-                                CrossSections *cross_sections,
-                                std::list<int> *collision_list,
-                                size_t *rejection_conflict,
-                                const ExperimentParameters &parameters);
-
-  /**
-   * XXX: document what it does in general
-   */
   void propagate(Particles *particles, const ExperimentParameters &parameters);
 
   /** BadInput is an error to throw if the configuration options are invalid.
