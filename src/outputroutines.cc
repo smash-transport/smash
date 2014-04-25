@@ -132,18 +132,6 @@ void printd_list(const std::list<int> &collision_list) {
   printd("\n");
 }
 
-/* write_oscar_header - OSCAR header format */
-void write_oscar_header(void) {
-  FILE *fp;
-
-  fp = fopen("data/collision.dat", "w");
-  fprintf(fp, "# OSC1999A\n");
-  fprintf(fp, "# Interaction history\n");
-  fprintf(fp, "# smash \n");
-  fprintf(fp, "# \n");
-  fclose(fp);
-}
-
 /**
  *  write_oscar_event_block
  *  - writes the initial and final particle information of an event

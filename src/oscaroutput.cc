@@ -10,12 +10,17 @@
 #include "include/oscaroutput.h"
 #include "include/particles.h"
 #include "include/outputroutines.h"
+#include "include/filedeleter.h"
 
 namespace Smash {
 
 OscarOutput::OscarOutput(boost::filesystem::path path)
     : base_path_(std::move(path)) {
-  write_oscar_header();
+  std::unique_ptr<FILE> fp{fopen("data/collision.dat", "w")};
+  fprintf(fp.get(), "# OSC1999A\n");
+  fprintf(fp.get(), "# Interaction history\n");
+  fprintf(fp.get(), "# smash \n");
+  fprintf(fp.get(), "# \n");
 }
 
 OscarOutput::~OscarOutput() {}

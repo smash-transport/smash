@@ -46,7 +46,6 @@ void printd_momenta(const char *message, const ParticleData &particle);
 void printd_list(const std::list<int> &collision_list);
 
 /* output data files */
-void write_oscar_header(void);
 void write_oscar_event_block(const Particles *particles,
                              size_t initial, size_t final, int event_id);
 /**
