@@ -43,9 +43,6 @@ if(CPPLINT)
       ${PROJECT_SOURCE_DIR}/src/*.cc)
    set(CPPLINT_ARGS --filter=-build/include_order,-readability/streams,-build/include ${CPPLINT_ARGS})
    message(STATUS "cpplint.py found at ${CPPLINT}")
-   add_test(NAME cclint COMMAND ${CPPLINT} ${CPPLINT_ARGS}
-      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-      )
    add_custom_target(run_cclint
       COMMAND ${CPPLINT} ${CPPLINT_ARGS}
       WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
