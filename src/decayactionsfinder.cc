@@ -9,6 +9,7 @@
 
 #include "include/decayactionsfinder.h"
 
+#include <algorithm>    // std::sort
 
 namespace Smash {
 
@@ -47,6 +48,9 @@ std::vector<ActionPtr> DecayActionsFinder::find_possible_actions(Particles *part
       actions.emplace_back(new DecayAction(in_part,0.,2));
     }
   }
+
+  /* Sort action list by time. */
+  std::sort (actions.begin(), actions.end());
 
   return actions;
 }

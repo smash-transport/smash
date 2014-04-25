@@ -26,11 +26,23 @@ class ScatterActionsFinder : public ActionFinderFactory {
 
   /* Check the whole particle list for collisions and return a list of Action objects. */
   std::vector<ActionPtr> find_possible_actions(Particles *particles,
-					       const ExperimentParameters &parameters,
-					       CrossSections *cross_sections = nullptr)
+						const ExperimentParameters &parameters,
+						CrossSections *cross_sections = nullptr)
       const override;
 
  private:
+};
+
+class GridScatterFinder : public ScatterActionsFinder {
+ public:
+  GridScatterFinder (float length);
+  std::vector<ActionPtr> find_possible_actions(Particles *particles,
+						const ExperimentParameters &parameters,
+						CrossSections *cross_sections = nullptr)
+      const override;
+ private:
+  /* Cube edge length. */
+  const float length_;
 };
 
 }  // namespace Smash
