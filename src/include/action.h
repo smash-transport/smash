@@ -54,8 +54,9 @@ class Action {
   float time_of_execution_;
   std::vector<ProcessBranch> subprocesses_;  /* list of possible subprocesses  */
   float total_weight_;                       /* sum of all subprocess weights  */
+  /* Type of interaction: 0=elastic collision, 1=resonance formation, 2=decay */
   int interaction_type_;
-  std::vector<int> outgoing_particles_;
+  std::vector<int> outgoing_particles_;      /* PDG codes of final-state particles  */
 };
 
 

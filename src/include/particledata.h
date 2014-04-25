@@ -24,10 +24,10 @@ class ParticleData {
  public:
   /// Use improbable values for default constructor
   ParticleData() :id_(-1), pdgcode_(-1), id_partner_(-1), id_process_(-1),
-    collision_time_(0.0), process_type_(-1) {}
+    collision_time_(0.0) {}
   /// Use improbable values for constructor
   explicit ParticleData(int i) :id_(i), pdgcode_(-1), id_partner_(-1),
-    id_process_(-1), collision_time_(0.0), process_type_(-1) {}
+    id_process_(-1), collision_time_(0.0) {}
   inline int id(void) const;
   inline void set_id(int id);
   inline int pdgcode(void) const;
@@ -37,13 +37,8 @@ class ParticleData {
   inline int id_process(void) const;
   inline void set_id_process(int id);
   inline double collision_time(void) const;
-  inline int process_type(void) const;
-//   inline const std::vector<int> &final_state(void) const;
   inline void set_collision_time(const double &collision_time);
-  inline void set_collision(int process_type, const double &collision_time,
-                            int collision_id);
-  inline void set_collision(int process_type, const double &collision_time,
-                int collision_id, std::vector<int> product_particles);
+  inline void set_collision(const double &collision_time,int collision_id);
   inline void set_collision_past(int process_id);
   inline const FourVector &momentum(void) const;
   inline void set_momentum(const FourVector &momentum_vector);
@@ -76,15 +71,6 @@ class ParticleData {
   int id_process_;
   /// collision time
   double collision_time_;
-  /**
-   *  Type of interaction.
-   * 0: elastic collision,
-   * 1: resonance formation,
-   * 2: decay
-   */
-  int process_type_;
-  /// PDG codes of final state particles
-  std::vector<int> final_state_;
   /// momenta of the particle: x0, x1, x2, x3 as E, px, py, pz
   FourVector momentum_;
   /// position in space: x0, x1, x2, x3 as t, x, y, z
@@ -136,42 +122,16 @@ inline double ParticleData::collision_time(void) const {
   return collision_time_;
 }
 
-/// return process type
-inline int ParticleData::process_type(void) const {
-  return process_type_;
-}
-
-/// return final state
-// inline const std::vector<int> &ParticleData::final_state(void) const {
-//   return final_state_;
-// }
-
 /// set possible collision time
 inline void ParticleData::set_collision_time(const double &collision_t) {
   collision_time_ = collision_t;
 }
 
 /// set possible collision data
-inline void ParticleData::set_collision(int proc_type,
+inline void ParticleData::set_collision(
   const double &collision_t, int id_b) {
-  process_type_ = proc_type;
   collision_time_ = collision_t;
   id_partner_ = id_b;
-  if (proc_type == -1 && !final_state_.empty())
-    final_state_.clear();
-}
-
-/// set possible collision data with custom final state
-inline void ParticleData::set_collision(int proc_type,
-  const double &collision_t, int id_b, std::vector<int> product_particles) {
-  process_type_ = proc_type;
-  collision_time_ = collision_t;
-  id_partner_ = id_b;
-  if (!product_particles.empty()) {
-    final_state_ = product_particles;
-  } else {
-    final_state_.clear();
-  }
 }
 
 /// set happened collision data
@@ -179,8 +139,6 @@ inline void ParticleData::set_collision_past(int id_counter) {
   collision_time_ = 0.0;
   id_process_ = id_counter;
   id_partner_ = -1;
-  if (!final_state_.empty())
-    final_state_.clear();
 }
 
 /// return the particle four momentum
