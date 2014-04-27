@@ -24,28 +24,6 @@ Action::Action(const std::vector<int> &in_part, float time_of_execution,
 
 Action::~Action() {}
 
-// return first incoming particle
-int Action::in1() const
-{
-  return ingoing_particles_[0];
-}
-
-// return second incoming particle
-int Action::in2() const
-{
-  return ingoing_particles_[1];
-}
-
-/// return process type
-int Action::process_type(void) const {
-  return interaction_type_;
-}
-
-/// return final state
-const std::vector<int> &Action::final_state(void) const {
-  return outgoing_particles_;
-}
-
 float Action::weight(void) const
 {
   return total_weight_;

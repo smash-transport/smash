@@ -24,19 +24,11 @@ class Action {
   Action(const std::vector<int> &in_part, float time_of_execution, int interaction_type);
   virtual ~Action();
 
-  /**
-   * for sorting by time of execution
-   */
+  /* For sorting by time of execution. */
   bool operator<(const Action &rhs) const {
     return time_of_execution_ < rhs.time_of_execution_;
   }
 
-  /* Return the first and second incoming particle.  */
-  int in1() const;
-  int in2() const;
-
-  int process_type(void) const;
-  const std::vector<int> &final_state(void) const;
   float weight(void) const;
 
   /* These functions add new subprocesses.  */
@@ -49,7 +41,7 @@ class Action {
   /* Actually perform the action, e.g. carry out a decay or scattering.  */
   virtual void perform (Particles *particles, size_t &id_process) = 0;
 
- private:
+ protected:
   std::vector<int> ingoing_particles_;
   float time_of_execution_;
   std::vector<ProcessBranch> subprocesses_;  /* list of possible subprocesses  */

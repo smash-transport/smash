@@ -296,12 +296,11 @@ static int resonance_decay(Particles *particles, int particle_id) {
 void DecayAction::perform (Particles *particles, size_t &id_process)
 {
   FourVector velocity_CM;
-  int id_a = this->in1();
-  int interaction_type = this->process_type();
+  int id_a = ingoing_particles_[0];
 
-  if (interaction_type != 2)
+  if (interaction_type_ != 2)
     printf("Decays warning: ID %i (%s) has process type %i.\n",
-	  id_a, particles->type(id_a).name().c_str(), interaction_type);
+	  id_a, particles->type(id_a).name().c_str(), interaction_type_);
 
   /* Save a copy of the initial state */
   ParticleData initial_data = particles->data(id_a);
@@ -389,7 +388,7 @@ void DecayAction::perform (Particles *particles, size_t &id_process)
   momentum_difference -= final_momentum;
   if (fabs(momentum_difference.x0()) > really_small) {
     printf("Process %zu type %i particle %s decay to %s and %s ",
-      id_process, interaction_type, particles->type(id_a).name().c_str(),
+      id_process, interaction_type_, particles->type(id_a).name().c_str(),
 	    particles->type(id_new_a).name().c_str(),
 	    particles->type(id_new_b).name().c_str());
     if (new_particles == 3) {
@@ -397,17 +396,17 @@ void DecayAction::perform (Particles *particles, size_t &id_process)
     }
     printf("time %g\n", initial_data.position().x0());
     printf("Warning: Interaction type %i E conservation violation %g\n",
-	    interaction_type, momentum_difference.x0());
+	    interaction_type_, momentum_difference.x0());
   }
   if (fabs(momentum_difference.x1()) > really_small)
     printf("Warning: Interaction type %i px conservation violation %g\n",
-	    interaction_type, momentum_difference.x1());
+	    interaction_type_, momentum_difference.x1());
   if (fabs(momentum_difference.x2()) > really_small)
     printf("Warning: Interaction type %i py conservation violation %g\n",
-	    interaction_type, momentum_difference.x2());
+	    interaction_type_, momentum_difference.x2());
   if (fabs(momentum_difference.x3()) > really_small)
     printf("Warning: Interaction type %i pz conservation violation %g\n",
-	    interaction_type, momentum_difference.x3());
+	    interaction_type_, momentum_difference.x3());
 
   /* Remove decayed particle */
   particles->remove(id_a);
