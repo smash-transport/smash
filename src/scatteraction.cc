@@ -27,6 +27,17 @@ void ScatterAction::perform (Particles *particles, size_t &id_process)
   /* Relevant particle IDs for the collision. */
   int id_a = ingoing_particles_[0];
   int id_b = ingoing_particles_[1];
+
+  /* Check if particles still exist. */
+  if (!particles->has_data(id_a)) {
+    printd("ScatterAction::perform: ID %i not found!\n", id_a);
+    return;
+  }
+  if (!particles->has_data(id_b)) {
+    printd("ScatterAction::perform: ID %i not found!\n", id_b);
+    return;
+  }
+
   FourVector initial_momentum(particles->data(id_a).momentum()
     + particles->data(id_b).momentum());
   FourVector final_momentum;

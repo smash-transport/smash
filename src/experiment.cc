@@ -118,7 +118,6 @@ void Experiment<Modus>::run_time_evolution() {
   std::vector<ActionPtr> decay_actions, scatter_actions;
   size_t interactions_total = 0, previous_interactions_total = 0,
          interactions_this_interval = 0;
-  size_t rejection_conflict = 0;
   print_measurements(particles_, interactions_total,
                      interactions_this_interval, energy_initial_, time_start_);
 
@@ -156,7 +155,6 @@ void Experiment<Modus>::run_time_evolution() {
       print_measurements(particles_, interactions_total,
                          interactions_this_interval, energy_initial_,
                          time_start_);
-      printd("Ignored collisions %zu\n", rejection_conflict);
       /* save evolution data */
       for (auto &output : outputs_) {
         output->write_state(particles_);
@@ -171,7 +169,6 @@ void Experiment<Modus>::run_time_evolution() {
                                   particles_.size());
     } else {
       print_tail(time_start_, 0);
-      printf("Total ignored collisions: %zu\n", rejection_conflict);
     }
   }
 }

@@ -84,42 +84,6 @@ ScatterActionsFinder::check_collision(int id_a, int id_b, Particles *particles,
 	  distance_squared);
   }
 
-  /* TODO: handle minimal collision time of both particles */
-//       if (unlikely(particles->data(id_a).collision_time() > 0.0)) {
-// 	int id_not = particles->data(id_a).id_partner();
-// 	printd("Not colliding particle %d <-> %d\n", id_a, id_not);
-// 	/* unset collision partner to zero time and unexisting id */
-// 	if (particles->count(id_not) > 0)
-// 	  particles->data_pointer(id_not)->set_collision(-1, 0.0, -1);
-// 	/* remove any of those partners from the list */
-// 	if (id_a < id_not) {
-// 	  printd("Removing particle %d from collision list\n", id_a);
-// 	  collision_list->remove(id_a);
-// 	} else {
-// 	  printd("Removing particle %d from collision list\n", id_not);
-// 	  collision_list->remove(id_not);
-// 	}
-// 	/* collect statistics of multiple possible collision partner */
-// 	(*rejection_conflict)++;
-//       }
-//       if (unlikely(particles->data(id_b).collision_time() > 0.0)) {
-// 	int id_not = particles->data(id_b).id_partner();
-// 	printd("Not colliding particle %d <-> %d\n", id_b, id_not);
-//     /* unset collision partner to zero time and unexisting id */
-// 	if (particles->count(id_not) > 0)
-// 	  particles->data_pointer(id_not)->set_collision(-1, 0.0, -1);
-// 	/* remove any of those partners from the list */
-// 	if (id_b < id_not) {
-// 	  printd("Removing particle %d from collision list\n", id_b);
-// 	  collision_list->remove(id_b);
-// 	} else {
-// 	  printd("Removing particle %d from collision list\n", id_not);
-// 	  collision_list->remove(id_not);
-// 	}
-// 	/* collect statistics of multiple possible collision partner */
-// 	(*rejection_conflict)++;
-//       }
-
   /* Decide for a particular final state. */
   act->decide();
 

@@ -298,6 +298,12 @@ void DecayAction::perform (Particles *particles, size_t &id_process)
   FourVector velocity_CM;
   int id_a = ingoing_particles_[0];
 
+  /* Check if particle still exists. */
+  if (!particles->has_data(id_a)) {
+    printf("ScatterAction::perform: ID %i not found!\n", id_a);
+    return;
+  }
+
   if (interaction_type_ != 2)
     printf("Decays warning: ID %i (%s) has process type %i.\n",
 	  id_a, particles->type(id_a).name().c_str(), interaction_type_);
