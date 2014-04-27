@@ -35,9 +35,21 @@ set(CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}" CACHE
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W -Wall -Wextra -Wmissing-declarations -Wpointer-arith -Wshadow -Wuninitialized -Winit-self -Wfloat-equal -Wundef -Wcast-align -Wformat=2 -std=c++11")
 
-# use C++ 11 standard
-#set(CMAKE_CXX_FLAGS “${CMAKE_CXX_FLAGS} “)
-#add_definitions()
+# check that C++11 code compiles
+include(CheckCXXSourceCompiles)
+CHECK_CXX_SOURCE_COMPILES("
+#include <initializer_list>
+struct A {};
+struct B : public A { using A::A; };
+template<typename T = void> int f() { return 1; }
+int main() {
+  auto l = []() { return f(); };
+  return l() - 1;
+}
+" CXX11_COMPILES)
+if(NOT CXX11_COMPILES)
+   message(FATAL_ERROR "Your compiler did not manage to compile a simple C++11 program. Please get a newer C++ compiler.")
+endif()
 
 # enable debug preprocessor variable
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
