@@ -5,6 +5,8 @@ string(REPLACE "-Winline " "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 add_executable(angles_distribution angles_distribution.cc ../random.cc)
 add_executable(angles_zero angles_zero.cc ../random.cc)
 add_executable(clebschgordan clebschgordan.cc ../clebschgordan.cc)
+add_executable(fourvector fourvector.cc)
+add_executable(lorentzboost lorentzboost.cc ../fourvector.cc ../random.cc)
 add_executable(pdgcode pdgcode.cc ../pdgcode.cc)
 add_executable(woods-saxon woods-saxon.cc ../nucleus.cc ../fourvector.cc
                 ../random.cc)
