@@ -132,31 +132,6 @@ void printd_list(const std::list<int> &collision_list) {
   printd("\n");
 }
 
-/**
- *  write_oscar_event_block
- *  - writes the initial and final particle information of an event
- */
-void write_oscar_event_block(const Particles *particles,
-                             size_t initial, size_t final, int event_id) {
-  FILE *fp;
-  fp = fopen("data/collision.dat", "a");
-  /* OSCAR line prefix : initial particles; final particles; event id
-   * First block of an event: initial = 0, final = number of particles
-   * Vice versa for the last block
-   */
-  fprintf(fp, "%zu %zu %i\n", initial, final, event_id);
-  for (const ParticleData &data : particles->data()) {
-    fprintf(fp, "%i %s %i %g %g %g %g %g %g %g %g %g \n",
-            data.id(), data.pdgcode().string().c_str(), 0,
-            data.momentum().x1(), data.momentum().x2(),
-            data.momentum().x3(), data.momentum().x0(),
-            sqrt(data.momentum().Dot(data.momentum())),
-            data.position().x1(), data.position().x2(),
-            data.position().x3(), data.position().x0() - 1.0);
-  }
-  fclose(fp);
-}
-
 /* write_oscar - OSCAR file */
 /* Use this for the first particle in a process */
 void write_oscar(const ParticleData &particle_data,

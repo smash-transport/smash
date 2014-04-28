@@ -10,6 +10,7 @@
 #ifndef SRC_INCLUDE_PARTICLESOUTPUT_H_
 #define SRC_INCLUDE_PARTICLESOUTPUT_H_
 
+#include "filedeleter.h"
 #include "outputinterface.h"
 #include <boost/filesystem.hpp>
 
@@ -21,14 +22,20 @@ class OscarOutput : public OutputInterface {
   OscarOutput(boost::filesystem::path path);
   ~OscarOutput();
 
+  /// writes the initial particle information of an event
   void at_eventstart(const Particles &particles, const int event_number) override;
+  /// writes the final particle information of an event
   void at_eventend(const Particles &particles, const int event_number) override;
+
   void after_collision() override;
   void before_collision() override;
   void after_Nth_timestep(const Particles &particles, const int event_number, const int timestep) override;
 
  private:
+  void write(const Particles &particles);
+
    const boost::filesystem::path base_path_;
+  FilePtr file_;
 };
 }  // namespace Smash
 

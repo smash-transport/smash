@@ -10,31 +10,51 @@
 #include "include/oscaroutput.h"
 #include "include/particles.h"
 #include "include/outputroutines.h"
-#include "include/filedeleter.h"
 
 namespace Smash {
 
 OscarOutput::OscarOutput(boost::filesystem::path path)
-    : base_path_(std::move(path)) {
-  std::unique_ptr<FILE> fp{fopen("data/collision.dat", "w")};
-  fprintf(fp.get(), "# OSC1999A\n");
-  fprintf(fp.get(), "# Interaction history\n");
-  fprintf(fp.get(), "# smash \n");
-  fprintf(fp.get(), "# \n");
+    : base_path_(std::move(path)),
+      file_{std::fopen("data/collision.dat", "w")} {
+  fprintf(file_.get(), "# OSC1999A\n");
+  fprintf(file_.get(), "# Interaction history\n");
+  fprintf(file_.get(), "# smash \n");
+  fprintf(file_.get(), "# \n");
 }
 
 OscarOutput::~OscarOutput() {}
 
 void OscarOutput::at_eventstart(const Particles &particles,
                                 const int event_number) {
-  /* Write the initial data block of the event */
-  write_oscar_event_block(&particles, 0, particles.size(), event_number + 1);
+  /* OSCAR line prefix : initial particles; final particles; event id
+   * First block of an event: initial = 0, final = number of particles
+   * Vice versa for the last block
+   */
+  const size_t zero = 0;
+  fprintf(file_.get(), "%zu %zu %i\n", zero, particles.size(), event_number + 1);
+  write(particles);
 }
 
 void OscarOutput::at_eventend(const Particles &particles,
                               const int event_number) {
-  /* Write the final data block of the event */
-  write_oscar_event_block(&particles, particles.size(), 0, event_number + 1);
+  /* OSCAR line prefix : initial particles; final particles; event id
+   * First block of an event: initial = 0, final = number of particles
+   * Vice versa for the last block
+   */
+  const size_t zero = 0;
+  fprintf(file_.get(), "%zu %zu %i\n", particles.size(), zero, event_number + 1);
+  write(particles);
+}
+
+void OscarOutput::write(const Particles &particles) {
+  for (const ParticleData &data : particles.data()) {
+    fprintf(file_.get(), "%i %s %i %g %g %g %g %g %g %g %g %g \n", data.id(),
+            data.pdgcode().string().c_str(), 0, data.momentum().x1(),
+            data.momentum().x2(), data.momentum().x3(), data.momentum().x0(),
+            sqrt(data.momentum().Dot(data.momentum())), data.position().x1(),
+            data.position().x2(), data.position().x3(),
+            data.position().x0() - 1.0);
+  }
 }
 
 void OscarOutput::before_collision() {}
