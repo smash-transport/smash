@@ -11,10 +11,11 @@
 
 #include <algorithm>    // std::sort
 
+#include "include/random.h"
+
 namespace Smash {
 
-std::vector<ActionPtr> DecayActionsFinder::find_possible_actions(Particles *particles, const ExperimentParameters &parameters, CrossSections *cross_sections) const
-{
+std::vector<ActionPtr> DecayActionsFinder::find_possible_actions(Particles *particles, const ExperimentParameters &parameters, CrossSections *cross_sections) const {
   std::vector<ActionPtr> actions;
   FourVector velocity_lrf;
   velocity_lrf.set_x0(1.0);
@@ -42,7 +43,7 @@ std::vector<ActionPtr> DecayActionsFinder::find_possible_actions(Particles *part
      * = (1 - width * Delta_t)^(t / Delta_t)
      * -> exp(-width * t) when Delta_t -> 0
      */
-    if (drand48() < resonance_frame_timestep * width / hbarc) {
+    if (Random::canonical() < resonance_frame_timestep * width / hbarc) {
       /* Time is up! Set the particle to decay at this timestep */
       in_part.push_back(id);
       actions.emplace_back(new DecayAction(in_part,0.,2));

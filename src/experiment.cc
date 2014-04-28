@@ -109,26 +109,27 @@ void Experiment<Modus>::initialize(const bf::path &/*path*/) {
   }
 }
 
+
 /* This is the loop over timesteps, carrying out collisions and decays
- * and propagating particles
- */
+ * and propagating particles. */
 template <typename Modus>
 void Experiment<Modus>::run_time_evolution() {
   modus_.sanity_check(&particles_);
-  std::vector<ActionPtr> decay_actions, scatter_actions;
   size_t interactions_total = 0, previous_interactions_total = 0,
          interactions_this_interval = 0;
   print_measurements(particles_, interactions_total,
                      interactions_this_interval, energy_initial_, time_start_);
 
   for (int step = 0; step < steps_; step++) {
+    std::vector<ActionPtr> decay_actions, scatter_actions;
 
     /* (1.a) Find possible decays. */
     decay_actions = decay_finder_.find_possible_actions(&particles_, parameters_);
     /* (1.b) Perform decays. */
     if (!decay_actions.empty()) {
-      for (auto act = decay_actions.begin(); act != decay_actions.end(); ++act)
+      for (auto act = decay_actions.begin(); act != decay_actions.end(); ++act) {
 	(*act)->perform (&particles_, interactions_total);
+      }
       decay_actions.clear();
       printd("Decay list done.\n");
     }
@@ -138,8 +139,9 @@ void Experiment<Modus>::run_time_evolution() {
 						parameters_, &cross_sections_);
     /* (2.b) Perform collisions. */
     if (!scatter_actions.empty()) {
-      for (auto act = scatter_actions.begin(); act != scatter_actions.end(); ++act)
+      for (auto act = scatter_actions.begin(); act != scatter_actions.end(); ++act) {
 	(*act)->perform (&particles_, interactions_total);
+      }
       scatter_actions.clear();
       printd("Collision list done.\n");
     }

@@ -54,7 +54,8 @@ class Action {
 
 class DecayAction : public Action {
  public:
-  DecayAction (const std::vector<int> &in_part, float time_of_execution, int interaction_type);
+  DecayAction (const std::vector<int> &in_part, float time_of_execution,
+	       int interaction_type);
   void perform (Particles *particles, size_t &id_process);
 };
 

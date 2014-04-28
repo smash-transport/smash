@@ -261,8 +261,28 @@ static int resonance_decay(Particles *particles, int particle_id) {
   }
   /* We found our decay branch, get the decay product pdgs and do the decay */
   size_t decay_particles = mode->particle_list().size();
-  int type_a = 0, type_b = 0, new_id_a = -1;
-  if (decay_particles > 3) {
+  int type_a = 0, type_b = 0, type_c = 0, new_id_a = -1;
+  switch (decay_particles) {
+  case 2:
+    type_a = mode->particle_list().at(0);
+    type_b = mode->particle_list().at(1);
+    if (abs(type_a) < 100 || abs(type_b) < 100) {
+      printf("Warning: decay products A: %i B: %i\n", type_a, type_b);
+    }
+    new_id_a = one_to_two(particles, particle_id, type_a, type_b);
+    break;
+  case 3:
+    type_a = mode->particle_list().at(0);
+    type_b = mode->particle_list().at(1);
+    type_c = mode->particle_list().at(2);
+    if (abs(type_a) < 100 || abs(type_b) < 100 || abs(type_c) < 100) {
+      printf("Warning: decay products A: %i B: %i C: %i\n",
+             type_a, type_b, type_c);
+    }
+    printd("Note: Doing 1->3 decay!\n");
+    new_id_a = one_to_three(particles, particle_id, type_a, type_b, type_c);
+    break;
+  default:
     printf("Warning: Not a 1->2 or 1->3 process!\n");
     printf("Number of decay particles: %zu \n", decay_particles);
     printf("Decay particles: ");
@@ -270,31 +290,13 @@ static int resonance_decay(Particles *particles, int particle_id) {
       printf("%i ", mode->particle_list().at(i));
     }
     printf("\n");
-  } else if (decay_particles == 2) {
-    type_a = mode->particle_list().at(0);
-    type_b = mode->particle_list().at(1);
-    if (abs(type_a) < 100 || abs(type_b) < 100) {
-      printf("Warning: decay products A: %i B: %i\n", type_a, type_b);
-    }
-    new_id_a = one_to_two(particles, particle_id, type_a, type_b);
-  } else if (decay_particles == 3) {
-    type_a = mode->particle_list().at(0);
-    type_b = mode->particle_list().at(1);
-    int type_c = mode->particle_list().at(2);
-    if (abs(type_a) < 100 || abs(type_b) < 100 || abs(type_c) < 100) {
-      printf("Warning: decay products A: %i B: %i C: %i\n",
-             type_a, type_b, type_c);
-    }
-    printd("Note: Doing 1->3 decay!\n");
-    new_id_a = one_to_three(particles, particle_id, type_a, type_b, type_c);
   }
   return new_id_a;
 }
 
 
 
-void DecayAction::perform (Particles *particles, size_t &id_process)
-{
+void DecayAction::perform (Particles *particles, size_t &id_process) {
   FourVector velocity_CM;
   int id_a = ingoing_particles_[0];
 
