@@ -37,8 +37,7 @@ void VtkOutput::after_Nth_timestep(const Particles &particles, const int event_n
   char filename[32];
   snprintf(filename, sizeof(filename), "pos_ev%05i_tstep%07i.vtk", event_number,
            timestep + 1);
-  std::unique_ptr<std::FILE> file_{
-      fopen((base_path_ / filename).native().c_str(), "w")};
+  FilePtr file_{fopen((base_path_ / filename).native().c_str(), "w")};
 
   /* Legacy VTK file format */
   fprintf(file_.get(), "# vtk DataFile Version 2.0\n");
