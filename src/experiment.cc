@@ -13,6 +13,7 @@
 #include <ctime>
 #include <list>
 #include <string>
+#include <algorithm>
 
 #include "include/boxmodus.h"
 #include "include/collidermodus.h"
@@ -121,29 +122,23 @@ void Experiment<Modus>::run_time_evolution() {
                      interactions_this_interval, energy_initial_, time_start_);
 
   for (int step = 0; step < steps_; step++) {
-    std::vector<ActionPtr> decay_actions, scatter_actions;
+    std::vector<ActionPtr> actions;
 
     /* (1.a) Find possible decays. */
-    decay_actions = decay_finder_.find_possible_actions(&particles_, parameters_);
-    /* (1.b) Perform decays. */
-    if (!decay_actions.empty()) {
-      for (auto act = decay_actions.begin(); act != decay_actions.end(); ++act) {
+    decay_finder_.find_possible_actions (actions, &particles_, parameters_);
+    /* (1.b) Find possible collisions. */
+    scatter_finder_.find_possible_actions (actions, &particles_, parameters_,
+					   &cross_sections_);
+    /* (1.c) Sort action list by time. */
+    std::sort (actions.begin(), actions.end());
+  
+    /* (2.a) Perform actions. */
+    if (!actions.empty()) {
+      for (auto act = actions.begin(); act != actions.end(); ++act) {
 	(*act)->perform (&particles_, interactions_total);
       }
-      decay_actions.clear();
-      printd("Decay list done.\n");
-    }
-
-    /* (2.a) Find possible collisions. */
-    scatter_actions = scatter_finder_.find_possible_actions(&particles_,
-						parameters_, &cross_sections_);
-    /* (2.b) Perform collisions. */
-    if (!scatter_actions.empty()) {
-      for (auto act = scatter_actions.begin(); act != scatter_actions.end(); ++act) {
-	(*act)->perform (&particles_, interactions_total);
-      }
-      scatter_actions.clear();
-      printd("Collision list done.\n");
+      actions.clear();
+      printd("Action list done.\n");
     }
 
     /* (3) Do propagation. */

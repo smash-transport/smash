@@ -26,11 +26,12 @@ class ScatterActionsFinder : public ActionFinderFactory {
 			    const ExperimentParameters &parameters,
 			    CrossSections *cross_sections = nullptr) const;
 
-  /* Check the whole particle list for collisions and return a list of Action objects. */
-  std::vector<ActionPtr> find_possible_actions(Particles *particles,
-						const ExperimentParameters &parameters,
-						CrossSections *cross_sections = nullptr)
-      const override;
+  /* Check the whole particle list for collisions
+   * and add them to a list of Action objects. */
+  void find_possible_actions (std::vector<ActionPtr> &actions,
+			      Particles *particles,
+			      const ExperimentParameters &parameters,
+			      CrossSections *cross_sections = nullptr) const override;
 
  private:
 };
@@ -41,10 +42,10 @@ class ScatterActionsFinder : public ActionFinderFactory {
 class GridScatterFinder : public ScatterActionsFinder {
  public:
   GridScatterFinder (float length);
-  std::vector<ActionPtr> find_possible_actions(Particles *particles,
-						const ExperimentParameters &parameters,
-						CrossSections *cross_sections = nullptr)
-      const override;
+  void find_possible_actions (std::vector<ActionPtr> &actions,
+			      Particles *particles,
+			      const ExperimentParameters &parameters,
+			      CrossSections *cross_sections = nullptr) const override;
  private:
   /* Cube edge length. */
   const float length_;

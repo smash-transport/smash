@@ -9,14 +9,15 @@
 
 #include "include/decayactionsfinder.h"
 
-#include <algorithm>    // std::sort
-
 #include "include/random.h"
 
 namespace Smash {
 
-std::vector<ActionPtr> DecayActionsFinder::find_possible_actions(Particles *particles, const ExperimentParameters &parameters, CrossSections *cross_sections) const {
-  std::vector<ActionPtr> actions;
+void
+DecayActionsFinder::find_possible_actions (std::vector<ActionPtr> &actions,
+	Particles *particles, const ExperimentParameters &parameters,
+	CrossSections *cross_sections) const {
+
   FourVector velocity_lrf;
   velocity_lrf.set_x0(1.0);
 
@@ -49,11 +50,6 @@ std::vector<ActionPtr> DecayActionsFinder::find_possible_actions(Particles *part
       actions.emplace_back(new DecayAction(in_part,0.,2));
     }
   }
-
-  /* Sort action list by time. */
-  std::sort (actions.begin(), actions.end());
-
-  return actions;
 }
   
 }  // namespace Smash

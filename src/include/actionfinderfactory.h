@@ -19,8 +19,10 @@ namespace Smash {
 
 class ActionFinderFactory {
  public:
-  virtual std::vector<ActionPtr> find_possible_actions(Particles *particles, const ExperimentParameters &parameters, CrossSections *cross_sections = nullptr) const = 0;
-
+  virtual void find_possible_actions (std::vector<ActionPtr> &actions,
+				      Particles *particles,
+				      const ExperimentParameters &parameters,
+				      CrossSections *cross_sections = nullptr) const = 0;
  private:
 };
 

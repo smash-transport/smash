@@ -9,8 +9,6 @@
 
 #include "include/scatteractionsfinder.h"
 
-#include <algorithm>    // std::sort
-
 #include "include/resonances.h"
 #include "include/macros.h"
 #include "include/outputroutines.h"
@@ -18,11 +16,10 @@
 namespace Smash {
 
 ActionPtr
-ScatterActionsFinder::check_collision(int id_a, int id_b, Particles *particles,
-				      const ExperimentParameters &parameters,
-				      CrossSections *cross_sections)
-      const
-{
+ScatterActionsFinder::check_collision (int id_a, int id_b, Particles *particles,
+				       const ExperimentParameters &parameters,
+				       CrossSections *cross_sections) const {
+
   ScatterAction* act = nullptr;
   std::vector<int> in_part;
 
@@ -102,12 +99,11 @@ ScatterActionsFinder::check_collision(int id_a, int id_b, Particles *particles,
 }
 
 
-std::vector<ActionPtr>
-ScatterActionsFinder::find_possible_actions (Particles *particles,
-					const ExperimentParameters &parameters,
-					CrossSections *cross_sections) const
-{
-  std::vector<ActionPtr> actions;
+void
+ScatterActionsFinder::find_possible_actions (std::vector<ActionPtr> &actions,
+	Particles *particles, const ExperimentParameters &parameters,
+	CrossSections *cross_sections) const {
+
   double neighborhood_radius_squared = parameters.cross_section * fm2_mb * M_1_PI * 4;
 
   for (const auto &p1 : particles->data()) {
@@ -133,36 +129,32 @@ ScatterActionsFinder::find_possible_actions (Particles *particles,
 	actions.push_back (std::move(act));
     }
   }
-
-  /* Sort action list by collision time. */
-  std::sort (actions.begin(), actions.end());
-
-  return actions;
 }
 
 
 
-GridScatterFinder::GridScatterFinder(float length) : length_(length)
-{
+GridScatterFinder::GridScatterFinder(float length) : length_(length) {
 }
 
 
-std::vector<ActionPtr>
-GridScatterFinder::find_possible_actions (Particles *particles,
-					   const ExperimentParameters &parameters,
-					   CrossSections *cross_sections) const
-{
+void
+GridScatterFinder::find_possible_actions (std::vector<ActionPtr> &actions,
+	Particles *particles, const ExperimentParameters &parameters,
+	CrossSections *cross_sections) const {
+
   std::vector<std::vector<std::vector<std::vector<int> > > > grid;
   int N;
   int x, y, z;
-  std::vector<ActionPtr> actions;
 
   /* For small boxes no point in splitting up in grids */
   /* calculate approximate grid size according to double interaction length */
   N = round(length_ / sqrt(parameters.cross_section * fm2_mb * M_1_PI) * 0.5);
-  if (unlikely(N < 4 || particles->size() < 10))
+  if (unlikely(N < 4 || particles->size() < 10)) {
     /* XXX: apply periodic boundary condition */
-    return ScatterActionsFinder::find_possible_actions (particles, parameters, cross_sections);
+    ScatterActionsFinder::find_possible_actions (actions, particles, parameters,
+						 cross_sections);
+    return;
+  }
 
   /* allocate grid */
   grid.resize(N);
@@ -264,11 +256,6 @@ GridScatterFinder::find_possible_actions (Particles *particles,
       }     /* grid sy */
     }       /* grid sx */
   }         /* outer particle loop */
-
-  /* Sort action list by collision time. */
-  std::sort (actions.begin(), actions.end());
-
-  return actions;
 }
 
 
