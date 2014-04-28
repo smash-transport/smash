@@ -78,8 +78,7 @@ class PdgCode {
    *                                                                          *
    ****************************************************************************/
   /// Standard initializer
-  PdgCode() : digits_({0,0,0,0,0,0,0,false}) {
-  }
+  PdgCode() : dump_(0x0) {}
   /** Initialize using a string
    *
    * The string is interpreted as a hexadecimal number, i.e., \c 211 is
@@ -92,7 +91,7 @@ class PdgCode {
    * is taken as antiparticle boolean, while the absolute value of the
    * integer is used as hexdigits.
    */
-  PdgCode(std::int32_t codenumber) : digits_({0,0,0,0,0,0,0,false})  {
+  PdgCode(std::int32_t codenumber) : dump_(0x0)  {
     digits_.antiparticle_ = false;
     if (codenumber < 0) {
       digits_.antiparticle_ = true;
@@ -103,7 +102,7 @@ class PdgCode {
   /** receive an unsigned integer and process it into a PDG Code. The
    *  first bit is taken and used as antiparticle boolean.
    */
-  PdgCode(const std::uint32_t abscode) : digits_({0,0,0,0,0,0,0,false}) {
+  PdgCode(const std::uint32_t abscode) : dump_(0x0) {
     // use the first bit for the antiparticle_ boolean.
     digits_.antiparticle_ = ((abscode & 0x80000000u) != 0);
     set_fields(abscode);
@@ -436,7 +435,7 @@ class PdgCode {
      * \f$n_{q_1}n_{q_2}n_{q_3}\f$ are directly accessible.
      */
     struct {
-#if defined(__GNUC__) || defined(__x86_64__)
+#if defined(__GNUC__) || defined(__x86_64__) || defined(DOXYGEN)
       std::uint32_t             :  4;
       /// the quark digits n_q{1,2,3}_
       std::uint32_t quarks_     : 12;
