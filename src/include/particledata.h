@@ -23,22 +23,20 @@ namespace Smash {
 class ParticleData {
  public:
   /// Use improbable values for default constructor
-  ParticleData() :id_(-1), pdgcode_(-1), id_partner_(-1), id_process_(-1),
+  ParticleData() :id_(-1), pdgcode_(-1), id_process_(-1),
     collision_time_(0.0) {}
   /// Use improbable values for constructor
-  explicit ParticleData(int i) :id_(i), pdgcode_(-1), id_partner_(-1),
+  explicit ParticleData(int i) :id_(i), pdgcode_(-1),
     id_process_(-1), collision_time_(0.0) {}
   inline int id(void) const;
   inline void set_id(int id);
   inline int pdgcode(void) const;
   inline void set_pdgcode(int pdgcode);
-  inline int id_partner(void) const;
-  inline void set_id_partner(int id_b);
   inline int id_process(void) const;
   inline void set_id_process(int id);
   inline double collision_time(void) const;
   inline void set_collision_time(const double &collision_time);
-  inline void set_collision(const double &collision_time,int collision_id);
+  inline void set_collision(const double &collision_time);
   inline void set_collision_past(int process_id);
   inline const FourVector &momentum(void) const;
   inline void set_momentum(const FourVector &momentum_vector);
@@ -65,8 +63,6 @@ class ParticleData {
   int id_;
   /// pdg id of the particle
   int pdgcode_;
-  /// Next particle we'd collide against
-  int id_partner_;
   /// counter of the last collision/decay
   int id_process_;
   /// collision time
@@ -97,16 +93,6 @@ inline void ParticleData::set_pdgcode(int i) {
   pdgcode_ = i;
 }
 
-/// look up the id of the collision partner
-inline int ParticleData::id_partner(void) const {
-  return id_partner_;
-}
-
-/// set the id of the collision partner
-inline void ParticleData::set_id_partner(int id_b) {
-  id_partner_ = id_b;
-}
-
 /// look up the id of the collision process
 inline int ParticleData::id_process(void) const {
   return id_process_;
@@ -128,17 +114,14 @@ inline void ParticleData::set_collision_time(const double &collision_t) {
 }
 
 /// set possible collision data
-inline void ParticleData::set_collision(
-  const double &collision_t, int id_b) {
+inline void ParticleData::set_collision(const double &collision_t) {
   collision_time_ = collision_t;
-  id_partner_ = id_b;
 }
 
 /// set happened collision data
 inline void ParticleData::set_collision_past(int id_counter) {
   collision_time_ = 0.0;
   id_process_ = id_counter;
-  id_partner_ = -1;
 }
 
 /// return the particle four momentum
