@@ -357,6 +357,33 @@ TEST(iso_multiplett) {
   COMPARE(  xi_cc_bar.iso_multiplett(), -0x4412);
   COMPARE(   omega_bc.iso_multiplett(),  0x5432);
 }
+TEST(spin) {
+  COMPARE(   electron.spin(), 1);
+  COMPARE(     antimu.spin(), 1);
+  COMPARE(     photon.spin(), 2);
+  COMPARE(       pion.spin(), 0);
+  COMPARE(       kaon.spin(), 0);
+  COMPARE(     kminus.spin(), 0);
+  COMPARE(     dminus.spin(), 0);
+  COMPARE(     bnulls.spin(), 0);
+  COMPARE(     bPcbar.spin(), 0);
+  COMPARE(     eta_pr.spin(), 0);
+  COMPARE(      j_psi.spin(), 2);
+  COMPARE(     proton.spin(), 1);
+  COMPARE(  antidelta.spin(), 3);
+  COMPARE(      sigma.spin(), 1);
+  COMPARE(     lambda.spin(), 1);
+  COMPARE(     antixi.spin(), 1);
+  COMPARE(  omega_bar.spin(), 3);
+  COMPARE(   lambda_c.spin(), 1);
+  COMPARE(sigma_c_bar.spin(), 3);
+  COMPARE(       xi_c.spin(), 1);
+  COMPARE(omega_c_bar.spin(), 1);
+  COMPARE(  xi_cc_bar.spin(), 1);
+  COMPARE(   omega_bc.spin(), 1);
+  PdgCode higgs(0x25);
+  // EXPECT_ASSERT_FAILURE(COMPARE(higgs.spin(), 0));
+}
 
 TEST_CATCH(set_invalid_code, PdgCode::InvalidPdgCode) {
   PdgCode invalidparticle(211);

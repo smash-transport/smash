@@ -253,7 +253,14 @@ class PdgCode {
   }
   /** Returns twice the spin of a particle **/
   inline unsigned int spin() const {
-    return digits_.n_J_ - 1;
+    if (is_hadron()) {
+      return digits_.n_J_ - 1;
+    }
+    // this assumes that we only have white particles (no single
+    // quarks): Electroweak fermions have 11-17, so the
+    // second-to-last-digit is the spin. The same for the Bosons: they
+    // have 21-29 and 2spin = 2 (this fails for the Higgs).
+    return digits_.n_q3_;
   }
   /** Returns the spin degeneracy \f$2s + 1\f$ of a particle **/
   inline unsigned int spin_degeneracy() const {
