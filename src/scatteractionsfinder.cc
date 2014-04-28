@@ -23,7 +23,7 @@ ScatterActionsFinder::check_collision(int id_a, int id_b, Particles *particles,
 				      CrossSections *cross_sections)
       const
 {
-  ActionPtr act = nullptr;
+  ScatterAction* act = nullptr;
   std::vector<int> in_part;
 
   /* just collided with this particle */
@@ -54,7 +54,7 @@ ScatterActionsFinder::check_collision(int id_a, int id_b, Particles *particles,
 
   in_part.push_back(id_a);
   in_part.push_back(id_b);
-  act = ActionPtr(new ScatterAction(in_part, time_collision));
+  act = new ScatterAction(in_part, time_collision);
 
   /* Compute kinematic quantities needed for cross section calculations  */
   cross_sections->compute_kinematics(particles, id_a, id_b);
@@ -77,7 +77,7 @@ ScatterActionsFinder::check_collision(int id_a, int id_b, Particles *particles,
 	      particles->data_pointer(id_a), particles->data_pointer(id_b));
     if (distance_squared >= act->weight() * fm2_mb * M_1_PI)
       {
-	act.reset(nullptr);
+	delete act;
 	return nullptr;
       }
     printd("distance squared particle %d <-> %d: %g \n", id_a, id_b,
@@ -98,7 +98,7 @@ ScatterActionsFinder::check_collision(int id_a, int id_b, Particles *particles,
 	particles->data(id_b).id_partner(),
 	particles->data(id_a).collision_time());
 
-  return act;
+  return ActionPtr(act);
 }
 
 

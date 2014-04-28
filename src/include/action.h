@@ -35,9 +35,6 @@ class Action {
   void add_process (ProcessBranch p);
   void add_processes (std::vector<ProcessBranch> &pv);
 
-  /* Decide for a particular subprocess via Monte-Carlo.  */
-  void decide ();
-
   /* Actually perform the action, e.g. carry out a decay or scattering.  */
   virtual void perform (Particles *particles, size_t &id_process) = 0;
 
@@ -56,18 +53,27 @@ class DecayAction : public Action {
  public:
   DecayAction (const std::vector<int> &in_part, float time_of_execution,
 	       int interaction_type);
+  /* Decide for a particular decay channel via Monte-Carlo
+   * and set the outgoing_particles_ correspondingly.  */
+  void decide (Particles *particles);
   void perform (Particles *particles, size_t &id_process);
+ private:
+  int resonance_decay (Particles *particles);
 };
 
 
 class ScatterAction : public Action {
  public:
   ScatterAction (const std::vector<int> &in_part, float time_of_execution);
+  /* Decide for a particular subprocess via Monte-Carlo
+   * and set the outgoing_particles_ correspondingly.  */
+  void decide ();
   void perform (Particles *particles, size_t &id_process);
 };
 
 
 using ActionPtr = std::unique_ptr<Action>;
+using ScatterActionPtr = std::unique_ptr<ScatterAction>;
 
 }  // namespace Smash
 

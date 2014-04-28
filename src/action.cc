@@ -10,7 +10,6 @@
 #include "include/action.h"
 
 #include "include/constants.h"
-#include "include/random.h"
 
 namespace Smash {
 
@@ -38,26 +37,6 @@ void Action::add_processes (std::vector<ProcessBranch> &pv) {
   for (auto proc = pv.begin(); proc != pv.end(); ++proc) {
     subprocesses_.push_back(*proc);
     total_weight_ += proc->weight();
-  }
-}
-
-void Action::decide () {
-  interaction_type_ = 0;
-  if (total_weight_ > really_small) {
-    double random_interaction = Random::canonical();
-    float interaction_probability = 0.0;
-    std::vector<ProcessBranch>::const_iterator proc = subprocesses_.begin();
-    while (interaction_type_ == 0 && proc != subprocesses_.end()) {
-      if (proc->particle_list().size() > 1
-	  || proc->particle_list().at(0) != 0) {
-	interaction_probability += proc->weight() / total_weight_;
-	if (random_interaction < interaction_probability) {
-	  interaction_type_ = proc->type();
-	  outgoing_particles_ = proc->particle_list();
-	}
-      }
-      ++proc;
-    }
   }
 }
 

@@ -229,21 +229,9 @@ static int one_to_three(Particles *particles, int resonance_id,
 }
 
 
+void DecayAction::decide (Particles *particles) {
+  const int pdgcode = particles->type(ingoing_particles_[0]).pdgcode();
 
-/**
- * Execute a decay process for the selected particle.
- *
- * Randomly select one of the decay modes of the particle
- * according to their relative weights. Then decay the particle
- * by calling function one_to_two or one_to_three.
- *
- * \param[in,out] particles Particles in the simulation.
- * \param[in] particle_id ID of the particle which should decay.
- *
- * \return The ID of the first decay product.
- */
-static int resonance_decay(Particles *particles, int particle_id) {
-  const int pdgcode = particles->type(particle_id).pdgcode();
   /* Get the decay modes of this resonance */
   const std::vector<ProcessBranch> decaymodes
     = particles->decay_modes(pdgcode).decay_mode_list();
@@ -259,22 +247,44 @@ static int resonance_decay(Particles *particles, int particle_id) {
     cumulated_probability += mode->weight();
     ++mode;
   }
+
+  outgoing_particles_ = mode->particle_list();
+}
+
+
+/**
+ * Execute a decay process for the selected particle.
+ *
+ * Randomly select one of the decay modes of the particle
+ * according to their relative weights. Then decay the particle
+ * by calling function one_to_two or one_to_three.
+ *
+ * \param[in,out] particles Particles in the simulation.
+ *
+ * \return The ID of the first decay product.
+ */
+int DecayAction::resonance_decay (Particles *particles) {
+  int particle_id = ingoing_particles_[0];
+
+  /* Decide for a particular decay channel. */
+  decide (particles);
+
   /* We found our decay branch, get the decay product pdgs and do the decay */
-  size_t decay_particles = mode->particle_list().size();
+  size_t decay_particles = outgoing_particles_.size();
   int type_a = 0, type_b = 0, type_c = 0, new_id_a = -1;
   switch (decay_particles) {
   case 2:
-    type_a = mode->particle_list().at(0);
-    type_b = mode->particle_list().at(1);
+    type_a = outgoing_particles_.at(0);
+    type_b = outgoing_particles_.at(1);
     if (abs(type_a) < 100 || abs(type_b) < 100) {
       printf("Warning: decay products A: %i B: %i\n", type_a, type_b);
     }
     new_id_a = one_to_two(particles, particle_id, type_a, type_b);
     break;
   case 3:
-    type_a = mode->particle_list().at(0);
-    type_b = mode->particle_list().at(1);
-    type_c = mode->particle_list().at(2);
+    type_a = outgoing_particles_.at(0);
+    type_b = outgoing_particles_.at(1);
+    type_c = outgoing_particles_.at(2);
     if (abs(type_a) < 100 || abs(type_b) < 100 || abs(type_c) < 100) {
       printf("Warning: decay products A: %i B: %i C: %i\n",
              type_a, type_b, type_c);
@@ -287,7 +297,7 @@ static int resonance_decay(Particles *particles, int particle_id) {
     printf("Number of decay particles: %zu \n", decay_particles);
     printf("Decay particles: ");
     for (size_t i = 0; i < decay_particles; i++) {
-      printf("%i ", mode->particle_list().at(i));
+      printf("%i ", outgoing_particles_.at(i));
     }
     printf("\n");
   }
@@ -336,7 +346,7 @@ void DecayAction::perform (Particles *particles, size_t &id_process) {
   /* Save the highest id before decay */
   size_t old_max_id = particles->id_max();
   /* Do the decay; this returns the smallest new id */
-  size_t id_new_a = resonance_decay(particles, id_a);
+  size_t id_new_a = resonance_decay (particles);
   /* There's going to be at least 2 new particles */
   size_t id_new_b = id_new_a + 1;
 
