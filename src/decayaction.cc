@@ -30,13 +30,18 @@ DecayAction::DecayAction(const std::vector<int> &in_part,
  * to the active particles data structure.
  *
  * \param[in,out] particles Particles in the simulation.
- * \param[in] resonance_id ID of the resonance.
- * \param[in] type_a PDG code of the first decay product.
- * \param[in] type_b PDG code of the second decay product.
  *
  * \return The ID of the first new particle.
  */
-static int one_to_two(Particles *particles, int resonance_id, int type_a, int type_b) {
+int DecayAction::one_to_two (Particles *particles) {
+  int resonance_id = ingoing_particles_[0];
+  int type_a = outgoing_particles_[0];
+  int type_b = outgoing_particles_[1];
+
+  if (abs(type_a) < 100 || abs(type_b) < 100) {
+    printf("Warning: decay products A: %i B: %i\n", type_a, type_b);
+  }
+
   /* Add two new particles */
   ParticleData new_particle_a, new_particle_b;
   new_particle_a.set_pdgcode(type_a);
@@ -80,15 +85,21 @@ static int one_to_two(Particles *particles, int resonance_id, int type_a, int ty
  * to the active particles data structure.
  *
  * \param[in,out] particles Particles in the simulation.
- * \param[in] resonance_id ID of the resonance.
- * \param[in] type_a PDG code of the first decay product.
- * \param[in] type_b PDG code of the second decay product.
- * \param[in] type_c PDG code of the third decay product.
  *
  * \return The ID of the first new particle.
  */
-static int one_to_three(Particles *particles, int resonance_id,
-                 int type_a, int type_b, int type_c) {
+int DecayAction::one_to_three (Particles *particles) {
+  int resonance_id = ingoing_particles_[0];
+  int type_a = outgoing_particles_[0];
+  int type_b = outgoing_particles_[1];
+  int type_c = outgoing_particles_[2];
+
+  if (abs(type_a) < 100 || abs(type_b) < 100 || abs(type_c) < 100) {
+    printf("Warning: decay products A: %i B: %i C: %i\n",
+	   type_a, type_b, type_c);
+  }
+  printd("Note: Doing 1->3 decay!\n");
+
   /* Add three new particles */
   ParticleData new_particle_a, new_particle_b, new_particle_c;
   new_particle_a.set_pdgcode(type_a);
@@ -264,40 +275,26 @@ void DecayAction::decide (Particles *particles) {
  * \return The ID of the first decay product.
  */
 int DecayAction::resonance_decay (Particles *particles) {
-  int particle_id = ingoing_particles_[0];
 
   /* Decide for a particular decay channel. */
   decide (particles);
 
   /* We found our decay branch, get the decay product pdgs and do the decay */
   size_t decay_particles = outgoing_particles_.size();
-  int type_a = 0, type_b = 0, type_c = 0, new_id_a = -1;
+  int new_id_a = -1;
   switch (decay_particles) {
   case 2:
-    type_a = outgoing_particles_.at(0);
-    type_b = outgoing_particles_.at(1);
-    if (abs(type_a) < 100 || abs(type_b) < 100) {
-      printf("Warning: decay products A: %i B: %i\n", type_a, type_b);
-    }
-    new_id_a = one_to_two(particles, particle_id, type_a, type_b);
+    new_id_a = one_to_two (particles);
     break;
   case 3:
-    type_a = outgoing_particles_.at(0);
-    type_b = outgoing_particles_.at(1);
-    type_c = outgoing_particles_.at(2);
-    if (abs(type_a) < 100 || abs(type_b) < 100 || abs(type_c) < 100) {
-      printf("Warning: decay products A: %i B: %i C: %i\n",
-             type_a, type_b, type_c);
-    }
-    printd("Note: Doing 1->3 decay!\n");
-    new_id_a = one_to_three(particles, particle_id, type_a, type_b, type_c);
+    new_id_a = one_to_three (particles);
     break;
   default:
     printf("Warning: Not a 1->2 or 1->3 process!\n");
     printf("Number of decay particles: %zu \n", decay_particles);
     printf("Decay particles: ");
     for (size_t i = 0; i < decay_particles; i++) {
-      printf("%i ", outgoing_particles_.at(i));
+      printf("%i ", outgoing_particles_[i]);
     }
     printf("\n");
   }

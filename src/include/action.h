@@ -59,6 +59,8 @@ class DecayAction : public Action {
   void perform (Particles *particles, size_t &id_process);
  private:
   int resonance_decay (Particles *particles);
+  int one_to_two (Particles *particles);
+  int one_to_three (Particles *particles);
 };
 
 
