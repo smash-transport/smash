@@ -382,7 +382,7 @@ TEST(spin) {
   COMPARE(  xi_cc_bar.spin(), 1);
   COMPARE(   omega_bc.spin(), 1);
   PdgCode higgs(0x25);
-  // EXPECT_ASSERT_FAILURE(COMPARE(higgs.spin(), 0));
+  EXPECT_ASSERT_FAILURE(assert(higgs.spin() == 0));
 }
 
 TEST_CATCH(set_invalid_code, PdgCode::InvalidPdgCode) {

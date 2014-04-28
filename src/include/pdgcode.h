@@ -251,7 +251,11 @@ class PdgCode {
     // default (this includes all other Bosons) is 0.
     return 0;
   }
-  /** Returns twice the spin of a particle **/
+  /** Returns twice the spin of a particle.
+   *
+   * The code is good for hadrons, leptons and spin-1-bosons. It returns
+   * 2 (meaning spin=1) for the Higgs, though.
+   */
   inline unsigned int spin() const {
     if (is_hadron()) {
       return digits_.n_J_ - 1;
