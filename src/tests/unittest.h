@@ -859,18 +859,18 @@ void unittest_assert(bool cond, const char *code, const char *file, int line) {
 }
 // EXPECT_ASSERT_FAILURE {{{1
 #define EXPECT_ASSERT_FAILURE(code)                                          \
-  global_unit_test_object_.expect_assert_failure = true;                     \
-  global_unit_test_object_.assert_failure = 0;                               \
+  UnitTest::global_unit_test_object_.expect_assert_failure = true;           \
+  UnitTest::global_unit_test_object_.assert_failure = 0;                     \
   code;                                                                      \
-  if (global_unit_test_object_.assert_failure == 0) {                        \
+  if (UnitTest::global_unit_test_object_.assert_failure == 0) {              \
     /* failure expected but it didn't fail */                                \
     std::cout << "       " << #code << " at " << __FILE__ << ":" << __LINE__ \
               << " did not fail as was expected.\n";                         \
-    global_unit_test_object_.status = false;                                 \
+    UnitTest::global_unit_test_object_.status = false;                       \
     throw UnitTestFailure();                                                 \
     return;                                                                  \
   }                                                                          \
-  global_unit_test_object_.expect_assert_failure = false
+  UnitTest::global_unit_test_object_.expect_assert_failure = false
 }  // namespace UnitTest
 namespace UnitTest {  // {{{1
 // typeToString {{{2
