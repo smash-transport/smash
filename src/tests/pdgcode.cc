@@ -92,6 +92,17 @@ TEST(dump) {
   COMPARE(   lambda.dump(),  0x3122);
   COMPARE(   antixi.dump(),  0x80003312u);
 }
+TEST(string) {
+  COMPARE( electron.string(),    "11");
+  COMPARE(   antimu.string(),   "-13");
+  COMPARE(   photon.string(),    "22");
+  COMPARE(     pion.string(),   "211");
+  COMPARE(     kaon.string(),   "311");
+  COMPARE(   proton.string(),  "2212");
+  COMPARE(antidelta.string(), "-2224");
+  COMPARE(   lambda.string(),  "3122");
+  COMPARE(   antixi.string(), "-3312");
+}
 
 TEST(hadron) {
   VERIFY(! electron.is_hadron());

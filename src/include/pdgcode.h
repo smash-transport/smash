@@ -150,7 +150,11 @@ class PdgCode {
   /// returns a C++ string from the PDG Code.
   inline std::string string() const {
     char hexstring[8];
-    snprintf(hexstring, 8, "%x", code());
+    if (digits_.antiparticle_) {
+      snprintf(hexstring, 8, "-%x", std::abs(code()));
+    } else {
+      snprintf(hexstring, 8, "%x", code());
+    }
     return std::string(hexstring);
   }
 
