@@ -27,11 +27,10 @@ namespace Smash {
 class FourVector {
  public:
   /// default constructor nulls the fourvector components
-  FourVector() : x_{0., 0., 0., 0.} {
-  }
+  FourVector() : x_{{0., 0., 0., 0.}} {}
   /// copy constructor
-  FourVector(double y0, double y1, double y2, double y3) : x_{y0, y1, y2, y3} {
-  }
+  FourVector(double y0, double y1, double y2, double y3)
+      : x_{{y0, y1, y2, y3}} {}
   /* t, x_\perp, z */
   double inline x0(void) const;
   void inline set_x0(double t);
@@ -178,7 +177,7 @@ void inline FourVector::set_x3(const double y) {
 
 void inline FourVector::set_FourVector(const double t, const double z,
                                        const double x, const double y) {
-  x_ = {t, z, x, y};
+  x_ = {{t, z, x, y}};
 }
 
 /// check if all four vector components are equal
