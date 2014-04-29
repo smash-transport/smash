@@ -139,7 +139,7 @@ std::vector<ProcessBranch> resonance_cross_section(
     /* If cross section is non-negligible, add resonance to the list */
     if (resonance_xsection > really_small) {
       resonance_process_list.push_back(ProcessBranch(type_resonance.pdgcode(),
-						     resonance_xsection,1));
+                                                     resonance_xsection,1));
 
       printd("Found resonance %i (%s) with mass %f and width %f.\n",
              type_resonance.pdgcode(), type_resonance.name().c_str(),
@@ -479,7 +479,7 @@ size_t two_to_two_formation(Particles *particles,
 
     if (xsection > really_small) {
       process_list->push_back(ProcessBranch(type_resonance.pdgcode(),
-					    second_type.pdgcode(),xsection,1));
+                                            second_type.pdgcode(),xsection,1));
       number_of_processes++;
     }
   }

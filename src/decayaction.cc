@@ -415,7 +415,7 @@ void DecayAction::perform (Particles *particles, size_t &id_process) {
   }
   if (fabs(momentum_difference.x1()) > really_small)
     printf("Warning: Interaction type %i px conservation violation %g\n",
-	    interaction_type_, momentum_difference.x1());
+           interaction_type_, momentum_difference.x1());
   if (fabs(momentum_difference.x2()) > really_small)
     printf("Warning: Interaction type %i py conservation violation %g\n",
            interaction_type_, momentum_difference.x2());

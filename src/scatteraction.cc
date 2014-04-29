@@ -165,7 +165,7 @@ void ScatterAction::perform (Particles *particles, size_t &id_process)
   if (fabs(momentum_difference.x0()) > really_small) {
     printf("Process %zu type %i\n", id_process, interaction_type_);
     printf("Warning: Interaction type %i E conservation violation %g\n",
-	    interaction_type_, momentum_difference.x0());
+           interaction_type_, momentum_difference.x0());
   }
   if (fabs(momentum_difference.x1()) > really_small)
     printf("Warning: Interaction type %i px conservation violation %g\n",

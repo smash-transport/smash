@@ -15,8 +15,8 @@ namespace Smash {
 
 void
 DecayActionsFinder::find_possible_actions (std::vector<ActionPtr> &actions,
-	Particles *particles, const ExperimentParameters &parameters,
-	CrossSections *cross_sections) const {
+        Particles *particles, const ExperimentParameters &parameters,
+        CrossSections *cross_sections) const {
 
   FourVector velocity_lrf;
   velocity_lrf.set_x0(1.0);
