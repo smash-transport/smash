@@ -20,6 +20,8 @@ namespace Smash {
 /** PdgCode stores a Particle Data Group Particle Numbering Scheme
  * particle type number.
  *
+ * \see http://pdg.lbl.gov/2013/reviews/rpp2012-rev-monte-carlo-numbering.pdf
+ *
  * Usage:
  * ------
  * \code
@@ -440,7 +442,7 @@ class PdgCode {
     } chunks_;
   };
 
-  /** returns the net number of (anti)quarks with given number
+  /** returns the net number of (anti)quarks with given flavour number
    *
    * \param quark PDG Code of quark: (1..8) = (d,u,s,c,b,t,b',t')
    * \return for u,c,t,t' quarks, it returns the net number of quarks
