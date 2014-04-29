@@ -37,7 +37,7 @@ namespace Smash {
  *   // fill from stringstream:
  *   std::cin >> other_particle;
  * }
- * if (pi_plus.multiplett() == other_particle.multiplett()) {
+ * if (pi_plus.multiplet() == other_particle.multiplet()) {
  *   printf("The other particle is a 0^-- meson.\n");
  * }
  * \endcode
@@ -284,40 +284,40 @@ class PdgCode {
     }
     return chunks_.quarks_;
   }
-  /** Returns an identifier for the SU(N) multiplett of this PDG Code.
+  /** Returns an identifier for the SU(N) multiplet of this PDG Code.
    *
    * This can be used to compare if two particles are in the same SU(N)
-   * multiplett, i.e., p, Λ, Σ and \f$\Xi_{cb}\f$ are in the same
-   * multiplett, as are Δ, Ω, \f$\Omega_{ccc}\f$ and ρ, ω,
+   * multiplet, i.e., p, Λ, Σ and \f$\Xi_{cb}\f$ are in the same
+   * multiplet, as are Δ, Ω, \f$\Omega_{ccc}\f$ and ρ, ω,
    * \f$D^\ast_s\f$.
    *
    * The antiparticle sign is ignored for mesons: Both \f$K^+\f$ and
-   * \f$K^-\f$ are in the same multiplett; the same applies for charmed
+   * \f$K^-\f$ are in the same multiplet; the same applies for charmed
    * and anti-charmed mesons.
    *
    * The exact format of this is subject to change; only use this to
-   * compare if two particles are in the same multiplett!
+   * compare if two particles are in the same multiplet!
    */
-  inline std::int32_t multiplett() const {
+  inline std::int32_t multiplet() const {
     if (! is_hadron()) {
       return 0;
     }
-    // the multiplett code is the antiparticle_*( baryon number +
+    // the multiplet code is the antiparticle_*( baryon number +
     // excitation_ + n_J_) [the "+" being a concatenation here].  Baryon
     // number and sign are added later.
-    std::int32_t multiplett_code = ((chunks_.excitation_ << 4) | digits_.n_J_);
-    // if the particle is in a meson multiplett, there are no signs.
+    std::int32_t multiplet_code = ((chunks_.excitation_ << 4) | digits_.n_J_);
+    // if the particle is in a meson multiplet, there are no signs.
     if (baryon_number() == 0) {
-      return multiplett_code;
+      return multiplet_code;
     }
     // else, return the sign and the baryon number, too.
     return antiparticle_sign() *
-                  (multiplett_code | ((baryon_number() & 1) << 16));
+                  (multiplet_code | ((baryon_number() & 1) << 16));
   }
-  /** Returns an identifier for the Isospin-multiplett of this PDG Code.
+  /** Returns an identifier for the Isospin-multiplet of this PDG Code.
    *
    * This can be used to compare if two particles are in the same
-   * isospin multiplett.  For non-hadrons, this returns 0, and for
+   * isospin multiplet.  For non-hadrons, this returns 0, and for
    * hadrons, it returns the PDG Code of the similar particle that has
    * all up quarks replaced with down quarks.
    *
@@ -325,16 +325,16 @@ class PdgCode {
    * = 0 states return the complete code.
    *
    * The antiparticle sign is ignored for pi-like mesons, so that \f$\pi^+\f$
-   * and \f$\pi^-\f$ are in the same multiplett. The sign is used for all other
+   * and \f$\pi^-\f$ are in the same multiplet. The sign is used for all other
    * mesons and baryons, so that \f$K^-\f$ and \f$K^+\f$ are not in the same
-   * multiplett, and neither \f$p\f$ and \f$\bar p\f$.
+   * multiplet, and neither \f$p\f$ and \f$\bar p\f$.
    *
    */
-  inline std::int32_t iso_multiplett() const {
+  inline std::int32_t iso_multiplet() const {
     if (! is_hadron()) {
       return 0;
     }
-    // the η meson is NOT in the same multiplett as the π, and Λ and Σ.
+    // the η meson is NOT in the same multiplet as the π, and Λ and Σ.
     // We return the complete code for the I=0 state.
     if (isospin_total() == 0) {
       return code();
@@ -343,18 +343,18 @@ class PdgCode {
     // doesn't matter that we change e.g. a proton to an (ddd)-state, because
     // we can distinguish nucleons and Δ resonances by the other numbers in the
     // new scheme (it's gotta be good for something!)
-    std::int32_t multiplett_code = ( (chunks_.excitation_  << 16)
+    std::int32_t multiplet_code = ( (chunks_.excitation_  << 16)
                           | ((digits_.n_q1_ == 2 ? 1 : digits_.n_q1_) << 12)
                           | ((digits_.n_q2_ == 2 ? 1 : digits_.n_q2_) <<  8)
                           | ((digits_.n_q3_ == 2 ? 1 : digits_.n_q3_) <<  4)
                           | (digits_.n_J_));
     // if we have pion-like particles, return the above code (discard
     // antiparticle_sign)
-    if ((multiplett_code & 0x0000fff0) == 0x110) {
-      return multiplett_code;
+    if ((multiplet_code & 0x0000fff0) == 0x110) {
+      return multiplet_code;
     }
     // else, the sign is important!
-    return antiparticle_sign()*multiplett_code;
+    return antiparticle_sign()*multiplet_code;
   }
 
   /****************************************************************************

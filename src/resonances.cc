@@ -79,9 +79,9 @@ std::vector<ProcessBranch> resonance_cross_section(
   /* Isospin symmetry factor, by default 1 */
   int symmetryfactor = 1;
   // the isospin symmetry factor is 2 if both particles are in the same
-  // isospin multiplett:
-  if (type_particle1.pdgcode().iso_multiplett()
-   == type_particle2.pdgcode().iso_multiplett()) {
+  // isospin multiplet:
+  if (type_particle1.pdgcode().iso_multiplet()
+   == type_particle2.pdgcode().iso_multiplet()) {
     symmetryfactor = 2;
   }
 

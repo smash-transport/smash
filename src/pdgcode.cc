@@ -59,7 +59,7 @@ unsigned int PdgCode::isospin_total() const {
   // Δ and N distinction. I don't know any smart algorithm for this; I am
   // confident that special casing is the only way to do that.
   if (number_of_u_or_d_quarks == 3) {
-    std::int32_t multi = std::abs(multiplett());
+    std::int32_t multi = std::abs(multiplet());
     // first the most common ones: p/n and Δ
     if (multi == 0x10002) { return 1; }
     if (multi == 0x10004) { return 3; }
