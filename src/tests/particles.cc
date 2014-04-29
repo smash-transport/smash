@@ -14,6 +14,7 @@
 #include "include/particledata.h"
 #include "include/pdgcode.h"
 #include "include/outputroutines.h"
+#include "../include/macros.h"
 #include <algorithm>
 
 using namespace Smash;
@@ -62,6 +63,7 @@ TEST(everything) {
   int type_size = 0;
   for (const ParticleData &data : particles.data()) {
     printd("id %d: pdg %s\n", data.id(), data.pdgcode().string().c_str());
+    SMASH_UNUSED(data);
     type_size++;
   }
   VERIFY(!(type_size != 2));
@@ -84,7 +86,7 @@ TEST_CATCH(load_from_incorrect_string, Particles::LoadFailure) {
 TEST(load_one_particle_no_extra_whitespace) {
   const std::string parts("pi0 0.1350 -1.0 111 2 0 0");
   Particles p(parts, {});
-  COMPARE(p.types_size(), 1);
+  COMPARE(p.types_size(), 1u);
   int count = 0;
   for (const auto &type : p.types()) {
     ++count;
@@ -101,7 +103,7 @@ TEST(load_one_particle_no_extra_whitespace) {
 TEST(load_one_particle_with_whitespace) {
   const std::string parts("\t\n\t  pi0  0.1350 \t -1.0 111\t2 0 0 \n ");
   Particles p(parts, {});
-  COMPARE(p.types_size(), 1);
+  COMPARE(p.types_size(), 1u);
   int count = 0;
   for (const auto &type : p.types()) {
     ++count;
@@ -126,13 +128,13 @@ TEST(load_only_comments) {
       "  # Will you ignore me? #### sldfkjsdf\n"
       "\t\t  \t # yes?");
   Particles p(parts, {});
-  COMPARE(p.types_size(), 0);
+  COMPARE(p.types_size(), 0u);
 }
 
 TEST(load_one_particle_with_comment) {
   const std::string parts("pi0 0.1350  -1.0 111 2 0 0 # This is pi0. Swell.");
   Particles p(parts, {});
-  COMPARE(p.types_size(), 1);
+  COMPARE(p.types_size(), 1u);
   int count = 0;
   for (const auto &type : p.types()) {
     ++count;
@@ -155,7 +157,7 @@ namespace decaymodes_txt {
 
 TEST(load_many_particles) {
   Particles p(particles_txt::data, {});
-  COMPARE(p.types_size(), 20);
+  COMPARE(p.types_size(), 20u);
   ParticleType type = p.particle_type(-0x1114);
   COMPARE(type.mass(), 1.232f);
   COMPARE(type.width(), .117f);
@@ -213,9 +215,9 @@ TEST(load_decaymodes_two_channels) {
     const auto &rho0 = p.decay_modes(0x113);
     VERIFY(!rho0.empty());
     const auto &modelist = rho0.decay_mode_list();
-    COMPARE(modelist.size(), 1);
+    COMPARE(modelist.size(), 1u);
     COMPARE(modelist[0].weight(), 1.);
-    COMPARE(modelist[0].particle_list().size(), 2);
+    COMPARE(modelist[0].particle_list().size(), 2u);
     COMPARE(modelist[0].particle_list()[0].dump(), 0x211);
     COMPARE(modelist[0].particle_list()[1].dump(), 0x80000211);
   }
@@ -223,17 +225,17 @@ TEST(load_decaymodes_two_channels) {
     const auto &omega = p.decay_modes(0x223);
     VERIFY(!omega.empty());
     const auto &modelist = omega.decay_mode_list();
-    COMPARE(modelist.size(), 3);
+    COMPARE(modelist.size(), 3u);
     FUZZY_COMPARE(float(modelist[0].weight()), 1.f/3.f);
     FUZZY_COMPARE(float(modelist[1].weight()), 1.f/3.f);
     FUZZY_COMPARE(float(modelist[2].weight()), 1.f/3.f);
-    COMPARE(modelist[0].particle_list().size(), 2);
+    COMPARE(modelist[0].particle_list().size(), 2u);
     COMPARE(modelist[0].particle_list()[0].dump(), 0x111);
     COMPARE(modelist[0].particle_list()[1].dump(), 0x113);
-    COMPARE(modelist[1].particle_list().size(), 2);
+    COMPARE(modelist[1].particle_list().size(), 2u);
     COMPARE(modelist[1].particle_list()[0].dump(), 0x211);
     COMPARE(modelist[1].particle_list()[1].dump(), 0x80000213);
-    COMPARE(modelist[2].particle_list().size(), 2);
+    COMPARE(modelist[2].particle_list().size(), 2u);
     COMPARE(modelist[2].particle_list()[0].dump(), 0x80000211);
     COMPARE(modelist[2].particle_list()[1].dump(), 0x213);
   }
@@ -241,7 +243,7 @@ TEST(load_decaymodes_two_channels) {
 
 template <typename T>
 void check_particle_data_iteration(T *p) {
-  int count = 0;
+  std::size_t count = 0;
   for (auto &data : p->data()) {
     const int id = data.id();
     const ParticleData &data2 = p->data(id);
@@ -253,7 +255,7 @@ void check_particle_data_iteration(T *p) {
 
 template <typename T>
 void check_particle_type_iteration(T *p) {
-  int count = 0;
+  std::size_t count = 0;
   for (const auto &type : p->types()) {
     const PdgCode pdg = type.pdgcode();
     const ParticleType &type2 = p->particle_type(pdg);
@@ -284,7 +286,7 @@ TEST(erase_particle) {
   p.create(0x211);
   p.create(-0x211);
   p.create(0x111);
-  COMPARE(p.size(), 3);
+  COMPARE(p.size(), 3u);
   VERIFY(p.has_data(0));
   VERIFY(p.has_data(1));
   VERIFY(p.has_data(2));
@@ -292,7 +294,7 @@ TEST(erase_particle) {
   COMPARE(p.data(1).pdgcode().dump(), 0x80000211);
 
   p.remove(0);
-  COMPARE(p.size(), 2);
+  COMPARE(p.size(), 2u);
   VERIFY(!p.has_data(0));
   VERIFY(p.has_data(1));
   VERIFY(p.has_data(2));
@@ -300,7 +302,7 @@ TEST(erase_particle) {
   COMPARE(p.data(1).pdgcode().dump(), 0x80000211);
 
   p.remove(2);
-  COMPARE(p.size(), 1);
+  COMPARE(p.size(), 1u);
   VERIFY(!p.has_data(0));
   VERIFY(p.has_data(1));
   VERIFY(!p.has_data(2));

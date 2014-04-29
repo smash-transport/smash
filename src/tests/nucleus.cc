@@ -20,16 +20,16 @@ TEST(initialize_realparticles) {
   Nucleus lead;
   // fill with 208 nucleons:
   lead.fill_from_list(list, 1);
-  COMPARE(lead.number_of_particles(), 208);
-  COMPARE(lead.size(), 208);
+  COMPARE(lead.number_of_particles(), 208u);
+  COMPARE(lead.size(), 208u);
 }
 
 TEST(initialize_testparticles) {
   Nucleus lead;
   constexpr int N_TEST = 10;
   lead.fill_from_list(list, N_TEST);
-  COMPARE(lead.number_of_particles(), 208);
-  COMPARE(lead.size(), 208*N_TEST);
+  COMPARE(lead.number_of_particles(), 208u);
+  COMPARE(lead.size(), 208u * N_TEST);
 }
 
 TEST(initialize_testparticles_multiple) {
@@ -37,8 +37,8 @@ TEST(initialize_testparticles_multiple) {
   constexpr int N_TEST = 10;
   lead.fill_from_list(list, N_TEST);
   lead.fill_from_list(list, N_TEST);
-  COMPARE(lead.number_of_particles(), 416);
-  COMPARE(lead.size(), 416*N_TEST);
+  COMPARE(lead.number_of_particles(), 416u);
+  COMPARE(lead.size(), 416u * N_TEST);
 }
 
 TEST_CATCH(initialize_testparticles_wrong, Nucleus::TestparticleConfusion) {
@@ -46,7 +46,7 @@ TEST_CATCH(initialize_testparticles_wrong, Nucleus::TestparticleConfusion) {
   constexpr int N_TEST = 10;
   lead.fill_from_list(list, 1);
   lead.fill_from_list(list, N_TEST);
-  COMPARE(lead.number_of_particles(), 208);
+  COMPARE(lead.number_of_particles(), 208u);
   // this should throw an error: list size is (N_TEST+1)*208 = 2288, not
   // divisible by N_TEST (unless someone set N_TEST to 1).
   size_t size = lead.size();
