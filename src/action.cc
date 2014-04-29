@@ -18,7 +18,7 @@ Action::Action(const std::vector<int> &in_part, float time_of_execution)
       total_weight_(0.), interaction_type_(0) {}
 
 Action::Action(const std::vector<int> &in_part, float time_of_execution,
-	       int interaction_type)
+               int interaction_type)
     : ingoing_particles_(in_part), time_of_execution_(time_of_execution),
       total_weight_(0.), interaction_type_(interaction_type) {}
 

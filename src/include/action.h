@@ -54,7 +54,7 @@ class Action {
 class DecayAction : public Action {
  public:
   DecayAction (const std::vector<int> &in_part, float time_of_execution,
-	       int interaction_type);
+               int interaction_type);
   /* Decide for a particular decay channel via Monte-Carlo
    * and set the outgoing_particles_ correspondingly.  */
   void decide (Particles *particles);

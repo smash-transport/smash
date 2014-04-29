@@ -23,15 +23,15 @@ class ScatterActionsFinder : public ActionFinderFactory {
   /* Check for a single pair of particles (id_a, id_b) if a collision will happen
    * in the next timestep and create a corresponding Action object in that case. */
   ActionPtr check_collision(int id_a, int id_b, Particles *particles,
-			    const ExperimentParameters &parameters,
-			    CrossSections *cross_sections = nullptr) const;
+                            const ExperimentParameters &parameters,
+                            CrossSections *cross_sections = nullptr) const;
 
   /* Check the whole particle list for collisions
    * and add them to a list of Action objects. */
   void find_possible_actions (std::vector<ActionPtr> &actions,
-			      Particles *particles,
-			      const ExperimentParameters &parameters,
-			      CrossSections *cross_sections = nullptr) const override;
+                              Particles *particles,
+                              const ExperimentParameters &parameters,
+                              CrossSections *cross_sections = nullptr) const override;
 
  private:
 };
@@ -43,9 +43,9 @@ class GridScatterFinder : public ScatterActionsFinder {
  public:
   GridScatterFinder (float length);
   void find_possible_actions (std::vector<ActionPtr> &actions,
-			      Particles *particles,
-			      const ExperimentParameters &parameters,
-			      CrossSections *cross_sections = nullptr) const override;
+                              Particles *particles,
+                              const ExperimentParameters &parameters,
+                              CrossSections *cross_sections = nullptr) const override;
  private:
   /* Cube edge length. */
   const float length_;

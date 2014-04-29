@@ -16,7 +16,7 @@
 namespace Smash {
 
 ScatterAction::ScatterAction(const std::vector<int> &in_part,
-			     float time_of_execution)
+                             float time_of_execution)
     : Action(in_part, time_of_execution) {}
 
 
@@ -28,12 +28,12 @@ void ScatterAction::decide () {
     std::vector<ProcessBranch>::const_iterator proc = subprocesses_.begin();
     while (interaction_type_ == 0 && proc != subprocesses_.end()) {
       if (proc->particle_list().size() > 1
-	  || proc->particle_list().at(0) != 0) {
-	interaction_probability += proc->weight() / total_weight_;
-	if (random_interaction < interaction_probability) {
-	  interaction_type_ = proc->type();
-	  outgoing_particles_ = proc->particle_list();
-	}
+          || proc->particle_list().at(0) != 0) {
+        interaction_probability += proc->weight() / total_weight_;
+        if (random_interaction < interaction_probability) {
+          interaction_type_ = proc->type();
+          outgoing_particles_ = proc->particle_list();
+        }
       }
       ++proc;
     }
@@ -65,9 +65,9 @@ void ScatterAction::perform (Particles *particles, size_t &id_process)
   FourVector final_momentum;
 
   printd("Process %zu type %i particle %s<->%s colliding %d<->%d time %g\n",
-    id_process, interaction_type_, particles->type(id_a).name().c_str(),
-	  particles->type(id_a).name().c_str(), id_a, id_b,
-	  particles->data(id_a).position().x0());
+         id_process, interaction_type_, particles->type(id_a).name().c_str(),
+         particles->type(id_a).name().c_str(), id_a, id_b,
+         particles->data(id_a).position().x0());
   printd_momenta("particle 1 momenta before", particles->data(id_a));
   printd_momenta("particle 2 momenta before", particles->data(id_b));
 
@@ -80,11 +80,11 @@ void ScatterAction::perform (Particles *particles, size_t &id_process)
 
     /* processes computed in the center of momenta */
     boost_CM(particles->data_pointer(id_a), particles->data_pointer(id_b),
-	      &velocity_CM);
+             &velocity_CM);
     momenta_exchange(particles->data_pointer(id_a),
-		      particles->data_pointer(id_b));
+                     particles->data_pointer(id_b));
     boost_back_CM(particles->data_pointer(id_a),
-		  particles->data_pointer(id_b), &velocity_CM);
+                  particles->data_pointer(id_b), &velocity_CM);
 
     write_oscar(particles->data(id_a), particles->type(id_a));
     write_oscar(particles->data(id_b), particles->type(id_b));
@@ -105,42 +105,42 @@ void ScatterAction::perform (Particles *particles, size_t &id_process)
     printd("Process: Resonance formation. ");
     new_particles = outgoing_particles_.size();
     write_oscar(particles->data(id_a), particles->type(id_a), 2,
-		new_particles);
+                new_particles);
     write_oscar(particles->data(id_b), particles->type(id_b));
     /* processes computed in the center of momenta */
     boost_CM(particles->data_pointer(id_a), particles->data_pointer(id_b),
-	      &velocity_CM);
+             &velocity_CM);
 
     id_new = resonance_formation(particles, id_a, id_b, outgoing_particles_);
 
     boost_back_CM(particles->data_pointer(id_a),
-		  particles->data_pointer(id_b), &velocity_CM);
+                  particles->data_pointer(id_b), &velocity_CM);
 
     /* Boost the new particle to computational frame */
     neg_velocity_CM.set_FourVector(1.0, -velocity_CM.x1(),
       -velocity_CM.x2(), -velocity_CM.x3());
 
     for (size_t id_value = id_new; id_value < id_new + new_particles;
-	  id_value++) {
+         id_value++) {
       particles->data_pointer(id_value)->set_momentum(
-	particles->data(id_value).momentum().LorentzBoost(neg_velocity_CM));
+        particles->data(id_value).momentum().LorentzBoost(neg_velocity_CM));
       final_momentum += particles->data(id_value).momentum();
 
       /* The starting point of resonance is between
-	* the two initial particles
-	* x_middle = x_a + (x_b - x_a) / 2
-	*/
+       * the two initial particles
+       * x_middle = x_a + (x_b - x_a) / 2
+       */
       FourVector middle_point = particles->data(id_a).position()
-	+ (particles->data(id_b).position()
-	    - particles->data(id_a).position())
-	/ 2.0;
+        + (particles->data(id_b).position()
+            - particles->data(id_a).position())
+        / 2.0;
       particles->data_pointer(id_value)->set_position(middle_point);
       write_oscar(particles->data(id_value), particles->type(id_value));
       /* unset collision time for particles + keep id + unset partner */
       particles->data_pointer(id_value)->set_collision_past(id_process);
 
       printd("Resonance %s with ID %zu \n",
-	particles->type(id_new).name().c_str(), id_new);
+             particles->type(id_new).name().c_str(), id_new);
       printd_momenta("momentum in comp frame", particles->data(id_new));
       printd_position("position in comp frame", particles->data(id_new));
     }
@@ -154,7 +154,7 @@ void ScatterAction::perform (Particles *particles, size_t &id_process)
 
   default:
     printf("Warning: ID %i (%s) has unspecified process type %i.\n",
-	    id_a, particles->type(id_a).name().c_str(), interaction_type_);
+           id_a, particles->type(id_a).name().c_str(), interaction_type_);
   } /* end switch (interaction_type_) */
 
   id_process++;
@@ -169,13 +169,13 @@ void ScatterAction::perform (Particles *particles, size_t &id_process)
   }
   if (fabs(momentum_difference.x1()) > really_small)
     printf("Warning: Interaction type %i px conservation violation %g\n",
-	    interaction_type_, momentum_difference.x1());
+           interaction_type_, momentum_difference.x1());
   if (fabs(momentum_difference.x2()) > really_small)
     printf("Warning: Interaction type %i py conservation violation %g\n",
-	    interaction_type_, momentum_difference.x2());
+           interaction_type_, momentum_difference.x2());
   if (fabs(momentum_difference.x3()) > really_small)
     printf("Warning: Interaction type %i pz conservation violation %g\n",
-	    interaction_type_, momentum_difference.x3());
+           interaction_type_, momentum_difference.x3());
 }
 
 }

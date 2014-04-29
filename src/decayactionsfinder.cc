@@ -51,5 +51,5 @@ DecayActionsFinder::find_possible_actions (std::vector<ActionPtr> &actions,
     }
   }
 }
-  
+
 }  // namespace Smash

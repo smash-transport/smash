@@ -128,10 +128,10 @@ void Experiment<Modus>::run_time_evolution() {
     decay_finder_.find_possible_actions (actions, &particles_, parameters_);
     /* (1.b) Find possible collisions. */
     scatter_finder_.find_possible_actions (actions, &particles_, parameters_,
-					   &cross_sections_);
+                                           &cross_sections_);
     /* (1.c) Sort action list by time. */
     std::sort (actions.begin(), actions.end());
-  
+
     /* (2.a) Perform actions. */
     if (!actions.empty()) {
       for (auto act = actions.begin(); act != actions.end(); ++act) {

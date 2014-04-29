@@ -17,9 +17,9 @@ namespace Smash {
 class DecayActionsFinder : public ActionFinderFactory {
  public:
   void find_possible_actions (std::vector<ActionPtr> &actions,
-			      Particles *particles,
-			      const ExperimentParameters &parameters,
-			      CrossSections *cross_sections = nullptr) const override;
+                              Particles *particles,
+                              const ExperimentParameters &parameters,
+                              CrossSections *cross_sections = nullptr) const override;
 };
 
 }  // namespace Smash

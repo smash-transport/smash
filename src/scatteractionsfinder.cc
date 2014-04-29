@@ -17,8 +17,8 @@ namespace Smash {
 
 ActionPtr
 ScatterActionsFinder::check_collision (int id_a, int id_b, Particles *particles,
-				       const ExperimentParameters &parameters,
-				       CrossSections *cross_sections) const {
+                                       const ExperimentParameters &parameters,
+                                       CrossSections *cross_sections) const {
 
   ScatterAction* act = nullptr;
   std::vector<int> in_part;
@@ -28,8 +28,8 @@ ScatterActionsFinder::check_collision (int id_a, int id_b, Particles *particles,
       && particles->data(id_a).id_process()
       == particles->data(id_b).id_process()) {
     printd("Skipping collided particle %d <-> %d at time %g due process %d\n",
-	id_a, id_b, particles->data(id_a).position().x0(),
-	particles->data(id_a).id_process());
+           id_a, id_b, particles->data(id_a).position().x0(),
+           particles->data(id_a).id_process());
     return nullptr;
   }
 
@@ -41,11 +41,11 @@ ScatterActionsFinder::check_collision (int id_a, int id_b, Particles *particles,
 
   /* check for minimal collision time both particles */
   if ((particles->data(id_a).collision_time() > 0.0
-	&& time_collision > particles->data(id_a).collision_time())
+       && time_collision > particles->data(id_a).collision_time())
       || (particles->data(id_b).collision_time() > 0.0
-	&& time_collision > particles->data(id_b).collision_time())) {
+          && time_collision > particles->data(id_b).collision_time())) {
     printd("%g Not minimal particle %d <-> %d\n",
-	particles->data(id_a).position().x0(), id_a, id_b);
+           particles->data(id_a).position().x0(), id_a, id_b);
     return nullptr;
   }
 
@@ -64,21 +64,20 @@ ScatterActionsFinder::check_collision (int id_a, int id_b, Particles *particles,
 
   /* Add elastic process.  */
   act->add_process(ProcessBranch(particles->data(id_a).pdgcode(),
-				  particles->data(id_b).pdgcode(),
-				  cross_sections->elastic(particles,
-							  id_a, id_b), 0));
+                                 particles->data(id_b).pdgcode(),
+                                 cross_sections->elastic(particles,
+                                                         id_a, id_b), 0));
 
   {
     /* distance criteria according to cross_section */
     const double distance_squared = particle_distance(
-	      particles->data_pointer(id_a), particles->data_pointer(id_b));
-    if (distance_squared >= act->weight() * fm2_mb * M_1_PI)
-      {
-	delete act;
-	return nullptr;
+              particles->data_pointer(id_a), particles->data_pointer(id_b));
+    if (distance_squared >= act->weight() * fm2_mb * M_1_PI) {
+        delete act;
+        return nullptr;
       }
     printd("distance squared particle %d <-> %d: %g \n", id_a, id_b,
-	  distance_squared);
+           distance_squared);
   }
 
   /* Decide for a particular final state. */
@@ -86,14 +85,14 @@ ScatterActionsFinder::check_collision (int id_a, int id_b, Particles *particles,
 
   /* Set up collision partners. */
   printd("collision type %d particle %d <-> %d time: %g\n",
-	 act->process_type(), id_a, id_b, time_collision);
+         act->process_type(), id_a, id_b, time_collision);
   particles->data_pointer(id_a)->set_collision_time(time_collision);
   particles->data_pointer(id_a)->set_collision_time(time_collision);
   printd("collision type %d particle %d <-> %d time: %g\n",
-	particles->data(id_a).process_type(),
-	particles->data(id_a).id_partner(),
-	particles->data(id_b).id_partner(),
-	particles->data(id_a).collision_time());
+         particles->data(id_a).process_type(),
+         particles->data(id_a).id_partner(),
+         particles->data(id_b).id_partner(),
+         particles->data(id_a).collision_time());
 
   return ActionPtr(act);
 }
@@ -101,8 +100,8 @@ ScatterActionsFinder::check_collision (int id_a, int id_b, Particles *particles,
 
 void
 ScatterActionsFinder::find_possible_actions (std::vector<ActionPtr> &actions,
-	Particles *particles, const ExperimentParameters &parameters,
-	CrossSections *cross_sections) const {
+        Particles *particles, const ExperimentParameters &parameters,
+        CrossSections *cross_sections) const {
 
   double neighborhood_radius_squared = parameters.cross_section * fm2_mb * M_1_PI * 4;
 
@@ -125,8 +124,9 @@ ScatterActionsFinder::find_possible_actions (std::vector<ActionPtr> &actions,
       ActionPtr act = check_collision (id_a, id_b, particles, parameters, cross_sections);
 
       /* Add to collision list. */
-      if (act != nullptr)
-	actions.push_back (std::move(act));
+      if (act != nullptr) {
+        actions.push_back (std::move(act));
+      }
     }
   }
 }
@@ -139,8 +139,8 @@ GridScatterFinder::GridScatterFinder(float length) : length_(length) {
 
 void
 GridScatterFinder::find_possible_actions (std::vector<ActionPtr> &actions,
-	Particles *particles, const ExperimentParameters &parameters,
-	CrossSections *cross_sections) const {
+        Particles *particles, const ExperimentParameters &parameters,
+        CrossSections *cross_sections) const {
 
   std::vector<std::vector<std::vector<std::vector<int> > > > grid;
   int N;
@@ -152,7 +152,7 @@ GridScatterFinder::find_possible_actions (std::vector<ActionPtr> &actions,
   if (unlikely(N < 4 || particles->size() < 10)) {
     /* XXX: apply periodic boundary condition */
     ScatterActionsFinder::find_possible_actions (actions, particles, parameters,
-						 cross_sections);
+                                                 cross_sections);
     return;
   }
 
@@ -237,20 +237,21 @@ GridScatterFinder::find_possible_actions (std::vector<ActionPtr> &actions,
               continue;
             }
             printd("grid cell particle %i <-> %i\n", data.id(), *id_other);
-	    ActionPtr act;
+            ActionPtr act;
             if (shift == 0)
-	      act = check_collision (data.id(), *id_other, particles, parameters, cross_sections);
+              act = check_collision (data.id(), *id_other, particles, parameters, cross_sections);
             else {
               /* apply eventual boundary before and restore after */
               particles->data_pointer(*id_other)
                   ->set_position(particles->data(*id_other).position() + shift);
-	      act = check_collision (data.id(), *id_other, particles, parameters, cross_sections);
+              act = check_collision (data.id(), *id_other, particles, parameters, cross_sections);
               particles->data_pointer(*id_other)
                   ->set_position(particles->data(*id_other).position() - shift);
             }
             /* Add to collision list. */
-	    if (act != nullptr)
-	      actions.push_back (std::move(act));
+            if (act != nullptr) {
+              actions.push_back (std::move(act));
+            }
           } /* grid particles loop */
         }   /* grid sz */
       }     /* grid sy */
