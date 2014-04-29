@@ -13,6 +13,7 @@
 #include "include/constants.h"
 #include "include/particledata.h"
 #include "include/outputroutines.h"
+#include "../include/macros.h"
 #include <algorithm>
 
 using namespace Smash;
@@ -61,6 +62,7 @@ TEST(everything) {
   int type_size = 0;
   for (const ParticleData &data : particles.data()) {
     printd("id %d: pdg %d\n", data.id(), data.pdgcode());
+    SMASH_UNUSED(data);
     type_size++;
   }
   VERIFY(!(type_size != 2));
