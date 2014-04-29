@@ -84,15 +84,8 @@ ScatterActionsFinder::check_collision (int id_a, int id_b, Particles *particles,
   act->decide();
 
   /* Set up collision partners. */
-  printd("collision type %d particle %d <-> %d time: %g\n",
-         act->process_type(), id_a, id_b, time_collision);
   particles->data_pointer(id_a)->set_collision_time(time_collision);
   particles->data_pointer(id_a)->set_collision_time(time_collision);
-  printd("collision type %d particle %d <-> %d time: %g\n",
-         particles->data(id_a).process_type(),
-         particles->data(id_a).id_partner(),
-         particles->data(id_b).id_partner(),
-         particles->data(id_a).collision_time());
 
   return ActionPtr(act);
 }

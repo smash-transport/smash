@@ -36,6 +36,9 @@ void ScatterAction::decide () {
         }
       }
       ++proc;
+      printd("ScatterAction::decide: collision type %d particle %d <-> %d time: %g\n",
+             interaction_type_, ingoing_particles_[0], ingoing_particles_[1],
+             time_of_execution_);
     }
   }
 }
