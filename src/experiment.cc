@@ -125,10 +125,10 @@ void Experiment<Modus>::run_time_evolution() {
     std::vector<ActionPtr> actions;
 
     /* (1.a) Find possible decays. */
-    decay_finder_.find_possible_actions (actions, &particles_, parameters_);
+    actions += decay_finder_.find_possible_actions(&particles_, parameters_);
     /* (1.b) Find possible collisions. */
-    scatter_finder_.find_possible_actions (actions, &particles_, parameters_,
-                                           &cross_sections_);
+    actions += scatter_finder_.find_possible_actions(&particles_, parameters_,
+                                                     &cross_sections_);
     /* (1.c) Sort action list by time. */
     std::sort (actions.begin(), actions.end());
 

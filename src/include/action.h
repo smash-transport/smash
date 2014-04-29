@@ -79,6 +79,17 @@ class ScatterAction : public Action {
 using ActionPtr = std::unique_ptr<Action>;
 using ScatterActionPtr = std::unique_ptr<ScatterAction>;
 
+inline std::vector<ActionPtr> &operator+=(std::vector<ActionPtr> &lhs,
+                                          std::vector<ActionPtr> &&rhs) {
+  if (lhs.size() == 0) {
+    lhs = std::move(rhs);
+  } else {
+    lhs.insert(lhs.end(), std::make_move_iterator(rhs.begin()),
+               std::make_move_iterator(rhs.end()));
+  }
+  return lhs;
+}
+
 }  // namespace Smash
 
 #endif  // SRC_INCLUDE_ACTION_H_

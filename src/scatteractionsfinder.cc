@@ -90,12 +90,10 @@ ScatterActionsFinder::check_collision (const int id_a, const int id_b, Particles
   return ActionPtr(act);
 }
 
-
-void
-ScatterActionsFinder::find_possible_actions (std::vector<ActionPtr> &actions,
-        Particles *particles, const ExperimentParameters &parameters,
-        CrossSections *cross_sections) const {
-
+std::vector<ActionPtr> ScatterActionsFinder::find_possible_actions(
+    Particles *particles, const ExperimentParameters &parameters,
+    CrossSections *cross_sections) const {
+  std::vector<ActionPtr> actions;
   double neighborhood_radius_squared = parameters.cross_section * fm2_mb * M_1_PI * 4;
 
   for (const auto &p1 : particles->data()) {
@@ -122,10 +120,12 @@ ScatterActionsFinder::find_possible_actions (std::vector<ActionPtr> &actions,
       }
     }
   }
+  return std::move(actions);
 }
 
 
 
+#if 0
 GridScatterFinder::GridScatterFinder(float length) : length_(length) {
 }
 
@@ -251,6 +251,6 @@ GridScatterFinder::find_possible_actions (std::vector<ActionPtr> &actions,
     }       /* grid sx */
   }         /* outer particle loop */
 }
-
+#endif
 
 }  // namespace Smash

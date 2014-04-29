@@ -29,15 +29,14 @@ class ScatterActionsFinder : public ActionFinderFactory {
 
   /* Check the whole particle list for collisions
    * and add them to a list of Action objects. */
-  void find_possible_actions (std::vector<ActionPtr> &actions,
-                              Particles *particles,
-                              const ExperimentParameters &parameters,
-                              CrossSections *cross_sections = nullptr) const override;
+  std::vector<ActionPtr> find_possible_actions(
+      Particles *particles, const ExperimentParameters &parameters,
+      CrossSections *cross_sections = nullptr) const override;
 
  private:
 };
 
-
+#if 0
 /* An advanced scatter finder:
  * Sets up a grid and sorts the particles into grid cells. */
 class GridScatterFinder : public ScatterActionsFinder {
@@ -51,6 +50,7 @@ class GridScatterFinder : public ScatterActionsFinder {
   /* Cube edge length. */
   const float length_;
 };
+#endif
 
 }  // namespace Smash
 
