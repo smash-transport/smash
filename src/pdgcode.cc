@@ -96,10 +96,10 @@ unsigned int PdgCode::isospin_total() const {
   return number_of_u_or_d_quarks;
 }
 
-int PdgCode::heavy_quarkness(const int quark) const {
+int PdgCode::quarkness(const int quark) const {
   // input sanitization: Only quark numbers 1 through 8 are allowed.
   if (quark < 1 || quark > 8) {
-    throw std::invalid_argument(std::string("PdgCode::heavy_quarkness(): ")
+    throw std::invalid_argument(std::string("PdgCode::quarkness(): ")
                  + std::string("Quark number must be in [1..8], received ")
                  + std::to_string(quark));
   }
