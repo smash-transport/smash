@@ -32,8 +32,8 @@ endmacro()
 macro(smash_add_unittest name)
    add_executable(${name} ${name}.cc)
    set_target_properties(${name} PROPERTIES
-      COMPILE_FLAGS ${ASAN_FLAG}
-      LINK_FLAGS ${ASAN_FLAG}
+      COMPILE_FLAGS ${SANITIZER_FLAG}
+      LINK_FLAGS ${SANITIZER_FLAG}
       )
    target_link_libraries(${name} smash_lib ${SMASH_LIBRARIES})
    smash_add_test(${name} ${name} ${name})
@@ -120,9 +120,9 @@ else()
    message(STATUS "valgrind not found. Memcheck tests are disabled!")
 endif()
 
-if(HAVE_ADDRESS_SANITIZER)
-   smash_add_test(asan_box      smash_asan smash_asan -c "General: {STEPS: 50,MODUS: Box}" ${SMASH_OPTIONS})
-   smash_add_test(asan_collider smash_asan smash_asan -s 500 -m Collider ${SMASH_OPTIONS})
-   smash_add_test(asan_nucleus  smash_asan smash_asan -s 500 -m Nucleus ${SMASH_OPTIONS})
-   #smash_add_test(asan_sphere   smash_asan smash_asan -s 500 -m Sphere ${SMASH_OPTIONS})
+if(HAVE_SANITIZER)
+   smash_add_test(sanitizer_box      smash_sanitizer smash_sanitizer -c "General: {STEPS: 50,MODUS: Box}" ${SMASH_OPTIONS})
+   smash_add_test(sanitizer_collider smash_sanitizer smash_sanitizer -s 500 -m Collider ${SMASH_OPTIONS})
+   smash_add_test(sanitizer_nucleus  smash_sanitizer smash_sanitizer -s 500 -m Nucleus ${SMASH_OPTIONS})
+   #smash_add_test(sanitizer_sphere   smash_sanitizer smash_sanitizer -s 500 -m Sphere ${SMASH_OPTIONS})
 endif()
