@@ -129,8 +129,9 @@ std::vector<ProcessBranch> resonance_cross_section(
       resonance_process_list.push_back(resonance_process);
       resonance_process_list.at(0).change_weight(resonance_xsection);
 
-      printd("Found resonance %x (%s) with mass %f and width %f.\n",
-             type_resonance.pdgcode().code(), type_resonance.name().c_str(),
+      printd("Found resonance %s (%s) with mass %f and width %f.\n",
+             type_resonance.pdgcode().string().c_str(),
+             type_resonance.name().c_str(),
              type_resonance.mass(), type_resonance.width());
       printd("2->1 with original particles: %s %s Charges: %i %i \n",
              type_particle1.name().c_str(), type_particle2.name().c_str(),
@@ -144,9 +145,10 @@ std::vector<ProcessBranch> resonance_cross_section(
            type_particle2, type_resonance, mandelstam_s, cm_momentum_squared,
            &resonance_process_list);
       if (two_to_two_processes > 0) {
-        printd("Found %zu 2->2 processes for resonance %x (%s).\n",
+        printd("Found %zu 2->2 processes for resonance %s (%s).\n",
                two_to_two_processes,
-               type_resonance.pdgcode().code(), type_resonance.name().c_str());
+               type_resonance.pdgcode().string().c_str(),
+               type_resonance.name().c_str());
         printd("2->2 with original particles: %s %s Charges: %i %i \n",
                type_particle1.name().c_str(), type_particle2.name().c_str(),
                type_particle1.charge(), type_particle2.charge());

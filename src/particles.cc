@@ -206,9 +206,9 @@ void sample_cms_momenta(ParticleData *particle1, ParticleData *particle2,
   Angles phitheta;
   phitheta.distribute_isotropically();
   if (!(energy1 > mass1)) {
-    printf("Particle %x radial momenta %g phi %g cos_theta %g\n",
-           particle1->pdgcode().code(), momentum_radial, phitheta.phi(),
-           phitheta.costheta());
+    printf("Particle %s radial momenta %g phi %g cos_theta %g\n",
+           particle1->pdgcode().string().c_str(), momentum_radial,
+           phitheta.phi(), phitheta.costheta());
     printf("Etot: %g m_a: %g m_b %g E_a: %g\n", cms_energy, mass1, mass2,
            energy1);
   }
@@ -322,8 +322,8 @@ Particles::ParticleTypeMap Particles::load_particle_types(  //{{{
     }
     ensure_all_read(lineinput, line);
 
-    printd("Setting particle type %s mass %g width %g pdgcode %x\n",
-           name.c_str(), mass, width, pdgcode.code());
+    printd("Setting particle type %s mass %g width %g pdgcode %s\n",
+           name.c_str(), mass, width, pdgcode.string().c_str());
     printd("Setting particle type %s isospin %i charge %i spin %i\n",
            name.c_str(), isospin, charge, spin);
 
@@ -352,7 +352,7 @@ Particles::DecayModesMap Particles::load_decaymodes(const std::string &input) {
     /* Check if ratios add to 1 */
     if (fabs(ratio_sum - 1.0) > really_small) {
       /* They didn't; renormalize */
-      printf("Particle %x:\n", pdgcode.code());
+      printf("Particle %s:\n", pdgcode.string().c_str());
       decay_modes_to_add.renormalize(ratio_sum);
     }
     /* Add the list of decay modes for this particle type */

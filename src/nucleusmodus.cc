@@ -76,8 +76,8 @@ NucleusModus::NucleusModus(Configuration modus_config,
 
 void NucleusModus::print_startup() {
   printf("Nucleus initialized:\n");
-  printf("sqrt_s_NN = %g GeV (pairs of %x and %x)\n", sqrt_s_NN_,
-                                   pdg_sNN_1_.code(), pdg_sNN_2_.code());
+  printf("sqrt_s_NN = %g GeV (pairs of %s and %s)\n", sqrt_s_NN_,
+         pdg_sNN_1_.string().c_str(), pdg_sNN_2_.string().c_str());
   printf("Impact parameter: %g fm\n", impact_);
   printf("Initial distance betw nuclei: %g fm\n", 2.0*initial_z_displacement_);
   printf("Projectile initialized with %zu particles (%zu test particles)\n",

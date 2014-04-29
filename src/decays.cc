@@ -228,14 +228,15 @@ int resonance_decay(Particles *particles, int particle_id) {
     printf("Number of decay particles: %zu \n", decay_particles);
     printf("Decay particles: ");
     for (size_t i = 0; i < decay_particles; i++) {
-      printf("%x ", mode->particle_list().at(i).code());
+      printf("%s ", mode->particle_list().at(i).string().c_str());
     }
     printf("\n");
   } else if (decay_particles == 2) {
     type_a = mode->particle_list().at(0);
     type_b = mode->particle_list().at(1);
     if (! (type_a.is_hadron() && type_b.is_hadron())) {
-      printf("Warning: decay products A: %x B: %x\n", type_a.code(), type_b.code());
+      printf("Warning: decay products A: %s B: %s\n", type_a.string().c_str(),
+                                                      type_b.string().c_str());
     }
     new_id_a = one_to_two(particles, particle_id, type_a, type_b);
   } else if (decay_particles == 3) {
@@ -243,8 +244,9 @@ int resonance_decay(Particles *particles, int particle_id) {
     type_b = mode->particle_list().at(1);
     PdgCode type_c = mode->particle_list().at(2);
     if (! (type_a.is_hadron() && type_b.is_hadron() && type_c.is_hadron())) {
-      printf("Warning: decay products A: %x B: %x C: %x\n",
-             type_a.code(), type_b.code(), type_c.code());
+      printf("Warning: decay products A: %s B: %s C: %s\n",
+                             type_a.string().c_str(), type_b.string().c_str(),
+                                                      type_c.string().c_str());
     }
     printd("Note: Doing 1->3 decay!\n");
     new_id_a = one_to_three(particles, particle_id, type_a, type_b, type_c);

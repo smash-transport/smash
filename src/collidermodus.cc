@@ -24,8 +24,8 @@ ColliderModus::ColliderModus(Configuration modus_config,
 
 /* print_startup - console output on startup of box specific parameters */
 void ColliderModus::print_startup() {
-  printf("Projectile PDG ID: %x \n", projectile_.code());
-  printf("Target PDG ID: %x \n", target_.code());
+  printf("Projectile PDG ID: %s \n", projectile_.string().c_str());
+  printf("Target PDG ID: %s \n", target_.string().c_str());
   printf("Center-of-mass energy %10.3f GeV\n", sqrts_);
 }
 
@@ -38,16 +38,16 @@ void ColliderModus::initial_conditions(Particles *particles,
   ParticleData *data_projectile = particles->data_pointer(particles->id_max());
   float mass_projectile
     = particles->particle_type(data_projectile->pdgcode()).mass();
-  printf("projectile pdgcode %x mass %f\n", data_projectile->pdgcode().code(),
-         mass_projectile);
+  printf("projectile pdgcode %s mass %f\n",
+         data_projectile->pdgcode().string().c_str(), mass_projectile);
   /* Create "target" particle */
   particles->create(1, target_);
   /* Pointer to "target" data */
   ParticleData *data_target = particles->data_pointer(particles->id_max());
   float mass_target
     = particles->particle_type(data_target->pdgcode()).mass();
-  printf("target pdgcode %x mass %f\n", data_target->pdgcode().code(),
-         mass_target);
+  printf("target pdgcode %s mass %f\n",
+         data_target->pdgcode().string().c_str(), mass_target);
   /* Projectile energy in CMS */
   double cms_energy_projectile = (sqrts_ * sqrts_
                                   + mass_projectile * mass_projectile

@@ -61,7 +61,7 @@ TEST(everything) {
   VERIFY(!(particles.size() != 2));
   int type_size = 0;
   for (const ParticleData &data : particles.data()) {
-    printd("id %d: pdg %x\n", data.id(), data.pdgcode().code());
+    printd("id %d: pdg %s\n", data.id(), data.pdgcode().string().c_str());
     type_size++;
   }
   VERIFY(!(type_size != 2));

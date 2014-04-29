@@ -163,8 +163,8 @@ void write_oscar_event_block(Particles *particles,
    */
   fprintf(fp, "%zu %zu %i\n", initial, final, event_id);
   for (const ParticleData &data : particles->data()) {
-    fprintf(fp, "%i %x %i %g %g %g %g %g %g %g %g %g \n",
-            data.id(), data.pdgcode().code(), 0,
+    fprintf(fp, "%i %s %i %g %g %g %g %g %g %g %g %g \n",
+            data.id(), data.pdgcode().string().c_str(), 0,
             data.momentum().x1(), data.momentum().x2(),
             data.momentum().x3(), data.momentum().x0(),
             sqrt(data.momentum().Dot(data.momentum())),
@@ -195,10 +195,11 @@ void write_oscar(const ParticleData &particle_data,
   FourVector momentum = particle_data.momentum(),
              position = particle_data.position();
   float mass = sqrt(momentum.Dot(momentum));
-  fprintf(fp, "%i %x %i %g %g %g %g %g %g %g %g %g \n", particle_data.id(),
-          particle_type.pdgcode().code(), 0, momentum.x1(), momentum.x2(),
-          momentum.x3(), momentum.x0(), mass, position.x1(),
-          position.x2(), position.x3(), position.x0() - 1.0);
+  fprintf(fp, "%i %s %i %g %g %g %g %g %g %g %g %g \n", particle_data.id(),
+          particle_type.pdgcode().string().c_str(), 0, momentum.x1(),
+          momentum.x2(), momentum.x3(), momentum.x0(), mass,
+          position.x1(), position.x2(), position.x3(),
+          position.x0() - 1.0);
 
   fclose(fp);
 }
