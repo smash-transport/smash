@@ -16,7 +16,7 @@
 namespace Smash {
 
 ActionPtr
-ScatterActionsFinder::check_collision (int id_a, int id_b, Particles *particles,
+ScatterActionsFinder::check_collision (const int id_a, const int id_b, Particles *particles,
                                        const ExperimentParameters &parameters,
                                        CrossSections *cross_sections) const {
 

@@ -22,7 +22,8 @@ class ScatterActionsFinder : public ActionFinderFactory {
  public:
   /* Check for a single pair of particles (id_a, id_b) if a collision will happen
    * in the next timestep and create a corresponding Action object in that case. */
-  ActionPtr check_collision(int id_a, int id_b, Particles *particles,
+  ActionPtr check_collision(const int id_a, const int id_b,
+                            Particles *particles,
                             const ExperimentParameters &parameters,
                             CrossSections *cross_sections = nullptr) const;
 
