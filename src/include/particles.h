@@ -108,9 +108,9 @@ class Particles {
     iterator end() const { return map_->end(); }
 
     /// returns an adapted iterator to the begin iterator of the map
-    const_iterator cbegin() const { return map_.cbegin(); }
+    const_iterator cbegin() const { return map_->cbegin(); }
     /// returns an adapted iterator to the end iterator of the map
-    const_iterator cend() const { return map_.cend(); }
+    const_iterator cend() const { return map_->cend(); }
 
    private:
     /// points to the map the adapter class wraps; needed for calls to begin/end
