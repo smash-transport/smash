@@ -29,6 +29,8 @@ class Action {
     return time_of_execution_ < rhs.time_of_execution_;
   }
 
+  /* Returns the total weight, which is a cross section in case of a ScatterAction
+   * and a decay width in case of a DecayAction. */
   float weight(void) const;
 
   /* These functions add new subprocesses.  */
