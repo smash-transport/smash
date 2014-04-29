@@ -178,13 +178,12 @@ class PdgCode {
   }
   /** returns twice the isospin-3 component.
    *
-   * This is calculated from the sum of quarkness of up and
-   * down.
+   * This is calculated from the sum of net_quark_number of up and down.
    */
   inline int isospin3() const {
-    // quarkness(2) is the number of u quarks,
-    // quarkness(1) is minus the number of d quarks.
-    return quarkness(2)+quarkness(1);
+    // net_quark_number(2) is the number of u quarks,
+    // net_quark_number(1) is the number of d quarks.
+    return net_quark_number(2)-net_quark_number(1);
   }
   /** returns twice the isospin vector length.
    *
@@ -194,15 +193,15 @@ class PdgCode {
   unsigned int isospin_total() const;
   /// returns the net number of \f$\bar s\f$ quarks.
   inline int strangeness() const {
-    return quarkness(3);
+    return -net_quark_number(3);
   }
   /// returns the net number of \f$c\f$ quarks
   inline int charmness() const {
-    return quarkness(4);
+    return +net_quark_number(4);
   }
   /// returns the net number of \f$\bar b\f$ quarks
   inline int bottomness() const {
-    return quarkness(5);
+    return -net_quark_number(5);
   }
   /** Returns the charge of the particle.
    *
@@ -221,10 +220,9 @@ class PdgCode {
       // be safely ignored, but I don't think this will be a bottle
       // neck.
       for (int i = 1; i < 9; i++) {
-        // the appropriate sign is already in quarkness; now
         // u,c,t,t' quarks have charge = 2/3 e, while d,s,b,b' quarks
-        // have -1/3 e.
-        Q += (i % 2 == 0 ? 2 : 1) * quarkness(i);
+        // have -1/3 e. The antiparticle sign s already in net_quark_number.
+        Q += (i % 2 == 0 ? 2 : -1) * net_quark_number(i);
       }
       return Q / 3;
     }
@@ -442,18 +440,15 @@ class PdgCode {
     } chunks_;
   };
 
-  /** returns the net number of (anti)quarks with given flavour number
+  /** returns the net number of quarks with given flavour number
    *
    * \param quark PDG Code of quark: (1..8) = (d,u,s,c,b,t,b',t')
-   * \return for u,c,t,t' quarks, it returns the net number of quarks
-   * (\#quarks - \#antiquarks), while for d,s,b,b', it returns the net
-   * number of antiquarks (\#antiquarks - \#quarks).
+   * \return for the net number of quarks (\#quarks - \#antiquarks)
    *
    * For public use, see strangeness(), charmness(), bottomness() and
    * isospin3().
-   *
    **/
-  int quarkness(const int quark) const;
+  int net_quark_number(const int quark) const;
   /** extract digits from a character. */
   inline std::uint32_t get_digit_from_char(const char inp) const {
     // atoi's behaviour for invalid input is undefined. I don't like

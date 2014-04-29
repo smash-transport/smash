@@ -96,10 +96,10 @@ unsigned int PdgCode::isospin_total() const {
   return number_of_u_or_d_quarks;
 }
 
-int PdgCode::quarkness(const int quark) const {
+int PdgCode::net_quark_number(const int quark) const {
   // input sanitization: Only quark numbers 1 through 8 are allowed.
   if (quark < 1 || quark > 8) {
-    throw std::invalid_argument(std::string("PdgCode::quarkness(): ")
+    throw std::invalid_argument(std::string("PdgCode::net_quark_number(): ")
                  + std::string("Quark number must be in [1..8], received ")
                  + std::to_string(quark));
   }
@@ -111,15 +111,13 @@ int PdgCode::quarkness(const int quark) const {
   }
   // baryons: count quarks.
   if (baryon_number() != 0) {
-    // d,s,b quarks get negative *ness; u,c,t have positive *ness:
-    int sign = (quark % 2 == 0) ? +1 : -1;
-    // and for anti-baryons, the sign changes:
-    sign *= antiparticle_sign();
-    return sign*((digits_.n_q1_ == quark) + (digits_.n_q2_ == quark)
-                                          + (digits_.n_q3_ == quark));
+    // for anti-baryons, the sign changes:
+    return antiparticle_sign()*((digits_.n_q1_ == quark)
+                              + (digits_.n_q2_ == quark)
+                              + (digits_.n_q3_ == quark));
   }
   // mesons.
-  // quarkonium state? Not open heavy-quarkness.
+  // quarkonium state? Not open net_quark_number.
   if (digits_.n_q3_ == quark && digits_.n_q2_ == quark) {
     return 0;
   }
@@ -127,16 +125,14 @@ int PdgCode::quarkness(const int quark) const {
   // get the "other" quark. (We know this must exist, since they are
   // not both the right one and one of them is the right one).
   int otherquark = (digits_.n_q2_ == quark) ? digits_.n_q3_ : digits_.n_q2_;
-  // "our" quark is the heavier one: 1 for particles
-  if (otherquark < quark) {
-    return antiparticle_sign();
+  // "our" quark is the heavier one: 1 for u,c,t; -1 for d,s,b (and of
+  // course the antiparticle sign)
+  if (quark > otherquark) {
+    return ((quark % 2 == 0) ? 1 : -1) * antiparticle_sign();
   }
-  // ours is the lighter: If the heavier quark has the same SIGN, we
-  // get a -1, else +1.
-  if (otherquark % 2 == quark %  2) {
-    return -1 * antiparticle_sign();
-  }
-  return antiparticle_sign();
+  // ours is the lighter: If the heavier particle is u,c,t, the lighter
+  // one (ours) is an antiquark.
+  return ((otherquark % 2 == 0) ? -1 : 1) * antiparticle_sign();
 }
 
 }  // namespace Smash
