@@ -122,7 +122,10 @@ void Experiment<Modus>::run_time_evolution() {
                      interactions_this_interval, energy_initial_, time_start_);
 
   for (int step = 0; step < steps_; step++) {
-    std::vector<ActionPtr> actions;
+    std::vector<ActionPtr> actions;  // XXX: a std::list might be better suited
+                                     // for the task: lots of appending, then
+                                     // sorting and finally a single linear
+                                     // iteration
 
     /* (1.a) Find possible decays. */
     actions += decay_finder_.find_possible_actions(&particles_, parameters_);
