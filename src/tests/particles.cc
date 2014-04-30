@@ -12,6 +12,7 @@
 #include "include/particles.h"
 #include "include/constants.h"
 #include "include/particledata.h"
+#include "include/pdgcode.h"
 #include "include/outputroutines.h"
 #include "../include/macros.h"
 #include <algorithm>
@@ -61,7 +62,7 @@ TEST(everything) {
   VERIFY(!(particles.size() != 2));
   int type_size = 0;
   for (const ParticleData &data : particles.data()) {
-    printd("id %d: pdg %d\n", data.id(), data.pdgcode());
+    printd("id %d: pdg %s\n", data.id(), data.pdgcode().string().c_str());
     SMASH_UNUSED(data);
     type_size++;
   }
@@ -91,7 +92,7 @@ TEST(load_one_particle_no_extra_whitespace) {
     ++count;
     COMPARE(type.mass(), 0.135f);
     COMPARE(type.width(), -1.f);
-    COMPARE(type.pdgcode(), 111);
+    COMPARE(type.pdgcode().dump(), 0x111);
     COMPARE(type.isospin(), 2);
     COMPARE(type.charge(), 0);
     COMPARE(type.spin(), 0);
@@ -108,7 +109,7 @@ TEST(load_one_particle_with_whitespace) {
     ++count;
     COMPARE(type.mass(), 0.135f);
     COMPARE(type.width(), -1.f);
-    COMPARE(type.pdgcode(), 111);
+    COMPARE(type.pdgcode().dump(), 0x111);
     COMPARE(type.isospin(), 2);
     COMPARE(type.charge(), 0);
     COMPARE(type.spin(), 0);
@@ -139,7 +140,7 @@ TEST(load_one_particle_with_comment) {
     ++count;
     COMPARE(type.mass(), 0.135f);
     COMPARE(type.width(), -1.f);
-    COMPARE(type.pdgcode(), 111);
+    COMPARE(type.pdgcode().dump(), 0x111);
     COMPARE(type.isospin(), 2);
     COMPARE(type.charge(), 0);
     COMPARE(type.spin(), 0);
@@ -157,18 +158,18 @@ namespace decaymodes_txt {
 TEST(load_many_particles) {
   Particles p(particles_txt::data, {});
   COMPARE(p.types_size(), 20u);
-  ParticleType type = p.particle_type(-1114);
+  ParticleType type = p.particle_type(-0x1114);
   COMPARE(type.mass(), 1.232f);
   COMPARE(type.width(), .117f);
-  COMPARE(type.pdgcode(), -1114);
+  COMPARE(type.pdgcode().dump(), 0x80001114);
   COMPARE(type.isospin(), 3);
   COMPARE(type.charge(), 1);
   COMPARE(type.spin(), 3);
 
-  type = p.particle_type(2112);
+  type = p.particle_type(0x2112);
   COMPARE(type.mass(), .9396f);
   COMPARE(type.width(), -1.f);
-  COMPARE(type.pdgcode(), 2112);
+  COMPARE(type.pdgcode().dump(), 0x2112);
   COMPARE(type.isospin(), 1);
   COMPARE(type.charge(), 0);
   COMPARE(type.spin(), 1);
@@ -188,7 +189,7 @@ TEST_CATCH(load_decaymodes_no_decays, Particles::MissingDecays) {
   Particles p(particles_txt::data, decays_input);
 }
 
-TEST_CATCH(load_decaymodes_incorrect_start, Particles::ParseError) {
+TEST_CATCH(load_decaymodes_incorrect_start, PdgCode::InvalidPdgCode) {
   const std::string decays_input(
       "113. # rho0\n"
       );
@@ -211,17 +212,17 @@ TEST(load_decaymodes_two_channels) {
   Particles p(particles_txt::data, decays_input);
 
   {
-    const auto &rho0 = p.decay_modes(113);
+    const auto &rho0 = p.decay_modes(0x113);
     VERIFY(!rho0.empty());
     const auto &modelist = rho0.decay_mode_list();
     COMPARE(modelist.size(), 1u);
     COMPARE(modelist[0].weight(), 1.);
     COMPARE(modelist[0].particle_list().size(), 2u);
-    COMPARE(modelist[0].particle_list()[0], 211);
-    COMPARE(modelist[0].particle_list()[1], -211);
+    COMPARE(modelist[0].particle_list()[0].dump(), 0x211);
+    COMPARE(modelist[0].particle_list()[1].dump(), 0x80000211);
   }
   {
-    const auto &omega = p.decay_modes(223);
+    const auto &omega = p.decay_modes(0x223);
     VERIFY(!omega.empty());
     const auto &modelist = omega.decay_mode_list();
     COMPARE(modelist.size(), 3u);
@@ -229,14 +230,14 @@ TEST(load_decaymodes_two_channels) {
     FUZZY_COMPARE(float(modelist[1].weight()), 1.f/3.f);
     FUZZY_COMPARE(float(modelist[2].weight()), 1.f/3.f);
     COMPARE(modelist[0].particle_list().size(), 2u);
-    COMPARE(modelist[0].particle_list()[0], 111);
-    COMPARE(modelist[0].particle_list()[1], 113);
+    COMPARE(modelist[0].particle_list()[0].dump(), 0x111);
+    COMPARE(modelist[0].particle_list()[1].dump(), 0x113);
     COMPARE(modelist[1].particle_list().size(), 2u);
-    COMPARE(modelist[1].particle_list()[0], 211);
-    COMPARE(modelist[1].particle_list()[1], -213);
+    COMPARE(modelist[1].particle_list()[0].dump(), 0x211);
+    COMPARE(modelist[1].particle_list()[1].dump(), 0x80000213);
     COMPARE(modelist[2].particle_list().size(), 2u);
-    COMPARE(modelist[2].particle_list()[0], -211);
-    COMPARE(modelist[2].particle_list()[1], 213);
+    COMPARE(modelist[2].particle_list()[0].dump(), 0x80000211);
+    COMPARE(modelist[2].particle_list()[1].dump(), 0x213);
   }
 }
 
@@ -256,7 +257,7 @@ template <typename T>
 void check_particle_type_iteration(T *p) {
   std::size_t count = 0;
   for (const auto &type : p->types()) {
-    const int pdg = type.pdgcode();
+    const PdgCode pdg = type.pdgcode();
     const ParticleType &type2 = p->particle_type(pdg);
     COMPARE(&type, &type2);
     ++count;
@@ -272,25 +273,25 @@ TEST(iterate_particle_data) {
 
   check_particle_data_iteration(&p);
   check_particle_data_iteration(p2);
-  p.create(211);
+  p.create(0x211);
   check_particle_data_iteration(&p);
   check_particle_data_iteration(p2);
-  p.create(-211);
+  p.create(-0x211);
   check_particle_data_iteration(&p);
   check_particle_data_iteration(p2);
 }
 
 TEST(erase_particle) {
   Particles p(particles_txt::data, decaymodes_txt::data);
-  p.create(211);
-  p.create(-211);
-  p.create(111);
+  p.create(0x211);
+  p.create(-0x211);
+  p.create(0x111);
   COMPARE(p.size(), 3u);
   VERIFY(p.has_data(0));
   VERIFY(p.has_data(1));
   VERIFY(p.has_data(2));
   VERIFY(!p.has_data(3));
-  COMPARE(p.data(1).pdgcode(), -211);
+  COMPARE(p.data(1).pdgcode().dump(), 0x80000211);
 
   p.remove(0);
   COMPARE(p.size(), 2u);
@@ -298,7 +299,7 @@ TEST(erase_particle) {
   VERIFY(p.has_data(1));
   VERIFY(p.has_data(2));
   VERIFY(!p.has_data(3));
-  COMPARE(p.data(1).pdgcode(), -211);
+  COMPARE(p.data(1).pdgcode().dump(), 0x80000211);
 
   p.remove(2);
   COMPARE(p.size(), 1u);
@@ -306,5 +307,5 @@ TEST(erase_particle) {
   VERIFY(p.has_data(1));
   VERIFY(!p.has_data(2));
   VERIFY(!p.has_data(3));
-  COMPARE(p.data(1).pdgcode(), -211);
+  COMPARE(p.data(1).pdgcode().dump(), 0x80000211);
 }

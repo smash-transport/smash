@@ -6,9 +6,11 @@
  */
 
 #include <limits>
+#include <map>
 
 #include "include/nucleus.h"
 #include "include/angles.h"
+#include "include/pdgcode.h"
 
 namespace Smash {
 
@@ -280,11 +282,11 @@ void Nucleus::boost(const double& beta_squared_with_sign) {
   return;
 }
 
-void Nucleus::fill_from_list(const std::map<int, int>& particle_list,
+void Nucleus::fill_from_list(const std::map<PdgCode, int>& particle_list,
                              const int testparticles) {
   testparticles_ = testparticles;
   for (auto n = particle_list.cbegin(); n != particle_list.cend(); n++) {
-    for (unsigned i = 0; i < n->second*testparticles_; i++) {
+    for (unsigned int i = 0; i < n->second*testparticles_; i++) {
       // append particle to list
       particles_.push_back({});
       // set this particle's PDG code.

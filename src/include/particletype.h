@@ -8,6 +8,7 @@
 #define SRC_INCLUDE_PARTICLETYPE_H_
 
 #include <string>
+#include "include/pdgcode.h"
 
 namespace Smash {
 
@@ -25,12 +26,12 @@ class ParticleType {
       : name_("unknown"),
         mass_(-1),
         width_(-1),
-        pdgcode_(-1),
+        pdgcode_(0x0),
         isospin_(100),
         charge_(100),
         spin_(100) {}
   /// Explicit constructor
-  ParticleType(std::string n, float m, float w, int id, int isosp, int ch,
+  ParticleType(std::string n, float m, float w, PdgCode id, int isosp, int ch,
                int sp)
       : name_(n),
         mass_(m),
@@ -40,7 +41,7 @@ class ParticleType {
         charge_(ch),
         spin_(sp) {}
   /// set particle type
-  inline void set(const std::string &n, float m, float w, int id, int isosp,
+  inline void set(const std::string &n, float m, float w, PdgCode id, int isosp,
                   int ch, int sp);
   /// return particle name
   inline std::string name(void) const;
@@ -49,7 +50,7 @@ class ParticleType {
   /// return particle width
   inline float width(void) const;
   /// return particle pdgcode
-  inline int pdgcode(void) const;
+  inline PdgCode pdgcode(void) const;
   /// Isospin is 2 * particle data book value
   inline int isospin(void) const;
   /// return particle charge
@@ -66,8 +67,8 @@ class ParticleType {
   float mass_;
   /// width of the particle
   float width_;
-  /// pdgcode of the particle
-  int pdgcode_;
+  /// PDG Code of the particle
+  PdgCode pdgcode_;
   /** isospin of the particle
    *
    * \todo What is the possible range of values?
@@ -85,11 +86,13 @@ class ParticleType {
   int spin_;
 };
 
+//TODO(baeuchle) I don't see why Isospin and Charge cannot be set from
+// pdgcode_.
 inline void ParticleType::set(const std::string &NAME, float MASS,
-     float WIDTH, int ID, int ISOSPIN, int CHARGE, int SPIN) {
+     float WIDTH, PdgCode ID, int ISOSPIN, int CHARGE, int SPIN) {
   mass_ = MASS;
   width_ = WIDTH;
-  pdgcode_ = ID;
+  pdgcode_ = PdgCode(ID);
   name_ = NAME;
   isospin_ = ISOSPIN;
   charge_ = CHARGE;
@@ -112,7 +115,7 @@ inline std::string ParticleType::name(void) const {
   return name_;
 }
 
-inline int ParticleType::pdgcode(void) const {
+inline PdgCode ParticleType::pdgcode(void) const {
   return pdgcode_;
 }
 

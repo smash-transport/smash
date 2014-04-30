@@ -19,6 +19,7 @@
 #include "include/outputroutines.h"
 #include "include/particledata.h"
 #include "include/particles.h"
+#include "include/pdgcode.h"
 #include <assert.h>
 
 namespace Smash {
@@ -205,9 +206,9 @@ void sample_cms_momenta(ParticleData *particle1, ParticleData *particle2,
   Angles phitheta;
   phitheta.distribute_isotropically();
   if (!(energy1 > mass1)) {
-    printf("Particle %d radial momenta %g phi %g cos_theta %g\n",
-           particle1->pdgcode(), momentum_radial, phitheta.phi(),
-           phitheta.costheta());
+    printf("Particle %s radial momenta %g phi %g cos_theta %g\n",
+           particle1->pdgcode().string().c_str(), momentum_radial,
+           phitheta.phi(), phitheta.costheta());
     printf("Etot: %g m_a: %g m_b %g E_a: %g\n", cms_energy, mass1, mass2,
            energy1);
   }
@@ -243,7 +244,7 @@ std::string trim(const std::string &s) {
     return {};
   }
   const auto end = s.find_last_not_of(" \t\n\r");
-  return s.substr(begin, end - begin);
+  return s.substr(begin, end - begin + 1);
 }
 struct Line {/*{{{*/
   Line() = default;
@@ -301,8 +302,6 @@ void ensure_all_read(std::istream &input, const Line &line) {/*{{{*/
                            line));
   }
 }/*}}}*/
-
-constexpr int NotAParticle = 0;
 }  // unnamed namespace/*}}}*/
 
 Particles::ParticleTypeMap Particles::load_particle_types(  //{{{
@@ -312,7 +311,8 @@ Particles::ParticleTypeMap Particles::load_particle_types(  //{{{
     std::istringstream lineinput(line.text);
     std::string name;
     float mass, width;
-    int pdgcode, isospin, charge, spin;
+    PdgCode pdgcode;
+    int isospin, charge, spin;
     lineinput >> name >> mass >> width >> pdgcode >> isospin >> charge >> spin;
     if (lineinput.fail()) {
       throw LoadFailure(build_error_string(
@@ -322,8 +322,8 @@ Particles::ParticleTypeMap Particles::load_particle_types(  //{{{
     }
     ensure_all_read(lineinput, line);
 
-    printd("Setting particle type %s mass %g width %g pdgcode %i\n",
-           name.c_str(), mass, width, pdgcode);
+    printd("Setting particle type %s mass %g width %g pdgcode %s\n",
+           name.c_str(), mass, width, pdgcode.string().c_str());
     printd("Setting particle type %s isospin %i charge %i spin %i\n",
            name.c_str(), isospin, charge, spin);
 
@@ -336,23 +336,23 @@ Particles::ParticleTypeMap Particles::load_particle_types(  //{{{
 
 Particles::DecayModesMap Particles::load_decaymodes(const std::string &input) {
   Particles::DecayModesMap decaymodes;
-  int pdgcode = NotAParticle;
+  PdgCode pdgcode = PdgCode::invalid();
   DecayModes decay_modes_to_add;
   float ratio_sum = 0.0;
 
   const auto end_of_decaymodes = [&]() {
-    if (pdgcode == NotAParticle) {  // at the start of the file
+    if (pdgcode == PdgCode::invalid()) {  // at the start of the file
       return;
     }
     if (decay_modes_to_add.empty()) {
       throw MissingDecays("No decay modes found for particle " +
-                          std::to_string(pdgcode));
+                          pdgcode.string());
     }
     // XXX: why not just unconditionally call renormalize? (mkretz)
     /* Check if ratios add to 1 */
     if (fabs(ratio_sum - 1.0) > really_small) {
       /* They didn't; renormalize */
-      printf("Particle %i:\n", pdgcode);
+      printf("Particle %s:\n", pdgcode.string().c_str());
       decay_modes_to_add.renormalize(ratio_sum);
     }
     /* Add the list of decay modes for this particle type */
@@ -371,35 +371,30 @@ Particles::DecayModesMap Particles::load_decaymodes(const std::string &input) {
         std::string::npos) {  // a single record on one line signifies a new
                               // decay mode section
       end_of_decaymodes();
-      std::size_t pos = 0;
-      pdgcode = std::stoi(line.text, &pos);
+      pdgcode = PdgCode(trim(line.text));
       if (!is_particle_type_registered(pdgcode)) {
         throw ReferencedParticleNotFound(build_error_string(
             "Inconsistency: The particle with PDG id " +
-                std::to_string(pdgcode) +
+                pdgcode.string() +
                 " was not registered through particles.txt, but "
                 "decaymodes.txt referenced it.",
             line));
-      } else if (pos <= trimmed.size()) {
-        throw ParseError(build_error_string(
-            "Parse error: A PDG code (signed integer value) was expected.",
-            line));
       }
-      assert(pdgcode != NotAParticle);  // special value for start of file
+      assert(pdgcode != PdgCode::invalid());  // special value for start of file
     } else {
       std::istringstream lineinput(line.text);
-      std::vector<int> decay_particles;
+      std::vector<PdgCode> decay_particles;
       decay_particles.reserve(4);
       float ratio;
       lineinput >> ratio;
 
-      int pdg;
+      PdgCode pdg;
       lineinput >> pdg;
       while (lineinput) {
         if (!is_particle_type_registered(pdg)) {
           throw ReferencedParticleNotFound(build_error_string(
               "Inconsistency: The particle with PDG id " +
-                  std::to_string(pdg) +
+                  pdg.string() +
                   " was not registered through particles.txt, but "
                   "decaymodes.txt referenced it.",
               line));
@@ -407,9 +402,10 @@ Particles::DecayModesMap Particles::load_decaymodes(const std::string &input) {
         decay_particles.push_back(pdg);
         lineinput >> pdg;
       }
+      decay_particles.push_back(pdg);
       if (lineinput.fail() && !lineinput.eof()) {
         throw LoadFailure(
-            build_error_string("Parse error: expected an integer", line));
+            build_error_string("Parse error: expected a PdgCode ", line));
       }
       decay_particles.shrink_to_fit();
       decay_modes_to_add.add_mode(std::move(decay_particles), ratio);

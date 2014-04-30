@@ -38,7 +38,7 @@ namespace Smash {
  * to be able to decay through any of its decay channels
  * NB: This function assumes stable decay products!
  */
-float calculate_minimum_mass(Particles *particles, int pdgcode) {
+float calculate_minimum_mass(Particles *particles, PdgCode pdgcode) {
   /* If the particle happens to be stable, just return the mass */
   if (particles->particle_type(pdgcode).width() < 0.0)
     return particles->particle_type(pdgcode).mass();
@@ -72,32 +72,11 @@ std::vector<ProcessBranch> resonance_cross_section(
 
   /* Isospin symmetry factor, by default 1 */
   int symmetryfactor = 1;
-  /* Do the particles have the same isospin value? */
-  if (type_particle1.isospin() == type_particle2.isospin()) {
-    /* Do they have the same spin? */
-    if (type_particle1.spin() == type_particle2.spin()) {
-      /* Are their PDG codes of same length? */
-      int abs_pdg1 = abs(type_particle1.pdgcode()), digits1 = 0;
-      while (abs_pdg1) {
-        abs_pdg1 /= 10;
-        digits1++;
-      }
-      int abs_pdg2 = abs(type_particle2.pdgcode()), digits2 = 0;
-      while (abs_pdg2) {
-        abs_pdg2 /= 10;
-        digits2++;
-      }
-      if (digits1 == digits2) {
-        /* If baryons, do they have the same baryon number? */
-        if (type_particle1.spin() % 2 == 0 ||
-            std::signbit(type_particle1.pdgcode())
-            == std::signbit(type_particle2.pdgcode())) {
-          /* Ok, particles are in the same isospin multiplet,
-             apply symmetry factor */
-          symmetryfactor = 2;
-        }
-      }
-    }
+  // the isospin symmetry factor is 2 if both particles are in the same
+  // isospin multiplet:
+  if (type_particle1.pdgcode().iso_multiplet()
+   == type_particle2.pdgcode().iso_multiplet()) {
+    symmetryfactor = 2;
   }
 
   /* Mandelstam s = (p_a + p_b)^2 = square of CMS energy */
@@ -141,8 +120,9 @@ std::vector<ProcessBranch> resonance_cross_section(
       resonance_process_list.push_back(ProcessBranch(type_resonance.pdgcode(),
                                                      resonance_xsection,1));
 
-      printd("Found resonance %i (%s) with mass %f and width %f.\n",
-             type_resonance.pdgcode(), type_resonance.name().c_str(),
+      printd("Found resonance %s (%s) with mass %f and width %f.\n",
+             type_resonance.pdgcode().string().c_str(),
+             type_resonance.name().c_str(),
              type_resonance.mass(), type_resonance.width());
       printd("2->1 with original particles: %s %s Charges: %i %i \n",
              type_particle1.name().c_str(), type_particle2.name().c_str(),
@@ -156,9 +136,10 @@ std::vector<ProcessBranch> resonance_cross_section(
            type_particle2, type_resonance, mandelstam_s, cm_momentum_squared,
            &resonance_process_list);
       if (two_to_two_processes > 0) {
-        printd("Found %zu 2->2 processes for resonance %i (%s).\n",
+        printd("Found %zu 2->2 processes for resonance %s (%s).\n",
                two_to_two_processes,
-               type_resonance.pdgcode(), type_resonance.name().c_str());
+               type_resonance.pdgcode().string().c_str(),
+               type_resonance.name().c_str());
         printd("2->2 with original particles: %s %s Charges: %i %i \n",
                type_particle1.name().c_str(), type_particle2.name().c_str(),
                type_particle1.charge(), type_particle2.charge());
@@ -187,13 +168,13 @@ double two_to_one_formation(Particles *particles,
     /* Step 2: We must have antiparticle for antibaryon
      * (and non-antiparticle for baryon)
      */
-    if (type_particle1.spin() % 2 != 0
-        && (std::signbit(type_particle1.pdgcode())
-            != std::signbit(type_resonance.pdgcode()))) {
+    if (type_particle1.pdgcode().baryon_number() != 0
+        && (type_particle1.pdgcode().baryon_number()
+            != type_resonance.pdgcode().baryon_number())) {
       return 0.0;
-    } else if (type_particle2.spin() % 2 != 0
-        && (std::signbit(type_particle2.pdgcode())
-        != std::signbit(type_resonance.pdgcode()))) {
+    } else if (type_particle2.pdgcode().baryon_number() != 0
+        && (type_particle2.pdgcode().baryon_number()
+        != type_resonance.pdgcode().baryon_number())) {
       return 0.0;
     }
   }
@@ -202,18 +183,9 @@ double two_to_one_formation(Particles *particles,
    * 2 * Iz = 2 * charge - (baryon number + strangeness + charm)
    * XXX: Strangeness and charm ignored for now!
    */
-  const int isospin_z1 = type_particle1.spin() % 2 == 0
-    ? type_particle1.charge() * 2
-    : type_particle1.charge() * 2 - type_particle1.pdgcode()
-                                    / abs(type_particle1.pdgcode());
-  const int isospin_z2 = type_particle2.spin() % 2 == 0
-    ? type_particle2.charge() * 2
-    : type_particle2.charge() * 2 - type_particle2.pdgcode()
-                                    / abs(type_particle2.pdgcode());
-  int isospin_z_resonance = (type_resonance.spin()) % 2 == 0
-    ? type_resonance.charge() * 2
-    : type_resonance.charge() * 2 - type_resonance.pdgcode()
-                                    / abs(type_resonance.pdgcode());
+  const int isospin_z1 = type_particle1.pdgcode().isospin3();
+  const int isospin_z2 = type_particle2.pdgcode().isospin3();
+  int isospin_z_resonance = type_resonance.pdgcode().isospin3();
 
   /* Calculate isospin Clebsch-Gordan coefficient
    * (-1)^(j1 - j2 + m3) * sqrt(2 * j3 + 1) * [Wigner 3J symbol]
@@ -305,19 +277,17 @@ size_t two_to_two_formation(Particles *particles,
   std::vector<ProcessBranch> *process_list) {
   size_t number_of_processes = 0;
   /* If we have two baryons in the beginning, we must have fermion resonance */
-  if (type_particle1.spin() % 2 != 0 && type_particle2.spin() % 2 != 0
-      && type_particle1.pdgcode() != -type_particle2.pdgcode()
-      && type_resonance.spin() % 2 == 0)
+  if (type_particle1.pdgcode().baryon_number() != 0
+   && type_particle2.pdgcode().baryon_number() != 0
+   && ! type_particle1.pdgcode().is_antiparticle_of(type_particle2.pdgcode())
+   && type_resonance.pdgcode().baryon_number() == 0)
     return 0.0;
 
   /* Isospin z-component based on Gell-Mann–Nishijima formula
    * 2 * Iz = 2 * charge - (baryon number + strangeness + charm)
    * XXX: Strangeness and charm ignored for now!
    */
-  const int isospin_z_resonance = (type_resonance.spin()) % 2 == 0
-    ? type_resonance.charge() * 2
-    : type_resonance.charge() * 2 - type_resonance.pdgcode()
-                                    / abs(type_resonance.pdgcode());
+  const int isospin_z_resonance = type_resonance.pdgcode().isospin3();
 
   /* Compute initial total combined isospin range */
   int initial_total_maximum
@@ -338,24 +308,10 @@ size_t two_to_two_formation(Particles *particles,
     }
 
     /* Check for baryon number conservation */
-    int initial_baryon_number = 0;
-    if (type_particle1.spin() % 2 != 0) {
-      initial_baryon_number += type_particle1.pdgcode()
-                               / abs(type_particle1.pdgcode());
-    }
-    if (type_particle2.spin() % 2 != 0) {
-      initial_baryon_number += type_particle2.pdgcode()
-                               / abs(type_particle2.pdgcode());
-    }
-    int final_baryon_number = 0;
-    if (type_resonance.spin() % 2 != 0) {
-      final_baryon_number += type_resonance.pdgcode()
-                               / abs(type_resonance.pdgcode());
-    }
-    if (second_type.spin() % 2 != 0) {
-      final_baryon_number += second_type.pdgcode()
-                               / abs(second_type.pdgcode());
-    }
+    int initial_baryon_number = type_particle1.pdgcode().baryon_number()
+                              + type_particle2.pdgcode().baryon_number();
+    int final_baryon_number = type_resonance.pdgcode().baryon_number()
+                            + second_type.pdgcode().baryon_number();
     if (final_baryon_number != initial_baryon_number) {
       continue;
     }
@@ -366,10 +322,7 @@ size_t two_to_two_formation(Particles *particles,
     int isospin_minimum = std::max(abs(type_resonance.isospin()
       - second_type.isospin()), initial_total_minimum);
 
-    int isospin_z_i = (second_type.spin()) % 2 == 0
-    ? second_type.charge() * 2
-    : second_type.charge() * 2 - second_type.pdgcode()
-       / abs(second_type.pdgcode());
+    int isospin_z_i = second_type.pdgcode().isospin3();
     int isospin_z_final = isospin_z_resonance + isospin_z_i;
 
     int isospin_final = isospin_maximum;
@@ -554,8 +507,8 @@ double spectral_function_integrand(double resonance_mass,
 }
 
 /* Resonance mass sampling for 2-particle final state */
-double sample_resonance_mass(Particles *particles, int pdg_resonance,
-  int pdg_stable, double cms_energy) {
+double sample_resonance_mass(Particles *particles, PdgCode pdg_resonance,
+  PdgCode pdg_stable, double cms_energy) {
   /* First, find the minimum mass of this resonance */
   double minimum_mass
     = calculate_minimum_mass(particles, pdg_resonance);
@@ -586,7 +539,7 @@ double sample_resonance_mass(Particles *particles, int pdg_resonance,
 
 /* Resonance formation kinematics */
 int resonance_formation(Particles *particles, int particle_id, int other_id,
-                        std::vector<int> produced_particles) {
+                        std::vector<PdgCode> produced_particles) {
   if (produced_particles.empty()) {
     printf("resonance_formation:\n");
     printf("Warning: No final state particles found!\n");

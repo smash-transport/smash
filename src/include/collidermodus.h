@@ -41,9 +41,10 @@ class ColliderModus : public ModusDefault {
 
  private:
   /* Projectile particle PDG ID*/
-  const int projectile_;
+  //TODO(mkretz): Matthias wants to fix this back to const.
+  PdgCode projectile_;
   /* Target particle PDG ID*/
-  const int target_;
+  PdgCode target_;
   /* Center-of-mass energy of the collision */
   const float sqrts_;
 };

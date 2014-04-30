@@ -11,6 +11,7 @@
 #include <vector>
 
 #include "include/fourvector.h"
+#include "include/pdgcode.h"
 
 namespace Smash {
 
@@ -23,15 +24,15 @@ namespace Smash {
 class ParticleData {
  public:
   /// Use improbable values for default constructor
-  ParticleData() :id_(-1), pdgcode_(-1), id_process_(-1),
+  ParticleData() :id_(-1), pdgcode_(0x0), id_process_(-1),
     collision_time_(0.0) {}
   /// Use improbable values for constructor
-  explicit ParticleData(int i) :id_(i), pdgcode_(-1),
+  explicit ParticleData(int i) :id_(i), pdgcode_(0x0),
     id_process_(-1), collision_time_(0.0) {}
   inline int id(void) const;
   inline void set_id(int id);
-  inline int pdgcode(void) const;
-  inline void set_pdgcode(int pdgcode);
+  inline PdgCode pdgcode(void) const;
+  inline void set_pdgcode(PdgCode pdgcode);
   inline int id_process(void) const;
   inline void set_id_process(int id);
   inline double collision_time(void) const;
@@ -62,7 +63,7 @@ class ParticleData {
   /// Each particle has a unique identifier
   int id_;
   /// pdg id of the particle
-  int pdgcode_;
+  PdgCode pdgcode_;
   /// counter of the last collision/decay
   int id_process_;
   /// collision time
@@ -84,12 +85,12 @@ inline void ParticleData::set_id(int i) {
 }
 
 /// look up the pdgcode of the particle
-inline int ParticleData::pdgcode(void) const {
+inline PdgCode ParticleData::pdgcode(void) const {
   return pdgcode_;
 }
 
 /// set id of the particle
-inline void ParticleData::set_pdgcode(int i) {
+inline void ParticleData::set_pdgcode(PdgCode i) {
   pdgcode_ = i;
 }
 

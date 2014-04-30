@@ -53,7 +53,7 @@ void VtkOutput::write_state(const Particles &particles) {
   fprintf(file_.get(), "SCALARS pdg_codes int 1\n");
   fprintf(file_.get(), "LOOKUP_TABLE default\n");
   for (const auto &p : particles.data()) {
-    fprintf(file_.get(), "%i\n", p.pdgcode());
+    fprintf(file_.get(), "%s\n", p.pdgcode().string().c_str());
   }
   fprintf(file_.get(), "VECTORS momentum double\n");
   for (const auto &p : particles.data()) {

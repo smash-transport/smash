@@ -26,12 +26,12 @@ namespace Smash {
  * std::vector<ProcessBranch> deltaplus_decay_modes;
  * ProcessBranch branch;
  * // Adding particle codes one by one
- * branch.add_particles(2212);
- * branch.add_particles(111)
+ * branch.add_particles(0x2212);
+ * branch.add_particles(0x111)
  * branch.set_weight(2);
  * deltaplus_decay_modes.push_back(branch);
  * // Using already existing particle list
- * std::vector<int> particle_list(2112, 211);
+ * std::vector<PdgCode> particle_list(0x2112, 0x211);
  * // set_particles erases the previous list
  * branch.set_particles(particle_list);
  * // set_weight erases the previous weight
@@ -44,32 +44,30 @@ class ProcessBranch {
   /// Default constructor
   ProcessBranch() : branch_weight_(-1.0) {}
   // Constructor with 1 particle
-  inline ProcessBranch (int p, float w, int t);
+  inline ProcessBranch(PdgCode p, float w, int t);
   // Constructor with 2 particles
-  inline ProcessBranch (int p1, int p2, float w, int t);
+  inline ProcessBranch(PdgCode p1, PdgCode p2, float w, int t);
   /// Add one particle to the list
-  inline void add_particle(int particle_pdg);
+  inline void add_particle(PdgCode particle_pdg);
   /**
    * Create a particle list.
    * This will remove any previously added particles,
    * but more members can be added to list afterwards
    * with add_particle(int)
    */
-  inline void set_particles(std::vector<int> particle_pdgs);
+  inline void set_particles(std::vector<PdgCode> particle_pdgs);
   /**
    * Set the weight of the branch.
    * In other words, how probable this branch is
    * compared to other branches
    */
   inline void set_weight(float process_weight);
-  /// Change the weight of the branch by the given amount
-//   inline void change_weight(float additional_weight);
   /// Set the type of interaction
   inline void set_type(int t);
   /// Clear all information from the branch
   inline void clear(void);
   /// Return the particle list
-  inline std::vector<int> particle_list(void) const;
+  inline std::vector<PdgCode> particle_list(void) const;
   /// Return the branch weight
   inline float weight(void) const;
   /// Return the type of interaction
@@ -86,7 +84,7 @@ class ProcessBranch {
    * which is somewhere on the heap. Also the alignment of ints is only half
    * that of size_t/void*. (I was obviously talking about 64bit here...)
    */
-  std::vector<int> particle_list_;
+  std::vector<PdgCode> particle_list_;
   /// Weight of the branch, typically a cross section or a branching ratio
   float branch_weight_;
   /// Type of interaction
@@ -94,18 +92,20 @@ class ProcessBranch {
 };
 
 // Constructor with 1 particle
-ProcessBranch::ProcessBranch (int p, float w, int t) : branch_weight_(w), interaction_type_(t) {
-  this->add_particle (p);
+ProcessBranch::ProcessBranch (PdgCode p, float w, int t)
+                        : branch_weight_(w), interaction_type_(t) {
+  this->add_particle(p);
 }
 
 // Constructor with 2 particles
-ProcessBranch::ProcessBranch (int p1, int p2, float w, int t) : branch_weight_(w), interaction_type_(t) {
-  this->add_particle (p1);
-  this->add_particle (p2);
+ProcessBranch::ProcessBranch (PdgCode p1, PdgCode p2, float w, int t)
+                          : branch_weight_(w), interaction_type_(t) {
+  this->add_particle(p1);
+  this->add_particle(p2);
 }
 
 /// Add one particle to the list
-inline void ProcessBranch::add_particle(int particle_pdg) {
+inline void ProcessBranch::add_particle(PdgCode particle_pdg) {
   particle_list_.push_back(particle_pdg);
 }
 
@@ -115,7 +115,7 @@ inline void ProcessBranch::add_particle(int particle_pdg) {
  * but more members can be added to list afterwards
  * with add_particle(int)
  */
-inline void ProcessBranch::set_particles(std::vector<int> particle_pdgs) {
+inline void ProcessBranch::set_particles(std::vector<PdgCode> particle_pdgs) {
   particle_list_ = std::move(particle_pdgs);
 }
 
@@ -127,11 +127,6 @@ inline void ProcessBranch::set_particles(std::vector<int> particle_pdgs) {
 inline void ProcessBranch::set_weight(float process_weight) {
   branch_weight_ = process_weight;
 }
-
-/// Change the weight of the branch by the given amount
-// inline void ProcessBranch::change_weight(float additional_weight) {
-//   branch_weight_ += additional_weight;
-// }
 
 /// Set the type of interaction.
 inline void ProcessBranch::set_type (int t) {
@@ -145,7 +140,7 @@ inline void ProcessBranch::clear(void) {
 }
 
 /// Return the particle list
-inline std::vector<int> ProcessBranch::particle_list(void) const {
+inline std::vector<PdgCode> ProcessBranch::particle_list(void) const {
   return particle_list_;
 }
 

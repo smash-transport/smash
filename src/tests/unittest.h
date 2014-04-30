@@ -867,7 +867,7 @@ void unittest_assert(bool cond, const char *code, const char *file, int line) {
     std::cout << "       " << #code << " at " << __FILE__ << ":" << __LINE__ \
               << " did not fail as was expected.\n";                         \
     UnitTest::global_unit_test_object_.status = false;                       \
-    throw UnitTestFailure();                                                 \
+    throw UnitTest::UnitTestFailure();                                                 \
     return;                                                                  \
   }                                                                          \
   UnitTest::global_unit_test_object_.expect_assert_failure = false

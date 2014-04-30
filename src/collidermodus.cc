@@ -17,15 +17,15 @@ namespace Smash {
 
 ColliderModus::ColliderModus(Configuration modus_config,
                              const ExperimentParameters &)
-    : projectile_(modus_config.take({"Collider", "PROJECTILE"})),
-      target_    (modus_config.take({"Collider", "TARGET"})),
-      sqrts_     (modus_config.take({"Collider", "SQRTS"})) {
+    : sqrts_     (modus_config.take({"Collider", "SQRTS"})) {
+  projectile_ = modus_config.take({"Collider", "PROJECTILE"});
+  target_     = modus_config.take({"Collider", "TARGET"});
 }
 
 /* print_startup - console output on startup of box specific parameters */
 void ColliderModus::print_startup() {
-  printf("Projectile PDG ID: %d \n", projectile_);
-  printf("Target PDG ID: %d \n", target_);
+  printf("Projectile PDG ID: %s \n", projectile_.string().c_str());
+  printf("Target PDG ID: %s \n", target_.string().c_str());
   printf("Center-of-mass energy %10.3f GeV\n", sqrts_);
 }
 
@@ -38,16 +38,16 @@ void ColliderModus::initial_conditions(Particles *particles,
   ParticleData *data_projectile = particles->data_pointer(particles->id_max());
   float mass_projectile
     = particles->particle_type(data_projectile->pdgcode()).mass();
-  printf("projectile pdgcode %d mass %f\n", data_projectile->pdgcode(),
-         mass_projectile);
+  printf("projectile pdgcode %s mass %f\n",
+         data_projectile->pdgcode().string().c_str(), mass_projectile);
   /* Create "target" particle */
   particles->create(1, target_);
   /* Pointer to "target" data */
   ParticleData *data_target = particles->data_pointer(particles->id_max());
   float mass_target
     = particles->particle_type(data_target->pdgcode()).mass();
-  printf("target pdgcode %d mass %f\n", data_target->pdgcode(),
-         mass_target);
+  printf("target pdgcode %s mass %f\n",
+         data_target->pdgcode().string().c_str(), mass_target);
   /* Projectile energy in CMS */
   double cms_energy_projectile = (sqrts_ * sqrts_
                                   + mass_projectile * mass_projectile

@@ -51,6 +51,7 @@ set(smash_src
         parametrizations.cc
         particles.cc
         particlesoutput.cc
+        pdgcode.cc
         random.cc
         resonances.cc
         scatteraction.cc

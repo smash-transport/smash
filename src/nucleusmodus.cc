@@ -14,6 +14,7 @@
 #include "include/configuration.h"
 #include "include/experimentparameters.h"
 #include "include/outputroutines.h"
+#include "include/pdgcode.h"
 #include "include/random.h"
 
 namespace Smash {
@@ -22,13 +23,13 @@ NucleusModus::NucleusModus(Configuration modus_config,
                            const ExperimentParameters &params) {
   Configuration modus_cfg = modus_config["Nucleus"];
   sqrt_s_NN_ = modus_cfg.take({"SQRTSNN"});
-  std::vector<int> sqrts_n = modus_cfg.take({"SQRTS_N"});
+  std::vector<PdgCode> sqrts_n = modus_cfg.take({"SQRTS_N"});
   pdg_sNN_1_ = sqrts_n[0];
   pdg_sNN_2_ = sqrts_n[1];
   // fill nuclei with particles
-  std::map<int, int> pro = modus_cfg.take({"Projectile", "PARTICLES"});
+  std::map<PdgCode, int> pro = modus_cfg.take({"Projectile", "PARTICLES"});
   projectile_.fill_from_list(pro, params.testparticles);
-  std::map<int, int> tar = modus_cfg.take({"Target", "PARTICLES"});
+  std::map<PdgCode, int> tar = modus_cfg.take({"Target", "PARTICLES"});
   target_.fill_from_list(tar, params.testparticles);
   // set diffusiveness of the nuclei if given (else take the default value)
   if (modus_cfg.has_value({"Projectile", "DIFFUSIVENESS"})) {
@@ -75,8 +76,8 @@ NucleusModus::NucleusModus(Configuration modus_config,
 
 void NucleusModus::print_startup() {
   printf("Nucleus initialized:\n");
-  printf("sqrt_s_NN = %g GeV (pairs of %d and %d)\n", sqrt_s_NN_,
-                                                      pdg_sNN_1_, pdg_sNN_2_);
+  printf("sqrt_s_NN = %g GeV (pairs of %s and %s)\n", sqrt_s_NN_,
+         pdg_sNN_1_.string().c_str(), pdg_sNN_2_.string().c_str());
   printf("Impact parameter: %g fm\n", impact_);
   printf("Initial distance betw nuclei: %g fm\n", 2.0*initial_z_displacement_);
   printf("Projectile initialized with %zu particles (%zu test particles)\n",

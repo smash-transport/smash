@@ -11,6 +11,7 @@
 
 #include "include/angles.h"
 #include "include/outputroutines.h"
+#include "include/pdgcode.h"
 #include "include/resonances.h"
 
 namespace Smash {
@@ -35,11 +36,14 @@ DecayAction::DecayAction(const std::vector<int> &in_part,
  */
 int DecayAction::one_to_two (Particles *particles) {
   int resonance_id = ingoing_particles_[0];
-  int type_a = outgoing_particles_[0];
-  int type_b = outgoing_particles_[1];
+  PdgCode type_a = outgoing_particles_[0];
+  PdgCode type_b = outgoing_particles_[1];
 
-  if (abs(type_a) < 100 || abs(type_b) < 100) {
-    printf("Warning: decay products A: %i B: %i\n", type_a, type_b);
+  //TODO(weil) This may be checked already when reading in the possible
+  //decay channels.
+  if (! type_a.is_hadron() || ! type_b.is_hadron()) {
+    printf("Warning: decay products A: %s B: %s\n", type_a.string().c_str()
+                                                  , type_b.string().c_str());
   }
 
   /* Add two new particles */
@@ -75,8 +79,6 @@ int DecayAction::one_to_two (Particles *particles) {
   return id_first_new;
 }
 
-
-
 /**
  * Kinematics of a 1-to-3 decay process.
  *
@@ -90,13 +92,16 @@ int DecayAction::one_to_two (Particles *particles) {
  */
 int DecayAction::one_to_three (Particles *particles) {
   int resonance_id = ingoing_particles_[0];
-  int type_a = outgoing_particles_[0];
-  int type_b = outgoing_particles_[1];
-  int type_c = outgoing_particles_[2];
+  PdgCode type_a = outgoing_particles_[0];
+  PdgCode type_b = outgoing_particles_[1];
+  PdgCode type_c = outgoing_particles_[2];
 
-  if (abs(type_a) < 100 || abs(type_b) < 100 || abs(type_c) < 100) {
-    printf("Warning: decay products A: %i B: %i C: %i\n",
-           type_a, type_b, type_c);
+  //TODO(weil) This may be checked already when reading in the possible
+  //decay channels.
+  if (! type_a.is_hadron() || ! type_b.is_hadron() || ! type_c.is_hadron()) {
+    printf("Warning: decay products A: %s B: %s C: %s\n",
+           type_a.string().c_str(), type_b.string().c_str(),
+           type_c.string().c_str());
   }
   printd("Note: Doing 1->3 decay!\n");
 
@@ -241,7 +246,7 @@ int DecayAction::one_to_three (Particles *particles) {
 
 
 void DecayAction::decide (Particles *particles) {
-  const int pdgcode = particles->type(ingoing_particles_[0]).pdgcode();
+  const PdgCode pdgcode = particles->type(ingoing_particles_[0]).pdgcode();
 
   /* Get the decay modes of this resonance */
   const std::vector<ProcessBranch> decaymodes
@@ -277,7 +282,7 @@ void DecayAction::decide (Particles *particles) {
 int DecayAction::resonance_decay (Particles *particles) {
 
   /* Decide for a particular decay channel. */
-  decide (particles);
+  decide(particles);
 
   /* We found our decay branch, get the decay product pdgs and do the decay */
   size_t decay_particles = outgoing_particles_.size();
@@ -294,14 +299,12 @@ int DecayAction::resonance_decay (Particles *particles) {
     printf("Number of decay particles: %zu \n", decay_particles);
     printf("Decay particles: ");
     for (size_t i = 0; i < decay_particles; i++) {
-      printf("%i ", outgoing_particles_[i]);
+      printf("%s ", outgoing_particles_[i].string().c_str());
     }
     printf("\n");
   }
   return new_id_a;
 }
-
-
 
 void DecayAction::perform (Particles *particles, size_t &id_process) {
   FourVector velocity_CM;
