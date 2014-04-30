@@ -290,7 +290,10 @@ class PdgCode {
   }
   /** Returns the spin degeneracy \f$2s + 1\f$ of a particle **/
   inline unsigned int spin_degeneracy() const {
-    return digits_.n_J_;
+    if (is_hadron()) {
+      return digits_.n_J_;
+    }
+    return spin() + 1;
   }
   /// returns -1 for antiparticles and +1 for particles.
   inline int antiparticle_sign() const {

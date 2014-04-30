@@ -395,6 +395,33 @@ TEST(spin) {
   PdgCode higgs(0x25);
   EXPECT_ASSERT_FAILURE(assert(higgs.spin() == 0));
 }
+TEST(spin_degeneracy) {
+  COMPARE(   electron.spin_degeneracy(), 2);
+  COMPARE(     antimu.spin_degeneracy(), 2);
+  COMPARE(     photon.spin_degeneracy(), 3);
+  COMPARE(       pion.spin_degeneracy(), 1);
+  COMPARE(       kaon.spin_degeneracy(), 1);
+  COMPARE(     kminus.spin_degeneracy(), 1);
+  COMPARE(     dminus.spin_degeneracy(), 1);
+  COMPARE(     bnulls.spin_degeneracy(), 1);
+  COMPARE(     bPcbar.spin_degeneracy(), 1);
+  COMPARE(     eta_pr.spin_degeneracy(), 1);
+  COMPARE(      j_psi.spin_degeneracy(), 3);
+  COMPARE(     proton.spin_degeneracy(), 2);
+  COMPARE(  antidelta.spin_degeneracy(), 4);
+  COMPARE(      sigma.spin_degeneracy(), 2);
+  COMPARE(     lambda.spin_degeneracy(), 2);
+  COMPARE(     antixi.spin_degeneracy(), 2);
+  COMPARE(  omega_bar.spin_degeneracy(), 4);
+  COMPARE(   lambda_c.spin_degeneracy(), 2);
+  COMPARE(sigma_c_bar.spin_degeneracy(), 4);
+  COMPARE(       xi_c.spin_degeneracy(), 2);
+  COMPARE(omega_c_bar.spin_degeneracy(), 2);
+  COMPARE(  xi_cc_bar.spin_degeneracy(), 2);
+  COMPARE(   omega_bc.spin_degeneracy(), 2);
+  PdgCode higgs(0x25);
+  EXPECT_ASSERT_FAILURE(assert(higgs.spin() == 1));
+}
 
 TEST_CATCH(set_invalid_code, PdgCode::InvalidPdgCode) {
   PdgCode invalidparticle(211);
