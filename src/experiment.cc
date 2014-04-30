@@ -130,7 +130,8 @@ void Experiment<Modus>::run_time_evolution() {
     actions += scatter_finder_.find_possible_actions(&particles_, parameters_,
                                                      &cross_sections_);
     /* (1.c) Sort action list by time. */
-    std::sort (actions.begin(), actions.end());
+    std::sort(actions.begin(), actions.end(),
+              [](const ActionPtr &a, const ActionPtr &b) { return *a < *b; });
 
     /* (2.a) Perform actions. */
     if (!actions.empty()) {
