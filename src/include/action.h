@@ -57,7 +57,7 @@ class DecayAction : public Action {
                int interaction_type);
   /* Decide for a particular decay channel via Monte-Carlo
    * and set the outgoing_particles_ correspondingly.  */
-  void decide (Particles *particles);
+  void choose_channel (Particles *particles);
   void perform (Particles *particles, size_t &id_process);
  private:
   int resonance_decay (Particles *particles);
@@ -69,9 +69,9 @@ class DecayAction : public Action {
 class ScatterAction : public Action {
  public:
   ScatterAction (const std::vector<int> &in_part, float time_of_execution);
-  /* Decide for a particular subprocess via Monte-Carlo
+  /* Decide for a particular final-state channel via Monte-Carlo
    * and set the outgoing_particles_ correspondingly.  */
-  void decide ();
+  void choose_channel ();
   void perform (Particles *particles, size_t &id_process);
 };
 

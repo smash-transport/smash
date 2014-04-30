@@ -21,7 +21,7 @@ ScatterAction::ScatterAction(const std::vector<int> &in_part,
     : Action(in_part, time_of_execution) {}
 
 
-void ScatterAction::decide () {
+void ScatterAction::choose_channel () {
   interaction_type_ = 0;
   if (total_weight_ > really_small) {
     double random_interaction = Random::canonical();
@@ -37,7 +37,7 @@ void ScatterAction::decide () {
         }
       }
       ++proc;
-      printd("ScatterAction::decide: collision type %d particle %d <-> %d time: %g\n",
+      printd("ScatterAction::choose_channel: collision type %d particle %d <-> %d time: %g\n",
              interaction_type_, ingoing_particles_[0], ingoing_particles_[1],
              time_of_execution_);
     }

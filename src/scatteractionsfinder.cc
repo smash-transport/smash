@@ -81,7 +81,7 @@ ScatterActionsFinder::check_collision (const int id_a, const int id_b, Particles
   }
 
   /* Decide for a particular final state. */
-  act->decide();
+  act->choose_channel();
 
   /* Set up collision partners. */
   particles->data_pointer(id_a)->set_collision_time(time_collision);

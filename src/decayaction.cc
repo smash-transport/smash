@@ -245,7 +245,7 @@ int DecayAction::one_to_three (Particles *particles) {
 }
 
 
-void DecayAction::decide (Particles *particles) {
+void DecayAction::choose_channel (Particles *particles) {
   const PdgCode pdgcode = particles->type(ingoing_particles_[0]).pdgcode();
 
   /* Get the decay modes of this resonance */
@@ -282,7 +282,7 @@ void DecayAction::decide (Particles *particles) {
 int DecayAction::resonance_decay (Particles *particles) {
 
   /* Decide for a particular decay channel. */
-  decide(particles);
+  choose_channel (particles);
 
   /* We found our decay branch, get the decay product pdgs and do the decay */
   size_t decay_particles = outgoing_particles_.size();
