@@ -29,9 +29,9 @@ namespace Smash {
  *
  * // initalize with an integer: make sure it is hex-encoded!
  * PdgCode pi_plus(0x211);
- * // initalize from a string:
+ * // you can also initalize from a string:
  * PdgCode pi_minus("-211");
- * // initialize default:
+ * // initialize a PDG Code that knows it is not set yet:
  * PdgCode other_particle();
  * // this is true:
  * if (other_particle == PdgCode::invalid()) {
@@ -39,18 +39,26 @@ namespace Smash {
  *   // fill from stringstream:
  *   std::cin >> other_particle;
  * }
+ * // check if particle is in the same multiplet as the pions:
  * if (pi_plus.multiplet() == other_particle.multiplet()) {
  *   printf("The other particle is a 0^-- meson.\n");
  * }
+ * // is this a Kaon?
+ * if (other_particle.code() == 0x311) {
+ *   printf("The particle is a K plus\n");
+ * }
+ * // what baryon number does the particle have?
+ * printf("The particle has a baryon number of %d\n",
+ *                                           other_particle.baryon_number());
  * \endcode
  *
- * This class is simpy a collection of smart accessors to a 32 bit long
- * bitfield.
+ * This class contains a collection of smart accessors to the PDG code
+ * so that quantum numbers etc can easily be read off.
  *
- * The content is stored in hexadecimal digits, i.e., '545' is
- * interpreted as '0x221', which is what an eta-meson has (that 545 is
- * also its approximate mass in MeV is, I promise, a complete
- * coincidence).
+ * The content is stored in hexadecimal digits, i.e., the number '545'
+ * is interpreted as '0x221', i.e., an eta-meson. To check if a given
+ * particle is of a given type, make sure that you give the type in hex
+ * digits as well (see example above).
  *
  * Limitations:
  * ------------
@@ -92,6 +100,9 @@ class PdgCode {
   /** receive a signed integer and process it into a PDG Code. The sign
    * is taken as antiparticle boolean, while the absolute value of the
    * integer is used as hexdigits.
+   *
+   * \param codenumber The number 0x221 is interpreted as an η meson,
+   * -0x211 is a "charged pi antiparticle", i.e., a \f$\pi^-\f$.
    */
   PdgCode(std::int32_t codenumber) : dump_(0x0)  {
     digits_.antiparticle_ = false;
@@ -176,7 +187,7 @@ class PdgCode {
     }
     return antiparticle_sign();
   }
-  /** returns twice the isospin-3 component.
+  /** returns twice the isospin-3 component \f$I_3\f$.
    *
    * This is calculated from the sum of net_quark_number of up and down.
    */
@@ -185,21 +196,30 @@ class PdgCode {
     // net_quark_number(1) is the number of d quarks.
     return net_quark_number(2)-net_quark_number(1);
   }
-  /** returns twice the isospin vector length.
+  /** returns twice the isospin vector length \f$I\f$.
    *
    * This returns e.g. 2 for all pions and 3 for all Deltas. It is
    * always positive.
    */
   unsigned int isospin_total() const;
-  /// returns the net number of \f$\bar s\f$ quarks.
+  /** returns the net number of \f$\bar s\f$ quarks.
+   *
+   * For particles with one strange quark, -1 is returned.
+   */
   inline int strangeness() const {
     return -net_quark_number(3);
   }
-  /// returns the net number of \f$c\f$ quarks
+  /** returns the net number of \f$c\f$ quarks
+   *
+   * For particles with one charm quark, +1 is returned.
+   */
   inline int charmness() const {
     return +net_quark_number(4);
   }
-  /// returns the net number of \f$\bar b\f$ quarks
+  /** returns the net number of \f$\bar b\f$ quarks
+   *
+   * For particles with one bottom quark, -1 is returned.
+   */
   inline int bottomness() const {
     return -net_quark_number(5);
   }
