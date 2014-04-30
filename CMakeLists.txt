@@ -13,7 +13,7 @@ cmake_minimum_required(VERSION 2.8)
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
 # The current version number
-set(VERSION_MAJOR 20140228)
+set(VERSION_MAJOR 20140430)
 
 # Set the default for CMAKE_BUILD_TYPE to Release, otherwise we get something
 # which is none of the options.
