@@ -10,25 +10,39 @@
 #ifndef SRC_INCLUDE_ALGORITHMS_H_
 #define SRC_INCLUDE_ALGORITHMS_H_
 
+/**
+ * \file
+ *
+ * Generic algorithms on containers and ranges.
+ *
+ * This file collects generic algorithms that follow the general idea of C++
+ * algorithms as defined in the C++ standard library. These typically work with
+ * iterators from arbitrary containers.
+ *
+ * The C++ standard itself categorizes algorithms into the following:
+ * * Non-modifying sequence operations
+ * * Mutating sequence operations
+ * * Sorting and related operations
+ */
+
 namespace Smash {
 
 /**
  * Enforces periodic boundaries on the given collection of values.
  *
- * The implementation assumes that the particle is at most one box length
- * away from the boundary to shift it in.
- * This implies for the velocity of the particles:
- * \f[
- * v_i <= \frac{L}{\Delta t}
- * \f]
+ * The values in an arbitrary container, starting from \p begin and ending at \p
+ * end, will be checked. If the value is less than 0, \p length will be added to
+ * it. If the value is greater than or equal to \p length, \p length will be
+ * subtracted from it.
+ *
+ * The implementation therefore assumes that the values are at most one \p
+ * length away from the 0 to \p length range.
  *
  * \param begin Iterator pointing to the first value to check.
  * \param end End iterator.
  * \param length The length of the valid interval.
  *
- * \return A tuple of
- *  * the position inside the box (corrected if needed)
- *  * whether a correction was done
+ * \return whether a correction was done
  */
 template <typename Iterator>
 static bool enforce_periodic_boundaries(
