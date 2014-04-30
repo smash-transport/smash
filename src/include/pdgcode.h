@@ -74,10 +74,11 @@ namespace Smash {
  * ------------
  *
  * The code is tuned to non-colored objects at the moment. That means
- * that neither Diquarks nor Quarks are easily useable with this class;
- * the behaviour of functions baryon_number, charge, is_hadron etc. is
- * undefined. (This is mostly because these things are not well-defined,
- * and/or because the charge and baryon number is not an integer anymore.)
+ * that colored objects (Diquarks and Quarks) are not easily useable
+ * with this class; the behaviour of functions baryon_number, charge,
+ * is_hadron etc. is undefined. (This is mostly because these things are
+ * not well-defined, and/or because the charge and baryon number is not
+ * an integer anymore.)
  *
  * Also, tetra- and pentaquarks as well as compound objects (small or
  * large nuclei) cannot be represented; that, though, is a problem of
