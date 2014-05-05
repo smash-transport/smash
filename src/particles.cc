@@ -402,7 +402,9 @@ Particles::DecayModesMap Particles::load_decaymodes(const std::string &input) {
         decay_particles.push_back(pdg);
         lineinput >> pdg;
       }
-      decay_particles.push_back(pdg);
+      if (pdg != PdgCode::invalid()) {
+        decay_particles.push_back(pdg);
+      }
       if (lineinput.fail() && !lineinput.eof()) {
         throw LoadFailure(
             build_error_string("Parse error: expected a PdgCode ", line));
