@@ -425,7 +425,7 @@ class PdgCode {
     /** the single digits collection of the code. Here, every PDG code
      * digits is directly accessible. */
     struct {
-#if defined(__GNUC__) || defined(__x86_64__) || defined(DOXYGEN)
+#if (defined(__GNUC__) && (defined(__x86_64__) || defined(__i386__))) || defined(DOXYGEN)
       /// spin quantum number \f$n_J = 2 J + 1\f$.
       std::uint32_t n_J_  : 4;
       /// third quark field
@@ -451,7 +451,7 @@ class PdgCode {
       std::uint32_t n_q2_ : 4;
       std::uint32_t n_q3_ : 4;
       std::uint32_t n_J_  : 4;
-#endif  // __GNUC__ or __x86_64__
+#endif
     } digits_;
     /** the bitfield dumped into a single integer. Please note that the
      * 2nd, 3rd and 4th highest bits are possibly undefined.
@@ -461,16 +461,16 @@ class PdgCode {
      * \f$n_{q_1}n_{q_2}n_{q_3}\f$ are directly accessible.
      */
     struct {
-#if defined(__GNUC__) || defined(__x86_64__) || defined(DOXYGEN)
+#if (defined(__GNUC__) && (defined(__x86_64__) || defined(__i386__))) || defined(DOXYGEN)
       std::uint32_t             :  4;
       /// the quark digits n_q{1,2,3}_
       std::uint32_t quarks_     : 12;
       /// the excitation digits n_, n_R_, n_L_
       std::uint32_t excitation_ : 12, : 4;
-#else
+#else  // reverse ordering
       std::uint32_t : 4, excitation_ : 12;
       std::uint32_t quarks_     : 12, : 4;
-#endif  // __GNUC__ or __x86_64__
+#endif
     } chunks_;
   };
 
