@@ -414,7 +414,7 @@ class PdgCode {
   static PdgCode invalid() { return PdgCode(0x0); }
 
  private:
-#if !defined(__GNUC__) || !defined(__x86_64__)
+#if !(defined(__GNUC__) && (defined(__x86_64__) || defined(__i386__)))
 #error "Please determine the correct bit-field order for your target/compiler"
 #endif
   /** the union holds the data; either as a single integer dump_, as a
