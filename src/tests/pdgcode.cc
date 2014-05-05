@@ -369,13 +369,59 @@ TEST(iso_multiplet) {
   COMPARE(   omega_bc.iso_multiplet(),  0x5432);
 }
 TEST(same_iso_multiplet) {
+  VERIFY(proton.iso_multiplet() != pion.iso_multiplet());
+  // baryon octett:
+  // - non-strange
   PdgCode neutron(0x2112);
+  PdgCode antiproton(-0x2212);
   PdgCode delta(0x2224);
-  PdgCode pinull(0x111);
   VERIFY(proton.iso_multiplet() == neutron.iso_multiplet());
   VERIFY(proton.iso_multiplet() != delta.iso_multiplet());
-  VERIFY(pion.iso_multiplet()   == pinull.iso_multiplet());
-  VERIFY(pion.iso_multiplet()   != eta_pr.iso_multiplet());
+  VERIFY(proton.iso_multiplet() != antiproton.iso_multiplet());
+  VERIFY(proton.iso_multiplet() != lambda.iso_multiplet());
+  VERIFY(proton.iso_multiplet() != sigma.iso_multiplet());
+  // - strange:
+  PdgCode sigmanull(0x3212);
+  VERIFY(sigma.iso_multiplet() != lambda.iso_multiplet());
+  VERIFY(sigma.iso_multiplet() == sigmanull.iso_multiplet());
+  // 0-- meson nonett:
+  // - non-strange
+  PdgCode pinull(0x111);
+  VERIFY(pion.iso_multiplet() == pinull.iso_multiplet());
+  VERIFY(pion.iso_multiplet() != eta_pr.iso_multiplet());
+  VERIFY(pion.iso_multiplet() != kaon.iso_multiplet());
+  // - strange:
+  PdgCode kanull(0x321);
+  VERIFY(kaon.iso_multiplet() != kminus.iso_multiplet());
+  VERIFY(kaon.iso_multiplet() == kanull.iso_multiplet());
+  // - heavy quarks:
+  PdgCode omega(0x333);
+  VERIFY(j_psi.iso_multiplet() != omega.iso_multiplet());
+}
+TEST(same_multiplet) {
+  VERIFY(proton.multiplet() != pion.multiplet());
+  // baryon octett:
+  PdgCode neutron(0x2112);
+  PdgCode antiproton(-0x2212);
+  PdgCode delta(0x2224);
+  VERIFY(proton.multiplet() == neutron.multiplet());
+  VERIFY(proton.multiplet() != delta.multiplet());
+  VERIFY(proton.multiplet() != antiproton.multiplet());
+  VERIFY(proton.multiplet() == lambda.multiplet());
+  VERIFY(proton.multiplet() == sigma.multiplet());
+  PdgCode sigmanull(0x3212);
+  VERIFY(sigma.multiplet() == sigmanull.multiplet());
+  // 0-- meson nonett:
+  PdgCode pinull(0x111);
+  VERIFY(pion.multiplet() == pinull.multiplet());
+  VERIFY(pion.multiplet() == eta_pr.multiplet());
+  VERIFY(pion.multiplet() == kaon.multiplet());
+  PdgCode kanull(0x321);
+  VERIFY(kaon.multiplet() == kminus.multiplet());
+  VERIFY(kaon.multiplet() == kanull.multiplet());
+  // - heavy quarks:
+  PdgCode omega(0x333);
+  VERIFY(j_psi.multiplet() == omega.multiplet());
 }
 TEST(spin) {
   COMPARE(   electron.spin(), 1);
