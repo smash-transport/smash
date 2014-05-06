@@ -165,17 +165,21 @@ void inline Angles::distribute_isotropically() {
   costheta_ = Random::uniform(-1.0, 1.0);
 }
 
-void inline Angles::set_phi(const double& newphi) {
-  phi_ = newphi;
-  /* check if phi is in 0 .. 2pi. If not, we simply transform it
-   * there by subtracting/adding 2pi as often as needed.
-   * floor(phi/(2pi) is the number of (2pi)s that we need to subtract
-   * (why use a loop if one statement can do it?)
-   */
-  if (phi_ < 0 || phi_ >= 2.0 * M_PI) {
-    phi_ -= 2.0 * M_PI * floor(phi_ / (2.0 * M_PI));
+void inline Angles::set_phi (const double& newphi) {
+  /* Make sure that phi is in the range [0,2pi).  */
+  const double twopi = 2. * M_PI;
+  if (newphi < 0.) {
+    phi_ = std::fmod (newphi, twopi);
+    phi_ += twopi;
+  }
+  else if (newphi >= twopi) {
+    phi_ = std::fmod (newphi, twopi);
+  }
+  else {
+    phi_ = newphi;
   }
 }
+
 void inline Angles::set_costheta(const double& newcos) {
   costheta_ = newcos;
   /* check if costheta_ is in -1..1. If not, well. Error handling here
