@@ -74,6 +74,11 @@ class ParticleData {
   FourVector position_;
 };
 
+/**
+ * Type for a list of particles.
+ */
+using ParticleList = std::vector<ParticleData>;
+
 /// look up the id of the particle
 inline int ParticleData::id(void) const {
   return id_;

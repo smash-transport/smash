@@ -10,6 +10,8 @@
 #ifndef SRC_INCLUDE_OUTPUTINTERFACE_H_
 #define SRC_INCLUDE_OUTPUTINTERFACE_H_
 
+#include "forwarddeclarations.h"
+
 namespace Smash {
 class Particles;
 
@@ -52,8 +54,8 @@ class OutputInterface {
    * \param final_particles   The list of particles after the Action was
    *                          performed.
    */
-  virtual void write_interaction(const ParticleList &initial_particles,
-                                 const ParticleList &final_particles) {}
+  virtual void write_interaction(const ParticleList &/*initial_particles*/,
+                                 const ParticleList &/*final_particles*/) {}
 
   /**
    * Output launched after every N'th timestep. N is controlled by an option.

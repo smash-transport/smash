@@ -61,6 +61,9 @@ void OscarOutput::before_collision() {}
 
 void OscarOutput::after_collision() {}
 
+void OscarOutput::write_interaction(const ParticleList &initial_particles,
+                                    const ParticleList &final_particles) {}
+
 void OscarOutput::after_Nth_timestep(const Particles & /*particles*/,
                                      const int /*event_number*/,
                                      const int /*timestep*/) {
