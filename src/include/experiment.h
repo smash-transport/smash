@@ -7,6 +7,7 @@
 #ifndef SRC_INCLUDE_EXPERIMENT_H_
 #define SRC_INCLUDE_EXPERIMENT_H_
 
+#include <chrono>
 #include <list>
 #include <memory>
 #include <stdexcept>
@@ -191,8 +192,8 @@ class Experiment : public ExperimentBase {
   const int output_interval_;
   /// initial total energy of the system
   float energy_initial_ = 0.f;
-  /// starting time of the simulation
-  timespec time_start_ = set_timer_start();
+  /// system starting time of the simulation
+  std::chrono::time_point<std::chrono::system_clock> time_start_ = std::chrono::system_clock::now();
 };
 
 }  // namespace Smash

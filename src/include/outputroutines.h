@@ -7,6 +7,7 @@
 #ifndef SRC_INCLUDE_OUTPUTROUTINES_H_
 #define SRC_INCLUDE_OUTPUTROUTINES_H_
 
+#include <chrono>
 #include <list>
 
 #include "include/particles.h"
@@ -24,8 +25,11 @@ void print_header(void);
 void print_measurements(const Particles &particles,
                         const size_t &scatterings_total,
                         const size_t &scatterings_this_interval,
-                        float energy_ini, timespec time_start);
-void print_tail(const timespec time_start, const double &scattering_rate);
+                        float energy_ini,
+                 std::chrono::time_point<std::chrono::system_clock> time_start);
+void print_tail(const
+                std::chrono::time_point<std::chrono::system_clock> time_start,
+                const double &scattering_rate);
 
 /* Compile time debug info */
 #ifdef DEBUG

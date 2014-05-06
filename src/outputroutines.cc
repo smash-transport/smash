@@ -9,6 +9,7 @@
 #include "include/outputroutines.h"
 
 #include <sys/stat.h>
+#include <chrono>
 #include <cmath>
 #include <cstdio>
 #include <ctime>
@@ -56,10 +57,12 @@ double measure_timediff(const timespec time_start) {
 void print_measurements(const Particles &particles,
                         const size_t &scatterings_total,
                         const size_t &scatterings_this_interval,
-                        float energy_ini, timespec time_start) {
+                        float energy_ini,
+                std::chrono::time_point<std::chrono::system_clock> time_start) {
   FourVector momentum_total(0, 0, 0, 0);
   /* calculate elapsed time */
-  double elapsed = measure_timediff(time_start);
+  std::chrono::duration<double> elapsed_seconds =
+                                std::chrono::system_clock::now() - time_start;
   double time = 0.0;
 
   for (const ParticleData &data : particles.data()) {
@@ -73,29 +76,32 @@ void print_measurements(const Particles &particles,
            energy_ini - momentum_total.x0(),
            sqrt(-1 * momentum_total.DotThree()),
            scatterings_total * 2 / (particles.size() * time),
-           scatterings_this_interval, particles.size(), elapsed);
+           scatterings_this_interval, particles.size(), elapsed_seconds.count());
   else
     printf("%5g%13g%13g%13g%10i%10zu%13g\n", time,
            energy_ini - momentum_total.x0(),
            sqrt(-1 * momentum_total.DotThree()), 0.0, 0, particles.size(),
-           elapsed);
+           elapsed_seconds.count());
 }
 
 /* print_tail - output at the end of the simulation */
-void print_tail(const timespec time_start, const double &scattering_rate) {
-  double time = measure_timediff(time_start);
+void print_tail(const
+                std::chrono::time_point<std::chrono::system_clock> time_start,
+                const double &scattering_rate) {
+  std::chrono::duration<double> time =
+                                std::chrono::system_clock::now() - time_start;
   print_line();
   /* print finishing time in human readable way:
    * time < 10 min => seconds
    * 10 min < time < 3 h => minutes
    * time > 3h => hours
    */
-  if (time < 600)
-    printf("Time real: %g [s]\n", time);
-  else if (time < 10800)
-    printf("Time real: %g [min]\n", time / 60);
+  if (time.count() < 600)
+    printf("Time real: %g [s]\n", time.count());
+  else if (time.count() < 10800)
+    printf("Time real: %g [min]\n", time.count() / 60);
   else
-    printf("Time real: %g [h]\n", time / 3600);
+    printf("Time real: %g [h]\n", time.count() / 3600);
   printf("Final scattering rate: %g [fm-1]\n", scattering_rate);
 }
 
