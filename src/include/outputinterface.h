@@ -45,6 +45,17 @@ class OutputInterface {
   virtual void after_collision() = 0;
 
   /**
+   * Called whenever an action modified one or more particles.
+   *
+   * \param initial_particles The list of particles before the Action was
+   *                          performed.
+   * \param final_particles   The list of particles after the Action was
+   *                          performed.
+   */
+  virtual void write_interaction(const ParticleList &initial_particles,
+                                 const ParticleList &final_particles) {}
+
+  /**
    * Output launched after every N'th timestep. N is controlled by an option.
    */
   virtual void after_Nth_timestep(const Particles &, const int, const int) = 0;
