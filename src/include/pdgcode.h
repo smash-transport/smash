@@ -414,8 +414,14 @@ class PdgCode {
   static PdgCode invalid() { return PdgCode(0x0); }
 
  private:
+// amend this line with something that identifies your compiler if its
+// bit field order is like in the gnu c compiler for 64 bit
+// architectures (if you are unsure, try one and check the pdgcode
+// test).
 #if defined(__GNUC__) && (defined(__x86_64__) || defined(__i386__)) || defined(DOXYGEN)
 #define SMASH_BITFIELD_ORDER_ 1
+// put your compiler here if the bit field order is reversed w.r.t. gnu
+// c compiler for 64 bit.
 #elif (defined(__OTHER_COMPILER__))
 #define SMASH_BITFIELD_ORDER_ 2
 #else
