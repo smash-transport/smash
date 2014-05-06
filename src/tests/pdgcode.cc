@@ -384,6 +384,9 @@ TEST(same_iso_multiplet) {
   PdgCode sigmanull(0x3212);
   VERIFY(sigma.iso_multiplet() != lambda.iso_multiplet());
   VERIFY(sigma.iso_multiplet() == sigmanull.iso_multiplet());
+  // different excitations:
+  PdgCode nstar(0x202112);  // N*(1440)^+
+  VERIFY(proton.iso_multiplet() != nstar.iso_multiplet());
   // 0-- meson nonett:
   // - non-strange
   PdgCode pinull(0x111);
@@ -411,6 +414,8 @@ TEST(same_multiplet) {
   VERIFY(proton.multiplet() == sigma.multiplet());
   PdgCode sigmanull(0x3212);
   VERIFY(sigma.multiplet() == sigmanull.multiplet());
+  PdgCode nstar(0x202112);  // N*(1440)^+
+  VERIFY(proton.multiplet() != nstar.multiplet());
   // 0-- meson nonett:
   PdgCode pinull(0x111);
   VERIFY(pion.multiplet() == pinull.multiplet());
