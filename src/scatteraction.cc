@@ -66,11 +66,11 @@ void ScatterAction::perform (Particles *particles, size_t &id_process)
   FourVector final_momentum;
 
   printd("Process %zu type %i particle %s<->%s colliding %d<->%d time %g\n",
-         id_process, interaction_type_, particles->type(id_a).name().c_str(),
-         particles->type(id_a).name().c_str(), id_a, id_b,
-         particles->data(id_a).position().x0());
-  printd_momenta("particle 1 momenta before", particles->data(id_a));
-  printd_momenta("particle 2 momenta before", particles->data(id_b));
+         id_process, interaction_type_, data_a.type(*particles).name().c_str(),
+         data_a.type(*particles).name().c_str(), id_a, id_b,
+         data_a.position().x0());
+  printd_momenta("particle 1 momenta before", data_a);
+  printd_momenta("particle 2 momenta before", data_b);
 
   /* 2->2 elastic scattering */
   switch (interaction_type_) {
@@ -78,22 +78,21 @@ void ScatterAction::perform (Particles *particles, size_t &id_process)
     printd("Process: Elastic collision.\n");
 
     /* processes computed in the center of momenta */
-    boost_CM(particles->data_pointer(id_a), particles->data_pointer(id_b),
-             &velocity_CM);
-    momenta_exchange(particles->data_pointer(id_a),
-                     particles->data_pointer(id_b));
-    boost_back_CM(particles->data_pointer(id_a),
-                  particles->data_pointer(id_b), &velocity_CM);
+    boost_CM(&data_a, &data_b, &velocity_CM);
+    momenta_exchange(&data_a, &data_b);
+    boost_back_CM(&data_a, &data_b, &velocity_CM);
 
-    printd_momenta("particle 1 momenta after", particles->data(id_a));
-    printd_momenta("particle 2 momenta after", particles->data(id_b));
+    printd_momenta("particle 1 momenta after", data_a);
+    printd_momenta("particle 2 momenta after", data_b);
 
-    final_momentum = particles->data(id_a).momentum()
-    + particles->data(id_b).momentum();
+    final_momentum = data_a.momentum() + data_b.momentum();
 
     /* unset collision time for both particles + keep id + unset partner */
-    particles->data_pointer(id_a)->set_collision_past(id_process);
-    particles->data_pointer(id_b)->set_collision_past(id_process);
+    data_a.set_collision_past(id_process);
+    data_b.set_collision_past(id_process);
+
+    *particles->data_pointer(id_a) = data_a;
+    *particles->data_pointer(id_b) = data_b;
     break;
 
   case 1:
@@ -101,8 +100,7 @@ void ScatterAction::perform (Particles *particles, size_t &id_process)
     printd("Process: Resonance formation. ");
     new_particles = outgoing_particles_.size();
     /* processes computed in the center of momenta */
-    boost_CM(particles->data_pointer(id_a), particles->data_pointer(id_b),
-             &velocity_CM);
+    boost_CM(&data_a, &data_b, &velocity_CM);
 
     id_new = resonance_formation(particles, data_a, data_b, outgoing_particles_);
 
@@ -123,10 +121,8 @@ void ScatterAction::perform (Particles *particles, size_t &id_process)
        * the two initial particles
        * x_middle = x_a + (x_b - x_a) / 2
        */
-      FourVector middle_point = particles->data(id_a).position()
-        + (particles->data(id_b).position()
-            - particles->data(id_a).position())
-        / 2.0;
+      FourVector middle_point =
+          data_a.position() + (data_b.position() - data_a.position()) / 2.0;
       particles->data_pointer(id_value)->set_position(middle_point);
       /* unset collision time for particles + keep id + unset partner */
       particles->data_pointer(id_value)->set_collision_past(id_process);
@@ -138,8 +134,8 @@ void ScatterAction::perform (Particles *particles, size_t &id_process)
     }
 
     /* Remove the initial particles */
-    particles->remove(id_a);
-    particles->remove(id_b);
+    particles->remove(data_a.id());
+    particles->remove(data_b.id());
 
     printd("Particle map has now %zu elements. \n", particles->size());
     break;
