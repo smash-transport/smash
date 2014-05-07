@@ -253,11 +253,9 @@ ParticleList DecayAction::choose_channel(Particles *particles) const {
   return mode->particle_list();
 }
 
-
-
 void DecayAction::perform(Particles *particles, size_t &id_process) {
   /* Check if particle still exists. */
-  if (is_valid(*particles)) {
+  if (!is_valid(*particles)) {
     printf("DecayAction::perform: ID %i not found!\n", incoming_particles_[0]);
     return;
   }
