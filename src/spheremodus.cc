@@ -38,9 +38,31 @@ void SphereModus::print_startup() {
 /* initial_conditions - sets particle data for @particles */
 void SphereModus::initial_conditions(Particles *particles,
                                      const ExperimentParameters &parameters){
-  FourVector momentum_total(0, 0, 0, 0);
-  /* loop over all the particle types creating each particles */
-//  for (auto i = particles->types_cbegin(); i != particles->types_cend(); ++i) {
+/* loop over all the particle types */
+    int number_of_stable_types = 0;
+    
+    for (const ParticleType &type : particles->types()) {
+        /* Particles with width > 0 (resonances) do not exist in the beginning */
+        if (type.width() > 0.0) {
+            continue;
+        }
+        number_of_stable_types = number_of_stable_types + 1;
+    }
+  
+    int number_of_particles_per_type;
+    number_of_particles_per_type = number_of_particles_/number_of_stable_types;
+   
+    for (const ParticleType &type : particles->types()) {
+        /* Particles with width > 0 (resonances) do not exist in the beginning */
+        if (type.width() > 0.0) {
+            continue;
+        }
+        particles->create(number_of_particles_per_type, type.pdgcode());
+    }
+    
+/* loop over all the particle types creating each particles */
+  
+    //  for (auto i = particles->types_cbegin(); i != particles->types_cend(); ++i) {
     /* Particles with width > 0 (resonances) do not exist in the beginning */
 //    if (data.width() > 0.0) continue;
 //    printd("%s mass: %g [GeV]\n", data.name().c_str(), data.mass());
