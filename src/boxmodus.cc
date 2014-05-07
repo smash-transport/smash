@@ -160,12 +160,11 @@ void BoxModus::propagate(Particles *particles,
     position += distance;
     bool wall_hit = enforce_periodic_boundaries(position.begin() + 1,
                                                 position.end(), length_);
-    if (wall_hit) {
-      write_oscar(data, particles->particle_type(data.pdgcode()), 1, 1);
-    }
+    const auto incoming_particle = particles->particle_type(data.pdgcode());
     data.set_position(position);
     if (wall_hit) {
-      write_oscar(data, particles->particle_type(data.pdgcode()));
+      // TODO(mkretz) output->write_interaction(incoming_particle,
+      // particles->particle_type(data.pdgcode()));
     }
     printd_position(data);
   }

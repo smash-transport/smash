@@ -358,11 +358,6 @@ void DecayAction::perform (Particles *particles, size_t &id_process) {
 
   /* How many new particles we have exactly */
   size_t new_particles = particles->id_max() - old_max_id;
-  /* Write the process type (1->N) and initial state oscar output */
-  write_oscar(initial_data, initial_type, 1, new_particles);
-  /* Write the first 2 final state particles, which are always there */
-  write_oscar(particles->data(id_new_a), particles->type(id_new_a));
-  write_oscar(particles->data(id_new_b), particles->type(id_new_b));
 
   /* Check for the possible third final state particle */
   int id_new_c = -1;
@@ -380,7 +375,6 @@ void DecayAction::perform (Particles *particles, size_t &id_process) {
     /* Write the oscar output for this particle */
     particles->data_pointer(id_new_c)->set_momentum(momentum_c);
     particles->data_pointer(id_new_c)->set_position(position_c);
-    write_oscar(particles->data(id_new_c), particles->type(id_new_c));
   }
 
   printd_momenta("particle 1 momenta in comp", particles->data(id_new_a));

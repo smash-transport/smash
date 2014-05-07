@@ -79,8 +79,6 @@ void ScatterAction::perform (Particles *particles, size_t &id_process)
   switch (interaction_type_) {
   case 0:
     printd("Process: Elastic collision.\n");
-    write_oscar(particles->data(id_a), particles->type(id_a), 2, 2);
-    write_oscar(particles->data(id_b), particles->type(id_b));
 
     /* processes computed in the center of momenta */
     boost_CM(particles->data_pointer(id_a), particles->data_pointer(id_b),
@@ -89,9 +87,6 @@ void ScatterAction::perform (Particles *particles, size_t &id_process)
                      particles->data_pointer(id_b));
     boost_back_CM(particles->data_pointer(id_a),
                   particles->data_pointer(id_b), &velocity_CM);
-
-    write_oscar(particles->data(id_a), particles->type(id_a));
-    write_oscar(particles->data(id_b), particles->type(id_b));
 
     printd_momenta("particle 1 momenta after", particles->data(id_a));
     printd_momenta("particle 2 momenta after", particles->data(id_b));
@@ -108,9 +103,6 @@ void ScatterAction::perform (Particles *particles, size_t &id_process)
     /* resonance formation */
     printd("Process: Resonance formation. ");
     new_particles = outgoing_particles_.size();
-    write_oscar(particles->data(id_a), particles->type(id_a), 2,
-                new_particles);
-    write_oscar(particles->data(id_b), particles->type(id_b));
     /* processes computed in the center of momenta */
     boost_CM(particles->data_pointer(id_a), particles->data_pointer(id_b),
              &velocity_CM);
@@ -139,7 +131,6 @@ void ScatterAction::perform (Particles *particles, size_t &id_process)
             - particles->data(id_a).position())
         / 2.0;
       particles->data_pointer(id_value)->set_position(middle_point);
-      write_oscar(particles->data(id_value), particles->type(id_value));
       /* unset collision time for particles + keep id + unset partner */
       particles->data_pointer(id_value)->set_collision_past(id_process);
 

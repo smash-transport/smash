@@ -29,6 +29,10 @@ class OscarOutput : public OutputInterface {
 
   void after_collision() override;
   void before_collision() override;
+
+  /**
+   * Write a prefix line and a line per particle to OSCAR output.
+   */
   void write_interaction(const ParticleList &incoming_particles,
                          const ParticleList &outgoing_particles) override;
   void after_Nth_timestep(const Particles &particles, const int event_number, const int timestep) override;
