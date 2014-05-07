@@ -70,6 +70,12 @@ class ProcessBranch {
   inline void clear(void);
   /// Return the particle list
   inline std::vector<PdgCode> pdg_list(void) const;
+
+  /**
+   * Return a list of ParticleData initialized only with a PDG code from pdg_list.
+   */
+  ParticleList particle_list() const;
+
   /// Return the branch weight
   inline float weight(void) const;
   /// Return the type of interaction
