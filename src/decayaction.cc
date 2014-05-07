@@ -36,8 +36,8 @@ DecayAction::DecayAction(const std::vector<int> &in_part,
  */
 int DecayAction::one_to_two (Particles *particles) {
   int resonance_id = incoming_particles_[0];
-  PdgCode type_a = outgoing_particles_[0];
-  PdgCode type_b = outgoing_particles_[1];
+  PdgCode type_a = outgoing_particles_[0].pdgcode();
+  PdgCode type_b = outgoing_particles_[1].pdgcode();
 
   //TODO(weil) This may be checked already when reading in the possible
   //decay channels.
@@ -92,9 +92,9 @@ int DecayAction::one_to_two (Particles *particles) {
  */
 int DecayAction::one_to_three (Particles *particles) {
   int resonance_id = incoming_particles_[0];
-  PdgCode type_a = outgoing_particles_[0];
-  PdgCode type_b = outgoing_particles_[1];
-  PdgCode type_c = outgoing_particles_[2];
+  PdgCode type_a = outgoing_particles_[0].pdgcode();
+  PdgCode type_b = outgoing_particles_[1].pdgcode();
+  PdgCode type_c = outgoing_particles_[2].pdgcode();
 
   //TODO(weil) This may be checked already when reading in the possible
   //decay channels.
@@ -299,7 +299,7 @@ int DecayAction::resonance_decay (Particles *particles) {
     printf("Number of decay particles: %zu \n", decay_particles);
     printf("Decay particles: ");
     for (size_t i = 0; i < decay_particles; i++) {
-      printf("%s ", outgoing_particles_[i].string().c_str());
+      printf("%s ", outgoing_particles_[i].pdgcode().string().c_str());
     }
     printf("\n");
   }

@@ -193,7 +193,7 @@ double sample_resonance_mass(Particles *particles, PdgCode pdg_resonance,
  * \return ID of the (first) new particle.
  */
 int resonance_formation(Particles *particles, int particle_id, int other_id,
-  std::vector<PdgCode> produced_particles);
+                        const ParticleList &produced_particles);
 
 }  // namespace Smash
 

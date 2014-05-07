@@ -539,22 +539,20 @@ double sample_resonance_mass(Particles *particles, PdgCode pdg_resonance,
 
 /* Resonance formation kinematics */
 int resonance_formation(Particles *particles, int particle_id, int other_id,
-                        std::vector<PdgCode> produced_particles) {
+                        const ParticleList &produced_particles) {
   if (produced_particles.empty()) {
     printf("resonance_formation:\n");
     printf("Warning: No final state particles found!\n");
     printf("Resonance formation canceled. Returning -1.\n");
     return -1;
   }
-  /* Template for a new particle */
-  ParticleData resonance;
 
   const double cms_energy = particles->data(particle_id).momentum().x0()
     + particles->data(other_id).momentum().x0();
 
   int id_first_new = -1;
   if (produced_particles.size() == 1) {
-    resonance.set_pdgcode(produced_particles.at(0));
+    ParticleData resonance = produced_particles.at(0);
     /* Center-of-momentum frame of initial particles
      * is the rest frame of the resonance
      *
@@ -578,12 +576,13 @@ int resonance_formation(Particles *particles, int particle_id, int other_id,
     /* 2 particles in final state. Need another particle template */
     /* XXX: For now, it is assumed that the other particle is stable! */
     ParticleData stable_product;
-    if (particles->particle_type(produced_particles.at(0)).width() > 0) {
-      resonance.set_pdgcode(produced_particles.at(0));
-      stable_product.set_pdgcode(produced_particles.at(1));
+    ParticleData resonance;
+    if (produced_particles.at(0).type(*particles).width() > 0) {
+      resonance = produced_particles.at(0);
+      stable_product = produced_particles.at(1);
     } else {
-      stable_product.set_pdgcode(produced_particles.at(0));
-      resonance.set_pdgcode(produced_particles.at(1));
+      stable_product = produced_particles.at(0);
+      resonance = produced_particles.at(1);
     }
     float mass_stable
       = particles->particle_type(stable_product.pdgcode()).mass();

@@ -61,8 +61,13 @@ class Action {
   float total_weight_;
   /** Type of interaction: 0=elastic collision, 1=resonance formation, 2=decay */
   int interaction_type_;
-  /** PDG codes of final-state particles  */
-  std::vector<PdgCode> outgoing_particles_;
+  /**
+   * Initially this stores only the PDG codes of final-state particles.
+   *
+   * After perform was called it contains the complete particle data of the
+   * outgoing particles.
+   */
+  ParticleList outgoing_particles_;
 };
 
 /**
