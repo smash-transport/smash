@@ -111,4 +111,8 @@ int PdgCode::net_quark_number(const int quark) const {
   return ((otherquark % 2 == 0) ? -1 : 1) * antiparticle_sign();
 }
 
+std::ostream& operator<<(std::ostream& s, const PdgCode& code) {
+  return s << code.string();
+}
+
 }  // namespace Smash
