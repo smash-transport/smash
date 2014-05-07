@@ -306,8 +306,7 @@ Particles::ParticleTypeMap Particles::load_particle_types(  //{{{
     std::string name;
     float mass, width;
     PdgCode pdgcode;
-    int isospin, charge, spin;
-    lineinput >> name >> mass >> width >> pdgcode >> isospin >> charge >> spin;
+    lineinput >> name >> mass >> width >> pdgcode;
     if (lineinput.fail()) {
       throw LoadFailure(build_error_string(
           "While loading the Particle data:\nFailed to convert the input "
@@ -318,12 +317,13 @@ Particles::ParticleTypeMap Particles::load_particle_types(  //{{{
 
     printd("Setting particle type %s mass %g width %g pdgcode %s\n",
            name.c_str(), mass, width, pdgcode.string().c_str());
-    printd("Setting particle type %s isospin %i charge %i spin %i\n",
-           name.c_str(), isospin, charge, spin);
+    printd("Setting particle type %s isospin %i/2 charge %i spin %i/2\n",
+           name.c_str(), pdgcode.isospin_total(), pdgcode.charge(),
+                                                  pdgcode.spin());
 
     types.insert(std::make_pair(
         pdgcode,
-        ParticleType{name, mass, width, pdgcode, isospin, charge, spin}));
+        ParticleType{name, mass, width, pdgcode}));
   }
   return std::move(types);
 }/*}}}*/
@@ -396,7 +396,9 @@ Particles::DecayModesMap Particles::load_decaymodes(const std::string &input) {
         decay_particles.push_back(pdg);
         lineinput >> pdg;
       }
-      decay_particles.push_back(pdg);
+      if (pdg != PdgCode::invalid()) {
+        decay_particles.push_back(pdg);
+      }
       if (lineinput.fail() && !lineinput.eof()) {
         throw LoadFailure(
             build_error_string("Parse error: expected a PdgCode ", line));
