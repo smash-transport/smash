@@ -34,7 +34,7 @@ if(DOXYGEN)
       add_custom_target(undocumented ${DOXYGEN}
          ${CMAKE_CURRENT_BINARY_DIR}/DoxyfileOnlyDocumented 2>&1 |
          ${SORT} -u |
-         ${GREP} -c warning: |
+         ${GREP} -ic warning: |
          ${XARGS} ${PRINTF} "============ There are %d undocumented entities ============\\n"
          WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
          COMMENT "Building Doxygen Code Documentation (only documented entities)"

@@ -101,6 +101,9 @@ target_link_libraries(smash ${SMASH_LIBRARIES})
 
 # tests:
 if(BUILD_TESTING)
+   # library for unit tests
+   add_library(smash_lib STATIC ${smash_src})
+
    # Look for sanitizers supported by the compiler. Sanitizers add
    # instrumentation code to the executable that test correctness of the code:
    # * address: looks for use-after-free and out-of-bounds like errors
@@ -123,7 +126,6 @@ if(BUILD_TESTING)
    endif()
    set(CMAKE_REQUIRED_FLAGS "${_tmp}")
    if(HAVE_SANITIZER)
-      add_library(smash_lib STATIC ${smash_src})
       set_target_properties(smash_lib PROPERTIES
          COMPILE_FLAGS ${SANITIZER_FLAG}
          LINK_FLAGS ${SANITIZER_FLAG}
@@ -135,7 +137,6 @@ if(BUILD_TESTING)
          LINK_FLAGS ${SANITIZER_FLAG}
          )
       target_link_libraries(smash_sanitizer smash_lib ${SMASH_LIBRARIES})
-
    endif()
 
    add_subdirectory(tests)
