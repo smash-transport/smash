@@ -35,7 +35,6 @@ endif()
 set(smash_src
         action.cc
         boxmodus.cc
-        clebschgordan.cc
         collidermodus.cc
         configuration.cc
         cross-sections.cc
