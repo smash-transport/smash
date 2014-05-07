@@ -44,7 +44,6 @@ void ScatterAction::choose_channel () {
   }
 }
 
-
 void ScatterAction::perform (Particles *particles, size_t &id_process)
 {
   FourVector velocity_CM, neg_velocity_CM;
@@ -167,6 +166,79 @@ void ScatterAction::perform (Particles *particles, size_t &id_process)
   if (fabs(momentum_difference.x3()) > really_small)
     printf("Warning: Interaction type %i pz conservation violation %g\n",
            interaction_type_, momentum_difference.x3());
+}
+
+int ScatterAction::resonance_formation(Particles *particles, int particle_id,
+                                       int other_id,
+                                       const ParticleList &produced_particles) {
+  if (produced_particles.empty()) {
+    printf("resonance_formation:\n");
+    printf("Warning: No final state particles found!\n");
+    printf("Resonance formation canceled. Returning -1.\n");
+    return -1;
+  }
+
+  const double cms_energy = particles->data(particle_id).momentum().x0()
+    + particles->data(other_id).momentum().x0();
+
+  int id_first_new = -1;
+  if (produced_particles.size() == 1) {
+    ParticleData resonance = produced_particles.at(0);
+    /* Center-of-momentum frame of initial particles
+     * is the rest frame of the resonance
+     *
+     * We use fourvector to set 4-momentum, as setting it
+     * with doubles requires that particle is on
+     * mass shell, which is not generally true for resonances
+     */
+    FourVector resonance_momentum(cms_energy, 0.0, 0.0, 0.0);
+    resonance.set_momentum(resonance_momentum);
+
+    printd("Momentum of the new particle: %g %g %g %g \n",
+      resonance.momentum().x0(),
+      resonance.momentum().x1(),
+      resonance.momentum().x2(),
+      resonance.momentum().x3());
+
+    /* Initialize position */
+    resonance.set_position(1.0, 0.0, 0.0, 0.0);
+    id_first_new = particles->add_data(resonance);
+  } else if (produced_particles.size() == 2) {
+    /* 2 particles in final state. Need another particle template */
+    /* XXX: For now, it is assumed that the other particle is stable! */
+    ParticleData stable_product;
+    ParticleData resonance;
+    if (produced_particles.at(0).type(*particles).width() > 0) {
+      resonance = produced_particles.at(0);
+      stable_product = produced_particles.at(1);
+    } else {
+      stable_product = produced_particles.at(0);
+      resonance = produced_particles.at(1);
+    }
+    float mass_stable
+      = particles->particle_type(stable_product.pdgcode()).mass();
+    /* Sample resonance mass */
+    double mass_resonance = sample_resonance_mass(particles,
+      resonance.pdgcode(), stable_product.pdgcode(), cms_energy);
+
+    /* Sample the particle momenta */
+    sample_cms_momenta(&resonance, &stable_product, cms_energy, mass_resonance,
+                       mass_stable);
+
+    /* Initialize positions */
+    resonance.set_position(1.0, 0.0, 0.0, 0.0);
+    stable_product.set_position(1.0, 0.0, 0.0, 0.0);
+    id_first_new = particles->add_data(resonance);
+    particles->add_data(stable_product);
+  } else {
+    printf("resonance_formation:\n");
+    printf("Warning: %zu particles in final state!\n",
+           produced_particles.size());
+    printf("Resonance formation canceled. Returning -1.\n");
+    return -1;
+  }
+  /* Return the id of the first new particle */
+  return id_first_new;
 }
 
 }

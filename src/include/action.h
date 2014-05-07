@@ -123,6 +123,23 @@ class ScatterAction : public Action {
   void choose_channel ();
   /** Carry out the action, i.e. do the scattering. */
   void perform (Particles *particles, size_t &id_process);
+
+ private:
+  /**
+   * Resonance formation process.
+   *
+   * Creates one or two new particles, of which
+   * one is a resonance.
+   *
+   * \param[in,out] particles Particles in the simulation.
+   * \param[in] particle_id ID of the first initial state particle.
+   * \param[in] other_id ID of the second initial state particle.
+   * \param[in] produced_particles Final state particle type(s).
+   *
+   * \return ID of the (first) new particle.
+   */
+  int resonance_formation(Particles *particles, int particle_id, int other_id,
+                          const ParticleList &produced_particles);
 };
 
 

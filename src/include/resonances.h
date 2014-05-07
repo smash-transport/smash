@@ -179,22 +179,6 @@ double spectral_function_integrand(double resonance_mass, void * parameters);
 double sample_resonance_mass(Particles *particles, PdgCode pdg_resonance,
   PdgCode pdg_stable, double cms_energy);
 
-/**
- * Resonance formation process.
- *
- * Creates one or two new particles, of which
- * one is a resonance.
- *
- * \param[in,out] particles Particles in the simulation.
- * \param[in] particle_id ID of the first initial state particle.
- * \param[in] other_id ID of the second initial state particle.
- * \param[in] produced_particles Final state particle type(s).
- *
- * \return ID of the (first) new particle.
- */
-int resonance_formation(Particles *particles, int particle_id, int other_id,
-                        const ParticleList &produced_particles);
-
 }  // namespace Smash
 
 #endif  // SRC_INCLUDE_RESONANCES_H_
