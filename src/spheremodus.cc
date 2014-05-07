@@ -35,7 +35,7 @@ SphereModus::SphereModus(Configuration modus_config,
 void SphereModus::print_startup() {
   printf("Radius of the sphere: %g [fm]\n", radius_);
   printf("Total number of particles in sphere: %i \n", number_of_particles_);
-    printf("Temperature for momentum sampling: %f \n", sphere_temperature_);
+  printf("Temperature for momentum sampling: %f \n", sphere_temperature_);
 }
 
 
