@@ -64,7 +64,48 @@ class ExperimentBase {
    * \throws InvalidModusRequest This exception is thrown if the \p
    *         Modus string in the \p config object does not contain a valid
    *         string.
+   *
+   * GENERAL:
+   * --------
    */
+  // !!USER:Input
+  /**
+   * \if user
+   * \page input_general_ Input Section General
+   * \endif
+   *
+   * `MODUS:` Choose a modus for the calculation, e.g.\ infinite matter
+   * calculation, collision of two particles or collision of nuclei. The modus
+   * will be configured in ref input_modi_. Recognized values are:
+   *
+   * \li `Nucleus` for collisions of nuclei or compound objects. See \ref
+   * input_modi_nucleus_
+   * \li `Sphere` for calculations of the expansion of a thermalized sphere.
+   * See ref input_modi_sphere_
+   * \li `Collider` ...
+   * \li `Box` for infinite matter calculation in a rectangular box. See ref
+   * input_modi_box_
+   *
+   * `EPS:` Time step for the calculation, in fm/c.
+   *
+   * `STEPS:` How many time steps should be taken per event.
+   *
+   * `UPDATE:` Output on conservation laws in Standard Output occurs every nth time step.
+   *
+   * `RANDOMSEED:` Initial seed for the random number generator. If this is
+   * negative, the program starting time is used.
+   *
+   * `SIGMA:` Elastic cross-section.
+   *
+   * `TESTPARTICLES:` How many test particles per real particles should be simulated.
+   *
+   * `NEVENTS:` Number of events to calculate.
+   *
+   * `particles:` ???
+   *
+   * `decaymodes:` ???
+   */
+  // !!/USER:Input
   static std::unique_ptr<ExperimentBase> create(Configuration &config);
 
   /**

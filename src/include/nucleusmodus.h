@@ -33,15 +33,18 @@ struct ExperimentParameters;
  * in the configuration file.
  *
  * Options for NucleusModus go in the "Modi"→"Nucleus" section of the
- * configuration:
- *
- * \code
- * Modi:
- *      Nucleus:
- *              # definitions here
- * \endcode
+ * configuration.
  *
  * The following directives are understood:
+ *
+ * Modi:Nucleus:
+ * -------------
+ */
+// !!USER:Input
+/**
+ * \if user
+ * \page input_modi_nucleus_ Input Section Modi:Nucleus
+ * \endif
  *
  * `SQRTSNN:` Defines the energy of the collision as center-of-mass
  * energy in the collision of one participant each from both nuclei.
@@ -96,6 +99,7 @@ struct ExperimentParameters;
  * `INITIAL_DISTANCE:` The initial distance of the two nuclei. That
  * means \f$z_{\rm min}^{\rm target} - z_{\rm max}^{\rm projectile}\f$.
  **/
+ // !!/USER:Input
 class NucleusModus : public ModusDefault {
  public:
   /** Constructor
