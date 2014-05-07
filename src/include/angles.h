@@ -10,12 +10,12 @@
 #ifndef SRC_INCLUDE_ANGLES_H_
 #define SRC_INCLUDE_ANGLES_H_
 
-#include <cmath>
 #include <cstdio>
 #include <cstdlib>
 #include <stdexcept>
 #include "include/random.h"
 #include "include/threevector.h"
+#include "include/constants.h"
 
 namespace Smash {
 
@@ -164,13 +164,12 @@ inline Angles::Angles() : phi_(0), costheta_(0) {}
 
 void inline Angles::distribute_isotropically() {
   /* isotropic distribution: phi in [0, 2pi) and cos(theta) in [-1,1] */
-  phi_ = Random::uniform(0.0, 2.0 * M_PI);
+  phi_ = Random::uniform(0.0, twopi);
   costheta_ = Random::uniform(-1.0, 1.0);
 }
 
 void inline Angles::set_phi (const double& newphi) {
   /* Make sure that phi is in the range [0,2pi).  */
-  const double twopi = 2. * M_PI;
   if (newphi < 0.) {
     phi_ = std::fmod (newphi, twopi);
     phi_ += twopi;
@@ -213,7 +212,7 @@ bool inline Angles::add_to_theta(const double& delta) {
    * theta + delta + the_new_angle = 2*M_PI
    */
   if (theta_plus_delta > M_PI) {
-    set_theta(2.0*M_PI - theta_plus_delta);
+    set_theta(twopi - theta_plus_delta);
     /* set_phi takes care that phi_ is in [0 .. 2*M_PI] */
     set_phi(phi() + M_PI);
     return true;  // meaning "we did change phi"

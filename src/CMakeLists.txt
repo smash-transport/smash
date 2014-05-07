@@ -101,27 +101,40 @@ target_link_libraries(smash ${SMASH_LIBRARIES})
 
 # tests:
 if(BUILD_TESTING)
-   set(ASAN_FLAG -fsanitize=address)
+   # Look for sanitizers supported by the compiler. Sanitizers add
+   # instrumentation code to the executable that test correctness of the code:
+   # * address: looks for use-after-free and out-of-bounds like errors
+   # * undefined: looks for undefined behavior in the code like misaligned
+   #              accesses, creation of infinity/NaN values, or conversions to
+   #              unrepresentable values
+   # If the undefined sanitizer is not available with the compiler it will fall
+   # back to address sanitizer only. If this ones also not available the
+   # sanitizer build will be skipped altogether.
+   set(SANITIZER_FLAG -fsanitize=address,undefined)
    set(_tmp "${CMAKE_REQUIRED_FLAGS}")
-   set(CMAKE_REQUIRED_FLAGS ${ASAN_FLAG}) # AddCompilerFlag only adds the
-                                                # flag for compilation - it's
-                                                # also required with the link
-                                                # command, though
-   AddCompilerFlag(${ASAN_FLAG} CXX_RESULT HAVE_ADDRESS_SANITIZER)
+   set(CMAKE_REQUIRED_FLAGS ${SANITIZER_FLAG}) # AddCompilerFlag only adds the
+                                               # flag for compilation - it's
+                                               # also required with the link
+                                               # command, though
+   AddCompilerFlag(${SANITIZER_FLAG} CXX_RESULT HAVE_SANITIZER)
+   if(NOT HAVE_SANITIZER)
+      set(SANITIZER_FLAG -fsanitize=address)
+      AddCompilerFlag(${SANITIZER_FLAG} CXX_RESULT HAVE_SANITIZER)
+   endif()
    set(CMAKE_REQUIRED_FLAGS "${_tmp}")
-   if(HAVE_ADDRESS_SANITIZER)
+   if(HAVE_SANITIZER)
       add_library(smash_lib STATIC ${smash_src})
       set_target_properties(smash_lib PROPERTIES
-         COMPILE_FLAGS ${ASAN_FLAG}
-         LINK_FLAGS ${ASAN_FLAG}
+         COMPILE_FLAGS ${SANITIZER_FLAG}
+         LINK_FLAGS ${SANITIZER_FLAG}
          )
 
-      add_executable(smash_asan smash.cc)
-      set_target_properties(smash_asan PROPERTIES
-         COMPILE_FLAGS ${ASAN_FLAG}
-         LINK_FLAGS ${ASAN_FLAG}
+      add_executable(smash_sanitizer smash.cc)
+      set_target_properties(smash_sanitizer PROPERTIES
+         COMPILE_FLAGS ${SANITIZER_FLAG}
+         LINK_FLAGS ${SANITIZER_FLAG}
          )
-      target_link_libraries(smash_asan smash_lib ${SMASH_LIBRARIES})
+      target_link_libraries(smash_sanitizer smash_lib ${SMASH_LIBRARIES})
 
    endif()
 
