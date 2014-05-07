@@ -138,7 +138,8 @@ class ScatterAction : public Action {
    *
    * \return ID of the (first) new particle.
    */
-  int resonance_formation(Particles *particles, int particle_id, int other_id,
+  int resonance_formation(Particles *particles, const ParticleData &particle0,
+                          const ParticleData &particle1,
                           const ParticleList &produced_particles);
 };
 

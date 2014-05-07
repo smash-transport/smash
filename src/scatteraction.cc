@@ -59,8 +59,10 @@ void ScatterAction::perform (Particles *particles, size_t &id_process)
     return;
   }
 
-  FourVector initial_momentum(particles->data(id_a).momentum()
-    + particles->data(id_b).momentum());
+  ParticleData data_a = particles->data(id_a);
+  ParticleData data_b = particles->data(id_b);
+
+  FourVector initial_momentum(data_a.momentum() + data_b.momentum());
   FourVector final_momentum;
 
   printd("Process %zu type %i particle %s<->%s colliding %d<->%d time %g\n",
@@ -102,7 +104,7 @@ void ScatterAction::perform (Particles *particles, size_t &id_process)
     boost_CM(particles->data_pointer(id_a), particles->data_pointer(id_b),
              &velocity_CM);
 
-    id_new = resonance_formation(particles, id_a, id_b, outgoing_particles_);
+    id_new = resonance_formation(particles, data_a, data_b, outgoing_particles_);
 
     boost_back_CM(particles->data_pointer(id_a),
                   particles->data_pointer(id_b), &velocity_CM);
@@ -168,8 +170,8 @@ void ScatterAction::perform (Particles *particles, size_t &id_process)
            interaction_type_, momentum_difference.x3());
 }
 
-int ScatterAction::resonance_formation(Particles *particles, int particle_id,
-                                       int other_id,
+int ScatterAction::resonance_formation(Particles *particles, const ParticleData &particle0,
+                                       const ParticleData &particle1,
                                        const ParticleList &produced_particles) {
   if (produced_particles.empty()) {
     printf("resonance_formation:\n");
@@ -178,8 +180,8 @@ int ScatterAction::resonance_formation(Particles *particles, int particle_id,
     return -1;
   }
 
-  const double cms_energy = particles->data(particle_id).momentum().x0()
-    + particles->data(other_id).momentum().x0();
+  const double cms_energy =
+      particle0.momentum().x0() + particle1.momentum().x0();
 
   int id_first_new = -1;
   if (produced_particles.size() == 1) {
