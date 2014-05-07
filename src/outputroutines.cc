@@ -65,7 +65,7 @@ void print_measurements(const Particles &particles,
   for (const ParticleData &data : particles.data()) {
     momentum_total += data.momentum();
     /* use the time from the last active particle - startup time */
-    time = data.position().x0() - 1.0;
+    time = data.position().x0();
   }
 
   if (likely(time > 0))
@@ -169,7 +169,7 @@ void write_oscar_event_block(Particles *particles,
             data.momentum().x3(), data.momentum().x0(),
             sqrt(data.momentum().Dot(data.momentum())),
             data.position().x1(), data.position().x2(),
-            data.position().x3(), data.position().x0() - 1.0);
+            data.position().x3(), data.position().x0());
   }
   fclose(fp);
 }
@@ -199,7 +199,7 @@ void write_oscar(const ParticleData &particle_data,
           particle_type.pdgcode().string().c_str(), 0, momentum.x1(),
           momentum.x2(), momentum.x3(), momentum.x0(), mass,
           position.x1(), position.x2(), position.x3(),
-          position.x0() - 1.0);
+          position.x0());
 
   fclose(fp);
 }

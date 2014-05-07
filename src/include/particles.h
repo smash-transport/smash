@@ -382,7 +382,7 @@ inline bool Particles::has_data(int id) const {
 
 /* return computation time which is reduced by the start up time */
 inline double Particles::time() const {
-  return data_.begin()->second.position().x0() - 1.0;
+  return data_.begin()->second.position().x0();
 }
 
 /* boost_CM - boost to center of momentum */
