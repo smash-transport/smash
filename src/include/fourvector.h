@@ -33,6 +33,8 @@ class FourVector {
   /// copy constructor
   FourVector(double y0, double y1, double y2, double y3)
       : x_{{y0, y1, y2, y3}} {}
+  FourVector(double y0, ThreeVector vec)
+      : x_{{y0, vec.x1(), vec.x2(), vec.x3()}} {}
   /* t, x_\perp, z */
   double inline x0(void) const;
   void inline set_x0(double t);

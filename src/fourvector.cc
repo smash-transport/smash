@@ -38,9 +38,7 @@ FourVector FourVector::LorentzBoost(const FourVector &velocity) const {
   // same:
   const double constantpart = gamma / (gamma + 1) * (xprime_0 + this->x0());
   return FourVector(xprime_0,
-                    this->x1() - velocity.x1() * constantpart,
-                    this->x2() - velocity.x2() * constantpart,
-                    this->x3() - velocity.x3() * constantpart);
+                    this->threevec() - velocity.threevec() * constantpart);
 }
 
 }  // namespace Smash
