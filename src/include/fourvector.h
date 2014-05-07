@@ -10,6 +10,8 @@
 #include <array>
 #include <cmath>
 
+#include "include/threevector.h"
+
 namespace Smash {
 
 /**
@@ -40,9 +42,12 @@ class FourVector {
   void inline set_x2(double y);
   double inline x3(void) const;
   void inline set_x3(double z);
+  /* get the three-vector */
+  ThreeVector inline threevec() const;
   /* set all four values */
   void inline set_FourVector(const double t, const double x, const double y,
                              const double z);
+  void inline set_FourVector(const double t, const ThreeVector &pos);
   /* inlined operations */
   double inline Dot(const FourVector &a) const;
   double inline Dot() const;
@@ -155,29 +160,37 @@ double inline FourVector::x1(void) const {
   return x_[1];
 }
 
-void inline FourVector::set_x1(const double z) {
-  x_[1] = z;
+void inline FourVector::set_x1(const double x) {
+  x_[1] = x;
 }
 
 double inline FourVector::x2(void) const {
   return x_[2];
 }
 
-void inline FourVector::set_x2(const double x) {
-  x_[2] = x;
+void inline FourVector::set_x2(const double y) {
+  x_[2] = y;
 }
 
 double inline FourVector::x3(void) const {
   return x_[3];
 }
 
-void inline FourVector::set_x3(const double y) {
-  x_[3] = y;
+void inline FourVector::set_x3(const double z) {
+  x_[3] = z;
 }
 
-void inline FourVector::set_FourVector(const double t, const double z,
-                                       const double x, const double y) {
-  x_ = {{t, z, x, y}};
+ThreeVector inline FourVector::threevec() const {
+  return ThreeVector(x1(),x2(),x3());
+}
+
+void inline FourVector::set_FourVector(const double t, const double x,
+                                       const double y, const double z) {
+  x_ = {{t, x, y, z}};
+}
+
+void inline FourVector::set_FourVector(const double t, const ThreeVector &pos) {
+  x_ = {{t, pos.x1(), pos.x2(), pos.x3()}};
 }
 
 /// check if all four vector components are equal

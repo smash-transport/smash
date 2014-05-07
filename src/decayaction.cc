@@ -173,10 +173,7 @@ int DecayAction::one_to_three (Particles *particles) {
   Angles phitheta;
   phitheta.distribute_isotropically();
   /* This is the angle of the plane of the three decay particles */
-  new_particle_a.set_momentum(mass_a,
-                              momentum_a * phitheta.x(),
-                              momentum_a * phitheta.y(),
-                              momentum_a * phitheta.z());
+  new_particle_a.set_momentum(mass_a, phitheta.threevec() * momentum_a);
 
   /* Angle between a and b */
   double theta_ab = acos((energy_a * energy_b - 0.5 * (s_ab - mass_a * mass_a
@@ -184,10 +181,7 @@ int DecayAction::one_to_three (Particles *particles) {
   printd("theta_ab: %g Ea: %g Eb: %g sab: %g pa: %g pb: %g\n",
          theta_ab, energy_a, energy_b, s_ab, momentum_a, momentum_b);
   bool phi_has_changed = phitheta.add_to_theta(theta_ab);
-  new_particle_b.set_momentum(mass_b,
-                              momentum_b * phitheta.x(),
-                              momentum_b * phitheta.y(),
-                              momentum_b * phitheta.z());
+  new_particle_b.set_momentum(mass_b, phitheta.threevec() * momentum_b);
 
   /* Angle between b and c */
   double theta_bc = acos((energy_b * energy_c - 0.5 *(s_bc - mass_b * mass_b
@@ -197,12 +191,10 @@ int DecayAction::one_to_three (Particles *particles) {
   // pass information on whether phi has changed during the last adding
   // on to add_to_theta:
   phitheta.add_to_theta(theta_bc, phi_has_changed);
-  new_particle_c.set_momentum(mass_c,
-                              momentum_c * phitheta.x(),
-                              momentum_c * phitheta.y(),
-                              momentum_c * phitheta.z());
+  new_particle_c.set_momentum(mass_c, phitheta.threevec() * momentum_c);
 
   /* Momentum check */
+  /* todo: use fourvectors here */
   double energy = new_particle_a.momentum().x0()
     + new_particle_b.momentum().x0() + new_particle_c.momentum().x0();
   double px = new_particle_a.momentum().x1() + new_particle_b.momentum().x1()

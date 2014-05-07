@@ -41,18 +41,22 @@ class ParticleData {
   inline void set_collision_past(int process_id);
   inline const FourVector &momentum(void) const;
   inline void set_momentum(const FourVector &momentum_vector);
+  inline void set_momentum(const double &mass, const ThreeVector &mom);
   inline void set_momentum(const double &mass, const double &px,
                            const double &py, const double &pz);
   inline const FourVector &position(void) const;
   inline void set_position(const FourVector &position);
+  inline void set_position(const double &t, const ThreeVector &pos);
   inline void set_position(const double &x0, const double &x1,
                            const double &x2, const double &x3);
-  /// get the x veolcity
-  inline double velocity_x(void) { return momentum().x1() / momentum().x0(); }
-  /// get the y veolcity
-  inline double velocity_y(void) { return momentum().x2() / momentum().x0(); }
-  /// get the z veolcity
-  inline double velocity_z(void) { return momentum().x3() / momentum().x0(); }
+  /// get the x velocity
+  inline double velocity_x(void) { return momentum_.x1() / momentum_.x0(); }
+  /// get the y velocity
+  inline double velocity_y(void) { return momentum_.x2() / momentum_.x0(); }
+  /// get the z velocity
+  inline double velocity_z(void) { return momentum_.x3() / momentum_.x0(); }
+  /* get the velocity 3-vector */
+  inline ThreeVector velocity (void) { return momentum_.threevec() / momentum_.x0(); }
   /* overloaded operators */
   inline bool operator==(const ParticleData &a) const;
   inline bool operator<(const ParticleData &a) const;
@@ -135,6 +139,10 @@ inline void ParticleData::set_momentum(const FourVector &momentum_vector) {
   momentum_ = momentum_vector;
 }
 
+inline void ParticleData::set_momentum(const double &mass, const ThreeVector &mom) {
+  momentum_.set_FourVector(sqrt(mass * mass + mom.sqr()), mom);
+}
+
 /// set particle four momentum by components
 inline void ParticleData::set_momentum(const double &mass, const double &px,
                           const double &py, const double &pz) {
@@ -150,6 +158,10 @@ inline const FourVector &ParticleData::position(void) const {
 /// set the particle position directly
 inline void ParticleData::set_position(const FourVector &pos) {
   position_ = pos;
+}
+
+inline void ParticleData::set_position(const double &t, const ThreeVector &pos) {
+  position_.set_FourVector(t, pos);
 }
 
 /// set the particle position by components
