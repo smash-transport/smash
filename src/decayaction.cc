@@ -306,9 +306,8 @@ int DecayAction::resonance_decay (Particles *particles) {
   return new_id_a;
 }
 
-void DecayAction::perform (Particles *particles, size_t &id_process) {
-  FourVector velocity_CM;
-  int id_a = incoming_particles_[0];
+void DecayAction::perform(Particles *particles, size_t &id_process) {
+  const int id_a = incoming_particles_[0];
 
   /* Check if particle still exists. */
   if (is_valid(*particles)) {
@@ -316,9 +315,10 @@ void DecayAction::perform (Particles *particles, size_t &id_process) {
     return;
   }
 
-  if (interaction_type_ != 2)
-    printf("Decays warning: ID %i (%s) has process type %i.\n",
-           id_a, particles->type(id_a).name().c_str(), interaction_type_);
+  if (interaction_type_ != 2) {
+    printf("Decays warning: ID %i (%s) has process type %i.\n", id_a,
+           particles->type(id_a).name().c_str(), interaction_type_);
+  }
 
   /* Save a copy of the initial state */
   ParticleData initial_data = particles->data(id_a);
@@ -328,13 +328,12 @@ void DecayAction::perform (Particles *particles, size_t &id_process) {
   printd_momenta("Resonance momenta before decay", particles->data(id_a));
 
   /* boost to rest frame */
-  velocity_CM.set_x0(1.0);
-  velocity_CM.set_x1(particles->data(id_a).momentum().x1()
-                      / particles->data(id_a).momentum().x0());
-  velocity_CM.set_x2(particles->data(id_a).momentum().x2()
-                      / particles->data(id_a).momentum().x0());
-  velocity_CM.set_x3(particles->data(id_a).momentum().x3()
-                      / particles->data(id_a).momentum().x0());
+  FourVector velocity_CM{1.0, particles->data(id_a).momentum().x1() /
+                                  particles->data(id_a).momentum().x0(),
+                         particles->data(id_a).momentum().x2() /
+                             particles->data(id_a).momentum().x0(),
+                         particles->data(id_a).momentum().x3() /
+                             particles->data(id_a).momentum().x0()};
   particles->data_pointer(id_a)->set_momentum(
       particles->data(id_a).momentum().LorentzBoost(velocity_CM));
   particles->data_pointer(id_a)->set_position(
@@ -346,7 +345,7 @@ void DecayAction::perform (Particles *particles, size_t &id_process) {
   /* Save the highest id before decay */
   size_t old_max_id = particles->id_max();
   /* Do the decay; this returns the smallest new id */
-  size_t id_new_a = resonance_decay (particles);
+  size_t id_new_a = resonance_decay(particles);
   /* There's going to be at least 2 new particles */
   size_t id_new_b = id_new_a + 1;
 
@@ -380,8 +379,8 @@ void DecayAction::perform (Particles *particles, size_t &id_process) {
   printd_momenta("particle 1 momenta in comp", particles->data(id_new_a));
   printd_momenta("particle 2 momenta in comp", particles->data(id_new_b));
 
-  FourVector final_momentum(particles->data(id_new_a).momentum()
-    + particles->data(id_new_b).momentum());
+  FourVector final_momentum(particles->data(id_new_a).momentum() +
+                            particles->data(id_new_b).momentum());
 
   /* unset collision time for both particles + keep id + unset partner */
   particles->data_pointer(id_new_a)->set_collision_past(id_process);
@@ -399,8 +398,8 @@ void DecayAction::perform (Particles *particles, size_t &id_process) {
   momentum_difference += initial_data.momentum();
   momentum_difference -= final_momentum;
   if (fabs(momentum_difference.x0()) > really_small) {
-    printf("Process %zu type %i particle %s decay to %s and %s ",
-           id_process, interaction_type_, particles->type(id_a).name().c_str(),
+    printf("Process %zu type %i particle %s decay to %s and %s ", id_process,
+           interaction_type_, particles->type(id_a).name().c_str(),
            particles->type(id_new_a).name().c_str(),
            particles->type(id_new_b).name().c_str());
     if (new_particles == 3) {
@@ -410,21 +409,22 @@ void DecayAction::perform (Particles *particles, size_t &id_process) {
     printf("Warning: Interaction type %i E conservation violation %g\n",
            interaction_type_, momentum_difference.x0());
   }
-  if (fabs(momentum_difference.x1()) > really_small)
+  if (fabs(momentum_difference.x1()) > really_small) {
     printf("Warning: Interaction type %i px conservation violation %g\n",
            interaction_type_, momentum_difference.x1());
-  if (fabs(momentum_difference.x2()) > really_small)
+  }
+  if (fabs(momentum_difference.x2()) > really_small) {
     printf("Warning: Interaction type %i py conservation violation %g\n",
            interaction_type_, momentum_difference.x2());
-  if (fabs(momentum_difference.x3()) > really_small)
+  }
+  if (fabs(momentum_difference.x3()) > really_small) {
     printf("Warning: Interaction type %i pz conservation violation %g\n",
            interaction_type_, momentum_difference.x3());
+  }
 
   /* Remove decayed particle */
   particles->remove(id_a);
   printd("ID %i has decayed and removed from the list.\n", id_a);
 }
-
-
 
 }
