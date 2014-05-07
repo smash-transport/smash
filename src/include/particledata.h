@@ -140,7 +140,7 @@ inline void ParticleData::set_momentum(const FourVector &momentum_vector) {
 }
 
 inline void ParticleData::set_momentum(const double &mass, const ThreeVector &mom) {
-  momentum_.set_FourVector(sqrt(mass * mass + mom.sqr()), mom);
+  momentum_.set_FourVector(sqrt(mass*mass + mom*mom), mom);
 }
 
 /// set particle four momentum by components

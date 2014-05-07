@@ -27,7 +27,6 @@ class ThreeVector {
   void inline set_x2(double y);
   double inline x3(void) const;
   void inline set_x3(double z);
-  double inline sqr(void) const;
   /* operators */
   ThreeVector inline operator- ();
   ThreeVector inline operator*= (const double &a);
@@ -60,10 +59,6 @@ void inline ThreeVector::set_x3(const double z) {
   x_[2] = z;
 }
 
-double inline ThreeVector::sqr(void) const {
-  return x_[0] * x_[0] + x_[1] * x_[1] + x_[2] * x_[2];
-}
-
 ThreeVector inline ThreeVector::operator- () {
   x_[0] = -x_[0];
   x_[1] = -x_[1];
@@ -81,6 +76,10 @@ ThreeVector inline ThreeVector::operator*= (const double &a) {
 inline ThreeVector operator* (ThreeVector a, const double &b) {
   a *= b;
   return a;
+}
+
+inline double operator* (ThreeVector a, const ThreeVector &b) {
+  return a.x1()*b.x1() + a.x2()*b.x2() + a.x3()*b.x3();
 }
 
 ThreeVector inline ThreeVector::operator/= (const double &a) {

@@ -100,8 +100,7 @@ void BoxModus::initial_conditions(Particles *particles,
       printd("Particle %d radial momenta %g phi %g cos_theta %g\n", data.id(),
              momentum_radial, phitheta.phi(), phitheta.costheta());
       data.set_momentum(
-          particles->particle_type(data.pdgcode()).mass(), momentum_radial * phitheta.x(),
-          momentum_radial * phitheta.y(), momentum_radial * phitheta.z());
+          particles->particle_type(data.pdgcode()).mass(), phitheta.threevec() * momentum_radial);
     } else {
       data.set_momentum(particles->particle_type(data.pdgcode()).mass(),
                        -particles->data(data.id() - 1).momentum().threevec());
