@@ -452,8 +452,11 @@ TEST(spin) {
   COMPARE(omega_c_bar.spin(), 1);
   COMPARE(  xi_cc_bar.spin(), 1);
   COMPARE(   omega_bc.spin(), 1);
+}
+TEST(spin_higgs) {
   PdgCode higgs(0x25);
-  EXPECT_ASSERT_FAILURE(assert(higgs.spin() == 0));
+  UnitTest::EXPECT_FAILURE();
+  COMPARE(higgs.spin(),0);
 }
 TEST(spin_degeneracy) {
   COMPARE(   electron.spin_degeneracy(), 2);
@@ -479,8 +482,11 @@ TEST(spin_degeneracy) {
   COMPARE(omega_c_bar.spin_degeneracy(), 2);
   COMPARE(  xi_cc_bar.spin_degeneracy(), 2);
   COMPARE(   omega_bc.spin_degeneracy(), 2);
+}
+TEST(spin_degeneracy_higgs) {
   PdgCode higgs(0x25);
-  EXPECT_ASSERT_FAILURE(assert(higgs.spin() == 1));
+  UnitTest::EXPECT_FAILURE();
+  COMPARE(higgs.spin_degeneracy(),1);
 }
 
 TEST_CATCH(set_invalid_code, PdgCode::InvalidPdgCode) {
