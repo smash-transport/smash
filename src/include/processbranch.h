@@ -8,6 +8,7 @@
 #define SRC_INCLUDE_PROCESSBRANCH_H_
 
 #include <vector>
+#include "pdgcode.h"
 
 namespace Smash {
 
