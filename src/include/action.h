@@ -68,7 +68,7 @@ class Action {
   /**
    * Return the list of particles that resulted from the interaction.
    */
-  ParticleList outgoing_particles(const Particles &particles) const;
+  const ParticleList &outgoing_particles() const { return outgoing_particles_; }
 
  protected:
   /** ID codes of incoming particles  */
