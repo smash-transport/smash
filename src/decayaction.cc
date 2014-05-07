@@ -307,40 +307,35 @@ int DecayAction::resonance_decay (Particles *particles) {
 }
 
 void DecayAction::perform(Particles *particles, size_t &id_process) {
-  const int id_a = incoming_particles_[0];
-
   /* Check if particle still exists. */
   if (is_valid(*particles)) {
-    printf("DecayAction::perform: ID %i not found!\n", id_a);
+    printf("DecayAction::perform: ID %i not found!\n", incoming_particles_[0]);
     return;
   }
 
+  ParticleData &particle0 = particles->data(incoming_particles_[0]);
+  const ParticleType &type0 = particle0.type(*particles);
+
   if (interaction_type_ != 2) {
-    printf("Decays warning: ID %i (%s) has process type %i.\n", id_a,
-           particles->type(id_a).name().c_str(), interaction_type_);
+    printf("Decays warning: ID %i (%s) has process type %i.\n", particle0.id(),
+           type0.name().c_str(), interaction_type_);
   }
 
   /* Save a copy of the initial state */
-  ParticleData initial_data = particles->data(id_a);
-  ParticleType initial_type = particles->type(id_a);
+  const ParticleData initial_data = particle0;
 
   printd("Process: Resonance decay. ");
-  printd_momenta("Resonance momenta before decay", particles->data(id_a));
+  printd_momenta("Resonance momenta before decay", particle0);
 
   /* boost to rest frame */
-  FourVector velocity_CM{1.0, particles->data(id_a).momentum().x1() /
-                                  particles->data(id_a).momentum().x0(),
-                         particles->data(id_a).momentum().x2() /
-                             particles->data(id_a).momentum().x0(),
-                         particles->data(id_a).momentum().x3() /
-                             particles->data(id_a).momentum().x0()};
-  particles->data_pointer(id_a)->set_momentum(
-      particles->data(id_a).momentum().LorentzBoost(velocity_CM));
-  particles->data_pointer(id_a)->set_position(
-      particles->data(id_a).position().LorentzBoost(velocity_CM));
+  FourVector velocity_CM{1.0,
+                         particle0.momentum().x1() / particle0.momentum().x0(),
+                         particle0.momentum().x2() / particle0.momentum().x0(),
+                         particle0.momentum().x3() / particle0.momentum().x0()};
+  particle0.set_momentum(particle0.momentum().LorentzBoost(velocity_CM));
+  particle0.set_position(particle0.position().LorentzBoost(velocity_CM));
 
-  printd_momenta("Boosted resonance momenta before decay",
-                 particles->data(id_a));
+  printd_momenta("Boosted resonance momenta before decay", particle0);
 
   /* Save the highest id before decay */
   size_t old_max_id = particles->id_max();
@@ -399,7 +394,7 @@ void DecayAction::perform(Particles *particles, size_t &id_process) {
   momentum_difference -= final_momentum;
   if (fabs(momentum_difference.x0()) > really_small) {
     printf("Process %zu type %i particle %s decay to %s and %s ", id_process,
-           interaction_type_, particles->type(id_a).name().c_str(),
+           interaction_type_, type0.name().c_str(),
            particles->type(id_new_a).name().c_str(),
            particles->type(id_new_b).name().c_str());
     if (new_particles == 3) {
@@ -423,8 +418,7 @@ void DecayAction::perform(Particles *particles, size_t &id_process) {
   }
 
   /* Remove decayed particle */
-  particles->remove(id_a);
-  printd("ID %i has decayed and removed from the list.\n", id_a);
+  particles->remove(particle0.id());
+  printd("ID %i has decayed and removed from the list.\n", particle0.id());
 }
-
 }
