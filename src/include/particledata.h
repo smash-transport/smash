@@ -12,6 +12,7 @@
 
 #include "include/fourvector.h"
 #include "include/pdgcode.h"
+#include "forwarddeclarations.h"
 
 namespace Smash {
 
@@ -33,6 +34,14 @@ class ParticleData {
   inline void set_id(int id);
   inline PdgCode pdgcode(void) const;
   inline void set_pdgcode(PdgCode pdgcode);
+
+  /**
+   * Return the ParticleType object associated to this particle.
+   *
+   * \todo Remove the need for the Particles parameter.
+   */
+  const ParticleType &type(const Particles &particles) const;
+
   inline int id_process(void) const;
   inline void set_id_process(int id);
   inline double collision_time(void) const;

@@ -43,6 +43,7 @@ set(smash_src
         oscaroutput.cc
         outputroutines.cc
         parametrizations.cc
+        particledata.cc
         particles.cc
         pdgcode.cc
         random.cc
