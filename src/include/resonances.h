@@ -35,7 +35,7 @@ namespace Smash {
  * to be available for the resonance.
  *
  */
-float calculate_minimum_mass(Particles *particles, PdgCode pdgcode);
+float calculate_minimum_mass(const Particles &particles, PdgCode pdgcode);
 
 /**
  * Find all resonances that can be produced in a collision of the two
@@ -176,8 +176,8 @@ double spectral_function_integrand(double resonance_mass, void * parameters);
  *
  * \return The mass of the resonance particle.
  */
-double sample_resonance_mass(Particles *particles, PdgCode pdg_resonance,
-  PdgCode pdg_stable, double cms_energy);
+double sample_resonance_mass(const Particles &particles, PdgCode pdg_resonance,
+                             PdgCode pdg_stable, double cms_energy);
 
 }  // namespace Smash
 

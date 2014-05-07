@@ -102,7 +102,7 @@ void ScatterAction::perform (Particles *particles, size_t &id_process)
 
     /* processes computed in the center of momenta */
     boost_CM(&data_a, &data_b, &velocity_CM);
-    resonance_formation(particles, data_a, data_b);
+    resonance_formation(*particles, data_a, data_b);
     boost_back_CM(&data_a, &data_b, &velocity_CM);  // TODO(mkretz) why? can't
                                                     // we just boost a copy of
                                                     // the ParticleData objects?
@@ -167,8 +167,9 @@ void ScatterAction::perform (Particles *particles, size_t &id_process)
            interaction_type_, momentum_difference.x3());
 }
 
-void ScatterAction::resonance_formation(Particles *particles, const ParticleData &particle0,
-                                       const ParticleData &particle1) {
+void ScatterAction::resonance_formation(const Particles &particles,
+                                        const ParticleData &particle0,
+                                        const ParticleData &particle1) {
   const double cms_energy =
       particle0.momentum().x0() + particle1.momentum().x0();
 
@@ -197,7 +198,7 @@ void ScatterAction::resonance_formation(Particles *particles, const ParticleData
     /* XXX: For now, it is assumed that the other particle is stable! */
     ParticleData *resonance = &outgoing_particles_.at(0);
     ParticleData *stable_product;
-    if (resonance->type(*particles).width() >
+    if (resonance->type(particles).width() >
         0) {  // TODO: can we change this to an is_stable or is_unstable method,
               // please?
       stable_product = &outgoing_particles_.at(1);
@@ -205,7 +206,7 @@ void ScatterAction::resonance_formation(Particles *particles, const ParticleData
       stable_product = resonance;
       resonance = &outgoing_particles_.at(1);
     }
-    float mass_stable = stable_product->type(*particles).mass();
+    float mass_stable = stable_product->type(particles).mass();
     /* Sample resonance mass */
     double mass_resonance = sample_resonance_mass(
         particles, resonance->pdgcode(), stable_product->pdgcode(), cms_energy);

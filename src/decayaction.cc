@@ -58,9 +58,9 @@ int DecayAction::one_to_two (Particles *particles) {
   /* If one of the particles is resonance, sample its mass */
   /* XXX: Other particle assumed stable! */
   if (particles->particle_type(type_a).width() > 0) {
-    mass_a = sample_resonance_mass(particles, type_a, type_b, total_energy);
+    mass_a = sample_resonance_mass(*particles, type_a, type_b, total_energy);
   } else if (particles->particle_type(type_b).width() > 0) {
-    mass_b = sample_resonance_mass(particles, type_b, type_a, total_energy);
+    mass_b = sample_resonance_mass(*particles, type_b, type_a, total_energy);
   }
 
   /* Sample the momenta */
