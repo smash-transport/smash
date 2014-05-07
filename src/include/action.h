@@ -105,11 +105,23 @@ class DecayAction : public Action {
    * list of particles that are only initialized with their PDG code.
    */
   ParticleList choose_channel(Particles *particles) const;
-  /** Carry out the action, i.e. do the decay. */
+
+  /** Carry out the action, i.e. do the decay.
+   * Performs a decay of one particle to two or three particles.
+   *
+   * \throws InvalidDecay
+   */
   void perform (Particles *particles, size_t &id_process);
 
+  /**
+   * Thrown when DecayAction is called to perform with 0 or more than 2
+   * entries in outgoing_particles.
+   */
+  class InvalidDecay : public std::invalid_argument {
+    using std::invalid_argument::invalid_argument;
+  };
+
  private:
-  int resonance_decay (Particles *particles);
   int one_to_two (Particles *particles);
   int one_to_three (Particles *particles);
 };

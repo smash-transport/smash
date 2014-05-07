@@ -266,41 +266,6 @@ ParticleList DecayAction::choose_channel(Particles *particles) const {
 }
 
 
-/**
- * Execute a decay process for the selected particle.
- *
- * Randomly select one of the decay modes of the particle
- * according to their relative weights. Then decay the particle
- * by calling function one_to_two or one_to_three.
- *
- * \param[in,out] particles Particles in the simulation.
- *
- * \return The ID of the first decay product.
- */
-int DecayAction::resonance_decay (Particles *particles) {
-
-
-  /* We found our decay branch, get the decay product pdgs and do the decay */
-  size_t decay_particles = outgoing_particles_.size();
-  int new_id_a = -1;
-  switch (decay_particles) {
-  case 2:
-    new_id_a = one_to_two (particles);
-    break;
-  case 3:
-    new_id_a = one_to_three (particles);
-    break;
-  default:
-    printf("Warning: Not a 1->2 or 1->3 process!\n");
-    printf("Number of decay particles: %zu \n", decay_particles);
-    printf("Decay particles: ");
-    for (size_t i = 0; i < decay_particles; i++) {
-      printf("%s ", outgoing_particles_[i].pdgcode().string().c_str());
-    }
-    printf("\n");
-  }
-  return new_id_a;
-}
 
 void DecayAction::perform(Particles *particles, size_t &id_process) {
   /* Check if particle still exists. */
@@ -336,10 +301,26 @@ void DecayAction::perform(Particles *particles, size_t &id_process) {
   /* Save the highest id before decay */
   size_t old_max_id = particles->id_max();
 
+  /*
+   * Execute a decay process for the selected particle.
+   *
+   * Randomly select one of the decay modes of the particle
+   * according to their relative weights. Then decay the particle
+   * by calling function one_to_two or one_to_three.
+   */
   outgoing_particles_ = choose_channel(particles);
+  size_t id_new_a = -1;
+  if (outgoing_particles_.size() == 2) {
+    id_new_a = one_to_two(particles);
+  } else if (outgoing_particles_.size() == 3) {
+    id_new_a = one_to_three(particles);
+  } else {
+    throw InvalidDecay(
+        "DecayAction::perform: Only 1->2 or 1->3 processes are supported. "
+        "Decay from 1->" +
+        std::to_string(outgoing_particles_.size()) + " was requested.");
+  }
 
-  /* Do the decay; this returns the smallest new id */
-  size_t id_new_a = resonance_decay(particles);
   /* There's going to be at least 2 new particles */
   size_t id_new_b = id_new_a + 1;
 
