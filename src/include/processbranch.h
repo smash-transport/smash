@@ -57,7 +57,7 @@ class ProcessBranch {
    * but more members can be added to list afterwards
    * with add_particle(int)
    */
-  inline void set_particles(std::vector<PdgCode> particle_pdgs);
+  inline void set_particles(std::vector<PdgCode> pdg_list);
   /**
    * Set the weight of the branch.
    * In other words, how probable this branch is
@@ -123,8 +123,8 @@ inline void ProcessBranch::add_particle(PdgCode particle_pdg) {
  * but more members can be added to list afterwards
  * with add_particle(int)
  */
-inline void ProcessBranch::set_particles(std::vector<PdgCode> particle_pdgs) {
-  pdg_list_ = std::move(particle_pdgs);
+inline void ProcessBranch::set_particles(std::vector<PdgCode> new_pdg_list) {
+  pdg_list_ = std::move(new_pdg_list);
 }
 
 /**
