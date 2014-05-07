@@ -61,8 +61,8 @@ void OscarOutput::before_collision() {}
 
 void OscarOutput::after_collision() {}
 
-void OscarOutput::write_interaction(const ParticleList &initial_particles,
-                                    const ParticleList &final_particles) {
+void OscarOutput::write_interaction(const ParticleList &incoming_particles,
+                                    const ParticleList &outgoing_particles) {
   /* OSCAR line prefix : initial final
    * particle creation: 0 1
    * particle 2<->2 collision: 2 2
@@ -70,8 +70,8 @@ void OscarOutput::write_interaction(const ParticleList &initial_particles,
    * resonance decay: 1 2
    * etc.
    */
-  fprintf(file_.get(), "%zu %zu\n", initial_particles.size(),
-          final_particles.size());
+  fprintf(file_.get(), "%zu %zu\n", incoming_particles.size(),
+          outgoing_particles.size());
   const auto print = [&](const ParticleData &p) {
     const float mass = std::sqrt(p.momentum().Dot(p.momentum()));
     fprintf(file_.get(), "%i %s %i %g %g %g %g %g %g %g %g %g \n", p.id(),
@@ -80,10 +80,10 @@ void OscarOutput::write_interaction(const ParticleList &initial_particles,
             p.position().x1(), p.position().x2(), p.position().x3(),
             p.position().x0() - 1.0);
   };
-  for (const auto &p : initial_particles) {
+  for (const auto &p : incoming_particles) {
     print(p);
   }
-  for (const auto &p : final_particles) {
+  for (const auto &p : outgoing_particles) {
     print(p);
   }
 }

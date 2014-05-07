@@ -49,13 +49,13 @@ class OutputInterface {
   /**
    * Called whenever an action modified one or more particles.
    *
-   * \param initial_particles The list of particles before the Action was
+   * \param incoming_particles The list of particles before the Action was
    *                          performed.
-   * \param final_particles   The list of particles after the Action was
+   * \param outgoing_particles   The list of particles after the Action was
    *                          performed.
    */
-  virtual void write_interaction(const ParticleList &/*initial_particles*/,
-                                 const ParticleList &/*final_particles*/) {}
+  virtual void write_interaction(const ParticleList &/*incoming_particles*/,
+                                 const ParticleList &/*outgoing_particles*/) {}
 
   /**
    * Output launched after every N'th timestep. N is controlled by an option.

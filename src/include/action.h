@@ -52,7 +52,7 @@ class Action {
 
  protected:
   /** ID codes of incoming particles  */
-  std::vector<int> ingoing_particles_;
+  std::vector<int> incoming_particles;
   /** time at which the action is supposed to be performed  */
   float time_of_execution_;
   /** list of possible subprocesses  */
