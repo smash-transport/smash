@@ -27,6 +27,8 @@ class ThreeVector {
   void inline set_x2(double y);
   double inline x3(void) const;
   void inline set_x3(double z);
+  double inline sqr(void) const;
+  double inline abs(void) const;
   /* operators */
   ThreeVector inline operator- ();
   ThreeVector inline operator-= (const ThreeVector &v);
@@ -105,6 +107,14 @@ ThreeVector inline ThreeVector::operator/= (const double &a) {
 ThreeVector inline operator/ (ThreeVector a, const double &b) {
   a /= b;
   return a;
+}
+
+double inline ThreeVector::sqr(void) const {
+  return (*this)*(*this);
+}
+
+double inline ThreeVector::abs(void) const {
+  return sqrt((*this)*(*this));
 }
 
 }  // namespace Smash

@@ -19,7 +19,7 @@ Nucleus::Nucleus() {}
 float Nucleus::mass() const {
   float total_mass = 0.f;
   for (auto i = cbegin(); i != cend(); i++) {
-    total_mass += sqrt(i->momentum().Dot());
+    total_mass += i->momentum().abs();
   }
   return total_mass/(testparticles_+0.0);
 }

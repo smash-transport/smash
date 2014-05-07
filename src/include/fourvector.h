@@ -52,10 +52,10 @@ class FourVector {
   void inline set_FourVector(const double t, const ThreeVector &pos);
   /* inlined operations */
   double inline Dot(const FourVector &a) const;
-  double inline Dot() const;
-  double inline DotThree(const FourVector &a) const;
-  double inline DotThree() const;
-  double inline DiffThree(const FourVector &a) const;
+  double inline sqr() const;
+  double inline abs() const;
+  double inline abs3() const;
+  double inline sqr3() const;
   /** Returns the FourVector boosted with velocity.
    *
    * The current FourVector is not changed.
@@ -323,20 +323,20 @@ double inline FourVector::Dot(const FourVector &a) const {
   return x_[0] * a.x_[0] - x_[1] * a.x_[1] - x_[2] * a.x_[2] - x_[3] * a.x_[3];
 }
 
-double inline FourVector::Dot() const {
+double inline FourVector::sqr() const {
   return x_[0] * x_[0] - x_[1] * x_[1] - x_[2] * x_[2] - x_[3] * x_[3];
 }
 
-double inline FourVector::DotThree(const FourVector &a) const {
-  return - x_[1] * a.x_[1] - x_[2] * a.x_[2] - x_[3] * a.x_[3];
+double inline FourVector::abs() const {
+  return sqrt(this->sqr());
 }
 
-double inline FourVector::DotThree() const {
-  return - x_[1] * x_[1] - x_[2] * x_[2] - x_[3] * x_[3];
+double inline FourVector::abs3() const {
+  return this->threevec().abs();
 }
 
-double inline FourVector::DiffThree(const FourVector &a) const {
-  return x_[1] - a.x_[1] + x_[2] - a.x_[2] + x_[3] - a.x_[3];
+double inline FourVector::sqr3() const {
+  return this->threevec().sqr();
 }
 
 }  // namespace Smash

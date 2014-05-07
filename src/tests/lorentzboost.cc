@@ -21,7 +21,7 @@ FourVector random_velocity() {
   double beta = Random::canonical();
   // velocity-"vector" is not normalized (that's how LorentzBoost
   // works):
-  return FourVector(1.0, beta*dir.x(), beta*dir.y(), beta*dir.z());
+  return FourVector(1.0, dir.threevec()*beta);
 }
 
 // here, we boost a velocity vector with itself.
@@ -29,7 +29,7 @@ TEST(self_boost) {
   for(int i = 0; i < 1000000; i++) {
     FourVector velocity = random_velocity();
     // u_mu is a real four-vector.
-    double gamma = 1.0/sqrt(velocity.Dot());
+    double gamma = 1.0/velocity.abs();
     FourVector u_mu = velocity*gamma;
     FourVector boosted = u_mu.LorentzBoost(velocity);
     COMPARE_ABSOLUTE_ERROR(boosted.x0(), 1.0, accuracy) << " at loop " << i;
@@ -50,7 +50,7 @@ TEST(keep_invariant_length) {
                   , cos_like()
                   , cos_like());
       FourVector A = a.LorentzBoost(velocity);
-      COMPARE_RELATIVE_ERROR(a.Dot(), A.Dot(), accuracy) << " at loop " << i
+      COMPARE_RELATIVE_ERROR(a.sqr(), A.sqr(), accuracy) << " at loop " << i
                                                                 << "*" << j;
     }
   }

@@ -44,7 +44,7 @@ TEST(woods_saxon) {
     FourVector com = projectile.center();
     // for all particles in the nucleus, save position in histograms.
     for (auto p : projectile) {
-      double r = sqrt(-p.position().DotThree());
+      double r = p.position().abs3();
       ++hist_vanilla[0][floor(p.position().x1()/dx)];
       ++hist_vanilla[1][floor(p.position().x2()/dx)];
       ++hist_vanilla[2][floor(p.position().x3()/dx)];
@@ -52,7 +52,7 @@ TEST(woods_saxon) {
       // we'll "center" the nucleus "by hand", i.e., we subtract com by
       // hand instead of doing it in a dedicated function / loop.
       FourVector centered = p.position() - com;
-      double R = sqrt(-centered.DotThree());
+      double R = centered.abs3();
       ++hist_centerd[0][floor(centered.x1()/dx)];
       ++hist_centerd[1][floor(centered.x2()/dx)];
       ++hist_centerd[2][floor(centered.x3()/dx)];

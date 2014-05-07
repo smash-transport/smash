@@ -102,7 +102,7 @@ double particle_distance(ParticleData *particle_orig1,
   if (fabs(momentum_difference.x1()) < really_small
       && fabs(momentum_difference.x2()) < really_small
       && fabs(momentum_difference.x3()) < really_small)
-    return  - position_difference.DotThree(position_difference);
+    return  position_difference.sqr3();
 
   /* UrQMD squared distance criteria:
    * arXiv:nucl-th/9803035 (3.27): in center of momemtum frame
@@ -112,10 +112,10 @@ double particle_distance(ParticleData *particle_orig1,
    * velocity of particle b: v_b
    * d^2_{coll} = (x_a - x_b)^2 - ((x_a - x_a) . (v_a - v_b))^2 / (v_a - v_b)^2
    */
-  return - position_difference.DotThree(position_difference)
-    + position_difference.DotThree(momentum_difference)
-      * position_difference.DotThree(momentum_difference)
-      / momentum_difference.DotThree(momentum_difference);
+  return position_difference.sqr3()
+    - (position_difference.threevec()*momentum_difference.threevec())
+      * (position_difference.threevec()*momentum_difference.threevec())
+      / momentum_difference.sqr3();
 }
 
 /* time_collision - measure collision time of two particles */
@@ -147,8 +147,8 @@ double collision_time(const ParticleData &particle1,
       && fabs(velocity_difference.x2()) < really_small
       && fabs(velocity_difference.x3()) < really_small)
     return -1.0;
-  return - position_difference.DotThree(velocity_difference)
-           / velocity_difference.DotThree(velocity_difference);
+  return - position_difference.threevec()*velocity_difference.threevec()
+           / velocity_difference.sqr3();
 }
 
 /* momenta_exchange - soft scattering */
