@@ -40,7 +40,6 @@ class OscarOutput : public OutputInterface {
  private:
   void write(const Particles &particles);
 
-   const boost::filesystem::path base_path_;
   FilePtr file_;
 };
 }  // namespace Smash
