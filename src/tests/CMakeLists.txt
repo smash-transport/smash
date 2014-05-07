@@ -65,7 +65,7 @@ smash_add_unittest(configuration)
 smash_add_unittest(experiment)
 smash_add_unittest(particles)
 smash_add_unittest(decaymodes)
-
+smash_add_unittest(clock)
 # some angle operations tests
 smash_add_unittest(angles)
 smash_add_unittest(nucleus)
