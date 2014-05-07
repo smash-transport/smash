@@ -136,7 +136,7 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
         const ParticleList incoming_particles = action->incoming_particles(particles_);
         action->perform(&particles_, interactions_total);
         const ParticleList outgoing_particles = action->outgoing_particles(particles_);
-        for (auto &output : outputs_) {
+        for (const auto &output : outputs_) {
           output->write_interaction(incoming_particles, outgoing_particles);
         }
       }
@@ -156,7 +156,7 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
                          interactions_this_interval, energy_initial_,
                          time_start_);
       /* save evolution data */
-      for (auto &output : outputs_) {
+      for (const auto &output : outputs_) {
         output->after_Nth_timestep(particles_, evt_num, step);
       }
     }
@@ -204,7 +204,7 @@ void Experiment<Modus>::run(const bf::path &path) {
     initialize(path);
 
     /* Output at event start */
-    for (auto &output : outputs_) {
+    for (const auto &output : outputs_) {
       output->at_eventstart(particles_, j);
     }
 
@@ -212,7 +212,7 @@ void Experiment<Modus>::run(const bf::path &path) {
     run_time_evolution(j);
 
     /* Output at event end */
-    for (auto &output : outputs_) {
+    for (const auto &output : outputs_) {
       output->at_eventend(particles_, j);
     }
   }
