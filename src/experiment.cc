@@ -145,7 +145,7 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
     }
 
     /* (3) Do propagation. */
-    modus_.propagate(&particles_, parameters_);
+    modus_.propagate(&particles_, parameters_, outputs_);
 
     /* (4) Physics output during the run. */
     if (step > 0 && (step + 1) % output_interval_ == 0) {

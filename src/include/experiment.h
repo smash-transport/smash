@@ -164,7 +164,7 @@ class Experiment : public ExperimentBase {
    * A list of output formaters. They will be called to write the state of the
    * particles to file.
    */
-  std::vector<std::unique_ptr<Smash::OutputInterface>> outputs_;
+  OutputsList outputs_;
 
   /**
    * ?
