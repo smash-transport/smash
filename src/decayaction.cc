@@ -244,8 +244,7 @@ int DecayAction::one_to_three (Particles *particles) {
   return id_first_new;
 }
 
-
-void DecayAction::choose_channel (Particles *particles) {
+ParticleList DecayAction::choose_channel(Particles *particles) const {
   const PdgCode pdgcode = particles->type(incoming_particles_[0]).pdgcode();
 
   /* Get the decay modes of this resonance */
@@ -263,8 +262,7 @@ void DecayAction::choose_channel (Particles *particles) {
     cumulated_probability += mode->weight();
     ++mode;
   }
-
-  outgoing_particles_ = mode->particle_list();
+  return mode->particle_list();
 }
 
 
@@ -281,8 +279,6 @@ void DecayAction::choose_channel (Particles *particles) {
  */
 int DecayAction::resonance_decay (Particles *particles) {
 
-  /* Decide for a particular decay channel. */
-  choose_channel (particles);
 
   /* We found our decay branch, get the decay product pdgs and do the decay */
   size_t decay_particles = outgoing_particles_.size();
@@ -339,6 +335,9 @@ void DecayAction::perform(Particles *particles, size_t &id_process) {
 
   /* Save the highest id before decay */
   size_t old_max_id = particles->id_max();
+
+  outgoing_particles_ = choose_channel(particles);
+
   /* Do the decay; this returns the smallest new id */
   size_t id_new_a = resonance_decay(particles);
   /* There's going to be at least 2 new particles */

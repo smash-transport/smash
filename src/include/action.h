@@ -100,11 +100,14 @@ class DecayAction : public Action {
   /** Constructor. */
   DecayAction (const std::vector<int> &in_part, float time_of_execution,
                int interaction_type);
-  /** Decide for a particular decay channel via Monte-Carlo
-   * and set the outgoing_particles_ correspondingly.  */
-  void choose_channel (Particles *particles);
+  /**
+   * Decide for a particular decay channel via Monte-Carlo and return it as a
+   * list of particles that are only initialized with their PDG code.
+   */
+  ParticleList choose_channel(Particles *particles) const;
   /** Carry out the action, i.e. do the decay. */
   void perform (Particles *particles, size_t &id_process);
+
  private:
   int resonance_decay (Particles *particles);
   int one_to_two (Particles *particles);
