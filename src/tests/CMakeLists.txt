@@ -31,10 +31,12 @@ endmacro()
 
 macro(smash_add_unittest name)
    add_executable(${name} ${name}.cc)
-   set_target_properties(${name} PROPERTIES
-      COMPILE_FLAGS ${SANITIZER_FLAG}
-      LINK_FLAGS ${SANITIZER_FLAG}
-      )
+   if(HAVE_SANITIZER)
+      set_target_properties(${name} PROPERTIES
+         COMPILE_FLAGS ${SANITIZER_FLAG}
+         LINK_FLAGS ${SANITIZER_FLAG}
+         )
+   endif()
    target_link_libraries(${name} smash_lib ${SMASH_LIBRARIES})
    smash_add_test(${name} ${name} ${name})
 endmacro()
