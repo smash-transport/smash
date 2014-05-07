@@ -311,7 +311,7 @@ void DecayAction::perform (Particles *particles, size_t &id_process) {
   int id_a = incoming_particles_[0];
 
   /* Check if particle still exists. */
-  if (!particles->has_data(id_a)) {
+  if (is_valid(*particles)) {
     printf("ScatterAction::perform: ID %i not found!\n", id_a);
     return;
   }

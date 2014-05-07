@@ -51,6 +51,15 @@ class Action {
   virtual void perform (Particles *particles, size_t &id_process) = 0;
 
   /**
+   * Check whether the action still applies.
+   *
+   * It can happen that a different action removed the incoming_particles from
+   * the set of existing particles in the experiment. In this case this Action
+   * doesn't apply anymore.
+   */
+  bool is_valid(const Particles &) const;
+
+  /**
    * Return the list of particles that go into the interaction.
    */
   ParticleList incoming_particles(const Particles &particles) const;

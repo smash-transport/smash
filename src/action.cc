@@ -40,6 +40,15 @@ void Action::add_processes (std::vector<ProcessBranch> &pv) {
   }
 }
 
+bool Action::is_valid(const Particles &particles) const {
+  for (int id : incoming_particles_) {
+    if (!particles.has_data(id)) {
+      return false;
+    }
+  }
+  return true;
+}
+
 ParticleList Action::incoming_particles(const Particles &particles) const {
   ParticleList l;
   for (int id : incoming_particles_) {

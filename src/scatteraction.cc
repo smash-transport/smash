@@ -55,12 +55,8 @@ void ScatterAction::perform (Particles *particles, size_t &id_process)
   int id_b = incoming_particles_[1];
 
   /* Check if particles still exist. */
-  if (!particles->has_data(id_a)) {
-    printd("ScatterAction::perform: ID %i not found!\n", id_a);
-    return;
-  }
-  if (!particles->has_data(id_b)) {
-    printd("ScatterAction::perform: ID %i not found!\n", id_b);
+  if (!is_valid(*particles)) {
+    printd("ScatterAction::perform: ID %i or %i not found!\n", id_a, id_b);
     return;
   }
 
