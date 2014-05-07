@@ -47,7 +47,7 @@ void ScatterAction::choose_channel () {
 
 void ScatterAction::perform (Particles *particles, size_t &id_process)
 {
-  FourVector velocity_CM, neg_velocity_CM;
+  ThreeVector velocity_CM;
   size_t new_particles, id_new;
 
   /* Relevant particle IDs for the collision. */
@@ -84,11 +84,11 @@ void ScatterAction::perform (Particles *particles, size_t &id_process)
 
     /* processes computed in the center of momenta */
     boost_CM(particles->data_pointer(id_a), particles->data_pointer(id_b),
-             &velocity_CM);
+             velocity_CM);
     momenta_exchange(particles->data_pointer(id_a),
                      particles->data_pointer(id_b));
     boost_back_CM(particles->data_pointer(id_a),
-                  particles->data_pointer(id_b), &velocity_CM);
+                  particles->data_pointer(id_b), velocity_CM);
 
     write_oscar(particles->data(id_a), particles->type(id_a));
     write_oscar(particles->data(id_b), particles->type(id_b));
@@ -113,21 +113,18 @@ void ScatterAction::perform (Particles *particles, size_t &id_process)
     write_oscar(particles->data(id_b), particles->type(id_b));
     /* processes computed in the center of momenta */
     boost_CM(particles->data_pointer(id_a), particles->data_pointer(id_b),
-             &velocity_CM);
+             velocity_CM);
 
     id_new = resonance_formation(particles, id_a, id_b, outgoing_particles_);
 
     boost_back_CM(particles->data_pointer(id_a),
-                  particles->data_pointer(id_b), &velocity_CM);
+                  particles->data_pointer(id_b), velocity_CM);
 
-    /* Boost the new particle to computational frame */
-    neg_velocity_CM.set_FourVector(1.0, -velocity_CM.x1(),
-      -velocity_CM.x2(), -velocity_CM.x3());
-
+    /* Boost the new particles to computational frame */
     for (size_t id_value = id_new; id_value < id_new + new_particles;
          id_value++) {
       particles->data_pointer(id_value)->set_momentum(
-        particles->data(id_value).momentum().LorentzBoost(neg_velocity_CM));
+        particles->data(id_value).momentum().LorentzBoost(-velocity_CM));
       final_momentum += particles->data(id_value).momentum();
 
       /* The starting point of resonance is between

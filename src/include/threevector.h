@@ -21,16 +21,17 @@ class ThreeVector {
   /// copy constructor
   ThreeVector(double y1, double y2, double y3)
       : x_{{y1, y2, y3}} {}
-  double inline x1(void) const;
+  double inline x1() const;
   void inline set_x1(double x);
-  double inline x2(void) const;
+  double inline x2() const;
   void inline set_x2(double y);
-  double inline x3(void) const;
+  double inline x3() const;
   void inline set_x3(double z);
-  double inline sqr(void) const;
-  double inline abs(void) const;
+  double inline sqr() const;
+  double inline abs() const;
   /* operators */
-  ThreeVector inline operator- ();
+  ThreeVector inline operator- () const;
+  ThreeVector inline operator+= (const ThreeVector &v);
   ThreeVector inline operator-= (const ThreeVector &v);
   ThreeVector inline operator*= (const double &a);
   ThreeVector inline operator/= (const double &a);
@@ -38,7 +39,7 @@ class ThreeVector {
   std::array<double, 3> x_;
 };
 
-double inline ThreeVector::x1(void) const {
+double inline ThreeVector::x1() const {
   return x_[0];
 }
 
@@ -46,7 +47,7 @@ void inline ThreeVector::set_x1(const double x) {
   x_[0] = x;
 }
 
-double inline ThreeVector::x2(void) const {
+double inline ThreeVector::x2() const {
   return x_[1];
 }
 
@@ -54,7 +55,7 @@ void inline ThreeVector::set_x2(const double y) {
   x_[1] = y;
 }
 
-double inline ThreeVector::x3(void) const {
+double inline ThreeVector::x3() const {
   return x_[2];
 }
 
@@ -62,11 +63,21 @@ void inline ThreeVector::set_x3(const double z) {
   x_[2] = z;
 }
 
-ThreeVector inline ThreeVector::operator- () {
-  x_[0] = -x_[0];
-  x_[1] = -x_[1];
-  x_[2] = -x_[2];
+ThreeVector inline ThreeVector::operator- () const{
+  ThreeVector neg(-x_[0],-x_[1],-x_[2]);
+  return neg;
+}
+
+ThreeVector inline ThreeVector::operator+= (const ThreeVector &v) {
+  x_[0] += v.x_[0];
+  x_[1] += v.x_[1];
+  x_[2] += v.x_[2];
   return *this;
+}
+
+ThreeVector inline operator+ (ThreeVector a, const ThreeVector &b) {
+  a += b;
+  return a;
 }
 
 ThreeVector inline ThreeVector::operator-= (const ThreeVector &v) {
@@ -109,12 +120,12 @@ ThreeVector inline operator/ (ThreeVector a, const double &b) {
   return a;
 }
 
-double inline ThreeVector::sqr(void) const {
+double inline ThreeVector::sqr() const {
   return (*this)*(*this);
 }
 
-double inline ThreeVector::abs(void) const {
-  return sqrt((*this)*(*this));
+double inline ThreeVector::abs() const {
+  return std::sqrt((*this)*(*this));
 }
 
 }  // namespace Smash

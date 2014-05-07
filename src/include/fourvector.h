@@ -100,7 +100,7 @@ class FourVector {
    *     &=&x_i - v_i \cdot \frac{\gamma}{\gamma + 1} \cdot (x^\prime_0 + x_0)
    * \f}
    */
-  FourVector LorentzBoost(const FourVector &velocity) const;
+  FourVector LorentzBoost(const ThreeVector &velocity) const;
 
   /* overloaded operators */
   bool inline operator==(const FourVector &a) const;
@@ -183,7 +183,7 @@ void inline FourVector::set_x3(const double z) {
 }
 
 ThreeVector inline FourVector::threevec() const {
-  return ThreeVector(x1(),x2(),x3());
+  return ThreeVector(x_[1],x_[2],x_[3]);
 }
 
 void inline FourVector::set_FourVector(const double t, const double x,
@@ -328,7 +328,7 @@ double inline FourVector::sqr() const {
 }
 
 double inline FourVector::abs() const {
-  return sqrt(this->sqr());
+  return std::sqrt(this->sqr());
 }
 
 double inline FourVector::abs3() const {

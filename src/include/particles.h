@@ -385,13 +385,13 @@ inline double Particles::time() const {
   return data_.begin()->second.position().x0() - 1.0;
 }
 
-/* boost_CM - boost to center of momentum */
+/* boost_CM - boost to center of momentum and return the corresponding boost vector */
 void boost_CM(ParticleData *particle1, ParticleData *particle2,
-  FourVector *velocity);
+              ThreeVector &velocity);
 
 /* boost_from_CM - boost back from center of momentum */
 void boost_back_CM(ParticleData *particle1, ParticleData *particle2,
-  FourVector *velocity_orig);
+                   const ThreeVector &velocity_orig);
 
 /* particle_distance - measure distance between two particles */
 double particle_distance(ParticleData *particle_orig1,

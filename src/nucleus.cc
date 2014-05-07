@@ -247,13 +247,10 @@ void Nucleus::boost(const double& beta_squared_with_sign) {
   // the sign of the velocity itself.
   double sign = beta_squared_with_sign >= 0 ? 1 : -1;
   double beta_squared = std::abs(beta_squared_with_sign);
-  double one_over_gamma = sqrt(1.0 - beta_squared);
+  double one_over_gamma = std::sqrt(1.0 - beta_squared);
   /*double gamma = 1.0/one_over_gamma;
     double gammabeta = sign*sqrt(beta_squared)*gamma;
    */
-  // despite the type name and the interface, the lorentz-boost does NOT
-  // take a FourVector in the physical sense, i.e., one that has
-  // u_mu*u^mu=1.
   // We are talking about a /passive/ lorentz transformation here, as
   // far as I can see, so we need to boost in the direction opposite to
   // where we want to go
@@ -261,7 +258,7 @@ void Nucleus::boost(const double& beta_squared_with_sign) {
   //       a system that moves with -beta. Now in this frame, it seems
   //       like p has been accelerated with +beta.
   //     )
-  FourVector u_mu(1, 0.0, 0.0, -sign*sqrt(beta_squared));
+  ThreeVector beta (0., 0., -sign*std::sqrt(beta_squared));
   for (auto i = begin(); i != end(); i++) {
     // a real Lorentz Transformation would leave the particles at
     // different times here, which we would then have to propagate back
@@ -273,7 +270,7 @@ void Nucleus::boost(const double& beta_squared_with_sign) {
     // for momenta, though, we CAN do normal Lorentz Boosts, since we
     // *do* want to transform the zero-component (i.e., the energy).
     FourVector this_momentum = i->momentum();
-    this_momentum = this_momentum.LorentzBoost(u_mu);
+    this_momentum = this_momentum.LorentzBoost(beta);
     i->set_momentum(this_momentum);
   }
   // we also need to update z_max_ and z_min:

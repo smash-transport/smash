@@ -299,7 +299,7 @@ int DecayAction::resonance_decay (Particles *particles) {
 }
 
 void DecayAction::perform (Particles *particles, size_t &id_process) {
-  FourVector velocity_CM;
+  ThreeVector velocity_CM;
   int id_a = ingoing_particles_[0];
 
   /* Check if particle still exists. */
@@ -320,13 +320,8 @@ void DecayAction::perform (Particles *particles, size_t &id_process) {
   printd_momenta("Resonance momenta before decay", particles->data(id_a));
 
   /* boost to rest frame */
-  velocity_CM.set_x0(1.0);
-  velocity_CM.set_x1(particles->data(id_a).momentum().x1()
-                      / particles->data(id_a).momentum().x0());
-  velocity_CM.set_x2(particles->data(id_a).momentum().x2()
-                      / particles->data(id_a).momentum().x0());
-  velocity_CM.set_x3(particles->data(id_a).momentum().x3()
-                      / particles->data(id_a).momentum().x0());
+  velocity_CM = particles->data(id_a).momentum().threevec()
+                      / particles->data(id_a).momentum().x0();
   particles->data_pointer(id_a)->set_momentum(
       particles->data(id_a).momentum().LorentzBoost(velocity_CM));
   particles->data_pointer(id_a)->set_position(
@@ -346,7 +341,7 @@ void DecayAction::perform (Particles *particles, size_t &id_process) {
   printd_momenta("particle 2 momenta in lrf", particles->data(id_new_b));
 
   boost_back_CM(particles->data_pointer(id_new_a),
-                particles->data_pointer(id_new_b), &velocity_CM);
+                particles->data_pointer(id_new_b), velocity_CM);
 
   /* How many new particles we have exactly */
   size_t new_particles = particles->id_max() - old_max_id;
@@ -360,15 +355,12 @@ void DecayAction::perform (Particles *particles, size_t &id_process) {
   int id_new_c = -1;
   if (new_particles == 3) {
     id_new_c = id_new_b + 1;
-    FourVector velocity = velocity_CM;
-    velocity *= -1;
-    velocity.set_x0(1.0);
     FourVector momentum_c(particles->data(id_new_c).momentum());
     FourVector position_c(particles->data(id_new_c).position());
     /* Boost the momenta back to lab frame */
-    momentum_c = momentum_c.LorentzBoost(velocity);
+    momentum_c = momentum_c.LorentzBoost(-velocity_CM);
     /* Boost the position back to lab frame */
-    position_c = position_c.LorentzBoost(velocity);
+    position_c = position_c.LorentzBoost(-velocity_CM);
     /* Write the oscar output for this particle */
     particles->data_pointer(id_new_c)->set_momentum(momentum_c);
     particles->data_pointer(id_new_c)->set_position(position_c);

@@ -26,24 +26,21 @@ namespace Smash {
 
 /* boost_CM - boost to center of momentum */
 void boost_CM(ParticleData *particle1, ParticleData *particle2,
-  FourVector *velocity) {
+  ThreeVector &velocity) {
   FourVector momentum1(particle1->momentum()), momentum2(particle2->momentum());
   FourVector position1(particle1->position()), position2(particle2->position());
   double cms_energy = momentum1.x0() + momentum2.x0();
 
-  // CMS 4-velocity
-  velocity->set_x0(1.0);
-  velocity->set_x1((momentum1.x1() + momentum2.x1()) / cms_energy);
-  velocity->set_x2((momentum1.x2() + momentum2.x2()) / cms_energy);
-  velocity->set_x3((momentum1.x3() + momentum2.x3()) / cms_energy);
+  // determine CMS velocity
+  velocity = (momentum1.threevec() + momentum2.threevec()) / cms_energy;
 
   // Boost the momenta into CMS frame
-  momentum1 = momentum1.LorentzBoost(*velocity);
-  momentum2 = momentum2.LorentzBoost(*velocity);
+  momentum1 = momentum1.LorentzBoost(velocity);
+  momentum2 = momentum2.LorentzBoost(velocity);
 
   // Boost the positions into CMS frame
-  position1 = position1.LorentzBoost(*velocity);
-  position2 = position2.LorentzBoost(*velocity);
+  position1 = position1.LorentzBoost(velocity);
+  position2 = position2.LorentzBoost(velocity);
 
   particle1->set_momentum(momentum1);
   particle1->set_position(position1);
@@ -53,14 +50,11 @@ void boost_CM(ParticleData *particle1, ParticleData *particle2,
 
 /* boost_back_CM - boost back from center of momentum */
 void boost_back_CM(ParticleData *particle1, ParticleData *particle2,
-  FourVector *velocity_orig) {
+                   const ThreeVector &velocity_orig) {
   FourVector momentum1(particle1->momentum()), momentum2(particle2->momentum());
   FourVector position1(particle1->position()), position2(particle2->position());
-  FourVector velocity = *velocity_orig;
 
-  /* To boost back set 1 + velocity */
-  velocity *= -1;
-  velocity.set_x0(1.0);
+  ThreeVector velocity = - velocity_orig;
 
   /* Boost the momenta back to lab frame */
   momentum1 = momentum1.LorentzBoost(velocity);
@@ -83,10 +77,10 @@ double particle_distance(ParticleData *particle_orig1,
   ParticleData *particle_orig2) {
   /* Copy the particles in order to boost them and to forget the copy */
   ParticleData particle1 = *particle_orig1, particle2 = *particle_orig2;
-  FourVector velocity_CM;
+  ThreeVector velocity_CM;
 
   /* boost particles in center of momenta frame */
-  boost_CM(&particle1, &particle2, &velocity_CM);
+  boost_CM(&particle1, &particle2, velocity_CM);
   FourVector position_difference = particle1.position() - particle2.position();
   printd("Particle %d<->%d position difference: %g %g %g %g [fm]\n",
     particle1.id(), particle2.id(), position_difference.x0(),
