@@ -13,12 +13,16 @@ namespace Smash {
 std::istream& operator>>(std::istream& is, PdgCode& code) {
   std::string codestring("");
   is >> codestring;
+  if (!is) {
+    code = PdgCode::invalid();
+    return is;
+  }
   try {
     // set the fields from the string:
     code.set_from_string(codestring);
   } catch (PdgCode::InvalidPdgCode) {
     is.setstate(std::ios::failbit);
-    return is;
+    code = PdgCode::invalid();
   }
   return is;
 }
