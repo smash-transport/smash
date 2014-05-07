@@ -40,5 +40,20 @@ void Action::add_processes (std::vector<ProcessBranch> &pv) {
   }
 }
 
+ParticleList Action::incoming_particles(const Particles &particles) const {
+  ParticleList l;
+  for (int id : incoming_particles_) {
+    l.emplace_back(particles.data(id));
+  }
+  return std::move(l);
+}
+
+ParticleList Action::outgoing_particles(const Particles &particles) const {
+  ParticleList l;
+  for (int id : incoming_particles_) {
+    l.emplace_back(particles.data(id));
+  }
+  return std::move(l);
+}
 
 }  // namespace Smash

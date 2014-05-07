@@ -50,6 +50,16 @@ class Action {
   /** Actually perform the action, e.g. carry out a decay or scattering.  */
   virtual void perform (Particles *particles, size_t &id_process) = 0;
 
+  /**
+   * Return the list of particles that go into the interaction.
+   */
+  ParticleList incoming_particles(const Particles &particles) const;
+
+  /**
+   * Return the list of particles that resulted from the interaction.
+   */
+  ParticleList outgoing_particles(const Particles &particles) const;
+
  protected:
   /** ID codes of incoming particles  */
   std::vector<int> incoming_particles_;

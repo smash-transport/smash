@@ -133,9 +133,9 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
     /* (2.a) Perform actions. */
     if (!actions.empty()) {
       for (const auto &action : actions) {
-        ParticleList incoming_particles;  // TODO(mkretz)
+        const ParticleList incoming_particles = action->incoming_particles(particles_);
         action->perform(&particles_, interactions_total);
-        ParticleList outgoing_particles;  // TODO(mkretz)
+        const ParticleList outgoing_particles = action->outgoing_particles(particles_);
         for (auto &output : outputs_) {
           output->write_interaction(incoming_particles, outgoing_particles);
         }
