@@ -1,6 +1,6 @@
 General:
     # Modus decision
-    MODUS:         Nucleus
+    MODUS:         Sphere
 
     # temporal grid spacing
     EPS:           0.01
