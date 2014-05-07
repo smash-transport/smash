@@ -61,7 +61,7 @@ void SphereModus::initial_conditions(Particles *particles,
     if (type.width() > 0.0) {
             continue;
     }
-        particles->create(number_of_particles_per_type, type.pdgcode());
+    particles->create(number_of_particles_per_type, type.pdgcode());
   }
     
 auto uniform_radius = Random::make_uniform_distribution(0.0,
@@ -70,18 +70,12 @@ auto uniform_radius = Random::make_uniform_distribution(0.0,
   for (ParticleData &data : particles->data()) {
     double x, y, z, time_begin;
     Angles phitheta;
-    /* back to back pair creation with random momenta direction */
-    if (unlikely(data.id() == particles->id_max() && !(data.id() % 2))) {
-    /* poor last guy just sits around */
-      data.set_momentum(particles->particle_type(data.pdgcode()).mass(), 0, 0, 0);
-    } else if (!(data.id() % 2)) {
     /* thermal momentum according Maxwell-Boltzmann distribution */
       double momentum_radial;
       momentum_radial = sample_momenta(this->sphere_temperature_,
                                                  particles->particle_type(data.pdgcode()).mass());
       phitheta.distribute_isotropically();
       data.set_momentum(particles->particle_type(data.pdgcode()).mass(), momentum_radial * phitheta.x(),momentum_radial * phitheta.y(), momentum_radial * phitheta.z());
-    }
     time_begin = 1.0;
     /* random position in a quadratic box */
     x = uniform_radius();
