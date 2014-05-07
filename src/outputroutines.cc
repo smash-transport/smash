@@ -23,7 +23,6 @@
 #include "include/particledata.h"
 #include "include/particletype.h"
 #include "include/macros.h"
-#include "include/time.h"
 
 namespace Smash {
 
@@ -44,14 +43,6 @@ void print_header(void) {
   print_line();
 }
 
-
-/* measure_timediff - time the simulation used */
-double measure_timediff(const timespec time_start) {
-  timespec now;
-  clock_gettime(&now);
-  return (now.tv_sec + now.tv_nsec / 10.0E9
-    - time_start.tv_sec -   time_start.tv_nsec / 10.0E9);
-}
 
 /* print_measurements - console output during simulation */
 void print_measurements(const Particles &particles,

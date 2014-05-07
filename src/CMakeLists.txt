@@ -25,12 +25,6 @@ set(SMASH_LIBRARIES
    ${YAML_LDFLAGS}
    )
 
-# if clock_gettime is in rt link against it
-CHECK_LIBRARY_EXISTS(rt clock_gettime "time.h" HAVE_CLOCK_GETTIME)
-if(HAVE_CLOCK_GETTIME)
-   list(APPEND SMASH_LIBRARIES rt)
-endif()
-
 # list the source files
 set(smash_src
         action.cc
@@ -56,7 +50,6 @@ set(smash_src
         resonances.cc
         scatteraction.cc
         scatteractionsfinder.cc
-        time.cc
         vtkoutput.cc
         )
 

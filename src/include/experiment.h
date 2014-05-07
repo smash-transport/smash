@@ -142,8 +142,6 @@ class Experiment : public ExperimentBase {
 
   float energy_total(Particles *particles);
 
-  inline timespec set_timer_start();
-
   /**
    * Struct of several member variables.
    * These variables are combined into a struct for efficient input to functions
