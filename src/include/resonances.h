@@ -16,14 +16,9 @@
 #include <cstddef>
 #include <vector>
 #include "include/pdgcode.h"
+#include "forwarddeclarations.h"
 
 namespace Smash {
-
-/* necessary forward declarations */
-class Particles;
-class ParticleData;
-class ParticleType;
-class ProcessBranch;
 
 /**
  * The minimum mass of the resonance.

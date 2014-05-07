@@ -22,6 +22,7 @@ namespace Smash {
 class ParticleData;
 class ParticleType;
 class Particles;
+class ProcessBranch;
 
 using ParticleList = std::vector<ParticleData, std::allocator<ParticleData>>;
 

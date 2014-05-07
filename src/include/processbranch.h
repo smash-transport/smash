@@ -9,6 +9,7 @@
 
 #include <vector>
 #include "pdgcode.h"
+#include "forwarddeclarations.h"
 
 namespace Smash {
 
@@ -32,9 +33,9 @@ namespace Smash {
  * branch.set_weight(2);
  * deltaplus_decay_modes.push_back(branch);
  * // Using already existing particle list
- * std::vector<PdgCode> particle_list(0x2112, 0x211);
+ * std::vector<PdgCode> pdg_list(0x2112, 0x211);
  * // set_particles erases the previous list
- * branch.set_particles(particle_list);
+ * branch.set_particles(pdg_list);
  * // set_weight erases the previous weight
  * branch.set_weight(1);
  * deltaplus_decay_modes.push_back(branch);
@@ -68,7 +69,7 @@ class ProcessBranch {
   /// Clear all information from the branch
   inline void clear(void);
   /// Return the particle list
-  inline std::vector<PdgCode> particle_list(void) const;
+  inline std::vector<PdgCode> pdg_list(void) const;
   /// Return the branch weight
   inline float weight(void) const;
   /// Return the type of interaction
@@ -85,7 +86,7 @@ class ProcessBranch {
    * which is somewhere on the heap. Also the alignment of ints is only half
    * that of size_t/void*. (I was obviously talking about 64bit here...)
    */
-  std::vector<PdgCode> particle_list_;
+  std::vector<PdgCode> pdg_list_;
   /// Weight of the branch, typically a cross section or a branching ratio
   float branch_weight_;
   /// Type of interaction
@@ -107,7 +108,7 @@ ProcessBranch::ProcessBranch (PdgCode p1, PdgCode p2, float w, int t)
 
 /// Add one particle to the list
 inline void ProcessBranch::add_particle(PdgCode particle_pdg) {
-  particle_list_.push_back(particle_pdg);
+  pdg_list_.push_back(particle_pdg);
 }
 
 /**
@@ -117,7 +118,7 @@ inline void ProcessBranch::add_particle(PdgCode particle_pdg) {
  * with add_particle(int)
  */
 inline void ProcessBranch::set_particles(std::vector<PdgCode> particle_pdgs) {
-  particle_list_ = std::move(particle_pdgs);
+  pdg_list_ = std::move(particle_pdgs);
 }
 
 /**
@@ -136,13 +137,13 @@ inline void ProcessBranch::set_type (int t) {
 
 /// Clear all information from the branch
 inline void ProcessBranch::clear(void) {
-  particle_list_.clear();
+  pdg_list_.clear();
   branch_weight_ = -1.0;
 }
 
 /// Return the particle list
-inline std::vector<PdgCode> ProcessBranch::particle_list(void) const {
-  return particle_list_;
+inline std::vector<PdgCode> ProcessBranch::pdg_list(void) const {
+  return pdg_list_;
 }
 
 /// Return the branch weight

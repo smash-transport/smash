@@ -48,12 +48,12 @@ float calculate_minimum_mass(Particles *particles, PdgCode pdgcode) {
     = particles->decay_modes(pdgcode).decay_mode_list();
   for (std::vector<ProcessBranch>::const_iterator mode = decaymodes.begin();
        mode != decaymodes.end(); ++mode) {
-    size_t decay_particles = mode->particle_list().size();
+    size_t decay_particles = mode->pdg_list().size();
     float total_mass = 0.0;
     for (size_t i = 0; i < decay_particles; i++) {
       /* Stable decay products assumed; for resonances the mass can be lower! */
       total_mass
-        += particles->particle_type(mode->particle_list().at(i)).mass();
+        += particles->particle_type(mode->pdg_list().at(i)).mass();
     }
     if (total_mass > minimum_mass)
       minimum_mass = total_mass;
@@ -221,17 +221,17 @@ double two_to_one_formation(Particles *particles,
   bool not_balanced = true;
   for (std::vector<ProcessBranch>::const_iterator mode
        = decaymodes.begin(); mode != decaymodes.end(); ++mode) {
-    size_t decay_particles = mode->particle_list().size();
+    size_t decay_particles = mode->pdg_list().size();
     if ( decay_particles > 3 ) {
       printf("Warning: Not a 1->2 or 1->3 process!\n");
       printf("Number of decay particles: %zu \n", decay_particles);
     } else {
       /* There must be enough energy to produce all decay products */
       float mass_a, mass_b, mass_c = 0.0;
-      mass_a = calculate_minimum_mass(particles, mode->particle_list().at(0));
-      mass_b = calculate_minimum_mass(particles, mode->particle_list().at(1));
+      mass_a = calculate_minimum_mass(particles, mode->pdg_list().at(0));
+      mass_b = calculate_minimum_mass(particles, mode->pdg_list().at(1));
       if (decay_particles == 3) {
-        mass_c = calculate_minimum_mass(particles, mode->particle_list().at(2));
+        mass_c = calculate_minimum_mass(particles, mode->pdg_list().at(2));
       }
       if (sqrt(mandelstam_s) < mass_a + mass_b + mass_c)
         not_enough_energy = true;
@@ -240,10 +240,10 @@ double two_to_one_formation(Particles *particles,
        * XXX: For now, assuming only 2-particle initial states
        */
       if (decay_particles == 2
-          && ((mode->particle_list().at(0) == type_particle1.pdgcode()
-               && mode->particle_list().at(1) == type_particle2.pdgcode())
-              || (mode->particle_list().at(0) == type_particle2.pdgcode()
-                  && mode->particle_list().at(1) == type_particle1.pdgcode()))
+          && ((mode->pdg_list().at(0) == type_particle1.pdgcode()
+               && mode->pdg_list().at(1) == type_particle2.pdgcode())
+              || (mode->pdg_list().at(0) == type_particle2.pdgcode()
+                  && mode->pdg_list().at(1) == type_particle1.pdgcode()))
           && (mode->weight() > 0.0))
         not_balanced = false;
     }
@@ -368,18 +368,18 @@ size_t two_to_two_formation(Particles *particles,
     double minimum_mass = 0.0;
     for (std::vector<ProcessBranch >::const_iterator mode
          = decaymodes.begin(); mode != decaymodes.end(); ++mode) {
-      size_t decay_particles = mode->particle_list().size();
+      size_t decay_particles = mode->pdg_list().size();
       if ( decay_particles > 3 ) {
         printf("Warning: Not a 1->2 or 1->3 process!\n");
         printf("Number of decay particles: %zu \n", decay_particles);
       } else {
         /* There must be enough energy to produce all decay products */
         float mass_a, mass_b, mass_c = 0.0;
-        mass_a = calculate_minimum_mass(particles, mode->particle_list().at(0));
-        mass_b = calculate_minimum_mass(particles, mode->particle_list().at(1));
+        mass_a = calculate_minimum_mass(particles, mode->pdg_list().at(0));
+        mass_b = calculate_minimum_mass(particles, mode->pdg_list().at(1));
         if (decay_particles == 3) {
           mass_c = calculate_minimum_mass(particles,
-                     mode->particle_list().at(2));
+                     mode->pdg_list().at(2));
         }
         if (sqrt(mandelstam_s) < mass_a + mass_b + mass_c
                                  + second_type.mass()) {
