@@ -35,6 +35,8 @@ class SphereModus : public ModusDefault {
  private:
   /* Sphere radius length */
   float radius_;
+  /* Total number of particles in Sphere */
+  int number_of_particles_; 
 };
 
 }  // namespace Smash

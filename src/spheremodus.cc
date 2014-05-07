@@ -24,12 +24,14 @@ namespace Smash {
 
 SphereModus::SphereModus(Configuration modus_config,
                          const ExperimentParameters &)
-    : radius_(modus_config.take({"Sphere", "RADIUS"})) {
+    : radius_(modus_config.take({"Sphere", "RADIUS"})),
+      number_of_particles_(modus_config.take({"Sphere","NUMBEROFPARTICLES"})) {
 }
 
 /* print_startup - console output on startup of sphere specific parameters */
 void SphereModus::print_startup() {
-  printf("Volume of the sphere: 4 * pi * %g^2 [fm]\n", radius_);
+  printf("Radius of the sphere: %g [fm]\n", radius_);
+  printf("Total number of particles in sphere: %i \n", number_of_particles_);
 }
 
 
