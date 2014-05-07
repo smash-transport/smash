@@ -44,6 +44,10 @@ class ParticleData {
   inline PdgCode pdgcode(void) const;
   inline void set_pdgcode(PdgCode pdgcode);
 
+  // convenience accessors to PdgCode:
+  /// \copydoc PdgCode::is_hadron
+  bool is_hadron() const { return pdgcode_.is_hadron(); }
+
   /**
    * Return the ParticleType object associated to this particle.
    *
