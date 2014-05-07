@@ -38,7 +38,7 @@ void ScatterAction::choose_channel () {
       }
       ++proc;
       printd("ScatterAction::choose_channel: collision type %d particle %d <-> %d time: %g\n",
-             interaction_type_, incoming_particles[0], incoming_particles[1],
+             interaction_type_, incoming_particles_[0], incoming_particles_[1],
              time_of_execution_);
     }
   }
@@ -51,8 +51,8 @@ void ScatterAction::perform (Particles *particles, size_t &id_process)
   size_t new_particles, id_new;
 
   /* Relevant particle IDs for the collision. */
-  int id_a = incoming_particles[0];
-  int id_b = incoming_particles[1];
+  int id_a = incoming_particles_[0];
+  int id_b = incoming_particles_[1];
 
   /* Check if particles still exist. */
   if (!particles->has_data(id_a)) {

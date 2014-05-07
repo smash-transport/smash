@@ -35,7 +35,7 @@ DecayAction::DecayAction(const std::vector<int> &in_part,
  * \return The ID of the first new particle.
  */
 int DecayAction::one_to_two (Particles *particles) {
-  int resonance_id = incoming_particles[0];
+  int resonance_id = incoming_particles_[0];
   PdgCode type_a = outgoing_particles_[0];
   PdgCode type_b = outgoing_particles_[1];
 
@@ -91,7 +91,7 @@ int DecayAction::one_to_two (Particles *particles) {
  * \return The ID of the first new particle.
  */
 int DecayAction::one_to_three (Particles *particles) {
-  int resonance_id = incoming_particles[0];
+  int resonance_id = incoming_particles_[0];
   PdgCode type_a = outgoing_particles_[0];
   PdgCode type_b = outgoing_particles_[1];
   PdgCode type_c = outgoing_particles_[2];
@@ -246,7 +246,7 @@ int DecayAction::one_to_three (Particles *particles) {
 
 
 void DecayAction::choose_channel (Particles *particles) {
-  const PdgCode pdgcode = particles->type(incoming_particles[0]).pdgcode();
+  const PdgCode pdgcode = particles->type(incoming_particles_[0]).pdgcode();
 
   /* Get the decay modes of this resonance */
   const std::vector<ProcessBranch> decaymodes
@@ -308,7 +308,7 @@ int DecayAction::resonance_decay (Particles *particles) {
 
 void DecayAction::perform (Particles *particles, size_t &id_process) {
   FourVector velocity_CM;
-  int id_a = incoming_particles[0];
+  int id_a = incoming_particles_[0];
 
   /* Check if particle still exists. */
   if (!particles->has_data(id_a)) {
