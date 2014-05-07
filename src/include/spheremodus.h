@@ -36,7 +36,9 @@ class SphereModus : public ModusDefault {
   /* Sphere radius length */
   float radius_;
   /* Total number of particles in Sphere */
-  int number_of_particles_; 
+  int number_of_particles_;
+  /* Temperature for momentum distribution */
+  float sphere_temperature_;
 };
 
 }  // namespace Smash

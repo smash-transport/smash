@@ -78,7 +78,7 @@ void BoxModus::initial_conditions(Particles *particles,
   printf("IC contains %zu particles\n", number_total);
   auto uniform_length = Random::make_uniform_distribution(0.0,
                                          static_cast<double>(this->length_));
-  /* Set paricles IC: */
+  /* Set particles IC: */
   for (ParticleData &data : particles->data()) {
     double x, y, z, time_begin;
     /* back to back pair creation with random momenta direction */
