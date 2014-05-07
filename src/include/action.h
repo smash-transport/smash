@@ -122,8 +122,8 @@ class DecayAction : public Action {
   };
 
  private:
-  int one_to_two (Particles *particles);
-  int one_to_three (Particles *particles);
+  void one_to_two(Particles *particles);
+  void one_to_three(Particles *particles);
 };
 
 /**
