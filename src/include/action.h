@@ -10,6 +10,7 @@
 #ifndef SRC_INCLUDE_ACTION_H_
 #define SRC_INCLUDE_ACTION_H_
 
+#include <stdexcept>
 #include <vector>
 #include <memory>
 
@@ -121,8 +122,22 @@ class ScatterAction : public Action {
   /** Decide for a particular final-state channel via Monte-Carlo
    * and set the outgoing_particles_ correspondingly.  */
   void choose_channel ();
-  /** Carry out the action, i.e. do the scattering. */
+
+  /**
+   * Carry out the action, i.e. do the scattering.
+   * Performs either elastic or inelastic scattering.
+   *
+   * \throws InvalidResonanceFormation
+   */
   void perform (Particles *particles, size_t &id_process);
+
+  /**
+   * Thrown when ScatterAction is called to perform with 0 or more than 2
+   * entries in outgoing_particles.
+   */
+  class InvalidResonanceFormation : public std::invalid_argument {
+    using std::invalid_argument::invalid_argument;
+  };
 
  private:
   /**
@@ -134,13 +149,9 @@ class ScatterAction : public Action {
    * \param[in,out] particles Particles in the simulation.
    * \param[in] particle_id ID of the first initial state particle.
    * \param[in] other_id ID of the second initial state particle.
-   * \param[in] produced_particles Final state particle type(s).
-   *
-   * \return ID of the (first) new particle.
    */
-  int resonance_formation(Particles *particles, const ParticleData &particle0,
-                          const ParticleData &particle1,
-                          const ParticleList &produced_particles);
+  void resonance_formation(Particles *particles, const ParticleData &particle0,
+                          const ParticleData &particle1);
 };
 
 

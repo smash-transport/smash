@@ -47,7 +47,6 @@ void ScatterAction::choose_channel () {
 void ScatterAction::perform (Particles *particles, size_t &id_process)
 {
   FourVector velocity_CM, neg_velocity_CM;
-  size_t new_particles, id_new;
 
   /* Relevant particle IDs for the collision. */
   int id_a = incoming_particles_[0];
@@ -74,7 +73,7 @@ void ScatterAction::perform (Particles *particles, size_t &id_process)
 
   /* 2->2 elastic scattering */
   switch (interaction_type_) {
-  case 0:
+  case 0: {
     printd("Process: Elastic collision.\n");
 
     /* processes computed in the center of momenta */
@@ -93,29 +92,29 @@ void ScatterAction::perform (Particles *particles, size_t &id_process)
 
     *particles->data_pointer(id_a) = data_a;
     *particles->data_pointer(id_b) = data_b;
-    break;
+    outgoing_particles_[0] = data_a;
+    outgoing_particles_[1] = data_b;
+  } break;
 
-  case 1:
+  case 1: {
     /* resonance formation */
     printd("Process: Resonance formation. ");
-    new_particles = outgoing_particles_.size();
+
     /* processes computed in the center of momenta */
     boost_CM(&data_a, &data_b, &velocity_CM);
-
-    id_new = resonance_formation(particles, data_a, data_b, outgoing_particles_);
-
-    boost_back_CM(particles->data_pointer(id_a),
-                  particles->data_pointer(id_b), &velocity_CM);
+    resonance_formation(particles, data_a, data_b);
+    boost_back_CM(&data_a, &data_b, &velocity_CM);  // TODO(mkretz) why? can't
+                                                    // we just boost a copy of
+                                                    // the ParticleData objects?
 
     /* Boost the new particle to computational frame */
     neg_velocity_CM.set_FourVector(1.0, -velocity_CM.x1(),
       -velocity_CM.x2(), -velocity_CM.x3());
 
-    for (size_t id_value = id_new; id_value < id_new + new_particles;
-         id_value++) {
-      particles->data_pointer(id_value)->set_momentum(
-        particles->data(id_value).momentum().LorentzBoost(neg_velocity_CM));
-      final_momentum += particles->data(id_value).momentum();
+    for (ParticleData &new_particle : outgoing_particles_) {
+      new_particle.set_momentum(
+          new_particle.momentum().LorentzBoost(neg_velocity_CM));
+      final_momentum += new_particle.momentum();
 
       /* The starting point of resonance is between
        * the two initial particles
@@ -123,14 +122,16 @@ void ScatterAction::perform (Particles *particles, size_t &id_process)
        */
       FourVector middle_point =
           data_a.position() + (data_b.position() - data_a.position()) / 2.0;
-      particles->data_pointer(id_value)->set_position(middle_point);
+      new_particle.set_position(middle_point);
       /* unset collision time for particles + keep id + unset partner */
-      particles->data_pointer(id_value)->set_collision_past(id_process);
+      new_particle.set_collision_past(id_process);
 
       printd("Resonance %s with ID %zu \n",
-             particles->type(id_new).name().c_str(), id_new);
-      printd_momenta("momentum in comp frame", particles->data(id_new));
-      printd_position("position in comp frame", particles->data(id_new));
+             new_particle.type(*particles).name().c_str(), new_particle.id());
+      printd_momenta("momentum in comp frame", new_particle);
+      printd_position("position in comp frame", new_particle);
+
+      particles->add_data(new_particle);
     }
 
     /* Remove the initial particles */
@@ -138,7 +139,7 @@ void ScatterAction::perform (Particles *particles, size_t &id_process)
     particles->remove(data_b.id());
 
     printd("Particle map has now %zu elements. \n", particles->size());
-    break;
+  } break;
 
   default:
     printf("Warning: ID %i (%s) has unspecified process type %i.\n",
@@ -166,22 +167,13 @@ void ScatterAction::perform (Particles *particles, size_t &id_process)
            interaction_type_, momentum_difference.x3());
 }
 
-int ScatterAction::resonance_formation(Particles *particles, const ParticleData &particle0,
-                                       const ParticleData &particle1,
-                                       const ParticleList &produced_particles) {
-  if (produced_particles.empty()) {
-    printf("resonance_formation:\n");
-    printf("Warning: No final state particles found!\n");
-    printf("Resonance formation canceled. Returning -1.\n");
-    return -1;
-  }
-
+void ScatterAction::resonance_formation(Particles *particles, const ParticleData &particle0,
+                                       const ParticleData &particle1) {
   const double cms_energy =
       particle0.momentum().x0() + particle1.momentum().x0();
 
-  int id_first_new = -1;
-  if (produced_particles.size() == 1) {
-    ParticleData resonance = produced_particles.at(0);
+  if (outgoing_particles_.size() == 1) {
+    ParticleData &resonance = outgoing_particles_.at(0);
     /* Center-of-momentum frame of initial particles
      * is the rest frame of the resonance
      *
@@ -200,43 +192,37 @@ int ScatterAction::resonance_formation(Particles *particles, const ParticleData 
 
     /* Initialize position */
     resonance.set_position(1.0, 0.0, 0.0, 0.0);
-    id_first_new = particles->add_data(resonance);
-  } else if (produced_particles.size() == 2) {
+  } else if (outgoing_particles_.size() == 2) {
     /* 2 particles in final state. Need another particle template */
     /* XXX: For now, it is assumed that the other particle is stable! */
-    ParticleData stable_product;
-    ParticleData resonance;
-    if (produced_particles.at(0).type(*particles).width() > 0) {
-      resonance = produced_particles.at(0);
-      stable_product = produced_particles.at(1);
+    ParticleData *resonance = &outgoing_particles_.at(0);
+    ParticleData *stable_product;
+    if (resonance->type(*particles).width() >
+        0) {  // TODO: can we change this to an is_stable or is_unstable method,
+              // please?
+      stable_product = &outgoing_particles_.at(1);
     } else {
-      stable_product = produced_particles.at(0);
-      resonance = produced_particles.at(1);
+      stable_product = resonance;
+      resonance = &outgoing_particles_.at(1);
     }
-    float mass_stable
-      = particles->particle_type(stable_product.pdgcode()).mass();
+    float mass_stable = stable_product->type(*particles).mass();
     /* Sample resonance mass */
-    double mass_resonance = sample_resonance_mass(particles,
-      resonance.pdgcode(), stable_product.pdgcode(), cms_energy);
+    double mass_resonance = sample_resonance_mass(
+        particles, resonance->pdgcode(), stable_product->pdgcode(), cms_energy);
 
     /* Sample the particle momenta */
-    sample_cms_momenta(&resonance, &stable_product, cms_energy, mass_resonance,
+    sample_cms_momenta(resonance, stable_product, cms_energy, mass_resonance,
                        mass_stable);
 
     /* Initialize positions */
-    resonance.set_position(1.0, 0.0, 0.0, 0.0);
-    stable_product.set_position(1.0, 0.0, 0.0, 0.0);
-    id_first_new = particles->add_data(resonance);
-    particles->add_data(stable_product);
+    resonance->set_position(1.0, 0.0, 0.0, 0.0);
+    stable_product->set_position(1.0, 0.0, 0.0, 0.0);
   } else {
-    printf("resonance_formation:\n");
-    printf("Warning: %zu particles in final state!\n",
-           produced_particles.size());
-    printf("Resonance formation canceled. Returning -1.\n");
-    return -1;
+    throw InvalidResonanceFormation(
+        "resonance_formation: Incorrect number of particles in final state. 1 "
+        "or 2 are expected. Called with " +
+        std::to_string(outgoing_particles_.size()));
   }
-  /* Return the id of the first new particle */
-  return id_first_new;
 }
 
 }
