@@ -10,6 +10,7 @@
 #include "include/action.h"
 
 #include "include/constants.h"
+#include <assert.h>
 
 namespace Smash {
 
@@ -50,6 +51,7 @@ bool Action::is_valid(const Particles &particles) const {
 }
 
 ParticleList Action::incoming_particles(const Particles &particles) const {
+  assert(is_valid(particles));
   ParticleList l;
   for (int id : incoming_particles_) {
     l.emplace_back(particles.data(id));
