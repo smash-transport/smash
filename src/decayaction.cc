@@ -370,8 +370,8 @@ void DecayAction::perform(Particles *particles, size_t &id_process) {
   particles->remove(particle0.id());
   printd("ID %i has decayed and removed from the list.\n", particle0.id());
 
-  for (const auto &p : outgoing_particles_) {
-    particles->add_data(p);
+  for (auto &p : outgoing_particles_) {
+    p.set_id(particles->add_data(p));
   }
   printd("Particle map has now %zu elements. \n", particles->size());
 }

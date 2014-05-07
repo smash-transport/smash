@@ -131,7 +131,7 @@ void ScatterAction::perform (Particles *particles, size_t &id_process)
       printd_momenta("momentum in comp frame", new_particle);
       printd_position("position in comp frame", new_particle);
 
-      particles->add_data(new_particle);
+      new_particle.set_id(particles->add_data(new_particle));
     }
 
     /* Remove the initial particles */
