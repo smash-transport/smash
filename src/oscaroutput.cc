@@ -17,8 +17,8 @@ OscarOutput::OscarOutput(boost::filesystem::path path)
     : file_{std::fopen((path / "collision.dat").native().c_str(), "w")} {
   fprintf(file_.get(), "# OSC1999A\n");
   fprintf(file_.get(), "# Interaction history\n");
-  fprintf(file_.get(), "# smash \n");
-  fprintf(file_.get(), "# \n");
+  fprintf(file_.get(), "# smash\n");
+  fprintf(file_.get(), "#\n");
 }
 
 OscarOutput::~OscarOutput() {}
@@ -47,7 +47,7 @@ void OscarOutput::at_eventend(const Particles &particles,
 
 void OscarOutput::write(const Particles &particles) {
   for (const ParticleData &data : particles.data()) {
-    fprintf(file_.get(), "%i %s %i %g %g %g %g %g %g %g %g %g \n", data.id(),
+    fprintf(file_.get(), "%i %s %i %g %g %g %g %g %g %g %g %g\n", data.id(),
             data.pdgcode().string().c_str(), 0, data.momentum().x1(),
             data.momentum().x2(), data.momentum().x3(), data.momentum().x0(),
             sqrt(data.momentum().Dot(data.momentum())), data.position().x1(),
@@ -73,7 +73,7 @@ void OscarOutput::write_interaction(const ParticleList &incoming_particles,
           outgoing_particles.size());
   const auto print = [&](const ParticleData &p) {
     const float mass = std::sqrt(p.momentum().Dot(p.momentum()));
-    fprintf(file_.get(), "%i %s %i %g %g %g %g %g %g %g %g %g \n", p.id(),
+    fprintf(file_.get(), "%i %s %i %g %g %g %g %g %g %g %g %g\n", p.id(),
             p.pdgcode().string().c_str(), 0, p.momentum().x1(),
             p.momentum().x2(), p.momentum().x3(), p.momentum().x0(), mass,
             p.position().x1(), p.position().x2(), p.position().x3(),
