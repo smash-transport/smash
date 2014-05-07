@@ -25,11 +25,20 @@ namespace Smash {
 class ParticleData {
  public:
   /// Use improbable values for default constructor
-  ParticleData() :id_(-1), pdgcode_(0x0), id_process_(-1),
-    collision_time_(0.0) {}
-  /// Use improbable values for constructor
-  explicit ParticleData(int i) :id_(i), pdgcode_(0x0),
-    id_process_(-1), collision_time_(0.0) {}
+  ParticleData() {}
+
+  /**
+   * Initialize the data with only a valid ID. All the other values are
+   * initialized to improbable values.
+   */
+  explicit ParticleData(int i) : id_(i) {}
+
+  /**
+   * Initialize the data with only a valid PDG code. All the other values are
+   * initialized to improbable values.
+   */
+  explicit ParticleData(PdgCode p) : pdgcode_(p) {}
+
   inline int id(void) const;
   inline void set_id(int id);
   inline PdgCode pdgcode(void) const;
@@ -70,13 +79,13 @@ class ParticleData {
 
  private:
   /// Each particle has a unique identifier
-  int id_;
+  int id_ = -1;
   /// pdg id of the particle
-  PdgCode pdgcode_;
+  PdgCode pdgcode_ = PdgCode::invalid();
   /// counter of the last collision/decay
-  int id_process_;
+  int id_process_ = -1;
   /// collision time
-  double collision_time_;
+  double collision_time_ = 0.;
   /// momenta of the particle: x0, x1, x2, x3 as E, px, py, pz
   FourVector momentum_;
   /// position in space: x0, x1, x2, x3 as t, x, y, z
