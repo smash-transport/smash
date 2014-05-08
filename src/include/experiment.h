@@ -13,6 +13,7 @@
 #include <string>
 #include <vector>
 
+#include "include/clock.h"
 #include "include/crosssections.h"
 #include "include/experimentparameters.h"
 #include "include/modusdefault.h"
@@ -185,10 +186,12 @@ class Experiment : public ExperimentBase {
    */
   const int nevents_;
 
-  /// number of steps
-  const int steps_;
-  /// number of steps before giving measurables
-  const int output_interval_;
+  /// simulation clock in the evolution.
+  Clock labclock_;
+  /// simulation time at which the evolution is stopped.
+  const float end_time_ = 10.0f;
+  /// time interval between SMASH giving measurables
+  const float output_interval_;
   /// initial total energy of the system
   float energy_initial_ = 0.f;
   /// starting time of the simulation

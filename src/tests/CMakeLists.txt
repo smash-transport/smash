@@ -111,7 +111,7 @@ if(CTEST_MEMORYCHECK_COMMAND)
    set(CTEST_MEMORYCHECK_COMMAND_OPTIONS "-v")
    smash_add_test(memcheck_box smash ${CTEST_MEMORYCHECK_COMMAND}
       ${CTEST_MEMORYCHECK_COMMAND_OPTIONS}
-      ${PROJECT_BINARY_DIR}/smash -c "General: {STEPS: 10, MODUS: Box}" ${SMASH_OPTIONS})
+      ${PROJECT_BINARY_DIR}/smash -c "General: {END_TIME: 1.0, MODUS: Box}" ${SMASH_OPTIONS})
    smash_add_test(memcheck_collider smash ${CTEST_MEMORYCHECK_COMMAND}
       ${CTEST_MEMORYCHECK_COMMAND_OPTIONS}
       ${PROJECT_BINARY_DIR}/smash -s 50 -m Collider ${SMASH_OPTIONS})
@@ -123,7 +123,7 @@ else()
 endif()
 
 if(HAVE_SANITIZER)
-   smash_add_test(sanitizer_box      smash_sanitizer smash_sanitizer -c "General: {STEPS: 50,MODUS: Box}" ${SMASH_OPTIONS})
+   smash_add_test(sanitizer_box      smash_sanitizer smash_sanitizer -c "General: {END_TIME: 5.0,MODUS: Box}" ${SMASH_OPTIONS})
    smash_add_test(sanitizer_collider smash_sanitizer smash_sanitizer -s 500 -m Collider ${SMASH_OPTIONS})
    smash_add_test(sanitizer_nucleus  smash_sanitizer smash_sanitizer -s 500 -m Nucleus ${SMASH_OPTIONS})
    #smash_add_test(sanitizer_sphere   smash_sanitizer smash_sanitizer -s 500 -m Sphere ${SMASH_OPTIONS})

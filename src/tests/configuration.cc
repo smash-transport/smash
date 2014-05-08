@@ -23,9 +23,9 @@ TEST(check_config_general_contents) {
 
   std::string modus = conf.read({"General", "MODUS"        });
   COMPARE(modus, "Nucleus");
-  COMPARE(double(conf.read({"General", "EPS"          })), 0.01);
-  COMPARE(int   (conf.read({"General", "STEPS"        })), 1000);
-  COMPARE(int   (conf.read({"General", "UPDATE"       })), 10);
+  COMPARE(double(conf.read({"General", "DELTA_TIME"   })), 0.01);
+  COMPARE(double(conf.read({"General", "END_TIME"     })), 1.0);
+  COMPARE(double(conf.read({"General", "UPDATE"       })), 1.0);
   COMPARE(int   (conf.read({"General", "RANDOMSEED"   })), 1);
   COMPARE(double(conf.read({"General", "SIGMA"        })), 10.0);
   COMPARE(int   (conf.read({"General", "TESTPARTICLES"})), 1);
@@ -115,8 +115,9 @@ TEST(check_unused_report) {
   conf.take({"particles"});
   conf.take({"decaymodes"});
   conf.take({"General", "MODUS"});
-  conf.take({"General", "EPS"});
-  conf.take({"General", "STEPS"});
+  conf.take({"General", "END_TIME"});
+  conf.take({"General", "DELTA_TIME"});
+  conf.take({"General", "START_TIME"});
   conf.take({"General", "UPDATE"});
   conf.take({"General", "RANDOMSEED"});
   conf.take({"General", "SIGMA"});
@@ -230,10 +231,10 @@ TEST(check_setting_new_value) {
 
 TEST(merge_override) {
   Configuration conf(TEST_CONFIG_PATH);
-  COMPARE(int(conf.read({"General", "STEPS"  })), 1000);
+  COMPARE(int(conf.read({"General", "RANDOMSEED"  })), 1);
   COMPARE(int(conf.read({"General", "NEVENTS"})), 1);
   conf.merge_yaml("General: { NEVENTS: 2 }");
-  COMPARE(int(conf.read({"General", "STEPS"  })), 1000);
+  COMPARE(int(conf.read({"General", "RANDOMSEED"  })), 1);
   COMPARE(int(conf.read({"General", "NEVENTS"})), 2);
 }
 

@@ -42,7 +42,7 @@ void usage(int rc, const std::string &progname) {
          "\n"
          "  -c, --config <YAML>     specify config value overrides\n"
          "  -m, --modus <modus>     shortcut for -c 'General: { MODUS: <modus> }'\n"
-         "  -s, --steps <steps>     shortcut for -c 'General: { STEPS: <steps> }'\n"
+         "  -e, --endtime <time>    shortcut for -c 'General: { END_TIME: <time> }'\n"
          "\n"
          "  -o, --output <dir>      output directory (default: $PWD/data/<runid>)\n"
          "  -f, --force             force overwriting files in the output directory\n"
@@ -166,7 +166,7 @@ int main(int argc, char *argv[]) {
           configuration["particles"] = read_all(bf::ifstream{optarg});
         } break;
         case 's':
-          configuration["General"]["STEPS"] = abs(atoi(optarg));
+          configuration["General"]["END_TIME"] = abs(atoi(optarg));
           break;
         case 'o':
           output_path = optarg;

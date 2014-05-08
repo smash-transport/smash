@@ -16,6 +16,7 @@
 #include <algorithm>
 
 #include "include/boxmodus.h"
+#include "include/clock.h"
 #include "include/collidermodus.h"
 #include "include/configuration.h"
 #include "include/experiment.h"
@@ -68,7 +69,7 @@ ExperimentParameters create_experiment_parameters(Configuration &config) {
     printf("Elastic cross section: %g mb\n", cross_section);
   }
 
-  return {config.take({"General", "EPS"}), cross_section, testparticles};
+  return {config.read({"General", "DELTA_TIME"}), cross_section, testparticles};
 }
 }  // unnamed namespace
 
@@ -79,7 +80,9 @@ Experiment<Modus>::Experiment(Configuration &config)
       particles_{config.take({"particles"}), config.take({"decaymodes"})},
       cross_sections_(parameters_.cross_section),
       nevents_(config.take({"General", "NEVENTS"})),
-      steps_(config.take({"General", "STEPS"})),
+      labclock_(config.take({"General", "START_TIME"}),
+                config.take({"General", "DELTA_TIME"})),
+      end_time_(config.take({"General", "END_TIME"})),
       output_interval_(config.take({"General", "UPDATE"})) {
   int64_t seed_ = config.take({"General", "RANDOMSEED"});
   if (seed_ < 0) {
@@ -121,7 +124,8 @@ void Experiment<Modus>::run_time_evolution() {
   print_measurements(particles_, interactions_total,
                      interactions_this_interval, energy_initial_, time_start_);
 
-  for (int step = 0; step < steps_; step++) {
+  while (! (++labclock_ > end_time_)) {
+  // for (int step = 0; step < steps_; step++) {
     std::vector<ActionPtr> actions;  // XXX: a std::list might be better suited
                                      // for the task: lots of appending, then
                                      // sorting and finally a single linear
@@ -149,7 +153,11 @@ void Experiment<Modus>::run_time_evolution() {
     modus_.propagate(&particles_, parameters_);
 
     /* (4) Physics output during the run. */
-    if (step > 0 && (step + 1) % output_interval_ == 0) {
+    // if the timestep of labclock_ is different in the next tick than
+    // in the current one, I assume it has been changed already. In that
+    // case, I know what the next tick is and I can check whether the
+    // output time is crossed within the next tick.
+    if (labclock_.multiple_is_in_next_tick(output_interval_)) {
       interactions_this_interval =
           interactions_total - previous_interactions_total;
       previous_interactions_total = interactions_total;
@@ -163,7 +171,8 @@ void Experiment<Modus>::run_time_evolution() {
     }
   }
   /* Guard against evolution */
-  if (likely(steps_ > 0)) {
+  // BB: WTF?
+  //if (likely(steps_ > 0)) {
     /* if there are no particles no interactions happened */
     if (likely(!particles_.empty())) {
       print_tail(time_start_, interactions_total * 2 / particles_.time() /
@@ -171,7 +180,7 @@ void Experiment<Modus>::run_time_evolution() {
     } else {
       print_tail(time_start_, 0);
     }
-  }
+  //}
 }
 
 /* print_startup - console output on startup of general parameters */
@@ -179,7 +188,7 @@ template <typename Modus>
 void Experiment<Modus>::print_startup(int64_t seed) {
   printf("Elastic cross section: %g mb\n", parameters_.cross_section);
   printf("Using temporal stepsize: %g fm/c\n", parameters_.eps);
-  printf("Maximum number of steps: %i \n", steps_);
+  // printf("Maximum number of steps: %i \n", steps_);
   printf("Random number seed: %" PRId64 "\n", seed);
   modus_.print_startup();
 }

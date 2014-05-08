@@ -3,13 +3,15 @@ General:
     MODUS:         Nucleus
 
     # temporal grid spacing
-    EPS:           0.01
+    DELTA_TIME:    0.01
 
-    # maximum of steps to take
-    STEPS:         1000
+    # start time of simulation
+    START_TIME:    0.0
+    # end time of simulation
+    END_TIME:      1.0
 
-    # how many steps before recording measurables
-    UPDATE:        10
+    # how much time before recording measurables
+    UPDATE:        1.0
 
     # initial random seed (negative for time)
     RANDOMSEED:    1
