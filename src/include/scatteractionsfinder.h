@@ -16,19 +16,19 @@
 
 namespace Smash {
 
-/* A simple scatter finder:
+/** A simple scatter finder:
  * Just loops through all particles and checks each pair for a collision.  */
 class ScatterActionsFinder : public ActionFinderFactory {
  public:
-  /* Check for a single pair of particles (id_a, id_b) if a collision will happen
+  /** Check for a single pair of particles (id_a, id_b) if a collision will happen
    * in the next timestep and create a corresponding Action object in that case. */
   ActionPtr check_collision(const int id_a, const int id_b,
                             Particles *particles,
                             const ExperimentParameters &parameters,
                             CrossSections *cross_sections = nullptr) const;
 
-  /* Check the whole particle list for collisions
-   * and add them to a list of Action objects. */
+  /** Check the whole particle list for collisions
+   * and return a list with the corrsponding Action objects. */
   std::vector<ActionPtr> find_possible_actions(
       Particles *particles, const ExperimentParameters &parameters,
       CrossSections *cross_sections = nullptr) const override;
