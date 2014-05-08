@@ -7,6 +7,8 @@
 #ifndef SRC_INCLUDE_EXPERIMENTPARAMETERS_H_
 #define SRC_INCLUDE_EXPERIMENTPARAMETERS_H_
 
+#include "include/clock.h"
+
 namespace Smash {
 
 /**
@@ -18,7 +20,7 @@ namespace Smash {
  */
 struct ExperimentParameters {
   /// temporal time step
-  const double eps;
+  Clock labclock;
   /// cross section of the elastic scattering
   const float cross_section;
   /// number of test particle

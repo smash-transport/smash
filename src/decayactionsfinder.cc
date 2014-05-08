@@ -34,7 +34,8 @@ std::vector<ActionPtr> DecayActionsFinder::find_possible_actions(
 
     /* The clock goes slower in the rest frame of the resonance */
     double inverse_gamma = sqrt(velocity_lrf.Dot(velocity_lrf));
-    double resonance_frame_timestep = parameters.eps * inverse_gamma;
+    double resonance_frame_timestep = parameters.labclock.timestep_size()
+                                    * inverse_gamma;
 
     /* Exponential decay. Average lifetime t_avr = 1 / width
      * t / t_avr = width * t (remember GeV-fm conversion)

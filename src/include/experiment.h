@@ -186,8 +186,6 @@ class Experiment : public ExperimentBase {
    */
   const int nevents_;
 
-  /// simulation clock in the evolution.
-  Clock labclock_;
   /// simulation time at which the evolution is stopped.
   const float end_time_ = 10.0f;
   /// time interval between SMASH giving measurables

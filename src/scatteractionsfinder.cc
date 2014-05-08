@@ -36,7 +36,8 @@ ScatterActionsFinder::check_collision (const int id_a, const int id_b, Particles
   /* check according timestep: positive and smaller */
   const double time_collision = collision_time(particles->data(id_a),
     particles->data(id_b));
-  if (time_collision < 0.0 || time_collision >= parameters.eps)
+  if (time_collision < 0.0 ||
+                 time_collision >= parameters.labclock.timestep_size())
     return nullptr;
 
   /* check for minimal collision time both particles */
