@@ -340,6 +340,7 @@ class UnitTester {  // {{{1
 static UnitTester global_unit_test_object_;
 #endif  // make this visible to doxygen:
 /**
+ * \ingroup unittest
  * \brief Use this to mark that the failure of a following test is
  * expected.
  *
