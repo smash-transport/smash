@@ -90,3 +90,12 @@ TEST(multiple_small_interval) {
     VERIFY(labtime.multiple_is_in_next_tick(interval)) << ticks;
   }
 }
+
+TEST(assignment) {
+  Clock labtime(4.2f, 0.3f);
+  Clock resettime = labtime;
+  ++labtime;
+  FUZZY_COMPARE(labtime.current_time(), 4.5f);
+  labtime = std::move(resettime);
+  FUZZY_COMPARE(labtime.current_time(), 4.2f);
+}

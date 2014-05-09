@@ -66,7 +66,9 @@ ExperimentParameters create_experiment_parameters(Configuration &config) {
     cross_section /= testparticles;
     printf("Elastic cross section: %g mb\n", cross_section);
   }
-
+ 
+  // The clock initializers are only read here and taken later when
+  // assigning initial_clock_.
   return {{config.read({"General", "START_TIME"}),
            config.read({"General", "DELTA_TIME"})},
            config.take({"General", "UPDATE"}),
@@ -81,7 +83,9 @@ Experiment<Modus>::Experiment(Configuration &config)
       particles_{config.take({"particles"}), config.take({"decaymodes"})},
       cross_sections_(parameters_.cross_section),
       nevents_(config.take({"General", "NEVENTS"})),
-      end_time_(config.take({"General", "END_TIME"})) {
+      end_time_(config.take({"General", "END_TIME"})),
+      initial_clock_(config.take({"General", "START_TIME"}),
+                     config.take({"General", "DELTA_TIME"})) {
   int64_t seed_ = config.take({"General", "RANDOMSEED"});
   if (seed_ < 0) {
     seed_ = time(nullptr);
@@ -98,6 +102,7 @@ template <typename Modus>
 void Experiment<Modus>::initialize(const bf::path &/*path*/) {
   cross_sections_.reset();
   particles_.reset();
+  parameters_.reset_clock(initial_clock_);
 
   /* Sample particles according to the initial conditions */
   modus_.initial_conditions(&particles_, parameters_);

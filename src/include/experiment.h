@@ -13,8 +13,8 @@
 #include <string>
 #include <vector>
 
-#include "include/clock.h"
 #include "include/chrono.h"
+#include "include/clock.h"
 #include "include/crosssections.h"
 #include "include/experimentparameters.h"
 #include "include/modusdefault.h"
@@ -191,6 +191,8 @@ class Experiment : public ExperimentBase {
   float energy_initial_ = 0.f;
   /// system starting time of the simulation
   SystemTimePoint time_start_ = SystemClock::now();
+  /// The clock at startup (will be copied in each event)
+  Clock initial_clock_;
 };
 
 }  // namespace Smash
