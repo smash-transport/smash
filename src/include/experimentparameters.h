@@ -19,8 +19,19 @@ namespace Smash {
  * function argument passing.
  */
 struct ExperimentParameters {
-  /// temporal time step
+  /// system clock (for simulation time keeping in the computational
+  /// frame)
   Clock labclock;
+  /// Time step size
+  float timestep_size() const {
+    return labclock.timestep_size();
+  }
+  /// returns if output should happen now
+  bool need_intermediate_output() const {
+    return labclock.multiple_is_in_next_tick(output_interval);
+  }
+  /// time interval between SMASH giving measurables
+  const float output_interval;
   /// cross section of the elastic scattering
   const float cross_section;
   /// number of test particle

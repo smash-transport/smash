@@ -187,8 +187,6 @@ class Experiment : public ExperimentBase {
 
   /// simulation time at which the evolution is stopped.
   const float end_time_ = 10.0f;
-  /// time interval between SMASH giving measurables
-  const float output_interval_;
   /// initial total energy of the system
   float energy_initial_ = 0.f;
   /// system starting time of the simulation

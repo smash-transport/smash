@@ -68,7 +68,7 @@ class Clock {
    * \mathbb{N}: t \le n \cdot t_i < t + \Delta t\f$.
    * 
    */
-  bool multiple_is_in_next_tick(const float interval) {
+  bool multiple_is_in_next_tick(const float interval) const {
     // if the interval is less than or equal to the time step size, one
     // multiple will surely be within the next tick!
     if (interval <= timestep_size_) {
@@ -95,15 +95,15 @@ class Clock {
     return *this;
   }
   /// compares the times between two clocks.
-  bool operator<(const Clock& rhs) {
+  bool operator<(const Clock& rhs) const {
     return current_time() < rhs.current_time();
   }
   /// compares the time of the clock against a fixed time.
-  bool operator<(const float& time) {
+  bool operator<(const float& time) const {
     return current_time() < time;
   }
   /// compares the time of the clock against a fixed time.
-  bool operator>(const float& time) {
+  bool operator>(const float& time) const {
     return current_time() > time;
   }
  private:

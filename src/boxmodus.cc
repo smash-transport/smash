@@ -149,10 +149,10 @@ void BoxModus::propagate(Particles *particles,
   FourVector distance, position;
   for (ParticleData &data : particles->data()) {
     /* propagation for this time step */
-    distance.set_FourVector(parameters.labclock.timestep_size(),
-                      data.velocity_x() * parameters.labclock.timestep_size(),
-                      data.velocity_y() * parameters.labclock.timestep_size(),
-                      data.velocity_z() * parameters.labclock.timestep_size());
+    distance.set_FourVector(parameters.timestep_size(),
+                      data.velocity_x() * parameters.timestep_size(),
+                      data.velocity_y() * parameters.timestep_size(),
+                      data.velocity_z() * parameters.timestep_size());
     printd("Particle %d motion: %g %g %g %g\n", data.id(), distance.x0(),
            distance.x1(), distance.x2(), distance.x3());
     /* treat the box boundaries */

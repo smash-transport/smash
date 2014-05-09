@@ -69,7 +69,8 @@ ExperimentParameters create_experiment_parameters(Configuration &config) {
 
   return {{config.read({"General", "START_TIME"}),
            config.read({"General", "DELTA_TIME"})},
-          cross_section, testparticles};
+           config.take({"General", "UPDATE"}),
+           cross_section, testparticles};
 }
 }  // unnamed namespace
 
@@ -80,8 +81,7 @@ Experiment<Modus>::Experiment(Configuration &config)
       particles_{config.take({"particles"}), config.take({"decaymodes"})},
       cross_sections_(parameters_.cross_section),
       nevents_(config.take({"General", "NEVENTS"})),
-      end_time_(config.take({"General", "END_TIME"})),
-      output_interval_(config.take({"General", "UPDATE"})) {
+      end_time_(config.take({"General", "END_TIME"})) {
   int64_t seed_ = config.take({"General", "RANDOMSEED"});
   if (seed_ < 0) {
     seed_ = time(nullptr);
@@ -155,7 +155,7 @@ void Experiment<Modus>::run_time_evolution() {
     // in the current one, I assume it has been changed already. In that
     // case, I know what the next tick is and I can check whether the
     // output time is crossed within the next tick.
-    if (parameters_.labclock.multiple_is_in_next_tick(output_interval_)) {
+    if (parameters_.need_intermediate_output()) {
       interactions_this_interval =
           interactions_total - previous_interactions_total;
       previous_interactions_total = interactions_total;
@@ -186,7 +186,7 @@ template <typename Modus>
 void Experiment<Modus>::print_startup(int64_t seed) {
   printf("Elastic cross section: %g mb\n", parameters_.cross_section);
   printf("Starting with temporal stepsize: %g fm/c\n",
-                                    parameters_.labclock.timestep_size());
+                                    parameters_.timestep_size());
   printf("End time: %g fm/c\n", end_time_);
   printf("Random number seed: %" PRId64 "\n", seed);
   modus_.print_startup();
