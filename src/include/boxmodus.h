@@ -34,7 +34,7 @@ class BoxModus : public ModusDefault {
 
   int sanity_check(Particles *particles);
 
-  void propagate(Particles *particles, const ExperimentParameters &parameters);
+  void propagate(Particles *particles, const ExperimentParameters &parameters, const OutputsList &);
 
  private:
   /* initial condition */

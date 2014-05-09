@@ -21,7 +21,10 @@ class VtkOutput : public OutputInterface {
    VtkOutput(boost::filesystem::path path);
    ~VtkOutput();
 
-   void write_state(const Particles &particles) override;
+   void at_eventstart(const Particles &particles, const int event_number) override;
+   void at_eventend(const Particles &particles, const int event_number) override;
+   void after_Nth_timestep(const Particles &particles, const int event_number, const int timestep) override;
+
 
  private:
    const boost::filesystem::path base_path_;

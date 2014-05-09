@@ -136,7 +136,7 @@ class Experiment : public ExperimentBase {
   explicit Experiment(Configuration &config);
 
   void initialize(const boost::filesystem::path &path);
-  void run_time_evolution();
+  void run_time_evolution(const int evt_num);
 
   void print_startup(int64_t seed);
 
@@ -164,7 +164,7 @@ class Experiment : public ExperimentBase {
    * A list of output formaters. They will be called to write the state of the
    * particles to file.
    */
-  std::vector<std::unique_ptr<Smash::OutputInterface>> outputs_;
+  OutputsList outputs_;
 
   /**
    * ?

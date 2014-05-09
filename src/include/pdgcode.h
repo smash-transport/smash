@@ -594,6 +594,7 @@ class PdgCode {
 };
 
 std::istream& operator>>(std::istream& is, PdgCode& code);
+std::ostream& operator<<(std::ostream& is, const PdgCode& code);
 
 }  // namespace SMASH
 

@@ -13,12 +13,16 @@ namespace Smash {
 std::istream& operator>>(std::istream& is, PdgCode& code) {
   std::string codestring("");
   is >> codestring;
+  if (!is) {
+    code = PdgCode::invalid();
+    return is;
+  }
   try {
     // set the fields from the string:
     code.set_from_string(codestring);
   } catch (PdgCode::InvalidPdgCode) {
     is.setstate(std::ios::failbit);
-    return is;
+    code = PdgCode::invalid();
   }
   return is;
 }
@@ -109,6 +113,10 @@ int PdgCode::net_quark_number(const int quark) const {
   // ours is the lighter: If the heavier particle is u,c,t, the lighter
   // one (ours) is an antiquark.
   return ((otherquark % 2 == 0) ? -1 : 1) * antiparticle_sign();
+}
+
+std::ostream& operator<<(std::ostream& s, const PdgCode& code) {
+  return s << code.string();
 }
 
 }  // namespace Smash
