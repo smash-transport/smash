@@ -338,10 +338,31 @@ class UnitTester {  // {{{1
 };
 
 static UnitTester global_unit_test_object_;
-
+#endif  // make this visible to doxygen:
+/**
+ * \ingroup unittest
+ * \brief Use this to mark that the failure of a following test is
+ * expected.
+ *
+ * \code
+ * TEST(something) {
+ *   // this needs to pass
+ *   VERIFY(true);
+ *   UnitTest::EXPECT_FAILURE();
+ *   // if this fails, the test will be marked "XFAIL" and the failure
+ *   // will not be counted
+ *   VERIFY(false);
+ *   // this will not be checked anymore, because the TEST stops at the
+ *   // (expectedly) failing VERIFY.
+ *   VERIFY(true);
+ * }
+ * \endcode
+ */
 static inline void EXPECT_FAILURE() {  // {{{1
   global_unit_test_object_.expect_failure = true;
 }
+#ifndef DOXYGEN  // make the following invisible to DOXYGEN
+
 
 static const char *_unittest_fail() {  // {{{1
   if (global_unit_test_object_.expect_failure) {
