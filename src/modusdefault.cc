@@ -30,6 +30,7 @@ void ModusDefault::propagate(Particles *particles,
            distance.x1(), distance.x2(), distance.x3());
     position = data.position();
     position += distance;
+    position.set_x0(parameters.new_particle_time());
     data.set_position(position);
   }
 }

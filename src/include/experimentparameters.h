@@ -33,6 +33,14 @@ struct ExperimentParameters {
   void reset_clock(const Clock initial_clock) {
     labclock = std::move(initial_clock);
   }
+  /// this is the time particles will have after propagating through the
+  /// current time step.
+  float new_particle_time() const {
+    // I'm not certain if they should have the current time or the next
+    // tick.
+    return labclock.current_time();
+      // + labclock.timestep_size();
+  }
   /// time interval between SMASH giving measurables
   const float output_interval;
   /// cross section of the elastic scattering

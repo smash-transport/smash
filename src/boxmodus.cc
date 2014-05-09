@@ -157,6 +157,7 @@ void BoxModus::propagate(Particles *particles,
            distance.x1(), distance.x2(), distance.x3());
     /* treat the box boundaries */
     position = data.position();
+    position.set_x0(parameters.new_particle_time());
     position += distance;
     bool wall_hit = enforce_periodic_boundaries(position.begin() + 1,
                                                 position.end(), length_);
