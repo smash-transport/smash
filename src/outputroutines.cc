@@ -53,13 +53,11 @@ void print_measurements(const Particles &particles,
   FourVector momentum_total(0, 0, 0, 0);
   /* calculate elapsed time */
   SystemTimeSpan elapsed_seconds = SystemClock::now() - time_start;
-  double time = 0.0;
 
   for (const ParticleData &data : particles.data()) {
     momentum_total += data.momentum();
-    /* use the time from the last active particle - startup time */
-    time = data.position().x0();
   }
+  double time = particles.time();
 
   if (likely(time > 0))
     printf("%5g%13g%13g%13g%10zu%10zu%13g\n", time,

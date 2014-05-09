@@ -25,7 +25,7 @@ void VtkOutput::write_state(const Particles &particles) {
   char filename[32];
   snprintf(
       filename, sizeof(filename), "pos_0.%05i.vtk",
-      static_cast<int>(particles.data().begin()->position().x0() * 10));
+      static_cast<int>(particles.time() * 10));
   std::unique_ptr<std::FILE> file_{
       fopen((base_path_ / filename).native().c_str(), "w")};
 
