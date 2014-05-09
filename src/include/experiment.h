@@ -7,13 +7,13 @@
 #ifndef SRC_INCLUDE_EXPERIMENT_H_
 #define SRC_INCLUDE_EXPERIMENT_H_
 
-#include <chrono>
 #include <list>
 #include <memory>
 #include <stdexcept>
 #include <string>
 #include <vector>
 
+#include "include/chrono.h"
 #include "include/crosssections.h"
 #include "include/experimentparameters.h"
 #include "include/modusdefault.h"
@@ -191,7 +191,7 @@ class Experiment : public ExperimentBase {
   /// initial total energy of the system
   float energy_initial_ = 0.f;
   /// system starting time of the simulation
-  std::chrono::time_point<std::chrono::system_clock> time_start_ = std::chrono::system_clock::now();
+  SystemTimePoint time_start_ = SystemClock::now();
 };
 
 }  // namespace Smash

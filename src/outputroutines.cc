@@ -9,7 +9,6 @@
 #include "include/outputroutines.h"
 
 #include <sys/stat.h>
-#include <chrono>
 #include <cmath>
 #include <cstdio>
 #include <ctime>
@@ -18,6 +17,7 @@
 #include <string>
 #include <utility>
 
+#include "include/chrono.h"
 #include "include/fourvector.h"
 #include "include/particles.h"
 #include "include/particledata.h"
@@ -49,11 +49,10 @@ void print_measurements(const Particles &particles,
                         const size_t &scatterings_total,
                         const size_t &scatterings_this_interval,
                         float energy_ini,
-                std::chrono::time_point<std::chrono::system_clock> time_start) {
+                SystemTimePoint time_start) {
   FourVector momentum_total(0, 0, 0, 0);
   /* calculate elapsed time */
-  std::chrono::duration<double> elapsed_seconds =
-                                std::chrono::system_clock::now() - time_start;
+  SystemTimeSpan elapsed_seconds = SystemClock::now() - time_start;
   double time = 0.0;
 
   for (const ParticleData &data : particles.data()) {
@@ -77,10 +76,9 @@ void print_measurements(const Particles &particles,
 
 /* print_tail - output at the end of the simulation */
 void print_tail(const
-                std::chrono::time_point<std::chrono::system_clock> time_start,
+                SystemTimePoint time_start,
                 const double &scattering_rate) {
-  std::chrono::duration<double> time =
-                                std::chrono::system_clock::now() - time_start;
+  SystemTimeSpan time = SystemClock::now() - time_start;
   print_line();
   /* print finishing time in human readable way:
    * time < 10 min => seconds

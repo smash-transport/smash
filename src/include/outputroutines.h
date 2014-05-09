@@ -7,9 +7,9 @@
 #ifndef SRC_INCLUDE_OUTPUTROUTINES_H_
 #define SRC_INCLUDE_OUTPUTROUTINES_H_
 
-#include <chrono>
 #include <list>
 
+#include "include/chrono.h"
 #include "include/particles.h"
 
 namespace Smash {
@@ -26,9 +26,9 @@ void print_measurements(const Particles &particles,
                         const size_t &scatterings_total,
                         const size_t &scatterings_this_interval,
                         float energy_ini,
-                 std::chrono::time_point<std::chrono::system_clock> time_start);
+                 SystemTimePoint time_start);
 void print_tail(const
-                std::chrono::time_point<std::chrono::system_clock> time_start,
+                SystemTimePoint time_start,
                 const double &scattering_rate);
 
 /* Compile time debug info */
