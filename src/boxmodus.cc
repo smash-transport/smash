@@ -108,7 +108,7 @@ void BoxModus::initial_conditions(Particles *particles,
     }
     momentum_total += data.momentum();
     time_begin = 1.0;
-    /* ramdom position in a quadratic box */
+    /* random position in a quadratic box */
     x = uniform_length();
     y = uniform_length();
     z = uniform_length();

@@ -4,7 +4,6 @@ string(REPLACE "-Winline " "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 # test sources
 add_executable(angles_distribution angles_distribution.cc ../random.cc)
 add_executable(angles_zero angles_zero.cc ../random.cc)
-add_executable(clebschgordan clebschgordan.cc ../clebschgordan.cc)
 add_executable(fourvector fourvector.cc)
 add_executable(lorentzboost lorentzboost.cc ../fourvector.cc ../random.cc)
 add_executable(pdgcode pdgcode.cc ../pdgcode.cc)
@@ -31,10 +30,12 @@ endmacro()
 
 macro(smash_add_unittest name)
    add_executable(${name} ${name}.cc)
-   set_target_properties(${name} PROPERTIES
-      COMPILE_FLAGS ${ASAN_FLAG}
-      LINK_FLAGS ${ASAN_FLAG}
-      )
+   if(HAVE_SANITIZER)
+      set_target_properties(${name} PROPERTIES
+         COMPILE_FLAGS ${SANITIZER_FLAG}
+         LINK_FLAGS ${SANITIZER_FLAG}
+         )
+   endif()
    target_link_libraries(${name} smash_lib ${SMASH_LIBRARIES})
    smash_add_test(${name} ${name} ${name})
 endmacro()
@@ -74,9 +75,6 @@ smash_add_test(fourvector fourvector fourvector)
 
 # Lorentz boost tests
 smash_add_test(lorentzboost lorentzboost lorentzboost)
-
-# clebsch-gordan coefficient tests
-smash_add_test(clebschgordan clebschgordan clebschgordan)
 
 # for now -o has to be "data", because OSCAR output still expects to output to
 # $PWD/data. In the future we want to use "${PROJECT_BINARY_DIR}/test_output"
@@ -120,9 +118,9 @@ else()
    message(STATUS "valgrind not found. Memcheck tests are disabled!")
 endif()
 
-if(HAVE_ADDRESS_SANITIZER)
-   smash_add_test(asan_box      smash_asan smash_asan -c "General: {STEPS: 50,MODUS: Box}" ${SMASH_OPTIONS})
-   smash_add_test(asan_collider smash_asan smash_asan -s 500 -m Collider ${SMASH_OPTIONS})
-   smash_add_test(asan_nucleus  smash_asan smash_asan -s 500 -m Nucleus ${SMASH_OPTIONS})
-   #smash_add_test(asan_sphere   smash_asan smash_asan -s 500 -m Sphere ${SMASH_OPTIONS})
+if(HAVE_SANITIZER)
+   smash_add_test(sanitizer_box      smash_sanitizer smash_sanitizer -c "General: {STEPS: 50,MODUS: Box}" ${SMASH_OPTIONS})
+   smash_add_test(sanitizer_collider smash_sanitizer smash_sanitizer -s 500 -m Collider ${SMASH_OPTIONS})
+   smash_add_test(sanitizer_nucleus  smash_sanitizer smash_sanitizer -s 500 -m Nucleus ${SMASH_OPTIONS})
+   #smash_add_test(sanitizer_sphere   smash_sanitizer smash_sanitizer -s 500 -m Sphere ${SMASH_OPTIONS})
 endif()

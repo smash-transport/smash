@@ -10,11 +10,11 @@
 #ifndef SRC_INCLUDE_ANGLES_H_
 #define SRC_INCLUDE_ANGLES_H_
 
-#include <cmath>
 #include <cstdio>
 #include <cstdlib>
 #include <stdexcept>
 #include "include/random.h"
+#include "include/constants.h"
 
 namespace Smash {
 
@@ -161,21 +161,18 @@ inline Angles::Angles() : phi_(0), costheta_(0) {}
 
 void inline Angles::distribute_isotropically() {
   /* isotropic distribution: phi in [0, 2pi) and cos(theta) in [-1,1] */
-  phi_ = Random::uniform(0.0, 2.0 * M_PI);
+  phi_ = Random::uniform(0.0, twopi);
   costheta_ = Random::uniform(-1.0, 1.0);
 }
 
-void inline Angles::set_phi(const double& newphi) {
-  phi_ = newphi;
-  /* check if phi is in 0 .. 2pi. If not, we simply transform it
-   * there by subtracting/adding 2pi as often as needed.
-   * floor(phi/(2pi) is the number of (2pi)s that we need to subtract
-   * (why use a loop if one statement can do it?)
-   */
-  if (phi_ < 0 || phi_ >= 2.0 * M_PI) {
-    phi_ -= 2.0 * M_PI * floor(phi_ / (2.0 * M_PI));
+void inline Angles::set_phi (const double& newphi) {
+  /* Make sure that phi is in the range [0,2pi).  */
+    phi_ = newphi;
+  if (newphi < 0 || newphi >= twopi) {
+    phi_ -= twopi * floor(newphi / twopi);
   }
 }
+
 void inline Angles::set_costheta(const double& newcos) {
   costheta_ = newcos;
   /* check if costheta_ is in -1..1. If not, well. Error handling here
@@ -206,7 +203,7 @@ bool inline Angles::add_to_theta(const double& delta) {
    * theta + delta + the_new_angle = 2*M_PI
    */
   if (theta_plus_delta > M_PI) {
-    set_theta(2.0*M_PI - theta_plus_delta);
+    set_theta(twopi - theta_plus_delta);
     /* set_phi takes care that phi_ is in [0 .. 2*M_PI] */
     set_phi(phi() + M_PI);
     return true;  // meaning "we did change phi"

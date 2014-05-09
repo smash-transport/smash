@@ -16,9 +16,9 @@
 namespace Smash {
 
 /**
- * ParticleData contains the dynamic information of a certain particle
+ * ParticleData contains the dynamic information of a certain particle.
  *
- * Each particle has it's momentum, position and other relevant physical
+ * Each particle has its momentum, position and other relevant physical
  * data entry.
  */
 class ParticleData {

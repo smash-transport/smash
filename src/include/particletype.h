@@ -27,22 +27,19 @@ class ParticleType {
         mass_(-1),
         width_(-1),
         pdgcode_(0x0),
-        isospin_(100),
-        charge_(100),
-        spin_(100) {}
+        isospin_(0),
+        charge_(0) {}
   /// Explicit constructor
-  ParticleType(std::string n, float m, float w, PdgCode id, int isosp, int ch,
-               int sp)
+  ParticleType(std::string n, float m, float w, PdgCode id)
       : name_(n),
         mass_(m),
         width_(w),
         pdgcode_(id),
-        isospin_(isosp),
-        charge_(ch),
-        spin_(sp) {}
+        isospin_(pdgcode_.isospin_total()),
+        charge_(pdgcode_.charge())
+        {}
   /// set particle type
-  inline void set(const std::string &n, float m, float w, PdgCode id, int isosp,
-                  int ch, int sp);
+  inline void set(const std::string &n, float m, float w, PdgCode id);
   /// return particle name
   inline std::string name(void) const;
   /// return particle mass
@@ -69,34 +66,26 @@ class ParticleType {
   float width_;
   /// PDG Code of the particle
   PdgCode pdgcode_;
-  /** isospin of the particle
+  /** twice the isospin of the particle
    *
-   * \todo What is the possible range of values?
+   * This is filled automatically from pdgcode_.
    */
   int isospin_;
   /** charge of the particle
    *
-   * \todo What is the possible range of values?
+   * This is filled automatically from pdgcode_.
    */
   int charge_;
-  /** spin of the particle
-   *
-   * \todo What is the possible range of values?
-   */
-  int spin_;
 };
 
-//TODO(baeuchle) I don't see why Isospin and Charge cannot be set from
-// pdgcode_.
 inline void ParticleType::set(const std::string &NAME, float MASS,
-     float WIDTH, PdgCode ID, int ISOSPIN, int CHARGE, int SPIN) {
+     float WIDTH, PdgCode ID) {
   mass_ = MASS;
   width_ = WIDTH;
   pdgcode_ = PdgCode(ID);
   name_ = NAME;
-  isospin_ = ISOSPIN;
-  charge_ = CHARGE;
-  spin_ = SPIN;
+  isospin_ = pdgcode_.isospin_total();
+  charge_ = pdgcode_.charge();
 }
 
 inline int ParticleType::charge(void) const {
@@ -120,7 +109,7 @@ inline PdgCode ParticleType::pdgcode(void) const {
 }
 
 inline int ParticleType::spin(void) const {
-  return spin_;
+  return pdgcode_.spin();
 }
 
 inline float ParticleType::width(void) const {
