@@ -320,8 +320,7 @@ void DecayAction::perform (Particles *particles, size_t &id_process) {
   printd_momenta("Resonance momenta before decay", particles->data(id_a));
 
   /* boost to rest frame */
-  velocity_CM = particles->data(id_a).momentum().threevec()
-                      / particles->data(id_a).momentum().x0();
+  velocity_CM = particles->data(id_a).velocity();
   particles->data_pointer(id_a)->set_momentum(
       particles->data(id_a).momentum().LorentzBoost(velocity_CM));
   particles->data_pointer(id_a)->set_position(

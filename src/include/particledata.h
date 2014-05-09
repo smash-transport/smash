@@ -47,7 +47,7 @@ class ParticleData {
   inline const FourVector &position(void) const;
   inline void set_position(const FourVector &position);
   /// get the velocity 3-vector
-  inline ThreeVector velocity (void) { return momentum_.threevec() / momentum_.x0(); }
+  inline ThreeVector velocity (void) const { return momentum_.threevec() / momentum_.x0(); }
   /* overloaded operators */
   inline bool operator==(const ParticleData &a) const;
   inline bool operator<(const ParticleData &a) const;

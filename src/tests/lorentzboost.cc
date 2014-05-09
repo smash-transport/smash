@@ -19,7 +19,6 @@ ThreeVector random_velocity();
 ThreeVector random_velocity() {
   dir.distribute_isotropically();
   double beta = Random::canonical();
-  // velocity-"vector" is not normalized (that's how LorentzBoost works):
   return dir.threevec()*beta;
 }
 
