@@ -17,8 +17,13 @@
 
 namespace Smash {
 
+/**
+ * ActionFinderFactory is the abstract base class for all action finders,
+ * i.e. objects which create action lists.
+ */
 class ActionFinderFactory {
  public:
+  /** Pure virtual function for finding actions, given a list of particles. */
   virtual std::vector<ActionPtr> find_possible_actions(
       Particles *particles, const ExperimentParameters &parameters,
       CrossSections *cross_sections = nullptr) const = 0;

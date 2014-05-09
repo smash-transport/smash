@@ -17,12 +17,12 @@
 #include <string>
 #include <utility>
 
+#include "include/chrono.h"
 #include "include/fourvector.h"
 #include "include/particles.h"
 #include "include/particledata.h"
 #include "include/particletype.h"
 #include "include/macros.h"
-#include "include/time.h"
 
 namespace Smash {
 
@@ -44,22 +44,15 @@ void print_header(void) {
 }
 
 
-/* measure_timediff - time the simulation used */
-double measure_timediff(const timespec time_start) {
-  timespec now;
-  clock_gettime(&now);
-  return (now.tv_sec + now.tv_nsec / 10.0E9
-    - time_start.tv_sec -   time_start.tv_nsec / 10.0E9);
-}
-
 /* print_measurements - console output during simulation */
 void print_measurements(const Particles &particles,
                         const size_t &scatterings_total,
                         const size_t &scatterings_this_interval,
-                        float energy_ini, timespec time_start) {
+                        float energy_ini,
+                SystemTimePoint time_start) {
   FourVector momentum_total(0, 0, 0, 0);
   /* calculate elapsed time */
-  double elapsed = measure_timediff(time_start);
+  SystemTimeSpan elapsed_seconds = SystemClock::now() - time_start;
   double time = 0.0;
 
   for (const ParticleData &data : particles.data()) {
@@ -73,29 +66,31 @@ void print_measurements(const Particles &particles,
            energy_ini - momentum_total.x0(),
            sqrt(-1 * momentum_total.DotThree()),
            scatterings_total * 2 / (particles.size() * time),
-           scatterings_this_interval, particles.size(), elapsed);
+           scatterings_this_interval, particles.size(), elapsed_seconds.count());
   else
     printf("%5g%13g%13g%13g%10i%10zu%13g\n", time,
            energy_ini - momentum_total.x0(),
            sqrt(-1 * momentum_total.DotThree()), 0.0, 0, particles.size(),
-           elapsed);
+           elapsed_seconds.count());
 }
 
 /* print_tail - output at the end of the simulation */
-void print_tail(const timespec time_start, const double &scattering_rate) {
-  double time = measure_timediff(time_start);
+void print_tail(const
+                SystemTimePoint time_start,
+                const double &scattering_rate) {
+  SystemTimeSpan time = SystemClock::now() - time_start;
   print_line();
   /* print finishing time in human readable way:
    * time < 10 min => seconds
    * 10 min < time < 3 h => minutes
    * time > 3h => hours
    */
-  if (time < 600)
-    printf("Time real: %g [s]\n", time);
-  else if (time < 10800)
-    printf("Time real: %g [min]\n", time / 60);
+  if (time.count() < 600)
+    printf("Time real: %g [s]\n", time.count());
+  else if (time.count() < 10800)
+    printf("Time real: %g [min]\n", time.count() / 60);
   else
-    printf("Time real: %g [h]\n", time / 3600);
+    printf("Time real: %g [h]\n", time.count() / 3600);
   printf("Final scattering rate: %g [fm-1]\n", scattering_rate);
 }
 
