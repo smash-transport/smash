@@ -4,7 +4,6 @@ string(REPLACE "-Winline " "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 # test sources
 add_executable(angles_distribution angles_distribution.cc ../random.cc)
 add_executable(angles_zero angles_zero.cc ../random.cc)
-add_executable(clebschgordan clebschgordan.cc ../clebschgordan.cc)
 add_executable(fourvector fourvector.cc)
 add_executable(lorentzboost lorentzboost.cc ../fourvector.cc ../random.cc)
 add_executable(pdgcode pdgcode.cc ../pdgcode.cc)
@@ -76,9 +75,6 @@ smash_add_test(fourvector fourvector fourvector)
 
 # Lorentz boost tests
 smash_add_test(lorentzboost lorentzboost lorentzboost)
-
-# clebsch-gordan coefficient tests
-smash_add_test(clebschgordan clebschgordan clebschgordan)
 
 # for now -o has to be "data", because OSCAR output still expects to output to
 # $PWD/data. In the future we want to use "${PROJECT_BINARY_DIR}/test_output"

@@ -170,15 +170,9 @@ void inline Angles::distribute_isotropically() {
 
 void inline Angles::set_phi (const double& newphi) {
   /* Make sure that phi is in the range [0,2pi).  */
-  if (newphi < 0.) {
-    phi_ = std::fmod (newphi, twopi);
-    phi_ += twopi;
-  }
-  else if (newphi >= twopi) {
-    phi_ = std::fmod (newphi, twopi);
-  }
-  else {
     phi_ = newphi;
+  if (newphi < 0 || newphi >= twopi) {
+    phi_ -= twopi * floor(newphi / twopi);
   }
 }
 
