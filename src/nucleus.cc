@@ -232,7 +232,7 @@ void Nucleus::arrange_nucleons() {
     double z = r*dir.z();
     double x = r*dir.x();
     // set position of current nucleon:
-    i->set_position(0.0, x, r*dir.y(), z);
+    i->set_position(FourVector(0.0, x, r*dir.y(), z));
     // update maximal and minimal z values
     z_max_ = (z > z_max_) ? z : z_max_;
     z_min_ = (z < z_min_) ? z : z_min_;

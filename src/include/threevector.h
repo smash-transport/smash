@@ -14,20 +14,31 @@
 
 namespace Smash {
 
+/**
+ * The ThreeVector class represents a physical three-vector
+ * \f$ \vec{x} = (x_1,x_2,x_3)\f$
+ * with the components \f$ x_1,x_2,x_3 \f$.
+ * It is related to the classes FourVector and Angles,
+ * both of which can be converted into a ThreeVector using
+ * the 'threevec()' method.
+ */
 class ThreeVector {
  public:
-  /// default constructor nulls the fourvector components
+  /// default constructor (nulls all components)
   ThreeVector() : x_{{0., 0., 0.}} {}
   /// copy constructor
   ThreeVector(double y1, double y2, double y3)
       : x_{{y1, y2, y3}} {}
+  /* getters and setters for the three components */
   double inline x1() const;
   void inline set_x1(double x);
   double inline x2() const;
   void inline set_x2(double y);
   double inline x3() const;
   void inline set_x3(double z);
+  /// calculate the square of the vector (which is a scalar)
   double inline sqr() const;
+  /// calculate the absolute value
   double inline abs() const;
   /* operators */
   ThreeVector inline operator- () const;

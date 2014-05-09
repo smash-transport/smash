@@ -572,7 +572,7 @@ int resonance_formation(Particles *particles, int particle_id, int other_id,
       resonance.momentum().x3());
 
     /* Initialize position */
-    resonance.set_position(1.0, 0.0, 0.0, 0.0);
+    resonance.set_position(FourVector(1., 0., 0., 0.));
     id_first_new = particles->add_data(resonance);
   } else if (produced_particles.size() == 2) {
     /* 2 particles in final state. Need another particle template */
@@ -596,8 +596,8 @@ int resonance_formation(Particles *particles, int particle_id, int other_id,
                        mass_stable);
 
     /* Initialize positions */
-    resonance.set_position(1.0, 0.0, 0.0, 0.0);
-    stable_product.set_position(1.0, 0.0, 0.0, 0.0);
+    resonance.set_position(FourVector(1., 0., 0., 0.));
+    stable_product.set_position(FourVector(1., 0., 0., 0.));
     id_first_new = particles->add_data(resonance);
     particles->add_data(stable_product);
   } else {

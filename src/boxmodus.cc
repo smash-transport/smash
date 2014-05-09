@@ -109,7 +109,7 @@ void BoxModus::initial_conditions(Particles *particles,
     time_begin = 1.0;
     /* random position in a quadratic box */
     pos = {uniform_length(), uniform_length(), uniform_length()};
-    data.set_position(time_begin, pos);
+    data.set_position(FourVector(time_begin, pos));
     /* IC: debug checks */
     printd_momenta(data);
     printd_position(data);
@@ -146,7 +146,7 @@ void BoxModus::propagate(Particles *particles,
   FourVector distance, position;
   for (ParticleData &data : particles->data()) {
     /* propagation for this time step */
-    distance.set_FourVector(parameters.eps, data.velocity() * parameters.eps);
+    distance = FourVector(parameters.eps, data.velocity() * parameters.eps);
     printd("Particle %d motion: %g %g %g %g\n", data.id(), distance.x0(),
            distance.x1(), distance.x2(), distance.x3());
     /* treat the box boundaries */
