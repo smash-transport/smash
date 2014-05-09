@@ -27,9 +27,6 @@ class OscarOutput : public OutputInterface {
   /// writes the final particle information of an event
   void at_eventend(const Particles &particles, const int event_number) override;
 
-  void after_collision() override;
-  void before_collision() override;
-
   /**
    * Write a prefix line and a line per particle to OSCAR output.
    */

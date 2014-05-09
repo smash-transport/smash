@@ -37,16 +37,6 @@ class OutputInterface {
   virtual void at_eventend(const Particles &, const int ) = 0;
 
   /**
-   *Output before any collision or decay should be added when Collision class is set up.
-   */
-  virtual void before_collision() = 0;
-
-  /**
-   *Output after any collision or decay should be added when Collision class is set up.
-   */
-  virtual void after_collision() = 0;
-
-  /**
    * Called whenever an action modified one or more particles.
    *
    * \param incoming_particles The list of particles before the Action was

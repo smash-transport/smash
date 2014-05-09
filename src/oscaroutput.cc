@@ -56,10 +56,6 @@ void OscarOutput::write(const Particles &particles) {
   }
 }
 
-void OscarOutput::before_collision() {}
-
-void OscarOutput::after_collision() {}
-
 void OscarOutput::write_interaction(const ParticleList &incoming_particles,
                                     const ParticleList &outgoing_particles) {
   /* OSCAR line prefix : initial final

@@ -27,12 +27,6 @@ void VtkOutput::at_eventstart(const Particles &/*particles*/, const int /*event_
 void VtkOutput::at_eventend(const Particles &/*particles*/, const int /*event_number*/) {
 }
 
-void VtkOutput::before_collision() {
-}
-
-void VtkOutput::after_collision() {
-}
-
 void VtkOutput::after_Nth_timestep(const Particles &particles, const int event_number, const int timestep) {
   char filename[32];
   snprintf(filename, sizeof(filename), "pos_ev%05i_tstep%07i.vtk", event_number,
