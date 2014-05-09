@@ -10,7 +10,6 @@
 
 #include <cinttypes>
 #include <cstdlib>
-#include <ctime>
 #include <list>
 #include <string>
 #include <algorithm>
@@ -25,7 +24,6 @@
 #include "include/outputroutines.h"
 #include "include/particlesoutput.h"
 #include "include/random.h"
-#include "include/time.h"
 #include "include/vtkoutput.h"
 
 #include <boost/filesystem.hpp>
@@ -204,14 +202,6 @@ float Experiment<Modus>::energy_total(Particles *particles) {
     energy_sum += data.momentum().x0();
   }
   return energy_sum;
-}
-
-/* set the timer to the actual time in nanoseconds precision */
-template <typename Modus>
-timespec inline Experiment<Modus>::set_timer_start(void) {
-  timespec time;
-  clock_gettime(&time);
-  return time;
 }
 
 template <typename Modus>

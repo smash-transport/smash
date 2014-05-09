@@ -14,6 +14,7 @@
 #include <vector>
 
 #include "include/clock.h"
+#include "include/chrono.h"
 #include "include/crosssections.h"
 #include "include/experimentparameters.h"
 #include "include/modusdefault.h"
@@ -142,8 +143,6 @@ class Experiment : public ExperimentBase {
 
   float energy_total(Particles *particles);
 
-  inline timespec set_timer_start();
-
   /**
    * Struct of several member variables.
    * These variables are combined into a struct for efficient input to functions
@@ -192,8 +191,8 @@ class Experiment : public ExperimentBase {
   const float output_interval_;
   /// initial total energy of the system
   float energy_initial_ = 0.f;
-  /// starting time of the simulation
-  timespec time_start_ = set_timer_start();
+  /// system starting time of the simulation
+  SystemTimePoint time_start_ = SystemClock::now();
 };
 
 }  // namespace Smash

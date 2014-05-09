@@ -9,6 +9,7 @@
 
 #include <list>
 
+#include "include/chrono.h"
 #include "include/particles.h"
 
 namespace Smash {
@@ -24,8 +25,11 @@ void print_header(void);
 void print_measurements(const Particles &particles,
                         const size_t &scatterings_total,
                         const size_t &scatterings_this_interval,
-                        float energy_ini, timespec time_start);
-void print_tail(const timespec time_start, const double &scattering_rate);
+                        float energy_ini,
+                 SystemTimePoint time_start);
+void print_tail(const
+                SystemTimePoint time_start,
+                const double &scattering_rate);
 
 /* Compile time debug info */
 #ifdef DEBUG
@@ -56,9 +60,6 @@ void write_oscar_event_block(Particles *particles,
  */
 void write_oscar(const ParticleData &particle_data,
                  const ParticleType &particle_type, int initial = 0, int final = 0);
-
-/* timing measure */
-double measure_timediff(const timespec time_start);
 
 }  // namespace Smash
 
