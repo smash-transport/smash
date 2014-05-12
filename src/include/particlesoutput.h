@@ -21,10 +21,23 @@ class ParticlesOutput : public OutputInterface {
   ParticlesOutput(boost::filesystem::path path);
   ~ParticlesOutput();
 
-  void write_state(const Particles& particles) override;
+  void at_eventstart(const Particles &particles, const int) override {
+    write_state(particles);
+  }
+
+  void at_eventend(const Particles &particles, const int) override {
+    write_state(particles);
+  }
+
+  void after_Nth_timestep(const Particles &particles, const int,
+                          const int) override {
+    write_state(particles);
+  }
 
  private:
-   const boost::filesystem::path base_path_;
+  void write_state(const Particles &particles);
+
+  const boost::filesystem::path base_path_;
 };
 }  // namespace Smash
 
