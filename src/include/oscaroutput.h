@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef SRC_INCLUDE_PARTICLESOUTPUT_H_
-#define SRC_INCLUDE_PARTICLESOUTPUT_H_
+#ifndef SRC_INCLUDE_OSCAROUTPUT_H_
+#define SRC_INCLUDE_OSCAROUTPUT_H_
 
 #include "filedeleter.h"
 #include "outputinterface.h"
@@ -41,4 +41,4 @@ class OscarOutput : public OutputInterface {
 };
 }  // namespace Smash
 
-#endif  // SRC_INCLUDE_PARTICLESOUTPUT_H_
+#endif  // SRC_INCLUDE_OSCAROUTPUT_H_
