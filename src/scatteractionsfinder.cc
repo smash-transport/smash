@@ -109,7 +109,7 @@ std::vector<ActionPtr> ScatterActionsFinder::find_possible_actions(
        * (3-product gives negative values
        * with the chosen sign convention for the metric). */
       FourVector distance = p1.position() - p2.position();
-      if (-distance.DotThree() > neighborhood_radius_squared)
+      if (distance.sqr3() > neighborhood_radius_squared)
         continue;
 
       /* Check if collision is possible. */

@@ -59,9 +59,9 @@ float ColliderModus::initial_conditions(Particles *particles,
   /* Sample impact parameter */
   double impact_parameter = Random::uniform(0.0, 5.0);
   /* Set positions and momenta */
-  data_projectile->set_position(1.0, impact_parameter, 0.0, -1.0);
+  data_projectile->set_position(FourVector(1., impact_parameter, 0., -1.));
   data_projectile->set_momentum(mass_projectile, 0.0, 0.0, cms_momentum);
-  data_target->set_position(1.0, 0.0, 0.0, 1.0);
+  data_target->set_position(FourVector(1., 0., 0., 1.));
   data_target->set_momentum(mass_target, 0.0, 0.0, -cms_momentum);
   // collider start is hard-coded for now.
   return -1.0f;

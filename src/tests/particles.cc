@@ -28,8 +28,8 @@ TEST(everything) {
   /* 2 particles with null momenta */
   particle_a.set_momentum(0.1, 0.0, 0.0, 0.0);
   particle_b.set_momentum(0.1, 0.0, 0.0, 0.0);
-  particle_a.set_position(1.0, 1.0, 1.0, 1.0);
-  particle_b.set_position(2.0, 2.0, 2.0, 2.0);
+  particle_a.set_position(FourVector(1., 1., 1., 1.));
+  particle_b.set_position(FourVector(2., 2., 2., 2.));
 
   /* check return of particle distance of null momenta particles */
   double distance_squared = particle_distance(&particle_a, &particle_b);

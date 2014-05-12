@@ -30,12 +30,10 @@ DecayAction::DecayAction(const std::vector<int> &in_part,
  * sample the momenta and position of the products and add them
  * to the active particles data structure.
  *
+ * \param[in] incoming0 decaying particle (in its rest frame)
  * \param[in,out] particles Particles in the simulation.
- *
- * \return The ID of the first new particle.
  */
-void DecayAction::one_to_two(Particles *particles) {
-  const ParticleData incoming0 = particles->data(incoming_particles_[0]);
+void DecayAction::one_to_two(const ParticleData &incoming0, Particles *particles) {
   ParticleData &outgoing0 = outgoing_particles_[0];
   ParticleData &outgoing1 = outgoing_particles_[1];
   const ParticleType &outgoing0_type = outgoing0.type(*particles);
@@ -78,12 +76,10 @@ void DecayAction::one_to_two(Particles *particles) {
  * sample the momenta and position of the products and add them
  * to the active particles data structure.
  *
+ * \param[in] incoming0 decaying particle (in its rest frame)
  * \param[in,out] particles Particles in the simulation.
- *
- * \return The ID of the first new particle.
  */
-void DecayAction::one_to_three(Particles *particles) {
-  const ParticleData incoming0 = particles->data(incoming_particles_[0]);
+void DecayAction::one_to_three(const ParticleData &incoming0, Particles *particles) {
   ParticleData &outgoing0 = outgoing_particles_[0];
   ParticleData &outgoing1 = outgoing_particles_[1];
   ParticleData &outgoing2 = outgoing_particles_[2];
@@ -168,9 +164,7 @@ void DecayAction::one_to_three(Particles *particles) {
   Angles phitheta;
   phitheta.distribute_isotropically();
   /* This is the angle of the plane of the three decay particles */
-  outgoing0.set_momentum(mass_a, momentum_a * phitheta.x(),
-                              momentum_a * phitheta.y(),
-                              momentum_a * phitheta.z());
+  outgoing0.set_momentum(mass_a, phitheta.threevec() * momentum_a);
 
   /* Angle between a and b */
   double theta_ab = acos(
@@ -179,9 +173,7 @@ void DecayAction::one_to_three(Particles *particles) {
   printd("theta_ab: %g Ea: %g Eb: %g sab: %g pa: %g pb: %g\n", theta_ab,
          energy_a, energy_b, s_ab, momentum_a, momentum_b);
   bool phi_has_changed = phitheta.add_to_theta(theta_ab);
-  outgoing1.set_momentum(mass_b, momentum_b * phitheta.x(),
-                              momentum_b * phitheta.y(),
-                              momentum_b * phitheta.z());
+  outgoing1.set_momentum(mass_b, phitheta.threevec() * momentum_b);
 
   /* Angle between b and c */
   double theta_bc = acos(
@@ -192,29 +184,20 @@ void DecayAction::one_to_three(Particles *particles) {
   // pass information on whether phi has changed during the last adding
   // on to add_to_theta:
   phitheta.add_to_theta(theta_bc, phi_has_changed);
-  outgoing2.set_momentum(mass_c, momentum_c * phitheta.x(),
-                              momentum_c * phitheta.y(),
-                              momentum_c * phitheta.z());
+  outgoing2.set_momentum(mass_c, phitheta.threevec() * momentum_c);
 
   /* Momentum check */
-  double energy = outgoing0.momentum().x0() +
-                  outgoing1.momentum().x0() +
-                  outgoing2.momentum().x0();
-  double px = outgoing0.momentum().x1() + outgoing1.momentum().x1() +
-              outgoing2.momentum().x1();
-  double py = outgoing0.momentum().x2() + outgoing1.momentum().x2() +
-              outgoing2.momentum().x2();
-  double pz = outgoing0.momentum().x3() + outgoing1.momentum().x3() +
-              outgoing2.momentum().x3();
+  FourVector ptot = outgoing0.momentum() + outgoing1.momentum() +
+                    outgoing2.momentum();
 
-  if (fabs(energy - total_energy) > really_small) {
+  if (fabs(ptot.x0() - total_energy) > really_small) {
     printf("1->3 energy not conserved! Before: %g After: %g\n", total_energy,
-           energy);
+           ptot.x0());
   }
-  if (fabs(px) > really_small || fabs(py) > really_small ||
-      fabs(pz) > really_small) {
-    printf("1->3 momentum check failed. Total momentum: %g %g %g\n", px, py,
-           pz);
+  if (fabs(ptot.x1()) > really_small || fabs(ptot.x2()) > really_small ||
+      fabs(ptot.x3()) > really_small) {
+    printf("1->3 momentum check failed. Total momentum: %g %g %g\n", ptot.x1(),
+           ptot.x2(), ptot.x3());
   }
 
   /* All decay products begin from the same point */
@@ -260,7 +243,8 @@ void DecayAction::perform(Particles *particles, size_t &id_process) {
     return;
   }
 
-  ParticleData &particle0 = particles->data(incoming_particles_[0]);
+  /* local copy of the initial state */
+  ParticleData particle0 = particles->data(incoming_particles_[0]);
   const ParticleType &type0 = particle0.type(*particles);
 
   if (interaction_type_ != 2) {
@@ -268,19 +252,12 @@ void DecayAction::perform(Particles *particles, size_t &id_process) {
            type0.name().c_str(), interaction_type_);
   }
 
-  /* Save a copy of the initial state */
-  const ParticleData initial_data = particle0;
-
   printd("Process: Resonance decay. ");
   printd_momenta("Resonance momenta before decay", particle0);
 
   /* boost to rest frame */
-  FourVector velocity_CM{1.0,
-                         particle0.momentum().x1() / particle0.momentum().x0(),
-                         particle0.momentum().x2() / particle0.momentum().x0(),
-                         particle0.momentum().x3() / particle0.momentum().x0()};
-  particle0.set_momentum(particle0.momentum().LorentzBoost(velocity_CM));
-  particle0.set_position(particle0.position().LorentzBoost(velocity_CM));
+  ThreeVector velocity_CM = particle0.velocity();
+  particle0.boost(velocity_CM);
 
   printd_momenta("Boosted resonance momenta before decay", particle0);
 
@@ -293,9 +270,9 @@ void DecayAction::perform(Particles *particles, size_t &id_process) {
    */
   outgoing_particles_ = choose_channel(particles);
   if (outgoing_particles_.size() == 2) {
-    one_to_two(particles);
+    one_to_two (particle0, particles);
   } else if (outgoing_particles_.size() == 3) {
-    one_to_three(particles);
+    one_to_three (particle0, particles);
   } else {
     throw InvalidDecay(
         "DecayAction::perform: Only 1->2 or 1->3 processes are supported. "
@@ -303,68 +280,17 @@ void DecayAction::perform(Particles *particles, size_t &id_process) {
         std::to_string(outgoing_particles_.size()) + " was requested.");
   }
 
-  for (const auto &p : outgoing_particles_) {
-    printd_momenta("particle momenta in lrf", p);
-  }
-
-  boost_back_CM(&outgoing_particles_[0], &outgoing_particles_[1], &velocity_CM);
-
-  /* Check for the possible third final state particle */
-  if (outgoing_particles_.size() == 3) {
-    FourVector velocity = velocity_CM;
-    velocity *= -1;
-    velocity.set_x0(1.0);
-    FourVector momentum_c(outgoing_particles_[2].momentum());
-    FourVector position_c(outgoing_particles_[2].position());
-    /* Boost the momenta back to lab frame */
-    momentum_c = momentum_c.LorentzBoost(velocity);
-    /* Boost the position back to lab frame */
-    position_c = position_c.LorentzBoost(velocity);
-    outgoing_particles_[2].set_momentum(momentum_c);
-    outgoing_particles_[2].set_position(position_c);
-  }
-
-  for (const auto &p : outgoing_particles_) {
-    printd_momenta("particle momenta in comp", p);
-  }
-
-  FourVector final_momentum{};  // null
   for (auto &p : outgoing_particles_) {
-    final_momentum += p.momentum();
+    printd_momenta("particle momenta in lrf", p);
+    p.boost(-velocity_CM);
+    printd_momenta("particle momenta in comp", p);
     // unset collision time for both particles + keep id + unset partner
     p.set_collision_past(id_process);
   }
 
   id_process++;
 
-  /* Check momentum conservation */
-  FourVector momentum_difference;
-  momentum_difference += initial_data.momentum();
-  momentum_difference -= final_momentum;
-  if (fabs(momentum_difference.x0()) > really_small) {
-    printf("Process %zu type %i particle %s decay to %s and %s ", id_process,
-           interaction_type_, type0.name().c_str(),
-           outgoing_particles_[0].type(*particles).name().c_str(),
-           outgoing_particles_[1].type(*particles).name().c_str());
-    if (outgoing_particles_.size() == 3) {
-      printf("and %s ", outgoing_particles_[2].type(*particles).name().c_str());
-    }
-    printf("time %g\n", initial_data.position().x0());
-    printf("Warning: Interaction type %i E conservation violation %g\n",
-           interaction_type_, momentum_difference.x0());
-  }
-  if (fabs(momentum_difference.x1()) > really_small) {
-    printf("Warning: Interaction type %i px conservation violation %g\n",
-           interaction_type_, momentum_difference.x1());
-  }
-  if (fabs(momentum_difference.x2()) > really_small) {
-    printf("Warning: Interaction type %i py conservation violation %g\n",
-           interaction_type_, momentum_difference.x2());
-  }
-  if (fabs(momentum_difference.x3()) > really_small) {
-    printf("Warning: Interaction type %i pz conservation violation %g\n",
-           interaction_type_, momentum_difference.x3());
-  }
+  check_conservation (particles, id_process);
 
   /* Remove decayed particle */
   particles->remove(particle0.id());

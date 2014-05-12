@@ -25,6 +25,7 @@
 #include "include/outputinterface.h"
 #include "include/particles.h"
 #include "include/random.h"
+#include "include/threevector.h"
 
 namespace Smash {
 
@@ -81,7 +82,8 @@ float BoxModus::initial_conditions(Particles *particles,
                                          static_cast<double>(this->length_));
   /* Set paricles IC: */
   for (ParticleData &data : particles->data()) {
-    double x, y, z, time_begin;
+    double time_begin;
+    ThreeVector pos;
     /* back to back pair creation with random momenta direction */
     if (unlikely(data.id() == particles->id_max() && !(data.id() % 2))) {
       /* poor last guy just sits around */
@@ -99,21 +101,16 @@ float BoxModus::initial_conditions(Particles *particles,
       printd("Particle %d radial momenta %g phi %g cos_theta %g\n", data.id(),
              momentum_radial, phitheta.phi(), phitheta.costheta());
       data.set_momentum(
-          particles->particle_type(data.pdgcode()).mass(), momentum_radial * phitheta.x(),
-          momentum_radial * phitheta.y(), momentum_radial * phitheta.z());
+          particles->particle_type(data.pdgcode()).mass(), phitheta.threevec() * momentum_radial);
     } else {
       data.set_momentum(particles->particle_type(data.pdgcode()).mass(),
-                             -particles->data(data.id() - 1).momentum().x1(),
-                             -particles->data(data.id() - 1).momentum().x2(),
-                             -particles->data(data.id() - 1).momentum().x3());
+                       -particles->data(data.id() - 1).momentum().threevec());
     }
     momentum_total += data.momentum();
     time_begin = 0.0;
     /* random position in a quadratic box */
-    x = uniform_length();
-    y = uniform_length();
-    z = uniform_length();
-    data.set_position(time_begin, x, y, z);
+    pos = {uniform_length(), uniform_length(), uniform_length()};
+    data.set_position(FourVector(time_begin, pos));
     /* IC: debug checks */
     printd_momenta(data);
     printd_position(data);
@@ -152,10 +149,8 @@ void BoxModus::propagate(Particles *particles,
   FourVector distance, position;
   for (ParticleData &data : particles->data()) {
     /* propagation for this time step */
-    distance.set_FourVector(parameters.timestep_size(),
-                      data.velocity_x() * parameters.timestep_size(),
-                      data.velocity_y() * parameters.timestep_size(),
-                      data.velocity_z() * parameters.timestep_size());
+    distance = FourVector(parameters.timestep_size(),
+                          data.velocity() * parameters.timestep_size());
     printd("Particle %d motion: %g %g %g %g\n", data.id(), distance.x0(),
            distance.x1(), distance.x2(), distance.x3());
     /* treat the box boundaries */

@@ -14,6 +14,7 @@
 #include <cstdlib>
 #include <stdexcept>
 #include "include/random.h"
+#include "include/threevector.h"
 #include "include/constants.h"
 
 namespace Smash {
@@ -142,6 +143,8 @@ class Angles {
    * \f$z = \cos\vartheta\f$
    **/
   double z() const;
+  /// get the three-vector
+  ThreeVector inline threevec() const;
   /// returns the polar angle
   double theta() const;
 
@@ -237,6 +240,11 @@ double inline Angles::sintheta() const {
 double inline Angles::x() const { return sintheta()*cos(phi_); }
 double inline Angles::y() const { return sintheta()*sin(phi_); }
 double inline Angles::z() const { return costheta_; }
+
+ThreeVector inline Angles::threevec() const {
+  return ThreeVector(x(),y(),z());
+}
+
 double inline Angles::theta() const { return acos(costheta_); }
 
 }  // namespace Smash
