@@ -44,7 +44,7 @@ SphereModus::SphereModus(Configuration modus_config)
 
 
 /* initial_conditions - sets particle data for @particles */
-void SphereModus::initial_conditions(Particles *particles) {
+float SphereModus::initial_conditions(Particles *particles) {
   size_t number_total = 0;
   double time_start = 1.0;
   FourVector momentum_total(0, 0, 0, 0);

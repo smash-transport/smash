@@ -108,7 +108,7 @@ class NucleusModus : public ModusDefault {
 
   void print_startup();
 
-  void initial_conditions(Particles *particles,
+  float initial_conditions(Particles *particles,
                           const ExperimentParameters &parameters);
 
   struct NucleusEmpty : public ModusDefault::BadInput {

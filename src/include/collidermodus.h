@@ -31,7 +31,7 @@ class ColliderModus : public ModusDefault {
   void print_startup();  // TODO(mkretz): needs to be discoverable from an
                          // outside "printer"
 
-  void initial_conditions(Particles *particles,
+  float initial_conditions(Particles *particles,
                           const ExperimentParameters &parameters);
 
   // in ModusDefault:

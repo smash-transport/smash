@@ -40,7 +40,7 @@ class ModusDefault {
   // never needs a virtual destructor
 
   // Missing functions for concrete Modus implementations:
-  // void initial_conditions(Particles *particles);
+  // float initial_conditions(Particles *particles);
 
   /**
    * Only needed for BoxModus. The default for all the other modi does nothing.

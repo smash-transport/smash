@@ -96,10 +96,10 @@ smash_add_test(collider_run smash smash -m Collider ${SMASH_OPTIONS})
 # verify that the binary can do sphere
 #smash_add_test(sphere_run smash smash -m Sphere ${SMASH_OPTIONS})
 
-# verify that binary runs certain number of steps
-smash_add_test(box_steps smash smash -s 20 -m Box ${SMASH_OPTIONS})
-smash_add_test(collider_steps smash smash -s 20 -m Collider ${SMASH_OPTIONS})
-#smash_add_test(sphere_steps smash smash -s 20 -m Sphere ${SMASH_OPTIONS})
+# verify that binary runs certain time (this corresponds to 20 steps)
+smash_add_test(box_steps smash smash -e 2.0 -c 'General: {DELTA_TIME: 0.1}' -m Box ${SMASH_OPTIONS})
+smash_add_test(collider_steps smash smash -e 2.0 -c 'General: {DELTA_TIME: 0.1}' -m Collider ${SMASH_OPTIONS})
+#smash_add_test(sphere_steps smash smash -e 2.0 -c 'General: {DELTA_TIME: 0.1}' -m Sphere ${SMASH_OPTIONS})
 
 # verify that default run has no mem leaks
 find_program(CTEST_MEMORYCHECK_COMMAND valgrind)

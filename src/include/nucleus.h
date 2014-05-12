@@ -113,7 +113,7 @@ class Nucleus {
   void shift(const bool is_projectile,
              const double& initial_z_displacement,
              const double& x_offset,
-             const double& simulation_time);
+             const float& simulation_time);
   /// copies the particles from this nucleus into the particle list.
   void copy_particles(Particles* particles);
   /// Number of numerical (=test-)particles in the nucleus:

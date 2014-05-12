@@ -42,7 +42,7 @@ void BoxModus::print_startup() {
 }
 
 /* initial_conditions - sets particle data for @particles */
-void BoxModus::initial_conditions(Particles *particles,
+float BoxModus::initial_conditions(Particles *particles,
                                   const ExperimentParameters &parameters) {
   double momentum_radial, number_density_total = 0;
   Angles phitheta;
@@ -130,6 +130,7 @@ void BoxModus::initial_conditions(Particles *particles,
   /* allows to check energy conservation */
   printf("IC total energy: %g [GeV]\n", momentum_total.x0());
   number_density_initial_ = number_density_total;
+  return 0.f;
 }
 
 /* evolve - the core of the box, stepping forward in time */

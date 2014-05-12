@@ -30,7 +30,7 @@ void ColliderModus::print_startup() {
 }
 
 /* initial_conditions - sets particle data for @particles */
-void ColliderModus::initial_conditions(Particles *particles,
+float ColliderModus::initial_conditions(Particles *particles,
                                        const ExperimentParameters &) {
   /* Create "projectile" particle */
   particles->create(1, projectile_);
@@ -63,6 +63,8 @@ void ColliderModus::initial_conditions(Particles *particles,
   data_projectile->set_momentum(mass_projectile, 0.0, 0.0, cms_momentum);
   data_target->set_position(1.0, 0.0, 0.0, 1.0);
   data_target->set_momentum(mass_target, 0.0, 0.0, -cms_momentum);
+  // collider start is hard-coded for now.
+  return -1.0f;
 }
 
 }  // namespace Smash

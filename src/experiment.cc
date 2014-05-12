@@ -106,7 +106,8 @@ void Experiment<Modus>::initialize(const bf::path &/*path*/) {
   parameters_.reset_clock(initial_clock_);
 
   /* Sample particles according to the initial conditions */
-  modus_.initial_conditions(&particles_, parameters_);
+  float time = modus_.initial_conditions(&particles_, parameters_);
+  parameters_.labclock.reset(time);
   /* Save the initial energy in the system for energy conservation checks */
   energy_initial_ = energy_total(&particles_);
   /* Print output headers */
@@ -125,7 +126,6 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
                      interactions_this_interval, energy_initial_, time_start_);
 
   while (! (++parameters_.labclock > end_time_)) {
-  // for (int step = 0; step < steps_; step++) {
     std::vector<ActionPtr> actions;  // XXX: a std::list might be better suited
                                      // for the task: lots of appending, then
                                      // sorting and finally a single linear

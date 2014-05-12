@@ -29,7 +29,7 @@ class SphereModus : public ModusDefault {
   /* member funtions */
   /* special class funtions */
   int evolve(Particles *particles, CrossSections *cross_sections);
-  void initial_conditions(Particles *particles);
+  float initial_conditions(Particles *particles);
   //     FourVector boundary_condition(FourVector position);
 
  private:

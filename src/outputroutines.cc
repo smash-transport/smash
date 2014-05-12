@@ -66,7 +66,7 @@ void print_measurements(const Particles &particles,
            scatterings_total * 2 / (particles.size() * time),
            scatterings_this_interval, particles.size(), elapsed_seconds.count());
   else
-    printf("%5g%13g%13g%13g%10i%10zu%13g\n", time,
+    printf("%+5.2f%13g%13g%13g%10i%10zu%13g\n", time,
            energy_ini - momentum_total.x0(),
            sqrt(-1 * momentum_total.DotThree()), 0.0, 0, particles.size(),
            elapsed_seconds.count());

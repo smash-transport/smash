@@ -116,12 +116,12 @@ int main(int argc, char *argv[]) {
   constexpr option longopts[] = {
     { "config",     required_argument,      0, 'c' },
     { "decaymodes", required_argument,      0, 'd' },
+    { "endtime",    required_argument,      0, 'e' },
     { "force",      no_argument,            0, 'f' },
     { "help",       no_argument,            0, 'h' },
     { "inputfile",  required_argument,      0, 'i' },
     { "modus",      required_argument,      0, 'm' },
     { "particles",  required_argument,      0, 'p' },
-    { "steps",      required_argument,      0, 's' },
     { "output",     required_argument,      0, 'o' },
     { "version",    no_argument,            0, 'v' },
     { NULL,         0, 0, 0 }
@@ -140,7 +140,7 @@ int main(int argc, char *argv[]) {
 
     /* check for overriding command line arguments */
     int opt;
-    while ((opt = getopt_long(argc, argv, "c:d:fhi:m:p:s:o:v", longopts,
+    while ((opt = getopt_long(argc, argv, "c:d:e:fhi:m:p:o:v", longopts,
                               nullptr)) != -1) {
       switch (opt) {
         case 'c':
@@ -165,8 +165,8 @@ int main(int argc, char *argv[]) {
         case 'p': {
           configuration["particles"] = read_all(bf::ifstream{optarg});
         } break;
-        case 's':
-          configuration["General"]["END_TIME"] = abs(atoi(optarg));
+        case 'e':
+          configuration["General"]["END_TIME"] = abs(atof(optarg));
           break;
         case 'o':
           output_path = optarg;

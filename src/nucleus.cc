@@ -309,7 +309,7 @@ void Nucleus::auto_set_masses(const Particles *external_particles) {
 void Nucleus::shift(const bool is_projectile,
                     const double& initial_z_displacement,
                     const double& x_offset,
-                    const double& simulation_time) {
+                    const float& simulation_time) {
   // amount to shift z value. If is_projectile, we shift to -z_max_,
   // else we shift to -z_min_ (z_min_ itself should be negative).
   double z_offset = is_projectile ? -z_max_ : -z_min_;

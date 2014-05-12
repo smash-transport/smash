@@ -92,6 +92,21 @@ class Clock {
     return (current_time() <= n * interval
          && n * interval < current_time() + timestep_size_);
   }
+  /** resets the time to a pre-defined value
+   * 
+   * This is the only way of turning the clock back. It is needed so
+   * that the time can be adjusted after initialization (different
+   * initial conditions may require different starting times).
+   *
+   **/
+  void reset(const float reset_time) {
+    if (reset_time < current_time()) {
+      printf("Resetting clock from %g fm/c to %g fm/c\n",
+              current_time(), reset_time);
+    }
+    reset_time_ = reset_time;
+    counter_ = 0.0;
+  }
   /// advances the clock by one tick (\f$\Delta t\f$)
   Clock& operator++() {
     counter_++;
