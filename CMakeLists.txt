@@ -54,6 +54,12 @@ endif()
 # enable debug preprocessor variable
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
 
+option(Profile "Profile" OFF)
+if(Profile)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg -O0")
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pg -O0")
+endif(Profile)
+
 # have binary in the build directory
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR})
 
