@@ -22,6 +22,7 @@
 #include "include/nucleusmodus.h"
 #include "include/oscaroutput.h"
 #include "include/outputroutines.h"
+#include "include/particlesoutput.h"
 #include "include/random.h"
 #include "include/vtkoutput.h"
 
@@ -200,6 +201,7 @@ float Experiment<Modus>::energy_total(Particles *particles) {
 template <typename Modus>
 void Experiment<Modus>::run(const bf::path &path) {
   outputs_.emplace_back(new OscarOutput(path));
+  outputs_.emplace_back(new ParticlesOutput(path));
   outputs_.emplace_back(new VtkOutput(path));
 
   for (int j = 0; j < nevents_; j++) {
