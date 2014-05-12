@@ -10,6 +10,8 @@
 #ifndef SRC_INCLUDE_CLOCK_H_
 #define SRC_INCLUDE_CLOCK_H_
 
+#include <cmath>
+
 namespace Smash {
 
 /** Clock tracks the simulation time, i.e., the time IN the simulation.

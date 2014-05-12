@@ -30,4 +30,8 @@ struct default_delete<std::FILE> {
 };
 }  // namespace std
 
+namespace Smash {
+using FilePtr = std::unique_ptr<std::FILE>;
+}  // namespace Smash
+
 #endif  // SRC_INCLUDE_FILEDELETER_H_

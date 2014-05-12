@@ -22,6 +22,7 @@
 #include "include/experimentparameters.h"
 #include "include/macros.h"
 #include "include/outputroutines.h"
+#include "include/outputinterface.h"
 #include "include/particles.h"
 #include "include/random.h"
 
@@ -145,7 +146,8 @@ int BoxModus::sanity_check(Particles *particles) {
 
 /* propagate all particles */
 void BoxModus::propagate(Particles *particles,
-                         const ExperimentParameters &parameters) {
+                         const ExperimentParameters &parameters,
+                         const OutputsList &output_list) {
   FourVector distance, position;
   for (ParticleData &data : particles->data()) {
     /* propagation for this time step */
@@ -161,12 +163,12 @@ void BoxModus::propagate(Particles *particles,
     position += distance;
     bool wall_hit = enforce_periodic_boundaries(position.begin() + 1,
                                                 position.end(), length_);
-    if (wall_hit) {
-      write_oscar(data, particles->particle_type(data.pdgcode()), 1, 1);
-    }
+    const ParticleList incoming_particle{1, data};
     data.set_position(position);
     if (wall_hit) {
-      write_oscar(data, particles->particle_type(data.pdgcode()));
+      for (const auto &output : output_list) {
+        output->write_interaction(incoming_particle, {1, data});
+      }
     }
     printd_position(data);
   }

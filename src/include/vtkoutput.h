@@ -10,6 +10,7 @@
 #ifndef SRC_INCLUDE_VTKOUTPUT_H_
 #define SRC_INCLUDE_VTKOUTPUT_H_
 
+#include "clock.h"
 #include "outputinterface.h"
 #include <boost/filesystem.hpp>
 class Particles;
@@ -21,7 +22,11 @@ class VtkOutput : public OutputInterface {
    VtkOutput(boost::filesystem::path path);
    ~VtkOutput();
 
-   void write_state(const Particles &particles) override;
+   void at_eventstart(const Particles &particles, const int event_number) override;
+   void at_eventend(const Particles &particles, const int event_number) override;
+   void after_Nth_timestep(const Particles &particles, const int event_number,
+                           const Clock timestep) override;
+
 
  private:
    const boost::filesystem::path base_path_;

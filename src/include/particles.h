@@ -182,6 +182,12 @@ class Particles {
    *
    * \throws std::out_of_range If there is no particle with the given \p id.
    */
+  inline ParticleData &data(int id) { return data_.at(id); }
+  /**
+   * Return the specific data of a particle according to its id
+   *
+   * \throws std::out_of_range If there is no particle with the given \p id.
+   */
   inline const ParticleData &data(int id) const;
   /**
    * Return the specific datapointer of a particle according to its id
