@@ -392,8 +392,7 @@ inline double Particles::time() const {
 }
 
 /* boost_CM - boost to center of momentum and return the corresponding boost vector */
-void boost_CM(ParticleData *particle1, ParticleData *particle2,
-              ThreeVector &velocity);
+ThreeVector boost_CM(ParticleData *particle1, ParticleData *particle2);
 
 /* boost_from_CM - boost back from center of momentum */
 void boost_back_CM(ParticleData *particle1, ParticleData *particle2,

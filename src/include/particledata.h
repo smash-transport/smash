@@ -70,6 +70,8 @@ class ParticleData {
   inline void set_position(const FourVector &position);
   /// get the velocity 3-vector
   inline ThreeVector velocity (void) const { return momentum_.threevec() / momentum_.x0(); }
+  /// do a Lorentz-boost
+  inline void boost (const ThreeVector &v);
   /* overloaded operators */
   inline bool operator==(const ParticleData &a) const;
   inline bool operator<(const ParticleData &a) const;
@@ -176,6 +178,13 @@ inline const FourVector &ParticleData::position(void) const {
 /// set the particle position directly
 inline void ParticleData::set_position(const FourVector &pos) {
   position_ = pos;
+}
+
+inline void ParticleData::boost (const ThreeVector &v)
+{
+  set_momentum(momentum_.LorentzBoost(v));
+  // TODO: do we actually need to boost the position?
+  set_position(position_.LorentzBoost(v));
 }
 
 /// check if the particles are identical

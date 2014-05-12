@@ -25,49 +25,26 @@
 namespace Smash {
 
 /* boost_CM - boost to center of momentum */
-void boost_CM(ParticleData *particle1, ParticleData *particle2,
-  ThreeVector &velocity) {
-  FourVector momentum1(particle1->momentum()), momentum2(particle2->momentum());
-  FourVector position1(particle1->position()), position2(particle2->position());
-  double cms_energy = momentum1.x0() + momentum2.x0();
-
+ThreeVector boost_CM(ParticleData *particle1, ParticleData *particle2) {
   // determine CMS velocity
-  velocity = (momentum1.threevec() + momentum2.threevec()) / cms_energy;
+  FourVector mom = particle1->momentum() + particle2->momentum();
+  ThreeVector velocity = mom.threevec() / mom.x0();
 
   // Boost the momenta into CMS frame
-  momentum1 = momentum1.LorentzBoost(velocity);
-  momentum2 = momentum2.LorentzBoost(velocity);
-
-  // Boost the positions into CMS frame
-  position1 = position1.LorentzBoost(velocity);
-  position2 = position2.LorentzBoost(velocity);
-
-  particle1->set_momentum(momentum1);
-  particle1->set_position(position1);
-  particle2->set_momentum(momentum2);
-  particle2->set_position(position2);
+  particle1->boost(velocity);
+  particle2->boost(velocity);
+  
+  return velocity;
 }
 
 /* boost_back_CM - boost back from center of momentum */
 void boost_back_CM(ParticleData *particle1, ParticleData *particle2,
                    const ThreeVector &velocity_orig) {
-  FourVector momentum1(particle1->momentum()), momentum2(particle2->momentum());
-  FourVector position1(particle1->position()), position2(particle2->position());
 
   ThreeVector velocity = - velocity_orig;
 
-  /* Boost the momenta back to lab frame */
-  momentum1 = momentum1.LorentzBoost(velocity);
-  momentum2 = momentum2.LorentzBoost(velocity);
-
-  /* Boost the positions back to lab frame */
-  position1 = position1.LorentzBoost(velocity);
-  position2 = position2.LorentzBoost(velocity);
-
-  particle1->set_momentum(momentum1);
-  particle1->set_position(position1);
-  particle2->set_momentum(momentum2);
-  particle2->set_position(position2);
+  particle1->boost(velocity);
+  particle2->boost(velocity);
 }
 
 /* particle_distance - measure distance between two particles
@@ -77,10 +54,9 @@ double particle_distance(ParticleData *particle_orig1,
   ParticleData *particle_orig2) {
   /* Copy the particles in order to boost them and to forget the copy */
   ParticleData particle1 = *particle_orig1, particle2 = *particle_orig2;
-  ThreeVector velocity_CM;
 
   /* boost particles in center of momenta frame */
-  boost_CM(&particle1, &particle2, velocity_CM);
+  boost_CM(&particle1, &particle2);
   FourVector position_difference = particle1.position() - particle2.position();
   printd("Particle %d<->%d position difference: %g %g %g %g [fm]\n",
     particle1.id(), particle2.id(), position_difference.x0(),

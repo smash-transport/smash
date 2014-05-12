@@ -59,4 +59,35 @@ ParticleList Action::incoming_particles(const Particles &particles) const {
   return std::move(l);
 }
 
+void Action::check_conservation(const Particles *particles,
+                                const size_t &id_process) const {
+
+  /* Check momentum conservation */
+  FourVector momentum_difference;
+  for (const auto &i : incoming_particles_) {
+    momentum_difference += particles->data(i).momentum();
+  }
+  for (const auto &p : outgoing_particles_) {
+    momentum_difference -= p.momentum();
+  }
+
+  /* TODO: throw an exception */
+  if (fabs(momentum_difference.x0()) > really_small) {
+    printf("Process %zu type %i\n", id_process, interaction_type_);
+    printf("Warning: Interaction type %i E conservation violation %g\n",
+           interaction_type_, momentum_difference.x0());
+  }
+  if (fabs(momentum_difference.x1()) > really_small)
+    printf("Warning: Interaction type %i px conservation violation %g\n",
+           interaction_type_, momentum_difference.x1());
+  if (fabs(momentum_difference.x2()) > really_small)
+    printf("Warning: Interaction type %i py conservation violation %g\n",
+           interaction_type_, momentum_difference.x2());
+  if (fabs(momentum_difference.x3()) > really_small)
+    printf("Warning: Interaction type %i pz conservation violation %g\n",
+           interaction_type_, momentum_difference.x3());
+    
+  // TODO: check other conservation laws (baryon number etc)
+}
+
 }  // namespace Smash

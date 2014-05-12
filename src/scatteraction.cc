@@ -62,7 +62,6 @@ void ScatterAction::perform (Particles *particles, size_t &id_process)
   ParticleData data_b = particles->data(id_b);
 
   FourVector initial_momentum(data_a.momentum() + data_b.momentum());
-  FourVector final_momentum;
 
   printd("Process %zu type %i particle %s<->%s colliding %d<->%d time %g\n",
          id_process, interaction_type_, data_a.type(*particles).name().c_str(),
@@ -77,14 +76,12 @@ void ScatterAction::perform (Particles *particles, size_t &id_process)
     printd("Process: Elastic collision.\n");
 
     /* processes computed in the center of momenta */
-    boost_CM(&data_a, &data_b, velocity_CM);
+    velocity_CM = boost_CM(&data_a, &data_b);
     momenta_exchange(&data_a, &data_b);
     boost_back_CM(&data_a, &data_b, velocity_CM);
 
     printd_momenta("particle 1 momenta after", data_a);
     printd_momenta("particle 2 momenta after", data_b);
-
-    final_momentum = data_a.momentum() + data_b.momentum();
 
     /* unset collision time for both particles + keep id + unset partner */
     data_a.set_collision_past(id_process);
@@ -101,7 +98,7 @@ void ScatterAction::perform (Particles *particles, size_t &id_process)
     printd("Process: Resonance formation. ");
 
     /* processes computed in the center of momenta */
-    boost_CM(&data_a, &data_b, velocity_CM);
+    velocity_CM = boost_CM(&data_a, &data_b);
     resonance_formation(*particles, data_a, data_b);
     boost_back_CM(&data_a, &data_b, velocity_CM);  // TODO(mkretz) why? can't
                                                     // we just boost a copy of
@@ -111,14 +108,12 @@ void ScatterAction::perform (Particles *particles, size_t &id_process)
     for (ParticleData &new_particle : outgoing_particles_) {
       new_particle.set_momentum(
           new_particle.momentum().LorentzBoost(-velocity_CM));
-      final_momentum += new_particle.momentum();
 
       /* The starting point of resonance is between
        * the two initial particles
-       * x_middle = x_a + (x_b - x_a) / 2
+       * x_middle = (x_a + x_b) / 2
        */
-      FourVector middle_point =
-          data_a.position() + (data_b.position() - data_a.position()) / 2.0;
+      FourVector middle_point = (data_a.position() + data_b.position()) / 2.;
       new_particle.set_position(middle_point);
       /* unset collision time for particles + keep id + unset partner */
       new_particle.set_collision_past(id_process);
@@ -130,6 +125,8 @@ void ScatterAction::perform (Particles *particles, size_t &id_process)
 
       new_particle.set_id(particles->add_data(new_particle));
     }
+
+    check_conservation (particles, id_process);
 
     /* Remove the initial particles */
     particles->remove(data_a.id());
@@ -144,24 +141,6 @@ void ScatterAction::perform (Particles *particles, size_t &id_process)
   } /* end switch (interaction_type_) */
 
   id_process++;
-
-  FourVector momentum_difference;
-  momentum_difference += initial_momentum;
-  momentum_difference -= final_momentum;
-  if (fabs(momentum_difference.x0()) > really_small) {
-    printf("Process %zu type %i\n", id_process, interaction_type_);
-    printf("Warning: Interaction type %i E conservation violation %g\n",
-           interaction_type_, momentum_difference.x0());
-  }
-  if (fabs(momentum_difference.x1()) > really_small)
-    printf("Warning: Interaction type %i px conservation violation %g\n",
-           interaction_type_, momentum_difference.x1());
-  if (fabs(momentum_difference.x2()) > really_small)
-    printf("Warning: Interaction type %i py conservation violation %g\n",
-           interaction_type_, momentum_difference.x2());
-  if (fabs(momentum_difference.x3()) > really_small)
-    printf("Warning: Interaction type %i pz conservation violation %g\n",
-           interaction_type_, momentum_difference.x3());
 }
 
 void ScatterAction::resonance_formation(const Particles &particles,

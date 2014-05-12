@@ -70,6 +70,8 @@ class Action {
    */
   const ParticleList &outgoing_particles() const { return outgoing_particles_; }
 
+  /** Check various conservation laws. */
+  void check_conservation(const Particles *particles, const size_t &id_process) const;
  protected:
   /** ID codes of incoming particles  */
   std::vector<int> incoming_particles_;
@@ -122,8 +124,8 @@ class DecayAction : public Action {
   };
 
  private:
-  void one_to_two(Particles *particles);
-  void one_to_three(Particles *particles);
+  void one_to_two (const ParticleData &incoming0, Particles *particles);
+  void one_to_three (const ParticleData &incoming0, Particles *particles);
 };
 
 /**
