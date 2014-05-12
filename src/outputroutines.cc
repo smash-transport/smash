@@ -64,13 +64,13 @@ void print_measurements(const Particles &particles,
   if (likely(time > 0))
     printf("%5g%13g%13g%13g%10zu%10zu%13g\n", time,
            energy_ini - momentum_total.x0(),
-           sqrt(-1 * momentum_total.DotThree()),
+           momentum_total.abs3(),
            scatterings_total * 2 / (particles.size() * time),
            scatterings_this_interval, particles.size(), elapsed_seconds.count());
   else
     printf("%5g%13g%13g%13g%10i%10zu%13g\n", time,
            energy_ini - momentum_total.x0(),
-           sqrt(-1 * momentum_total.DotThree()), 0.0, 0, particles.size(),
+           momentum_total.abs3(), 0.0, 0, particles.size(),
            elapsed_seconds.count());
 }
 

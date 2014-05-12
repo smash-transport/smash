@@ -22,10 +22,7 @@ void ModusDefault::propagate(Particles *particles,
   FourVector distance, position;
   for (ParticleData &data : particles->data()) {
     /* propagation for this time step */
-    distance.set_FourVector(parameters.eps,
-                            data.velocity_x() * parameters.eps,
-                            data.velocity_y() * parameters.eps,
-                            data.velocity_z() * parameters.eps);
+    distance = FourVector(parameters.eps, data.velocity() * parameters.eps);
     printd("Particle %d motion: %g %g %g %g\n", data.id(), distance.x0(),
            distance.x1(), distance.x2(), distance.x3());
     position = data.position();

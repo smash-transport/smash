@@ -10,6 +10,8 @@
 #include <array>
 #include <cmath>
 
+#include "include/threevector.h"
+
 namespace Smash {
 
 /**
@@ -31,7 +33,9 @@ class FourVector {
   /// copy constructor
   FourVector(double y0, double y1, double y2, double y3)
       : x_{{y0, y1, y2, y3}} {}
-  /* t, x_\perp, z */
+  FourVector(double y0, ThreeVector vec)
+      : x_{{y0, vec.x1(), vec.x2(), vec.x3()}} {}
+  /* getters and setters for the four components */
   double inline x0(void) const;
   void inline set_x0(double t);
   double inline x1(void) const;
@@ -40,60 +44,25 @@ class FourVector {
   void inline set_x2(double y);
   double inline x3(void) const;
   void inline set_x3(double z);
-  /* set all four values */
-  void inline set_FourVector(const double t, const double x, const double y,
-                             const double z);
-  /* inlined operations */
+  /// get the three-vector (spatial components)
+  ThreeVector inline threevec() const;
+  /// calculate the scalar product with another four-vector
   double inline Dot(const FourVector &a) const;
-  double inline Dot() const;
-  double inline DotThree(const FourVector &a) const;
-  double inline DotThree() const;
-  double inline DiffThree(const FourVector &a) const;
+  /// calculate the square of the vector (which is a scalar)
+  double inline sqr() const;
+  /// calculate the absolute value
+  double inline abs() const;
+  /// calculate the square of the spatial three-vector
+  double inline sqr3() const;
+  /// calculate the absolute value of the spatial three-vector
+  double inline abs3() const;
   /** Returns the FourVector boosted with velocity.
    *
    * The current FourVector is not changed.
    *
-   * \param velocity (\f$w^{"\mu"}\f$) is not a physical FourVector, but
-   * a collection of 1 for the time-like component and \f$\vec v\f$ for
-   * the space-like components. In other words, it is \f$\gamma^{-1}
-   * u^\mu\f$ with \f$u^\mu\f$ being the physical Four-Velocity.
-   *
-   * Algorithmic
-   * -----------
-   *
-   * (Note: \f$\vec a\f$ is a Three-Vector, \f$a^\mu\f$ is a Four-Vector
-   * and \f$a^{"\mu"}\f$ is a Pseudo-Four-Vector object.)
-   *
-   * The gamma factor \f$\gamma = 1/\sqrt{1-(v_1^2+v_2^2+v_3^2)}\f$
-   * needed in the boost can be calculated from velocity as the
-   * "invariant square" of a physical FourVector:
-   *
-   * \f[
-   * w^{"\mu"} = (1, \vec{v}) = (1, v_1, v_2, v_3)\\
-   * w^{"\mu"} w_{"\mu"} = 1 - v_1^2 - v_2^2 - v_3^2\\
-   * = \gamma^{-2}
-   * \f]
-   *
-   * The time-like component of a Lorentz-boosted FourVector \f$x^\mu =
-   * (x_0, x_1, x_2, x_3) = (x_0, \vec{r})\f$ with velocity \f$\vec v\f$
-   * is
-   *
-   * \f{eqnarray*}{
-   * x^\prime_0&=&\gamma \cdot (x_0 - \vec{r}\cdot\vec{v})\\
-   *     &=&\gamma \cdot (x_0 \cdot 1 - x_1 \cdot v_1 - x_2 \cdot v_2 - x_3 \cdot v_3)\\
-   *     &=&\gamma \cdot (x^\mu \cdot w_{"\mu"}),
-   * \f}
-   *
-   * and the space-like components i = 1, 2, 3 are:
-   * \f{eqnarray*}{
-   * x^\prime_i&=&x_i + v_i \cdot (\frac{\gamma - 1}{\vec{v}^2} \cdot \vec{r}\cdot\vec{v} - \gamma \cdot x_0)\\
-   *     &=&x_i + v_i \cdot (\frac{\gamma^2}{\gamma + 1} \cdot \vec{r}\cdot\vec{v} - \gamma \cdot x_0)\\
-   *     &=&x_i - v_i \cdot \gamma \cdot (\frac{\gamma}{\gamma + 1} x^\mu\cdot w_{"\mu"} + \frac{x_0}{\gamma + 1})\\
-   *     &=&x_i - v_i \cdot \frac{\gamma}{\gamma + 1} \cdot (\gamma x^\mu\cdot w_{"\mu"} + x_0) \\
-   *     &=&x_i - v_i \cdot \frac{\gamma}{\gamma + 1} \cdot (x^\prime_0 + x_0)
-   * \f}
+   * \param velocity (\f$\vec{v}\f$) is a ThreeVector representing the boost velocity
    */
-  FourVector LorentzBoost(const FourVector &velocity) const;
+  FourVector LorentzBoost(const ThreeVector &velocity) const;
 
   /* overloaded operators */
   bool inline operator==(const FourVector &a) const;
@@ -155,29 +124,28 @@ double inline FourVector::x1(void) const {
   return x_[1];
 }
 
-void inline FourVector::set_x1(const double z) {
-  x_[1] = z;
+void inline FourVector::set_x1(const double x) {
+  x_[1] = x;
 }
 
 double inline FourVector::x2(void) const {
   return x_[2];
 }
 
-void inline FourVector::set_x2(const double x) {
-  x_[2] = x;
+void inline FourVector::set_x2(const double y) {
+  x_[2] = y;
 }
 
 double inline FourVector::x3(void) const {
   return x_[3];
 }
 
-void inline FourVector::set_x3(const double y) {
-  x_[3] = y;
+void inline FourVector::set_x3(const double z) {
+  x_[3] = z;
 }
 
-void inline FourVector::set_FourVector(const double t, const double z,
-                                       const double x, const double y) {
-  x_ = {{t, z, x, y}};
+ThreeVector inline FourVector::threevec() const {
+  return ThreeVector(x_[1],x_[2],x_[3]);
 }
 
 /// check if all four vector components are equal
@@ -308,20 +276,20 @@ double inline FourVector::Dot(const FourVector &a) const {
   return x_[0] * a.x_[0] - x_[1] * a.x_[1] - x_[2] * a.x_[2] - x_[3] * a.x_[3];
 }
 
-double inline FourVector::Dot() const {
+double inline FourVector::sqr() const {
   return x_[0] * x_[0] - x_[1] * x_[1] - x_[2] * x_[2] - x_[3] * x_[3];
 }
 
-double inline FourVector::DotThree(const FourVector &a) const {
-  return - x_[1] * a.x_[1] - x_[2] * a.x_[2] - x_[3] * a.x_[3];
+double inline FourVector::abs() const {
+  return std::sqrt(this->sqr());
 }
 
-double inline FourVector::DotThree() const {
-  return - x_[1] * x_[1] - x_[2] * x_[2] - x_[3] * x_[3];
+double inline FourVector::sqr3() const {
+  return this->threevec().sqr();
 }
 
-double inline FourVector::DiffThree(const FourVector &a) const {
-  return x_[1] - a.x_[1] + x_[2] - a.x_[2] + x_[3] - a.x_[3];
+double inline FourVector::abs3() const {
+  return this->threevec().abs();
 }
 
 }  // namespace Smash
