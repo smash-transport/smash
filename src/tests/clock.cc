@@ -12,6 +12,10 @@
 
 using namespace Smash;
 
+TEST(size) {
+  COMPARE(sizeof(Clock), 12);
+}
+
 TEST(set_clock) {
   Clock labtime(0.123f, 0.234f);
   COMPARE(labtime.current_time(), 0.123f);
@@ -86,9 +90,43 @@ TEST(multiple) {
 TEST(multiple_small_interval) {
   Clock labtime(6.5f, 1.0f);
   float interval = 0.1f;
-  for (int ticks = 0; ticks < 10; ++ticks) {
+  for (int ticks = 0; ticks < 20; ++ticks) {
     VERIFY(labtime.multiple_is_in_next_tick(interval)) << ticks;
   }
+}
+
+TEST(multiple_negative_times) {
+  Clock labtime(-12.0f, 1.0f);
+  float interval = 2.2f;
+  VERIFY(!labtime.multiple_is_in_next_tick(interval)) << labtime.current_time();
+  ++labtime; // time is -11, next multiple is -11.0: YES
+  VERIFY( labtime.multiple_is_in_next_tick(interval)) << labtime.current_time();
+  ++labtime; // -10, -8.8: NO
+  VERIFY(!labtime.multiple_is_in_next_tick(interval)) << labtime.current_time();
+  ++labtime; // -9; -8.8: YES
+  VERIFY( labtime.multiple_is_in_next_tick(interval)) << labtime.current_time();
+  ++labtime; // -8; -6.6: NO
+  VERIFY(!labtime.multiple_is_in_next_tick(interval)) << labtime.current_time();
+  ++labtime; // -7; -6.6: YES
+  VERIFY( labtime.multiple_is_in_next_tick(interval)) << labtime.current_time();
+  ++labtime; // -6; -4.4: NO
+  VERIFY(!labtime.multiple_is_in_next_tick(interval)) << labtime.current_time();
+  ++labtime; // -5; -4.4: YES
+  VERIFY( labtime.multiple_is_in_next_tick(interval)) << labtime.current_time();
+  ++labtime; // -4; -2.2: NO
+  VERIFY(!labtime.multiple_is_in_next_tick(interval)) << labtime.current_time();
+  ++labtime; // -3; -2.2: YES
+  VERIFY( labtime.multiple_is_in_next_tick(interval)) << labtime.current_time();
+  ++labtime; // -2;  0.0: NO
+  VERIFY(!labtime.multiple_is_in_next_tick(interval)) << labtime.current_time();
+  ++labtime; // -1;  0.0: NO
+  VERIFY(!labtime.multiple_is_in_next_tick(interval)) << labtime.current_time();
+  ++labtime; // 0;  0.0: YES
+  VERIFY( labtime.multiple_is_in_next_tick(interval)) << labtime.current_time();
+  ++labtime; // 1;  2.2: NO
+  VERIFY(!labtime.multiple_is_in_next_tick(interval)) << labtime.current_time();
+  ++labtime; // 2;  2.2: YES
+  VERIFY( labtime.multiple_is_in_next_tick(interval)) << labtime.current_time();
 }
 
 TEST(assignment) {
@@ -98,4 +136,24 @@ TEST(assignment) {
   FUZZY_COMPARE(labtime.current_time(), 4.5f);
   labtime = std::move(resettime);
   FUZZY_COMPARE(labtime.current_time(), 4.2f);
+}
+
+TEST_CATCH(init_negative_dt, std::range_error) {
+  Clock labtime(4.4f, -0.2f);
+}
+TEST_CATCH(set_negative_dt, std::range_error) {
+  Clock labtime(4.4f, 0.2f);
+  labtime.set_timestep_size(-0.3f);
+}
+TEST_CATCH(negative_interval, std::range_error) {
+  Clock labtime(4.4f, 0.2f);
+  labtime.multiple_is_in_next_tick(-0.8f);
+}
+TEST_CATCH(big_timestep_negative, std::range_error) {
+  Clock labtime(4.4f, 0.2f);
+  labtime += -0.8f;
+}
+TEST_CATCH(advance_timestep_negative, std::range_error) {
+  Clock labtime(4.4f, 0.2f);
+  labtime += -8;
 }

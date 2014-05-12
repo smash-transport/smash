@@ -11,6 +11,7 @@
 #define SRC_INCLUDE_CLOCK_H_
 
 #include <cmath>
+#include <stdexcept>
 
 namespace Smash {
 
@@ -41,7 +42,11 @@ class Clock {
   Clock(const float time, const float dt)
                 : counter_(0)
                 , timestep_size_(dt)
-                , reset_time_(time) {}
+                , reset_time_(time) {
+    if (dt < 0.f) {
+      throw std::range_error("No negative time increment allowed");
+    }
+  }
   inline float current_time() const {
     return reset_time_ + timestep_size_ * counter_;
   }
@@ -55,6 +60,9 @@ class Clock {
    *
    */
   void set_timestep_size(const float dt) {
+    if (dt < 0.f) {
+      throw std::range_error("No negative time increment allowed");
+    }
     reset_time_ = current_time();
     counter_ = 0;
     timestep_size_ = dt;
@@ -71,6 +79,9 @@ class Clock {
    * 
    */
   bool multiple_is_in_next_tick(const float interval) const {
+    if (interval < 0.f) {
+      throw std::range_error("Negative interval makes no sense for clock");
+    }
     // if the interval is less than or equal to the time step size, one
     // multiple will surely be within the next tick!
     if (interval <= timestep_size_) {
@@ -88,11 +99,17 @@ class Clock {
   }
   /// advances the clock by an arbitrary timestep
   Clock& operator+=(const float& big_timestep) {
+    if (big_timestep < 0.f) {
+      throw std::range_error("Alas, the clock cannot be turned back.");
+    }
     reset_time_ += big_timestep;
     return *this;
   }
   /// advances the clock by an arbitrary number of ticks.
   Clock& operator+=(const int& advance_several_timesteps) {
+    if (advance_several_timesteps < 0) {
+      throw std::range_error("Alas, the clock cannot be turned back.");
+    }
     counter_ += advance_several_timesteps;
     return *this;
   }
