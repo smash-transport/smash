@@ -29,7 +29,7 @@ void VtkOutput::at_eventend(const Particles &/*particles*/, const int /*event_nu
 }
 
 void VtkOutput::after_Nth_timestep(const Particles &particles, const int event_number,
-                                   const Clock clock) {
+                                   const Clock& clock) {
   char filename[32];
   snprintf(filename, sizeof(filename), "pos_ev%05i_tstep%+7.3f.vtk", event_number,
            clock.current_time());

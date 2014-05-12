@@ -34,7 +34,7 @@ class OscarOutput : public OutputInterface {
   void write_interaction(const ParticleList &incoming_particles,
                          const ParticleList &outgoing_particles) override;
   void after_Nth_timestep(const Particles &particles, const int event_number,
-                          const Clock timestep) override;
+                          const Clock& clock) override;
 
  private:
   void write(const Particles &particles);

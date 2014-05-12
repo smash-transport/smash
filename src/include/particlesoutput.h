@@ -31,7 +31,7 @@ class ParticlesOutput : public OutputInterface {
   }
 
   void after_Nth_timestep(const Particles &particles, const int,
-                          const Clock) override {
+                          const Clock&) override {
     write_state(particles);
   }
 

@@ -52,7 +52,7 @@ class OutputInterface {
    * Output launched after every N'th timestep. N is controlled by an option.
    */
   virtual void after_Nth_timestep(const Particles &, const int,
-                                  const Clock) = 0;
+                                  const Clock&) = 0;
 
 };
 

@@ -25,7 +25,7 @@ class VtkOutput : public OutputInterface {
    void at_eventstart(const Particles &particles, const int event_number) override;
    void at_eventend(const Particles &particles, const int event_number) override;
    void after_Nth_timestep(const Particles &particles, const int event_number,
-                           const Clock timestep) override;
+                           const Clock& clock) override;
 
 
  private:
