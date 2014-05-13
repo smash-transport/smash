@@ -25,9 +25,39 @@ namespace Smash {
  *   Clock endtime(10.f, 0.f);
  *   while (labtime < endtime) {
  *     // do something
+ *     // adapt the timestep size to external circumstances:
+ *     if (system_is_very_dense()) {
+ *       labtime.set_timestep_size(labtime.timestep_size() / 2.0f);
+ *     }
+ *     if (system_is_very_dilute()) {
+ *       labtime.set_timestep_size(labtime.timestep_size() * 2.0f);
+ *     }
+ *     // let the clock tick
  *     ++labtime;
  *   }
  * \endcode
+ *
+ * Possible actions for Clock are:
+ * \li look at it and find out the current time \see current_time()
+ * \li advance the clock (by one tick, by several ticks, or by a given
+ * time)
+ * \see operator++()
+ * \see operator+=(const float&)
+ * \see operator+=(const int&)
+ * \li set / retrieve the timestep (length of one tick)
+ * \see set_timestep_size() \see timestep_size()
+ * \li compare time against different clock or fixed value
+ * \see operator<(const Clock&) const
+ * \see operator<(const float&) const
+ * \see operator>(const float&) const
+ *
+ * Internals
+ * ---------
+ *
+ * Clock stores a time step size \f$\Delta t\f$ and a base time
+ * \f$t_0\f$ as well as a counter \f$n\f$. The current time is
+ * calculated from \f$t = t_0 + n \cdot \Delta t\f$. When \f$\Delta t\f$
+ * is changed, \f$t_0\f$ is reset.
  *
  **/
 class Clock {
