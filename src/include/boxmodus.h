@@ -45,6 +45,8 @@ class BoxModus : public ModusDefault {
   const float temperature_;
   /* initial number density of the box */
   float number_density_initial_ = 0.f;
+  /// initial time of the box
+  const float start_time_ = 0.0f;
 };
 
 }  // namespace Smash

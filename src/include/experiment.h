@@ -187,12 +187,15 @@ class Experiment : public ExperimentBase {
 
   /// simulation time at which the evolution is stopped.
   const float end_time_ = 10.0f;
+  /** The clock's timestep size at start up
+   *
+   * Stored here so that the next event will remember this.
+   */
+  float delta_time_startup_;
   /// initial total energy of the system
   float energy_initial_ = 0.f;
   /// system starting time of the simulation
   SystemTimePoint time_start_ = SystemClock::now();
-  /// The clock at startup (will be copied in each event)
-  Clock initial_clock_;
 };
 
 }  // namespace Smash

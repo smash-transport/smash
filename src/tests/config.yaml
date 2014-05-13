@@ -9,8 +9,6 @@ General:
     # temporal grid spacing
     DELTA_TIME:    0.01
 
-    # start time of simulation
-    START_TIME:    0.0
     # end time of simulation
     END_TIME:      1.0
 
@@ -43,6 +41,9 @@ Modi:
         # 2:  random position box + peaked momenta
         #
         INITIAL_CONDITION: 1
+
+        # start time of simulation
+        START_TIME:    0.0
 
     Sphere:
         # Sphere size

@@ -102,7 +102,9 @@ class Configuration {
      * return an rvalue Value object - because the copy constructor is deleted.
      */
     Value(const YAML::Node &n, const char *key) : node_(n), key_(key) {
-      assert(n.IsScalar() || n.IsSequence() || n.IsMap());
+      if(!(n.IsScalar() || n.IsSequence() || n.IsMap())) {
+        fprintf(stderr, "Configuration::Value fails at %s\n", key);
+      }
     }
 
    public:

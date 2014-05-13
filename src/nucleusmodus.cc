@@ -90,7 +90,7 @@ void NucleusModus::print_startup() {
 
 /* initial_conditions - sets particle data for @particles */
 float NucleusModus::initial_conditions(Particles *particles,
-                                      const ExperimentParameters& parameters) {
+                                      const ExperimentParameters&) {
   // WHAT'S MISSING:
   //
   // Nuclei can be non-spherical. If they are, then they may be randomly

@@ -117,7 +117,6 @@ TEST(check_unused_report) {
   conf.take({"General", "MODUS"});
   conf.take({"General", "END_TIME"});
   conf.take({"General", "DELTA_TIME"});
-  conf.take({"General", "START_TIME"});
   conf.take({"General", "UPDATE"});
   conf.take({"General", "RANDOMSEED"});
   conf.take({"General", "SIGMA"});
@@ -126,6 +125,7 @@ TEST(check_unused_report) {
   modi.take({"Box", "LENGTH"});
   modi.take({"Box", "TEMPERATURE"});
   modi.take({"Box", "INITIAL_CONDITION"});
+  modi.take({"Box", "START_TIME"});
   modi.take({"Nucleus"});
   {
     std::istringstream unused(conf.unused_values_report());

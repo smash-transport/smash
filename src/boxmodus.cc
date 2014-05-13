@@ -32,7 +32,8 @@ namespace Smash {
 BoxModus::BoxModus(Configuration modus_config, const ExperimentParameters &)
     : initial_condition_(modus_config.take({"Box", "INITIAL_CONDITION"})),
       length_           (modus_config.take({"Box", "LENGTH"})),
-      temperature_      (modus_config.take({"Box", "TEMPERATURE"})) {
+      temperature_      (modus_config.take({"Box", "TEMPERATURE"})),
+      start_time_       (modus_config.take({"Box", "START_TIME"})) {
 }
 
 /* print_startup - console output on startup of box specific parameters */
@@ -82,8 +83,6 @@ float BoxModus::initial_conditions(Particles *particles,
                                          static_cast<double>(this->length_));
   /* Set paricles IC: */
   for (ParticleData &data : particles->data()) {
-    double time_begin;
-    ThreeVector pos;
     /* back to back pair creation with random momenta direction */
     if (unlikely(data.id() == particles->id_max() && !(data.id() % 2))) {
       /* poor last guy just sits around */
@@ -107,10 +106,9 @@ float BoxModus::initial_conditions(Particles *particles,
                        -particles->data(data.id() - 1).momentum().threevec());
     }
     momentum_total += data.momentum();
-    time_begin = 0.0;
     /* random position in a quadratic box */
-    pos = {uniform_length(), uniform_length(), uniform_length()};
-    data.set_position(FourVector(time_begin, pos));
+    ThreeVector pos{uniform_length(), uniform_length(), uniform_length()};
+    data.set_position(FourVector(start_time_, pos));
     /* IC: debug checks */
     printd_momenta(data);
     printd_position(data);
@@ -138,7 +136,7 @@ int BoxModus::sanity_check(Particles *particles) {
     enforce_periodic_boundaries(p.begin() + 1, p.end(), length_);
     data.set_position(p);
   }
-  return 0;
+  return start_time_;
 }
 
 
