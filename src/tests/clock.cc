@@ -95,6 +95,18 @@ TEST(multiple_small_interval) {
   }
 }
 
+TEST(multiple_small_increment) {
+  Clock labtime(0.0f, 0.002f);
+  for (int i = 0; i < 30; ++i) {
+    while (++labtime < i + 0.997f) {
+      VERIFY(!labtime.multiple_is_in_next_tick(1.0f)) << labtime.current_time();
+    }
+    // check that one of this or next tick (but one only!) fits.
+    VERIFY((labtime.multiple_is_in_next_tick(1.0f)
+       ^ (++labtime).multiple_is_in_next_tick(1.0f))) << labtime.current_time();
+  }
+}
+
 TEST(multiple_negative_times) {
   Clock labtime(-12.0f, 1.0f);
   float interval = 2.2f;

@@ -78,8 +78,21 @@ class Clock {
       throw std::range_error("No negative time increment allowed");
     }
   }
+  /// returns the current time
   inline float current_time() const {
     return reset_time_ + timestep_size_ * counter_;
+  }
+  /** returns the time in the next tick
+   *
+   * This function is needed, because current_time() + timestep_size()
+   * is not the same as the next tick (numerically; this is due to
+   * floating point arithmetic).
+   */
+  inline float next_time() const {
+    if (counter_ == std::numeric_limits<unsigned int>::max()) {
+      throw std::overflow_error("Too many timesteps, clock overflow imminent");
+    }
+    return reset_time_ + timestep_size_ * (counter_ + 1);
   }
   /// returns the time step size.
   float timestep_size() const {
@@ -121,7 +134,7 @@ class Clock {
     // else, let's first see what n is in question:
     float n = floor((current_time() + timestep_size_) / interval);
     return (current_time() <= n * interval
-         && n * interval < current_time() + timestep_size_);
+         && n * interval < next_time());
   }
   /** resets the time to a pre-defined value
    * 
