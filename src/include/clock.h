@@ -89,7 +89,7 @@ class Clock {
    * floating point arithmetic).
    */
   inline float next_time() const {
-    if (counter_ == std::numeric_limits<unsigned int>::max()) {
+    if (counter_ == std::numeric_limits<uint32_t>::max()) {
       throw std::overflow_error("Too many timesteps, clock overflow imminent");
     }
     return reset_time_ + timestep_size_ * (counter_ + 1);
@@ -154,7 +154,7 @@ class Clock {
   /// advances the clock by one tick (\f$\Delta t\f$)
   Clock& operator++() {
     // guard against overflow:
-    if (counter_ == std::numeric_limits<unsigned int>::max()) {
+    if (counter_ == std::numeric_limits<uint32_t>::max()) {
       throw std::overflow_error("Too many timesteps, clock overflow imminent");
     }
     ++counter_;
@@ -169,8 +169,8 @@ class Clock {
     return *this;
   }
   /// advances the clock by an arbitrary number of ticks.
-  Clock& operator+=(const unsigned int& advance_several_timesteps) {
-    if (counter_ > std::numeric_limits<unsigned int>::max()
+  Clock& operator+=(const uint32_t& advance_several_timesteps) {
+    if (counter_ > std::numeric_limits<uint32_t>::max()
                  - advance_several_timesteps) {
       throw std::overflow_error("Too many timesteps, clock overflow imminent");
     }
@@ -192,7 +192,7 @@ class Clock {
  private:
   /// clock tick. This is purely internal and will be reset when the
   /// timestep size is changed
-  unsigned int counter_ = 0;
+  uint32_t counter_ = 0;
   /// The time step size \f$\Delta t\f$
   float timestep_size_ = 0.0f;
   /// The time of last reset (when counter_ was set to 0).

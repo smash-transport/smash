@@ -13,6 +13,8 @@
 using namespace Smash;
 
 TEST(size) {
+  COMPARE(sizeof(unsigned int), 4);
+  COMPARE(sizeof(uint32_t), 4);
   COMPARE(sizeof(Clock), 12);
 }
 
@@ -29,7 +31,7 @@ TEST(run_clock) {
   FUZZY_COMPARE(labtime.current_time(), 0.1f);
   labtime += 0.5f;
   FUZZY_COMPARE(labtime.current_time(), 0.6f);
-  labtime += 2u;
+  labtime += static_cast<uint32_t>(2);
   FUZZY_COMPARE(labtime.current_time(), 0.8f);
   Clock endtime(1.0f, 0.0f);
   while (labtime < endtime) {
@@ -168,7 +170,7 @@ TEST_CATCH(big_timestep_negative, std::range_error) {
 
 TEST_CATCH(overflow_single_increment, std::overflow_error) {
   Clock labtime(0.0f, 1.0f);
-  labtime += (std::numeric_limits<unsigned int>::max() - 3);
+  labtime += (std::numeric_limits<uint32_t>::max() - 3);
   ++labtime;
   ++labtime;
   ++labtime;
@@ -183,5 +185,5 @@ TEST_CATCH(overflow_large_increment, std::overflow_error) {
   ++labtime;
   ++labtime;
   ++labtime;
-  labtime += (std::numeric_limits<unsigned int>::max() - 3);
+  labtime += (std::numeric_limits<uint32_t>::max() - 3);
 }
