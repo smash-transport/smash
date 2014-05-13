@@ -142,9 +142,7 @@ class Clock {
   Clock& operator++() {
     // guard against overflow:
     if (counter_ == UINT_MAX) {
-      reset_time_ = current_time();
-      // counter will be advanced after the if()!
-      counter_ = 0;
+      throw std::overflow_error("Too many timesteps, clock overflow imminent");
     }
     ++counter_;
     return *this;
@@ -160,8 +158,7 @@ class Clock {
   /// advances the clock by an arbitrary number of ticks.
   Clock& operator+=(const unsigned int& advance_several_timesteps) {
     if (counter_ > UINT_MAX - advance_several_timesteps) {
-      reset_time_ = current_time();
-      counter_ = 0;
+      throw std::overflow_error("Too many timesteps, clock overflow imminent");
     }
     counter_ += advance_several_timesteps;
     return *this;

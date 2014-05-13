@@ -153,3 +153,23 @@ TEST_CATCH(big_timestep_negative, std::range_error) {
   Clock labtime(4.4f, 0.2f);
   labtime += -0.8f;
 }
+
+TEST_CATCH(overflow_single_increment, std::overflow_error) {
+  Clock labtime(0.0f, 1.0f);
+  labtime += (UINT_MAX - 3);
+  ++labtime;
+  ++labtime;
+  ++labtime;
+  ++labtime;
+  ++labtime;
+  ++labtime;
+}
+
+TEST_CATCH(overflow_large_increment, std::overflow_error) {
+  Clock labtime(0.0f, 1.0f);
+  ++labtime;
+  ++labtime;
+  ++labtime;
+  ++labtime;
+  labtime += (UINT_MAX - 3);
+}
