@@ -11,7 +11,7 @@
 #define SRC_INCLUDE_CLOCK_H_
 
 #include <cmath>
-#include <climits>
+#include <limits>
 #include <stdexcept>
 
 namespace Smash {
@@ -141,7 +141,7 @@ class Clock {
   /// advances the clock by one tick (\f$\Delta t\f$)
   Clock& operator++() {
     // guard against overflow:
-    if (counter_ == UINT_MAX) {
+    if (counter_ == std::numeric_limits<unsigned int>::max()) {
       throw std::overflow_error("Too many timesteps, clock overflow imminent");
     }
     ++counter_;
@@ -157,7 +157,8 @@ class Clock {
   }
   /// advances the clock by an arbitrary number of ticks.
   Clock& operator+=(const unsigned int& advance_several_timesteps) {
-    if (counter_ > UINT_MAX - advance_several_timesteps) {
+    if (counter_ > std::numeric_limits<unsigned int>::max()
+                 - advance_several_timesteps) {
       throw std::overflow_error("Too many timesteps, clock overflow imminent");
     }
     counter_ += advance_several_timesteps;
