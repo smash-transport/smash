@@ -97,8 +97,8 @@ smash_add_test(collider_run smash smash -m Collider ${SMASH_OPTIONS})
 #smash_add_test(sphere_run smash smash -m Sphere ${SMASH_OPTIONS})
 
 # verify that binary runs certain time (this corresponds to 20 steps)
-smash_add_test(box_steps smash smash -e 2.0 -c 'General: {DELTA_TIME: 0.1}' -m Box ${SMASH_OPTIONS})
-smash_add_test(collider_steps smash smash -e 2.0 -c 'General: {DELTA_TIME: 0.1}' -m Collider ${SMASH_OPTIONS})
+smash_add_test(box_steps smash smash -e 2.0 -c "General: {DELTA_TIME: 0.1}" -m Box ${SMASH_OPTIONS})
+smash_add_test(collider_steps smash smash -e 2.0 -c "General: {DELTA_TIME: 0.1}" -m Collider ${SMASH_OPTIONS})
 #smash_add_test(sphere_steps smash smash -e 2.0 -c 'General: {DELTA_TIME: 0.1}' -m Sphere ${SMASH_OPTIONS})
 
 # verify that default run has no mem leaks
@@ -111,7 +111,7 @@ if(CTEST_MEMORYCHECK_COMMAND)
       ${PROJECT_BINARY_DIR}/smash -c "General: {END_TIME: 1.0, MODUS: Box}" ${SMASH_OPTIONS})
    smash_add_test(memcheck_collider smash ${CTEST_MEMORYCHECK_COMMAND}
       ${CTEST_MEMORYCHECK_COMMAND_OPTIONS}
-      ${PROJECT_BINARY_DIR}/smash -s 50 -m Collider ${SMASH_OPTIONS})
+      ${PROJECT_BINARY_DIR}/smash -c "General: {END_TIME: 5.0, DELTA_TIME: 0.1}" -m Collider ${SMASH_OPTIONS})
 #  smash_add_test(memcheck_sphere smash ${CTEST_MEMORYCHECK_COMMAND}
 #     ${CTEST_MEMORYCHECK_COMMAND_OPTIONS}
 #     ${PROJECT_BINARY_DIR}/smash -s 50 -m Sphere ${SMASH_OPTIONS})
