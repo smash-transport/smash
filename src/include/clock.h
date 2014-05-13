@@ -11,6 +11,7 @@
 #define SRC_INCLUDE_CLOCK_H_
 
 #include <cmath>
+#include <climits>
 #include <stdexcept>
 
 namespace Smash {
@@ -109,7 +110,13 @@ class Clock {
   }
   /// advances the clock by one tick (\f$\Delta t\f$)
   Clock& operator++() {
-    counter_++;
+    // guard against overflow:
+    if (counter_ == UINT_MAX) {
+      reset_time_ = current_time();
+      // counter will be advanced after the if()!
+      counter_ = 0;
+    }
+    ++counter_;
     return *this;
   }
   /// advances the clock by an arbitrary timestep
@@ -121,9 +128,10 @@ class Clock {
     return *this;
   }
   /// advances the clock by an arbitrary number of ticks.
-  Clock& operator+=(const int& advance_several_timesteps) {
-    if (advance_several_timesteps < 0) {
-      throw std::range_error("Alas, the clock cannot be turned back.");
+  Clock& operator+=(const unsigned int& advance_several_timesteps) {
+    if (counter_ > UINT_MAX - advance_several_timesteps) {
+      reset_time_ = current_time();
+      counter_ = 0;
     }
     counter_ += advance_several_timesteps;
     return *this;
@@ -143,7 +151,7 @@ class Clock {
  private:
   /// clock tick. This is purely internal and will be reset when the
   /// timestep size is changed
-  int counter_ = 0;
+  unsigned int counter_ = 0;
   /// The time step size \f$\Delta t\f$
   float timestep_size_ = 0.0f;
   /// The time of last reset (when counter_ was set to 0).

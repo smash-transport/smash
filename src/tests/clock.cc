@@ -29,7 +29,7 @@ TEST(run_clock) {
   FUZZY_COMPARE(labtime.current_time(), 0.1f);
   labtime += 0.5f;
   FUZZY_COMPARE(labtime.current_time(), 0.6f);
-  labtime += 2;
+  labtime += 2u;
   FUZZY_COMPARE(labtime.current_time(), 0.8f);
   Clock endtime(1.0f, 0.0f);
   while (labtime < endtime) {
@@ -152,8 +152,4 @@ TEST_CATCH(negative_interval, std::range_error) {
 TEST_CATCH(big_timestep_negative, std::range_error) {
   Clock labtime(4.4f, 0.2f);
   labtime += -0.8f;
-}
-TEST_CATCH(advance_timestep_negative, std::range_error) {
-  Clock labtime(4.4f, 0.2f);
-  labtime += -8;
 }
