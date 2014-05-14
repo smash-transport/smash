@@ -11,6 +11,7 @@
 #define SRC_INCLUDE_PARTICLESOUTPUT_H_
 
 #include "outputinterface.h"
+#include "forwarddeclarations.h"
 #include <boost/filesystem.hpp>
 
 namespace Smash {
@@ -18,7 +19,7 @@ class Particles;
 
 class ParticlesOutput : public OutputInterface {
  public:
-  ParticlesOutput(boost::filesystem::path path);
+  ParticlesOutput(bf::path path);
   ~ParticlesOutput();
 
   void at_eventstart(const Particles &particles, const int) override {
@@ -37,7 +38,7 @@ class ParticlesOutput : public OutputInterface {
  private:
   void write_state(const Particles &particles);
 
-  const boost::filesystem::path base_path_;
+  const bf::path base_path_;
 };
 }  // namespace Smash
 

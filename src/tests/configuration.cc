@@ -9,6 +9,7 @@
 
 #include "tests/unittest.h"
 #include "include/configuration.h"
+#include "include/forwarddeclarations.h"
 
 #include <boost/filesystem.hpp>
 
@@ -110,7 +111,7 @@ static void expect_lines(std::vector<std::string> expected, std::istream &stream
 
 TEST(check_unused_report) {
   std::string reference;
-  Configuration conf(boost::filesystem::path{TEST_CONFIG_PATH} / "tests");
+  Configuration conf(bf::path{TEST_CONFIG_PATH} / "tests");
   Configuration modi = conf["Modi"];
   conf.take({"particles"});
   conf.take({"decaymodes"});

@@ -18,6 +18,7 @@
 #include "include/collidermodus.h"
 #include "include/configuration.h"
 #include "include/experiment.h"
+#include "include/forwarddeclarations.h"
 #include "include/macros.h"
 #include "include/nucleusmodus.h"
 #include "include/oscaroutput.h"
@@ -31,8 +32,6 @@
 /* #include "include/spheremodus.h" */
 
 namespace Smash {
-
-namespace bf = boost::filesystem;
 
 /* ExperimentBase carries everything that is needed for the evolution */
 std::unique_ptr<ExperimentBase> ExperimentBase::create(Configuration &config) {

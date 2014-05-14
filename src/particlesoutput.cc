@@ -7,6 +7,7 @@
  *
  */
 
+#include "include/forwarddeclarations.h"
 #include "include/particlesoutput.h"
 #include "include/particles.h"
 #include "include/filedeleter.h"
@@ -14,7 +15,7 @@
 
 namespace Smash {
 
-ParticlesOutput::ParticlesOutput(boost::filesystem::path path)
+ParticlesOutput::ParticlesOutput(bf::path path)
     : base_path_(std::move(path)) {
 }
 

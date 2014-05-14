@@ -16,6 +16,7 @@
 #include "include/chrono.h"
 #include "include/crosssections.h"
 #include "include/experimentparameters.h"
+#include "include/forwarddeclarations.h"
 #include "include/modusdefault.h"
 #include "include/outputroutines.h"
 #include "include/particles.h"
@@ -76,7 +77,7 @@ class ExperimentBase {
    *
    * \param path The path where output files will be written to.
    */
-  virtual void run(const boost::filesystem::path &path) = 0;
+  virtual void run(const bf::path &path) = 0;
 
   /**
    * Exception class that is thrown if an invalid modus is requested from the
@@ -116,7 +117,7 @@ class Experiment : public ExperimentBase {
   friend class ExperimentBase;
 
  public:
-  virtual void run(const boost::filesystem::path &path) override;
+  virtual void run(const bf::path &path) override;
 
  private:
   /**
@@ -135,7 +136,7 @@ class Experiment : public ExperimentBase {
    */
   explicit Experiment(Configuration &config);
 
-  void initialize(const boost::filesystem::path &path);
+  void initialize(const bf::path &path);
   void run_time_evolution(const int evt_num);
 
   void print_startup(int64_t seed);
