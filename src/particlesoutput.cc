@@ -27,8 +27,7 @@ void ParticlesOutput::write_state(const Particles &particles) {
 
   snprintf(filename, sizeof(filename), "momenta_%.5f.dat",
            particles.time());
-  std::unique_ptr<FILE> momenta_file{
-      fopen((base_path_ / filename).native().c_str(), "w")};
+  FilePtr momenta_file{fopen((base_path_ / filename).native().c_str(), "w")};
   for (const ParticleData &data : particles.data()) {
     fprintf(momenta_file.get(), "%g %g %g %g %i %s\n",
             data.momentum().x0(),
@@ -37,8 +36,7 @@ void ParticlesOutput::write_state(const Particles &particles) {
   }
   snprintf(filename, sizeof(filename), "position_%.5f.dat",
            particles.time());
-  std::unique_ptr<FILE> position_file{
-      fopen((base_path_ / filename).native().c_str(), "w")};
+  FilePtr position_file{fopen((base_path_ / filename).native().c_str(), "w")};
   for (const ParticleData &data : particles.data()) {
     fprintf(position_file.get(), "%g %g %g %g %i %s\n",
             data.position().x0(),
