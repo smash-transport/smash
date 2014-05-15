@@ -7,29 +7,33 @@
 #ifndef SRC_INCLUDE_DECAYMODES_H_
 #define SRC_INCLUDE_DECAYMODES_H_
 
-#include <cstdio>
-#include <vector>
+#include "forwarddeclarations.h"
+#include "processbranch.h"
 
-#include "include/constants.h"
-#include "include/pdgcode.h"
-#include "include/processbranch.h"
 #include <stdexcept>
+#include <vector>
 
 namespace Smash {
 
 class DecayModes {
  public:
   /* Add a decay mode */
-  inline void add_mode(std::vector<PdgCode> pdg_list, float ratio);
-  inline void add_mode(ProcessBranch mode);
+  void add_mode(std::vector<PdgCode> pdg_list, float ratio);
+  void add_mode(ProcessBranch branch) { decay_modes_.push_back(branch); }
+
   /* Make sure ratios add to 1 */
-  inline void renormalize(float renormalization_constant);
+  void renormalize(float renormalization_constant);
+
   /* Remove all modes */
-  inline void clear(void);
+  void clear() { decay_modes_.clear(); }
+
   /* Check if empty */
-  inline bool empty(void) const;
+  bool empty() const { return decay_modes_.empty(); }
+
   /* Pass out the decay modes */
-  inline const std::vector<ProcessBranch> &decay_mode_list(void) const;
+  const std::vector<ProcessBranch> &decay_mode_list(void) const {
+    return decay_modes_;
+  }
 
   struct InvalidDecay : public std::invalid_argument {
     using std::invalid_argument::invalid_argument;
@@ -42,57 +46,6 @@ class DecayModes {
    */
   std::vector<ProcessBranch> decay_modes_;
 };
-
-/* Add a decay mode */
-inline void DecayModes::add_mode(std::vector<PdgCode> pdg_list, float ratio) {
-  if (pdg_list.size() < 2) {
-    throw InvalidDecay(
-        "DecayModes::add_mode was instructed to add a decay mode with less "
-        "than 2 branches. This is an invalid input.");
-  }
-  ProcessBranch branch;
-  branch.set_particles(std::move(pdg_list));
-  branch.set_weight(ratio);
-  decay_modes_.push_back(branch);
-}
-
-inline void DecayModes::add_mode(ProcessBranch branch) {
-  decay_modes_.push_back(branch);
-}
-
-/* Make sure ratios add to 1 */
-inline void DecayModes::renormalize(float renormalization_constant) {
-  if (renormalization_constant < really_small) {
-    printf("Warning: Extremely small renormalization constant: %g\n",
-           renormalization_constant);
-    printf("Skipping the renormalization.\n");
-  } else {
-    printf("Renormalizing decay modes with %g \n", renormalization_constant);
-    float new_sum = 0.0;
-    for (std::vector<ProcessBranch>::iterator mode
-           = decay_modes_.begin(); mode != decay_modes_.end(); ++mode) {
-      mode->set_weight(mode->weight() / renormalization_constant);
-      new_sum += mode->weight();
-    }
-    printf("After renormalization sum of ratios is %g. \n", new_sum);
-  }
-}
-
-/* Remove all modes */
-inline void DecayModes::clear(void) {
-  decay_modes_.clear();
-}
-
-/* Check if empty */
-inline bool DecayModes::empty(void) const {
-  return decay_modes_.empty();
-}
-
-/* Pass out the decay modes */
-inline const std::vector<ProcessBranch> &DecayModes::decay_mode_list(void)
-    const {
-  return decay_modes_;
-}
 
 }  // namespace Smash
 

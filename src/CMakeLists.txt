@@ -34,6 +34,7 @@ set(smash_src
         cross-sections.cc
         decayaction.cc
         decayactionsfinder.cc
+        decaymodes.cc
         distributions.cc
         experiment.cc
         fourvector.cc
