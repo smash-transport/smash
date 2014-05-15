@@ -14,12 +14,17 @@
 
 using namespace Smash;
 
+static Configuration make_test_configuration() {
+  return Configuration{boost::filesystem::path{TEST_CONFIG_PATH} / "tests",
+                       "test_config.yaml"};
+}
+
 TEST(create_object) {
   Configuration conf(TEST_CONFIG_PATH);
 }
 
 TEST(check_config_general_contents) {
-  Configuration conf(TEST_CONFIG_PATH);
+  Configuration conf = make_test_configuration();
 
   std::string modus = conf.read({"General", "MODUS"        });
   COMPARE(modus, "Nucleus");
@@ -33,20 +38,20 @@ TEST(check_config_general_contents) {
 }
 
 TEST(check_config_collider_contents) {
-  Configuration conf(TEST_CONFIG_PATH);
+  Configuration conf = make_test_configuration();
   COMPARE(int   (conf.read({"Modi", "Collider", "PROJECTILE"})), 211);
   COMPARE(int   (conf.read({"Modi", "Collider", "TARGET"    })), -211);
   COMPARE(double(conf.read({"Modi", "Collider", "SQRTS"     })), 1.0);
 }
 
 TEST(test_take) {
-  Configuration conf(TEST_CONFIG_PATH);
+  Configuration conf = make_test_configuration();
   double d = conf.take({"Modi", "Sphere", "RADIUS"});
   COMPARE(d, 5.);
 }
 
 TEST(test_take_multiple) {
-  Configuration conf(TEST_CONFIG_PATH);
+  Configuration conf = make_test_configuration();
   Configuration modi = conf["Modi"];
   double d = modi.take({"Box", "LENGTH"});
   COMPARE(d, 10.);
@@ -57,28 +62,28 @@ TEST(test_take_multiple) {
 }
 
 TEST_CATCH(take_incorrect_type, Configuration::IncorrectTypeInAssignment) {
-  Configuration conf(TEST_CONFIG_PATH);
+  Configuration conf = make_test_configuration();
   Configuration modi = conf["Modi"];
   int i = modi.take({"Sphere", "RADIUS"});
   COMPARE(i, 5);
 }
 
 TEST(take_always_converts_to_string) {
-  Configuration conf(TEST_CONFIG_PATH);
+  Configuration conf = make_test_configuration();
   Configuration modi = conf["Modi"];
   std::string s = modi.take({"Sphere", "RADIUS"});
   COMPARE(s, "5.0");
 }
 
 TEST(has_value) {
-  Configuration conf(TEST_CONFIG_PATH);
+  Configuration conf = make_test_configuration();
   Configuration modi = conf["Modi"];
   VERIFY(modi.has_value({"Sphere", "RADIUS"}));
   VERIFY(modi.has_value({"Sphere", "RADIUS"}));
 }
 
 TEST(take_removes_entry) {
-  Configuration conf(TEST_CONFIG_PATH);
+  Configuration conf = make_test_configuration();
   Configuration modi = conf["Modi"];
   VERIFY(modi.has_value({"Sphere", "RADIUS"}));
   modi.take({"Sphere", "RADIUS"});
@@ -110,7 +115,7 @@ static void expect_lines(std::vector<std::string> expected, std::istream &stream
 
 TEST(check_unused_report) {
   std::string reference;
-  Configuration conf(boost::filesystem::path{TEST_CONFIG_PATH} / "tests");
+  Configuration conf = make_test_configuration();
   Configuration modi = conf["Modi"];
   conf.take({"particles"});
   conf.take({"decaymodes"});
@@ -197,7 +202,7 @@ TEST(check_unused_report) {
 }
 
 TEST(test_config_read) {
-  Configuration conf(TEST_CONFIG_PATH);
+  Configuration conf = make_test_configuration();
   int nevents = conf.read({"General", "NEVENTS"});
   COMPARE(nevents, 1);
   nevents = conf.read({"General", "NEVENTS"});
@@ -207,7 +212,7 @@ TEST(test_config_read) {
 }
 
 TEST(test_sub_config_objects) {
-  Configuration conf(TEST_CONFIG_PATH);
+  Configuration conf = make_test_configuration();
   Configuration general = conf["General"];
   const Configuration box = conf["Modi"]["Box"];
   VERIFY(general.has_value({"NEVENTS"}));
@@ -221,7 +226,7 @@ TEST(test_sub_config_objects) {
 }
 
 TEST(check_setting_new_value) {
-  Configuration conf(TEST_CONFIG_PATH);
+  Configuration conf = make_test_configuration();
   VERIFY(!conf.has_value({"Test"}));
   conf["Test"] = 1.;
   VERIFY(conf.has_value({"Test"}));
@@ -229,7 +234,7 @@ TEST(check_setting_new_value) {
 }
 
 TEST(merge_override) {
-  Configuration conf(TEST_CONFIG_PATH);
+  Configuration conf = make_test_configuration();
   COMPARE(int(conf.read({"General", "STEPS"  })), 1000);
   COMPARE(int(conf.read({"General", "NEVENTS"})), 1);
   conf.merge_yaml("General: { NEVENTS: 2 }");
@@ -238,7 +243,7 @@ TEST(merge_override) {
 }
 
 TEST(remove_all_but) {
-  Configuration conf(TEST_CONFIG_PATH);
+  Configuration conf = make_test_configuration();
   Configuration modi = conf["Modi"];
   modi.remove_all_but("Sphere");
   conf.remove_all_but("Modi");
@@ -246,13 +251,13 @@ TEST(remove_all_but) {
 }
 
 TEST_CATCH(failed_sequence_conversion, Configuration::IncorrectTypeInAssignment) {
-  Configuration conf(TEST_CONFIG_PATH);
+  Configuration conf = make_test_configuration();
   conf.merge_yaml("{test: [123 456]}");
   std::vector<int> x = conf.read({"test"});
 }
 
 TEST_CATCH(incorrect_indent, Configuration::ParseError) {
-  Configuration conf(TEST_CONFIG_PATH);
+  Configuration conf = make_test_configuration();
   conf.merge_yaml("General:\n foo: 1\n  test: 1\n");
   int x = conf.read({"General", "test"});
   COMPARE(x, 1);
