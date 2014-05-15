@@ -39,7 +39,7 @@ struct ExperimentParameters {
     // I'm not certain if they should have the current time or the next
     // tick.
     return labclock.current_time();
-      // + labclock.timestep_size();
+        // labclock.next_time();
   }
   /// time interval between SMASH giving measurables
   const float output_interval;

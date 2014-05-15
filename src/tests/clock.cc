@@ -13,9 +13,15 @@
 using namespace Smash;
 
 TEST(size) {
-  COMPARE(sizeof(unsigned int), 4);
-  COMPARE(sizeof(uint32_t), 4);
-  COMPARE(sizeof(Clock), 12);
+  // if this fails, then either the internal structure in Clock is
+  // changed (using other types or the addition of new variables) or the
+  // alignment of the internal structure is somehow different. In both
+  // cases, this test is meant to warn future developers to check if the
+  // new behaviour is wanted or an unintendet side effect that should be
+  // corrected.
+  size_t floatsize = sizeof(float);
+  size_t int32size = sizeof(uint32_t);
+  COMPARE(sizeof(Clock), 2 * floatsize + int32size);
 }
 
 TEST(set_clock) {
@@ -31,7 +37,7 @@ TEST(run_clock) {
   FUZZY_COMPARE(labtime.current_time(), 0.1f);
   labtime += 0.5f;
   FUZZY_COMPARE(labtime.current_time(), 0.6f);
-  labtime += static_cast<uint32_t>(2);
+  labtime += 2u;
   FUZZY_COMPARE(labtime.current_time(), 0.8f);
   Clock endtime(1.0f, 0.0f);
   while (labtime < endtime) {

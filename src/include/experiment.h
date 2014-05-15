@@ -191,7 +191,7 @@ class Experiment : public ExperimentBase {
    *
    * Stored here so that the next event will remember this.
    */
-  float delta_time_startup_;
+  const float delta_time_startup_;
   /// initial total energy of the system
   float energy_initial_ = 0.f;
   /// system starting time of the simulation

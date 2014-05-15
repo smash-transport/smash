@@ -151,7 +151,12 @@ class Clock {
     reset_time_ = reset_time;
     counter_ = 0.0;
   }
-  /// advances the clock by one tick (\f$\Delta t\f$)
+  /** advances the clock by one tick (\f$\Delta t\f$)
+   *
+   * This operator is used as `++clock`. The operator `clock++` is not
+   * implemented deliberately, because that requires a copy of the clock
+   * being created.
+   */
   Clock& operator++() {
     // guard against overflow:
     if (counter_ == std::numeric_limits<uint32_t>::max()) {
