@@ -44,8 +44,15 @@ class OutputInterface {
    * \param outgoing_particles   The list of particles after the Action was
    *                          performed.
    */
-  virtual void write_interaction(const ParticleList &/*incoming_particles*/,
-                                 const ParticleList &/*outgoing_particles*/) {}
+  virtual void write_interaction(const ParticleList &
+#ifdef DOXYGEN
+                                                      incoming_particles
+#endif
+                               , const ParticleList &
+#ifdef DOXYGEN
+                                                      outgoing_particles
+#endif
+                                ) {}
 
   /**
    * Output launched after every N'th timestep. N is controlled by an option.

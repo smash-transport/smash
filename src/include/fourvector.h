@@ -29,60 +29,109 @@ namespace Smash {
 class FourVector {
  public:
   /// default constructor nulls the fourvector components
-  FourVector() : x_{{0., 0., 0., 0.}} {}
+  FourVector() {
+    x_ = {0., 0., 0., 0.};
+  }
   /// copy constructor
-  FourVector(double y0, double y1, double y2, double y3)
-      : x_{{y0, y1, y2, y3}} {}
-  FourVector(double y0, ThreeVector vec)
-      : x_{{y0, vec.x1(), vec.x2(), vec.x3()}} {}
-  /* getters and setters for the four components */
+  FourVector(double y0, double y1, double y2, double y3) {
+    x_ = {y0, y1, y2, y3};
+  }
+  /// construct from time-like component and a ThreeVector.
+  FourVector(double y0, ThreeVector vec) {
+      x_ = {y0, vec.x1(), vec.x2(), vec.x3()};
+  }
+  /// retrieve time-like component
   double inline x0(void) const;
+  /// set time-like component
   void inline set_x0(double t);
+  /// retrieve first space-like component
   double inline x1(void) const;
+  /// set first space-like component
   void inline set_x1(double x);
+  /// retrieve second space-like component
   double inline x2(void) const;
+  /// set second space-like component
   void inline set_x2(double y);
+  /// set third space-like component
   double inline x3(void) const;
+  /// set third space-like component
   void inline set_x3(double z);
   /// get the three-vector (spatial components)
   ThreeVector inline threevec() const;
-  /// calculate the scalar product with another four-vector
+  /** calculate the scalar product with another four-vector
+   *
+   * \return \f$x^\mu a_\mu\f$
+   */
   double inline Dot(const FourVector &a) const;
-  /// calculate the square of the vector (which is a scalar)
+  /** calculate the square of the vector (which is a scalar)
+   *
+   * \return \f$x^\mu x_\mu\f$
+   */
   double inline sqr() const;
-  /// calculate the absolute value
+  /** calculate the lorentz invariant absolute value
+   *
+   * \return \f$\sqrt{x^\mu x_\mu}\f$
+   *
+   * Note that this will fail for space-like vectors.
+   */
   double inline abs() const;
-  /// calculate the square of the spatial three-vector
+  /** calculate the square of the spatial three-vector
+   *
+   * \return \f$\vec x \cdot \vec x\f$
+   *
+   */
   double inline sqr3() const;
-  /// calculate the absolute value of the spatial three-vector
+  /** calculate the absolute value of the spatial three-vector
+   *
+   * \return \f$\sqrt{\vec x \cdot \vec x}\f$
+   */
   double inline abs3() const;
   /** Returns the FourVector boosted with velocity.
    *
    * The current FourVector is not changed.
    *
-   * \param velocity (\f$\vec{v}\f$) is a ThreeVector representing the boost velocity
+   * \param velocity (\f$\vec{v}\f$) is a ThreeVector representing the
+   * boost velocity
    */
   FourVector LorentzBoost(const ThreeVector &velocity) const;
 
-  /* overloaded operators */
+  /// checks component-wise equality (accuracy \f$10^{-12}\f$)
   bool inline operator==(const FourVector &a) const;
+  /// checks inequality (logical complement to
+  /// FourVector::operator==(const FourVector&) const)
   bool inline operator!=(const FourVector &a) const;
+  /// checks if \f$x^\mu > a^\mu\f$ for all \f$\mu\f$
   bool inline operator<(const FourVector &a) const;
+  /// checks if \f$x^\mu > a^\mu\f$ for all \f$\mu\f$
   bool inline operator>(const FourVector &a) const;
+  /// logical complement to FourVector::operator>(const FourVector&) const
   bool inline operator<=(const FourVector &a) const;
+  /// logical complement to FourVector::operator<(const FourVector&) const
   bool inline operator>=(const FourVector &a) const;
+  /// checks if \f$x^\mu < a\f$ for all \f$\mu\f$.
   bool inline operator==(const double &a) const;
+  /// logical complement of FourVector::operator==(const double&) const
   bool inline operator!=(const double &a) const;
+  /// checks if \f$x^\mu < a\f$ for all \f$\mu\f$.
   bool inline operator<(const double &a) const;
+  /// checks if \f$x^\mu > a\f$ for all \f$\mu\f$.
   bool inline operator>(const double &a) const;
+  /// logical complement to FourVector::operator>(const double&) const
   bool inline operator<=(const double &a) const;
+  /// logical complement to FourVector::operator<(const double&) const
   bool inline operator>=(const double &a) const;
+  /// adds \f$a_\mu: x_\mu^\prime = x_\mu + a_\mu\f$
   FourVector inline operator+=(const FourVector &a);
+  /// subtracts \f$a_\mu: x_\mu^\prime = x_\mu - a_\mu\f$
   FourVector inline operator-=(const FourVector &a);
+  /// multiplies by \f$a: x_\mu^\prime = a \cdot x_\mu\f$
   FourVector inline operator*=(const double &a);
+  /// divides by \f$a: x_\mu^\prime = \frac{1}{a} \cdot x_\mu\f$
   FourVector inline operator/=(const double &a);
 
+  /// iterates over the components
   using iterator = std::array<double, 4>::iterator;
+  /// iterates over the components
   using const_iterator = std::array<double, 4>::const_iterator;
 
   /**
@@ -148,7 +197,7 @@ ThreeVector inline FourVector::threevec() const {
   return ThreeVector(x_[1],x_[2],x_[3]);
 }
 
-/// check if all four vector components are equal
+// check if all four vector components are equal
 bool inline FourVector::operator==(const FourVector &a) const {
   return std::abs(x_[0] - a.x_[0]) < 1e-12 &&
          std::abs(x_[1] - a.x_[1]) < 1e-12 &&
@@ -156,63 +205,63 @@ bool inline FourVector::operator==(const FourVector &a) const {
          std::abs(x_[3] - a.x_[3]) < 1e-12;
 }
 
-/// use == operator for the inverse != check
+// use == operator for the inverse != check
 bool inline FourVector::operator!=(const FourVector &a) const {
   return !(*this == a);
 }
 
-/// all four vector components are below comparison vector
+// all four vector components are below comparison vector
 bool inline FourVector::operator<(const FourVector &a) const {
   return (x_[0] < a.x_[0]) && (x_[1] < a.x_[1]) && (x_[2] < a.x_[2]) && (x_[3] < a.x_[3]);
 }
 
-/// use < operator for the inverse by switching arguments
+// use < operator for the inverse by switching arguments
 bool inline FourVector::operator>(const FourVector &a) const {
   return a < *this;
 }
 
-/// use > operator for less equal
+// use > operator for less equal
 bool inline FourVector::operator<=(const FourVector &a) const {
   return !(*this > a);
 }
 
-/// use < operator for greater equal
+// use < operator for greater equal
 bool inline FourVector::operator>=(const FourVector &a) const {
   return !(*this < a);
 }
 
-/// all vector components are equal to that number
+// all vector components are equal to that number
 bool inline FourVector::operator==(const double &a) const {
   return std::abs(x_[0] - a) < 1e-12 && std::abs(x_[1] - a) < 1e-12 &&
          std::abs(x_[2] - a) < 1e-12 && std::abs(x_[3] - a) < 1e-12;
 }
 
-/// use == operator for the inverse !=
+// use == operator for the inverse !=
 bool inline FourVector::operator!=(const double &a) const {
   return !(*this == a);
 }
 
-/// all vector components are below that number
+// all vector components are below that number
 bool inline FourVector::operator<(const double &a) const {
   return (x_[0] < a) && (x_[1] < a) && (x_[2] < a) && (x_[3] < a);
 }
 
-/// all vector components are above that number
+// all vector components are above that number
 bool inline FourVector::operator>(const double &a) const {
   return (x_[0] > a) && (x_[1] > a) && (x_[2] > a) && (x_[3] > a);
 }
 
-/// all vector components are less equal that number
+// all vector components are less equal that number
 bool inline FourVector::operator<=(const double &a) const {
   return !(*this > a);
 }
 
-/// all vector components are greater equal that number
+// all vector components are greater equal that number
 bool inline FourVector::operator>=(const double &a) const {
   return !(*this < a);
 }
 
-/// += assignement addition
+// += assignement addition
 FourVector inline FourVector::operator+=(const FourVector &a) {
   this->x_[0] += a.x_[0];
   this->x_[1] += a.x_[1];
@@ -221,13 +270,17 @@ FourVector inline FourVector::operator+=(const FourVector &a) {
   return *this;
 }
 
-/// addition +operator uses +=
+// addition +operator uses +=
+/** add two FourVectors
+ *
+ * \return \f$x^\mu = a^\mu + b^\mu\f$
+ */
 inline FourVector operator+(FourVector a, const FourVector &b) {
   a += b;
   return a;
 }
 
-/// -= assignement subtraction
+// -= assignement subtraction
 FourVector inline FourVector::operator-=(const FourVector &a) {
   this->x_[0] -= a.x_[0];
   this->x_[1] -= a.x_[1];
@@ -236,13 +289,16 @@ FourVector inline FourVector::operator-=(const FourVector &a) {
   return *this;
 }
 
-/// subtraction operator- uses -=
+/** subtract two FourVectors
+ *
+ * \return \f$x^\mu = a^\mu - b^\mu\f$
+ */
 inline FourVector operator-(FourVector a, const FourVector &b) {
   a -= b;
   return a;
 }
 
-/// assignement factor multiplication
+// assignement factor multiplication
 FourVector inline FourVector::operator*=(const double &a) {
   this->x_[0] *= a;
   this->x_[1] *= a;
@@ -251,13 +307,17 @@ FourVector inline FourVector::operator*=(const double &a) {
   return *this;
 }
 
-/// factor multiplication uses *=
+// factor multiplication uses *=
+/** multiply a vector with a scalar
+ *
+ * \return \f$x^\mu = b \cdot a^\mu\f$
+ */
 inline FourVector operator*(FourVector a, const double &b) {
   a *= b;
   return a;
 }
 
-/// assignement factor division
+// assignement factor division
 FourVector inline FourVector::operator/=(const double &a) {
   this->x_[0] /= a;
   this->x_[1] /= a;
@@ -266,7 +326,11 @@ FourVector inline FourVector::operator/=(const double &a) {
   return *this;
 }
 
-/// factor division uses /=
+// factor division uses /=
+/** divide a vector by a scalar
+ *
+ * \return \f$x^\mu = \frac{1}{b} \cdot a^\mu\f$
+ */
 inline FourVector operator/(FourVector a, const double &b) {
   a /= b;
   return a;

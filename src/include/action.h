@@ -164,8 +164,8 @@ class ScatterAction : public Action {
    * one is a resonance.
    *
    * \param[in,out] particles Particles in the simulation.
-   * \param[in] particle_id ID of the first initial state particle.
-   * \param[in] other_id ID of the second initial state particle.
+   * \param[in] particle0 ID of the first initial state particle.
+   * \param[in] particle1 ID of the second initial state particle.
    */
   void resonance_formation(const Particles &particles,
                            const ParticleData &particle0,

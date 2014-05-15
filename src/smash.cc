@@ -20,6 +20,7 @@
 
 #include "include/configuration.h"
 #include "include/experiment.h"
+#include "include/forwarddeclarations.h"
 #include "include/macros.h"
 #include "include/outputroutines.h"
 
@@ -27,8 +28,6 @@
 #include "include/config.h"
 
 namespace Smash {
-
-namespace bf = boost::filesystem;
 
 namespace {
 void usage(int rc, const std::string &progname) {
@@ -153,7 +152,7 @@ int main(int argc, char *argv[]) {
           force_overwrite = true;
           break;
         case 'i': {
-          const boost::filesystem::path file(optarg);
+          const bf::path file(optarg);
           configuration = Configuration(file.parent_path(), file.filename());
         } break;
         case 'h':

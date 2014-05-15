@@ -16,9 +16,9 @@
 #include <boost/filesystem.hpp>
 #include <yaml-cpp/yaml.h>
 
-namespace Smash {
+#include "include/forwarddeclarations.h"
 
-namespace bf = boost::filesystem;
+namespace Smash {
 
 // internal helper functions
 namespace {

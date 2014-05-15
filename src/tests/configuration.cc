@@ -9,13 +9,14 @@
 
 #include "tests/unittest.h"
 #include "include/configuration.h"
+#include "include/forwarddeclarations.h"
 
 #include <boost/filesystem.hpp>
 
 using namespace Smash;
 
 static Configuration make_test_configuration() {
-  return Configuration{boost::filesystem::path{TEST_CONFIG_PATH} / "tests",
+  return Configuration{bf::path{TEST_CONFIG_PATH} / "tests",
                        "test_config.yaml"};
 }
 
