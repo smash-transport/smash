@@ -27,7 +27,7 @@ TEST(size) {
 TEST(set_clock) {
   Clock labtime(0.123f, 0.234f);
   COMPARE(labtime.current_time(), 0.123f);
-  COMPARE(labtime.timestep_size(), 0.234f);
+  COMPARE(labtime.timestep_duration(), 0.234f);
 }
 
 TEST(run_clock) {
@@ -50,7 +50,7 @@ TEST(reset_timestep) {
   Clock labtime(0.0f, 0.1f);
   ++labtime;
   ++labtime;
-  labtime.set_timestep_size(0.2f);
+  labtime.set_timestep_duration(0.2f);
   ++labtime;
   FUZZY_COMPARE(labtime.current_time(), 0.4f);
 }
@@ -163,7 +163,7 @@ TEST_CATCH(init_negative_dt, std::range_error) {
 }
 TEST_CATCH(set_negative_dt, std::range_error) {
   Clock labtime(4.4f, 0.2f);
-  labtime.set_timestep_size(-0.3f);
+  labtime.set_timestep_duration(-0.3f);
 }
 TEST_CATCH(negative_interval, std::range_error) {
   Clock labtime(4.4f, 0.2f);

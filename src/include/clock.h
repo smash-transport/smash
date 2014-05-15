@@ -27,10 +27,10 @@ namespace Smash {
  *     // do something
  *     // adapt the timestep size to external circumstances:
  *     if (system_is_very_dense()) {
- *       labtime.set_timestep_size(labtime.timestep_size() / 2.0f);
+ *       labtime.set_timestep_duration(labtime.timestep_duration() / 2.0f);
  *     }
  *     if (system_is_very_dilute()) {
- *       labtime.set_timestep_size(labtime.timestep_size() * 2.0f);
+ *       labtime.set_timestep_duration(labtime.timestep_duration() * 2.0f);
  *     }
  *     // let the clock tick
  *     ++labtime;
@@ -47,7 +47,7 @@ namespace Smash {
  * \see operator+=(const float&)
  * \see operator+=(const int&)
  * \li set / retrieve the timestep (length of one tick)
- * \see set_timestep_size() \see timestep_size()
+ * \see set_timestep_duration() \see timestep_duration()
  * \li compare time against different clock or fixed value
  * \see operator<(const Clock&) const
  * \see operator<(const float&) const
@@ -65,7 +65,7 @@ namespace Smash {
 class Clock {
  public:
   /// default initializer: Timestep size is set to 0!
-  Clock() : counter_(0), timestep_size_(0.f), reset_time_(0.f) {};
+  Clock() : counter_(0), timestep_duration_(0.f), reset_time_(0.f) {};
   /** initialize with base time and time step size.
    *
    * \param time base time
@@ -74,7 +74,7 @@ class Clock {
    */
   Clock(const float time, const float dt)
                 : counter_(0)
-                , timestep_size_(dt)
+                , timestep_duration_(dt)
                 , reset_time_(time) {
     if (dt < 0.f) {
       throw std::range_error("No negative time increment allowed");
@@ -82,11 +82,11 @@ class Clock {
   }
   /// returns the current time
   inline float current_time() const {
-    return reset_time_ + timestep_size_ * counter_;
+    return reset_time_ + timestep_duration_ * counter_;
   }
   /** returns the time in the next tick
    *
-   * This function is needed, because current_time() + timestep_size()
+   * This function is needed, because current_time() + timestep_duration()
    * is not the same as the next tick (numerically; this is due to
    * floating point arithmetic).
    */
@@ -94,24 +94,24 @@ class Clock {
     if (counter_ == std::numeric_limits<uint32_t>::max()) {
       throw std::overflow_error("Too many timesteps, clock overflow imminent");
     }
-    return reset_time_ + timestep_size_ * (counter_ + 1);
+    return reset_time_ + timestep_duration_ * (counter_ + 1);
   }
   /// returns the time step size.
-  float timestep_size() const {
-    return timestep_size_;
+  float timestep_duration() const {
+    return timestep_duration_;
   }
   /** sets the time step size (and resets the counter)
    *
    * \param dt new time step size
    *
    */
-  void set_timestep_size(const float dt) {
+  void set_timestep_duration(const float dt) {
     if (dt < 0.f) {
       throw std::range_error("No negative time increment allowed");
     }
     reset_time_ = current_time();
     counter_ = 0;
-    timestep_size_ = dt;
+    timestep_duration_ = dt;
   }
   /** checks if a multiple of a given interval is reached within the
    * next tick.
@@ -130,11 +130,11 @@ class Clock {
     }
     // if the interval is less than or equal to the time step size, one
     // multiple will surely be within the next tick!
-    if (interval <= timestep_size_) {
+    if (interval <= timestep_duration_) {
       return true;
     }
     // else, let's first see what n is in question:
-    float n = floor((current_time() + timestep_size_) / interval);
+    float n = floor((current_time() + timestep_duration_) / interval);
     return (current_time() <= n * interval
          && n * interval < next_time());
   }
@@ -201,7 +201,7 @@ class Clock {
   /// timestep size is changed
   uint32_t counter_ = 0;
   /// The time step size \f$\Delta t\f$
-  float timestep_size_ = 0.0f;
+  float timestep_duration_ = 0.0f;
   /// The time of last reset (when counter_ was set to 0).
   float reset_time_ = 0.0f;
 };

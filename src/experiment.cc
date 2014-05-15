@@ -196,7 +196,7 @@ template <typename Modus>
 void Experiment<Modus>::print_startup(int64_t seed) {
   printf("Elastic cross section: %g mb\n", parameters_.cross_section);
   printf("Starting with temporal stepsize: %g fm/c\n",
-                                    parameters_.timestep_size());
+                                    parameters_.timestep_duration());
   printf("End time: %g fm/c\n", end_time_);
   printf("Random number seed: %" PRId64 "\n", seed);
   modus_.print_startup();

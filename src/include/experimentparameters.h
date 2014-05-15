@@ -23,8 +23,8 @@ struct ExperimentParameters {
   /// frame)
   Clock labclock;
   /// Time step size
-  float timestep_size() const {
-    return labclock.timestep_size();
+  float timestep_duration() const {
+    return labclock.timestep_duration();
   }
   /// returns if output should happen now
   bool need_intermediate_output() const {
