@@ -9,12 +9,9 @@
 #ifndef SRC_INCLUDE_MODUSDEFAULT_H_
 #define SRC_INCLUDE_MODUSDEFAULT_H_
 
-#include <stdexcept>
-#include <stdint.h>
-#include <list>
-
-#include "include/particles.h"
 #include "forwarddeclarations.h"
+
+#include <stdexcept>
 
 namespace Smash {
 

@@ -13,6 +13,8 @@
 #include "include/particles.h"
 #include "include/outputroutines.h"
 
+#include <boost/filesystem.hpp>
+
 namespace Smash {
 
 OscarOutput::OscarOutput(bf::path path)

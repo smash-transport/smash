@@ -9,9 +9,14 @@
 
 #include "include/scatteractionsfinder.h"
 
-#include "include/resonances.h"
+#include "include/action.h"
+#include "include/constants.h"
+#include "include/crosssections.h"
+#include "include/experimentparameters.h"
 #include "include/macros.h"
 #include "include/outputroutines.h"
+#include "include/particles.h"
+#include "include/resonances.h"
 
 namespace Smash {
 

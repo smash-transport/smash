@@ -7,17 +7,11 @@
 #ifndef SRC_INCLUDE_NUCLEUSMODUS_H_
 #define SRC_INCLUDE_NUCLEUSMODUS_H_
 
-#include <stdint.h>
-#include <cmath>
-#include <stdexcept>
-#include <list>
-#include <string>
+#include "modusdefault.h"
 
-#include "include/configuration.h"
-#include "include/modusdefault.h"
-#include "include/nucleus.h"
-#include "include/particles.h"
-#include "include/pdgcode.h"
+#include "forwarddeclarations.h"
+#include "nucleus.h"
+#include "pdgcode.h"
 
 namespace Smash {
 

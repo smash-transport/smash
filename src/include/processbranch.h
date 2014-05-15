@@ -7,9 +7,10 @@
 #ifndef SRC_INCLUDE_PROCESSBRANCH_H_
 #define SRC_INCLUDE_PROCESSBRANCH_H_
 
-#include <vector>
-#include "pdgcode.h"
 #include "forwarddeclarations.h"
+#include "pdgcode.h"
+
+#include <vector>
 
 namespace Smash {
 

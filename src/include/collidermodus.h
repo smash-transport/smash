@@ -7,16 +7,10 @@
 #ifndef SRC_INCLUDE_COLLIDERMODUS_H_
 #define SRC_INCLUDE_COLLIDERMODUS_H_
 
-#include <stdint.h>
-#include <cmath>
-#include <list>
-#include <string>
+#include "modusdefault.h"
 
-#include "include/crosssections.h"
-#include "include/modusdefault.h"
-#include "include/particles.h"
-#include "include/random.h"
 #include "forwarddeclarations.h"
+#include "pdgcode.h"
 
 namespace Smash {
 

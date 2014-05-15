@@ -7,10 +7,7 @@
 #ifndef SRC_INCLUDE_OUTPUTROUTINES_H_
 #define SRC_INCLUDE_OUTPUTROUTINES_H_
 
-#include <list>
-
-#include "include/chrono.h"
-#include "include/particles.h"
+#include "chrono.h"
 #include "forwarddeclarations.h"
 
 namespace Smash {

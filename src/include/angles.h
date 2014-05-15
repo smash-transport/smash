@@ -10,8 +10,6 @@
 #ifndef SRC_INCLUDE_ANGLES_H_
 #define SRC_INCLUDE_ANGLES_H_
 
-#include <cstdio>
-#include <cstdlib>
 #include <stdexcept>
 #include "include/random.h"
 #include "include/threevector.h"

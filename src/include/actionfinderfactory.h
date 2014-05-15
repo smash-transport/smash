@@ -10,10 +10,7 @@
 #ifndef SRC_INCLUDE_ACTIONFINDERFACTORY_H_
 #define SRC_INCLUDE_ACTIONFINDERFACTORY_H_
 
-#include "action.h"
-#include "particles.h"
-#include "crosssections.h"
-#include "experimentparameters.h"
+#include "forwarddeclarations.h"
 
 namespace Smash {
 
@@ -24,7 +21,7 @@ namespace Smash {
 class ActionFinderFactory {
  public:
   /** Pure virtual function for finding actions, given a list of particles. */
-  virtual std::vector<ActionPtr> find_possible_actions(
+  virtual ActionList find_possible_actions(
       Particles *particles, const ExperimentParameters &parameters,
       CrossSections *cross_sections = nullptr) const = 0;
 

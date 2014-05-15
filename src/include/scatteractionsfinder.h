@@ -10,8 +10,6 @@
 #ifndef SRC_INCLUDE_SCATTERACTIONSFINDER_H_
 #define SRC_INCLUDE_SCATTERACTIONSFINDER_H_
 
-#include <vector>
-
 #include "actionfinderfactory.h"
 
 namespace Smash {
@@ -29,7 +27,7 @@ class ScatterActionsFinder : public ActionFinderFactory {
 
   /** Check the whole particle list for collisions
    * and return a list with the corrsponding Action objects. */
-  std::vector<ActionPtr> find_possible_actions(
+  ActionList find_possible_actions(
       Particles *particles, const ExperimentParameters &parameters,
       CrossSections *cross_sections = nullptr) const override;
 

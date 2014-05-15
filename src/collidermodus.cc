@@ -9,9 +9,11 @@
 #include <list>
 
 #include "include/collidermodus.h"
+#include "include/particles.h"
 #include "include/configuration.h"
 #include "include/experimentparameters.h"
 #include "include/outputroutines.h"
+#include "include/random.h"
 
 namespace Smash {
 

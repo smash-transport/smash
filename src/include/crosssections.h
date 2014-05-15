@@ -7,7 +7,7 @@
 #ifndef SRC_INCLUDE_CROSSSECTIONS_H_
 #define SRC_INCLUDE_CROSSSECTIONS_H_
 
-#include "include/particles.h"
+#include "forwarddeclarations.h"
 
 namespace Smash {
 

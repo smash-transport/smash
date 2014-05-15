@@ -15,8 +15,6 @@
 #include "filedeleter.h"
 #include "forwarddeclarations.h"
 
-#include <boost/filesystem.hpp>
-
 namespace Smash {
 
 class OscarOutput : public OutputInterface {

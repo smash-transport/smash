@@ -7,15 +7,12 @@
 #ifndef SRC_INCLUDE_PARTICLES_H_
 #define SRC_INCLUDE_PARTICLES_H_
 
-#include <iterator>
-#include <map>
-#include <string>
-#include <utility>
+#include "decaymodes.h"
+#include "particledata.h"
+#include "particletype.h"
+#include "pdgcode.h"
 
-#include "include/decaymodes.h"
-#include "include/particledata.h"
-#include "include/particletype.h"
-#include "include/pdgcode.h"
+#include <map>
 
 namespace Smash {
 

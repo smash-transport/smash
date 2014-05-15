@@ -7,15 +7,13 @@
 #ifndef SRC_INCLUDE_NUCLEUS_H_
 #define SRC_INCLUDE_NUCLEUS_H_
 
-#include<map>
-#include<stdexcept>
-#include<string>
-#include<vector>
-#include "include/fourvector.h"
-#include "include/particledata.h"
-#include "include/particles.h"
-#include "include/pdgcode.h"
-#include "include/random.h"
+#include "forwarddeclarations.h"
+#include "fourvector.h"
+#include "particledata.h"
+
+#include <map>
+#include <stdexcept>
+#include <vector>
 
 namespace Smash {
 

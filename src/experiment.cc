@@ -14,6 +14,7 @@
 #include <string>
 #include <algorithm>
 
+#include "include/action.h"
 #include "include/boxmodus.h"
 #include "include/clock.h"
 #include "include/collidermodus.h"
