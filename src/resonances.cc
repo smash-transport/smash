@@ -107,7 +107,7 @@ std::vector<ProcessBranch> resonance_cross_section(
     }
 
     /* No decay channels found, ignore */
-    if (particles->decay_modes(type_resonance.pdgcode()).empty()) {
+    if (particles->decay_modes(type_resonance.pdgcode()).is_empty()) {
       continue;
     }
 

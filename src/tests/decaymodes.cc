@@ -25,7 +25,7 @@ TEST_CATCH(add_one_particle, DecayModes::InvalidDecay) {
 
 TEST(add_two_particles) {
   DecayModes m;
-  VERIFY(m.empty());
+  VERIFY(m.is_empty());
   m.add_mode({0, 1}, 1.f);
-  VERIFY(!m.empty());
+  VERIFY(!m.is_empty());
 }

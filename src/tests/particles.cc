@@ -213,7 +213,7 @@ TEST(load_decaymodes_two_channels) {
 
   {
     const auto &rho0 = p.decay_modes(0x113);
-    VERIFY(!rho0.empty());
+    VERIFY(!rho0.is_empty());
     const auto &modelist = rho0.decay_mode_list();
     COMPARE(modelist.size(), 1u);
     COMPARE(modelist[0].weight(), 1.);
@@ -223,7 +223,7 @@ TEST(load_decaymodes_two_channels) {
   }
   {
     const auto &omega = p.decay_modes(0x223);
-    VERIFY(!omega.empty());
+    VERIFY(!omega.is_empty());
     const auto &modelist = omega.decay_mode_list();
     COMPARE(modelist.size(), 3u);
     FUZZY_COMPARE(float(modelist[0].weight()), 1.f/3.f);

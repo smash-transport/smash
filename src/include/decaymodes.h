@@ -28,7 +28,7 @@ class DecayModes {
   void clear() { decay_modes_.clear(); }
 
   /* Check if empty */
-  bool empty() const { return decay_modes_.empty(); }
+  bool is_empty() const { return decay_modes_.empty(); }
 
   /* Pass out the decay modes */
   const std::vector<ProcessBranch> &decay_mode_list(void) const {
