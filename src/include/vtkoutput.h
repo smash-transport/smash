@@ -14,7 +14,6 @@
 #include "include/forwarddeclarations.h"
 #include "outputinterface.h"
 #include <boost/filesystem.hpp>
-class Particles;
 
 namespace Smash {
 

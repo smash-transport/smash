@@ -17,7 +17,6 @@
 #include <boost/filesystem.hpp>
 
 namespace Smash {
-class Particles;
 
 class OscarOutput : public OutputInterface {
  public:

@@ -16,11 +16,9 @@
 #include "include/modusdefault.h"
 #include "include/particles.h"
 #include "include/random.h"
+#include "forwarddeclarations.h"
 
 namespace Smash {
-
-class Configuration;
-struct ExperimentParameters;
 
 class ColliderModus : public ModusDefault {
  public:

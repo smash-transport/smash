@@ -15,7 +15,6 @@
 #include "macros.h"
 
 namespace Smash {
-class Particles;
 
 /**
  * \brief Abstraction of generic output

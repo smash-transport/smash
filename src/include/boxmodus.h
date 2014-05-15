@@ -11,15 +11,12 @@
 #include <cmath>
 #include <list>
 
+#include "forwarddeclarations.h"
 #include "include/crosssections.h"
 #include "include/modusdefault.h"
 #include "include/particles.h"
 
 namespace Smash {
-
-class BoxModus;
-class Configuration;
-struct ExperimentParameters;
 
 /** BoxModus: Provides a modus for infinite matter calculations
  *

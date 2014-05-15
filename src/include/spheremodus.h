@@ -16,11 +16,9 @@
 #include "include/modusdefault.h"
 #include "include/particles.h"
 #include "include/time.h"
+#include "forwarddeclarations.h"
 
 namespace Smash {
-
-/* forward declarations */
-class FourVector;
 
 class SphereModus : public ModusDefault {
  public:

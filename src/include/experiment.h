@@ -25,16 +25,7 @@
 #include "decayactionsfinder.h"
 #include "scatteractionsfinder.h"
 
-#ifndef DOXYGEN
-namespace boost {
-namespace filesystem {
-class path;
-}  // namespace filesystem
-}  // namespace boost
-#endif
-
 namespace Smash {
-class Configuration;
 
 /**
  * Non-template interface to Experiment<Modus>.

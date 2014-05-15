@@ -11,13 +11,9 @@
 
 #include "include/chrono.h"
 #include "include/particles.h"
+#include "forwarddeclarations.h"
 
 namespace Smash {
-
-/* forward declarations */
-class ModusDefault;
-class ParticleData;
-class ParticleType;
 
 /* console output */
 void print_startup(const ModusDefault &parameters);

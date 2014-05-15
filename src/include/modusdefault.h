@@ -14,13 +14,9 @@
 #include <list>
 
 #include "include/particles.h"
+#include "forwarddeclarations.h"
 
 namespace Smash {
-
-/* forward declarations */
-class Particles;
-class CrossSections;
-struct ExperimentParameters;
 
 /**
  * Baseclass for Modus classes that provides default function implementations.
