@@ -71,6 +71,29 @@ namespace Smash {
  * important for the user to discover typos in his configuration file (or
  * command line parameters).
  */
+// !!USER:Input
+/** \if user
+ * \page inputoptions Input file Options
+ *
+ * To configure SMASH, you can specify an input file. This file should be in
+ * YAML format.
+ *
+ * ###TEXT MISSING###
+ *
+ * \li \ref input_general_
+ * \li \ref input_modi_nucleus_
+ * \li \ref input_modi_box_
+ * \else
+ * 
+ * Options
+ * -------
+ * For possible configuration values, see
+ * \li \ref Experiment::create()
+ * \li \ref NucleusModus
+ * \li \ref BoxModus
+ * \endif
+ */
+// !!/USER:Input
 class Configuration {
  public:
   /// Thrown when the types in the config file and C++ don't match.

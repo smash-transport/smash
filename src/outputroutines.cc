@@ -26,6 +26,12 @@
 
 namespace Smash {
 
+// !!USER:Output
+/** \page outputexample Output file format and Examples
+ * There is output. This is explained here.
+ */
+// !!/USER:Output
+
 /* print_line - output a visible seperator */
 static void print_line(void) {
   int field_width = 80;
