@@ -14,7 +14,6 @@
 #define unlikely(x)     (x)
 #endif
 
-#define SMASH_UNUSED(x) \
-  if (&x) {}
+#define SMASH_UNUSED(x) (void)(x)
 
 #endif  // SRC_INCLUDE_MACROS_H_
