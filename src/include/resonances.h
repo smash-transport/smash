@@ -126,22 +126,6 @@ size_t two_to_two_formation(Particles *particles,
   std::vector<ProcessBranch> *process_list);
 
 /**
- * Function for 1-dimensional GSL integration.
- *
- * \param[in] integrand_function Function of 1 variable to be integrated over.
- * \param[in] parameters Container for possible parameters
- * needed by the integrand.
- * \param[in] lower_limit Lower limit of the integral.
- * \param[in] upper_limit Upper limit of the integral.
- * \param[out] integral_value Result of integration.
- * \param[out] integral_error Uncertainty of the result.
- */
-void quadrature_1d(double (*integrand_function)(double, void*),
-                   std::vector<double> *parameters,
-                   double lower_limit, double upper_limit,
-                   double *integral_value, double *integral_error);
-
-/**
  * Spectral function
  * \f$A(m)=\frac{1}{\pi}\frac{m\Gamma(m)}{(m^2-m_0^2)^2+(m\Gamma(m))^2}\f$
  * of the resonance.

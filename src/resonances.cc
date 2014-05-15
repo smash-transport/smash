@@ -33,6 +33,22 @@
 
 namespace Smash {
 
+/**
+ * Function for 1-dimensional GSL integration.
+ *
+ * \param[in] integrand_function Function of 1 variable to be integrated over.
+ * \param[in] parameters Container for possible parameters
+ * needed by the integrand.
+ * \param[in] lower_limit Lower limit of the integral.
+ * \param[in] upper_limit Upper limit of the integral.
+ * \param[out] integral_value Result of integration.
+ * \param[out] integral_error Uncertainty of the result.
+ */
+static void quadrature_1d(double (*integrand_function)(double, void *),
+                          std::vector<double> *parameters, double lower_limit,
+                          double upper_limit, double *integral_value,
+                          double *integral_error);
+
 /* calculate_minimum_mass
  * - calculate the minimum rest energy the resonance must have
  * to be able to decay through any of its decay channels
