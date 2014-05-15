@@ -16,14 +16,9 @@
 #include <cstddef>
 #include <vector>
 #include "include/pdgcode.h"
+#include "forwarddeclarations.h"
 
 namespace Smash {
-
-/* necessary forward declarations */
-class Particles;
-class ParticleData;
-class ParticleType;
-class ProcessBranch;
 
 /**
  * The minimum mass of the resonance.
@@ -40,7 +35,7 @@ class ProcessBranch;
  * to be available for the resonance.
  *
  */
-float calculate_minimum_mass(Particles *particles, PdgCode pdgcode);
+float calculate_minimum_mass(const Particles &particles, PdgCode pdgcode);
 
 /**
  * Find all resonances that can be produced in a collision of the two
@@ -181,24 +176,8 @@ double spectral_function_integrand(double resonance_mass, void * parameters);
  *
  * \return The mass of the resonance particle.
  */
-double sample_resonance_mass(Particles *particles, PdgCode pdg_resonance,
-  PdgCode pdg_stable, double cms_energy);
-
-/**
- * Resonance formation process.
- *
- * Creates one or two new particles, of which
- * one is a resonance.
- *
- * \param[in,out] particles Particles in the simulation.
- * \param[in] particle_id ID of the first initial state particle.
- * \param[in] other_id ID of the second initial state particle.
- * \param[in] produced_particles Final state particle type(s).
- *
- * \return ID of the (first) new particle.
- */
-int resonance_formation(Particles *particles, int particle_id, int other_id,
-  std::vector<PdgCode> produced_particles);
+double sample_resonance_mass(const Particles &particles, PdgCode pdg_resonance,
+                             PdgCode pdg_stable, double cms_energy);
 
 }  // namespace Smash
 

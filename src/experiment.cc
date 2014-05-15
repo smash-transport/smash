@@ -10,7 +10,6 @@
 
 #include <cinttypes>
 #include <cstdlib>
-#include <ctime>
 #include <list>
 #include <string>
 #include <algorithm>
@@ -19,12 +18,13 @@
 #include "include/collidermodus.h"
 #include "include/configuration.h"
 #include "include/experiment.h"
+#include "include/forwarddeclarations.h"
 #include "include/macros.h"
 #include "include/nucleusmodus.h"
+#include "include/oscaroutput.h"
 #include "include/outputroutines.h"
 #include "include/particlesoutput.h"
 #include "include/random.h"
-#include "include/time.h"
 #include "include/vtkoutput.h"
 
 #include <boost/filesystem.hpp>
@@ -32,8 +32,6 @@
 /* #include "include/spheremodus.h" */
 
 namespace Smash {
-
-namespace bf = boost::filesystem;
 
 /* ExperimentBase carries everything that is needed for the evolution */
 std::unique_ptr<ExperimentBase> ExperimentBase::create(Configuration &config) {
@@ -57,6 +55,12 @@ std::unique_ptr<ExperimentBase> ExperimentBase::create(Configuration &config) {
 }
 
 namespace {
+/** Gathers all general Experiment parameters
+ *
+ * \param[in, out] config Configuration element
+ * \return The ExperimentParameters struct filled with values from the
+ * Configuration
+ */
 ExperimentParameters create_experiment_parameters(Configuration &config) {
   const int testparticles = config.take({"General", "TESTPARTICLES"});
   float cross_section = config.take({"General", "SIGMA"});
@@ -104,17 +108,13 @@ void Experiment<Modus>::initialize(const bf::path &/*path*/) {
   energy_initial_ = energy_total(&particles_);
   /* Print output headers */
   print_header();
-  /* Write out the initial momenta and positions of the particles */
-  for (auto &output : outputs_) {
-    output->write_state(particles_);
-  }
 }
 
 
 /* This is the loop over timesteps, carrying out collisions and decays
  * and propagating particles. */
 template <typename Modus>
-void Experiment<Modus>::run_time_evolution() {
+void Experiment<Modus>::run_time_evolution(const int evt_num) {
   modus_.sanity_check(&particles_);
   size_t interactions_total = 0, previous_interactions_total = 0,
          interactions_this_interval = 0;
@@ -138,15 +138,22 @@ void Experiment<Modus>::run_time_evolution() {
 
     /* (2.a) Perform actions. */
     if (!actions.empty()) {
-      for (auto act = actions.begin(); act != actions.end(); ++act) {
-        (*act)->perform (&particles_, interactions_total);
+      for (const auto &action : actions) {
+        if (action->is_valid(particles_)) {
+          const ParticleList incoming_particles = action->incoming_particles(particles_);
+          action->perform(&particles_, interactions_total);
+          const ParticleList outgoing_particles = action->outgoing_particles();
+          for (const auto &output : outputs_) {
+            output->write_interaction(incoming_particles, outgoing_particles);
+          }
+        }
       }
       actions.clear();
       printd("Action list done.\n");
     }
 
     /* (3) Do propagation. */
-    modus_.propagate(&particles_, parameters_);
+    modus_.propagate(&particles_, parameters_, outputs_);
 
     /* (4) Physics output during the run. */
     if (step > 0 && (step + 1) % output_interval_ == 0) {
@@ -157,8 +164,8 @@ void Experiment<Modus>::run_time_evolution() {
                          interactions_this_interval, energy_initial_,
                          time_start_);
       /* save evolution data */
-      for (auto &output : outputs_) {
-        output->write_state(particles_);
+      for (const auto &output : outputs_) {
+        output->after_Nth_timestep(particles_, evt_num, step);
       }
     }
   }
@@ -196,29 +203,27 @@ float Experiment<Modus>::energy_total(Particles *particles) {
   return energy_sum;
 }
 
-/* set the timer to the actual time in nanoseconds precision */
-template <typename Modus>
-timespec inline Experiment<Modus>::set_timer_start(void) {
-  timespec time;
-  clock_gettime(&time);
-  return time;
-}
-
 template <typename Modus>
 void Experiment<Modus>::run(const bf::path &path) {
+  outputs_.emplace_back(new OscarOutput(path));
   outputs_.emplace_back(new ParticlesOutput(path));
   outputs_.emplace_back(new VtkOutput(path));
 
-  /* Write the header of OSCAR data output file */
-  write_oscar_header();
   for (int j = 0; j < nevents_; j++) {
     initialize(path);
-    /* Write the initial data block of the event */
-    write_oscar_event_block(&particles_, 0, particles_.size(), j + 1);
+
+    /* Output at event start */
+    for (const auto &output : outputs_) {
+      output->at_eventstart(particles_, j);
+    }
+
     /* the time evolution of the relevant subsystem */
-    run_time_evolution();
-    /* Write the final data block of the event */
-    write_oscar_event_block(&particles_, particles_.size(), 0, j + 1);
+    run_time_evolution(j);
+
+    /* Output at event end */
+    for (const auto &output : outputs_) {
+      output->at_eventend(particles_, j);
+    }
   }
 }
 

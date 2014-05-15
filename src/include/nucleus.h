@@ -131,7 +131,16 @@ class Nucleus {
     }
     return nop;
   }
+  /** returns the geometrical center of the nucleus.
+   *
+   * \return \f$\vec r_s = \frac{1}{N} \sum_{i=1}^N \vec r_i\f$ (for a
+   * nucleus with N particles that are at the positions \f$\vec r_i\f$).
+   */
   FourVector center() const;
+  /** shifts the nucleus so that its center is at (0,0,0)
+   *
+   * \see center()
+   */
   void align_center() {
     FourVector centerpoint = center();
     for (auto p = particles_.begin(); p != particles_.end(); ++p) {

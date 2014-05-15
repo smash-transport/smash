@@ -17,12 +17,12 @@
 #include <string>
 #include <utility>
 
+#include "include/chrono.h"
 #include "include/fourvector.h"
 #include "include/particles.h"
 #include "include/particledata.h"
 #include "include/particletype.h"
 #include "include/macros.h"
-#include "include/time.h"
 
 namespace Smash {
 
@@ -50,22 +50,15 @@ void print_header(void) {
 }
 
 
-/* measure_timediff - time the simulation used */
-double measure_timediff(const timespec time_start) {
-  timespec now;
-  clock_gettime(&now);
-  return (now.tv_sec + now.tv_nsec / 10.0E9
-    - time_start.tv_sec -   time_start.tv_nsec / 10.0E9);
-}
-
 /* print_measurements - console output during simulation */
 void print_measurements(const Particles &particles,
                         const size_t &scatterings_total,
                         const size_t &scatterings_this_interval,
-                        float energy_ini, timespec time_start) {
+                        float energy_ini,
+                SystemTimePoint time_start) {
   FourVector momentum_total(0, 0, 0, 0);
   /* calculate elapsed time */
-  double elapsed = measure_timediff(time_start);
+  SystemTimeSpan elapsed_seconds = SystemClock::now() - time_start;
   double time = 0.0;
 
   for (const ParticleData &data : particles.data()) {
@@ -77,31 +70,33 @@ void print_measurements(const Particles &particles,
   if (likely(time > 0))
     printf("%5g%13g%13g%13g%10zu%10zu%13g\n", time,
            energy_ini - momentum_total.x0(),
-           sqrt(-1 * momentum_total.DotThree()),
+           momentum_total.abs3(),
            scatterings_total * 2 / (particles.size() * time),
-           scatterings_this_interval, particles.size(), elapsed);
+           scatterings_this_interval, particles.size(), elapsed_seconds.count());
   else
     printf("%5g%13g%13g%13g%10i%10zu%13g\n", time,
            energy_ini - momentum_total.x0(),
-           sqrt(-1 * momentum_total.DotThree()), 0.0, 0, particles.size(),
-           elapsed);
+           momentum_total.abs3(), 0.0, 0, particles.size(),
+           elapsed_seconds.count());
 }
 
 /* print_tail - output at the end of the simulation */
-void print_tail(const timespec time_start, const double &scattering_rate) {
-  double time = measure_timediff(time_start);
+void print_tail(const
+                SystemTimePoint time_start,
+                const double &scattering_rate) {
+  SystemTimeSpan time = SystemClock::now() - time_start;
   print_line();
   /* print finishing time in human readable way:
    * time < 10 min => seconds
    * 10 min < time < 3 h => minutes
    * time > 3h => hours
    */
-  if (time < 600)
-    printf("Time real: %g [s]\n", time);
-  else if (time < 10800)
-    printf("Time real: %g [min]\n", time / 60);
+  if (time.count() < 600)
+    printf("Time real: %g [s]\n", time.count());
+  else if (time.count() < 10800)
+    printf("Time real: %g [min]\n", time.count() / 60);
   else
-    printf("Time real: %g [h]\n", time / 3600);
+    printf("Time real: %g [h]\n", time.count() / 3600);
   printf("Final scattering rate: %g [fm-1]\n", scattering_rate);
 }
 
@@ -141,73 +136,6 @@ void printd_list(const std::list<int> &collision_list) {
        id != collision_list.cend(); ++id)
     printd(" particle %d", *id);
   printd("\n");
-}
-
-/* write_oscar_header - OSCAR header format */
-void write_oscar_header(void) {
-  FILE *fp;
-
-  fp = fopen("data/collision.dat", "w");
-  fprintf(fp, "# OSC1999A\n");
-  fprintf(fp, "# Interaction history\n");
-  fprintf(fp, "# smash \n");
-  fprintf(fp, "# \n");
-  fclose(fp);
-}
-
-/**
- *  write_oscar_event_block
- *  - writes the initial and final particle information of an event
- */
-void write_oscar_event_block(Particles *particles,
-                             size_t initial, size_t final, int event_id) {
-  FILE *fp;
-  fp = fopen("data/collision.dat", "a");
-  /* OSCAR line prefix : initial particles; final particles; event id
-   * First block of an event: initial = 0, final = number of particles
-   * Vice versa for the last block
-   */
-  fprintf(fp, "%zu %zu %i\n", initial, final, event_id);
-  for (const ParticleData &data : particles->data()) {
-    fprintf(fp, "%i %s %i %g %g %g %g %g %g %g %g %g \n",
-            data.id(), data.pdgcode().string().c_str(), 0,
-            data.momentum().x1(), data.momentum().x2(),
-            data.momentum().x3(), data.momentum().x0(),
-            sqrt(data.momentum().Dot(data.momentum())),
-            data.position().x1(), data.position().x2(),
-            data.position().x3(), data.position().x0() - 1.0);
-  }
-  fclose(fp);
-}
-
-/* write_oscar - OSCAR file */
-/* Use this for the first particle in a process */
-void write_oscar(const ParticleData &particle_data,
-                 const ParticleType &particle_type,
-                 const int initial, const int final) {
-  FILE *fp;
-  fp = fopen("data/collision.dat", "a");
-  /* OSCAR line prefix : initial final
-   * particle creation: 0 1
-   * particle 2<->2 collision: 2 2
-   * resonance formation: 2 1
-   * resonance decay: 1 2
-   * etc.
-   */
-  if (initial > 0 || final > 0)
-    fprintf(fp, "%i %i \n", initial, final);
-
-  /* particle_index, particle_pdgcode, ?, momenta, mass position */
-  FourVector momentum = particle_data.momentum(),
-             position = particle_data.position();
-  float mass = sqrt(momentum.Dot(momentum));
-  fprintf(fp, "%i %s %i %g %g %g %g %g %g %g %g %g \n", particle_data.id(),
-          particle_type.pdgcode().string().c_str(), 0, momentum.x1(),
-          momentum.x2(), momentum.x3(), momentum.x0(), mass,
-          position.x1(), position.x2(), position.x3(),
-          position.x0() - 1.0);
-
-  fclose(fp);
 }
 
 }  // namespace Smash

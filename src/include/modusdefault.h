@@ -42,15 +42,28 @@ class ModusDefault {
   // Missing functions for concrete Modus implementations:
   // void initial_conditions(Particles *particles);
 
-  /**
-   * Only needed for BoxModus. The default for all the other modi does nothing.
+  /** Enforces sensible positions for the particles.
+   *
+   * Currently, this is only needed for BoxModus; the other Modi do
+   * nothing.
+   *
+   * \see BoxModus::sanity_check
    */
   int sanity_check(Particles * /*p*/) { return 0; }
 
-  /**
-   * XXX: document what it does in general
+  /** Propagates the positions of all particles on a straight line
+   * through the current time step.
+   *
+   * For each particle, the position is shifted:
+   * \f[\vec x^\prime = \vec x + \vec v \cdot \Delta t\f]
+   * where \f$\vec x\f$ is the current position, \f$\vec v\f$ its
+   * velocity and \f$\Delta t\f$ the duration of this timestep.
+   *
+   * \param[in,out] particles The particle list in the event
+   * \param[in] parameters parameters for the experiment
    */
-  void propagate(Particles *particles, const ExperimentParameters &parameters);
+  void propagate(Particles *particles, const ExperimentParameters &parameters,
+                                       const OutputsList &);
 
   /** BadInput is an error to throw if the configuration options are invalid.
    *

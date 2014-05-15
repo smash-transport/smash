@@ -13,8 +13,10 @@
 #include <string>
 #include <vector>
 
+#include "include/chrono.h"
 #include "include/crosssections.h"
 #include "include/experimentparameters.h"
+#include "include/forwarddeclarations.h"
 #include "include/modusdefault.h"
 #include "include/outputroutines.h"
 #include "include/particles.h"
@@ -116,7 +118,7 @@ class ExperimentBase {
    *
    * \param path The path where output files will be written to.
    */
-  virtual void run(const boost::filesystem::path &path) = 0;
+  virtual void run(const bf::path &path) = 0;
 
   /**
    * Exception class that is thrown if an invalid modus is requested from the
@@ -156,7 +158,7 @@ class Experiment : public ExperimentBase {
   friend class ExperimentBase;
 
  public:
-  virtual void run(const boost::filesystem::path &path) override;
+  virtual void run(const bf::path &path) override;
 
  private:
   /**
@@ -175,14 +177,31 @@ class Experiment : public ExperimentBase {
    */
   explicit Experiment(Configuration &config);
 
-  void initialize(const boost::filesystem::path &path);
-  void run_time_evolution();
+  /** Reads particle type information and cross sections information and
+   * does the initialization of the system
+   *
+   * This is called in the beginning of each event.
+   */
+  void initialize(const bf::path &path);
+  /** Runs the time evolution of an event
+   *
+   * Here, the time steps are looped over, collisions and decays are
+   * carried out and particles are propagated.
+   *
+   * \param evt_num Running number of the event
+   */
+  void run_time_evolution(const int evt_num);
 
+  /** Output about the beginning of the event.
+   *
+   * This output goes to the console
+   *
+   * \param seed The random number engine seed
+   */
   void print_startup(int64_t seed);
 
+  /// returns the total energy of the particles.
   float energy_total(Particles *particles);
-
-  inline timespec set_timer_start();
 
   /**
    * Struct of several member variables.
@@ -206,7 +225,7 @@ class Experiment : public ExperimentBase {
    * A list of output formaters. They will be called to write the state of the
    * particles to file.
    */
-  std::vector<std::unique_ptr<Smash::OutputInterface>> outputs_;
+  OutputsList outputs_;
 
   /**
    * ?
@@ -215,7 +234,9 @@ class Experiment : public ExperimentBase {
    */
   CrossSections cross_sections_;
 
+  /// The object that finds decays
   DecayActionsFinder decay_finder_;
+  /// The object that finds scatterings
   ScatterActionsFinder scatter_finder_;
 
   /**
@@ -232,8 +253,8 @@ class Experiment : public ExperimentBase {
   const int output_interval_;
   /// initial total energy of the system
   float energy_initial_ = 0.f;
-  /// starting time of the simulation
-  timespec time_start_ = set_timer_start();
+  /// system starting time of the simulation
+  SystemTimePoint time_start_ = SystemClock::now();
 };
 
 }  // namespace Smash

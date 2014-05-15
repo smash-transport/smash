@@ -20,6 +20,7 @@
 
 #include "include/configuration.h"
 #include "include/experiment.h"
+#include "include/forwarddeclarations.h"
 #include "include/macros.h"
 #include "include/outputroutines.h"
 
@@ -28,10 +29,18 @@
 
 namespace Smash {
 
-namespace bf = boost::filesystem;
-
 namespace {
-void usage(int rc, const std::string &progname) {
+/** prints usage information and exits the program
+ *
+ * \param rc Exit status to return
+ * \param progname Name of the program
+ *
+ * usage() is called when either the `--help` or `-h` command line
+ * options are given to the program; in this case, the exit status is
+ * EXIT_SUCCESS, or when an unknown option is given; in this case,
+ * the exit status is EXIT_FAIL.
+ */
+void usage(const int rc, const std::string &progname) {
   printf("\nUsage: %s [option]\n\n", progname.c_str());
   printf("Calculate transport box\n"
          "  -h, --help              usage information\n"
@@ -50,13 +59,21 @@ void usage(int rc, const std::string &progname) {
   exit(rc);
 }
 
+/** Exception class that is thrown if the requested output directory
+ * already exists and `-f` was not specified on the command line.
+ */
 struct OutputDirectoryExists : public std::runtime_error {
   using std::runtime_error::runtime_error;
 };
+/** Exception class that is thrown if no new output path can be
+ * generated (there is a directory name for each positive integer
+ * value)
+ */
 struct OutputDirectoryOutOfIds : public std::runtime_error {
   using std::runtime_error::runtime_error;
 };
 
+/// returns the default path for output.
 bf::path default_output_path() {
   const bf::path p = bf::absolute("data");
   if (!bf::exists(p)) {
@@ -75,6 +92,7 @@ bf::path default_output_path() {
   return p2;
 }
 
+/// makes sure the output path is valid (throws if not)
 void ensure_path_is_valid(const bf::path &path) {
   if (bf::exists(path)) {
     if (!bf::is_directory(path)) {
@@ -153,7 +171,7 @@ int main(int argc, char *argv[]) {
           force_overwrite = true;
           break;
         case 'i': {
-          const boost::filesystem::path file(optarg);
+          const bf::path file(optarg);
           configuration = Configuration(file.parent_path(), file.filename());
         } break;
         case 'h':

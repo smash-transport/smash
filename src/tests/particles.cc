@@ -28,8 +28,8 @@ TEST(everything) {
   /* 2 particles with null momenta */
   particle_a.set_momentum(0.1, 0.0, 0.0, 0.0);
   particle_b.set_momentum(0.1, 0.0, 0.0, 0.0);
-  particle_a.set_position(1.0, 1.0, 1.0, 1.0);
-  particle_b.set_position(2.0, 2.0, 2.0, 2.0);
+  particle_a.set_position(FourVector(1., 1., 1., 1.));
+  particle_b.set_position(FourVector(2., 2., 2., 2.));
 
   /* check return of particle distance of null momenta particles */
   double distance_squared = particle_distance(&particle_a, &particle_b);
@@ -51,8 +51,8 @@ TEST(everything) {
 
   /* now check the Particles class itself */
   const std::string pis(
-      "pi+ 0.13957 -1.0 211 1 1 0\n"
-      "pi- 0.13957 -1.0 -211 1 -1 0\n");
+      "pi+ 0.13957 -1.0 211\n"
+      "pi- 0.13957 -1.0 -211\n");
   Particles particles(pis, {});
 
   /* check addition of particles */
@@ -84,7 +84,7 @@ TEST_CATCH(load_from_incorrect_string, Particles::LoadFailure) {
 }
 
 TEST(load_one_particle_no_extra_whitespace) {
-  const std::string parts("pi0 0.1350 -1.0 111 2 0 0");
+  const std::string parts("pi0 0.1350 -1.0 111");
   Particles p(parts, {});
   COMPARE(p.types_size(), 1u);
   int count = 0;
@@ -101,7 +101,7 @@ TEST(load_one_particle_no_extra_whitespace) {
 }
 
 TEST(load_one_particle_with_whitespace) {
-  const std::string parts("\t\n\t  pi0  0.1350 \t -1.0 111\t2 0 0 \n ");
+  const std::string parts("\t\n\t  pi0  0.1350 \t -1.0 111\n ");
   Particles p(parts, {});
   COMPARE(p.types_size(), 1u);
   int count = 0;
@@ -118,7 +118,7 @@ TEST(load_one_particle_with_whitespace) {
 }
 
 TEST_CATCH(load_one_particle_with_incorrect_newline, Particles::LoadFailure) {
-  const std::string parts("pi0 0.1350\n-1.0 111 2 0 0");
+  const std::string parts("pi0 0.1350\n-1.0 111");
   Particles p(parts, {});
 }
 
@@ -132,7 +132,7 @@ TEST(load_only_comments) {
 }
 
 TEST(load_one_particle_with_comment) {
-  const std::string parts("pi0 0.1350  -1.0 111 2 0 0 # This is pi0. Swell.");
+  const std::string parts("pi0 0.1350  -1.0 111 # This is pi0. Swell.");
   Particles p(parts, {});
   COMPARE(p.types_size(), 1u);
   int count = 0;
@@ -217,9 +217,9 @@ TEST(load_decaymodes_two_channels) {
     const auto &modelist = rho0.decay_mode_list();
     COMPARE(modelist.size(), 1u);
     COMPARE(modelist[0].weight(), 1.);
-    COMPARE(modelist[0].particle_list().size(), 2u);
-    COMPARE(modelist[0].particle_list()[0].dump(), 0x211);
-    COMPARE(modelist[0].particle_list()[1].dump(), 0x80000211);
+    COMPARE(modelist[0].pdg_list().size(), 2u);
+    COMPARE(modelist[0].pdg_list()[0].dump(), 0x211);
+    COMPARE(modelist[0].pdg_list()[1].dump(), 0x80000211);
   }
   {
     const auto &omega = p.decay_modes(0x223);
@@ -229,15 +229,15 @@ TEST(load_decaymodes_two_channels) {
     FUZZY_COMPARE(float(modelist[0].weight()), 1.f/3.f);
     FUZZY_COMPARE(float(modelist[1].weight()), 1.f/3.f);
     FUZZY_COMPARE(float(modelist[2].weight()), 1.f/3.f);
-    COMPARE(modelist[0].particle_list().size(), 2u);
-    COMPARE(modelist[0].particle_list()[0].dump(), 0x111);
-    COMPARE(modelist[0].particle_list()[1].dump(), 0x113);
-    COMPARE(modelist[1].particle_list().size(), 2u);
-    COMPARE(modelist[1].particle_list()[0].dump(), 0x211);
-    COMPARE(modelist[1].particle_list()[1].dump(), 0x80000213);
-    COMPARE(modelist[2].particle_list().size(), 2u);
-    COMPARE(modelist[2].particle_list()[0].dump(), 0x80000211);
-    COMPARE(modelist[2].particle_list()[1].dump(), 0x213);
+    COMPARE(modelist[0].pdg_list().size(), 2u);
+    COMPARE(modelist[0].pdg_list()[0].dump(), 0x111);
+    COMPARE(modelist[0].pdg_list()[1].dump(), 0x113);
+    COMPARE(modelist[1].pdg_list().size(), 2u);
+    COMPARE(modelist[1].pdg_list()[0].dump(), 0x211);
+    COMPARE(modelist[1].pdg_list()[1].dump(), 0x80000213);
+    COMPARE(modelist[2].pdg_list().size(), 2u);
+    COMPARE(modelist[2].pdg_list()[0].dump(), 0x80000211);
+    COMPARE(modelist[2].pdg_list()[1].dump(), 0x213);
   }
 }
 

@@ -12,6 +12,7 @@
 
 #include "include/fourvector.h"
 #include "include/pdgcode.h"
+#include "forwarddeclarations.h"
 
 namespace Smash {
 
@@ -24,15 +25,36 @@ namespace Smash {
 class ParticleData {
  public:
   /// Use improbable values for default constructor
-  ParticleData() :id_(-1), pdgcode_(0x0), id_process_(-1),
-    collision_time_(0.0) {}
-  /// Use improbable values for constructor
-  explicit ParticleData(int i) :id_(i), pdgcode_(0x0),
-    id_process_(-1), collision_time_(0.0) {}
+  ParticleData() {}
+
+  /**
+   * Initialize the data with only a valid ID. All the other values are
+   * initialized to improbable values.
+   */
+  explicit ParticleData(int i) : id_(i) {}
+
+  /**
+   * Initialize the data with only a valid PDG code. All the other values are
+   * initialized to improbable values.
+   */
+  explicit ParticleData(PdgCode p) : pdgcode_(p) {}
+
   inline int id(void) const;
   inline void set_id(int id);
   inline PdgCode pdgcode(void) const;
   inline void set_pdgcode(PdgCode pdgcode);
+
+  // convenience accessors to PdgCode:
+  /// \copydoc PdgCode::is_hadron
+  bool is_hadron() const { return pdgcode_.is_hadron(); }
+
+  /**
+   * Return the ParticleType object associated to this particle.
+   *
+   * \todo Remove the need for the Particles parameter.
+   */
+  const ParticleType &type(const Particles &particles) const;
+
   inline int id_process(void) const;
   inline void set_id_process(int id);
   inline double collision_time(void) const;
@@ -41,18 +63,15 @@ class ParticleData {
   inline void set_collision_past(int process_id);
   inline const FourVector &momentum(void) const;
   inline void set_momentum(const FourVector &momentum_vector);
+  inline void set_momentum(const double &mass, const ThreeVector &mom);
   inline void set_momentum(const double &mass, const double &px,
                            const double &py, const double &pz);
   inline const FourVector &position(void) const;
   inline void set_position(const FourVector &position);
-  inline void set_position(const double &x0, const double &x1,
-                           const double &x2, const double &x3);
-  /// get the x veolcity
-  inline double velocity_x(void) { return momentum().x1() / momentum().x0(); }
-  /// get the y veolcity
-  inline double velocity_y(void) { return momentum().x2() / momentum().x0(); }
-  /// get the z veolcity
-  inline double velocity_z(void) { return momentum().x3() / momentum().x0(); }
+  /// get the velocity 3-vector
+  inline ThreeVector velocity (void) const { return momentum_.threevec() / momentum_.x0(); }
+  /// do a Lorentz-boost
+  inline void boost (const ThreeVector &v);
   /* overloaded operators */
   inline bool operator==(const ParticleData &a) const;
   inline bool operator<(const ParticleData &a) const;
@@ -61,18 +80,23 @@ class ParticleData {
 
  private:
   /// Each particle has a unique identifier
-  int id_;
+  int id_ = -1;
   /// pdg id of the particle
-  PdgCode pdgcode_;
+  PdgCode pdgcode_ = PdgCode::invalid();
   /// counter of the last collision/decay
-  int id_process_;
+  int id_process_ = -1;
   /// collision time
-  double collision_time_;
+  double collision_time_ = 0.;
   /// momenta of the particle: x0, x1, x2, x3 as E, px, py, pz
   FourVector momentum_;
   /// position in space: x0, x1, x2, x3 as t, x, y, z
   FourVector position_;
 };
+
+/**
+ * Type for a list of particles.
+ */
+using ParticleList = std::vector<ParticleData>;
 
 /// look up the id of the particle
 inline int ParticleData::id(void) const {
@@ -135,10 +159,14 @@ inline void ParticleData::set_momentum(const FourVector &momentum_vector) {
   momentum_ = momentum_vector;
 }
 
+inline void ParticleData::set_momentum(const double &mass, const ThreeVector &mom) {
+  momentum_ = FourVector(sqrt(mass*mass + mom*mom), mom);
+}
+
 /// set particle four momentum by components
 inline void ParticleData::set_momentum(const double &mass, const double &px,
                           const double &py, const double &pz) {
-  momentum_.set_FourVector(sqrt(mass * mass + px * px + py * py + pz * pz),
+  momentum_ = FourVector(sqrt(mass * mass + px * px + py * py + pz * pz),
                            px, py, pz);
 }
 
@@ -152,10 +180,11 @@ inline void ParticleData::set_position(const FourVector &pos) {
   position_ = pos;
 }
 
-/// set the particle position by components
-inline void ParticleData::set_position(const double &x0, const double &x1,
-                          const double &x2, const double &x3) {
-  position_.set_FourVector(x0, x1, x2, x3);
+inline void ParticleData::boost (const ThreeVector &v)
+{
+  set_momentum(momentum_.LorentzBoost(v));
+  // TODO: do we actually need to boost the position?
+  set_position(position_.LorentzBoost(v));
 }
 
 /// check if the particles are identical

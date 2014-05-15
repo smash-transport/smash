@@ -25,55 +25,26 @@
 namespace Smash {
 
 /* boost_CM - boost to center of momentum */
-void boost_CM(ParticleData *particle1, ParticleData *particle2,
-  FourVector *velocity) {
-  FourVector momentum1(particle1->momentum()), momentum2(particle2->momentum());
-  FourVector position1(particle1->position()), position2(particle2->position());
-  double cms_energy = momentum1.x0() + momentum2.x0();
-
-  // CMS 4-velocity
-  velocity->set_x0(1.0);
-  velocity->set_x1((momentum1.x1() + momentum2.x1()) / cms_energy);
-  velocity->set_x2((momentum1.x2() + momentum2.x2()) / cms_energy);
-  velocity->set_x3((momentum1.x3() + momentum2.x3()) / cms_energy);
+ThreeVector boost_CM(ParticleData *particle1, ParticleData *particle2) {
+  // determine CMS velocity
+  FourVector mom = particle1->momentum() + particle2->momentum();
+  ThreeVector velocity = mom.threevec() / mom.x0();
 
   // Boost the momenta into CMS frame
-  momentum1 = momentum1.LorentzBoost(*velocity);
-  momentum2 = momentum2.LorentzBoost(*velocity);
-
-  // Boost the positions into CMS frame
-  position1 = position1.LorentzBoost(*velocity);
-  position2 = position2.LorentzBoost(*velocity);
-
-  particle1->set_momentum(momentum1);
-  particle1->set_position(position1);
-  particle2->set_momentum(momentum2);
-  particle2->set_position(position2);
+  particle1->boost(velocity);
+  particle2->boost(velocity);
+  
+  return velocity;
 }
 
 /* boost_back_CM - boost back from center of momentum */
 void boost_back_CM(ParticleData *particle1, ParticleData *particle2,
-  FourVector *velocity_orig) {
-  FourVector momentum1(particle1->momentum()), momentum2(particle2->momentum());
-  FourVector position1(particle1->position()), position2(particle2->position());
-  FourVector velocity = *velocity_orig;
+                   const ThreeVector &velocity_orig) {
 
-  /* To boost back set 1 + velocity */
-  velocity *= -1;
-  velocity.set_x0(1.0);
+  ThreeVector velocity = - velocity_orig;
 
-  /* Boost the momenta back to lab frame */
-  momentum1 = momentum1.LorentzBoost(velocity);
-  momentum2 = momentum2.LorentzBoost(velocity);
-
-  /* Boost the positions back to lab frame */
-  position1 = position1.LorentzBoost(velocity);
-  position2 = position2.LorentzBoost(velocity);
-
-  particle1->set_momentum(momentum1);
-  particle1->set_position(position1);
-  particle2->set_momentum(momentum2);
-  particle2->set_position(position2);
+  particle1->boost(velocity);
+  particle2->boost(velocity);
 }
 
 /* particle_distance - measure distance between two particles
@@ -83,10 +54,9 @@ double particle_distance(ParticleData *particle_orig1,
   ParticleData *particle_orig2) {
   /* Copy the particles in order to boost them and to forget the copy */
   ParticleData particle1 = *particle_orig1, particle2 = *particle_orig2;
-  FourVector velocity_CM;
 
   /* boost particles in center of momenta frame */
-  boost_CM(&particle1, &particle2, &velocity_CM);
+  boost_CM(&particle1, &particle2);
   FourVector position_difference = particle1.position() - particle2.position();
   printd("Particle %d<->%d position difference: %g %g %g %g [fm]\n",
     particle1.id(), particle2.id(), position_difference.x0(),
@@ -102,7 +72,7 @@ double particle_distance(ParticleData *particle_orig1,
   if (fabs(momentum_difference.x1()) < really_small
       && fabs(momentum_difference.x2()) < really_small
       && fabs(momentum_difference.x3()) < really_small)
-    return  - position_difference.DotThree(position_difference);
+    return  position_difference.sqr3();
 
   /* UrQMD squared distance criteria:
    * arXiv:nucl-th/9803035 (3.27): in center of momemtum frame
@@ -112,10 +82,10 @@ double particle_distance(ParticleData *particle_orig1,
    * velocity of particle b: v_b
    * d^2_{coll} = (x_a - x_b)^2 - ((x_a - x_a) . (v_a - v_b))^2 / (v_a - v_b)^2
    */
-  return - position_difference.DotThree(position_difference)
-    + position_difference.DotThree(momentum_difference)
-      * position_difference.DotThree(momentum_difference)
-      / momentum_difference.DotThree(momentum_difference);
+  return position_difference.sqr3()
+    - (position_difference.threevec()*momentum_difference.threevec())
+      * (position_difference.threevec()*momentum_difference.threevec())
+      / momentum_difference.sqr3();
 }
 
 /* time_collision - measure collision time of two particles */
@@ -147,8 +117,8 @@ double collision_time(const ParticleData &particle1,
       && fabs(velocity_difference.x2()) < really_small
       && fabs(velocity_difference.x3()) < really_small)
     return -1.0;
-  return - position_difference.DotThree(velocity_difference)
-           / velocity_difference.DotThree(velocity_difference);
+  return - position_difference.threevec()*velocity_difference.threevec()
+           / velocity_difference.sqr3();
 }
 
 /* momenta_exchange - soft scattering */
@@ -312,8 +282,7 @@ Particles::ParticleTypeMap Particles::load_particle_types(  //{{{
     std::string name;
     float mass, width;
     PdgCode pdgcode;
-    int isospin, charge, spin;
-    lineinput >> name >> mass >> width >> pdgcode >> isospin >> charge >> spin;
+    lineinput >> name >> mass >> width >> pdgcode;
     if (lineinput.fail()) {
       throw LoadFailure(build_error_string(
           "While loading the Particle data:\nFailed to convert the input "
@@ -324,12 +293,13 @@ Particles::ParticleTypeMap Particles::load_particle_types(  //{{{
 
     printd("Setting particle type %s mass %g width %g pdgcode %s\n",
            name.c_str(), mass, width, pdgcode.string().c_str());
-    printd("Setting particle type %s isospin %i charge %i spin %i\n",
-           name.c_str(), isospin, charge, spin);
+    printd("Setting particle type %s isospin %i/2 charge %i spin %i/2\n",
+           name.c_str(), pdgcode.isospin_total(), pdgcode.charge(),
+                                                  pdgcode.spin());
 
     types.insert(std::make_pair(
         pdgcode,
-        ParticleType{name, mass, width, pdgcode, isospin, charge, spin}));
+        ParticleType{name, mass, width, pdgcode}));
   }
   return std::move(types);
 }/*}}}*/
@@ -402,7 +372,9 @@ Particles::DecayModesMap Particles::load_decaymodes(const std::string &input) {
         decay_particles.push_back(pdg);
         lineinput >> pdg;
       }
-      decay_particles.push_back(pdg);
+      if (pdg != PdgCode::invalid()) {
+        decay_particles.push_back(pdg);
+      }
       if (lineinput.fail() && !lineinput.eof()) {
         throw LoadFailure(
             build_error_string("Parse error: expected a PdgCode ", line));

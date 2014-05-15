@@ -38,22 +38,22 @@ namespace Smash {
  * to be able to decay through any of its decay channels
  * NB: This function assumes stable decay products!
  */
-float calculate_minimum_mass(Particles *particles, PdgCode pdgcode) {
+float calculate_minimum_mass(const Particles &particles, PdgCode pdgcode) {
   /* If the particle happens to be stable, just return the mass */
-  if (particles->particle_type(pdgcode).width() < 0.0)
-    return particles->particle_type(pdgcode).mass();
+  if (particles.particle_type(pdgcode).width() < 0.0) {
+    return particles.particle_type(pdgcode).mass();
+  }
   /* Otherwise, let's find the highest mass value needed in any decay mode */
   float minimum_mass = 0.0;
-  const std::vector<ProcessBranch> decaymodes
-    = particles->decay_modes(pdgcode).decay_mode_list();
+  const std::vector<ProcessBranch> decaymodes =
+      particles.decay_modes(pdgcode).decay_mode_list();
   for (std::vector<ProcessBranch>::const_iterator mode = decaymodes.begin();
        mode != decaymodes.end(); ++mode) {
-    size_t decay_particles = mode->particle_list().size();
+    size_t decay_particles = mode->pdg_list().size();
     float total_mass = 0.0;
     for (size_t i = 0; i < decay_particles; i++) {
       /* Stable decay products assumed; for resonances the mass can be lower! */
-      total_mass
-        += particles->particle_type(mode->particle_list().at(i)).mass();
+      total_mass += particles.particle_type(mode->pdg_list().at(i)).mass();
     }
     if (total_mass > minimum_mass)
       minimum_mass = total_mass;
@@ -221,17 +221,17 @@ double two_to_one_formation(Particles *particles,
   bool not_balanced = true;
   for (std::vector<ProcessBranch>::const_iterator mode
        = decaymodes.begin(); mode != decaymodes.end(); ++mode) {
-    size_t decay_particles = mode->particle_list().size();
+    size_t decay_particles = mode->pdg_list().size();
     if ( decay_particles > 3 ) {
       printf("Warning: Not a 1->2 or 1->3 process!\n");
       printf("Number of decay particles: %zu \n", decay_particles);
     } else {
       /* There must be enough energy to produce all decay products */
       float mass_a, mass_b, mass_c = 0.0;
-      mass_a = calculate_minimum_mass(particles, mode->particle_list().at(0));
-      mass_b = calculate_minimum_mass(particles, mode->particle_list().at(1));
+      mass_a = calculate_minimum_mass(*particles, mode->pdg_list().at(0));
+      mass_b = calculate_minimum_mass(*particles, mode->pdg_list().at(1));
       if (decay_particles == 3) {
-        mass_c = calculate_minimum_mass(particles, mode->particle_list().at(2));
+        mass_c = calculate_minimum_mass(*particles, mode->pdg_list().at(2));
       }
       if (sqrt(mandelstam_s) < mass_a + mass_b + mass_c)
         not_enough_energy = true;
@@ -240,10 +240,10 @@ double two_to_one_formation(Particles *particles,
        * XXX: For now, assuming only 2-particle initial states
        */
       if (decay_particles == 2
-          && ((mode->particle_list().at(0) == type_particle1.pdgcode()
-               && mode->particle_list().at(1) == type_particle2.pdgcode())
-              || (mode->particle_list().at(0) == type_particle2.pdgcode()
-                  && mode->particle_list().at(1) == type_particle1.pdgcode()))
+          && ((mode->pdg_list().at(0) == type_particle1.pdgcode()
+               && mode->pdg_list().at(1) == type_particle2.pdgcode())
+              || (mode->pdg_list().at(0) == type_particle2.pdgcode()
+                  && mode->pdg_list().at(1) == type_particle1.pdgcode()))
           && (mode->weight() > 0.0))
         not_balanced = false;
     }
@@ -368,18 +368,17 @@ size_t two_to_two_formation(Particles *particles,
     double minimum_mass = 0.0;
     for (std::vector<ProcessBranch >::const_iterator mode
          = decaymodes.begin(); mode != decaymodes.end(); ++mode) {
-      size_t decay_particles = mode->particle_list().size();
+      size_t decay_particles = mode->pdg_list().size();
       if ( decay_particles > 3 ) {
         printf("Warning: Not a 1->2 or 1->3 process!\n");
         printf("Number of decay particles: %zu \n", decay_particles);
       } else {
         /* There must be enough energy to produce all decay products */
         float mass_a, mass_b, mass_c = 0.0;
-        mass_a = calculate_minimum_mass(particles, mode->particle_list().at(0));
-        mass_b = calculate_minimum_mass(particles, mode->particle_list().at(1));
+        mass_a = calculate_minimum_mass(*particles, mode->pdg_list().at(0));
+        mass_b = calculate_minimum_mass(*particles, mode->pdg_list().at(1));
         if (decay_particles == 3) {
-          mass_c = calculate_minimum_mass(particles,
-                     mode->particle_list().at(2));
+          mass_c = calculate_minimum_mass(*particles, mode->pdg_list().at(2));
         }
         if (sqrt(mandelstam_s) < mass_a + mass_b + mass_c
                                  + second_type.mass()) {
@@ -507,17 +506,15 @@ double spectral_function_integrand(double resonance_mass,
 }
 
 /* Resonance mass sampling for 2-particle final state */
-double sample_resonance_mass(Particles *particles, PdgCode pdg_resonance,
-  PdgCode pdg_stable, double cms_energy) {
+double sample_resonance_mass(const Particles &particles, PdgCode pdg_resonance,
+                             PdgCode pdg_stable, double cms_energy) {
   /* First, find the minimum mass of this resonance */
-  double minimum_mass
-    = calculate_minimum_mass(particles, pdg_resonance);
+  double minimum_mass = calculate_minimum_mass(particles, pdg_resonance);
   /* Define distribution parameters */
-  float mass_stable
-    = particles->particle_type(pdg_stable).mass();
+  float mass_stable = particles.particle_type(pdg_stable).mass();
   std::vector<double> parameters;
-  parameters.push_back(particles->particle_type(pdg_resonance).width());
-  parameters.push_back(particles->particle_type(pdg_resonance).mass());
+  parameters.push_back(particles.particle_type(pdg_resonance).width());
+  parameters.push_back(particles.particle_type(pdg_resonance).mass());
   parameters.push_back(mass_stable);
   parameters.push_back(cms_energy * cms_energy);
 
@@ -535,80 +532,6 @@ double sample_resonance_mass(Particles *particles, PdgCode pdg_resonance,
       = spectral_function_integrand(mass_resonance, &parameters);
   }
   return mass_resonance;
-}
-
-/* Resonance formation kinematics */
-int resonance_formation(Particles *particles, int particle_id, int other_id,
-                        std::vector<PdgCode> produced_particles) {
-  if (produced_particles.empty()) {
-    printf("resonance_formation:\n");
-    printf("Warning: No final state particles found!\n");
-    printf("Resonance formation canceled. Returning -1.\n");
-    return -1;
-  }
-  /* Template for a new particle */
-  ParticleData resonance;
-
-  const double cms_energy = particles->data(particle_id).momentum().x0()
-    + particles->data(other_id).momentum().x0();
-
-  int id_first_new = -1;
-  if (produced_particles.size() == 1) {
-    resonance.set_pdgcode(produced_particles.at(0));
-    /* Center-of-momentum frame of initial particles
-     * is the rest frame of the resonance
-     *
-     * We use fourvector to set 4-momentum, as setting it
-     * with doubles requires that particle is on
-     * mass shell, which is not generally true for resonances
-     */
-    FourVector resonance_momentum(cms_energy, 0.0, 0.0, 0.0);
-    resonance.set_momentum(resonance_momentum);
-
-    printd("Momentum of the new particle: %g %g %g %g \n",
-      resonance.momentum().x0(),
-      resonance.momentum().x1(),
-      resonance.momentum().x2(),
-      resonance.momentum().x3());
-
-    /* Initialize position */
-    resonance.set_position(1.0, 0.0, 0.0, 0.0);
-    id_first_new = particles->add_data(resonance);
-  } else if (produced_particles.size() == 2) {
-    /* 2 particles in final state. Need another particle template */
-    /* XXX: For now, it is assumed that the other particle is stable! */
-    ParticleData stable_product;
-    if (particles->particle_type(produced_particles.at(0)).width() > 0) {
-      resonance.set_pdgcode(produced_particles.at(0));
-      stable_product.set_pdgcode(produced_particles.at(1));
-    } else {
-      stable_product.set_pdgcode(produced_particles.at(0));
-      resonance.set_pdgcode(produced_particles.at(1));
-    }
-    float mass_stable
-      = particles->particle_type(stable_product.pdgcode()).mass();
-    /* Sample resonance mass */
-    double mass_resonance = sample_resonance_mass(particles,
-      resonance.pdgcode(), stable_product.pdgcode(), cms_energy);
-
-    /* Sample the particle momenta */
-    sample_cms_momenta(&resonance, &stable_product, cms_energy, mass_resonance,
-                       mass_stable);
-
-    /* Initialize positions */
-    resonance.set_position(1.0, 0.0, 0.0, 0.0);
-    stable_product.set_position(1.0, 0.0, 0.0, 0.0);
-    id_first_new = particles->add_data(resonance);
-    particles->add_data(stable_product);
-  } else {
-    printf("resonance_formation:\n");
-    printf("Warning: %zu particles in final state!\n",
-           produced_particles.size());
-    printf("Resonance formation canceled. Returning -1.\n");
-    return -1;
-  }
-  /* Return the id of the first new particle */
-  return id_first_new;
 }
 
 }  // namespace Smash

@@ -15,6 +15,7 @@
 #include <vector>
 
 #include <yaml-cpp/yaml.h>
+#include "include/forwarddeclarations.h"
 
 #ifndef DOXYGEN
 namespace boost {
@@ -171,7 +172,7 @@ class Configuration {
    *
    * \param path The directory where the SMASH config files are located.
    */
-  explicit Configuration(const boost::filesystem::path &path);
+  explicit Configuration(const bf::path &path);
 
   /**
    * Reads a YAML config file from the specified \p path.
@@ -180,8 +181,8 @@ class Configuration {
    * \param filename The filename (without path) of the YAML config file, in
    *                 case you don't want the default "config.yaml".
    */
-  explicit Configuration(const boost::filesystem::path &path,
-                         const boost::filesystem::path &filename);
+  explicit Configuration(const bf::path &path,
+                         const bf::path &filename);
 
   /// if you want to copy this you're doing it wrong
   Configuration(const Configuration &) = delete;

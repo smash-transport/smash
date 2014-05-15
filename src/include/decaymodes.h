@@ -20,7 +20,7 @@ namespace Smash {
 class DecayModes {
  public:
   /* Add a decay mode */
-  inline void add_mode(std::vector<PdgCode> particles, float ratio);
+  inline void add_mode(std::vector<PdgCode> pdg_list, float ratio);
   inline void add_mode(ProcessBranch mode);
   /* Make sure ratios add to 1 */
   inline void renormalize(float renormalization_constant);
@@ -44,14 +44,14 @@ class DecayModes {
 };
 
 /* Add a decay mode */
-inline void DecayModes::add_mode(std::vector<PdgCode> particles, float ratio) {
-  if (particles.size() < 2) {
+inline void DecayModes::add_mode(std::vector<PdgCode> pdg_list, float ratio) {
+  if (pdg_list.size() < 2) {
     throw InvalidDecay(
         "DecayModes::add_mode was instructed to add a decay mode with less "
         "than 2 branches. This is an invalid input.");
   }
   ProcessBranch branch;
-  branch.set_particles(std::move(particles));
+  branch.set_particles(std::move(pdg_list));
   branch.set_weight(ratio);
   decay_modes_.push_back(branch);
 }
