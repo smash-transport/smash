@@ -136,11 +136,30 @@ class Experiment : public ExperimentBase {
    */
   explicit Experiment(Configuration &config);
 
+  /** Reads particle type information and cross sections information and
+   * does the initialization of the system
+   *
+   * This is called in the beginning of each event.
+   */
   void initialize(const bf::path &path);
+  /** Runs the time evolution of an event
+   *
+   * Here, the time steps are looped over, collisions and decays are
+   * carried out and particles are propagated.
+   *
+   * \param evt_num Running number of the event
+   */
   void run_time_evolution(const int evt_num);
 
+  /** Output about the beginning of the event.
+   *
+   * This output goes to the console
+   *
+   * \param seed The random number engine seed
+   */
   void print_startup(int64_t seed);
 
+  /// returns the total energy of the particles.
   float energy_total(Particles *particles);
 
   /**
@@ -174,7 +193,9 @@ class Experiment : public ExperimentBase {
    */
   CrossSections cross_sections_;
 
+  /// The object that finds decays
   DecayActionsFinder decay_finder_;
+  /// The object that finds scatterings
   ScatterActionsFinder scatter_finder_;
 
   /**

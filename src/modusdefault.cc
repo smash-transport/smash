@@ -16,9 +16,11 @@
 
 namespace Smash {
 
-/*general propagation routine */
+// general propagation routine
+
 void ModusDefault::propagate(Particles *particles,
-                             const ExperimentParameters &parameters, const OutputsList &) {
+                             const ExperimentParameters &parameters,
+                             const OutputsList &) {
   FourVector distance, position;
   for (ParticleData &data : particles->data()) {
     /* propagation for this time step */

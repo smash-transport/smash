@@ -55,6 +55,12 @@ std::unique_ptr<ExperimentBase> ExperimentBase::create(Configuration &config) {
 }
 
 namespace {
+/** Gathers all general Experiment parameters
+ *
+ * \param[in, out] config Configuration element
+ * \return The ExperimentParameters struct filled with values from the
+ * Configuration
+ */
 ExperimentParameters create_experiment_parameters(Configuration &config) {
   const int testparticles = config.take({"General", "TESTPARTICLES"});
   float cross_section = config.take({"General", "SIGMA"});
