@@ -9,6 +9,14 @@ if(DOXYGEN)
    else()
       message(STATUS "Doxygen ${DOXYGEN_VERSION} found at ${DOXYGEN}")
    endif()
+
+   find_program(DOT_EXECUTABLE dot)
+   if(DOT_EXECUTABLE)
+      set(HAVE_DOT "YES")
+   else()
+      set(HAVE_DOT "NO")
+   endif()
+
    set(DOXYGEN_EXTRACT_ALL "YES")
    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in
       ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
