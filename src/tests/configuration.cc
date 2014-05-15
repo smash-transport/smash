@@ -26,68 +26,68 @@ TEST(create_object) {
 TEST(check_config_general_contents) {
   Configuration conf = make_test_configuration();
 
-  std::string modus = conf.read({"General", "MODUS"        });
-  COMPARE(modus, "Nucleus");
-  COMPARE(double(conf.read({"General", "EPS"          })), 0.01);
-  COMPARE(int   (conf.read({"General", "STEPS"        })), 1000);
-  COMPARE(int   (conf.read({"General", "UPDATE"       })), 10);
-  COMPARE(int   (conf.read({"General", "RANDOMSEED"   })), 1);
-  COMPARE(double(conf.read({"General", "SIGMA"        })), 10.0);
-  COMPARE(int   (conf.read({"General", "TESTPARTICLES"})), 1);
-  COMPARE(int   (conf.read({"General", "NEVENTS"      })), 1);
+  std::string modus = conf.read({"fireballs", "extorting"        });
+  COMPARE(modus, "feathered");
+  COMPARE(double(conf.read({"fireballs", "infection"          })), 0.01);
+  COMPARE(int   (conf.read({"fireballs", "arena"        })), 1000);
+  COMPARE(int   (conf.read({"fireballs", "pendulous"       })), 10);
+  COMPARE(int   (conf.read({"fireballs", "scudded"   })), 1);
+  COMPARE(double(conf.read({"fireballs", "firebrands"        })), 10.0);
+  COMPARE(int   (conf.read({"fireballs", "joker"})), 1);
+  COMPARE(int   (conf.read({"fireballs", "classify"      })), 1);
 }
 
 TEST(check_config_collider_contents) {
   Configuration conf = make_test_configuration();
-  COMPARE(int   (conf.read({"Modi", "Collider", "PROJECTILE"})), 211);
-  COMPARE(int   (conf.read({"Modi", "Collider", "TARGET"    })), -211);
-  COMPARE(double(conf.read({"Modi", "Collider", "SQRTS"     })), 1.0);
+  COMPARE(int   (conf.read({"tamer", "schmoozed", "warbler"})), 211);
+  COMPARE(int   (conf.read({"tamer", "schmoozed", "neglects"    })), -211);
+  COMPARE(double(conf.read({"tamer", "schmoozed", "reedier"     })), 1.0);
 }
 
 TEST(test_take) {
   Configuration conf = make_test_configuration();
-  double d = conf.take({"Modi", "Sphere", "RADIUS"});
+  double d = conf.take({"tamer", "pipit", "bushelling"});
   COMPARE(d, 5.);
 }
 
 TEST(test_take_multiple) {
   Configuration conf = make_test_configuration();
-  Configuration modi = conf["Modi"];
-  double d = modi.take({"Box", "LENGTH"});
+  Configuration modi = conf["tamer"];
+  double d = modi.take({"Altaic", "Meccas"});
   COMPARE(d, 10.);
-  d = modi.take({"Box", "TEMPERATURE"});
+  d = modi.take({"Altaic", "Kathleen"});
   COMPARE(d, 0.2);
-  int i = modi.take({"Box", "INITIAL_CONDITION"});
+  int i = modi.take({"Altaic", "Brahmins"});
   COMPARE(i, 1);
 }
 
 TEST_CATCH(take_incorrect_type, Configuration::IncorrectTypeInAssignment) {
   Configuration conf = make_test_configuration();
-  Configuration modi = conf["Modi"];
-  int i = modi.take({"Sphere", "RADIUS"});
+  Configuration modi = conf["tamer"];
+  int i = modi.take({"pipit", "bushelling"});
   COMPARE(i, 5);
 }
 
 TEST(take_always_converts_to_string) {
   Configuration conf = make_test_configuration();
-  Configuration modi = conf["Modi"];
-  std::string s = modi.take({"Sphere", "RADIUS"});
+  Configuration modi = conf["tamer"];
+  std::string s = modi.take({"pipit", "bushelling"});
   COMPARE(s, "5.0");
 }
 
 TEST(has_value) {
   Configuration conf = make_test_configuration();
-  Configuration modi = conf["Modi"];
-  VERIFY(modi.has_value({"Sphere", "RADIUS"}));
-  VERIFY(modi.has_value({"Sphere", "RADIUS"}));
+  Configuration modi = conf["tamer"];
+  VERIFY(modi.has_value({"pipit", "bushelling"}));
+  VERIFY(modi.has_value({"pipit", "bushelling"}));
 }
 
 TEST(take_removes_entry) {
   Configuration conf = make_test_configuration();
-  Configuration modi = conf["Modi"];
-  VERIFY(modi.has_value({"Sphere", "RADIUS"}));
-  modi.take({"Sphere", "RADIUS"});
-  VERIFY(!modi.has_value({"Sphere", "RADIUS"}));
+  Configuration modi = conf["tamer"];
+  VERIFY(modi.has_value({"pipit", "bushelling"}));
+  modi.take({"pipit", "bushelling"});
+  VERIFY(!modi.has_value({"pipit", "bushelling"}));
 }
 
 // Sorry, but I have to put this in the std namespace, otherwise it doesn't
@@ -116,113 +116,113 @@ static void expect_lines(std::vector<std::string> expected, std::istream &stream
 TEST(check_unused_report) {
   std::string reference;
   Configuration conf = make_test_configuration();
-  Configuration modi = conf["Modi"];
+  Configuration modi = conf["tamer"];
   conf.take({"particles"});
   conf.take({"decaymodes"});
-  conf.take({"General", "MODUS"});
-  conf.take({"General", "EPS"});
-  conf.take({"General", "STEPS"});
-  conf.take({"General", "UPDATE"});
-  conf.take({"General", "RANDOMSEED"});
-  conf.take({"General", "SIGMA"});
-  conf.take({"General", "TESTPARTICLES"});
-  conf.take({"General", "NEVENTS"});
-  modi.take({"Box", "LENGTH"});
-  modi.take({"Box", "TEMPERATURE"});
-  modi.take({"Box", "INITIAL_CONDITION"});
-  modi.take({"Nucleus"});
+  conf.take({"fireballs", "extorting"});
+  conf.take({"fireballs", "infection"});
+  conf.take({"fireballs", "arena"});
+  conf.take({"fireballs", "pendulous"});
+  conf.take({"fireballs", "scudded"});
+  conf.take({"fireballs", "firebrands"});
+  conf.take({"fireballs", "joker"});
+  conf.take({"fireballs", "classify"});
+  modi.take({"Altaic", "Meccas"});
+  modi.take({"Altaic", "Kathleen"});
+  modi.take({"Altaic", "Brahmins"});
+  modi.take({"feathered"});
   {
     std::istringstream unused(conf.unused_values_report());
     std::string line;
     getline(unused, line);
-    COMPARE(line, "Modi:");
+    COMPARE(line, "tamer:");
     getline(unused, line);
-    if (line == "  Collider:") {
+    if (line == "  schmoozed:") {
       expect_lines(
-          {"    TARGET: -211", "    PROJECTILE: 211", "    SQRTS: 1.0"},
+          {"    neglects: -211", "    warbler: 211", "    reedier: 1.0"},
           unused);
       getline(unused, line);
-      COMPARE(line, "  Sphere:");
+      COMPARE(line, "  pipit:");
       getline(unused, line);
-      COMPARE(line, "    RADIUS: 5.0");
+      COMPARE(line, "    bushelling: 5.0");
     } else {
-      COMPARE(line, "  Sphere:");
+      COMPARE(line, "  pipit:");
       getline(unused, line);
-      COMPARE(line, "    RADIUS: 5.0");
+      COMPARE(line, "    bushelling: 5.0");
       getline(unused, line);
-      COMPARE(line, "  Collider:");
+      COMPARE(line, "  schmoozed:");
       expect_lines(
-          {"    TARGET: -211", "    PROJECTILE: 211", "    SQRTS: 1.0"},
+          {"    neglects: -211", "    warbler: 211", "    reedier: 1.0"},
           unused);
     }
     VERIFY(unused.eof());
   }
 
-  modi.take({"Sphere", "RADIUS"});
+  modi.take({"pipit", "bushelling"});
   {
     std::istringstream unused(conf.unused_values_report());
     std::string line;
     getline(unused, line);
-    COMPARE(line, "Modi:");
+    COMPARE(line, "tamer:");
     getline(unused, line);
-    COMPARE(line, "  Collider:");
-    expect_lines({"    TARGET: -211", "    PROJECTILE: 211", "    SQRTS: 1.0"},
+    COMPARE(line, "  schmoozed:");
+    expect_lines({"    neglects: -211", "    warbler: 211", "    reedier: 1.0"},
                  unused);
     VERIFY(unused.eof());
   }
 
-  modi.take({"Collider", "PROJECTILE"});
+  modi.take({"schmoozed", "warbler"});
   {
     std::istringstream unused(conf.unused_values_report());
     std::string line;
     getline(unused, line);
-    COMPARE(line, "Modi:");
+    COMPARE(line, "tamer:");
     getline(unused, line);
-    COMPARE(line, "  Collider:");
-    expect_lines({"    TARGET: -211", "    SQRTS: 1.0"}, unused);
+    COMPARE(line, "  schmoozed:");
+    expect_lines({"    neglects: -211", "    reedier: 1.0"}, unused);
     VERIFY(unused.eof());
   }
 
-  modi.take({"Collider", "SQRTS"});
+  modi.take({"schmoozed", "reedier"});
   {
     std::istringstream unused(conf.unused_values_report());
     std::string line;
     getline(unused, line);
-    COMPARE(line, "Modi:");
+    COMPARE(line, "tamer:");
     getline(unused, line);
-    COMPARE(line, "  Collider:");
+    COMPARE(line, "  schmoozed:");
     getline(unused, line);
-    COMPARE(line, "    TARGET: -211");
+    COMPARE(line, "    neglects: -211");
     VERIFY(unused.eof());
   }
 
-  modi.take({"Collider", "TARGET"});
+  modi.take({"schmoozed", "neglects"});
   reference = "{}";
   COMPARE(conf.unused_values_report(), reference);
 }
 
 TEST(test_config_read) {
   Configuration conf = make_test_configuration();
-  int nevents = conf.read({"General", "NEVENTS"});
+  int nevents = conf.read({"fireballs", "classify"});
   COMPARE(nevents, 1);
-  nevents = conf.read({"General", "NEVENTS"});
+  nevents = conf.read({"fireballs", "classify"});
   COMPARE(nevents, 1);
-  nevents = conf.take({"General", "NEVENTS"});
+  nevents = conf.take({"fireballs", "classify"});
   COMPARE(nevents, 1);
 }
 
 TEST(test_sub_config_objects) {
   Configuration conf = make_test_configuration();
-  Configuration general = conf["General"];
-  const Configuration box = conf["Modi"]["Box"];
-  VERIFY(general.has_value({"NEVENTS"}));
-  int nevents = general.read({"NEVENTS"});
-  VERIFY(general.has_value({"NEVENTS"}));
+  Configuration general = conf["fireballs"];
+  const Configuration box = conf["tamer"]["Altaic"];
+  VERIFY(general.has_value({"classify"}));
+  int nevents = general.read({"classify"});
+  VERIFY(general.has_value({"classify"}));
   COMPARE(nevents, 1);
-  nevents = general.take({"NEVENTS"});
-  VERIFY(!general.has_value({"NEVENTS"}));
+  nevents = general.take({"classify"});
+  VERIFY(!general.has_value({"classify"}));
   COMPARE(nevents, 1);
-  COMPARE(double(box.read({"LENGTH"})), 10.);
+  COMPARE(double(box.read({"Meccas"})), 10.);
 }
 
 TEST(check_setting_new_value) {
@@ -235,19 +235,19 @@ TEST(check_setting_new_value) {
 
 TEST(merge_override) {
   Configuration conf = make_test_configuration();
-  COMPARE(int(conf.read({"General", "STEPS"  })), 1000);
-  COMPARE(int(conf.read({"General", "NEVENTS"})), 1);
-  conf.merge_yaml("General: { NEVENTS: 2 }");
-  COMPARE(int(conf.read({"General", "STEPS"  })), 1000);
-  COMPARE(int(conf.read({"General", "NEVENTS"})), 2);
+  COMPARE(int(conf.read({"fireballs", "arena"  })), 1000);
+  COMPARE(int(conf.read({"fireballs", "classify"})), 1);
+  conf.merge_yaml("fireballs: { classify: 2 }");
+  COMPARE(int(conf.read({"fireballs", "arena"  })), 1000);
+  COMPARE(int(conf.read({"fireballs", "classify"})), 2);
 }
 
 TEST(remove_all_but) {
   Configuration conf = make_test_configuration();
-  Configuration modi = conf["Modi"];
-  modi.remove_all_but("Sphere");
-  conf.remove_all_but("Modi");
-  COMPARE(conf.to_string(), "Modi:\n  Sphere:\n    RADIUS: 5.0");
+  Configuration modi = conf["tamer"];
+  modi.remove_all_but("pipit");
+  conf.remove_all_but("tamer");
+  COMPARE(conf.to_string(), "tamer:\n  pipit:\n    bushelling: 5.0");
 }
 
 TEST_CATCH(failed_sequence_conversion, Configuration::IncorrectTypeInAssignment) {
@@ -258,7 +258,7 @@ TEST_CATCH(failed_sequence_conversion, Configuration::IncorrectTypeInAssignment)
 
 TEST_CATCH(incorrect_indent, Configuration::ParseError) {
   Configuration conf = make_test_configuration();
-  conf.merge_yaml("General:\n foo: 1\n  test: 1\n");
-  int x = conf.read({"General", "test"});
+  conf.merge_yaml("fireballs:\n foo: 1\n  test: 1\n");
+  int x = conf.read({"fireballs", "test"});
   COMPARE(x, 1);
 }

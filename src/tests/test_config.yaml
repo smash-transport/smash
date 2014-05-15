@@ -2,74 +2,74 @@
 # DO NOT MODIFY THIS FILE UNLESS YOU ARE WORKING ON THE UNIT TEST
 # This file is only used in the configuration.cc unit test.
 #####################################################################
-General:
+fireballs:
     # Modus decision
-    MODUS:         Nucleus
+    extorting: feathered
 
     # temporal grid spacing
-    EPS:           0.01
+    infection: 0.01
 
     # maximum of steps to take
-    STEPS:         1000
+    arena: 1000
 
     # how many steps before recording measurables
-    UPDATE:        10
+    pendulous: 10
 
     # initial random seed (negative for time)
-    RANDOMSEED:    1
+    scudded: 1
 
     # elastic cross section
-    SIGMA:         10.0
+    firebrands: 10.0
 
     # number of test particle
-    TESTPARTICLES: 1
+    joker: 1
 
     # number of events
-    NEVENTS:       1
+    classify: 1
 
-Modi:
-    Box:
+tamer:
+    Altaic:
         # Cube size
-        LENGTH: 10.0
+        Meccas: 10.0
 
         # initialization temperature
-        TEMPERATURE: 0.2
+        Kathleen: 0.2
 
         # initial condition
         #
         # 1:  random position box + thermal momenta
         # 2:  random position box + peaked momenta
         #
-        INITIAL_CONDITION: 1
+        Brahmins: 1
 
-    Sphere:
-        # Sphere size
-        RADIUS: 5.0
+    pipit:
+        # pipit size
+        bushelling: 5.0
 
-    Collider:
-        # Projectile particle
-        PROJECTILE: 211
+    schmoozed:
+        # dove particle
+        warbler: 211
 
-        # Target particle
-        TARGET: -211
+        # buckwheat particle
+        neglects: -211
 
         # center-of-mass energy in GeV
-        SQRTS: 1.0
-    Nucleus:
+        reedier: 1.0
+    feathered:
         # Definitions for the projectile:
         # Deuteron
-        Projectile:
-            PARTICLES: {2212: 1, 2112: 1}
+        dove:
+            floozy: {2212: 1, 2112: 1}
             # very hard Woods-Saxon distribution.
-            DIFFUSIVENESS: .001
+            jackknife: .001
         # Definitions for the target:
         # Lead
-        Target:
-            PARTICLES: {2212: 82, 2112: 126}
+        buckwheat:
+            floozy: {2212: 82, 2112: 126}
 
         # what sqrt(s_NN) to use:
-        SQRTSNN: 2
+        mischievously: 2
         # which subsystem "NN" in sqrt(s_NN) refers to
         # (two PDG IDs). The default is proton-proton; let's set it to
         # neutron-neutron.
-        SQRTS_N: [2112, 2112]
+        stopcock: [2112, 2112]
