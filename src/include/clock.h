@@ -38,7 +38,9 @@ namespace Smash {
  * \endcode
  *
  * Possible actions for Clock are:
- * \li look at it and find out the current time \see current_time()
+ * \li look at it and find out the current time
+ * \see current_time()
+ * \see next_time()
  * \li advance the clock (by one tick, by several ticks, or by a given
  * time)
  * \see operator++()
