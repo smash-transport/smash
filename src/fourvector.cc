@@ -31,7 +31,7 @@ namespace Smash {
  *            &=& x_i - v_i \cdot \frac{\gamma}{\gamma + 1} \cdot (\gamma(x_0 - \vec{r}\cdot\vec{v}) + x_0 )\\
  *            &=& x_i - v_i \cdot \frac{\gamma}{\gamma + 1} \cdot (x^\prime_0 + x_0)
  * \f}
- * 
+ *
  * Note: This function is equivalent to -velocity Boost from ROOT
  */
 FourVector FourVector::LorentzBoost(const ThreeVector &velocity) const {

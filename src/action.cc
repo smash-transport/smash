@@ -86,7 +86,7 @@ void Action::check_conservation(const Particles *particles,
   if (fabs(momentum_difference.x3()) > really_small)
     printf("Warning: Interaction type %i pz conservation violation %g\n",
            interaction_type_, momentum_difference.x3());
-    
+
   // TODO: check other conservation laws (baryon number etc)
 }
 

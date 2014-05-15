@@ -37,7 +37,7 @@ class Nucleus {
     return proton_radius_*pow(number_of_particles(), 1./3.);
   }
 
-  /** returns a Woods-Saxon distributed length 
+  /** returns a Woods-Saxon distributed length
    *
    * the distribution of return values from this function is according
    * to a Woods-Saxon distribution suitable for this nucleus.
@@ -48,7 +48,7 @@ class Nucleus {
   /** returns the Woods-Saxon distribution directly
    *
    * @param x the position at which to evaluate the function
-   * @return the 
+   * @return the
    **/
   float woods_saxon(const float& x);
   /// sets the positions of the nuclei inside nucleus A.
@@ -60,7 +60,7 @@ class Nucleus {
    * @param beta_squared_with_sign velocity used for boosting,
    * interpreted as z-value. Note that the sign of this variable is used
    * to determine the sign of the velocity, i.e., \f$\beta_z =
-   * \mathop{sign}(\beta^2)\cdot\sqrt{|\beta^2|}\f$. 
+   * \mathop{sign}(\beta^2)\cdot\sqrt{|\beta^2|}\f$.
    **/
   void boost(const double& beta_squared_with_sign);
   /** Adds a particle to the nucleus
@@ -147,7 +147,7 @@ class Nucleus {
   /** diffusiveness of Woods-Saxon-distribution in this nucleus im fm
    * (for diffusiveness_ == 0, we obtain a hard sphere. */
   float diffusiveness_ = .545f;
-  /** single-proton-radius 
+  /** single-proton-radius
    *
    * \see nuclear_radius
    * */

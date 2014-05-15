@@ -33,7 +33,7 @@ ThreeVector boost_CM(ParticleData *particle1, ParticleData *particle2) {
   // Boost the momenta into CMS frame
   particle1->boost(velocity);
   particle2->boost(velocity);
-  
+
   return velocity;
 }
 

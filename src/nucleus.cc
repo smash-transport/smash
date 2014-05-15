@@ -31,7 +31,7 @@ float Nucleus::mass() const {
  *
  * The distribution
  * ----------------
- * 
+ *
  *
  * Nucleons in nuclei are distributed according to a
  * Woods-Saxon-distribution[See Phys. Rev. 95, 577 (1954)]
@@ -41,7 +41,7 @@ float Nucleus::mass() const {
  *
  * where \f$d\f$ is the \em diffuseness of the nucleus. For \f$d=0\f$,
  * the nucleus is a hard sphere.  \f$\rho_0\f$ and \f$r_0\f$ are, in
- * this limit, the nuclear ground state density and 
+ * this limit, the nuclear ground state density and
  * nuclear radius, respectively. For small \f$d\f$, this is still
  * approximately true.
  *
@@ -98,7 +98,7 @@ float Nucleus::mass() const {
  * \frac{3}{R^3} (t+R)^2 & -R \le t < 0 \\
  * e^{-t} \left( \frac{3}{R}+\frac{6}{R^2}t+\frac{6}{R^3}\frac{1}{2}t^2 \right)
  * & t \ge 0 \end{cases}.\f]
- *  
+ *
  * (the tilde \f$\tilde{p}\f$ means that this is normalized).
  *
  * Four parts inside the rejection

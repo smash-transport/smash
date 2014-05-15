@@ -43,7 +43,7 @@ endmacro()
 # test source code to be clean, requires cpplint in the path
 find_program(CPPLINT cpplint.py)
 if(CPPLINT)
-   file(GLOB_RECURSE CPPLINT_ARGS ${PROJECT_SOURCE_DIR}/src/*.h 
+   file(GLOB_RECURSE CPPLINT_ARGS ${PROJECT_SOURCE_DIR}/src/*.h
       ${PROJECT_SOURCE_DIR}/src/*.cc)
    set(CPPLINT_ARGS --filter=-build/include_order,-readability/streams,-build/include ${CPPLINT_ARGS})
    message(STATUS "cpplint.py found at ${CPPLINT}")

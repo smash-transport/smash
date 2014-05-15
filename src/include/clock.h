@@ -120,7 +120,7 @@ class Clock {
    * \return is there a natural number n so that \f$n \cdot t_i\f$ is
    * between the current time and the next time: \f$\exists n \in
    * \mathbb{N}: t \le n \cdot t_i < t + \Delta t\f$.
-   * 
+   *
    */
   bool multiple_is_in_next_tick(const float interval) const {
     if (interval < 0.f) {
@@ -137,7 +137,7 @@ class Clock {
          && n * interval < next_time());
   }
   /** resets the time to a pre-defined value
-   * 
+   *
    * This is the only way of turning the clock back. It is needed so
    * that the time can be adjusted after initialization (different
    * initial conditions may require different starting times).

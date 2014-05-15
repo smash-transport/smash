@@ -117,7 +117,7 @@ class NucleusModus : public ModusDefault {
   struct InvalidEnergy : public ModusDefault::BadInput {
     using ModusDefault::BadInput::BadInput;
   };
- 
+
  private:
   /** Projectile.
    *
