@@ -80,17 +80,26 @@ class ExperimentBase {
    * calculation, collision of two particles or collision of nuclei. The modus
    * will be configured in ref input_modi_. Recognized values are:
    *
-   * \li `Nucleus` for collisions of nuclei or compound objects. See \ref
-   * input_modi_nucleus_
+   * \li `Nucleus` for collisions of nuclei or compound objects. See
+   *     \if user
+   *     \ref input_modi_nucleus_
+   *     \else
+   *     \ref NucleusModus
+   *     \endif
    * \li `Sphere` for calculations of the expansion of a thermalized sphere.
    * See ref input_modi_sphere_
    * \li `Collider` ...
-   * \li `Box` for infinite matter calculation in a rectangular box. See ref
-   * input_modi_box_
+   * \li `Box` for infinite matter calculation in a rectangular box. See
+   *     \if user
+   *     \ref input_modi_box_
+   *     \else
+   *     \ref BoxModus
+   *     \endif
    *
    * `EPS:` Time step for the calculation, in fm/c.
    *
    * `STEPS:` How many time steps should be taken per event.
+   *
    *
    * `UPDATE:` Output on conservation laws in Standard Output occurs every nth time step.
    *

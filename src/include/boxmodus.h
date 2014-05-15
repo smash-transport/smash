@@ -45,13 +45,25 @@ struct ExperimentParameters;
  *
  * The following directives are understood:
  *
- * ...
- * TODO(baeuchle) needs to be completed.
- * 
- * 
- *
- *
+ * Modi:Box:
+ * ---------
  */
+// !!USER:Input
+/**
+ * \if user
+ * \page input_modi_box_ Input Section Modi:Box
+ * \endif
+ *
+ * `INITIAL_CONDITION`: Controls whether particles are created with
+ * thermal momenta (sampled from a Maxwell-Boltzmann distribution) or
+ * with average momentum \f$p = 3 \cdot T\f$ with T the temperature. The
+ * latter is chosen if INITIAL_CONDITION is 2.
+ *
+ * `LENGTH`: Length of the cube's edge in fm/c
+ *
+ * `TEMPERATURE`: Temperature in the box in GeV.
+ */
+// !!/USER:Input
 class BoxModus : public ModusDefault {
  public:
   /// Gathers all configuration variables for the Box.
@@ -89,14 +101,21 @@ class BoxModus : public ModusDefault {
                                        const OutputsList &output_list);
 
  private:
-  /// initial condition: ??? TODO(baeuchle): check what this is for.
+  /** initial condition
+   *
+   * If initial_condition_ == 2, all particles have the same momentum
+   * \f$p = 3 \cdot T\f$ with T the temperature.
+   *
+   * Else, a thermalized ensemble is generated (the momenta are sampled
+   * from a Maxwell-Boltzmann distribution).
+   */
   const int initial_condition_;
   /// length of the cube's edge in fm/c
   const float length_;
   /// Temperature of the Box in GeV
   const float temperature_;
-  /// initial number density of the Box TODO(baeuchle): What is this
-  /// for? Why isn't the density fixed by the temperature?
+  /// initial number density of the Box as calculated from the
+  /// initialization.
   float number_density_initial_ = 0.f;
 };
 

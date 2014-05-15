@@ -74,7 +74,6 @@ namespace Smash {
 // !!USER:Input
 /** \if user
  * \page inputoptions Input file Options
- * \endif
  *
  * To configure SMASH, you can specify an input file. This file should be in
  * YAML format.
@@ -83,6 +82,16 @@ namespace Smash {
  *
  * \li \ref input_general_
  * \li \ref input_modi_nucleus_
+ * \li \ref input_modi_box_
+ * \else
+ * 
+ * Options
+ * -------
+ * For possible configuration values, see
+ * \li \ref Experiment::create()
+ * \li \ref NucleusModus
+ * \li \ref BoxModus
+ * \endif
  */
 // !!/USER:Input
 class Configuration {
