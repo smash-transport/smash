@@ -128,12 +128,4 @@ void printd_position(const ParticleData &particle __attribute__((unused))) {
       particle.position().x2(), particle.position().x3());
 }
 
-void printd_list(const std::list<int> &collision_list) {
-  printd("Collision list contains:");
-  for (std::list<int>::const_iterator id = collision_list.cbegin();
-       id != collision_list.cend(); ++id)
-    printd(" particle %d", *id);
-  printd("\n");
-}
-
 }  // namespace Smash
