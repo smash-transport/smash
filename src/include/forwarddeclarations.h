@@ -39,6 +39,7 @@ template <typename T>
 using build_vector_ = std::vector<T, std::allocator<T>>;
 
 class BoxModus;
+class Clock;
 class Configuration;
 class CrossSections;
 class FourVector;
