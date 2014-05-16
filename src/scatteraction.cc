@@ -125,7 +125,7 @@ void ScatterAction::perform (Particles *particles, size_t &id_process)
       new_particle.set_id(particles->add_data(new_particle));
     }
 
-    check_conservation (particles, id_process);
+    check_conservation(*particles, id_process);
 
     /* Remove the initial particles */
     particles->remove(data_a.id());

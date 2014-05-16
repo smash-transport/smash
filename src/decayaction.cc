@@ -290,7 +290,7 @@ void DecayAction::perform(Particles *particles, size_t &id_process) {
 
   id_process++;
 
-  check_conservation (particles, id_process);
+  check_conservation(*particles, id_process);
 
   /* Remove decayed particle */
   particles->remove(particle0.id());

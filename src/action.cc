@@ -59,13 +59,13 @@ ParticleList Action::incoming_particles(const Particles &particles) const {
   return std::move(l);
 }
 
-void Action::check_conservation(const Particles *particles,
+void Action::check_conservation(const Particles &particles,
                                 const size_t &id_process) const {
 
   /* Check momentum conservation */
   FourVector momentum_difference;
   for (const auto &i : incoming_particles_) {
-    momentum_difference += particles->data(i).momentum();
+    momentum_difference += particles.data(i).momentum();
   }
   for (const auto &p : outgoing_particles_) {
     momentum_difference -= p.momentum();

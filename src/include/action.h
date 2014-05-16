@@ -71,7 +71,7 @@ class Action {
   const ParticleList &outgoing_particles() const { return outgoing_particles_; }
 
   /** Check various conservation laws. */
-  void check_conservation(const Particles *particles, const size_t &id_process) const;
+  void check_conservation(const Particles &particles, const size_t &id_process) const;
  protected:
   /** ID codes of incoming particles  */
   std::vector<int> incoming_particles_;

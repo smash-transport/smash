@@ -297,10 +297,10 @@ void Nucleus::set_diffusiveness(const float& diffuse) {
   diffusiveness_ = diffuse;
 }
 
-void Nucleus::auto_set_masses(const Particles *external_particles) {
+void Nucleus::auto_set_masses(const Particles &external_particles) {
   for (auto p = begin(); p != end(); p++) {
     p->set_momentum(
-      external_particles->particle_type(p->pdgcode()).mass(), 0.0, 0.0, 0.0);
+      external_particles.particle_type(p->pdgcode()).mass(), 0.0, 0.0, 0.0);
   }
 }
 
