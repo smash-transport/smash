@@ -7,9 +7,9 @@
  *
  */
 
-#include "tests/unittest.h"
+#include "unittest.h"
 
-#include "include/decaymodes.h"
+#include "../include/decaymodes.h"
 
 using namespace Smash;
 

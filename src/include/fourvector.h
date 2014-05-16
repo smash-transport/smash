@@ -10,7 +10,7 @@
 #include <array>
 #include <cmath>
 
-#include "include/threevector.h"
+#include "threevector.h"
 
 namespace Smash {
 

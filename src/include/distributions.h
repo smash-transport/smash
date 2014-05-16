@@ -10,7 +10,7 @@
 #include <gsl/gsl_sf_bessel.h>
 #include <cmath>
 
-#include "include/constants.h"
+#include "constants.h"
 
 namespace Smash {
 

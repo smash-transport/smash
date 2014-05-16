@@ -7,8 +7,8 @@
  *
  */
 
-#include "tests/unittest.h"
-#include "include/clock.h"
+#include "unittest.h"
+#include "../include/clock.h"
 
 using namespace Smash;
 

@@ -10,14 +10,13 @@
 #include <memory>
 #include <stdexcept>
 
-#include "include/chrono.h"
-#include "include/clock.h"
-#include "include/crosssections.h"
-#include "include/experimentparameters.h"
-#include "include/forwarddeclarations.h"
-#include "include/particles.h"
-#include "outputinterface.h"
+#include "chrono.h"
+#include "crosssections.h"
 #include "decayactionsfinder.h"
+#include "experimentparameters.h"
+#include "forwarddeclarations.h"
+#include "outputinterface.h"
+#include "particles.h"
 #include "scatteractionsfinder.h"
 
 namespace Smash {

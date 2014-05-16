@@ -7,10 +7,10 @@
  *
  */
 
-#include "tests/unittest.h"
+#include "unittest.h"
 
-#include "include/experiment.h"
-#include "include/configuration.h"
+#include "../include/experiment.h"
+#include "../include/configuration.h"
 
 #include <boost/filesystem.hpp>
 

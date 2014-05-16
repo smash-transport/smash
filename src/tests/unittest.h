@@ -41,9 +41,9 @@
 #include <ext/stdio_sync_filebuf.h>
 #endif
 
-#include "tests/assert.h"
-#include "tests/macros.h"
-#include "tests/ulp.h"
+#include "assert.h"
+#include "macros.h"
+#include "ulp.h"
 
 #ifdef DOXYGEN
 /**

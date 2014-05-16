@@ -5,15 +5,15 @@
  *    GNU General Public License (GPLv3)
  */
 
-#include "tests/unittest.h"
+#include "unittest.h"
 
 #include <cstdio>
 
-#include "include/particles.h"
-#include "include/constants.h"
-#include "include/particledata.h"
-#include "include/pdgcode.h"
-#include "include/outputroutines.h"
+#include "../include/particles.h"
+#include "../include/constants.h"
+#include "../include/particledata.h"
+#include "../include/pdgcode.h"
+#include "../include/outputroutines.h"
 #include "../include/macros.h"
 #include <algorithm>
 
@@ -149,10 +149,10 @@ TEST(load_one_particle_with_comment) {
 }
 
 namespace particles_txt {
-#include "particles.txt.h"
+#include <particles.txt.h>
 }  // namespace particles_txt
 namespace decaymodes_txt {
-#include "decaymodes.txt.h"
+#include <decaymodes.txt.h>
 }  // namespace decaymodes_txt
 
 TEST(load_many_particles) {

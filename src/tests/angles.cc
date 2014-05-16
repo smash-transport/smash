@@ -7,8 +7,8 @@
  *
  */
 
-#include "tests/unittest.h"
-#include "include/angles.h"
+#include "unittest.h"
+#include "../include/angles.h"
 
 using namespace Smash;
 

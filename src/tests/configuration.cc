@@ -7,9 +7,9 @@
  *
  */
 
-#include "tests/unittest.h"
-#include "include/configuration.h"
-#include "include/forwarddeclarations.h"
+#include "unittest.h"
+#include "../include/configuration.h"
+#include "../include/forwarddeclarations.h"
 
 #include <boost/filesystem.hpp>
 
