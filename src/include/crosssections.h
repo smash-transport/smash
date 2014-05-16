@@ -33,7 +33,7 @@ class CrossSections {
    * \see mandelstam_s_
    * \see p_lab_
    */
-  void compute_kinematics(Particles *particles, int id_a, int id_b);
+  void compute_kinematics(const Particles &particles, int id_a, int id_b);
   /** returns the elastic cross-section of a collision of the particles
    * \a a and \a b.
    *
@@ -41,7 +41,7 @@ class CrossSections {
    * \param id_a Unique ID of first particle (\a a)
    * \param id_b Unique ID of second particle (\a b)
    */
-  float elastic(Particles *particles, int id_a, int id_b) const;
+  float elastic(const Particles &particles, int id_a, int id_b) const;
   /** returns the total (elastic + inelastic) cross-section of a
    * collision of the particles \a a and \a b.
    *
@@ -49,7 +49,7 @@ class CrossSections {
    * \param id_a Unique ID of first particle (\a a)
    * \param id_b Unique ID of second particle (\a b)
    */
-  float total(Particles *particles, int id_a, int id_b) const;
+  float total(const Particles &particles, int id_a, int id_b) const;
 
   /// Resets the parameters to the default values.
   void reset() {

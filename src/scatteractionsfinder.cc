@@ -60,7 +60,7 @@ ScatterActionsFinder::check_collision (const int id_a, const int id_b, Particles
   act = new ScatterAction(in_part, time_collision);
 
   /* Compute kinematic quantities needed for cross section calculations  */
-  cross_sections->compute_kinematics(particles, id_a, id_b);
+  cross_sections->compute_kinematics(*particles, id_a, id_b);
 
   /* Resonance production cross section */
   std::vector<ProcessBranch> resonance_xsections
@@ -71,7 +71,7 @@ ScatterActionsFinder::check_collision (const int id_a, const int id_b, Particles
   /* Add elastic process.  */
   act->add_process(ProcessBranch(particles->data(id_a).pdgcode(),
                                  particles->data(id_b).pdgcode(),
-                                 cross_sections->elastic(particles,
+                                 cross_sections->elastic(*particles,
                                                          id_a, id_b), 0));
 
   {
