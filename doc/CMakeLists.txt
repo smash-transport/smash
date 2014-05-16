@@ -75,6 +75,15 @@ if(DOXYGEN)
          COMMENT "Building Doxygen Code Documentation (only documented entities)"
          VERBATIM
          )
+
+      add_custom_target(undocumented_verbose ${DOXYGEN}
+         ${CMAKE_CURRENT_BINARY_DIR}/DoxyfileOnlyDocumented 2>&1 |
+         ${SORT} -u |
+         ${GREP} -i warning:
+         WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+         COMMENT "Building Doxygen Code Documentation (only documented entities)"
+         VERBATIM
+         )
    endif()
 else()
    message(STATUS "Doxygen not found.")
