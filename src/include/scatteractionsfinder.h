@@ -18,13 +18,6 @@ namespace Smash {
  * Just loops through all particles and checks each pair for a collision.  */
 class ScatterActionsFinder : public ActionFinderFactory {
  public:
-  /** Check for a single pair of particles (id_a, id_b) if a collision will happen
-   * in the next timestep and create a corresponding Action object in that case. */
-  ActionPtr check_collision(const int id_a, const int id_b,
-                            Particles *particles,
-                            const ExperimentParameters &parameters,
-                            CrossSections *cross_sections = nullptr) const;
-
   /** Check the whole particle list for collisions
    * and return a list with the corrsponding Action objects. */
   ActionList find_possible_actions(
@@ -32,6 +25,13 @@ class ScatterActionsFinder : public ActionFinderFactory {
       CrossSections *cross_sections = nullptr) const override;
 
  private:
+  /** Check for a single pair of particles (id_a, id_b) if a collision will happen
+   * in the next timestep and create a corresponding Action object in that case. */
+  ActionPtr check_collision(const int id_a, const int id_b,
+                            Particles *particles,
+                            const ExperimentParameters &parameters,
+                            CrossSections *cross_sections = nullptr) const;
+
 };
 
 #if 0
