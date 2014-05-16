@@ -178,9 +178,10 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
       }
     }
   }
-  /* Guard against evolution */
-  // BB: WTF?
-  //if (likely(steps_ > 0)) {
+  // make sure the experiment actually ran (note: we should compare this
+  // to the start time, but we don't know that. Therefore, we check that
+  // the time is positive, which should heuristically be the same).
+  if (likely(parameters_.labclock > 0)) {
     /* if there are no particles no interactions happened */
     if (likely(!particles_.empty())) {
       print_tail(time_start_, interactions_total * 2 / particles_.time() /
@@ -188,7 +189,7 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
     } else {
       print_tail(time_start_, 0);
     }
-  //}
+  }
 }
 
 /* print_startup - console output on startup of general parameters */
