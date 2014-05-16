@@ -18,6 +18,9 @@ namespace Smash {
 
 /** Clock tracks the simulation time, i.e., the time IN the simulation.
  *
+ * The basic unit is 1 fm/c = \f$1 / 2.99798542 \cdot 10^{-23}\f$s
+ * \f$\approx 0.33 \cdot 10^{-24}\f$ s.
+ *
  * Usage:
  * ------
  * \code
@@ -45,7 +48,7 @@ namespace Smash {
  * time)
  * \see operator++()
  * \see operator+=(const float&)
- * \see operator+=(const int&)
+ * \see operator+=(const uint32_t&)
  * \li set / retrieve the timestep (length of one tick)
  * \see set_timestep_duration() \see timestep_duration()
  * \li compare time against different clock or fixed value
