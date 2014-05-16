@@ -39,17 +39,18 @@ ScatterActionsFinder::check_collision (const int id_a, const int id_b, Particles
   }
 
   /* check according timestep: positive and smaller */
-  const double time_collision = collision_time(particles->data(id_a),
+  const double time_until_collision = collision_time(particles->data(id_a),
     particles->data(id_b));
-  if (time_collision < 0.0 ||
-                 time_collision >= parameters.timestep_duration())
+  if (time_until_collision < 0.0 ||
+      time_until_collision >= parameters.timestep_duration()) {
     return nullptr;
+  }
 
   /* check for minimal collision time both particles */
   if ((particles->data(id_a).collision_time() > 0.0
-       && time_collision > particles->data(id_a).collision_time())
+       && time_until_collision > particles->data(id_a).collision_time())
       || (particles->data(id_b).collision_time() > 0.0
-          && time_collision > particles->data(id_b).collision_time())) {
+          && time_until_collision > particles->data(id_b).collision_time())) {
     printd("%g Not minimal particle %d <-> %d\n",
            particles->data(id_a).position().x0(), id_a, id_b);
     return nullptr;
@@ -57,7 +58,7 @@ ScatterActionsFinder::check_collision (const int id_a, const int id_b, Particles
 
   in_part.push_back(id_a);
   in_part.push_back(id_b);
-  act = new ScatterAction(in_part, time_collision);
+  act = new ScatterAction(in_part, time_until_collision);
 
   /* Compute kinematic quantities needed for cross section calculations  */
   cross_sections->compute_kinematics(*particles, id_a, id_b);
@@ -90,8 +91,8 @@ ScatterActionsFinder::check_collision (const int id_a, const int id_b, Particles
   act->choose_channel();
 
   /* Set up collision partners. */
-  particles->data(id_a).set_collision_time(time_collision);
-  particles->data(id_a).set_collision_time(time_collision);
+  particles->data(id_a).set_collision_time(time_until_collision);
+  particles->data(id_a).set_collision_time(time_until_collision);
 
   return ActionPtr(act);
 }
