@@ -12,6 +12,7 @@
 
 #include "clock.h"
 #include "forwarddeclarations.h"
+#include "macros.h"
 
 namespace Smash {
 class Particles;
@@ -45,8 +46,11 @@ class OutputInterface {
    * \param outgoing_particles   The list of particles after the Action was
    *                          performed.
    */
-  virtual void write_interaction(const ParticleList &/*incoming_particles*/,
-                                 const ParticleList &/*outgoing_particles*/) {}
+  virtual void write_interaction(const ParticleList &incoming_particles,
+                                 const ParticleList &outgoing_particles) {
+    SMASH_UNUSED(incoming_particles);
+    SMASH_UNUSED(outgoing_particles);
+  }
 
   /**
    * Output launched after every N'th timestep. N is controlled by an option.

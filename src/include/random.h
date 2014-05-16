@@ -21,8 +21,8 @@ namespace Random {
 
 /// The random number engine used is std::randlux48
 using Engine = std::ranlux48;
-/// For all intents and purposes, there is a common RN engine "engine"
-/// defined in \file src/random.cc
+
+/// The engine that is used commonly by all distributions.
 extern /*thread_local*/ Engine engine;
 
 /** Provides uniform random numbers on a fixed interval.

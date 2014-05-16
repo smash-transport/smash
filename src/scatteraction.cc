@@ -61,8 +61,6 @@ void ScatterAction::perform (Particles *particles, size_t &id_process)
   ParticleData data_a = particles->data(id_a);
   ParticleData data_b = particles->data(id_b);
 
-  FourVector initial_momentum(data_a.momentum() + data_b.momentum());
-
   printd("Process %zu type %i particle %s<->%s colliding %d<->%d time %g\n",
          id_process, interaction_type_, data_a.type(*particles).name().c_str(),
          data_a.type(*particles).name().c_str(), id_a, id_b,
@@ -87,8 +85,8 @@ void ScatterAction::perform (Particles *particles, size_t &id_process)
     data_a.set_collision_past(id_process);
     data_b.set_collision_past(id_process);
 
-    *particles->data_pointer(id_a) = data_a;
-    *particles->data_pointer(id_b) = data_b;
+    particles->data(id_a) = data_a;
+    particles->data(id_b) = data_b;
     outgoing_particles_[0] = data_a;
     outgoing_particles_[1] = data_b;
   } break;

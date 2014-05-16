@@ -72,7 +72,7 @@ ScatterActionsFinder::check_collision (const int id_a, const int id_b, Particles
   {
     /* distance criteria according to cross_section */
     const double distance_squared = particle_distance(
-              particles->data_pointer(id_a), particles->data_pointer(id_b));
+              particles->data(id_a), particles->data(id_b));
     if (distance_squared >= act->weight() * fm2_mb * M_1_PI) {
         delete act;
         return nullptr;
@@ -85,8 +85,8 @@ ScatterActionsFinder::check_collision (const int id_a, const int id_b, Particles
   act->choose_channel();
 
   /* Set up collision partners. */
-  particles->data_pointer(id_a)->set_collision_time(time_collision);
-  particles->data_pointer(id_a)->set_collision_time(time_collision);
+  particles->data(id_a).set_collision_time(time_collision);
+  particles->data(id_a).set_collision_time(time_collision);
 
   return ActionPtr(act);
 }
@@ -236,11 +236,11 @@ GridScatterFinder::find_possible_actions (std::vector<ActionPtr> &actions,
               act = check_collision (data.id(), *id_other, particles, parameters, cross_sections);
             else {
               /* apply eventual boundary before and restore after */
-              particles->data_pointer(*id_other)
-                  ->set_position(particles->data(*id_other).position() + shift);
+              particles->data(*id_other)
+                  .set_position(particles->data(*id_other).position() + shift);
               act = check_collision (data.id(), *id_other, particles, parameters, cross_sections);
-              particles->data_pointer(*id_other)
-                  ->set_position(particles->data(*id_other).position() - shift);
+              particles->data(*id_other)
+                  .set_position(particles->data(*id_other).position() - shift);
             }
             /* Add to collision list. */
             if (act != nullptr) {

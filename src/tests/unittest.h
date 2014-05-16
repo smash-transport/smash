@@ -222,7 +222,7 @@
  * * `FUZZY_COMPARE(1.f, 0.999999940395355224609375f)` will show a distance of 1
  *
  * ### Comparing to 0
- * Distance to 0 is implemented as comparing to `std::numeric_limits<T>::min()`
+ * Distance to 0 is implemented as comparing to <tt>std::numeric_limits<T>::min()</tt>
  * instead and adding 1 to the resulting distance.
  */
 #define FUZZY_COMPARE(test_value, reference)

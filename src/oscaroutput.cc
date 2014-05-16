@@ -8,13 +8,14 @@
  */
 
 #include "include/clock.h"
+#include "include/forwarddeclarations.h"
 #include "include/oscaroutput.h"
 #include "include/particles.h"
 #include "include/outputroutines.h"
 
 namespace Smash {
 
-OscarOutput::OscarOutput(boost::filesystem::path path)
+OscarOutput::OscarOutput(bf::path path)
     : file_{std::fopen((path / "collision.dat").native().c_str(), "w")} {
   fprintf(file_.get(), "# OSC1999A\n");
   fprintf(file_.get(), "# Interaction history\n");

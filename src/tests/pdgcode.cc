@@ -72,24 +72,24 @@ TEST(size) {
 }
 TEST(code) {
   COMPARE( electron.code(),  0x11);
-  COMPARE(   antimu.code(),  0xffffffed);
+  COMPARE(   antimu.code(),  static_cast<int>(0xffffffedu));
   COMPARE(   photon.code(),  0x22);
   COMPARE(     pion.code(),  0x211);
   COMPARE(     kaon.code(),  0x311);
   COMPARE(   proton.code(),  0x2212);
-  COMPARE(antidelta.code(),  0xffeddddc);
+  COMPARE(antidelta.code(),  static_cast<int>(0xffeddddcu));
   COMPARE(   lambda.code(),  0x3122);
-  COMPARE(   antixi.code(),  0xffefccee);
+  COMPARE(   antixi.code(),  static_cast<int>(0xffefcceeu));
 }
 TEST(dump) {
-  COMPARE( electron.dump(),  0x11);
+  COMPARE( electron.dump(),  0x11u);
   COMPARE(   antimu.dump(),  0x80000013u);
-  COMPARE(   photon.dump(),  0x22);
-  COMPARE(     pion.dump(),  0x211);
-  COMPARE(     kaon.dump(),  0x311);
-  COMPARE(   proton.dump(),  0x2212);
+  COMPARE(   photon.dump(),  0x22u);
+  COMPARE(     pion.dump(),  0x211u);
+  COMPARE(     kaon.dump(),  0x311u);
+  COMPARE(   proton.dump(),  0x2212u);
   COMPARE(antidelta.dump(),  0x80122224u);
-  COMPARE(   lambda.dump(),  0x3122);
+  COMPARE(   lambda.dump(),  0x3122u);
   COMPARE(   antixi.dump(),  0x80103312u);
 }
 TEST(string) {
@@ -162,30 +162,30 @@ TEST(isospin3) {
 }
 TEST(isospin_total) {
   PdgCode eta(0x221);
-  COMPARE(   electron.isospin_total(),  0);
-  COMPARE(     antimu.isospin_total(),  0);
-  COMPARE(     photon.isospin_total(),  0);
-  COMPARE(       pion.isospin_total(), +2);
-  COMPARE(        eta.isospin_total(),  0);
-  COMPARE(       kaon.isospin_total(),  1);
-  COMPARE(     kminus.isospin_total(),  1);
-  COMPARE(     dminus.isospin_total(),  1);
-  COMPARE(     bnulls.isospin_total(),  0);
-  COMPARE(     bPcbar.isospin_total(),  0);
-  COMPARE(     eta_pr.isospin_total(),  0);
-  COMPARE(      j_psi.isospin_total(),  0);
-  COMPARE(     proton.isospin_total(),  1);
-  COMPARE(  antidelta.isospin_total(),  3);
-  COMPARE(      sigma.isospin_total(), +2);
-  COMPARE(     lambda.isospin_total(),  0);
-  COMPARE(     antixi.isospin_total(), +1);
-  COMPARE(  omega_bar.isospin_total(),  0);
-  COMPARE(   lambda_c.isospin_total(),  0);
-  COMPARE(sigma_c_bar.isospin_total(), +2);
-  COMPARE(       xi_c.isospin_total(), +1);
-  COMPARE(omega_c_bar.isospin_total(),  0);
-  COMPARE(  xi_cc_bar.isospin_total(), +1);
-  COMPARE(   omega_bc.isospin_total(),  0);
+  COMPARE(   electron.isospin_total(),  0u);
+  COMPARE(     antimu.isospin_total(),  0u);
+  COMPARE(     photon.isospin_total(),  0u);
+  COMPARE(       pion.isospin_total(), +2u);
+  COMPARE(        eta.isospin_total(),  0u);
+  COMPARE(       kaon.isospin_total(),  1u);
+  COMPARE(     kminus.isospin_total(),  1u);
+  COMPARE(     dminus.isospin_total(),  1u);
+  COMPARE(     bnulls.isospin_total(),  0u);
+  COMPARE(     bPcbar.isospin_total(),  0u);
+  COMPARE(     eta_pr.isospin_total(),  0u);
+  COMPARE(      j_psi.isospin_total(),  0u);
+  COMPARE(     proton.isospin_total(),  1u);
+  COMPARE(  antidelta.isospin_total(),  3u);
+  COMPARE(      sigma.isospin_total(), +2u);
+  COMPARE(     lambda.isospin_total(),  0u);
+  COMPARE(     antixi.isospin_total(), +1u);
+  COMPARE(  omega_bar.isospin_total(),  0u);
+  COMPARE(   lambda_c.isospin_total(),  0u);
+  COMPARE(sigma_c_bar.isospin_total(), +2u);
+  COMPARE(       xi_c.isospin_total(), +1u);
+  COMPARE(omega_c_bar.isospin_total(),  0u);
+  COMPARE(  xi_cc_bar.isospin_total(), +1u);
+  COMPARE(   omega_bc.isospin_total(),  0u);
 }
 TEST(strangeness) {
   COMPARE(   electron.strangeness(),  0);
@@ -429,64 +429,64 @@ TEST(same_multiplet) {
   VERIFY(j_psi.multiplet() == omega.multiplet());
 }
 TEST(spin) {
-  COMPARE(   electron.spin(), 1);
-  COMPARE(     antimu.spin(), 1);
-  COMPARE(     photon.spin(), 2);
-  COMPARE(       pion.spin(), 0);
-  COMPARE(       kaon.spin(), 0);
-  COMPARE(     kminus.spin(), 0);
-  COMPARE(     dminus.spin(), 0);
-  COMPARE(     bnulls.spin(), 0);
-  COMPARE(     bPcbar.spin(), 0);
-  COMPARE(     eta_pr.spin(), 0);
-  COMPARE(      j_psi.spin(), 2);
-  COMPARE(     proton.spin(), 1);
-  COMPARE(  antidelta.spin(), 3);
-  COMPARE(      sigma.spin(), 1);
-  COMPARE(     lambda.spin(), 1);
-  COMPARE(     antixi.spin(), 1);
-  COMPARE(  omega_bar.spin(), 3);
-  COMPARE(   lambda_c.spin(), 1);
-  COMPARE(sigma_c_bar.spin(), 3);
-  COMPARE(       xi_c.spin(), 1);
-  COMPARE(omega_c_bar.spin(), 1);
-  COMPARE(  xi_cc_bar.spin(), 1);
-  COMPARE(   omega_bc.spin(), 1);
+  COMPARE(   electron.spin(), 1u);
+  COMPARE(     antimu.spin(), 1u);
+  COMPARE(     photon.spin(), 2u);
+  COMPARE(       pion.spin(), 0u);
+  COMPARE(       kaon.spin(), 0u);
+  COMPARE(     kminus.spin(), 0u);
+  COMPARE(     dminus.spin(), 0u);
+  COMPARE(     bnulls.spin(), 0u);
+  COMPARE(     bPcbar.spin(), 0u);
+  COMPARE(     eta_pr.spin(), 0u);
+  COMPARE(      j_psi.spin(), 2u);
+  COMPARE(     proton.spin(), 1u);
+  COMPARE(  antidelta.spin(), 3u);
+  COMPARE(      sigma.spin(), 1u);
+  COMPARE(     lambda.spin(), 1u);
+  COMPARE(     antixi.spin(), 1u);
+  COMPARE(  omega_bar.spin(), 3u);
+  COMPARE(   lambda_c.spin(), 1u);
+  COMPARE(sigma_c_bar.spin(), 3u);
+  COMPARE(       xi_c.spin(), 1u);
+  COMPARE(omega_c_bar.spin(), 1u);
+  COMPARE(  xi_cc_bar.spin(), 1u);
+  COMPARE(   omega_bc.spin(), 1u);
 }
 TEST(spin_higgs) {
   PdgCode higgs(0x25);
   UnitTest::EXPECT_FAILURE();
-  COMPARE(higgs.spin(),0);
+  COMPARE(higgs.spin(), 0u);
 }
 TEST(spin_degeneracy) {
-  COMPARE(   electron.spin_degeneracy(), 2);
-  COMPARE(     antimu.spin_degeneracy(), 2);
-  COMPARE(     photon.spin_degeneracy(), 3);
-  COMPARE(       pion.spin_degeneracy(), 1);
-  COMPARE(       kaon.spin_degeneracy(), 1);
-  COMPARE(     kminus.spin_degeneracy(), 1);
-  COMPARE(     dminus.spin_degeneracy(), 1);
-  COMPARE(     bnulls.spin_degeneracy(), 1);
-  COMPARE(     bPcbar.spin_degeneracy(), 1);
-  COMPARE(     eta_pr.spin_degeneracy(), 1);
-  COMPARE(      j_psi.spin_degeneracy(), 3);
-  COMPARE(     proton.spin_degeneracy(), 2);
-  COMPARE(  antidelta.spin_degeneracy(), 4);
-  COMPARE(      sigma.spin_degeneracy(), 2);
-  COMPARE(     lambda.spin_degeneracy(), 2);
-  COMPARE(     antixi.spin_degeneracy(), 2);
-  COMPARE(  omega_bar.spin_degeneracy(), 4);
-  COMPARE(   lambda_c.spin_degeneracy(), 2);
-  COMPARE(sigma_c_bar.spin_degeneracy(), 4);
-  COMPARE(       xi_c.spin_degeneracy(), 2);
-  COMPARE(omega_c_bar.spin_degeneracy(), 2);
-  COMPARE(  xi_cc_bar.spin_degeneracy(), 2);
-  COMPARE(   omega_bc.spin_degeneracy(), 2);
+  COMPARE(   electron.spin_degeneracy(), 2u);
+  COMPARE(     antimu.spin_degeneracy(), 2u);
+  COMPARE(     photon.spin_degeneracy(), 3u);
+  COMPARE(       pion.spin_degeneracy(), 1u);
+  COMPARE(       kaon.spin_degeneracy(), 1u);
+  COMPARE(     kminus.spin_degeneracy(), 1u);
+  COMPARE(     dminus.spin_degeneracy(), 1u);
+  COMPARE(     bnulls.spin_degeneracy(), 1u);
+  COMPARE(     bPcbar.spin_degeneracy(), 1u);
+  COMPARE(     eta_pr.spin_degeneracy(), 1u);
+  COMPARE(      j_psi.spin_degeneracy(), 3u);
+  COMPARE(     proton.spin_degeneracy(), 2u);
+  COMPARE(  antidelta.spin_degeneracy(), 4u);
+  COMPARE(      sigma.spin_degeneracy(), 2u);
+  COMPARE(     lambda.spin_degeneracy(), 2u);
+  COMPARE(     antixi.spin_degeneracy(), 2u);
+  COMPARE(  omega_bar.spin_degeneracy(), 4u);
+  COMPARE(   lambda_c.spin_degeneracy(), 2u);
+  COMPARE(sigma_c_bar.spin_degeneracy(), 4u);
+  COMPARE(       xi_c.spin_degeneracy(), 2u);
+  COMPARE(omega_c_bar.spin_degeneracy(), 2u);
+  COMPARE(  xi_cc_bar.spin_degeneracy(), 2u);
+  COMPARE(   omega_bc.spin_degeneracy(), 2u);
 }
 TEST(spin_degeneracy_higgs) {
   PdgCode higgs(0x25);
   UnitTest::EXPECT_FAILURE();
-  COMPARE(higgs.spin_degeneracy(),1);
+  COMPARE(higgs.spin_degeneracy(), 1u);
 }
 
 TEST_CATCH(set_invalid_code, PdgCode::InvalidPdgCode) {
@@ -497,11 +497,11 @@ TEST_CATCH(set_invalid_code_hex, PdgCode::InvalidPdgCode) {
 }
 TEST(initialize_from_string) {
   PdgCode particle1("+1234567");
-  COMPARE(particle1.dump(), 0x1234567);
+  COMPARE(particle1.dump(), 0x1234567u);
   PdgCode particle2("-211");
-  COMPARE(particle2.dump(), 0x80000211);
+  COMPARE(particle2.dump(), 0x80000211u);
   PdgCode particle3("1234");
-  COMPARE(particle3.dump(), 0x1234);
+  COMPARE(particle3.dump(), 0x1234u);
 }
 TEST_CATCH(empty_string, PdgCode::InvalidPdgCode) {
   PdgCode particle("");
@@ -544,17 +544,17 @@ TEST(stream) {
   std::istringstream sourcestream("-1234567 +1234567 1234567 +123 -214");
   sourcestream >> particle1;
   COMPARE(particle1.code(), -0x1234567);
-  COMPARE(particle1.dump(), 0x81234567);
+  COMPARE(particle1.dump(), 0x81234567u);
   sourcestream >> particle1;
   COMPARE(particle1.code(), 0x1234567);
-  COMPARE(particle1.dump(), 0x1234567);
+  COMPARE(particle1.dump(), 0x1234567u);
   sourcestream >> particle1;
   COMPARE(particle1.code(), 0x1234567);
-  COMPARE(particle1.dump(), 0x1234567);
+  COMPARE(particle1.dump(), 0x1234567u);
   sourcestream >> particle1;
-  COMPARE(particle1.dump(), 0x123);
+  COMPARE(particle1.dump(), 0x123u);
   sourcestream >> particle1;
-  COMPARE(particle1.dump(), 0x80000214);
+  COMPARE(particle1.dump(), 0x80000214u);
 }
 TEST(stream_fail) {
   PdgCode particle1;

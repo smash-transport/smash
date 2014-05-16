@@ -17,6 +17,7 @@
 #include "include/clock.h"
 #include "include/crosssections.h"
 #include "include/experimentparameters.h"
+#include "include/forwarddeclarations.h"
 #include "include/modusdefault.h"
 #include "include/outputroutines.h"
 #include "include/particles.h"
@@ -66,7 +67,57 @@ class ExperimentBase {
    * \throws InvalidModusRequest This exception is thrown if the \p
    *         Modus string in the \p config object does not contain a valid
    *         string.
+   *
+   * GENERAL:
+   * --------
    */
+  // !!USER:Input
+  /**
+   * \if user
+   * \page input_general_ Input Section General
+   * \endif
+   *
+   * `MODUS:` Choose a modus for the calculation, e.g.\ infinite matter
+   * calculation, collision of two particles or collision of nuclei. The modus
+   * will be configured in ref input_modi_. Recognized values are:
+   *
+   * \li `Nucleus` for collisions of nuclei or compound objects. See
+   *     \if user
+   *     \ref input_modi_nucleus_
+   *     \else
+   *     \ref NucleusModus
+   *     \endif
+   * \li `Sphere` for calculations of the expansion of a thermalized sphere.
+   * See ref input_modi_sphere_
+   * \li `Collider` ...
+   * \li `Box` for infinite matter calculation in a rectangular box. See
+   *     \if user
+   *     \ref input_modi_box_
+   *     \else
+   *     \ref BoxModus
+   *     \endif
+   *
+   * `EPS:` Time step for the calculation, in fm/c.
+   *
+   * `STEPS:` How many time steps should be taken per event.
+   *
+   *
+   * `UPDATE:` Output on conservation laws in Standard Output occurs every nth time step.
+   *
+   * `RANDOMSEED:` Initial seed for the random number generator. If this is
+   * negative, the program starting time is used.
+   *
+   * `SIGMA:` Elastic cross-section.
+   *
+   * `TESTPARTICLES:` How many test particles per real particles should be simulated.
+   *
+   * `NEVENTS:` Number of events to calculate.
+   *
+   * `particles:` ???
+   *
+   * `decaymodes:` ???
+   */
+  // !!/USER:Input
   static std::unique_ptr<ExperimentBase> create(Configuration &config);
 
   /**
@@ -77,7 +128,7 @@ class ExperimentBase {
    *
    * \param path The path where output files will be written to.
    */
-  virtual void run(const boost::filesystem::path &path) = 0;
+  virtual void run(const bf::path &path) = 0;
 
   /**
    * Exception class that is thrown if an invalid modus is requested from the
@@ -117,7 +168,7 @@ class Experiment : public ExperimentBase {
   friend class ExperimentBase;
 
  public:
-  virtual void run(const boost::filesystem::path &path) override;
+  virtual void run(const bf::path &path) override;
 
  private:
   /**
@@ -136,11 +187,30 @@ class Experiment : public ExperimentBase {
    */
   explicit Experiment(Configuration &config);
 
-  void initialize(const boost::filesystem::path &path);
+  /** Reads particle type information and cross sections information and
+   * does the initialization of the system
+   *
+   * This is called in the beginning of each event.
+   */
+  void initialize(const bf::path &path);
+  /** Runs the time evolution of an event
+   *
+   * Here, the time steps are looped over, collisions and decays are
+   * carried out and particles are propagated.
+   *
+   * \param evt_num Running number of the event
+   */
   void run_time_evolution(const int evt_num);
 
+  /** Output about the beginning of the event.
+   *
+   * This output goes to the console
+   *
+   * \param seed The random number engine seed
+   */
   void print_startup(int64_t seed);
 
+  /// returns the total energy of the particles.
   float energy_total(Particles *particles);
 
   /**
@@ -174,7 +244,9 @@ class Experiment : public ExperimentBase {
    */
   CrossSections cross_sections_;
 
+  /// The object that finds decays
   DecayActionsFinder decay_finder_;
+  /// The object that finds scatterings
   ScatterActionsFinder scatter_finder_;
 
   /**

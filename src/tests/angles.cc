@@ -43,6 +43,9 @@ TEST(accessors_and_relations) {
                    + dir.z()*dir.z();
     COMPARE_ABSOLUTE_ERROR(xyz_one, 1.0, accuracy);
 
+    ThreeVector direction = dir.threevec();
+    COMPARE_ABSOLUTE_ERROR(xyz_one, direction.abs(), accuracy);
+
     // compare cos(theta) and costheta:
     COMPARE_RELATIVE_ERROR(cos(dir.theta()), dir.costheta(), accuracy)
                         << " (trial #" << c << " of " << NumberOfTries << ")";

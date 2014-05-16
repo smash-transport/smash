@@ -15,6 +15,7 @@
 #include <vector>
 
 #include <yaml-cpp/yaml.h>
+#include "include/forwarddeclarations.h"
 
 #ifndef DOXYGEN
 namespace boost {
@@ -70,6 +71,29 @@ namespace Smash {
  * important for the user to discover typos in his configuration file (or
  * command line parameters).
  */
+// !!USER:Input
+/** \if user
+ * \page inputoptions Input file Options
+ *
+ * To configure SMASH, you can specify an input file. This file should be in
+ * YAML format.
+ *
+ * ###TEXT MISSING###
+ *
+ * \li \ref input_general_
+ * \li \ref input_modi_nucleus_
+ * \li \ref input_modi_box_
+ * \else
+ * 
+ * Options
+ * -------
+ * For possible configuration values, see
+ * \li \ref Experiment::create()
+ * \li \ref NucleusModus
+ * \li \ref BoxModus
+ * \endif
+ */
+// !!/USER:Input
 class Configuration {
  public:
   /// Thrown when the types in the config file and C++ don't match.
@@ -160,7 +184,7 @@ class Configuration {
    *
    * \param path The directory where the SMASH config files are located.
    */
-  explicit Configuration(const boost::filesystem::path &path);
+  explicit Configuration(const bf::path &path);
 
   /**
    * Reads a YAML config file from the specified \p path.
@@ -169,8 +193,8 @@ class Configuration {
    * \param filename The filename (without path) of the YAML config file, in
    *                 case you don't want the default "config.yaml".
    */
-  explicit Configuration(const boost::filesystem::path &path,
-                         const boost::filesystem::path &filename);
+  explicit Configuration(const bf::path &path,
+                         const bf::path &filename);
 
   /// if you want to copy this you're doing it wrong
   Configuration(const Configuration &) = delete;

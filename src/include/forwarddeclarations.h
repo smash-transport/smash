@@ -25,6 +25,9 @@ template <typename T, typename Deleter>
 class unique_ptr;
 }  // namespace std
 
+namespace boost {
+  namespace filesystem {}
+}
 namespace Smash {
 
 template <typename T>
@@ -40,6 +43,8 @@ class OutputInterface;
 
 using OutputsList = build_vector_<build_unique_ptr_<OutputInterface>>;
 using ParticleList = build_vector_<ParticleData>;
+
+namespace bf = boost::filesystem;
 
 }  // namespace Smash
 

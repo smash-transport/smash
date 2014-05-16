@@ -7,15 +7,16 @@
  *
  */
 
-#include "include/clock.h"
-#include "include/vtkoutput.h"
-#include "include/particles.h"
-#include "include/filedeleter.h"
 #include <memory>
+#include "include/clock.h"
+#include "include/filedeleter.h"
+#include "include/forwarddeclarations.h"
+#include "include/particles.h"
+#include "include/vtkoutput.h"
 
 namespace Smash {
 
-VtkOutput::VtkOutput(boost::filesystem::path path)
+VtkOutput::VtkOutput(bf::path path)
     : base_path_(std::move(path)) {
 }
 

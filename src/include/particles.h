@@ -190,12 +190,6 @@ class Particles {
    */
   inline const ParticleData &data(int id) const;
   /**
-   * Return the specific datapointer of a particle according to its id
-   *
-   * \throws std::out_of_range If there is no particle with the given \p id.
-   */
-  inline ParticleData * data_pointer(int id);
-  /**
    * Return the type of a specific particle given its id
    *
    * \warning This function has a high cost. Prefer to call \ref particle_type
@@ -298,11 +292,6 @@ inline const ParticleData &Particles::data(int particle_id) const {
   return data_.at(particle_id);
 }
 
-/* return the pointer to the data of a specific particle */
-inline ParticleData* Particles::data_pointer(int particle_id) {
-  return &data_.at(particle_id);
-}
-
 /* return the type of a specific particle */
 inline const ParticleType &Particles::type(int particle_id) const {
   return types_.at(data_.at(particle_id).pdgcode());
@@ -399,8 +388,7 @@ void boost_back_CM(ParticleData *particle1, ParticleData *particle2,
                    const ThreeVector &velocity_orig);
 
 /* particle_distance - measure distance between two particles */
-double particle_distance(ParticleData *particle_orig1,
-  ParticleData *particle_orig2);
+double particle_distance(ParticleData particle1, ParticleData particle2);
 
 /* time_collision - measure collision time of two particles */
 double collision_time(const ParticleData &particle1,

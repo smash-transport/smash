@@ -12,6 +12,7 @@
 
 #include "clock.h"
 #include "filedeleter.h"
+#include "forwarddeclarations.h"
 #include "outputinterface.h"
 #include <boost/filesystem.hpp>
 
@@ -20,7 +21,7 @@ class Particles;
 
 class OscarOutput : public OutputInterface {
  public:
-  OscarOutput(boost::filesystem::path path);
+  OscarOutput(bf::path path);
   ~OscarOutput();
 
   /// writes the initial particle information of an event
