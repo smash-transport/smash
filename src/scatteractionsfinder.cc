@@ -28,31 +28,30 @@ ScatterActionsFinder::check_collision (const int id_a, const int id_b, Particles
   ScatterAction* act = nullptr;
   std::vector<int> in_part;
 
+  const ParticleData data_a = particles->data(id_a);
+  const ParticleData data_b = particles->data(id_b);
+
   /* just collided with this particle */
-  if (particles->data(id_a).id_process() >= 0
-      && particles->data(id_a).id_process()
-      == particles->data(id_b).id_process()) {
+  if (data_a.id_process() >= 0 && data_a.id_process() == data_b.id_process()) {
     printd("Skipping collided particle %d <-> %d at time %g due process %d\n",
-           id_a, id_b, particles->data(id_a).position().x0(),
-           particles->data(id_a).id_process());
+           id_a, id_b, data_a.position().x0(), data_a.id_process());
     return nullptr;
   }
 
   /* check according timestep: positive and smaller */
-  const double time_until_collision = collision_time(particles->data(id_a),
-    particles->data(id_b));
+  const double time_until_collision = collision_time(data_a, data_b);
   if (time_until_collision < 0.0 ||
       time_until_collision >= parameters.timestep_duration()) {
     return nullptr;
   }
 
   /* check for minimal collision time both particles */
-  if ((particles->data(id_a).collision_time() > 0.0
-       && time_until_collision > particles->data(id_a).collision_time())
-      || (particles->data(id_b).collision_time() > 0.0
-          && time_until_collision > particles->data(id_b).collision_time())) {
-    printd("%g Not minimal particle %d <-> %d\n",
-           particles->data(id_a).position().x0(), id_a, id_b);
+  if ((data_a.collision_time() > 0.0 &&
+       time_until_collision > data_a.collision_time()) ||
+      (data_b.collision_time() > 0.0 &&
+       time_until_collision > data_b.collision_time())) {
+    printd("%g Not minimal particle %d <-> %d\n", data_a.position().x0(), id_a,
+           id_b);
     return nullptr;
   }
 
@@ -64,21 +63,19 @@ ScatterActionsFinder::check_collision (const int id_a, const int id_b, Particles
   cross_sections->compute_kinematics(*particles, id_a, id_b);
 
   /* Resonance production cross section */
-  std::vector<ProcessBranch> resonance_xsections
-    = resonance_cross_section(particles->data(id_a), particles->data(id_b),
-      particles->type(id_a), particles->type(id_b), particles);
+  std::vector<ProcessBranch> resonance_xsections =
+      resonance_cross_section(data_a, data_b, data_a.type(*particles),
+                              data_b.type(*particles), particles);
   act->add_processes(resonance_xsections);
 
   /* Add elastic process.  */
-  act->add_process(ProcessBranch(particles->data(id_a).pdgcode(),
-                                 particles->data(id_b).pdgcode(),
-                                 cross_sections->elastic(*particles,
-                                                         id_a, id_b), 0));
+  act->add_process(
+      ProcessBranch(data_a.pdgcode(), data_b.pdgcode(),
+                    cross_sections->elastic(*particles, id_a, id_b), 0));
 
   {
     /* distance criteria according to cross_section */
-    const double distance_squared = particle_distance(
-              particles->data(id_a), particles->data(id_b));
+    const double distance_squared = particle_distance(data_a, data_b);
     if (distance_squared >= act->weight() * fm2_mb * M_1_PI) {
         delete act;
         return nullptr;
