@@ -50,11 +50,7 @@ void boost_back_CM(ParticleData *particle1, ParticleData *particle2,
 /* particle_distance - measure distance between two particles
  *                     in center of momentum
  */
-double particle_distance(ParticleData *particle_orig1,
-  ParticleData *particle_orig2) {
-  /* Copy the particles in order to boost them and to forget the copy */
-  ParticleData particle1 = *particle_orig1, particle2 = *particle_orig2;
-
+double particle_distance(ParticleData particle1, ParticleData particle2) {
   /* boost particles in center of momenta frame */
   boost_CM(&particle1, &particle2);
   FourVector position_difference = particle1.position() - particle2.position();

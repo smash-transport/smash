@@ -85,8 +85,8 @@ void ScatterAction::perform (Particles *particles, size_t &id_process)
     data_a.set_collision_past(id_process);
     data_b.set_collision_past(id_process);
 
-    *particles->data_pointer(id_a) = data_a;
-    *particles->data_pointer(id_b) = data_b;
+    particles->data(id_a) = data_a;
+    particles->data(id_b) = data_b;
     outgoing_particles_[0] = data_a;
     outgoing_particles_[1] = data_b;
   } break;
