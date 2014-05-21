@@ -11,6 +11,7 @@
 
 #include "include/chrono.h"
 #include "include/particles.h"
+#include "quantumnumbers.h"
 
 namespace Smash {
 
@@ -25,7 +26,7 @@ void print_header(void);
 void print_measurements(const Particles &particles,
                         const size_t &scatterings_total,
                         const size_t &scatterings_this_interval,
-                        float energy_ini,
+                        const QuantumNumbers& initial_values,
                  SystemTimePoint time_start);
 void print_tail(const
                 SystemTimePoint time_start,

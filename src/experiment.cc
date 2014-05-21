@@ -115,7 +115,7 @@ void Experiment<Modus>::initialize(const bf::path &/*path*/) {
   parameters_.labclock = std::move(clock_for_this_event);
 
   /* Save the initial energy in the system for energy conservation checks */
-  energy_initial_ = energy_total(&particles_);
+  initial_values_.count_conserved_things(particles_);
   /* Print output headers */
   print_header();
 }
@@ -129,7 +129,7 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
   size_t interactions_total = 0, previous_interactions_total = 0,
          interactions_this_interval = 0;
   print_measurements(particles_, interactions_total,
-                     interactions_this_interval, energy_initial_, time_start_);
+                interactions_this_interval, initial_values_, time_start_);
 
   while (! (++parameters_.labclock > end_time_)) {
     std::vector<ActionPtr> actions;  // XXX: a std::list might be better suited
@@ -175,13 +175,15 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
           interactions_total - previous_interactions_total;
       previous_interactions_total = interactions_total;
       print_measurements(particles_, interactions_total,
-                         interactions_this_interval, energy_initial_,
+                         interactions_this_interval, initial_values_,
                          time_start_);
       /* save evolution data */
       for (const auto &output : outputs_) {
         output->after_Nth_timestep(particles_, evt_num, parameters_.labclock);
       }
     }
+    // check conservation of conserved quantities:
+    printf("%s", initial_values_.report_deviations(particles_).c_str());
   }
   // make sure the experiment actually ran (note: we should compare this
   // to the start time, but we don't know that. Therefore, we check that
@@ -206,18 +208,6 @@ void Experiment<Modus>::print_startup(int64_t seed) {
   printf("End time: %g fm/c\n", end_time_);
   printf("Random number seed: %" PRId64 "\n", seed);
   modus_.print_startup();
-}
-
-/* calculates the total energy in the system from zero component of
- * all momenta of particles
- * XXX should be expanded to all quantum numbers of interest */
-template <typename Modus>
-float Experiment<Modus>::energy_total(Particles *particles) {
-  float energy_sum = 0.0;
-  for (const ParticleData &data : particles->data()) {
-    energy_sum += data.momentum().x0();
-  }
-  return energy_sum;
 }
 
 template <typename Modus>
