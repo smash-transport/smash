@@ -148,7 +148,7 @@ class PdgCode {
    * to the return value is 0b10 = 0x2 = 2.
    *
    **/
-  inline int test_code() {
+  inline int test_code() const {
     int fail = 0;
     if (digits_.n_    > 9) { fail |= 1<<6; }
     if (digits_.n_R_  > 9) { fail |= 1<<5; }
