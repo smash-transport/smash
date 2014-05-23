@@ -28,8 +28,11 @@ namespace Smash {
  * distributing it to the new particles.
  *
  * Currently, momentum conservation (including energy conservation),
- * charge-, isospin3-, strangeness-, bottomness-, charmness- and baryon
- * number conservation are checked.
+ * charge-, isospin3-, (net-) strangeness-, (net-) bottomness-, (net-)
+ * charmness- and (net-) baryon number conservation are checked. (It
+ * should be noted, or repeated, that only the net quantities are
+ * conserved, hence this is what is stored and compared with this
+ * class.)
  *
  * Usage
  * -----
@@ -81,11 +84,11 @@ class QuantumNumbers {
    * found in \p particles
    */
   QuantumNumbers(const Particles &particles) {
-    count_conserved_things(particles);
+    count_conserved_values(particles);
   }
 
   /// sum up all conserved quantities from \p particles
-  void count_conserved_things(const Particles &particles) {
+  void count_conserved_values(const Particles &particles) {
     for (const ParticleData &data : particles.data()) {
       momentum_      += data.momentum();
       charge_        += data.pdgcode().charge();

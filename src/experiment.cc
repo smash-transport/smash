@@ -114,8 +114,9 @@ void Experiment<Modus>::initialize(const bf::path &/*path*/) {
   Clock clock_for_this_event(start_time, delta_time_startup_);
   parameters_.labclock = std::move(clock_for_this_event);
 
-  /* Save the initial energy in the system for energy conservation checks */
-  initial_values_.count_conserved_things(particles_);
+  /* Save the initial conserved quantum numbers and total momentum in
+   * the system for conservation checks */
+  initial_values_.count_conserved_values(particles_);
   /* Print output headers */
   print_header();
 }
