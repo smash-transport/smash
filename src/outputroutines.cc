@@ -45,7 +45,7 @@ static void print_line(void) {
 /* print_header - title for each row */
 void print_header(void) {
   print_line();
-  printf(" Time    <Ediff>       <ptot>    <scattrate>"
+  printf(" Time    <Ediff>       <pdiff>   <scattrate>"
          "  <scatt>   <particles>  <timing>\n");
   print_line();
 }
