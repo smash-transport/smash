@@ -87,8 +87,14 @@ class QuantumNumbers {
     count_conserved_values(particles);
   }
 
-  /// sum up all conserved quantities from \p particles
+  /** sum up all conserved quantities from \p particles
+   *
+   * (sets everything to 0 at the beginning)
+   */
   void count_conserved_values(const Particles &particles) {
+    momentum_ = FourVector(0,0,0,0);
+    charge_ = isospin3_ = strangeness_ = charmness_
+            = bottomness_ = baryon_number_ = 0;
     for (const ParticleData &data : particles.data()) {
       momentum_      += data.momentum();
       charge_        += data.pdgcode().charge();
