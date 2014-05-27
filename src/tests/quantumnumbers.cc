@@ -114,3 +114,71 @@ TEST(report_deviations) {
   QuantumNumbers J(R, 5, 6, 1, -8, 12358, -15);
   COMPARE(H.report_deviations(J), "");
 }
+
+TEST(count_from_particles) {
+  // we will successively fill a particle list and compare the quantum
+  // numbers with it. Finally, we will see if report_deviations also
+  // works for particle lists.
+
+  // create particle with fake PdgCode (this would be equivalent to a
+  // rho^+, but that should be "213").
+  ParticleData particle(PdgCode("123"));
+  FourVector P(1,2,3,4);
+  particle.set_momentum(P);
+  // create particle list:
+  Particles list("species 0.123 -.0 123\nspecies2 0.245 2.3 2345", {});
+  list.add_data(particle);
+
+  QuantumNumbers onlyone(list);
+  QuantumNumbers check1(P, 1, 2, 0, 0, 0, 0);
+  // won't print anything if the following VERIFY succeeds
+  printf("%s", check1.report_deviations(onlyone).c_str());
+  VERIFY(onlyone == check1);
+
+  ParticleData particleQ(PdgCode("123"));
+  FourVector Q(2,3,4,5);
+  particleQ.set_momentum(Q);
+  list.add_data(particleQ);
+
+  QuantumNumbers two(list);
+  QuantumNumbers check2(P + Q, 2, 4, 0, 0, 0, 0);
+  printf("%s", check2.report_deviations(two).c_str());
+  VERIFY(two == check2);
+
+  ParticleData particleR(PdgCode("2345"));
+  FourVector R(3,4,5,6);
+  particleR.set_momentum(R);
+  list.add_data(particleR);
+
+  QuantumNumbers three(list);
+  QuantumNumbers check3(P + Q + R, 3, 5, -1, 1, 0, 1);
+  printf("%s", check3.report_deviations(three).c_str());
+  VERIFY(three == check3);
+
+  ParticleData particleS(PdgCode("-1234567"));
+  FourVector S(-6,-9,-12,-15);
+  particleS.set_momentum(S);
+  list.add_data(particleS);
+
+  QuantumNumbers four(list);
+  QuantumNumbers check4(P + Q + R + S, 2, 5, -1, 0, 1, 0);
+  printf("%s", check4.report_deviations(four).c_str());
+  VERIFY(four == check4);
+
+  //
+  COMPARE(three.report_deviations(list),
+  "Conservation law violations detected  (old vs. new)\n"
+  "Deviation in Four-Momentum:\n"
+  " P_0: 6.000000 vs. 0.000000\n"
+  " P_1: 9.000000 vs. 0.000000\n"
+  " P_2: 12.000000 vs. 0.000000\n"
+  " P_3: 15.000000 vs. 0.000000\n"
+  "Deviation in Charge:\n"
+  " 3 vs. 2\n"
+  "Deviation in Charmness:\n"
+  " 1 vs. 0\n"
+  "Deviation in Bottomness:\n"
+  " 0 vs. 1\n"
+  "Deviation in Baryon Number:\n"
+  " 1 vs. 0\n");
+}
