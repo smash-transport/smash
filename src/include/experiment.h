@@ -269,7 +269,7 @@ class Experiment : public ExperimentBase {
    * used to regularly check if they are still good.
    *
    */
-  QuantumNumbers initial_values_;
+  QuantumNumbers conserved_initial_;
   /// system starting time of the simulation
   SystemTimePoint time_start_ = SystemClock::now();
 };

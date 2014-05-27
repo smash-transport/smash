@@ -116,7 +116,7 @@ void Experiment<Modus>::initialize(const bf::path &/*path*/) {
 
   /* Save the initial conserved quantum numbers and total momentum in
    * the system for conservation checks */
-  initial_values_.count_conserved_values(particles_);
+  conserved_initial_.count_conserved_values(particles_);
   /* Print output headers */
   print_header();
 }
@@ -130,7 +130,7 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
   size_t interactions_total = 0, previous_interactions_total = 0,
          interactions_this_interval = 0;
   print_measurements(particles_, interactions_total,
-                interactions_this_interval, initial_values_, time_start_);
+                interactions_this_interval, conserved_initial_, time_start_);
 
   while (! (++parameters_.labclock > end_time_)) {
     std::vector<ActionPtr> actions;  // XXX: a std::list might be better suited
@@ -176,7 +176,7 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
           interactions_total - previous_interactions_total;
       previous_interactions_total = interactions_total;
       print_measurements(particles_, interactions_total,
-                         interactions_this_interval, initial_values_,
+                         interactions_this_interval, conserved_initial_,
                          time_start_);
       /* save evolution data */
       for (const auto &output : outputs_) {
@@ -184,7 +184,7 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
       }
     }
     // check conservation of conserved quantities:
-    printf("%s", initial_values_.report_deviations(particles_).c_str());
+    printf("%s", conserved_initial_.report_deviations(particles_).c_str());
   }
   // make sure the experiment actually ran (note: we should compare this
   // to the start time, but we don't know that. Therefore, we check that

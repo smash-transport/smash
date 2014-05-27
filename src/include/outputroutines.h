@@ -26,7 +26,7 @@ void print_header(void);
 void print_measurements(const Particles &particles,
                         const size_t &scatterings_total,
                         const size_t &scatterings_this_interval,
-                        const QuantumNumbers& initial_values,
+                        const QuantumNumbers& conserved_initial,
                  SystemTimePoint time_start);
 void print_tail(const
                 SystemTimePoint time_start,

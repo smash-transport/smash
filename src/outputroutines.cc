@@ -55,14 +55,14 @@ void print_header(void) {
 void print_measurements(const Particles &particles,
                         const size_t &scatterings_total,
                         const size_t &scatterings_this_interval,
-                        const QuantumNumbers& initial_values,
+                        const QuantumNumbers& conserved_initial,
                 SystemTimePoint time_start) {
   FourVector momentum_total(0, 0, 0, 0);
   /* calculate elapsed time */
   SystemTimeSpan elapsed_seconds = SystemClock::now() - time_start;
 
   QuantumNumbers current_values(particles);
-  QuantumNumbers difference = initial_values - current_values;
+  QuantumNumbers difference = conserved_initial - current_values;
   double time = particles.time();
 
   if (likely(time > 0))
