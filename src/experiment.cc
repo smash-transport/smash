@@ -76,7 +76,7 @@ ExperimentParameters create_experiment_parameters(Configuration &config) {
   // The clock initializers are only read here and taken later when
   // assigning initial_clock_.
   return {{0.0f, config.read({"General", "DELTA_TIME"})},
-           config.take({"General", "UPDATE"}),
+           config.take({"General", "OUTPUT_INTERVAL"}),
            cross_section, testparticles};
 }
 }  // unnamed namespace

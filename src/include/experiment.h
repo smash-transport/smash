@@ -101,8 +101,8 @@ class ExperimentBase {
    *
    * `STEPS:` How many time steps should be taken per event.
    *
-   *
-   * `UPDATE:` Output on conservation laws in Standard Output occurs every nth time step.
+   * `OUTPUT_INTERVAL:` Output on conservation laws in Standard Output
+   * occurs every nth time step.
    *
    * `RANDOMSEED:` Initial seed for the random number generator. If this is
    * negative, the program starting time is used.
