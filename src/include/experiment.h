@@ -82,10 +82,10 @@ class ExperimentBase {
    *     \ref BoxModus
    *     \endif
    *
-   * `EPS:` Time step for the calculation, in fm/c.
+   * `DELTA_TIME:` Time step for the calculation, in fm/c.
    *
-   * `STEPS:` How many time steps should be taken per event.
-   *
+   * `END_TIME:` The time after which the evolution is stopped. Note
+   * that the starting time depends on the chosen MODUS.
    *
    * `UPDATE:` Output on conservation laws in Standard Output occurs every nth time step.
    *
