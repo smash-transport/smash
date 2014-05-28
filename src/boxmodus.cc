@@ -125,7 +125,7 @@ float BoxModus::initial_conditions(Particles *particles,
   /* allows to check energy conservation */
   printf("IC total energy: %g [GeV]\n", momentum_total.x0());
   number_density_initial_ = number_density_total;
-  return 0.f;
+  return start_time_;
 }
 
 /* evolve - the core of the box, stepping forward in time */
