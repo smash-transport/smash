@@ -39,19 +39,13 @@ void RootOutput::at_eventstart(const Particles &particles, const int event_numbe
   particles_to_tree("at_eventstart","Initial particles", particles, event_number);
 }
 
-void RootOutput::before_collision() {
-}
-
-void RootOutput::after_collision() {
-}
-
 /**
  * Writes to tree "at_tstep_N", where N is timestep number counting from 1.
  */
-void RootOutput::after_Nth_timestep(const Particles &particles, const int event_number, const int timestep) {
+void RootOutput::after_Nth_timestep(const Particles &particles, const int event_number, const Clock &clock) {
   char treename[32], treedescr[64];
-  snprintf(treename, sizeof(treename), "at_tstep_%07i", timestep + 1);
-  snprintf(treedescr, sizeof(treedescr), "Particles after timestep %i", timestep + 1);
+  snprintf(treename, sizeof(treename), "at_tstep_%07i", clock.current_time());
+  snprintf(treedescr, sizeof(treedescr), "Particles after timestep %i", clock.current_time());
   particles_to_tree(treename, treedescr, particles, event_number);
 }
 

@@ -7,7 +7,7 @@
  *
  */
 
-#include "include/Tmnoutput.h"
+#include "include/tmnoutput.h"
 #include "include/particles.h"
 //#include "include/filedeleter.h"
 //#include <memory>
@@ -18,14 +18,13 @@ namespace Smash {
 
 TmnOutput::TmnOutput(boost::filesystem::path path)
     : base_path_(std::move(path)) {
+  root_out_file =
+      new TFile((base_path_ / "smash_run_Tmn.root").native().c_str(), "NEW");
 }
 
 TmnOutput::~TmnOutput() {
-}
-
-
-void TmnOutput::at_runstart(){
- root_out_file = new TFile( (base_path_ / "smash_run_Tmn.root").native().c_str(),"NEW");
+  root_out_file->Write();
+  root_out_file->Close();
 }
 
 
@@ -48,17 +47,6 @@ void TmnOutput::at_outtime(const Particles &particles, const int evt_num, const 
 void TmnOutput::at_eventend(const Particles &particles, const int evt_num){
  Tmn_to_tree("at_eventend","Final Tmn", particles, evt_num);
 }
-
-void TmnOutput::at_runend(){
- root_out_file->Write();
- root_out_file->Close();
-}
-
-void TmnOutput::at_crash(){
- root_out_file->Write();
- root_out_file->Close();
-}
-
 
 void TmnOutput::Tmn_to_tree(const char* treename, const char* treedescr, const Particles &particles, const int evt_num){
 

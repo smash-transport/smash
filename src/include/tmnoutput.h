@@ -23,13 +23,9 @@ class TmnOutput : public OutputInterface {
   TmnOutput(boost::filesystem::path path);
   ~TmnOutput();
 
-  void at_runstart() override;
   void at_eventstart(const Particles &particles, const int evt_num) override;
   void at_eventend(const Particles &particles, const int evt_num) override;
-  //void at_collision(const Collisions &collisions) override;
   void at_outtime(const Particles &particles, const int evt_num, const int timestep) override;
-  void at_runend() override;
-  void at_crash() override;
   void Tmn_to_tree(const char* treename, const char* treedescr, const Particles &particles, const int evt_num);
 
  private:

@@ -25,9 +25,7 @@ class RootOutput : public OutputInterface {
 
   void at_eventstart(const Particles &particles, const int event_number) override;
   void at_eventend(const Particles &particles, const int event_number) override;
-  void before_collision() override;
-  void after_collision() override;
-  void after_Nth_timestep(const Particles &particles, const int event_number, const int timestep) override;
+  void after_Nth_timestep(const Particles &particles, const int event_number, const Clock &) override;
 
  private:
    const boost::filesystem::path base_path_;
