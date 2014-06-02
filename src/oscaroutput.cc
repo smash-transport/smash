@@ -92,7 +92,7 @@ void OscarOutput::write_interaction(const ParticleList &incoming_particles,
 
 void OscarOutput::after_Nth_timestep(const Particles & particles,
                                      const int event_number,
-                                     const Clock& clock) {
+                                     const Clock& /*clock*/) {
   /* OSCAR line prefix : initial particles; final particles; event id
    * Time interval output: initial = number of particles, final = 0
    */
