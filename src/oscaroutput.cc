@@ -31,21 +31,22 @@ void OscarOutput::at_eventstart(const Particles &particles,
                                 const int event_number) {
   /* OSCAR line prefix : initial particles; final particles; event id
    * First block of an event: initial = 0, final = number of particles
-   * Vice versa for the last block
    */
   const size_t zero = 0;
-  fprintf(file_.get(), "%zu %zu %i\n", zero, particles.size(), event_number + 1);
+  fprintf(file_.get(), "%zu %zu %i\n", zero, particles.size(),
+          event_number + 1);
   write(particles);
 }
 
 void OscarOutput::at_eventend(const Particles &particles,
                               const int event_number) {
   /* OSCAR line prefix : initial particles; final particles; event id
-   * First block of an event: initial = 0, final = number of particles
-   * Vice versa for the last block
+   * Last block of an event: initial = number of particles, final = 0
+   * Block ends with null interaction
    */
   const size_t zero = 0;
-  fprintf(file_.get(), "%zu %zu %i\n", particles.size(), zero, event_number + 1);
+  fprintf(file_.get(), "%zu %zu %i\n", particles.size(), zero,
+          event_number + 1);
   write(particles);
   /* Null interaction marks the end of an event */
   fprintf(file_.get(), "%zu %zu %i\n", zero, zero, event_number + 1);
@@ -96,7 +97,8 @@ void OscarOutput::after_Nth_timestep(const Particles & particles,
    * Time interval output: initial = number of particles, final = 0
    */
   const size_t zero = 0;
-  fprintf(file_.get(), "%zu %zu %i\n", particles.size(), zero, event_number + 1);
+  fprintf(file_.get(), "%zu %zu %i\n", particles.size(), zero,
+          event_number + 1);
   write(particles);
 }
 
