@@ -47,6 +47,8 @@ void OscarOutput::at_eventend(const Particles &particles,
   const size_t zero = 0;
   fprintf(file_.get(), "%zu %zu %i\n", particles.size(), zero, event_number + 1);
   write(particles);
+  /* Null interaction marks the end of an event */
+  fprintf(file_.get(), "%zu %zu %i\n", zero, zero, event_number + 1);
 }
 
 void OscarOutput::write(const Particles &particles) {
