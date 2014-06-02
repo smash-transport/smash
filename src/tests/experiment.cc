@@ -45,3 +45,15 @@ TEST_CATCH(create_invalid, ExperimentBase::InvalidModusRequest) {
   conf["General"]["MODUS"] = "Invalid";
   ExperimentBase::create(conf);
 }
+
+// TEST(experiment_parameters) {
+//   Configuration conf(TEST_CONFIG_PATH);
+//   conf["General"]["TESTPARTICLES"] = 2;
+//   conf["General"]["SIGMA"] = 3;
+//   conf["General"]["DELTA_TIME"] = 4;
+//   conf["General"]["OUTPUT_INTERVAL"] = 5;
+//   ExperimentParameters param = create_experiment_parameters(conf);
+//   COMPARE(param.output_interval, 5.f);
+//   COMPARE(param.cross_section, 3.0 / 2.0);
+//   COMPARE(param.testparticles, 2);
+// }
