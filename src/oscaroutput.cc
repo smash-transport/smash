@@ -89,33 +89,15 @@ void OscarOutput::write_interaction(const ParticleList &incoming_particles,
   }
 }
 
-void OscarOutput::after_Nth_timestep(const Particles & /*particles*/,
-                                     const int /*event_number*/,
-                                     const Clock& /*clock*/) {
-  /*
-  char filename[64];
-
-  snprintf(filename, sizeof(filename), "momenta_%.5f.dat",
-           particles.time());
-  std::unique_ptr<FILE> momenta_file{
-      fopen((base_path_ / filename).native().c_str(), "w")};
-  for (const ParticleData &data : particles.data()) {
-    fprintf(momenta_file.get(), "%g %g %g %g %i %s\n",
-            data.momentum().x0(),
-            data.momentum().x1(), data.momentum().x2(),
-            data.momentum().x3(), data.id(), data.pdgcode().string().c_str());
-  }
-  snprintf(filename, sizeof(filename), "position_%.5f.dat",
-           particles.time());
-  std::unique_ptr<FILE> position_file{
-      fopen((base_path_ / filename).native().c_str(), "w")};
-  for (const ParticleData &data : particles.data()) {
-    fprintf(position_file.get(), "%g %g %g %g %i %s\n",
-            data.position().x0(),
-            data.position().x1(), data.position().x2(),
-            data.position().x3(), data.id(), data.pdgcode().string().c_str());
-  }
-  */
+void OscarOutput::after_Nth_timestep(const Particles & particles,
+                                     const int event_number,
+                                     const Clock& clock) {
+  /* OSCAR line prefix : initial particles; final particles; event id
+   * Time interval output: initial = number of particles, final = 0
+   */
+  const size_t zero = 0;
+  fprintf(file_.get(), "%zu %zu %i\n", particles.size(), zero, event_number + 1);
+  write(particles);
 }
 
 }  // namespace Smash
