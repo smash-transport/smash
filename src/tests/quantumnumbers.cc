@@ -7,7 +7,7 @@
  *
  */
 
-#include "tests/unittest.h"
+#include "unittest.h"
 #include "../include/quantumnumbers.h"
 
 using namespace Smash;

@@ -10,12 +10,10 @@
 #ifndef SRC_INCLUDE_ANGLES_H_
 #define SRC_INCLUDE_ANGLES_H_
 
-#include <cstdio>
-#include <cstdlib>
 #include <stdexcept>
-#include "include/random.h"
-#include "include/threevector.h"
-#include "include/constants.h"
+#include "random.h"
+#include "threevector.h"
+#include "constants.h"
 
 namespace Smash {
 

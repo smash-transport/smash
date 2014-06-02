@@ -7,12 +7,9 @@
 #ifndef SRC_INCLUDE_PARTICLEDATA_H_
 #define SRC_INCLUDE_PARTICLEDATA_H_
 
-#include <math.h>
-#include <vector>
-
-#include "include/fourvector.h"
-#include "include/pdgcode.h"
 #include "forwarddeclarations.h"
+#include "fourvector.h"
+#include "pdgcode.h"
 
 namespace Smash {
 
@@ -92,11 +89,6 @@ class ParticleData {
   /// position in space: x0, x1, x2, x3 as t, x, y, z
   FourVector position_;
 };
-
-/**
- * Type for a list of particles.
- */
-using ParticleList = std::vector<ParticleData>;
 
 /// look up the id of the particle
 inline int ParticleData::id(void) const {

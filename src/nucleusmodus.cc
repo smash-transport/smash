@@ -14,6 +14,7 @@
 #include "include/configuration.h"
 #include "include/experimentparameters.h"
 #include "include/outputroutines.h"
+#include "include/particles.h"
 #include "include/pdgcode.h"
 #include "include/random.h"
 

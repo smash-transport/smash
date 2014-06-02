@@ -7,8 +7,8 @@
  *
  */
 
-#include "tests/unittest.h"
-#include "include/pdgcode.h"
+#include "unittest.h"
+#include "../include/pdgcode.h"
 
 using namespace Smash;
 

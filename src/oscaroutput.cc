@@ -13,6 +13,8 @@
 #include "include/particles.h"
 #include "include/outputroutines.h"
 
+#include <boost/filesystem.hpp>
+
 namespace Smash {
 
 OscarOutput::OscarOutput(bf::path path)
@@ -54,7 +56,7 @@ void OscarOutput::write(const Particles &particles) {
             data.momentum().x2(), data.momentum().x3(), data.momentum().x0(),
             sqrt(data.momentum().Dot(data.momentum())), data.position().x1(),
             data.position().x2(), data.position().x3(),
-            data.position().x0() - 1.0);
+            data.position().x0());
   }
 }
 
@@ -75,7 +77,7 @@ void OscarOutput::write_interaction(const ParticleList &incoming_particles,
             p.pdgcode().string().c_str(), 0, p.momentum().x1(),
             p.momentum().x2(), p.momentum().x3(), p.momentum().x0(), mass,
             p.position().x1(), p.position().x2(), p.position().x3(),
-            p.position().x0() - 1.0);
+            p.position().x0());
   };
   for (const auto &p : incoming_particles) {
     print(p);

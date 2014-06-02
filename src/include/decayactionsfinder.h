@@ -20,7 +20,7 @@ class DecayActionsFinder : public ActionFinderFactory {
  public:
   /** Check the whole particle list for decays
    * and return a list with the corrsponding Action objects. */
-  std::vector<ActionPtr> find_possible_actions(
+  ActionList find_possible_actions(
       Particles *particles, const ExperimentParameters &parameters,
       CrossSections *cross_sections = nullptr) const override;
 };

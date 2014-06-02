@@ -9,18 +9,11 @@
 #ifndef SRC_INCLUDE_MODUSDEFAULT_H_
 #define SRC_INCLUDE_MODUSDEFAULT_H_
 
-#include <stdexcept>
-#include <stdint.h>
-#include <list>
+#include "forwarddeclarations.h"
 
-#include "include/particles.h"
+#include <stdexcept>
 
 namespace Smash {
-
-/* forward declarations */
-class Particles;
-class CrossSections;
-struct ExperimentParameters;
 
 /**
  * Baseclass for Modus classes that provides default function implementations.

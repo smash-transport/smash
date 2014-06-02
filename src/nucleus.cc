@@ -5,12 +5,13 @@
  *    GNU General Public License (GPLv3 or later)
  */
 
-#include <limits>
-#include <map>
-
 #include "include/nucleus.h"
 #include "include/angles.h"
+#include "include/particles.h"
 #include "include/pdgcode.h"
+
+#include <limits>
+#include <map>
 
 namespace Smash {
 

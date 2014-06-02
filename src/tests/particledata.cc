@@ -8,8 +8,8 @@
  */
 
 #include "unittest.h"
-#include "include/particledata.h"
-#include "include/pdgcode.h"
+#include "../include/particledata.h"
+#include "../include/pdgcode.h"
 
 using namespace Smash;
 

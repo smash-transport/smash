@@ -7,7 +7,7 @@
  *
  */
 
-#include "tests/unittest.h"
+#include "unittest.h"
 
 #include <yaml-cpp/yaml.h>
 #include <iostream>

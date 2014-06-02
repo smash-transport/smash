@@ -8,7 +8,7 @@
 #define SRC_INCLUDE_PARTICLETYPE_H_
 
 #include <string>
-#include "include/pdgcode.h"
+#include "pdgcode.h"
 
 namespace Smash {
 

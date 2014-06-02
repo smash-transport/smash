@@ -7,35 +7,20 @@
 #ifndef SRC_INCLUDE_EXPERIMENT_H_
 #define SRC_INCLUDE_EXPERIMENT_H_
 
-#include <list>
 #include <memory>
 #include <stdexcept>
-#include <string>
-#include <vector>
 
-#include "include/chrono.h"
-#include "include/clock.h"
-#include "include/crosssections.h"
-#include "include/experimentparameters.h"
-#include "include/forwarddeclarations.h"
-#include "include/modusdefault.h"
-#include "include/outputroutines.h"
-#include "include/particles.h"
-#include "quantumnumbers.h"
-#include "outputinterface.h"
+#include "chrono.h"
+#include "crosssections.h"
 #include "decayactionsfinder.h"
+#include "experimentparameters.h"
+#include "forwarddeclarations.h"
+#include "outputinterface.h"
+#include "particles.h"
+#include "quantumnumbers.h"
 #include "scatteractionsfinder.h"
 
-#ifndef DOXYGEN
-namespace boost {
-namespace filesystem {
-class path;
-}  // namespace filesystem
-}  // namespace boost
-#endif
-
 namespace Smash {
-class Configuration;
 
 /**
  * Non-template interface to Experiment<Modus>.
@@ -98,12 +83,13 @@ class ExperimentBase {
    *     \ref BoxModus
    *     \endif
    *
-   * `EPS:` Time step for the calculation, in fm/c.
+   * `DELTA_TIME:` Time step for the calculation, in fm/c.
    *
-   * `STEPS:` How many time steps should be taken per event.
+   * `END_TIME:` The time after which the evolution is stopped. Note
+   * that the starting time depends on the chosen MODUS.
    *
-   *
-   * `UPDATE:` Output on conservation laws in Standard Output occurs every nth time step.
+   * `OUTPUT_INTERVAL:` Output on conservation laws in Standard Output
+   * occurs every nth time step.
    *
    * `RANDOMSEED:` Initial seed for the random number generator. If this is
    * negative, the program starting time is used.

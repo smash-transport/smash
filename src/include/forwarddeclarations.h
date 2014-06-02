@@ -26,8 +26,11 @@ class unique_ptr;
 }  // namespace std
 
 namespace boost {
-  namespace filesystem {}
-}
+namespace filesystem {
+class path;
+}  // namespace filesystem
+}  // namespace boost
+
 namespace Smash {
 
 template <typename T>
@@ -35,14 +38,26 @@ using build_unique_ptr_ = std::unique_ptr<T, std::default_delete<T>>;
 template <typename T>
 using build_vector_ = std::vector<T, std::allocator<T>>;
 
-class ParticleData;
-class ParticleType;
-class Particles;
-class ProcessBranch;
+class Action;
+class BoxModus;
+class Clock;
+class Configuration;
+class CrossSections;
+class FourVector;
+class ModusDefault;
 class OutputInterface;
+class ParticleData;
+class Particles;
+class ParticleType;
+class PdgCode;
+class ProcessBranch;
+struct ExperimentParameters;
 
+using ActionPtr = build_unique_ptr_<Action>;
+using ActionList = build_vector_<ActionPtr>;
 using OutputsList = build_vector_<build_unique_ptr_<OutputInterface>>;
 using ParticleList = build_vector_<ParticleData>;
+using ProcessBranchList = build_vector_<ProcessBranch>;
 
 namespace bf = boost::filesystem;
 

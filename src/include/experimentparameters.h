@@ -7,7 +7,7 @@
 #ifndef SRC_INCLUDE_EXPERIMENTPARAMETERS_H_
 #define SRC_INCLUDE_EXPERIMENTPARAMETERS_H_
 
-#include "include/clock.h"
+#include "clock.h"
 
 namespace Smash {
 

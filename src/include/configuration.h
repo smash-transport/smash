@@ -15,15 +15,7 @@
 #include <vector>
 
 #include <yaml-cpp/yaml.h>
-#include "include/forwarddeclarations.h"
-
-#ifndef DOXYGEN
-namespace boost {
-namespace filesystem {
-class path;
-}  // namespace filesystem
-}  // namespace boost
-#endif
+#include "forwarddeclarations.h"
 
 namespace YAML {
 template <typename T>

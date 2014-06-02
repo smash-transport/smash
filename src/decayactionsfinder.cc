@@ -8,7 +8,12 @@
  */
 
 #include "include/decayactionsfinder.h"
-
+#include "include/action.h"
+#include "include/constants.h"
+#include "include/crosssections.h"
+#include "include/experimentparameters.h"
+#include "include/fourvector.h"
+#include "include/particles.h"
 #include "include/random.h"
 
 namespace Smash {

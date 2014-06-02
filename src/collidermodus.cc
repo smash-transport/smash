@@ -9,9 +9,11 @@
 #include <list>
 
 #include "include/collidermodus.h"
+#include "include/particles.h"
 #include "include/configuration.h"
 #include "include/experimentparameters.h"
 #include "include/outputroutines.h"
+#include "include/random.h"
 
 namespace Smash {
 
@@ -58,13 +60,15 @@ float ColliderModus::initial_conditions(Particles *particles,
                              - mass_projectile * mass_projectile);
   /* Sample impact parameter */
   double impact_parameter = Random::uniform(0.0, 5.0);
-  /* Set positions and momenta */
-  data_projectile.set_position(FourVector(1., impact_parameter, 0., -1.));
-  data_projectile.set_momentum(mass_projectile, 0.0, 0.0, cms_momentum);
-  data_target.set_position(FourVector(1., 0., 0., 1.));
-  data_target.set_momentum(mass_target, 0.0, 0.0, -cms_momentum);
   // collider start is hard-coded for now.
-  return -1.0f;
+  const float start_time = -1.0f;
+  /* Set positions and momenta */
+  data_projectile.set_position(FourVector(start_time, impact_parameter,
+                                          0., -1.));
+  data_projectile.set_momentum(mass_projectile, 0.0, 0.0, cms_momentum);
+  data_target.set_position(FourVector(start_time, 0., 0., 1.));
+  data_target.set_momentum(mass_target, 0.0, 0.0, -cms_momentum);
+  return start_time;
 }
 
 }  // namespace Smash

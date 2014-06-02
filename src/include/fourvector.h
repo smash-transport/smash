@@ -10,7 +10,7 @@
 #include <array>
 #include <cmath>
 
-#include "include/threevector.h"
+#include "threevector.h"
 
 namespace Smash {
 
@@ -158,6 +158,7 @@ class FourVector {
   const_iterator cend() const { return x_.cend(); }
 
  private:
+  /// internal storage of this vector's components
   std::array<double, 4> x_;
 };
 

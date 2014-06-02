@@ -310,7 +310,7 @@ Particles::DecayModesMap Particles::load_decaymodes(const std::string &input) {
     if (pdgcode == PdgCode::invalid()) {  // at the start of the file
       return;
     }
-    if (decay_modes_to_add.empty()) {
+    if (decay_modes_to_add.is_empty()) {
       throw MissingDecays("No decay modes found for particle " +
                           pdgcode.string());
     }

@@ -5,15 +5,15 @@
  *    GNU General Public License (GPLv3)
  */
 
-#include "tests/unittest.h"
+#include "unittest.h"
 
 #include <cstdio>
 
-#include "include/particles.h"
-#include "include/constants.h"
-#include "include/particledata.h"
-#include "include/pdgcode.h"
-#include "include/outputroutines.h"
+#include "../include/particles.h"
+#include "../include/constants.h"
+#include "../include/particledata.h"
+#include "../include/pdgcode.h"
+#include "../include/outputroutines.h"
 #include "../include/macros.h"
 #include <algorithm>
 
@@ -149,10 +149,10 @@ TEST(load_one_particle_with_comment) {
 }
 
 namespace particles_txt {
-#include "particles.txt.h"
+#include <particles.txt.h>
 }  // namespace particles_txt
 namespace decaymodes_txt {
-#include "decaymodes.txt.h"
+#include <decaymodes.txt.h>
 }  // namespace decaymodes_txt
 
 TEST(load_many_particles) {
@@ -213,7 +213,7 @@ TEST(load_decaymodes_two_channels) {
 
   {
     const auto &rho0 = p.decay_modes(0x113);
-    VERIFY(!rho0.empty());
+    VERIFY(!rho0.is_empty());
     const auto &modelist = rho0.decay_mode_list();
     COMPARE(modelist.size(), 1u);
     COMPARE(modelist[0].weight(), 1.);
@@ -223,7 +223,7 @@ TEST(load_decaymodes_two_channels) {
   }
   {
     const auto &omega = p.decay_modes(0x223);
-    VERIFY(!omega.empty());
+    VERIFY(!omega.is_empty());
     const auto &modelist = omega.decay_mode_list();
     COMPARE(modelist.size(), 3u);
     FUZZY_COMPARE(float(modelist[0].weight()), 1.f/3.f);

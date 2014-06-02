@@ -9,6 +9,7 @@
 
 #include "include/action.h"
 
+#include "include/constants.h"
 #include "include/outputroutines.h"
 #include "include/pdgcode.h"
 #include "include/random.h"

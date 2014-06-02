@@ -9,16 +9,11 @@
 
 #include <list>
 
-#include "include/chrono.h"
-#include "include/particles.h"
+#include "chrono.h"
+#include "forwarddeclarations.h"
 #include "quantumnumbers.h"
 
 namespace Smash {
-
-/* forward declarations */
-class ModusDefault;
-class ParticleData;
-class ParticleType;
 
 /* console output */
 void print_startup(const ModusDefault &parameters);
@@ -44,7 +39,6 @@ void printd_position(const ParticleData &particle);
 void printd_position(const char *message, const ParticleData &particle);
 void printd_momenta(const ParticleData &particle);
 void printd_momenta(const char *message, const ParticleData &particle);
-void printd_list(const std::list<int> &collision_list);
 
 }  // namespace Smash
 

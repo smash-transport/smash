@@ -5,9 +5,9 @@
  *    GNU General Public License (GPLv3 or later)
  */
 
-#include "tests/unittest.h"
-#include "include/fourvector.h"
-#include "include/angles.h"
+#include "unittest.h"
+#include "../include/fourvector.h"
+#include "../include/angles.h"
 
 using namespace Smash;
 

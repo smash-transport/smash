@@ -7,19 +7,10 @@
 #ifndef SRC_INCLUDE_BOXMODUS_H_
 #define SRC_INCLUDE_BOXMODUS_H_
 
-#include <stdint.h>
-#include <cmath>
-#include <list>
-
-#include "include/crosssections.h"
-#include "include/modusdefault.h"
-#include "include/particles.h"
+#include "modusdefault.h"
+#include "forwarddeclarations.h"
 
 namespace Smash {
-
-class BoxModus;
-class Configuration;
-struct ExperimentParameters;
 
 /** BoxModus: Provides a modus for infinite matter calculations
  *
