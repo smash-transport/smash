@@ -17,6 +17,7 @@
 #include "forwarddeclarations.h"
 #include "outputinterface.h"
 #include "particles.h"
+#include "quantumnumbers.h"
 #include "scatteractionsfinder.h"
 
 namespace Smash {
@@ -196,9 +197,6 @@ class Experiment : public ExperimentBase {
    */
   void print_startup(int64_t seed);
 
-  /// returns the total energy of the particles.
-  float energy_total(Particles *particles);
-
   /**
    * Struct of several member variables.
    * These variables are combined into a struct for efficient input to functions
@@ -250,8 +248,14 @@ class Experiment : public ExperimentBase {
    * Stored here so that the next event will remember this.
    */
   const float delta_time_startup_;
-  /// initial total energy of the system
-  float energy_initial_ = 0.f;
+  /** The conserved quantities of the system.
+   *
+   * This struct carries the sums of the single particle's various
+   * quantities as measured at the beginning of the evolution and can be
+   * used to regularly check if they are still good.
+   *
+   */
+  QuantumNumbers conserved_initial_;
   /// system starting time of the simulation
   SystemTimePoint time_start_ = SystemClock::now();
 };
