@@ -72,6 +72,7 @@ smash_add_unittest(angles)
 smash_add_unittest(nucleus)
 smash_add_unittest(random)
 smash_add_test(pdgcode pdgcode pdgcode)
+smash_add_unittest(particletype)
 smash_add_test(fourvector fourvector fourvector)
 smash_add_test(lorentzboost lorentzboost lorentzboost)
 
