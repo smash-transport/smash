@@ -28,6 +28,18 @@ TEST(create_collider) {
   VERIFY(!!ExperimentBase::create(conf));
 }
 
+TEST(create_nucleus) {
+  Configuration conf(TEST_CONFIG_PATH);
+  conf["General"]["MODUS"] = "Nucleus";
+  VERIFY(!!ExperimentBase::create(conf));
+}
+
+// TEST(create_sphere) {
+//   Configuration conf(TEST_CONFIG_PATH);
+//   conf["General"]["MODUS"] = "Sphere";
+//   VERIFY(!!ExperimentBase::create(conf));
+// }
+//
 TEST_CATCH(create_invalid, ExperimentBase::InvalidModusRequest) {
   Configuration conf(TEST_CONFIG_PATH);
   conf["General"]["MODUS"] = "Invalid";
