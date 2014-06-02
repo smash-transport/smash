@@ -28,7 +28,7 @@ std::vector<ActionPtr> DecayActionsFinder::find_possible_actions(
   for (const auto &p : particles->data()) {
     std::vector<int> in_part;
     int id = p.id();
-    float width = particles->type(id).width();
+    float width = p.type(*particles).width();
     /* particle doesn't decay */
     if (width < 0.0)
       continue;

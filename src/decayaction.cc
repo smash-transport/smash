@@ -31,13 +31,13 @@ DecayAction::DecayAction(const std::vector<int> &in_part,
  * to the active particles data structure.
  *
  * \param[in] incoming0 decaying particle (in its rest frame)
- * \param[in,out] particles Particles in the simulation.
+ * \param[in] particles Particles in the simulation.
  */
-void DecayAction::one_to_two(const ParticleData &incoming0, Particles *particles) {
+void DecayAction::one_to_two(const ParticleData &incoming0, const Particles &particles) {
   ParticleData &outgoing0 = outgoing_particles_[0];
   ParticleData &outgoing1 = outgoing_particles_[1];
-  const ParticleType &outgoing0_type = outgoing0.type(*particles);
-  const ParticleType &outgoing1_type = outgoing1.type(*particles);
+  const ParticleType &outgoing0_type = outgoing0.type(particles);
+  const ParticleType &outgoing1_type = outgoing1.type(particles);
 
   const PdgCode type_a = outgoing0.pdgcode();
   const PdgCode type_b = outgoing1.pdgcode();
@@ -56,9 +56,9 @@ void DecayAction::one_to_two(const ParticleData &incoming0, Particles *particles
   /* If one of the particles is resonance, sample its mass */
   /* XXX: Other particle assumed stable! */
   if (outgoing0_type.width() > 0) {
-    mass_a = sample_resonance_mass(*particles, type_a, type_b, total_energy);
+    mass_a = sample_resonance_mass(particles, type_a, type_b, total_energy);
   } else if (outgoing1_type.width() > 0) {
-    mass_b = sample_resonance_mass(*particles, type_b, type_a, total_energy);
+    mass_b = sample_resonance_mass(particles, type_b, type_a, total_energy);
   }
 
   /* Sample the momenta */
@@ -77,15 +77,15 @@ void DecayAction::one_to_two(const ParticleData &incoming0, Particles *particles
  * to the active particles data structure.
  *
  * \param[in] incoming0 decaying particle (in its rest frame)
- * \param[in,out] particles Particles in the simulation.
+ * \param[in] particles Particles in the simulation.
  */
-void DecayAction::one_to_three(const ParticleData &incoming0, Particles *particles) {
+void DecayAction::one_to_three(const ParticleData &incoming0, const Particles &particles) {
   ParticleData &outgoing0 = outgoing_particles_[0];
   ParticleData &outgoing1 = outgoing_particles_[1];
   ParticleData &outgoing2 = outgoing_particles_[2];
-  const ParticleType &outgoing0_type = outgoing0.type(*particles);
-  const ParticleType &outgoing1_type = outgoing1.type(*particles);
-  const ParticleType &outgoing2_type = outgoing2.type(*particles);
+  const ParticleType &outgoing0_type = outgoing0.type(particles);
+  const ParticleType &outgoing1_type = outgoing1.type(particles);
+  const ParticleType &outgoing2_type = outgoing2.type(particles);
 
   // TODO(weil) This may be checked already when reading in the possible
   // decay channels.
@@ -215,12 +215,12 @@ void DecayAction::one_to_three(const ParticleData &incoming0, Particles *particl
          outgoing1.momentum().x3(), outgoing2.momentum().x3());
 }
 
-ParticleList DecayAction::choose_channel(Particles *particles) const {
-  const PdgCode pdgcode = particles->type(incoming_particles_[0]).pdgcode();
+ParticleList DecayAction::choose_channel(const Particles &particles) const {
+  const PdgCode pdgcode = particles.type(incoming_particles_[0]).pdgcode();
 
   /* Get the decay modes of this resonance */
   const std::vector<ProcessBranch> decaymodes
-    = particles->decay_modes(pdgcode).decay_mode_list();
+    = particles.decay_modes(pdgcode).decay_mode_list();
   /* Get the first decay mode and its branching ratio */
   std::vector<ProcessBranch>::const_iterator mode = decaymodes.begin();
   float cumulated_probability = mode->weight();
@@ -268,11 +268,11 @@ void DecayAction::perform(Particles *particles, size_t &id_process) {
    * according to their relative weights. Then decay the particle
    * by calling function one_to_two or one_to_three.
    */
-  outgoing_particles_ = choose_channel(particles);
+  outgoing_particles_ = choose_channel(*particles);
   if (outgoing_particles_.size() == 2) {
-    one_to_two (particle0, particles);
+    one_to_two (particle0, *particles);
   } else if (outgoing_particles_.size() == 3) {
-    one_to_three (particle0, particles);
+    one_to_three (particle0, *particles);
   } else {
     throw InvalidDecay(
         "DecayAction::perform: Only 1->2 or 1->3 processes are supported. "
@@ -290,7 +290,7 @@ void DecayAction::perform(Particles *particles, size_t &id_process) {
 
   id_process++;
 
-  check_conservation (particles, id_process);
+  check_conservation(*particles, id_process);
 
   /* Remove decayed particle */
   particles->remove(particle0.id());
