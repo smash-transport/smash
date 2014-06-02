@@ -18,7 +18,7 @@
 namespace Smash {
 
 OscarOutput::OscarOutput(bf::path path)
-    : file_{std::fopen((path / "collision.dat").native().c_str(), "w")} {
+    : file_{std::fopen((path / "osc1999a.dat").native().c_str(), "w")} {
   fprintf(file_.get(), "# OSC1999A\n");
   fprintf(file_.get(), "# Interaction history\n");
   fprintf(file_.get(), "# smash\n");
