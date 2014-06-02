@@ -59,6 +59,7 @@ endif()
 add_definitions("-DTEST_CONFIG_PATH=\"${PROJECT_SOURCE_DIR}/src\"")
 add_definitions("-DBUILD_TESTS")
 
+# unit tests for classes:
 smash_add_unittest(yamltest)
 smash_add_unittest(configuration)
 smash_add_unittest(experiment)
@@ -66,15 +67,12 @@ smash_add_unittest(particledata)
 smash_add_unittest(particles)
 smash_add_unittest(decaymodes)
 smash_add_unittest(clock)
-# some angle operations tests
+smash_add_unittest(quantumnumbers)
 smash_add_unittest(angles)
 smash_add_unittest(nucleus)
 smash_add_unittest(random)
-
 smash_add_test(pdgcode pdgcode pdgcode)
 smash_add_test(fourvector fourvector fourvector)
-
-# Lorentz boost tests
 smash_add_test(lorentzboost lorentzboost lorentzboost)
 
 # for now -o has to be "data", because OSCAR output still expects to output to
@@ -84,21 +82,17 @@ set(SMASH_OPTIONS -o "data" -f)
 # verify that the binary has a cli help
 smash_add_test(mash_help smash smash -h)
 
-# verify that the binary runs
+# verify that the binary runs with the various modi:
 smash_add_test(mash_run smash smash ${SMASH_OPTIONS})
-
-# verify that the binary can run a box calculation
 smash_add_test(box_run smash smash -m Box ${SMASH_OPTIONS})
-
-# verify that the binary can do Collider
 smash_add_test(collider_run smash smash -m Collider ${SMASH_OPTIONS})
-
-# verify that the binary can do sphere
+smash_add_test(nucleus_run smash smash -m Nucleus ${SMASH_OPTIONS})
 #smash_add_test(sphere_run smash smash -m Sphere ${SMASH_OPTIONS})
 
 # verify that binary runs certain time (this corresponds to 20 steps)
 smash_add_test(box_steps smash smash -e 2.0 -c "General: {DELTA_TIME: 0.1}" -m Box ${SMASH_OPTIONS})
 smash_add_test(collider_steps smash smash -e 2.0 -c "General: {DELTA_TIME: 0.1}" -m Collider ${SMASH_OPTIONS})
+smash_add_test(nucleus_steps smash smash -e 2.0 -c "General: {DELTA_TIME: 0.1}" -m Nucleus ${SMASH_OPTIONS})
 #smash_add_test(sphere_steps smash smash -e 2.0 -c 'General: {DELTA_TIME: 0.1}' -m Sphere ${SMASH_OPTIONS})
 
 # verify that default run has no mem leaks
@@ -112,6 +106,9 @@ if(CTEST_MEMORYCHECK_COMMAND)
    smash_add_test(memcheck_collider smash ${CTEST_MEMORYCHECK_COMMAND}
       ${CTEST_MEMORYCHECK_COMMAND_OPTIONS}
       ${PROJECT_BINARY_DIR}/smash -c "General: {END_TIME: 5.0, DELTA_TIME: 0.1}" -m Collider ${SMASH_OPTIONS})
+   smash_add_test(memcheck_nucleus smash ${CTEST_MEMORYCHECK_COMMAND}
+      ${CTEST_MEMORYCHECK_COMMAND_OPTIONS}
+      ${PROJECT_BINARY_DIR}/smash -c "General: {END_TIME: 5.0, DELTA_TIME: 0.1}" -m Nucleus ${SMASH_OPTIONS})
 #  smash_add_test(memcheck_sphere smash ${CTEST_MEMORYCHECK_COMMAND}
 #     ${CTEST_MEMORYCHECK_COMMAND_OPTIONS}
 #     ${PROJECT_BINARY_DIR}/smash -s 50 -m Sphere ${SMASH_OPTIONS})
@@ -120,7 +117,7 @@ else()
 endif()
 
 if(HAVE_SANITIZER)
-   smash_add_test(sanitizer_box      smash_sanitizer smash_sanitizer -c "General: {END_TIME: 5.0,MODUS: Box}" ${SMASH_OPTIONS})
+   smash_add_test(sanitizer_box      smash_sanitizer smash_sanitizer -e 5.0 -m Box ${SMASH_OPTIONS})
    smash_add_test(sanitizer_collider smash_sanitizer smash_sanitizer -e 5.0 -m Collider ${SMASH_OPTIONS})
    smash_add_test(sanitizer_nucleus  smash_sanitizer smash_sanitizer -e 5.0 -m Nucleus ${SMASH_OPTIONS})
    #smash_add_test(sanitizer_sphere   smash_sanitizer smash_sanitizer -e 5.0 -m Sphere ${SMASH_OPTIONS})
