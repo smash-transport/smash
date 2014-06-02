@@ -28,18 +28,18 @@ class ParticleData {
    * Initialize the data with only a valid ID. All the other values are
    * initialized to improbable values.
    */
-  explicit ParticleData(int i) : id_(i) {}
+  explicit ParticleData(const int i) : id_(i) {}
 
   /**
    * Initialize the data with only a valid PDG code. All the other values are
    * initialized to improbable values.
    */
-  explicit ParticleData(PdgCode p) : pdgcode_(p) {}
+  explicit ParticleData(const PdgCode p) : pdgcode_(p) {}
 
   inline int id(void) const;
-  inline void set_id(int id);
+  inline void set_id(const int id);
   inline PdgCode pdgcode(void) const;
-  inline void set_pdgcode(PdgCode pdgcode);
+  inline void set_pdgcode(const PdgCode pdgcode);
 
   // convenience accessors to PdgCode:
   /// \copydoc PdgCode::is_hadron
@@ -53,11 +53,11 @@ class ParticleData {
   const ParticleType &type(const Particles &particles) const;
 
   inline int id_process(void) const;
-  inline void set_id_process(int id);
+  inline void set_id_process(const int id);
   inline double collision_time(void) const;
   inline void set_collision_time(const double &collision_time);
   inline void set_collision(const double &collision_time);
-  inline void set_collision_past(int process_id);
+  inline void set_collision_past(const int process_id);
   inline const FourVector &momentum(void) const;
   inline void set_momentum(const FourVector &momentum_vector);
   inline void set_momentum(const double &mass, const ThreeVector &mom);
@@ -72,8 +72,8 @@ class ParticleData {
   /* overloaded operators */
   inline bool operator==(const ParticleData &a) const;
   inline bool operator<(const ParticleData &a) const;
-  inline bool operator==(int id_a) const;
-  inline bool operator<(int id_a) const;
+  inline bool operator==(const int id_a) const;
+  inline bool operator<(const int id_a) const;
 
  private:
   /// Each particle has a unique identifier
@@ -96,7 +96,7 @@ inline int ParticleData::id(void) const {
 }
 
 /// set id of the particle
-inline void ParticleData::set_id(int i) {
+inline void ParticleData::set_id(const int i) {
   id_ = i;
 }
 
@@ -106,7 +106,7 @@ inline PdgCode ParticleData::pdgcode(void) const {
 }
 
 /// set id of the particle
-inline void ParticleData::set_pdgcode(PdgCode i) {
+inline void ParticleData::set_pdgcode(const PdgCode i) {
   pdgcode_ = i;
 }
 
@@ -116,7 +116,7 @@ inline int ParticleData::id_process(void) const {
 }
 
 /// set the id of the collision process
-inline void ParticleData::set_id_process(int process_id) {
+inline void ParticleData::set_id_process(const int process_id) {
   id_process_ = process_id;
 }
 
@@ -136,7 +136,7 @@ inline void ParticleData::set_collision(const double &collision_t) {
 }
 
 /// set happened collision data
-inline void ParticleData::set_collision_past(int id_counter) {
+inline void ParticleData::set_collision_past(const int id_counter) {
   collision_time_ = 0.0;
   id_process_ = id_counter;
 }
@@ -190,12 +190,12 @@ inline bool ParticleData::operator<(const ParticleData &a) const {
 }
 
 /// check if the particles are identical to a given id
-inline bool ParticleData::operator==(int id_a) const {
+inline bool ParticleData::operator==(const int id_a) const {
   return this->id_ == id_a;
 }
 
 /// sort particles along to given id
-inline bool ParticleData::operator<(int id_a) const {
+inline bool ParticleData::operator<(const int id_a) const {
   return this->id_ < id_a;
 }
 

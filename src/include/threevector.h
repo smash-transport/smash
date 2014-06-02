@@ -11,6 +11,7 @@
 #define SRC_INCLUDE_THREEVECTOR_H_
 
 #include <array>
+#include <cmath>
 
 namespace Smash {
 
