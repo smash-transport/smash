@@ -11,6 +11,7 @@
 #define SRC_INCLUDE_PDGCODE_H_
 
 #include <cstdio>
+#include <cstdlib>
 #include <iosfwd>
 #include <stdexcept>
 #include <string>

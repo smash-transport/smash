@@ -9,6 +9,7 @@
 
 #include <array>
 #include <cmath>
+#include <iosfwd>
 
 #include "threevector.h"
 
@@ -356,6 +357,9 @@ double inline FourVector::sqr3() const {
 double inline FourVector::abs3() const {
   return this->threevec().abs();
 }
+
+  /// ostream << FourVector for output.
+  std::ostream& operator<<(std::ostream& os, const FourVector& vec);
 
 }  // namespace Smash
 

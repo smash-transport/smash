@@ -33,6 +33,32 @@
 
 namespace Smash {
 
+/* Calculate isospin Clebsch-Gordan coefficient
+ * (-1)^(j1 - j2 + m3) * sqrt(2 * j3 + 1) * [Wigner 3J symbol]
+ * Note that the calculation assumes that isospin values
+ * have been multiplied by two
+ */
+double clebsch_gordan_coefficient(const int isospin_a,
+  const int isospin_b, const int isospin_resonance,
+  const int isospin_z_a, const int isospin_z_b,
+  const int isospin_z_resonance) {
+  double wigner_3j =  gsl_sf_coupling_3j(isospin_a,
+     isospin_b, isospin_resonance,
+     isospin_z_a, isospin_z_b, -isospin_z_resonance);
+  double clebsch_gordan_isospin = 0.0;
+  if (std::abs(wigner_3j) > really_small)
+    clebsch_gordan_isospin = pow(-1, isospin_a / 2.0
+    - isospin_b / 2.0 + isospin_z_resonance / 2.0)
+    * sqrt(isospin_resonance + 1) * wigner_3j;
+
+  printd("CG: %g I1: %i I2: %i IR: %i iz1: %i iz2: %i izR: %i \n",
+       clebsch_gordan_isospin, isospin_a, isospin_b,
+       isospin_resonance, isospin_z_a, isospin_z_b,
+       isospin_z_resonance);
+
+  return clebsch_gordan_isospin;
+}
+
 /**
  * Function for 1-dimensional GSL integration.
  *
@@ -196,36 +222,15 @@ double two_to_one_formation(const Particles &particles,
     }
   }
 
-  /* Isospin z-component based on Gell-Mann–Nishijima formula
-   * 2 * Iz = 2 * charge - (baryon number + strangeness + charm)
-   * XXX: Strangeness and charm ignored for now!
-   */
-  const int isospin_z1 = type_particle1.pdgcode().isospin3();
-  const int isospin_z2 = type_particle2.pdgcode().isospin3();
-  int isospin_z_resonance = type_resonance.pdgcode().isospin3();
-
-  /* Calculate isospin Clebsch-Gordan coefficient
-   * (-1)^(j1 - j2 + m3) * sqrt(2 * j3 + 1) * [Wigner 3J symbol]
-   * Note that the calculation assumes that isospin values
-   * have been multiplied by two
-   */
-  double wigner_3j =  gsl_sf_coupling_3j(type_particle1.isospin(),
-     type_particle2.isospin(), type_resonance.isospin(),
-     isospin_z1, isospin_z2, -isospin_z_resonance);
-  double clebsch_gordan_isospin = 0.0;
-  if (fabs(wigner_3j) > really_small)
-    clebsch_gordan_isospin = pow(-1, type_particle1.isospin() / 2.0
-    - type_particle2.isospin() / 2.0 + isospin_z_resonance / 2.0)
-    * sqrt(type_resonance.isospin() + 1) * wigner_3j;
-
-  printd("CG: %g I1: %i I2: %i IR: %i iz1: %i iz2: %i izR: %i \n",
-       clebsch_gordan_isospin,
-       type_particle1.isospin(), type_particle2.isospin(),
-       type_resonance.isospin(),
-       isospin_z1, isospin_z2, isospin_z_resonance);
+  double clebsch_gordan_isospin
+    = clebsch_gordan_coefficient(type_particle1.isospin(),
+	 type_particle2.isospin(), type_resonance.isospin(),
+	 type_particle1.pdgcode().isospin3(),
+         type_particle2.pdgcode().isospin3(),
+         type_resonance.pdgcode().isospin3());
 
   /* If Clebsch-Gordan coefficient is zero, don't bother with the rest */
-  if (fabs(clebsch_gordan_isospin) < really_small)
+  if (std::abs(clebsch_gordan_isospin) < really_small)
     return 0.0;
 
   /* Check the decay modes of this resonance */
@@ -348,26 +353,11 @@ size_t two_to_two_formation(const Particles &particles,
       if (abs(isospin_z_final) > isospin_final) {
         break;
       }
-      /* Calculate isospin Clebsch-Gordan coefficient combinations
-       * (-1)^(j1 - j2 + m3) * sqrt(2 * j3 + 1) * [Wigner 3J symbol]
-       * Note that the calculation assumes that isospin values
-       * have been multiplied by two
-       */
-      double wigner_3j =  gsl_sf_coupling_3j(type_resonance.isospin(),
-        second_type.isospin(), isospin_final,
-        isospin_z_resonance, isospin_z_i, -isospin_z_final);
-      if (fabs(wigner_3j) > really_small) {
-        clebsch_gordan_isospin +=
-            pow(-1, type_resonance.isospin() / 2.0 -
-                        second_type.isospin() / 2.0 + isospin_z_final / 2.0) *
-            sqrt(isospin_final + 1) * wigner_3j;
-      }
+      clebsch_gordan_isospin
+        = clebsch_gordan_coefficient(type_resonance.isospin(),
+            second_type.isospin(), isospin_final,
+            isospin_z_resonance, isospin_z_i, isospin_z_final);
 
-      printd("CG: %g I1: %i I2: %i IR: %i iz1: %i iz2: %i izR: %i \n",
-         clebsch_gordan_isospin,
-         type_resonance.isospin(), second_type.isospin(),
-         isospin_final,
-         isospin_z_resonance, isospin_z_i, isospin_z_final);
       /* isospin is multiplied by 2,
        *  so we must also decrease it by increments of 2
        */
