@@ -85,7 +85,7 @@ TEST(set_get) {
   COMPARE(p.momentum(), FourVector(1.0, 1.2, 1.4, 1.6));
   ThreeVector M(1.1, 1.3, 1.5);
   p.set_momentum(1.0, M);
-  COMPARE(p.momentum(), FourVector(sqrt(1.0 + M.sqr(), 1.1, 1.3, 1.5));
+  COMPARE(p.momentum(), FourVector(sqrt(1.0 + M.sqr()), 1.1, 1.3, 1.5));
 }
 
 TEST(set_get2) {
