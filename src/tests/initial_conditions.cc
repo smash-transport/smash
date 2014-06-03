@@ -39,6 +39,19 @@ TEST(initialize_box) {
   COMPARE(P.data(67).pdgcode(), 0x222);
   // we might also look at other properties of Particles, like total
   // momentum and such.
+  FourVector momentum(0.0, 0.0, 0.0, 0.0);
+  for (auto p : P.data()) {
+    momentum += p.momentum();
+    VERIFY(p.position().x1() <  5.0);
+    VERIFY(p.position().x1() >= 0.0);
+    VERIFY(p.position().x2() <  5.0);
+    VERIFY(p.position().x2() >= 0.0);
+    VERIFY(p.position().x3() <  5.0);
+    VERIFY(p.position().x3() >= 0.0);
+  }
+  FUZZY_COMPARE(momentum.x1(), 0.0);
+  FUZZY_COMPARE(momentum.x2(), 0.0);
+  FUZZY_COMPARE(momentum.x3(), 0.0);
 }
 
 TEST(initialize_collider) {
@@ -53,7 +66,18 @@ TEST(initialize_collider) {
   COMPARE(P.size(), 2);
   COMPARE(P.data(0).pdgcode(), 0x222);
   COMPARE(P.data(1).pdgcode(), 0x222);
-  // here, also, we might check other properties.
+  VERIFY (P.data(0).position().x1() > 0.0);
+  COMPARE(P.data(1).position().x1(), 0.0);
+  COMPARE(P.data(0).position().x2(), 0.0);
+  COMPARE(P.data(1).position().x2(), 0.0);
+  COMPARE(P.data(0).position().x3(), -P.data(1).position().x3());
+  VERIFY (P.data(0).position().x3() < 0.0);
+  // total momentum is checked in two steps:
+  FourVector momentum_total = P.data(0).momentum() + P.data(1).momentum();
+  // energy component with a possible deviation,
+  COMPARE_RELATIVE_ERROR(momentum_total.x0(), 1.6, 1e-7);
+  // and the spatial components exactly.
+  COMPARE(momentum_total, FourVector(momentum_total.x0(), 0.0, 0.0, 0.0));
 }
 
 TEST(initialize_nucleus_normal) {
