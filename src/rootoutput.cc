@@ -7,10 +7,10 @@
  *
  */
 
-#include "include/rootoutput.h"
+#include "include/clock.h"
+#include "include/forwarddeclarations.h"
 #include "include/particles.h"
-//#include "include/filedeleter.h"
-//#include <memory>
+#include "include/rootoutput.h"
 #include "TFile.h"
 #include "TTree.h"
 
@@ -28,8 +28,11 @@ RootOutput::RootOutput(boost::filesystem::path path)
  * RootOutput destructor. Writes root objects (here TTrees) to file and closes it.
  */
 RootOutput::~RootOutput() {
+  printf("Write root file\n");
   root_out_file_->Write();
+  printf("Close root file\n");
   root_out_file_->Close();
+  printf("Done with root file\n");
 }
 
 /**
@@ -44,8 +47,8 @@ void RootOutput::at_eventstart(const Particles &particles, const int event_numbe
  */
 void RootOutput::after_Nth_timestep(const Particles &particles, const int event_number, const Clock &clock) {
   char treename[32], treedescr[64];
-  snprintf(treename, sizeof(treename), "at_tstep_%07i", clock.current_time());
-  snprintf(treedescr, sizeof(treedescr), "Particles after timestep %i", clock.current_time());
+  snprintf(treename, sizeof(treename), "at_time_%+7.3f", clock.current_time());
+  snprintf(treedescr, sizeof(treedescr), "Particles after timestep %+7.3f", clock.current_time());
   particles_to_tree(treename, treedescr, particles, event_number);
 }
 
@@ -57,11 +60,23 @@ void RootOutput::at_eventend(const Particles &particles, const int event_number)
 }
 
 /**
+ * Writes interactions to ROOT-file
+ */
+void RootOutput::write_interaction(const ParticleList &/*incoming_particles*/, const ParticleList &/*outgoing_particles*/){
+
+//  for (const auto &p : incoming_particles) {
+//  }
+//  for (const auto &p : outgoing_particles) {
+//  }
+
+}
+
+/**
  * Writes particles to a tree defined by treename.
  */
 void RootOutput::particles_to_tree(const char* treename, const char* treedescr, const Particles &particles, const int event_number) {
 
-  TTree *curr_tree = (TTree*)root_out_file_->Get(treename);
+  TTree *curr_tree = static_cast<TTree*>(root_out_file_->Get(treename));
   if (curr_tree == NULL) {
     tree_list_.emplace_back(curr_tree = new TTree(treename, treedescr));
   }
@@ -83,18 +98,18 @@ void RootOutput::particles_to_tree(const char* treename, const char* treedescr, 
   curr_tree->Branch("id",&id,"id/I");
   curr_tree->Branch("ev",&ev,"ev/I");
 
-  for (const auto &p : particles) {
-    x = p.second.position().x1();
-    y = p.second.position().x2();
-    z = p.second.position().x3();
+  for (const auto &p : particles.data()) {
+    x = p.position().x1();
+    y = p.position().x2();
+    z = p.position().x3();
 
-    p0 = p.second.momentum().x0();
-    px = p.second.momentum().x1();
-    py = p.second.momentum().x2();
-    pz = p.second.momentum().x3();
+    p0 = p.momentum().x0();
+    px = p.momentum().x1();
+    py = p.momentum().x2();
+    pz = p.momentum().x3();
 
-    pdgcode = p.second.pdgcode();
-    id = p.second.id();
+    pdgcode = p.pdgcode().get_decimal();
+    id = p.id();
 
     ev = event_number;
 

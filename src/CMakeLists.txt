@@ -6,7 +6,7 @@ find_package(GSL REQUIRED)
 find_package(Boost 1.49.0 REQUIRED COMPONENTS filesystem system)
 pkg_check_modules(YAML REQUIRED yaml-cpp>=0.5.1)
 
-option(USE_ROOT "Turn this on to build ROOT output support into SMASH." OFF)
+option(USE_ROOT "Turn this on to build ROOT output support into SMASH." ON)
 if(USE_ROOT)
    find_package(ROOT 5.34 REQUIRED)
    include_directories(SYSTEM
@@ -70,7 +70,6 @@ set(smash_src
 if(USE_ROOT)
    set(smash_src ${smash_src}
       rootoutput.cc
-      tmnoutput.cc
       )
 endif()
 

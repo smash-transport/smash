@@ -29,7 +29,6 @@
 #include "include/random.h"
 #ifdef SMASH_USE_ROOT
 #  include "include/rootoutput.h"
-#  include "include/tmnoutput.h"
 #endif
 #include "include/vtkoutput.h"
 
@@ -223,7 +222,6 @@ void Experiment<Modus>::run(const bf::path &path) {
   outputs_.emplace_back(new VtkOutput(path));
 #ifdef SMASH_USE_ROOT
   outputs_.emplace_back(new RootOutput(path));
-  outputs_.emplace_back(new TmnOutput(path));
 #endif
 
   for (int j = 0; j < nevents_; j++) {
