@@ -45,7 +45,7 @@ namespace Smash {
 class ProcessBranch {
  public:
   /// Default constructor
-  ProcessBranch() : branch_weight_(-1.0) {}
+  ProcessBranch() : branch_weight_(-1.0), interaction_type_(0) {}
   // Constructor with 1 particle
   inline ProcessBranch(PdgCode p, float w, int t);
   // Constructor with 2 particles

@@ -71,7 +71,7 @@ class Action {
   const ParticleList &outgoing_particles() const { return outgoing_particles_; }
 
   /** Check various conservation laws. */
-  void check_conservation(const Particles *particles, const size_t &id_process) const;
+  void check_conservation(const Particles &particles, const size_t &id_process) const;
  protected:
   /** ID codes of incoming particles  */
   std::vector<int> incoming_particles_;
@@ -106,7 +106,7 @@ class DecayAction : public Action {
    * Decide for a particular decay channel via Monte-Carlo and return it as a
    * list of particles that are only initialized with their PDG code.
    */
-  ParticleList choose_channel(Particles *particles) const;
+  ParticleList choose_channel(const Particles &particles) const;
 
   /** Carry out the action, i.e. do the decay.
    * Performs a decay of one particle to two or three particles.
@@ -124,8 +124,8 @@ class DecayAction : public Action {
   };
 
  private:
-  void one_to_two (const ParticleData &incoming0, Particles *particles);
-  void one_to_three (const ParticleData &incoming0, Particles *particles);
+  void one_to_two (const ParticleData &incoming0, const Particles &particles);
+  void one_to_three (const ParticleData &incoming0, const Particles &particles);
 };
 
 /**

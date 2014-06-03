@@ -9,7 +9,7 @@ General:
     END_TIME:      1.0
 
     # how much time before recording measurables
-    UPDATE:        1.0
+    OUTPUT_INTERVAL:  1.0
 
     # initial random seed (negative for time)
     RANDOMSEED:    1

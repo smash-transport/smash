@@ -117,9 +117,12 @@ class NucleusModus : public ModusDefault {
   float initial_conditions(Particles *particles,
                           const ExperimentParameters &parameters);
 
-  struct NucleusEmpty : public ModusDefault::BadInput {
+  /// Thrown when either \a projectile_ or \a target_ nuclei are empty.
+    struct NucleusEmpty : public ModusDefault::BadInput {
     using ModusDefault::BadInput::BadInput;
   };
+  /// Thrown when the requested \a sqrt_s_NN_ is smaller than the masses
+  /// of two particles.
   struct InvalidEnergy : public ModusDefault::BadInput {
     using ModusDefault::BadInput::BadInput;
   };

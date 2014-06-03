@@ -125,18 +125,21 @@ float BoxModus::initial_conditions(Particles *particles,
   /* allows to check energy conservation */
   printf("IC total energy: %g [GeV]\n", momentum_total.x0());
   number_density_initial_ = number_density_total;
-  return 0.f;
+  return start_time_;
 }
 
 /* evolve - the core of the box, stepping forward in time */
 int BoxModus::sanity_check(Particles *particles) {
+  int wraps = 0;
   /* fixup positions on startup, particles need to be *inside* the box */
   for (ParticleData &data : particles->data()) {
     FourVector p = data.position();
-    enforce_periodic_boundaries(p.begin() + 1, p.end(), length_);
+    if (enforce_periodic_boundaries(p.begin() + 1, p.end(), length_)) {
+      ++wraps;
+    }
     data.set_position(p);
   }
-  return start_time_;
+  return wraps;
 }
 
 

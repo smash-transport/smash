@@ -158,6 +158,7 @@ class FourVector {
   const_iterator cend() const { return x_.cend(); }
 
  private:
+  /// internal storage of this vector's components
   std::array<double, 4> x_;
 };
 

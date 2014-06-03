@@ -90,7 +90,7 @@ class Nucleus {
    * @param particles is an object of Particles which has all the PDG
    * types read in.
    **/
-  void auto_set_masses(const Particles *particles);
+  void auto_set_masses(const Particles &particles);
   /**
    * shifts the nucleus to correct impact parameter and z displacement.
    *

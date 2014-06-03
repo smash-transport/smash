@@ -15,6 +15,7 @@
 
 #include "forwarddeclarations.h"
 
+#include <cstddef>
 #include <cstdint>
 
 namespace Smash {
@@ -61,7 +62,7 @@ ProcessBranchList resonance_cross_section(const ParticleData &particle1,
                                           const ParticleData &particle2,
                                           const ParticleType &type_particle1,
                                           const ParticleType &type_particle2,
-                                          Particles *particles);
+                                          const Particles &particles);
 
 /**
  * Given the types of the two initial particles and a resonance,
@@ -86,10 +87,11 @@ ProcessBranchList resonance_cross_section(const ParticleData &particle1,
  * \return The cross section for the process
  * [initial particle 1] + [initial particle 2] -> resonance.
  */
-double two_to_one_formation(Particles *particles,
-  const ParticleType &type_particle1,
-  const ParticleType &type_particle2, const ParticleType &type_resonance,
-  double mandelstam_s, double cm_momentum_squared);
+double two_to_one_formation(const Particles &particles,
+                            const ParticleType &type_particle1,
+                            const ParticleType &type_particle2,
+                            const ParticleType &type_resonance,
+                            double mandelstam_s, double cm_momentum_squared);
 
 /**
  * Given the types of the two initial particles and a resonance,
@@ -119,7 +121,7 @@ double two_to_one_formation(Particles *particles,
  * \return The number of possible processes. Also adds elements
  * to the process_list.
  */
-std::size_t two_to_two_formation(Particles *particles,
+std::size_t two_to_two_formation(const Particles &particles,
                                  const ParticleType &type_particle1,
                                  const ParticleType &type_particle2,
                                  const ParticleType &type_resonance,

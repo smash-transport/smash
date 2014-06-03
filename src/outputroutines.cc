@@ -22,6 +22,7 @@
 #include "include/particles.h"
 #include "include/particledata.h"
 #include "include/particletype.h"
+#include "include/quantumnumbers.h"
 #include "include/macros.h"
 
 namespace Smash {
@@ -44,7 +45,7 @@ static void print_line(void) {
 /* print_header - title for each row */
 void print_header(void) {
   print_line();
-  printf(" Time    <Ediff>       <ptot>    <scattrate>"
+  printf(" Time    <Ediff>       <pdiff>   <scattrate>"
          "  <scatt>   <particles>  <timing>\n");
   print_line();
 }
@@ -54,27 +55,25 @@ void print_header(void) {
 void print_measurements(const Particles &particles,
                         const size_t &scatterings_total,
                         const size_t &scatterings_this_interval,
-                        float energy_ini,
+                        const QuantumNumbers& conserved_initial,
                 SystemTimePoint time_start) {
   FourVector momentum_total(0, 0, 0, 0);
   /* calculate elapsed time */
   SystemTimeSpan elapsed_seconds = SystemClock::now() - time_start;
 
-  for (const ParticleData &data : particles.data()) {
-    momentum_total += data.momentum();
-  }
+  QuantumNumbers current_values(particles);
+  QuantumNumbers difference = conserved_initial - current_values;
   double time = particles.time();
 
   if (likely(time > 0))
     printf("%5g%13g%13g%13g%10zu%10zu%13g\n", time,
-           energy_ini - momentum_total.x0(),
-           momentum_total.abs3(),
+           difference.momentum().x0(), difference.momentum().abs3(),
            scatterings_total * 2 / (particles.size() * time),
            scatterings_this_interval, particles.size(), elapsed_seconds.count());
   else
     printf("%+5.2f%13g%13g%13g%10i%10zu%13g\n", time,
-           energy_ini - momentum_total.x0(),
-           momentum_total.abs3(), 0.0, 0, particles.size(),
+           difference.momentum().x0(), difference.momentum().abs3(),
+           0.0, 0, particles.size(),
            elapsed_seconds.count());
 }
 
