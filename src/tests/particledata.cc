@@ -82,16 +82,10 @@ TEST(set_get) {
   COMPARE(p.id_process(), 6);
   FourVector m(1.0, 1.2, 1.4, 1.6);
   p.set_momentum(m);
-  COMPARE(p.momentum().x0(), 1.0);
-  COMPARE(p.momentum().x1(), 1.2);
-  COMPARE(p.momentum().x2(), 1.4);
-  COMPARE(p.momentum().x3(), 1.6);
+  COMPARE(p.momentum(), FourVector(1.0, 1.2, 1.4, 1.6));
   ThreeVector M(1.1, 1.3, 1.5);
   p.set_momentum(1.0, M);
-  COMPARE(p.momentum().x0(), sqrt(1.0 + M.sqr()));
-  COMPARE(p.momentum().x1(), 1.1);
-  COMPARE(p.momentum().x2(), 1.3);
-  COMPARE(p.momentum().x3(), 1.5);
+  COMPARE(p.momentum(), FourVector(sqrt(1.0 + M.sqr(), 1.1, 1.3, 1.5));
 }
 
 TEST(set_get2) {
