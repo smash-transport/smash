@@ -7,31 +7,20 @@
 #ifndef SRC_INCLUDE_EXPERIMENT_H_
 #define SRC_INCLUDE_EXPERIMENT_H_
 
-#include <list>
 #include <memory>
 #include <stdexcept>
-#include <string>
-#include <vector>
 
-#include "include/crosssections.h"
-#include "include/experimentparameters.h"
-#include "include/modusdefault.h"
-#include "include/outputroutines.h"
-#include "include/particles.h"
-#include "outputinterface.h"
+#include "chrono.h"
+#include "crosssections.h"
 #include "decayactionsfinder.h"
+#include "experimentparameters.h"
+#include "forwarddeclarations.h"
+#include "outputinterface.h"
+#include "particles.h"
+#include "quantumnumbers.h"
 #include "scatteractionsfinder.h"
 
-#ifndef DOXYGEN
-namespace boost {
-namespace filesystem {
-class path;
-}  // namespace filesystem
-}  // namespace boost
-#endif
-
 namespace Smash {
-class Configuration;
 
 /**
  * Non-template interface to Experiment<Modus>.
@@ -64,7 +53,58 @@ class ExperimentBase {
    * \throws InvalidModusRequest This exception is thrown if the \p
    *         Modus string in the \p config object does not contain a valid
    *         string.
+   *
+   * GENERAL:
+   * --------
    */
+  // !!USER:Input
+  /**
+   * \if user
+   * \page input_general_ Input Section General
+   * \endif
+   *
+   * `MODUS:` Choose a modus for the calculation, e.g.\ infinite matter
+   * calculation, collision of two particles or collision of nuclei. The modus
+   * will be configured in ref input_modi_. Recognized values are:
+   *
+   * \li `Nucleus` for collisions of nuclei or compound objects. See
+   *     \if user
+   *     \ref input_modi_nucleus_
+   *     \else
+   *     \ref NucleusModus
+   *     \endif
+   * \li `Sphere` for calculations of the expansion of a thermalized sphere.
+   * See ref input_modi_sphere_
+   * \li `Collider` ...
+   * \li `Box` for infinite matter calculation in a rectangular box. See
+   *     \if user
+   *     \ref input_modi_box_
+   *     \else
+   *     \ref BoxModus
+   *     \endif
+   *
+   * `DELTA_TIME:` Time step for the calculation, in fm/c.
+   *
+   * `END_TIME:` The time after which the evolution is stopped. Note
+   * that the starting time depends on the chosen MODUS.
+   *
+   * `OUTPUT_INTERVAL:` Output on conservation laws in Standard Output
+   * occurs every nth time step.
+   *
+   * `RANDOMSEED:` Initial seed for the random number generator. If this is
+   * negative, the program starting time is used.
+   *
+   * `SIGMA:` Elastic cross-section.
+   *
+   * `TESTPARTICLES:` How many test particles per real particles should be simulated.
+   *
+   * `NEVENTS:` Number of events to calculate.
+   *
+   * `particles:` ???
+   *
+   * `decaymodes:` ???
+   */
+  // !!/USER:Input
   static std::unique_ptr<ExperimentBase> create(Configuration &config);
 
   /**
@@ -75,7 +115,7 @@ class ExperimentBase {
    *
    * \param path The path where output files will be written to.
    */
-  virtual void run(const boost::filesystem::path &path) = 0;
+  virtual void run(const bf::path &path) = 0;
 
   /**
    * Exception class that is thrown if an invalid modus is requested from the
@@ -115,7 +155,7 @@ class Experiment : public ExperimentBase {
   friend class ExperimentBase;
 
  public:
-  virtual void run(const boost::filesystem::path &path) override;
+  virtual void run(const bf::path &path) override;
 
  private:
   /**
@@ -134,14 +174,28 @@ class Experiment : public ExperimentBase {
    */
   explicit Experiment(Configuration &config);
 
-  void initialize(const boost::filesystem::path &path);
-  void run_time_evolution();
+  /** Reads particle type information and cross sections information and
+   * does the initialization of the system
+   *
+   * This is called in the beginning of each event.
+   */
+  void initialize(const bf::path &path);
+  /** Runs the time evolution of an event
+   *
+   * Here, the time steps are looped over, collisions and decays are
+   * carried out and particles are propagated.
+   *
+   * \param evt_num Running number of the event
+   */
+  void run_time_evolution(const int evt_num);
 
+  /** Output about the beginning of the event.
+   *
+   * This output goes to the console
+   *
+   * \param seed The random number engine seed
+   */
   void print_startup(int64_t seed);
-
-  float energy_total(Particles *particles);
-
-  inline timespec set_timer_start();
 
   /**
    * Struct of several member variables.
@@ -165,7 +219,7 @@ class Experiment : public ExperimentBase {
    * A list of output formaters. They will be called to write the state of the
    * particles to file.
    */
-  std::vector<std::unique_ptr<Smash::OutputInterface>> outputs_;
+  OutputsList outputs_;
 
   /**
    * ?
@@ -174,7 +228,9 @@ class Experiment : public ExperimentBase {
    */
   CrossSections cross_sections_;
 
+  /// The object that finds decays
   DecayActionsFinder decay_finder_;
+  /// The object that finds scatterings
   ScatterActionsFinder scatter_finder_;
 
   /**
@@ -185,14 +241,23 @@ class Experiment : public ExperimentBase {
    */
   const int nevents_;
 
-  /// number of steps
-  const int steps_;
-  /// number of steps before giving measurables
-  const int output_interval_;
-  /// initial total energy of the system
-  float energy_initial_ = 0.f;
-  /// starting time of the simulation
-  timespec time_start_ = set_timer_start();
+  /// simulation time at which the evolution is stopped.
+  const float end_time_ = 10.0f;
+  /** The clock's timestep size at start up
+   *
+   * Stored here so that the next event will remember this.
+   */
+  const float delta_time_startup_;
+  /** The conserved quantities of the system.
+   *
+   * This struct carries the sums of the single particle's various
+   * quantities as measured at the beginning of the evolution and can be
+   * used to regularly check if they are still good.
+   *
+   */
+  QuantumNumbers conserved_initial_;
+  /// system starting time of the simulation
+  SystemTimePoint time_start_ = SystemClock::now();
 };
 
 }  // namespace Smash

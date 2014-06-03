@@ -10,11 +10,10 @@
 #ifndef SRC_INCLUDE_ANGLES_H_
 #define SRC_INCLUDE_ANGLES_H_
 
-#include <cstdio>
-#include <cstdlib>
 #include <stdexcept>
-#include "include/random.h"
-#include "include/constants.h"
+#include "random.h"
+#include "threevector.h"
+#include "constants.h"
 
 namespace Smash {
 
@@ -142,6 +141,8 @@ class Angles {
    * \f$z = \cos\vartheta\f$
    **/
   double z() const;
+  /// get the three-vector
+  ThreeVector inline threevec() const;
   /// returns the polar angle
   double theta() const;
 
@@ -167,15 +168,9 @@ void inline Angles::distribute_isotropically() {
 
 void inline Angles::set_phi (const double& newphi) {
   /* Make sure that phi is in the range [0,2pi).  */
-  if (newphi < 0.) {
-    phi_ = std::fmod (newphi, twopi);
-    phi_ += twopi;
-  }
-  else if (newphi >= twopi) {
-    phi_ = std::fmod (newphi, twopi);
-  }
-  else {
     phi_ = newphi;
+  if (newphi < 0 || newphi >= twopi) {
+    phi_ -= twopi * floor(newphi / twopi);
   }
 }
 
@@ -243,6 +238,11 @@ double inline Angles::sintheta() const {
 double inline Angles::x() const { return sintheta()*cos(phi_); }
 double inline Angles::y() const { return sintheta()*sin(phi_); }
 double inline Angles::z() const { return costheta_; }
+
+ThreeVector inline Angles::threevec() const {
+  return ThreeVector(x(),y(),z());
+}
+
 double inline Angles::theta() const { return acos(costheta_); }
 
 }  // namespace Smash

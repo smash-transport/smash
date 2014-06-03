@@ -11,7 +11,7 @@
 #define SRC_INCLUDE_PDGCODE_H_
 
 #include <cstdio>
-#include <iostream>
+#include <iosfwd>
 #include <stdexcept>
 #include <string>
 
@@ -148,7 +148,7 @@ class PdgCode {
    * to the return value is 0b10 = 0x2 = 2.
    *
    **/
-  inline int test_code() {
+  inline int test_code() const {
     int fail = 0;
     if (digits_.n_    > 9) { fail |= 1<<6; }
     if (digits_.n_R_  > 9) { fail |= 1<<5; }
@@ -594,6 +594,7 @@ class PdgCode {
 };
 
 std::istream& operator>>(std::istream& is, PdgCode& code);
+std::ostream& operator<<(std::ostream& is, const PdgCode& code);
 
 }  // namespace SMASH
 

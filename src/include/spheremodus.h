@@ -12,15 +12,13 @@
 #include <cmath>
 #include <list>
 
-#include "include/crosssections.h"
-#include "include/modusdefault.h"
-#include "include/particles.h"
-#include "include/time.h"
+#include "crosssections.h"
+#include "forwarddeclarations.h"
+#include "modusdefault.h"
+#include "particles.h"
+#include "time.h"
 
 namespace Smash {
-
-/* forward declarations */
-class FourVector;
 
 class SphereModus : public ModusDefault {
  public:
@@ -29,7 +27,7 @@ class SphereModus : public ModusDefault {
   /* member funtions */
   /* special class funtions */
   int evolve(Particles *particles, CrossSections *cross_sections);
-  void initial_conditions(Particles *particles);
+  float initial_conditions(Particles *particles);
   //     FourVector boundary_condition(FourVector position);
 
  private:

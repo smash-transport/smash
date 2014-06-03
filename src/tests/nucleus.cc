@@ -6,11 +6,11 @@
  *    GNU General Public License (GPLv3 or later)
  *
  */
-#include "tests/unittest.h"
+#include "unittest.h"
 
 #include <map>
-#include "include/nucleus.h"
-#include "include/pdgcode.h"
+#include "../include/nucleus.h"
+#include "../include/pdgcode.h"
 
 using namespace Smash;
 

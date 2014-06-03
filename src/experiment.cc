@@ -10,21 +10,23 @@
 
 #include <cinttypes>
 #include <cstdlib>
-#include <ctime>
 #include <list>
 #include <string>
 #include <algorithm>
 
+#include "include/action.h"
 #include "include/boxmodus.h"
+#include "include/clock.h"
 #include "include/collidermodus.h"
 #include "include/configuration.h"
 #include "include/experiment.h"
+#include "include/forwarddeclarations.h"
 #include "include/macros.h"
 #include "include/nucleusmodus.h"
+#include "include/oscaroutput.h"
 #include "include/outputroutines.h"
 #include "include/particlesoutput.h"
 #include "include/random.h"
-#include "include/time.h"
 #include "include/vtkoutput.h"
 
 #include <boost/filesystem.hpp>
@@ -32,8 +34,6 @@
 /* #include "include/spheremodus.h" */
 
 namespace Smash {
-
-namespace bf = boost::filesystem;
 
 /* ExperimentBase carries everything that is needed for the evolution */
 std::unique_ptr<ExperimentBase> ExperimentBase::create(Configuration &config) {
@@ -57,6 +57,12 @@ std::unique_ptr<ExperimentBase> ExperimentBase::create(Configuration &config) {
 }
 
 namespace {
+/** Gathers all general Experiment parameters
+ *
+ * \param[in, out] config Configuration element
+ * \return The ExperimentParameters struct filled with values from the
+ * Configuration
+ */
 ExperimentParameters create_experiment_parameters(Configuration &config) {
   const int testparticles = config.take({"General", "TESTPARTICLES"});
   float cross_section = config.take({"General", "SIGMA"});
@@ -68,7 +74,11 @@ ExperimentParameters create_experiment_parameters(Configuration &config) {
     printf("Elastic cross section: %g mb\n", cross_section);
   }
 
-  return {config.take({"General", "EPS"}), cross_section, testparticles};
+  // The clock initializers are only read here and taken later when
+  // assigning initial_clock_.
+  return {{0.0f, config.read({"General", "DELTA_TIME"})},
+           config.take({"General", "OUTPUT_INTERVAL"}),
+           cross_section, testparticles};
 }
 }  // unnamed namespace
 
@@ -79,8 +89,8 @@ Experiment<Modus>::Experiment(Configuration &config)
       particles_{config.take({"particles"}), config.take({"decaymodes"})},
       cross_sections_(parameters_.cross_section),
       nevents_(config.take({"General", "NEVENTS"})),
-      steps_(config.take({"General", "STEPS"})),
-      output_interval_(config.take({"General", "UPDATE"})) {
+      end_time_(config.take({"General", "END_TIME"})),
+      delta_time_startup_(config.take({"General", "DELTA_TIME"})) {
   int64_t seed_ = config.take({"General", "RANDOMSEED"});
   if (seed_ < 0) {
     seed_ = time(nullptr);
@@ -99,29 +109,31 @@ void Experiment<Modus>::initialize(const bf::path &/*path*/) {
   particles_.reset();
 
   /* Sample particles according to the initial conditions */
-  modus_.initial_conditions(&particles_, parameters_);
-  /* Save the initial energy in the system for energy conservation checks */
-  energy_initial_ = energy_total(&particles_);
+  float start_time = modus_.initial_conditions(&particles_, parameters_);
+
+  // reset the clock:
+  Clock clock_for_this_event(start_time, delta_time_startup_);
+  parameters_.labclock = std::move(clock_for_this_event);
+
+  /* Save the initial conserved quantum numbers and total momentum in
+   * the system for conservation checks */
+  conserved_initial_.count_conserved_values(particles_);
   /* Print output headers */
   print_header();
-  /* Write out the initial momenta and positions of the particles */
-  for (auto &output : outputs_) {
-    output->write_state(particles_);
-  }
 }
 
 
 /* This is the loop over timesteps, carrying out collisions and decays
  * and propagating particles. */
 template <typename Modus>
-void Experiment<Modus>::run_time_evolution() {
+void Experiment<Modus>::run_time_evolution(const int evt_num) {
   modus_.sanity_check(&particles_);
   size_t interactions_total = 0, previous_interactions_total = 0,
          interactions_this_interval = 0;
   print_measurements(particles_, interactions_total,
-                     interactions_this_interval, energy_initial_, time_start_);
+                interactions_this_interval, conserved_initial_, time_start_);
 
-  for (int step = 0; step < steps_; step++) {
+  while (! (++parameters_.labclock > end_time_)) {
     std::vector<ActionPtr> actions;  // XXX: a std::list might be better suited
                                      // for the task: lots of appending, then
                                      // sorting and finally a single linear
@@ -138,32 +150,47 @@ void Experiment<Modus>::run_time_evolution() {
 
     /* (2.a) Perform actions. */
     if (!actions.empty()) {
-      for (auto act = actions.begin(); act != actions.end(); ++act) {
-        (*act)->perform (&particles_, interactions_total);
+      for (const auto &action : actions) {
+        if (action->is_valid(particles_)) {
+          const ParticleList incoming_particles = action->incoming_particles(particles_);
+          action->perform(&particles_, interactions_total);
+          const ParticleList outgoing_particles = action->outgoing_particles();
+          for (const auto &output : outputs_) {
+            output->write_interaction(incoming_particles, outgoing_particles);
+          }
+        }
       }
       actions.clear();
       printd("Action list done.\n");
     }
 
     /* (3) Do propagation. */
-    modus_.propagate(&particles_, parameters_);
+    modus_.propagate(&particles_, parameters_, outputs_);
 
     /* (4) Physics output during the run. */
-    if (step > 0 && (step + 1) % output_interval_ == 0) {
+    // if the timestep of labclock is different in the next tick than
+    // in the current one, I assume it has been changed already. In that
+    // case, I know what the next tick is and I can check whether the
+    // output time is crossed within the next tick.
+    if (parameters_.need_intermediate_output()) {
       interactions_this_interval =
           interactions_total - previous_interactions_total;
       previous_interactions_total = interactions_total;
       print_measurements(particles_, interactions_total,
-                         interactions_this_interval, energy_initial_,
+                         interactions_this_interval, conserved_initial_,
                          time_start_);
       /* save evolution data */
-      for (auto &output : outputs_) {
-        output->write_state(particles_);
+      for (const auto &output : outputs_) {
+        output->after_Nth_timestep(particles_, evt_num, parameters_.labclock);
       }
     }
+    // check conservation of conserved quantities:
+    printf("%s", conserved_initial_.report_deviations(particles_).c_str());
   }
-  /* Guard against evolution */
-  if (likely(steps_ > 0)) {
+  // make sure the experiment actually ran (note: we should compare this
+  // to the start time, but we don't know that. Therefore, we check that
+  // the time is positive, which should heuristically be the same).
+  if (likely(parameters_.labclock > 0)) {
     /* if there are no particles no interactions happened */
     if (likely(!particles_.empty())) {
       print_tail(time_start_, interactions_total * 2 / particles_.time() /
@@ -178,47 +205,34 @@ void Experiment<Modus>::run_time_evolution() {
 template <typename Modus>
 void Experiment<Modus>::print_startup(int64_t seed) {
   printf("Elastic cross section: %g mb\n", parameters_.cross_section);
-  printf("Using temporal stepsize: %g fm/c\n", parameters_.eps);
-  printf("Maximum number of steps: %i \n", steps_);
+  printf("Starting with temporal stepsize: %g fm/c\n",
+                                    parameters_.timestep_duration());
+  printf("End time: %g fm/c\n", end_time_);
   printf("Random number seed: %" PRId64 "\n", seed);
   modus_.print_startup();
 }
 
-/* calculates the total energy in the system from zero component of
- * all momenta of particles
- * XXX should be expanded to all quantum numbers of interest */
-template <typename Modus>
-float Experiment<Modus>::energy_total(Particles *particles) {
-  float energy_sum = 0.0;
-  for (const ParticleData &data : particles->data()) {
-    energy_sum += data.momentum().x0();
-  }
-  return energy_sum;
-}
-
-/* set the timer to the actual time in nanoseconds precision */
-template <typename Modus>
-timespec inline Experiment<Modus>::set_timer_start(void) {
-  timespec time;
-  clock_gettime(&time);
-  return time;
-}
-
 template <typename Modus>
 void Experiment<Modus>::run(const bf::path &path) {
+  outputs_.emplace_back(new OscarOutput(path));
   outputs_.emplace_back(new ParticlesOutput(path));
   outputs_.emplace_back(new VtkOutput(path));
 
-  /* Write the header of OSCAR data output file */
-  write_oscar_header();
   for (int j = 0; j < nevents_; j++) {
     initialize(path);
-    /* Write the initial data block of the event */
-    write_oscar_event_block(&particles_, 0, particles_.size(), j + 1);
+
+    /* Output at event start */
+    for (const auto &output : outputs_) {
+      output->at_eventstart(particles_, j);
+    }
+
     /* the time evolution of the relevant subsystem */
-    run_time_evolution();
-    /* Write the final data block of the event */
-    write_oscar_event_block(&particles_, particles_.size(), 0, j + 1);
+    run_time_evolution(j);
+
+    /* Output at event end */
+    for (const auto &output : outputs_) {
+      output->at_eventend(particles_, j);
+    }
   }
 }
 

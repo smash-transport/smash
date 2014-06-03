@@ -7,17 +7,11 @@
 #ifndef SRC_INCLUDE_NUCLEUSMODUS_H_
 #define SRC_INCLUDE_NUCLEUSMODUS_H_
 
-#include <stdint.h>
-#include <cmath>
-#include <stdexcept>
-#include <list>
-#include <string>
+#include "modusdefault.h"
 
-#include "include/configuration.h"
-#include "include/modusdefault.h"
-#include "include/nucleus.h"
-#include "include/particles.h"
-#include "include/pdgcode.h"
+#include "forwarddeclarations.h"
+#include "nucleus.h"
+#include "pdgcode.h"
 
 namespace Smash {
 
@@ -33,15 +27,18 @@ struct ExperimentParameters;
  * in the configuration file.
  *
  * Options for NucleusModus go in the "Modi"→"Nucleus" section of the
- * configuration:
- *
- * \code
- * Modi:
- *      Nucleus:
- *              # definitions here
- * \endcode
+ * configuration.
  *
  * The following directives are understood:
+ *
+ * Modi:Nucleus:
+ * -------------
+ */
+// !!USER:Input
+/**
+ * \if user
+ * \page input_modi_nucleus_ Input Section Modi:Nucleus
+ * \endif
  *
  * `SQRTSNN:` Defines the energy of the collision as center-of-mass
  * energy in the collision of one participant each from both nuclei.
@@ -96,6 +93,7 @@ struct ExperimentParameters;
  * `INITIAL_DISTANCE:` The initial distance of the two nuclei. That
  * means \f$z_{\rm min}^{\rm target} - z_{\rm max}^{\rm projectile}\f$.
  **/
+ // !!/USER:Input
 class NucleusModus : public ModusDefault {
  public:
   /** Constructor
@@ -106,18 +104,29 @@ class NucleusModus : public ModusDefault {
   explicit NucleusModus(Configuration modus_config,
            const ExperimentParameters &parameters);
 
+  /** Prints some information about the initialization of NucleusModus.
+   *
+   * \see ModusDefalt::print_startup()
+   */
   void print_startup();
 
-  void initial_conditions(Particles *particles,
+  /** creates initial conditions from the particles.
+   *
+   * In particular, it initializes the nuclei.
+   */
+  float initial_conditions(Particles *particles,
                           const ExperimentParameters &parameters);
 
-  struct NucleusEmpty : public ModusDefault::BadInput {
+  /// Thrown when either \a projectile_ or \a target_ nuclei are empty.
+    struct NucleusEmpty : public ModusDefault::BadInput {
     using ModusDefault::BadInput::BadInput;
   };
+  /// Thrown when the requested \a sqrt_s_NN_ is smaller than the masses
+  /// of two particles.
   struct InvalidEnergy : public ModusDefault::BadInput {
     using ModusDefault::BadInput::BadInput;
   };
- 
+
  private:
   /** Projectile.
    *

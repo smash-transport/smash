@@ -9,9 +9,14 @@
 
 #include "include/scatteractionsfinder.h"
 
-#include "include/resonances.h"
+#include "include/action.h"
+#include "include/constants.h"
+#include "include/crosssections.h"
+#include "include/experimentparameters.h"
 #include "include/macros.h"
 #include "include/outputroutines.h"
+#include "include/particles.h"
+#include "include/resonances.h"
 
 namespace Smash {
 
@@ -23,55 +28,54 @@ ScatterActionsFinder::check_collision (const int id_a, const int id_b, Particles
   ScatterAction* act = nullptr;
   std::vector<int> in_part;
 
+  const ParticleData data_a = particles->data(id_a);
+  const ParticleData data_b = particles->data(id_b);
+
   /* just collided with this particle */
-  if (particles->data(id_a).id_process() >= 0
-      && particles->data(id_a).id_process()
-      == particles->data(id_b).id_process()) {
+  if (data_a.id_process() >= 0 && data_a.id_process() == data_b.id_process()) {
     printd("Skipping collided particle %d <-> %d at time %g due process %d\n",
-           id_a, id_b, particles->data(id_a).position().x0(),
-           particles->data(id_a).id_process());
+           id_a, id_b, data_a.position().x0(), data_a.id_process());
     return nullptr;
   }
 
   /* check according timestep: positive and smaller */
-  const double time_collision = collision_time(particles->data(id_a),
-    particles->data(id_b));
-  if (time_collision < 0.0 || time_collision >= parameters.eps)
+  const double time_until_collision = collision_time(data_a, data_b);
+  if (time_until_collision < 0.0 ||
+      time_until_collision >= parameters.timestep_duration()) {
     return nullptr;
+  }
 
   /* check for minimal collision time both particles */
-  if ((particles->data(id_a).collision_time() > 0.0
-       && time_collision > particles->data(id_a).collision_time())
-      || (particles->data(id_b).collision_time() > 0.0
-          && time_collision > particles->data(id_b).collision_time())) {
-    printd("%g Not minimal particle %d <-> %d\n",
-           particles->data(id_a).position().x0(), id_a, id_b);
+  if ((data_a.collision_time() > 0.0 &&
+       time_until_collision > data_a.collision_time()) ||
+      (data_b.collision_time() > 0.0 &&
+       time_until_collision > data_b.collision_time())) {
+    printd("%g Not minimal particle %d <-> %d\n", data_a.position().x0(), id_a,
+           id_b);
     return nullptr;
   }
 
   in_part.push_back(id_a);
   in_part.push_back(id_b);
-  act = new ScatterAction(in_part, time_collision);
+  act = new ScatterAction(in_part, time_until_collision);
 
   /* Compute kinematic quantities needed for cross section calculations  */
-  cross_sections->compute_kinematics(particles, id_a, id_b);
+  cross_sections->compute_kinematics(*particles, id_a, id_b);
 
   /* Resonance production cross section */
-  std::vector<ProcessBranch> resonance_xsections
-    = resonance_cross_section(particles->data(id_a), particles->data(id_b),
-      particles->type(id_a), particles->type(id_b), particles);
+  std::vector<ProcessBranch> resonance_xsections =
+      resonance_cross_section(data_a, data_b, data_a.type(*particles),
+                              data_b.type(*particles), *particles);
   act->add_processes(resonance_xsections);
 
   /* Add elastic process.  */
-  act->add_process(ProcessBranch(particles->data(id_a).pdgcode(),
-                                 particles->data(id_b).pdgcode(),
-                                 cross_sections->elastic(particles,
-                                                         id_a, id_b), 0));
+  act->add_process(
+      ProcessBranch(data_a.pdgcode(), data_b.pdgcode(),
+                    cross_sections->elastic(*particles, id_a, id_b), 0));
 
   {
     /* distance criteria according to cross_section */
-    const double distance_squared = particle_distance(
-              particles->data_pointer(id_a), particles->data_pointer(id_b));
+    const double distance_squared = particle_distance(data_a, data_b);
     if (distance_squared >= act->weight() * fm2_mb * M_1_PI) {
         delete act;
         return nullptr;
@@ -84,8 +88,8 @@ ScatterActionsFinder::check_collision (const int id_a, const int id_b, Particles
   act->choose_channel();
 
   /* Set up collision partners. */
-  particles->data_pointer(id_a)->set_collision_time(time_collision);
-  particles->data_pointer(id_a)->set_collision_time(time_collision);
+  particles->data(id_a).set_collision_time(time_until_collision);
+  particles->data(id_a).set_collision_time(time_until_collision);
 
   return ActionPtr(act);
 }
@@ -108,7 +112,7 @@ std::vector<ActionPtr> ScatterActionsFinder::find_possible_actions(
        * (3-product gives negative values
        * with the chosen sign convention for the metric). */
       FourVector distance = p1.position() - p2.position();
-      if (-distance.DotThree() > neighborhood_radius_squared)
+      if (distance.sqr3() > neighborhood_radius_squared)
         continue;
 
       /* Check if collision is possible. */
@@ -235,11 +239,11 @@ GridScatterFinder::find_possible_actions (std::vector<ActionPtr> &actions,
               act = check_collision (data.id(), *id_other, particles, parameters, cross_sections);
             else {
               /* apply eventual boundary before and restore after */
-              particles->data_pointer(*id_other)
-                  ->set_position(particles->data(*id_other).position() + shift);
+              particles->data(*id_other)
+                  .set_position(particles->data(*id_other).position() + shift);
               act = check_collision (data.id(), *id_other, particles, parameters, cross_sections);
-              particles->data_pointer(*id_other)
-                  ->set_position(particles->data(*id_other).position() - shift);
+              particles->data(*id_other)
+                  .set_position(particles->data(*id_other).position() - shift);
             }
             /* Add to collision list. */
             if (act != nullptr) {

@@ -7,8 +7,8 @@
  *
  */
 
-#include "tests/unittest.h"
-#include "include/angles.h"
+#include "unittest.h"
+#include "../include/angles.h"
 
 using namespace Smash;
 
@@ -42,6 +42,9 @@ TEST(accessors_and_relations) {
                    + dir.y()*dir.y()
                    + dir.z()*dir.z();
     COMPARE_ABSOLUTE_ERROR(xyz_one, 1.0, accuracy);
+
+    ThreeVector direction = dir.threevec();
+    COMPARE_ABSOLUTE_ERROR(xyz_one, direction.abs(), accuracy);
 
     // compare cos(theta) and costheta:
     COMPARE_RELATIVE_ERROR(cos(dir.theta()), dir.costheta(), accuracy)

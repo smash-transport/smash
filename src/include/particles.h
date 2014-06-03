@@ -7,15 +7,12 @@
 #ifndef SRC_INCLUDE_PARTICLES_H_
 #define SRC_INCLUDE_PARTICLES_H_
 
-#include <iterator>
-#include <map>
-#include <string>
-#include <utility>
+#include "decaymodes.h"
+#include "particledata.h"
+#include "particletype.h"
+#include "pdgcode.h"
 
-#include "include/decaymodes.h"
-#include "include/particledata.h"
-#include "include/particletype.h"
-#include "include/pdgcode.h"
+#include <map>
 
 namespace Smash {
 
@@ -182,13 +179,13 @@ class Particles {
    *
    * \throws std::out_of_range If there is no particle with the given \p id.
    */
-  inline const ParticleData &data(int id) const;
+  inline ParticleData &data(int id) { return data_.at(id); }
   /**
-   * Return the specific datapointer of a particle according to its id
+   * Return the specific data of a particle according to its id
    *
    * \throws std::out_of_range If there is no particle with the given \p id.
    */
-  inline ParticleData * data_pointer(int id);
+  inline const ParticleData &data(int id) const;
   /**
    * Return the type of a specific particle given its id
    *
@@ -292,11 +289,6 @@ inline const ParticleData &Particles::data(int particle_id) const {
   return data_.at(particle_id);
 }
 
-/* return the pointer to the data of a specific particle */
-inline ParticleData* Particles::data_pointer(int particle_id) {
-  return &data_.at(particle_id);
-}
-
 /* return the type of a specific particle */
 inline const ParticleType &Particles::type(int particle_id) const {
   return types_.at(data_.at(particle_id).pdgcode());
@@ -382,20 +374,18 @@ inline bool Particles::has_data(int id) const {
 
 /* return computation time which is reduced by the start up time */
 inline double Particles::time() const {
-  return data_.begin()->second.position().x0() - 1.0;
+  return data_.begin()->second.position().x0();
 }
 
-/* boost_CM - boost to center of momentum */
-void boost_CM(ParticleData *particle1, ParticleData *particle2,
-  FourVector *velocity);
+/* boost_CM - boost to center of momentum and return the corresponding boost vector */
+ThreeVector boost_CM(ParticleData *particle1, ParticleData *particle2);
 
 /* boost_from_CM - boost back from center of momentum */
 void boost_back_CM(ParticleData *particle1, ParticleData *particle2,
-  FourVector *velocity_orig);
+                   const ThreeVector &velocity_orig);
 
 /* particle_distance - measure distance between two particles */
-double particle_distance(ParticleData *particle_orig1,
-  ParticleData *particle_orig2);
+double particle_distance(ParticleData particle1, ParticleData particle2);
 
 /* time_collision - measure collision time of two particles */
 double collision_time(const ParticleData &particle1,

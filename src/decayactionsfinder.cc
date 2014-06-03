@@ -8,7 +8,12 @@
  */
 
 #include "include/decayactionsfinder.h"
-
+#include "include/action.h"
+#include "include/constants.h"
+#include "include/crosssections.h"
+#include "include/experimentparameters.h"
+#include "include/fourvector.h"
+#include "include/particles.h"
 #include "include/random.h"
 
 namespace Smash {
@@ -23,7 +28,7 @@ std::vector<ActionPtr> DecayActionsFinder::find_possible_actions(
   for (const auto &p : particles->data()) {
     std::vector<int> in_part;
     int id = p.id();
-    float width = particles->type(id).width();
+    float width = p.type(*particles).width();
     /* particle doesn't decay */
     if (width < 0.0)
       continue;
@@ -34,7 +39,8 @@ std::vector<ActionPtr> DecayActionsFinder::find_possible_actions(
 
     /* The clock goes slower in the rest frame of the resonance */
     double inverse_gamma = sqrt(velocity_lrf.Dot(velocity_lrf));
-    double resonance_frame_timestep = parameters.eps * inverse_gamma;
+    double resonance_frame_timestep = parameters.timestep_duration()
+                                    * inverse_gamma;
 
     /* Exponential decay. Average lifetime t_avr = 1 / width
      * t / t_avr = width * t (remember GeV-fm conversion)

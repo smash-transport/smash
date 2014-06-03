@@ -5,12 +5,13 @@
  *    GNU General Public License (GPLv3 or later)
  */
 
-#include <limits>
-#include <map>
-
 #include "include/nucleus.h"
 #include "include/angles.h"
+#include "include/particles.h"
 #include "include/pdgcode.h"
+
+#include <limits>
+#include <map>
 
 namespace Smash {
 
@@ -19,7 +20,7 @@ Nucleus::Nucleus() {}
 float Nucleus::mass() const {
   float total_mass = 0.f;
   for (auto i = cbegin(); i != cend(); i++) {
-    total_mass += sqrt(i->momentum().Dot());
+    total_mass += i->momentum().abs();
   }
   return total_mass/(testparticles_+0.0);
 }
@@ -31,7 +32,7 @@ float Nucleus::mass() const {
  *
  * The distribution
  * ----------------
- * 
+ *
  *
  * Nucleons in nuclei are distributed according to a
  * Woods-Saxon-distribution[See Phys. Rev. 95, 577 (1954)]
@@ -41,7 +42,7 @@ float Nucleus::mass() const {
  *
  * where \f$d\f$ is the \em diffuseness of the nucleus. For \f$d=0\f$,
  * the nucleus is a hard sphere.  \f$\rho_0\f$ and \f$r_0\f$ are, in
- * this limit, the nuclear ground state density and 
+ * this limit, the nuclear ground state density and
  * nuclear radius, respectively. For small \f$d\f$, this is still
  * approximately true.
  *
@@ -98,7 +99,7 @@ float Nucleus::mass() const {
  * \frac{3}{R^3} (t+R)^2 & -R \le t < 0 \\
  * e^{-t} \left( \frac{3}{R}+\frac{6}{R^2}t+\frac{6}{R^3}\frac{1}{2}t^2 \right)
  * & t \ge 0 \end{cases}.\f]
- *  
+ *
  * (the tilde \f$\tilde{p}\f$ means that this is normalized).
  *
  * Four parts inside the rejection
@@ -232,7 +233,7 @@ void Nucleus::arrange_nucleons() {
     double z = r*dir.z();
     double x = r*dir.x();
     // set position of current nucleon:
-    i->set_position(0.0, x, r*dir.y(), z);
+    i->set_position(FourVector(0.0, x, r*dir.y(), z));
     // update maximal and minimal z values
     z_max_ = (z > z_max_) ? z : z_max_;
     z_min_ = (z < z_min_) ? z : z_min_;
@@ -247,13 +248,10 @@ void Nucleus::boost(const double& beta_squared_with_sign) {
   // the sign of the velocity itself.
   double sign = beta_squared_with_sign >= 0 ? 1 : -1;
   double beta_squared = std::abs(beta_squared_with_sign);
-  double one_over_gamma = sqrt(1.0 - beta_squared);
+  double one_over_gamma = std::sqrt(1.0 - beta_squared);
   /*double gamma = 1.0/one_over_gamma;
     double gammabeta = sign*sqrt(beta_squared)*gamma;
    */
-  // despite the type name and the interface, the lorentz-boost does NOT
-  // take a FourVector in the physical sense, i.e., one that has
-  // u_mu*u^mu=1.
   // We are talking about a /passive/ lorentz transformation here, as
   // far as I can see, so we need to boost in the direction opposite to
   // where we want to go
@@ -261,7 +259,7 @@ void Nucleus::boost(const double& beta_squared_with_sign) {
   //       a system that moves with -beta. Now in this frame, it seems
   //       like p has been accelerated with +beta.
   //     )
-  FourVector u_mu(1, 0.0, 0.0, -sign*sqrt(beta_squared));
+  ThreeVector beta (0., 0., -sign*std::sqrt(beta_squared));
   for (auto i = begin(); i != end(); i++) {
     // a real Lorentz Transformation would leave the particles at
     // different times here, which we would then have to propagate back
@@ -273,7 +271,7 @@ void Nucleus::boost(const double& beta_squared_with_sign) {
     // for momenta, though, we CAN do normal Lorentz Boosts, since we
     // *do* want to transform the zero-component (i.e., the energy).
     FourVector this_momentum = i->momentum();
-    this_momentum = this_momentum.LorentzBoost(u_mu);
+    this_momentum = this_momentum.LorentzBoost(beta);
     i->set_momentum(this_momentum);
   }
   // we also need to update z_max_ and z_min:
@@ -299,17 +297,17 @@ void Nucleus::set_diffusiveness(const float& diffuse) {
   diffusiveness_ = diffuse;
 }
 
-void Nucleus::auto_set_masses(const Particles *external_particles) {
+void Nucleus::auto_set_masses(const Particles &external_particles) {
   for (auto p = begin(); p != end(); p++) {
     p->set_momentum(
-      external_particles->particle_type(p->pdgcode()).mass(), 0.0, 0.0, 0.0);
+      external_particles.particle_type(p->pdgcode()).mass(), 0.0, 0.0, 0.0);
   }
 }
 
 void Nucleus::shift(const bool is_projectile,
                     const double& initial_z_displacement,
                     const double& x_offset,
-                    const double& simulation_time) {
+                    const float& simulation_time) {
   // amount to shift z value. If is_projectile, we shift to -z_max_,
   // else we shift to -z_min_ (z_min_ itself should be negative).
   double z_offset = is_projectile ? -z_max_ : -z_min_;

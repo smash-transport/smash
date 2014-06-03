@@ -9,8 +9,8 @@
 
 #include <cmath>
 
-#include "tests/unittest.h"
-#include "include/resonances.h"
+#include "unittest.h"
+#include "../include/resonances.h"
 
 /* spins are two times the actual values,
  * so j = 1 for spin-1/2 particle, 2 for spin-1 particle, etc.

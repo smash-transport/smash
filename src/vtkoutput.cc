@@ -7,27 +7,34 @@
  *
  */
 
-#include "include/vtkoutput.h"
-#include "include/particles.h"
-#include "include/filedeleter.h"
 #include <memory>
+#include "include/clock.h"
+#include "include/filedeleter.h"
+#include "include/forwarddeclarations.h"
+#include "include/particles.h"
+#include "include/vtkoutput.h"
 
 namespace Smash {
 
-VtkOutput::VtkOutput(boost::filesystem::path path)
+VtkOutput::VtkOutput(bf::path path)
     : base_path_(std::move(path)) {
 }
 
 VtkOutput::~VtkOutput() {
 }
 
-void VtkOutput::write_state(const Particles &particles) {
+void VtkOutput::at_eventstart(const Particles &/*particles*/, const int /*event_number*/) {
+}
+
+void VtkOutput::at_eventend(const Particles &/*particles*/, const int /*event_number*/) {
+}
+
+void VtkOutput::after_Nth_timestep(const Particles &particles, const int event_number,
+                                   const Clock& clock) {
   char filename[32];
-  snprintf(
-      filename, sizeof(filename), "pos_0.%05i.vtk",
-      static_cast<int>((particles.data().begin()->position().x0() - 1.0) * 10));
-  std::unique_ptr<std::FILE> file_{
-      fopen((base_path_ / filename).native().c_str(), "w")};
+  snprintf(filename, sizeof(filename), "pos_ev%05i_tstep%+7.3f.vtk", event_number,
+           clock.current_time());
+  FilePtr file_{fopen((base_path_ / filename).native().c_str(), "w")};
 
   /* Legacy VTK file format */
   fprintf(file_.get(), "# vtk DataFile Version 2.0\n");

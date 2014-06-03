@@ -1,0 +1,11 @@
+/**
+\mainpage SMASH User Guide
+
+SMASH is a great program written by VSP (very smart people). It can do
+everything, please note especially the `--rule-world` command line option.
+
+Quick Links:
+- \ref inputoptions
+- \ref outputexample
+
+*/

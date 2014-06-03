@@ -14,6 +14,7 @@
 #include "include/configuration.h"
 #include "include/experimentparameters.h"
 #include "include/outputroutines.h"
+#include "include/particles.h"
 #include "include/pdgcode.h"
 #include "include/random.h"
 
@@ -89,14 +90,14 @@ void NucleusModus::print_startup() {
 }
 
 /* initial_conditions - sets particle data for @particles */
-void NucleusModus::initial_conditions(Particles *particles,
-                                       const ExperimentParameters &) {
+float NucleusModus::initial_conditions(Particles *particles,
+                                      const ExperimentParameters&) {
   // WHAT'S MISSING:
   //
   // Nuclei can be non-spherical. If they are, then they may be randomly
   // aligned. Excentricities and angles should be configurable.
-  projectile_.auto_set_masses(particles);
-  target_.auto_set_masses(particles);
+  projectile_.auto_set_masses(*particles);
+  target_.auto_set_masses(*particles);
   float mass_projec = projectile_.mass();
   float mass_target = target_.mass();
   printf("Masses of Nuclei: %g GeV %g GeV\n", projectile_.mass(),
@@ -147,7 +148,7 @@ void NucleusModus::initial_conditions(Particles *particles,
   // Projectile hits at positive x.
   // Also, it sets the time of the particles to
   // -initial_z_displacement_/sqrt(velocity_squared).
-  double simulation_time = -initial_z_displacement_/sqrt(velocity_squared);
+  float simulation_time = -initial_z_displacement_/sqrt(velocity_squared);
   projectile_.shift(true, -initial_z_displacement_, +impact_/2.0
                                                   , simulation_time);
   target_.shift(false,    +initial_z_displacement_, -impact_/2.0
@@ -155,6 +156,7 @@ void NucleusModus::initial_conditions(Particles *particles,
   // now, put the particles in the nuclei into particles.
   projectile_.copy_particles(particles);
   target_.copy_particles(particles);
+  return simulation_time;
 }
 
 void NucleusModus::sample_impact(const bool s, const float min,

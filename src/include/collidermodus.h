@@ -7,20 +7,12 @@
 #ifndef SRC_INCLUDE_COLLIDERMODUS_H_
 #define SRC_INCLUDE_COLLIDERMODUS_H_
 
-#include <stdint.h>
-#include <cmath>
-#include <list>
-#include <string>
+#include "modusdefault.h"
 
-#include "include/crosssections.h"
-#include "include/modusdefault.h"
-#include "include/particles.h"
-#include "include/random.h"
+#include "forwarddeclarations.h"
+#include "pdgcode.h"
 
 namespace Smash {
-
-class Configuration;
-struct ExperimentParameters;
 
 class ColliderModus : public ModusDefault {
  public:
@@ -31,7 +23,7 @@ class ColliderModus : public ModusDefault {
   void print_startup();  // TODO(mkretz): needs to be discoverable from an
                          // outside "printer"
 
-  void initial_conditions(Particles *particles,
+  float initial_conditions(Particles *particles,
                           const ExperimentParameters &parameters);
 
   // in ModusDefault:

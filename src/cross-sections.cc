@@ -20,17 +20,15 @@
 
 namespace Smash {
 
-void CrossSections::compute_kinematics(Particles *particles,
-  int id_a, int id_b) {
+void CrossSections::compute_kinematics(const Particles &particles, int id_a,
+                                       int id_b) {
+  const FourVector momentum_a = particles.data(id_a).momentum();
+  const FourVector momentum_b = particles.data(id_b).momentum();
   /* Mandelstam s = (p_a + p_b)^2 = square of CMS energy */
-  mandelstam_s_ =
-    (particles->data(id_a).momentum() + particles->data(id_b).momentum()).Dot(
-     particles->data(id_a).momentum() + particles->data(id_b).momentum());
+  mandelstam_s_ = (momentum_a + momentum_b).Dot(momentum_a + momentum_b);
   /* In case we have resonances, let's use the relation m^2 = p^2 for masses */
-  squared_mass_a_
-    = particles->data(id_a).momentum().Dot(particles->data(id_a).momentum());
-  squared_mass_b_
-    = particles->data(id_b).momentum().Dot(particles->data(id_b).momentum());
+  squared_mass_a_ = momentum_a.Dot(momentum_a);
+  squared_mass_b_ = momentum_b.Dot(momentum_b);
   /* Beam momentum (assuming particle A as "beam") */
   p_lab_ = sqrt((mandelstam_s_ - squared_mass_a_ - squared_mass_b_)
                 * (mandelstam_s_ - squared_mass_a_ - squared_mass_b_)
@@ -38,23 +36,26 @@ void CrossSections::compute_kinematics(Particles *particles,
            / (2 * sqrt(squared_mass_b_));
 }
 
-float CrossSections::elastic(Particles *particles, int id_a, int id_b)
-  const {
-  const int spin_a = particles->type(id_a).spin(),
-    spin_b = particles->type(id_b).spin();
+float CrossSections::elastic(const Particles &particles, int id_a,
+                             int id_b) const {
+  const ParticleType &type_a = particles.type(id_a);
+  const ParticleType &type_b = particles.type(id_b);
+
+  const int spin_a = type_a.spin();
+  const int spin_b = type_b.spin();
   /* For now, the meson-meson and meson-baryon elastic cross sections
    * are simply given by the cross section parameter
    */
-  if (spin_a % 2 == 0 || spin_b % 2 == 0)
+  if (spin_a % 2 == 0 || spin_b % 2 == 0) {
     return elastic_parameter_;
+  }
 
   /* For baryon-baryon, we have to check the parametrized cross sections */
   /* pp-scattering */
-  if (particles->type(id_a).pdgcode() == particles->type(id_b).pdgcode()) {
+  if (type_a.pdgcode() == type_b.pdgcode()) {
     return pp_elastic(p_lab_, mandelstam_s_, sqrt(squared_mass_a_));
   /* ppbar-scattering */
-  } else if (particles->type(id_a).pdgcode().is_antiparticle_of(
-                                particles->type(id_b).pdgcode())) {
+  } else if (type_a.pdgcode().is_antiparticle_of(type_b.pdgcode())) {
     return ppbar_elastic(p_lab_);
   /* np-scattering */
   } else {
@@ -62,23 +63,26 @@ float CrossSections::elastic(Particles *particles, int id_a, int id_b)
   }
 }
 
-float CrossSections::total(Particles *particles, int id_a, int id_b)
-  const {
-  const int spin_a = particles->type(id_a).spin(),
-    spin_b = particles->type(id_b).spin();
+float CrossSections::total(const Particles &particles, int id_a,
+                           int id_b) const {
+  const ParticleType &type_a = particles.type(id_a);
+  const ParticleType &type_b = particles.type(id_b);
+
+  const int spin_a = type_a.spin();
+  const int spin_b = type_b.spin();
   /* For now, the meson-meson and meson-baryon
    *  "total" cross section is just zero
    */
-  if (spin_a % 2 == 0 || spin_b % 2 == 0)
-    return 0.0;
+  if (spin_a % 2 == 0 || spin_b % 2 == 0) {
+    return 0.f;
+  }
 
   /* For baryon-baryon, we have to check the parametrized cross sections */
   /* pp-scattering */
-  if (particles->type(id_a).pdgcode() == particles->type(id_b).pdgcode()) {
+  if (type_a.pdgcode() == type_b.pdgcode()) {
     return pp_total(p_lab_);
   /* ppbar-scattering */
-  } else if (particles->type(id_a).pdgcode().is_antiparticle_of(
-                                particles->type(id_b).pdgcode())) {
+  } else if (type_a.pdgcode().is_antiparticle_of(type_b.pdgcode())) {
     return ppbar_total(p_lab_);
   /* np-scattering */
   } else {
