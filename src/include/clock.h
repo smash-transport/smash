@@ -50,7 +50,7 @@ namespace Smash {
  * time)
  * \see operator++()
  * \see operator+=(const float&)
- * \see operator+=(const uint32_t&)
+ * \see operator+=(const std::uint32_t&)
  * \li set / retrieve the timestep (length of one tick)
  * \see set_timestep_duration() \see timestep_duration()
  * \li compare time against different clock or fixed value
@@ -96,7 +96,7 @@ class Clock {
    * floating point arithmetic).
    */
   inline float next_time() const {
-    if (counter_ == std::numeric_limits<uint32_t>::max()) {
+    if (counter_ == std::numeric_limits<std::uint32_t>::max()) {
       throw std::overflow_error("Too many timesteps, clock overflow imminent");
     }
     return reset_time_ + timestep_duration_ * (counter_ + 1);
@@ -152,7 +152,7 @@ class Clock {
    **/
   void reset(const float reset_time) {
     if (reset_time < current_time()) {
-      printf("Resetting clock from %g fm/c to %g fm/c\n",
+      std::printf("Resetting clock from %g fm/c to %g fm/c\n",
               current_time(), reset_time);
     }
     reset_time_ = reset_time;
@@ -166,7 +166,7 @@ class Clock {
    */
   Clock& operator++() {
     // guard against overflow:
-    if (counter_ == std::numeric_limits<uint32_t>::max()) {
+    if (counter_ == std::numeric_limits<std::uint32_t>::max()) {
       throw std::overflow_error("Too many timesteps, clock overflow imminent");
     }
     ++counter_;
@@ -181,8 +181,8 @@ class Clock {
     return *this;
   }
   /// advances the clock by an arbitrary number of ticks.
-  Clock& operator+=(const uint32_t& advance_several_timesteps) {
-    if (counter_ > std::numeric_limits<uint32_t>::max()
+  Clock& operator+=(const std::uint32_t& advance_several_timesteps) {
+    if (counter_ > std::numeric_limits<std::uint32_t>::max()
                  - advance_several_timesteps) {
       throw std::overflow_error("Too many timesteps, clock overflow imminent");
     }
@@ -204,7 +204,7 @@ class Clock {
  private:
   /// clock tick. This is purely internal and will be reset when the
   /// timestep size is changed
-  uint32_t counter_ = 0;
+  std::uint32_t counter_ = 0;
   /// The time step size \f$\Delta t\f$
   float timestep_duration_ = 0.0f;
   /// The time of last reset (when counter_ was set to 0).
