@@ -23,7 +23,8 @@
 #include "include/forwarddeclarations.h"
 #include "include/macros.h"
 #include "include/nucleusmodus.h"
-#include "include/oscaroutput.h"
+#include "include/oscarinteractionoutput.h"
+#include "include/oscarparticlelistoutput.h"
 #include "include/outputroutines.h"
 #include "include/random.h"
 #include "include/vtkoutput.h"
@@ -213,7 +214,8 @@ void Experiment<Modus>::print_startup(int64_t seed) {
 
 template <typename Modus>
 void Experiment<Modus>::run(const bf::path &path) {
-  outputs_.emplace_back(new OscarOutput(path));
+  outputs_.emplace_back(new OscarInteractionOutput(path));
+  outputs_.emplace_back(new OscarParticleListOutput(path));
   outputs_.emplace_back(new VtkOutput(path));
 
   for (int j = 0; j < nevents_; j++) {

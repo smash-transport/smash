@@ -9,7 +9,7 @@
 
 #include "include/clock.h"
 #include "include/forwarddeclarations.h"
-#include "include/oscaroutput.h"
+#include "include/oscarinteractionoutput.h"
 #include "include/particles.h"
 #include "include/outputroutines.h"
 
@@ -17,17 +17,17 @@
 
 namespace Smash {
 
-OscarOutput::OscarOutput(bf::path path)
-    : file_{std::fopen((path / "osc1999a.dat").native().c_str(), "w")} {
+OscarInteractionOutput::OscarInteractionOutput(bf::path path)
+    : file_{std::fopen((path / "osc_interactions.dat").native().c_str(), "w")} {
   fprintf(file_.get(), "# OSC1999A\n");
   fprintf(file_.get(), "# Interaction history\n");
   fprintf(file_.get(), "# smash\n");
   fprintf(file_.get(), "#\n");
 }
 
-OscarOutput::~OscarOutput() {}
+OscarInteractionOutput::~OscarInteractionOutput() {}
 
-void OscarOutput::at_eventstart(const Particles &particles,
+void OscarInteractionOutput::at_eventstart(const Particles &particles,
                                 const int event_number) {
   /* OSCAR line prefix : initial particles; final particles; event id
    * First block of an event: initial = 0, final = number of particles
@@ -38,7 +38,7 @@ void OscarOutput::at_eventstart(const Particles &particles,
   write(particles);
 }
 
-void OscarOutput::at_eventend(const Particles &particles,
+void OscarInteractionOutput::at_eventend(const Particles &particles,
                               const int event_number) {
   /* OSCAR line prefix : initial particles; final particles; event id
    * Last block of an event: initial = number of particles, final = 0
@@ -52,7 +52,7 @@ void OscarOutput::at_eventend(const Particles &particles,
   fprintf(file_.get(), "%zu %zu %i\n", zero, zero, event_number + 1);
 }
 
-void OscarOutput::write(const Particles &particles) {
+void OscarInteractionOutput::write(const Particles &particles) {
   for (const ParticleData &data : particles.data()) {
     fprintf(file_.get(), "%i %s %i %g %g %g %g %g %g %g %g %g\n", data.id(),
             data.pdgcode().string().c_str(), 0, data.momentum().x1(),
@@ -63,8 +63,9 @@ void OscarOutput::write(const Particles &particles) {
   }
 }
 
-void OscarOutput::write_interaction(const ParticleList &incoming_particles,
-                                    const ParticleList &outgoing_particles) {
+void OscarInteractionOutput::write_interaction(
+  const ParticleList &incoming_particles,
+  const ParticleList &outgoing_particles) {
   /* OSCAR line prefix : initial final
    * particle creation: 0 1
    * particle 2<->2 collision: 2 2
@@ -90,7 +91,7 @@ void OscarOutput::write_interaction(const ParticleList &incoming_particles,
   }
 }
 
-void OscarOutput::after_Nth_timestep(const Particles & particles,
+void OscarInteractionOutput::after_Nth_timestep(const Particles & particles,
                                      const int event_number,
                                      const Clock& /*clock*/) {
   /* OSCAR line prefix : initial particles; final particles; event id
