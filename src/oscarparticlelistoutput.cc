@@ -22,6 +22,10 @@ OscarParticleListOutput::OscarParticleListOutput(bf::path path)
   fprintf(file_.get(), "# OSC1999A\n");
   fprintf(file_.get(), "# final_id_p_x\n");
   fprintf(file_.get(), "# smash\n");
+  fprintf(file_.get(), "# Block format:\n");
+  fprintf(file_.get(), "# nin nout event_number\n");
+  fprintf(file_.get(), "# ipart id ist px py pz p0 mass x y z t\n");
+  fprintf(file_.get(), "# End of event: 0 0 event_number\n");
   fprintf(file_.get(), "#\n");
 }
 
