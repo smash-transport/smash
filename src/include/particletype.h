@@ -54,6 +54,8 @@ class ParticleType {
   inline int charge(void) const;
   /// Spin is 2 * particle data book value
   inline int spin(void) const;
+  /// Check if the particle is stable
+  inline bool is_stable() const;
 
  private:
   /// name of the particle
@@ -114,6 +116,12 @@ inline int ParticleType::spin(void) const {
 
 inline float ParticleType::width(void) const {
   return width_;
+}
+
+inline bool ParticleType::is_stable() const {
+  /* We currently regard a particle type as stable if its on-shell width is
+   * less than 10 keV. */
+  return width_<1E-5;
 }
 
 }  // namespace Smash

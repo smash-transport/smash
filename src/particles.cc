@@ -10,6 +10,7 @@
 #include <cstdio>
 #include <iostream>
 #include <sstream>
+#include <assert.h>
 
 #include "include/angles.h"
 #include "include/constants.h"
@@ -20,7 +21,7 @@
 #include "include/particledata.h"
 #include "include/particles.h"
 #include "include/pdgcode.h"
-#include <assert.h>
+#include "include/width.h"
 
 namespace Smash {
 
@@ -203,6 +204,33 @@ Particles::Particles(const std::string &particles,
     : types_(load_particle_types(particles)),
       all_decay_modes_(load_decaymodes(decaymodes)) {}
 
+
+float Particles::width(int id) const {
+  float w = 0.;
+  const PdgCode pdgcode = type(id).pdgcode();
+  if (type(id).is_stable()) return w;
+  const std::vector<DecayBranch> decaymodes
+    = decay_modes(pdgcode).decay_mode_list();
+  for (std::vector<DecayBranch>::const_iterator mode = decaymodes.begin();
+       mode != decaymodes.end(); ++mode) {
+    if (mode->pdg_list().size()==2) {
+      // mass-dependent width for 2-body decays
+      w = w + width_Manley (data(id).momentum().abs(), type(id).mass(),
+                            particle_type(mode->pdg_list()[0]).mass(),
+                            particle_type(mode->pdg_list()[1]).mass(),
+                            mode->angular_momentum(),
+                            type(id).width()*mode->weight());
+    }
+    else {
+      // constant width for three-body decays
+      w = w + type(id).width()*mode->weight();
+    }
+  }
+
+  return w;
+}
+
+
 namespace {/*{{{*/
 std::string trim(const std::string &s) {
   const auto begin = s.find_first_not_of(" \t\n\r");
@@ -354,6 +382,9 @@ Particles::DecayModesMap Particles::load_decaymodes(const std::string &input) {
       float ratio;
       lineinput >> ratio;
 
+      int L;
+      lineinput >> L;
+
       PdgCode pdg;
       lineinput >> pdg;
       while (lineinput) {
@@ -376,7 +407,7 @@ Particles::DecayModesMap Particles::load_decaymodes(const std::string &input) {
             build_error_string("Parse error: expected a PdgCode ", line));
       }
       decay_particles.shrink_to_fit();
-      decay_modes_to_add.add_mode(std::move(decay_particles), ratio);
+      decay_modes_to_add.add_mode(ratio, L, std::move(decay_particles));
       ratio_sum += ratio;
     }
   }

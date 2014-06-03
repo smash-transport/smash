@@ -23,19 +23,16 @@ std::vector<ActionPtr> DecayActionsFinder::find_possible_actions(
     CrossSections *) const {
   std::vector<ActionPtr> actions;
   FourVector velocity_lrf;
-  velocity_lrf.set_x0(1.0);
 
   for (const auto &p : particles->data()) {
     std::vector<int> in_part;
     int id = p.id();
-    float width = p.type(*particles).width();
+    float width = particles->width(id);
     /* particle doesn't decay */
     if (width < 0.0)
       continue;
     /* local rest frame velocity */
-    velocity_lrf.set_x1(p.momentum().x1() / p.momentum().x0());
-    velocity_lrf.set_x2(p.momentum().x2() / p.momentum().x0());
-    velocity_lrf.set_x3(p.momentum().x3() / p.momentum().x0());
+    velocity_lrf = FourVector(1., p.momentum().threevec()/p.momentum().x0());
 
     /* The clock goes slower in the rest frame of the resonance */
     double inverse_gamma = sqrt(velocity_lrf.Dot(velocity_lrf));

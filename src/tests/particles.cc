@@ -200,14 +200,14 @@ TEST(load_decaymodes_two_channels) {
   const std::string decays_input(
       " 113\t# rho0\n"
       "\n"
-      " 1.0\t211 -211\t# pi+ pi- \n"
+      " 1.0\t1\t211 -211\t# pi+ pi- \n"
       " \n"
       "\n"
       "223	# omega\n"
-      "0.33 111 113	# pi0 rho0\n"
+      "0.33 0 111 113	# pi0 rho0\n"
       "\n"
-      "0.33 211 -213	# pi+ rho-\n"
-      "0.33 -211 213	# pi- rho+\n"
+      "0.33 0 211 -213	# pi+ rho-\n"
+      "0.33 0 -211 213	# pi- rho+\n"
       );
   Particles p(particles_txt::data, decays_input);
 

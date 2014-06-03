@@ -53,6 +53,7 @@ set(smash_src
         scatteraction.cc
         scatteractionsfinder.cc
         vtkoutput.cc
+        width.cc
         )
 
 add_executable(smash smash.cc ${smash_src})

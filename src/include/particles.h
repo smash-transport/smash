@@ -224,6 +224,9 @@ class Particles {
   /// return time of the computational frame
   inline double time(void) const;
 
+  /// get the full decay width (mass-dependent!) of a particular particle
+  float width(int id) const;
+
   /** Check whether a particle type with the given \p pdg code is known.
    *
    * \param pdgcode The pdg code of the particle in question.

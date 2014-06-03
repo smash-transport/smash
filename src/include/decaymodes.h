@@ -18,8 +18,8 @@ namespace Smash {
 class DecayModes {
  public:
   /* Add a decay mode */
-  void add_mode(std::vector<PdgCode> pdg_list, float ratio);
-  void add_mode(ProcessBranch branch) { decay_modes_.push_back(branch); }
+  void add_mode(float ratio, int L, std::vector<PdgCode> pdg_list);
+  void add_mode(DecayBranch branch) { decay_modes_.push_back(branch); }
 
   /* Make sure ratios add to 1 */
   void renormalize(float renormalization_constant);
@@ -31,7 +31,7 @@ class DecayModes {
   bool is_empty() const { return decay_modes_.empty(); }
 
   /* Pass out the decay modes */
-  const std::vector<ProcessBranch> &decay_mode_list(void) const {
+  const std::vector<DecayBranch> &decay_mode_list(void) const {
     return decay_modes_;
   }
 
@@ -44,7 +44,7 @@ class DecayModes {
    * Each mode consists of a vector of the pdg codes of decay products
    * and a ratio of this decay mode compared to all possible modes
    */
-  std::vector<ProcessBranch> decay_modes_;
+  std::vector<DecayBranch> decay_modes_;
 };
 
 }  // namespace Smash

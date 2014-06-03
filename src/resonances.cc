@@ -56,14 +56,14 @@ static void quadrature_1d(double (*integrand_function)(double, void *),
  */
 float calculate_minimum_mass(const Particles &particles, PdgCode pdgcode) {
   /* If the particle happens to be stable, just return the mass */
-  if (particles.particle_type(pdgcode).width() < 0.0) {
+  if (particles.particle_type(pdgcode).is_stable()) {
     return particles.particle_type(pdgcode).mass();
   }
   /* Otherwise, let's find the highest mass value needed in any decay mode */
   float minimum_mass = 0.0;
-  const std::vector<ProcessBranch> decaymodes =
+  const std::vector<DecayBranch> decaymodes =
       particles.decay_modes(pdgcode).decay_mode_list();
-  for (std::vector<ProcessBranch>::const_iterator mode = decaymodes.begin();
+  for (std::vector<DecayBranch>::const_iterator mode = decaymodes.begin();
        mode != decaymodes.end(); ++mode) {
     size_t decay_particles = mode->pdg_list().size();
     float total_mass = 0.0;
@@ -110,14 +110,12 @@ std::vector<ProcessBranch> resonance_cross_section(
   /* Find all the possible resonances */
   for (const ParticleType &type_resonance : particles.types()) {
     /* Not a resonance, go to next type of particle */
-    if (type_resonance.width() < 0.0) {
-      continue;
-    }
+    if (type_resonance.is_stable()) continue;
 
     /* Same resonance as in the beginning, ignore */
-    if ((type_particle1.width() > 0.0
+    if ((!type_particle1.is_stable()
          && type_resonance.pdgcode() == type_particle1.pdgcode())
-        || (type_particle2.width() > 0.0
+        || (!type_particle2.is_stable()
             && type_resonance.pdgcode() == type_particle2.pdgcode())) {
       continue;
     }
@@ -229,14 +227,14 @@ double two_to_one_formation(const Particles &particles,
     return 0.0;
 
   /* Check the decay modes of this resonance */
-  const std::vector<ProcessBranch> decaymodes
+  const std::vector<DecayBranch> decaymodes
     = particles.decay_modes(type_resonance.pdgcode()).decay_mode_list();
   bool not_enough_energy = false;
   /* Detailed balance required: Formation only possible if
    * the resonance can decay back to these particles
    */
   bool not_balanced = true;
-  for (std::vector<ProcessBranch>::const_iterator mode
+  for (std::vector<DecayBranch>::const_iterator mode
        = decaymodes.begin(); mode != decaymodes.end(); ++mode) {
     size_t decay_particles = mode->pdg_list().size();
     if ( decay_particles > 3 ) {
@@ -274,6 +272,7 @@ double two_to_one_formation(const Particles &particles,
   /* Calculate spin factor */
   const double spinfactor = (type_resonance.spin() + 1)
     / ((type_particle1.spin() + 1) * (type_particle2.spin() + 1));
+  // TODO: use off-shell width here (Particles::width)
   float resonance_width = type_resonance.width();
   float resonance_mass = type_resonance.mass();
   /* Calculate resonance production cross section
@@ -314,9 +313,7 @@ size_t two_to_two_formation(const Particles &particles,
   /* Loop over particle types to find allowed combinations */
   for (const ParticleType &second_type : particles.types()) {
     /* We are interested only stable particles here */
-    if (second_type.width() > 0.0) {
-      continue;
-    }
+    if (!second_type.is_stable()) continue;
 
     /* Check for charge conservation */
     if (type_resonance.charge() + second_type.charge()
@@ -379,11 +376,11 @@ size_t two_to_two_formation(const Particles &particles,
     }
 
     /* Check the decay modes of this resonance */
-    const std::vector<ProcessBranch> decaymodes
+    const std::vector<DecayBranch> decaymodes
       = particles.decay_modes(type_resonance.pdgcode()).decay_mode_list();
     bool not_enough_energy = false;
     double minimum_mass = 0.0;
-    for (std::vector<ProcessBranch >::const_iterator mode
+    for (std::vector<DecayBranch>::const_iterator mode
          = decaymodes.begin(); mode != decaymodes.end(); ++mode) {
       size_t decay_particles = mode->pdg_list().size();
       if ( decay_particles > 3 ) {
@@ -414,6 +411,7 @@ size_t two_to_two_formation(const Particles &particles,
      * Integrate over the allowed resonance mass range
      */
     std::vector<double> integrand_parameters;
+    // TODO: use off-shell width here (Particles::width)
     integrand_parameters.push_back(type_resonance.width());
     integrand_parameters.push_back(type_resonance.mass());
     integrand_parameters.push_back(second_type.mass());
@@ -530,6 +528,7 @@ double sample_resonance_mass(const Particles &particles, PdgCode pdg_resonance,
   /* Define distribution parameters */
   float mass_stable = particles.particle_type(pdg_stable).mass();
   std::vector<double> parameters;
+  // TODO: use off-shell width here (Particles::width)
   parameters.push_back(particles.particle_type(pdg_resonance).width());
   parameters.push_back(particles.particle_type(pdg_resonance).mass());
   parameters.push_back(mass_stable);

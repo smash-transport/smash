@@ -55,9 +55,9 @@ void DecayAction::one_to_two(const ParticleData &incoming0, const Particles &par
 
   /* If one of the particles is resonance, sample its mass */
   /* XXX: Other particle assumed stable! */
-  if (outgoing0_type.width() > 0) {
+  if (!outgoing0_type.is_stable()) {
     mass_a = sample_resonance_mass(particles, type_a, type_b, total_energy);
-  } else if (outgoing1_type.width() > 0) {
+  } else if (!outgoing1_type.is_stable()) {
     mass_b = sample_resonance_mass(particles, type_b, type_a, total_energy);
   }
 
@@ -219,10 +219,10 @@ ParticleList DecayAction::choose_channel(const Particles &particles) const {
   const PdgCode pdgcode = particles.type(incoming_particles_[0]).pdgcode();
 
   /* Get the decay modes of this resonance */
-  const std::vector<ProcessBranch> decaymodes
+  const std::vector<DecayBranch> decaymodes
     = particles.decay_modes(pdgcode).decay_mode_list();
   /* Get the first decay mode and its branching ratio */
-  std::vector<ProcessBranch>::const_iterator mode = decaymodes.begin();
+  std::vector<DecayBranch>::const_iterator mode = decaymodes.begin();
   float cumulated_probability = mode->weight();
   /* Ratios of decay channels should add to 1; pick a random number
    * between 0 and 1 to select the decay mode to be used
