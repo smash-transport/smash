@@ -16,23 +16,20 @@
 #include <memory>
 #include <stdexcept>
 
-namespace std {
-template <>
-struct default_delete<std::FILE> {
-  constexpr default_delete() = default;
+namespace Smash {
+struct FileDeleter {
+  constexpr FileDeleter() = default;
   void operator()(std::FILE *f) const {
     if (f == nullptr) {
       return;
     }
     if (0 != std::fclose(f)) {
-      throw runtime_error(strerror(errno));
+      throw std::runtime_error(std::strerror(errno));
     }
   }
 };
-}  // namespace std
 
-namespace Smash {
-using FilePtr = std::unique_ptr<std::FILE>;
+using FilePtr = std::unique_ptr<std::FILE, FileDeleter>;
 }  // namespace Smash
 
 #endif  // SRC_INCLUDE_FILEDELETER_H_
