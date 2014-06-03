@@ -56,7 +56,7 @@ TEST(initialize_collider) {
   // here, also, we might check other properties.
 }
 
-TEST(initialize_nucleus) {
+TEST(initialize_nucleus_normal) {
   Configuration conf(TEST_CONFIG_PATH);
   conf["Modi"]["Nucleus"]["SQRTSNN"] = 1.6;
   conf.take({"Modi", "Nucleus", "Projectile"});
@@ -74,6 +74,54 @@ TEST(initialize_nucleus) {
   // for this, a test might include different initializations that
   // should throw an exception. This might warrant a separate file
   // nucleusmodus.cc.
+}
+
+TEST_CATCH(initialize_nucleus_low_energy, NucleusModus::InvalidEnergy) {
+  Configuration conf(TEST_CONFIG_PATH);
+  conf["Modi"]["Nucleus"]["SQRTSNN"] = 1.0;
+  conf.take({"Modi", "Nucleus", "Projectile"});
+  conf.take({"Modi", "Nucleus", "Target"});
+  conf["Modi"]["Nucleus"]["Projectile"]["PARTICLES"]["222"] = 1;
+  conf["Modi"]["Nucleus"]["Target"]["PARTICLES"]["222"] = 8;
+  conf["Modi"]["Nucleus"]["SQRTS_N"][0] = "222";
+  conf["Modi"]["Nucleus"]["SQRTS_N"][1] = "222";
+  conf["Modi"]["Nucleus"]["INITIAL_DISTANCE"] = 0;
+  ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};
+  NucleusModus n(conf["Modi"], param);
+  Particles P{"smashon 0.7834 -1.0 222", ""};
+  n.initial_conditions(&P, param);
+}
+
+TEST_CATCH(initialize_nucleus_empty_projectile, NucleusModus::NucleusEmpty) {
+  Configuration conf(TEST_CONFIG_PATH);
+  conf["Modi"]["Nucleus"]["SQRTSNN"] = 1.6;
+  conf.take({"Modi", "Nucleus", "Projectile"});
+  conf.take({"Modi", "Nucleus", "Target"});
+  conf["Modi"]["Nucleus"]["Projectile"]["PARTICLES"]["222"] = 0;
+  conf["Modi"]["Nucleus"]["Target"]["PARTICLES"]["222"] = 8;
+  conf["Modi"]["Nucleus"]["SQRTS_N"][0] = 0;
+  conf["Modi"]["Nucleus"]["SQRTS_N"][1] = 0;
+  conf["Modi"]["Nucleus"]["INITIAL_DISTANCE"] = 0;
+  ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};
+  NucleusModus n(conf["Modi"], param);
+  Particles P{"smashon 0.7834 -1.0 222", ""};
+  n.initial_conditions(&P, param);
+}
+
+TEST_CATCH(initialize_nucleus_empty_target, NucleusModus::NucleusEmpty) {
+  Configuration conf(TEST_CONFIG_PATH);
+  conf["Modi"]["Nucleus"]["SQRTSNN"] = 1.6;
+  conf.take({"Modi", "Nucleus", "Projectile"});
+  conf.take({"Modi", "Nucleus", "Target"});
+  conf["Modi"]["Nucleus"]["Projectile"]["PARTICLES"]["222"] = 8;
+  conf["Modi"]["Nucleus"]["Target"]["PARTICLES"]["222"] = 0;
+  conf["Modi"]["Nucleus"]["SQRTS_N"][0] = 0;
+  conf["Modi"]["Nucleus"]["SQRTS_N"][1] = 0;
+  conf["Modi"]["Nucleus"]["INITIAL_DISTANCE"] = 0;
+  ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};
+  NucleusModus n(conf["Modi"], param);
+  Particles P{"smashon 0.7834 -1.0 222", ""};
+  n.initial_conditions(&P, param);
 }
 
 // TEST(initialize_sphere) {
