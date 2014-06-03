@@ -90,14 +90,25 @@ TEST(initialize_nucleus_normal) {
   conf["Modi"]["Nucleus"]["SQRTS_N"][0] = "222";
   conf["Modi"]["Nucleus"]["SQRTS_N"][1] = "222";
   conf["Modi"]["Nucleus"]["INITIAL_DISTANCE"] = 0;
+  conf["Modi"]["Nucleus"]["Impact"]["VALUE"] = 0;
   ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};
   NucleusModus n(conf["Modi"], param);
-  Particles P{"smashon 0.7834 -1.0 222", ""};
+  Particles P{"smashon 0.4 -1.0 222", ""};
   COMPARE(n.initial_conditions(&P, param), 0.f);
   COMPARE(P.size(), 9);
-  // for this, a test might include different initializations that
-  // should throw an exception. This might warrant a separate file
-  // nucleusmodus.cc.
+  for (auto p : P.data()) {
+    // velocity should be +- sqrt(3/4)
+    COMPARE_RELATIVE_ERROR(p.velocity().sqr(), 0.75, 1e-6);
+    // this is the mass squared
+    COMPARE_RELATIVE_ERROR(p.momentum().sqr(), 0.16, 1e-6);
+    COMPARE(p.position().x0(), 0.0);
+    COMPARE(p.pdgcode(), PdgCode(0x222));
+    COMPARE_RELATIVE_ERROR(p.momentum().x0(), 0.8, 1e-6);
+    COMPARE_ABSOLUTE_ERROR(p.momentum().x1(), 0.0, 1e-6);
+    COMPARE_ABSOLUTE_ERROR(p.momentum().x2(), 0.0, 1e-6);
+    COMPARE_RELATIVE_ERROR(std::abs(p.momentum().x3()), std::sqrt(0.48), 1e-6);
+  }
+  // all other things can only be tested with statistics.
 }
 
 TEST_CATCH(initialize_nucleus_low_energy, NucleusModus::InvalidEnergy) {
