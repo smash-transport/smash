@@ -39,7 +39,6 @@ class ParticleData {
   inline int id(void) const;
   inline void set_id(const int id);
   inline PdgCode pdgcode(void) const;
-  inline void set_pdgcode(const PdgCode pdgcode);
 
   // convenience accessors to PdgCode:
   /// \copydoc PdgCode::is_hadron
@@ -103,11 +102,6 @@ inline void ParticleData::set_id(const int i) {
 /// look up the pdgcode of the particle
 inline PdgCode ParticleData::pdgcode(void) const {
   return pdgcode_;
-}
-
-/// set id of the particle
-inline void ParticleData::set_pdgcode(const PdgCode i) {
-  pdgcode_ = i;
 }
 
 /// look up the id of the collision process

@@ -64,11 +64,10 @@ TEST(init_id) {
 }
 
 TEST(set_get) {
-  ParticleData p;
+  PdgCode smashon = 0x12345;
+  ParticleData p(smashon);
   p.set_id(4);
   COMPARE(p.id(), 4);
-  PdgCode smashon = 0x12345;
-  p.set_pdgcode(smashon);
   COMPARE(p.pdgcode(), smashon);
   COMPARE(p.is_hadron(), smashon.is_hadron());
   p.set_id_process(5);
