@@ -18,9 +18,10 @@
 namespace Smash {
 
 OscarInteractionOutput::OscarInteractionOutput(bf::path path)
-    : file_{std::fopen((path / "osc_interactions.dat").native().c_str(), "w")} {
+  : file_{std::fopen((path / "full_event_history.oscar").native().c_str(),
+                     "w")} {
   fprintf(file_.get(), "# OSC1999A\n");
-  fprintf(file_.get(), "# Interaction history\n");
+  fprintf(file_.get(), "# full_event_history\n");
   fprintf(file_.get(), "# smash\n");
   fprintf(file_.get(), "#\n");
 }
@@ -91,16 +92,10 @@ void OscarInteractionOutput::write_interaction(
   }
 }
 
-void OscarInteractionOutput::after_Nth_timestep(const Particles & particles,
-                                     const int event_number,
+void OscarInteractionOutput::after_Nth_timestep(const Particles & /*particles*/,
+                                                const int /*event_number*/,
                                      const Clock& /*clock*/) {
-  /* OSCAR line prefix : initial particles; final particles; event id
-   * Time interval output: initial = number of particles, final = 0
-   */
-  const size_t zero = 0;
-  fprintf(file_.get(), "%zu %zu %i\n", particles.size(), zero,
-          event_number + 1);
-  write(particles);
+  /* No time interval output for interaction history */
 }
 
 }  // namespace Smash
