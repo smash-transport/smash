@@ -198,7 +198,11 @@ class Particles {
    *
    * \throws std::out_of_range If there is no type with the given \p pdgcode.
    */
-  inline const ParticleType &particle_type(PdgCode pdgcode) const;
+  inline const ParticleType &type(PdgCode pdgcode) const;
+  /// \deprecated Use the function above
+  inline const ParticleType &particle_type(PdgCode pdgcode) const {
+    return type(pdgcode);
+  }
   /// Return decay modes of this particle type
   inline const DecayModes &decay_modes(PdgCode pdg) const;
   /// return the highest used id
@@ -295,7 +299,7 @@ inline const ParticleType &Particles::type(int particle_id) const {
 }
 
 /* return a specific type */
-inline const ParticleType &Particles::particle_type(PdgCode pdgcode) const {
+inline const ParticleType &Particles::type(PdgCode pdgcode) const {
   return types_.at(pdgcode);
 }
 
