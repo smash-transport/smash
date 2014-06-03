@@ -55,6 +55,9 @@ class ParticleType {
   /// Spin is 2 * particle data book value
   inline int spin(void) const;
 
+  /// \copydoc PdgCode::is_hadron
+  bool is_hadron() const { return pdgcode_.is_hadron(); }
+
  private:
   /// name of the particle
   /// \todo This variable is only used for debug output. Maybe `ifdef` it out
