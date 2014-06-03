@@ -63,12 +63,6 @@ static void create_particle_list(Particles &P) {
   return;
 }
 
-TEST(sanity) {
-  ModusDefault m;
-  Particles * P;
-  COMPARE(m.sanity_check(P), 0);
-}
-
 TEST(propagate_default) {
   ModusDefault m;
   Particles Pdef{"",""};
