@@ -173,15 +173,15 @@ void ScatterAction::resonance_formation(const Particles &particles,
     /* XXX: For now, it is assumed that the other particle is stable! */
     ParticleData *resonance = &outgoing_particles_.at(0);
     ParticleData *stable_product;
-    if (resonance->type(particles).width() >
-        0) {  // TODO: can we change this to an is_stable or is_unstable method,
-              // please?
+    if (resonance->type().width() > 0) {  // TODO: can we change this to an
+                                          // is_stable or is_unstable method,
+                                          // please?
       stable_product = &outgoing_particles_.at(1);
     } else {
       stable_product = resonance;
       resonance = &outgoing_particles_.at(1);
     }
-    float mass_stable = stable_product->type(particles).mass();
+    float mass_stable = stable_product->type().mass();
     /* Sample resonance mass */
     double mass_resonance = sample_resonance_mass(
         particles, resonance->pdgcode(), stable_product->pdgcode(), cms_energy);

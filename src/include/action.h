@@ -125,7 +125,7 @@ class DecayAction : public Action {
 
  private:
   void one_to_two (const ParticleData &incoming0, const Particles &particles);
-  void one_to_three (const ParticleData &incoming0, const Particles &particles);
+  void one_to_three (const ParticleData &incoming0);
 };
 
 /**

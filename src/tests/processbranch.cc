@@ -13,6 +13,14 @@
 
 using namespace Smash;
 
+TEST(init_particle_types) {
+  ParticleType::create_type_list(
+      "# NAME MASS[GEV] WIDTH[GEV] PDG\n"
+      "smashon 1.1 1.1 9876543\n"
+      "smashino 1.1 1.1 1234567\n"
+      "anto_smashino 1.1 1.1 -1234567\n");
+}
+
 TEST(assign_default) {
   ProcessBranch branch;
   FUZZY_COMPARE(branch.weight(), -1.f);

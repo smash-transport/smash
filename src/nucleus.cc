@@ -286,7 +286,7 @@ void Nucleus::fill_from_list(const std::map<PdgCode, int>& particle_list,
   for (auto n = particle_list.cbegin(); n != particle_list.cend(); n++) {
     for (unsigned int i = 0; i < n->second*testparticles_; i++) {
       // append particle to list and set its PDG code.
-      particles_.emplace_back(n->first);
+      particles_.emplace_back(ParticleType::find(n->first));
     }
   }
 }

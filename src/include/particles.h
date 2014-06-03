@@ -19,11 +19,8 @@ namespace Smash {
 /**
  * The Particles class abstracts the storage and manipulation of particles.
  *
- * There should be only one Particles object per Experiment. This object stores
- * the data about all existing particles in the experiment (ParticleData). Each
- * particle is of a predefined type (ParticleType). The types are immutable and
- * need not be copied into each ParticleData object. The type information can
- * easily be retrieved via the PDG code.
+ * There is one Particles object per Experiment. It stores
+ * the data about all existing particles in the experiment (ParticleData).
  *
  * \note
  * The Particles object cannot be copied, because it does not make sense
@@ -116,7 +113,6 @@ class Particles {
   };
 
   using ParticleDataMap = std::map<int, ParticleData>;
-  using ParticleTypeMap = std::map<PdgCode, ParticleType>;
   using DecayModesMap = std::map<PdgCode, DecayModes>;
 
  public:
@@ -126,12 +122,10 @@ class Particles {
    * This initializes all the members. The object is ready for usage right after
    * construction.
    *
-   * \param particles A string that contains the definition of ParticleTypes to
-   *                  be created.
    * \param decaymodes A string that contains the definition of possible
    *                   DecayModes.
    */
-  Particles(const std::string &particles, const std::string &decaymodes);
+  Particles(const std::string &decaymodes);
 
   /// Cannot be copied
   Particles(const Particles &) = delete;
@@ -155,21 +149,6 @@ class Particles {
   /// const overload of the above
   MapIterationAdapter<const ParticleDataMap> data() const { return &data_; }
 
-  /**
-   * Use returned object for iterating over all ParticleType objects.
-   *
-   * You can use this object for use with range-based for:
-   * \code
-   * for (const ParticleType &type : particles->types()) {
-   *   ...
-   * }
-   * \endcode
-   *
-   * \returns Opaque object that provides begin/end functions for iteration of
-   * all ParticleType objects.
-   */
-  MapIterationAdapter<const ParticleTypeMap> types() const { return &types_; }
-
   // Iterating the DecayModes map would be easy, but not useful.
   // MapIterationAdapter<const DecayModesMap> decay_modes() const { return
   // &decay_modes_; }
@@ -186,23 +165,20 @@ class Particles {
    * \throws std::out_of_range If there is no particle with the given \p id.
    */
   inline const ParticleData &data(int id) const;
-  /**
-   * Return the type of a specific particle given its id
-   *
-   * \warning This function has a high cost. Prefer to call \ref particle_type
-   *          instead.
-   */
-  inline const ParticleType &type(int id) const;
-  /**
-   * Return the type for a specific pdgcode
-   *
-   * \throws std::out_of_range If there is no type with the given \p pdgcode.
-   */
-  inline const ParticleType &type(PdgCode pdgcode) const;
-  /// \deprecated Use the function above
+
+  __attribute__((deprecated))
+  inline const ParticleType &type(int id) const { return data(id).type(); }
+
+  __attribute__((deprecated))
+  inline const ParticleType &type(PdgCode pdgcode) const {
+    return ParticleType::find(pdgcode);
+  }
+
+  __attribute__((deprecated))
   inline const ParticleType &particle_type(PdgCode pdgcode) const {
     return type(pdgcode);
   }
+
   /// Return decay modes of this particle type
   inline const DecayModes &decay_modes(PdgCode pdg) const;
   /// return the highest used id
@@ -221,22 +197,8 @@ class Particles {
   inline bool empty(void) const;
   /// check the existence of an element in the ParticleData map
   inline bool has_data(int id) const;
-  /// size() check of the ParticleType map
-  inline size_t types_size(void) const;
-  /// empty() check of the ParticleType map
-  inline bool types_empty(void) const;
   /// return time of the computational frame
   inline double time(void) const;
-
-  /** Check whether a particle type with the given \p pdg code is known.
-   *
-   * \param pdgcode The pdg code of the particle in question.
-   * \return \c true  If a ParticleType of the given \p pdg code is registered.
-   * \return \c false otherwise.
-   */
-  bool is_particle_type_registered(PdgCode pdgcode) const {
-    return types_.find(pdgcode) != types_.end();
-  }
 
   struct LoadFailure : public std::runtime_error {
     using std::runtime_error::runtime_error;
@@ -257,14 +219,11 @@ class Particles {
   void reset();
 
  private:
-  /// Returns the ParticleData map as described in the \p input string.
-  static ParticleTypeMap load_particle_types(const std::string &input);
   /**
    * Returns the DecayModes map as described in the \p input string.
    *
    * It does sanity checking - that the particles it talks about are in the
-   * ParticleType map - and therefore needs access to the previously created
-   * types_ map.
+   * ParticleType map.
    */
   DecayModesMap load_decaymodes(const std::string &input);
 
@@ -278,12 +237,7 @@ class Particles {
    * lookup of the corresponding particle id with its data.
    */
   ParticleDataMap data_;
-  /**
-   * a map between pdg and correspoding static data of the particles
-   *
-   * PDG ids are scattered in a large range of values, hence it is a map.
-   */
-  const ParticleTypeMap types_;
+
   /// a map between pdg and corresponding decay modes
   const DecayModesMap all_decay_modes_;
 };
@@ -291,16 +245,6 @@ class Particles {
 /* return the data of a specific particle */
 inline const ParticleData &Particles::data(int particle_id) const {
   return data_.at(particle_id);
-}
-
-/* return the type of a specific particle */
-inline const ParticleType &Particles::type(int particle_id) const {
-  return types_.at(data_.at(particle_id).pdgcode());
-}
-
-/* return a specific type */
-inline const ParticleType &Particles::type(PdgCode pdgcode) const {
-  return types_.at(pdgcode);
 }
 
 /* return the decay modes of specific type */
@@ -357,16 +301,6 @@ inline size_t Particles::size() const {
 /* check if we have particles */
 inline bool Particles::empty() const {
   return data_.empty();
-}
-
-/* total number particle types */
-inline size_t Particles::types_size() const {
-  return types_.size();
-}
-
-/* check if we have particle types */
-inline bool Particles::types_empty() const {
-  return types_.empty();
 }
 
 /* check the existence of an element in the ParticleData map */

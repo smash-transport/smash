@@ -46,6 +46,7 @@ set(smash_src
         particledata.cc
         particles.cc
         particlesoutput.cc
+        particletype.cc
         pdgcode.cc
         processbranch.cc
         random.cc

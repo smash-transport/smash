@@ -29,7 +29,7 @@ class ParticleData {
    * All other values are initialized to improbable values.
    */
   explicit ParticleData(const ParticleType &particle_type, int unique_id = -1)
-      : id_(unique_id), type_(particle_type) {}
+      : id_(unique_id), type_(&particle_type) {}
 
   inline int id(void) const;
   inline void set_id(const int id);
@@ -37,14 +37,14 @@ class ParticleData {
 
   // convenience accessors to PdgCode:
   /// \copydoc PdgCode::is_hadron
-  bool is_hadron() const { return type_.is_hadron(); }
+  bool is_hadron() const { return type_->is_hadron(); }
 
   /**
    * Return the ParticleType object associated to this particle.
    *
    * \todo Remove the need for the Particles parameter.
    */
-  const ParticleType &type(const Particles &particles) const;
+  const ParticleType &type() const { return *type_; }
 
   inline int id_process(void) const;
   inline void set_id_process(const int id);
@@ -71,13 +71,13 @@ class ParticleData {
 
  private:
   /// Each particle has a unique identifier
-  int id_;
+  int id_ = -1;
 
   /**
    * A reference to the ParticleType object for this particle (this contains
    * all the static information).
    */
-  const ParticleType &type_;
+  const ParticleType *type_ = nullptr;
 
   /// counter of the last collision/decay
   int id_process_ = -1;
@@ -101,7 +101,7 @@ inline void ParticleData::set_id(const int i) {
 
 /// look up the pdgcode of the particle
 inline PdgCode ParticleData::pdgcode(void) const {
-  return type_.pdgcode();
+  return type_->pdgcode();
 }
 
 /// look up the id of the collision process

@@ -36,8 +36,8 @@ DecayAction::DecayAction(const std::vector<int> &in_part,
 void DecayAction::one_to_two(const ParticleData &incoming0, const Particles &particles) {
   ParticleData &outgoing0 = outgoing_particles_[0];
   ParticleData &outgoing1 = outgoing_particles_[1];
-  const ParticleType &outgoing0_type = outgoing0.type(particles);
-  const ParticleType &outgoing1_type = outgoing1.type(particles);
+  const ParticleType &outgoing0_type = outgoing0.type();
+  const ParticleType &outgoing1_type = outgoing1.type();
 
   const PdgCode type_a = outgoing0.pdgcode();
   const PdgCode type_b = outgoing1.pdgcode();
@@ -79,13 +79,13 @@ void DecayAction::one_to_two(const ParticleData &incoming0, const Particles &par
  * \param[in] incoming0 decaying particle (in its rest frame)
  * \param[in] particles Particles in the simulation.
  */
-void DecayAction::one_to_three(const ParticleData &incoming0, const Particles &particles) {
+void DecayAction::one_to_three(const ParticleData &incoming0) {
   ParticleData &outgoing0 = outgoing_particles_[0];
   ParticleData &outgoing1 = outgoing_particles_[1];
   ParticleData &outgoing2 = outgoing_particles_[2];
-  const ParticleType &outgoing0_type = outgoing0.type(particles);
-  const ParticleType &outgoing1_type = outgoing1.type(particles);
-  const ParticleType &outgoing2_type = outgoing2.type(particles);
+  const ParticleType &outgoing0_type = outgoing0.type();
+  const ParticleType &outgoing1_type = outgoing1.type();
+  const ParticleType &outgoing2_type = outgoing2.type();
 
   // TODO(weil) This may be checked already when reading in the possible
   // decay channels.
@@ -245,7 +245,7 @@ void DecayAction::perform(Particles *particles, size_t &id_process) {
 
   /* local copy of the initial state */
   ParticleData particle0 = particles->data(incoming_particles_[0]);
-  const ParticleType &type0 = particle0.type(*particles);
+  const ParticleType &type0 = particle0.type();
 
   if (interaction_type_ != 2) {
     printf("Decays warning: ID %i (%s) has process type %i.\n", particle0.id(),
@@ -272,7 +272,7 @@ void DecayAction::perform(Particles *particles, size_t &id_process) {
   if (outgoing_particles_.size() == 2) {
     one_to_two (particle0, *particles);
   } else if (outgoing_particles_.size() == 3) {
-    one_to_three (particle0, *particles);
+    one_to_three (particle0);
   } else {
     throw InvalidDecay(
         "DecayAction::perform: Only 1->2 or 1->3 processes are supported. "

@@ -7,8 +7,10 @@
 #ifndef SRC_INCLUDE_PARTICLETYPE_H_
 #define SRC_INCLUDE_PARTICLETYPE_H_
 
-#include <string>
+#include "forwarddeclarations.h"
 #include "pdgcode.h"
+
+#include <string>
 
 namespace Smash {
 
@@ -57,6 +59,30 @@ class ParticleType {
 
   /// \copydoc PdgCode::is_hadron
   bool is_hadron() const { return pdgcode_.is_hadron(); }
+
+  /**
+   * Returns a list of all ParticleType objects.
+   */
+  static const ParticleTypeList &list_all();
+
+  /**
+   * Returns the ParticleType object for the given \p pdgcode.
+   */
+  static const ParticleType &find(PdgCode pdgcode);
+
+  /**
+   * Returns whether the ParticleType with the given \p pdgcode exists.
+   */
+  static bool exists(PdgCode pdgcode);
+
+  /**
+   * Initialize the global ParticleType list (list_all) from the given input
+   * data.
+   *
+   * \param particles A string that contains the definition of ParticleTypes to
+   *                  be created.
+   */
+  static void create_type_list(const std::string &particles);
 
  private:
   /// name of the particle

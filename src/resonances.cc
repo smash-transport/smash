@@ -134,7 +134,7 @@ std::vector<ProcessBranch> resonance_cross_section(
        * type_particle2.mass() * type_particle2.mass()) / mandelstam_s;
 
   /* Find all the possible resonances */
-  for (const ParticleType &type_resonance : particles.types()) {
+  for (const ParticleType &type_resonance : ParticleType::list_all()) {
     /* Not a resonance, go to next type of particle */
     if (type_resonance.width() < 0.0) {
       continue;
@@ -317,7 +317,7 @@ size_t two_to_two_formation(const Particles &particles,
   int initial_total_minimum
     = abs(type_particle1.isospin() - type_particle2.isospin());
   /* Loop over particle types to find allowed combinations */
-  for (const ParticleType &second_type : particles.types()) {
+  for (const ParticleType &second_type : ParticleType::list_all()) {
     /* We are interested only stable particles here */
     if (second_type.width() > 0.0) {
       continue;

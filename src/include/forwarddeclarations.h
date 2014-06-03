@@ -69,6 +69,7 @@ using ActionPtr = build_unique_ptr_<Action>;
 using ActionList = build_vector_<ActionPtr>;
 using OutputsList = build_vector_<build_unique_ptr_<OutputInterface>>;
 using ParticleList = build_vector_<ParticleData>;
+using ParticleTypeList = build_vector_<ParticleType>;
 using ProcessBranchList = build_vector_<ProcessBranch>;
 
 namespace bf = boost::filesystem;
