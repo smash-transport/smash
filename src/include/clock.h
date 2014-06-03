@@ -11,6 +11,8 @@
 #define SRC_INCLUDE_CLOCK_H_
 
 #include <cmath>
+#include <cstdint>
+#include <cstdio>
 #include <limits>
 #include <stdexcept>
 

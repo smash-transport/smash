@@ -15,6 +15,7 @@
 
 #include "forwarddeclarations.h"
 
+#include <cstddef>
 #include <cstdint>
 
 namespace Smash {

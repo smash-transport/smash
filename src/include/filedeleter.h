@@ -10,6 +10,7 @@
 #ifndef SRC_INCLUDE_FILEDELETER_H_
 #define SRC_INCLUDE_FILEDELETER_H_
 
+#include <cerrno>
 #include <cstdio>
 #include <cstring>
 #include <memory>
