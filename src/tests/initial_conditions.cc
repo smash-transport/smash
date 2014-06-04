@@ -21,38 +21,37 @@ using namespace Smash;
 
 TEST(init_particle_types) {
   ParticleType::create_type_list(
-      "smashon1 0.7834 -1.0 222\n"
-      "smashon2 0.4 -1.0 224\n");
+      "smashon 0.4 -1.0 222\n");
 }
 
 TEST(initialize_box) {
   Configuration conf(TEST_CONFIG_PATH);
   conf["Modi"]["Box"]["INITIAL_CONDITION"] = 1;
-  conf["Modi"]["Box"]["LENGTH"] = 5.0;
+  conf["Modi"]["Box"]["LENGTH"] = 7.9615;
   conf["Modi"]["Box"]["TEMPERATURE"] = 0.5;
   conf["Modi"]["Box"]["START_TIME"] = 0.2;
   ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};
   BoxModus b(conf["Modi"], param);
 
-  // the mass and temperature have been fixed to give a particle number
-  // which is as close to an integer as possible (while still > 1).
-  // The value is 131.000022, meaning this has a change of 0.0022 % of
-  // giving 132 particles.
+  // length, mass and temperature have been fixed to give a particle
+  // number which is as close to an integer as possible (while still >
+  // 1).  The value is 724.000021, meaning this has a change of 0.0021 %
+  // of giving 725 particles.
   Particles P{""};
   // should return START_TIME and set P:
   COMPARE(b.initial_conditions(&P, param), 0.2f);
-  COMPARE(P.size(), 131);
+  COMPARE(P.size(), 724);
   COMPARE(P.data(67).pdgcode(), 0x222);
   // we might also look at other properties of Particles, like total
   // momentum and such.
   FourVector momentum(0.0, 0.0, 0.0, 0.0);
   for (auto p : P.data()) {
     momentum += p.momentum();
-    VERIFY(p.position().x1() <  5.0);
+    VERIFY(p.position().x1() <  7.9615);
     VERIFY(p.position().x1() >= 0.0);
-    VERIFY(p.position().x2() <  5.0);
+    VERIFY(p.position().x2() <  7.9615);
     VERIFY(p.position().x2() >= 0.0);
-    VERIFY(p.position().x3() <  5.0);
+    VERIFY(p.position().x3() <  7.9615);
     VERIFY(p.position().x3() >= 0.0);
   }
   FUZZY_COMPARE(momentum.x1(), 0.0);
@@ -91,10 +90,10 @@ TEST(initialize_nucleus_normal) {
   conf["Modi"]["Nucleus"]["SQRTSNN"] = 1.6;
   conf.take({"Modi", "Nucleus", "Projectile"});
   conf.take({"Modi", "Nucleus", "Target"});
-  conf["Modi"]["Nucleus"]["Projectile"]["PARTICLES"]["224"] = 1;
-  conf["Modi"]["Nucleus"]["Target"]["PARTICLES"]["224"] = 8;
-  conf["Modi"]["Nucleus"]["SQRTS_N"][0] = "224";
-  conf["Modi"]["Nucleus"]["SQRTS_N"][1] = "224";
+  conf["Modi"]["Nucleus"]["Projectile"]["PARTICLES"]["222"] = 1;
+  conf["Modi"]["Nucleus"]["Target"]["PARTICLES"]["222"] = 8;
+  conf["Modi"]["Nucleus"]["SQRTS_N"][0] = "222";
+  conf["Modi"]["Nucleus"]["SQRTS_N"][1] = "222";
   conf["Modi"]["Nucleus"]["INITIAL_DISTANCE"] = 0;
   conf["Modi"]["Nucleus"]["Impact"]["VALUE"] = 0;
   ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};
@@ -108,7 +107,7 @@ TEST(initialize_nucleus_normal) {
     // this is the mass squared
     COMPARE_RELATIVE_ERROR(p.momentum().sqr(), 0.16, 1e-6);
     COMPARE(p.position().x0(), 0.0);
-    COMPARE(p.pdgcode(), PdgCode(0x224));
+    COMPARE(p.pdgcode(), PdgCode(0x222));
     COMPARE_RELATIVE_ERROR(p.momentum().x0(), 0.8, 1e-6);
     COMPARE_ABSOLUTE_ERROR(p.momentum().x1(), 0.0, 1e-6);
     COMPARE_ABSOLUTE_ERROR(p.momentum().x2(), 0.0, 1e-6);
@@ -119,7 +118,7 @@ TEST(initialize_nucleus_normal) {
 
 TEST_CATCH(initialize_nucleus_low_energy, NucleusModus::InvalidEnergy) {
   Configuration conf(TEST_CONFIG_PATH);
-  conf["Modi"]["Nucleus"]["SQRTSNN"] = 1.0;
+  conf["Modi"]["Nucleus"]["SQRTSNN"] = 0.5;
   conf.take({"Modi", "Nucleus", "Projectile"});
   conf.take({"Modi", "Nucleus", "Target"});
   conf["Modi"]["Nucleus"]["Projectile"]["PARTICLES"]["222"] = 1;
