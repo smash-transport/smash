@@ -414,6 +414,18 @@ class PdgCode {
    */
   static PdgCode invalid() { return PdgCode(0x0); }
 
+  /** returns an integer with decimal representation of the code.
+   *
+   * This is necessary for ROOT output.
+   *
+   */
+  int get_decimal() const {
+    return antiparticle_sign() * ( digits_.n_J_ + digits_.n_q3_ * 10
+                                 + digits_.n_q2_ * 100 + digits_.n_q1_ * 1000
+                                 + digits_.n_L_ * 10000 + digits_.n_R_ * 100000
+                                 + digits_.n_ * 1000000);
+  }
+
  private:
 // amend this line with something that identifies your compiler if its
 // bit field order is like in the gnu c compiler for 64 bit
