@@ -134,7 +134,8 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
   size_t interactions_total = 0, previous_interactions_total = 0,
          interactions_this_interval = 0;
   print_measurements(particles_, interactions_total,
-                interactions_this_interval, conserved_initial_, time_start_);
+                interactions_this_interval, conserved_initial_, time_start_,
+                parameters_.labclock.current_time());
 
   while (! (++parameters_.labclock > end_time_)) {
     std::vector<ActionPtr> actions;  // XXX: a std::list might be better suited
@@ -180,8 +181,9 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
           interactions_total - previous_interactions_total;
       previous_interactions_total = interactions_total;
       print_measurements(particles_, interactions_total,
-                         interactions_this_interval, conserved_initial_,
-                         time_start_);
+              interactions_this_interval, conserved_initial_,
+              time_start_,
+              parameters_.labclock.next_multiple(parameters_.output_interval));
       /* save evolution data */
       for (const auto &output : outputs_) {
         output->after_Nth_timestep(particles_, evt_num, parameters_.labclock);

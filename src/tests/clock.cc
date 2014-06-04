@@ -149,6 +149,50 @@ TEST(multiple_negative_times) {
   VERIFY( labtime.multiple_is_in_next_tick(interval)) << labtime.current_time();
 }
 
+TEST(next_multiple) {
+  Clock labtime(-1.4, 0.4);
+  float interval = 1.3;
+  COMPARE(labtime.next_multiple(interval), -interval);
+  ++labtime;  // t = -1.0
+  COMPARE(labtime.next_multiple(interval), 0.f);
+  ++labtime;  // t = -0.6
+  COMPARE(labtime.next_multiple(interval), 0.f);
+  ++labtime;  // t = -0.2
+  COMPARE(labtime.next_multiple(interval), 0.f);
+  ++labtime;  // t = +0.2
+  COMPARE(labtime.next_multiple(interval), interval);
+  ++labtime;  // t = +0.6
+  COMPARE(labtime.next_multiple(interval), interval);
+  ++labtime;  // t = +1.0
+  COMPARE(labtime.next_multiple(interval), interval);
+  ++labtime;  // t = +1.4
+  COMPARE(labtime.next_multiple(interval), interval * 2.f);
+  ++labtime;  // t = +1.8
+  ++labtime;  // t = +2.2
+  COMPARE(labtime.next_multiple(interval), interval * 2.f);
+  ++labtime;  // t = +2.6
+  COMPARE(labtime.next_multiple(interval), interval * 2.f);
+  ++labtime;  // t = +3.0
+  COMPARE(labtime.next_multiple(interval), interval * 3.f);
+  ++labtime;  // t = +3.4
+  ++labtime;  // t = +3.8
+  ++labtime;  // t = +4.2
+  ++labtime;  // t = +4.6
+  ++labtime;  // t = +5.0
+  COMPARE(labtime.next_multiple(interval), interval * 4.f);
+  ++labtime;  // t = +5.4
+  ++labtime;  // t = +5.8
+  ++labtime;  // t = +6.2
+  ++labtime;  // t = +6.6
+  ++labtime;  // t = +7.0
+  ++labtime;  // t = +7.4
+  COMPARE(labtime.next_multiple(interval), interval * 6.f);
+  ++labtime;  // t = +7.8
+  COMPARE(labtime.next_multiple(interval), interval * 6.f);
+  ++labtime;  // t = +8.2
+  COMPARE(labtime.next_multiple(interval), interval * 7.f);
+}
+
 TEST(assignment) {
   Clock labtime(4.2f, 0.3f);
   Clock resettime = labtime;

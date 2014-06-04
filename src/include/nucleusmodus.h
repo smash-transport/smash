@@ -121,11 +121,6 @@ class NucleusModus : public ModusDefault {
     struct NucleusEmpty : public ModusDefault::BadInput {
     using ModusDefault::BadInput::BadInput;
   };
-  /// Thrown when the requested \a sqrt_s_NN_ is smaller than the masses
-  /// of two particles.
-  struct InvalidEnergy : public ModusDefault::BadInput {
-    using ModusDefault::BadInput::BadInput;
-  };
 
  private:
   /** Projectile.
