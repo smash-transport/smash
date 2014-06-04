@@ -38,9 +38,9 @@ class OscarFullHistoryOutput : public OutputInterface {
   void after_Nth_timestep(const Particles &particles, const int event_number,
                           const Clock &clock) override;
 
- private:
+ protected:
+  OscarFullHistoryOutput(bf::path path, const char* second_line);
   void write(const Particles &particles);
-
   FilePtr file_;
 };
 }  // namespace Smash

@@ -10,14 +10,11 @@
 #ifndef SRC_INCLUDE_OSCARPARTICLELISTOUTPUT_H_
 #define SRC_INCLUDE_OSCARPARTICLELISTOUTPUT_H_
 
-#include "outputinterface.h"
-
-#include "filedeleter.h"
-#include "forwarddeclarations.h"
+#include "oscarfullhistoryoutput.h"
 
 namespace Smash {
 
-class OscarParticleListOutput : public OutputInterface {
+class OscarParticleListOutput : public OscarFullHistoryOutput {
  public:
   OscarParticleListOutput(bf::path path);
   ~OscarParticleListOutput();
@@ -26,22 +23,12 @@ class OscarParticleListOutput : public OutputInterface {
   void at_eventstart(const Particles &particles,
                      const int event_number) override;
 
-  /// writes the final particle information of an event
-  void at_eventend(const Particles &particles, const int event_number) override;
-
   /**
    * Write a prefix line and a line per particle to OSCAR output.
    */
   void write_interaction(const ParticleList &incoming_particles,
                          const ParticleList &outgoing_particles) override;
 
-  void after_Nth_timestep(const Particles &particles, const int event_number,
-                          const Clock &clock) override;
-
- private:
-  void write(const Particles &particles);
-
-  FilePtr file_;
 };
 }  // namespace Smash
 
