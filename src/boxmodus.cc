@@ -51,7 +51,7 @@ float BoxModus::initial_conditions(Particles *particles,
   FourVector momentum_total(0, 0, 0, 0);
   size_t number_total = 0;
   /* loop over all the particle types */
-  for (const ParticleType &type : particles->types()) {
+  for (const ParticleType &type : ParticleType::list_all()) {
     /* Particles with width > 0 (resonances) do not exist in the beginning */
     if (!type.is_stable()) continue;
     printd("%s mass: %g [GeV]\n", type.name().c_str(), type.mass());

@@ -19,11 +19,40 @@
 
 using namespace Smash;
 
+TEST(init_particle_types) {
+  ParticleType::create_type_list(
+      "# NAME MASS[GEV] WIDTH[GEV] PDG\n"
+      "smashon 0.123 1.2 -331\n"
+      "pi0 0.1350 -1.0 111\n"
+      "pi+ 0.1396 -1.0 211\n"
+      "pi- 0.1396 -1.0 -211\n"
+      "rho0 0.7755 0.149 113\n"
+      "rho+ 0.7755 0.149 213\n"
+      "rho- 0.7755 0.149 -213\n"
+      "eta 0.5479 1.0e-6 221\n"
+      "omega 0.7827 0.0085 223\n"
+      "p 0.9383 -1.0 2212\n"
+      "pbar 0.9383 -1.0 -2212\n"
+      "n 0.9396 -1.0 2112\n"
+      "nbar 0.9396 -1.0 -2112\n"
+      "Delta++ 1.232 0.117 2224\n"
+      "Delta+ 1.232 0.117 2214\n"
+      "Delta0 1.232 0.117 2114\n"
+      "Delta- 1.232 0.117 1114\n"
+      "Deltabar++ 1.232 0.117 -2224\n"
+      "Deltabar+ 1.232 0.117 -2214\n"
+      "Deltabar0 1.232 0.117 -2114\n"
+      "Deltabar- 1.232 0.117 -1114\n");
+}
+
+static ParticleData create_smashon_particle(int id = -1) {
+  return ParticleData{ParticleType::find(-0x331), id};
+}
+
 TEST(everything) {
   /* checks for geometric distance criteria */
-  ParticleData particle_a, particle_b;
-  particle_a.set_id(0);
-  particle_b.set_id(1);
+  ParticleData particle_a = create_smashon_particle(0),
+               particle_b = create_smashon_particle(1);
 
   /* 2 particles with null momenta */
   particle_a.set_momentum(0.1, 0.0, 0.0, 0.0);
@@ -50,23 +79,20 @@ TEST(everything) {
   VERIFY(!(distance_squared < 0.0));
 
   /* now check the Particles class itself */
-  const std::string pis(
-      "pi+ 0.13957 -1.0 211\n"
-      "pi- 0.13957 -1.0 -211\n");
-  Particles particles(pis, {});
+  Particles particles({});
 
   /* check addition of particles */
   particles.add_data(particle_a);
   VERIFY(!(particles.size() != 1));
   particles.add_data(particle_b);
   VERIFY(!(particles.size() != 2));
-  int type_size = 0;
+  int data_size = 0;
   for (const ParticleData &data : particles.data()) {
     printd("id %d: pdg %s\n", data.id(), data.pdgcode().string().c_str());
     SMASH_UNUSED(data);
-    type_size++;
+    data_size++;
   }
-  VERIFY(!(type_size != 2));
+  VERIFY(!(data_size != 2));
   VERIFY(!(particles.empty()));
   VERIFY(particles.has_data(1));
 
@@ -78,122 +104,25 @@ TEST(everything) {
   VERIFY(!(distance_squared_2 - distance_squared > really_small));
 }
 
-TEST_CATCH(load_from_incorrect_string, Particles::LoadFailure) {
-  const std::string parts("Hallo Welt! (wave)");
-  Particles p(parts, {});
-}
-
-TEST(load_one_particle_no_extra_whitespace) {
-  const std::string parts("pi0 0.1350 -1.0 111");
-  Particles p(parts, {});
-  COMPARE(p.types_size(), 1u);
-  int count = 0;
-  for (const auto &type : p.types()) {
-    ++count;
-    COMPARE(type.mass(), 0.135f);
-    COMPARE(type.width(), -1.f);
-    COMPARE(type.pdgcode().dump(), 0x111u);
-    COMPARE(type.isospin(), 2);
-    COMPARE(type.charge(), 0);
-    COMPARE(type.spin(), 0);
-  }
-  COMPARE(count, 1);
-}
-
-TEST(load_one_particle_with_whitespace) {
-  const std::string parts("\t\n\t  pi0  0.1350 \t -1.0 111\n ");
-  Particles p(parts, {});
-  COMPARE(p.types_size(), 1u);
-  int count = 0;
-  for (const auto &type : p.types()) {
-    ++count;
-    COMPARE(type.mass(), 0.135f);
-    COMPARE(type.width(), -1.f);
-    COMPARE(type.pdgcode().dump(), 0x111u);
-    COMPARE(type.isospin(), 2);
-    COMPARE(type.charge(), 0);
-    COMPARE(type.spin(), 0);
-  }
-  COMPARE(count, 1);
-}
-
-TEST_CATCH(load_one_particle_with_incorrect_newline, Particles::LoadFailure) {
-  const std::string parts("pi0 0.1350\n-1.0 111");
-  Particles p(parts, {});
-}
-
-TEST(load_only_comments) {
-  const std::string parts(
-      "# Hello\n"
-      "  # Will you ignore me? #### sldfkjsdf\n"
-      "\t\t  \t # yes?");
-  Particles p(parts, {});
-  COMPARE(p.types_size(), 0u);
-}
-
-TEST(load_one_particle_with_comment) {
-  const std::string parts("pi0 0.1350  -1.0 111 # This is pi0. Swell.");
-  Particles p(parts, {});
-  COMPARE(p.types_size(), 1u);
-  int count = 0;
-  for (const auto &type : p.types()) {
-    ++count;
-    COMPARE(type.mass(), 0.135f);
-    COMPARE(type.width(), -1.f);
-    COMPARE(type.pdgcode().dump(), 0x111u);
-    COMPARE(type.isospin(), 2);
-    COMPARE(type.charge(), 0);
-    COMPARE(type.spin(), 0);
-  }
-  COMPARE(count, 1);
-}
-
-namespace particles_txt {
-#include <particles.txt.h>
-}  // namespace particles_txt
-namespace decaymodes_txt {
-#include <decaymodes.txt.h>
-}  // namespace decaymodes_txt
-
-TEST(load_many_particles) {
-  Particles p(particles_txt::data, {});
-  COMPARE(p.types_size(), 20u);
-  ParticleType type = p.particle_type(-0x1114);
-  COMPARE(type.mass(), 1.232f);
-  COMPARE(type.width(), .117f);
-  COMPARE(type.pdgcode().dump(), 0x80001114);
-  COMPARE(type.isospin(), 3);
-  COMPARE(type.charge(), 1);
-  COMPARE(type.spin(), 3);
-
-  type = p.particle_type(0x2112);
-  COMPARE(type.mass(), .9396f);
-  COMPARE(type.width(), -1.f);
-  COMPARE(type.pdgcode().dump(), 0x2112u);
-  COMPARE(type.isospin(), 1);
-  COMPARE(type.charge(), 0);
-  COMPARE(type.spin(), 1);
-}
-
 TEST_CATCH(load_decaymodes_missing_pdg, Particles::ReferencedParticleNotFound) {
   const std::string decays_input(
-      "113 \n"
+      "-441 \n"
       );
-  Particles p({}, decays_input);
+  Particles p(decays_input);
 }
 
 TEST_CATCH(load_decaymodes_no_decays, Particles::MissingDecays) {
   const std::string decays_input(
       "113 # rho0\n"
       );
-  Particles p(particles_txt::data, decays_input);
+  Particles p(decays_input);
 }
 
 TEST_CATCH(load_decaymodes_incorrect_start, PdgCode::InvalidPdgCode) {
   const std::string decays_input(
       "113. # rho0\n"
       );
-  Particles p(particles_txt::data, decays_input);
+  Particles p(decays_input);
 }
 
 TEST(load_decaymodes_two_channels) {
@@ -209,7 +138,7 @@ TEST(load_decaymodes_two_channels) {
       "0.33 0 211 -213	# pi+ rho-\n"
       "0.33 0 -211 213	# pi- rho+\n"
       );
-  Particles p(particles_txt::data, decays_input);
+  Particles p(decays_input);
 
   {
     const auto &rho0 = p.decay_modes(0x113);
@@ -256,17 +185,21 @@ void check_particle_data_iteration(T *p) {
 template <typename T>
 void check_particle_type_iteration(T *p) {
   std::size_t count = 0;
-  for (const auto &type : p->types()) {
+  for (const auto &type : ParticleType::list_all()) {
     const PdgCode pdg = type.pdgcode();
     const ParticleType &type2 = p->particle_type(pdg);
     COMPARE(&type, &type2);
     ++count;
   }
-  COMPARE(count, p->types_size());
+  COMPARE(count, ParticleType::list_all().size());
 }
 
+namespace decaymodes_txt {
+#include <decaymodes.txt.h>
+}  // namespace decaymodes_txt
+
 TEST(iterate_particle_data) {
-  Particles p(particles_txt::data, decaymodes_txt::data);
+  Particles p(decaymodes_txt::data);
   const Particles *p2 = &p;
   check_particle_type_iteration(&p);
   check_particle_type_iteration(p2);
@@ -282,7 +215,7 @@ TEST(iterate_particle_data) {
 }
 
 TEST(erase_particle) {
-  Particles p(particles_txt::data, decaymodes_txt::data);
+  Particles p(decaymodes_txt::data);
   p.create(0x211);
   p.create(-0x211);
   p.create(0x111);

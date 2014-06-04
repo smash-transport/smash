@@ -12,6 +12,13 @@
 
 using namespace Smash;
 
+TEST(init_particle_types) {
+  ParticleType::create_type_list(
+      "species 0.123 -.0 123\n"
+      "species3 0.123 -.0 -1234567\n"
+      "species2 0.245 2.3 2345\n");
+}
+
 TEST(size) {
   COMPARE(sizeof(QuantumNumbers), 56);
 }
@@ -119,11 +126,11 @@ TEST(count_from_particles) {
 
   // create particle with fake PdgCode (this would be equivalent to a
   // rho^+, but that should be "213").
-  ParticleData particle(PdgCode("123"));
+  ParticleData particle(ParticleType::find(PdgCode("123")));
   FourVector P(1,2,3,4);
   particle.set_momentum(P);
   // create particle list:
-  Particles list("species 0.123 -.0 123\nspecies2 0.245 2.3 2345", {});
+  Particles list({});
   list.add_data(particle);
 
   QuantumNumbers onlyone(list);
@@ -132,7 +139,7 @@ TEST(count_from_particles) {
   printf("%s", check1.report_deviations(onlyone).c_str());
   VERIFY(onlyone == check1);
 
-  ParticleData particleQ(PdgCode("123"));
+  ParticleData particleQ(ParticleType::find(PdgCode("123")));
   FourVector Q(2,3,4,5);
   particleQ.set_momentum(Q);
   list.add_data(particleQ);
@@ -142,7 +149,7 @@ TEST(count_from_particles) {
   printf("%s", check2.report_deviations(two).c_str());
   VERIFY(two == check2);
 
-  ParticleData particleR(PdgCode("2345"));
+  ParticleData particleR(ParticleType::find(PdgCode("2345")));
   FourVector R(3,4,5,6);
   particleR.set_momentum(R);
   list.add_data(particleR);
@@ -152,7 +159,7 @@ TEST(count_from_particles) {
   printf("%s", check3.report_deviations(three).c_str());
   VERIFY(three == check3);
 
-  ParticleData particleS(PdgCode("-1234567"));
+  ParticleData particleS(ParticleType::find(PdgCode("-1234567")));
   FourVector S(-6,-9,-12,-15);
   particleS.set_momentum(S);
   list.add_data(particleS);

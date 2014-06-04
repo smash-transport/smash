@@ -19,6 +19,12 @@
 
 using namespace Smash;
 
+TEST(init_particle_types) {
+  ParticleType::create_type_list(
+      "smashon1 0.7834 -1.0 222\n"
+      "smashon2 0.4 -1.0 224\n");
+}
+
 TEST(initialize_box) {
   Configuration conf(TEST_CONFIG_PATH);
   conf["Modi"]["Box"]["INITIAL_CONDITION"] = 1;
@@ -32,7 +38,7 @@ TEST(initialize_box) {
   // which is as close to an integer as possible (while still > 1).
   // The value is 131.000022, meaning this has a change of 0.0022 % of
   // giving 132 particles.
-  Particles P{"smashon 0.7834 -1.0 222\n", ""};
+  Particles P{""};
   // should return START_TIME and set P:
   COMPARE(b.initial_conditions(&P, param), 0.2f);
   COMPARE(P.size(), 131);
@@ -61,7 +67,7 @@ TEST(initialize_collider) {
   conf["Modi"]["Collider"]["TARGET"] = "222";
   ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};
   ColliderModus c(conf["Modi"], param);
-  Particles P{"smashon 0.7834 -1.0 222\n", ""};
+  Particles P{""};
   COMPARE(c.initial_conditions(&P, param), -1.f);
   COMPARE(P.size(), 2);
   COMPARE(P.data(0).pdgcode(), 0x222);
@@ -85,15 +91,15 @@ TEST(initialize_nucleus_normal) {
   conf["Modi"]["Nucleus"]["SQRTSNN"] = 1.6;
   conf.take({"Modi", "Nucleus", "Projectile"});
   conf.take({"Modi", "Nucleus", "Target"});
-  conf["Modi"]["Nucleus"]["Projectile"]["PARTICLES"]["222"] = 1;
-  conf["Modi"]["Nucleus"]["Target"]["PARTICLES"]["222"] = 8;
-  conf["Modi"]["Nucleus"]["SQRTS_N"][0] = "222";
-  conf["Modi"]["Nucleus"]["SQRTS_N"][1] = "222";
+  conf["Modi"]["Nucleus"]["Projectile"]["PARTICLES"]["224"] = 1;
+  conf["Modi"]["Nucleus"]["Target"]["PARTICLES"]["224"] = 8;
+  conf["Modi"]["Nucleus"]["SQRTS_N"][0] = "224";
+  conf["Modi"]["Nucleus"]["SQRTS_N"][1] = "224";
   conf["Modi"]["Nucleus"]["INITIAL_DISTANCE"] = 0;
   conf["Modi"]["Nucleus"]["Impact"]["VALUE"] = 0;
   ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};
   NucleusModus n(conf["Modi"], param);
-  Particles P{"smashon 0.4 -1.0 222", ""};
+  Particles P{""};
   COMPARE(n.initial_conditions(&P, param), 0.f);
   COMPARE(P.size(), 9);
   for (auto p : P.data()) {
@@ -102,7 +108,7 @@ TEST(initialize_nucleus_normal) {
     // this is the mass squared
     COMPARE_RELATIVE_ERROR(p.momentum().sqr(), 0.16, 1e-6);
     COMPARE(p.position().x0(), 0.0);
-    COMPARE(p.pdgcode(), PdgCode(0x222));
+    COMPARE(p.pdgcode(), PdgCode(0x224));
     COMPARE_RELATIVE_ERROR(p.momentum().x0(), 0.8, 1e-6);
     COMPARE_ABSOLUTE_ERROR(p.momentum().x1(), 0.0, 1e-6);
     COMPARE_ABSOLUTE_ERROR(p.momentum().x2(), 0.0, 1e-6);
@@ -123,7 +129,7 @@ TEST_CATCH(initialize_nucleus_low_energy, NucleusModus::InvalidEnergy) {
   conf["Modi"]["Nucleus"]["INITIAL_DISTANCE"] = 0;
   ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};
   NucleusModus n(conf["Modi"], param);
-  Particles P{"smashon 0.7834 -1.0 222", ""};
+  Particles P{""};
   n.initial_conditions(&P, param);
 }
 
@@ -139,7 +145,7 @@ TEST_CATCH(initialize_nucleus_empty_projectile, NucleusModus::NucleusEmpty) {
   conf["Modi"]["Nucleus"]["INITIAL_DISTANCE"] = 0;
   ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};
   NucleusModus n(conf["Modi"], param);
-  Particles P{"smashon 0.7834 -1.0 222", ""};
+  Particles P{""};
   n.initial_conditions(&P, param);
 }
 
@@ -155,7 +161,7 @@ TEST_CATCH(initialize_nucleus_empty_target, NucleusModus::NucleusEmpty) {
   conf["Modi"]["Nucleus"]["INITIAL_DISTANCE"] = 0;
   ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};
   NucleusModus n(conf["Modi"], param);
-  Particles P{"smashon 0.7834 -1.0 222", ""};
+  Particles P{""};
   n.initial_conditions(&P, param);
 }
 

@@ -9,6 +9,7 @@
 
 #include "forwarddeclarations.h"
 #include "fourvector.h"
+#include "particletype.h"
 #include "pdgcode.h"
 
 namespace Smash {
@@ -21,36 +22,29 @@ namespace Smash {
  */
 class ParticleData {
  public:
-  /// Use improbable values for default constructor
-  ParticleData() {}
-
   /**
-   * Initialize the data with only a valid ID. All the other values are
-   * initialized to improbable values.
+   * Create a new particle with the given \p particle_type and optionally a
+   * specific \p unique_id.
+   *
+   * All other values are initialized to improbable values.
    */
-  explicit ParticleData(const int i) : id_(i) {}
-
-  /**
-   * Initialize the data with only a valid PDG code. All the other values are
-   * initialized to improbable values.
-   */
-  explicit ParticleData(const PdgCode p) : pdgcode_(p) {}
+  explicit ParticleData(const ParticleType &particle_type, int unique_id = -1)
+      : id_(unique_id), type_(&particle_type) {}
 
   inline int id(void) const;
   inline void set_id(const int id);
   inline PdgCode pdgcode(void) const;
-  inline void set_pdgcode(const PdgCode pdgcode);
 
   // convenience accessors to PdgCode:
   /// \copydoc PdgCode::is_hadron
-  bool is_hadron() const { return pdgcode_.is_hadron(); }
+  bool is_hadron() const { return type_->is_hadron(); }
 
   /**
    * Return the ParticleType object associated to this particle.
    *
    * \todo Remove the need for the Particles parameter.
    */
-  const ParticleType &type(const Particles &particles) const;
+  const ParticleType &type() const { return *type_; }
 
   inline int id_process(void) const;
   inline void set_id_process(const int id);
@@ -78,8 +72,13 @@ class ParticleData {
  private:
   /// Each particle has a unique identifier
   int id_ = -1;
-  /// pdg id of the particle
-  PdgCode pdgcode_ = PdgCode::invalid();
+
+  /**
+   * A reference to the ParticleType object for this particle (this contains
+   * all the static information).
+   */
+  const ParticleType *type_ = nullptr;
+
   /// counter of the last collision/decay
   int id_process_ = -1;
   /// collision time
@@ -102,12 +101,7 @@ inline void ParticleData::set_id(const int i) {
 
 /// look up the pdgcode of the particle
 inline PdgCode ParticleData::pdgcode(void) const {
-  return pdgcode_;
-}
-
-/// set id of the particle
-inline void ParticleData::set_pdgcode(const PdgCode i) {
-  pdgcode_ = i;
+  return type_->pdgcode();
 }
 
 /// look up the id of the collision process
