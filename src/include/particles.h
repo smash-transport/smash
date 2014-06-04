@@ -8,6 +8,7 @@
 #define SRC_INCLUDE_PARTICLES_H_
 
 #include "decaymodes.h"
+#include "macros.h"
 #include "particledata.h"
 #include "particletype.h"
 #include "pdgcode.h"
@@ -166,15 +167,15 @@ class Particles {
    */
   inline const ParticleData &data(int id) const;
 
-  __attribute__((deprecated))
+  SMASH_DEPRECATED("use ParticleData::type() instead")
   inline const ParticleType &type(int id) const { return data(id).type(); }
 
-  __attribute__((deprecated))
+  SMASH_DEPRECATED("use ParticleType::find(PdgCode) instead")
   inline const ParticleType &type(PdgCode pdgcode) const {
     return ParticleType::find(pdgcode);
   }
 
-  __attribute__((deprecated))
+  SMASH_DEPRECATED("use ParticleType::find(PdgCode) instead")
   inline const ParticleType &particle_type(PdgCode pdgcode) const {
     return type(pdgcode);
   }

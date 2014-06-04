@@ -16,4 +16,6 @@
 
 #define SMASH_UNUSED(x) (void)(x)
 
+#define SMASH_DEPRECATED(msg) __attribute__((deprecated(msg)))
+
 #endif  // SRC_INCLUDE_MACROS_H_
