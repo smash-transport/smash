@@ -14,6 +14,8 @@
 #include <istream>
 
 #include "include/constants.h"
+#include "include/processbranch.h"
+#include "include/decaymodes.h"
 
 namespace Smash {
 
@@ -26,7 +28,7 @@ namespace Smash {
  * \param mass1 Mass of first particle [GeV].
  * \param mass2 Mass of second particle [GeV].
  */
-static float pCM (float srts, float mass1, float mass2) {
+static float pCM (const float srts, const float mass1, const float mass2) {
   float s,mass12,x;
   s = srts*srts;
   mass12 = mass1*mass1;
@@ -65,7 +67,9 @@ static float BlattWeisskopf (const float x, const int L) {
 }
 
 
-float width_Manley (float mass, float poleMass, float mass1, float mass2, int L, float partialWidth_pole) {
+float width_Manley (const float mass, const float poleMass,
+                    const float mass1, const float mass2,
+                    const int L, const float partialWidth_pole) {
   float bw, p_ab_mass, p_ab_pole, rho_ab_mass, rho_ab_pole;
   float interactionRadius = 1./hbarc;
 
@@ -87,5 +91,32 @@ float width_Manley (float mass, float poleMass, float mass1, float mass2, int L,
 
   return partialWidth_pole * rho_ab_mass/rho_ab_pole;
 }
+
+
+float width_total (const ParticleType *t, const float m) {
+  float w = 0., partial_width_at_pole;
+  if (t->is_stable()) return w;
+  const std::vector<DecayBranch> decaymodes
+        = DecayModes::find(t->pdgcode()).decay_mode_list();
+  // loop over decay modes and sum up all partial widths
+  for (std::vector<DecayBranch>::const_iterator mode = decaymodes.begin();
+       mode != decaymodes.end(); ++mode) {
+    partial_width_at_pole = t->width_at_pole()*mode->weight();
+    if (mode->pdg_list().size()==2) {
+      // mass-dependent width for 2-body decays
+      w = w + width_Manley (m, t->mass(),
+                            ParticleType::find(mode->pdg_list()[0]).mass(),
+                            ParticleType::find(mode->pdg_list()[1]).mass(),
+                            mode->angular_momentum(), partial_width_at_pole);
+    }
+    else {
+      // constant width for three-body decays
+      w = w + partial_width_at_pole;
+    }
+  }
+
+  return w;
+}
+
 
 }  // namespace Smash

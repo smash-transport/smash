@@ -97,7 +97,7 @@ void ScatterAction::perform (Particles *particles, size_t &id_process)
 
     /* processes computed in the center of momenta */
     velocity_CM = boost_CM(&data_a, &data_b);
-    resonance_formation(*particles, data_a, data_b);
+    resonance_formation (data_a, data_b);
     boost_back_CM(&data_a, &data_b, velocity_CM);  // TODO(mkretz) why? can't
                                                     // we just boost a copy of
                                                     // the ParticleData objects?
@@ -141,8 +141,7 @@ void ScatterAction::perform (Particles *particles, size_t &id_process)
   id_process++;
 }
 
-void ScatterAction::resonance_formation(const Particles &particles,
-                                        const ParticleData &particle0,
+void ScatterAction::resonance_formation(const ParticleData &particle0,
                                         const ParticleData &particle1) {
   const double cms_energy =
       particle0.momentum().x0() + particle1.momentum().x0();
@@ -180,8 +179,9 @@ void ScatterAction::resonance_formation(const Particles &particles,
     }
     float mass_stable = stable_product->type().mass();
     /* Sample resonance mass */
-    double mass_resonance = sample_resonance_mass(
-        particles, resonance->pdgcode(), stable_product->pdgcode(), cms_energy);
+    double mass_resonance = sample_resonance_mass(resonance->pdgcode(),
+                                                  stable_product->pdgcode(),
+                                                  cms_energy);
 
     /* Sample the particle momenta */
     sample_cms_momenta(resonance, stable_product, cms_energy, mass_resonance,

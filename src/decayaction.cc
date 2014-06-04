@@ -34,7 +34,7 @@ DecayAction::DecayAction(const std::vector<int> &in_part,
  * \param[in] incoming0 decaying particle (in its rest frame)
  * \param[in] particles Particles in the simulation.
  */
-void DecayAction::one_to_two(const ParticleData &incoming0, const Particles &particles) {
+void DecayAction::one_to_two (const ParticleData &incoming0) {
   ParticleData &outgoing0 = outgoing_particles_[0];
   ParticleData &outgoing1 = outgoing_particles_[1];
   const ParticleType &outgoing0_type = outgoing0.type();
@@ -57,9 +57,9 @@ void DecayAction::one_to_two(const ParticleData &incoming0, const Particles &par
   /* If one of the particles is resonance, sample its mass */
   /* XXX: Other particle assumed stable! */
   if (!outgoing0_type.is_stable()) {
-    mass_a = sample_resonance_mass(particles, type_a, type_b, total_energy);
+    mass_a = sample_resonance_mass (type_a, type_b, total_energy);
   } else if (!outgoing1_type.is_stable()) {
-    mass_b = sample_resonance_mass(particles, type_b, type_a, total_energy);
+    mass_b = sample_resonance_mass (type_b, type_a, total_energy);
   }
 
   /* Sample the momenta */
@@ -270,7 +270,7 @@ void DecayAction::perform(Particles *particles, size_t &id_process) {
    */
   outgoing_particles_ = choose_channel(*particles);
   if (outgoing_particles_.size() == 2) {
-    one_to_two (particle0, *particles);
+    one_to_two (particle0);
   } else if (outgoing_particles_.size() == 3) {
     one_to_three (particle0);
   } else {

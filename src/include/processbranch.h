@@ -171,8 +171,8 @@ inline int ProcessBranch::type (void) const {
  */
 class DecayBranch : public ProcessBranch {
  public:
-   inline int angular_momentum() const;
-   inline void set_angular_momentum(const int L);
+  inline int angular_momentum() const;
+  inline void set_angular_momentum(const int L);
  private:
   int angular_momentum_;
 };

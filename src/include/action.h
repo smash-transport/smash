@@ -124,7 +124,7 @@ class DecayAction : public Action {
   };
 
  private:
-  void one_to_two (const ParticleData &incoming0, const Particles &particles);
+  void one_to_two (const ParticleData &incoming0);
   void one_to_three (const ParticleData &incoming0);
 };
 
@@ -167,8 +167,7 @@ class ScatterAction : public Action {
    * \param[in] particle0 ID of the first initial state particle.
    * \param[in] particle1 ID of the second initial state particle.
    */
-  void resonance_formation(const Particles &particles,
-                           const ParticleData &particle0,
+  void resonance_formation(const ParticleData &particle0,
                            const ParticleData &particle1);
 };
 

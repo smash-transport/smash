@@ -7,6 +7,8 @@
 #ifndef SRC_INCLUDE_WIDTH_H_
 #define SRC_INCLUDE_WIDTH_H_
 
+#include "particletype.h"
+
 namespace Smash {
 
 /**
@@ -20,7 +22,11 @@ namespace Smash {
  * \param L Angular momentum of the decay.
  * \param partialWidth_pole Partial width at the pole mass [GeV].
  */
-float width_Manley (float mass, float poleMass, float mass1, float mass2, int L, float partialWidth_pole);
+float width_Manley (const float mass, const float poleMass,
+                    const float mass1, const float mass2,
+                    const int L, const float partialWidth_pole);
+
+float width_total (const ParticleType *t, const float m);
 
 }  // namespace Smash
 
