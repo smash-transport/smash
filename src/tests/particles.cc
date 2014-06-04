@@ -182,12 +182,11 @@ void check_particle_data_iteration(T *p) {
   COMPARE(count, p->size());
 }
 
-template <typename T>
-void check_particle_type_iteration(T *p) {
+static void check_particle_type_iteration() {
   std::size_t count = 0;
   for (const auto &type : ParticleType::list_all()) {
     const PdgCode pdg = type.pdgcode();
-    const ParticleType &type2 = p->particle_type(pdg);
+    const ParticleType &type2 = ParticleType::find(pdg);
     COMPARE(&type, &type2);
     ++count;
   }
@@ -201,8 +200,8 @@ namespace decaymodes_txt {
 TEST(iterate_particle_data) {
   Particles p(decaymodes_txt::data);
   const Particles *p2 = &p;
-  check_particle_type_iteration(&p);
-  check_particle_type_iteration(p2);
+  check_particle_type_iteration();
+  check_particle_type_iteration();
 
   check_particle_data_iteration(&p);
   check_particle_data_iteration(p2);

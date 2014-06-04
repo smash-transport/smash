@@ -177,7 +177,7 @@ class Particles {
 
   SMASH_DEPRECATED("use ParticleType::find(PdgCode) instead")
   inline const ParticleType &particle_type(PdgCode pdgcode) const {
-    return type(pdgcode);
+    return ParticleType::find(pdgcode);
   }
 
   /// Return decay modes of this particle type
@@ -264,7 +264,7 @@ inline int Particles::add_data(ParticleData const &particle_data) {
 /* create a bunch of particles */
 inline void Particles::create(size_t number, PdgCode pdgcode) {
   /* fixed pdgcode and no collision yet */
-  ParticleData particle(type(pdgcode));
+  ParticleData particle(ParticleType::find(pdgcode));
   particle.set_collision(0);
   for (size_t i = 0; i < number; i++) {
     id_max_++;
@@ -276,7 +276,7 @@ inline void Particles::create(size_t number, PdgCode pdgcode) {
 /* create a bunch of particles */
 inline ParticleData& Particles::create(PdgCode pdgcode) {
   /* fixed pdgcode and no collision yet */
-  ParticleData particle(type(pdgcode));
+  ParticleData particle(ParticleType::find(pdgcode));
   particle.set_collision(0);
   id_max_++;
   particle.set_id(id_max_);

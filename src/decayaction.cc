@@ -215,7 +215,7 @@ void DecayAction::one_to_three(const ParticleData &incoming0) {
 }
 
 ParticleList DecayAction::choose_channel(const Particles &particles) const {
-  const PdgCode pdgcode = particles.type(incoming_particles_[0]).pdgcode();
+  const PdgCode pdgcode = particles.data(incoming_particles_[0]).pdgcode();
 
   /* Get the decay modes of this resonance */
   const std::vector<ProcessBranch> decaymodes
