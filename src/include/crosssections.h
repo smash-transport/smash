@@ -11,6 +11,10 @@
 
 namespace Smash {
 
+/** Contains the parametrizations of Cross-Sections
+ *
+ * This Class is deprecated and will be replaced in DecayAction
+ */
 class CrossSections {
  public:
   /** Constructs a new cross-sections object

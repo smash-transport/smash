@@ -9,6 +9,7 @@
 
 #include "forwarddeclarations.h"
 #include "fourvector.h"
+#include "particletype.h"
 #include "pdgcode.h"
 
 namespace Smash {
@@ -21,36 +22,32 @@ namespace Smash {
  */
 class ParticleData {
  public:
-  /// Use improbable values for default constructor
-  ParticleData() {}
-
   /**
-   * Initialize the data with only a valid ID. All the other values are
-   * initialized to improbable values.
+   * Create a new particle with the given \p particle_type and optionally a
+   * specific \p unique_id.
+   *
+   * All other values are initialized to improbable values.
    */
-  explicit ParticleData(const int i) : id_(i) {}
-
-  /**
-   * Initialize the data with only a valid PDG code. All the other values are
-   * initialized to improbable values.
-   */
-  explicit ParticleData(const PdgCode p) : pdgcode_(p) {}
+  explicit ParticleData(const ParticleType &particle_type, int unique_id = -1)
+      : id_(unique_id), type_(&particle_type) {}
 
   inline int id(void) const;
   inline void set_id(const int id);
   inline PdgCode pdgcode(void) const;
-  inline void set_pdgcode(const PdgCode pdgcode);
 
   // convenience accessors to PdgCode:
   /// \copydoc PdgCode::is_hadron
-  bool is_hadron() const { return pdgcode_.is_hadron(); }
+  bool is_hadron() const { return type_->is_hadron(); }
+
+  /// \copydoc ParticleType::mass
+  float mass() const { return type_->mass(); }
 
   /**
    * Return the ParticleType object associated to this particle.
    *
    * \todo Remove the need for the Particles parameter.
    */
-  const ParticleType &type(const Particles &particles) const;
+  const ParticleType &type() const { return *type_; }
 
   inline int id_process(void) const;
   inline void set_id_process(const int id);
@@ -60,9 +57,8 @@ class ParticleData {
   inline void set_collision_past(const int process_id);
   inline const FourVector &momentum(void) const;
   inline void set_momentum(const FourVector &momentum_vector);
-  inline void set_momentum(const double &mass, const ThreeVector &mom);
-  inline void set_momentum(const double &mass, const double &px,
-                           const double &py, const double &pz);
+  inline void set_momentum(double mass, const ThreeVector &mom);
+  inline void set_momentum(double mass, double px, double py, double pz);
   inline const FourVector &position(void) const;
   inline void set_position(const FourVector &position);
   /// get the velocity 3-vector
@@ -78,8 +74,13 @@ class ParticleData {
  private:
   /// Each particle has a unique identifier
   int id_ = -1;
-  /// pdg id of the particle
-  PdgCode pdgcode_ = PdgCode::invalid();
+
+  /**
+   * A reference to the ParticleType object for this particle (this contains
+   * all the static information).
+   */
+  const ParticleType *type_ = nullptr;
+
   /// counter of the last collision/decay
   int id_process_ = -1;
   /// collision time
@@ -102,12 +103,7 @@ inline void ParticleData::set_id(const int i) {
 
 /// look up the pdgcode of the particle
 inline PdgCode ParticleData::pdgcode(void) const {
-  return pdgcode_;
-}
-
-/// set id of the particle
-inline void ParticleData::set_pdgcode(const PdgCode i) {
-  pdgcode_ = i;
+  return type_->pdgcode();
 }
 
 /// look up the id of the collision process
@@ -151,15 +147,26 @@ inline void ParticleData::set_momentum(const FourVector &momentum_vector) {
   momentum_ = momentum_vector;
 }
 
-inline void ParticleData::set_momentum(const double &mass, const ThreeVector &mom) {
-  momentum_ = FourVector(sqrt(mass*mass + mom*mom), mom);
+/** set particle four momentum
+ *
+ * \param[in] new_mass the mass of the particle
+ * \param[in] mom the three-momentum of the particle
+ */
+inline void ParticleData::set_momentum(double new_mass, const ThreeVector &mom) {
+  momentum_ = FourVector(std::sqrt(new_mass * new_mass + mom * mom), mom);
 }
 
-/// set particle four momentum by components
-inline void ParticleData::set_momentum(const double &mass, const double &px,
-                          const double &py, const double &pz) {
-  momentum_ = FourVector(sqrt(mass * mass + px * px + py * py + pz * pz),
-                           px, py, pz);
+/** set particle four momentum
+ *
+ * \param[in] new_mass the mass of the particle
+ * \param[in] px x-component of the momentum
+ * \param[in] py y-component of the momentum
+ * \param[in] pz z-component of the momentum
+ */
+inline void ParticleData::set_momentum(double new_mass, double px, double py,
+                                       double pz) {
+  momentum_ = FourVector(
+      std::sqrt(new_mass * new_mass + px * px + py * py + pz * pz), px, py, pz);
 }
 
 /// particle position in Minkowski space

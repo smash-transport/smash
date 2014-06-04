@@ -15,6 +15,7 @@
 #include "include/constants.h"
 #include "include/distributions.h"
 #include "include/fourvector.h"
+#include "include/lineparser.h"
 #include "include/macros.h"
 #include "include/outputroutines.h"
 #include "include/particledata.h"
@@ -198,107 +199,8 @@ void sample_cms_momenta(ParticleData *particle1, ParticleData *particle2,
   printd("p3: %g %g \n", momentum1.x3(), momentum2.x3());
 }
 
-Particles::Particles(const std::string &particles,
-                     const std::string &decaymodes)
-    : types_(load_particle_types(particles)),
-      all_decay_modes_(load_decaymodes(decaymodes)) {}
-
-namespace {/*{{{*/
-std::string trim(const std::string &s) {
-  const auto begin = s.find_first_not_of(" \t\n\r");
-  if (begin == std::string::npos) {
-    return {};
-  }
-  const auto end = s.find_last_not_of(" \t\n\r");
-  return s.substr(begin, end - begin + 1);
-}
-struct Line {/*{{{*/
-  Line() = default;
-  Line(int n, std::string &&t) : number(n), text(std::move(t)) {
-  }
-  int number;
-  std::string text;
-};/*}}}*/
-
-std::string build_error_string(std::string message, const Line &line) {/*{{{*/
-  return message + " (on line " + std::to_string(line.number) + ": \"" +
-         line.text + "\")";
-}/*}}}*/
-
-/**
- * Helper function for parsing particles.txt and decaymodes.txt.
- *
- * This function goes through an input stream line by line and removes
- * comments and empty lines. The remaining lines will be returned as a vector
- * of strings and linenumber pairs (Line).
- *
- * \param input an lvalue reference to an input stream
- */
-std::vector<Line> line_parser(const std::string &input) {/*{{{*/
-  std::istringstream input_stream(input);
-  std::vector<Line> lines;
-  lines.reserve(50);
-
-  std::string line;
-  int line_number = 0;
-  while (std::getline(input_stream, line)) {
-    ++line_number;
-    const auto hash_pos = line.find('#');
-    if (hash_pos != std::string::npos) {
-      // found a comment, remove it from the line and look further
-      line = line.substr(0, hash_pos);
-    }
-    if (line.find_first_not_of(" \t") == std::string::npos) {
-      // only whitespace (or nothing) on this line. Next, please.
-      continue;
-    }
-    lines.emplace_back(line_number, std::move(line));
-    line = std::string();
-  }
-  return std::move(lines);
-}/*}}}*/
-
-void ensure_all_read(std::istream &input, const Line &line) {/*{{{*/
-  std::string tmp;
-  input >> tmp;
-  if (!input.eof()) {
-    throw Particles::LoadFailure(
-        build_error_string("While loading the Particle data:\nGarbage (" + tmp +
-                               ") at the remainder of the line.",
-                           line));
-  }
-}/*}}}*/
-}  // unnamed namespace/*}}}*/
-
-Particles::ParticleTypeMap Particles::load_particle_types(  //{{{
-    const std::string &input) {
-  Particles::ParticleTypeMap types;
-  for (const Line &line : line_parser(input)) {
-    std::istringstream lineinput(line.text);
-    std::string name;
-    float mass, width;
-    PdgCode pdgcode;
-    lineinput >> name >> mass >> width >> pdgcode;
-    if (lineinput.fail()) {
-      throw LoadFailure(build_error_string(
-          "While loading the Particle data:\nFailed to convert the input "
-          "string to the expected data types.",
-          line));
-    }
-    ensure_all_read(lineinput, line);
-
-    printd("Setting particle type %s mass %g width %g pdgcode %s\n",
-           name.c_str(), mass, width, pdgcode.string().c_str());
-    printd("Setting particle type %s isospin %i/2 charge %i spin %i/2\n",
-           name.c_str(), pdgcode.isospin_total(), pdgcode.charge(),
-                                                  pdgcode.spin());
-
-    types.insert(std::make_pair(
-        pdgcode,
-        ParticleType{name, mass, width, pdgcode}));
-  }
-  return std::move(types);
-}/*}}}*/
+Particles::Particles(const std::string &decaymodes)
+    : all_decay_modes_(load_decaymodes(decaymodes)) {}
 
 Particles::DecayModesMap Particles::load_decaymodes(const std::string &input) {
   Particles::DecayModesMap decaymodes;
@@ -338,7 +240,7 @@ Particles::DecayModesMap Particles::load_decaymodes(const std::string &input) {
                               // decay mode section
       end_of_decaymodes();
       pdgcode = PdgCode(trim(line.text));
-      if (!is_particle_type_registered(pdgcode)) {
+      if (!ParticleType::exists(pdgcode)) {
         throw ReferencedParticleNotFound(build_error_string(
             "Inconsistency: The particle with PDG id " +
                 pdgcode.string() +
@@ -357,7 +259,7 @@ Particles::DecayModesMap Particles::load_decaymodes(const std::string &input) {
       PdgCode pdg;
       lineinput >> pdg;
       while (lineinput) {
-        if (!is_particle_type_registered(pdg)) {
+        if (!ParticleType::exists(pdg)) {
           throw ReferencedParticleNotFound(build_error_string(
               "Inconsistency: The particle with PDG id " +
                   pdg.string() +

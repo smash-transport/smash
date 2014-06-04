@@ -82,8 +82,9 @@ static void quadrature_1d(double (*integrand_function)(double, void *),
  */
 float calculate_minimum_mass(const Particles &particles, PdgCode pdgcode) {
   /* If the particle happens to be stable, just return the mass */
-  if (particles.particle_type(pdgcode).width() < 0.0) {
-    return particles.particle_type(pdgcode).mass();
+  const auto type = ParticleType::find(pdgcode);
+  if (type.width() < 0.0) {
+    return type.mass();
   }
   /* Otherwise, let's find the highest mass value needed in any decay mode */
   float minimum_mass = 0.0;
@@ -91,14 +92,14 @@ float calculate_minimum_mass(const Particles &particles, PdgCode pdgcode) {
       particles.decay_modes(pdgcode).decay_mode_list();
   for (std::vector<ProcessBranch>::const_iterator mode = decaymodes.begin();
        mode != decaymodes.end(); ++mode) {
-    size_t decay_particles = mode->pdg_list().size();
     float total_mass = 0.0;
-    for (size_t i = 0; i < decay_particles; i++) {
+    for (const PdgCode code : mode->pdg_list()) {
       /* Stable decay products assumed; for resonances the mass can be lower! */
-      total_mass += particles.particle_type(mode->pdg_list().at(i)).mass();
+      total_mass += ParticleType::find(code).mass();
     }
-    if (total_mass > minimum_mass)
+    if (total_mass > minimum_mass) {
       minimum_mass = total_mass;
+    }
   }
   return minimum_mass;
 }
@@ -134,7 +135,7 @@ std::vector<ProcessBranch> resonance_cross_section(
        * type_particle2.mass() * type_particle2.mass()) / mandelstam_s;
 
   /* Find all the possible resonances */
-  for (const ParticleType &type_resonance : particles.types()) {
+  for (const ParticleType &type_resonance : ParticleType::list_all()) {
     /* Not a resonance, go to next type of particle */
     if (type_resonance.width() < 0.0) {
       continue;
@@ -317,7 +318,7 @@ size_t two_to_two_formation(const Particles &particles,
   int initial_total_minimum
     = abs(type_particle1.isospin() - type_particle2.isospin());
   /* Loop over particle types to find allowed combinations */
-  for (const ParticleType &second_type : particles.types()) {
+  for (const ParticleType &second_type : ParticleType::list_all()) {
     /* We are interested only stable particles here */
     if (second_type.width() > 0.0) {
       continue;
@@ -518,10 +519,10 @@ double sample_resonance_mass(const Particles &particles, PdgCode pdg_resonance,
   /* First, find the minimum mass of this resonance */
   double minimum_mass = calculate_minimum_mass(particles, pdg_resonance);
   /* Define distribution parameters */
-  float mass_stable = particles.particle_type(pdg_stable).mass();
+  float mass_stable = ParticleType::find(pdg_stable).mass();
   std::vector<double> parameters;
-  parameters.push_back(particles.particle_type(pdg_resonance).width());
-  parameters.push_back(particles.particle_type(pdg_resonance).mass());
+  parameters.push_back(ParticleType::find(pdg_resonance).width());
+  parameters.push_back(ParticleType::find(pdg_resonance).mass());
   parameters.push_back(mass_stable);
   parameters.push_back(cms_energy * cms_energy);
 

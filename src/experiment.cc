@@ -27,6 +27,9 @@
 #include "include/oscarparticlelistoutput.h"
 #include "include/outputroutines.h"
 #include "include/random.h"
+#ifdef SMASH_USE_ROOT
+#  include "include/rootoutput.h"
+#endif
 #include "include/vtkoutput.h"
 
 #include <boost/filesystem.hpp>
@@ -86,7 +89,7 @@ template <typename Modus>
 Experiment<Modus>::Experiment(Configuration &config)
     : parameters_(create_experiment_parameters(config)),
       modus_(config["Modi"], parameters_),
-      particles_{config.take({"particles"}), config.take({"decaymodes"})},
+      particles_(static_cast<std::string &&>(config.take({"decaymodes"}))),
       cross_sections_(parameters_.cross_section),
       nevents_(config.take({"General", "NEVENTS"})),
       end_time_(config.take({"General", "END_TIME"})),
@@ -131,7 +134,8 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
   size_t interactions_total = 0, previous_interactions_total = 0,
          interactions_this_interval = 0;
   print_measurements(particles_, interactions_total,
-                interactions_this_interval, conserved_initial_, time_start_);
+                interactions_this_interval, conserved_initial_, time_start_,
+                parameters_.labclock.current_time());
 
   while (! (++parameters_.labclock > end_time_)) {
     std::vector<ActionPtr> actions;  // XXX: a std::list might be better suited
@@ -177,8 +181,9 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
           interactions_total - previous_interactions_total;
       previous_interactions_total = interactions_total;
       print_measurements(particles_, interactions_total,
-                         interactions_this_interval, conserved_initial_,
-                         time_start_);
+              interactions_this_interval, conserved_initial_,
+              time_start_,
+              parameters_.labclock.next_multiple(parameters_.output_interval));
       /* save evolution data */
       for (const auto &output : outputs_) {
         output->after_Nth_timestep(particles_, evt_num, parameters_.labclock);
@@ -217,6 +222,9 @@ void Experiment<Modus>::run(const bf::path &path) {
   outputs_.emplace_back(new OscarFullHistoryOutput(path));
   outputs_.emplace_back(new OscarParticleListOutput(path));
   outputs_.emplace_back(new VtkOutput(path));
+#ifdef SMASH_USE_ROOT
+  outputs_.emplace_back(new RootOutput(path));
+#endif
 
   for (int j = 0; j < nevents_; j++) {
     initialize(path);

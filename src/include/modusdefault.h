@@ -64,6 +64,11 @@ class ModusDefault {
   struct BadInput : public std::invalid_argument {
     using std::invalid_argument::invalid_argument;
   };
+  /// Thrown when the requested energy is smaller than the masses
+  /// of two particles.
+  struct InvalidEnergy : public BadInput {
+    using BadInput::BadInput;
+  };
 };
 
 }  // namespace Smash

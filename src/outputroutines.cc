@@ -53,20 +53,20 @@ void print_header(void) {
 
 /* print_measurements - console output during simulation */
 void print_measurements(const Particles &particles,
-                        const size_t &scatterings_total,
-                        const size_t &scatterings_this_interval,
+                        const size_t scatterings_total,
+                        const size_t scatterings_this_interval,
                         const QuantumNumbers& conserved_initial,
-                SystemTimePoint time_start) {
+                        const SystemTimePoint time_start,
+                        const float time) {
   FourVector momentum_total(0, 0, 0, 0);
   /* calculate elapsed time */
   SystemTimeSpan elapsed_seconds = SystemClock::now() - time_start;
 
   QuantumNumbers current_values(particles);
   QuantumNumbers difference = conserved_initial - current_values;
-  double time = particles.time();
 
   if (likely(time > 0))
-    printf("%5g%13g%13g%13g%10zu%10zu%13g\n", time,
+    printf("%5.3f%13g%13g%13g%10zu%10zu%13g\n", time,
            difference.momentum().x0(), difference.momentum().abs3(),
            scatterings_total * 2 / (particles.size() * time),
            scatterings_this_interval, particles.size(), elapsed_seconds.count());
@@ -78,8 +78,7 @@ void print_measurements(const Particles &particles,
 }
 
 /* print_tail - output at the end of the simulation */
-void print_tail(const
-                SystemTimePoint time_start,
+void print_tail(const SystemTimePoint time_start,
                 const double &scattering_rate) {
   SystemTimeSpan time = SystemClock::now() - time_start;
   print_line();

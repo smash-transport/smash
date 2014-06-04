@@ -14,8 +14,4 @@
 
 namespace Smash {
 
-const ParticleType &ParticleData::type(const Particles &particles) const {
-  return particles.particle_type(pdgcode_);
-}
-
 }  // namespace Smash

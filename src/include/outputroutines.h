@@ -19,12 +19,12 @@ namespace Smash {
 void print_startup(const ModusDefault &parameters);
 void print_header(void);
 void print_measurements(const Particles &particles,
-                        const size_t &scatterings_total,
-                        const size_t &scatterings_this_interval,
+                        const size_t scatterings_total,
+                        const size_t scatterings_this_interval,
                         const QuantumNumbers& conserved_initial,
-                 SystemTimePoint time_start);
-void print_tail(const
-                SystemTimePoint time_start,
+                        const SystemTimePoint time_start,
+                        const float time);
+void print_tail(const SystemTimePoint time_start,
                 const double &scattering_rate);
 
 /* Compile time debug info */

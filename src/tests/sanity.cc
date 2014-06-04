@@ -19,22 +19,32 @@
 
 using namespace Smash;
 
+TEST(init_particle_types) {
+  ParticleType::create_type_list(
+      "# NAME MASS[GEV] WIDTH[GEV] PDG\n"
+      "smashon 0.123 1.2 -331\n");
+}
+
+static ParticleData create_smashon_particle(int id = -1) {
+  return ParticleData{ParticleType::find(-0x331), id};
+}
+
 // create a particle list with various interesting particles. We will
 // assume a box of 5 fm length and a time step (for propagation) of 1
 // fm.
 static void create_particle_list(Particles &P) {
   // particle that doesn't move:
-  ParticleData particle_stop;
+  ParticleData particle_stop = create_smashon_particle();
   // particle that moves with speed of light
-  ParticleData particle_fast;
+  ParticleData particle_fast = create_smashon_particle();
   // particle that moves slowly:
-  ParticleData particle_slow;
+  ParticleData particle_slow = create_smashon_particle();
   // particle that will cross a box boundary at high x:
-  ParticleData particle_x_hi;
+  ParticleData particle_x_hi = create_smashon_particle();
   // particle that will cross a box boundary at low y:
-  ParticleData particle_y_lo;
+  ParticleData particle_y_lo = create_smashon_particle();
   // particle that will cross a box boundary at low x and high z:
-  ParticleData particle_xlzh;
+  ParticleData particle_xlzh = create_smashon_particle();
 
   // set momenta:
   particle_stop.set_momentum(FourVector(4.0, 0.0, 0.0, 0.0));
@@ -65,7 +75,7 @@ static void create_particle_list(Particles &P) {
 
 TEST(sanity_default) {
   ModusDefault m;
-  Particles P{"",""};
+  Particles P{""};
   create_particle_list(P);
   COMPARE(m.sanity_check(&P), 0);
 }
@@ -78,7 +88,7 @@ TEST(sanity_box) {
   conf["Modi"]["Box"]["START_TIME"] = 0.2;
   ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};
   BoxModus b(conf["Modi"], param);
-  Particles P{"",""};
+  Particles P{""};
   create_particle_list(P);
   COMPARE(b.sanity_check(&P), 4);
 }
@@ -86,30 +96,32 @@ TEST(sanity_box) {
 TEST(sanity_collider) {
   Configuration conf(TEST_CONFIG_PATH);
   conf["Modi"]["Collider"]["SQRTS"] = 1.0;
-  conf["Modi"]["Collider"]["PROJECTILE"] = 0x211;
-  conf["Modi"]["Collider"]["TARGET"] = 0x211;
+  conf["Modi"]["Collider"]["PROJECTILE"] = "-331";
+  conf["Modi"]["Collider"]["TARGET"] = "-331";
   ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};
   ColliderModus c(conf["Modi"], param);
-  Particles P{"",""};
+  Particles P{""};
   create_particle_list(P);
   COMPARE(c.sanity_check(&P), 0);
 }
 
 TEST(sanity_nucleus) {
   Configuration conf(TEST_CONFIG_PATH);
+  conf.take({"Modi", "Nucleus", "Projectile"});
+  conf.take({"Modi", "Nucleus", "Target"});
   conf["Modi"]["Nucleus"]["SQRTSNN"] = 1.0;
-  conf["Modi"]["Nucleus"]["Projectile"]["PARTICLES"][1] = 1;
-  conf["Modi"]["Nucleus"]["Target"]["PARTICLES"][1] = 1;
+  conf["Modi"]["Nucleus"]["Projectile"]["PARTICLES"]["-331"] = 1;
+  conf["Modi"]["Nucleus"]["Target"]["PARTICLES"]["-331"] = 1;
   ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};
   NucleusModus n(conf["Modi"], param);
-  Particles P{"",""};
+  Particles P{""};
   create_particle_list(P);
   COMPARE(n.sanity_check(&P), 0);
 }
 
 //TEST(sanity_sphere) {
 //  Configuration conf(TEST_CONFIG_PATH);
-//  Particles P{"",""};
+//  Particles P{""};
 //   conf["Modi"]["Sphere"]["..."] = 1.0;
 //   ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};
 //   SphereModus s(conf["Modi"], param);

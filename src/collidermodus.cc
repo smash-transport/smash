@@ -22,6 +22,14 @@ ColliderModus::ColliderModus(Configuration modus_config,
     : sqrts_     (modus_config.take({"Collider", "SQRTS"})) {
   projectile_ = modus_config.take({"Collider", "PROJECTILE"});
   target_     = modus_config.take({"Collider", "TARGET"});
+  if (sqrts_ < ParticleType::find(projectile_).mass()
+             + ParticleType::find(target_).mass()) {
+    throw ModusDefault::InvalidEnergy(
+          "Error in input: sqrt(s) is smaller than masses:\n"
+          + std::to_string(sqrts_) + " GeV < "
+          + std::to_string(ParticleType::find(projectile_).mass()) + " GeV + "
+          + std::to_string(ParticleType::find(projectile_).mass()) + " GeV.");
+  }
 }
 
 /* print_startup - console output on startup of box specific parameters */
@@ -38,16 +46,14 @@ float ColliderModus::initial_conditions(Particles *particles,
   particles->create(1, projectile_);
   /* Pointer to "projectile" data */
   ParticleData &data_projectile = particles->data(particles->id_max());
-  float mass_projectile
-    = particles->particle_type(data_projectile.pdgcode()).mass();
+  float mass_projectile = data_projectile.mass();
   printf("projectile pdgcode %s mass %f\n",
          data_projectile.pdgcode().string().c_str(), mass_projectile);
   /* Create "target" particle */
   particles->create(1, target_);
   /* Pointer to "target" data */
   ParticleData &data_target = particles->data(particles->id_max());
-  float mass_target
-    = particles->particle_type(data_target.pdgcode()).mass();
+  float mass_target = data_target.mass();
   printf("target pdgcode %s mass %f\n",
          data_target.pdgcode().string().c_str(), mass_target);
   /* Projectile energy in CMS */

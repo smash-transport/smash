@@ -63,9 +63,8 @@ void ScatterAction::perform (Particles *particles, size_t &id_process)
   ParticleData data_b = particles->data(id_b);
 
   printd("Process %zu type %i particle %s<->%s colliding %d<->%d time %g\n",
-         id_process, interaction_type_, data_a.type(*particles).name().c_str(),
-         data_a.type(*particles).name().c_str(), id_a, id_b,
-         data_a.position().x0());
+         id_process, interaction_type_, data_a.type().name().c_str(),
+         data_a.type().name().c_str(), id_a, id_b, data_a.position().x0());
   printd_momenta("particle 1 momenta before", data_a);
   printd_momenta("particle 2 momenta before", data_b);
 
@@ -136,7 +135,7 @@ void ScatterAction::perform (Particles *particles, size_t &id_process)
 
   default:
     printf("Warning: ID %i (%s) has unspecified process type %i.\n",
-           id_a, particles->type(id_a).name().c_str(), interaction_type_);
+           id_a, data_a.type().name().c_str(), interaction_type_);
   } /* end switch (interaction_type_) */
 
   id_process++;
@@ -173,15 +172,15 @@ void ScatterAction::resonance_formation(const Particles &particles,
     /* XXX: For now, it is assumed that the other particle is stable! */
     ParticleData *resonance = &outgoing_particles_.at(0);
     ParticleData *stable_product;
-    if (resonance->type(particles).width() >
-        0) {  // TODO: can we change this to an is_stable or is_unstable method,
-              // please?
+    if (resonance->type().width() > 0) {  // TODO: can we change this to an
+                                          // is_stable or is_unstable method,
+                                          // please?
       stable_product = &outgoing_particles_.at(1);
     } else {
       stable_product = resonance;
       resonance = &outgoing_particles_.at(1);
     }
-    float mass_stable = stable_product->type(particles).mass();
+    float mass_stable = stable_product->type().mass();
     /* Sample resonance mass */
     double mass_resonance = sample_resonance_mass(
         particles, resonance->pdgcode(), stable_product->pdgcode(), cms_energy);

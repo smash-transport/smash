@@ -139,9 +139,18 @@ class Clock {
       return true;
     }
     // else, let's first see what n is in question:
-    float n = floor((current_time() + timestep_duration_) / interval);
-    return (current_time() <= n * interval
-         && n * interval < next_time());
+    float n = next_multiple(interval);
+    return (current_time() <= n && n < next_time());
+  }
+  /** returns the next multiple of a given interval
+   *
+   * \param interval the interval in question
+   *
+   * \return The smallest multiple of \p interval that is larger than
+   * the current time.
+   */
+  float next_multiple(const float interval) const {
+    return ceil(current_time() / interval) * interval;
   }
   /** resets the time to a pre-defined value
    *
