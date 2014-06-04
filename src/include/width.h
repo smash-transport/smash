@@ -12,20 +12,11 @@
 namespace Smash {
 
 /**
- * Get the mass-dependent width of a two-body decay into stable particles
- * according to Manley/Saleski, Phys. Rev. D 45 (1992) 4002.
+ * Get the mass-dependent total width of particle with type t and mass m.
  * 
- * \param mass Actual mass of the decaying particle [GeV].
- * \param poleMass Pole mass of the decaying particle [GeV].
- * \param mass1 Mass of the first daughter particle [GeV].
- * \param mass2 Mass of the second daughter particle [GeV].
- * \param L Angular momentum of the decay.
- * \param partialWidth_pole Partial width at the pole mass [GeV].
+ * \param t Type of the decaying particle.
+ * \param m Invariant mass of the decaying particle.
  */
-float width_Manley (const float mass, const float poleMass,
-                    const float mass1, const float mass2,
-                    const int L, const float partialWidth_pole);
-
 float width_total (const ParticleType *t, const float m);
 
 }  // namespace Smash
