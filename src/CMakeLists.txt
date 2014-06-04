@@ -40,7 +40,7 @@ set(smash_src
         modusdefault.cc
         nucleus.cc
         nucleusmodus.cc
-        oscarinteractionoutput.cc
+        oscarfullhistoryoutput.cc
         oscarparticlelistoutput.cc
         outputroutines.cc
         parametrizations.cc

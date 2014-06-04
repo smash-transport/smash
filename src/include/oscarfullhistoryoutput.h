@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef SRC_INCLUDE_OSCARINTERACTIONOUTPUT_H_
-#define SRC_INCLUDE_OSCARINTERACTIONOUTPUT_H_
+#ifndef SRC_INCLUDE_OSCARFULLHISTORYOUTPUT_H_
+#define SRC_INCLUDE_OSCARFULLHISTORYOUTPUT_H_
 
 #include "outputinterface.h"
 
@@ -17,10 +17,10 @@
 
 namespace Smash {
 
-class OscarInteractionOutput : public OutputInterface {
+class OscarFullHistoryOutput : public OutputInterface {
  public:
-  OscarInteractionOutput(bf::path path);
-  ~OscarInteractionOutput();
+  OscarFullHistoryOutput(bf::path path);
+  ~OscarFullHistoryOutput();
 
   /// writes the initial particle information of an event
   void at_eventstart(const Particles &particles,
@@ -45,4 +45,4 @@ class OscarInteractionOutput : public OutputInterface {
 };
 }  // namespace Smash
 
-#endif  // SRC_INCLUDE_OSCARINTERACTIONOUTPUT_H_
+#endif  // SRC_INCLUDE_OSCARFULLHISTORYOUTPUT_H_
