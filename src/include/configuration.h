@@ -75,6 +75,7 @@ namespace Smash {
  * \li \ref input_general_
  * \li \ref input_modi_nucleus_
  * \li \ref input_modi_box_
+ * \li \ref input_modi_collider_
  * \else
  * 
  * Options
@@ -83,6 +84,7 @@ namespace Smash {
  * \li \ref Experiment::create()
  * \li \ref NucleusModus
  * \li \ref BoxModus
+ * \li \ref ColliderModus
  * \endif
  */
 // !!/USER:Input
