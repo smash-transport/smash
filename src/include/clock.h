@@ -139,9 +139,8 @@ class Clock {
       return true;
     }
     // else, let's first see what n is in question:
-    float n = floor((current_time() + timestep_duration_) / interval);
-    return (current_time() <= n * interval
-         && n * interval < next_time());
+    float n = next_multiple(interval);
+    return (current_time() <= n && n < next_time());
   }
   /** returns the next multiple of a given interval
    *
