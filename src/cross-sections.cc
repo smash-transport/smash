@@ -38,8 +38,8 @@ void CrossSections::compute_kinematics(const Particles &particles, int id_a,
 
 float CrossSections::elastic(const Particles &particles, int id_a,
                              int id_b) const {
-  const ParticleType &type_a = particles.type(id_a);
-  const ParticleType &type_b = particles.type(id_b);
+  const ParticleType &type_a = particles.data(id_a).type();
+  const ParticleType &type_b = particles.data(id_b).type();
 
   const int spin_a = type_a.spin();
   const int spin_b = type_b.spin();
@@ -65,8 +65,8 @@ float CrossSections::elastic(const Particles &particles, int id_a,
 
 float CrossSections::total(const Particles &particles, int id_a,
                            int id_b) const {
-  const ParticleType &type_a = particles.type(id_a);
-  const ParticleType &type_b = particles.type(id_b);
+  const ParticleType &type_a = particles.data(id_a).type();
+  const ParticleType &type_b = particles.data(id_b).type();
 
   const int spin_a = type_a.spin();
   const int spin_b = type_b.spin();

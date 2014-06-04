@@ -82,8 +82,9 @@ static void quadrature_1d(double (*integrand_function)(double, void *),
  */
 float calculate_minimum_mass(const Particles &particles, PdgCode pdgcode) {
   /* If the particle happens to be stable, just return the mass */
-  if (particles.particle_type(pdgcode).is_stable()) {
-    return particles.particle_type(pdgcode).mass();
+  const auto type = ParticleType::find(pdgcode);
+  if (type.is_stable()) {
+    return type.mass();
   }
   /* Otherwise, let's find the highest mass value needed in any decay mode */
   float minimum_mass = 0.0;
@@ -91,14 +92,14 @@ float calculate_minimum_mass(const Particles &particles, PdgCode pdgcode) {
       DecayModes::find(pdgcode).decay_mode_list();
   for (std::vector<DecayBranch>::const_iterator mode = decaymodes.begin();
        mode != decaymodes.end(); ++mode) {
-    size_t decay_particles = mode->pdg_list().size();
     float total_mass = 0.0;
-    for (size_t i = 0; i < decay_particles; i++) {
+    for (const PdgCode code : mode->pdg_list()) {
       /* Stable decay products assumed; for resonances the mass can be lower! */
-      total_mass += particles.particle_type(mode->pdg_list().at(i)).mass();
+      total_mass += ParticleType::find(code).mass();
     }
-    if (total_mass > minimum_mass)
+    if (total_mass > minimum_mass) {
       minimum_mass = total_mass;
+    }
   }
   return minimum_mass;
 }
@@ -275,7 +276,7 @@ double two_to_one_formation(const Particles &particles,
   /* Calculate spin factor */
   const double spinfactor = (type_resonance.spin() + 1)
     / ((type_particle1.spin() + 1) * (type_particle2.spin() + 1));
-  // TODO: use off-shell width here (Particles::width)
+  // TODO: use off-shell width here (ParticleData::total_width)
   float resonance_width = type_resonance.width_at_pole();
   float resonance_mass = type_resonance.mass();
   /* Calculate resonance production cross section
@@ -399,7 +400,7 @@ size_t two_to_two_formation(const Particles &particles,
      * Integrate over the allowed resonance mass range
      */
     std::vector<double> integrand_parameters;
-    // TODO: use off-shell width here (Particles::width)
+    // TODO: use off-shell width here (ParticleData::total_width)
     integrand_parameters.push_back(type_resonance.width_at_pole());
     integrand_parameters.push_back(type_resonance.mass());
     integrand_parameters.push_back(second_type.mass());
@@ -514,11 +515,11 @@ double sample_resonance_mass(const Particles &particles, PdgCode pdg_resonance,
   /* First, find the minimum mass of this resonance */
   double minimum_mass = calculate_minimum_mass(particles, pdg_resonance);
   /* Define distribution parameters */
-  float mass_stable = particles.particle_type(pdg_stable).mass();
+  float mass_stable = ParticleType::find(pdg_stable).mass();
   std::vector<double> parameters;
-  // TODO: use off-shell width here (Particles::width)
-  parameters.push_back(particles.particle_type(pdg_resonance).width_at_pole());
-  parameters.push_back(particles.particle_type(pdg_resonance).mass());
+  // TODO: use off-shell width here (ParticleData::total_width)
+  parameters.push_back(ParticleType::find(pdg_resonance).width_at_pole());
+  parameters.push_back(ParticleType::find(pdg_resonance).mass());
   parameters.push_back(mass_stable);
   parameters.push_back(cms_energy * cms_energy);
 

@@ -96,8 +96,6 @@ float NucleusModus::initial_conditions(Particles *particles,
   //
   // Nuclei can be non-spherical. If they are, then they may be randomly
   // aligned. Excentricities and angles should be configurable.
-  projectile_.auto_set_masses(*particles);
-  target_.auto_set_masses(*particles);
   float mass_projec = projectile_.mass();
   float mass_target = target_.mass();
   printf("Masses of Nuclei: %g GeV %g GeV\n", projectile_.mass(),
@@ -109,7 +107,7 @@ float NucleusModus::initial_conditions(Particles *particles,
   // projectile.
   if (pdg_sNN_1_ != 0) {
     // If PDG Code is given, use mass of this particle type.
-    mass_1 = particles->particle_type(pdg_sNN_1_).mass();
+    mass_1 = ParticleType::find(pdg_sNN_1_).mass();
   } else if (projectile_.size() > 0) {
     // else, use average mass of a particle in that nucleus
     mass_1 = projectile_.mass()/projectile_.size();
@@ -118,7 +116,7 @@ float NucleusModus::initial_conditions(Particles *particles,
   }
   // same logic for mass2 and target as for projectile directly above.
   if (pdg_sNN_2_ != 0) {
-    mass_2 = particles->particle_type(pdg_sNN_2_).mass();
+    mass_2 = ParticleType::find(pdg_sNN_2_).mass();
   } else if (target_.size() > 0) {
     mass_2 = target_.mass()/target_.size();
   } else {

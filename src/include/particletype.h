@@ -8,6 +8,7 @@
 #define SRC_INCLUDE_PARTICLETYPE_H_
 
 #include "forwarddeclarations.h"
+#include "macros.h"
 #include "pdgcode.h"
 
 #include <string>
@@ -86,14 +87,14 @@ class ParticleType {
    *
    * \note The complexity of the search is \f$\mathcal O(\log N)\f$.
    */
-  static const ParticleType &find(PdgCode pdgcode);
+  static const ParticleType &find(PdgCode pdgcode) SMASH_CONST;
 
   /**
    * Returns whether the ParticleType with the given \p pdgcode exists.
    *
    * \note The complexity of the search is \f$\mathcal O(\log N)\f$.
    */
-  static bool exists(PdgCode pdgcode);
+  static bool exists(PdgCode pdgcode) SMASH_CONST;
 
   /**
    * Initialize the global ParticleType list (list_all) from the given input

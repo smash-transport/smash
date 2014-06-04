@@ -63,9 +63,8 @@ void ScatterAction::perform (Particles *particles, size_t &id_process)
   ParticleData data_b = particles->data(id_b);
 
   printd("Process %zu type %i particle %s<->%s colliding %d<->%d time %g\n",
-         id_process, interaction_type_, data_a.type(*particles).name().c_str(),
-         data_a.type(*particles).name().c_str(), id_a, id_b,
-         data_a.position().x0());
+         id_process, interaction_type_, data_a.type().name().c_str(),
+         data_a.type().name().c_str(), id_a, id_b, data_a.position().x0());
   printd_momenta("particle 1 momenta before", data_a);
   printd_momenta("particle 2 momenta before", data_b);
 
@@ -136,7 +135,7 @@ void ScatterAction::perform (Particles *particles, size_t &id_process)
 
   default:
     printf("Warning: ID %i (%s) has unspecified process type %i.\n",
-           id_a, particles->type(id_a).name().c_str(), interaction_type_);
+           id_a, data_a.type().name().c_str(), interaction_type_);
   } /* end switch (interaction_type_) */
 
   id_process++;

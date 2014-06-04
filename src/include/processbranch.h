@@ -46,9 +46,9 @@ class ProcessBranch {
  public:
   /// Default constructor
   ProcessBranch() : branch_weight_(-1.0), interaction_type_(0) {}
-  // Constructor with 1 particle
+  /// Constructor with 1 particle
   inline ProcessBranch(PdgCode p, float w, int t);
-  // Constructor with 2 particles
+  /// Constructor with 2 particles
   inline ProcessBranch(PdgCode p1, PdgCode p2, float w, int t);
   /// Add one particle to the list
   inline void add_particle(PdgCode particle_pdg);
@@ -73,7 +73,8 @@ class ProcessBranch {
   inline std::vector<PdgCode> pdg_list(void) const;
 
   /**
-   * Return a list of ParticleData initialized only with a PDG code from pdg_list.
+   * Return a list of ParticleData initialized with the ParticleType for the PDG
+   * codes from pdg_list.
    */
   ParticleList particle_list() const;
 

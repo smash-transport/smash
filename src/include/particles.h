@@ -112,6 +112,10 @@ class Particles {
     T *map_;
   };
 
+  /** ParticleDataMap is the prime accessor for ParticleData
+   *
+   * It maps the unique Particle ID to its volatile data.
+   */
   using ParticleDataMap = std::map<int, ParticleData>;
 
  public:
@@ -157,19 +161,6 @@ class Particles {
    * \throws std::out_of_range If there is no particle with the given \p id.
    */
   inline const ParticleData &data(int id) const;
-
-  SMASH_DEPRECATED("use ParticleData::type() instead")
-  inline const ParticleType &type(int id) const { return data(id).type(); }
-
-  SMASH_DEPRECATED("use ParticleType::find(PdgCode) instead")
-  inline const ParticleType &type(PdgCode pdgcode) const {
-    return ParticleType::find(pdgcode);
-  }
-
-  SMASH_DEPRECATED("use ParticleType::find(PdgCode) instead")
-  inline const ParticleType &particle_type(PdgCode pdgcode) const {
-    return type(pdgcode);
-  }
 
   /// return the highest used id
   inline int id_max(void) const;
@@ -232,7 +223,7 @@ inline int Particles::add_data(ParticleData const &particle_data) {
 /* create a bunch of particles */
 inline void Particles::create(size_t number, PdgCode pdgcode) {
   /* fixed pdgcode and no collision yet */
-  ParticleData particle(type(pdgcode));
+  ParticleData particle(ParticleType::find(pdgcode));
   particle.set_collision(0);
   for (size_t i = 0; i < number; i++) {
     id_max_++;
@@ -244,7 +235,7 @@ inline void Particles::create(size_t number, PdgCode pdgcode) {
 /* create a bunch of particles */
 inline ParticleData& Particles::create(PdgCode pdgcode) {
   /* fixed pdgcode and no collision yet */
-  ParticleData particle(type(pdgcode));
+  ParticleData particle(ParticleType::find(pdgcode));
   particle.set_collision(0);
   id_max_++;
   particle.set_id(id_max_);

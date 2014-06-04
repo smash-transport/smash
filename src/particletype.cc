@@ -21,6 +21,7 @@
 namespace Smash {
 
 namespace {
+/// Global pointer to the Particle Type list.
 const ParticleTypeList *all_particle_types = nullptr;
 }  // unnamed namespace
 
@@ -29,7 +30,7 @@ const ParticleTypeList &ParticleType::list_all() {
   return *all_particle_types;
 }
 
-const ParticleType &ParticleType::find(PdgCode pdgcode) {
+SMASH_CONST const ParticleType &ParticleType::find(PdgCode pdgcode) {
   const auto found = std::lower_bound(
       all_particle_types->begin(), all_particle_types->end(), pdgcode,
       [](const ParticleType &l, const PdgCode &r) { return l.pdgcode() < r; });
@@ -38,7 +39,7 @@ const ParticleType &ParticleType::find(PdgCode pdgcode) {
   return *found;
 }
 
-bool ParticleType::exists(PdgCode pdgcode) {
+SMASH_CONST bool ParticleType::exists(PdgCode pdgcode) {
   const auto found = std::lower_bound(
       all_particle_types->begin(), all_particle_types->end(), pdgcode,
       [](const ParticleType &l, const PdgCode &r) { return l.pdgcode() < r; });
@@ -81,7 +82,9 @@ void ParticleType::create_type_list(const std::string &input) {  //{{{
                const ParticleType &r) { return l.pdgcode() < r.pdgcode(); });
 
   assert(nullptr == all_particle_types);
-  all_particle_types = &type_list;
+  all_particle_types = &type_list;  // note that type_list is a function-local
+                                    // static and thus will live on until after
+                                    // main().
 }/*}}}*/
 
 }  // namespace Smash

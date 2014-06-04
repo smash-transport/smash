@@ -14,15 +14,61 @@
 
 namespace Smash {
 
+/** ColliderModus: Provides a modus for collisions of single particles
+ *
+ * To use this modus, chose
+ * \code
+ * General:
+ *      MODUS: Collider
+ * \endcode
+ * in the configuration file.
+ *
+ * Options for ColliderModus go in the "Modi"→"Collider" section of the
+ * configuration:
+ *
+ * \code
+ * Modi:
+ *      Collider:
+ *              # definitions here
+ * \endcode
+ *
+ * The following directives are understood:
+ *
+ * Modi:Collider:
+ * ---------
+ */
+// !!USER:Input
+/**
+ * \if user
+ * \page input_modi_collider_ Input Section Modi:Collider
+ * \endif
+ *
+ * `SQRTS`: Center-of-mass energy of the system, in GeV. Needs to be
+ * larger than the sum of the masses of the two particles.
+ *
+ * `PROJECTILE`: PdgCode of the Projectile
+ *
+ * `TARGETR`: PdgCode of the Target
+ */
+// !!/USER:Input
 class ColliderModus : public ModusDefault {
  public:
-  /* default constructor with probable values */
+  /** Constructor
+   *
+   * Takes all there is to take from the (truncated!) configuration
+   * object (only contains configuration for this modus).
+   **/
   explicit ColliderModus(Configuration modus_config,
            const ExperimentParameters &parameters);
-
-  void print_startup();  // TODO(mkretz): needs to be discoverable from an
-                         // outside "printer"
-
+  /** Prints some information about the initialization of ColliderModus.
+   *
+   * \see ModusDefalt::print_startup()
+   */
+  void print_startup();
+  /** creates initial conditions from the particles.
+   *
+   * In particular, it initializes target and projectile.
+   */
   float initial_conditions(Particles *particles,
                           const ExperimentParameters &parameters);
 
@@ -32,12 +78,12 @@ class ColliderModus : public ModusDefault {
   // * propagate
 
  private:
-  /* Projectile particle PDG ID*/
+  /// PdgCode of Projectile particle
   //TODO(mkretz): Matthias wants to fix this back to const.
   PdgCode projectile_;
-  /* Target particle PDG ID*/
+  /// PdgCode of Target particle
   PdgCode target_;
-  /* Center-of-mass energy of the collision */
+  /// Center-of-mass energy of the collision in GeV
   const float sqrts_;
 };
 
