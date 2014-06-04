@@ -33,10 +33,7 @@ TEST(assign_empty) {
 TEST(assign_full) {
   FourVector P(1,2,3,4);
   QuantumNumbers fullset(P, 5, 6, 7, 8, 9, 0);
-  COMPARE(fullset.momentum().x0(), 1);
-  COMPARE(fullset.momentum().x1(), 2);
-  COMPARE(fullset.momentum().x2(), 3);
-  COMPARE(fullset.momentum().x3(), 4);
+  COMPARE(fullset.momentum(), FourVector(1,2,3,4));
   COMPARE(fullset.charge(),        5);
   COMPARE(fullset.isospin3(),      6);
   COMPARE(fullset.strangeness(),   7);
@@ -109,7 +106,7 @@ TEST(report_deviations) {
         " 9 vs. 12358\n"
         "Deviation in Baryon Number:\n"
         " 0 vs. -15\n");
-  // small deviation in FourVector should satisfy "":
+  // small deviation in FourVector should satisfy ==:
   FourVector R(2 + 2e-13,3,4,4);
   QuantumNumbers J(R, 5, 6, 1, -8, 12358, -15);
   COMPARE(H.report_deviations(J), "");
