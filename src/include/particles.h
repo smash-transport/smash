@@ -167,19 +167,6 @@ class Particles {
    */
   inline const ParticleData &data(int id) const;
 
-  SMASH_DEPRECATED("use ParticleData::type() instead")
-  inline const ParticleType &type(int id) const { return data(id).type(); }
-
-  SMASH_DEPRECATED("use ParticleType::find(PdgCode) instead")
-  inline const ParticleType &type(PdgCode pdgcode) const {
-    return ParticleType::find(pdgcode);
-  }
-
-  SMASH_DEPRECATED("use ParticleType::find(PdgCode) instead")
-  inline const ParticleType &particle_type(PdgCode pdgcode) const {
-    return ParticleType::find(pdgcode);
-  }
-
   /// Return decay modes of this particle type
   inline const DecayModes &decay_modes(PdgCode pdg) const;
   /// return the highest used id
