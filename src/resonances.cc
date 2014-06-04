@@ -34,6 +34,13 @@
 
 namespace Smash {
 
+/* Parameters for spectral function integration via GSL. */
+struct IntegrandParameters {
+  const ParticleType *type;
+  double m2;
+  double s;
+};
+
 /* Calculate isospin Clebsch-Gordan coefficient
  * (-1)^(j1 - j2 + m3) * sqrt(2 * j3 + 1) * [Wigner 3J symbol]
  * Note that the calculation assumes that isospin values
@@ -72,7 +79,7 @@ double clebsch_gordan_coefficient(const int isospin_a,
  * \param[out] integral_error Uncertainty of the result.
  */
 static void quadrature_1d(double (*integrand_function)(double, void *),
-                          std::vector<double> *parameters, double lower_limit,
+                          IntegrandParameters *parameters, double lower_limit,
                           double upper_limit, double *integral_value,
                           double *integral_error);
 
@@ -394,12 +401,8 @@ size_t two_to_two_formation (const ParticleType &type_particle1,
      * using the Breit-Wigner distribution as probability amplitude
      * Integrate over the allowed resonance mass range
      */
-    std::vector<double> integrand_parameters;
-    // TODO: use off-shell width here (ParticleData::total_width)
-    integrand_parameters.push_back(type_resonance.width_at_pole());
-    integrand_parameters.push_back(type_resonance.mass());
-    integrand_parameters.push_back(second_type.mass());
-    integrand_parameters.push_back(mandelstam_s);
+    IntegrandParameters params = {&type_resonance, second_type.mass(),
+                                  mandelstam_s};
     double lower_limit = minimum_mass;
     double upper_limit = (sqrt(mandelstam_s) - second_type.mass());
     printd("Process: %s %s -> %s %s\n", type_particle1.name().c_str(),
@@ -407,7 +410,7 @@ size_t two_to_two_formation (const ParticleType &type_particle1,
      type_resonance.name().c_str());
     printd("Limits: %g %g \n", lower_limit, upper_limit);
     double resonance_integral, integral_error;
-    quadrature_1d(&spectral_function_integrand, &integrand_parameters,
+    quadrature_1d(&spectral_function_integrand, &params,
                   lower_limit, upper_limit,
                   &resonance_integral, &integral_error);
     printd("Integral value: %g Error: %g \n", resonance_integral,
@@ -439,7 +442,7 @@ size_t two_to_two_formation (const ParticleType &type_particle1,
 
 /* Function for 1-dimensional GSL integration  */
 void quadrature_1d(double (*integrand_function)(double, void*),
-                     std::vector<double> *parameters,
+                     IntegrandParameters *parameters,
                      double lower_limit, double upper_limit,
                      double *integral_value, double *integral_error) {
   gsl_integration_workspace *workspace
@@ -474,12 +477,12 @@ double spectral_function(double resonance_mass, double resonance_pole,
 /* Spectral function integrand for GSL integration */
 double spectral_function_integrand(double resonance_mass,
                                    void *parameters) {
-  std::vector<double> *integrand_parameters
-    = reinterpret_cast<std::vector<double> *>(parameters);
-  double resonance_width = integrand_parameters->at(0);
-  double resonance_pole_mass = integrand_parameters->at(1);
-  double stable_mass = integrand_parameters->at(2);
-  double mandelstam_s = integrand_parameters->at(3);
+  IntegrandParameters *params
+    = reinterpret_cast<IntegrandParameters*>(parameters);
+  double resonance_pole_mass = params->type->mass();
+  double stable_mass = params->m2;
+  double mandelstam_s = params->s;
+  double resonance_width = params->type->width_at_pole();  // TODO: use width_total(params->type, resonance_mass);
 
   /* center-of-mass momentum of final state particles */
   if (mandelstam_s - (stable_mass + resonance_mass)
@@ -511,25 +514,21 @@ double sample_resonance_mass(PdgCode pdg_resonance, PdgCode pdg_stable,
   double minimum_mass = calculate_minimum_mass (pdg_resonance);
   /* Define distribution parameters */
   float mass_stable = ParticleType::find(pdg_stable).mass();
-  std::vector<double> parameters;
-  // TODO: use off-shell width here (ParticleData::total_width)
-  parameters.push_back(ParticleType::find(pdg_resonance).width_at_pole());
-  parameters.push_back(ParticleType::find(pdg_resonance).mass());
-  parameters.push_back(mass_stable);
-  parameters.push_back(cms_energy * cms_energy);
+  IntegrandParameters params = {&ParticleType::find(pdg_resonance),
+                                mass_stable, cms_energy * cms_energy};
 
   /* sample resonance mass from the distribution
    * used for calculating the cross section
    */
   double mass_resonance = 0.0, random_number = 1.0;
   double distribution_max
-    = spectral_function_integrand(parameters.at(0), &parameters);
+    = spectral_function_integrand(params.type->mass(), &params);
   double distribution_value = 0.0;
   while (random_number > distribution_value) {
     random_number = Random::uniform(0.0, distribution_max);
     mass_resonance = Random::uniform(minimum_mass, cms_energy - mass_stable);
     distribution_value
-      = spectral_function_integrand(mass_resonance, &parameters);
+      = spectral_function_integrand(mass_resonance, &params);
   }
   return mass_resonance;
 }
