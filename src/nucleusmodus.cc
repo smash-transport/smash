@@ -124,7 +124,8 @@ float NucleusModus::initial_conditions(Particles *particles,
   }
   double s_NN = sqrt_s_NN_*sqrt_s_NN_;
   if (sqrt_s_NN_ < mass_1 + mass_2) {
-    throw InvalidEnergy("Error in input: sqrt(s_NN) is smaller than masses:\n"
+    throw ModusDefault::InvalidEnergy(
+                      "Error in input: sqrt(s_NN) is smaller than masses:\n"
                       + std::to_string(sqrt_s_NN_) + " GeV < "
                       + std::to_string(mass_1) + " GeV + "
                       + std::to_string(mass_2) + " GeV.");
