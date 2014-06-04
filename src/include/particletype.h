@@ -17,13 +17,26 @@ namespace Smash {
 /**
  * Particle type contains the static properties of a particle
  *
- * SMASH reads in first the list of particles with their properties
- * and they don't change from this time on.
- * They are looked up according to their PDG code.
+ * Before creation of Experiment, SMASH initializes the list of particles
+ * (\ref list_all). After construction these values are immutable.
+ *
+ * The list of particles is stored in such a way that look up of a ParticleType
+ * object (\ref find) is efficient for PDG codes (\f$\mathcal O(\log N)\f$).
  */
 class ParticleType {
  public:
-  /// Explicit constructor
+  /**
+   * Creates a fully initialized ParticleType object.
+   *
+   * \param n The name of the particle (only used for debug output).
+   * \param m The mass of the particle.
+   * \param w The width of the particle.
+   * \param id The PDG code of the particle.
+   *
+   * \note The remaining properties ParticleType provides are derived from the
+   *       PDG code and therefore cannot be set explicitly (this avoids the
+   *       chance of introducing inconsistencies).
+   */
   ParticleType(std::string n, float m, float w, PdgCode id)
       : name_(n),
         mass_(m),
@@ -32,36 +45,50 @@ class ParticleType {
         isospin_(pdgcode_.isospin_total()),
         charge_(pdgcode_.charge())
         {}
-  /// return particle name
-  inline std::string name(void) const;
-  /// return particle mass
-  inline float mass(void) const;
-  /// return particle width
-  inline float width(void) const;
-  /// return particle pdgcode
-  inline PdgCode pdgcode(void) const;
-  /// Isospin is 2 * particle data book value
-  inline int isospin(void) const;
-  /// return particle charge
-  inline int charge(void) const;
-  /// Spin is 2 * particle data book value
-  inline int spin(void) const;
+
+  /// Returns the name of the particle (for debug output only).
+  const std::string &name() const { return name_; }
+
+  /// Returns the particle mass.
+  float mass() const { return mass_; }
+
+  /// Returns the particle width.
+  float width() const { return width_; }
+
+  /// Returns the PDG code of the particle.
+  PdgCode pdgcode() const { return pdgcode_; }
+
+  /// \copydoc PdgCode::isospin_total
+  int isospin() const { return isospin_; }
+
+  /// \copydoc PdgCode::charge
+  int charge() const { return charge_; }
+
+  /// \copydoc PdgCode::spin
+  int spin() const { return pdgcode_.spin(); }
 
   /// \copydoc PdgCode::is_hadron
   bool is_hadron() const { return pdgcode_.is_hadron(); }
 
   /**
    * Returns a list of all ParticleType objects.
+   *
+   * \note The order of the list may be sorted by PDG codes, but do not rely on
+   *       this.
    */
   static const ParticleTypeList &list_all();
 
   /**
    * Returns the ParticleType object for the given \p pdgcode.
+   *
+   * \note The complexity of the search is \f$\mathcal O(\log N)\f$.
    */
   static const ParticleType &find(PdgCode pdgcode);
 
   /**
    * Returns whether the ParticleType with the given \p pdgcode exists.
+   *
+   * \note The complexity of the search is \f$\mathcal O(\log N)\f$.
    */
   static bool exists(PdgCode pdgcode);
 
@@ -96,34 +123,6 @@ class ParticleType {
    */
   int charge_;
 };
-
-inline int ParticleType::charge(void) const {
-  return charge_;
-}
-
-inline int ParticleType::isospin(void) const {
-  return isospin_;
-}
-
-inline float ParticleType::mass(void) const {
-  return mass_;
-}
-
-inline std::string ParticleType::name(void) const {
-  return name_;
-}
-
-inline PdgCode ParticleType::pdgcode(void) const {
-  return pdgcode_;
-}
-
-inline int ParticleType::spin(void) const {
-  return pdgcode_.spin();
-}
-
-inline float ParticleType::width(void) const {
-  return width_;
-}
 
 }  // namespace Smash
 
