@@ -39,6 +39,9 @@ class ParticleData {
   /// \copydoc PdgCode::is_hadron
   bool is_hadron() const { return type_->is_hadron(); }
 
+  /// \copydoc ParticleType::mass
+  float mass() const { return type_->mass(); }
+
   /**
    * Return the ParticleType object associated to this particle.
    *
@@ -54,9 +57,8 @@ class ParticleData {
   inline void set_collision_past(const int process_id);
   inline const FourVector &momentum(void) const;
   inline void set_momentum(const FourVector &momentum_vector);
-  inline void set_momentum(const double &mass, const ThreeVector &mom);
-  inline void set_momentum(const double &mass, const double &px,
-                           const double &py, const double &pz);
+  inline void set_momentum(double mass, const ThreeVector &mom);
+  inline void set_momentum(double mass, double px, double py, double pz);
   inline const FourVector &position(void) const;
   inline void set_position(const FourVector &position);
   /// get the velocity 3-vector
@@ -145,15 +147,15 @@ inline void ParticleData::set_momentum(const FourVector &momentum_vector) {
   momentum_ = momentum_vector;
 }
 
-inline void ParticleData::set_momentum(const double &mass, const ThreeVector &mom) {
-  momentum_ = FourVector(sqrt(mass*mass + mom*mom), mom);
+inline void ParticleData::set_momentum(double new_mass, const ThreeVector &mom) {
+  momentum_ = FourVector(std::sqrt(new_mass * new_mass + mom * mom), mom);
 }
 
 /// set particle four momentum by components
-inline void ParticleData::set_momentum(const double &mass, const double &px,
-                          const double &py, const double &pz) {
-  momentum_ = FourVector(sqrt(mass * mass + px * px + py * py + pz * pz),
-                           px, py, pz);
+inline void ParticleData::set_momentum(double new_mass, double px, double py,
+                                       double pz) {
+  momentum_ = FourVector(
+      std::sqrt(new_mass * new_mass + px * px + py * py + pz * pz), px, py, pz);
 }
 
 /// particle position in Minkowski space
