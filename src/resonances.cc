@@ -33,6 +33,32 @@
 
 namespace Smash {
 
+/* Calculate isospin Clebsch-Gordan coefficient
+ * (-1)^(j1 - j2 + m3) * sqrt(2 * j3 + 1) * [Wigner 3J symbol]
+ * Note that the calculation assumes that isospin values
+ * have been multiplied by two
+ */
+double clebsch_gordan_coefficient(const int isospin_a,
+  const int isospin_b, const int isospin_resonance,
+  const int isospin_z_a, const int isospin_z_b,
+  const int isospin_z_resonance) {
+  double wigner_3j =  gsl_sf_coupling_3j(isospin_a,
+     isospin_b, isospin_resonance,
+     isospin_z_a, isospin_z_b, -isospin_z_resonance);
+  double clebsch_gordan_isospin = 0.0;
+  if (std::abs(wigner_3j) > really_small)
+    clebsch_gordan_isospin = pow(-1, isospin_a / 2.0
+    - isospin_b / 2.0 + isospin_z_resonance / 2.0)
+    * sqrt(isospin_resonance + 1) * wigner_3j;
+
+  printd("CG: %g I1: %i I2: %i IR: %i iz1: %i iz2: %i izR: %i \n",
+       clebsch_gordan_isospin, isospin_a, isospin_b,
+       isospin_resonance, isospin_z_a, isospin_z_b,
+       isospin_z_resonance);
+
+  return clebsch_gordan_isospin;
+}
+
 /**
  * Function for 1-dimensional GSL integration.
  *
@@ -56,8 +82,9 @@ static void quadrature_1d(double (*integrand_function)(double, void *),
  */
 float calculate_minimum_mass(const Particles &particles, PdgCode pdgcode) {
   /* If the particle happens to be stable, just return the mass */
-  if (particles.particle_type(pdgcode).width() < 0.0) {
-    return particles.particle_type(pdgcode).mass();
+  const auto type = ParticleType::find(pdgcode);
+  if (type.width() < 0.0) {
+    return type.mass();
   }
   /* Otherwise, let's find the highest mass value needed in any decay mode */
   float minimum_mass = 0.0;
@@ -65,14 +92,14 @@ float calculate_minimum_mass(const Particles &particles, PdgCode pdgcode) {
       particles.decay_modes(pdgcode).decay_mode_list();
   for (std::vector<ProcessBranch>::const_iterator mode = decaymodes.begin();
        mode != decaymodes.end(); ++mode) {
-    size_t decay_particles = mode->pdg_list().size();
     float total_mass = 0.0;
-    for (size_t i = 0; i < decay_particles; i++) {
+    for (const PdgCode code : mode->pdg_list()) {
       /* Stable decay products assumed; for resonances the mass can be lower! */
-      total_mass += particles.particle_type(mode->pdg_list().at(i)).mass();
+      total_mass += ParticleType::find(code).mass();
     }
-    if (total_mass > minimum_mass)
+    if (total_mass > minimum_mass) {
       minimum_mass = total_mass;
+    }
   }
   return minimum_mass;
 }
@@ -108,7 +135,7 @@ std::vector<ProcessBranch> resonance_cross_section(
        * type_particle2.mass() * type_particle2.mass()) / mandelstam_s;
 
   /* Find all the possible resonances */
-  for (const ParticleType &type_resonance : particles.types()) {
+  for (const ParticleType &type_resonance : ParticleType::list_all()) {
     /* Not a resonance, go to next type of particle */
     if (type_resonance.width() < 0.0) {
       continue;
@@ -196,36 +223,15 @@ double two_to_one_formation(const Particles &particles,
     }
   }
 
-  /* Isospin z-component based on Gell-Mann–Nishijima formula
-   * 2 * Iz = 2 * charge - (baryon number + strangeness + charm)
-   * XXX: Strangeness and charm ignored for now!
-   */
-  const int isospin_z1 = type_particle1.pdgcode().isospin3();
-  const int isospin_z2 = type_particle2.pdgcode().isospin3();
-  int isospin_z_resonance = type_resonance.pdgcode().isospin3();
-
-  /* Calculate isospin Clebsch-Gordan coefficient
-   * (-1)^(j1 - j2 + m3) * sqrt(2 * j3 + 1) * [Wigner 3J symbol]
-   * Note that the calculation assumes that isospin values
-   * have been multiplied by two
-   */
-  double wigner_3j =  gsl_sf_coupling_3j(type_particle1.isospin(),
-     type_particle2.isospin(), type_resonance.isospin(),
-     isospin_z1, isospin_z2, -isospin_z_resonance);
-  double clebsch_gordan_isospin = 0.0;
-  if (fabs(wigner_3j) > really_small)
-    clebsch_gordan_isospin = pow(-1, type_particle1.isospin() / 2.0
-    - type_particle2.isospin() / 2.0 + isospin_z_resonance / 2.0)
-    * sqrt(type_resonance.isospin() + 1) * wigner_3j;
-
-  printd("CG: %g I1: %i I2: %i IR: %i iz1: %i iz2: %i izR: %i \n",
-       clebsch_gordan_isospin,
-       type_particle1.isospin(), type_particle2.isospin(),
-       type_resonance.isospin(),
-       isospin_z1, isospin_z2, isospin_z_resonance);
+  double clebsch_gordan_isospin
+    = clebsch_gordan_coefficient(type_particle1.isospin(),
+	 type_particle2.isospin(), type_resonance.isospin(),
+	 type_particle1.pdgcode().isospin3(),
+         type_particle2.pdgcode().isospin3(),
+         type_resonance.pdgcode().isospin3());
 
   /* If Clebsch-Gordan coefficient is zero, don't bother with the rest */
-  if (fabs(clebsch_gordan_isospin) < really_small)
+  if (std::abs(clebsch_gordan_isospin) < really_small)
     return 0.0;
 
   /* Check the decay modes of this resonance */
@@ -312,7 +318,7 @@ size_t two_to_two_formation(const Particles &particles,
   int initial_total_minimum
     = abs(type_particle1.isospin() - type_particle2.isospin());
   /* Loop over particle types to find allowed combinations */
-  for (const ParticleType &second_type : particles.types()) {
+  for (const ParticleType &second_type : ParticleType::list_all()) {
     /* We are interested only stable particles here */
     if (second_type.width() > 0.0) {
       continue;
@@ -348,26 +354,11 @@ size_t two_to_two_formation(const Particles &particles,
       if (abs(isospin_z_final) > isospin_final) {
         break;
       }
-      /* Calculate isospin Clebsch-Gordan coefficient combinations
-       * (-1)^(j1 - j2 + m3) * sqrt(2 * j3 + 1) * [Wigner 3J symbol]
-       * Note that the calculation assumes that isospin values
-       * have been multiplied by two
-       */
-      double wigner_3j =  gsl_sf_coupling_3j(type_resonance.isospin(),
-        second_type.isospin(), isospin_final,
-        isospin_z_resonance, isospin_z_i, -isospin_z_final);
-      if (fabs(wigner_3j) > really_small) {
-        clebsch_gordan_isospin +=
-            pow(-1, type_resonance.isospin() / 2.0 -
-                        second_type.isospin() / 2.0 + isospin_z_final / 2.0) *
-            sqrt(isospin_final + 1) * wigner_3j;
-      }
+      clebsch_gordan_isospin
+        = clebsch_gordan_coefficient(type_resonance.isospin(),
+            second_type.isospin(), isospin_final,
+            isospin_z_resonance, isospin_z_i, isospin_z_final);
 
-      printd("CG: %g I1: %i I2: %i IR: %i iz1: %i iz2: %i izR: %i \n",
-         clebsch_gordan_isospin,
-         type_resonance.isospin(), second_type.isospin(),
-         isospin_final,
-         isospin_z_resonance, isospin_z_i, isospin_z_final);
       /* isospin is multiplied by 2,
        *  so we must also decrease it by increments of 2
        */
@@ -528,10 +519,10 @@ double sample_resonance_mass(const Particles &particles, PdgCode pdg_resonance,
   /* First, find the minimum mass of this resonance */
   double minimum_mass = calculate_minimum_mass(particles, pdg_resonance);
   /* Define distribution parameters */
-  float mass_stable = particles.particle_type(pdg_stable).mass();
+  float mass_stable = ParticleType::find(pdg_stable).mass();
   std::vector<double> parameters;
-  parameters.push_back(particles.particle_type(pdg_resonance).width());
-  parameters.push_back(particles.particle_type(pdg_resonance).mass());
+  parameters.push_back(ParticleType::find(pdg_resonance).width());
+  parameters.push_back(ParticleType::find(pdg_resonance).mass());
   parameters.push_back(mass_stable);
   parameters.push_back(cms_energy * cms_energy);
 

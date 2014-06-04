@@ -13,25 +13,39 @@
 
 using namespace Smash;
 
-TEST(init_default) {
-  ParticleData p;
-  COMPARE(p.id(), -1);
-  COMPARE(p.pdgcode(), PdgCode::invalid());
-  COMPARE(p.id_process(), -1);
-  COMPARE(p.collision_time(), 0.0);
-  COMPARE(p.momentum().x0(), 0.0);
-  COMPARE(p.momentum().x1(), 0.0);
-  COMPARE(p.momentum().x2(), 0.0);
-  COMPARE(p.momentum().x3(), 0.0);
-  COMPARE(p.position().x0(), 0.0);
-  COMPARE(p.position().x1(), 0.0);
-  COMPARE(p.position().x2(), 0.0);
-  COMPARE(p.position().x3(), 0.0);
+TEST(init_particle_types) {
+  ParticleType::create_type_list(
+      "# NAME MASS[GEV] WIDTH[GEV] PDG\n"
+      "smashon 0.123 1.2 -331\n"
+      "pi0 0.1350 -1.0 111\n"
+      "pi+ 0.1396 -1.0 211\n"
+      "pi- 0.1396 -1.0 -211\n"
+      "rho0 0.7755 0.149 113\n"
+      "rho+ 0.7755 0.149 213\n"
+      "rho- 0.7755 0.149 -213\n"
+      "eta 0.5479 1.0e-6 221\n"
+      "omega 0.7827 0.0085 223\n"
+      "p 0.9383 -1.0 2212\n"
+      "pbar 0.9383 -1.0 -2212\n"
+      "n 0.9396 -1.0 2112\n"
+      "nbar 0.9396 -1.0 -2112\n"
+      "Delta++ 1.232 0.117 2224\n"
+      "Delta+ 1.232 0.117 2214\n"
+      "Delta0 1.232 0.117 2114\n"
+      "Delta- 1.232 0.117 1114\n"
+      "Deltabar++ 1.232 0.117 -2224\n"
+      "Deltabar+ 1.232 0.117 -2214\n"
+      "Deltabar0 1.232 0.117 -2114\n"
+      "Deltabar- 1.232 0.117 -1114\n");
 }
 
-TEST(init_from_pdgcode) {
+static ParticleData create_smashon_particle(int id = -1) {
+  return ParticleData{ParticleType::find(-0x331), id};
+}
+
+TEST(create_particledata_piplus) {
   PdgCode pdg = 0x211;
-  ParticleData p{pdg};
+  ParticleData p{ParticleType::find(pdg)};
 
   COMPARE(p.id(), -1);
   COMPARE(p.pdgcode(), pdg);
@@ -45,30 +59,16 @@ TEST(init_from_pdgcode) {
   COMPARE(p.position().x1(), 0.0);
   COMPARE(p.position().x2(), 0.0);
   COMPARE(p.position().x3(), 0.0);
-}
 
-TEST(init_id) {
-  ParticleData p(2);
+  p.set_id(2);
   COMPARE(p.id(), 2);
-  COMPARE(p.pdgcode(), PdgCode::invalid());
-  COMPARE(p.id_process(), -1);
-  COMPARE(p.collision_time(), 0.0);
-  COMPARE(p.momentum().x0(), 0.0);
-  COMPARE(p.momentum().x1(), 0.0);
-  COMPARE(p.momentum().x2(), 0.0);
-  COMPARE(p.momentum().x3(), 0.0);
-  COMPARE(p.position().x0(), 0.0);
-  COMPARE(p.position().x1(), 0.0);
-  COMPARE(p.position().x2(), 0.0);
-  COMPARE(p.position().x3(), 0.0);
 }
 
 TEST(set_get) {
-  ParticleData p;
+  PdgCode smashon = -0x331;
+  ParticleData p = create_smashon_particle();
   p.set_id(4);
   COMPARE(p.id(), 4);
-  PdgCode smashon = 0x12345;
-  p.set_pdgcode(smashon);
   COMPARE(p.pdgcode(), smashon);
   COMPARE(p.is_hadron(), smashon.is_hadron());
   p.set_id_process(5);
@@ -82,20 +82,14 @@ TEST(set_get) {
   COMPARE(p.id_process(), 6);
   FourVector m(1.0, 1.2, 1.4, 1.6);
   p.set_momentum(m);
-  COMPARE(p.momentum().x0(), 1.0);
-  COMPARE(p.momentum().x1(), 1.2);
-  COMPARE(p.momentum().x2(), 1.4);
-  COMPARE(p.momentum().x3(), 1.6);
+  COMPARE(p.momentum(), FourVector(1.0, 1.2, 1.4, 1.6));
   ThreeVector M(1.1, 1.3, 1.5);
   p.set_momentum(1.0, M);
-  COMPARE(p.momentum().x0(), sqrt(1.0 + M.sqr()));
-  COMPARE(p.momentum().x1(), 1.1);
-  COMPARE(p.momentum().x2(), 1.3);
-  COMPARE(p.momentum().x3(), 1.5);
+  COMPARE(p.momentum(), FourVector(sqrt(1.0 + M.sqr()), 1.1, 1.3, 1.5));
 }
 
 TEST(set_get2) {
-  ParticleData p;
+  ParticleData p = create_smashon_particle();
   FourVector X(3.5, 3.6, 3.7, 2345.3);
   p.set_position(X);
   COMPARE(p.position().x0(), 3.5);
@@ -120,9 +114,9 @@ TEST(set_get2) {
 }
 
 TEST(comparisons) {
-  ParticleData p(1);
-  ParticleData q(2);
-  ParticleData r(1);
+  ParticleData p = create_smashon_particle(1);
+  ParticleData q = create_smashon_particle(2);
+  ParticleData r = create_smashon_particle(1);
   VERIFY(!(p == q));
   VERIFY(  p == r );
   VERIFY(  p == 1 );

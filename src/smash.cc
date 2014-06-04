@@ -23,6 +23,7 @@
 #include "include/forwarddeclarations.h"
 #include "include/macros.h"
 #include "include/outputroutines.h"
+#include "include/particletype.h"
 
 /* build dependent variables */
 #include "include/config.h"
@@ -209,6 +210,7 @@ int main(int argc, char *argv[]) {
     bf::ofstream(output_path / "config.yaml") << configuration.to_string()
                                               << '\n';
 
+    ParticleType::create_type_list(configuration.take({"particles"}));
     auto experiment = ExperimentBase::create(configuration);
     const std::string report = configuration.unused_values_report();
     if (report != "{}") {

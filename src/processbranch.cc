@@ -16,7 +16,7 @@ ParticleList ProcessBranch::particle_list() const {
   ParticleList l;
   l.reserve(pdg_list_.size());
   for (auto pdgcode : pdg_list_) {
-    l.push_back(ParticleData{pdgcode});
+    l.push_back(ParticleData{ParticleType::find(pdgcode)});
   }
   return std::move(l);
 }

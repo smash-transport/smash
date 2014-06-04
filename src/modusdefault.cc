@@ -24,7 +24,7 @@ void ModusDefault::propagate(Particles *particles,
   FourVector distance, position;
   for (ParticleData &data : particles->data()) {
     /* propagation for this time step */
-    distance = FourVector(parameters.timestep_duration(),
+    distance = FourVector(0.0,
                           data.velocity() * parameters.timestep_duration());
     printd("Particle %d motion: %g %g %g %g\n", data.id(), distance.x0(),
            distance.x1(), distance.x2(), distance.x3());

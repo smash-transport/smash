@@ -89,7 +89,7 @@ template <typename Modus>
 Experiment<Modus>::Experiment(Configuration &config)
     : parameters_(create_experiment_parameters(config)),
       modus_(config["Modi"], parameters_),
-      particles_{config.take({"particles"}), config.take({"decaymodes"})},
+      particles_(static_cast<std::string &&>(config.take({"decaymodes"}))),
       cross_sections_(parameters_.cross_section),
       nevents_(config.take({"General", "NEVENTS"})),
       end_time_(config.take({"General", "END_TIME"})),

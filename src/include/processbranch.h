@@ -73,7 +73,8 @@ class ProcessBranch {
   inline std::vector<PdgCode> pdg_list(void) const;
 
   /**
-   * Return a list of ParticleData initialized only with a PDG code from pdg_list.
+   * Return a list of ParticleData initialized with the ParticleType for the PDG
+   * codes from pdg_list.
    */
   ParticleList particle_list() const;
 

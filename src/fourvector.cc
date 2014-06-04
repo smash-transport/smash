@@ -5,6 +5,7 @@
  *    GNU General Public License (GPLv3 or later)
  */
 #include <cmath>
+#include<istream>
 
 #include "include/fourvector.h"
 
@@ -45,6 +46,11 @@ FourVector FourVector::LorentzBoost(const ThreeVector &velocity) const {
   // this is the part of the space-like components that is always the same:
   const double constantpart = gamma / (gamma + 1) * (xprime_0 + this->x0());
   return FourVector (xprime_0, this->threevec() - velocity * constantpart);
+}
+
+std::ostream& operator<<(std::ostream& os, const FourVector& vec) {
+  return os << vec.x0() << "/" << vec.x1() << "/"
+            << vec.x2() << "/" << vec.x3();
 }
 
 }  // namespace Smash

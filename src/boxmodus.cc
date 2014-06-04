@@ -51,7 +51,7 @@ float BoxModus::initial_conditions(Particles *particles,
   FourVector momentum_total(0, 0, 0, 0);
   size_t number_total = 0;
   /* loop over all the particle types */
-  for (const ParticleType &type : particles->types()) {
+  for (const ParticleType &type : ParticleType::list_all()) {
     /* Particles with width > 0 (resonances) do not exist in the beginning */
     if (type.width() > 0.0) {
       continue;
@@ -86,12 +86,11 @@ float BoxModus::initial_conditions(Particles *particles,
     /* back to back pair creation with random momenta direction */
     if (unlikely(data.id() == particles->id_max() && !(data.id() % 2))) {
       /* poor last guy just sits around */
-      data.set_momentum(particles->particle_type(data.pdgcode()).mass(), 0, 0, 0);
+      data.set_momentum(data.mass(), 0, 0, 0);
     } else if (!(data.id() % 2)) {
       if (this->initial_condition_ != 2) {
         /* thermal momentum according Maxwell-Boltzmann distribution */
-        momentum_radial = sample_momenta(this->temperature_,
-                                         particles->particle_type(data.pdgcode()).mass());
+        momentum_radial = sample_momenta(this->temperature_, data.mass());
       } else {
         /* IC == 2 initial thermal momentum is the average 3T */
         momentum_radial = 3.0 * this->temperature_;
@@ -99,11 +98,10 @@ float BoxModus::initial_conditions(Particles *particles,
       phitheta.distribute_isotropically();
       printd("Particle %d radial momenta %g phi %g cos_theta %g\n", data.id(),
              momentum_radial, phitheta.phi(), phitheta.costheta());
-      data.set_momentum(
-          particles->particle_type(data.pdgcode()).mass(), phitheta.threevec() * momentum_radial);
+      data.set_momentum(data.mass(), phitheta.threevec() * momentum_radial);
     } else {
-      data.set_momentum(particles->particle_type(data.pdgcode()).mass(),
-                       -particles->data(data.id() - 1).momentum().threevec());
+      data.set_momentum(data.mass(),
+                        -particles->data(data.id() - 1).momentum().threevec());
     }
     momentum_total += data.momentum();
     /* random position in a quadratic box */
@@ -150,14 +148,14 @@ void BoxModus::propagate(Particles *particles,
   FourVector distance, position;
   for (ParticleData &data : particles->data()) {
     /* propagation for this time step */
-    distance = FourVector(parameters.timestep_duration(),
+    distance = FourVector(0.0,
                           data.velocity() * parameters.timestep_duration());
     printd("Particle %d motion: %g %g %g %g\n", data.id(), distance.x0(),
            distance.x1(), distance.x2(), distance.x3());
     /* treat the box boundaries */
     position = data.position();
-    position.set_x0(parameters.new_particle_time());
     position += distance;
+    position.set_x0(parameters.new_particle_time());
     bool wall_hit = enforce_periodic_boundaries(position.begin() + 1,
                                                 position.end(), length_);
     const ParticleList incoming_particle{1, data};
