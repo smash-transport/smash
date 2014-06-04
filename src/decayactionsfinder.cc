@@ -27,12 +27,11 @@ std::vector<ActionPtr> DecayActionsFinder::find_possible_actions(
   for (const auto &p : particles->data()) {
     std::vector<int> in_part;
     int id = p.id();
-    float width = particles->width(id);
+    float width = p.total_width();
     /* particle doesn't decay */
-    if (width < 0.0)
-      continue;
+    if (width <= 0.0) continue;
     /* local rest frame velocity */
-    velocity_lrf = FourVector(1., p.momentum().threevec()/p.momentum().x0());
+    velocity_lrf = FourVector(1., p.velocity());
 
     /* The clock goes slower in the rest frame of the resonance */
     double inverse_gamma = sqrt(velocity_lrf.Dot(velocity_lrf));

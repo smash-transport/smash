@@ -7,7 +7,6 @@
 #ifndef SRC_INCLUDE_DECAYMODES_H_
 #define SRC_INCLUDE_DECAYMODES_H_
 
-#include "forwarddeclarations.h"
 #include "processbranch.h"
 
 #include <stdexcept>
@@ -35,8 +34,28 @@ class DecayModes {
     return decay_modes_;
   }
 
+  /// Return decay modes of this particle type
+  static const DecayModes &find(PdgCode pdg);
+
+  /**
+   * Loads the DecayModes map as described in the \p input string.
+   *
+   * It does sanity checking - that the particles it talks about are in the
+   * ParticleType map.
+   */
+  static void load_decaymodes(const std::string &input);
+
   struct InvalidDecay : public std::invalid_argument {
     using std::invalid_argument::invalid_argument;
+  };
+  struct LoadFailure : public std::runtime_error {
+    using std::runtime_error::runtime_error;
+  };
+  struct MissingDecays : public LoadFailure {
+    using LoadFailure::LoadFailure;
+  };
+  struct ReferencedParticleNotFound : public LoadFailure {
+    using LoadFailure::LoadFailure;
   };
 
  private:

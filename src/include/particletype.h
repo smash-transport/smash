@@ -52,8 +52,8 @@ class ParticleType {
   /// Returns the particle mass.
   float mass() const { return mass_; }
 
-  /// Returns the particle width.
-  float width() const { return width_; }
+  /// Returns the particle width (at the mass pole).
+  float width_at_pole () const { return width_; }
 
   /// Returns the PDG code of the particle.
   PdgCode pdgcode() const { return pdgcode_; }

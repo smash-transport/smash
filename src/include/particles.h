@@ -7,7 +7,6 @@
 #ifndef SRC_INCLUDE_PARTICLES_H_
 #define SRC_INCLUDE_PARTICLES_H_
 
-#include "decaymodes.h"
 #include "macros.h"
 #include "particledata.h"
 #include "particletype.h"
@@ -114,7 +113,6 @@ class Particles {
   };
 
   using ParticleDataMap = std::map<int, ParticleData>;
-  using DecayModesMap = std::map<PdgCode, DecayModes>;
 
  public:
   /**
@@ -122,11 +120,8 @@ class Particles {
    *
    * This initializes all the members. The object is ready for usage right after
    * construction.
-   *
-   * \param decaymodes A string that contains the definition of possible
-   *                   DecayModes.
    */
-  Particles(const std::string &decaymodes);
+  Particles();
 
   /// Cannot be copied
   Particles(const Particles &) = delete;
@@ -149,10 +144,6 @@ class Particles {
   MapIterationAdapter<ParticleDataMap> data() { return &data_; }
   /// const overload of the above
   MapIterationAdapter<const ParticleDataMap> data() const { return &data_; }
-
-  // Iterating the DecayModes map would be easy, but not useful.
-  // MapIterationAdapter<const DecayModesMap> decay_modes() const { return
-  // &decay_modes_; }
 
   /**
    * Return the specific data of a particle according to its id
@@ -180,8 +171,6 @@ class Particles {
     return type(pdgcode);
   }
 
-  /// Return decay modes of this particle type
-  inline const DecayModes &decay_modes(PdgCode pdg) const;
   /// return the highest used id
   inline int id_max(void) const;
   /// inserts a new particle and returns its id
@@ -201,17 +190,8 @@ class Particles {
   /// return time of the computational frame
   inline double time(void) const;
 
-  /// get the full decay width (mass-dependent!) of a particular particle
-  float width(int id) const;
-
   struct LoadFailure : public std::runtime_error {
     using std::runtime_error::runtime_error;
-  };
-  struct ReferencedParticleNotFound : public LoadFailure {
-    using LoadFailure::LoadFailure;
-  };
-  struct MissingDecays : public LoadFailure {
-    using LoadFailure::LoadFailure;
   };
   struct ParseError : public LoadFailure {
     using LoadFailure::LoadFailure;
@@ -223,13 +203,6 @@ class Particles {
   void reset();
 
  private:
-  /**
-   * Returns the DecayModes map as described in the \p input string.
-   *
-   * It does sanity checking - that the particles it talks about are in the
-   * ParticleType map.
-   */
-  DecayModesMap load_decaymodes(const std::string &input);
 
   /// Highest id of a given particle
   int id_max_ = -1;
@@ -241,19 +214,11 @@ class Particles {
    * lookup of the corresponding particle id with its data.
    */
   ParticleDataMap data_;
-
-  /// a map between pdg and corresponding decay modes
-  const DecayModesMap all_decay_modes_;
 };
 
 /* return the data of a specific particle */
 inline const ParticleData &Particles::data(int particle_id) const {
   return data_.at(particle_id);
-}
-
-/* return the decay modes of specific type */
-inline const DecayModes &Particles::decay_modes(PdgCode pdg) const {
-  return all_decay_modes_.at(pdg);
 }
 
 /* add a new particle data and return the id of the new particle */

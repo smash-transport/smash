@@ -13,6 +13,7 @@
 #include "include/outputroutines.h"
 #include "include/pdgcode.h"
 #include "include/resonances.h"
+#include "include/decaymodes.h"
 
 namespace Smash {
 
@@ -220,7 +221,7 @@ ParticleList DecayAction::choose_channel(const Particles &particles) const {
 
   /* Get the decay modes of this resonance */
   const std::vector<DecayBranch> decaymodes
-    = particles.decay_modes(pdgcode).decay_mode_list();
+    = DecayModes::find(pdgcode).decay_mode_list();
   /* Get the first decay mode and its branching ratio */
   std::vector<DecayBranch>::const_iterator mode = decaymodes.begin();
   float cumulated_probability = mode->weight();

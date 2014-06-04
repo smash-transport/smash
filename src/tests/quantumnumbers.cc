@@ -130,7 +130,7 @@ TEST(count_from_particles) {
   FourVector P(1,2,3,4);
   particle.set_momentum(P);
   // create particle list:
-  Particles list({});
+  Particles list;
   list.add_data(particle);
 
   QuantumNumbers onlyone(list);
