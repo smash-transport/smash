@@ -23,14 +23,6 @@ namespace Smash {
  */
 class ParticleType {
  public:
-  /// Use improbable values for default constructor
-  ParticleType()
-      : name_("unknown"),
-        mass_(-1),
-        width_(-1),
-        pdgcode_(0x0),
-        isospin_(0),
-        charge_(0) {}
   /// Explicit constructor
   ParticleType(std::string n, float m, float w, PdgCode id)
       : name_(n),

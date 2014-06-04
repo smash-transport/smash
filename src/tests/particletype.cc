@@ -13,16 +13,6 @@
 
 using namespace Smash;
 
-TEST(assign_default) {
-  ParticleType A;
-  COMPARE(A.name(), "unknown");
-  COMPARE(A.mass(), -1.f);
-  COMPARE(A.width(), -1.f);
-  COMPARE(A.pdgcode(), PdgCode::invalid());
-  COMPARE(A.isospin(), 0);
-  COMPARE(A.charge(), 0);
-}
-
 TEST(assign) {
   PdgCode smashon("9003234");
   // there is a double for mass and a float for width. This is
