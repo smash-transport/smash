@@ -17,15 +17,15 @@ namespace Smash {
 /* Breit-Wigner distribution for calculating resonance
  * production probability
  */
-double breit_wigner(double mandelstam_s, float resonance_mass,
-                          float resonance_width);
+double breit_wigner(const double mandelstam_s, const float resonance_mass,
+                    const float resonance_width);
 
 /* density_integrand - Maxwell-Boltzmann distribution */
-double inline density_integrand(const double &momentum, const double &temp,
-  const double &mass);
+double density_integrand(const double momentum, const double temp,
+  const double mass);
 
 /* sample_momenta - return thermal momenta */
-double sample_momenta(const double &temp, const double &mass);
+double sample_momenta(const double temp, const double mass);
 
 /* return number density for given mass and temperature */
 inline double number_density_maxwellboltzmann(double mass, double temperature) {
