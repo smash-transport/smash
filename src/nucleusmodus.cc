@@ -96,8 +96,6 @@ float NucleusModus::initial_conditions(Particles *particles,
   //
   // Nuclei can be non-spherical. If they are, then they may be randomly
   // aligned. Excentricities and angles should be configurable.
-  projectile_.auto_set_masses();
-  target_.auto_set_masses();
   float mass_projec = projectile_.mass();
   float mass_target = target_.mass();
   printf("Masses of Nuclei: %g GeV %g GeV\n", projectile_.mass(),

@@ -84,14 +84,6 @@ class Nucleus {
   /// \see diffusiveness_.
   void set_diffusiveness(const float& soft);
   /**
-   * sets the masses of all nucleons automatically from the PDG info in
-   * particles.
-   *
-   * @param particles is an object of Particles which has all the PDG
-   * types read in.
-   **/
-  void auto_set_masses();
-  /**
    * shifts the nucleus to correct impact parameter and z displacement.
    *
    * @param is_projectile switches if the projectile is shifted to
