@@ -21,10 +21,10 @@
 namespace Smash {
 
 namespace {
-const std::vector<ParticleType> *all_particle_types = nullptr;
+const ParticleTypeList *all_particle_types = nullptr;
 }  // unnamed namespace
 
-const std::vector<ParticleType> &ParticleType::list_all() {
+const ParticleTypeList &ParticleType::list_all() {
   assert(all_particle_types);
   return *all_particle_types;
 }
@@ -49,7 +49,7 @@ bool ParticleType::exists(PdgCode pdgcode) {
 }
 
 void ParticleType::create_type_list(const std::string &input) {  //{{{
-  static std::vector<ParticleType> type_list;
+  static ParticleTypeList type_list;
   type_list.clear();  // in case LoadFailure was thrown and caught and we should
                       // try again
   for (const Line &line : line_parser(input)) {
