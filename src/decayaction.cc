@@ -77,7 +77,6 @@ void DecayAction::one_to_two(const ParticleData &incoming0, const Particles &par
  * to the active particles data structure.
  *
  * \param[in] incoming0 decaying particle (in its rest frame)
- * \param[in] particles Particles in the simulation.
  */
 void DecayAction::one_to_three(const ParticleData &incoming0) {
   ParticleData &outgoing0 = outgoing_particles_[0];
