@@ -32,8 +32,6 @@ class ParticleType {
         isospin_(pdgcode_.isospin_total()),
         charge_(pdgcode_.charge())
         {}
-  /// set particle type
-  inline void set(const std::string &n, float m, float w, PdgCode id);
   /// return particle name
   inline std::string name(void) const;
   /// return particle mass
@@ -98,16 +96,6 @@ class ParticleType {
    */
   int charge_;
 };
-
-inline void ParticleType::set(const std::string &NAME, float MASS,
-     float WIDTH, PdgCode ID) {
-  mass_ = MASS;
-  width_ = WIDTH;
-  pdgcode_ = PdgCode(ID);
-  name_ = NAME;
-  isospin_ = pdgcode_.isospin_total();
-  charge_ = pdgcode_.charge();
-}
 
 inline int ParticleType::charge(void) const {
   return charge_;
