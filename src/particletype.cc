@@ -29,7 +29,7 @@ const ParticleTypeList &ParticleType::list_all() {
   return *all_particle_types;
 }
 
-const ParticleType &ParticleType::find(PdgCode pdgcode) {
+SMASH_CONST const ParticleType &ParticleType::find(PdgCode pdgcode) {
   const auto found = std::lower_bound(
       all_particle_types->begin(), all_particle_types->end(), pdgcode,
       [](const ParticleType &l, const PdgCode &r) { return l.pdgcode() < r; });
@@ -38,7 +38,7 @@ const ParticleType &ParticleType::find(PdgCode pdgcode) {
   return *found;
 }
 
-bool ParticleType::exists(PdgCode pdgcode) {
+SMASH_CONST bool ParticleType::exists(PdgCode pdgcode) {
   const auto found = std::lower_bound(
       all_particle_types->begin(), all_particle_types->end(), pdgcode,
       [](const ParticleType &l, const PdgCode &r) { return l.pdgcode() < r; });
