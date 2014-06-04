@@ -9,9 +9,11 @@
 #include <list>
 
 #include "include/collidermodus.h"
+#include "include/particles.h"
 #include "include/configuration.h"
 #include "include/experimentparameters.h"
 #include "include/outputroutines.h"
+#include "include/random.h"
 
 namespace Smash {
 
@@ -30,24 +32,22 @@ void ColliderModus::print_startup() {
 }
 
 /* initial_conditions - sets particle data for @particles */
-void ColliderModus::initial_conditions(Particles *particles,
+float ColliderModus::initial_conditions(Particles *particles,
                                        const ExperimentParameters &) {
   /* Create "projectile" particle */
   particles->create(1, projectile_);
   /* Pointer to "projectile" data */
-  ParticleData *data_projectile = particles->data_pointer(particles->id_max());
-  float mass_projectile
-    = particles->particle_type(data_projectile->pdgcode()).mass();
+  ParticleData &data_projectile = particles->data(particles->id_max());
+  float mass_projectile = data_projectile.mass();
   printf("projectile pdgcode %s mass %f\n",
-         data_projectile->pdgcode().string().c_str(), mass_projectile);
+         data_projectile.pdgcode().string().c_str(), mass_projectile);
   /* Create "target" particle */
   particles->create(1, target_);
   /* Pointer to "target" data */
-  ParticleData *data_target = particles->data_pointer(particles->id_max());
-  float mass_target
-    = particles->particle_type(data_target->pdgcode()).mass();
+  ParticleData &data_target = particles->data(particles->id_max());
+  float mass_target = data_target.mass();
   printf("target pdgcode %s mass %f\n",
-         data_target->pdgcode().string().c_str(), mass_target);
+         data_target.pdgcode().string().c_str(), mass_target);
   /* Projectile energy in CMS */
   double cms_energy_projectile = (sqrts_ * sqrts_
                                   + mass_projectile * mass_projectile
@@ -58,11 +58,15 @@ void ColliderModus::initial_conditions(Particles *particles,
                              - mass_projectile * mass_projectile);
   /* Sample impact parameter */
   double impact_parameter = Random::uniform(0.0, 5.0);
+  // collider start is hard-coded for now.
+  const float start_time = -1.0f;
   /* Set positions and momenta */
-  data_projectile->set_position(1.0, impact_parameter, 0.0, -1.0);
-  data_projectile->set_momentum(mass_projectile, 0.0, 0.0, cms_momentum);
-  data_target->set_position(1.0, 0.0, 0.0, 1.0);
-  data_target->set_momentum(mass_target, 0.0, 0.0, -cms_momentum);
+  data_projectile.set_position(FourVector(start_time, impact_parameter,
+                                          0., -1.));
+  data_projectile.set_momentum(mass_projectile, 0.0, 0.0, cms_momentum);
+  data_target.set_position(FourVector(start_time, 0., 0., 1.));
+  data_target.set_momentum(mass_target, 0.0, 0.0, -cms_momentum);
+  return start_time;
 }
 
 }  // namespace Smash

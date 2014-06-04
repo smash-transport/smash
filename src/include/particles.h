@@ -7,26 +7,21 @@
 #ifndef SRC_INCLUDE_PARTICLES_H_
 #define SRC_INCLUDE_PARTICLES_H_
 
-#include <iterator>
-#include <map>
-#include <string>
-#include <utility>
+#include "decaymodes.h"
+#include "macros.h"
+#include "particledata.h"
+#include "particletype.h"
+#include "pdgcode.h"
 
-#include "include/decaymodes.h"
-#include "include/particledata.h"
-#include "include/particletype.h"
-#include "include/pdgcode.h"
+#include <map>
 
 namespace Smash {
 
 /**
  * The Particles class abstracts the storage and manipulation of particles.
  *
- * There should be only one Particles object per Experiment. This object stores
- * the data about all existing particles in the experiment (ParticleData). Each
- * particle is of a predefined type (ParticleType). The types are immutable and
- * need not be copied into each ParticleData object. The type information can
- * easily be retrieved via the PDG code.
+ * There is one Particles object per Experiment. It stores
+ * the data about all existing particles in the experiment (ParticleData).
  *
  * \note
  * The Particles object cannot be copied, because it does not make sense
@@ -119,7 +114,6 @@ class Particles {
   };
 
   using ParticleDataMap = std::map<int, ParticleData>;
-  using ParticleTypeMap = std::map<PdgCode, ParticleType>;
   using DecayModesMap = std::map<PdgCode, DecayModes>;
 
  public:
@@ -129,12 +123,10 @@ class Particles {
    * This initializes all the members. The object is ready for usage right after
    * construction.
    *
-   * \param particles A string that contains the definition of ParticleTypes to
-   *                  be created.
    * \param decaymodes A string that contains the definition of possible
    *                   DecayModes.
    */
-  Particles(const std::string &particles, const std::string &decaymodes);
+  Particles(const std::string &decaymodes);
 
   /// Cannot be copied
   Particles(const Particles &) = delete;
@@ -158,21 +150,6 @@ class Particles {
   /// const overload of the above
   MapIterationAdapter<const ParticleDataMap> data() const { return &data_; }
 
-  /**
-   * Use returned object for iterating over all ParticleType objects.
-   *
-   * You can use this object for use with range-based for:
-   * \code
-   * for (const ParticleType &type : particles->types()) {
-   *   ...
-   * }
-   * \endcode
-   *
-   * \returns Opaque object that provides begin/end functions for iteration of
-   * all ParticleType objects.
-   */
-  MapIterationAdapter<const ParticleTypeMap> types() const { return &types_; }
-
   // Iterating the DecayModes map would be easy, but not useful.
   // MapIterationAdapter<const DecayModesMap> decay_modes() const { return
   // &decay_modes_; }
@@ -182,26 +159,14 @@ class Particles {
    *
    * \throws std::out_of_range If there is no particle with the given \p id.
    */
-  inline const ParticleData &data(int id) const;
+  inline ParticleData &data(int id) { return data_.at(id); }
   /**
-   * Return the specific datapointer of a particle according to its id
+   * Return the specific data of a particle according to its id
    *
    * \throws std::out_of_range If there is no particle with the given \p id.
    */
-  inline ParticleData * data_pointer(int id);
-  /**
-   * Return the type of a specific particle given its id
-   *
-   * \warning This function has a high cost. Prefer to call \ref particle_type
-   *          instead.
-   */
-  inline const ParticleType &type(int id) const;
-  /**
-   * Return the type for a specific pdgcode
-   *
-   * \throws std::out_of_range If there is no type with the given \p pdgcode.
-   */
-  inline const ParticleType &particle_type(PdgCode pdgcode) const;
+  inline const ParticleData &data(int id) const;
+
   /// Return decay modes of this particle type
   inline const DecayModes &decay_modes(PdgCode pdg) const;
   /// return the highest used id
@@ -220,22 +185,8 @@ class Particles {
   inline bool empty(void) const;
   /// check the existence of an element in the ParticleData map
   inline bool has_data(int id) const;
-  /// size() check of the ParticleType map
-  inline size_t types_size(void) const;
-  /// empty() check of the ParticleType map
-  inline bool types_empty(void) const;
   /// return time of the computational frame
   inline double time(void) const;
-
-  /** Check whether a particle type with the given \p pdg code is known.
-   *
-   * \param pdgcode The pdg code of the particle in question.
-   * \return \c true  If a ParticleType of the given \p pdg code is registered.
-   * \return \c false otherwise.
-   */
-  bool is_particle_type_registered(PdgCode pdgcode) const {
-    return types_.find(pdgcode) != types_.end();
-  }
 
   struct LoadFailure : public std::runtime_error {
     using std::runtime_error::runtime_error;
@@ -256,14 +207,11 @@ class Particles {
   void reset();
 
  private:
-  /// Returns the ParticleData map as described in the \p input string.
-  static ParticleTypeMap load_particle_types(const std::string &input);
   /**
    * Returns the DecayModes map as described in the \p input string.
    *
    * It does sanity checking - that the particles it talks about are in the
-   * ParticleType map - and therefore needs access to the previously created
-   * types_ map.
+   * ParticleType map.
    */
   DecayModesMap load_decaymodes(const std::string &input);
 
@@ -277,12 +225,7 @@ class Particles {
    * lookup of the corresponding particle id with its data.
    */
   ParticleDataMap data_;
-  /**
-   * a map between pdg and correspoding static data of the particles
-   *
-   * PDG ids are scattered in a large range of values, hence it is a map.
-   */
-  const ParticleTypeMap types_;
+
   /// a map between pdg and corresponding decay modes
   const DecayModesMap all_decay_modes_;
 };
@@ -290,21 +233,6 @@ class Particles {
 /* return the data of a specific particle */
 inline const ParticleData &Particles::data(int particle_id) const {
   return data_.at(particle_id);
-}
-
-/* return the pointer to the data of a specific particle */
-inline ParticleData* Particles::data_pointer(int particle_id) {
-  return &data_.at(particle_id);
-}
-
-/* return the type of a specific particle */
-inline const ParticleType &Particles::type(int particle_id) const {
-  return types_.at(data_.at(particle_id).pdgcode());
-}
-
-/* return a specific type */
-inline const ParticleType &Particles::particle_type(PdgCode pdgcode) const {
-  return types_.at(pdgcode);
 }
 
 /* return the decay modes of specific type */
@@ -322,9 +250,8 @@ inline int Particles::add_data(ParticleData const &particle_data) {
 
 /* create a bunch of particles */
 inline void Particles::create(size_t number, PdgCode pdgcode) {
-  ParticleData particle;
   /* fixed pdgcode and no collision yet */
-  particle.set_pdgcode(pdgcode);
+  ParticleData particle(ParticleType::find(pdgcode));
   particle.set_collision(0);
   for (size_t i = 0; i < number; i++) {
     id_max_++;
@@ -335,14 +262,13 @@ inline void Particles::create(size_t number, PdgCode pdgcode) {
 
 /* create a bunch of particles */
 inline ParticleData& Particles::create(PdgCode pdgcode) {
-  ParticleData particle;
   /* fixed pdgcode and no collision yet */
-  particle.set_pdgcode(pdgcode);
+  ParticleData particle(ParticleType::find(pdgcode));
   particle.set_collision(0);
   id_max_++;
   particle.set_id(id_max_);
   data_.insert(std::make_pair(id_max_, particle));
-  return data_[id_max_];
+  return data_.at(id_max_);
 }
 
 /* return the highest used id */
@@ -365,16 +291,6 @@ inline bool Particles::empty() const {
   return data_.empty();
 }
 
-/* total number particle types */
-inline size_t Particles::types_size() const {
-  return types_.size();
-}
-
-/* check if we have particle types */
-inline bool Particles::types_empty() const {
-  return types_.empty();
-}
-
 /* check the existence of an element in the ParticleData map */
 inline bool Particles::has_data(int id) const {
   return data_.find(id) != data_.end();
@@ -382,20 +298,18 @@ inline bool Particles::has_data(int id) const {
 
 /* return computation time which is reduced by the start up time */
 inline double Particles::time() const {
-  return data_.begin()->second.position().x0() - 1.0;
+  return data_.begin()->second.position().x0();
 }
 
-/* boost_CM - boost to center of momentum */
-void boost_CM(ParticleData *particle1, ParticleData *particle2,
-  FourVector *velocity);
+/* boost_CM - boost to center of momentum and return the corresponding boost vector */
+ThreeVector boost_CM(ParticleData *particle1, ParticleData *particle2);
 
 /* boost_from_CM - boost back from center of momentum */
 void boost_back_CM(ParticleData *particle1, ParticleData *particle2,
-  FourVector *velocity_orig);
+                   const ThreeVector &velocity_orig);
 
 /* particle_distance - measure distance between two particles */
-double particle_distance(ParticleData *particle_orig1,
-  ParticleData *particle_orig2);
+double particle_distance(ParticleData particle1, ParticleData particle2);
 
 /* time_collision - measure collision time of two particles */
 double collision_time(const ParticleData &particle1,

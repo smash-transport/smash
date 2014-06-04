@@ -41,9 +41,9 @@
 #include <ext/stdio_sync_filebuf.h>
 #endif
 
-#include "tests/assert.h"
-#include "tests/macros.h"
-#include "tests/ulp.h"
+#include "assert.h"
+#include "macros.h"
+#include "ulp.h"
 
 #ifdef DOXYGEN
 /**
@@ -222,7 +222,7 @@
  * * `FUZZY_COMPARE(1.f, 0.999999940395355224609375f)` will show a distance of 1
  *
  * ### Comparing to 0
- * Distance to 0 is implemented as comparing to `std::numeric_limits<T>::min()`
+ * Distance to 0 is implemented as comparing to <tt>std::numeric_limits<T>::min()</tt>
  * instead and adding 1 to the resulting distance.
  */
 #define FUZZY_COMPARE(test_value, reference)
@@ -338,10 +338,31 @@ class UnitTester {  // {{{1
 };
 
 static UnitTester global_unit_test_object_;
-
+#endif  // make this visible to doxygen:
+/**
+ * \ingroup unittest
+ * \brief Use this to mark that the failure of a following test is
+ * expected.
+ *
+ * \code
+ * TEST(something) {
+ *   // this needs to pass
+ *   VERIFY(true);
+ *   UnitTest::EXPECT_FAILURE();
+ *   // if this fails, the test will be marked "XFAIL" and the failure
+ *   // will not be counted
+ *   VERIFY(false);
+ *   // this will not be checked anymore, because the TEST stops at the
+ *   // (expectedly) failing VERIFY.
+ *   VERIFY(true);
+ * }
+ * \endcode
+ */
 static inline void EXPECT_FAILURE() {  // {{{1
   global_unit_test_object_.expect_failure = true;
 }
+#ifndef DOXYGEN  // make the following invisible to DOXYGEN
+
 
 static const char *_unittest_fail() {  // {{{1
   if (global_unit_test_object_.expect_failure) {

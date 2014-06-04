@@ -14,7 +14,10 @@
 #define unlikely(x)     (x)
 #endif
 
-#define SMASH_UNUSED(x) \
-  if (&x) {}
+#define SMASH_UNUSED(x) (void)(x)
+
+#define SMASH_DEPRECATED(msg) __attribute__((deprecated(msg)))
+
+#define SMASH_CONST __attribute__((const))
 
 #endif  // SRC_INCLUDE_MACROS_H_

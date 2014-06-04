@@ -13,17 +13,25 @@
 #ifndef SRC_INCLUDE_RESONANCES_H_
 #define SRC_INCLUDE_RESONANCES_H_
 
+#include "forwarddeclarations.h"
+
 #include <cstddef>
-#include <vector>
-#include "include/pdgcode.h"
+#include <cstdint>
 
 namespace Smash {
 
-/* necessary forward declarations */
-class Particles;
-class ParticleData;
-class ParticleType;
-class ProcessBranch;
+
+/** 
+ * Calculate isospin Clebsch-Gordan coefficient
+ *
+ * \f$(-1)^{j_1 - j_2 + m_3} \sqrt(2 j_3 + 1) \cdot [Wigner 3J symbol] \f$
+ * Note that the calculation assumes that isospin values
+ * have been multiplied by two
+ */
+double clebsch_gordan_coefficient(const int isospin_a,
+  const int isospin_b, const int isospin_resonance,
+  const int isospin_z_a, const int isospin_z_b,
+  const int isospin_z_resonance);
 
 /**
  * The minimum mass of the resonance.
@@ -40,7 +48,7 @@ class ProcessBranch;
  * to be available for the resonance.
  *
  */
-float calculate_minimum_mass(Particles *particles, PdgCode pdgcode);
+float calculate_minimum_mass(const Particles &particles, PdgCode pdgcode);
 
 /**
  * Find all resonances that can be produced in a collision of the two
@@ -63,10 +71,11 @@ float calculate_minimum_mass(Particles *particles, PdgCode pdgcode);
  * of the final state particle(s)
  * and the cross section for that particular process.
  */
-std::vector<ProcessBranch> resonance_cross_section(
-  const ParticleData &particle1, const ParticleData &particle2,
-  const ParticleType &type_particle1, const ParticleType &type_particle2,
-  Particles *particles);
+ProcessBranchList resonance_cross_section(const ParticleData &particle1,
+                                          const ParticleData &particle2,
+                                          const ParticleType &type_particle1,
+                                          const ParticleType &type_particle2,
+                                          const Particles &particles);
 
 /**
  * Given the types of the two initial particles and a resonance,
@@ -91,10 +100,11 @@ std::vector<ProcessBranch> resonance_cross_section(
  * \return The cross section for the process
  * [initial particle 1] + [initial particle 2] -> resonance.
  */
-double two_to_one_formation(Particles *particles,
-  const ParticleType &type_particle1,
-  const ParticleType &type_particle2, const ParticleType &type_resonance,
-  double mandelstam_s, double cm_momentum_squared);
+double two_to_one_formation(const Particles &particles,
+                            const ParticleType &type_particle1,
+                            const ParticleType &type_particle2,
+                            const ParticleType &type_resonance,
+                            double mandelstam_s, double cm_momentum_squared);
 
 /**
  * Given the types of the two initial particles and a resonance,
@@ -124,27 +134,13 @@ double two_to_one_formation(Particles *particles,
  * \return The number of possible processes. Also adds elements
  * to the process_list.
  */
-size_t two_to_two_formation(Particles *particles,
-  const ParticleType &type_particle1,
-  const ParticleType &type_particle2, const ParticleType &type_resonance,
-  double mandelstam_s, double cm_momentum_squared,
-  std::vector<ProcessBranch> *process_list);
-
-/**
- * Function for 1-dimensional GSL integration.
- *
- * \param[in] integrand_function Function of 1 variable to be integrated over.
- * \param[in] parameters Container for possible parameters
- * needed by the integrand.
- * \param[in] lower_limit Lower limit of the integral.
- * \param[in] upper_limit Upper limit of the integral.
- * \param[out] integral_value Result of integration.
- * \param[out] integral_error Uncertainty of the result.
- */
-void quadrature_1d(double (*integrand_function)(double, void*),
-                   std::vector<double> *parameters,
-                   double lower_limit, double upper_limit,
-                   double *integral_value, double *integral_error);
+std::size_t two_to_two_formation(const Particles &particles,
+                                 const ParticleType &type_particle1,
+                                 const ParticleType &type_particle2,
+                                 const ParticleType &type_resonance,
+                                 double mandelstam_s,
+                                 double cm_momentum_squared,
+                                 ProcessBranchList *process_list);
 
 /**
  * Spectral function
@@ -181,24 +177,8 @@ double spectral_function_integrand(double resonance_mass, void * parameters);
  *
  * \return The mass of the resonance particle.
  */
-double sample_resonance_mass(Particles *particles, PdgCode pdg_resonance,
-  PdgCode pdg_stable, double cms_energy);
-
-/**
- * Resonance formation process.
- *
- * Creates one or two new particles, of which
- * one is a resonance.
- *
- * \param[in,out] particles Particles in the simulation.
- * \param[in] particle_id ID of the first initial state particle.
- * \param[in] other_id ID of the second initial state particle.
- * \param[in] produced_particles Final state particle type(s).
- *
- * \return ID of the (first) new particle.
- */
-int resonance_formation(Particles *particles, int particle_id, int other_id,
-  std::vector<PdgCode> produced_particles);
+double sample_resonance_mass(const Particles &particles, PdgCode pdg_resonance,
+                             PdgCode pdg_stable, double cms_energy);
 
 }  // namespace Smash
 

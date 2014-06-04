@@ -5,42 +5,52 @@
  *    GNU General Public License (GPLv3 or later)
  */
 #include <cmath>
+#include<istream>
 
 #include "include/fourvector.h"
 
 namespace Smash {
 
-/* LorentzBoost - This is equivalent to -velocity Boost from ROOT */
-FourVector FourVector::LorentzBoost(const FourVector &velocity) const {
-  /* 4-velocity u = (1, v) = (1, v_1, v_2, v_3)
-   * u.u = 1 - v_1^2 - v_2^2 - v_3^2
-   */
-  const double velocity_squared = velocity.Dot(velocity);
-  /* Lorentz gamma = 1/sqrt(1 - v^2)
-   *               = 1/sqrt(1 - v_1^2 - v_2^2 - v_3^2)
-   *               = 1/sqrt(u.u)
-   */
-  const double gamma = velocity_squared > 0 ? 1.0 / std::sqrt(velocity_squared) : 0;
+/**
+ * Algorithmic
+ * -----------
+ *
+ * (Notation: \f$\vec{a}\f$ is a Three-Vector, \f$a^\mu\f$ is a Four-Vector.)
+ *
+ * The gamma factor is \f$\gamma = 1/\sqrt{1-\vec{v}^2}\f$.
+ *
+ * The time-like component of a Lorentz-boosted FourVector \f$x^\mu =
+ * (x_0, x_1, x_2, x_3) = (x_0, \vec{r})\f$ with velocity \f$\vec v\f$
+ * is
+ *
+ * \f{eqnarray*}{x^\prime_0 = \gamma \cdot (x_0 - \vec{r}\cdot\vec{v}),\f}
+ *
+ * and the space-like components i = 1, 2, 3 are:
+ * \f{eqnarray*}{
+ * x^\prime_i &=& x_i + v_i \cdot (\frac{\gamma - 1}{\vec{v}^2} \cdot \vec{r}\cdot\vec{v} - \gamma \cdot x_0)\\
+ *            &=& x_i + v_i \cdot (\frac{\gamma^2}{\gamma + 1} \cdot \vec{r}\cdot\vec{v} - \gamma \cdot x_0)\\
+ *            &=& x_i - v_i \cdot \frac{\gamma}{\gamma + 1} \cdot (\gamma(x_0 - \vec{r}\cdot\vec{v}) + x_0 )\\
+ *            &=& x_i - v_i \cdot \frac{\gamma}{\gamma + 1} \cdot (x^\prime_0 + x_0)
+ * \f}
+ *
+ * Note: This function is equivalent to -velocity Boost from ROOT
+ */
+FourVector FourVector::LorentzBoost(const ThreeVector &velocity) const {
+  const double velocity_squared = velocity.sqr();
 
-  /* Lorentz boost for a four-vector x = (x_0, x_1, x_2, x_3) = (x_0, r)
-   * and velocity u = (1, v_1, v_2, v_3) = (1, v) (r and v 3-vectors):
-   * x'_0 = gamma * (x_0 - r.v)
-   *      = gamma * (x_0 - x_1 * v_1 - x_2 * v_2 - x_3 * v_3
-   *      = gamma * (x.u)
-   * For i = 1, 2, 3:
-   * x'_i = x_i + v_i * [(gamma - 1) / v^2 * r.v - gamma * x0]
-   *      = x_i + v_i * [(gamma^2 / (gamma + 1) * r.v - gamma * x0]
-   *      = x_i - gamma * v_i * [gamma / (gamma + 1) x.u + x_0 / (gamma + 1)]
-   */
+  const double gamma = velocity_squared < 1. ?
+                       1. / std::sqrt(1. - velocity_squared) : 0;
+
   // this is used four times in the Vector:
-  const double xprime_0 = gamma * this->Dot(velocity);
-  // this is the part of the space-like components that is always the
-  // same:
+  const double xprime_0 = gamma * (this->x0() - this->threevec()*velocity);
+  // this is the part of the space-like components that is always the same:
   const double constantpart = gamma / (gamma + 1) * (xprime_0 + this->x0());
-  return FourVector(xprime_0,
-                    this->x1() - velocity.x1() * constantpart,
-                    this->x2() - velocity.x2() * constantpart,
-                    this->x3() - velocity.x3() * constantpart);
+  return FourVector (xprime_0, this->threevec() - velocity * constantpart);
+}
+
+std::ostream& operator<<(std::ostream& os, const FourVector& vec) {
+  return os << vec.x0() << "/" << vec.x1() << "/"
+            << vec.x2() << "/" << vec.x3();
 }
 
 }  // namespace Smash

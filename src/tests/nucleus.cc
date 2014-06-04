@@ -6,15 +6,40 @@
  *    GNU General Public License (GPLv3 or later)
  *
  */
-#include "tests/unittest.h"
+#include "unittest.h"
 
 #include <map>
-#include "include/nucleus.h"
-#include "include/pdgcode.h"
+#include "../include/nucleus.h"
+#include "../include/pdgcode.h"
 
 using namespace Smash;
 
 std::map<PdgCode, int> list = {{0x2212, 82}, {0x2112, 126}};
+
+TEST(init_particle_types) {
+  ParticleType::create_type_list(
+      "# NAME MASS[GEV] WIDTH[GEV] PDG\n"
+      "pi0 0.1350 -1.0 111\n"
+      "pi+ 0.1396 -1.0 211\n"
+      "pi- 0.1396 -1.0 -211\n"
+      "rho0 0.7755 0.149 113\n"
+      "rho+ 0.7755 0.149 213\n"
+      "rho- 0.7755 0.149 -213\n"
+      "eta 0.5479 1.0e-6 221\n"
+      "omega 0.7827 0.0085 223\n"
+      "p 0.9383 -1.0 2212\n"
+      "pbar 0.9383 -1.0 -2212\n"
+      "n 0.9396 -1.0 2112\n"
+      "nbar 0.9396 -1.0 -2112\n"
+      "Delta++ 1.232 0.117 2224\n"
+      "Delta+ 1.232 0.117 2214\n"
+      "Delta0 1.232 0.117 2114\n"
+      "Delta- 1.232 0.117 1114\n"
+      "Deltabar++ 1.232 0.117 -2224\n"
+      "Deltabar+ 1.232 0.117 -2214\n"
+      "Deltabar0 1.232 0.117 -2114\n"
+      "Deltabar- 1.232 0.117 -1114\n");
+}
 
 TEST(initialize_realparticles) {
   Nucleus lead;

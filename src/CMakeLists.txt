@@ -9,7 +9,6 @@ pkg_check_modules(YAML REQUIRED yaml-cpp>=0.5.1)
 # set up include paths
 include_directories(
     "${CMAKE_CURRENT_BINARY_DIR}"
-    "${CMAKE_CURRENT_SOURCE_DIR}"
     )
 include_directories(SYSTEM
     "${GSL_INCLUDES}"
@@ -25,39 +24,36 @@ set(SMASH_LIBRARIES
    ${YAML_LDFLAGS}
    )
 
-# if clock_gettime is in rt link against it
-CHECK_LIBRARY_EXISTS(rt clock_gettime "time.h" HAVE_CLOCK_GETTIME)
-if(HAVE_CLOCK_GETTIME)
-   list(APPEND SMASH_LIBRARIES rt)
-endif()
-
 # list the source files
 set(smash_src
         action.cc
         boxmodus.cc
-        clebschgordan.cc
         collidermodus.cc
         configuration.cc
         cross-sections.cc
         decayaction.cc
         decayactionsfinder.cc
+        decaymodes.cc
         distributions.cc
         experiment.cc
         fourvector.cc
         modusdefault.cc
         nucleus.cc
         nucleusmodus.cc
+        oscaroutput.cc
         outputroutines.cc
         parametrizations.cc
+        particledata.cc
         particles.cc
         particlesoutput.cc
+        particletype.cc
         pdgcode.cc
+        processbranch.cc
         random.cc
         resonances.cc
         scatteraction.cc
         scatteractionsfinder.cc
 	spheremodus.cc
-        time.cc
         vtkoutput.cc
         )
 

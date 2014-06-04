@@ -7,6 +7,8 @@
 #ifndef SRC_INCLUDE_EXPERIMENTPARAMETERS_H_
 #define SRC_INCLUDE_EXPERIMENTPARAMETERS_H_
 
+#include "clock.h"
+
 namespace Smash {
 
 /**
@@ -17,8 +19,30 @@ namespace Smash {
  * function argument passing.
  */
 struct ExperimentParameters {
-  /// temporal time step
-  const double eps;
+  /// system clock (for simulation time keeping in the computational
+  /// frame)
+  Clock labclock;
+  /// Time step size
+  float timestep_duration() const {
+    return labclock.timestep_duration();
+  }
+  /// returns if output should happen now
+  bool need_intermediate_output() const {
+    return labclock.multiple_is_in_next_tick(output_interval);
+  }
+  void reset_clock(const Clock initial_clock) {
+    labclock = std::move(initial_clock);
+  }
+  /// this is the time particles will have after propagating through the
+  /// current time step.
+  float new_particle_time() const {
+    // I'm not certain if they should have the current time or the next
+    // tick.
+    return labclock.current_time();
+        // labclock.next_time();
+  }
+  /// time interval between SMASH giving measurables
+  const float output_interval;
   /// cross section of the elastic scattering
   const float cross_section;
   /// number of test particle

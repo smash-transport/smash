@@ -3,13 +3,13 @@ General:
     MODUS:         Sphere
 
     # temporal grid spacing
-    EPS:           0.01
+    DELTA_TIME:    0.01
 
-    # maximum of steps to take
-    STEPS:         1000
+    # end time of simulation
+    END_TIME:      1.0
 
-    # how many steps before recording measurables
-    UPDATE:        10
+    # how much time before recording measurables
+    OUTPUT_INTERVAL:  1.0
 
     # initial random seed (negative for time)
     RANDOMSEED:    1
@@ -37,6 +37,9 @@ Modi:
         # 2:  random position box + peaked momenta
         #
         INITIAL_CONDITION: 1
+
+        # start time of simulation
+        START_TIME:    0.0
 
     Sphere:
         # Sphere size
@@ -66,7 +69,7 @@ Modi:
         # Lead
         Target:
             PARTICLES: {2212: 82, 2112: 126}
-    
+
         # what sqrt(s_NN) to use:
         SQRTSNN: 2
         # which subsystem "NN" in sqrt(s_NN) refers to

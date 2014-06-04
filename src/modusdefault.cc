@@ -16,20 +16,21 @@
 
 namespace Smash {
 
-/*general propagation routine */
+// general propagation routine
+
 void ModusDefault::propagate(Particles *particles,
-                             const ExperimentParameters &parameters) {
+                             const ExperimentParameters &parameters,
+                             const OutputsList &) {
   FourVector distance, position;
   for (ParticleData &data : particles->data()) {
     /* propagation for this time step */
-    distance.set_FourVector(parameters.eps,
-                            data.velocity_x() * parameters.eps,
-                            data.velocity_y() * parameters.eps,
-                            data.velocity_z() * parameters.eps);
+    distance = FourVector(0.0,
+                          data.velocity() * parameters.timestep_duration());
     printd("Particle %d motion: %g %g %g %g\n", data.id(), distance.x0(),
            distance.x1(), distance.x2(), distance.x3());
     position = data.position();
     position += distance;
+    position.set_x0(parameters.new_particle_time());
     data.set_position(position);
   }
 }

@@ -14,6 +14,7 @@
 #include "include/configuration.h"
 #include "include/experimentparameters.h"
 #include "include/outputroutines.h"
+#include "include/particles.h"
 #include "include/pdgcode.h"
 #include "include/random.h"
 
@@ -89,14 +90,14 @@ void NucleusModus::print_startup() {
 }
 
 /* initial_conditions - sets particle data for @particles */
-void NucleusModus::initial_conditions(Particles *particles,
-                                       const ExperimentParameters &) {
+float NucleusModus::initial_conditions(Particles *particles,
+                                      const ExperimentParameters&) {
   // WHAT'S MISSING:
   //
   // Nuclei can be non-spherical. If they are, then they may be randomly
   // aligned. Excentricities and angles should be configurable.
-  projectile_.auto_set_masses(particles);
-  target_.auto_set_masses(particles);
+  projectile_.auto_set_masses();
+  target_.auto_set_masses();
   float mass_projec = projectile_.mass();
   float mass_target = target_.mass();
   printf("Masses of Nuclei: %g GeV %g GeV\n", projectile_.mass(),
@@ -108,7 +109,7 @@ void NucleusModus::initial_conditions(Particles *particles,
   // projectile.
   if (pdg_sNN_1_ != 0) {
     // If PDG Code is given, use mass of this particle type.
-    mass_1 = particles->particle_type(pdg_sNN_1_).mass();
+    mass_1 = ParticleType::find(pdg_sNN_1_).mass();
   } else if (projectile_.size() > 0) {
     // else, use average mass of a particle in that nucleus
     mass_1 = projectile_.mass()/projectile_.size();
@@ -117,15 +118,18 @@ void NucleusModus::initial_conditions(Particles *particles,
   }
   // same logic for mass2 and target as for projectile directly above.
   if (pdg_sNN_2_ != 0) {
-    mass_2 = particles->particle_type(pdg_sNN_2_).mass();
+    mass_2 = ParticleType::find(pdg_sNN_2_).mass();
   } else if (target_.size() > 0) {
     mass_2 = target_.mass()/target_.size();
   } else {
     throw NucleusEmpty("Target nucleus is empty!");
   }
   double s_NN = sqrt_s_NN_*sqrt_s_NN_;
-  if (s_NN < (mass_1 + mass_2)*(mass_1 + mass_2)) {
-    throw InvalidEnergy("Error in input: sqrt(s_NN) is smaller than masses.");
+  if (sqrt_s_NN_ < mass_1 + mass_2) {
+    throw InvalidEnergy("Error in input: sqrt(s_NN) is smaller than masses:\n"
+                      + std::to_string(sqrt_s_NN_) + " GeV < "
+                      + std::to_string(mass_1) + " GeV + "
+                      + std::to_string(mass_2) + " GeV.");
   }
   float total_mandelstam_s = (s_NN - mass_1*mass_1 - mass_2*mass_2)
                              * mass_projec*mass_target
@@ -147,7 +151,7 @@ void NucleusModus::initial_conditions(Particles *particles,
   // Projectile hits at positive x.
   // Also, it sets the time of the particles to
   // -initial_z_displacement_/sqrt(velocity_squared).
-  double simulation_time = -initial_z_displacement_/sqrt(velocity_squared);
+  float simulation_time = -initial_z_displacement_/sqrt(velocity_squared);
   projectile_.shift(true, -initial_z_displacement_, +impact_/2.0
                                                   , simulation_time);
   target_.shift(false,    +initial_z_displacement_, -impact_/2.0
@@ -155,6 +159,7 @@ void NucleusModus::initial_conditions(Particles *particles,
   // now, put the particles in the nuclei into particles.
   projectile_.copy_particles(particles);
   target_.copy_particles(particles);
+  return simulation_time;
 }
 
 void NucleusModus::sample_impact(const bool s, const float min,

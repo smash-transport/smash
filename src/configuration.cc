@@ -16,9 +16,9 @@
 #include <boost/filesystem.hpp>
 #include <yaml-cpp/yaml.h>
 
-namespace Smash {
+#include "include/forwarddeclarations.h"
 
-namespace bf = boost::filesystem;
+namespace Smash {
 
 // internal helper functions
 namespace {
@@ -61,10 +61,10 @@ YAML::Node operator|=(YAML::Node a, const YAML::Node &b) {
 
 #ifndef DOXYGEN
 namespace particles_txt {
-#include "particles.txt.h"
+#include <particles.txt.h>
 }  // namespace particles_txt
 namespace decaymodes_txt {
-#include "decaymodes.txt.h"
+#include <decaymodes.txt.h>
 }  // namespace decaymodes_txt
 #endif
 

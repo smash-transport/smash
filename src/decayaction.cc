@@ -30,53 +30,43 @@ DecayAction::DecayAction(const std::vector<int> &in_part,
  * sample the momenta and position of the products and add them
  * to the active particles data structure.
  *
- * \param[in,out] particles Particles in the simulation.
- *
- * \return The ID of the first new particle.
+ * \param[in] incoming0 decaying particle (in its rest frame)
+ * \param[in] particles Particles in the simulation.
  */
-int DecayAction::one_to_two (Particles *particles) {
-  int resonance_id = ingoing_particles_[0];
-  PdgCode type_a = outgoing_particles_[0];
-  PdgCode type_b = outgoing_particles_[1];
+void DecayAction::one_to_two(const ParticleData &incoming0, const Particles &particles) {
+  ParticleData &outgoing0 = outgoing_particles_[0];
+  ParticleData &outgoing1 = outgoing_particles_[1];
+  const ParticleType &outgoing0_type = outgoing0.type();
+  const ParticleType &outgoing1_type = outgoing1.type();
 
-  //TODO(weil) This may be checked already when reading in the possible
-  //decay channels.
-  if (! type_a.is_hadron() || ! type_b.is_hadron()) {
-    printf("Warning: decay products A: %s B: %s\n", type_a.string().c_str()
-                                                  , type_b.string().c_str());
+  const PdgCode type_a = outgoing0.pdgcode();
+  const PdgCode type_b = outgoing1.pdgcode();
+
+  // TODO(weil) This may be checked already when reading in the possible
+  // decay channels.
+  if (!outgoing0.is_hadron() || !outgoing1.is_hadron()) {
+    printf("Warning: decay products A: %s B: %s\n", type_a.string().c_str(),
+           type_b.string().c_str());
   }
 
-  /* Add two new particles */
-  ParticleData new_particle_a, new_particle_b;
-  new_particle_a.set_pdgcode(type_a);
-  new_particle_b.set_pdgcode(type_b);
-
-  double mass_a = particles->particle_type(type_a).mass(),
-    mass_b = particles->particle_type(type_b).mass();
-  const double total_energy = particles->data(resonance_id).momentum().x0();
+  double mass_a = outgoing0_type.mass();
+  double mass_b = outgoing1_type.mass();
+  const double total_energy = incoming0.momentum().x0();
 
   /* If one of the particles is resonance, sample its mass */
   /* XXX: Other particle assumed stable! */
-  if (particles->particle_type(type_a).width() > 0) {
+  if (outgoing0_type.width() > 0) {
     mass_a = sample_resonance_mass(particles, type_a, type_b, total_energy);
-  } else if (particles->particle_type(type_b).width() > 0) {
+  } else if (outgoing1_type.width() > 0) {
     mass_b = sample_resonance_mass(particles, type_b, type_a, total_energy);
   }
 
   /* Sample the momenta */
-  sample_cms_momenta(&new_particle_a, &new_particle_b, total_energy,
-                     mass_a, mass_b);
+  sample_cms_momenta(&outgoing0, &outgoing1, total_energy, mass_a, mass_b);
 
   /* Both decay products begin from the same point */
-  FourVector decay_point = particles->data(resonance_id).position();
-  new_particle_a.set_position(decay_point);
-  new_particle_b.set_position(decay_point);
-
-  int id_first_new = particles->add_data(new_particle_a);
-  particles->add_data(new_particle_b);
-
-  /* 2 new particles created; return the id of the first one */
-  return id_first_new;
+  outgoing0.set_position(incoming0.position());
+  outgoing1.set_position(incoming0.position());
 }
 
 /**
@@ -86,42 +76,39 @@ int DecayAction::one_to_two (Particles *particles) {
  * sample the momenta and position of the products and add them
  * to the active particles data structure.
  *
- * \param[in,out] particles Particles in the simulation.
- *
- * \return The ID of the first new particle.
+ * \param[in] incoming0 decaying particle (in its rest frame)
  */
-int DecayAction::one_to_three (Particles *particles) {
-  int resonance_id = ingoing_particles_[0];
-  PdgCode type_a = outgoing_particles_[0];
-  PdgCode type_b = outgoing_particles_[1];
-  PdgCode type_c = outgoing_particles_[2];
+void DecayAction::one_to_three(const ParticleData &incoming0) {
+  ParticleData &outgoing0 = outgoing_particles_[0];
+  ParticleData &outgoing1 = outgoing_particles_[1];
+  ParticleData &outgoing2 = outgoing_particles_[2];
+  const ParticleType &outgoing0_type = outgoing0.type();
+  const ParticleType &outgoing1_type = outgoing1.type();
+  const ParticleType &outgoing2_type = outgoing2.type();
 
-  //TODO(weil) This may be checked already when reading in the possible
-  //decay channels.
-  if (! type_a.is_hadron() || ! type_b.is_hadron() || ! type_c.is_hadron()) {
+  // TODO(weil) This may be checked already when reading in the possible
+  // decay channels.
+  if (!outgoing0.is_hadron() || !outgoing1.is_hadron() ||
+      !outgoing2.is_hadron()) {
     printf("Warning: decay products A: %s B: %s C: %s\n",
-           type_a.string().c_str(), type_b.string().c_str(),
-           type_c.string().c_str());
+           outgoing0.pdgcode().string().c_str(),
+           outgoing1.pdgcode().string().c_str(),
+           outgoing2.pdgcode().string().c_str());
   }
   printd("Note: Doing 1->3 decay!\n");
 
-  /* Add three new particles */
-  ParticleData new_particle_a, new_particle_b, new_particle_c;
-  new_particle_a.set_pdgcode(type_a);
-  new_particle_b.set_pdgcode(type_b);
-  new_particle_c.set_pdgcode(type_c);
-
-  FourVector momentum_resonance = particles->data(resonance_id).momentum();
-  const double mass_a = particles->particle_type(type_a).mass(),
-    mass_b = particles->particle_type(type_b).mass(),
-    mass_c = particles->particle_type(type_c).mass(),
-    mass_resonance = sqrt(momentum_resonance.Dot(momentum_resonance));
+  const FourVector momentum_resonance = incoming0.momentum();
+  const double mass_a = outgoing0_type.mass();
+  const double mass_b = outgoing1_type.mass();
+  const double mass_c = outgoing2_type.mass();
+  const double mass_resonance =
+      sqrt(momentum_resonance.Dot(momentum_resonance));
 
   /* mandelstam-s limits for pairs ab and bc */
-  double s_ab_max = (mass_resonance - mass_c) * (mass_resonance - mass_c);
-  double s_ab_min = (mass_a + mass_b) * (mass_a + mass_b);
-  double s_bc_max = (mass_resonance - mass_a) * (mass_resonance - mass_a);
-  double s_bc_min = (mass_b + mass_c) * (mass_b + mass_c);
+  const double s_ab_max = (mass_resonance - mass_c) * (mass_resonance - mass_c);
+  const double s_ab_min = (mass_a + mass_b) * (mass_a + mass_b);
+  const double s_bc_max = (mass_resonance - mass_a) * (mass_resonance - mass_a);
+  const double s_bc_min = (mass_b + mass_c) * (mass_b + mass_c);
 
   printd("s_ab limits: %g %g \n", s_ab_min, s_ab_max);
   printd("s_bc limits: %g %g \n", s_bc_min, s_bc_max);
@@ -133,32 +120,35 @@ int DecayAction::one_to_three (Particles *particles) {
   while (s_bc > dalitz_bc_max || s_bc < dalitz_bc_min) {
     s_ab = Random::uniform(s_ab_min, s_ab_max);
     s_bc = Random::uniform(s_bc_min, s_bc_max);
-    double e_b_rest = (s_ab - mass_a * mass_a + mass_b * mass_b)
-                           / (2 * sqrt(s_ab));
-    double e_c_rest = (mass_resonance * mass_resonance - s_ab
-                            - mass_c * mass_c) / (2 * sqrt(s_ab));
-    dalitz_bc_max = (e_b_rest + e_c_rest) * (e_b_rest + e_c_rest)
-      - (sqrt(e_b_rest * e_b_rest - mass_b * mass_b)
-         - sqrt(e_c_rest * e_c_rest - mass_c * mass_c))
-      * (sqrt(e_b_rest * e_b_rest - mass_b * mass_b)
-         - sqrt(e_c_rest * e_c_rest - mass_c * mass_c));
-    dalitz_bc_min = (e_b_rest + e_c_rest) * (e_b_rest + e_c_rest)
-      - (sqrt(e_b_rest * e_b_rest - mass_b * mass_b)
-         + sqrt(e_c_rest * e_c_rest - mass_c * mass_c))
-      * (sqrt(e_b_rest * e_b_rest - mass_b * mass_b)
-         + sqrt(e_c_rest * e_c_rest - mass_c * mass_c));
+    const double e_b_rest =
+        (s_ab - mass_a * mass_a + mass_b * mass_b) / (2 * sqrt(s_ab));
+    const double e_c_rest =
+        (mass_resonance * mass_resonance - s_ab - mass_c * mass_c) /
+        (2 * sqrt(s_ab));
+    dalitz_bc_max = (e_b_rest + e_c_rest) * (e_b_rest + e_c_rest) -
+                    (sqrt(e_b_rest * e_b_rest - mass_b * mass_b) -
+                     sqrt(e_c_rest * e_c_rest - mass_c * mass_c)) *
+                        (sqrt(e_b_rest * e_b_rest - mass_b * mass_b) -
+                         sqrt(e_c_rest * e_c_rest - mass_c * mass_c));
+    dalitz_bc_min = (e_b_rest + e_c_rest) * (e_b_rest + e_c_rest) -
+                    (sqrt(e_b_rest * e_b_rest - mass_b * mass_b) +
+                     sqrt(e_c_rest * e_c_rest - mass_c * mass_c)) *
+                        (sqrt(e_b_rest * e_b_rest - mass_b * mass_b) +
+                         sqrt(e_c_rest * e_c_rest - mass_c * mass_c));
   }
 
-  printd("s_ab: %g s_bc: %g min: %g max: %g\n",
-         s_ab, s_bc, dalitz_bc_min, dalitz_bc_max);
+  printd("s_ab: %g s_bc: %g min: %g max: %g\n", s_ab, s_bc, dalitz_bc_min,
+         dalitz_bc_max);
 
   /* Compute energy and momentum magnitude */
-  const double energy_a = (mass_resonance * mass_resonance + mass_a * mass_a
-                           - s_bc) / (2 * mass_resonance);
-  const double energy_c = (mass_resonance * mass_resonance + mass_c * mass_c
-                           - s_ab) / (2 * mass_resonance);
-  const double energy_b = (s_ab + s_bc - mass_a * mass_a - mass_c * mass_c)
-                           / (2 * mass_resonance);
+  const double energy_a =
+      (mass_resonance * mass_resonance + mass_a * mass_a - s_bc) /
+      (2 * mass_resonance);
+  const double energy_c =
+      (mass_resonance * mass_resonance + mass_c * mass_c - s_ab) /
+      (2 * mass_resonance);
+  const double energy_b =
+      (s_ab + s_bc - mass_a * mass_a - mass_c * mass_c) / (2 * mass_resonance);
   const double momentum_a = sqrt(energy_a * energy_a - mass_a * mass_a);
   const double momentum_c = sqrt(energy_c * energy_c - mass_c * mass_c);
   const double momentum_b = sqrt(energy_b * energy_b - mass_b * mass_b);
@@ -173,84 +163,63 @@ int DecayAction::one_to_three (Particles *particles) {
   Angles phitheta;
   phitheta.distribute_isotropically();
   /* This is the angle of the plane of the three decay particles */
-  new_particle_a.set_momentum(mass_a,
-                              momentum_a * phitheta.x(),
-                              momentum_a * phitheta.y(),
-                              momentum_a * phitheta.z());
+  outgoing0.set_momentum(mass_a, phitheta.threevec() * momentum_a);
 
   /* Angle between a and b */
-  double theta_ab = acos((energy_a * energy_b - 0.5 * (s_ab - mass_a * mass_a
-                          - mass_b * mass_b)) / (momentum_a * momentum_b));
-  printd("theta_ab: %g Ea: %g Eb: %g sab: %g pa: %g pb: %g\n",
-         theta_ab, energy_a, energy_b, s_ab, momentum_a, momentum_b);
+  double theta_ab = acos(
+      (energy_a * energy_b - 0.5 * (s_ab - mass_a * mass_a - mass_b * mass_b)) /
+      (momentum_a * momentum_b));
+  printd("theta_ab: %g Ea: %g Eb: %g sab: %g pa: %g pb: %g\n", theta_ab,
+         energy_a, energy_b, s_ab, momentum_a, momentum_b);
   bool phi_has_changed = phitheta.add_to_theta(theta_ab);
-  new_particle_b.set_momentum(mass_b,
-                              momentum_b * phitheta.x(),
-                              momentum_b * phitheta.y(),
-                              momentum_b * phitheta.z());
+  outgoing1.set_momentum(mass_b, phitheta.threevec() * momentum_b);
 
   /* Angle between b and c */
-  double theta_bc = acos((energy_b * energy_c - 0.5 *(s_bc - mass_b * mass_b
-                         - mass_c * mass_c)) / (momentum_b * momentum_c));
-  printd("theta_bc: %g Eb: %g Ec: %g sbc: %g pb: %g pc: %g\n",
-         theta_bc, energy_b, energy_c, s_bc, momentum_b, momentum_c);
+  double theta_bc = acos(
+      (energy_b * energy_c - 0.5 * (s_bc - mass_b * mass_b - mass_c * mass_c)) /
+      (momentum_b * momentum_c));
+  printd("theta_bc: %g Eb: %g Ec: %g sbc: %g pb: %g pc: %g\n", theta_bc,
+         energy_b, energy_c, s_bc, momentum_b, momentum_c);
   // pass information on whether phi has changed during the last adding
   // on to add_to_theta:
   phitheta.add_to_theta(theta_bc, phi_has_changed);
-  new_particle_c.set_momentum(mass_c,
-                              momentum_c * phitheta.x(),
-                              momentum_c * phitheta.y(),
-                              momentum_c * phitheta.z());
+  outgoing2.set_momentum(mass_c, phitheta.threevec() * momentum_c);
 
   /* Momentum check */
-  double energy = new_particle_a.momentum().x0()
-    + new_particle_b.momentum().x0() + new_particle_c.momentum().x0();
-  double px = new_particle_a.momentum().x1() + new_particle_b.momentum().x1()
-    + new_particle_c.momentum().x1();
-  double py = new_particle_a.momentum().x2() + new_particle_b.momentum().x2()
-    + new_particle_c.momentum().x2();
-  double pz = new_particle_a.momentum().x3() + new_particle_b.momentum().x3()
-    + new_particle_c.momentum().x3();
+  FourVector ptot = outgoing0.momentum() + outgoing1.momentum() +
+                    outgoing2.momentum();
 
-  if (fabs(energy - total_energy) > really_small)
-    printf("1->3 energy not conserved! Before: %g After: %g\n",
-           total_energy, energy);
-
-  if (fabs(px) > really_small || fabs(py) > really_small
-      || fabs(pz) > really_small)
-    printf("1->3 momentum check failed. Total momentum: %g %g %g\n",
-           px, py, pz);
+  if (fabs(ptot.x0() - total_energy) > really_small) {
+    printf("1->3 energy not conserved! Before: %g After: %g\n", total_energy,
+           ptot.x0());
+  }
+  if (fabs(ptot.x1()) > really_small || fabs(ptot.x2()) > really_small ||
+      fabs(ptot.x3()) > really_small) {
+    printf("1->3 momentum check failed. Total momentum: %g %g %g\n", ptot.x1(),
+           ptot.x2(), ptot.x3());
+  }
 
   /* All decay products begin from the same point */
-  FourVector decay_point = particles->data(resonance_id).position();
-  new_particle_a.set_position(decay_point);
-  new_particle_b.set_position(decay_point);
-  new_particle_c.set_position(decay_point);
+  outgoing0.set_position(incoming0.position());
+  outgoing1.set_position(incoming0.position());
+  outgoing2.set_position(incoming0.position());
 
-  int id_first_new = particles->add_data(new_particle_a);
-  particles->add_data(new_particle_b);
-  particles->add_data(new_particle_c);
-
-  printd("p0: %g %g %g \n", new_particle_a.momentum().x0(),
-         new_particle_b.momentum().x0(), new_particle_c.momentum().x0());
-  printd("p1: %g %g %g \n", new_particle_a.momentum().x1(),
-         new_particle_b.momentum().x1(), new_particle_c.momentum().x1());
-  printd("p2: %g %g %g \n", new_particle_a.momentum().x2(),
-         new_particle_b.momentum().x2(), new_particle_c.momentum().x2());
-  printd("p3: %g %g %g \n", new_particle_a.momentum().x3(),
-         new_particle_b.momentum().x3(), new_particle_c.momentum().x3());
-
-  /* 3 new particles created; return the id of the first one */
-  return id_first_new;
+  printd("p0: %g %g %g \n", outgoing0.momentum().x0(),
+         outgoing1.momentum().x0(), outgoing2.momentum().x0());
+  printd("p1: %g %g %g \n", outgoing0.momentum().x1(),
+         outgoing1.momentum().x1(), outgoing2.momentum().x1());
+  printd("p2: %g %g %g \n", outgoing0.momentum().x2(),
+         outgoing1.momentum().x2(), outgoing2.momentum().x2());
+  printd("p3: %g %g %g \n", outgoing0.momentum().x3(),
+         outgoing1.momentum().x3(), outgoing2.momentum().x3());
 }
 
-
-void DecayAction::choose_channel (Particles *particles) {
-  const PdgCode pdgcode = particles->type(ingoing_particles_[0]).pdgcode();
+ParticleList DecayAction::choose_channel(const Particles &particles) const {
+  const PdgCode pdgcode = particles.data(incoming_particles_[0]).pdgcode();
 
   /* Get the decay modes of this resonance */
   const std::vector<ProcessBranch> decaymodes
-    = particles->decay_modes(pdgcode).decay_mode_list();
+    = particles.decay_modes(pdgcode).decay_mode_list();
   /* Get the first decay mode and its branching ratio */
   std::vector<ProcessBranch>::const_iterator mode = decaymodes.begin();
   float cumulated_probability = mode->weight();
@@ -263,174 +232,72 @@ void DecayAction::choose_channel (Particles *particles) {
     cumulated_probability += mode->weight();
     ++mode;
   }
-
-  outgoing_particles_ = mode->particle_list();
+  return mode->particle_list();
 }
 
-
-/**
- * Execute a decay process for the selected particle.
- *
- * Randomly select one of the decay modes of the particle
- * according to their relative weights. Then decay the particle
- * by calling function one_to_two or one_to_three.
- *
- * \param[in,out] particles Particles in the simulation.
- *
- * \return The ID of the first decay product.
- */
-int DecayAction::resonance_decay (Particles *particles) {
-
-  /* Decide for a particular decay channel. */
-  choose_channel (particles);
-
-  /* We found our decay branch, get the decay product pdgs and do the decay */
-  size_t decay_particles = outgoing_particles_.size();
-  int new_id_a = -1;
-  switch (decay_particles) {
-  case 2:
-    new_id_a = one_to_two (particles);
-    break;
-  case 3:
-    new_id_a = one_to_three (particles);
-    break;
-  default:
-    printf("Warning: Not a 1->2 or 1->3 process!\n");
-    printf("Number of decay particles: %zu \n", decay_particles);
-    printf("Decay particles: ");
-    for (size_t i = 0; i < decay_particles; i++) {
-      printf("%s ", outgoing_particles_[i].string().c_str());
-    }
-    printf("\n");
-  }
-  return new_id_a;
-}
-
-void DecayAction::perform (Particles *particles, size_t &id_process) {
-  FourVector velocity_CM;
-  int id_a = ingoing_particles_[0];
-
+void DecayAction::perform(Particles *particles, size_t &id_process) {
   /* Check if particle still exists. */
-  if (!particles->has_data(id_a)) {
-    printf("ScatterAction::perform: ID %i not found!\n", id_a);
+  if (!is_valid(*particles)) {
+    printf("DecayAction::perform: ID %i not found!\n", incoming_particles_[0]);
     return;
   }
 
-  if (interaction_type_ != 2)
-    printf("Decays warning: ID %i (%s) has process type %i.\n",
-           id_a, particles->type(id_a).name().c_str(), interaction_type_);
+  /* local copy of the initial state */
+  ParticleData particle0 = particles->data(incoming_particles_[0]);
+  const ParticleType &type0 = particle0.type();
 
-  /* Save a copy of the initial state */
-  ParticleData initial_data = particles->data(id_a);
-  ParticleType initial_type = particles->type(id_a);
+  if (interaction_type_ != 2) {
+    printf("Decays warning: ID %i (%s) has process type %i.\n", particle0.id(),
+           type0.name().c_str(), interaction_type_);
+  }
 
   printd("Process: Resonance decay. ");
-  printd_momenta("Resonance momenta before decay", particles->data(id_a));
+  printd_momenta("Resonance momenta before decay", particle0);
 
   /* boost to rest frame */
-  velocity_CM.set_x0(1.0);
-  velocity_CM.set_x1(particles->data(id_a).momentum().x1()
-                      / particles->data(id_a).momentum().x0());
-  velocity_CM.set_x2(particles->data(id_a).momentum().x2()
-                      / particles->data(id_a).momentum().x0());
-  velocity_CM.set_x3(particles->data(id_a).momentum().x3()
-                      / particles->data(id_a).momentum().x0());
-  particles->data_pointer(id_a)->set_momentum(
-      particles->data(id_a).momentum().LorentzBoost(velocity_CM));
-  particles->data_pointer(id_a)->set_position(
-      particles->data(id_a).position().LorentzBoost(velocity_CM));
+  ThreeVector velocity_CM = particle0.velocity();
+  particle0.boost(velocity_CM);
 
-  printd_momenta("Boosted resonance momenta before decay",
-                 particles->data(id_a));
+  printd_momenta("Boosted resonance momenta before decay", particle0);
 
-  /* Save the highest id before decay */
-  size_t old_max_id = particles->id_max();
-  /* Do the decay; this returns the smallest new id */
-  size_t id_new_a = resonance_decay (particles);
-  /* There's going to be at least 2 new particles */
-  size_t id_new_b = id_new_a + 1;
-
-  printd_momenta("particle 1 momenta in lrf", particles->data(id_new_a));
-  printd_momenta("particle 2 momenta in lrf", particles->data(id_new_b));
-
-  boost_back_CM(particles->data_pointer(id_new_a),
-                particles->data_pointer(id_new_b), &velocity_CM);
-
-  /* How many new particles we have exactly */
-  size_t new_particles = particles->id_max() - old_max_id;
-  /* Write the process type (1->N) and initial state oscar output */
-  write_oscar(initial_data, initial_type, 1, new_particles);
-  /* Write the first 2 final state particles, which are always there */
-  write_oscar(particles->data(id_new_a), particles->type(id_new_a));
-  write_oscar(particles->data(id_new_b), particles->type(id_new_b));
-
-  /* Check for the possible third final state particle */
-  int id_new_c = -1;
-  if (new_particles == 3) {
-    id_new_c = id_new_b + 1;
-    FourVector velocity = velocity_CM;
-    velocity *= -1;
-    velocity.set_x0(1.0);
-    FourVector momentum_c(particles->data(id_new_c).momentum());
-    FourVector position_c(particles->data(id_new_c).position());
-    /* Boost the momenta back to lab frame */
-    momentum_c = momentum_c.LorentzBoost(velocity);
-    /* Boost the position back to lab frame */
-    position_c = position_c.LorentzBoost(velocity);
-    /* Write the oscar output for this particle */
-    particles->data_pointer(id_new_c)->set_momentum(momentum_c);
-    particles->data_pointer(id_new_c)->set_position(position_c);
-    write_oscar(particles->data(id_new_c), particles->type(id_new_c));
+  /*
+   * Execute a decay process for the selected particle.
+   *
+   * Randomly select one of the decay modes of the particle
+   * according to their relative weights. Then decay the particle
+   * by calling function one_to_two or one_to_three.
+   */
+  outgoing_particles_ = choose_channel(*particles);
+  if (outgoing_particles_.size() == 2) {
+    one_to_two (particle0, *particles);
+  } else if (outgoing_particles_.size() == 3) {
+    one_to_three (particle0);
+  } else {
+    throw InvalidDecay(
+        "DecayAction::perform: Only 1->2 or 1->3 processes are supported. "
+        "Decay from 1->" +
+        std::to_string(outgoing_particles_.size()) + " was requested.");
   }
 
-  printd_momenta("particle 1 momenta in comp", particles->data(id_new_a));
-  printd_momenta("particle 2 momenta in comp", particles->data(id_new_b));
-
-  FourVector final_momentum(particles->data(id_new_a).momentum()
-    + particles->data(id_new_b).momentum());
-
-  /* unset collision time for both particles + keep id + unset partner */
-  particles->data_pointer(id_new_a)->set_collision_past(id_process);
-  particles->data_pointer(id_new_b)->set_collision_past(id_process);
-  if (new_particles == 3) {
-    final_momentum += particles->data(id_new_c).momentum();
-    particles->data_pointer(id_new_c)->set_collision_past(id_process);
+  for (auto &p : outgoing_particles_) {
+    printd_momenta("particle momenta in lrf", p);
+    p.boost(-velocity_CM);
+    printd_momenta("particle momenta in comp", p);
+    // unset collision time for both particles + keep id + unset partner
+    p.set_collision_past(id_process);
   }
-  printd("Particle map has now %zu elements. \n", particles->size());
 
   id_process++;
 
-  /* Check momentum conservation */
-  FourVector momentum_difference;
-  momentum_difference += initial_data.momentum();
-  momentum_difference -= final_momentum;
-  if (fabs(momentum_difference.x0()) > really_small) {
-    printf("Process %zu type %i particle %s decay to %s and %s ",
-           id_process, interaction_type_, particles->type(id_a).name().c_str(),
-           particles->type(id_new_a).name().c_str(),
-           particles->type(id_new_b).name().c_str());
-    if (new_particles == 3) {
-      printf("and %s ", particles->type(id_new_c).name().c_str());
-    }
-    printf("time %g\n", initial_data.position().x0());
-    printf("Warning: Interaction type %i E conservation violation %g\n",
-           interaction_type_, momentum_difference.x0());
-  }
-  if (fabs(momentum_difference.x1()) > really_small)
-    printf("Warning: Interaction type %i px conservation violation %g\n",
-           interaction_type_, momentum_difference.x1());
-  if (fabs(momentum_difference.x2()) > really_small)
-    printf("Warning: Interaction type %i py conservation violation %g\n",
-           interaction_type_, momentum_difference.x2());
-  if (fabs(momentum_difference.x3()) > really_small)
-    printf("Warning: Interaction type %i pz conservation violation %g\n",
-           interaction_type_, momentum_difference.x3());
+  check_conservation(*particles, id_process);
 
   /* Remove decayed particle */
-  particles->remove(id_a);
-  printd("ID %i has decayed and removed from the list.\n", id_a);
+  particles->remove(particle0.id());
+  printd("ID %i has decayed and removed from the list.\n", particle0.id());
+
+  for (auto &p : outgoing_particles_) {
+    p.set_id(particles->add_data(p));
+  }
+  printd("Particle map has now %zu elements. \n", particles->size());
 }
-
-
-
 }

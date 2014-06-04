@@ -6,10 +6,10 @@
  *    GNU General Public License (GPLv3 or later)
  *
  */
-#include "tests/unittest.h"
+#include "unittest.h"
 
 #include <map>
-#include "include/random.h"
+#include "../include/random.h"
 
 using namespace Smash;
 

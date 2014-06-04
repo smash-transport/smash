@@ -15,6 +15,7 @@
 #include "include/constants.h"
 #include "include/distributions.h"
 #include "include/fourvector.h"
+#include "include/lineparser.h"
 #include "include/macros.h"
 #include "include/outputroutines.h"
 #include "include/particledata.h"
@@ -25,68 +26,34 @@
 namespace Smash {
 
 /* boost_CM - boost to center of momentum */
-void boost_CM(ParticleData *particle1, ParticleData *particle2,
-  FourVector *velocity) {
-  FourVector momentum1(particle1->momentum()), momentum2(particle2->momentum());
-  FourVector position1(particle1->position()), position2(particle2->position());
-  double cms_energy = momentum1.x0() + momentum2.x0();
-
-  // CMS 4-velocity
-  velocity->set_x0(1.0);
-  velocity->set_x1((momentum1.x1() + momentum2.x1()) / cms_energy);
-  velocity->set_x2((momentum1.x2() + momentum2.x2()) / cms_energy);
-  velocity->set_x3((momentum1.x3() + momentum2.x3()) / cms_energy);
+ThreeVector boost_CM(ParticleData *particle1, ParticleData *particle2) {
+  // determine CMS velocity
+  FourVector mom = particle1->momentum() + particle2->momentum();
+  ThreeVector velocity = mom.threevec() / mom.x0();
 
   // Boost the momenta into CMS frame
-  momentum1 = momentum1.LorentzBoost(*velocity);
-  momentum2 = momentum2.LorentzBoost(*velocity);
+  particle1->boost(velocity);
+  particle2->boost(velocity);
 
-  // Boost the positions into CMS frame
-  position1 = position1.LorentzBoost(*velocity);
-  position2 = position2.LorentzBoost(*velocity);
-
-  particle1->set_momentum(momentum1);
-  particle1->set_position(position1);
-  particle2->set_momentum(momentum2);
-  particle2->set_position(position2);
+  return velocity;
 }
 
 /* boost_back_CM - boost back from center of momentum */
 void boost_back_CM(ParticleData *particle1, ParticleData *particle2,
-  FourVector *velocity_orig) {
-  FourVector momentum1(particle1->momentum()), momentum2(particle2->momentum());
-  FourVector position1(particle1->position()), position2(particle2->position());
-  FourVector velocity = *velocity_orig;
+                   const ThreeVector &velocity_orig) {
 
-  /* To boost back set 1 + velocity */
-  velocity *= -1;
-  velocity.set_x0(1.0);
+  ThreeVector velocity = - velocity_orig;
 
-  /* Boost the momenta back to lab frame */
-  momentum1 = momentum1.LorentzBoost(velocity);
-  momentum2 = momentum2.LorentzBoost(velocity);
-
-  /* Boost the positions back to lab frame */
-  position1 = position1.LorentzBoost(velocity);
-  position2 = position2.LorentzBoost(velocity);
-
-  particle1->set_momentum(momentum1);
-  particle1->set_position(position1);
-  particle2->set_momentum(momentum2);
-  particle2->set_position(position2);
+  particle1->boost(velocity);
+  particle2->boost(velocity);
 }
 
 /* particle_distance - measure distance between two particles
  *                     in center of momentum
  */
-double particle_distance(ParticleData *particle_orig1,
-  ParticleData *particle_orig2) {
-  /* Copy the particles in order to boost them and to forget the copy */
-  ParticleData particle1 = *particle_orig1, particle2 = *particle_orig2;
-  FourVector velocity_CM;
-
+double particle_distance(ParticleData particle1, ParticleData particle2) {
   /* boost particles in center of momenta frame */
-  boost_CM(&particle1, &particle2, &velocity_CM);
+  boost_CM(&particle1, &particle2);
   FourVector position_difference = particle1.position() - particle2.position();
   printd("Particle %d<->%d position difference: %g %g %g %g [fm]\n",
     particle1.id(), particle2.id(), position_difference.x0(),
@@ -102,7 +69,7 @@ double particle_distance(ParticleData *particle_orig1,
   if (fabs(momentum_difference.x1()) < really_small
       && fabs(momentum_difference.x2()) < really_small
       && fabs(momentum_difference.x3()) < really_small)
-    return  - position_difference.DotThree(position_difference);
+    return  position_difference.sqr3();
 
   /* UrQMD squared distance criteria:
    * arXiv:nucl-th/9803035 (3.27): in center of momemtum frame
@@ -112,10 +79,10 @@ double particle_distance(ParticleData *particle_orig1,
    * velocity of particle b: v_b
    * d^2_{coll} = (x_a - x_b)^2 - ((x_a - x_a) . (v_a - v_b))^2 / (v_a - v_b)^2
    */
-  return - position_difference.DotThree(position_difference)
-    + position_difference.DotThree(momentum_difference)
-      * position_difference.DotThree(momentum_difference)
-      / momentum_difference.DotThree(momentum_difference);
+  return position_difference.sqr3()
+    - (position_difference.threevec()*momentum_difference.threevec())
+      * (position_difference.threevec()*momentum_difference.threevec())
+      / momentum_difference.sqr3();
 }
 
 /* time_collision - measure collision time of two particles */
@@ -147,8 +114,8 @@ double collision_time(const ParticleData &particle1,
       && fabs(velocity_difference.x2()) < really_small
       && fabs(velocity_difference.x3()) < really_small)
     return -1.0;
-  return - position_difference.DotThree(velocity_difference)
-           / velocity_difference.DotThree(velocity_difference);
+  return - position_difference.threevec()*velocity_difference.threevec()
+           / velocity_difference.sqr3();
 }
 
 /* momenta_exchange - soft scattering */
@@ -232,107 +199,8 @@ void sample_cms_momenta(ParticleData *particle1, ParticleData *particle2,
   printd("p3: %g %g \n", momentum1.x3(), momentum2.x3());
 }
 
-Particles::Particles(const std::string &particles,
-                     const std::string &decaymodes)
-    : types_(load_particle_types(particles)),
-      all_decay_modes_(load_decaymodes(decaymodes)) {}
-
-namespace {/*{{{*/
-std::string trim(const std::string &s) {
-  const auto begin = s.find_first_not_of(" \t\n\r");
-  if (begin == std::string::npos) {
-    return {};
-  }
-  const auto end = s.find_last_not_of(" \t\n\r");
-  return s.substr(begin, end - begin + 1);
-}
-struct Line {/*{{{*/
-  Line() = default;
-  Line(int n, std::string &&t) : number(n), text(std::move(t)) {
-  }
-  int number;
-  std::string text;
-};/*}}}*/
-
-std::string build_error_string(std::string message, const Line &line) {/*{{{*/
-  return message + " (on line " + std::to_string(line.number) + ": \"" +
-         line.text + "\")";
-}/*}}}*/
-
-/**
- * Helper function for parsing particles.txt and decaymodes.txt.
- *
- * This function goes through an input stream line by line and removes
- * comments and empty lines. The remaining lines will be returned as a vector
- * of strings and linenumber pairs (Line).
- *
- * \param input an lvalue reference to an input stream
- */
-std::vector<Line> line_parser(const std::string &input) {/*{{{*/
-  std::istringstream input_stream(input);
-  std::vector<Line> lines;
-  lines.reserve(50);
-
-  std::string line;
-  int line_number = 0;
-  while (std::getline(input_stream, line)) {
-    ++line_number;
-    const auto hash_pos = line.find('#');
-    if (hash_pos != std::string::npos) {
-      // found a comment, remove it from the line and look further
-      line = line.substr(0, hash_pos);
-    }
-    if (line.find_first_not_of(" \t") == std::string::npos) {
-      // only whitespace (or nothing) on this line. Next, please.
-      continue;
-    }
-    lines.emplace_back(line_number, std::move(line));
-    line = std::string();
-  }
-  return std::move(lines);
-}/*}}}*/
-
-void ensure_all_read(std::istream &input, const Line &line) {/*{{{*/
-  std::string tmp;
-  input >> tmp;
-  if (!input.eof()) {
-    throw Particles::LoadFailure(
-        build_error_string("While loading the Particle data:\nGarbage (" + tmp +
-                               ") at the remainder of the line.",
-                           line));
-  }
-}/*}}}*/
-}  // unnamed namespace/*}}}*/
-
-Particles::ParticleTypeMap Particles::load_particle_types(  //{{{
-    const std::string &input) {
-  Particles::ParticleTypeMap types;
-  for (const Line &line : line_parser(input)) {
-    std::istringstream lineinput(line.text);
-    std::string name;
-    float mass, width;
-    PdgCode pdgcode;
-    int isospin, charge, spin;
-    lineinput >> name >> mass >> width >> pdgcode >> isospin >> charge >> spin;
-    if (lineinput.fail()) {
-      throw LoadFailure(build_error_string(
-          "While loading the Particle data:\nFailed to convert the input "
-          "string to the expected data types.",
-          line));
-    }
-    ensure_all_read(lineinput, line);
-
-    printd("Setting particle type %s mass %g width %g pdgcode %s\n",
-           name.c_str(), mass, width, pdgcode.string().c_str());
-    printd("Setting particle type %s isospin %i charge %i spin %i\n",
-           name.c_str(), isospin, charge, spin);
-
-    types.insert(std::make_pair(
-        pdgcode,
-        ParticleType{name, mass, width, pdgcode, isospin, charge, spin}));
-  }
-  return std::move(types);
-}/*}}}*/
+Particles::Particles(const std::string &decaymodes)
+    : all_decay_modes_(load_decaymodes(decaymodes)) {}
 
 Particles::DecayModesMap Particles::load_decaymodes(const std::string &input) {
   Particles::DecayModesMap decaymodes;
@@ -344,7 +212,7 @@ Particles::DecayModesMap Particles::load_decaymodes(const std::string &input) {
     if (pdgcode == PdgCode::invalid()) {  // at the start of the file
       return;
     }
-    if (decay_modes_to_add.empty()) {
+    if (decay_modes_to_add.is_empty()) {
       throw MissingDecays("No decay modes found for particle " +
                           pdgcode.string());
     }
@@ -372,7 +240,7 @@ Particles::DecayModesMap Particles::load_decaymodes(const std::string &input) {
                               // decay mode section
       end_of_decaymodes();
       pdgcode = PdgCode(trim(line.text));
-      if (!is_particle_type_registered(pdgcode)) {
+      if (!ParticleType::exists(pdgcode)) {
         throw ReferencedParticleNotFound(build_error_string(
             "Inconsistency: The particle with PDG id " +
                 pdgcode.string() +
@@ -391,7 +259,7 @@ Particles::DecayModesMap Particles::load_decaymodes(const std::string &input) {
       PdgCode pdg;
       lineinput >> pdg;
       while (lineinput) {
-        if (!is_particle_type_registered(pdg)) {
+        if (!ParticleType::exists(pdg)) {
           throw ReferencedParticleNotFound(build_error_string(
               "Inconsistency: The particle with PDG id " +
                   pdg.string() +
@@ -402,7 +270,9 @@ Particles::DecayModesMap Particles::load_decaymodes(const std::string &input) {
         decay_particles.push_back(pdg);
         lineinput >> pdg;
       }
-      decay_particles.push_back(pdg);
+      if (pdg != PdgCode::invalid()) {
+        decay_particles.push_back(pdg);
+      }
       if (lineinput.fail() && !lineinput.eof()) {
         throw LoadFailure(
             build_error_string("Parse error: expected a PdgCode ", line));

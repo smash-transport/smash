@@ -7,15 +7,13 @@
 #ifndef SRC_INCLUDE_NUCLEUS_H_
 #define SRC_INCLUDE_NUCLEUS_H_
 
-#include<map>
-#include<stdexcept>
-#include<string>
-#include<vector>
-#include "include/fourvector.h"
-#include "include/particledata.h"
-#include "include/particles.h"
-#include "include/pdgcode.h"
-#include "include/random.h"
+#include "forwarddeclarations.h"
+#include "fourvector.h"
+#include "particledata.h"
+
+#include <map>
+#include <stdexcept>
+#include <vector>
 
 namespace Smash {
 
@@ -37,7 +35,7 @@ class Nucleus {
     return proton_radius_*pow(number_of_particles(), 1./3.);
   }
 
-  /** returns a Woods-Saxon distributed length 
+  /** returns a Woods-Saxon distributed length
    *
    * the distribution of return values from this function is according
    * to a Woods-Saxon distribution suitable for this nucleus.
@@ -48,7 +46,7 @@ class Nucleus {
   /** returns the Woods-Saxon distribution directly
    *
    * @param x the position at which to evaluate the function
-   * @return the 
+   * @return the
    **/
   float woods_saxon(const float& x);
   /// sets the positions of the nuclei inside nucleus A.
@@ -60,7 +58,7 @@ class Nucleus {
    * @param beta_squared_with_sign velocity used for boosting,
    * interpreted as z-value. Note that the sign of this variable is used
    * to determine the sign of the velocity, i.e., \f$\beta_z =
-   * \mathop{sign}(\beta^2)\cdot\sqrt{|\beta^2|}\f$. 
+   * \mathop{sign}(\beta^2)\cdot\sqrt{|\beta^2|}\f$.
    **/
   void boost(const double& beta_squared_with_sign);
   /** Adds a particle to the nucleus
@@ -92,7 +90,7 @@ class Nucleus {
    * @param particles is an object of Particles which has all the PDG
    * types read in.
    **/
-  void auto_set_masses(const Particles *particles);
+  void auto_set_masses();
   /**
    * shifts the nucleus to correct impact parameter and z displacement.
    *
@@ -113,7 +111,7 @@ class Nucleus {
   void shift(const bool is_projectile,
              const double& initial_z_displacement,
              const double& x_offset,
-             const double& simulation_time);
+             const float& simulation_time);
   /// copies the particles from this nucleus into the particle list.
   void copy_particles(Particles* particles);
   /// Number of numerical (=test-)particles in the nucleus:
@@ -131,7 +129,16 @@ class Nucleus {
     }
     return nop;
   }
+  /** returns the geometrical center of the nucleus.
+   *
+   * \return \f$\vec r_s = \frac{1}{N} \sum_{i=1}^N \vec r_i\f$ (for a
+   * nucleus with N particles that are at the positions \f$\vec r_i\f$).
+   */
   FourVector center() const;
+  /** shifts the nucleus so that its center is at (0,0,0)
+   *
+   * \see center()
+   */
   void align_center() {
     FourVector centerpoint = center();
     for (auto p = particles_.begin(); p != particles_.end(); ++p) {
@@ -147,7 +154,7 @@ class Nucleus {
   /** diffusiveness of Woods-Saxon-distribution in this nucleus im fm
    * (for diffusiveness_ == 0, we obtain a hard sphere. */
   float diffusiveness_ = .545f;
-  /** single-proton-radius 
+  /** single-proton-radius
    *
    * \see nuclear_radius
    * */

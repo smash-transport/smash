@@ -10,21 +10,35 @@
 #ifndef SRC_INCLUDE_PARTICLESOUTPUT_H_
 #define SRC_INCLUDE_PARTICLESOUTPUT_H_
 
+#include "clock.h"
 #include "outputinterface.h"
+#include "forwarddeclarations.h"
 #include <boost/filesystem.hpp>
 
 namespace Smash {
-class Particles;
 
 class ParticlesOutput : public OutputInterface {
  public:
-  ParticlesOutput(boost::filesystem::path path);
+  ParticlesOutput(bf::path path);
   ~ParticlesOutput();
 
-  void write_state(const Particles& particles) override;
+  void at_eventstart(const Particles &particles, const int) override {
+    write_state(particles);
+  }
+
+  void at_eventend(const Particles &particles, const int) override {
+    write_state(particles);
+  }
+
+  void after_Nth_timestep(const Particles &particles, const int,
+                          const Clock&) override {
+    write_state(particles);
+  }
 
  private:
-   const boost::filesystem::path base_path_;
+  void write_state(const Particles &particles);
+
+  const bf::path base_path_;
 };
 }  // namespace Smash
 

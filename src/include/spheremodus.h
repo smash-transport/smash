@@ -11,9 +11,11 @@
 #include <cmath>
 #include <list>
 
-#include "include/crosssections.h"
-#include "include/modusdefault.h"
-#include "include/particles.h"
+#include "crosssections.h"
+#include "forwarddeclarations.h"
+#include "modusdefault.h"
+#include "particles.h"
+#include "time.h"
 
 namespace Smash {
 

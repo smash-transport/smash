@@ -10,6 +10,7 @@
 #ifndef SRC_INCLUDE_ACTION_H_
 #define SRC_INCLUDE_ACTION_H_
 
+#include <stdexcept>
 #include <vector>
 #include <memory>
 
@@ -18,61 +19,157 @@
 
 namespace Smash {
 
+/**
+ * Action is the base class for a generic process that takes a number of
+ * incoming particles and transforms them into any number of outgoing particles.
+ * Currently such an action can be either a decay or a two-body collision
+ * (see derived classes).
+ */
 class Action {
  public:
+  /** Simple constructor. */
   Action(const std::vector<int> &in_part, float time_of_execution);
+  /** Constructor with known interaction_type. */
   Action(const std::vector<int> &in_part, float time_of_execution, int interaction_type);
+  /** Destructor. */
   virtual ~Action();
 
-  /* For sorting by time of execution. */
+  /** For sorting by time of execution. */
   bool operator<(const Action &rhs) const {
     return time_of_execution_ < rhs.time_of_execution_;
   }
 
-  /* Returns the total weight, which is a cross section in case of a ScatterAction
+  /** Returns the total weight, which is a cross section in case of a ScatterAction
    * and a decay width in case of a DecayAction. */
   float weight(void) const;
 
-  /* These functions add new subprocesses.  */
+  /** Add a new subprocess.  */
   void add_process (ProcessBranch p);
+  /** Add several new subprocesses at once.  */
   void add_processes (std::vector<ProcessBranch> &pv);
 
-  /* Actually perform the action, e.g. carry out a decay or scattering.  */
+  /** Actually perform the action, e.g. carry out a decay or scattering.  */
   virtual void perform (Particles *particles, size_t &id_process) = 0;
 
+  /**
+   * Check whether the action still applies.
+   *
+   * It can happen that a different action removed the incoming_particles from
+   * the set of existing particles in the experiment. In this case this Action
+   * doesn't apply anymore.
+   */
+  bool is_valid(const Particles &) const;
+
+  /**
+   * Return the list of particles that go into the interaction.
+   */
+  ParticleList incoming_particles(const Particles &particles) const;
+
+  /**
+   * Return the list of particles that resulted from the interaction.
+   */
+  const ParticleList &outgoing_particles() const { return outgoing_particles_; }
+
+  /** Check various conservation laws. */
+  void check_conservation(const Particles &particles, const size_t &id_process) const;
  protected:
-  std::vector<int> ingoing_particles_;
+  /** ID codes of incoming particles  */
+  std::vector<int> incoming_particles_;
+  /** time at which the action is supposed to be performed  */
   float time_of_execution_;
-  std::vector<ProcessBranch> subprocesses_;  /* list of possible subprocesses  */
-  float total_weight_;                       /* sum of all subprocess weights  */
-  /* Type of interaction: 0=elastic collision, 1=resonance formation, 2=decay */
+  /** list of possible subprocesses  */
+  std::vector<ProcessBranch> subprocesses_;
+  /** sum of all subprocess weights  */
+  float total_weight_;
+  /** Type of interaction: 0=elastic collision, 1=resonance formation, 2=decay */
   int interaction_type_;
-  std::vector<PdgCode> outgoing_particles_;  /* PDG codes of final-state particles  */
+  /**
+   * Initially this stores only the PDG codes of final-state particles.
+   *
+   * After perform was called it contains the complete particle data of the
+   * outgoing particles.
+   */
+  ParticleList outgoing_particles_;
 };
 
-
+/**
+ * DecayAction is a special action which takes one single particle in the
+ * initial state and makes it decay into a number of daughter particles
+ * (currently two or three).
+ */
 class DecayAction : public Action {
  public:
+  /** Constructor. */
   DecayAction (const std::vector<int> &in_part, float time_of_execution,
                int interaction_type);
-  /* Decide for a particular decay channel via Monte-Carlo
-   * and set the outgoing_particles_ correspondingly.  */
-  void choose_channel (Particles *particles);
+  /**
+   * Decide for a particular decay channel via Monte-Carlo and return it as a
+   * list of particles that are only initialized with their PDG code.
+   */
+  ParticleList choose_channel(const Particles &particles) const;
+
+  /** Carry out the action, i.e. do the decay.
+   * Performs a decay of one particle to two or three particles.
+   *
+   * \throws InvalidDecay
+   */
   void perform (Particles *particles, size_t &id_process);
+
+  /**
+   * Thrown when DecayAction is called to perform with 0 or more than 2
+   * entries in outgoing_particles.
+   */
+  class InvalidDecay : public std::invalid_argument {
+    using std::invalid_argument::invalid_argument;
+  };
+
  private:
-  int resonance_decay (Particles *particles);
-  int one_to_two (Particles *particles);
-  int one_to_three (Particles *particles);
+  void one_to_two (const ParticleData &incoming0, const Particles &particles);
+  void one_to_three (const ParticleData &incoming0);
 };
 
-
+/**
+ * ScatterAction is a special action which takes two incoming particles
+ * and performs a scattering, producing one or more final-state particles.
+ */
 class ScatterAction : public Action {
  public:
+  /** Constructor. */
   ScatterAction (const std::vector<int> &in_part, float time_of_execution);
-  /* Decide for a particular final-state channel via Monte-Carlo
+  /** Decide for a particular final-state channel via Monte-Carlo
    * and set the outgoing_particles_ correspondingly.  */
   void choose_channel ();
+
+  /**
+   * Carry out the action, i.e. do the scattering.
+   * Performs either elastic or inelastic scattering.
+   *
+   * \throws InvalidResonanceFormation
+   */
   void perform (Particles *particles, size_t &id_process);
+
+  /**
+   * Thrown when ScatterAction is called to perform with 0 or more than 2
+   * entries in outgoing_particles.
+   */
+  class InvalidResonanceFormation : public std::invalid_argument {
+    using std::invalid_argument::invalid_argument;
+  };
+
+ private:
+  /**
+   * Resonance formation process.
+   *
+   * Creates one or two new particles, of which
+   * one is a resonance.
+   *
+   * \param[in,out] particles Particles in the simulation.
+   * \param[in] particle0 ID of the first initial state particle.
+   * \param[in] particle1 ID of the second initial state particle.
+   */
+  void resonance_formation(const Particles &particles,
+                           const ParticleData &particle0,
+                           const ParticleData &particle1);
 };
 
 

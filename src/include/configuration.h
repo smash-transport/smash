@@ -15,14 +15,7 @@
 #include <vector>
 
 #include <yaml-cpp/yaml.h>
-
-#ifndef DOXYGEN
-namespace boost {
-namespace filesystem {
-class path;
-}  // namespace filesystem
-}  // namespace boost
-#endif
+#include "forwarddeclarations.h"
 
 namespace YAML {
 template <typename T>
@@ -70,6 +63,31 @@ namespace Smash {
  * important for the user to discover typos in his configuration file (or
  * command line parameters).
  */
+// !!USER:Input
+/** \if user
+ * \page inputoptions Input file Options
+ *
+ * To configure SMASH, you can specify an input file. This file should be in
+ * YAML format.
+ *
+ * ###TEXT MISSING###
+ *
+ * \li \ref input_general_
+ * \li \ref input_modi_nucleus_
+ * \li \ref input_modi_box_
+ * \li \ref input_modi_collider_
+ * \else
+ * 
+ * Options
+ * -------
+ * For possible configuration values, see
+ * \li \ref Experiment::create()
+ * \li \ref NucleusModus
+ * \li \ref BoxModus
+ * \li \ref ColliderModus
+ * \endif
+ */
+// !!/USER:Input
 class Configuration {
  public:
   /// Thrown when the types in the config file and C++ don't match.
@@ -102,7 +120,10 @@ class Configuration {
      * return an rvalue Value object - because the copy constructor is deleted.
      */
     Value(const YAML::Node &n, const char *key) : node_(n), key_(key) {
-      assert(n.IsScalar() || n.IsSequence() || n.IsMap());
+      if(!(n.IsScalar() || n.IsSequence() || n.IsMap())) {
+        fprintf(stderr, "Configuration::Value fails at %s\n", key);
+        abort();
+      }
     }
 
    public:
@@ -157,7 +178,7 @@ class Configuration {
    *
    * \param path The directory where the SMASH config files are located.
    */
-  explicit Configuration(const boost::filesystem::path &path);
+  explicit Configuration(const bf::path &path);
 
   /**
    * Reads a YAML config file from the specified \p path.
@@ -166,8 +187,8 @@ class Configuration {
    * \param filename The filename (without path) of the YAML config file, in
    *                 case you don't want the default "config.yaml".
    */
-  explicit Configuration(const boost::filesystem::path &path,
-                         const boost::filesystem::path &filename);
+  explicit Configuration(const bf::path &path,
+                         const bf::path &filename);
 
   /// if you want to copy this you're doing it wrong
   Configuration(const Configuration &) = delete;

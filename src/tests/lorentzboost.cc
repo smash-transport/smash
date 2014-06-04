@@ -5,9 +5,9 @@
  *    GNU General Public License (GPLv3 or later)
  */
 
-#include "tests/unittest.h"
-#include "include/fourvector.h"
-#include "include/angles.h"
+#include "unittest.h"
+#include "../include/fourvector.h"
+#include "../include/angles.h"
 
 using namespace Smash;
 
@@ -15,22 +15,20 @@ constexpr double accuracy = 4e-9;
 Angles dir;
 auto cos_like = Random::make_uniform_distribution(-1.0, +1.0);
 
-FourVector random_velocity();
-FourVector random_velocity() {
+ThreeVector random_velocity();
+ThreeVector random_velocity() {
   dir.distribute_isotropically();
   double beta = Random::canonical();
-  // velocity-"vector" is not normalized (that's how LorentzBoost
-  // works):
-  return FourVector(1.0, beta*dir.x(), beta*dir.y(), beta*dir.z());
+  return dir.threevec()*beta;
 }
 
 // here, we boost a velocity vector with itself.
 TEST(self_boost) {
   for(int i = 0; i < 1000000; i++) {
-    FourVector velocity = random_velocity();
+    ThreeVector velocity = random_velocity();
     // u_mu is a real four-vector.
-    double gamma = 1.0/sqrt(velocity.Dot());
-    FourVector u_mu = velocity*gamma;
+    double gamma = 1./sqrt(1. - velocity.sqr());
+    FourVector u_mu = FourVector (gamma, velocity*gamma);
     FourVector boosted = u_mu.LorentzBoost(velocity);
     COMPARE_ABSOLUTE_ERROR(boosted.x0(), 1.0, accuracy) << " at loop " << i;
     COMPARE_ABSOLUTE_ERROR(boosted.x1(), 0.0, accuracy) << " at loop " << i;
@@ -43,14 +41,14 @@ TEST(self_boost) {
 // 1. "length" of a four-vector
 TEST(keep_invariant_length) {
   for(int i = 0; i < 1000; i++) {
-    FourVector velocity = random_velocity();
+    ThreeVector velocity = random_velocity();
     for(int j = 0; j < 1000; j++) {
       FourVector a( cos_like()
                   , cos_like()
                   , cos_like()
                   , cos_like());
       FourVector A = a.LorentzBoost(velocity);
-      COMPARE_RELATIVE_ERROR(a.Dot(), A.Dot(), accuracy) << " at loop " << i
+      COMPARE_RELATIVE_ERROR(a.sqr(), A.sqr(), accuracy) << " at loop " << i
                                                                 << "*" << j;
     }
   }
@@ -59,7 +57,7 @@ TEST(keep_invariant_length) {
 // 2. scalar product between two four-vectors
 TEST(keep_invariant_angle) {
   for(int i = 0; i < 1000; i++) {
-    FourVector velocity = random_velocity();
+    ThreeVector velocity = random_velocity();
     for(int j = 0; j < 1000; j++) {
       FourVector a( cos_like()
                   , cos_like()
@@ -80,15 +78,14 @@ TEST(keep_invariant_angle) {
 // Lorentz transformation and back should get the same vector:
 TEST(back_and_forth) {
   for(int i = 0; i < 1000; i++) {
-    FourVector velocity = random_velocity();
-    FourVector back(1, -velocity.x1(), -velocity.x2(), -velocity.x3());
+    ThreeVector velocity = random_velocity();
     for(int j = 0; j < 1000; j++) {
       FourVector a( cos_like()
                   , cos_like()
                   , cos_like()
                   , cos_like());
       FourVector forward  = a.LorentzBoost(velocity);
-      FourVector backward = forward.LorentzBoost(back);
+      FourVector backward = forward.LorentzBoost(-velocity);
       COMPARE_RELATIVE_ERROR(backward.x0(), a.x0(), accuracy) << " at loop "
                                                         << i << "*" << j;
       COMPARE_RELATIVE_ERROR(backward.x1(), a.x1(), accuracy) << " at loop "
