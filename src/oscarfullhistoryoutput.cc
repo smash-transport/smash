@@ -29,7 +29,7 @@ OscarFullHistoryOutput::OscarFullHistoryOutput(bf::path path,
   fprintf(file_.get(), "# smash\n");
   fprintf(file_.get(), "# Block format:\n");
   fprintf(file_.get(), "# nin nout event_number\n");
-  fprintf(file_.get(), "# ipart id ist px py pz p0 mass x y z t\n");
+  fprintf(file_.get(), "# id pdg 0 px py pz p0 mass x y z t\n");
   fprintf(file_.get(), "# End of event: 0 0 event_number\n");
   fprintf(file_.get(), "#\n");
 }
