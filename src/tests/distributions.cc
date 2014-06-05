@@ -12,7 +12,7 @@
 
 using namespace Smash;
 
-static double test_breit_wigner(const double s, const float m, const float w) {
+static float test_breit_wigner(const double s, const float m, const float w) {
   const double sw2 = s * w * w;
   const double smm = s - m * m;
   return sw2 / (smm * smm + sw2);
@@ -26,7 +26,7 @@ TEST(breitwigner) {
       float m = m_i * 0.05;
       for (int w_i = 1; w_i < 200; ++w_i) {
         float w = w_i * 0.05;
-        COMPARE(breit_wigner(s, m, w), test_breit_wigner(s, m, w))
+        FUZZY_COMPARE(breit_wigner(s, m, w), test_breit_wigner(s, m, w))
                 << s << "/" << m << "/" << w;
       }
     }

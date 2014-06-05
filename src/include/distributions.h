@@ -23,7 +23,7 @@ namespace Smash {
  *
  * \return \f$\frac{s \Gamma^2}{(s-m^2)^2 + s\Gamma^2}\f$
  */
-double breit_wigner(const double mandelstam_s, const float resonance_mass,
+float breit_wigner(const double mandelstam_s, const float resonance_mass,
                     const float resonance_width);
 
 /** Returns the Maxwell-Boltzmann distribution
