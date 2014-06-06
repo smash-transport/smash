@@ -36,24 +36,30 @@ TEST(output_format) {
   OscarFullHistoryOutput *oscfull = new OscarFullHistoryOutput(testoutputpath);
   VERIFY(bf::exists(testoutputpath / "full_event_history.oscar"));
 
-  ParticleType::create_type_list(
-      "# NAME MASS[GEV] WIDTH[GEV] PDG\n"
-      "smashon 0.123 1.2 -331\n");
+  std::string mass_str = "0.123";
+  std::string width_str = "1.200";
+  std::string pdg_str = "-331";
+  std::string smashon_str = "smashon " + mass_str + " "
+    + width_str + " " + pdg_str + "\n";
 
-  ParticleData particle = create_smashon_particle(0);
+  ParticleType::create_type_list(
+      "# NAME MASS[GEV] WIDTH[GEV] PDG\n" + smashon_str);
+
+  int id = 0;
+  ParticleData particle = create_smashon_particle(id);
   particle.set_momentum(0.123, 1.1, 2.2, 3.3);
   particle.set_position(FourVector(7.7, 4.4, 5.5, 6.6));
   Particles particles({});
   particles.add_data(particle);
-  int id = 0;
-  oscfull->at_eventstart(particles, id);
+  int event_id = 0;
+  int zero = 0;
+  oscfull->at_eventstart(particles, event_id);
 
   delete oscfull;
 
   std::fstream outputfile;
   outputfile.open((testoutputpath / "full_event_history.oscar")
-                  .native().c_str(),
-         std::ios_base::in);
+                  .native().c_str(), std::ios_base::in);
   if (outputfile.good()) {
     std::string line, item;
     std::getline(outputfile, line);
@@ -73,16 +79,20 @@ TEST(output_format) {
     COMPARE(line, "# End of event: 0 0 event_number");
     std::getline(outputfile, line);
     COMPARE(line, "#");
-    /* Check interaction block description line  */
-    std::getline(outputfile, line);
-    COMPARE(line, "0 1 1");
+    /* Check interaction block description line item by item */
+    outputfile >> item;
+    COMPARE(std::atoi(item.c_str()), 0);
+    outputfile >> item;
+    COMPARE(std::atoi(item.c_str()), particles.size());
+    outputfile >> item;
+    COMPARE(std::atoi(item.c_str()), event_id + 1);
     /* Check particle data line item by item */
     outputfile >> item;
     COMPARE(std::atoi(item.c_str()), id);
     outputfile >> item;
-    COMPARE(std::atoi(item.c_str()), -331);
+    COMPARE(item, pdg_str);
     outputfile >> item;
-    COMPARE(std::atoi(item.c_str()), 0);
+    COMPARE(std::atoi(item.c_str()), zero);
     outputfile >> item;
     COMPARE(std::atof(item.c_str()), particle.momentum().x1());
     outputfile >> item;
@@ -93,7 +103,7 @@ TEST(output_format) {
     COMPARE_ABSOLUTE_ERROR(std::atof(item.c_str()), particle.momentum().x0(),
                            0.000001);
     outputfile >> item;
-    COMPARE(std::atof(item.c_str()), 0.123);
+    COMPARE(item, mass_str);
     outputfile >> item;
     COMPARE(std::atof(item.c_str()), particle.position().x1());
     outputfile >> item;
