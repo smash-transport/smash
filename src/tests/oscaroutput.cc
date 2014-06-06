@@ -15,7 +15,8 @@
 #include <string>
 #include <boost/filesystem.hpp>
 #include "../include/outputinterface.h"
-#include "../include/oscaroutput.h"
+#include "../include/oscarfullhistoryoutput.h"
+#include "../include/oscarparticlelistoutput.h"
 #include "../include/particles.h"
 
 using namespace Smash;
@@ -32,8 +33,8 @@ static ParticleData create_smashon_particle(int id = -1) {
 }
 
 TEST(output_format) {
-  OscarOutput *oscout = new OscarOutput(testoutputpath);
-  VERIFY(bf::exists(testoutputpath / "collision.dat"));
+  OscarFullHistoryOutput *oscfull = new OscarFullHistoryOutput(testoutputpath);
+  VERIFY(bf::exists(testoutputpath / "full_event_history.oscar"));
 
   ParticleType::create_type_list(
       "# NAME MASS[GEV] WIDTH[GEV] PDG\n"
@@ -45,12 +46,13 @@ TEST(output_format) {
   Particles particles({});
   particles.add_data(particle);
   int id = 0;
-  oscout->at_eventstart(particles, id);
+  oscfull->at_eventstart(particles, id);
 
-  delete oscout;
+  delete oscfull;
 
   std::fstream outputfile;
-  outputfile.open((testoutputpath / "collision.dat").native().c_str(),
+  outputfile.open((testoutputpath / "full_event_history.oscar")
+                  .native().c_str(),
          std::ios_base::in);
   if (outputfile.good()) {
     std::string line, item;
@@ -58,9 +60,17 @@ TEST(output_format) {
     /* Check header */
     COMPARE(line, "# OSC1999A");
     std::getline(outputfile, line);
-    COMPARE(line, "# Interaction history");
+    COMPARE(line, "# full_event_history");
     std::getline(outputfile, line);
     COMPARE(line, "# smash");
+    std::getline(outputfile, line);
+    COMPARE(line, "# Block format:");
+    std::getline(outputfile, line);
+    COMPARE(line, "# nin nout event_number");
+    std::getline(outputfile, line);
+    COMPARE(line, "# id pdg 0 px py pz p0 mass x y z t");
+    std::getline(outputfile, line);
+    COMPARE(line, "# End of event: 0 0 event_number");
     std::getline(outputfile, line);
     COMPARE(line, "#");
     /* Check interaction block description line  */
