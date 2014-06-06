@@ -21,7 +21,7 @@
 
 using namespace Smash;
 
-const bf::path testoutputpath = bf::absolute(SMASH_TEST_OUTPUT_PATH);
+static const bf::path testoutputpath = bf::absolute(SMASH_TEST_OUTPUT_PATH);
 
 TEST(directory_is_created) {
   bf::create_directory(testoutputpath);
@@ -32,15 +32,16 @@ static ParticleData create_smashon_particle(int id = -1) {
   return ParticleData{ParticleType::find(-0x331), id};
 }
 
-TEST(output_format) {
+static std::string mass_str = "0.123";
+static std::string width_str = "1.200";
+static std::string pdg_str = "-331";
+static std::string smashon_str = "smashon " + mass_str + " "
+    + width_str + " " + pdg_str + "\n";
+static int zero = 0;
+
+TEST(fullhistory_format) {
   OscarFullHistoryOutput *oscfull = new OscarFullHistoryOutput(testoutputpath);
   VERIFY(bf::exists(testoutputpath / "full_event_history.oscar"));
-
-  std::string mass_str = "0.123";
-  std::string width_str = "1.200";
-  std::string pdg_str = "-331";
-  std::string smashon_str = "smashon " + mass_str + " "
-    + width_str + " " + pdg_str + "\n";
 
   ParticleType::create_type_list(
       "# NAME MASS[GEV] WIDTH[GEV] PDG\n" + smashon_str);
@@ -52,7 +53,6 @@ TEST(output_format) {
   Particles particles({});
   particles.add_data(particle);
   int event_id = 0;
-  int zero = 0;
   oscfull->at_eventstart(particles, event_id);
 
   delete oscfull;
