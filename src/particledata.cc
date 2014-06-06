@@ -10,7 +10,13 @@
 #include "include/particledata.h"
 
 #include "include/width.h"
+#include <iostream>
 
 namespace Smash {
+
+std::ostream &operator<<(std::ostream &s, const ParticleData &p) {
+  return s << "ParticleData{ id: " << p.id() << ", '" << p.type().name()
+           << "', pos: " << p.position() << ", mom: " << p.momentum() << " }";
+}
 
 }  // namespace Smash

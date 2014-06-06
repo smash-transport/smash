@@ -222,6 +222,8 @@ inline bool ParticleData::operator<(const int id_a) const {
   return this->id_ < id_a;
 }
 
+std::ostream &operator<<(std::ostream &s, const ParticleData &p);
+
 }  // namespace Smash
 
 #endif  // SRC_INCLUDE_PARTICLEDATA_H_
