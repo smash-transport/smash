@@ -11,8 +11,7 @@
 #define SRC_INCLUDE_FORWARDDECLARATIONS_H_
 
 #include <iosfwd>
-#include <memory>
-#include <vector>
+#include "deprecate_c_functions.h"
 
 // the forward declarations should not appear in doxygen output
 #ifndef DOXYGEN
