@@ -96,8 +96,8 @@ TEST(sanity_box) {
 TEST(sanity_collider) {
   Configuration conf(TEST_CONFIG_PATH);
   conf["Modi"]["Collider"]["SQRTS"] = 1.0;
-  conf["Modi"]["Collider"]["PROJECTILE"] = -0x331;
-  conf["Modi"]["Collider"]["TARGET"] = -0x331;
+  conf["Modi"]["Collider"]["PROJECTILE"] = "-331";
+  conf["Modi"]["Collider"]["TARGET"] = "-331";
   ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};
   ColliderModus c(conf["Modi"], param);
   Particles P{""};

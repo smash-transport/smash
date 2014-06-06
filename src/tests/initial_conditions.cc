@@ -85,6 +85,15 @@ TEST(initialize_collider) {
   COMPARE(momentum_total, FourVector(momentum_total.x0(), 0.0, 0.0, 0.0));
 }
 
+TEST_CATCH(initialize_collider_low_energy, ModusDefault::InvalidEnergy) {
+  Configuration conf(TEST_CONFIG_PATH);
+  conf["Modi"]["Collider"]["SQRTS"] = 0.5;
+  conf["Modi"]["Collider"]["PROJECTILE"] = "222";
+  conf["Modi"]["Collider"]["TARGET"] = "222";
+  ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};
+  ColliderModus c(conf["Modi"], param);
+}
+
 TEST(initialize_nucleus_normal) {
   Configuration conf(TEST_CONFIG_PATH);
   conf["Modi"]["Nucleus"]["SQRTSNN"] = 1.6;
@@ -116,7 +125,7 @@ TEST(initialize_nucleus_normal) {
   // all other things can only be tested with statistics.
 }
 
-TEST_CATCH(initialize_nucleus_low_energy, NucleusModus::InvalidEnergy) {
+TEST_CATCH(initialize_nucleus_low_energy, ModusDefault::InvalidEnergy) {
   Configuration conf(TEST_CONFIG_PATH);
   conf["Modi"]["Nucleus"]["SQRTSNN"] = 0.5;
   conf.take({"Modi", "Nucleus", "Projectile"});

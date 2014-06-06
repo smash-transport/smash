@@ -21,6 +21,7 @@
 namespace Smash {
 
 namespace {
+/// Global pointer to the Particle Type list.
 const ParticleTypeList *all_particle_types = nullptr;
 }  // unnamed namespace
 

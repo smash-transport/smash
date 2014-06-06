@@ -113,6 +113,10 @@ class Particles {
     T *map_;
   };
 
+  /** ParticleDataMap is the prime accessor for ParticleData
+   *
+   * It maps the unique Particle ID to its volatile data.
+   */
   using ParticleDataMap = std::map<int, ParticleData>;
   using DecayModesMap = std::map<PdgCode, DecayModes>;
 
