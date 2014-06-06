@@ -90,16 +90,17 @@ TEST(output_format) {
     outputfile >> item;
     COMPARE(std::atof(item.c_str()), particle.momentum().x3());
     outputfile >> item;
-    COMPARE(std::atof(item.c_str()), particle.momentum().x0());
+    COMPARE_ABSOLUTE_ERROR(std::atof(item.c_str()), particle.momentum().x0(),
+                           0.000001);
     outputfile >> item;
     COMPARE(std::atof(item.c_str()), 0.123);
     outputfile >> item;
     COMPARE(std::atof(item.c_str()), particle.position().x1());
     outputfile >> item;
-    COMPARE(std::atof(item.c_str()), particle.momentum().x2());
+    COMPARE(std::atof(item.c_str()), particle.position().x2());
     outputfile >> item;
-    COMPARE(std::atof(item.c_str()), particle.momentum().x3());
+    COMPARE(std::atof(item.c_str()), particle.position().x3());
     outputfile >> item;
-    COMPARE(std::atof(item.c_str()), particle.momentum().x0());
+    COMPARE(std::atof(item.c_str()), particle.position().x0());
   }
 }
