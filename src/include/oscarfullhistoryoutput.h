@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef SRC_INCLUDE_OSCAROUTPUT_H_
-#define SRC_INCLUDE_OSCAROUTPUT_H_
+#ifndef SRC_INCLUDE_OSCARFULLHISTORYOUTPUT_H_
+#define SRC_INCLUDE_OSCARFULLHISTORYOUTPUT_H_
 
 #include "outputinterface.h"
 
@@ -17,10 +17,10 @@
 
 namespace Smash {
 
-class OscarOutput : public OutputInterface {
+class OscarFullHistoryOutput : public OutputInterface {
  public:
-  OscarOutput(bf::path path);
-  ~OscarOutput();
+  OscarFullHistoryOutput(bf::path path);
+  ~OscarFullHistoryOutput();
 
   /// writes the initial particle information of an event
   void at_eventstart(const Particles &particles,
@@ -38,11 +38,11 @@ class OscarOutput : public OutputInterface {
   void after_Nth_timestep(const Particles &particles, const int event_number,
                           const Clock &clock) override;
 
- private:
+ protected:
+  OscarFullHistoryOutput(bf::path path, const char* second_line);
   void write(const Particles &particles);
-
   FilePtr file_;
 };
 }  // namespace Smash
 
-#endif  // SRC_INCLUDE_OSCAROUTPUT_H_
+#endif  // SRC_INCLUDE_OSCARFULLHISTORYOUTPUT_H_
