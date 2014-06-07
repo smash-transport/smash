@@ -21,6 +21,8 @@
 
 using namespace Smash;
 
+static const float accuracy = 0.000001;
+
 static const bf::path testoutputpath = bf::absolute(SMASH_TEST_OUTPUT_PATH);
 
 TEST(directory_is_created) {
@@ -28,16 +30,17 @@ TEST(directory_is_created) {
   VERIFY(bf::exists(testoutputpath));
 }
 
-static ParticleData create_smashon_particle(int id = -1) {
-  return ParticleData{ParticleType::find(-0x331), id};
+static ParticleData create_smashon_particle() {
+  return ParticleData{ParticleType::find(-0x331)};
 }
 
-static std::string mass_str = "0.123";
+static const float mass_smashon = 0.123;
+static std::string mass_str = std::to_string(mass_smashon);
 static std::string width_str = "1.200";
 static std::string pdg_str = "-331";
 static std::string smashon_str = "smashon " + mass_str + " "
     + width_str + " " + pdg_str + "\n";
-static int zero = 0;
+static const int zero = 0;
 
 TEST(fullhistory_format) {
   OscarFullHistoryOutput *oscfull = new OscarFullHistoryOutput(testoutputpath);
@@ -46,11 +49,10 @@ TEST(fullhistory_format) {
   ParticleType::create_type_list(
       "# NAME MASS[GEV] WIDTH[GEV] PDG\n" + smashon_str);
 
-  int id = 0;
-  ParticleData particle = create_smashon_particle(id);
-  particle.set_momentum(0.123, 1.1, 2.2, 3.3);
-  particle.set_position(FourVector(7.7, 4.4, 5.5, 6.6));
   Particles particles({});
+  ParticleData particle = create_smashon_particle();
+  particle.set_momentum(mass_smashon, 1.1, 2.2, 3.3);
+  particle.set_position(FourVector(7.7, 4.4, 5.5, 6.6));
   particles.add_data(particle);
   int event_id = 0;
   oscfull->at_eventstart(particles, event_id);
@@ -88,7 +90,7 @@ TEST(fullhistory_format) {
     COMPARE(std::atoi(item.c_str()), event_id + 1);
     /* Check particle data line item by item */
     outputfile >> item;
-    COMPARE(std::atoi(item.c_str()), id);
+    COMPARE(std::atoi(item.c_str()), 0);
     outputfile >> item;
     COMPARE(item, pdg_str);
     outputfile >> item;
@@ -101,9 +103,9 @@ TEST(fullhistory_format) {
     COMPARE(std::atof(item.c_str()), particle.momentum().x3());
     outputfile >> item;
     COMPARE_ABSOLUTE_ERROR(std::atof(item.c_str()), particle.momentum().x0(),
-                           0.000001);
+                           accuracy);
     outputfile >> item;
-    COMPARE(item, mass_str);
+    COMPARE(float(std::atof(item.c_str())), mass_smashon);
     outputfile >> item;
     COMPARE(std::atof(item.c_str()), particle.position().x1());
     outputfile >> item;
