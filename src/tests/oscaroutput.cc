@@ -90,6 +90,13 @@ TEST(fullhistory_format) {
                                    random_value(), random_value()));
   particles.add_data(particle);
 
+  ParticleData second_particle = create_smashon_particle();
+  second_particle.set_momentum(mass_smashon, random_value(), random_value(),
+                               random_value());
+  second_particle.set_position(FourVector(random_value(), random_value(),
+                                   random_value(), random_value()));
+  particles.add_data(second_particle);
+
   int event_id = 0;
   oscfull->at_eventstart(particles, event_id);
 
@@ -124,11 +131,13 @@ TEST(fullhistory_format) {
     COMPARE(std::atoi(item.c_str()), particles.size());
     outputfile >> item;
     COMPARE(std::atoi(item.c_str()), event_id + 1);
-    /* Check particle data line item by item */
-    std::array<std::string,12> datastring;
-    for (int i = 0; i < 12; i++) {
-      outputfile >> datastring.at(i);
+    for (ParticleData &data : particles.data()) {
+      /* Check particle data line item by item */
+      std::array<std::string,12> datastring;
+      for (int j = 0; j < 12; j++) {
+        outputfile >> datastring.at(j);
+      }
+      compare_particledata(datastring, data, data.id());
     }
-    compare_particledata(datastring, particle, 0);
   }
 }
