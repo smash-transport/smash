@@ -18,12 +18,13 @@
 #include "../include/oscarfullhistoryoutput.h"
 #include "../include/oscarparticlelistoutput.h"
 #include "../include/particles.h"
+#include "../include/random.h"
 
 using namespace Smash;
 
-static const float accuracy = 0.000001;
-
+static const float accuracy = 1.0e-4;
 static const bf::path testoutputpath = bf::absolute(SMASH_TEST_OUTPUT_PATH);
+static auto random_value = Random::make_uniform_distribution(-15.0, +15.0);
 
 TEST(directory_is_created) {
   bf::create_directory(testoutputpath);
@@ -50,10 +51,14 @@ TEST(fullhistory_format) {
       "# NAME MASS[GEV] WIDTH[GEV] PDG\n" + smashon_str);
 
   Particles particles({});
+
   ParticleData particle = create_smashon_particle();
-  particle.set_momentum(mass_smashon, 1.1, 2.2, 3.3);
-  particle.set_position(FourVector(7.7, 4.4, 5.5, 6.6));
+  particle.set_momentum(mass_smashon, random_value(), random_value(),
+                        random_value());
+  particle.set_position(FourVector(random_value(), random_value(),
+                                   random_value(), random_value()));
   particles.add_data(particle);
+
   int event_id = 0;
   oscfull->at_eventstart(particles, event_id);
 
@@ -96,23 +101,30 @@ TEST(fullhistory_format) {
     outputfile >> item;
     COMPARE(std::atoi(item.c_str()), zero);
     outputfile >> item;
-    COMPARE(std::atof(item.c_str()), particle.momentum().x1());
+    COMPARE_ABSOLUTE_ERROR(std::atof(item.c_str()), particle.momentum().x1(),
+                           accuracy);
     outputfile >> item;
-    COMPARE(std::atof(item.c_str()), particle.momentum().x2());
+    COMPARE_ABSOLUTE_ERROR(std::atof(item.c_str()), particle.momentum().x2(),
+                           accuracy);
     outputfile >> item;
-    COMPARE(std::atof(item.c_str()), particle.momentum().x3());
+    COMPARE_ABSOLUTE_ERROR(std::atof(item.c_str()), particle.momentum().x3(),
+                           accuracy);
     outputfile >> item;
     COMPARE_ABSOLUTE_ERROR(std::atof(item.c_str()), particle.momentum().x0(),
                            accuracy);
     outputfile >> item;
     COMPARE(float(std::atof(item.c_str())), mass_smashon);
     outputfile >> item;
-    COMPARE(std::atof(item.c_str()), particle.position().x1());
+    COMPARE_ABSOLUTE_ERROR(std::atof(item.c_str()), particle.position().x1(),
+                           accuracy);
     outputfile >> item;
-    COMPARE(std::atof(item.c_str()), particle.position().x2());
+    COMPARE_ABSOLUTE_ERROR(std::atof(item.c_str()), particle.position().x2(),
+                           accuracy);
     outputfile >> item;
-    COMPARE(std::atof(item.c_str()), particle.position().x3());
+    COMPARE_ABSOLUTE_ERROR(std::atof(item.c_str()), particle.position().x3(),
+                           accuracy);
     outputfile >> item;
-    COMPARE(std::atof(item.c_str()), particle.position().x0());
+    COMPARE_ABSOLUTE_ERROR(std::atof(item.c_str()), particle.position().x0(),
+                           accuracy);
   }
 }
