@@ -14,6 +14,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <vector>
 #include <boost/filesystem.hpp>
 #include "../include/outputinterface.h"
 #include "../include/oscarfullhistoryoutput.h"
@@ -32,10 +33,6 @@ TEST(directory_is_created) {
   VERIFY(bf::exists(testoutputpath));
 }
 
-static ParticleData create_smashon_particle() {
-  return ParticleData{ParticleType::find(-0x331)};
-}
-
 static const float mass_smashon = 0.123;
 static std::string mass_str = std::to_string(mass_smashon);
 static std::string width_str = "1.200";
@@ -43,6 +40,15 @@ static std::string pdg_str = "-331";
 static std::string smashon_str = "smashon " + mass_str + " "
     + width_str + " " + pdg_str + "\n";
 static const int zero = 0;
+
+static ParticleData create_smashon_particle() {
+  ParticleData particle = ParticleData{ParticleType::find(-0x331)};
+  particle.set_momentum(mass_smashon, random_value(), random_value(),
+                        random_value());
+  particle.set_position(FourVector(random_value(), random_value(),
+                                   random_value(), random_value()));
+  return particle;
+}
 
 static void compare_fourvector(const std::array<std::string,4> &stringarray,
                                const FourVector &fourvector) {
@@ -84,21 +90,26 @@ TEST(fullhistory_format) {
   Particles particles({});
 
   ParticleData particle = create_smashon_particle();
-  particle.set_momentum(mass_smashon, random_value(), random_value(),
-                        random_value());
-  particle.set_position(FourVector(random_value(), random_value(),
-                                   random_value(), random_value()));
   particles.add_data(particle);
 
   ParticleData second_particle = create_smashon_particle();
-  second_particle.set_momentum(mass_smashon, random_value(), random_value(),
-                               random_value());
-  second_particle.set_position(FourVector(random_value(), random_value(),
-                                   random_value(), random_value()));
   particles.add_data(second_particle);
 
   int event_id = 0;
+  /* Initial state output */
   oscfull->at_eventstart(particles, event_id);
+  /* Create interaction */
+  std::vector<ParticleData> initial_particles, final_particles;
+  initial_particles.push_back(particles.data(0));
+  initial_particles.push_back(particles.data(1));
+  particles.remove(0);
+  particles.remove(1);
+  ParticleData final_particle = create_smashon_particle();
+  particles.add_data(final_particle);
+  final_particles.push_back(final_particle);
+  oscfull->write_interaction(initial_particles, final_particles);
+  /* Final state output */
+  oscfull->at_eventend(particles, event_id);
 
   delete oscfull;
 
@@ -107,8 +118,8 @@ TEST(fullhistory_format) {
                   .native().c_str(), std::ios_base::in);
   if (outputfile.good()) {
     std::string line, item;
-    std::getline(outputfile, line);
     /* Check header */
+    std::getline(outputfile, line);
     COMPARE(line, "# OSC1999A");
     std::getline(outputfile, line);
     COMPARE(line, "# full_event_history");
@@ -124,20 +135,59 @@ TEST(fullhistory_format) {
     COMPARE(line, "# End of event: 0 0 event_number");
     std::getline(outputfile, line);
     COMPARE(line, "#");
-    /* Check interaction block description line item by item */
+    /* Check initial particle list description line item by item */
     outputfile >> item;
     COMPARE(std::atoi(item.c_str()), 0);
     outputfile >> item;
-    COMPARE(std::atoi(item.c_str()), particles.size());
+    COMPARE(std::atoi(item.c_str()), initial_particles.size());
     outputfile >> item;
     COMPARE(std::atoi(item.c_str()), event_id + 1);
-    for (ParticleData &data : particles.data()) {
-      /* Check particle data line item by item */
+    /* Check initial particle data lines item by item */
+    for (ParticleData &data : initial_particles) {
       std::array<std::string,12> datastring;
       for (int j = 0; j < 12; j++) {
         outputfile >> datastring.at(j);
       }
       compare_particledata(datastring, data, data.id());
     }
+    /* Check interaction block */
+    outputfile >> item;
+    COMPARE(std::atoi(item.c_str()), initial_particles.size());
+    outputfile >> item;
+    COMPARE(std::atoi(item.c_str()), final_particles.size());
+    for (ParticleData &data : initial_particles) {
+      std::array<std::string,12> datastring;
+      for (int j = 0; j < 12; j++) {
+        outputfile >> datastring.at(j);
+      }
+      compare_particledata(datastring, data, data.id());
+    }
+    for (ParticleData &data : final_particles) {
+      std::array<std::string,12> datastring;
+      for (int j = 0; j < 12; j++) {
+        outputfile >> datastring.at(j);
+      }
+      compare_particledata(datastring, data, data.id());
+    }
+    /* Check final particle list */
+    outputfile >> item;
+    COMPARE(std::atoi(item.c_str()), final_particles.size());
+    outputfile >> item;
+    COMPARE(std::atoi(item.c_str()), 0);
+    outputfile >> item;
+    COMPARE(std::atoi(item.c_str()), event_id + 1);
+    for (ParticleData &data : particles.data()) {
+      std::array<std::string,12> datastring;
+      for (int j = 0; j < 12; j++) {
+        outputfile >> datastring.at(j);
+      }
+      compare_particledata(datastring, data, data.id());
+    }
+    outputfile >> item;
+    COMPARE(std::atoi(item.c_str()), 0);
+    outputfile >> item;
+    COMPARE(std::atoi(item.c_str()), 0);
+    outputfile >> item;
+    COMPARE(std::atoi(item.c_str()), event_id + 1);
   }
 }
