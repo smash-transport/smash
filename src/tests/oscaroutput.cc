@@ -10,6 +10,7 @@
 #include "unittest.h"
 #include <cstdio>
 #include <cstring>
+#include <array>
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -42,6 +43,36 @@ static std::string pdg_str = "-331";
 static std::string smashon_str = "smashon " + mass_str + " "
     + width_str + " " + pdg_str + "\n";
 static const int zero = 0;
+
+static void compare_fourvector(const std::array<std::string,4> &stringarray,
+                               const FourVector &fourvector) {
+  COMPARE_ABSOLUTE_ERROR(std::atof(stringarray.at(0).c_str()), fourvector.x1(),
+                         accuracy);
+  COMPARE_ABSOLUTE_ERROR(std::atof(stringarray.at(1).c_str()), fourvector.x2(),
+                         accuracy);
+  COMPARE_ABSOLUTE_ERROR(std::atof(stringarray.at(2).c_str()), fourvector.x3(),
+                         accuracy);
+  COMPARE_ABSOLUTE_ERROR(std::atof(stringarray.at(3).c_str()), fourvector.x0(),
+                         accuracy);
+}
+
+static void compare_particledata(const std::array<std::string,12> &datastring,
+                                 const ParticleData &particle, const int id) {
+  COMPARE(std::atoi(datastring.at(0).c_str()), id);
+  COMPARE(datastring.at(1), pdg_str);
+  COMPARE(std::atoi(datastring.at(2).c_str()), zero);
+  std::array<std::string,4> momentum_string;
+  for (int i = 0; i < 4 ; i++) {
+    momentum_string.at(i) = datastring.at(i + 3);
+  }
+  compare_fourvector(momentum_string, particle.momentum());
+  COMPARE(float(std::atof(datastring.at(7).c_str())), mass_smashon);
+  std::array<std::string,4> position_string;
+  for (int i = 0; i < 4 ; i++) {
+    position_string.at(i) = datastring.at(i + 8);
+  }
+  compare_fourvector(position_string, particle.position());
+}
 
 TEST(fullhistory_format) {
   OscarFullHistoryOutput *oscfull = new OscarFullHistoryOutput(testoutputpath);
@@ -94,37 +125,10 @@ TEST(fullhistory_format) {
     outputfile >> item;
     COMPARE(std::atoi(item.c_str()), event_id + 1);
     /* Check particle data line item by item */
-    outputfile >> item;
-    COMPARE(std::atoi(item.c_str()), 0);
-    outputfile >> item;
-    COMPARE(item, pdg_str);
-    outputfile >> item;
-    COMPARE(std::atoi(item.c_str()), zero);
-    outputfile >> item;
-    COMPARE_ABSOLUTE_ERROR(std::atof(item.c_str()), particle.momentum().x1(),
-                           accuracy);
-    outputfile >> item;
-    COMPARE_ABSOLUTE_ERROR(std::atof(item.c_str()), particle.momentum().x2(),
-                           accuracy);
-    outputfile >> item;
-    COMPARE_ABSOLUTE_ERROR(std::atof(item.c_str()), particle.momentum().x3(),
-                           accuracy);
-    outputfile >> item;
-    COMPARE_ABSOLUTE_ERROR(std::atof(item.c_str()), particle.momentum().x0(),
-                           accuracy);
-    outputfile >> item;
-    COMPARE(float(std::atof(item.c_str())), mass_smashon);
-    outputfile >> item;
-    COMPARE_ABSOLUTE_ERROR(std::atof(item.c_str()), particle.position().x1(),
-                           accuracy);
-    outputfile >> item;
-    COMPARE_ABSOLUTE_ERROR(std::atof(item.c_str()), particle.position().x2(),
-                           accuracy);
-    outputfile >> item;
-    COMPARE_ABSOLUTE_ERROR(std::atof(item.c_str()), particle.position().x3(),
-                           accuracy);
-    outputfile >> item;
-    COMPARE_ABSOLUTE_ERROR(std::atof(item.c_str()), particle.position().x0(),
-                           accuracy);
+    std::array<std::string,12> datastring;
+    for (int i = 0; i < 12; i++) {
+      outputfile >> datastring.at(i);
+    }
+    compare_particledata(datastring, particle, 0);
   }
 }
