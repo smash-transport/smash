@@ -340,16 +340,16 @@ class QuantumNumbers {
    * \param x
    * \param y
    *
-   * \returns true if the difference between x and y is less than
-   * \f$10^{-12}\f$ times the average of \f$|x|\f$ and \f$|y|\f$:
+   * \returns true the difference between x and y is less than or equal
+   * to \f$10^{-12}\f$ times the average of \f$|x|\f$ and \f$|y|\f$:
    *
-   * \f[|x - y| \stackrel{?}{<} \frac{|x| + |y|}{2} \cdot 10^{-12}\f]
+   * \f[|x - y| \stackrel{?}{\le} \frac{|x| + |y|}{2} \cdot 10^{-12}\f]
    *
    * This function might be helpful elsewhere, thus possibly it should
    * be moved into src/include/algorithms.h
    */
   bool almost_equal(const double x, const double y) const {
-    return (std::abs(x - y) < .5e-12 * (std::abs(x) + std::abs(y)));
+    return (std::abs(x - y) <= .5e-12 * (std::abs(x) + std::abs(y)));
   }
 };
 
