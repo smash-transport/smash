@@ -243,15 +243,28 @@ class QuantumNumbers {
                           " (old vs. new)\n");
     if (momentum_ != rhs.momentum_) {
       error_msg += "Deviation in Four-Momentum:\n";
-      error_msg += " P_0: " + std::to_string(momentum_.x0()) + " vs. "
-                            + std::to_string(rhs.momentum_.x0()) + "\n";
-      error_msg += " P_1: " + std::to_string(momentum_.x1()) + " vs. "
-                            + std::to_string(rhs.momentum_.x1()) + "\n";
-      error_msg += " P_2: " + std::to_string(momentum_.x2()) + " vs. "
-                            + std::to_string(rhs.momentum_.x2()) + "\n";
-      error_msg += " P_3: " + std::to_string(momentum_.x3()) + " vs. "
-                            + std::to_string(rhs.momentum_.x3()) + "\n";
     }
+    // programmer's note: here, I'd like to simultaneously loop over an
+    // integer (for the output; so that we know which component is
+    // faulty) and both the current and rhs's momentum four-vector. If
+    // there is a better way to do this, feel free to implement.
+    //
+    // I chose mu < 4 as the breaking condition out of the vague feeling
+    // that comparing integers may be faster than accessing the
+    // iterators.
+    int mu = 0;
+    for (auto here_iter = momentum_.cbegin(),
+              rhs_iter = rhs.momentum_.cbegin();
+         mu < 4;
+         ++here_iter, ++rhs_iter, ++mu) {
+      if (! almost_equal(*here_iter, *rhs_iter)) {
+        error_msg += " P_" + std::to_string(mu) + ": "
+                     + std::to_string(*here_iter) + " vs. "
+                     + std::to_string(*rhs_iter) + "; Δ = "
+                     + std::to_string(*here_iter - *rhs_iter)
+                     + "\n";
+      }
+     }
     if (charge_ != rhs.charge_) {
       error_msg += "Deviation in Charge:\n "
                                 + std::to_string(charge_)
@@ -321,6 +334,23 @@ class QuantumNumbers {
    * \see QuantumNumbers::baryon_number()
    */
   int baryon_number_;
+
+  /** checks two numbers for relative approximate equality.
+   *
+   * \param x
+   * \param y
+   *
+   * \returns true if the difference between x and y is less than
+   * \f$10^{-12}\f$ times the average of \f$|x|\f$ and \f$|y|\f$:
+   *
+   * \f[|x - y| \stackrel{?}{<} \frac{|x| + |y|}{2} \cdot 10^{-12}\f]
+   *
+   * This function might be helpful elsewhere, thus possibly it should
+   * be moved into src/include/algorithms.h
+   */
+  bool almost_equal(const double x, const double y) const {
+    return (std::abs(x - y) < .5e-12 * (std::abs(x) + std::abs(y)));
+  }
 };
 
 }  // namespace SMASH
