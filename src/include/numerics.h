@@ -31,14 +31,16 @@ namespace Smash {
  * \param y
  *
  * \returns true the difference between x and y is less than or equal to
- * \f$\delta = \f$SMASH::really_small times the average of \f$|x|\f$ and
- * \f$|y|\f$:
+ * \f$\delta = \f$SMASH::really_small or that times the average of
+ * \f$|x|\f$ and \f$|y|\f$:
  *
- * \f[|x - y| \stackrel{?}{\le} \frac{|x| + |y|}{2} \cdot \delta\f]
+ * \f[|x - y| \stackrel{?}{\le} \delta \mbox{ or } |x - y|
+ * \stackrel{?}{\le} \frac{|x| + |y|}{2} \cdot \delta\f]
  */
 template <typename N>
 bool almost_equal(const N x, const N y) {
-  return (std::abs(x - y) <= N(0.5 * really_small)
+  return (std::abs(x - y) <= N(really_small)
+       || std::abs(x - y) <= N(0.5 * really_small)
                                    * (std::abs(x) + std::abs(y)));
 }
 
