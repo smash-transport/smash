@@ -96,22 +96,24 @@ TEST(difference) {
 TEST(report_deviations) {
   FourVector P(1,2,3,4);
   FourVector Q(2,3,4,4);
+  // FourVector Q(1,2,4,4);
   QuantumNumbers A(P, 5, 6, 7, 8, 9, 0);
   QuantumNumbers H(Q, 5, 6, 1, -8, 12358, -15);
   COMPARE(A.report_deviations(H),
-        "Conservation law violations detected  (old vs. new)\n"
-        "Deviation in Four-Momentum:\n"
-        " P_0: 1.000000 vs. 2.000000; Δ = -1.000000\n"
-        " P_1: 2.000000 vs. 3.000000; Δ = -1.000000\n"
-        " P_2: 3.000000 vs. 4.000000; Δ = -1.000000\n"
-        "Deviation in Strangeness:\n"
-        " 7 vs. 1\n"
-        "Deviation in Charmness:\n"
-        " 8 vs. -8\n"
-        "Deviation in Bottomness:\n"
-        " 9 vs. 12358\n"
-        "Deviation in Baryon Number:\n"
-        " 0 vs. -15\n");
+          "Conservation law violations detected (old vs. new)\n"
+          "Deviation in Four-Momentum:\n"
+          " P_0: 1.000000e+00 vs. 2.000000e+00; Δ = -1.000000e+00\n"
+          " P_1: 2.000000e+00 vs. 3.000000e+00; Δ = -1.000000e+00\n"
+          " P_2: 3.000000e+00 vs. 4.000000e+00; Δ = -1.000000e+00\n"
+          "Deviation in Strangeness:\n"
+          " 7 vs. 1\n"
+          "Deviation in Charmness:\n"
+          " 8 vs. -8\n"
+          "Deviation in Bottomness:\n"
+          " 9 vs. 12358\n"
+          "Deviation in Baryon Number:\n"
+          " 0 vs. -15\n"
+          );
   // small deviation in FourVector should satisfy ==:
   FourVector R(2 + 2e-13,3,4,4);
   QuantumNumbers J(R, 5, 6, 1, -8, 12358, -15);
@@ -170,12 +172,12 @@ TEST(count_from_particles) {
 
   //
   COMPARE(three.report_deviations(list),
-  "Conservation law violations detected  (old vs. new)\n"
+  "Conservation law violations detected (old vs. new)\n"
   "Deviation in Four-Momentum:\n"
-  " P_0: 6.000000 vs. 0.000000; Δ = 6.000000\n"
-  " P_1: 9.000000 vs. 0.000000; Δ = 9.000000\n"
-  " P_2: 12.000000 vs. 0.000000; Δ = 12.000000\n"
-  " P_3: 15.000000 vs. 0.000000; Δ = 15.000000\n"
+  " P_0: 6.000000e+00 vs. 0.000000e+00; Δ = 6.000000e+00\n"
+  " P_1: 9.000000e+00 vs. 0.000000e+00; Δ = 9.000000e+00\n"
+  " P_2: 12.000000e+00 vs. 0.000000e+00; Δ = 1.200000e+01\n"
+  " P_3: 15.000000e+00 vs. 0.000000e+00; Δ = 1.500000e+01\n"
   "Deviation in Charge:\n"
   " 3 vs. 2\n"
   "Deviation in Charmness:\n"
