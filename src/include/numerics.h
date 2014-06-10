@@ -38,7 +38,8 @@ namespace Smash {
  */
 template <typename N>
 bool almost_equal(const N x, const N y) {
-  return (std::abs(x - y) <= 0.5 * really_small * (std::abs(x) + std::abs(y)));
+  return (std::abs(x - y) <= N(0.5 * really_small)
+                                   * (std::abs(x) + std::abs(y)));
 }
 
 }  // namespace Smash
