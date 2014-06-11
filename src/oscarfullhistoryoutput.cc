@@ -60,6 +60,9 @@ void OscarFullHistoryOutput::at_eventend(const Particles &particles,
   write(particles);
   /* Null interaction marks the end of an event */
   fprintf(file_.get(), "%zu %zu %i\n", zero, zero, event_number + 1);
+
+  /* Flush to disk */
+  std::fflush(file_.get());
 }
 
 void OscarFullHistoryOutput::write(const Particles &particles) {

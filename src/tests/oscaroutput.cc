@@ -111,8 +111,6 @@ TEST(fullhistory_format) {
   /* Final state output */
   oscfull->at_eventend(particles, event_id);
 
-  delete oscfull;
-
   std::fstream outputfile;
   outputfile.open((testoutputpath / "full_event_history.oscar")
                   .native().c_str(), std::ios_base::in);
@@ -223,8 +221,6 @@ TEST(particlelist_format) {
   oscfinal->write_interaction(initial_particles, final_particles);
   /* Final state output; this is the only thing we expect to find in file */
   oscfinal->at_eventend(particles, event_id);
-
-  delete oscfinal;
 
   std::fstream outputfile;
   outputfile.open((testoutputpath / "final_id_p_x.oscar")
