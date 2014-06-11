@@ -98,7 +98,7 @@ TEST(fullhistory_format) {
   int event_id = 0;
   /* Initial state output */
   oscfull->at_eventstart(particles, event_id);
-  /* Create interaction */
+  /* Create interaction ("resonance formation") */
   std::vector<ParticleData> initial_particles, final_particles;
   initial_particles.push_back(particles.data(0));
   initial_particles.push_back(particles.data(1));
@@ -119,22 +119,20 @@ TEST(fullhistory_format) {
   if (outputfile.good()) {
     std::string line, item;
     /* Check header */
-    std::getline(outputfile, line);
-    COMPARE(line, "# OSC1999A");
-    std::getline(outputfile, line);
-    COMPARE(line, "# full_event_history");
-    std::getline(outputfile, line);
-    COMPARE(line, "# smash");
-    std::getline(outputfile, line);
-    COMPARE(line, "# Block format:");
-    std::getline(outputfile, line);
-    COMPARE(line, "# nin nout event_number");
-    std::getline(outputfile, line);
-    COMPARE(line, "# id pdg 0 px py pz p0 mass x y z t");
-    std::getline(outputfile, line);
-    COMPARE(line, "# End of event: 0 0 event_number");
-    std::getline(outputfile, line);
-    COMPARE(line, "#");
+    std::string output_header = "";
+    std::string header = "# OSC1999A\n"
+                         "# full_event_history\n"
+                         "# smash\n"
+                         "# Block format:\n"
+                         "# nin nout event_number\n"
+                         "# id pdg 0 px py pz p0 mass x y z t\n"
+                         "# End of event: 0 0 event_number\n"
+                         "#\n";
+    do {
+      std::getline(outputfile, line);
+      output_header += line + '\n';
+    } while (line != "#");
+    COMPARE(output_header, header);
     /* Check initial particle list description line item by item */
     outputfile >> item;
     COMPARE(std::atoi(item.c_str()), 0);
@@ -183,6 +181,86 @@ TEST(fullhistory_format) {
       }
       compare_particledata(datastring, data, data.id());
     }
+    /* Check for null interaction */
+    outputfile >> item;
+    COMPARE(std::atoi(item.c_str()), 0);
+    outputfile >> item;
+    COMPARE(std::atoi(item.c_str()), 0);
+    outputfile >> item;
+    COMPARE(std::atoi(item.c_str()), event_id + 1);
+  }
+}
+
+
+TEST(particlelist_format) {
+  OscarFullHistoryOutput *oscfinal
+    = new OscarParticleListOutput(testoutputpath);
+  VERIFY(bf::exists(testoutputpath / "final_id_p_x.oscar"));
+
+  Particles particles({});
+
+  /* Create 5 particles */
+  for (int i = 0; i < 5; i++) {
+    ParticleData particle = create_smashon_particle();
+    particles.add_data(particle);
+  }
+  int event_id = 0;
+
+  /* Initial state output (note that this should not do anything!) */
+  oscfinal->at_eventstart(particles, event_id);
+  /* Create interaction ("elastic scattering") */
+  std::vector<ParticleData> initial_particles, final_particles;
+  initial_particles.push_back(particles.data(0));
+  initial_particles.push_back(particles.data(1));
+  /* Change the momenta */
+  particles.data(0).set_momentum(mass_smashon, random_value(), random_value(),
+                        random_value());
+  particles.data(1).set_momentum(mass_smashon, random_value(), random_value(),
+                                 random_value());
+  final_particles.push_back(particles.data(0));
+  final_particles.push_back(particles.data(1));
+  /* As with initial state output, this should not do anything */
+  oscfinal->write_interaction(initial_particles, final_particles);
+  /* Final state output; this is the only thing we expect to find in file */
+  oscfinal->at_eventend(particles, event_id);
+
+  delete oscfinal;
+
+  std::fstream outputfile;
+  outputfile.open((testoutputpath / "final_id_p_x.oscar")
+                  .native().c_str(), std::ios_base::in);
+  if (outputfile.good()) {
+    std::string line, item;
+    /* Check header */
+    std::string output_header = "";
+    std::string header = "# OSC1999A\n"
+                         "# final_id_p_x\n"
+                         "# smash\n"
+                         "# Block format:\n"
+                         "# nin nout event_number\n"
+                         "# id pdg 0 px py pz p0 mass x y z t\n"
+                         "# End of event: 0 0 event_number\n"
+                         "#\n";
+    do {
+      std::getline(outputfile, line);
+      output_header += line + '\n';
+    } while (line != "#");
+    COMPARE(output_header, header);
+    /* Check final particle list */
+    outputfile >> item;
+    COMPARE(std::atoi(item.c_str()), particles.size());
+    outputfile >> item;
+    COMPARE(std::atoi(item.c_str()), 0);
+    outputfile >> item;
+    COMPARE(std::atoi(item.c_str()), event_id + 1);
+    for (ParticleData &data : particles.data()) {
+      std::array<std::string,12> datastring;
+      for (int j = 0; j < 12; j++) {
+        outputfile >> datastring.at(j);
+      }
+      compare_particledata(datastring, data, data.id());
+    }
+    /* Check for null interaction */
     outputfile >> item;
     COMPARE(std::atoi(item.c_str()), 0);
     outputfile >> item;
