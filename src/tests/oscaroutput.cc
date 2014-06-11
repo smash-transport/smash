@@ -106,7 +106,7 @@ TEST(fullhistory_format) {
   particles.remove(1);
   ParticleData final_particle = create_smashon_particle();
   particles.add_data(final_particle);
-  final_particles.push_back(final_particle);
+  final_particles.push_back(particles.data(particles.id_max()));
   oscfull->write_interaction(initial_particles, final_particles);
   /* Final state output */
   oscfull->at_eventend(particles, event_id);
