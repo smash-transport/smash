@@ -13,6 +13,7 @@
 #include <list>
 #include <string>
 #include <algorithm>
+#include <vector>
 
 #include "include/action.h"
 #include "include/boxmodus.h"
@@ -99,8 +100,12 @@ Experiment<Modus>::Experiment(Configuration &config)
     seed_ = time(nullptr);
   }
   Random::set_seed(seed_);
-
   print_startup(seed_);
+
+  std::vector<std::string> opformatlist = config.take({"General", "OUTPUT"});
+  for (const auto &opformat : opformatlist) {
+    outputformats_.push_back(opformat);
+  }
 }
 
 /* This method reads the particle type and cross section information
@@ -219,12 +224,21 @@ void Experiment<Modus>::print_startup(int64_t seed) {
 
 template <typename Modus>
 void Experiment<Modus>::run(const bf::path &path) {
-  outputs_.emplace_back(new OscarFullHistoryOutput(path));
-  outputs_.emplace_back(new OscarParticleListOutput(path));
-  outputs_.emplace_back(new VtkOutput(path));
+  for (const auto &outputformat : outputformats_) {
+    if (outputformat == "OSCAR1999_FINAL") {
+      outputs_.emplace_back(new OscarFullHistoryOutput(path));
+    } else if (outputformat == "OSCAR1999_FULL") {
+        outputs_.emplace_back(new OscarParticleListOutput(path));
+    } else if (outputformat == "VTK") {
+        outputs_.emplace_back(new VtkOutput(path));
 #ifdef SMASH_USE_ROOT
-  outputs_.emplace_back(new RootOutput(path));
+    } else if (outputformat == "ROOT") {
+        outputs_.emplace_back(new RootOutput(path));
 #endif
+    } else {
+      printf("WARNING: Unsupported output format: %s\n", outputformat.c_str());
+    }
+  }
 
   for (int j = 0; j < nevents_; j++) {
     initialize(path);
