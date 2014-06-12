@@ -23,6 +23,7 @@
 #include "include/forwarddeclarations.h"
 #include "include/macros.h"
 #include "include/nucleusmodus.h"
+#include "include/binaryoutput.h"
 #include "include/oscarfullhistoryoutput.h"
 #include "include/oscarparticlelistoutput.h"
 #include "include/outputroutines.h"
@@ -219,6 +220,7 @@ void Experiment<Modus>::print_startup(int64_t seed) {
 
 template <typename Modus>
 void Experiment<Modus>::run(const bf::path &path) {
+  outputs_.emplace_back(new BinaryOutput(path));
   outputs_.emplace_back(new OscarFullHistoryOutput(path));
   outputs_.emplace_back(new OscarParticleListOutput(path));
   outputs_.emplace_back(new VtkOutput(path));
