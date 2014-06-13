@@ -20,7 +20,6 @@ namespace Smash {
 class BinaryOutput : public OutputInterface {
  public:
   BinaryOutput(bf::path path);
-  ~BinaryOutput();
 
   /// writes the initial particle information of an event
   void at_eventstart(const Particles &particles,
@@ -35,11 +34,13 @@ class BinaryOutput : public OutputInterface {
   void after_Nth_timestep(const Particles &particles, const int event_number,
                           const Clock &clock) override;
 
- protected:
-  
+ private:
+  void write(const std::string &s);
+  void write(const FourVector &v);
+  void write(std::int32_t x);
   void write(const Particles &particles, const int event_number);
-  FilePtr file_;
 
+  FilePtr file_;
 };
 }  // namespace Smash
 
