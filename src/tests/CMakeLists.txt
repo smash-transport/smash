@@ -31,7 +31,7 @@ macro(smash_add_unittest name)
    add_executable(${name} ${name}.cc)
    if(HAVE_SANITIZER)
       set_target_properties(${name} PROPERTIES
-         COMPILE_FLAGS ${SANITIZER_FLAG} "-DSMASH_TEST_OUTPUT_PATH=\\\"${PROJECT_BINARY_DIR}/${name}_output/\\\""
+         COMPILE_FLAGS "${SANITIZER_FLAG} -DSMASH_TEST_OUTPUT_PATH=\\\"${PROJECT_BINARY_DIR}/${name}_output/\\\""
          LINK_FLAGS ${SANITIZER_FLAG}
          )
    else()
