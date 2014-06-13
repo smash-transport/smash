@@ -51,7 +51,9 @@ float SphereModus::initial_conditions(Particles *particles) {
   /* loop over all the particle types creating each particles */
   for (auto i = particles->types_cbegin(); i != particles->types_cend(); ++i) {
     /* Unstable particles (resonances) do not exist in the beginning */
-    if (!data.is_stable()) continue;
+    if (!data.is_stable()) {
+      continue;
+    }
     printd("%s mass: %g [GeV]\n", data.name().c_str(), data.mass());
     /* Maxwell-Boltzmann statistics with temperature 0.3 GeV */
     double number_density = number_density_maxwellboltzmann(data.mass(), 0.3);

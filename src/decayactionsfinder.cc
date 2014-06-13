@@ -29,7 +29,9 @@ std::vector<ActionPtr> DecayActionsFinder::find_possible_actions(
     int id = p.id();
     float width = p.total_width();
     /* particle doesn't decay */
-    if (width <= 0.0) continue;
+    if (width <= 0.0) {
+      continue;
+    }
     /* local rest frame velocity */
     velocity_lrf = FourVector(1., p.velocity());
 

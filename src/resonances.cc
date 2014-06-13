@@ -144,7 +144,9 @@ std::vector<ProcessBranch> resonance_cross_section(
   /* Find all the possible resonances */
   for (const ParticleType &type_resonance : ParticleType::list_all()) {
     /* Not a resonance, go to next type of particle */
-    if (type_resonance.is_stable()) continue;
+    if (type_resonance.is_stable()) {
+      continue;
+    }
 
     /* Same resonance as in the beginning, ignore */
     if ((!type_particle1.is_stable()
@@ -155,7 +157,9 @@ std::vector<ProcessBranch> resonance_cross_section(
     }
 
     /* No decay channels found, ignore */
-    if (DecayModes::find(type_resonance.pdgcode()).is_empty()) continue;
+    if (DecayModes::find(type_resonance.pdgcode()).is_empty()) {
+      continue;
+    }
 
     float resonance_xsection
       = symmetryfactor * two_to_one_formation (type_particle1, type_particle2,
@@ -273,8 +277,9 @@ double two_to_one_formation(const ParticleType &type_particle1,
         not_balanced = false;
     }
   }
-  if (not_enough_energy || not_balanced)
+  if (not_enough_energy || not_balanced) {
     return 0.0;
+  }
 
   /* Calculate spin factor */
   const double spinfactor = (type_resonance.spin() + 1)
@@ -319,7 +324,9 @@ size_t two_to_two_formation (const ParticleType &type_particle1,
   /* Loop over particle types to find allowed combinations */
   for (const ParticleType &second_type : ParticleType::list_all()) {
     /* We are interested only stable particles here */
-    if (!second_type.is_stable()) continue;
+    if (!second_type.is_stable()) {
+      continue;
+    }
 
     /* Check for charge conservation */
     if (type_resonance.charge() + second_type.charge()
