@@ -14,7 +14,7 @@
 namespace Smash {
 
 float ParticleData::total_width() const {
-  return width_total (type_, momentum_.abs());
+  return width_total(type_, momentum_.abs());
 }
 
 }  // namespace Smash

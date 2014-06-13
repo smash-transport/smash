@@ -48,10 +48,9 @@ void DecayModes::renormalize(float renormalization_constant) {
   } else {
     printf("Renormalizing decay modes with %g \n", renormalization_constant);
     float new_sum = 0.0;
-    for (std::vector<DecayBranch>::iterator mode
-           = decay_modes_.begin(); mode != decay_modes_.end(); ++mode) {
-      mode->set_weight(mode->weight() / renormalization_constant);
-      new_sum += mode->weight();
+    for (auto &mode : decay_modes_) {
+      mode.set_weight(mode.weight() / renormalization_constant);
+      new_sum += mode.weight();
     }
     printf("After renormalization sum of ratios is %g. \n", new_sum);
   }

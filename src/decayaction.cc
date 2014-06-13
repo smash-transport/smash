@@ -34,7 +34,7 @@ DecayAction::DecayAction(const std::vector<int> &in_part,
  * \param[in] incoming0 decaying particle (in its rest frame)
  * \param[in] particles Particles in the simulation.
  */
-void DecayAction::one_to_two (const ParticleData &incoming0) {
+void DecayAction::one_to_two(const ParticleData &incoming0) {
   ParticleData &outgoing0 = outgoing_particles_[0];
   ParticleData &outgoing1 = outgoing_particles_[1];
   const ParticleType &outgoing0_type = outgoing0.type();
@@ -270,9 +270,9 @@ void DecayAction::perform(Particles *particles, size_t &id_process) {
    */
   outgoing_particles_ = choose_channel(*particles);
   if (outgoing_particles_.size() == 2) {
-    one_to_two (particle0);
+    one_to_two(particle0);
   } else if (outgoing_particles_.size() == 3) {
-    one_to_three (particle0);
+    one_to_three(particle0);
   } else {
     throw InvalidDecay(
         "DecayAction::perform: Only 1->2 or 1->3 processes are supported. "

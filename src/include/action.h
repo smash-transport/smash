@@ -44,12 +44,12 @@ class Action {
   float weight(void) const;
 
   /** Add a new subprocess.  */
-  void add_process (ProcessBranch p);
+  void add_process(ProcessBranch p);
   /** Add several new subprocesses at once.  */
-  void add_processes (std::vector<ProcessBranch> &pv);
+  void add_processes(std::vector<ProcessBranch> &pv);
 
   /** Actually perform the action, e.g. carry out a decay or scattering.  */
-  virtual void perform (Particles *particles, size_t &id_process) = 0;
+  virtual void perform(Particles *particles, size_t &id_process) = 0;
 
   /**
    * Check whether the action still applies.
@@ -100,8 +100,8 @@ class Action {
 class DecayAction : public Action {
  public:
   /** Constructor. */
-  DecayAction (const std::vector<int> &in_part, float time_of_execution,
-               int interaction_type);
+  DecayAction(const std::vector<int> &in_part, float time_of_execution,
+              int interaction_type);
   /**
    * Decide for a particular decay channel via Monte-Carlo and return it as a
    * list of particles that are only initialized with their PDG code.
@@ -113,7 +113,7 @@ class DecayAction : public Action {
    *
    * \throws InvalidDecay
    */
-  void perform (Particles *particles, size_t &id_process);
+  void perform(Particles *particles, size_t &id_process);
 
   /**
    * Thrown when DecayAction is called to perform with 0 or more than 2
@@ -124,8 +124,8 @@ class DecayAction : public Action {
   };
 
  private:
-  void one_to_two (const ParticleData &incoming0);
-  void one_to_three (const ParticleData &incoming0);
+  void one_to_two(const ParticleData &incoming0);
+  void one_to_three(const ParticleData &incoming0);
 };
 
 /**
@@ -135,10 +135,10 @@ class DecayAction : public Action {
 class ScatterAction : public Action {
  public:
   /** Constructor. */
-  ScatterAction (const std::vector<int> &in_part, float time_of_execution);
+  ScatterAction(const std::vector<int> &in_part, float time_of_execution);
   /** Decide for a particular final-state channel via Monte-Carlo
    * and set the outgoing_particles_ correspondingly.  */
-  void choose_channel ();
+  void choose_channel();
 
   /**
    * Carry out the action, i.e. do the scattering.
@@ -146,7 +146,7 @@ class ScatterAction : public Action {
    *
    * \throws InvalidResonanceFormation
    */
-  void perform (Particles *particles, size_t &id_process);
+  void perform(Particles *particles, size_t &id_process);
 
   /**
    * Thrown when ScatterAction is called to perform with 0 or more than 2

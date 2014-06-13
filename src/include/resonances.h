@@ -67,8 +67,8 @@ float calculate_minimum_mass(PdgCode pdgcode);
  * of the final state particle(s)
  * and the cross section for that particular process.
  */
-ProcessBranchList resonance_cross_section (const ParticleData &particle1,
-                                           const ParticleData &particle2);
+ProcessBranchList resonance_cross_section(const ParticleData &particle1,
+                                          const ParticleData &particle2);
 
 /**
  * Given the types of the two initial particles and a resonance,

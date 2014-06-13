@@ -97,7 +97,7 @@ void ScatterAction::perform (Particles *particles, size_t &id_process)
 
     /* processes computed in the center of momenta */
     velocity_CM = boost_CM(&data_a, &data_b);
-    resonance_formation (data_a, data_b);
+    resonance_formation(data_a, data_b);
     boost_back_CM(&data_a, &data_b, velocity_CM);  // TODO(mkretz) why? can't
                                                     // we just boost a copy of
                                                     // the ParticleData objects?

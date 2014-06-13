@@ -28,7 +28,7 @@ namespace Smash {
  * \param mass1 Mass of first particle [GeV].
  * \param mass2 Mass of second particle [GeV].
  */
-static float pCM (const float srts, const float mass1, const float mass2) {
+static float pCM(const float srts, const float mass1, const float mass2) {
   float s,mass12,x;
   s = srts*srts;
   mass12 = mass1*mass1;
@@ -47,7 +47,7 @@ static float pCM (const float srts, const float mass1, const float mass2) {
  *        R = interaction radius
  * \param l Angular momentum of outgoing particles AB.
  */
-static float BlattWeisskopf (const float x, const int L) {
+static float BlattWeisskopf(const float x, const int L) {
   switch (L)
   {
     case 0:
@@ -78,9 +78,9 @@ static float BlattWeisskopf (const float x, const int L) {
  * \param L Angular momentum of the decay.
  * \param partialWidth_pole Partial width at the pole mass [GeV].
  */
-static float width_Manley_stable (const float mass, const float poleMass,
-                                  const float mass1, const float mass2,
-                                  const int L, const float partialWidth_pole) {
+static float width_Manley_stable(const float mass, const float poleMass,
+                                 const float mass1, const float mass2,
+                                 const int L, const float partialWidth_pole) {
 
   float bw, p_ab_mass, p_ab_pole, rho_ab_mass, rho_ab_pole;
   float interactionRadius = 1./hbarc;
@@ -105,23 +105,21 @@ static float width_Manley_stable (const float mass, const float poleMass,
 }
 
 
-float width_total (const ParticleType *t, const float m) {
+float width_total(const ParticleType *t, const float m) {
   float w = 0., partial_width_at_pole;
-  const ParticleType *t1, *t2;
   if (t->is_stable()) return w;
   const std::vector<DecayBranch> decaymodes
         = DecayModes::find(t->pdgcode()).decay_mode_list();
   // loop over decay modes and sum up all partial widths
-  for (std::vector<DecayBranch>::const_iterator mode = decaymodes.begin();
-       mode != decaymodes.end(); ++mode) {
-    partial_width_at_pole = t->width_at_pole()*mode->weight();
-    t1 = &ParticleType::find(mode->pdg_list()[0]);
-    t2 = &ParticleType::find(mode->pdg_list()[1]);
-    if (mode->pdg_list().size()==2 && t1->is_stable() && t2->is_stable()) {
+  for (const auto &mode : decaymodes) {
+    partial_width_at_pole = t->width_at_pole()*mode.weight();
+    const ParticleType &t1 = ParticleType::find(mode.pdg_list()[0]);
+    const ParticleType &t2 = ParticleType::find(mode.pdg_list()[1]);
+    if (mode.pdg_list().size()==2 && t1.is_stable() && t2.is_stable()) {
       // mass-dependent width for 2-body decays
-      w = w + width_Manley_stable (m, t->mass(), t1->mass(), t2->mass(),
-                                   mode->angular_momentum(),
-                                   partial_width_at_pole);
+      w = w + width_Manley_stable(m, t->mass(), t1.mass(), t2.mass(),
+                                  mode.angular_momentum(),
+                                  partial_width_at_pole);
     }
     else {
       // constant width for three-body decays

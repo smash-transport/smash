@@ -17,7 +17,7 @@ namespace Smash {
  * \param t Type of the decaying particle.
  * \param m Invariant mass of the decaying particle.
  */
-float width_total (const ParticleType *t, const float m);
+float width_total(const ParticleType *t, const float m);
 
 }  // namespace Smash
 

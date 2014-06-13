@@ -21,9 +21,9 @@
 namespace Smash {
 
 ActionPtr
-ScatterActionsFinder::check_collision (const int id_a, const int id_b, Particles *particles,
-                                       const ExperimentParameters &parameters,
-                                       CrossSections *cross_sections) const {
+ScatterActionsFinder::check_collision(const int id_a, const int id_b, Particles *particles,
+                                      const ExperimentParameters &parameters,
+                                      CrossSections *cross_sections) const {
 
   ScatterAction* act = nullptr;
   std::vector<int> in_part;
@@ -63,8 +63,8 @@ ScatterActionsFinder::check_collision (const int id_a, const int id_b, Particles
   cross_sections->compute_kinematics(*particles, id_a, id_b);
 
   /* Resonance production cross section */
-  ProcessBranchList resonance_xsections = resonance_cross_section (data_a,
-                                                                   data_b);
+  ProcessBranchList resonance_xsections = resonance_cross_section(data_a,
+                                                                  data_b);
   act->add_processes(resonance_xsections);
 
   /* Add elastic process.  */
