@@ -19,9 +19,26 @@ namespace Smash {
 BinaryOutput::BinaryOutput(bf::path path)
   : file_{std::fopen((path / "particles_binary.bin").native().c_str(), "wb")} {
 
-  fwrite (smash_version_string , sizeof(char), 80, file_.get());
-  fwrite (format_version_string , sizeof(char), 80, file_.get());
-  fwrite (contents_units, sizeof(char), 300, file_.get());
+  const char smash_version_string[80] = "SMASH V0.3\n";
+  const char format_version_string[80] = "BINARY TEST 0.1\n";
+  const char contents_units[300] = "/2 ints:/ id PDGid /8 doubles:/"
+                                   "t[fm/c] x[fm] y[fm] z[fm] E[GeV] px[GeV/c]"
+                                   "py[GeV/c] pz[GeV/c] int(reserved)"
+                                   "int(reserved) double(reserved)\n";
+  
+  char sizeof_int_string[30];
+  char sizeof_double_string[30];
+   
+  snprintf(sizeof_int_string, sizeof(sizeof_int_string),
+           "size of int is %zu bytes\n", sizeof(int));
+  snprintf(sizeof_double_string, sizeof(sizeof_double_string),
+           "size of double is %zu bytes\n", sizeof(double));
+
+  fwrite (&smash_version_string , sizeof(char), 80, file_.get());
+  fwrite (&format_version_string , sizeof(char), 80, file_.get());
+  fwrite (&contents_units, sizeof(char), 300, file_.get());
+  fwrite (&sizeof_int_string, sizeof(char), 30, file_.get());
+  fwrite (&sizeof_double_string, sizeof(char), 30, file_.get());
 }
 
 
@@ -44,9 +61,9 @@ void BinaryOutput::write(const Particles &particles, const int event_number) {
 
   double r[4], mom[4], dummy_double;
   int id, pdgcode, dummy_int[2];
-  size_t psize = particles.size();
+  int psize = static_cast<int>(particles.size());
 
-  fwrite (&psize,         sizeof(size_t), 1, file_.get());
+  fwrite (&psize,         sizeof(int), 1, file_.get());
   fwrite (&event_number,  sizeof(int), 1, file_.get());
 
   for (const auto &p : particles.data()) {

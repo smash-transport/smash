@@ -39,9 +39,6 @@ class BinaryOutput : public OutputInterface {
   
   void write(const Particles &particles, const int event_number);
   FilePtr file_;
-  const char* smash_version_string = "SMASH V0.3\n";
-  const char* format_version_string = "BINARY TEST 0.1\n";
-  const char* contents_units = "id PDGid t[fm/c] x[fm] y[fm] z[fm] E[GeV] px[GeV/c] py[GeV/c] pz[GeV/c] int(reserved) int(reserved) double(reserved)\n";
 
 };
 }  // namespace Smash
