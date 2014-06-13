@@ -75,6 +75,13 @@ class ParticleType {
   inline bool is_stable() const;
 
   /**
+  * Get the mass-dependent total width of a particle with mass m.
+  * 
+  * \param m Invariant mass of the decaying particle.
+  */
+  float width_total(const float m) const;
+
+  /**
    * Returns a list of all ParticleType objects.
    *
    * \note The order of the list may be sorted by PDG codes, but do not rely on
