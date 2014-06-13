@@ -9,7 +9,7 @@
 
 #include "include/clock.h"
 #include "include/forwarddeclarations.h"
-#include "include/oscaroutput.h"
+#include "include/oscarfullhistoryoutput.h"
 #include "include/particles.h"
 #include "include/outputroutines.h"
 
@@ -17,39 +17,55 @@
 
 namespace Smash {
 
-OscarOutput::OscarOutput(bf::path path)
-    : file_{std::fopen((path / "collision.dat").native().c_str(), "w")} {
+OscarFullHistoryOutput::OscarFullHistoryOutput(bf::path path)
+  : OscarFullHistoryOutput(path / "full_event_history.oscar",
+                           "# full_event_history\n"){}
+
+OscarFullHistoryOutput::OscarFullHistoryOutput(bf::path path,
+                                               const char* second_line)
+  : file_{std::fopen(path.native().c_str(), "w")} {
   fprintf(file_.get(), "# OSC1999A\n");
-  fprintf(file_.get(), "# Interaction history\n");
+  fprintf(file_.get(), "%s", second_line);
   fprintf(file_.get(), "# smash\n");
+  fprintf(file_.get(), "# Block format:\n");
+  fprintf(file_.get(), "# nin nout event_number\n");
+  fprintf(file_.get(), "# id pdg 0 px py pz p0 mass x y z t\n");
+  fprintf(file_.get(), "# End of event: 0 0 event_number\n");
   fprintf(file_.get(), "#\n");
 }
 
-OscarOutput::~OscarOutput() {}
 
-void OscarOutput::at_eventstart(const Particles &particles,
+OscarFullHistoryOutput::~OscarFullHistoryOutput() {}
+
+void OscarFullHistoryOutput::at_eventstart(const Particles &particles,
                                 const int event_number) {
   /* OSCAR line prefix : initial particles; final particles; event id
    * First block of an event: initial = 0, final = number of particles
-   * Vice versa for the last block
    */
   const size_t zero = 0;
-  fprintf(file_.get(), "%zu %zu %i\n", zero, particles.size(), event_number + 1);
+  fprintf(file_.get(), "%zu %zu %i\n", zero, particles.size(),
+          event_number + 1);
   write(particles);
 }
 
-void OscarOutput::at_eventend(const Particles &particles,
+void OscarFullHistoryOutput::at_eventend(const Particles &particles,
                               const int event_number) {
   /* OSCAR line prefix : initial particles; final particles; event id
-   * First block of an event: initial = 0, final = number of particles
-   * Vice versa for the last block
+   * Last block of an event: initial = number of particles, final = 0
+   * Block ends with null interaction
    */
   const size_t zero = 0;
-  fprintf(file_.get(), "%zu %zu %i\n", particles.size(), zero, event_number + 1);
+  fprintf(file_.get(), "%zu %zu %i\n", particles.size(), zero,
+          event_number + 1);
   write(particles);
+  /* Null interaction marks the end of an event */
+  fprintf(file_.get(), "%zu %zu %i\n", zero, zero, event_number + 1);
+
+  /* Flush to disk */
+  std::fflush(file_.get());
 }
 
-void OscarOutput::write(const Particles &particles) {
+void OscarFullHistoryOutput::write(const Particles &particles) {
   for (const ParticleData &data : particles.data()) {
     fprintf(file_.get(), "%i %s %i %g %g %g %g %g %g %g %g %g\n", data.id(),
             data.pdgcode().string().c_str(), 0, data.momentum().x1(),
@@ -60,8 +76,9 @@ void OscarOutput::write(const Particles &particles) {
   }
 }
 
-void OscarOutput::write_interaction(const ParticleList &incoming_particles,
-                                    const ParticleList &outgoing_particles) {
+void OscarFullHistoryOutput::write_interaction(
+  const ParticleList &incoming_particles,
+  const ParticleList &outgoing_particles) {
   /* OSCAR line prefix : initial final
    * particle creation: 0 1
    * particle 2<->2 collision: 2 2
@@ -87,33 +104,10 @@ void OscarOutput::write_interaction(const ParticleList &incoming_particles,
   }
 }
 
-void OscarOutput::after_Nth_timestep(const Particles & /*particles*/,
-                                     const int /*event_number*/,
+void OscarFullHistoryOutput::after_Nth_timestep(const Particles & /*particles*/,
+                                                const int /*event_number*/,
                                      const Clock& /*clock*/) {
-  /*
-  char filename[64];
-
-  snprintf(filename, sizeof(filename), "momenta_%.5f.dat",
-           particles.time());
-  std::unique_ptr<FILE> momenta_file{
-      fopen((base_path_ / filename).native().c_str(), "w")};
-  for (const ParticleData &data : particles.data()) {
-    fprintf(momenta_file.get(), "%g %g %g %g %i %s\n",
-            data.momentum().x0(),
-            data.momentum().x1(), data.momentum().x2(),
-            data.momentum().x3(), data.id(), data.pdgcode().string().c_str());
-  }
-  snprintf(filename, sizeof(filename), "position_%.5f.dat",
-           particles.time());
-  std::unique_ptr<FILE> position_file{
-      fopen((base_path_ / filename).native().c_str(), "w")};
-  for (const ParticleData &data : particles.data()) {
-    fprintf(position_file.get(), "%g %g %g %g %i %s\n",
-            data.position().x0(),
-            data.position().x1(), data.position().x2(),
-            data.position().x3(), data.id(), data.pdgcode().string().c_str());
-  }
-  */
+  /* No time interval output for interaction history */
 }
 
 }  // namespace Smash
