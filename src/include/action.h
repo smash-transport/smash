@@ -152,8 +152,8 @@ class ScatterAction : public Action {
   };
 
  private:
-  /** Type of interaction: 0=elastic collision, 1=resonance formation */
-  int interaction_type_;
+  /** Check if the scattering is elastic. */
+  bool is_elastic(Particles *particles) const;
 
   /**
    * Resonance formation process.
