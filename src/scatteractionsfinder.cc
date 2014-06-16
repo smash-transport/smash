@@ -70,7 +70,7 @@ ScatterActionsFinder::check_collision(const int id_a, const int id_b, Particles 
   /* Add elastic process.  */
   act->add_process(
       ProcessBranch(data_a.pdgcode(), data_b.pdgcode(),
-                    cross_sections->elastic(*particles, id_a, id_b), 0));
+                    cross_sections->elastic(*particles, id_a, id_b)));
 
   {
     /* distance criteria according to cross_section */

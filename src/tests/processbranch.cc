@@ -24,25 +24,22 @@ TEST(init_particle_types) {
 TEST(assign_default) {
   ProcessBranch branch;
   FUZZY_COMPARE(branch.weight(), -1.f);
-  FUZZY_COMPARE(branch.type(), 0);
 }
 TEST(assign_1_particle) {
   PdgCode smashon("9876543");
-  ProcessBranch branch(smashon, 1.234f, 8);
+  ProcessBranch branch(smashon, 1.234f);
   FUZZY_COMPARE(branch.weight(), 1.234f);
-  FUZZY_COMPARE(branch.type(), 8);
 }
 TEST(assign_2_particle) {
   PdgCode smashon("9876543");
-  ProcessBranch branch(smashon, smashon, 2.345, 9);
+  ProcessBranch branch(smashon, smashon, 2.345);
   FUZZY_COMPARE(branch.weight(), 2.345f);
-  FUZZY_COMPARE(branch.type(), 9);
 }
 
 TEST(lists) {
   PdgCode smashon("9876543");
   PdgCode smashino("1234567");
-  ProcessBranch branch(smashon, smashino, 2.345, 9);
+  ProcessBranch branch(smashon, smashino, 2.345);
   std::vector<PdgCode> list = branch.pdg_list();
   COMPARE(list.size(), 2);
   COMPARE(list.at(0), smashon);
@@ -71,7 +68,7 @@ TEST(add_particle) {
   PdgCode smashon("9876543");
   PdgCode smashino("1234567");
   PdgCode anti_smashino("-1234567");
-  ProcessBranch branch(smashon, smashino, 1.2, 1);
+  ProcessBranch branch(smashon, smashino, 1.2);
   branch.add_particle(anti_smashino);
   COMPARE(branch.pdg_list().size(), 3);
 }
@@ -92,10 +89,4 @@ TEST(weights) {
   // double is intentional here.
   branch.set_weight(0.33);
   COMPARE(branch.weight(), 0.33f);
-}
-
-TEST(types) {
-  ProcessBranch branch;
-  branch.set_type(18);
-  COMPARE(branch.type(), 18);
 }
