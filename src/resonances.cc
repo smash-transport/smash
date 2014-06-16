@@ -420,20 +420,21 @@ size_t two_to_two_formation(const ParticleType &type_particle1,
     printd("Integral value: %g Error: %g \n", resonance_integral,
       integral_error);
 
-    /* matrix element squared over 16pi (in mb GeV^2)
-     * (uniform angular distribution assumed)
-     */
-    double matrix_element = 180;
-
     /* Cross section for 2->2 process with resonance in final state.
-     * Based on the general differential form in
-     * Buss et al., Physics Reports 512, 1 (2012), Eq. (D.28)
+     * Based on Eq. (3.29) in Bass et al.
+     * Prog.Part.Nucl.Phys. 41 (1998) 255-369,
+     * Prog.Part.Nucl.Phys. 41 (1998) 225-370
+     * and Eq. (51) in PhD thesis of J. Weil (Giessen U., 2013)
+     * http://geb.uni-giessen.de/geb/volltexte/2013/10253/
      */
-    float xsection = clebsch_gordan_isospin * clebsch_gordan_isospin
-                      * matrix_element
-                      / mandelstam_s
-                      / sqrt(cm_momentum_squared)
-                      * resonance_integral;
+    float xsection
+      = clebsch_gordan_isospin * clebsch_gordan_isospin
+        * (type_resonance.spin() + 1) * (second_type.spin() + 1)
+        / mandelstam_s
+        / sqrt(cm_momentum_squared)
+        * resonance_integral
+        * nn_to_resonance_matrix_element(mandelstam_s, type_resonance,
+                                         second_type);
 
     if (xsection > really_small) {
       process_list->push_back(ProcessBranch(type_resonance.pdgcode(),
@@ -535,6 +536,38 @@ double sample_resonance_mass(PdgCode pdg_resonance, PdgCode pdg_stable,
       = spectral_function_integrand(mass_resonance, &params);
   }
   return mass_resonance;
+}
+
+/* Scattering matrix amplitude squared.
+ * Based on Eq. (3.34) in Bass et al. Prog.Part.Nucl.Phys. 41 (1998) 255-369,
+ * Prog.Part.Nucl.Phys. 41 (1998) 225-370
+ */
+float nn_to_resonance_matrix_element(const double mandelstam_s,
+  const ParticleType &type_final_a, const ParticleType &type_final_b) {
+  PdgCode delta = PdgCode("2224");
+  if (type_final_a.pdgcode().iso_multiplet()
+      != type_final_b.pdgcode().iso_multiplet()) {
+    /* N + N -> N + Delta */
+    float delta_mass_squared = 0.0;
+    float delta_width_squared = 0.0;
+    if (type_final_a.pdgcode().iso_multiplet()
+         == delta.iso_multiplet()) {
+      delta_mass_squared = type_final_a.mass() * type_final_a.mass();
+      delta_width_squared = type_final_a.width_at_pole()
+                            * type_final_a.width_at_pole();
+    } else if (type_final_b.pdgcode().iso_multiplet()
+                == delta.iso_multiplet()) {
+      delta_mass_squared = type_final_b.mass() * type_final_b.mass();
+      delta_width_squared = type_final_b.width_at_pole()
+                            * type_final_b.width_at_pole();
+    }
+    return 40000 * delta_mass_squared * delta_width_squared
+           / ((mandelstam_s - delta_mass_squared)
+               * (mandelstam_s - delta_mass_squared)
+              + delta_mass_squared * delta_width_squared);
+  } else {
+    return 0.0;
+  }
 }
 
 }  // namespace Smash
