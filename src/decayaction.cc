@@ -19,21 +19,10 @@ namespace Smash {
 
 
 DecayAction::DecayAction(const std::vector<int> &in_part,
-                         float time_of_execution, int interaction_type)
-    : Action (in_part, time_of_execution, interaction_type) {}
+                         float time_of_execution)
+    : Action (in_part, time_of_execution) {}
 
 
-
-/**
- * Kinematics of a 1-to-2 decay process.
- *
- * Given a resonance ID and the PDG codes of decay product particles,
- * sample the momenta and position of the products and add them
- * to the active particles data structure.
- *
- * \param[in] incoming0 decaying particle (in its rest frame)
- * \param[in] particles Particles in the simulation.
- */
 void DecayAction::one_to_two(const ParticleData &incoming0) {
   ParticleData &outgoing0 = outgoing_particles_[0];
   ParticleData &outgoing1 = outgoing_particles_[1];
@@ -70,15 +59,7 @@ void DecayAction::one_to_two(const ParticleData &incoming0) {
   outgoing1.set_position(incoming0.position());
 }
 
-/**
- * Kinematics of a 1-to-3 decay process.
- *
- * Given a resonance ID and the PDG codes of decay product particles,
- * sample the momenta and position of the products and add them
- * to the active particles data structure.
- *
- * \param[in] incoming0 decaying particle (in its rest frame)
- */
+
 void DecayAction::one_to_three(const ParticleData &incoming0) {
   ParticleData &outgoing0 = outgoing_particles_[0];
   ParticleData &outgoing1 = outgoing_particles_[1];
@@ -245,12 +226,6 @@ void DecayAction::perform(Particles *particles, size_t &id_process) {
 
   /* local copy of the initial state */
   ParticleData particle0 = particles->data(incoming_particles_[0]);
-  const ParticleType &type0 = particle0.type();
-
-  if (interaction_type_ != 2) {
-    printf("Decays warning: ID %i (%s) has process type %i.\n", particle0.id(),
-           type0.name().c_str(), interaction_type_);
-  }
 
   printd("Process: Resonance decay. ");
   printd_momenta("Resonance momenta before decay", particle0);

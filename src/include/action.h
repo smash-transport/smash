@@ -29,8 +29,6 @@ class Action {
  public:
   /** Simple constructor. */
   Action(const std::vector<int> &in_part, float time_of_execution);
-  /** Constructor with known interaction_type. */
-  Action(const std::vector<int> &in_part, float time_of_execution, int interaction_type);
   /** Destructor. */
   virtual ~Action();
 
@@ -81,8 +79,6 @@ class Action {
   std::vector<ProcessBranch> subprocesses_;
   /** sum of all subprocess weights  */
   float total_weight_;
-  /** Type of interaction: 0=elastic collision, 1=resonance formation, 2=decay */
-  int interaction_type_;
   /**
    * Initially this stores only the PDG codes of final-state particles.
    *
@@ -100,13 +96,7 @@ class Action {
 class DecayAction : public Action {
  public:
   /** Constructor. */
-  DecayAction(const std::vector<int> &in_part, float time_of_execution,
-              int interaction_type);
-  /**
-   * Decide for a particular decay channel via Monte-Carlo and return it as a
-   * list of particles that are only initialized with their PDG code.
-   */
-  ParticleList choose_channel(const Particles &particles) const;
+  DecayAction(const std::vector<int> &in_part, float time_of_execution);
 
   /** Carry out the action, i.e. do the decay.
    * Performs a decay of one particle to two or three particles.
@@ -124,7 +114,32 @@ class DecayAction : public Action {
   };
 
  private:
+  /**
+   * Decide for a particular decay channel via Monte-Carlo and return it as a
+   * list of particles that are only initialized with their PDG code.
+   */
+  ParticleList choose_channel(const Particles &particles) const;
+
+  /**
+   * Kinematics of a 1-to-2 decay process.
+   *
+   * Given a resonance ID and the PDG codes of decay product particles,
+   * sample the momenta and position of the products and add them
+   * to the active particles data structure.
+   *
+   * \param[in] incoming0 decaying particle (in its rest frame)
+   */
   void one_to_two(const ParticleData &incoming0);
+
+  /**
+   * Kinematics of a 1-to-3 decay process.
+   *
+   * Given a resonance ID and the PDG codes of decay product particles,
+   * sample the momenta and position of the products and add them
+   * to the active particles data structure.
+   *
+   * \param[in] incoming0 decaying particle (in its rest frame)
+   */
   void one_to_three(const ParticleData &incoming0);
 };
 
@@ -136,9 +151,6 @@ class ScatterAction : public Action {
  public:
   /** Constructor. */
   ScatterAction(const std::vector<int> &in_part, float time_of_execution);
-  /** Decide for a particular final-state channel via Monte-Carlo
-   * and set the outgoing_particles_ correspondingly.  */
-  void choose_channel();
 
   /**
    * Carry out the action, i.e. do the scattering.
@@ -157,6 +169,16 @@ class ScatterAction : public Action {
   };
 
  private:
+  /** Check if the scattering is elastic. */
+  bool is_elastic(const Particles &particles) const;
+
+  /**
+   * Decide for a particular final-state channel via Monte-Carlo
+   * and return it as a list of particles that are only initialized
+   * with their PDG code.
+   */
+  ParticleList choose_channel();
+
   /**
    * Resonance formation process.
    *

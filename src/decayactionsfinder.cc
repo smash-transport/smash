@@ -50,7 +50,7 @@ std::vector<ActionPtr> DecayActionsFinder::find_possible_actions(
     if (Random::canonical() < resonance_frame_timestep * width / hbarc) {
       /* Time is up! Set the particle to decay at this timestep */
       in_part.push_back(id);
-      actions.emplace_back(new DecayAction(in_part,0.,2));
+      actions.emplace_back(new DecayAction(in_part,0.));
     }
   }
   return std::move(actions);

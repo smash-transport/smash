@@ -22,27 +22,27 @@ ScatterAction::ScatterAction(const std::vector<int> &in_part,
     : Action(in_part, time_of_execution) {}
 
 
-void ScatterAction::choose_channel () {
-  interaction_type_ = 0;
-  if (total_weight_ > really_small) {
-    double random_interaction = Random::canonical();
-    float interaction_probability = 0.0;
-    std::vector<ProcessBranch>::const_iterator proc = subprocesses_.begin();
-    while (interaction_type_ == 0 && proc != subprocesses_.end()) {
-      if (proc->pdg_list().size() > 1
-          || proc->pdg_list().at(0) != PdgCode::invalid()) {
-        interaction_probability += proc->weight() / total_weight_;
-        if (random_interaction < interaction_probability) {
-          interaction_type_ = proc->type();
-          outgoing_particles_ = proc->particle_list();
-        }
-      }
-      ++proc;
-      printd("ScatterAction::choose_channel: collision type %d particle %d <-> %d time: %g\n",
-             interaction_type_, incoming_particles_[0], incoming_particles_[1],
-             time_of_execution_);
-    }
+ParticleList ScatterAction::choose_channel () {
+  if (total_weight_ < really_small) {
+    return ParticleList();
   }
+  double random_interaction = Random::canonical();
+  float interaction_probability = 0.0;
+  std::vector<ProcessBranch>::const_iterator proc = subprocesses_.begin();
+  while (outgoing_particles_.size() == 0 && proc != subprocesses_.end()) {
+    if (proc->pdg_list().size() > 1
+        || proc->pdg_list().at(0) != PdgCode::invalid()) {
+      interaction_probability += proc->weight() / total_weight_;
+      if (random_interaction < interaction_probability) {
+        break;
+      }
+    }
+    ++proc;
+  }
+  printd("ScatterAction::choose_channel: particle %d <-> %d time: %g\n",
+         incoming_particles_[0], incoming_particles_[1],
+         time_of_execution_);
+  return proc->particle_list();
 }
 
 void ScatterAction::perform (Particles *particles, size_t &id_process)
@@ -62,15 +62,17 @@ void ScatterAction::perform (Particles *particles, size_t &id_process)
   ParticleData data_a = particles->data(id_a);
   ParticleData data_b = particles->data(id_b);
 
-  printd("Process %zu type %i particle %s<->%s colliding %d<->%d time %g\n",
-         id_process, interaction_type_, data_a.type().name().c_str(),
+  printd("Process %zu particle %s<->%s colliding %d<->%d time %g\n",
+         id_process, data_a.type().name().c_str(),
          data_a.type().name().c_str(), id_a, id_b, data_a.position().x0());
   printd_momenta("particle 1 momenta before", data_a);
   printd_momenta("particle 2 momenta before", data_b);
 
-  /* 2->2 elastic scattering */
-  switch (interaction_type_) {
-  case 0: {
+  /* Decide for a particular final state. */
+  outgoing_particles_ = choose_channel();
+
+  if (is_elastic(*particles)) {
+    /* 2->2 elastic scattering */
     printd("Process: Elastic collision.\n");
 
     /* processes computed in the center of momenta */
@@ -89,9 +91,7 @@ void ScatterAction::perform (Particles *particles, size_t &id_process)
     particles->data(id_b) = data_b;
     outgoing_particles_[0] = data_a;
     outgoing_particles_[1] = data_b;
-  } break;
-
-  case 1: {
+  } else {
     /* resonance formation */
     printd("Process: Resonance formation. ");
 
@@ -131,15 +131,18 @@ void ScatterAction::perform (Particles *particles, size_t &id_process)
     particles->remove(data_b.id());
 
     printd("Particle map has now %zu elements. \n", particles->size());
-  } break;
-
-  default:
-    printf("Warning: ID %i (%s) has unspecified process type %i.\n",
-           id_a, data_a.type().name().c_str(), interaction_type_);
-  } /* end switch (interaction_type_) */
+  }
 
   id_process++;
 }
+
+
+bool ScatterAction::is_elastic(const Particles &particles) const {
+  return outgoing_particles_.size()==2 &&
+         outgoing_particles_[0].pdgcode() == particles.data(incoming_particles_[0]).pdgcode() &&
+         outgoing_particles_[1].pdgcode() == particles.data(incoming_particles_[1]).pdgcode();
+}
+
 
 void ScatterAction::resonance_formation(const ParticleData &particle0,
                                         const ParticleData &particle1) {
