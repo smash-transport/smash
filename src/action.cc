@@ -16,12 +16,7 @@ namespace Smash {
 
 Action::Action(const std::vector<int> &in_part, float time_of_execution)
     : incoming_particles_(in_part), time_of_execution_(time_of_execution),
-      total_weight_(0.), interaction_type_(0) {}
-
-Action::Action(const std::vector<int> &in_part, float time_of_execution,
-               int interaction_type)
-    : incoming_particles_(in_part), time_of_execution_(time_of_execution),
-      total_weight_(0.), interaction_type_(interaction_type) {}
+      total_weight_(0.) {}
 
 Action::~Action() {}
 
@@ -73,19 +68,19 @@ void Action::check_conservation(const Particles &particles,
 
   /* TODO: throw an exception */
   if (fabs(momentum_difference.x0()) > really_small) {
-    printf("Process %zu type %i\n", id_process, interaction_type_);
-    printf("Warning: Interaction type %i E conservation violation %g\n",
-           interaction_type_, momentum_difference.x0());
+    printf("Process %zu\n", id_process);
+    printf("Warning: E conservation violation %g\n",
+           momentum_difference.x0());
   }
   if (fabs(momentum_difference.x1()) > really_small)
-    printf("Warning: Interaction type %i px conservation violation %g\n",
-           interaction_type_, momentum_difference.x1());
+    printf("Warning: px conservation violation %g\n",
+           momentum_difference.x1());
   if (fabs(momentum_difference.x2()) > really_small)
-    printf("Warning: Interaction type %i py conservation violation %g\n",
-           interaction_type_, momentum_difference.x2());
+    printf("Warning: py conservation violation %g\n",
+           momentum_difference.x2());
   if (fabs(momentum_difference.x3()) > really_small)
-    printf("Warning: Interaction type %i pz conservation violation %g\n",
-           interaction_type_, momentum_difference.x3());
+    printf("Warning: pz conservation violation %g\n",
+           momentum_difference.x3());
 
   // TODO: check other conservation laws (baryon number etc)
 }

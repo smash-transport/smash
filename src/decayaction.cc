@@ -19,8 +19,8 @@ namespace Smash {
 
 
 DecayAction::DecayAction(const std::vector<int> &in_part,
-                         float time_of_execution, int interaction_type)
-    : Action (in_part, time_of_execution, interaction_type) {}
+                         float time_of_execution)
+    : Action (in_part, time_of_execution) {}
 
 
 
@@ -245,12 +245,6 @@ void DecayAction::perform(Particles *particles, size_t &id_process) {
 
   /* local copy of the initial state */
   ParticleData particle0 = particles->data(incoming_particles_[0]);
-  const ParticleType &type0 = particle0.type();
-
-  if (interaction_type_ != 2) {
-    printf("Decays warning: ID %i (%s) has process type %i.\n", particle0.id(),
-           type0.name().c_str(), interaction_type_);
-  }
 
   printd("Process: Resonance decay. ");
   printd_momenta("Resonance momenta before decay", particle0);

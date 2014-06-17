@@ -29,8 +29,6 @@ class Action {
  public:
   /** Simple constructor. */
   Action(const std::vector<int> &in_part, float time_of_execution);
-  /** Constructor with known interaction_type. */
-  Action(const std::vector<int> &in_part, float time_of_execution, int interaction_type);
   /** Destructor. */
   virtual ~Action();
 
@@ -81,8 +79,6 @@ class Action {
   std::vector<ProcessBranch> subprocesses_;
   /** sum of all subprocess weights  */
   float total_weight_;
-  /** Type of interaction: 0=elastic collision, 1=resonance formation, 2=decay */
-  int interaction_type_;
   /**
    * Initially this stores only the PDG codes of final-state particles.
    *
@@ -100,8 +96,7 @@ class Action {
 class DecayAction : public Action {
  public:
   /** Constructor. */
-  DecayAction(const std::vector<int> &in_part, float time_of_execution,
-              int interaction_type);
+  DecayAction(const std::vector<int> &in_part, float time_of_execution);
   /**
    * Decide for a particular decay channel via Monte-Carlo and return it as a
    * list of particles that are only initialized with their PDG code.
@@ -157,6 +152,9 @@ class ScatterAction : public Action {
   };
 
  private:
+  /** Check if the scattering is elastic. */
+  bool is_elastic(const Particles &particles) const;
+
   /**
    * Resonance formation process.
    *
