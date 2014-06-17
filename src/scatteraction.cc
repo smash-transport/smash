@@ -66,7 +66,7 @@ void ScatterAction::perform (Particles *particles, size_t &id_process)
   printd_momenta("particle 1 momenta before", data_a);
   printd_momenta("particle 2 momenta before", data_b);
 
-  if (is_elastic(particles)) {
+  if (is_elastic(*particles)) {
     /* 2->2 elastic scattering */
     printd("Process: Elastic collision.\n");
 
@@ -132,10 +132,10 @@ void ScatterAction::perform (Particles *particles, size_t &id_process)
 }
 
 
-bool ScatterAction::is_elastic(Particles *particles) const {
+bool ScatterAction::is_elastic(const Particles &particles) const {
   return outgoing_particles_.size()==2 &&
-         outgoing_particles_[0].pdgcode() == particles->data(incoming_particles_[0]).pdgcode() &&
-         outgoing_particles_[1].pdgcode() == particles->data(incoming_particles_[1]).pdgcode();
+         outgoing_particles_[0].pdgcode() == particles.data(incoming_particles_[0]).pdgcode() &&
+         outgoing_particles_[1].pdgcode() == particles.data(incoming_particles_[1]).pdgcode();
 }
 
 

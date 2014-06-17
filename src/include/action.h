@@ -153,7 +153,7 @@ class ScatterAction : public Action {
 
  private:
   /** Check if the scattering is elastic. */
-  bool is_elastic(Particles *particles) const;
+  bool is_elastic(const Particles &particles) const;
 
   /**
    * Resonance formation process.
