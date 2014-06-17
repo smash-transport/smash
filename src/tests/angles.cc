@@ -13,25 +13,24 @@
 using namespace Smash;
 
 Angles dir;
-constexpr float accuracy = 1e-6;
+constexpr float accuracy = 1e-5;
 
 TEST(set_angles) {
   dir.set_phi(.5);
+  // this needs to come out exactly:
   FUZZY_COMPARE(dir.phi(), .5f);
   dir.set_phi(4*M_PI);
   COMPARE_ABSOLUTE_ERROR(dir.phi(), 0.f, accuracy);
   dir.set_costheta(.3);
   FUZZY_COMPARE(dir.costheta(), 0.3f);
   dir.set_theta(.3);
-  // for cos(acos()), we need greater leniency
-  UnitTest::setFuzzyness<float>(3);
-  FUZZY_COMPARE(dir.theta(), 0.3f);
+  COMPARE_ABSOLUTE_ERROR(dir.theta(), 0.3f, accuracy);
 }
 
 TEST(accessors_and_relations) {
   constexpr int NumberOfTries = 1000000;
   // second: check accessors and the relations between them:
-  for (int c = 0; c < NumberOfTries; c++) {
+  for (int c = 0; c < NumberOfTries; ++c) {
     dir.distribute_isotropically();
     // sintheta**2 + costheta**2 = 1
     COMPARE_ABSOLUTE_ERROR(dir.sintheta()*dir.sintheta()
@@ -55,39 +54,37 @@ TEST(accessors_and_relations) {
 }
 
 TEST(unusual_set_phi) {
-  UnitTest::setFuzzyness<float>(64);
   constexpr int kMinM = -6;
   constexpr int kMaxM = 12;
   for (int m = kMinM; m < kMaxM; m++) {
     // set phi outside [0..2pi]
     dir.set_phi(2.0 * M_PI * m + .5);
-    FUZZY_COMPARE(dir.phi(), .5f) << " (m = " << m << ")";
+    COMPARE_RELATIVE_ERROR(dir.phi(), .5f, accuracy) << " (m = " << m << ")";
   }
 }
 
 TEST(unusual_set_theta_even) {
-  UnitTest::setFuzzyness<float>(64);
   constexpr int kMinM = -6;
   constexpr int kMaxM = 12;
   for (int m = kMinM; m < kMaxM; m++) {
     // set theta in [2*n*pi .. (2*n+1)*pi]
     dir.set_theta(2.0 * M_PI * m + .7);
-    FUZZY_COMPARE(dir.theta(), .7f) << " (m = " << m << ")";
+    COMPARE_ABSOLUTE_ERROR(dir.theta(), .7f, accuracy) << " (m = " << m << ")";
   }
 }
+
 TEST(unusual_set_theta_odd) {
-  UnitTest::setFuzzyness<float>(128);
   constexpr int kMinM = -6;
   constexpr int kMaxM = 12;
   for (int m = kMinM; m < kMaxM; m++) {
     // set theta in [(2*n-1)*pi .. 2*n*pi]
     dir.set_theta(2.0 * M_PI * m - .7);
-    FUZZY_COMPARE(dir.theta(), .7f) << " (m = " << m << ")";
+    COMPARE_ABSOLUTE_ERROR(dir.theta(), .7f, accuracy) << " (m = " << m << ")";
   }
 }
 
 TEST(catch_invalid_cosine) {
-  for (float newcos = -8.0; newcos < 8.0; newcos += .2) {
+  for (float newcos = -8.0; newcos < 8.0; newcos += .2f) {
     bool invalid_input = (newcos < -1 || newcos > 1);
     // Did I catch an exception?
     bool caught = false;
@@ -111,26 +108,26 @@ TEST(setting_costheta_does_not_change_phi) {
   dir.set_phi(3.0);
   float old_phi = dir.phi();
   dir.set_costheta(.2);
-  FUZZY_COMPARE(old_phi, dir.phi());
+  COMPARE(old_phi, dir.phi());
 }
 
 TEST(setting_theta_does_not_change_phi) {
   dir.set_phi(3.0);
   float old_phi = dir.phi();
   dir.set_theta(.2);
-  FUZZY_COMPARE(old_phi, dir.phi());
+  COMPARE(old_phi, dir.phi());
 }
 
 TEST(setting_phi_does_not_change_costheta) {
   float old_costheta = dir.costheta();
   dir.set_phi(.4);
-  FUZZY_COMPARE(old_costheta, dir.costheta());
+  COMPARE(old_costheta, dir.costheta());
 }
 
 TEST(setting_phi_does_not_change_z) {
   float old_z = dir.z();
   dir.set_phi(.4);
-  FUZZY_COMPARE(old_z, dir.z());
+  COMPARE(old_z, dir.z());
 }
 
 TEST(add_theta) {
@@ -144,7 +141,7 @@ TEST(add_theta) {
     dir.set_theta(0.0);
     bool sign = dir.add_to_theta(M_PI / 2.0);
     // phi shouldn't have changed:
-    FUZZY_COMPARE(current_phi, dir.phi()) << " (phi = " << current_phi << ")";
+    COMPARE(current_phi, dir.phi()) << " (phi = " << current_phi << ")";
     // the sign shouldn't have changed.
     VERIFY(!sign) << " (phi = " << current_phi << ")";
     // theta, though, should have changed.
