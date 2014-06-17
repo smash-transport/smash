@@ -62,6 +62,9 @@ void ScatterAction::perform (Particles *particles, size_t &id_process)
   ParticleData data_a = particles->data(id_a);
   ParticleData data_b = particles->data(id_b);
 
+  /* Decide for a particular final state. */
+  choose_channel();
+
   printd("Process %zu type %i particle %s<->%s colliding %d<->%d time %g\n",
          id_process, interaction_type_, data_a.type().name().c_str(),
          data_a.type().name().c_str(), id_a, id_b, data_a.position().x0());

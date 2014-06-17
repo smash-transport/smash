@@ -156,9 +156,6 @@ class ScatterAction : public Action {
  public:
   /** Constructor. */
   ScatterAction(const std::vector<int> &in_part, float time_of_execution);
-  /** Decide for a particular final-state channel via Monte-Carlo
-   * and set the outgoing_particles_ correspondingly.  */
-  void choose_channel();
 
   /**
    * Carry out the action, i.e. do the scattering.
@@ -177,6 +174,10 @@ class ScatterAction : public Action {
   };
 
  private:
+  /** Decide for a particular final-state channel via Monte-Carlo
+   * and set the outgoing_particles_ correspondingly.  */
+  void choose_channel();
+
   /**
    * Resonance formation process.
    *
