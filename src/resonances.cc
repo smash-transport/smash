@@ -421,15 +421,11 @@ size_t two_to_two_formation(const ParticleType &type_particle1,
       integral_error);
 
     /* Cross section for 2->2 process with resonance in final state.
-     * Based on Eq. (3.29) in Bass et al.
-     * Prog.Part.Nucl.Phys. 41 (1998) 255-369,
-     * Prog.Part.Nucl.Phys. 41 (1998) 225-370
-     * and Eq. (51) in PhD thesis of J. Weil (Giessen U., 2013)
+     * Based on Eq. (51) in PhD thesis of J. Weil (Giessen U., 2013)
      * http://geb.uni-giessen.de/geb/volltexte/2013/10253/
      */
     float xsection
       = clebsch_gordan_isospin * clebsch_gordan_isospin
-        * (type_resonance.spin() + 1) * (second_type.spin() + 1)
         / mandelstam_s
         / sqrt(cm_momentum_squared)
         * resonance_integral
@@ -539,8 +535,9 @@ double sample_resonance_mass(PdgCode pdg_resonance, PdgCode pdg_stable,
 }
 
 /* Scattering matrix amplitude squared.
- * Based on Eq. (3.34) in Bass et al. Prog.Part.Nucl.Phys. 41 (1998) 255-369,
- * Prog.Part.Nucl.Phys. 41 (1998) 225-370
+ * Introduces energy-dependent modification
+ * on the constant matrix element from
+ * M. Effenberger diploma thesis (Giessen 1996)
  */
 float nn_to_resonance_matrix_element(const double mandelstam_s,
   const ParticleType &type_final_a, const ParticleType &type_final_b) {
@@ -548,23 +545,16 @@ float nn_to_resonance_matrix_element(const double mandelstam_s,
   if (type_final_a.pdgcode().iso_multiplet()
       != type_final_b.pdgcode().iso_multiplet()) {
     /* N + N -> N + Delta */
-    float delta_mass_squared = 0.0;
-    float delta_width_squared = 0.0;
-    if (type_final_a.pdgcode().iso_multiplet()
-         == delta.iso_multiplet()) {
-      delta_mass_squared = type_final_a.mass() * type_final_a.mass();
-      delta_width_squared = type_final_a.width_at_pole()
-                            * type_final_a.width_at_pole();
-    } else if (type_final_b.pdgcode().iso_multiplet()
-                == delta.iso_multiplet()) {
-      delta_mass_squared = type_final_b.mass() * type_final_b.mass();
-      delta_width_squared = type_final_b.width_at_pole()
-                            * type_final_b.width_at_pole();
+    if (type_final_a.pdgcode().iso_multiplet() == delta.iso_multiplet()
+        || type_final_b.pdgcode().iso_multiplet() == delta.iso_multiplet()) {
+      float M0 = 2.55 * 180;  // 180 is the constant matrix element value
+      float x00 = 1.232 + 0.938;
+      float x0 = 1.066;
+      float n = 1.951;
+      return M0 / std::pow(std::sqrt(mandelstam_s) - x00 + x0, n);
+    } else {
+      return 0.0;
     }
-    return 40000 * delta_mass_squared * delta_width_squared
-           / ((mandelstam_s - delta_mass_squared)
-               * (mandelstam_s - delta_mass_squared)
-              + delta_mass_squared * delta_width_squared);
   } else {
     return 0.0;
   }
