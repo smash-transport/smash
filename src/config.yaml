@@ -8,8 +8,12 @@ General:
     # end time of simulation
     END_TIME:      1.0
 
-    # output format(s). Always within square brackets [ ]!
-    OUTPUT:        [OSCAR1999_FINAL, OSCAR1999_FULL, ROOT, VTK]
+    # output formats
+    OUTPUT:
+        OSCAR1999_COLLISIONS:    Yes
+        OSCAR1999_PARTICLELIST:  Yes 
+        VTK:                     No
+        ROOT:                    Yes
 
     # how much time before recording measurables
     OUTPUT_INTERVAL:  1.0

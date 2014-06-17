@@ -10,6 +10,7 @@
 #include <memory>
 #include <stdexcept>
 #include <string>
+#include <map>
 #include <vector>
 
 #include "chrono.h"
@@ -269,7 +270,7 @@ class Experiment : public ExperimentBase {
    *
    * Specifies the format of output; OSCAR, ROOT, VTK etc.
    */
-  std::vector<std::string> outputformats_;
+  std::map<std::string, std::string> outputformats_;
 };
 
 }  // namespace Smash

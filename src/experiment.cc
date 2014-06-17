@@ -101,10 +101,10 @@ Experiment<Modus>::Experiment(Configuration &config)
   }
   Random::set_seed(seed_);
   print_startup(seed_);
-
-  std::vector<std::string> opformatlist = config.take({"General", "OUTPUT"});
+  std::map<std::string, std::string> opformatlist
+    = config.take({"General", "OUTPUT"});
   for (const auto &opformat : opformatlist) {
-    outputformats_.push_back(opformat);
+    outputformats_.insert(opformat);
   }
 }
 
@@ -222,21 +222,45 @@ void Experiment<Modus>::print_startup(int64_t seed) {
   modus_.print_startup();
 }
 
+static void no_output_notification(std::string outputname) {
+  printf("No %s output (no valid options given)\n", outputname.c_str());
+}
+
 template <typename Modus>
 void Experiment<Modus>::run(const bf::path &path) {
-  for (const auto &outputformat : outputformats_) {
-    if (outputformat == "OSCAR1999_FINAL") {
-      outputs_.emplace_back(new OscarFullHistoryOutput(path));
-    } else if (outputformat == "OSCAR1999_FULL") {
+  for(std::map<std::string, std::string>::iterator outputformat
+      = outputformats_.begin(); outputformat != outputformats_.end();
+      ++outputformat) {
+    std::string formatname = outputformat->first;
+    std::string formatoption = outputformat->second;
+    if (formatname == "OSCAR1999_COLLISIONS") {
+      if (formatoption == "Yes") {
+        outputs_.emplace_back(new OscarFullHistoryOutput(path));
+      } else {
+        no_output_notification(formatname);
+      }
+    } else if (formatname == "OSCAR1999_PARTICLELIST") {
+      if (formatoption == "Yes") {
         outputs_.emplace_back(new OscarParticleListOutput(path));
-    } else if (outputformat == "VTK") {
+      } else {
+        no_output_notification(formatname);
+      }
+    } else if (formatname == "VTK") {
+      if (formatoption == "Yes") {
         outputs_.emplace_back(new VtkOutput(path));
+      } else {
+        no_output_notification(formatname);
+      }
 #ifdef SMASH_USE_ROOT
-    } else if (outputformat == "ROOT") {
+    } else if (formatname == "ROOT") {
+      if (formatoption == "Yes") {
         outputs_.emplace_back(new RootOutput(path));
+      } else {
+        no_output_notification(formatname);
+      }
 #endif
     } else {
-      printf("WARNING: Unsupported output format: %s\n", outputformat.c_str());
+      printf("Warning: Unknown output format %s.\n", formatname.c_str());
     }
   }
 
