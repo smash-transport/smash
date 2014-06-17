@@ -10,8 +10,8 @@ General:
 
     # output formats
     OUTPUT:
-        OSCAR1999_COLLISIONS:    Yes
-        OSCAR1999_PARTICLELIST:  Yes 
+        OSCAR1999_COLLISIONS:    No lists
+        OSCAR1999_PARTICLELIST:  Final
         VTK:                     No
         ROOT:                    Yes
 

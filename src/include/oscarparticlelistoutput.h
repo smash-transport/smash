@@ -23,6 +23,9 @@ class OscarParticleListOutput : public OscarFullHistoryOutput {
   void at_eventstart(const Particles &particles,
                      const int event_number) override;
 
+  /// writes the final particle information of an event
+  void at_eventend(const Particles &particles, const int event_number) override;
+
   /**
    * Write a prefix line and a line per particle to OSCAR output.
    */

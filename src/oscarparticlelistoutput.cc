@@ -37,6 +37,25 @@ void OscarParticleListOutput::at_eventstart(const Particles &particles,
   }
 }
 
+void OscarParticleListOutput::at_eventend(const Particles &particles,
+                              const int event_number) {
+  /* OSCAR line prefix : initial particles; final particles; event id
+   * Last block of an event: initial = number of particles, final = 0
+   * Block ends with null interaction
+   */
+  const size_t zero = 0;
+  if (config_option_ == "Final") {
+    fprintf(file_.get(), "%zu %zu %i\n", particles.size(), zero,
+            event_number + 1);
+    write(particles);
+  }
+  /* Null interaction marks the end of an event */
+  fprintf(file_.get(), "%zu %zu %i\n", zero, zero, event_number + 1);
+
+  /* Flush to disk */
+  std::fflush(file_.get());
+}
+
 void OscarParticleListOutput::write_interaction(
   const ParticleList &/*incoming_particles*/,
   const ParticleList &/*outgoing_particles*/) {
