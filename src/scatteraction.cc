@@ -22,27 +22,29 @@ ScatterAction::ScatterAction(const std::vector<int> &in_part,
     : Action(in_part, time_of_execution) {}
 
 
-void ScatterAction::choose_channel () {
+ParticleList ScatterAction::choose_channel () {
   interaction_type_ = 0;
-  if (total_weight_ > really_small) {
-    double random_interaction = Random::canonical();
-    float interaction_probability = 0.0;
-    std::vector<ProcessBranch>::const_iterator proc = subprocesses_.begin();
-    while (interaction_type_ == 0 && proc != subprocesses_.end()) {
-      if (proc->pdg_list().size() > 1
-          || proc->pdg_list().at(0) != PdgCode::invalid()) {
-        interaction_probability += proc->weight() / total_weight_;
-        if (random_interaction < interaction_probability) {
-          interaction_type_ = proc->type();
-          outgoing_particles_ = proc->particle_list();
-        }
-      }
-      ++proc;
-      printd("ScatterAction::choose_channel: collision type %d particle %d <-> %d time: %g\n",
-             interaction_type_, incoming_particles_[0], incoming_particles_[1],
-             time_of_execution_);
-    }
+  if (total_weight_ < really_small) {
+    return ParticleList();
   }
+  double random_interaction = Random::canonical();
+  float interaction_probability = 0.0;
+  std::vector<ProcessBranch>::const_iterator proc = subprocesses_.begin();
+  while (interaction_type_ == 0 && proc != subprocesses_.end()) {
+    if (proc->pdg_list().size() > 1
+        || proc->pdg_list().at(0) != PdgCode::invalid()) {
+      interaction_probability += proc->weight() / total_weight_;
+      if (random_interaction < interaction_probability) {
+        interaction_type_ = proc->type();
+        break;
+      }
+    }
+    ++proc;
+  }
+  printd("ScatterAction::choose_channel: collision type %d particle %d <-> %d time: %g\n",
+         interaction_type_, incoming_particles_[0], incoming_particles_[1],
+         time_of_execution_);
+  return proc->particle_list();
 }
 
 void ScatterAction::perform (Particles *particles, size_t &id_process)
@@ -63,7 +65,7 @@ void ScatterAction::perform (Particles *particles, size_t &id_process)
   ParticleData data_b = particles->data(id_b);
 
   /* Decide for a particular final state. */
-  choose_channel();
+  outgoing_particles_ = choose_channel();
 
   printd("Process %zu type %i particle %s<->%s colliding %d<->%d time %g\n",
          id_process, interaction_type_, data_a.type().name().c_str(),

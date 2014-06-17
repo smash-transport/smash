@@ -174,9 +174,12 @@ class ScatterAction : public Action {
   };
 
  private:
-  /** Decide for a particular final-state channel via Monte-Carlo
-   * and set the outgoing_particles_ correspondingly.  */
-  void choose_channel();
+  /**
+   * Decide for a particular final-state channel via Monte-Carlo
+   * and return it as a list of particles that are only initialized
+   * with their PDG code.
+   */
+  ParticleList choose_channel();
 
   /**
    * Resonance formation process.
