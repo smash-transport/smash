@@ -544,14 +544,10 @@ float nn_to_resonance_matrix_element(const double mandelstam_s,
   PdgCode delta = PdgCode("2224");
   if (type_final_a.pdgcode().iso_multiplet()
       != type_final_b.pdgcode().iso_multiplet()) {
-    /* N + N -> N + Delta */
+    /* N + N -> N + Delta: fit to Dmitriev OBE model, Nucl. Phys. A 459, 503 (1986) */
     if (type_final_a.pdgcode().iso_multiplet() == delta.iso_multiplet()
         || type_final_b.pdgcode().iso_multiplet() == delta.iso_multiplet()) {
-      float M0 = 2.55 * 180;  // 180 is the constant matrix element value
-      float x00 = 1.232 + 0.938;
-      float x0 = 1.066;
-      float n = 1.951;
-      return M0 / std::pow(std::sqrt(mandelstam_s) - x00 + x0, n);
+      return 459. / std::pow(std::sqrt(mandelstam_s) - 1.104, 1.951);
     } else {
       return 0.0;
     }
