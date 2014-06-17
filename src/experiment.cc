@@ -223,7 +223,7 @@ void Experiment<Modus>::print_startup(int64_t seed) {
 }
 
 static void no_output_notification(std::string outputname) {
-  printf("No %s output (no valid options given)\n", outputname.c_str());
+  printf("Output %s disabled.\n", outputname.c_str());
 }
 
 template <typename Modus>
@@ -234,26 +234,26 @@ void Experiment<Modus>::run(const bf::path &path) {
     std::string formatname = outputformat->first;
     std::string formatoption = outputformat->second;
     if (formatname == "OSCAR1999_COLLISIONS") {
-      if (formatoption == "Yes") {
-        outputs_.emplace_back(new OscarFullHistoryOutput(path));
+      if (formatoption != "No") {
+        outputs_.emplace_back(new OscarFullHistoryOutput(path, formatoption));
       } else {
         no_output_notification(formatname);
       }
     } else if (formatname == "OSCAR1999_PARTICLELIST") {
-      if (formatoption == "Yes") {
-        outputs_.emplace_back(new OscarParticleListOutput(path));
+      if (formatoption != "No") {
+        outputs_.emplace_back(new OscarParticleListOutput(path, formatoption));
       } else {
         no_output_notification(formatname);
       }
     } else if (formatname == "VTK") {
-      if (formatoption == "Yes") {
+      if (formatoption != "No") {
         outputs_.emplace_back(new VtkOutput(path));
       } else {
         no_output_notification(formatname);
       }
 #ifdef SMASH_USE_ROOT
     } else if (formatname == "ROOT") {
-      if (formatoption == "Yes") {
+      if (formatoption != "No") {
         outputs_.emplace_back(new RootOutput(path));
       } else {
         no_output_notification(formatname);
