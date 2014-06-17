@@ -23,17 +23,6 @@ DecayAction::DecayAction(const std::vector<int> &in_part,
     : Action (in_part, time_of_execution, interaction_type) {}
 
 
-
-/**
- * Kinematics of a 1-to-2 decay process.
- *
- * Given a resonance ID and the PDG codes of decay product particles,
- * sample the momenta and position of the products and add them
- * to the active particles data structure.
- *
- * \param[in] incoming0 decaying particle (in its rest frame)
- * \param[in] particles Particles in the simulation.
- */
 void DecayAction::one_to_two(const ParticleData &incoming0) {
   ParticleData &outgoing0 = outgoing_particles_[0];
   ParticleData &outgoing1 = outgoing_particles_[1];
@@ -70,15 +59,7 @@ void DecayAction::one_to_two(const ParticleData &incoming0) {
   outgoing1.set_position(incoming0.position());
 }
 
-/**
- * Kinematics of a 1-to-3 decay process.
- *
- * Given a resonance ID and the PDG codes of decay product particles,
- * sample the momenta and position of the products and add them
- * to the active particles data structure.
- *
- * \param[in] incoming0 decaying particle (in its rest frame)
- */
+
 void DecayAction::one_to_three(const ParticleData &incoming0) {
   ParticleData &outgoing0 = outgoing_particles_[0];
   ParticleData &outgoing1 = outgoing_particles_[1];

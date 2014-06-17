@@ -102,11 +102,6 @@ class DecayAction : public Action {
   /** Constructor. */
   DecayAction(const std::vector<int> &in_part, float time_of_execution,
               int interaction_type);
-  /**
-   * Decide for a particular decay channel via Monte-Carlo and return it as a
-   * list of particles that are only initialized with their PDG code.
-   */
-  ParticleList choose_channel(const Particles &particles) const;
 
   /** Carry out the action, i.e. do the decay.
    * Performs a decay of one particle to two or three particles.
@@ -124,7 +119,32 @@ class DecayAction : public Action {
   };
 
  private:
+  /**
+   * Decide for a particular decay channel via Monte-Carlo and return it as a
+   * list of particles that are only initialized with their PDG code.
+   */
+  ParticleList choose_channel(const Particles &particles) const;
+
+  /**
+   * Kinematics of a 1-to-2 decay process.
+   *
+   * Given a resonance ID and the PDG codes of decay product particles,
+   * sample the momenta and position of the products and add them
+   * to the active particles data structure.
+   *
+   * \param[in] incoming0 decaying particle (in its rest frame)
+   */
   void one_to_two(const ParticleData &incoming0);
+
+  /**
+   * Kinematics of a 1-to-3 decay process.
+   *
+   * Given a resonance ID and the PDG codes of decay product particles,
+   * sample the momenta and position of the products and add them
+   * to the active particles data structure.
+   *
+   * \param[in] incoming0 decaying particle (in its rest frame)
+   */
   void one_to_three(const ParticleData &incoming0);
 };
 
