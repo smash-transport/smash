@@ -34,12 +34,13 @@ BinaryOutput::BinaryOutput(bf::path path)
       "pz[GeV/c]");
 }
 
-void BinaryOutput::at_eventstart(const Particles &, const int) {}
-
-void BinaryOutput::at_eventend(const Particles &particles,
-                               const int event_number) {
+void BinaryOutput::at_eventstart(const Particles &particles,
+                                 const int event_number) {
   write(particles, event_number);
+}
 
+void BinaryOutput::at_eventend(const Particles &,
+                               const int) {
   /* Flush to disk */
   std::fflush(file_.get());
 }
@@ -47,8 +48,11 @@ void BinaryOutput::at_eventend(const Particles &particles,
 void BinaryOutput::write_interaction(const ParticleList &,
                                      const ParticleList &) {}
 
-void BinaryOutput::after_Nth_timestep(const Particles &, const int,
-                                      const Clock &) {}
+void BinaryOutput::after_Nth_timestep(const Particles &particles,
+                                      const int event_number,
+                                      const Clock &) {
+  write(particles, event_number);
+}
 
 // write functions:
 inline void BinaryOutput::write(const std::string &s) {
