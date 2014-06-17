@@ -87,7 +87,7 @@ TEST(fullhistory_format) {
   ParticleType::create_type_list(
       "# NAME MASS[GEV] WIDTH[GEV] PDG\n" + smashon_str);
 
-  Particles particles({});
+  Particles particles;
 
   ParticleData particle = create_smashon_particle();
   particles.add_data(particle);
@@ -195,7 +195,7 @@ TEST(particlelist_format) {
     = new OscarParticleListOutput(testoutputpath);
   VERIFY(bf::exists(testoutputpath / "final_id_p_x.oscar"));
 
-  Particles particles({});
+  Particles particles;
 
   /* Create 5 particles */
   for (int i = 0; i < 5; i++) {

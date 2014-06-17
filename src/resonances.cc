@@ -30,8 +30,16 @@
 #include "include/particletype.h"
 #include "include/processbranch.h"
 #include "include/random.h"
+#include "include/width.h"
 
 namespace Smash {
+
+/* Parameters for spectral function integration via GSL. */
+struct IntegrandParameters {
+  const ParticleType *type;
+  double m2;
+  double s;
+};
 
 /* Calculate isospin Clebsch-Gordan coefficient
  * (-1)^(j1 - j2 + m3) * sqrt(2 * j3 + 1) * [Wigner 3J symbol]
@@ -71,7 +79,7 @@ double clebsch_gordan_coefficient(const int isospin_a,
  * \param[out] integral_error Uncertainty of the result.
  */
 static void quadrature_1d(double (*integrand_function)(double, void *),
-                          std::vector<double> *parameters, double lower_limit,
+                          IntegrandParameters *parameters, double lower_limit,
                           double upper_limit, double *integral_value,
                           double *integral_error);
 
@@ -80,20 +88,19 @@ static void quadrature_1d(double (*integrand_function)(double, void *),
  * to be able to decay through any of its decay channels
  * NB: This function assumes stable decay products!
  */
-float calculate_minimum_mass(const Particles &particles, PdgCode pdgcode) {
+float calculate_minimum_mass(PdgCode pdgcode) {
   /* If the particle happens to be stable, just return the mass */
   const auto type = ParticleType::find(pdgcode);
-  if (type.width() < 0.0) {
+  if (type.is_stable()) {
     return type.mass();
   }
   /* Otherwise, let's find the highest mass value needed in any decay mode */
   float minimum_mass = 0.0;
-  const std::vector<ProcessBranch> decaymodes =
-      particles.decay_modes(pdgcode).decay_mode_list();
-  for (std::vector<ProcessBranch>::const_iterator mode = decaymodes.begin();
-       mode != decaymodes.end(); ++mode) {
+  const std::vector<DecayBranch> decaymodes =
+      DecayModes::find(pdgcode).decay_mode_list();
+  for (const auto &mode : decaymodes) {
     float total_mass = 0.0;
-    for (const PdgCode code : mode->pdg_list()) {
+    for (const PdgCode code : mode.pdg_list()) {
       /* Stable decay products assumed; for resonances the mass can be lower! */
       total_mass += ParticleType::find(code).mass();
     }
@@ -108,10 +115,10 @@ float calculate_minimum_mass(const Particles &particles, PdgCode pdgcode) {
  * for producing a resonance
  */
 std::vector<ProcessBranch> resonance_cross_section(
-    const ParticleData &particle1, const ParticleData &particle2,
-    const ParticleType &type_particle1, const ParticleType &type_particle2,
-    const Particles &particles) {
+    const ParticleData &particle1, const ParticleData &particle2) {
   std::vector<ProcessBranch> resonance_process_list;
+  ParticleType type_particle1 = particle1.type(),
+               type_particle2 = particle2.type();
 
   /* Isospin symmetry factor, by default 1 */
   int symmetryfactor = 1;
@@ -124,8 +131,7 @@ std::vector<ProcessBranch> resonance_cross_section(
 
   /* Mandelstam s = (p_a + p_b)^2 = square of CMS energy */
   const double mandelstam_s =
-       (particle1.momentum() + particle2.momentum()).Dot(
-         particle1.momentum() + particle2.momentum());
+       (particle1.momentum() + particle2.momentum()).sqr();
 
   /* CM momentum */
   const double cm_momentum_squared
@@ -137,26 +143,26 @@ std::vector<ProcessBranch> resonance_cross_section(
   /* Find all the possible resonances */
   for (const ParticleType &type_resonance : ParticleType::list_all()) {
     /* Not a resonance, go to next type of particle */
-    if (type_resonance.width() < 0.0) {
+    if (type_resonance.is_stable()) {
       continue;
     }
 
     /* Same resonance as in the beginning, ignore */
-    if ((type_particle1.width() > 0.0
+    if ((!type_particle1.is_stable()
          && type_resonance.pdgcode() == type_particle1.pdgcode())
-        || (type_particle2.width() > 0.0
+        || (!type_particle2.is_stable()
             && type_resonance.pdgcode() == type_particle2.pdgcode())) {
       continue;
     }
 
     /* No decay channels found, ignore */
-    if (particles.decay_modes(type_resonance.pdgcode()).is_empty()) {
+    if (DecayModes::find(type_resonance.pdgcode()).is_empty()) {
       continue;
     }
 
     float resonance_xsection
-      = symmetryfactor * two_to_one_formation(particles, type_particle1,
-        type_particle2, type_resonance, mandelstam_s, cm_momentum_squared);
+      = symmetryfactor * two_to_one_formation(type_particle1, type_particle2,
+                         type_resonance, mandelstam_s, cm_momentum_squared);
 
     /* If cross section is non-negligible, add resonance to the list */
     if (resonance_xsection > really_small) {
@@ -166,7 +172,7 @@ std::vector<ProcessBranch> resonance_cross_section(
       printd("Found resonance %s (%s) with mass %f and width %f.\n",
              type_resonance.pdgcode().string().c_str(),
              type_resonance.name().c_str(),
-             type_resonance.mass(), type_resonance.width());
+             type_resonance.mass(), type_resonance.width_at_pole());
       printd("2->1 with original particles: %s %s Charges: %i %i \n",
              type_particle1.name().c_str(), type_particle2.name().c_str(),
              type_particle1.charge(), type_particle2.charge());
@@ -175,9 +181,9 @@ std::vector<ProcessBranch> resonance_cross_section(
     /* XXX: For now, we allow this only for baryon-baryon interactions */
     if (type_particle1.spin() % 2 != 0 && type_particle2.spin() % 2 != 0) {
       size_t two_to_two_processes
-         = two_to_two_formation(particles, type_particle1,
-           type_particle2, type_resonance, mandelstam_s, cm_momentum_squared,
-           &resonance_process_list);
+         = two_to_two_formation(type_particle1, type_particle2,
+                                type_resonance, mandelstam_s,
+                                cm_momentum_squared, &resonance_process_list);
       if (two_to_two_processes > 0) {
         printd("Found %zu 2->2 processes for resonance %s (%s).\n",
                two_to_two_processes,
@@ -193,8 +199,7 @@ std::vector<ProcessBranch> resonance_cross_section(
 }
 
 /* two_to_one_formation -- only the resonance in the final state */
-double two_to_one_formation(const Particles &particles,
-                            const ParticleType &type_particle1,
+double two_to_one_formation(const ParticleType &type_particle1,
                             const ParticleType &type_particle2,
                             const ParticleType &type_resonance,
                             double mandelstam_s, double cm_momentum_squared) {
@@ -235,26 +240,25 @@ double two_to_one_formation(const Particles &particles,
     return 0.0;
 
   /* Check the decay modes of this resonance */
-  const std::vector<ProcessBranch> decaymodes
-    = particles.decay_modes(type_resonance.pdgcode()).decay_mode_list();
+  const std::vector<DecayBranch> decaymodes
+    = DecayModes::find(type_resonance.pdgcode()).decay_mode_list();
   bool not_enough_energy = false;
   /* Detailed balance required: Formation only possible if
    * the resonance can decay back to these particles
    */
   bool not_balanced = true;
-  for (std::vector<ProcessBranch>::const_iterator mode
-       = decaymodes.begin(); mode != decaymodes.end(); ++mode) {
-    size_t decay_particles = mode->pdg_list().size();
+  for (const auto &mode : decaymodes) {
+    size_t decay_particles = mode.pdg_list().size();
     if ( decay_particles > 3 ) {
       printf("Warning: Not a 1->2 or 1->3 process!\n");
       printf("Number of decay particles: %zu \n", decay_particles);
     } else {
       /* There must be enough energy to produce all decay products */
       float mass_a, mass_b, mass_c = 0.0;
-      mass_a = calculate_minimum_mass(particles, mode->pdg_list().at(0));
-      mass_b = calculate_minimum_mass(particles, mode->pdg_list().at(1));
+      mass_a = calculate_minimum_mass(mode.pdg_list()[0]);
+      mass_b = calculate_minimum_mass(mode.pdg_list()[1]);
       if (decay_particles == 3) {
-        mass_c = calculate_minimum_mass(particles, mode->pdg_list().at(2));
+        mass_c = calculate_minimum_mass(mode.pdg_list()[2]);
       }
       if (sqrt(mandelstam_s) < mass_a + mass_b + mass_c)
         not_enough_energy = true;
@@ -263,24 +267,22 @@ double two_to_one_formation(const Particles &particles,
        * XXX: For now, assuming only 2-particle initial states
        */
       if (decay_particles == 2
-          && ((mode->pdg_list().at(0) == type_particle1.pdgcode()
-               && mode->pdg_list().at(1) == type_particle2.pdgcode())
-              || (mode->pdg_list().at(0) == type_particle2.pdgcode()
-                  && mode->pdg_list().at(1) == type_particle1.pdgcode()))
-          && (mode->weight() > 0.0))
+          && ((mode.pdg_list().at(0) == type_particle1.pdgcode()
+               && mode.pdg_list().at(1) == type_particle2.pdgcode())
+              || (mode.pdg_list().at(0) == type_particle2.pdgcode()
+                  && mode.pdg_list().at(1) == type_particle1.pdgcode()))
+          && (mode.weight() > 0.0))
         not_balanced = false;
     }
   }
-  if (not_enough_energy)
+  if (not_enough_energy || not_balanced) {
     return 0.0;
-
-  if (not_balanced)
-    return 0.0;
+  }
 
   /* Calculate spin factor */
   const double spinfactor = (type_resonance.spin() + 1)
     / ((type_particle1.spin() + 1) * (type_particle2.spin() + 1));
-  float resonance_width = type_resonance.width();
+  float resonance_width = type_resonance.width_total(sqrt(mandelstam_s));
   float resonance_mass = type_resonance.mass();
   /* Calculate resonance production cross section
    * using the Breit-Wigner distribution as probability amplitude
@@ -293,11 +295,11 @@ double two_to_one_formation(const Particles &particles,
 }
 
 /* two_to_two_formation -- resonance and another particle in final state */
-size_t two_to_two_formation(const Particles &particles,
-  const ParticleType &type_particle1,
-  const ParticleType &type_particle2, const ParticleType &type_resonance,
-  double mandelstam_s, double cm_momentum_squared,
-  std::vector<ProcessBranch> *process_list) {
+size_t two_to_two_formation(const ParticleType &type_particle1,
+                            const ParticleType &type_particle2,
+                            const ParticleType &type_resonance,
+                            double mandelstam_s, double cm_momentum_squared,
+                            std::vector<ProcessBranch> *process_list) {
   size_t number_of_processes = 0;
   /* If we have two baryons in the beginning, we must have fermion resonance */
   if (type_particle1.pdgcode().baryon_number() != 0
@@ -320,7 +322,7 @@ size_t two_to_two_formation(const Particles &particles,
   /* Loop over particle types to find allowed combinations */
   for (const ParticleType &second_type : ParticleType::list_all()) {
     /* We are interested only stable particles here */
-    if (second_type.width() > 0.0) {
+    if (!second_type.is_stable()) {
       continue;
     }
 
@@ -370,23 +372,22 @@ size_t two_to_two_formation(const Particles &particles,
     }
 
     /* Check the decay modes of this resonance */
-    const std::vector<ProcessBranch> decaymodes
-      = particles.decay_modes(type_resonance.pdgcode()).decay_mode_list();
+    const std::vector<DecayBranch> decaymodes
+      = DecayModes::find(type_resonance.pdgcode()).decay_mode_list();
     bool not_enough_energy = false;
     double minimum_mass = 0.0;
-    for (std::vector<ProcessBranch >::const_iterator mode
-         = decaymodes.begin(); mode != decaymodes.end(); ++mode) {
-      size_t decay_particles = mode->pdg_list().size();
+    for (const auto &mode : decaymodes) {
+      size_t decay_particles = mode.pdg_list().size();
       if ( decay_particles > 3 ) {
         printf("Warning: Not a 1->2 or 1->3 process!\n");
         printf("Number of decay particles: %zu \n", decay_particles);
       } else {
         /* There must be enough energy to produce all decay products */
         float mass_a, mass_b, mass_c = 0.0;
-        mass_a = calculate_minimum_mass(particles, mode->pdg_list().at(0));
-        mass_b = calculate_minimum_mass(particles, mode->pdg_list().at(1));
+        mass_a = calculate_minimum_mass(mode.pdg_list()[0]);
+        mass_b = calculate_minimum_mass(mode.pdg_list()[1]);
         if (decay_particles == 3) {
-          mass_c = calculate_minimum_mass(particles, mode->pdg_list().at(2));
+          mass_c = calculate_minimum_mass(mode.pdg_list()[2]);
         }
         if (sqrt(mandelstam_s) < mass_a + mass_b + mass_c
                                  + second_type.mass()) {
@@ -404,11 +405,8 @@ size_t two_to_two_formation(const Particles &particles,
      * using the Breit-Wigner distribution as probability amplitude
      * Integrate over the allowed resonance mass range
      */
-    std::vector<double> integrand_parameters;
-    integrand_parameters.push_back(type_resonance.width());
-    integrand_parameters.push_back(type_resonance.mass());
-    integrand_parameters.push_back(second_type.mass());
-    integrand_parameters.push_back(mandelstam_s);
+    IntegrandParameters params = {&type_resonance, second_type.mass(),
+                                  mandelstam_s};
     double lower_limit = minimum_mass;
     double upper_limit = (sqrt(mandelstam_s) - second_type.mass());
     printd("Process: %s %s -> %s %s\n", type_particle1.name().c_str(),
@@ -416,7 +414,7 @@ size_t two_to_two_formation(const Particles &particles,
      type_resonance.name().c_str());
     printd("Limits: %g %g \n", lower_limit, upper_limit);
     double resonance_integral, integral_error;
-    quadrature_1d(&spectral_function_integrand, &integrand_parameters,
+    quadrature_1d(&spectral_function_integrand, &params,
                   lower_limit, upper_limit,
                   &resonance_integral, &integral_error);
     printd("Integral value: %g Error: %g \n", resonance_integral,
@@ -448,7 +446,7 @@ size_t two_to_two_formation(const Particles &particles,
 
 /* Function for 1-dimensional GSL integration  */
 void quadrature_1d(double (*integrand_function)(double, void*),
-                     std::vector<double> *parameters,
+                     IntegrandParameters *parameters,
                      double lower_limit, double upper_limit,
                      double *integral_value, double *integral_error) {
   gsl_integration_workspace *workspace
@@ -483,12 +481,12 @@ double spectral_function(double resonance_mass, double resonance_pole,
 /* Spectral function integrand for GSL integration */
 double spectral_function_integrand(double resonance_mass,
                                    void *parameters) {
-  std::vector<double> *integrand_parameters
-    = reinterpret_cast<std::vector<double> *>(parameters);
-  double resonance_width = integrand_parameters->at(0);
-  double resonance_pole_mass = integrand_parameters->at(1);
-  double stable_mass = integrand_parameters->at(2);
-  double mandelstam_s = integrand_parameters->at(3);
+  IntegrandParameters *params
+    = reinterpret_cast<IntegrandParameters*>(parameters);
+  double resonance_pole_mass = params->type->mass();
+  double stable_mass = params->m2;
+  double mandelstam_s = params->s;
+  double resonance_width = params->type->width_total(resonance_mass);
 
   /* center-of-mass momentum of final state particles */
   if (mandelstam_s - (stable_mass + resonance_mass)
@@ -514,30 +512,27 @@ double spectral_function_integrand(double resonance_mass,
 }
 
 /* Resonance mass sampling for 2-particle final state */
-double sample_resonance_mass(const Particles &particles, PdgCode pdg_resonance,
-                             PdgCode pdg_stable, double cms_energy) {
+double sample_resonance_mass(PdgCode pdg_resonance, PdgCode pdg_stable,
+                             double cms_energy) {
   /* First, find the minimum mass of this resonance */
-  double minimum_mass = calculate_minimum_mass(particles, pdg_resonance);
+  double minimum_mass = calculate_minimum_mass(pdg_resonance);
   /* Define distribution parameters */
   float mass_stable = ParticleType::find(pdg_stable).mass();
-  std::vector<double> parameters;
-  parameters.push_back(ParticleType::find(pdg_resonance).width());
-  parameters.push_back(ParticleType::find(pdg_resonance).mass());
-  parameters.push_back(mass_stable);
-  parameters.push_back(cms_energy * cms_energy);
+  IntegrandParameters params = {&ParticleType::find(pdg_resonance),
+                                mass_stable, cms_energy * cms_energy};
 
   /* sample resonance mass from the distribution
    * used for calculating the cross section
    */
   double mass_resonance = 0.0, random_number = 1.0;
   double distribution_max
-    = spectral_function_integrand(parameters.at(0), &parameters);
+    = spectral_function_integrand(params.type->mass(), &params);
   double distribution_value = 0.0;
   while (random_number > distribution_value) {
     random_number = Random::uniform(0.0, distribution_max);
     mass_resonance = Random::uniform(minimum_mass, cms_energy - mass_stable);
     distribution_value
-      = spectral_function_integrand(mass_resonance, &parameters);
+      = spectral_function_integrand(mass_resonance, &params);
   }
   return mass_resonance;
 }

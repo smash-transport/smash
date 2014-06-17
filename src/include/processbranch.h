@@ -164,6 +164,28 @@ inline int ProcessBranch::type (void) const {
   return interaction_type_;
 }
 
+/**
+ * DecayBranch is a derivative of ProcessBranch,
+ * which is used to represent decay channels.
+ * It contains additional information like the angular momentum.
+ */
+class DecayBranch : public ProcessBranch {
+ public:
+  inline int angular_momentum() const;
+  inline void set_angular_momentum(const int L);
+ private:
+  int angular_momentum_;
+};
+
+inline int DecayBranch::angular_momentum() const {
+  return angular_momentum_;
+};
+
+inline void DecayBranch::set_angular_momentum(const int L)
+{
+  angular_momentum_ = L;
+};
+
 }  // namespace Smash
 
 #endif  // SRC_INCLUDE_PROCESSBRANCH_H_

@@ -24,6 +24,7 @@
 #include "include/macros.h"
 #include "include/outputroutines.h"
 #include "include/particletype.h"
+#include "include/decaymodes.h"
 
 /* build dependent variables */
 #include "include/config.h"
@@ -211,6 +212,7 @@ int main(int argc, char *argv[]) {
                                               << '\n';
 
     ParticleType::create_type_list(configuration.take({"particles"}));
+    DecayModes::load_decaymodes(configuration.take({"decaymodes"}));
     auto experiment = ExperimentBase::create(configuration);
     const std::string report = configuration.unused_values_report();
     if (report != "{}") {

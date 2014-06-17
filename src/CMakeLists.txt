@@ -66,6 +66,7 @@ set(smash_src
         scatteraction.cc
         scatteractionsfinder.cc
         vtkoutput.cc
+        width.cc
         )
 
 if(USE_ROOT)

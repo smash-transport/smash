@@ -65,6 +65,9 @@ class ParticleData {
   inline ThreeVector velocity (void) const { return momentum_.threevec() / momentum_.x0(); }
   /// do a Lorentz-boost
   inline void boost (const ThreeVector &v);
+  /// get the full decay width (mass-dependent!) of a particular particle
+  float total_width() const;
+
   /* overloaded operators */
   inline bool operator==(const ParticleData &a) const;
   inline bool operator<(const ParticleData &a) const;
