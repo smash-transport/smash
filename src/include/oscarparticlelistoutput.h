@@ -16,7 +16,7 @@ namespace Smash {
 
 class OscarParticleListOutput : public OscarFullHistoryOutput {
  public:
-  OscarParticleListOutput(bf::path path);
+  OscarParticleListOutput(bf::path path, std::string option);
   ~OscarParticleListOutput();
 
   /// writes the initial particle information of an event
@@ -29,6 +29,8 @@ class OscarParticleListOutput : public OscarFullHistoryOutput {
   void write_interaction(const ParticleList &incoming_particles,
                          const ParticleList &outgoing_particles) override;
 
+  void after_Nth_timestep(const Particles &particles, const int event_number,
+                          const Clock &clock) override;
 };
 }  // namespace Smash
 

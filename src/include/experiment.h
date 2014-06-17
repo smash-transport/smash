@@ -9,6 +9,8 @@
 
 #include <memory>
 #include <stdexcept>
+#include <string>
+#include <map>
 #include <vector>
 
 #include "chrono.h"
@@ -89,15 +91,19 @@ class ExperimentBase {
    * `END_TIME:` The time after which the evolution is stopped. Note
    * that the starting time depends on the chosen MODUS.
    *
-   * `OUTPUT_INTERVAL:` Output on conservation laws in Standard Output
-   * occurs every nth time step.
+   * 'OUTPUT:' List of the desired output format(s).
+   *
+   * `OUTPUT_INTERVAL:` Defines the period of intermediate output
+   * of the status of the simulated system in Standard Output
+   * and other output formats which support this functionality.
    *
    * `RANDOMSEED:` Initial seed for the random number generator. If this is
    * negative, the program starting time is used.
    *
    * `SIGMA:` Elastic cross-section.
    *
-   * `TESTPARTICLES:` How many test particles per real particles should be simulated.
+   * `TESTPARTICLES:` How many test particles per real particles should be
+   * simulated.
    *
    * `NEVENTS:` Number of events to calculate.
    *
@@ -259,6 +265,12 @@ class Experiment : public ExperimentBase {
   QuantumNumbers conserved_initial_;
   /// system starting time of the simulation
   SystemTimePoint time_start_ = SystemClock::now();
+
+  /** Output formats.
+   *
+   * Specifies the format of output; OSCAR, ROOT, VTK etc.
+   */
+  std::map<std::string, std::string> outputformats_;
 };
 
 }  // namespace Smash

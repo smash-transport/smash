@@ -14,12 +14,13 @@
 
 #include "filedeleter.h"
 #include "forwarddeclarations.h"
+#include <string>
 
 namespace Smash {
 
 class OscarFullHistoryOutput : public OutputInterface {
  public:
-  OscarFullHistoryOutput(bf::path path);
+  OscarFullHistoryOutput(bf::path path, std::string option);
   ~OscarFullHistoryOutput();
 
   /// writes the initial particle information of an event
@@ -39,9 +40,11 @@ class OscarFullHistoryOutput : public OutputInterface {
                           const Clock &clock) override;
 
  protected:
-  OscarFullHistoryOutput(bf::path path, const char* second_line);
+  OscarFullHistoryOutput(bf::path path, const char* second_line,
+                         std::string option);
   void write(const Particles &particles);
   FilePtr file_;
+  std::string config_option_;
 };
 }  // namespace Smash
 

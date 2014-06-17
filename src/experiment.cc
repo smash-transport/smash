@@ -13,6 +13,7 @@
 #include <list>
 #include <string>
 #include <algorithm>
+#include <vector>
 
 #include "include/action.h"
 #include "include/boxmodus.h"
@@ -99,8 +100,12 @@ Experiment<Modus>::Experiment(Configuration &config)
     seed_ = time(nullptr);
   }
   Random::set_seed(seed_);
-
   print_startup(seed_);
+  std::map<std::string, std::string> opformatlist
+    = config.take({"General", "OUTPUT"});
+  for (const auto &opformat : opformatlist) {
+    outputformats_.insert(opformat);
+  }
 }
 
 /* This method reads the particle type and cross section information
@@ -217,14 +222,47 @@ void Experiment<Modus>::print_startup(int64_t seed) {
   modus_.print_startup();
 }
 
+static void no_output_notification(std::string outputname) {
+  printf("Output %s disabled.\n", outputname.c_str());
+}
+
 template <typename Modus>
 void Experiment<Modus>::run(const bf::path &path) {
-  outputs_.emplace_back(new OscarFullHistoryOutput(path));
-  outputs_.emplace_back(new OscarParticleListOutput(path));
-  outputs_.emplace_back(new VtkOutput(path));
+  for(std::map<std::string, std::string>::iterator outputformat
+      = outputformats_.begin(); outputformat != outputformats_.end();
+      ++outputformat) {
+    std::string formatname = outputformat->first;
+    std::string formatoption = outputformat->second;
+    if (formatname == "OSCAR1999_COLLISIONS") {
+      if (formatoption != "No") {
+        outputs_.emplace_back(new OscarFullHistoryOutput(path, formatoption));
+      } else {
+        no_output_notification(formatname);
+      }
+    } else if (formatname == "OSCAR1999_PARTICLELIST") {
+      if (formatoption != "No") {
+        outputs_.emplace_back(new OscarParticleListOutput(path, formatoption));
+      } else {
+        no_output_notification(formatname);
+      }
+    } else if (formatname == "VTK") {
+      if (formatoption != "No") {
+        outputs_.emplace_back(new VtkOutput(path));
+      } else {
+        no_output_notification(formatname);
+      }
 #ifdef SMASH_USE_ROOT
-  outputs_.emplace_back(new RootOutput(path));
+    } else if (formatname == "ROOT") {
+      if (formatoption != "No") {
+        outputs_.emplace_back(new RootOutput(path));
+      } else {
+        no_output_notification(formatname);
+      }
 #endif
+    } else {
+      printf("Warning: Unknown output format %s.\n", formatname.c_str());
+    }
+  }
 
   for (int j = 0; j < nevents_; j++) {
     initialize(path);
