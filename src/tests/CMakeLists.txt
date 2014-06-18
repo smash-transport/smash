@@ -1,15 +1,6 @@
 # remove -Winline for test code
 string(REPLACE "-Winline " "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 
-# test sources
-add_executable(angles_distribution angles_distribution.cc ../random.cc)
-add_executable(angles_zero angles_zero.cc ../random.cc)
-add_executable(lorentzboost lorentzboost.cc ../fourvector.cc ../random.cc)
-add_executable(pdgcode pdgcode.cc ../pdgcode.cc)
-
-add_executable(woods-saxon woods-saxon.cc)
-target_link_libraries(woods-saxon smash_lib ${SMASH_LIBRARIES})
-
 file(COPY ../config.yaml DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ../particles.txt DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ../decaymodes.txt DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
@@ -28,8 +19,13 @@ macro(smash_add_test name depends)
       )
 endmacro()
 
+macro(smash_add_exe name)
+  add_executable(${name} ${name}.cc)
+  target_link_libraries(${name} smash_lib ${SMASH_LIBRARIES})
+endmacro()
+
 macro(smash_add_unittest name)
-   add_executable(${name} ${name}.cc)
+   smash_add_exe(${name})
    if(HAVE_SANITIZER)
       set_target_properties(${name} PROPERTIES
          COMPILE_FLAGS "${SANITIZER_FLAG} -DSMASH_TEST_OUTPUT_PATH=\\\"${PROJECT_BINARY_DIR}/${name}_output/\\\""
@@ -40,7 +36,6 @@ macro(smash_add_unittest name)
          COMPILE_FLAGS "-DSMASH_TEST_OUTPUT_PATH=\\\"${PROJECT_BINARY_DIR}/${name}_output/\\\""
          )
    endif()
-   target_link_libraries(${name} smash_lib ${SMASH_LIBRARIES})
    smash_add_test(${name} ${name} ${name})
 endmacro()
 
@@ -62,6 +57,14 @@ endif()
 
 add_definitions("-DTEST_CONFIG_PATH=\"${PROJECT_SOURCE_DIR}/src\"")
 add_definitions("-DBUILD_TESTS")
+
+# compile-only tests
+smash_add_exe(angles_distribution)
+smash_add_exe(angles_zero)
+smash_add_exe(woods-saxon)
+
+smash_add_exe(lorentzboost)
+smash_add_exe(pdgcode)
 
 # unit tests for classes:
 smash_add_unittest(yamltest)
