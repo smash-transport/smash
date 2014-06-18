@@ -32,14 +32,12 @@ void DecayAction::one_to_two(const ParticleData &incoming0) {
   const ParticleType &outgoing0_type = outgoing0.type();
   const ParticleType &outgoing1_type = outgoing1.type();
 
-  const PdgCode type_a = outgoing0.pdgcode();
-  const PdgCode type_b = outgoing1.pdgcode();
-
   // TODO(weil) This may be checked already when reading in the possible
   // decay channels.
   if (!outgoing0.is_hadron() || !outgoing1.is_hadron()) {
-    printf("Warning: decay products A: %s B: %s\n", type_a.string().c_str(),
-           type_b.string().c_str());
+    printf("Warning: decay products A: %s B: %s\n",
+           outgoing0.pdgcode().string().c_str(),
+           outgoing1.pdgcode().string().c_str());
   }
 
   double mass_a = outgoing0_type.mass();
@@ -49,9 +47,11 @@ void DecayAction::one_to_two(const ParticleData &incoming0) {
   /* If one of the particles is resonance, sample its mass */
   /* XXX: Other particle assumed stable! */
   if (!outgoing0_type.is_stable()) {
-    mass_a = sample_resonance_mass (type_a, type_b, total_energy);
+    mass_a = sample_resonance_mass (outgoing0_type, outgoing1_type,
+                                    total_energy);
   } else if (!outgoing1_type.is_stable()) {
-    mass_b = sample_resonance_mass (type_b, type_a, total_energy);
+    mass_b = sample_resonance_mass (outgoing1_type, outgoing0_type,
+                                    total_energy);
   }
 
   /* Sample the momenta */

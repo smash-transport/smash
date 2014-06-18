@@ -90,6 +90,21 @@ void ParticleType::create_type_list(const std::string &input) {  //{{{
 }/*}}}*/
 
 
+float ParticleType::minimum_mass() const {
+  float minmass = mass();
+
+  /* If the particle happens to be stable, just return the mass. */
+  if (is_stable()) {
+    return minmass;
+  }
+  /* Otherwise, find the lowest mass value needed in any decay mode */
+  for (const auto &mode : DecayModes::find(pdgcode()).decay_mode_list()) {
+    minmass = std::min(minmass, mode.threshold());
+  }
+  return minmass;
+}
+
+
 float ParticleType::width_total(const float m) const {
   float w = 0.;
   const ProcessBranchList partial = width_partial(m);

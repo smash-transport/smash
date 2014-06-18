@@ -83,33 +83,6 @@ static void quadrature_1d(double (*integrand_function)(double, void *),
                           double upper_limit, double *integral_value,
                           double *integral_error);
 
-/* calculate_minimum_mass
- * - calculate the minimum rest energy the resonance must have
- * to be able to decay through any of its decay channels
- * NB: This function assumes stable decay products!
- */
-float calculate_minimum_mass(PdgCode pdgcode) {
-  /* If the particle happens to be stable, just return the mass */
-  const auto type = ParticleType::find(pdgcode);
-  if (type.is_stable()) {
-    return type.mass();
-  }
-  /* Otherwise, let's find the highest mass value needed in any decay mode */
-  float minimum_mass = 0.0;
-  const std::vector<DecayBranch> decaymodes =
-      DecayModes::find(pdgcode).decay_mode_list();
-  for (const auto &mode : decaymodes) {
-    float total_mass = 0.0;
-    for (const PdgCode code : mode.pdg_list()) {
-      /* Stable decay products assumed; for resonances the mass can be lower! */
-      total_mass += ParticleType::find(code).mass();
-    }
-    if (total_mass > minimum_mass) {
-      minimum_mass = total_mass;
-    }
-  }
-  return minimum_mass;
-}
 
 /* resonance_cross_section - energy-dependent cross section
  * for producing a resonance
@@ -254,13 +227,7 @@ double two_to_one_formation(const ParticleType &type_particle1,
       printf("Number of decay particles: %zu \n", decay_particles);
     } else {
       /* There must be enough energy to produce all decay products */
-      float mass_a, mass_b, mass_c = 0.0;
-      mass_a = calculate_minimum_mass(mode.pdg_list()[0]);
-      mass_b = calculate_minimum_mass(mode.pdg_list()[1]);
-      if (decay_particles == 3) {
-        mass_c = calculate_minimum_mass(mode.pdg_list()[2]);
-      }
-      if (sqrt(mandelstam_s) < mass_a + mass_b + mass_c)
+      if (sqrt(mandelstam_s) < mode.threshold())
         not_enough_energy = true;
       /* Initial state is also a possible final state;
        * weigh the cross section with the ratio of this branch
@@ -383,17 +350,10 @@ size_t two_to_two_formation(const ParticleType &type_particle1,
         printf("Number of decay particles: %zu \n", decay_particles);
       } else {
         /* There must be enough energy to produce all decay products */
-        float mass_a, mass_b, mass_c = 0.0;
-        mass_a = calculate_minimum_mass(mode.pdg_list()[0]);
-        mass_b = calculate_minimum_mass(mode.pdg_list()[1]);
-        if (decay_particles == 3) {
-          mass_c = calculate_minimum_mass(mode.pdg_list()[2]);
-        }
-        if (sqrt(mandelstam_s) < mass_a + mass_b + mass_c
-                                 + second_type.mass()) {
+        if (sqrt(mandelstam_s) < mode.threshold() + second_type.mass()) {
           not_enough_energy = true;
-        } else if (minimum_mass < mass_a + mass_b + mass_c) {
-          minimum_mass = mass_a + mass_b + mass_c;
+        } else if (minimum_mass < mode.threshold()) {
+          minimum_mass = mode.threshold();
         }
       }
     }
@@ -512,14 +472,13 @@ double spectral_function_integrand(double resonance_mass,
 }
 
 /* Resonance mass sampling for 2-particle final state */
-double sample_resonance_mass(PdgCode pdg_resonance, PdgCode pdg_stable,
-                             double cms_energy) {
-  /* First, find the minimum mass of this resonance */
-  double minimum_mass = calculate_minimum_mass(pdg_resonance);
+double sample_resonance_mass(const ParticleType &type_resonance,
+                             const ParticleType &type_stable,
+                             const float cms_energy) {
   /* Define distribution parameters */
-  float mass_stable = ParticleType::find(pdg_stable).mass();
-  IntegrandParameters params = {&ParticleType::find(pdg_resonance),
-                                mass_stable, cms_energy * cms_energy};
+  float mass_stable = type_stable.mass();
+  IntegrandParameters params = {&type_resonance, mass_stable,
+                                cms_energy * cms_energy};
 
   /* sample resonance mass from the distribution
    * used for calculating the cross section
@@ -530,9 +489,9 @@ double sample_resonance_mass(PdgCode pdg_resonance, PdgCode pdg_stable,
   double distribution_value = 0.0;
   while (random_number > distribution_value) {
     random_number = Random::uniform(0.0, distribution_max);
-    mass_resonance = Random::uniform(minimum_mass, cms_energy - mass_stable);
-    distribution_value
-      = spectral_function_integrand(mass_resonance, &params);
+    mass_resonance = Random::uniform(type_resonance.minimum_mass(),
+                                     cms_energy - mass_stable);
+    distribution_value = spectral_function_integrand(mass_resonance, &params);
   }
   return mass_resonance;
 }

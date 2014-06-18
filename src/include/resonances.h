@@ -33,21 +33,6 @@ double clebsch_gordan_coefficient(const int isospin_a,
   const int isospin_z_a, const int isospin_z_b,
   const int isospin_z_resonance);
 
-/**
- * The minimum mass of the resonance.
- *
- * Calculate the minimum rest energy the resonance must have
- * for all its decay channels to be kinematically available.
- * (In other words, find the largest sum of final state particle masses)
- * **NB: This function assumes stable decay products!**
- *
- * \param[in] pdgcode PDG code of the resonance.
- *
- * \return The minimum mass required for all the decay channels
- * to be available for the resonance.
- *
- */
-float calculate_minimum_mass(PdgCode pdgcode);
 
 /**
  * Find all resonances that can be produced in a collision of the two
@@ -165,8 +150,9 @@ double spectral_function_integrand(double resonance_mass, void * parameters);
  *
  * \return The mass of the resonance particle.
  */
-double sample_resonance_mass(PdgCode pdg_resonance, PdgCode pdg_stable,
-                             double cms_energy);
+double sample_resonance_mass(const ParticleType &type_resonance,
+                             const ParticleType &type_stable,
+                             const float cms_energy);
 
 }  // namespace Smash
 

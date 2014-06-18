@@ -75,19 +75,30 @@ class ParticleType {
   inline bool is_stable() const;
 
   /**
-  * Get the mass-dependent total width of a particle with mass m.
-  * 
-  * \param m Invariant mass of the decaying particle.
-  */
+   * The minimum mass of the resonance.
+   *
+   * Calculate the minimum rest energy the resonance must have
+   * for any decay channel to be kinematically available.
+   * (In other words, find the smallest sum of final-state particle masses.)
+   *
+   * \return The minimum mass that a particle of this type can assume.
+   */
+  float minimum_mass() const;
+
+  /**
+   * Get the mass-dependent total width of a particle with mass m.
+   * 
+   * \param m Invariant mass of the decaying particle.
+   */
   float width_total(const float m) const;
 
   /**
-  * Get the mass-dependent partial widths of a particle with mass m.
-  * Returns a list of process branches, whose weights correspond to the actual
-  * partial widths.
-  * 
-  * \param m Invariant mass of the decaying particle.
-  */
+   * Get the mass-dependent partial widths of a particle with mass m.
+   * Returns a list of process branches, whose weights correspond to the
+   * actual partial widths.
+   *
+   * \param m Invariant mass of the decaying particle.
+   */
   ProcessBranchList width_partial(const float m) const;
 
   /**

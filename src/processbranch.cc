@@ -9,7 +9,6 @@
 
 #include "include/processbranch.h"
 #include "include/particledata.h"
-#include "include/resonances.h"
 
 namespace Smash {
 
@@ -30,7 +29,7 @@ float ProcessBranch::threshold() const {
       thr += t.mass();
     }
     else {
-      thr += calculate_minimum_mass(pdgcode);
+      thr += t.minimum_mass();
     }
   }
   return thr;

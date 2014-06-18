@@ -159,8 +159,8 @@ void ScatterAction::resonance_formation(const ParticleData &particle0,
     }
     float mass_stable = stable_product->type().mass();
     /* Sample resonance mass */
-    double mass_resonance = sample_resonance_mass(resonance->pdgcode(),
-                                                  stable_product->pdgcode(),
+    double mass_resonance = sample_resonance_mass(resonance->type(),
+                                                  stable_product->type(),
                                                   cms_energy);
 
     /* Sample the particle momenta */
