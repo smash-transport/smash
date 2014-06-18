@@ -21,7 +21,7 @@
 namespace Smash {
 
 
-/** 
+/**
  * Calculate isospin Clebsch-Gordan coefficient
  *
  * \f$(-1)^{j_1 - j_2 + m_3} \sqrt(2 j_3 + 1) \cdot [Wigner 3J symbol] \f$
@@ -153,6 +153,20 @@ double spectral_function_integrand(double resonance_mass, void * parameters);
 double sample_resonance_mass(const ParticleType &type_resonance,
                              const ParticleType &type_stable,
                              const float cms_energy);
+
+/**
+ * Scattering matrix amplitude squared for \f$NN \rightarrow \f$
+ *  \[resonant state\] processes.
+ *
+ * \param[in] mandelstam_s Mandelstam-s, i.e. collision CMS energy squared.
+ * \param[in] type_final_a Type information for the first final state particle.
+ * \param[in] type_final_b Type information for the second final state particle.
+ *
+ * \return Matrix amplitude squared \f$|\mathcal{M}(\sqrt{s})|^2\f$ for
+ * process \f$N+N \rightarrow\f$ type_final_a + type_final_b
+ */
+float nn_to_resonance_matrix_element(const double mandelstam_s,
+  const ParticleType &type_final_a, const ParticleType &type_final_b);
 
 }  // namespace Smash
 

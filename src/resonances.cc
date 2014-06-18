@@ -380,20 +380,17 @@ size_t two_to_two_formation(const ParticleType &type_particle1,
     printd("Integral value: %g Error: %g \n", resonance_integral,
       integral_error);
 
-    /* matrix element squared over 16pi (in mb GeV^2)
-     * (uniform angular distribution assumed)
-     */
-    double matrix_element = 180;
-
     /* Cross section for 2->2 process with resonance in final state.
-     * Based on the general differential form in
-     * Buss et al., Physics Reports 512, 1 (2012), Eq. (D.28)
+     * Based on Eq. (51) in PhD thesis of J. Weil (Giessen U., 2013)
+     * http://geb.uni-giessen.de/geb/volltexte/2013/10253/
      */
-    float xsection = clebsch_gordan_isospin * clebsch_gordan_isospin
-                      * matrix_element
-                      / mandelstam_s
-                      / sqrt(cm_momentum_squared)
-                      * resonance_integral;
+    float xsection
+      = clebsch_gordan_isospin * clebsch_gordan_isospin
+        / mandelstam_s
+        / sqrt(cm_momentum_squared)
+        * resonance_integral
+        * nn_to_resonance_matrix_element(mandelstam_s, type_resonance,
+                                         second_type);
 
     if (xsection > really_small) {
       process_list->push_back(ProcessBranch(type_resonance.pdgcode(),
@@ -494,6 +491,28 @@ double sample_resonance_mass(const ParticleType &type_resonance,
     distribution_value = spectral_function_integrand(mass_resonance, &params);
   }
   return mass_resonance;
+}
+
+/* Scattering matrix amplitude squared.
+ * Introduces energy-dependent modification
+ * on the constant matrix element from
+ * M. Effenberger diploma thesis (Giessen 1996)
+ */
+float nn_to_resonance_matrix_element(const double mandelstam_s,
+  const ParticleType &type_final_a, const ParticleType &type_final_b) {
+  PdgCode delta = PdgCode("2224");
+  if (type_final_a.pdgcode().iso_multiplet()
+      != type_final_b.pdgcode().iso_multiplet()) {
+    /* N + N -> N + Delta: fit to Dmitriev OBE model, Nucl. Phys. A 459, 503 (1986) */
+    if (type_final_a.pdgcode().iso_multiplet() == delta.iso_multiplet()
+        || type_final_b.pdgcode().iso_multiplet() == delta.iso_multiplet()) {
+      return 459. / std::pow(std::sqrt(mandelstam_s) - 1.104, 1.951);
+    } else {
+      return 0.0;
+    }
+  } else {
+    return 0.0;
+  }
 }
 
 }  // namespace Smash
