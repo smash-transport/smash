@@ -22,10 +22,6 @@ endmacro()
 macro(smash_add_exe name)
   add_executable(${name} ${name}.cc)
   target_link_libraries(${name} smash_lib ${SMASH_LIBRARIES})
-endmacro()
-
-macro(smash_add_unittest name)
-   smash_add_exe(${name})
    if(HAVE_SANITIZER)
       set_target_properties(${name} PROPERTIES
          COMPILE_FLAGS "${SANITIZER_FLAG} -DSMASH_TEST_OUTPUT_PATH=\\\"${PROJECT_BINARY_DIR}/${name}_output/\\\""
@@ -36,6 +32,10 @@ macro(smash_add_unittest name)
          COMPILE_FLAGS "-DSMASH_TEST_OUTPUT_PATH=\\\"${PROJECT_BINARY_DIR}/${name}_output/\\\""
          )
    endif()
+endmacro()
+
+macro(smash_add_unittest name)
+   smash_add_exe(${name})
    smash_add_test(${name} ${name} ${name})
 endmacro()
 
@@ -63,9 +63,6 @@ smash_add_exe(angles_distribution)
 smash_add_exe(angles_zero)
 smash_add_exe(woods-saxon)
 
-smash_add_exe(lorentzboost)
-smash_add_exe(pdgcode)
-
 # unit tests for classes:
 smash_add_unittest(yamltest)
 smash_add_unittest(configuration)
@@ -81,15 +78,15 @@ smash_add_unittest(clebschgordan)
 smash_add_unittest(clock)
 smash_add_unittest(quantumnumbers)
 smash_add_unittest(angles)
-smash_add_unittest(nucleus)
-smash_add_unittest(random)
-smash_add_test(pdgcode pdgcode pdgcode)
+smash_add_unittest(pdgcode)
 smash_add_unittest(particletype)
 smash_add_unittest(processbranch)
 smash_add_unittest(threevector)
 smash_add_unittest(fourvector)
 smash_add_unittest(oscaroutput)
-smash_add_test(lorentzboost lorentzboost lorentzboost)
+smash_add_unittest(lorentzboost)
+smash_add_unittest(nucleus)
+smash_add_unittest(random)
 
 # for now -o has to be "data", because OSCAR output still expects to output to
 # $PWD/data. In the future we want to use "${PROJECT_BINARY_DIR}/test_output"
