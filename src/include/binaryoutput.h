@@ -16,28 +16,30 @@
 #include "filedeleter.h"
 #include "forwarddeclarations.h"
 
+namespace Smash {
+
 /**
  * \brief SMASH output to binary file
  * ----------------------------------------------------------------------------
  * SMASH output to binary file is similar to OSCAR output,
- * but it is stored in a binary format. Suc format is faster
- * to read and write, but may be system architecture dependent.
+ * but it is stored in a binary format. Such format is faster
+ * to read and write, but may be architecture dependent.
  *
  * Binary file contains 
- * 1) General header:
+ * -# General header:
  *   - SMASH version
  *   - Binary format version
  *   - List of variables stored in the file and their units
- * 2) Arbitrary number of data blocks in the following format:
+ * -# Arbitrary number of data blocks in the following format:
  *   - block header: number of particles, number of event
- *   - N records (id, pdgid, t,x,y,z, p0,px,py,pz),
- *     where N = number of particles,
- *     id - particle unique id in SMASH simulation
- *     pdgid - particle PDG code
- *     t,x,y,z - space coordinates,
- *     p0,px,py,pz - 4-momenta
+ *   - N records (id, pdgid, t,x,y,z, p0,px,py,pz), where <br>
+ *     N = number of particles, <br>
+ *     id - particle unique id in SMASH simulation <br>
+ *     pdgid - particle PDG code <br>
+ *     t,x,y,z - space coordinates, <br>
+ *     p0,px,py,pz - 4-momenta 
  *
- *  Output is performed every equal amount of time defined by option,
+ *  Output is performed every equal amount of time defined by option OUTPUT_INTERVAL,
  *  at event start and at event end.
  *
  *  TODO: Options that make this output more configurable
@@ -103,8 +105,6 @@
  *  print "Total time of one event: ", dt*(dt_counter - 1)
  *  \endcode
  **/
-
-namespace Smash {
 
 class BinaryOutput : public OutputInterface {
  public:
