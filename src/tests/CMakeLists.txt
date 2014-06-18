@@ -7,7 +7,9 @@ add_executable(angles_zero angles_zero.cc ../random.cc)
 add_executable(lorentzboost lorentzboost.cc ../fourvector.cc ../random.cc)
 add_executable(pdgcode pdgcode.cc ../pdgcode.cc)
 add_executable(woods-saxon woods-saxon.cc ../nucleus.cc ../fourvector.cc
-                ../particletype.cc ../pdgcode.cc ../random.cc)
+                ../decaymodes.cc ../width.cc ../particletype.cc
+                ../pdgcode.cc ../random.cc
+                )
 
 file(COPY ../config.yaml DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ../particles.txt DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
@@ -31,8 +33,12 @@ macro(smash_add_unittest name)
    add_executable(${name} ${name}.cc)
    if(HAVE_SANITIZER)
       set_target_properties(${name} PROPERTIES
-         COMPILE_FLAGS ${SANITIZER_FLAG}
+         COMPILE_FLAGS "${SANITIZER_FLAG} -DSMASH_TEST_OUTPUT_PATH=\\\"${PROJECT_BINARY_DIR}/${name}_output/\\\""
          LINK_FLAGS ${SANITIZER_FLAG}
+         )
+   else()
+      set_target_properties(${name} PROPERTIES
+         COMPILE_FLAGS "-DSMASH_TEST_OUTPUT_PATH=\\\"${PROJECT_BINARY_DIR}/${name}_output/\\\""
          )
    endif()
    target_link_libraries(${name} smash_lib ${SMASH_LIBRARIES})
@@ -80,6 +86,7 @@ smash_add_unittest(particletype)
 smash_add_unittest(processbranch)
 smash_add_unittest(threevector)
 smash_add_unittest(fourvector)
+smash_add_unittest(oscaroutput)
 smash_add_test(lorentzboost lorentzboost lorentzboost)
 
 # for now -o has to be "data", because OSCAR output still expects to output to

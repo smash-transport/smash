@@ -53,7 +53,7 @@ float BoxModus::initial_conditions(Particles *particles,
   /* loop over all the particle types */
   for (const ParticleType &type : ParticleType::list_all()) {
     /* Particles with width > 0 (resonances) do not exist in the beginning */
-    if (type.width() > 0.0) {
+    if (!type.is_stable()) {
       continue;
     }
     printd("%s mass: %g [GeV]\n", type.name().c_str(), type.mass());

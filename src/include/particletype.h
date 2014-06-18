@@ -53,8 +53,8 @@ class ParticleType {
   /// Returns the particle mass.
   float mass() const { return mass_; }
 
-  /// Returns the particle width.
-  float width() const { return width_; }
+  /// Returns the particle width (at the mass pole).
+  float width_at_pole() const { return width_; }
 
   /// Returns the PDG code of the particle.
   PdgCode pdgcode() const { return pdgcode_; }
@@ -70,6 +70,16 @@ class ParticleType {
 
   /// \copydoc PdgCode::is_hadron
   bool is_hadron() const { return pdgcode_.is_hadron(); }
+
+  /// Check if the particle is stable
+  inline bool is_stable() const;
+
+  /**
+  * Get the mass-dependent total width of a particle with mass m.
+  * 
+  * \param m Invariant mass of the decaying particle.
+  */
+  float width_total(const float m) const;
 
   /**
    * Returns a list of all ParticleType objects.
@@ -124,6 +134,12 @@ class ParticleType {
    */
   int charge_;
 };
+
+inline bool ParticleType::is_stable() const {
+  /* We currently regard a particle type as stable if its on-shell width is
+   * less than 10 keV. */
+  return width_<1E-5;
+}
 
 }  // namespace Smash
 

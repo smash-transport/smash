@@ -23,19 +23,17 @@ std::vector<ActionPtr> DecayActionsFinder::find_possible_actions(
     CrossSections *) const {
   std::vector<ActionPtr> actions;
   FourVector velocity_lrf;
-  velocity_lrf.set_x0(1.0);
 
   for (const auto &p : particles->data()) {
     std::vector<int> in_part;
     int id = p.id();
-    float width = p.type().width();
+    float width = p.total_width();
     /* particle doesn't decay */
-    if (width < 0.0)
+    if (width <= 0.0) {
       continue;
+    }
     /* local rest frame velocity */
-    velocity_lrf.set_x1(p.momentum().x1() / p.momentum().x0());
-    velocity_lrf.set_x2(p.momentum().x2() / p.momentum().x0());
-    velocity_lrf.set_x3(p.momentum().x3() / p.momentum().x0());
+    velocity_lrf = FourVector(1., p.velocity());
 
     /* The clock goes slower in the rest frame of the resonance */
     double inverse_gamma = sqrt(velocity_lrf.Dot(velocity_lrf));
@@ -52,7 +50,7 @@ std::vector<ActionPtr> DecayActionsFinder::find_possible_actions(
     if (Random::canonical() < resonance_frame_timestep * width / hbarc) {
       /* Time is up! Set the particle to decay at this timestep */
       in_part.push_back(id);
-      actions.emplace_back(new DecayAction(in_part,0.,2));
+      actions.emplace_back(new DecayAction(in_part,0.));
     }
   }
   return std::move(actions);

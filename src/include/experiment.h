@@ -9,6 +9,7 @@
 
 #include <memory>
 #include <stdexcept>
+#include <vector>
 
 #include "chrono.h"
 #include "crosssections.h"

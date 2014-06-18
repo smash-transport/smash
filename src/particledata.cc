@@ -9,9 +9,12 @@
 
 #include "include/particledata.h"
 
-#include "include/particles.h"
-#include "include/particletype.h"
+#include "include/width.h"
 
 namespace Smash {
+
+float ParticleData::total_width() const {
+  return type_->width_total(momentum_.abs());
+}
 
 }  // namespace Smash

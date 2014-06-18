@@ -45,11 +45,11 @@ namespace Smash {
 class ProcessBranch {
  public:
   /// Default constructor
-  ProcessBranch() : branch_weight_(-1.0), interaction_type_(0) {}
+  ProcessBranch() : branch_weight_(-1.0) {}
   /// Constructor with 1 particle
-  inline ProcessBranch(PdgCode p, float w, int t);
+  inline ProcessBranch(PdgCode p, float w);
   /// Constructor with 2 particles
-  inline ProcessBranch(PdgCode p1, PdgCode p2, float w, int t);
+  inline ProcessBranch(PdgCode p1, PdgCode p2, float w);
   /// Add one particle to the list
   inline void add_particle(PdgCode particle_pdg);
   /**
@@ -65,8 +65,6 @@ class ProcessBranch {
    * compared to other branches
    */
   inline void set_weight(float process_weight);
-  /// Set the type of interaction
-  inline void set_type(int t);
   /// Clear all information from the branch
   inline void clear(void);
   /// Return the particle list
@@ -80,8 +78,6 @@ class ProcessBranch {
 
   /// Return the branch weight
   inline float weight(void) const;
-  /// Return the type of interaction
-  inline int type(void) const;
 
  private:
   /**
@@ -97,19 +93,16 @@ class ProcessBranch {
   std::vector<PdgCode> pdg_list_;
   /// Weight of the branch, typically a cross section or a branching ratio
   float branch_weight_;
-  /// Type of interaction
-  int interaction_type_;
 };
 
 // Constructor with 1 particle
-ProcessBranch::ProcessBranch (PdgCode p, float w, int t)
-                        : branch_weight_(w), interaction_type_(t) {
+ProcessBranch::ProcessBranch (PdgCode p, float w) : branch_weight_(w) {
   this->add_particle(p);
 }
 
 // Constructor with 2 particles
-ProcessBranch::ProcessBranch (PdgCode p1, PdgCode p2, float w, int t)
-                          : branch_weight_(w), interaction_type_(t) {
+ProcessBranch::ProcessBranch (PdgCode p1, PdgCode p2, float w)
+                          : branch_weight_(w) {
   this->add_particle(p1);
   this->add_particle(p2);
 }
@@ -138,11 +131,6 @@ inline void ProcessBranch::set_weight(float process_weight) {
   branch_weight_ = process_weight;
 }
 
-/// Set the type of interaction.
-inline void ProcessBranch::set_type (int t) {
-  interaction_type_ = t;
-}
-
 /// Clear all information from the branch
 inline void ProcessBranch::clear(void) {
   pdg_list_.clear();
@@ -159,10 +147,27 @@ inline float ProcessBranch::weight(void) const {
   return branch_weight_;
 }
 
-/// Return the type of interaction
-inline int ProcessBranch::type (void) const {
-  return interaction_type_;
-}
+/**
+ * DecayBranch is a derivative of ProcessBranch,
+ * which is used to represent decay channels.
+ * It contains additional information like the angular momentum.
+ */
+class DecayBranch : public ProcessBranch {
+ public:
+  inline int angular_momentum() const;
+  inline void set_angular_momentum(const int L);
+ private:
+  int angular_momentum_;
+};
+
+inline int DecayBranch::angular_momentum() const {
+  return angular_momentum_;
+};
+
+inline void DecayBranch::set_angular_momentum(const int L)
+{
+  angular_momentum_ = L;
+};
 
 }  // namespace Smash
 

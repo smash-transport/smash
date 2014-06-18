@@ -52,12 +52,12 @@ set(smash_src
         modusdefault.cc
         nucleus.cc
         nucleusmodus.cc
-        oscaroutput.cc
+        oscarfullhistoryoutput.cc
+        oscarparticlelistoutput.cc
         outputroutines.cc
         parametrizations.cc
         particledata.cc
         particles.cc
-        particlesoutput.cc
         particletype.cc
         pdgcode.cc
         processbranch.cc
@@ -66,6 +66,7 @@ set(smash_src
         scatteraction.cc
         scatteractionsfinder.cc
         vtkoutput.cc
+        width.cc
         )
 
 if(USE_ROOT)
