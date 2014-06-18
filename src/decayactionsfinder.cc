@@ -48,8 +48,7 @@ std::vector<ActionPtr> DecayActionsFinder::find_possible_actions(
     if (Random::canonical() < resonance_frame_timestep * width / hbarc) {
       /* Time is up! Set the particle to decay at this timestep */
       actions.emplace_back(act);
-    }
-    else {
+    } else {
       /* No decay. Clean up. */
       delete act;
     }

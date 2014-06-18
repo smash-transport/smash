@@ -57,7 +57,7 @@ double clebsch_gordan_coefficient(const int isospin_a,
   if (std::abs(wigner_3j) > really_small)
     clebsch_gordan_isospin = pow(-1, isospin_a / 2.0
     - isospin_b / 2.0 + isospin_z_resonance / 2.0)
-    * sqrt(isospin_resonance + 1) * wigner_3j;
+    * std::sqrt(isospin_resonance + 1) * wigner_3j;
 
   printd("CG: %g I1: %i I2: %i IR: %i iz1: %i iz2: %i izR: %i \n",
        clebsch_gordan_isospin, isospin_a, isospin_b,
@@ -227,7 +227,7 @@ double two_to_one_formation(const ParticleType &type_particle1,
       printf("Number of decay particles: %zu \n", decay_particles);
     } else {
       /* There must be enough energy to produce all decay products */
-      if (sqrt(mandelstam_s) < mode.threshold())
+      if (std::sqrt(mandelstam_s) < mode.threshold())
         not_enough_energy = true;
       /* Initial state is also a possible final state;
        * weigh the cross section with the ratio of this branch
@@ -249,7 +249,7 @@ double two_to_one_formation(const ParticleType &type_particle1,
   /* Calculate spin factor */
   const double spinfactor = (type_resonance.spin() + 1)
     / ((type_particle1.spin() + 1) * (type_particle2.spin() + 1));
-  float resonance_width = type_resonance.width_total(sqrt(mandelstam_s));
+  float resonance_width = type_resonance.width_total(std::sqrt(mandelstam_s));
   float resonance_mass = type_resonance.mass();
   /* Calculate resonance production cross section
    * using the Breit-Wigner distribution as probability amplitude
@@ -350,7 +350,7 @@ size_t two_to_two_formation(const ParticleType &type_particle1,
         printf("Number of decay particles: %zu \n", decay_particles);
       } else {
         /* There must be enough energy to produce all decay products */
-        if (sqrt(mandelstam_s) < mode.threshold() + second_type.mass()) {
+        if (std::sqrt(mandelstam_s) < mode.threshold() + second_type.mass()) {
           not_enough_energy = true;
         } else if (minimum_mass < mode.threshold()) {
           minimum_mass = mode.threshold();
@@ -368,7 +368,7 @@ size_t two_to_two_formation(const ParticleType &type_particle1,
     IntegrandParameters params = {&type_resonance, second_type.mass(),
                                   mandelstam_s};
     double lower_limit = minimum_mass;
-    double upper_limit = (sqrt(mandelstam_s) - second_type.mass());
+    double upper_limit = (std::sqrt(mandelstam_s) - second_type.mass());
     printd("Process: %s %s -> %s %s\n", type_particle1.name().c_str(),
      type_particle2.name().c_str(), second_type.name().c_str(),
      type_resonance.name().c_str());
@@ -387,7 +387,7 @@ size_t two_to_two_formation(const ParticleType &type_particle1,
     float xsection
       = clebsch_gordan_isospin * clebsch_gordan_isospin
         / mandelstam_s
-        / sqrt(cm_momentum_squared)
+        / std::sqrt(cm_momentum_squared)
         * resonance_integral
         * nn_to_resonance_matrix_element(mandelstam_s, type_resonance,
                                          second_type);
@@ -449,7 +449,7 @@ double spectral_function_integrand(double resonance_mass,
   if (mandelstam_s - (stable_mass + resonance_mass)
       * (stable_mass + resonance_mass) > 0.0) {
     double cm_momentum_final
-      = sqrt((mandelstam_s - (stable_mass + resonance_mass)
+      = std::sqrt((mandelstam_s - (stable_mass + resonance_mass)
               * (stable_mass + resonance_mass))
              * (mandelstam_s - (stable_mass - resonance_mass)
                 * (stable_mass - resonance_mass))

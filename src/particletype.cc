@@ -135,8 +135,7 @@ ProcessBranchList ParticleType::width_partial(const float m) const {
       // mass-dependent width for 2-body decays
       w = width_Manley_stable(m, mass(), t1.mass(), t2.mass(),
                               mode.angular_momentum(), partial_width_at_pole);
-    }
-    else {
+    } else {
       // constant width for three-body decays
       w = partial_width_at_pole;
     }
