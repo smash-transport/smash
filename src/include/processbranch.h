@@ -50,6 +50,8 @@ class ProcessBranch {
   inline ProcessBranch(PdgCode p, float w);
   /// Constructor with 2 particles
   inline ProcessBranch(PdgCode p1, PdgCode p2, float w);
+  /// Constructor with particle vector
+  inline ProcessBranch(std::vector<PdgCode> pdg_list, float w);
   /// Add one particle to the list
   inline void add_particle(PdgCode particle_pdg);
   /**
@@ -79,6 +81,12 @@ class ProcessBranch {
   /// Return the branch weight
   inline float weight(void) const;
 
+  /**
+   * Determine the threshold for this branch, i.e. the minimum energy that is
+   * required to produce all final-state particles.
+   */
+  float threshold() const;
+
  private:
   /**
    * List of particles appearing in this process outcome.
@@ -97,14 +105,20 @@ class ProcessBranch {
 
 // Constructor with 1 particle
 ProcessBranch::ProcessBranch (PdgCode p, float w) : branch_weight_(w) {
-  this->add_particle(p);
+  add_particle(p);
 }
 
 // Constructor with 2 particles
 ProcessBranch::ProcessBranch (PdgCode p1, PdgCode p2, float w)
                           : branch_weight_(w) {
-  this->add_particle(p1);
-  this->add_particle(p2);
+  add_particle(p1);
+  add_particle(p2);
+}
+
+// Constructor with particle vector
+ProcessBranch::ProcessBranch (std::vector<PdgCode> new_pdg_list, float w)
+                          : branch_weight_(w) {
+  set_particles(new_pdg_list);
 }
 
 /// Add one particle to the list

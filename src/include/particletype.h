@@ -82,6 +82,15 @@ class ParticleType {
   float width_total(const float m) const;
 
   /**
+  * Get the mass-dependent partial widths of a particle with mass m.
+  * Returns a list of process branches, whose weights correspond to the actual
+  * partial widths.
+  * 
+  * \param m Invariant mass of the decaying particle.
+  */
+  ProcessBranchList width_partial(const float m) const;
+
+  /**
    * Returns a list of all ParticleType objects.
    *
    * \note The order of the list may be sorted by PDG codes, but do not rely on

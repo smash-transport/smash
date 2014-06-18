@@ -91,28 +91,44 @@ void ParticleType::create_type_list(const std::string &input) {  //{{{
 
 
 float ParticleType::width_total(const float m) const {
-  float w = 0., partial_width_at_pole;
-  if (this->is_stable()) return w;
-  const std::vector<DecayBranch> decaymodes
-        = DecayModes::find(this->pdgcode()).decay_mode_list();
+  float w = 0.;
+  const ProcessBranchList partial = width_partial(m);
+  // loop over decay modes and sum up all partial widths
+  for (const auto &mode : partial) {
+    w = w + mode.weight();
+  }
+  return w;
+}
+
+
+ProcessBranchList ParticleType::width_partial(const float m) const {
+  float w = 0.;
+  ProcessBranchList partial;
+  if (is_stable()) {
+    return partial;
+  }
+  const DecayBranchList decaymodes
+        = DecayModes::find(pdgcode()).decay_mode_list();
   // loop over decay modes and sum up all partial widths
   for (const auto &mode : decaymodes) {
-    partial_width_at_pole = this->width_at_pole()*mode.weight();
+    if (m < mode.threshold()) {
+      continue; }
+    float partial_width_at_pole = width_at_pole()*mode.weight();
     const ParticleType &t1 = ParticleType::find(mode.pdg_list()[0]);
     const ParticleType &t2 = ParticleType::find(mode.pdg_list()[1]);
     if (mode.pdg_list().size()==2 && t1.is_stable() && t2.is_stable()) {
       // mass-dependent width for 2-body decays
-      w = w + width_Manley_stable(m, this->mass(), t1.mass(), t2.mass(),
-                                  mode.angular_momentum(),
-                                  partial_width_at_pole);
+      w = width_Manley_stable(m, mass(), t1.mass(), t2.mass(),
+                              mode.angular_momentum(), partial_width_at_pole);
     }
     else {
       // constant width for three-body decays
-      w = w + partial_width_at_pole;
+      w = partial_width_at_pole;
     }
+    partial.push_back(ProcessBranch(mode.pdg_list(),w));
   }
 
-  return w;
+  return partial;
 }
 
 

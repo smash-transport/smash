@@ -22,29 +22,6 @@ ScatterAction::ScatterAction(const std::vector<int> &in_part,
     : Action(in_part, time_of_execution) {}
 
 
-ParticleList ScatterAction::choose_channel () {
-  if (total_weight_ < really_small) {
-    return ParticleList();
-  }
-  double random_interaction = Random::canonical();
-  float interaction_probability = 0.0;
-  std::vector<ProcessBranch>::const_iterator proc = subprocesses_.begin();
-  while (outgoing_particles_.size() == 0 && proc != subprocesses_.end()) {
-    if (proc->pdg_list().size() > 1
-        || proc->pdg_list().at(0) != PdgCode::invalid()) {
-      interaction_probability += proc->weight() / total_weight_;
-      if (random_interaction < interaction_probability) {
-        break;
-      }
-    }
-    ++proc;
-  }
-  printd("ScatterAction::choose_channel: particle %d <-> %d time: %g\n",
-         incoming_particles_[0], incoming_particles_[1],
-         time_of_execution_);
-  return proc->particle_list();
-}
-
 void ScatterAction::perform (Particles *particles, size_t &id_process)
 {
   ThreeVector velocity_CM;

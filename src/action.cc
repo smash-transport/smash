@@ -10,6 +10,8 @@
 #include "include/action.h"
 
 #include "include/constants.h"
+#include "include/random.h"
+
 #include <assert.h>
 
 namespace Smash {
@@ -29,7 +31,7 @@ void Action::add_process (ProcessBranch p) {
   total_weight_ += p.weight();
 }
 
-void Action::add_processes (std::vector<ProcessBranch> &pv) {
+void Action::add_processes (ProcessBranchList &pv) {
   for (auto proc = pv.begin(); proc != pv.end(); ++proc) {
     subprocesses_.push_back(*proc);
     total_weight_ += proc->weight();
@@ -52,6 +54,26 @@ ParticleList Action::incoming_particles(const Particles &particles) const {
     l.emplace_back(particles.data(id));
   }
   return std::move(l);
+}
+
+ParticleList Action::choose_channel () {
+  if (total_weight_ < really_small) {
+    return ParticleList();
+  }
+  double random_interaction = Random::canonical();
+  float interaction_probability = 0.0;
+  std::vector<ProcessBranch>::const_iterator proc = subprocesses_.begin();
+  while (outgoing_particles_.size() == 0 && proc != subprocesses_.end()) {
+    if (proc->pdg_list().size() > 1
+        || proc->pdg_list().at(0) != PdgCode::invalid()) {
+      interaction_probability += proc->weight() / total_weight_;
+      if (random_interaction < interaction_probability) {
+        break;
+      }
+    }
+    ++proc;
+  }
+  return proc->particle_list();
 }
 
 void Action::check_conservation(const Particles &particles,

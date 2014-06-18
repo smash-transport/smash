@@ -18,10 +18,13 @@
 namespace Smash {
 
 
-DecayAction::DecayAction(const std::vector<int> &in_part,
-                         float time_of_execution)
-    : Action (in_part, time_of_execution) {}
+DecayAction::DecayAction(const int &id_in, float time_of_execution)
+    : Action (std::vector<int>(1,id_in), time_of_execution) {}
 
+DecayAction::DecayAction(const ParticleData &p) : Action (std::vector<int>(1,p.id()), 0.) {
+  ProcessBranchList partial = p.type().width_partial(p.mass());
+  add_processes(partial);
+}
 
 void DecayAction::one_to_two(const ParticleData &incoming0) {
   ParticleData &outgoing0 = outgoing_particles_[0];
@@ -196,26 +199,6 @@ void DecayAction::one_to_three(const ParticleData &incoming0) {
          outgoing1.momentum().x3(), outgoing2.momentum().x3());
 }
 
-ParticleList DecayAction::choose_channel(const Particles &particles) const {
-  const PdgCode pdgcode = particles.data(incoming_particles_[0]).pdgcode();
-
-  /* Get the decay modes of this resonance */
-  const std::vector<DecayBranch> decaymodes
-    = DecayModes::find(pdgcode).decay_mode_list();
-  /* Get the first decay mode and its branching ratio */
-  std::vector<DecayBranch>::const_iterator mode = decaymodes.begin();
-  float cumulated_probability = mode->weight();
-  /* Ratios of decay channels should add to 1; pick a random number
-   * between 0 and 1 to select the decay mode to be used
-   */
-  double random_mode = Random::canonical();
-  /* Keep adding to the probability until it exceeds the random value */
-  while (random_mode > cumulated_probability &&  mode != decaymodes.end()) {
-    cumulated_probability += mode->weight();
-    ++mode;
-  }
-  return mode->particle_list();
-}
 
 void DecayAction::perform(Particles *particles, size_t &id_process) {
   /* Check if particle still exists. */
@@ -243,7 +226,8 @@ void DecayAction::perform(Particles *particles, size_t &id_process) {
    * according to their relative weights. Then decay the particle
    * by calling function one_to_two or one_to_three.
    */
-  outgoing_particles_ = choose_channel(*particles);
+  outgoing_particles_ = choose_channel();
+
   if (outgoing_particles_.size() == 2) {
     one_to_two(particle0);
   } else if (outgoing_particles_.size() == 3) {

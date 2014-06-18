@@ -7,9 +7,10 @@ add_executable(angles_zero angles_zero.cc ../random.cc)
 add_executable(lorentzboost lorentzboost.cc ../fourvector.cc ../random.cc)
 add_executable(pdgcode pdgcode.cc ../pdgcode.cc)
 add_executable(woods-saxon woods-saxon.cc ../nucleus.cc ../fourvector.cc
-                ../decaymodes.cc ../width.cc ../particletype.cc
+                ../decaymodes.cc ../width.cc ../distributions.cc ../resonances.cc ../processbranch.cc ../particletype.cc
                 ../pdgcode.cc ../random.cc
                 )
+target_link_libraries(woods-saxon smash_lib ${SMASH_LIBRARIES})
 
 file(COPY ../config.yaml DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ../particles.txt DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
