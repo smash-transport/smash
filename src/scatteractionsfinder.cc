@@ -83,9 +83,6 @@ ScatterActionsFinder::check_collision(const int id_a, const int id_b, Particles 
            distance_squared);
   }
 
-  /* Decide for a particular final state. */
-  act->choose_channel();
-
   /* Set up collision partners. */
   particles->data(id_a).set_collision_time(time_until_collision);
   particles->data(id_b).set_collision_time(time_until_collision);
