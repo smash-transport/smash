@@ -44,6 +44,12 @@ class FourVector {
   FourVector(double y0, ThreeVector vec) {
       x_ = {y0, vec.x1(), vec.x2(), vec.x3()};
   }
+
+  /// access the component at offset \p i.
+  double &operator[](std::size_t i) { return x_[i]; }
+  /// const overload of the above.
+  double operator[](std::size_t i) const { return x_[i]; }
+
   /// retrieve time-like component
   double inline x0(void) const;
   /// set time-like component

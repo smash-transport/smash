@@ -35,6 +35,12 @@ class ThreeVector {
   ThreeVector(double y1, double y2, double y3) {
     x_ = {y1, y2, y3};
   }
+
+  /// access the component at offset \p i.
+  double &operator[](std::size_t i) { return x_[i]; }
+  /// const overload of the above.
+  double operator[](std::size_t i) const { return x_[i]; }
+
   /// retrieve first component
   double inline x1() const;
   /// set first component
