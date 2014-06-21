@@ -178,7 +178,7 @@ float Nucleus::mass() const {
  *  So, the algorithm needs to do all this from the end:
  *
  **/
-float Nucleus::distribution_nucleons() const {
+float Nucleus::distribute_nucleon() const {
   // diffusiveness_ zero or negative? Use hard sphere.
   if (diffusiveness_ < std::numeric_limits<float>::min()) {
     return nuclear_radius()*(pow(Random::canonical(), 1./3.));
@@ -226,7 +226,7 @@ float Nucleus::woods_saxon(const float& r) {
 void Nucleus::arrange_nucleons() {
   for (auto i = begin(); i != end(); i++) {
     // get radial position of current nucleon:
-    float r = distribution_nucleons();
+    float r = distribute_nucleon();
     // get solid angle for current nucleon:
     Angles dir;
     dir.distribute_isotropically();

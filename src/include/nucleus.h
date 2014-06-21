@@ -37,12 +37,12 @@ class Nucleus {
 
   /** returns a Woods-Saxon distributed length
    *
-   * the distribution of return values from this function is according
-   * to a Woods-Saxon distribution suitable for this nucleus.
+   * the distribution of return values from this function is according to a 
+   * spherically symmetric Woods-Saxon distribution suitable for this nucleus.
    * \f$\frac{dN}{dr} = \frac{r^2}{\exp\left(\frac{r-R}{d}\right) +
    * 1}\f$ where \f$d\f$ is the diffusiveness_ parameter and \f$R\f$ is
    * nuclear_radius(). */
-  float distribution_nucleons() const;
+  float distribute_nucleon() const;
   /** returns the Woods-Saxon distribution directly
    *
    * @param x the position at which to evaluate the function
@@ -50,7 +50,7 @@ class Nucleus {
    **/
   float woods_saxon(const float& x);
   /// sets the positions of the nuclei inside nucleus A.
-  void arrange_nucleons();
+  virtual void arrange_nucleons();
   /**
    * Boosts the nuclei so that the nucleons have the appropriate
    * momentum and the nuclei are lorentz-contracted.
@@ -83,6 +83,12 @@ class Nucleus {
   ///
   /// \see diffusiveness_.
   void set_diffusiveness(const float& soft);
+  /// gets the diffusiveness of the nucleus
+  ///
+  /// \see diffusiveness
+  float get_diffusiveness() {
+    return diffusiveness_;
+  }
   /**
    * shifts the nucleus to correct impact parameter and z displacement.
    *
@@ -143,7 +149,7 @@ class Nucleus {
   };
 
  private:
-  /** diffusiveness of Woods-Saxon-distribution in this nucleus im fm
+  /** diffusiveness of Woods-Saxon-distribution in this nucleus in fm
    * (for diffusiveness_ == 0, we obtain a hard sphere. */
   float diffusiveness_ = .545f;
   /** single-proton-radius

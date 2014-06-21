@@ -19,7 +19,7 @@ struct ExperimentParameters;
 
 /** NucleusModus: Provides a modus for colliding nuclei.
  *
- * To use this modus, chose
+ * To use this modus, choose
  * \code
  * General:
  *      MODUS: Nucleus

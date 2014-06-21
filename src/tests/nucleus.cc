@@ -202,7 +202,7 @@ TEST(woods_saxon) {
   constexpr int N_TEST = 10000000;
   // fill the histogram
   for (int i = 0; i < N_TEST; i++) {
-    float radius = projectile.distribution_nucleons();
+    float radius = projectile.distribute_nucleon();
     int bin = radius/dx;
     ++histogram[bin];
   }
