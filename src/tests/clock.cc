@@ -193,6 +193,20 @@ TEST(next_multiple) {
   COMPARE(labtime.next_multiple(interval), interval * 7.f);
 }
 
+TEST(longtime_test) {
+  // this test is added after assessing Issue #697: At very long times,
+  // the code for Clock::multiple_is_in_next_tick() failed.
+  Clock labtime(0.0f, 0.01f);
+  while (labtime < 100*1000) {
+    for (int i = 0; i < 10; ++i) {
+      ++labtime;
+    }
+    Clock nexttime = labtime;
+    ++nexttime;
+    VERIFY(labtime.multiple_is_in_next_tick(0.1f));
+  }
+}
+
 TEST(assignment) {
   Clock labtime(4.2f, 0.3f);
   Clock resettime = labtime;
