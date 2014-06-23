@@ -8,15 +8,15 @@
 #SBATCH --cpus-per-task=1
 #
 # job output:
-#SBATCH --output=/scratch/hyihp/attems/mash.o%j
-#SBATCH --error=/scratch/hyihp/attems/mash.e%j
+#SBATCH --output=/scratch/hyihp/oliiny/smash.o%j
+#SBATCH --error=/scratch/hyihp/oliiny/smash.e%j
 #
 # email
 #SBATCH --mail-type=FAIL
-#SBATCH --mail-user=attems@fias.uni-frankfurt.de
+#SBATCH --mail-user=oliiny@fias.uni-frankfurt.de
 #
 # job name:
-#SBATCH --job-name=mash
+#SBATCH --job-name=smash
 #
 # mpi stuff:
 #SBATCH --partition=serial
@@ -28,7 +28,7 @@
 #SBATCH --time=6-23:00:00
 
 # output
-path="/scratch/hyihp/attems/mash_a10_T12_s25_t1_${SLURM_JOB_ID}"
+path="/scratch/hyihp/oliiny/binary_output_test_${SLURM_JOB_ID}"
 
  # git show-ref HEAD # show sha1 tag and branch of run
 git_branch=$(cat ../.git/HEAD)
@@ -46,11 +46,11 @@ echo "Saving data: $path"
 
 # Run stuff in scratch space
 mkdir -p "$path"
-cp params_t12_s25.txt "$path/params.txt"
-cp mash "$path/"
+cp ../build/config.yaml "$path/"
+cp ../build/smash "$path/"
 cd $path
 
 export OMP_NUM_THREADS=1
 
 # start programm
-srun ./mash -R ${SLURM_JOB_ID}
+srun ./smash
