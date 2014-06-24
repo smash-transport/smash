@@ -21,4 +21,14 @@ ParticleList ProcessBranch::particle_list() const {
   return std::move(l);
 }
 
+float ProcessBranch::threshold() const {
+  float thr = 0.;
+  /* Sum up the (minimum) masses of all final-state particles. */
+  for (auto pdgcode : pdg_list_) {
+    const ParticleType &t = ParticleType::find(pdgcode);
+    thr += t.minimum_mass();
+  }
+  return thr;
+}
+
 }  // namespace Smash

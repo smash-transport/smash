@@ -90,29 +90,69 @@ void ParticleType::create_type_list(const std::string &input) {  //{{{
 }/*}}}*/
 
 
-float ParticleType::width_total(const float m) const {
-  float w = 0., partial_width_at_pole;
-  if (this->is_stable()) return w;
-  const std::vector<DecayBranch> decaymodes
-        = DecayModes::find(this->pdgcode()).decay_mode_list();
-  // loop over decay modes and sum up all partial widths
-  for (const auto &mode : decaymodes) {
-    partial_width_at_pole = this->width_at_pole()*mode.weight();
-    const ParticleType &t1 = ParticleType::find(mode.pdg_list()[0]);
-    const ParticleType &t2 = ParticleType::find(mode.pdg_list()[1]);
-    if (mode.pdg_list().size()==2 && t1.is_stable() && t2.is_stable()) {
-      // mass-dependent width for 2-body decays
-      w = w + width_Manley_stable(m, this->mass(), t1.mass(), t2.mass(),
-                                  mode.angular_momentum(),
-                                  partial_width_at_pole);
-    }
-    else {
-      // constant width for three-body decays
-      w = w + partial_width_at_pole;
+float ParticleType::minimum_mass() const {
+  float minmass = mass();
+
+  /* If the particle happens to be stable, just return the mass. */
+  if (is_stable()) {
+    return minmass;
+  }
+  /* Otherwise, find the lowest mass value needed in any decay mode */
+  for (const auto &mode : DecayModes::find(pdgcode()).decay_mode_list()) {
+    minmass = std::min(minmass, mode.threshold());
+  }
+  return minmass;
+}
+
+
+float ParticleType::partial_width(const float m,
+                                  const DecayBranch &mode) const{
+  if (m < mode.threshold()) {
+    return 0.;
+  }
+  float partial_width_at_pole = width_at_pole()*mode.weight();
+  const ParticleType &t1 = ParticleType::find(mode.pdg_list()[0]);
+  const ParticleType &t2 = ParticleType::find(mode.pdg_list()[1]);
+  if (mode.pdg_list().size()==2 && t1.is_stable() && t2.is_stable()) {
+    /* mass-dependent width for 2-body decays with stable decay products */
+    return width_Manley_stable(m, mass(), t1.mass(), t2.mass(),
+                               mode.angular_momentum(),
+                               partial_width_at_pole);
+  } else {
+    /* constant width for three-body decays
+     * (and two-body decays with unstable products) */
+    return partial_width_at_pole;
+  }
+}
+
+
+float ParticleType::total_width(const float m) const {
+  float w = 0.;
+  if (is_stable()) {
+    return w;
+  }
+  /* Loop over decay modes and sum up all partial widths. */
+  for (const auto &mode : DecayModes::find(pdgcode()).decay_mode_list()) {
+    w = w + partial_width(m, mode);
+  }
+  return w;
+}
+
+
+ProcessBranchList ParticleType::get_partial_widths(const float m) const {
+  float w = 0.;
+  ProcessBranchList partial;
+  if (is_stable()) {
+    return partial;
+  }
+  /* Loop over decay modes and calculate all partial widths. */
+  for (const auto &mode : DecayModes::find(pdgcode()).decay_mode_list()) {
+    w = partial_width(m, mode);
+    if (w>0.) {
+      partial.push_back(ProcessBranch(mode.pdg_list(),w));
     }
   }
-
-  return w;
+  return partial;
 }
 
 
