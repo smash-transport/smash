@@ -102,11 +102,11 @@ class Action {
 class DecayAction : public Action {
  public:
   /** Simple constructor (without processes). */
-  DecayAction(const int &id_in, float time_of_execution);
+  DecayAction(const int id_in, float time_of_execution);
   /** Construct a DecayAction from a particle p.
    *
    * Sets up the full list of possible decay processes.
-   * 
+   *
    * \param[in] p Data of decaying particle. We use its ID and mass.
    */
   DecayAction(const ParticleData &p);

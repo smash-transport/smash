@@ -18,10 +18,9 @@
 
 namespace Smash {
 
-std::vector<ActionPtr> DecayActionsFinder::find_possible_actions(
-    Particles *particles, const ExperimentParameters &parameters,
-    CrossSections *) const {
-  std::vector<ActionPtr> actions;
+ActionList DecayActionsFinder::find_possible_actions(Particles *particles,
+              const ExperimentParameters &parameters, CrossSections *) const {
+  ActionList actions;
 
   for (const auto &p : particles->data()) {
     if (p.type().is_stable()) {
@@ -35,11 +34,11 @@ std::vector<ActionPtr> DecayActionsFinder::find_possible_actions(
     double resonance_frame_timestep = parameters.timestep_duration()
                                     * inverse_gamma;
 
-    DecayAction *act = new DecayAction(p);
+    std::unique_ptr<DecayAction> act(new DecayAction(p));
     float width = act->weight();   // total decay width (mass-dependent)
 
-    /* Exponential decay. Average lifetime t_avr = 1 / width
-     * t / t_avr = width * t (remember GeV-fm conversion)
+    /* Exponential decay. Lifetime tau = 1 / width
+     * t / tau = width * t (remember GeV-fm conversion)
      * P(decay at Delta_t) = width * Delta_t
      * P(alive after n steps) = (1 - width * Delta_t)^n
      * = (1 - width * Delta_t)^(t / Delta_t)
@@ -47,10 +46,7 @@ std::vector<ActionPtr> DecayActionsFinder::find_possible_actions(
      */
     if (Random::canonical() < resonance_frame_timestep * width / hbarc) {
       /* Time is up! Set the particle to decay at this timestep. */
-      actions.emplace_back(act);
-    } else {
-      /* No decay. Clean up. */
-      delete act;
+      actions.emplace_back(std::move(act));
     }
   }
   return std::move(actions);

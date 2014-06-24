@@ -18,12 +18,11 @@
 namespace Smash {
 
 
-DecayAction::DecayAction(const int &id_in, float time_of_execution)
-    : Action (std::vector<int>(1,id_in), time_of_execution) {}
+DecayAction::DecayAction(const int id_in, float time_of_execution)
+    : Action ({id_in}, time_of_execution) {}
 
-DecayAction::DecayAction(const ParticleData &p) : Action (std::vector<int>(1,p.id()), 0.) {
-  ProcessBranchList partial = p.type().width_partial(p.mass());
-  add_processes(partial);
+DecayAction::DecayAction(const ParticleData &p) : Action ({p.id()}, 0.) {
+  add_processes(p.type().get_partial_widths(p.mass()));
 }
 
 void DecayAction::one_to_two(const ParticleData &incoming0) {

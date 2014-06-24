@@ -86,11 +86,20 @@ class ParticleType {
   float minimum_mass() const;
 
   /**
+   * Get the mass-dependent partial width of a particle with mass m
+   * in a particular decay mode.
+   *
+   * \param m Invariant mass of the decaying particle.
+   * \param mode Decay mode to consider.
+   */
+  float partial_width(const float m, const DecayBranch &mode) const;
+
+  /**
    * Get the mass-dependent total width of a particle with mass m.
-   * 
+   *
    * \param m Invariant mass of the decaying particle.
    */
-  float width_total(const float m) const;
+  float total_width(const float m) const;
 
   /**
    * Get the mass-dependent partial widths of a particle with mass m.
@@ -99,7 +108,7 @@ class ParticleType {
    *
    * \param m Invariant mass of the decaying particle.
    */
-  ProcessBranchList width_partial(const float m) const;
+  ProcessBranchList get_partial_widths(const float m) const;
 
   /**
    * Returns a list of all ParticleType objects.

@@ -118,7 +118,7 @@ ProcessBranch::ProcessBranch (PdgCode p1, PdgCode p2, float w)
 // Constructor with particle vector
 ProcessBranch::ProcessBranch (std::vector<PdgCode> new_pdg_list, float w)
                           : branch_weight_(w) {
-  set_particles(new_pdg_list);
+  set_particles(std::move(new_pdg_list));
 }
 
 /// Add one particle to the list

@@ -249,7 +249,7 @@ double two_to_one_formation(const ParticleType &type_particle1,
   /* Calculate spin factor */
   const double spinfactor = (type_resonance.spin() + 1)
     / ((type_particle1.spin() + 1) * (type_particle2.spin() + 1));
-  float resonance_width = type_resonance.width_total(std::sqrt(mandelstam_s));
+  float resonance_width = type_resonance.total_width(std::sqrt(mandelstam_s));
   float resonance_mass = type_resonance.mass();
   /* Calculate resonance production cross section
    * using the Breit-Wigner distribution as probability amplitude
@@ -443,7 +443,7 @@ double spectral_function_integrand(double resonance_mass,
   double resonance_pole_mass = params->type->mass();
   double stable_mass = params->m2;
   double mandelstam_s = params->s;
-  double resonance_width = params->type->width_total(resonance_mass);
+  double resonance_width = params->type->total_width(resonance_mass);
 
   /* center-of-mass momentum of final state particles */
   if (mandelstam_s - (stable_mass + resonance_mass)
