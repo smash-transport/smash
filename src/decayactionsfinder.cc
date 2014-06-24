@@ -36,7 +36,7 @@ std::vector<ActionPtr> DecayActionsFinder::find_possible_actions(
                                     * inverse_gamma;
 
     DecayAction *act = new DecayAction(p);
-    float width = act->weight();
+    float width = act->weight();   // total decay width (mass-dependent)
 
     /* Exponential decay. Average lifetime t_avr = 1 / width
      * t / t_avr = width * t (remember GeV-fm conversion)
@@ -46,7 +46,7 @@ std::vector<ActionPtr> DecayActionsFinder::find_possible_actions(
      * -> exp(-width * t) when Delta_t -> 0
      */
     if (Random::canonical() < resonance_frame_timestep * width / hbarc) {
-      /* Time is up! Set the particle to decay at this timestep */
+      /* Time is up! Set the particle to decay at this timestep. */
       actions.emplace_back(act);
     } else {
       /* No decay. Clean up. */

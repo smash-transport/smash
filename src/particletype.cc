@@ -122,21 +122,20 @@ ProcessBranchList ParticleType::width_partial(const float m) const {
   if (is_stable()) {
     return partial;
   }
-  const DecayBranchList decaymodes
-        = DecayModes::find(pdgcode()).decay_mode_list();
-  // loop over decay modes and sum up all partial widths
-  for (const auto &mode : decaymodes) {
+  /* Loop over decay modes and sum up all partial widths. */
+  for (const auto &mode : DecayModes::find(pdgcode()).decay_mode_list()) {
     if (m < mode.threshold()) {
       continue; }
     float partial_width_at_pole = width_at_pole()*mode.weight();
     const ParticleType &t1 = ParticleType::find(mode.pdg_list()[0]);
     const ParticleType &t2 = ParticleType::find(mode.pdg_list()[1]);
     if (mode.pdg_list().size()==2 && t1.is_stable() && t2.is_stable()) {
-      // mass-dependent width for 2-body decays
+      /* mass-dependent width for 2-body decays with stable decay products */
       w = width_Manley_stable(m, mass(), t1.mass(), t2.mass(),
                               mode.angular_momentum(), partial_width_at_pole);
     } else {
-      // constant width for three-body decays
+      /* constant width for three-body decays
+       * (and two-body decays with unstable products) */
       w = partial_width_at_pole;
     }
     partial.push_back(ProcessBranch(mode.pdg_list(),w));

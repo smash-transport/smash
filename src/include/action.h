@@ -39,12 +39,12 @@ class Action {
 
   /** Returns the total weight, which is a cross section in case of a ScatterAction
    * and a decay width in case of a DecayAction. */
-  float weight(void) const;
+  float weight() const;
 
   /** Add a new subprocess.  */
-  void add_process(ProcessBranch p);
+  void add_process(const ProcessBranch &p);
   /** Add several new subprocesses at once.  */
-  void add_processes(ProcessBranchList &pv);
+  void add_processes(const ProcessBranchList &pv);
 
   /** Actually perform the action, e.g. carry out a decay or scattering.  */
   virtual void perform(Particles *particles, size_t &id_process) = 0;
