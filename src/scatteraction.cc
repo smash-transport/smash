@@ -93,8 +93,8 @@ void ScatterAction::perform (Particles *particles, size_t &id_process)
       /* unset collision time for particles + keep id + unset partner */
       new_particle.set_collision_past(id_process);
 
-      printd("Resonance %s with ID %zu \n",
-             new_particle.type(*particles).name().c_str(), new_particle.id());
+      printd("Resonance %s with ID %i \n",
+             new_particle.type().name().c_str(), new_particle.id());
       printd_momenta("momentum in comp frame", new_particle);
       printd_position("position in comp frame", new_particle);
 
