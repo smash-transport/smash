@@ -129,5 +129,7 @@ void RootOutput::particles_to_tree(const char* treename,
 
     curr_tree->Fill();
   }
+  // Flush tree from memory to disk
+  curr_tree->FlushBaskets();
 }
 }  // namespace Smash
