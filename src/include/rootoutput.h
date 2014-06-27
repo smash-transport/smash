@@ -30,18 +30,16 @@ class Particles;
   * cmake -D USE_ROOT=ON ..
   * make
   * \endcode
-  * This class produces file smash_run.root, which contains
-  * ROOT TTrees. Each TTree contains information about particles
-  * at some moment of simulation from all SMASH events.
-  * In addition there are TTrees with names at_eventstart and at_eventend,
-  * which store information at event start (after initialization) and at 
-  * event end (after the final moment of time). 
+  * This class produces file smash_run.root, which contains a
+  * ROOT TTree. TTree contains information about particles
+  * during simulation from all SMASH events.
   * Particle information is stored in TBranches.
   * For each particle characteristic there is a separate branch.
-  * Currently these are x,y,z (coordinates), p0,px,py,pz (4-momentum), 
+  * Currently these are t,x,y,z (coordinates), p0,px,py,pz (4-momentum), 
   * id - unique identifier for every SMASH particle during one event,
-  * pdgid - PDG code of particle, that characterizes its sort and
-  * ev - number of event particle encountered in.
+  * pdgid - PDG code of particle, that characterizes its sort,
+  * ev - number of event particle encountered in and
+  * output_counter - number of output block in a given event.
   * 
   * Here is an example of ROOT macro to read the ROOT output of SMASH:
   * \code
@@ -55,17 +53,17 @@ class Particles;
   *   }
   * 
   *   // Get a tree from file
-  *   TTree *ev_end_tree = static_cast<TTree*>(input_file->Get("at_eventend"));
+  *   TTree *tree = static_cast<TTree*>(input_file->Get("particles"));
   * 
   *   // Get number of entries in a tree
-  *   Int_t nentries = ev_end_tree->GetEntries();
+  *   Int_t nentries = tree->GetEntries();
   *   printf("Number of entries in a tree is %d\n", nentries);
   *
   *   // This draws p_T distribution 
-  *   // ev_end_tree->Draw("sqrt(px*px + py*py)");
+  *   // tree->Draw("sqrt(px*px + py*py)");
 
   *   // This draws 3D momentum space distribution
-  *   ev_end_tree->Draw("px:py:pz");
+  *   tree->Draw("px:py:pz");
   * 
   *   return 0;
   * }
@@ -91,12 +89,19 @@ class RootOutput : public OutputInterface {
   const boost::filesystem::path base_path_;
   std::unique_ptr<TFile> root_out_file_;
   // TFile takes ownership of all TTrees.
-  // That's why TTrees are not unique pointers.
-  std::vector<TTree*> tree_list_;
-  void particles_to_tree(const char* treename,
-                         const char* treedescr,
-                         const Particles &particles,
+  // That's why TTree is not a unique pointer.
+  TTree* tree_;
+  void particles_to_tree(const Particles &particles,
                          const int event_number);
+  // Counts number of output in a given event
+  int output_counter_;
+
+  const int max_buffer_size_;
+  // Variables that serve as buffer for filling TTree
+  double *p0, *px, *py, *pz;
+  double *t, *x, *y, *z;
+  int    *pdgcode;
+  int    npart, tcounter, ev;
 };
 }  // namespace Smash
 

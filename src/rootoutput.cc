@@ -17,12 +17,43 @@
 namespace Smash {
 
 /**
- * RootOuput constructor. Creates file smash_run.root in run directory.
+ * RootOuput constructor. Creates file smash_run.root in run directory
+ * and TTree with the name "particles" in it.
  */
 RootOutput::RootOutput(boost::filesystem::path path)
     : base_path_(std::move(path)),
       root_out_file_(
-          new TFile((base_path_ / "smash_run.root").native().c_str(), "NEW")) {}
+          new TFile((base_path_ / "smash_run.root").native().c_str(), "NEW")),
+      output_counter_(0),
+      max_buffer_size_(10000) {
+  tree_ = new TTree("particles","particles");
+
+  t  = new double[max_buffer_size_];
+  x  = new double[max_buffer_size_];
+  y  = new double[max_buffer_size_];
+  z  = new double[max_buffer_size_];
+  p0 = new double[max_buffer_size_];
+  px = new double[max_buffer_size_];
+  py = new double[max_buffer_size_];
+  pz = new double[max_buffer_size_];
+  pdgcode = new int[max_buffer_size_];
+
+  tree_->Branch("npart", &npart, "npart/I");
+  tree_->Branch("ev", &ev, "ev/I");
+  tree_->Branch("tcounter", &tcounter, "tcounter/I");
+
+  tree_->Branch("pdgcode", &pdgcode[0], "pdgcode[npart]/I");
+
+  tree_->Branch("p0", &p0[0], "p0[npart]/D");
+  tree_->Branch("px", &px[0], "px[npart]/D");
+  tree_->Branch("py", &py[0], "py[npart]/D");
+  tree_->Branch("pz", &pz[0], "pz[npart]/D");
+
+  tree_->Branch("t", &t[0], "t[npart]/D");
+  tree_->Branch("x", &x[0], "x[npart]/D");
+  tree_->Branch("y", &y[0], "y[npart]/D");
+  tree_->Branch("z", &z[0], "z[npart]/D");
+}
 
 /**
  * RootOutput destructor. Writes root objects (here TTrees) to file and closes it.
@@ -38,8 +69,9 @@ RootOutput::~RootOutput() {
  */
 void RootOutput::at_eventstart(const Particles &particles,
                                const int event_number) {
-  particles_to_tree("at_eventstart", "Initial particles",
-                    particles, event_number);
+  output_counter_ = 0;
+  particles_to_tree(particles, event_number);
+  output_counter_++;
 }
 
 /**
@@ -47,22 +79,22 @@ void RootOutput::at_eventstart(const Particles &particles,
  */
 void RootOutput::after_Nth_timestep(const Particles &particles,
                                     const int event_number,
-                                    const Clock &clock) {
-  char treename[32], treedescr[64];
-  snprintf(treename, sizeof(treename),
-           "at_time_%8.3f", clock.current_time());
-  snprintf(treedescr, sizeof(treedescr),
-           "Particles after time %8.3f", clock.current_time());
-  particles_to_tree(treename, treedescr, particles, event_number);
+                                    const Clock &/*clock*/) {
+  particles_to_tree(particles, event_number);
+  output_counter_++;
 }
 
 /**
  * Writes to tree "at_eventend".
  */
-void RootOutput::at_eventend(const Particles &particles,
+void RootOutput::at_eventend(const Particles &/*particles*/,
                              const int event_number) {
-  particles_to_tree("at_eventend", "Final particles",
-                    particles, event_number);
+  // Forced dump from operational memory to disk every 10 events
+  // If program crashes written data will NOT be lost
+  if (event_number%10 == 1) {
+    tree_->AutoSave("SaveSelf");
+  }
+
 }
 
 /**
@@ -79,57 +111,40 @@ void RootOutput::write_interaction(const ParticleList &/*incoming_particles*/,
 /**
  * Writes particles to a tree defined by treename.
  */
-void RootOutput::particles_to_tree(const char* treename,
-                                   const char* treedescr,
-                                   const Particles &particles,
+void RootOutput::particles_to_tree(const Particles &particles,
                                    const int event_number) {
-  TTree *curr_tree = static_cast<TTree*>(root_out_file_->Get(treename));
-  if (curr_tree == NULL) {
-    tree_list_.emplace_back(curr_tree = new TTree(treename, treedescr));
-  }
+  int i = 0;
 
-  // Forced dump from operational memory to disk every 10 events
-  // If program crashes written data will NOT be lost
-  if (event_number%10 == 1) {
-    curr_tree->AutoSave("SaveSelf");
-  }
-
-
-  double p0, px, py, pz;
-  double x, y, z;
-  int    id, pdgcode, ev;
-
-  curr_tree->Branch("p0", &p0, "p0/D");
-  curr_tree->Branch("px", &px, "px/D");
-  curr_tree->Branch("py", &py, "py/D");
-  curr_tree->Branch("pz", &pz, "pz/D");
-
-  curr_tree->Branch("x", &x, "x/D");
-  curr_tree->Branch("y", &y, "y/D");
-  curr_tree->Branch("z", &z, "z/D");
-
-  curr_tree->Branch("pdgcode", &pdgcode, "pdgcode/I");
-  curr_tree->Branch("id", &id, "id/I");
-  curr_tree->Branch("ev", &ev, "ev/I");
+  tcounter = output_counter_;
+  ev = event_number;
 
   for (const auto &p : particles.data()) {
-    x = p.position().x1();
-    y = p.position().x2();
-    z = p.position().x3();
+    // Buffer full - flush to tree, else fill with particles
+    if (i >= max_buffer_size_) { 
+      npart = max_buffer_size_;
+      i = 0;
+      tree_->Fill();
+    } else {
+      t[i] = p.position().x0();
+      x[i] = p.position().x1();
+      y[i] = p.position().x2();
+      z[i] = p.position().x3();
 
-    p0 = p.momentum().x0();
-    px = p.momentum().x1();
-    py = p.momentum().x2();
-    pz = p.momentum().x3();
+      p0[i] = p.momentum().x0();
+      px[i] = p.momentum().x1();
+      py[i] = p.momentum().x2();
+      pz[i] = p.momentum().x3();
 
-    pdgcode = p.pdgcode().get_decimal();
-    id = p.id();
-
-    ev = event_number;
-
-    curr_tree->Fill();
+      pdgcode[i] = p.pdgcode().get_decimal();
+  
+      i++;
+    }
   }
-  // Flush tree from memory to disk
-  curr_tree->FlushBaskets();
+  
+  // Flush rest to tree
+  if (i>0) {
+   npart = i;
+   tree_->Fill();
+  }
 }
 }  // namespace Smash
