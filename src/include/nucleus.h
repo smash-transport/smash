@@ -26,31 +26,25 @@ class Nucleus {
 
   /// returns the mass of the nucleus
   float mass() const;
-  /** returns the radius of the nucleus
-   *
-   * Nuclear radius is calculated with the proton radius times the third
-   * root of the number of nucleons.
-   **/
-  inline float nuclear_radius() const {
-    return proton_radius_*pow(number_of_particles(), 1./3.);
-  }
-
   /** returns a Woods-Saxon distributed length
    *
    * the distribution of return values from this function is according to a 
    * spherically symmetric Woods-Saxon distribution suitable for this nucleus.
    * \f$\frac{dN}{dr} = \frac{r^2}{\exp\left(\frac{r-R}{d}\right) +
    * 1}\f$ where \f$d\f$ is the diffusiveness_ parameter and \f$R\f$ is
-   * nuclear_radius(). */
+   * nuclear_radius_. */
   float distribute_nucleon() const;
   /** returns the Woods-Saxon distribution directly
    *
    * @param x the position at which to evaluate the function
    * @return the
    **/
-  float woods_saxon(const float& x);
+  float woods_saxon(float x);
   /// sets the positions of the nuclei inside nucleus A.
   virtual void arrange_nucleons();
+  // Sets the parameters of the Woods-Saxon distribution
+  // according to the current mass number.
+  virtual size_t determine_nucleus();
   /**
    * Boosts the nuclei so that the nucleons have the appropriate
    * momentum and the nuclei are lorentz-contracted.
@@ -60,11 +54,11 @@ class Nucleus {
    * to determine the sign of the velocity, i.e., \f$\beta_z =
    * \mathop{sign}(\beta^2)\cdot\sqrt{|\beta^2|}\f$.
    **/
-  void boost(const double& beta_squared_with_sign);
+  void boost(double beta_squared_with_sign);
   /** Adds a particle to the nucleus
    *
    * @param pdgcode PDG code of the particle. */
-  void add_particle(const int pdgcode);
+  void add_particle(int pdgcode);
   /**
    * Adds particles from a map PDG_ID => Number_of_particles_with_that_PDG_ID
    * to the nucleus.
@@ -78,17 +72,7 @@ class Nucleus {
    *
    **/
   void fill_from_list(const std::map<PdgCode, int>& particle_list,
-                      const int testparticles);
-  /// sets the diffusiveness of the nucleus
-  ///
-  /// \see diffusiveness_.
-  void set_diffusiveness(const float& soft);
-  /// gets the diffusiveness of the nucleus
-  ///
-  /// \see diffusiveness
-  float get_diffusiveness() {
-    return diffusiveness_;
-  }
+                      int testparticles);
   /**
    * shifts the nucleus to correct impact parameter and z displacement.
    *
@@ -106,10 +90,10 @@ class Nucleus {
    *
    * @param simulation_time set the time of each particle to this value.
    **/
-  void shift(const bool is_projectile,
-             const double& initial_z_displacement,
-             const double& x_offset,
-             const float& simulation_time);
+  void shift(bool is_projectile,
+             double initial_z_displacement,
+             double x_offset,
+             float simulation_time);
   /// copies the particles from this nucleus into the particle list.
   void copy_particles(Particles* particles);
   /// Number of numerical (=test-)particles in the nucleus:
@@ -152,9 +136,13 @@ class Nucleus {
   /** diffusiveness of Woods-Saxon-distribution in this nucleus in fm
    * (for diffusiveness_ == 0, we obtain a hard sphere. */
   float diffusiveness_ = .545f;
+  // Saturation density of nuclear matter
+  float saturation_density_ = 1.f;
+  // Nuclear radius of this nucleus
+  float nuclear_radius_;
   /** single-proton-radius
    *
-   * \see nuclear_radius
+   * \see default_nuclear_radius
    * */
   float proton_radius_ = 1.2f;
   /// z (beam direction-) coordinate of the outermost particle (highest
@@ -189,6 +177,48 @@ class Nucleus {
   /// for iterators over the particle list:
   inline std::vector<ParticleData>::const_iterator cend() const {
     return particles_.cend();
+  }
+  /// sets the diffusiveness of the nucleus
+  ///
+  /// \see diffusiveness_.
+  inline void set_diffusiveness(float diffuse) {
+    diffusiveness_ = diffuse;
+  }
+  /// gets the diffusiveness of the nucleus
+  ///
+  /// \see diffusiveness
+  inline float get_diffusiveness() const {
+    return diffusiveness_;
+  }
+  /// sets the saturation density of the nucleus
+  ///
+  /// \see saturation_density
+  inline void set_saturation_density(float density) {
+    saturation_density_ = density;
+  }
+  inline float get_saturation_density() const {
+    return saturation_density_;
+  }
+  /** sets and returns a default radius for the nucleus
+   *
+   * Nuclear radius is calculated with the proton radius times the third
+   * root of the number of nucleons.
+   **/
+  inline float default_nuclear_radius() {
+    nuclear_radius_ = proton_radius_*pow(number_of_particles(), 1./3.);
+    return nuclear_radius_;
+  }
+  /// sets the nuclear radius
+  ///
+  /// \see nuclear_radius 
+  inline void set_nuclear_radius(float rad) {
+    nuclear_radius_ = rad;
+  }
+  /// gets the nuclear radius
+  ///
+  /// \see nuclear_radius 
+  inline float get_nuclear_radius() const {
+    return nuclear_radius_;
   }
 };
 

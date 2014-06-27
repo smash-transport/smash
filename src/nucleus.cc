@@ -181,9 +181,9 @@ float Nucleus::mass() const {
 float Nucleus::distribute_nucleon() const {
   // diffusiveness_ zero or negative? Use hard sphere.
   if (diffusiveness_ < std::numeric_limits<float>::min()) {
-    return nuclear_radius()*(pow(Random::canonical(), 1./3.));
+    return nuclear_radius_*(pow(Random::canonical(), 1./3.));
   }
-  float radius_scaled = nuclear_radius()/diffusiveness_;
+  float radius_scaled = nuclear_radius_/diffusiveness_;
   float prob_range1 = 1.0;
   float prob_range2 = 3. / radius_scaled;
   float prob_range3 = 2. * prob_range2 / radius_scaled;
@@ -219,8 +219,8 @@ float Nucleus::distribute_nucleon() const {
   /// though).
 }
 
-float Nucleus::woods_saxon(const float& r) {
-  return r*r/(exp((r-nuclear_radius())/diffusiveness_)+1);
+float Nucleus::woods_saxon(float r) {
+  return r*r/(exp((r-nuclear_radius_)/diffusiveness_)+1);
 }
 
 void Nucleus::arrange_nucleons() {
@@ -243,7 +243,51 @@ void Nucleus::arrange_nucleons() {
   }
 }
 
-void Nucleus::boost(const double& beta_squared_with_sign) {
+size_t Nucleus::determine_nucleus() {
+  // Establish the current system.
+  size_t mass_number = Nucleus::number_of_particles();
+  // Uranium
+  if (mass_number == 238) {
+    // Default values. !!! Unsure.
+    Nucleus::set_diffusiveness(0.54);
+    Nucleus::set_nuclear_radius(6.86);
+    Nucleus::set_saturation_density(0.166);
+    // Hirano, Huovinen, Nara - Correction.
+    // Nucleus::set_diffusiveness(0.44);
+    // Nucleus::set_nuclear_radius(6.86);
+  }  
+  // Lead !!! Reference?
+  else if (mass_number == 208) {
+    Nucleus::set_diffusiveness(0.44);
+    Nucleus::set_nuclear_radius(6.67);
+    Nucleus::set_saturation_density(0.161);
+  }
+  // Gold 
+  else if (mass_number == 197) {
+    // Default values.
+    Nucleus::set_diffusiveness(0.535);
+    Nucleus::set_nuclear_radius(6.38);
+    Nucleus::set_saturation_density(0.1695);
+    // Hirano, Nara - Corrections.
+    // Nucleus::set_diffusiveness(0.44);
+    // Nucleus::set_nuclear_radius(6.42);
+  }
+  // Copper
+  else if (mass_number == 63){
+    // Default values.
+    Nucleus::set_diffusiveness(0.5977);
+    Nucleus::set_nuclear_radius(4.20641);
+    Nucleus::set_saturation_density(0.1686);  
+    // Hirano, Nara - Corrections.
+    // Nucleus::set_diffusiveness(0.50);
+    // Nucleus::set_nuclear_radius(4.28);   
+  } else {
+      throw std::domain_error("Mass number not listed in Nucleus::determine_nucleus.");
+  }
+  return mass_number;
+}
+
+void Nucleus::boost(double beta_squared_with_sign) {
   // we use the sign of the squared velocity to get information about
   // the sign of the velocity itself.
   double sign = beta_squared_with_sign >= 0 ? 1 : -1;
@@ -281,7 +325,7 @@ void Nucleus::boost(const double& beta_squared_with_sign) {
 }
 
 void Nucleus::fill_from_list(const std::map<PdgCode, int>& particle_list,
-                             const int testparticles) {
+                             int testparticles) {
   testparticles_ = testparticles;
   for (auto n = particle_list.cbegin(); n != particle_list.cend(); ++n) {
     const ParticleType &current_type = ParticleType::find(n->first);
@@ -294,14 +338,10 @@ void Nucleus::fill_from_list(const std::map<PdgCode, int>& particle_list,
   }
 }
 
-void Nucleus::set_diffusiveness(const float& diffuse) {
-  diffusiveness_ = diffuse;
-}
-
-void Nucleus::shift(const bool is_projectile,
-                    const double& initial_z_displacement,
-                    const double& x_offset,
-                    const float& simulation_time) {
+void Nucleus::shift(bool is_projectile,
+                    double initial_z_displacement,
+                    double x_offset,
+                    float simulation_time) {
   // amount to shift z value. If is_projectile, we shift to -z_max_,
   // else we shift to -z_min_ (z_min_ itself should be negative).
   double z_offset = is_projectile ? -z_max_ : -z_min_;
@@ -314,7 +354,7 @@ void Nucleus::shift(const bool is_projectile,
     this_position.set_x1(this_position.x1() + x_offset);
     this_position.set_x0(simulation_time);
     i->set_position(this_position);
-  }
+  } 
 }
 
 void Nucleus::copy_particles(Particles* external_particles) {

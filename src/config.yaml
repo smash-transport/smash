@@ -56,15 +56,15 @@ Modi:
         SQRTS: 1.0
     Nucleus:
         # Definitions for the projectile:
-        # Deuteron
+        # Lead
         Projectile:
-            PARTICLES: {2212: 1, 2112: 1}
-            # very hard Woods-Saxon distribution.
-            DIFFUSIVENESS: .001
+            PARTICLES: {2212: 82, 2112: 126}
+            AUTOMATIC: 1
         # Definitions for the target:
         # Lead
         Target:
             PARTICLES: {2212: 82, 2112: 126}
+            AUTOMATIC: 1
 
         # what sqrt(s_NN) to use:
         SQRTSNN: 2

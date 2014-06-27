@@ -171,7 +171,7 @@ class NucleusModus : public ModusDefault {
    * Note that max less than min also works fine.
    *
    **/
-  void sample_impact(const bool s, const float min, const float max);
+  void sample_impact(bool s, float min, float max);
   /** initial z displacement of nuclei
    *
    * each nucleus is shifted so that

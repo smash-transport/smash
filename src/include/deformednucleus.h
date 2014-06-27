@@ -15,10 +15,10 @@ class DeformedNucleus : public Nucleus {
 
   // Return the deformed Woods-Saxon probability for
   // the current parameters.
-  double deformed_woods_saxon(const double& r, const double& cosx);
+  double deformed_woods_saxon(double r, double cosx) const;
 
   // Deformed Woods-Saxon sampling routine.
-  void deformed_distribute_nucleon(ThreeVector& vec);
+  void deformed_distribute_nucleon(ThreeVector& vec) const;
 
   // Sets the positions of the nuclei inside nucleus A.
   virtual void arrange_nucleons();
@@ -34,32 +34,22 @@ class DeformedNucleus : public Nucleus {
   // arxiv:0904.4080 [nucl-th] by T. Hirano and Y. Nara for copper and gold, and 
   // arxiv:1010.6222 [nucl-th] by T. Hirano, P. Huovinen, and Y. Nara for uranium.
   // Currently unsure of reference for Lead.
-  void determine_nucleus();
+  virtual size_t determine_nucleus();
 
   // Spherical harmonics Y_2_0 and Y_4_0.
-  double y_l_0(const int l, const double& cosx) const;
-
-  void set_saturation_density(const double& density){
-    saturation_density_ = density;
-  }
+  double y_l_0(int l, double cosx) const;
   
-  void set_initial_radius(const double& radius){
-    initial_radius_ = radius;
-  }
-  
-  void set_deformation_params(const double& b2, const double& b4) {
+  inline void set_deformation_params(double b2, double b4) {
     beta2_ = b2;
     beta4_ = b4;
   }
 
-  void set_manual_deformation(bool x) {
+  inline void set_manual_deformation(bool x) {
     manual_deformation_ = x;
   }
 
  private:
   double manual_deformation_ = false;
-  double saturation_density_ = 1.0;
-  double initial_radius_ = 1.0;
   double beta2_ = 0.0;
   double beta4_ = 0.0;
 

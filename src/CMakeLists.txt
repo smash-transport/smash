@@ -46,6 +46,7 @@ set(smash_src
         decayaction.cc
         decayactionsfinder.cc
         decaymodes.cc
+        deformednucleus.cc
         distributions.cc
         experiment.cc
         fourvector.cc

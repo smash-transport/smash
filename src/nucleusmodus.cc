@@ -27,19 +27,45 @@ NucleusModus::NucleusModus(Configuration modus_config,
   std::vector<PdgCode> sqrts_n = modus_cfg.take({"SQRTS_N"});
   pdg_sNN_1_ = sqrts_n[0];
   pdg_sNN_2_ = sqrts_n[1];
+
   // fill nuclei with particles
   std::map<PdgCode, int> pro = modus_cfg.take({"Projectile", "PARTICLES"});
   projectile_.fill_from_list(pro, params.testparticles);
   std::map<PdgCode, int> tar = modus_cfg.take({"Target", "PARTICLES"});
   target_.fill_from_list(tar, params.testparticles);
-  // set diffusiveness of the nuclei if given (else take the default value)
-  if (modus_cfg.has_value({"Projectile", "DIFFUSIVENESS"})) {
-    projectile_.set_diffusiveness(static_cast<float>(
-                modus_cfg.take({"Projectile", "DIFFUSIVENESS"})));
+
+  // ask to construct nuclei based on atomic number; otherwise,
+  // look for user defined values or take the default parameters.
+  if (modus_cfg.has_value({"Projectile", "AUTOMATIC"})) {
+    projectile_.determine_nucleus();
+  } else {
+    // set diffusiveness of the nuclei if given (else take the default value)
+      if (modus_cfg.has_value({"Projectile", "DIFFUSIVENESS"})) {
+        projectile_.set_diffusiveness(static_cast<float>(
+                    modus_cfg.take({"Projectile", "DIFFUSIVENESS"})));
+      // set radius of the nuclei if given (else use the atomic number
+      // and proton radius to compute a default value)
+      if (modus_cfg.has_value({"Projectile", "RADIUS"})) {
+        projectile_.set_diffusiveness(static_cast<float>(
+                    modus_cfg.take({"Projectile", "RADIUS"})));
+      } else {
+        projectile_.default_nuclear_radius();
+      }
+    }
   }
-  if (modus_cfg.has_value({"Target", "DIFFUSIVENESS"})) {
-    target_.set_diffusiveness(static_cast<float>(
+  if (modus_cfg.has_value({"Target", "AUTOMATIC"})) {
+    target_.determine_nucleus();
+  } else {
+      if (modus_cfg.has_value({"Target", "DIFFUSIVENESS"})) {
+        target_.set_diffusiveness(static_cast<float>(
                 modus_cfg.take({"Target", "DIFFUSIVENESS"})));
+    }
+      if (modus_cfg.has_value({"Target", "RADIUS"})) {
+        target_.set_diffusiveness(static_cast<float>(
+                modus_cfg.take({"Target", "RADIUS"})));
+    } else {
+        target_.default_nuclear_radius();
+    }
   }
 
   // Impact parameter setting: Either "VALUE", "RANGE" or "MAX".
@@ -100,8 +126,8 @@ float NucleusModus::initial_conditions(Particles *particles,
   float mass_target = target_.mass();
   printf("Masses of Nuclei: %g GeV %g GeV\n", projectile_.mass(),
                                               target_.mass());
-  printf("Radii of Nuclei: %g fm %g fm\n", projectile_.nuclear_radius(),
-                                           target_.nuclear_radius());
+  printf("Radii of Nuclei: %g fm %g fm\n", projectile_.get_nuclear_radius(),
+                                           target_.get_nuclear_radius());
   float mass_1, mass_2;
   // set the masses used in sqrt_sNN. mass1 corresponds to the
   // projectile.
@@ -161,8 +187,7 @@ float NucleusModus::initial_conditions(Particles *particles,
   return simulation_time;
 }
 
-void NucleusModus::sample_impact(const bool s, const float min,
-                                               const float max) {
+void NucleusModus::sample_impact(bool s, float min, float max) {
   if (s) {
     // quadratic sampling: Note that for min > max, this still yields
     // the correct distribution (only that canonical() = 0 then is the

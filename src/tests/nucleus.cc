@@ -81,7 +81,7 @@ TEST_CATCH(initialize_testparticles_wrong, Nucleus::TestparticleConfusion) {
 TEST(nuclear_radius) {
   Nucleus lead;
   lead.fill_from_list(list, 1);
-  FUZZY_COMPARE(lead.nuclear_radius(), static_cast<float>(1.2f*pow(208,1./3.)));
+  FUZZY_COMPARE(lead.default_nuclear_radius(), static_cast<float>(1.2f*pow(208,1./3.)));
 }
 
 // check that center is at (0/0/0):
@@ -124,7 +124,7 @@ TEST(center_hard_sphere) {
    * Here, we can actually calculate the exact value for the width:
    * \f$\sigma = R\sqrt{\frac{3}{5}}\f$.
    **/
-  double threesigma = 3* lead.nuclear_radius() * sqrt(0.6) / sqrt(N_TEST);
+  double threesigma = 3* lead.default_nuclear_radius() * sqrt(0.6) / sqrt(N_TEST);
   VERIFY(std::abs(middle.x1()) < threesigma) << " x=" << middle.x1() << " vs. 3σ=" << threesigma << " (chance 1 in 370)";
   VERIFY(std::abs(middle.x2()) < threesigma) << " x=" << middle.x2() << " vs. 3σ=" << threesigma << " (chance 1 in 370)";
   VERIFY(std::abs(middle.x3()) < threesigma) << " x=" << middle.x3() << " vs. 3σ=" << threesigma << " (chance 1 in 370)";
@@ -148,7 +148,7 @@ TEST(shift_zero) {
   UnitTest::setFuzzyness<double>(10);
   FUZZY_COMPARE(postcenter.x1(), precenter.x1());
   FUZZY_COMPARE(postcenter.x2(), precenter.x2());
-  COMPARE_RELATIVE_ERROR(postcenter.x3(), precenter.x3()-lead.nuclear_radius(),
+  COMPARE_RELATIVE_ERROR(postcenter.x3(), precenter.x3()-lead.default_nuclear_radius(),
                          0.2);
 }
 
@@ -165,7 +165,7 @@ TEST(shift_x) {
   UnitTest::setFuzzyness<double>(150);
   FUZZY_COMPARE(postcenter.x1(), precenter.x1()+4.0);
   FUZZY_COMPARE(postcenter.x2(), precenter.x2());
-  COMPARE_RELATIVE_ERROR(postcenter.x3(), precenter.x3()-lead.nuclear_radius(),
+  COMPARE_RELATIVE_ERROR(postcenter.x3(), precenter.x3()-lead.default_nuclear_radius(),
                         0.2);
 }
 
@@ -185,7 +185,7 @@ TEST(shift_z) {
   FUZZY_COMPARE(postcenter.x1(), precenter.x1());
   FUZZY_COMPARE(postcenter.x2(), precenter.x2());
   COMPARE_RELATIVE_ERROR(postcenter.x3(),
-      precenter.x3() - lead.nuclear_radius() + 4.0, 0.2);
+      precenter.x3() - lead.default_nuclear_radius() + 4.0, 0.2);
 }
 
 // test the woods-saxon distribution at various discrete points:
@@ -197,7 +197,7 @@ TEST(woods_saxon) {
   // the nucleus. Fill it from list with 1 testparticle.
   Nucleus projectile;
   projectile.fill_from_list(list, 1);
-  float R = projectile.nuclear_radius();
+  float R = projectile.default_nuclear_radius();
   // this is the number of times we access the distribution.
   constexpr int N_TEST = 10000000;
   // fill the histogram
