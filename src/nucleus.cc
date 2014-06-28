@@ -338,16 +338,15 @@ void Nucleus::fill_from_list(const std::map<PdgCode, int>& particle_list,
   }
 }
 
-void Nucleus::shift(bool is_projectile,
-                    double initial_z_displacement,
-                    double x_offset,
-                    float simulation_time) {
-  // amount to shift z value. If is_projectile, we shift to -z_max_,
-  // else we shift to -z_min_ (z_min_ itself should be negative).
+void Nucleus::shift(bool is_projectile, double initial_z_displacement,
+                    double x_offset, float simulation_time) {
+  // The amount to to shift the z value. If is_projectile, shift back by
+  // -z_max_, else shift forward -z_min_ (z_min_ itself should be negative).
   double z_offset = is_projectile ? -z_max_ : -z_min_;
-  // now, the nuclei would touch. We want them to be a little apart, so
-  // we need a bigger offset.
+  // In the current system, the nuclei would touch. We want them to be
+  // a little apart, so we need a slightly bigger offset.
   z_offset += initial_z_displacement;
+  // Move the nucleus in z and x directions, and set the time.
   for (auto i = begin(); i != end(); i++) {
     FourVector this_position = i->position();
     this_position.set_x3(this_position.x3() + z_offset);

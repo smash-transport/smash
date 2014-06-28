@@ -110,7 +110,7 @@ class NucleusModus : public ModusDefault {
    */
   void print_startup();
 
-  /** creates initial conditions from the particles.
+  /** Creates initial conditions from the particles.
    *
    * In particular, it initializes the nuclei.
    */

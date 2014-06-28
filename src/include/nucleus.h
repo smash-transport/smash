@@ -26,7 +26,8 @@ class Nucleus {
 
   /// returns the mass of the nucleus
   float mass() const;
-  /** returns a Woods-Saxon distributed length
+
+  /** Returns a Woods-Saxon distributed length.
    *
    * the distribution of return values from this function is according to a 
    * spherically symmetric Woods-Saxon distribution suitable for this nucleus.
@@ -34,17 +35,21 @@ class Nucleus {
    * 1}\f$ where \f$d\f$ is the diffusiveness_ parameter and \f$R\f$ is
    * nuclear_radius_. */
   float distribute_nucleon() const;
+
   /** returns the Woods-Saxon distribution directly
    *
    * @param x the position at which to evaluate the function
    * @return the
    **/
   float woods_saxon(float x);
+
   /// sets the positions of the nuclei inside nucleus A.
   virtual void arrange_nucleons();
+
   // Sets the parameters of the Woods-Saxon distribution
   // according to the current mass number.
   virtual size_t determine_nucleus();
+
   /**
    * Boosts the nuclei so that the nucleons have the appropriate
    * momentum and the nuclei are lorentz-contracted.
@@ -55,10 +60,12 @@ class Nucleus {
    * \mathop{sign}(\beta^2)\cdot\sqrt{|\beta^2|}\f$.
    **/
   void boost(double beta_squared_with_sign);
+
   /** Adds a particle to the nucleus
    *
    * @param pdgcode PDG code of the particle. */
   void add_particle(int pdgcode);
+
   /**
    * Adds particles from a map PDG_ID => Number_of_particles_with_that_PDG_ID
    * to the nucleus.
@@ -73,8 +80,9 @@ class Nucleus {
    **/
   void fill_from_list(const std::map<PdgCode, int>& particle_list,
                       int testparticles);
+
   /**
-   * shifts the nucleus to correct impact parameter and z displacement.
+   * Shifts the nucleus to correct impact parameter and z displacement.
    *
    * @param is_projectile switches if the projectile is shifted to
    * -z_max_ or -z_min_ (the projetcile is shifted to -z_max_, so that
@@ -90,16 +98,17 @@ class Nucleus {
    *
    * @param simulation_time set the time of each particle to this value.
    **/
-  void shift(bool is_projectile,
-             double initial_z_displacement,
-             double x_offset,
-             float simulation_time);
+  virtual void shift(bool is_projectile, double initial_z_displacement,
+                     double x_offset, float simulation_time);
+
   /// copies the particles from this nucleus into the particle list.
   void copy_particles(Particles* particles);
+
   /// Number of numerical (=test-)particles in the nucleus:
   inline size_t size() const {
     return particles_.size();
   }
+
   /// Number of physical particles in the nucleus:
   inline size_t number_of_particles() const {
     int nop = particles_.size()/testparticles_;
@@ -111,12 +120,14 @@ class Nucleus {
     }
     return nop;
   }
+
   /** returns the geometrical center of the nucleus.
    *
    * \return \f$\vec r_s = \frac{1}{N} \sum_{i=1}^N \vec r_i\f$ (for a
    * nucleus with N particles that are at the positions \f$\vec r_i\f$).
    */
   FourVector center() const;
+  
   /** shifts the nucleus so that its center is at (0,0,0)
    *
    * \see center()

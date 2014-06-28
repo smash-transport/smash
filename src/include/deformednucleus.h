@@ -36,20 +36,21 @@ class DeformedNucleus : public Nucleus {
   // Currently unsure of reference for Lead.
   virtual size_t determine_nucleus();
 
+  // Shifts the nucleus to correct impact parameter and z displacement.
+  // \see Nucleus::shift
+  virtual void shift(bool is_projectile, double initial_z_displacement,
+                     double x_offset, float simulation_time);
+
   // Spherical harmonics Y_2_0 and Y_4_0.
   double y_l_0(int l, double cosx) const;
   
-  inline void set_deformation_params(double b2, double b4) {
+  inline void set_deformation_parameters(double b2, double b4) {
     beta2_ = b2;
     beta4_ = b4;
   }
 
-  inline void set_manual_deformation(bool x) {
-    manual_deformation_ = x;
-  }
-
  private:
-  double manual_deformation_ = false;
+  double r_max_ = 0.0;
   double beta2_ = 0.0;
   double beta4_ = 0.0;
 

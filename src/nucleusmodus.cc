@@ -46,7 +46,7 @@ NucleusModus::NucleusModus(Configuration modus_config,
       // set radius of the nuclei if given (else use the atomic number
       // and proton radius to compute a default value)
       if (modus_cfg.has_value({"Projectile", "RADIUS"})) {
-        projectile_.set_diffusiveness(static_cast<float>(
+        projectile_.set_nuclear_radius(static_cast<float>(
                     modus_cfg.take({"Projectile", "RADIUS"})));
       } else {
         projectile_.default_nuclear_radius();
@@ -61,7 +61,7 @@ NucleusModus::NucleusModus(Configuration modus_config,
                 modus_cfg.take({"Target", "DIFFUSIVENESS"})));
     }
       if (modus_cfg.has_value({"Target", "RADIUS"})) {
-        target_.set_diffusiveness(static_cast<float>(
+        target_.set_nuclear_radius(static_cast<float>(
                 modus_cfg.take({"Target", "RADIUS"})));
     } else {
         target_.default_nuclear_radius();
@@ -110,12 +110,11 @@ void NucleusModus::print_startup() {
   printf("Projectile initialized with %zu particles (%zu test particles)\n",
                                              projectile_.number_of_particles(),
                                              projectile_.size());
-  printf("Target     initialized with %zu particles (%zu test particles)\n",
+  printf("Target initialized with %zu particles (%zu test particles)\n",
                                                  target_.number_of_particles(),
                                                  target_.size());
 }
 
-/* initial_conditions - sets particle data for @particles */
 float NucleusModus::initial_conditions(Particles *particles,
                                       const ExperimentParameters&) {
   // WHAT'S MISSING:
@@ -128,9 +127,10 @@ float NucleusModus::initial_conditions(Particles *particles,
                                               target_.mass());
   printf("Radii of Nuclei: %g fm %g fm\n", projectile_.get_nuclear_radius(),
                                            target_.get_nuclear_radius());
-  float mass_1, mass_2;
+
   // set the masses used in sqrt_sNN. mass1 corresponds to the
   // projectile.
+  float mass_1, mass_2;
   if (pdg_sNN_1_ != 0) {
     // If PDG Code is given, use mass of this particle type.
     mass_1 = ParticleType::find(pdg_sNN_1_).mass();
@@ -140,7 +140,6 @@ float NucleusModus::initial_conditions(Particles *particles,
   } else {
     throw NucleusEmpty("Projectile nucleus is empty!");
   }
-  // same logic for mass2 and target as for projectile directly above.
   if (pdg_sNN_2_ != 0) {
     mass_2 = ParticleType::find(pdg_sNN_2_).mass();
   } else if (target_.size() > 0) {
@@ -148,6 +147,8 @@ float NucleusModus::initial_conditions(Particles *particles,
   } else {
     throw NucleusEmpty("Target nucleus is empty!");
   }
+
+  // Energy calculations !!!
   double s_NN = sqrt_s_NN_*sqrt_s_NN_;
   if (sqrt_s_NN_ < mass_1 + mass_2) {
     throw ModusDefault::InvalidEnergy(
@@ -164,24 +165,33 @@ float NucleusModus::initial_conditions(Particles *particles,
                                                * (mass_projec + mass_target))
                          / (total_mandelstam_s - (mass_projec - mass_target)
                                                * (mass_projec - mass_target));
-  // populate the nuclei with appropriately distributed nucleons
+
+  // Populate the nuclei with appropriately distributed nucleons.
   projectile_.arrange_nucleons();
   target_.arrange_nucleons();
-  // boost the nuclei to the appropriate velocity (target is in opposite
-  // direction!
-  projectile_.boost(velocity_squared);
-  target_.boost(-velocity_squared);
-  // shift the nuclei along the z-axis so that they are 2*1 fm apart
-  // touch and along the x-axis to get the right impact parameter.
-  // Projectile hits at positive x.
-  // Also, it sets the time of the particles to
+
+  // Shift the nuclei into starting positions.
+  // Keep the pair separated in z by some small distance,
+  // and shift in x by the impact parameter. (Projectile is 
+  // chosen to hit at positive x.)
+  // For regular nuclei, the shift is along the z-axis so that
+  // the nuclei are 2*1 fm apart.
+  // For deformed nuclei, movement is also along z but due to
+  // geometry, initial separation may include extra space.
+  // After shifting, set the time component of the particles to
   // -initial_z_displacement_/sqrt(velocity_squared).
   float simulation_time = -initial_z_displacement_/sqrt(velocity_squared);
   projectile_.shift(true, -initial_z_displacement_, +impact_/2.0
                                                   , simulation_time);
   target_.shift(false,    +initial_z_displacement_, -impact_/2.0
                                                   , simulation_time);
-  // now, put the particles in the nuclei into particles.
+
+  // Boost the nuclei to the appropriate velocity. (target is in opposite
+  // direction!)
+  projectile_.boost(velocity_squared);
+  target_.boost(-velocity_squared);
+
+  // Put the particles in the nuclei into particles.
   projectile_.copy_particles(particles);
   target_.copy_particles(particles);
   return simulation_time;
