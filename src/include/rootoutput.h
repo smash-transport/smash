@@ -36,10 +36,9 @@ class Particles;
   * Particle information is stored in TBranches.
   * For each particle characteristic there is a separate branch.
   * Currently these are t,x,y,z (coordinates), p0,px,py,pz (4-momentum), 
-  * id - unique identifier for every SMASH particle during one event,
   * pdgid - PDG code of particle, that characterizes its sort,
   * ev - number of event particle encountered in and
-  * output_counter - number of output block in a given event.
+  * tcounter - number of output moment in a given event.
   * 
   * Here is an example of ROOT macro to read the ROOT output of SMASH:
   * \code
@@ -59,11 +58,11 @@ class Particles;
   *   Int_t nentries = tree->GetEntries();
   *   printf("Number of entries in a tree is %d\n", nentries);
   *
-  *   // This draws p_T distribution 
-  *   // tree->Draw("sqrt(px*px + py*py)");
+  *   // This draws p_T distribution at initialization
+  *   // tree->Draw("sqrt(px*px + py*py)","tcounter==0");
 
-  *   // This draws 3D momentum space distribution
-  *   tree->Draw("px:py:pz");
+  *   // This draws 3D momentum space distribution at initialization
+  *   tree->Draw("px:py:pz","tcounter==0");
   * 
   *   return 0;
   * }

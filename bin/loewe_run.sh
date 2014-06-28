@@ -22,13 +22,13 @@
 #SBATCH --partition=serial
 #
 # mem allocation (only 200m default)
-#SBATCH --mem-per-cpu=2600
+#SBATCH --mem-per-cpu=1000
 #
 # default time 10min, max 8 days?:
 #SBATCH --time=6-23:00:00
 
 # output
-path="/scratch/hyihp/oliiny/binary_output_test_${SLURM_JOB_ID}"
+path="/scratch/hyihp/oliiny/root_output_test_${SLURM_JOB_ID}"
 
  # git show-ref HEAD # show sha1 tag and branch of run
 git_branch=$(cat ../.git/HEAD)

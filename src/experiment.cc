@@ -220,10 +220,10 @@ void Experiment<Modus>::print_startup(int64_t seed) {
 
 template <typename Modus>
 void Experiment<Modus>::run(const bf::path &path) {
-  outputs_.emplace_back(new BinaryOutput(path));
-  outputs_.emplace_back(new OscarFullHistoryOutput(path));
-  outputs_.emplace_back(new OscarParticleListOutput(path));
-  outputs_.emplace_back(new VtkOutput(path));
+  //outputs_.emplace_back(new BinaryOutput(path));
+  //outputs_.emplace_back(new OscarFullHistoryOutput(path));
+  //outputs_.emplace_back(new OscarParticleListOutput(path));
+  //outputs_.emplace_back(new VtkOutput(path));
 #ifdef SMASH_USE_ROOT
   outputs_.emplace_back(new RootOutput(path));
 #endif
