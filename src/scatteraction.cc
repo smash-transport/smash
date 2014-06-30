@@ -171,10 +171,10 @@ void ScatterAction::resonance_formation(const ParticleData &particle0,
     resonance->set_position(FourVector(1., 0., 0., 0.));
     stable_product->set_position(FourVector(1., 0., 0., 0.));
   } else {
-    throw InvalidResonanceFormation(
-        "resonance_formation: Incorrect number of particles in final state. 1 "
-        "or 2 are expected. Called with " +
-        std::to_string(outgoing_particles_.size()));
+    std::string s = "resonance_formation: Incorrect number of particles in final state: ";
+    s += std::to_string(outgoing_particles_.size()) + " (";
+    s += particle0.pdgcode().string() + " + " + particle1.pdgcode().string() + ")";
+    throw InvalidResonanceFormation(s);
   }
 }
 
