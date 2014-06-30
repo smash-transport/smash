@@ -33,12 +33,15 @@ class Particles;
   * This class produces file smash_run.root, which contains a
   * ROOT TTree. TTree contains information about particles
   * during simulation from all SMASH events.
+  * Output is happening in blocks. All particles in a block
+  * are at the same time and in the same event. However, it is possible that
+  * different blocks are at the same time and from the same event.
   * Particle information is stored in TBranches.
   * For each particle characteristic there is a separate branch.
   * Currently these are t,x,y,z (coordinates), p0,px,py,pz (4-momentum), 
   * pdgid - PDG code of particle, that characterizes its sort,
   * ev - number of event particle encountered in and
-  * tcounter - number of output moment in a given event.
+  * tcounter - number of output block in a given event.
   * 
   * Here is an example of ROOT macro to read the ROOT output of SMASH:
   * \code

@@ -25,7 +25,7 @@ RootOutput::RootOutput(boost::filesystem::path path)
       root_out_file_(
           new TFile((base_path_ / "smash_run.root").native().c_str(), "NEW")),
       output_counter_(0) {
-  tree_ = new TTree("particles","particles");
+  tree_ = new TTree("particles", "particles");
 
   tree_->Branch("npart", &npart, "npart/I");
   tree_->Branch("ev", &ev, "ev/I");
@@ -83,7 +83,6 @@ void RootOutput::at_eventend(const Particles &/*particles*/,
   if (event_number%10 == 1) {
     tree_->AutoSave("SaveSelf");
   }
-
 }
 
 /**
@@ -109,7 +108,7 @@ void RootOutput::particles_to_tree(const Particles &particles,
 
   for (const auto &p : particles.data()) {
     // Buffer full - flush to tree, else fill with particles
-    if (i >= max_buffer_size_) { 
+    if (i >= max_buffer_size_) {
       npart = max_buffer_size_;
       i = 0;
       tree_->Fill();
@@ -125,15 +124,14 @@ void RootOutput::particles_to_tree(const Particles &particles,
       pz[i] = p.momentum().x3();
 
       pdgcode[i] = p.pdgcode().get_decimal();
-  
+
       i++;
     }
   }
-  
   // Flush rest to tree
-  if (i>0) {
-   npart = i;
-   tree_->Fill();
+  if (i > 0) {
+    npart = i;
+    tree_->Fill();
   }
 }
 }  // namespace Smash
