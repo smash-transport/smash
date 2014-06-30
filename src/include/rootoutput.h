@@ -95,12 +95,11 @@ class RootOutput : public OutputInterface {
   // Counts number of output in a given event
   int output_counter_;
 
-  const int max_buffer_size_;
+  static const int max_buffer_size_ = 10000;
   // Variables that serve as buffer for filling TTree
-  double *p0, *px, *py, *pz;
-  double *t, *x, *y, *z;
-  int    *pdgcode;
-  int    npart, tcounter, ev;
+  std::array<double, max_buffer_size_> p0, px, py, pz, t, x, y, z;
+  std::array<int, max_buffer_size_>    pdgcode;
+  int npart, tcounter, ev;
 };
 }  // namespace Smash
 

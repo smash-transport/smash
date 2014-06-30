@@ -24,19 +24,8 @@ RootOutput::RootOutput(boost::filesystem::path path)
     : base_path_(std::move(path)),
       root_out_file_(
           new TFile((base_path_ / "smash_run.root").native().c_str(), "NEW")),
-      output_counter_(0),
-      max_buffer_size_(10000) {
+      output_counter_(0) {
   tree_ = new TTree("particles","particles");
-
-  t  = new double[max_buffer_size_];
-  x  = new double[max_buffer_size_];
-  y  = new double[max_buffer_size_];
-  z  = new double[max_buffer_size_];
-  p0 = new double[max_buffer_size_];
-  px = new double[max_buffer_size_];
-  py = new double[max_buffer_size_];
-  pz = new double[max_buffer_size_];
-  pdgcode = new int[max_buffer_size_];
 
   tree_->Branch("npart", &npart, "npart/I");
   tree_->Branch("ev", &ev, "ev/I");
