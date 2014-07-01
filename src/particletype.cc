@@ -36,7 +36,9 @@ SMASH_CONST const ParticleType &ParticleType::find(PdgCode pdgcode) {
   const auto found = std::lower_bound(
       all_particle_types->begin(), all_particle_types->end(), pdgcode,
       [](const ParticleType &l, const PdgCode &r) { return l.pdgcode() < r; });
-  assert(found != all_particle_types->end());
+  if (found == all_particle_types->end()) {
+    throw std::runtime_error("PDG code "+pdgcode.string()+ " not found!");
+  }
   assert(found->pdgcode() == pdgcode);
   return *found;
 }

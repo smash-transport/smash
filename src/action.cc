@@ -13,6 +13,7 @@
 #include "include/random.h"
 
 #include <assert.h>
+#include <sstream>
 
 namespace Smash {
 
@@ -76,7 +77,10 @@ ParticleList Action::choose_channel () {
     }
   }
   /* Should never get here. */
-  return ParticleList();
+  std::stringstream ss;
+  ss << "problem in choose_channel: " << subprocesses_.size() << " " <<
+         interaction_probability << " " << total_weight_;
+  throw std::runtime_error(ss.str());
 }
 
 
