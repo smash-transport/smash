@@ -9,7 +9,7 @@
 
 #include "include/particletype.h"
 
-#include "include/lineparser.h"
+#include "include/inputfunctions.h"
 #include "include/outputroutines.h"
 #include "include/pdgcode.h"
 #include "include/width.h"
@@ -55,7 +55,7 @@ SMASH_CONST bool ParticleType::exists(PdgCode pdgcode) {
 
 /* Construct an antiparticle name-string from the given name-string for the
  * particle and its PDG code. */
-static std::string antiname(std::string name, PdgCode code) {
+static std::string antiname(const std::string &name, PdgCode code) {
   std::string basename, charge;
 
   if (name.find("++") != std::string::npos) {
@@ -114,7 +114,7 @@ void ParticleType::create_type_list(const std::string &input) {  //{{{
     type_list.emplace_back(name, mass, width, pdgcode);
     if (pdgcode.has_antiparticle()) {
       /* add corresponding antiparticle */
-      PdgCode anti = pdgcode.anti();
+      PdgCode anti = pdgcode.get_antiparticle();
       name = antiname (name, pdgcode);
       type_list.emplace_back(name, mass, width, anti);
       printd("Setting antiparticle type %s mass %g width %g pdgcode %s\n",

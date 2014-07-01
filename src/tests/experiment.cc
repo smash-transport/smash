@@ -11,14 +11,19 @@
 
 #include "../include/experiment.h"
 #include "../include/configuration.h"
-#include "../include/lineparser.h"
 
-#include <boost/filesystem/fstream.hpp>
+#include <boost/filesystem.hpp>
+
+#ifndef DOXYGEN
+namespace particles_txt {
+#include <particles.txt.h>
+}  // namespace particles_txt
+#endif
 
 using namespace Smash;
 
 TEST(init_particle_types) {
-  ParticleType::create_type_list(read_all(bf::ifstream{"particles.txt"}));
+  ParticleType::create_type_list(particles_txt::data);
 }
 
 TEST(create_box) {

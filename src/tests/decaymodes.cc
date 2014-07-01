@@ -11,14 +11,17 @@
 
 #include "../include/particletype.h"
 #include "../include/decaymodes.h"
-#include "../include/lineparser.h"
 
-#include <boost/filesystem/fstream.hpp>
+#ifndef DOXYGEN
+namespace particles_txt {
+#include <particles.txt.h>
+}  // namespace particles_txt
+#endif
 
 using namespace Smash;
 
 TEST(init_particle_types) {
-  ParticleType::create_type_list(read_all(bf::ifstream{"particles.txt"}));
+  ParticleType::create_type_list(particles_txt::data);
 }
 
 TEST_CATCH(load_decaymodes_missing_pdg, DecayModes::ReferencedParticleNotFound) {

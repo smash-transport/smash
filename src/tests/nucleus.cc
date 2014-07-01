@@ -11,16 +11,19 @@
 #include <map>
 #include "../include/nucleus.h"
 #include "../include/pdgcode.h"
-#include "../include/lineparser.h"
 
-#include <boost/filesystem/fstream.hpp>
+#ifndef DOXYGEN
+namespace particles_txt {
+#include <particles.txt.h>
+}  // namespace particles_txt
+#endif
 
 using namespace Smash;
 
 std::map<PdgCode, int> list = {{0x2212, 82}, {0x2112, 126}};
 
 TEST(init_particle_types) {
-  ParticleType::create_type_list(read_all(bf::ifstream{"particles.txt"}));
+  ParticleType::create_type_list(particles_txt::data);
 }
 
 TEST(initialize_realparticles) {

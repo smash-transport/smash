@@ -184,7 +184,8 @@ class PdgCode {
   }
 
   /// Construct the antiparticle to a given PDG code.
-  PdgCode anti() const {
+  PdgCode get_antiparticle() const {
+    // TODO: more efficient implementation
     return PdgCode(-code());
   }
 

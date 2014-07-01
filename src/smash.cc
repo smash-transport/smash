@@ -25,7 +25,7 @@
 #include "include/outputroutines.h"
 #include "include/particletype.h"
 #include "include/decaymodes.h"
-#include "include/lineparser.h"
+#include "include/inputfunctions.h"
 
 /* build dependent variables */
 #include "include/config.h"
