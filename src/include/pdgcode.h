@@ -161,6 +161,8 @@ class PdgCode {
     if (digits_.n_q2_ > 6) { fail |= 1<<2; }
     if (digits_.n_q3_ > 6) { fail |= 1<<1; }
     if (digits_.n_J_  > 9) { fail |= 1; }
+    // n_J==0 is only allowed for the special cases K0_L=0x130 and K0_S=0x310
+    if (digits_.n_J_==0 && dump()!=0x0 && dump()!=0x130 && dump()!=0x310) { fail |= 1; }
     return fail;
   }
 
@@ -283,7 +285,11 @@ class PdgCode {
    */
   inline unsigned int spin() const {
     if (is_hadron()) {
-      return digits_.n_J_ - 1;
+      if (digits_.n_J_ == 0) {
+        return 0;  // special cases: K0_L=0x130 & K0_S=0x310
+      } else {
+        return digits_.n_J_ - 1;
+      }
     }
     // this assumes that we only have white particles (no single
     // quarks): Electroweak fermions have 11-17, so the
@@ -294,7 +300,11 @@ class PdgCode {
   /** Returns the spin degeneracy \f$2s + 1\f$ of a particle **/
   inline unsigned int spin_degeneracy() const {
     if (is_hadron()) {
-      return digits_.n_J_;
+      if (digits_.n_J_ == 0) {
+        return 1;  // special cases: K0_L=0x130 and K0_S=0x310
+      } else {
+        return digits_.n_J_;
+      }
     }
     return spin() + 1;
   }
@@ -573,26 +583,30 @@ class PdgCode {
     if (length > 3 + sign) {
       digits_.n_q1_ = get_digit_from_char(codestring[c++]);
       if (digits_.n_q1_>6) {
-        throw InvalidPdgCode("Invalid PDG code " +codestring + "(n_q1>6)");
+        throw InvalidPdgCode("Invalid PDG code " + codestring + " (n_q1>6)");
       }
     }
     // 3rd from last is n_q2_.
     if (length > 2 + sign) {
       digits_.n_q2_ = get_digit_from_char(codestring[c++]);
       if (digits_.n_q2_>6) {
-        throw InvalidPdgCode("Invalid PDG code " +codestring + "(n_q2>6)");
+        throw InvalidPdgCode("Invalid PDG code " + codestring + " (n_q2>6)");
       }
     }
     // next to last is n_q3_.
     if (length > 1 + sign) {
       digits_.n_q3_ = get_digit_from_char(codestring[c++]);
       if (digits_.n_q3_>6) {
-        throw InvalidPdgCode("Invalid PDG code " +codestring + "(n_q3>6)");
+        throw InvalidPdgCode("Invalid PDG code " + codestring + " (n_q3>6)");
       }
     }
     // last digit is the spin degeneracy.
     if (length > sign) {
       digits_.n_J_ = get_digit_from_char(codestring[c++]);
+      if (digits_.n_J_==0 && dump()!=0x0 && dump()!=0x130 && dump()!=0x310) {
+        // n_J==0 is only allowed for the special cases K0_L=0x130 and K0_S=0x310
+        throw InvalidPdgCode("Invalid PDG code " + codestring + " (n_J==0)");
+      }
     } else {
       throw InvalidPdgCode("String \"" + codestring +
                  "\" only consists of a sign, that is no valid PDG Code\n");
