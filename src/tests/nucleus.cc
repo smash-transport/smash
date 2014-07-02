@@ -12,11 +12,9 @@
 #include "../include/nucleus.h"
 #include "../include/pdgcode.h"
 
-#ifndef DOXYGEN
 namespace particles_txt {
 #include <particles.txt.h>
-}  // namespace particles_txt
-#endif
+}
 
 using namespace Smash;
 

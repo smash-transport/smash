@@ -14,11 +14,9 @@
 
 #include <boost/filesystem.hpp>
 
-#ifndef DOXYGEN
 namespace particles_txt {
 #include <particles.txt.h>
-}  // namespace particles_txt
-#endif
+}
 
 using namespace Smash;
 
