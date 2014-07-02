@@ -12,31 +12,16 @@
 #include "../include/particletype.h"
 #include "../include/decaymodes.h"
 
+#ifndef DOXYGEN
+namespace particles_txt {
+#include <particles.txt.h>
+}  // namespace particles_txt
+#endif
+
 using namespace Smash;
 
 TEST(init_particle_types) {
-  ParticleType::create_type_list(
-      "# NAME MASS[GEV] WIDTH[GEV] PDG\n"
-      "pi0 0.1350 -1.0 111\n"
-      "pi+ 0.1396 -1.0 211\n"
-      "pi- 0.1396 -1.0 -211\n"
-      "rho0 0.7755 0.149 113\n"
-      "rho+ 0.7755 0.149 213\n"
-      "rho- 0.7755 0.149 -213\n"
-      "eta 0.5479 1.0e-6 221\n"
-      "omega 0.7827 0.0085 223\n"
-      "p 0.9383 -1.0 2212\n"
-      "pbar 0.9383 -1.0 -2212\n"
-      "n 0.9396 -1.0 2112\n"
-      "nbar 0.9396 -1.0 -2112\n"
-      "Delta++ 1.232 0.117 2224\n"
-      "Delta+ 1.232 0.117 2214\n"
-      "Delta0 1.232 0.117 2114\n"
-      "Delta- 1.232 0.117 1114\n"
-      "Deltabar++ 1.232 0.117 -2224\n"
-      "Deltabar+ 1.232 0.117 -2214\n"
-      "Deltabar0 1.232 0.117 -2114\n"
-      "Deltabar- 1.232 0.117 -1114\n");
+  ParticleType::create_type_list(particles_txt::data);
 }
 
 TEST_CATCH(load_decaymodes_missing_pdg, DecayModes::ReferencedParticleNotFound) {
@@ -60,12 +45,16 @@ TEST_CATCH(load_decaymodes_incorrect_start, PdgCode::InvalidPdgCode) {
   DecayModes::load_decaymodes(decays_input);
 }
 
-TEST(load_decaymodes_two_channels) {
+
+TEST(load_decay_modes) {
   const std::string decays_input(
       " 113\t# rho0\n"
       "\n"
       " 1.0\t1\t211 -211\t# pi+ pi- \n"
       " \n"
+      "213\t# rho+\n"
+      "1.0\t1\t211 111\t# pi+ pi0 \n"
+      "\n"
       "\n"
       "223      # omega\n"
       "0.33 0 111 113   # pi0 rho0\n"
@@ -86,6 +75,27 @@ TEST(load_decaymodes_two_channels) {
     COMPARE(modelist[0].pdg_list()[1].dump(), 0x80000211u);
   }
   {
+    const auto &rhoplus = DecayModes::find(0x213);
+    VERIFY(!rhoplus.is_empty());
+    const auto &modelist = rhoplus.decay_mode_list();
+    COMPARE(modelist.size(), 1u);
+    COMPARE(modelist[0].weight(), 1.);
+    COMPARE(modelist[0].pdg_list().size(), 2u);
+    COMPARE(modelist[0].pdg_list()[0].dump(), 0x211u);
+    COMPARE(modelist[0].pdg_list()[1].dump(), 0x111u);
+  }
+  {
+    // the rho- decay is auto-generated from the rho+ decay
+    const auto &rhominus = DecayModes::find(-0x213);
+    VERIFY(!rhominus.is_empty());
+    const auto &modelist = rhominus.decay_mode_list();
+    COMPARE(modelist.size(), 1u);
+    COMPARE(modelist[0].weight(), 1.);
+    COMPARE(modelist[0].pdg_list().size(), 2u);
+    COMPARE(modelist[0].pdg_list()[0].dump(), 0x80000211u);
+    COMPARE(modelist[0].pdg_list()[1].dump(), 0x111u);
+  }
+  {
     const auto &omega = DecayModes::find(0x223);
     VERIFY(!omega.is_empty());
     const auto &modelist = omega.decay_mode_list();
@@ -104,6 +114,7 @@ TEST(load_decaymodes_two_channels) {
     COMPARE(modelist[2].pdg_list()[1].dump(), 0x213u);
   }
 }
+
 
 TEST_CATCH(add_no_particles, DecayModes::InvalidDecay) {
   DecayModes m;

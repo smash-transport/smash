@@ -96,6 +96,22 @@ void ensure_all_read(std::istream &input, const Line &line) {/*{{{*/
                            line));
   }
 }/*}}}*/
+
+/**
+ * Utility function to read a complete input stream (e.g. file) into one string.
+ *
+ * \param input The input stream. Since it reads until EOF und thus "uses up the
+ * whole input stream" the function takes an rvalue reference to the stream
+ * object (just pass a temporary).
+ *
+ * \note There's no slicing here: the actual istream object is a temporary that
+ * is not destroyed until read_all returns.
+ */
+std::string read_all(std::istream &&input) {
+  return {std::istreambuf_iterator<char>{input},
+          std::istreambuf_iterator<char>{}};
+}
+
 }  // unnamed namespace/*}}}*/
 
 }  // namespace Smash

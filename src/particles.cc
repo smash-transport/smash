@@ -16,7 +16,7 @@
 #include "include/constants.h"
 #include "include/distributions.h"
 #include "include/fourvector.h"
-#include "include/lineparser.h"
+#include "include/inputfunctions.h"
 #include "include/macros.h"
 #include "include/outputroutines.h"
 #include "include/particledata.h"

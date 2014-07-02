@@ -12,7 +12,7 @@
 #include "include/constants.h"
 #include "include/pdgcode.h"
 #include "include/processbranch.h"
-#include "include/lineparser.h"
+#include "include/inputfunctions.h"
 
 #include <cstdio>
 #include <map>
@@ -86,6 +86,24 @@ void DecayModes::load_decaymodes(const std::string &input) {
     }
     /* Add the list of decay modes for this particle type */
     decaymodes.insert(std::make_pair(pdgcode, decay_modes_to_add));
+
+    if (pdgcode.has_antiparticle()) {
+      /* Construct and add the list of decay modes for the antiparticle.  */
+      DecayModes decay_modes_anti;
+      for (const auto &mode : decay_modes_to_add.decay_mode_list()) {
+        std::vector<PdgCode> list = mode.pdg_list();
+        for (auto &code : list) {
+          if (code.has_antiparticle()) {
+            code = code.get_antiparticle();
+          }
+        }
+        decay_modes_anti.add_mode(mode.weight(), mode.angular_momentum(),
+                                  list);
+      }
+      decaymodes.insert(std::make_pair(pdgcode.get_antiparticle(),
+                                       decay_modes_anti));
+    }
+
     /* Clean up the list for the next particle type */
     decay_modes_to_add.clear();
     ratio_sum = 0.0;

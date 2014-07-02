@@ -9,7 +9,7 @@
 
 #include "include/particletype.h"
 
-#include "include/lineparser.h"
+#include "include/inputfunctions.h"
 #include "include/outputroutines.h"
 #include "include/pdgcode.h"
 #include "include/width.h"
@@ -53,6 +53,40 @@ SMASH_CONST bool ParticleType::exists(PdgCode pdgcode) {
   return false;
 }
 
+/* Construct an antiparticle name-string from the given name-string for the
+ * particle and its PDG code. */
+static std::string antiname(const std::string &name, PdgCode code) {
+  std::string basename, charge;
+
+  if (name.find("++") != std::string::npos) {
+    basename = name.substr(0, name.length()-2);
+    charge = "--";
+  } else if (name.find("+") != std::string::npos) {
+    basename = name.substr(0, name.length()-1);
+    charge = "-";
+  } else if (name.find("0") != std::string::npos) {
+    basename = name.substr(0, name.length()-1);
+    charge = "0";
+  } else if (name.find("-") != std::string::npos) {
+    basename = name.substr(0, name.length()-1);
+    charge = "+";
+  } else if (name.find("--") != std::string::npos) {
+    basename = name.substr(0, name.length()-2);
+    charge = "++";
+  } else {
+    basename = name;
+    charge = "";
+  }
+
+  if (code.baryon_number() != 0) {
+    return basename+"bar"+charge;  // baron
+  } else if (code.charge() != 0) {
+    return basename+charge;        // charged meson
+  } else {
+    return basename+charge+"bar";  // neutral meson
+  }
+};
+
 void ParticleType::create_type_list(const std::string &input) {  //{{{
   static ParticleTypeList type_list;
   type_list.clear();  // in case LoadFailure was thrown and caught and we should
@@ -78,6 +112,16 @@ void ParticleType::create_type_list(const std::string &input) {  //{{{
                                                   pdgcode.spin());
 
     type_list.emplace_back(name, mass, width, pdgcode);
+    if (pdgcode.has_antiparticle()) {
+      /* add corresponding antiparticle */
+      PdgCode anti = pdgcode.get_antiparticle();
+      name = antiname (name, pdgcode);
+      type_list.emplace_back(name, mass, width, anti);
+      printd("Setting antiparticle type %s mass %g width %g pdgcode %s\n",
+             name.c_str(), mass, width, anti.string().c_str());
+      printd("Setting antiparticle type %s isospin %i/2 charge %i spin %i/2\n",
+             name.c_str(), anti.isospin_total(), anti.charge(), anti.spin());
+    }
   }
   type_list.shrink_to_fit();
 
