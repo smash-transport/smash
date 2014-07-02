@@ -161,11 +161,32 @@ class PdgCode {
     if (digits_.n_q2_ > 6) { fail |= 1<<2; }
     if (digits_.n_q3_ > 6) { fail |= 1<<1; }
     if (digits_.n_J_  > 9) { fail |= 1; }
-    // n_J==0 is only allowed for the special cases K0_L=0x130 and K0_S=0x310
-    if (digits_.n_J_==0 && dump()!=0x0 && dump()!=0x130 && dump()!=0x310) { fail |= 1; }
-    // antiparticle flag only makes sense for particle types that have an antiparticle
-    if (digits_.antiparticle_ && !has_antiparticle()) { fail |= 1<<7; }
     return fail;
+  }
+
+  /// Do all sorts of validity checks.
+  void check() const {
+    // n_J must be odd for mesons and even for baryons (and cannot be zero)
+    if (is_hadron()) {
+      if (baryon_number()==0) {
+        // mesons: special cases K0_L=0x130 and K0_S=0x310
+        if ((digits_.n_J_ % 2 == 0) && dump()!=0x130 && dump()!=0x310) {
+          throw InvalidPdgCode("Invalid PDG code " + string() + " (meson with wrong n_J)");
+        }
+      } else {
+        if ((digits_.n_J_ % 2 != 0) || digits_.n_J_==0) {
+          throw InvalidPdgCode("Invalid PDG code " + string() + " (baryon with wrong n_J)");
+        }
+      }
+    } else {
+      if (digits_.n_J_==0 && dump()!=0x0) {
+        throw InvalidPdgCode("Invalid PDG code " + string() + " (n_J==0)");
+      }
+    }
+    // antiparticle flag only makes sense for particle types that have an antiparticle
+    if (digits_.antiparticle_ && !has_antiparticle()) {
+      throw InvalidPdgCode("Invalid PDG code " + string() + " (cannot be negative)");
+    }
   }
 
   /** Dumps the bitfield into an unsigned integer. */
@@ -616,18 +637,11 @@ class PdgCode {
     // last digit is the spin degeneracy.
     if (length > sign) {
       digits_.n_J_ = get_digit_from_char(codestring[c++]);
-      if (digits_.n_J_==0 && dump()!=0x0 && dump()!=0x130 && dump()!=0x310) {
-        // n_J==0 is only allowed for the special cases K0_L=0x130 and K0_S=0x310
-        throw InvalidPdgCode("Invalid PDG code " + codestring + " (n_J==0)");
-      }
     } else {
       throw InvalidPdgCode("String \"" + codestring +
                  "\" only consists of a sign, that is no valid PDG Code\n");
     }
-
-    if (digits_.antiparticle_ && !has_antiparticle()) {
-      throw InvalidPdgCode("Invalid PDG code " + codestring + " (cannot be negative)");
-    }
+    check();
   }
 
   /** Sets the bitfield from an unsigned integer. Usually called from
@@ -644,6 +658,7 @@ class PdgCode {
       throw InvalidPdgCode("Invalid digits " + std::to_string(test) +
                            " in PDG Code " + string());
     }
+    check();
   }
 
 };

@@ -528,10 +528,13 @@ TEST_CATCH(set_invalid_code_quark, PdgCode::InvalidPdgCode) {
 TEST_CATCH(set_invalid_code_nJ0, PdgCode::InvalidPdgCode) {
   PdgCode invalidparticle(0x110);
 }
+TEST_CATCH(set_invalid_code_antimeson, PdgCode::InvalidPdgCode) {
+  PdgCode invalidparticle(-0x331);
+}
 
 TEST(initialize_from_string) {
-  PdgCode particle1("+1234567");
-  COMPARE(particle1.dump(), 0x1234567u);
+  PdgCode particle1("+1234568");
+  COMPARE(particle1.dump(), 0x1234568u);
   PdgCode particle2("-211");
   COMPARE(particle2.dump(), 0x80000211u);
   PdgCode particle3("1234");
@@ -579,23 +582,26 @@ TEST_CATCH(invalid_digits_quark, PdgCode::InvalidPdgCode) {
 TEST_CATCH(invalid_digits_nJ0, PdgCode::InvalidPdgCode) {
   PdgCode particle("110");
 }
+TEST_CATCH(invalid_digits_antimeson, PdgCode::InvalidPdgCode) {
+  PdgCode particle("-331");
+}
 
 TEST(stream) {
   PdgCode particle1;
-  std::istringstream sourcestream("-1234567 +1234567 1234567 +123 -214");
+  std::istringstream sourcestream("-1234568 +1234568 1234568 +123 -213");
   sourcestream >> particle1;
-  COMPARE(particle1.code(), -0x1234567);
-  COMPARE(particle1.dump(), 0x81234567u);
+  COMPARE(particle1.code(), -0x1234568);
+  COMPARE(particle1.dump(), 0x81234568u);
   sourcestream >> particle1;
-  COMPARE(particle1.code(), 0x1234567);
-  COMPARE(particle1.dump(), 0x1234567u);
+  COMPARE(particle1.code(), 0x1234568);
+  COMPARE(particle1.dump(), 0x1234568u);
   sourcestream >> particle1;
-  COMPARE(particle1.code(), 0x1234567);
-  COMPARE(particle1.dump(), 0x1234567u);
+  COMPARE(particle1.code(), 0x1234568);
+  COMPARE(particle1.dump(), 0x1234568u);
   sourcestream >> particle1;
   COMPARE(particle1.dump(), 0x123u);
   sourcestream >> particle1;
-  COMPARE(particle1.dump(), 0x80000214u);
+  COMPARE(particle1.dump(), 0x80000213u);
 }
 TEST(stream_fail) {
   PdgCode particle1;
