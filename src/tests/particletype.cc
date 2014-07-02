@@ -38,12 +38,12 @@ TEST_CATCH(load_one_particle_with_incorrect_newline, Particles::LoadFailure) {
 
 TEST(create_type_list) {
   ParticleType::create_type_list(
-      "test0 0.1350 -1.0 -331\n"
+      "test0 0.1350 -1.0 661\n"
       "# Hello\n"
       "  # Will you ignore me? #### sldfkjsdf\n"
       "\t\t  \t # yes?\n"
-      "test1 0.1350  -2.0 -441 # This is pi0. Swell.\n"
-      "\t\n\t  test2  0.1350 \t -3.0 -551\n "
+      "test1 0.1350  -2.0 663 # This is pi0. Swell.\n"
+      "\t\n\t  test2  0.1350 \t -3.0 665\n "
       "pi0 0.1350 -1.0 111\n"
       "pi+ 0.1396 -1.0 211\n"
       "rho0 0.7755 0.149 113\n"
@@ -59,18 +59,18 @@ TEST(create_type_list) {
 
   COMPARE(ParticleType::list_all().size(), 23u);
 
-  ParticleType type = ParticleType::find(-0x331);
+  ParticleType type = ParticleType::find(0x661);
   COMPARE(type.mass(), 0.135f);
   COMPARE(type.width_at_pole(), -1.f);
-  COMPARE(type.pdgcode(), PdgCode(-0x331));
-  type = ParticleType::find(-0x441);
+  COMPARE(type.pdgcode(), PdgCode(0x661));
+  type = ParticleType::find(0x663);
   COMPARE(type.mass(), 0.135f);
   COMPARE(type.width_at_pole(), -2.f);
-  COMPARE(type.pdgcode(), PdgCode(-0x441));
-  type = ParticleType::find(-0x551);
+  COMPARE(type.pdgcode(), PdgCode(0x663));
+  type = ParticleType::find(0x665);
   COMPARE(type.mass(), 0.135f);
   COMPARE(type.width_at_pole(), -3.f);
-  COMPARE(type.pdgcode(), PdgCode(-0x551));
+  COMPARE(type.pdgcode(), PdgCode(0x665));
 
   type = ParticleType::find(-0x1114);
   COMPARE(type.mass(), 1.232f);
@@ -91,6 +91,6 @@ TEST(create_type_list) {
 
 TEST(exists) {
   VERIFY(ParticleType::exists(0x111));
-  VERIFY(!ParticleType::exists(-0x661));
+  VERIFY(!ParticleType::exists(0x667));
 }
 

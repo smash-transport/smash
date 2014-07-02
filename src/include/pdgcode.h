@@ -163,6 +163,8 @@ class PdgCode {
     if (digits_.n_J_  > 9) { fail |= 1; }
     // n_J==0 is only allowed for the special cases K0_L=0x130 and K0_S=0x310
     if (digits_.n_J_==0 && dump()!=0x0 && dump()!=0x130 && dump()!=0x310) { fail |= 1; }
+    // antiparticle flag only makes sense for particle types that have an antiparticle
+    if (digits_.antiparticle_ && !has_antiparticle()) { fail |= 1<<7; }
     return fail;
   }
 
@@ -622,6 +624,10 @@ class PdgCode {
       throw InvalidPdgCode("String \"" + codestring +
                  "\" only consists of a sign, that is no valid PDG Code\n");
     }
+
+    if (digits_.antiparticle_ && !has_antiparticle()) {
+      throw InvalidPdgCode("Invalid PDG code " + codestring + " (cannot be negative)");
+    }
   }
 
   /** Sets the bitfield from an unsigned integer. Usually called from
@@ -636,7 +642,7 @@ class PdgCode {
     int test = test_code();
     if (test > 0) {
       throw InvalidPdgCode("Invalid digits " + std::to_string(test) +
-                           " in PDG Code " + std::to_string(code()));
+                           " in PDG Code " + string());
     }
   }
 
