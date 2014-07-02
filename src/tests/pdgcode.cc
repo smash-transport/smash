@@ -506,6 +506,10 @@ TEST_CATCH(set_invalid_code, PdgCode::InvalidPdgCode) {
 TEST_CATCH(set_invalid_code_hex, PdgCode::InvalidPdgCode) {
   PdgCode invalidparticle(0xfedcba98);
 }
+TEST_CATCH(set_invalid_code_quark, PdgCode::InvalidPdgCode) {
+  PdgCode invalidparticle(0x711);
+}
+
 TEST(initialize_from_string) {
   PdgCode particle1("+1234567");
   COMPARE(particle1.dump(), 0x1234567u);
@@ -550,6 +554,10 @@ TEST_CATCH(invalid_digits_question, PdgCode::InvalidPdgCode) {
 TEST_CATCH(invalid_characters, PdgCode::InvalidPdgCode) {
   PdgCode particle("abcdef");
 }
+TEST_CATCH(invalid_digits_quark, PdgCode::InvalidPdgCode) {
+  PdgCode particle("771");
+}
+
 TEST(stream) {
   PdgCode particle1;
   std::istringstream sourcestream("-1234567 +1234567 1234567 +123 -214");

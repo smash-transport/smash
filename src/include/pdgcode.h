@@ -138,7 +138,10 @@ class PdgCode {
    * test function and export functions                                       *
    *                                                                          *
    ****************************************************************************/
-  /** Checks the integer for hex digits that are > 9.
+  /** Checks the integer for invalid hex digits.
+   *
+   * Usually all digits are at least <= 9. The n_q digits are even <= 6
+   * (because there are only six quarks).
    *
    * If one of the hex digits is not also a valid decimal digit,
    * something went wrong - maybe some user of this class forgot to
@@ -154,9 +157,9 @@ class PdgCode {
     if (digits_.n_    > 9) { fail |= 1<<6; }
     if (digits_.n_R_  > 9) { fail |= 1<<5; }
     if (digits_.n_L_  > 9) { fail |= 1<<4; }
-    if (digits_.n_q1_ > 9) { fail |= 1<<3; }
-    if (digits_.n_q2_ > 9) { fail |= 1<<2; }
-    if (digits_.n_q3_ > 9) { fail |= 1<<1; }
+    if (digits_.n_q1_ > 6) { fail |= 1<<3; }
+    if (digits_.n_q2_ > 6) { fail |= 1<<2; }
+    if (digits_.n_q3_ > 6) { fail |= 1<<1; }
     if (digits_.n_J_  > 9) { fail |= 1; }
     return fail;
   }
@@ -248,19 +251,18 @@ class PdgCode {
       // want to distinguish this from q which might be interpreted as
       // shorthand for "quark".)
       int Q = 0;
-      // this loops over d,u,s,c,b,t,b',t' quarks (the latter three can
-      // be safely ignored, but I don't think this will be a bottle
-      // neck.
-      for (int i = 1; i < 9; i++) {
-        // u,c,t,t' quarks have charge = 2/3 e, while d,s,b,b' quarks
-        // have -1/3 e. The antiparticle sign s already in net_quark_number.
+      /* This loops over d,u,s,c,b,t quarks (the latter can be safely ignored,
+       * but I don't think this will be a bottle neck. */
+      for (int i = 1; i < 7; i++) {
+        /* u,c,t quarks have charge = 2/3 e, while d,s,b quarks have -1/3 e.
+         * The antiparticle sign is already in net_quark_number. */
         Q += (i % 2 == 0 ? 2 : -1) * net_quark_number(i);
       }
       return Q / 3;
     }
-    // non-hadron:
-    // Leptons: 11, 13, 15, 17 are e, μ, τ, τ' and have a charge -1,
-    // while    12, 14, 16, 18 are the neutrinos that have no charge.
+    /* non-hadron:
+     * Leptons: 11, 13, 15 are e, μ, τ and have a charge -1, while
+     *          12, 14, 16 are the neutrinos that have no charge. */
     if (digits_.n_q3_ == 1) {
       return -1 * (digits_.n_J_ % 2) * antiparticle_sign();
     }
@@ -499,7 +501,7 @@ class PdgCode {
 
   /** returns the net number of quarks with given flavour number
    *
-   * \param quark PDG Code of quark: (1..8) = (d,u,s,c,b,t,b',t')
+   * \param quark PDG Code of quark: (1..6) = (d,u,s,c,b,t)
    * \return for the net number of quarks (\#quarks - \#antiquarks)
    *
    * For public use, see strangeness(), charmness(), bottomness() and
@@ -570,14 +572,23 @@ class PdgCode {
     // 4th from last is n_q1_.
     if (length > 3 + sign) {
       digits_.n_q1_ = get_digit_from_char(codestring[c++]);
+      if (digits_.n_q1_>6) {
+        throw InvalidPdgCode("Invalid PDG code " +codestring + "(n_q1>6)");
+      }
     }
     // 3rd from last is n_q2_.
     if (length > 2 + sign) {
       digits_.n_q2_ = get_digit_from_char(codestring[c++]);
+      if (digits_.n_q2_>6) {
+        throw InvalidPdgCode("Invalid PDG code " +codestring + "(n_q2>6)");
+      }
     }
     // next to last is n_q3_.
     if (length > 1 + sign) {
       digits_.n_q3_ = get_digit_from_char(codestring[c++]);
+      if (digits_.n_q3_>6) {
+        throw InvalidPdgCode("Invalid PDG code " +codestring + "(n_q3>6)");
+      }
     }
     // last digit is the spin degeneracy.
     if (length > sign) {
