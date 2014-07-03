@@ -525,8 +525,17 @@ TEST_CATCH(set_invalid_code_hex, PdgCode::InvalidPdgCode) {
 TEST_CATCH(set_invalid_code_quark, PdgCode::InvalidPdgCode) {
   PdgCode invalidparticle(0x711);
 }
-TEST_CATCH(set_invalid_code_nJ0, PdgCode::InvalidPdgCode) {
+TEST_CATCH(set_invalid_code_nJ0_meson, PdgCode::InvalidPdgCode) {
   PdgCode invalidparticle(0x110);
+}
+TEST_CATCH(set_invalid_code_nJ0_baryon, PdgCode::InvalidPdgCode) {
+  PdgCode invalidparticle(0x2210);
+}
+TEST_CATCH(set_invalid_code_nJ_meson, PdgCode::InvalidPdgCode) {
+  PdgCode invalidparticle(0x112);
+}
+TEST_CATCH(set_invalid_code_nJ_baryon, PdgCode::InvalidPdgCode) {
+  PdgCode invalidparticle(0x2211);
 }
 TEST_CATCH(set_invalid_code_antimeson, PdgCode::InvalidPdgCode) {
   PdgCode invalidparticle(-0x331);
@@ -579,8 +588,17 @@ TEST_CATCH(invalid_characters, PdgCode::InvalidPdgCode) {
 TEST_CATCH(invalid_digits_quark, PdgCode::InvalidPdgCode) {
   PdgCode particle("771");
 }
-TEST_CATCH(invalid_digits_nJ0, PdgCode::InvalidPdgCode) {
+TEST_CATCH(invalid_digits_nJ0_meson, PdgCode::InvalidPdgCode) {
   PdgCode particle("110");
+}
+TEST_CATCH(invalid_digits_nJ0_baryon, PdgCode::InvalidPdgCode) {
+  PdgCode particle("2210");
+}
+TEST_CATCH(invalid_digits_nJ_meson, PdgCode::InvalidPdgCode) {
+  PdgCode particle("112");
+}
+TEST_CATCH(invalid_digits_nJ_baryon, PdgCode::InvalidPdgCode) {
+  PdgCode particle("2211");
 }
 TEST_CATCH(invalid_digits_antimeson, PdgCode::InvalidPdgCode) {
   PdgCode particle("-331");

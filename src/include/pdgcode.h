@@ -170,16 +170,16 @@ class PdgCode {
     if (is_hadron()) {
       if (baryon_number()==0) {
         // mesons: special cases K0_L=0x130 and K0_S=0x310
-        if ((digits_.n_J_ % 2 == 0) && dump()!=0x130 && dump()!=0x310) {
-          throw InvalidPdgCode("Invalid PDG code " + string() + " (meson with wrong n_J)");
+        if ((digits_.n_J_ % 2 == 0) && dump() != 0x130 && dump() != 0x310) {
+          throw InvalidPdgCode("Invalid PDG code " + string() + " (meson with even n_J)");
         }
       } else {
-        if ((digits_.n_J_ % 2 != 0) || digits_.n_J_==0) {
-          throw InvalidPdgCode("Invalid PDG code " + string() + " (baryon with wrong n_J)");
+        if ((digits_.n_J_ % 2 != 0) || digits_.n_J_ == 0) {
+          throw InvalidPdgCode("Invalid PDG code " + string() + " (baryon with odd n_J)");
         }
       }
     } else {
-      if (digits_.n_J_==0 && dump()!=0x0) {
+      if (digits_.n_J_ == 0 && dump() != 0x0) {
         throw InvalidPdgCode("Invalid PDG code " + string() + " (n_J==0)");
       }
     }
@@ -333,12 +333,8 @@ class PdgCode {
   }
   /** Returns the spin degeneracy \f$2s + 1\f$ of a particle **/
   inline unsigned int spin_degeneracy() const {
-    if (is_hadron()) {
-      if (digits_.n_J_ == 0) {
-        return 1;  // special cases: K0_L=0x130 and K0_S=0x310
-      } else {
-        return digits_.n_J_;
-      }
+    if (is_hadron() && digits_.n_J_ > 0) {
+      return digits_.n_J_;
     }
     return spin() + 1;
   }
