@@ -2,6 +2,7 @@
  *    Andy's Deformed Nucleus Class File
  */
 #include "include/angles.h"
+#include "include/configuration.h"
 #include "include/constants.h"
 #include "include/deformednucleus.h"
 #include "include/fourvector.h"
@@ -27,20 +28,21 @@ void DeformedNucleus::deformed_distribute_nucleon(ThreeVector& vec) const {
   // !!! Efficiency.
   // !!! radius_max?
 
-  double radius;
+  double a_radius;
   double radius_max = 2*Nucleus::get_nuclear_radius();
-  Angles dir;
+  Angles a_direction;
 
   // Sample the distribution.
   do {
-    dir.distribute_isotropically();
-    radius = Random::uniform(0.0, radius_max);
+    a_direction.distribute_isotropically();
+    a_radius = Random::uniform(0.0, radius_max);
 
-  } while (Random::canonical() > deformed_woods_saxon(radius, 
-           dir.costheta()));
+  } while (Random::canonical() > deformed_woods_saxon(a_radius, 
+           a_direction.costheta()));
 
   // Update (x, y, z).
-  vec = ThreeVector(radius * dir.x(), radius * dir.y(), radius * dir.z());
+  vec = ThreeVector(a_radius * a_direction.x(), a_radius * 
+                    a_direction.y(), a_radius * a_direction.z());
 
 }
 
@@ -67,38 +69,80 @@ size_t DeformedNucleus::determine_nucleus() {
   // Uranium
   if (mass_number == 238) {
     // Moeller et. al. - Default.
-    DeformedNucleus::set_deformation_parameters(0.215, 0.093);
+    DeformedNucleus::set_beta_2(0.215);
+    DeformedNucleus::set_beta_4(0.093);
     // Kuhlman, Heinz - Correction.
-    // DeformedNucleus::set_deformation_parameters(0.28, 0.093);
+    // DeformedNucleus::set_beta_2(0.28);
+    // DeformedNucleus::set_beta_4(0.093);
   }  
-  // Lead !!! Reference?
+  // Lead
     else if (mass_number == 208) {
-      DeformedNucleus::set_deformation_parameters(0.0, 0.0);
+      DeformedNucleus::set_beta_2(0.0);
+      DeformedNucleus::set_beta_4(0.0);
   }
   // Gold 
     else if (mass_number == 197) {
-      DeformedNucleus::set_deformation_parameters(-0.131, -0.031);
+      DeformedNucleus::set_beta_2(-0.131);
+      DeformedNucleus::set_beta_4(-0.031);
   }
   // Copper
-    else if (mass_number == 63){
-      DeformedNucleus::set_deformation_parameters(0.162, -0.006);
+    else if (mass_number == 63) {
+      DeformedNucleus::set_beta_2(0.162);
+      DeformedNucleus::set_beta_4(-0.006);
   } else {
       throw std::domain_error("Mass number not listed in DeformedNucleus::determine_nucleus.");
   }
   return mass_number;
 }
 
+void DeformedNucleus::manual_nucleus(bool is_projectile, Configuration &modus_cfg) {
+  // Regular nucleus parameters.
+  Nucleus::manual_nucleus(is_projectile, modus_cfg);
+
+  const char * nucleus_type = is_projectile ? "Projectile" : "Target";
+  // Deformation parameters.
+  if (modus_cfg.has_value({nucleus_type, "BETA_2"})) {
+    set_beta_2(static_cast<double>(modus_cfg.take({nucleus_type, "BETA_2"})));
+  }
+  if (modus_cfg.has_value({nucleus_type, "BETA_4"})) {
+    set_beta_4(static_cast<double>(modus_cfg.take({nucleus_type, "BETA_4"})));
+  }
+}
+
 void DeformedNucleus::shift(bool is_projectile, double initial_z_displacement,
                             double x_offset, float simulation_time) {
+  // Determine the nucleus rotation.
+  Angles nuclear_rotation;
+  nuclear_rotation.distribute_isotropically();
+  nucleus_polar_angle_ = nuclear_rotation.theta();
+  nucleus_azimuthal_angle_ = nuclear_rotation.phi();
+
   // The amount to shift the z coordinates. If is_projectile, we shift
   // back by -r_max_, else we shift forward r_max_.
   double z_offset = is_projectile ? -r_max_ : r_max_;
   // In the current system, the nuclei may touch. We want them to be
   // a little apart, so we include a slightly bigger offset.
   z_offset += initial_z_displacement;
-  // Move the nucleus in z and x directions, and set the time.
+
+  // Move the nucleons to their new x, y, and z positions, and set the time.
   for (auto i = begin(); i != end(); i++) {
     FourVector this_position = i->position();
+
+    // Get current position.
+    double old_radius = std::sqrt(this_position.x1() * this_position.x1()
+                           + this_position.x2() * this_position.x2()
+                           + this_position.x3() * this_position.x3());
+    double old_polar_angle = std::acos(this_position.x3()/old_radius);
+    double old_azimuthal_angle = std::atan(this_position.x2()/this_position.x1());
+
+    // Rotate
+    this_position.set_x1(old_radius * std::sin(old_polar_angle + nucleus_polar_angle_)
+                         * std::cos(old_azimuthal_angle + nucleus_azimuthal_angle_));
+    this_position.set_x2(old_radius * std::sin(old_polar_angle + nucleus_polar_angle_) 
+                          * std::sin(old_azimuthal_angle + nucleus_azimuthal_angle_));
+    this_position.set_x3(old_radius * std::cos(old_polar_angle + nucleus_polar_angle_));
+
+    // Translate
     this_position.set_x3(this_position.x3() + z_offset);
     this_position.set_x1(this_position.x1() + x_offset);
     this_position.set_x0(simulation_time);

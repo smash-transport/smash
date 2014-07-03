@@ -5,8 +5,9 @@
  *    GNU General Public License (GPLv3 or later)
  */
 
-#include "include/nucleus.h"
 #include "include/angles.h"
+#include "include/configuration.h"
+#include "include/nucleus.h"
 #include "include/particles.h"
 #include "include/pdgcode.h"
 
@@ -252,7 +253,7 @@ size_t Nucleus::determine_nucleus() {
     Nucleus::set_diffusiveness(0.54);
     Nucleus::set_nuclear_radius(6.86);
     Nucleus::set_saturation_density(0.166);
-    // Hirano, Huovinen, Nara - Correction.
+    // Hirano, Huovinen, Nara - Corrections.
     // Nucleus::set_diffusiveness(0.44);
     // Nucleus::set_nuclear_radius(6.86);
   }  
@@ -285,6 +286,22 @@ size_t Nucleus::determine_nucleus() {
       throw std::domain_error("Mass number not listed in Nucleus::determine_nucleus.");
   }
   return mass_number;
+}
+
+void Nucleus::manual_nucleus(bool is_projectile, Configuration &modus_cfg) {
+  const char * nucleus_type = is_projectile ? "Projectile" : "Target";
+  // Diffusiveness
+  if (modus_cfg.has_value({nucleus_type, "DIFFUSIVENESS"})) {
+    set_diffusiveness(static_cast<float>(modus_cfg.take(
+                      {nucleus_type, "DIFFUSIVENESS"})));
+  }
+  // Radius
+  if (modus_cfg.has_value({nucleus_type, "RADIUS"})) {
+    set_nuclear_radius(static_cast<float>(modus_cfg.take(
+                       {nucleus_type, "RADIUS"})));
+  } else {
+    default_nuclear_radius();
+  }
 }
 
 void Nucleus::boost(double beta_squared_with_sign) {

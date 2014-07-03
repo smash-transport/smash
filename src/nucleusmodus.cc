@@ -39,33 +39,12 @@ NucleusModus::NucleusModus(Configuration modus_config,
   if (modus_cfg.has_value({"Projectile", "AUTOMATIC"})) {
     projectile_.determine_nucleus();
   } else {
-    // set diffusiveness of the nuclei if given (else take the default value)
-      if (modus_cfg.has_value({"Projectile", "DIFFUSIVENESS"})) {
-        projectile_.set_diffusiveness(static_cast<float>(
-                    modus_cfg.take({"Projectile", "DIFFUSIVENESS"})));
-      // set radius of the nuclei if given (else use the atomic number
-      // and proton radius to compute a default value)
-      if (modus_cfg.has_value({"Projectile", "RADIUS"})) {
-        projectile_.set_nuclear_radius(static_cast<float>(
-                    modus_cfg.take({"Projectile", "RADIUS"})));
-      } else {
-        projectile_.default_nuclear_radius();
-      }
-    }
+    projectile_.manual_nucleus(true, modus_cfg);
   }
   if (modus_cfg.has_value({"Target", "AUTOMATIC"})) {
     target_.determine_nucleus();
   } else {
-      if (modus_cfg.has_value({"Target", "DIFFUSIVENESS"})) {
-        target_.set_diffusiveness(static_cast<float>(
-                modus_cfg.take({"Target", "DIFFUSIVENESS"})));
-    }
-      if (modus_cfg.has_value({"Target", "RADIUS"})) {
-        target_.set_nuclear_radius(static_cast<float>(
-                modus_cfg.take({"Target", "RADIUS"})));
-    } else {
-        target_.default_nuclear_radius();
-    }
+    target_.manual_nucleus(false, modus_cfg);
   }
 
   // Impact parameter setting: Either "VALUE", "RANGE" or "MAX".
@@ -117,10 +96,6 @@ void NucleusModus::print_startup() {
 
 float NucleusModus::initial_conditions(Particles *particles,
                                       const ExperimentParameters&) {
-  // WHAT'S MISSING:
-  //
-  // Nuclei can be non-spherical. If they are, then they may be randomly
-  // aligned. Excentricities and angles should be configurable.
   float mass_projec = projectile_.mass();
   float mass_target = target_.mass();
   printf("Masses of Nuclei: %g GeV %g GeV\n", projectile_.mass(),
@@ -177,14 +152,15 @@ float NucleusModus::initial_conditions(Particles *particles,
   // For regular nuclei, the shift is along the z-axis so that
   // the nuclei are 2*1 fm apart.
   // For deformed nuclei, movement is also along z but due to
-  // geometry, initial separation may include extra space.
+  // geometry, initial separation may include extra space. Also,
+  // deformed nuclei are rotated here.
   // After shifting, set the time component of the particles to
   // -initial_z_displacement_/sqrt(velocity_squared).
   float simulation_time = -initial_z_displacement_/sqrt(velocity_squared);
-  projectile_.shift(true, -initial_z_displacement_, +impact_/2.0
-                                                  , simulation_time);
-  target_.shift(false,    +initial_z_displacement_, -impact_/2.0
-                                                  , simulation_time);
+  projectile_.shift(true, -initial_z_displacement_, +impact_/2.0,
+                    simulation_time);
+  target_.shift(false, +initial_z_displacement_, -impact_/2.0,
+                simulation_time);
 
   // Boost the nuclei to the appropriate velocity. (target is in opposite
   // direction!)

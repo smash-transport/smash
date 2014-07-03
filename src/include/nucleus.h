@@ -7,6 +7,7 @@
 #ifndef SRC_INCLUDE_NUCLEUS_H_
 #define SRC_INCLUDE_NUCLEUS_H_
 
+#include "configuration.h"
 #include "forwarddeclarations.h"
 #include "fourvector.h"
 #include "particledata.h"
@@ -49,6 +50,11 @@ class Nucleus {
   // Sets the parameters of the Woods-Saxon distribution
   // according to the current mass number.
   virtual size_t determine_nucleus();
+
+  // Sets the parameters of the nucleus according to
+  // manually added values in the configuration file.
+  // Returns the type of nucleus (Projectile or Target).
+  virtual void manual_nucleus(bool is_projectile, Configuration &modus_cfg);
 
   /**
    * Boosts the nuclei so that the nucleons have the appropriate
