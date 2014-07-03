@@ -100,6 +100,13 @@ void Action::sample_cms_momenta(const double cms_energy) {
   double mass1 = t1.mass();
   double mass2 = t2.mass();
 
+  if (cms_energy < t1.minimum_mass() + t2.minimum_mass()) {
+    throw InvalidResonanceFormation("resonance_formation: not enough energy! " +
+      std::to_string(cms_energy) + " " + std::to_string(t1.minimum_mass()) +
+      " " + std::to_string(t2.minimum_mass()) + " " +
+      p1->pdgcode().string() + " " + p2->pdgcode().string());
+  }
+
   /* If one of the particles is a resonance, sample its mass. */
   /* XXX: Other particle assumed stable! */
   if (!t1.is_stable()) {

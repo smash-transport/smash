@@ -76,6 +76,15 @@ class Action {
   /** Check various conservation laws. */
   void check_conservation(const size_t &id_process) const;
 
+  /**
+   * Thrown for example when ScatterAction is called to perform with a wrong
+   * number of final-state particles or when the energy is too low to produce
+   * the resonance.
+   */
+  class InvalidResonanceFormation : public std::invalid_argument {
+    using std::invalid_argument::invalid_argument;
+  };
+
  protected:
   /** List with data of incoming particles.  */
   ParticleList incoming_particles_;
@@ -100,7 +109,11 @@ class Action {
    * with their PDG code.
    */
   ParticleList choose_channel();
-  /** Sample final state momenta (and masses) in general X->2 process. */
+  /**
+   * Sample final state momenta (and masses) in general X->2 process.
+   * 
+   * \throws InvalidResonanceFormation
+   */
   void sample_cms_momenta(const double cms_energy);
 };
 
@@ -195,14 +208,6 @@ class ScatterAction : public Action {
    * \throws InvalidResonanceFormation
    */
   void perform(Particles *particles, size_t &id_process);
-
-  /**
-   * Thrown when ScatterAction is called to perform with 0 or more than 2
-   * entries in outgoing_particles.
-   */
-  class InvalidResonanceFormation : public std::invalid_argument {
-    using std::invalid_argument::invalid_argument;
-  };
 
  protected:
   /// determine the total energy in the center-of-mass frame
