@@ -22,11 +22,11 @@ using namespace Smash;
 TEST(init_particle_types) {
   ParticleType::create_type_list(
       "# NAME MASS[GEV] WIDTH[GEV] PDG\n"
-      "smashon 0.123 1.2 -331\n");
+      "smashon 0.123 1.2 661\n");
 }
 
 static ParticleData create_smashon_particle(int id = -1) {
-  return ParticleData{ParticleType::find(-0x331), id};
+  return ParticleData{ParticleType::find(0x661), id};
 }
 
 // create a particle list with various interesting particles. We will
@@ -140,8 +140,8 @@ TEST(propagate_collider) {
   ModusDefault m;
   Configuration conf(TEST_CONFIG_PATH);
   conf["Modi"]["Collider"]["SQRTS"] = 1.0;
-  conf["Modi"]["Collider"]["PROJECTILE"] = "-331";
-  conf["Modi"]["Collider"]["TARGET"] = "-331";
+  conf["Modi"]["Collider"]["PROJECTILE"] = "661";
+  conf["Modi"]["Collider"]["TARGET"] = "661";
   ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};
   ColliderModus c(conf["Modi"], param);
   Particles Pdef, Pcol;
@@ -171,10 +171,10 @@ TEST(propagate_nucleus) {
   conf["Modi"]["Nucleus"]["SQRTSNN"] = 1.0;
   conf.take({"Modi", "Nucleus", "Projectile"});
   conf.take({"Modi", "Nucleus", "Target"});
-  conf["Modi"]["Nucleus"]["Projectile"]["PARTICLES"]["-331"] = 1;
-  conf["Modi"]["Nucleus"]["Target"]["PARTICLES"]["-331"] = 1;
-  conf["Modi"]["Nucleus"]["SQRTS_N"][0] = "-331";
-  conf["Modi"]["Nucleus"]["SQRTS_N"][1] = "-331";
+  conf["Modi"]["Nucleus"]["Projectile"]["PARTICLES"]["661"] = 1;
+  conf["Modi"]["Nucleus"]["Target"]["PARTICLES"]["661"] = 1;
+  conf["Modi"]["Nucleus"]["SQRTS_N"][0] = "661";
+  conf["Modi"]["Nucleus"]["SQRTS_N"][1] = "661";
   ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};
   NucleusModus n(conf["Modi"], param);
   Particles Pdef, Pnuc;
