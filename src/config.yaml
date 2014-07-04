@@ -8,6 +8,16 @@ General:
     # end time of simulation
     END_TIME:      1.0
 
+    # output formats
+    OUTPUT:
+        OSCAR1999_COLLISIONS:    No lists
+        OSCAR1999_PARTICLELIST:  Final
+        VTK:                     OFF
+        ROOT:                    ON
+        Binary:                  ON
+        SURPRISE:                ON
+        VTK:                     ON
+
     # how much time before recording measurables
     OUTPUT_INTERVAL:  1.0
 

@@ -13,6 +13,7 @@
 #include <list>
 #include <string>
 #include <algorithm>
+#include <vector>
 
 #include "include/action.h"
 #include "include/boxmodus.h"
@@ -100,15 +101,20 @@ Experiment<Modus>::Experiment(Configuration &config)
     seed_ = time(nullptr);
   }
   Random::set_seed(seed_);
-
   print_startup(seed_);
+  // Get list of options concerning ouput
+  std::map<std::string, std::string> opformatlist
+    = config.take({"General", "OUTPUT"});
+  for (const auto &opformat : opformatlist) {
+    outputformats_.insert(opformat);
+  }
 }
 
 /* This method reads the particle type and cross section information
  * and does the initialization of the system (fill the particles map)
  */
 template <typename Modus>
-void Experiment<Modus>::initialize(const bf::path &/*path*/) {
+void Experiment<Modus>::initialize_new_event() {
   cross_sections_.reset();
   particles_.reset();
 
@@ -124,6 +130,53 @@ void Experiment<Modus>::initialize(const bf::path &/*path*/) {
   conserved_initial_.count_conserved_values(particles_);
   /* Print output headers */
   print_header();
+}
+
+
+/* This method sets all the outputs up depending on options
+ *  specified in config file.
+ */
+template <typename Modus>
+void Experiment<Modus>::set_outputs(const bf::path &path) {
+  for(std::map<std::string, std::string>::iterator outputformat
+      = outputformats_.begin(); outputformat != outputformats_.end();
+      ++outputformat) {
+
+    std::string formatname = outputformat->first;
+    std::string formatoption = outputformat->second;
+
+    if ( formatoption == "off" || formatoption == "OFF" ||
+         formatoption == "Off" ||
+         formatoption == "no" || formatoption == "NO" || formatoption == "No" ||
+         formatoption == "disable" || formatoption =="Disable") {
+      printf("Output %s disabled.\n", formatname.c_str());
+      continue;
+    } else {
+      printf("Output %s enabled with option %s.\n", formatname.c_str(), 
+                                            formatoption.c_str());
+    }
+
+    if        (formatname =="OSCAR1999_COLLISIONS") {
+      outputs_.emplace_back(new OscarFullHistoryOutput(path, formatoption));
+    } else if (formatname =="OSCAR1999_PARTICLELIST") {
+      outputs_.emplace_back(new OscarParticleListOutput(path, formatoption));
+    } else if (formatname == "VTK") {
+      outputs_.emplace_back(new VtkOutput(path));
+    } else if (formatname == "Binary") {
+      outputs_.emplace_back(new BinaryOutput(path));
+    } else if (formatname == "ROOT") {
+      #ifdef SMASH_USE_ROOT
+      outputs_.emplace_back(new RootOutput(path));
+      #endif
+      #ifndef SMASH_USE_ROOT
+      printf("You requested ROOT output, but ROOT is disabled. ");
+      printf("To enable ROOT: cmake -D USE_ROOT=ON <path>. \n");
+      #endif
+    } else {
+      printf("Warning: Unknown output format %s. ", formatname.c_str());
+      printf("Option will be ignored.\n");
+    }
+  }
 }
 
 
@@ -220,16 +273,10 @@ void Experiment<Modus>::print_startup(int64_t seed) {
 
 template <typename Modus>
 void Experiment<Modus>::run(const bf::path &path) {
-  outputs_.emplace_back(new BinaryOutput(path));
-  outputs_.emplace_back(new OscarFullHistoryOutput(path));
-  outputs_.emplace_back(new OscarParticleListOutput(path));
-  outputs_.emplace_back(new VtkOutput(path));
-#ifdef SMASH_USE_ROOT
-  outputs_.emplace_back(new RootOutput(path));
-#endif
+  set_outputs(path);
 
   for (int j = 0; j < nevents_; j++) {
-    initialize(path);
+    initialize_new_event();
 
     /* Output at event start */
     for (const auto &output : outputs_) {

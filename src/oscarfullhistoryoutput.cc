@@ -7,6 +7,8 @@
  *
  */
 
+#include <string>
+
 #include "include/clock.h"
 #include "include/forwarddeclarations.h"
 #include "include/oscarfullhistoryoutput.h"
@@ -17,13 +19,14 @@
 
 namespace Smash {
 
-OscarFullHistoryOutput::OscarFullHistoryOutput(bf::path path)
+OscarFullHistoryOutput::OscarFullHistoryOutput(bf::path path, std::string op)
   : OscarFullHistoryOutput(path / "full_event_history.oscar",
-                           "# full_event_history\n"){}
+                           "# full_event_history\n", op){}
 
 OscarFullHistoryOutput::OscarFullHistoryOutput(bf::path path,
-                                               const char* second_line)
-  : file_{std::fopen(path.native().c_str(), "w")} {
+                                               const char* second_line,
+                                               std::string option)
+  : file_{std::fopen(path.native().c_str(), "w")}, config_option_(option) {
   fprintf(file_.get(), "# OSC1999A\n");
   fprintf(file_.get(), "%s", second_line);
   fprintf(file_.get(), "# smash\n");
@@ -32,6 +35,13 @@ OscarFullHistoryOutput::OscarFullHistoryOutput(bf::path path,
   fprintf(file_.get(), "# id pdg 0 px py pz p0 mass x y z t\n");
   fprintf(file_.get(), "# End of event: 0 0 event_number\n");
   fprintf(file_.get(), "#\n");
+
+  if (config_option_ == "No lists") {
+    printf("Initial and final particles lists are switched off by option ");
+    printf("%s\n", config_option_.c_str());
+  } else {
+    printf("Option %s is not meaningful. \n", config_option_.c_str());
+  }
 }
 
 
@@ -42,10 +52,12 @@ void OscarFullHistoryOutput::at_eventstart(const Particles &particles,
   /* OSCAR line prefix : initial particles; final particles; event id
    * First block of an event: initial = 0, final = number of particles
    */
-  const size_t zero = 0;
-  fprintf(file_.get(), "%zu %zu %i\n", zero, particles.size(),
-          event_number + 1);
-  write(particles);
+  if (config_option_ != "No lists") {
+    const size_t zero = 0;
+    fprintf(file_.get(), "%zu %zu %i\n", zero, particles.size(),
+            event_number + 1);
+    write(particles);
+  }
 }
 
 void OscarFullHistoryOutput::at_eventend(const Particles &particles,
@@ -55,9 +67,11 @@ void OscarFullHistoryOutput::at_eventend(const Particles &particles,
    * Block ends with null interaction
    */
   const size_t zero = 0;
-  fprintf(file_.get(), "%zu %zu %i\n", particles.size(), zero,
-          event_number + 1);
-  write(particles);
+  if (config_option_ != "No lists") {
+    fprintf(file_.get(), "%zu %zu %i\n", particles.size(), zero,
+            event_number + 1);
+    write(particles);
+  }
   /* Null interaction marks the end of an event */
   fprintf(file_.get(), "%zu %zu %i\n", zero, zero, event_number + 1);
 
