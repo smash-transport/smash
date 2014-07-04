@@ -24,16 +24,17 @@ VtkOutput::~VtkOutput() {
 }
 
 void VtkOutput::at_eventstart(const Particles &/*particles*/, const int /*event_number*/) {
+  vtk_output_counter_ = 0;
 }
 
 void VtkOutput::at_eventend(const Particles &/*particles*/, const int /*event_number*/) {
 }
 
 void VtkOutput::after_Nth_timestep(const Particles &particles, const int event_number,
-                                   const Clock& clock) {
+                                   const Clock& /*clock*/) {
   char filename[32];
-  snprintf(filename, sizeof(filename), "pos_ev%05i_tstep%+7.3f.vtk", event_number,
-           clock.current_time());
+  snprintf(filename, sizeof(filename), "pos_ev%05i_tstep%05i.vtk", event_number,
+           vtk_output_counter_);
   FilePtr file_{fopen((base_path_ / filename).native().c_str(), "w")};
 
   /* Legacy VTK file format */
@@ -67,6 +68,7 @@ void VtkOutput::after_Nth_timestep(const Particles &particles, const int event_n
     fprintf(file_.get(), "%g %g %g\n", p.momentum().x1(),
             p.momentum().x2(), p.momentum().x3());
   }
+  vtk_output_counter_++;
 }
 
 }  // namespace Smash
