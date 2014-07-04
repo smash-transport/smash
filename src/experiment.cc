@@ -23,9 +23,10 @@
 #include "include/forwarddeclarations.h"
 #include "include/macros.h"
 #include "include/nucleusmodus.h"
-#include "include/oscaroutput.h"
+#include "include/binaryoutput.h"
+#include "include/oscarfullhistoryoutput.h"
+#include "include/oscarparticlelistoutput.h"
 #include "include/outputroutines.h"
-#include "include/particlesoutput.h"
 #include "include/random.h"
 #ifdef SMASH_USE_ROOT
 #  include "include/rootoutput.h"
@@ -89,7 +90,7 @@ template <typename Modus>
 Experiment<Modus>::Experiment(Configuration &config)
     : parameters_(create_experiment_parameters(config)),
       modus_(config["Modi"], parameters_),
-      particles_(static_cast<std::string &&>(config.take({"decaymodes"}))),
+      particles_(),
       cross_sections_(parameters_.cross_section),
       nevents_(config.take({"General", "NEVENTS"})),
       end_time_(config.take({"General", "END_TIME"})),
@@ -219,8 +220,9 @@ void Experiment<Modus>::print_startup(int64_t seed) {
 
 template <typename Modus>
 void Experiment<Modus>::run(const bf::path &path) {
-  outputs_.emplace_back(new OscarOutput(path));
-  outputs_.emplace_back(new ParticlesOutput(path));
+  outputs_.emplace_back(new BinaryOutput(path));
+  outputs_.emplace_back(new OscarFullHistoryOutput(path));
+  outputs_.emplace_back(new OscarParticleListOutput(path));
   outputs_.emplace_back(new VtkOutput(path));
 #ifdef SMASH_USE_ROOT
   outputs_.emplace_back(new RootOutput(path));

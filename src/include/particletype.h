@@ -53,8 +53,8 @@ class ParticleType {
   /// Returns the particle mass.
   float mass() const { return mass_; }
 
-  /// Returns the particle width.
-  float width() const { return width_; }
+  /// Returns the particle width (at the mass pole).
+  float width_at_pole() const { return width_; }
 
   /// Returns the PDG code of the particle.
   PdgCode pdgcode() const { return pdgcode_; }
@@ -70,6 +70,45 @@ class ParticleType {
 
   /// \copydoc PdgCode::is_hadron
   bool is_hadron() const { return pdgcode_.is_hadron(); }
+
+  /// Check if the particle is stable
+  inline bool is_stable() const;
+
+  /**
+   * The minimum mass of the resonance.
+   *
+   * Calculate the minimum rest energy the resonance must have
+   * for any decay channel to be kinematically available.
+   * (In other words, find the smallest sum of final-state particle masses.)
+   *
+   * \return The minimum mass that a particle of this type can assume.
+   */
+  float minimum_mass() const;
+
+  /**
+   * Get the mass-dependent partial width of a particle with mass m
+   * in a particular decay mode.
+   *
+   * \param m Invariant mass of the decaying particle.
+   * \param mode Decay mode to consider.
+   */
+  float partial_width(const float m, const DecayBranch &mode) const;
+
+  /**
+   * Get the mass-dependent total width of a particle with mass m.
+   *
+   * \param m Invariant mass of the decaying particle.
+   */
+  float total_width(const float m) const;
+
+  /**
+   * Get the mass-dependent partial widths of a particle with mass m.
+   * Returns a list of process branches, whose weights correspond to the
+   * actual partial widths.
+   *
+   * \param m Invariant mass of the decaying particle.
+   */
+  ProcessBranchList get_partial_widths(const float m) const;
 
   /**
    * Returns a list of all ParticleType objects.
@@ -124,6 +163,12 @@ class ParticleType {
    */
   int charge_;
 };
+
+inline bool ParticleType::is_stable() const {
+  /* We currently regard a particle type as stable if its on-shell width is
+   * less than 10 keV. */
+  return width_<1E-5;
+}
 
 }  // namespace Smash
 

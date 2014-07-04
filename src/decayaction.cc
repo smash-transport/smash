@@ -13,40 +13,30 @@
 #include "include/outputroutines.h"
 #include "include/pdgcode.h"
 #include "include/resonances.h"
+#include "include/decaymodes.h"
 
 namespace Smash {
 
 
-DecayAction::DecayAction(const std::vector<int> &in_part,
-                         float time_of_execution, int interaction_type)
-    : Action (in_part, time_of_execution, interaction_type) {}
+DecayAction::DecayAction(const int id_in, float time_of_execution)
+    : Action ({id_in}, time_of_execution) {}
 
+DecayAction::DecayAction(const ParticleData &p) : Action ({p.id()}, 0.) {
+  add_processes(p.type().get_partial_widths(p.mass()));
+}
 
-
-/**
- * Kinematics of a 1-to-2 decay process.
- *
- * Given a resonance ID and the PDG codes of decay product particles,
- * sample the momenta and position of the products and add them
- * to the active particles data structure.
- *
- * \param[in] incoming0 decaying particle (in its rest frame)
- * \param[in] particles Particles in the simulation.
- */
-void DecayAction::one_to_two(const ParticleData &incoming0, const Particles &particles) {
+void DecayAction::one_to_two(const ParticleData &incoming0) {
   ParticleData &outgoing0 = outgoing_particles_[0];
   ParticleData &outgoing1 = outgoing_particles_[1];
   const ParticleType &outgoing0_type = outgoing0.type();
   const ParticleType &outgoing1_type = outgoing1.type();
 
-  const PdgCode type_a = outgoing0.pdgcode();
-  const PdgCode type_b = outgoing1.pdgcode();
-
   // TODO(weil) This may be checked already when reading in the possible
   // decay channels.
   if (!outgoing0.is_hadron() || !outgoing1.is_hadron()) {
-    printf("Warning: decay products A: %s B: %s\n", type_a.string().c_str(),
-           type_b.string().c_str());
+    printf("Warning: decay products A: %s B: %s\n",
+           outgoing0.pdgcode().string().c_str(),
+           outgoing1.pdgcode().string().c_str());
   }
 
   double mass_a = outgoing0_type.mass();
@@ -55,10 +45,12 @@ void DecayAction::one_to_two(const ParticleData &incoming0, const Particles &par
 
   /* If one of the particles is resonance, sample its mass */
   /* XXX: Other particle assumed stable! */
-  if (outgoing0_type.width() > 0) {
-    mass_a = sample_resonance_mass(particles, type_a, type_b, total_energy);
-  } else if (outgoing1_type.width() > 0) {
-    mass_b = sample_resonance_mass(particles, type_b, type_a, total_energy);
+  if (!outgoing0_type.is_stable()) {
+    mass_a = sample_resonance_mass (outgoing0_type, outgoing1_type,
+                                    total_energy);
+  } else if (!outgoing1_type.is_stable()) {
+    mass_b = sample_resonance_mass (outgoing1_type, outgoing0_type,
+                                    total_energy);
   }
 
   /* Sample the momenta */
@@ -69,15 +61,7 @@ void DecayAction::one_to_two(const ParticleData &incoming0, const Particles &par
   outgoing1.set_position(incoming0.position());
 }
 
-/**
- * Kinematics of a 1-to-3 decay process.
- *
- * Given a resonance ID and the PDG codes of decay product particles,
- * sample the momenta and position of the products and add them
- * to the active particles data structure.
- *
- * \param[in] incoming0 decaying particle (in its rest frame)
- */
+
 void DecayAction::one_to_three(const ParticleData &incoming0) {
   ParticleData &outgoing0 = outgoing_particles_[0];
   ParticleData &outgoing1 = outgoing_particles_[1];
@@ -214,26 +198,6 @@ void DecayAction::one_to_three(const ParticleData &incoming0) {
          outgoing1.momentum().x3(), outgoing2.momentum().x3());
 }
 
-ParticleList DecayAction::choose_channel(const Particles &particles) const {
-  const PdgCode pdgcode = particles.data(incoming_particles_[0]).pdgcode();
-
-  /* Get the decay modes of this resonance */
-  const std::vector<ProcessBranch> decaymodes
-    = particles.decay_modes(pdgcode).decay_mode_list();
-  /* Get the first decay mode and its branching ratio */
-  std::vector<ProcessBranch>::const_iterator mode = decaymodes.begin();
-  float cumulated_probability = mode->weight();
-  /* Ratios of decay channels should add to 1; pick a random number
-   * between 0 and 1 to select the decay mode to be used
-   */
-  double random_mode = Random::canonical();
-  /* Keep adding to the probability until it exceeds the random value */
-  while (random_mode > cumulated_probability &&  mode != decaymodes.end()) {
-    cumulated_probability += mode->weight();
-    ++mode;
-  }
-  return mode->particle_list();
-}
 
 void DecayAction::perform(Particles *particles, size_t &id_process) {
   /* Check if particle still exists. */
@@ -244,12 +208,6 @@ void DecayAction::perform(Particles *particles, size_t &id_process) {
 
   /* local copy of the initial state */
   ParticleData particle0 = particles->data(incoming_particles_[0]);
-  const ParticleType &type0 = particle0.type();
-
-  if (interaction_type_ != 2) {
-    printf("Decays warning: ID %i (%s) has process type %i.\n", particle0.id(),
-           type0.name().c_str(), interaction_type_);
-  }
 
   printd("Process: Resonance decay. ");
   printd_momenta("Resonance momenta before decay", particle0);
@@ -267,11 +225,12 @@ void DecayAction::perform(Particles *particles, size_t &id_process) {
    * according to their relative weights. Then decay the particle
    * by calling function one_to_two or one_to_three.
    */
-  outgoing_particles_ = choose_channel(*particles);
+  outgoing_particles_ = choose_channel();
+
   if (outgoing_particles_.size() == 2) {
-    one_to_two (particle0, *particles);
+    one_to_two(particle0);
   } else if (outgoing_particles_.size() == 3) {
-    one_to_three (particle0);
+    one_to_three(particle0);
   } else {
     throw InvalidDecay(
         "DecayAction::perform: Only 1->2 or 1->3 processes are supported. "

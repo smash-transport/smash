@@ -75,7 +75,7 @@ static void create_particle_list(Particles &P) {
 
 TEST(propagate_default) {
   ModusDefault m;
-  Particles Pdef{""};
+  Particles Pdef;
   create_particle_list(Pdef);
   OutputsList out;
   // clock, output interval, cross-section, testparticles
@@ -109,7 +109,7 @@ TEST(propagate_box) {
   conf["Modi"]["Box"]["START_TIME"] = 0.2;
   ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};
   BoxModus b(conf["Modi"], param);
-  Particles Pdef{""}, Pbox{""};
+  Particles Pdef, Pbox;
   create_particle_list(Pdef);
   create_particle_list(Pbox);
   OutputsList out;
@@ -144,7 +144,7 @@ TEST(propagate_collider) {
   conf["Modi"]["Collider"]["TARGET"] = "-331";
   ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};
   ColliderModus c(conf["Modi"], param);
-  Particles Pdef{""}, Pcol{""};
+  Particles Pdef, Pcol;
   create_particle_list(Pdef);
   create_particle_list(Pcol);
   OutputsList out;
@@ -177,7 +177,7 @@ TEST(propagate_nucleus) {
   conf["Modi"]["Nucleus"]["SQRTS_N"][1] = "-331";
   ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};
   NucleusModus n(conf["Modi"], param);
-  Particles Pdef{""}, Pnuc{""};
+  Particles Pdef, Pnuc;
   create_particle_list(Pdef);
   create_particle_list(Pnuc);
   OutputsList out;

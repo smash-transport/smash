@@ -37,7 +37,7 @@ TEST(initialize_box) {
   // number which is as close to an integer as possible (while still >
   // 1).  The value is 724.000021, meaning this has a change of 0.0021 %
   // of giving 725 particles.
-  Particles P{""};
+  Particles P;
   // should return START_TIME and set P:
   COMPARE(b.initial_conditions(&P, param), 0.2f);
   COMPARE(P.size(), 724);
@@ -66,7 +66,7 @@ TEST(initialize_collider) {
   conf["Modi"]["Collider"]["TARGET"] = "222";
   ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};
   ColliderModus c(conf["Modi"], param);
-  Particles P{""};
+  Particles P;
   COMPARE(c.initial_conditions(&P, param), -1.f);
   COMPARE(P.size(), 2);
   COMPARE(P.data(0).pdgcode(), 0x222);
@@ -107,7 +107,7 @@ TEST(initialize_nucleus_normal) {
   conf["Modi"]["Nucleus"]["Impact"]["VALUE"] = 0;
   ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};
   NucleusModus n(conf["Modi"], param);
-  Particles P{""};
+  Particles P;
   COMPARE(n.initial_conditions(&P, param), 0.f);
   COMPARE(P.size(), 9);
   for (auto p : P.data()) {
@@ -137,7 +137,7 @@ TEST_CATCH(initialize_nucleus_low_energy, ModusDefault::InvalidEnergy) {
   conf["Modi"]["Nucleus"]["INITIAL_DISTANCE"] = 0;
   ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};
   NucleusModus n(conf["Modi"], param);
-  Particles P{""};
+  Particles P;
   n.initial_conditions(&P, param);
 }
 
@@ -153,7 +153,7 @@ TEST_CATCH(initialize_nucleus_empty_projectile, NucleusModus::NucleusEmpty) {
   conf["Modi"]["Nucleus"]["INITIAL_DISTANCE"] = 0;
   ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};
   NucleusModus n(conf["Modi"], param);
-  Particles P{""};
+  Particles P;
   n.initial_conditions(&P, param);
 }
 
@@ -169,7 +169,7 @@ TEST_CATCH(initialize_nucleus_empty_target, NucleusModus::NucleusEmpty) {
   conf["Modi"]["Nucleus"]["INITIAL_DISTANCE"] = 0;
   ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};
   NucleusModus n(conf["Modi"], param);
-  Particles P{""};
+  Particles P;
   n.initial_conditions(&P, param);
 }
 

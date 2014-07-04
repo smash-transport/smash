@@ -24,6 +24,8 @@
 #include "include/macros.h"
 #include "include/outputroutines.h"
 #include "include/particletype.h"
+#include "include/decaymodes.h"
+#include "include/inputfunctions.h"
 
 /* build dependent variables */
 #include "include/config.h"
@@ -108,21 +110,6 @@ void ensure_path_is_valid(const bf::path &path) {
           "a different process.");
     }
   }
-}
-
-/**
- * Utility function to read a complete input stream (e.g. file) into one string.
- *
- * \param input The input stream. Since it reads until EOF und thus "uses up the
- * whole input stream" the function takes an rvalue reference to the stream
- * object (just pass a temporary).
- *
- * \note There's no slicing here: the actual istream object is a temporary that
- * is not destroyed until read_all returns.
- */
-std::string read_all(std::istream &&input) {
-  return {std::istreambuf_iterator<char>{input},
-          std::istreambuf_iterator<char>{}};
 }
 
 }  // unnamed namespace
@@ -211,6 +198,7 @@ int main(int argc, char *argv[]) {
                                               << '\n';
 
     ParticleType::create_type_list(configuration.take({"particles"}));
+    DecayModes::load_decaymodes(configuration.take({"decaymodes"}));
     auto experiment = ExperimentBase::create(configuration);
     const std::string report = configuration.unused_values_report();
     if (report != "{}") {

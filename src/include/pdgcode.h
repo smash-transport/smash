@@ -183,6 +183,12 @@ class PdgCode {
     return std::string(hexstring);
   }
 
+  /// Construct the antiparticle to a given PDG code.
+  PdgCode get_antiparticle() const {
+    // TODO: more efficient implementation
+    return PdgCode(-code());
+  }
+
   /****************************************************************************
    *                                                                          *
    * accessors of various properties                                          *
@@ -198,6 +204,11 @@ class PdgCode {
       return  0;
     }
     return antiparticle_sign();
+  }
+  /** Determine whether a particle has a distinct antiparticle
+    * (or whether it is its own antiparticle). */
+  bool has_antiparticle() const {
+    return (baryon_number() != 0) || (digits_.n_q2_ != digits_.n_q3_);
   }
   /** returns twice the isospin-3 component \f$I_3\f$.
    *

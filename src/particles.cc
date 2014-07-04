@@ -10,18 +10,18 @@
 #include <cstdio>
 #include <iostream>
 #include <sstream>
+#include <assert.h>
 
 #include "include/angles.h"
 #include "include/constants.h"
 #include "include/distributions.h"
 #include "include/fourvector.h"
-#include "include/lineparser.h"
+#include "include/inputfunctions.h"
 #include "include/macros.h"
 #include "include/outputroutines.h"
 #include "include/particledata.h"
 #include "include/particles.h"
 #include "include/pdgcode.h"
-#include <assert.h>
 
 namespace Smash {
 
@@ -199,92 +199,9 @@ void sample_cms_momenta(ParticleData *particle1, ParticleData *particle2,
   printd("p3: %g %g \n", momentum1.x3(), momentum2.x3());
 }
 
-Particles::Particles(const std::string &decaymodes)
-    : all_decay_modes_(load_decaymodes(decaymodes)) {}
 
-Particles::DecayModesMap Particles::load_decaymodes(const std::string &input) {
-  Particles::DecayModesMap decaymodes;
-  PdgCode pdgcode = PdgCode::invalid();
-  DecayModes decay_modes_to_add;
-  float ratio_sum = 0.0;
+Particles::Particles() {}
 
-  const auto end_of_decaymodes = [&]() {
-    if (pdgcode == PdgCode::invalid()) {  // at the start of the file
-      return;
-    }
-    if (decay_modes_to_add.is_empty()) {
-      throw MissingDecays("No decay modes found for particle " +
-                          pdgcode.string());
-    }
-    // XXX: why not just unconditionally call renormalize? (mkretz)
-    /* Check if ratios add to 1 */
-    if (fabs(ratio_sum - 1.0) > really_small) {
-      /* They didn't; renormalize */
-      printf("Particle %s:\n", pdgcode.string().c_str());
-      decay_modes_to_add.renormalize(ratio_sum);
-    }
-    /* Add the list of decay modes for this particle type */
-    decaymodes.insert(std::make_pair(pdgcode, decay_modes_to_add));
-    /* Clean up the list for the next particle type */
-    decay_modes_to_add.clear();
-    ratio_sum = 0.0;
-  };
-
-  for (const Line &line : line_parser(input)) {
-    const auto trimmed = trim(line.text);
-    assert(!trimmed.empty());  // trim(line.text) is never empty - else
-                               // line_parser is broken
-    // if (trimmed.find_first_not_of("-0123456789") ==
-    if (trimmed.find_first_of(" \t") ==
-        std::string::npos) {  // a single record on one line signifies a new
-                              // decay mode section
-      end_of_decaymodes();
-      pdgcode = PdgCode(trim(line.text));
-      if (!ParticleType::exists(pdgcode)) {
-        throw ReferencedParticleNotFound(build_error_string(
-            "Inconsistency: The particle with PDG id " +
-                pdgcode.string() +
-                " was not registered through particles.txt, but "
-                "decaymodes.txt referenced it.",
-            line));
-      }
-      assert(pdgcode != PdgCode::invalid());  // special value for start of file
-    } else {
-      std::istringstream lineinput(line.text);
-      std::vector<PdgCode> decay_particles;
-      decay_particles.reserve(4);
-      float ratio;
-      lineinput >> ratio;
-
-      PdgCode pdg;
-      lineinput >> pdg;
-      while (lineinput) {
-        if (!ParticleType::exists(pdg)) {
-          throw ReferencedParticleNotFound(build_error_string(
-              "Inconsistency: The particle with PDG id " +
-                  pdg.string() +
-                  " was not registered through particles.txt, but "
-                  "decaymodes.txt referenced it.",
-              line));
-        }
-        decay_particles.push_back(pdg);
-        lineinput >> pdg;
-      }
-      if (pdg != PdgCode::invalid()) {
-        decay_particles.push_back(pdg);
-      }
-      if (lineinput.fail() && !lineinput.eof()) {
-        throw LoadFailure(
-            build_error_string("Parse error: expected a PdgCode ", line));
-      }
-      decay_particles.shrink_to_fit();
-      decay_modes_to_add.add_mode(std::move(decay_particles), ratio);
-      ratio_sum += ratio;
-    }
-  }
-  end_of_decaymodes();
-  return std::move(decaymodes);
-}
 
 void Particles::reset() {
   id_max_ = -1;

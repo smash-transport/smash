@@ -128,6 +128,10 @@ class Clock {
    * between the current time and the next time: \f$\exists n \in
    * \mathbb{N}: t \le n \cdot t_i < t + \Delta t\f$.
    *
+   * Internally, it checks if \f$n\f$ is the same for this time step as
+   * for the next time step. If so, the next multiple is outside the
+   * current time step, if not, then the multiple must be within.
+   *
    */
   bool multiple_is_in_next_tick(const float interval) const {
     if (interval < 0.f) {
@@ -138,9 +142,7 @@ class Clock {
     if (interval <= timestep_duration_) {
       return true;
     }
-    // else, let's first see what n is in question:
-    float n = next_multiple(interval);
-    return (current_time() <= n && n < next_time());
+    return (next_multiple(interval) < find_next_multiple(next_time(), interval));
   }
   /** returns the next multiple of a given interval
    *
@@ -150,7 +152,7 @@ class Clock {
    * the current time.
    */
   float next_multiple(const float interval) const {
-    return ceil(current_time() / interval) * interval;
+    return find_next_multiple(current_time(), interval);
   }
   /** resets the time to a pre-defined value
    *
@@ -218,6 +220,20 @@ class Clock {
   float timestep_duration_ = 0.0f;
   /// The time of last reset (when counter_ was set to 0).
   float reset_time_ = 0.0f;
+  /** returns the next multiple of a given interval at a given time
+   *
+   * \param time the time at which to evaluate the next multiple
+   * \param interval the interval in question
+   *
+   * \return The smallest multiple of \p interval that is larger than
+   * time.
+   *
+   * This function is needed because next_multiple fails for large time
+   * step numbers.
+   */
+  float find_next_multiple(const float time, const float interval) const {
+    return std::ceil(time / interval) * interval;
+  }
 };
 
 }  // namespace Smash

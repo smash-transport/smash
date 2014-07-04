@@ -25,24 +25,16 @@ TEST(init_particle_types) {
       "smashon 0.123 1.2 -331\n"
       "pi0 0.1350 -1.0 111\n"
       "pi+ 0.1396 -1.0 211\n"
-      "pi- 0.1396 -1.0 -211\n"
       "rho0 0.7755 0.149 113\n"
       "rho+ 0.7755 0.149 213\n"
-      "rho- 0.7755 0.149 -213\n"
       "eta 0.5479 1.0e-6 221\n"
       "omega 0.7827 0.0085 223\n"
       "p 0.9383 -1.0 2212\n"
-      "pbar 0.9383 -1.0 -2212\n"
       "n 0.9396 -1.0 2112\n"
-      "nbar 0.9396 -1.0 -2112\n"
       "Delta++ 1.232 0.117 2224\n"
       "Delta+ 1.232 0.117 2214\n"
       "Delta0 1.232 0.117 2114\n"
-      "Delta- 1.232 0.117 1114\n"
-      "Deltabar++ 1.232 0.117 -2224\n"
-      "Deltabar+ 1.232 0.117 -2214\n"
-      "Deltabar0 1.232 0.117 -2114\n"
-      "Deltabar- 1.232 0.117 -1114\n");
+      "Delta- 1.232 0.117 1114\n");
 }
 
 static ParticleData create_smashon_particle(int id = -1) {
@@ -79,7 +71,7 @@ TEST(everything) {
   VERIFY(!(distance_squared < 0.0));
 
   /* now check the Particles class itself */
-  Particles particles({});
+  Particles particles;
 
   /* check addition of particles */
   particles.add_data(particle_a);
@@ -102,72 +94,6 @@ TEST(everything) {
   printd("%g versus %g\n", distance_squared, distance_squared_2);
   VERIFY(!(distance_squared_2 < 0.0));
   VERIFY(!(distance_squared_2 - distance_squared > really_small));
-}
-
-TEST_CATCH(load_decaymodes_missing_pdg, Particles::ReferencedParticleNotFound) {
-  const std::string decays_input(
-      "-441 \n"
-      );
-  Particles p(decays_input);
-}
-
-TEST_CATCH(load_decaymodes_no_decays, Particles::MissingDecays) {
-  const std::string decays_input(
-      "113 # rho0\n"
-      );
-  Particles p(decays_input);
-}
-
-TEST_CATCH(load_decaymodes_incorrect_start, PdgCode::InvalidPdgCode) {
-  const std::string decays_input(
-      "113. # rho0\n"
-      );
-  Particles p(decays_input);
-}
-
-TEST(load_decaymodes_two_channels) {
-  const std::string decays_input(
-      " 113\t# rho0\n"
-      "\n"
-      " 1.0\t211 -211\t# pi+ pi- \n"
-      " \n"
-      "\n"
-      "223	# omega\n"
-      "0.33 111 113	# pi0 rho0\n"
-      "\n"
-      "0.33 211 -213	# pi+ rho-\n"
-      "0.33 -211 213	# pi- rho+\n"
-      );
-  Particles p(decays_input);
-
-  {
-    const auto &rho0 = p.decay_modes(0x113);
-    VERIFY(!rho0.is_empty());
-    const auto &modelist = rho0.decay_mode_list();
-    COMPARE(modelist.size(), 1u);
-    COMPARE(modelist[0].weight(), 1.);
-    COMPARE(modelist[0].pdg_list().size(), 2u);
-    COMPARE(modelist[0].pdg_list()[0].dump(), 0x211u);
-    COMPARE(modelist[0].pdg_list()[1].dump(), 0x80000211u);
-  }
-  {
-    const auto &omega = p.decay_modes(0x223);
-    VERIFY(!omega.is_empty());
-    const auto &modelist = omega.decay_mode_list();
-    COMPARE(modelist.size(), 3u);
-    FUZZY_COMPARE(float(modelist[0].weight()), 1.f/3.f);
-    FUZZY_COMPARE(float(modelist[1].weight()), 1.f/3.f);
-    FUZZY_COMPARE(float(modelist[2].weight()), 1.f/3.f);
-    COMPARE(modelist[0].pdg_list().size(), 2u);
-    COMPARE(modelist[0].pdg_list()[0].dump(), 0x111u);
-    COMPARE(modelist[0].pdg_list()[1].dump(), 0x113u);
-    COMPARE(modelist[1].pdg_list().size(), 2u);
-    COMPARE(modelist[1].pdg_list()[0].dump(), 0x211u);
-    COMPARE(modelist[1].pdg_list()[1].dump(), 0x80000213u);
-    COMPARE(modelist[2].pdg_list().size(), 2u);
-    COMPARE(modelist[2].pdg_list()[0].dump(), 0x80000211u);
-    COMPARE(modelist[2].pdg_list()[1].dump(), 0x213u);
-  }
 }
 
 template <typename T>
@@ -193,12 +119,8 @@ static void check_particle_type_iteration() {
   COMPARE(count, ParticleType::list_all().size());
 }
 
-namespace decaymodes_txt {
-#include <decaymodes.txt.h>
-}  // namespace decaymodes_txt
-
 TEST(iterate_particle_data) {
-  Particles p(decaymodes_txt::data);
+  Particles p;
   const Particles *p2 = &p;
   check_particle_type_iteration();
   check_particle_type_iteration();
@@ -214,7 +136,7 @@ TEST(iterate_particle_data) {
 }
 
 TEST(erase_particle) {
-  Particles p(decaymodes_txt::data);
+  Particles p;
   p.create(0x211);
   p.create(-0x211);
   p.create(0x111);

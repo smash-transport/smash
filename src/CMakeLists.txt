@@ -40,6 +40,7 @@ set(SMASH_LIBRARIES ${SMASH_LIBRARIES}
 set(smash_src
         action.cc
         boxmodus.cc
+        binaryoutput.cc
         collidermodus.cc
         configuration.cc
         cross-sections.cc
@@ -53,12 +54,12 @@ set(smash_src
         modusdefault.cc
         nucleus.cc
         nucleusmodus.cc
-        oscaroutput.cc
+        oscarfullhistoryoutput.cc
+        oscarparticlelistoutput.cc
         outputroutines.cc
         parametrizations.cc
         particledata.cc
         particles.cc
-        particlesoutput.cc
         particletype.cc
         pdgcode.cc
         processbranch.cc
@@ -67,6 +68,7 @@ set(smash_src
         scatteraction.cc
         scatteractionsfinder.cc
         vtkoutput.cc
+        width.cc
         )
 
 if(USE_ROOT)

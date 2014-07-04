@@ -20,7 +20,7 @@ TEST(assign) {
   ParticleType A("smashon", 3.243, 0.234f, smashon);
   COMPARE(A.name(), "smashon");
   COMPARE(A.mass(), 3.243f);
-  COMPARE(A.width(), 0.234f);
+  COMPARE(A.width_at_pole(), 0.234f);
   COMPARE(A.pdgcode(), smashon);
   COMPARE(A.isospin(), smashon.isospin_total());
   COMPARE(A.charge(), smashon.charge());
@@ -46,43 +46,35 @@ TEST(create_type_list) {
       "\t\n\t  test2  0.1350 \t -3.0 -551\n "
       "pi0 0.1350 -1.0 111\n"
       "pi+ 0.1396 -1.0 211\n"
-      "pi- 0.1396 -1.0 -211\n"
       "rho0 0.7755 0.149 113\n"
       "rho+ 0.7755 0.149 213\n"
-      "rho- 0.7755 0.149 -213\n"
       "eta 0.5479 1.0e-6 221\n"
       "omega 0.7827 0.0085 223\n"
       "p 0.9383 -1.0 2212\n"
-      "pbar 0.9383 -1.0 -2212\n"
       "n 0.9396 -1.0 2112\n"
-      "nbar 0.9396 -1.0 -2112\n"
       "Delta++ 1.232 0.117 2224\n"
       "Delta+ 1.232 0.117 2214\n"
       "Delta0 1.232 0.117 2114\n"
-      "Delta- 1.232 0.117 1114\n"
-      "Deltabar++ 1.232 0.117 -2224\n"
-      "Deltabar+ 1.232 0.117 -2214\n"
-      "Deltabar0 1.232 0.117 -2114\n"
-      "Deltabar- 1.232 0.117 -1114\n");
+      "Delta- 1.232 0.117 1114\n");
 
   COMPARE(ParticleType::list_all().size(), 23u);
 
   ParticleType type = ParticleType::find(-0x331);
   COMPARE(type.mass(), 0.135f);
-  COMPARE(type.width(), -1.f);
+  COMPARE(type.width_at_pole(), -1.f);
   COMPARE(type.pdgcode(), PdgCode(-0x331));
   type = ParticleType::find(-0x441);
   COMPARE(type.mass(), 0.135f);
-  COMPARE(type.width(), -2.f);
+  COMPARE(type.width_at_pole(), -2.f);
   COMPARE(type.pdgcode(), PdgCode(-0x441));
   type = ParticleType::find(-0x551);
   COMPARE(type.mass(), 0.135f);
-  COMPARE(type.width(), -3.f);
+  COMPARE(type.width_at_pole(), -3.f);
   COMPARE(type.pdgcode(), PdgCode(-0x551));
 
   type = ParticleType::find(-0x1114);
   COMPARE(type.mass(), 1.232f);
-  COMPARE(type.width(), .117f);
+  COMPARE(type.width_at_pole(), .117f);
   COMPARE(type.pdgcode().dump(), 0x80001114);
   COMPARE(type.isospin(), 3);
   COMPARE(type.charge(), 1);
@@ -90,7 +82,7 @@ TEST(create_type_list) {
 
   type = ParticleType::find(0x2112);
   COMPARE(type.mass(), .9396f);
-  COMPARE(type.width(), -1.f);
+  COMPARE(type.width_at_pole(), -1.f);
   COMPARE(type.pdgcode().dump(), 0x2112u);
   COMPARE(type.isospin(), 1);
   COMPARE(type.charge(), 0);
