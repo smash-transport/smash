@@ -95,17 +95,17 @@ size_t DeformedNucleus::determine_nucleus() {
   return mass_number;
 }
 
-void DeformedNucleus::manual_nucleus(bool is_projectile, Configuration &modus_cfg) {
+void DeformedNucleus::manual_nucleus(bool is_projectile, Configuration &config) {
   // Regular nucleus parameters.
-  Nucleus::manual_nucleus(is_projectile, modus_cfg);
+  Nucleus::manual_nucleus(is_projectile, config);
 
   const char * nucleus_type = is_projectile ? "Projectile" : "Target";
   // Deformation parameters.
-  if (modus_cfg.has_value({nucleus_type, "BETA_2"})) {
-    set_beta_2(static_cast<double>(modus_cfg.take({nucleus_type, "BETA_2"})));
+  if (config.has_value({nucleus_type, "BETA_2"})) {
+    set_beta_2(static_cast<double>(config.take({nucleus_type, "BETA_2"})));
   }
-  if (modus_cfg.has_value({nucleus_type, "BETA_4"})) {
-    set_beta_4(static_cast<double>(modus_cfg.take({nucleus_type, "BETA_4"})));
+  if (config.has_value({nucleus_type, "BETA_4"})) {
+    set_beta_4(static_cast<double>(config.take({nucleus_type, "BETA_4"})));
   }
 }
 

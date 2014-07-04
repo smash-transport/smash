@@ -5,6 +5,7 @@
 #define SRC_INCLUDE_DEFORMEDNUCLEUS_H_
 
 #include "configuration.h"
+#include "forwarddeclarations.h"
 #include "nucleus.h"
 #include "threevector.h"
 
@@ -39,7 +40,7 @@ class DeformedNucleus : public Nucleus {
 
   // Set parameters for Woods-Saxon by hand using the configuration file.
   // \see Nucleus::manual_nucleus
-  virtual void manual_nucleus(bool is_projectile, Configuration &modus_cfg);
+  virtual void manual_nucleus(bool is_projectile, Configuration &config);
 
   // Shifts the nucleus to correct impact parameter and z displacement.
   // \see Nucleus::shift

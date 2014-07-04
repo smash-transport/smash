@@ -6,13 +6,13 @@ General:
     DELTA_TIME:    0.01
 
     # end time of simulation
-    END_TIME:      1.0
+    END_TIME:      50.0
 
     # how much time before recording measurables
-    OUTPUT_INTERVAL:  1.0
+    OUTPUT_INTERVAL:  1
 
     # initial random seed (negative for time)
-    RANDOMSEED:    1
+    RANDOMSEED:    -1
 
     # elastic cross section
     SIGMA:         10.0
@@ -56,19 +56,19 @@ Modi:
         SQRTS: 1.0
     Nucleus:
         # Definitions for the projectile:
-        # Lead
         Projectile:
-            PARTICLES: {2212: 82, 2112: 126}
+            PARTICLES: {2212: 92, 2112: 146}
             AUTOMATIC: 1
         # Definitions for the target:
-        # Lead
         Target:
-            PARTICLES: {2212: 82, 2112: 126}
+            PARTICLES: {2212: 92, 2112: 146}
             AUTOMATIC: 1
 
         # what sqrt(s_NN) to use:
-        SQRTSNN: 2
+        SQRTSNN: 193
         # which subsystem "NN" in sqrt(s_NN) refers to
         # (two PDG IDs). The default is proton-proton; let's set it to
         # neutron-neutron.
         SQRTS_N: [2112, 2112]
+        # the initial z distance
+        INITIAL_DISTANCE: 20

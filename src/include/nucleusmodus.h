@@ -11,6 +11,7 @@
 
 #include "forwarddeclarations.h"
 #include "nucleus.h"
+#include "deformednucleus.h"
 #include "pdgcode.h"
 
 namespace Smash {
@@ -128,14 +129,14 @@ class NucleusModus : public ModusDefault {
    * The object that comes from negative z-values at positive x-values
    * with positive velocity.
    **/
-  Nucleus projectile_;
+  Nucleus *projectile_;
   /** Target.
    *
    * The object that comes from positive z-values at negative x-values
    * with negative velocity. In fixed target experiments, the target is
    * at rest.
    **/
-  Nucleus target_;
+  Nucleus *target_;
   /** Center-of-mass energy of the individual nucleon-nucleon
    * collisions.
    *

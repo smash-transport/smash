@@ -54,7 +54,7 @@ class Nucleus {
   // Sets the parameters of the nucleus according to
   // manually added values in the configuration file.
   // Returns the type of nucleus (Projectile or Target).
-  virtual void manual_nucleus(bool is_projectile, Configuration &modus_cfg);
+  virtual void manual_nucleus(bool is_projectile, Configuration &config);
 
   /**
    * Boosts the nuclei so that the nucleons have the appropriate
