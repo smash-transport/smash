@@ -108,7 +108,7 @@ namespace Smash {
 
 class BinaryOutput : public OutputInterface {
  public:
-  explicit BinaryOutput(bf::path path);
+  explicit BinaryOutput(bf::path path, Options op);
 
   /// writes the initial particle information of an event
   void at_eventstart(const Particles &particles,

@@ -19,7 +19,7 @@ namespace Smash {
 
 class VtkOutput : public OutputInterface {
  public:
-  VtkOutput(bf::path path);
+  VtkOutput(bf::path path, Options op);
   ~VtkOutput();
 
   void at_eventstart(const Particles &particles,
@@ -29,7 +29,9 @@ class VtkOutput : public OutputInterface {
                           const Clock &clock) override;
 
  private:
+  /// filesystem path for output
   const bf::path base_path_;
+
   /// Number of vtk output in current event
   int vtk_output_counter_;
 };

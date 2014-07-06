@@ -249,8 +249,16 @@ class Experiment : public ExperimentBase {
   /**
    * Number of events.
    *
-   * \todo Explain what event means
-   * \todo What does the number of events imply for the experiment?
+   * Event is a single simulation of a physical phenomenon:
+   * elementary particle or nucleus-nucleus collision. Result
+   * of a single SMASH event is random (by construction)
+   * as well as result of one collision in nature. To compare
+   * simulation with experiment one has to take ensemble averages,
+   * i.e. perform simulation and real experiment many times 
+   * and compare average results.
+   * 
+   * nevents_ is number of times single phenomenon (particle
+   * or nucleus-nucleus collision) will be simulated.
    */
   const int nevents_;
 
@@ -272,11 +280,11 @@ class Experiment : public ExperimentBase {
   /// system starting time of the simulation
   SystemTimePoint time_start_ = SystemClock::now();
 
-  /** Output formats.
+  /** Output configuration.
    *
-   * Specifies the format of output; OSCAR, ROOT, VTK etc.
+   * Specifies the format of outputs: OSCAR, ROOT, VTK etc.
    */
-  std::map<std::string, std::string> outputformats_;
+  std::map<std::string, std::map<std::string, std::string>> outputs_config_;
 };
 
 }  // namespace Smash

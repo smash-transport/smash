@@ -18,16 +18,9 @@
 namespace Smash {
 
 OscarParticleListOutput::OscarParticleListOutput(bf::path path,
-                                                 std::string option)
+                                                 Options op)
   : OscarFullHistoryOutput(path / "final_id_p_x.oscar", "# final_id_p_x\n",
-                           option) {
-  if (config_option_ == "Final") {
-    printf("Option %s is on: ", config_option_.c_str());
-    printf("only final particles in event are written to file.\n ");
-  } else {
-    printf("Option %s is not meaningful. \n", config_option_.c_str());
-  }
-}
+                           op) {}
 
 OscarParticleListOutput::~OscarParticleListOutput() {}
 
@@ -36,12 +29,12 @@ void OscarParticleListOutput::at_eventstart(const Particles &particles,
   /* OSCAR line prefix : initial particles; final particles; event id
    * First block of an event: initial = 0, final = number of particles
    */
-  if (config_option_ != "Final") {
+//  if (config_option_ != "Final") {
     const size_t zero = 0;
     fprintf(file_.get(), "%zu %zu %i\n", zero, particles.size(),
             event_number + 1);
     write(particles);
-  }
+//  }
 }
 
 void OscarParticleListOutput::at_eventend(const Particles &particles,
@@ -51,11 +44,11 @@ void OscarParticleListOutput::at_eventend(const Particles &particles,
    * Block ends with null interaction
    */
   const size_t zero = 0;
-  if (config_option_ == "Final") {
+//  if (config_option_ == "Final") {
     fprintf(file_.get(), "%zu %zu %i\n", particles.size(), zero,
             event_number + 1);
     write(particles);
-  }
+//  }
   /* Null interaction marks the end of an event */
   fprintf(file_.get(), "%zu %zu %i\n", zero, zero, event_number + 1);
 
@@ -73,12 +66,12 @@ void OscarParticleListOutput::write_interaction(
 void OscarParticleListOutput::after_Nth_timestep(const Particles &particles,
                                                  const int event_number,
                                                  const Clock&/*clock*/) {
-  if (config_option_ != "Final") {
+//  if (config_option_ != "Final") {
     const size_t zero = 0;
     fprintf(file_.get(), "%zu %zu %i\n", particles.size(), zero,
             event_number + 1);
     write(particles);
-  }
+//  }
 }
 
 }  // namespace Smash

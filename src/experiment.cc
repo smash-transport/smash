@@ -102,11 +102,36 @@ Experiment<Modus>::Experiment(Configuration &config)
   }
   Random::set_seed(seed_);
   print_startup(seed_);
-  // Get list of options concerning ouput
-  std::map<std::string, std::string> opformatlist
-    = config.take({"General", "OUTPUT"});
-  for (const auto &opformat : opformatlist) {
-    outputformats_.insert(opformat);
+
+  // Get outputs and their options
+  std::map<std::string, std::map<std::string, std::string>> op_conf =
+                                  config.take({"General", "OUTPUT"});
+  bool output_on;
+  std::string enable_str, why;
+  for (auto &output : op_conf) {
+    output_on = false;
+    enable_str = output.second["Enable"];
+    output.second.erase("Enable");
+
+    // Get string to lowercase for easier comparison later
+    for (auto &c : enable_str) c = tolower(c);
+
+    if (enable_str.compare("") == 0) {
+      why = "because \"Enable\" option is absent";
+    } else if (enable_str.compare("false") == 0) {
+      why = "by user";
+    } else if (enable_str.compare("true") == 0) {
+      output_on = true;
+    } else {
+      why = "because \"Enable\" option is neither true nor false";
+    }
+      
+    if (output_on) {
+      outputs_config_[output.first] = output.second;
+      printf("Output %s is enabled.\n", output.first.c_str());
+    } else {
+      printf("Output %s is disabled %s.\n", output.first.c_str(), why.c_str());
+    }
   }
 }
 
@@ -138,43 +163,31 @@ void Experiment<Modus>::initialize_new_event() {
  */
 template <typename Modus>
 void Experiment<Modus>::set_outputs(const bf::path &path) {
-  for(std::map<std::string, std::string>::iterator outputformat
-      = outputformats_.begin(); outputformat != outputformats_.end();
-      ++outputformat) {
 
-    std::string formatname = outputformat->first;
-    std::string formatoption = outputformat->second;
+  for(const auto &outputformat : outputs_config_) {
 
-    if ( formatoption == "off" || formatoption == "OFF" ||
-         formatoption == "Off" ||
-         formatoption == "no" || formatoption == "NO" || formatoption == "No" ||
-         formatoption == "disable" || formatoption =="Disable") {
-      printf("Output %s disabled.\n", formatname.c_str());
-      continue;
-    } else {
-      printf("Output %s enabled with option %s.\n", formatname.c_str(), 
-                                            formatoption.c_str());
-    }
+    std::string formatname = outputformat.first;
+    std::map<std::string, std::string> formatoptions = outputformat.second;
 
     if        (formatname =="OSCAR1999_COLLISIONS") {
-      outputs_.emplace_back(new OscarFullHistoryOutput(path, formatoption));
+      outputs_.emplace_back(new OscarFullHistoryOutput(path, formatoptions));
     } else if (formatname =="OSCAR1999_PARTICLELIST") {
-      outputs_.emplace_back(new OscarParticleListOutput(path, formatoption));
+      outputs_.emplace_back(new OscarParticleListOutput(path, formatoptions));
     } else if (formatname == "VTK") {
-      outputs_.emplace_back(new VtkOutput(path));
+      outputs_.emplace_back(new VtkOutput(path, formatoptions));
     } else if (formatname == "Binary") {
-      outputs_.emplace_back(new BinaryOutput(path));
+      outputs_.emplace_back(new BinaryOutput(path, formatoptions));
     } else if (formatname == "ROOT") {
       #ifdef SMASH_USE_ROOT
-      outputs_.emplace_back(new RootOutput(path));
+      outputs_.emplace_back(new RootOutput(path, formatoptions));
       #endif
       #ifndef SMASH_USE_ROOT
       printf("You requested ROOT output, but ROOT is disabled. ");
       printf("To enable ROOT: cmake -D USE_ROOT=ON <path>. \n");
       #endif
     } else {
-      printf("Warning: Unknown output format %s. ", formatname.c_str());
-      printf("Option will be ignored.\n");
+      printf("Warning: Unknown output format name %s. ", formatname.c_str());
+      printf("It will be ignored with all its options.\n");
     }
   }
 }

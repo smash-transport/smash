@@ -16,7 +16,7 @@ namespace Smash {
 
 class OscarParticleListOutput : public OscarFullHistoryOutput {
  public:
-  OscarParticleListOutput(bf::path path, std::string option);
+  OscarParticleListOutput(bf::path path, Options op);
   ~OscarParticleListOutput();
 
   /// writes the initial particle information of an event

@@ -74,7 +74,7 @@ class Particles;
   **/
 class RootOutput : public OutputInterface {
  public:
-  explicit RootOutput(boost::filesystem::path path);
+  explicit RootOutput(boost::filesystem::path path, Options op);
   ~RootOutput();
 
   void at_eventstart(const Particles &particles,

@@ -10,13 +10,26 @@ General:
 
     # output formats
     OUTPUT:
-        OSCAR1999_COLLISIONS:    No lists
-        OSCAR1999_PARTICLELIST:  Final
-        VTK:                     OFF
-        ROOT:                    ON
-        Binary:                  ON
-        SURPRISE:                ON
-        VTK:                     ON
+        OSCAR1999_COLLISIONS:    
+            Enable:             False
+            print_final:        True
+            print_initial:      False
+            print_intermediate: False
+        OSCAR1999_PARTICLELIST:  
+            Enable:             False
+        VTK:
+            Enable:             NEVER
+            max_output_files:   1000
+        ROOT:
+            Enable:             Nope
+        Binary:
+            Enable:             True
+        SURPRISE_format:
+            Enable:             True
+        VTK:
+            Enable:             False
+        Yet_another_format:
+            SwitchMeOn:         True
 
     # how much time before recording measurables
     OUTPUT_INTERVAL:  1.0

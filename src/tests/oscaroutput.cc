@@ -81,8 +81,10 @@ static void compare_particledata(const std::array<std::string,12> &datastring,
 }
 
 TEST(fullhistory_format) {
+  std::map<std::string, std::string> op;
+  op["Final"] = "true";
   OscarFullHistoryOutput *oscfull = new OscarFullHistoryOutput(testoutputpath,
-                                                               "Yes");
+                                                               op);
   VERIFY(bf::exists(testoutputpath / "full_event_history.oscar"));
 
   ParticleType::create_type_list(
@@ -192,8 +194,10 @@ TEST(fullhistory_format) {
 
 
 TEST(particlelist_format) {
+  std::map<std::string, std::string> op;
+  op["Final"] = "True";
   OscarFullHistoryOutput *oscfinal
-    = new OscarParticleListOutput(testoutputpath, "Final");
+    = new OscarParticleListOutput(testoutputpath, op);
   VERIFY(bf::exists(testoutputpath / "final_id_p_x.oscar"));
 
   Particles particles;

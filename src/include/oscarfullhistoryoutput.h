@@ -20,7 +20,7 @@ namespace Smash {
 
 class OscarFullHistoryOutput : public OutputInterface {
  public:
-  OscarFullHistoryOutput(bf::path path, std::string option);
+  OscarFullHistoryOutput(bf::path path, Options op);
   ~OscarFullHistoryOutput();
 
   /// writes the initial particle information of an event
@@ -41,7 +41,7 @@ class OscarFullHistoryOutput : public OutputInterface {
 
  protected:
   OscarFullHistoryOutput(bf::path path, const char* second_line,
-                         std::string option);
+                         Options op);
   void write(const Particles &particles);
   FilePtr file_;
   std::string config_option_;

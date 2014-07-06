@@ -10,6 +10,8 @@
 #ifndef SRC_INCLUDE_OUTPUTINTERFACE_H_
 #define SRC_INCLUDE_OUTPUTINTERFACE_H_
 
+#include <map>
+
 #include "forwarddeclarations.h"
 #include "macros.h"
 
@@ -58,6 +60,11 @@ class OutputInterface {
    */
   virtual void after_Nth_timestep(const Particles &, const int,
                                   const Clock &) = 0;
+
+protected:
+  /// options of output
+  typedef std::map<std::string, std::string> Options;
+  Options options_;
 };
 
 }  // namespace Smash
