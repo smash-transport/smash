@@ -6,10 +6,10 @@ General:
     DELTA_TIME:    0.01
 
     # end time of simulation
-    END_TIME:      50.0
+    END_TIME:      1.0
 
     # how much time before recording measurables
-    OUTPUT_INTERVAL:  1
+    OUTPUT_INTERVAL:  .2
 
     # initial random seed (negative for time)
     RANDOMSEED:    -1
@@ -18,7 +18,7 @@ General:
     SIGMA:         10.0
 
     # number of test particle
-    TESTPARTICLES: 1
+    TESTPARTICLES: 10
 
     # number of events
     NEVENTS:       1
@@ -58,12 +58,13 @@ Modi:
         # Definitions for the projectile:
         Projectile:
             PARTICLES: {2212: 92, 2112: 146}
-            AUTOMATIC: 1
+            AUTOMATIC: true
+            DEFORMED: true
         # Definitions for the target:
         Target:
             PARTICLES: {2212: 92, 2112: 146}
-            AUTOMATIC: 1
-
+            AUTOMATIC: true
+            DEFORMED: true
         # what sqrt(s_NN) to use:
         SQRTSNN: 193
         # which subsystem "NN" in sqrt(s_NN) refers to
@@ -71,4 +72,7 @@ Modi:
         # neutron-neutron.
         SQRTS_N: [2112, 2112]
         # the initial z distance
-        INITIAL_DISTANCE: 20
+        INITIAL_DISTANCE: 400
+        # impact parameter
+        Impact:
+            MAX: 10

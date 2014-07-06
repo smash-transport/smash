@@ -8,7 +8,7 @@
 #include <cstdlib>
 #include <cstring>
 // #include <list>
-
+ 
 #include "include/nucleusmodus.h"
 #include "include/angles.h"
 #include "include/configuration.h"
@@ -29,44 +29,50 @@ NucleusModus::NucleusModus(Configuration modus_config,
   pdg_sNN_2_ = sqrts_n[1];
 
   // Decide which type of nucleus (deformed or not).
-  if (modus_cfg.has_value({"Projectile", "DEFORMED"})) {
+  if (modus_cfg.has_value({"Projectile", "DEFORMED"}) &&
+      modus_cfg.take({"Projectile", "DEFORMED"})) {
     projectile_ = new DeformedNucleus();
+    proj_type_ = "DeformedNucleus";
   } else {
     projectile_ = new Nucleus();
   }
-  if (modus_cfg.has_value({"Target", "DEFORMED"})) {
+  if (modus_cfg.has_value({"Target", "DEFORMED"}) &&
+      modus_cfg.take({"Target", "DEFORMED"})) {
     target_ = new DeformedNucleus();
+    targ_type_ = "DeformedNucleus";
   } else {
     target_ = new Nucleus();
   }  
 
-  // fill nuclei with particles
+  // Fill nuclei with particles.
   std::map<PdgCode, int> pro = modus_cfg.take({"Projectile", "PARTICLES"});
   projectile_->fill_from_list(pro, params.testparticles);
   std::map<PdgCode, int> tar = modus_cfg.take({"Target", "PARTICLES"});
   target_->fill_from_list(tar, params.testparticles);
 
-  // ask to construct nuclei based on atomic number; otherwise,
+  // Ask to construct nuclei based on atomic number; otherwise,
   // look for user defined values or take the default parameters.
-  if (modus_cfg.has_value({"Projectile", "AUTOMATIC"})) {
-    projectile_->determine_nucleus();
+  if (modus_cfg.has_value({"Projectile", "AUTOMATIC"}) && 
+      modus_cfg.take({"Projectile", "AUTOMATIC"})) {
+    projectile_->set_parameters_automatic();
   } else {
-    projectile_->manual_nucleus(true, modus_cfg);
+    projectile_->set_parameters_from_config(true, modus_cfg);
   }
-  if (modus_cfg.has_value({"Target", "AUTOMATIC"})) {
-    target_->determine_nucleus();
+  if (modus_cfg.has_value({"Target", "AUTOMATIC"}) &&
+      modus_cfg.take({"Target", "AUTOMATIC"})) {
+    target_->set_parameters_automatic();
   } else {
-    target_->manual_nucleus(false, modus_cfg);
+    target_->set_parameters_from_config(false, modus_cfg);
   }
 
-  // Impact parameter setting: Either "VALUE", "RANGE" or "MAX".
+  // Impact parameter setting: Either "VALUE", "RANGE", or "MAX".
   if (modus_cfg.has_value({"Impact", "VALUE"})) {
     impact_ = modus_cfg.take({"Impact", "VALUE"});
   } else {
     bool sampling_quadratically = true;
     float min = 0.0;
     float max = 0.0;
-    // if not value, we need to take a look at the sampling:
+    // If impact is not supplied by value, inspect sampling parameters:
     if (modus_cfg.has_value({"Impact", "SAMPLE"})) {
       std::string sampling_method = modus_cfg.take({"IMPACT", "SAMPLE"});
       if (sampling_method.compare(0, 6, "uniform") == 0) {
@@ -82,8 +88,11 @@ NucleusModus::NucleusModus(Configuration modus_config,
        min = 0.0;
        max = modus_cfg.take({"Impact", "MAX"});
     }
+    // Get an impact parameter.
     sample_impact(sampling_quadratically, min, max);
   }
+
+  // Determine the initial separation between nuclei.
   if (modus_cfg.has_value({"INITIAL_DISTANCE"})) {
     initial_z_displacement_ = modus_cfg.take({"INITIAL_DISTANCE"});
     // the displacement is half the distance (both nuclei are shifted
@@ -94,16 +103,16 @@ NucleusModus::NucleusModus(Configuration modus_config,
 
 void NucleusModus::print_startup() {
   printf("Nucleus initialized:\n");
+  printf("Object type of projectile: %s \n", proj_type_.c_str());
+  printf("Object type of target: %s \n", targ_type_.c_str());
   printf("sqrt_s_NN = %g GeV (pairs of %s and %s)\n", sqrt_s_NN_,
          pdg_sNN_1_.string().c_str(), pdg_sNN_2_.string().c_str());
   printf("Impact parameter: %g fm\n", impact_);
-  printf("Initial distance betw nuclei: %g fm\n", 2.0*initial_z_displacement_);
+  printf("Initial distance betwn nuclei: %g fm\n", 2.0*initial_z_displacement_);
   printf("Projectile initialized with %zu particles (%zu test particles)\n",
-                                             projectile_->number_of_particles(),
-                                             projectile_->size());
+          projectile_->number_of_particles(), projectile_->size());
   printf("Target initialized with %zu particles (%zu test particles)\n",
-                                                 target_->number_of_particles(),
-                                                 target_->size());
+          target_->number_of_particles(), target_->size());
 }
 
 float NucleusModus::initial_conditions(Particles *particles,
@@ -154,6 +163,7 @@ float NucleusModus::initial_conditions(Particles *particles,
                                                * (mass_projec - mass_target));
 
   // Populate the nuclei with appropriately distributed nucleons.
+  // If deformed, this includes rotating the nucleus.
   projectile_->arrange_nucleons();
   target_->arrange_nucleons();
 
@@ -164,8 +174,7 @@ float NucleusModus::initial_conditions(Particles *particles,
   // For regular nuclei, the shift is along the z-axis so that
   // the nuclei are 2*1 fm apart.
   // For deformed nuclei, movement is also along z but due to
-  // geometry, initial separation may include extra space. Also,
-  // deformed nuclei are rotated here.
+  // geometry, initial separation may include extra space.
   // After shifting, set the time component of the particles to
   // -initial_z_displacement_/sqrt(velocity_squared).
   float simulation_time = -initial_z_displacement_/sqrt(velocity_squared);

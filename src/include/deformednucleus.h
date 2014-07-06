@@ -15,12 +15,21 @@ class DeformedNucleus : public Nucleus {
  public:
   DeformedNucleus();
 
-  // Return the deformed Woods-Saxon probability for
-  // the current parameters.
+  /** Return the deformed Woods-Saxon probability for
+   * the given position.
+   * 
+   * @param r The sample radius
+   * @param cosx The cosine of the sample polar angle
+   * @return The woods-saxon probability
+   **/
   double deformed_woods_saxon(double r, double cosx) const;
 
-  // Deformed Woods-Saxon sampling routine.
-  void deformed_distribute_nucleon(ThreeVector& vec) const;
+  /**  Deformed Woods-Saxon sampling routine.
+   *
+   * @return a spatial position from uniformly sampling 
+   * the deformed woods-saxon distribution
+   **/
+  ThreeVector deformed_distribute_nucleon() const;
 
   // Sets the positions of the nuclei inside nucleus A.
   virtual void arrange_nucleons();
@@ -36,11 +45,15 @@ class DeformedNucleus : public Nucleus {
   // arxiv:0904.4080 [nucl-th] by T. Hirano and Y. Nara for copper and gold, and 
   // arxiv:1010.6222 [nucl-th] by T. Hirano, P. Huovinen, and Y. Nara for uranium.
   // Currently misplaced reference for Lead.
-  virtual size_t determine_nucleus();
+  virtual void set_parameters_automatic();
 
   // Set parameters for Woods-Saxon by hand using the configuration file.
-  // \see Nucleus::manual_nucleus
-  virtual void manual_nucleus(bool is_projectile, Configuration &config);
+  // \see Nucleus::set_parameters_from_config
+  virtual void set_parameters_from_config(bool is_projectile, Configuration &config);
+
+  // Rotates the nucleus according to members nucleus_polar_angle_
+  // and nucleus_azimuthal_angle_ and updates nucleon positions.
+  void rotate();
 
   // Shifts the nucleus to correct impact parameter and z displacement.
   // \see Nucleus::shift
@@ -58,6 +71,14 @@ class DeformedNucleus : public Nucleus {
   inline void set_beta_4(double b4) {
     beta4_ = b4;
   }
+  // Set deformation coefficient for Y_2_0.
+  inline void set_polar_angle(double theta) {
+    polar_theta_ = theta;
+  }
+  // Set deformation coefficient for Y_4_0.
+  inline void set_azimuthal_angle(double phi) {
+    azimuthal_phi_ = phi;
+  }
 
  private:
   // Maximum nucleon radius.
@@ -66,8 +87,8 @@ class DeformedNucleus : public Nucleus {
   double beta2_ = 0.0;
   double beta4_ = 0.0;
   // Nucleus orientation (initial profile in xz plane).
-  double nucleus_polar_angle_ = 0.0;
-  double nucleus_azimuthal_angle_ = 0.0;
+  double polar_theta_ = 0.0;
+  double azimuthal_phi_ = 0.0;
 };
 
 }

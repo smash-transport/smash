@@ -29,18 +29,18 @@ class Nucleus {
   float mass() const;
 
   /** Returns a Woods-Saxon distributed length.
-   *
-   * the distribution of return values from this function is according to a 
+   * The distribution of return values from this function is according to a 
    * spherically symmetric Woods-Saxon distribution suitable for this nucleus.
    * \f$\frac{dN}{dr} = \frac{r^2}{\exp\left(\frac{r-R}{d}\right) +
    * 1}\f$ where \f$d\f$ is the diffusiveness_ parameter and \f$R\f$ is
-   * nuclear_radius_. */
+   * nuclear_radius_. 
+   **/
   float distribute_nucleon() const;
 
   /** returns the Woods-Saxon distribution directly
    *
    * @param x the position at which to evaluate the function
-   * @return the
+   * @return un-normalized woods-saxon probability for @param x
    **/
   float woods_saxon(float x);
 
@@ -49,12 +49,15 @@ class Nucleus {
 
   // Sets the parameters of the Woods-Saxon distribution
   // according to the current mass number.
-  virtual size_t determine_nucleus();
+  virtual void set_parameters_automatic();
 
-  // Sets the parameters of the nucleus according to
-  // manually added values in the configuration file.
-  // Returns the type of nucleus (Projectile or Target).
-  virtual void manual_nucleus(bool is_projectile, Configuration &config);
+  /** Sets the parameters of the Woods-Saxon according to
+   * manually added values in the configuration file.
+   * 
+   * @param is_projectile
+   * @param config The configuration file located at node Nucleus
+   **/
+  virtual void set_parameters_from_config(bool is_projectile, Configuration &config);
 
   /**
    * Boosts the nuclei so that the nucleons have the appropriate
@@ -80,8 +83,8 @@ class Nucleus {
    * and 7 neutrons). The particles are only created, no position or
    * momenta are yet assigned.
    *
-   * \param particle_list The particles that are added.
-   * \param testparticles Number of test particles to use.
+   * @param particle_list The particles that are added.
+   * @param testparticles Number of test particles to use.
    *
    **/
   void fill_from_list(const std::map<PdgCode, int>& particle_list,
@@ -129,7 +132,7 @@ class Nucleus {
 
   /** returns the geometrical center of the nucleus.
    *
-   * \return \f$\vec r_s = \frac{1}{N} \sum_{i=1}^N \vec r_i\f$ (for a
+   * @return \f$\vec r_s = \frac{1}{N} \sum_{i=1}^N \vec r_i\f$ (for a
    * nucleus with N particles that are at the positions \f$\vec r_i\f$).
    */
   FourVector center() const;
@@ -151,7 +154,8 @@ class Nucleus {
 
  private:
   /** diffusiveness of Woods-Saxon-distribution in this nucleus in fm
-   * (for diffusiveness_ == 0, we obtain a hard sphere. */
+   * (for diffusiveness_ == 0, we obtain a hard sphere. 
+   **/
   float diffusiveness_ = .545f;
   // Saturation density of nuclear matter
   float saturation_density_ = 1.f;
@@ -216,14 +220,13 @@ class Nucleus {
   inline float get_saturation_density() const {
     return saturation_density_;
   }
-  /** sets and returns a default radius for the nucleus
+  /** returns a default radius for the nucleus
    *
    * Nuclear radius is calculated with the proton radius times the third
    * root of the number of nucleons.
    **/
   inline float default_nuclear_radius() {
-    nuclear_radius_ = proton_radius_*pow(number_of_particles(), 1./3.);
-    return nuclear_radius_;
+    return proton_radius_*pow(number_of_particles(), 1./3.);
   }
   /// sets the nuclear radius
   ///

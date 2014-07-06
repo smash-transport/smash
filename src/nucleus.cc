@@ -243,53 +243,50 @@ void Nucleus::arrange_nucleons() {
     x_max_ = (x > x_max_) ? x : x_max_;
     x_min_ = (x < x_min_) ? x : x_min_;
   }
+  // recenter
+  align_center();
 }
 
-size_t Nucleus::determine_nucleus() {
-  // Establish the current system.
-  size_t mass_number = Nucleus::number_of_particles();
-  // Uranium
-  if (mass_number == 238) {
-    // Default values. !!! Unsure.
-    Nucleus::set_diffusiveness(0.54);
-    Nucleus::set_nuclear_radius(6.86);
-    Nucleus::set_saturation_density(0.166);
-    // Hirano, Huovinen, Nara - Corrections.
-    // Nucleus::set_diffusiveness(0.44);
-    // Nucleus::set_nuclear_radius(6.86);
-  }  
-  // Lead !!! Reference?
-  else if (mass_number == 208) {
-    Nucleus::set_diffusiveness(0.44);
-    Nucleus::set_nuclear_radius(6.67);
-    Nucleus::set_saturation_density(0.161);
-  }
-  // Gold 
-  else if (mass_number == 197) {
-    // Default values.
-    Nucleus::set_diffusiveness(0.535);
-    Nucleus::set_nuclear_radius(6.38);
-    Nucleus::set_saturation_density(0.1695);
-    // Hirano, Nara - Corrections.
-    // Nucleus::set_diffusiveness(0.44);
-    // Nucleus::set_nuclear_radius(6.42);
-  }
-  // Copper
-  else if (mass_number == 63){
-    // Default values.
-    Nucleus::set_diffusiveness(0.5977);
-    Nucleus::set_nuclear_radius(4.20641);
-    Nucleus::set_saturation_density(0.1686);  
-    // Hirano, Nara - Corrections.
-    // Nucleus::set_diffusiveness(0.50);
-    // Nucleus::set_nuclear_radius(4.28);   
-  } else {
+void Nucleus::set_parameters_automatic() {
+  switch (Nucleus::number_of_particles()) {
+    case 238:  // Uranium
+      // Default values. !!! Unsure.
+      set_diffusiveness(0.54);
+      set_nuclear_radius(6.86);
+      set_saturation_density(0.166);
+      // Hirano, Huovinen, Nara - Corrections.
+      // set_diffusiveness(0.44);
+      // set_nuclear_radius(6.86);
+      break;
+    case 208:  // Lead !!! Reference?
+      set_diffusiveness(0.44);
+      set_nuclear_radius(6.67);
+      set_saturation_density(0.161);
+      break;
+    case 197:  // Gold 
+      // Default values.
+      set_diffusiveness(0.535);
+      set_nuclear_radius(6.38);
+      set_saturation_density(0.1695);
+      // Hirano, Nara - Corrections.
+      // set_diffusiveness(0.44);
+      // set_nuclear_radius(6.42);
+      break;
+    case 63:  // Copper
+      // Default values.
+      set_diffusiveness(0.5977);
+      set_nuclear_radius(4.20641);
+      set_saturation_density(0.1686);  
+      // Hirano, Nara - Corrections.
+      // set_diffusiveness(0.50);
+      // set_nuclear_radius(4.28);
+      break;
+    default:
       throw std::domain_error("Mass number not listed in Nucleus::determine_nucleus.");
   }
-  return mass_number;
 }
 
-void Nucleus::manual_nucleus(bool is_projectile, Configuration &config) {
+void Nucleus::set_parameters_from_config(bool is_projectile, Configuration &config) {
   const char * nucleus_type = is_projectile ? "Projectile" : "Target";
   // Diffusiveness
   if (config.has_value({nucleus_type, "DIFFUSIVENESS"})) {
@@ -301,7 +298,7 @@ void Nucleus::manual_nucleus(bool is_projectile, Configuration &config) {
     set_nuclear_radius(static_cast<float>(config.take(
                        {nucleus_type, "RADIUS"})));
   } else {
-    default_nuclear_radius();
+    set_nuclear_radius(default_nuclear_radius());
   }
 }
 
