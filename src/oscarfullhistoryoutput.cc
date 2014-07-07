@@ -26,8 +26,16 @@ OscarFullHistoryOutput::OscarFullHistoryOutput(bf::path path, Options op)
 OscarFullHistoryOutput::OscarFullHistoryOutput(bf::path path,
                                                const char* second_line,
                                                Options op)
-  : file_{std::fopen(path.native().c_str(), "w")} {
-  options_ = op;
+  : file_{std::fopen(path.native().c_str(), "w")},
+    print_start_end_(false) {
+
+  std::string opt_str = op["print_start_end"];
+  for (auto &c : opt_str) {
+    c = tolower(c);
+  }
+  if (opt_str == "true") {
+    print_start_end_=true;
+  }
   fprintf(file_.get(), "# OSC1999A\n");
   fprintf(file_.get(), "%s", second_line);
   fprintf(file_.get(), "# smash\n");
@@ -47,12 +55,12 @@ void OscarFullHistoryOutput::at_eventstart(const Particles &particles,
   /* OSCAR line prefix : initial particles; final particles; event id
    * First block of an event: initial = 0, final = number of particles
    */
-//  if (config_option_ != "No lists") {
+  if (print_start_end_) {
     const size_t zero = 0;
     fprintf(file_.get(), "%zu %zu %i\n", zero, particles.size(),
             event_number + 1);
     write(particles);
-//  }
+  }
 }
 
 void OscarFullHistoryOutput::at_eventend(const Particles &particles,
@@ -62,11 +70,11 @@ void OscarFullHistoryOutput::at_eventend(const Particles &particles,
    * Block ends with null interaction
    */
   const size_t zero = 0;
-//  if (config_option_ != "No lists") {
+  if (print_start_end_) {
     fprintf(file_.get(), "%zu %zu %i\n", particles.size(), zero,
             event_number + 1);
     write(particles);
-//  }
+  }
   /* Null interaction marks the end of an event */
   fprintf(file_.get(), "%zu %zu %i\n", zero, zero, event_number + 1);
 

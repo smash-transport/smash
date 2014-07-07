@@ -64,7 +64,6 @@ class OutputInterface {
 protected:
   /// options of output
   typedef std::map<std::string, std::string> Options;
-  Options options_;
 };
 
 }  // namespace Smash

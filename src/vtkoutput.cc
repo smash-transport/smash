@@ -16,9 +16,8 @@
 
 namespace Smash {
 
-VtkOutput::VtkOutput(bf::path path, Options op)
+VtkOutput::VtkOutput(bf::path path, Options /*op*/)
     : base_path_(std::move(path)) {
-  options_ = op;
 }
 
 VtkOutput::~VtkOutput() {

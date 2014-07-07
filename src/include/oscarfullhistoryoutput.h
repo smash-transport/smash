@@ -44,7 +44,10 @@ class OscarFullHistoryOutput : public OutputInterface {
                          Options op);
   void write(const Particles &particles);
   FilePtr file_;
-  std::string config_option_;
+ 
+ private:
+  /// An option. True - initial and final particles are printed, else not.
+  bool print_start_end_;
 };
 }  // namespace Smash
 

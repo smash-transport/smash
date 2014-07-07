@@ -18,10 +18,9 @@
 
 namespace Smash {
 
-BinaryOutput::BinaryOutput(bf::path path, Options op)
+BinaryOutput::BinaryOutput(bf::path path, Options /*op*/)
     : file_{
           std::fopen((path / "particles_binary.bin").native().c_str(), "wb")} {
-  options_ = op;
   fwrite("SMSH", 4, 1, file_.get());     // magic number
   write(0);                              // file format version number
   write(std::to_string(VERSION_MAJOR));  // version of SMASH

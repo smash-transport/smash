@@ -34,6 +34,9 @@ class OscarParticleListOutput : public OscarFullHistoryOutput {
 
   void after_Nth_timestep(const Particles &particles, const int event_number,
                           const Clock &clock) override;
+ private:
+  /// An option. If true - only final particles in event are printed
+  bool only_final_;
 };
 }  // namespace Smash
 
