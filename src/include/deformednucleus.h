@@ -71,11 +71,11 @@ class DeformedNucleus : public Nucleus {
   inline void set_beta_4(double b4) {
     beta4_ = b4;
   }
-  // Set deformation coefficient for Y_2_0.
+  // Set the nucleus polar angle.
   inline void set_polar_angle(double theta) {
     polar_theta_ = theta;
   }
-  // Set deformation coefficient for Y_4_0.
+  // Set the nucleus azimuthal angle.
   inline void set_azimuthal_angle(double phi) {
     azimuthal_phi_ = phi;
   }

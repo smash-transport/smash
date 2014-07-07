@@ -32,14 +32,12 @@ NucleusModus::NucleusModus(Configuration modus_config,
   if (modus_cfg.has_value({"Projectile", "DEFORMED"}) &&
       modus_cfg.take({"Projectile", "DEFORMED"})) {
     projectile_ = new DeformedNucleus();
-    proj_type_ = "DeformedNucleus";
   } else {
     projectile_ = new Nucleus();
   }
   if (modus_cfg.has_value({"Target", "DEFORMED"}) &&
       modus_cfg.take({"Target", "DEFORMED"})) {
     target_ = new DeformedNucleus();
-    targ_type_ = "DeformedNucleus";
   } else {
     target_ = new Nucleus();
   }  
@@ -103,8 +101,6 @@ NucleusModus::NucleusModus(Configuration modus_config,
 
 void NucleusModus::print_startup() {
   printf("Nucleus initialized:\n");
-  printf("Object type of projectile: %s \n", proj_type_.c_str());
-  printf("Object type of target: %s \n", targ_type_.c_str());
   printf("sqrt_s_NN = %g GeV (pairs of %s and %s)\n", sqrt_s_NN_,
          pdg_sNN_1_.string().c_str(), pdg_sNN_2_.string().c_str());
   printf("Impact parameter: %g fm\n", impact_);
@@ -166,6 +162,10 @@ float NucleusModus::initial_conditions(Particles *particles,
   // If deformed, this includes rotating the nucleus.
   projectile_->arrange_nucleons();
   target_->arrange_nucleons();
+
+  // Debug
+  projectile_->print_nucleus("_projectile_debug.txt");
+  target_->print_nucleus("_target_debug.txt");
 
   // Shift the nuclei into starting positions.
   // Keep the pair separated in z by some small distance,

@@ -13,10 +13,6 @@
 #include <cmath>
 #include <stdexcept>
 
-#include <iostream>
-#include <fstream>
-#include <string>
-
 namespace Smash {
 
 DeformedNucleus::DeformedNucleus() {}
@@ -34,32 +30,25 @@ ThreeVector DeformedNucleus::deformed_distribute_nucleon() const {
   double a_radius;
   Angles a_direction;
   // Set a sensible max bound for radial sampling.
-  double radius_max = Nucleus::get_nuclear_radius() + 
-                      5 * Nucleus::get_diffusiveness();
+  // Stil working on this... but needs to be ~16 ?
+  double radius_max = 16;
 
   // Sample the distribution.
   do {
     a_direction.distribute_isotropically();
     a_radius = Random::uniform(0.0, radius_max);
+
   } while (Random::canonical() > deformed_woods_saxon(a_radius, 
            a_direction.costheta()));
   
-  // temporary debug file
-  std::ofstream myfile;
-  myfile.open("_debug_positions.txt", std::ios::app);
-  myfile << std::to_string(a_radius * a_direction.x()) + " " + 
-            std::to_string(a_radius * a_direction.y()) + " " +
-            std::to_string(a_radius * a_direction.z()) << std::endl;
-
   // Update (x, y, z).
   return a_direction.threevec() * a_radius;
-
 }
 
 void DeformedNucleus::arrange_nucleons() {
   for (auto i = Nucleus::begin(); i != Nucleus::end(); i++) { 
     // Sampling a deformed W.S., get the radial 
-    // position and solid angle for the nucleon..
+    // position and solid angle for the nucleon.
     ThreeVector pos = deformed_distribute_nucleon();
     
     // Set the position of the nucleon.
@@ -70,7 +59,7 @@ void DeformedNucleus::arrange_nucleons() {
     r_max_ = (r_tmp > r_max_) ? r_tmp : r_max_;
   }
   // Recenter and rotate
-  Nucleus::align_center();
+  align_center();
   rotate();
 }
 
@@ -137,20 +126,26 @@ void DeformedNucleus::set_parameters_from_config(bool is_projectile, Configurati
 void DeformedNucleus::rotate() {
   for (auto i = begin(); i != end(); i++) {
     FourVector this_position = i->position();
+    double old_x = this_position.x1();
+    double old_y = this_position.x2();
+    double old_z = this_position.x3();
 
-    // Get current position.
-    double old_radius = std::sqrt(this_position.x1() * this_position.x1()
-                           + this_position.x2() * this_position.x2()
-                           + this_position.x3() * this_position.x3());
-    double old_polar = std::acos(this_position.x3()/old_radius);
-    double old_azimuthal = std::atan(this_position.x2()/this_position.x1());
+    // Rotate every vector by the private members azimuthal_phi_ and
+    // polar_theta_ (Euler angles). This means applying the matrix for
+    // a rotation of azimuthal_phi_ about z, followed by the matrix for
+    // a rotation polar_theta_ about the rotated x axis.
+    double cos_phi = std::cos(azimuthal_phi_);
+    double sin_phi = std::sin(azimuthal_phi_);
+    double cos_theta = std::cos(polar_theta_);
+    double sin_theta = std::sin(polar_theta_);
 
-    // Rotate
-    double new_polar = old_polar + polar_theta_;
-    double new_azimuthal = old_azimuthal + azimuthal_phi_;
-    this_position.set_x1(old_radius * std::sin(new_polar) * std::cos(new_azimuthal));
-    this_position.set_x2(old_radius * std::sin(new_polar) * std::sin(new_azimuthal));
-    this_position.set_x3(old_radius * std::cos(new_polar));
+    this_position.set_x1(cos_phi * old_x + sin_phi * old_y);
+    this_position.set_x2(-cos_theta * sin_phi * old_x + cos_theta 
+                         * cos_phi * old_y + sin_theta * old_z);
+    this_position.set_x3(sin_theta * sin_phi * old_x - sin_theta
+                         * cos_phi * old_y + cos_theta * old_z);
+
+    i->set_position(this_position);
   }
 }
 
@@ -173,12 +168,11 @@ void DeformedNucleus::shift(bool is_projectile, double initial_z_displacement,
   } 
 }
 
-
 double DeformedNucleus::y_l_0(int l, double cosx) const {
   if (l == 2) {
     return (1./4) * std::sqrt(5/M_PI) * (3. * (cosx * cosx) - 1);
   } else if (l == 4) {
-    return (3./16) * std::sqrt(1/M_PI) * (35. * (cosx * cosx) * (cosx * cosx)- 30. * (cosx * cosx) + 3);
+    return (3./16) * std::sqrt(1/M_PI) * (35. * (cosx * cosx) * (cosx * cosx) - 30. * (cosx * cosx) + 3);
   } else {
     throw std::domain_error("Not a valid angular momentum quantum number in DeformedNucleus::y_l_0.");
   }

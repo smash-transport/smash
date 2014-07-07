@@ -72,7 +72,7 @@ Modi:
         # neutron-neutron.
         SQRTS_N: [2112, 2112]
         # the initial z distance
-        INITIAL_DISTANCE: 400
+        INITIAL_DISTANCE: 1000
         # impact parameter
         Impact:
             MAX: 10

@@ -12,8 +12,11 @@
 #include "include/particles.h"
 #include "include/pdgcode.h"
 
+#include <fstream>
+#include <iostream>
 #include <limits>
 #include <map>
+#include <string>
 
 namespace Smash {
 
@@ -376,6 +379,19 @@ void Nucleus::copy_particles(Particles* external_particles) {
     external_particles->add_data(*p);
   }
 }
+
+void Nucleus::print_nucleus(const char * file_name) const {
+  for (auto i = cbegin(); i != cend(); i++) {
+    FourVector this_position = i->position();
+    std::ofstream myfile;
+    myfile.open(file_name, std::ios::app);
+    myfile << std::to_string(this_position.x1()) + " " + 
+              std::to_string(this_position.x2()) + " " +
+              std::to_string(this_position.x3()) << std::endl;
+    myfile.close();
+  }
+}
+
 
 FourVector Nucleus::center() const {
   FourVector centerpoint(0.0,0.0,0.0,0.0);

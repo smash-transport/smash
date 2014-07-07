@@ -148,6 +148,9 @@ class Nucleus {
     }
   }
 
+  // Write the nucleon positions to a text file.
+  void print_nucleus(const char * file_name) const;
+
   struct TestparticleConfusion : public std::length_error {
     using std::length_error::length_error;
   };

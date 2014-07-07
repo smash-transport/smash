@@ -132,7 +132,6 @@ class NucleusModus : public ModusDefault {
    * with positive velocity.
    **/
   Nucleus *projectile_;
-  std::string proj_type_ = "Nucleus";
   /** Target.
    *
    * The object that comes from positive z-values at negative x-values
@@ -140,7 +139,6 @@ class NucleusModus : public ModusDefault {
    * at rest.
    **/
   Nucleus *target_;
-  std::string targ_type_ = "Nucleus";
   /** Center-of-mass energy of the individual nucleon-nucleon
    * collisions.
    *
