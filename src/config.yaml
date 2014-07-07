@@ -12,10 +12,10 @@ General:
     OUTPUT:
         OSCAR1999_COLLISIONS:    
             Enable:             True
-            only_final:         True
+            print_start_end:    False
         OSCAR1999_PARTICLELIST:  
             Enable:             True
-            print_start_end:    False
+            only_final:         True
         VTK:
             Enable:             True
             max_output_files:   1000
