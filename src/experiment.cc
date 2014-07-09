@@ -157,7 +157,7 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
     if (!actions.empty()) {
       for (const auto &action : actions) {
         if (action->is_valid(particles_)) {
-          const ParticleList incoming_particles = action->incoming_particles(particles_);
+          const ParticleList incoming_particles = action->incoming_particles();
           action->perform(&particles_, interactions_total);
           const ParticleList outgoing_particles = action->outgoing_particles();
           for (const auto &output : outputs_) {

@@ -18,10 +18,10 @@
 namespace Smash {
 
 
-DecayAction::DecayAction(const int id_in, float time_of_execution)
-    : Action ({id_in}, time_of_execution) {}
+DecayAction::DecayAction(const ParticleData &in_part, float time_of_execution)
+    : Action ({in_part}, time_of_execution) {}
 
-DecayAction::DecayAction(const ParticleData &p) : Action ({p.id()}, 0.) {
+DecayAction::DecayAction(const ParticleData &p) : Action ({p}, 0.) {
   add_processes(p.type().get_partial_widths(p.mass()));
 }
 
@@ -202,12 +202,12 @@ void DecayAction::one_to_three(const ParticleData &incoming0) {
 void DecayAction::perform(Particles *particles, size_t &id_process) {
   /* Check if particle still exists. */
   if (!is_valid(*particles)) {
-    printf("DecayAction::perform: ID %i not found!\n", incoming_particles_[0]);
+    printf("DecayAction::perform: ID %i not found!\n", incoming_particles_[0].id());
     return;
   }
 
   /* local copy of the initial state */
-  ParticleData particle0 = particles->data(incoming_particles_[0]);
+  ParticleData particle0 = incoming_particles_[0];
 
   printd("Process: Resonance decay. ");
   printd_momenta("Resonance momenta before decay", particle0);
@@ -248,7 +248,7 @@ void DecayAction::perform(Particles *particles, size_t &id_process) {
 
   id_process++;
 
-  check_conservation(*particles, id_process);
+  check_conservation(id_process);
 
   /* Remove decayed particle */
   particles->remove(particle0.id());
@@ -259,4 +259,5 @@ void DecayAction::perform(Particles *particles, size_t &id_process) {
   }
   printd("Particle map has now %zu elements. \n", particles->size());
 }
+
 }

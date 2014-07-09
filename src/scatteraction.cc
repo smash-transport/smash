@@ -17,7 +17,7 @@
 
 namespace Smash {
 
-ScatterAction::ScatterAction(const std::vector<int> &in_part,
+ScatterAction::ScatterAction(const ParticleList &in_part,
                              float time_of_execution)
     : Action(in_part, time_of_execution) {}
 
@@ -27,8 +27,8 @@ void ScatterAction::perform (Particles *particles, size_t &id_process)
   ThreeVector velocity_CM;
 
   /* Relevant particle IDs for the collision. */
-  int id_a = incoming_particles_[0];
-  int id_b = incoming_particles_[1];
+  int id_a = incoming_particles_[0].id();
+  int id_b = incoming_particles_[1].id();
 
   /* Check if particles still exist. */
   if (!is_valid(*particles)) {
@@ -36,8 +36,8 @@ void ScatterAction::perform (Particles *particles, size_t &id_process)
     return;
   }
 
-  ParticleData data_a = particles->data(id_a);
-  ParticleData data_b = particles->data(id_b);
+  ParticleData data_a = incoming_particles_[0];
+  ParticleData data_b = incoming_particles_[1];
 
   printd("Process %zu particle %s<->%s colliding %d<->%d time %g\n",
          id_process, data_a.type().name().c_str(),
@@ -48,7 +48,7 @@ void ScatterAction::perform (Particles *particles, size_t &id_process)
   /* Decide for a particular final state. */
   outgoing_particles_ = choose_channel();
 
-  if (is_elastic(*particles)) {
+  if (is_elastic()) {
     /* 2->2 elastic scattering */
     printd("Process: Elastic collision.\n");
 
@@ -101,7 +101,7 @@ void ScatterAction::perform (Particles *particles, size_t &id_process)
       new_particle.set_id(particles->add_data(new_particle));
     }
 
-    check_conservation(*particles, id_process);
+    check_conservation(id_process);
 
     /* Remove the initial particles */
     particles->remove(data_a.id());
@@ -114,10 +114,10 @@ void ScatterAction::perform (Particles *particles, size_t &id_process)
 }
 
 
-bool ScatterAction::is_elastic(const Particles &particles) const {
+bool ScatterAction::is_elastic() const {
   return outgoing_particles_.size()==2 &&
-         outgoing_particles_[0].pdgcode() == particles.data(incoming_particles_[0]).pdgcode() &&
-         outgoing_particles_[1].pdgcode() == particles.data(incoming_particles_[1]).pdgcode();
+         outgoing_particles_[0].pdgcode() == incoming_particles_[0].pdgcode() &&
+         outgoing_particles_[1].pdgcode() == incoming_particles_[1].pdgcode();
 }
 
 

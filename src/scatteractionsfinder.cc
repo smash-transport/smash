@@ -26,7 +26,7 @@ ScatterActionsFinder::check_collision(const int id_a, const int id_b, Particles 
                                       CrossSections *cross_sections) const {
 
   ScatterAction* act = nullptr;
-  std::vector<int> in_part;
+  ParticleList in_part;
 
   const ParticleData data_a = particles->data(id_a);
   const ParticleData data_b = particles->data(id_b);
@@ -55,8 +55,8 @@ ScatterActionsFinder::check_collision(const int id_a, const int id_b, Particles 
     return nullptr;
   }
 
-  in_part.push_back(id_a);
-  in_part.push_back(id_b);
+  in_part.push_back(data_a);
+  in_part.push_back(data_b);
   act = new ScatterAction(in_part, time_until_collision);
 
   /* Resonance production cross section */

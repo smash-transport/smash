@@ -17,7 +17,7 @@
 
 namespace Smash {
 
-Action::Action(const std::vector<int> &in_part, float time_of_execution)
+Action::Action(const ParticleList &in_part, float time_of_execution)
     : incoming_particles_(in_part), time_of_execution_(time_of_execution),
       total_weight_(0.) {}
 
@@ -40,19 +40,18 @@ void Action::add_processes (const ProcessBranchList &pv) {
 }
 
 bool Action::is_valid(const Particles &particles) const {
-  for (const int id : incoming_particles_) {
-    if (!particles.has_data(id)) {
+  for (const auto &part : incoming_particles_) {
+    if (!particles.has_data(part.id())) {
       return false;
     }
   }
   return true;
 }
 
-ParticleList Action::incoming_particles(const Particles &particles) const {
-  assert(is_valid(particles));
+ParticleList Action::incoming_particles() const {
   ParticleList l;
-  for (const int id : incoming_particles_) {
-    l.emplace_back(particles.data(id));
+  for (const auto &part : incoming_particles_) {
+    l.emplace_back(part);
   }
   return std::move(l);
 }
@@ -84,13 +83,12 @@ ParticleList Action::choose_channel () {
 }
 
 
-void Action::check_conservation(const Particles &particles,
-                                const size_t &id_process) const {
+void Action::check_conservation(const size_t &id_process) const {
 
   /* Check momentum conservation */
   FourVector momentum_difference;
-  for (const auto &i : incoming_particles_) {
-    momentum_difference += particles.data(i).momentum();
+  for (const auto &part : incoming_particles_) {
+    momentum_difference += part.momentum();
   }
   for (const auto &p : outgoing_particles_) {
     momentum_difference -= p.momentum();

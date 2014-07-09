@@ -28,7 +28,7 @@ namespace Smash {
 class Action {
  public:
   /** Simple constructor. */
-  Action(const std::vector<int> &in_part, float time_of_execution);
+  Action(const ParticleList &in_part, float time_of_execution);
   /** Destructor. */
   virtual ~Action();
 
@@ -61,7 +61,7 @@ class Action {
   /**
    * Return the list of particles that go into the interaction.
    */
-  ParticleList incoming_particles(const Particles &particles) const;
+  ParticleList incoming_particles() const;
 
   /**
    * Return the list of particles that resulted from the interaction.
@@ -69,10 +69,11 @@ class Action {
   const ParticleList &outgoing_particles() const { return outgoing_particles_; }
 
   /** Check various conservation laws. */
-  void check_conservation(const Particles &particles, const size_t &id_process) const;
+  void check_conservation(const size_t &id_process) const;
+
  protected:
   /** ID codes of incoming particles  */
-  std::vector<int> incoming_particles_;
+  ParticleList incoming_particles_;
   /** time at which the action is supposed to be performed  */
   float time_of_execution_;
   /** list of possible subprocesses  */
@@ -102,7 +103,7 @@ class Action {
 class DecayAction : public Action {
  public:
   /** Simple constructor (without processes). */
-  DecayAction(const int id_in, float time_of_execution);
+  DecayAction(const ParticleData &in_part, float time_of_execution);
   /** Construct a DecayAction from a particle p.
    *
    * Sets up the full list of possible decay processes.
@@ -158,7 +159,7 @@ class DecayAction : public Action {
 class ScatterAction : public Action {
  public:
   /** Constructor. */
-  ScatterAction(const std::vector<int> &in_part, float time_of_execution);
+  ScatterAction(const ParticleList &in_part, float time_of_execution);
 
   /**
    * Carry out the action, i.e. do the scattering.
@@ -178,7 +179,7 @@ class ScatterAction : public Action {
 
  private:
   /** Check if the scattering is elastic. */
-  bool is_elastic(const Particles &particles) const;
+  bool is_elastic() const;
 
   /**
    * Resonance formation process.
