@@ -84,25 +84,18 @@ float BoxModus::initial_conditions(Particles *particles,
   /* Set paricles IC: */
   for (ParticleData &data : particles->data()) {
     /* back to back pair creation with random momenta direction */
-    if (unlikely(data.id() == particles->id_max() && !(data.id() % 2))) {
-      /* poor last guy just sits around */
-      data.set_momentum(data.mass(), 0, 0, 0);
-    } else if (!(data.id() % 2)) {
-      if (this->initial_condition_ != 2) {
-        /* thermal momentum according Maxwell-Boltzmann distribution */
-        momentum_radial = sample_momenta(this->temperature_, data.mass());
-      } else {
-        /* IC == 2 initial thermal momentum is the average 3T */
-        momentum_radial = 3.0 * this->temperature_;
-      }
-      phitheta.distribute_isotropically();
-      printd("Particle %d radial momenta %g phi %g cos_theta %g\n", data.id(),
-             momentum_radial, phitheta.phi(), phitheta.costheta());
-      data.set_momentum(data.mass(), phitheta.threevec() * momentum_radial);
+    if (this->initial_condition_ != 2) {
+      /* thermal momentum according Maxwell-Boltzmann distribution */
+      momentum_radial = sample_momenta(this->temperature_, data.mass());
     } else {
-      data.set_momentum(data.mass(),
-                        -particles->data(data.id() - 1).momentum().threevec());
+      /* IC == 2 initial thermal momentum is the average 3T */
+      momentum_radial = 3.0 * this->temperature_;
     }
+    phitheta.distribute_isotropically();
+    printd("Particle %d radial momenta %g phi %g cos_theta %g\n", data.id(),
+           momentum_radial, phitheta.phi(), phitheta.costheta());
+    data.set_momentum(data.mass(), phitheta.threevec() * momentum_radial);
+     
     momentum_total += data.momentum();
     /* random position in a quadratic box */
     ThreeVector pos{uniform_length(), uniform_length(), uniform_length()};
@@ -110,6 +103,16 @@ float BoxModus::initial_conditions(Particles *particles,
     /* IC: debug checks */
     printd_momenta(data);
     printd_position(data);
+  }
+  /* Make total 3-momentum 0 */
+  for (ParticleData &data : particles->data()) {
+    data.set_momentum(data.mass(), data.momentum().threevec() -
+                          momentum_total.threevec()/particles->size());
+  }
+  /* Recalculate total momentum */
+  momentum_total = FourVector(0, 0, 0, 0);
+  for (ParticleData &data : particles->data()) {
+    momentum_total += data.momentum();
   }
   /* Display on startup if pseudo grid is used */
   size_t number = number_total;
