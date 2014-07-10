@@ -114,12 +114,12 @@ void DeformedNucleus::set_parameters_from_config(bool is_projectile, Configurati
   }
 
   // Polar angle
-  if (config.has_value({nucleus_type, "Theta"})) {
-    set_polar_angle(static_cast<double>(config.take({nucleus_type, "Theta"})));
+  if (config.has_value({nucleus_type, "THETA"})) {
+    set_polar_angle(static_cast<double>(config.take({nucleus_type, "THETA"})));
   }
   // Azimuth
-  if (config.has_value({nucleus_type, "Phi"})) {
-    set_azimuthal_angle(static_cast<double>(config.take({nucleus_type, "Phi"})));
+  if (config.has_value({nucleus_type, "PHI"})) {
+    set_azimuthal_angle(static_cast<double>(config.take({nucleus_type, "PHI"})));
   }
 }
 

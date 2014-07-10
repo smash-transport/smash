@@ -49,7 +49,7 @@ NucleusModus::NucleusModus(Configuration modus_config,
   target_->fill_from_list(tar, params.testparticles);
 
   // Ask to construct nuclei based on atomic number; otherwise,
-  // look for user defined values or take the default parameters.
+  // look for user defined values or take default parameters.
   if (modus_cfg.has_value({"Projectile", "AUTOMATIC"}) && 
       modus_cfg.take({"Projectile", "AUTOMATIC"})) {
     projectile_->set_parameters_automatic();
@@ -120,6 +120,32 @@ float NucleusModus::initial_conditions(Particles *particles,
   printf("Radii of Nuclei: %g fm %g fm\n", projectile_->get_nuclear_radius(),
                                            target_->get_nuclear_radius());
 
+
+  // Populate the nuclei with appropriately distributed nucleons.
+  // If deformed, this includes rotating the nucleus.
+  projectile_->arrange_nucleons();
+  target_->arrange_nucleons();
+
+  // Debug
+  projectile_->print_nucleus("_projectile_debug.txt");
+  target_->print_nucleus("_target_debug.txt");
+
+  // Shift the nuclei into starting positions.
+  // Keep the pair separated in z by some small distance,
+  // and shift in x by the impact parameter. (Projectile is 
+  // chosen to hit at positive x.)
+  // For regular nuclei, the shift is along the z-axis so that
+  // the nuclei are 2*1 fm apart.
+  // For deformed nuclei, movement is also along z but due to
+  // geometry, initial separation may include extra space.
+  // After shifting, set the time component of the particles to
+  // -initial_z_displacement_/sqrt(velocity_squared).
+  float simulation_time = -initial_z_displacement_/sqrt(velocity_squared);
+  projectile_->shift(true, -initial_z_displacement_, +impact_/2.0,
+                    simulation_time);
+  target_->shift(false, +initial_z_displacement_, -impact_/2.0,
+                simulation_time);
+
   // set the masses used in sqrt_sNN. mass1 corresponds to the
   // projectile.
   float mass_1, mass_2;
@@ -157,31 +183,6 @@ float NucleusModus::initial_conditions(Particles *particles,
                                                * (mass_projec + mass_target))
                          / (total_mandelstam_s - (mass_projec - mass_target)
                                                * (mass_projec - mass_target));
-
-  // Populate the nuclei with appropriately distributed nucleons.
-  // If deformed, this includes rotating the nucleus.
-  projectile_->arrange_nucleons();
-  target_->arrange_nucleons();
-
-  // Debug
-  projectile_->print_nucleus("_projectile_debug.txt");
-  target_->print_nucleus("_target_debug.txt");
-
-  // Shift the nuclei into starting positions.
-  // Keep the pair separated in z by some small distance,
-  // and shift in x by the impact parameter. (Projectile is 
-  // chosen to hit at positive x.)
-  // For regular nuclei, the shift is along the z-axis so that
-  // the nuclei are 2*1 fm apart.
-  // For deformed nuclei, movement is also along z but due to
-  // geometry, initial separation may include extra space.
-  // After shifting, set the time component of the particles to
-  // -initial_z_displacement_/sqrt(velocity_squared).
-  float simulation_time = -initial_z_displacement_/sqrt(velocity_squared);
-  projectile_->shift(true, -initial_z_displacement_, +impact_/2.0,
-                    simulation_time);
-  target_->shift(false, +initial_z_displacement_, -impact_/2.0,
-                simulation_time);
 
   // Boost the nuclei to the appropriate velocity. (target is in opposite
   // direction!)
