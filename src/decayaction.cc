@@ -28,8 +28,6 @@ DecayAction::DecayAction(const ParticleData &p) : Action ({p}, 0.) {
 void DecayAction::one_to_two(const ParticleData &incoming0) {
   ParticleData &outgoing0 = outgoing_particles_[0];
   ParticleData &outgoing1 = outgoing_particles_[1];
-  const ParticleType &outgoing0_type = outgoing0.type();
-  const ParticleType &outgoing1_type = outgoing1.type();
 
   // TODO(weil) This may be checked already when reading in the possible
   // decay channels.
@@ -39,26 +37,9 @@ void DecayAction::one_to_two(const ParticleData &incoming0) {
            outgoing1.pdgcode().string().c_str());
   }
 
-  double mass_a = outgoing0_type.mass();
-  double mass_b = outgoing1_type.mass();
+  /* Sample the masses and momenta. */
   const double total_energy = incoming0.momentum().x0();
-
-  /* If one of the particles is resonance, sample its mass */
-  /* XXX: Other particle assumed stable! */
-  if (!outgoing0_type.is_stable()) {
-    mass_a = sample_resonance_mass (outgoing0_type, outgoing1_type,
-                                    total_energy);
-  } else if (!outgoing1_type.is_stable()) {
-    mass_b = sample_resonance_mass (outgoing1_type, outgoing0_type,
-                                    total_energy);
-  }
-
-  /* Sample the momenta */
-  sample_cms_momenta(&outgoing0, &outgoing1, total_energy, mass_a, mass_b);
-
-  /* Both decay products begin from the same point */
-  outgoing0.set_position(incoming0.position());
-  outgoing1.set_position(incoming0.position());
+  sample_cms_momenta(total_energy);
 }
 
 
@@ -183,11 +164,6 @@ void DecayAction::one_to_three(const ParticleData &incoming0) {
            ptot.x2(), ptot.x3());
   }
 
-  /* All decay products begin from the same point */
-  outgoing0.set_position(incoming0.position());
-  outgoing1.set_position(incoming0.position());
-  outgoing2.set_position(incoming0.position());
-
   printd("p0: %g %g %g \n", outgoing0.momentum().x0(),
          outgoing1.momentum().x0(), outgoing2.momentum().x0());
   printd("p1: %g %g %g \n", outgoing0.momentum().x1(),
@@ -238,7 +214,9 @@ void DecayAction::perform(Particles *particles, size_t &id_process) {
         std::to_string(outgoing_particles_.size()) + " was requested.");
   }
 
+  /* Set positions and boost back. */
   for (auto &p : outgoing_particles_) {
+    p.set_position(particle0.position());
     printd_momenta("particle momenta in lrf", p);
     p.boost(-velocity_CM);
     printd_momenta("particle momenta in comp", p);

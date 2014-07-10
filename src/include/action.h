@@ -93,6 +93,8 @@ class Action {
    * with their PDG code.
    */
   ParticleList choose_channel();
+  /** Sample final state momenta (and masses) in general X->2 process. */
+  void sample_cms_momenta(const double cms_energy);
 };
 
 /**
@@ -180,6 +182,9 @@ class ScatterAction : public Action {
  private:
   /** Check if the scattering is elastic. */
   bool is_elastic() const;
+
+  /** Perform an elastic two-body scattering, i.e. just exchange momentum. */
+  void momenta_exchange();
 
   /**
    * Resonance formation process.

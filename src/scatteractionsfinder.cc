@@ -20,6 +20,61 @@
 
 namespace Smash {
 
+
+double ScatterActionsFinder::collision_time(const ParticleData &p1,
+                                            const ParticleData &p2) {
+  /* UrQMD collision time
+   * arXiv:1203.4418 (5.15): in computational frame
+   * position of particle a: x_a
+   * position of particle b: x_b
+   * momentum of particle a: p_a
+   * momentum of particle b: p_b
+   * t_{coll} = - (x_a - x_b) . (p_a - p_b) / (p_a - p_b)^2
+   */
+  ThreeVector pos_diff = p1.position().threevec() - p2.position().threevec();
+  printd("Particle %d<->%d position difference: %g %g %g %g [fm]\n",
+    p1.id(), p2.id(), pos_diff.x1(), pos_diff.x2(), pos_diff.x3());
+  ThreeVector velo_diff = p1.velocity() - p2.velocity();
+  printd("Particle %d<->%d velocity difference: %g %g %g %g [fm]\n",
+    p1.id(), p2.id(), velo_diff.x1(), velo_diff.x2(), velo_diff.x3());
+  /* Zero momentum leads to infite distance, particles are not approaching. */
+  if (fabs(velo_diff.sqr()) < really_small) {
+    return -1.0;
+  } else {
+    return -pos_diff * velo_diff/velo_diff.sqr();
+  }
+}
+
+
+double ScatterActionsFinder::particle_distance(ParticleData p1,
+                                               ParticleData p2) {
+  /* Boost particles in center-of-momentum frame. */
+  boost_CM(&p1, &p2);
+  ThreeVector pos_diff = p1.position().threevec() - p2.position().threevec();
+  printd("Particle %d<->%d position difference: %g %g %g %g [fm]\n",
+         p1.id(), p2.id(), pos_diff.x1(), pos_diff.x2(), pos_diff.x3());
+  ThreeVector mom_diff = p1.momentum().threevec() - p2.momentum().threevec();
+  printd("Particle %d<->%d momentum difference: %g %g %g %g [fm]\n",
+         p1.id(), p2.id(), mom_diff.x1(), mom_diff.x2(), mom_diff.x3());
+  /* Zero momentum leads to infite distance. */
+  if (fabs(mom_diff.sqr()) < really_small)
+    return  pos_diff.sqr();
+
+  /* UrQMD squared distance criteria:
+   * arXiv:nucl-th/9803035 (3.27): in center of momemtum frame
+   * position of particle a: x_a
+   * position of particle b: x_b
+   * velocity of particle a: v_a
+   * velocity of particle b: v_b
+   * d^2_{coll} = (x_a - x_b)^2 - ((x_a - x_a) . (v_a - v_b))^2 / (v_a - v_b)^2
+   */
+  return pos_diff.sqr()
+    - (pos_diff*mom_diff)
+      * (pos_diff*mom_diff)
+      / mom_diff.sqr();
+}
+
+
 ActionPtr
 ScatterActionsFinder::check_collision(const int id_a, const int id_b, Particles *particles,
                                       const ExperimentParameters &parameters,

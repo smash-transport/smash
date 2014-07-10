@@ -18,6 +18,10 @@ namespace Smash {
  * Just loops through all particles and checks each pair for a collision.  */
 class ScatterActionsFinder : public ActionFinderFactory {
  public:
+  /** Determine the collision time of the two particles. */
+  static double collision_time(const ParticleData &p1, const ParticleData &p2);
+  /** Measure distance between two particles in center-of-momentum frame. */
+  static double particle_distance(ParticleData p1, ParticleData p2);
   /** Check the whole particle list for collisions
    * and return a list with the corrsponding Action objects. */
   ActionList find_possible_actions(

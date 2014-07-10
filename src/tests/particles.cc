@@ -15,6 +15,7 @@
 #include "../include/pdgcode.h"
 #include "../include/outputroutines.h"
 #include "../include/macros.h"
+#include "../include/scatteractionsfinder.h"
 #include <algorithm>
 
 using namespace Smash;
@@ -53,7 +54,7 @@ TEST(everything) {
   particle_b.set_position(FourVector(2., 2., 2., 2.));
 
   /* check return of particle distance of null momenta particles */
-  double distance_squared = particle_distance(particle_a, particle_b);
+  double distance_squared = ScatterActionsFinder::particle_distance(particle_a, particle_b);
   VERIFY(!(distance_squared < 0.0));
   /* XXX: does this test NaN?? */
   VERIFY(!(distance_squared > 1000.0));
@@ -61,13 +62,13 @@ TEST(everything) {
   /* check collision_time for parallel momenta => impossible collision */
   particle_a.set_momentum(0.1, 0.3, -0.1, 0.2);
   particle_b.set_momentum(0.1, 0.3, -0.1, 0.2);
-  double time = collision_time(particle_a, particle_b);
+  double time = ScatterActionsFinder::collision_time(particle_a, particle_b);
   VERIFY(!(time >= 0.0));
 
   /* reset momenta for possible collision and compare to Particle class */
   particle_a.set_momentum(0.1, 10.0, 9.0, 8.0);
   particle_b.set_momentum(0.1, -10.0, -90.0, -80.0);
-  distance_squared = particle_distance(particle_a, particle_b);
+  distance_squared = ScatterActionsFinder::particle_distance(particle_a, particle_b);
   VERIFY(!(distance_squared < 0.0));
 
   /* now check the Particles class itself */
@@ -90,7 +91,7 @@ TEST(everything) {
 
   /* check usage particle data */
   double distance_squared_2 =
-      particle_distance(particles.data(0), particles.data(1));
+      ScatterActionsFinder::particle_distance(particles.data(0), particles.data(1));
   printd("%g versus %g\n", distance_squared, distance_squared_2);
   VERIFY(!(distance_squared_2 < 0.0));
   VERIFY(!(distance_squared_2 - distance_squared > really_small));
