@@ -24,7 +24,7 @@ TEST(init_particle_types) {
 
 TEST_CATCH(load_decaymodes_missing_pdg, DecayModes::ReferencedParticleNotFound) {
   const std::string decays_input(
-      "-441 \n"
+      "661 \n"
       );
   DecayModes::load_decaymodes(decays_input);
 }

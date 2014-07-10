@@ -22,7 +22,7 @@ using namespace Smash;
 TEST(init_particle_types) {
   ParticleType::create_type_list(
       "# NAME MASS[GEV] WIDTH[GEV] PDG\n"
-      "smashon 0.123 1.2 -331\n"
+      "smashon 0.123 1.2 661\n"
       "pi0 0.1350 -1.0 111\n"
       "pi+ 0.1396 -1.0 211\n"
       "rho0 0.7755 0.149 113\n"
@@ -38,7 +38,7 @@ TEST(init_particle_types) {
 }
 
 static ParticleData create_smashon_particle(int id = -1) {
-  return ParticleData{ParticleType::find(-0x331), id};
+  return ParticleData{ParticleType::find(0x661), id};
 }
 
 TEST(everything) {

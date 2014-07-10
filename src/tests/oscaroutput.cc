@@ -36,13 +36,13 @@ TEST(directory_is_created) {
 static const float mass_smashon = 0.123;
 static std::string mass_str = std::to_string(mass_smashon);
 static std::string width_str = "1.200";
-static std::string pdg_str = "-331";
+static std::string pdg_str = "661";
 static std::string smashon_str = "smashon " + mass_str + " "
     + width_str + " " + pdg_str + "\n";
 static const int zero = 0;
 
 static ParticleData create_smashon_particle() {
-  ParticleData particle = ParticleData{ParticleType::find(-0x331)};
+  ParticleData particle = ParticleData{ParticleType::find(0x661)};
   particle.set_momentum(mass_smashon, random_value(), random_value(),
                         random_value());
   particle.set_position(FourVector(random_value(), random_value(),

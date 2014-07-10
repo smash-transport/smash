@@ -15,8 +15,8 @@ using namespace Smash;
 TEST(init_particle_types) {
   ParticleType::create_type_list(
       "species 0.123 -.0 123\n"
-      "species3 0.123 -.0 -1234567\n"
-      "species2 0.245 2.3 2345\n");
+      "species3 0.123 -.0 -1234568\n"
+      "species2 0.245 2.3 2346\n");
 }
 
 TEST(size) {
@@ -150,7 +150,7 @@ TEST(count_from_particles) {
   printf("%s", check2.report_deviations(two).c_str());
   VERIFY(two == check2);
 
-  ParticleData particleR(ParticleType::find(PdgCode("2345")));
+  ParticleData particleR(ParticleType::find(PdgCode("2346")));
   FourVector R(3,4,5,6);
   particleR.set_momentum(R);
   list.add_data(particleR);
@@ -160,7 +160,7 @@ TEST(count_from_particles) {
   printf("%s", check3.report_deviations(three).c_str());
   VERIFY(three == check3);
 
-  ParticleData particleS(ParticleType::find(PdgCode("-1234567")));
+  ParticleData particleS(ParticleType::find(PdgCode("-1234568")));
   FourVector S(-6,-9,-12,-15);
   particleS.set_momentum(S);
   list.add_data(particleS);
