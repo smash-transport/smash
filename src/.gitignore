@@ -9,3 +9,5 @@
 *.S
 *~
 *.bak
+.directory
+*.kate-swp

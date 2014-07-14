@@ -18,6 +18,7 @@
 namespace Smash {
 
 namespace {/*{{{*/
+/// takes a string and strips leading and trailing whitespaces.
 std::string trim(const std::string &s) {
   const auto begin = s.find_first_not_of(" \t\n\r");
   if (begin == std::string::npos) {
@@ -26,14 +27,26 @@ std::string trim(const std::string &s) {
   const auto end = s.find_last_not_of(" \t\n\r");
   return s.substr(begin, end - begin + 1);
 }
+/// Line consists of a line number and the contents of that line
 struct Line {/*{{{*/
+  /// initialize line with empty string and number
   Line() = default;
+  /// initialize a line with line number \p n and text \p t
   Line(int n, std::string &&t) : number(n), text(std::move(t)) {
   }
+  /// line number
   int number;
+  /// line content.
   std::string text;
 };/*}}}*/
 
+/** builds a meaningful error message
+ *
+ * Takes the message and quotes the Line where the error occurs
+ *
+ * \param[in] message Error message
+ * \param[in] line Line object containing line number and line content.
+ */
 std::string build_error_string(std::string message, const Line &line) {/*{{{*/
   return message + " (on line " + std::to_string(line.number) + ": \"" +
          line.text + "\")";
@@ -72,6 +85,7 @@ std::vector<Line> line_parser(const std::string &input) {/*{{{*/
   return std::move(lines);
 }/*}}}*/
 
+/// makes sure that nothing is left to read from this line.
 void ensure_all_read(std::istream &input, const Line &line) {/*{{{*/
   std::string tmp;
   input >> tmp;
@@ -82,6 +96,22 @@ void ensure_all_read(std::istream &input, const Line &line) {/*{{{*/
                            line));
   }
 }/*}}}*/
+
+/**
+ * Utility function to read a complete input stream (e.g. file) into one string.
+ *
+ * \param input The input stream. Since it reads until EOF und thus "uses up the
+ * whole input stream" the function takes an rvalue reference to the stream
+ * object (just pass a temporary).
+ *
+ * \note There's no slicing here: the actual istream object is a temporary that
+ * is not destroyed until read_all returns.
+ */
+std::string read_all(std::istream &&input) {
+  return {std::istreambuf_iterator<char>{input},
+          std::istreambuf_iterator<char>{}};
+}
+
 }  // unnamed namespace/*}}}*/
 
 }  // namespace Smash

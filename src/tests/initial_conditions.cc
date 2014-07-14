@@ -21,7 +21,7 @@ using namespace Smash;
 
 TEST(init_particle_types) {
   ParticleType::create_type_list(
-      "smashon 0.4 -1.0 222\n");
+      "smashon 0.4 -1.0 661\n");
 }
 
 TEST(initialize_box) {
@@ -37,11 +37,11 @@ TEST(initialize_box) {
   // number which is as close to an integer as possible (while still >
   // 1).  The value is 724.000021, meaning this has a change of 0.0021 %
   // of giving 725 particles.
-  Particles P{""};
+  Particles P;
   // should return START_TIME and set P:
   COMPARE(b.initial_conditions(&P, param), 0.2f);
   COMPARE(P.size(), 724);
-  COMPARE(P.data(67).pdgcode(), 0x222);
+  COMPARE(P.data(67).pdgcode(), 0x661);
   // we might also look at other properties of Particles, like total
   // momentum and such.
   FourVector momentum(0.0, 0.0, 0.0, 0.0);
@@ -62,15 +62,15 @@ TEST(initialize_box) {
 TEST(initialize_collider) {
   Configuration conf(TEST_CONFIG_PATH);
   conf["Modi"]["Collider"]["SQRTS"] = 1.6;
-  conf["Modi"]["Collider"]["PROJECTILE"] = "222";
-  conf["Modi"]["Collider"]["TARGET"] = "222";
+  conf["Modi"]["Collider"]["PROJECTILE"] = "661";
+  conf["Modi"]["Collider"]["TARGET"] = "661";
   ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};
   ColliderModus c(conf["Modi"], param);
-  Particles P{""};
+  Particles P;
   COMPARE(c.initial_conditions(&P, param), -1.f);
   COMPARE(P.size(), 2);
-  COMPARE(P.data(0).pdgcode(), 0x222);
-  COMPARE(P.data(1).pdgcode(), 0x222);
+  COMPARE(P.data(0).pdgcode(), 0x661);
+  COMPARE(P.data(1).pdgcode(), 0x661);
   VERIFY (P.data(0).position().x1() > 0.0);
   COMPARE(P.data(1).position().x1(), 0.0);
   COMPARE(P.data(0).position().x2(), 0.0);
@@ -85,20 +85,29 @@ TEST(initialize_collider) {
   COMPARE(momentum_total, FourVector(momentum_total.x0(), 0.0, 0.0, 0.0));
 }
 
+TEST_CATCH(initialize_collider_low_energy, ModusDefault::InvalidEnergy) {
+  Configuration conf(TEST_CONFIG_PATH);
+  conf["Modi"]["Collider"]["SQRTS"] = 0.5;
+  conf["Modi"]["Collider"]["PROJECTILE"] = "661";
+  conf["Modi"]["Collider"]["TARGET"] = "661";
+  ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};
+  ColliderModus c(conf["Modi"], param);
+}
+
 TEST(initialize_nucleus_normal) {
   Configuration conf(TEST_CONFIG_PATH);
   conf["Modi"]["Nucleus"]["SQRTSNN"] = 1.6;
   conf.take({"Modi", "Nucleus", "Projectile"});
   conf.take({"Modi", "Nucleus", "Target"});
-  conf["Modi"]["Nucleus"]["Projectile"]["PARTICLES"]["222"] = 1;
-  conf["Modi"]["Nucleus"]["Target"]["PARTICLES"]["222"] = 8;
-  conf["Modi"]["Nucleus"]["SQRTS_N"][0] = "222";
-  conf["Modi"]["Nucleus"]["SQRTS_N"][1] = "222";
+  conf["Modi"]["Nucleus"]["Projectile"]["PARTICLES"]["661"] = 1;
+  conf["Modi"]["Nucleus"]["Target"]["PARTICLES"]["661"] = 8;
+  conf["Modi"]["Nucleus"]["SQRTS_N"][0] = "661";
+  conf["Modi"]["Nucleus"]["SQRTS_N"][1] = "661";
   conf["Modi"]["Nucleus"]["INITIAL_DISTANCE"] = 0;
   conf["Modi"]["Nucleus"]["Impact"]["VALUE"] = 0;
   ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};
   NucleusModus n(conf["Modi"], param);
-  Particles P{""};
+  Particles P;
   COMPARE(n.initial_conditions(&P, param), 0.f);
   COMPARE(P.size(), 9);
   for (auto p : P.data()) {
@@ -107,7 +116,7 @@ TEST(initialize_nucleus_normal) {
     // this is the mass squared
     COMPARE_RELATIVE_ERROR(p.momentum().sqr(), 0.16, 1e-6);
     COMPARE(p.position().x0(), 0.0);
-    COMPARE(p.pdgcode(), PdgCode(0x222));
+    COMPARE(p.pdgcode(), PdgCode(0x661));
     COMPARE_RELATIVE_ERROR(p.momentum().x0(), 0.8, 1e-6);
     COMPARE_ABSOLUTE_ERROR(p.momentum().x1(), 0.0, 1e-6);
     COMPARE_ABSOLUTE_ERROR(p.momentum().x2(), 0.0, 1e-6);
@@ -116,19 +125,19 @@ TEST(initialize_nucleus_normal) {
   // all other things can only be tested with statistics.
 }
 
-TEST_CATCH(initialize_nucleus_low_energy, NucleusModus::InvalidEnergy) {
+TEST_CATCH(initialize_nucleus_low_energy, ModusDefault::InvalidEnergy) {
   Configuration conf(TEST_CONFIG_PATH);
   conf["Modi"]["Nucleus"]["SQRTSNN"] = 0.5;
   conf.take({"Modi", "Nucleus", "Projectile"});
   conf.take({"Modi", "Nucleus", "Target"});
-  conf["Modi"]["Nucleus"]["Projectile"]["PARTICLES"]["222"] = 1;
-  conf["Modi"]["Nucleus"]["Target"]["PARTICLES"]["222"] = 8;
-  conf["Modi"]["Nucleus"]["SQRTS_N"][0] = "222";
-  conf["Modi"]["Nucleus"]["SQRTS_N"][1] = "222";
+  conf["Modi"]["Nucleus"]["Projectile"]["PARTICLES"]["661"] = 1;
+  conf["Modi"]["Nucleus"]["Target"]["PARTICLES"]["661"] = 8;
+  conf["Modi"]["Nucleus"]["SQRTS_N"][0] = "661";
+  conf["Modi"]["Nucleus"]["SQRTS_N"][1] = "661";
   conf["Modi"]["Nucleus"]["INITIAL_DISTANCE"] = 0;
   ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};
   NucleusModus n(conf["Modi"], param);
-  Particles P{""};
+  Particles P;
   n.initial_conditions(&P, param);
 }
 
@@ -137,14 +146,14 @@ TEST_CATCH(initialize_nucleus_empty_projectile, NucleusModus::NucleusEmpty) {
   conf["Modi"]["Nucleus"]["SQRTSNN"] = 1.6;
   conf.take({"Modi", "Nucleus", "Projectile"});
   conf.take({"Modi", "Nucleus", "Target"});
-  conf["Modi"]["Nucleus"]["Projectile"]["PARTICLES"]["222"] = 0;
-  conf["Modi"]["Nucleus"]["Target"]["PARTICLES"]["222"] = 8;
+  conf["Modi"]["Nucleus"]["Projectile"]["PARTICLES"]["661"] = 0;
+  conf["Modi"]["Nucleus"]["Target"]["PARTICLES"]["661"] = 8;
   conf["Modi"]["Nucleus"]["SQRTS_N"][0] = 0;
   conf["Modi"]["Nucleus"]["SQRTS_N"][1] = 0;
   conf["Modi"]["Nucleus"]["INITIAL_DISTANCE"] = 0;
   ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};
   NucleusModus n(conf["Modi"], param);
-  Particles P{""};
+  Particles P;
   n.initial_conditions(&P, param);
 }
 
@@ -153,14 +162,14 @@ TEST_CATCH(initialize_nucleus_empty_target, NucleusModus::NucleusEmpty) {
   conf["Modi"]["Nucleus"]["SQRTSNN"] = 1.6;
   conf.take({"Modi", "Nucleus", "Projectile"});
   conf.take({"Modi", "Nucleus", "Target"});
-  conf["Modi"]["Nucleus"]["Projectile"]["PARTICLES"]["222"] = 8;
-  conf["Modi"]["Nucleus"]["Target"]["PARTICLES"]["222"] = 0;
+  conf["Modi"]["Nucleus"]["Projectile"]["PARTICLES"]["661"] = 8;
+  conf["Modi"]["Nucleus"]["Target"]["PARTICLES"]["661"] = 0;
   conf["Modi"]["Nucleus"]["SQRTS_N"][0] = 0;
   conf["Modi"]["Nucleus"]["SQRTS_N"][1] = 0;
   conf["Modi"]["Nucleus"]["INITIAL_DISTANCE"] = 0;
   ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};
   NucleusModus n(conf["Modi"], param);
-  Particles P{""};
+  Particles P;
   n.initial_conditions(&P, param);
 }
 

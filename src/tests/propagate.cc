@@ -22,11 +22,11 @@ using namespace Smash;
 TEST(init_particle_types) {
   ParticleType::create_type_list(
       "# NAME MASS[GEV] WIDTH[GEV] PDG\n"
-      "smashon 0.123 1.2 -331\n");
+      "smashon 0.123 1.2 661\n");
 }
 
 static ParticleData create_smashon_particle(int id = -1) {
-  return ParticleData{ParticleType::find(-0x331), id};
+  return ParticleData{ParticleType::find(0x661), id};
 }
 
 // create a particle list with various interesting particles. We will
@@ -75,7 +75,7 @@ static void create_particle_list(Particles &P) {
 
 TEST(propagate_default) {
   ModusDefault m;
-  Particles Pdef{""};
+  Particles Pdef;
   create_particle_list(Pdef);
   OutputsList out;
   // clock, output interval, cross-section, testparticles
@@ -109,7 +109,7 @@ TEST(propagate_box) {
   conf["Modi"]["Box"]["START_TIME"] = 0.2;
   ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};
   BoxModus b(conf["Modi"], param);
-  Particles Pdef{""}, Pbox{""};
+  Particles Pdef, Pbox;
   create_particle_list(Pdef);
   create_particle_list(Pbox);
   OutputsList out;
@@ -140,11 +140,11 @@ TEST(propagate_collider) {
   ModusDefault m;
   Configuration conf(TEST_CONFIG_PATH);
   conf["Modi"]["Collider"]["SQRTS"] = 1.0;
-  conf["Modi"]["Collider"]["PROJECTILE"] = 0x211;
-  conf["Modi"]["Collider"]["TARGET"] = 0x211;
+  conf["Modi"]["Collider"]["PROJECTILE"] = "661";
+  conf["Modi"]["Collider"]["TARGET"] = "661";
   ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};
   ColliderModus c(conf["Modi"], param);
-  Particles Pdef{""}, Pcol{""};
+  Particles Pdef, Pcol;
   create_particle_list(Pdef);
   create_particle_list(Pcol);
   OutputsList out;
@@ -171,13 +171,13 @@ TEST(propagate_nucleus) {
   conf["Modi"]["Nucleus"]["SQRTSNN"] = 1.0;
   conf.take({"Modi", "Nucleus", "Projectile"});
   conf.take({"Modi", "Nucleus", "Target"});
-  conf["Modi"]["Nucleus"]["Projectile"]["PARTICLES"]["-331"] = 1;
-  conf["Modi"]["Nucleus"]["Target"]["PARTICLES"]["-331"] = 1;
-  conf["Modi"]["Nucleus"]["SQRTS_N"][0] = "-331";
-  conf["Modi"]["Nucleus"]["SQRTS_N"][1] = "-331";
+  conf["Modi"]["Nucleus"]["Projectile"]["PARTICLES"]["661"] = 1;
+  conf["Modi"]["Nucleus"]["Target"]["PARTICLES"]["661"] = 1;
+  conf["Modi"]["Nucleus"]["SQRTS_N"][0] = "661";
+  conf["Modi"]["Nucleus"]["SQRTS_N"][1] = "661";
   ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};
   NucleusModus n(conf["Modi"], param);
-  Particles Pdef{""}, Pnuc{""};
+  Particles Pdef, Pnuc;
   create_particle_list(Pdef);
   create_particle_list(Pnuc);
   OutputsList out;

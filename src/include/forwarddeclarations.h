@@ -63,6 +63,7 @@ class Particles;
 class ParticleType;
 class PdgCode;
 class ProcessBranch;
+class DecayBranch;
 struct ExperimentParameters;
 
 using ActionPtr = build_unique_ptr_<Action>;
@@ -71,6 +72,7 @@ using OutputsList = build_vector_<build_unique_ptr_<OutputInterface>>;
 using ParticleList = build_vector_<ParticleData>;
 using ParticleTypeList = build_vector_<ParticleType>;
 using ProcessBranchList = build_vector_<ProcessBranch>;
+using DecayBranchList = build_vector_<DecayBranch>;
 
 namespace bf = boost::filesystem;
 

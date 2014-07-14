@@ -30,6 +30,8 @@ class VtkOutput : public OutputInterface {
 
  private:
   const bf::path base_path_;
+  /// Number of vtk output in current event
+  int vtk_output_counter_;
 };
 
 }  // namespace Smash

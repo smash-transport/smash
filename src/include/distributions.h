@@ -14,26 +14,51 @@
 
 namespace Smash {
 
-/* Breit-Wigner distribution for calculating resonance
- * production probability
+/** Returns a Breit-Wigner distribution
+ *
+ * \param[in] mandelstam_s the Mandelstam s variable (available energy
+ * squared - in GeV\f$^2\f$)
+ * \param[in] resonance_mass resonance pole mass in GeV
+ * \param[in] resonance_width resonance width in GeV
+ *
+ * \return \f$\frac{s \Gamma^2}{(s-m^2)^2 + s\Gamma^2}\f$
  */
-double breit_wigner(double mandelstam_s, float resonance_mass,
-                          float resonance_width);
+float breit_wigner(const double mandelstam_s, const float resonance_mass,
+                    const float resonance_width);
 
-/* density_integrand - Maxwell-Boltzmann distribution */
-double inline density_integrand(const double &momentum, const double &temp,
-  const double &mass);
+/** Returns the Maxwell-Boltzmann distribution
+ *
+ * \param[in] energy \f$E\f$ (in GeV)
+ * \param[in] momentum \f$p\f$ (in GeV)
+ * \param[in] temperature \f$T\f$ (in GeV)
+ *
+ * \return \f$4\pi p^2 \exp{-\frac{E}{T}}\f$
+ */
+double density_integrand(const double energy, const double momentum,
+                         const double temperature);
 
-/* sample_momenta - return thermal momenta */
-double sample_momenta(const double &temp, const double &mass);
+/** samples a momentum from the Maxwell-Boltzmann distribution
+ *
+ * \see density_integrand
+ * \param[in] temperature Temperature \f$T\f$
+ * \param[in] mass Mass of the particle: \f$m = \sqrt{E^2 - p^2}\f$
+ *
+ * \return one possible momentum between mass and 50 GeV
+ */
+double sample_momenta(const double temperature, const double mass);
 
-/* return number density for given mass and temperature */
+/** return number density from a Maxwell-Boltzmann distribution
+ *
+ * \see density_integrand
+ *
+ * \param[in] temperature Temperature
+ * \param[in] mass Mass of the particle: \f$m = \sqrt{E^2 - p^2}\f$
+ *
+ * \return \f$\frac{1}{2\pi^2} m^2 T K_2\left(\frac{m}{T}\right)\f$
+ *
+ * where \f$K_2\f$ is the modified Bessel function of the second kind.
+ */
 inline double number_density_maxwellboltzmann(double mass, double temperature) {
-  /*
-   * The particle number depends on distribution function
-   * (assumes Maxwell-Boltzmann):
-   * Volume m^2 T BesselK[2, m/T] / (2\pi^2)
-   */
   return mass * mass * temperature * gsl_sf_bessel_Knu(2, mass / temperature)
     * 0.5 * M_1_PI * M_1_PI / hbarc / hbarc / hbarc;
 }

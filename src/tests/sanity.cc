@@ -22,11 +22,11 @@ using namespace Smash;
 TEST(init_particle_types) {
   ParticleType::create_type_list(
       "# NAME MASS[GEV] WIDTH[GEV] PDG\n"
-      "smashon 0.123 1.2 -331\n");
+      "smashon 0.123 1.2 661\n");
 }
 
 static ParticleData create_smashon_particle(int id = -1) {
-  return ParticleData{ParticleType::find(-0x331), id};
+  return ParticleData{ParticleType::find(0x661), id};
 }
 
 // create a particle list with various interesting particles. We will
@@ -75,7 +75,7 @@ static void create_particle_list(Particles &P) {
 
 TEST(sanity_default) {
   ModusDefault m;
-  Particles P{""};
+  Particles P;
   create_particle_list(P);
   COMPARE(m.sanity_check(&P), 0);
 }
@@ -88,7 +88,7 @@ TEST(sanity_box) {
   conf["Modi"]["Box"]["START_TIME"] = 0.2;
   ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};
   BoxModus b(conf["Modi"], param);
-  Particles P{""};
+  Particles P;
   create_particle_list(P);
   COMPARE(b.sanity_check(&P), 4);
 }
@@ -96,11 +96,11 @@ TEST(sanity_box) {
 TEST(sanity_collider) {
   Configuration conf(TEST_CONFIG_PATH);
   conf["Modi"]["Collider"]["SQRTS"] = 1.0;
-  conf["Modi"]["Collider"]["PROJECTILE"] = -0x331;
-  conf["Modi"]["Collider"]["TARGET"] = -0x331;
+  conf["Modi"]["Collider"]["PROJECTILE"] = "661";
+  conf["Modi"]["Collider"]["TARGET"] = "661";
   ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};
   ColliderModus c(conf["Modi"], param);
-  Particles P{""};
+  Particles P;
   create_particle_list(P);
   COMPARE(c.sanity_check(&P), 0);
 }
@@ -110,11 +110,11 @@ TEST(sanity_nucleus) {
   conf.take({"Modi", "Nucleus", "Projectile"});
   conf.take({"Modi", "Nucleus", "Target"});
   conf["Modi"]["Nucleus"]["SQRTSNN"] = 1.0;
-  conf["Modi"]["Nucleus"]["Projectile"]["PARTICLES"]["-331"] = 1;
-  conf["Modi"]["Nucleus"]["Target"]["PARTICLES"]["-331"] = 1;
+  conf["Modi"]["Nucleus"]["Projectile"]["PARTICLES"]["661"] = 1;
+  conf["Modi"]["Nucleus"]["Target"]["PARTICLES"]["661"] = 1;
   ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};
   NucleusModus n(conf["Modi"], param);
-  Particles P{""};
+  Particles P;
   create_particle_list(P);
   COMPARE(n.sanity_check(&P), 0);
 }

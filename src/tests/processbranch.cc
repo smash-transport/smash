@@ -16,33 +16,30 @@ using namespace Smash;
 TEST(init_particle_types) {
   ParticleType::create_type_list(
       "# NAME MASS[GEV] WIDTH[GEV] PDG\n"
-      "smashon 1.1 1.1 9876543\n"
-      "smashino 1.1 1.1 1234567\n"
-      "anto_smashino 1.1 1.1 -1234567\n");
+      "smashon 1.1 1.1 9876542\n"
+      "smashino 1.1 1.1 1234568\n"
+      "anto_smashino 1.1 1.1 -1234568\n");
 }
 
 TEST(assign_default) {
   ProcessBranch branch;
   FUZZY_COMPARE(branch.weight(), -1.f);
-  FUZZY_COMPARE(branch.type(), 0);
 }
 TEST(assign_1_particle) {
-  PdgCode smashon("9876543");
-  ProcessBranch branch(smashon, 1.234f, 8);
+  PdgCode smashon("9876542");
+  ProcessBranch branch(smashon, 1.234f);
   FUZZY_COMPARE(branch.weight(), 1.234f);
-  FUZZY_COMPARE(branch.type(), 8);
 }
 TEST(assign_2_particle) {
-  PdgCode smashon("9876543");
-  ProcessBranch branch(smashon, smashon, 2.345, 9);
+  PdgCode smashon("9876542");
+  ProcessBranch branch(smashon, smashon, 2.345);
   FUZZY_COMPARE(branch.weight(), 2.345f);
-  FUZZY_COMPARE(branch.type(), 9);
 }
 
 TEST(lists) {
-  PdgCode smashon("9876543");
-  PdgCode smashino("1234567");
-  ProcessBranch branch(smashon, smashino, 2.345, 9);
+  PdgCode smashon("9876542");
+  PdgCode smashino("1234568");
+  ProcessBranch branch(smashon, smashino, 2.345);
   std::vector<PdgCode> list = branch.pdg_list();
   COMPARE(list.size(), 2);
   COMPARE(list.at(0), smashon);
@@ -68,17 +65,17 @@ TEST(lists) {
 }
 
 TEST(add_particle) {
-  PdgCode smashon("9876543");
-  PdgCode smashino("1234567");
-  PdgCode anti_smashino("-1234567");
-  ProcessBranch branch(smashon, smashino, 1.2, 1);
+  PdgCode smashon("9876542");
+  PdgCode smashino("1234568");
+  PdgCode anti_smashino("-1234568");
+  ProcessBranch branch(smashon, smashino, 1.2);
   branch.add_particle(anti_smashino);
   COMPARE(branch.pdg_list().size(), 3);
 }
 TEST(set_particles) {
-  PdgCode smashon("9876543");
-  PdgCode smashino("1234567");
-  PdgCode anti_smashino("-1234567");
+  PdgCode smashon("9876542");
+  PdgCode smashino("1234568");
+  PdgCode anti_smashino("-1234568");
   std::vector<PdgCode> list = {smashon, smashino, anti_smashino};
   ProcessBranch branch;
   branch.set_particles(list);
@@ -92,10 +89,4 @@ TEST(weights) {
   // double is intentional here.
   branch.set_weight(0.33);
   COMPARE(branch.weight(), 0.33f);
-}
-
-TEST(types) {
-  ProcessBranch branch;
-  branch.set_type(18);
-  COMPARE(branch.type(), 18);
 }

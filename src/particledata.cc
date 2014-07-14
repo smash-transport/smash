@@ -9,8 +9,7 @@
 
 #include "include/particledata.h"
 
-#include "include/particles.h"
-#include "include/particletype.h"
+#include "include/width.h"
 
 namespace Smash {
 

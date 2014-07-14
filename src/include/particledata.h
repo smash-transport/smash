@@ -65,6 +65,7 @@ class ParticleData {
   inline ThreeVector velocity (void) const { return momentum_.threevec() / momentum_.x0(); }
   /// do a Lorentz-boost
   inline void boost (const ThreeVector &v);
+
   /* overloaded operators */
   inline bool operator==(const ParticleData &a) const;
   inline bool operator<(const ParticleData &a) const;
@@ -147,11 +148,22 @@ inline void ParticleData::set_momentum(const FourVector &momentum_vector) {
   momentum_ = momentum_vector;
 }
 
+/** set particle four momentum
+ *
+ * \param[in] new_mass the mass of the particle
+ * \param[in] mom the three-momentum of the particle
+ */
 inline void ParticleData::set_momentum(double new_mass, const ThreeVector &mom) {
   momentum_ = FourVector(std::sqrt(new_mass * new_mass + mom * mom), mom);
 }
 
-/// set particle four momentum by components
+/** set particle four momentum
+ *
+ * \param[in] new_mass the mass of the particle
+ * \param[in] px x-component of the momentum
+ * \param[in] py y-component of the momentum
+ * \param[in] pz z-component of the momentum
+ */
 inline void ParticleData::set_momentum(double new_mass, double px, double py,
                                        double pz) {
   momentum_ = FourVector(

@@ -11,6 +11,7 @@
 #include <cmath>
 #include <iosfwd>
 
+#include "numerics.h"
 #include "threevector.h"
 
 namespace Smash {
@@ -201,10 +202,10 @@ ThreeVector inline FourVector::threevec() const {
 
 // check if all four vector components are equal
 bool inline FourVector::operator==(const FourVector &a) const {
-  return std::abs(x_[0] - a.x_[0]) < 1e-12 &&
-         std::abs(x_[1] - a.x_[1]) < 1e-12 &&
-         std::abs(x_[2] - a.x_[2]) < 1e-12 &&
-         std::abs(x_[3] - a.x_[3]) < 1e-12;
+  return almost_equal(x_[0], a.x_[0])
+      && almost_equal(x_[1], a.x_[1])
+      && almost_equal(x_[2], a.x_[2])
+      && almost_equal(x_[3], a.x_[3]);
 }
 
 // use == operator for the inverse != check

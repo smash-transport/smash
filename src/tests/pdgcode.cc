@@ -12,25 +12,35 @@
 
 using namespace Smash;
 
-// non-hadrons:
-PdgCode electron( 0x11);
-PdgCode   antimu(-0x13);
-PdgCode   photon( 0x22);
 // mesons:
-PdgCode   pion( 0x211);
-PdgCode   kaon( 0x311);
-PdgCode kminus(-0x321);
-PdgCode dminus(-0x411);
-PdgCode bnulls( 0x531);
-PdgCode bPcbar(-0x541);
-PdgCode eta_pr( 0x331);
-PdgCode  j_psi( 0x443);
+PdgCode   pinull( 0x111);
+PdgCode     pion( 0x211);
+PdgCode  piminus(-0x211);
+PdgCode      eta( 0x221);
+PdgCode rhominus(-0x213);
+PdgCode    omega( 0x223);
+PdgCode      phi( 0x333);
+PdgCode       K0( 0x311);
+PdgCode    Kplus( 0x321);
+PdgCode   Kminus(-0x321);
+PdgCode      K0L( 0x130);
+PdgCode      K0S( 0x310);
+PdgCode   dminus(-0x411);
+PdgCode   bnulls( 0x531);
+PdgCode   bPcbar(-0x541);
+PdgCode   eta_pr( 0x331);
+PdgCode    j_psi( 0x443);
 // baryons:
+PdgCode      neutron(0x2112);
 PdgCode      proton( 0x2212);
-PdgCode   antidelta(-0x122224); // this is Δ(1700)
+PdgCode  antiproton(-0x2212);
+PdgCode       delta( 0x2224);
+PdgCode       nstar( 0x202112); // N*(1440)^+
+PdgCode   antidelta(-0x122224); // Δ(1700)
+PdgCode   sigmanull( 0x3212);
 PdgCode       sigma( 0x3222);
 PdgCode      lambda( 0x3122);
-PdgCode      antixi(-0x103312); // this is Anti-Ξ(1820)
+PdgCode      antixi(-0x103312); // Anti-Ξ(1820)
 PdgCode   omega_bar(-0x3334);
 PdgCode    lambda_c( 0x4122);
 PdgCode sigma_c_bar(-0x4114);
@@ -38,6 +48,13 @@ PdgCode        xi_c( 0x4322);
 PdgCode omega_c_bar(-0x4332);
 PdgCode   xi_cc_bar(-0x4422);
 PdgCode    omega_bc( 0x5432);
+// non-hadrons:
+// leptons
+PdgCode electron( 0x11);
+PdgCode   antimu(-0x13);
+// bosons
+PdgCode photon(0x22);
+PdgCode higgs (0x25);
 
 TEST(write_codes) {
   printf("######################### Non-Hadrons:\n");
@@ -46,8 +63,10 @@ TEST(write_codes) {
   printf("γ:         %8s %8x 0x%08x\n",      photon.string().c_str(),      photon.code(),     photon.dump());
   printf("############################## Mesons:\n");
   printf("π^+:       %8s %8x 0x%08x\n",        pion.string().c_str(),        pion.code(),       pion.dump());
-  printf("K^0:       %8s %8x 0x%08x\n",        kaon.string().c_str(),        kaon.code(),       kaon.dump());
-  printf("K^-:       %8s %8x 0x%08x\n",      kminus.string().c_str(),      kminus.code(),     kminus.dump());
+  printf("K^0:       %8s %8x 0x%08x\n",          K0.string().c_str(),          K0.code(),         K0.dump());
+  printf("K^0L:      %8s %8x 0x%08x\n",         K0L.string().c_str(),         K0L.code(),        K0L.dump());
+  printf("K^0S:      %8s %8x 0x%08x\n",         K0S.string().c_str(),         K0S.code(),        K0S.dump());
+  printf("K^-:       %8s %8x 0x%08x\n",      Kminus.string().c_str(),      Kminus.code(),     Kminus.dump());
   printf("D^-:       %8s %8x 0x%08x\n",      dminus.string().c_str(),      dminus.code(),     dminus.dump());
   printf("B^0_s:     %8s %8x 0x%08x\n",      bnulls.string().c_str(),      bnulls.code(),     bnulls.dump());
   printf("bar B^+_c: %8s %8x 0x%08x\n",      bPcbar.string().c_str(),      bPcbar.code(),     bPcbar.dump());
@@ -75,7 +94,9 @@ TEST(code) {
   COMPARE(   antimu.code(),  static_cast<int>(0xffffffedu));
   COMPARE(   photon.code(),  0x22);
   COMPARE(     pion.code(),  0x211);
-  COMPARE(     kaon.code(),  0x311);
+  COMPARE(       K0.code(),  0x311);
+  COMPARE(      K0L.code(),  0x130);
+  COMPARE(      K0S.code(),  0x310);
   COMPARE(   proton.code(),  0x2212);
   COMPARE(antidelta.code(),  static_cast<int>(0xffeddddcu));
   COMPARE(   lambda.code(),  0x3122);
@@ -86,7 +107,9 @@ TEST(dump) {
   COMPARE(   antimu.dump(),  0x80000013u);
   COMPARE(   photon.dump(),  0x22u);
   COMPARE(     pion.dump(),  0x211u);
-  COMPARE(     kaon.dump(),  0x311u);
+  COMPARE(       K0.dump(),  0x311u);
+  COMPARE(      K0L.dump(),  0x130u);
+  COMPARE(      K0S.dump(),  0x310u);
   COMPARE(   proton.dump(),  0x2212u);
   COMPARE(antidelta.dump(),  0x80122224u);
   COMPARE(   lambda.dump(),  0x3122u);
@@ -97,11 +120,24 @@ TEST(string) {
   COMPARE(   antimu.string(),     "-13");
   COMPARE(   photon.string(),      "22");
   COMPARE(     pion.string(),     "211");
-  COMPARE(     kaon.string(),     "311");
+  COMPARE(       K0.string(),     "311");
+  COMPARE(      K0L.string(),     "130");
+  COMPARE(      K0S.string(),     "310");
   COMPARE(   proton.string(),    "2212");
   COMPARE(antidelta.string(), "-122224");
   COMPARE(   lambda.string(),    "3122");
   COMPARE(   antixi.string(), "-103312");
+}
+TEST(decimal) {
+  COMPARE( electron.get_decimal(),      11);
+  COMPARE(   antimu.get_decimal(),     -13);
+  COMPARE(   photon.get_decimal(),      22);
+  COMPARE(     pion.get_decimal(),     211);
+  COMPARE(       K0.get_decimal(),     311);
+  COMPARE(   proton.get_decimal(),    2212);
+  COMPARE(antidelta.get_decimal(), -122224);
+  COMPARE(   lambda.get_decimal(),    3122);
+  COMPARE(   antixi.get_decimal(), -103312);
 }
 
 TEST(hadron) {
@@ -115,8 +151,10 @@ TEST(baryon_number) {
   COMPARE(     antimu.baryon_number(),  0);
   COMPARE(     photon.baryon_number(),  0);
   COMPARE(       pion.baryon_number(),  0);
-  COMPARE(       kaon.baryon_number(),  0);
-  COMPARE(     kminus.baryon_number(),  0);
+  COMPARE(         K0.baryon_number(),  0);
+  COMPARE(        K0L.baryon_number(),  0);
+  COMPARE(        K0S.baryon_number(),  0);
+  COMPARE(     Kminus.baryon_number(),  0);
   COMPARE(     dminus.baryon_number(),  0);
   COMPARE(     bnulls.baryon_number(),  0);
   COMPARE(     bPcbar.baryon_number(),  0);
@@ -140,8 +178,8 @@ TEST(isospin3) {
   COMPARE(     antimu.isospin3(),  0);
   COMPARE(     photon.isospin3(),  0);
   COMPARE(       pion.isospin3(), +2);
-  COMPARE(       kaon.isospin3(), -1);
-  COMPARE(     kminus.isospin3(), -1);
+  COMPARE(         K0.isospin3(), -1);
+  COMPARE(     Kminus.isospin3(), -1);
   COMPARE(     dminus.isospin3(), -1);
   COMPARE(     bnulls.isospin3(),  0);
   COMPARE(     bPcbar.isospin3(),  0);
@@ -161,14 +199,15 @@ TEST(isospin3) {
   COMPARE(   omega_bc.isospin3(),  0);
 }
 TEST(isospin_total) {
-  PdgCode eta(0x221);
   COMPARE(   electron.isospin_total(),  0u);
   COMPARE(     antimu.isospin_total(),  0u);
   COMPARE(     photon.isospin_total(),  0u);
   COMPARE(       pion.isospin_total(), +2u);
   COMPARE(        eta.isospin_total(),  0u);
-  COMPARE(       kaon.isospin_total(),  1u);
-  COMPARE(     kminus.isospin_total(),  1u);
+  COMPARE(         K0.isospin_total(),  1u);
+  COMPARE(        K0L.isospin_total(),  1u);
+  COMPARE(        K0S.isospin_total(),  1u);
+  COMPARE(     Kminus.isospin_total(),  1u);
   COMPARE(     dminus.isospin_total(),  1u);
   COMPARE(     bnulls.isospin_total(),  0u);
   COMPARE(     bPcbar.isospin_total(),  0u);
@@ -192,8 +231,8 @@ TEST(strangeness) {
   COMPARE(     antimu.strangeness(),  0);
   COMPARE(     photon.strangeness(),  0);
   COMPARE(       pion.strangeness(),  0);
-  COMPARE(       kaon.strangeness(),  1);
-  COMPARE(     kminus.strangeness(), -1);
+  COMPARE(         K0.strangeness(),  1);
+  COMPARE(     Kminus.strangeness(), -1);
   COMPARE(     dminus.strangeness(),  0);
   COMPARE(     bnulls.strangeness(), -1);
   COMPARE(     bPcbar.strangeness(),  0);
@@ -217,8 +256,8 @@ TEST(charmness) {
   COMPARE(     antimu.charmness(),  0);
   COMPARE(     photon.charmness(),  0);
   COMPARE(       pion.charmness(),  0);
-  COMPARE(       kaon.charmness(),  0);
-  COMPARE(     kminus.charmness(),  0);
+  COMPARE(         K0.charmness(),  0);
+  COMPARE(     Kminus.charmness(),  0);
   COMPARE(     dminus.charmness(), -1);
   COMPARE(     bnulls.charmness(),  0);
   COMPARE(     bPcbar.charmness(), -1);
@@ -242,8 +281,8 @@ TEST(bottomness) {
   COMPARE(     antimu.bottomness(),  0);
   COMPARE(     photon.bottomness(),  0);
   COMPARE(       pion.bottomness(),  0);
-  COMPARE(       kaon.bottomness(),  0);
-  COMPARE(     kminus.bottomness(),  0);
+  COMPARE(         K0.bottomness(),  0);
+  COMPARE(     Kminus.bottomness(),  0);
   COMPARE(     dminus.bottomness(),  0);
   COMPARE(     bnulls.bottomness(),  1);
   COMPARE(     bPcbar.bottomness(), -1);
@@ -267,8 +306,10 @@ TEST(charge) {
   COMPARE(     antimu.charge(), +1);
   COMPARE(     photon.charge(),  0);
   COMPARE(       pion.charge(), +1);
-  COMPARE(       kaon.charge(),  0);
-  COMPARE(     kminus.charge(), -1);
+  COMPARE(         K0.charge(),  0);
+  COMPARE(        K0L.charge(),  0);
+  COMPARE(        K0S.charge(),  0);
+  COMPARE(     Kminus.charge(), -1);
   COMPARE(     dminus.charge(), -1);
   COMPARE(     bnulls.charge(),  0);
   COMPARE(     bPcbar.charge(), -1);
@@ -292,8 +333,10 @@ TEST(quarks) {
   COMPARE(     antimu.quarks(), 0x000);
   COMPARE(     photon.quarks(), 0x000);
   COMPARE(       pion.quarks(), 0x021);
-  COMPARE(       kaon.quarks(), 0x031);
-  COMPARE(     kminus.quarks(), 0x032);
+  COMPARE(         K0.quarks(), 0x031);
+  COMPARE(        K0L.quarks(), 0x013);
+  COMPARE(        K0S.quarks(), 0x031);
+  COMPARE(     Kminus.quarks(), 0x032);
   COMPARE(     dminus.quarks(), 0x041);
   COMPARE(     bnulls.quarks(), 0x053);
   COMPARE(     bPcbar.quarks(), 0x054);
@@ -317,8 +360,8 @@ TEST(multiplet) {
   COMPARE(     antimu.multiplet(),  0x0);
   COMPARE(     photon.multiplet(),  0x0);
   COMPARE(       pion.multiplet(),  0x1);
-  COMPARE(       kaon.multiplet(),  0x1);
-  COMPARE(     kminus.multiplet(),  0x1);
+  COMPARE(         K0.multiplet(),  0x1);
+  COMPARE(     Kminus.multiplet(),  0x1);
   COMPARE(     dminus.multiplet(),  0x1);
   COMPARE(     bnulls.multiplet(),  0x1);
   COMPARE(     bPcbar.multiplet(),  0x1);
@@ -338,9 +381,6 @@ TEST(multiplet) {
   COMPARE(   omega_bc.multiplet(),  0x10002);
 }
 TEST(iso_multiplet) {
-  PdgCode pinull(0x111);
-  PdgCode rhominus(-0x213);
-  PdgCode omega(0x223);
   COMPARE(   electron.iso_multiplet(),  0x0000);
   COMPARE(     antimu.iso_multiplet(),  0x0000);
   COMPARE(     photon.iso_multiplet(),  0x0000);
@@ -348,8 +388,8 @@ TEST(iso_multiplet) {
   COMPARE(     pinull.iso_multiplet(),  0x0111);
   COMPARE(   rhominus.iso_multiplet(),  0x0113);
   COMPARE(      omega.iso_multiplet(),  0x0223);
-  COMPARE(       kaon.iso_multiplet(),  0x0311);
-  COMPARE(     kminus.iso_multiplet(), -0x0311);
+  COMPARE(         K0.iso_multiplet(),  0x0311);
+  COMPARE(     Kminus.iso_multiplet(), -0x0311);
   COMPARE(     dminus.iso_multiplet(), -0x0411);
   COMPARE(     bnulls.iso_multiplet(),  0x0531);
   COMPARE(     bPcbar.iso_multiplet(), -0x0541);
@@ -372,69 +412,56 @@ TEST(same_iso_multiplet) {
   VERIFY(proton.iso_multiplet() != pion.iso_multiplet());
   // baryon octett:
   // - non-strange
-  PdgCode neutron(0x2112);
-  PdgCode antiproton(-0x2212);
-  PdgCode delta(0x2224);
   VERIFY(proton.iso_multiplet() == neutron.iso_multiplet());
   VERIFY(proton.iso_multiplet() != delta.iso_multiplet());
   VERIFY(proton.iso_multiplet() != antiproton.iso_multiplet());
   VERIFY(proton.iso_multiplet() != lambda.iso_multiplet());
   VERIFY(proton.iso_multiplet() != sigma.iso_multiplet());
   // - strange:
-  PdgCode sigmanull(0x3212);
   VERIFY(sigma.iso_multiplet() != lambda.iso_multiplet());
   VERIFY(sigma.iso_multiplet() == sigmanull.iso_multiplet());
   // different excitations:
-  PdgCode nstar(0x202112);  // N*(1440)^+
   VERIFY(proton.iso_multiplet() != nstar.iso_multiplet());
   // 0-- meson nonett:
   // - non-strange
-  PdgCode pinull(0x111);
   VERIFY(pion.iso_multiplet() == pinull.iso_multiplet());
   VERIFY(pion.iso_multiplet() != eta_pr.iso_multiplet());
-  VERIFY(pion.iso_multiplet() != kaon.iso_multiplet());
+  VERIFY(pion.iso_multiplet() != K0.iso_multiplet());
   // - strange:
-  PdgCode kanull(0x321);
-  VERIFY(kaon.iso_multiplet() != kminus.iso_multiplet());
-  VERIFY(kaon.iso_multiplet() == kanull.iso_multiplet());
+  VERIFY(K0.iso_multiplet() != Kminus.iso_multiplet());
+  VERIFY(K0.iso_multiplet() == Kplus.iso_multiplet());
   // - heavy quarks:
-  PdgCode omega(0x333);
-  VERIFY(j_psi.iso_multiplet() != omega.iso_multiplet());
+  VERIFY(j_psi.iso_multiplet() != phi.iso_multiplet());
 }
 TEST(same_multiplet) {
   VERIFY(proton.multiplet() != pion.multiplet());
   // baryon octett:
-  PdgCode neutron(0x2112);
-  PdgCode antiproton(-0x2212);
-  PdgCode delta(0x2224);
   VERIFY(proton.multiplet() == neutron.multiplet());
   VERIFY(proton.multiplet() != delta.multiplet());
   VERIFY(proton.multiplet() != antiproton.multiplet());
   VERIFY(proton.multiplet() == lambda.multiplet());
   VERIFY(proton.multiplet() == sigma.multiplet());
-  PdgCode sigmanull(0x3212);
   VERIFY(sigma.multiplet() == sigmanull.multiplet());
-  PdgCode nstar(0x202112);  // N*(1440)^+
   VERIFY(proton.multiplet() != nstar.multiplet());
   // 0-- meson nonett:
-  PdgCode pinull(0x111);
   VERIFY(pion.multiplet() == pinull.multiplet());
   VERIFY(pion.multiplet() == eta_pr.multiplet());
-  VERIFY(pion.multiplet() == kaon.multiplet());
-  PdgCode kanull(0x321);
-  VERIFY(kaon.multiplet() == kminus.multiplet());
-  VERIFY(kaon.multiplet() == kanull.multiplet());
+  VERIFY(pion.multiplet() == K0.multiplet());
+  VERIFY(K0.multiplet() == Kminus.multiplet());
+  VERIFY(K0.multiplet() == Kplus.multiplet());
   // - heavy quarks:
-  PdgCode omega(0x333);
-  VERIFY(j_psi.multiplet() == omega.multiplet());
+
+  VERIFY(j_psi.multiplet() == phi.multiplet());
 }
 TEST(spin) {
   COMPARE(   electron.spin(), 1u);
   COMPARE(     antimu.spin(), 1u);
   COMPARE(     photon.spin(), 2u);
   COMPARE(       pion.spin(), 0u);
-  COMPARE(       kaon.spin(), 0u);
-  COMPARE(     kminus.spin(), 0u);
+  COMPARE(         K0.spin(), 0u);
+  COMPARE(        K0L.spin(), 0u);
+  COMPARE(        K0S.spin(), 0u);
+  COMPARE(     Kminus.spin(), 0u);
   COMPARE(     dminus.spin(), 0u);
   COMPARE(     bnulls.spin(), 0u);
   COMPARE(     bPcbar.spin(), 0u);
@@ -454,7 +481,6 @@ TEST(spin) {
   COMPARE(   omega_bc.spin(), 1u);
 }
 TEST(spin_higgs) {
-  PdgCode higgs(0x25);
   UnitTest::EXPECT_FAILURE();
   COMPARE(higgs.spin(), 0u);
 }
@@ -463,8 +489,10 @@ TEST(spin_degeneracy) {
   COMPARE(     antimu.spin_degeneracy(), 2u);
   COMPARE(     photon.spin_degeneracy(), 3u);
   COMPARE(       pion.spin_degeneracy(), 1u);
-  COMPARE(       kaon.spin_degeneracy(), 1u);
-  COMPARE(     kminus.spin_degeneracy(), 1u);
+  COMPARE(         K0.spin_degeneracy(), 1u);
+  COMPARE(        K0L.spin_degeneracy(), 1u);
+  COMPARE(        K0S.spin_degeneracy(), 1u);
+  COMPARE(     Kminus.spin_degeneracy(), 1u);
   COMPARE(     dminus.spin_degeneracy(), 1u);
   COMPARE(     bnulls.spin_degeneracy(), 1u);
   COMPARE(     bPcbar.spin_degeneracy(), 1u);
@@ -484,7 +512,6 @@ TEST(spin_degeneracy) {
   COMPARE(   omega_bc.spin_degeneracy(), 2u);
 }
 TEST(spin_degeneracy_higgs) {
-  PdgCode higgs(0x25);
   UnitTest::EXPECT_FAILURE();
   COMPARE(higgs.spin_degeneracy(), 1u);
 }
@@ -495,9 +522,28 @@ TEST_CATCH(set_invalid_code, PdgCode::InvalidPdgCode) {
 TEST_CATCH(set_invalid_code_hex, PdgCode::InvalidPdgCode) {
   PdgCode invalidparticle(0xfedcba98);
 }
+TEST_CATCH(set_invalid_code_quark, PdgCode::InvalidPdgCode) {
+  PdgCode invalidparticle(0x711);
+}
+TEST_CATCH(set_invalid_code_nJ0_meson, PdgCode::InvalidPdgCode) {
+  PdgCode invalidparticle(0x110);
+}
+TEST_CATCH(set_invalid_code_nJ0_baryon, PdgCode::InvalidPdgCode) {
+  PdgCode invalidparticle(0x2210);
+}
+TEST_CATCH(set_invalid_code_nJ_meson, PdgCode::InvalidPdgCode) {
+  PdgCode invalidparticle(0x112);
+}
+TEST_CATCH(set_invalid_code_nJ_baryon, PdgCode::InvalidPdgCode) {
+  PdgCode invalidparticle(0x2211);
+}
+TEST_CATCH(set_invalid_code_antimeson, PdgCode::InvalidPdgCode) {
+  PdgCode invalidparticle(-0x331);
+}
+
 TEST(initialize_from_string) {
-  PdgCode particle1("+1234567");
-  COMPARE(particle1.dump(), 0x1234567u);
+  PdgCode particle1("+1234568");
+  COMPARE(particle1.dump(), 0x1234568u);
   PdgCode particle2("-211");
   COMPARE(particle2.dump(), 0x80000211u);
   PdgCode particle3("1234");
@@ -539,22 +585,41 @@ TEST_CATCH(invalid_digits_question, PdgCode::InvalidPdgCode) {
 TEST_CATCH(invalid_characters, PdgCode::InvalidPdgCode) {
   PdgCode particle("abcdef");
 }
+TEST_CATCH(invalid_digits_quark, PdgCode::InvalidPdgCode) {
+  PdgCode particle("771");
+}
+TEST_CATCH(invalid_digits_nJ0_meson, PdgCode::InvalidPdgCode) {
+  PdgCode particle("110");
+}
+TEST_CATCH(invalid_digits_nJ0_baryon, PdgCode::InvalidPdgCode) {
+  PdgCode particle("2210");
+}
+TEST_CATCH(invalid_digits_nJ_meson, PdgCode::InvalidPdgCode) {
+  PdgCode particle("112");
+}
+TEST_CATCH(invalid_digits_nJ_baryon, PdgCode::InvalidPdgCode) {
+  PdgCode particle("2211");
+}
+TEST_CATCH(invalid_digits_antimeson, PdgCode::InvalidPdgCode) {
+  PdgCode particle("-331");
+}
+
 TEST(stream) {
   PdgCode particle1;
-  std::istringstream sourcestream("-1234567 +1234567 1234567 +123 -214");
+  std::istringstream sourcestream("-1234568 +1234568 1234568 +123 -213");
   sourcestream >> particle1;
-  COMPARE(particle1.code(), -0x1234567);
-  COMPARE(particle1.dump(), 0x81234567u);
+  COMPARE(particle1.code(), -0x1234568);
+  COMPARE(particle1.dump(), 0x81234568u);
   sourcestream >> particle1;
-  COMPARE(particle1.code(), 0x1234567);
-  COMPARE(particle1.dump(), 0x1234567u);
+  COMPARE(particle1.code(), 0x1234568);
+  COMPARE(particle1.dump(), 0x1234568u);
   sourcestream >> particle1;
-  COMPARE(particle1.code(), 0x1234567);
-  COMPARE(particle1.dump(), 0x1234567u);
+  COMPARE(particle1.code(), 0x1234568);
+  COMPARE(particle1.dump(), 0x1234568u);
   sourcestream >> particle1;
   COMPARE(particle1.dump(), 0x123u);
   sourcestream >> particle1;
-  COMPARE(particle1.dump(), 0x80000214u);
+  COMPARE(particle1.dump(), 0x80000213u);
 }
 TEST(stream_fail) {
   PdgCode particle1;
@@ -574,6 +639,5 @@ TEST(equal) {
   VERIFY(pion2 < omega_bc);
 }
 TEST(antiparticle) {
-  PdgCode antipion(-0x211);
-  VERIFY(pion.is_antiparticle_of(antipion));
+  VERIFY(pion.is_antiparticle_of(piminus));
 }

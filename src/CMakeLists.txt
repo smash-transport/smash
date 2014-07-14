@@ -6,6 +6,18 @@ find_package(GSL REQUIRED)
 find_package(Boost 1.49.0 REQUIRED COMPONENTS filesystem system)
 pkg_check_modules(YAML REQUIRED yaml-cpp>=0.5.1)
 
+option(USE_ROOT "Turn this on to build ROOT output support into SMASH." OFF)
+if(USE_ROOT)
+   find_package(ROOT 5.34 REQUIRED)
+   include_directories(SYSTEM
+      "${ROOT_INCLUDE_DIR}"
+      )
+   set(SMASH_LIBRARIES
+      ${ROOT_LIBRARIES}
+      )
+   add_definitions(-DSMASH_USE_ROOT)
+endif()
+
 # set up include paths
 include_directories(
     "${CMAKE_CURRENT_BINARY_DIR}"
@@ -17,7 +29,7 @@ include_directories(SYSTEM
     )
 
 # set default libraries for linking
-set(SMASH_LIBRARIES
+set(SMASH_LIBRARIES ${SMASH_LIBRARIES}
    ${GSL_LIBRARY}
    ${GSL_CBLAS_LIBRARY}
    ${Boost_LIBRARIES}
@@ -28,6 +40,7 @@ set(SMASH_LIBRARIES
 set(smash_src
         action.cc
         boxmodus.cc
+        binaryoutput.cc
         collidermodus.cc
         configuration.cc
         cross-sections.cc
@@ -40,12 +53,12 @@ set(smash_src
         modusdefault.cc
         nucleus.cc
         nucleusmodus.cc
-        oscaroutput.cc
+        oscarfullhistoryoutput.cc
+        oscarparticlelistoutput.cc
         outputroutines.cc
         parametrizations.cc
         particledata.cc
         particles.cc
-        particlesoutput.cc
         particletype.cc
         pdgcode.cc
         processbranch.cc
@@ -55,7 +68,14 @@ set(smash_src
         scatteractionsfinder.cc
 	spheremodus.cc
         vtkoutput.cc
+        width.cc
         )
+
+if(USE_ROOT)
+   set(smash_src ${smash_src}
+      rootoutput.cc
+      )
+endif()
 
 add_executable(smash smash.cc ${smash_src})
 

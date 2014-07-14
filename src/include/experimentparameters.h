@@ -30,6 +30,7 @@ struct ExperimentParameters {
   bool need_intermediate_output() const {
     return labclock.multiple_is_in_next_tick(output_interval);
   }
+  /// replaces the current clock with a new one.
   void reset_clock(const Clock initial_clock) {
     labclock = std::move(initial_clock);
   }

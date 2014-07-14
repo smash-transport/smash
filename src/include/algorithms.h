@@ -10,6 +10,8 @@
 #ifndef SRC_INCLUDE_ALGORITHMS_H_
 #define SRC_INCLUDE_ALGORITHMS_H_
 
+#include<cmath>
+
 /**
  * \file
  *

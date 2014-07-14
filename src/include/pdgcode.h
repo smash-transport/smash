@@ -138,7 +138,10 @@ class PdgCode {
    * test function and export functions                                       *
    *                                                                          *
    ****************************************************************************/
-  /** Checks the integer for hex digits that are > 9.
+  /** Checks the integer for invalid hex digits.
+   *
+   * Usually all digits are at least <= 9. The n_q digits are even <= 6
+   * (because there are only six quarks).
    *
    * If one of the hex digits is not also a valid decimal digit,
    * something went wrong - maybe some user of this class forgot to
@@ -154,11 +157,36 @@ class PdgCode {
     if (digits_.n_    > 9) { fail |= 1<<6; }
     if (digits_.n_R_  > 9) { fail |= 1<<5; }
     if (digits_.n_L_  > 9) { fail |= 1<<4; }
-    if (digits_.n_q1_ > 9) { fail |= 1<<3; }
-    if (digits_.n_q2_ > 9) { fail |= 1<<2; }
-    if (digits_.n_q3_ > 9) { fail |= 1<<1; }
+    if (digits_.n_q1_ > 6) { fail |= 1<<3; }
+    if (digits_.n_q2_ > 6) { fail |= 1<<2; }
+    if (digits_.n_q3_ > 6) { fail |= 1<<1; }
     if (digits_.n_J_  > 9) { fail |= 1; }
     return fail;
+  }
+
+  /// Do all sorts of validity checks.
+  void check() const {
+    // n_J must be odd for mesons and even for baryons (and cannot be zero)
+    if (is_hadron()) {
+      if (baryon_number()==0) {
+        // mesons: special cases K0_L=0x130 and K0_S=0x310
+        if ((digits_.n_J_ % 2 == 0) && dump() != 0x130 && dump() != 0x310) {
+          throw InvalidPdgCode("Invalid PDG code " + string() + " (meson with even n_J)");
+        }
+      } else {
+        if ((digits_.n_J_ % 2 != 0) || digits_.n_J_ == 0) {
+          throw InvalidPdgCode("Invalid PDG code " + string() + " (baryon with odd n_J)");
+        }
+      }
+    } else {
+      if (digits_.n_J_ == 0 && dump() != 0x0) {
+        throw InvalidPdgCode("Invalid PDG code " + string() + " (n_J==0)");
+      }
+    }
+    // antiparticle flag only makes sense for particle types that have an antiparticle
+    if (digits_.antiparticle_ && !has_antiparticle()) {
+      throw InvalidPdgCode("Invalid PDG code " + string() + " (cannot be negative)");
+    }
   }
 
   /** Dumps the bitfield into an unsigned integer. */
@@ -183,6 +211,12 @@ class PdgCode {
     return std::string(hexstring);
   }
 
+  /// Construct the antiparticle to a given PDG code.
+  PdgCode get_antiparticle() const {
+    // TODO: more efficient implementation
+    return PdgCode(-code());
+  }
+
   /****************************************************************************
    *                                                                          *
    * accessors of various properties                                          *
@@ -198,6 +232,11 @@ class PdgCode {
       return  0;
     }
     return antiparticle_sign();
+  }
+  /** Determine whether a particle has a distinct antiparticle
+    * (or whether it is its own antiparticle). */
+  bool has_antiparticle() const {
+    return (baryon_number() != 0) || (digits_.n_q2_ != digits_.n_q3_);
   }
   /** returns twice the isospin-3 component \f$I_3\f$.
    *
@@ -248,19 +287,18 @@ class PdgCode {
       // want to distinguish this from q which might be interpreted as
       // shorthand for "quark".)
       int Q = 0;
-      // this loops over d,u,s,c,b,t,b',t' quarks (the latter three can
-      // be safely ignored, but I don't think this will be a bottle
-      // neck.
-      for (int i = 1; i < 9; i++) {
-        // u,c,t,t' quarks have charge = 2/3 e, while d,s,b,b' quarks
-        // have -1/3 e. The antiparticle sign s already in net_quark_number.
+      /* This loops over d,u,s,c,b,t quarks (the latter can be safely ignored,
+       * but I don't think this will be a bottle neck. */
+      for (int i = 1; i < 7; i++) {
+        /* u,c,t quarks have charge = 2/3 e, while d,s,b quarks have -1/3 e.
+         * The antiparticle sign is already in net_quark_number. */
         Q += (i % 2 == 0 ? 2 : -1) * net_quark_number(i);
       }
       return Q / 3;
     }
-    // non-hadron:
-    // Leptons: 11, 13, 15, 17 are e, μ, τ, τ' and have a charge -1,
-    // while    12, 14, 16, 18 are the neutrinos that have no charge.
+    /* non-hadron:
+     * Leptons: 11, 13, 15 are e, μ, τ and have a charge -1, while
+     *          12, 14, 16 are the neutrinos that have no charge. */
     if (digits_.n_q3_ == 1) {
       return -1 * (digits_.n_J_ % 2) * antiparticle_sign();
     }
@@ -281,7 +319,11 @@ class PdgCode {
    */
   inline unsigned int spin() const {
     if (is_hadron()) {
-      return digits_.n_J_ - 1;
+      if (digits_.n_J_ == 0) {
+        return 0;  // special cases: K0_L=0x130 & K0_S=0x310
+      } else {
+        return digits_.n_J_ - 1;
+      }
     }
     // this assumes that we only have white particles (no single
     // quarks): Electroweak fermions have 11-17, so the
@@ -291,7 +333,7 @@ class PdgCode {
   }
   /** Returns the spin degeneracy \f$2s + 1\f$ of a particle **/
   inline unsigned int spin_degeneracy() const {
-    if (is_hadron()) {
+    if (is_hadron() && digits_.n_J_ > 0) {
       return digits_.n_J_;
     }
     return spin() + 1;
@@ -414,6 +456,18 @@ class PdgCode {
    */
   static PdgCode invalid() { return PdgCode(0x0); }
 
+  /** returns an integer with decimal representation of the code.
+   *
+   * This is necessary for ROOT output.
+   *
+   */
+  int get_decimal() const {
+    return antiparticle_sign() * ( digits_.n_J_ + digits_.n_q3_ * 10
+                                 + digits_.n_q2_ * 100 + digits_.n_q1_ * 1000
+                                 + digits_.n_L_ * 10000 + digits_.n_R_ * 100000
+                                 + digits_.n_ * 1000000);
+  }
+
  private:
 // amend this line with something that identifies your compiler if its
 // bit field order is like in the gnu c compiler for 64 bit
@@ -487,7 +541,7 @@ class PdgCode {
 
   /** returns the net number of quarks with given flavour number
    *
-   * \param quark PDG Code of quark: (1..8) = (d,u,s,c,b,t,b',t')
+   * \param quark PDG Code of quark: (1..6) = (d,u,s,c,b,t)
    * \return for the net number of quarks (\#quarks - \#antiquarks)
    *
    * For public use, see strangeness(), charmness(), bottomness() and
@@ -558,14 +612,23 @@ class PdgCode {
     // 4th from last is n_q1_.
     if (length > 3 + sign) {
       digits_.n_q1_ = get_digit_from_char(codestring[c++]);
+      if (digits_.n_q1_>6) {
+        throw InvalidPdgCode("Invalid PDG code " + codestring + " (n_q1>6)");
+      }
     }
     // 3rd from last is n_q2_.
     if (length > 2 + sign) {
       digits_.n_q2_ = get_digit_from_char(codestring[c++]);
+      if (digits_.n_q2_>6) {
+        throw InvalidPdgCode("Invalid PDG code " + codestring + " (n_q2>6)");
+      }
     }
     // next to last is n_q3_.
     if (length > 1 + sign) {
       digits_.n_q3_ = get_digit_from_char(codestring[c++]);
+      if (digits_.n_q3_>6) {
+        throw InvalidPdgCode("Invalid PDG code " + codestring + " (n_q3>6)");
+      }
     }
     // last digit is the spin degeneracy.
     if (length > sign) {
@@ -574,6 +637,7 @@ class PdgCode {
       throw InvalidPdgCode("String \"" + codestring +
                  "\" only consists of a sign, that is no valid PDG Code\n");
     }
+    check();
   }
 
   /** Sets the bitfield from an unsigned integer. Usually called from
@@ -588,8 +652,9 @@ class PdgCode {
     int test = test_code();
     if (test > 0) {
       throw InvalidPdgCode("Invalid digits " + std::to_string(test) +
-                           " in PDG Code " + std::to_string(code()));
+                           " in PDG Code " + string());
     }
+    check();
   }
 
 };

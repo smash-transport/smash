@@ -10,7 +10,11 @@
 #ifndef SRC_INCLUDE_QUANTUMNUMBERS_H_
 #define SRC_INCLUDE_QUANTUMNUMBERS_H_
 
+#include<iostream>
+#include<sstream>
+
 #include "fourvector.h"
+#include "numerics.h"
 #include "particles.h"
 #include "pdgcode.h"
 
@@ -239,50 +243,54 @@ class QuantumNumbers {
     if (rhs == *this) {
       return "";
     }
-    std::string error_msg("Conservation law violations detected "
-                          " (old vs. new)\n");
+    std::stringstream error_msg;
+    error_msg << "Conservation law violations detected (old vs. new)\n";
     if (momentum_ != rhs.momentum_) {
-      error_msg += "Deviation in Four-Momentum:\n";
-      error_msg += " P_0: " + std::to_string(momentum_.x0()) + " vs. "
-                            + std::to_string(rhs.momentum_.x0()) + "\n";
-      error_msg += " P_1: " + std::to_string(momentum_.x1()) + " vs. "
-                            + std::to_string(rhs.momentum_.x1()) + "\n";
-      error_msg += " P_2: " + std::to_string(momentum_.x2()) + " vs. "
-                            + std::to_string(rhs.momentum_.x2()) + "\n";
-      error_msg += " P_3: " + std::to_string(momentum_.x3()) + " vs. "
-                            + std::to_string(rhs.momentum_.x3()) + "\n";
+      error_msg << "Deviation in Four-Momentum:\n" << std::scientific;
     }
+    // programmer's note: here, I'd like to simultaneously loop over an
+    // integer (for the output; so that we know which component is
+    // faulty) and both the current and rhs's momentum four-vector. If
+    // there is a better way to do this, feel free to implement.
+    //
+    // I chose mu < 4 as the breaking condition out of the vague feeling
+    // that comparing integers may be faster than accessing the
+    // iterators.
+    int mu = 0;
+    for (auto here_iter = momentum_.cbegin(),
+              rhs_iter = rhs.momentum_.cbegin();
+         mu < 4;
+         ++here_iter, ++rhs_iter, ++mu) {
+      if (! almost_equal(*here_iter, *rhs_iter)) {
+        error_msg << " P_" << mu << ": " << *here_iter << " vs. " << *rhs_iter
+                  << "; Δ = " << (*here_iter - *rhs_iter) << "\n";
+      }
+     }
     if (charge_ != rhs.charge_) {
-      error_msg += "Deviation in Charge:\n "
-                                + std::to_string(charge_)
-                      + " vs. " + std::to_string(rhs.charge_) + "\n";
+      error_msg << "Deviation in Charge:\n " << charge_ << " vs. "
+                << rhs.charge_ << "\n";
     }
     if (isospin3_ != rhs.isospin3_) {
-      error_msg += "Deviation in Isospin 3:\n "
-                                + std::to_string(isospin3_)
-                      + " vs. " + std::to_string(rhs.isospin3_) + "\n";
+      error_msg << "Deviation in Isospin 3:\n " << isospin3_ << " vs ."
+                << rhs.isospin3_ << "\n";
     }
     if (strangeness_ != rhs.strangeness_) {
-      error_msg += "Deviation in Strangeness:\n "
-                             + std::to_string(strangeness_)
-                   + " vs. " + std::to_string(rhs.strangeness_) + "\n";
+      error_msg << "Deviation in Strangeness:\n " << strangeness_ << " vs. "
+                << rhs.strangeness_ << "\n";
     }
     if (charmness_ != rhs.charmness_) {
-      error_msg += "Deviation in Charmness:\n "
-                             + std::to_string(charmness_)
-                   + " vs. " + std::to_string(rhs.charmness_) + "\n";
+      error_msg << "Deviation in Charmness:\n " << charmness_ << " vs. "
+                << rhs.charmness_ << "\n";
     }
     if (bottomness_ != rhs.bottomness_) {
-      error_msg += "Deviation in Bottomness:\n "
-                             + std::to_string(bottomness_)
-                   + " vs. " + std::to_string(rhs.bottomness_) + "\n";
+      error_msg << "Deviation in Bottomness:\n " << bottomness_ << " vs. "
+                << rhs.bottomness_ << "\n";
     }
     if (baryon_number_ != rhs.baryon_number_) {
-      error_msg += "Deviation in Baryon Number:\n "
-                             + std::to_string(baryon_number_)
-                   + " vs. " + std::to_string(rhs.baryon_number_) + "\n";
+      error_msg << "Deviation in Baryon Number:\n " << baryon_number_ << " vs. "
+                << rhs.baryon_number_ << "\n";
     }
-    return error_msg;
+    return error_msg.str();
   }
 
  private:

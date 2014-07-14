@@ -22,6 +22,14 @@ ColliderModus::ColliderModus(Configuration modus_config,
     : sqrts_     (modus_config.take({"Collider", "SQRTS"})) {
   projectile_ = modus_config.take({"Collider", "PROJECTILE"});
   target_     = modus_config.take({"Collider", "TARGET"});
+  if (sqrts_ < ParticleType::find(projectile_).mass()
+             + ParticleType::find(target_).mass()) {
+    throw ModusDefault::InvalidEnergy(
+          "Error in input: sqrt(s) is smaller than masses:\n"
+          + std::to_string(sqrts_) + " GeV < "
+          + std::to_string(ParticleType::find(projectile_).mass()) + " GeV + "
+          + std::to_string(ParticleType::find(projectile_).mass()) + " GeV.");
+  }
 }
 
 /* print_startup - console output on startup of box specific parameters */
