@@ -203,11 +203,14 @@ void DecayAction::perform(Particles *particles, size_t &id_process) {
    */
   outgoing_particles_ = choose_channel();
 
-  if (outgoing_particles_.size() == 2) {
+  switch (outgoing_particles_.size()) {
+  case 2:
     one_to_two(particle0);
-  } else if (outgoing_particles_.size() == 3) {
+    break;
+  case 3:
     one_to_three(particle0);
-  } else {
+    break;
+  default:
     throw InvalidDecay(
         "DecayAction::perform: Only 1->2 or 1->3 processes are supported. "
         "Decay from 1->" +

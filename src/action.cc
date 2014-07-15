@@ -88,6 +88,9 @@ ParticleList Action::choose_channel () {
 
 void Action::sample_cms_momenta(const double cms_energy) {
 
+  /* This function only operates on 2-particle final states. */
+  assert(outgoing_particles_.size() == 2);
+
   ParticleData *p1 = &outgoing_particles_[0];
   ParticleData *p2 = &outgoing_particles_[1];
 

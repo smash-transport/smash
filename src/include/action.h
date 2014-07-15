@@ -77,7 +77,7 @@ class Action {
   void check_conservation(const size_t &id_process) const;
 
  protected:
-  /** ID codes of incoming particles  */
+  /** List with data of incoming particles.  */
   ParticleList incoming_particles_;
   /** time at which the action is supposed to be performed  */
   float time_of_execution_;
