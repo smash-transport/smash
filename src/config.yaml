@@ -1,15 +1,15 @@
 General:
     # Modus decision
-    MODUS:         Nucleus
+    MODUS:         Box
 
     # temporal grid spacing
-    DELTA_TIME:    0.01
+    DELTA_TIME:    0.1
 
     # end time of simulation
-    END_TIME:      1.0
+    END_TIME:      1000.0
 
     # how much time before recording measurables
-    OUTPUT_INTERVAL:  1.0
+    OUTPUT_INTERVAL:  100.0
 
     # initial random seed (negative for time)
     RANDOMSEED:    1
@@ -21,7 +21,7 @@ General:
     TESTPARTICLES: 1
 
     # number of events
-    NEVENTS:       1
+    NEVENTS:       500
 
 Modi:
     Box:
