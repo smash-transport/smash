@@ -48,6 +48,8 @@ Modi:
         NUMBEROFPARTICLES: 280
         # Current temperature
         SPHERETEMPERATURE: 0.2
+        # start time of simulation
+        START_TIME: 0.0
 
     Collider:
         # Projectile particle
