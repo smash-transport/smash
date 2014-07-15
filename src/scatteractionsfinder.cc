@@ -46,42 +46,12 @@ double ScatterActionsFinder::collision_time(const ParticleData &p1,
 }
 
 
-double ScatterActionsFinder::particle_distance(ParticleData p1,
-                                               ParticleData p2) {
-  /* Boost particles in center-of-momentum frame. */
-  boost_CM(&p1, &p2);
-  ThreeVector pos_diff = p1.position().threevec() - p2.position().threevec();
-  printd("Particle %d<->%d position difference: %g %g %g %g [fm]\n",
-         p1.id(), p2.id(), pos_diff.x1(), pos_diff.x2(), pos_diff.x3());
-  ThreeVector mom_diff = p1.momentum().threevec() - p2.momentum().threevec();
-  printd("Particle %d<->%d momentum difference: %g %g %g %g [fm]\n",
-         p1.id(), p2.id(), mom_diff.x1(), mom_diff.x2(), mom_diff.x3());
-  /* Zero momentum leads to infite distance. */
-  if (fabs(mom_diff.sqr()) < really_small)
-    return  pos_diff.sqr();
-
-  /* UrQMD squared distance criteria:
-   * arXiv:nucl-th/9803035 (3.27): in center of momemtum frame
-   * position of particle a: x_a
-   * position of particle b: x_b
-   * velocity of particle a: v_a
-   * velocity of particle b: v_b
-   * d^2_{coll} = (x_a - x_b)^2 - ((x_a - x_a) . (v_a - v_b))^2 / (v_a - v_b)^2
-   */
-  return pos_diff.sqr()
-    - (pos_diff*mom_diff)
-      * (pos_diff*mom_diff)
-      / mom_diff.sqr();
-}
-
-
 ActionPtr
 ScatterActionsFinder::check_collision(const int id_a, const int id_b, Particles *particles,
                                       const ExperimentParameters &parameters,
                                       CrossSections *cross_sections) const {
 
   ScatterAction* act = nullptr;
-  ParticleList in_part;
 
   const ParticleData data_a = particles->data(id_a);
   const ParticleData data_b = particles->data(id_b);
@@ -110,9 +80,7 @@ ScatterActionsFinder::check_collision(const int id_a, const int id_b, Particles 
     return nullptr;
   }
 
-  in_part.push_back(data_a);
-  in_part.push_back(data_b);
-  act = new ScatterAction(in_part, time_until_collision);
+  act = new ScatterAction(data_a, data_b, time_until_collision);
 
   /* Resonance production cross section */
   ProcessBranchList resonance_xsections = resonance_cross_section(data_a,
@@ -125,7 +93,7 @@ ScatterActionsFinder::check_collision(const int id_a, const int id_b, Particles 
 
   {
     /* distance criteria according to cross_section */
-    const double distance_squared = particle_distance(data_a, data_b);
+    const double distance_squared = act->particle_distance();
     if (distance_squared >= act->weight() * fm2_mb * M_1_PI) {
         delete act;
         return nullptr;

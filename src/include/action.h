@@ -27,7 +27,12 @@ namespace Smash {
  */
 class Action {
  public:
-  /** Simple constructor. */
+  /**
+   * Construct an action object.
+   *
+   * \param[in] in_part list of incoming particles
+   * \param[in] time_of_execution time at which the action is supposed to take place
+   */
   Action(const ParticleList &in_part, float time_of_execution);
   /** Destructor. */
   virtual ~Action();
@@ -97,6 +102,7 @@ class Action {
   void sample_cms_momenta(const double cms_energy);
 };
 
+
 /**
  * DecayAction is a special action which takes one single particle in the
  * initial state and makes it decay into a number of daughter particles
@@ -104,7 +110,12 @@ class Action {
  */
 class DecayAction : public Action {
  public:
-  /** Simple constructor (without processes). */
+  /**
+   * Construct a DecayAction object.
+   *
+   * \param[in] in_part1 decaying particle
+   * \param[in] time_of_execution time at which the action is supposed to take place
+   */
   DecayAction(const ParticleData &in_part, float time_of_execution);
   /** Construct a DecayAction from a particle p.
    *
@@ -154,14 +165,28 @@ class DecayAction : public Action {
   void one_to_three(const ParticleData &incoming0);
 };
 
+
 /**
  * ScatterAction is a special action which takes two incoming particles
  * and performs a scattering, producing one or more final-state particles.
  */
 class ScatterAction : public Action {
  public:
-  /** Constructor. */
-  ScatterAction(const ParticleList &in_part, float time_of_execution);
+  /**
+   * Construct a ScatterAction object.
+   *
+   * \param[in] in_part1 first scattering partner
+   * \param[in] in_part2 second scattering partner
+   * \param[in] time_of_execution time at which the action is supposed to take place
+   */
+  ScatterAction(const ParticleData &in_part1, const ParticleData &in_part2,
+                float time_of_execution);
+
+  /**
+   * Measure distance between incoming particles in center-of-momentum frame.
+   * Returns the squared distance.
+   */
+  double particle_distance() const;
 
   /**
    * Carry out the action, i.e. do the scattering.
@@ -180,6 +205,11 @@ class ScatterAction : public Action {
   };
 
  private:
+  /// determine the velocity of the center-of-mass frame in the lab
+  ThreeVector beta_cm() const;
+  /// determine the total energy in the center-of-mass frame
+  double sqrt_s() const;
+
   /** Check if the scattering is elastic. */
   bool is_elastic() const;
 
@@ -189,15 +219,9 @@ class ScatterAction : public Action {
   /**
    * Resonance formation process.
    *
-   * Creates one or two new particles, of which
-   * one is a resonance.
-   *
-   * \param[in,out] particles Particles in the simulation.
-   * \param[in] particle0 ID of the first initial state particle.
-   * \param[in] particle1 ID of the second initial state particle.
+   * Creates one or two new particles, one of which is a resonance.
    */
-  void resonance_formation(const ParticleData &particle0,
-                           const ParticleData &particle1);
+  void resonance_formation();
 };
 
 
