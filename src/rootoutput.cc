@@ -9,6 +9,7 @@
 
 #include "include/clock.h"
 #include "include/forwarddeclarations.h"
+#include "include/inputfunctions.h"
 #include "include/particles.h"
 #include "include/rootoutput.h"
 #include "TFile.h"
@@ -20,28 +21,51 @@ namespace Smash {
  * RootOuput constructor. Creates file smash_run.root in run directory
  * and TTree with the name "particles" in it.
  */
-RootOutput::RootOutput(bf::path path, Options /*op*/)
+RootOutput::RootOutput(bf::path path, Options op)
     : base_path_(std::move(path)),
       root_out_file_(
           new TFile((base_path_ / "smash_run.root").native().c_str(), "NEW")),
       output_counter_(0) {
-  tree_ = new TTree("particles", "particles");
+  write_collisions_ = str_to_bool(op["write_collisions"]);
 
-  tree_->Branch("npart", &npart, "npart/I");
-  tree_->Branch("ev", &ev, "ev/I");
-  tree_->Branch("tcounter", &tcounter, "tcounter/I");
+  particles_tree_ = new TTree("particles", "particles");
 
-  tree_->Branch("pdgcode", &pdgcode[0], "pdgcode[npart]/I");
+  particles_tree_->Branch("npart", &npart, "npart/I");
+  particles_tree_->Branch("ev", &ev, "ev/I");
+  particles_tree_->Branch("tcounter", &tcounter, "tcounter/I");
 
-  tree_->Branch("p0", &p0[0], "p0[npart]/D");
-  tree_->Branch("px", &px[0], "px[npart]/D");
-  tree_->Branch("py", &py[0], "py[npart]/D");
-  tree_->Branch("pz", &pz[0], "pz[npart]/D");
+  particles_tree_->Branch("pdgcode", &pdgcode[0], "pdgcode[npart]/I");
 
-  tree_->Branch("t", &t[0], "t[npart]/D");
-  tree_->Branch("x", &x[0], "x[npart]/D");
-  tree_->Branch("y", &y[0], "y[npart]/D");
-  tree_->Branch("z", &z[0], "z[npart]/D");
+  particles_tree_->Branch("p0", &p0[0], "p0[npart]/D");
+  particles_tree_->Branch("px", &px[0], "px[npart]/D");
+  particles_tree_->Branch("py", &py[0], "py[npart]/D");
+  particles_tree_->Branch("pz", &pz[0], "pz[npart]/D");
+
+  particles_tree_->Branch("t", &t[0], "t[npart]/D");
+  particles_tree_->Branch("x", &x[0], "x[npart]/D");
+  particles_tree_->Branch("y", &y[0], "y[npart]/D");
+  particles_tree_->Branch("z", &z[0], "z[npart]/D");
+
+  if (write_collisions_) {
+    collisions_tree_ = new TTree("collisions", "collisions");
+
+    collisions_tree_->Branch("nin", &nin, "nin/I");
+    collisions_tree_->Branch("nout", &nout, "nout/I");
+    collisions_tree_->Branch("npart", &npart, "npart/I");
+    collisions_tree_->Branch("ev", &ev, "ev/I");
+
+    collisions_tree_->Branch("pdgcode", &pdgcode[0], "pdgcode[npart]/I");
+
+    collisions_tree_->Branch("p0", &p0[0], "p0[npart]/D");
+    collisions_tree_->Branch("px", &px[0], "px[npart]/D");
+    collisions_tree_->Branch("py", &py[0], "py[npart]/D");
+    collisions_tree_->Branch("pz", &pz[0], "pz[npart]/D");
+
+    collisions_tree_->Branch("t", &t[0], "t[npart]/D");
+    collisions_tree_->Branch("x", &x[0], "x[npart]/D");
+    collisions_tree_->Branch("y", &y[0], "y[npart]/D");
+    collisions_tree_->Branch("z", &z[0], "z[npart]/D");
+  }
 }
 
 /**
@@ -69,6 +93,8 @@ void RootOutput::at_eventstart(const Particles &particles,
 void RootOutput::after_Nth_timestep(const Particles &particles,
                                     const int event_number,
                                     const Clock &/*clock*/) {
+  // This is needed by collision output
+  current_event_ = event_number;
   particles_to_tree(particles, event_number);
   output_counter_++;
 }
@@ -81,19 +107,17 @@ void RootOutput::at_eventend(const Particles &/*particles*/,
   // Forced dump from operational memory to disk every 10 events
   // If program crashes written data will NOT be lost
   if (event_number%10 == 1) {
-    tree_->AutoSave("SaveSelf");
+    particles_tree_->AutoSave("SaveSelf");
+    collisions_tree_->AutoSave("SaveSelf");
   }
 }
 
 /**
  * Writes interactions to ROOT-file
  */
-void RootOutput::write_interaction(const ParticleList &/*incoming_particles*/,
-                                   const ParticleList &/*outgoing_particles*/) {
-//  for (const auto &p : incoming_particles) {
-//  }
-//  for (const auto &p : outgoing_particles) {
-//  }
+void RootOutput::write_interaction(const ParticleList &incoming,
+                                   const ParticleList &outgoing) {
+  collisions_to_tree(incoming, outgoing);
 }
 
 /**
@@ -111,7 +135,7 @@ void RootOutput::particles_to_tree(const Particles &particles,
     if (i >= max_buffer_size_) {
       npart = max_buffer_size_;
       i = 0;
-      tree_->Fill();
+      particles_tree_->Fill();
     } else {
       t[i] = p.position().x0();
       x[i] = p.position().x1();
@@ -131,7 +155,56 @@ void RootOutput::particles_to_tree(const Particles &particles,
   // Flush rest to tree
   if (i > 0) {
     npart = i;
-    tree_->Fill();
+    particles_tree_->Fill();
   }
+}
+
+void RootOutput::collisions_to_tree(const ParticleList &incoming,
+                                    const ParticleList &outgoing) {
+  ev = current_event_;
+  nin = incoming.size();
+  nout = outgoing.size();
+  npart = nin + nout;
+
+  int i = 0;
+
+  // It is assumed that nin + nout < max_buffer_size_
+  // This is true for any possible reaction for current buffer size: 10000
+  // But if one wants initial/final particles written to collisions
+  // then implementation should be updated.
+
+  for (const auto &p : incoming) {
+    t[i] = p.position().x0();
+    x[i] = p.position().x1();
+    y[i] = p.position().x2();
+    z[i] = p.position().x3();
+
+    p0[i] = p.momentum().x0();
+    px[i] = p.momentum().x1();
+    py[i] = p.momentum().x2();
+    pz[i] = p.momentum().x3();
+
+    pdgcode[i] = p.pdgcode().get_decimal();
+
+    i++;
+  }
+
+  for (const auto &p : incoming) {
+    t[i] = p.position().x0();
+    x[i] = p.position().x1();
+    y[i] = p.position().x2();
+    z[i] = p.position().x3();
+
+    p0[i] = p.momentum().x0();
+    px[i] = p.momentum().x1();
+    py[i] = p.momentum().x2();
+    pz[i] = p.momentum().x3();
+
+    pdgcode[i] = p.pdgcode().get_decimal();
+
+    i++;
+  }
+
+  collisions_tree_->Fill();
 }
 }  // namespace Smash

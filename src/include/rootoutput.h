@@ -71,6 +71,16 @@ class Particles;
   * }
   * \endcode
   * For examples of extracting info from .root file see root.cern.ch
+  * To view ROOT file use TBrowser:
+  * \code
+  * root -l
+  * new TBrowser
+  * \endcode
+  * If option write_collisions is set True, then in addition to particles 
+  * TTree a collision TTree is created. Information about each collision is
+  * written as one leaf: nin, nout - number of incoming and outgoing particles,
+  * ev - event number, (t,x,y,z), (p0,px,py,pz) - arrays of dimension nin+nout
+  * that contain coordinates and momenta.
   **/
 class RootOutput : public OutputInterface {
  public:
@@ -92,17 +102,24 @@ class RootOutput : public OutputInterface {
   std::unique_ptr<TFile> root_out_file_;
   // TFile takes ownership of all TTrees.
   // That's why TTree is not a unique pointer.
-  TTree* tree_;
+  TTree* particles_tree_;
+  TTree* collisions_tree_;
   void particles_to_tree(const Particles &particles,
                          const int event_number);
+  void collisions_to_tree(const ParticleList &incoming,
+                          const ParticleList &outgoing);
   // Counts number of output in a given event
   int output_counter_;
+  int current_event_;
 
   static const int max_buffer_size_ = 10000;
   // Variables that serve as buffer for filling TTree
   std::array<double, max_buffer_size_> p0, px, py, pz, t, x, y, z;
   std::array<int, max_buffer_size_>    pdgcode;
-  int npart, tcounter, ev;
+  int npart, tcounter, ev, nin, nout;
+
+  // Option to write collisions
+  bool write_collisions_;
 };
 }  // namespace Smash
 

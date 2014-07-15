@@ -17,10 +17,11 @@ General:
             Enable:             True
             only_final:         True
         VTK:
-            Enable:             True
+            Enable:             False
             max_output_files:   1000
         ROOT:
             Enable:             True
+            write_collisions:   True
         Binary:
             Enable:             True
 
