@@ -11,8 +11,8 @@
 #include <cmath>
 #include <list>
 
-#include "include/forwarddeclarations.h"
-#include "include/modusdefault.h"
+#include "forwarddeclarations.h"
+#include "modusdefault.h"
 
 namespace Smash {
 
