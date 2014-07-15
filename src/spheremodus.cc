@@ -23,11 +23,10 @@
 #include "include/experimentparameters.h"
 #include "include/fourvector.h"
 #include "include/macros.h"
-#include "include/particledata.h"
 #include "include/particles.h"
 #include "include/random.h"
 #include "include/spheremodus.h"
-
+#include "include/threevector.h"
 
 namespace Smash {
 
@@ -76,14 +75,13 @@ auto uniform_radius = Random::make_uniform_distribution(0.0,
                                         static_cast<double>(this->radius_));
     /* loop over particle data to fill in momentum and position information */
   for (ParticleData &data : particles->data()) {
-    double x, y, z, time_begin;
     Angles phitheta;
     /* thermal momentum according Maxwell-Boltzmann distribution */
       double momentum_radial;
       momentum_radial = sample_momenta(this->sphere_temperature_,
                                                  data.mass());
       phitheta.distribute_isotropically();
-       data.set_momentum(data.mass(), phitheta.threevec() * momentum_radial);
+      data.set_momentum(data.mass(), phitheta.threevec() * momentum_radial);
 
       ThreeVector pos{uniform_radius(), uniform_radius(), uniform_radius()};
       data.set_position(FourVector(start_time_, pos));
