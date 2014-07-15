@@ -12,13 +12,13 @@
 namespace Smash {
 
 /* pp elastic cross section parametrization */
-float pp_elastic(double p_lab, double mandelstam_s, float nucleon_mass);
+float pp_elastic(double mandelstam_s);
 
 /* pp total cross section parametrization */
 float pp_total(double p_lab);
 
 /* np elastic cross section parametrization */
-float np_elastic(double p_lab, double mandelstam_s, float nucleon_mass);
+float np_elastic(double mandelstam_s);
 
 /* np total cross section parametrization */
 float np_total(double p_lab);
