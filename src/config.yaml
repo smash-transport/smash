@@ -23,6 +23,15 @@ General:
             Enable:             True
         Binary:
             Enable:             True
+
+            # print only particles in the end of event
+            only_final:         False
+
+            # write collisions (written to separate file)
+            collisions_output:  True
+
+            # write initial and final particles to collision file
+            print_start_end:    True
         Yet_another_format:
             Enable:             True
 

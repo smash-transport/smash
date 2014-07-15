@@ -119,17 +119,32 @@ class BinaryOutput : public OutputInterface {
 
   void write_interaction(const ParticleList &incoming_particles,
                          const ParticleList &outgoing_particles) override;
-  /// writes particles every time interval fixed by option OUTPUT_INTERVAL 
+  /// writes particles every time interval fixed by option OUTPUT_INTERVAL
   void after_Nth_timestep(const Particles &particles, const int event_number,
                           const Clock &clock) override;
 
  private:
-  void write(const std::string &s);
-  void write(const FourVector &v);
-  void write(std::int32_t x);
-  void write(const Particles &particles, const int event_number);
+  void write(const std::string &s, const std::string &option);
+  void write(const FourVector &v, const std::string &option);
+  void write(std::int32_t x, const std::string &option);
+  void write(const Particles &particles, const std::string &option);
+  void write(const ParticleList &particles, const std::string &option);
 
-  FilePtr file_;
+  /// Binary particles output
+  FilePtr particles_file_;
+
+  /// Binary collisions output
+  FilePtr collisions_file_;
+
+  /// Option: true - print only final particles in event, else -
+  // also print initial particles and particles in regular intervals.
+  bool only_final_;
+
+  /// Option: switch collisions output on/off
+  bool enable_collision_output_;
+
+  /// Option for collisions output: print initial and final particles or not
+  bool print_start_end_;
 };
 }  // namespace Smash
 
