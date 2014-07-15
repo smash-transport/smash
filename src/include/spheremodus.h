@@ -11,11 +11,8 @@
 #include <cmath>
 #include <list>
 
-#include "crosssections.h"
 #include "forwarddeclarations.h"
 #include "modusdefault.h"
-#include "particles.h"
-#include "time.h"
 
 namespace Smash {
 
@@ -31,7 +28,7 @@ class SphereModus : public ModusDefault {
   
   void print_startup();
     
-  void initial_conditions(Particles *particles,
+  float initial_conditions(Particles *particles,
                           const ExperimentParameters &parameters);
   
  private:
@@ -41,6 +38,8 @@ class SphereModus : public ModusDefault {
   int number_of_particles_;
   /* Temperature for momentum distribution */
   float sphere_temperature_;
+  /// Starting time for the Sphere
+    const float start_time_ = 0.0f;    
 };
 
 }  // namespace Smash

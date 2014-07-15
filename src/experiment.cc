@@ -31,11 +31,12 @@
 #ifdef SMASH_USE_ROOT
 #  include "include/rootoutput.h"
 #endif
+#include "include/spheremodus.h"
 #include "include/vtkoutput.h"
 
 #include <boost/filesystem.hpp>
 
-/* #include "include/spheremodus.h" */
+
 
 namespace Smash {
 
