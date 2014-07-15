@@ -39,13 +39,14 @@ class ParticleData {
   /// \copydoc PdgCode::is_hadron
   bool is_hadron() const { return type_->is_hadron(); }
 
-  /// \copydoc ParticleType::mass
-  float mass() const { return type_->mass(); }
+  /** Returns the particle's pole mass ("on-shell"). */
+  float pole_mass() const { return type_->mass(); }
+  /** Returns the particle's effective mass
+   * (as determined from the 4-momentum, possibly "off-shell"). */
+  float effective_mass() const { return momentum().abs(); }
 
   /**
    * Return the ParticleType object associated to this particle.
-   *
-   * \todo Remove the need for the Particles parameter.
    */
   const ParticleType &type() const { return *type_; }
 

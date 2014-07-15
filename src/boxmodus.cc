@@ -86,11 +86,11 @@ float BoxModus::initial_conditions(Particles *particles,
     /* back to back pair creation with random momenta direction */
     if (unlikely(data.id() == particles->id_max() && !(data.id() % 2))) {
       /* poor last guy just sits around */
-      data.set_momentum(data.mass(), 0, 0, 0);
+      data.set_momentum(data.pole_mass(), 0., 0., 0.);
     } else if (!(data.id() % 2)) {
       if (this->initial_condition_ != 2) {
         /* thermal momentum according Maxwell-Boltzmann distribution */
-        momentum_radial = sample_momenta(this->temperature_, data.mass());
+        momentum_radial = sample_momenta(this->temperature_, data.pole_mass());
       } else {
         /* IC == 2 initial thermal momentum is the average 3T */
         momentum_radial = 3.0 * this->temperature_;
@@ -98,9 +98,9 @@ float BoxModus::initial_conditions(Particles *particles,
       phitheta.distribute_isotropically();
       printd("Particle %d radial momenta %g phi %g cos_theta %g\n", data.id(),
              momentum_radial, phitheta.phi(), phitheta.costheta());
-      data.set_momentum(data.mass(), phitheta.threevec() * momentum_radial);
+      data.set_momentum(data.pole_mass(), phitheta.threevec()*momentum_radial);
     } else {
-      data.set_momentum(data.mass(),
+      data.set_momentum(data.pole_mass(),
                         -particles->data(data.id() - 1).momentum().threevec());
     }
     momentum_total += data.momentum();

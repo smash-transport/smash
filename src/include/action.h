@@ -92,6 +92,8 @@ class Action {
    * outgoing particles.
    */
   ParticleList outgoing_particles_;
+  /// determine the total energy in the center-of-mass frame
+  virtual double sqrt_s() const = 0;
   /**
    * Decide for a particular final-state channel via Monte-Carlo
    * and return it as a list of particles that are only initialized
@@ -140,29 +142,27 @@ class DecayAction : public Action {
     using std::invalid_argument::invalid_argument;
   };
 
+ protected:
+  /// determine the total energy in the center-of-mass frame
+  double sqrt_s() const;
+
  private:
 
   /**
    * Kinematics of a 1-to-2 decay process.
    *
-   * Given a resonance ID and the PDG codes of decay product particles,
-   * sample the momenta and position of the products and add them
-   * to the active particles data structure.
-   *
-   * \param[in] incoming0 decaying particle (in its rest frame)
+   * Sample the masses and momenta of the decay products in the
+   * center-of-momentum frame.
    */
-  void one_to_two(const ParticleData &incoming0);
+  void one_to_two();
 
   /**
    * Kinematics of a 1-to-3 decay process.
-   *
-   * Given a resonance ID and the PDG codes of decay product particles,
-   * sample the momenta and position of the products and add them
-   * to the active particles data structure.
-   *
-   * \param[in] incoming0 decaying particle (in its rest frame)
+   * 
+   * Sample the masses and momenta of the decay products in the
+   * center-of-momentum frame.
    */
-  void one_to_three(const ParticleData &incoming0);
+  void one_to_three();
 };
 
 
@@ -204,11 +204,13 @@ class ScatterAction : public Action {
     using std::invalid_argument::invalid_argument;
   };
 
+ protected:
+  /// determine the total energy in the center-of-mass frame
+  double sqrt_s() const;
+
  private:
   /// determine the velocity of the center-of-mass frame in the lab
   ThreeVector beta_cm() const;
-  /// determine the total energy in the center-of-mass frame
-  double sqrt_s() const;
 
   /** Check if the scattering is elastic. */
   bool is_elastic() const;
