@@ -60,7 +60,7 @@ static void compare_threevector(const std::array<std::string,3> &stringarray,
                          accuracy);
 }
 
-TEST(format) {
+TEST(outputfile) {
   ParticleType::create_type_list(
       "# NAME MASS[GEV] WIDTH[GEV] PDG\n" + smashon_str);
 
@@ -114,6 +114,27 @@ TEST(format) {
       }
       compare_threevector(position_string,
                           particles.data(i).position().threevec());
+    }
+    /* Check cell information */
+    outputfile >> item;
+    COMPARE(item, "CELLS");
+    outputfile >> item;
+    COMPARE(std::atoi(item.c_str()), particles.size());
+    outputfile >> item;
+    COMPARE(std::atoi(item.c_str()), particles.size() * 2);
+    for (int i = 0; i < number_of_particles; i++) {
+      outputfile >> item;
+      COMPARE(std::atoi(item.c_str()), 1);
+      outputfile >> item;
+      COMPARE(std::atoi(item.c_str()), i);
+    }
+    outputfile >> item;
+    COMPARE(item, "CELL_TYPES");
+    outputfile >> item;
+    COMPARE(std::atoi(item.c_str()), particles.size());
+    for (int i = 0; i < number_of_particles; i++) {
+      outputfile >> item;
+      COMPARE(std::atoi(item.c_str()), 1);
     }
   }
 }
