@@ -23,6 +23,7 @@
 #include "include/experimentparameters.h"
 #include "include/fourvector.h"
 #include "include/macros.h"
+#include "include/outputroutines.h"
 #include "include/particles.h"
 #include "include/random.h"
 #include "include/spheremodus.h"
@@ -59,6 +60,7 @@ float SphereModus::initial_conditions(Particles *particles,
             continue;
     }
         number_of_stable_types = number_of_stable_types + 1;
+      printd("%s mass: %g [GeV]\n", type.name().c_str(), type.mass());
   }
 
 /* just produce equally many particles per type */
@@ -75,17 +77,22 @@ auto uniform_radius = Random::make_uniform_distribution(0.0,
                                         static_cast<double>(this->radius_));
     /* loop over particle data to fill in momentum and position information */
   for (ParticleData &data : particles->data()) {
-    Angles phitheta;
+      Angles phitheta;
     /* thermal momentum according Maxwell-Boltzmann distribution */
       double momentum_radial;
       momentum_radial = sample_momenta(this->sphere_temperature_,
                                                  data.mass());
       phitheta.distribute_isotropically();
+      printd("Particle %d radial momenta %g phi %g cos_theta %g\n", data.id(),
+             momentum_radial, phitheta.phi(), phitheta.costheta());
       data.set_momentum(data.mass(), phitheta.threevec() * momentum_radial);
 
       ThreeVector pos{uniform_radius(), uniform_radius(), uniform_radius()};
       data.set_position(FourVector(start_time_, pos));
-      return start_time_;
+     /* IC Debug checks */
+      printd_position(data);
+      printd_momenta(data);
   }
+  return start_time_;
 }
 }  // namespace Smash

@@ -60,7 +60,7 @@ class SphereModus : public ModusDefault {
  public:
   /* default constructor with probable values */
   explicit SphereModus(Configuration modus_config,
-  const ExperimentParameters &parameters);
+                       const ExperimentParameters &parameters);
   /** Prints some information about the initialization of SphereModus
    *
    * \see ModusDefalt::print_startup()
