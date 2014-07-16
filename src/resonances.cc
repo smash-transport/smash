@@ -334,19 +334,20 @@ size_t two_to_two_formation(const ParticleType &type_particle1,
       continue;
     }
 
-    /* Check the available energy. */
-    if (std::sqrt(mandelstam_s) < type_resonance.minimum_mass() + second_type.mass()) {
+    /* Integration limits. */
+    double lower_limit = type_resonance.minimum_mass();
+    double upper_limit = std::sqrt(mandelstam_s) - second_type.mass();
+    /* Check the available energy (requiring it to be a little above the
+     * threshold, because the integration will not work if it's too close). */
+    if (upper_limit - lower_limit < 1E-3) {
       continue;
     }
 
     /* Calculate resonance production cross section
      * using the Breit-Wigner distribution as probability amplitude.
-     * Integrate over the allowed resonance mass range.
-     */
+     * Integrate over the allowed resonance mass range. */
     IntegrandParameters params = {&type_resonance, second_type.mass(),
                                   mandelstam_s};
-    double lower_limit = type_resonance.minimum_mass();
-    double upper_limit = (std::sqrt(mandelstam_s) - second_type.mass());
     printd("Process: %s %s -> %s %s\n", type_particle1.name().c_str(),
      type_particle2.name().c_str(), second_type.name().c_str(),
      type_resonance.name().c_str());
