@@ -77,6 +77,7 @@ void BinaryOutput::at_eventend(const Particles &particles,
       write(zero, "collisions");
       write(particles, "collisions");
     }
+    // (nin, nout) = (0, 0)
     write(zero, "collisions");
     write(zero, "collisions");
     write(event_number, "collisions");
@@ -87,6 +88,11 @@ void BinaryOutput::at_eventend(const Particles &particles,
     write(event_number, "particles");
     write(particles, "particles");
   }
+  /* (nin, nout) = (0, 0) to indicate event end */
+  write(zero, "particles");
+  write(zero, "particles");
+  write(event_number, "particles");  
+ 
   /* Flush to disk */
   std::fflush(particles_file_.get());
   std::fflush(collisions_file_.get());
