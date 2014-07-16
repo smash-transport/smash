@@ -20,13 +20,38 @@
 
 namespace Smash {
 
+
+double ScatterActionsFinder::collision_time(const ParticleData &p1,
+                                            const ParticleData &p2) {
+  /* UrQMD collision time
+   * arXiv:1203.4418 (5.15): in computational frame
+   * position of particle a: x_a
+   * position of particle b: x_b
+   * momentum of particle a: p_a
+   * momentum of particle b: p_b
+   * t_{coll} = - (x_a - x_b) . (p_a - p_b) / (p_a - p_b)^2
+   */
+  ThreeVector pos_diff = p1.position().threevec() - p2.position().threevec();
+  printd("Particle %d<->%d position difference: %g %g %g %g [fm]\n",
+    p1.id(), p2.id(), pos_diff.x1(), pos_diff.x2(), pos_diff.x3());
+  ThreeVector velo_diff = p1.velocity() - p2.velocity();
+  printd("Particle %d<->%d velocity difference: %g %g %g %g [fm]\n",
+    p1.id(), p2.id(), velo_diff.x1(), velo_diff.x2(), velo_diff.x3());
+  /* Zero momentum leads to infite distance, particles are not approaching. */
+  if (fabs(velo_diff.sqr()) < really_small) {
+    return -1.0;
+  } else {
+    return -pos_diff * velo_diff/velo_diff.sqr();
+  }
+}
+
+
 ActionPtr
 ScatterActionsFinder::check_collision(const int id_a, const int id_b, Particles *particles,
                                       const ExperimentParameters &parameters,
                                       CrossSections *cross_sections) const {
 
   ScatterAction* act = nullptr;
-  std::vector<int> in_part;
 
   const ParticleData data_a = particles->data(id_a);
   const ParticleData data_b = particles->data(id_b);
@@ -55,9 +80,7 @@ ScatterActionsFinder::check_collision(const int id_a, const int id_b, Particles 
     return nullptr;
   }
 
-  in_part.push_back(id_a);
-  in_part.push_back(id_b);
-  act = new ScatterAction(in_part, time_until_collision);
+  act = new ScatterAction(data_a, data_b, time_until_collision);
 
   /* Resonance production cross section */
   ProcessBranchList resonance_xsections = resonance_cross_section(data_a,
@@ -70,7 +93,7 @@ ScatterActionsFinder::check_collision(const int id_a, const int id_b, Particles 
 
   {
     /* distance criteria according to cross_section */
-    const double distance_squared = particle_distance(data_a, data_b);
+    const double distance_squared = act->particle_distance();
     if (distance_squared >= act->weight() * fm2_mb * M_1_PI) {
         delete act;
         return nullptr;

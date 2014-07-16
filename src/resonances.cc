@@ -128,11 +128,6 @@ std::vector<ProcessBranch> resonance_cross_section(
       continue;
     }
 
-    /* No decay channels found, ignore */
-    if (DecayModes::find(type_resonance.pdgcode()).is_empty()) {
-      continue;
-    }
-
     float resonance_xsection
       = symmetryfactor * two_to_one_formation(type_particle1, type_particle2,
                          type_resonance, mandelstam_s, cm_momentum_squared);
@@ -152,7 +147,8 @@ std::vector<ProcessBranch> resonance_cross_section(
     }
     /* Same procedure for possible 2->2 resonance formation processes */
     /* XXX: For now, we allow this only for baryon-baryon interactions */
-    if (type_particle1.spin() % 2 != 0 && type_particle2.spin() % 2 != 0) {
+    if (type_particle1.pdgcode().baryon_number() != 0 &&
+        type_particle2.pdgcode().baryon_number() != 0) {
       size_t two_to_two_processes
          = two_to_two_formation(type_particle1, type_particle2,
                                 type_resonance, mandelstam_s,
@@ -338,37 +334,20 @@ size_t two_to_two_formation(const ParticleType &type_particle1,
       continue;
     }
 
-    /* Check the decay modes of this resonance */
-    const std::vector<DecayBranch> decaymodes
-      = DecayModes::find(type_resonance.pdgcode()).decay_mode_list();
-    bool not_enough_energy = false;
-    double minimum_mass = 0.0;
-    for (const auto &mode : decaymodes) {
-      size_t decay_particles = mode.pdg_list().size();
-      if ( decay_particles > 3 ) {
-        printf("Warning: Not a 1->2 or 1->3 process!\n");
-        printf("Number of decay particles: %zu \n", decay_particles);
-      } else {
-        /* There must be enough energy to produce all decay products */
-        if (std::sqrt(mandelstam_s) < mode.threshold() + second_type.mass()) {
-          not_enough_energy = true;
-        } else if (minimum_mass < mode.threshold()) {
-          minimum_mass = mode.threshold();
-        }
-      }
-    }
-    if (not_enough_energy) {
+    /* Integration limits. */
+    double lower_limit = type_resonance.minimum_mass();
+    double upper_limit = std::sqrt(mandelstam_s) - second_type.mass();
+    /* Check the available energy (requiring it to be a little above the
+     * threshold, because the integration will not work if it's too close). */
+    if (upper_limit - lower_limit < 1E-3) {
       continue;
     }
 
     /* Calculate resonance production cross section
-     * using the Breit-Wigner distribution as probability amplitude
-     * Integrate over the allowed resonance mass range
-     */
+     * using the Breit-Wigner distribution as probability amplitude.
+     * Integrate over the allowed resonance mass range. */
     IntegrandParameters params = {&type_resonance, second_type.mass(),
                                   mandelstam_s};
-    double lower_limit = minimum_mass;
-    double upper_limit = (std::sqrt(mandelstam_s) - second_type.mass());
     printd("Process: %s %s -> %s %s\n", type_particle1.name().c_str(),
      type_particle2.name().c_str(), second_type.name().c_str(),
      type_resonance.name().c_str());
@@ -490,6 +469,7 @@ double sample_resonance_mass(const ParticleType &type_resonance,
                                      cms_energy - mass_stable);
     distribution_value = spectral_function_integrand(mass_resonance, &params);
   }
+
   return mass_resonance;
 }
 
