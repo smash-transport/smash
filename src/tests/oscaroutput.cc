@@ -82,7 +82,7 @@ static void compare_particledata(const std::array<std::string,12> &datastring,
 
 TEST(fullhistory_format) {
   std::map<std::string, std::string> options;
-  options["Write_lists"] = "True";
+  options["Print_start_end"] = "True";
   options["Format"] = "1999";
   OscarFullHistoryOutput *oscfull = new OscarFullHistoryOutput(testoutputpath,
                                                                options);
