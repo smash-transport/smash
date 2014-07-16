@@ -128,7 +128,7 @@ class DecayAction : public Action {
   /**
    * Construct a DecayAction object.
    *
-   * \param[in] in_part1 decaying particle
+   * \param[in] in_part decaying particle
    * \param[in] time_of_execution time at which the action is supposed to take place
    */
   DecayAction(const ParticleData &in_part, float time_of_execution);
