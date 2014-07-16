@@ -51,47 +51,48 @@ void SphereModus::print_startup() {
 /* initial_conditions - sets particle data for @particles */
 float SphereModus::initial_conditions(Particles *particles,
                                      const ExperimentParameters &parameters) {
-/* count number of stable types */
+  /* count number of stable types */
   int number_of_stable_types = 0;
-    /* loop over all the particle types */
+  /* loop over all the particle types */
   for (const ParticleType &type : ParticleType::list_all()) {
     /* Particles with width > 0 (resonances) do not exist in the beginning */
     if (!type.is_stable()) {
             continue;
     }
-        number_of_stable_types = number_of_stable_types + 1;
-      printd("%s mass: %g [GeV]\n", type.name().c_str(), type.mass());
+    number_of_stable_types = number_of_stable_types + 1;
+    printd("%s mass: %g [GeV]\n", type.name().c_str(), type.mass());
   }
 
-/* just produce equally many particles per type */
+  /* just produce equally many particles per type */
   int number_of_particles_per_type;
   number_of_particles_per_type = number_of_particles_/number_of_stable_types;
-    for (const ParticleType &type : ParticleType::list_all()) {
-    /* Particles with width > 0 (resonances) do not exist in the beginning */
+  for (const ParticleType &type : ParticleType::list_all()) {
+  /* Particles with width > 0 (resonances) do not exist in the beginning */
     if (!type.is_stable()) {
             continue;
     }
-    particles->create(number_of_particles_per_type, type.pdgcode());
+  particles->create(number_of_particles_per_type, type.pdgcode());
   }
-auto uniform_radius = Random::make_uniform_distribution(0.0,
-                                        static_cast<double>(this->radius_));
-    /* loop over particle data to fill in momentum and position information */
+  /* loop over particle data to fill in momentum and position information */
   for (ParticleData &data : particles->data()) {
-      Angles phitheta;
+    Angles phitheta;
     /* thermal momentum according Maxwell-Boltzmann distribution */
-      double momentum_radial;
-      momentum_radial = sample_momenta(this->sphere_temperature_,
+    double momentum_radial;
+    momentum_radial = sample_momenta(this->sphere_temperature_,
                                                  data.mass());
-      phitheta.distribute_isotropically();
-      printd("Particle %d radial momenta %g phi %g cos_theta %g\n", data.id(),
-             momentum_radial, phitheta.phi(), phitheta.costheta());
-      data.set_momentum(data.mass(), phitheta.threevec() * momentum_radial);
-
-      ThreeVector pos{uniform_radius(), uniform_radius(), uniform_radius()};
-      data.set_position(FourVector(start_time_, pos));
-     /* IC Debug checks */
-      printd_position(data);
-      printd_momenta(data);
+    phitheta.distribute_isotropically();
+    printd("Particle %d radial momenta %g phi %g cos_theta %g\n", data.id(),
+           momentum_radial, phitheta.phi(), phitheta.costheta());
+    data.set_momentum(data.mass(), phitheta.threevec() * momentum_radial);
+    /* uniform sampling in a sphere with radius r */
+    double position_radial;
+    position_radial = cbrt(Random::canonical()) * radius_;
+    Angles pos_phitheta;
+    pos_phitheta.distribute_isotropically();
+    data.set_position(FourVector(start_time_, pos_phitheta.threevec() * position_radial));
+    /* IC Debug checks */
+    printd_position(data);
+    printd_momenta(data);
   }
   return start_time_;
 }
