@@ -40,14 +40,18 @@ class OscarFullHistoryOutput : public OutputInterface {
                           const Clock &clock) override;
 
  protected:
-  OscarFullHistoryOutput(bf::path path, const char* second_line,
+  OscarFullHistoryOutput(bf::path path, const char* format_specifier,
                          Options op);
   void write(const Particles &particles);
+  void write_2013(const Particles &particles);
   FilePtr file_;
- 
+  /* Use 2013 format */
+  bool modern_format_;
+
  private:
-  /// An option. True - initial and final particles are printed, else not.
-  bool print_start_end_;
+  /* Output options */
+  /* Print  initial and final particles */
+  bool write_initial_final_lists_;
 };
 }  // namespace Smash
 

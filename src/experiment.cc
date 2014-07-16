@@ -169,9 +169,9 @@ void Experiment<Modus>::set_outputs(const bf::path &path) {
     std::string formatname = outputformat.first;
     std::map<std::string, std::string> formatoptions = outputformat.second;
 
-    if        (formatname =="OSCAR1999_COLLISIONS") {
+    if (formatname =="OSCAR_COLLISIONS") {
       outputs_.emplace_back(new OscarFullHistoryOutput(path, formatoptions));
-    } else if (formatname =="OSCAR1999_PARTICLELIST") {
+    } else if (formatname =="OSCAR_PARTICLELIST") {
       outputs_.emplace_back(new OscarParticleListOutput(path, formatoptions));
     } else if (formatname == "VTK") {
       outputs_.emplace_back(new VtkOutput(path, formatoptions));
