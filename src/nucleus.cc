@@ -253,7 +253,7 @@ void Nucleus::arrange_nucleons() {
 void Nucleus::set_parameters_automatic() {
   switch (Nucleus::number_of_particles()) {
     case 238:  // Uranium
-      // Default values. !!! Unsure.
+      // Default values.
       set_diffusiveness(0.54);
       set_nuclear_radius(6.86);
       set_saturation_density(0.166);
@@ -383,12 +383,12 @@ void Nucleus::copy_particles(Particles* external_particles) {
 void Nucleus::print_nucleus(const char * file_name) const {
   for (auto i = cbegin(); i != cend(); i++) {
     FourVector this_position = i->position();
-    std::ofstream myfile;
-    myfile.open(file_name, std::ios::app);
-    myfile << std::to_string(this_position.x1()) + " " + 
+    std::ofstream a_file;
+    a_file.open(file_name, std::ios::app);
+    a_file << std::to_string(this_position.x1()) + " " + 
               std::to_string(this_position.x2()) + " " +
               std::to_string(this_position.x3()) << std::endl;
-    myfile.close();
+    a_file.close();
   }
 }
 

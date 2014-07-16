@@ -20,7 +20,7 @@ DeformedNucleus::DeformedNucleus() {}
 double DeformedNucleus::deformed_woods_saxon(double r, double cosx) const {
   // Return the deformed woods-saxon calculation
   // at the given location for the current system.
-  return Nucleus::get_saturation_density() / (1 + std::exp(r - Nucleus::get_nuclear_radius() * 
+  return Nucleus::get_saturation_density() / (1 + std::exp(r - Nucleus::get_nuclear_radius() *
          (1 + beta2_ * y_l_0(2, cosx) + beta4_ * y_l_0(4, cosx)) / Nucleus::get_diffusiveness()));
 }
 
@@ -38,19 +38,19 @@ ThreeVector DeformedNucleus::deformed_distribute_nucleon() const {
     a_direction.distribute_isotropically();
     a_radius = Random::uniform(0.0, radius_max);
 
-  } while (Random::canonical() > deformed_woods_saxon(a_radius, 
+  } while (Random::canonical() > deformed_woods_saxon(a_radius,
            a_direction.costheta()));
-  
+
   // Update (x, y, z).
   return a_direction.threevec() * a_radius;
 }
 
 void DeformedNucleus::arrange_nucleons() {
-  for (auto i = Nucleus::begin(); i != Nucleus::end(); i++) { 
-    // Sampling a deformed W.S., get the radial 
+  for (auto i = Nucleus::begin(); i != Nucleus::end(); i++) {
+    // Sampling a deformed W.S., get the radial
     // position and solid angle for the nucleon.
     ThreeVector pos = deformed_distribute_nucleon();
-    
+
     // Set the position of the nucleon.
     i->set_position(FourVector(0.0, pos));
 
@@ -60,7 +60,7 @@ void DeformedNucleus::arrange_nucleons() {
   }
   // Recenter and rotate
   align_center();
-  rotate();
+  //rotate();
 }
 
 void DeformedNucleus::set_parameters_automatic() {
@@ -81,7 +81,7 @@ void DeformedNucleus::set_parameters_automatic() {
       set_beta_2(0.0);
       set_beta_4(0.0);
       break;
-    case 197:  // Gold 
+    case 197:  // Gold
       set_beta_2(-0.131);
       set_beta_4(-0.031);
       break;
@@ -140,7 +140,7 @@ void DeformedNucleus::rotate() {
     double sin_theta = std::sin(polar_theta_);
 
     this_position.set_x1(cos_phi * old_x + sin_phi * old_y);
-    this_position.set_x2(-cos_theta * sin_phi * old_x + cos_theta 
+    this_position.set_x2(-cos_theta * sin_phi * old_x + cos_theta
                          * cos_phi * old_y + sin_theta * old_z);
     this_position.set_x3(sin_theta * sin_phi * old_x - sin_theta
                          * cos_phi * old_y + cos_theta * old_z);
@@ -165,7 +165,7 @@ void DeformedNucleus::shift(bool is_projectile, double initial_z_displacement,
     this_position.set_x1(this_position.x1() + x_offset);
     this_position.set_x0(simulation_time);
     i->set_position(this_position);
-  } 
+  }
 }
 
 double DeformedNucleus::y_l_0(int l, double cosx) const {

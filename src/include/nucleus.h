@@ -47,9 +47,13 @@ class Nucleus {
   /// sets the positions of the nuclei inside nucleus A.
   virtual void arrange_nucleons();
 
-  // Sets the parameters of the Woods-Saxon distribution
-  // according to the current mass number.
-  virtual void set_parameters_automatic();
+ /** Sets the deformation parameters of the Woods-Saxon distribution
+  * according to the current mass number.
+  *
+  * Ref. for nuclear radii is Atom. Data Nucl. Data Tabl. by H. De Vries et. al.
+  * For diffusiveness and saturation density, see [insert reference].
+  */
+   virtual void set_parameters_automatic();
 
   /** Sets the parameters of the Woods-Saxon according to
    * manually added values in the configuration file.

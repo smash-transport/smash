@@ -34,17 +34,17 @@ class DeformedNucleus : public Nucleus {
   // Sets the positions of the nuclei inside nucleus A.
   virtual void arrange_nucleons();
 
-  // Sets the parameters of the Woods-Saxon distribution
-  // according to the current mass number.
-  //
-  // Ref. for deformation parameters is "Nuclear Ground-State Masses and Deformations" 
-  // by P. Möller, J. R. Nix, W. D. Myers, and W. J. Swiatecki.
-  // Corrections to deformation parameter beta2 in Uranium come from arxiv:nuclth/0506088 
-  // by A. Kuhlman and U. Heinz.
-  // For finite nucleon size corrections to the nuclear density and radius, see ref.
-  // arxiv:0904.4080 [nucl-th] by T. Hirano and Y. Nara for copper and gold, and 
-  // arxiv:1010.6222 [nucl-th] by T. Hirano, P. Huovinen, and Y. Nara for uranium.
-  // Currently misplaced reference for Lead.
+  /** Sets the deformation parameters of the Woods-Saxon distribution
+   * according to the current mass number.
+   *
+   * Ref. for deformation parameters is "Nuclear Ground-State Masses and Deformations" 
+   * by P. Möller, J. R. Nix, W. D. Myers, and W. J. Swiatecki.
+   * Corrections to deformation parameter beta2 in Uranium come from 
+   * arxiv:nuclth/0506088 by A. Kuhlman and U. Heinz.
+   * For finite nucleon size corrections to the nuclear density and radius, see ref.
+   * arxiv:0904.4080 [nucl-th] by T. Hirano and Y. Nara for copper and gold, and 
+   * arxiv:1010.6222 [nucl-th] by T. Hirano, P. Huovinen, and Y. Nara for uranium.
+   */
   virtual void set_parameters_automatic();
 
   // Set parameters for Woods-Saxon by hand using the configuration file.

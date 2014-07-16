@@ -72,6 +72,7 @@ TEST(center) {
   Nucleus lead;
   constexpr int N_TEST = 20000;
   lead.fill_from_list(list, N_TEST);
+  lead.set_nuclear_radius(lead.default_nuclear_radius());
   lead.arrange_nucleons();
   FourVector middle = lead.center();
   /** \f$\sqrt(\frac{\int_0^\infinity \frac{dr
@@ -101,6 +102,7 @@ TEST(center_hard_sphere) {
   constexpr int N_TEST = 20000;
   lead.fill_from_list(list, N_TEST);
   lead.set_diffusiveness(0.0);
+  lead.set_nuclear_radius(lead.default_nuclear_radius());
   lead.arrange_nucleons();
   FourVector middle = lead.center();
   /**
@@ -121,6 +123,7 @@ TEST(shift_zero) {
   constexpr int N_TEST = 1000;
   lead.fill_from_list(list, N_TEST);
   lead.set_diffusiveness(0.0);
+  lead.set_nuclear_radius(lead.default_nuclear_radius());
   lead.arrange_nucleons();
   FourVector precenter = lead.center();
   // shift with zero displacement: shouldn't change x and y, but note
@@ -140,6 +143,7 @@ TEST(shift_x) {
   constexpr int N_TEST = 1000;
   lead.fill_from_list(list, N_TEST);
   lead.set_diffusiveness(0.0);
+  lead.set_nuclear_radius(lead.default_nuclear_radius());
   lead.arrange_nucleons();
   FourVector precenter = lead.center();
   // shift only in x.
@@ -157,6 +161,7 @@ TEST(shift_z) {
   constexpr int N_TEST = 1000;
   lead.fill_from_list(list, N_TEST);
   lead.set_diffusiveness(0.0);
+  lead.set_nuclear_radius(lead.default_nuclear_radius());
   lead.arrange_nucleons();
   FourVector precenter = lead.center();
   // shift in z. Here, we cannot exactly predict what happens, because
@@ -181,6 +186,7 @@ TEST(woods_saxon) {
   Nucleus projectile;
   projectile.fill_from_list(list, 1);
   float R = projectile.default_nuclear_radius();
+  projectile.set_nuclear_radius(R);
   // this is the number of times we access the distribution.
   constexpr int N_TEST = 10000000;
   // fill the histogram
