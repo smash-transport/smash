@@ -50,34 +50,14 @@ static ParticleData create_smashon_particle() {
   return particle;
 }
 
-static void compare_fourvector(const std::array<std::string,4> &stringarray,
-                               const FourVector &fourvector) {
-  COMPARE_ABSOLUTE_ERROR(std::atof(stringarray.at(0).c_str()), fourvector.x1(),
+static void compare_threevector(const std::array<std::string,3> &stringarray,
+                               const ThreeVector &threevector) {
+  COMPARE_ABSOLUTE_ERROR(std::atof(stringarray.at(0).c_str()), threevector.x1(),
                          accuracy);
-  COMPARE_ABSOLUTE_ERROR(std::atof(stringarray.at(1).c_str()), fourvector.x2(),
+  COMPARE_ABSOLUTE_ERROR(std::atof(stringarray.at(1).c_str()), threevector.x2(),
                          accuracy);
-  COMPARE_ABSOLUTE_ERROR(std::atof(stringarray.at(2).c_str()), fourvector.x3(),
+  COMPARE_ABSOLUTE_ERROR(std::atof(stringarray.at(2).c_str()), threevector.x3(),
                          accuracy);
-  COMPARE_ABSOLUTE_ERROR(std::atof(stringarray.at(3).c_str()), fourvector.x0(),
-                         accuracy);
-}
-
-static void compare_particledata(const std::array<std::string,12> &datastring,
-                                 const ParticleData &particle, const int id) {
-  COMPARE(std::atoi(datastring.at(0).c_str()), id);
-  COMPARE(datastring.at(1), pdg_str);
-  COMPARE(std::atoi(datastring.at(2).c_str()), zero);
-  std::array<std::string,4> momentum_string;
-  for (int i = 0; i < 4 ; i++) {
-    momentum_string.at(i) = datastring.at(i + 3);
-  }
-  compare_fourvector(momentum_string, particle.momentum());
-  COMPARE(float(std::atof(datastring.at(7).c_str())), mass_smashon);
-  std::array<std::string,4> position_string;
-  for (int i = 0; i < 4 ; i++) {
-    position_string.at(i) = datastring.at(i + 8);
-  }
-  compare_fourvector(position_string, particle.position());
 }
 
 TEST(format) {
@@ -126,5 +106,14 @@ TEST(format) {
     COMPARE(std::atoi(item.c_str()), particles.size());
     outputfile >> item;
     COMPARE(item, "double");
+    for (int i = 0; i < number_of_particles; i++) {
+      std::array<std::string, 3> position_string;
+      for (int j = 0; j < 3; j++) {
+        outputfile >> item;
+        position_string[j] = item;
+      }
+      compare_threevector(position_string,
+                          particles.data(i).position().threevec());
+    }
   }
 }
