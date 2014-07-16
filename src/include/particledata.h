@@ -39,13 +39,14 @@ class ParticleData {
   /// \copydoc PdgCode::is_hadron
   bool is_hadron() const { return type_->is_hadron(); }
 
-  /// \copydoc ParticleType::mass
-  float mass() const { return type_->mass(); }
+  /** Returns the particle's pole mass ("on-shell"). */
+  float pole_mass() const { return type_->mass(); }
+  /** Returns the particle's effective mass
+   * (as determined from the 4-momentum, possibly "off-shell"). */
+  float effective_mass() const { return momentum().abs(); }
 
   /**
    * Return the ParticleType object associated to this particle.
-   *
-   * \todo Remove the need for the Particles parameter.
    */
   const ParticleType &type() const { return *type_; }
 
@@ -59,6 +60,7 @@ class ParticleData {
   inline void set_momentum(const FourVector &momentum_vector);
   inline void set_momentum(double mass, const ThreeVector &mom);
   inline void set_momentum(double mass, double px, double py, double pz);
+  inline void set_3momentum(const ThreeVector &mom);
   inline const FourVector &position(void) const;
   inline void set_position(const FourVector &position);
   /// get the velocity 3-vector
@@ -138,17 +140,17 @@ inline void ParticleData::set_collision_past(const int id_counter) {
   id_process_ = id_counter;
 }
 
-/// return the particle four momentum
+/// return the particle 4-momentum
 inline const FourVector &ParticleData::momentum(void) const {
   return momentum_;
 }
 
-/// set particle four momentum directly
+/// set particle 4-momentum directly
 inline void ParticleData::set_momentum(const FourVector &momentum_vector) {
   momentum_ = momentum_vector;
 }
 
-/** set particle four momentum
+/** set particle 4-momentum
  *
  * \param[in] new_mass the mass of the particle
  * \param[in] mom the three-momentum of the particle
@@ -157,7 +159,7 @@ inline void ParticleData::set_momentum(double new_mass, const ThreeVector &mom) 
   momentum_ = FourVector(std::sqrt(new_mass * new_mass + mom * mom), mom);
 }
 
-/** set particle four momentum
+/** set particle 4-momentum
  *
  * \param[in] new_mass the mass of the particle
  * \param[in] px x-component of the momentum
@@ -168,6 +170,11 @@ inline void ParticleData::set_momentum(double new_mass, double px, double py,
                                        double pz) {
   momentum_ = FourVector(
       std::sqrt(new_mass * new_mass + px * px + py * py + pz * pz), px, py, pz);
+}
+
+/// set particle 3-momentum
+inline void ParticleData::set_3momentum(const ThreeVector &mom) {
+  momentum_ = FourVector(momentum_.x0(), mom);
 }
 
 /// particle position in Minkowski space

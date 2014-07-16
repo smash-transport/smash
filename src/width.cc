@@ -43,7 +43,7 @@ static float pCM(const float srts, const float mass1, const float mass2) {
  * \param x = p_ab*R  with
  *        p_ab = relative momentum of outgoing particles AB and
  *        R = interaction radius
- * \param l Angular momentum of outgoing particles AB.
+ * \param L Angular momentum of outgoing particles AB.
  */
 static float BlattWeisskopf(const float x, const int L) {
   switch (L)
