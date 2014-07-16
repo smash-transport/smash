@@ -22,8 +22,8 @@ class CrossSections {
    * \param elastic_parameter sets the fall-back elastic cross-section,
    * \see elastic_parameter_
    */
-  explicit CrossSections(float elastic_parameter)
-      : elastic_parameter_(elastic_parameter) {
+  explicit CrossSections(float elastic_par)
+      : elastic_parameter_(elastic_par) {
   }
   /** Returns the elastic cross-section of a collision of the particles
    * \a a and \a b.
@@ -40,6 +40,8 @@ class CrossSections {
     mandelstam_s_ = -1.;
     p_lab_ = -1.;
   }
+
+  inline float elastic_parameter() const { return elastic_parameter_; }
 
  private:
   /** Elastic Cross section, in mb

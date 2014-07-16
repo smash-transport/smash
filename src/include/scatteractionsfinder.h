@@ -11,6 +11,7 @@
 #define SRC_INCLUDE_SCATTERACTIONSFINDER_H_
 
 #include "actionfinderfactory.h"
+#include "crosssections.h"
 
 namespace Smash {
 
@@ -18,22 +19,21 @@ namespace Smash {
  * Just loops through all particles and checks each pair for a collision.  */
 class ScatterActionsFinder : public ActionFinderFactory {
  public:
+  /** Initialize the finder with the given parameters. */
+  ScatterActionsFinder(const ExperimentParameters &parameters);
   /** Determine the collision time of the two particles. */
   static double collision_time(const ParticleData &p1, const ParticleData &p2);
   /** Check the whole particle list for collisions
    * and return a list with the corrsponding Action objects. */
-  ActionList find_possible_actions(
-      Particles *particles, const ExperimentParameters &parameters,
-      CrossSections *cross_sections = nullptr) const override;
+  ActionList find_possible_actions(Particles *particles) override;
 
  private:
   /** Check for a single pair of particles (id_a, id_b) if a collision will happen
    * in the next timestep and create a corresponding Action object in that case. */
   ActionPtr check_collision(const int id_a, const int id_b,
-                            Particles *particles,
-                            const ExperimentParameters &parameters,
-                            CrossSections *cross_sections = nullptr) const;
-
+                            Particles *particles);
+  /** The object that administrates the cross sections. */
+  CrossSections cross_sections_;
 };
 
 #if 0

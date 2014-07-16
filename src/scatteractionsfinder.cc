@@ -20,6 +20,10 @@
 
 namespace Smash {
 
+ScatterActionsFinder::ScatterActionsFinder(const ExperimentParameters &parameters)
+                     : ActionFinderFactory(parameters.timestep_duration()),
+                       cross_sections_(parameters.cross_section) {
+}
 
 double ScatterActionsFinder::collision_time(const ParticleData &p1,
                                             const ParticleData &p2) {
@@ -47,9 +51,8 @@ double ScatterActionsFinder::collision_time(const ParticleData &p1,
 
 
 ActionPtr
-ScatterActionsFinder::check_collision(const int id_a, const int id_b, Particles *particles,
-                                      const ExperimentParameters &parameters,
-                                      CrossSections *cross_sections) const {
+ScatterActionsFinder::check_collision(const int id_a, const int id_b,
+                                      Particles *particles) {
 
   ScatterAction* act = nullptr;
 
@@ -65,8 +68,7 @@ ScatterActionsFinder::check_collision(const int id_a, const int id_b, Particles 
 
   /* check according timestep: positive and smaller */
   const double time_until_collision = collision_time(data_a, data_b);
-  if (time_until_collision < 0.0 ||
-      time_until_collision >= parameters.timestep_duration()) {
+  if (time_until_collision < 0.0 || time_until_collision >= dt_) {
     return nullptr;
   }
 
@@ -89,7 +91,7 @@ ScatterActionsFinder::check_collision(const int id_a, const int id_b, Particles 
 
   /* Add elastic process.  */
   act->add_process(ProcessBranch(data_a.pdgcode(), data_b.pdgcode(),
-                                 cross_sections->elastic(data_a, data_b)));
+                                 cross_sections_.elastic(data_a, data_b)));
 
   {
     /* distance criteria according to cross_section */
@@ -110,10 +112,10 @@ ScatterActionsFinder::check_collision(const int id_a, const int id_b, Particles 
 }
 
 std::vector<ActionPtr> ScatterActionsFinder::find_possible_actions(
-    Particles *particles, const ExperimentParameters &parameters,
-    CrossSections *cross_sections) const {
+    Particles *particles) {
   std::vector<ActionPtr> actions;
-  double neighborhood_radius_squared = parameters.cross_section * fm2_mb * M_1_PI * 4;
+  double neighborhood_radius_squared = cross_sections_.elastic_parameter()
+                                       * fm2_mb * M_1_PI * 4;
 
   for (const auto &p1 : particles->data()) {
     for (const auto &p2 : particles->data()) {
@@ -131,7 +133,7 @@ std::vector<ActionPtr> ScatterActionsFinder::find_possible_actions(
         continue;
 
       /* Check if collision is possible. */
-      ActionPtr act = check_collision (id_a, id_b, particles, parameters, cross_sections);
+      ActionPtr act = check_collision (id_a, id_b, particles);
 
       /* Add to collision list. */
       if (act != nullptr) {

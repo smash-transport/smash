@@ -12,7 +12,6 @@
 #include <vector>
 
 #include "chrono.h"
-#include "crosssections.h"
 #include "decayactionsfinder.h"
 #include "experimentparameters.h"
 #include "forwarddeclarations.h"
@@ -221,13 +220,6 @@ class Experiment : public ExperimentBase {
    * particles to file.
    */
   OutputsList outputs_;
-
-  /**
-   * ?
-   *
-   * \todo CrossSections needs a rename?
-   */
-  CrossSections cross_sections_;
 
   /// The object that finds decays
   DecayActionsFinder decay_finder_;
