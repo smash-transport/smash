@@ -136,5 +136,42 @@ TEST(outputfile) {
       outputfile >> item;
       COMPARE(std::atoi(item.c_str()), 1);
     }
+    /* Check point data */
+    outputfile >> item;
+    COMPARE(item, "POINT_DATA");
+    outputfile >> item;
+    COMPARE(std::atoi(item.c_str()), particles.size());
+    outputfile >> item;
+    COMPARE(item, "SCALARS");
+    outputfile >> item;
+    COMPARE(item, "pdg_codes");
+    outputfile >> item;
+    COMPARE(item, "int");
+    outputfile >> item;
+    COMPARE(item, "1");
+    outputfile >> item;
+    COMPARE(item, "LOOKUP_TABLE");
+    outputfile >> item;
+    COMPARE(item, "default");
+    for (int i = 0; i < number_of_particles; i++) {
+      outputfile >> item;
+      COMPARE(item, "661");
+    }
+    /* Check momentum vectors */
+    outputfile >> item;
+    COMPARE(item, "VECTORS");
+    outputfile >> item;
+    COMPARE(item, "momentum");
+    outputfile >> item;
+    COMPARE(item, "double");
+    for (int i = 0; i < number_of_particles; i++) {
+      std::array<std::string, 3> momentum_string;
+      for (int j = 0; j < 3; j++) {
+        outputfile >> item;
+        momentum_string[j] = item;
+      }
+      compare_threevector(momentum_string,
+                          particles.data(i).momentum().threevec());
+    }
   }
 }
