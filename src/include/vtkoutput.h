@@ -10,10 +10,11 @@
 #ifndef SRC_INCLUDE_VTKOUTPUT_H_
 #define SRC_INCLUDE_VTKOUTPUT_H_
 
-#include "outputinterface.h"
-#include "forwarddeclarations.h"
 
 #include <boost/filesystem.hpp>
+
+#include "outputinterface.h"
+#include "forwarddeclarations.h"
 
 namespace Smash {
 
@@ -29,6 +30,8 @@ class VtkOutput : public OutputInterface {
                           const Clock &clock) override;
 
  private:
+  void write(const Particles &particles, const int event_number);
+
   /// filesystem path for output
   const bf::path base_path_;
 
