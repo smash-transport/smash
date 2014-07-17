@@ -160,7 +160,7 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
     if (!actions.empty()) {
       for (const auto &action : actions) {
         if (action->is_valid(particles_)) {
-          const ParticleList incoming_particles = action->incoming_particles(particles_);
+          const ParticleList incoming_particles = action->incoming_particles();
           action->perform(&particles_, interactions_total);
           const ParticleList outgoing_particles = action->outgoing_particles();
           for (const auto &output : outputs_) {
@@ -187,7 +187,7 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
       print_measurements(particles_, interactions_total,
               interactions_this_interval, conserved_initial_,
               time_start_,
-              parameters_.labclock.next_multiple(parameters_.output_interval));
+              parameters_.labclock.current_time());
       /* save evolution data */
       for (const auto &output : outputs_) {
         output->after_Nth_timestep(particles_, evt_num, parameters_.labclock);
