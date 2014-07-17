@@ -19,7 +19,7 @@ class CrossSections {
  public:
   /** Constructs a new cross-sections object
    *
-   * \param elastic_parameter sets the fall-back elastic cross-section,
+   * \param elastic_par sets the fall-back elastic cross-section,
    * \see elastic_parameter_
    */
   explicit CrossSections(float elastic_par)
