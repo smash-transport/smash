@@ -60,7 +60,7 @@ float SphereModus::initial_conditions(Particles *particles,
             continue;
     }
     number_of_stable_types = number_of_stable_types + 1;
-    printd("%s mass: %g [GeV]\n", type.name().c_str(), type.mass());
+    printd("%s mass: %g [GeV]\n", type.name().c_str(), type.pole_mass());
   }
 
   /* just produce equally many particles per type */
@@ -79,11 +79,11 @@ float SphereModus::initial_conditions(Particles *particles,
     /* thermal momentum according Maxwell-Boltzmann distribution */
     double momentum_radial;
     momentum_radial = sample_momenta(this->sphere_temperature_,
-                                                 data.mass());
+                                                 data.pole_mass());
     phitheta.distribute_isotropically();
     printd("Particle %d radial momenta %g phi %g cos_theta %g\n", data.id(),
            momentum_radial, phitheta.phi(), phitheta.costheta());
-    data.set_momentum(data.mass(), phitheta.threevec() * momentum_radial);
+    data.set_momentum(data.pole_mass(), phitheta.threevec() * momentum_radial);
     /* uniform sampling in a sphere with radius r */
     double position_radial;
     position_radial = cbrt(Random::canonical()) * radius_;
