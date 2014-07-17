@@ -50,7 +50,7 @@ void SphereModus::print_startup() {
 
 /* initial_conditions - sets particle data for @particles */
 float SphereModus::initial_conditions(Particles *particles,
-                                     const ExperimentParameters &parameters) {
+                                     const ExperimentParameters& /*parameters*/) {
   /* count number of stable types */
   int number_of_stable_types = 0;
   /* loop over all the particle types */
