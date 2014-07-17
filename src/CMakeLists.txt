@@ -66,6 +66,7 @@ set(smash_src
         resonances.cc
         scatteraction.cc
         scatteractionsfinder.cc
+	spheremodus.cc
         vtkoutput.cc
         width.cc
         )

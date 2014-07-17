@@ -31,11 +31,12 @@
 #ifdef SMASH_USE_ROOT
 #  include "include/rootoutput.h"
 #endif
+#include "include/spheremodus.h"
 #include "include/vtkoutput.h"
 
 #include <boost/filesystem.hpp>
 
-/* #include "include/spheremodus.h" */
+
 
 namespace Smash {
 
@@ -53,7 +54,9 @@ std::unique_ptr<ExperimentBase> ExperimentBase::create(Configuration &config) {
   } else if (modus_chooser.compare("Collider") == 0) {
     return ExperimentPointer(new Experiment<ColliderModus>(config));
   } else if (modus_chooser.compare("Nucleus") == 0) {
-    return ExperimentPointer(new Experiment<NucleusModus>(config));
+      return ExperimentPointer(new Experiment<NucleusModus>(config));
+  } else if (modus_chooser.compare("Sphere") == 0) {
+      return ExperimentPointer(new Experiment<SphereModus>(config));
   } else {
     throw InvalidModusRequest("Invalid Modus (" + modus_chooser +
                               ") requested from ExperimentBase::create.");
