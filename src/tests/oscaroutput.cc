@@ -21,6 +21,7 @@
 #include "../include/oscarparticlelistoutput.h"
 #include "../include/particles.h"
 #include "../include/random.h"
+#include "../include/configuration.h"
 
 using namespace Smash;
 
@@ -81,8 +82,10 @@ static void compare_particledata(const std::array<std::string,12> &datastring,
 }
 
 TEST(fullhistory_format) {
-  std::map<std::string, std::string> op;
-  op["print_start_end"] = "True";
+  FilePtr conf_file{fopen("./testconf.yaml", "w")};
+  fprintf(conf_file.get(), "print_start_end:   True\n");        
+  Configuration op(".");
+
   OscarFullHistoryOutput *oscfull = new OscarFullHistoryOutput(testoutputpath,
                                                                op);
   VERIFY(bf::exists(testoutputpath / "full_event_history.oscar"));
@@ -194,8 +197,11 @@ TEST(fullhistory_format) {
 
 
 TEST(particlelist_format) {
-  std::map<std::string, std::string> op;
-  op["only_final"] = "True";
+  // Create a "config file"
+  FilePtr conf_file{fopen("./testconf.yaml", "w")}; 
+  fprintf(conf_file.get(), "only_final:   True\n"); 
+  Configuration op(".");
+
   OscarFullHistoryOutput *oscfinal
     = new OscarParticleListOutput(testoutputpath, op);
   VERIFY(bf::exists(testoutputpath / "final_id_p_x.oscar"));

@@ -24,7 +24,8 @@
 #include "include/forwarddeclarations.h"
 #include "include/macros.h"
 #include "include/nucleusmodus.h"
-
+#include "include/random.h"
+#include "include/outputroutines.h"
 /* #include "include/spheremodus.h" */
 
 namespace Smash {

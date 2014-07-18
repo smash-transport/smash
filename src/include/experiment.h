@@ -167,8 +167,8 @@ class Experiment : public ExperimentBase {
  public:
   virtual void run() override;
   void set_outputs (OutputsList &output_list) {
-    outputs_ = output_list;
-  }
+    outputs_ = std::move(output_list);
+  } 
 
  private:
   /**
