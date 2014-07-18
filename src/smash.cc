@@ -22,6 +22,7 @@
 #include "include/experiment.h"
 #include "include/forwarddeclarations.h"
 #include "include/macros.h"
+#include "include/oscarparticlelistoutput.h"
 #include "include/outputroutines.h"
 #include "include/particletype.h"
 #include "include/decaymodes.h"
@@ -205,6 +206,18 @@ int main(int argc, char *argv[]) {
       printf("The following configuration values were not used:\n%s\n",
              report.c_str());
     }
+
+    // create outputs
+    std::vector<std::unique_ptr<OutputInterface>> output_list;
+    auto output_config = configuration["General"]["OUTPUT"];
+    if (static_cast<bool>(
+            output_config.take({"OSCAR1999_PARTICLELIST", "Enable"}))) {
+      output_list.emplace_back(new OscarParticleListOutput(
+          output_path, output_config["OSCAR1999_PARTICLELIST"]));
+    } else {
+      output_config.take({"OSCAR1999_PARTICLELIST"});
+    }
+
     experiment->run(output_path);
   }
   catch(std::exception &e) {
