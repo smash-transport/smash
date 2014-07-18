@@ -261,7 +261,8 @@ void Nucleus::set_parameters_automatic() {
       // set_diffusiveness(0.44);
       // set_nuclear_radius(6.86);
       break;
-    case 208:  // Lead !!! Reference?
+    case 208:  // Lead
+      // Default values.
       set_diffusiveness(0.44);
       set_nuclear_radius(6.67);
       set_saturation_density(0.161);

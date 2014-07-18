@@ -9,7 +9,7 @@ General:
     END_TIME:      1.0
 
     # how much time before recording measurables
-    OUTPUT_INTERVAL:  .2
+    OUTPUT_INTERVAL:  1.0
 
     # initial random seed (negative for time)
     RANDOMSEED:    -1
@@ -18,7 +18,7 @@ General:
     SIGMA:         10.0
 
     # number of test particle
-    TESTPARTICLES: 10
+    TESTPARTICLES: 1
 
     # number of events
     NEVENTS:       1
@@ -54,25 +54,27 @@ Modi:
 
         # center-of-mass energy in GeV
         SQRTS: 1.0
+
     Nucleus:
+        # Set up a p-lead collision.
         # Definitions for the projectile:
         Projectile:
-            PARTICLES: {2212: 92, 2112: 146}
-            AUTOMATIC: true
-            DEFORMED: true
+            PARTICLES: {2212: 1, 2112: 0}
+            DIFFUSIVENESS: 0.001 # very hard
+            AUTOMATIC: false
+            DEFORMED: false
         # Definitions for the target:
         Target:
-            PARTICLES: {2212: 92, 2112: 146}
-            AUTOMATIC: true
-            DEFORMED: true
+            PARTICLES: {2212: 82, 2112: 126}
+            AUTOMATIC: false
+            DEFORMED: false
         # what sqrt(s_NN) to use:
-        SQRTSNN: 193
+        SQRTSNN: 2
         # which subsystem "NN" in sqrt(s_NN) refers to
         # (two PDG IDs). The default is proton-proton; let's set it to
         # neutron-neutron.
         SQRTS_N: [2112, 2112]
-        # the initial z distance
-        INITIAL_DISTANCE: 10000
-        # impact parameter
+        # impact parameter (we'll sample from a distribution
+        # between 0 and 10)
         Impact:
             MAX: 10

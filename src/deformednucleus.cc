@@ -25,13 +25,11 @@ double DeformedNucleus::deformed_woods_saxon(double r, double cosx) const {
 }
 
 ThreeVector DeformedNucleus::deformed_distribute_nucleon() const {
-  // !!! Efficiency.
-
   double a_radius;
   Angles a_direction;
   // Set a sensible max bound for radial sampling.
-  // Stil working on this... but needs to be ~16 ?
-  double radius_max = 16;
+  double radius_max = a_radius / Nucleus::get_diffusiveness() + 
+                      a_radius * Nucleus::get_diffusiveness();
 
   // Sample the distribution.
   do {
@@ -60,7 +58,7 @@ void DeformedNucleus::arrange_nucleons() {
   }
   // Recenter and rotate
   align_center();
-  //rotate();
+  rotate();
 }
 
 void DeformedNucleus::set_parameters_automatic() {

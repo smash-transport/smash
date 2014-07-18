@@ -48,8 +48,8 @@ NucleusModus::NucleusModus(Configuration modus_config,
   std::map<PdgCode, int> tar = modus_cfg.take({"Target", "PARTICLES"});
   target_->fill_from_list(tar, params.testparticles);
 
-  // Ask to construct nuclei based on atomic number; otherwise,
-  // look for user defined values or take default parameters.
+  // Ask to construct nuclei based on atomic number; otherwise, look
+  // for the user defined values or take the default parameters.
   if (modus_cfg.has_value({"Projectile", "AUTOMATIC"}) && 
       modus_cfg.take({"Projectile", "AUTOMATIC"})) {
     projectile_->set_parameters_automatic();
@@ -126,10 +126,6 @@ float NucleusModus::initial_conditions(Particles *particles,
   projectile_->arrange_nucleons();
   target_->arrange_nucleons();
 
-  // Debug
-  projectile_->print_nucleus("_projectile_debug.txt");
-  target_->print_nucleus("_target_debug.txt");
-
   // set the masses used in sqrt_sNN. mass1 corresponds to the
   // projectile.
   float mass_1, mass_2;
@@ -150,7 +146,7 @@ float NucleusModus::initial_conditions(Particles *particles,
     throw NucleusEmpty("Target nucleus is empty!");
   }
 
-  // Energy calculations !!!
+  // Energy calculations
   double s_NN = sqrt_s_NN_*sqrt_s_NN_;
   if (sqrt_s_NN_ < mass_1 + mass_2) {
     throw ModusDefault::InvalidEnergy(
