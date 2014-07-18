@@ -14,28 +14,22 @@
 #include "include/oscarfullhistoryoutput.h"
 #include "include/particles.h"
 #include "include/outputroutines.h"
+#include "include/configuration.h"
 
 #include <boost/filesystem.hpp>
 
 namespace Smash {
 
-OscarFullHistoryOutput::OscarFullHistoryOutput(bf::path path, Options op)
+OscarFullHistoryOutput::OscarFullHistoryOutput(bf::path path, 
+                                          Configuration conf)
   : OscarFullHistoryOutput(path / "full_event_history.oscar",
-                           "# full_event_history\n", op){}
+                           "# full_event_history\n", conf){}
 
 OscarFullHistoryOutput::OscarFullHistoryOutput(bf::path path,
                                                const char* second_line,
-                                               Options op)
+                                               Configuration &conf)
   : file_{std::fopen(path.native().c_str(), "w")},
-    print_start_end_(false) {
-
-  std::string opt_str = op["print_start_end"];
-  for (auto &c : opt_str) {
-    c = tolower(c);
-  }
-  if (opt_str == "true") {
-    print_start_end_=true;
-  }
+    print_start_end_(static_cast<bool>(conf.take({"print_start_end"}))) {
   fprintf(file_.get(), "# OSC1999A\n");
   fprintf(file_.get(), "%s", second_line);
   fprintf(file_.get(), "# smash\n");

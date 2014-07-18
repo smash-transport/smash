@@ -11,12 +11,13 @@
 #define SRC_INCLUDE_OSCARPARTICLELISTOUTPUT_H_
 
 #include "oscarfullhistoryoutput.h"
+#include "configuration.h"
 
 namespace Smash {
 
 class OscarParticleListOutput : public OscarFullHistoryOutput {
  public:
-  OscarParticleListOutput(bf::path path, Options op);
+  OscarParticleListOutput(bf::path path, Configuration conf);
   ~OscarParticleListOutput();
 
   /// writes the initial particle information of an event

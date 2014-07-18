@@ -16,9 +16,8 @@
 
 namespace Smash {
 
-VtkOutput::VtkOutput(bf::path path, Options /*op*/)
-    : base_path_(std::move(path)) {
-}
+VtkOutput::VtkOutput(bf::path path, Configuration /*conf*/)
+    : base_path_(std::move(path)) {}
 
 VtkOutput::~VtkOutput() {
 }

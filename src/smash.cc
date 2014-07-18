@@ -27,7 +27,16 @@
 #include "include/particletype.h"
 #include "include/decaymodes.h"
 #include "include/inputfunctions.h"
-
+/* Outputs */
+#include "include/binaryoutput.h"
+#include "include/oscarfullhistoryoutput.h"
+#include "include/oscarparticlelistoutput.h"
+#include "include/outputroutines.h"
+#include "include/random.h"
+#ifdef SMASH_USE_ROOT
+#  include "include/rootoutput.h"
+#endif
+#include "include/vtkoutput.h"
 /* build dependent variables */
 #include "include/config.h"
 
@@ -200,6 +209,48 @@ int main(int argc, char *argv[]) {
 
     ParticleType::create_type_list(configuration.take({"particles"}));
     DecayModes::load_decaymodes(configuration.take({"decaymodes"}));
+
+    // create outputs
+    OutputsList output_list;
+    auto output_conf = configuration["General"]["OUTPUT"];
+    if (static_cast<bool>(
+            output_conf.take({"OSCAR1999_PARTICLELIST", "Enable"}))) {
+      output_list.emplace_back(new OscarParticleListOutput(
+          output_path, output_conf["OSCAR1999_PARTICLELIST"]));
+    } else {
+      output_conf.take({"OSCAR1999_PARTICLELIST"});
+    }
+    if (static_cast<bool>(
+            output_conf.take({"OSCAR1999_COLLISIONS", "Enable"}))) {
+      output_list.emplace_back(new OscarFullHistoryOutput(
+          output_path, output_conf["OSCAR1999_COLLISIONS"]));
+    } else {
+      output_conf.take({"OSCAR1999_COLLISIONS"});
+    }
+    if (static_cast<bool>(output_conf.take({"VTK", "Enable"}))) {
+      output_list.emplace_back(new VtkOutput(output_path, output_conf["VTK"]));
+    } else {
+      output_conf.take({"VTK"});
+    }    
+/*    if (static_cast<bool>(output_conf.take({"Binary", "Enable"}))) {
+      output_list.emplace_back(new BinaryOutput(output_path, 
+                                                output_conf["Binary"]));
+    } else {
+      output_conf.take({"Binary"});
+    }*/
+    if (static_cast<bool>(output_conf.take({"ROOT", "Enable"}))) {
+      #ifdef SMASH_USE_ROOT
+      output_list.emplace_back(new RootOutput(output_path, output_conf["ROOT"]));
+      #endif
+      #ifndef SMASH_USE_ROOT
+      printf("You requested ROOT output, but ROOT is disabled. ");
+      printf("To enable ROOT: cmake -D USE_ROOT=ON <path>. \n");
+      #endif
+    } else {
+      output_conf.take({"ROOT"});
+    }
+
+    // create an experiment
     auto experiment = ExperimentBase::create(configuration);
     const std::string report = configuration.unused_values_report();
     if (report != "{}") {
@@ -207,18 +258,11 @@ int main(int argc, char *argv[]) {
              report.c_str());
     }
 
-    // create outputs
-    std::vector<std::unique_ptr<OutputInterface>> output_list;
-    auto output_config = configuration["General"]["OUTPUT"];
-    if (static_cast<bool>(
-            output_config.take({"OSCAR1999_PARTICLELIST", "Enable"}))) {
-      output_list.emplace_back(new OscarParticleListOutput(
-          output_path, output_config["OSCAR1999_PARTICLELIST"]));
-    } else {
-      output_config.take({"OSCAR1999_PARTICLELIST"});
-    }
+    // set outputs to experiment
+    experiment->set_outputs(output_list);
 
-    experiment->run(output_path);
+    // run the experiment
+    experiment->run();
   }
   catch(std::exception &e) {
     printf("SMASH failed with the following error:\n%s\n", e.what());

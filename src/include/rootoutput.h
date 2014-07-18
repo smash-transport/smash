@@ -13,6 +13,7 @@
 #include <boost/filesystem.hpp>
 #include <vector>
 #include "outputinterface.h"
+#include "configuration.h"
 #include "TFile.h"
 #include "TTree.h"
 
@@ -84,7 +85,7 @@ class Particles;
   **/
 class RootOutput : public OutputInterface {
  public:
-  explicit RootOutput(boost::filesystem::path path, Options op);
+  RootOutput(boost::filesystem::path path, Configuration conf);
   ~RootOutput();
 
   void at_eventstart(const Particles &particles,

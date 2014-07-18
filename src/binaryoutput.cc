@@ -20,7 +20,7 @@
 
 namespace Smash {
 
-BinaryOutput::BinaryOutput(bf::path path, Configuration &config)
+BinaryOutput::BinaryOutput(bf::path path, Configuration config)
     : file_{std::fopen((path / (only_final_ ? "particles_binary.bin"
                                             : "collisions_binary.bin"))
                            .native()

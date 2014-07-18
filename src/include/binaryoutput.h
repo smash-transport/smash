@@ -106,10 +106,10 @@ namespace Smash {
  *  \endcode
  **/
 
-template <bool only_final_>
+//template <bool only_final_>
 class BinaryOutput : public OutputInterface {
  public:
-  explicit BinaryOutput(bf::path path, Configuration &config);
+  BinaryOutput(bf::path path, Configuration config);
 
   /// writes the initial particle information of an event
   void at_eventstart(const Particles &particles,
@@ -145,8 +145,8 @@ class BinaryOutput : public OutputInterface {
   bool print_start_end_;
 };
 
-using BinaryOutputFinal = BinaryOutput<true>;
-using BinaryOutputNonFinal = BinaryOutput<false>;
+//using BinaryOutputFinal = BinaryOutput<true>;
+//using BinaryOutputNonFinal = BinaryOutput<false>;
 
 }  // namespace Smash
 

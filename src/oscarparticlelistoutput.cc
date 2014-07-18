@@ -12,24 +12,17 @@
 #include "include/oscarparticlelistoutput.h"
 #include "include/particles.h"
 #include "include/outputroutines.h"
+#include "include/configuration.h"
 
 #include <boost/filesystem.hpp>
 
 namespace Smash {
 
 OscarParticleListOutput::OscarParticleListOutput(bf::path path,
-                                                 Options op)
+                                                 Configuration conf)
   : OscarFullHistoryOutput(path / "final_id_p_x.oscar", "# final_id_p_x\n",
-                                                                    op),
-  only_final_(true) {
-  std::string opt_str = op["only_final"];
-  for (auto &c : opt_str) {
-    c = tolower(c);
-  }
-  if (opt_str == "false") {
-    only_final_=false;
-  }
-}
+                                                                    conf),
+  only_final_(static_cast<bool>(conf.take({"only_final"}))) {}
 
 OscarParticleListOutput::~OscarParticleListOutput() {}
 
