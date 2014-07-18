@@ -20,14 +20,15 @@
 
 namespace Smash {
 
-BinaryOutput::BinaryOutput(bf::path path, Options op)
-    : particles_file_{
-         std::fopen((path / "particles_binary.bin").native().c_str(), "wb")},
-      collisions_file_{
-         std::fopen((path / "collisions_binary.bin").native().c_str(), "wb")} {
-  enable_collision_output_ = str_to_bool(op["collisions_output"]);
-  only_final_ = str_to_bool(op["only_final"]);
-  print_start_end_ = str_to_bool(op["print_start_end"]);
+BinaryOutput::BinaryOutput(bf::path path, Configuration &config)
+    : file_{std::fopen((path / (only_final_ ? "particles_binary.bin"
+                                            : "collisions_binary.bin"))
+                           .native()
+                           .c_str(),
+                       "wb")} {
+  enable_collision_output_ = config.take({"collisions_output"});
+  only_final_ = config.take({"only_final"});
+  print_start_end_ = config.take({"print_start_end"});
 
   if (enable_collision_output_) {
     fwrite("SMSH", 4, 1, collisions_file_.get());  // magic number

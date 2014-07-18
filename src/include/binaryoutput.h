@@ -106,9 +106,10 @@ namespace Smash {
  *  \endcode
  **/
 
+template <bool only_final_>
 class BinaryOutput : public OutputInterface {
  public:
-  explicit BinaryOutput(bf::path path, Options op);
+  explicit BinaryOutput(bf::path path, Configuration &config);
 
   /// writes the initial particle information of an event
   void at_eventstart(const Particles &particles,
@@ -131,14 +132,11 @@ class BinaryOutput : public OutputInterface {
   void write(const ParticleList &particles, FILE *file);
 
   /// Binary particles output
-  FilePtr particles_file_;
-
-  /// Binary collisions output
-  FilePtr collisions_file_;
+  FilePtr file_;
 
   /// Option: true - print only final particles in event, else -
   // also print initial particles and particles in regular intervals.
-  bool only_final_;
+  //bool only_final_;
 
   /// Option: switch collisions output on/off
   bool enable_collision_output_;
@@ -146,6 +144,10 @@ class BinaryOutput : public OutputInterface {
   /// Option for collisions output: print initial and final particles or not
   bool print_start_end_;
 };
+
+using BinaryOutputFinal = BinaryOutput<true>;
+using BinaryOutputNonFinal = BinaryOutput<false>;
+
 }  // namespace Smash
 
 #endif  // SRC_INCLUDE_BINARYOUTPUT_H_
