@@ -124,11 +124,11 @@ class BinaryOutput : public OutputInterface {
                           const Clock &clock) override;
 
  private:
-  void write(const std::string &s, const std::string &option);
-  void write(const FourVector &v, const std::string &option);
-  void write(std::int32_t x, const std::string &option);
-  void write(const Particles &particles, const std::string &option);
-  void write(const ParticleList &particles, const std::string &option);
+  void write(const std::string &s, FILE *file);
+  void write(const FourVector &v, FILE *file);
+  void write(std::int32_t x, FILE *file);
+  void write(const Particles &particles, FILE *file);
+  void write(const ParticleList &particles, FILE *file);
 
   /// Binary particles output
   FilePtr particles_file_;
