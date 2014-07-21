@@ -26,7 +26,8 @@
 #include "include/decaymodes.h"
 #include "include/inputfunctions.h"
 /* Outputs */
-#include "include/binaryoutput.h"
+#include "include/binaryoutput_collisions.h"
+#include "include/binaryoutput_particles.h"
 #include "include/oscarfullhistoryoutput.h"
 #include "include/oscarparticlelistoutput.h"
 #include "include/outputroutines.h"
@@ -229,12 +230,18 @@ int main(int argc, char *argv[]) {
     } else {
       output_conf.take({"VTK"});
     }
-/*    if (static_cast<bool>(output_conf.take({"Binary", "Enable"}))) {
-      output_list.emplace_back(new BinaryOutput(output_path, 
-                                                output_conf["Binary"]));
+    if (static_cast<bool>(output_conf.take({"Binary_collisions", "Enable"}))) {
+      output_list.emplace_back(new BinaryOutputCollisions(output_path, 
+                                       output_conf["Binary_collisions"]));
     } else {
-      output_conf.take({"Binary"});
-    }*/
+      output_conf.take({"Binary_collisions"});
+    }
+    if (static_cast<bool>(output_conf.take({"Binary_particles", "Enable"}))) {
+      output_list.emplace_back(new BinaryOutputParticles(output_path,
+                                       output_conf["Binary_particles"]));
+    } else {
+      output_conf.take({"Binary_particles"});
+    }
     if (static_cast<bool>(output_conf.take({"ROOT", "Enable"}))) {
       #ifdef SMASH_USE_ROOT
       output_list.emplace_back(new RootOutput(

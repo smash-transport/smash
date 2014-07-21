@@ -18,23 +18,16 @@ General:
             only_final:         True
         VTK:
             Enable:             False
-            max_output_files:   1000
         ROOT:
             Enable:             True
             write_collisions:   True
-        Binary:
+            write_particles:    True
+        Binary_collisions:
             Enable:             True
-
-            # print only particles in the end of event
-            only_final:         False
-
-            # write collisions (written to separate file)
-            collisions_output:  True
-
-            # write initial and final particles to collision file
             print_start_end:    True
-        Yet_another_format:
+        Binary_particles:
             Enable:             True
+            only_final:         False
 
     # how much time before recording measurables
     OUTPUT_INTERVAL:  1.0

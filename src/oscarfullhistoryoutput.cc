@@ -23,7 +23,8 @@ OscarFullHistoryOutput::OscarFullHistoryOutput(bf::path path,
                                                Configuration &&conf)
   : file_{std::fopen(
           (path / "full_event_history.oscar").native().c_str(), "w")},
-    print_start_end_(static_cast<bool>(conf.take({"print_start_end"}))) {
+    print_start_end_(conf.has_value({"print_start_end"})
+                             ? conf.take({"print_start_end"}) : false) {
   fprintf(file_.get(), "# OSC1999A\n");
   fprintf(file_.get(), "# full_event_history\n");
   fprintf(file_.get(), "# smash\n");

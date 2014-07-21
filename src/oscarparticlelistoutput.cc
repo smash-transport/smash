@@ -7,21 +7,23 @@
  *
  */
 
-#include "include/clock.h"
-#include "include/oscarfullhistoryoutput.h"
 #include "include/oscarparticlelistoutput.h"
+
+#include <boost/filesystem.hpp>
+
+#include "include/clock.h"
 #include "include/particles.h"
 #include "include/outputroutines.h"
 #include "include/configuration.h"
 
-#include <boost/filesystem.hpp>
 
 namespace Smash {
 
 OscarParticleListOutput::OscarParticleListOutput(bf::path path,
                                                  Configuration&& conf)
   : file_{std::fopen((path / "final_id_p_x.oscar").native().c_str(), "w")},
-  only_final_(static_cast<bool>(conf.take({"only_final"}))) {
+  only_final_(conf.has_value({"only_final"})
+                               ? conf.take({"only_final"}) : true) {
   fprintf(file_.get(), "# OSC1999A\n");
   fprintf(file_.get(), "# final_id_p_x\n");
   fprintf(file_.get(), "# smash\n");
@@ -69,7 +71,6 @@ void OscarParticleListOutput::at_eventend(const Particles &particles,
 void OscarParticleListOutput::write_interaction(
   const ParticleList &/*incoming_particles*/,
   const ParticleList &/*outgoing_particles*/) {
-
   /* No interaction output */
 }
 

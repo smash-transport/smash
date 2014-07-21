@@ -13,6 +13,7 @@
 #include "filedeleter.h"
 #include "forwarddeclarations.h"
 #include "configuration.h"
+#include "outputinterface.h"
 
 namespace Smash {
 

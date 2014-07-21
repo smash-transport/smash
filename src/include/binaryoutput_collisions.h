@@ -7,14 +7,15 @@
  *
  */
 
-#ifndef SRC_INCLUDE_BINARYOUTPUT_H_
-#define SRC_INCLUDE_BINARYOUTPUT_H_
+#ifndef SRC_INCLUDE_BINARYOUTPUT_COLLISIONS_H_
+#define SRC_INCLUDE_BINARYOUTPUT_COLLISIONS_H_
 
 #include <string>
 
 #include "outputinterface.h"
 #include "filedeleter.h"
 #include "forwarddeclarations.h"
+#include "configuration.h"
 
 namespace Smash {
 
@@ -107,9 +108,9 @@ namespace Smash {
  **/
 
 //template <bool only_final_>
-class BinaryOutput : public OutputInterface {
+class BinaryOutputCollisions : public OutputInterface {
  public:
-  BinaryOutput(bf::path path, Configuration config);
+  BinaryOutputCollisions(bf::path path, Configuration&& config);
 
   /// writes the initial particle information of an event
   void at_eventstart(const Particles &particles,
@@ -125,29 +126,20 @@ class BinaryOutput : public OutputInterface {
                           const Clock &clock) override;
 
  private:
-  void write(const std::string &s, FILE *file);
-  void write(const FourVector &v, FILE *file);
-  void write(std::int32_t x, FILE *file);
-  void write(const Particles &particles, FILE *file);
-  void write(const ParticleList &particles, FILE *file);
+  void write(const std::string &s);
+  void write(const FourVector &v);
+  void write(std::int32_t x);
+  void write(const Particles &particles);
+  void write(const ParticleList &particles);
 
   /// Binary particles output
   FilePtr file_;
 
-  /// Option: true - print only final particles in event, else -
-  // also print initial particles and particles in regular intervals.
-  //bool only_final_;
-
-  /// Option: switch collisions output on/off
-  bool enable_collision_output_;
-
-  /// Option for collisions output: print initial and final particles or not
+  /// Option: print initial and final particles or not
   bool print_start_end_;
 };
 
-//using BinaryOutputFinal = BinaryOutput<true>;
-//using BinaryOutputNonFinal = BinaryOutput<false>;
 
 }  // namespace Smash
 
-#endif  // SRC_INCLUDE_BINARYOUTPUT_H_
+#endif  // SRC_INCLUDE_BINARYOUTPUT_COLLISIONS_H_

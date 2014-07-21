@@ -40,7 +40,8 @@ set(SMASH_LIBRARIES ${SMASH_LIBRARIES}
 set(smash_src
         action.cc
         boxmodus.cc
-#        binaryoutput.cc
+        binaryoutput_collisions.cc
+        binaryoutput_particles.cc
         collidermodus.cc
         configuration.cc
         cross-sections.cc

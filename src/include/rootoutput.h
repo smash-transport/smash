@@ -119,8 +119,11 @@ class RootOutput : public OutputInterface {
   std::array<int, max_buffer_size_>    pdgcode;
   int npart, tcounter, ev, nin, nout;
 
-  // Option to write collisions
+  // Option to write collisions tree
   bool write_collisions_;
+
+  // Option to write particles tree
+  bool write_particles_;
 };
 }  // namespace Smash
 
