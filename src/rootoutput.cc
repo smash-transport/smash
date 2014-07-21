@@ -21,7 +21,7 @@ namespace Smash {
  * RootOuput constructor. Creates file smash_run.root in run directory
  * and TTree with the name "particles" in it.
  */
-RootOutput::RootOutput(bf::path path, Configuration conf)
+RootOutput::RootOutput(bf::path path, Configuration&& conf)
     : base_path_(std::move(path)),
       root_out_file_(
           new TFile((base_path_ / "smash_run.root").native().c_str(), "NEW")),

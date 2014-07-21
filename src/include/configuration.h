@@ -191,9 +191,9 @@ class Configuration {
                          const bf::path &filename);
 
   /// if you want to copy this you're doing it wrong
-  Configuration(const Configuration &) = delete;
+  Configuration(const Configuration &) = default;
   /// if you want to copy this you're doing it wrong
-  Configuration &operator=(const Configuration &) = delete;
+  Configuration &operator=(const Configuration &) = default;
 
   /// moving is fine
   Configuration(Configuration &&) = default;

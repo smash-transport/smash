@@ -112,7 +112,7 @@ class ExperimentBase {
    * `decaymodes:` a list of processes used in simulation
    */
   // !!/USER:Input
-  static std::unique_ptr<ExperimentBase> create(Configuration &config);
+  static std::unique_ptr<ExperimentBase> create(Configuration config);
 
   /**
    * Runs the experiment.
@@ -125,7 +125,7 @@ class ExperimentBase {
   /**
    * Sets list of outputs
    */
-  virtual void set_outputs(OutputsList &output_list) = 0;
+  virtual void set_outputs(OutputsList &&output_list) = 0;
 
   /**
    * Exception class that is thrown if an invalid modus is requested from the
@@ -166,9 +166,9 @@ class Experiment : public ExperimentBase {
 
  public:
   virtual void run() override;
-  void set_outputs (OutputsList &output_list) {
+  void set_outputs(OutputsList &&output_list) {
     outputs_ = std::move(output_list);
-  } 
+  }
 
  private:
   /**
@@ -185,7 +185,7 @@ class Experiment : public ExperimentBase {
    *                but actually taken out of the object. Thus, all values that
    *                remain were not used.
    */
-  explicit Experiment(Configuration &config);
+  explicit Experiment(Configuration config);
 
   /** Reads particle type information and cross sections information and
    * does the initialization of the system

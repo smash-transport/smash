@@ -82,12 +82,11 @@ static void compare_particledata(const std::array<std::string,12> &datastring,
 }
 
 TEST(fullhistory_format) {
-  FilePtr conf_file{fopen("./testconf.yaml", "w")};
-  fprintf(conf_file.get(), "print_start_end:   True\n");        
-  Configuration op(".");
-
-  OscarFullHistoryOutput *oscfull = new OscarFullHistoryOutput(testoutputpath,
-                                                               op);
+  // Set options
+  Configuration&& op{bf::path{TEST_CONFIG_PATH} / "tests",
+                       "test_oscar99_fullhist.yaml"};
+  OscarFullHistoryOutput *oscfull
+                   = new OscarFullHistoryOutput(testoutputpath, std::move(op));
   VERIFY(bf::exists(testoutputpath / "full_event_history.oscar"));
 
   ParticleType::create_type_list(
@@ -197,13 +196,12 @@ TEST(fullhistory_format) {
 
 
 TEST(particlelist_format) {
-  // Create a "config file"
-  FilePtr conf_file{fopen("./testconf.yaml", "w")}; 
-  fprintf(conf_file.get(), "only_final:   True\n"); 
-  Configuration op(".");
+  // Set options
+  Configuration&& op{bf::path{TEST_CONFIG_PATH} / "tests",
+                     "test_oscar99_part.yaml"};
 
-  OscarFullHistoryOutput *oscfinal
-    = new OscarParticleListOutput(testoutputpath, op);
+  OscarParticleListOutput *oscfinal
+    = new OscarParticleListOutput(testoutputpath, std::move(op));
   VERIFY(bf::exists(testoutputpath / "final_id_p_x.oscar"));
 
   Particles particles;

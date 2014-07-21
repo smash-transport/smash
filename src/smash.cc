@@ -7,6 +7,9 @@
  *
  */
 
+#include <boost/filesystem.hpp>
+#include <boost/filesystem/fstream.hpp>
+
 #include <getopt.h>
 #include <cstdio>
 #include <cstdlib>
@@ -15,15 +18,10 @@
 #include <stdexcept>
 #include <string>
 
-#include <boost/filesystem.hpp>
-#include <boost/filesystem/fstream.hpp>
-
 #include "include/configuration.h"
 #include "include/experiment.h"
 #include "include/forwarddeclarations.h"
 #include "include/macros.h"
-#include "include/oscarparticlelistoutput.h"
-#include "include/outputroutines.h"
 #include "include/particletype.h"
 #include "include/decaymodes.h"
 #include "include/inputfunctions.h"
@@ -32,7 +30,6 @@
 #include "include/oscarfullhistoryoutput.h"
 #include "include/oscarparticlelistoutput.h"
 #include "include/outputroutines.h"
-#include "include/random.h"
 #ifdef SMASH_USE_ROOT
 #  include "include/rootoutput.h"
 #endif
@@ -231,7 +228,7 @@ int main(int argc, char *argv[]) {
       output_list.emplace_back(new VtkOutput(output_path, output_conf["VTK"]));
     } else {
       output_conf.take({"VTK"});
-    }    
+    }
 /*    if (static_cast<bool>(output_conf.take({"Binary", "Enable"}))) {
       output_list.emplace_back(new BinaryOutput(output_path, 
                                                 output_conf["Binary"]));
@@ -240,7 +237,8 @@ int main(int argc, char *argv[]) {
     }*/
     if (static_cast<bool>(output_conf.take({"ROOT", "Enable"}))) {
       #ifdef SMASH_USE_ROOT
-      output_list.emplace_back(new RootOutput(output_path, output_conf["ROOT"]));
+      output_list.emplace_back(new RootOutput(
+                               output_path, output_conf["ROOT"]));
       #endif
       #ifndef SMASH_USE_ROOT
       printf("You requested ROOT output, but ROOT is disabled. ");
@@ -259,7 +257,7 @@ int main(int argc, char *argv[]) {
     }
 
     // set outputs to experiment
-    experiment->set_outputs(output_list);
+    experiment->set_outputs(std::move(output_list));
 
     // run the experiment
     experiment->run();

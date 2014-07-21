@@ -10,14 +10,15 @@
 #ifndef SRC_INCLUDE_OSCARPARTICLELISTOUTPUT_H_
 #define SRC_INCLUDE_OSCARPARTICLELISTOUTPUT_H_
 
-#include "oscarfullhistoryoutput.h"
+#include "filedeleter.h"
+#include "forwarddeclarations.h"
 #include "configuration.h"
 
 namespace Smash {
 
-class OscarParticleListOutput : public OscarFullHistoryOutput {
+class OscarParticleListOutput : public OutputInterface {
  public:
-  OscarParticleListOutput(bf::path path, Configuration conf);
+  OscarParticleListOutput(bf::path path, Configuration&& conf);
   ~OscarParticleListOutput();
 
   /// writes the initial particle information of an event
@@ -35,7 +36,11 @@ class OscarParticleListOutput : public OscarFullHistoryOutput {
 
   void after_Nth_timestep(const Particles &particles, const int event_number,
                           const Clock &clock) override;
+
  private:
+  void write(const Particles &particles);
+  FilePtr file_;
+
   /// An option. If true - only final particles in event are printed
   bool only_final_;
 };

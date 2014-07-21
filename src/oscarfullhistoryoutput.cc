@@ -6,39 +6,32 @@
  *    GNU General Public License (GPLv3 or later)
  *
  */
+#include "include/oscarfullhistoryoutput.h"
 
+#include <boost/filesystem.hpp>
 #include <string>
 
 #include "include/clock.h"
 #include "include/forwarddeclarations.h"
-#include "include/oscarfullhistoryoutput.h"
 #include "include/particles.h"
 #include "include/outputroutines.h"
 #include "include/configuration.h"
 
-#include <boost/filesystem.hpp>
-
 namespace Smash {
 
-OscarFullHistoryOutput::OscarFullHistoryOutput(bf::path path, 
-                                          Configuration conf)
-  : OscarFullHistoryOutput(path / "full_event_history.oscar",
-                           "# full_event_history\n", conf){}
-
 OscarFullHistoryOutput::OscarFullHistoryOutput(bf::path path,
-                                               const char* second_line,
-                                               Configuration &conf)
-  : file_{std::fopen(path.native().c_str(), "w")},
+                                               Configuration &&conf)
+  : file_{std::fopen(
+          (path / "full_event_history.oscar").native().c_str(), "w")},
     print_start_end_(static_cast<bool>(conf.take({"print_start_end"}))) {
   fprintf(file_.get(), "# OSC1999A\n");
-  fprintf(file_.get(), "%s", second_line);
+  fprintf(file_.get(), "# full_event_history\n");
   fprintf(file_.get(), "# smash\n");
   fprintf(file_.get(), "# Block format:\n");
   fprintf(file_.get(), "# nin nout event_number\n");
   fprintf(file_.get(), "# id pdg 0 px py pz p0 mass x y z t\n");
   fprintf(file_.get(), "# End of event: 0 0 event_number\n");
   fprintf(file_.get(), "#\n");
-
 }
 
 
@@ -117,7 +110,7 @@ void OscarFullHistoryOutput::write_interaction(
 
 void OscarFullHistoryOutput::after_Nth_timestep(const Particles & /*particles*/,
                                                 const int /*event_number*/,
-                                     const Clock& /*clock*/) {
+                                                const Clock& /*clock*/) {
   /* No time interval output for interaction history */
 }
 

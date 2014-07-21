@@ -21,7 +21,7 @@ namespace Smash {
 
 class VtkOutput : public OutputInterface {
  public:
-  VtkOutput(bf::path path, Configuration conf);
+  VtkOutput(bf::path path, Configuration&& conf);
   ~VtkOutput();
 
   void at_eventstart(const Particles &particles,
