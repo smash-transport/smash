@@ -13,6 +13,7 @@
 #include <boost/filesystem.hpp>
 #include <vector>
 #include "outputinterface.h"
+#include "configuration.h"
 #include "TFile.h"
 #include "TTree.h"
 
@@ -84,7 +85,7 @@ class Particles;
   **/
 class RootOutput : public OutputInterface {
  public:
-  explicit RootOutput(boost::filesystem::path path, Options op);
+  RootOutput(boost::filesystem::path path, Configuration&& conf);
   ~RootOutput();
 
   void at_eventstart(const Particles &particles,
@@ -118,8 +119,11 @@ class RootOutput : public OutputInterface {
   std::array<int, max_buffer_size_>    pdgcode;
   int npart, tcounter, ev, nin, nout;
 
-  // Option to write collisions
+  // Option to write collisions tree
   bool write_collisions_;
+
+  // Option to write particles tree
+  bool write_particles_;
 };
 }  // namespace Smash
 

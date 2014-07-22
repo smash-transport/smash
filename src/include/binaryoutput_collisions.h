@@ -7,14 +7,15 @@
  *
  */
 
-#ifndef SRC_INCLUDE_BINARYOUTPUT_H_
-#define SRC_INCLUDE_BINARYOUTPUT_H_
+#ifndef SRC_INCLUDE_BINARYOUTPUT_COLLISIONS_H_
+#define SRC_INCLUDE_BINARYOUTPUT_COLLISIONS_H_
 
 #include <string>
 
 #include "outputinterface.h"
 #include "filedeleter.h"
 #include "forwarddeclarations.h"
+#include "configuration.h"
 
 namespace Smash {
 
@@ -106,9 +107,10 @@ namespace Smash {
  *  \endcode
  **/
 
-class BinaryOutput : public OutputInterface {
+//template <bool only_final_>
+class BinaryOutputCollisions : public OutputInterface {
  public:
-  explicit BinaryOutput(bf::path path, Options op);
+  BinaryOutputCollisions(bf::path path, Configuration&& config);
 
   /// writes the initial particle information of an event
   void at_eventstart(const Particles &particles,
@@ -124,28 +126,20 @@ class BinaryOutput : public OutputInterface {
                           const Clock &clock) override;
 
  private:
-  void write(const std::string &s, const std::string &option);
-  void write(const FourVector &v, const std::string &option);
-  void write(std::int32_t x, const std::string &option);
-  void write(const Particles &particles, const std::string &option);
-  void write(const ParticleList &particles, const std::string &option);
+  void write(const std::string &s);
+  void write(const FourVector &v);
+  void write(std::int32_t x);
+  void write(const Particles &particles);
+  void write(const ParticleList &particles);
 
   /// Binary particles output
-  FilePtr particles_file_;
+  FilePtr file_;
 
-  /// Binary collisions output
-  FilePtr collisions_file_;
-
-  /// Option: true - print only final particles in event, else -
-  // also print initial particles and particles in regular intervals.
-  bool only_final_;
-
-  /// Option: switch collisions output on/off
-  bool enable_collision_output_;
-
-  /// Option for collisions output: print initial and final particles or not
+  /// Option: print initial and final particles or not
   bool print_start_end_;
 };
+
+
 }  // namespace Smash
 
-#endif  // SRC_INCLUDE_BINARYOUTPUT_H_
+#endif  // SRC_INCLUDE_BINARYOUTPUT_COLLISIONS_H_

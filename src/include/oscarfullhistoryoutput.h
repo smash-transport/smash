@@ -11,16 +11,15 @@
 #define SRC_INCLUDE_OSCARFULLHISTORYOUTPUT_H_
 
 #include "outputinterface.h"
-
 #include "filedeleter.h"
 #include "forwarddeclarations.h"
-#include <string>
+#include "configuration.h"
 
 namespace Smash {
 
 class OscarFullHistoryOutput : public OutputInterface {
  public:
-  OscarFullHistoryOutput(bf::path path, Options op);
+  OscarFullHistoryOutput(bf::path path, Configuration&& conf);
   ~OscarFullHistoryOutput();
 
   /// writes the initial particle information of an event
@@ -39,13 +38,10 @@ class OscarFullHistoryOutput : public OutputInterface {
   void after_Nth_timestep(const Particles &particles, const int event_number,
                           const Clock &clock) override;
 
- protected:
-  OscarFullHistoryOutput(bf::path path, const char* second_line,
-                         Options op);
+ private:
   void write(const Particles &particles);
   FilePtr file_;
- 
- private:
+
   /// An option. True - initial and final particles are printed, else not.
   bool print_start_end_;
 };

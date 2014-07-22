@@ -6,45 +6,33 @@
  *    GNU General Public License (GPLv3 or later)
  *
  */
+#include "include/oscarfullhistoryoutput.h"
 
+#include <boost/filesystem.hpp>
 #include <string>
 
 #include "include/clock.h"
 #include "include/forwarddeclarations.h"
-#include "include/oscarfullhistoryoutput.h"
 #include "include/particles.h"
 #include "include/outputroutines.h"
-
-#include <boost/filesystem.hpp>
+#include "include/configuration.h"
 
 namespace Smash {
 
-OscarFullHistoryOutput::OscarFullHistoryOutput(bf::path path, Options op)
-  : OscarFullHistoryOutput(path / "full_event_history.oscar",
-                           "# full_event_history\n", op){}
-
 OscarFullHistoryOutput::OscarFullHistoryOutput(bf::path path,
-                                               const char* second_line,
-                                               Options op)
-  : file_{std::fopen(path.native().c_str(), "w")},
-    print_start_end_(false) {
-
-  std::string opt_str = op["print_start_end"];
-  for (auto &c : opt_str) {
-    c = tolower(c);
-  }
-  if (opt_str == "true") {
-    print_start_end_=true;
-  }
+                                               Configuration &&conf)
+  : file_{std::fopen(
+          (path / "full_event_history.oscar").native().c_str(), "w")},
+    print_start_end_(conf.has_value({"print_start_end"})
+                             ? conf.take({"print_start_end"}) : false) {
   fprintf(file_.get(), "# OSC1999A\n");
-  fprintf(file_.get(), "%s", second_line);
+  fprintf(file_.get(), "# full_event_history\n");
   fprintf(file_.get(), "# smash\n");
   fprintf(file_.get(), "# Block format:\n");
   fprintf(file_.get(), "# nin nout event_number\n");
   fprintf(file_.get(), "# id pdg 0 px py pz p0 mass x y z t\n");
   fprintf(file_.get(), "# End of event: 0 0 event_number\n");
   fprintf(file_.get(), "#\n");
-
 }
 
 
@@ -123,7 +111,7 @@ void OscarFullHistoryOutput::write_interaction(
 
 void OscarFullHistoryOutput::after_Nth_timestep(const Particles & /*particles*/,
                                                 const int /*event_number*/,
-                                     const Clock& /*clock*/) {
+                                                const Clock& /*clock*/) {
   /* No time interval output for interaction history */
 }
 

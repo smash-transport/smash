@@ -7,28 +7,31 @@
  *
  */
 
-#include "include/clock.h"
-#include "include/oscarfullhistoryoutput.h"
 #include "include/oscarparticlelistoutput.h"
-#include "include/particles.h"
-#include "include/outputroutines.h"
 
 #include <boost/filesystem.hpp>
+
+#include "include/clock.h"
+#include "include/particles.h"
+#include "include/outputroutines.h"
+#include "include/configuration.h"
+
 
 namespace Smash {
 
 OscarParticleListOutput::OscarParticleListOutput(bf::path path,
-                                                 Options op)
-  : OscarFullHistoryOutput(path / "final_id_p_x.oscar", "# final_id_p_x\n",
-                                                                    op),
-  only_final_(true) {
-  std::string opt_str = op["only_final"];
-  for (auto &c : opt_str) {
-    c = tolower(c);
-  }
-  if (opt_str == "false") {
-    only_final_=false;
-  }
+                                                 Configuration&& conf)
+  : file_{std::fopen((path / "final_id_p_x.oscar").native().c_str(), "w")},
+  only_final_(conf.has_value({"only_final"})
+                               ? conf.take({"only_final"}) : true) {
+  fprintf(file_.get(), "# OSC1999A\n");
+  fprintf(file_.get(), "# final_id_p_x\n");
+  fprintf(file_.get(), "# smash\n");
+  fprintf(file_.get(), "# Block format:\n");
+  fprintf(file_.get(), "# nin nout event_number\n");
+  fprintf(file_.get(), "# id pdg 0 px py pz p0 mass x y z t\n");
+  fprintf(file_.get(), "# End of event: 0 0 event_number\n");
+  fprintf(file_.get(), "#\n");
 }
 
 OscarParticleListOutput::~OscarParticleListOutput() {}
@@ -68,7 +71,6 @@ void OscarParticleListOutput::at_eventend(const Particles &particles,
 void OscarParticleListOutput::write_interaction(
   const ParticleList &/*incoming_particles*/,
   const ParticleList &/*outgoing_particles*/) {
-
   /* No interaction output */
 }
 
@@ -80,6 +82,17 @@ void OscarParticleListOutput::after_Nth_timestep(const Particles &particles,
     fprintf(file_.get(), "%zu %zu %i\n", particles.size(), zero,
             event_number + 1);
     write(particles);
+  }
+}
+
+void OscarParticleListOutput::write(const Particles &particles) {
+  for (const ParticleData &data : particles.data()) {
+    fprintf(file_.get(), "%i %s %i %g %g %g %g %g %g %g %g %g\n", data.id(),
+            data.pdgcode().string().c_str(), 0, data.momentum().x1(),
+            data.momentum().x2(), data.momentum().x3(), data.momentum().x0(),
+            sqrt(data.momentum().Dot(data.momentum())), data.position().x1(),
+            data.position().x2(), data.position().x3(),
+            data.position().x0());
   }
 }
 
