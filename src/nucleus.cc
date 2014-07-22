@@ -254,7 +254,7 @@ void Nucleus::set_parameters_automatic() {
   switch (Nucleus::number_of_particles()) {
     case 238:  // Uranium
       // Default values.
-      set_diffusiveness(0.54);
+      set_diffusiveness(0.556);
       set_nuclear_radius(6.86);
       set_saturation_density(0.166);
       // Hirano, Huovinen, Nara - Corrections.
@@ -263,7 +263,7 @@ void Nucleus::set_parameters_automatic() {
       break;
     case 208:  // Lead
       // Default values.
-      set_diffusiveness(0.44);
+      set_diffusiveness(0.54);
       set_nuclear_radius(6.67);
       set_saturation_density(0.161);
       break;
@@ -278,7 +278,7 @@ void Nucleus::set_parameters_automatic() {
       break;
     case 63:  // Copper
       // Default values.
-      set_diffusiveness(0.5977);
+      set_diffusiveness(0.597);
       set_nuclear_radius(4.20641);
       set_saturation_density(0.1686);  
       // Hirano, Nara - Corrections.
@@ -306,11 +306,10 @@ void Nucleus::set_parameters_from_config(bool is_projectile, Configuration &conf
   }
 }
 
-void Nucleus::boost(double beta_squared_with_sign) {
+void Nucleus::boost(double beta_scalar) {
   // we use the sign of the squared velocity to get information about
   // the sign of the velocity itself.
-  double sign = beta_squared_with_sign >= 0 ? 1 : -1;
-  double beta_squared = std::abs(beta_squared_with_sign);
+  double beta_squared = beta_scalar * beta_scalar;
   double one_over_gamma = std::sqrt(1.0 - beta_squared);
   /*double gamma = 1.0/one_over_gamma;
     double gammabeta = sign*sqrt(beta_squared)*gamma;
@@ -322,7 +321,7 @@ void Nucleus::boost(double beta_squared_with_sign) {
   //       a system that moves with -beta. Now in this frame, it seems
   //       like p has been accelerated with +beta.
   //     )
-  ThreeVector beta (0., 0., -sign*std::sqrt(beta_squared));
+  ThreeVector beta (0., 0., beta_scalar);
   for (auto i = begin(); i != end(); i++) {
     // a real Lorentz Transformation would leave the particles at
     // different times here, which we would then have to propagate back
@@ -340,7 +339,6 @@ void Nucleus::boost(double beta_squared_with_sign) {
   // we also need to update z_max_ and z_min:
   z_max_ *= one_over_gamma;
   z_min_ *= one_over_gamma;
-  return;
 }
 
 void Nucleus::fill_from_list(const std::map<PdgCode, int>& particle_list,
@@ -392,7 +390,6 @@ void Nucleus::print_nucleus(const char * file_name) const {
     a_file.close();
   }
 }
-
 
 FourVector Nucleus::center() const {
   FourVector centerpoint(0.0,0.0,0.0,0.0);

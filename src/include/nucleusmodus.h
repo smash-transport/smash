@@ -182,6 +182,20 @@ class NucleusModus : public ModusDefault {
    * \f$\pm\f$ this value.
    **/
   double initial_z_displacement_ = 1.0;
+  // Reference frame for the system.
+  // 1 = Center of mass
+  // 2 = Center of velocity
+  // 3 = Target at rest
+  // 4 = Projectile at rest
+  int frame_ = 0;
+  // Get the frame dependent velocity for each nucleus, using
+  // the current value of the frame_ class member. \see frame_
+  // 
+  // @param s The total mandelstam s of the system
+  // @param m1 The mass of the projectile.
+  // @param m2 The mass of the target.
+  // @return < p1, p2 >
+  std::vector<float> get_velocities(float mandelstam_s, float m1, float m2);
 };
 
 }  // namespace Smash

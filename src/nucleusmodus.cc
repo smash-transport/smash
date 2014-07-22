@@ -7,6 +7,7 @@
 #include <cmath>
 #include <cstdlib>
 #include <cstring>
+#include <stdexcept>
 // #include <list>
  
 #include "include/nucleusmodus.h"
@@ -23,10 +24,16 @@ namespace Smash {
 NucleusModus::NucleusModus(Configuration modus_config,
                            const ExperimentParameters &params) {
   Configuration modus_cfg = modus_config["Nucleus"];
+
+  // TODO: Allow user to select different energy inputs (energy/mom. of beam, etc.)
+  // Get energy input.
   sqrt_s_NN_ = modus_cfg.take({"SQRTSNN"});
   std::vector<PdgCode> sqrts_n = modus_cfg.take({"SQRTS_N"});
   pdg_sNN_1_ = sqrts_n[0];
   pdg_sNN_2_ = sqrts_n[1];
+
+  // TODO: Allow user to choose the desired frame
+  frame_ = 1;
 
   // Decide which type of nucleus (deformed or not).
   if (modus_cfg.has_value({"Projectile", "DEFORMED"}) &&
@@ -146,8 +153,7 @@ float NucleusModus::initial_conditions(Particles *particles,
     throw NucleusEmpty("Target nucleus is empty!");
   }
 
-  // Energy calculations
-  double s_NN = sqrt_s_NN_*sqrt_s_NN_;
+  // Check if energy is valid.
   if (sqrt_s_NN_ < mass_1 + mass_2) {
     throw ModusDefault::InvalidEnergy(
                       "Error in input: sqrt(s_NN) is smaller than masses:\n"
@@ -155,14 +161,14 @@ float NucleusModus::initial_conditions(Particles *particles,
                       + std::to_string(mass_1) + " GeV + "
                       + std::to_string(mass_2) + " GeV.");
   }
-  float total_mandelstam_s = (s_NN - mass_1*mass_1 - mass_2*mass_2)
+  // Calculate the lorentz invariant mandelstam variable for the total system.
+  float total_mandelstam_s = (sqrt_s_NN_*sqrt_s_NN_ - mass_1*mass_1 - mass_2*mass_2)
                              * mass_projec*mass_target
                              / (mass_1*mass_2)
-                           + mass_projec*mass_projec + mass_target*mass_target;
-  float velocity_squared = (total_mandelstam_s - (mass_projec + mass_target)
-                                               * (mass_projec + mass_target))
-                         / (total_mandelstam_s - (mass_projec - mass_target)
-                                               * (mass_projec - mass_target));
+                             + mass_projec*mass_projec + mass_target*mass_target;
+  // Use the total mandelstam variable to get the frame-denendent velocity for
+  // each nucleus. Position 1 is projectile, position 2 is target.
+  std::vector<float> velocities = get_velocities(total_mandelstam_s, mass_projec, mass_target);                           
 
   // Shift the nuclei into starting positions.
   // Keep the pair separated in z by some small distance,
@@ -174,16 +180,16 @@ float NucleusModus::initial_conditions(Particles *particles,
   // geometry, initial separation may include extra space.
   // After shifting, set the time component of the particles to
   // -initial_z_displacement_/sqrt(velocity_squared).
-  float simulation_time = -initial_z_displacement_/sqrt(velocity_squared);
+  float avg_velocity = sqrt(velocities[0] * velocities[0] + velocities[1] * velocities[1]);
+  float simulation_time = -initial_z_displacement_/ avg_velocity;
   projectile_->shift(true, -initial_z_displacement_, +impact_/2.0,
-                    simulation_time);
-  target_->shift(false, +initial_z_displacement_, -impact_/2.0,
-                simulation_time);
+                     simulation_time);
+  target_->shift(false, initial_z_displacement_, -impact_/2.0,
+                 simulation_time);
 
-  // Boost the nuclei to the appropriate velocity. (target is in opposite
-  // direction!)
-  projectile_->boost(velocity_squared);
-  target_->boost(-velocity_squared);
+  // Boost the nuclei to the appropriate velocity.
+  projectile_->boost(velocities[0]);
+  target_->boost(velocities[1]);
 
   // Put the particles in the nuclei into particles.
   projectile_->copy_particles(particles);
@@ -203,4 +209,37 @@ void NucleusModus::sample_impact(bool s, float min, float max) {
   }
 }
 
+std::vector<float> NucleusModus::get_velocities(float s, float m1, float m2) {
+  // Vector for storing nuclear velocities.
+  std::vector<float> velocities;
+  // Frame dependent calculations of velocities.
+  switch (frame_) {
+    case 1:  // Center of mass
+      // Note temporary storage of center of mass momentum in velocity 1.
+      velocities[1] = sqrt(((s - (m1 + m2) * (m1 + m2)) * (s - (m1 - m2) * (m1 - m2))) / (4 * s));
+      velocities[0] = velocities[1] / m1;
+      velocities[1] = - velocities[1] / m2;
+      break;
+    case 2:  // Center of velocity
+      velocities[0] = sqrt((((m1 * m1) - (m2 * m2)) * ((m1 * m1) - (m2 * m2)) 
+                      - 2 * s * ((m1 * m1) + (m2 * m2)))
+                      / (8 * (m1 * m2) * (m1 * m2) + 4 * (m1 * m2) *
+                      (s - ((m1 * m1) + (m2 * m2)))));
+      velocities[1] = - velocities[0];
+      break;
+    case 3:  // Target at rest
+      velocities[0] = sqrt(-1 + ((s - (m1 * m1 + m2 * m2)) / (2 * m1 * m2))
+                      * ((s - (m1 * m1 + m2 * m2)) / (2 * m1 * m2)));
+      velocities[1] = 0;
+      break;
+    case 4:  // Projectile at rest
+      velocities[0] = 0;
+      velocities[1] = - sqrt(-1 + ((s - (m1 * m1 + m2 * m2)) / (2 * m1 * m2))
+                      * ((s - (m1 * m1 + m2 * m2)) / (2 * m1 * m2)));
+      break;
+    default:
+      throw std::domain_error("Invalid reference frame in NucleusModus::get_velocities.");
+  }
+  return velocities;
+}
 }  // namespace Smash
