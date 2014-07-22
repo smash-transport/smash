@@ -70,7 +70,7 @@ static void read_binary(std::int32_t &x, FILE* file) {
 }
 
 /* Function to read and compare particle */
-static bool compare_particle(ParticleData &p, FILE* file) {
+static bool compare_particle(const ParticleData &p, FILE* file) {
   int id, pdgcode;
   FourVector pos, mom;
   read_binary(mom, file);
@@ -84,7 +84,7 @@ static bool compare_particle(ParticleData &p, FILE* file) {
 }
 
 /* function to read and compare particle block header */
-static bool compare_particles_block_header(int &npart, FILE* file) {
+static bool compare_particles_block_header(const int &npart, FILE* file) {
   int npart_read;
   char c_read;
   std::fread(&c_read, sizeof(char), 1, file);
@@ -95,7 +95,9 @@ static bool compare_particles_block_header(int &npart, FILE* file) {
 }
 
 /* function to read and compare collision block header */
-static bool compare_interaction_block_header(int &nin, int& nout, FILE* file) {
+static bool compare_interaction_block_header(const int &nin,
+                                             const int &nout,
+                                             FILE* file) {
   int nin_read, nout_read;
   char c_read;
   std::fread(&c_read, sizeof(char), 1, file);
@@ -108,7 +110,7 @@ static bool compare_interaction_block_header(int &nin, int& nout, FILE* file) {
 }
 
 /* function to read and compare event end line */
-static bool compare_final_block_header(int &ev, FILE* file) {
+static bool compare_final_block_header(const int &ev, FILE* file) {
   int ev_read;
   char c_read;
   std::fread(&c_read, sizeof(char), 1, file);
@@ -118,11 +120,11 @@ static bool compare_final_block_header(int &ev, FILE* file) {
 
 TEST(fullhistory_format) {
   /* Set the most verbose option */
-  Configuration&& op{bf::path{TEST_CONFIG_PATH} / "tests",
+  Configuration&& op {bf::path {TEST_CONFIG_PATH} / "tests",
                        "test_binary_collisions.yaml"};
 
   /* Create an instance of binary output */
-  BinaryOutputCollisions *bin_output = 
+  BinaryOutputCollisions *bin_output =
                 new BinaryOutputCollisions(testoutputpath, std::move(op));
   VERIFY(bf::exists(testoutputpath / "collisions_binary.bin"));
 
@@ -157,25 +159,25 @@ TEST(fullhistory_format) {
    * Now we have an artificially generated binary output.
    * Let us try if we can read and understand it.
    */
-  
+
   // Open file as a binary
   FILE * binF;
-  binF = fopen ( (testoutputpath / "collisions_binary.bin").native().c_str(),
+  binF = fopen((testoutputpath / "collisions_binary.bin").native().c_str(),
                                                                         "rb");
   // Header
   std::vector<char> buf(4);
   std::string magic, smash_version;
   int format_version_number;
 
-  fread(&buf[0], 1, 4, binF); // magic number
+  fread(&buf[0], 1, 4, binF);  // magic number
   magic.assign(&buf[0], 4);
-  read_binary(format_version_number, binF); // format version number
+  read_binary(format_version_number, binF);  // format version number
   read_binary(smash_version, binF);  // smash version
 
   VERIFY(magic == "SMSH");
   VERIFY(format_version_number == 0);
-  //TODO:  VERIFY(smash_version == std::to_string(VERSION_MAJOR));
-  
+  // TODO(oliiny):  VERIFY(smash_version == std::to_string(VERSION_MAJOR));
+
   // particles at event atart: expect two smashons
   int nin, nout, npart;
   npart = 2;  // our two smashons
@@ -202,12 +204,12 @@ TEST(fullhistory_format) {
 
 TEST(particles_format) {
   /* Set the most verbose option */
-  Configuration&& op{bf::path{TEST_CONFIG_PATH} / "tests",
+  Configuration&& op {bf::path {TEST_CONFIG_PATH} / "tests",
                        "test_binary_particles.yaml"};
 
 
   /* Create an instance of binary output */
-  BinaryOutputParticles *bin_output = 
+  BinaryOutputParticles *bin_output =
                      new BinaryOutputParticles(testoutputpath, std::move(op));
   VERIFY(bf::exists(testoutputpath / "particles_binary.bin"));
 
@@ -234,7 +236,7 @@ TEST(particles_format) {
   particles.add_data(final_particle);
   final_particles.push_back(particles.data(particles.id_max()));
   Clock clock;
-  
+
   bin_output->after_Nth_timestep(particles, event_id, clock);
 
   /* Final state output */
@@ -243,25 +245,25 @@ TEST(particles_format) {
    * Now we have an artificially generated binary output.
    * Let us try if we can read and understand it.
    */
-  
+
   // Open file as a binary
   FILE * binF;
-  binF = fopen ( (testoutputpath / "particles_binary.bin").native().c_str(),
+  binF = fopen((testoutputpath / "particles_binary.bin").native().c_str(),
                                                                         "rb");
   // Header
   std::vector<char> buf(4);
   std::string magic, smash_version;
   int format_version_number;
 
-  fread(&buf[0], 1, 4, binF); // magic number
+  fread(&buf[0], 1, 4, binF);  // magic number
   magic.assign(&buf[0], 4);
-  read_binary(format_version_number, binF); // format version number
+  read_binary(format_version_number, binF);  // format version number
   read_binary(smash_version, binF);  // smash version
 
   VERIFY(magic == "SMSH");
   VERIFY(format_version_number == 0);
-  //TODO:  VERIFY(smash_version == std::to_string(VERSION_MAJOR));
-  
+  // TODO(oliiny):  VERIFY(smash_version == std::to_string(VERSION_MAJOR));
+
   int npart;
   // particles at event start: expect two smashons
   npart = 2;
