@@ -24,24 +24,14 @@
 #include "include/forwarddeclarations.h"
 #include "include/macros.h"
 #include "include/nucleusmodus.h"
-#include "include/binaryoutput.h"
-#include "include/oscarfullhistoryoutput.h"
-#include "include/oscarparticlelistoutput.h"
-#include "include/outputroutines.h"
 #include "include/random.h"
-#ifdef SMASH_USE_ROOT
-#  include "include/rootoutput.h"
-#endif
-#include "include/vtkoutput.h"
-
-#include <boost/filesystem.hpp>
-
+#include "include/outputroutines.h"
 /* #include "include/spheremodus.h" */
 
 namespace Smash {
 
 /* ExperimentBase carries everything that is needed for the evolution */
-std::unique_ptr<ExperimentBase> ExperimentBase::create(Configuration &config) {
+std::unique_ptr<ExperimentBase> ExperimentBase::create(Configuration config) {
   const std::string modus_chooser = config.take({"General", "MODUS"});
   printf("Modus for this calculation: %s\n", modus_chooser.c_str());
 
@@ -68,7 +58,7 @@ namespace {
  * \return The ExperimentParameters struct filled with values from the
  * Configuration
  */
-ExperimentParameters create_experiment_parameters(Configuration &config) {
+ExperimentParameters create_experiment_parameters(Configuration config) {
   const int testparticles = config.take({"General", "TESTPARTICLES"});
   float cross_section = config.take({"General", "SIGMA"});
 
@@ -88,7 +78,7 @@ ExperimentParameters create_experiment_parameters(Configuration &config) {
 }  // unnamed namespace
 
 template <typename Modus>
-Experiment<Modus>::Experiment(Configuration &config)
+Experiment<Modus>::Experiment(Configuration config)
     : parameters_(create_experiment_parameters(config)),
       modus_(config["Modi"], parameters_),
       particles_(),
@@ -102,37 +92,6 @@ Experiment<Modus>::Experiment(Configuration &config)
   }
   Random::set_seed(seed_);
   print_startup(seed_);
-
-  // Get outputs and their options
-  std::map<std::string, std::map<std::string, std::string>> op_conf =
-                                  config.take({"General", "OUTPUT"});
-  bool output_on;
-  std::string enable_str, why;
-  for (auto &output : op_conf) {
-    output_on = false;
-    enable_str = output.second["Enable"];
-    output.second.erase("Enable");
-
-    // Get string to lowercase for easier comparison later
-    for (auto &c : enable_str) c = tolower(c);
-
-    if (enable_str.compare("") == 0) {
-      why = "because \"Enable\" option is absent";
-    } else if (enable_str.compare("false") == 0) {
-      why = "by user";
-    } else if (enable_str.compare("true") == 0) {
-      output_on = true;
-    } else {
-      why = "because \"Enable\" option is neither true nor false";
-    }
-      
-    if (output_on) {
-      outputs_config_[output.first] = output.second;
-      printf("Output %s is enabled.\n", output.first.c_str());
-    } else {
-      printf("Output %s is disabled %s.\n", output.first.c_str(), why.c_str());
-    }
-  }
 }
 
 /* This method reads the particle type and cross section information
@@ -157,42 +116,6 @@ void Experiment<Modus>::initialize_new_event() {
   print_header();
 }
 
-
-/* This method sets all the outputs up depending on options
- *  specified in config file.
- */
-template <typename Modus>
-void Experiment<Modus>::set_outputs(const bf::path &path) {
-
-  for(const auto &outputformat : outputs_config_) {
-
-    std::string formatname = outputformat.first;
-    std::map<std::string, std::string> formatoptions = outputformat.second;
-
-    if (formatname =="OSCAR_COLLISIONS") {
-      outputs_.emplace_back(new OscarFullHistoryOutput(path, formatoptions));
-    } else if (formatname =="OSCAR_PARTICLELIST") {
-      outputs_.emplace_back(new OscarParticleListOutput(path, formatoptions));
-    } else if (formatname == "VTK") {
-      outputs_.emplace_back(new VtkOutput(path, formatoptions));
-    } else if (formatname == "Binary") {
-      outputs_.emplace_back(new BinaryOutput(path, formatoptions));
-    } else if (formatname == "ROOT") {
-      #ifdef SMASH_USE_ROOT
-      outputs_.emplace_back(new RootOutput(path, formatoptions));
-      #endif
-      #ifndef SMASH_USE_ROOT
-      printf("You requested ROOT output, but ROOT is disabled. ");
-      printf("To enable ROOT: cmake -D USE_ROOT=ON <path>. \n");
-      #endif
-    } else {
-      printf("Warning: Unknown output format name %s. ", formatname.c_str());
-      printf("It will be ignored with all its options.\n");
-    }
-  }
-}
-
-
 /* This is the loop over timesteps, carrying out collisions and decays
  * and propagating particles. */
 template <typename Modus>
@@ -204,7 +127,7 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
                 interactions_this_interval, conserved_initial_, time_start_,
                 parameters_.labclock.current_time());
 
-  while (! (++parameters_.labclock > end_time_)) {
+  while (!(++parameters_.labclock > end_time_)) {
     std::vector<ActionPtr> actions;  // XXX: a std::list might be better suited
                                      // for the task: lots of appending, then
                                      // sorting and finally a single linear
@@ -223,7 +146,8 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
     if (!actions.empty()) {
       for (const auto &action : actions) {
         if (action->is_valid(particles_)) {
-          const ParticleList incoming_particles = action->incoming_particles(particles_);
+          const ParticleList incoming_particles =
+                                        action->incoming_particles(particles_);
           action->perform(&particles_, interactions_total);
           const ParticleList outgoing_particles = action->outgoing_particles();
           for (const auto &output : outputs_) {
@@ -285,10 +209,9 @@ void Experiment<Modus>::print_startup(int64_t seed) {
 }
 
 template <typename Modus>
-void Experiment<Modus>::run(const bf::path &path) {
-  set_outputs(path);
-
+void Experiment<Modus>::run() {
   for (int j = 0; j < nevents_; j++) {
+    /* Sample initial particles, start clock, some printout and book-keeping */
     initialize_new_event();
 
     /* Output at event start */

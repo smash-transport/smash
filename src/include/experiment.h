@@ -78,7 +78,7 @@ class ExperimentBase {
    *     \endif
    * \li `Sphere` for calculations of the expansion of a thermalized sphere.
    * See ref input_modi_sphere_
-   * \li `Collider` ...
+   * \li `Collider` for testing elementary cross-sections
    * \li `Box` for infinite matter calculation in a rectangular box. See
    *     \if user
    *     \ref input_modi_box_
@@ -107,22 +107,25 @@ class ExperimentBase {
    *
    * `NEVENTS:` Number of events to calculate.
    *
-   * `particles:` ???
+   * `particles:` a list of particle sorts used in simulation 
    *
-   * `decaymodes:` ???
+   * `decaymodes:` a list of processes used in simulation
    */
   // !!/USER:Input
-  static std::unique_ptr<ExperimentBase> create(Configuration &config);
+  static std::unique_ptr<ExperimentBase> create(Configuration config);
 
   /**
    * Runs the experiment.
    *
    * The constructor does the setup of the experiment. The run function executes
    * the complete experiment.
-   *
-   * \param path The path where output files will be written to.
    */
-  virtual void run(const bf::path &path) = 0;
+  virtual void run() = 0;
+
+  /**
+   * Sets list of outputs
+   */
+  virtual void set_outputs(OutputsList &&output_list) = 0;
 
   /**
    * Exception class that is thrown if an invalid modus is requested from the
@@ -162,7 +165,10 @@ class Experiment : public ExperimentBase {
   friend class ExperimentBase;
 
  public:
-  virtual void run(const bf::path &path) override;
+  virtual void run() override;
+  void set_outputs(OutputsList &&output_list) {
+    outputs_ = std::move(output_list);
+  }
 
  private:
   /**
@@ -179,7 +185,7 @@ class Experiment : public ExperimentBase {
    *                but actually taken out of the object. Thus, all values that
    *                remain were not used.
    */
-  explicit Experiment(Configuration &config);
+  explicit Experiment(Configuration config);
 
   /** Reads particle type information and cross sections information and
    * does the initialization of the system
@@ -187,11 +193,6 @@ class Experiment : public ExperimentBase {
    * This is called in the beginning of each event.
    */
   void initialize_new_event();
-
-  /*
-   *  Sets up SMASH outputs.
-   */
-  void set_outputs(const bf::path &path);
 
   /** Runs the time evolution of an event
    *
@@ -279,12 +280,6 @@ class Experiment : public ExperimentBase {
   QuantumNumbers conserved_initial_;
   /// system starting time of the simulation
   SystemTimePoint time_start_ = SystemClock::now();
-
-  /** Output configuration.
-   *
-   * Specifies the format of outputs: OSCAR, ROOT, VTK etc.
-   */
-  std::map<std::string, std::map<std::string, std::string>> outputs_config_;
 };
 
 }  // namespace Smash

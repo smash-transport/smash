@@ -21,6 +21,7 @@
 #include "../include/oscarparticlelistoutput.h"
 #include "../include/particles.h"
 #include "../include/random.h"
+#include "../include/configuration.h"
 
 using namespace Smash;
 
@@ -81,11 +82,22 @@ static void compare_particledata(const std::array<std::string,12> &datastring,
 }
 
 TEST(fullhistory_format) {
-  std::map<std::string, std::string> options;
-  options["Print_start_end"] = "True";
-  options["Format"] = "1999";
-  OscarFullHistoryOutput *oscfull = new OscarFullHistoryOutput(testoutputpath,
-                                                               options);
+  // Set options
+  std::string configfilename = "oscar_1999.yaml";
+  std::ofstream configfile;
+  std::cout << (testoutputpath / configfilename).native().c_str() << std::endl;
+  configfile.open((testoutputpath / configfilename).native().c_str());
+  if (configfile.is_open()) {
+    configfile << "Print_start_end:" << "\t" << "True" << std::endl;
+    configfile << "2013_format:" << "\t" << "False" << std::endl;
+    configfile.close();
+  } else {
+    std::cout << "Could not open config file!" << std::endl;
+  }
+  VERIFY(bf::exists(testoutputpath / configfilename));
+  Configuration&& op{testoutputpath, configfilename};
+  OscarFullHistoryOutput *oscfull
+                   = new OscarFullHistoryOutput(testoutputpath, std::move(op));
   std::string outputfilename = "full_event_history.oscar";
   VERIFY(bf::exists(testoutputpath / outputfilename));
 
@@ -196,16 +208,23 @@ TEST(fullhistory_format) {
 
 
 TEST(particlelist_format) {
-  std::map<std::string, std::string> options;
-  options["Only_final"] = "True";
-  options["Format"] = "1999";
-  OscarFullHistoryOutput *oscfinal
-    = new OscarParticleListOutput(testoutputpath, options);
-  std::string outputfilename = "final_particle_list.oscar";
+  // Set options
+  std::string configfilename = "oscar_1999.yaml";
+  std::ofstream configfile;
+  configfile.open((testoutputpath / configfilename).native().c_str());
+  configfile << "Only_final:" << "\t" << "True" << std::endl;
+  configfile << "2013_format:" << "\t" << "False" << std::endl;
+  configfile.close();
+  VERIFY(bf::exists(testoutputpath / configfilename));
+
+  Configuration&& op{testoutputpath, configfilename};
+
+  OscarParticleListOutput *oscfinal
+    = new OscarParticleListOutput(testoutputpath, std::move(op));
+  std::string outputfilename = "particle_lists.oscar";
   VERIFY(bf::exists(testoutputpath / outputfilename));
 
   Particles particles;
-
   /* Create 5 particles */
   for (int i = 0; i < 5; i++) {
     ParticleData particle = create_smashon_particle();
@@ -239,7 +258,7 @@ TEST(particlelist_format) {
     /* Check header */
     std::string output_header = "";
     std::string header = "# OSC1999A\n"
-                         "# final_particle_list\n"
+                         "# final_id_p_x\n"
                          "# smash\n"
                          "# Block format:\n"
                          "# nin nout event_number\n"

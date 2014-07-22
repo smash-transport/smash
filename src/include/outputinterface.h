@@ -60,10 +60,6 @@ class OutputInterface {
    */
   virtual void after_Nth_timestep(const Particles &, const int,
                                   const Clock &) = 0;
-
-protected:
-  /// options of output
-  typedef std::map<std::string, std::string> Options;
 };
 
 }  // namespace Smash

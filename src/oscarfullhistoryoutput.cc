@@ -6,52 +6,36 @@
  *    GNU General Public License (GPLv3 or later)
  *
  */
+#include "include/oscarfullhistoryoutput.h"
 
+#include <boost/filesystem.hpp>
 #include <string>
 
 #include "include/clock.h"
 #include "include/forwarddeclarations.h"
-#include "include/oscarfullhistoryoutput.h"
 #include "include/particles.h"
 #include "include/outputroutines.h"
-
-#include <boost/filesystem.hpp>
+#include "include/configuration.h"
 
 namespace Smash {
 
-OscarFullHistoryOutput::OscarFullHistoryOutput(bf::path path, Options op)
-  : OscarFullHistoryOutput(path / "full_event_history.oscar",
-                           "full_event_history", op){}
-
 OscarFullHistoryOutput::OscarFullHistoryOutput(bf::path path,
-                                               const char* format_specifier,
-                                               Options op)
-  : file_{std::fopen(path.native().c_str(), "w")},
-    modern_format_(false), write_initial_final_lists_(false) {
+                                               Configuration &&conf)
+  : file_{std::fopen(
+          (path / "full_event_history.oscar").native().c_str(), "w")},
+    modern_format_(conf.has_value({"2013_format"})
+                   ? conf.take({"2013_format"}) : false),
+    print_start_end_(conf.has_value({"Print_start_end"})
+                     ? conf.take({"Print_start_end"}) : false) {
 
-  std::string opt_str;
-  if (op.count("Print_start_end") != 0) {
-    opt_str = op.at("Print_start_end");
-    for (auto &c : opt_str) {
-      c = tolower(c);
-    }
-    if (opt_str == "true") {
-      write_initial_final_lists_ = true;
-    }
-  }
-  if (op.count("Format") != 0) {
-    if (op.at("Format") == "2013") {
-      modern_format_ = true;
-    }
-  }
   if (modern_format_) {
-    fprintf(file_.get(), "#!OSCAR2013 %s ", format_specifier);
+    fprintf(file_.get(), "#!OSCAR2013 full_event_history ");
     fprintf(file_.get(), "t x y z mass p0 px py pz pdg ID\n");
     fprintf(file_.get(),
             "# Units: fm fm fm fm GeV GeV GeV GeV GeV none none\n");
   } else {
     fprintf(file_.get(), "# OSC1999A\n");
-    fprintf(file_.get(), "# %s\n", format_specifier);
+    fprintf(file_.get(), "# full_event_history\n");
     fprintf(file_.get(), "# smash\n");
     fprintf(file_.get(), "# Block format:\n");
     fprintf(file_.get(), "# nin nout event_number\n");
@@ -66,7 +50,7 @@ OscarFullHistoryOutput::~OscarFullHistoryOutput() {}
 
 void OscarFullHistoryOutput::at_eventstart(const Particles &particles,
                                 const int event_number) {
-  if (write_initial_final_lists_) {
+  if (print_start_end_) {
     if (modern_format_) {
         fprintf(file_.get(), "# event %i in %zu\n", event_number + 1,
                 particles.size());
@@ -86,7 +70,7 @@ void OscarFullHistoryOutput::at_eventstart(const Particles &particles,
 void OscarFullHistoryOutput::at_eventend(const Particles &particles,
                               const int event_number) {
   if (modern_format_) {
-    if (write_initial_final_lists_) {
+    if (print_start_end_) {
       fprintf(file_.get(), "# event %i out %zu\n", event_number + 1,
               particles.size());
       write_2013(particles);
@@ -99,7 +83,7 @@ void OscarFullHistoryOutput::at_eventend(const Particles &particles,
      * Block ends with null interaction
      */
     const size_t zero = 0;
-    if (write_initial_final_lists_) {
+    if (print_start_end_) {
       fprintf(file_.get(), "%zu %zu %i\n", particles.size(), zero,
               event_number + 1);
       write(particles);
@@ -185,7 +169,7 @@ void OscarFullHistoryOutput::write_interaction(
 
 void OscarFullHistoryOutput::after_Nth_timestep(const Particles & /*particles*/,
                                                 const int /*event_number*/,
-                                     const Clock& /*clock*/) {
+                                                const Clock& /*clock*/) {
   /* No time interval output for interaction history */
 }
 

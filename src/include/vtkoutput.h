@@ -15,12 +15,13 @@
 
 #include "outputinterface.h"
 #include "forwarddeclarations.h"
+#include "configuration.h"
 
 namespace Smash {
 
 class VtkOutput : public OutputInterface {
  public:
-  VtkOutput(bf::path path, Options op);
+  VtkOutput(bf::path path, Configuration&& conf);
   ~VtkOutput();
 
   void at_eventstart(const Particles &particles,

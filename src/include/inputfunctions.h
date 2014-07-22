@@ -113,20 +113,6 @@ std::string read_all(std::istream &&input) {
           std::istreambuf_iterator<char>{}};
 }
 
-/**
- * A function for converting string to boolean. Used for options.
- */
-bool str_to_bool(const std::string &s) {
-  std::string tmp = s;
-  for (auto &c : tmp) c = tolower(c);
-  if (tmp == "true") {
-    return true;
-  } else if (tmp == "false") {
-    return false;
-  } else {
-    throw std::runtime_error("Expected boolean, got " + s + "\n");
-  }
-}
 }  // unnamed namespace/*}}}*/
 
 }  // namespace Smash
