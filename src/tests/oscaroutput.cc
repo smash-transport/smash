@@ -85,7 +85,6 @@ TEST(fullhistory_format) {
   // Set options
   std::string configfilename = "oscar_1999.yaml";
   std::ofstream configfile;
-  std::cout << (testoutputpath / configfilename).native().c_str() << std::endl;
   configfile.open((testoutputpath / configfilename).native().c_str());
   if (configfile.is_open()) {
     configfile << "Print_start_end:" << "\t" << "True" << std::endl;
@@ -93,6 +92,8 @@ TEST(fullhistory_format) {
     configfile.close();
   } else {
     std::cout << "Could not open config file!" << std::endl;
+    std::cout << (testoutputpath / configfilename).native().c_str()
+              << std::endl;
   }
   VERIFY(bf::exists(testoutputpath / configfilename));
   Configuration&& op{testoutputpath, configfilename};

@@ -83,11 +83,17 @@ static void compare_particledata(
 }
 
 TEST(full2013_format) {
-  std::map<std::string, std::string> options;
-  options["Print_start_end"] = "True";
-  options["Format"] = "2013";
+  // Set options
+  std::string configfilename = "oscar_2013.yaml";
+  std::ofstream configfile;
+  configfile.open((testoutputpath / configfilename).native().c_str());
+  configfile << "Print_start_end:" << "\t" << "True" << std::endl;
+  configfile << "2013_format:" << "\t" << "True" << std::endl;
+  configfile.close();
+  VERIFY(bf::exists(testoutputpath / configfilename));
+  Configuration&& op{testoutputpath, configfilename};
   OscarFullHistoryOutput *osc2013full
-    = new OscarFullHistoryOutput(testoutputpath, options);
+                   = new OscarFullHistoryOutput(testoutputpath, std::move(op));
   std::string outputfilename = "full_event_history.oscar";
   VERIFY(bf::exists(testoutputpath / outputfilename));
 
@@ -198,12 +204,21 @@ TEST(full2013_format) {
 
 
 TEST(final2013_format) {
-  std::map<std::string, std::string> options;
-  options["Only_final"] = "True";
-  options["Format"] = "2013";
-  OscarFullHistoryOutput *osc2013final
-    = new OscarParticleListOutput(testoutputpath, options);
-  std::string outputfilename = "final_particle_list.oscar";
+  // Set options
+  std::string configfilename = "oscar_2013.yaml";
+  std::ofstream configfile;
+  configfile.open((testoutputpath / configfilename).native().c_str(),
+                  std::ios::in);
+  configfile << "Only_final:" << "\t" << "True" << std::endl;
+  configfile << "2013_format:" << "\t" << "True" << std::endl;
+  configfile.close();
+  VERIFY(bf::exists(testoutputpath / configfilename));
+
+  Configuration&& op{testoutputpath, configfilename};
+
+  OscarParticleListOutput *osc2013final
+    = new OscarParticleListOutput(testoutputpath, std::move(op));
+  std::string outputfilename = "particle_lists.oscar";
   VERIFY(bf::exists(testoutputpath / outputfilename));
 
   std::cout << "Testing final format" << std::endl;
@@ -244,7 +259,7 @@ TEST(final2013_format) {
     /* Check header */
     std::string output_header = "";
     std::string header = "#!OSCAR2013 "
-                         "final_particle_list "
+                         "particle_lists "
                          "t x y z mass p0 px py pz pdg ID\n"
                          "# Units: fm fm fm fm GeV GeV GeV GeV GeV none none\n";
     do {
