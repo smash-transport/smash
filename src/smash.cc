@@ -212,18 +212,18 @@ int main(int argc, char *argv[]) {
     OutputsList output_list;
     auto output_conf = configuration["General"]["OUTPUT"];
     if (static_cast<bool>(
-            output_conf.take({"OSCAR1999_PARTICLELIST", "Enable"}))) {
+            output_conf.take({"OSCAR_PARTICLELIST", "Enable"}))) {
       output_list.emplace_back(new OscarParticleListOutput(
-          output_path, output_conf["OSCAR1999_PARTICLELIST"]));
+          output_path, output_conf["OSCAR_PARTICLELIST"]));
     } else {
-      output_conf.take({"OSCAR1999_PARTICLELIST"});
+      output_conf.take({"OSCAR_PARTICLELIST"});
     }
     if (static_cast<bool>(
-            output_conf.take({"OSCAR1999_COLLISIONS", "Enable"}))) {
+            output_conf.take({"OSCAR_COLLISIONS", "Enable"}))) {
       output_list.emplace_back(new OscarFullHistoryOutput(
-          output_path, output_conf["OSCAR1999_COLLISIONS"]));
+          output_path, output_conf["OSCAR_COLLISIONS"]));
     } else {
-      output_conf.take({"OSCAR1999_COLLISIONS"});
+      output_conf.take({"OSCAR_COLLISIONS"});
     }
     if (static_cast<bool>(output_conf.take({"VTK", "Enable"}))) {
       output_list.emplace_back(new VtkOutput(output_path, output_conf["VTK"]));
