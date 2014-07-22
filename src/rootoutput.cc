@@ -116,8 +116,12 @@ void RootOutput::at_eventend(const Particles &/*particles*/,
   // Forced dump from operational memory to disk every 10 events
   // If program crashes written data will NOT be lost
   if (event_number%10 == 1) {
-    particles_tree_->AutoSave("SaveSelf");
-    collisions_tree_->AutoSave("SaveSelf");
+    if (write_particles_) {
+      particles_tree_->AutoSave("SaveSelf");
+    }
+    if (write_collisions_) {
+      collisions_tree_->AutoSave("SaveSelf");
+    }
   }
 }
 
