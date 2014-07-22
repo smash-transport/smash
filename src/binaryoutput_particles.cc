@@ -46,7 +46,7 @@ void BinaryOutputParticles::at_eventstart(const Particles &particles,
 void BinaryOutputParticles::at_eventend(const Particles &particles,
                                const int event_number) {
   char pchar = 'p';
-  if (!only_final_) {
+  if (only_final_) {
     std::fwrite(&pchar, sizeof(char), 1, file_.get());
     write(particles.size());
     write(particles);
@@ -70,7 +70,7 @@ void BinaryOutputParticles::after_Nth_timestep(const Particles &particles,
                                       const int /*event_number*/,
                                       const Clock &) {
   char pchar = 'p';
-  if (only_final_) {
+  if (!only_final_) {
     std::fwrite(&pchar, sizeof(char), 1, file_.get());
     write(particles.size());
     write(particles);
