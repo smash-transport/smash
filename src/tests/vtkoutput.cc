@@ -19,6 +19,7 @@
 #include "../include/outputinterface.h"
 #include "../include/vtkoutput.h"
 #include "../include/clock.h"
+#include "../include/configuration.h"
 #include "../include/particles.h"
 #include "../include/random.h"
 
@@ -61,6 +62,7 @@ static void compare_threevector(const std::array<std::string,3> &stringarray,
 }
 
 TEST(outputfile) {
+  /* Create particles */
   ParticleType::create_type_list(
       "# NAME MASS[GEV] WIDTH[GEV] PDG\n" + smashon_str);
 
@@ -71,8 +73,16 @@ TEST(outputfile) {
     particles.add_data(particle);
   }
 
-  std::map<std::string, std::string> op;
-  VtkOutput *vtkop = new VtkOutput(testoutputpath, op);
+  /* Create config file and object */
+  std::string configfilename = "vtkconfig.yaml";
+  std::ofstream cfgfile;
+  cfgfile.open((testoutputpath / configfilename).native().c_str(),
+               std::ios::out);
+  cfgfile << "Options: None" << std::endl;
+  cfgfile.close();
+  Configuration&& op{testoutputpath, configfilename};
+  /* Create output object */
+  VtkOutput *vtkop = new VtkOutput(testoutputpath, std::move(op));
   int event_id = 0;
   /* Initial output */
   vtkop->at_eventstart(particles, event_id);
