@@ -35,6 +35,8 @@ class OscarOutput : public OutputInterface {
   void after_Nth_timestep(const Particles &particles, const int event_number,
                           const Clock &clock) override;
 
+  void write_format_description(void);
+  void write_particledata(const ParticleData &data);
   void write(const Particles &particles);
 
  protected:

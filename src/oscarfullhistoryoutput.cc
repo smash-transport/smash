@@ -26,19 +26,12 @@ OscarFullHistoryOutput::OscarFullHistoryOutput(bf::path path,
                      ? conf.take({"Print_start_end"}) : false) {
   if (modern_format_) {
     fprintf(file_.get(), "#!OSCAR2013 full_event_history ");
-    fprintf(file_.get(), "t x y z mass p0 px py pz pdg ID\n");
-    fprintf(file_.get(),
-            "# Units: fm fm fm fm GeV GeV GeV GeV GeV none none\n");
   } else {
     fprintf(file_.get(), "# OSC1999A\n");
     fprintf(file_.get(), "# full_event_history\n");
     fprintf(file_.get(), "# smash\n");
-    fprintf(file_.get(), "# Block format:\n");
-    fprintf(file_.get(), "# nin nout event_number\n");
-    fprintf(file_.get(), "# id pdg 0 px py pz p0 mass x y z t\n");
-    fprintf(file_.get(), "# End of event: 0 0 event_number\n");
-    fprintf(file_.get(), "#\n");
   }
+  write_format_description();
 }
 
 
@@ -96,21 +89,6 @@ void OscarFullHistoryOutput::write_interaction(
   if (modern_format_) {
     fprintf(file_.get(), "# interaction in %zu out %zu\n",
             incoming_particles.size(), outgoing_particles.size());
-    const auto print = [&](const ParticleData &p) {
-      const float mass = std::sqrt(p.momentum().Dot(p.momentum()));
-      fprintf(file_.get(), "%g %g %g %g %g %g %g %g %g %s %i\n",
-              p.position().x0(), p.position().x1(),
-              p.position().x2(), p.position().x3(),
-              mass, p.momentum().x0(), p.momentum().x1(),
-              p.momentum().x2(), p.momentum().x3(),
-              p.pdgcode().string().c_str(), p.id());
-    };
-    for (const auto &p : incoming_particles) {
-      print(p);
-    }
-    for (const auto &p : outgoing_particles) {
-      print(p);
-    }
   } else {
     /* OSCAR line prefix : initial final
      * particle creation: 0 1
@@ -121,20 +99,12 @@ void OscarFullHistoryOutput::write_interaction(
      */
     fprintf(file_.get(), "%zu %zu\n", incoming_particles.size(),
             outgoing_particles.size());
-    const auto print = [&](const ParticleData &p) {
-      const float mass = std::sqrt(p.momentum().Dot(p.momentum()));
-      fprintf(file_.get(), "%i %s %i %g %g %g %g %g %g %g %g %g\n", p.id(),
-              p.pdgcode().string().c_str(), 0, p.momentum().x1(),
-              p.momentum().x2(), p.momentum().x3(), p.momentum().x0(), mass,
-              p.position().x1(), p.position().x2(), p.position().x3(),
-              p.position().x0());
-    };
-    for (const auto &p : incoming_particles) {
-      print(p);
-    }
-    for (const auto &p : outgoing_particles) {
-      print(p);
-    }
+  }
+  for (const auto &p : incoming_particles) {
+    write_particledata(p);
+  }
+  for (const auto &p : outgoing_particles) {
+    write_particledata(p);
   }
 }
 
