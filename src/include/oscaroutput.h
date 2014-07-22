@@ -7,38 +7,40 @@
  *
  */
 
-#ifndef SRC_INCLUDE_OSCARFULLHISTORYOUTPUT_H_
-#define SRC_INCLUDE_OSCARFULLHISTORYOUTPUT_H_
+#ifndef SRC_INCLUDE_OSCAROUTPUT_H_
+#define SRC_INCLUDE_OSCAROUTPUT_H_
 
-#include "oscaroutput.h"
+#include <string>
+
+#include "outputinterface.h"
 #include "filedeleter.h"
 #include "forwarddeclarations.h"
 #include "configuration.h"
 
 namespace Smash {
 
-class OscarFullHistoryOutput : public OscarOutput {
+class OscarOutput : public OutputInterface {
  public:
-  OscarFullHistoryOutput(bf::path path, Configuration&& conf);
-  ~OscarFullHistoryOutput();
+  OscarOutput(bf::path path, std::string filename, Configuration&& conf);
+  ~OscarOutput();
 
-  /// writes the initial particle information of an event
   void at_eventstart(const Particles &particles,
                      const int event_number) override;
 
-  /// writes the final particle information of an event
   void at_eventend(const Particles &particles, const int event_number) override;
 
-  /**
-   * Write a prefix line and a line per particle to OSCAR output.
-   */
   void write_interaction(const ParticleList &incoming_particles,
                          const ParticleList &outgoing_particles) override;
 
- private:
-  /* Print  initial and final particles */
-  bool print_start_end_;
+  void after_Nth_timestep(const Particles &particles, const int event_number,
+                          const Clock &clock) override;
+
+  void write(const Particles &particles);
+
+ protected:
+  FilePtr file_;
+  bool modern_format_;
 };
 }  // namespace Smash
 
-#endif  // SRC_INCLUDE_OSCARFULLHISTORYOUTPUT_H_
+#endif  // SRC_INCLUDE_OSCAROUTPUT_H_

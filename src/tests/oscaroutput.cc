@@ -82,6 +82,7 @@ static void compare_particledata(const std::array<std::string,12> &datastring,
 }
 
 TEST(fullhistory_format) {
+  std::cout << "Create config file..." << std::endl;
   // Set options
   std::string configfilename = "oscar_1999.yaml";
   std::ofstream configfile;
@@ -97,6 +98,7 @@ TEST(fullhistory_format) {
   }
   VERIFY(bf::exists(testoutputpath / configfilename));
   Configuration&& op{testoutputpath, configfilename};
+  std::cout << "Create output object..." << std::endl;
   OscarFullHistoryOutput *oscfull
                    = new OscarFullHistoryOutput(testoutputpath, std::move(op));
   std::string outputfilename = "full_event_history.oscar";
