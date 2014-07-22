@@ -12,11 +12,11 @@ General:
     OUTPUT:
         OSCAR_COLLISIONS:
             Enable:             True
-            Format:             2013
+            2013_format:        True        
             Print_start_end:    False
         OSCAR_PARTICLELIST:
             Enable:             True
-            Format:             2013
+            2013_format:        True
             Only_final:         True
         VTK:
             Enable:             False
