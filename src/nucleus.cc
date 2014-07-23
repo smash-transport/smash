@@ -307,8 +307,6 @@ void Nucleus::set_parameters_from_config(bool is_projectile, Configuration &conf
 }
 
 void Nucleus::boost(double beta_scalar) {
-  // we use the sign of the squared velocity to get information about
-  // the sign of the velocity itself.
   double beta_squared = beta_scalar * beta_scalar;
   double one_over_gamma = std::sqrt(1.0 - beta_squared);
   /*double gamma = 1.0/one_over_gamma;
@@ -321,7 +319,7 @@ void Nucleus::boost(double beta_scalar) {
   //       a system that moves with -beta. Now in this frame, it seems
   //       like p has been accelerated with +beta.
   //     )
-  ThreeVector beta (0., 0., beta_scalar);
+  ThreeVector beta (0., 0., - beta_scalar);
   for (auto i = begin(); i != end(); i++) {
     // a real Lorentz Transformation would leave the particles at
     // different times here, which we would then have to propagate back
