@@ -124,6 +124,9 @@ class RootOutput : public OutputInterface {
 
   // Option to write particles tree
   bool write_particles_;
+
+  // Option, defines how often root-file is "saved"
+  int autosave_frequency_;
 };
 }  // namespace Smash
 

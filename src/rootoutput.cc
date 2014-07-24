@@ -29,7 +29,9 @@ RootOutput::RootOutput(bf::path path, Configuration&& conf)
       write_collisions_(conf.has_value({"write_collisions"})
                                  ? conf.take({"write_collisions"}) : false),
       write_particles_(conf.has_value({"write_particles"})
-                                 ? conf.take({"write_particles"}) : true) {
+                                 ? conf.take({"write_particles"}) : true),
+      autosave_frequency_(conf.has_value({"autosave_frequency"})
+                               ? conf.take({"autosave_frequency"}) : 1000) {
   if (write_particles_) {
     particles_tree_ = new TTree("particles", "particles");
 
@@ -113,9 +115,9 @@ void RootOutput::after_Nth_timestep(const Particles &particles,
  */
 void RootOutput::at_eventend(const Particles &/*particles*/,
                              const int event_number) {
-  // Forced dump from operational memory to disk every 10 events
+  // Forced regular dump from operational memory to disk. Very demanding!
   // If program crashes written data will NOT be lost
-  if (event_number%10 == 1) {
+  if (event_number > 0  && event_number % autosave_frequency_ == 0) {
     if (write_particles_) {
       particles_tree_->AutoSave("SaveSelf");
     }

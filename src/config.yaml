@@ -24,6 +24,7 @@ General:
             Enable:             True
             write_collisions:   True
             write_particles:    True
+            autosave_frequency: 1000
         Binary_collisions:
             Enable:             True
             print_start_end:    True
