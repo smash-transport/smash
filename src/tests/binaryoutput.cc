@@ -6,8 +6,8 @@
  *    GNU General Public License (GPLv3 or later)
  *
  */
-
 #include "unittest.h"
+
 #include <cstdio>
 #include <cstring>
 #include <array>
@@ -16,6 +16,7 @@
 #include <string>
 #include <vector>
 #include <boost/filesystem.hpp>
+
 #include "../include/outputinterface.h"
 #include "../include/binaryoutputcollisions.h"
 #include "../include/binaryoutputparticles.h"
@@ -25,7 +26,6 @@
 
 using namespace Smash;
 
-static const double accuracy = 1.0e-15;
 static const bf::path testoutputpath = bf::absolute(SMASH_TEST_OUTPUT_PATH);
 static auto random_value = Random::make_uniform_distribution(-15.0, +15.0);
 
@@ -55,18 +55,18 @@ static ParticleData create_smashon_particle() {
 
 static void read_binary(std::string &s, FILE *file) {
   std::int32_t size = s.size();
-  std::fread(&size, sizeof(std::int32_t), 1, file);
+  VERIFY(std::fread(&size, sizeof(std::int32_t), 1, file) == 1);
   std::vector<char> buf(size);
-  std::fread(&buf[0], 1, size, file);
+  VERIFY(std::fread(&buf[0], 1, size, file) == static_cast<size_t>(size));
   s.assign(&buf[0], size);
 }
 
 static void read_binary(FourVector &v, FILE* file) {
-  std::fread(v.begin(), sizeof(*v.begin()), 4, file);
+  VERIFY(std::fread(v.begin(), sizeof(*v.begin()), 4, file) == 4);
 }
 
 static void read_binary(std::int32_t &x, FILE* file) {
-  std::fread(&x, sizeof(x), 1, file);
+  VERIFY(std::fread(&x, sizeof(x), 1, file) == 1);
 }
 
 /* Function to read and compare particle */
@@ -87,7 +87,7 @@ static bool compare_particle(const ParticleData &p, FILE* file) {
 static bool compare_particles_block_header(const int &npart, FILE* file) {
   int npart_read;
   char c_read;
-  std::fread(&c_read, sizeof(char), 1, file);
+  VERIFY(std::fread(&c_read, sizeof(char), 1, file) == 1);
   read_binary(npart_read, file);
   // std::cout << c_read << std::endl;
   // std::cout << npart_read << " " << npart << std::endl;
@@ -100,7 +100,7 @@ static bool compare_interaction_block_header(const int &nin,
                                              FILE* file) {
   int nin_read, nout_read;
   char c_read;
-  std::fread(&c_read, sizeof(char), 1, file);
+  VERIFY(std::fread(&c_read, sizeof(char), 1, file) == 1);
   read_binary(nin_read, file);
   read_binary(nout_read, file);
   // std::cout << c_read << std::endl;
@@ -113,7 +113,7 @@ static bool compare_interaction_block_header(const int &nin,
 static bool compare_final_block_header(const int &ev, FILE* file) {
   int ev_read;
   char c_read;
-  std::fread(&c_read, sizeof(char), 1, file);
+  VERIFY(std::fread(&c_read, sizeof(char), 1, file) == 1);
   read_binary(ev_read, file);
   return (c_read == 'f') && (ev_read == ev);
 }
@@ -169,7 +169,7 @@ TEST(fullhistory_format) {
   std::string magic, smash_version;
   int format_version_number;
 
-  fread(&buf[0], 1, 4, binF);  // magic number
+  VERIFY(fread(&buf[0], 1, 4, binF) == 4);  // magic number
   magic.assign(&buf[0], 4);
   read_binary(format_version_number, binF);  // format version number
   read_binary(smash_version, binF);  // smash version
@@ -255,7 +255,7 @@ TEST(particles_format) {
   std::string magic, smash_version;
   int format_version_number;
 
-  fread(&buf[0], 1, 4, binF);  // magic number
+  VERIFY(fread(&buf[0], 1, 4, binF) == 4);  // magic number
   magic.assign(&buf[0], 4);
   read_binary(format_version_number, binF);  // format version number
   read_binary(smash_version, binF);  // smash version
