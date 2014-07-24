@@ -13,11 +13,11 @@
 #include "filedeleter.h"
 #include "forwarddeclarations.h"
 #include "configuration.h"
-#include "outputinterface.h"
+#include "oscaroutput.h"
 
 namespace Smash {
 
-class OscarParticleListOutput : public OutputInterface {
+class OscarParticleListOutput : public OscarOutput {
  public:
   OscarParticleListOutput(bf::path path, Configuration&& conf);
   ~OscarParticleListOutput();
@@ -29,19 +29,10 @@ class OscarParticleListOutput : public OutputInterface {
   /// writes the final particle information of an event
   void at_eventend(const Particles &particles, const int event_number) override;
 
-  /**
-   * Write a prefix line and a line per particle to OSCAR output.
-   */
-  void write_interaction(const ParticleList &incoming_particles,
-                         const ParticleList &outgoing_particles) override;
-
   void after_Nth_timestep(const Particles &particles, const int event_number,
                           const Clock &clock) override;
 
  private:
-  void write(const Particles &particles);
-  FilePtr file_;
-
   /// An option. If true - only final particles in event are printed
   bool only_final_;
 };
