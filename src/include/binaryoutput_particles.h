@@ -12,7 +12,7 @@
 
 #include <string>
 
-#include "outputinterface.h"
+#include "binaryoutput_collisions.h"
 #include "filedeleter.h"
 #include "forwarddeclarations.h"
 #include "configuration.h"
@@ -108,7 +108,7 @@ namespace Smash {
  **/
 
 //template <bool only_final_>
-class BinaryOutputParticles : public OutputInterface {
+class BinaryOutputParticles : public BinaryOutputBase {
  public:
   BinaryOutputParticles(bf::path path, Configuration&& config);
 
@@ -126,15 +126,6 @@ class BinaryOutputParticles : public OutputInterface {
                           const Clock &clock) override;
 
  private:
-  void write(const std::string &s);
-  void write(const FourVector &v);
-  void write(std::int32_t x);
-  void write(const Particles &particles);
-  void write(const ParticleList &particles);
-
-  /// Binary output file
-  FilePtr file_;
-
   /// Option: print initial and final particles or not
   bool only_final_;
 };

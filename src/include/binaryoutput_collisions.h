@@ -107,8 +107,23 @@ namespace Smash {
  *  \endcode
  **/
 
+class BinaryOutputBase : public OutputInterface {
+ protected:
+  BinaryOutputBase(FILE *f) : file_{f} {}
+  void write(const std::string &s);
+  void write(const FourVector &v);
+  void write(std::int32_t x) {
+    std::fwrite(&x, sizeof(x), 1, file_.get());
+  }
+  void write(const Particles &particles);
+  void write(const ParticleList &particles);
+
+  /// Binary particles output
+  FilePtr file_;
+};
+
 //template <bool only_final_>
-class BinaryOutputCollisions : public OutputInterface {
+class BinaryOutputCollisions : public BinaryOutputBase {
  public:
   BinaryOutputCollisions(bf::path path, Configuration&& config);
 
@@ -126,15 +141,6 @@ class BinaryOutputCollisions : public OutputInterface {
                           const Clock &clock) override;
 
  private:
-  void write(const std::string &s);
-  void write(const FourVector &v);
-  void write(std::int32_t x);
-  void write(const Particles &particles);
-  void write(const ParticleList &particles);
-
-  /// Binary particles output
-  FilePtr file_;
-
   /// Option: print initial and final particles or not
   bool print_start_end_;
 };

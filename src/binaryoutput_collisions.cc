@@ -22,12 +22,12 @@
 namespace Smash {
 
 BinaryOutputCollisions::BinaryOutputCollisions(bf::path path,
-                                              Configuration&& config)
-    : file_{std::fopen(((
-            path / "collisions_binary.bin")).native().c_str(), "wb")},
-  print_start_end_(config.has_value({"print_start_end"}) 
-                               ? config.take({"print_start_end"}) : false) {
- 
+                                               Configuration &&config)
+    : BinaryOutputBase(std::fopen(
+          ((path / "collisions_binary.bin")).native().c_str(), "wb")),
+      print_start_end_(config.has_value({"print_start_end"})
+                           ? config.take({"print_start_end"})
+                           : false) {
   fwrite("SMSH", 4, 1, file_.get());  // magic number
   write(0);              // file format version number
   write(GIT_SHA1);  // commit sha
@@ -78,21 +78,17 @@ void BinaryOutputCollisions::after_Nth_timestep(const Particles &/*particles*/,
 }
 
 // write functions:
-inline void BinaryOutputCollisions::write(const std::string &s) {
+void BinaryOutputBase::write(const std::string &s) {
   std::int32_t size = s.size();
   std::fwrite(&size, sizeof(std::int32_t), 1, file_.get());
   std::fwrite(s.c_str(), s.size(), 1, file_.get());
 }
 
-inline void BinaryOutputCollisions::write(const FourVector &v) {
+void BinaryOutputBase::write(const FourVector &v) {
   std::fwrite(v.begin(), sizeof(*v.begin()), 4, file_.get());
 }
 
-inline void BinaryOutputCollisions::write(std::int32_t x) {
-  std::fwrite(&x, sizeof(x), 1, file_.get());
-}
-
-void BinaryOutputCollisions::write(const Particles &particles) {
+void BinaryOutputBase::write(const Particles &particles) {
   for (const auto &p : particles.data()) {
     write(p.momentum());
     write(p.position());
@@ -101,7 +97,7 @@ void BinaryOutputCollisions::write(const Particles &particles) {
   }
 }
 
-void BinaryOutputCollisions::write(const ParticleList &particles) {
+void BinaryOutputBase::write(const ParticleList &particles) {
   for (const auto &p : particles) {
     write(p.momentum());
     write(p.position());
