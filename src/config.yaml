@@ -10,10 +10,10 @@ General:
 
     # output formats
     OUTPUT:
-        OSCAR1999_COLLISIONS:    
+        OSCAR1999_COLLISIONS:
             Enable:             True
             print_start_end:    False
-        OSCAR1999_PARTICLELIST:  
+        OSCAR1999_PARTICLELIST:
             Enable:             True
             only_final:         True
         VTK:
