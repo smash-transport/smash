@@ -1,6 +1,6 @@
 General:
     # Modus decision
-    MODUS:         Nucleus
+    MODUS:         Sphere
 
     # temporal grid spacing
     DELTA_TIME:    0.01
@@ -65,6 +65,12 @@ Modi:
     Sphere:
         # Sphere size
         RADIUS: 5.0
+        # Number of particles in Sphere
+        NUMBEROFPARTICLES: 280
+        # Current temperature
+        SPHERETEMPERATURE: 0.2
+        # start time of simulation
+        START_TIME: 0.0
 
     Collider:
         # Projectile particle

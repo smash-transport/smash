@@ -25,10 +25,10 @@ void CrossSections::compute_kinematics(const ParticleData &data_a,
   const FourVector momentum_a = data_a.momentum();
   const FourVector momentum_b = data_b.momentum();
   /* Mandelstam s = (p_a + p_b)^2 = square of CMS energy */
-  mandelstam_s_ = (momentum_a + momentum_b).Dot(momentum_a + momentum_b);
+  mandelstam_s_ = (momentum_a + momentum_b).sqr();
   /* In case we have resonances, let's use the relation m^2 = p^2 for masses */
-  squared_mass_a_ = momentum_a.Dot(momentum_a);
-  squared_mass_b_ = momentum_b.Dot(momentum_b);
+  squared_mass_a_ = momentum_a.sqr();
+  squared_mass_b_ = momentum_b.sqr();
   /* Beam momentum (assuming particle A as "beam") */
   p_lab_ = sqrt((mandelstam_s_ - squared_mass_a_ - squared_mass_b_)
                 * (mandelstam_s_ - squared_mass_a_ - squared_mass_b_)
@@ -55,13 +55,13 @@ float CrossSections::elastic(const ParticleData &data_a,
   float sig;
   /* pp-scattering */
   if (pdg_a == pdg_b) {
-    sig = pp_elastic(p_lab_, mandelstam_s_, sqrt(squared_mass_a_));
+    sig = pp_elastic(mandelstam_s_);
   /* ppbar-scattering */
   } else if (pdg_a.is_antiparticle_of(pdg_b)) {
     sig = ppbar_elastic(p_lab_);
   /* np-scattering */
   } else {
-    sig = np_elastic(p_lab_, mandelstam_s_, sqrt(squared_mass_a_));
+    sig = np_elastic(mandelstam_s_);
   }
 
   if (sig>0.) {
@@ -70,7 +70,8 @@ float CrossSections::elastic(const ParticleData &data_a,
     std::stringstream ss;
     ss << "problem in CrossSections::elastic: " << pdg_a.string().c_str()
        << " " << pdg_b.string().c_str() << " " << pdg_a.spin() << " "
-       << pdg_b.spin() << " " << sig;
+       << pdg_b.spin() << " " << sig << " " << p_lab_ << " " << mandelstam_s_
+       << " " << sqrt(squared_mass_a_);
     throw std::runtime_error(ss.str());
   }
 }
