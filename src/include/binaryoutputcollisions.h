@@ -7,12 +7,12 @@
  *
  */
 
-#ifndef SRC_INCLUDE_BINARYOUTPUT_PARTICLES_H_
-#define SRC_INCLUDE_BINARYOUTPUT_PARTICLES_H_
+#ifndef SRC_INCLUDE_BINARYOUTPUTCOLLISIONS_H_
+#define SRC_INCLUDE_BINARYOUTPUTCOLLISIONS_H_
 
 #include <string>
 
-#include "binaryoutput_collisions.h"
+#include "outputinterface.h"
 #include "filedeleter.h"
 #include "forwarddeclarations.h"
 #include "configuration.h"
@@ -107,10 +107,25 @@ namespace Smash {
  *  \endcode
  **/
 
+class BinaryOutputBase : public OutputInterface {
+ protected:
+  BinaryOutputBase(FILE *f) : file_{f} {}
+  void write(const std::string &s);
+  void write(const FourVector &v);
+  void write(std::int32_t x) {
+    std::fwrite(&x, sizeof(x), 1, file_.get());
+  }
+  void write(const Particles &particles);
+  void write(const ParticleList &particles);
+
+  /// Binary particles output
+  FilePtr file_;
+};
+
 //template <bool only_final_>
-class BinaryOutputParticles : public BinaryOutputBase {
+class BinaryOutputCollisions : public BinaryOutputBase {
  public:
-  BinaryOutputParticles(bf::path path, Configuration&& config);
+  BinaryOutputCollisions(bf::path path, Configuration&& config);
 
   /// writes the initial particle information of an event
   void at_eventstart(const Particles &particles,
@@ -127,10 +142,10 @@ class BinaryOutputParticles : public BinaryOutputBase {
 
  private:
   /// Option: print initial and final particles or not
-  bool only_final_;
+  bool print_start_end_;
 };
 
 
 }  // namespace Smash
 
-#endif  // SRC_INCLUDE_BINARYOUTPUT_PARTICLES_H_
+#endif  // SRC_INCLUDE_BINARYOUTPUTCOLLISIONS_H_

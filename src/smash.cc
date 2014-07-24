@@ -26,8 +26,8 @@
 #include "include/decaymodes.h"
 #include "include/inputfunctions.h"
 /* Outputs */
-#include "include/binaryoutput_collisions.h"
-#include "include/binaryoutput_particles.h"
+#include "include/binaryoutputcollisions.h"
+#include "include/binaryoutputparticles.h"
 #include "include/oscarfullhistoryoutput.h"
 #include "include/oscarparticlelistoutput.h"
 #include "include/outputroutines.h"

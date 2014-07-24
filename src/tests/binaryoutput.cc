@@ -17,8 +17,8 @@
 #include <vector>
 #include <boost/filesystem.hpp>
 #include "../include/outputinterface.h"
-#include "../include/binaryoutput_collisions.h"
-#include "../include/binaryoutput_particles.h"
+#include "../include/binaryoutputcollisions.h"
+#include "../include/binaryoutputparticles.h"
 #include "../include/particles.h"
 #include "../include/random.h"
 #include "../include/clock.h"

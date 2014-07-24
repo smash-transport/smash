@@ -7,7 +7,7 @@
  *
  */
 
-#include "include/binaryoutput_collisions.h"
+#include "include/binaryoutputcollisions.h"
 
 #include <string>
 #include <boost/filesystem.hpp>

@@ -7,7 +7,7 @@
  *
  */
 
-#include "include/binaryoutput_particles.h"
+#include "include/binaryoutputparticles.h"
 
 #include <string>
 #include <boost/filesystem.hpp>

@@ -43,8 +43,8 @@ set(SMASH_LIBRARIES ${SMASH_LIBRARIES}
 set(smash_src
         action.cc
         boxmodus.cc
-        binaryoutput_collisions.cc
-        binaryoutput_particles.cc
+        binaryoutputcollisions.cc
+        binaryoutputparticles.cc
         collidermodus.cc
         configuration.cc
         cross-sections.cc
@@ -70,7 +70,7 @@ set(smash_src
         resonances.cc
         scatteraction.cc
         scatteractionsfinder.cc
-	spheremodus.cc
+        spheremodus.cc
         vtkoutput.cc
         width.cc
         )
