@@ -8,11 +8,11 @@
  */
 
 
+#include <algorithm>
 #include <cinttypes>
 #include <cstdlib>
 #include <list>
 #include <string>
-#include <algorithm>
 #include <vector>
 
 #include "include/action.h"
@@ -24,8 +24,8 @@
 #include "include/forwarddeclarations.h"
 #include "include/macros.h"
 #include "include/nucleusmodus.h"
-#include "include/random.h"
 #include "include/outputroutines.h"
+#include "include/random.h"
 #include "include/spheremodus.h"
 
 
