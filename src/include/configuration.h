@@ -77,7 +77,7 @@ namespace Smash {
  * \li \ref input_modi_box_
  * \li \ref input_modi_collider_
  * \else
- * 
+ *
  * Options
  * -------
  * For possible configuration values, see

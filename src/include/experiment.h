@@ -107,7 +107,7 @@ class ExperimentBase {
    *
    * `NEVENTS:` Number of events to calculate.
    *
-   * `particles:` a list of particle sorts used in simulation 
+   * `particles:` a list of particle sorts used in simulation
    *
    * `decaymodes:` a list of processes used in simulation
    */
@@ -255,9 +255,9 @@ class Experiment : public ExperimentBase {
    * of a single SMASH event is random (by construction)
    * as well as result of one collision in nature. To compare
    * simulation with experiment one has to take ensemble averages,
-   * i.e. perform simulation and real experiment many times 
+   * i.e. perform simulation and real experiment many times
    * and compare average results.
-   * 
+   *
    * nevents_ is number of times single phenomenon (particle
    * or nucleus-nucleus collision) will be simulated.
    */

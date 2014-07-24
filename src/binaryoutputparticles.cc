@@ -55,7 +55,7 @@ void BinaryOutputParticles::at_eventend(const Particles &particles,
   char fchar = 'f';
   std::fwrite(&fchar, sizeof(char), 1, file_.get());
   write(event_number);
-  
+
   /* Flush to disk */
   std::fflush(file_.get());
 }

@@ -111,7 +111,7 @@ class Action {
   ParticleList choose_channel();
   /**
    * Sample final state momenta (and masses) in general X->2 process.
-   * 
+   *
    * \throws InvalidResonanceFormation
    */
   void sample_cms_momenta(const double cms_energy);
@@ -171,7 +171,7 @@ class DecayAction : public Action {
 
   /**
    * Kinematics of a 1-to-3 decay process.
-   * 
+   *
    * Sample the masses and momenta of the decay products in the
    * center-of-momentum frame.
    */

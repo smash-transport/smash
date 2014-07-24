@@ -81,7 +81,7 @@ void ScatterAction::perform (Particles *particles, size_t &id_process)
     /* Set positions & boost to computational frame. */
     for (ParticleData &new_particle : outgoing_particles_) {
       new_particle.set_position(middle_point);
- 
+
       new_particle.set_momentum(
           new_particle.momentum().LorentzBoost(-beta_cm()));
 

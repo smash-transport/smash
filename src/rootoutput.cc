@@ -26,24 +26,24 @@ RootOutput::RootOutput(bf::path path, Configuration&& conf)
       root_out_file_(
           new TFile((base_path_ / "smash_run.root").native().c_str(), "NEW")),
       output_counter_(0),
-      write_collisions_(conf.has_value({"write_collisions"}) 
+      write_collisions_(conf.has_value({"write_collisions"})
                                  ? conf.take({"write_collisions"}) : false),
-      write_particles_(conf.has_value({"write_particles"}) 
+      write_particles_(conf.has_value({"write_particles"})
                                  ? conf.take({"write_particles"}) : true) {
   if (write_particles_) {
     particles_tree_ = new TTree("particles", "particles");
-  
+
     particles_tree_->Branch("npart", &npart, "npart/I");
     particles_tree_->Branch("ev", &ev, "ev/I");
     particles_tree_->Branch("tcounter", &tcounter, "tcounter/I");
-  
+
     particles_tree_->Branch("pdgcode", &pdgcode[0], "pdgcode[npart]/I");
-  
+
     particles_tree_->Branch("p0", &p0[0], "p0[npart]/D");
     particles_tree_->Branch("px", &px[0], "px[npart]/D");
     particles_tree_->Branch("py", &py[0], "py[npart]/D");
     particles_tree_->Branch("pz", &pz[0], "pz[npart]/D");
-  
+
     particles_tree_->Branch("t", &t[0], "t[npart]/D");
     particles_tree_->Branch("x", &x[0], "x[npart]/D");
     particles_tree_->Branch("y", &y[0], "y[npart]/D");

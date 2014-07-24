@@ -155,7 +155,7 @@ TEST(fullhistory_format) {
   /* Final state output */
   bin_output->at_eventend(particles, event_id);
 
-  /* 
+  /*
    * Now we have an artificially generated binary output.
    * Let us try if we can read and understand it.
    */
@@ -241,7 +241,7 @@ TEST(particles_format) {
 
   /* Final state output */
   bin_output->at_eventend(particles, event_id);
-  /* 
+  /*
    * Now we have an artificially generated binary output.
    * Let us try if we can read and understand it.
    */
