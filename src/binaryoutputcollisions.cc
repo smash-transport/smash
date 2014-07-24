@@ -30,7 +30,7 @@ BinaryOutputCollisions::BinaryOutputCollisions(bf::path path,
                            : false) {
   fwrite("SMSH", 4, 1, file_.get());  // magic number
   write(0);              // file format version number
-  write(GIT_SHA1);  // commit sha
+  write(VERSION_MAJOR);  // SMASH version
 }
 
 void BinaryOutputCollisions::at_eventstart(const Particles &particles,
