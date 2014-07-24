@@ -8,11 +8,11 @@
  */
 
 
+#include <algorithm>
 #include <cinttypes>
 #include <cstdlib>
 #include <list>
 #include <string>
-#include <algorithm>
 #include <vector>
 
 #include "include/action.h"
@@ -24,9 +24,10 @@
 #include "include/forwarddeclarations.h"
 #include "include/macros.h"
 #include "include/nucleusmodus.h"
-#include "include/random.h"
 #include "include/outputroutines.h"
-/* #include "include/spheremodus.h" */
+#include "include/random.h"
+#include "include/spheremodus.h"
+
 
 namespace Smash {
 
@@ -44,7 +45,9 @@ std::unique_ptr<ExperimentBase> ExperimentBase::create(Configuration config) {
   } else if (modus_chooser.compare("Collider") == 0) {
     return ExperimentPointer(new Experiment<ColliderModus>(config));
   } else if (modus_chooser.compare("Nucleus") == 0) {
-    return ExperimentPointer(new Experiment<NucleusModus>(config));
+      return ExperimentPointer(new Experiment<NucleusModus>(config));
+  } else if (modus_chooser.compare("Sphere") == 0) {
+      return ExperimentPointer(new Experiment<SphereModus>(config));
   } else {
     throw InvalidModusRequest("Invalid Modus (" + modus_chooser +
                               ") requested from ExperimentBase::create.");
@@ -146,8 +149,7 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
     if (!actions.empty()) {
       for (const auto &action : actions) {
         if (action->is_valid(particles_)) {
-          const ParticleList incoming_particles =
-                                        action->incoming_particles(particles_);
+          const ParticleList incoming_particles = action->incoming_particles();
           action->perform(&particles_, interactions_total);
           const ParticleList outgoing_particles = action->outgoing_particles();
           for (const auto &output : outputs_) {
@@ -174,7 +176,7 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
       print_measurements(particles_, interactions_total,
               interactions_this_interval, conserved_initial_,
               time_start_,
-              parameters_.labclock.next_multiple(parameters_.output_interval));
+              parameters_.labclock.current_time());
       /* save evolution data */
       for (const auto &output : outputs_) {
         output->after_Nth_timestep(particles_, evt_num, parameters_.labclock);

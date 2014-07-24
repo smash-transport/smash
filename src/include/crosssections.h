@@ -25,12 +25,11 @@ class CrossSections {
   explicit CrossSections(float elastic_parameter)
       : elastic_parameter_(elastic_parameter) {
   }
-  /** returns the elastic cross-section of a collision of the particles
+  /** Returns the elastic cross-section of a collision of the particles
    * \a a and \a b.
    *
-   * \param particles Particle list
-   * \param id_a Unique ID of first particle (\a a)
-   * \param id_b Unique ID of second particle (\a b)
+   * \param data_a Data of first particle (\a a)
+   * \param data_b Data of second particle (\a b)
    */
   float elastic(const ParticleData &data_a, const ParticleData &data_b);
 
@@ -54,16 +53,15 @@ class CrossSections {
   /// mass of second particle (\a b), squared
   float squared_mass_b_ = -1.0;
   /** Mandelstam s of the collision (= total center-of-mass energy
-   * squared 
+   * squared
    */
   double mandelstam_s_ = -1.0;
   /// Momentum of particle \a a in center-of-mass-frame
   double p_lab_ = -1.0;
-  /** computes the kinematic variables used in the further calculations
+  /** Computes the kinematic variables used in the further calculations.
    *
-   * \param particles Particle list
-   * \param id_a Unique ID of first particle (\a a)
-   * \param id_b Unique ID of second particle (\a b)
+   * \param data_a Data of first particle (\a a)
+   * \param data_b Data ID of second particle (\a b)
    *
    * This function sets
    * \see squared_mass_a_
@@ -73,12 +71,11 @@ class CrossSections {
    */
   void compute_kinematics(const ParticleData &data_a,
                           const ParticleData &data_b);
-  /** returns the total (elastic + inelastic) cross-section of a
+  /** Returns the total (elastic + inelastic) cross-section of a
    * collision of the particles \a a and \a b.
    *
-   * \param particles Particle list
-   * \param id_a Unique ID of first particle (\a a)
-   * \param id_b Unique ID of second particle (\a b)
+   * \param pdg_a PDG code of first particle (\a a)
+   * \param pdg_b PDG code of second particle (\a b)
    */
   float total(const PdgCode &pdg_a, const PdgCode &pdg_b) const;
 };

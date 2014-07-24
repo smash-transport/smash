@@ -15,6 +15,8 @@
 #include "../include/pdgcode.h"
 #include "../include/outputroutines.h"
 #include "../include/macros.h"
+#include "../include/action.h"
+#include "../include/scatteractionsfinder.h"
 #include <algorithm>
 
 using namespace Smash;
@@ -53,22 +55,26 @@ TEST(everything) {
   particle_b.set_position(FourVector(2., 2., 2., 2.));
 
   /* check return of particle distance of null momenta particles */
-  double distance_squared = particle_distance(particle_a, particle_b);
+  ScatterAction *act = new ScatterAction(particle_a, particle_b, 0.);
+  double distance_squared = act->particle_distance();
   VERIFY(!(distance_squared < 0.0));
   /* XXX: does this test NaN?? */
   VERIFY(!(distance_squared > 1000.0));
+  delete(act);
 
   /* check collision_time for parallel momenta => impossible collision */
   particle_a.set_momentum(0.1, 0.3, -0.1, 0.2);
   particle_b.set_momentum(0.1, 0.3, -0.1, 0.2);
-  double time = collision_time(particle_a, particle_b);
+  double time = ScatterActionsFinder::collision_time(particle_a, particle_b);
   VERIFY(!(time >= 0.0));
 
   /* reset momenta for possible collision and compare to Particle class */
   particle_a.set_momentum(0.1, 10.0, 9.0, 8.0);
   particle_b.set_momentum(0.1, -10.0, -90.0, -80.0);
-  distance_squared = particle_distance(particle_a, particle_b);
+  act = new ScatterAction(particle_a, particle_b, 0.);
+  distance_squared = act->particle_distance();
   VERIFY(!(distance_squared < 0.0));
+  delete act;
 
   /* now check the Particles class itself */
   Particles particles;
@@ -89,11 +95,12 @@ TEST(everything) {
   VERIFY(particles.has_data(1));
 
   /* check usage particle data */
-  double distance_squared_2 =
-      particle_distance(particles.data(0), particles.data(1));
+  act = new ScatterAction(particles.data(0), particles.data(1), 0.);
+  double distance_squared_2 = act->particle_distance();
   printd("%g versus %g\n", distance_squared, distance_squared_2);
   VERIFY(!(distance_squared_2 < 0.0));
   VERIFY(!(distance_squared_2 - distance_squared > really_small));
+  delete act;
 }
 
 template <typename T>

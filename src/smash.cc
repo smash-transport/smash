@@ -26,8 +26,8 @@
 #include "include/decaymodes.h"
 #include "include/inputfunctions.h"
 /* Outputs */
-#include "include/binaryoutput_collisions.h"
-#include "include/binaryoutput_particles.h"
+#include "include/binaryoutputcollisions.h"
+#include "include/binaryoutputparticles.h"
 #include "include/oscarfullhistoryoutput.h"
 #include "include/oscarparticlelistoutput.h"
 #include "include/outputroutines.h"
@@ -231,7 +231,7 @@ int main(int argc, char *argv[]) {
       output_conf.take({"VTK"});
     }
     if (static_cast<bool>(output_conf.take({"Binary_collisions", "Enable"}))) {
-      output_list.emplace_back(new BinaryOutputCollisions(output_path, 
+      output_list.emplace_back(new BinaryOutputCollisions(output_path,
                                        output_conf["Binary_collisions"]));
     } else {
       output_conf.take({"Binary_collisions"});

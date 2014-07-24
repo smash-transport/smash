@@ -39,11 +39,11 @@ class Particles;
   * different blocks are at the same time and from the same event.
   * Particle information is stored in TBranches.
   * For each particle characteristic there is a separate branch.
-  * Currently these are t,x,y,z (coordinates), p0,px,py,pz (4-momentum), 
+  * Currently these are t,x,y,z (coordinates), p0,px,py,pz (4-momentum),
   * pdgid - PDG code of particle, that characterizes its sort,
   * ev - number of event particle encountered in and
   * tcounter - number of output block in a given event.
-  * 
+  *
   * Here is an example of ROOT macro to read the ROOT output of SMASH:
   * \code
   * int rootfile_analysis_example(void) {
@@ -54,10 +54,10 @@ class Particles;
   *   } else {
   *     printf("Error at opening file %s\n", input_file->GetName());
   *   }
-  * 
+  *
   *   // Get a tree from file
   *   TTree *tree = static_cast<TTree*>(input_file->Get("particles"));
-  * 
+  *
   *   // Get number of entries in a tree
   *   Int_t nentries = tree->GetEntries();
   *   printf("Number of entries in a tree is %d\n", nentries);
@@ -67,7 +67,7 @@ class Particles;
 
   *   // This draws 3D momentum space distribution at initialization
   *   tree->Draw("px:py:pz","tcounter==0");
-  * 
+  *
   *   return 0;
   * }
   * \endcode
@@ -77,7 +77,7 @@ class Particles;
   * root -l
   * new TBrowser
   * \endcode
-  * If option write_collisions is set True, then in addition to particles 
+  * If option write_collisions is set True, then in addition to particles
   * TTree a collision TTree is created. Information about each collision is
   * written as one leaf: nin, nout - number of incoming and outgoing particles,
   * ev - event number, (t,x,y,z), (p0,px,py,pz) - arrays of dimension nin+nout

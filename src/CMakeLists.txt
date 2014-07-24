@@ -2,6 +2,9 @@ include(CheckLibraryExists)
 include(AddCompilerFlag)
 include(FindPkgConfig)
 
+include(GetGitRevisionDescription)
+get_git_head_revision(GIT_REFSPEC GIT_SHA1)
+
 find_package(GSL REQUIRED)
 find_package(Boost 1.49.0 REQUIRED COMPONENTS filesystem system)
 pkg_check_modules(YAML REQUIRED yaml-cpp>=0.5.1)
@@ -40,8 +43,8 @@ set(SMASH_LIBRARIES ${SMASH_LIBRARIES}
 set(smash_src
         action.cc
         boxmodus.cc
-        binaryoutput_collisions.cc
-        binaryoutput_particles.cc
+        binaryoutputcollisions.cc
+        binaryoutputparticles.cc
         collidermodus.cc
         configuration.cc
         cross-sections.cc
@@ -67,6 +70,7 @@ set(smash_src
         resonances.cc
         scatteraction.cc
         scatteractionsfinder.cc
+        spheremodus.cc
         vtkoutput.cc
         width.cc
         )
