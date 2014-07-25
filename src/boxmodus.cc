@@ -31,9 +31,9 @@ namespace Smash {
 
 BoxModus::BoxModus(Configuration modus_config, const ExperimentParameters &)
     : initial_condition_(modus_config.take({"Box", "INITIAL_CONDITION"})),
-      length_           (modus_config.take({"Box", "LENGTH"})),
-      temperature_      (modus_config.take({"Box", "TEMPERATURE"})),
-      start_time_       (modus_config.take({"Box", "START_TIME"})) {
+      length_(modus_config.take({"Box", "LENGTH"})),
+      temperature_(modus_config.take({"Box", "TEMPERATURE"})),
+      start_time_(modus_config.take({"Box", "START_TIME"})) {
 }
 
 /* print_startup - console output on startup of box specific parameters */

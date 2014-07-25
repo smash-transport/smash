@@ -9,11 +9,10 @@
 
 #include "include/configuration.h"
 
+#include <boost/filesystem.hpp>
 #include <cstdio>
 #include <string>
 #include <vector>
-
-#include <boost/filesystem.hpp>
 #include <yaml-cpp/yaml.h>
 
 #include "include/forwarddeclarations.h"

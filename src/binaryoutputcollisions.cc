@@ -9,15 +9,15 @@
 
 #include "include/binaryoutputcollisions.h"
 
-#include <string>
 #include <boost/filesystem.hpp>
-#include <include/config.h>
+#include <string>
 
 #include "include/clock.h"
-#include "include/forwarddeclarations.h"
-#include "include/particles.h"
-#include "include/inputfunctions.h"
+#include "include/config.h"
 #include "include/configuration.h"
+#include "include/forwarddeclarations.h"
+#include "include/inputfunctions.h"
+#include "include/particles.h"
 
 namespace Smash {
 

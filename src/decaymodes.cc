@@ -9,14 +9,14 @@
 
 #include "include/decaymodes.h"
 
-#include "include/constants.h"
-#include "include/pdgcode.h"
-#include "include/processbranch.h"
-#include "include/inputfunctions.h"
-
+#include <assert.h>
 #include <cstdio>
 #include <map>
-#include <assert.h>
+
+#include "include/constants.h"
+#include "include/inputfunctions.h"
+#include "include/pdgcode.h"
+#include "include/processbranch.h"
 
 namespace Smash {
 
@@ -80,7 +80,7 @@ const DecayModes &DecayModes::find(PdgCode pdg) {
 
 void DecayModes::load_decaymodes(const std::string &input) {
   static DecayModesMap decaymodes;
-  decaymodes.clear();  // in case an exception was thrown and we should try again
+  decaymodes.clear();  // in case an exception was thrown and should try again
   PdgCode pdgcode = PdgCode::invalid();
   DecayModes decay_modes_to_add;
   float ratio_sum = 0.0;

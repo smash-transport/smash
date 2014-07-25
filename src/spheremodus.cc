@@ -50,14 +50,14 @@ void SphereModus::print_startup() {
 
 /* initial_conditions - sets particle data for @particles */
 float SphereModus::initial_conditions(Particles *particles,
-                                     const ExperimentParameters& /*parameters*/) {
+  const ExperimentParameters& /*parameters*/) {
   /* count number of stable types */
   int number_of_stable_types = 0;
   /* loop over all the particle types */
   for (const ParticleType &type : ParticleType::list_all()) {
     /* Particles with width > 0 (resonances) do not exist in the beginning */
     if (!type.is_stable()) {
-            continue;
+      continue;
     }
     number_of_stable_types = number_of_stable_types + 1;
     printd("%s mass: %g [GeV]\n", type.name().c_str(), type.pole_mass());
@@ -69,7 +69,7 @@ float SphereModus::initial_conditions(Particles *particles,
   for (const ParticleType &type : ParticleType::list_all()) {
   /* Particles with width > 0 (resonances) do not exist in the beginning */
     if (!type.is_stable()) {
-            continue;
+      continue;
     }
   particles->create(number_of_particles_per_type, type.pdgcode());
   }
@@ -79,7 +79,7 @@ float SphereModus::initial_conditions(Particles *particles,
     /* thermal momentum according Maxwell-Boltzmann distribution */
     double momentum_radial;
     momentum_radial = sample_momenta(this->sphere_temperature_,
-                                                 data.pole_mass());
+                                     data.pole_mass());
     phitheta.distribute_isotropically();
     printd("Particle %d radial momenta %g phi %g cos_theta %g\n", data.id(),
            momentum_radial, phitheta.phi(), phitheta.costheta());
@@ -89,7 +89,8 @@ float SphereModus::initial_conditions(Particles *particles,
     position_radial = cbrt(Random::canonical()) * radius_;
     Angles pos_phitheta;
     pos_phitheta.distribute_isotropically();
-    data.set_position(FourVector(start_time_, pos_phitheta.threevec() * position_radial));
+    data.set_position(FourVector(start_time_, pos_phitheta.threevec()
+                                 * position_radial));
     /* IC Debug checks */
     printd_position(data);
     printd_momenta(data);

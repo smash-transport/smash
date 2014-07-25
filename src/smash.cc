@@ -54,19 +54,21 @@ namespace {
 void usage(const int rc, const std::string &progname) {
   printf("\nUsage: %s [option]\n\n", progname.c_str());
   printf("Calculate transport box\n"
-         "  -h, --help              usage information\n"
-         "\n"
-         "  -i, --inputfile <file>  path to input configuration file\n"
-         "  -d, --decaymodes <file> override default decay modes from file\n"
-         "  -p, --particles <file>  override default particles from file\n"
-         "\n"
-         "  -c, --config <YAML>     specify config value overrides\n"
-         "  -m, --modus <modus>     shortcut for -c 'General: { MODUS: <modus> }'\n"
-         "  -e, --endtime <time>    shortcut for -c 'General: { END_TIME: <time> }'\n"
-         "\n"
-         "  -o, --output <dir>      output directory (default: $PWD/data/<runid>)\n"
-         "  -f, --force             force overwriting files in the output directory\n"
-         "  -v, --version\n\n");
+    "  -h, --help              usage information\n"
+    "\n"
+    "  -i, --inputfile <file>  path to input configuration file\n"
+    "  -d, --decaymodes <file> override default decay modes from file\n"
+    "  -p, --particles <file>  override default particles from file\n"
+    "\n"
+    "  -c, --config <YAML>     specify config value overrides\n"
+    "  -m, --modus <modus>     shortcut for -c 'General: { MODUS: <modus> }'\n"
+    "  -e, --endtime <time>    shortcut for -c 'General: { END_TIME: <time> }'"
+    "\n"
+    "\n"
+    "  -o, --output <dir>      output directory (default: $PWD/data/<runid>)\n"
+    "  -f, --force             force overwriting files in the output directory"
+    "\n"
+    "  -v, --version\n\n");
   exit(rc);
 }
 

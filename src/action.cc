@@ -9,14 +9,15 @@
 
 #include "include/action.h"
 
-#include "include/constants.h"
-#include "include/random.h"
-#include "include/resonances.h"
-#include "include/angles.h"
-#include "include/outputroutines.h"
-
 #include <assert.h>
 #include <sstream>
+
+#include "include/angles.h"
+#include "include/constants.h"
+#include "include/outputroutines.h"
+#include "include/random.h"
+#include "include/resonances.h"
+
 
 namespace Smash {
 
@@ -30,12 +31,12 @@ float Action::weight() const {
   return total_weight_;
 }
 
-void Action::add_process (const ProcessBranch &p) {
+void Action::add_process(const ProcessBranch &p) {
   subprocesses_.push_back(p);
   total_weight_ += p.weight();
 }
 
-void Action::add_processes (const ProcessBranchList &pv) {
+void Action::add_processes(const ProcessBranchList &pv) {
   for (const auto &proc : pv) {
     subprocesses_.push_back(proc);
     total_weight_ += proc.weight();
@@ -60,7 +61,7 @@ ParticleList Action::incoming_particles() const {
 }
 
 
-ParticleList Action::choose_channel () {
+ParticleList Action::choose_channel() {
   if (total_weight_ < really_small) {
     return ParticleList();
   }
@@ -87,7 +88,6 @@ ParticleList Action::choose_channel () {
 
 
 void Action::sample_cms_momenta(const double cms_energy) {
-
   /* This function only operates on 2-particle final states. */
   assert(outgoing_particles_.size() == 2);
 
@@ -110,14 +110,14 @@ void Action::sample_cms_momenta(const double cms_energy) {
   /* If one of the particles is a resonance, sample its mass. */
   /* XXX: Other particle assumed stable! */
   if (!t1.is_stable()) {
-    mass1 = sample_resonance_mass (t1, t2, cms_energy);
+    mass1 = sample_resonance_mass(t1, t2, cms_energy);
   } else if (!t2.is_stable()) {
-    mass2 = sample_resonance_mass (t2, t1, cms_energy);
+    mass2 = sample_resonance_mass(t2, t1, cms_energy);
   }
 
   double energy1 = (cms_energy * cms_energy + mass1 * mass1 - mass2 * mass2) /
                    (2.0 * cms_energy);
-  double momentum_radial = sqrt(energy1 * energy1 - mass1 * mass1);
+  double momentum_radial = std::sqrt(energy1 * energy1 - mass1 * mass1);
   if (!(momentum_radial > 0.0))
     printf("Warning: radial momenta %g \n", momentum_radial);
   /* XXX: Angles should be sampled from differential cross section
@@ -132,9 +132,9 @@ void Action::sample_cms_momenta(const double cms_energy) {
            energy1);
   }
 
-  p1->set_momentum(FourVector(energy1,phitheta.threevec()*momentum_radial));
+  p1->set_momentum(FourVector(energy1, phitheta.threevec() * momentum_radial));
   p2->set_momentum(FourVector(cms_energy - energy1,
-                              -phitheta.threevec()*momentum_radial));
+                              -phitheta.threevec() * momentum_radial));
 
   printd("p0: %g %g \n", p1->momentum().x0(), p2->momentum().x0());
   printd("p1: %g %g \n", p1->momentum().x1(), p2->momentum().x1());
@@ -144,7 +144,6 @@ void Action::sample_cms_momenta(const double cms_energy) {
 
 
 void Action::check_conservation(const size_t &id_process) const {
-
   /* Check momentum conservation */
   FourVector momentum_difference;
   for (const auto &part : incoming_particles_) {
