@@ -197,8 +197,6 @@ TEST(initialize_sphere) {
     p.position().x2()*p.position().x2()+p.position().x3()*p.position().x3()); 
     VERIFY(radius <  10.0);
   }
-
-//known to fail at the moment
 //  FUZZY_COMPARE(momentum.x1(), 0.0);
 //  FUZZY_COMPARE(momentum.x2(), 0.0);
 //  FUZZY_COMPARE(momentum.x3(), 0.0);
