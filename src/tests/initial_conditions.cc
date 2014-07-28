@@ -14,6 +14,7 @@
 #include "../include/nucleusmodus.h"
 #include "../include/experiment.h"
 #include "../include/configuration.h"
+#include "../include/spheremodus.h"
 
 #include <boost/filesystem.hpp>
 
@@ -173,6 +174,32 @@ TEST_CATCH(initialize_nucleus_empty_target, NucleusModus::NucleusEmpty) {
   n.initial_conditions(&P, param);
 }
 
-// TEST(initialize_sphere) {
-//   // really don't know what to do here.
-// }
+TEST(initialize_sphere) {
+ Configuration conf(TEST_CONFIG_PATH);
+  conf["Modi"]["Sphere"]["RADIUS"] = 10;
+  conf["Modi"]["Sphere"]["NUMBEROFPARTICLES"] = 300;
+  conf["Modi"]["Sphere"]["SPHERETEMPERATURE"] = 0.2;
+  conf["Modi"]["Sphere"]["START_TIME"] = 0.0;
+  ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};
+  SphereModus s(conf["Modi"], param);
+  Particles P;
+//Is the correct number of particles in the map?
+  COMPARE(s.initial_conditions(&P, param), 0.0f);
+  COMPARE(P.size(), 300);
+  COMPARE(P.data(67).pdgcode(), 0x661);
+// total momentum check
+  FourVector momentum(0.0, 0.0, 0.0, 0.0);
+// position less than radius?
+  float radius = 0.0;
+  for (auto p : P.data()) {
+    momentum += p.momentum();
+    radius = sqrt(p.position().x1()*p.position().x1()+
+    p.position().x2()*p.position().x2()+p.position().x3()*p.position().x3()); 
+    VERIFY(radius <  10.0);
+  }
+
+//known to fail at the moment
+//  FUZZY_COMPARE(momentum.x1(), 0.0);
+//  FUZZY_COMPARE(momentum.x2(), 0.0);
+//  FUZZY_COMPARE(momentum.x3(), 0.0);
+}
