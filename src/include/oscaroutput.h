@@ -20,31 +20,62 @@
 namespace Smash {
 
 /**
- * \ingroup output
+ * \addtogroup output
+ * @{
  */
+
+/// Selector for the output format of OscarOutput
+enum OscarOutputFormat { OscarFormat2013, OscarFormat1999 };
+
+/// Flags for the \p Contents template parameter of OscarOutput
+enum OscarOutputContents {
+  /// store interaction information (write_interaction)
+  OscarInteractions = 0x001,
+  /// store the state after N timesteps (after_Nth_timestep)
+  OscarTimesteps = 0x002,
+  /// store the state at the start of each event (at_eventstart)
+  OscarAtEventstart = 0x004,
+  /// store the state at the end of each event (at_eventend)
+  OscarParticlesAtEventend = 0x008
+};
+
+template <OscarOutputFormat Format, int Contents>
 class OscarOutput : public OutputInterface {
  public:
-  OscarOutput(bf::path path, std::string filename, Configuration&& conf);
-  ~OscarOutput();
+  OscarOutput(bf::path path, std::string name);
 
+  /// writes the initial particle information of an event
   void at_eventstart(const Particles &particles,
                      const int event_number) override;
 
+  /// writes the final particle information of an event
   void at_eventend(const Particles &particles, const int event_number) override;
 
+  /// Write a prefix line and a line per particle to OSCAR output.
   void at_interaction(const ParticleList &incoming_particles,
-                         const ParticleList &outgoing_particles) override;
+                      const ParticleList &outgoing_particles) override;
 
   void at_intermediate_time(const Particles &particles, const int event_number,
-                          const Clock &clock) override;
+                            const Clock &clock) override;
 
- protected:
-  void write_format_description(void);
+ private:
   void write_particledata(const ParticleData &data);
   void write(const Particles &particles);
+
   FilePtr file_;
-  bool modern_format_;
 };
+
+/**
+ * Returns a new OscarOutput object using information from \p config to
+ * select the correct implementation.
+ *
+ * \param path The path to the output directory where the file(s) will be
+ *             placed.
+ * \param config A Configuration object that has direct entries for OSCAR.
+ */
+std::unique_ptr<OutputInterface> create_oscar_output(bf::path path, Configuration config);
+
+//@}
 }  // namespace Smash
 
 #endif  // SRC_INCLUDE_OSCAROUTPUT_H_

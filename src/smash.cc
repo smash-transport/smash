@@ -28,8 +28,7 @@
 /* Outputs */
 #include "include/binaryoutputcollisions.h"
 #include "include/binaryoutputparticles.h"
-#include "include/oscarfullhistoryoutput.h"
-#include "include/oscarparticlelistoutput.h"
+#include "include/oscaroutput.h"
 #include "include/outputroutines.h"
 #ifdef SMASH_USE_ROOT
 #  include "include/rootoutput.h"
@@ -215,19 +214,12 @@ int main(int argc, char *argv[]) {
     // create outputs
     OutputsList output_list;
     auto output_conf = configuration["General"]["OUTPUT"];
-    if (static_cast<bool>(
-            output_conf.take({"OSCAR_PARTICLELIST", "Enable"}))) {
-      output_list.emplace_back(new OscarParticleListOutput(
-          output_path, output_conf["OSCAR_PARTICLELIST"]));
-    } else {
-      output_conf.take({"OSCAR_PARTICLELIST"});
-    }
-    if (static_cast<bool>(
-            output_conf.take({"OSCAR_COLLISIONS", "Enable"}))) {
-      output_list.emplace_back(new OscarFullHistoryOutput(
-          output_path, output_conf["OSCAR_COLLISIONS"]));
-    } else {
-      output_conf.take({"OSCAR_COLLISIONS"});
+
+    // loop until all OSCAR outputs are created (create_oscar_output will return
+    // nullptr then).
+    while (std::unique_ptr<OutputInterface> oscar =
+               create_oscar_output(output_path, output_conf)) {
+      output_list.emplace_back(std::move(oscar));
     }
     if (static_cast<bool>(output_conf.take({"VTK", "Enable"}))) {
       output_list.emplace_back(new VtkOutput(output_path, output_conf["VTK"]));
