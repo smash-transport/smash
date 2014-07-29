@@ -79,10 +79,9 @@ class ColliderModus : public ModusDefault {
 
  private:
   /// PdgCode of Projectile particle
-  //TODO(mkretz): Matthias wants to fix this back to const.
-  PdgCode projectile_;
+  const PdgCode projectile_;
   /// PdgCode of Target particle
-  PdgCode target_;
+  const PdgCode target_;
   /// Center-of-mass energy of the collision in GeV
   const float sqrts_;
 };

@@ -137,6 +137,9 @@ class Configuration {
     /// if you want to copy this you're doing it wrong
     Value &operator=(const Value &) = delete;
 
+    /// Return the string value.
+    std::string to_string() const { return node_.Scalar(); }
+
     /**
      * This function determines the type it is assigned to and calls
      * YAML::Node::as<T>() with this type.
