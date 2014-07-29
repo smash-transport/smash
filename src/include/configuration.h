@@ -72,10 +72,10 @@ namespace Smash {
  *
  * ###TEXT MISSING###
  *
- * \li \ref input_general_
- * \li \ref input_modi_nucleus_
- * \li \ref input_modi_box_
- * \li \ref input_modi_collider_
+ * \li \subpage input_general_
+ * \li \subpage input_modi_nucleus_
+ * \li \subpage input_modi_box_
+ * \li \subpage input_modi_collider_
  * \else
  *
  * Options
