@@ -6,7 +6,7 @@ General:
     DELTA_TIME:    0.01
 
     # end time of simulation
-    END_TIME:      150.0
+    END_TIME:      100.0
 
     # how much time before recording measurables
     OUTPUT_INTERVAL:  1.0
@@ -56,21 +56,21 @@ Modi:
         SQRTS: 1.0
 
     Nucleus:
-        # Set up a deuteron-lead collision.
+        # Set up a copper-gold collision.
         # Definitions for the projectile:
         Projectile:
-            PARTICLES: {2212: 82, 2112: 126}
-            AUTOMATIC: true
+            PARTICLES: {2212: 29, 2112: 34}
+            AUTOMATIC: false
             DEFORMED: false
         # Definitions for the target:
         Target:
-            PARTICLES: {2212: 82, 2112: 126}
-            AUTOMATIC: true
+            PARTICLES: {2212: 79, 2112: 118}
+            AUTOMATIC: false
             DEFORMED: false
         # what sqrt(s_NN) to use:
-        SQRTSNN: 200
+        SQRTSNN: 10
         # the reference frame
-        FRAME: 3
+        CALCULATION_FRAME: 3
         # which subsystem "NN" in sqrt(s_NN) refers to
         # (two PDG IDs). The default is proton-proton; let's set it to
         # neutron-neutron.
@@ -79,3 +79,4 @@ Modi:
         # between 0 and 10)
         Impact:
             MAX: 10
+        INITIAL_DISTANCE: 60

@@ -9,13 +9,13 @@
 #include <cstring>
 #include <stdexcept>
 #include "boost/tuple/tuple.hpp"
-#include <iostream>
-// #include <list>
  
 #include "include/nucleusmodus.h"
 #include "include/angles.h"
 #include "include/configuration.h"
+//#include "include/constants.h"
 #include "include/experimentparameters.h"
+#include "include/numerics.h"
 #include "include/outputroutines.h"
 #include "include/particles.h"
 #include "include/pdgcode.h"
@@ -34,9 +34,10 @@ NucleusModus::NucleusModus(Configuration modus_config,
   pdg_sNN_1_ = sqrts_n[0];
   pdg_sNN_2_ = sqrts_n[1];
 
+  // Get the reference frame for the calculation.
   // TODO: Improve frame user interface.
-  if (modus_cfg.has_value({"FRAME"})) {
-    frame_ = modus_cfg.take({"FRAME"});
+  if (modus_cfg.has_value({"CALCULATION_FRAME"})) {
+    frame_ = modus_cfg.take({"CALCULATION_FRAME"});
   }
 
   // Decide which type of nucleus (deformed or not).
@@ -157,6 +158,7 @@ float NucleusModus::initial_conditions(Particles *particles,
   }
 
   // Check if energy is valid.
+  double s_NN = sqrt_s_NN_ * sqrt_s_NN_;
   if (sqrt_s_NN_ < mass_1 + mass_2) {
     throw ModusDefault::InvalidEnergy(
                       "Error in input: sqrt(s_NN) is smaller than masses:\n"
@@ -165,13 +167,19 @@ float NucleusModus::initial_conditions(Particles *particles,
                       + std::to_string(mass_2) + " GeV.");
   }
   // Calculate the lorentz invariant mandelstam variable for the total system.
-  float total_mandelstam_s = (sqrt_s_NN_*sqrt_s_NN_ - mass_1*mass_1 - mass_2*mass_2)
-                             * mass_projec*mass_target
-                             / (mass_1*mass_2)
-                             + mass_projec*mass_projec + mass_target*mass_target;
+  float total_mandelstam_s = (s_NN - mass_1 * mass_1 - mass_2 * mass_2)
+                             * mass_projec * mass_target / (mass_1 * mass_2)
+                             + mass_projec * mass_projec + mass_target * mass_target;
   // Use the total mandelstam variable to get the frame-denendent velocity for
   // each nucleus. Position 1 is projectile, position 2 is target.
-  boost::tuple<float, float> velocities = get_velocities(total_mandelstam_s, mass_projec, mass_target);                           
+  boost::tuple<double, double> velocities = get_velocities(total_mandelstam_s, 
+                                                           mass_projec, mass_target);                           
+  // If velocities are too close to 1 for our calculations, throw an exception.
+  if (almost_equal(std::abs(1.0 - velocities.get<0>()), 0.0)
+      || almost_equal(std::abs(1.0 - velocities.get<1>()), 0.0)) {
+    throw std::domain_error("Found velocity equal to 1 in nucleusmodus::initial_conditions.\n"
+                            "Consider using the center of velocity reference frame.");
+  }
 
   // Shift the nuclei into starting positions.
   // Keep the pair separated in z by some small distance,
@@ -185,15 +193,11 @@ float NucleusModus::initial_conditions(Particles *particles,
   // -initial_z_displacement_/sqrt(velocity_squared).
   float avg_velocity = sqrt(velocities.get<0>() * velocities.get<0>() 
                             + velocities.get<1>() * velocities.get<1>());
-  float simulation_time = -initial_z_displacement_/ avg_velocity;
+  float simulation_time = -initial_z_displacement_ / avg_velocity;
   projectile_->shift(true, -initial_z_displacement_, +impact_/2.0,
                      simulation_time);
   target_->shift(false, initial_z_displacement_, -impact_/2.0,
                  simulation_time);
-
-  // debug
-  std::cout << std::endl << std::to_string(velocities.get<0>()) << std::endl
-            << std::to_string(velocities.get<1>()) << std::endl;
 
   // Boost the nuclei to the appropriate velocity.
   projectile_->boost(velocities.get<0>());
@@ -217,42 +221,36 @@ void NucleusModus::sample_impact(bool s, float min, float max) {
   }
 }
 
-boost::tuple<float, float> NucleusModus::get_velocities(float s, float m1, float m2) {
-  float v1 = 0.f;
-  float v2 = 0.f;
-  // Frame dependent calculations of velocities.
+boost::tuple<double, double> NucleusModus::get_velocities(float s, float m1, float m2) {
+  double v1 = 0.0;
+  double v2 = 0.0;
+  // Frame dependent calculations of velocities. Assume v1 >= 0, v2 <= 0.
   switch (frame_) {
-    case 0:  // Lab frame
+    case 1:  // Center of velocity.
         v1 = sqrt((s - (m1 + m2) * (m1 + m2))
-             / (s - (m1 - m2) * (m1 - m2)));
+                  / (s - (m1 - m2) * (m1 - m2)));
         v2 = - v1;
       break;
-    case 1:  // Center of mass
-      // Note temporary storage of center of mass momentum in velocity 2.
-      v2 = sqrt(((s - (m1 + m2) * (m1 + m2)) * (s - (m1 - m2) * (m1 - m2))) / (4 * s));
-      v1 = v2 / m1;
-      v2 = - v2 / m2;
+    case 2:  // Center of mass.
+      {
+        double A = (s -(m1 - m2) * (m1 - m2)) * (s -(m1 + m2) * (m1 + m2));
+        double B = - 8 * (m1 * m1) * m1 * (m2 * m2) * m2 - ((m1 * m1) + (m2 * m2))
+                   * (s - (m1 * m1) - (m2 * m2)) * (s - (m1 * m1) - (m2 * m2));
+        double C = (m1 * m1) * (m2 * m2) * A;
+        // Compute positive center of mass momentum.
+        double abs_p = sqrt((-B - sqrt(B * B - 4 * A * C)) / (2 * A));
+        v1 = abs_p / m1;
+        v2 = -abs_p / m2;
+      }
       break;
-    case 2:  // Center of velocity
-      v1 = sqrt((s * s + ((m1 * m1) - (m2 * m2)) * ((m1 * m1) - (m2 * m2))
-                - 2 * s * ((m1 * m1) + (m2 * m2)))
-                / (8 * (m1 * m2) * (m1 * m2) + 4 * (m1 * m2) * s 
-                - 4 * (m1 * m2) * ((m1 * m1) + (m2 * m2))));
-      v2 = - v1;
-      break;
-    case 3:  // Target at rest
-      v1 = sqrt(-1 + ((s - ((m1 * m1) + (m2 * m2))) * (s - ((m1 * m1) + (m2 * m2))))
-                / (4 * (m1 * m1) * (m2 * m2)));
-      v2 = 0;
-      break;
-    case 4:  // Projectile at rest
-      v1 = 0;
-      v2 = sqrt(-1 + ((s - ((m1 * m1) + (m2 * m2))) * (s - ((m1 * m1) + (m2 * m2))))
-                / (4 * (m1 * m1) * (m2 * m2)));
+    case 3:  // Target at rest.
+      v1 = sqrt(1 - 4 * (m1 * m1) * (m2 * m2) / ((s - (m1 * m1) - (m2 * m2)) 
+                * (s - (m1 * m1) - (m2 * m2))));
       break;
     default:
       throw std::domain_error("Invalid reference frame in NucleusModus::get_velocities.");
   }
   return boost::make_tuple(v1, v2);
 }
+
 }  // namespace Smash

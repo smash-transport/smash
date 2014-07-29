@@ -185,20 +185,18 @@ class NucleusModus : public ModusDefault {
    **/
   double initial_z_displacement_ = 1.0;
   // Reference frame for the system.
-  // 0 = Lab frame
-  // 1 = Center of mass
-  // 2 = Center of velocity
+  // 1 = Center of velocity
+  // 2 = Center of mass
   // 3 = Target at rest
-  // 4 = Projectile at rest
-  int frame_ = 0;
+  int frame_ = 1;
   // Get the frame dependent velocity for each nucleus, using
-  // the current value of the frame_ class member. \see frame_
+  // the current reference frame. \see frame_
   // 
-  // @param s The total mandelstam s of the system
+  // @param s The total mandelstam S of the system
   // @param m1 The mass of the projectile.
   // @param m2 The mass of the target.
-  // @return < p1, p2 >
-  boost::tuple<float, float> get_velocities(float mandelstam_s, float m1, float m2);
+  // @return < v1, v2 >
+  boost::tuple<double, double> get_velocities(float mandelstam_s, float m1, float m2);
 };
 
 }  // namespace Smash
