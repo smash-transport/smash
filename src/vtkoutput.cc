@@ -33,7 +33,7 @@ void VtkOutput::at_eventend(const Particles &/*particles*/,
                             const int /*event_number*/) {
 }
 
-void VtkOutput::after_Nth_timestep(const Particles &particles,
+void VtkOutput::at_intermediate_time(const Particles &particles,
                                    const int event_number,
                                    const Clock& /*clock*/) {
   write(particles, event_number);

@@ -83,7 +83,7 @@ void OscarFullHistoryOutput::at_eventend(const Particles &particles,
   std::fflush(file_.get());
 }
 
-void OscarFullHistoryOutput::write_interaction(
+void OscarFullHistoryOutput::at_interaction(
   const ParticleList &incoming_particles,
   const ParticleList &outgoing_particles) {
   if (modern_format_) {

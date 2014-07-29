@@ -60,12 +60,12 @@ void BinaryOutputParticles::at_eventend(const Particles &particles,
   std::fflush(file_.get());
 }
 
-void BinaryOutputParticles::write_interaction(const ParticleList &/*incoming*/,
+void BinaryOutputParticles::at_interaction(const ParticleList &/*incoming*/,
                                      const ParticleList &/*outgoing*/) {
   /* No output of this kind in particles output */
 }
 
-void BinaryOutputParticles::after_Nth_timestep(const Particles &particles,
+void BinaryOutputParticles::at_intermediate_time(const Particles &particles,
                                       const int /*event_number*/,
                                       const Clock &) {
   char pchar = 'p';

@@ -90,7 +90,7 @@ TEST(outputfile) {
   VERIFY(bf::exists(testoutputpath / outputfilename));
   /* Time step output */
   Clock clock(0.0, 1.0);
-  vtkop->after_Nth_timestep(particles, event_id, clock);
+  vtkop->at_intermediate_time(particles, event_id, clock);
   VERIFY(bf::exists(testoutputpath / "pos_ev00000_tstep00001.vtk"));
 
   std::fstream outputfile;

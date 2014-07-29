@@ -76,13 +76,13 @@ void OscarOutput::at_eventend(const Particles& /*particles*/,
   /* Behavior of this function depends on subclass */
 }
 
-void OscarOutput::write_interaction(
+void OscarOutput::at_interaction(
   const ParticleList& /*incoming_particles*/,
   const ParticleList& /*outgoing_particles*/) {
   /* Behavior of this function depends on subclass */
 }
 
-void OscarOutput::after_Nth_timestep(const Particles & /*particles*/,
+void OscarOutput::at_intermediate_time(const Particles & /*particles*/,
                                                 const int /*event_number*/,
                                                 const Clock& /*clock*/) {
   /* Behavior of this function depends on subclass */

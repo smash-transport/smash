@@ -82,7 +82,7 @@ void OscarParticleListOutput::at_eventend(const Particles &particles,
   std::fflush(file_.get());
 }
 
-void OscarParticleListOutput::after_Nth_timestep(const Particles &particles,
+void OscarParticleListOutput::at_intermediate_time(const Particles &particles,
                                                  const int event_number,
                                                  const Clock&/*clock*/) {
   if (!only_final_) {

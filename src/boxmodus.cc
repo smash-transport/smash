@@ -162,7 +162,7 @@ void BoxModus::propagate(Particles *particles,
     data.set_position(position);
     if (wall_hit) {
       for (const auto &output : output_list) {
-        output->write_interaction(incoming_particle, {1, data});
+        output->at_interaction(incoming_particle, {1, data});
       }
     }
     printd_position(data);
