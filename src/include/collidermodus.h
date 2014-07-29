@@ -37,7 +37,7 @@ namespace Smash {
  * Modi:Collider:
  * ---------
  */
-// !!USER:Input
+// Userguide {
 /**
  * \if user
  * \page input_modi_collider_ Input Section Modi:Collider
@@ -50,7 +50,7 @@ namespace Smash {
  *
  * `TARGETR`: PdgCode of the Target
  */
-// !!/USER:Input
+// } Userguide
 class ColliderModus : public ModusDefault {
  public:
   /** Constructor

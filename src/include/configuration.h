@@ -63,7 +63,7 @@ namespace Smash {
  * important for the user to discover typos in his configuration file (or
  * command line parameters).
  */
-// !!USER:Input
+// Userguide {
 /** \if user
  * \page inputoptions Input file Options
  *
@@ -87,7 +87,7 @@ namespace Smash {
  * \li \ref ColliderModus
  * \endif
  */
-// !!/USER:Input
+// } Userguide
 class Configuration {
  public:
   /// Thrown when the types in the config file and C++ don't match.

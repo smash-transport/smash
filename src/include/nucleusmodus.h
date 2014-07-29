@@ -34,7 +34,7 @@ struct ExperimentParameters;
  * Modi:Nucleus:
  * -------------
  */
-// !!USER:Input
+// Userguide {
 /**
  * \if user
  * \page input_modi_nucleus_ Input Section Modi:Nucleus
@@ -93,7 +93,7 @@ struct ExperimentParameters;
  * `INITIAL_DISTANCE:` The initial distance of the two nuclei. That
  * means \f$z_{\rm min}^{\rm target} - z_{\rm max}^{\rm projectile}\f$.
  **/
- // !!/USER:Input
+ // } Userguide
 class NucleusModus : public ModusDefault {
  public:
   /** Constructor
