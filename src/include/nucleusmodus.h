@@ -52,10 +52,10 @@ struct ExperimentParameters;
  * \f$NN\f$=neutron+neutron, you can specify which \f$NN\f$-pair you
  * want this to refer to with `SQRTS_N`
  *
- * `SQRTS_N:` The "N" that's used for `SQRTSNN`. Expects a vector of two
- * PDG Codes, e.g. `SQRTS_N: [2212, 2212]` for proton-proton (that's the
- * default behaviour). The important part here is which mass is used for
- * the calculation \f$\sqrt{s_{\rm NN}} \rightarrow \beta\f$.
+ * `SQRTS_REPS:` The representative particles used for the "N"'s in
+ * `SQRTSNN`. Expects a vector of two PDG Codes, e.g. `SQRTS_N: [2212, 2212]`
+ * for proton-proton (that's the default behaviour). The important part is
+ * which mass to use for calculating \f$\sqrt{s_{\rm NN}} \rightarrow \beta\f$.
  *
  * `Projectile:` Section for projectile nucleus. The projectile will
  * start at \f$z < 0\f$ and fly in positive \f$z\f$-direction, at \f$x
@@ -63,6 +63,10 @@ struct ExperimentParameters;
  *
  * `Target:` Section for target nucleus. The target will start at \f$z
  * > 0\f$ and fly in negative \f$z\f$-direction, at \f$x \le 0\f$.
+ *
+ * `FRAME:` The frame in which the collision happens. Options are the
+ * center of velocity (1, default), the center of mass (2), and the
+ * fixed target (3). Set the number to specify the desired frame.
  *
  * `Projectile:`/`Target:` options:
  * \li `PARTICLES:` A map in which the keys are PDG codes and the
@@ -141,21 +145,8 @@ class NucleusModus : public ModusDefault {
    * at rest.
    **/
   Nucleus *target_;
-  /** Center-of-mass energy of the individual nucleon-nucleon
-   * collisions.
-   *
-   * Note that \f$\sqrt{s}\f$ is different for neutron-neutron and
-   * proton-proton collisions (because of the different masses).
-   * Therefore, pdg_sNN_1_ and pdg_sNN_2_ are needed to specify which
-   * two particles' collisions have this \f$\sqrt{s}\f$. (They each
-   * specify the PDG code of the particle species that we want to use
-   * for the definition of \f$\sqrt{s}\f$).
-   **/
-  float sqrt_s_NN_;
-  /// \see sqrt_s_NN_
-  PdgCode pdg_sNN_1_ = PdgCode(0x2212);
-  /// \see sqrt_s_NN_
-  PdgCode pdg_sNN_2_ = PdgCode(0x2212);
+  // Center-of-mass energy of the nucleus-nucleus collision.
+  float total_s_;
   /** impact parameter
    *
    * The nuclei projectile_ and target_ will be shifted along the x axis
@@ -187,7 +178,7 @@ class NucleusModus : public ModusDefault {
   // Reference frame for the system.
   // 1 = Center of velocity
   // 2 = Center of mass
-  // 3 = Target at rest
+  // 3 = Fixed target
   int frame_ = 1;
   // Get the frame dependent velocity for each nucleus, using
   // the current reference frame. \see frame_

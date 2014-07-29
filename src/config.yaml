@@ -67,16 +67,18 @@ Modi:
             PARTICLES: {2212: 79, 2112: 118}
             AUTOMATIC: false
             DEFORMED: false
-        # what sqrt(s_NN) to use:
+        # Collision energy.
+        # E_LAB : 100
+        # P_LAB : 50
         SQRTSNN: 10
-        # the reference frame
-        CALCULATION_FRAME: 3
-        # which subsystem "NN" in sqrt(s_NN) refers to
-        # (two PDG IDs). The default is proton-proton; let's set it to
-        # neutron-neutron.
-        SQRTS_N: [2112, 2112]
-        # impact parameter (we'll sample from a distribution
-        # between 0 and 10)
+        # The representative "N"'s (two PDG IDs) determining the 
+        # subsystem "NN" in sqrt(s_NN). Let's try neutron-neutron.
+        SQRTS_REPS: [2112, 2112]
+        # The reference frame in which to do the calculation.
+        # (1 = center of velocity, 2 = center of mass, 3 = fixed target)
+        CALCULATION_FRAME: 1
+        # Impact parameter. We'll sample from a distribution
+        # between 0 and 10.
         Impact:
             MAX: 10
         INITIAL_DISTANCE: 60
