@@ -6,12 +6,13 @@
  */
 
 #include "include/nucleus.h"
-#include "include/angles.h"
-#include "include/particles.h"
-#include "include/pdgcode.h"
 
 #include <limits>
 #include <map>
+
+#include "include/angles.h"
+#include "include/particles.h"
+#include "include/pdgcode.h"
 
 namespace Smash {
 
@@ -25,7 +26,7 @@ float Nucleus::mass() const {
   return total_mass/(testparticles_+0.0);
 }
 
-/**************************************************************************//**
+/****************************************************************************
  *
  * Woods-Saxon-distribution
  * ========================
@@ -220,7 +221,7 @@ float Nucleus::distribution_nucleons() const {
 }
 
 float Nucleus::woods_saxon(const float& r) {
-  return r*r/(exp((r-nuclear_radius())/diffusiveness_)+1);
+  return r*r / (exp((r - nuclear_radius()) / diffusiveness_) + 1);
 }
 
 void Nucleus::arrange_nucleons() {
@@ -230,10 +231,10 @@ void Nucleus::arrange_nucleons() {
     // get solid angle for current nucleon:
     Angles dir;
     dir.distribute_isotropically();
-    double z = r*dir.z();
-    double x = r*dir.x();
+    double z = r * dir.z();
+    double x = r * dir.x();
     // set position of current nucleon:
-    i->set_position(FourVector(0.0, x, r*dir.y(), z));
+    i->set_position(FourVector(0.0, x, r * dir.y(), z));
     // update maximal and minimal z values
     z_max_ = (z > z_max_) ? z : z_max_;
     z_min_ = (z < z_min_) ? z : z_min_;
@@ -259,7 +260,7 @@ void Nucleus::boost(const double& beta_squared_with_sign) {
   //       a system that moves with -beta. Now in this frame, it seems
   //       like p has been accelerated with +beta.
   //     )
-  ThreeVector beta (0., 0., -sign*std::sqrt(beta_squared));
+  ThreeVector beta(0., 0., -sign * std::sqrt(beta_squared));
   for (auto i = begin(); i != end(); i++) {
     // a real Lorentz Transformation would leave the particles at
     // different times here, which we would then have to propagate back
@@ -324,7 +325,7 @@ void Nucleus::copy_particles(Particles* external_particles) {
 }
 
 FourVector Nucleus::center() const {
-  FourVector centerpoint(0.0,0.0,0.0,0.0);
+  FourVector centerpoint(0.0, 0.0, 0.0, 0.0);
   for (auto p = cbegin(); p != cend(); p++) {
     centerpoint += p->position();
   }

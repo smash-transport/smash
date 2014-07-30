@@ -55,7 +55,7 @@ double clebsch_gordan_coefficient(const int isospin_a,
      isospin_z_a, isospin_z_b, -isospin_z_resonance);
   double clebsch_gordan_isospin = 0.0;
   if (std::abs(wigner_3j) > really_small)
-    clebsch_gordan_isospin = pow(-1, isospin_a / 2.0
+    clebsch_gordan_isospin = std::pow(-1, isospin_a / 2.0
     - isospin_b / 2.0 + isospin_z_resonance / 2.0)
     * std::sqrt(isospin_resonance + 1) * wigner_3j;
 
@@ -116,8 +116,8 @@ double two_to_one_formation(const ParticleType &type_particle1,
 
   double clebsch_gordan_isospin
     = clebsch_gordan_coefficient(type_particle1.isospin(),
-	 type_particle2.isospin(), type_resonance.isospin(),
-	 type_particle1.pdgcode().isospin3(),
+         type_particle2.isospin(), type_resonance.isospin(),
+         type_particle1.pdgcode().isospin3(),
          type_particle2.pdgcode().isospin3(),
          type_resonance.pdgcode().isospin3());
 
@@ -183,9 +183,9 @@ size_t two_to_two_formation(const ParticleType &type_particle1,
   size_t number_of_processes = 0;
   /* If we have two baryons in the beginning, we must have fermion resonance */
   if (type_particle1.pdgcode().baryon_number() != 0
-   && type_particle2.pdgcode().baryon_number() != 0
-   && ! type_particle1.pdgcode().is_antiparticle_of(type_particle2.pdgcode())
-   && type_resonance.pdgcode().baryon_number() == 0)
+      && type_particle2.pdgcode().baryon_number() != 0
+      && !type_particle1.pdgcode().is_antiparticle_of(type_particle2.pdgcode())
+      && type_resonance.pdgcode().baryon_number() == 0)
     return 0.0;
 
   /* Isospin z-component based on Gell-Mann–Nishijima formula
@@ -290,7 +290,7 @@ size_t two_to_two_formation(const ParticleType &type_particle1,
 
     if (xsection > really_small) {
       process_list->push_back(ProcessBranch(type_resonance.pdgcode(),
-                                            second_type.pdgcode(),xsection));
+                                            second_type.pdgcode(), xsection));
       number_of_processes++;
     }
   }
@@ -400,7 +400,8 @@ float nn_to_resonance_matrix_element(const double mandelstam_s,
   PdgCode delta = PdgCode("2224");
   if (type_final_a.pdgcode().iso_multiplet()
       != type_final_b.pdgcode().iso_multiplet()) {
-    /* N + N -> N + Delta: fit to Dmitriev OBE model, Nucl. Phys. A 459, 503 (1986) */
+    /* N + N -> N + Delta: fit to Dmitriev OBE model,
+       Nucl. Phys. A 459, 503 (1986) */
     if (type_final_a.pdgcode().iso_multiplet() == delta.iso_multiplet()
         || type_final_b.pdgcode().iso_multiplet() == delta.iso_multiplet()) {
       return 459. / std::pow(std::sqrt(mandelstam_s) - 1.104, 1.951);

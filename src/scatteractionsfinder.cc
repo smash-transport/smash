@@ -45,7 +45,7 @@ double ScatterActionsFinder::collision_time(const ParticleData &p1,
   if (fabs(velo_diff.sqr()) < really_small) {
     return -1.0;
   } else {
-    return -pos_diff * velo_diff/velo_diff.sqr();
+    return -pos_diff * velo_diff / velo_diff.sqr();
   }
 }
 
@@ -114,7 +114,6 @@ std::vector<ActionPtr> ScatterActionsFinder::find_possible_actions(
 
   for (const auto &p1 : particles->data()) {
     for (const auto &p2 : particles->data()) {
-
       int id_a = p1.id(), id_b = p2.id();
 
       /* Check for same particle and double counting. */
@@ -125,7 +124,7 @@ std::vector<ActionPtr> ScatterActionsFinder::find_possible_actions(
 
       /* Add to collision list. */
       if (act != nullptr) {
-        actions.push_back (std::move(act));
+        actions.push_back(std::move(act));
       }
     }
   }
@@ -133,17 +132,14 @@ std::vector<ActionPtr> ScatterActionsFinder::find_possible_actions(
 }
 
 
-
 #if 0
 GridScatterFinder::GridScatterFinder(float length) : length_(length) {
 }
 
-
 void
-GridScatterFinder::find_possible_actions (std::vector<ActionPtr> &actions,
+GridScatterFinder::find_possible_actions(std::vector<ActionPtr> &actions,
         Particles *particles, const ExperimentParameters &parameters,
         CrossSections *cross_sections) const {
-
   std::vector<std::vector<std::vector<std::vector<int> > > > grid;
   int N;
   int x, y, z;
@@ -153,8 +149,8 @@ GridScatterFinder::find_possible_actions (std::vector<ActionPtr> &actions,
   N = round(length_ / sqrt(parameters.cross_section * fm2_mb * M_1_PI) * 0.5);
   if (unlikely(N < 4 || particles->size() < 10)) {
     /* XXX: apply periodic boundary condition */
-    ScatterActionsFinder::find_possible_actions (actions, particles, parameters,
-                                                 cross_sections);
+    ScatterActionsFinder::find_possible_actions(actions, particles, parameters,
+                                                cross_sections);
     return;
   }
 
@@ -240,19 +236,21 @@ GridScatterFinder::find_possible_actions (std::vector<ActionPtr> &actions,
             }
             printd("grid cell particle %i <-> %i\n", data.id(), *id_other);
             ActionPtr act;
-            if (shift == 0)
-              act = check_collision (data.id(), *id_other, particles, parameters, cross_sections);
-            else {
+            if (shift == 0) {
+              act = check_collision(data.id(), *id_other, particles,
+                                    parameters, cross_sections);
+            } else {
               /* apply eventual boundary before and restore after */
               particles->data(*id_other)
                   .set_position(particles->data(*id_other).position() + shift);
-              act = check_collision (data.id(), *id_other, particles, parameters, cross_sections);
+              act = check_collision(data.id(), *id_other, particles,
+                                    parameters, cross_sections);
               particles->data(*id_other)
                   .set_position(particles->data(*id_other).position() - shift);
             }
             /* Add to collision list. */
             if (act != nullptr) {
-              actions.push_back (std::move(act));
+              actions.push_back(std::move(act));
             }
           } /* grid particles loop */
         }   /* grid sz */

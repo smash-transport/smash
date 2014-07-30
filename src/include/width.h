@@ -12,7 +12,7 @@ namespace Smash {
 /**
  * Get the mass-dependent width of a two-body decay into stable particles
  * according to Manley/Saleski, Phys. Rev. D 45 (1992) 4002.
- * 
+ *
  * \param mass Actual mass of the decaying particle [GeV].
  * \param poleMass Pole mass of the decaying particle [GeV].
  * \param mass1 Mass of the first daughter particle [GeV].

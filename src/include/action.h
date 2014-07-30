@@ -173,7 +173,7 @@ class DecayAction : public Action {
 
   /**
    * Kinematics of a 1-to-3 decay process.
-   * 
+   *
    * Sample the masses and momenta of the decay products in the
    * center-of-momentum frame.
    */

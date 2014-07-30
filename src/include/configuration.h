@@ -77,7 +77,7 @@ namespace Smash {
  * \li \ref input_modi_box_
  * \li \ref input_modi_collider_
  * \else
- * 
+ *
  * Options
  * -------
  * For possible configuration values, see
@@ -191,9 +191,9 @@ class Configuration {
                          const bf::path &filename);
 
   /// if you want to copy this you're doing it wrong
-  Configuration(const Configuration &) = delete;
+  Configuration(const Configuration &) = default;
   /// if you want to copy this you're doing it wrong
-  Configuration &operator=(const Configuration &) = delete;
+  Configuration &operator=(const Configuration &) = default;
 
   /// moving is fine
   Configuration(Configuration &&) = default;

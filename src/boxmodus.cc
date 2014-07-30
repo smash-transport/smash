@@ -31,9 +31,9 @@ namespace Smash {
 
 BoxModus::BoxModus(Configuration modus_config, const ExperimentParameters &)
     : initial_condition_(modus_config.take({"Box", "INITIAL_CONDITION"})),
-      length_           (modus_config.take({"Box", "LENGTH"})),
-      temperature_      (modus_config.take({"Box", "TEMPERATURE"})),
-      start_time_       (modus_config.take({"Box", "START_TIME"})) {
+      length_(modus_config.take({"Box", "LENGTH"})),
+      temperature_(modus_config.take({"Box", "TEMPERATURE"})),
+      start_time_(modus_config.take({"Box", "START_TIME"})) {
 }
 
 /* print_startup - console output on startup of box specific parameters */
@@ -81,7 +81,7 @@ float BoxModus::initial_conditions(Particles *particles,
   printf("IC contains %zu particles\n", number_total);
   auto uniform_length = Random::make_uniform_distribution(0.0,
                                          static_cast<double>(this->length_));
-  /* Set paricles IC: */
+  /* Set particles IC: */
   for (ParticleData &data : particles->data()) {
     /* back to back pair creation with random momenta direction */
     if (unlikely(data.id() == particles->id_max() && !(data.id() % 2))) {
@@ -162,7 +162,7 @@ void BoxModus::propagate(Particles *particles,
     data.set_position(position);
     if (wall_hit) {
       for (const auto &output : output_list) {
-        output->write_interaction(incoming_particle, {1, data});
+        output->at_interaction(incoming_particle, {1, data});
       }
     }
     printd_position(data);

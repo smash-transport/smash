@@ -30,16 +30,14 @@ void CrossSections::compute_kinematics(const ParticleData &data_a,
   squared_mass_a_ = momentum_a.sqr();
   squared_mass_b_ = momentum_b.sqr();
   /* Beam momentum (assuming particle A as "beam") */
-  p_lab_ = sqrt((mandelstam_s_ - squared_mass_a_ - squared_mass_b_)
-                * (mandelstam_s_ - squared_mass_a_ - squared_mass_b_)
-                - 4 * squared_mass_a_ * squared_mass_b_)
-           / (2 * sqrt(squared_mass_b_));
+  p_lab_ = std::sqrt((mandelstam_s_ - squared_mass_a_ - squared_mass_b_)
+                     * (mandelstam_s_ - squared_mass_a_ - squared_mass_b_)
+                     - 4 * squared_mass_a_ * squared_mass_b_)
+           / (2 * std::sqrt(squared_mass_b_));
 }
 
 
-
 float CrossSections::total(const PdgCode &pdg_a, const PdgCode &pdg_b) const {
-
   /* For now, the meson-meson and meson-baryon
    *  "total" cross section is just zero. */
   if (pdg_a.baryon_number() == 0 || pdg_b.baryon_number() == 0) {
