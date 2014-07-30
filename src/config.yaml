@@ -6,7 +6,7 @@ General:
     DELTA_TIME:    0.01
 
     # end time of simulation
-    END_TIME:      100.0
+    END_TIME:      42.0
 
     # how much time before recording measurables
     OUTPUT_INTERVAL:  1.0
@@ -69,7 +69,7 @@ Modi:
             DEFORMED: false
         # Collision energy.
         # E_LAB : 100
-        # P_LAB : 50
+        # P_LAB : 100
         SQRTSNN: 10
         # The representative "N"'s (two PDG IDs) determining the 
         # subsystem "NN" in sqrt(s_NN). Let's try neutron-neutron.
@@ -81,4 +81,3 @@ Modi:
         # between 0 and 10.
         Impact:
             MAX: 10
-        INITIAL_DISTANCE: 60

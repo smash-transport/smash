@@ -45,17 +45,20 @@ struct ExperimentParameters;
  * \page input_modi_nucleus_ Input Section Modi:Nucleus
  * \endif
  *
- * `SQRTSNN:` Defines the energy of the collision as center-of-mass
+ * Possible Incident Energies:
+ * \li `SQRTSNN:` Defines the energy of the collision as center-of-mass
  * energy in the collision of one participant each from both nuclei.
  * Since not all participants have the same mass, and hence
  * \f$\sqrt{s_{\rm NN}}\f$ is different for \f$NN\f$ = proton+proton and
  * \f$NN\f$=neutron+neutron, you can specify which \f$NN\f$-pair you
- * want this to refer to with `SQRTS_N`
+ * want this to refer to with `SQRTS_REPS`. This expects a vector of two 
+ * PDG Codes, e.g. `SQRTS_N: [2212, 2212]` for proton-proton.
  *
- * `SQRTS_REPS:` The representative particles used for the "N"'s in
- * `SQRTSNN`. Expects a vector of two PDG Codes, e.g. `SQRTS_N: [2212, 2212]`
- * for proton-proton (that's the default behaviour). The important part is
- * which mass to use for calculating \f$\sqrt{s_{\rm NN}} \rightarrow \beta\f$.
+ * \li `E_LAB:` Defines the energy of the collision by the initial energy of
+ * the projectile nucleus.  This assumes the target nucleus is at rest.
+ *
+ * \li `P_LAB:` Defines the energy of the collision by the initial momentum
+ * of the projectile nucleus.  This assumes the target nucleus is at rest.
  *
  * `Projectile:` Section for projectile nucleus. The projectile will
  * start at \f$z < 0\f$ and fly in positive \f$z\f$-direction, at \f$x
@@ -64,9 +67,9 @@ struct ExperimentParameters;
  * `Target:` Section for target nucleus. The target will start at \f$z
  * > 0\f$ and fly in negative \f$z\f$-direction, at \f$x \le 0\f$.
  *
- * `FRAME:` The frame in which the collision happens. Options are the
- * center of velocity (1, default), the center of mass (2), and the
- * fixed target (3). Set the number to specify the desired frame.
+ * `CALCULATION FRAME:` The frame in which the collision is calculated.
+ * Options are the center of velocity (1, default), the center of mass (2),
+ * and the fixed target (3). Set the number to specify the desired frame.
  *
  * `Projectile:`/`Target:` options:
  * \li `PARTICLES:` A map in which the keys are PDG codes and the
@@ -76,12 +79,14 @@ struct ExperimentParameters;
  * `PARTICLES: {2212: 1, 2112: 1, 3122: 1}` for Hyper-Triton (one
  * proton, one neutron and one Lambda).
  * \li `DIFFUSIVENESS:` The diffusiveness used in the Woods-Saxon
- * distribution for this nucleus.
- * 0 means a hard sphere.
+ * distribution for this nucleus. 0 means a hard sphere.
+ * \li `AUTOMATIC:` Whether or not to use default values based on the
+ * current nucleus atomic number (true/false).
+ * \li `DEFORMED:` Whether to construct nuclei using the nucleus class
+ * or the deformed nucleus class (true=deformednucleus/false=nucleus).
  *
  * `Impact:` A section for the impact parameter (= distance of the two
  * straight lines that the center of masses of the nuclei travel on).
- *
  * \li `VALUE: `fixed value for the impact parameter. No other \a
  * Impact: directive is looked at.
  * \li `SAMPLE:` if `uniform`, use uniform sampling of the impact
