@@ -37,45 +37,6 @@ void CrossSections::compute_kinematics(const ParticleData &data_a,
 }
 
 
-float CrossSections::elastic(const ParticleData &data_a,
-                             const ParticleData &data_b) {
-
-  compute_kinematics(data_a, data_b);
-
-  const PdgCode &pdg_a = data_a.type().pdgcode();
-  const PdgCode &pdg_b = data_b.type().pdgcode();
-
-  /* For now, the meson-meson and meson-baryon elastic cross sections
-   * are simply given by the cross section parameter. */
-  if (pdg_a.baryon_number() == 0 || pdg_b.baryon_number() == 0) {
-    return elastic_parameter_;
-  }
-
-  /* For baryon-baryon, we have to check the parametrized cross sections */
-  float sig;
-  /* pp-scattering */
-  if (pdg_a == pdg_b) {
-    sig = pp_elastic(mandelstam_s_);
-  /* ppbar-scattering */
-  } else if (pdg_a.is_antiparticle_of(pdg_b)) {
-    sig = ppbar_elastic(p_lab_);
-  /* np-scattering */
-  } else {
-    sig = np_elastic(mandelstam_s_);
-  }
-
-  if (sig>0.) {
-    return sig;
-  } else {
-    std::stringstream ss;
-    ss << "problem in CrossSections::elastic: " << pdg_a.string().c_str()
-       << " " << pdg_b.string().c_str() << " " << pdg_a.spin() << " "
-       << pdg_b.spin() << " " << sig << " " << p_lab_ << " " << mandelstam_s_
-       << " " << sqrt(squared_mass_a_);
-    throw std::runtime_error(ss.str());
-  }
-}
-
 
 float CrossSections::total(const PdgCode &pdg_a, const PdgCode &pdg_b) const {
 

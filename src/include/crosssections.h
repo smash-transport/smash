@@ -22,8 +22,7 @@ class CrossSections {
    * \param elastic_par sets the fall-back elastic cross-section,
    * \see elastic_parameter_
    */
-  explicit CrossSections(float elastic_par)
-      : elastic_parameter_(elastic_par) {
+  explicit CrossSections() {
   }
   /** Returns the elastic cross-section of a collision of the particles
    * \a a and \a b.
@@ -31,7 +30,7 @@ class CrossSections {
    * \param data_a Data of first particle (\a a)
    * \param data_b Data of second particle (\a b)
    */
-  float elastic(const ParticleData &data_a, const ParticleData &data_b);
+  float elastic(const ParticleData &data_a, const ParticleData &data_b, float elast_par);
 
   /// Resets the parameters to the default values.
   void reset() {
@@ -41,15 +40,8 @@ class CrossSections {
     p_lab_ = -1.;
   }
 
-  inline float elastic_parameter() const { return elastic_parameter_; }
-
  private:
-  /** Elastic Cross section, in mb
-   *
-   * This is the cross-section that is returned for elastic collisions.
-   *
-   */
-  const float elastic_parameter_ = 0.0;
+
   /// mass of first particle (\a a), squared
   float squared_mass_a_ = -1.0;
   /// mass of second particle (\a b), squared

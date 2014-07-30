@@ -24,7 +24,7 @@ float np_elastic(double mandelstam_s);
 float np_total(double p_lab);
 
 /* ppbar elastic cross section parametrization */
-float ppbar_elastic(double p_lab);
+float ppbar_elastic(double mandelstam_s);
 
 /* ppbar total cross section parametrization */
 float ppbar_total(double p_lab);

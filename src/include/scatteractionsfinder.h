@@ -32,8 +32,8 @@ class ScatterActionsFinder : public ActionFinderFactory {
    * in the next timestep and create a corresponding Action object in that case. */
   ActionPtr check_collision(const int id_a, const int id_b,
                             Particles *particles);
-  /** The object that administrates the cross sections. */
-  CrossSections cross_sections_;
+  /** Elastic cross section parameter (in mb). */
+  const float elastic_parameter_ = 0.0;
 };
 
 #if 0

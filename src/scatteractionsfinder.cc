@@ -22,7 +22,7 @@ namespace Smash {
 
 ScatterActionsFinder::ScatterActionsFinder(const ExperimentParameters &parameters)
                      : ActionFinderFactory(parameters.timestep_duration()),
-                       cross_sections_(parameters.cross_section) {
+                       elastic_parameter_(parameters.cross_section) {
 }
 
 double ScatterActionsFinder::collision_time(const ParticleData &p1,
@@ -85,13 +85,10 @@ ScatterActionsFinder::check_collision(const int id_a, const int id_b,
   act = new ScatterAction(data_a, data_b, time_until_collision);
 
   /* Resonance production cross section */
-  ProcessBranchList resonance_xsections = resonance_cross_section(data_a,
-                                                                  data_b);
-  act->add_processes(resonance_xsections);
+  act->add_processes(act->resonance_cross_section());
 
   /* Add elastic process.  */
-  act->add_process(ProcessBranch(data_a.pdgcode(), data_b.pdgcode(),
-                                 cross_sections_.elastic(data_a, data_b)));
+  act->add_process(act->elastic_cross_section(elastic_parameter_));
 
   {
     /* distance criteria according to cross_section */
@@ -114,8 +111,6 @@ ScatterActionsFinder::check_collision(const int id_a, const int id_b,
 std::vector<ActionPtr> ScatterActionsFinder::find_possible_actions(
     Particles *particles) {
   std::vector<ActionPtr> actions;
-  double neighborhood_radius_squared = cross_sections_.elastic_parameter()
-                                       * fm2_mb * M_1_PI * 4;
 
   for (const auto &p1 : particles->data()) {
     for (const auto &p2 : particles->data()) {
@@ -124,13 +119,6 @@ std::vector<ActionPtr> ScatterActionsFinder::find_possible_actions(
 
       /* Check for same particle and double counting. */
       if (id_a >= id_b) continue;
-
-      /* Skip particles that are double interaction radius length away
-       * (3-product gives negative values
-       * with the chosen sign convention for the metric). */
-      FourVector distance = p1.position() - p2.position();
-      if (distance.sqr3() > neighborhood_radius_squared)
-        continue;
 
       /* Check if collision is possible. */
       ActionPtr act = check_collision (id_a, id_b, particles);

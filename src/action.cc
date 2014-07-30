@@ -86,7 +86,7 @@ ParticleList Action::choose_channel () {
 }
 
 
-void Action::sample_cms_momenta(const double cms_energy) {
+void Action::sample_cms_momenta() {
 
   /* This function only operates on 2-particle final states. */
   assert(outgoing_particles_.size() == 2);
@@ -99,6 +99,8 @@ void Action::sample_cms_momenta(const double cms_energy) {
 
   double mass1 = t1.mass();
   double mass2 = t2.mass();
+
+  const double cms_energy = sqrt_s();
 
   if (cms_energy < t1.minimum_mass() + t2.minimum_mass()) {
     throw InvalidResonanceFormation("resonance_formation: not enough energy! " +

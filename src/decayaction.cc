@@ -33,7 +33,7 @@ double DecayAction::sqrt_s() const {
 
 void DecayAction::one_to_two() {
   /* Sample the masses and momenta. */
-  sample_cms_momenta(sqrt_s());
+  sample_cms_momenta();
 }
 
 
