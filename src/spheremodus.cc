@@ -18,7 +18,6 @@
 #include "include/angles.h"
 #include "include/constants.h"
 #include "include/configuration.h"
-#include "include/crosssections.h"
 #include "include/distributions.h"
 #include "include/experimentparameters.h"
 #include "include/fourvector.h"

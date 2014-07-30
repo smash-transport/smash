@@ -11,7 +11,6 @@
 #define SRC_INCLUDE_SCATTERACTIONSFINDER_H_
 
 #include "actionfinderfactory.h"
-#include "crosssections.h"
 
 namespace Smash {
 

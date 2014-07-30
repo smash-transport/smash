@@ -17,7 +17,6 @@
 #include "include/boxmodus.h"
 #include "include/configuration.h"
 #include "include/constants.h"
-#include "include/crosssections.h"
 #include "include/distributions.h"
 #include "include/experimentparameters.h"
 #include "include/macros.h"

@@ -47,7 +47,6 @@ set(smash_src
         binaryoutputparticles.cc
         collidermodus.cc
         configuration.cc
-        cross-sections.cc
         decayaction.cc
         decayactionsfinder.cc
         decaymodes.cc
