@@ -58,8 +58,9 @@ class Action {
    * Check whether the action still applies.
    *
    * It can happen that a different action removed the incoming_particles from
-   * the set of existing particles in the experiment. In this case this Action
-   * doesn't apply anymore.
+   * the set of existing particles in the experiment, or that the particle has
+   * scattered elastically in the meantime. In this case the Action doesn't
+   * apply anymore and should be discarded.
    */
   bool is_valid(const Particles &) const;
 

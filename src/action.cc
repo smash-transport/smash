@@ -45,7 +45,14 @@ void Action::add_processes(const ProcessBranchList &pv) {
 
 bool Action::is_valid(const Particles &particles) const {
   for (const auto &part : incoming_particles_) {
+    /* Check if the particles still exist. */
     if (!particles.has_data(part.id())) {
+      return false;
+    }
+    /* Check if particles have scattered in the meantime
+     * (by checking if their energy has changed). */
+    if (fabs(part.momentum().x0()
+             - particles.data(part.id()).momentum().x0()) > really_small) {
       return false;
     }
   }
