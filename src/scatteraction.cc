@@ -24,8 +24,7 @@ ScatterAction::ScatterAction(const ParticleData &in_part1,
     : Action({in_part1, in_part2}, time_of_execution) {}
 
 
-void ScatterAction::perform (Particles *particles, size_t &id_process)
-{
+void ScatterAction::perform(Particles *particles, size_t &id_process) {
   /* Relevant particle IDs for the collision. */
   int id_a = incoming_particles_[0].id();
   int id_b = incoming_particles_[1].id();
@@ -39,16 +38,17 @@ void ScatterAction::perform (Particles *particles, size_t &id_process)
   /* Check if particles have scattered in the meantime
    * (by checking if their energy has changed). */
   if (fabs(incoming_particles_[0].momentum().x0()
-           -particles->data(id_a).momentum().x0())>really_small ||
+           - particles->data(id_a).momentum().x0()) > really_small ||
       fabs(incoming_particles_[1].momentum().x0()
-           -particles->data(id_b).momentum().x0())>really_small) {
+           - particles->data(id_b).momentum().x0()) > really_small) {
     printd("ScatterAction::perform: Particle has scattered already.\n");
     return;
   }
 
   printd("Process %zu particle %s<->%s colliding %d<->%d time %g\n",
          id_process, incoming_particles_[0].type().name().c_str(),
-         incoming_particles_[1].type().name().c_str(), id_a, id_b, incoming_particles_[0].position().x0());
+         incoming_particles_[1].type().name().c_str(), id_a, id_b,
+         incoming_particles_[0].position().x0());
   printd_momenta("particle 1 momenta before", incoming_particles_[0]);
   printd_momenta("particle 2 momenta before", incoming_particles_[1]);
 
@@ -73,7 +73,8 @@ void ScatterAction::perform (Particles *particles, size_t &id_process)
 
     /* The starting point of resonance is between the two initial particles:
      * x_middle = (x_a + x_b) / 2   */
-    FourVector middle_point = (incoming_particles_[0].position() + incoming_particles_[1].position()) / 2.;
+    FourVector middle_point = (incoming_particles_[0].position()
+                               + incoming_particles_[1].position()) / 2.;
 
     /* processes computed in the center of momenta */
     resonance_formation();
@@ -81,7 +82,7 @@ void ScatterAction::perform (Particles *particles, size_t &id_process)
     /* Set positions & boost to computational frame. */
     for (ParticleData &new_particle : outgoing_particles_) {
       new_particle.set_position(middle_point);
- 
+
       new_particle.set_momentum(
           new_particle.momentum().LorentzBoost(-beta_cm()));
 
@@ -150,19 +151,18 @@ double ScatterAction::particle_distance() const {
    * d^2_{coll} = (x_a - x_b)^2 - ((x_a - x_a) . (v_a - v_b))^2 / (v_a - v_b)^2
    */
   return pos_diff.sqr()
-         - (pos_diff*mom_diff) * (pos_diff*mom_diff) / mom_diff.sqr();
+         - (pos_diff * mom_diff) * (pos_diff * mom_diff) / mom_diff.sqr();
 }
 
 
 bool ScatterAction::is_elastic() const {
-  return outgoing_particles_.size()==2 &&
+  return outgoing_particles_.size() == 2 &&
          outgoing_particles_[0].pdgcode() == incoming_particles_[0].pdgcode() &&
          outgoing_particles_[1].pdgcode() == incoming_particles_[1].pdgcode();
 }
 
 
 void ScatterAction::momenta_exchange() {
-
   outgoing_particles_[0] = incoming_particles_[0];
   outgoing_particles_[1] = incoming_particles_[1];
 
@@ -178,7 +178,8 @@ void ScatterAction::momenta_exchange() {
   printd_momenta("center of momenta 1", *p1);
   printd_momenta("center of momenta 2", *p2);
 
-  /* We are in the center of momentum, hence this is equal for both particles. */
+  /* We are in the center of momentum,
+     hence this is equal for both particles. */
   const double momentum_radial = p1->momentum().abs3();
 
   /* Particle exchange momenta and scatter to random direction.
@@ -192,8 +193,8 @@ void ScatterAction::momenta_exchange() {
   /* Only direction of 3-momentum, not magnitude, changes in CM frame.
    * Thus particle energies remain the same (Lorentz boost will change them for
    * computational frame, however). */
-  p1->set_3momentum(  phitheta.threevec() * momentum_radial);
-  p2->set_3momentum(- phitheta.threevec() * momentum_radial);
+  p1->set_3momentum(phitheta.threevec() * momentum_radial);
+  p2->set_3momentum(-phitheta.threevec() * momentum_radial);
 
   /* debug output */
   printd_momenta("exchanged momenta 1", *p1);
@@ -216,15 +217,18 @@ void ScatterAction::resonance_formation() {
     outgoing_particles_[0].set_momentum(FourVector(cms_energy, 0., 0., 0.));
 
     printd("Momentum of the new particle: %g %g %g %g \n",
-      outgoing_particles_[0].momentum().x0(), outgoing_particles_[0].momentum().x1(),
-      outgoing_particles_[0].momentum().x2(), outgoing_particles_[0].momentum().x3());
+           outgoing_particles_[0].momentum().x0(),
+           outgoing_particles_[0].momentum().x1(),
+           outgoing_particles_[0].momentum().x2(),
+           outgoing_particles_[0].momentum().x3());
     break;
   case 2:
     /* 2 particles in final state: Sample the particle momenta. */
     sample_cms_momenta(cms_energy);
     break;
   default:
-    std::string s = "resonance_formation: Incorrect number of particles in final state: ";
+    std::string s = "resonance_formation: "
+                    "Incorrect number of particles in final state: ";
     s += std::to_string(outgoing_particles_.size()) + " (";
     s += incoming_particles_[0].pdgcode().string() + " + ";
     s += incoming_particles_[1].pdgcode().string() + ")";
@@ -232,4 +236,4 @@ void ScatterAction::resonance_formation() {
   }
 }
 
-}
+}  // namespace Smash

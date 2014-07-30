@@ -4,22 +4,24 @@
  *
  *    GNU General Public License (GPLv3 or later)
  */
+
+#include "include/collidermodus.h"
+
 #include <cmath>
 #include <cstdlib>
 #include <list>
 
-#include "include/collidermodus.h"
-#include "include/particles.h"
 #include "include/configuration.h"
 #include "include/experimentparameters.h"
 #include "include/outputroutines.h"
+#include "include/particles.h"
 #include "include/random.h"
 
 namespace Smash {
 
 ColliderModus::ColliderModus(Configuration modus_config,
                              const ExperimentParameters &)
-    : sqrts_     (modus_config.take({"Collider", "SQRTS"})) {
+    : sqrts_(modus_config.take({"Collider", "SQRTS"})) {
   projectile_ = modus_config.take({"Collider", "PROJECTILE"});
   target_     = modus_config.take({"Collider", "TARGET"});
   if (sqrts_ < ParticleType::find(projectile_).mass()

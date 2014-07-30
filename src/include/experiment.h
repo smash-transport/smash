@@ -9,6 +9,8 @@
 
 #include <memory>
 #include <stdexcept>
+#include <string>
+#include <map>
 #include <vector>
 
 #include "chrono.h"
@@ -76,7 +78,7 @@ class ExperimentBase {
    *     \endif
    * \li `Sphere` for calculations of the expansion of a thermalized sphere.
    * See ref input_modi_sphere_
-   * \li `Collider` ...
+   * \li `Collider` for testing elementary cross-sections
    * \li `Box` for infinite matter calculation in a rectangular box. See
    *     \if user
    *     \ref input_modi_box_
@@ -89,34 +91,41 @@ class ExperimentBase {
    * `END_TIME:` The time after which the evolution is stopped. Note
    * that the starting time depends on the chosen MODUS.
    *
-   * `OUTPUT_INTERVAL:` Output on conservation laws in Standard Output
-   * occurs every nth time step.
+   * 'OUTPUT:' List of the desired output format(s).
+   *
+   * `OUTPUT_INTERVAL:` Defines the period of intermediate output
+   * of the status of the simulated system in Standard Output
+   * and other output formats which support this functionality.
    *
    * `RANDOMSEED:` Initial seed for the random number generator. If this is
    * negative, the program starting time is used.
    *
    * `SIGMA:` Elastic cross-section.
    *
-   * `TESTPARTICLES:` How many test particles per real particles should be simulated.
+   * `TESTPARTICLES:` How many test particles per real particles should be
+   * simulated.
    *
    * `NEVENTS:` Number of events to calculate.
    *
-   * `particles:` ???
+   * `particles:` a list of particle sorts used in simulation
    *
-   * `decaymodes:` ???
+   * `decaymodes:` a list of processes used in simulation
    */
   // !!/USER:Input
-  static std::unique_ptr<ExperimentBase> create(Configuration &config);
+  static std::unique_ptr<ExperimentBase> create(Configuration config);
 
   /**
    * Runs the experiment.
    *
    * The constructor does the setup of the experiment. The run function executes
    * the complete experiment.
-   *
-   * \param path The path where output files will be written to.
    */
-  virtual void run(const bf::path &path) = 0;
+  virtual void run() = 0;
+
+  /**
+   * Sets list of outputs
+   */
+  virtual void set_outputs(OutputsList &&output_list) = 0;
 
   /**
    * Exception class that is thrown if an invalid modus is requested from the
@@ -130,7 +139,7 @@ class ExperimentBase {
 /**
  * The main class, where the simulation of an experiment is executed.
  *
- * The Experiment class is owns all data (maybe indirectly) relevant for the
+ * The Experiment class owns all data (maybe indirectly) relevant for the
  * execution of the experiment simulation. The experiment can be conducted in
  * different running modi. Since the abstraction of these differences should not
  * incur any overhead, the design is built around the Policy pattern.
@@ -156,7 +165,10 @@ class Experiment : public ExperimentBase {
   friend class ExperimentBase;
 
  public:
-  virtual void run(const bf::path &path) override;
+  virtual void run() override;
+  void set_outputs(OutputsList &&output_list) {
+    outputs_ = std::move(output_list);
+  }
 
  private:
   /**
@@ -173,14 +185,15 @@ class Experiment : public ExperimentBase {
    *                but actually taken out of the object. Thus, all values that
    *                remain were not used.
    */
-  explicit Experiment(Configuration &config);
+  explicit Experiment(Configuration config);
 
   /** Reads particle type information and cross sections information and
    * does the initialization of the system
    *
    * This is called in the beginning of each event.
    */
-  void initialize(const bf::path &path);
+  void initialize_new_event();
+
   /** Runs the time evolution of an event
    *
    * Here, the time steps are looped over, collisions and decays are
@@ -237,8 +250,16 @@ class Experiment : public ExperimentBase {
   /**
    * Number of events.
    *
-   * \todo Explain what event means
-   * \todo What does the number of events imply for the experiment?
+   * Event is a single simulation of a physical phenomenon:
+   * elementary particle or nucleus-nucleus collision. Result
+   * of a single SMASH event is random (by construction)
+   * as well as result of one collision in nature. To compare
+   * simulation with experiment one has to take ensemble averages,
+   * i.e. perform simulation and real experiment many times
+   * and compare average results.
+   *
+   * nevents_ is number of times single phenomenon (particle
+   * or nucleus-nucleus collision) will be simulated.
    */
   const int nevents_;
 

@@ -8,11 +8,12 @@
  */
 
 
+#include <algorithm>
 #include <cinttypes>
 #include <cstdlib>
 #include <list>
 #include <string>
-#include <algorithm>
+#include <vector>
 
 #include "include/action.h"
 #include "include/boxmodus.h"
@@ -23,24 +24,15 @@
 #include "include/forwarddeclarations.h"
 #include "include/macros.h"
 #include "include/nucleusmodus.h"
-#include "include/binaryoutput.h"
-#include "include/oscarfullhistoryoutput.h"
-#include "include/oscarparticlelistoutput.h"
 #include "include/outputroutines.h"
 #include "include/random.h"
-#ifdef SMASH_USE_ROOT
-#  include "include/rootoutput.h"
-#endif
-#include "include/vtkoutput.h"
+#include "include/spheremodus.h"
 
-#include <boost/filesystem.hpp>
-
-/* #include "include/spheremodus.h" */
 
 namespace Smash {
 
 /* ExperimentBase carries everything that is needed for the evolution */
-std::unique_ptr<ExperimentBase> ExperimentBase::create(Configuration &config) {
+std::unique_ptr<ExperimentBase> ExperimentBase::create(Configuration config) {
   const std::string modus_chooser = config.take({"General", "MODUS"});
   printf("Modus for this calculation: %s\n", modus_chooser.c_str());
 
@@ -53,7 +45,9 @@ std::unique_ptr<ExperimentBase> ExperimentBase::create(Configuration &config) {
   } else if (modus_chooser.compare("Collider") == 0) {
     return ExperimentPointer(new Experiment<ColliderModus>(config));
   } else if (modus_chooser.compare("Nucleus") == 0) {
-    return ExperimentPointer(new Experiment<NucleusModus>(config));
+      return ExperimentPointer(new Experiment<NucleusModus>(config));
+  } else if (modus_chooser.compare("Sphere") == 0) {
+      return ExperimentPointer(new Experiment<SphereModus>(config));
   } else {
     throw InvalidModusRequest("Invalid Modus (" + modus_chooser +
                               ") requested from ExperimentBase::create.");
@@ -67,7 +61,7 @@ namespace {
  * \return The ExperimentParameters struct filled with values from the
  * Configuration
  */
-ExperimentParameters create_experiment_parameters(Configuration &config) {
+ExperimentParameters create_experiment_parameters(Configuration config) {
   const int testparticles = config.take({"General", "TESTPARTICLES"});
   float cross_section = config.take({"General", "SIGMA"});
 
@@ -87,7 +81,7 @@ ExperimentParameters create_experiment_parameters(Configuration &config) {
 }  // unnamed namespace
 
 template <typename Modus>
-Experiment<Modus>::Experiment(Configuration &config)
+Experiment<Modus>::Experiment(Configuration config)
     : parameters_(create_experiment_parameters(config)),
       modus_(config["Modi"], parameters_),
       particles_(),
@@ -100,7 +94,6 @@ Experiment<Modus>::Experiment(Configuration &config)
     seed_ = time(nullptr);
   }
   Random::set_seed(seed_);
-
   print_startup(seed_);
 }
 
@@ -108,7 +101,7 @@ Experiment<Modus>::Experiment(Configuration &config)
  * and does the initialization of the system (fill the particles map)
  */
 template <typename Modus>
-void Experiment<Modus>::initialize(const bf::path &/*path*/) {
+void Experiment<Modus>::initialize_new_event() {
   cross_sections_.reset();
   particles_.reset();
 
@@ -126,7 +119,6 @@ void Experiment<Modus>::initialize(const bf::path &/*path*/) {
   print_header();
 }
 
-
 /* This is the loop over timesteps, carrying out collisions and decays
  * and propagating particles. */
 template <typename Modus>
@@ -138,7 +130,7 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
                 interactions_this_interval, conserved_initial_, time_start_,
                 parameters_.labclock.current_time());
 
-  while (! (++parameters_.labclock > end_time_)) {
+  while (!(++parameters_.labclock > end_time_)) {
     std::vector<ActionPtr> actions;  // XXX: a std::list might be better suited
                                      // for the task: lots of appending, then
                                      // sorting and finally a single linear
@@ -161,7 +153,7 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
           action->perform(&particles_, interactions_total);
           const ParticleList outgoing_particles = action->outgoing_particles();
           for (const auto &output : outputs_) {
-            output->write_interaction(incoming_particles, outgoing_particles);
+            output->at_interaction(incoming_particles, outgoing_particles);
           }
         }
       }
@@ -187,7 +179,7 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
               parameters_.labclock.current_time());
       /* save evolution data */
       for (const auto &output : outputs_) {
-        output->after_Nth_timestep(particles_, evt_num, parameters_.labclock);
+        output->at_intermediate_time(particles_, evt_num, parameters_.labclock);
       }
     }
     // check conservation of conserved quantities:
@@ -219,17 +211,10 @@ void Experiment<Modus>::print_startup(int64_t seed) {
 }
 
 template <typename Modus>
-void Experiment<Modus>::run(const bf::path &path) {
-  outputs_.emplace_back(new BinaryOutput(path));
-  outputs_.emplace_back(new OscarFullHistoryOutput(path));
-  outputs_.emplace_back(new OscarParticleListOutput(path));
-  outputs_.emplace_back(new VtkOutput(path));
-#ifdef SMASH_USE_ROOT
-  outputs_.emplace_back(new RootOutput(path));
-#endif
-
+void Experiment<Modus>::run() {
   for (int j = 0; j < nevents_; j++) {
-    initialize(path);
+    /* Sample initial particles, start clock, some printout and book-keeping */
+    initialize_new_event();
 
     /* Output at event start */
     for (const auto &output : outputs_) {

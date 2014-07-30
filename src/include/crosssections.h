@@ -53,7 +53,7 @@ class CrossSections {
   /// mass of second particle (\a b), squared
   float squared_mass_b_ = -1.0;
   /** Mandelstam s of the collision (= total center-of-mass energy
-   * squared 
+   * squared
    */
   double mandelstam_s_ = -1.0;
   /// Momentum of particle \a a in center-of-mass-frame
