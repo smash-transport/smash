@@ -64,8 +64,8 @@ namespace Smash {
 std::unique_ptr<ExperimentBase> ExperimentBase::create(Configuration config) {
   const auto &log = logger<LogArea::Experiment>();
   log.trace() << source_location;
-  // Userguide {
-  /*! \page input_general_ General
+  /*!\Userguide
+   * \page input_general_ General
    * \key MODUS: \n
    * Selects a modus for the calculation, e.g.\ infinite matter
    * calculation, collision of two particles or collision of nuclei. The modus
@@ -80,13 +80,13 @@ std::unique_ptr<ExperimentBase> ExperimentBase::create(Configuration config) {
    *     \BoxModus
    */
 
-  /*! \page input_modi_ Modi
+  /*!\Userguide
+   * \page input_modi_ Modi
    * \li \subpage input_modi_nucleus_
    * \li \subpage input_modi_sphere_
    * \li \subpage input_modi_box_
    * \li \subpage input_modi_collider_
    */
-  // } Userguide
   const std::string modus_chooser = config.take({"General", "MODUS"});
   log.info() << "Modus for this calculation: " << modus_chooser;
 
@@ -109,8 +109,8 @@ std::unique_ptr<ExperimentBase> ExperimentBase::create(Configuration config) {
 }
 
 namespace {
-// Userguide {
-/*! \page input_general_ General
+/*!\Userguide
+ * \page input_general_ General
  * \key DELTA_TIME: \n
  * Time step for the calculation, in fm/c.
  *
@@ -125,7 +125,6 @@ namespace {
  * system in Standard Output and other output formats which support this
  * functionality.
  */
-// } Userguide
 /** Gathers all general Experiment parameters
  *
  * \param[in, out] config Configuration element
@@ -166,8 +165,8 @@ std::ostream &operator<<(std::ostream &out, const Experiment<Modus> &e) {
   return out;
 }
 
-// Userguide {
-/*! \page input_general_
+/*!\Userguide
+ * \page input_general_
  * \key END_TIME: \n
  * The time after which the evolution is stopped. Note
  * that the starting time depends on the chosen MODUS.
@@ -180,7 +179,6 @@ std::ostream &operator<<(std::ostream &out, const Experiment<Modus> &e) {
  * Number of events to calculate.
  *
  */
-// } Userguide
 template <typename Modus>
 Experiment<Modus>::Experiment(Configuration config)
     : parameters_(create_experiment_parameters(config)),

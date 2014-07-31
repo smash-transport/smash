@@ -20,8 +20,7 @@
 
 namespace Smash {
 
-// Userguide {
-/*!
+/*!\Userguide
  * \page input_modi_collider_ Collider
  *
  * \key SQRTS: \n
@@ -34,7 +33,6 @@ namespace Smash {
  * \key TARGET: \n
  * PdgCode of the Target
  */
-// } Userguide
 ColliderModus::ColliderModus(Configuration modus_config,
                              const ExperimentParameters &)
     : projectile_(modus_config.take({"Collider", "PROJECTILE"})

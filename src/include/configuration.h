@@ -35,8 +35,7 @@ struct convert {
 }  // namespace YAML
 
 namespace Smash {
-// Userguide {
-/*!
+/*!\Userguide
  * \page inputoptions Input file Options
  *
  * SMASH is configured via an input file in YAML format. Typically you will
@@ -60,14 +59,14 @@ namespace Smash {
  * \endif
  */
 
-/*! \page input_general_ General
+/*!\Userguide
+ * \page input_general_ General
  * This section in the `config.yaml` file contains all general/global
  * configuration options to SMASH.
  *
  * Available Settings
  * ------------------
  */
-// } Userguide
 
 /**
  * Interface to the SMASH configuration files.

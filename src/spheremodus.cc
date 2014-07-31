@@ -30,8 +30,7 @@
 
 namespace Smash {
 
-// Userguide {
-/*!
+/*!\Userguide
  * \page input_modi_sphere_ Sphere
  *
  * \key RADIUS: \n
@@ -46,7 +45,6 @@ namespace Smash {
  * \key START_TIME: \n
  * Starting time of Sphere calculation.
  */
-// } Userguide
 SphereModus::SphereModus(Configuration modus_config,
                          const ExperimentParameters &)
     : radius_(modus_config.take({"Sphere", "RADIUS"})),

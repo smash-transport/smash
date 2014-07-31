@@ -22,8 +22,7 @@ namespace Smash {
 
 struct ExperimentParameters;
 
-// Userguide {
-/*!
+/*!\Userguide
  * \page input_modi_nucleus_ Nucleus
  *
  * Possible Incident Energies:
@@ -102,8 +101,7 @@ struct ExperimentParameters;
  * \key INITIAL_DISTANCE: \n
  * The initial distance of the two nuclei. That
  * means \f$z_{\rm min}^{\rm target} - z_{\rm max}^{\rm projectile}\f$.
- **/
-// } Userguide
+ */
 
 /**
  * \ingroup modus

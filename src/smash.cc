@@ -219,14 +219,12 @@ int main(int argc, char *argv[]) {
     // create outputs
     log.trace(source_location, " create OutputInterface objects");
     OutputsList output_list;
-    // Userguide {
-    /*!
+    /*!\Userguide
      * \page input_general_ General
      *
      * \key OUTPUT: \n
      * List of the desired output format(s).
      */
-    // } Userguide
     auto output_conf = configuration["General"]["OUTPUT"];
 
     // loop until all OSCAR outputs are created (create_oscar_output will return

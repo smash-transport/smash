@@ -36,8 +36,7 @@ std::ostream &operator<<(std::ostream &out, const BoxModus &m) {
              << "\nIC type " << m.initial_condition_ << '\n';
 }
 
-// Userguide {
-/*!
+/*!\Userguide
  * \page input_modi_box_ Box
  *
  * \key INITIAL_CONDITION: \n
@@ -52,7 +51,6 @@ std::ostream &operator<<(std::ostream &out, const BoxModus &m) {
  * \key TEMPERATURE: \n
  * Temperature in the box in GeV.
  */
-// } Userguide
 BoxModus::BoxModus(Configuration modus_config, const ExperimentParameters &)
     : initial_condition_(modus_config.take({"Box", "INITIAL_CONDITION"})),
                  length_(modus_config.take({"Box", "LENGTH"})),
