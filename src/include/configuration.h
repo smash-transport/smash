@@ -100,6 +100,11 @@ class Configuration {
     using std::runtime_error::runtime_error;
   };
 
+  /// Thrown if the file does not exist
+  struct FileDoesNotExist : public std::runtime_error {
+    using std::runtime_error::runtime_error;
+  };
+
   /**
    * Return type of Configuration::take that automatically determines the target
    * type.
