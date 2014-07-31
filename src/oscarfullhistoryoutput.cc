@@ -30,7 +30,7 @@ OscarFullHistoryOutput::OscarFullHistoryOutput(bf::path path,
   } else {
     fprintf(file_.get(), "# OSC1999A\n");
     fprintf(file_.get(), "# full_event_history\n");
-    fprintf(file_.get(), "# " VERSION_MAJOR "\n");
+    fprintf(file_.get(), "# %s\n", VERSION_MAJOR);
   }
   write_format_description();
 }
