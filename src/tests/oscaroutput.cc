@@ -16,6 +16,7 @@
 #include <string>
 #include <vector>
 #include <boost/filesystem.hpp>
+#include "../include/config.h"
 #include "../include/outputinterface.h"
 #include "../include/oscarfullhistoryoutput.h"
 #include "../include/oscarparticlelistoutput.h"
@@ -140,7 +141,7 @@ TEST(fullhistory_format) {
     std::string output_header = "";
     std::string header = "# OSC1999A\n"
                          "# full_event_history\n"
-                         "# smash\n"
+                         "# " VERSION_MAJOR "\n"
                          "# Block format:\n"
                          "# nin nout event_number\n"
                          "# id pdg 0 px py pz p0 mass x y z t\n"
@@ -262,7 +263,7 @@ TEST(particlelist_format) {
     std::string output_header = "";
     std::string header = "# OSC1999A\n"
                          "# final_id_p_x\n"
-                         "# smash\n"
+                         "# " VERSION_MAJOR "\n"
                          "# Block format:\n"
                          "# nin nout event_number\n"
                          "# id pdg 0 px py pz p0 mass x y z t\n"

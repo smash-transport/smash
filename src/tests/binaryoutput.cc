@@ -17,12 +17,13 @@
 #include <vector>
 #include <boost/filesystem.hpp>
 
-#include "../include/outputinterface.h"
 #include "../include/binaryoutputcollisions.h"
 #include "../include/binaryoutputparticles.h"
+#include "../include/clock.h"
+#include "../include/config.h"
+#include "../include/outputinterface.h"
 #include "../include/particles.h"
 #include "../include/random.h"
-#include "../include/clock.h"
 
 using namespace Smash;
 
@@ -176,7 +177,7 @@ TEST(fullhistory_format) {
 
   VERIFY(magic == "SMSH");
   VERIFY(format_version_number == 0);
-  // TODO(oliiny):  VERIFY(smash_version == std::to_string(VERSION_MAJOR));
+  VERIFY(smash_version == VERSION_MAJOR);
 
   // particles at event atart: expect two smashons
   int nin, nout, npart;
@@ -262,7 +263,7 @@ TEST(particles_format) {
 
   VERIFY(magic == "SMSH");
   VERIFY(format_version_number == 0);
-  // TODO(oliiny):  VERIFY(smash_version == std::to_string(VERSION_MAJOR));
+  VERIFY(smash_version == VERSION_MAJOR);
 
   int npart;
   // particles at event start: expect two smashons

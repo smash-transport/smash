@@ -145,7 +145,7 @@ int main(int argc, char *argv[]) {
 
   /* strip any path to progname */
   const std::string progname = bf::path(argv[0]).filename().native();
-  printf("%s (%d)\n", progname.c_str(), VERSION_MAJOR);
+  printf("%s (%s)\n", progname.c_str(), VERSION_MAJOR);
 
   try {
     bool force_overwrite = false;
