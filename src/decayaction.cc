@@ -159,13 +159,6 @@ void DecayAction::one_to_three() {
 
 
 void DecayAction::perform(Particles *particles, size_t &id_process) {
-  /* Check if particle still exists. */
-  if (!is_valid(*particles)) {
-    printf("DecayAction::perform: ID %i not found!\n",
-           incoming_particles_[0].id());
-    return;
-  }
-
   printd("Process: Resonance decay. ");
 
   /*
