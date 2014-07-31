@@ -59,7 +59,7 @@ class ExperimentBase {
    * GENERAL:
    * --------
    */
-  // !!USER:Input
+  // Userguide {
   /**
    * \if user
    * \page input_general_ Input Section General
@@ -110,7 +110,7 @@ class ExperimentBase {
    *
    * `decaymodes:` a list of processes used in simulation
    */
-  // !!/USER:Input
+  // } Userguide
   static std::unique_ptr<ExperimentBase> create(Configuration config);
 
   /**

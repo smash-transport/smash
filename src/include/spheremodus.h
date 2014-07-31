@@ -41,7 +41,7 @@ namespace Smash {
 * Modi:Sphere:
 *--------
 */
-// !!USER:Input
+// Userguide {
 /**
 * \if user
 * \page input_modi_box_ Input Section Modi:Box
@@ -55,7 +55,7 @@ namespace Smash {
 *
 * `START_TIME`: Starting time of Sphere calculation.
 */
-// !!/USER:Input
+// } Userguide
 class SphereModus : public ModusDefault {
  public:
   /* default constructor with probable values */

@@ -30,22 +30,6 @@ void ScatterAction::perform(Particles *particles, size_t &id_process) {
   int id_a = incoming_particles_[0].id();
   int id_b = incoming_particles_[1].id();
 
-  /* Check if particles still exist. */
-  if (!is_valid(*particles)) {
-    printd("ScatterAction::perform: ID %i or %i not found!\n", id_a, id_b);
-    return;
-  }
-
-  /* Check if particles have scattered in the meantime
-   * (by checking if their energy has changed). */
-  if (fabs(incoming_particles_[0].momentum().x0()
-           - particles->data(id_a).momentum().x0()) > really_small ||
-      fabs(incoming_particles_[1].momentum().x0()
-           - particles->data(id_b).momentum().x0()) > really_small) {
-    printd("ScatterAction::perform: Particle has scattered already.\n");
-    return;
-  }
-
   printd("Process %zu particle %s<->%s colliding %d<->%d time %g\n",
          id_process, incoming_particles_[0].type().name().c_str(),
          incoming_particles_[1].type().name().c_str(), id_a, id_b,

@@ -63,7 +63,7 @@ namespace Smash {
  * important for the user to discover typos in his configuration file (or
  * command line parameters).
  */
-// !!USER:Input
+// Userguide {
 /** \if user
  * \page inputoptions Input file Options
  *
@@ -72,10 +72,10 @@ namespace Smash {
  *
  * ###TEXT MISSING###
  *
- * \li \ref input_general_
- * \li \ref input_modi_nucleus_
- * \li \ref input_modi_box_
- * \li \ref input_modi_collider_
+ * \li \subpage input_general_
+ * \li \subpage input_modi_nucleus_
+ * \li \subpage input_modi_box_
+ * \li \subpage input_modi_collider_
  * \else
  *
  * Options
@@ -87,7 +87,7 @@ namespace Smash {
  * \li \ref ColliderModus
  * \endif
  */
-// !!/USER:Input
+// } Userguide
 class Configuration {
  public:
   /// Thrown when the types in the config file and C++ don't match.
@@ -97,6 +97,11 @@ class Configuration {
 
   /// Thrown for YAML parse errors
   struct ParseError : public std::runtime_error {
+    using std::runtime_error::runtime_error;
+  };
+
+  /// Thrown if the file does not exist
+  struct FileDoesNotExist : public std::runtime_error {
     using std::runtime_error::runtime_error;
   };
 
@@ -131,6 +136,9 @@ class Configuration {
     Value(const Value &) = delete;
     /// if you want to copy this you're doing it wrong
     Value &operator=(const Value &) = delete;
+
+    /// Return the string value.
+    std::string to_string() const { return node_.Scalar(); }
 
     /**
      * This function determines the type it is assigned to and calls

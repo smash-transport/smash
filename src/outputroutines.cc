@@ -27,11 +27,11 @@
 
 namespace Smash {
 
-// !!USER:Output
+// Userguide {
 /** \page outputexample Output file format and Examples
  * There is output. This is explained here.
  */
-// !!/USER:Output
+// } Userguide
 
 /* print_line - output a visible seperator */
 static void print_line(void) {

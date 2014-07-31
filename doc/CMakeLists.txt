@@ -33,23 +33,17 @@ if(DOXYGEN)
       )
    find_program(SED sed)
    find_program(GREP grep)
-   file(GLOB files_with_input "${PROJECT_SOURCE_DIR}/src/include/*.h")
-   add_custom_target(inputoptions ${SED}
-      "\\_^\\s*\\(\\*\\|//\\)\\s*!!USER:Input_, \\_^\\s*\\(\\*\\|//\\)\\s*!!/USER:Input_!d" ${files_with_input} |
-      ${GREP} -v USER:Input > ${CMAKE_CURRENT_BINARY_DIR}/inputoptions.dox
+   file(GLOB files_with_input "${PROJECT_SOURCE_DIR}/src/include/*.h" "${PROJECT_SOURCE_DIR}/src/*.cc")
+   add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/userguide.dox
+      COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/generateuserdocs.sh ${SED}
+      ${CMAKE_CURRENT_BINARY_DIR}/userguide.dox ${files_with_input}
+      DEPENDS ${files_with_input}
       WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-      COMMENT "Preparing input options file"
-      VERBATIM
-      )
-   add_custom_target(outputexamples ${SED}
-      "\\_^\\s*\\(\\*\\|//\\)\\s*!!USER:Output_, \\_^ \\* !!/USER:Output_!d" ${PROJECT_SOURCE_DIR}/src/outputroutines.cc |
-      ${GREP} -v USER:Input > ${CMAKE_CURRENT_BINARY_DIR}/outputexamples.dox
-      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-      COMMENT "Preparing output examples file"
+      COMMENT "Generating User Guide input file"
       VERBATIM
       )
    add_custom_target(user ${DOXYGEN} ${CMAKE_CURRENT_BINARY_DIR}/DoxyUser
-      DEPENDS inputoptions outputexamples
+      DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/userguide.dox
       WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
       COMMENT "Building User Guide"
       VERBATIM

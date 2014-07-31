@@ -51,15 +51,21 @@ class Action {
   /** Add several new subprocesses at once.  */
   void add_processes(const ProcessBranchList &pv);
 
-  /** Actually perform the action, e.g. carry out a decay or scattering.  */
+  /**
+   * Actually perform the action, e.g. carry out a decay or scattering.
+   *
+   * This method does not do any sanity checks, but assumes that is_valid has
+   * been called to determine if the action is still valid.
+   */
   virtual void perform(Particles *particles, size_t &id_process) = 0;
 
   /**
    * Check whether the action still applies.
    *
    * It can happen that a different action removed the incoming_particles from
-   * the set of existing particles in the experiment. In this case this Action
-   * doesn't apply anymore.
+   * the set of existing particles in the experiment, or that the particle has
+   * scattered elastically in the meantime. In this case the Action doesn't
+   * apply anymore and should be discarded.
    */
   bool is_valid(const Particles &) const;
 

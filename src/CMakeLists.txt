@@ -3,7 +3,7 @@ include(AddCompilerFlag)
 include(FindPkgConfig)
 
 include(GetGitRevisionDescription)
-get_git_head_revision(GIT_REFSPEC GIT_SHA1)
+git_describe(VERSION_MAJOR)
 
 find_package(GSL REQUIRED)
 find_package(Boost 1.49.0 REQUIRED COMPONENTS filesystem system)

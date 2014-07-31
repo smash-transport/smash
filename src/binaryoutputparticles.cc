@@ -29,7 +29,7 @@ BinaryOutputParticles::BinaryOutputParticles(bf::path path,
                                                    : true) {
   fwrite("SMSH", 4, 1, file_.get());  // magic number
   write(0);              // file format version number
-  write(std::to_string(VERSION_MAJOR));  // version
+  write(VERSION_MAJOR);  // version
 }
 
 void BinaryOutputParticles::at_eventstart(const Particles &particles,
