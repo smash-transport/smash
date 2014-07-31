@@ -4,8 +4,6 @@
  *
  *    GNU General Public License (GPLv3 or later)
  */
-
-
 #include "include/nucleus.h"
 
 #include <fstream>
@@ -15,8 +13,11 @@
 #include <string>
 
 #include "include/angles.h"
+#include "include/numerics.h"
 #include "include/particles.h"
 #include "include/pdgcode.h"
+#include "include/threevector.h"
+
 
 namespace Smash {
 
@@ -183,10 +184,14 @@ float Nucleus::mass() const {
  *  So, the algorithm needs to do all this from the end:
  *
  **/
-float Nucleus::distribute_nucleon() const {
+ThreeVector Nucleus::distribute_nucleon() const {
+  // Get the solid angle of the nucleon.
+  Angles dir;
+  dir.distribute_isotropically();
   // diffusiveness_ zero or negative? Use hard sphere.
-  if (diffusiveness_ < std::numeric_limits<float>::min()) {
-    return nuclear_radius_*(pow(Random::canonical(), 1./3.));
+  if (almost_equal(diffusiveness_, 0.f)) {
+    return dir.threevec() * nuclear_radius_ 
+           * pow(Random::canonical(), 1./3.);
   }
   float radius_scaled = nuclear_radius_/diffusiveness_;
   float prob_range1 = 1.0;
@@ -219,9 +224,7 @@ float Nucleus::distribute_nucleon() const {
   /// \li shift and rescale \f$t\f$ to \f$r = d\cdot t + r_0\f$
   float position_scaled = t + radius_scaled;
   float position = position_scaled * diffusiveness_;
-  return position;
-  /// \li (choose direction; this is done outside of this routine,
-  /// though).
+  return dir.threevec() * position;
 }
 
 float Nucleus::woods_saxon(float r) {
@@ -230,24 +233,20 @@ float Nucleus::woods_saxon(float r) {
 
 void Nucleus::arrange_nucleons() {
   for (auto i = begin(); i != end(); i++) {
-    // get radial position of current nucleon:
-    float r = distribute_nucleon();
-    // get solid angle for current nucleon:
-    Angles dir;
-    dir.distribute_isotropically();
-    double z = r * dir.z();
-    double x = r * dir.x();
-    // set position of current nucleon:
-    i->set_position(FourVector(0.0, x, r * dir.y(), z));
-    // update maximal and minimal z values
-    z_max_ = (z > z_max_) ? z : z_max_;
-    z_min_ = (z < z_min_) ? z : z_min_;
-    // update maximal and minimal x values
-    x_max_ = (x > x_max_) ? x : x_max_;
-    x_min_ = (x < x_min_) ? x : x_min_;
+    // Sampling the W.S., get the radial
+    // position and solid angle for the nucleon.
+    ThreeVector pos = distribute_nucleon();
+
+    // Set the position of the nucleon.
+    i->set_position(FourVector(0.0, pos));
+
+    // Update the radial bound of the nucleus.
+    double r_tmp = pos.abs();
+    r_max_ = (r_tmp > r_max_) ? r_tmp : r_max_;
   }
-  // recenter
+  // Recenter and rotate
   align_center();
+  rotate();
 }
 
 void Nucleus::set_parameters_automatic() {
@@ -334,9 +333,8 @@ void Nucleus::boost(double beta_scalar) {
     this_momentum = this_momentum.LorentzBoost(beta);
     i->set_momentum(this_momentum);
   }
-  // we also need to update z_max_ and z_min:
-  z_max_ *= one_over_gamma;
-  z_min_ *= one_over_gamma;
+  // we also need to update r_max_:
+  r_max_ *= one_over_gamma;
 }
 
 void Nucleus::fill_from_list(const std::map<PdgCode, int>& particle_list,
@@ -355,9 +353,9 @@ void Nucleus::fill_from_list(const std::map<PdgCode, int>& particle_list,
 
 void Nucleus::shift(bool is_projectile, double initial_z_displacement,
                     double x_offset, float simulation_time) {
-  // The amount to to shift the z value. If is_projectile, shift back by
-  // -z_max_, else shift forward -z_min_ (z_min_ itself should be negative).
-  double z_offset = is_projectile ? -z_max_ : -z_min_;
+  // The amount to shift the z coordinates. If is_projectile, we shift
+  // back by -r_max_, else we shift forward r_max_.
+  double z_offset = is_projectile ? -r_max_ : r_max_;
   // In the current system, the nuclei would touch. We want them to be
   // a little apart, so we need a slightly bigger offset.
   z_offset += initial_z_displacement;

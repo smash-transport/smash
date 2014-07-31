@@ -11,6 +11,7 @@
 #include <map>
 #include "../include/nucleus.h"
 #include "../include/pdgcode.h"
+#include "../include/threevector.h"
 
 namespace particles_txt {
 #include <particles.txt.h>
@@ -191,8 +192,8 @@ TEST(woods_saxon) {
   constexpr int N_TEST = 10000000;
   // fill the histogram
   for (int i = 0; i < N_TEST; i++) {
-    float radius = projectile.distribute_nucleon();
-    int bin = radius/dx;
+    ThreeVector pos = projectile.distribute_nucleon();
+    int bin = pos.abs()/dx;
     ++histogram[bin];
   }
   // We'll compare to relative values (I don't know what the integral

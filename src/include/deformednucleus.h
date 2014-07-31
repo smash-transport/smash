@@ -1,5 +1,8 @@
 /*
- *    Andy's Deformed Nucleus Class Header
+ *    Copyright (c) 2014
+ *      SMASH Team
+ *
+ *    GNU General Public License (GPLv3 or later)
  */
 #ifndef SRC_INCLUDE_DEFORMEDNUCLEUS_H_
 #define SRC_INCLUDE_DEFORMEDNUCLEUS_H_
@@ -29,10 +32,7 @@ class DeformedNucleus : public Nucleus {
    * @return a spatial position from uniformly sampling 
    * the deformed woods-saxon distribution
    **/
-  ThreeVector deformed_distribute_nucleon() const;
-
-  // Sets the positions of the nuclei inside nucleus A.
-  virtual void arrange_nucleons();
+  virtual ThreeVector distribute_nucleon() const;
 
   /** Sets the deformation parameters of the Woods-Saxon distribution
    * according to the current mass number.
@@ -53,12 +53,7 @@ class DeformedNucleus : public Nucleus {
 
   // Rotates the nucleus according to members nucleus_polar_angle_
   // and nucleus_azimuthal_angle_ and updates nucleon positions.
-  void rotate();
-
-  // Shifts the nucleus to correct impact parameter and z displacement.
-  // \see Nucleus::shift
-  virtual void shift(bool is_projectile, double initial_z_displacement,
-                     double x_offset, float simulation_time);
+  virtual void rotate();
 
   // Spherical harmonics Y_2_0 and Y_4_0.
   double y_l_0(int l, double cosx) const;
@@ -81,8 +76,6 @@ class DeformedNucleus : public Nucleus {
   }
 
  private:
-  // Maximum nucleon radius.
-  double r_max_ = 0.0;
   // Deformation parameters.
   double beta2_ = 0.0;
   double beta4_ = 0.0;

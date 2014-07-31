@@ -11,6 +11,7 @@
 #include "forwarddeclarations.h"
 #include "fourvector.h"
 #include "particledata.h"
+#include "threevector.h"
 
 #include <map>
 #include <stdexcept>
@@ -28,14 +29,14 @@ class Nucleus {
   /// returns the mass of the nucleus
   float mass() const;
 
-  /** Returns a Woods-Saxon distributed length.
+  /** Returns a Woods-Saxon distributed position.
    * The distribution of return values from this function is according to a 
    * spherically symmetric Woods-Saxon distribution suitable for this nucleus.
    * \f$\frac{dN}{dr} = \frac{r^2}{\exp\left(\frac{r-R}{d}\right) +
    * 1}\f$ where \f$d\f$ is the diffusiveness_ parameter and \f$R\f$ is
    * nuclear_radius_. 
    **/
-  float distribute_nucleon() const;
+  virtual ThreeVector distribute_nucleon() const;
 
   /** returns the Woods-Saxon distribution directly
    *
@@ -45,7 +46,7 @@ class Nucleus {
   float woods_saxon(float x);
 
   /// sets the positions of the nuclei inside nucleus A.
-  virtual void arrange_nucleons();
+  void arrange_nucleons();
 
  /** Sets the deformation parameters of the Woods-Saxon distribution
   * according to the current mass number.
@@ -109,8 +110,12 @@ class Nucleus {
    *
    * @param simulation_time set the time of each particle to this value.
    **/
-  virtual void shift(bool is_projectile, double initial_z_displacement,
+  void shift(bool is_projectile, double initial_z_displacement,
                      double x_offset, float simulation_time);
+
+  // Rotates the nucleus. (Spherical symmetry of nondeformed nuclei
+  // means there is nothing to do.)
+  virtual void rotate() {};
 
   /// copies the particles from this nucleus into the particle list.
   void copy_particles(Particles* particles);
@@ -171,18 +176,8 @@ class Nucleus {
    * \see default_nuclear_radius
    * */
   float proton_radius_ = 1.2f;
-  /// z (beam direction-) coordinate of the outermost particle (highest
-  /// z)
-  float z_max_ = 0.f;
-  /// z (beam direction-) coordinate of the outermost particle (lowest
-  /// z)
-  float z_min_ = 0.f;
-  /// x (impact parameter direction-) coordinate of the outermost
-  /// particle (highest x)
-  float x_max_ = 0.f;
-  /// x (impact parameter direction-) coordinate of the outermost
-  /// particle (lowest x)
-  float x_min_ = 0.f;
+  /// Coordinate of the outermost particle.
+  float r_max_ = 0.f;
   /// Number of testparticles per physical particle
   size_t testparticles_ = 1;
   /// particles associated with this nucleus.

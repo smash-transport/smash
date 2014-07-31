@@ -88,7 +88,7 @@ NucleusModus::NucleusModus(Configuration modus_config,
       // specifies a pair of PDG codes for the two particle species we want to use.
       // The default is otherwise the average nucleon mass for each nucleus.
       PdgCode id_1 = 0, id_2 = 0;
-      if (modus_cfg.has_value({"SQRT_REPS"})) {
+      if (modus_cfg.has_value({"SQRTS_REPS"})) {
         std::vector<PdgCode> sqrts_reps = modus_cfg.take({"SQRTS_REPS"});
         id_1 = sqrts_reps[0];
         id_2 = sqrts_reps[1];
@@ -225,10 +225,6 @@ float NucleusModus::initial_conditions(Particles *particles,
   // Shift the nuclei into starting positions. Keep the pair separated
   // in z by some small distance and shift in x by the impact parameter. 
   // (Projectile is chosen to hit at positive x.)
-  // For regular nuclei, the shift is along the z-axis so that
-  // the nuclei are 2*1 fm apart.
-  // For deformed nuclei, movement is also along z but due to
-  // asymmetries, initial separation may include extra space.
   // After shifting, set the time component of the particles to
   // -initial_z_displacement_/average_velocity.
   float avg_velocity = sqrt(velocities.get<0>() * velocities.get<0>() 

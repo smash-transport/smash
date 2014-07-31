@@ -1,6 +1,6 @@
 General:
     # Modus decision
-    MODUS:         Sphere
+    MODUS:         Nucleus
 
     # temporal grid spacing
     DELTA_TIME:    0.01
@@ -95,13 +95,13 @@ Modi:
         # Definitions for the target:
         Target:
             PARTICLES: {2212: 79, 2112: 118}
-            AUTOMATIC: false
-            DEFORMED: false
-        # Collision energy.
+            AUTOMATIC: true
+            DEFORMED: true
+        # Collision energy (E_LAB, P_LAB, SQRTSNN).
         # E_LAB : 100
         # P_LAB : 100
         SQRTSNN: 10
-        # The representative "N"'s (two PDG IDs) determining the 
+        # The representative particles (two PDG IDs) determining the 
         # subsystem "NN" in sqrt(s_NN). Let's try neutron-neutron.
         SQRTS_REPS: [2112, 2112]
         # The reference frame in which to do the calculation.

@@ -1,10 +1,14 @@
 /*
- *    Andy's Deformed Nucleus Class File
+ *    Copyright (c) 2014
+ *      SMASH Team
+ *
+ *    GNU General Public License (GPLv3 or later)
  */
+#include "include/deformednucleus.h"
+
 #include "include/angles.h"
 #include "include/configuration.h"
 #include "include/constants.h"
-#include "include/deformednucleus.h"
 #include "include/fourvector.h"
 #include "include/particledata.h"
 #include "include/random.h"
@@ -24,7 +28,7 @@ double DeformedNucleus::deformed_woods_saxon(double r, double cosx) const {
          (1 + beta2_ * y_l_0(2, cosx) + beta4_ * y_l_0(4, cosx)) / Nucleus::get_diffusiveness()));
 }
 
-ThreeVector DeformedNucleus::deformed_distribute_nucleon() const {
+ThreeVector DeformedNucleus::distribute_nucleon() const {
   double a_radius;
   Angles a_direction;
   // Set a sensible max bound for radial sampling.
@@ -41,24 +45,6 @@ ThreeVector DeformedNucleus::deformed_distribute_nucleon() const {
 
   // Update (x, y, z).
   return a_direction.threevec() * a_radius;
-}
-
-void DeformedNucleus::arrange_nucleons() {
-  for (auto i = Nucleus::begin(); i != Nucleus::end(); i++) {
-    // Sampling a deformed W.S., get the radial
-    // position and solid angle for the nucleon.
-    ThreeVector pos = deformed_distribute_nucleon();
-
-    // Set the position of the nucleon.
-    i->set_position(FourVector(0.0, pos));
-
-    // Update the radial bound of the nucleus.
-    double r_tmp = pos.abs();
-    r_max_ = (r_tmp > r_max_) ? r_tmp : r_max_;
-  }
-  // Recenter and rotate
-  align_center();
-  rotate();
 }
 
 void DeformedNucleus::set_parameters_automatic() {
@@ -142,26 +128,6 @@ void DeformedNucleus::rotate() {
                          * cos_phi * old_y + sin_theta * old_z);
     this_position.set_x3(sin_theta * sin_phi * old_x - sin_theta
                          * cos_phi * old_y + cos_theta * old_z);
-
-    i->set_position(this_position);
-  }
-}
-
-void DeformedNucleus::shift(bool is_projectile, double initial_z_displacement,
-                            double x_offset, float simulation_time) {
-  // The amount to shift the z coordinates. If is_projectile, we shift
-  // back by -r_max_, else we shift forward r_max_.
-  double z_offset = is_projectile ? -r_max_ : r_max_;
-  // In the current system, the nuclei may touch. We want them to be
-  // a little apart, so we include a slightly bigger offset.
-  z_offset += initial_z_displacement;
-
-  // Move the nucleons to the new x and z positions, and set the time.
-  for (auto i = begin(); i != end(); i++) {
-    FourVector this_position = i->position();
-    this_position.set_x3(this_position.x3() + z_offset);
-    this_position.set_x1(this_position.x1() + x_offset);
-    this_position.set_x0(simulation_time);
     i->set_position(this_position);
   }
 }

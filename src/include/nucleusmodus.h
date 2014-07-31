@@ -78,12 +78,14 @@ struct ExperimentParameters;
  * lead-208 nucleus (82 protons and 126 neutrons = 208 nucleons), and
  * `PARTICLES: {2212: 1, 2112: 1, 3122: 1}` for Hyper-Triton (one
  * proton, one neutron and one Lambda).
- * \li `DIFFUSIVENESS:` The diffusiveness used in the Woods-Saxon
- * distribution for this nucleus. 0 means a hard sphere.
- * \li `AUTOMATIC:` Whether or not to use default values based on the
- * current nucleus atomic number (true/false).
  * \li `DEFORMED:` Whether to construct nuclei using the nucleus class
  * or the deformed nucleus class (true=deformednucleus/false=nucleus).
+ * \li `AUTOMATIC:` Whether or not to use default values based on the
+ * current nucleus atomic number (true/false).
+ * \li `Additional Woods-Saxon Parameters: ` There are also many other
+ * parameters for specifying the shape of the Woods-Saxon distribution,
+ * and other nucleus specific properties. See NUCLEUS.CC and 
+ * DEFORMEDNUCLEUS.CC for more on these choices.
  *
  * `Impact:` A section for the impact parameter (= distance of the two
  * straight lines that the center of masses of the nuclei travel on).
