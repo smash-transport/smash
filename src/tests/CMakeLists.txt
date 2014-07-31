@@ -91,6 +91,13 @@ smash_add_unittest(lorentzboost)
 smash_add_unittest(nucleus)
 smash_add_unittest(random)
 
+# configure a header file to pass some of the CMake settings
+# to the source code
+configure_file (
+  "${CMAKE_CURRENT_SOURCE_DIR}/../include/config.h.in"
+  "${CMAKE_CURRENT_SOURCE_DIR}/../include/config.h"
+)
+
 # for now -o has to be "data", because OSCAR output still expects to output to
 # $PWD/data. In the future we want to use "${PROJECT_BINARY_DIR}/test_output"
 set(SMASH_OPTIONS -o "data" -f)

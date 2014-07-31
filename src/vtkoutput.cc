@@ -9,6 +9,7 @@
 
 #include <memory>
 #include "include/clock.h"
+#include "include/config.h"
 #include "include/filedeleter.h"
 #include "include/forwarddeclarations.h"
 #include "include/particles.h"
@@ -48,7 +49,7 @@ void VtkOutput::write(const Particles &particles, const int event_number) {
 
   /* Legacy VTK file format */
   fprintf(file_.get(), "# vtk DataFile Version 2.0\n");
-  fprintf(file_.get(), "Generated from molecular-offset data\n");
+  fprintf(file_.get(), "Generated from molecular-offset data " VERSION_MAJOR "\n");
   fprintf(file_.get(), "ASCII\n");
 
   /* Unstructured data sets are composed of points, lines, polygons, .. */
