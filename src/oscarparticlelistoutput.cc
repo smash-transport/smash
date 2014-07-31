@@ -26,7 +26,7 @@ OscarParticleListOutput::OscarParticleListOutput(bf::path path,
     only_final_(conf.has_value({"Only_final"})
               ? conf.take({"Only_final"}) : true)  {
   if (modern_format_) {
-    fprintf(file_.get(), "#!OSCAR2013 particle_lists " VERSION_MAJOR " ");
+    fprintf(file_.get(), "#!OSCAR2013 particle_lists %s ", VERSION_MAJOR);
   } else {
     fprintf(file_.get(), "# OSC1999A\n");
     fprintf(file_.get(), "# final_id_p_x\n");

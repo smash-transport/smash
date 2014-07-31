@@ -26,7 +26,7 @@ OscarFullHistoryOutput::OscarFullHistoryOutput(bf::path path,
     print_start_end_(conf.has_value({"Print_start_end"})
                      ? conf.take({"Print_start_end"}) : false) {
   if (modern_format_) {
-    fprintf(file_.get(), "#!OSCAR2013 full_event_history " VERSION_MAJOR " ");
+    fprintf(file_.get(), "#!OSCAR2013 full_event_history %s ", VERSION_MAJOR);
   } else {
     fprintf(file_.get(), "# OSC1999A\n");
     fprintf(file_.get(), "# full_event_history\n");
