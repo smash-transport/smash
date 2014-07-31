@@ -223,7 +223,16 @@ int main(int argc, char *argv[]) {
      * \page input_general_ General
      *
      * \key OUTPUT: \n
-     * List of the desired output format(s).
+     * Below this key the configuration for the different output formats is
+     * defined. All the \key Enable entries must be present. This \key Enable
+     * setting is used to select the desired output formats/files. The following
+     * outputs exist:
+     * \li \subpage input_oscar_particlelist
+     * \li \subpage input_oscar_collisions
+     * \li \subpage input_vtk
+     * \li \subpage input_binary_collisions
+     * \li \subpage input_binary_particles
+     * \li \subpage input_root
      */
     auto output_conf = configuration["General"]["OUTPUT"];
 

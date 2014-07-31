@@ -23,6 +23,21 @@ namespace Smash {
 template <OscarOutputFormat Format, int Contents>
 OscarOutput<Format, Contents>::OscarOutput(bf::path path, std::string name)
     : file_{std::fopen((path / (name + ".oscar")).native().c_str(), "w")} {
+  /*!\Userguide
+   * \page input_oscar_particlelist OSCAR_PARTICLELIST
+   * \key 2013_format: \n
+   * Optional, defaults to \c false.
+   *
+   * \key Only_final: \n
+   * Optional, defaults to \c true.
+   *
+   * \page input_oscar_collisions OSCAR_COLLISIONS
+   * \key 2013_format: \n
+   * Optional, defaults to \c false.
+   *
+   * \key Print_start_end: \n
+   * Optional, defaults to \c false.
+   */
   if (Format == OscarFormat2013) {
     fprintf(file_.get(), "#!OSCAR2013 %s %s ", name.c_str(), VERSION_MAJOR);
     fprintf(file_.get(), "t x y z mass p0 px py pz pdg ID\n");
