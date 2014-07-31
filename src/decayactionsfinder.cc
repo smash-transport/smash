@@ -21,7 +21,7 @@ DecayActionsFinder::DecayActionsFinder(const ExperimentParameters &parameters)
                      : ActionFinderFactory(parameters.timestep_duration()) {
 }
 
-ActionList DecayActionsFinder::find_possible_actions(Particles *particles) {
+ActionList DecayActionsFinder::find_possible_actions(Particles *particles) const {
   ActionList actions;
 
   for (const auto &p : particles->data()) {

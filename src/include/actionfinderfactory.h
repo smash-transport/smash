@@ -23,7 +23,7 @@ class ActionFinderFactory {
   /** Initialize the finder with the given parameters. */
   ActionFinderFactory(float dt) : dt_(dt) {}
   /** Pure virtual function for finding actions, given a list of particles. */
-  virtual ActionList find_possible_actions(Particles *particles) = 0;
+  virtual ActionList find_possible_actions(Particles *particles) const = 0;
 
  protected:
   /** Timestep duration. */

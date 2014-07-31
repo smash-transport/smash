@@ -24,13 +24,13 @@ class ScatterActionsFinder : public ActionFinderFactory {
   static double collision_time(const ParticleData &p1, const ParticleData &p2);
   /** Check the whole particle list for collisions
    * and return a list with the corrsponding Action objects. */
-  ActionList find_possible_actions(Particles *particles) override;
+  ActionList find_possible_actions(Particles *particles) const override;
 
  private:
   /** Check for a single pair of particles (id_a, id_b) if a collision will happen
    * in the next timestep and create a corresponding Action object in that case. */
   ActionPtr check_collision(const int id_a, const int id_b,
-                            Particles *particles);
+                            Particles *particles) const;
   /** Elastic cross section parameter (in mb). */
   const float elastic_parameter_ = 0.0;
 };

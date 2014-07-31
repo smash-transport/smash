@@ -51,7 +51,7 @@ double ScatterActionsFinder::collision_time(const ParticleData &p1,
 
 ActionPtr
 ScatterActionsFinder::check_collision(const int id_a, const int id_b,
-                                      Particles *particles) {
+                                      Particles *particles) const {
 
   ScatterAction* act = nullptr;
 
@@ -108,7 +108,7 @@ ScatterActionsFinder::check_collision(const int id_a, const int id_b,
 }
 
 std::vector<ActionPtr> ScatterActionsFinder::find_possible_actions(
-    Particles *particles) {
+    Particles *particles) const {
   std::vector<ActionPtr> actions;
 
   for (const auto &p1 : particles->data()) {

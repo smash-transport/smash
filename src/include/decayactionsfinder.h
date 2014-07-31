@@ -22,7 +22,7 @@ class DecayActionsFinder : public ActionFinderFactory {
   DecayActionsFinder(const ExperimentParameters &parameters);
   /** Check the whole particle list for decays
    * and return a list with the corrsponding Action objects. */
-  ActionList find_possible_actions(Particles *particles) override;
+  ActionList find_possible_actions(Particles *particles) const override;
 };
 
 }  // namespace Smash
