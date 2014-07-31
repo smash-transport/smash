@@ -110,6 +110,8 @@ TEST(sanity_nucleus) {
   conf.take({"Modi", "Nucleus", "Projectile"});
   conf.take({"Modi", "Nucleus", "Target"});
   conf["Modi"]["Nucleus"]["SQRTSNN"] = 1.0;
+  conf["Modi"]["Nucleus"]["SQRTS_REPS"][0] = "661";
+  conf["Modi"]["Nucleus"]["SQRTS_REPS"][1] = "661";
   conf["Modi"]["Nucleus"]["Projectile"]["PARTICLES"]["661"] = 1;
   conf["Modi"]["Nucleus"]["Target"]["PARTICLES"]["661"] = 1;
   ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};

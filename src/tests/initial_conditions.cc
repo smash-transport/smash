@@ -101,8 +101,8 @@ TEST(initialize_nucleus_normal) {
   conf.take({"Modi", "Nucleus", "Target"});
   conf["Modi"]["Nucleus"]["Projectile"]["PARTICLES"]["661"] = 1;
   conf["Modi"]["Nucleus"]["Target"]["PARTICLES"]["661"] = 8;
-  conf["Modi"]["Nucleus"]["SQRTS_N"][0] = "661";
-  conf["Modi"]["Nucleus"]["SQRTS_N"][1] = "661";
+  conf["Modi"]["Nucleus"]["SQRTS_REPS"][0] = "661";
+  conf["Modi"]["Nucleus"]["SQRTS_REPS"][1] = "661";
   conf["Modi"]["Nucleus"]["INITIAL_DISTANCE"] = 0;
   conf["Modi"]["Nucleus"]["Impact"]["VALUE"] = 0;
   ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};
@@ -132,8 +132,8 @@ TEST_CATCH(initialize_nucleus_low_energy, ModusDefault::InvalidEnergy) {
   conf.take({"Modi", "Nucleus", "Target"});
   conf["Modi"]["Nucleus"]["Projectile"]["PARTICLES"]["661"] = 1;
   conf["Modi"]["Nucleus"]["Target"]["PARTICLES"]["661"] = 8;
-  conf["Modi"]["Nucleus"]["SQRTS_N"][0] = "661";
-  conf["Modi"]["Nucleus"]["SQRTS_N"][1] = "661";
+  conf["Modi"]["Nucleus"]["SQRTS_REPS"][0] = "661";
+  conf["Modi"]["Nucleus"]["SQRTS_REPS"][1] = "661";
   conf["Modi"]["Nucleus"]["INITIAL_DISTANCE"] = 0;
   ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};
   NucleusModus n(conf["Modi"], param);
@@ -148,8 +148,8 @@ TEST_CATCH(initialize_nucleus_empty_projectile, NucleusModus::NucleusEmpty) {
   conf.take({"Modi", "Nucleus", "Target"});
   conf["Modi"]["Nucleus"]["Projectile"]["PARTICLES"]["661"] = 0;
   conf["Modi"]["Nucleus"]["Target"]["PARTICLES"]["661"] = 8;
-  conf["Modi"]["Nucleus"]["SQRTS_N"][0] = 0;
-  conf["Modi"]["Nucleus"]["SQRTS_N"][1] = 0;
+  conf["Modi"]["Nucleus"]["SQRTS_REPS"][0] = 0;
+  conf["Modi"]["Nucleus"]["SQRTS_REPS"][1] = 0;
   conf["Modi"]["Nucleus"]["INITIAL_DISTANCE"] = 0;
   ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};
   NucleusModus n(conf["Modi"], param);
@@ -164,8 +164,8 @@ TEST_CATCH(initialize_nucleus_empty_target, NucleusModus::NucleusEmpty) {
   conf.take({"Modi", "Nucleus", "Target"});
   conf["Modi"]["Nucleus"]["Projectile"]["PARTICLES"]["661"] = 8;
   conf["Modi"]["Nucleus"]["Target"]["PARTICLES"]["661"] = 0;
-  conf["Modi"]["Nucleus"]["SQRTS_N"][0] = 0;
-  conf["Modi"]["Nucleus"]["SQRTS_N"][1] = 0;
+  conf["Modi"]["Nucleus"]["SQRTS_REPS"][0] = 0;
+  conf["Modi"]["Nucleus"]["SQRTS_REPS"][1] = 0;
   conf["Modi"]["Nucleus"]["INITIAL_DISTANCE"] = 0;
   ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};
   NucleusModus n(conf["Modi"], param);

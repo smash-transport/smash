@@ -173,8 +173,8 @@ TEST(propagate_nucleus) {
   conf.take({"Modi", "Nucleus", "Target"});
   conf["Modi"]["Nucleus"]["Projectile"]["PARTICLES"]["661"] = 1;
   conf["Modi"]["Nucleus"]["Target"]["PARTICLES"]["661"] = 1;
-  conf["Modi"]["Nucleus"]["SQRTS_N"][0] = "661";
-  conf["Modi"]["Nucleus"]["SQRTS_N"][1] = "661";
+  conf["Modi"]["Nucleus"]["SQRTS_REPS"][0] = "661";
+  conf["Modi"]["Nucleus"]["SQRTS_REPS"][1] = "661";
   ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};
   NucleusModus n(conf["Modi"], param);
   Particles Pdef, Pnuc;
