@@ -36,7 +36,7 @@
 #endif
 #include "include/vtkoutput.h"
 /* build dependent variables */
-#include "include/config.h"
+#include <include/config.h>
 
 namespace Smash {
 

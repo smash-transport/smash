@@ -8,8 +8,8 @@
  */
 
 #include <memory>
+#include <include/config.h>
 #include "include/clock.h"
-#include "include/config.h"
 #include "include/filedeleter.h"
 #include "include/forwarddeclarations.h"
 #include "include/particles.h"

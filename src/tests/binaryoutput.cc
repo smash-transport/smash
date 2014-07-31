@@ -16,11 +16,11 @@
 #include <string>
 #include <vector>
 #include <boost/filesystem.hpp>
+#include <include/config.h>
 
 #include "../include/binaryoutputcollisions.h"
 #include "../include/binaryoutputparticles.h"
 #include "../include/clock.h"
-#include "../include/config.h"
 #include "../include/outputinterface.h"
 #include "../include/particles.h"
 #include "../include/random.h"

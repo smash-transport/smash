@@ -16,7 +16,7 @@
 #include <string>
 #include <vector>
 #include <boost/filesystem.hpp>
-#include "../include/config.h"
+#include <include/config.h>
 #include "../include/outputinterface.h"
 #include "../include/oscarfullhistoryoutput.h"
 #include "../include/oscarparticlelistoutput.h"
