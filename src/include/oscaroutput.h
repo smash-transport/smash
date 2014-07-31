@@ -29,17 +29,16 @@ class OscarOutput : public OutputInterface {
 
   void at_eventend(const Particles &particles, const int event_number) override;
 
-  void write_interaction(const ParticleList &incoming_particles,
+  void at_interaction(const ParticleList &incoming_particles,
                          const ParticleList &outgoing_particles) override;
 
-  void after_Nth_timestep(const Particles &particles, const int event_number,
+  void at_intermediate_time(const Particles &particles, const int event_number,
                           const Clock &clock) override;
 
+ protected:
   void write_format_description(void);
   void write_particledata(const ParticleData &data);
   void write(const Particles &particles);
-
- protected:
   FilePtr file_;
   bool modern_format_;
 };

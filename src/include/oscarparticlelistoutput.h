@@ -29,7 +29,7 @@ class OscarParticleListOutput : public OscarOutput {
   /// writes the final particle information of an event
   void at_eventend(const Particles &particles, const int event_number) override;
 
-  void after_Nth_timestep(const Particles &particles, const int event_number,
+  void at_intermediate_time(const Particles &particles, const int event_number,
                           const Clock &clock) override;
 
  private:

@@ -9,15 +9,15 @@
 
 #include "include/binaryoutputcollisions.h"
 
-#include <string>
 #include <boost/filesystem.hpp>
-#include <include/config.h>
+#include <string>
 
 #include "include/clock.h"
-#include "include/forwarddeclarations.h"
-#include "include/particles.h"
-#include "include/inputfunctions.h"
+#include "include/config.h"
 #include "include/configuration.h"
+#include "include/forwarddeclarations.h"
+#include "include/inputfunctions.h"
+#include "include/particles.h"
 
 namespace Smash {
 
@@ -61,7 +61,7 @@ void BinaryOutputCollisions::at_eventend(const Particles &particles,
   std::fflush(file_.get());
 }
 
-void BinaryOutputCollisions::write_interaction(const ParticleList &incoming,
+void BinaryOutputCollisions::at_interaction(const ParticleList &incoming,
                                      const ParticleList &outgoing) {
   char ichar = 'i';
   std::fwrite(&ichar, sizeof(char), 1, file_.get());
@@ -71,7 +71,7 @@ void BinaryOutputCollisions::write_interaction(const ParticleList &incoming,
   write(outgoing);
 }
 
-void BinaryOutputCollisions::after_Nth_timestep(const Particles &/*particles*/,
+void BinaryOutputCollisions::at_intermediate_time(const Particles &/*particles*/,
                                       const int /*event_number*/,
                                       const Clock &) {
   /* No output of this kind in collisions output */

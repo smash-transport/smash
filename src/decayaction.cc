@@ -10,18 +10,18 @@
 #include "include/action.h"
 
 #include "include/angles.h"
+#include "include/decaymodes.h"
 #include "include/outputroutines.h"
 #include "include/pdgcode.h"
 #include "include/resonances.h"
-#include "include/decaymodes.h"
 
 namespace Smash {
 
 
 DecayAction::DecayAction(const ParticleData &in_part, float time_of_execution)
-    : Action ({in_part}, time_of_execution) {}
+    : Action({in_part}, time_of_execution) {}
 
-DecayAction::DecayAction(const ParticleData &p) : Action ({p}, 0.) {
+DecayAction::DecayAction(const ParticleData &p) : Action({p}, 0.) {
   add_processes(p.type().get_partial_widths(p.effective_mass()));
 }
 
@@ -69,20 +69,20 @@ void DecayAction::one_to_three() {
     s_ab = Random::uniform(s_ab_min, s_ab_max);
     s_bc = Random::uniform(s_bc_min, s_bc_max);
     const double e_b_rest =
-        (s_ab - mass_a * mass_a + mass_b * mass_b) / (2 * sqrt(s_ab));
+      (s_ab - mass_a * mass_a + mass_b * mass_b) / (2 * std::sqrt(s_ab));
     const double e_c_rest =
-        (mass_resonance * mass_resonance - s_ab - mass_c * mass_c) /
-        (2 * sqrt(s_ab));
+      (mass_resonance * mass_resonance - s_ab - mass_c * mass_c) /
+      (2 * std::sqrt(s_ab));
     dalitz_bc_max = (e_b_rest + e_c_rest) * (e_b_rest + e_c_rest) -
-                    (sqrt(e_b_rest * e_b_rest - mass_b * mass_b) -
-                     sqrt(e_c_rest * e_c_rest - mass_c * mass_c)) *
-                        (sqrt(e_b_rest * e_b_rest - mass_b * mass_b) -
-                         sqrt(e_c_rest * e_c_rest - mass_c * mass_c));
+                    (std::sqrt(e_b_rest * e_b_rest - mass_b * mass_b) -
+                     std::sqrt(e_c_rest * e_c_rest - mass_c * mass_c)) *
+                     (std::sqrt(e_b_rest * e_b_rest - mass_b * mass_b) -
+                      std::sqrt(e_c_rest * e_c_rest - mass_c * mass_c));
     dalitz_bc_min = (e_b_rest + e_c_rest) * (e_b_rest + e_c_rest) -
-                    (sqrt(e_b_rest * e_b_rest - mass_b * mass_b) +
-                     sqrt(e_c_rest * e_c_rest - mass_c * mass_c)) *
-                        (sqrt(e_b_rest * e_b_rest - mass_b * mass_b) +
-                         sqrt(e_c_rest * e_c_rest - mass_c * mass_c));
+                    (std::sqrt(e_b_rest * e_b_rest - mass_b * mass_b) +
+                     std::sqrt(e_c_rest * e_c_rest - mass_c * mass_c)) *
+                     (std::sqrt(e_b_rest * e_b_rest - mass_b * mass_b) +
+                      std::sqrt(e_c_rest * e_c_rest - mass_c * mass_c));
   }
 
   printd("s_ab: %g s_bc: %g min: %g max: %g\n", s_ab, s_bc, dalitz_bc_min,
@@ -97,9 +97,9 @@ void DecayAction::one_to_three() {
       (2 * mass_resonance);
   const double energy_b =
       (s_ab + s_bc - mass_a * mass_a - mass_c * mass_c) / (2 * mass_resonance);
-  const double momentum_a = sqrt(energy_a * energy_a - mass_a * mass_a);
-  const double momentum_c = sqrt(energy_c * energy_c - mass_c * mass_c);
-  const double momentum_b = sqrt(energy_b * energy_b - mass_b * mass_b);
+  const double momentum_a = std::sqrt(energy_a * energy_a - mass_a * mass_a);
+  const double momentum_c = std::sqrt(energy_c * energy_c - mass_c * mass_c);
+  const double momentum_b = std::sqrt(energy_b * energy_b - mass_b * mass_b);
 
   const double total_energy = sqrt_s();
   if (fabs(energy_a + energy_b + energy_c - total_energy) > really_small)
@@ -161,7 +161,8 @@ void DecayAction::one_to_three() {
 void DecayAction::perform(Particles *particles, size_t &id_process) {
   /* Check if particle still exists. */
   if (!is_valid(*particles)) {
-    printf("DecayAction::perform: ID %i not found!\n", incoming_particles_[0].id());
+    printf("DecayAction::perform: ID %i not found!\n",
+           incoming_particles_[0].id());
     return;
   }
 
@@ -216,4 +217,4 @@ void DecayAction::perform(Particles *particles, size_t &id_process) {
   printd("Particle map has now %zu elements. \n", particles->size());
 }
 
-}
+}  // namespace Smash

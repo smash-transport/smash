@@ -98,7 +98,7 @@ void RootOutput::at_eventstart(const Particles &particles,
 /**
  * Writes to tree "at_tstep_N", where N is timestep number counting from 1.
  */
-void RootOutput::after_Nth_timestep(const Particles &particles,
+void RootOutput::at_intermediate_time(const Particles &particles,
                                     const int event_number,
                                     const Clock &/*clock*/) {
   if (write_particles_) {
@@ -130,7 +130,7 @@ void RootOutput::at_eventend(const Particles &/*particles*/,
 /**
  * Writes interactions to ROOT-file
  */
-void RootOutput::write_interaction(const ParticleList &incoming,
+void RootOutput::at_interaction(const ParticleList &incoming,
                                    const ParticleList &outgoing) {
   if (write_collisions_) {
     collisions_to_tree(incoming, outgoing);

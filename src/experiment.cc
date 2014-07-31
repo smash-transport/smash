@@ -153,7 +153,7 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
           action->perform(&particles_, interactions_total);
           const ParticleList outgoing_particles = action->outgoing_particles();
           for (const auto &output : outputs_) {
-            output->write_interaction(incoming_particles, outgoing_particles);
+            output->at_interaction(incoming_particles, outgoing_particles);
           }
         }
       }
@@ -179,7 +179,7 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
               parameters_.labclock.current_time());
       /* save evolution data */
       for (const auto &output : outputs_) {
-        output->after_Nth_timestep(particles_, evt_num, parameters_.labclock);
+        output->at_intermediate_time(particles_, evt_num, parameters_.labclock);
       }
     }
     // check conservation of conserved quantities:

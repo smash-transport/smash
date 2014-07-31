@@ -127,7 +127,7 @@ TEST(fullhistory_format) {
   ParticleData final_particle = create_smashon_particle();
   particles.add_data(final_particle);
   final_particles.push_back(particles.data(particles.id_max()));
-  oscfull->write_interaction(initial_particles, final_particles);
+  oscfull->at_interaction(initial_particles, final_particles);
   /* Final state output */
   oscfull->at_eventend(particles, event_id);
 
@@ -249,7 +249,7 @@ TEST(particlelist_format) {
   final_particles.push_back(particles.data(0));
   final_particles.push_back(particles.data(1));
   /* As with initial state output, this should not do anything */
-  oscfinal->write_interaction(initial_particles, final_particles);
+  oscfinal->at_interaction(initial_particles, final_particles);
   /* Final state output; this is the only thing we expect to find in file */
   oscfinal->at_eventend(particles, event_id);
 

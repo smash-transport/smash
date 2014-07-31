@@ -31,9 +31,9 @@ namespace Smash {
 
 BoxModus::BoxModus(Configuration modus_config, const ExperimentParameters &)
     : initial_condition_(modus_config.take({"Box", "INITIAL_CONDITION"})),
-      length_           (modus_config.take({"Box", "LENGTH"})),
-      temperature_      (modus_config.take({"Box", "TEMPERATURE"})),
-      start_time_       (modus_config.take({"Box", "START_TIME"})) {
+      length_(modus_config.take({"Box", "LENGTH"})),
+      temperature_(modus_config.take({"Box", "TEMPERATURE"})),
+      start_time_(modus_config.take({"Box", "START_TIME"})) {
 }
 
 /* print_startup - console output on startup of box specific parameters */
@@ -162,7 +162,7 @@ void BoxModus::propagate(Particles *particles,
     data.set_position(position);
     if (wall_hit) {
       for (const auto &output : output_list) {
-        output->write_interaction(incoming_particle, {1, data});
+        output->at_interaction(incoming_particle, {1, data});
       }
     }
     printd_position(data);

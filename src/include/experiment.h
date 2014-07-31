@@ -139,7 +139,7 @@ class ExperimentBase {
 /**
  * The main class, where the simulation of an experiment is executed.
  *
- * The Experiment class is owns all data (maybe indirectly) relevant for the
+ * The Experiment class owns all data (maybe indirectly) relevant for the
  * execution of the experiment simulation. The experiment can be conducted in
  * different running modi. Since the abstraction of these differences should not
  * incur any overhead, the design is built around the Policy pattern.

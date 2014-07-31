@@ -32,7 +32,7 @@ class OscarFullHistoryOutput : public OscarOutput {
   /**
    * Write a prefix line and a line per particle to OSCAR output.
    */
-  void write_interaction(const ParticleList &incoming_particles,
+  void at_interaction(const ParticleList &incoming_particles,
                          const ParticleList &outgoing_particles) override;
 
  private:

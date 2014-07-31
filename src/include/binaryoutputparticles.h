@@ -40,10 +40,10 @@ class BinaryOutputParticles : public BinaryOutputBase {
   /// writes the final particle information of an event
   void at_eventend(const Particles &particles, const int event_number) override;
 
-  void write_interaction(const ParticleList &incoming_particles,
+  void at_interaction(const ParticleList &incoming_particles,
                          const ParticleList &outgoing_particles) override;
   /// writes particles every time interval fixed by option OUTPUT_INTERVAL
-  void after_Nth_timestep(const Particles &particles, const int event_number,
+  void at_intermediate_time(const Particles &particles, const int event_number,
                           const Clock &clock) override;
 
  private:

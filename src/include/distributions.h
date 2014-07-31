@@ -28,6 +28,8 @@ float breit_wigner(const double mandelstam_s, const float resonance_mass,
 
 /** Returns the Maxwell-Boltzmann distribution
  *
+ * \todo rename this function to make clear what it is
+ * 
  * \param[in] energy \f$E\f$ (in GeV)
  * \param[in] momentum \f$p\f$ (in GeV)
  * \param[in] temperature \f$T\f$ (in GeV)
@@ -39,6 +41,7 @@ double density_integrand(const double energy, const double momentum,
 
 /** samples a momentum from the Maxwell-Boltzmann distribution
  *
+ * \todo rename this function to make clear what it is
  * \see density_integrand
  * \param[in] temperature Temperature \f$T\f$
  * \param[in] mass Mass of the particle: \f$m = \sqrt{E^2 - p^2}\f$
@@ -49,6 +52,8 @@ double sample_momenta(const double temperature, const double mass);
 
 /** return number density from a Maxwell-Boltzmann distribution
  *
+ * \todo rename this function to make clear what it is
+ * 
  * \see density_integrand
  *
  * \param[in] temperature Temperature
