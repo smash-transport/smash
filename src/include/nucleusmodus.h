@@ -15,8 +15,7 @@
 #include "pdgcode.h"
 
 #include <cstring>
-#include "boost/tuple/tuple.hpp"
-
+#include <utility>
 
 namespace Smash {
 
@@ -194,7 +193,7 @@ class NucleusModus : public ModusDefault {
   // @param m1 The mass of the projectile.
   // @param m2 The mass of the target.
   // @return < v1, v2 >
-  boost::tuple<double, double> get_velocities(float mandelstam_s, float m1, float m2);
+  std::pair<double, double> get_velocities(float mandelstam_s, float m1, float m2);
 };
 
 }  // namespace Smash

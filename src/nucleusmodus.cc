@@ -8,7 +8,8 @@
 #include <cstdlib>
 #include <cstring>
 #include <stdexcept>
-#include "boost/tuple/tuple.hpp"
+#include <tuple>
+#include <utility>
  
 #include "include/nucleusmodus.h"
 #include "include/angles.h"
@@ -213,11 +214,12 @@ float NucleusModus::initial_conditions(Particles *particles,
 
   // Use the total mandelstam variable to get the frame-dependent velocity for
   // each nucleus. Position 1 is projectile, position 2 is target.
-  boost::tuple<double, double> velocities = get_velocities(total_s_, 
-                                            projectile_->mass(), target_->mass());                           
+  double v1, v2;
+  std::tie(v1, v2) = get_velocities(total_s_, projectile_->mass(), target_->mass());
+
   // If velocities are too close to 1 for our calculations, throw an exception.
-  if (almost_equal(std::abs(1.0 - velocities.get<0>()), 0.0)
-      || almost_equal(std::abs(1.0 - velocities.get<1>()), 0.0)) {
+  if (almost_equal(std::abs(1.0 - v1), 0.0)
+      || almost_equal(std::abs(1.0 - v2), 0.0)) {
     throw std::domain_error("Found velocity equal to 1 in nucleusmodus::initial_conditions.\n"
                             "Consider using the center of velocity reference frame.");
   }
@@ -227,8 +229,8 @@ float NucleusModus::initial_conditions(Particles *particles,
   // (Projectile is chosen to hit at positive x.)
   // After shifting, set the time component of the particles to
   // -initial_z_displacement_/average_velocity.
-  float avg_velocity = sqrt(velocities.get<0>() * velocities.get<0>() 
-                            + velocities.get<1>() * velocities.get<1>());
+  float avg_velocity = sqrt(v1 * v1 
+                            + v2 * v2);
   float simulation_time = -initial_z_displacement_ / avg_velocity;
   projectile_->shift(true, -initial_z_displacement_, +impact_/2.0,
                      simulation_time);
@@ -236,8 +238,8 @@ float NucleusModus::initial_conditions(Particles *particles,
                  simulation_time);
 
   // Boost the nuclei to the appropriate velocity.
-  projectile_->boost(velocities.get<0>());
-  target_->boost(velocities.get<1>());
+  projectile_->boost(v1);
+  target_->boost(v2);
 
   // Put the particles in the nuclei into code particles.
   projectile_->copy_particles(particles);
@@ -257,7 +259,7 @@ void NucleusModus::sample_impact(bool s, float min, float max) {
   }
 }
 
-boost::tuple<double, double> NucleusModus::get_velocities(float s, float m1, float m2) {
+std::pair<double, double> NucleusModus::get_velocities(float s, float m1, float m2) {
   double v1 = 0.0;
   double v2 = 0.0;
   // Frame dependent calculations of velocities. Assume v1 >= 0, v2 <= 0.
@@ -286,7 +288,7 @@ boost::tuple<double, double> NucleusModus::get_velocities(float s, float m1, flo
     default:
       throw std::domain_error("Invalid reference frame in NucleusModus::get_velocities.");
   }
-  return boost::make_tuple(v1, v2);
+  return std::make_pair(v1, v2);
 }
 
 }  // namespace Smash
