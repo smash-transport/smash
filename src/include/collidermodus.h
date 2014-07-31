@@ -34,25 +34,8 @@ namespace Smash {
  *              # definitions here
  * \endcode
  *
- * The following directives are understood:
- *
- * Modi:Collider:
- * ---------
+ * The following configuration options are understood: \ref input_modi_collider_
  */
-// Userguide {
-/**
- * \if user
- * \page input_modi_collider_ Input Section Modi:Collider
- * \endif
- *
- * `SQRTS`: Center-of-mass energy of the system, in GeV. Needs to be
- * larger than the sum of the masses of the two particles.
- *
- * `PROJECTILE`: PdgCode of the Projectile
- *
- * `TARGETR`: PdgCode of the Target
- */
-// } Userguide
 class ColliderModus : public ModusDefault {
  public:
   /** Constructor

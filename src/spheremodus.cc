@@ -30,6 +30,23 @@
 
 namespace Smash {
 
+// Userguide {
+/*!
+ * \page input_modi_sphere_ Sphere
+ *
+ * \key RADIUS: \n
+ * Radius of the Sphere.
+ *
+ * \key NUMBEROFPARTICLES: \n
+ * Total number of particles in the Sphere.
+ *
+ * \key SPHERETEMPERATURE: \n
+ * Temperature for the momentum sampling in the sphere in GeV.
+ *
+ * \key START_TIME: \n
+ * Starting time of Sphere calculation.
+ */
+// } Userguide
 SphereModus::SphereModus(Configuration modus_config,
                          const ExperimentParameters &)
     : radius_(modus_config.take({"Sphere", "RADIUS"})),

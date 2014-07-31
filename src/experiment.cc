@@ -64,6 +64,29 @@ namespace Smash {
 std::unique_ptr<ExperimentBase> ExperimentBase::create(Configuration config) {
   const auto &log = logger<LogArea::Experiment>();
   log.trace() << source_location;
+  // Userguide {
+  /*! \page input_general_ General
+   * \key MODUS: \n
+   * Selects a modus for the calculation, e.g.\ infinite matter
+   * calculation, collision of two particles or collision of nuclei. The modus
+   * will be configured in \ref input_modi_. Recognized values are:
+   * \li \key Nucleus for collisions of nuclei or compound objects. See \ref
+   *     \NucleusModus
+   * \li \key Sphere for calculations of the expansion of a thermalized sphere. See
+   *     \ref \SphereModus
+   * \li \key Collider for testing elementary cross-sections. See \ref
+   *     \ColliderModus
+   * \li \key Box for infinite matter calculation in a rectangular box. See \ref
+   *     \BoxModus
+   */
+
+  /*! \page input_modi_ Modi
+   * \li \subpage input_modi_nucleus_
+   * \li \subpage input_modi_sphere_
+   * \li \subpage input_modi_box_
+   * \li \subpage input_modi_collider_
+   */
+  // } Userguide
   const std::string modus_chooser = config.take({"General", "MODUS"});
   log.info() << "Modus for this calculation: " << modus_chooser;
 
@@ -86,6 +109,23 @@ std::unique_ptr<ExperimentBase> ExperimentBase::create(Configuration config) {
 }
 
 namespace {
+// Userguide {
+/*! \page input_general_ General
+ * \key DELTA_TIME: \n
+ * Time step for the calculation, in fm/c.
+ *
+ * \key TESTPARTICLES: \n
+ * How many test particles per real particles should be simulated.
+ *
+ * \key SIGMA: \n
+ * Elastic cross-section.
+ *
+ * \key OUTPUT_INTERVAL: \n
+ * Defines the period of intermediate output of the status of the simulated
+ * system in Standard Output and other output formats which support this
+ * functionality.
+ */
+// } Userguide
 /** Gathers all general Experiment parameters
  *
  * \param[in, out] config Configuration element
@@ -126,6 +166,21 @@ std::ostream &operator<<(std::ostream &out, const Experiment<Modus> &e) {
   return out;
 }
 
+// Userguide {
+/*! \page input_general_
+ * \key END_TIME: \n
+ * The time after which the evolution is stopped. Note
+ * that the starting time depends on the chosen MODUS.
+ *
+ * \key RANDOMSEED: \n
+ * Initial seed for the random number generator. If this is
+ * negative, the program starting time is used.
+ *
+ * \key NEVENTS: \n
+ * Number of events to calculate.
+ *
+ */
+// } Userguide
 template <typename Modus>
 Experiment<Modus>::Experiment(Configuration config)
     : parameters_(create_experiment_parameters(config)),

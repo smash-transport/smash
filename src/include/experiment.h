@@ -56,61 +56,9 @@ class ExperimentBase {
    *         Modus string in the \p config object does not contain a valid
    *         string.
    *
-   * GENERAL:
-   * --------
+   * Most of the Configuration values are read starting from this function. The
+   * configuration itself is documented in \subpage input_general_
    */
-  // Userguide {
-  /**
-   * \if user
-   * \page input_general_ Input Section General
-   * \endif
-   *
-   * `MODUS:` Choose a modus for the calculation, e.g.\ infinite matter
-   * calculation, collision of two particles or collision of nuclei. The modus
-   * will be configured in ref input_modi_. Recognized values are:
-   *
-   * \li `Nucleus` for collisions of nuclei or compound objects. See
-   *     \if user
-   *     \ref input_modi_nucleus_
-   *     \else
-   *     \ref NucleusModus
-   *     \endif
-   * \li `Sphere` for calculations of the expansion of a thermalized sphere.
-   * See ref input_modi_sphere_
-   * \li `Collider` for testing elementary cross-sections
-   * \li `Box` for infinite matter calculation in a rectangular box. See
-   *     \if user
-   *     \ref input_modi_box_
-   *     \else
-   *     \ref BoxModus
-   *     \endif
-   *
-   * `DELTA_TIME:` Time step for the calculation, in fm/c.
-   *
-   * `END_TIME:` The time after which the evolution is stopped. Note
-   * that the starting time depends on the chosen MODUS.
-   *
-   * 'OUTPUT:' List of the desired output format(s).
-   *
-   * `OUTPUT_INTERVAL:` Defines the period of intermediate output
-   * of the status of the simulated system in Standard Output
-   * and other output formats which support this functionality.
-   *
-   * `RANDOMSEED:` Initial seed for the random number generator. If this is
-   * negative, the program starting time is used.
-   *
-   * `SIGMA:` Elastic cross-section.
-   *
-   * `TESTPARTICLES:` How many test particles per real particles should be
-   * simulated.
-   *
-   * `NEVENTS:` Number of events to calculate.
-   *
-   * `particles:` a list of particle sorts used in simulation
-   *
-   * `decaymodes:` a list of processes used in simulation
-   */
-  // } Userguide
   static std::unique_ptr<ExperimentBase> create(Configuration config);
 
   /**
