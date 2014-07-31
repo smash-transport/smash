@@ -71,7 +71,8 @@ void BinaryOutputCollisions::at_interaction(const ParticleList &incoming,
   write(outgoing);
 }
 
-void BinaryOutputCollisions::at_intermediate_time(const Particles &/*particles*/,
+void BinaryOutputCollisions::at_intermediate_time(
+                                      const Particles &/*particles*/,
                                       const int /*event_number*/,
                                       const Clock &) {
   /* No output of this kind in collisions output */
