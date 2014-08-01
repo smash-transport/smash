@@ -17,6 +17,9 @@
 
 namespace Smash {
 
+/**
+ * \ingroup output
+ */
 class OscarParticleListOutput : public OscarOutput {
  public:
   OscarParticleListOutput(bf::path path, Configuration&& conf);

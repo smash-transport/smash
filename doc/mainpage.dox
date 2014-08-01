@@ -9,4 +9,5 @@ Quick Links:
 */
 
 // define all the groups/moduls
+/// \defgroup output Output Classes
 /// \defgroup exception Exception Classes

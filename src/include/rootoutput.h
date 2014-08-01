@@ -21,6 +21,8 @@ namespace Smash {
 class Particles;
 
 /**
+  * \ingroup output
+  *
   * \brief SMASH output to ROOT file
   * ----------------------------------------------------------------------------
   * SMASH supports ROOT (root.cern.ch) output as an option. By default SMASH

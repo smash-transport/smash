@@ -17,6 +17,9 @@
 
 namespace Smash {
 
+/**
+ * \ingroup output
+ */
 class OscarFullHistoryOutput : public OscarOutput {
  public:
   OscarFullHistoryOutput(bf::path path, Configuration&& conf);

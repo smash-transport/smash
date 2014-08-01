@@ -19,6 +19,9 @@
 
 namespace Smash {
 
+/**
+ * \ingroup output
+ */
 class OscarOutput : public OutputInterface {
  public:
   OscarOutput(bf::path path, std::string filename, Configuration&& conf);

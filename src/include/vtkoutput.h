@@ -19,6 +19,9 @@
 
 namespace Smash {
 
+/**
+ * \ingroup output
+ */
 class VtkOutput : public OutputInterface {
  public:
   VtkOutput(bf::path path, Configuration&& conf);

@@ -20,6 +20,8 @@
 namespace Smash {
 
 /**
+ * \ingroup output
+ *
  * \brief SMASH output to binary file
  * ----------------------------------------------------------------------------
  * SMASH output to binary file is similar to OSCAR output,
@@ -28,7 +30,6 @@ namespace Smash {
  *
  * Binary file format is documented on the wiki in User Guide section
  **/
-
 class BinaryOutputBase : public OutputInterface {
  protected:
   BinaryOutputBase(FILE *f) : file_{f} {}
@@ -44,6 +45,9 @@ class BinaryOutputBase : public OutputInterface {
   FilePtr file_;
 };
 
+/**
+ * \ingroup output
+ */
 class BinaryOutputCollisions : public BinaryOutputBase {
  public:
   BinaryOutputCollisions(bf::path path, Configuration&& config);

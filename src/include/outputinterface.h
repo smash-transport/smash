@@ -18,6 +18,8 @@
 namespace Smash {
 
 /**
+ * \ingroup output
+ *
  * \brief Abstraction of generic output
  * Any output should inherit this class. It provides virtual methods that will
  * be called at predefined moments:
