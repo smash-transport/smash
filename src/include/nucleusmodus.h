@@ -15,6 +15,7 @@
 #include "pdgcode.h"
 
 #include <cstring>
+#include <memory>
 #include <utility>
 
 namespace Smash {
@@ -143,14 +144,14 @@ class NucleusModus : public ModusDefault {
    * The object that comes from negative z-values at positive x-values
    * with positive velocity.
    **/
-  Nucleus *projectile_;
+  std::unique_ptr<Nucleus> projectile_;
   /** Target.
    *
    * The object that comes from positive z-values at negative x-values
    * with negative velocity. In fixed target experiments, the target is
    * at rest.
    **/
-  Nucleus *target_;
+  std::unique_ptr<Nucleus> target_;
   // Center-of-mass energy of the nucleus-nucleus collision.
   float total_s_;
   /** impact parameter

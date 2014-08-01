@@ -7,6 +7,7 @@
 #include <cmath>
 #include <cstdlib>
 #include <cstring>
+#include <memory>
 #include <stdexcept>
 #include <tuple>
 #include <utility>
@@ -35,15 +36,16 @@ NucleusModus::NucleusModus(Configuration modus_config,
   // Decide which type of nucleus: deformed or not (default).
   if (modus_cfg.has_value({"Projectile", "DEFORMED"}) &&
       modus_cfg.take({"Projectile", "DEFORMED"})) {
-    projectile_ = new DeformedNucleus();
+    projectile_ = std::unique_ptr<DeformedNucleus>(new DeformedNucleus());
   } else {
-    projectile_ = new Nucleus();
+    projectile_ = std::unique_ptr<Nucleus>(new Nucleus());
+
   }
   if (modus_cfg.has_value({"Target", "DEFORMED"}) &&
       modus_cfg.take({"Target", "DEFORMED"})) {
-    target_ = new DeformedNucleus();
+    target_ = std::unique_ptr<DeformedNucleus>(new DeformedNucleus());
   } else {
-    target_ = new Nucleus();
+    target_ = std::unique_ptr<Nucleus>(new Nucleus());
   }  
 
   // Fill nuclei with particles.
