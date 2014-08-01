@@ -136,7 +136,7 @@
  * simplifies test creation to the bare minimum. The following code suffices to
  * run a test:
  * \code
- * #include "tests/unittest.h"
+ * #include "unittest.h"
  *
  * TEST(test_name) {
  *   int test = 1 + 1;
