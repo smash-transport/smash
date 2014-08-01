@@ -14,7 +14,9 @@
 
 namespace Smash {
 
-/** A simple scatter finder:
+/**
+ * \ingroup action
+ * A simple scatter finder:
  * Just loops through all particles and checks each pair for a collision.  */
 class ScatterActionsFinder : public ActionFinderFactory {
  public:

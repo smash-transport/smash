@@ -20,6 +20,7 @@
 namespace Smash {
 
 /**
+ * \ingroup action
  * Action is the base class for a generic process that takes a number of
  * incoming particles and transforms them into any number of outgoing particles.
  * Currently such an action can be either a decay or a two-body collision
@@ -128,6 +129,7 @@ class Action {
 
 
 /**
+ * \ingroup action
  * DecayAction is a special action which takes one single particle in the
  * initial state and makes it decay into a number of daughter particles
  * (currently two or three).
@@ -190,6 +192,7 @@ class DecayAction : public Action {
 
 
 /**
+ * \ingroup action
  * ScatterAction is a special action which takes two incoming particles
  * and performs a scattering, producing one or more final-state particles.
  */

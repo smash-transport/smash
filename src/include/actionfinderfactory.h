@@ -15,6 +15,7 @@
 namespace Smash {
 
 /**
+ * \ingroup action
  * ActionFinderFactory is the abstract base class for all action finders,
  * i.e. objects which create action lists.
  */
