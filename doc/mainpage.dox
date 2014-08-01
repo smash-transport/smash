@@ -7,3 +7,6 @@ Quick Links:
 - Experiment
 
 */
+
+// define all the groups/moduls
+/// \defgroup exception Exception Classes

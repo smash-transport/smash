@@ -45,15 +45,19 @@ class DecayModes {
    */
   static void load_decaymodes(const std::string &input);
 
+  /// \ingroup exception
   struct InvalidDecay : public std::invalid_argument {
     using std::invalid_argument::invalid_argument;
   };
+  /// \ingroup exception
   struct LoadFailure : public std::runtime_error {
     using std::runtime_error::runtime_error;
   };
+  /// \ingroup exception
   struct MissingDecays : public LoadFailure {
     using LoadFailure::LoadFailure;
   };
+  /// \ingroup exception
   struct ReferencedParticleNotFound : public LoadFailure {
     using LoadFailure::LoadFailure;
   };

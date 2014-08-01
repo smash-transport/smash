@@ -72,13 +72,15 @@ void usage(const int rc, const std::string &progname) {
   exit(rc);
 }
 
-/** Exception class that is thrown if the requested output directory
+/** \ingroup exception
+ *  Exception class that is thrown if the requested output directory
  * already exists and `-f` was not specified on the command line.
  */
 struct OutputDirectoryExists : public std::runtime_error {
   using std::runtime_error::runtime_error;
 };
-/** Exception class that is thrown if no new output path can be
+/** \ingroup exception
+ *  Exception class that is thrown if no new output path can be
  * generated (there is a directory name for each positive integer
  * value)
  */

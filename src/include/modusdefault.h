@@ -58,12 +58,14 @@ class ModusDefault {
   void propagate(Particles *particles, const ExperimentParameters &parameters,
                                        const OutputsList &);
 
-  /** BadInput is an error to throw if the configuration options are invalid.
+  /** \ingroup exception
+   *  BadInput is an error to throw if the configuration options are invalid.
    *
    **/
   struct BadInput : public std::invalid_argument {
     using std::invalid_argument::invalid_argument;
   };
+  /// \ingroup exception
   /// Thrown when the requested energy is smaller than the masses
   /// of two particles.
   struct InvalidEnergy : public BadInput {

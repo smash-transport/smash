@@ -133,8 +133,9 @@ class NucleusModus : public ModusDefault {
   float initial_conditions(Particles *particles,
                           const ExperimentParameters &parameters);
 
+  /// \ingroup exception
   /// Thrown when either \a projectile_ or \a target_ nuclei are empty.
-    struct NucleusEmpty : public ModusDefault::BadInput {
+  struct NucleusEmpty : public ModusDefault::BadInput {
     using ModusDefault::BadInput::BadInput;
   };
 

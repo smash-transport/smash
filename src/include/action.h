@@ -83,6 +83,7 @@ class Action {
   void check_conservation(const size_t &id_process) const;
 
   /**
+   * \ingroup exception
    * Thrown for example when ScatterAction is called to perform with a wrong
    * number of final-state particles or when the energy is too low to produce
    * the resonance.
@@ -156,6 +157,7 @@ class DecayAction : public Action {
   void perform(Particles *particles, size_t &id_process);
 
   /**
+   * \ingroup exception
    * Thrown when DecayAction is called to perform with 0 or more than 2
    * entries in outgoing_particles.
    */

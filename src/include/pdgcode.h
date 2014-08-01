@@ -89,6 +89,7 @@ namespace Smash {
 
 class PdgCode {
  public:
+  /// \ingroup exception
   /// thrown for invalid inputs
   struct InvalidPdgCode : public std::invalid_argument {
     using std::invalid_argument::invalid_argument;

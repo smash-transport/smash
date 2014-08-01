@@ -146,6 +146,7 @@ class Angles {
   /// returns the polar angle
   float theta() const;
 
+  /// \ingroup exception
   /// thrown for invalid values for theta
   struct InvalidTheta : public std::invalid_argument {
     using std::invalid_argument::invalid_argument;

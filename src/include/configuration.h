@@ -90,16 +90,19 @@ namespace Smash {
 // } Userguide
 class Configuration {
  public:
+  /// \ingroup exception
   /// Thrown when the types in the config file and C++ don't match.
   struct IncorrectTypeInAssignment : public std::runtime_error {
     using std::runtime_error::runtime_error;
   };
 
+  /// \ingroup exception
   /// Thrown for YAML parse errors
   struct ParseError : public std::runtime_error {
     using std::runtime_error::runtime_error;
   };
 
+  /// \ingroup exception
   /// Thrown if the file does not exist
   struct FileDoesNotExist : public std::runtime_error {
     using std::runtime_error::runtime_error;

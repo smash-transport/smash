@@ -127,6 +127,7 @@ class ExperimentBase {
   virtual void set_outputs(OutputsList &&output_list) = 0;
 
   /**
+   * \ingroup exception
    * Exception class that is thrown if an invalid modus is requested from the
    * Experiment factory.
    */

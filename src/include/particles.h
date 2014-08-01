@@ -181,9 +181,11 @@ class Particles {
   /// return time of the computational frame
   inline double time(void) const;
 
+  /// \ingroup exception
   struct LoadFailure : public std::runtime_error {
     using std::runtime_error::runtime_error;
   };
+  /// \ingroup exception
   struct ParseError : public LoadFailure {
     using LoadFailure::LoadFailure;
   };
