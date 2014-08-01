@@ -9,6 +9,7 @@ Quick Links:
 */
 
 // define all the groups/moduls
+/// \defgroup unittest Unit Test Macros and Functions
 /// \defgroup output Output Classes
 /// \defgroup modus Experiment Modi Classes
 /// \defgroup action Action Classes
