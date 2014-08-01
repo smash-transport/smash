@@ -50,6 +50,8 @@ std::ostream &operator<<(std::ostream &out, const BoxModus &m) {
  *
  * \key TEMPERATURE: \n
  * Temperature in the box in GeV.
+ *
+ * \key START_TIME: \n
  */
 BoxModus::BoxModus(Configuration modus_config, const ExperimentParameters &)
     : initial_condition_(modus_config.take({"Box", "INITIAL_CONDITION"})),
