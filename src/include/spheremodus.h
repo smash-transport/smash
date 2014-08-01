@@ -16,7 +16,9 @@
 
 namespace Smash {
 
-/** SphereModus: Provides a modus for expanding matter calculations
+/**
+ * \ingroup modus
+ * SphereModus: Provides a modus for expanding matter calculations
 *
 *  Matter is put in a sphere of radius R with isotropic thermal momenta.
 *

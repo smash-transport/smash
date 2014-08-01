@@ -22,7 +22,9 @@ namespace Smash {
 
 struct ExperimentParameters;
 
-/** NucleusModus: Provides a modus for colliding nuclei.
+/**
+ * \ingroup modus
+ * NucleusModus: Provides a modus for colliding nuclei.
  *
  * To use this modus, choose
  * \code

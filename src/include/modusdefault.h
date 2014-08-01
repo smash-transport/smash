@@ -16,6 +16,7 @@
 namespace Smash {
 
 /**
+ * \ingroup modus
  * Baseclass for Modus classes that provides default function implementations.
  *
  * This is only a base class for actual Modus classes. Meaning there will never

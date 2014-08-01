@@ -14,7 +14,9 @@
 
 namespace Smash {
 
-/** ColliderModus: Provides a modus for collisions of single particles
+/**
+ * \ingroup modus
+ * ColliderModus: Provides a modus for collisions of single particles
  *
  * To use this modus, chose
  * \code

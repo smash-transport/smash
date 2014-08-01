@@ -13,7 +13,9 @@
 
 namespace Smash {
 
-/** BoxModus: Provides a modus for infinite matter calculations
+/**
+ * \ingroup modus
+ * BoxModus: Provides a modus for infinite matter calculations
  *
  * Matter is confined in a cubical box. Depending on the initial
  * condition, particles are either reflected on the boundaries or
