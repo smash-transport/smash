@@ -34,10 +34,13 @@
 
 namespace Smash {
 
-/* Parameters for spectral function integration via GSL. */
+/** Parameters for spectral-function integration via GSL. */
 struct IntegrandParameters {
+  /// Type of the resonance
   const ParticleType *type;
+  /// Mass of second particle
   double m2;
+  /// Mandelstam s
   double s;
 };
 
