@@ -17,6 +17,8 @@
 namespace Smash {
 
 /**
+ * \ingroup data
+ *
  * The Particles class abstracts the storage and manipulation of particles.
  *
  * There is one Particles object per Experiment. It stores

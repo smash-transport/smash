@@ -14,6 +14,9 @@
 
 namespace Smash {
 
+/**
+ * \ingroup data
+ */
 class DecayModes {
  public:
   /* Add a decay mode */

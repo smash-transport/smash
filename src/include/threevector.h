@@ -16,6 +16,8 @@
 namespace Smash {
 
 /**
+ * \ingroup data
+ *
  * The ThreeVector class represents a physical three-vector
  * \f$ \vec{x} = (x_1,x_2,x_3)\f$
  * with the components \f$ x_1,x_2,x_3 \f$.

@@ -18,7 +18,10 @@
 
 namespace Smash {
 
-/** PdgCode stores a Particle Data Group Particle Numbering Scheme
+/**
+ * \ingroup data
+ *
+ * PdgCode stores a Particle Data Group Particle Numbering Scheme
  * particle type number.
  *
  * \see http://pdg.lbl.gov/2013/reviews/rpp2012-rev-monte-carlo-numbering.pdf

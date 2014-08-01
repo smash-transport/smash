@@ -12,4 +12,5 @@ Quick Links:
 /// \defgroup output Output Classes
 /// \defgroup modus Experiment Modi Classes
 /// \defgroup action Action Classes
+/// \defgroup data Abstractions for data (particles, branches)
 /// \defgroup exception Exception Classes

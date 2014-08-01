@@ -16,6 +16,8 @@
 namespace Smash {
 
 /**
+ * \ingroup data
+ *
  * Particle type contains the static properties of a particle
  *
  * Before creation of Experiment, SMASH initializes the list of particles

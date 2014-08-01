@@ -15,6 +15,8 @@
 namespace Smash {
 
 /**
+ * \ingroup data
+ *
  * ProcessBranch represents one possible final state
  * of an interaction process.
  *
@@ -162,6 +164,8 @@ inline float ProcessBranch::weight(void) const {
 }
 
 /**
+ * \ingroup data
+ *
  * DecayBranch is a derivative of ProcessBranch,
  * which is used to represent decay channels.
  * It contains additional information like the angular momentum.

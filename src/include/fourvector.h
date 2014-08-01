@@ -17,6 +17,8 @@
 namespace Smash {
 
 /**
+ * \ingroup data
+ *
  * The FourVector class holds relevant values in Minkowski spacetime
  * with (+, −, −, −) metric signature.
  *

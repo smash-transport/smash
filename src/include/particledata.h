@@ -15,6 +15,8 @@
 namespace Smash {
 
 /**
+ * \ingroup data
+ *
  * ParticleData contains the dynamic information of a certain particle.
  *
  * Each particle has its momentum, position and other relevant physical

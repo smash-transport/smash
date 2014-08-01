@@ -20,7 +20,10 @@
 
 namespace Smash {
 
-/** QuantumNumbers - a container for storing conserved values
+/**
+ * \ingroup data
+ *
+ * QuantumNumbers - a container for storing conserved values
  *
  * QuantumNumbers can be used to compare all values that should be
  * conserved during the evolution, in particular for the whole system at
