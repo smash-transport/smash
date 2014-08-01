@@ -74,14 +74,11 @@ void DeformedNucleus::set_parameters_automatic() {
       set_beta_4(-0.006);
       break;
     default:
-      throw std::domain_error("Mass number not listed in DeformedNucleus::determine_nucleus.");
+      throw std::domain_error("Mass number not listed in DeformedNucleus::set_parameters_automatic.");
   }
 
   // Set a random nuclear rotation.
-  Angles nuclear_rotation;
-  nuclear_rotation.distribute_isotropically();
-  set_polar_angle(nuclear_rotation.theta());
-  set_azimuthal_angle(nuclear_rotation.phi());
+  nuclear_orientation_.distribute_isotropically();
 }
 
 void DeformedNucleus::set_parameters_from_config(bool is_projectile, Configuration &config) {
@@ -97,6 +94,11 @@ void DeformedNucleus::set_parameters_from_config(bool is_projectile, Configurati
     set_beta_4(static_cast<double>(config.take({nucleus_type, "BETA_4"})));
   }
 
+  // Saturation density (normalization for accept/reject sampling)
+  if (config.has_value({nucleus_type, "SATURATION_DENSITY"})) {
+    Nucleus::set_saturation_density(static_cast<double>(config.take({nucleus_type, "SATURATION_DENSITY"})));
+  }
+
   // Polar angle
   if (config.has_value({nucleus_type, "THETA"})) {
     set_polar_angle(static_cast<double>(config.take({nucleus_type, "THETA"})));
@@ -109,26 +111,14 @@ void DeformedNucleus::set_parameters_from_config(bool is_projectile, Configurati
 
 void DeformedNucleus::rotate() {
   for (auto i = begin(); i != end(); i++) {
-    FourVector this_position = i->position();
-    double old_x = this_position.x1();
-    double old_y = this_position.x2();
-    double old_z = this_position.x3();
-
-    // Rotate every vector by the private members azimuthal_phi_ and
-    // polar_theta_ (Euler angles). This means applying the matrix for
-    // a rotation of azimuthal_phi_ about z, followed by the matrix for
-    // a rotation polar_theta_ about the rotated x axis.
-    double cos_phi = std::cos(azimuthal_phi_);
-    double sin_phi = std::sin(azimuthal_phi_);
-    double cos_theta = std::cos(polar_theta_);
-    double sin_theta = std::sin(polar_theta_);
-
-    this_position.set_x1(cos_phi * old_x + sin_phi * old_y);
-    this_position.set_x2(-cos_theta * sin_phi * old_x + cos_theta
-                         * cos_phi * old_y + sin_theta * old_z);
-    this_position.set_x3(sin_theta * sin_phi * old_x - sin_theta
-                         * cos_phi * old_y + cos_theta * old_z);
-    i->set_position(this_position);
+    FourVector four_pos = i->position();
+    ThreeVector three_pos = four_pos.threevec();
+    // Rotate every vector by the nuclear azimuth phi and polar angle
+    // theta (the Euler angles). This means applying the matrix for a
+    // rotation of phi about z, followed by the matrix for a rotation
+    // theta about the rotated x axis. The third angle psi is 0 by symmetry.
+    three_pos.rotate(nuclear_orientation_.phi(), nuclear_orientation_.theta(), 0.0);
+    i->set_position(FourVector(four_pos.x0(), three_pos));
   }
 }
 

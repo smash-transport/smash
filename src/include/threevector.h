@@ -49,6 +49,13 @@ class ThreeVector {
   double inline sqr() const;
   /// calculate the absolute value
   double inline abs() const;
+  /** Rotate vector by the given Euler angles phi, theta, psi. If we
+   * assume the standard basis x, y, z then this means applying the 
+   * matrix for a rotation of phi about z, followed by the matrix for
+   * a rotation theta about the rotated x axis. Last, psi is a rotation
+   * about the rotated z axis.
+   **/
+  ThreeVector inline rotate(double phi, double theta, double psi);
   /// negation: Returns \f$-\vec x\f$
   ThreeVector inline operator- () const;
   /// increase this vector by \f$\vec v: \vec x^\prime = \vec x + \vec v\f$
@@ -151,6 +158,30 @@ double inline ThreeVector::sqr() const {
 
 double inline ThreeVector::abs() const {
   return std::sqrt((*this)*(*this));
+}
+
+ThreeVector ThreeVector::rotate(double phi, double theta, double psi) {
+  // Compute the cosine and sine for each angle.
+  double cos_phi = std::cos(phi);
+  double sin_phi = std::sin(phi);
+  double cos_theta = std::cos(theta);
+  double sin_theta = std::sin(theta);
+  double cos_psi = std::cos(psi);
+  double sin_psi = std::sin(psi);
+  // Get original coordinates.
+  double old_x = x_[0];
+  double old_y = x_[1];
+  double old_z = x_[2];
+  // Compute new coordinates.
+  x_[0] = (cos_phi * cos_psi - sin_phi * cos_theta * sin_psi) * old_x
+          + (sin_phi * cos_psi + cos_phi * cos_theta * sin_psi) * old_y
+          + sin_theta * sin_psi * old_z;
+  x_[1] = (-cos_phi * sin_psi - sin_phi * cos_theta * cos_psi) * old_x
+          + (-sin_phi * sin_psi + cos_phi * cos_theta * cos_psi) * old_y
+          + sin_theta * cos_psi * old_z;
+  x_[2] = sin_phi * sin_theta * old_x - cos_phi * sin_theta * old_y
+          + cos_theta * old_z;
+  return *this; 
 }
 
 }  // namespace Smash

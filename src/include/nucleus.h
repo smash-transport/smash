@@ -19,9 +19,30 @@
 
 namespace Smash {
 
-/// A Nucleus is a collection of Particles (ParticleData thingys) that
-/// are initialized before the beginning of the simulation and all have
-/// the same velocity (and spatial proximity).
+/** Nucleus: a nucleus is a collection of Particles (ParticleData thingys) that
+ * are initialized before the beginning of the simulation and all have
+ * the same velocity (and spatial proximity).
+ *
+ * Options added by Nucleus go in the "Modi"→"Nucleus"->"a nucleus" section of the
+ * configuration, where "a nucleus" is either projectile or target.
+ *
+ * The following nucleus directives are understood:
+ * -------------
+ */
+// !!USER:Input
+/**
+ * \if user
+ * \page input_modi_nucleus_ Input Section Modi:Nucleus
+ * \endif
+ *
+ * \li `AUTOMATIC:` Sets all necessary parameters based on the atomic number
+ * of the input nucleus (true=automatic, false=manual, see additional directives).
+ * \li `DIFFUSIVENESS` The woods-saxon parameter controlling the width of the
+ * nucleus. If unspecified, the default value is 0.545.
+ * \li `RADIUS` The radius of the nucleus. If not specified, the default is
+ * proton_radius * A ^ (1/3).
+ **/
+ // !!/USER:Input
 class Nucleus {
  public:
   Nucleus();
@@ -113,8 +134,9 @@ class Nucleus {
   void shift(bool is_projectile, double initial_z_displacement,
                      double x_offset, float simulation_time);
 
-  // Rotates the nucleus. (Spherical symmetry of nondeformed nuclei
-  // means there is nothing to do.)
+  /** Rotates the nucleus. (Spherical symmetry of nondeformed nuclei
+   * means there is nothing to do.)
+   **/
   virtual void rotate() {};
 
   /// copies the particles from this nucleus into the particle list.
@@ -155,7 +177,7 @@ class Nucleus {
     }
   }
 
-  // Write the nucleon positions to a text file.
+  /// Write the nucleon positions to a text file.
   void print_nucleus(const char * file_name) const;
 
   struct TestparticleConfusion : public std::length_error {
@@ -167,9 +189,9 @@ class Nucleus {
    * (for diffusiveness_ == 0, we obtain a hard sphere. 
    **/
   float diffusiveness_ = .545f;
-  // Saturation density of nuclear matter
-  float saturation_density_ = 1.f;
-  // Nuclear radius of this nucleus
+  /// Saturation density of this nucleus.
+  float saturation_density_ = .168f;
+  /// Nuclear radius of this nucleus
   float nuclear_radius_;
   /** single-proton-radius
    *

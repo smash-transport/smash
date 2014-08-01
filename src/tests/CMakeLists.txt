@@ -89,6 +89,7 @@ smash_add_unittest(vtkoutput)
 smash_add_unittest(binaryoutput)
 smash_add_unittest(lorentzboost)
 smash_add_unittest(nucleus)
+smash_add_unittest(deformednucleus)
 smash_add_unittest(random)
 
 # for now -o has to be "data", because OSCAR output still expects to output to

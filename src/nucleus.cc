@@ -31,8 +31,7 @@ float Nucleus::mass() const {
   return total_mass/(testparticles_+0.0);
 }
 
-/****************************************************************************
- *
+/**
  * Woods-Saxon-distribution
  * ========================
  *
@@ -285,7 +284,7 @@ void Nucleus::set_parameters_automatic() {
       // set_nuclear_radius(4.28);
       break;
     default:
-      throw std::domain_error("Mass number not listed in Nucleus::determine_nucleus.");
+      throw std::domain_error("Mass number not listed in Nucleus::set_parameters_automatic.");
   }
 }
 

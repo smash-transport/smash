@@ -11,8 +11,47 @@
 #include "forwarddeclarations.h"
 #include "nucleus.h"
 #include "threevector.h"
+#include "angles.h"
 
 namespace Smash {
+
+/** DeformedNucleus: Child of nucleus for deformed nuclei.
+ *
+ * To use this modus, choose (ex: for deformed projectile)
+ * \code
+ * Modi:
+ *      Nucleus:
+ *            Projectile:
+ *                 Deformed: true
+ * \endcode
+ * in the configuration file.
+ *
+ * Options added by NucleusModus go in the "Modi"→"Nucleus"->"a nucleus" section of the
+ * configuration, where "a nucleus" is either projectile or target.
+ * All options from the nucleus will still apply. The deformed nucleus adds new or updated
+ * features which are outlined below.
+ *
+ * The following deformed nucleus directives are understood:
+ * -------------
+ */
+// !!USER:Input
+/**
+ * \if user
+ * \page input_modi_nucleus_ Input Section Modi:Nucleus
+ * \endif
+ *
+ * \li `AUTOMATIC:` Sets all necessary parameters based on the atomic number
+ * of the input nucleus (true=automatic, false=manual, see additional directives).
+ * \li `BETA_2` The deformation coefficient for the spherical harmonic Y_2_0 in the
+ * \beta decomposition of the nuclear radius in the deformed woods-saxon distribution.
+ * \li `BETA_4` The deformation coefficient for the spherical harmonic Y_4_0.
+ * \li `SATURATION_DENISTY` The normalization coefficient in the Woods-Saxon distribution,
+ * needed here (and not in nucleus) due to the accept/reject sampling used. Default is
+ * given as the infinite nuclear matter value .168f.
+ * \li `THETA` The polar angle by which to rotate the nucleus.
+ * \li `PHI` The azimuthal angle by which to rotate the nucleus.
+ **/
+ // !!/USER:Input
 
 class DeformedNucleus : public Nucleus {
  public:
@@ -47,41 +86,44 @@ class DeformedNucleus : public Nucleus {
    */
   virtual void set_parameters_automatic();
 
-  // Set parameters for Woods-Saxon by hand using the configuration file.
-  // \see Nucleus::set_parameters_from_config
+  /** Set parameters for Woods-Saxon by hand using the configuration file.
+   * \see Nucleus::set_parameters_from_config
+   */
   virtual void set_parameters_from_config(bool is_projectile, Configuration &config);
 
-  // Rotates the nucleus according to members nucleus_polar_angle_
-  // and nucleus_azimuthal_angle_ and updates nucleon positions.
+  /** Rotates the nucleus according to members nucleus_polar_angle_
+   * and nucleus_azimuthal_angle_ and updates nucleon positions.
+   */
   virtual void rotate();
 
-  // Spherical harmonics Y_2_0 and Y_4_0.
+  /// Spherical harmonics Y_2_0 and Y_4_0.
   double y_l_0(int l, double cosx) const;
   
-  // Set deformation coefficient for Y_2_0.
+  /// Set deformation coefficient for Y_2_0.
   inline void set_beta_2(double b2) {
     beta2_ = b2;
   }
-  // Set deformation coefficient for Y_4_0.
+  /// Set deformation coefficient for Y_4_0.
   inline void set_beta_4(double b4) {
     beta4_ = b4;
   }
-  // Set the nucleus polar angle.
+  /// Set the nucleus polar angle.
   inline void set_polar_angle(double theta) {
-    polar_theta_ = theta;
+    nuclear_orientation_.set_theta(theta);
   }
-  // Set the nucleus azimuthal angle.
+  /// Set the nucleus azimuthal angle.
   inline void set_azimuthal_angle(double phi) {
-    azimuthal_phi_ = phi;
+    nuclear_orientation_.set_phi(phi);
   }
 
  private:
-  // Deformation parameters.
+  /// Deformation parameter 2.
   double beta2_ = 0.0;
+  /// Deformation parameter 4.
   double beta4_ = 0.0;
-  // Nucleus orientation (initial profile in xz plane).
-  double polar_theta_ = 0.0;
-  double azimuthal_phi_ = 0.0;
+  /// Nucleus orientation (initial profile in xz plane).
+  Angles nuclear_orientation_;
+
 };
 
 }
