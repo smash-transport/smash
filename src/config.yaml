@@ -1,12 +1,12 @@
 General:
     # Modus decision
-    MODUS:         Sphere
+    MODUS:         Box
 
     # temporal grid spacing
     DELTA_TIME:    0.1
 
     # end time of simulation
-    END_TIME:      1000.0
+    END_TIME:      1.0
 
     # output formats
     OUTPUT:
@@ -33,7 +33,7 @@ General:
             only_final:         False
 
     # how much time before recording measurables
-    OUTPUT_INTERVAL:  100.0
+    OUTPUT_INTERVAL:  1.0
 
     # initial random seed (negative for time)
     RANDOMSEED:    1
@@ -45,7 +45,7 @@ General:
     TESTPARTICLES: 1
 
     # number of events
-    NEVENTS:       500
+    NEVENTS:       1
 
 Modi:
     Box:
@@ -68,7 +68,7 @@ Modi:
         INIT_MULTIPLICITIES:
             221:    100
             111:    200
-            2221:   20
+            2112:   20
 
     Sphere:
         # Sphere size

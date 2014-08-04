@@ -52,7 +52,9 @@ float BoxModus::initial_conditions(Particles *particles,
   FourVector momentum_total(0, 0, 0, 0);
   size_t number_total = 0;
   /* Create number of particles according to config config */
+  printf("I am going to create particles!\n");
   for (const auto &current_pdg : init_multipl_) {
+    printf("particle %d, number %d\n", current_pdg.first.get_decimal(), current_pdg.second);
     particles->create(current_pdg.second, current_pdg.first);
     number_total += current_pdg.second;
   }
