@@ -1,2 +1,2 @@
 /* the configured options and settings from cmake */
-#define VERSION_MAJOR @VERSION_MAJOR@
+#define VERSION_MAJOR "@VERSION_MAJOR@"

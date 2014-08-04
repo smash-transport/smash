@@ -19,19 +19,19 @@
 
 #include "include/chrono.h"
 #include "include/fourvector.h"
-#include "include/particles.h"
+#include "include/macros.h"
 #include "include/particledata.h"
+#include "include/particles.h"
 #include "include/particletype.h"
 #include "include/quantumnumbers.h"
-#include "include/macros.h"
 
 namespace Smash {
 
-// !!USER:Output
+// Userguide {
 /** \page outputexample Output file format and Examples
  * There is output. This is explained here.
  */
-// !!/USER:Output
+// } Userguide
 
 /* print_line - output a visible seperator */
 static void print_line(void) {
@@ -69,7 +69,8 @@ void print_measurements(const Particles &particles,
     printf("%5.3f%13g%13g%13g%10zu%10zu%13g\n", time,
            difference.momentum().x0(), difference.momentum().abs3(),
            scatterings_total * 2 / (particles.size() * time),
-           scatterings_this_interval, particles.size(), elapsed_seconds.count());
+           scatterings_this_interval, particles.size(),
+           elapsed_seconds.count());
   else
     printf("%+5.2f%13g%13g%13g%10i%10zu%13g\n", time,
            difference.momentum().x0(), difference.momentum().abs3(),

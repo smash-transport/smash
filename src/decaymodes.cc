@@ -9,14 +9,14 @@
 
 #include "include/decaymodes.h"
 
-#include "include/constants.h"
-#include "include/pdgcode.h"
-#include "include/processbranch.h"
-#include "include/inputfunctions.h"
-
+#include <assert.h>
 #include <cstdio>
 #include <map>
-#include <assert.h>
+
+#include "include/constants.h"
+#include "include/inputfunctions.h"
+#include "include/pdgcode.h"
+#include "include/processbranch.h"
 
 namespace Smash {
 
@@ -28,10 +28,26 @@ namespace {
 }  // unnamed namespace
 
 void DecayModes::add_mode(float ratio, int L, std::vector<PdgCode> pdg_list) {
-  if (pdg_list.size() < 2) {
+  switch (pdg_list.size()) {
+  case 2:
+    if (!pdg_list[0].is_hadron() || !pdg_list[1].is_hadron()) {
+      printf("Warning: decay products A: %s B: %s\n",
+            pdg_list[0].string().c_str(), pdg_list[1].string().c_str());
+    }
+    break;
+  case 3:
+    if (!pdg_list[0].is_hadron() || !pdg_list[1].is_hadron() ||
+        !pdg_list[2].is_hadron()) {
+      printf("Warning: decay products A: %s B: %s C: %s\n",
+            pdg_list[0].string().c_str(), pdg_list[1].string().c_str(),
+            pdg_list[2].string().c_str());
+    }
+    break;
+  default:
     throw InvalidDecay(
-        "DecayModes::add_mode was instructed to add a decay mode with less "
-        "than 2 particles. This is an invalid input.");
+        "DecayModes::add_mode was instructed to add a decay mode with " +
+        std::to_string(pdg_list.size()) +
+        " particles. This is an invalid input.");
   }
   DecayBranch branch;
   branch.set_weight(ratio);
@@ -64,7 +80,7 @@ const DecayModes &DecayModes::find(PdgCode pdg) {
 
 void DecayModes::load_decaymodes(const std::string &input) {
   static DecayModesMap decaymodes;
-  decaymodes.clear();  // in case an exception was thrown and we should try again
+  decaymodes.clear();  // in case an exception was thrown and should try again
   PdgCode pdgcode = PdgCode::invalid();
   DecayModes decay_modes_to_add;
   float ratio_sum = 0.0;

@@ -9,11 +9,10 @@
 
 #include "include/configuration.h"
 
+#include <boost/filesystem.hpp>
 #include <cstdio>
 #include <string>
 #include <vector>
-
-#include <boost/filesystem.hpp>
 #include <yaml-cpp/yaml.h>
 
 #include "include/forwarddeclarations.h"
@@ -76,7 +75,9 @@ Configuration::Configuration(const bf::path &path)
 
 Configuration::Configuration(const bf::path &path, const bf::path &filename) {
   const auto file_path = path / filename;
-  assert(bf::exists(file_path));
+  if (!bf::exists(file_path)) {
+    throw FileDoesNotExist("The configuration file was expected at '" + file_path.native() + "', but the file does not exist.");
+  }
   try {
     root_node_ = YAML::LoadFile(file_path.native());
   }

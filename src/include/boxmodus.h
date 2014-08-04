@@ -39,7 +39,7 @@ namespace Smash {
  * Modi:Box:
  * ---------
  */
-// !!USER:Input
+// Userguide {
 /**
  * \if user
  * \page input_modi_box_ Input Section Modi:Box
@@ -54,7 +54,7 @@ namespace Smash {
  *
  * `TEMPERATURE`: Temperature in the box in GeV.
  */
-// !!/USER:Input
+// } Userguide
 class BoxModus : public ModusDefault {
  public:
   /// Gathers all configuration variables for the Box.

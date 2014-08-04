@@ -34,10 +34,13 @@
 
 namespace Smash {
 
-/* Parameters for spectral function integration via GSL. */
+/** Parameters for spectral-function integration via GSL. */
 struct IntegrandParameters {
+  /// Type of the resonance
   const ParticleType *type;
+  /// Mass of second particle
   double m2;
+  /// Mandelstam s
   double s;
 };
 
@@ -55,7 +58,7 @@ double clebsch_gordan_coefficient(const int isospin_a,
      isospin_z_a, isospin_z_b, -isospin_z_resonance);
   double clebsch_gordan_isospin = 0.0;
   if (std::abs(wigner_3j) > really_small)
-    clebsch_gordan_isospin = pow(-1, isospin_a / 2.0
+    clebsch_gordan_isospin = std::pow(-1, isospin_a / 2.0
     - isospin_b / 2.0 + isospin_z_resonance / 2.0)
     * std::sqrt(isospin_resonance + 1) * wigner_3j;
 
@@ -83,93 +86,6 @@ static void quadrature_1d(double (*integrand_function)(double, void *),
                           double upper_limit, double *integral_value,
                           double *integral_error);
 
-
-/* resonance_cross_section - energy-dependent cross section
- * for producing a resonance
- */
-std::vector<ProcessBranch> resonance_cross_section(
-    const ParticleData &particle1, const ParticleData &particle2) {
-  std::vector<ProcessBranch> resonance_process_list;
-  ParticleType type_particle1 = particle1.type(),
-               type_particle2 = particle2.type();
-
-  /* Isospin symmetry factor, by default 1 */
-  int symmetryfactor = 1;
-  // the isospin symmetry factor is 2 if both particles are in the same
-  // isospin multiplet:
-  if (type_particle1.pdgcode().iso_multiplet()
-   == type_particle2.pdgcode().iso_multiplet()) {
-    symmetryfactor = 2;
-  }
-
-  /* Mandelstam s = (p_a + p_b)^2 = square of CMS energy */
-  const double mandelstam_s =
-       (particle1.momentum() + particle2.momentum()).sqr();
-
-  /* CM momentum */
-  const double cm_momentum_squared
-    = (particle1.momentum().Dot(particle2.momentum())
-       * particle1.momentum().Dot(particle2.momentum())
-       - type_particle1.mass() * type_particle1.mass()
-       * type_particle2.mass() * type_particle2.mass()) / mandelstam_s;
-
-  /* Find all the possible resonances */
-  for (const ParticleType &type_resonance : ParticleType::list_all()) {
-    /* Not a resonance, go to next type of particle */
-    if (type_resonance.is_stable()) {
-      continue;
-    }
-
-    /* Same resonance as in the beginning, ignore */
-    if ((!type_particle1.is_stable()
-         && type_resonance.pdgcode() == type_particle1.pdgcode())
-        || (!type_particle2.is_stable()
-            && type_resonance.pdgcode() == type_particle2.pdgcode())) {
-      continue;
-    }
-
-    /* No decay channels found, ignore */
-    if (DecayModes::find(type_resonance.pdgcode()).is_empty()) {
-      continue;
-    }
-
-    float resonance_xsection
-      = symmetryfactor * two_to_one_formation(type_particle1, type_particle2,
-                         type_resonance, mandelstam_s, cm_momentum_squared);
-
-    /* If cross section is non-negligible, add resonance to the list */
-    if (resonance_xsection > really_small) {
-      resonance_process_list.push_back(ProcessBranch(type_resonance.pdgcode(),
-                                                     resonance_xsection));
-
-      printd("Found resonance %s (%s) with mass %f and width %f.\n",
-             type_resonance.pdgcode().string().c_str(),
-             type_resonance.name().c_str(),
-             type_resonance.mass(), type_resonance.width_at_pole());
-      printd("2->1 with original particles: %s %s Charges: %i %i \n",
-             type_particle1.name().c_str(), type_particle2.name().c_str(),
-             type_particle1.charge(), type_particle2.charge());
-    }
-    /* Same procedure for possible 2->2 resonance formation processes */
-    /* XXX: For now, we allow this only for baryon-baryon interactions */
-    if (type_particle1.spin() % 2 != 0 && type_particle2.spin() % 2 != 0) {
-      size_t two_to_two_processes
-         = two_to_two_formation(type_particle1, type_particle2,
-                                type_resonance, mandelstam_s,
-                                cm_momentum_squared, &resonance_process_list);
-      if (two_to_two_processes > 0) {
-        printd("Found %zu 2->2 processes for resonance %s (%s).\n",
-               two_to_two_processes,
-               type_resonance.pdgcode().string().c_str(),
-               type_resonance.name().c_str());
-        printd("2->2 with original particles: %s %s Charges: %i %i \n",
-               type_particle1.name().c_str(), type_particle2.name().c_str(),
-               type_particle1.charge(), type_particle2.charge());
-      }
-    }
-  }
-  return resonance_process_list;
-}
 
 /* two_to_one_formation -- only the resonance in the final state */
 double two_to_one_formation(const ParticleType &type_particle1,
@@ -203,8 +119,8 @@ double two_to_one_formation(const ParticleType &type_particle1,
 
   double clebsch_gordan_isospin
     = clebsch_gordan_coefficient(type_particle1.isospin(),
-	 type_particle2.isospin(), type_resonance.isospin(),
-	 type_particle1.pdgcode().isospin3(),
+         type_particle2.isospin(), type_resonance.isospin(),
+         type_particle1.pdgcode().isospin3(),
          type_particle2.pdgcode().isospin3(),
          type_resonance.pdgcode().isospin3());
 
@@ -270,9 +186,9 @@ size_t two_to_two_formation(const ParticleType &type_particle1,
   size_t number_of_processes = 0;
   /* If we have two baryons in the beginning, we must have fermion resonance */
   if (type_particle1.pdgcode().baryon_number() != 0
-   && type_particle2.pdgcode().baryon_number() != 0
-   && ! type_particle1.pdgcode().is_antiparticle_of(type_particle2.pdgcode())
-   && type_resonance.pdgcode().baryon_number() == 0)
+      && type_particle2.pdgcode().baryon_number() != 0
+      && !type_particle1.pdgcode().is_antiparticle_of(type_particle2.pdgcode())
+      && type_resonance.pdgcode().baryon_number() == 0)
     return 0.0;
 
   /* Isospin z-component based on Gell-Mann–Nishijima formula
@@ -338,37 +254,20 @@ size_t two_to_two_formation(const ParticleType &type_particle1,
       continue;
     }
 
-    /* Check the decay modes of this resonance */
-    const std::vector<DecayBranch> decaymodes
-      = DecayModes::find(type_resonance.pdgcode()).decay_mode_list();
-    bool not_enough_energy = false;
-    double minimum_mass = 0.0;
-    for (const auto &mode : decaymodes) {
-      size_t decay_particles = mode.pdg_list().size();
-      if ( decay_particles > 3 ) {
-        printf("Warning: Not a 1->2 or 1->3 process!\n");
-        printf("Number of decay particles: %zu \n", decay_particles);
-      } else {
-        /* There must be enough energy to produce all decay products */
-        if (std::sqrt(mandelstam_s) < mode.threshold() + second_type.mass()) {
-          not_enough_energy = true;
-        } else if (minimum_mass < mode.threshold()) {
-          minimum_mass = mode.threshold();
-        }
-      }
-    }
-    if (not_enough_energy) {
+    /* Integration limits. */
+    double lower_limit = type_resonance.minimum_mass();
+    double upper_limit = std::sqrt(mandelstam_s) - second_type.mass();
+    /* Check the available energy (requiring it to be a little above the
+     * threshold, because the integration will not work if it's too close). */
+    if (upper_limit - lower_limit < 1E-3) {
       continue;
     }
 
     /* Calculate resonance production cross section
-     * using the Breit-Wigner distribution as probability amplitude
-     * Integrate over the allowed resonance mass range
-     */
+     * using the Breit-Wigner distribution as probability amplitude.
+     * Integrate over the allowed resonance mass range. */
     IntegrandParameters params = {&type_resonance, second_type.mass(),
                                   mandelstam_s};
-    double lower_limit = minimum_mass;
-    double upper_limit = (std::sqrt(mandelstam_s) - second_type.mass());
     printd("Process: %s %s -> %s %s\n", type_particle1.name().c_str(),
      type_particle2.name().c_str(), second_type.name().c_str(),
      type_resonance.name().c_str());
@@ -394,7 +293,7 @@ size_t two_to_two_formation(const ParticleType &type_particle1,
 
     if (xsection > really_small) {
       process_list->push_back(ProcessBranch(type_resonance.pdgcode(),
-                                            second_type.pdgcode(),xsection));
+                                            second_type.pdgcode(), xsection));
       number_of_processes++;
     }
   }
@@ -490,6 +389,7 @@ double sample_resonance_mass(const ParticleType &type_resonance,
                                      cms_energy - mass_stable);
     distribution_value = spectral_function_integrand(mass_resonance, &params);
   }
+
   return mass_resonance;
 }
 
@@ -503,7 +403,8 @@ float nn_to_resonance_matrix_element(const double mandelstam_s,
   PdgCode delta = PdgCode("2224");
   if (type_final_a.pdgcode().iso_multiplet()
       != type_final_b.pdgcode().iso_multiplet()) {
-    /* N + N -> N + Delta: fit to Dmitriev OBE model, Nucl. Phys. A 459, 503 (1986) */
+    /* N + N -> N + Delta: fit to Dmitriev OBE model,
+       Nucl. Phys. A 459, 503 (1986) */
     if (type_final_a.pdgcode().iso_multiplet() == delta.iso_multiplet()
         || type_final_b.pdgcode().iso_multiplet() == delta.iso_multiplet()) {
       return 459. / std::pow(std::sqrt(mandelstam_s) - 1.104, 1.951);

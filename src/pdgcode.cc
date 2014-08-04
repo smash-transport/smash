@@ -84,7 +84,7 @@ int PdgCode::net_quark_number(const int quark) const {
                  + std::to_string(quark));
   }
   // non-hadrons and those that have none of this quark type: 0.
-  if (! is_hadron() ||
+  if (!is_hadron() ||
         (digits_.n_q1_ != quark && digits_.n_q2_ != quark
                                 && digits_.n_q3_ != quark)) {
     return 0;

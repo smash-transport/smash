@@ -1,12 +1,36 @@
 General:
     # Modus decision
-    MODUS:         Box
+    MODUS:         Sphere
 
     # temporal grid spacing
     DELTA_TIME:    0.1
 
     # end time of simulation
     END_TIME:      1000.0
+
+    # output formats
+    OUTPUT:
+        OSCAR_COLLISIONS:
+            Enable:             True
+            2013_format:        True
+            Print_start_end:    False
+        OSCAR_PARTICLELIST:
+            Enable:             True
+            2013_format:        True
+            Only_final:         True
+        VTK:
+            Enable:             False
+        ROOT:
+            Enable:             True
+            write_collisions:   True
+            write_particles:    True
+            autosave_frequency: 1000
+        Binary_collisions:
+            Enable:             True
+            print_start_end:    True
+        Binary_particles:
+            Enable:             True
+            only_final:         False
 
     # how much time before recording measurables
     OUTPUT_INTERVAL:  100.0
@@ -44,6 +68,12 @@ Modi:
     Sphere:
         # Sphere size
         RADIUS: 5.0
+        # Number of particles in Sphere
+        NUMBEROFPARTICLES: 280
+        # Current temperature
+        SPHERETEMPERATURE: 0.2
+        # start time of simulation
+        START_TIME: 0.0
 
     Collider:
         # Projectile particle

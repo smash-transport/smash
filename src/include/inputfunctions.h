@@ -7,13 +7,14 @@
  *
  */
 
-#ifndef SRC_INCLUDE_LINEPARSER_H_
-#define SRC_INCLUDE_LINEPARSER_H_
+#ifndef SRC_INCLUDE_INPUTFUNCTIONS_H_
+#define SRC_INCLUDE_INPUTFUNCTIONS_H_
 
-#include "particles.h"
 #include <sstream>
 #include <string>
 #include <vector>
+
+#include "particles.h"
 
 namespace Smash {
 
@@ -116,4 +117,4 @@ std::string read_all(std::istream &&input) {
 
 }  // namespace Smash
 
-#endif  // SRC_INCLUDE_LINEPARSER_H_
+#endif  // SRC_INCLUDE_INPUTFUNCTIONS_H_

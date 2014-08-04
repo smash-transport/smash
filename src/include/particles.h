@@ -273,27 +273,6 @@ inline double Particles::time() const {
   return data_.begin()->second.position().x0();
 }
 
-/* boost_CM - boost to center of momentum and return the corresponding boost vector */
-ThreeVector boost_CM(ParticleData *particle1, ParticleData *particle2);
-
-/* boost_from_CM - boost back from center of momentum */
-void boost_back_CM(ParticleData *particle1, ParticleData *particle2,
-                   const ThreeVector &velocity_orig);
-
-/* particle_distance - measure distance between two particles */
-double particle_distance(ParticleData particle1, ParticleData particle2);
-
-/* time_collision - measure collision time of two particles */
-double collision_time(const ParticleData &particle1,
-  const ParticleData &particle2);
-
-/* momenta_exchange - soft scattering */
-void momenta_exchange(ParticleData *particle1, ParticleData *particle2);
-
-/* Sample final state momenta in general 2->2 process */
-void sample_cms_momenta(ParticleData *particle1, ParticleData *particle2,
-  const double cms_energy, const double mass1, const double mass2);
-
 }  // namespace Smash
 
 #endif  // SRC_INCLUDE_PARTICLES_H_

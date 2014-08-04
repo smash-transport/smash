@@ -35,27 +35,6 @@ double clebsch_gordan_coefficient(const int isospin_a,
 
 
 /**
- * Find all resonances that can be produced in a collision of the two
- * input particles, and the production cross sections of these resonances.
- *
- * Given the data and type information of two colliding particles,
- * create a list of possible resonance production processes
- * and their cross sections.
- * Process can be either 2-to-1 (just a resonance in the final state)
- * or 2-to-2 (resonance and a stable particle in the final state).
- *
- * \param[in] particle1 Data of the first colliding particle.
- * \param[in] particle2 Data of the second colliding particle.
- *
- * \return A list of processes with resonance in the final state.
- * Each element in the list contains the type(s)
- * of the final state particle(s)
- * and the cross section for that particular process.
- */
-ProcessBranchList resonance_cross_section(const ParticleData &particle1,
-                                          const ParticleData &particle2);
-
-/**
  * Given the types of the two initial particles and a resonance,
  * return the 2-to-1 resonance production cross section.
  *
@@ -143,10 +122,9 @@ double spectral_function_integrand(double resonance_mass, void * parameters);
  * Resonance mass sampling for 2-particle final state
  * with *one resonance* and one *stable* particle.
  *
- * \param[in] pdg_resonance PDG code of the resonance particle.
- * \param[in] pdg_stable PDG code of the stable particle.
- * \param[in] cms_energy center-of-mass energy
- * of the 2-particle final state.
+ * \param[in] type_resonance Type of the resonance particle.
+ * \param[in] type_stable Type of the stable particle.
+ * \param[in] cms_energy center-of-mass energy of the 2-particle final state.
  *
  * \return The mass of the resonance particle.
  */

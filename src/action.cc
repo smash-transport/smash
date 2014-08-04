@@ -9,15 +9,19 @@
 
 #include "include/action.h"
 
-#include "include/constants.h"
-#include "include/random.h"
-
 #include <assert.h>
 #include <sstream>
 
+#include "include/angles.h"
+#include "include/constants.h"
+#include "include/outputroutines.h"
+#include "include/random.h"
+#include "include/resonances.h"
+
+
 namespace Smash {
 
-Action::Action(const std::vector<int> &in_part, float time_of_execution)
+Action::Action(const ParticleList &in_part, float time_of_execution)
     : incoming_particles_(in_part), time_of_execution_(time_of_execution),
       total_weight_(0.) {}
 
@@ -27,12 +31,12 @@ float Action::weight() const {
   return total_weight_;
 }
 
-void Action::add_process (const ProcessBranch &p) {
+void Action::add_process(const ProcessBranch &p) {
   subprocesses_.push_back(p);
   total_weight_ += p.weight();
 }
 
-void Action::add_processes (const ProcessBranchList &pv) {
+void Action::add_processes(const ProcessBranchList &pv) {
   for (const auto &proc : pv) {
     subprocesses_.push_back(proc);
     total_weight_ += proc.weight();
@@ -40,25 +44,31 @@ void Action::add_processes (const ProcessBranchList &pv) {
 }
 
 bool Action::is_valid(const Particles &particles) const {
-  for (const int id : incoming_particles_) {
-    if (!particles.has_data(id)) {
+  for (const auto &part : incoming_particles_) {
+    /* Check if the particles still exist. */
+    if (!particles.has_data(part.id())) {
+      return false;
+    }
+    /* Check if particles have scattered in the meantime
+     * (by checking if their energy has changed). */
+    if (fabs(part.momentum().x0()
+             - particles.data(part.id()).momentum().x0()) > really_small) {
       return false;
     }
   }
   return true;
 }
 
-ParticleList Action::incoming_particles(const Particles &particles) const {
-  assert(is_valid(particles));
+ParticleList Action::incoming_particles() const {
   ParticleList l;
-  for (const int id : incoming_particles_) {
-    l.emplace_back(particles.data(id));
+  for (const auto &part : incoming_particles_) {
+    l.emplace_back(part);
   }
   return std::move(l);
 }
 
 
-ParticleList Action::choose_channel () {
+ParticleList Action::choose_channel() {
   if (total_weight_ < really_small) {
     return ParticleList();
   }
@@ -84,13 +94,69 @@ ParticleList Action::choose_channel () {
 }
 
 
-void Action::check_conservation(const Particles &particles,
-                                const size_t &id_process) const {
+void Action::sample_cms_momenta() {
+  /* This function only operates on 2-particle final states. */
+  assert(outgoing_particles_.size() == 2);
 
+  ParticleData *p1 = &outgoing_particles_[0];
+  ParticleData *p2 = &outgoing_particles_[1];
+
+  const ParticleType &t1 = p1->type();
+  const ParticleType &t2 = p2->type();
+
+  double mass1 = t1.mass();
+  double mass2 = t2.mass();
+
+  const double cms_energy = sqrt_s();
+
+  if (cms_energy < t1.minimum_mass() + t2.minimum_mass()) {
+    throw InvalidResonanceFormation("resonance_formation: not enough energy! " +
+      std::to_string(cms_energy) + " " + std::to_string(t1.minimum_mass()) +
+      " " + std::to_string(t2.minimum_mass()) + " " +
+      p1->pdgcode().string() + " " + p2->pdgcode().string());
+  }
+
+  /* If one of the particles is a resonance, sample its mass. */
+  /* XXX: Other particle assumed stable! */
+  if (!t1.is_stable()) {
+    mass1 = sample_resonance_mass(t1, t2, cms_energy);
+  } else if (!t2.is_stable()) {
+    mass2 = sample_resonance_mass(t2, t1, cms_energy);
+  }
+
+  double energy1 = (cms_energy * cms_energy + mass1 * mass1 - mass2 * mass2) /
+                   (2.0 * cms_energy);
+  double momentum_radial = std::sqrt(energy1 * energy1 - mass1 * mass1);
+  if (!(momentum_radial > 0.0))
+    printf("Warning: radial momenta %g \n", momentum_radial);
+  /* XXX: Angles should be sampled from differential cross section
+   * of this process. */
+  Angles phitheta;
+  phitheta.distribute_isotropically();
+  if (!(energy1 > mass1)) {
+    printf("Particle %s radial momenta %g phi %g cos_theta %g\n",
+           t1.pdgcode().string().c_str(), momentum_radial,
+           phitheta.phi(), phitheta.costheta());
+    printf("Etot: %g m_a: %g m_b %g E_a: %g\n", cms_energy, mass1, mass2,
+           energy1);
+  }
+
+  p1->set_momentum(FourVector(energy1, phitheta.threevec() * momentum_radial));
+  p2->set_momentum(FourVector(cms_energy - energy1,
+                              -phitheta.threevec() * momentum_radial));
+
+  printd("p0: %g %g \n", p1->momentum().x0(), p2->momentum().x0());
+  printd("p1: %g %g \n", p1->momentum().x1(), p2->momentum().x1());
+  printd("p2: %g %g \n", p1->momentum().x2(), p2->momentum().x2());
+  printd("p3: %g %g \n", p1->momentum().x3(), p2->momentum().x3());
+}
+
+
+void Action::check_conservation(const size_t &id_process) const {
   /* Check momentum conservation */
   FourVector momentum_difference;
-  for (const auto &i : incoming_particles_) {
-    momentum_difference += particles.data(i).momentum();
+  for (const auto &part : incoming_particles_) {
+    momentum_difference += part.momentum();
   }
   for (const auto &p : outgoing_particles_) {
     momentum_difference -= p.momentum();

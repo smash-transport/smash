@@ -4,24 +4,25 @@
  *
  *    GNU General Public License (GPLv3 or later)
  */
+
+#include "include/collidermodus.h"
+
 #include <cmath>
 #include <cstdlib>
 #include <list>
 
-#include "include/collidermodus.h"
-#include "include/particles.h"
 #include "include/configuration.h"
 #include "include/experimentparameters.h"
 #include "include/outputroutines.h"
+#include "include/particles.h"
 #include "include/random.h"
 
 namespace Smash {
-
 ColliderModus::ColliderModus(Configuration modus_config,
                              const ExperimentParameters &)
-    : sqrts_     (modus_config.take({"Collider", "SQRTS"})) {
-  projectile_ = modus_config.take({"Collider", "PROJECTILE"});
-  target_     = modus_config.take({"Collider", "TARGET"});
+    : projectile_(modus_config.take({"Collider", "PROJECTILE"}).to_string()),
+      target_(modus_config.take({"Collider", "TARGET"}).to_string()),
+      sqrts_(modus_config.take({"Collider", "SQRTS"})) {
   if (sqrts_ < ParticleType::find(projectile_).mass()
              + ParticleType::find(target_).mass()) {
     throw ModusDefault::InvalidEnergy(
@@ -46,14 +47,14 @@ float ColliderModus::initial_conditions(Particles *particles,
   particles->create(1, projectile_);
   /* Pointer to "projectile" data */
   ParticleData &data_projectile = particles->data(particles->id_max());
-  float mass_projectile = data_projectile.mass();
+  float mass_projectile = data_projectile.pole_mass();
   printf("projectile pdgcode %s mass %f\n",
          data_projectile.pdgcode().string().c_str(), mass_projectile);
   /* Create "target" particle */
   particles->create(1, target_);
   /* Pointer to "target" data */
   ParticleData &data_target = particles->data(particles->id_max());
-  float mass_target = data_target.mass();
+  float mass_target = data_target.pole_mass();
   printf("target pdgcode %s mass %f\n",
          data_target.pdgcode().string().c_str(), mass_target);
   /* Projectile energy in CMS */

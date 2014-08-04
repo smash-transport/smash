@@ -9,16 +9,16 @@
 
 #include "include/particletype.h"
 
+#include <assert.h>
+#include <algorithm>
+#include <map>
+#include <vector>
+
+#include "include/decaymodes.h"
 #include "include/inputfunctions.h"
 #include "include/outputroutines.h"
 #include "include/pdgcode.h"
 #include "include/width.h"
-#include "include/decaymodes.h"
-
-#include <algorithm>
-#include <assert.h>
-#include <map>
-#include <vector>
 
 namespace Smash {
 
@@ -115,7 +115,7 @@ void ParticleType::create_type_list(const std::string &input) {  //{{{
     if (pdgcode.has_antiparticle()) {
       /* add corresponding antiparticle */
       PdgCode anti = pdgcode.get_antiparticle();
-      name = antiname (name, pdgcode);
+      name = antiname(name, pdgcode);
       type_list.emplace_back(name, mass, width, anti);
       printd("Setting antiparticle type %s mass %g width %g pdgcode %s\n",
              name.c_str(), mass, width, anti.string().c_str());
@@ -152,14 +152,14 @@ float ParticleType::minimum_mass() const {
 
 
 float ParticleType::partial_width(const float m,
-                                  const DecayBranch &mode) const{
+                                  const DecayBranch &mode) const {
   if (m < mode.threshold()) {
     return 0.;
   }
   float partial_width_at_pole = width_at_pole()*mode.weight();
   const ParticleType &t1 = ParticleType::find(mode.pdg_list()[0]);
   const ParticleType &t2 = ParticleType::find(mode.pdg_list()[1]);
-  if (mode.pdg_list().size()==2 && t1.is_stable() && t2.is_stable()) {
+  if (mode.pdg_list().size() == 2 && t1.is_stable() && t2.is_stable()) {
     /* mass-dependent width for 2-body decays with stable decay products */
     return width_Manley_stable(m, mass(), t1.mass(), t2.mass(),
                                mode.angular_momentum(),
@@ -194,8 +194,8 @@ ProcessBranchList ParticleType::get_partial_widths(const float m) const {
   /* Loop over decay modes and calculate all partial widths. */
   for (const auto &mode : DecayModes::find(pdgcode()).decay_mode_list()) {
     w = partial_width(m, mode);
-    if (w>0.) {
-      partial.push_back(ProcessBranch(mode.pdg_list(),w));
+    if (w > 0.) {
+      partial.push_back(ProcessBranch(mode.pdg_list(), w));
     }
   }
   return partial;

@@ -17,7 +17,6 @@
 #include "include/boxmodus.h"
 #include "include/configuration.h"
 #include "include/constants.h"
-#include "include/crosssections.h"
 #include "include/distributions.h"
 #include "include/experimentparameters.h"
 #include "include/macros.h"
@@ -31,9 +30,9 @@ namespace Smash {
 
 BoxModus::BoxModus(Configuration modus_config, const ExperimentParameters &)
     : initial_condition_(modus_config.take({"Box", "INITIAL_CONDITION"})),
-      length_           (modus_config.take({"Box", "LENGTH"})),
-      temperature_      (modus_config.take({"Box", "TEMPERATURE"})),
-      start_time_       (modus_config.take({"Box", "START_TIME"})) {
+      length_(modus_config.take({"Box", "LENGTH"})),
+      temperature_(modus_config.take({"Box", "TEMPERATURE"})),
+      start_time_(modus_config.take({"Box", "START_TIME"})) {
 }
 
 /* print_startup - console output on startup of box specific parameters */
@@ -81,15 +80,27 @@ float BoxModus::initial_conditions(Particles *particles,
   printf("IC contains %zu particles\n", number_total);
   auto uniform_length = Random::make_uniform_distribution(0.0,
                                          static_cast<double>(this->length_));
-  /* Set paricles IC: */
+  /* Set particles IC: */
   for (ParticleData &data : particles->data()) {
     /* back to back pair creation with random momenta direction */
-    if (this->initial_condition_ != 2) {
-      /* thermal momentum according Maxwell-Boltzmann distribution */
-      momentum_radial = sample_momenta(this->temperature_, data.mass());
+    if (unlikely(data.id() == particles->id_max() && !(data.id() % 2))) {
+      /* poor last guy just sits around */
+      data.set_momentum(data.pole_mass(), 0., 0., 0.);
+    } else if (!(data.id() % 2)) {
+      if (this->initial_condition_ != 2) {
+        /* thermal momentum according Maxwell-Boltzmann distribution */
+        momentum_radial = sample_momenta(this->temperature_, data.pole_mass());
+      } else {
+        /* IC == 2 initial thermal momentum is the average 3T */
+        momentum_radial = 3.0 * this->temperature_;
+      }
+      phitheta.distribute_isotropically();
+      printd("Particle %d radial momenta %g phi %g cos_theta %g\n", data.id(),
+             momentum_radial, phitheta.phi(), phitheta.costheta());
+      data.set_momentum(data.pole_mass(), phitheta.threevec()*momentum_radial);
     } else {
-      /* IC == 2 initial thermal momentum is the average 3T */
-      momentum_radial = 3.0 * this->temperature_;
+      data.set_momentum(data.pole_mass(),
+                        -particles->data(data.id() - 1).momentum().threevec());
     }
     phitheta.distribute_isotropically();
     printd("Particle %d radial momenta %g phi %g cos_theta %g\n", data.id(),
@@ -165,7 +176,7 @@ void BoxModus::propagate(Particles *particles,
     data.set_position(position);
     if (wall_hit) {
       for (const auto &output : output_list) {
-        output->write_interaction(incoming_particle, {1, data});
+        output->at_interaction(incoming_particle, {1, data});
       }
     }
     printd_position(data);
