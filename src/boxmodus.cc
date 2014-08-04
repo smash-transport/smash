@@ -32,8 +32,9 @@ BoxModus::BoxModus(Configuration modus_config, const ExperimentParameters &)
     : initial_condition_(modus_config.take({"Box", "INITIAL_CONDITION"})),
       length_           (modus_config.take({"Box", "LENGTH"})),
       temperature_      (modus_config.take({"Box", "TEMPERATURE"})),
-      start_time_       (modus_config.take({"Box", "START_TIME"})),
-      init_multipl_     (modus_config.take({"Box", "INIT_MULTIPLICITIES"})) {
+      start_time_       (modus_config.take({"Box", "START_TIME"})) {
+  std::map<PdgCode, int> x = modus_config.take({"Box", "INIT_MULTIPLICITIES"});
+  init_multipl_ = x; // TODO: get rid of this ugly construction
 }
 
 /* print_startup - console output on startup of box specific parameters */

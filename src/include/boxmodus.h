@@ -7,6 +7,7 @@
 #ifndef SRC_INCLUDE_BOXMODUS_H_
 #define SRC_INCLUDE_BOXMODUS_H_
 
+#include <map>
 #include "modusdefault.h"
 #include "forwarddeclarations.h"
 
@@ -111,7 +112,7 @@ class BoxModus : public ModusDefault {
   /// initial time of the box
   const float start_time_ = 0.0f;
   /// particle multiplicities at initialization
-  const std::map<int, int> init_multipl_;
+  std::map<PdgCode, int> init_multipl_;
 };
 
 }  // namespace Smash
