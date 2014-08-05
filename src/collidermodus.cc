@@ -20,8 +20,9 @@
 namespace Smash {
 ColliderModus::ColliderModus(Configuration modus_config,
                              const ExperimentParameters &)
-    : projectile_(modus_config.take({"Collider", "PROJECTILE"}).to_string()),
-      target_(modus_config.take({"Collider", "TARGET"}).to_string()),
+    : projectile_(modus_config.take({"Collider", "PROJECTILE"})
+                      .convert_for(projectile_)),
+      target_(modus_config.take({"Collider", "TARGET"}).convert_for(target_)),
       sqrts_(modus_config.take({"Collider", "SQRTS"})) {
   if (sqrts_ < ParticleType::find(projectile_).mass()
              + ParticleType::find(target_).mass()) {
