@@ -32,9 +32,9 @@ BoxModus::BoxModus(Configuration modus_config, const ExperimentParameters &)
     : initial_condition_(modus_config.take({"Box", "INITIAL_CONDITION"})),
       length_           (modus_config.take({"Box", "LENGTH"})),
       temperature_      (modus_config.take({"Box", "TEMPERATURE"})),
-      start_time_       (modus_config.take({"Box", "START_TIME"})) {
-  std::map<PdgCode, int> x = modus_config.take({"Box", "INIT_MULTIPLICITIES"});
-  init_multipl_ = x; // TODO: get rid of this ugly construction
+      start_time_       (modus_config.take({"Box", "START_TIME"})),
+      init_multipl_     (modus_config.take({"Box", "INIT_MULTIPLICITIES"}).
+                                                convert_for(init_multipl_)){
 }
 
 /* print_startup - console output on startup of box specific parameters */
@@ -51,12 +51,11 @@ float BoxModus::initial_conditions(Particles *particles,
   Angles phitheta;
   FourVector momentum_total(0, 0, 0, 0);
   size_t number_total = 0;
-  /* Create number of particles according to config config */
-  printf("I am going to create particles!\n");
-  for (const auto &current_pdg : init_multipl_) {
-    printf("particle %d, number %d\n", current_pdg.first.get_decimal(), current_pdg.second);
-    particles->create(current_pdg.second, current_pdg.first);
-    number_total += current_pdg.second;
+  /* Create number of particles according to configuration */
+  for (const auto &p : init_multipl_) {
+    particles->create(p.second, p.first);
+    number_total += p.second;
+    printd("Particle %d init multiplicity %d\n", p.first, p.second);
   }
   auto uniform_length = Random::make_uniform_distribution(0.0,
                                          static_cast<double>(this->length_));
