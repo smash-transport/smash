@@ -110,14 +110,14 @@ void DeformedNucleus::set_parameters_from_config(bool is_projectile, Configurati
 }
 
 void DeformedNucleus::rotate() {
-  for (auto i = begin(); i != end(); i++) {
+  for (auto &particle : *this) {
     // Rotate every vector by the nuclear azimuth phi and polar angle
     // theta (the Euler angles). This means applying the matrix for a
     // rotation of phi about z, followed by the matrix for a rotation
     // theta about the rotated x axis. The third angle psi is 0 by symmetry.
-    ThreeVector three_pos = i->position().threevec();
+    ThreeVector three_pos = particle.position().threevec();
     three_pos.rotate(nuclear_orientation_.phi(), nuclear_orientation_.theta(), 0.0);
-    i->set_3position(three_pos);
+    particle.set_3position(three_pos);
   }
 }
 
