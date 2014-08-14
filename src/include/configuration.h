@@ -137,8 +137,36 @@ class Configuration {
     /// if you want to copy this you're doing it wrong
     Value &operator=(const Value &) = delete;
 
-    /// Return the string value.
-    std::string to_string() const { return node_.Scalar(); }
+    /**
+     * Convert the value to the type of the supplied argument.
+     *
+     * The argument itself is not used other than to determine its type. This
+     * function is necessary because in some situations the overload resolution
+     * rules lead to the correct conversion becoming hidden. Then you'll see a
+     * compiler error with a list of ambiguous constructor calls as candidates.
+     * Use this function as a workaround.
+     * Example:
+     * \code
+     * // this doesn't compile:
+     * const PdgCode code0(config.take({"key"}));
+     * // this compiles (because PdgCode::operator= is not overloaded), but note
+     * // that it cannot be used in constructor initializer lists:
+     * const PdgCode code1 = config.take({"key"});
+     *
+     * // Thus, for class member variables use the following pattern:
+     * class X {
+     *  public:
+     *   X() : code_(config.take({"key"}).convert_for(code_)) {}
+     *
+     *  private:
+     *   const PdgCode code_;
+     * };
+     * \endcode
+     */
+    template <typename T>
+    T convert_for(const T &) const {
+      return operator T();
+    }
 
     /**
      * This function determines the type it is assigned to and calls
@@ -148,7 +176,7 @@ class Configuration {
      * explicitly.
      */
     template <typename T>
-    operator T() {
+    operator T() const {
       try {
         return node_.as<T>();
       }
