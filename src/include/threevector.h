@@ -50,7 +50,7 @@ class ThreeVector {
   /// calculate the absolute value
   double inline abs() const;
   /** Rotate vector by the given Euler angles phi, theta, psi. If we
-   * assume the standard basis x, y, z then this means applying the 
+   * assume the standard basis x, y, z then this means applying the
    * matrix for a rotation of phi about z, followed by the matrix for
    * a rotation theta about the rotated x axis. Last, psi is a rotation
    * about the rotated z axis.
@@ -180,7 +180,7 @@ ThreeVector ThreeVector::rotate(double phi, double theta, double psi) {
   x_[2] = sin_phi * sin_theta * x_old[0]
         - cos_phi * sin_theta * x_old[1]
         + cos_theta * x_old[2];
-  return *this; 
+  return *this;
 }
 
 }  // namespace Smash

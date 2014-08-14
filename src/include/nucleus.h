@@ -51,11 +51,11 @@ class Nucleus {
   float mass() const;
 
   /** Returns a Woods-Saxon distributed position.
-   * The distribution of return values from this function is according to a 
+   * The distribution of return values from this function is according to a
    * spherically symmetric Woods-Saxon distribution suitable for this nucleus.
    * \f$\frac{dN}{dr} = \frac{r^2}{\exp\left(\frac{r-R}{d}\right) +
    * 1}\f$ where \f$d\f$ is the diffusiveness_ parameter and \f$R\f$ is
-   * nuclear_radius_. 
+   * nuclear_radius_.
    **/
   virtual ThreeVector distribute_nucleon() const;
 
@@ -79,7 +79,7 @@ class Nucleus {
 
   /** Sets the parameters of the Woods-Saxon according to
    * manually added values in the configuration file.
-   * 
+   *
    * @param is_projectile
    * @param config The configuration file located at node Nucleus
    **/
@@ -89,7 +89,7 @@ class Nucleus {
    * Boosts the nuclei so that the nucleons have the appropriate
    * momentum and the nuclei are lorentz-contracted.
    *
-   * @param beta_scalar magnitude (with sign) of the z 
+   * @param beta_scalar magnitude (with sign) of the z
    * component velocity used for boosting.
    **/
   void boost(double beta_scalar);
@@ -165,7 +165,7 @@ class Nucleus {
    * nucleus with N particles that are at the positions \f$\vec r_i\f$).
    */
   FourVector center() const;
-  
+
   /** shifts the nucleus so that its center is at (0,0,0)
    *
    * \see center()
@@ -186,7 +186,7 @@ class Nucleus {
 
  private:
   /** diffusiveness of Woods-Saxon-distribution in this nucleus in fm
-   * (for diffusiveness_ == 0, we obtain a hard sphere. 
+   * (for diffusiveness_ == 0, we obtain a hard sphere.
    **/
   float diffusiveness_ = .545f;
   /// Saturation density of this nucleus.
@@ -255,13 +255,13 @@ class Nucleus {
   }
   /// sets the nuclear radius
   ///
-  /// \see nuclear_radius 
+  /// \see nuclear_radius
   inline void set_nuclear_radius(float rad) {
     nuclear_radius_ = rad;
   }
   /// gets the nuclear radius
   ///
-  /// \see nuclear_radius 
+  /// \see nuclear_radius
   inline float get_nuclear_radius() const {
     return nuclear_radius_;
   }

@@ -11,7 +11,7 @@
 #include <stdexcept>
 #include <tuple>
 #include <utility>
- 
+
 #include "include/nucleusmodus.h"
 #include "include/angles.h"
 #include "include/configuration.h"
@@ -46,7 +46,7 @@ NucleusModus::NucleusModus(Configuration modus_config,
     target_ = std::unique_ptr<DeformedNucleus>(new DeformedNucleus());
   } else {
     target_ = std::unique_ptr<Nucleus>(new Nucleus());
-  }  
+  }
 
   // Fill nuclei with particles.
   std::map<PdgCode, int> pro = modus_cfg.take({"Projectile", "PARTICLES"});
@@ -62,7 +62,7 @@ NucleusModus::NucleusModus(Configuration modus_config,
 
   // Ask to construct nuclei based on atomic number; otherwise, look
   // for the user defined values or take the default parameters.
-  if (modus_cfg.has_value({"Projectile", "AUTOMATIC"}) && 
+  if (modus_cfg.has_value({"Projectile", "AUTOMATIC"}) &&
       modus_cfg.take({"Projectile", "AUTOMATIC"})) {
     projectile_->set_parameters_automatic();
   } else {
@@ -75,7 +75,7 @@ NucleusModus::NucleusModus(Configuration modus_config,
     target_->set_parameters_from_config(false, modus_cfg);
   }
 
-  // Get the total nucleus-nucleus collision energy. Since there is 
+  // Get the total nucleus-nucleus collision energy. Since there is
   // no meaningful choice for a default energy, we require the user to
   // give one (and only one) energy input from the available options.
   int energy_input = 0;
@@ -108,7 +108,7 @@ NucleusModus::NucleusModus(Configuration modus_config,
         mass_2 = ParticleType::find(id_2).mass();
       } else {
         mass_2 = target_->mass()/target_->size();
-      } 
+      }
       // Check that input satisfies the lower bound (everything at rest).
       if (sqrt_s_NN < mass_1 + mass_2) {
         throw ModusDefault::InvalidEnergy(
@@ -153,7 +153,7 @@ NucleusModus::NucleusModus(Configuration modus_config,
   }
   if (energy_input != 1){
     throw std::domain_error("Input Error: Redundant or nonexistant collision energy.");
-  } 
+  }
 
   // Impact parameter setting: Either "VALUE", "RANGE", or "MAX".
   // Unspecified means 0 impact parameter.
@@ -227,11 +227,11 @@ float NucleusModus::initial_conditions(Particles *particles,
   }
 
   // Shift the nuclei into starting positions. Keep the pair separated
-  // in z by some small distance and shift in x by the impact parameter. 
+  // in z by some small distance and shift in x by the impact parameter.
   // (Projectile is chosen to hit at positive x.)
   // After shifting, set the time component of the particles to
   // -initial_z_displacement_/average_velocity.
-  float avg_velocity = sqrt(v1 * v1 
+  float avg_velocity = sqrt(v1 * v1
                             + v2 * v2);
   float simulation_time = -initial_z_displacement_ / avg_velocity;
   projectile_->shift(true, -initial_z_displacement_, +impact_/2.0,
@@ -284,7 +284,7 @@ std::pair<double, double> NucleusModus::get_velocities(float s, float m1, float 
       }
       break;
     case 3:  // Target at rest.
-      v1 = sqrt(1 - 4 * (m1 * m1) * (m2 * m2) / ((s - (m1 * m1) - (m2 * m2)) 
+      v1 = sqrt(1 - 4 * (m1 * m1) * (m2 * m2) / ((s - (m1 * m1) - (m2 * m2))
                 * (s - (m1 * m1) - (m2 * m2))));
       break;
     default:

@@ -51,7 +51,7 @@ struct ExperimentParameters;
  * Since not all participants have the same mass, and hence
  * \f$\sqrt{s_{\rm NN}}\f$ is different for \f$NN\f$ = proton+proton and
  * \f$NN\f$=neutron+neutron, you can specify which \f$NN\f$-pair you
- * want this to refer to with `SQRTS_REPS`. This expects a vector of two 
+ * want this to refer to with `SQRTS_REPS`. This expects a vector of two
  * PDG Codes, e.g. `SQRTS_N: [2212, 2212]` for proton-proton.
  *
  * \li `E_LAB:` Defines the energy of the collision by the initial energy of
@@ -84,7 +84,7 @@ struct ExperimentParameters;
  * current nucleus atomic number (true/false).
  * \li `Additional Woods-Saxon Parameters: ` There are also many other
  * parameters for specifying the shape of the Woods-Saxon distribution,
- * and other nucleus specific properties. See NUCLEUS.CC and 
+ * and other nucleus specific properties. See NUCLEUS.CC and
  * DEFORMEDNUCLEUS.CC for more on these choices.
  *
  * `Impact:` A section for the impact parameter (= distance of the two
@@ -189,7 +189,7 @@ class NucleusModus : public ModusDefault {
   int frame_ = 1;
   // Get the frame dependent velocity for each nucleus, using
   // the current reference frame. \see frame_
-  // 
+  //
   // @param s The total mandelstam S of the system
   // @param m1 The mass of the projectile.
   // @param m2 The mass of the target.

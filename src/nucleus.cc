@@ -18,7 +18,6 @@
 #include "include/pdgcode.h"
 #include "include/threevector.h"
 
-
 namespace Smash {
 
 Nucleus::Nucleus() {}
@@ -189,7 +188,7 @@ ThreeVector Nucleus::distribute_nucleon() const {
   dir.distribute_isotropically();
   // diffusiveness_ zero or negative? Use hard sphere.
   if (almost_equal(diffusiveness_, 0.f)) {
-    return dir.threevec() * nuclear_radius_ 
+    return dir.threevec() * nuclear_radius_
            * pow(Random::canonical(), 1./3.);
   }
   float radius_scaled = nuclear_radius_/diffusiveness_;
@@ -265,7 +264,7 @@ void Nucleus::set_parameters_automatic() {
       set_nuclear_radius(6.67);
       set_saturation_density(0.161);
       break;
-    case 197:  // Gold 
+    case 197:  // Gold
       // Default values.
       set_diffusiveness(0.535);
       set_nuclear_radius(6.38);
@@ -278,7 +277,7 @@ void Nucleus::set_parameters_automatic() {
       // Default values.
       set_diffusiveness(0.597);
       set_nuclear_radius(4.20641);
-      set_saturation_density(0.1686);  
+      set_saturation_density(0.1686);
       // Hirano, Nara - Corrections.
       // set_diffusiveness(0.50);
       // set_nuclear_radius(4.28);
@@ -365,7 +364,7 @@ void Nucleus::shift(bool is_projectile, double initial_z_displacement,
     this_position.set_x1(this_position.x1() + x_offset);
     this_position.set_x0(simulation_time);
     i->set_position(this_position);
-  } 
+  }
 }
 
 void Nucleus::copy_particles(Particles* external_particles) {
@@ -379,7 +378,7 @@ void Nucleus::print_nucleus(const char * file_name) const {
     FourVector this_position = i->position();
     std::ofstream a_file;
     a_file.open(file_name, std::ios::app);
-    a_file << std::to_string(this_position.x1()) + " " + 
+    a_file << std::to_string(this_position.x1()) + " " +
               std::to_string(this_position.x2()) + " " +
               std::to_string(this_position.x3()) << std::endl;
     a_file.close();
