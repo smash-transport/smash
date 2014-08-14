@@ -59,7 +59,7 @@ class DeformedNucleus : public Nucleus {
 
   /** Return the deformed Woods-Saxon probability for
    * the given position.
-   * 
+   *
    * @param r The sample radius
    * @param cosx The cosine of the sample polar angle
    * @return The woods-saxon probability
@@ -68,7 +68,7 @@ class DeformedNucleus : public Nucleus {
 
   /**  Deformed Woods-Saxon sampling routine.
    *
-   * @return a spatial position from uniformly sampling 
+   * @return a spatial position from uniformly sampling
    * the deformed woods-saxon distribution
    **/
   virtual ThreeVector distribute_nucleon() const;
@@ -76,12 +76,12 @@ class DeformedNucleus : public Nucleus {
   /** Sets the deformation parameters of the Woods-Saxon distribution
    * according to the current mass number.
    *
-   * Ref. for deformation parameters is "Nuclear Ground-State Masses and Deformations" 
+   * Ref. for deformation parameters is "Nuclear Ground-State Masses and Deformations"
    * by P. Möller, J. R. Nix, W. D. Myers, and W. J. Swiatecki.
-   * Corrections to deformation parameter beta2 in Uranium come from 
+   * Corrections to deformation parameter beta2 in Uranium come from
    * arxiv:nuclth/0506088 by A. Kuhlman and U. Heinz.
    * For finite nucleon size corrections to the nuclear density and radius, see ref.
-   * arxiv:0904.4080 [nucl-th] by T. Hirano and Y. Nara for copper and gold, and 
+   * arxiv:0904.4080 [nucl-th] by T. Hirano and Y. Nara for copper and gold, and
    * arxiv:1010.6222 [nucl-th] by T. Hirano, P. Huovinen, and Y. Nara for uranium.
    */
   virtual void set_parameters_automatic();
@@ -98,7 +98,7 @@ class DeformedNucleus : public Nucleus {
 
   /// Spherical harmonics Y_2_0 and Y_4_0.
   double y_l_0(int l, double cosx) const;
-  
+
   /// Set deformation coefficient for Y_2_0.
   inline void set_beta_2(double b2) {
     beta2_ = b2;

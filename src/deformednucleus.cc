@@ -32,7 +32,7 @@ ThreeVector DeformedNucleus::distribute_nucleon() const {
   double a_radius;
   Angles a_direction;
   // Set a sensible max bound for radial sampling.
-  double radius_max = Nucleus::get_nuclear_radius() / Nucleus::get_diffusiveness() + 
+  double radius_max = Nucleus::get_nuclear_radius() / Nucleus::get_diffusiveness() +
                       Nucleus::get_nuclear_radius() * Nucleus::get_diffusiveness();
 
   // Sample the distribution.
