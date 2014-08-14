@@ -62,7 +62,8 @@ class ParticleData {
   inline void set_momentum(double mass, double px, double py, double pz);
   inline void set_3momentum(const ThreeVector &mom);
   inline const FourVector &position(void) const;
-  inline void set_position(const FourVector &position);
+  inline void set_position(const FourVector &pos);
+  inline void set_3position(const ThreeVector &pos);
   /// get the velocity 3-vector
   inline ThreeVector velocity (void) const { return momentum_.threevec() / momentum_.x0(); }
   /// do a Lorentz-boost
@@ -185,6 +186,11 @@ inline const FourVector &ParticleData::position(void) const {
 /// set the particle position directly
 inline void ParticleData::set_position(const FourVector &pos) {
   position_ = pos;
+}
+
+/// set the particle 3-position only (time component is not changed)
+inline void ParticleData::set_3position(const ThreeVector &pos) {
+  position_ = FourVector(position_.x0(), pos);
 }
 
 inline void ParticleData::boost (const ThreeVector &v)

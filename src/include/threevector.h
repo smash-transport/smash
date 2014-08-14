@@ -169,18 +169,17 @@ ThreeVector ThreeVector::rotate(double phi, double theta, double psi) {
   double cos_psi = std::cos(psi);
   double sin_psi = std::sin(psi);
   // Get original coordinates.
-  double old_x = x_[0];
-  double old_y = x_[1];
-  double old_z = x_[2];
+  std::array<double, 3> x_old = x_;
   // Compute new coordinates.
-  x_[0] = (cos_phi * cos_psi - sin_phi * cos_theta * sin_psi) * old_x
-          + (sin_phi * cos_psi + cos_phi * cos_theta * sin_psi) * old_y
-          + sin_theta * sin_psi * old_z;
-  x_[1] = (-cos_phi * sin_psi - sin_phi * cos_theta * cos_psi) * old_x
-          + (-sin_phi * sin_psi + cos_phi * cos_theta * cos_psi) * old_y
-          + sin_theta * cos_psi * old_z;
-  x_[2] = sin_phi * sin_theta * old_x - cos_phi * sin_theta * old_y
-          + cos_theta * old_z;
+  x_[0] = (cos_phi * cos_psi - sin_phi * cos_theta * sin_psi) * x_old[0]
+        + (sin_phi * cos_psi + cos_phi * cos_theta * sin_psi) * x_old[1]
+        + sin_theta * sin_psi * x_old[2];
+  x_[1] = (-cos_phi * sin_psi - sin_phi * cos_theta * cos_psi) * x_old[0]
+        + (-sin_phi * sin_psi + cos_phi * cos_theta * cos_psi) * x_old[1]
+        + sin_theta * cos_psi * x_old[2];
+  x_[2] = sin_phi * sin_theta * x_old[0]
+        - cos_phi * sin_theta * x_old[1]
+        + cos_theta * x_old[2];
   return *this; 
 }
 
