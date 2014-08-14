@@ -112,7 +112,7 @@ class BoxModus : public ModusDefault {
   /// initial time of the box
   const float start_time_ = 0.0f;
   /// particle multiplicities at initialization
-  std::map<PdgCode, int> init_multipl_;
+  const std::map<PdgCode, int> init_multipl_;
 };
 
 }  // namespace Smash
