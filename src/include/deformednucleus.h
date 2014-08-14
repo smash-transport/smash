@@ -43,7 +43,7 @@ namespace Smash {
  * \li `AUTOMATIC:` Sets all necessary parameters based on the atomic number
  * of the input nucleus (true=automatic, false=manual, see additional directives).
  * \li `BETA_2` The deformation coefficient for the spherical harmonic Y_2_0 in the
- * \beta decomposition of the nuclear radius in the deformed woods-saxon distribution.
+ * beta decomposition of the nuclear radius in the deformed woods-saxon distribution.
  * \li `BETA_4` The deformation coefficient for the spherical harmonic Y_4_0.
  * \li `SATURATION_DENISTY` The normalization coefficient in the Woods-Saxon distribution,
  * needed here (and not in nucleus) due to the accept/reject sampling used. Default is

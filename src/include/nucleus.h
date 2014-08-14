@@ -223,22 +223,25 @@ class Nucleus {
   }
   /// sets the diffusiveness of the nucleus
   ///
-  /// \see diffusiveness_.
+  /// \see diffusiveness_
   inline void set_diffusiveness(float diffuse) {
     diffusiveness_ = diffuse;
   }
   /// gets the diffusiveness of the nucleus
   ///
-  /// \see diffusiveness
+  /// \see diffusiveness_
   inline float get_diffusiveness() const {
     return diffusiveness_;
   }
   /// sets the saturation density of the nucleus
   ///
-  /// \see saturation_density
+  /// \see saturation_density_
   inline void set_saturation_density(float density) {
     saturation_density_ = density;
   }
+  /// gets the saturation density of the nucleus
+  ///
+  /// \see saturation_density_
   inline float get_saturation_density() const {
     return saturation_density_;
   }

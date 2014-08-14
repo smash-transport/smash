@@ -46,10 +46,10 @@ TEST(rotate_phi) {
   for (auto i = dnucleus.begin(); i != dnucleus.end(); i++) {
     actual = i->position();
   }
-  FUZZY_COMPARE(actual.x0(), expectation.x0());
-  FUZZY_COMPARE(actual.x1(), expectation.x1());
-  FUZZY_COMPARE(actual.x2(), expectation.x2());
-  FUZZY_COMPARE(actual.x3(), expectation.x3());
+  COMPARE_ABSOLUTE_ERROR(actual.x0(), expectation.x0(), 1e-7);
+  COMPARE_ABSOLUTE_ERROR(actual.x1(), expectation.x1(), 1e-7);
+  COMPARE_ABSOLUTE_ERROR(actual.x2(), expectation.x2(), 1e-7);
+  COMPARE_ABSOLUTE_ERROR(actual.x3(), expectation.x3(), 1e-7);
 }
 
 // TEST(rotate_theta) {
