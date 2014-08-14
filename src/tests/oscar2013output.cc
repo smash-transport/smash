@@ -12,15 +12,14 @@
 #include <cstring>
 #include <array>
 #include <iostream>
-#include <fstream>
 #include <map>
 #include <string>
 #include <vector>
 #include <boost/filesystem.hpp>
+#include <boost/filesystem/fstream.hpp>
 #include <include/config.h>
 #include "../include/outputinterface.h"
-#include "../include/oscarfullhistoryoutput.h"
-#include "../include/oscarparticlelistoutput.h"
+#include "../include/oscaroutput.h"
 #include "../include/particles.h"
 #include "../include/random.h"
 
@@ -86,19 +85,19 @@ static void compare_particledata(
 TEST(full2013_format) {
   // Set options
   std::string configfilename = "oscar_2013.yaml";
-  std::ofstream configfile;
-  configfile.open((testoutputpath / configfilename).native().c_str());
-  configfile << "Print_start_end:" << "\t" << "True" << std::endl;
-  configfile << "2013_format:" << "\t" << "True" << std::endl;
-  configfile.close();
+  bf::ofstream(testoutputpath / configfilename)
+      << "OSCAR_COLLISIONS:\n"
+         "    Enable:          True\n"
+         "    Print_start_end: True\n"
+         "    2013_format:     True\n";
   VERIFY(bf::exists(testoutputpath / configfilename));
-  Configuration&& op{testoutputpath, configfilename};
-  OscarFullHistoryOutput *osc2013full
-                   = new OscarFullHistoryOutput(testoutputpath, std::move(op));
+
+  std::unique_ptr<OutputInterface> osc2013full = create_oscar_output(
+      testoutputpath, Configuration{testoutputpath, configfilename});
+  VERIFY(bool(osc2013full));
+
   std::string outputfilename = "full_event_history.oscar";
   VERIFY(bf::exists(testoutputpath / outputfilename));
-
-  std::cout << "Testing full format" << std::endl;
 
   ParticleType::create_type_list(
       "# NAME MASS[GEV] WIDTH[GEV] PDG\n" + smashon_str);
@@ -207,22 +206,19 @@ TEST(full2013_format) {
 TEST(final2013_format) {
   // Set options
   std::string configfilename = "oscar_2013.yaml";
-  std::ofstream configfile;
-  configfile.open((testoutputpath / configfilename).native().c_str(),
-                  std::ios::in);
-  configfile << "Only_final:" << "\t" << "True" << std::endl;
-  configfile << "2013_format:" << "\t" << "True" << std::endl;
-  configfile.close();
+  bf::ofstream(testoutputpath / configfilename)
+      << "OSCAR_PARTICLELIST:\n"
+         "    Enable:          True\n"
+         "    Only_final:      True\n"
+         "    2013_format:     True\n";
   VERIFY(bf::exists(testoutputpath / configfilename));
 
-  Configuration&& op{testoutputpath, configfilename};
+  std::unique_ptr<OutputInterface> osc2013final = create_oscar_output(
+      testoutputpath, Configuration{testoutputpath, configfilename});
+  VERIFY(bool(osc2013final));
 
-  OscarParticleListOutput *osc2013final
-    = new OscarParticleListOutput(testoutputpath, std::move(op));
   std::string outputfilename = "particle_lists.oscar";
   VERIFY(bf::exists(testoutputpath / outputfilename));
-
-  std::cout << "Testing final format" << std::endl;
 
   Particles particles;
 

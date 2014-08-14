@@ -12,14 +12,13 @@
 #include <cstring>
 #include <array>
 #include <iostream>
-#include <fstream>
 #include <string>
 #include <vector>
 #include <boost/filesystem.hpp>
+#include <boost/filesystem/fstream.hpp>
 #include <include/config.h>
 #include "../include/outputinterface.h"
-#include "../include/oscarfullhistoryoutput.h"
-#include "../include/oscarparticlelistoutput.h"
+#include "../include/oscaroutput.h"
 #include "../include/particles.h"
 #include "../include/random.h"
 #include "../include/configuration.h"
@@ -83,25 +82,19 @@ static void compare_particledata(const std::array<std::string,12> &datastring,
 }
 
 TEST(fullhistory_format) {
-  std::cout << "Create config file..." << std::endl;
   // Set options
   std::string configfilename = "oscar_1999.yaml";
-  std::ofstream configfile;
-  configfile.open((testoutputpath / configfilename).native().c_str());
-  if (configfile.is_open()) {
-    configfile << "Print_start_end:" << "\t" << "True" << std::endl;
-    configfile << "2013_format:" << "\t" << "False" << std::endl;
-    configfile.close();
-  } else {
-    std::cout << "Could not open config file!" << std::endl;
-    std::cout << (testoutputpath / configfilename).native().c_str()
-              << std::endl;
-  }
+  bf::ofstream(testoutputpath / configfilename)
+      << "OSCAR_COLLISIONS:\n"
+         "    Enable:          True\n"
+         "    Print_start_end: True\n"
+         "    2013_format:     False\n";
   VERIFY(bf::exists(testoutputpath / configfilename));
-  Configuration&& op{testoutputpath, configfilename};
-  std::cout << "Create output object..." << std::endl;
-  OscarFullHistoryOutput *oscfull
-                   = new OscarFullHistoryOutput(testoutputpath, std::move(op));
+
+  std::unique_ptr<OutputInterface> oscfull = create_oscar_output(
+      testoutputpath, Configuration{testoutputpath, configfilename});
+  VERIFY(bool(oscfull));
+
   std::string outputfilename = "full_event_history.oscar";
   VERIFY(bf::exists(testoutputpath / outputfilename));
 
@@ -214,17 +207,17 @@ TEST(fullhistory_format) {
 TEST(particlelist_format) {
   // Set options
   std::string configfilename = "oscar_1999.yaml";
-  std::ofstream configfile;
-  configfile.open((testoutputpath / configfilename).native().c_str());
-  configfile << "Only_final:" << "\t" << "True" << std::endl;
-  configfile << "2013_format:" << "\t" << "False" << std::endl;
-  configfile.close();
+  bf::ofstream(testoutputpath / configfilename)
+      << "OSCAR_PARTICLELIST:\n"
+         "    Enable:          True\n"
+         "    Only_final:      True\n"
+         "    2013_format:     False\n";
   VERIFY(bf::exists(testoutputpath / configfilename));
 
-  Configuration&& op{testoutputpath, configfilename};
+  std::unique_ptr<OutputInterface> oscfinal = create_oscar_output(
+      testoutputpath, Configuration{testoutputpath, configfilename});
+  VERIFY(bool(oscfinal));
 
-  OscarParticleListOutput *oscfinal
-    = new OscarParticleListOutput(testoutputpath, std::move(op));
   std::string outputfilename = "particle_lists.oscar";
   VERIFY(bf::exists(testoutputpath / outputfilename));
 
