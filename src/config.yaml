@@ -6,7 +6,7 @@ General:
     DELTA_TIME:    0.01
 
     # end time of simulation
-    END_TIME:      42.0
+    END_TIME:      1.0
 
     # output formats
     OUTPUT:
@@ -36,7 +36,7 @@ General:
     OUTPUT_INTERVAL:  1.0
 
     # initial random seed (negative for time)
-    RANDOMSEED:    -1
+    RANDOMSEED:    1
 
     # elastic cross section
     SIGMA:         10.0
@@ -101,7 +101,7 @@ Modi:
         # E_LAB : 100
         # P_LAB : 100
         SQRTSNN: 10
-        # The representative particles (two PDG IDs) determining the 
+        # The representative particles (two PDG IDs) determining the
         # subsystem "NN" in sqrt(s_NN). Let's try neutron-neutron.
         SQRTS_REPS: [2112, 2112]
         # The reference frame in which to do the calculation.
