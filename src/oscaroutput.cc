@@ -29,16 +29,12 @@ OscarOutput<Format, Contents>::OscarOutput(bf::path path, std::string name)
     fprintf(file_.get(),
             "# Units: fm fm fm fm GeV GeV GeV GeV GeV none none\n");
   } else {
-    fprintf(file_.get(), "# OSC1999A\n");
-    switch (Contents) {
-      case OscarInteractions:
-        fprintf(file_.get(), "# full_event_history\n");
-        break;
-      case OscarTimesteps:
-        fprintf(file_.get(), "# final_id_p_x\n");
-        break;
+    if (name == "particle_lists") {
+      name = "final_id_p_x";  // FIXME: why is this necessary? I.e. what does
+                              // the string on the second line tell, and why
+                              // does it have to be this specific string?
     }
-    fprintf(file_.get(), "# %s\n", VERSION_MAJOR);
+    fprintf(file_.get(), "# OSC1999A\n# %s\n# %s\n", name.c_str(), VERSION_MAJOR);
     fprintf(file_.get(), "# Block format:\n");
     fprintf(file_.get(), "# nin nout event_number\n");
     fprintf(file_.get(), "# id pdg 0 px py pz p0 mass x y z t\n");
