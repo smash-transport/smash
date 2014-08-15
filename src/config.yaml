@@ -67,8 +67,9 @@ Modi:
 
         INIT_MULTIPLICITIES:
             221:    100
-            111:    200
+            111:    100
             2112:   20
+            113:    50
 
     Sphere:
         # Sphere size

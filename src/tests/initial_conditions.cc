@@ -52,9 +52,9 @@ TEST(initialize_box) {
     VERIFY(p.position().x3() <  7.9615);
     VERIFY(p.position().x3() >= 0.0);
   }
-  FUZZY_COMPARE(momentum.x1(), 0.0);
-  FUZZY_COMPARE(momentum.x2(), 0.0);
-  FUZZY_COMPARE(momentum.x3(), 0.0);
+  COMPARE_ABSOLUTE_ERROR(momentum.x1(), 0.0, 1e-12);
+  COMPARE_ABSOLUTE_ERROR(momentum.x2(), 0.0, 1e-12);
+  COMPARE_ABSOLUTE_ERROR(momentum.x3(), 0.0, 1e-12);
 }
 
 TEST(initialize_collider) {

@@ -46,22 +46,22 @@ void BoxModus::print_startup() {
 
 /* initial_conditions - sets particle data for @particles */
 float BoxModus::initial_conditions(Particles *particles,
-                                  const ExperimentParameters &parameters) {
-  double momentum_radial, number_density_total = 0;
+                                  const ExperimentParameters &/*parameters*/) {
+  double momentum_radial = 0;
   Angles phitheta;
   FourVector momentum_total(0, 0, 0, 0);
-  size_t number_total = 0;
-  /* Create number of particles according to configuration */
-  for (const auto &p : init_multipl_) {
-    particles->create(p.second, p.first);
-    number_total += p.second;
-    printd("Particle %d init multiplicity %d\n", p.first, p.second);
-  }
   auto uniform_length = Random::make_uniform_distribution(0.0,
                                          static_cast<double>(this->length_));
-  /* Set paricles IC: */
+
+  /* Create NUMBER OF PARTICLES according to configuration */
+  for (const auto &p : init_multipl_) {
+    particles->create(p.second, p.first);
+    printd("Particle %d init multiplicity %d\n", p.first, p.second);
+  }
+  number_density_initial_ = particles->size()/(length_*length_*length_);
+
   for (ParticleData &data : particles->data()) {
-    /* back to back pair creation with random momenta direction */
+    /* Set MOMENTUM SPACE distribution */
     if (this->initial_condition_ != 2) {
       /* thermal momentum according Maxwell-Boltzmann distribution */
       momentum_radial = sample_momenta(this->temperature_, data.pole_mass());
@@ -73,37 +73,31 @@ float BoxModus::initial_conditions(Particles *particles,
     printd("Particle %d radial momenta %g phi %g cos_theta %g\n", data.id(),
            momentum_radial, phitheta.phi(), phitheta.costheta());
     data.set_momentum(data.pole_mass(), phitheta.threevec() * momentum_radial);
-
     momentum_total += data.momentum();
-    /* random position in a quadratic box */
+
+    /* Set COORDINATE SPACE distribution */
     ThreeVector pos{uniform_length(), uniform_length(), uniform_length()};
     data.set_position(FourVector(start_time_, pos));
+
     /* IC: debug checks */
     printd_momenta(data);
     printd_position(data);
   }
+
   /* Make total 3-momentum 0 */
   for (ParticleData &data : particles->data()) {
     data.set_momentum(data.pole_mass(), data.momentum().threevec() -
                           momentum_total.threevec()/particles->size());
   }
+
   /* Recalculate total momentum */
   momentum_total = FourVector(0, 0, 0, 0);
   for (ParticleData &data : particles->data()) {
     momentum_total += data.momentum();
   }
-  /* Display on startup if pseudo grid is used */
-  size_t number = number_total;
-  int const grid_number = round(
-      this->length_ / sqrt(parameters.cross_section * fm2_mb * M_1_PI) * 0.5);
-  /* pseudo grid not used for 3^3 or extremely small particle numbers */
-  if (grid_number >= 4 && number > 10)
-    printf("Simulation with pseudo grid: %d^3\n", grid_number);
-  else
-    printf("W: Not using pseudo grid: %d^3\n", grid_number);
   /* allows to check energy conservation */
-  printf("IC total energy: %g [GeV]\n", momentum_total.x0());
-  number_density_initial_ = number_density_total;
+  printf("IC total 4-momentum [GeV]: (%g, %g, %g, %g)\n", momentum_total.x0(),
+             momentum_total.x1(), momentum_total.x2(), momentum_total.x3());
   return start_time_;
 }
 
