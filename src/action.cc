@@ -50,9 +50,21 @@ bool Action::is_valid(const Particles &particles) const {
       return false;
     }
     /* Check if particles have scattered in the meantime
-     * (by checking if their energy has changed). */
+     * (by checking if their energy or momentum has changed). */
     if (fabs(part.momentum().x0()
              - particles.data(part.id()).momentum().x0()) > really_small) {
+      return false;
+    }
+    if (fabs(part.momentum().x1()
+             - particles.data(part.id()).momentum().x1()) > really_small) {
+      return false;
+    }
+    if (fabs(part.momentum().x2()
+             - particles.data(part.id()).momentum().x2()) > really_small) {
+      return false;
+    }
+    if (fabs(part.momentum().x3()
+             - particles.data(part.id()).momentum().x3()) > really_small) {
       return false;
     }
   }
