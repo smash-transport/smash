@@ -30,9 +30,11 @@ namespace Smash {
 
 BoxModus::BoxModus(Configuration modus_config, const ExperimentParameters &)
     : initial_condition_(modus_config.take({"Box", "INITIAL_CONDITION"})),
-      length_(modus_config.take({"Box", "LENGTH"})),
-      temperature_(modus_config.take({"Box", "TEMPERATURE"})),
-      start_time_(modus_config.take({"Box", "START_TIME"})) {
+                 length_(modus_config.take({"Box", "LENGTH"})),
+            temperature_(modus_config.take({"Box", "TEMPERATURE"})),
+             start_time_(modus_config.take({"Box", "START_TIME"})),
+           init_multipl_(modus_config.take({"Box", "INIT_MULTIPLICITIES"}).
+                                                convert_for(init_multipl_)) {
 }
 
 /* print_startup - console output on startup of box specific parameters */
@@ -49,59 +51,29 @@ float BoxModus::initial_conditions(Particles *particles,
   Angles phitheta;
   FourVector momentum_total(0, 0, 0, 0);
   size_t number_total = 0;
-  /* loop over all the particle types */
-  for (const ParticleType &type : ParticleType::list_all()) {
-    /* Particles with width > 0 (resonances) do not exist in the beginning */
-    if (!type.is_stable()) {
-      continue;
-    }
-    printd("%s mass: %g [GeV]\n", type.name().c_str(), type.mass());
-    /* Particle densities according to Maxwell-Boltzmann statistics */
-    double number_density =
-        number_density_maxwellboltzmann(type.mass(), this->temperature_);
-    // calculate the expected of particles in the box
-    double real_number = this->length_ * this->length_ * this->length_ *
-                         number_density * parameters.testparticles;
-    size_t int_number = static_cast<size_t>(real_number);
-    // decide if we have an extra particle: the probability for that is
-    // equal to the fractional part of the number.
-    if (real_number - int_number > Random::canonical()) {
-      int_number++;
-    }
-    printf("IC number density %.6g [fm^-3]\n", number_density);
-    printf("IC %zu number of %s\n", int_number, type.name().c_str());
-    number_density_total += number_density;
-    /* create bunch of particles */
-    printf("IC creating %zu particles\n", int_number);
-    particles->create(int_number, type.pdgcode());
-    number_total += int_number;
+  /* Create number of particles according to configuration */
+  for (const auto &p : init_multipl_) {
+    particles->create(p.second, p.first);
+    number_total += p.second;
+    printd("Particle %d init multiplicity %d\n", p.first, p.second);
   }
-  printf("IC total number density %.6g [fm^-3]\n", number_density_total);
-  printf("IC contains %zu particles\n", number_total);
   auto uniform_length = Random::make_uniform_distribution(0.0,
                                          static_cast<double>(this->length_));
-  /* Set particles IC: */
+  /* Set paricles IC: */
   for (ParticleData &data : particles->data()) {
     /* back to back pair creation with random momenta direction */
-    if (unlikely(data.id() == particles->id_max() && !(data.id() % 2))) {
-      /* poor last guy just sits around */
-      data.set_momentum(data.pole_mass(), 0., 0., 0.);
-    } else if (!(data.id() % 2)) {
-      if (this->initial_condition_ != 2) {
-        /* thermal momentum according Maxwell-Boltzmann distribution */
-        momentum_radial = sample_momenta(this->temperature_, data.pole_mass());
-      } else {
-        /* IC == 2 initial thermal momentum is the average 3T */
-        momentum_radial = 3.0 * this->temperature_;
-      }
-      phitheta.distribute_isotropically();
-      printd("Particle %d radial momenta %g phi %g cos_theta %g\n", data.id(),
-             momentum_radial, phitheta.phi(), phitheta.costheta());
-      data.set_momentum(data.pole_mass(), phitheta.threevec()*momentum_radial);
+    if (this->initial_condition_ != 2) {
+      /* thermal momentum according Maxwell-Boltzmann distribution */
+      momentum_radial = sample_momenta(this->temperature_, data.pole_mass());
     } else {
-      data.set_momentum(data.pole_mass(),
-                        -particles->data(data.id() - 1).momentum().threevec());
+      /* IC == 2 initial thermal momentum is the average 3T */
+      momentum_radial = 3.0 * this->temperature_;
     }
+    phitheta.distribute_isotropically();
+    printd("Particle %d radial momenta %g phi %g cos_theta %g\n", data.id(),
+           momentum_radial, phitheta.phi(), phitheta.costheta());
+    data.set_momentum(data.pole_mass(), phitheta.threevec() * momentum_radial);
+
     momentum_total += data.momentum();
     /* random position in a quadratic box */
     ThreeVector pos{uniform_length(), uniform_length(), uniform_length()};
@@ -109,6 +81,16 @@ float BoxModus::initial_conditions(Particles *particles,
     /* IC: debug checks */
     printd_momenta(data);
     printd_position(data);
+  }
+  /* Make total 3-momentum 0 */
+  for (ParticleData &data : particles->data()) {
+    data.set_momentum(data.pole_mass(), data.momentum().threevec() -
+                          momentum_total.threevec()/particles->size());
+  }
+  /* Recalculate total momentum */
+  momentum_total = FourVector(0, 0, 0, 0);
+  for (ParticleData &data : particles->data()) {
+    momentum_total += data.momentum();
   }
   /* Display on startup if pseudo grid is used */
   size_t number = number_total;
