@@ -79,6 +79,7 @@ if(DOXYGEN)
          VERBATIM
          )
    endif()
+   mark_as_advanced(XARGS PRINTF SORT SED GREP DOT_EXECUTABLE DOXYGEN)
 else()
    message(STATUS "Doxygen not found.")
 endif()
