@@ -182,7 +182,11 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
       }
     }
     // check conservation of conserved quantities:
-    printf("%s", conserved_initial_.report_deviations(particles_).c_str());
+    std::string err_msg = conserved_initial_.report_deviations(particles_);
+    if (!err_msg.empty()) {
+      printf("%s", err_msg.c_str());
+      throw std::runtime_error("Violation of conserved quantities!");
+    }
   }
   // make sure the experiment actually ran (note: we should compare this
   // to the start time, but we don't know that. Therefore, we check that
