@@ -46,7 +46,7 @@ void BoxModus::print_startup() {
 
 /* initial_conditions - sets particle data for @particles */
 float BoxModus::initial_conditions(Particles *particles,
-                                  const ExperimentParameters &/*parameters*/) {
+                                  const ExperimentParameters &parameters) {
   double momentum_radial = 0;
   Angles phitheta;
   FourVector momentum_total(0, 0, 0, 0);
@@ -55,7 +55,7 @@ float BoxModus::initial_conditions(Particles *particles,
 
   /* Create NUMBER OF PARTICLES according to configuration */
   for (const auto &p : init_multipl_) {
-    particles->create(p.second, p.first);
+    particles->create(p.second*parameters.testparticles, p.first);
     printd("Particle %d init multiplicity %d\n", p.first, p.second);
   }
   number_density_initial_ = particles->size()/(length_*length_*length_);
