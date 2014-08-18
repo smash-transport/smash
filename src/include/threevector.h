@@ -55,7 +55,7 @@ class ThreeVector {
    * a rotation theta about the rotated x axis. Last, psi is a rotation
    * about the rotated z axis.
    **/
-  ThreeVector inline rotate(double phi, double theta, double psi);
+  void inline rotate(double phi, double theta, double psi);
   /// negation: Returns \f$-\vec x\f$
   ThreeVector inline operator- () const;
   /// increase this vector by \f$\vec v: \vec x^\prime = \vec x + \vec v\f$
@@ -160,14 +160,12 @@ double inline ThreeVector::abs() const {
   return std::sqrt((*this)*(*this));
 }
 
-ThreeVector ThreeVector::rotate(double phi, double theta, double psi) {
+void ThreeVector::rotate(double phi, double theta, double psi) {
   // Compute the cosine and sine for each angle.
-  double cos_phi = std::cos(phi);
-  double sin_phi = std::sin(phi);
-  double cos_theta = std::cos(theta);
-  double sin_theta = std::sin(theta);
-  double cos_psi = std::cos(psi);
-  double sin_psi = std::sin(psi);
+  double sin_phi, cos_phi, sin_theta, cos_theta, sin_psi, cos_psi;
+  sincos(phi, &sin_phi, &cos_phi);
+  sincos(theta, &sin_theta, &cos_theta);
+  sincos(psi, &sin_psi, &cos_psi);
   // Get original coordinates.
   std::array<double, 3> x_old = x_;
   // Compute new coordinates.
@@ -180,7 +178,6 @@ ThreeVector ThreeVector::rotate(double phi, double theta, double psi) {
   x_[2] = sin_phi * sin_theta * x_old[0]
         - cos_phi * sin_theta * x_old[1]
         + cos_theta * x_old[2];
-  return *this;
 }
 
 }  // namespace Smash

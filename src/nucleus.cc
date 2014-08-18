@@ -287,8 +287,8 @@ void Nucleus::set_parameters_automatic() {
   }
 }
 
-void Nucleus::set_parameters_from_config(bool is_projectile, Configuration &config) {
-  const char * nucleus_type = is_projectile ? "Projectile" : "Target";
+void Nucleus::set_parameters_from_config(const char *nucleus_type,
+                                         Configuration &config) {
   // Diffusiveness
   if (config.has_value({nucleus_type, "DIFFUSIVENESS"})) {
     set_diffusiveness(static_cast<float>(config.take(

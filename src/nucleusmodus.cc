@@ -66,13 +66,13 @@ NucleusModus::NucleusModus(Configuration modus_config,
       modus_cfg.take({"Projectile", "AUTOMATIC"})) {
     projectile_->set_parameters_automatic();
   } else {
-    projectile_->set_parameters_from_config(true, modus_cfg);
+    projectile_->set_parameters_from_config("Projectile", modus_cfg);
   }
   if (modus_cfg.has_value({"Target", "AUTOMATIC"}) &&
       modus_cfg.take({"Target", "AUTOMATIC"})) {
     target_->set_parameters_automatic();
   } else {
-    target_->set_parameters_from_config(false, modus_cfg);
+    target_->set_parameters_from_config("Target", modus_cfg);
   }
 
   // Get the total nucleus-nucleus collision energy. Since there is

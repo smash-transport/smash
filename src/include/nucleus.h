@@ -80,10 +80,12 @@ class Nucleus {
   /** Sets the parameters of the Woods-Saxon according to
    * manually added values in the configuration file.
    *
-   * @param is_projectile
+   * @param nucleus_type A string determining the nucleus type
+   *                     (either "Projectile" or "Target")
    * @param config The configuration file located at node Nucleus
    **/
-  virtual void set_parameters_from_config(bool is_projectile, Configuration &config);
+  virtual void set_parameters_from_config(const char *nucleus_type,
+                                          Configuration &config);
 
   /**
    * Boosts the nuclei so that the nucleons have the appropriate

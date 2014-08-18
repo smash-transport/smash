@@ -57,8 +57,10 @@ class DeformedNucleus : public Nucleus {
  public:
   DeformedNucleus();
 
-  /** Return the deformed Woods-Saxon probability for
-   * the given position.
+  /** Return the deformed Woods-Saxon probability for the given position.
+   *
+   * Double-precision is used for safety, no effort was made to check whether
+   * single-precision works.
    *
    * @param r The sample radius
    * @param cosx The cosine of the sample polar angle
@@ -89,7 +91,8 @@ class DeformedNucleus : public Nucleus {
   /** Set parameters for Woods-Saxon by hand using the configuration file.
    * \see Nucleus::set_parameters_from_config
    */
-  virtual void set_parameters_from_config(bool is_projectile, Configuration &config);
+  virtual void set_parameters_from_config(const char *nucleus_type,
+                                          Configuration &config);
 
   /** Rotates the nucleus according to members nucleus_polar_angle_
    * and nucleus_azimuthal_angle_ and updates nucleon positions.

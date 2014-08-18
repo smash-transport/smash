@@ -81,10 +81,10 @@ void DeformedNucleus::set_parameters_automatic() {
   nuclear_orientation_.distribute_isotropically();
 }
 
-void DeformedNucleus::set_parameters_from_config(bool is_projectile, Configuration &config) {
+void DeformedNucleus::set_parameters_from_config(const char *nucleus_type,
+                                                 Configuration &config) {
   // Inherited nucleus parameters.
-  Nucleus::set_parameters_from_config(is_projectile, config);
-  const char * nucleus_type = is_projectile ? "Projectile" : "Target";
+  Nucleus::set_parameters_from_config(nucleus_type, config);
 
   // Deformation parameters.
   if (config.has_value({nucleus_type, "BETA_2"})) {
