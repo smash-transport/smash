@@ -11,3 +11,5 @@
 *.bak
 .directory
 *.kate-swp
+*.orig
+*.rej
