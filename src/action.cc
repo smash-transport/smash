@@ -45,7 +45,20 @@ void Action::add_processes(const ProcessBranchList &pv) {
 
 bool Action::is_valid(const Particles &particles) const {
   for (const auto &part : incoming_particles_) {
+    /* Check if the particles still exist. */
     if (!particles.has_data(part.id())) {
+      return false;
+    }
+    /* Check if particles have scattered in the meantime
+     * (by checking if their energy or momentum has changed). */
+    if ((fabs(part.momentum().x0()
+             - particles.data(part.id()).momentum().x0()) > really_small)
+        || (fabs(part.momentum().x1()
+                 - particles.data(part.id()).momentum().x1()) > really_small)
+        || (fabs(part.momentum().x2()
+                 - particles.data(part.id()).momentum().x2()) > really_small)
+        || (fabs(part.momentum().x3()
+                 - particles.data(part.id()).momentum().x3()) > really_small)) {
       return false;
     }
   }
@@ -87,7 +100,7 @@ ParticleList Action::choose_channel() {
 }
 
 
-void Action::sample_cms_momenta(const double cms_energy) {
+void Action::sample_cms_momenta() {
   /* This function only operates on 2-particle final states. */
   assert(outgoing_particles_.size() == 2);
 
@@ -99,6 +112,8 @@ void Action::sample_cms_momenta(const double cms_energy) {
 
   double mass1 = t1.mass();
   double mass2 = t2.mass();
+
+  const double cms_energy = sqrt_s();
 
   if (cms_energy < t1.minimum_mass() + t2.minimum_mass()) {
     throw InvalidResonanceFormation("resonance_formation: not enough energy! " +

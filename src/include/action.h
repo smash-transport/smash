@@ -51,15 +51,21 @@ class Action {
   /** Add several new subprocesses at once.  */
   void add_processes(const ProcessBranchList &pv);
 
-  /** Actually perform the action, e.g. carry out a decay or scattering.  */
+  /**
+   * Actually perform the action, e.g. carry out a decay or scattering.
+   *
+   * This method does not do any sanity checks, but assumes that is_valid has
+   * been called to determine if the action is still valid.
+   */
   virtual void perform(Particles *particles, size_t &id_process) = 0;
 
   /**
    * Check whether the action still applies.
    *
    * It can happen that a different action removed the incoming_particles from
-   * the set of existing particles in the experiment. In this case this Action
-   * doesn't apply anymore.
+   * the set of existing particles in the experiment, or that the particle has
+   * scattered elastically in the meantime. In this case the Action doesn't
+   * apply anymore and should be discarded.
    */
   bool is_valid(const Particles &) const;
 
@@ -103,18 +109,20 @@ class Action {
   ParticleList outgoing_particles_;
   /// determine the total energy in the center-of-mass frame
   virtual double sqrt_s() const = 0;
+
   /**
    * Decide for a particular final-state channel via Monte-Carlo
    * and return it as a list of particles that are only initialized
    * with their PDG code.
    */
   ParticleList choose_channel();
+
   /**
    * Sample final state momenta (and masses) in general X->2 process.
    *
    * \throws InvalidResonanceFormation
    */
-  void sample_cms_momenta(const double cms_energy);
+  void sample_cms_momenta();
 };
 
 
@@ -208,6 +216,36 @@ class ScatterAction : public Action {
    * \throws InvalidResonanceFormation
    */
   void perform(Particles *particles, size_t &id_process);
+
+  /**
+   * Determine the elastic cross section for this collision. It is given by a
+   * parametrization of exp. data for BB collisions and is constant for
+   * BM and MM collisions.
+   *
+   * \param[in] elast_par Elastic cross section parameter from the input file
+   * (currently only used for BM and MM collisions).
+   * 
+   * \return A ProcessBranch object containing the cross section and
+   * final-state IDs.
+   */
+  ProcessBranch elastic_cross_section(float elast_par);
+
+  /**
+  * Find all resonances that can be produced in a collision of the two
+  * input particles and the production cross sections of these resonances.
+  *
+  * Given the data and type information of two colliding particles,
+  * create a list of possible resonance production processes
+  * and their cross sections.
+  * Process can be either 2-to-1 (just a resonance in the final state)
+  * or 2-to-2 (resonance and a stable particle in the final state).
+  *
+  * \return A list of processes with resonance in the final state.
+  * Each element in the list contains the type(s)
+  * of the final state particle(s)
+  * and the cross section for that particular process.
+  */
+  ProcessBranchList resonance_cross_section();
 
  protected:
   /// determine the total energy in the center-of-mass frame

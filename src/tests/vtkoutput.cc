@@ -16,12 +16,13 @@
 #include <string>
 #include <vector>
 #include <boost/filesystem.hpp>
-#include "../include/outputinterface.h"
-#include "../include/vtkoutput.h"
+#include <include/config.h>
 #include "../include/clock.h"
 #include "../include/configuration.h"
+#include "../include/outputinterface.h"
 #include "../include/particles.h"
 #include "../include/random.h"
+#include "../include/vtkoutput.h"
 
 using namespace Smash;
 
@@ -101,7 +102,8 @@ TEST(outputfile) {
     /* Check header */
     std::string output_header = "";
     std::string header = "# vtk DataFile Version 2.0\n"
-                         "Generated from molecular-offset data\n"
+                         "Generated from molecular-offset data "
+                         VERSION_MAJOR "\n"
                          "ASCII\n"
                          "DATASET UNSTRUCTURED_GRID\n";
     do {

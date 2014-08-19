@@ -14,7 +14,6 @@
 #include <vector>
 
 #include "chrono.h"
-#include "crosssections.h"
 #include "decayactionsfinder.h"
 #include "experimentparameters.h"
 #include "forwarddeclarations.h"
@@ -60,7 +59,7 @@ class ExperimentBase {
    * GENERAL:
    * --------
    */
-  // !!USER:Input
+  // Userguide {
   /**
    * \if user
    * \page input_general_ Input Section General
@@ -111,7 +110,7 @@ class ExperimentBase {
    *
    * `decaymodes:` a list of processes used in simulation
    */
-  // !!/USER:Input
+  // } Userguide
   static std::unique_ptr<ExperimentBase> create(Configuration config);
 
   /**
@@ -234,13 +233,6 @@ class Experiment : public ExperimentBase {
    * particles to file.
    */
   OutputsList outputs_;
-
-  /**
-   * ?
-   *
-   * \todo CrossSections needs a rename?
-   */
-  CrossSections cross_sections_;
 
   /// The object that finds decays
   DecayActionsFinder decay_finder_;

@@ -18,12 +18,12 @@
 #include "include/random.h"
 
 namespace Smash {
-
 ColliderModus::ColliderModus(Configuration modus_config,
                              const ExperimentParameters &)
-    : sqrts_(modus_config.take({"Collider", "SQRTS"})) {
-  projectile_ = modus_config.take({"Collider", "PROJECTILE"});
-  target_     = modus_config.take({"Collider", "TARGET"});
+    : projectile_(modus_config.take({"Collider", "PROJECTILE"})
+                      .convert_for(projectile_)),
+      target_(modus_config.take({"Collider", "TARGET"}).convert_for(target_)),
+      sqrts_(modus_config.take({"Collider", "SQRTS"})) {
   if (sqrts_ < ParticleType::find(projectile_).mass()
              + ParticleType::find(target_).mass()) {
     throw ModusDefault::InvalidEnergy(

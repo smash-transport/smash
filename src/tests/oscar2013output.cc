@@ -17,6 +17,7 @@
 #include <string>
 #include <vector>
 #include <boost/filesystem.hpp>
+#include <include/config.h>
 #include "../include/outputinterface.h"
 #include "../include/oscarfullhistoryoutput.h"
 #include "../include/oscarparticlelistoutput.h"
@@ -135,7 +136,7 @@ TEST(full2013_format) {
     /* Check header */
     std::string output_header = "";
     std::string header = "#!OSCAR2013 "
-                         "full_event_history "
+                         "full_event_history " VERSION_MAJOR " "
                          "t x y z mass p0 px py pz pdg ID\n"
                          "# Units: fm fm fm fm GeV GeV GeV GeV GeV none none\n";
     do {
@@ -259,7 +260,7 @@ TEST(final2013_format) {
     /* Check header */
     std::string output_header = "";
     std::string header = "#!OSCAR2013 "
-                         "particle_lists "
+                         "particle_lists " VERSION_MAJOR " "
                          "t x y z mass p0 px py pz pdg ID\n"
                          "# Units: fm fm fm fm GeV GeV GeV GeV GeV none none\n";
     do {

@@ -11,6 +11,7 @@
 
 #include <boost/filesystem.hpp>
 
+#include <include/config.h>
 #include "include/clock.h"
 #include "include/particles.h"
 #include "include/outputroutines.h"
@@ -25,11 +26,11 @@ OscarParticleListOutput::OscarParticleListOutput(bf::path path,
     only_final_(conf.has_value({"Only_final"})
               ? conf.take({"Only_final"}) : true)  {
   if (modern_format_) {
-    fprintf(file_.get(), "#!OSCAR2013 particle_lists ");
+    fprintf(file_.get(), "#!OSCAR2013 particle_lists %s ", VERSION_MAJOR);
   } else {
     fprintf(file_.get(), "# OSC1999A\n");
     fprintf(file_.get(), "# final_id_p_x\n");
-    fprintf(file_.get(), "# smash\n");
+    fprintf(file_.get(), "# %s\n", VERSION_MAJOR);
   }
   write_format_description();
 }

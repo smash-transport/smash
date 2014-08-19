@@ -65,6 +65,11 @@ Modi:
         # start time of simulation
         START_TIME:    0.0
 
+        INIT_MULTIPLICITIES:
+            221:    100
+            111:    200
+            2112:   20
+
     Sphere:
         # Sphere size
         RADIUS: 5.0

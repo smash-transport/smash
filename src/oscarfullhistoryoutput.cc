@@ -11,6 +11,7 @@
 #include <boost/filesystem.hpp>
 #include <string>
 
+#include <include/config.h>
 #include "include/clock.h"
 #include "include/forwarddeclarations.h"
 #include "include/particles.h"
@@ -25,11 +26,11 @@ OscarFullHistoryOutput::OscarFullHistoryOutput(bf::path path,
     print_start_end_(conf.has_value({"Print_start_end"})
                      ? conf.take({"Print_start_end"}) : false) {
   if (modern_format_) {
-    fprintf(file_.get(), "#!OSCAR2013 full_event_history ");
+    fprintf(file_.get(), "#!OSCAR2013 full_event_history %s ", VERSION_MAJOR);
   } else {
     fprintf(file_.get(), "# OSC1999A\n");
     fprintf(file_.get(), "# full_event_history\n");
-    fprintf(file_.get(), "# smash\n");
+    fprintf(file_.get(), "# %s\n", VERSION_MAJOR);
   }
   write_format_description();
 }

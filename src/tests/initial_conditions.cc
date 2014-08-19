@@ -21,7 +21,7 @@ using namespace Smash;
 
 TEST(init_particle_types) {
   ParticleType::create_type_list(
-      "smashon 0.4 -1.0 661\n");
+      "smashon 0.4 0.0 661\n");
 }
 
 TEST(initialize_box) {
@@ -30,13 +30,11 @@ TEST(initialize_box) {
   conf["Modi"]["Box"]["LENGTH"] = 7.9615;
   conf["Modi"]["Box"]["TEMPERATURE"] = 0.5;
   conf["Modi"]["Box"]["START_TIME"] = 0.2;
+  conf.take({"Modi", "Box", "INIT_MULTIPLICITIES"});
+  conf["Modi"]["Box"]["INIT_MULTIPLICITIES"]["661"] = 724;
   ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};
   BoxModus b(conf["Modi"], param);
 
-  // length, mass and temperature have been fixed to give a particle
-  // number which is as close to an integer as possible (while still >
-  // 1).  The value is 724.000021, meaning this has a change of 0.0021 %
-  // of giving 725 particles.
   Particles P;
   // should return START_TIME and set P:
   COMPARE(b.initial_conditions(&P, param), 0.2f);
@@ -54,9 +52,9 @@ TEST(initialize_box) {
     VERIFY(p.position().x3() <  7.9615);
     VERIFY(p.position().x3() >= 0.0);
   }
-  FUZZY_COMPARE(momentum.x1(), 0.0);
-  FUZZY_COMPARE(momentum.x2(), 0.0);
-  FUZZY_COMPARE(momentum.x3(), 0.0);
+  COMPARE_ABSOLUTE_ERROR(momentum.x1(), 0.0, 1e-12);
+  COMPARE_ABSOLUTE_ERROR(momentum.x2(), 0.0, 1e-12);
+  COMPARE_ABSOLUTE_ERROR(momentum.x3(), 0.0, 1e-12);
 }
 
 TEST(initialize_collider) {

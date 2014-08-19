@@ -15,6 +15,7 @@
 #include "include/random.h"
 #include "include/resonances.h"
 #include "include/angles.h"
+#include "include/parametrizations.h"
 
 namespace Smash {
 
@@ -28,22 +29,6 @@ void ScatterAction::perform(Particles *particles, size_t &id_process) {
   /* Relevant particle IDs for the collision. */
   int id_a = incoming_particles_[0].id();
   int id_b = incoming_particles_[1].id();
-
-  /* Check if particles still exist. */
-  if (!is_valid(*particles)) {
-    printd("ScatterAction::perform: ID %i or %i not found!\n", id_a, id_b);
-    return;
-  }
-
-  /* Check if particles have scattered in the meantime
-   * (by checking if their energy has changed). */
-  if (fabs(incoming_particles_[0].momentum().x0()
-           - particles->data(id_a).momentum().x0()) > really_small ||
-      fabs(incoming_particles_[1].momentum().x0()
-           - particles->data(id_b).momentum().x0()) > really_small) {
-    printd("ScatterAction::perform: Particle has scattered already.\n");
-    return;
-  }
 
   printd("Process %zu particle %s<->%s colliding %d<->%d time %g\n",
          id_process, incoming_particles_[0].type().name().c_str(),
@@ -162,6 +147,125 @@ bool ScatterAction::is_elastic() const {
 }
 
 
+ProcessBranch ScatterAction::elastic_cross_section(float elast_par) {
+
+  const PdgCode &pdg_a = incoming_particles_[0].type().pdgcode();
+  const PdgCode &pdg_b = incoming_particles_[1].type().pdgcode();
+
+  /* For now, the meson-meson and meson-baryon elastic cross sections
+   * are simply given by the cross section parameter. */
+  if (pdg_a.baryon_number() == 0 || pdg_b.baryon_number() == 0) {
+    return ProcessBranch(pdg_a, pdg_b, elast_par);
+  }
+
+  float mandelstam_s = (incoming_particles_[0].momentum()
+                       +incoming_particles_[1].momentum()).sqr();
+
+  /* For baryon-baryon, we have to check the parametrized cross sections */
+  float sig;
+  /* pp scattering */
+  if (pdg_a == pdg_b) {
+    sig = pp_elastic(mandelstam_s);
+  /* ppbar scattering */
+  } else if (pdg_a.is_antiparticle_of(pdg_b)) {
+    sig = ppbar_elastic(mandelstam_s);
+  /* np scattering */
+  } else {
+    sig = np_elastic(mandelstam_s);
+  }
+
+  if (sig>0.) {
+    return ProcessBranch(pdg_a, pdg_b, sig);
+  } else {
+    std::stringstream ss;
+    ss << "problem in CrossSections::elastic: " << pdg_a.string().c_str()
+       << " " << pdg_b.string().c_str() << " " << pdg_a.spin() << " "
+       << pdg_b.spin() << " " << sig << " " << mandelstam_s;
+    throw std::runtime_error(ss.str());
+  }
+}
+
+
+ProcessBranchList ScatterAction::resonance_cross_section() {
+  ProcessBranchList resonance_process_list;
+  ParticleType type_particle1 = incoming_particles_[0].type(),
+               type_particle2 = incoming_particles_[1].type();
+
+  /* Isospin symmetry factor, by default 1 */
+  int symmetryfactor = 1;
+  /* The isospin symmetry factor is 2 if both particles are in the same
+   * isospin multiplet. */
+  if (type_particle1.pdgcode().iso_multiplet()
+      == type_particle2.pdgcode().iso_multiplet()) {
+    symmetryfactor = 2;
+  }
+
+  /* Mandelstam s = (p_a + p_b)^2 = square of CMS energy */
+  const double mandelstam_s =
+       (incoming_particles_[0].momentum() + incoming_particles_[1].momentum()).sqr();
+
+  /* CM momentum */
+  const double cm_momentum_squared
+    = (incoming_particles_[0].momentum().Dot(incoming_particles_[1].momentum())
+       * incoming_particles_[0].momentum().Dot(incoming_particles_[1].momentum())
+       - type_particle1.mass() * type_particle1.mass()
+       * type_particle2.mass() * type_particle2.mass()) / mandelstam_s;
+
+  /* Find all the possible resonances */
+  for (const ParticleType &type_resonance : ParticleType::list_all()) {
+    /* Not a resonance, go to next type of particle */
+    if (type_resonance.is_stable()) {
+      continue;
+    }
+
+    /* Same resonance as in the beginning, ignore */
+    if ((!type_particle1.is_stable()
+         && type_resonance.pdgcode() == type_particle1.pdgcode())
+        || (!type_particle2.is_stable()
+            && type_resonance.pdgcode() == type_particle2.pdgcode())) {
+      continue;
+    }
+
+    float resonance_xsection
+      = symmetryfactor * two_to_one_formation(type_particle1, type_particle2,
+                         type_resonance, mandelstam_s, cm_momentum_squared);
+
+    /* If cross section is non-negligible, add resonance to the list */
+    if (resonance_xsection > really_small) {
+      resonance_process_list.push_back(ProcessBranch(type_resonance.pdgcode(),
+                                                     resonance_xsection));
+
+      printd("Found resonance %s (%s) with mass %f and width %f.\n",
+             type_resonance.pdgcode().string().c_str(),
+             type_resonance.name().c_str(),
+             type_resonance.mass(), type_resonance.width_at_pole());
+      printd("2->1 with original particles: %s %s Charges: %i %i \n",
+             type_particle1.name().c_str(), type_particle2.name().c_str(),
+             type_particle1.charge(), type_particle2.charge());
+    }
+    /* Same procedure for possible 2->2 resonance formation processes */
+    /* XXX: For now, we allow this only for baryon-baryon interactions */
+    if (type_particle1.pdgcode().baryon_number() != 0 &&
+        type_particle2.pdgcode().baryon_number() != 0) {
+      size_t two_to_two_processes
+         = two_to_two_formation(type_particle1, type_particle2,
+                                type_resonance, mandelstam_s,
+                                cm_momentum_squared, &resonance_process_list);
+      if (two_to_two_processes > 0) {
+        printd("Found %zu 2->2 processes for resonance %s (%s).\n",
+               two_to_two_processes,
+               type_resonance.pdgcode().string().c_str(),
+               type_resonance.name().c_str());
+        printd("2->2 with original particles: %s %s Charges: %i %i \n",
+               type_particle1.name().c_str(), type_particle2.name().c_str(),
+               type_particle1.charge(), type_particle2.charge());
+      }
+    }
+  }
+  return resonance_process_list;
+}
+
+
 void ScatterAction::momenta_exchange() {
   outgoing_particles_[0] = incoming_particles_[0];
   outgoing_particles_[1] = incoming_particles_[1];
@@ -207,14 +311,13 @@ void ScatterAction::momenta_exchange() {
 
 
 void ScatterAction::resonance_formation() {
-  const double cms_energy = sqrt_s();
 
   switch (outgoing_particles_.size()) {
   case 1:
     /* 1 particle in final state: Center-of-momentum frame of initial
      * particles is the rest frame of the resonance.
      */
-    outgoing_particles_[0].set_momentum(FourVector(cms_energy, 0., 0., 0.));
+    outgoing_particles_[0].set_momentum(FourVector(sqrt_s(), 0., 0., 0.));
 
     printd("Momentum of the new particle: %g %g %g %g \n",
            outgoing_particles_[0].momentum().x0(),
@@ -224,7 +327,7 @@ void ScatterAction::resonance_formation() {
     break;
   case 2:
     /* 2 particles in final state: Sample the particle momenta. */
-    sample_cms_momenta(cms_energy);
+    sample_cms_momenta();
     break;
   default:
     std::string s = "resonance_formation: "
