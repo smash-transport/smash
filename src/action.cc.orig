@@ -147,9 +147,9 @@ void Action::sample_cms_momenta() {
            energy1);
   }
 
-  p1->set_4momentum(FourVector(energy1, phitheta.threevec() * momentum_radial));
-  p2->set_4momentum(FourVector(cms_energy - energy1,
-                               -phitheta.threevec() * momentum_radial));
+  p1->set_momentum(FourVector(energy1, phitheta.threevec() * momentum_radial));
+  p2->set_momentum(FourVector(cms_energy - energy1,
+                              -phitheta.threevec() * momentum_radial));
 
   printd("p0: %g %g \n", p1->momentum().x0(), p2->momentum().x0());
   printd("p1: %g %g \n", p1->momentum().x1(), p2->momentum().x1());

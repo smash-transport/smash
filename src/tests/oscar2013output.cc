@@ -46,10 +46,10 @@ static const int zero = 0;
 
 static ParticleData create_smashon_particle() {
   ParticleData particle = ParticleData{ParticleType::find(0x661)};
-  particle.set_momentum(mass_smashon, random_value(), random_value(),
-                        random_value());
-  particle.set_position(FourVector(random_value(), random_value(),
-                                   random_value(), random_value()));
+  particle.set_4momentum(mass_smashon, random_value(), random_value(),
+                         random_value());
+  particle.set_4position(FourVector(random_value(), random_value(),
+                                    random_value(), random_value()));
   return particle;
 }
 
@@ -240,10 +240,10 @@ TEST(final2013_format) {
   initial_particles.push_back(particles.data(0));
   initial_particles.push_back(particles.data(1));
   /* Change the momenta */
-  particles.data(0).set_momentum(mass_smashon, random_value(), random_value(),
-                        random_value());
-  particles.data(1).set_momentum(mass_smashon, random_value(), random_value(),
-                                 random_value());
+  particles.data(0).set_4momentum(mass_smashon, random_value(),
+                                  random_value(), random_value());
+  particles.data(1).set_4momentum(mass_smashon, random_value(),
+                                  random_value(), random_value());
   final_particles.push_back(particles.data(0));
   final_particles.push_back(particles.data(1));
   /* As with initial state output, this should not do anything */

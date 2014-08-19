@@ -72,12 +72,12 @@ float BoxModus::initial_conditions(Particles *particles,
     phitheta.distribute_isotropically();
     printd("Particle %d radial momenta %g phi %g cos_theta %g\n", data.id(),
            momentum_radial, phitheta.phi(), phitheta.costheta());
-    data.set_4momentum(data.pole_mass(), phitheta.threevec() * momentum_radial);
+    data.set_momentum(data.pole_mass(), phitheta.threevec() * momentum_radial);
     momentum_total += data.momentum();
 
     /* Set COORDINATE SPACE distribution */
     ThreeVector pos{uniform_length(), uniform_length(), uniform_length()};
-    data.set_4position(FourVector(start_time_, pos));
+    data.set_position(FourVector(start_time_, pos));
 
     /* IC: debug checks */
     printd_momenta(data);
@@ -86,8 +86,8 @@ float BoxModus::initial_conditions(Particles *particles,
 
   /* Make total 3-momentum 0 */
   for (ParticleData &data : particles->data()) {
-    data.set_4momentum(data.pole_mass(), data.momentum().threevec() -
-                       momentum_total.threevec()/particles->size());
+    data.set_momentum(data.pole_mass(), data.momentum().threevec() -
+                          momentum_total.threevec()/particles->size());
   }
 
   /* Recalculate total momentum */
@@ -110,7 +110,7 @@ int BoxModus::sanity_check(Particles *particles) {
     if (enforce_periodic_boundaries(p.begin() + 1, p.end(), length_)) {
       ++wraps;
     }
-    data.set_4position(p);
+    data.set_position(p);
   }
   return wraps;
 }
@@ -134,7 +134,7 @@ void BoxModus::propagate(Particles *particles,
     bool wall_hit = enforce_periodic_boundaries(position.begin() + 1,
                                                 position.end(), length_);
     const ParticleList incoming_particle{1, data};
-    data.set_4position(position);
+    data.set_position(position);
     if (wall_hit) {
       for (const auto &output : output_list) {
         output->at_interaction(incoming_particle, {1, data});

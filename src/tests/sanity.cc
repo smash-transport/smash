@@ -47,20 +47,20 @@ static void create_particle_list(Particles &P) {
   ParticleData particle_xlzh = create_smashon_particle();
 
   // set momenta:
-  particle_stop.set_momentum(FourVector(4.0, 0.0, 0.0, 0.0));
-  particle_fast.set_momentum(FourVector(sqrt(0.02), 0.1, -.1, 0.0));
-  particle_slow.set_momentum(FourVector(sqrt(1.13), 0.1, 0.2, -.3));
-  particle_x_hi.set_momentum(FourVector(0.1, 0.1, 0.0, 0.0));
-  particle_y_lo.set_momentum(FourVector(0.1, 0.0, -.1, 0.0));
-  particle_xlzh.set_momentum(FourVector(0.5, -.3, 0.0, 0.4));
+  particle_stop.set_4momentum(FourVector(4.0, 0.0, 0.0, 0.0));
+  particle_fast.set_4momentum(FourVector(sqrt(0.02), 0.1, -.1, 0.0));
+  particle_slow.set_4momentum(FourVector(sqrt(1.13), 0.1, 0.2, -.3));
+  particle_x_hi.set_4momentum(FourVector(0.1, 0.1, 0.0, 0.0));
+  particle_y_lo.set_4momentum(FourVector(0.1, 0.0, -.1, 0.0));
+  particle_xlzh.set_4momentum(FourVector(0.5, -.3, 0.0, 0.4));
 
   // set positions:
-  particle_stop.set_position(FourVector(0.0, 5.6, 0.7, 0.8));
-  particle_fast.set_position(FourVector(0.5, -.7, 0.8, 8.9));
-  particle_slow.set_position(FourVector(0.7, 0.1, 0.2, 0.3));
-  particle_x_hi.set_position(FourVector(1.2, 4.5, 5.0, 0.0));
-  particle_y_lo.set_position(FourVector(1.8, 0.0, 19., 0.0));
-  particle_xlzh.set_position(FourVector(2.2, 0.2, 0.0, 4.8));
+  particle_stop.set_4position(FourVector(0.0, 5.6, 0.7, 0.8));
+  particle_fast.set_4position(FourVector(0.5, -.7, 0.8, 8.9));
+  particle_slow.set_4position(FourVector(0.7, 0.1, 0.2, 0.3));
+  particle_x_hi.set_4position(FourVector(1.2, 4.5, 5.0, 0.0));
+  particle_y_lo.set_4position(FourVector(1.8, 0.0, 19., 0.0));
+  particle_xlzh.set_4position(FourVector(2.2, 0.2, 0.0, 4.8));
 
   // add particles (and make sure the particles get the correct ID):
   COMPARE(P.add_data(particle_stop), 0);

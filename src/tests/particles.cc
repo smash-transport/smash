@@ -49,10 +49,10 @@ TEST(everything) {
                particle_b = create_smashon_particle(1);
 
   /* 2 particles with null momenta */
-  particle_a.set_momentum(0.1, 0.0, 0.0, 0.0);
-  particle_b.set_momentum(0.1, 0.0, 0.0, 0.0);
-  particle_a.set_position(FourVector(1., 1., 1., 1.));
-  particle_b.set_position(FourVector(2., 2., 2., 2.));
+  particle_a.set_4momentum(0.1, 0.0, 0.0, 0.0);
+  particle_b.set_4momentum(0.1, 0.0, 0.0, 0.0);
+  particle_a.set_4position(FourVector(1., 1., 1., 1.));
+  particle_b.set_4position(FourVector(2., 2., 2., 2.));
 
   /* check return of particle distance of null momenta particles */
   ScatterAction *act = new ScatterAction(particle_a, particle_b, 0.);
@@ -63,14 +63,14 @@ TEST(everything) {
   delete(act);
 
   /* check collision_time for parallel momenta => impossible collision */
-  particle_a.set_momentum(0.1, 0.3, -0.1, 0.2);
-  particle_b.set_momentum(0.1, 0.3, -0.1, 0.2);
+  particle_a.set_4momentum(0.1, 0.3, -0.1, 0.2);
+  particle_b.set_4momentum(0.1, 0.3, -0.1, 0.2);
   double time = ScatterActionsFinder::collision_time(particle_a, particle_b);
   VERIFY(!(time >= 0.0));
 
   /* reset momenta for possible collision and compare to Particle class */
-  particle_a.set_momentum(0.1, 10.0, 9.0, 8.0);
-  particle_b.set_momentum(0.1, -10.0, -90.0, -80.0);
+  particle_a.set_4momentum(0.1, 10.0, 9.0, 8.0);
+  particle_b.set_4momentum(0.1, -10.0, -90.0, -80.0);
   act = new ScatterAction(particle_a, particle_b, 0.);
   distance_squared = act->particle_distance();
   VERIFY(!(distance_squared < 0.0));

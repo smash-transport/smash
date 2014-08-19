@@ -45,10 +45,10 @@ static const int zero = 0;
 
 static ParticleData create_smashon_particle() {
   ParticleData particle = ParticleData{ParticleType::find(0x661)};
-  particle.set_momentum(mass_smashon, random_value(), random_value(),
-                        random_value());
-  particle.set_position(FourVector(random_value(), random_value(),
-                                   random_value(), random_value()));
+  particle.set_4momentum(mass_smashon, random_value(), random_value(),
+                         random_value());
+  particle.set_4position(FourVector(random_value(), random_value(),
+                                    random_value(), random_value()));
   return particle;
 }
 

@@ -236,7 +236,7 @@ void Nucleus::arrange_nucleons() {
     ThreeVector pos = distribute_nucleon();
 
     // Set the position of the nucleon.
-    i->set_position(FourVector(0.0, pos));
+    i->set_4position(FourVector(0.0, pos));
 
     // Update the radial bound of the nucleus.
     double r_tmp = pos.abs();
@@ -324,12 +324,10 @@ void Nucleus::boost(double beta_scalar) {
     // the z-value with 1/gamma.
     FourVector this_position = i->position();
     this_position.set_x3(this_position.x3() * one_over_gamma);
-    i->set_position(this_position);
+    i->set_4position(this_position);
     // for momenta, though, we CAN do normal Lorentz Boosts, since we
     // *do* want to transform the zero-component (i.e., the energy).
-    FourVector this_momentum = i->momentum();
-    this_momentum = this_momentum.LorentzBoost(beta);
-    i->set_momentum(this_momentum);
+    i->set_4momentum(i->momentum().LorentzBoost(beta));
   }
   // we also need to update r_max_:
   r_max_ *= one_over_gamma;
@@ -344,7 +342,7 @@ void Nucleus::fill_from_list(const std::map<PdgCode, int>& particle_list,
     for (unsigned int i = 0; i < n->second*testparticles_; i++) {
       // append particle to list and set its PDG code.
       particles_.emplace_back(current_type);
-      particles_.back().set_momentum(current_mass, 0.0, 0.0, 0.0);
+      particles_.back().set_4momentum(current_mass, 0.0, 0.0, 0.0);
     }
   }
 }
@@ -363,7 +361,7 @@ void Nucleus::shift(bool is_projectile, double initial_z_displacement,
     this_position.set_x3(this_position.x3() + z_offset);
     this_position.set_x1(this_position.x1() + x_offset);
     this_position.set_x0(simulation_time);
-    i->set_position(this_position);
+    i->set_4position(this_position);
   }
 }
 

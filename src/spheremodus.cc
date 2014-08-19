@@ -82,14 +82,14 @@ float SphereModus::initial_conditions(Particles *particles,
     phitheta.distribute_isotropically();
     printd("Particle %d radial momenta %g phi %g cos_theta %g\n", data.id(),
            momentum_radial, phitheta.phi(), phitheta.costheta());
-    data.set_momentum(data.pole_mass(), phitheta.threevec() * momentum_radial);
+    data.set_4momentum(data.pole_mass(), phitheta.threevec() * momentum_radial);
     /* uniform sampling in a sphere with radius r */
     double position_radial;
     position_radial = cbrt(Random::canonical()) * radius_;
     Angles pos_phitheta;
     pos_phitheta.distribute_isotropically();
-    data.set_position(FourVector(start_time_, pos_phitheta.threevec()
-                                 * position_radial));
+    data.set_4position(FourVector(start_time_,
+                                  pos_phitheta.threevec() * position_radial));
     /* IC Debug checks */
     printd_position(data);
     printd_momenta(data);

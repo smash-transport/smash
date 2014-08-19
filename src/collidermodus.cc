@@ -71,11 +71,11 @@ float ColliderModus::initial_conditions(Particles *particles,
   // collider start is hard-coded for now.
   const float start_time = -1.0f;
   /* Set positions and momenta */
-  data_projectile.set_position(FourVector(start_time, impact_parameter,
-                                          0., -1.));
-  data_projectile.set_momentum(mass_projectile, 0.0, 0.0, cms_momentum);
-  data_target.set_position(FourVector(start_time, 0., 0., 1.));
-  data_target.set_momentum(mass_target, 0.0, 0.0, -cms_momentum);
+  data_projectile.set_4position(FourVector(start_time, impact_parameter,
+                                           0., -1.));
+  data_projectile.set_4momentum(mass_projectile, 0.0, 0.0, cms_momentum);
+  data_target.set_4position(FourVector(start_time, 0., 0., 1.));
+  data_target.set_4momentum(mass_target, 0.0, 0.0, -cms_momentum);
   return start_time;
 }
 

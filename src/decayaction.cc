@@ -111,7 +111,7 @@ void DecayAction::one_to_three() {
   Angles phitheta;
   phitheta.distribute_isotropically();
   /* This is the angle of the plane of the three decay particles */
-  outgoing0.set_momentum(mass_a, phitheta.threevec() * momentum_a);
+  outgoing0.set_4momentum(mass_a, phitheta.threevec() * momentum_a);
 
   /* Angle between a and b */
   double theta_ab = acos(
@@ -120,7 +120,7 @@ void DecayAction::one_to_three() {
   printd("theta_ab: %g Ea: %g Eb: %g sab: %g pa: %g pb: %g\n", theta_ab,
          energy_a, energy_b, s_ab, momentum_a, momentum_b);
   bool phi_has_changed = phitheta.add_to_theta(theta_ab);
-  outgoing1.set_momentum(mass_b, phitheta.threevec() * momentum_b);
+  outgoing1.set_4momentum(mass_b, phitheta.threevec() * momentum_b);
 
   /* Angle between b and c */
   double theta_bc = acos(
@@ -131,7 +131,7 @@ void DecayAction::one_to_three() {
   // pass information on whether phi has changed during the last adding
   // on to add_to_theta:
   phitheta.add_to_theta(theta_bc, phi_has_changed);
-  outgoing2.set_momentum(mass_c, phitheta.threevec() * momentum_c);
+  outgoing2.set_4momentum(mass_c, phitheta.threevec() * momentum_c);
 
   /* Momentum check */
   FourVector ptot = outgoing0.momentum() + outgoing1.momentum() +
@@ -188,8 +188,8 @@ void DecayAction::perform(Particles *particles, size_t &id_process) {
   ThreeVector velocity_CM = incoming_particles_[0].velocity();
   for (auto &p : outgoing_particles_) {
     printd_momenta("particle momenta in lrf", p);
-    p.set_momentum(p.momentum().LorentzBoost(-velocity_CM));
-    p.set_position(incoming_particles_[0].position());
+    p.set_4momentum(p.momentum().LorentzBoost(-velocity_CM));
+    p.set_4position(incoming_particles_[0].position());
     printd_momenta("particle momenta in comp", p);
     // unset collision time for both particles + keep id + unset partner
     p.set_collision_past(id_process);

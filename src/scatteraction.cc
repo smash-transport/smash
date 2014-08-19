@@ -66,9 +66,9 @@ void ScatterAction::perform(Particles *particles, size_t &id_process) {
 
     /* Set positions & boost to computational frame. */
     for (ParticleData &new_particle : outgoing_particles_) {
-      new_particle.set_position(middle_point);
+      new_particle.set_4position(middle_point);
 
-      new_particle.set_momentum(
+      new_particle.set_4momentum(
           new_particle.momentum().LorentzBoost(-beta_cm()));
 
       /* unset collision time for particles + keep id + unset partner */
@@ -317,7 +317,7 @@ void ScatterAction::resonance_formation() {
     /* 1 particle in final state: Center-of-momentum frame of initial
      * particles is the rest frame of the resonance.
      */
-    outgoing_particles_[0].set_momentum(FourVector(sqrt_s(), 0., 0., 0.));
+    outgoing_particles_[0].set_4momentum(FourVector(sqrt_s(), 0., 0., 0.));
 
     printd("Momentum of the new particle: %g %g %g %g \n",
            outgoing_particles_[0].momentum().x0(),

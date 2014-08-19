@@ -28,10 +28,9 @@ void ModusDefault::propagate(Particles *particles,
                           data.velocity() * parameters.timestep_duration());
     printd("Particle %d motion: %g %g %g %g\n", data.id(), distance.x0(),
            distance.x1(), distance.x2(), distance.x3());
-    position = data.position();
-    position += distance;
+    position = data.position() + distance;
     position.set_x0(parameters.new_particle_time());
-    data.set_position(position);
+    data.set_4position(position);
   }
 }
 

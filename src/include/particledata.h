@@ -57,12 +57,12 @@ class ParticleData {
   inline void set_collision(const double &collision_time);
   inline void set_collision_past(const int process_id);
   inline const FourVector &momentum(void) const;
-  inline void set_momentum(const FourVector &momentum_vector);
-  inline void set_momentum(double mass, const ThreeVector &mom);
-  inline void set_momentum(double mass, double px, double py, double pz);
+  inline void set_4momentum(const FourVector &momentum_vector);
+  inline void set_4momentum(double mass, const ThreeVector &mom);
+  inline void set_4momentum(double mass, double px, double py, double pz);
   inline void set_3momentum(const ThreeVector &mom);
   inline const FourVector &position(void) const;
-  inline void set_position(const FourVector &pos);
+  inline void set_4position(const FourVector &pos);
   inline void set_3position(const ThreeVector &pos);
   /// get the velocity 3-vector
   inline ThreeVector velocity (void) const { return momentum_.threevec() / momentum_.x0(); }
@@ -147,7 +147,7 @@ inline const FourVector &ParticleData::momentum(void) const {
 }
 
 /// set particle 4-momentum directly
-inline void ParticleData::set_momentum(const FourVector &momentum_vector) {
+inline void ParticleData::set_4momentum(const FourVector &momentum_vector) {
   momentum_ = momentum_vector;
 }
 
@@ -156,7 +156,7 @@ inline void ParticleData::set_momentum(const FourVector &momentum_vector) {
  * \param[in] new_mass the mass of the particle
  * \param[in] mom the three-momentum of the particle
  */
-inline void ParticleData::set_momentum(double new_mass, const ThreeVector &mom) {
+inline void ParticleData::set_4momentum(double new_mass, const ThreeVector &mom) {
   momentum_ = FourVector(std::sqrt(new_mass * new_mass + mom * mom), mom);
 }
 
@@ -167,7 +167,7 @@ inline void ParticleData::set_momentum(double new_mass, const ThreeVector &mom) 
  * \param[in] py y-component of the momentum
  * \param[in] pz z-component of the momentum
  */
-inline void ParticleData::set_momentum(double new_mass, double px, double py,
+inline void ParticleData::set_4momentum(double new_mass, double px, double py,
                                        double pz) {
   momentum_ = FourVector(
       std::sqrt(new_mass * new_mass + px * px + py * py + pz * pz), px, py, pz);
@@ -184,7 +184,7 @@ inline const FourVector &ParticleData::position(void) const {
 }
 
 /// set the particle position directly
-inline void ParticleData::set_position(const FourVector &pos) {
+inline void ParticleData::set_4position(const FourVector &pos) {
   position_ = pos;
 }
 
@@ -195,9 +195,9 @@ inline void ParticleData::set_3position(const ThreeVector &pos) {
 
 inline void ParticleData::boost (const ThreeVector &v)
 {
-  set_momentum(momentum_.LorentzBoost(v));
+  set_4momentum(momentum_.LorentzBoost(v));
   // TODO: do we actually need to boost the position?
-  set_position(position_.LorentzBoost(v));
+  set_4position(position_.LorentzBoost(v));
 }
 
 /// check if the particles are identical

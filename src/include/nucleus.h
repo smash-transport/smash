@@ -175,7 +175,7 @@ class Nucleus {
   void align_center() {
     FourVector centerpoint = center();
     for (auto p = particles_.begin(); p != particles_.end(); ++p) {
-      p->set_position(p->position()-centerpoint);
+      p->set_4position(p->position()-centerpoint);
     }
   }
 

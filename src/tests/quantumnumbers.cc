@@ -129,7 +129,7 @@ TEST(count_from_particles) {
   // rho^+, but that should be "213").
   ParticleData particle(ParticleType::find(PdgCode("123")));
   FourVector P(1,2,3,4);
-  particle.set_momentum(P);
+  particle.set_4momentum(P);
   // create particle list:
   Particles list;
   list.add_data(particle);
@@ -142,7 +142,7 @@ TEST(count_from_particles) {
 
   ParticleData particleQ(ParticleType::find(PdgCode("123")));
   FourVector Q(2,3,4,5);
-  particleQ.set_momentum(Q);
+  particleQ.set_4momentum(Q);
   list.add_data(particleQ);
 
   QuantumNumbers two(list);
@@ -152,7 +152,7 @@ TEST(count_from_particles) {
 
   ParticleData particleR(ParticleType::find(PdgCode("2346")));
   FourVector R(3,4,5,6);
-  particleR.set_momentum(R);
+  particleR.set_4momentum(R);
   list.add_data(particleR);
 
   QuantumNumbers three(list);
@@ -162,7 +162,7 @@ TEST(count_from_particles) {
 
   ParticleData particleS(ParticleType::find(PdgCode("-1234568")));
   FourVector S(-6,-9,-12,-15);
-  particleS.set_momentum(S);
+  particleS.set_4momentum(S);
   list.add_data(particleS);
 
   QuantumNumbers four(list);

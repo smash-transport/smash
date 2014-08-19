@@ -39,7 +39,7 @@ TEST(rotate_phi) {
   dnucleus.set_azimuthal_angle(M_PI/2);
   FourVector expectation = FourVector(0., 0., 1., 1.);
   for (auto i = dnucleus.begin(); i != dnucleus.end(); i++) {
-    i->set_position(FourVector(0., 1., 0., 1.));
+    i->set_4position(FourVector(0., 1., 0., 1.));
   }
   dnucleus.rotate();
   FourVector actual;
