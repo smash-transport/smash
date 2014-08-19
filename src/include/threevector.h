@@ -162,10 +162,12 @@ double inline ThreeVector::abs() const {
 
 void ThreeVector::rotate(double phi, double theta, double psi) {
   // Compute the cosine and sine for each angle.
-  double sin_phi, cos_phi, sin_theta, cos_theta, sin_psi, cos_psi;
-  sincos(phi, &sin_phi, &cos_phi);
-  sincos(theta, &sin_theta, &cos_theta);
-  sincos(psi, &sin_psi, &cos_psi);
+  double cos_phi = std::cos(phi);
+  double sin_phi = std::sin(phi);
+  double cos_theta = std::cos(theta);
+  double sin_theta = std::sin(theta);
+  double cos_psi = std::cos(psi);
+  double sin_psi = std::sin(psi);
   // Get original coordinates.
   std::array<double, 3> x_old = x_;
   // Compute new coordinates.
