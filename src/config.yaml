@@ -91,28 +91,26 @@ Modi:
         SQRTS: 1.0
 
     Nucleus:
-        # Set up a copper-gold collision.
         # Definitions for the projectile:
+        # Deuteron
         Projectile:
-            PARTICLES: {2212: 29, 2112: 34}
+            PARTICLES: {2212: 1, 2112: 1}
+            # very hard Woods-Saxon distribution.
+            DIFFUSIVENESS: .001
             AUTOMATIC: false
             DEFORMED: false
         # Definitions for the target:
+        # Lead
         Target:
-            PARTICLES: {2212: 79, 2112: 118}
+            PARTICLES: {2212: 82, 2112: 126}
             AUTOMATIC: true
-            DEFORMED: true
+            DEFORMED: false
+
         # Collision energy (E_LAB, P_LAB, SQRTSNN).
-        # E_LAB : 100
-        # P_LAB : 100
-        SQRTSNN: 10
+        SQRTSNN: 2
         # The representative particles (two PDG IDs) determining the
         # subsystem "NN" in sqrt(s_NN). Let's try neutron-neutron.
         SQRTS_REPS: [2112, 2112]
         # The reference frame in which to do the calculation.
         # (1 = center of velocity, 2 = center of mass, 3 = fixed target)
         CALCULATION_FRAME: 1
-        # Impact parameter. We'll sample from a distribution
-        # between 0 and 10.
-        Impact:
-            MAX: 10
