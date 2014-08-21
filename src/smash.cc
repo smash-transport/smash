@@ -239,14 +239,15 @@ int main(int argc, char *argv[]) {
       output_conf.take({"Binary_particles"});
     }
     if (static_cast<bool>(output_conf.take({"ROOT", "Enable"}))) {
-      #ifdef SMASH_USE_ROOT
+#ifdef SMASH_USE_ROOT
       output_list.emplace_back(new RootOutput(
                                output_path, output_conf["ROOT"]));
-      #endif
-      #ifndef SMASH_USE_ROOT
-      printf("You requested ROOT output, but ROOT is disabled. ");
-      printf("To enable ROOT: cmake -D USE_ROOT=ON <path>. \n");
-      #endif
+#else
+      printf(
+          "You requested ROOT output, but ROOT is disabled. "
+          "To enable ROOT: cmake -D USE_ROOT=ON <path>.\n");
+      output_conf.take({"ROOT"});
+#endif
     } else {
       output_conf.take({"ROOT"});
     }
