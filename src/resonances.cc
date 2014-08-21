@@ -216,10 +216,12 @@ size_t two_to_two_formation(const ParticleType &type_particle1,
     int I_z = type_resonance.isospin3() + second_type.isospin3();
 
     /* Compute total isospin range with given initial and final particles. */
-    int I_max = std::min(type_resonance.isospin()+second_type.isospin(),
-                         type_particle1.isospin()+type_particle2.isospin());
-    int I_min = std::max(abs(type_resonance.isospin()-second_type.isospin()),
-                         abs(type_particle1.isospin()-type_particle2.isospin()));
+    int I_max = std::min(type_resonance.isospin() + second_type.isospin(),
+                         type_particle1.isospin() + type_particle2.isospin());
+    int I_min = std::max(abs(type_resonance.isospin()
+                             - second_type.isospin()),
+                         abs(type_particle1.isospin()
+                             - type_particle2.isospin()));
     I_min = std::max(I_min, abs(I_z));
 
     /* Loop over total isospin in allowed range.

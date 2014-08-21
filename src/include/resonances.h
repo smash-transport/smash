@@ -25,7 +25,7 @@ namespace Smash {
  *
  * \f$(-1)^{j_1 - j_2 + m_3} \sqrt(2 j_3 + 1) \cdot [Wigner 3J symbol] \f$
  * Note that the calculation assumes that the spin/isospin values (j/m)
- * have been multiplied by two (in oder to be integer). */
+ * have been multiplied by two (in order to be integer). */
 double clebsch_gordan(const int j1, const int j2, const int j3,
                       const int m1, const int m2, const int m3);
 
