@@ -170,6 +170,23 @@ std::unique_ptr<T> make_unique(Args &&... args) {
   return std::unique_ptr<T>{new T{std::forward<Args>(args)...}};
 }
 
+namespace {
+template <int Contents>
+std::unique_ptr<OutputInterface> create_select_format(bf::path path,
+                                                      Configuration config,
+                                                      std::string name) {
+  const bool modern_format =
+      config.has_value({"2013_format"}) ? config.take({"2013_format"}) : false;
+  if (modern_format) {
+    return make_unique<OscarOutput<OscarFormat2013, Contents>>(std::move(path),
+                                                               std::move(name));
+  } else {
+    return make_unique<OscarOutput<OscarFormat1999, Contents>>(std::move(path),
+                                                               std::move(name));
+  }
+}
+}  // unnamed namespace
+
 std::unique_ptr<OutputInterface> create_oscar_output(bf::path path,
                                                      Configuration config) {
   if (config.has_value({"OSCAR_PARTICLELIST", "Enable"})) {
@@ -178,33 +195,15 @@ std::unique_ptr<OutputInterface> create_oscar_output(bf::path path,
     if (!enabled) {
       config.take({"OSCAR_PARTICLELIST"});
     } else {
-      const bool modern_format = subconfig.has_value({"2013_format"})
-                                     ? subconfig.take({"2013_format"})
-                                     : false;
       const bool only_final = subconfig.has_value({"Only_final"})
                                   ? subconfig.take({"Only_final"})
                                   : true;
-      // combine the two bools to get four possible states
-      switch (modern_format * 2 + only_final) {
-        case 0:  // modern_format == only_final == false
-          return make_unique<
-              OscarOutput<OscarFormat1999, OscarTimesteps | OscarAtEventstart>>(
-              std::move(path), "particle_lists");
-        case 1:  // modern_format == false && only_final == true
-          return make_unique<
-              OscarOutput<OscarFormat1999, OscarParticlesAtEventend>>(
-              std::move(path), "particle_lists");
-        case 2:  // modern_format == true  && only_final == false
-          return make_unique<
-              OscarOutput<OscarFormat2013, OscarTimesteps | OscarAtEventstart>>(
-              std::move(path), "particle_lists");
-        case 3:  // modern_format == only_final == true
-          return make_unique<
-              OscarOutput<OscarFormat2013, OscarParticlesAtEventend>>(
-              std::move(path), "particle_lists");
-        default:
-          throw std::runtime_error(
-              "impossible Oscar output configuration requested");
+      if (only_final) {
+        return create_select_format<OscarParticlesAtEventend>(
+            std::move(path), std::move(subconfig), "particle_lists");
+      } else {
+        return create_select_format<OscarTimesteps | OscarAtEventstart>(
+            std::move(path), std::move(subconfig), "particle_lists");
       }
     }
   }
@@ -214,33 +213,16 @@ std::unique_ptr<OutputInterface> create_oscar_output(bf::path path,
     if (!enabled) {
       config.take({"OSCAR_COLLISIONS"});
     } else {
-      const bool modern_format = subconfig.has_value({"2013_format"})
-                                     ? subconfig.take({"2013_format"})
-                                     : false;
       const bool print_start_end = subconfig.has_value({"Print_start_end"})
                                   ? subconfig.take({"Print_start_end"})
                                   : false;
-      // combine the two bools to get four possible states
-      switch (modern_format * 2 + print_start_end) {
-        case 0:  // modern_format == print_start_end == false
-          return make_unique<OscarOutput<OscarFormat1999, OscarInteractions>>(
-              std::move(path), "full_event_history");
-        case 1:  // modern_format == false && print_start_end == true
-          return make_unique<OscarOutput<OscarFormat1999,
-                                         OscarInteractions | OscarAtEventstart |
-                                             OscarParticlesAtEventend>>(
-              std::move(path), "full_event_history");
-        case 2:  // modern_format == true  && print_start_end == false
-          return make_unique<OscarOutput<OscarFormat2013, OscarInteractions>>(
-              std::move(path), "full_event_history");
-        case 3:  // modern_format == print_start_end == true
-          return make_unique<OscarOutput<OscarFormat2013,
-                                         OscarInteractions | OscarAtEventstart |
-                                             OscarParticlesAtEventend>>(
-              std::move(path), "full_event_history");
-        default:
-          throw std::runtime_error(
-              "impossible Oscar output configuration requested");
+      if (print_start_end) {
+        return create_select_format<OscarInteractions | OscarAtEventstart |
+                                    OscarParticlesAtEventend>(
+            std::move(path), std::move(subconfig), "full_event_history");
+      } else {
+        return create_select_format<OscarInteractions>(
+            std::move(path), std::move(subconfig), "full_event_history");
       }
     }
   }
