@@ -62,6 +62,9 @@ class ParticleType {
   /// \copydoc PdgCode::isospin_total
   int isospin() const { return isospin_; }
 
+  /// \copydoc PdgCode::isospin3
+  int isospin3() const { return pdgcode_.isospin3(); }
+
   /// \copydoc PdgCode::charge
   int charge() const { return charge_; }
 
