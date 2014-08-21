@@ -27,7 +27,13 @@ namespace Smash {
 /// Selector for the output format of OscarOutput
 enum OscarOutputFormat { OscarFormat2013, OscarFormat1999 };
 
-/// Flags for the \p Contents template parameter of OscarOutput
+/**
+ * \brief Flags for the \p Contents template parameter of OscarOutput.
+ *
+ * Flags can be combined with binary OR operators to some arbitrary int. That's
+ * why the values of the enumerators are written out (in hexadecimal), to ensure
+ * every flag occupies a single bit.
+ */
 enum OscarOutputContents {
   /// store interaction information (write_interaction)
   OscarInteractions = 0x001,
@@ -39,6 +45,13 @@ enum OscarOutputContents {
   OscarParticlesAtEventend = 0x008
 };
 
+/**
+ * \tparam Format Determines the variant of OSCAR formatting that is used. See
+ *                OscarOutputFormat.
+ * \tparam Contents Determines what information will be written to file. This
+ *                  integer is a bitflag that can be constructed from ORing
+ *                  enumerators from OscarOutputContents together.
+ */
 template <OscarOutputFormat Format, int Contents>
 class OscarOutput : public OutputInterface {
  public:

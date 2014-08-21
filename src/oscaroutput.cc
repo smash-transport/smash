@@ -184,6 +184,7 @@ std::unique_ptr<OutputInterface> create_oscar_output(bf::path path,
       const bool only_final = subconfig.has_value({"Only_final"})
                                   ? subconfig.take({"Only_final"})
                                   : true;
+      // combine the two bools to get four possible states
       switch (modern_format * 2 + only_final) {
         case 0:  // modern_format == only_final == false
           return make_unique<
@@ -219,6 +220,7 @@ std::unique_ptr<OutputInterface> create_oscar_output(bf::path path,
       const bool print_start_end = subconfig.has_value({"Print_start_end"})
                                   ? subconfig.take({"Print_start_end"})
                                   : false;
+      // combine the two bools to get four possible states
       switch (modern_format * 2 + print_start_end) {
         case 0:  // modern_format == print_start_end == false
           return make_unique<OscarOutput<OscarFormat1999, OscarInteractions>>(
@@ -242,7 +244,8 @@ std::unique_ptr<OutputInterface> create_oscar_output(bf::path path,
       }
     }
   }
-  return {};
+  return {};  // return a nullptr to signify the end of OSCAR outputs in the
+              // config file
 }
 
 }  // namespace Smash
