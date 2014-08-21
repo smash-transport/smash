@@ -239,7 +239,13 @@ size_t two_to_two_formation(const ParticleType &type_particle1,
       clebsch_gordan_isospin
         = clebsch_gordan_coefficient(type_resonance.isospin(),
             second_type.isospin(), isospin_final,
-            isospin_z_resonance, isospin_z_i, isospin_z_final);
+            isospin_z_resonance, isospin_z_i, isospin_z_final)
+          * clebsch_gordan_coefficient(type_particle1.isospin(),
+                                       type_particle2.isospin(),
+                                       isospin_final,
+                                       type_particle1.pdgcode().isospin3(),
+                                       type_particle2.pdgcode().isospin3(),
+                                       isospin_z_final);
 
       /* isospin is multiplied by 2,
        *  so we must also decrease it by increments of 2
