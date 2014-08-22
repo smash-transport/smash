@@ -37,6 +37,7 @@ set(SMASH_LIBRARIES ${SMASH_LIBRARIES}
    ${GSL_CBLAS_LIBRARY}
    ${Boost_LIBRARIES}
    ${YAML_LDFLAGS}
+   einhard
    )
 
 # list the source files

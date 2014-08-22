@@ -52,9 +52,6 @@ if(NOT CXX11_COMPILES)
    message(FATAL_ERROR "Your compiler did not manage to compile a simple C++11 program. Please get a newer C++ compiler.")
 endif()
 
-# enable debug preprocessor variable
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
-
 option(Profile "Profile" OFF)
 if(Profile)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg -O0")
@@ -64,6 +61,8 @@ endif(Profile)
 # have binary in the build directory
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR})
 
+include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/einhard")
+
 # enable standard CTest
 # tests are enabled/disabled with the BUILD_TESTING switch to cmake
 # uncomment the next line to default BUILD_TESTING to OFF
@@ -71,5 +70,6 @@ SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR})
 include(CTest)
 
 # subdirectories where the code is
+add_subdirectory(3rdparty)
 add_subdirectory(src)
 add_subdirectory(doc)
