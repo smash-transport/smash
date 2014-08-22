@@ -274,6 +274,14 @@ class Configuration {
    */
   Value take(std::initializer_list<const char *> keys);
 
+  template <typename T>
+  T take(std::initializer_list<const char *> keys, T default_value) {
+    if (has_value(keys)) {
+      return take(keys).operator T();
+    }
+    return default_value;
+  }
+
   /**
    * Additional interface for SMASH to read configuration values without
    * removing them.
