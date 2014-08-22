@@ -144,7 +144,12 @@ template <LogLevel VERBOSITY> void OutputFormatter::doInit( const char *areaName
 
 	if( colorize )
 	{
+		indent = out->str().size() - sizeof(colorForLogLevel<VERBOSITY>());
 		*out << NoColor_t_::ANSI();
+	}
+	else
+	{
+		indent = out->str().size();
 	}
 }
 
@@ -167,9 +172,22 @@ void OutputFormatter::checkColorReset()
 void OutputFormatter::doCleanup() noexcept
 {
 	*out << '\n';
-	const std::string s = out->str();
+	std::string s = out->str();
 	out->str( std::string() );
-	std::fwrite( s.c_str(), s.size(), 1, stdout );
+	std::string s2;
+	s2.reserve( s.size() + 18 * 2 );
+	std::size_t pos = 0;
+	std::size_t start = 0;
+	while( ( pos = s.find( '\n', start ) + 1 ) <
+	       s.size() - 1 )  // the size - 1 catches double \n\n at the end of the string, reducing it to a single \n
+	{
+		s2.append( s, start, pos - start );
+		s2.append( indent, ' ' );
+		start = pos;
+	}
+	s2.append( s, start, pos - start );
+	std::fwrite( s2.c_str(), s2.size(), 1, stdout );
+	std::fflush( stdout );  // FIXME: don't want to flush too often, what's the right logic here?
 }
 }  // namespace einhard
 

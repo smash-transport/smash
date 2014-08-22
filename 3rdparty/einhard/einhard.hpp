@@ -196,6 +196,8 @@ namespace einhard
 		private:
 			// Pointer to the thread_local stringstream (if enabled)
 			std::ostringstream *out;
+			// The number of chars required for aligning
+			unsigned char indent;
 			// Whether output is enabled
 			const bool enabled;
 			// Whether to colorize the output
