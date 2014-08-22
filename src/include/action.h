@@ -223,34 +223,33 @@ class ScatterAction : public Action {
   void perform(Particles *particles, size_t &id_process);
 
   /**
-   * Determine the elastic cross section for this collision. It is given by a
-   * parametrization of exp. data for BB collisions and is constant for
-   * BM and MM collisions.
+   * Determine the elastic cross section for this collision. This routine
+   * by default just gives a constant cross section (corresponding to
+   * elast_par) but can be overriden in child classes for a different behavior.
    *
-   * \param[in] elast_par Elastic cross section parameter from the input file
-   * (currently only used for BM and MM collisions).
+   * \param[in] elast_par Elastic cross section parameter from the input file.
    * 
    * \return A ProcessBranch object containing the cross section and
    * final-state IDs.
    */
-  ProcessBranch elastic_cross_section(float elast_par);
+  virtual ProcessBranch elastic_cross_section(float elast_par);
 
   /**
-  * Find all resonances that can be produced in a collision of the two
+  * Find all resonances that can be produced in a 2->1 collision of the two
   * input particles and the production cross sections of these resonances.
   *
   * Given the data and type information of two colliding particles,
   * create a list of possible resonance production processes
   * and their cross sections.
-  * Process can be either 2-to-1 (just a resonance in the final state)
-  * or 2-to-2 (resonance and a stable particle in the final state).
   *
   * \return A list of processes with resonance in the final state.
-  * Each element in the list contains the type(s)
-  * of the final state particle(s)
+  * Each element in the list contains the type of the final-state particle
   * and the cross section for that particular process.
   */
-  ProcessBranchList resonance_cross_section();
+  virtual ProcessBranchList resonance_cross_sections();
+
+  /** Find all inelastic 2->2 processes for this reaction. */
+  virtual ProcessBranchList two_to_two_cross_sections() { return ProcessBranchList(); }
 
  protected:
   /// determine the total energy in the center-of-mass frame
@@ -274,6 +273,55 @@ class ScatterAction : public Action {
   void resonance_formation();
 };
 
+
+/**
+ * \ingroup action
+ * ScatterActionBarBar is a special ScatterAction which represents the
+ * scattering of two baryons.
+ */
+class ScatterActionBarBar : public ScatterAction {
+ public:
+  /* Inherit constructor. */
+  using ScatterAction::ScatterAction;
+  /**
+   * Determine the elastic cross section for a baryon-baryon collision.
+   * It is given by a parametrization of exp. data for NN collisions and is
+   * constant otherwise.
+   *
+   * \param[in] elast_par Elastic cross section parameter from the input file.
+   * 
+   * \return A ProcessBranch object containing the cross section and
+   * final-state IDs.
+   */
+  ProcessBranch elastic_cross_section(float elast_par);
+  /* There is no resonance formation out of two baryons: Return empty list. */
+  ProcessBranchList resonance_cross_sections() { return ProcessBranchList(); }
+  /** Find all inelastic 2->2 processes for this reaction. */
+  ProcessBranchList two_to_two_cross_sections();
+};
+
+/**
+ * \ingroup action
+ * ScatterActionBarMes is a special ScatterAction which represents the
+ * scattering of a baryon and a meson.
+ */
+class ScatterActionBarMes : public ScatterAction {
+ public:
+  /* Inherit constructor. */
+  using ScatterAction::ScatterAction;
+};
+
+/**
+ * \ingroup action
+ * ScatterActionMesMes is a special ScatterAction which represents the
+ * scattering of two mesons.
+ */
+class ScatterActionMesMes : public ScatterAction {
+ public:
+  /* Inherit constructor. */
+  using ScatterAction::ScatterAction;
+ private:
+};
 
 using ActionPtr = std::unique_ptr<Action>;
 using ScatterActionPtr = std::unique_ptr<ScatterAction>;

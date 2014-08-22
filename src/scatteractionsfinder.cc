@@ -81,13 +81,24 @@ ScatterActionsFinder::check_collision(const int id_a, const int id_b,
     return nullptr;
   }
 
-  act = new ScatterAction(data_a, data_b, time_until_collision);
+  /* Create ScatterAction object. */
+  if (data_a.pdgcode().baryon_number() != 0 &&
+      data_b.pdgcode().baryon_number() != 0) {
+    act = new ScatterActionBarBar(data_a, data_b, time_until_collision);
+  } else if (data_a.pdgcode().baryon_number() != 0 ||
+             data_b.pdgcode().baryon_number() != 0) {
+    act = new ScatterActionBarMes(data_a, data_b, time_until_collision);
+  } else {
+    act = new ScatterActionMesMes(data_a, data_b, time_until_collision);
+  }
 
-  /* Resonance production cross section */
-  act->add_processes(act->resonance_cross_section());
-
-  /* Add elastic process.  */
+  /* Add various subprocesses.  */
+  /* (1) elastic */
   act->add_process(act->elastic_cross_section(elastic_parameter_));
+  /* (2) resonance formation (2->1) */
+  act->add_processes(act->resonance_cross_sections());
+  /* (3) 2->2 (inelastic) */
+  act->add_processes(act->two_to_two_cross_sections());
 
   {
     /* distance criteria according to cross_section */
