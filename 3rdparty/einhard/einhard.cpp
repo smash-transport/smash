@@ -19,6 +19,7 @@
  */
 
 #include <einhard.hpp>
+#include <stdexcept>
 
 namespace einhard
 {
@@ -108,6 +109,30 @@ const char *getLogLevelString( LogLevel level )
 	return "";
 }
 
+LogLevel getLogLevel( const std::string &level) {
+  if (level == "ALL") {
+    return einhard::ALL;
+  } else if (level == "TRACE") {
+    return einhard::TRACE;
+  } else if (level == "DEBUG") {
+    return einhard::DEBUG;
+  } else if (level == "INFO") {
+    return einhard::INFO;
+  } else if (level == "WARN") {
+    return einhard::WARN;
+  } else if (level == "ERROR") {
+    return einhard::ERROR;
+  } else if (level == "FATAL") {
+    return einhard::FATAL;
+  } else if (level == "OFF") {
+    return einhard::OFF;
+  } else {
+    throw std::invalid_argument("invalid logging level " + level +
+                                ". Accepted values are ALL, TRACE, DEBUG, "
+                                "INFO, WARN, ERROR, FATAL, and OFF.");
+  }
+}
+
 template <LogLevel VERBOSITY> void OutputFormatter::doInit( const char *areaName )
 {
 	out = &t_out;
@@ -136,7 +161,7 @@ template <LogLevel VERBOSITY> void OutputFormatter::doInit( const char *areaName
 
 	// output the log level and logging area of the message
 	*out << ' ' << getLogLevelString<VERBOSITY>();
-	if( areaName )
+	if( areaName && areaName[0] != '\0' )
 	{
 		*out << ' ' << areaName;
 	}
