@@ -198,6 +198,8 @@ class NucleusModus : public ModusDefault {
   // @param m2 The mass of the target.
   // @return < v1, v2 >
   std::pair<double, double> get_velocities(float mandelstam_s, float m1, float m2);
+
+  friend std::ostream &operator<<(std::ostream &, const NucleusModus &);
 };
 
 }  // namespace Smash

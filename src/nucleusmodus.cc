@@ -16,6 +16,7 @@
 #include "include/angles.h"
 #include "include/configuration.h"
 #include "include/experimentparameters.h"
+#include "include/logging.h"
 #include "include/numerics.h"
 #include "include/outputroutines.h"
 #include "include/particles.h"
@@ -192,19 +193,14 @@ NucleusModus::NucleusModus(Configuration modus_config,
   }
 }
 
-void NucleusModus::print_startup() {
-  printf("Nucleus initialized:\n");
-  printf("S (nucleus-nucleus) = %g GeV \n", total_s_);
-  printf("Impact parameter = %g fm\n", impact_);
-  printf("Initial distance between nuclei: %g fm\n", 2.0*initial_z_displacement_);
-  printf("Projectile initialized with %zu particles (%zu test particles)\n",
-          projectile_->number_of_particles(), projectile_->size());
-  printf("Target initialized with %zu particles (%zu test particles)\n",
-          target_->number_of_particles(), target_->size());
-  printf("Masses (projectile, target): %g GeV %g GeV\n",
-          projectile_->mass(), target_->mass());
-  printf("Radii (projectile, target): %g fm %g fm\n",
-          projectile_->get_nuclear_radius(), target_->get_nuclear_radius());
+std::ostream &operator<<(std::ostream &out, const NucleusModus &m) {
+  return out << "-- Nucleus Modus:\n"
+                "S (nucleus-nucleus) = " << format(m.total_s_, "GeV")
+             << "\nImpact parameter = " << format(m.impact_, "fm")
+             << "\nInitial distance between nuclei: "
+             << format(2 * m.initial_z_displacement_, "fm")
+             << "\nProjectile:\n" << *m.projectile_
+             << "\nTarget:\n" << *m.target_;
 }
 
 float NucleusModus::initial_conditions(Particles *particles,

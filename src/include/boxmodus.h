@@ -115,6 +115,8 @@ class BoxModus : public ModusDefault {
   const float start_time_ = 0.0f;
   /// particle multiplicities at initialization
   const std::map<PdgCode, int> init_multipl_;
+
+  friend std::ostream &operator<<(std::ostream &, const BoxModus &);
 };
 
 }  // namespace Smash

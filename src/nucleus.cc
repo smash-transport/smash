@@ -13,6 +13,7 @@
 #include <string>
 
 #include "include/angles.h"
+#include "include/logging.h"
 #include "include/numerics.h"
 #include "include/particles.h"
 #include "include/pdgcode.h"
@@ -390,6 +391,15 @@ FourVector Nucleus::center() const {
   }
   centerpoint /= size();
   return centerpoint;
+}
+
+std::ostream &operator<<(std::ostream &out, const Nucleus &n) {
+  return out << "  #particles   #testparticles   mass [GeV]   radius [fm]  diffusiveness [fm]\n"
+             << format(n.number_of_particles(), nullptr, 12)
+             << format(n.size(), nullptr, 17)
+             << format(n.mass(), nullptr, 13)
+             << format(n.get_nuclear_radius(), nullptr, 14)
+             << format(n.get_diffusiveness(), nullptr, 20);
 }
 
 }  // namespace Smash

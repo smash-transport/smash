@@ -142,8 +142,9 @@ double two_to_one_formation(const ParticleType &type_particle1,
   for (const auto &mode : decaymodes) {
     size_t decay_particles = mode.pdg_list().size();
     if ( decay_particles > 3 ) {
-      printf("Warning: Not a 1->2 or 1->3 process!\n");
-      printf("Number of decay particles: %zu \n", decay_particles);
+      logger<LogArea::Resonances>().warn("Not a 1->2 or 1->3 process!\n",
+                                         "Number of decay particles: ",
+                                         decay_particles);
     } else {
       /* There must be enough energy to produce all decay products */
       if (std::sqrt(mandelstam_s) < mode.threshold())

@@ -12,6 +12,7 @@
 #include "include/action.h"
 #include "include/constants.h"
 #include "include/experimentparameters.h"
+#include "include/logging.h"
 #include "include/macros.h"
 #include "include/outputroutines.h"
 #include "include/particles.h"
@@ -26,6 +27,7 @@ ScatterActionsFinder::ScatterActionsFinder(const ExperimentParameters &parameter
 
 double ScatterActionsFinder::collision_time(const ParticleData &p1,
                                             const ParticleData &p2) {
+  const auto &log = logger<LogArea::FindScatter>();
   /* UrQMD collision time
    * arXiv:1203.4418 (5.15): in computational frame
    * position of particle a: x_a
@@ -35,11 +37,12 @@ double ScatterActionsFinder::collision_time(const ParticleData &p1,
    * t_{coll} = - (x_a - x_b) . (p_a - p_b) / (p_a - p_b)^2
    */
   ThreeVector pos_diff = p1.position().threevec() - p2.position().threevec();
-  printd("Particle %d<->%d position difference: %g %g %g %g [fm]\n",
-    p1.id(), p2.id(), pos_diff.x1(), pos_diff.x2(), pos_diff.x3());
   ThreeVector velo_diff = p1.velocity() - p2.velocity();
-  printd("Particle %d<->%d velocity difference: %g %g %g %g [fm]\n",
-    p1.id(), p2.id(), velo_diff.x1(), velo_diff.x2(), velo_diff.x3());
+  log.trace(source_location, "\n"
+            "Scatter ", p1, "\n"
+            "    <-> ", p2, "\n"
+            "=> position difference: ", pos_diff, " [fm]",
+            ", velocity difference: ", velo_diff, " [GeV]");
   /* Zero momentum leads to infite distance, particles are not approaching. */
   if (fabs(velo_diff.sqr()) < really_small) {
     return -1.0;
@@ -52,6 +55,7 @@ double ScatterActionsFinder::collision_time(const ParticleData &p1,
 ActionPtr
 ScatterActionsFinder::check_collision(const int id_a, const int id_b,
                                       Particles *particles) const {
+  const auto &log = logger<LogArea::FindScatter>();
 
   ScatterAction* act = nullptr;
 
@@ -60,8 +64,10 @@ ScatterActionsFinder::check_collision(const int id_a, const int id_b,
 
   /* just collided with this particle */
   if (data_a.id_process() >= 0 && data_a.id_process() == data_b.id_process()) {
-    printd("Skipping collided particle %d <-> %d at time %g due process %d\n",
-           id_a, id_b, data_a.position().x0(), data_a.id_process());
+    log.debug("Skipping collided particles at time ", data_a.position().x0(),
+              " due to process ", data_a.id_process(),
+              "\n    ", data_a,
+              "\n<-> ", data_b);
     return nullptr;
   }
 
@@ -76,8 +82,9 @@ ScatterActionsFinder::check_collision(const int id_a, const int id_b,
        time_until_collision > data_a.collision_time()) ||
       (data_b.collision_time() > 0.0 &&
        time_until_collision > data_b.collision_time())) {
-    printd("%g Not minimal particle %d <-> %d\n", data_a.position().x0(), id_a,
-           id_b);
+    log.debug(data_a.position().x0(), " Not minimal particle",
+              "\n    ", data_a,
+              "\n<-> ", data_b);
     return nullptr;
   }
 
@@ -96,8 +103,9 @@ ScatterActionsFinder::check_collision(const int id_a, const int id_b,
         delete act;
         return nullptr;
       }
-    printd("distance squared particle %d <-> %d: %g \n", id_a, id_b,
-           distance_squared);
+      log.debug("particle distance squared: ", distance_squared,
+                "\n    ", data_a,
+                "\n<-> ", data_b);
   }
 
   /* Set up collision partners. */

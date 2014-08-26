@@ -17,6 +17,7 @@
 #include "include/decaymodes.h"
 #include "include/inputfunctions.h"
 #include "include/iomanipulators.h"
+#include "include/logging.h"
 #include "include/outputroutines.h"
 #include "include/pdgcode.h"
 #include "include/stringfunctions.h"
@@ -98,6 +99,7 @@ static std::string antiname(const std::string &name, PdgCode code) {
 };
 
 void ParticleType::create_type_list(const std::string &input) {  //{{{
+  const auto &log = logger<LogArea::ParticleType>();
   static ParticleTypeList type_list;
   type_list.clear();  // in case LoadFailure was thrown and caught and we should
                       // try again
@@ -109,28 +111,20 @@ void ParticleType::create_type_list(const std::string &input) {  //{{{
     lineinput >> name >> mass >> width >> pdgcode;
     if (lineinput.fail()) {
       throw Particles::LoadFailure(build_error_string(
-          "While loading the Particle data:\nFailed to convert the input "
+          "While loading the ParticleType data:\nFailed to convert the input "
           "string to the expected data types.",
           line));
     }
     ensure_all_read(lineinput, line);
 
-    printd("Setting particle type %s mass %g width %g pdgcode %s\n",
-           name.c_str(), mass, width, pdgcode.string().c_str());
-    printd("Setting particle type %s isospin %i/2 charge %i spin %i/2\n",
-           name.c_str(), pdgcode.isospin_total(), pdgcode.charge(),
-                                                  pdgcode.spin());
-
     type_list.emplace_back(name, mass, width, pdgcode);
+    log.debug() << "Setting     particle type: " << type_list.back();
     if (pdgcode.has_antiparticle()) {
       /* add corresponding antiparticle */
       PdgCode anti = pdgcode.get_antiparticle();
       name = antiname(name, pdgcode);
       type_list.emplace_back(name, mass, width, anti);
-      printd("Setting antiparticle type %s mass %g width %g pdgcode %s\n",
-             name.c_str(), mass, width, anti.string().c_str());
-      printd("Setting antiparticle type %s isospin %i/2 charge %i spin %i/2\n",
-             name.c_str(), anti.isospin_total(), anti.charge(), anti.spin());
+      log.debug() << "Setting antiparticle type: " << type_list.back();
     }
   }
   type_list.shrink_to_fit();

@@ -16,6 +16,8 @@
 #include <limits>
 #include <stdexcept>
 
+#include "logging.h"
+
 namespace Smash {
 
 /** Clock tracks the simulation time, i.e., the time IN the simulation.
@@ -163,8 +165,8 @@ class Clock {
    **/
   void reset(const float reset_time) {
     if (reset_time < current_time()) {
-      std::printf("Resetting clock from %g fm/c to %g fm/c\n",
-              current_time(), reset_time);
+      logger<LogArea::Clock>().info("Resetting clock from", current_time(),
+                                    " fm/c to ", reset_time, " fm/c");
     }
     reset_time_ = reset_time;
     counter_ = 0.0;

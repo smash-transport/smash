@@ -86,6 +86,8 @@ class ColliderModus : public ModusDefault {
   const PdgCode target_;
   /// Center-of-mass energy of the collision in GeV
   const float sqrts_;
+
+  friend std::ostream &operator<<(std::ostream &, const ColliderModus &);
 };
 
 }  // namespace Smash

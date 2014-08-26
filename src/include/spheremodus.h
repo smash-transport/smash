@@ -82,6 +82,8 @@ class SphereModus : public ModusDefault {
   float sphere_temperature_;
   /// Starting time for the Sphere
   const float start_time_ = 0.0f;
+
+  friend std::ostream &operator<<(std::ostream &, const SphereModus &);
 };
 }  // namespace Smash
 #endif  // SRC_INCLUDE_SPHEREMODUS_H_

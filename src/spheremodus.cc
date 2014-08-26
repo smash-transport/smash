@@ -38,12 +38,15 @@ SphereModus::SphereModus(Configuration modus_config,
       start_time_(modus_config.take({"Sphere", "START_TIME"})) {
 }
 
-/* print_startup - console output on startup of sphere specific parameters */
-void SphereModus::print_startup() {
-  printf("Radius of the sphere: %g [fm]\n", radius_);
-  printf("Total number of particles in sphere: %i \n", number_of_particles_);
-  printf("Temperature for momentum sampling: %f \n", sphere_temperature_);
-  printf("Starting time for Sphere calculation: %f \n", start_time_);
+/* console output on startup of sphere specific parameters */
+std::ostream &operator<<(std::ostream &out, const SphereModus &m) {
+  return out << "-- Sphere Modus:\n"
+                "Radius of the sphere: " << m.radius_ << " [fm]"
+             << "\nTotal number of particles in sphere: "
+             << m.number_of_particles_
+             << "\nTemperature for momentum sampling: " << m.sphere_temperature_
+             << "\nStarting time for Sphere calculation: " << m.start_time_
+             << '\n';
 }
 
 
@@ -59,7 +62,7 @@ float SphereModus::initial_conditions(Particles *particles,
       continue;
     }
     number_of_stable_types = number_of_stable_types + 1;
-    printd("%s mass: %g [GeV]\n", type.name().c_str(), type.pole_mass());
+    printd("%s mass: %g [GeV]\n", type.name().c_str(), type.mass());
   }
 
   /* just produce equally many particles per type */

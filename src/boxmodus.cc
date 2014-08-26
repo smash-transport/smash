@@ -19,14 +19,23 @@
 #include "include/constants.h"
 #include "include/distributions.h"
 #include "include/experimentparameters.h"
+#include "include/logging.h"
 #include "include/macros.h"
-#include "include/outputroutines.h"
 #include "include/outputinterface.h"
+#include "include/outputroutines.h"
 #include "include/particles.h"
 #include "include/random.h"
 #include "include/threevector.h"
 
 namespace Smash {
+
+/* console output on startup of box specific parameters */
+std::ostream &operator<<(std::ostream &out, const BoxModus &m) {
+  return out << "-- Box Modus:\n"
+                "Size of the box: (" << m.length_ << " fm)³"
+             << "\nInitial temperature: " << m.temperature_ << " GeV"
+             << "\nIC type " << m.initial_condition_ << '\n';
+}
 
 BoxModus::BoxModus(Configuration modus_config, const ExperimentParameters &)
     : initial_condition_(modus_config.take({"Box", "INITIAL_CONDITION"})),
@@ -37,16 +46,10 @@ BoxModus::BoxModus(Configuration modus_config, const ExperimentParameters &)
                                                 convert_for(init_multipl_)) {
 }
 
-/* print_startup - console output on startup of box specific parameters */
-void BoxModus::print_startup() {
-  printf("Size of the box: %g x %g x %g fm\n", length_, length_, length_);
-  printf("Initial temperature: %g GeV\n", temperature_);
-  printf("IC type %d\n", initial_condition_);
-}
-
 /* initial_conditions - sets particle data for @particles */
 float BoxModus::initial_conditions(Particles *particles,
                                   const ExperimentParameters &parameters) {
+  const auto &log = logger<LogArea::Box>();
   double momentum_radial = 0;
   Angles phitheta;
   FourVector momentum_total(0, 0, 0, 0);
@@ -56,7 +59,7 @@ float BoxModus::initial_conditions(Particles *particles,
   /* Create NUMBER OF PARTICLES according to configuration */
   for (const auto &p : init_multipl_) {
     particles->create(p.second*parameters.testparticles, p.first);
-    printd("Particle %d init multiplicity %d\n", p.first, p.second);
+    log.debug() << "Particle " << p.first << " init multiplicity " << p.second;
   }
   number_density_initial_ = particles->size()/(length_*length_*length_);
 
@@ -70,8 +73,8 @@ float BoxModus::initial_conditions(Particles *particles,
       momentum_radial = 3.0 * this->temperature_;
     }
     phitheta.distribute_isotropically();
-    printd("Particle %d radial momenta %g phi %g cos_theta %g\n", data.id(),
-           momentum_radial, phitheta.phi(), phitheta.costheta());
+    log.debug() << data << ", radial mom:" << field << momentum_radial << ", "
+                << phitheta;
     data.set_4momentum(data.pole_mass(), phitheta.threevec() * momentum_radial);
     momentum_total += data.momentum();
 
@@ -80,8 +83,7 @@ float BoxModus::initial_conditions(Particles *particles,
     data.set_4position(FourVector(start_time_, pos));
 
     /* IC: debug checks */
-    printd_momenta(data);
-    printd_position(data);
+    log.debug() << data;
   }
 
   /* Make total 3-momentum 0 */
@@ -96,8 +98,9 @@ float BoxModus::initial_conditions(Particles *particles,
     momentum_total += data.momentum();
   }
   /* allows to check energy conservation */
-  printf("IC total 4-momentum [GeV]: (%g, %g, %g, %g)\n", momentum_total.x0(),
-             momentum_total.x1(), momentum_total.x2(), momentum_total.x3());
+  log.info() << "IC total 4-momentum [GeV]: "
+             << momentum_total;  // FIXME: for an info message the "IC" string
+                                 // is too cryptic.
   return start_time_;
 }
 
@@ -120,13 +123,13 @@ int BoxModus::sanity_check(Particles *particles) {
 void BoxModus::propagate(Particles *particles,
                          const ExperimentParameters &parameters,
                          const OutputsList &output_list) {
+  const auto &log = logger<LogArea::Box>();
   FourVector distance, position;
   for (ParticleData &data : particles->data()) {
     /* propagation for this time step */
     distance = FourVector(0.0,
                           data.velocity() * parameters.timestep_duration());
-    printd("Particle %d motion: %g %g %g %g\n", data.id(), distance.x0(),
-           distance.x1(), distance.x2(), distance.x3());
+    log.debug() << data << " motion: " << distance;
     /* treat the box boundaries */
     position = data.position();
     position += distance;
@@ -140,7 +143,7 @@ void BoxModus::propagate(Particles *particles,
         output->at_interaction(incoming_particle, {1, data});
       }
     }
-    printd_position(data);
+    log.debug() << data;
   }
 }
 

@@ -268,6 +268,8 @@ class Nucleus {
   inline float get_nuclear_radius() const {
     return nuclear_radius_;
   }
+
+  friend std::ostream &operator<<(std::ostream &, const Nucleus &);
 };
 
 }  // namespace Smash

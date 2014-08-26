@@ -14,6 +14,7 @@
 
 #include "include/angles.h"
 #include "include/constants.h"
+#include "include/logging.h"
 #include "include/outputroutines.h"
 #include "include/random.h"
 #include "include/resonances.h"
@@ -101,6 +102,7 @@ ParticleList Action::choose_channel() {
 
 
 void Action::sample_cms_momenta() {
+  const auto &log = logger<LogArea::Action>();
   /* This function only operates on 2-particle final states. */
   assert(outgoing_particles_.size() == 2);
 
@@ -133,32 +135,30 @@ void Action::sample_cms_momenta() {
   double energy1 = (cms_energy * cms_energy + mass1 * mass1 - mass2 * mass2) /
                    (2.0 * cms_energy);
   double momentum_radial = std::sqrt(energy1 * energy1 - mass1 * mass1);
-  if (!(momentum_radial > 0.0))
-    printf("Warning: radial momenta %g \n", momentum_radial);
+  if (!(momentum_radial > 0.0)) {
+    log.warn("radial momenta ", momentum_radial);
+  }
   /* XXX: Angles should be sampled from differential cross section
    * of this process. */
   Angles phitheta;
   phitheta.distribute_isotropically();
   if (!(energy1 > mass1)) {
-    printf("Particle %s radial momenta %g phi %g cos_theta %g\n",
-           t1.pdgcode().string().c_str(), momentum_radial,
-           phitheta.phi(), phitheta.costheta());
-    printf("Etot: %g m_a: %g m_b %g E_a: %g\n", cms_energy, mass1, mass2,
-           energy1);
+    log.info("Particle ", t1.pdgcode(), " radial momenta ", momentum_radial,
+             phitheta);
+    log.info("Etot: ", cms_energy, " m_a: ", mass1, " m_b: ", mass2, " E_a: ",
+             energy1);
   }
 
   p1->set_4momentum(FourVector(energy1, phitheta.threevec() * momentum_radial));
   p2->set_4momentum(FourVector(cms_energy - energy1,
                                -phitheta.threevec() * momentum_radial));
 
-  printd("p0: %g %g \n", p1->momentum().x0(), p2->momentum().x0());
-  printd("p1: %g %g \n", p1->momentum().x1(), p2->momentum().x1());
-  printd("p2: %g %g \n", p1->momentum().x2(), p2->momentum().x2());
-  printd("p3: %g %g \n", p1->momentum().x3(), p2->momentum().x3());
+  log.debug("p1: ", *p1, "\np2: ", *p2);
 }
 
 
 void Action::check_conservation(const size_t &id_process) const {
+  const auto &log = logger<LogArea::Action>();
   /* Check momentum conservation */
   FourVector momentum_difference;
   for (const auto &part : incoming_particles_) {
@@ -170,19 +170,18 @@ void Action::check_conservation(const size_t &id_process) const {
 
   /* TODO: throw an exception */
   if (fabs(momentum_difference.x0()) > really_small) {
-    printf("Process %zu\n", id_process);
-    printf("Warning: E conservation violation %g\n",
-           momentum_difference.x0());
+    log.warn("Process ", id_process, "\nE conservation violation ",
+             momentum_difference.x0());
   }
-  if (fabs(momentum_difference.x1()) > really_small)
-    printf("Warning: px conservation violation %g\n",
-           momentum_difference.x1());
-  if (fabs(momentum_difference.x2()) > really_small)
-    printf("Warning: py conservation violation %g\n",
-           momentum_difference.x2());
-  if (fabs(momentum_difference.x3()) > really_small)
-    printf("Warning: pz conservation violation %g\n",
-           momentum_difference.x3());
+  if (fabs(momentum_difference.x1()) > really_small) {
+    log.warn("px conservation violation ", momentum_difference.x1());
+  }
+  if (fabs(momentum_difference.x2()) > really_small) {
+    log.warn("py conservation violation ", momentum_difference.x2());
+  }
+  if (fabs(momentum_difference.x3()) > really_small) {
+    log.warn("pz conservation violation ", momentum_difference.x3());
+  }
 
   // TODO: check other conservation laws (baryon number etc)
 }

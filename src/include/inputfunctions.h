@@ -15,6 +15,7 @@
 #include <vector>
 
 #include "particles.h"
+#include "logging.h"
 
 namespace Smash {
 
@@ -63,6 +64,8 @@ std::string build_error_string(std::string message, const Line &line) {/*{{{*/
  * \param input an lvalue reference to an input stream
  */
 std::vector<Line> line_parser(const std::string &input) {/*{{{*/
+  const auto &log = logger<LogArea::InputParser>();
+  log.trace() << source_location << input;
   std::istringstream input_stream(input);
   std::vector<Line> lines;
   lines.reserve(50);

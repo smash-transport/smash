@@ -136,6 +136,11 @@ class ExperimentBase {
   };
 };
 
+template <typename Modus>
+class Experiment;
+template <typename Modus>
+std::ostream &operator<<(std::ostream &out, const Experiment<Modus> &e);
+
 /**
  * The main class, where the simulation of an experiment is executed.
  *
@@ -273,8 +278,9 @@ class Experiment : public ExperimentBase {
   QuantumNumbers conserved_initial_;
   /// system starting time of the simulation
   SystemTimePoint time_start_ = SystemClock::now();
-};
 
+  friend std::ostream &operator<<<>(std::ostream &out, const Experiment &e);
+};
 }  // namespace Smash
 
 #endif  // SRC_INCLUDE_EXPERIMENT_H_
