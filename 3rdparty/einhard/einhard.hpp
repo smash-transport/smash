@@ -207,22 +207,67 @@ namespace einhard
 	// The output stream to print to
 	extern thread_local std::ostringstream t_out;
 
+	class UnconditionalOutput
+	{
+	private:
+		// Pointer to the thread_local stringstream (if enabled)
+		std::ostringstream *out;
+		// The number of chars required for aligning
+		unsigned char indent;
+		// Whether to colorize the output
+		const bool colorize;
+		// Whether the color needs to be reset with the next operator<<
+		bool resetColor = false;
+
+	public:
+		template <LogLevel VERBOSITY>
+		EINHARD_ALWAYS_INLINE_ UnconditionalOutput( bool colorize_, const char *areaName,
+							    std::integral_constant<LogLevel, VERBOSITY> )
+		    : colorize( colorize_ )
+		{
+			doInit<VERBOSITY>( areaName );
+		}
+
+		template <typename T> UnconditionalOutput &operator<<( const Color<T> &col )
+		{
+			if( colorize )
+			{
+				*out << col.ansiCode();
+				resetColor = col.resetColor();
+			}
+			return *this;
+		}
+
+		EINHARD_ALWAYS_INLINE_ UnconditionalOutput &operator<<( std::ostream &( *manip )( std::ostream & ) )
+		{
+			*out << manip;
+			return *this;
+		}
+
+		template <typename T> EINHARD_ALWAYS_INLINE_ UnconditionalOutput &operator<<( const T &msg )
+		{
+			*out << msg;
+			checkColorReset();
+			return *this;
+		}
+
+		void doCleanup() noexcept;
+
+	protected:
+		EINHARD_ALWAYS_INLINE_ UnconditionalOutput( bool colorize_ ) : colorize( colorize_ )
+		{
+		}
+		template <LogLevel VERBOSITY> void doInit( const char *areaName );
+		void checkColorReset();
+	};
 	/**
 	 * A wrapper for the output stream taking care proper formatting and colorization of the output.
 	 */
-	class OutputFormatter
+	class OutputFormatter : public UnconditionalOutput
 	{
 		private:
-			// Pointer to the thread_local stringstream (if enabled)
-			std::ostringstream *out;
-			// The number of chars required for aligning
-			unsigned char indent;
 			// Whether output is enabled
 			const bool enabled;
-			// Whether to colorize the output
-			const bool colorize;
-			// Whether the color needs to be reset with the next operator<<
-			bool resetColor = false;
 
 		public:
 			OutputFormatter( const OutputFormatter & ) = delete;
@@ -232,7 +277,7 @@ namespace einhard
 			EINHARD_ALWAYS_INLINE_ OutputFormatter( bool enabled_, bool const colorize_,
 								const char *areaName,
 								std::integral_constant<LogLevel, VERBOSITY> )
-			    : enabled( enabled_ ), colorize( colorize_ )
+			    : UnconditionalOutput( colorize_ ), enabled( enabled_ )
 			{
 				if( enabled )
 				{
@@ -242,10 +287,9 @@ namespace einhard
 
 			template <typename T> OutputFormatter &operator<<( const Color<T> &col )
 			{
-				if( enabled && colorize )
+				if( enabled )
 				{
-					*out << col.ansiCode();
-					resetColor = col.resetColor();
+					UnconditionalOutput::operator<<(col);
 				}
 				return *this;
 			}
@@ -254,7 +298,7 @@ namespace einhard
 			{
 				if( enabled )
 				{
-					*out << manip;
+					UnconditionalOutput::operator<<(manip);
 				}
 				return *this;
 			}
@@ -263,8 +307,7 @@ namespace einhard
 			{
 				if( enabled )
 				{
-					*out << msg;
-					checkColorReset();
+					UnconditionalOutput::operator<<(msg);
 				}
 				return *this;
 			}
@@ -277,13 +320,6 @@ namespace einhard
 					doCleanup();
 				}
 			}
-
-		private:
-			template <LogLevel VERBOSITY> void doInit( const char *areaName );
-
-			void checkColorReset();
-
-			void doCleanup() noexcept;
 	};
 
 	/**
@@ -351,11 +387,26 @@ namespace einhard
 			{
 				return DummyOutputFormatter();
 			}
+
+			template <typename... Ts> void trace( Ts &&... ) const noexcept
+			{
+			}
 #else
 			OutputFormatter trace() const
 			{
 				return {isEnabled<TRACE>(), colorize, areaName,
 					std::integral_constant<LogLevel, TRACE>()};
+			}
+
+			template <typename... Ts> void trace( Ts &&... args ) const noexcept
+			{
+				if( isEnabled<TRACE>() )
+				{
+					UnconditionalOutput o{colorize, areaName,
+							      std::integral_constant<LogLevel, TRACE>()};
+					auto &&unused = {&( o << args )...};
+					o.doCleanup();
+				}
 			}
 #endif
 			/** Access to the debug message stream. */
@@ -364,11 +415,24 @@ namespace einhard
 			{
 				return DummyOutputFormatter();
 			}
+			template <typename... Ts> void debug( Ts &&... ) const noexcept
+			{
+			}
 #else
 			OutputFormatter debug() const
 			{
 				return {isEnabled<DEBUG>(), colorize, areaName,
 					std::integral_constant<LogLevel, DEBUG>()};
+			}
+			template <typename... Ts> void debug( Ts &&... args ) const noexcept
+			{
+				if( isEnabled<DEBUG>() )
+				{
+					UnconditionalOutput o{colorize, areaName,
+							  std::integral_constant<LogLevel, DEBUG>()};
+					auto &&unused = {&( o << args )...};
+					o.doCleanup();
+				}
 			}
 #endif
 			/** Access to the info message stream. */
@@ -377,11 +441,31 @@ namespace einhard
 				return {isEnabled<INFO>(), colorize, areaName,
 					std::integral_constant<LogLevel, INFO>()};
 			}
+			template <typename... Ts> void info( Ts &&... args ) const noexcept
+			{
+				if( isEnabled<INFO>() )
+				{
+					UnconditionalOutput o{colorize, areaName,
+							  std::integral_constant<LogLevel, INFO>()};
+					auto &&unused = {&( o << args )...};
+					o.doCleanup();
+				}
+			}
 			/** Access to the warning message stream. */
 			OutputFormatter warn() const
 			{
 				return {isEnabled<WARN>(), colorize, areaName,
 					std::integral_constant<LogLevel, WARN>()};
+			}
+			template <typename... Ts> void warn( Ts &&... args ) const noexcept
+			{
+				if( isEnabled<WARN>() )
+				{
+					UnconditionalOutput o{colorize, areaName,
+							  std::integral_constant<LogLevel, WARN>()};
+					auto &&unused = {&( o << args )...};
+					o.doCleanup();
+				}
 			}
 			/** Access to the error message stream. */
 			OutputFormatter error() const
@@ -389,11 +473,31 @@ namespace einhard
 				return {isEnabled<ERROR>(), colorize, areaName,
 					std::integral_constant<LogLevel, ERROR>()};
 			}
+			template <typename... Ts> void error( Ts &&... args ) const noexcept
+			{
+				if( isEnabled<ERROR>() )
+				{
+					UnconditionalOutput o{colorize, areaName,
+							  std::integral_constant<LogLevel, ERROR>()};
+					auto &&unused = {&( o << args )...};
+					o.doCleanup();
+				}
+			}
 			/** Access to the fatal message stream. */
 			OutputFormatter fatal() const
 			{
 				return {isEnabled<FATAL>(), colorize, areaName,
 					std::integral_constant<LogLevel, FATAL>()};
+			}
+			template <typename... Ts> void fatal( Ts &&... args ) const noexcept
+			{
+				if( isEnabled<FATAL>() )
+				{
+					UnconditionalOutput o{colorize, areaName,
+							  std::integral_constant<LogLevel, FATAL>()};
+					auto &&unused = {&( o << args )...};
+					o.doCleanup();
+				}
 			}
 
 			template <LogLevel LEVEL> bool isEnabled() const noexcept

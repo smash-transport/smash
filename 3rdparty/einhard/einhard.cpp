@@ -133,7 +133,7 @@ LogLevel getLogLevel( const std::string &level) {
   }
 }
 
-template <LogLevel VERBOSITY> void OutputFormatter::doInit( const char *areaName )
+template <LogLevel VERBOSITY> void UnconditionalOutput::doInit( const char *areaName )
 {
 	out = &t_out;
 	if( colorize )
@@ -151,9 +151,9 @@ template <LogLevel VERBOSITY> void OutputFormatter::doInit( const char *areaName
 	// output it
 	*out << '[';
 	*out << std::setfill( '0' ) << std::setw( 2 ) << timeinfo->tm_hour;
-	*out << ':';
+	*out << '\'';
 	*out << std::setfill( '0' ) << std::setw( 2 ) << timeinfo->tm_min;
-	*out << ':';
+	*out << '\'';
 	*out << std::setfill( '0' ) << std::setw( 2 ) << timeinfo->tm_sec;
 	*out << ']';
 	// TODO would be good to have this at least .01 seconds
@@ -178,14 +178,14 @@ template <LogLevel VERBOSITY> void OutputFormatter::doInit( const char *areaName
 	}
 }
 
-template void OutputFormatter::doInit<TRACE>( const char * );
-template void OutputFormatter::doInit<DEBUG>( const char * );
-template void OutputFormatter::doInit<INFO>( const char * );
-template void OutputFormatter::doInit<WARN>( const char * );
-template void OutputFormatter::doInit<ERROR>( const char * );
-template void OutputFormatter::doInit<FATAL>( const char * );
+template void UnconditionalOutput::doInit<TRACE>( const char * );
+template void UnconditionalOutput::doInit<DEBUG>( const char * );
+template void UnconditionalOutput::doInit<INFO>( const char * );
+template void UnconditionalOutput::doInit<WARN>( const char * );
+template void UnconditionalOutput::doInit<ERROR>( const char * );
+template void UnconditionalOutput::doInit<FATAL>( const char * );
 
-void OutputFormatter::checkColorReset()
+void UnconditionalOutput::checkColorReset()
 {
 	if( resetColor )
 	{
@@ -194,7 +194,7 @@ void OutputFormatter::checkColorReset()
 	}
 }
 
-void OutputFormatter::doCleanup() noexcept
+void UnconditionalOutput::doCleanup() noexcept
 {
 	*out << '\n';
 	std::string s = out->str();
