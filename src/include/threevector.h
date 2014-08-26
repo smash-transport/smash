@@ -68,10 +68,41 @@ class ThreeVector {
   ThreeVector inline operator*= (const double &a);
   /// divide this vector by \f$a: \vec x^\prime = \frac{1}{a} \cdot \vec x\f$
   ThreeVector inline operator/= (const double &a);
+
+  /// iterates over the components
+  using iterator = std::array<double, 3>::iterator;
+  /// iterates over the components
+  using const_iterator = std::array<double, 3>::const_iterator;
+
+  /**
+   * Returns an iterator starting at the 0th component.
+   *
+   * The iterator implements the RandomIterator concept. Thus, you can simply
+   * write `begin() + 1` to get an iterator that points to the 1st component.
+   */
+  iterator begin() { return x_.begin(); }
+
+  /**
+   * Returns an iterator pointing after the 4th component.
+   */
+  iterator end() { return x_.end(); }
+
+  /// const overload of the above
+  const_iterator begin() const { return x_.begin(); }
+  /// const overload of the above
+  const_iterator end() const { return x_.end(); }
+
+  /// \see begin
+  const_iterator cbegin() const { return x_.cbegin(); }
+  /// \see end
+  const_iterator cend() const { return x_.cend(); }
+
  private:
   /// the internal storage of the components.
   std::array<double, 3> x_;
 };
+
+std::ostream &operator<<(std::ostream &, const ThreeVector &);
 
 double inline ThreeVector::x1() const {
   return x_[0];
