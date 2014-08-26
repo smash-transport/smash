@@ -55,6 +55,7 @@ set(smash_src
         distributions.cc
         experiment.cc
         fourvector.cc
+        logging.cc
         modusdefault.cc
         nucleus.cc
         nucleusmodus.cc

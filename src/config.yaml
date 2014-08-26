@@ -1,3 +1,16 @@
+Logging:
+  default: INFO
+  #Legacy: ALL
+  #Main: ALL
+  #Experiment: ALL
+  #Box: ALL
+  #Collider: ALL
+  #Nucleus: ALL
+  #Sphere: ALL
+  #ParticleType: ALL
+  #Action: ALL
+  #FindScatter: ALL
+
 General:
     # Modus decision
     MODUS:         Nucleus
