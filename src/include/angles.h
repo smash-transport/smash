@@ -11,9 +11,11 @@
 #define SRC_INCLUDE_ANGLES_H_
 
 #include <stdexcept>
+#include <iostream>
+#include "constants.h"
+#include "iomanipulators.h"
 #include "random.h"
 #include "threevector.h"
-#include "constants.h"
 
 namespace Smash {
 
@@ -158,6 +160,10 @@ class Angles {
   /// cosine of polar angle \f$\cos\varphi\f$
   float costheta_;
 };
+
+inline std::ostream &operator<<(std::ostream &out, const Angles &a) {
+  return out << "φ:" << field << a.phi() << ", cos ϑ:" << field << a.costheta();
+}
 
 inline Angles::Angles() : phi_(0), costheta_(0) {}
 

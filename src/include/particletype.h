@@ -40,14 +40,7 @@ class ParticleType {
    *       PDG code and therefore cannot be set explicitly (this avoids the
    *       chance of introducing inconsistencies).
    */
-  ParticleType(std::string n, float m, float w, PdgCode id)
-      : name_(n),
-        mass_(m),
-        width_(w),
-        pdgcode_(id),
-        isospin_(pdgcode_.isospin_total()),
-        charge_(pdgcode_.charge())
-        {}
+  ParticleType(std::string n, float m, float w, PdgCode id);
 
   /// Returns the name of the particle (for debug output only).
   const std::string &name() const { return name_; }
@@ -167,6 +160,8 @@ class ParticleType {
    * This is filled automatically from pdgcode_.
    */
   int charge_;
+
+  friend std::ostream &operator<<(std::ostream &out, const ParticleType &type);
 };
 
 inline bool ParticleType::is_stable() const {

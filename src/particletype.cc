@@ -16,8 +16,10 @@
 
 #include "include/decaymodes.h"
 #include "include/inputfunctions.h"
+#include "include/iomanipulators.h"
 #include "include/outputroutines.h"
 #include "include/pdgcode.h"
+#include "include/stringfunctions.h"
 #include "include/width.h"
 
 namespace Smash {
@@ -52,6 +54,14 @@ SMASH_CONST bool ParticleType::exists(PdgCode pdgcode) {
   }
   return false;
 }
+
+ParticleType::ParticleType(std::string n, float m, float w, PdgCode id)
+    : name_(fill_right(n, 3)),
+      mass_(m),
+      width_(w),
+      pdgcode_(id),
+      isospin_(pdgcode_.isospin_total()),
+      charge_(pdgcode_.charge()) {}
 
 /* Construct an antiparticle name-string from the given name-string for the
  * particle and its PDG code. */
@@ -201,5 +211,15 @@ ProcessBranchList ParticleType::get_partial_widths(const float m) const {
   return partial;
 }
 
+std::ostream &operator<<(std::ostream &out, const ParticleType &type) {
+  const PdgCode &pdg = type.pdgcode();
+  return out << type.name() << std::setfill(' ') << std::right
+             << "[mass:" << field<6> << type.mass()
+             << ", width:" << field<6> << type.width_at_pole()
+             << ", PDG:" << field<6> << pdg
+             << ", Isospin:" << field<2> << pdg.isospin_total()
+             << "/2, Charge:" << field<3> << pdg.charge()
+             << ", Spin:" << field<2> << pdg.spin() << "/2]";
+}
 
 }  // namespace Smash
