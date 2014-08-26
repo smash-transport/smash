@@ -72,29 +72,45 @@ static std::string antiname(const std::string &name, PdgCode code) {
   if (name.find("++") != std::string::npos) {
     basename = name.substr(0, name.length()-2);
     charge = "--";
+  } else if (name.find("⁺⁺") != std::string::npos) {
+    basename = name.substr(0, name.length() - sizeof("⁺⁺") + 1);
+    charge = "⁻⁻";
   } else if (name.find("+") != std::string::npos) {
     basename = name.substr(0, name.length()-1);
     charge = "-";
+  } else if (name.find("⁺") != std::string::npos) {
+    basename = name.substr(0, name.length() - sizeof("⁺") + 1);
+    charge = "⁻";
   } else if (name.find("0") != std::string::npos) {
     basename = name.substr(0, name.length()-1);
     charge = "0";
+  } else if (name.find("⁰") != std::string::npos) {
+    basename = name.substr(0, name.length() - sizeof("⁰") + 1);
+    charge = "⁰";
   } else if (name.find("-") != std::string::npos) {
     basename = name.substr(0, name.length()-1);
     charge = "+";
+  } else if (name.find("⁻") != std::string::npos) {
+    basename = name.substr(0, name.length() - sizeof("⁻") + 1);
+    charge = "⁺";
   } else if (name.find("--") != std::string::npos) {
     basename = name.substr(0, name.length()-2);
     charge = "++";
+  } else if (name.find("⁻⁻") != std::string::npos) {
+    basename = name.substr(0, name.length() - sizeof("⁻⁻") + 1);
+    charge = "⁺⁺";
   } else {
     basename = name;
     charge = "";
   }
 
+  constexpr char bar[] = "\u0305";
   if (code.baryon_number() != 0) {
-    return basename+"bar"+charge;  // baron
+    return basename+bar+charge;  // baryon
   } else if (code.charge() != 0) {
     return basename+charge;        // charged meson
   } else {
-    return basename+charge+"bar";  // neutral meson
+    return basename+bar+charge;  // neutral meson
   }
 };
 
