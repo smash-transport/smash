@@ -165,7 +165,7 @@ NucleusModus::NucleusModus(Configuration modus_config,
     float max = 0.0;
     // If impact is not supplied by value, inspect sampling parameters:
     if (modus_cfg.has_value({"Impact", "SAMPLE"})) {
-      std::string sampling_method = modus_cfg.take({"IMPACT", "SAMPLE"});
+      std::string sampling_method = modus_cfg.take({"Impact", "SAMPLE"});
       if (sampling_method.compare(0, 6, "uniform") == 0) {
         sampling_quadratically = false;
       }
