@@ -9,14 +9,18 @@
 
 #include "include/particledata.h"
 
-#include "include/width.h"
+#include "include/iomanipulators.h"
 #include <iostream>
 
 namespace Smash {
 
-std::ostream &operator<<(std::ostream &s, const ParticleData &p) {
-  return s << "ParticleData{ id: " << p.id() << ", '" << p.type().name()
-           << "', pos: " << p.position() << ", mom: " << p.momentum() << " }";
+std::ostream &operator<<(std::ostream &out, const ParticleData &p) {
+  using namespace std;
+  out.fill(' ');
+  return out << p.type().name() << right
+             << "{id:" << field<6> << p.id()
+             << ", pos [fm]:"  // XXX: is fm correct?
+             << p.position() << ", mom [GeV]:" << p.momentum() << "}";
 }
 
 }  // namespace Smash
