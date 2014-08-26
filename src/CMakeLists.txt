@@ -71,6 +71,7 @@ set(smash_src
         scatteraction.cc
         scatteractionsfinder.cc
         spheremodus.cc
+        stringfunctions.cc
         vtkoutput.cc
         width.cc
         )
