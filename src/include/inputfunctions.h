@@ -18,16 +18,6 @@
 
 namespace Smash {
 
-namespace {/*{{{*/
-/// takes a string and strips leading and trailing whitespaces.
-std::string trim(const std::string &s) {
-  const auto begin = s.find_first_not_of(" \t\n\r");
-  if (begin == std::string::npos) {
-    return {};
-  }
-  const auto end = s.find_last_not_of(" \t\n\r");
-  return s.substr(begin, end - begin + 1);
-}
 /// Line consists of a line number and the contents of that line
 struct Line {/*{{{*/
   /// initialize line with empty string and number

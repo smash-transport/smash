@@ -57,4 +57,13 @@ std::string fill_both(const std::string &s, int width, char fill) {
   return s;
 }
 
+std::string trim(const std::string &s) {
+  const auto begin = s.find_first_not_of(" \t\n\r");
+  if (begin == std::string::npos) {
+    return {};
+  }
+  const auto end = s.find_last_not_of(" \t\n\r");
+  return s.substr(begin, end - begin + 1);
+}
+
 }  // namespace Smash

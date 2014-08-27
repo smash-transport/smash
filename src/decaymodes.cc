@@ -18,6 +18,7 @@
 #include "include/logging.h"
 #include "include/pdgcode.h"
 #include "include/processbranch.h"
+#include "include/stringfunctions.h"
 
 namespace Smash {
 

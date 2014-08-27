@@ -18,6 +18,9 @@ std::string fill_left(const std::string &s, int width, char fill = ' ');
 std::string fill_right(const std::string &s, int width, char fill = ' ');
 std::string fill_both(const std::string &s, int width, char fill = ' ');
 
+/// takes a string and strips leading and trailing whitespaces.
+std::string trim(const std::string &s);
+
 }  // namespace Smash
 
 #endif  // SRC_INCLUDE_STRINGFUNCTIONS_H_
