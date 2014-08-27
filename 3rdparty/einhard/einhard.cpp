@@ -24,7 +24,12 @@
 namespace einhard
 {
 char const VERSION[] = "0.4";
+#ifndef EINHARD_NO_THREAD_LOCAL
+namespace
+{
 thread_local std::ostringstream t_out;
+}  // unnamed namespace
+#endif
 
 template <> const char *colorForLogLevel<TRACE>() noexcept
 {
@@ -135,7 +140,11 @@ LogLevel getLogLevel( const std::string &level) {
 
 template <LogLevel VERBOSITY> void UnconditionalOutput::doInit( const char *areaName )
 {
+#ifdef EINHARD_NO_THREAD_LOCAL
+	out = &realOut;
+#else
 	out = &t_out;
+#endif
 	if( colorize )
 	{
 		// set color according to log level
@@ -149,13 +158,16 @@ template <LogLevel VERBOSITY> void UnconditionalOutput::doInit( const char *area
 	timeinfo = localtime( &rawtime );
 
 	// output it
+	const auto oldFill = out->fill();
+	out->fill( '0' );
 	*out << '[';
-	*out << std::setfill( '0' ) << std::setw( 2 ) << timeinfo->tm_hour;
+	*out << std::setw( 2 ) << timeinfo->tm_hour;
 	*out << '\'';
-	*out << std::setfill( '0' ) << std::setw( 2 ) << timeinfo->tm_min;
+	*out << std::setw( 2 ) << timeinfo->tm_min;
 	*out << '\'';
-	*out << std::setfill( '0' ) << std::setw( 2 ) << timeinfo->tm_sec;
+	*out << std::setw( 2 ) << timeinfo->tm_sec;
 	*out << ']';
+	out->fill( oldFill );
 	// TODO would be good to have this at least .01 seconds
 	// for non-console output pure timestamp would probably be better
 
@@ -167,14 +179,14 @@ template <LogLevel VERBOSITY> void UnconditionalOutput::doInit( const char *area
 	}
 	*out << ": ";
 
+	indent = out->str().size();
 	if( colorize )
 	{
-		indent = out->str().size() - sizeof(colorForLogLevel<VERBOSITY>());
+		// The bytes from the ANSI color code don't appear on screen and thus must be subtracted from the indent
+		// value. We still make an error if the areaName contains multi-byte (utf-8) characters. At
+		// this point that's just not supported.
+		indent -= sizeof( "\33[00;30m" ) - 1;  // sizeof includes the trailing \0
 		*out << NoColor_t_::ANSI();
-	}
-	else
-	{
-		indent = out->str().size();
 	}
 }
 

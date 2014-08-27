@@ -77,6 +77,13 @@
 #define EINHARD_ALWAYS_INLINE_
 #endif
 
+// Error on MacOS:
+//    “thread-local storage is unsupported for the current target”
+// To enable a workaround the EINHARD_NO_THREAD_LOCAL macro must be defined.
+#ifdef __APPLE__
+#define EINHARD_NO_THREAD_LOCAL 1
+#endif
+
 /**
  * This namespace contains all objects required for logging using Einhard.
  */
@@ -198,20 +205,21 @@ namespace einhard
 			return *this;
 		}
 		EINHARD_ALWAYS_INLINE_ DummyOutputFormatter &operator<<(
-		    std::ostream &( *manip )( std::ostream & ) ) noexcept
+		    std::ostream &( * )( std::ostream & ) ) noexcept
 		{
 			return *this;
 		}
 	};
-
-	// The output stream to print to
-	extern thread_local std::ostringstream t_out;
 
 	class UnconditionalOutput
 	{
 	private:
 		// Pointer to the thread_local stringstream (if enabled)
 		std::ostringstream *out;
+#ifdef EINHARD_NO_THREAD_LOCAL
+		// without thread_local we simply use a local stringstream object
+		std::ostringstream realOut;
+#endif
 		// The number of chars required for aligning
 		unsigned char indent;
 		// Whether to colorize the output
