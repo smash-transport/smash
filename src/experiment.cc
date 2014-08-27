@@ -118,7 +118,7 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
  * Creates a verbose textual description of the setup of the Experiment.
  */
 template <typename Modus>
-static std::ostream &operator<<(std::ostream &out, const Experiment<Modus> &e) {
+std::ostream &operator<<(std::ostream &out, const Experiment<Modus> &e) {
   out << "Elastic cross section: " << e.parameters_.cross_section << " mb\n";
   out << "Starting with temporal stepsize: " << e.parameters_.timestep_duration()
       << " fm/c\n";
