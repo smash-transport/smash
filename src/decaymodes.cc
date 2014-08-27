@@ -15,6 +15,7 @@
 
 #include "include/constants.h"
 #include "include/inputfunctions.h"
+#include "include/logging.h"
 #include "include/pdgcode.h"
 #include "include/processbranch.h"
 

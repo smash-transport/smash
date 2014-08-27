@@ -10,12 +10,11 @@
 #ifndef SRC_INCLUDE_INPUTFUNCTIONS_H_
 #define SRC_INCLUDE_INPUTFUNCTIONS_H_
 
-#include <sstream>
+#include <iostream>
 #include <string>
-#include <vector>
 
+#include "forwarddeclarations.h"
 #include "particles.h"
-#include "logging.h"
 
 namespace Smash {
 
@@ -49,7 +48,7 @@ struct Line {/*{{{*/
  * \param[in] message Error message
  * \param[in] line Line object containing line number and line content.
  */
-std::string build_error_string(std::string message, const Line &line) {/*{{{*/
+inline std::string build_error_string(std::string message, const Line &line) {/*{{{*/
   return message + " (on line " + std::to_string(line.number) + ": \"" +
          line.text + "\")";
 }/*}}}*/
@@ -63,34 +62,10 @@ std::string build_error_string(std::string message, const Line &line) {/*{{{*/
  *
  * \param input an lvalue reference to an input stream
  */
-std::vector<Line> line_parser(const std::string &input) {/*{{{*/
-  const auto &log = logger<LogArea::InputParser>();
-  log.trace() << source_location << input;
-  std::istringstream input_stream(input);
-  std::vector<Line> lines;
-  lines.reserve(50);
-
-  std::string line;
-  int line_number = 0;
-  while (std::getline(input_stream, line)) {
-    ++line_number;
-    const auto hash_pos = line.find('#');
-    if (hash_pos != std::string::npos) {
-      // found a comment, remove it from the line and look further
-      line = line.substr(0, hash_pos);
-    }
-    if (line.find_first_not_of(" \t") == std::string::npos) {
-      // only whitespace (or nothing) on this line. Next, please.
-      continue;
-    }
-    lines.emplace_back(line_number, std::move(line));
-    line = std::string();
-  }
-  return std::move(lines);
-}/*}}}*/
+build_vector_<Line> line_parser(const std::string &input);
 
 /// makes sure that nothing is left to read from this line.
-void ensure_all_read(std::istream &input, const Line &line) {/*{{{*/
+inline void ensure_all_read(std::istream &input, const Line &line) {/*{{{*/
   std::string tmp;
   input >> tmp;
   if (!input.eof()) {
@@ -111,12 +86,10 @@ void ensure_all_read(std::istream &input, const Line &line) {/*{{{*/
  * \note There's no slicing here: the actual istream object is a temporary that
  * is not destroyed until read_all returns.
  */
-std::string read_all(std::istream &&input) {
+inline std::string read_all(std::istream &&input) {
   return {std::istreambuf_iterator<char>{input},
           std::istreambuf_iterator<char>{}};
 }
-
-}  // unnamed namespace/*}}}*/
 
 }  // namespace Smash
 
