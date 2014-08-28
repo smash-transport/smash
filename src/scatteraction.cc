@@ -27,12 +27,12 @@ ScatterAction::ScatterAction(const ParticleData &in_part1,
 
 void ScatterAction::perform(Particles *particles, size_t &id_process) {
   /* Relevant particle IDs for the collision. */
-  int id_a = incoming_particles_[0].id();
-  int id_b = incoming_particles_[1].id();
+  int id1 = incoming_particles_[0].id();
+  int id2 = incoming_particles_[1].id();
 
   printd("Process %zu particle %s<->%s colliding %d<->%d time %g\n",
          id_process, incoming_particles_[0].type().name().c_str(),
-         incoming_particles_[1].type().name().c_str(), id_a, id_b,
+         incoming_particles_[1].type().name().c_str(), id1, id2,
          incoming_particles_[0].position().x0());
   printd_momenta("particle 1 momenta before", incoming_particles_[0]);
   printd_momenta("particle 2 momenta before", incoming_particles_[1]);
@@ -50,8 +50,8 @@ void ScatterAction::perform(Particles *particles, size_t &id_process) {
     outgoing_particles_[0].set_collision_past(id_process);
     outgoing_particles_[1].set_collision_past(id_process);
 
-    particles->data(id_a) = outgoing_particles_[0];
-    particles->data(id_b) = outgoing_particles_[1];
+    particles->data(id1) = outgoing_particles_[0];
+    particles->data(id2) = outgoing_particles_[1];
   } else {
     /* resonance formation */
     printd("Process: Resonance formation. ");
@@ -83,8 +83,8 @@ void ScatterAction::perform(Particles *particles, size_t &id_process) {
     }
 
     /* Remove the initial particles */
-    particles->remove(id_a);
-    particles->remove(id_b);
+    particles->remove(id1);
+    particles->remove(id2);
 
     printd("Particle map has now %zu elements. \n", particles->size());
   }
@@ -102,10 +102,23 @@ ThreeVector ScatterAction::beta_cm() const {
 }
 
 
+double ScatterAction::mandelstam_s() const {
+  return (incoming_particles_[0].momentum() +
+          incoming_particles_[1].momentum()).sqr();
+}
+
+
 double ScatterAction::sqrt_s() const {
-  FourVector mom = incoming_particles_[0].momentum() +
-                   incoming_particles_[1].momentum();
-  return mom.abs();
+  return (incoming_particles_[0].momentum() +
+          incoming_particles_[1].momentum()).abs();
+}
+
+
+double ScatterAction::cm_momentum_squared() const {
+  return (incoming_particles_[0].momentum().Dot(incoming_particles_[1].momentum())
+       * incoming_particles_[0].momentum().Dot(incoming_particles_[1].momentum())
+       - incoming_particles_[0].type().mass_sqr()
+       * incoming_particles_[1].type().mass_sqr()) / mandelstam_s();
 }
 
 
@@ -167,16 +180,8 @@ ProcessBranchList ScatterAction::resonance_cross_sections() {
     symmetryfactor = 2;
   }
 
-  /* Mandelstam s = (p_a + p_b)^2 = square of CMS energy */
-  const double mandelstam_s =
-       (incoming_particles_[0].momentum() + incoming_particles_[1].momentum()).sqr();
-
-  /* CM momentum */
-  const double cm_momentum_squared
-    = (incoming_particles_[0].momentum().Dot(incoming_particles_[1].momentum())
-       * incoming_particles_[0].momentum().Dot(incoming_particles_[1].momentum())
-       - type_particle1.mass() * type_particle1.mass()
-       * type_particle2.mass() * type_particle2.mass()) / mandelstam_s;
+  const double s = mandelstam_s();
+  const double p_cm_sqr = cm_momentum_squared();
 
   /* Find all the possible resonances */
   for (const ParticleType &type_resonance : ParticleType::list_all()) {
@@ -195,7 +200,7 @@ ProcessBranchList ScatterAction::resonance_cross_sections() {
 
     float resonance_xsection
       = symmetryfactor * two_to_one_formation(type_particle1, type_particle2,
-                         type_resonance, mandelstam_s, cm_momentum_squared);
+                                              type_resonance, s, p_cm_sqr);
 
     /* If cross section is non-negligible, add resonance to the list */
     if (resonance_xsection > really_small) {
@@ -291,30 +296,29 @@ void ScatterAction::resonance_formation() {
 
 ProcessBranch ScatterActionBarBar::elastic_cross_section(float elast_par) {
 
-  const PdgCode &pdg_a = incoming_particles_[0].type().pdgcode();
-  const PdgCode &pdg_b = incoming_particles_[1].type().pdgcode();
+  const PdgCode &pdg1 = incoming_particles_[0].type().pdgcode();
+  const PdgCode &pdg2 = incoming_particles_[1].type().pdgcode();
 
-  float mandelstam_s = (incoming_particles_[0].momentum()
-                       +incoming_particles_[1].momentum()).sqr();
+  const double s = mandelstam_s();
 
-  if ((pdg_a.iso_multiplet() == 0x1112) &&
-      (pdg_b.iso_multiplet() == 0x1112)) {
+  if ((pdg1.iso_multiplet() == 0x1112) &&
+      (pdg2.iso_multiplet() == 0x1112)) {
     /* Nucleon-Nucleon scattering: use parametrized cross sections. */
-    float sig;
-    if (pdg_a == pdg_b) {                          /* pp */
-      sig = pp_elastic(mandelstam_s);
-    } else if (pdg_a.is_antiparticle_of(pdg_b)) {  /* ppbar */
-      sig = ppbar_elastic(mandelstam_s);
-    } else {                                       /* np */
-      sig = np_elastic(mandelstam_s);
+    float sig_el;
+    if (pdg1 == pdg2) {                          /* pp */
+      sig_el = pp_elastic(s);
+    } else if (pdg1.is_antiparticle_of(pdg2)) {  /* ppbar */
+      sig_el = ppbar_elastic(s);
+    } else {                                     /* np */
+      sig_el = np_elastic(s);
     }
-    if (sig>0.) {
-      return ProcessBranch(pdg_a, pdg_b, sig);
+    if (sig_el>0.) {
+      return ProcessBranch(pdg1, pdg2, sig_el);
     } else {
       std::stringstream ss;
-      ss << "problem in CrossSections::elastic: " << pdg_a.string().c_str()
-        << " " << pdg_b.string().c_str() << " " << pdg_a.spin() << " "
-        << pdg_b.spin() << " " << sig << " " << mandelstam_s;
+      ss << "problem in CrossSections::elastic: " << pdg1.string().c_str()
+        << " " << pdg2.string().c_str() << " " << pdg1.spin() << " "
+        << pdg2.spin() << " " << sig_el << " " << s;
       throw std::runtime_error(ss.str());
     }
   } else {
@@ -328,16 +332,8 @@ ProcessBranchList ScatterActionBarBar::two_to_two_cross_sections() {
   ParticleType type_particle1 = incoming_particles_[0].type(),
                type_particle2 = incoming_particles_[1].type();
 
-  /* Mandelstam s = (p_a + p_b)^2 = square of CMS energy */
-  const double mandelstam_s =
-       (incoming_particles_[0].momentum() + incoming_particles_[1].momentum()).sqr();
-
-  /* CM momentum */
-  const double cm_momentum_squared
-    = (incoming_particles_[0].momentum().Dot(incoming_particles_[1].momentum())
-       * incoming_particles_[0].momentum().Dot(incoming_particles_[1].momentum())
-       - type_particle1.mass() * type_particle1.mass()
-       * type_particle2.mass() * type_particle2.mass()) / mandelstam_s;
+  const double s = mandelstam_s();
+  const double p_cm_sqr = cm_momentum_squared();
 
   /* Find all the possible resonances */
   for (const ParticleType &type_resonance : ParticleType::list_all()) {
@@ -347,9 +343,8 @@ ProcessBranchList ScatterActionBarBar::two_to_two_cross_sections() {
     }
 
     size_t two_to_two_processes
-        = two_to_two_formation(type_particle1, type_particle2,
-                              type_resonance, mandelstam_s,
-                              cm_momentum_squared, &resonance_process_list);
+        = two_to_two_formation(type_particle1, type_particle2, type_resonance,
+                               s, p_cm_sqr, &resonance_process_list);
     if (two_to_two_processes > 0) {
       printd("Found %zu 2->2 processes for resonance %s (%s).\n",
               two_to_two_processes,
