@@ -43,7 +43,11 @@ class ParticleType {
   ParticleType(std::string n, float m, float w, PdgCode id);
 
   /// Returns the name of the particle (for debug output only).
+#ifdef NDEBUG
+  std::string name() const { return {}; }
+#else
   const std::string &name() const { return name_; }
+#endif
 
   /// Returns the particle mass.
   float mass() const { return mass_; }
@@ -140,10 +144,12 @@ class ParticleType {
   static void create_type_list(const std::string &particles);
 
  private:
+#ifndef NDEBUG
   /// name of the particle
-  /// \todo This variable is only used for debug output. Maybe `ifdef` it out
-  ///       for non-debug builds to save the memory?
+  /// This variable is only used for debug output. Non-debug builds save the
+  /// memory to be more cache-efficient.
   std::string name_;
+#endif
   /// mass of the particle
   float mass_;
   /// width of the particle

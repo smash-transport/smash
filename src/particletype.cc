@@ -57,7 +57,10 @@ SMASH_CONST bool ParticleType::exists(PdgCode pdgcode) {
 }
 
 ParticleType::ParticleType(std::string n, float m, float w, PdgCode id)
-    : name_(fill_right(n, 3)),
+    :
+#ifndef NDEBUG
+      name_(fill_right(n, 3)),
+#endif
       mass_(m),
       width_(w),
       pdgcode_(id),
