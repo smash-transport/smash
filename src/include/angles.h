@@ -161,6 +161,9 @@ class Angles {
   float costheta_;
 };
 
+/** \ingroup logging
+ * Creates output for an Angles object in the form "φ: 0.1294, cos ϑ:  0.423".
+ */
 inline std::ostream &operator<<(std::ostream &out, const Angles &a) {
   return out << "φ:" << field << a.phi() << ", cos ϑ:" << field << a.costheta();
 }

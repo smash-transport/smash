@@ -269,6 +269,9 @@ class Nucleus {
     return nuclear_radius_;
   }
 
+  /**\ingroup logging
+   * Writes the state of the Nucleus object to the output stream.
+   */
   friend std::ostream &operator<<(std::ostream &, const Nucleus &);
 };
 

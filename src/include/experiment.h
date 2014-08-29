@@ -279,6 +279,10 @@ class Experiment : public ExperimentBase {
   /// system starting time of the simulation
   SystemTimePoint time_start_ = SystemClock::now();
 
+  /**\ingroup logging
+   * Writes the initial state for the Experiment to the output stream.
+   * It automatically appends the output of the current Modus.
+   */
   friend std::ostream &operator<<<>(std::ostream &out, const Experiment &e);
 };
 }  // namespace Smash

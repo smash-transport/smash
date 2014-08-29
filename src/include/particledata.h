@@ -222,6 +222,9 @@ inline bool ParticleData::operator<(const int id_a) const {
   return this->id_ < id_a;
 }
 
+/**\ingroup logging
+ * Writes the state of the particle to the output stream.
+ */
 std::ostream &operator<<(std::ostream &s, const ParticleData &p);
 
 }  // namespace Smash

@@ -116,6 +116,9 @@ class BoxModus : public ModusDefault {
   /// particle multiplicities at initialization
   const std::map<PdgCode, int> init_multipl_;
 
+  /**\ingroup logging
+   * Writes the initial state for the Box to the output stream.
+   */
   friend std::ostream &operator<<(std::ostream &, const BoxModus &);
 };
 

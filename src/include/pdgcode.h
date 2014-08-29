@@ -664,6 +664,9 @@ class PdgCode {
 };
 
 std::istream& operator>>(std::istream& is, PdgCode& code);
+/**\ingroup logging
+ * Writes the textual representation of the PDG code to the output stream.
+ */
 std::ostream& operator<<(std::ostream& is, const PdgCode& code);
 
 }  // namespace SMASH

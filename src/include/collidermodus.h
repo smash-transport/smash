@@ -87,6 +87,9 @@ class ColliderModus : public ModusDefault {
   /// Center-of-mass energy of the collision in GeV
   const float sqrts_;
 
+  /**\ingroup logging
+   * Writes the initial state for the Collider to the output stream.
+   */
   friend std::ostream &operator<<(std::ostream &, const ColliderModus &);
 };
 

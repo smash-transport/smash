@@ -15,3 +15,4 @@ Quick Links:
 /// \defgroup action Action Classes
 /// \defgroup data Abstractions for data (particles, branches)
 /// \defgroup exception Exception Classes
+/// \defgroup logging Logging Classes and Functions

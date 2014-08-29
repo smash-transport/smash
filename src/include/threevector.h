@@ -102,6 +102,9 @@ class ThreeVector {
   std::array<double, 3> x_;
 };
 
+/**\ingroup logging
+ * Writes the three components of the vector to the output stream.
+ */
 std::ostream &operator<<(std::ostream &, const ThreeVector &);
 
 double inline ThreeVector::x1() const {

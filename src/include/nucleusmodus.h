@@ -199,6 +199,9 @@ class NucleusModus : public ModusDefault {
   // @return < v1, v2 >
   std::pair<double, double> get_velocities(float mandelstam_s, float m1, float m2);
 
+  /**\ingroup logging
+   * Writes the initial state for the NucleusModus to the output stream.
+   */
   friend std::ostream &operator<<(std::ostream &, const NucleusModus &);
 };
 

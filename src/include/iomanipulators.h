@@ -14,6 +14,13 @@
 
 namespace Smash {
 
+/**
+ * \ingroup logging
+ *
+ * Stream modifier to align the next object to a specific width \p w.
+ *
+ * \tparam w The number of characters the field should have in the output.
+ */
 template <int w = 9, typename CharT, typename Traits>
 inline std::basic_ostream<CharT, Traits> &field(
     std::basic_ostream<CharT, Traits> &s) {

@@ -161,6 +161,9 @@ class ParticleType {
    */
   int charge_;
 
+  /**\ingroup logging
+   * Writes all information about the particle type to the output stream.
+   */
   friend std::ostream &operator<<(std::ostream &out, const ParticleType &type);
 };
 

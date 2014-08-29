@@ -83,6 +83,9 @@ class SphereModus : public ModusDefault {
   /// Starting time for the Sphere
   const float start_time_ = 0.0f;
 
+  /**\ingroup logging
+   * Writes the initial state for the Sphere to the output stream.
+   */
   friend std::ostream &operator<<(std::ostream &, const SphereModus &);
 };
 }  // namespace Smash
