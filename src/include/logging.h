@@ -65,7 +65,8 @@ using AreaTuple = std::tuple<Main, Experiment, Box, Collider, Nucleus, Sphere,
  * create all logger objects (as defined by LogArea::AreaTuple) with the correct
  * area names and log levels.
  *
- * \param A configuration object with the log area names as toplevel keys.
+ * \param config A configuration object with the log area names as toplevel
+ *               keys.
  */
 void create_all_loggers(Configuration config);
 
