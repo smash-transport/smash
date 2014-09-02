@@ -52,6 +52,9 @@ class ParticleType {
   /// Returns the particle mass.
   float mass() const { return mass_; }
 
+  /// Returns the squared particle mass.
+  float mass_sqr() const { return mass_*mass_; }
+
   /// Returns the particle width (at the mass pole).
   float width_at_pole() const { return width_; }
 
