@@ -280,10 +280,10 @@ class ScatterAction : public Action {
 
 /**
  * \ingroup action
- * ScatterActionBarBar is a special ScatterAction which represents the
+ * ScatterActionBaryonBaryon is a special ScatterAction which represents the
  * scattering of two baryons.
  */
-class ScatterActionBarBar : public ScatterAction {
+class ScatterActionBaryonBaryon : public ScatterAction {
  public:
   /* Inherit constructor. */
   using ScatterAction::ScatterAction;
@@ -297,19 +297,21 @@ class ScatterActionBarBar : public ScatterAction {
    * \return A ProcessBranch object containing the cross section and
    * final-state IDs.
    */
-  ProcessBranch elastic_cross_section(float elast_par);
+  ProcessBranch elastic_cross_section(float elast_par) override;
   /* There is no resonance formation out of two baryons: Return empty list. */
-  ProcessBranchList resonance_cross_sections() { return ProcessBranchList(); }
+  ProcessBranchList resonance_cross_sections() override {
+    return ProcessBranchList();
+  }
   /** Find all inelastic 2->2 processes for this reaction. */
-  ProcessBranchList two_to_two_cross_sections();
+  ProcessBranchList two_to_two_cross_sections() override;
 };
 
 /**
  * \ingroup action
- * ScatterActionBarMes is a special ScatterAction which represents the
+ * ScatterActionBaryonMeson is a special ScatterAction which represents the
  * scattering of a baryon and a meson.
  */
-class ScatterActionBarMes : public ScatterAction {
+class ScatterActionBaryonMeson : public ScatterAction {
  public:
   /* Inherit constructor. */
   using ScatterAction::ScatterAction;
@@ -317,10 +319,10 @@ class ScatterActionBarMes : public ScatterAction {
 
 /**
  * \ingroup action
- * ScatterActionMesMes is a special ScatterAction which represents the
+ * ScatterActionMesonMeson is a special ScatterAction which represents the
  * scattering of two mesons.
  */
-class ScatterActionMesMes : public ScatterAction {
+class ScatterActionMesonMeson : public ScatterAction {
  public:
   /* Inherit constructor. */
   using ScatterAction::ScatterAction;

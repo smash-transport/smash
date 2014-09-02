@@ -294,7 +294,7 @@ void ScatterAction::resonance_formation() {
 }
 
 
-ProcessBranch ScatterActionBarBar::elastic_cross_section(float elast_par) {
+ProcessBranch ScatterActionBaryonBaryon::elastic_cross_section(float elast_par) {
 
   const PdgCode &pdg1 = incoming_particles_[0].type().pdgcode();
   const PdgCode &pdg2 = incoming_particles_[1].type().pdgcode();
@@ -327,7 +327,7 @@ ProcessBranch ScatterActionBarBar::elastic_cross_section(float elast_par) {
   }
 }
 
-ProcessBranchList ScatterActionBarBar::two_to_two_cross_sections() {
+ProcessBranchList ScatterActionBaryonBaryon::two_to_two_cross_sections() {
   ProcessBranchList resonance_process_list;
   ParticleType type_particle1 = incoming_particles_[0].type(),
                type_particle2 = incoming_particles_[1].type();

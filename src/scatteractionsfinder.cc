@@ -84,12 +84,12 @@ ScatterActionsFinder::check_collision(const int id_a, const int id_b,
   /* Create ScatterAction object. */
   if (data_a.pdgcode().baryon_number() != 0 &&
       data_b.pdgcode().baryon_number() != 0) {
-    act = new ScatterActionBarBar(data_a, data_b, time_until_collision);
+    act = new ScatterActionBaryonBaryon(data_a, data_b, time_until_collision);
   } else if (data_a.pdgcode().baryon_number() != 0 ||
              data_b.pdgcode().baryon_number() != 0) {
-    act = new ScatterActionBarMes(data_a, data_b, time_until_collision);
+    act = new ScatterActionBaryonMeson(data_a, data_b, time_until_collision);
   } else {
-    act = new ScatterActionMesMes(data_a, data_b, time_until_collision);
+    act = new ScatterActionMesonMeson(data_a, data_b, time_until_collision);
   }
 
   /* Add various subprocesses.  */
