@@ -328,35 +328,225 @@ ProcessBranch ScatterActionBaryonBaryon::elastic_cross_section(float elast_par) 
 }
 
 ProcessBranchList ScatterActionBaryonBaryon::two_to_two_cross_sections() {
-  ProcessBranchList resonance_process_list;
+  ProcessBranchList process_list;
   ParticleType type_particle1 = incoming_particles_[0].type(),
                type_particle2 = incoming_particles_[1].type();
 
-  const double s = mandelstam_s();
-  const double p_cm_sqr = cm_momentum_squared();
-
-  /* Find all the possible resonances */
-  for (const ParticleType &type_resonance : ParticleType::list_all()) {
-    /* Not a resonance, go to next type of particle */
-    if (type_resonance.is_stable()) {
-      continue;
-    }
-
-    size_t two_to_two_processes
-        = two_to_two_formation(type_particle1, type_particle2, type_resonance,
-                               s, p_cm_sqr, &resonance_process_list);
-    if (two_to_two_processes > 0) {
-      printd("Found %zu 2->2 processes for resonance %s (%s).\n",
-              two_to_two_processes,
-              type_resonance.pdgcode().string().c_str(),
-              type_resonance.name().c_str());
-      printd("2->2 with original particles: %s %s Charges: %i %i \n",
-              type_particle1.name().c_str(), type_particle2.name().c_str(),
-              type_particle1.charge(), type_particle2.charge());
-    }
+  if (type_particle1.pdgcode().iso_multiplet() == 0x1112 &&
+      type_particle2.pdgcode().iso_multiplet() == 0x1112) {
+    /* Nucleon+Nucleon: find all resonance production channels */
+      process_list = NucNuc_to_NucRes (type_particle1, type_particle2);
+  } else if (type_particle1.pdgcode().iso_multiplet() == 0x1112 ||
+             type_particle2.pdgcode().iso_multiplet() == 0x1112) {
+    /* Nucleon+Resonance: absorption */
+    process_list = NucRes_to_NucNuc (type_particle1, type_particle2);
   }
 
-  return resonance_process_list;
+  return process_list;
 }
+
+
+/**
+ * Scattering matrix amplitude squared for \f$NN \rightarrow NR\f$ processes,
+ * where R is a baryon resonance (Delta, N*, Delta*).
+ *
+ * \param[in] mandelstam_s Mandelstam-s, i.e. collision CMS energy squared.
+ * \param[in] type_final_a Type information for the first final state particle.
+ * \param[in] type_final_b Type information for the second final state particle.
+ *
+ * \return Matrix amplitude squared \f$|\mathcal{M}(\sqrt{s})|^2/16\pi\f$.
+ */
+static float nn_to_resonance_matrix_element(const double mandelstam_s,
+  const ParticleType &type_final_a, const ParticleType &type_final_b) {
+  PdgCode delta = PdgCode("2224");
+  if (type_final_a.pdgcode().iso_multiplet()
+      != type_final_b.pdgcode().iso_multiplet()) {
+    /* N + N -> N + Delta: fit to Dmitriev OBE model,
+     * Nucl. Phys. A 459, 503 (1986) */
+    if (type_final_a.pdgcode().iso_multiplet() == delta.iso_multiplet()
+        || type_final_b.pdgcode().iso_multiplet() == delta.iso_multiplet()) {
+      return 459. / std::pow(std::sqrt(mandelstam_s) - 1.104, 1.951);
+    } else {
+      return 0.0;
+    }
+  } else {
+    return 0.0;
+  }
+}
+
+
+ProcessBranchList ScatterActionBaryonBaryon::NucNuc_to_NucRes (
+                            const ParticleType &type_particle1,
+                            const ParticleType &type_particle2) {
+
+  ProcessBranchList process_list;
+  const double s = mandelstam_s();
+
+  /* Loop over all baryon resonances. */
+  for (const ParticleType &type_resonance :
+       ParticleType::list_baryon_resonances()) {
+    /* Loop over second particle (nucleon). */
+    for (const ParticleType &second_type : ParticleType::list_nucleons()) {
+
+      /* Check for charge conservation. */
+      if (type_resonance.charge() + second_type.charge()
+          != type_particle1.charge() + type_particle2.charge()) {
+        continue;
+      }
+
+      int I_z = type_resonance.isospin3() + second_type.isospin3();
+
+      /* Compute total isospin range with given initial and final particles. */
+      int I_max = std::min(type_resonance.isospin() + second_type.isospin(),
+                          type_particle1.isospin() + type_particle2.isospin());
+      int I_min = std::max(abs(type_resonance.isospin()
+                              - second_type.isospin()),
+                          abs(type_particle1.isospin()
+                              - type_particle2.isospin()));
+      I_min = std::max(I_min, abs(I_z));
+
+      /* Loop over total isospin in allowed range.
+      * Use decrement of 2, since isospin is multiplied by 2. */
+      double isospin_factor = 0.;
+      for (int I_tot = I_max; I_tot >= I_min; I_tot -= 2) {
+        isospin_factor = isospin_factor +
+            isospin_clebsch_gordan(type_particle1, type_particle2, I_tot, I_z)
+          * isospin_clebsch_gordan(type_resonance, second_type, I_tot, I_z);
+      }
+
+      /* If Clebsch-Gordan coefficient is zero, don't bother with the rest. */
+      if (std::abs(isospin_factor) < really_small) {
+        continue;
+      }
+
+      /* Integration limits. */
+      double lower_limit = type_resonance.minimum_mass();
+      double upper_limit = std::sqrt(s) - second_type.mass();
+      /* Check the available energy (requiring it to be a little above the
+      * threshold, because the integration will not work if it's too close). */
+      if (upper_limit - lower_limit < 1E-3) {
+        continue;
+      }
+
+      /* Calculate resonance production cross section
+      * using the Breit-Wigner distribution as probability amplitude.
+      * Integrate over the allowed resonance mass range. */
+      IntegrandParameters params = {&type_resonance, second_type.mass(), s};
+      printd("Process: %s %s -> %s %s\n", type_particle1.name().c_str(),
+      type_particle2.name().c_str(), second_type.name().c_str(),
+      type_resonance.name().c_str());
+      printd("Limits: %g %g \n", lower_limit, upper_limit);
+      double resonance_integral, integral_error;
+      quadrature_1d(&spectral_function_integrand, &params,
+                    lower_limit, upper_limit,
+                    &resonance_integral, &integral_error);
+      printd("Integral value: %g Error: %g \n", resonance_integral,
+        integral_error);
+
+      /* Cross section for 2->2 process with one resonance in final state.
+       * Based on Eq. (46) in PhD thesis of J. Weil
+       * (https://gibuu.hepforge.org/trac/chrome/site/files/phd/weil.pdf) */
+      float xsection
+           = isospin_factor * isospin_factor
+             * resonance_integral / (s * std::sqrt(cm_momentum_squared()))
+             * nn_to_resonance_matrix_element(s, type_resonance, second_type);
+
+      if (xsection > really_small) {
+        process_list.push_back(ProcessBranch(type_resonance.pdgcode(),
+                                            second_type.pdgcode(), xsection));
+        printd("Found 2->2 creation process for resonance %s (%s).\n",
+              type_resonance.pdgcode().string().c_str(),
+              type_resonance.name().c_str());
+        printd("2->2 with original particles: %s %s Charges: %i %i \n",
+              type_particle1.name().c_str(), type_particle2.name().c_str(),
+              type_particle1.charge(), type_particle2.charge());
+      }
+    }
+  }
+  return process_list;
+}
+
+
+ProcessBranchList ScatterActionBaryonBaryon::NucRes_to_NucNuc (
+                            const ParticleType &type_particle1,
+                            const ParticleType &type_particle2) {
+
+  const ParticleType *type_resonance, *type_nucleon;
+  ProcessBranchList process_list;
+
+  if (type_particle1.pdgcode().iso_multiplet() == 0x1112) {
+    type_nucleon = &type_particle1;
+    type_resonance = &type_particle2;
+  } else if (type_particle2.pdgcode().iso_multiplet() == 0x1112) {
+    type_nucleon = &type_particle2;
+    type_resonance = &type_particle1;
+  } else {
+    throw std::runtime_error("Error: no nucleon found in NucRes_to_NucNuc!");
+  }
+
+  const double s = mandelstam_s();
+  /* CM momentum in final state */
+  double p_cm_final = sqrt(s - 4.*type_nucleon->mass_sqr())/2.;
+
+  /* Loop over all nucleon charge states. */
+  for (const ParticleType &nuc1 : ParticleType::list_nucleons()) {
+    for (const ParticleType &nuc2 : ParticleType::list_nucleons()) {
+      /* Prevent double counting. */
+      if (nuc2.charge()>nuc1.charge()) {
+        continue;
+      }
+      /* Check for charge conservation. */
+      if (type_resonance->charge() + type_nucleon->charge()
+          != nuc1.charge() + nuc2.charge()) {
+        continue;
+      }
+
+      int I_z = type_resonance->isospin3() + type_nucleon->isospin3();
+
+      /* Compute total isospin range with given initial and final particles. */
+      int I_max = std::min(type_resonance->isospin() + type_nucleon->isospin(),
+                          nuc1.isospin() + nuc2.isospin());
+      int I_min = std::max(abs(type_resonance->isospin()
+                               - type_nucleon->isospin()),
+                          abs(nuc1.isospin() - nuc2.isospin()));
+      I_min = std::max(I_min, abs(I_z));
+
+      /* Loop over total isospin in allowed range.
+      * Use decrement of 2, since isospin is multiplied by 2. */
+      double isospin_factor = 0.;
+      for (int I_tot = I_max; I_tot >= I_min; I_tot -= 2) {
+        isospin_factor = isospin_factor +
+            isospin_clebsch_gordan(nuc1, nuc2, I_tot, I_z)
+          * isospin_clebsch_gordan(*type_resonance, *type_nucleon, I_tot, I_z);
+      }
+
+      /* If Clebsch-Gordan coefficient is zero, don't bother with the rest */
+      if (std::abs(isospin_factor) < really_small) {
+        continue;
+      }
+
+      /* Cross section for 2->2 resonance absorption.
+       * See eqs. (B.6), (B.9) and (181) in the GiBUU review paper. */
+      float xsection
+        = isospin_factor * isospin_factor
+          * p_cm_final / ( 2. * s * std::sqrt(cm_momentum_squared()))
+          * nn_to_resonance_matrix_element(s, *type_resonance, *type_nucleon);
+
+      if (xsection > really_small) {
+        process_list.push_back(ProcessBranch(type_resonance->pdgcode(),
+                                             type_nucleon->pdgcode(),
+                                             xsection));
+        printd("Found 2->2 absorption process for resonance %s (%s).\n",
+              type_resonance->pdgcode().string().c_str(),
+              type_resonance->name().c_str());
+        printd("2->2 with original particles: %s %s Charges: %i %i \n",
+              type_particle1.name().c_str(), type_particle2.name().c_str(),
+              type_particle1.charge(), type_particle2.charge());
+      }
+    }
+  }
+  return process_list;
+}
+
 
 }  // namespace Smash

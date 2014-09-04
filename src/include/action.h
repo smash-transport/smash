@@ -304,6 +304,39 @@ class ScatterActionBaryonBaryon : public ScatterAction {
   }
   /** Find all inelastic 2->2 processes for this reaction. */
   ProcessBranchList two_to_two_cross_sections() override;
+ private:
+  /**
+  * Calculate cross sections for single-resonance production from
+  * nucleon-nucleon collisions (i.e. NN->NR).
+  *
+  * Checks are processed in the following order:
+  * 1. Charge conservation
+  * 3. Isospin factors (Clebsch-Gordan)
+  * 4. Enough energy for all decay channels to be available for the resonance
+  *
+  * \param[in] type_particle1 Type information of the first incoming nucleon.
+  * \param[in] type_particle2 Type information of the second incoming nucleon.
+  *
+  * \return List of resonance production processes possible in the collision
+  * of the two nucleons. Each element in the list contains the type(s) of the
+  * final state particle(s) and the cross section for that particular process.
+  */
+  ProcessBranchList NucNuc_to_NucRes (const ParticleType &type_particle1,
+                                      const ParticleType &type_particle2);
+
+  /**
+  * Calculate cross sections for resonance absorption on a nucleon
+  * (i.e. NR->NN).
+  *
+  * \param[in] type_particle1 Type information of the first incoming nucleon.
+  * \param[in] type_particle2 Type information of the second incoming nucleon.
+  *
+  * \return List of resonance absorption processes possible in the collision
+  * with a nucleon. Each element in the list contains the type(s) of the
+  * final state particle(s) and the cross section for that particular process.
+  */
+  ProcessBranchList NucRes_to_NucNuc (const ParticleType &type_particle1,
+                                      const ParticleType &type_particle2);
 };
 
 /**

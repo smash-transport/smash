@@ -35,6 +35,31 @@ const ParticleTypeList &ParticleType::list_all() {
   return *all_particle_types;
 }
 
+const ParticleTypeList ParticleType::list_nucleons() {
+  ParticleType proton = find(0x2212);
+  ParticleType neutron = find(0x2112);
+
+  ParticleTypeList list;
+  list.push_back(proton);
+  list.push_back(neutron);
+
+  return list;
+}
+
+const ParticleTypeList ParticleType::list_baryon_resonances() {
+  ParticleTypeList list;
+
+  for (const ParticleType &type_resonance : ParticleType::list_all()) {
+    /* Only loop over baryon resonances. */
+    if (type_resonance.is_stable()
+        || type_resonance.pdgcode().baryon_number() != 1) {
+      continue;
+    }
+   list.push_back(type_resonance);
+  }
+  return list;
+}
+
 SMASH_CONST const ParticleType &ParticleType::find(PdgCode pdgcode) {
   const auto found = std::lower_bound(
       all_particle_types->begin(), all_particle_types->end(), pdgcode,
