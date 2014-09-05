@@ -533,8 +533,7 @@ ProcessBranchList ScatterActionBaryonBaryon::NucRes_to_NucNuc (
           * nn_to_resonance_matrix_element(s, *type_resonance, *type_nucleon);
 
       if (xsection > really_small) {
-        process_list.push_back(ProcessBranch(type_resonance->pdgcode(),
-                                             type_nucleon->pdgcode(),
+        process_list.push_back(ProcessBranch(nuc1.pdgcode(), nuc2.pdgcode(),
                                              xsection));
         printd("Found 2->2 absorption process for resonance %s (%s).\n",
               type_resonance->pdgcode().string().c_str(),
