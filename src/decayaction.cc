@@ -207,4 +207,8 @@ void DecayAction::perform(Particles *particles, size_t &id_process) {
   log.debug("Particle map now has ", particles->size(), " elements.");
 }
 
+void DecayAction::format_debug_output(std::ostream &out) const {
+  out << "Decay of " << incoming_particles_ << " to " << outgoing_particles_;
+}
+
 }  // namespace Smash

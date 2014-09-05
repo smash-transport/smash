@@ -359,4 +359,25 @@ ProcessBranchList ScatterActionBaryonBaryon::two_to_two_cross_sections() {
   return resonance_process_list;
 }
 
+void ScatterAction::format_debug_output(std::ostream &out) const {
+  out << "Scatter of " << incoming_particles_;
+  if (outgoing_particles_.empty()) {
+    out << " (not performed)";
+  } else {
+    out << " to " << outgoing_particles_;
+  }
+}
+void ScatterActionMesonMeson::format_debug_output(std::ostream &out) const {
+  out << " Meson-Meson  ";
+  ScatterAction::format_debug_output(out);
+}
+void ScatterActionBaryonMeson::format_debug_output(std::ostream &out) const {
+  out << "Baryon-Meson  ";
+  ScatterAction::format_debug_output(out);
+}
+void ScatterActionBaryonBaryon::format_debug_output(std::ostream &out) const {
+  out << "Baryon-Baryon ";
+  ScatterAction::format_debug_output(out);
+}
+
 }  // namespace Smash

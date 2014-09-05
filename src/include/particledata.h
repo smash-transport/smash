@@ -227,6 +227,12 @@ inline bool ParticleData::operator<(const int id_a) const {
  */
 std::ostream &operator<<(std::ostream &s, const ParticleData &p);
 
+/** \ingroup logging
+ * Writes a compact overview over the particles in the \p particle_list argument
+ * to the stream.
+ */
+std::ostream &operator<<(std::ostream &out, const ParticleList &particle_list);
+
 }  // namespace Smash
 
 #endif  // SRC_INCLUDE_PARTICLEDATA_H_

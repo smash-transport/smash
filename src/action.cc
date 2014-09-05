@@ -186,4 +186,12 @@ void Action::check_conservation(const size_t &id_process) const {
   // TODO: check other conservation laws (baryon number etc)
 }
 
+std::ostream &operator<<(std::ostream &out, const ActionList &actions) {
+  out << "ActionList {\n";
+  for (const auto &a : actions) {
+    out << "- " << a << '\n';
+  }
+  return out << '}';
+}
+
 }  // namespace Smash

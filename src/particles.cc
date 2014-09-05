@@ -22,7 +22,7 @@ void Particles::reset() {
 
 std::ostream &operator<<(std::ostream &out, const Particles &particles) {
   using namespace std;
-  out << "Particles:\n";
+  out << particles.size() << " Particles:\n";
   int n = 0;
   for (const auto &p : particles.data()) {
     while (p.id() != n) {
@@ -31,7 +31,7 @@ std::ostream &operator<<(std::ostream &out, const Particles &particles) {
         out << '\n';
       }
     }
-    out << setw(5) << setprecision(3) << p.effective_mass() << p.type().name();
+    out << setw(5) << setprecision(3) << p.momentum().abs3() << p.type().name();
     if ((++n & 15) == 0) {
       out << '\n';
     }
