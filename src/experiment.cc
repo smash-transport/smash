@@ -184,8 +184,6 @@ Experiment<Modus>::Experiment(Configuration config)
     : parameters_(create_experiment_parameters(config)),
       modus_(config["Modi"], parameters_),
       particles_(),
-      decay_finder_(parameters_),
-      scatter_finder_(parameters_),
       nevents_(config.take({"General", "NEVENTS"})),
       end_time_(config.take({"General", "END_TIME"})),
       delta_time_startup_(config.take({"General", "DELTA_TIME"})) {
@@ -199,6 +197,9 @@ Experiment<Modus>::Experiment(Configuration config)
   Random::set_seed(seed_);
   log.info() << "Random number seed: " << seed_;
   log.info() << *this;
+
+  action_finders_.emplace_back(new ScatterActionsFinder(parameters_));
+  action_finders_.emplace_back(new DecayActionsFinder(parameters_));
 }
 
 /* This method reads the particle type and cross section information
@@ -268,10 +269,25 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
                                      // sorting and finally a single linear
                                      // iteration
 
-    /* (1.a) Find possible decays. */
-    actions += decay_finder_.find_possible_actions(particles_);
-    /* (1.b) Find possible collisions. */
-    actions += scatter_finder_.find_possible_actions(particles_);
+    //for (const auto &neighbors_list : ) {
+    {
+      ParticleList search_list;  // a list of particles where each pair needs to
+                                 // be tested for possible interaction
+      ParticleList neighbors_list;  // a list of particles that need to be
+                                    // tested against particles in search_list
+                                    // for possible interaction
+      // For now we start with the trivial segmentation: all particles in
+      // search_list and neighbors_list empty:
+      search_list.reserve(particles_.size());
+      for (const auto &p : particles_.data()) {
+        search_list.emplace_back(p);
+      }
+      for (const auto &finder : action_finders_) {
+        actions += finder->find_possible_actions(search_list, neighbors_list,
+                                                 particles_);
+      }
+    }
+
     /* (1.c) Sort action list by time. */
     std::sort(actions.begin(), actions.end(),
               [](const ActionPtr &a, const ActionPtr &b) { return *a < *b; });

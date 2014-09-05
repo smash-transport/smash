@@ -20,10 +20,10 @@
 
 namespace Smash {
 
-ScatterActionsFinder::ScatterActionsFinder(const ExperimentParameters &parameters)
-                     : ActionFinderFactory(parameters.timestep_duration()),
-                       elastic_parameter_(parameters.cross_section) {
-}
+ScatterActionsFinder::ScatterActionsFinder(
+    const ExperimentParameters &parameters)
+    : ActionFinderInterface(parameters.timestep_duration()),
+      elastic_parameter_(parameters.cross_section) {}
 
 double ScatterActionsFinder::collision_time(const ParticleData &p1,
                                             const ParticleData &p2) {
@@ -108,11 +108,12 @@ ScatterActionsFinder::check_collision(const ParticleData &data_a,
 }
 
 std::vector<ActionPtr> ScatterActionsFinder::find_possible_actions(
-    const Particles &particles) const {
+    const ParticleList &search_list, const ParticleList &neighbors_list,
+    const Particles &) const {
   std::vector<ActionPtr> actions;
 
-  for (const auto &p1 : particles.data()) {
-    for (const auto &p2 : particles.data()) {
+  for (const auto &p1 : search_list) {
+    for (const auto &p2 : search_list) {
       /* Check for same particle and double counting. */
       if (p1.id() >= p2.id()) continue;
 
