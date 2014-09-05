@@ -211,6 +211,12 @@ class Particles {
   ParticleDataMap data_;
 };
 
+/**
+ * \ingroup logging
+ * Print effective mass and type name for all particles to the stream.
+ */
+std::ostream &operator<<(std::ostream &out, const Particles &p);
+
 /* return the data of a specific particle */
 inline const ParticleData &Particles::data(int particle_id) const {
   return data_.at(particle_id);
