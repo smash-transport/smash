@@ -72,8 +72,8 @@ ScatterActionsFinder::check_collision(const int id_a, const int id_b,
   }
 
   /* check according timestep: positive and smaller */
-  const double time_until_collision = collision_time(data_a, data_b);
-  if (time_until_collision < 0.0 || time_until_collision >= dt_) {
+  const float time_until_collision = collision_time(data_a, data_b);
+  if (time_until_collision < 0.f || time_until_collision >= dt_) {
     return nullptr;
   }
 
