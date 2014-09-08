@@ -51,10 +51,8 @@ double ScatterActionsFinder::collision_time(const ParticleData &p1,
   }
 }
 
-
-ActionPtr
-ScatterActionsFinder::check_collision(const ParticleData &data_a,
-                                      const ParticleData &data_b) const {
+ActionPtr ScatterActionsFinder::check_collision(
+    const ParticleData &data_a, const ParticleData &data_b) const {
   const auto &log = logger<LogArea::FindScatter>();
 
   /* just collided with this particle */
@@ -108,8 +106,7 @@ ScatterActionsFinder::check_collision(const ParticleData &data_a,
 }
 
 std::vector<ActionPtr> ScatterActionsFinder::find_possible_actions(
-    const ParticleList &search_list, const ParticleList &neighbors_list,
-    const Particles &) const {
+    const ParticleList &search_list, const ParticleList &neighbors_list) const {
   std::vector<ActionPtr> actions;
 
   for (const auto &p1 : search_list) {
@@ -118,7 +115,7 @@ std::vector<ActionPtr> ScatterActionsFinder::find_possible_actions(
       if (p1.id() >= p2.id()) continue;
 
       /* Check if collision is possible. */
-      ActionPtr act = check_collision (p1, p2);
+      ActionPtr act = check_collision(p1, p2);
 
       /* Add to collision list. */
       if (act != nullptr) {
@@ -128,7 +125,6 @@ std::vector<ActionPtr> ScatterActionsFinder::find_possible_actions(
   }
   return std::move(actions);
 }
-
 
 #if 0
 GridScatterFinder::GridScatterFinder(float length) : length_(length) {

@@ -24,9 +24,9 @@ class DecayActionsFinder : public ActionFinderInterface {
   DecayActionsFinder(const ExperimentParameters &parameters);
   /** Check the whole particle list for decays
    * and return a list with the corrsponding Action objects. */
-  ActionList find_possible_actions(const ParticleList &search_list,
-                                   const ParticleList &neighbors_list,
-                                   const Particles &particles) const override;
+  ActionList find_possible_actions(
+      const ParticleList &search_list,
+      const ParticleList &neighbors_list) const override;
 };
 
 }  // namespace Smash

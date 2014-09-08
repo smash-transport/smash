@@ -283,8 +283,7 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
         search_list.emplace_back(p);
       }
       for (const auto &finder : action_finders_) {
-        actions += finder->find_possible_actions(search_list, neighbors_list,
-                                                 particles_);
+        actions += finder->find_possible_actions(search_list, neighbors_list);
       }
     }
 

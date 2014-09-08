@@ -23,8 +23,8 @@ DecayActionsFinder::DecayActionsFinder(const ExperimentParameters &parameters)
 
 ActionList DecayActionsFinder::find_possible_actions(
     const ParticleList &search_list,
-    const ParticleList &,  // the list of neighbors is irrelevant for decays
-    const Particles &) const {
+    const ParticleList &  // the list of neighbors is irrelevant for decays
+    ) const {
   ActionList actions;
   actions.reserve(10);  // for short time steps this seems reasonable to expect
                         // less than 10 decays in most time steps
