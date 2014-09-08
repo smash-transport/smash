@@ -42,7 +42,6 @@ TEST(create_particledata_piplus) {
   COMPARE(p.id(), -1);
   COMPARE(p.pdgcode(), pdg);
   COMPARE(p.id_process(), -1);
-  COMPARE(p.collision_time(), 0.0);
   COMPARE(p.momentum().x0(), 0.0);
   COMPARE(p.momentum().x1(), 0.0);
   COMPARE(p.momentum().x2(), 0.0);
@@ -65,12 +64,7 @@ TEST(set_get) {
   COMPARE(p.is_hadron(), smashon.is_hadron());
   p.set_id_process(5);
   COMPARE(p.id_process(), 5);
-  p.set_collision_time(1.234);
-  COMPARE(p.collision_time(), 1.234);
-  p.set_collision(2.345);
-  COMPARE(p.collision_time(), 2.345);
-  p.set_collision_past(6);
-  COMPARE(p.collision_time(), 0.0);
+  p.set_id_process(6);
   COMPARE(p.id_process(), 6);
   FourVector m(1.0, 1.2, 1.4, 1.6);
   p.set_4momentum(m);

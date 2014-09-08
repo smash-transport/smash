@@ -46,9 +46,9 @@ void ScatterAction::perform(Particles *particles, size_t &id_process) {
 
     momenta_exchange();
 
-    /* unset collision time for both particles + keep id + unset partner */
-    outgoing_particles_[0].set_collision_past(id_process);
-    outgoing_particles_[1].set_collision_past(id_process);
+    // store the process id in the Particle data
+    outgoing_particles_[0].set_id_process(id_process);
+    outgoing_particles_[1].set_id_process(id_process);
 
     particles->data(id1) = outgoing_particles_[0];
     particles->data(id2) = outgoing_particles_[1];
@@ -71,8 +71,8 @@ void ScatterAction::perform(Particles *particles, size_t &id_process) {
       new_particle.set_4momentum(
           new_particle.momentum().LorentzBoost(-beta_cm()));
 
-      /* unset collision time for particles + keep id + unset partner */
-      new_particle.set_collision_past(id_process);
+      // store the process id in the Particle data
+      new_particle.set_id_process(id_process);
 
       printd("Resonance %s with ID %i \n",
              new_particle.type().name().c_str(), new_particle.id());

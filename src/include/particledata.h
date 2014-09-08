@@ -54,10 +54,6 @@ class ParticleData {
 
   inline int id_process(void) const;
   inline void set_id_process(const int id);
-  inline double collision_time(void) const;
-  inline void set_collision_time(const double &collision_time);
-  inline void set_collision(const double &collision_time);
-  inline void set_collision_past(const int process_id);
   inline const FourVector &momentum(void) const;
   inline void set_4momentum(const FourVector &momentum_vector);
   inline void set_4momentum(double mass, const ThreeVector &mom);
@@ -89,8 +85,6 @@ class ParticleData {
 
   /// counter of the last collision/decay
   int id_process_ = -1;
-  /// collision time
-  double collision_time_ = 0.;
   /// momenta of the particle: x0, x1, x2, x3 as E, px, py, pz
   FourVector momentum_;
   /// position in space: x0, x1, x2, x3 as t, x, y, z
@@ -120,27 +114,6 @@ inline int ParticleData::id_process(void) const {
 /// set the id of the collision process
 inline void ParticleData::set_id_process(const int process_id) {
   id_process_ = process_id;
-}
-
-/// return collision time
-inline double ParticleData::collision_time(void) const {
-  return collision_time_;
-}
-
-/// set possible collision time
-inline void ParticleData::set_collision_time(const double &collision_t) {
-  collision_time_ = collision_t;
-}
-
-/// set possible collision data
-inline void ParticleData::set_collision(const double &collision_t) {
-  collision_time_ = collision_t;
-}
-
-/// set happened collision data
-inline void ParticleData::set_collision_past(const int id_counter) {
-  collision_time_ = 0.0;
-  id_process_ = id_counter;
 }
 
 /// return the particle 4-momentum

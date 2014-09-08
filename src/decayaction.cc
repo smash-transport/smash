@@ -188,8 +188,8 @@ void DecayAction::perform(Particles *particles, size_t &id_process) {
     p.set_4momentum(p.momentum().LorentzBoost(-velocity_CM));
     p.set_4position(incoming_particles_[0].position());
     log.debug("particle momenta in comp ", p);
-    // unset collision time for both particles + keep id + unset partner
-    p.set_collision_past(id_process);
+    // store the process id in the Particle data
+    p.set_id_process(id_process);
   }
 
   id_process++;
