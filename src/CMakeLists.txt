@@ -74,6 +74,7 @@ set(smash_src
         spheremodus.cc
         stringfunctions.cc
         threevector.cc
+        tsc.cc
         vtkoutput.cc
         width.cc
         )
