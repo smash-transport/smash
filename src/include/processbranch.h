@@ -172,6 +172,18 @@ inline float ProcessBranch::weight(void) const {
   return branch_weight_;
 }
 
+/** \relates ProcessBranch
+ * Calculates the total weight by summing all weights of the ProcessBranch
+ * objects in the list \p l.
+ */
+inline float total_weight(const ProcessBranchList &l) {
+  float sum = 0.f;
+  for (const auto &p : l) {
+    sum += p.weight();
+  }
+  return sum;
+}
+
 /**
  * \ingroup data
  *

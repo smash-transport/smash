@@ -14,6 +14,7 @@
 #include "include/fourvector.h"
 #include "include/particles.h"
 #include "include/random.h"
+#include "include/cxx14compat.h"
 
 namespace Smash {
 
@@ -31,12 +32,10 @@ ActionList DecayActionsFinder::find_possible_actions(Particles *particles) const
       continue;      /* particle doesn't decay */
     }
 
-    /* The clock goes slower in the rest frame of the resonance */
-    double resonance_frame_timestep = dt_ * p.inverse_gamma();
-
-    // Create a candidate Action
-    DecayAction act(p);
-    const auto width = act.weight();  // total decay width (mass-dependent)
+    ProcessBranchList processes =
+        p.type().get_partial_widths(p.effective_mass());
+    const float width =
+        total_weight(processes);  // total decay width (mass-dependent)
 
     /* Exponential decay. Lifetime tau = 1 / width
      * t / tau = width * t (remember GeV-fm conversion)
@@ -44,10 +43,23 @@ ActionList DecayActionsFinder::find_possible_actions(Particles *particles) const
      * P(alive after n steps) = (1 - width * Delta_t)^n
      * = (1 - width * Delta_t)^(t / Delta_t)
      * -> exp(-width * t) when Delta_t -> 0
+     *
+     * A uniform distribution is not really correct, but good enough for small
+     * time steps.
      */
-    if (Random::canonical() < resonance_frame_timestep * width / hbarc) {
-      /* Time is up! Set the particle to decay at this timestep. */
-      actions.emplace_back(new DecayAction(std::move(act)));
+    const float decay_time =
+        Random::canonical<float>() *
+        (static_cast<float>(hbarc) /
+         (p.inverse_gamma()  // The clock goes slower in the rest frame of the
+                             // resonance
+          * width));
+
+    if (decay_time < dt_) {
+      // => decay_time ∈ [0, dt_[
+      // => the particle decays in this timestep.
+      auto act = make_unique<DecayAction>(p, decay_time);
+      act->add_processes(std::move(processes));
+      actions.emplace_back(std::move(act));
     }
   }
   return std::move(actions);

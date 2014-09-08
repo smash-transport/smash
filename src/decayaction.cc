@@ -17,14 +17,9 @@
 
 namespace Smash {
 
-
-DecayAction::DecayAction(const ParticleData &in_part, float time_of_execution)
-    : Action({in_part}, time_of_execution) {}
-
-DecayAction::DecayAction(const ParticleData &p) : Action({p}, 0.) {
-  add_processes(p.type().get_partial_widths(p.effective_mass()));
+DecayAction::DecayAction(const ParticleData &p, float time_of_execution)
+    : Action({p}, time_of_execution) {
 }
-
 
 double DecayAction::sqrt_s() const {
   return incoming_particles_[0].momentum().abs();

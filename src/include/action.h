@@ -167,19 +167,15 @@ class Action {
 class DecayAction : public Action {
  public:
   /**
-   * Construct a DecayAction object.
+   * Construct a DecayAction from a particle \p p.
    *
-   * \param[in] in_part decaying particle
+   * It does not initialize the list of possible decay processes. You need to
+   * call add_processes after construction.
+   *
+   * \param[in] p The particle that should decay if the action is performed.
    * \param[in] time_of_execution time at which the action is supposed to take place
    */
-  DecayAction(const ParticleData &in_part, float time_of_execution);
-  /** Construct a DecayAction from a particle p.
-   *
-   * Sets up the full list of possible decay processes.
-   *
-   * \param[in] p Data of decaying particle. We use its ID and mass.
-   */
-  DecayAction(const ParticleData &p);
+  DecayAction(const ParticleData &p, float time_of_execution);
 
   /** Carry out the action, i.e. do the decay.
    * Performs a decay of one particle to two or three particles.
