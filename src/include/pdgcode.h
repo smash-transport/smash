@@ -237,6 +237,10 @@ class PdgCode {
     }
     return antiparticle_sign();
   }
+
+  /// Returns whether this PDG code identifies a baryon.
+  bool is_baryon() const { return is_hadron() && digits_.n_q1_ != 0; }
+
   /** Determine whether a particle has a distinct antiparticle
     * (or whether it is its own antiparticle). */
   bool has_antiparticle() const {

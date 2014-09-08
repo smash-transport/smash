@@ -57,8 +57,6 @@ ScatterActionsFinder::check_collision(const int id_a, const int id_b,
                                       Particles *particles) const {
   const auto &log = logger<LogArea::FindScatter>();
 
-  ScatterAction* act = nullptr;
-
   const ParticleData data_a = particles->data(id_a);
   const ParticleData data_b = particles->data(id_b);
 
@@ -78,11 +76,10 @@ ScatterActionsFinder::check_collision(const int id_a, const int id_b,
   }
 
   /* Create ScatterAction object. */
-  if (data_a.pdgcode().baryon_number() != 0 &&
-      data_b.pdgcode().baryon_number() != 0) {
+  ScatterAction *act = nullptr;
+  if (data_a.is_baryon() && data_b.is_baryon()) {
     act = new ScatterActionBaryonBaryon(data_a, data_b, time_until_collision);
-  } else if (data_a.pdgcode().baryon_number() != 0 ||
-             data_b.pdgcode().baryon_number() != 0) {
+  } else if (data_a.is_baryon() || data_b.is_baryon()) {
     act = new ScatterActionBaryonMeson(data_a, data_b, time_until_collision);
   } else {
     act = new ScatterActionMesonMeson(data_a, data_b, time_until_collision);
