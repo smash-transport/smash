@@ -21,10 +21,10 @@ DecayActionsFinder::DecayActionsFinder(const ExperimentParameters &parameters)
                      : ActionFinderFactory(parameters.timestep_duration()) {
 }
 
-ActionList DecayActionsFinder::find_possible_actions(Particles *particles) const {
+ActionList DecayActionsFinder::find_possible_actions(const Particles &particles) const {
   ActionList actions;
 
-  for (const auto &p : particles->data()) {
+  for (const auto &p : particles.data()) {
     if (p.type().is_stable()) {
       continue;      /* particle doesn't decay */
     }

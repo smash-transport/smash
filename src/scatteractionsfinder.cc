@@ -53,14 +53,11 @@ double ScatterActionsFinder::collision_time(const ParticleData &p1,
 
 
 ActionPtr
-ScatterActionsFinder::check_collision(const int id_a, const int id_b,
-                                      Particles *particles) const {
+ScatterActionsFinder::check_collision(const ParticleData &data_a,
+                                      const ParticleData &data_b) const {
   const auto &log = logger<LogArea::FindScatter>();
 
   ScatterAction* act = nullptr;
-
-  const ParticleData data_a = particles->data(id_a);
-  const ParticleData data_b = particles->data(id_b);
 
   /* just collided with this particle */
   if (data_a.id_process() >= 0 && data_a.id_process() == data_b.id_process()) {
@@ -112,18 +109,16 @@ ScatterActionsFinder::check_collision(const int id_a, const int id_b,
 }
 
 std::vector<ActionPtr> ScatterActionsFinder::find_possible_actions(
-    Particles *particles) const {
+    const Particles &particles) const {
   std::vector<ActionPtr> actions;
 
-  for (const auto &p1 : particles->data()) {
-    for (const auto &p2 : particles->data()) {
-      int id_a = p1.id(), id_b = p2.id();
-
+  for (const auto &p1 : particles.data()) {
+    for (const auto &p2 : particles.data()) {
       /* Check for same particle and double counting. */
-      if (id_a >= id_b) continue;
+      if (p1.id() >= p2.id()) continue;
 
       /* Check if collision is possible. */
-      ActionPtr act = check_collision (id_a, id_b, particles);
+      ActionPtr act = check_collision (p1, p2);
 
       /* Add to collision list. */
       if (act != nullptr) {

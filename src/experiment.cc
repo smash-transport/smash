@@ -215,9 +215,9 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
                                      // iteration
 
     /* (1.a) Find possible decays. */
-    actions += decay_finder_.find_possible_actions(&particles_);
+    actions += decay_finder_.find_possible_actions(particles_);
     /* (1.b) Find possible collisions. */
-    actions += scatter_finder_.find_possible_actions(&particles_);
+    actions += scatter_finder_.find_possible_actions(particles_);
     /* (1.c) Sort action list by time. */
     std::sort(actions.begin(), actions.end(),
               [](const ActionPtr &a, const ActionPtr &b) { return *a < *b; });
