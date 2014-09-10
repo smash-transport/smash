@@ -11,6 +11,7 @@
 #define SRC_INCLUDE_ACTIONFINDERFACTORY_H_
 
 #include "forwarddeclarations.h"
+#include <vector>
 
 namespace Smash {
 
@@ -42,7 +43,7 @@ class ActionFinderInterface {
    */
   virtual ActionList find_possible_actions(
       const ParticleList &search_list,
-      const ParticleList &neighbors_list) const = 0;
+      const std::vector<const ParticleList *> &neighbors_list) const = 0;
 
  protected:
   /** Timestep duration. */

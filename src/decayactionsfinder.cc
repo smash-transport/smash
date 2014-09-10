@@ -23,7 +23,8 @@ DecayActionsFinder::DecayActionsFinder(const ExperimentParameters &parameters)
 
 ActionList DecayActionsFinder::find_possible_actions(
     const ParticleList &search_list,
-    const ParticleList &  // the list of neighbors is irrelevant for decays
+    const std::vector<const ParticleList *> &  // the list of neighbors is
+                                               // irrelevant for decays
     ) const {
   ActionList actions;
   actions.reserve(10);  // for short time steps this seems reasonable to expect

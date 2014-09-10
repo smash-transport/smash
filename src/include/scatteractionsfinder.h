@@ -28,7 +28,7 @@ class ScatterActionsFinder : public ActionFinderInterface {
    * and return a list with the corrsponding Action objects. */
   ActionList find_possible_actions(
       const ParticleList &search_list,
-      const ParticleList &neighbors_list) const override;
+      const std::vector<const ParticleList *> &neighbors_list) const override;
 
  private:
   /** Check for a single pair of particles (id_a, id_b) if a collision will happen

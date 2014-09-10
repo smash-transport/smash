@@ -22,6 +22,7 @@
 #include "include/configuration.h"
 #include "include/experiment.h"
 #include "include/forwarddeclarations.h"
+#include "include/grid.h"
 #include "include/logging.h"
 #include "include/macros.h"
 #include "include/nucleusmodus.h"
@@ -269,23 +270,20 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
                                      // sorting and finally a single linear
                                      // iteration
 
-    //for (const auto &neighbors_list : ) {
-    {
-      ParticleList search_list;  // a list of particles where each pair needs to
-                                 // be tested for possible interaction
-      ParticleList neighbors_list;  // a list of particles that need to be
-                                    // tested against particles in search_list
-                                    // for possible interaction
-      // For now we start with the trivial segmentation: all particles in
-      // search_list and neighbors_list empty:
-      search_list.reserve(particles_.size());
-      for (const auto &p : particles_.data()) {
-        search_list.emplace_back(p);
-      }
+    Grid<GridOptions::Normal> grid(particles_.data());
+    grid.iterate_cells([&](
+        const ParticleList &search_list,  // a list of particles where each pair
+                                          // needs to be tested for possible
+                                          // interaction
+        const std::vector<const ParticleList *> &
+            neighbors_list  // a list of particles that need to be tested
+                            // against particles in search_list for possible
+                            // interaction
+        ) {
       for (const auto &finder : action_finders_) {
         actions += finder->find_possible_actions(search_list, neighbors_list);
       }
-    }
+    });
 
     /* (1.c) Sort action list by time. */
     std::sort(actions.begin(), actions.end(),

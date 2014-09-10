@@ -105,24 +105,49 @@ ActionPtr ScatterActionsFinder::check_collision(
   return std::move(act);
 }
 
-std::vector<ActionPtr> ScatterActionsFinder::find_possible_actions(
-    const ParticleList &search_list, const ParticleList &neighbors_list) const {
-  std::vector<ActionPtr> actions;
-
-  for (const auto &p1 : search_list) {
-    for (const auto &p2 : search_list) {
-      /* Check for same particle and double counting. */
-      if (p1.id() >= p2.id()) continue;
-
-      /* Check if collision is possible. */
-      ActionPtr act = check_collision(p1, p2);
-
-      /* Add to collision list. */
-      if (act != nullptr) {
-        actions.push_back(std::move(act));
+template <typename F>
+inline void iterate_all_pairs(
+    const ParticleList &search_list,
+    const std::vector<const ParticleList *> &neighbors_list, F &&closure) {
+  const auto end0 = search_list.end();
+  const auto end1 = neighbors_list.end();
+  for (auto it0 = search_list.begin(); it0 != end0; ++it0) {
+    for (auto it1 = std::next(it0); it1 != end0; ++it1) {
+      if (it0->id() < it1->id()) {
+        closure(*it0, *it1);
+      } else {
+        closure(*it1, *it0);
+      }
+    }
+    for (auto it1 = neighbors_list.begin(); it1 != end1; ++it1) {
+      const ParticleList &inner_neighbors_list = **it1;
+      const auto end2 = inner_neighbors_list.end();
+      for (auto it2 = inner_neighbors_list.begin(); it2 != end2; ++it2) {
+        if (it0->id() < it2->id()) {
+          closure(*it0, *it2);
+        } else {
+          closure(*it2, *it0);
+        }
       }
     }
   }
+}
+
+std::vector<ActionPtr> ScatterActionsFinder::find_possible_actions(
+    const ParticleList &search_list,
+    const std::vector<const ParticleList *> &neighbors_list) const {
+  std::vector<ActionPtr> actions;
+
+  iterate_all_pairs(search_list, neighbors_list,
+                    [&](const ParticleData &p1, const ParticleData &p2) {
+    /* Check if collision is possible. */
+    ActionPtr act = check_collision(p1, p2);
+
+    /* Add to collision list. */
+    if (act != nullptr) {
+      actions.push_back(std::move(act));
+    }
+  });
   return std::move(actions);
 }
 
