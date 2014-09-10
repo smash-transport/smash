@@ -491,10 +491,6 @@ ProcessBranchList ScatterActionBaryonBaryon::NucRes_to_NucNuc (
   /* Loop over all nucleon charge states. */
   for (const ParticleType &nuc1 : ParticleType::list_nucleons()) {
     for (const ParticleType &nuc2 : ParticleType::list_nucleons()) {
-      /* Prevent double counting. */
-      if (nuc2.charge()>nuc1.charge()) {
-        continue;
-      }
       /* Check for charge conservation. */
       if (type_resonance->charge() + type_nucleon->charge()
           != nuc1.charge() + nuc2.charge()) {
@@ -529,7 +525,7 @@ ProcessBranchList ScatterActionBaryonBaryon::NucRes_to_NucNuc (
        * See eqs. (B.6), (B.9) and (181) in the GiBUU review paper. */
       float xsection
         = isospin_factor * isospin_factor
-          * p_cm_final / ( 2. * s * std::sqrt(cm_momentum_squared()))
+          * p_cm_final / ( s * std::sqrt(cm_momentum_squared()))
           * nn_to_resonance_matrix_element(s, *type_resonance, *type_nucleon);
 
       if (xsection > really_small) {
