@@ -46,20 +46,14 @@ void Action::add_processes(const ProcessBranchList &pv) {
 
 bool Action::is_valid(const Particles &particles) const {
   for (const auto &part : incoming_particles_) {
-    /* Check if the particles still exist. */
+    // Check if the particles still exists. If it decayed or scattered
+    // inelastically it is gone.
     if (!particles.has_data(part.id())) {
       return false;
     }
-    /* Check if particles have scattered in the meantime
-     * (by checking if their energy or momentum has changed). */
-    if ((fabs(part.momentum().x0()
-             - particles.data(part.id()).momentum().x0()) > really_small)
-        || (fabs(part.momentum().x1()
-                 - particles.data(part.id()).momentum().x1()) > really_small)
-        || (fabs(part.momentum().x2()
-                 - particles.data(part.id()).momentum().x2()) > really_small)
-        || (fabs(part.momentum().x3()
-                 - particles.data(part.id()).momentum().x3()) > really_small)) {
+    // If the particle has scattered elastically, its id_process has changed and
+    // we consider it invalid.
+    if (particles.data(part.id()).id_process() != part.id_process()) {
       return false;
     }
   }
@@ -184,6 +178,14 @@ void Action::check_conservation(const size_t &id_process) const {
   }
 
   // TODO: check other conservation laws (baryon number etc)
+}
+
+std::ostream &operator<<(std::ostream &out, const ActionList &actions) {
+  out << "ActionList {\n";
+  for (const auto &a : actions) {
+    out << "- " << a << '\n';
+  }
+  return out << '}';
 }
 
 }  // namespace Smash

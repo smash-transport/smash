@@ -232,10 +232,15 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
           for (const auto &output : outputs_) {
             output->at_interaction(incoming_particles, outgoing_particles);
           }
+          log.debug(~einhard::Green(), "✔ ", action);
+        } else {
+          log.debug(~einhard::DRed(), "✘ ", action, " (discarded: invalid)");
         }
       }
       actions.clear();
-      log.trace() << source_location << " Action list done.";
+      log.debug(~einhard::Blue(), particles_);
+    } else {
+      log.debug("no actions performed");
     }
 
     /* (3) Do propagation. */

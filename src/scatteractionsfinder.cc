@@ -77,17 +77,6 @@ ScatterActionsFinder::check_collision(const int id_a, const int id_b,
     return nullptr;
   }
 
-  /* check for minimal collision time both particles */
-  if ((data_a.collision_time() > 0.0 &&
-       time_until_collision > data_a.collision_time()) ||
-      (data_b.collision_time() > 0.0 &&
-       time_until_collision > data_b.collision_time())) {
-    log.debug(data_a.position().x0(), " Not minimal particle",
-              "\n    ", data_a,
-              "\n<-> ", data_b);
-    return nullptr;
-  }
-
   /* Create ScatterAction object. */
   if (data_a.pdgcode().baryon_number() != 0 &&
       data_b.pdgcode().baryon_number() != 0) {
@@ -118,10 +107,6 @@ ScatterActionsFinder::check_collision(const int id_a, const int id_b,
                 "\n    ", data_a,
                 "\n<-> ", data_b);
   }
-
-  /* Set up collision partners. */
-  particles->data(id_a).set_collision_time(time_until_collision);
-  particles->data(id_b).set_collision_time(time_until_collision);
 
   return ActionPtr(act);
 }

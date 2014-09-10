@@ -125,6 +125,21 @@ class Action {
    * \throws InvalidResonanceFormation
    */
   void sample_cms_momenta();
+
+  /**
+   * \ingroup logging
+   * Writes information about this action to the \p out stream.
+   */
+  virtual void format_debug_output(std::ostream &out) const = 0;
+
+  /**
+   * \ingroup logging
+   * Dispatches formatting to the virtual Action::format_debug_output function.
+   */
+  friend std::ostream &operator<<(std::ostream &out, const Action &action) {
+    action.format_debug_output(out);
+    return out;
+  }
 };
 
 
@@ -170,6 +185,12 @@ class DecayAction : public Action {
  protected:
   /// determine the total energy in the center-of-mass frame
   double sqrt_s() const;
+
+  /**
+   * \ingroup logging
+   * Writes information about this decay action to the \p out stream.
+   */
+  void format_debug_output(std::ostream &out) const override;
 
  private:
 
@@ -259,6 +280,12 @@ class ScatterAction : public Action {
   /// determine the squared momenta of the incoming particles in the center-of-mass system
   double cm_momentum_squared() const;
 
+  /**
+   * \ingroup logging
+   * Writes information about this scatter action to the \p out stream.
+   */
+  void format_debug_output(std::ostream &out) const override;
+
  private:
   /// determine the velocity of the center-of-mass frame in the lab
   ThreeVector beta_cm() const;
@@ -304,6 +331,7 @@ class ScatterActionBaryonBaryon : public ScatterAction {
   }
   /** Find all inelastic 2->2 processes for this reaction. */
   ProcessBranchList two_to_two_cross_sections() override;
+
  private:
   /**
   * Calculate cross sections for single-resonance production from
@@ -337,6 +365,13 @@ class ScatterActionBaryonBaryon : public ScatterAction {
   */
   ProcessBranchList NucRes_to_NucNuc (const ParticleType &type_particle1,
                                       const ParticleType &type_particle2);
+
+ protected:
+  /**
+   * \ingroup logging
+   * Writes information about this scatter action to the \p out stream.
+   */
+  void format_debug_output(std::ostream &out) const override;
 };
 
 /**
@@ -348,6 +383,13 @@ class ScatterActionBaryonMeson : public ScatterAction {
  public:
   /* Inherit constructor. */
   using ScatterAction::ScatterAction;
+
+ protected:
+  /**
+   * \ingroup logging
+   * Writes information about this scatter action to the \p out stream.
+   */
+  void format_debug_output(std::ostream &out) const override;
 };
 
 /**
@@ -359,7 +401,13 @@ class ScatterActionMesonMeson : public ScatterAction {
  public:
   /* Inherit constructor. */
   using ScatterAction::ScatterAction;
- private:
+
+ protected:
+  /**
+   * \ingroup logging
+   * Writes information about this scatter action to the \p out stream.
+   */
+  void format_debug_output(std::ostream &out) const override;
 };
 
 using ActionPtr = std::unique_ptr<Action>;
@@ -375,6 +423,20 @@ inline std::vector<ActionPtr> &operator+=(std::vector<ActionPtr> &lhs,
   }
   return lhs;
 }
+
+/**
+ * \ingroup logging
+ * Convenience: dereferences the ActionPtr to Action.
+ */
+inline std::ostream &operator<<(std::ostream &out, const ActionPtr &action) {
+  return out << *action;
+}
+
+/**
+ * \ingroup logging
+ * Writes multiple actions to the \p out stream.
+ */
+std::ostream &operator<<(std::ostream &out, const ActionList &actions);
 
 }  // namespace Smash
 

@@ -46,9 +46,9 @@ void ScatterAction::perform(Particles *particles, size_t &id_process) {
 
     momenta_exchange();
 
-    /* unset collision time for both particles + keep id + unset partner */
-    outgoing_particles_[0].set_collision_past(id_process);
-    outgoing_particles_[1].set_collision_past(id_process);
+    // store the process id in the Particle data
+    outgoing_particles_[0].set_id_process(id_process);
+    outgoing_particles_[1].set_id_process(id_process);
 
     particles->data(id1) = outgoing_particles_[0];
     particles->data(id2) = outgoing_particles_[1];
@@ -71,8 +71,8 @@ void ScatterAction::perform(Particles *particles, size_t &id_process) {
       new_particle.set_4momentum(
           new_particle.momentum().LorentzBoost(-beta_cm()));
 
-      /* unset collision time for particles + keep id + unset partner */
-      new_particle.set_collision_past(id_process);
+      // store the process id in the Particle data
+      new_particle.set_id_process(id_process);
 
       printd("Resonance %s with ID %i \n",
              new_particle.type().name().c_str(), new_particle.id());
@@ -541,6 +541,28 @@ ProcessBranchList ScatterActionBaryonBaryon::NucRes_to_NucNuc (
     }
   }
   return process_list;
+}
+
+
+void ScatterAction::format_debug_output(std::ostream &out) const {
+  out << "Scatter of " << incoming_particles_;
+  if (outgoing_particles_.empty()) {
+    out << " (not performed)";
+  } else {
+    out << " to " << outgoing_particles_;
+  }
+}
+void ScatterActionMesonMeson::format_debug_output(std::ostream &out) const {
+  out << " Meson-Meson  ";
+  ScatterAction::format_debug_output(out);
+}
+void ScatterActionBaryonMeson::format_debug_output(std::ostream &out) const {
+  out << "Baryon-Meson  ";
+  ScatterAction::format_debug_output(out);
+}
+void ScatterActionBaryonBaryon::format_debug_output(std::ostream &out) const {
+  out << "Baryon-Baryon ";
+  ScatterAction::format_debug_output(out);
 }
 
 

@@ -17,6 +17,7 @@
 #include "include/particles.h"
 #include "include/outputroutines.h"
 #include "include/configuration.h"
+#include "include/cxx14compat.h"
 
 namespace Smash {
 
@@ -160,14 +161,6 @@ void OscarOutput<Format, Contents>::write_particledata(
             data.position().x1(), data.position().x2(), data.position().x3(),
             data.position().x0());
   }
-}
-
-/**
- * Will be in C++14's standard library
- */
-template <typename T, typename... Args>
-std::unique_ptr<T> make_unique(Args &&... args) {
-  return std::unique_ptr<T>{new T{std::forward<Args>(args)...}};
 }
 
 namespace {
