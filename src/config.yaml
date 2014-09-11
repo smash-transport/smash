@@ -86,12 +86,16 @@ Modi:
     Sphere:
         # Sphere size
         RADIUS: 5.0
-        # Number of particles in Sphere
-        NUMBEROFPARTICLES: 280
         # Current temperature
         SPHERETEMPERATURE: 0.2
         # start time of simulation
         START_TIME: 0.0
+        # Number of particles in Sphere
+        INIT_MULTIPLICITIES:
+            221:    100
+            111:    200
+            2112:   20
+
 
     Collider:
         # Projectile particle

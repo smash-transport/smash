@@ -35,17 +35,16 @@ namespace Smash {
 SphereModus::SphereModus(Configuration modus_config,
                          const ExperimentParameters &)
     : radius_(modus_config.take({"Sphere", "RADIUS"})),
-      number_of_particles_(modus_config.take({"Sphere", "NUMBEROFPARTICLES"})),
       sphere_temperature_(modus_config.take({"Sphere", "SPHERETEMPERATURE"})),
-      start_time_(modus_config.take({"Sphere", "START_TIME"})) {
+      start_time_(modus_config.take({"Sphere", "START_TIME"})),    
+      init_multipl_(modus_config.take({"Sphere", "INIT_MULTIPLICITIES"}).
+                                        convert_for(init_multipl_)) {
 }
 
 /* console output on startup of sphere specific parameters */
 std::ostream &operator<<(std::ostream &out, const SphereModus &m) {
   return out << "-- Sphere Modus:\n"
                 "Radius of the sphere: " << m.radius_ << " [fm]"
-             << "\nTotal number of particles in sphere: "
-             << m.number_of_particles_
              << "\nTemperature for momentum sampling: " << m.sphere_temperature_
              << "\nStarting time for Sphere calculation: " << m.start_time_
              << '\n';
@@ -54,30 +53,13 @@ std::ostream &operator<<(std::ostream &out, const SphereModus &m) {
 
 /* initial_conditions - sets particle data for @particles */
 float SphereModus::initial_conditions(Particles *particles,
-  const ExperimentParameters& /*parameters*/) {
+  const ExperimentParameters &parameters) {
   const auto &log = logger<LogArea::Sphere>(); 
   FourVector momentum_total(0, 0, 0, 0);	  
-  /* count number of stable types */
-  int number_of_stable_types = 0;
-  /* loop over all the particle types */
-  for (const ParticleType &type : ParticleType::list_all()) {
-    /* Particles with width > 0 (resonances) do not exist in the beginning */
-    if (!type.is_stable()) {
-      continue;
-    }
-    number_of_stable_types = number_of_stable_types + 1;
-    printd("%s mass: %g [GeV]\n", type.name().c_str(), type.mass());
-  }
-
-  /* just produce equally many particles per type */
-  int number_of_particles_per_type;
-  number_of_particles_per_type = number_of_particles_/number_of_stable_types;
-  for (const ParticleType &type : ParticleType::list_all()) {
-  /* Particles with width > 0 (resonances) do not exist in the beginning */
-    if (!type.is_stable()) {
-      continue;
-    }
-  particles->create(number_of_particles_per_type, type.pdgcode());
+ /* Create NUMBER OF PARTICLES according to configuration */
+  for (const auto &p : init_multipl_) {
+    particles->create(p.second*parameters.testparticles, p.first);
+    log.debug() << "Particle " << p.first << " init multiplicity " << p.second;
   }
   /* loop over particle data to fill in momentum and position information */
   for (ParticleData &data : particles->data()) {
