@@ -26,7 +26,14 @@ Action::Action(const ParticleList &in_part, float time_of_execution)
     : incoming_particles_(in_part), time_of_execution_(time_of_execution),
       total_weight_(0.) {}
 
-Action::~Action() {}
+Action::Action(Action &&a)
+    : incoming_particles_(std::move(a.incoming_particles_)),
+      outgoing_particles_(std::move(a.outgoing_particles_)),
+      subprocesses_(std::move(a.subprocesses_)),
+      time_of_execution_(a.time_of_execution_),
+      total_weight_(a.total_weight_) {}
+
+Action::~Action() = default;
 
 float Action::weight() const {
   return total_weight_;

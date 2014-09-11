@@ -35,7 +35,21 @@ class Action {
    * \param[in] time_of_execution time at which the action is supposed to take place
    */
   Action(const ParticleList &in_part, float time_of_execution);
-  /** Destructor. */
+
+  /// Copying is disabled. Use std::move or create a new Action.
+  Action(const Action &) = delete;
+
+  /**
+   * Move constructor for Action.
+   *
+   * The move constructor makes moving efficient since it can move the three
+   * std::vector member variables.
+   */
+  Action(Action &&);
+
+  /** Virtual Destructor.
+   * The declaration of the destructor is necessary to make it virtual.
+   */
   virtual ~Action();
 
   /** For sorting by time of execution. */

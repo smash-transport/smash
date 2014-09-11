@@ -34,8 +34,9 @@ ActionList DecayActionsFinder::find_possible_actions(Particles *particles) const
     /* The clock goes slower in the rest frame of the resonance */
     double resonance_frame_timestep = dt_ * p.inverse_gamma();
 
-    std::unique_ptr<DecayAction> act(new DecayAction(p));
-    float width = act->weight();   // total decay width (mass-dependent)
+    // Create a candidate Action
+    DecayAction act(p);
+    const auto width = act.weight();  // total decay width (mass-dependent)
 
     /* Exponential decay. Lifetime tau = 1 / width
      * t / tau = width * t (remember GeV-fm conversion)
@@ -46,7 +47,7 @@ ActionList DecayActionsFinder::find_possible_actions(Particles *particles) const
      */
     if (Random::canonical() < resonance_frame_timestep * width / hbarc) {
       /* Time is up! Set the particle to decay at this timestep. */
-      actions.emplace_back(std::move(act));
+      actions.emplace_back(new DecayAction(std::move(act)));
     }
   }
   return std::move(actions);
