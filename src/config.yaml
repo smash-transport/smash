@@ -48,7 +48,7 @@ General:
     # how much time before recording measurables
     OUTPUT_INTERVAL:  1.0
 
-    # initial random seed (negative for time)
+    # initial random seed (auto-generated if negative)
     RANDOMSEED:    1
 
     # elastic cross section
