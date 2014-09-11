@@ -96,12 +96,6 @@ class Action {
  protected:
   /** List with data of incoming particles.  */
   ParticleList incoming_particles_;
-  /** time at which the action is supposed to be performed  */
-  float time_of_execution_;
-  /** list of possible subprocesses  */
-  std::vector<ProcessBranch> subprocesses_;
-  /** sum of all subprocess weights  */
-  float total_weight_;
   /**
    * Initially this stores only the PDG codes of final-state particles.
    *
@@ -109,6 +103,13 @@ class Action {
    * outgoing particles.
    */
   ParticleList outgoing_particles_;
+  /** list of possible subprocesses  */
+  std::vector<ProcessBranch> subprocesses_;
+  /** time at which the action is supposed to be performed  */
+  float time_of_execution_;
+  /** sum of all subprocess weights  */
+  float total_weight_;
+
   /// determine the total energy in the center-of-mass frame
   virtual double sqrt_s() const = 0;
 
