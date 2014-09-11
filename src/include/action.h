@@ -172,7 +172,7 @@ class DecayAction : public Action {
    *
    * \throws InvalidDecay
    */
-  void perform(Particles *particles, size_t &id_process);
+  void perform(Particles *particles, size_t &id_process) override;
 
   /**
    * \ingroup exception
@@ -185,7 +185,7 @@ class DecayAction : public Action {
 
  protected:
   /// determine the total energy in the center-of-mass frame
-  double sqrt_s() const;
+  double sqrt_s() const override;
 
   /**
    * \ingroup logging
@@ -242,7 +242,7 @@ class ScatterAction : public Action {
    *
    * \throws InvalidResonanceFormation
    */
-  void perform(Particles *particles, size_t &id_process);
+  void perform(Particles *particles, size_t &id_process) override;
 
   /**
    * Determine the elastic cross section for this collision. This routine
@@ -277,7 +277,7 @@ class ScatterAction : public Action {
   /// determine the Mandelstam s variable, s = (p_a + p_b)^2 = square of CMS energy
   double mandelstam_s() const;
   /// determine the total energy in the center-of-mass frame, i.e. sqrt of Mandelstam s
-  double sqrt_s() const;
+  double sqrt_s() const override;
   /// determine the squared momenta of the incoming particles in the center-of-mass system
   double cm_momentum_squared() const;
 
