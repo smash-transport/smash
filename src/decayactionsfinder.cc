@@ -31,11 +31,8 @@ ActionList DecayActionsFinder::find_possible_actions(Particles *particles) const
       continue;      /* particle doesn't decay */
     }
 
-    /* local rest frame velocity */
-    FourVector velocity_lrf = FourVector(1., p.velocity());
     /* The clock goes slower in the rest frame of the resonance */
-    double inverse_gamma = sqrt(velocity_lrf.Dot(velocity_lrf));
-    double resonance_frame_timestep = dt_ * inverse_gamma;
+    double resonance_frame_timestep = dt_ * p.inverse_gamma();
 
     std::unique_ptr<DecayAction> act(new DecayAction(p));
     float width = act->weight();   // total decay width (mass-dependent)
