@@ -11,9 +11,11 @@
 #define SRC_INCLUDE_ANGLES_H_
 
 #include <stdexcept>
+#include <iostream>
+#include "constants.h"
+#include "iomanipulators.h"
 #include "random.h"
 #include "threevector.h"
-#include "constants.h"
 
 namespace Smash {
 
@@ -146,6 +148,7 @@ class Angles {
   /// returns the polar angle
   float theta() const;
 
+  /// \ingroup exception
   /// thrown for invalid values for theta
   struct InvalidTheta : public std::invalid_argument {
     using std::invalid_argument::invalid_argument;
@@ -157,6 +160,13 @@ class Angles {
   /// cosine of polar angle \f$\cos\varphi\f$
   float costheta_;
 };
+
+/** \ingroup logging
+ * Creates output for an Angles object in the form "φ: 0.1294, cos ϑ:  0.423".
+ */
+inline std::ostream &operator<<(std::ostream &out, const Angles &a) {
+  return out << "φ:" << field << a.phi() << ", cos ϑ:" << field << a.costheta();
+}
 
 inline Angles::Angles() : phi_(0), costheta_(0) {}
 

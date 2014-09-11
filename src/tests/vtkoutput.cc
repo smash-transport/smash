@@ -16,12 +16,13 @@
 #include <string>
 #include <vector>
 #include <boost/filesystem.hpp>
-#include "../include/outputinterface.h"
-#include "../include/vtkoutput.h"
+#include <include/config.h>
 #include "../include/clock.h"
 #include "../include/configuration.h"
+#include "../include/outputinterface.h"
 #include "../include/particles.h"
 #include "../include/random.h"
+#include "../include/vtkoutput.h"
 
 using namespace Smash;
 
@@ -44,10 +45,10 @@ static const int zero = 0;
 
 static ParticleData create_smashon_particle() {
   ParticleData particle = ParticleData{ParticleType::find(0x661)};
-  particle.set_momentum(mass_smashon, random_value(), random_value(),
-                        random_value());
-  particle.set_position(FourVector(random_value(), random_value(),
-                                   random_value(), random_value()));
+  particle.set_4momentum(mass_smashon, random_value(), random_value(),
+                         random_value());
+  particle.set_4position(FourVector(random_value(), random_value(),
+                                    random_value(), random_value()));
   return particle;
 }
 
@@ -90,7 +91,7 @@ TEST(outputfile) {
   VERIFY(bf::exists(testoutputpath / outputfilename));
   /* Time step output */
   Clock clock(0.0, 1.0);
-  vtkop->after_Nth_timestep(particles, event_id, clock);
+  vtkop->at_intermediate_time(particles, event_id, clock);
   VERIFY(bf::exists(testoutputpath / "pos_ev00000_tstep00001.vtk"));
 
   std::fstream outputfile;
@@ -101,7 +102,8 @@ TEST(outputfile) {
     /* Check header */
     std::string output_header = "";
     std::string header = "# vtk DataFile Version 2.0\n"
-                         "Generated from molecular-offset data\n"
+                         "Generated from molecular-offset data "
+                         VERSION_MAJOR "\n"
                          "ASCII\n"
                          "DATASET UNSTRUCTURED_GRID\n";
     do {

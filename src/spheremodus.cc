@@ -18,7 +18,6 @@
 #include "include/angles.h"
 #include "include/constants.h"
 #include "include/configuration.h"
-#include "include/crosssections.h"
 #include "include/distributions.h"
 #include "include/experimentparameters.h"
 #include "include/fourvector.h"
@@ -39,12 +38,15 @@ SphereModus::SphereModus(Configuration modus_config,
       start_time_(modus_config.take({"Sphere", "START_TIME"})) {
 }
 
-/* print_startup - console output on startup of sphere specific parameters */
-void SphereModus::print_startup() {
-  printf("Radius of the sphere: %g [fm]\n", radius_);
-  printf("Total number of particles in sphere: %i \n", number_of_particles_);
-  printf("Temperature for momentum sampling: %f \n", sphere_temperature_);
-  printf("Starting time for Sphere calculation: %f \n", start_time_);
+/* console output on startup of sphere specific parameters */
+std::ostream &operator<<(std::ostream &out, const SphereModus &m) {
+  return out << "-- Sphere Modus:\n"
+                "Radius of the sphere: " << m.radius_ << " [fm]"
+             << "\nTotal number of particles in sphere: "
+             << m.number_of_particles_
+             << "\nTemperature for momentum sampling: " << m.sphere_temperature_
+             << "\nStarting time for Sphere calculation: " << m.start_time_
+             << '\n';
 }
 
 
@@ -60,7 +62,7 @@ float SphereModus::initial_conditions(Particles *particles,
       continue;
     }
     number_of_stable_types = number_of_stable_types + 1;
-    printd("%s mass: %g [GeV]\n", type.name().c_str(), type.pole_mass());
+    printd("%s mass: %g [GeV]\n", type.name().c_str(), type.mass());
   }
 
   /* just produce equally many particles per type */
@@ -83,14 +85,14 @@ float SphereModus::initial_conditions(Particles *particles,
     phitheta.distribute_isotropically();
     printd("Particle %d radial momenta %g phi %g cos_theta %g\n", data.id(),
            momentum_radial, phitheta.phi(), phitheta.costheta());
-    data.set_momentum(data.pole_mass(), phitheta.threevec() * momentum_radial);
+    data.set_4momentum(data.pole_mass(), phitheta.threevec() * momentum_radial);
     /* uniform sampling in a sphere with radius r */
     double position_radial;
     position_radial = cbrt(Random::canonical()) * radius_;
     Angles pos_phitheta;
     pos_phitheta.distribute_isotropically();
-    data.set_position(FourVector(start_time_, pos_phitheta.threevec()
-                                 * position_radial));
+    data.set_4position(FourVector(start_time_,
+                                  pos_phitheta.threevec() * position_radial));
     /* IC Debug checks */
     printd_position(data);
     printd_momenta(data);

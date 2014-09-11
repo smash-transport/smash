@@ -42,7 +42,6 @@ TEST(create_particledata_piplus) {
   COMPARE(p.id(), -1);
   COMPARE(p.pdgcode(), pdg);
   COMPARE(p.id_process(), -1);
-  COMPARE(p.collision_time(), 0.0);
   COMPARE(p.momentum().x0(), 0.0);
   COMPARE(p.momentum().x1(), 0.0);
   COMPARE(p.momentum().x2(), 0.0);
@@ -65,31 +64,26 @@ TEST(set_get) {
   COMPARE(p.is_hadron(), smashon.is_hadron());
   p.set_id_process(5);
   COMPARE(p.id_process(), 5);
-  p.set_collision_time(1.234);
-  COMPARE(p.collision_time(), 1.234);
-  p.set_collision(2.345);
-  COMPARE(p.collision_time(), 2.345);
-  p.set_collision_past(6);
-  COMPARE(p.collision_time(), 0.0);
+  p.set_id_process(6);
   COMPARE(p.id_process(), 6);
   FourVector m(1.0, 1.2, 1.4, 1.6);
-  p.set_momentum(m);
+  p.set_4momentum(m);
   COMPARE(p.momentum(), FourVector(1.0, 1.2, 1.4, 1.6));
   ThreeVector M(1.1, 1.3, 1.5);
-  p.set_momentum(1.0, M);
+  p.set_4momentum(1.0, M);
   COMPARE(p.momentum(), FourVector(sqrt(1.0 + M.sqr()), 1.1, 1.3, 1.5));
 }
 
 TEST(set_get2) {
   ParticleData p = create_smashon_particle();
   FourVector X(3.5, 3.6, 3.7, 2345.3);
-  p.set_position(X);
+  p.set_4position(X);
   COMPARE(p.position().x0(), 3.5);
   COMPARE(p.position().x1(), 3.6);
   COMPARE(p.position().x2(), 3.7);
   COMPARE(p.position().x3(), 2345.3);
   ThreeVector M(2.1, 2.3, 2.5);
-  p.set_momentum(2.0, M.x1(), M.x2(), M.x3());
+  p.set_4momentum(2.0, M.x1(), M.x2(), M.x3());
   COMPARE(p.momentum().x0(), sqrt(4.0 + M.sqr()));
   COMPARE(p.momentum().x1(), 2.1);
   COMPARE(p.momentum().x2(), 2.3);

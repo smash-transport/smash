@@ -5,9 +5,10 @@
  *    GNU General Public License (GPLv3 or later)
  */
 #include <cmath>
-#include<istream>
+#include <iostream>
 
 #include "include/fourvector.h"
+#include "include/iomanipulators.h"
 
 namespace Smash {
 
@@ -48,9 +49,14 @@ FourVector FourVector::LorentzBoost(const ThreeVector &velocity) const {
   return FourVector (xprime_0, this->threevec() - velocity * constantpart);
 }
 
-std::ostream& operator<<(std::ostream& os, const FourVector& vec) {
-  return os << vec.x0() << "/" << vec.x1() << "/"
-            << vec.x2() << "/" << vec.x3();
+std::ostream& operator<<(std::ostream& out, const FourVector& vec) {
+  using namespace std;
+  out.put('(');
+  out.fill(' ');
+  for (auto x : vec) {
+    out << field<8> << x;
+  }
+  return out << ')';
 }
 
 }  // namespace Smash

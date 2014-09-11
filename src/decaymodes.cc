@@ -15,8 +15,10 @@
 
 #include "include/constants.h"
 #include "include/inputfunctions.h"
+#include "include/logging.h"
 #include "include/pdgcode.h"
 #include "include/processbranch.h"
+#include "include/stringfunctions.h"
 
 namespace Smash {
 
@@ -31,16 +33,16 @@ void DecayModes::add_mode(float ratio, int L, std::vector<PdgCode> pdg_list) {
   switch (pdg_list.size()) {
   case 2:
     if (!pdg_list[0].is_hadron() || !pdg_list[1].is_hadron()) {
-      printf("Warning: decay products A: %s B: %s\n",
-            pdg_list[0].string().c_str(), pdg_list[1].string().c_str());
+      logger<LogArea::DecayModes>().warn("decay products A: ", pdg_list[0],
+                                         " B: ", pdg_list[1]);
     }
     break;
   case 3:
     if (!pdg_list[0].is_hadron() || !pdg_list[1].is_hadron() ||
         !pdg_list[2].is_hadron()) {
-      printf("Warning: decay products A: %s B: %s C: %s\n",
-            pdg_list[0].string().c_str(), pdg_list[1].string().c_str(),
-            pdg_list[2].string().c_str());
+      logger<LogArea::DecayModes>().warn("decay products A: ", pdg_list[0],
+                                         " B: ", pdg_list[1], " C: ",
+                                         pdg_list[2]);
     }
     break;
   default:
@@ -57,18 +59,19 @@ void DecayModes::add_mode(float ratio, int L, std::vector<PdgCode> pdg_list) {
 }
 
 void DecayModes::renormalize(float renormalization_constant) {
+  const auto &log = logger<LogArea::DecayModes>();
   if (renormalization_constant < really_small) {
-    printf("Warning: Extremely small renormalization constant: %g\n",
-           renormalization_constant);
-    printf("Skipping the renormalization.\n");
+    log.warn("Extremely small renormalization constant: ",
+             renormalization_constant,
+             "\n=> Skipping the renormalization.");
   } else {
-    printf("Renormalizing decay modes with %g \n", renormalization_constant);
+    log.info("Renormalizing decay modes with ", renormalization_constant);
     float new_sum = 0.0;
     for (auto &mode : decay_modes_) {
       mode.set_weight(mode.weight() / renormalization_constant);
       new_sum += mode.weight();
     }
-    printf("After renormalization sum of ratios is %g. \n", new_sum);
+    log.info("After renormalization sum of ratios is ", new_sum);
   }
 }
 
@@ -97,7 +100,7 @@ void DecayModes::load_decaymodes(const std::string &input) {
     /* Check if ratios add to 1 */
     if (fabs(ratio_sum - 1.0) > really_small) {
       /* They didn't; renormalize */
-      printf("Particle %s:\n", pdgcode.string().c_str());
+      logger<LogArea::DecayModes>().info("Particle ", pdgcode);
       decay_modes_to_add.renormalize(ratio_sum);
     }
     /* Add the list of decay modes for this particle type */

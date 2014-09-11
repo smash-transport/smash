@@ -12,14 +12,14 @@
 #include <cstring>
 #include <array>
 #include <iostream>
-#include <fstream>
 #include <map>
 #include <string>
 #include <vector>
 #include <boost/filesystem.hpp>
+#include <boost/filesystem/fstream.hpp>
+#include <include/config.h>
 #include "../include/outputinterface.h"
-#include "../include/oscarfullhistoryoutput.h"
-#include "../include/oscarparticlelistoutput.h"
+#include "../include/oscaroutput.h"
 #include "../include/particles.h"
 #include "../include/random.h"
 
@@ -45,10 +45,10 @@ static const int zero = 0;
 
 static ParticleData create_smashon_particle() {
   ParticleData particle = ParticleData{ParticleType::find(0x661)};
-  particle.set_momentum(mass_smashon, random_value(), random_value(),
-                        random_value());
-  particle.set_position(FourVector(random_value(), random_value(),
-                                   random_value(), random_value()));
+  particle.set_4momentum(mass_smashon, random_value(), random_value(),
+                         random_value());
+  particle.set_4position(FourVector(random_value(), random_value(),
+                                    random_value(), random_value()));
   return particle;
 }
 
@@ -85,19 +85,19 @@ static void compare_particledata(
 TEST(full2013_format) {
   // Set options
   std::string configfilename = "oscar_2013.yaml";
-  std::ofstream configfile;
-  configfile.open((testoutputpath / configfilename).native().c_str());
-  configfile << "Print_start_end:" << "\t" << "True" << std::endl;
-  configfile << "2013_format:" << "\t" << "True" << std::endl;
-  configfile.close();
+  bf::ofstream(testoutputpath / configfilename)
+      << "OSCAR_COLLISIONS:\n"
+         "    Enable:          True\n"
+         "    Print_start_end: True\n"
+         "    2013_format:     True\n";
   VERIFY(bf::exists(testoutputpath / configfilename));
-  Configuration&& op{testoutputpath, configfilename};
-  OscarFullHistoryOutput *osc2013full
-                   = new OscarFullHistoryOutput(testoutputpath, std::move(op));
+
+  std::unique_ptr<OutputInterface> osc2013full = create_oscar_output(
+      testoutputpath, Configuration{testoutputpath, configfilename});
+  VERIFY(bool(osc2013full));
+
   std::string outputfilename = "full_event_history.oscar";
   VERIFY(bf::exists(testoutputpath / outputfilename));
-
-  std::cout << "Testing full format" << std::endl;
 
   ParticleType::create_type_list(
       "# NAME MASS[GEV] WIDTH[GEV] PDG\n" + smashon_str);
@@ -122,7 +122,7 @@ TEST(full2013_format) {
   ParticleData final_particle = create_smashon_particle();
   particles.add_data(final_particle);
   final_particles.push_back(particles.data(particles.id_max()));
-  osc2013full->write_interaction(initial_particles, final_particles);
+  osc2013full->at_interaction(initial_particles, final_particles);
   /* Final state output */
   osc2013full->at_eventend(particles, event_id);
 
@@ -135,7 +135,7 @@ TEST(full2013_format) {
     /* Check header */
     std::string output_header = "";
     std::string header = "#!OSCAR2013 "
-                         "full_event_history "
+                         "full_event_history " VERSION_MAJOR " "
                          "t x y z mass p0 px py pz pdg ID\n"
                          "# Units: fm fm fm fm GeV GeV GeV GeV GeV none none\n";
     do {
@@ -206,22 +206,19 @@ TEST(full2013_format) {
 TEST(final2013_format) {
   // Set options
   std::string configfilename = "oscar_2013.yaml";
-  std::ofstream configfile;
-  configfile.open((testoutputpath / configfilename).native().c_str(),
-                  std::ios::in);
-  configfile << "Only_final:" << "\t" << "True" << std::endl;
-  configfile << "2013_format:" << "\t" << "True" << std::endl;
-  configfile.close();
+  bf::ofstream(testoutputpath / configfilename)
+      << "OSCAR_PARTICLELIST:\n"
+         "    Enable:          True\n"
+         "    Only_final:      True\n"
+         "    2013_format:     True\n";
   VERIFY(bf::exists(testoutputpath / configfilename));
 
-  Configuration&& op{testoutputpath, configfilename};
+  std::unique_ptr<OutputInterface> osc2013final = create_oscar_output(
+      testoutputpath, Configuration{testoutputpath, configfilename});
+  VERIFY(bool(osc2013final));
 
-  OscarParticleListOutput *osc2013final
-    = new OscarParticleListOutput(testoutputpath, std::move(op));
   std::string outputfilename = "particle_lists.oscar";
   VERIFY(bf::exists(testoutputpath / outputfilename));
-
-  std::cout << "Testing final format" << std::endl;
 
   Particles particles;
 
@@ -239,14 +236,14 @@ TEST(final2013_format) {
   initial_particles.push_back(particles.data(0));
   initial_particles.push_back(particles.data(1));
   /* Change the momenta */
-  particles.data(0).set_momentum(mass_smashon, random_value(), random_value(),
-                        random_value());
-  particles.data(1).set_momentum(mass_smashon, random_value(), random_value(),
-                                 random_value());
+  particles.data(0).set_4momentum(mass_smashon, random_value(),
+                                  random_value(), random_value());
+  particles.data(1).set_4momentum(mass_smashon, random_value(),
+                                  random_value(), random_value());
   final_particles.push_back(particles.data(0));
   final_particles.push_back(particles.data(1));
   /* As with initial state output, this should not do anything */
-  osc2013final->write_interaction(initial_particles, final_particles);
+  osc2013final->at_interaction(initial_particles, final_particles);
   /* Final state output; this is the only thing we expect to find in file */
   osc2013final->at_eventend(particles, event_id);
 
@@ -259,7 +256,7 @@ TEST(final2013_format) {
     /* Check header */
     std::string output_header = "";
     std::string header = "#!OSCAR2013 "
-                         "particle_lists "
+                         "particle_lists " VERSION_MAJOR " "
                          "t x y z mass p0 px py pz pdg ID\n"
                          "# Units: fm fm fm fm GeV GeV GeV GeV GeV none none\n";
     do {

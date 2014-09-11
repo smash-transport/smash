@@ -20,6 +20,8 @@
 namespace Smash {
 
 /**
+ * \ingroup output
+ *
  * \brief SMASH output to binary file
  * ----------------------------------------------------------------------------
  * SMASH output to binary file is similar to OSCAR output,
@@ -28,7 +30,6 @@ namespace Smash {
  *
  * Binary file format is documented on the wiki in User Guide section
  **/
-
 class BinaryOutputBase : public OutputInterface {
  protected:
   BinaryOutputBase(FILE *f) : file_{f} {}
@@ -44,6 +45,9 @@ class BinaryOutputBase : public OutputInterface {
   FilePtr file_;
 };
 
+/**
+ * \ingroup output
+ */
 class BinaryOutputCollisions : public BinaryOutputBase {
  public:
   BinaryOutputCollisions(bf::path path, Configuration&& config);
@@ -55,10 +59,10 @@ class BinaryOutputCollisions : public BinaryOutputBase {
   /// writes the final particle information of an event
   void at_eventend(const Particles &particles, const int event_number) override;
 
-  void write_interaction(const ParticleList &incoming_particles,
+  void at_interaction(const ParticleList &incoming_particles,
                          const ParticleList &outgoing_particles) override;
   /// writes particles every time interval fixed by option OUTPUT_INTERVAL
-  void after_Nth_timestep(const Particles &particles, const int event_number,
+  void at_intermediate_time(const Particles &particles, const int event_number,
                           const Clock &clock) override;
 
  private:

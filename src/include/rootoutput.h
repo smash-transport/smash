@@ -21,6 +21,8 @@ namespace Smash {
 class Particles;
 
 /**
+  * \ingroup output
+  *
   * \brief SMASH output to ROOT file
   * ----------------------------------------------------------------------------
   * SMASH supports ROOT (root.cern.ch) output as an option. By default SMASH
@@ -92,10 +94,10 @@ class RootOutput : public OutputInterface {
                      const int event_number) override;
   void at_eventend(const Particles &particles,
                    const int event_number) override;
-  void after_Nth_timestep(const Particles &particles,
+  void at_intermediate_time(const Particles &particles,
                           const int event_number,
                           const Clock &) override;
-  void write_interaction(const ParticleList &incoming_particles,
+  void at_interaction(const ParticleList &incoming_particles,
                          const ParticleList &outgoing_particles) override;
 
  private:

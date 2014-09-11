@@ -47,7 +47,7 @@
 
 #ifdef DOXYGEN
 /**
- * \defgroup unittest Unit Testing
+ * \addtogroup unittest
  * @{
  *
  * In SMASH we use a unit testing framework that was originally developed for

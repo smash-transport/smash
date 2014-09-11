@@ -41,6 +41,7 @@ float pp_elastic(double mandelstam_s) {
  * highest-p:  O. Buss et al., Physics Reports 512, 1 (2012)
  */
 float pp_total(double p_lab) {
+
   if (p_lab < 0.4) {
     return 34 * pow(p_lab / 0.4, -2.104);
   } else if (p_lab < 0.8) {
@@ -98,7 +99,11 @@ float np_total(double p_lab) {
 
 /* ppbar elastic cross section parametrization */
 /* Source: S. Bass et al., Prog.Part.Nucl.Phys. 41, 255 (1998) */
-float ppbar_elastic(double p_lab) {
+float ppbar_elastic(double mandelstam_s) {
+  const double mN = 0.938;    // nucleon mass
+  const double mNsqr = mN*mN;
+  double p_lab = sqrt((mandelstam_s - 2*mNsqr) * (mandelstam_s - 2*mNsqr)
+                       - 4 * mNsqr * mNsqr) / (2 * mN);
   if (p_lab < 0.3) {
     return 78.6;
   } else if (p_lab < 5.0) {

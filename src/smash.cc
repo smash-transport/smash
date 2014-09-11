@@ -19,24 +19,23 @@
 #include <string>
 
 #include "include/configuration.h"
+#include "include/decaymodes.h"
 #include "include/experiment.h"
 #include "include/forwarddeclarations.h"
+#include "include/inputfunctions.h"
+#include "include/logging.h"
 #include "include/macros.h"
 #include "include/particletype.h"
-#include "include/decaymodes.h"
-#include "include/inputfunctions.h"
 /* Outputs */
 #include "include/binaryoutputcollisions.h"
 #include "include/binaryoutputparticles.h"
-#include "include/oscarfullhistoryoutput.h"
-#include "include/oscarparticlelistoutput.h"
-#include "include/outputroutines.h"
+#include "include/oscaroutput.h"
 #ifdef SMASH_USE_ROOT
 #  include "include/rootoutput.h"
 #endif
 #include "include/vtkoutput.h"
 /* build dependent variables */
-#include "include/config.h"
+#include <include/config.h>
 
 namespace Smash {
 
@@ -72,13 +71,15 @@ void usage(const int rc, const std::string &progname) {
   exit(rc);
 }
 
-/** Exception class that is thrown if the requested output directory
+/** \ingroup exception
+ *  Exception class that is thrown if the requested output directory
  * already exists and `-f` was not specified on the command line.
  */
 struct OutputDirectoryExists : public std::runtime_error {
   using std::runtime_error::runtime_error;
 };
-/** Exception class that is thrown if no new output path can be
+/** \ingroup exception
+ *  Exception class that is thrown if no new output path can be
  * generated (there is a directory name for each positive integer
  * value)
  */
@@ -129,6 +130,8 @@ void ensure_path_is_valid(const bf::path &path) {
 /* main - do command line parsing and hence decides modus */
 int main(int argc, char *argv[]) {
   using namespace Smash;
+  const auto &log = logger<LogArea::Main>();
+
   constexpr option longopts[] = {
     { "config",     required_argument,      0, 'c' },
     { "decaymodes", required_argument,      0, 'd' },
@@ -145,7 +148,6 @@ int main(int argc, char *argv[]) {
 
   /* strip any path to progname */
   const std::string progname = bf::path(argv[0]).filename().native();
-  printf("%s (%d)\n", progname.c_str(), VERSION_MAJOR);
 
   try {
     bool force_overwrite = false;
@@ -193,9 +195,12 @@ int main(int argc, char *argv[]) {
           usage(EXIT_FAILURE, progname);
       }
     }
+    set_default_loglevel(configuration.take({"Logging", "default"}, einhard::ALL));
+    create_all_loggers(configuration["Logging"]);
+    log.info(progname, " (", VERSION_MAJOR, ')');
 
     ensure_path_is_valid(output_path);
-    printd("output path: %s\n", output_path.native().c_str());
+    log.debug("output path: ", output_path);
 
     if (!force_overwrite && bf::exists(output_path / "config.yaml")) {
       throw std::runtime_error(
@@ -207,25 +212,20 @@ int main(int argc, char *argv[]) {
     bf::ofstream(output_path / "config.yaml") << configuration.to_string()
                                               << '\n';
 
+    log.trace(source_location, " create ParticleType and DecayModes");
     ParticleType::create_type_list(configuration.take({"particles"}));
     DecayModes::load_decaymodes(configuration.take({"decaymodes"}));
 
     // create outputs
+    log.trace(source_location, " create OutputInterface objects");
     OutputsList output_list;
     auto output_conf = configuration["General"]["OUTPUT"];
-    if (static_cast<bool>(
-            output_conf.take({"OSCAR_PARTICLELIST", "Enable"}))) {
-      output_list.emplace_back(new OscarParticleListOutput(
-          output_path, output_conf["OSCAR_PARTICLELIST"]));
-    } else {
-      output_conf.take({"OSCAR_PARTICLELIST"});
-    }
-    if (static_cast<bool>(
-            output_conf.take({"OSCAR_COLLISIONS", "Enable"}))) {
-      output_list.emplace_back(new OscarFullHistoryOutput(
-          output_path, output_conf["OSCAR_COLLISIONS"]));
-    } else {
-      output_conf.take({"OSCAR_COLLISIONS"});
+
+    // loop until all OSCAR outputs are created (create_oscar_output will return
+    // nullptr then).
+    while (std::unique_ptr<OutputInterface> oscar =
+               create_oscar_output(output_path, output_conf)) {
+      output_list.emplace_back(std::move(oscar));
     }
     if (static_cast<bool>(output_conf.take({"VTK", "Enable"}))) {
       output_list.emplace_back(new VtkOutput(output_path, output_conf["VTK"]));
@@ -245,36 +245,40 @@ int main(int argc, char *argv[]) {
       output_conf.take({"Binary_particles"});
     }
     if (static_cast<bool>(output_conf.take({"ROOT", "Enable"}))) {
-      #ifdef SMASH_USE_ROOT
+#ifdef SMASH_USE_ROOT
       output_list.emplace_back(new RootOutput(
                                output_path, output_conf["ROOT"]));
-      #endif
-      #ifndef SMASH_USE_ROOT
-      printf("You requested ROOT output, but ROOT is disabled. ");
-      printf("To enable ROOT: cmake -D USE_ROOT=ON <path>. \n");
-      #endif
+#else
+      log.error() << "You requested ROOT output, but ROOT support has not been "
+                     "compiled in. To enable ROOT support call: cmake -D "
+                     "USE_ROOT=ON <path>.";
+      output_conf.take({"ROOT"});
+#endif
     } else {
       output_conf.take({"ROOT"});
     }
 
     // create an experiment
+    log.trace(source_location, " create Experiment");
     auto experiment = ExperimentBase::create(configuration);
     const std::string report = configuration.unused_values_report();
     if (report != "{}") {
-      printf("The following configuration values were not used:\n%s\n",
-             report.c_str());
+      log.warn() << "The following configuration values were not used:\n"
+                 << report;
     }
 
     // set outputs to experiment
     experiment->set_outputs(std::move(output_list));
 
     // run the experiment
+    log.trace(source_location, " run the Experiment");
     experiment->run();
   }
   catch(std::exception &e) {
-    printf("SMASH failed with the following error:\n%s\n", e.what());
+    log.fatal() << "SMASH failed with the following error:\n" << e.what();
     return EXIT_FAILURE;
   }
 
+  log.trace() << source_location << " about to return from main";
   return 0;
 }

@@ -17,6 +17,8 @@
 namespace Smash {
 
 /**
+ * \ingroup data
+ *
  * The FourVector class holds relevant values in Minkowski spacetime
  * with (+, −, −, −) metric signature.
  *
@@ -359,8 +361,10 @@ double inline FourVector::abs3() const {
   return this->threevec().abs();
 }
 
-  /// ostream << FourVector for output.
-  std::ostream& operator<<(std::ostream& os, const FourVector& vec);
+/**\ingroup logging
+ * Writes the four components of the vector to the output stream.
+ */
+std::ostream &operator<<(std::ostream &os, const FourVector &vec);
 
 }  // namespace Smash
 

@@ -1,4 +1,6 @@
-file(STRINGS "${INPUT_FILE}" TEXT)
+file(READ "${INPUT_FILE}" TEXT)
+string(REPLACE ";" "\\;" TEXT "${TEXT}")
+string(REPLACE "\n" ";" TEXT "${TEXT}")
 set(output "// This file was generated from ${INPUT_FILE}. Do not modify.\n")
 set(output "${output}const char ${NAME}[] =")
 foreach(line ${TEXT})

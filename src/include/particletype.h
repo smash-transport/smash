@@ -16,6 +16,8 @@
 namespace Smash {
 
 /**
+ * \ingroup data
+ *
  * Particle type contains the static properties of a particle
  *
  * Before creation of Experiment, SMASH initializes the list of particles
@@ -38,20 +40,20 @@ class ParticleType {
    *       PDG code and therefore cannot be set explicitly (this avoids the
    *       chance of introducing inconsistencies).
    */
-  ParticleType(std::string n, float m, float w, PdgCode id)
-      : name_(n),
-        mass_(m),
-        width_(w),
-        pdgcode_(id),
-        isospin_(pdgcode_.isospin_total()),
-        charge_(pdgcode_.charge())
-        {}
+  ParticleType(std::string n, float m, float w, PdgCode id);
 
   /// Returns the name of the particle (for debug output only).
+#ifdef NDEBUG
+  std::string name() const { return {}; }
+#else
   const std::string &name() const { return name_; }
+#endif
 
   /// Returns the particle mass.
   float mass() const { return mass_; }
+
+  /// Returns the squared particle mass.
+  float mass_sqr() const { return mass_*mass_; }
 
   /// Returns the particle width (at the mass pole).
   float width_at_pole() const { return width_; }
@@ -61,6 +63,9 @@ class ParticleType {
 
   /// \copydoc PdgCode::isospin_total
   int isospin() const { return isospin_; }
+
+  /// \copydoc PdgCode::isospin3
+  int isospin3() const { return pdgcode_.isospin3(); }
 
   /// \copydoc PdgCode::charge
   int charge() const { return charge_; }
@@ -142,10 +147,12 @@ class ParticleType {
   static void create_type_list(const std::string &particles);
 
  private:
+#ifndef NDEBUG
   /// name of the particle
-  /// \todo This variable is only used for debug output. Maybe `ifdef` it out
-  ///       for non-debug builds to save the memory?
+  /// This variable is only used for debug output. Non-debug builds save the
+  /// memory to be more cache-efficient.
   std::string name_;
+#endif
   /// mass of the particle
   float mass_;
   /// width of the particle
@@ -162,6 +169,11 @@ class ParticleType {
    * This is filled automatically from pdgcode_.
    */
   int charge_;
+
+  /**\ingroup logging
+   * Writes all information about the particle type to the output stream.
+   */
+  friend std::ostream &operator<<(std::ostream &out, const ParticleType &type);
 };
 
 inline bool ParticleType::is_stable() const {

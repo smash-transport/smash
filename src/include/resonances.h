@@ -20,40 +20,14 @@
 
 namespace Smash {
 
-
 /**
- * Calculate isospin Clebsch-Gordan coefficient
+ * Calculate Clebsch-Gordan coefficient
  *
  * \f$(-1)^{j_1 - j_2 + m_3} \sqrt(2 j_3 + 1) \cdot [Wigner 3J symbol] \f$
- * Note that the calculation assumes that isospin values
- * have been multiplied by two
- */
-double clebsch_gordan_coefficient(const int isospin_a,
-  const int isospin_b, const int isospin_resonance,
-  const int isospin_z_a, const int isospin_z_b,
-  const int isospin_z_resonance);
-
-
-/**
- * Find all resonances that can be produced in a collision of the two
- * input particles, and the production cross sections of these resonances.
- *
- * Given the data and type information of two colliding particles,
- * create a list of possible resonance production processes
- * and their cross sections.
- * Process can be either 2-to-1 (just a resonance in the final state)
- * or 2-to-2 (resonance and a stable particle in the final state).
- *
- * \param[in] particle1 Data of the first colliding particle.
- * \param[in] particle2 Data of the second colliding particle.
- *
- * \return A list of processes with resonance in the final state.
- * Each element in the list contains the type(s)
- * of the final state particle(s)
- * and the cross section for that particular process.
- */
-ProcessBranchList resonance_cross_section(const ParticleData &particle1,
-                                          const ParticleData &particle2);
+ * Note that the calculation assumes that the spin/isospin values (j/m)
+ * have been multiplied by two (in order to be integer). */
+double clebsch_gordan(const int j1, const int j2, const int j3,
+                      const int m1, const int m2, const int m3);
 
 /**
  * Given the types of the two initial particles and a resonance,

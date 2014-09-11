@@ -4,15 +4,20 @@
  *
  *    GNU General Public License (GPLv3 or later)
  */
-
 #include "include/nucleus.h"
 
+#include <fstream>
+#include <iostream>
 #include <limits>
 #include <map>
+#include <string>
 
 #include "include/angles.h"
+#include "include/logging.h"
+#include "include/numerics.h"
 #include "include/particles.h"
 #include "include/pdgcode.h"
+#include "include/threevector.h"
 
 namespace Smash {
 
@@ -26,8 +31,7 @@ float Nucleus::mass() const {
   return total_mass/(testparticles_+0.0);
 }
 
-/****************************************************************************
- *
+/**
  * Woods-Saxon-distribution
  * ========================
  *
@@ -179,12 +183,16 @@ float Nucleus::mass() const {
  *  So, the algorithm needs to do all this from the end:
  *
  **/
-float Nucleus::distribution_nucleons() const {
+ThreeVector Nucleus::distribute_nucleon() const {
+  // Get the solid angle of the nucleon.
+  Angles dir;
+  dir.distribute_isotropically();
   // diffusiveness_ zero or negative? Use hard sphere.
-  if (diffusiveness_ < std::numeric_limits<float>::min()) {
-    return nuclear_radius()*(pow(Random::canonical(), 1./3.));
+  if (almost_equal(diffusiveness_, 0.f)) {
+    return dir.threevec() * nuclear_radius_
+           * pow(Random::canonical(), 1./3.);
   }
-  float radius_scaled = nuclear_radius()/diffusiveness_;
+  float radius_scaled = nuclear_radius_/diffusiveness_;
   float prob_range1 = 1.0;
   float prob_range2 = 3. / radius_scaled;
   float prob_range3 = 2. * prob_range2 / radius_scaled;
@@ -215,40 +223,89 @@ float Nucleus::distribution_nucleons() const {
   /// \li shift and rescale \f$t\f$ to \f$r = d\cdot t + r_0\f$
   float position_scaled = t + radius_scaled;
   float position = position_scaled * diffusiveness_;
-  return position;
-  /// \li (choose direction; this is done outside of this routine,
-  /// though).
+  return dir.threevec() * position;
 }
 
-float Nucleus::woods_saxon(const float& r) {
-  return r*r / (exp((r - nuclear_radius()) / diffusiveness_) + 1);
+float Nucleus::woods_saxon(float r) {
+  return r*r/(exp((r-nuclear_radius_)/diffusiveness_)+1);
 }
 
 void Nucleus::arrange_nucleons() {
   for (auto i = begin(); i != end(); i++) {
-    // get radial position of current nucleon:
-    float r = distribution_nucleons();
-    // get solid angle for current nucleon:
-    Angles dir;
-    dir.distribute_isotropically();
-    double z = r * dir.z();
-    double x = r * dir.x();
-    // set position of current nucleon:
-    i->set_position(FourVector(0.0, x, r * dir.y(), z));
-    // update maximal and minimal z values
-    z_max_ = (z > z_max_) ? z : z_max_;
-    z_min_ = (z < z_min_) ? z : z_min_;
-    // update maximal and minimal x values
-    x_max_ = (x > x_max_) ? x : x_max_;
-    x_min_ = (x < x_min_) ? x : x_min_;
+    // Sampling the W.S., get the radial
+    // position and solid angle for the nucleon.
+    ThreeVector pos = distribute_nucleon();
+
+    // Set the position of the nucleon.
+    i->set_4position(FourVector(0.0, pos));
+
+    // Update the radial bound of the nucleus.
+    double r_tmp = pos.abs();
+    r_max_ = (r_tmp > r_max_) ? r_tmp : r_max_;
+  }
+  // Recenter and rotate
+  align_center();
+  rotate();
+}
+
+void Nucleus::set_parameters_automatic() {
+  switch (Nucleus::number_of_particles()) {
+    case 238:  // Uranium
+      // Default values.
+      set_diffusiveness(0.556);
+      set_nuclear_radius(6.86);
+      set_saturation_density(0.166);
+      // Hirano, Huovinen, Nara - Corrections.
+      // set_diffusiveness(0.44);
+      // set_nuclear_radius(6.86);
+      break;
+    case 208:  // Lead
+      // Default values.
+      set_diffusiveness(0.54);
+      set_nuclear_radius(6.67);
+      set_saturation_density(0.161);
+      break;
+    case 197:  // Gold
+      // Default values.
+      set_diffusiveness(0.535);
+      set_nuclear_radius(6.38);
+      set_saturation_density(0.1695);
+      // Hirano, Nara - Corrections.
+      // set_diffusiveness(0.44);
+      // set_nuclear_radius(6.42);
+      break;
+    case 63:  // Copper
+      // Default values.
+      set_diffusiveness(0.597);
+      set_nuclear_radius(4.20641);
+      set_saturation_density(0.1686);
+      // Hirano, Nara - Corrections.
+      // set_diffusiveness(0.50);
+      // set_nuclear_radius(4.28);
+      break;
+    default:
+      throw std::domain_error("Mass number not listed in Nucleus::set_parameters_automatic.");
   }
 }
 
-void Nucleus::boost(const double& beta_squared_with_sign) {
-  // we use the sign of the squared velocity to get information about
-  // the sign of the velocity itself.
-  double sign = beta_squared_with_sign >= 0 ? 1 : -1;
-  double beta_squared = std::abs(beta_squared_with_sign);
+void Nucleus::set_parameters_from_config(const char *nucleus_type,
+                                         Configuration &config) {
+  // Diffusiveness
+  if (config.has_value({nucleus_type, "DIFFUSIVENESS"})) {
+    set_diffusiveness(static_cast<float>(config.take(
+                      {nucleus_type, "DIFFUSIVENESS"})));
+  }
+  // Radius
+  if (config.has_value({nucleus_type, "RADIUS"})) {
+    set_nuclear_radius(static_cast<float>(config.take(
+                       {nucleus_type, "RADIUS"})));
+  } else {
+    set_nuclear_radius(default_nuclear_radius());
+  }
+}
+
+void Nucleus::boost(double beta_scalar) {
+  double beta_squared = beta_scalar * beta_scalar;
   double one_over_gamma = std::sqrt(1.0 - beta_squared);
   /*double gamma = 1.0/one_over_gamma;
     double gammabeta = sign*sqrt(beta_squared)*gamma;
@@ -260,7 +317,7 @@ void Nucleus::boost(const double& beta_squared_with_sign) {
   //       a system that moves with -beta. Now in this frame, it seems
   //       like p has been accelerated with +beta.
   //     )
-  ThreeVector beta(0., 0., -sign * std::sqrt(beta_squared));
+  ThreeVector beta (0., 0., - beta_scalar);
   for (auto i = begin(); i != end(); i++) {
     // a real Lorentz Transformation would leave the particles at
     // different times here, which we would then have to propagate back
@@ -268,21 +325,17 @@ void Nucleus::boost(const double& beta_squared_with_sign) {
     // the z-value with 1/gamma.
     FourVector this_position = i->position();
     this_position.set_x3(this_position.x3() * one_over_gamma);
-    i->set_position(this_position);
+    i->set_4position(this_position);
     // for momenta, though, we CAN do normal Lorentz Boosts, since we
     // *do* want to transform the zero-component (i.e., the energy).
-    FourVector this_momentum = i->momentum();
-    this_momentum = this_momentum.LorentzBoost(beta);
-    i->set_momentum(this_momentum);
+    i->set_4momentum(i->momentum().LorentzBoost(beta));
   }
-  // we also need to update z_max_ and z_min:
-  z_max_ *= one_over_gamma;
-  z_min_ *= one_over_gamma;
-  return;
+  // we also need to update r_max_:
+  r_max_ *= one_over_gamma;
 }
 
 void Nucleus::fill_from_list(const std::map<PdgCode, int>& particle_list,
-                             const int testparticles) {
+                             int testparticles) {
   testparticles_ = testparticles;
   for (auto n = particle_list.cbegin(); n != particle_list.cend(); ++n) {
     const ParticleType &current_type = ParticleType::find(n->first);
@@ -290,37 +343,44 @@ void Nucleus::fill_from_list(const std::map<PdgCode, int>& particle_list,
     for (unsigned int i = 0; i < n->second*testparticles_; i++) {
       // append particle to list and set its PDG code.
       particles_.emplace_back(current_type);
-      particles_.back().set_momentum(current_mass, 0.0, 0.0, 0.0);
+      particles_.back().set_4momentum(current_mass, 0.0, 0.0, 0.0);
     }
   }
 }
 
-void Nucleus::set_diffusiveness(const float& diffuse) {
-  diffusiveness_ = diffuse;
-}
-
-void Nucleus::shift(const bool is_projectile,
-                    const double& initial_z_displacement,
-                    const double& x_offset,
-                    const float& simulation_time) {
-  // amount to shift z value. If is_projectile, we shift to -z_max_,
-  // else we shift to -z_min_ (z_min_ itself should be negative).
-  double z_offset = is_projectile ? -z_max_ : -z_min_;
-  // now, the nuclei would touch. We want them to be a little apart, so
-  // we need a bigger offset.
+void Nucleus::shift(bool is_projectile, double initial_z_displacement,
+                    double x_offset, float simulation_time) {
+  // The amount to shift the z coordinates. If is_projectile, we shift
+  // back by -r_max_, else we shift forward r_max_.
+  double z_offset = is_projectile ? -r_max_ : r_max_;
+  // In the current system, the nuclei would touch. We want them to be
+  // a little apart, so we need a slightly bigger offset.
   z_offset += initial_z_displacement;
+  // Move the nucleus in z and x directions, and set the time.
   for (auto i = begin(); i != end(); i++) {
     FourVector this_position = i->position();
     this_position.set_x3(this_position.x3() + z_offset);
     this_position.set_x1(this_position.x1() + x_offset);
     this_position.set_x0(simulation_time);
-    i->set_position(this_position);
+    i->set_4position(this_position);
   }
 }
 
 void Nucleus::copy_particles(Particles* external_particles) {
   for (auto p = begin(); p != end(); p++) {
     external_particles->add_data(*p);
+  }
+}
+
+void Nucleus::print_nucleus(const char * file_name) const {
+  for (auto i = cbegin(); i != cend(); i++) {
+    FourVector this_position = i->position();
+    std::ofstream a_file;
+    a_file.open(file_name, std::ios::app);
+    a_file << std::to_string(this_position.x1()) + " " +
+              std::to_string(this_position.x2()) + " " +
+              std::to_string(this_position.x3()) << std::endl;
+    a_file.close();
   }
 }
 
@@ -331,6 +391,15 @@ FourVector Nucleus::center() const {
   }
   centerpoint /= size();
   return centerpoint;
+}
+
+std::ostream &operator<<(std::ostream &out, const Nucleus &n) {
+  return out << "  #particles   #testparticles   mass [GeV]   radius [fm]  diffusiveness [fm]\n"
+             << format(n.number_of_particles(), nullptr, 12)
+             << format(n.size(), nullptr, 17)
+             << format(n.mass(), nullptr, 13)
+             << format(n.get_nuclear_radius(), nullptr, 14)
+             << format(n.get_diffusiveness(), nullptr, 20);
 }
 
 }  // namespace Smash

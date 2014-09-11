@@ -63,7 +63,7 @@ namespace Smash {
  * important for the user to discover typos in his configuration file (or
  * command line parameters).
  */
-// !!USER:Input
+// Userguide {
 /** \if user
  * \page inputoptions Input file Options
  *
@@ -72,10 +72,10 @@ namespace Smash {
  *
  * ###TEXT MISSING###
  *
- * \li \ref input_general_
- * \li \ref input_modi_nucleus_
- * \li \ref input_modi_box_
- * \li \ref input_modi_collider_
+ * \li \subpage input_general_
+ * \li \subpage input_modi_nucleus_
+ * \li \subpage input_modi_box_
+ * \li \subpage input_modi_collider_
  * \else
  *
  * Options
@@ -87,16 +87,24 @@ namespace Smash {
  * \li \ref ColliderModus
  * \endif
  */
-// !!/USER:Input
+// } Userguide
 class Configuration {
  public:
+  /// \ingroup exception
   /// Thrown when the types in the config file and C++ don't match.
   struct IncorrectTypeInAssignment : public std::runtime_error {
     using std::runtime_error::runtime_error;
   };
 
+  /// \ingroup exception
   /// Thrown for YAML parse errors
   struct ParseError : public std::runtime_error {
+    using std::runtime_error::runtime_error;
+  };
+
+  /// \ingroup exception
+  /// Thrown if the file does not exist
+  struct FileDoesNotExist : public std::runtime_error {
     using std::runtime_error::runtime_error;
   };
 
@@ -133,6 +141,37 @@ class Configuration {
     Value &operator=(const Value &) = delete;
 
     /**
+     * Convert the value to the type of the supplied argument.
+     *
+     * The argument itself is not used other than to determine its type. This
+     * function is necessary because in some situations the overload resolution
+     * rules lead to the correct conversion becoming hidden. Then you'll see a
+     * compiler error with a list of ambiguous constructor calls as candidates.
+     * Use this function as a workaround.
+     * Example:
+     * \code
+     * // this doesn't compile:
+     * const PdgCode code0(config.take({"key"}));
+     * // this compiles (because PdgCode::operator= is not overloaded), but note
+     * // that it cannot be used in constructor initializer lists:
+     * const PdgCode code1 = config.take({"key"});
+     *
+     * // Thus, for class member variables use the following pattern:
+     * class X {
+     *  public:
+     *   X() : code_(config.take({"key"}).convert_for(code_)) {}
+     *
+     *  private:
+     *   const PdgCode code_;
+     * };
+     * \endcode
+     */
+    template <typename T>
+    T convert_for(const T &) const {
+      return operator T();
+    }
+
+    /**
      * This function determines the type it is assigned to and calls
      * YAML::Node::as<T>() with this type.
      *
@@ -140,7 +179,7 @@ class Configuration {
      * explicitly.
      */
     template <typename T>
-    operator T() {
+    operator T() const {
       try {
         return node_.as<T>();
       }
@@ -234,6 +273,14 @@ class Configuration {
    *         assignment.
    */
   Value take(std::initializer_list<const char *> keys);
+
+  template <typename T>
+  T take(std::initializer_list<const char *> keys, T default_value) {
+    if (has_value(keys)) {
+      return take(keys).operator T();
+    }
+    return default_value;
+  }
 
   /**
    * Additional interface for SMASH to read configuration values without

@@ -17,6 +17,8 @@
 namespace Smash {
 
 /**
+ * \ingroup data
+ *
  * The Particles class abstracts the storage and manipulation of particles.
  *
  * There is one Particles object per Experiment. It stores
@@ -181,9 +183,11 @@ class Particles {
   /// return time of the computational frame
   inline double time(void) const;
 
+  /// \ingroup exception
   struct LoadFailure : public std::runtime_error {
     using std::runtime_error::runtime_error;
   };
+  /// \ingroup exception
   struct ParseError : public LoadFailure {
     using LoadFailure::LoadFailure;
   };
@@ -207,6 +211,12 @@ class Particles {
   ParticleDataMap data_;
 };
 
+/**
+ * \ingroup logging
+ * Print effective mass and type name for all particles to the stream.
+ */
+std::ostream &operator<<(std::ostream &out, const Particles &p);
+
 /* return the data of a specific particle */
 inline const ParticleData &Particles::data(int particle_id) const {
   return data_.at(particle_id);
@@ -224,7 +234,6 @@ inline int Particles::add_data(ParticleData const &particle_data) {
 inline void Particles::create(size_t number, PdgCode pdgcode) {
   /* fixed pdgcode and no collision yet */
   ParticleData particle(ParticleType::find(pdgcode));
-  particle.set_collision(0);
   for (size_t i = 0; i < number; i++) {
     id_max_++;
     particle.set_id(id_max_);
@@ -236,7 +245,6 @@ inline void Particles::create(size_t number, PdgCode pdgcode) {
 inline ParticleData& Particles::create(PdgCode pdgcode) {
   /* fixed pdgcode and no collision yet */
   ParticleData particle(ParticleType::find(pdgcode));
-  particle.set_collision(0);
   id_max_++;
   particle.set_id(id_max_);
   data_.insert(std::make_pair(id_max_, particle));

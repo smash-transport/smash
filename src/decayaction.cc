@@ -33,11 +33,12 @@ double DecayAction::sqrt_s() const {
 
 void DecayAction::one_to_two() {
   /* Sample the masses and momenta. */
-  sample_cms_momenta(sqrt_s());
+  sample_cms_momenta();
 }
 
 
 void DecayAction::one_to_three() {
+  const auto &log = logger<LogArea::DecayModes>();
   ParticleData &outgoing0 = outgoing_particles_[0];
   ParticleData &outgoing1 = outgoing_particles_[1];
   ParticleData &outgoing2 = outgoing_particles_[2];
@@ -102,71 +103,60 @@ void DecayAction::one_to_three() {
   const double momentum_b = std::sqrt(energy_b * energy_b - mass_b * mass_b);
 
   const double total_energy = sqrt_s();
-  if (fabs(energy_a + energy_b + energy_c - total_energy) > really_small)
-    printf("1->3 warning: Ea + Eb + Ec: %g Total E: %g",
-           energy_a + energy_b + energy_c, total_energy);
-  printd("Calculating the angles...\n");
+  if (fabs(energy_a + energy_b + energy_c - total_energy) > really_small) {
+    log.warn("1->3: Ea + Eb + Ec: ", energy_a + energy_b + energy_c,
+             " Total E: ", total_energy);
+  }
+  log.debug("Calculating the angles...");
 
   /* momentum_a direction is random */
   Angles phitheta;
   phitheta.distribute_isotropically();
   /* This is the angle of the plane of the three decay particles */
-  outgoing0.set_momentum(mass_a, phitheta.threevec() * momentum_a);
+  outgoing0.set_4momentum(mass_a, phitheta.threevec() * momentum_a);
 
   /* Angle between a and b */
   double theta_ab = acos(
       (energy_a * energy_b - 0.5 * (s_ab - mass_a * mass_a - mass_b * mass_b)) /
       (momentum_a * momentum_b));
-  printd("theta_ab: %g Ea: %g Eb: %g sab: %g pa: %g pb: %g\n", theta_ab,
-         energy_a, energy_b, s_ab, momentum_a, momentum_b);
+  log.debug("theta_ab: ", theta_ab, " Ea: ", energy_a, " Eb: ", energy_b,
+            " sab: ", s_ab, " pa: ", momentum_a, " pb: ", momentum_b);
   bool phi_has_changed = phitheta.add_to_theta(theta_ab);
-  outgoing1.set_momentum(mass_b, phitheta.threevec() * momentum_b);
+  outgoing1.set_4momentum(mass_b, phitheta.threevec() * momentum_b);
 
   /* Angle between b and c */
   double theta_bc = acos(
       (energy_b * energy_c - 0.5 * (s_bc - mass_b * mass_b - mass_c * mass_c)) /
       (momentum_b * momentum_c));
-  printd("theta_bc: %g Eb: %g Ec: %g sbc: %g pb: %g pc: %g\n", theta_bc,
-         energy_b, energy_c, s_bc, momentum_b, momentum_c);
+  log.debug("theta_bc: ", theta_bc, " Eb: ", energy_b, " Ec: ", energy_c,
+            " sbc: ", s_bc, " pb: ", momentum_b, " pc: ", momentum_c);
   // pass information on whether phi has changed during the last adding
   // on to add_to_theta:
   phitheta.add_to_theta(theta_bc, phi_has_changed);
-  outgoing2.set_momentum(mass_c, phitheta.threevec() * momentum_c);
+  outgoing2.set_4momentum(mass_c, phitheta.threevec() * momentum_c);
 
   /* Momentum check */
   FourVector ptot = outgoing0.momentum() + outgoing1.momentum() +
                     outgoing2.momentum();
 
   if (fabs(ptot.x0() - total_energy) > really_small) {
-    printf("1->3 energy not conserved! Before: %g After: %g\n", total_energy,
-           ptot.x0());
+    log.warn("1->3 energy not conserved! Before: ", total_energy, " After: ",
+             ptot.x0());
   }
   if (fabs(ptot.x1()) > really_small || fabs(ptot.x2()) > really_small ||
       fabs(ptot.x3()) > really_small) {
-    printf("1->3 momentum check failed. Total momentum: %g %g %g\n", ptot.x1(),
-           ptot.x2(), ptot.x3());
+    log.warn("1->3 momentum check failed. Total momentum: ", ptot.threevec());
   }
 
-  printd("p0: %g %g %g \n", outgoing0.momentum().x0(),
-         outgoing1.momentum().x0(), outgoing2.momentum().x0());
-  printd("p1: %g %g %g \n", outgoing0.momentum().x1(),
-         outgoing1.momentum().x1(), outgoing2.momentum().x1());
-  printd("p2: %g %g %g \n", outgoing0.momentum().x2(),
-         outgoing1.momentum().x2(), outgoing2.momentum().x2());
-  printd("p3: %g %g %g \n", outgoing0.momentum().x3(),
-         outgoing1.momentum().x3(), outgoing2.momentum().x3());
+  log.debug(  "outgoing0: ", outgoing0.momentum(),
+            "\noutgoing1: ", outgoing1.momentum(),
+            "\noutgoing2: ", outgoing2.momentum());
 }
 
 
 void DecayAction::perform(Particles *particles, size_t &id_process) {
-  /* Check if particle still exists. */
-  if (!is_valid(*particles)) {
-    printf("DecayAction::perform: ID %i not found!\n",
-           incoming_particles_[0].id());
-    return;
-  }
-
-  printd("Process: Resonance decay. ");
+  const auto &log = logger<LogArea::DecayModes>();
+  log.debug("Process: Resonance decay. ");
 
   /*
    * Execute a decay process for the selected particle.
@@ -194,12 +184,12 @@ void DecayAction::perform(Particles *particles, size_t &id_process) {
   /* Set positions and boost back. */
   ThreeVector velocity_CM = incoming_particles_[0].velocity();
   for (auto &p : outgoing_particles_) {
-    printd_momenta("particle momenta in lrf", p);
-    p.set_momentum(p.momentum().LorentzBoost(-velocity_CM));
-    p.set_position(incoming_particles_[0].position());
-    printd_momenta("particle momenta in comp", p);
-    // unset collision time for both particles + keep id + unset partner
-    p.set_collision_past(id_process);
+    log.debug("particle momenta in lrf ", p);
+    p.set_4momentum(p.momentum().LorentzBoost(-velocity_CM));
+    p.set_4position(incoming_particles_[0].position());
+    log.debug("particle momenta in comp ", p);
+    // store the process id in the Particle data
+    p.set_id_process(id_process);
   }
 
   id_process++;
@@ -208,13 +198,17 @@ void DecayAction::perform(Particles *particles, size_t &id_process) {
 
   /* Remove decayed particle */
   particles->remove(incoming_particles_[0].id());
-  printd("ID %i has decayed and removed from the list.\n",
-         incoming_particles_[0].id());
+  log.debug("ID ", incoming_particles_[0].id(),
+            " has decayed and removed from the list.");
 
   for (auto &p : outgoing_particles_) {
     p.set_id(particles->add_data(p));
   }
-  printd("Particle map has now %zu elements. \n", particles->size());
+  log.debug("Particle map now has ", particles->size(), " elements.");
+}
+
+void DecayAction::format_debug_output(std::ostream &out) const {
+  out << "Decay of " << incoming_particles_ << " to " << outgoing_particles_;
 }
 
 }  // namespace Smash

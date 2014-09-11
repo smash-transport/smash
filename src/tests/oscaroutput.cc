@@ -12,13 +12,13 @@
 #include <cstring>
 #include <array>
 #include <iostream>
-#include <fstream>
 #include <string>
 #include <vector>
 #include <boost/filesystem.hpp>
+#include <boost/filesystem/fstream.hpp>
+#include <include/config.h>
 #include "../include/outputinterface.h"
-#include "../include/oscarfullhistoryoutput.h"
-#include "../include/oscarparticlelistoutput.h"
+#include "../include/oscaroutput.h"
 #include "../include/particles.h"
 #include "../include/random.h"
 #include "../include/configuration.h"
@@ -44,10 +44,10 @@ static const int zero = 0;
 
 static ParticleData create_smashon_particle() {
   ParticleData particle = ParticleData{ParticleType::find(0x661)};
-  particle.set_momentum(mass_smashon, random_value(), random_value(),
-                        random_value());
-  particle.set_position(FourVector(random_value(), random_value(),
-                                   random_value(), random_value()));
+  particle.set_4momentum(mass_smashon, random_value(), random_value(),
+                         random_value());
+  particle.set_4position(FourVector(random_value(), random_value(),
+                                    random_value(), random_value()));
   return particle;
 }
 
@@ -82,25 +82,19 @@ static void compare_particledata(const std::array<std::string,12> &datastring,
 }
 
 TEST(fullhistory_format) {
-  std::cout << "Create config file..." << std::endl;
   // Set options
   std::string configfilename = "oscar_1999.yaml";
-  std::ofstream configfile;
-  configfile.open((testoutputpath / configfilename).native().c_str());
-  if (configfile.is_open()) {
-    configfile << "Print_start_end:" << "\t" << "True" << std::endl;
-    configfile << "2013_format:" << "\t" << "False" << std::endl;
-    configfile.close();
-  } else {
-    std::cout << "Could not open config file!" << std::endl;
-    std::cout << (testoutputpath / configfilename).native().c_str()
-              << std::endl;
-  }
+  bf::ofstream(testoutputpath / configfilename)
+      << "OSCAR_COLLISIONS:\n"
+         "    Enable:          True\n"
+         "    Print_start_end: True\n"
+         "    2013_format:     False\n";
   VERIFY(bf::exists(testoutputpath / configfilename));
-  Configuration&& op{testoutputpath, configfilename};
-  std::cout << "Create output object..." << std::endl;
-  OscarFullHistoryOutput *oscfull
-                   = new OscarFullHistoryOutput(testoutputpath, std::move(op));
+
+  std::unique_ptr<OutputInterface> oscfull = create_oscar_output(
+      testoutputpath, Configuration{testoutputpath, configfilename});
+  VERIFY(bool(oscfull));
+
   std::string outputfilename = "full_event_history.oscar";
   VERIFY(bf::exists(testoutputpath / outputfilename));
 
@@ -127,7 +121,7 @@ TEST(fullhistory_format) {
   ParticleData final_particle = create_smashon_particle();
   particles.add_data(final_particle);
   final_particles.push_back(particles.data(particles.id_max()));
-  oscfull->write_interaction(initial_particles, final_particles);
+  oscfull->at_interaction(initial_particles, final_particles);
   /* Final state output */
   oscfull->at_eventend(particles, event_id);
 
@@ -140,7 +134,7 @@ TEST(fullhistory_format) {
     std::string output_header = "";
     std::string header = "# OSC1999A\n"
                          "# full_event_history\n"
-                         "# smash\n"
+                         "# " VERSION_MAJOR "\n"
                          "# Block format:\n"
                          "# nin nout event_number\n"
                          "# id pdg 0 px py pz p0 mass x y z t\n"
@@ -213,17 +207,17 @@ TEST(fullhistory_format) {
 TEST(particlelist_format) {
   // Set options
   std::string configfilename = "oscar_1999.yaml";
-  std::ofstream configfile;
-  configfile.open((testoutputpath / configfilename).native().c_str());
-  configfile << "Only_final:" << "\t" << "True" << std::endl;
-  configfile << "2013_format:" << "\t" << "False" << std::endl;
-  configfile.close();
+  bf::ofstream(testoutputpath / configfilename)
+      << "OSCAR_PARTICLELIST:\n"
+         "    Enable:          True\n"
+         "    Only_final:      True\n"
+         "    2013_format:     False\n";
   VERIFY(bf::exists(testoutputpath / configfilename));
 
-  Configuration&& op{testoutputpath, configfilename};
+  std::unique_ptr<OutputInterface> oscfinal = create_oscar_output(
+      testoutputpath, Configuration{testoutputpath, configfilename});
+  VERIFY(bool(oscfinal));
 
-  OscarParticleListOutput *oscfinal
-    = new OscarParticleListOutput(testoutputpath, std::move(op));
   std::string outputfilename = "particle_lists.oscar";
   VERIFY(bf::exists(testoutputpath / outputfilename));
 
@@ -242,14 +236,14 @@ TEST(particlelist_format) {
   initial_particles.push_back(particles.data(0));
   initial_particles.push_back(particles.data(1));
   /* Change the momenta */
-  particles.data(0).set_momentum(mass_smashon, random_value(), random_value(),
-                        random_value());
-  particles.data(1).set_momentum(mass_smashon, random_value(), random_value(),
-                                 random_value());
+  particles.data(0).set_4momentum(mass_smashon, random_value(),
+                                  random_value(), random_value());
+  particles.data(1).set_4momentum(mass_smashon, random_value(),
+                                  random_value(), random_value());
   final_particles.push_back(particles.data(0));
   final_particles.push_back(particles.data(1));
   /* As with initial state output, this should not do anything */
-  oscfinal->write_interaction(initial_particles, final_particles);
+  oscfinal->at_interaction(initial_particles, final_particles);
   /* Final state output; this is the only thing we expect to find in file */
   oscfinal->at_eventend(particles, event_id);
 
@@ -262,7 +256,7 @@ TEST(particlelist_format) {
     std::string output_header = "";
     std::string header = "# OSC1999A\n"
                          "# final_id_p_x\n"
-                         "# smash\n"
+                         "# " VERSION_MAJOR "\n"
                          "# Block format:\n"
                          "# nin nout event_number\n"
                          "# id pdg 0 px py pz p0 mass x y z t\n"

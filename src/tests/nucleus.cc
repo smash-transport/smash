@@ -11,6 +11,7 @@
 #include <map>
 #include "../include/nucleus.h"
 #include "../include/pdgcode.h"
+#include "../include/threevector.h"
 
 namespace particles_txt {
 #include <particles.txt.h>
@@ -64,7 +65,7 @@ TEST_CATCH(initialize_testparticles_wrong, Nucleus::TestparticleConfusion) {
 TEST(nuclear_radius) {
   Nucleus lead;
   lead.fill_from_list(list, 1);
-  FUZZY_COMPARE(lead.nuclear_radius(), static_cast<float>(1.2f*pow(208,1./3.)));
+  FUZZY_COMPARE(lead.default_nuclear_radius(), static_cast<float>(1.2f*pow(208,1./3.)));
 }
 
 // check that center is at (0/0/0):
@@ -72,6 +73,7 @@ TEST(center) {
   Nucleus lead;
   constexpr int N_TEST = 20000;
   lead.fill_from_list(list, N_TEST);
+  lead.set_nuclear_radius(lead.default_nuclear_radius());
   lead.arrange_nucleons();
   FourVector middle = lead.center();
   /** \f$\sqrt(\frac{\int_0^\infinity \frac{dr
@@ -101,13 +103,14 @@ TEST(center_hard_sphere) {
   constexpr int N_TEST = 20000;
   lead.fill_from_list(list, N_TEST);
   lead.set_diffusiveness(0.0);
+  lead.set_nuclear_radius(lead.default_nuclear_radius());
   lead.arrange_nucleons();
   FourVector middle = lead.center();
   /**
    * Here, we can actually calculate the exact value for the width:
    * \f$\sigma = R\sqrt{\frac{3}{5}}\f$.
    **/
-  double threesigma = 3* lead.nuclear_radius() * sqrt(0.6) / sqrt(N_TEST);
+  double threesigma = 3* lead.default_nuclear_radius() * sqrt(0.6) / sqrt(N_TEST);
   VERIFY(std::abs(middle.x1()) < threesigma) << " x=" << middle.x1() << " vs. 3σ=" << threesigma << " (chance 1 in 370)";
   VERIFY(std::abs(middle.x2()) < threesigma) << " x=" << middle.x2() << " vs. 3σ=" << threesigma << " (chance 1 in 370)";
   VERIFY(std::abs(middle.x3()) < threesigma) << " x=" << middle.x3() << " vs. 3σ=" << threesigma << " (chance 1 in 370)";
@@ -121,6 +124,7 @@ TEST(shift_zero) {
   constexpr int N_TEST = 1000;
   lead.fill_from_list(list, N_TEST);
   lead.set_diffusiveness(0.0);
+  lead.set_nuclear_radius(lead.default_nuclear_radius());
   lead.arrange_nucleons();
   FourVector precenter = lead.center();
   // shift with zero displacement: shouldn't change x and y, but note
@@ -131,7 +135,7 @@ TEST(shift_zero) {
   UnitTest::setFuzzyness<double>(10);
   FUZZY_COMPARE(postcenter.x1(), precenter.x1());
   FUZZY_COMPARE(postcenter.x2(), precenter.x2());
-  COMPARE_RELATIVE_ERROR(postcenter.x3(), precenter.x3()-lead.nuclear_radius(),
+  COMPARE_RELATIVE_ERROR(postcenter.x3(), precenter.x3()-lead.default_nuclear_radius(),
                          0.2);
 }
 
@@ -140,6 +144,7 @@ TEST(shift_x) {
   constexpr int N_TEST = 1000;
   lead.fill_from_list(list, N_TEST);
   lead.set_diffusiveness(0.0);
+  lead.set_nuclear_radius(lead.default_nuclear_radius());
   lead.arrange_nucleons();
   FourVector precenter = lead.center();
   // shift only in x.
@@ -148,7 +153,7 @@ TEST(shift_x) {
   UnitTest::setFuzzyness<double>(150);
   FUZZY_COMPARE(postcenter.x1(), precenter.x1()+4.0);
   FUZZY_COMPARE(postcenter.x2(), precenter.x2());
-  COMPARE_RELATIVE_ERROR(postcenter.x3(), precenter.x3()-lead.nuclear_radius(),
+  COMPARE_RELATIVE_ERROR(postcenter.x3(), precenter.x3()-lead.default_nuclear_radius(),
                         0.2);
 }
 
@@ -157,6 +162,7 @@ TEST(shift_z) {
   constexpr int N_TEST = 1000;
   lead.fill_from_list(list, N_TEST);
   lead.set_diffusiveness(0.0);
+  lead.set_nuclear_radius(lead.default_nuclear_radius());
   lead.arrange_nucleons();
   FourVector precenter = lead.center();
   // shift in z. Here, we cannot exactly predict what happens, because
@@ -168,7 +174,7 @@ TEST(shift_z) {
   FUZZY_COMPARE(postcenter.x1(), precenter.x1());
   FUZZY_COMPARE(postcenter.x2(), precenter.x2());
   COMPARE_RELATIVE_ERROR(postcenter.x3(),
-      precenter.x3() - lead.nuclear_radius() + 4.0, 0.2);
+      precenter.x3() - lead.default_nuclear_radius() + 4.0, 0.2);
 }
 
 // test the woods-saxon distribution at various discrete points:
@@ -180,13 +186,14 @@ TEST(woods_saxon) {
   // the nucleus. Fill it from list with 1 testparticle.
   Nucleus projectile;
   projectile.fill_from_list(list, 1);
-  float R = projectile.nuclear_radius();
+  float R = projectile.default_nuclear_radius();
+  projectile.set_nuclear_radius(R);
   // this is the number of times we access the distribution.
   constexpr int N_TEST = 10000000;
   // fill the histogram
   for (int i = 0; i < N_TEST; i++) {
-    float radius = projectile.distribution_nucleons();
-    int bin = radius/dx;
+    ThreeVector pos = projectile.distribute_nucleon();
+    int bin = pos.abs()/dx;
     ++histogram[bin];
   }
   // We'll compare to relative values (I don't know what the integral

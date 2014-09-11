@@ -7,12 +7,17 @@
 #include <cmath>
 #include <cstdlib>
 #include <cstring>
-// #include <list>
+#include <memory>
+#include <stdexcept>
+#include <tuple>
+#include <utility>
 
 #include "include/nucleusmodus.h"
 #include "include/angles.h"
 #include "include/configuration.h"
 #include "include/experimentparameters.h"
+#include "include/logging.h"
+#include "include/numerics.h"
 #include "include/outputroutines.h"
 #include "include/particles.h"
 #include "include/pdgcode.h"
@@ -23,35 +28,145 @@ namespace Smash {
 NucleusModus::NucleusModus(Configuration modus_config,
                            const ExperimentParameters &params) {
   Configuration modus_cfg = modus_config["Nucleus"];
-  sqrt_s_NN_ = modus_cfg.take({"SQRTSNN"});
-  std::vector<PdgCode> sqrts_n = modus_cfg.take({"SQRTS_N"});
-  pdg_sNN_1_ = sqrts_n[0];
-  pdg_sNN_2_ = sqrts_n[1];
-  // fill nuclei with particles
-  std::map<PdgCode, int> pro = modus_cfg.take({"Projectile", "PARTICLES"});
-  projectile_.fill_from_list(pro, params.testparticles);
-  std::map<PdgCode, int> tar = modus_cfg.take({"Target", "PARTICLES"});
-  target_.fill_from_list(tar, params.testparticles);
-  // set diffusiveness of the nuclei if given (else take the default value)
-  if (modus_cfg.has_value({"Projectile", "DIFFUSIVENESS"})) {
-    projectile_.set_diffusiveness(static_cast<float>(
-                modus_cfg.take({"Projectile", "DIFFUSIVENESS"})));
-  }
-  if (modus_cfg.has_value({"Target", "DIFFUSIVENESS"})) {
-    target_.set_diffusiveness(static_cast<float>(
-                modus_cfg.take({"Target", "DIFFUSIVENESS"})));
+
+  // Get the reference frame for the collision calculation.
+  if (modus_cfg.has_value({"CALCULATION_FRAME"})) {
+    frame_ = modus_cfg.take({"CALCULATION_FRAME"});
   }
 
-  // Impact parameter setting: Either "VALUE", "RANGE" or "MAX".
+  // Decide which type of nucleus: deformed or not (default).
+  if (modus_cfg.has_value({"Projectile", "DEFORMED"}) &&
+      modus_cfg.take({"Projectile", "DEFORMED"})) {
+    projectile_ = std::unique_ptr<DeformedNucleus>(new DeformedNucleus());
+  } else {
+    projectile_ = std::unique_ptr<Nucleus>(new Nucleus());
+
+  }
+  if (modus_cfg.has_value({"Target", "DEFORMED"}) &&
+      modus_cfg.take({"Target", "DEFORMED"})) {
+    target_ = std::unique_ptr<DeformedNucleus>(new DeformedNucleus());
+  } else {
+    target_ = std::unique_ptr<Nucleus>(new Nucleus());
+  }
+
+  // Fill nuclei with particles.
+  std::map<PdgCode, int> pro = modus_cfg.take({"Projectile", "PARTICLES"});
+  projectile_->fill_from_list(pro, params.testparticles);
+  if (projectile_->size() < 1) {
+    throw NucleusEmpty("Input Error: Projectile nucleus is empty.");
+  }
+  std::map<PdgCode, int> tar = modus_cfg.take({"Target", "PARTICLES"});
+  target_->fill_from_list(tar, params.testparticles);
+  if (target_->size() < 1) {
+    throw NucleusEmpty("Input Error: Target nucleus is empty.");
+  }
+
+  // Ask to construct nuclei based on atomic number; otherwise, look
+  // for the user defined values or take the default parameters.
+  if (modus_cfg.has_value({"Projectile", "AUTOMATIC"}) &&
+      modus_cfg.take({"Projectile", "AUTOMATIC"})) {
+    projectile_->set_parameters_automatic();
+  } else {
+    projectile_->set_parameters_from_config("Projectile", modus_cfg);
+  }
+  if (modus_cfg.has_value({"Target", "AUTOMATIC"}) &&
+      modus_cfg.take({"Target", "AUTOMATIC"})) {
+    target_->set_parameters_automatic();
+  } else {
+    target_->set_parameters_from_config("Target", modus_cfg);
+  }
+
+  // Get the total nucleus-nucleus collision energy. Since there is
+  // no meaningful choice for a default energy, we require the user to
+  // give one (and only one) energy input from the available options.
+  int energy_input = 0;
+  float mass_projec = projectile_->mass();
+  float mass_target = target_->mass();
+  // Option 1: Center of mass energy.
+  if (modus_cfg.has_value({"SQRTSNN"})) {
+      float sqrt_s_NN = modus_cfg.take({"SQRTSNN"});
+      // Note that \f$\sqrt{s_{NN}}\f$ is different for neutron-neutron and
+      // proton-proton collisions (because of the different masses).
+      // Therefore,representative particles are needed to specify which
+      // two particles' collisions have this \f$\sqrt{s_{NN}}\f$. The vector
+      // specifies a pair of PDG codes for the two particle species we want to use.
+      // The default is otherwise the average nucleon mass for each nucleus.
+      PdgCode id_1 = 0, id_2 = 0;
+      if (modus_cfg.has_value({"SQRTS_REPS"})) {
+        std::vector<PdgCode> sqrts_reps = modus_cfg.take({"SQRTS_REPS"});
+        id_1 = sqrts_reps[0];
+        id_2 = sqrts_reps[1];
+      }
+      float mass_1, mass_2;
+      if (id_1 != 0) {
+        // If PDG Code is given, use mass of this particle type.
+        mass_1 = ParticleType::find(id_1).mass();
+      } else {
+        // else, use average mass of a particle in that nucleus
+        mass_1 = projectile_->mass()/projectile_->size();
+      }
+      if (id_2 != 0) {
+        mass_2 = ParticleType::find(id_2).mass();
+      } else {
+        mass_2 = target_->mass()/target_->size();
+      }
+      // Check that input satisfies the lower bound (everything at rest).
+      if (sqrt_s_NN < mass_1 + mass_2) {
+        throw ModusDefault::InvalidEnergy(
+                "Input Error: sqrt(s_NN) is smaller than masses:\n"
+                + std::to_string(sqrt_s_NN) + " GeV < "
+                + std::to_string(mass_1) + " GeV + "
+                + std::to_string(mass_2) + " GeV.");
+      }
+      // Set the total nucleus-nucleus collision energy.
+      total_s_= (sqrt_s_NN * sqrt_s_NN - mass_1 * mass_1 - mass_2 * mass_2)
+                * mass_projec * mass_target / (mass_1 * mass_2)
+                + mass_projec * mass_projec + mass_target * mass_target;
+      energy_input++;
+  }
+  // Option 2: Energy of the projectile nucleus (target at rest).
+  if (modus_cfg.has_value({"E_LAB"})) {
+      int e_lab = modus_cfg.take({"E_LAB"});
+      // Check that energy is nonnegative.
+      if (e_lab < 0) {
+        throw ModusDefault::InvalidEnergy("Input Error: E_LAB must be nonnegative.");
+      }
+      // Set the total nucleus-nucleus collision energy.
+      total_s_ = (mass_projec * mass_projec) + (mass_target * mass_target)
+                 + 2 * e_lab * mass_target;
+      energy_input++;
+  }
+  // Option 3: Momentum of the projectile nucleus (target at rest).
+  if (modus_cfg.has_value({"P_LAB"})) {
+      int p_lab = modus_cfg.take({"P_LAB"});
+      // Check upper bound (projectile mass).
+      if (p_lab * p_lab > mass_projec * mass_projec) {
+        throw ModusDefault::InvalidEnergy(
+                "Input Error: P_LAB squared is greater than projectile mass squared: \n"
+                + std::to_string(p_lab * p_lab) + " GeV > "
+                + std::to_string(mass_projec * mass_projec) + " GeV");
+      }
+      // Set the total nucleus-nucleus collision energy.
+      total_s_ = (mass_projec * mass_projec) + (mass_target * mass_target)
+                  + 2 * (mass_projec * mass_projec) * mass_target
+                  / sqrt((mass_projec * mass_projec) - (p_lab * p_lab));
+      energy_input++;
+  }
+  if (energy_input != 1){
+    throw std::domain_error("Input Error: Redundant or nonexistant collision energy.");
+  }
+
+  // Impact parameter setting: Either "VALUE", "RANGE", or "MAX".
+  // Unspecified means 0 impact parameter.
   if (modus_cfg.has_value({"Impact", "VALUE"})) {
     impact_ = modus_cfg.take({"Impact", "VALUE"});
   } else {
     bool sampling_quadratically = true;
     float min = 0.0;
     float max = 0.0;
-    // if not value, we need to take a look at the sampling:
+    // If impact is not supplied by value, inspect sampling parameters:
     if (modus_cfg.has_value({"Impact", "SAMPLE"})) {
-      std::string sampling_method = modus_cfg.take({"IMPACT", "SAMPLE"});
+      std::string sampling_method = modus_cfg.take({"Impact", "SAMPLE"});
       if (sampling_method.compare(0, 6, "uniform") == 0) {
         sampling_quadratically = false;
       }
@@ -65,8 +180,11 @@ NucleusModus::NucleusModus(Configuration modus_config,
        min = 0.0;
        max = modus_cfg.take({"Impact", "MAX"});
     }
+    // Sample impact parameter distribution.
     sample_impact(sampling_quadratically, min, max);
   }
+
+  // Look for user-defined initial separation between nuclei.
   if (modus_cfg.has_value({"INITIAL_DISTANCE"})) {
     initial_z_displacement_ = modus_cfg.take({"INITIAL_DISTANCE"});
     // the displacement is half the distance (both nuclei are shifted
@@ -75,94 +193,59 @@ NucleusModus::NucleusModus(Configuration modus_config,
   }
 }
 
-void NucleusModus::print_startup() {
-  printf("Nucleus initialized:\n");
-  printf("sqrt_s_NN = %g GeV (pairs of %s and %s)\n", sqrt_s_NN_,
-         pdg_sNN_1_.string().c_str(), pdg_sNN_2_.string().c_str());
-  printf("Impact parameter: %g fm\n", impact_);
-  printf("Initial distance betw nuclei: %g fm\n", 2.0*initial_z_displacement_);
-  printf("Projectile initialized with %zu particles (%zu test particles)\n",
-                                             projectile_.number_of_particles(),
-                                             projectile_.size());
-  printf("Target     initialized with %zu particles (%zu test particles)\n",
-                                                 target_.number_of_particles(),
-                                                 target_.size());
+std::ostream &operator<<(std::ostream &out, const NucleusModus &m) {
+  return out << "-- Nucleus Modus:\n"
+                "S (nucleus-nucleus) = " << format(m.total_s_, "GeV")
+             << "\nImpact parameter = " << format(m.impact_, "fm")
+             << "\nInitial distance between nuclei: "
+             << format(2 * m.initial_z_displacement_, "fm")
+             << "\nProjectile:\n" << *m.projectile_
+             << "\nTarget:\n" << *m.target_;
 }
 
-/* initial_conditions - sets particle data for @particles */
 float NucleusModus::initial_conditions(Particles *particles,
                                       const ExperimentParameters&) {
-  // WHAT'S MISSING:
-  //
-  // Nuclei can be non-spherical. If they are, then they may be randomly
-  // aligned. Excentricities and angles should be configurable.
-  float mass_projec = projectile_.mass();
-  float mass_target = target_.mass();
-  printf("Masses of Nuclei: %g GeV %g GeV\n", projectile_.mass(),
-                                              target_.mass());
-  printf("Radii of Nuclei: %g fm %g fm\n", projectile_.nuclear_radius(),
-                                           target_.nuclear_radius());
-  float mass_1, mass_2;
-  // set the masses used in sqrt_sNN. mass1 corresponds to the
-  // projectile.
-  if (pdg_sNN_1_ != 0) {
-    // If PDG Code is given, use mass of this particle type.
-    mass_1 = ParticleType::find(pdg_sNN_1_).mass();
-  } else if (projectile_.size() > 0) {
-    // else, use average mass of a particle in that nucleus
-    mass_1 = projectile_.mass()/projectile_.size();
-  } else {
-    throw NucleusEmpty("Projectile nucleus is empty!");
+  // Populate the nuclei with appropriately distributed nucleons.
+  // If deformed, this includes rotating the nucleus.
+  projectile_->arrange_nucleons();
+  target_->arrange_nucleons();
+
+  // Use the total mandelstam variable to get the frame-dependent velocity for
+  // each nucleus. Position 1 is projectile, position 2 is target.
+  double v1, v2;
+  std::tie(v1, v2) = get_velocities(total_s_, projectile_->mass(), target_->mass());
+
+  // If velocities are too close to 1 for our calculations, throw an exception.
+  if (almost_equal(std::abs(1.0 - v1), 0.0)
+      || almost_equal(std::abs(1.0 - v2), 0.0)) {
+    throw std::domain_error("Found velocity equal to 1 in nucleusmodus::initial_conditions.\n"
+                            "Consider using the center of velocity reference frame.");
   }
-  // same logic for mass2 and target as for projectile directly above.
-  if (pdg_sNN_2_ != 0) {
-    mass_2 = ParticleType::find(pdg_sNN_2_).mass();
-  } else if (target_.size() > 0) {
-    mass_2 = target_.mass()/target_.size();
-  } else {
-    throw NucleusEmpty("Target nucleus is empty!");
-  }
-  double s_NN = sqrt_s_NN_*sqrt_s_NN_;
-  if (sqrt_s_NN_ < mass_1 + mass_2) {
-    throw ModusDefault::InvalidEnergy(
-                      "Error in input: sqrt(s_NN) is smaller than masses:\n"
-                      + std::to_string(sqrt_s_NN_) + " GeV < "
-                      + std::to_string(mass_1) + " GeV + "
-                      + std::to_string(mass_2) + " GeV.");
-  }
-  float total_mandelstam_s = (s_NN - mass_1*mass_1 - mass_2*mass_2)
-                             * mass_projec*mass_target
-                             / (mass_1*mass_2)
-                           + mass_projec*mass_projec + mass_target*mass_target;
-  float velocity_squared = (total_mandelstam_s - (mass_projec + mass_target)
-                                               * (mass_projec + mass_target))
-                         / (total_mandelstam_s - (mass_projec - mass_target)
-                                               * (mass_projec - mass_target));
-  // populate the nuclei with appropriately distributed nucleons
-  projectile_.arrange_nucleons();
-  target_.arrange_nucleons();
-  // boost the nuclei to the appropriate velocity (target is in opposite
-  // direction!
-  projectile_.boost(velocity_squared);
-  target_.boost(-velocity_squared);
-  // shift the nuclei along the z-axis so that they are 2*1 fm apart
-  // touch and along the x-axis to get the right impact parameter.
-  // Projectile hits at positive x.
-  // Also, it sets the time of the particles to
-  // -initial_z_displacement_/sqrt(velocity_squared).
-  float simulation_time = -initial_z_displacement_/sqrt(velocity_squared);
-  projectile_.shift(true, -initial_z_displacement_, +impact_/2.0
-                                                  , simulation_time);
-  target_.shift(false,    +initial_z_displacement_, -impact_/2.0
-                                                  , simulation_time);
-  // now, put the particles in the nuclei into particles.
-  projectile_.copy_particles(particles);
-  target_.copy_particles(particles);
+
+  // Shift the nuclei into starting positions. Keep the pair separated
+  // in z by some small distance and shift in x by the impact parameter.
+  // (Projectile is chosen to hit at positive x.)
+  // After shifting, set the time component of the particles to
+  // -initial_z_displacement_/average_velocity.
+  float avg_velocity = sqrt(v1 * v1
+                            + v2 * v2);
+  float simulation_time = -initial_z_displacement_ / avg_velocity;
+  projectile_->shift(true, -initial_z_displacement_, +impact_/2.0,
+                     simulation_time);
+  target_->shift(false, initial_z_displacement_, -impact_/2.0,
+                 simulation_time);
+
+  // Boost the nuclei to the appropriate velocity.
+  projectile_->boost(v1);
+  target_->boost(v2);
+
+  // Put the particles in the nuclei into code particles.
+  projectile_->copy_particles(particles);
+  target_->copy_particles(particles);
   return simulation_time;
 }
 
-void NucleusModus::sample_impact(const bool s, const float min,
-                                               const float max) {
+void NucleusModus::sample_impact(bool s, float min, float max) {
   if (s) {
     // quadratic sampling: Note that for min > max, this still yields
     // the correct distribution (only that canonical() = 0 then is the
@@ -172,6 +255,38 @@ void NucleusModus::sample_impact(const bool s, const float min,
     // linear sampling. Still, min > max works fine.
     impact_ = Random::uniform(min, max);
   }
+}
+
+std::pair<double, double> NucleusModus::get_velocities(float s, float m1, float m2) {
+  double v1 = 0.0;
+  double v2 = 0.0;
+  // Frame dependent calculations of velocities. Assume v1 >= 0, v2 <= 0.
+  switch (frame_) {
+    case 1:  // Center of velocity.
+        v1 = sqrt((s - (m1 + m2) * (m1 + m2))
+                  / (s - (m1 - m2) * (m1 - m2)));
+        v2 = - v1;
+      break;
+    case 2:  // Center of mass.
+      {
+        double A = (s -(m1 - m2) * (m1 - m2)) * (s -(m1 + m2) * (m1 + m2));
+        double B = - 8 * (m1 * m1) * m1 * (m2 * m2) * m2 - ((m1 * m1) + (m2 * m2))
+                   * (s - (m1 * m1) - (m2 * m2)) * (s - (m1 * m1) - (m2 * m2));
+        double C = (m1 * m1) * (m2 * m2) * A;
+        // Compute positive center of mass momentum.
+        double abs_p = sqrt((-B - sqrt(B * B - 4 * A * C)) / (2 * A));
+        v1 = abs_p / m1;
+        v2 = -abs_p / m2;
+      }
+      break;
+    case 3:  // Target at rest.
+      v1 = sqrt(1 - 4 * (m1 * m1) * (m2 * m2) / ((s - (m1 * m1) - (m2 * m2))
+                * (s - (m1 * m1) - (m2 * m2))));
+      break;
+    default:
+      throw std::domain_error("Invalid reference frame in NucleusModus::get_velocities.");
+  }
+  return std::make_pair(v1, v2);
 }
 
 }  // namespace Smash

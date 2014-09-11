@@ -16,13 +16,14 @@
 #include <string>
 #include <vector>
 #include <boost/filesystem.hpp>
+#include <include/config.h>
 
-#include "../include/outputinterface.h"
 #include "../include/binaryoutputcollisions.h"
 #include "../include/binaryoutputparticles.h"
+#include "../include/clock.h"
+#include "../include/outputinterface.h"
 #include "../include/particles.h"
 #include "../include/random.h"
-#include "../include/clock.h"
 
 using namespace Smash;
 
@@ -44,10 +45,10 @@ static const int zero = 0;
 
 static ParticleData create_smashon_particle() {
   ParticleData particle = ParticleData{ParticleType::find(0x661)};
-  particle.set_momentum(mass_smashon, random_value(), random_value(),
-                        random_value());
-  particle.set_position(FourVector(random_value(), random_value(),
-                                   random_value(), random_value()));
+  particle.set_4momentum(mass_smashon, random_value(), random_value(),
+                         random_value());
+  particle.set_4position(FourVector(random_value(), random_value(),
+                                    random_value(), random_value()));
   return particle;
 }
 
@@ -150,7 +151,7 @@ TEST(fullhistory_format) {
   ParticleData final_particle = create_smashon_particle();
   particles.add_data(final_particle);
   final_particles.push_back(particles.data(particles.id_max()));
-  bin_output->write_interaction(initial_particles, final_particles);
+  bin_output->at_interaction(initial_particles, final_particles);
 
   /* Final state output */
   bin_output->at_eventend(particles, event_id);
@@ -176,7 +177,7 @@ TEST(fullhistory_format) {
 
   VERIFY(magic == "SMSH");
   VERIFY(format_version_number == 0);
-  // TODO(oliiny):  VERIFY(smash_version == std::to_string(VERSION_MAJOR));
+  VERIFY(smash_version == VERSION_MAJOR);
 
   // particles at event atart: expect two smashons
   int nin, nout, npart;
@@ -237,7 +238,7 @@ TEST(particles_format) {
   final_particles.push_back(particles.data(particles.id_max()));
   Clock clock;
 
-  bin_output->after_Nth_timestep(particles, event_id, clock);
+  bin_output->at_intermediate_time(particles, event_id, clock);
 
   /* Final state output */
   bin_output->at_eventend(particles, event_id);
@@ -262,7 +263,7 @@ TEST(particles_format) {
 
   VERIFY(magic == "SMSH");
   VERIFY(format_version_number == 0);
-  // TODO(oliiny):  VERIFY(smash_version == std::to_string(VERSION_MAJOR));
+  VERIFY(smash_version == VERSION_MAJOR);
 
   int npart;
   // particles at event start: expect two smashons

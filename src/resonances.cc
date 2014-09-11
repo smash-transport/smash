@@ -34,37 +34,47 @@
 
 namespace Smash {
 
-/* Parameters for spectral function integration via GSL. */
+/** Parameters for spectral-function integration via GSL. */
 struct IntegrandParameters {
+  /// Type of the resonance
   const ParticleType *type;
+  /// Mass of second particle
   double m2;
+  /// Mandelstam s
   double s;
 };
 
-/* Calculate isospin Clebsch-Gordan coefficient
- * (-1)^(j1 - j2 + m3) * sqrt(2 * j3 + 1) * [Wigner 3J symbol]
- * Note that the calculation assumes that isospin values
- * have been multiplied by two
- */
-double clebsch_gordan_coefficient(const int isospin_a,
-  const int isospin_b, const int isospin_resonance,
-  const int isospin_z_a, const int isospin_z_b,
-  const int isospin_z_resonance) {
-  double wigner_3j =  gsl_sf_coupling_3j(isospin_a,
-     isospin_b, isospin_resonance,
-     isospin_z_a, isospin_z_b, -isospin_z_resonance);
-  double clebsch_gordan_isospin = 0.0;
+
+double clebsch_gordan(const int j1, const int j2, const int j3,
+                      const int m1, const int m2, const int m3) {
+  double wigner_3j =  gsl_sf_coupling_3j(j1, j2, j3, m1, m2, -m3);
+  double result = 0.;
   if (std::abs(wigner_3j) > really_small)
-    clebsch_gordan_isospin = std::pow(-1, isospin_a / 2.0
-    - isospin_b / 2.0 + isospin_z_resonance / 2.0)
-    * std::sqrt(isospin_resonance + 1) * wigner_3j;
+    result = std::pow(-1, (j1-j2+m3)/2.) * std::sqrt(j3 + 1) * wigner_3j;
 
   printd("CG: %g I1: %i I2: %i IR: %i iz1: %i iz2: %i izR: %i \n",
-       clebsch_gordan_isospin, isospin_a, isospin_b,
-       isospin_resonance, isospin_z_a, isospin_z_b,
-       isospin_z_resonance);
+         result, j1, j2, j3, m1, m2, m3);
 
-  return clebsch_gordan_isospin;
+  return result;
+}
+
+
+/* Calculate isospin Clebsch-Gordan coefficient for two particles p1 and p2
+ * coupling to a total isospin (I_tot, I_z). */
+inline double isospin_clebsch_gordan(const ParticleType p1,
+                                     const ParticleType p2,
+                                     const int I_tot, const int I_z) {
+  return clebsch_gordan (p1.isospin(), p2.isospin(), I_tot,
+                         p1.isospin3(), p2.isospin3(), I_z);
+}
+
+/* Calculate isospin Clebsch-Gordan coefficient for two particles p1 and p2
+ * coupling to a resonance Res. */
+inline double isospin_clebsch_gordan(const ParticleType p1,
+                                     const ParticleType p2,
+                                     const ParticleType Res) {
+  return clebsch_gordan (p1.isospin(), p2.isospin(), Res.isospin(),
+                         p1.isospin3(), p2.isospin3(), Res.isospin3());
 }
 
 /**
@@ -83,89 +93,6 @@ static void quadrature_1d(double (*integrand_function)(double, void *),
                           double upper_limit, double *integral_value,
                           double *integral_error);
 
-
-/* resonance_cross_section - energy-dependent cross section
- * for producing a resonance
- */
-std::vector<ProcessBranch> resonance_cross_section(
-    const ParticleData &particle1, const ParticleData &particle2) {
-  std::vector<ProcessBranch> resonance_process_list;
-  ParticleType type_particle1 = particle1.type(),
-               type_particle2 = particle2.type();
-
-  /* Isospin symmetry factor, by default 1 */
-  int symmetryfactor = 1;
-  // the isospin symmetry factor is 2 if both particles are in the same
-  // isospin multiplet:
-  if (type_particle1.pdgcode().iso_multiplet()
-      == type_particle2.pdgcode().iso_multiplet()) {
-    symmetryfactor = 2;
-  }
-
-  /* Mandelstam s = (p_a + p_b)^2 = square of CMS energy */
-  const double mandelstam_s =
-       (particle1.momentum() + particle2.momentum()).sqr();
-
-  /* CM momentum */
-  const double cm_momentum_squared
-    = (particle1.momentum().Dot(particle2.momentum())
-       * particle1.momentum().Dot(particle2.momentum())
-       - type_particle1.mass() * type_particle1.mass()
-       * type_particle2.mass() * type_particle2.mass()) / mandelstam_s;
-
-  /* Find all the possible resonances */
-  for (const ParticleType &type_resonance : ParticleType::list_all()) {
-    /* Not a resonance, go to next type of particle */
-    if (type_resonance.is_stable()) {
-      continue;
-    }
-
-    /* Same resonance as in the beginning, ignore */
-    if ((!type_particle1.is_stable()
-         && type_resonance.pdgcode() == type_particle1.pdgcode())
-        || (!type_particle2.is_stable()
-            && type_resonance.pdgcode() == type_particle2.pdgcode())) {
-      continue;
-    }
-
-    float resonance_xsection
-      = symmetryfactor * two_to_one_formation(type_particle1, type_particle2,
-                         type_resonance, mandelstam_s, cm_momentum_squared);
-
-    /* If cross section is non-negligible, add resonance to the list */
-    if (resonance_xsection > really_small) {
-      resonance_process_list.push_back(ProcessBranch(type_resonance.pdgcode(),
-                                                     resonance_xsection));
-
-      printd("Found resonance %s (%s) with mass %f and width %f.\n",
-             type_resonance.pdgcode().string().c_str(),
-             type_resonance.name().c_str(),
-             type_resonance.mass(), type_resonance.width_at_pole());
-      printd("2->1 with original particles: %s %s Charges: %i %i \n",
-             type_particle1.name().c_str(), type_particle2.name().c_str(),
-             type_particle1.charge(), type_particle2.charge());
-    }
-    /* Same procedure for possible 2->2 resonance formation processes */
-    /* XXX: For now, we allow this only for baryon-baryon interactions */
-    if (type_particle1.pdgcode().baryon_number() != 0 &&
-        type_particle2.pdgcode().baryon_number() != 0) {
-      size_t two_to_two_processes
-         = two_to_two_formation(type_particle1, type_particle2,
-                                type_resonance, mandelstam_s,
-                                cm_momentum_squared, &resonance_process_list);
-      if (two_to_two_processes > 0) {
-        printd("Found %zu 2->2 processes for resonance %s (%s).\n",
-               two_to_two_processes,
-               type_resonance.pdgcode().string().c_str(),
-               type_resonance.name().c_str());
-        printd("2->2 with original particles: %s %s Charges: %i %i \n",
-               type_particle1.name().c_str(), type_particle2.name().c_str(),
-               type_particle1.charge(), type_particle2.charge());
-      }
-    }
-  }
-  return resonance_process_list;
-}
 
 /* two_to_one_formation -- only the resonance in the final state */
 double two_to_one_formation(const ParticleType &type_particle1,
@@ -197,15 +124,11 @@ double two_to_one_formation(const ParticleType &type_particle1,
     }
   }
 
-  double clebsch_gordan_isospin
-    = clebsch_gordan_coefficient(type_particle1.isospin(),
-         type_particle2.isospin(), type_resonance.isospin(),
-         type_particle1.pdgcode().isospin3(),
-         type_particle2.pdgcode().isospin3(),
-         type_resonance.pdgcode().isospin3());
+  double isospin_factor
+    = isospin_clebsch_gordan(type_particle1, type_particle2, type_resonance);
 
   /* If Clebsch-Gordan coefficient is zero, don't bother with the rest */
-  if (std::abs(clebsch_gordan_isospin) < really_small)
+  if (std::abs(isospin_factor) < really_small)
     return 0.0;
 
   /* Check the decay modes of this resonance */
@@ -219,8 +142,9 @@ double two_to_one_formation(const ParticleType &type_particle1,
   for (const auto &mode : decaymodes) {
     size_t decay_particles = mode.pdg_list().size();
     if ( decay_particles > 3 ) {
-      printf("Warning: Not a 1->2 or 1->3 process!\n");
-      printf("Number of decay particles: %zu \n", decay_particles);
+      logger<LogArea::Resonances>().warn("Not a 1->2 or 1->3 process!\n",
+                                         "Number of decay particles: ",
+                                         decay_particles);
     } else {
       /* There must be enough energy to produce all decay products */
       if (std::sqrt(mandelstam_s) < mode.threshold())
@@ -251,7 +175,7 @@ double two_to_one_formation(const ParticleType &type_particle1,
    * using the Breit-Wigner distribution as probability amplitude
    * See Eq. (176) in Buss et al., Physics Reports 512, 1 (2012)
    */
-  return clebsch_gordan_isospin * clebsch_gordan_isospin * spinfactor
+  return isospin_factor * isospin_factor * spinfactor
          * 4.0 * M_PI / cm_momentum_squared
          * breit_wigner(mandelstam_s, resonance_mass, resonance_width)
          * hbarc * hbarc / fm2_mb;
@@ -271,31 +195,20 @@ size_t two_to_two_formation(const ParticleType &type_particle1,
       && type_resonance.pdgcode().baryon_number() == 0)
     return 0.0;
 
-  /* Isospin z-component based on Gell-Mann–Nishijima formula
-   * 2 * Iz = 2 * charge - (baryon number + strangeness + charm)
-   * XXX: Strangeness and charm ignored for now!
-   */
-  const int isospin_z_resonance = type_resonance.pdgcode().isospin3();
-
-  /* Compute initial total combined isospin range */
-  int initial_total_maximum
-    = type_particle1.isospin() + type_particle2.isospin();
-  int initial_total_minimum
-    = abs(type_particle1.isospin() - type_particle2.isospin());
-  /* Loop over particle types to find allowed combinations */
+  /* Loop over particle types to find allowed combinations. */
   for (const ParticleType &second_type : ParticleType::list_all()) {
     /* We are interested only stable particles here */
     if (!second_type.is_stable()) {
       continue;
     }
 
-    /* Check for charge conservation */
+    /* Check for charge conservation. */
     if (type_resonance.charge() + second_type.charge()
         != type_particle1.charge() + type_particle2.charge()) {
       continue;
     }
 
-    /* Check for baryon number conservation */
+    /* Check for baryon number conservation. */
     int initial_baryon_number = type_particle1.pdgcode().baryon_number()
                               + type_particle2.pdgcode().baryon_number();
     int final_baryon_number = type_resonance.pdgcode().baryon_number()
@@ -304,33 +217,28 @@ size_t two_to_two_formation(const ParticleType &type_particle1,
       continue;
     }
 
-    /* Compute total isospin range with given initial and final particles */
-    int isospin_maximum = std::min(type_resonance.isospin()
-      + second_type.isospin(), initial_total_maximum);
-    int isospin_minimum = std::max(abs(type_resonance.isospin()
-      - second_type.isospin()), initial_total_minimum);
+    int I_z = type_resonance.isospin3() + second_type.isospin3();
 
-    int isospin_z_i = second_type.pdgcode().isospin3();
-    int isospin_z_final = isospin_z_resonance + isospin_z_i;
+    /* Compute total isospin range with given initial and final particles. */
+    int I_max = std::min(type_resonance.isospin() + second_type.isospin(),
+                         type_particle1.isospin() + type_particle2.isospin());
+    int I_min = std::max(abs(type_resonance.isospin()
+                             - second_type.isospin()),
+                         abs(type_particle1.isospin()
+                             - type_particle2.isospin()));
+    I_min = std::max(I_min, abs(I_z));
 
-    int isospin_final = isospin_maximum;
-    double clebsch_gordan_isospin = 0.0;
-    while (isospin_final >= isospin_minimum) {
-      if (abs(isospin_z_final) > isospin_final) {
-        break;
-      }
-      clebsch_gordan_isospin
-        = clebsch_gordan_coefficient(type_resonance.isospin(),
-            second_type.isospin(), isospin_final,
-            isospin_z_resonance, isospin_z_i, isospin_z_final);
-
-      /* isospin is multiplied by 2,
-       *  so we must also decrease it by increments of 2
-       */
-      isospin_final = isospin_final - 2;
+    /* Loop over total isospin in allowed range.
+     * Use decrement of 2, since isospin is multiplied by 2. */
+    double isospin_factor = 0.;
+    for (int I_tot = I_max; I_tot >= I_min; I_tot -= 2) {
+      isospin_factor
+        = isospin_clebsch_gordan(type_particle1, type_particle2, I_tot, I_z)
+        * isospin_clebsch_gordan(type_resonance, second_type, I_tot, I_z);
     }
+
     /* If Clebsch-Gordan coefficient is zero, don't bother with the rest */
-    if (fabs(clebsch_gordan_isospin) < really_small) {
+    if (std::abs(isospin_factor) < really_small) {
       continue;
     }
 
@@ -364,7 +272,7 @@ size_t two_to_two_formation(const ParticleType &type_particle1,
      * http://geb.uni-giessen.de/geb/volltexte/2013/10253/
      */
     float xsection
-      = clebsch_gordan_isospin * clebsch_gordan_isospin
+      = isospin_factor * isospin_factor
         / mandelstam_s
         / std::sqrt(cm_momentum_squared)
         * resonance_integral

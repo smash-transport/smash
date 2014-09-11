@@ -15,6 +15,8 @@
 namespace Smash {
 
 /**
+ * \ingroup data
+ *
  * ParticleData contains the dynamic information of a certain particle.
  *
  * Each particle has its momentum, position and other relevant physical
@@ -52,17 +54,14 @@ class ParticleData {
 
   inline int id_process(void) const;
   inline void set_id_process(const int id);
-  inline double collision_time(void) const;
-  inline void set_collision_time(const double &collision_time);
-  inline void set_collision(const double &collision_time);
-  inline void set_collision_past(const int process_id);
   inline const FourVector &momentum(void) const;
-  inline void set_momentum(const FourVector &momentum_vector);
-  inline void set_momentum(double mass, const ThreeVector &mom);
-  inline void set_momentum(double mass, double px, double py, double pz);
+  inline void set_4momentum(const FourVector &momentum_vector);
+  inline void set_4momentum(double mass, const ThreeVector &mom);
+  inline void set_4momentum(double mass, double px, double py, double pz);
   inline void set_3momentum(const ThreeVector &mom);
   inline const FourVector &position(void) const;
-  inline void set_position(const FourVector &position);
+  inline void set_4position(const FourVector &pos);
+  inline void set_3position(const ThreeVector &pos);
   /// get the velocity 3-vector
   inline ThreeVector velocity (void) const { return momentum_.threevec() / momentum_.x0(); }
   /// do a Lorentz-boost
@@ -86,8 +85,6 @@ class ParticleData {
 
   /// counter of the last collision/decay
   int id_process_ = -1;
-  /// collision time
-  double collision_time_ = 0.;
   /// momenta of the particle: x0, x1, x2, x3 as E, px, py, pz
   FourVector momentum_;
   /// position in space: x0, x1, x2, x3 as t, x, y, z
@@ -119,34 +116,13 @@ inline void ParticleData::set_id_process(const int process_id) {
   id_process_ = process_id;
 }
 
-/// return collision time
-inline double ParticleData::collision_time(void) const {
-  return collision_time_;
-}
-
-/// set possible collision time
-inline void ParticleData::set_collision_time(const double &collision_t) {
-  collision_time_ = collision_t;
-}
-
-/// set possible collision data
-inline void ParticleData::set_collision(const double &collision_t) {
-  collision_time_ = collision_t;
-}
-
-/// set happened collision data
-inline void ParticleData::set_collision_past(const int id_counter) {
-  collision_time_ = 0.0;
-  id_process_ = id_counter;
-}
-
 /// return the particle 4-momentum
 inline const FourVector &ParticleData::momentum(void) const {
   return momentum_;
 }
 
 /// set particle 4-momentum directly
-inline void ParticleData::set_momentum(const FourVector &momentum_vector) {
+inline void ParticleData::set_4momentum(const FourVector &momentum_vector) {
   momentum_ = momentum_vector;
 }
 
@@ -155,7 +131,7 @@ inline void ParticleData::set_momentum(const FourVector &momentum_vector) {
  * \param[in] new_mass the mass of the particle
  * \param[in] mom the three-momentum of the particle
  */
-inline void ParticleData::set_momentum(double new_mass, const ThreeVector &mom) {
+inline void ParticleData::set_4momentum(double new_mass, const ThreeVector &mom) {
   momentum_ = FourVector(std::sqrt(new_mass * new_mass + mom * mom), mom);
 }
 
@@ -166,7 +142,7 @@ inline void ParticleData::set_momentum(double new_mass, const ThreeVector &mom) 
  * \param[in] py y-component of the momentum
  * \param[in] pz z-component of the momentum
  */
-inline void ParticleData::set_momentum(double new_mass, double px, double py,
+inline void ParticleData::set_4momentum(double new_mass, double px, double py,
                                        double pz) {
   momentum_ = FourVector(
       std::sqrt(new_mass * new_mass + px * px + py * py + pz * pz), px, py, pz);
@@ -183,15 +159,20 @@ inline const FourVector &ParticleData::position(void) const {
 }
 
 /// set the particle position directly
-inline void ParticleData::set_position(const FourVector &pos) {
+inline void ParticleData::set_4position(const FourVector &pos) {
   position_ = pos;
+}
+
+/// set the particle 3-position only (time component is not changed)
+inline void ParticleData::set_3position(const ThreeVector &pos) {
+  position_ = FourVector(position_.x0(), pos);
 }
 
 inline void ParticleData::boost (const ThreeVector &v)
 {
-  set_momentum(momentum_.LorentzBoost(v));
+  set_4momentum(momentum_.LorentzBoost(v));
   // TODO: do we actually need to boost the position?
-  set_position(position_.LorentzBoost(v));
+  set_4position(position_.LorentzBoost(v));
 }
 
 /// check if the particles are identical
@@ -213,6 +194,17 @@ inline bool ParticleData::operator==(const int id_a) const {
 inline bool ParticleData::operator<(const int id_a) const {
   return this->id_ < id_a;
 }
+
+/**\ingroup logging
+ * Writes the state of the particle to the output stream.
+ */
+std::ostream &operator<<(std::ostream &s, const ParticleData &p);
+
+/** \ingroup logging
+ * Writes a compact overview over the particles in the \p particle_list argument
+ * to the stream.
+ */
+std::ostream &operator<<(std::ostream &out, const ParticleList &particle_list);
 
 }  // namespace Smash
 

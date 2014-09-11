@@ -16,8 +16,11 @@
 
 #include "include/decaymodes.h"
 #include "include/inputfunctions.h"
+#include "include/iomanipulators.h"
+#include "include/logging.h"
 #include "include/outputroutines.h"
 #include "include/pdgcode.h"
+#include "include/stringfunctions.h"
 #include "include/width.h"
 
 namespace Smash {
@@ -53,6 +56,19 @@ SMASH_CONST bool ParticleType::exists(PdgCode pdgcode) {
   return false;
 }
 
+#ifdef NDEBUG
+ParticleType::ParticleType(std::string, float m, float w, PdgCode id)
+    :
+#else
+ParticleType::ParticleType(std::string n, float m, float w, PdgCode id)
+    : name_(fill_right(n, 3)),
+#endif
+      mass_(m),
+      width_(w),
+      pdgcode_(id),
+      isospin_(pdgcode_.isospin_total()),
+      charge_(pdgcode_.charge()) {}
+
 /* Construct an antiparticle name-string from the given name-string for the
  * particle and its PDG code. */
 static std::string antiname(const std::string &name, PdgCode code) {
@@ -61,33 +77,50 @@ static std::string antiname(const std::string &name, PdgCode code) {
   if (name.find("++") != std::string::npos) {
     basename = name.substr(0, name.length()-2);
     charge = "--";
+  } else if (name.find("⁺⁺") != std::string::npos) {
+    basename = name.substr(0, name.length() - sizeof("⁺⁺") + 1);
+    charge = "⁻⁻";
   } else if (name.find("+") != std::string::npos) {
     basename = name.substr(0, name.length()-1);
     charge = "-";
+  } else if (name.find("⁺") != std::string::npos) {
+    basename = name.substr(0, name.length() - sizeof("⁺") + 1);
+    charge = "⁻";
   } else if (name.find("0") != std::string::npos) {
     basename = name.substr(0, name.length()-1);
     charge = "0";
+  } else if (name.find("⁰") != std::string::npos) {
+    basename = name.substr(0, name.length() - sizeof("⁰") + 1);
+    charge = "⁰";
   } else if (name.find("-") != std::string::npos) {
     basename = name.substr(0, name.length()-1);
     charge = "+";
+  } else if (name.find("⁻") != std::string::npos) {
+    basename = name.substr(0, name.length() - sizeof("⁻") + 1);
+    charge = "⁺";
   } else if (name.find("--") != std::string::npos) {
     basename = name.substr(0, name.length()-2);
     charge = "++";
+  } else if (name.find("⁻⁻") != std::string::npos) {
+    basename = name.substr(0, name.length() - sizeof("⁻⁻") + 1);
+    charge = "⁺⁺";
   } else {
     basename = name;
     charge = "";
   }
 
+  constexpr char bar[] = "\u0305";
   if (code.baryon_number() != 0) {
-    return basename+"bar"+charge;  // baron
+    return basename+bar+charge;  // baryon
   } else if (code.charge() != 0) {
     return basename+charge;        // charged meson
   } else {
-    return basename+charge+"bar";  // neutral meson
+    return basename+bar+charge;  // neutral meson
   }
 };
 
 void ParticleType::create_type_list(const std::string &input) {  //{{{
+  const auto &log = logger<LogArea::ParticleType>();
   static ParticleTypeList type_list;
   type_list.clear();  // in case LoadFailure was thrown and caught and we should
                       // try again
@@ -99,28 +132,20 @@ void ParticleType::create_type_list(const std::string &input) {  //{{{
     lineinput >> name >> mass >> width >> pdgcode;
     if (lineinput.fail()) {
       throw Particles::LoadFailure(build_error_string(
-          "While loading the Particle data:\nFailed to convert the input "
+          "While loading the ParticleType data:\nFailed to convert the input "
           "string to the expected data types.",
           line));
     }
     ensure_all_read(lineinput, line);
 
-    printd("Setting particle type %s mass %g width %g pdgcode %s\n",
-           name.c_str(), mass, width, pdgcode.string().c_str());
-    printd("Setting particle type %s isospin %i/2 charge %i spin %i/2\n",
-           name.c_str(), pdgcode.isospin_total(), pdgcode.charge(),
-                                                  pdgcode.spin());
-
     type_list.emplace_back(name, mass, width, pdgcode);
+    log.debug() << "Setting     particle type: " << type_list.back();
     if (pdgcode.has_antiparticle()) {
       /* add corresponding antiparticle */
       PdgCode anti = pdgcode.get_antiparticle();
       name = antiname(name, pdgcode);
       type_list.emplace_back(name, mass, width, anti);
-      printd("Setting antiparticle type %s mass %g width %g pdgcode %s\n",
-             name.c_str(), mass, width, anti.string().c_str());
-      printd("Setting antiparticle type %s isospin %i/2 charge %i spin %i/2\n",
-             name.c_str(), anti.isospin_total(), anti.charge(), anti.spin());
+      log.debug() << "Setting antiparticle type: " << type_list.back();
     }
   }
   type_list.shrink_to_fit();
@@ -201,5 +226,15 @@ ProcessBranchList ParticleType::get_partial_widths(const float m) const {
   return partial;
 }
 
+std::ostream &operator<<(std::ostream &out, const ParticleType &type) {
+  const PdgCode &pdg = type.pdgcode();
+  return out << type.name() << std::setfill(' ') << std::right
+             << "[mass:" << field<6> << type.mass()
+             << ", width:" << field<6> << type.width_at_pole()
+             << ", PDG:" << field<6> << pdg
+             << ", Isospin:" << field<2> << pdg.isospin_total()
+             << "/2, Charge:" << field<3> << pdg.charge()
+             << ", Spin:" << field<2> << pdg.spin() << "/2]";
+}
 
 }  // namespace Smash

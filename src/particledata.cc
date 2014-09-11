@@ -9,8 +9,29 @@
 
 #include "include/particledata.h"
 
-#include "include/width.h"
+#include "include/iomanipulators.h"
+#include <iostream>
+#include <iomanip>
+#include <vector>
 
 namespace Smash {
+
+std::ostream &operator<<(std::ostream &out, const ParticleData &p) {
+  using namespace std;
+  out.fill(' ');
+  return out << p.type().name() << right
+             << "{id:" << field<6> << p.id()
+             << ", pos [fm]:"  // XXX: is fm correct?
+             << p.position() << ", mom [GeV]:" << p.momentum() << "}";
+}
+
+std::ostream &operator<<(std::ostream &out, const ParticleList &particle_list) {
+  using namespace std;
+  out << '[';
+  for (const auto &p : particle_list) {
+    out << setw(5) << setprecision(3) << p.momentum().abs3() << p.type().name();
+  }
+  return out << ']';
+}
 
 }  // namespace Smash

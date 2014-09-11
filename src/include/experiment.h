@@ -14,7 +14,6 @@
 #include <vector>
 
 #include "chrono.h"
-#include "crosssections.h"
 #include "decayactionsfinder.h"
 #include "experimentparameters.h"
 #include "forwarddeclarations.h"
@@ -60,7 +59,7 @@ class ExperimentBase {
    * GENERAL:
    * --------
    */
-  // !!USER:Input
+  // Userguide {
   /**
    * \if user
    * \page input_general_ Input Section General
@@ -111,7 +110,7 @@ class ExperimentBase {
    *
    * `decaymodes:` a list of processes used in simulation
    */
-  // !!/USER:Input
+  // } Userguide
   static std::unique_ptr<ExperimentBase> create(Configuration config);
 
   /**
@@ -128,6 +127,7 @@ class ExperimentBase {
   virtual void set_outputs(OutputsList &&output_list) = 0;
 
   /**
+   * \ingroup exception
    * Exception class that is thrown if an invalid modus is requested from the
    * Experiment factory.
    */
@@ -135,6 +135,11 @@ class ExperimentBase {
     using std::invalid_argument::invalid_argument;
   };
 };
+
+template <typename Modus>
+class Experiment;
+template <typename Modus>
+std::ostream &operator<<(std::ostream &out, const Experiment<Modus> &e);
 
 /**
  * The main class, where the simulation of an experiment is executed.
@@ -235,13 +240,6 @@ class Experiment : public ExperimentBase {
    */
   OutputsList outputs_;
 
-  /**
-   * ?
-   *
-   * \todo CrossSections needs a rename?
-   */
-  CrossSections cross_sections_;
-
   /// The object that finds decays
   DecayActionsFinder decay_finder_;
   /// The object that finds scatterings
@@ -280,8 +278,13 @@ class Experiment : public ExperimentBase {
   QuantumNumbers conserved_initial_;
   /// system starting time of the simulation
   SystemTimePoint time_start_ = SystemClock::now();
-};
 
+  /**\ingroup logging
+   * Writes the initial state for the Experiment to the output stream.
+   * It automatically appends the output of the current Modus.
+   */
+  friend std::ostream &operator<<<>(std::ostream &out, const Experiment &e);
+};
 }  // namespace Smash
 
 #endif  // SRC_INCLUDE_EXPERIMENT_H_

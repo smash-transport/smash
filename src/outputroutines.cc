@@ -27,75 +27,11 @@
 
 namespace Smash {
 
-// !!USER:Output
+// Userguide {
 /** \page outputexample Output file format and Examples
  * There is output. This is explained here.
  */
-// !!/USER:Output
-
-/* print_line - output a visible seperator */
-static void print_line(void) {
-  int field_width = 80;
-
-  for (int i = 0; i < field_width; i++)
-    printf("-");
-  printf("\n");
-}
-
-/* print_header - title for each row */
-void print_header(void) {
-  print_line();
-  printf(" Time    <Ediff>       <pdiff>   <scattrate>"
-         "  <scatt>   <particles>  <timing>\n");
-  print_line();
-}
-
-
-/* print_measurements - console output during simulation */
-void print_measurements(const Particles &particles,
-                        const size_t scatterings_total,
-                        const size_t scatterings_this_interval,
-                        const QuantumNumbers& conserved_initial,
-                        const SystemTimePoint time_start,
-                        const float time) {
-  FourVector momentum_total(0, 0, 0, 0);
-  /* calculate elapsed time */
-  SystemTimeSpan elapsed_seconds = SystemClock::now() - time_start;
-
-  QuantumNumbers current_values(particles);
-  QuantumNumbers difference = conserved_initial - current_values;
-
-  if (likely(time > 0))
-    printf("%5.3f%13g%13g%13g%10zu%10zu%13g\n", time,
-           difference.momentum().x0(), difference.momentum().abs3(),
-           scatterings_total * 2 / (particles.size() * time),
-           scatterings_this_interval, particles.size(),
-           elapsed_seconds.count());
-  else
-    printf("%+5.2f%13g%13g%13g%10i%10zu%13g\n", time,
-           difference.momentum().x0(), difference.momentum().abs3(),
-           0.0, 0, particles.size(),
-           elapsed_seconds.count());
-}
-
-/* print_tail - output at the end of the simulation */
-void print_tail(const SystemTimePoint time_start,
-                const double &scattering_rate) {
-  SystemTimeSpan time = SystemClock::now() - time_start;
-  print_line();
-  /* print finishing time in human readable way:
-   * time < 10 min => seconds
-   * 10 min < time < 3 h => minutes
-   * time > 3h => hours
-   */
-  if (time.count() < 600)
-    printf("Time real: %g [s]\n", time.count());
-  else if (time.count() < 10800)
-    printf("Time real: %g [min]\n", time.count() / 60);
-  else
-    printf("Time real: %g [h]\n", time.count() / 3600);
-  printf("Final scattering rate: %g [fm-1]\n", scattering_rate);
-}
+// } Userguide
 
 /* printd_momenta - print debug data of the specific particle with message */
 void printd_momenta(const char *message __attribute__((unused)),

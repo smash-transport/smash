@@ -11,15 +11,22 @@
 
 #include "forwarddeclarations.h"
 #include "nucleus.h"
+#include "deformednucleus.h"
 #include "pdgcode.h"
+
+#include <cstring>
+#include <memory>
+#include <utility>
 
 namespace Smash {
 
 struct ExperimentParameters;
 
-/** NucleusModus: Provides a modus for colliding nuclei.
+/**
+ * \ingroup modus
+ * NucleusModus: Provides a modus for colliding nuclei.
  *
- * To use this modus, chose
+ * To use this modus, choose
  * \code
  * General:
  *      MODUS: Nucleus
@@ -34,23 +41,26 @@ struct ExperimentParameters;
  * Modi:Nucleus:
  * -------------
  */
-// !!USER:Input
+// Userguide {
 /**
  * \if user
  * \page input_modi_nucleus_ Input Section Modi:Nucleus
  * \endif
  *
- * `SQRTSNN:` Defines the energy of the collision as center-of-mass
+ * Possible Incident Energies:
+ * \li `SQRTSNN:` Defines the energy of the collision as center-of-mass
  * energy in the collision of one participant each from both nuclei.
  * Since not all participants have the same mass, and hence
  * \f$\sqrt{s_{\rm NN}}\f$ is different for \f$NN\f$ = proton+proton and
  * \f$NN\f$=neutron+neutron, you can specify which \f$NN\f$-pair you
- * want this to refer to with `SQRTS_N`
+ * want this to refer to with `SQRTS_REPS`. This expects a vector of two
+ * PDG Codes, e.g. `SQRTS_N: [2212, 2212]` for proton-proton.
  *
- * `SQRTS_N:` The "N" that's used for `SQRTSNN`. Expects a vector of two
- * PDG Codes, e.g. `SQRTS_N: [2212, 2212]` for proton-proton (that's the
- * default behaviour). The important part here is which mass is used for
- * the calculation \f$\sqrt{s_{\rm NN}} \rightarrow \beta\f$.
+ * \li `E_LAB:` Defines the energy of the collision by the initial energy of
+ * the projectile nucleus.  This assumes the target nucleus is at rest.
+ *
+ * \li `P_LAB:` Defines the energy of the collision by the initial momentum
+ * of the projectile nucleus.  This assumes the target nucleus is at rest.
  *
  * `Projectile:` Section for projectile nucleus. The projectile will
  * start at \f$z < 0\f$ and fly in positive \f$z\f$-direction, at \f$x
@@ -59,6 +69,10 @@ struct ExperimentParameters;
  * `Target:` Section for target nucleus. The target will start at \f$z
  * > 0\f$ and fly in negative \f$z\f$-direction, at \f$x \le 0\f$.
  *
+ * `CALCULATION FRAME:` The frame in which the collision is calculated.
+ * Options are the center of velocity (1, default), the center of mass (2),
+ * and the fixed target (3). Set the number to specify the desired frame.
+ *
  * `Projectile:`/`Target:` options:
  * \li `PARTICLES:` A map in which the keys are PDG codes and the
  * values are number of particles with that PDG code that should be in
@@ -66,13 +80,17 @@ struct ExperimentParameters;
  * lead-208 nucleus (82 protons and 126 neutrons = 208 nucleons), and
  * `PARTICLES: {2212: 1, 2112: 1, 3122: 1}` for Hyper-Triton (one
  * proton, one neutron and one Lambda).
- * \li `DIFFUSIVENESS:` The diffusiveness used in the Woods-Saxon
- * distribution for this nucleus.
- * 0 means a hard sphere.
+ * \li `DEFORMED:` Whether to construct nuclei using the nucleus class
+ * or the deformed nucleus class (true=deformednucleus/false=nucleus).
+ * \li `AUTOMATIC:` Whether or not to use default values based on the
+ * current nucleus atomic number (true/false).
+ * \li `Additional Woods-Saxon Parameters: ` There are also many other
+ * parameters for specifying the shape of the Woods-Saxon distribution,
+ * and other nucleus specific properties. See NUCLEUS.CC and
+ * DEFORMEDNUCLEUS.CC for more on these choices.
  *
  * `Impact:` A section for the impact parameter (= distance of the two
  * straight lines that the center of masses of the nuclei travel on).
- *
  * \li `VALUE: `fixed value for the impact parameter. No other \a
  * Impact: directive is looked at.
  * \li `SAMPLE:` if `uniform`, use uniform sampling of the impact
@@ -93,7 +111,7 @@ struct ExperimentParameters;
  * `INITIAL_DISTANCE:` The initial distance of the two nuclei. That
  * means \f$z_{\rm min}^{\rm target} - z_{\rm max}^{\rm projectile}\f$.
  **/
- // !!/USER:Input
+ // } Userguide
 class NucleusModus : public ModusDefault {
  public:
   /** Constructor
@@ -110,15 +128,16 @@ class NucleusModus : public ModusDefault {
    */
   void print_startup();
 
-  /** creates initial conditions from the particles.
+  /** Creates initial conditions from the particles.
    *
    * In particular, it initializes the nuclei.
    */
   float initial_conditions(Particles *particles,
                           const ExperimentParameters &parameters);
 
+  /// \ingroup exception
   /// Thrown when either \a projectile_ or \a target_ nuclei are empty.
-    struct NucleusEmpty : public ModusDefault::BadInput {
+  struct NucleusEmpty : public ModusDefault::BadInput {
     using ModusDefault::BadInput::BadInput;
   };
 
@@ -128,29 +147,16 @@ class NucleusModus : public ModusDefault {
    * The object that comes from negative z-values at positive x-values
    * with positive velocity.
    **/
-  Nucleus projectile_;
+  std::unique_ptr<Nucleus> projectile_;
   /** Target.
    *
    * The object that comes from positive z-values at negative x-values
    * with negative velocity. In fixed target experiments, the target is
    * at rest.
    **/
-  Nucleus target_;
-  /** Center-of-mass energy of the individual nucleon-nucleon
-   * collisions.
-   *
-   * Note that \f$\sqrt{s}\f$ is different for neutron-neutron and
-   * proton-proton collisions (because of the different masses).
-   * Therefore, pdg_sNN_1_ and pdg_sNN_2_ are needed to specify which
-   * two particles' collisions have this \f$\sqrt{s}\f$. (They each
-   * specify the PDG code of the particle species that we want to use
-   * for the definition of \f$\sqrt{s}\f$).
-   **/
-  float sqrt_s_NN_;
-  /// \see sqrt_s_NN_
-  PdgCode pdg_sNN_1_ = PdgCode(0x2212);
-  /// \see sqrt_s_NN_
-  PdgCode pdg_sNN_2_ = PdgCode(0x2212);
+  std::unique_ptr<Nucleus> target_;
+  // Center-of-mass energy of the nucleus-nucleus collision.
+  float total_s_;
   /** impact parameter
    *
    * The nuclei projectile_ and target_ will be shifted along the x axis
@@ -171,7 +177,7 @@ class NucleusModus : public ModusDefault {
    * Note that max less than min also works fine.
    *
    **/
-  void sample_impact(const bool s, const float min, const float max);
+  void sample_impact(bool s, float min, float max);
   /** initial z displacement of nuclei
    *
    * each nucleus is shifted so that
@@ -179,6 +185,24 @@ class NucleusModus : public ModusDefault {
    * \f$\pm\f$ this value.
    **/
   double initial_z_displacement_ = 1.0;
+  // Reference frame for the system.
+  // 1 = Center of velocity
+  // 2 = Center of mass
+  // 3 = Fixed target
+  int frame_ = 1;
+  // Get the frame dependent velocity for each nucleus, using
+  // the current reference frame. \see frame_
+  //
+  // @param s The total mandelstam S of the system
+  // @param m1 The mass of the projectile.
+  // @param m2 The mass of the target.
+  // @return < v1, v2 >
+  std::pair<double, double> get_velocities(float mandelstam_s, float m1, float m2);
+
+  /**\ingroup logging
+   * Writes the initial state for the NucleusModus to the output stream.
+   */
+  friend std::ostream &operator<<(std::ostream &, const NucleusModus &);
 };
 
 }  // namespace Smash

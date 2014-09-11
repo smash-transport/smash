@@ -7,29 +7,19 @@
 #ifndef SRC_INCLUDE_OUTPUTROUTINES_H_
 #define SRC_INCLUDE_OUTPUTROUTINES_H_
 
-#include <list>
-
-#include "chrono.h"
 #include "forwarddeclarations.h"
-#include "quantumnumbers.h"
+#include "logging.h"
 
 namespace Smash {
 
-/* console output */
-void print_startup(const ModusDefault &parameters);
-void print_header(void);
-void print_measurements(const Particles &particles,
-                        const size_t scatterings_total,
-                        const size_t scatterings_this_interval,
-                        const QuantumNumbers& conserved_initial,
-                        const SystemTimePoint time_start,
-                        const float time);
-void print_tail(const SystemTimePoint time_start,
-                const double &scattering_rate);
-
 /* Compile time debug info */
-#ifdef DEBUG
-# define printd printf
+#ifndef NDEBUG
+template <typename... Ts>
+void printd(const char *format, Ts &&... args) {
+  char tmp[512];
+  snprintf(tmp, 512, format, std::forward<Ts>(args)...);
+  logger<LogArea::Legacy>().debug(tmp);
+}
 #else
 # define printd(...) ((void)0)
 #endif

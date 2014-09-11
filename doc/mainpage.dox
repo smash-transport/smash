@@ -7,3 +7,12 @@ Quick Links:
 - Experiment
 
 */
+
+// define all the groups/moduls
+/// \defgroup unittest Unit Test Macros and Functions
+/// \defgroup output Output Classes
+/// \defgroup modus Experiment Modi Classes
+/// \defgroup action Action Classes
+/// \defgroup data Abstractions for data (particles, branches)
+/// \defgroup exception Exception Classes
+/// \defgroup logging Logging Classes and Functions

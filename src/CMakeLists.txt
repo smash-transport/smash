@@ -3,7 +3,7 @@ include(AddCompilerFlag)
 include(FindPkgConfig)
 
 include(GetGitRevisionDescription)
-get_git_head_revision(GIT_REFSPEC GIT_SHA1)
+git_describe(VERSION_MAJOR)
 
 find_package(GSL REQUIRED)
 find_package(Boost 1.49.0 REQUIRED COMPONENTS filesystem system)
@@ -37,6 +37,7 @@ set(SMASH_LIBRARIES ${SMASH_LIBRARIES}
    ${GSL_CBLAS_LIBRARY}
    ${Boost_LIBRARIES}
    ${YAML_LDFLAGS}
+   einhard
    )
 
 # list the source files
@@ -47,19 +48,19 @@ set(smash_src
         binaryoutputparticles.cc
         collidermodus.cc
         configuration.cc
-        cross-sections.cc
         decayaction.cc
         decayactionsfinder.cc
         decaymodes.cc
+        deformednucleus.cc
         distributions.cc
         experiment.cc
         fourvector.cc
+        inputfunctions.cc
+        logging.cc
         modusdefault.cc
         nucleus.cc
         nucleusmodus.cc
         oscaroutput.cc
-        oscarfullhistoryoutput.cc
-        oscarparticlelistoutput.cc
         outputroutines.cc
         parametrizations.cc
         particledata.cc
@@ -72,6 +73,8 @@ set(smash_src
         scatteraction.cc
         scatteractionsfinder.cc
         spheremodus.cc
+        stringfunctions.cc
+        threevector.cc
         vtkoutput.cc
         width.cc
         )

@@ -7,12 +7,15 @@
 #ifndef SRC_INCLUDE_BOXMODUS_H_
 #define SRC_INCLUDE_BOXMODUS_H_
 
+#include <map>
 #include "modusdefault.h"
 #include "forwarddeclarations.h"
 
 namespace Smash {
 
-/** BoxModus: Provides a modus for infinite matter calculations
+/**
+ * \ingroup modus
+ * BoxModus: Provides a modus for infinite matter calculations
  *
  * Matter is confined in a cubical box. Depending on the initial
  * condition, particles are either reflected on the boundaries or
@@ -39,7 +42,7 @@ namespace Smash {
  * Modi:Box:
  * ---------
  */
-// !!USER:Input
+// Userguide {
 /**
  * \if user
  * \page input_modi_box_ Input Section Modi:Box
@@ -54,7 +57,7 @@ namespace Smash {
  *
  * `TEMPERATURE`: Temperature in the box in GeV.
  */
-// !!/USER:Input
+// } Userguide
 class BoxModus : public ModusDefault {
  public:
   /// Gathers all configuration variables for the Box.
@@ -110,6 +113,13 @@ class BoxModus : public ModusDefault {
   float number_density_initial_ = 0.f;
   /// initial time of the box
   const float start_time_ = 0.0f;
+  /// particle multiplicities at initialization
+  const std::map<PdgCode, int> init_multipl_;
+
+  /**\ingroup logging
+   * Writes the initial state for the Box to the output stream.
+   */
+  friend std::ostream &operator<<(std::ostream &, const BoxModus &);
 };
 
 }  // namespace Smash

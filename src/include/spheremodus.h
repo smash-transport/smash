@@ -16,7 +16,9 @@
 
 namespace Smash {
 
-/** SphereModus: Provides a modus for expanding matter calculations
+/**
+ * \ingroup modus
+ * SphereModus: Provides a modus for expanding matter calculations
 *
 *  Matter is put in a sphere of radius R with isotropic thermal momenta.
 *
@@ -41,7 +43,7 @@ namespace Smash {
 * Modi:Sphere:
 *--------
 */
-// !!USER:Input
+// Userguide {
 /**
 * \if user
 * \page input_modi_box_ Input Section Modi:Box
@@ -55,7 +57,7 @@ namespace Smash {
 *
 * `START_TIME`: Starting time of Sphere calculation.
 */
-// !!/USER:Input
+// } Userguide
 class SphereModus : public ModusDefault {
  public:
   /* default constructor with probable values */
@@ -80,6 +82,11 @@ class SphereModus : public ModusDefault {
   float sphere_temperature_;
   /// Starting time for the Sphere
   const float start_time_ = 0.0f;
+
+  /**\ingroup logging
+   * Writes the initial state for the Sphere to the output stream.
+   */
+  friend std::ostream &operator<<(std::ostream &, const SphereModus &);
 };
 }  // namespace Smash
 #endif  // SRC_INCLUDE_SPHEREMODUS_H_

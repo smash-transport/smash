@@ -20,6 +20,7 @@
 namespace Smash {
 
 /**
+ * \ingroup action
  * Action is the base class for a generic process that takes a number of
  * incoming particles and transforms them into any number of outgoing particles.
  * Currently such an action can be either a decay or a two-body collision
@@ -51,15 +52,21 @@ class Action {
   /** Add several new subprocesses at once.  */
   void add_processes(const ProcessBranchList &pv);
 
-  /** Actually perform the action, e.g. carry out a decay or scattering.  */
+  /**
+   * Actually perform the action, e.g. carry out a decay or scattering.
+   *
+   * This method does not do any sanity checks, but assumes that is_valid has
+   * been called to determine if the action is still valid.
+   */
   virtual void perform(Particles *particles, size_t &id_process) = 0;
 
   /**
    * Check whether the action still applies.
    *
    * It can happen that a different action removed the incoming_particles from
-   * the set of existing particles in the experiment. In this case this Action
-   * doesn't apply anymore.
+   * the set of existing particles in the experiment, or that the particle has
+   * scattered elastically in the meantime. In this case the Action doesn't
+   * apply anymore and should be discarded.
    */
   bool is_valid(const Particles &) const;
 
@@ -77,6 +84,7 @@ class Action {
   void check_conservation(const size_t &id_process) const;
 
   /**
+   * \ingroup exception
    * Thrown for example when ScatterAction is called to perform with a wrong
    * number of final-state particles or when the energy is too low to produce
    * the resonance.
@@ -103,22 +111,40 @@ class Action {
   ParticleList outgoing_particles_;
   /// determine the total energy in the center-of-mass frame
   virtual double sqrt_s() const = 0;
+
   /**
    * Decide for a particular final-state channel via Monte-Carlo
    * and return it as a list of particles that are only initialized
    * with their PDG code.
    */
   ParticleList choose_channel();
+
   /**
    * Sample final state momenta (and masses) in general X->2 process.
    *
    * \throws InvalidResonanceFormation
    */
-  void sample_cms_momenta(const double cms_energy);
+  void sample_cms_momenta();
+
+  /**
+   * \ingroup logging
+   * Writes information about this action to the \p out stream.
+   */
+  virtual void format_debug_output(std::ostream &out) const = 0;
+
+  /**
+   * \ingroup logging
+   * Dispatches formatting to the virtual Action::format_debug_output function.
+   */
+  friend std::ostream &operator<<(std::ostream &out, const Action &action) {
+    action.format_debug_output(out);
+    return out;
+  }
 };
 
 
 /**
+ * \ingroup action
  * DecayAction is a special action which takes one single particle in the
  * initial state and makes it decay into a number of daughter particles
  * (currently two or three).
@@ -148,6 +174,7 @@ class DecayAction : public Action {
   void perform(Particles *particles, size_t &id_process);
 
   /**
+   * \ingroup exception
    * Thrown when DecayAction is called to perform with 0 or more than 2
    * entries in outgoing_particles.
    */
@@ -158,6 +185,12 @@ class DecayAction : public Action {
  protected:
   /// determine the total energy in the center-of-mass frame
   double sqrt_s() const;
+
+  /**
+   * \ingroup logging
+   * Writes information about this decay action to the \p out stream.
+   */
+  void format_debug_output(std::ostream &out) const override;
 
  private:
 
@@ -180,6 +213,7 @@ class DecayAction : public Action {
 
 
 /**
+ * \ingroup action
  * ScatterAction is a special action which takes two incoming particles
  * and performs a scattering, producing one or more final-state particles.
  */
@@ -209,9 +243,48 @@ class ScatterAction : public Action {
    */
   void perform(Particles *particles, size_t &id_process);
 
+  /**
+   * Determine the elastic cross section for this collision. This routine
+   * by default just gives a constant cross section (corresponding to
+   * elast_par) but can be overriden in child classes for a different behavior.
+   *
+   * \param[in] elast_par Elastic cross section parameter from the input file.
+   * 
+   * \return A ProcessBranch object containing the cross section and
+   * final-state IDs.
+   */
+  virtual ProcessBranch elastic_cross_section(float elast_par);
+
+  /**
+  * Find all resonances that can be produced in a 2->1 collision of the two
+  * input particles and the production cross sections of these resonances.
+  *
+  * Given the data and type information of two colliding particles,
+  * create a list of possible resonance production processes
+  * and their cross sections.
+  *
+  * \return A list of processes with resonance in the final state.
+  * Each element in the list contains the type of the final-state particle
+  * and the cross section for that particular process.
+  */
+  virtual ProcessBranchList resonance_cross_sections();
+
+  /** Find all inelastic 2->2 processes for this reaction. */
+  virtual ProcessBranchList two_to_two_cross_sections() { return ProcessBranchList(); }
+
  protected:
-  /// determine the total energy in the center-of-mass frame
+  /// determine the Mandelstam s variable, s = (p_a + p_b)^2 = square of CMS energy
+  double mandelstam_s() const;
+  /// determine the total energy in the center-of-mass frame, i.e. sqrt of Mandelstam s
   double sqrt_s() const;
+  /// determine the squared momenta of the incoming particles in the center-of-mass system
+  double cm_momentum_squared() const;
+
+  /**
+   * \ingroup logging
+   * Writes information about this scatter action to the \p out stream.
+   */
+  void format_debug_output(std::ostream &out) const override;
 
  private:
   /// determine the velocity of the center-of-mass frame in the lab
@@ -232,6 +305,77 @@ class ScatterAction : public Action {
 };
 
 
+/**
+ * \ingroup action
+ * ScatterActionBaryonBaryon is a special ScatterAction which represents the
+ * scattering of two baryons.
+ */
+class ScatterActionBaryonBaryon : public ScatterAction {
+ public:
+  /* Inherit constructor. */
+  using ScatterAction::ScatterAction;
+  /**
+   * Determine the elastic cross section for a baryon-baryon collision.
+   * It is given by a parametrization of exp. data for NN collisions and is
+   * constant otherwise.
+   *
+   * \param[in] elast_par Elastic cross section parameter from the input file.
+   * 
+   * \return A ProcessBranch object containing the cross section and
+   * final-state IDs.
+   */
+  ProcessBranch elastic_cross_section(float elast_par) override;
+  /* There is no resonance formation out of two baryons: Return empty list. */
+  ProcessBranchList resonance_cross_sections() override {
+    return ProcessBranchList();
+  }
+  /** Find all inelastic 2->2 processes for this reaction. */
+  ProcessBranchList two_to_two_cross_sections() override;
+
+ protected:
+  /**
+   * \ingroup logging
+   * Writes information about this scatter action to the \p out stream.
+   */
+  void format_debug_output(std::ostream &out) const override;
+};
+
+/**
+ * \ingroup action
+ * ScatterActionBaryonMeson is a special ScatterAction which represents the
+ * scattering of a baryon and a meson.
+ */
+class ScatterActionBaryonMeson : public ScatterAction {
+ public:
+  /* Inherit constructor. */
+  using ScatterAction::ScatterAction;
+
+ protected:
+  /**
+   * \ingroup logging
+   * Writes information about this scatter action to the \p out stream.
+   */
+  void format_debug_output(std::ostream &out) const override;
+};
+
+/**
+ * \ingroup action
+ * ScatterActionMesonMeson is a special ScatterAction which represents the
+ * scattering of two mesons.
+ */
+class ScatterActionMesonMeson : public ScatterAction {
+ public:
+  /* Inherit constructor. */
+  using ScatterAction::ScatterAction;
+
+ protected:
+  /**
+   * \ingroup logging
+   * Writes information about this scatter action to the \p out stream.
+   */
+  void format_debug_output(std::ostream &out) const override;
+};
+
 using ActionPtr = std::unique_ptr<Action>;
 using ScatterActionPtr = std::unique_ptr<ScatterAction>;
 
@@ -245,6 +389,20 @@ inline std::vector<ActionPtr> &operator+=(std::vector<ActionPtr> &lhs,
   }
   return lhs;
 }
+
+/**
+ * \ingroup logging
+ * Convenience: dereferences the ActionPtr to Action.
+ */
+inline std::ostream &operator<<(std::ostream &out, const ActionPtr &action) {
+  return out << *action;
+}
+
+/**
+ * \ingroup logging
+ * Writes multiple actions to the \p out stream.
+ */
+std::ostream &operator<<(std::ostream &out, const ActionList &actions);
 
 }  // namespace Smash
 

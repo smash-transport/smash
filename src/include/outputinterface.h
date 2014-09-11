@@ -18,6 +18,8 @@
 namespace Smash {
 
 /**
+ * \ingroup output
+ *
  * \brief Abstraction of generic output
  * Any output should inherit this class. It provides virtual methods that will
  * be called at predefined moments:
@@ -49,7 +51,7 @@ class OutputInterface {
    * \param outgoing_particles   The list of particles after the Action was
    *                          performed.
    */
-  virtual void write_interaction(const ParticleList &incoming_particles,
+  virtual void at_interaction(const ParticleList &incoming_particles,
                                  const ParticleList &outgoing_particles) {
     SMASH_UNUSED(incoming_particles);
     SMASH_UNUSED(outgoing_particles);
@@ -58,7 +60,7 @@ class OutputInterface {
   /**
    * Output launched after every N'th timestep. N is controlled by an option.
    */
-  virtual void after_Nth_timestep(const Particles &, const int,
+  virtual void at_intermediate_time(const Particles &, const int,
                                   const Clock &) = 0;
 };
 

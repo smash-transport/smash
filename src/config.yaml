@@ -1,6 +1,19 @@
+Logging:
+  default: INFO
+  #Legacy: ALL
+  #Main: ALL
+  #Experiment: ALL
+  #Box: ALL
+  #Collider: ALL
+  #Nucleus: ALL
+  #Sphere: ALL
+  #ParticleType: ALL
+  #Action: ALL
+  #FindScatter: ALL
+
 General:
     # Modus decision
-    MODUS:         Sphere
+    MODUS:         Nucleus
 
     # temporal grid spacing
     DELTA_TIME:    0.01
@@ -65,6 +78,11 @@ Modi:
         # start time of simulation
         START_TIME:    0.0
 
+        INIT_MULTIPLICITIES:
+            221:    100
+            111:    200
+            2112:   20
+
     Sphere:
         # Sphere size
         RADIUS: 5.0
@@ -84,6 +102,7 @@ Modi:
 
         # center-of-mass energy in GeV
         SQRTS: 1.0
+
     Nucleus:
         # Definitions for the projectile:
         # Deuteron
@@ -91,14 +110,20 @@ Modi:
             PARTICLES: {2212: 1, 2112: 1}
             # very hard Woods-Saxon distribution.
             DIFFUSIVENESS: .001
+            AUTOMATIC: false
+            DEFORMED: false
         # Definitions for the target:
         # Lead
         Target:
             PARTICLES: {2212: 82, 2112: 126}
+            AUTOMATIC: true
+            DEFORMED: false
 
-        # what sqrt(s_NN) to use:
+        # Collision energy (E_LAB, P_LAB, SQRTSNN).
         SQRTSNN: 2
-        # which subsystem "NN" in sqrt(s_NN) refers to
-        # (two PDG IDs). The default is proton-proton; let's set it to
-        # neutron-neutron.
-        SQRTS_N: [2112, 2112]
+        # The representative particles (two PDG IDs) determining the
+        # subsystem "NN" in sqrt(s_NN). Let's try neutron-neutron.
+        SQRTS_REPS: [2112, 2112]
+        # The reference frame in which to do the calculation.
+        # (1 = center of velocity, 2 = center of mass, 3 = fixed target)
+        CALCULATION_FRAME: 1

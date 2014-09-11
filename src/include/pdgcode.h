@@ -18,7 +18,10 @@
 
 namespace Smash {
 
-/** PdgCode stores a Particle Data Group Particle Numbering Scheme
+/**
+ * \ingroup data
+ *
+ * PdgCode stores a Particle Data Group Particle Numbering Scheme
  * particle type number.
  *
  * \see http://pdg.lbl.gov/2013/reviews/rpp2012-rev-monte-carlo-numbering.pdf
@@ -89,6 +92,7 @@ namespace Smash {
 
 class PdgCode {
  public:
+  /// \ingroup exception
   /// thrown for invalid inputs
   struct InvalidPdgCode : public std::invalid_argument {
     using std::invalid_argument::invalid_argument;
@@ -660,6 +664,9 @@ class PdgCode {
 };
 
 std::istream& operator>>(std::istream& is, PdgCode& code);
+/**\ingroup logging
+ * Writes the textual representation of the PDG code to the output stream.
+ */
 std::ostream& operator<<(std::ostream& is, const PdgCode& code);
 
 }  // namespace SMASH
