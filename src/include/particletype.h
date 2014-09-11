@@ -179,7 +179,7 @@ class ParticleType {
 inline bool ParticleType::is_stable() const {
   /* We currently regard a particle type as stable if its on-shell width is
    * less than 10 keV. */
-  return width_<1E-5;
+  return width_ < 1E-5f;
 }
 
 }  // namespace Smash
