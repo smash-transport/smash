@@ -49,7 +49,7 @@ General:
     OUTPUT_INTERVAL:  1.0
 
     # initial random seed (auto-generated if negative)
-    RANDOMSEED:    -1
+    RANDOMSEED:    1
 
     # elastic cross section
     SIGMA:         10.0
