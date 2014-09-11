@@ -23,6 +23,8 @@ DecayActionsFinder::DecayActionsFinder(const ExperimentParameters &parameters)
 
 ActionList DecayActionsFinder::find_possible_actions(Particles *particles) const {
   ActionList actions;
+  actions.reserve(10);  // for short time steps this seems reasonable to expect
+                        // less than 10 decays in most time steps
 
   for (const auto &p : particles->data()) {
     if (p.type().is_stable()) {
