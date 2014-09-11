@@ -15,12 +15,14 @@
 #include <utility>
 #include <vector>
 
+#include "include/algorithms.h"
 #include "include/angles.h"
 #include "include/constants.h"
 #include "include/configuration.h"
 #include "include/distributions.h"
 #include "include/experimentparameters.h"
 #include "include/fourvector.h"
+#include "include/logging.h"
 #include "include/macros.h"
 #include "include/outputroutines.h"
 #include "include/particles.h"
@@ -53,6 +55,8 @@ std::ostream &operator<<(std::ostream &out, const SphereModus &m) {
 /* initial_conditions - sets particle data for @particles */
 float SphereModus::initial_conditions(Particles *particles,
   const ExperimentParameters& /*parameters*/) {
+  const auto &log = logger<LogArea::Sphere>(); 
+  FourVector momentum_total(0, 0, 0, 0);	  
   /* count number of stable types */
   int number_of_stable_types = 0;
   /* loop over all the particle types */
@@ -83,9 +87,10 @@ float SphereModus::initial_conditions(Particles *particles,
     momentum_radial = sample_momenta(this->sphere_temperature_,
                                      data.pole_mass());
     phitheta.distribute_isotropically();
-    printd("Particle %d radial momenta %g phi %g cos_theta %g\n", data.id(),
-           momentum_radial, phitheta.phi(), phitheta.costheta());
+    log.debug() << data << ", radial mom:" << field << momentum_radial << ", "
+                << phitheta;
     data.set_4momentum(data.pole_mass(), phitheta.threevec() * momentum_radial);
+    momentum_total += data.momentum();
     /* uniform sampling in a sphere with radius r */
     double position_radial;
     position_radial = cbrt(Random::canonical()) * radius_;
@@ -93,10 +98,23 @@ float SphereModus::initial_conditions(Particles *particles,
     pos_phitheta.distribute_isotropically();
     data.set_4position(FourVector(start_time_,
                                   pos_phitheta.threevec() * position_radial));
-    /* IC Debug checks */
-    printd_position(data);
-    printd_momenta(data);
+ }
+  /* Make total 3-momentum 0 */
+  for (ParticleData &data : particles->data()) {
+    data.set_4momentum(data.pole_mass(), data.momentum().threevec() -
+                       momentum_total.threevec()/particles->size());
   }
+
+  /* Recalculate total momentum */
+  momentum_total = FourVector(0, 0, 0, 0);
+  for (ParticleData &data : particles->data()) {
+    momentum_total += data.momentum();
+    /* IC: debug checks */
+    log.debug() << data;
+  }
+  /* allows to check energy conservation */
+  log.info() << "Sphere initial total 4-momentum [GeV]: "
+             << momentum_total;  
   return start_time_;
 }
 }  // namespace Smash

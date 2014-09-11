@@ -81,10 +81,7 @@ float BoxModus::initial_conditions(Particles *particles,
     /* Set COORDINATE SPACE distribution */
     ThreeVector pos{uniform_length(), uniform_length(), uniform_length()};
     data.set_4position(FourVector(start_time_, pos));
-
-    /* IC: debug checks */
-    log.debug() << data;
-  }
+ }
 
   /* Make total 3-momentum 0 */
   for (ParticleData &data : particles->data()) {
@@ -96,12 +93,12 @@ float BoxModus::initial_conditions(Particles *particles,
   momentum_total = FourVector(0, 0, 0, 0);
   for (ParticleData &data : particles->data()) {
     momentum_total += data.momentum();
+    /* IC: debug checks */
+    log.debug() << data;
   }
   /* allows to check energy conservation */
-  log.info() << "IC total 4-momentum [GeV]: "
-             << momentum_total;  // FIXME: for an info message the "IC" string
-                                 // is too cryptic.
-  return start_time_;
+  log.info() << "Box initial total 4-momentum [GeV]: "
+             << momentum_total;   return start_time_;
 }
 
 /* evolve - the core of the box, stepping forward in time */
