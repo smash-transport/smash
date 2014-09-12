@@ -140,7 +140,9 @@ Experiment<Modus>::Experiment(Configuration config)
   const auto &log = logger<LogArea::Experiment>();
   int64_t seed_ = config.take({"General", "RANDOMSEED"});
   if (seed_ < 0) {
-    seed_ = time(nullptr);
+    // Seed with a real random value, if available
+    std::random_device rd;
+    seed_ = rd();
   }
   Random::set_seed(seed_);
   log.info() << "Random number seed: " << seed_;

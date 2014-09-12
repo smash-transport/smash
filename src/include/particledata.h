@@ -41,6 +41,9 @@ class ParticleData {
   /// \copydoc PdgCode::is_hadron
   bool is_hadron() const { return type_->is_hadron(); }
 
+  /// \copydoc PdgCode::is_baryon
+  bool is_baryon() const { return pdgcode().is_baryon(); }
+
   /** Returns the particle's pole mass ("on-shell"). */
   float pole_mass() const { return type_->mass(); }
   /** Returns the particle's effective mass
@@ -64,6 +67,25 @@ class ParticleData {
   inline void set_3position(const ThreeVector &pos);
   /// get the velocity 3-vector
   inline ThreeVector velocity (void) const { return momentum_.threevec() / momentum_.x0(); }
+
+  /**
+   * Returns the inverse of the gamma factor from the current velocity of the
+   * particle.
+   *
+   * \f[\frac{1}{\gamma}=\sqrt{1-v^2}\f]
+   *
+   * This functions is more efficient than calculating the gamma factor from
+   * \ref velocity, since the \ref velocity function must execute three
+   * divisions (for every space component of the momentum vector).
+   */
+  double inverse_gamma() const {
+    return std::sqrt(1. -
+                     (momentum_.x1() * momentum_.x1() +
+                      momentum_.x2() * momentum_.x2() +
+                      momentum_.x3() * momentum_.x3()) /
+                         (momentum_.x0() * momentum_.x0()));
+  }
+
   /// do a Lorentz-boost
   inline void boost (const ThreeVector &v);
 

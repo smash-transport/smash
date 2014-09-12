@@ -54,6 +54,15 @@ class ProcessBranch {
   inline ProcessBranch(PdgCode p1, PdgCode p2, float w);
   /// Constructor with particle vector
   inline ProcessBranch(std::vector<PdgCode> pdg_list, float w);
+
+  /// Copying is disabled. Use std::move or create a new object.
+  ProcessBranch(const ProcessBranch &) = delete;
+
+  /// The move constructor efficiently moves the PDG list member.
+  ProcessBranch(ProcessBranch &&rhs)
+      : pdg_list_(std::move(rhs.pdg_list_)),
+        branch_weight_(rhs.branch_weight_) {}
+
   /// Add one particle to the list
   inline void add_particle(PdgCode particle_pdg);
   /**

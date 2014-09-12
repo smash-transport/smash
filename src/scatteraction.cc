@@ -9,13 +9,13 @@
 
 #include "include/action.h"
 
+#include "include/angles.h"
 #include "include/constants.h"
-#include "include/outputroutines.h"
+#include "include/logging.h"
+#include "include/parametrizations.h"
 #include "include/pdgcode.h"
 #include "include/random.h"
 #include "include/resonances.h"
-#include "include/angles.h"
-#include "include/parametrizations.h"
 
 namespace Smash {
 
@@ -26,23 +26,21 @@ ScatterAction::ScatterAction(const ParticleData &in_part1,
 
 
 void ScatterAction::perform(Particles *particles, size_t &id_process) {
+  const auto &log = logger<LogArea::ScatterAction>();
+
   /* Relevant particle IDs for the collision. */
   int id1 = incoming_particles_[0].id();
   int id2 = incoming_particles_[1].id();
 
-  printd("Process %zu particle %s<->%s colliding %d<->%d time %g\n",
-         id_process, incoming_particles_[0].type().name().c_str(),
-         incoming_particles_[1].type().name().c_str(), id1, id2,
-         incoming_particles_[0].position().x0());
-  printd_momenta("particle 1 momenta before", incoming_particles_[0]);
-  printd_momenta("particle 2 momenta before", incoming_particles_[1]);
+  log.debug("Process ", id_process, " particles:\n", incoming_particles_[0],
+            incoming_particles_[1]);
 
   /* Decide for a particular final state. */
   outgoing_particles_ = choose_channel();
 
   if (is_elastic()) {
     /* 2->2 elastic scattering */
-    printd("Process: Elastic collision.\n");
+    log.debug("Process: Elastic collision.");
 
     momenta_exchange();
 
@@ -54,7 +52,7 @@ void ScatterAction::perform(Particles *particles, size_t &id_process) {
     particles->data(id2) = outgoing_particles_[1];
   } else {
     /* resonance formation */
-    printd("Process: Resonance formation. ");
+    log.debug("Process: Resonance formation.");
 
     /* The starting point of resonance is between the two initial particles:
      * x_middle = (x_a + x_b) / 2   */
@@ -74,10 +72,7 @@ void ScatterAction::perform(Particles *particles, size_t &id_process) {
       // store the process id in the Particle data
       new_particle.set_id_process(id_process);
 
-      printd("Resonance %s with ID %i \n",
-             new_particle.type().name().c_str(), new_particle.id());
-      printd_momenta("momentum in comp frame", new_particle);
-      printd_position("position in comp frame", new_particle);
+      log.debug("Resonance: ", new_particle);
 
       new_particle.set_id(particles->add_data(new_particle));
     }
@@ -86,7 +81,7 @@ void ScatterAction::perform(Particles *particles, size_t &id_process) {
     particles->remove(id1);
     particles->remove(id2);
 
-    printd("Particle map has now %zu elements. \n", particles->size());
+    log.debug("Particle map now has ", particles->size(), " elements.");
   }
 
   check_conservation(id_process);
@@ -123,6 +118,7 @@ double ScatterAction::cm_momentum_squared() const {
 
 
 double ScatterAction::particle_distance() const {
+  const auto &log = logger<LogArea::ScatterAction>();
   // local copy of particles (since we need to boost them)
   ParticleData p1 = incoming_particles_[0];
   ParticleData p2 = incoming_particles_[1];
@@ -131,11 +127,9 @@ double ScatterAction::particle_distance() const {
   p1.boost(velocity);
   p2.boost(velocity);
   ThreeVector pos_diff = p1.position().threevec() - p2.position().threevec();
-  printd("Particle %d<->%d position difference: %g %g %g %g [fm]\n",
-         p1.id(), p2.id(), pos_diff.x1(), pos_diff.x2(), pos_diff.x3());
   ThreeVector mom_diff = p1.momentum().threevec() - p2.momentum().threevec();
-  printd("Particle %d<->%d momentum difference: %g %g %g %g [fm]\n",
-         p1.id(), p2.id(), mom_diff.x1(), mom_diff.x2(), mom_diff.x3());
+  log.debug("Particle ", incoming_particles_, " position difference [fm]: ",
+            pos_diff, ", momentum difference [GeV]: ", mom_diff);
   /* Zero momentum leads to infite distance. */
   if (fabs(mom_diff.sqr()) < really_small)
     return  pos_diff.sqr();
@@ -167,6 +161,7 @@ ProcessBranch ScatterAction::elastic_cross_section(float elast_par) {
 
 
 ProcessBranchList ScatterAction::resonance_cross_sections() {
+  const auto &log = logger<LogArea::ScatterAction>();
   ProcessBranchList resonance_process_list;
   ParticleType type_particle1 = incoming_particles_[0].type(),
                type_particle2 = incoming_particles_[1].type();
@@ -207,13 +202,9 @@ ProcessBranchList ScatterAction::resonance_cross_sections() {
       resonance_process_list.push_back(ProcessBranch(type_resonance.pdgcode(),
                                                      resonance_xsection));
 
-      printd("Found resonance %s (%s) with mass %f and width %f.\n",
-             type_resonance.pdgcode().string().c_str(),
-             type_resonance.name().c_str(),
-             type_resonance.mass(), type_resonance.width_at_pole());
-      printd("2->1 with original particles: %s %s Charges: %i %i \n",
-             type_particle1.name().c_str(), type_particle2.name().c_str(),
-             type_particle1.charge(), type_particle2.charge());
+      log.debug("Found resonance: ", type_resonance);
+      log.debug("2->1 with original particles: ", type_particle1,
+                type_particle2);
     }
   }
   return resonance_process_list;
@@ -221,6 +212,7 @@ ProcessBranchList ScatterAction::resonance_cross_sections() {
 
 
 void ScatterAction::momenta_exchange() {
+  const auto &log = logger<LogArea::ScatterAction>();
   outgoing_particles_[0] = incoming_particles_[0];
   outgoing_particles_[1] = incoming_particles_[1];
 
@@ -233,8 +225,8 @@ void ScatterAction::momenta_exchange() {
   p2->boost(velocity_CM);
 
   /* debug output */
-  printd_momenta("center of momenta 1", *p1);
-  printd_momenta("center of momenta 2", *p2);
+  log.debug("center of momenta 1", p1->momentum());
+  log.debug("center of momenta 2", p2->momentum());
 
   /* We are in the center of momentum,
      hence this is equal for both particles. */
@@ -245,8 +237,7 @@ void ScatterAction::momenta_exchange() {
    * of this process. */
   Angles phitheta;
   phitheta.distribute_isotropically();
-  printd("Random momentum: %g %g %g %g \n", momentum_radial, phitheta.phi(),
-        phitheta.costheta(), phitheta.sintheta());
+  log.debug("Random momentum: ", momentum_radial, " ", phitheta);
 
   /* Only direction of 3-momentum, not magnitude, changes in CM frame.
    * Thus particle energies remain the same (Lorentz boost will change them for
@@ -255,8 +246,8 @@ void ScatterAction::momenta_exchange() {
   p2->set_3momentum(-phitheta.threevec() * momentum_radial);
 
   /* debug output */
-  printd_momenta("exchanged momenta 1", *p1);
-  printd_momenta("exchanged momenta 2", *p2);
+  log.debug("exchanged momenta 1", p1->momentum());
+  log.debug("exchanged momenta 2", p2->momentum());
 
   /* Boost back. */
   p1->boost(-velocity_CM);
@@ -265,6 +256,7 @@ void ScatterAction::momenta_exchange() {
 
 
 void ScatterAction::resonance_formation() {
+  const auto &log = logger<LogArea::ScatterAction>();
 
   switch (outgoing_particles_.size()) {
   case 1:
@@ -273,11 +265,8 @@ void ScatterAction::resonance_formation() {
      */
     outgoing_particles_[0].set_4momentum(FourVector(sqrt_s(), 0., 0., 0.));
 
-    printd("Momentum of the new particle: %g %g %g %g \n",
-           outgoing_particles_[0].momentum().x0(),
-           outgoing_particles_[0].momentum().x1(),
-           outgoing_particles_[0].momentum().x2(),
-           outgoing_particles_[0].momentum().x3());
+    log.debug("Momentum of the new particle: ",
+              outgoing_particles_[0].momentum());
     break;
   case 2:
     /* 2 particles in final state: Sample the particle momenta. */
@@ -379,6 +368,7 @@ ProcessBranchList ScatterActionBaryonBaryon::NucNuc_to_NucRes (
                             const ParticleType &type_particle1,
                             const ParticleType &type_particle2) {
 
+  const auto &log = logger<LogArea::ScatterAction>();
   ProcessBranchList process_list;
   const double s = mandelstam_s();
 
@@ -432,16 +422,15 @@ ProcessBranchList ScatterActionBaryonBaryon::NucNuc_to_NucRes (
       * using the Breit-Wigner distribution as probability amplitude.
       * Integrate over the allowed resonance mass range. */
       IntegrandParameters params = {&type_resonance, second_type.mass(), s};
-      printd("Process: %s %s -> %s %s\n", type_particle1.name().c_str(),
-      type_particle2.name().c_str(), second_type.name().c_str(),
-      type_resonance.name().c_str());
-      printd("Limits: %g %g \n", lower_limit, upper_limit);
+      log.debug("Process: ", type_particle1, type_particle2," -> ",
+                second_type, type_resonance);
+      log.debug("Limits: ", lower_limit, upper_limit);
       double resonance_integral, integral_error;
       quadrature_1d(&spectral_function_integrand, &params,
                     lower_limit, upper_limit,
                     &resonance_integral, &integral_error);
-      printd("Integral value: %g Error: %g \n", resonance_integral,
-        integral_error);
+      log.debug("Integral value: ", resonance_integral,
+                " Error: ",integral_error);
 
       /* Cross section for 2->2 process with one resonance in final state.
        * Based on Eq. (46) in PhD thesis of J. Weil
@@ -454,12 +443,10 @@ ProcessBranchList ScatterActionBaryonBaryon::NucNuc_to_NucRes (
       if (xsection > really_small) {
         process_list.push_back(ProcessBranch(type_resonance.pdgcode(),
                                             second_type.pdgcode(), xsection));
-        printd("Found 2->2 creation process for resonance %s (%s).\n",
-              type_resonance.pdgcode().string().c_str(),
-              type_resonance.name().c_str());
-        printd("2->2 with original particles: %s %s Charges: %i %i \n",
-              type_particle1.name().c_str(), type_particle2.name().c_str(),
-              type_particle1.charge(), type_particle2.charge());
+        log.debug("Found 2->2 creation process for resonance ",
+                  type_resonance);
+        log.debug("2->2 with original particles: ",
+                  type_particle1, type_particle2);
       }
     }
   }
@@ -531,12 +518,11 @@ ProcessBranchList ScatterActionBaryonBaryon::NucRes_to_NucNuc (
       if (xsection > really_small) {
         process_list.push_back(ProcessBranch(nuc1.pdgcode(), nuc2.pdgcode(),
                                              xsection));
-        printd("Found 2->2 absorption process for resonance %s (%s).\n",
-              type_resonance->pdgcode().string().c_str(),
-              type_resonance->name().c_str());
-        printd("2->2 with original particles: %s %s Charges: %i %i \n",
-              type_particle1.name().c_str(), type_particle2.name().c_str(),
-              type_particle1.charge(), type_particle2.charge());
+        const auto &log = logger<LogArea::ScatterAction>();
+        log.debug("Found 2->2 absoption process for resonance ",
+                  type_resonance);
+        log.debug("2->2 with original particles: ",
+                  type_particle1, type_particle2);
       }
     }
   }

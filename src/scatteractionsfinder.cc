@@ -57,8 +57,6 @@ ScatterActionsFinder::check_collision(const ParticleData &data_a,
                                       const ParticleData &data_b) const {
   const auto &log = logger<LogArea::FindScatter>();
 
-  ScatterAction* act = nullptr;
-
   /* just collided with this particle */
   if (data_a.id_process() >= 0 && data_a.id_process() == data_b.id_process()) {
     log.debug("Skipping collided particles at time ", data_a.position().x0(),
@@ -69,17 +67,16 @@ ScatterActionsFinder::check_collision(const ParticleData &data_a,
   }
 
   /* check according timestep: positive and smaller */
-  const double time_until_collision = collision_time(data_a, data_b);
-  if (time_until_collision < 0.0 || time_until_collision >= dt_) {
+  const float time_until_collision = collision_time(data_a, data_b);
+  if (time_until_collision < 0.f || time_until_collision >= dt_) {
     return nullptr;
   }
 
   /* Create ScatterAction object. */
-  if (data_a.pdgcode().baryon_number() != 0 &&
-      data_b.pdgcode().baryon_number() != 0) {
+  ScatterAction *act = nullptr;
+  if (data_a.is_baryon() && data_b.is_baryon()) {
     act = new ScatterActionBaryonBaryon(data_a, data_b, time_until_collision);
-  } else if (data_a.pdgcode().baryon_number() != 0 ||
-             data_b.pdgcode().baryon_number() != 0) {
+  } else if (data_a.is_baryon() || data_b.is_baryon()) {
     act = new ScatterActionBaryonMeson(data_a, data_b, time_until_collision);
   } else {
     act = new ScatterActionMesonMeson(data_a, data_b, time_until_collision);

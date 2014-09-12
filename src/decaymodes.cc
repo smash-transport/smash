@@ -55,7 +55,7 @@ void DecayModes::add_mode(float ratio, int L, std::vector<PdgCode> pdg_list) {
   branch.set_weight(ratio);
   branch.set_angular_momentum(L);
   branch.set_particles(std::move(pdg_list));
-  decay_modes_.push_back(branch);
+  decay_modes_.emplace_back(std::move(branch));
 }
 
 void DecayModes::renormalize(float renormalization_constant) {
@@ -103,8 +103,6 @@ void DecayModes::load_decaymodes(const std::string &input) {
       logger<LogArea::DecayModes>().info("Particle ", pdgcode);
       decay_modes_to_add.renormalize(ratio_sum);
     }
-    /* Add the list of decay modes for this particle type */
-    decaymodes.insert(std::make_pair(pdgcode, decay_modes_to_add));
 
     if (pdgcode.has_antiparticle()) {
       /* Construct and add the list of decay modes for the antiparticle.  */
@@ -120,8 +118,11 @@ void DecayModes::load_decaymodes(const std::string &input) {
                                   list);
       }
       decaymodes.insert(std::make_pair(pdgcode.get_antiparticle(),
-                                       decay_modes_anti));
+                                       std::move(decay_modes_anti)));
     }
+
+    /* Add the list of decay modes for this particle type */
+    decaymodes.insert(std::make_pair(pdgcode, std::move(decay_modes_to_add)));
 
     /* Clean up the list for the next particle type */
     decay_modes_to_add.clear();

@@ -48,9 +48,9 @@ class Action {
   float weight() const;
 
   /** Add a new subprocess.  */
-  void add_process(const ProcessBranch &p);
+  void add_process(ProcessBranch p);
   /** Add several new subprocesses at once.  */
-  void add_processes(const ProcessBranchList &pv);
+  void add_processes(ProcessBranchList pv);
 
   /**
    * Actually perform the action, e.g. carry out a decay or scattering.
@@ -96,12 +96,6 @@ class Action {
  protected:
   /** List with data of incoming particles.  */
   ParticleList incoming_particles_;
-  /** time at which the action is supposed to be performed  */
-  float time_of_execution_;
-  /** list of possible subprocesses  */
-  std::vector<ProcessBranch> subprocesses_;
-  /** sum of all subprocess weights  */
-  float total_weight_;
   /**
    * Initially this stores only the PDG codes of final-state particles.
    *
@@ -109,6 +103,13 @@ class Action {
    * outgoing particles.
    */
   ParticleList outgoing_particles_;
+  /** list of possible subprocesses  */
+  std::vector<ProcessBranch> subprocesses_;
+  /** time at which the action is supposed to be performed  */
+  float time_of_execution_;
+  /** sum of all subprocess weights  */
+  float total_weight_;
+
   /// determine the total energy in the center-of-mass frame
   virtual double sqrt_s() const = 0;
 
@@ -171,7 +172,7 @@ class DecayAction : public Action {
    *
    * \throws InvalidDecay
    */
-  void perform(Particles *particles, size_t &id_process);
+  void perform(Particles *particles, size_t &id_process) override;
 
   /**
    * \ingroup exception
@@ -184,7 +185,7 @@ class DecayAction : public Action {
 
  protected:
   /// determine the total energy in the center-of-mass frame
-  double sqrt_s() const;
+  double sqrt_s() const override;
 
   /**
    * \ingroup logging
@@ -241,7 +242,7 @@ class ScatterAction : public Action {
    *
    * \throws InvalidResonanceFormation
    */
-  void perform(Particles *particles, size_t &id_process);
+  void perform(Particles *particles, size_t &id_process) override;
 
   /**
    * Determine the elastic cross section for this collision. This routine
@@ -276,7 +277,7 @@ class ScatterAction : public Action {
   /// determine the Mandelstam s variable, s = (p_a + p_b)^2 = square of CMS energy
   double mandelstam_s() const;
   /// determine the total energy in the center-of-mass frame, i.e. sqrt of Mandelstam s
-  double sqrt_s() const;
+  double sqrt_s() const override;
   /// determine the squared momenta of the incoming particles in the center-of-mass system
   double cm_momentum_squared() const;
 

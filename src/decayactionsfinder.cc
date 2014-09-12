@@ -23,17 +23,16 @@ DecayActionsFinder::DecayActionsFinder(const ExperimentParameters &parameters)
 
 ActionList DecayActionsFinder::find_possible_actions(const Particles &particles) const {
   ActionList actions;
+  actions.reserve(10);  // for short time steps this seems reasonable to expect
+                        // less than 10 decays in most time steps
 
   for (const auto &p : particles.data()) {
     if (p.type().is_stable()) {
       continue;      /* particle doesn't decay */
     }
 
-    /* local rest frame velocity */
-    FourVector velocity_lrf = FourVector(1., p.velocity());
     /* The clock goes slower in the rest frame of the resonance */
-    double inverse_gamma = sqrt(velocity_lrf.Dot(velocity_lrf));
-    double resonance_frame_timestep = dt_ * inverse_gamma;
+    double resonance_frame_timestep = dt_ * p.inverse_gamma();
 
     std::unique_ptr<DecayAction> act(new DecayAction(p));
     float width = act->weight();   // total decay width (mass-dependent)
