@@ -11,7 +11,7 @@
 
 #include "include/angles.h"
 #include "include/decaymodes.h"
-#include "include/outputroutines.h"
+#include "include/logging.h"
 #include "include/pdgcode.h"
 #include "include/resonances.h"
 
@@ -46,7 +46,7 @@ void DecayAction::one_to_three() {
   const ParticleType &outgoing1_type = outgoing1.type();
   const ParticleType &outgoing2_type = outgoing2.type();
 
-  printd("Note: Doing 1->3 decay!\n");
+  log.debug("Note: Doing 1->3 decay!");
 
   const double mass_a = outgoing0_type.mass();
   const double mass_b = outgoing1_type.mass();
@@ -59,8 +59,8 @@ void DecayAction::one_to_three() {
   const double s_bc_max = (mass_resonance - mass_a) * (mass_resonance - mass_a);
   const double s_bc_min = (mass_b + mass_c) * (mass_b + mass_c);
 
-  printd("s_ab limits: %g %g \n", s_ab_min, s_ab_max);
-  printd("s_bc limits: %g %g \n", s_bc_min, s_bc_max);
+  log.debug("s_ab limits: ", s_ab_min, " ", s_ab_max);
+  log.debug("s_bc limits: ", s_bc_min, " ", s_bc_max);
 
   /* randomly pick values for s_ab and s_bc
    * until the pair is within the Dalitz plot */
@@ -86,8 +86,8 @@ void DecayAction::one_to_three() {
                       std::sqrt(e_c_rest * e_c_rest - mass_c * mass_c));
   }
 
-  printd("s_ab: %g s_bc: %g min: %g max: %g\n", s_ab, s_bc, dalitz_bc_min,
-         dalitz_bc_max);
+  log.debug("s_ab: ", s_ab, " s_bc: ", s_bc, " min: ", dalitz_bc_min, " max: ",
+            dalitz_bc_max);
 
   /* Compute energy and momentum magnitude */
   const double energy_a =
