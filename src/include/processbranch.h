@@ -81,7 +81,7 @@ class ProcessBranch {
   /// Clear all information from the branch
   inline void clear(void);
   /// Return the particle list
-  inline std::vector<PdgCode> pdg_list(void) const;
+  const std::vector<PdgCode> &pdg_list() const { return pdg_list_; }
 
   /**
    * Return a list of ParticleData initialized with the ParticleType for the PDG
@@ -160,11 +160,6 @@ inline void ProcessBranch::set_weight(float process_weight) {
 inline void ProcessBranch::clear(void) {
   pdg_list_.clear();
   branch_weight_ = -1.0;
-}
-
-/// Return the particle list
-inline std::vector<PdgCode> ProcessBranch::pdg_list(void) const {
-  return pdg_list_;
 }
 
 /// Return the branch weight
