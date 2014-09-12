@@ -60,9 +60,12 @@ class Grid {
 
  public:
   template <typename T>
-  Grid(T &&all_particles){
+  Grid(const T &all_particles){
     const auto &log = logger<LogArea::Grid>();
-    assert(all_particles.begin() != all_particles.end());
+
+    const auto particle_count = all_particles.size();
+    assert(particle_count > 0);
+
     // intialize min and max position arrays with the position of the first
     // particle in the list
     const auto first = all_particles.begin()->position().threevec();
@@ -83,14 +86,24 @@ class Grid {
     // The number of cells is determined by the min and max coordinates where
     // particles are positioned and the maximal interaction length (which equals
     // the length of a cell).
+    // But don't let the number of cells exceed the actual number of particles.
+    // That would be overkill. Let max_cells³ ≤ particle_count (conversion to
+    // int truncates).
+    const int max_cells = std::cbrt(particle_count);
     for (std::size_t i = 0; i < number_of_cells_.size(); ++i) {
-      number_of_cells_[i] = std::ceil((max_position[i] - min_position_[i]) /
-                                      max_interaction_length[i]);
+      index_factor_[i] = 1.f / max_interaction_length[i];
+      number_of_cells_[i] =
+          std::ceil((max_position[i] - min_position_[i]) * index_factor_[i]);
+      if (number_of_cells_[i] > max_cells) {
+        number_of_cells_[i] = max_cells;
+        index_factor_[i] = (max_cells - 0.1f)  // -0.1 for safety margin
+                           / (max_position[i] - min_position_[i]);
+      }
     }
 
     log.debug("min: ", min_position_, "\nmax: ", max_position, "\ncells: ",
               number_of_cells_, "\ninteraction length: ",
-              max_interaction_length);
+              max_interaction_length, "\nindex_factor: ", index_factor_);
 
     // After the grid parameters are determined, we can start placing the
     // particles in cells.
@@ -287,15 +300,22 @@ class Grid {
 
   std::size_t make_index(const ThreeVector &position) {
     return make_index(
-        std::floor((static_cast<float>(position[0]) - min_position_[0]) /
-                   max_interaction_length[0]),
-        std::floor((static_cast<float>(position[1]) - min_position_[1]) /
-                   max_interaction_length[1]),
-        std::floor((static_cast<float>(position[2]) - min_position_[2]) /
-                   max_interaction_length[2]));
+        std::floor((static_cast<float>(position[0]) - min_position_[0]) *
+                   index_factor_[0]),
+        std::floor((static_cast<float>(position[1]) - min_position_[1]) *
+                   index_factor_[1]),
+        std::floor((static_cast<float>(position[2]) - min_position_[2]) *
+                   index_factor_[2]));
   }
 
   std::array<float, 3> min_position_;
+
+  /**
+   * This normally equals 1/max_interaction_length, but if the number of cells
+   * is reduced (because of low density) then this value is smaller.
+   */
+  std::array<float, 3> index_factor_;
+
   std::array<int, 3> number_of_cells_;
   std::vector<ParticleList> cells_;
 };
