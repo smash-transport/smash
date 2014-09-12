@@ -48,9 +48,9 @@ class Action {
   float weight() const;
 
   /** Add a new subprocess.  */
-  void add_process(const ProcessBranch &p);
+  void add_process(ProcessBranch p);
   /** Add several new subprocesses at once.  */
-  void add_processes(const ProcessBranchList &pv);
+  void add_processes(ProcessBranchList pv);
 
   /**
    * Actually perform the action, e.g. carry out a decay or scattering.

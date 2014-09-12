@@ -32,15 +32,23 @@ float Action::weight() const {
   return total_weight_;
 }
 
-void Action::add_process(const ProcessBranch &p) {
-  subprocesses_.push_back(p);
+void Action::add_process(ProcessBranch p) {
   total_weight_ += p.weight();
+  subprocesses_.emplace_back(std::move(p));
 }
 
-void Action::add_processes(const ProcessBranchList &pv) {
-  for (const auto &proc : pv) {
-    subprocesses_.push_back(proc);
-    total_weight_ += proc.weight();
+void Action::add_processes(ProcessBranchList pv) {
+  if (subprocesses_.empty()) {
+    subprocesses_ = std::move(pv);
+    for (auto &proc : subprocesses_) {
+      total_weight_ += proc.weight();
+    }
+  } else {
+    subprocesses_.reserve(subprocesses_.size() + pv.size());
+    for (auto &proc : pv) {
+      total_weight_ += proc.weight();
+      subprocesses_.emplace_back(std::move(proc));
+    }
   }
 }
 

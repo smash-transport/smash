@@ -132,8 +132,8 @@ double two_to_one_formation(const ParticleType &type_particle1,
     return 0.0;
 
   /* Check the decay modes of this resonance */
-  const std::vector<DecayBranch> decaymodes
-    = DecayModes::find(type_resonance.pdgcode()).decay_mode_list();
+  const std::vector<DecayBranch> &decaymodes =
+      DecayModes::find(type_resonance.pdgcode()).decay_mode_list();
   bool not_enough_energy = false;
   /* Detailed balance required: Formation only possible if
    * the resonance can decay back to these particles
