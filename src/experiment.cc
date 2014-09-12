@@ -270,7 +270,8 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
                                      // sorting and finally a single linear
                                      // iteration
 
-    Grid<GridOptions::Normal> grid(particles_.data());
+    Grid<GridOptions::Normal> grid(
+        ParticleList{particles_.data().begin(), particles_.data().end()});
     grid.iterate_cells([&](
         const ParticleList &search_list,  // a list of particles where each pair
                                           // needs to be tested for possible
