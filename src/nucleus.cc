@@ -232,6 +232,8 @@ float Nucleus::woods_saxon(float r) {
 
 void Nucleus::arrange_nucleons() {
   for (auto i = begin(); i != end(); i++) {
+    // Initialize momentum
+    i->set_4momentum(i->pole_mass(), 0.0, 0.0, 0.0);
     // Sampling the W.S., get the radial
     // position and solid angle for the nucleon.
     ThreeVector pos = distribute_nucleon();
