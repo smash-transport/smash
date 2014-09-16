@@ -508,11 +508,14 @@ ProcessBranchList ScatterActionBaryonBaryon::NucRes_to_NucNuc (
         continue;
       }
 
-      /* Cross section for 2->2 resonance absorption.
-       * See eqs. (B.6), (B.9) and (181) in the GiBUU review paper. */
+      /* Cross section for 2->2 resonance absorption, obtained via detailed
+       * balance from the inverse reaction.
+       * See eqs. (B.6), (B.9) and (181) in the GiBUU review paper.
+       * There is a symmetry factor 1/2 and a spin factor 2/(2S+1) involved,
+       * which combine to 1/(2S+1). */
       float xsection
-        = isospin_factor * isospin_factor
-          * p_cm_final / ( s * std::sqrt(cm_momentum_squared()))
+        = isospin_factor * isospin_factor * p_cm_final
+          / ((type_resonance->spin()+1) * s * std::sqrt(cm_momentum_squared()))
           * nn_to_resonance_matrix_element(s, *type_resonance, *type_nucleon);
 
       if (xsection > really_small) {
