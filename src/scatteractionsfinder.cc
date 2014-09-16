@@ -11,6 +11,7 @@
 
 #include "include/action.h"
 #include "include/constants.h"
+#include "include/cxx14compat.h"
 #include "include/experimentparameters.h"
 #include "include/logging.h"
 #include "include/macros.h"
@@ -73,13 +74,16 @@ ScatterActionsFinder::check_collision(const ParticleData &data_a,
   }
 
   /* Create ScatterAction object. */
-  ScatterAction *act = nullptr;
+  std::unique_ptr<ScatterAction> act;
   if (data_a.is_baryon() && data_b.is_baryon()) {
-    act = new ScatterActionBaryonBaryon(data_a, data_b, time_until_collision);
+    act = make_unique<ScatterActionBaryonBaryon>(data_a, data_b,
+                                                 time_until_collision);
   } else if (data_a.is_baryon() || data_b.is_baryon()) {
-    act = new ScatterActionBaryonMeson(data_a, data_b, time_until_collision);
+    act = make_unique<ScatterActionBaryonMeson>(data_a, data_b,
+                                                time_until_collision);
   } else {
-    act = new ScatterActionMesonMeson(data_a, data_b, time_until_collision);
+    act = make_unique<ScatterActionMesonMeson>(data_a, data_b,
+                                               time_until_collision);
   }
 
   /* Add various subprocesses.  */
@@ -94,15 +98,14 @@ ScatterActionsFinder::check_collision(const ParticleData &data_a,
     /* distance criteria according to cross_section */
     const double distance_squared = act->particle_distance();
     if (distance_squared >= act->weight() * fm2_mb * M_1_PI) {
-        delete act;
-        return nullptr;
-      }
-      log.debug("particle distance squared: ", distance_squared,
-                "\n    ", data_a,
-                "\n<-> ", data_b);
+      return nullptr;
+    }
+    log.debug("particle distance squared: ", distance_squared,
+              "\n    ", data_a,
+              "\n<-> ", data_b);
   }
 
-  return ActionPtr(act);
+  return std::move(act);
 }
 
 std::vector<ActionPtr> ScatterActionsFinder::find_possible_actions(

@@ -237,18 +237,20 @@ float ParticleType::total_width(const float m) const {
 
 ProcessBranchList ParticleType::get_partial_widths(const float m) const {
   float w = 0.;
-  ProcessBranchList partial;
   if (is_stable()) {
-    return partial;
+    return {};
   }
   /* Loop over decay modes and calculate all partial widths. */
-  for (const auto &mode : DecayModes::find(pdgcode()).decay_mode_list()) {
+  const auto &decay_mode_list = DecayModes::find(pdgcode()).decay_mode_list();
+  ProcessBranchList partial;
+  partial.reserve(decay_mode_list.size());
+  for (const auto &mode : decay_mode_list) {
     w = partial_width(m, mode);
     if (w > 0.) {
-      partial.push_back(ProcessBranch(mode.pdg_list(), w));
+      partial.emplace_back(mode.pdg_list(), w);
     }
   }
-  return partial;
+  return std::move(partial);
 }
 
 std::ostream &operator<<(std::ostream &out, const ParticleType &type) {
