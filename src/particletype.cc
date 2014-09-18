@@ -41,6 +41,7 @@ const ParticleTypeList ParticleType::list_nucleons() {
 
 const ParticleTypeList ParticleType::list_baryon_resonances() {
   ParticleTypeList list;
+  list.reserve(4);  // currently we have only the Delta (with four charge states)
 
   for (const ParticleType &type_resonance : ParticleType::list_all()) {
     /* Only loop over baryon resonances. */
