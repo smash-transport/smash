@@ -324,11 +324,11 @@ ProcessBranchList ScatterActionBaryonBaryon::two_to_two_cross_sections() {
   if (type_particle1.pdgcode().iso_multiplet() == 0x1112 &&
       type_particle2.pdgcode().iso_multiplet() == 0x1112) {
     /* Nucleon+Nucleon: find all resonance production channels */
-      process_list = NucNuc_to_NucRes (type_particle1, type_particle2);
+      process_list = nuc_nuc_to_nuc_res (type_particle1, type_particle2);
   } else if (type_particle1.pdgcode().iso_multiplet() == 0x1112 ||
              type_particle2.pdgcode().iso_multiplet() == 0x1112) {
     /* Nucleon+Resonance: absorption */
-    process_list = NucRes_to_NucNuc (type_particle1, type_particle2);
+    process_list = nuc_res_to_nuc_nuc (type_particle1, type_particle2);
   }
 
   return process_list;
@@ -364,7 +364,7 @@ static float nn_to_resonance_matrix_element(const double mandelstam_s,
 }
 
 
-ProcessBranchList ScatterActionBaryonBaryon::NucNuc_to_NucRes (
+ProcessBranchList ScatterActionBaryonBaryon::nuc_nuc_to_nuc_res (
                             const ParticleType &type_particle1,
                             const ParticleType &type_particle2) {
 
@@ -454,7 +454,7 @@ ProcessBranchList ScatterActionBaryonBaryon::NucNuc_to_NucRes (
 }
 
 
-ProcessBranchList ScatterActionBaryonBaryon::NucRes_to_NucNuc (
+ProcessBranchList ScatterActionBaryonBaryon::nuc_res_to_nuc_nuc (
                             const ParticleType &type_particle1,
                             const ParticleType &type_particle2) {
 
@@ -468,7 +468,7 @@ ProcessBranchList ScatterActionBaryonBaryon::NucRes_to_NucNuc (
     type_nucleon = &type_particle2;
     type_resonance = &type_particle1;
   } else {
-    throw std::runtime_error("Error: no nucleon found in NucRes_to_NucNuc!");
+    throw std::runtime_error("Error: no nucleon found in nuc_res_to_nuc_nuc!");
   }
 
   const double s = mandelstam_s();

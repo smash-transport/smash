@@ -36,14 +36,7 @@ const ParticleTypeList &ParticleType::list_all() {
 }
 
 const ParticleTypeList ParticleType::list_nucleons() {
-  ParticleType proton = find(0x2212);
-  ParticleType neutron = find(0x2112);
-
-  ParticleTypeList list;
-  list.push_back(proton);
-  list.push_back(neutron);
-
-  return list;
+  return {find(0x2212), find(0x2112)};
 }
 
 const ParticleTypeList ParticleType::list_baryon_resonances() {
