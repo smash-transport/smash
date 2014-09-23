@@ -13,7 +13,7 @@
 #include <cstdio>
 #include <cstdlib>
 
-#include "include/outputroutines.h"
+#include "include/logging.h"
 #include "include/random.h"
 
 namespace Smash {
@@ -37,7 +37,8 @@ double density_integrand(const double energy, const double momentum,
 
 /* sample_momenta - return thermal momenta */
 double sample_momenta(const double temperature, const double mass) {
-  printd("Sample momenta with mass %g and T %g\n", mass, temperature);
+  const auto &log = logger<LogArea::Distributions>();
+  log.debug("Sample momenta with mass ", mass, " and T ", temperature);
   /* Maxwell-Boltzmann average E <E>=3T + m * K_1(m/T) / K_2(m/T) */
   float energy_average = 3 * temperature
                            + mass * gsl_sf_bessel_K1(mass / temperature)

@@ -12,7 +12,7 @@
 #include "include/modusdefault.h"
 #include "include/constants.h"
 #include "include/experiment.h"
-#include "include/outputroutines.h"
+#include "include/logging.h"
 
 namespace Smash {
 
@@ -21,13 +21,13 @@ namespace Smash {
 void ModusDefault::propagate(Particles *particles,
                              const ExperimentParameters &parameters,
                              const OutputsList &) {
+  const auto &log = logger<LogArea::ModusDefault>();
   FourVector distance, position;
   for (ParticleData &data : particles->data()) {
     /* propagation for this time step */
     distance = FourVector(0.0,
                           data.velocity() * parameters.timestep_duration());
-    printd("Particle %d motion: %g %g %g %g\n", data.id(), distance.x0(),
-           distance.x1(), distance.x2(), distance.x3());
+    log.debug("Particle ", data, " motion: ", distance);
     position = data.position() + distance;
     position.set_x0(parameters.new_particle_time());
     data.set_4position(position);

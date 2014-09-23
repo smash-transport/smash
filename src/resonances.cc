@@ -23,10 +23,11 @@
 #include "include/decaymodes.h"
 #include "include/distributions.h"
 #include "include/fourvector.h"
+#include "include/logging.h"
 #include "include/macros.h"
-#include "include/outputroutines.h"
-#include "include/particles.h"
 #include "include/particledata.h"
+#include "include/particles.h"
+#include "include/particletype.h"
 #include "include/processbranch.h"
 #include "include/random.h"
 #include "include/width.h"
@@ -36,13 +37,14 @@ namespace Smash {
 
 double clebsch_gordan(const int j1, const int j2, const int j3,
                       const int m1, const int m2, const int m3) {
+  const auto &log = logger<LogArea::Resonances>();
   double wigner_3j =  gsl_sf_coupling_3j(j1, j2, j3, m1, m2, -m3);
   double result = 0.;
   if (std::abs(wigner_3j) > really_small)
     result = std::pow(-1, (j1-j2+m3)/2.) * std::sqrt(j3 + 1) * wigner_3j;
 
-  printd("CG: %g I1: %i I2: %i IR: %i iz1: %i iz2: %i izR: %i \n",
-         result, j1, j2, j3, m1, m2, m3);
+  log.debug("CG: ", result, " I1: ", j1, " I2: ", j2, " IR: ", j3, " iz1: ", m1,
+            " iz2: ", m2, " izR: ", m3);
 
   return result;
 }

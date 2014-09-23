@@ -15,7 +15,6 @@
 #include "include/experimentparameters.h"
 #include "include/logging.h"
 #include "include/macros.h"
-#include "include/outputroutines.h"
 #include "include/particles.h"
 #include "include/resonances.h"
 

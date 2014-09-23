@@ -13,7 +13,7 @@
 #include "../include/constants.h"
 #include "../include/particledata.h"
 #include "../include/pdgcode.h"
-#include "../include/outputroutines.h"
+#include "../include/logging.h"
 #include "../include/macros.h"
 #include "../include/action.h"
 #include "../include/scatteractionsfinder.h"
@@ -44,6 +44,7 @@ static ParticleData create_smashon_particle(int id = -1) {
 }
 
 TEST(everything) {
+  const einhard::Logger<> log(einhard::ALL);
   /* checks for geometric distance criteria */
   ParticleData particle_a = create_smashon_particle(0),
                particle_b = create_smashon_particle(1);
@@ -86,7 +87,7 @@ TEST(everything) {
   VERIFY(!(particles.size() != 2));
   int data_size = 0;
   for (const ParticleData &data : particles.data()) {
-    printd("id %d: pdg %s\n", data.id(), data.pdgcode().string().c_str());
+    log.debug("id ", data.id(), ": pdg ", data.pdgcode());
     SMASH_UNUSED(data);
     data_size++;
   }
@@ -97,7 +98,7 @@ TEST(everything) {
   /* check usage particle data */
   act = new ScatterAction(particles.data(0), particles.data(1), 0.);
   double distance_squared_2 = act->particle_distance();
-  printd("%g versus %g\n", distance_squared, distance_squared_2);
+  log.debug(distance_squared, " versus ", distance_squared_2);
   VERIFY(!(distance_squared_2 < 0.0));
   VERIFY(!(distance_squared_2 - distance_squared > really_small));
   delete act;

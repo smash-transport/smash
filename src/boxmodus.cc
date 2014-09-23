@@ -22,7 +22,6 @@
 #include "include/logging.h"
 #include "include/macros.h"
 #include "include/outputinterface.h"
-#include "include/outputroutines.h"
 #include "include/particles.h"
 #include "include/random.h"
 #include "include/threevector.h"

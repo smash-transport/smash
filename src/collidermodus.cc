@@ -15,7 +15,6 @@
 #include "include/configuration.h"
 #include "include/experimentparameters.h"
 #include "include/logging.h"
-#include "include/outputroutines.h"
 #include "include/particles.h"
 #include "include/random.h"
 

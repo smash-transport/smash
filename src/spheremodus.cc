@@ -21,8 +21,8 @@
 #include "include/distributions.h"
 #include "include/experimentparameters.h"
 #include "include/fourvector.h"
+#include "include/logging.h"
 #include "include/macros.h"
-#include "include/outputroutines.h"
 #include "include/particles.h"
 #include "include/random.h"
 #include "include/spheremodus.h"
@@ -53,6 +53,7 @@ std::ostream &operator<<(std::ostream &out, const SphereModus &m) {
 /* initial_conditions - sets particle data for @particles */
 float SphereModus::initial_conditions(Particles *particles,
   const ExperimentParameters& /*parameters*/) {
+  const auto &log = logger<LogArea::Sphere>();
   /* count number of stable types */
   int number_of_stable_types = 0;
   /* loop over all the particle types */
@@ -62,7 +63,7 @@ float SphereModus::initial_conditions(Particles *particles,
       continue;
     }
     number_of_stable_types = number_of_stable_types + 1;
-    printd("%s mass: %g [GeV]\n", type.name().c_str(), type.mass());
+    log.debug(type);
   }
 
   /* just produce equally many particles per type */
@@ -83,8 +84,8 @@ float SphereModus::initial_conditions(Particles *particles,
     momentum_radial = sample_momenta(this->sphere_temperature_,
                                      data.pole_mass());
     phitheta.distribute_isotropically();
-    printd("Particle %d radial momenta %g phi %g cos_theta %g\n", data.id(),
-           momentum_radial, phitheta.phi(), phitheta.costheta());
+    log.debug("Particle ", data.id(), " radial momenta ", momentum_radial, ' ',
+              phitheta);
     data.set_4momentum(data.pole_mass(), phitheta.threevec() * momentum_radial);
     /* uniform sampling in a sphere with radius r */
     double position_radial;
@@ -94,8 +95,7 @@ float SphereModus::initial_conditions(Particles *particles,
     data.set_4position(FourVector(start_time_,
                                   pos_phitheta.threevec() * position_radial));
     /* IC Debug checks */
-    printd_position(data);
-    printd_momenta(data);
+    log.debug(data);
   }
   return start_time_;
 }
