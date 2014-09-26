@@ -11,6 +11,7 @@
 #define SRC_INCLUDE_GRID_H_
 
 #include <algorithm>
+#include <stdexcept>
 #include <vector>
 #include <array>
 #include <assert.h>
@@ -92,8 +93,9 @@ class Grid {
     const int max_cells = std::cbrt(particle_count);
     for (std::size_t i = 0; i < number_of_cells_.size(); ++i) {
       index_factor_[i] = 1.f / max_interaction_length[i];
-      number_of_cells_[i] =
-          std::ceil((max_position[i] - min_position_[i]) * index_factor_[i]);
+      number_of_cells_[i] = std::max(
+          1, static_cast<int>(std::ceil((max_position[i] - min_position_[i]) *
+                                        index_factor_[i])));
       if (number_of_cells_[i] > max_cells) {
         number_of_cells_[i] = max_cells;
         index_factor_[i] = (max_cells - 0.1f)  // -0.1 for safety margin
@@ -112,7 +114,16 @@ class Grid {
 
     for (const auto &p : all_particles) {
       const auto idx = make_index(p.position().threevec());
-      assert(idx < cells_.size());
+      if (idx >= cells_.size()) {
+        log.fatal(source_location,
+            "\nan out-of-bounds access would be necessary for the particle ", p,
+            "\nfor a grid with the following parameters:\nmin: ", min_position_,
+            "\nmax: ", max_position, "\ncells: ", number_of_cells_,
+            "\ninteraction length: ", max_interaction_length,
+            "\nindex_factor: ", index_factor_, "\ncells_.size: ", cells_.size(),
+            "\nrequested index: ", idx);
+        throw std::runtime_error("out-of-bounds grid access on construction");
+      }
       cells_[idx].push_back(p);
     }
     log.debug(cells_);
