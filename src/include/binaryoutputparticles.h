@@ -22,13 +22,17 @@ namespace Smash {
 /**
  * \ingroup output
  *
- * \brief SMASH output to binary file
- * ----------------------------------------------------------------------------
- * SMASH output to binary file is similar to OSCAR output,
- * but it is stored in a binary format. Such format is faster
- * to read and write, but may be architecture dependent.
+ * \brief Saves snapshots of SMASH particles to binary file.
  *
- * Binary file format is documented on the wiki in User Guide section
+ * This class writes a snapshot of all simulated particles at some
+ * fixed moments to the binary output file. These fixed moments can
+ * be: event start, event end, every next time interval \f$\Delta t \f$.
+ * Writing (or not writing) output at these moments is controlled by options.
+ * Time interval \f$\Delta t \f$ is also regulated by an option.
+ * Output file is binary and has a block structure.
+ *
+ * Details of the output format can be found 
+ * on the wiki in User Guide section, look for binary output.
  **/
 class BinaryOutputParticles : public BinaryOutputBase {
  public:
