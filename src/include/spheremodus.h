@@ -45,14 +45,9 @@ class SphereModus : public ModusDefault {
   /* default constructor with probable values */
   explicit SphereModus(Configuration modus_config,
                        const ExperimentParameters &parameters);
-  /** Prints some information about the initialization of SphereModus
-   *
-   * \see ModusDefalt::print_startup()
+
+  /** creates initial conditions for the particles.
    */
-  void print_startup();  // TODO(mkretz): needs to be discoverable from an
-    // outside "printer"
-    /** creates initial conditions for the particles.
-     */
   float initial_conditions(Particles *particles,
                           const ExperimentParameters &parameters);
  private:

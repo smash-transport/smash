@@ -129,12 +129,6 @@ class NucleusModus : public ModusDefault {
   explicit NucleusModus(Configuration modus_config,
            const ExperimentParameters &parameters);
 
-  /** Prints some information about the initialization of NucleusModus.
-   *
-   * \see ModusDefalt::print_startup()
-   */
-  void print_startup();
-
   /** Creates initial conditions from the particles.
    *
    * In particular, it initializes the nuclei.
