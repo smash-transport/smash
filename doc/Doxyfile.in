@@ -663,7 +663,7 @@ INPUT                  = \
                          doc/ \
                          src/include/ \
                          src/tests/unittest.h \
-                         src/
+                         src/ \
                          3rdparty/einhard/einhard.hpp
 
 # This tag can be used to specify the character encoding of the source files
