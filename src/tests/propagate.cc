@@ -8,12 +8,13 @@
  */
 
 #include "unittest.h"
-#include "../include/modusdefault.h"
 #include "../include/boxmodus.h"
 #include "../include/collidermodus.h"
-#include "../include/nucleusmodus.h"
-#include "../include/experiment.h"
 #include "../include/configuration.h"
+#include "../include/experiment.h"
+#include "../include/modusdefault.h"
+#include "../include/nucleusmodus.h"
+#include "../include/spheremodus.h"
 
 #include <boost/filesystem.hpp>
 
@@ -198,29 +199,33 @@ TEST(propagate_nucleus) {
   COMPARE(Pdef.data(5).position(), Pnuc.data(5).position());
 }
 
-// TEST(propagate_sphere) {
-//   ModusDefault m;
-//   Configuration conf(TEST_CONFIG_PATH);
-//   conf["Modi"]["Sphere"]["..."] = 1.0;
-//   ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};
-//   SphereModus s(conf["Modi"], param);
-//   Particles Pdef{""}, Psph{""};
-//   create_particle_list(Pdef);
-//   create_particle_list(Psph);
-//   OutputsList out;
-//   m.propagate(&Pdef, param, out);
-//   s.propagate(&Psph, param, out);
-//   // Sphere and Default modus should do the same everywhere (?):
-//   COMPARE(Pdef.data(0).momentum(), Psph.data(0).momentum());
-//   COMPARE(Pdef.data(1).momentum(), Psph.data(1).momentum());
-//   COMPARE(Pdef.data(2).momentum(), Psph.data(2).momentum());
-//   COMPARE(Pdef.data(3).momentum(), Psph.data(3).momentum());
-//   COMPARE(Pdef.data(4).momentum(), Psph.data(4).momentum());
-//   COMPARE(Pdef.data(5).momentum(), Psph.data(5).momentum());
-//   COMPARE(Pdef.data(0).position(), Psph.data(0).position());
-//   COMPARE(Pdef.data(1).position(), Psph.data(1).position());
-//   COMPARE(Pdef.data(2).position(), Psph.data(2).position());
-//   COMPARE(Pdef.data(3).position(), Psph.data(3).position());
-//   COMPARE(Pdef.data(4).position(), Psph.data(4).position());
-//   COMPARE(Pdef.data(5).position(), Psph.data(5).position());
-// }
+TEST(propagate_sphere) {
+   ModusDefault m;
+   Configuration conf(TEST_CONFIG_PATH);
+   conf["Modi"]["Sphere"]["RADIUS"] = 10;
+   conf["Modi"]["Sphere"]["SPHERETEMPERATURE"] = 0.2;
+   conf["Modi"]["Sphere"]["START_TIME"] = 0.0;
+   conf.take({"Modi", "Sphere", "INIT_MULTIPLICITIES"});
+   conf["Modi"]["Sphere"]["INIT_MULTIPLICITIES"]["661"] = 500;
+   ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};
+   SphereModus s(conf["Modi"], param);
+   Particles Pdef, Psph;
+   create_particle_list(Pdef);
+   create_particle_list(Psph);
+   OutputsList out;
+   m.propagate(&Pdef, param, out);
+   s.propagate(&Psph, param, out);
+   // Sphere and Default modus should do the same everywhere:
+   COMPARE(Pdef.data(0).momentum(), Psph.data(0).momentum());
+   COMPARE(Pdef.data(1).momentum(), Psph.data(1).momentum());
+   COMPARE(Pdef.data(2).momentum(), Psph.data(2).momentum());
+   COMPARE(Pdef.data(3).momentum(), Psph.data(3).momentum());
+   COMPARE(Pdef.data(4).momentum(), Psph.data(4).momentum());
+   COMPARE(Pdef.data(5).momentum(), Psph.data(5).momentum());
+   COMPARE(Pdef.data(0).position(), Psph.data(0).position());
+   COMPARE(Pdef.data(1).position(), Psph.data(1).position());
+   COMPARE(Pdef.data(2).position(), Psph.data(2).position());
+   COMPARE(Pdef.data(3).position(), Psph.data(3).position());
+   COMPARE(Pdef.data(4).position(), Psph.data(4).position());
+   COMPARE(Pdef.data(5).position(), Psph.data(5).position());
+}
