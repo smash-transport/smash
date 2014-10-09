@@ -177,8 +177,8 @@ TEST(initialize_sphere) {
   conf["Modi"]["Sphere"]["RADIUS"] = 10;
   conf["Modi"]["Sphere"]["SPHERETEMPERATURE"] = 0.2;
   conf["Modi"]["Sphere"]["START_TIME"] = 0.0;
-  conf.take({"Modi", "Box", "INIT_MULTIPLICITIES"});
-  conf["Modi"]["Box"]["INIT_MULTIPLICITIES"]["661"] = 500;
+  conf.take({"Modi", "Sphere", "INIT_MULTIPLICITIES"});
+  conf["Modi"]["Sphere"]["INIT_MULTIPLICITIES"]["661"] = 500;
   ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};
   SphereModus s(conf["Modi"], param);
   Particles P;
