@@ -179,6 +179,16 @@ std::ostream &operator<<(std::ostream &out, const Experiment<Modus> &e) {
  * \key NEVENTS: \n
  * Number of events to calculate.
  *
+ * \page input_collision_term_ Collision_Term
+ * \key Decays: \n
+ * This boolean value determines whether any decays are performed.
+ * Setting it to \c false will disable all decays.
+ * Default: \c true.
+ *
+ * \key Collisions: \n
+ * This boolean value determines whether any collisions are performed.
+ * Setting it to \c false will disable all collisions.
+ * Default: \c true.
  */
 template <typename Modus>
 Experiment<Modus>::Experiment(Configuration config)
