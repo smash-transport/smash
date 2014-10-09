@@ -23,7 +23,96 @@
 #include "include/random.h"
 
 namespace Smash {
+    
+/*!\Userguide
+ * \page input_modi_nucleus_ Nucleus
+ *
+ * Possible Incident Energies, only one can be given:
+ * \key SQRTSNN (float, optional, no default): \n
+ * Defines the energy of the collision as center-of-mass
+ * energy in the collision of one participant each from both nuclei.
+ * Optional: Since not all participants have the same mass, and hence
+ * \f$\sqrt{s_{\rm NN}}\f$ is different for \f$NN\f$ = proton+proton and
+ * \f$NN\f$=neutron+neutron, you can specify which \f$NN\f$-pair you
+ * want this to refer to with `SQRTS_REPS`. This expects a vector of two
+ * PDG Codes, e.g. `SQRTS_N: [2212, 2212]` for proton-proton.
+ * Default is the average nucleon mass per nucleus.
+ *
+ * \key E_LAB (float, optional, no default): \n
+ * Defines the energy of the collision by the initial energy in GeV? of
+ * the projectile nucleus.  This assumes the target nucleus is at rest.
+ *
+ * \key P_LAB (float, optional, no default): \n
+ * Defines the energy of the collision by the initial momentum
+ * of the projectile nucleus in GeV?.  This assumes the target nucleus is at rest.
+ *
+ * \key CALCULATION FRAME (int, required, default = 1): \n
+ * The frame in which the collision is calculated.\n
+ * 1 - center of velocity frame\n
+ * 2 - center of mass frame\n
+ * 3 - fixed target frame
+ *
+ * \key Projectile: \n
+ * Section for projectile nucleus. The projectile will
+ * start at \f$z < 0\f$ and fly in positive \f$z\f$-direction, at \f$x
+ * \ge 0\f$.
+ *
+ * \key Target: \n
+ * Section for target nucleus. The target will start at \f$z
+ * > 0\f$ and fly in negative \f$z\f$-direction, at \f$x \le 0\f$.
+ *
+ *
+ * \key Projectile: and \key Target: \n
+ * \li \key PARTICLES (int:int, int:int, required):\n
+ * A map in which the keys are PDG codes and the
+ * values are number of particles with that PDG code that should be in
+ * the current nucleus. E.g.\ `PARTICLES: {2212: 82, 2112: 126}` for a
+ * lead-208 nucleus (82 protons and 126 neutrons = 208 nucleons), and
+ * `PARTICLES: {2212: 1, 2112: 1, 3122: 1}` for Hyper-Triton (one
+ * proton, one neutron and one Lambda).
+ * \li \key DEFORMED (bool, required): \n
+ * true - deformed nucleus is initialized
+ * false - spherical nucleus is initialized
+ * \li \key AUTOMATIC (bool, required): \n
+ * Whether or not to use default values based on the
+ * current nucleus atomic number (true/false).
+ *
+ * Additional Woods-Saxon Parameters: \n
+ * There are also many other
+ * parameters for specifying the shape of the Woods-Saxon distribution,
+ * and other nucleus specific properties. See NUCLEUS.CC and
+ * DEFORMEDNUCLEUS.CC for more on these choices.
+ *
+ * \key Impact: \n
+ * A section for the impact parameter (= distance of the two
+ * straight lines that the center of masses of the nuclei travel on).
+ *
+ * \li \key VALUE (float, optional, optional, default = 0.f): fixed value for 
+ * the impact parameter. No other \key Impact: directive is looked at.
+ * \li \key SAMPLE (string, optional, default = quadratic sampling): \n
+ * if \key uniform, use uniform sampling of the impact parameter 
+ * (\f$dP(b) = db\f$). If else, use areal input sampling
+ * (the probability of an input parameter range is proportional to the
+ * area corresponding to that range, \f$dP(b) = b\cdot db\f$).
+ * \li \key RANGE (float, float, optional, default = 0.0f):\n
+ * A vector of minimal and maximal impact parameters
+ * between which b should be chosen. (The order of these is not
+ * important.)
+ * \li \key MAX (float, optional, default = 0.0f): 
+ * Like `RANGE: [0.0, MAX]`. Note that if both \key RANGE and
+ * \key MAX are specified, \key MAX takes precedence.
+ *
+ * Note that there are no safeguards to prevent you from specifying
+ * negative impact parameters. The value chosen here is simply the
+ * x-component of \f$\vec b\f$. The result will be that the projectile
+ * and target will have switched position in x.
+ *
+ * \key INITIAL_DISTANCE (float, optional, default = no displacement): \n
+ * The initial distance of the two nuclei. That
+ * means \f$z_{\rm min}^{\rm target} - z_{\rm max}^{\rm projectile}\f$.
+ */
 
+    
 NucleusModus::NucleusModus(Configuration modus_config,
                            const ExperimentParameters &params) {
   Configuration modus_cfg = modus_config["Nucleus"];
@@ -125,7 +214,7 @@ NucleusModus::NucleusModus(Configuration modus_config,
   }
   // Option 2: Energy of the projectile nucleus (target at rest).
   if (modus_cfg.has_value({"E_LAB"})) {
-      int e_lab = modus_cfg.take({"E_LAB"});
+      float e_lab = modus_cfg.take({"E_LAB"});
       // Check that energy is nonnegative.
       if (e_lab < 0) {
         throw ModusDefault::InvalidEnergy("Input Error: E_LAB must be nonnegative.");
@@ -137,7 +226,7 @@ NucleusModus::NucleusModus(Configuration modus_config,
   }
   // Option 3: Momentum of the projectile nucleus (target at rest).
   if (modus_cfg.has_value({"P_LAB"})) {
-      int p_lab = modus_cfg.take({"P_LAB"});
+      float p_lab = modus_cfg.take({"P_LAB"});
       // Check upper bound (projectile mass).
       if (p_lab * p_lab > mass_projec * mass_projec) {
         throw ModusDefault::InvalidEnergy(
