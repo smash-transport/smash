@@ -38,39 +38,16 @@ namespace Smash {
 *              # definitions here
 * \endcode
 *
-* The following directives are understood:
-*
-* Modi:Sphere:
-*--------
+* The following configuration options are understood: \ref input_modi_sphere_
 */
-// Userguide {
-/**
-* \if user
-* \page input_modi_box_ Input Section Modi:Box
-* \endif
-*
-* `RADIUS`: Radius of the Sphere.
-*
-* `NUMBEROFPARTICLES`: Total number of particles in the Sphere.
-*
-* `SPHERETEMPERATURE`: Temperature for the momentum sampling in the sphere in GeV.
-*
-* `START_TIME`: Starting time of Sphere calculation.
-*/
-// } Userguide
 class SphereModus : public ModusDefault {
  public:
   /* default constructor with probable values */
   explicit SphereModus(Configuration modus_config,
                        const ExperimentParameters &parameters);
-  /** Prints some information about the initialization of SphereModus
-   *
-   * \see ModusDefalt::print_startup()
+
+  /** creates initial conditions for the particles.
    */
-  void print_startup();  // TODO(mkretz): needs to be discoverable from an
-    // outside "printer"
-    /** creates initial conditions for the particles.
-     */
   float initial_conditions(Particles *particles,
                           const ExperimentParameters &parameters);
  private:

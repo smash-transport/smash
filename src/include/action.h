@@ -35,7 +35,21 @@ class Action {
    * \param[in] time_of_execution time at which the action is supposed to take place
    */
   Action(const ParticleList &in_part, float time_of_execution);
-  /** Destructor. */
+
+  /// Copying is disabled. Use std::move or create a new Action.
+  Action(const Action &) = delete;
+
+  /**
+   * Move constructor for Action.
+   *
+   * The move constructor makes moving efficient since it can move the three
+   * std::vector member variables.
+   */
+  Action(Action &&);
+
+  /** Virtual Destructor.
+   * The declaration of the destructor is necessary to make it virtual.
+   */
   virtual ~Action();
 
   /** For sorting by time of execution. */
@@ -48,9 +62,9 @@ class Action {
   float weight() const;
 
   /** Add a new subprocess.  */
-  void add_process(const ProcessBranch &p);
+  void add_process(ProcessBranch p);
   /** Add several new subprocesses at once.  */
-  void add_processes(const ProcessBranchList &pv);
+  void add_processes(ProcessBranchList pv);
 
   /**
    * Actually perform the action, e.g. carry out a decay or scattering.
@@ -96,12 +110,6 @@ class Action {
  protected:
   /** List with data of incoming particles.  */
   ParticleList incoming_particles_;
-  /** time at which the action is supposed to be performed  */
-  float time_of_execution_;
-  /** list of possible subprocesses  */
-  std::vector<ProcessBranch> subprocesses_;
-  /** sum of all subprocess weights  */
-  float total_weight_;
   /**
    * Initially this stores only the PDG codes of final-state particles.
    *
@@ -109,6 +117,13 @@ class Action {
    * outgoing particles.
    */
   ParticleList outgoing_particles_;
+  /** list of possible subprocesses  */
+  std::vector<ProcessBranch> subprocesses_;
+  /** time at which the action is supposed to be performed  */
+  float time_of_execution_;
+  /** sum of all subprocess weights  */
+  float total_weight_;
+
   /// determine the total energy in the center-of-mass frame
   virtual double sqrt_s() const = 0;
 
@@ -152,26 +167,22 @@ class Action {
 class DecayAction : public Action {
  public:
   /**
-   * Construct a DecayAction object.
+   * Construct a DecayAction from a particle \p p.
    *
-   * \param[in] in_part decaying particle
+   * It does not initialize the list of possible decay processes. You need to
+   * call add_processes after construction.
+   *
+   * \param[in] p The particle that should decay if the action is performed.
    * \param[in] time_of_execution time at which the action is supposed to take place
    */
-  DecayAction(const ParticleData &in_part, float time_of_execution);
-  /** Construct a DecayAction from a particle p.
-   *
-   * Sets up the full list of possible decay processes.
-   *
-   * \param[in] p Data of decaying particle. We use its ID and mass.
-   */
-  DecayAction(const ParticleData &p);
+  DecayAction(const ParticleData &p, float time_of_execution);
 
   /** Carry out the action, i.e. do the decay.
    * Performs a decay of one particle to two or three particles.
    *
    * \throws InvalidDecay
    */
-  void perform(Particles *particles, size_t &id_process);
+  void perform(Particles *particles, size_t &id_process) override;
 
   /**
    * \ingroup exception
@@ -184,7 +195,7 @@ class DecayAction : public Action {
 
  protected:
   /// determine the total energy in the center-of-mass frame
-  double sqrt_s() const;
+  double sqrt_s() const override;
 
   /**
    * \ingroup logging
@@ -241,7 +252,7 @@ class ScatterAction : public Action {
    *
    * \throws InvalidResonanceFormation
    */
-  void perform(Particles *particles, size_t &id_process);
+  void perform(Particles *particles, size_t &id_process) override;
 
   /**
    * Determine the elastic cross section for this collision. This routine
@@ -276,7 +287,7 @@ class ScatterAction : public Action {
   /// determine the Mandelstam s variable, s = (p_a + p_b)^2 = square of CMS energy
   double mandelstam_s() const;
   /// determine the total energy in the center-of-mass frame, i.e. sqrt of Mandelstam s
-  double sqrt_s() const;
+  double sqrt_s() const override;
   /// determine the squared momenta of the incoming particles in the center-of-mass system
   double cm_momentum_squared() const;
 
@@ -331,6 +342,40 @@ class ScatterActionBaryonBaryon : public ScatterAction {
   }
   /** Find all inelastic 2->2 processes for this reaction. */
   ProcessBranchList two_to_two_cross_sections() override;
+
+ private:
+  /**
+  * Calculate cross sections for single-resonance production from
+  * nucleon-nucleon collisions (i.e. NN->NR).
+  *
+  * Checks are processed in the following order:
+  * 1. Charge conservation
+  * 3. Isospin factors (Clebsch-Gordan)
+  * 4. Enough energy for all decay channels to be available for the resonance
+  *
+  * \param[in] type_particle1 Type information of the first incoming nucleon.
+  * \param[in] type_particle2 Type information of the second incoming nucleon.
+  *
+  * \return List of resonance production processes possible in the collision
+  * of the two nucleons. Each element in the list contains the type(s) of the
+  * final state particle(s) and the cross section for that particular process.
+  */
+  ProcessBranchList nuc_nuc_to_nuc_res (const ParticleType &type_particle1,
+                                      const ParticleType &type_particle2);
+
+  /**
+  * Calculate cross sections for resonance absorption on a nucleon
+  * (i.e. NR->NN).
+  *
+  * \param[in] type_particle1 Type information of the first incoming nucleon.
+  * \param[in] type_particle2 Type information of the second incoming nucleon.
+  *
+  * \return List of resonance absorption processes possible in the collision
+  * with a nucleon. Each element in the list contains the type(s) of the
+  * final state particle(s) and the cross section for that particular process.
+  */
+  ProcessBranchList nuc_res_to_nuc_nuc (const ParticleType &type_particle1,
+                                      const ParticleType &type_particle2);
 
  protected:
   /**

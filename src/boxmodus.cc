@@ -22,7 +22,6 @@
 #include "include/logging.h"
 #include "include/macros.h"
 #include "include/outputinterface.h"
-#include "include/outputroutines.h"
 #include "include/particles.h"
 #include "include/random.h"
 #include "include/threevector.h"
@@ -37,6 +36,23 @@ std::ostream &operator<<(std::ostream &out, const BoxModus &m) {
              << "\nIC type " << m.initial_condition_ << '\n';
 }
 
+/*!\Userguide
+ * \page input_modi_box_ Box
+ *
+ * \key INITIAL_CONDITION: \n
+ * Controls whether particles are created with
+ * thermal momenta (sampled from a Maxwell-Boltzmann distribution) or
+ * with average momentum \f$p = 3 \cdot T\f$ with T the temperature. The
+ * latter is chosen if \key INITIAL_CONDITION is 2.
+ *
+ * \key LENGTH: \n
+ * Length of the cube's edge in fm/c
+ *
+ * \key TEMPERATURE: \n
+ * Temperature in the box in GeV.
+ *
+ * \key START_TIME: \n
+ */
 BoxModus::BoxModus(Configuration modus_config, const ExperimentParameters &)
     : initial_condition_(modus_config.take({"Box", "INITIAL_CONDITION"})),
                  length_(modus_config.take({"Box", "LENGTH"})),

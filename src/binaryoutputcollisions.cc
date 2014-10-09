@@ -28,6 +28,12 @@ BinaryOutputCollisions::BinaryOutputCollisions(bf::path path,
       print_start_end_(config.has_value({"print_start_end"})
                            ? config.take({"print_start_end"})
                            : false) {
+  /*!\Userguide
+   * \page input_binary_collisions Binary_collisions
+   *
+   * \key print_start_end: \n
+   * Optional, defaults to \c false.
+   */
   fwrite("SMSH", 4, 1, file_.get());  // magic number
   write(0);              // file format version number
   write(VERSION_MAJOR);  // SMASH version

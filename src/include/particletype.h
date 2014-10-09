@@ -123,6 +123,11 @@ class ParticleType {
    */
   static const ParticleTypeList &list_all();
 
+  /** Returns a list of all nucleons (i.e. proton and neutron). */
+  static const ParticleTypeList list_nucleons();
+  /** Returns a list of all baryon resonances, i.e. unstable baryons (not including antibaryons). */
+  static const ParticleTypeList list_baryon_resonances();
+
   /**
    * Returns the ParticleType object for the given \p pdgcode.
    *
@@ -179,7 +184,7 @@ class ParticleType {
 inline bool ParticleType::is_stable() const {
   /* We currently regard a particle type as stable if its on-shell width is
    * less than 10 keV. */
-  return width_<1E-5;
+  return width_ < 1E-5f;
 }
 
 }  // namespace Smash

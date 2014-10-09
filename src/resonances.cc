@@ -23,10 +23,10 @@
 #include "include/decaymodes.h"
 #include "include/distributions.h"
 #include "include/fourvector.h"
+#include "include/logging.h"
 #include "include/macros.h"
-#include "include/outputroutines.h"
-#include "include/particles.h"
 #include "include/particledata.h"
+#include "include/particles.h"
 #include "include/particletype.h"
 #include "include/processbranch.h"
 #include "include/random.h"
@@ -34,64 +34,20 @@
 
 namespace Smash {
 
-/** Parameters for spectral-function integration via GSL. */
-struct IntegrandParameters {
-  /// Type of the resonance
-  const ParticleType *type;
-  /// Mass of second particle
-  double m2;
-  /// Mandelstam s
-  double s;
-};
-
 
 double clebsch_gordan(const int j1, const int j2, const int j3,
                       const int m1, const int m2, const int m3) {
+  const auto &log = logger<LogArea::Resonances>();
   double wigner_3j =  gsl_sf_coupling_3j(j1, j2, j3, m1, m2, -m3);
   double result = 0.;
   if (std::abs(wigner_3j) > really_small)
     result = std::pow(-1, (j1-j2+m3)/2.) * std::sqrt(j3 + 1) * wigner_3j;
 
-  printd("CG: %g I1: %i I2: %i IR: %i iz1: %i iz2: %i izR: %i \n",
-         result, j1, j2, j3, m1, m2, m3);
+  log.debug("CG: ", result, " I1: ", j1, " I2: ", j2, " IR: ", j3, " iz1: ", m1,
+            " iz2: ", m2, " izR: ", m3);
 
   return result;
 }
-
-
-/* Calculate isospin Clebsch-Gordan coefficient for two particles p1 and p2
- * coupling to a total isospin (I_tot, I_z). */
-inline double isospin_clebsch_gordan(const ParticleType p1,
-                                     const ParticleType p2,
-                                     const int I_tot, const int I_z) {
-  return clebsch_gordan (p1.isospin(), p2.isospin(), I_tot,
-                         p1.isospin3(), p2.isospin3(), I_z);
-}
-
-/* Calculate isospin Clebsch-Gordan coefficient for two particles p1 and p2
- * coupling to a resonance Res. */
-inline double isospin_clebsch_gordan(const ParticleType p1,
-                                     const ParticleType p2,
-                                     const ParticleType Res) {
-  return clebsch_gordan (p1.isospin(), p2.isospin(), Res.isospin(),
-                         p1.isospin3(), p2.isospin3(), Res.isospin3());
-}
-
-/**
- * Function for 1-dimensional GSL integration.
- *
- * \param[in] integrand_function Function of 1 variable to be integrated over.
- * \param[in] parameters Container for possible parameters
- * needed by the integrand.
- * \param[in] lower_limit Lower limit of the integral.
- * \param[in] upper_limit Upper limit of the integral.
- * \param[out] integral_value Result of integration.
- * \param[out] integral_error Uncertainty of the result.
- */
-static void quadrature_1d(double (*integrand_function)(double, void *),
-                          IntegrandParameters *parameters, double lower_limit,
-                          double upper_limit, double *integral_value,
-                          double *integral_error);
 
 
 /* two_to_one_formation -- only the resonance in the final state */
@@ -132,8 +88,8 @@ double two_to_one_formation(const ParticleType &type_particle1,
     return 0.0;
 
   /* Check the decay modes of this resonance */
-  const std::vector<DecayBranch> decaymodes
-    = DecayModes::find(type_resonance.pdgcode()).decay_mode_list();
+  const std::vector<DecayBranch> &decaymodes =
+      DecayModes::find(type_resonance.pdgcode()).decay_mode_list();
   bool not_enough_energy = false;
   /* Detailed balance required: Formation only possible if
    * the resonance can decay back to these particles
@@ -181,112 +137,6 @@ double two_to_one_formation(const ParticleType &type_particle1,
          * hbarc * hbarc / fm2_mb;
 }
 
-/* two_to_two_formation -- resonance and another particle in final state */
-size_t two_to_two_formation(const ParticleType &type_particle1,
-                            const ParticleType &type_particle2,
-                            const ParticleType &type_resonance,
-                            double mandelstam_s, double cm_momentum_squared,
-                            std::vector<ProcessBranch> *process_list) {
-  size_t number_of_processes = 0;
-  /* If we have two baryons in the beginning, we must have fermion resonance */
-  if (type_particle1.pdgcode().baryon_number() != 0
-      && type_particle2.pdgcode().baryon_number() != 0
-      && !type_particle1.pdgcode().is_antiparticle_of(type_particle2.pdgcode())
-      && type_resonance.pdgcode().baryon_number() == 0)
-    return 0.0;
-
-  /* Loop over particle types to find allowed combinations. */
-  for (const ParticleType &second_type : ParticleType::list_all()) {
-    /* We are interested only stable particles here */
-    if (!second_type.is_stable()) {
-      continue;
-    }
-
-    /* Check for charge conservation. */
-    if (type_resonance.charge() + second_type.charge()
-        != type_particle1.charge() + type_particle2.charge()) {
-      continue;
-    }
-
-    /* Check for baryon number conservation. */
-    int initial_baryon_number = type_particle1.pdgcode().baryon_number()
-                              + type_particle2.pdgcode().baryon_number();
-    int final_baryon_number = type_resonance.pdgcode().baryon_number()
-                            + second_type.pdgcode().baryon_number();
-    if (final_baryon_number != initial_baryon_number) {
-      continue;
-    }
-
-    int I_z = type_resonance.isospin3() + second_type.isospin3();
-
-    /* Compute total isospin range with given initial and final particles. */
-    int I_max = std::min(type_resonance.isospin() + second_type.isospin(),
-                         type_particle1.isospin() + type_particle2.isospin());
-    int I_min = std::max(abs(type_resonance.isospin()
-                             - second_type.isospin()),
-                         abs(type_particle1.isospin()
-                             - type_particle2.isospin()));
-    I_min = std::max(I_min, abs(I_z));
-
-    /* Loop over total isospin in allowed range.
-     * Use decrement of 2, since isospin is multiplied by 2. */
-    double isospin_factor = 0.;
-    for (int I_tot = I_max; I_tot >= I_min; I_tot -= 2) {
-      isospin_factor
-        = isospin_clebsch_gordan(type_particle1, type_particle2, I_tot, I_z)
-        * isospin_clebsch_gordan(type_resonance, second_type, I_tot, I_z);
-    }
-
-    /* If Clebsch-Gordan coefficient is zero, don't bother with the rest */
-    if (std::abs(isospin_factor) < really_small) {
-      continue;
-    }
-
-    /* Integration limits. */
-    double lower_limit = type_resonance.minimum_mass();
-    double upper_limit = std::sqrt(mandelstam_s) - second_type.mass();
-    /* Check the available energy (requiring it to be a little above the
-     * threshold, because the integration will not work if it's too close). */
-    if (upper_limit - lower_limit < 1E-3) {
-      continue;
-    }
-
-    /* Calculate resonance production cross section
-     * using the Breit-Wigner distribution as probability amplitude.
-     * Integrate over the allowed resonance mass range. */
-    IntegrandParameters params = {&type_resonance, second_type.mass(),
-                                  mandelstam_s};
-    printd("Process: %s %s -> %s %s\n", type_particle1.name().c_str(),
-     type_particle2.name().c_str(), second_type.name().c_str(),
-     type_resonance.name().c_str());
-    printd("Limits: %g %g \n", lower_limit, upper_limit);
-    double resonance_integral, integral_error;
-    quadrature_1d(&spectral_function_integrand, &params,
-                  lower_limit, upper_limit,
-                  &resonance_integral, &integral_error);
-    printd("Integral value: %g Error: %g \n", resonance_integral,
-      integral_error);
-
-    /* Cross section for 2->2 process with resonance in final state.
-     * Based on Eq. (51) in PhD thesis of J. Weil (Giessen U., 2013)
-     * http://geb.uni-giessen.de/geb/volltexte/2013/10253/
-     */
-    float xsection
-      = isospin_factor * isospin_factor
-        / mandelstam_s
-        / std::sqrt(cm_momentum_squared)
-        * resonance_integral
-        * nn_to_resonance_matrix_element(mandelstam_s, type_resonance,
-                                         second_type);
-
-    if (xsection > really_small) {
-      process_list->push_back(ProcessBranch(type_resonance.pdgcode(),
-                                            second_type.pdgcode(), xsection));
-      number_of_processes++;
-    }
-  }
-  return number_of_processes;
-}
 
 /* Function for 1-dimensional GSL integration  */
 void quadrature_1d(double (*integrand_function)(double, void*),
@@ -381,27 +231,5 @@ double sample_resonance_mass(const ParticleType &type_resonance,
   return mass_resonance;
 }
 
-/* Scattering matrix amplitude squared.
- * Introduces energy-dependent modification
- * on the constant matrix element from
- * M. Effenberger diploma thesis (Giessen 1996)
- */
-float nn_to_resonance_matrix_element(const double mandelstam_s,
-  const ParticleType &type_final_a, const ParticleType &type_final_b) {
-  PdgCode delta = PdgCode("2224");
-  if (type_final_a.pdgcode().iso_multiplet()
-      != type_final_b.pdgcode().iso_multiplet()) {
-    /* N + N -> N + Delta: fit to Dmitriev OBE model,
-       Nucl. Phys. A 459, 503 (1986) */
-    if (type_final_a.pdgcode().iso_multiplet() == delta.iso_multiplet()
-        || type_final_b.pdgcode().iso_multiplet() == delta.iso_multiplet()) {
-      return 459. / std::pow(std::sqrt(mandelstam_s) - 1.104, 1.951);
-    } else {
-      return 0.0;
-    }
-  } else {
-    return 0.0;
-  }
-}
 
 }  // namespace Smash

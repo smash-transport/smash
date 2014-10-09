@@ -11,10 +11,10 @@
 
 #include "include/action.h"
 #include "include/constants.h"
+#include "include/cxx14compat.h"
 #include "include/experimentparameters.h"
 #include "include/logging.h"
 #include "include/macros.h"
-#include "include/outputroutines.h"
 #include "include/particles.h"
 #include "include/resonances.h"
 
@@ -53,14 +53,9 @@ double ScatterActionsFinder::collision_time(const ParticleData &p1,
 
 
 ActionPtr
-ScatterActionsFinder::check_collision(const int id_a, const int id_b,
-                                      Particles *particles) const {
+ScatterActionsFinder::check_collision(const ParticleData &data_a,
+                                      const ParticleData &data_b) const {
   const auto &log = logger<LogArea::FindScatter>();
-
-  ScatterAction* act = nullptr;
-
-  const ParticleData data_a = particles->data(id_a);
-  const ParticleData data_b = particles->data(id_b);
 
   /* just collided with this particle */
   if (data_a.id_process() >= 0 && data_a.id_process() == data_b.id_process()) {
@@ -72,20 +67,22 @@ ScatterActionsFinder::check_collision(const int id_a, const int id_b,
   }
 
   /* check according timestep: positive and smaller */
-  const double time_until_collision = collision_time(data_a, data_b);
-  if (time_until_collision < 0.0 || time_until_collision >= dt_) {
+  const float time_until_collision = collision_time(data_a, data_b);
+  if (time_until_collision < 0.f || time_until_collision >= dt_) {
     return nullptr;
   }
 
   /* Create ScatterAction object. */
-  if (data_a.pdgcode().baryon_number() != 0 &&
-      data_b.pdgcode().baryon_number() != 0) {
-    act = new ScatterActionBaryonBaryon(data_a, data_b, time_until_collision);
-  } else if (data_a.pdgcode().baryon_number() != 0 ||
-             data_b.pdgcode().baryon_number() != 0) {
-    act = new ScatterActionBaryonMeson(data_a, data_b, time_until_collision);
+  std::unique_ptr<ScatterAction> act;
+  if (data_a.is_baryon() && data_b.is_baryon()) {
+    act = make_unique<ScatterActionBaryonBaryon>(data_a, data_b,
+                                                 time_until_collision);
+  } else if (data_a.is_baryon() || data_b.is_baryon()) {
+    act = make_unique<ScatterActionBaryonMeson>(data_a, data_b,
+                                                time_until_collision);
   } else {
-    act = new ScatterActionMesonMeson(data_a, data_b, time_until_collision);
+    act = make_unique<ScatterActionMesonMeson>(data_a, data_b,
+                                               time_until_collision);
   }
 
   /* Add various subprocesses.  */
@@ -100,30 +97,27 @@ ScatterActionsFinder::check_collision(const int id_a, const int id_b,
     /* distance criteria according to cross_section */
     const double distance_squared = act->particle_distance();
     if (distance_squared >= act->weight() * fm2_mb * M_1_PI) {
-        delete act;
-        return nullptr;
-      }
-      log.debug("particle distance squared: ", distance_squared,
-                "\n    ", data_a,
-                "\n<-> ", data_b);
+      return nullptr;
+    }
+    log.debug("particle distance squared: ", distance_squared,
+              "\n    ", data_a,
+              "\n<-> ", data_b);
   }
 
-  return ActionPtr(act);
+  return std::move(act);
 }
 
 std::vector<ActionPtr> ScatterActionsFinder::find_possible_actions(
-    Particles *particles) const {
+    const Particles &particles) const {
   std::vector<ActionPtr> actions;
 
-  for (const auto &p1 : particles->data()) {
-    for (const auto &p2 : particles->data()) {
-      int id_a = p1.id(), id_b = p2.id();
-
+  for (const auto &p1 : particles.data()) {
+    for (const auto &p2 : particles.data()) {
       /* Check for same particle and double counting. */
-      if (id_a >= id_b) continue;
+      if (p1.id() >= p2.id()) continue;
 
       /* Check if collision is possible. */
-      ActionPtr act = check_collision (id_a, id_b, particles);
+      ActionPtr act = check_collision (p1, p2);
 
       /* Add to collision list. */
       if (act != nullptr) {

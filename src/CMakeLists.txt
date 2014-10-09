@@ -61,7 +61,6 @@ set(smash_src
         nucleus.cc
         nucleusmodus.cc
         oscaroutput.cc
-        outputroutines.cc
         parametrizations.cc
         particledata.cc
         particles.cc

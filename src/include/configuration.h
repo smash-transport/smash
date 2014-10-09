@@ -35,6 +35,38 @@ struct convert {
 }  // namespace YAML
 
 namespace Smash {
+/*!\Userguide
+ * \page inputoptions Input file Options
+ *
+ * SMASH is configured via an input file in YAML format. Typically you will
+ * start from the supplied `config.yaml` file and modify it according to your
+ * needs. If you ever make a mistake there and specify a configuration key that
+ * SMASH does not recognize, then on startup it will tell you about the keys it
+ * could not make any sense of.
+ *
+ * \par The available keys are documented on the following pages:
+ * \li \subpage input_general_
+ * \li \subpage input_modi_
+ *
+ * \ifnot user
+ * \par The relevant functions and classes for input are:
+ * \li \ref Configuration
+ * \li \ref ExperimentBase::create()
+ * \li \ref NucleusModus
+ * \li \ref BoxModus
+ * \li \ref ColliderModus
+ * \li \ref SphereModus
+ * \endif
+ */
+
+/*!\Userguide
+ * \page input_general_ General
+ * This section in the `config.yaml` file contains all general/global
+ * configuration options to SMASH.
+ *
+ * Available Settings
+ * ------------------
+ */
 
 /**
  * Interface to the SMASH configuration files.
@@ -63,31 +95,6 @@ namespace Smash {
  * important for the user to discover typos in his configuration file (or
  * command line parameters).
  */
-// Userguide {
-/** \if user
- * \page inputoptions Input file Options
- *
- * To configure SMASH, you can specify an input file. This file should be in
- * YAML format.
- *
- * ###TEXT MISSING###
- *
- * \li \subpage input_general_
- * \li \subpage input_modi_nucleus_
- * \li \subpage input_modi_box_
- * \li \subpage input_modi_collider_
- * \else
- *
- * Options
- * -------
- * For possible configuration values, see
- * \li \ref Experiment::create()
- * \li \ref NucleusModus
- * \li \ref BoxModus
- * \li \ref ColliderModus
- * \endif
- */
-// } Userguide
 class Configuration {
  public:
   /// \ingroup exception

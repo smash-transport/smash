@@ -14,11 +14,22 @@
 #define SRC_INCLUDE_RESONANCES_H_
 
 #include "forwarddeclarations.h"
+#include "particletype.h"
 
 #include <cstddef>
 #include <cstdint>
 
 namespace Smash {
+
+/** Parameters for spectral-function integration via GSL. */
+struct IntegrandParameters {
+  /// Type of the resonance
+  const ParticleType *type;
+  /// Mass of second particle
+  double m2;
+  /// Mandelstam s
+  double s;
+};
 
 /**
  * Calculate Clebsch-Gordan coefficient
@@ -28,6 +39,26 @@ namespace Smash {
  * have been multiplied by two (in order to be integer). */
 double clebsch_gordan(const int j1, const int j2, const int j3,
                       const int m1, const int m2, const int m3);
+
+
+/* Calculate isospin Clebsch-Gordan coefficient for two particles p1 and p2
+ * coupling to a total isospin (I_tot, I_z). */
+inline double isospin_clebsch_gordan(const ParticleType p1,
+                                     const ParticleType p2,
+                                     const int I_tot, const int I_z) {
+  return clebsch_gordan (p1.isospin(), p2.isospin(), I_tot,
+                         p1.isospin3(), p2.isospin3(), I_z);
+}
+
+/* Calculate isospin Clebsch-Gordan coefficient for two particles p1 and p2
+ * coupling to a resonance Res. */
+inline double isospin_clebsch_gordan(const ParticleType p1,
+                                     const ParticleType p2,
+                                     const ParticleType Res) {
+  return clebsch_gordan (p1.isospin(), p2.isospin(), Res.isospin(),
+                         p1.isospin3(), p2.isospin3(), Res.isospin3());
+}
+
 
 /**
  * Given the types of the two initial particles and a resonance,
@@ -56,39 +87,6 @@ double two_to_one_formation(const ParticleType &type_particle1,
                             const ParticleType &type_resonance,
                             double mandelstam_s, double cm_momentum_squared);
 
-/**
- * Given the types of the two initial particles and a resonance,
- * return the final states containing the resonance and a stable particle
- * which are possible in the collision of the initial particles.
- *
- * Checks are processed in the following order:
- * 1. Charge conservation
- * 2. Baryon number conservation
- * 3. Clebsch-Gordan
- * 4. Enough energy for all decay channels to be available for the resonance
- *
- * \param[in] type_particle1 Type information for the first initial particle.
- * \param[in] type_particle2 Type information for the second initial particle.
- * \param[in] type_resonance Type information for the resonance to be produced.
- * \param[in] mandelstam_s Mandelstam-s of the collision
- * of the two initial particles.
- * \param[in] cm_momentum_squared Square of the center-of-mass momentum of the
- * two initial particles.
- * \param[in,out] process_list List of resonance production processes possible
- * in the collision of the two initial particles.
- * Each element in the list contains the type(s)
- * of the final state particle(s)
- * and the cross section for that particular process.
- *
- * \return The number of possible processes. Also adds elements
- * to the process_list.
- */
-std::size_t two_to_two_formation(const ParticleType &type_particle1,
-                                 const ParticleType &type_particle2,
-                                 const ParticleType &type_resonance,
-                                 double mandelstam_s,
-                                 double cm_momentum_squared,
-                                 ProcessBranchList *process_list);
 
 /**
  * Spectral function
@@ -128,18 +126,20 @@ double sample_resonance_mass(const ParticleType &type_resonance,
                              const float cms_energy);
 
 /**
- * Scattering matrix amplitude squared for \f$NN \rightarrow \f$
- *  \[resonant state\] processes.
+ * Function for 1-dimensional GSL integration.
  *
- * \param[in] mandelstam_s Mandelstam-s, i.e. collision CMS energy squared.
- * \param[in] type_final_a Type information for the first final state particle.
- * \param[in] type_final_b Type information for the second final state particle.
- *
- * \return Matrix amplitude squared \f$|\mathcal{M}(\sqrt{s})|^2\f$ for
- * process \f$N+N \rightarrow\f$ type_final_a + type_final_b
+ * \param[in] integrand_function Function of 1 variable to be integrated over.
+ * \param[in] parameters Container for possible parameters
+ * needed by the integrand.
+ * \param[in] lower_limit Lower limit of the integral.
+ * \param[in] upper_limit Upper limit of the integral.
+ * \param[out] integral_value Result of integration.
+ * \param[out] integral_error Uncertainty of the result.
  */
-float nn_to_resonance_matrix_element(const double mandelstam_s,
-  const ParticleType &type_final_a, const ParticleType &type_final_b);
+void quadrature_1d(double (*integrand_function)(double, void *),
+                          IntegrandParameters *parameters, double lower_limit,
+                          double upper_limit, double *integral_value,
+                          double *integral_error);
 
 }  // namespace Smash
 

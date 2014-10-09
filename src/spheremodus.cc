@@ -24,7 +24,6 @@
 #include "include/fourvector.h"
 #include "include/logging.h"
 #include "include/macros.h"
-#include "include/outputroutines.h"
 #include "include/particles.h"
 #include "include/random.h"
 #include "include/spheremodus.h"
@@ -32,6 +31,21 @@
 
 namespace Smash {
 
+/*!\Userguide
+ * \page input_modi_sphere_ Sphere
+ *
+ * \key RADIUS: \n
+ * Radius of the Sphere.
+ *
+ * \key NUMBEROFPARTICLES: \n
+ * Total number of particles in the Sphere.
+ *
+ * \key SPHERETEMPERATURE: \n
+ * Temperature for the momentum sampling in the sphere in GeV.
+ *
+ * \key START_TIME: \n
+ * Starting time of Sphere calculation.
+ */
 SphereModus::SphereModus(Configuration modus_config,
                          const ExperimentParameters &)
     : radius_(modus_config.take({"Sphere", "RADIUS"})),
@@ -45,6 +59,8 @@ SphereModus::SphereModus(Configuration modus_config,
 std::ostream &operator<<(std::ostream &out, const SphereModus &m) {
   return out << "-- Sphere Modus:\n"
                 "Radius of the sphere: " << m.radius_ << " [fm]"
+             << "\nTotal number of particles in sphere: "
+             << m.number_of_particles_
              << "\nTemperature for momentum sampling: " << m.sphere_temperature_
              << "\nStarting time for Sphere calculation: " << m.start_time_
              << '\n';
@@ -69,8 +85,8 @@ float SphereModus::initial_conditions(Particles *particles,
     momentum_radial = sample_momenta(this->sphere_temperature_,
                                      data.pole_mass());
     phitheta.distribute_isotropically();
-    log.debug() << data << ", radial mom:" << field << momentum_radial << ", "
-                << phitheta;
+    log.debug("Particle ", data.id(), " radial momenta ", momentum_radial, ' ',
+              phitheta);
     data.set_4momentum(data.pole_mass(), phitheta.threevec() * momentum_radial);
     momentum_total += data.momentum();
     /* uniform sampling in a sphere with radius r */

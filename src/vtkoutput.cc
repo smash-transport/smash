@@ -19,6 +19,11 @@ namespace Smash {
 
 VtkOutput::VtkOutput(bf::path path, Configuration&& /*conf*/)
   : base_path_(std::move(path)), vtk_output_counter_(0) {}
+/*!\Userguide
+ * \page input_vtk VTK
+ *
+ * No further options. It can only be enabled/disabled.
+ */
 
 VtkOutput::~VtkOutput() {
 }

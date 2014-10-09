@@ -27,6 +27,12 @@ BinaryOutputParticles::BinaryOutputParticles(bf::path path,
           std::fopen(((path / "particles_binary.bin")).native().c_str(), "wb")),
       only_final_(config.has_value({"only_final"}) ? config.take({"only_final"})
                                                    : true) {
+  /*!\Userguide
+   * \page input_binary_particles Binary_particles
+   *
+   * \key only_final: \n
+   * Optional, defaults to \c true.
+   */
   fwrite("SMSH", 4, 1, file_.get());  // magic number
   write(0);              // file format version number
   write(VERSION_MAJOR);  // version

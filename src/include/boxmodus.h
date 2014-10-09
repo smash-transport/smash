@@ -37,39 +37,13 @@ namespace Smash {
  *              # definitions here
  * \endcode
  *
- * The following directives are understood:
- *
- * Modi:Box:
- * ---------
+ * The following configuration options are understood: \ref input_modi_box_
  */
-// Userguide {
-/**
- * \if user
- * \page input_modi_box_ Input Section Modi:Box
- * \endif
- *
- * `INITIAL_CONDITION`: Controls whether particles are created with
- * thermal momenta (sampled from a Maxwell-Boltzmann distribution) or
- * with average momentum \f$p = 3 \cdot T\f$ with T the temperature. The
- * latter is chosen if INITIAL_CONDITION is 2.
- *
- * `LENGTH`: Length of the cube's edge in fm/c
- *
- * `TEMPERATURE`: Temperature in the box in GeV.
- */
-// } Userguide
 class BoxModus : public ModusDefault {
  public:
   /// Gathers all configuration variables for the Box.
   explicit BoxModus(Configuration modus_config,
            const ExperimentParameters &parameters);
-
-  /** Prints some information about the initialization of BoxModus
-   *
-   * \see ModusDefalt::print_startup()
-   */
-  void print_startup();  // TODO(mkretz): needs to be discoverable from an
-                         // outside "printer"
 
   /** creates initial conditions from the particles.
    */

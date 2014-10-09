@@ -32,6 +32,18 @@ RootOutput::RootOutput(bf::path path, Configuration&& conf)
                                  ? conf.take({"write_particles"}) : true),
       autosave_frequency_(conf.has_value({"autosave_frequency"})
                                ? conf.take({"autosave_frequency"}) : 1000) {
+  /*!\Userguide
+   * \page input_root ROOT
+   *
+   * \key write_collisions: \n
+   * Optional, defaults to \c false.
+   *
+   * \key write_particles: \n
+   * Optional, defaults to \c true.
+   *
+   * \key autosave_frequency: \n
+   * Optional, defaults to \c 1000.
+   */
   if (write_particles_) {
     particles_tree_ = new TTree("particles", "particles");
 

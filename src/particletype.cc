@@ -18,7 +18,6 @@
 #include "include/inputfunctions.h"
 #include "include/iomanipulators.h"
 #include "include/logging.h"
-#include "include/outputroutines.h"
 #include "include/pdgcode.h"
 #include "include/stringfunctions.h"
 #include "include/width.h"
@@ -33,6 +32,25 @@ const ParticleTypeList *all_particle_types = nullptr;
 const ParticleTypeList &ParticleType::list_all() {
   assert(all_particle_types);
   return *all_particle_types;
+}
+
+const ParticleTypeList ParticleType::list_nucleons() {
+  return {find(0x2212), find(0x2112)};
+}
+
+const ParticleTypeList ParticleType::list_baryon_resonances() {
+  ParticleTypeList list;
+  list.reserve(4);  // currently we have only the Delta (with four charge states)
+
+  for (const ParticleType &type_resonance : ParticleType::list_all()) {
+    /* Only loop over baryon resonances. */
+    if (type_resonance.is_stable()
+        || type_resonance.pdgcode().baryon_number() != 1) {
+      continue;
+    }
+   list.push_back(type_resonance);
+  }
+  return list;
 }
 
 SMASH_CONST const ParticleType &ParticleType::find(PdgCode pdgcode) {
@@ -212,18 +230,20 @@ float ParticleType::total_width(const float m) const {
 
 ProcessBranchList ParticleType::get_partial_widths(const float m) const {
   float w = 0.;
-  ProcessBranchList partial;
   if (is_stable()) {
-    return partial;
+    return {};
   }
   /* Loop over decay modes and calculate all partial widths. */
-  for (const auto &mode : DecayModes::find(pdgcode()).decay_mode_list()) {
+  const auto &decay_mode_list = DecayModes::find(pdgcode()).decay_mode_list();
+  ProcessBranchList partial;
+  partial.reserve(decay_mode_list.size());
+  for (const auto &mode : decay_mode_list) {
     w = partial_width(m, mode);
     if (w > 0.) {
-      partial.push_back(ProcessBranch(mode.pdg_list(), w));
+      partial.emplace_back(mode.pdg_list(), w);
     }
   }
-  return partial;
+  return std::move(partial);
 }
 
 std::ostream &operator<<(std::ostream &out, const ParticleType &type) {

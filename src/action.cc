@@ -15,7 +15,6 @@
 #include "include/angles.h"
 #include "include/constants.h"
 #include "include/logging.h"
-#include "include/outputroutines.h"
 #include "include/random.h"
 #include "include/resonances.h"
 
@@ -26,21 +25,36 @@ Action::Action(const ParticleList &in_part, float time_of_execution)
     : incoming_particles_(in_part), time_of_execution_(time_of_execution),
       total_weight_(0.) {}
 
-Action::~Action() {}
+Action::Action(Action &&a)
+    : incoming_particles_(std::move(a.incoming_particles_)),
+      outgoing_particles_(std::move(a.outgoing_particles_)),
+      subprocesses_(std::move(a.subprocesses_)),
+      time_of_execution_(a.time_of_execution_),
+      total_weight_(a.total_weight_) {}
+
+Action::~Action() = default;
 
 float Action::weight() const {
   return total_weight_;
 }
 
-void Action::add_process(const ProcessBranch &p) {
-  subprocesses_.push_back(p);
+void Action::add_process(ProcessBranch p) {
   total_weight_ += p.weight();
+  subprocesses_.emplace_back(std::move(p));
 }
 
-void Action::add_processes(const ProcessBranchList &pv) {
-  for (const auto &proc : pv) {
-    subprocesses_.push_back(proc);
-    total_weight_ += proc.weight();
+void Action::add_processes(ProcessBranchList pv) {
+  if (subprocesses_.empty()) {
+    subprocesses_ = std::move(pv);
+    for (auto &proc : subprocesses_) {
+      total_weight_ += proc.weight();
+    }
+  } else {
+    subprocesses_.reserve(subprocesses_.size() + pv.size());
+    for (auto &proc : pv) {
+      total_weight_ += proc.weight();
+      subprocesses_.emplace_back(std::move(proc));
+    }
   }
 }
 

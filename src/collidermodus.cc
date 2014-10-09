@@ -15,11 +15,24 @@
 #include "include/configuration.h"
 #include "include/experimentparameters.h"
 #include "include/logging.h"
-#include "include/outputroutines.h"
 #include "include/particles.h"
 #include "include/random.h"
 
 namespace Smash {
+
+/*!\Userguide
+ * \page input_modi_collider_ Collider
+ *
+ * \key SQRTS: \n
+ * Center-of-mass energy of the system, in GeV. Needs to be
+ * larger than the sum of the masses of the two particles.
+ *
+ * \key PROJECTILE: \n
+ * PdgCode of the Projectile
+ *
+ * \key TARGET: \n
+ * PdgCode of the Target
+ */
 ColliderModus::ColliderModus(Configuration modus_config,
                              const ExperimentParameters &)
     : projectile_(modus_config.take({"Collider", "PROJECTILE"})

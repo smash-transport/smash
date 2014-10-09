@@ -1,10 +1,16 @@
 /**
 \mainpage SMASH Development Documentation
 
-Quick Links:
+\par Important entry points
+- \ref Smash::Experiment
+- \ref Smash::Configuration
+
+\par Configuration options
+- \subpage inputoptions
+- \subpage outputexample
+
+\par Unit Testing
 - \ref unittest
-- Configuration
-- Experiment
 
 */
 
