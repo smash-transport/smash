@@ -175,15 +175,16 @@ TEST_CATCH(initialize_nucleus_empty_target, NucleusModus::NucleusEmpty) {
 TEST(initialize_sphere) {
  Configuration conf(TEST_CONFIG_PATH);
   conf["Modi"]["Sphere"]["RADIUS"] = 10;
-  conf["Modi"]["Sphere"]["NUMBEROFPARTICLES"] = 300;
   conf["Modi"]["Sphere"]["SPHERETEMPERATURE"] = 0.2;
   conf["Modi"]["Sphere"]["START_TIME"] = 0.0;
+  conf.take({"Modi", "Box", "INIT_MULTIPLICITIES"});
+  conf["Modi"]["Box"]["INIT_MULTIPLICITIES"]["661"] = 500;
   ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};
   SphereModus s(conf["Modi"], param);
   Particles P;
 //Is the correct number of particles in the map?
   COMPARE(s.initial_conditions(&P, param), 0.0f);
-  COMPARE(P.size(), 300);
+  COMPARE(P.size(), 500);
   COMPARE(P.data(67).pdgcode(), 0x661);
 // total momentum check
   FourVector momentum(0.0, 0.0, 0.0, 0.0);

@@ -44,8 +44,18 @@ namespace Smash {
  * Starting time of Sphere calculation.
  *
  * \key INIT_MULTIPLICITIES: \n
- * Initial multiplicities per particle species
+ * Initial multiplicities per particle species.
+ * Map of PDG number and quantity of this PDG number.
+ * Controls how many particles of each sort will be initialized. \n
+ * Example:
+ * \verbatim
+ INIT_MULTIPLICITIES:
+ 2112: 200
+ -2112: 100
+ \endverbatim
+ * It means that 200 neutrons and 100 antineutrons will be initialized.
  */
+ 
     
 SphereModus::SphereModus(Configuration modus_config,
                          const ExperimentParameters &)
