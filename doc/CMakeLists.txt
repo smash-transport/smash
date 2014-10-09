@@ -32,22 +32,29 @@ if(DOXYGEN)
       VERBATIM
       )
    find_program(SED sed)
+   execute_process(COMMAND ${SED} --version OUTPUT_VARIABLE _sed_version)
+   if(NOT "${_sed_version}" MATCHES "GNU sed")
+      set(SED "SED-NOTFOUND")
+      message(WARNING "GNU sed is required to build the user guide")
+   endif()
    find_program(GREP grep)
-   file(GLOB files_with_input "${PROJECT_SOURCE_DIR}/src/include/*.h" "${PROJECT_SOURCE_DIR}/src/*.cc")
-   add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/userguide.dox
-      COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/generateuserdocs.sh ${SED}
-      ${CMAKE_CURRENT_BINARY_DIR}/userguide.dox ${files_with_input}
-      DEPENDS ${files_with_input}
-      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-      COMMENT "Generating User Guide input file"
-      VERBATIM
-      )
-   add_custom_target(user ${DOXYGEN} ${CMAKE_CURRENT_BINARY_DIR}/DoxyUser
-      DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/userguide.dox
-      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-      COMMENT "Building User Guide"
-      VERBATIM
-      )
+   if(SED)
+      file(GLOB files_with_input "${PROJECT_SOURCE_DIR}/src/include/*.h" "${PROJECT_SOURCE_DIR}/src/*.cc")
+      add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/userguide.dox
+         COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/generateuserdocs.sh ${SED}
+         ${CMAKE_CURRENT_BINARY_DIR}/userguide.dox ${files_with_input}
+         DEPENDS ${files_with_input}
+         WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+         COMMENT "Generating User Guide input file"
+         VERBATIM
+         )
+      add_custom_target(user ${DOXYGEN} ${CMAKE_CURRENT_BINARY_DIR}/DoxyUser
+         DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/userguide.dox
+         WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+         COMMENT "Building User Guide"
+         VERBATIM
+         )
+   endif()
 
    find_program(XARGS xargs)
    find_program(PRINTF printf)
