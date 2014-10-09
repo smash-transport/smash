@@ -45,13 +45,6 @@ class BoxModus : public ModusDefault {
   explicit BoxModus(Configuration modus_config,
            const ExperimentParameters &parameters);
 
-  /** Prints some information about the initialization of BoxModus
-   *
-   * \see ModusDefalt::print_startup()
-   */
-  void print_startup();  // TODO(mkretz): needs to be discoverable from an
-                         // outside "printer"
-
   /** creates initial conditions from the particles.
    */
   float initial_conditions(Particles *particles,

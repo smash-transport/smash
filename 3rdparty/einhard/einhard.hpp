@@ -22,7 +22,7 @@
  * along with Einhard.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/** \mainpage Einhard Logging Library
+/** \page Einhard Logging Library
  *
  * \section intro_sec Introduction
  *

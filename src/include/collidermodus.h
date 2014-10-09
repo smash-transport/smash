@@ -45,11 +45,7 @@ class ColliderModus : public ModusDefault {
    **/
   explicit ColliderModus(Configuration modus_config,
            const ExperimentParameters &parameters);
-  /** Prints some information about the initialization of ColliderModus.
-   *
-   * \see ModusDefalt::print_startup()
-   */
-  void print_startup();
+
   /** creates initial conditions from the particles.
    *
    * In particular, it initializes target and projectile.
