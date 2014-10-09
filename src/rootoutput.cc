@@ -34,15 +34,29 @@ RootOutput::RootOutput(bf::path path, Configuration&& conf)
                                ? conf.take({"autosave_frequency"}) : 1000) {
   /*!\Userguide
    * \page input_root ROOT
+   * Enables output in a ROOT format. The latter is a structured binary format
+   * invented at CERN. For more details see root.cern.ch. The resulting
+   * output file can optionally contain two TTree's: the one containing
+   * information about particles snapshots at fixed moments of time and
+   * the one containing information about collisions.
+   *
    *
    * \key write_collisions: \n
-   * Optional, defaults to \c false.
+   * Optional, chooses if information about collisions, decays and box wall
+   * crossings should be written out (true) or not (false, default).
    *
    * \key write_particles: \n
-   * Optional, defaults to \c true.
+   * Optional, chooses if particles snapshots at fixed moments of time
+   * should be written out (true, default) or not (false).
    *
    * \key autosave_frequency: \n
-   * Optional, defaults to \c 1000.
+   * Root file cannot be read if it was not properly closed and finalized.
+   * It can happen that SMASH simulation crashed and root file was not closed.
+   * To save results of simulation in such case, "AutoSave" is
+   * applied every N events. The autosave_frequency option sets
+   * this N (default N = 1000). Note that "AutoSave" operation is very
+   * time-consuming, so the autosave_frequency is
+   * always a compromise between safety and speed.
    */
   if (write_particles_) {
     particles_tree_ = new TTree("particles", "particles");
@@ -218,7 +232,7 @@ void RootOutput::collisions_to_tree(const ParticleList &incoming,
     i++;
   }
 
-  for (const auto &p : incoming) {
+  for (const auto &p : outgoing) {
     t[i] = p.position().x0();
     x[i] = p.position().x1();
     y[i] = p.position().x2();

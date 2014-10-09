@@ -21,14 +21,7 @@ namespace Smash {
 
 /**
  * \ingroup output
- *
- * \brief SMASH output to binary file
- * ----------------------------------------------------------------------------
- * SMASH output to binary file is similar to OSCAR output,
- * but it is stored in a binary format. Such format is faster
- * to read and write, but may be architecture dependent.
- *
- * Binary file format is documented on the wiki in User Guide section
+ * Base class for SMASH binary output.
  **/
 class BinaryOutputBase : public OutputInterface {
  protected:
@@ -47,6 +40,15 @@ class BinaryOutputBase : public OutputInterface {
 
 /**
  * \ingroup output
+ * \brief Saves SMASH collision history to binary file.
+ *
+ * This class writes every collision, decay and box wall crossing
+ * to the output file. Optionally one can also write
+ * snapshots of initial and final state to the same file. 
+ * Output file is binary and has a block structure.
+ *
+ * Details of the output format can be found 
+ * on the wiki in User Guide section, look for binary output.
  */
 class BinaryOutputCollisions : public BinaryOutputBase {
  public:

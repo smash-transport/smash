@@ -29,9 +29,13 @@ BinaryOutputParticles::BinaryOutputParticles(bf::path path,
                                                    : true) {
   /*!\Userguide
    * \page input_binary_particles Binary_particles
-   *
+   * Saves snapshots of simulated particles at fixed moments
+   * in a binary format.
    * \key only_final: \n
-   * Optional, defaults to \c true.
+   * If true (default) - only particles at the end of event are saved to file.
+   * Otherwise, snapshots are also written to file every next fixed
+   * time interval starting from the moment of initialization
+   * and including it.
    */
   fwrite("SMSH", 4, 1, file_.get());  // magic number
   write(0);              // file format version number
