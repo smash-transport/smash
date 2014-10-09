@@ -37,6 +37,20 @@ std::ostream &operator<<(std::ostream &out, const std::vector<T> &v) {
   return out << '}';
 }
 
+template <typename T>
+std::ostream &operator<<(std::ostream &out, const std::initializer_list<T> &v) {
+  auto column = out.tellp();
+  out << "initializer_list{";
+  for (const auto &x : v) {
+    if (out.tellp() - column >= 100) {
+      out << '\n';
+      column = out.tellp();
+    }
+    out << x << ' ';
+  }
+  return out << '}';
+}
+
 template <typename T, std::size_t N>
 std::ostream &operator<<(std::ostream &out, const std::array<T, N> &a) {
   out << "array{";
@@ -129,178 +143,73 @@ class Grid {
     log.debug(cells_);
   }
 
+  using size_type = std::size_t;
+
   template <typename F>
-  void iterate_cells(F &&closure) {
+  void iterate_cells(F &&call_finder) {
+    const auto &log = logger<LogArea::Grid>();
     std::vector<const ParticleList *> neighbors;
     neighbors.reserve(13);
-    auto &&
-    build_neighbors = [&](const std::initializer_list<std::size_t> &indexes)
-                          -> const std::vector<const ParticleList *> &
-    {
+
+    auto &&call_closure = [&](size_type cell_index,
+                              const std::initializer_list<int> &xoffsets,
+                              const std::initializer_list<int> &yoffsets,
+                              const std::initializer_list<int> &zoffsets) {
       neighbors.clear();
-      for (const auto i : indexes) {
-        neighbors.emplace_back(&cells_[i]);
+      log.debug("call_closure(", cell_index, ", ", xoffsets, ", ", yoffsets,
+                ", ", zoffsets, ")");
+      for (auto dz : zoffsets) {
+        const auto cell_index_dz =
+            cell_index + dz * number_of_cells_[1] * number_of_cells_[0];
+        for (auto dy : yoffsets) {
+          const auto cell_index_dzdy = cell_index_dz + dy * number_of_cells_[0];
+          for (auto dx : xoffsets) {
+            const auto cell_index_dzdydx = cell_index_dzdy + dx;
+            if (cell_index_dzdydx > cell_index) {
+              neighbors.emplace_back(&cells_[cell_index_dzdydx]);
+            }
+          }
+        }
       }
-      return neighbors;
+      log.debug("iterate_cells calls closure with search_list: ", cells_[cell_index],
+                " and neighbors_list: ", neighbors);
+      call_finder(cells_[cell_index], neighbors);
     };
+
+    auto &&build_neighbors_with_zy = [&](
+        size_type y, size_type z, const std::initializer_list<int> &yoffsets,
+        const std::initializer_list<int> &zoffsets) {
+      if (number_of_cells_[1] > 1) {
+        call_closure(make_index(0, y, z), {0, 1}, yoffsets, zoffsets);
+        for (size_type x = 1; x < number_of_cells_[0] - 1; ++x) {
+          call_closure(make_index(x, y, z), {-1, 0, 1}, yoffsets, zoffsets);
+        }
+        call_closure(make_index(number_of_cells_[0] - 1, y, z), {-1, 0},
+                     yoffsets, zoffsets);
+      } else {
+        call_closure(make_index(0, y, z), {0}, yoffsets, zoffsets);
+      }
+    };
+
+    auto &&build_neighbors_with_z = [&](
+        size_type z, const std::initializer_list<int> &zoffsets) {
+      if (number_of_cells_[1] > 1) {
+        build_neighbors_with_zy(0, z, {0, 1}, zoffsets);
+        for (size_type y = 1; y < number_of_cells_[1] - 1; ++y) {
+          build_neighbors_with_zy(y, z, {-1, 0, 1}, zoffsets);
+        }
+        build_neighbors_with_zy(number_of_cells_[1] - 1, z, {-1, 0}, zoffsets);
+      } else {
+        build_neighbors_with_zy(0, z, {0}, zoffsets);
+      }
+    };
+
     if (Options == GridOptions::PeriodicBoundaries) {
     } else {
-      for (std::size_t z = 0; z < number_of_cells_[2] - 1; ++z) {
-        closure(cells_[make_index(0, 0, z)], build_neighbors({
-                make_index(1, 0, z + 0),
-                make_index(0, 1, z + 0),
-                make_index(1, 1, z + 0),
-                make_index(0, 0, z + 1),
-                make_index(1, 0, z + 1),
-                make_index(0, 1, z + 1),
-                make_index(1, 1, z + 1)
-              }));
-        for (std::size_t x = 1; x < number_of_cells_[0] - 1; ++x) {
-          closure(cells_[make_index(x, 0, z)], build_neighbors({
-                  make_index(x + 1, 0, z + 0),
-                  make_index(x - 1, 1, z + 0),
-                  make_index(x + 0, 1, z + 0),
-                  make_index(x + 1, 1, z + 0),
-                  make_index(x - 1, 0, z + 1),
-                  make_index(x + 0, 0, z + 1),
-                  make_index(x + 1, 0, z + 1),
-                  make_index(x - 1, 1, z + 1),
-                  make_index(x + 0, 1, z + 1),
-                  make_index(x + 1, 1, z + 1)
-                }));
-        }
-        {
-          const std::size_t x = number_of_cells_[0] - 1;
-          closure(cells_[make_index(x, 0, z)], build_neighbors({
-                  make_index(x - 1, 1, z + 0),
-                  make_index(x + 0, 1, z + 0),
-                  make_index(x - 1, 0, z + 1),
-                  make_index(x + 0, 0, z + 1),
-                  make_index(x - 1, 1, z + 1),
-                  make_index(x + 0, 1, z + 1)
-                }));
-        }
-        for (std::size_t y = 1; y < number_of_cells_[1] - 1; ++y) {
-          closure(cells_[make_index(0, y, z)], build_neighbors({
-                  make_index(1, y + 0, z + 0),
-                  make_index(0, y + 1, z + 0),
-                  make_index(1, y + 1, z + 0),
-                  make_index(0, y - 1, z + 1),
-                  make_index(1, y - 1, z + 1),
-                  make_index(0, y + 0, z + 1),
-                  make_index(1, y + 0, z + 1),
-                  make_index(0, y + 1, z + 1),
-                  make_index(1, y + 1, z + 1)
-                }));
-          for (std::size_t x = 1; x < number_of_cells_[0] - 1; ++x) {
-            neighbors.clear();
-            neighbors.emplace_back(&cells_[make_index(x + 1, y + 0, z + 0)]);
-            neighbors.emplace_back(&cells_[make_index(x - 1, y + 1, z + 0)]);
-            neighbors.emplace_back(&cells_[make_index(x + 0, y + 1, z + 0)]);
-            neighbors.emplace_back(&cells_[make_index(x + 1, y + 1, z + 0)]);
-            neighbors.emplace_back(&cells_[make_index(x - 1, y - 1, z + 1)]);
-            neighbors.emplace_back(&cells_[make_index(x + 0, y - 1, z + 1)]);
-            neighbors.emplace_back(&cells_[make_index(x + 1, y - 1, z + 1)]);
-            neighbors.emplace_back(&cells_[make_index(x - 1, y + 0, z + 1)]);
-            neighbors.emplace_back(&cells_[make_index(x + 0, y + 0, z + 1)]);
-            neighbors.emplace_back(&cells_[make_index(x + 1, y + 0, z + 1)]);
-            neighbors.emplace_back(&cells_[make_index(x - 1, y + 1, z + 1)]);
-            neighbors.emplace_back(&cells_[make_index(x + 0, y + 1, z + 1)]);
-            neighbors.emplace_back(&cells_[make_index(x + 1, y + 1, z + 1)]);
-            closure(cells_[make_index(x, y, z)], neighbors);
-          }
-          const std::size_t x = number_of_cells_[0] - 1;
-          neighbors.clear();
-          neighbors.emplace_back(&cells_[make_index(x - 1, y + 1, z + 0)]);
-          neighbors.emplace_back(&cells_[make_index(x + 0, y + 1, z + 0)]);
-          neighbors.emplace_back(&cells_[make_index(x - 1, y - 1, z + 1)]);
-          neighbors.emplace_back(&cells_[make_index(x + 0, y - 1, z + 1)]);
-          neighbors.emplace_back(&cells_[make_index(x - 1, y + 0, z + 1)]);
-          neighbors.emplace_back(&cells_[make_index(x + 0, y + 0, z + 1)]);
-          neighbors.emplace_back(&cells_[make_index(x - 1, y + 1, z + 1)]);
-          neighbors.emplace_back(&cells_[make_index(x + 0, y + 1, z + 1)]);
-          closure(cells_[make_index(x, y, z)], neighbors);
-        }
-        const std::size_t y = number_of_cells_[1] - 1;
-        neighbors.clear();
-        neighbors.emplace_back(&cells_[make_index(1, y + 0, z + 0)]);
-        neighbors.emplace_back(&cells_[make_index(0, y - 1, z + 1)]);
-        neighbors.emplace_back(&cells_[make_index(1, y - 1, z + 1)]);
-        neighbors.emplace_back(&cells_[make_index(0, y + 0, z + 1)]);
-        neighbors.emplace_back(&cells_[make_index(1, y + 0, z + 1)]);
-        closure(cells_[make_index(0, y, z)], neighbors);
-        for (std::size_t x = 1; x < number_of_cells_[0] - 1; ++x) {
-          neighbors.clear();
-          neighbors.emplace_back(&cells_[make_index(x + 1, y + 0, z + 0)]);
-          neighbors.emplace_back(&cells_[make_index(x - 1, y - 1, z + 1)]);
-          neighbors.emplace_back(&cells_[make_index(x + 0, y - 1, z + 1)]);
-          neighbors.emplace_back(&cells_[make_index(x + 1, y - 1, z + 1)]);
-          neighbors.emplace_back(&cells_[make_index(x - 1, y + 0, z + 1)]);
-          neighbors.emplace_back(&cells_[make_index(x + 0, y + 0, z + 1)]);
-          neighbors.emplace_back(&cells_[make_index(x + 1, y + 0, z + 1)]);
-          closure(cells_[make_index(x, y, z)], neighbors);
-        }
-        const std::size_t x = number_of_cells_[0] - 1;
-        neighbors.clear();
-        neighbors.emplace_back(&cells_[make_index(x - 1, y - 1, z + 1)]);
-        neighbors.emplace_back(&cells_[make_index(x + 0, y - 1, z + 1)]);
-        neighbors.emplace_back(&cells_[make_index(x - 1, y + 0, z + 1)]);
-        neighbors.emplace_back(&cells_[make_index(x + 0, y + 0, z + 1)]);
-        closure(cells_[make_index(x, y, z)], neighbors);
+      for (size_type z = 0; z < number_of_cells_[2] - 1; ++z) {
+        build_neighbors_with_z(z, {0, 1});
       }
-      const std::size_t z = number_of_cells_[2] - 1;
-      neighbors.clear();
-      neighbors.emplace_back(&cells_[make_index(1, 0, z + 0)]);
-      neighbors.emplace_back(&cells_[make_index(0, 1, z + 0)]);
-      neighbors.emplace_back(&cells_[make_index(1, 1, z + 0)]);
-      closure(cells_[make_index(0, 0, z)], neighbors);
-      for (std::size_t x = 1; x < number_of_cells_[0] - 1; ++x) {
-        neighbors.clear();
-        neighbors.emplace_back(&cells_[make_index(x + 1, 0, z + 0)]);
-        neighbors.emplace_back(&cells_[make_index(x - 1, 1, z + 0)]);
-        neighbors.emplace_back(&cells_[make_index(x + 0, 1, z + 0)]);
-        neighbors.emplace_back(&cells_[make_index(x + 1, 1, z + 0)]);
-        closure(cells_[make_index(x, 0, z)], neighbors);
-      }
-      {
-        const std::size_t x = number_of_cells_[0] - 1;
-        neighbors.clear();
-        neighbors.emplace_back(&cells_[make_index(x - 1, 1, z + 0)]);
-        neighbors.emplace_back(&cells_[make_index(x + 0, 1, z + 0)]);
-        closure(cells_[make_index(x, 0, z)], neighbors);
-      }
-      for (std::size_t y = 1; y < number_of_cells_[1] - 1; ++y) {
-        neighbors.clear();
-        neighbors.emplace_back(&cells_[make_index(1, y + 0, z + 0)]);
-        neighbors.emplace_back(&cells_[make_index(0, y + 1, z + 0)]);
-        neighbors.emplace_back(&cells_[make_index(1, y + 1, z + 0)]);
-        closure(cells_[make_index(0, y, z)], neighbors);
-        for (std::size_t x = 1; x < number_of_cells_[0] - 1; ++x) {
-          neighbors.clear();
-          neighbors.emplace_back(&cells_[make_index(x + 1, y + 0, z + 0)]);
-          neighbors.emplace_back(&cells_[make_index(x - 1, y + 1, z + 0)]);
-          neighbors.emplace_back(&cells_[make_index(x + 0, y + 1, z + 0)]);
-          neighbors.emplace_back(&cells_[make_index(x + 1, y + 1, z + 0)]);
-          closure(cells_[make_index(x, y, z)], neighbors);
-        }
-        const std::size_t x = number_of_cells_[0] - 1;
-        neighbors.clear();
-        neighbors.emplace_back(&cells_[make_index(x - 1, y + 1, z + 0)]);
-        neighbors.emplace_back(&cells_[make_index(x + 0, y + 1, z + 0)]);
-        closure(cells_[make_index(x, y, z)], neighbors);
-      }
-      const std::size_t y = number_of_cells_[1] - 1;
-      neighbors.clear();
-      neighbors.emplace_back(&cells_[make_index(1, y + 0, z + 0)]);
-      closure(cells_[make_index(0, y, z)], neighbors);
-      for (std::size_t x = 1; x < number_of_cells_[0] - 1; ++x) {
-        neighbors.clear();
-        neighbors.emplace_back(&cells_[make_index(x + 1, y + 0, z + 0)]);
-        closure(cells_[make_index(x, y, z)], neighbors);
-      }
-      const std::size_t x = number_of_cells_[0] - 1;
-      neighbors.clear();
-      closure(cells_[make_index(x, y, z)], neighbors);
+      build_neighbors_with_z(number_of_cells_[2] - 1, {0});
     }
   }
 
