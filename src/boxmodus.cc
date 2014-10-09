@@ -40,18 +40,33 @@ std::ostream &operator<<(std::ostream &out, const BoxModus &m) {
  * \page input_modi_box_ Box
  *
  * \key INITIAL_CONDITION: \n
- * Controls whether particles are created with
- * thermal momenta (sampled from a Maxwell-Boltzmann distribution) or
- * with average momentum \f$p = 3 \cdot T\f$ with T the temperature. The
- * latter is chosen if \key INITIAL_CONDITION is 2.
+ * Controls initial momentum distribution of particles.
+ * If the value is 2 then all the particles have momentum
+ * \f$p = 3 \cdot T\f$, where T is the temperature. Directions
+ * of momenta are uniformly distributed.
+ * If the value is not 2 then thermal momenta (sampled from a 
+ * Maxwell-Boltzmann distribution) are taken.
  *
  * \key LENGTH: \n
- * Length of the cube's edge in fm/c
+ * Length of the cube's edge in fm
  *
  * \key TEMPERATURE: \n
  * Temperature in the box in GeV.
  *
  * \key START_TIME: \n
+ * Starting time of the simulation.
+ * All particles in the box are initialized with \f$x^0\f$ = START_TIME.
+ *
+ * \key INIT_MULTIPLICITIES: \n
+ * Map of PDG number and quantity of this PDG number.
+ * Controls how many particles of each sort will be initialized. \n
+ * Example:
+ * \verbatim
+   INIT_MULTIPLICITIES:
+       2112: 200
+       -2112: 100
+   \endverbatim
+ * It means that 200 neutrons and 100 antineutrons will be initialized.
  */
 BoxModus::BoxModus(Configuration modus_config, const ExperimentParameters &)
     : initial_condition_(modus_config.take({"Box", "INITIAL_CONDITION"})),
@@ -113,8 +128,9 @@ float BoxModus::initial_conditions(Particles *particles,
     log.debug() << data;
   }
   /* allows to check energy conservation */
-  log.info() << "Box initial total 4-momentum [GeV]: "
-             << momentum_total;   return start_time_;
+  log.info() << "Initial total 4-momentum [GeV]: "
+             << momentum_total;
+  return start_time_;
 }
 
 /* evolve - the core of the box, stepping forward in time */

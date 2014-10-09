@@ -21,6 +21,8 @@ namespace Smash {
 
 /**
  * \ingroup output
+ * SMASH output in a paraview format,
+ * intended for simple visualization.
  */
 class VtkOutput : public OutputInterface {
  public:

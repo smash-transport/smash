@@ -22,7 +22,12 @@ VtkOutput::VtkOutput(bf::path path, Configuration&& /*conf*/)
 /*!\Userguide
  * \page input_vtk VTK
  *
- * No further options. It can only be enabled/disabled.
+ * Writes snapshots of simulated particles at fixed moments of time
+ * to separate .vtk files. These fixed moments of time are event start,
+ * event end and every next time interval \f$\Delta t\f$, where
+ * \f$\Delta t\f$ is controlled by an option.
+ * Produced output can be opened by paraview
+ * and used for an easy visualization of the simulation.
  */
 
 VtkOutput::~VtkOutput() {
