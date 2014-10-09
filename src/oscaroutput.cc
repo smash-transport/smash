@@ -26,36 +26,34 @@ OscarOutput<Format, Contents>::OscarOutput(bf::path path, std::string name)
   /*!\Userguide
    * \page input_oscar_particlelist OSCAR_PARTICLELIST
    * Enables OSCAR particles output. 
-   * OSCAR particles output writes a snapshot of all simulated
-   * particles at some fixed moments to the output text file. The format
+   * OSCAR particles output provides the particle list at the output intervals. The text format
    * is either OSCAR1999 or OSCAR2013, this is controlled by an option.
    * Fixed moments of output can be: event start, event end, every next
-   * time interval \f$\Delta t \f$.
+   * output interval \f$\Delta t \f$.
    * Writing (or not writing) output at these moments is controlled by options.
-   * Time interval \f$\Delta t \f$ is also regulated by an option.
+   * Output time interval \f$\Delta t \f$ is also regulated by an option.
    * 
-   * \key 2013_format: \n
-   * Optional, chooses if output will be in OSCAR2013 format (true)
-   * or in OSCAR1999 format (false, default).
+   * \key 2013_format (bool, optional, default = false): \n
+   * true - output will be in OSCAR2013 format\n
+   * false - output will be in OSCAR1999 format
    *
-   * \key Only_final: \n
-   * Optional, if true (default) then only final particles are printed.
-   * Otherwise, snapshots of simulated particles are written periodically
-   * with a fixed time period starting from event initialization
-   * and including it.
+   * \key Only_final (bool, optional, default = true): \n
+   * true - print only final particle list \n
+   * false - particle list at output interval including initial time
    *
    * \page input_oscar_collisions OSCAR_COLLISIONS
    * Enables OSCAR collisions output. The latter saves information about
    * every collision, decay and box wall crossing in OSCAR1999 or OSCAR2013 format.
    * Optionally initial and final particle configurations can be written out.
    *
-   * \key 2013_format: \n
-   * Optional, chooses if output will be in OSCAR2013 format (true)
-   * or in OSCAR1999 format (false, default).
+   * \key 2013_format (bool, optional, default = false): \n
+   * true - output will be in OSCAR2013 format\n
+   * false - output will be in OSCAR1999 format
    *
-   * \key Print_start_end: \n
-   * Optional, chooses if initial and final configurations will be
-   * printed (true) or not (false, default).
+   * \key Print_start_end (bool, optional, default = false): \n
+   * true - initial and final particle list is written out \n
+   * false - initial and final particle list is not written out
+   *
    */
   if (Format == OscarFormat2013) {
     fprintf(file_.get(), "#!OSCAR2013 %s %s ", name.c_str(), VERSION_MAJOR);

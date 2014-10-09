@@ -37,19 +37,20 @@ RootOutput::RootOutput(bf::path path, Configuration&& conf)
    * Enables output in a ROOT format. The latter is a structured binary format
    * invented at CERN. For more details see root.cern.ch. The resulting
    * output file can optionally contain two TTree's: the one containing
-   * information about particles snapshots at fixed moments of time and
-   * the one containing information about collisions.
+   * information about the particle list at fixed moments of time and
+   * the other one containing information about the collision history.
    *
    *
-   * \key write_collisions: \n
-   * Optional, chooses if information about collisions, decays and box wall
-   * crossings should be written out (true) or not (false, default).
+   * \key write_collisions (bool, optional, default = false): \n
+   * true - information about collisions, decays and box wall
+   * crossings will be written out \n
+   * false - collision history information is suppressed
    *
-   * \key write_particles: \n
-   * Optional, chooses if particles snapshots at fixed moments of time
-   * should be written out (true, default) or not (false).
+   * \key write_particles (bool, optional, default = true): \n
+   * true - particle list at output interval is written out \n
+   * false - particle list is not written out 
    *
-   * \key autosave_frequency: \n
+   * \key autosave_frequency (int, optional, default = 1000): \n
    * Root file cannot be read if it was not properly closed and finalized.
    * It can happen that SMASH simulation crashed and root file was not closed.
    * To save results of simulation in such case, "AutoSave" is
