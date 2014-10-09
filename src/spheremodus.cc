@@ -37,15 +37,16 @@ namespace Smash {
  * \key RADIUS: \n
  * Radius of the Sphere.
  *
- * \key NUMBEROFPARTICLES: \n
- * Total number of particles in the Sphere.
- *
  * \key SPHERETEMPERATURE: \n
  * Temperature for the momentum sampling in the sphere in GeV.
  *
  * \key START_TIME: \n
  * Starting time of Sphere calculation.
+ *
+ * \key INIT_MULTIPLICITIES: \n
+ * Initial multiplicities per particle species
  */
+    
 SphereModus::SphereModus(Configuration modus_config,
                          const ExperimentParameters &)
     : radius_(modus_config.take({"Sphere", "RADIUS"})),
@@ -59,8 +60,6 @@ SphereModus::SphereModus(Configuration modus_config,
 std::ostream &operator<<(std::ostream &out, const SphereModus &m) {
   return out << "-- Sphere Modus:\n"
                 "Radius of the sphere: " << m.radius_ << " [fm]"
-             << "\nTotal number of particles in sphere: "
-             << m.number_of_particles_
              << "\nTemperature for momentum sampling: " << m.sphere_temperature_
              << "\nStarting time for Sphere calculation: " << m.start_time_
              << '\n';
