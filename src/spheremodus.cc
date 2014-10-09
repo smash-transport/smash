@@ -34,16 +34,16 @@ namespace Smash {
 /*!\Userguide
  * \page input_modi_sphere_ Sphere
  *
- * \key RADIUS: \n
+ * \key RADIUS (float required): \n
  * Radius of the Sphere.
  *
- * \key SPHERETEMPERATURE: \n
+ * \key SPHERETEMPERATURE (float required):\n
  * Temperature for the momentum sampling in the sphere in GeV.
  *
- * \key START_TIME: \n
+ * \key START_TIME (float required):\n
  * Starting time of Sphere calculation.
  *
- * \key INIT_MULTIPLICITIES: \n
+ * \key INIT_MULTIPLICITIES (int int required):\n
  * Initial multiplicities per particle species.
  * Map of PDG number and quantity of this PDG number.
  * Controls how many particles of each sort will be initialized. \n
