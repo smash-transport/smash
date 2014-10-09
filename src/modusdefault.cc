@@ -46,7 +46,10 @@ FourVector ModusDefault::baryon_jmu(ThreeVector r,
     if (!p.is_baryon()) continue;
     ri = p.position().threevec();
     betai = p.velocity();
+    // printf("betai = %12.4f %12.4f %12.4f\n",betai.x1(),betai.x2(),betai.x3());
+
     inv_gammai = p.inverse_gamma();
+    // printf("gamma_inv = %12.4f\n", inv_gammai);
 
     // Get distance between particle and r in the particle rest frame
     hlp = ((ri - r) * betai) / (inv_gammai * (1. + inv_gammai));
