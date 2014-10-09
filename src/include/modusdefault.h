@@ -10,6 +10,7 @@
 #define SRC_INCLUDE_MODUSDEFAULT_H_
 
 #include "forwarddeclarations.h"
+#include "threevector.h"
 
 #include <stdexcept>
 
@@ -58,6 +59,19 @@ class ModusDefault {
    */
   void propagate(Particles *particles, const ExperimentParameters &parameters,
                                        const OutputsList &);
+  /** Calculates baryon 4-current in the computational frame.
+   *  \f[j^{\mu} = (\sqrt{2\pi} \sigma )^{-3} \sum_{i=1}^N B_i u^{\mu}_i
+   *   exp \left(- \frac{(\vec r - \vec r_i + \vec \beta_i \gamma_i^2 / (1+\gamma_i)
+   *   (\vec \beta_i, \vec r - \vec r_i))^2}{2\sigma^2} \right) \f]
+   *  \f[ \rho_B = \sqrt{j^{\mu} j_{\mu}} \f]
+   *
+   * \param[in] r the point at which baryon 4-current is calculated
+   * \param[in] plist list of particles for calculation
+   * \param[in] gs_sigma sigma of the gaussian,
+   *  which represents particle Wigner density
+   */
+  FourVector baryon_jmu(ThreeVector r, const ParticleList &plist,
+                                                  double gs_sigma);
 
   /** \ingroup exception
    *  BadInput is an error to throw if the configuration options are invalid.

@@ -193,7 +193,7 @@ inline void ParticleData::set_3position(const ThreeVector &pos) {
 inline void ParticleData::boost (const ThreeVector &v)
 {
   set_4momentum(momentum_.LorentzBoost(v));
-  // TODO: do we actually need to boost the position?
+  // we also need to boost the position
   set_4position(position_.LorentzBoost(v));
 }
 
