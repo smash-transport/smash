@@ -199,8 +199,13 @@ Experiment<Modus>::Experiment(Configuration config)
   log.info() << "Random number seed: " << seed_;
   log.info() << *this;
 
-  action_finders_.emplace_back(new ScatterActionsFinder(parameters_));
-  action_finders_.emplace_back(new DecayActionsFinder(parameters_));
+  if (config.take({"Collision_Term", "Decays"})) {
+    action_finders_.emplace_back(new DecayActionsFinder(parameters_));
+  }
+  if (config.take({"Collision_Term", "Collisions"})) {
+    action_finders_.emplace_back(new ScatterActionsFinder(parameters_));
+  }
+
 }
 
 /* This method reads the particle type and cross section information
