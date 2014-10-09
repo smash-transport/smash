@@ -7,7 +7,6 @@
 
 \par Configuration options
 - \subpage inputoptions
-- \subpage outputexample
 
 \par Unit Testing
 - \ref unittest
