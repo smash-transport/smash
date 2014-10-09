@@ -180,10 +180,8 @@ class Experiment : public ExperimentBase {
    */
   OutputsList outputs_;
 
-  /// The object that finds decays
-  DecayActionsFinder decay_finder_;
-  /// The object that finds scatterings
-  ScatterActionsFinder scatter_finder_;
+  /// The Action finder objects
+  std::vector<std::unique_ptr<ActionFinderInterface>> action_finders_;
 
   /**
    * Number of events.

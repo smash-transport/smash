@@ -22,6 +22,7 @@
 #include "include/configuration.h"
 #include "include/experiment.h"
 #include "include/forwarddeclarations.h"
+#include "include/grid.h"
 #include "include/logging.h"
 #include "include/macros.h"
 #include "include/nucleusmodus.h"
@@ -178,14 +179,22 @@ std::ostream &operator<<(std::ostream &out, const Experiment<Modus> &e) {
  * \key NEVENTS: \n
  * Number of events to calculate.
  *
+ * \page input_collision_term_ Collision_Term
+ * \key Decays: \n
+ * This boolean value determines whether any decays are performed.
+ * Setting it to \c false will disable all decays.
+ * Default: \c true.
+ *
+ * \key Collisions: \n
+ * This boolean value determines whether any collisions are performed.
+ * Setting it to \c false will disable all collisions.
+ * Default: \c true.
  */
 template <typename Modus>
 Experiment<Modus>::Experiment(Configuration config)
     : parameters_(create_experiment_parameters(config)),
       modus_(config["Modi"], parameters_),
       particles_(),
-      decay_finder_(parameters_),
-      scatter_finder_(parameters_),
       nevents_(config.take({"General", "NEVENTS"})),
       end_time_(config.take({"General", "END_TIME"})),
       delta_time_startup_(config.take({"General", "DELTA_TIME"})) {
@@ -199,6 +208,14 @@ Experiment<Modus>::Experiment(Configuration config)
   Random::set_seed(seed_);
   log.info() << "Random number seed: " << seed_;
   log.info() << *this;
+
+  if (config.take({"Collision_Term", "Decays"})) {
+    action_finders_.emplace_back(new DecayActionsFinder(parameters_));
+  }
+  if (config.take({"Collision_Term", "Collisions"})) {
+    action_finders_.emplace_back(new ScatterActionsFinder(parameters_));
+  }
+
 }
 
 /* This method reads the particle type and cross section information
@@ -268,10 +285,22 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
                                      // sorting and finally a single linear
                                      // iteration
 
-    /* (1.a) Find possible decays. */
-    actions += decay_finder_.find_possible_actions(particles_);
-    /* (1.b) Find possible collisions. */
-    actions += scatter_finder_.find_possible_actions(particles_);
+    Grid<GridOptions::Normal> grid(
+        ParticleList{particles_.data().begin(), particles_.data().end()});
+    grid.iterate_cells([&](
+        const ParticleList &search_list,  // a list of particles where each pair
+                                          // needs to be tested for possible
+                                          // interaction
+        const std::vector<const ParticleList *> &
+            neighbors_list  // a list of particles that need to be tested
+                            // against particles in search_list for possible
+                            // interaction
+        ) {
+      for (const auto &finder : action_finders_) {
+        actions += finder->find_possible_actions(search_list, neighbors_list);
+      }
+    });
+
     /* (1.c) Sort action list by time. */
     std::sort(actions.begin(), actions.end(),
               [](const ActionPtr &a, const ActionPtr &b) { return *a < *b; });
