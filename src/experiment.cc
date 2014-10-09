@@ -67,7 +67,7 @@ std::unique_ptr<ExperimentBase> ExperimentBase::create(Configuration config) {
   log.trace() << source_location;
   /*!\Userguide
    * \page input_general_ General
-   * \key MODUS: \n
+   * \key MODUS (string, required): \n
    * Selects a modus for the calculation, e.g.\ infinite matter
    * calculation, collision of two particles or collision of nuclei. The modus
    * will be configured in \ref input_modi_. Recognized values are:
@@ -112,16 +112,16 @@ std::unique_ptr<ExperimentBase> ExperimentBase::create(Configuration config) {
 namespace {
 /*!\Userguide
  * \page input_general_ General
- * \key DELTA_TIME: \n
+ * \key DELTA_TIME (float, required): \n
  * Time step for the calculation, in fm/c.
  *
- * \key TESTPARTICLES: \n
+ * \key TESTPARTICLES (int, required): \n
  * How many test particles per real particles should be simulated.
  *
- * \key SIGMA: \n
+ * \key SIGMA (float, required): \n
  * Elastic cross-section.
  *
- * \key OUTPUT_INTERVAL: \n
+ * \key OUTPUT_INTERVAL (float, required): \n
  * Defines the period of intermediate output of the status of the simulated
  * system in Standard Output and other output formats which support this
  * functionality.
@@ -168,24 +168,24 @@ std::ostream &operator<<(std::ostream &out, const Experiment<Modus> &e) {
 
 /*!\Userguide
  * \page input_general_
- * \key END_TIME: \n
+ * \key END_TIME (float, required): \n
  * The time after which the evolution is stopped. Note
  * that the starting time depends on the chosen MODUS.
  *
- * \key RANDOMSEED: \n
+ * \key RANDOMSEED (int64_t, required): \n
  * Initial seed for the random number generator. If this is
  * negative, the program starting time is used.
  *
- * \key NEVENTS: \n
+ * \key NEVENTS (int, required): \n
  * Number of events to calculate.
  *
  * \page input_collision_term_ Collision_Term
- * \key Decays: \n
+ * \key Decays (bool, optional, default = true): \n
  * This boolean value determines whether any decays are performed.
  * Setting it to \c false will disable all decays.
  * Default: \c true.
  *
- * \key Collisions: \n
+ * \key Collisions (bool, optional, default = true): \n
  * This boolean value determines whether any collisions are performed.
  * Setting it to \c false will disable all collisions.
  * Default: \c true.
@@ -199,7 +199,7 @@ Experiment<Modus>::Experiment(Configuration config)
       end_time_(config.take({"General", "END_TIME"})),
       delta_time_startup_(config.take({"General", "DELTA_TIME"})) {
   const auto &log = logger<LogArea::Experiment>();
-  int64_t seed_ = config.take({"General", "RANDOMSEED"});
+  int64_t seed_ = config.take({"General",  "RANDOMSEED"});
   if (seed_ < 0) {
     // Seed with a real random value, if available
     std::random_device rd;

@@ -34,10 +34,10 @@ BinaryOutputCollisions::BinaryOutputCollisions(bf::path path,
    * wall crossing in a binary format. Optionally initial and 
    * final particle configurations can be written out.
    *
-   * \key print_start_end: \n
-   * If false (default) - only information about collisions, decays and
-   * box wall crossings is saved, no initial or final state snapshot is
-   * written. If true - initial and final configuration are saved too.
+   * \key print_start_end (bool, optional, default = false): \n
+   * false - only information about collisions, decays and
+   * box wall crossings during the whole evolution \n
+   * true - initial and final configuration are written in addition
    */
   fwrite("SMSH", 4, 1, file_.get());  // magic number
   write(0);              // file format version number
