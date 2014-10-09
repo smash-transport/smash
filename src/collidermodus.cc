@@ -23,14 +23,14 @@ namespace Smash {
 /*!\Userguide
  * \page input_modi_collider_ Collider
  *
- * \key SQRTS: \n
+ * \key SQRTS (float, required): \n
  * Center-of-mass energy of the system, in GeV. Needs to be
  * larger than the sum of the masses of the two particles.
  *
- * \key PROJECTILE: \n
+ * \key PROJECTILE (int, required): \n
  * PdgCode of the Projectile
  *
- * \key TARGET: \n
+ * \key TARGET (int, required): \n
  * PdgCode of the Target
  */
 ColliderModus::ColliderModus(Configuration modus_config,
