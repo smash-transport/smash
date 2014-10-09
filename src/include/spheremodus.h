@@ -53,13 +53,12 @@ class SphereModus : public ModusDefault {
  private:
   /// Sphere radius length
   float radius_;
-  /// Total number of particles in Sphere
-  int number_of_particles_;
   /// Temperature for momentum distribution
   float sphere_temperature_;
   /// Starting time for the Sphere
   const float start_time_ = 0.0f;
-
+  /// particle multiplicities at initialization
+  const std::map<PdgCode, int> init_multipl_;
   /**\ingroup logging
    * Writes the initial state for the Sphere to the output stream.
    */
