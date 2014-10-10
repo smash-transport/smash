@@ -55,8 +55,8 @@ namespace Smash {
  \endverbatim
  * It means that 200 neutrons and 100 antineutrons will be initialized.
  */
- 
-    
+
+
 SphereModus::SphereModus(Configuration modus_config,
                          const ExperimentParameters &)
     : radius_(modus_config.take({"Sphere", "Radius"})),
@@ -68,19 +68,22 @@ SphereModus::SphereModus(Configuration modus_config,
 
 /* console output on startup of sphere specific parameters */
 std::ostream &operator<<(std::ostream &out, const SphereModus &m) {
-  return out << "-- Sphere Modus:\n"
-                "Radius of the sphere: " << m.radius_ << " [fm]"
-             << "\nTemperature for momentum sampling: " << m.sphere_temperature_
-             << "\nStarting time for Sphere calculation: " << m.start_time_
-             << '\n';
+  out << "-- Sphere Modus:\nRadius of the sphere: " << m.radius_ << " [fm]"
+      << "\nTemperature for momentum sampling: " << m.sphere_temperature_
+      << "\nStarting time for Sphere calculation: " << m.start_time_ << '\n';
+  for (const auto &p : m.init_multipl_) {
+    out << "Particle " << p.first << " initial multiplicity "
+                       << p.second << '\n';
+  }
+  return out;
 }
 
 
 /* initial_conditions - sets particle data for @particles */
 float SphereModus::initial_conditions(Particles *particles,
   const ExperimentParameters &parameters) {
-  const auto &log = logger<LogArea::Sphere>(); 
-  FourVector momentum_total(0, 0, 0, 0);	  
+  const auto &log = logger<LogArea::Sphere>();
+  FourVector momentum_total(0, 0, 0, 0);
  /* Create NUMBER OF PARTICLES according to configuration */
   for (const auto &p : init_multipl_) {
     particles->create(p.second*parameters.testparticles, p.first);
@@ -121,7 +124,7 @@ float SphereModus::initial_conditions(Particles *particles,
   }
   /* allows to check energy conservation */
   log.info() << "Sphere initial total 4-momentum [GeV]: "
-             << momentum_total;  
+             << momentum_total;
   return start_time_;
 }
 }  // namespace Smash
