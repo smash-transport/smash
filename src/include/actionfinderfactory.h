@@ -32,12 +32,6 @@ class ActionFinderInterface {
    *                    for possible interaction
    * \param neighbors_list a list of particles that need to be tested against
    *                       particles in search_list for possible interaction
-   * \param particles We should not need this parameter. But until the
-   *                  interfaces are fixed, this is the pointer to the global
-   *                  Particles map, which allows to modify particles globally.
-   * \param parameters
-   * \param cross_sections
-   *
    * \return The function returns a list (std::vector) of Action objects that
    *         could possibly be executed in this time step.
    */

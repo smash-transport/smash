@@ -23,38 +23,129 @@
 #include "include/random.h"
 
 namespace Smash {
-
+  
+/*!\Userguide
+ * \page input_modi_nucleus_ Nucleus
+ *
+ * Possible Incident Energies, only one can be given:
+ * \key Sqrtsnn (float, optional, no default): \n
+ * Defines the energy of the collision as center-of-mass
+ * energy in the collision of one participant each from both nuclei.
+ * Optional: Since not all participants have the same mass, and hence
+ * \f$\sqrt{s_{\rm NN}}\f$ is different for \f$NN\f$ = proton+proton and
+ * \f$NN\f$=neutron+neutron, you can specify which \f$NN\f$-pair you
+ * want this to refer to with `Sqrts_Reps`. This expects a vector of two
+ * PDG Codes, e.g. `Sqrts_n: [2212, 2212]` for proton-proton.
+ * Default is the average nucleon mass per nucleus.
+ *
+ * \key E_Lab (float, optional, no default): \n
+ * Defines the energy of the collision by the initial energy in GeV? of
+ * the projectile nucleus.  This assumes the target nucleus is at rest.
+ *
+ * \key P_Lab (float, optional, no default): \n
+ * Defines the energy of the collision by the initial momentum
+ * of the projectile nucleus in GeV?.  This assumes the target nucleus is at rest.
+ *
+ * \key Calculation_Frame (int, required, default = 1): \n
+ * The frame in which the collision is calculated.\n
+ * 1 - center of velocity frame\n
+ * 2 - center of mass frame\n
+ * 3 - fixed target frame
+ *
+ * \key Projectile: \n
+ * Section for projectile nucleus. The projectile will
+ * start at \f$z < 0\f$ and fly in positive \f$z\f$-direction, at \f$x
+ * \ge 0\f$.
+ *
+ * \key Target: \n
+ * Section for target nucleus. The target will start at \f$z
+ * > 0\f$ and fly in negative \f$z\f$-direction, at \f$x \le 0\f$.
+ *
+ *
+ * \key Projectile: and \key Target: \n
+ * \li \key Particles (int:int, int:int, required):\n
+ * A map in which the keys are PDG codes and the
+ * values are number of particles with that PDG code that should be in
+ * the current nucleus. E.g.\ `Particles: {2212: 82, 2112: 126}` for a
+ * lead-208 nucleus (82 protons and 126 neutrons = 208 nucleons), and
+ * `Particles: {2212: 1, 2112: 1, 3122: 1}` for Hyper-Triton (one
+ * proton, one neutron and one Lambda).
+ * \li \key Deformed (bool, optional, default = false): \n
+ * true - deformed nucleus is initialized
+ * false - spherical nucleus is initialized
+ * \li \key Automatic (bool, optional, default = values from config file): \n
+ * Whether or not to use default values based on the
+ * current nucleus atomic number (true/false).
+ *
+ * Additional Woods-Saxon Parameters: \n
+ * There are also many other
+ * parameters for specifying the shape of the Woods-Saxon distribution,
+ * and other nucleus specific properties. See nucleus.cc and
+ * deformednucleus.cc for more on these choices.
+ *
+ * \li \subpage input_deformed_nucleus_
+ *
+ * \key Impact: \n
+ * A section for the impact parameter (= distance of the two
+ * straight lines that the center of masses of the nuclei travel on).
+ *
+ * \li \key Value (float, optional, optional, default = 0.f): fixed value for
+ * the impact parameter. No other \key Impact: directive is looked at.
+ * \li \key Sample (string, optional, default = quadratic sampling): \n
+ * if \key uniform, use uniform sampling of the impact parameter 
+ * (\f$dP(b) = db\f$). If else, use areal input sampling
+ * (the probability of an input parameter range is proportional to the
+ * area corresponding to that range, \f$dP(b) = b\cdot db\f$).
+ * \li \key Range (float, float, optional, default = 0.0f):\n
+ * A vector of minimal and maximal impact parameters
+ * between which b should be chosen. (The order of these is not
+ * important.)
+ * \li \key Max (float, optional, default = 0.0f):
+ * Like `Range: [0.0, Max]`. Note that if both \key Range and
+ * \key Max are specified, \key Max takes precedence.
+ *
+ * Note that there are no safeguards to prevent you from specifying
+ * negative impact parameters. The value chosen here is simply the
+ * x-component of \f$\vec b\f$. The result will be that the projectile
+ * and target will have switched position in x.
+ *
+ * \key Initial_Distance (float, optional, default = no displacement): \n
+ * The initial distance of the two nuclei. That
+ * means \f$z_{\rm min}^{\rm target} - z_{\rm max}^{\rm projectile}\f$.
+ */
+    
+ 
 NucleusModus::NucleusModus(Configuration modus_config,
                            const ExperimentParameters &params) {
   Configuration modus_cfg = modus_config["Nucleus"];
 
   // Get the reference frame for the collision calculation.
-  if (modus_cfg.has_value({"CALCULATION_FRAME"})) {
-    frame_ = modus_cfg.take({"CALCULATION_FRAME"});
+  if (modus_cfg.has_value({"Calculation_Frame"})) {
+    frame_ = modus_cfg.take({"Calculation_Frame"});
   }
 
   // Decide which type of nucleus: deformed or not (default).
-  if (modus_cfg.has_value({"Projectile", "DEFORMED"}) &&
-      modus_cfg.take({"Projectile", "DEFORMED"})) {
+  if (modus_cfg.has_value({"Projectile", "Deformed"}) &&
+      modus_cfg.take({"Projectile", "Deformed"})) {
     projectile_ = std::unique_ptr<DeformedNucleus>(new DeformedNucleus());
   } else {
     projectile_ = std::unique_ptr<Nucleus>(new Nucleus());
 
   }
-  if (modus_cfg.has_value({"Target", "DEFORMED"}) &&
-      modus_cfg.take({"Target", "DEFORMED"})) {
+  if (modus_cfg.has_value({"Target", "Deformed"}) &&
+      modus_cfg.take({"Target", "Deformed"})) {
     target_ = std::unique_ptr<DeformedNucleus>(new DeformedNucleus());
   } else {
     target_ = std::unique_ptr<Nucleus>(new Nucleus());
   }
 
   // Fill nuclei with particles.
-  std::map<PdgCode, int> pro = modus_cfg.take({"Projectile", "PARTICLES"});
+  std::map<PdgCode, int> pro = modus_cfg.take({"Projectile", "Particles"});
   projectile_->fill_from_list(pro, params.testparticles);
   if (projectile_->size() < 1) {
     throw NucleusEmpty("Input Error: Projectile nucleus is empty.");
   }
-  std::map<PdgCode, int> tar = modus_cfg.take({"Target", "PARTICLES"});
+  std::map<PdgCode, int> tar = modus_cfg.take({"Target", "Particles"});
   target_->fill_from_list(tar, params.testparticles);
   if (target_->size() < 1) {
     throw NucleusEmpty("Input Error: Target nucleus is empty.");
@@ -62,14 +153,14 @@ NucleusModus::NucleusModus(Configuration modus_config,
 
   // Ask to construct nuclei based on atomic number; otherwise, look
   // for the user defined values or take the default parameters.
-  if (modus_cfg.has_value({"Projectile", "AUTOMATIC"}) &&
-      modus_cfg.take({"Projectile", "AUTOMATIC"})) {
+  if (modus_cfg.has_value({"Projectile", "Automatic"}) &&
+      modus_cfg.take({"Projectile", "Automatic"})) {
     projectile_->set_parameters_automatic();
   } else {
     projectile_->set_parameters_from_config("Projectile", modus_cfg);
   }
-  if (modus_cfg.has_value({"Target", "AUTOMATIC"}) &&
-      modus_cfg.take({"Target", "AUTOMATIC"})) {
+  if (modus_cfg.has_value({"Target", "Automatic"}) &&
+      modus_cfg.take({"Target", "Automatic"})) {
     target_->set_parameters_automatic();
   } else {
     target_->set_parameters_from_config("Target", modus_cfg);
@@ -82,8 +173,8 @@ NucleusModus::NucleusModus(Configuration modus_config,
   float mass_projec = projectile_->mass();
   float mass_target = target_->mass();
   // Option 1: Center of mass energy.
-  if (modus_cfg.has_value({"SQRTSNN"})) {
-      float sqrt_s_NN = modus_cfg.take({"SQRTSNN"});
+  if (modus_cfg.has_value({"Sqrtsnn"})) {
+      float sqrt_s_NN = modus_cfg.take({"Sqrtsnn"});
       // Note that \f$\sqrt{s_{NN}}\f$ is different for neutron-neutron and
       // proton-proton collisions (because of the different masses).
       // Therefore,representative particles are needed to specify which
@@ -91,8 +182,8 @@ NucleusModus::NucleusModus(Configuration modus_config,
       // specifies a pair of PDG codes for the two particle species we want to use.
       // The default is otherwise the average nucleon mass for each nucleus.
       PdgCode id_1 = 0, id_2 = 0;
-      if (modus_cfg.has_value({"SQRTS_REPS"})) {
-        std::vector<PdgCode> sqrts_reps = modus_cfg.take({"SQRTS_REPS"});
+      if (modus_cfg.has_value({"Sqrts_Reps"})) {
+        std::vector<PdgCode> sqrts_reps = modus_cfg.take({"Sqrts_Reps"});
         id_1 = sqrts_reps[0];
         id_2 = sqrts_reps[1];
       }
@@ -124,11 +215,11 @@ NucleusModus::NucleusModus(Configuration modus_config,
       energy_input++;
   }
   // Option 2: Energy of the projectile nucleus (target at rest).
-  if (modus_cfg.has_value({"E_LAB"})) {
-      int e_lab = modus_cfg.take({"E_LAB"});
+  if (modus_cfg.has_value({"E_Lab"})) {
+      float e_lab = modus_cfg.take({"E_Lab"});
       // Check that energy is nonnegative.
       if (e_lab < 0) {
-        throw ModusDefault::InvalidEnergy("Input Error: E_LAB must be nonnegative.");
+        throw ModusDefault::InvalidEnergy("Input Error: E_Lab must be nonnegative.");
       }
       // Set the total nucleus-nucleus collision energy.
       total_s_ = (mass_projec * mass_projec) + (mass_target * mass_target)
@@ -136,12 +227,12 @@ NucleusModus::NucleusModus(Configuration modus_config,
       energy_input++;
   }
   // Option 3: Momentum of the projectile nucleus (target at rest).
-  if (modus_cfg.has_value({"P_LAB"})) {
-      int p_lab = modus_cfg.take({"P_LAB"});
+  if (modus_cfg.has_value({"P_Lab"})) {
+      float p_lab = modus_cfg.take({"P_Lab"});
       // Check upper bound (projectile mass).
       if (p_lab * p_lab > mass_projec * mass_projec) {
         throw ModusDefault::InvalidEnergy(
-                "Input Error: P_LAB squared is greater than projectile mass squared: \n"
+                "Input Error: P_Lab squared is greater than projectile mass squared: \n"
                 + std::to_string(p_lab * p_lab) + " GeV > "
                 + std::to_string(mass_projec * mass_projec) + " GeV");
       }
@@ -155,37 +246,37 @@ NucleusModus::NucleusModus(Configuration modus_config,
     throw std::domain_error("Input Error: Redundant or nonexistant collision energy.");
   }
 
-  // Impact parameter setting: Either "VALUE", "RANGE", or "MAX".
+  // Impact parameter setting: Either "Value", "Range", or "Max".
   // Unspecified means 0 impact parameter.
-  if (modus_cfg.has_value({"Impact", "VALUE"})) {
-    impact_ = modus_cfg.take({"Impact", "VALUE"});
+  if (modus_cfg.has_value({"Impact", "Value"})) {
+    impact_ = modus_cfg.take({"Impact", "Value"});
   } else {
     bool sampling_quadratically = true;
     float min = 0.0;
     float max = 0.0;
     // If impact is not supplied by value, inspect sampling parameters:
-    if (modus_cfg.has_value({"Impact", "SAMPLE"})) {
-      std::string sampling_method = modus_cfg.take({"Impact", "SAMPLE"});
+    if (modus_cfg.has_value({"Impact", "Sample"})) {
+      std::string sampling_method = modus_cfg.take({"Impact", "Sample"});
       if (sampling_method.compare(0, 6, "uniform") == 0) {
         sampling_quadratically = false;
       }
     }
-    if (modus_cfg.has_value({"Impact", "RANGE"})) {
-       std::vector<float> range = modus_cfg.take({"Impact", "RANGE"});
+    if (modus_cfg.has_value({"Impact", "Range"})) {
+       std::vector<float> range = modus_cfg.take({"Impact", "Range"});
        min = range.at(0);
        max = range.at(1);
     }
-    if (modus_cfg.has_value({"Impact", "MAX"})) {
+    if (modus_cfg.has_value({"Impact", "Max"})) {
        min = 0.0;
-       max = modus_cfg.take({"Impact", "MAX"});
+       max = modus_cfg.take({"Impact", "Max"});
     }
     // Sample impact parameter distribution.
     sample_impact(sampling_quadratically, min, max);
   }
 
   // Look for user-defined initial separation between nuclei.
-  if (modus_cfg.has_value({"INITIAL_DISTANCE"})) {
-    initial_z_displacement_ = modus_cfg.take({"INITIAL_DISTANCE"});
+  if (modus_cfg.has_value({"Initial_Distance"})) {
+    initial_z_displacement_ = modus_cfg.take({"Initial_Distance"});
     // the displacement is half the distance (both nuclei are shifted
     // initial_z_displacement_ away from origin)
     initial_z_displacement_ /= 2.0;

@@ -293,14 +293,14 @@ void Nucleus::set_parameters_automatic() {
 void Nucleus::set_parameters_from_config(const char *nucleus_type,
                                          Configuration &config) {
   // Diffusiveness
-  if (config.has_value({nucleus_type, "DIFFUSIVENESS"})) {
+  if (config.has_value({nucleus_type, "Diffusiveness"})) {
     set_diffusiveness(static_cast<float>(config.take(
-                      {nucleus_type, "DIFFUSIVENESS"})));
+                      {nucleus_type, "Diffusiveness"})));
   }
   // Radius
-  if (config.has_value({nucleus_type, "RADIUS"})) {
+  if (config.has_value({nucleus_type, "Radius"})) {
     set_nuclear_radius(static_cast<float>(config.take(
-                       {nucleus_type, "RADIUS"})));
+                       {nucleus_type, "Radius"})));
   } else {
     set_nuclear_radius(default_nuclear_radius());
   }
