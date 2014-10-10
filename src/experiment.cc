@@ -253,18 +253,18 @@ static std::string format_measurements(const Particles &particles,
   QuantumNumbers current_values(particles);
   QuantumNumbers difference = conserved_initial - current_values;
 
-  std::string line(81, ' ');
+  char buffer[81];
   if (likely(time > 0))
-    snprintf(&line[0], line.size(), "%6.2f %12g %12g %12g %10zu %12zu %12g",
-             time, difference.momentum().x0(), difference.momentum().abs3(),
+    snprintf(buffer, 81, "%6.2f %12g %12g %12g %10zu %12zu %12g", time,
+             difference.momentum().x0(), difference.momentum().abs3(),
              scatterings_total * 2 / (particles.size() * time),
              scatterings_this_interval, particles.size(),
              elapsed_seconds.count());
   else
-    snprintf(&line[0], line.size(), "%+6.2f %12g %12g %12g %10i %12zu %12g",
-             time, difference.momentum().x0(), difference.momentum().abs3(),
-             0.0, 0, particles.size(), elapsed_seconds.count());
-  return line;
+    snprintf(buffer, 81, "%+6.2f %12g %12g %12g %10i %12zu %12g", time,
+             difference.momentum().x0(), difference.momentum().abs3(), 0.0, 0,
+             particles.size(), elapsed_seconds.count());
+  return std::string(buffer);
 }
 
 /* This is the loop over timesteps, carrying out collisions and decays
