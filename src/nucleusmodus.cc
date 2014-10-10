@@ -249,27 +249,22 @@ NucleusModus::NucleusModus(Configuration modus_config,
   if (modus_cfg.has_value({"Impact", "VALUE"})) {
     impact_ = modus_cfg.take({"Impact", "VALUE"});
   } else {
-    bool sampling_quadratically = true;
-    float min = 0.0;
-    float max = 0.0;
     // If impact is not supplied by value, inspect sampling parameters:
     if (modus_cfg.has_value({"Impact", "SAMPLE"})) {
       std::string sampling_method = modus_cfg.take({"Impact", "SAMPLE"});
       if (sampling_method.compare(0, 6, "uniform") == 0) {
-        sampling_quadratically = false;
+        sampling_quadratically_ = false;
       }
     }
     if (modus_cfg.has_value({"Impact", "RANGE"})) {
        std::vector<float> range = modus_cfg.take({"Impact", "RANGE"});
-       min = range.at(0);
-       max = range.at(1);
+       imp_min_ = range.at(0);
+       imp_max_ = range.at(1);
     }
     if (modus_cfg.has_value({"Impact", "MAX"})) {
-       min = 0.0;
-       max = modus_cfg.take({"Impact", "MAX"});
+       imp_min_ = 0.0;
+       imp_max_ = modus_cfg.take({"Impact", "MAX"});
     }
-    // Sample impact parameter distribution.
-    sample_impact(sampling_quadratically, min, max);
   }
 
   // Look for user-defined initial separation between nuclei.
@@ -293,6 +288,9 @@ std::ostream &operator<<(std::ostream &out, const NucleusModus &m) {
 
 float NucleusModus::initial_conditions(Particles *particles,
                                       const ExperimentParameters&) {
+  // Sample impact parameter distribution.
+  sample_impact();
+
   // Populate the nuclei with appropriately distributed nucleons.
   // If deformed, this includes rotating the nucleus.
   projectile_->arrange_nucleons();
@@ -333,15 +331,17 @@ float NucleusModus::initial_conditions(Particles *particles,
   return simulation_time;
 }
 
-void NucleusModus::sample_impact(bool s, float min, float max) {
-  if (s) {
-    // quadratic sampling: Note that for min > max, this still yields
+void NucleusModus::sample_impact() {
+  if (sampling_quadratically_) {
+    // quadratic sampling: Note that for bmin > bmax, this still yields
     // the correct distribution (only that canonical() = 0 then is the
     // upper end, not the lower).
-    impact_ = sqrt(min*min + Random::canonical() * (max*max - min*min));
+    impact_ = sqrt(imp_min_*imp_min_
+		   + Random::canonical()
+		   * (imp_max_*imp_max_ - imp_min_*imp_min_));
   } else {
     // linear sampling. Still, min > max works fine.
-    impact_ = Random::uniform(min, max);
+    impact_ = Random::uniform(imp_min_, imp_max_);
   }
 }
 
