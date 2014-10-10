@@ -29,20 +29,6 @@ namespace Smash {
  * The following nucleus directives are understood:
  * -------------
  */
-// !!USER:Input
-/**
- * \if user
- * \page input_modi_nucleus_ Input Section Modi:Nucleus
- * \endif
- *
- * \li `AUTOMATIC:` Sets all necessary parameters based on the atomic number
- * of the input nucleus (true=automatic, false=manual, see additional directives).
- * \li `DIFFUSIVENESS` The woods-saxon parameter controlling the width of the
- * nucleus. If unspecified, the default value is 0.545.
- * \li `RADIUS` The radius of the nucleus. If not specified, the default is
- * proton_radius * A ^ (1/3).
- **/
- // !!/USER:Input
 class Nucleus {
  public:
   Nucleus();

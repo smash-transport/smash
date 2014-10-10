@@ -25,17 +25,16 @@ BinaryOutputParticles::BinaryOutputParticles(bf::path path,
                                              Configuration &&config)
     : BinaryOutputBase(
           std::fopen(((path / "particles_binary.bin")).native().c_str(), "wb")),
-      only_final_(config.has_value({"only_final"}) ? config.take({"only_final"})
+      only_final_(config.has_value({"Only_Final"}) ? config.take({"Only_Final"})
                                                    : true) {
   /*!\Userguide
    * \page input_binary_particles Binary_particles
-   * Saves snapshots of simulated particles at fixed moments
-   * in a binary format.
-   * \key only_final: \n
-   * If true (default) - only particles at the end of event are saved to file.
-   * Otherwise, snapshots are also written to file every next fixed
-   * time interval starting from the moment of initialization
-   * and including it.
+   * Writes the particle list at fixed times in binary format.
+   *
+   * \key only_final (bool, optional, default = true): \n
+   * true - only final particle list at the end of each event \n
+   * false - particle list output at every output interval including initial 
+   * time
    */
   fwrite("SMSH", 4, 1, file_.get());  // magic number
   write(0);              // file format version number

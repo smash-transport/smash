@@ -26,36 +26,37 @@ RootOutput::RootOutput(bf::path path, Configuration&& conf)
       root_out_file_(
           new TFile((base_path_ / "smash_run.root").native().c_str(), "NEW")),
       output_counter_(0),
-      write_collisions_(conf.has_value({"write_collisions"})
-                                 ? conf.take({"write_collisions"}) : false),
-      write_particles_(conf.has_value({"write_particles"})
-                                 ? conf.take({"write_particles"}) : true),
-      autosave_frequency_(conf.has_value({"autosave_frequency"})
-                               ? conf.take({"autosave_frequency"}) : 1000) {
+      write_collisions_(conf.has_value({"Write_Collisions"})
+                                 ? conf.take({"Write_Collisions"}) : false),
+      write_particles_(conf.has_value({"Write_Particles"})
+                                 ? conf.take({"Write_Particles"}) : true),
+      autosave_frequency_(conf.has_value({"Autosave_Frequency"})
+                               ? conf.take({"Autosave_Frequency"}) : 1000) {
   /*!\Userguide
    * \page input_root ROOT
    * Enables output in a ROOT format. The latter is a structured binary format
    * invented at CERN. For more details see root.cern.ch. The resulting
    * output file can optionally contain two TTree's: the one containing
-   * information about particles snapshots at fixed moments of time and
-   * the one containing information about collisions.
+   * information about the particle list at fixed moments of time and
+   * the other one containing information about the collision history.
    *
    *
-   * \key write_collisions: \n
-   * Optional, chooses if information about collisions, decays and box wall
-   * crossings should be written out (true) or not (false, default).
+   * \key Write_Collisions (bool, optional, default = false): \n
+   * true - information about collisions, decays and box wall
+   * crossings will be written out \n
+   * false - collision history information is suppressed
    *
-   * \key write_particles: \n
-   * Optional, chooses if particles snapshots at fixed moments of time
-   * should be written out (true, default) or not (false).
+   * \key Write_Particles (bool, optional, default = true): \n
+   * true - particle list at output interval is written out \n
+   * false - particle list is not written out 
    *
-   * \key autosave_frequency: \n
+   * \key Autosave_Frequency (int, optional, default = 1000): \n
    * Root file cannot be read if it was not properly closed and finalized.
    * It can happen that SMASH simulation crashed and root file was not closed.
    * To save results of simulation in such case, "AutoSave" is
    * applied every N events. The autosave_frequency option sets
    * this N (default N = 1000). Note that "AutoSave" operation is very
-   * time-consuming, so the autosave_frequency is
+   * time-consuming, so the Autosave_Frequency is
    * always a compromise between safety and speed.
    */
 

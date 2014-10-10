@@ -56,6 +56,10 @@ class Particles {
      */
     class iterator : public map_iterator {
      public:
+      typedef mapped_type value_type;
+      typedef mapped_type * pointer;
+      typedef mapped_type & reference;
+
       iterator(map_iterator it)  // NOLINT(runtime/explicit)
           : map_iterator(it) {}
 
@@ -82,6 +86,10 @@ class Particles {
      */
     class const_iterator : public const_map_iterator {
      public:
+      typedef mapped_type value_type;
+      typedef const mapped_type * pointer;
+      typedef const mapped_type & reference;
+
       const_iterator(const_map_iterator it)  // NOLINT(runtime/explicit)
           : const_map_iterator(it) {}
 

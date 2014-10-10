@@ -20,7 +20,7 @@ namespace Smash {
 VtkOutput::VtkOutput(bf::path path, Configuration&& /*conf*/)
   : base_path_(std::move(path)), vtk_output_counter_(0) {}
 /*!\Userguide
- * \page input_vtk VTK
+ * \page input_vtk Vtk
  *
  * Writes snapshots of simulated particles at fixed moments of time
  * to separate .vtk files. These fixed moments of time are event start,

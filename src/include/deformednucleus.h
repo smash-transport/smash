@@ -34,24 +34,6 @@ namespace Smash {
  * The following deformed nucleus directives are understood:
  * -------------
  */
-// !!USER:Input
-/**
- * \if user
- * \page input_modi_nucleus_ Input Section Modi:Nucleus
- * \endif
- *
- * \li `AUTOMATIC:` Sets all necessary parameters based on the atomic number
- * of the input nucleus (true=automatic, false=manual, see additional directives).
- * \li `BETA_2` The deformation coefficient for the spherical harmonic Y_2_0 in the
- * beta decomposition of the nuclear radius in the deformed woods-saxon distribution.
- * \li `BETA_4` The deformation coefficient for the spherical harmonic Y_4_0.
- * \li `SATURATION_DENISTY` The normalization coefficient in the Woods-Saxon distribution,
- * needed here (and not in nucleus) due to the accept/reject sampling used. Default is
- * given as the infinite nuclear matter value .168f.
- * \li `THETA` The polar angle by which to rotate the nucleus.
- * \li `PHI` The azimuthal angle by which to rotate the nucleus.
- **/
- // !!/USER:Input
 
 class DeformedNucleus : public Nucleus {
  public:

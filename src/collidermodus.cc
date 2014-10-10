@@ -23,22 +23,22 @@ namespace Smash {
 /*!\Userguide
  * \page input_modi_collider_ Collider
  *
- * \key SQRTS: \n
+ * \key Sqrts (float, required): \n
  * Center-of-mass energy of the system, in GeV. Needs to be
  * larger than the sum of the masses of the two particles.
  *
- * \key PROJECTILE: \n
+ * \key Projectile (int, required): \n
  * PdgCode of the Projectile
  *
- * \key TARGET: \n
+ * \key Target (int, required): \n
  * PdgCode of the Target
  */
 ColliderModus::ColliderModus(Configuration modus_config,
                              const ExperimentParameters &)
-    : projectile_(modus_config.take({"Collider", "PROJECTILE"})
+    : projectile_(modus_config.take({"Collider", "Projectile"})
                       .convert_for(projectile_)),
-      target_(modus_config.take({"Collider", "TARGET"}).convert_for(target_)),
-      sqrts_(modus_config.take({"Collider", "SQRTS"})) {
+      target_(modus_config.take({"Collider", "Target"}).convert_for(target_)),
+      sqrts_(modus_config.take({"Collider", "Sqrts"})) {
   if (sqrts_ < ParticleType::find(projectile_).mass()
              + ParticleType::find(target_).mass()) {
     throw ModusDefault::InvalidEnergy(
