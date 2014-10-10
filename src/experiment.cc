@@ -369,9 +369,9 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
 
 template <typename Modus>
 void Experiment<Modus>::run() {
-  const auto &log = logger<LogArea::Main>();
+  const auto &mainlog = logger<LogArea::Main>();
   for (int j = 0; j < nevents_; j++) {
-    log.info() << "Event " << j << '\n';
+    mainlog.info() << "Event " << j;
 
     /* Sample initial particles, start clock, some printout and book-keeping */
     initialize_new_event();
