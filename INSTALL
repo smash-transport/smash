@@ -1,4 +1,4 @@
-/*!\Userguide
+/**
 \page install Install
 
 Quick instructions how to build smash.
@@ -28,89 +28,94 @@ Building SMASH
 --------------
 
 Build it in a separate directory:
-<pre>
-  mkdir build
-  cd build
-  cmake ../
-  make
-</pre>
+
+    mkdir build
+    cd build
+    cmake ../
+    make
 
 Run it with specific settings:
-<pre>
-  vi config.yaml
-  ./smash
-</pre>
 
+    vi config.yaml
+    ./smash
+
+
+
+Changing the compiler
+---------------------
+
+In order to use a particular compiler, you can set the following environment
+variables:
+
+    export CC=gcc
+    export CXX=g++
+
+
+
+Compiling with ROOT support
+---------------------------
+
+In order to produce ROOT output with SMASH,
+you need a working installation of ROOT.
 
 Building the Documentation
 --------------------------
 
 Build the code documentation:
-<pre>
-  make doc
-</pre>
 
+    make doc
 
 Build the user documentation:
-<pre>
-  make user
-</pre>
+
+    make user
 
 
 Running Tests
 -------------
 
 Run the various unit tests:
-<pre>
-  make test
-</pre>
+
+    make test
 
 Another way to do this is:
-<pre>
-  ctest
-</pre>
+
+    ctest
+
 
 This has the advantage that it can also be used for running tests in parallel on
-a multicore machine, e.g.
-<pre>
-  ctest -j4
-</pre>
+a multicore machine, e.g. via
+
+    ctest -j4
+
 (on a quad-core machine).
-
-Creating a tarball
-----------------
-
-<pre>
-  ./bin/smash_tarball
-</pre>
 
 
 Installing yaml-cpp manually
 ----------------------------
 
 - get the yaml-cpp tarball
-<pre>
-  % wget http://yaml-cpp.googlecode.com/files/yaml-cpp-0.5.1.tar.gz
-</pre>
+
+      wget http://yaml-cpp.googlecode.com/files/yaml-cpp-0.5.1.tar.gz
+
 - unpack
-<pre>
-  % tar -xf yaml-cpp-0.5.1.tar.gz
-</pre>
+
+      tar -xf yaml-cpp-0.5.1.tar.gz
+
 - build in a build directory
-<pre>
-  % cd yaml-cpp-0.5.1
-  % mkdir build
-  % cd build
-  % cmake -DCMAKE_INSTALL_PREFIX=[prefix] -DCMAKE_BUILD_TYPE=Release ..
-  % make
-  % make install
-</pre>
+
+      cd yaml-cpp-0.5.1
+      mkdir build
+      cd build
+      cmake -DCMAKE_INSTALL_PREFIX=[prefix] -DCMAKE_BUILD_TYPE=Release ..
+      make
+      make install
+
   Replace [prefix] above with the place where you want to install yaml-cpp. You
   can e.g. install it to $HOME.
 - If you did not install you a standard location you'll need to set the
   PKG_CONFIG_PATH environment variable for SMASH to find it:
-<pre>
-  % export PKG_CONFIG_PATH=[prefix]/lib/pkgconfig
-</pre>
+
+      export PKG_CONFIG_PATH=[prefix]/lib/pkgconfig
+
 
 */
