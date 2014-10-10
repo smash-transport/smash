@@ -285,7 +285,8 @@ NucleusModus::NucleusModus(Configuration modus_config,
 
 std::ostream &operator<<(std::ostream &out, const NucleusModus &m) {
   return out << "-- Nucleus Modus:\n"
-                "S (nucleus-nucleus) = " << format(m.total_s_, "GeV")
+                "sqrt(S) (nucleus-nucleus) = "
+             << format(std::sqrt(m.total_s_), "GeV")
              << "\nImpact parameter = " << format(m.impact_, "fm")
              << "\nInitial distance between nuclei: "
              << format(2 * m.initial_z_displacement_, "fm")
