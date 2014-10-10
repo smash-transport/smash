@@ -84,6 +84,12 @@ class NucleusModus : public ModusDefault {
    * distance apart from each other.
    **/
   float impact_ = 0.f;
+  /// Flag for quadratic sampling of impact parameter.
+  bool sampling_quadratically_ = true;
+  /// Minimum value of impact parameter.
+  float imp_min_ = 0.0;
+  /// Maximum value of impact parameter.
+  float imp_max_ = 0.0;
   /** sample impact parameter
    *
    * sets the impact parameter to a value between min and max.
@@ -97,7 +103,7 @@ class NucleusModus : public ModusDefault {
    * Note that max less than min also works fine.
    *
    **/
-  void sample_impact(bool s, float min, float max);
+  void sample_impact();
   /** initial z displacement of nuclei
    *
    * each nucleus is shifted so that
