@@ -42,6 +42,11 @@ BinaryOutputParticles::BinaryOutputParticles(bf::path path,
   write(VERSION_MAJOR);  // version
 }
 
+  /*!\Userguide
+   * \page format_binary_particles Binary particles format
+   * Here there is INFO about binary particles format
+   **/
+
 void BinaryOutputParticles::at_eventstart(const Particles &particles,
                                  const int /*event_number*/) {
   char pchar = 'p';

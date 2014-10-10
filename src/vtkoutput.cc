@@ -33,6 +33,11 @@ VtkOutput::VtkOutput(bf::path path, Configuration&& /*conf*/)
 VtkOutput::~VtkOutput() {
 }
 
+  /*!\Userguide
+   * \page format_vtk Vtk format
+   * Here there is INFO about vtk output format
+   **/
+
 void VtkOutput::at_eventstart(const Particles &particles,
                               const int event_number) {
   vtk_output_counter_ = 0;

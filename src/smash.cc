@@ -236,6 +236,41 @@ int main(int argc, char *argv[]) {
      */
     auto output_conf = configuration["General"]["OUTPUT"];
 
+    /*!\Userguide
+     * \page output_general_ SMASH outputs
+     * During its run SMASH produces output, which is saved in the SMASH
+     * output directory.Default name of output directory is ./data/\<run_id\>,
+     * where \<run_id\> is an integer number starting from 0. At the beginning
+     * of run SMASH checks if there exists ./data/0 directory, if no then it
+     * is created and all output files are written there. If the directory
+     * already exists, SMASH tries for ./data/1, ./data/2 and so on until it
+     * finds a free number. User can change output directory by a command
+     * line option:
+     * \code smash -o \<user_output_dir\> \endcode
+     * SMASH supports several kinds of configurable output formats.
+     * They are called OSCAR1999, OSCAR2013, binary OSCAR2013, VTK and ROOT
+     * outputs. Every format can be switched on/off using option Enable in the
+     * configuration file config.yaml. For more information on configuring the
+     * output see page \li input_general_.
+     *
+     * Producing ROOT output requires ROOT installed (see http://root.cern.ch).
+     * SMASH philosophy is being a self-contained software, so by default SMASH
+     * does not need ROOT to compile and run. To produce ROOT output one has to
+     * compile SMASH in a special way:
+     * \code 
+     * cmake -D USE_ROOT=ON <source_dir>
+     * make
+     * \endcode
+     * 
+     * \key Specific output formats: \n
+     * \li \subpage format_oscar_particlelist
+     * \li \subpage format_oscar_collisions
+     * \li \subpage format_vtk
+     * \li \subpage format_binary_collisions
+     * \li \subpage format_binary_particles
+     * \li \subpage format_root 
+     */
+
     // loop until all OSCAR outputs are created (create_oscar_output will return
     // nullptr then).
     while (std::unique_ptr<OutputInterface> oscar =

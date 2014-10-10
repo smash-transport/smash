@@ -44,6 +44,12 @@ BinaryOutputCollisions::BinaryOutputCollisions(bf::path path,
   write(VERSION_MAJOR);  // SMASH version
 }
 
+  /*!\Userguide
+   * \page format_binary_collisions Binary collisions format
+   * Here there is INFO about binary collisions format
+   **/
+
+
 void BinaryOutputCollisions::at_eventstart(const Particles &particles,
                                  const int /*event_number*/) {
   char pchar = 'p';

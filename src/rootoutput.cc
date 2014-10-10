@@ -58,6 +58,12 @@ RootOutput::RootOutput(bf::path path, Configuration&& conf)
    * time-consuming, so the autosave_frequency is
    * always a compromise between safety and speed.
    */
+
+  /*!\Userguide
+   * \page format_root ROOT format
+   * Here there is INFO about ROOT format
+   **/
+
   if (write_particles_) {
     particles_tree_ = new TTree("particles", "particles");
 

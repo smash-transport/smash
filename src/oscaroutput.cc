@@ -176,6 +176,12 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
   }
 }
 
+  /*!\Userguide
+   * \page format_oscar_particlelist Oscar particles format
+   * Here there is INFO about Oscar particles formats
+   * \page format_oscar_collisions Oscar collisions format
+   * INFO about Oscar collisions formats
+   **/
 template <OscarOutputFormat Format, int Contents>
 void OscarOutput<Format, Contents>::write_particledata(
     const ParticleData &data) {
