@@ -369,7 +369,10 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
 
 template <typename Modus>
 void Experiment<Modus>::run() {
+  const auto &mainlog = logger<LogArea::Main>();
   for (int j = 0; j < nevents_; j++) {
+    mainlog.info() << "Event " << j;
+
     /* Sample initial particles, start clock, some printout and book-keeping */
     initialize_new_event();
 
