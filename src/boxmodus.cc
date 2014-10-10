@@ -30,16 +30,14 @@ namespace Smash {
 
 /* console output on startup of box specific parameters */
 std::ostream &operator<<(std::ostream &out, const BoxModus &m) {
-  std::string init_multipl_str = "";
+  out << "-- Box Modus:\nSize of the box: (" << m.length_ << " fm)³"
+      << "\nInitial temperature: " << m.temperature_ << " GeV"
+      << "\nInitial condition type " << m.initial_condition_ << "\n";
   for (const auto &p : m.init_multipl_) {
-    init_multipl_str+= "Particle " + std::to_string(p.first.get_decimal()) +
-                 " initial multiplicity " + std::to_string(p.second) + "\n";
+    out << "Particle " << p.first << " initial multiplicity "
+                       << p.second << '\n';
   }
-  return out << "-- Box Modus:\n"
-                "Size of the box: (" << m.length_ << " fm)³"
-             << "\nInitial temperature: " << m.temperature_ << " GeV"
-             << "\nInitial condition type " << m.initial_condition_ << "\n"
-             << init_multipl_str;
+  return out;
 }
 
 /*!\Userguide
