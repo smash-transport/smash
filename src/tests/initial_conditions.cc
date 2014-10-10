@@ -27,12 +27,12 @@ TEST(init_particle_types) {
 
 TEST(initialize_box) {
   Configuration conf(TEST_CONFIG_PATH);
-  conf["Modi"]["Box"]["INITIAL_CONDITION"] = 1;
-  conf["Modi"]["Box"]["LENGTH"] = 7.9615;
-  conf["Modi"]["Box"]["TEMPERATURE"] = 0.5;
-  conf["Modi"]["Box"]["START_TIME"] = 0.2;
-  conf.take({"Modi", "Box", "INIT_MULTIPLICITIES"});
-  conf["Modi"]["Box"]["INIT_MULTIPLICITIES"]["661"] = 724;
+  conf["Modi"]["Box"]["Initial_Condition"] = 1;
+  conf["Modi"]["Box"]["Length"] = 7.9615;
+  conf["Modi"]["Box"]["Temperature"] = 0.5;
+  conf["Modi"]["Box"]["Start_Time"] = 0.2;
+  conf.take({"Modi", "Box", "Init_Multiplicities"});
+  conf["Modi"]["Box"]["Init_Multiplicities"]["661"] = 724;
   ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};
   BoxModus b(conf["Modi"], param);
 
@@ -60,9 +60,9 @@ TEST(initialize_box) {
 
 TEST(initialize_collider) {
   Configuration conf(TEST_CONFIG_PATH);
-  conf["Modi"]["Collider"]["SQRTS"] = 1.6;
-  conf["Modi"]["Collider"]["PROJECTILE"] = "661";
-  conf["Modi"]["Collider"]["TARGET"] = "661";
+  conf["Modi"]["Collider"]["Sqrts"] = 1.6;
+  conf["Modi"]["Collider"]["Projectile"] = "661";
+  conf["Modi"]["Collider"]["Target"] = "661";
   ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};
   ColliderModus c(conf["Modi"], param);
   Particles P;
@@ -86,24 +86,24 @@ TEST(initialize_collider) {
 
 TEST_CATCH(initialize_collider_low_energy, ModusDefault::InvalidEnergy) {
   Configuration conf(TEST_CONFIG_PATH);
-  conf["Modi"]["Collider"]["SQRTS"] = 0.5;
-  conf["Modi"]["Collider"]["PROJECTILE"] = "661";
-  conf["Modi"]["Collider"]["TARGET"] = "661";
+  conf["Modi"]["Collider"]["Sqrts"] = 0.5;
+  conf["Modi"]["Collider"]["Projectile"] = "661";
+  conf["Modi"]["Collider"]["Target"] = "661";
   ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};
   ColliderModus c(conf["Modi"], param);
 }
 
 TEST(initialize_nucleus_normal) {
   Configuration conf(TEST_CONFIG_PATH);
-  conf["Modi"]["Nucleus"]["SQRTSNN"] = 1.6;
+  conf["Modi"]["Nucleus"]["Sqrtsnn"] = 1.6;
   conf.take({"Modi", "Nucleus", "Projectile"});
   conf.take({"Modi", "Nucleus", "Target"});
-  conf["Modi"]["Nucleus"]["Projectile"]["PARTICLES"]["661"] = 1;
-  conf["Modi"]["Nucleus"]["Target"]["PARTICLES"]["661"] = 8;
-  conf["Modi"]["Nucleus"]["SQRTS_REPS"][0] = "661";
-  conf["Modi"]["Nucleus"]["SQRTS_REPS"][1] = "661";
-  conf["Modi"]["Nucleus"]["INITIAL_DISTANCE"] = 0;
-  conf["Modi"]["Nucleus"]["Impact"]["VALUE"] = 0;
+  conf["Modi"]["Nucleus"]["Projectile"]["Particles"]["661"] = 1;
+  conf["Modi"]["Nucleus"]["Target"]["Particles"]["661"] = 8;
+  conf["Modi"]["Nucleus"]["Sqrts_Reps"][0] = "661";
+  conf["Modi"]["Nucleus"]["Sqrts_Reps"][1] = "661";
+  conf["Modi"]["Nucleus"]["Initial_Distance"] = 0;
+  conf["Modi"]["Nucleus"]["Impact"]["Value"] = 0;
   ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};
   NucleusModus n(conf["Modi"], param);
   Particles P;
@@ -126,14 +126,14 @@ TEST(initialize_nucleus_normal) {
 
 TEST_CATCH(initialize_nucleus_low_energy, ModusDefault::InvalidEnergy) {
   Configuration conf(TEST_CONFIG_PATH);
-  conf["Modi"]["Nucleus"]["SQRTSNN"] = 0.5;
+  conf["Modi"]["Nucleus"]["Sqrtsnn"] = 0.5;
   conf.take({"Modi", "Nucleus", "Projectile"});
   conf.take({"Modi", "Nucleus", "Target"});
-  conf["Modi"]["Nucleus"]["Projectile"]["PARTICLES"]["661"] = 1;
-  conf["Modi"]["Nucleus"]["Target"]["PARTICLES"]["661"] = 8;
-  conf["Modi"]["Nucleus"]["SQRTS_REPS"][0] = "661";
-  conf["Modi"]["Nucleus"]["SQRTS_REPS"][1] = "661";
-  conf["Modi"]["Nucleus"]["INITIAL_DISTANCE"] = 0;
+  conf["Modi"]["Nucleus"]["Projectile"]["Particles"]["661"] = 1;
+  conf["Modi"]["Nucleus"]["Target"]["Particles"]["661"] = 8;
+  conf["Modi"]["Nucleus"]["Sqrts_Reps"][0] = "661";
+  conf["Modi"]["Nucleus"]["Sqrts_Reps"][1] = "661";
+  conf["Modi"]["Nucleus"]["Initial_Distance"] = 0;
   ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};
   NucleusModus n(conf["Modi"], param);
   Particles P;
@@ -142,14 +142,14 @@ TEST_CATCH(initialize_nucleus_low_energy, ModusDefault::InvalidEnergy) {
 
 TEST_CATCH(initialize_nucleus_empty_projectile, NucleusModus::NucleusEmpty) {
   Configuration conf(TEST_CONFIG_PATH);
-  conf["Modi"]["Nucleus"]["SQRTSNN"] = 1.6;
+  conf["Modi"]["Nucleus"]["Sqrtsnn"] = 1.6;
   conf.take({"Modi", "Nucleus", "Projectile"});
   conf.take({"Modi", "Nucleus", "Target"});
-  conf["Modi"]["Nucleus"]["Projectile"]["PARTICLES"]["661"] = 0;
-  conf["Modi"]["Nucleus"]["Target"]["PARTICLES"]["661"] = 8;
-  conf["Modi"]["Nucleus"]["SQRTS_REPS"][0] = 0;
-  conf["Modi"]["Nucleus"]["SQRTS_REPS"][1] = 0;
-  conf["Modi"]["Nucleus"]["INITIAL_DISTANCE"] = 0;
+  conf["Modi"]["Nucleus"]["Projectile"]["Particles"]["661"] = 0;
+  conf["Modi"]["Nucleus"]["Target"]["Particles"]["661"] = 8;
+  conf["Modi"]["Nucleus"]["Sqrts_Reps"][0] = 0;
+  conf["Modi"]["Nucleus"]["Sqrts_Reps"][1] = 0;
+  conf["Modi"]["Nucleus"]["Initial_Distance"] = 0;
   ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};
   NucleusModus n(conf["Modi"], param);
   Particles P;
@@ -158,14 +158,14 @@ TEST_CATCH(initialize_nucleus_empty_projectile, NucleusModus::NucleusEmpty) {
 
 TEST_CATCH(initialize_nucleus_empty_target, NucleusModus::NucleusEmpty) {
   Configuration conf(TEST_CONFIG_PATH);
-  conf["Modi"]["Nucleus"]["SQRTSNN"] = 1.6;
+  conf["Modi"]["Nucleus"]["Sqrtsnn"] = 1.6;
   conf.take({"Modi", "Nucleus", "Projectile"});
   conf.take({"Modi", "Nucleus", "Target"});
-  conf["Modi"]["Nucleus"]["Projectile"]["PARTICLES"]["661"] = 8;
-  conf["Modi"]["Nucleus"]["Target"]["PARTICLES"]["661"] = 0;
-  conf["Modi"]["Nucleus"]["SQRTS_REPS"][0] = 0;
-  conf["Modi"]["Nucleus"]["SQRTS_REPS"][1] = 0;
-  conf["Modi"]["Nucleus"]["INITIAL_DISTANCE"] = 0;
+  conf["Modi"]["Nucleus"]["Projectile"]["Particles"]["661"] = 8;
+  conf["Modi"]["Nucleus"]["Target"]["Particles"]["661"] = 0;
+  conf["Modi"]["Nucleus"]["Sqrts_Reps"][0] = 0;
+  conf["Modi"]["Nucleus"]["Sqrts_Reps"][1] = 0;
+  conf["Modi"]["Nucleus"]["Initial_Distance"] = 0;
   ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};
   NucleusModus n(conf["Modi"], param);
   Particles P;
@@ -174,11 +174,11 @@ TEST_CATCH(initialize_nucleus_empty_target, NucleusModus::NucleusEmpty) {
 
 TEST(initialize_sphere) {
  Configuration conf(TEST_CONFIG_PATH);
-  conf["Modi"]["Sphere"]["RADIUS"] = 10;
-  conf["Modi"]["Sphere"]["SPHERETEMPERATURE"] = 0.2;
-  conf["Modi"]["Sphere"]["START_TIME"] = 0.0;
-  conf.take({"Modi", "Sphere", "INIT_MULTIPLICITIES"});
-  conf["Modi"]["Sphere"]["INIT_MULTIPLICITIES"]["661"] = 500;
+  conf["Modi"]["Sphere"]["Radius"] = 10;
+  conf["Modi"]["Sphere"]["Sphere_Temperature"] = 0.2;
+  conf["Modi"]["Sphere"]["Start_Time"] = 0.0;
+  conf.take({"Modi", "Sphere", "Init_Multiplicities"});
+  conf["Modi"]["Sphere"]["Init_Multiplicities"]["661"] = 500;
   ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};
   SphereModus s(conf["Modi"], param);
   Particles P;

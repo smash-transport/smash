@@ -60,8 +60,8 @@ void usage(const int rc, const std::string &progname) {
     "  -p, --particles <file>  override default particles from file\n"
     "\n"
     "  -c, --config <YAML>     specify config value overrides\n"
-    "  -m, --modus <modus>     shortcut for -c 'General: { MODUS: <modus> }'\n"
-    "  -e, --endtime <time>    shortcut for -c 'General: { END_TIME: <time> }'"
+    "  -m, --modus <modus>     shortcut for -c 'General: { Modus: <modus> }'\n"
+    "  -e, --endtime <time>    shortcut for -c 'General: { End_Time: <time> }'"
     "\n"
     "\n"
     "  -o, --output <dir>      output directory (default: $PWD/data/<runid>)\n"
@@ -178,13 +178,13 @@ int main(int argc, char *argv[]) {
           usage(EXIT_SUCCESS, progname);
           break;
         case 'm':
-          configuration["General"]["MODUS"] = std::string(optarg);
+          configuration["General"]["Modus"] = std::string(optarg);
           break;
         case 'p': {
           configuration["particles"] = read_all(bf::ifstream{optarg});
         } break;
         case 'e':
-          configuration["General"]["END_TIME"] = abs(atof(optarg));
+          configuration["General"]["End_Time"] = abs(atof(optarg));
           break;
         case 'o':
           output_path = optarg;
@@ -222,7 +222,7 @@ int main(int argc, char *argv[]) {
     /*!\Userguide
      * \page input_general_ General
      *
-     * \key OUTPUT: \n
+     * \key Output: \n
      * Below this key the configuration for the different output formats is
      * defined. All the \key Enable entries must be present. This \key Enable
      * setting is used to select the desired output formats/files. The following
@@ -234,7 +234,7 @@ int main(int argc, char *argv[]) {
      * \li \subpage input_binary_particles
      * \li \subpage input_root
      */
-    auto output_conf = configuration["General"]["OUTPUT"];
+    auto output_conf = configuration["General"]["Output"];
 
     // loop until all OSCAR outputs are created (create_oscar_output will return
     // nullptr then).
@@ -242,35 +242,35 @@ int main(int argc, char *argv[]) {
                create_oscar_output(output_path, output_conf)) {
       output_list.emplace_back(std::move(oscar));
     }
-    if (static_cast<bool>(output_conf.take({"VTK", "Enable"}))) {
-      output_list.emplace_back(new VtkOutput(output_path, output_conf["VTK"]));
+    if (static_cast<bool>(output_conf.take({"Vtk", "Enable"}))) {
+      output_list.emplace_back(new VtkOutput(output_path, output_conf["Vtk"]));
     } else {
-      output_conf.take({"VTK"});
+      output_conf.take({"Vtk"});
     }
-    if (static_cast<bool>(output_conf.take({"Binary_collisions", "Enable"}))) {
+    if (static_cast<bool>(output_conf.take({"Binary_Collisions", "Enable"}))) {
       output_list.emplace_back(new BinaryOutputCollisions(output_path,
-                                       output_conf["Binary_collisions"]));
+                                       output_conf["Binary_Collisions"]));
     } else {
-      output_conf.take({"Binary_collisions"});
+      output_conf.take({"Binary_Collisions"});
     }
-    if (static_cast<bool>(output_conf.take({"Binary_particles", "Enable"}))) {
+    if (static_cast<bool>(output_conf.take({"Binary_Particles", "Enable"}))) {
       output_list.emplace_back(new BinaryOutputParticles(output_path,
-                                       output_conf["Binary_particles"]));
+                                       output_conf["Binary_Particles"]));
     } else {
-      output_conf.take({"Binary_particles"});
+      output_conf.take({"Binary_Particles"});
     }
-    if (static_cast<bool>(output_conf.take({"ROOT", "Enable"}))) {
+    if (static_cast<bool>(output_conf.take({"Root", "Enable"}))) {
 #ifdef SMASH_USE_ROOT
       output_list.emplace_back(new RootOutput(
-                               output_path, output_conf["ROOT"]));
+                               output_path, output_conf["Root"]));
 #else
-      log.error() << "You requested ROOT output, but ROOT support has not been "
-                     "compiled in. To enable ROOT support call: cmake -D "
+      log.error() << "You requested Root output, but Root support has not been "
+                     "compiled in. To enable Root support call: cmake -D "
                      "USE_ROOT=ON <path>.";
-      output_conf.take({"ROOT"});
+      output_conf.take({"Root"});
 #endif
     } else {
-      output_conf.take({"ROOT"});
+      output_conf.take({"Root"});
     }
 
     // create an experiment

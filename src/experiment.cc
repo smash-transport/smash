@@ -67,7 +67,7 @@ std::unique_ptr<ExperimentBase> ExperimentBase::create(Configuration config) {
   log.trace() << source_location;
   /*!\Userguide
    * \page input_general_ General
-   * \key MODUS (string, required): \n
+   * \key Modus (string, required): \n
    * Selects a modus for the calculation, e.g.\ infinite matter
    * calculation, collision of two particles or collision of nuclei. The modus
    * will be configured in \ref input_modi_. Recognized values are:
@@ -88,7 +88,7 @@ std::unique_ptr<ExperimentBase> ExperimentBase::create(Configuration config) {
    * \li \subpage input_modi_box_
    * \li \subpage input_modi_collider_
    */
-  const std::string modus_chooser = config.take({"General", "MODUS"});
+  const std::string modus_chooser = config.take({"General", "Modus"});
   log.info() << "Modus for this calculation: " << modus_chooser;
 
   // remove config maps of unused Modi
@@ -112,16 +112,16 @@ std::unique_ptr<ExperimentBase> ExperimentBase::create(Configuration config) {
 namespace {
 /*!\Userguide
  * \page input_general_ General
- * \key DELTA_TIME (float, required): \n
+ * \key Delta_Time (float, required): \n
  * Time step for the calculation, in fm/c.
  *
- * \key TESTPARTICLES (int, required): \n
+ * \key Testparticles (int, required): \n
  * How many test particles per real particles should be simulated.
  *
- * \key SIGMA (float, required): \n
+ * \key Sigma (float, required): \n
  * Elastic cross-section.
  *
- * \key OUTPUT_INTERVAL (float, required): \n
+ * \key Output_Interval (float, required): \n
  * Defines the period of intermediate output of the status of the simulated
  * system in Standard Output and other output formats which support this
  * functionality.
@@ -135,8 +135,8 @@ namespace {
 ExperimentParameters create_experiment_parameters(Configuration config) {
   const auto &log = logger<LogArea::Experiment>();
   log.trace() << source_location;
-  const int testparticles = config.take({"General", "TESTPARTICLES"});
-  float cross_section = config.take({"General", "SIGMA"});
+  const int testparticles = config.take({"General", "Testparticles"});
+  float cross_section = config.take({"General", "Sigma"});
 
   /* reducing cross section according to number of test particle */
   if (testparticles > 1) {
@@ -147,8 +147,8 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
 
   // The clock initializers are only read here and taken later when
   // assigning initial_clock_.
-  return {{0.0f, config.read({"General", "DELTA_TIME"})},
-           config.take({"General", "OUTPUT_INTERVAL"}),
+  return {{0.0f, config.read({"General", "Delta_Time"})},
+           config.take({"General", "Output_Interval"}),
            cross_section, testparticles};
 }
 }  // unnamed namespace
@@ -168,38 +168,36 @@ std::ostream &operator<<(std::ostream &out, const Experiment<Modus> &e) {
 
 /*!\Userguide
  * \page input_general_
- * \key END_TIME (float, required): \n
+ * \key End_Time (float, required): \n
  * The time after which the evolution is stopped. Note
- * that the starting time depends on the chosen MODUS.
+ * that the starting time depends on the chosen Modus.
  *
- * \key RANDOMSEED (int64_t, required): \n
+ * \key Randomseed (int64_t, required): \n
  * Initial seed for the random number generator. If this is
  * negative, the program starting time is used.
  *
- * \key NEVENTS (int, required): \n
+ * \key Nevents (int, required): \n
  * Number of events to calculate.
  *
  * \page input_collision_term_ Collision_Term
  * \key Decays (bool, optional, default = true): \n
- * This boolean value determines whether any decays are performed.
- * Setting it to \c false will disable all decays.
- * Default: \c true.
+ * true - decays are enabled
+ * false - disable all decays
  *
  * \key Collisions (bool, optional, default = true): \n
- * This boolean value determines whether any collisions are performed.
- * Setting it to \c false will disable all collisions.
- * Default: \c true.
+ * true - collisions are enabled
+ * false - all collisions are disabled
  */
 template <typename Modus>
 Experiment<Modus>::Experiment(Configuration config)
     : parameters_(create_experiment_parameters(config)),
       modus_(config["Modi"], parameters_),
       particles_(),
-      nevents_(config.take({"General", "NEVENTS"})),
-      end_time_(config.take({"General", "END_TIME"})),
-      delta_time_startup_(config.take({"General", "DELTA_TIME"})) {
+      nevents_(config.take({"General", "Nevents"})),
+      end_time_(config.take({"General", "End_Time"})),
+      delta_time_startup_(config.take({"General", "Delta_Time"})) {
   const auto &log = logger<LogArea::Experiment>();
-  int64_t seed_ = config.take({"General",  "RANDOMSEED"});
+  int64_t seed_ = config.take({"General",  "Randomseed"});
   if (seed_ < 0) {
     // Seed with a real random value, if available
     std::random_device rd;

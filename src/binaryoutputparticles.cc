@@ -25,7 +25,7 @@ BinaryOutputParticles::BinaryOutputParticles(bf::path path,
                                              Configuration &&config)
     : BinaryOutputBase(
           std::fopen(((path / "particles_binary.bin")).native().c_str(), "wb")),
-      only_final_(config.has_value({"only_final"}) ? config.take({"only_final"})
+      only_final_(config.has_value({"Only_Final"}) ? config.take({"Only_Final"})
                                                    : true) {
   /*!\Userguide
    * \page input_binary_particles Binary_particles

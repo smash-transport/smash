@@ -34,22 +34,22 @@ namespace Smash {
 /*!\Userguide
  * \page input_modi_sphere_ Sphere
  *
- * \key RADIUS (float, required): \n
+ * \key Radius (float, required): \n
  * Radius of the Sphere.
  *
- * \key SPHERETEMPERATURE (float, required):\n
+ * \key Sphere_Temperature (float, required):\n
  * Temperature for the momentum sampling in the sphere in GeV.
  *
- * \key START_TIME (float, required):\n
+ * \key Start_Time (float, required):\n
  * Starting time of Sphere calculation.
  *
- * \key INIT_MULTIPLICITIES (int int, required):\n
+ * \key Init_Multiplicities (int int, required):\n
  * Initial multiplicities per particle species.
  * Map of PDG number and quantity of this PDG number.
  * Controls how many particles of each sort will be initialized. \n
  * Example:
  * \verbatim
- INIT_MULTIPLICITIES:
+ Init_Multiplicities:
  2112: 200
  -2112: 100
  \endverbatim
@@ -59,10 +59,10 @@ namespace Smash {
     
 SphereModus::SphereModus(Configuration modus_config,
                          const ExperimentParameters &)
-    : radius_(modus_config.take({"Sphere", "RADIUS"})),
-      sphere_temperature_(modus_config.take({"Sphere", "SPHERETEMPERATURE"})),
-      start_time_(modus_config.take({"Sphere", "START_TIME"})),    
-      init_multipl_(modus_config.take({"Sphere", "INIT_MULTIPLICITIES"}).
+    : radius_(modus_config.take({"Sphere", "Radius"})),
+      sphere_temperature_(modus_config.take({"Sphere", "Sphere_Temperature"})),
+      start_time_(modus_config.take({"Sphere", "Start_Time"})),
+      init_multipl_(modus_config.take({"Sphere", "Init_Multiplicities"}).
                                         convert_for(init_multipl_)) {
 }
 
@@ -84,7 +84,7 @@ float SphereModus::initial_conditions(Particles *particles,
  /* Create NUMBER OF PARTICLES according to configuration */
   for (const auto &p : init_multipl_) {
     particles->create(p.second*parameters.testparticles, p.first);
-    log.debug() << "Particle " << p.first << " init multiplicity " << p.second;
+    log.debug() << "Particle " << p.first << " initial multiplicity " << p.second;
   }
   /* loop over particle data to fill in momentum and position information */
   for (ParticleData &data : particles->data()) {

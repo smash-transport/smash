@@ -86,10 +86,10 @@ TEST(full2013_format) {
   // Set options
   std::string configfilename = "oscar_2013.yaml";
   bf::ofstream(testoutputpath / configfilename)
-      << "OSCAR_COLLISIONS:\n"
+      << "Oscar_Collisions:\n"
          "    Enable:          True\n"
-         "    Print_start_end: True\n"
-         "    2013_format:     True\n";
+         "    Print_Start_End: True\n"
+         "    2013_Format:     True\n";
   VERIFY(bf::exists(testoutputpath / configfilename));
 
   std::unique_ptr<OutputInterface> osc2013full = create_oscar_output(
@@ -207,10 +207,10 @@ TEST(final2013_format) {
   // Set options
   std::string configfilename = "oscar_2013.yaml";
   bf::ofstream(testoutputpath / configfilename)
-      << "OSCAR_PARTICLELIST:\n"
+      << "Oscar_Particlelist:\n"
          "    Enable:          True\n"
-         "    Only_final:      True\n"
-         "    2013_format:     True\n";
+         "    Only_Final:      True\n"
+         "    2013_Format:     True\n";
   VERIFY(bf::exists(testoutputpath / configfilename));
 
   std::unique_ptr<OutputInterface> osc2013final = create_oscar_output(

@@ -25,8 +25,8 @@ BinaryOutputCollisions::BinaryOutputCollisions(bf::path path,
                                                Configuration &&config)
     : BinaryOutputBase(std::fopen(
           ((path / "collisions_binary.bin")).native().c_str(), "wb")),
-      print_start_end_(config.has_value({"print_start_end"})
-                           ? config.take({"print_start_end"})
+      print_start_end_(config.has_value({"Print_Start_End"})
+                           ? config.take({"Print_Start_End"})
                            : false) {
   /*!\Userguide
    * \page input_binary_collisions Binary_collisions
@@ -34,7 +34,7 @@ BinaryOutputCollisions::BinaryOutputCollisions(bf::path path,
    * wall crossing in a binary format. Optionally initial and 
    * final particle configurations can be written out.
    *
-   * \key print_start_end (bool, optional, default = false): \n
+   * \key Print_Start_End (bool, optional, default = false): \n
    * false - only information about collisions, decays and
    * box wall crossings during the whole evolution \n
    * true - initial and final configuration are written in addition
