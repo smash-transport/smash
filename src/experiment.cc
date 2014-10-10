@@ -181,11 +181,11 @@ std::ostream &operator<<(std::ostream &out, const Experiment<Modus> &e) {
  *
  * \page input_collision_term_ Collision_Term
  * \key Decays (bool, optional, default = true): \n
- * true - decays are enabled
+ * true - decays are enabled\n
  * false - disable all decays
  *
  * \key Collisions (bool, optional, default = true): \n
- * true - collisions are enabled
+ * true - collisions are enabled\n
  * false - all collisions are disabled
  */
 template <typename Modus>
