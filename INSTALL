@@ -1,5 +1,5 @@
 /**
-\page install Install
+\page install Installation
 
 Quick instructions how to build smash.
 
@@ -31,14 +31,13 @@ Build it in a separate directory:
 
     mkdir build
     cd build
-    cmake ../
+    cmake ..
     make
 
 Run it with specific settings:
 
     vi config.yaml
     ./smash
-
 
 
 Changing the compiler
@@ -50,6 +49,9 @@ variables:
     export CC=gcc
     export CXX=g++
 
+Alternatively the compiler can also be specified to cmake like this:
+
+    cmake .. -DCMAKE_CXX_COMPILER=g++
 
 
 Compiling with ROOT support
@@ -64,10 +66,12 @@ Building the Documentation
 Build the code documentation:
 
     make doc
+    firefox doc/html/index.html
 
 Build the user documentation:
 
     make user
+    firefox doc/user/index.html
 
 
 Running Tests
