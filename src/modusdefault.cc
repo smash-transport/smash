@@ -44,25 +44,26 @@ FourVector ModusDefault::baryon_jmu(ThreeVector r,
   for (const auto &p : plist) {
     if (!p.is_baryon()) continue;
     const ThreeVector ri = p.position().threevec();
+    // If particle is too far - reject it immediately: its input is too small
+    if ((r - ri).sqr() > (6*gs_sigma) * (6*gs_sigma)) continue;
+
     const ThreeVector betai = p.velocity();
+    const double inv_gammai = p.inverse_gamma();
+
     // printf("betai = %12.4f %12.4f %12.4f\n",
     //                               betai.x1(), betai.x2(), betai.x3());
-
-    const double inv_gammai = p.inverse_gamma();
     // printf("gamma_inv = %12.4f\n", inv_gammai);
 
     // Get distance between particle and r in the particle rest frame
     temp = ((r - ri) * betai) / (inv_gammai * (1. + inv_gammai));
     const ThreeVector dr_rest = r - ri + betai * temp;
+
     // printf("r-ri = %12.4f %12.4f %12.4f\n",
     //                      (ri - r).x1(), (ri - r).x2(), (ri - r).x3());
     // printf("temp = %12.4f\n", temp);
     // printf("dr_rest = %12.4f\n", dr_rest);
 
-    // Calculate the argument of exponential and check if it is too large
     temp = 0.5 * dr_rest.sqr() / (gs_sigma * gs_sigma);
-    if (temp > 10.) continue;
-
     temp = p.pdgcode().baryon_number() * std::exp(- temp) / inv_gammai;
     jmu += FourVector(1., betai) * temp;
   }
