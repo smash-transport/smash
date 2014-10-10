@@ -39,34 +39,35 @@ FourVector ModusDefault::baryon_jmu(ThreeVector r,
                                     const ParticleList &plist,
                                     double gs_sigma) {
   FourVector jmu(0.0, 0.0, 0.0, 0.0);
-  ThreeVector ri, betai, dr_rest;
-  double inv_gammai, hlp, norm;
+  double temp;
 
   for (const auto &p : plist) {
     if (!p.is_baryon()) continue;
-    ri = p.position().threevec();
-    betai = p.velocity();
-    // printf("betai = %12.4f %12.4f %12.4f\n",betai.x1(),betai.x2(),betai.x3());
+    const ThreeVector ri = p.position().threevec();
+    const ThreeVector betai = p.velocity();
+    // printf("betai = %12.4f %12.4f %12.4f\n",
+    //                               betai.x1(), betai.x2(), betai.x3());
 
-    inv_gammai = p.inverse_gamma();
+    const double inv_gammai = p.inverse_gamma();
     // printf("gamma_inv = %12.4f\n", inv_gammai);
 
     // Get distance between particle and r in the particle rest frame
-    // printf("r-ri = %12.4f %12.4f %12.4f\n",(ri - r).x1(),(ri - r).x2(),(ri - r).x3());
-    hlp = ((r - ri) * betai) / (inv_gammai * (1. + inv_gammai));
-    // printf("hlp = %12.4f\n", hlp);
-    dr_rest = r - ri + betai * hlp;
+    temp = ((r - ri) * betai) / (inv_gammai * (1. + inv_gammai));
+    const ThreeVector dr_rest = r - ri + betai * temp;
+    // printf("r-ri = %12.4f %12.4f %12.4f\n",
+    //                      (ri - r).x1(), (ri - r).x2(), (ri - r).x3());
+    // printf("temp = %12.4f\n", temp);
     // printf("dr_rest = %12.4f\n", dr_rest);
 
     // Calculate the argument of exponential and check if it is too large
-    hlp = 0.5 * dr_rest.sqr() / (gs_sigma * gs_sigma);
-    if (hlp > 10.) continue;
+    temp = 0.5 * dr_rest.sqr() / (gs_sigma * gs_sigma);
+    if (temp > 10.) continue;
 
-    hlp = p.pdgcode().baryon_number() * std::exp(- hlp) / inv_gammai;
-    jmu += FourVector(1., betai) * hlp;
+    temp = p.pdgcode().baryon_number() * std::exp(- temp) / inv_gammai;
+    jmu += FourVector(1., betai) * temp;
   }
 
-  norm = twopi * std::sqrt(twopi) * gs_sigma * gs_sigma * gs_sigma;
+  const double norm = twopi * std::sqrt(twopi) * gs_sigma*gs_sigma*gs_sigma;
   jmu /= norm;
 
   // j^0 = jmu.x0() is computational frame density
