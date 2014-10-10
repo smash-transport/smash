@@ -46,16 +46,16 @@ static void create_particle_list(Particles &P) {
 
   double mass = 0.938;
   // set momenta:
-  proton_x.set_4momentum(mass, ThreeVector(0.5, 0.0, 0.0));
-  proton_y.set_4momentum(mass, ThreeVector(0.0, -.5, 0.0));
-  proton_z.set_4momentum(mass, ThreeVector(0.0, 0.0, 0.5));
+  proton_x.set_4momentum(mass, ThreeVector(2.0, 0.0, 0.0));
+  proton_y.set_4momentum(mass, ThreeVector(0.0, -2.0, 0.0));
+  proton_z.set_4momentum(mass, ThreeVector(0.0, 0.0, 2.0));
   proton.set_4momentum(mass, ThreeVector(0.4, 0.5, 0.7));
   antiproton.set_4momentum(mass, ThreeVector(-0.4, -0.5, -0.7));
 
   // set positions:
   proton_x.set_4position(FourVector(0.0, -5.0, 0.0, 0.0));
   proton_y.set_4position(FourVector(0.0, 0.0, 5.0, 0.0));
-  proton_z.set_4position(FourVector(0.0, 0.0, 0.0, 5.0));
+  proton_z.set_4position(FourVector(0.0, 0.0, 0.0, -5.0));
   proton.set_4position(FourVector(0.0,-4.0,-5.0,-7.0));
   antiproton.set_4position(FourVector(0.0, 4.0, 5.0, 7.0));
 
@@ -69,13 +69,41 @@ static void create_particle_list(Particles &P) {
   return;
 }
 
+// create one particle moving along x axis and check density in comp. frame
+// check if density in the comp. frame gets contracted as expected
+TEST(density_number) {
+
+  ParticleData part_x = create_proton();
+  part_x.set_4momentum(FourVector(1.0, 0.95, 0.0, 0.0));
+  part_x.set_4position(FourVector(0.0, 0.0, 0.0, 0.0));
+  ParticleList P;
+  P.push_back(part_x);
+  ThreeVector r;
+  double sigma = 1.0;
+  FourVector jmu;
+  ModusDefault m;
+
+  r = ThreeVector(1.0, 0.0, 0.0);
+  jmu = m.baryon_jmu(r, P, sigma);
+  COMPARE_ABSOLUTE_ERROR(jmu.x0(), .00120524877950247448, 1.e-15);
+
+  r = ThreeVector(0.0, 1.0, 0.0);
+  jmu = m.baryon_jmu(r, P, sigma);
+  COMPARE_ABSOLUTE_ERROR(jmu.x0(), .12333338425608940690, 1.e-15);
+
+  r = ThreeVector(0.0, 0.0, 1.0);
+  jmu = m.baryon_jmu(r, P, sigma);
+  COMPARE_ABSOLUTE_ERROR(jmu.x0(), .12333338425608940690, 1.e-15);
+
+}
+
 TEST(density_compframe) {
   ModusDefault m;
   Particles Pdef;
   create_particle_list(Pdef);
   OutputsList out;
   // clock, output interval, cross-section, testparticles
-  ExperimentParameters param{{0.f, 0.3f}, 1.f, 0.0, 1};
+  ExperimentParameters param{{0.f, 1.0f}, 1.f, 0.0, 1};
   double dx = 0.3;
   double dy = 0.3;
   double dz = 0.3;
@@ -86,15 +114,18 @@ TEST(density_compframe) {
   ThreeVector r;
   FourVector jmu;
   FILE * pFile;
-  ParticleList plist = ParticleList(Pdef.data().begin(), Pdef.data().end());
-  /* for (const auto &p : plist) {
+  ParticleList plist;
+  /*
+  for (const auto &p : plist) {
     printf("Momentum: %10.2f  %10.2f  %10.2f %10.2f\n", p.momentum().x0(),
                    p.momentum().x1(), p.momentum().x2(), p.momentum().x3());
   }
   */
   printf("Ready to write vtk files.\n");
 
-  for (auto it = 0; it < 5; it++) {
+  for (auto it = 0; it < 30; it++) {
+    plist = ParticleList(Pdef.data().begin(), Pdef.data().end());
+
     pFile = fopen(("bdens.vtk." + std::to_string(it)).c_str(), "w");
     // printf("Writing a header to file %d, pointer %p.\n", it, pFile);
     fprintf(pFile, "# vtk DataFile Version 2.0\n");
@@ -123,5 +154,4 @@ TEST(density_compframe) {
     fclose(pFile);
     m.propagate(&Pdef, param, out);
   }
-
 }

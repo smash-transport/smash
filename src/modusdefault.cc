@@ -52,8 +52,11 @@ FourVector ModusDefault::baryon_jmu(ThreeVector r,
     // printf("gamma_inv = %12.4f\n", inv_gammai);
 
     // Get distance between particle and r in the particle rest frame
-    hlp = ((ri - r) * betai) / (inv_gammai * (1. + inv_gammai));
+    // printf("r-ri = %12.4f %12.4f %12.4f\n",(ri - r).x1(),(ri - r).x2(),(ri - r).x3());
+    hlp = ((r - ri) * betai) / (inv_gammai * (1. + inv_gammai));
+    // printf("hlp = %12.4f\n", hlp);
     dr_rest = r - ri + betai * hlp;
+    // printf("dr_rest = %12.4f\n", dr_rest);
 
     // Calculate the argument of exponential and check if it is too large
     hlp = 0.5 * dr_rest.sqr() / (gs_sigma * gs_sigma);
