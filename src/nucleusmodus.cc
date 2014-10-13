@@ -28,6 +28,7 @@ namespace Smash {
  * \page input_modi_nucleus_ Nucleus
  *
  * Possible Incident Energies, only one can be given:
+ *
  * \key Sqrtsnn (float, optional, no default): \n
  * Defines the energy of the collision as center-of-mass
  * energy in the collision of one participant each from both nuclei.
@@ -36,15 +37,15 @@ namespace Smash {
  * \f$NN\f$=neutron+neutron, you can specify which \f$NN\f$-pair you
  * want this to refer to with `Sqrts_Reps`. This expects a vector of two
  * PDG Codes, e.g. `Sqrts_n: [2212, 2212]` for proton-proton.
- * Default is the average nucleon mass per nucleus.
+ * Default is the average nucleon mass in the given nucleus.
  *
  * \key E_Lab (float, optional, no default): \n
- * Defines the energy of the collision by the initial energy in GeV? of
- * the projectile nucleus.  This assumes the target nucleus is at rest.
+ * Defines the energy of the collision by the initial energy in GeV of
+ * the projectile nucleus. This assumes the target nucleus is at rest.
  *
  * \key P_Lab (float, optional, no default): \n
  * Defines the energy of the collision by the initial momentum
- * of the projectile nucleus in GeV?.  This assumes the target nucleus is at rest.
+ * of the projectile nucleus in GeV. This assumes the target nucleus is at rest.
  *
  * \key Calculation_Frame (int, required, default = 1): \n
  * The frame in which the collision is calculated.\n
@@ -86,14 +87,14 @@ namespace Smash {
  * \li \subpage input_deformed_nucleus_
  *
  * \key Impact: \n
- * A section for the impact parameter (= distance of the two
+ * A section for the impact parameter (= distance (in fm) of the two
  * straight lines that the center of masses of the nuclei travel on).
  *
  * \li \key Value (float, optional, optional, default = 0.f): fixed value for
  * the impact parameter. No other \key Impact: directive is looked at.
  * \li \key Sample (string, optional, default = quadratic sampling): \n
  * if \key uniform, use uniform sampling of the impact parameter 
- * (\f$dP(b) = db\f$). If else, use areal input sampling
+ * (\f$dP(b) = db\f$). Otherwise use areal (aka quadratic) input sampling
  * (the probability of an input parameter range is proportional to the
  * area corresponding to that range, \f$dP(b) = b\cdot db\f$).
  * \li \key Range (float, float, optional, default = 0.0f):\n
@@ -109,9 +110,12 @@ namespace Smash {
  * x-component of \f$\vec b\f$. The result will be that the projectile
  * and target will have switched position in x.
  *
- * \key Initial_Distance (float, optional, default = no displacement): \n
- * The initial distance of the two nuclei. That
- * means \f$z_{\rm min}^{\rm target} - z_{\rm max}^{\rm projectile}\f$.
+ * \key Initial_Distance (float, optional, default = 2.0): \n
+ * The initial distance of the two nuclei (in fm). That
+ * means \f$z_{\rm min}^{\rm target} - z_{\rm max}^{\rm projectile}\f$.\n
+ *
+ * Note that this distance is applied before the Lorentz boost
+ * to chosen calculation frame, and thus the actual distance may be different.
  */
     
  
