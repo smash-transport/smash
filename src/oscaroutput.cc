@@ -315,7 +315,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
    * https://karman.physics.purdue.edu/OSCAR and
    * http://phy.duke.edu/~jeb65/oscar2013. SMASH OSCAR collisions output
    * produces \c full_event_history.oscar file. Format is flexible, options
-   * that regulate output can be found at \ref input_oscar_particlelist
+   * that regulate output can be found at \ref input_oscar_collisions
    * and at \ref input_general_. **Collision output always gives
    * a list of collisions/decays/box wall crossings plus optionally
    * initial and final configuration.**

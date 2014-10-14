@@ -237,7 +237,7 @@ int main(int argc, char *argv[]) {
     auto output_conf = configuration["General"]["Output"];
 
     /*!\Userguide
-     * \page output_general_ SMASH outputs
+     * \page output_general_ Output files
      * During its run SMASH produces output, which is saved in the SMASH
      * output directory.Default name of output directory is ./data/\<run_id\>,
      * where \<run_id\> is an integer number starting from 0. At the beginning
