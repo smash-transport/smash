@@ -22,16 +22,19 @@ namespace Smash {
 /*!\Userguide
  * \page input_deformed_nucleus_ Deformed Nucleus
  *
- * \li `Automatic:` Sets all necessary parameters based on the atomic number
- * of the input nucleus (true=automatic, false=manual, see additional directives).
- * \li `Beta_2` The deformation coefficient for the spherical harmonic Y_2_0 in the
+ * \li \key Beta_2 (double, optional, default = 0.0):\n
+ * The deformation coefficient for the spherical harmonic Y_2_0 in the
  * beta decomposition of the nuclear radius in the deformed woods-saxon distribution.
- * \li `Beta_4` The deformation coefficient for the spherical harmonic Y_4_0.
- * \li `Saturation_Density` The normalization coefficient in the Woods-Saxon distribution,
+ * \li \key Beta_4 (double, optional, default = 0.0):\n 
+ * The deformation coefficient for the spherical harmonic Y_4_0.
+ * \li \key Saturation_Density (float, optional, default = .168f)\n
+ * The normalization coefficient in the Woods-Saxon distribution,
  * needed here (and not in nucleus) due to the accept/reject sampling used. Default is
- * given as the infinite nuclear matter value .168f.
- * \li `Theta` The polar angle by which to rotate the nucleus.
- * \li `Phi` The azimuthal angle by which to rotate the nucleus.
+ * given as the infinite nuclear matter value.
+ * \li \key Theta (double, optional): \n
+ * The polar angle by which to rotate the nucleus.
+ * \li \key Phi (double, optional):\n
+ * The azimuthal angle by which to rotate the nucleus.
  */
     
 DeformedNucleus::DeformedNucleus() {}

@@ -74,9 +74,10 @@ namespace Smash {
  * \li \key Deformed (bool, optional, default = false): \n
  * true - deformed nucleus is initialized
  * false - spherical nucleus is initialized
- * \li \key Automatic (bool, optional, default = values from config file): \n
- * Whether or not to use default values based on the
- * current nucleus atomic number (true/false).
+ * \li \key Automatic (bool, optional, default = true): \n
+ * true - sets all necessary parameters based on the atomic number
+ * of the input nucleus \n
+ * false - manual values according to deformed nucleus (see below)
  *
  * Additional Woods-Saxon Parameters: \n
  * There are also many other
