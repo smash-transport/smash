@@ -1,4 +1,5 @@
-This is the repository for the development of a new transport approach
-for the dynamical description of heavy ion reactions: SMASH.
+This is the repository for the development of a new transport
+approach for the dynamical description of heavy ion reactions:
+SMASH (SiMulAtor for Smashing Heavy ions).
 
 See INSTALL on how to compile it and DEBUG for development hints.

@@ -1,15 +1,21 @@
-* Debug build:
-  cmake -DCMAKE_BUILD_TYPE=Debug ../
+/**
+\page debug Debugging
 
-* Find cmake build errors (best debugged with full compiler output):
-  make VERBOSE=1
+Debug build:
 
-* Change c++ compiler:
-  cmake ../ -DCMAKE_CXX_COMPILER=$HOME/lib/bin/g++
+      cmake .. -DCMAKE_BUILD_TYPE=Debug
 
-* smash binary is regularly checked by:
-  valgrind -v ./smash
-  
-* smash src is checked by:
-  cpplint.py *cc include/*h
-  cppcheck --enable=all -I include/ .
+Find cmake build errors (best debugged with full compiler output):
+
+      make VERBOSE=1
+
+smash binary is regularly checked by:
+
+      valgrind -v ./smash
+
+smash src is checked by:
+
+      cpplint.py *cc include/*h
+      cppcheck --enable=all -I include/ .
+
+*/

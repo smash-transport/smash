@@ -75,48 +75,55 @@ class NucleusModus : public ModusDefault {
    * at rest.
    **/
   std::unique_ptr<Nucleus> target_;
-  // Center-of-mass energy of the nucleus-nucleus collision.
+  /** Center-of-mass energy of the nucleus-nucleus collision.
+   *
+   **/
   float total_s_;
-  /** impact parameter
+  /** Impact parameter.
    *
    * The nuclei projectile_ and target_ will be shifted along the x axis
    * so that their centers move on antiparallel lines that are this
    * distance apart from each other.
    **/
   float impact_ = 0.f;
-  /** sample impact parameter
+  /// Flag for quadratic sampling of impact parameter.
+  bool sampling_quadratically_ = true;
+  /// Minimum value of impact parameter.
+  float imp_min_ = 0.0;
+  /// Maximum value of impact parameter.
+  float imp_max_ = 0.0;
+  /** Sample impact parameter.
    *
-   * sets the impact parameter to a value between min and max.
+   * Samples the impact parameter from values between imp_min_ and imp_max_.
+   * Sampling is either quadratic or linear, depending if
+   * sampling_quadratically_ is true or false.
    *
-   * @param s if true, use quadratic sampling (probability for a given
-   * impact parameter \f$dP(b)\f$ is proportional to \f$b\f$: \f$dP(b) =
-   * b\cdot db\f$), else every \f$b\f$ has same probability.
-   * @param min minimum value for impact parameter
-   * @param max maximum value for impact parameter
-   *
-   * Note that max less than min also works fine.
+   * Note that imp_max_ less than imp_min_ also works fine.
    *
    **/
-  void sample_impact(bool s, float min, float max);
-  /** initial z displacement of nuclei
+  void sample_impact();
+  /** Initial z displacement of nuclei.
    *
-   * each nucleus is shifted so that
+   * Each nucleus is shifted so that
    * the outermost particle on the side facing the other nucleus is at
    * \f$\pm\f$ this value.
    **/
   double initial_z_displacement_ = 1.0;
-  // Reference frame for the system.
-  // 1 = Center of velocity
-  // 2 = Center of mass
-  // 3 = Fixed target
+  /** Reference frame for the system.
+   *
+   * 1 = Center of velocity<br>
+   * 2 = Center of mass<br>
+   * 3 = Fixed target<br>
+   **/
   int frame_ = 1;
-  // Get the frame dependent velocity for each nucleus, using
-  // the current reference frame. \see frame_
-  //
-  // @param s The total mandelstam S of the system
-  // @param m1 The mass of the projectile.
-  // @param m2 The mass of the target.
-  // @return < v1, v2 >
+  /** Get the frame dependent velocity for each nucleus, using
+   * the current reference frame. \see frame_
+   *
+   * @param mandelstam_s The total center-of-mass energy of the system.
+   * @param m1 The mass of the projectile.
+   * @param m2 The mass of the target.
+   * @return < v1, v2 > Velocities of the nuclei.
+   **/
   std::pair<double, double> get_velocities(float mandelstam_s, float m1, float m2);
 
   /**\ingroup logging
