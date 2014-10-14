@@ -660,7 +660,7 @@ WARN_LOGFILE           =
 # with spaces.
 
 INPUT                  = doc/ \
-                         AUTHORS DEBUG INSTALL \
+                         AUTHORS INSTALL \
                          @CMAKE_CURRENT_BINARY_DIR@/userguide.dox
 
 # This tag can be used to specify the character encoding of the source files
