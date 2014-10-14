@@ -46,7 +46,8 @@ BinaryOutputCollisions::BinaryOutputCollisions(bf::path path,
 
   /*!\Userguide
    * \page format_binary_collisions Binary collisions format
-   * Here there is INFO about binary collisions format
+   * The format follows general block structure of OSCAR format:
+   * \ref oscar_general_. Specifics are the following.
    **/
 
 

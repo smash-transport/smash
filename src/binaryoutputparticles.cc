@@ -43,7 +43,8 @@ BinaryOutputParticles::BinaryOutputParticles(bf::path path,
 
   /*!\Userguide
    * \page format_binary_particles Binary particles format
-   * Here there is INFO about binary particles format
+   * The format follows general block structure of OSCAR format:
+   * \ref oscar_general_. Specifics are the following.
    **/
 
 void BinaryOutputParticles::at_eventstart(const Particles &particles,

@@ -263,8 +263,10 @@ int main(int argc, char *argv[]) {
      * cmake -D USE_ROOT=ON <source_dir>
      * make
      * \endcode
-     * 
-     * \key Specific output formats are explained here: \n
+     *
+     * \key Details of output formats are explained here: \n
+     * \li General block structure of OSCAR formats: \n
+     *     \subpage oscar_general_ 
      * \li A family of OSCAR ASCII outputs.\n
      *     \subpage format_oscar_particlelist\n
      *     \subpage format_oscar_collisions

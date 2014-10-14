@@ -55,6 +55,55 @@ OscarOutput<Format, Contents>::OscarOutput(bf::path path, std::string name)
    * false - initial and final particle list is not written out
    *
    */
+
+  /*!\Userguide
+   * \page oscar_general_ OSCAR block structure
+   * OSCAR outputs are a family of ASCII and binary formats that follow
+   * OSCAR format conventions. \n
+   * **All OSCAR outputs have the same general structure: header and arbitrary
+   * number of event blocks.** Each event block consists of arbitrary number of
+   * output blocks and special event end line that marks the end of event. One
+   * output block consists of output block header and N particle lines, N is
+   * specified in the output block  header. \n
+   * File structure can be visualized in the following way: 
+   * \code
+   * Header
+   * Event block 1
+   *   output block 1 
+   *       output block header
+   *       particle line 1
+   *       particle line 2
+   *       ...
+   *       particle line N
+   *   output block 2
+   *   ...
+   *   output block k
+   *   event end line
+   * Event block 2
+   * ...
+   * \endcode
+   * To fully characterise any OSCAR output one has to specify the following
+   * formatting:
+   * \li header
+   * \li output block header
+   * \li particle line
+   * \li event end line
+   *
+   * Every OSCAR output can produce two types of files: collisions output and
+   * particles output. In collisions output file and in particles output file
+   * the above structure is the same, but meaning of blocks is different.
+   * **In collision file one output block typically corresponds to one collision
+   * / decay / box wall crossing, while in particles output one block
+   * corresponds to a snapshot of all particles at one moment of time.**
+   * Particles output may contain snapshots of system at event start
+   * immediately after initialization, at event end (which is reached when
+   * time is larger or equal than \c End_Time in configuration file) and
+   * periodically during evolution, period is defined by \c Output_Interval
+   * option in configuration file, see \ref input_general_.
+   * Collisions output contains all collisions / decays / box wall crossings
+   * and optionally initial and final configuration.
+   */
+
   if (Format == OscarFormat2013) {
     fprintf(file_.get(), "#!OSCAR2013 %s %s ", name.c_str(), VERSION_MAJOR);
     fprintf(file_.get(), "t x y z mass p0 px py pz pdg ID\n");
@@ -176,9 +225,25 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
 
   /*!\Userguide
    * \page format_oscar_particlelist Oscar particles format
-   * Here there is INFO about Oscar particles formats
+   * The format follows general block structure of OSCAR format:
+   * \ref oscar_general_. There are two kinds of this format - 
+   * OSCAR2013 and OSCAR99.
+   * Oscar99
+   * ---------
+   *
+   * Oscar2013
+   * ---------
+   *
    * \page format_oscar_collisions Oscar collisions format
-   * INFO about Oscar collisions formats
+   * The format follows general block structure of OSCAR format:
+   * \ref oscar_general_. There are two kinds of this format - 
+   * OSCAR2013 and OSCAR99.
+   * Oscar99
+   * ---------
+   *
+   * Oscar2013
+   * ---------
+   *
    **/
 template <OscarOutputFormat Format, int Contents>
 void OscarOutput<Format, Contents>::write_particledata(
