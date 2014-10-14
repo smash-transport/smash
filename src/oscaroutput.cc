@@ -227,23 +227,163 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
    * \page format_oscar_particlelist Oscar particles format
    * The format follows general block structure of OSCAR format:
    * \ref oscar_general_. There are two kinds of this format - 
-   * OSCAR2013 and OSCAR99.
+   * OSCAR2013 and OSCAR99. Information about OSCAR standard can be found at
+   * https://karman.physics.purdue.edu/OSCAR and
+   * http://phy.duke.edu/~jeb65/oscar2013. SMASH OSCAR particles output
+   * produces \c particle_lists.oscar file. Format is flexible, options that
+   * regulate output can be found at \ref input_oscar_particlelist
+   * and at \ref input_general_. **Particle output always gives
+   * a snapshot of all particles at some moment of time.**
    * Oscar99
    * ---------
+   * This is ASCII (text) human-readable output according to OSCAR 1999
+   * standard. Format specifics are the following:\n
+   * **Header**
+   * \code
+   * # OSC1999A
+   * # final_id_p_x
+   * # smash
+   * # Block format:
+   * # nin nout event_number
+   * # id pdg 0 px py pz p0 mass x y z t
+   * # End of event: 0 0 event_number
+   * #
+   * \endcode
+   *
+   * **Output block header**
+   * \code
+   * nin nout /(not guaranteed) event_number/
+   * \endcode
+   *
+   * For initial particles block (nin, nout) = (0, npart), for intermediate
+   * and final - (nin, nout) = (npart, 0). Here npart - total number of
+   * particles. Output block header is followed by npart particle lines.
+   *
+   * **Particle line**
+   * \code
+   * id pdg 0 px py pz p0 mass x y z t
+   * \endcode
+   *
+   * \li \c id is an integer particle identifier.
+   *     It is unique for every particle in event.
+   * \li \c pdg is a PDG code of the particle (see http://pdg.lbl.gov/).
+   * It contains all the quantum numbers of the particle and uniquely
+   * identifies its type.
+   * \li \c px \c py \c pz \c p0 - 3-momentum and energy
+   * \li \c x \c y \c z \c t - coordinates and time
+   *
+   * **Event end line**
+   * \code
+   * 0 0 event_number
+   * \endcode
    *
    * Oscar2013
    * ---------
+   *
+   * This is ASCII (text) human-readable output according to OSCAR 2013
+   * standard. Format specifics are the following:\n
+   * **Header**
+   * \code
+   * #!OSCAR2013 final_particle_list t x y z mass p0 px py pz pdg ID
+   * # Units: fm fm fm fm GeV GeV GeV GeV GeV none none
+   * \endcode
+   *
+   * **Output block header**\n
+   * At start of event:
+   * \code
+   * # event ev_num in npart
+   * \endcode
+   * At end of event of intermediate particle snapshot:
+   * \code
+   * # event ev_num out npart
+   * \endcode
+   *
+   * **Particle line**
+   * \code
+   * t x y z mass p0 px py pz pdg ID
+   * \endcode
+   *
+   * **Event end line**
+   * \code
+   * # event ev_num end
+   * \endcode
    *
    * \page format_oscar_collisions Oscar collisions format
    * The format follows general block structure of OSCAR format:
    * \ref oscar_general_. There are two kinds of this format - 
-   * OSCAR2013 and OSCAR99.
+   * OSCAR2013 and OSCAR99. Information about OSCAR standard can be found at
+   * https://karman.physics.purdue.edu/OSCAR and
+   * http://phy.duke.edu/~jeb65/oscar2013. SMASH OSCAR collisions output
+   * produces \c full_event_history.oscar file. Format is flexible, options
+   * that regulate output can be found at \ref input_oscar_particlelist
+   * and at \ref input_general_. **Collision output always gives
+   * a list of collisions/decays/box wall crossings plus optionally
+   * initial and final configuration.**
    * Oscar99
    * ---------
+   * Format specifics are the following:\n
+   * **Header**
+   * \code
+   * # OSC1999A
+   * # full_event_history
+   * # smash
+   * # Block format:
+   * # nin nout event_number
+   * # id pdg 0 px py pz p0 mass x y z t
+   * # End of event: 0 0 event_number
+   * #
+   * \endcode
+   *
+   * **Output block header**
+   * \code
+   * nin nout /(not guaranteed) event_number/
+   * \endcode
+   * nin, nout are numbers of incoming and outgoing particles in a given
+   * reaction in collision output file. If initial and final configurations
+   * are written to collision file then (nin nout) = (0 npart) in the initial
+   * configuration and (nin nout) = (npart 0) in the final.
+   *
+   * **Particle line**
+   * \code
+   * id pdg 0 px py pz p0 mass x y z t
+   * \endcode
+   * **Event end line**
+   * \code
+   * # event ev_num end
+   * \endcode
    *
    * Oscar2013
    * ---------
+   *  Format specifics are the following:\n
+   * **Header**
+   * \code
+   * #!OSCAR2013 full_event_history t x y z mass p0 px py pz pdg ID
+   * # Units: fm fm fm fm GeV GeV GeV GeV GeV none none
+   * \endcode
    *
+   * **Output block header**\n
+   * At start of event:
+   * \code
+   * # event ev_num in npart
+   * \endcode
+   * At end of event:
+   * \code
+   * # event ev_num out npart
+   * \endcode
+   * At interaction:
+   * \code
+   * # interaction in nin out nout
+   * \endcode 
+   *
+   * **Particle line**
+   * \code
+   * t x y z mass p0 px py pz pdg ID
+   * \endcode
+   *
+   * **Event end line**
+   * \code
+   * # event ev_num end
+   * \endcode
    **/
 template <OscarOutputFormat Format, int Contents>
 void OscarOutput<Format, Contents>::write_particledata(
