@@ -1,19 +1,19 @@
 /**
 \page debug Debugging
 
-* Debug build:
+Debug build:
 
       cmake .. -DCMAKE_BUILD_TYPE=Debug
 
-* Find cmake build errors (best debugged with full compiler output):
+Find cmake build errors (best debugged with full compiler output):
 
       make VERBOSE=1
 
-* smash binary is regularly checked by:
+smash binary is regularly checked by:
 
       valgrind -v ./smash
 
-* smash src is checked by:
+smash src is checked by:
 
       cpplint.py *cc include/*h
       cppcheck --enable=all -I include/ .
