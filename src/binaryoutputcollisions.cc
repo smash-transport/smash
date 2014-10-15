@@ -48,7 +48,7 @@ BinaryOutputCollisions::BinaryOutputCollisions(bf::path path,
 }
 
   /*!\Userguide
-   * \page format_binary_
+   * \page format_binary_ Binary format
    *
    * Collisions output
    * -----------------
