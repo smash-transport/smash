@@ -44,7 +44,7 @@ class BinaryOutputBase : public OutputInterface {
  *
  * This class writes every collision, decay and box wall crossing
  * to the output file. Optionally one can also write
- * snapshots of initial and final state to the same file. 
+ * initial and final particle lists to the same file. 
  * Output file is binary and has a block structure.
  *
  * Details of the output format can be found 

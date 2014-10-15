@@ -41,6 +41,9 @@ OscarOutput<Format, Contents>::OscarOutput(bf::path path, std::string name)
    * true - print only final particle list \n
    * false - particle list at output interval including initial time
    *
+   *  Detailed specification of OSCAR particle list format can be found here:
+   * \ref format_oscar_particlelist
+   *
    * \page input_oscar_collisions Oscar_Collisions
    * Enables OSCAR collisions output. The latter saves information about
    * every collision, decay and box wall crossing in OSCAR1999 or OSCAR2013 format.
@@ -54,6 +57,8 @@ OscarOutput<Format, Contents>::OscarOutput(bf::path path, std::string name)
    * true - initial and final particle list is written out \n
    * false - initial and final particle list is not written out
    *
+   * Detailed specification of OSCAR collisions format can be found here:
+   * \ref format_oscar_collisions
    */
 
   /*!\Userguide
@@ -94,8 +99,8 @@ OscarOutput<Format, Contents>::OscarOutput(bf::path path, std::string name)
    * the above structure is the same, but meaning of blocks is different.
    * **In collision file one output block typically corresponds to one collision
    * / decay / box wall crossing, while in particles output one block
-   * corresponds to a snapshot of all particles at one moment of time.**
-   * Particles output may contain snapshots of system at event start
+   * corresponds to the current particle list at one moment of time.**
+   * Particles output may contain the particle list at event start
    * immediately after initialization, at event end (which is reached when
    * time is larger or equal than \c End_Time in configuration file) and
    * periodically during evolution, period is defined by \c Output_Interval
@@ -233,7 +238,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
    * produces \c particle_lists.oscar file. Format is flexible, options that
    * regulate output can be found at \ref input_oscar_particlelist
    * and at \ref input_general_. **Particle output always gives
-   * a snapshot of all particles at some moment of time.**
+   * the current particle list at a specific time.**
    * Oscar99
    * ---------
    * This is ASCII (text) human-readable output according to OSCAR 1999
@@ -293,7 +298,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
    * \code
    * # event ev_num in npart
    * \endcode
-   * At end of event of intermediate particle snapshot:
+   * At end of event or intermediate particle list output:
    * \code
    * # event ev_num out npart
    * \endcode

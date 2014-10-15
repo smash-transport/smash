@@ -35,6 +35,9 @@ BinaryOutputParticles::BinaryOutputParticles(bf::path path,
    * true - only final particle list at the end of each event \n
    * false - particle list output at every output interval including initial 
    * time
+   * 
+   * Detailed specification of the binary format can be found here:
+   * \ref format_binary_
    */
   fwrite("SMSH", 4, 1, file_.get());  // magic number
   write(0);              // file format version number
@@ -49,8 +52,8 @@ BinaryOutputParticles::BinaryOutputParticles(bf::path path,
    * written for any real number, while binary saves the whole double
    * (16 digits). By accident this makes sizes of binary output files
    * approximately the same as OSCAR ASCII files.
-   * **The format follows general block structure of OSCAR format:
-   * \ref oscar_general_.** However, for binary specification is stricter.
+   * **The format follows general block structure of OSCAR format:**
+   * \ref oscar_general_. However, for binary specification is stricter.
    * Types used for output are 4 bytes signed integers, 8 bytes doubles and
    * 1 byte chars. Integer variables will be marked as (int), double as (d),
    * char as (char).\n
@@ -94,8 +97,8 @@ BinaryOutputParticles::BinaryOutputParticles(bf::path path,
    *
    * Particles output
    * ----------------
-   * Written to \c particles_binary.bin file. Contains snapshots of
-   * particles at different moments of time. Every moment of time
+   * Written to \c particles_binary.bin file. Contains the current particle
+   * list at specific moments of time. Every moment of time
    * is written as a 'p' block. For options of this output see
    * \ref input_general_, \ref input_binary_particles.
    **/

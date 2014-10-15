@@ -238,9 +238,10 @@ int main(int argc, char *argv[]) {
 
     /*!\Userguide
      * \page output_general_ Output files
-     * During its run SMASH produces output, which is saved in the SMASH
-     * output directory.Default name of output directory is ./data/\<run_id\>,
-     * where \<run_id\> is an integer number starting from 0. At the beginning
+     * There are different optional formats for SMASH output that are explained
+     * below in more detail. Per default, the selected output files will be
+     * saved in the directory ./data/\<run_id\>, where \<run_id\> is an integer
+     * number starting from 0. At the beginning
      * of run SMASH checks if there exists ./data/0 directory, if no then it
      * is created and all output files are written there. If the directory
      * already exists, SMASH tries for ./data/1, ./data/2 and so on until it
@@ -254,15 +255,6 @@ int main(int argc, char *argv[]) {
      * output see corresponding pages: \ref input_oscar_particlelist,
      * \ref input_oscar_collisions, \ref input_binary_collisions,
      * \ref input_binary_particles, \ref input_root, \ref input_vtk.
-     *
-     * Producing ROOT output requires ROOT installed (see http://root.cern.ch).
-     * SMASH philosophy is being a self-contained software, so by default SMASH
-     * does not need ROOT to compile and run. To produce ROOT output one has to
-     * compile SMASH in a special way:
-     * \code 
-     * cmake -D USE_ROOT=ON <source_dir>
-     * make
-     * \endcode
      *
      * \key Details of output formats are explained here: \n
      * \li General block structure of OSCAR formats: \n

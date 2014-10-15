@@ -38,6 +38,9 @@ BinaryOutputCollisions::BinaryOutputCollisions(bf::path path,
    * false - only information about collisions, decays and
    * box wall crossings during the whole evolution \n
    * true - initial and final configuration are written in addition
+   *
+   * Detailed specification of the binary format can be found here:
+   * \ref format_binary_
    */
   fwrite("SMSH", 4, 1, file_.get());  // magic number
   write(0);              // file format version number

@@ -58,6 +58,8 @@ RootOutput::RootOutput(bf::path path, Configuration&& conf)
    * this N (default N = 1000). Note that "AutoSave" operation is very
    * time-consuming, so the Autosave_Frequency is
    * always a compromise between safety and speed.
+   *
+   * For details on ROOT output format see \ref format_root
    */
 
   /*!\Userguide
@@ -71,6 +73,15 @@ RootOutput::RootOutput(bf::path path, Configuration&& conf)
    * here http://root.cern.ch/root/html/TFile.html. We only desribe the logical
    * structure of the SMASH root output. Knowing the logical structure is
    * enough to read, write root-file and understand its view in TBrowser.
+   *
+   * Producing ROOT output requires ROOT installed (see http://root.cern.ch).
+   * SMASH philosophy is being a self-contained software, so by default SMASH
+   * does not need ROOT to compile and run. To produce ROOT output one has to
+   * compile SMASH in a special way:
+   * \code 
+   * cmake -D USE_ROOT=ON <source_dir>
+   * make
+   * \endcode
    *
    * SMASH produces one root file per run: \c smash_run.root. This file
    * contains TTree called \c particles and a TTree \c collisions.
