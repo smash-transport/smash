@@ -242,7 +242,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
    * \code
    * # OSC1999A
    * # final_id_p_x
-   * # smash
+   * # smash <version>
    * # Block format:
    * # nin nout event_number
    * # id pdg 0 px py pz p0 mass x y z t
@@ -326,7 +326,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
    * \code
    * # OSC1999A
    * # full_event_history
-   * # smash
+   * # smash <version>
    * # Block format:
    * # nin nout event_number
    * # id pdg 0 px py pz p0 mass x y z t

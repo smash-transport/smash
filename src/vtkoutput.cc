@@ -35,7 +35,22 @@ VtkOutput::~VtkOutput() {
 
   /*!\Userguide
    * \page format_vtk Vtk format
-   * Here there is INFO about vtk output format
+   * In general VTK is a very versatile format, which allows many possible
+   * structures. For generic VTK format one can see http://vtk.org. Here only
+   * SMASH-specific VTK format is described.
+   *
+   * SMASH VTK files contain snapshot of simulation at one moment of time.
+   * VTK output files are written at initialization at event start and
+   * every period of time \f$ \Delta t \f$, where \f$ \Delta t \f$ is regulated
+   * by option (see \ref input_general_). For every new output moment
+   * a separate VTK file is written. File names are constructed as follows:
+   * pos_ev<event>_tstep<output_number>.vtk.
+   *
+   * Files contain particle coordinates, momenta and PDG codes. VTK output is
+   * known to work with paraview, a free visualization and data analysis
+   * software. Files of this format are supposed to be used as a black box
+   * and opened with paraview, but at the same time they are
+   * human-readable text files.
    **/
 
 void VtkOutput::at_eventstart(const Particles &particles,

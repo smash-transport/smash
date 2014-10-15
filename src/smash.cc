@@ -271,11 +271,12 @@ int main(int argc, char *argv[]) {
      *     \subpage format_oscar_particlelist\n
      *     \subpage format_oscar_collisions
      * \li Binary outputs analoguous to OSCAR format\n
-     *     \subpage format_binary_collisions\n
-     *     \subpage format_binary_particles
+     *     \subpage format_binary_\n
      * \li Output in vtk format suitable for an easy
      *     visualization using paraview software:\n \subpage format_vtk
-     * \li Output in ROOT format:\n \subpage format_root 
+     * \li Formatted binary output that uses ROOT software
+     *     (http://root.cern.ch).\n Fast to read and write, requires less
+     *     disk space.\n \subpage format_root 
      */
 
     // loop until all OSCAR outputs are created (create_oscar_output will return
@@ -339,3 +340,4 @@ int main(int argc, char *argv[]) {
   log.trace() << source_location << " about to return from main";
   return 0;
 }
+

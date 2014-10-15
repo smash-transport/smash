@@ -45,9 +45,16 @@ BinaryOutputCollisions::BinaryOutputCollisions(bf::path path,
 }
 
   /*!\Userguide
-   * \page format_binary_collisions Binary collisions format
-   * The format follows general block structure of OSCAR format:
-   * \ref oscar_general_. Specifics are the following.
+   * \page format_binary_
+   *
+   * Collisions output
+   * -----------------
+   * Written to \c collisions_binary.bin file. Contains interactions
+   * (collisions, decays, box wall crossings) and optionally initial
+   * and final configuration. Interactions are written in comp. frame
+   * time-ordered fashion, in 'i' blocks. Initial and final states
+   * are written as 'p' blocks. For options of this output see
+   * \ref input_general_, \ref input_binary_collisions.
    **/
 
 
