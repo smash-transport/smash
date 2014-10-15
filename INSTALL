@@ -57,8 +57,13 @@ Alternatively the compiler can also be specified to cmake like this:
 Compiling with ROOT support
 ---------------------------
 
-In order to produce ROOT output with SMASH,
-you need a working installation of ROOT.
+Producing ROOT output requires ROOT installed (see http://root.cern.ch).
+SMASH philosophy is being a self-contained software, so by default SMASH does
+not need ROOT to compile and run. To produce ROOT output one has to compile
+SMASH in a special way:
+
+    cmake -D USE_ROOT=ON <source_dir>
+    make
 
 Building the Documentation
 --------------------------
