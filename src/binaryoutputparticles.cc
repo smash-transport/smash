@@ -55,15 +55,15 @@ BinaryOutputParticles::BinaryOutputParticles(bf::path path,
    * **The format follows general block structure of OSCAR format:**
    * \ref oscar_general_. However, for binary specification is stricter.
    * Types used for output are 4 bytes signed integers, 8 bytes doubles and
-   * 1 byte chars. Integer variables will be marked as (int), double as (d),
-   * char as (char).\n
+   * 1 byte chars.
    *
    * As for OSCAR ASCII output there are two kinds of binary output:
    * particles and collisions.
    * Specifics for both particles and collisions output are the following:\n
    * **Header**
    * \code
-   * magic_number, format_version(int), len(int), smash_version
+   *    4*char          int        int    len*char
+   * magic_number, format_version, len, smash_version
    * \endcode
    * \li magic_number - 4 bytes that in ASCII read as "SMSH".
    * \li Format version is an integer number, currently it is 0.
@@ -73,26 +73,30 @@ BinaryOutputParticles::BinaryOutputParticles(bf::path path,
    * **Output block header**\n
    * At start of event, end of event or any other particle output:
    * \code
-   * 'p'(char) npart(int)
+   * char  int
+   * 'p'  npart
    * \endcode
-   * \li npart is number of particle lines in the block that follows
+   * \li \c npart is number of particle lines in the block that follows
    *
    * At interaction:
    * \code
-   * 'i'(char) nin(int) nout(int)
+   * char int int
+   * 'i'  nin nout
    * \endcode
-   * \li nin, nout are numbers of incoming and outgoing particles
+   * \li \c nin, \c nout are numbers of incoming and outgoing particles
    *
    * Block header is followed by \c nin + \c nout particle lines.
    *
    * **Particle line**
    * \code
-   * t x y z mass p0 px py pz pdg(int) ID(int)
+   *     9*double             int int
+   * t x y z mass p0 px py pz pdg ID
    * \endcode
    *
    * **Event end line**
    * \code
-   * 'f'(char) event_number(int)
+   * char    int
+   * 'f' event_number
    * \endcode
    *
    * Particles output
