@@ -26,38 +26,93 @@ RootOutput::RootOutput(bf::path path, Configuration&& conf)
       root_out_file_(
           new TFile((base_path_ / "smash_run.root").native().c_str(), "NEW")),
       output_counter_(0),
-      write_collisions_(conf.has_value({"write_collisions"})
-                                 ? conf.take({"write_collisions"}) : false),
-      write_particles_(conf.has_value({"write_particles"})
-                                 ? conf.take({"write_particles"}) : true),
-      autosave_frequency_(conf.has_value({"autosave_frequency"})
-                               ? conf.take({"autosave_frequency"}) : 1000) {
+      write_collisions_(conf.has_value({"Write_Collisions"})
+                                 ? conf.take({"Write_Collisions"}) : false),
+      write_particles_(conf.has_value({"Write_Particles"})
+                                 ? conf.take({"Write_Particles"}) : true),
+      autosave_frequency_(conf.has_value({"Autosave_Frequency"})
+                               ? conf.take({"Autosave_Frequency"}) : 1000) {
   /*!\Userguide
    * \page input_root ROOT
    * Enables output in a ROOT format. The latter is a structured binary format
    * invented at CERN. For more details see root.cern.ch. The resulting
    * output file can optionally contain two TTree's: the one containing
-   * information about particles snapshots at fixed moments of time and
-   * the one containing information about collisions.
+   * information about the particle list at fixed moments of time and
+   * the other one containing information about the collision history.
    *
    *
-   * \key write_collisions: \n
-   * Optional, chooses if information about collisions, decays and box wall
-   * crossings should be written out (true) or not (false, default).
+   * \key Write_Collisions (bool, optional, default = false): \n
+   * true - information about collisions, decays and box wall
+   * crossings will be written out \n
+   * false - collision history information is suppressed
    *
-   * \key write_particles: \n
-   * Optional, chooses if particles snapshots at fixed moments of time
-   * should be written out (true, default) or not (false).
+   * \key Write_Particles (bool, optional, default = true): \n
+   * true - particle list at output interval is written out \n
+   * false - particle list is not written out 
    *
-   * \key autosave_frequency: \n
+   * \key Autosave_Frequency (int, optional, default = 1000): \n
    * Root file cannot be read if it was not properly closed and finalized.
    * It can happen that SMASH simulation crashed and root file was not closed.
    * To save results of simulation in such case, "AutoSave" is
    * applied every N events. The autosave_frequency option sets
    * this N (default N = 1000). Note that "AutoSave" operation is very
-   * time-consuming, so the autosave_frequency is
+   * time-consuming, so the Autosave_Frequency is
    * always a compromise between safety and speed.
+   *
+   * For details on ROOT output format see \ref format_root
    */
+
+  /*!\Userguide
+   * \page format_root ROOT format
+   * SMASH ROOT output has the same functionality as OSCAR output, but
+   * root-files are faster to read, write and they need less disk space
+   * for the same amount of information. This is reached due to complex
+   * internal structure of ROOT file. ROOT file is not human-readable, but it
+   * can be viewed using ROOT TBrowser. One can also open and read it using
+   * ROOT functions. Full memory structure of the ROOT-file can be found
+   * here http://root.cern.ch/root/html/TFile.html. We only desribe the logical
+   * structure of the SMASH root output. Knowing the logical structure is
+   * enough to read, write root-file and understand its view in TBrowser.
+   *
+   * Producing ROOT output requires ROOT installed (see http://root.cern.ch).
+   * SMASH philosophy is being a self-contained software, so by default SMASH
+   * does not need ROOT to compile and run. To produce ROOT output one has to
+   * compile SMASH in a special way:
+   * \code 
+   * cmake -D USE_ROOT=ON <source_dir>
+   * make
+   * \endcode
+   *
+   * SMASH produces one root file per run: \c smash_run.root. This file
+   * contains TTree called \c particles and a TTree \c collisions.
+   * The latter can be switched on and off by an option (see \ref input_root).
+   * Particles tree contains the same information as OSCAR particles output
+   * and collisions tree contains the same information as OSCAR collision output. 
+   *
+   * Every physical quantity is in separate TBranch.\n
+   * One entry in the particles TTree is:
+   * \code
+   * ev tcounter npart pdgcode[npart] t[npart] x[npart] y[npart] z[npart] ->
+   * -> p0[npart] px[npart] py[npart] pz[npart]
+   * \endcode
+   * One tree entry is analogous to OSCAR output block, but maximal size of
+   * ROOT entry is limited to 10000. This is done to limit buffer size needed
+   * for root output. If number of particles in one block exceeds 10000,
+   * then they are written in separate blocks with the same tcounter and ev. 
+   *
+   * \li ev is event number
+   * \li tcounter is number of output block in a given event in terms of OSCAR
+   * \li npart is number of particles in the block
+   * \li pdgcode is PDG id array
+   * \li t, x, y, z are position arrays
+   * \li p0, px, py, pz are 4-momenta arrays
+   *
+   * In collisions tree entries are organized in the same way, but additional
+   * fields \c nin and \c nout are added to characterize number of incoming
+   * and outgoing particles in the reaction, nin + nout = npart. Currently
+   * writing initial and final configuration to collisions tree is not supported.
+   **/
+
   if (write_particles_) {
     particles_tree_ = new TTree("particles", "particles");
 

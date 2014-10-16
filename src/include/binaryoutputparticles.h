@@ -22,10 +22,10 @@ namespace Smash {
 /**
  * \ingroup output
  *
- * \brief Saves snapshots of SMASH particles to binary file.
+ * \brief Writes the particle list at specific times to binary file
  *
- * This class writes a snapshot of all simulated particles at some
- * fixed moments to the binary output file. These fixed moments can
+ * This class writes the current particle list at a specific time t
+ * to the binary output file. These specific time can
  * be: event start, event end, every next time interval \f$\Delta t \f$.
  * Writing (or not writing) output at these moments is controlled by options.
  * Time interval \f$\Delta t \f$ is also regulated by an option.

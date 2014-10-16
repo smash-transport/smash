@@ -10,120 +10,130 @@ Logging:
   #ParticleType: ALL
   #Action: ALL
   #FindScatter: ALL
+  #DecayModes: ALL
+  #ScatterAction: ALL
 
 General:
     # Modus decision
-    MODUS:         Nucleus
+    Modus:         Nucleus
 
     # temporal grid spacing
-    DELTA_TIME:    0.01
+    Delta_Time:    0.01
 
     # end time of simulation
-    END_TIME:      1.0
+    End_Time:      1.0
 
     # output formats
-    OUTPUT:
-        OSCAR_COLLISIONS:
+    Output:
+        Oscar_Collisions:
             Enable:             True
-            2013_format:        True
-            Print_start_end:    False
-        OSCAR_PARTICLELIST:
+            2013_Format:        True
+            Print_Start_End:    False
+        Oscar_Particlelist:
             Enable:             True
-            2013_format:        True
-            Only_final:         True
-        VTK:
+            2013_Format:        True
+            Only_Final:         True
+        Vtk:
             Enable:             False
-        ROOT:
+        Root:
             Enable:             True
-            write_collisions:   True
-            write_particles:    True
-            autosave_frequency: 1000
-        Binary_collisions:
+            Write_Collisions:   True
+            Write_Particles:    True
+            Autosave_Frequency: 1000
+        Binary_Collisions:
             Enable:             True
-            print_start_end:    True
-        Binary_particles:
+            Print_Start_End:    True
+        Binary_Particles:
             Enable:             True
-            only_final:         False
+            Only_Final:         False
 
     # how much time before recording measurables
-    OUTPUT_INTERVAL:  1.0
+    Output_Interval:  1.0
 
     # initial random seed (auto-generated if negative)
-    RANDOMSEED:    1
+    Randomseed:    1
 
     # elastic cross section
-    SIGMA:         10.0
+    Sigma:         10.0
 
     # number of test particle
-    TESTPARTICLES: 1
+    Testparticles: 1
 
     # number of events
-    NEVENTS:       1
+    Nevents:       1
+
+Collision_Term:
+    Decays:        True
+    Collisions:    True
 
 Modi:
     Box:
         # Cube size
-        LENGTH: 10.0
+        Length: 10.0
 
         # initialization temperature
-        TEMPERATURE: 0.2
+        Temperature: 0.2
 
         # initial condition
         #
         # 1:  random position box + thermal momenta
         # 2:  random position box + peaked momenta
         #
-        INITIAL_CONDITION: 1
+        Initial_Condition: 1
 
         # start time of simulation
-        START_TIME:    0.0
+        Start_Time:    0.0
 
-        INIT_MULTIPLICITIES:
+        Init_Multiplicities:
             221:    100
             111:    200
             2112:   20
 
     Sphere:
         # Sphere size
-        RADIUS: 5.0
-        # Number of particles in Sphere
-        NUMBEROFPARTICLES: 280
+        Radius: 5.0
         # Current temperature
-        SPHERETEMPERATURE: 0.2
+        Sphere_Temperature: 0.2
         # start time of simulation
-        START_TIME: 0.0
+        Start_Time: 0.0
+        # Number of particles in Sphere
+        Init_Multiplicities:
+            221:    100
+            111:    200
+            2112:   20
+
 
     Collider:
         # Projectile particle
-        PROJECTILE: 211
+        Projectile: 211
 
         # Target particle
-        TARGET: -211
+        Target: -211
 
         # center-of-mass energy in GeV
-        SQRTS: 1.0
+        Sqrts: 1.0
 
     Nucleus:
         # Definitions for the projectile:
         # Deuteron
         Projectile:
-            PARTICLES: {2212: 1, 2112: 1}
+            Particles: {2212: 1, 2112: 1}
             # very hard Woods-Saxon distribution.
-            DIFFUSIVENESS: .001
-            AUTOMATIC: false
-            DEFORMED: false
+            Diffusiveness: .001
+            Automatic: false
+            Deformed: false
         # Definitions for the target:
         # Lead
         Target:
-            PARTICLES: {2212: 82, 2112: 126}
-            AUTOMATIC: true
-            DEFORMED: false
+            Particles: {2212: 82, 2112: 126}
+            Automatic: true
+            Deformed: false
 
         # Collision energy (E_LAB, P_LAB, SQRTSNN).
-        SQRTSNN: 2
+        Sqrtsnn: 2
         # The representative particles (two PDG IDs) determining the
         # subsystem "NN" in sqrt(s_NN). Let's try neutron-neutron.
-        SQRTS_REPS: [2112, 2112]
+        Sqrts_Reps: [2112, 2112]
         # The reference frame in which to do the calculation.
         # (1 = center of velocity, 2 = center of mass, 3 = fixed target)
-        CALCULATION_FRAME: 1
+        Calculation_Frame: 1

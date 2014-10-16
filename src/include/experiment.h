@@ -180,10 +180,8 @@ class Experiment : public ExperimentBase {
    */
   OutputsList outputs_;
 
-  /// The object that finds decays
-  DecayActionsFinder decay_finder_;
-  /// The object that finds scatterings
-  ScatterActionsFinder scatter_finder_;
+  /// The Action finder objects
+  std::vector<std::unique_ptr<ActionFinderInterface>> action_finders_;
 
   /**
    * Number of events.
@@ -202,7 +200,7 @@ class Experiment : public ExperimentBase {
   const int nevents_;
 
   /// simulation time at which the evolution is stopped.
-  const float end_time_ = 10.0f;
+  const float end_time_;
   /** The clock's timestep size at start up
    *
    * Stored here so that the next event will remember this.

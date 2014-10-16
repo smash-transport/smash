@@ -20,10 +20,10 @@
 
 namespace Smash {
 
-ScatterActionsFinder::ScatterActionsFinder(const ExperimentParameters &parameters)
-                     : ActionFinderFactory(parameters.timestep_duration()),
-                       elastic_parameter_(parameters.cross_section) {
-}
+ScatterActionsFinder::ScatterActionsFinder(
+    const ExperimentParameters &parameters)
+    : ActionFinderInterface(parameters.timestep_duration()),
+      elastic_parameter_(parameters.cross_section) {}
 
 double ScatterActionsFinder::collision_time(const ParticleData &p1,
                                             const ParticleData &p2) {
@@ -51,10 +51,8 @@ double ScatterActionsFinder::collision_time(const ParticleData &p1,
   }
 }
 
-
-ActionPtr
-ScatterActionsFinder::check_collision(const ParticleData &data_a,
-                                      const ParticleData &data_b) const {
+ActionPtr ScatterActionsFinder::check_collision(
+    const ParticleData &data_a, const ParticleData &data_b) const {
   const auto &log = logger<LogArea::FindScatter>();
 
   /* just collided with this particle */
@@ -107,154 +105,50 @@ ScatterActionsFinder::check_collision(const ParticleData &data_a,
   return std::move(act);
 }
 
-std::vector<ActionPtr> ScatterActionsFinder::find_possible_actions(
-    const Particles &particles) const {
-  std::vector<ActionPtr> actions;
-
-  for (const auto &p1 : particles.data()) {
-    for (const auto &p2 : particles.data()) {
-      /* Check for same particle and double counting. */
-      if (p1.id() >= p2.id()) continue;
-
-      /* Check if collision is possible. */
-      ActionPtr act = check_collision (p1, p2);
-
-      /* Add to collision list. */
-      if (act != nullptr) {
-        actions.push_back(std::move(act));
+template <typename F>
+inline void iterate_all_pairs(
+    const ParticleList &search_list,
+    const std::vector<const ParticleList *> &neighbors_list, F &&closure) {
+  const auto end0 = search_list.end();
+  const auto end1 = neighbors_list.end();
+  for (auto it0 = search_list.begin(); it0 != end0; ++it0) {
+    for (auto it1 = std::next(it0); it1 != end0; ++it1) {
+      if (it0->id() < it1->id()) {
+        closure(*it0, *it1);
+      } else {
+        closure(*it1, *it0);
+      }
+    }
+    for (auto it1 = neighbors_list.begin(); it1 != end1; ++it1) {
+      const ParticleList &inner_neighbors_list = **it1;
+      const auto end2 = inner_neighbors_list.end();
+      for (auto it2 = inner_neighbors_list.begin(); it2 != end2; ++it2) {
+        if (it0->id() < it2->id()) {
+          closure(*it0, *it2);
+        } else {
+          closure(*it2, *it0);
+        }
       }
     }
   }
+}
+
+std::vector<ActionPtr> ScatterActionsFinder::find_possible_actions(
+    const ParticleList &search_list,
+    const std::vector<const ParticleList *> &neighbors_list) const {
+  std::vector<ActionPtr> actions;
+
+  iterate_all_pairs(search_list, neighbors_list,
+                    [&](const ParticleData &p1, const ParticleData &p2) {
+    /* Check if collision is possible. */
+    ActionPtr act = check_collision(p1, p2);
+
+    /* Add to collision list. */
+    if (act != nullptr) {
+      actions.push_back(std::move(act));
+    }
+  });
   return std::move(actions);
 }
-
-
-#if 0
-GridScatterFinder::GridScatterFinder(float length) : length_(length) {
-}
-
-void
-GridScatterFinder::find_possible_actions(std::vector<ActionPtr> &actions,
-        Particles *particles, const ExperimentParameters &parameters,
-        CrossSections *cross_sections) const {
-  std::vector<std::vector<std::vector<std::vector<int> > > > grid;
-  int N;
-  int x, y, z;
-
-  /* For small boxes no point in splitting up in grids */
-  /* calculate approximate grid size according to double interaction length */
-  N = round(length_ / sqrt(parameters.cross_section * fm2_mb * M_1_PI) * 0.5);
-  if (unlikely(N < 4 || particles->size() < 10)) {
-    /* XXX: apply periodic boundary condition */
-    ScatterActionsFinder::find_possible_actions(actions, particles, parameters,
-                                                cross_sections);
-    return;
-  }
-
-  /* allocate grid */
-  grid.resize(N);
-  for (int i = 0; i < N; i++) {
-    grid[i].resize(N);
-    for (int j = 0; j < N; j++)
-      grid[i][j].resize(N);
-  }
-  /* populate grid */
-  for (const ParticleData &data : particles->data()) {
-    /* XXX: function - map particle position to grid number */
-    x = round(data.position().x1() / length_ * (N - 1));
-    y = round(data.position().x2() / length_ * (N - 1));
-    z = round(data.position().x3() / length_ * (N - 1));
-    printd_position(data);
-    printd("grid cell particle %i: %i %i %i of %i\n", data.id(), x, y, z, N);
-    if (unlikely(x >= N || y >= N || z >= N))
-      printf("W: Particle outside the box: %g %g %g \n",
-             data.position().x1(), data.position().x2(),
-             data.position().x3());
-    grid[x][y][z].push_back(data.id());
-  }
-  /* semi optimised nearest neighbour search:
-   * http://en.wikipedia.org/wiki/Cell_lists
-   */
-  FourVector shift;
-  for (const ParticleData &data : particles->data()) {
-    /* XXX: function - map particle position to grid number */
-    x = round(data.position().x1() / length_ * (N - 1));
-    y = round(data.position().x2() / length_ * (N - 1));
-    z = round(data.position().x3() / length_ * (N - 1));
-    if (unlikely(x >= N || y >= N || z >= N))
-      printf("grid cell particle %i: %i %i %i of %i\n", data.id(), x, y, z, N);
-    /* check all neighbour grids */
-    for (int cx = -1; cx < 2; cx++) {
-      int sx = cx + x;
-      /* apply periodic boundary condition for particle positions */
-      if (sx < 0) {
-        sx = N - 1;
-        shift.set_x1(-length_);
-      } else if (sx > N - 1) {
-        sx = 0;
-        shift.set_x1(length_);
-      } else {
-        shift.set_x1(0);
-      }
-      for (int cy = -1; cy < 2; cy++) {
-        int sy = cy + y;
-        if (sy < 0) {
-          sy = N - 1;
-          shift.set_x2(-length_);
-        } else if (sy > N - 1) {
-          sy = 0;
-          shift.set_x2(length_);
-        } else {
-          shift.set_x2(0);
-        }
-        for (int cz = -1; cz < 2; cz++) {
-          int sz = cz + z;
-          if (sz < 0) {
-            sz = N - 1;
-            shift.set_x3(-length_);
-          } else if (sz > N - 1) {
-            sz = 0;
-            shift.set_x3(length_);
-          } else {
-            shift.set_x3(0);
-          }
-          /* empty grid cell */
-          if (grid[sx][sy][sz].empty()) {
-            continue;
-          }
-          /* grid cell particle list */
-          for (auto id_other = grid[sx][sy][sz].begin();
-               id_other != grid[sx][sy][sz].end(); ++id_other) {
-            /* only check against particles above current id
-             * to avoid double counting
-             */
-            if (*id_other <= data.id()) {
-              continue;
-            }
-            printd("grid cell particle %i <-> %i\n", data.id(), *id_other);
-            ActionPtr act;
-            if (shift == 0) {
-              act = check_collision(data.id(), *id_other, particles,
-                                    parameters, cross_sections);
-            } else {
-              /* apply eventual boundary before and restore after */
-              particles->data(*id_other)
-                  .set_position(particles->data(*id_other).position() + shift);
-              act = check_collision(data.id(), *id_other, particles,
-                                    parameters, cross_sections);
-              particles->data(*id_other)
-                  .set_position(particles->data(*id_other).position() - shift);
-            }
-            /* Add to collision list. */
-            if (act != nullptr) {
-              actions.push_back(std::move(act));
-            }
-          } /* grid particles loop */
-        }   /* grid sz */
-      }     /* grid sy */
-    }       /* grid sx */
-  }         /* outer particle loop */
-}
-#endif
 
 }  // namespace Smash

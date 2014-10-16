@@ -20,18 +20,40 @@ namespace Smash {
 VtkOutput::VtkOutput(bf::path path, Configuration&& /*conf*/)
   : base_path_(std::move(path)), vtk_output_counter_(0) {}
 /*!\Userguide
- * \page input_vtk VTK
+ * \page input_vtk Vtk
  *
- * Writes snapshots of simulated particles at fixed moments of time
+ * Writes the current particle list at a specific time
  * to separate .vtk files. These fixed moments of time are event start,
  * event end and every next time interval \f$\Delta t\f$, where
  * \f$\Delta t\f$ is controlled by an option.
  * Produced output can be opened by paraview
  * and used for an easy visualization of the simulation.
+ *
+ * For details on VTK output format see \ref format_vtk.
  */
 
 VtkOutput::~VtkOutput() {
 }
+
+  /*!\Userguide
+   * \page format_vtk Vtk format
+   * In general VTK is a very versatile format, which allows many possible
+   * structures. For generic VTK format one can see http://vtk.org. Here only
+   * SMASH-specific VTK format is described.
+   *
+   * SMASH VTK files contain a snapshot of simulation at one moment of time.
+   * VTK output files are written at initialization at event start and
+   * every period of time \f$ \Delta t \f$, where \f$ \Delta t \f$ is regulated
+   * by option (see \ref input_general_). For every new output moment
+   * a separate VTK file is written. File names are constructed as follows:
+   * pos_ev<event>_tstep<output_number>.vtk.
+   *
+   * Files contain particle coordinates, momenta and PDG codes. VTK output is
+   * known to work with paraview, a free visualization and data analysis
+   * software. Files of this format are supposed to be used as a black box
+   * and opened with paraview, but at the same time they are
+   * human-readable text files.
+   **/
 
 void VtkOutput::at_eventstart(const Particles &particles,
                               const int event_number) {

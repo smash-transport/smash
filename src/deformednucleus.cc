@@ -19,6 +19,24 @@
 
 namespace Smash {
 
+/*!\Userguide
+ * \page input_deformed_nucleus_ Deformed Nucleus
+ *
+ * \li \key Beta_2 (double, optional, default = 0.0):\n
+ * The deformation coefficient for the spherical harmonic Y_2_0 in the
+ * beta decomposition of the nuclear radius in the deformed woods-saxon distribution.
+ * \li \key Beta_4 (double, optional, default = 0.0):\n 
+ * The deformation coefficient for the spherical harmonic Y_4_0.
+ * \li \key Saturation_Density (float, optional, default = .168f)\n
+ * The normalization coefficient in the Woods-Saxon distribution,
+ * needed here (and not in nucleus) due to the accept/reject sampling used. Default is
+ * given as the infinite nuclear matter value.
+ * \li \key Theta (double, optional): \n
+ * The polar angle by which to rotate the nucleus.
+ * \li \key Phi (double, optional):\n
+ * The azimuthal angle by which to rotate the nucleus.
+ */
+    
 DeformedNucleus::DeformedNucleus() {}
 
 double DeformedNucleus::deformed_woods_saxon(double r, double cosx) const {
@@ -87,25 +105,25 @@ void DeformedNucleus::set_parameters_from_config(const char *nucleus_type,
   Nucleus::set_parameters_from_config(nucleus_type, config);
 
   // Deformation parameters.
-  if (config.has_value({nucleus_type, "BETA_2"})) {
-    set_beta_2(static_cast<double>(config.take({nucleus_type, "BETA_2"})));
+  if (config.has_value({nucleus_type, "Beta_2"})) {
+    set_beta_2(static_cast<double>(config.take({nucleus_type, "Beta_2"})));
   }
-  if (config.has_value({nucleus_type, "BETA_4"})) {
-    set_beta_4(static_cast<double>(config.take({nucleus_type, "BETA_4"})));
+  if (config.has_value({nucleus_type, "Beta_4"})) {
+    set_beta_4(static_cast<double>(config.take({nucleus_type, "Beta_4"})));
   }
 
   // Saturation density (normalization for accept/reject sampling)
-  if (config.has_value({nucleus_type, "SATURATION_DENSITY"})) {
-    Nucleus::set_saturation_density(static_cast<double>(config.take({nucleus_type, "SATURATION_DENSITY"})));
+  if (config.has_value({nucleus_type, "Saturation_Density"})) {
+    Nucleus::set_saturation_density(static_cast<double>(config.take({nucleus_type, "Saturation_Density"})));
   }
 
   // Polar angle
-  if (config.has_value({nucleus_type, "THETA"})) {
-    set_polar_angle(static_cast<double>(config.take({nucleus_type, "THETA"})));
+  if (config.has_value({nucleus_type, "Theta"})) {
+    set_polar_angle(static_cast<double>(config.take({nucleus_type, "Theta"})));
   }
   // Azimuth
-  if (config.has_value({nucleus_type, "PHI"})) {
-    set_azimuthal_angle(static_cast<double>(config.take({nucleus_type, "PHI"})));
+  if (config.has_value({nucleus_type, "Phi"})) {
+    set_azimuthal_angle(static_cast<double>(config.take({nucleus_type, "Phi"})));
   }
 }
 

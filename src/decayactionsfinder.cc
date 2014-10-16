@@ -19,15 +19,18 @@
 namespace Smash {
 
 DecayActionsFinder::DecayActionsFinder(const ExperimentParameters &parameters)
-                     : ActionFinderFactory(parameters.timestep_duration()) {
-}
+    : ActionFinderInterface(parameters.timestep_duration()) {}
 
-ActionList DecayActionsFinder::find_possible_actions(const Particles &particles) const {
+ActionList DecayActionsFinder::find_possible_actions(
+    const ParticleList &search_list,
+    const std::vector<const ParticleList *> &  // the list of neighbors is
+                                               // irrelevant for decays
+    ) const {
   ActionList actions;
   actions.reserve(10);  // for short time steps this seems reasonable to expect
                         // less than 10 decays in most time steps
 
-  for (const auto &p : particles.data()) {
+  for (const auto &p : search_list) {
     if (p.type().is_stable()) {
       continue;      /* particle doesn't decay */
     }

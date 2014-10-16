@@ -1,10 +1,13 @@
 /**
 \mainpage SMASH User Guide
 
-SMASH is ...
-It can do ...
+SMASH (SiMulAtor for Smashing Heavy ions) is a next-generation hadronic
+transport code. It can do hadron-hadron and nucleus-nucleus collisions as
+well as box-mode simulations.
 
 Quick Links:
+- \subpage authors
+- \subpage install
 - \subpage inputoptions
-
+- \subpage output_general_
 */

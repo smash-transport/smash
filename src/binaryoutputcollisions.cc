@@ -25,8 +25,8 @@ BinaryOutputCollisions::BinaryOutputCollisions(bf::path path,
                                                Configuration &&config)
     : BinaryOutputBase(std::fopen(
           ((path / "collisions_binary.bin")).native().c_str(), "wb")),
-      print_start_end_(config.has_value({"print_start_end"})
-                           ? config.take({"print_start_end"})
+      print_start_end_(config.has_value({"Print_Start_End"})
+                           ? config.take({"Print_Start_End"})
                            : false) {
   /*!\Userguide
    * \page input_binary_collisions Binary_collisions
@@ -34,15 +34,32 @@ BinaryOutputCollisions::BinaryOutputCollisions(bf::path path,
    * wall crossing in a binary format. Optionally initial and 
    * final particle configurations can be written out.
    *
-   * \key print_start_end: \n
-   * If false (default) - only information about collisions, decays and
-   * box wall crossings is saved, no initial or final state snapshot is
-   * written. If true - initial and final configuration are saved too.
+   * \key Print_Start_End (bool, optional, default = false): \n
+   * false - only information about collisions, decays and
+   * box wall crossings during the whole evolution \n
+   * true - initial and final configuration are written in addition
+   *
+   * Detailed specification of the binary format can be found here:
+   * \ref format_binary_
    */
   fwrite("SMSH", 4, 1, file_.get());  // magic number
   write(0);              // file format version number
   write(VERSION_MAJOR);  // SMASH version
 }
+
+  /*!\Userguide
+   * \page format_binary_ Binary format
+   *
+   * Collisions output
+   * -----------------
+   * Written to \c collisions_binary.bin file. Contains interactions
+   * (collisions, decays, box wall crossings) and optionally initial
+   * and final configuration. Interactions are written in comp. frame
+   * time-ordered fashion, in 'i' blocks. Initial and final states
+   * are written as 'p' blocks. For options of this output see
+   * \ref input_general_, \ref input_binary_collisions.
+   **/
+
 
 void BinaryOutputCollisions::at_eventstart(const Particles &particles,
                                  const int /*event_number*/) {

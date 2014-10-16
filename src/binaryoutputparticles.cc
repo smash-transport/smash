@@ -25,22 +25,83 @@ BinaryOutputParticles::BinaryOutputParticles(bf::path path,
                                              Configuration &&config)
     : BinaryOutputBase(
           std::fopen(((path / "particles_binary.bin")).native().c_str(), "wb")),
-      only_final_(config.has_value({"only_final"}) ? config.take({"only_final"})
+      only_final_(config.has_value({"Only_Final"}) ? config.take({"Only_Final"})
                                                    : true) {
   /*!\Userguide
    * \page input_binary_particles Binary_particles
-   * Saves snapshots of simulated particles at fixed moments
-   * in a binary format.
-   * \key only_final: \n
-   * If true (default) - only particles at the end of event are saved to file.
-   * Otherwise, snapshots are also written to file every next fixed
-   * time interval starting from the moment of initialization
-   * and including it.
+   * Writes the particle list at fixed times in binary format.
+   *
+   * \key only_final (bool, optional, default = true): \n
+   * true - only final particle list at the end of each event \n
+   * false - particle list output at every output interval including initial 
+   * time
+   * 
+   * Detailed specification of the binary format can be found here:
+   * \ref format_binary_
    */
   fwrite("SMSH", 4, 1, file_.get());  // magic number
   write(0);              // file format version number
   write(VERSION_MAJOR);  // version
 }
+
+  /*!\Userguide
+   * \page format_binary_ Binary format
+   * SMASH supports a binary version of output similar to OSCAR 2013 standard.
+   * It is faster to read and write and theoretically needs less disk space.
+   * However, currently in ASCII OSCAR 2013 only 5 digits after comma are
+   * written for any real number, while binary saves the whole double
+   * (16 digits). By accident this makes sizes of binary output files
+   * approximately the same as OSCAR ASCII files.
+   * **The format follows general block structure of OSCAR format:**
+   * \ref oscar_general_. However, for binary specification is stricter.
+   * Types used for output are 4 bytes signed integers, 8 bytes doubles and
+   * 1 byte chars. Integer variables will be marked as (int), double as (d),
+   * char as (char).\n
+   *
+   * As for OSCAR ASCII output there are two kinds of binary output:
+   * particles and collisions.
+   * Specifics for both particles and collisions output are the following:\n
+   * **Header**
+   * \code
+   * magic_number, format_version(int), len(int), smash_version
+   * \endcode
+   * \li magic_number - 4 bytes that in ASCII read as "SMSH".
+   * \li Format version is an integer number, currently it is 0.
+   * \li len is the length of smash version string
+   * \li smash_version is len chars that give information about SMASH version.
+   *
+   * **Output block header**\n
+   * At start of event, end of event or any other particle output:
+   * \code
+   * 'p'(char) npart(int)
+   * \endcode
+   * \li npart is number of particle lines in the block that follows
+   *
+   * At interaction:
+   * \code
+   * 'i'(char) nin(int) nout(int)
+   * \endcode
+   * \li nin, nout are numbers of incoming and outgoing particles
+   *
+   * Block header is followed by \c nin + \c nout particle lines.
+   *
+   * **Particle line**
+   * \code
+   * t x y z mass p0 px py pz pdg(int) ID(int)
+   * \endcode
+   *
+   * **Event end line**
+   * \code
+   * 'f'(char) event_number(int)
+   * \endcode
+   *
+   * Particles output
+   * ----------------
+   * Written to \c particles_binary.bin file. Contains the current particle
+   * list at specific moments of time. Every moment of time
+   * is written as a 'p' block. For options of this output see
+   * \ref input_general_, \ref input_binary_particles.
+   **/
 
 void BinaryOutputParticles::at_eventstart(const Particles &particles,
                                  const int /*event_number*/) {

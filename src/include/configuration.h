@@ -46,6 +46,7 @@ namespace Smash {
  *
  * \par The available keys are documented on the following pages:
  * \li \subpage input_general_
+ * \li \subpage input_collision_term_
  * \li \subpage input_modi_
  *
  * \ifnot user
