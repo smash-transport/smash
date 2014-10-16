@@ -15,7 +15,7 @@ smash binary is regularly checked by:
 
 smash src is checked by:
 
-      cpplint.py *cc include/*h
+      cpplint.py *cc include/ *h
       cppcheck --enable=all -I include/ .
 
 */
