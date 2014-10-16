@@ -242,11 +242,11 @@ int main(int argc, char *argv[]) {
      * below in more detail. Per default, the selected output files will be
      * saved in the directory ./data/\<run_id\>, where \<run_id\> is an integer
      * number starting from 0. At the beginning
-     * of run SMASH checks if there exists ./data/0 directory, if no then it
+     * of a run SMASH checks, if the ./data/0 directory exists. If it does not exist, it
      * is created and all output files are written there. If the directory
      * already exists, SMASH tries for ./data/1, ./data/2 and so on until it
-     * finds a free number. User can change output directory by a command
-     * line option:
+     * finds a free number. The user can change output directory by a command
+     * line option, if desired:
      * \code smash -o <user_output_dir> \endcode
      * SMASH supports several kinds of configurable output formats.
      * They are called OSCAR1999, OSCAR2013, binary OSCAR2013, VTK and ROOT

@@ -232,14 +232,14 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
    * \page format_oscar_particlelist Oscar particles format
    * The format follows general block structure of OSCAR format:
    * \ref oscar_general_. There are two kinds of this format - 
-   * OSCAR2013 and OSCAR99. Information about OSCAR standard can be found at
+   * OSCAR2013 and OSCAR1999. Information about OSCAR standard can be found at
    * https://karman.physics.purdue.edu/OSCAR and
    * http://phy.duke.edu/~jeb65/oscar2013. SMASH OSCAR particles output
    * produces \c particle_lists.oscar file. Format is flexible, options that
    * regulate output can be found at \ref input_oscar_particlelist
    * and at \ref input_general_. **Particle output always gives
    * the current particle list at a specific time.**
-   * Oscar99
+   * Oscar1999
    * ---------
    * This is ASCII (text) human-readable output according to OSCAR 1999
    * standard. Format specifics are the following:\n
@@ -316,7 +316,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
    * \page format_oscar_collisions Oscar collisions format
    * The format follows general block structure of OSCAR format:
    * \ref oscar_general_. There are two kinds of this format - 
-   * OSCAR2013 and OSCAR99. Information about OSCAR standard can be found at
+   * OSCAR2013 and OSCAR1999. Information about OSCAR standard can be found at
    * https://karman.physics.purdue.edu/OSCAR and
    * http://phy.duke.edu/~jeb65/oscar2013. SMASH OSCAR collisions output
    * produces \c full_event_history.oscar file. Format is flexible, options
@@ -324,7 +324,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
    * and at \ref input_general_. **Collision output always gives
    * a list of collisions/decays/box wall crossings plus optionally
    * initial and final configuration.**
-   * Oscar99
+   * Oscar1999
    * ---------
    * Format specifics are the following:\n
    * **Header**
