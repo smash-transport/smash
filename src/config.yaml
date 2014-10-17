@@ -4,7 +4,7 @@ Logging:
   #Main: ALL
   #Experiment: ALL
   #Box: ALL
-  #Nucleus: ALL
+  #Collider: ALL
   #Sphere: ALL
   #ParticleType: ALL
   #Action: ALL
