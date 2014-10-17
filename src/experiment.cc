@@ -94,7 +94,7 @@ std::unique_ptr<ExperimentBase> ExperimentBase::create(Configuration config) {
   if (modus_chooser.compare("Box") == 0) {
     return ExperimentPointer(new Experiment<BoxModus>(config));
   } else if (modus_chooser.compare("Collider") == 0) {
-      return ExperimentPointer(new Experiment<NucleusModus>(config));
+      return ExperimentPointer(new Experiment<ColliderModus>(config));
   } else if (modus_chooser.compare("Sphere") == 0) {
       return ExperimentPointer(new Experiment<SphereModus>(config));
   } else {
