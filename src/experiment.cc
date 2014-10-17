@@ -18,7 +18,6 @@
 #include "include/action.h"
 #include "include/boxmodus.h"
 #include "include/clock.h"
-#include "include/collidermodus.h"
 #include "include/configuration.h"
 #include "include/experiment.h"
 #include "include/forwarddeclarations.h"
@@ -75,8 +74,6 @@ std::unique_ptr<ExperimentBase> ExperimentBase::create(Configuration config) {
    *     \NucleusModus
    * \li \key Sphere for calculations of the expansion of a thermalized sphere. See
    *     \ref \SphereModus
-   * \li \key Collider for testing elementary cross-sections. See \ref
-   *     \ColliderModus
    * \li \key Box for infinite matter calculation in a rectangular box. See \ref
    *     \BoxModus
    */
@@ -86,7 +83,6 @@ std::unique_ptr<ExperimentBase> ExperimentBase::create(Configuration config) {
    * \li \subpage input_modi_nucleus_
    * \li \subpage input_modi_sphere_
    * \li \subpage input_modi_box_
-   * \li \subpage input_modi_collider_
    */
   const std::string modus_chooser = config.take({"General", "Modus"});
   log.info() << "Modus for this calculation: " << modus_chooser;
@@ -97,8 +93,6 @@ std::unique_ptr<ExperimentBase> ExperimentBase::create(Configuration config) {
   typedef std::unique_ptr<ExperimentBase> ExperimentPointer;
   if (modus_chooser.compare("Box") == 0) {
     return ExperimentPointer(new Experiment<BoxModus>(config));
-  } else if (modus_chooser.compare("Collider") == 0) {
-    return ExperimentPointer(new Experiment<ColliderModus>(config));
   } else if (modus_chooser.compare("Nucleus") == 0) {
       return ExperimentPointer(new Experiment<NucleusModus>(config));
   } else if (modus_chooser.compare("Sphere") == 0) {

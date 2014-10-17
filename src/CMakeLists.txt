@@ -46,7 +46,6 @@ set(smash_src
         boxmodus.cc
         binaryoutputcollisions.cc
         binaryoutputparticles.cc
-        collidermodus.cc
         configuration.cc
         decayaction.cc
         decayactionsfinder.cc
