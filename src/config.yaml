@@ -14,7 +14,7 @@ Logging:
 
 General:
     # Modus decision
-    Modus:         Nucleus
+    Modus:         Collider
 
     # temporal grid spacing
     Delta_Time:    0.01
@@ -102,7 +102,7 @@ Modi:
             2112:   20
 
 
-    Nucleus:
+    Collider:
         # Definitions for the projectile:
         # Deuteron
         Projectile:

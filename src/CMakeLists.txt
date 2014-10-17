@@ -47,6 +47,7 @@ set(smash_src
         binaryoutputcollisions.cc
         binaryoutputparticles.cc
         configuration.cc
+	collidermodus.cc
         decayaction.cc
         decayactionsfinder.cc
         decaymodes.cc
@@ -58,7 +59,6 @@ set(smash_src
         logging.cc
         modusdefault.cc
         nucleus.cc
-        nucleusmodus.cc
         oscaroutput.cc
         parametrizations.cc
         particledata.cc

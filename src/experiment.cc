@@ -18,13 +18,13 @@
 #include "include/action.h"
 #include "include/boxmodus.h"
 #include "include/clock.h"
+#include "include/collidermodus.h"
 #include "include/configuration.h"
 #include "include/experiment.h"
 #include "include/forwarddeclarations.h"
 #include "include/grid.h"
 #include "include/logging.h"
 #include "include/macros.h"
-#include "include/nucleusmodus.h"
 #include "include/random.h"
 #include "include/spheremodus.h"
 
@@ -70,8 +70,8 @@ std::unique_ptr<ExperimentBase> ExperimentBase::create(Configuration config) {
    * Selects a modus for the calculation, e.g.\ infinite matter
    * calculation, collision of two particles or collision of nuclei. The modus
    * will be configured in \ref input_modi_. Recognized values are:
-   * \li \key Nucleus for collisions of nuclei or compound objects. See \ref
-   *     \NucleusModus
+   * \li \key Collider for collisions of nuclei or compound objects. See \ref
+   *     \ColliderModus
    * \li \key Sphere for calculations of the expansion of a thermalized sphere. See
    *     \ref \SphereModus
    * \li \key Box for infinite matter calculation in a rectangular box. See \ref
@@ -80,7 +80,7 @@ std::unique_ptr<ExperimentBase> ExperimentBase::create(Configuration config) {
 
   /*!\Userguide
    * \page input_modi_ Modi
-   * \li \subpage input_modi_nucleus_
+   * \li \subpage input_modi_collider_
    * \li \subpage input_modi_sphere_
    * \li \subpage input_modi_box_
    */
@@ -93,7 +93,7 @@ std::unique_ptr<ExperimentBase> ExperimentBase::create(Configuration config) {
   typedef std::unique_ptr<ExperimentBase> ExperimentPointer;
   if (modus_chooser.compare("Box") == 0) {
     return ExperimentPointer(new Experiment<BoxModus>(config));
-  } else if (modus_chooser.compare("Nucleus") == 0) {
+  } else if (modus_chooser.compare("Collider") == 0) {
       return ExperimentPointer(new Experiment<NucleusModus>(config));
   } else if (modus_chooser.compare("Sphere") == 0) {
       return ExperimentPointer(new Experiment<SphereModus>(config));
