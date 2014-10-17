@@ -10,7 +10,7 @@
 #include "unittest.h"
 #include "../include/modusdefault.h"
 #include "../include/boxmodus.h"
-#include "../include/nucleusmodus.h"
+#include "../include/collidermodus.h"
 #include "../include/experiment.h"
 #include "../include/configuration.h"
 #include "../include/spheremodus.h"
@@ -57,19 +57,19 @@ TEST(initialize_box) {
   COMPARE_ABSOLUTE_ERROR(momentum.x3(), 0.0, 1e-12);
 }
 
-TEST(initialize_nucleus_normal) {
+TEST(initialize_collider_normal) {
   Configuration conf(TEST_CONFIG_PATH);
-  conf["Modi"]["Nucleus"]["Sqrtsnn"] = 1.6;
-  conf.take({"Modi", "Nucleus", "Projectile"});
-  conf.take({"Modi", "Nucleus", "Target"});
-  conf["Modi"]["Nucleus"]["Projectile"]["Particles"]["661"] = 1;
-  conf["Modi"]["Nucleus"]["Target"]["Particles"]["661"] = 8;
-  conf["Modi"]["Nucleus"]["Sqrts_Reps"][0] = "661";
-  conf["Modi"]["Nucleus"]["Sqrts_Reps"][1] = "661";
-  conf["Modi"]["Nucleus"]["Initial_Distance"] = 0;
-  conf["Modi"]["Nucleus"]["Impact"]["Value"] = 0;
+  conf["Modi"]["Collider"]["Sqrtsnn"] = 1.6;
+  conf.take({"Modi", "Collider", "Projectile"});
+  conf.take({"Modi", "Collider", "Target"});
+  conf["Modi"]["Collider"]["Projectile"]["Particles"]["661"] = 1;
+  conf["Modi"]["Collider"]["Target"]["Particles"]["661"] = 8;
+  conf["Modi"]["Collider"]["Sqrts_Reps"][0] = "661";
+  conf["Modi"]["Collider"]["Sqrts_Reps"][1] = "661";
+  conf["Modi"]["Collider"]["Initial_Distance"] = 0;
+  conf["Modi"]["Collider"]["Impact"]["Value"] = 0;
   ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};
-  NucleusModus n(conf["Modi"], param);
+  ColliderModus n(conf["Modi"], param);
   Particles P;
   COMPARE(n.initial_conditions(&P, param), 0.f);
   COMPARE(P.size(), 9);
@@ -88,50 +88,50 @@ TEST(initialize_nucleus_normal) {
   // all other things can only be tested with statistics.
 }
 
-TEST_CATCH(initialize_nucleus_low_energy, ModusDefault::InvalidEnergy) {
+TEST_CATCH(initialize_collider_low_energy, ModusDefault::InvalidEnergy) {
   Configuration conf(TEST_CONFIG_PATH);
-  conf["Modi"]["Nucleus"]["Sqrtsnn"] = 0.5;
-  conf.take({"Modi", "Nucleus", "Projectile"});
-  conf.take({"Modi", "Nucleus", "Target"});
-  conf["Modi"]["Nucleus"]["Projectile"]["Particles"]["661"] = 1;
-  conf["Modi"]["Nucleus"]["Target"]["Particles"]["661"] = 8;
-  conf["Modi"]["Nucleus"]["Sqrts_Reps"][0] = "661";
-  conf["Modi"]["Nucleus"]["Sqrts_Reps"][1] = "661";
-  conf["Modi"]["Nucleus"]["Initial_Distance"] = 0;
+  conf["Modi"]["Collider"]["Sqrtsnn"] = 0.5;
+  conf.take({"Modi", "Collider", "Projectile"});
+  conf.take({"Modi", "Collider", "Target"});
+  conf["Modi"]["Collider"]["Projectile"]["Particles"]["661"] = 1;
+  conf["Modi"]["Collider"]["Target"]["Particles"]["661"] = 8;
+  conf["Modi"]["Collider"]["Sqrts_Reps"][0] = "661";
+  conf["Modi"]["Collider"]["Sqrts_Reps"][1] = "661";
+  conf["Modi"]["Collider"]["Initial_Distance"] = 0;
   ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};
-  NucleusModus n(conf["Modi"], param);
+  ColliderModus n(conf["Modi"], param);
   Particles P;
   n.initial_conditions(&P, param);
 }
 
-TEST_CATCH(initialize_nucleus_empty_projectile, NucleusModus::NucleusEmpty) {
+TEST_CATCH(initialize_nucleus_empty_projectile, ColliderModus::ColliderEmpty) {
   Configuration conf(TEST_CONFIG_PATH);
-  conf["Modi"]["Nucleus"]["Sqrtsnn"] = 1.6;
-  conf.take({"Modi", "Nucleus", "Projectile"});
-  conf.take({"Modi", "Nucleus", "Target"});
-  conf["Modi"]["Nucleus"]["Projectile"]["Particles"]["661"] = 0;
-  conf["Modi"]["Nucleus"]["Target"]["Particles"]["661"] = 8;
-  conf["Modi"]["Nucleus"]["Sqrts_Reps"][0] = 0;
-  conf["Modi"]["Nucleus"]["Sqrts_Reps"][1] = 0;
-  conf["Modi"]["Nucleus"]["Initial_Distance"] = 0;
+  conf["Modi"]["Collider"]["Sqrtsnn"] = 1.6;
+  conf.take({"Modi", "Collider", "Projectile"});
+  conf.take({"Modi", "Collider", "Target"});
+  conf["Modi"]["Collider"]["Projectile"]["Particles"]["661"] = 0;
+  conf["Modi"]["Collider"]["Target"]["Particles"]["661"] = 8;
+  conf["Modi"]["Collider"]["Sqrts_Reps"][0] = 0;
+  conf["Modi"]["Collider"]["Sqrts_Reps"][1] = 0;
+  conf["Modi"]["Collider"]["Initial_Distance"] = 0;
   ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};
-  NucleusModus n(conf["Modi"], param);
+  ColliderModus n(conf["Modi"], param);
   Particles P;
   n.initial_conditions(&P, param);
 }
 
-TEST_CATCH(initialize_nucleus_empty_target, NucleusModus::NucleusEmpty) {
+TEST_CATCH(initialize_nucleus_empty_target, ColliderModus::ColliderEmpty) {
   Configuration conf(TEST_CONFIG_PATH);
-  conf["Modi"]["Nucleus"]["Sqrtsnn"] = 1.6;
-  conf.take({"Modi", "Nucleus", "Projectile"});
-  conf.take({"Modi", "Nucleus", "Target"});
-  conf["Modi"]["Nucleus"]["Projectile"]["Particles"]["661"] = 8;
-  conf["Modi"]["Nucleus"]["Target"]["Particles"]["661"] = 0;
-  conf["Modi"]["Nucleus"]["Sqrts_Reps"][0] = 0;
-  conf["Modi"]["Nucleus"]["Sqrts_Reps"][1] = 0;
-  conf["Modi"]["Nucleus"]["Initial_Distance"] = 0;
+  conf["Modi"]["Collider"]["Sqrtsnn"] = 1.6;
+  conf.take({"Modi", "Collider", "Projectile"});
+  conf.take({"Modi", "Collider", "Target"});
+  conf["Modi"]["Collider"]["Projectile"]["Particles"]["661"] = 8;
+  conf["Modi"]["Collider"]["Target"]["Particles"]["661"] = 0;
+  conf["Modi"]["Collider"]["Sqrts_Reps"][0] = 0;
+  conf["Modi"]["Collider"]["Sqrts_Reps"][1] = 0;
+  conf["Modi"]["Collider"]["Initial_Distance"] = 0;
   ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};
-  NucleusModus n(conf["Modi"], param);
+  ColliderModus n(conf["Modi"], param);
   Particles P;
   n.initial_conditions(&P, param);
 }

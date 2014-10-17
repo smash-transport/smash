@@ -10,9 +10,9 @@
 #include "unittest.h"
 #include "../include/boxmodus.h"
 #include "../include/configuration.h"
+#include "../include/collidermodus.h"
 #include "../include/experiment.h"
 #include "../include/modusdefault.h"
-#include "../include/nucleusmodus.h"
 #include "../include/spheremodus.h"
 
 #include <boost/filesystem.hpp>
@@ -93,17 +93,17 @@ TEST(sanity_box) {
   COMPARE(b.sanity_check(&P), 4);
 }
 
-TEST(sanity_nucleus) {
+TEST(sanity_collider) {
   Configuration conf(TEST_CONFIG_PATH);
-  conf.take({"Modi", "Nucleus", "Projectile"});
-  conf.take({"Modi", "Nucleus", "Target"});
-  conf["Modi"]["Nucleus"]["Sqrtsnn"] = 1.0;
-  conf["Modi"]["Nucleus"]["Sqrts_Reps"][0] = "661";
-  conf["Modi"]["Nucleus"]["Sqrts_Reps"][1] = "661";
-  conf["Modi"]["Nucleus"]["Projectile"]["Particles"]["661"] = 1;
-  conf["Modi"]["Nucleus"]["Target"]["Particles"]["661"] = 1;
+  conf.take({"Modi", "Collider", "Projectile"});
+  conf.take({"Modi", "Collider", "Target"});
+  conf["Modi"]["Collider"]["Sqrtsnn"] = 1.0;
+  conf["Modi"]["Collider"]["Sqrts_Reps"][0] = "661";
+  conf["Modi"]["Collider"]["Sqrts_Reps"][1] = "661";
+  conf["Modi"]["Collider"]["Projectile"]["Particles"]["661"] = 1;
+  conf["Modi"]["Collider"]["Target"]["Particles"]["661"] = 1;
   ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};
-  NucleusModus n(conf["Modi"], param);
+  ColliderModus n(conf["Modi"], param);
   Particles P;
   create_particle_list(P);
   COMPARE(n.sanity_check(&P), 0);

@@ -30,9 +30,9 @@ TEST(create_box) {
   VERIFY(!!ExperimentBase::create(conf));
 }
 
-TEST(create_nucleus) {
+TEST(create_collider) {
   Configuration conf(TEST_CONFIG_PATH);
-  conf["General"]["Modus"] = "Nucleus";
+  conf["General"]["Modus"] = "Collider";
   VERIFY(!!ExperimentBase::create(conf));
 }
 

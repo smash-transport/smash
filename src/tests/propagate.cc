@@ -10,9 +10,9 @@
 #include "unittest.h"
 #include "../include/boxmodus.h"
 #include "../include/configuration.h"
+#include "../include/collidermodus.h"
 #include "../include/experiment.h"
 #include "../include/modusdefault.h"
-#include "../include/nucleusmodus.h"
 #include "../include/spheremodus.h"
 
 #include <boost/filesystem.hpp>
@@ -136,25 +136,25 @@ TEST(propagate_box) {
                                  + FourVector(0.0, -5., 0.0, 5.0));
 }
 
-TEST(propagate_nucleus) {
+TEST(propagate_collider) {
   ModusDefault m;
   Configuration conf(TEST_CONFIG_PATH);
-  conf["Modi"]["Nucleus"]["Sqrtsnn"] = 1.0;
-  conf.take({"Modi", "Nucleus", "Projectile"});
-  conf.take({"Modi", "Nucleus", "Target"});
-  conf["Modi"]["Nucleus"]["Projectile"]["Particles"]["661"] = 1;
-  conf["Modi"]["Nucleus"]["Target"]["Particles"]["661"] = 1;
-  conf["Modi"]["Nucleus"]["Sqrts_Reps"][0] = "661";
-  conf["Modi"]["Nucleus"]["Sqrts_Reps"][1] = "661";
+  conf["Modi"]["Collider"]["Sqrtsnn"] = 1.0;
+  conf.take({"Modi", "Collider", "Projectile"});
+  conf.take({"Modi", "Collider", "Target"});
+  conf["Modi"]["Collider"]["Projectile"]["Particles"]["661"] = 1;
+  conf["Modi"]["Collider"]["Target"]["Particles"]["661"] = 1;
+  conf["Modi"]["Collider"]["Sqrts_Reps"][0] = "661";
+  conf["Modi"]["Collider"]["Sqrts_Reps"][1] = "661";
   ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};
-  NucleusModus n(conf["Modi"], param);
+  ColliderModus n(conf["Modi"], param);
   Particles Pdef, Pnuc;
   create_particle_list(Pdef);
   create_particle_list(Pnuc);
   OutputsList out;
   m.propagate(&Pdef, param, out);
   n.propagate(&Pnuc, param, out);
-  // Nucleus and Default modus should do the same everywhere:
+  // Collider and Default modus should do the same everywhere:
   COMPARE(Pdef.data(0).momentum(), Pnuc.data(0).momentum());
   COMPARE(Pdef.data(1).momentum(), Pnuc.data(1).momentum());
   COMPARE(Pdef.data(2).momentum(), Pnuc.data(2).momentum());
