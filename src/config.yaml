@@ -4,7 +4,6 @@ Logging:
   #Main: ALL
   #Experiment: ALL
   #Box: ALL
-  #Collider: ALL
   #Nucleus: ALL
   #Sphere: ALL
   #ParticleType: ALL
@@ -102,16 +101,6 @@ Modi:
             111:    200
             2112:   20
 
-
-    Collider:
-        # Projectile particle
-        Projectile: 211
-
-        # Target particle
-        Target: -211
-
-        # center-of-mass energy in GeV
-        Sqrts: 1.0
 
     Nucleus:
         # Definitions for the projectile:

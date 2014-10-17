@@ -9,7 +9,6 @@
 
 #include "unittest.h"
 #include "../include/boxmodus.h"
-#include "../include/collidermodus.h"
 #include "../include/configuration.h"
 #include "../include/experiment.h"
 #include "../include/modusdefault.h"
@@ -92,18 +91,6 @@ TEST(sanity_box) {
   Particles P;
   create_particle_list(P);
   COMPARE(b.sanity_check(&P), 4);
-}
-
-TEST(sanity_collider) {
-  Configuration conf(TEST_CONFIG_PATH);
-  conf["Modi"]["Collider"]["Sqrts"] = 1.0;
-  conf["Modi"]["Collider"]["Projectile"] = "661";
-  conf["Modi"]["Collider"]["Target"] = "661";
-  ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};
-  ColliderModus c(conf["Modi"], param);
-  Particles P;
-  create_particle_list(P);
-  COMPARE(c.sanity_check(&P), 0);
 }
 
 TEST(sanity_nucleus) {

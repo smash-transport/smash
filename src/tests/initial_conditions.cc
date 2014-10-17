@@ -10,7 +10,6 @@
 #include "unittest.h"
 #include "../include/modusdefault.h"
 #include "../include/boxmodus.h"
-#include "../include/collidermodus.h"
 #include "../include/nucleusmodus.h"
 #include "../include/experiment.h"
 #include "../include/configuration.h"
@@ -56,41 +55,6 @@ TEST(initialize_box) {
   COMPARE_ABSOLUTE_ERROR(momentum.x1(), 0.0, 1e-12);
   COMPARE_ABSOLUTE_ERROR(momentum.x2(), 0.0, 1e-12);
   COMPARE_ABSOLUTE_ERROR(momentum.x3(), 0.0, 1e-12);
-}
-
-TEST(initialize_collider) {
-  Configuration conf(TEST_CONFIG_PATH);
-  conf["Modi"]["Collider"]["Sqrts"] = 1.6;
-  conf["Modi"]["Collider"]["Projectile"] = "661";
-  conf["Modi"]["Collider"]["Target"] = "661";
-  ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};
-  ColliderModus c(conf["Modi"], param);
-  Particles P;
-  COMPARE(c.initial_conditions(&P, param), -1.f);
-  COMPARE(P.size(), 2);
-  COMPARE(P.data(0).pdgcode(), 0x661);
-  COMPARE(P.data(1).pdgcode(), 0x661);
-  VERIFY (P.data(0).position().x1() > 0.0);
-  COMPARE(P.data(1).position().x1(), 0.0);
-  COMPARE(P.data(0).position().x2(), 0.0);
-  COMPARE(P.data(1).position().x2(), 0.0);
-  COMPARE(P.data(0).position().x3(), -P.data(1).position().x3());
-  VERIFY (P.data(0).position().x3() < 0.0);
-  // total momentum is checked in two steps:
-  FourVector momentum_total = P.data(0).momentum() + P.data(1).momentum();
-  // energy component with a possible deviation,
-  COMPARE_RELATIVE_ERROR(momentum_total.x0(), 1.6, 1e-7);
-  // and the spatial components exactly.
-  COMPARE(momentum_total, FourVector(momentum_total.x0(), 0.0, 0.0, 0.0));
-}
-
-TEST_CATCH(initialize_collider_low_energy, ModusDefault::InvalidEnergy) {
-  Configuration conf(TEST_CONFIG_PATH);
-  conf["Modi"]["Collider"]["Sqrts"] = 0.5;
-  conf["Modi"]["Collider"]["Projectile"] = "661";
-  conf["Modi"]["Collider"]["Target"] = "661";
-  ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};
-  ColliderModus c(conf["Modi"], param);
 }
 
 TEST(initialize_nucleus_normal) {

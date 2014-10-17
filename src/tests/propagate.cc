@@ -9,7 +9,6 @@
 
 #include "unittest.h"
 #include "../include/boxmodus.h"
-#include "../include/collidermodus.h"
 #include "../include/configuration.h"
 #include "../include/experiment.h"
 #include "../include/modusdefault.h"
@@ -135,35 +134,6 @@ TEST(propagate_box) {
                                  + FourVector(0.0, 0.0, -5., 0.0));
   COMPARE(Pdef.data(5).position(), Pbox.data(5).position()
                                  + FourVector(0.0, -5., 0.0, 5.0));
-}
-
-TEST(propagate_collider) {
-  ModusDefault m;
-  Configuration conf(TEST_CONFIG_PATH);
-  conf["Modi"]["Collider"]["Sqrts"] = 1.0;
-  conf["Modi"]["Collider"]["Projectile"] = "661";
-  conf["Modi"]["Collider"]["Target"] = "661";
-  ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};
-  ColliderModus c(conf["Modi"], param);
-  Particles Pdef, Pcol;
-  create_particle_list(Pdef);
-  create_particle_list(Pcol);
-  OutputsList out;
-  m.propagate(&Pdef, param, out);
-  c.propagate(&Pcol, param, out);
-  // Collider and Default modus should do the same everywhere:
-  COMPARE(Pdef.data(0).momentum(), Pcol.data(0).momentum());
-  COMPARE(Pdef.data(1).momentum(), Pcol.data(1).momentum());
-  COMPARE(Pdef.data(2).momentum(), Pcol.data(2).momentum());
-  COMPARE(Pdef.data(3).momentum(), Pcol.data(3).momentum());
-  COMPARE(Pdef.data(4).momentum(), Pcol.data(4).momentum());
-  COMPARE(Pdef.data(5).momentum(), Pcol.data(5).momentum());
-  COMPARE(Pdef.data(0).position(), Pcol.data(0).position());
-  COMPARE(Pdef.data(1).position(), Pcol.data(1).position());
-  COMPARE(Pdef.data(2).position(), Pcol.data(2).position());
-  COMPARE(Pdef.data(3).position(), Pcol.data(3).position());
-  COMPARE(Pdef.data(4).position(), Pcol.data(4).position());
-  COMPARE(Pdef.data(5).position(), Pcol.data(5).position());
 }
 
 TEST(propagate_nucleus) {
