@@ -122,7 +122,7 @@ namespace Smash {
  
 ColliderModus::ColliderModus(Configuration modus_config,
                            const ExperimentParameters &params) {
-  Configuration modus_cfg = modus_config["Nucleus"];
+  Configuration modus_cfg = modus_config["Collider"];
 
   // Get the reference frame for the collision calculation.
   if (modus_cfg.has_value({"Calculation_Frame"})) {
