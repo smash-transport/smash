@@ -71,4 +71,69 @@ FourVector ModusDefault::baryon_jmu(ThreeVector r,
   return jmu;
 }
 
+double ModusDefault::potential(ThreeVector r, const ParticleList &plist,
+                                                         double gs_sigma) {
+  const double rho_eckart = baryon_jmu(r, plist, gs_sigma).abs();
+  return skyrme_a * (rho_eckart/rho0) +
+                     skyrme_b * std::pow(rho_eckart/rho0, skyrme_tau);
+}
+
+ThreeVector ModusDefault::potential_gradient(ThreeVector r,
+                              const ParticleList &plist, double gs_sigma) {
+  // baryon four-current in computational frame
+  FourVector jbmu(0.0, 0.0, 0.0, 0.0);
+  // derivatives of baryon four-current in computational frame
+  FourVector djbmu_dx(0.0, 0.0, 0.0, 0.0);
+  FourVector djbmu_dy(0.0, 0.0, 0.0, 0.0);
+  FourVector djbmu_dz(0.0, 0.0, 0.0, 0.0);
+  double tmp1, tmp2;
+
+  for (const auto &p : plist) {
+    if (!p.is_baryon()) {
+      continue;
+    }
+    const ThreeVector ri = p.position().threevec();
+    // If particle is too far - reject it immediately: its input is too small
+    if ((r - ri).sqr() > (6*gs_sigma) * (6*gs_sigma)) {
+      continue;
+    }
+
+    const ThreeVector betai = p.velocity();
+    const double inv_gammai = p.inverse_gamma();
+
+    // Get distance between particle and r in the particle rest frame
+    tmp1 = inv_gammai * (1. + inv_gammai);
+    const ThreeVector dr_rest = r - ri + betai * (((r - ri) * betai) / tmp1);
+
+    tmp2 = 0.5 * dr_rest.sqr() / (gs_sigma * gs_sigma);
+    tmp2 = p.pdgcode().baryon_number() * std::exp(- tmp2) / inv_gammai;
+    jbmu += FourVector(1., betai) * tmp2;
+    djbmu_dx += FourVector(1., betai) * (tmp2 * dr_rest.x1() * (1.0 + betai.x1() * betai.x1() / tmp1));
+    djbmu_dy += FourVector(1., betai) * (tmp2 * dr_rest.x2() * (1.0 + betai.x2() * betai.x2() / tmp1));
+    djbmu_dx += FourVector(1., betai) * (tmp2 * dr_rest.x3() * (1.0 + betai.x3() * betai.x3() / tmp1));
+  }
+  const double norm1 = twopi * std::sqrt(twopi) * gs_sigma*gs_sigma*gs_sigma;
+  jbmu /= norm1;
+  const double norm2 = - norm1 * gs_sigma*gs_sigma;
+  djbmu_dx /= norm2;
+  djbmu_dy /= norm2;
+  djbmu_dz /= norm2;
+
+  // Eckart rest frame baryon density
+  const double rhob = jbmu.abs();
+
+  // Gradient of Eckart rest frame baryon density
+  const ThreeVector drho_dr = ThreeVector(jbmu.Dot(djbmu_dx),
+                                          jbmu.Dot(djbmu_dy),
+                                          jbmu.Dot(djbmu_dz)) / rhob;
+
+  // Derivative of potential with respect to density
+  tmp1 = skyrme_tau * std::pow(rhob/rho0, skyrme_tau);
+  const double dpotential_drho = (skyrme_a  + skyrme_b * tmp1) / rho0;
+
+  return drho_dr * dpotential_drho;
+
+}
+
+
 }  // namespace Smash
