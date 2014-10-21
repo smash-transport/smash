@@ -12,8 +12,8 @@
 
 namespace Smash {
 
-/* pp elastic cross section parametrization */
-/* Source: O. Buss et al., Physics Reports 512, 1 (2012) */
+/* pp elastic cross section parametrization.
+ * Source: J. Weil, PhD thesis, eq. (44) */
 float pp_elastic(double mandelstam_s) {
   const double mN = 0.938;    // nucleon mass
   const double mNsqr = mN*mN;
@@ -26,7 +26,7 @@ float pp_elastic(double mandelstam_s) {
       * (p_lab - 0.7) *(p_lab - 0.7);
   } else if (p_lab < 2.0) {
     return 1250 / (p_lab + 50) - 4 * (p_lab - 1.3) * (p_lab - 1.3);
-  } else if (p_lab < 6.0) {
+  } else if (p_lab < 2.776) {
     return 77 / (p_lab + 1.5);
   } else {
     return 11.9 + 26.9 * pow(p_lab, -1.21) + 0.169 * log(p_lab) * log(p_lab)
@@ -56,8 +56,8 @@ float pp_total(double p_lab) {
   }
 }
 
-/* np elastic cross section parametrization */
-/* Source: O. Buss et al., Physics Reports 512, 1 (2012) */
+/* np elastic cross section parametrization.
+ * Source: J. Weil, PhD thesis, eq. (45) */
 float np_elastic(double mandelstam_s) {
   const double mN = 0.938;    // nucleon mass
   const double mNsqr = mN*mN;
@@ -69,7 +69,7 @@ float np_elastic(double mandelstam_s) {
     return 33 + 196 * pow(fabs(p_lab - 0.95), 2.5);
   } else if (p_lab < 2.0) {
     return 31 / sqrt(p_lab);
-  } else if (p_lab < 6.0) {
+  } else if (p_lab < 2.776) {
     return 77 / (p_lab + 1.5);
   } else {
     return 11.9 + 26.9 * pow(p_lab, -1.21) + 0.169 * log(p_lab) * log(p_lab)
