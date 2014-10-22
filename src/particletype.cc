@@ -264,6 +264,30 @@ ProcessBranchList ParticleType::get_partial_widths(const float m) const {
   return std::move(partial);
 }
 
+float ParticleType::get_partial_width(const float m, const PdgCode pdg1,
+                                      const PdgCode pdg2) const {
+  /* Get all decay modes. */
+  const auto &decaymodes = DecayModes::find(pdgcode()).decay_mode_list();
+
+  /* Find the right one. */
+  for (const auto &mode : decaymodes) {
+    size_t decay_particles = mode.pdg_list().size();
+    if ( decay_particles > 3 ) {
+      logger<LogArea::ParticleType>().warn("Not a 1->2 or 1->3 process!\n",
+                                           "Number of decay particles: ",
+                                           decay_particles);
+    } else {
+      if (decay_particles == 2
+          && ((mode.pdg_list()[0] == pdg1 && mode.pdg_list()[1] == pdg2) ||
+              (mode.pdg_list()[0] == pdg2 && mode.pdg_list()[1] == pdg1)))
+        /* Found: calculate width. */
+        return partial_width(m, mode);
+    }
+  }
+  /* Decay mode not found: width is zero. */
+  return 0.;
+}
+
 std::ostream &operator<<(std::ostream &out, const ParticleType &type) {
   const PdgCode &pdg = type.pdgcode();
   return out << type.name() << std::setfill(' ') << std::right
