@@ -66,6 +66,7 @@ set(smash_src
         particles.cc
         particletype.cc
         pdgcode.cc
+        potentials.cc
         processbranch.cc
         random.cc
         resonances.cc

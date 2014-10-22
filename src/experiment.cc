@@ -26,6 +26,7 @@
 #include "include/logging.h"
 #include "include/macros.h"
 #include "include/nucleusmodus.h"
+#include "include/potentials.h"
 #include "include/random.h"
 #include "include/spheremodus.h"
 
@@ -220,6 +221,11 @@ Experiment<Modus>::Experiment(Configuration config)
     action_finders_.emplace_back(new ScatterActionsFinder(parameters_));
   }
 
+  //TODO: check also that "Potentials" is not empty
+  if (config.has_value({"Potentials"})) {
+    log.info() << "Potentials are ON.";
+    potentials_ = new Potentials(config["Potentials"]);
+  }
 }
 
 /* This method reads the particle type and cross section information
