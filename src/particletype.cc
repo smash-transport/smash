@@ -202,14 +202,32 @@ float ParticleType::partial_width(const float m,
   float partial_width_at_pole = width_at_pole()*mode.weight();
   const ParticleType &t1 = ParticleType::find(mode.pdg_list()[0]);
   const ParticleType &t2 = ParticleType::find(mode.pdg_list()[1]);
-  if (mode.pdg_list().size() == 2 && t1.is_stable() && t2.is_stable()) {
-    /* mass-dependent width for 2-body decays with stable decay products */
-    return width_Manley_stable(m, mass(), t1.mass(), t2.mass(),
-                               mode.angular_momentum(),
-                               partial_width_at_pole);
+  if (mode.pdg_list().size() == 2) {
+    /* two-body decays */
+    if (t1.is_stable() && t2.is_stable()) {
+      /* mass-dependent width for stable decay products */
+      return width_Manley_stable(m, mass(), t1.mass(), t2.mass(),
+                                 mode.angular_momentum(),
+                                 partial_width_at_pole);
+    }
+    else if (t1.is_stable()) {
+      /* mass-dependent width for one unstable daughter */
+      return width_Manley_semistable(m, mass(), t1.mass(), &t2,
+                                     mode.angular_momentum(),
+                                     partial_width_at_pole);
+    }
+    else if (t2.is_stable()) {
+      /* mass-dependent width for one unstable daughter */
+      return width_Manley_semistable(m, mass(), t2.mass(), &t1,
+                                     mode.angular_momentum(),
+                                     partial_width_at_pole);
+    }
+    else {
+      /* two unstable decay products: assume constant width */
+      return partial_width_at_pole;
+    }
   } else {
-    /* constant width for three-body decays
-     * (and two-body decays with unstable products) */
+    /* three-body decays: asssume constant width */
     return partial_width_at_pole;
   }
 }
