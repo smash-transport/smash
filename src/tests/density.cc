@@ -102,8 +102,8 @@ TEST(density_compframe) {
   Particles Pdef;
   create_particle_list(Pdef);
   OutputsList out;
-  // clock, output interval, cross-section, testparticles
-  ExperimentParameters param{{0.f, 1.0f}, 1.f, 0.0, 1};
+  // clock, output interval, cross-section, testparticles, gauss. sigma
+  ExperimentParameters param{{0.f, 1.0f}, 1.f, 0.0, 1, 1.0};
   double dx = 0.3;
   double dy = 0.3;
   double dz = 0.3;

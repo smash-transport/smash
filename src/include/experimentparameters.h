@@ -48,6 +48,8 @@ struct ExperimentParameters {
   const float cross_section;
   /// number of test particle
   int testparticles;
+  /// width if gaussian Wigner density of particles
+  double gaussian_sigma;
 };
 
 }  // namespace Smash

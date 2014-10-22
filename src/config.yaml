@@ -53,11 +53,14 @@ General:
     # initial random seed (auto-generated if negative)
     Randomseed:    1
 
-    # elastic cross section
+    # elastic cross section, mb (= 0.1 fm^2)
     Sigma:         10.0
 
-    # number of test particle
+    # number of test particles
     Testparticles: 1
+
+    # width of gaussians representing particles, fm
+    Gaussian_Sigma: 1.0
 
     # number of events
     Nevents:       1

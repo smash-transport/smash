@@ -33,7 +33,7 @@ TEST(initialize_box) {
   conf["Modi"]["Box"]["Start_Time"] = 0.2;
   conf.take({"Modi", "Box", "Init_Multiplicities"});
   conf["Modi"]["Box"]["Init_Multiplicities"]["661"] = 724;
-  ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};
+  ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1, 1.0};
   BoxModus b(conf["Modi"], param);
 
   Particles P;
@@ -63,7 +63,7 @@ TEST(initialize_collider) {
   conf["Modi"]["Collider"]["Sqrts"] = 1.6;
   conf["Modi"]["Collider"]["Projectile"] = "661";
   conf["Modi"]["Collider"]["Target"] = "661";
-  ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};
+  ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1, 1.0};
   ColliderModus c(conf["Modi"], param);
   Particles P;
   COMPARE(c.initial_conditions(&P, param), -1.f);
@@ -89,7 +89,7 @@ TEST_CATCH(initialize_collider_low_energy, ModusDefault::InvalidEnergy) {
   conf["Modi"]["Collider"]["Sqrts"] = 0.5;
   conf["Modi"]["Collider"]["Projectile"] = "661";
   conf["Modi"]["Collider"]["Target"] = "661";
-  ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};
+  ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1, 1.0};
   ColliderModus c(conf["Modi"], param);
 }
 
@@ -104,7 +104,7 @@ TEST(initialize_nucleus_normal) {
   conf["Modi"]["Nucleus"]["Sqrts_Reps"][1] = "661";
   conf["Modi"]["Nucleus"]["Initial_Distance"] = 0;
   conf["Modi"]["Nucleus"]["Impact"]["Value"] = 0;
-  ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};
+  ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1, 1.0};
   NucleusModus n(conf["Modi"], param);
   Particles P;
   COMPARE(n.initial_conditions(&P, param), 0.f);
@@ -134,7 +134,7 @@ TEST_CATCH(initialize_nucleus_low_energy, ModusDefault::InvalidEnergy) {
   conf["Modi"]["Nucleus"]["Sqrts_Reps"][0] = "661";
   conf["Modi"]["Nucleus"]["Sqrts_Reps"][1] = "661";
   conf["Modi"]["Nucleus"]["Initial_Distance"] = 0;
-  ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};
+  ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1, 1.0};
   NucleusModus n(conf["Modi"], param);
   Particles P;
   n.initial_conditions(&P, param);
@@ -150,7 +150,7 @@ TEST_CATCH(initialize_nucleus_empty_projectile, NucleusModus::NucleusEmpty) {
   conf["Modi"]["Nucleus"]["Sqrts_Reps"][0] = 0;
   conf["Modi"]["Nucleus"]["Sqrts_Reps"][1] = 0;
   conf["Modi"]["Nucleus"]["Initial_Distance"] = 0;
-  ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};
+  ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1, 1.0};
   NucleusModus n(conf["Modi"], param);
   Particles P;
   n.initial_conditions(&P, param);
@@ -166,7 +166,7 @@ TEST_CATCH(initialize_nucleus_empty_target, NucleusModus::NucleusEmpty) {
   conf["Modi"]["Nucleus"]["Sqrts_Reps"][0] = 0;
   conf["Modi"]["Nucleus"]["Sqrts_Reps"][1] = 0;
   conf["Modi"]["Nucleus"]["Initial_Distance"] = 0;
-  ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};
+  ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1, 1.0};
   NucleusModus n(conf["Modi"], param);
   Particles P;
   n.initial_conditions(&P, param);
@@ -179,7 +179,7 @@ TEST(initialize_sphere) {
   conf["Modi"]["Sphere"]["Start_Time"] = 0.0;
   conf.take({"Modi", "Sphere", "Init_Multiplicities"});
   conf["Modi"]["Sphere"]["Init_Multiplicities"]["661"] = 500;
-  ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};
+  ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1, 1.0};
   SphereModus s(conf["Modi"], param);
   Particles P;
 //Is the correct number of particles in the map?

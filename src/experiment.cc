@@ -125,6 +125,9 @@ namespace {
  * Defines the period of intermediate output of the status of the simulated
  * system in Standard Output and other output formats which support this
  * functionality.
+ *
+ * \key Gaussian_Sigma (float, required): \n
+ * Width of gaussians that represent Wigner density of particles.
  */
 /** Gathers all general Experiment parameters
  *
@@ -149,7 +152,8 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
   // assigning initial_clock_.
   return {{0.0f, config.read({"General", "Delta_Time"})},
            config.take({"General", "Output_Interval"}),
-           cross_section, testparticles};
+           cross_section, testparticles,
+           config.take({"General", "Gaussian_Sigma"})};
 }
 }  // unnamed namespace
 
