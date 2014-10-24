@@ -205,17 +205,17 @@
  * Let's take a look at what this tells us.
  * 1. The test macro that failed was in testfile.cc in line 5.
  * 2. If you want to look at the disassembly, the failure was at 0x40451f.
- * 3. The COMPARE macro compared the expression `test` against the expression
+ * 3. The \ref COMPARE macro compared the expression `test` against the expression
  *    `2`. It shows that `test` had a value of `3` while `2` had a value of `2`
  *    (what a surprise). Since the values are not equal `test == 2` returns \c
  *    false.
- * 4. The COMPARE, FUZZY_COMPARE, VERIFY, and FAIL macros can be used as
+ * 4. The \ref COMPARE, \ref FUZZY_COMPARE, \ref VERIFY, and \ref FAIL macros can be used as
  *    streams. The output will only appear on failure and will be printed right
  *    after the normal output of the macro.
- * 5. Finally the name of the failed test (the name specified inside the TEST()
+ * 5. Finally the name of the failed test (the name specified inside the \ref TEST()
  *    macro) is printed.
  * 6. At the end of the run, a summary of the test results is shown. This may be
- *    important when there are many TEST functions.
+ *    important when there are many \ref TEST functions.
  *
  * If the test passed you'll see:
    \verbatim
