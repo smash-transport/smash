@@ -46,16 +46,144 @@
 #include "ulp.h"
 
 #ifdef DOXYGEN
-/**
- * \addtogroup unittest
- * @{
+
+/*!
+ * \page unittest_page Unit Testing
+ * \tableofcontents
  *
+ * See also: \ref unittest
+ *
+ * \section unittest_intro Introduction
+ * (The “Introduction” text is adapted from the <a
+ * href="https://en.wikipedia.org/wiki/Unit_testing">Wikipedia article on Unit
+ * testing</a>, for a stronger focus on SMASH and C++.)
+ *
+ * Unit testing is a software testing method by which
+ * individual units of source code
+ * are tested to determine if they are fit for use.
+ * View a unit as the smallest testable part of an application.
+ * Thus, a unit is typically an entire class.
+ *
+ * Ideally, each test case is independent from the others. Substitutes such as
+ * <a href="https://en.wikipedia.org/wiki/Method_stub">method stubs</a> and <a
+ * href="https://en.wikipedia.org/wiki/Mock_object">mock objects</a> can be used
+ * to assist testing a module in isolation. Unit tests are written and
+ * run by software developers to ensure that code meets its design and behaves
+ * as intended.
+ *
+ * \subsection unittest_intro_benefits Benefits
+ * The goal of unit testing is to isolate each part of the program and show that
+ * the individual parts are correct. A unit test provides a strict, written
+ * contract that the piece of code must satisfy. As a result, it affords several
+ * benefits.
+ *
+ * \subsubsection unittest_intro_benefits_find_problems Finds problems early
+ * Unit testing finds problems early in the development cycle.
+ *
+ * In test-driven development, unit tests are created before the code itself is
+ * written. When the tests pass, that code is considered complete. The same unit
+ * tests are run against that function frequently as the larger code base is
+ * developed either as the code is changed or via an automated process with the
+ * build. If the unit tests fail, it is considered to be a bug either in the
+ * changed code or the tests themselves. The unit tests then allow the location
+ * of the fault or failure to be easily traced. Since the unit tests alert the
+ * development team of the problem before handing the code off to testers or
+ * clients, it is still early in the development process.
+ *
+ * \subsubsection unittest_intro_benefits_change Facilitates change
+ * Unit testing allows the programmer to refactor code at a later date, and make
+ * sure the module still works correctly (e.g., in regression testing). The
+ * procedure is to write test cases for all functions and methods so that
+ * whenever a change causes a fault, it can be quickly identified.
+ *
+ * Readily available unit tests make it easy for the programmer to check whether
+ * a piece of code is still working properly.
+ *
+ * \subsubsection unittest_intro_benefits_integration Simplifies integration
+ * Unit testing may reduce uncertainty in the units themselves and can be used
+ * in a bottom-up testing style approach. By testing the parts of a program
+ * first and then testing the sum of its parts, integration testing becomes much
+ * easier.
+ *
+ * \subsubsection unittest_intro_benefits_design Design
+ * When software is developed using a test-driven approach, the combination of
+ * writing the unit test to specify the interface plus the refactoring
+ * activities performed after the test is passing, may take the place of formal
+ * design. Each unit test can be seen as a design element specifying classes,
+ * methods, and observable behaviour.
+ *
+ ******************************************************************************
+ *
+ * \section unittest_smash SMASH Specific Hints and Rules
+ * The typical unit test in SMASH is centered around one C++ class.
+ * But many of the classes in SMASH rely on specific data to do any useful
+ * operations.
+ * The obvious candidates are
+ * - \ref Smash::ParticleData
+ * - \ref Smash::ParticleType
+ * - \ref Smash::Particles
+ * - \ref Smash::Configuration
+ * - \ref Smash::ProcessBranch
+ *
+ * Each of these are interfaces to data that most classes in SMASH read,
+ * modify, or create. For example, consider testing Smash::DecayAction. The
+ * class is created with a const-ref to a Smash::ParticleData object. This
+ * class in turn requires a Smash::ParticleType object for its constructor. To
+ * make things worse, the Smash::DecayAction::perform function requires a
+ * pointer to Smash::Particles (which contains a map of all existing
+ * Smash::ParticleData objects). The \c perform function further calls
+ * Smash::Action::choose_channel which requires a std::vector of
+ * Smash::ProcessBranch to determine the the final state particles.
+ *
+ * We see that testing \c DecayAction in isolation will be hard. If we'd want to
+ * follow the purist rules for unit testing we'd have to mock all those classes.
+ *
+ ******************************************************************************
+ * \section unittest_run Running tests & Test-driven development
+ * Tests are built with cmake. They can be disabled via the BUILD_TESTING option
+ * of cmake; per default tests are enabled.
+ *
+ * Once a test is built you will find an executable in the top-level build
+ * directory. Every test has a name that is used for the \c .cc file, the
+ * executable name, and the \c make target names. Take for example the \c
+ * pdgcode test:
+ * - The source for the test is in \c src/tests/pdgcode.cc.
+ * - The executable will be in \c ${CMAKE_BINARY_DIR}/pdgcode.
+ * - The make file will have two targets: \c pdgcode and \c run_pdgcode. The
+ *   former will only build the executable, the latter will build and run it.
+ *
+ * For test-driven development, the run target can be quite handy, since it
+ * requires a single command to compile and run a unit test. A vim user, for
+ * example, will be able to call `:make run_pdgcode` (possibly mapped to a key,
+ * such as F10) and get compiler output and test output into the Quickfix
+ * buffer.
+ *
+ * Finally, if you want to run all tests in the test suite you can first build
+ * all tests with
+ *
+ *     make -j4 all
+ *
+ * and then run all tests with
+ *
+ *     ctest -j4
+ *
+ * . Using \c ctest instead of `make test` allows you to run tests in parallel
+ * with the \c -j flag. (Use a number that corresponds to the number of cores on
+ * the machine where you're working on, instead of \c -j4.)
+ * If you run \c ctest with the \c -V flag you will see more output from the
+ * tests. The test output is always captured in a file, so that you don't
+ * necessarily have to rerun a failed test to see what happened. You can find it
+ * in the \c Testing directory in the build dir.
+ *
+ ******************************************************************************
+ *
+ * \section unittest_getstarted Get started
  * In SMASH we use a unit testing framework that was originally developed for
  * the [Vc library](http://code.compeng.uni-frankfurt.de/projects/vc). It
  * simplifies test creation to the bare minimum. The following code suffices to
  * run a test:
  * \code
- * #include "tests/unittest.h"
+ * #include "unittest.h"
  *
  * TEST(test_name) {
  *   int test = 1 + 1;
@@ -106,6 +234,11 @@
  * You will then get two new targets that you can build with make: \c testfile
  * and \c run_testtest . The latter can be used to build and run a test quickly
  * in "code - compile - test" cycles in test-driven development.
+ */
+
+/**
+ * \addtogroup unittest
+ * @{
  */
 
 /**
