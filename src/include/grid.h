@@ -16,6 +16,7 @@
 #include <array>
 #include <assert.h>
 
+#include "algorithms.h"
 #include "forwarddeclarations.h"
 #include "fourvector.h"
 #include "logging.h"
@@ -74,8 +75,10 @@ class Grid {
       {2.5f, 2.5f, 2.5f}};
 
  public:
+  typedef std::size_t size_type;
+
   template <typename T>
-  Grid(const T &all_particles){
+  Grid(T &&all_particles) {
     const auto &log = logger<LogArea::Grid>();
 
     const auto particle_count = all_particles.size();
@@ -117,33 +120,46 @@ class Grid {
       }
     }
 
-    log.debug("min: ", min_position_, "\nmax: ", max_position, "\ncells: ",
-              number_of_cells_, "\ninteraction length: ",
-              max_interaction_length, "\nindex_factor: ", index_factor_);
+    if (all_of(number_of_cells_, [](size_type n) { return n <= 2; })) {
+      // dilute limit:
+      // the grid would have <= 2x2x2 cells, meaning every particle has to be
+      // compared with every other particle anyway. Then we can just as well
+      // fall back to not using the grid at all
+      log.debug("There would only be ", number_of_cells_,
+                " cells. Therefore the Grid falls back to a single cell / "
+                "particle list.");
+      number_of_cells_ = {1, 1, 1};
+      cells_.reserve(1);
+      cells_.emplace_back(std::forward<T>(all_particles));
+    } else {
+      // construct a normal grid
+      log.debug("min: ", min_position_, "\nmax: ", max_position, "\ncells: ",
+          number_of_cells_, "\ninteraction length: ",
+          max_interaction_length, "\nindex_factor: ", index_factor_);
 
-    // After the grid parameters are determined, we can start placing the
-    // particles in cells.
-    cells_.resize(number_of_cells_[0] * number_of_cells_[1] *
-                  number_of_cells_[2]);
+      // After the grid parameters are determined, we can start placing the
+      // particles in cells.
+      cells_.resize(number_of_cells_[0] * number_of_cells_[1] *
+          number_of_cells_[2]);
 
-    for (const auto &p : all_particles) {
-      const auto idx = make_index(p.position().threevec());
-      if (idx >= cells_.size()) {
-        log.fatal(source_location,
-            "\nan out-of-bounds access would be necessary for the particle ", p,
-            "\nfor a grid with the following parameters:\nmin: ", min_position_,
-            "\nmax: ", max_position, "\ncells: ", number_of_cells_,
-            "\ninteraction length: ", max_interaction_length,
-            "\nindex_factor: ", index_factor_, "\ncells_.size: ", cells_.size(),
-            "\nrequested index: ", idx);
-        throw std::runtime_error("out-of-bounds grid access on construction");
+      for (const auto &p : all_particles) {
+        const auto idx = make_index(p.position().threevec());
+        if (idx >= cells_.size()) {
+          log.fatal(source_location,
+              "\nan out-of-bounds access would be necessary for the particle ", p,
+              "\nfor a grid with the following parameters:\nmin: ", min_position_,
+              "\nmax: ", max_position, "\ncells: ", number_of_cells_,
+              "\ninteraction length: ", max_interaction_length,
+              "\nindex_factor: ", index_factor_, "\ncells_.size: ", cells_.size(),
+              "\nrequested index: ", idx);
+          throw std::runtime_error("out-of-bounds grid access on construction");
+        }
+        cells_[idx].push_back(p);
       }
-      cells_[idx].push_back(p);
     }
-    log.debug(cells_);
-  }
 
-  using size_type = std::size_t;
+    //log.debug(cells_);
+  }
 
   template <typename F>
   void iterate_cells(F &&call_finder) {
