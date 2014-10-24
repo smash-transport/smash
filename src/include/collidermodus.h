@@ -10,13 +10,21 @@
 #include "modusdefault.h"
 
 #include "forwarddeclarations.h"
+#include "nucleus.h"
+#include "deformednucleus.h"
 #include "pdgcode.h"
+
+#include <cstring>
+#include <memory>
+#include <utility>
 
 namespace Smash {
 
+struct ExperimentParameters;
+
 /**
  * \ingroup modus
- * ColliderModus: Provides a modus for collisions of single particles
+ * ColliderModus: Provides a modus for colliding nuclei.
  *
  * To use this modus, chose
  * \code
@@ -26,13 +34,7 @@ namespace Smash {
  * in the configuration file.
  *
  * Options for ColliderModus go in the "Modi"→"Collider" section of the
- * configuration:
- *
- * \code
- * Modi:
- *      Collider:
- *              # definitions here
- * \endcode
+ * configuration.
  *
  * The following configuration options are understood: \ref input_modi_collider_
  */
@@ -46,28 +48,86 @@ class ColliderModus : public ModusDefault {
   explicit ColliderModus(Configuration modus_config,
            const ExperimentParameters &parameters);
 
-  /** creates initial conditions from the particles.
+  /** Creates initial conditions from the particles.
    *
-   * In particular, it initializes target and projectile.
+   * In particular, it initializes the nuclei.
    */
   float initial_conditions(Particles *particles,
                           const ExperimentParameters &parameters);
 
-  // in ModusDefault:
-  // * sanity_check
-  // * check_collision_geometry
-  // * propagate
+  /// \ingroup exception
+  /// Thrown when either \a projectile_ or \a target_ nuclei are empty.
+  struct ColliderEmpty : public ModusDefault::BadInput {
+    using ModusDefault::BadInput::BadInput;
+  };
 
  private:
-  /// PdgCode of Projectile particle
-  const PdgCode projectile_;
-  /// PdgCode of Target particle
-  const PdgCode target_;
-  /// Center-of-mass energy of the collision in GeV
-  const float sqrts_;
+  /** Projectile.
+   *
+   * The object that comes from negative z-values at positive x-values
+   * with positive velocity.
+   **/
+  std::unique_ptr<Nucleus> projectile_;
+  /** Target.
+   *
+   * The object that comes from positive z-values at negative x-values
+   * with negative velocity. In fixed target experiments, the target is
+   * at rest.
+   **/
+  std::unique_ptr<Nucleus> target_;
+  /** Center-of-mass energy of the nucleus-nucleus collision.
+   *
+   **/
+  float total_s_;
+  /** Impact parameter.
+   *
+   * The nuclei projectile_ and target_ will be shifted along the x axis
+   * so that their centers move on antiparallel lines that are this
+   * distance apart from each other.
+   **/
+  float impact_ = 0.f;
+  /// Flag for quadratic sampling of impact parameter.
+  bool sampling_quadratically_ = true;
+  /// Minimum value of impact parameter.
+  float imp_min_ = 0.0;
+  /// Maximum value of impact parameter.
+  float imp_max_ = 0.0;
+  /** Sample impact parameter.
+   *
+   * Samples the impact parameter from values between imp_min_ and imp_max_.
+   * Sampling is either quadratic or linear, depending if
+   * sampling_quadratically_ is true or false.
+   *
+   * Note that imp_max_ less than imp_min_ also works fine.
+   *
+   **/
+  void sample_impact();
+  /** Initial z displacement of nuclei.
+   *
+   * Each nucleus is shifted so that
+   * the outermost particle on the side facing the other nucleus is at
+   * \f$\pm\f$ this value.
+   **/
+  double initial_z_displacement_ = 1.0;
+  /** Reference frame for the system.
+   *
+   * 1 = Center of velocity<br>
+   * 2 = Center of mass<br>
+   * 3 = Fixed target<br>
+   **/
+  int frame_ = 1;
+  /** Get the frame dependent velocity for each nucleus, using
+   * the current reference frame. \see frame_
+   *
+   * @param mandelstam_s The total center-of-mass energy of the system.
+   * @param m1 The mass of the projectile.
+   * @param m2 The mass of the target.
+   * @return < v1, v2 > Velocities of the nuclei.
+   **/
+  std::pair<double, double> get_velocities(float mandelstam_s, float m1, float m2);
 
   /**\ingroup logging
-   * Writes the initial state for the Collider to the output stream.
+   * Writes the initial state for the ColliderModus to the output stream.
    */
   friend std::ostream &operator<<(std::ostream &, const ColliderModus &);
 };

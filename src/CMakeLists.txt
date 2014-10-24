@@ -59,7 +59,6 @@ set(smash_src
         logging.cc
         modusdefault.cc
         nucleus.cc
-        nucleusmodus.cc
         oscaroutput.cc
         parametrizations.cc
         particledata.cc

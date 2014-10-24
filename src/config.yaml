@@ -5,7 +5,6 @@ Logging:
   #Experiment: ALL
   #Box: ALL
   #Collider: ALL
-  #Nucleus: ALL
   #Sphere: ALL
   #ParticleType: ALL
   #Action: ALL
@@ -15,7 +14,7 @@ Logging:
 
 General:
     # Modus decision
-    Modus:         Nucleus
+    Modus:         Collider
 
     # temporal grid spacing
     Delta_Time:    0.01
@@ -104,16 +103,6 @@ Modi:
 
 
     Collider:
-        # Projectile particle
-        Projectile: 211
-
-        # Target particle
-        Target: -211
-
-        # center-of-mass energy in GeV
-        Sqrts: 1.0
-
-    Nucleus:
         # Definitions for the projectile:
         # Deuteron
         Projectile:

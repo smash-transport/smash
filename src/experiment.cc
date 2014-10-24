@@ -25,7 +25,6 @@
 #include "include/grid.h"
 #include "include/logging.h"
 #include "include/macros.h"
-#include "include/nucleusmodus.h"
 #include "include/random.h"
 #include "include/spheremodus.h"
 
@@ -71,22 +70,19 @@ std::unique_ptr<ExperimentBase> ExperimentBase::create(Configuration config) {
    * Selects a modus for the calculation, e.g.\ infinite matter
    * calculation, collision of two particles or collision of nuclei. The modus
    * will be configured in \ref input_modi_. Recognized values are:
-   * \li \key Nucleus for collisions of nuclei or compound objects. See \ref
-   *     \NucleusModus
+   * \li \key Collider for collisions of nuclei or compound objects. See \ref
+   *     \ColliderModus
    * \li \key Sphere for calculations of the expansion of a thermalized sphere. See
    *     \ref \SphereModus
-   * \li \key Collider for testing elementary cross-sections. See \ref
-   *     \ColliderModus
    * \li \key Box for infinite matter calculation in a rectangular box. See \ref
    *     \BoxModus
    */
 
   /*!\Userguide
    * \page input_modi_ Modi
-   * \li \subpage input_modi_nucleus_
+   * \li \subpage input_modi_collider_
    * \li \subpage input_modi_sphere_
    * \li \subpage input_modi_box_
-   * \li \subpage input_modi_collider_
    */
   const std::string modus_chooser = config.take({"General", "Modus"});
   log.info() << "Modus for this calculation: " << modus_chooser;
@@ -98,9 +94,7 @@ std::unique_ptr<ExperimentBase> ExperimentBase::create(Configuration config) {
   if (modus_chooser.compare("Box") == 0) {
     return ExperimentPointer(new Experiment<BoxModus>(config));
   } else if (modus_chooser.compare("Collider") == 0) {
-    return ExperimentPointer(new Experiment<ColliderModus>(config));
-  } else if (modus_chooser.compare("Nucleus") == 0) {
-      return ExperimentPointer(new Experiment<NucleusModus>(config));
+      return ExperimentPointer(new Experiment<ColliderModus>(config));
   } else if (modus_chooser.compare("Sphere") == 0) {
       return ExperimentPointer(new Experiment<SphereModus>(config));
   } else {

@@ -83,24 +83,23 @@ DECLARE_LOGAREA( 0, Main);
 DECLARE_LOGAREA( 1, Experiment);
 DECLARE_LOGAREA( 2, Box);
 DECLARE_LOGAREA( 3, Collider);
-DECLARE_LOGAREA( 4, Nucleus);
-DECLARE_LOGAREA( 5, Sphere);
-DECLARE_LOGAREA( 6, Action);
-DECLARE_LOGAREA( 7, InputParser);
-DECLARE_LOGAREA( 8, ParticleType);
-DECLARE_LOGAREA( 9, FindScatter);
-DECLARE_LOGAREA(10, Legacy);
-DECLARE_LOGAREA(11, Clock);
-DECLARE_LOGAREA(12, DecayModes);
-DECLARE_LOGAREA(13, Resonances);
-DECLARE_LOGAREA(14, ScatterAction);
-DECLARE_LOGAREA(15, Distributions);
-DECLARE_LOGAREA(16, ModusDefault);
-DECLARE_LOGAREA(17, Grid);
+DECLARE_LOGAREA( 4, Sphere);
+DECLARE_LOGAREA( 5, Action);
+DECLARE_LOGAREA( 6, InputParser);
+DECLARE_LOGAREA( 7, ParticleType);
+DECLARE_LOGAREA( 8, FindScatter);
+DECLARE_LOGAREA( 9, Legacy);
+DECLARE_LOGAREA(10, Clock);
+DECLARE_LOGAREA(11, DecayModes);
+DECLARE_LOGAREA(12, Resonances);
+DECLARE_LOGAREA(13, ScatterAction);
+DECLARE_LOGAREA(14, Distributions);
+DECLARE_LOGAREA(15, ModusDefault);
+DECLARE_LOGAREA(16, Grid);
 
 /// This type collects all existing log areas so they will be created with the
 /// correct log level automatically.
-using AreaTuple = std::tuple<Main, Experiment, Box, Collider, Nucleus, Sphere,
+using AreaTuple = std::tuple<Main, Experiment, Box, Collider, Sphere,
                              Action, InputParser, ParticleType, FindScatter,
                              Legacy, Clock, DecayModes, Resonances,
                              ScatterAction, Distributions, ModusDefault, Grid>;

@@ -53,9 +53,8 @@ namespace Smash {
  * \par The relevant functions and classes for input are:
  * \li \ref Configuration
  * \li \ref ExperimentBase::create()
- * \li \ref NucleusModus
- * \li \ref BoxModus
  * \li \ref ColliderModus
+ * \li \ref BoxModus
  * \li \ref SphereModus
  * \endif
  */
