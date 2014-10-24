@@ -123,10 +123,20 @@
  * - \ref Smash::ParticleType
  * - \ref Smash::Particles
  * - \ref Smash::Configuration
- * - \ref Smash::DecayModes
- * Each of these, are interfaces to data that most classes in SMASH read,
- * modify, or create.
- * For example, consider
+ * - \ref Smash::ProcessBranch
+ *
+ * Each of these are interfaces to data that most classes in SMASH read,
+ * modify, or create. For example, consider testing Smash::DecayAction. The
+ * class is created with a const-ref to a Smash::ParticleData object. This
+ * class in turn requires a Smash::ParticleType object for its constructor. To
+ * make things worse, the Smash::DecayAction::perform function requires a
+ * pointer to Smash::Particles (which contains a map of all existing
+ * Smash::ParticleData objects). The \c perform function further calls
+ * Smash::Action::choose_channel which requires a std::vector of
+ * Smash::ProcessBranch to determine the the final state particles.
+ *
+ * We see that testing \c DecayAction in isolation will be hard. If we'd want to
+ * follow the purist rules for unit testing we'd have to mock all those classes.
  *
  ******************************************************************************
  *
