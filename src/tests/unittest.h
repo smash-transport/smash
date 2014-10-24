@@ -139,6 +139,43 @@
  * follow the purist rules for unit testing we'd have to mock all those classes.
  *
  ******************************************************************************
+ * \section unittest_run Running tests & Test-driven development
+ * Tests are built with cmake. They can be disabled via the BUILD_TESTING option
+ * of cmake; per default tests are enabled.
+ *
+ * Once a test is built you will find an executable in the top-level build
+ * directory. Every test has a name that is used for the \c .cc file, the
+ * executable name, and the \c make target names. Take for example the \c
+ * pdgcode test:
+ * - The source for the test is in \c src/tests/pdgcode.cc.
+ * - The executable will be in \c ${CMAKE_BINARY_DIR}/pdgcode.
+ * - The make file will have two targets: \c pdgcode and \c run_pdgcode. The
+ *   former will only build the executable, the latter will build and run it.
+ *
+ * For test-driven development, the run target can be quite handy, since it
+ * requires a single command to compile and run a unit test. A vim user, for
+ * example, will be able to call `:make run_pdgcode` (possibly mapped to a key,
+ * such as F10) and get compiler output and test output into the Quickfix
+ * buffer.
+ *
+ * Finally, if you want to run all tests in the test suite you can first build
+ * all tests with
+ *
+ *     make -j4 all
+ *
+ * and then run all tests with
+ *
+ *     ctest -j4
+ *
+ * . Using \c ctest instead of `make test` allows you to run tests in parallel
+ * with the \c -j flag. (Use a number that corresponds to the number of cores on
+ * the machine where you're working on, instead of \c -j4.)
+ * If you run \c ctest with the \c -V flag you will see more output from the
+ * tests. The test output is always captured in a file, so that you don't
+ * necessarily have to rerun a failed test to see what happened. You can find it
+ * in the \c Testing directory in the build dir.
+ *
+ ******************************************************************************
  *
  * \section unittest_getstarted Get started
  * In SMASH we use a unit testing framework that was originally developed for
