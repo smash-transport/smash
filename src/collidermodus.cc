@@ -39,13 +39,13 @@ namespace Smash {
  * PDG Codes, e.g. `Sqrts_n: [2212, 2212]` for proton-proton.
  * Default is the average nucleon mass in the given nucleus.
  *
- * \key E_Lab (float, optional, no default): \n
- * Defines the energy of the collision by the initial energy in GeV of
- * the projectile nucleus. This assumes the target nucleus is at rest.
+ * \key E_Kin (float, optional, no default): \n
+ * Defines the energy of the collision by the kinetic energy per nucleon of
+ * the projectile nucleus (in AGeV). This assumes the target nucleus is at rest.
  *
  * \key P_Lab (float, optional, no default): \n
- * Defines the energy of the collision by the initial momentum
- * of the projectile nucleus in GeV. This assumes the target nucleus is at rest.
+ * Defines the energy of the collision by the initial momentum per nucleon
+ * of the projectile nucleus (in AGeV). This assumes the target nucleus is at rest.
  *
  * \key Calculation_Frame (int, required, default = 1): \n
  * The frame in which the collision is calculated.\n
@@ -219,36 +219,40 @@ ColliderModus::ColliderModus(Configuration modus_config,
                 + mass_projec * mass_projec + mass_target * mass_target;
       energy_input++;
   }
-  // Option 2: Energy of the projectile nucleus (target at rest).
-  if (modus_cfg.has_value({"E_Lab"})) {
-      float e_lab = modus_cfg.take({"E_Lab"});
+  // Option 2: Kinetic energy per nucleon of the projectile nucleus (target at rest).
+  if (modus_cfg.has_value({"E_Kin"})) {
+      float e_kin = modus_cfg.take({"E_Kin"});
       // Check that energy is nonnegative.
-      if (e_lab < 0) {
-        throw ModusDefault::InvalidEnergy("Input Error: E_Lab must be nonnegative.");
+      if (e_kin < 0) {
+        throw ModusDefault::InvalidEnergy("Input Error: E_Kin must be nonnegative.");
       }
       // Set the total nucleus-nucleus collision energy.
       total_s_ = (mass_projec * mass_projec) + (mass_target * mass_target)
-                 + 2 * e_lab * mass_target;
+                 + 2 * mass_target *
+                   (mass_projec + e_kin*projectile_->number_of_particles());
       energy_input++;
   }
   // Option 3: Momentum of the projectile nucleus (target at rest).
   if (modus_cfg.has_value({"P_Lab"})) {
       float p_lab = modus_cfg.take({"P_Lab"});
-      // Check upper bound (projectile mass).
-      if (p_lab * p_lab > mass_projec * mass_projec) {
-        throw ModusDefault::InvalidEnergy(
-                "Input Error: P_Lab squared is greater than projectile mass squared: \n"
-                + std::to_string(p_lab * p_lab) + " GeV > "
-                + std::to_string(mass_projec * mass_projec) + " GeV");
+      // Check that p_lab is nonnegative.
+      if (p_lab < 0) {
+        throw ModusDefault::InvalidEnergy("Input Error: P_Lab must be nonnegative.");
       }
+      float p_proj = p_lab * projectile_->number_of_particles(); // momentum of projectile nucleus
       // Set the total nucleus-nucleus collision energy.
       total_s_ = (mass_projec * mass_projec) + (mass_target * mass_target)
-                  + 2 * (mass_projec * mass_projec) * mass_target
-                  / sqrt((mass_projec * mass_projec) - (p_lab * p_lab));
+                  + 2 * mass_target *
+                    sqrt(mass_projec*mass_projec + p_proj*p_proj);
       energy_input++;
   }
-  if (energy_input != 1){
-    throw std::domain_error("Input Error: Redundant or nonexistant collision energy.");
+  if (energy_input == 0) {
+    throw std::domain_error("Input Error: Non-existent collision energy. "
+                            "Please provide one of Sqrtsnn/E_Kin/P_Lab.");
+  }
+  if (energy_input > 1){
+    throw std::domain_error("Input Error: Redundant collision energy. "
+                            "Please provide only one of Sqrtsnn/E_Kin/P_Lab.");
   }
 
   // Impact parameter setting: Either "Value", "Range", or "Max".

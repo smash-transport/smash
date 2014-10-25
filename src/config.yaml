@@ -104,22 +104,18 @@ Modi:
 
     Collider:
         # Definitions for the projectile:
-        # Deuteron
         Projectile:
-            Particles: {2212: 1, 2112: 1}
-            # very hard Woods-Saxon distribution.
-            Diffusiveness: .001
-            Automatic: false
+            Particles: {2212: 29, 2112: 34}  # Copper63
+            Automatic: true
             Deformed: false
         # Definitions for the target:
-        # Lead
         Target:
-            Particles: {2212: 82, 2112: 126}
+            Particles: {2212: 29, 2112: 34}  # Copper63
             Automatic: true
             Deformed: false
 
-        # Collision energy (E_LAB, P_LAB, SQRTSNN).
-        Sqrtsnn: 2
+        # Collision energy (E_Kin, P_Lab, Sqrtsnn).
+        Sqrtsnn: 2.0
         # The representative particles (two PDG IDs) determining the
         # subsystem "NN" in sqrt(s_NN). Let's try neutron-neutron.
         Sqrts_Reps: [2112, 2112]
