@@ -40,8 +40,8 @@ static float pCM(const float srts, const float mass1, const float mass2) {
 const float interactionRadius = 1. / hbarc;
 
 /**
- * Returns the value of the Blatt-Weisskopf functions,
- *  which govern the mass dependence of the width of a resonance
+ * Returns the squared Blatt-Weisskopf functions,
+ * which govern the mass dependence of the width of a resonance
  * decaying into two particles A and B. See e.g. Effenberger's thesis, page 28.
  *
  * \param x = p_ab*R  with
@@ -50,23 +50,30 @@ const float interactionRadius = 1. / hbarc;
  * \param L Angular momentum of outgoing particles AB.
  */
 static float BlattWeisskopf(const float x, const int L) {
+  float bw;
   switch (L) {
     case 0:
-      return 1.;
+      bw = 1.;
+      break;
     case 1:
-      return x / std::sqrt(1. + x*x);
+      bw = x / std::sqrt(1. + x*x);
+      break;
     case 2:
-      return x*x / std::sqrt(9. + 3. * x*x + x*x*x*x);
+      bw = x*x / std::sqrt(9. + 3. * x*x + x*x*x*x);
+      break;
     case 3:
-      return x*x*x / std::sqrt(225. + 45. * x*x + 6.*x*x*x*x + x*x*x*x*x*x);
+      bw = x*x*x / std::sqrt(225. + 45. * x*x + 6.*x*x*x*x + x*x*x*x*x*x);
+      break;
     case 4:
-      return x*x*x*x / std::sqrt(11025. + 1575. * x*x + 135. * x*x*x*x
-                            + 10. * x*x*x*x*x*x + x*x*x*x*x*x*x*x);
+      bw = x*x*x*x / std::sqrt(11025. + 1575. * x*x + 135. * x*x*x*x
+                               + 10. * x*x*x*x*x*x + x*x*x*x*x*x*x*x);
+      break;
     default:
       throw std::invalid_argument(
         std::string("Wrong angular momentum in BlattWeisskopf: ")
         + std::to_string(L));
   }
+  return bw*bw;
 }
 
 
@@ -84,11 +91,11 @@ float width_Manley_stable(const float mass, const float poleMass,
 
   // Evaluate rho_ab according to equ. (2.76) in Effenberger's thesis
   // rho_ab(mu)=p_ab/mu * BlattWeisskopf(pab*interactionRadius,L)
-  float bw = BlattWeisskopf(p_ab_mass * interactionRadius, L);
-  const float rho_ab_mass = p_ab_mass / mass * bw*bw;
+  const float rho_ab_mass = p_ab_mass / mass *
+                            BlattWeisskopf(p_ab_mass*interactionRadius, L);
 
-  bw = BlattWeisskopf(p_ab_pole*interactionRadius, L);
-  const float rho_ab_pole = p_ab_pole / poleMass * bw*bw;
+  const float rho_ab_pole = p_ab_pole / poleMass *
+                            BlattWeisskopf(p_ab_pole*interactionRadius, L);
 
   return partialWidth_pole * rho_ab_mass / rho_ab_pole;
 }

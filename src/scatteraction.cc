@@ -409,9 +409,9 @@ ProcessBranchList ScatterActionBaryonBaryon::nuc_nuc_to_nuc_res (
       }
 
       /* Calculate matrix element. */
-      const float ME = nn_to_resonance_matrix_element(s, type_resonance,
-                                                      second_type);
-      if (ME <= 0.) {
+      const float matrix_element = nn_to_resonance_matrix_element(s,
+                                                   type_resonance, second_type);
+      if (matrix_element <= 0.) {
         continue;
       }
 
@@ -432,7 +432,7 @@ ProcessBranchList ScatterActionBaryonBaryon::nuc_nuc_to_nuc_res (
       /* Cross section for 2->2 process with one resonance in final state.
        * Based on Eq. (46) in PhD thesis of J. Weil
        * (https://gibuu.hepforge.org/trac/chrome/site/files/phd/weil.pdf) */
-      float xsection = isospin_factor * isospin_factor * ME
+      float xsection = isospin_factor * isospin_factor * matrix_element
                 * resonance_integral / (s * std::sqrt(cm_momentum_squared()));
 
       if (xsection > really_small) {
@@ -504,9 +504,9 @@ ProcessBranchList ScatterActionBaryonBaryon::nuc_res_to_nuc_nuc (
       }
 
       /* Calculate matrix element. */
-      const float ME = nn_to_resonance_matrix_element(s, *type_resonance,
-                                                      *type_nucleon);
-      if (ME <= 0.) {
+      const float matrix_element = nn_to_resonance_matrix_element(s,
+                                                *type_resonance, *type_nucleon);
+      if (matrix_element <= 0.) {
         continue;
       }
 
@@ -515,7 +515,8 @@ ProcessBranchList ScatterActionBaryonBaryon::nuc_res_to_nuc_nuc (
        * See eqs. (B.6), (B.9) and (181) in the GiBUU review paper.
        * There is a symmetry factor 1/2 and a spin factor 2/(2S+1) involved,
        * which combine to 1/(2S+1). */
-      float xsection = isospin_factor * isospin_factor * p_cm_final * ME
+      float xsection = isospin_factor * isospin_factor
+        * p_cm_final * matrix_element
         / ((type_resonance->spin()+1) * s * std::sqrt(cm_momentum_squared()));
 
       if (xsection > really_small) {
