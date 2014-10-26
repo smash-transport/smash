@@ -20,7 +20,7 @@ General:
     Delta_Time:    0.01
 
     # end time of simulation
-    End_Time:      1.0
+    End_Time:      10.0
 
     # output formats
     Output:
@@ -119,6 +119,11 @@ Modi:
         # The representative particles (two PDG IDs) determining the
         # subsystem "NN" in sqrt(s_NN). Let's try neutron-neutron.
         Sqrts_Reps: [2112, 2112]
+
         # The reference frame in which to do the calculation.
         # (1 = center of velocity, 2 = center of mass, 3 = fixed target)
         Calculation_Frame: 1
+
+        # Specify an impact parameter
+        Impact:
+            Value: 0.0
