@@ -20,7 +20,7 @@ General:
     Delta_Time:    0.01
 
     # end time of simulation
-    End_Time:      10.0
+    End_Time:      50.0
 
     # output formats
     Output:
@@ -33,7 +33,7 @@ General:
             2013_Format:        True
             Only_Final:         True
         Vtk:
-            Enable:             False
+            Enable:             True
         Root:
             Enable:             True
             Write_Collisions:   True
