@@ -190,6 +190,7 @@ int main(int argc, char *argv[]) {
           output_path = optarg;
           break;
         case 'v':
+          printf("%s\n", VERSION_MAJOR);
           exit(EXIT_SUCCESS);
         default:
           usage(EXIT_FAILURE, progname);
