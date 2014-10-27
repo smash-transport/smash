@@ -17,10 +17,10 @@ General:
     Modus:         Collider
 
     # temporal grid spacing
-    Delta_Time:    0.01
+    Delta_Time:    0.1
 
     # end time of simulation
-    End_Time:      50.0
+    End_Time:      20.0
 
     # output formats
     Output:
@@ -115,7 +115,7 @@ Modi:
             Deformed: false
 
         # Collision energy (E_Kin, P_Lab, Sqrtsnn).
-        Sqrtsnn: 2.0
+        Sqrtsnn: 3.0
         # The representative particles (two PDG IDs) determining the
         # subsystem "NN" in sqrt(s_NN). Let's try neutron-neutron.
         Sqrts_Reps: [2112, 2112]
