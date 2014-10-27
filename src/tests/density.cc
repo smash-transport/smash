@@ -11,6 +11,7 @@
 #include "../include/configuration.h"
 #include "../include/experiment.h"
 #include "../include/modusdefault.h"
+#include "../include/density.h"
 
 #include <boost/filesystem.hpp>
 
@@ -84,15 +85,15 @@ TEST(density_number) {
   ModusDefault m;
 
   r = ThreeVector(1.0, 0.0, 0.0);
-  jmu = m.baryon_jmu(r, P, sigma);
+  jmu = baryon_jmu(r, P, sigma);
   COMPARE_ABSOLUTE_ERROR(jmu.x0(), .00120524877950247448, 1.e-15);
 
   r = ThreeVector(0.0, 1.0, 0.0);
-  jmu = m.baryon_jmu(r, P, sigma);
+  jmu = baryon_jmu(r, P, sigma);
   COMPARE_ABSOLUTE_ERROR(jmu.x0(), .12333338425608940690, 1.e-15);
 
   r = ThreeVector(0.0, 0.0, 1.0);
-  jmu = m.baryon_jmu(r, P, sigma);
+  jmu = baryon_jmu(r, P, sigma);
   COMPARE_ABSOLUTE_ERROR(jmu.x0(), .12333338425608940690, 1.e-15);
 
 }
@@ -145,7 +146,7 @@ TEST(density_compframe) {
       for (auto iy = -ny; iy <= ny; iy++) {
         for (auto ix = -nx; ix <= nx; ix++) {
           r = ThreeVector(ix*dx, iy*dy, iz*dz);
-          jmu = m.baryon_jmu(r, plist, sigma);
+          jmu = baryon_jmu(r, plist, sigma);
           fprintf(pFile,"%f ", jmu.x0());
         }
         fprintf(pFile,"\n");
