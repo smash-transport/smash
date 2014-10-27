@@ -6,44 +6,55 @@
  *    GNU General Public License (GPLv3 or later)
  *
  */
-#include <cinttypes>
-#include <list>
 
-#include "include/modusdefault.h"
-#include "include/experiment.h"
-#include "include/logging.h"
+#include "include/constants.h"
+#include "include/density.h"
 
 namespace Smash {
 
-// general propagation routine
+FourVector four_current(ThreeVector r, const ParticleList &plist,
+                   double gs_sigma, Density_type dens_type) {
+  FourVector jmu(0.0, 0.0, 0.0, 0.0);
+  double tmp;
 
-void ModusDefault::propagate(Particles *particles,
-                             const ExperimentParameters &parameters,
-                             const OutputsList &) {
-  const auto &log = logger<LogArea::ModusDefault>();
-  FourVector distance, position;
-  for (ParticleData &data : particles->data()) {
-    /* propagation for this time step */
-    distance = FourVector(0.0,
-                          data.velocity() * parameters.timestep_duration());
-    log.debug("Particle ", data, " motion: ", distance);
-    position = data.position() + distance;
-    position.set_x0(parameters.new_particle_time());
-    data.set_4position(position);
+  for (const auto &p : plist) {
+    if ( (dens_type == baryon  && !p.is_baryon() ) ||
+         (dens_type == proton  && p.pdgcode() != 0x2212) ||
+         (dens_type == neutron && p.pdgcode() != 0x2112) ) {
+      continue;
+    }
+    const ThreeVector ri = p.position().threevec();
+    // If particle is too far - reject it immediately: its input is too small
+    if ((r - ri).sqr() > (6*gs_sigma) * (6*gs_sigma)) {
+      continue;
+    }
+
+    const ThreeVector betai = p.velocity();
+    const double inv_gammai = p.inverse_gamma();
+
+    // Get distance between particle and r in the particle rest frame
+    tmp = ((r - ri) * betai) / (inv_gammai * (1. + inv_gammai));
+    const ThreeVector dr_rest = r - ri + betai * tmp;
+
+    tmp = std::exp(- 0.5 * dr_rest.sqr() / (gs_sigma * gs_sigma)) / inv_gammai;
+    if (dens_type == baryon) {
+      tmp *= p.pdgcode().baryon_number();
+    }
+    jmu += FourVector(1., betai) * tmp;
   }
+
+  const double norm = twopi * std::sqrt(twopi) * gs_sigma*gs_sigma*gs_sigma;
+  jmu /= norm;
+
+  // j^0 = jmu.x0() is computational frame density
+  // jmu.abs() = sqrt(j^mu j_mu) is Eckart rest frame density
+  return jmu;
 }
 
-
-/*
-double ModusDefault::potential(ThreeVector r, const ParticleList &plist,
-                                                         double gs_sigma) {
-  const double rho_eckart = baryon_jmu(r, plist, gs_sigma).abs();
-  return skyrme_a * (rho_eckart/rho0) +
-                     skyrme_b * std::pow(rho_eckart/rho0, skyrme_tau);
-}
-
-ThreeVector ModusDefault::potential_gradient(ThreeVector r,
-                              const ParticleList &plist, double gs_sigma) {
+ThreeVector rho_eckart_gradient(ThreeVector r, const ParticleList &plist,
+                                double gs_sigma, Density_type dens_type) {
+  // TODO: change the implementation for different density types
+         
   // baryon four-current in computational frame
   FourVector jbmu(0.0, 0.0, 0.0, 0.0);
   // derivatives of baryon four-current in computational frame
@@ -87,17 +98,9 @@ ThreeVector ModusDefault::potential_gradient(ThreeVector r,
   const double rhob = jbmu.abs();
 
   // Gradient of Eckart rest frame baryon density
-  const ThreeVector drho_dr = ThreeVector(jbmu.Dot(djbmu_dx),
-                                          jbmu.Dot(djbmu_dy),
-                                          jbmu.Dot(djbmu_dz)) / rhob;
-
-  // Derivative of potential with respect to density
-  tmp1 = skyrme_tau * std::pow(rhob/rho0, skyrme_tau);
-  const double dpotential_drho = (skyrme_a  + skyrme_b * tmp1) / rho0;
-
-  return drho_dr * dpotential_drho;
+  return ThreeVector(jbmu.Dot(djbmu_dx),
+                     jbmu.Dot(djbmu_dy),
+                     jbmu.Dot(djbmu_dz)) / rhob;
 
 }
-
-*/
 }  // namespace Smash

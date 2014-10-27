@@ -82,18 +82,18 @@ TEST(density_number) {
   ThreeVector r;
   double sigma = 1.0;
   FourVector jmu;
-  ModusDefault m;
+  Density_type bar_dens = baryon;
 
   r = ThreeVector(1.0, 0.0, 0.0);
-  jmu = baryon_jmu(r, P, sigma);
+  jmu = four_current(r, P, sigma, bar_dens);
   COMPARE_ABSOLUTE_ERROR(jmu.x0(), .00120524877950247448, 1.e-15);
 
   r = ThreeVector(0.0, 1.0, 0.0);
-  jmu = baryon_jmu(r, P, sigma);
+  jmu = four_current(r, P, sigma, bar_dens);
   COMPARE_ABSOLUTE_ERROR(jmu.x0(), .12333338425608940690, 1.e-15);
 
   r = ThreeVector(0.0, 0.0, 1.0);
-  jmu = baryon_jmu(r, P, sigma);
+  jmu = four_current(r, P, sigma, bar_dens);
   COMPARE_ABSOLUTE_ERROR(jmu.x0(), .12333338425608940690, 1.e-15);
 
 }
@@ -114,6 +114,7 @@ TEST(density_compframe) {
   double sigma = 0.8;
   ThreeVector r;
   FourVector jmu;
+  Density_type bar_dens = baryon;
   FILE * pFile;
   ParticleList plist;
   /*
@@ -146,7 +147,7 @@ TEST(density_compframe) {
       for (auto iy = -ny; iy <= ny; iy++) {
         for (auto ix = -nx; ix <= nx; ix++) {
           r = ThreeVector(ix*dx, iy*dy, iz*dz);
-          jmu = baryon_jmu(r, plist, sigma);
+          jmu = four_current(r, plist, sigma, bar_dens);
           fprintf(pFile,"%f ", jmu.x0());
         }
         fprintf(pFile,"\n");

@@ -70,7 +70,7 @@ class ModusDefault {
    * \param[in] gs_sigma Width of the gaussian (\f$ \sigma \f$),
    *  which represents particle Wigner density.
    **/
-  double potential(ThreeVector r, const ParticleList &plist, double gs_sigma);
+//  double potential(ThreeVector r, const ParticleList &plist, double gs_sigma);
  
   /** Evaluates potential gradient at point r. Potential is always taken in
    * the local Eckart rest frame, but point r is in the computational frame.
@@ -83,8 +83,8 @@ class ModusDefault {
    * \param[in] gs_sigma Width of the gaussian (\f$ \sigma \f$),
    *  which represents particle Wigner density.
    **/
-   ThreeVector potential_gradient(ThreeVector r, const ParticleList &plist,
-                                                          double gs_sigma);
+//   ThreeVector potential_gradient(ThreeVector r, const ParticleList &plist,
+//                                                          double gs_sigma);
 
   /** \ingroup exception
    *  BadInput is an error to throw if the configuration options are invalid.
