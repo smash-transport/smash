@@ -238,6 +238,7 @@ class Configuration {
 
 #ifdef BUILD_TESTS
   /**
+   * \mocking
    * Unit tests can use this constructor to get a Configuration object from a
    * built-in string.
    * This function is only available to tests and should never be used/needed in

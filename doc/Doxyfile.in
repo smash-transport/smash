@@ -202,7 +202,8 @@ ALIASES                = "NucleusModus=Smash::NucleusModus" \
                          "BoxModus=Smash::BoxModus" \
                          "ColliderModus=Smash::ColliderModus" \
                          "key=\c" \
-                         "Userguide="
+                         "Userguide=" \
+                         "mocking=\xrefitem unittest_mocking \"\" \"\""
 
 # This tag can be used to specify a number of word-keyword mappings (TCL only).
 # A mapping has the form "name=value". For example adding
@@ -1602,7 +1603,8 @@ INCLUDE_FILE_PATTERNS  =
 
 PREDEFINED             = "DOXYGEN=1" \
                          "DECLARE_LOGAREA(id,name)=/** Log area tag type. */struct name {}" \
-                         "_COLOR(name,code)=/** Color stream modifier */typedef Color<name##_t_> name"
+                         "_COLOR(name,code)=/** Color stream modifier */typedef Color<name##_t_> name" \
+                         "BUILD_TESTS=1"
 
 # If the MACRO_EXPANSION and EXPAND_ONLY_PREDEF tags are set to YES then
 # this tag can be used to specify a list of macro names that should be expanded.

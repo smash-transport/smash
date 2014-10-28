@@ -135,8 +135,17 @@
  * Smash::Action::choose_channel which requires a std::vector of
  * Smash::ProcessBranch to determine the the final state particles.
  *
+ * \subsection unittest_smash_compromise Compromise
  * We see that testing \c DecayAction in isolation will be hard. If we'd want to
  * follow the purist rules for unit testing we'd have to mock all those classes.
+ * Up to now we have not used mocking, as it would create even more work when
+ * the design of SMASH changes. We should consider mocking on a case by case
+ * basis, but feel free to just use the real thing for now.
+ *
+ * Instead of creating complete mock classes we can use the BUILD_TESTS macro in
+ * actual SMASH classes to easily construct mock objects
+ *
+ * See \subpage unittest_mocking.
  *
  ******************************************************************************
  * \section unittest_run Running tests & Test-driven development
@@ -234,6 +243,14 @@
  * You will then get two new targets that you can build with make: \c testfile
  * and \c run_testtest . The latter can be used to build and run a test quickly
  * in "code - compile - test" cycles in test-driven development.
+ */
+
+/**
+ * \page unittest_mocking Mock Functions/Classes
+ *
+ * This is a list of functions and classes that can be useful in unit tests for
+ * creating objects that are necessary for testing a class in (more or less)
+ * isolation.
  */
 
 /**
