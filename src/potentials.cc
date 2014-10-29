@@ -7,8 +7,8 @@
  *
  */
 
-#include "include/forwarddeclarations.h"
 #include "include/potentials.h"
+#include "include/density.h"
 
 namespace Smash {
 
@@ -58,5 +58,50 @@ Potentials::Potentials(Configuration conf)
 
 Potentials::~Potentials() {
 }
+
+double Potentials::potential(ThreeVector r, const ParticleList &plist,
+                                                    double gs_sigma) {
+  double total_potential = 0.0;
+
+  if (use_skyrme_) {
+    const Density_type dens_type = baryon;
+    const double rho_eckart = four_current(r, plist, gs_sigma, dens_type).abs();
+    total_potential += skyrme_a * (rho_eckart/rho0) +
+                       skyrme_b * std::pow(rho_eckart/rho0, skyrme_tau);
+  }
+  if (use_symmetry_) {
+    //TODO: use neutron-proton density here or isospin density?
+    // total_potential +=
+  }
+  return total_potential;
+}
+
+ThreeVector Potentials::potential_gradient(ThreeVector r,
+                            const ParticleList &plist, double gs_sigma) {
+  ThreeVector total_gradient(0.0, 0.0, 0.0);
+  double tmp;
+
+  if (use_skyrme_) {
+    const Density_type dens_type = baryon;
+    const auto density_and_gradient = rho_eckart_gradient(r, plist,
+                                                    gs_sigma, dens_type); 
+    const double rho = density_and_gradient.first;
+    const ThreeVector drho_dr = density_and_gradient.second;
+
+    // Derivative of potential with respect to density
+    tmp = skyrme_tau * std::pow(rho/rho0, skyrme_tau - 1);    
+    const double dpotential_drho = (skyrme_a  + skyrme_b * tmp) / rho0;
+    total_gradient += drho_dr * dpotential_drho;
+  }
+
+  if (use_symmetry_) {
+    //TODO: use neutron-proton density here or isospin density?
+    // total_gradient +=                             
+  }
+  return total_gradient;
+
+}
+
+
 
 }  // namespace Smash

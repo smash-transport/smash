@@ -10,7 +10,12 @@
 #ifndef SRC_INCLUDE_POTENTIALS_H_
 #define SRC_INCLUDE_POTENTIALS_H_
 
+#include <vector>
+
 #include "configuration.h"
+#include "threevector.h"
+#include "particledata.h"
+#include "forwarddeclarations.h"
 
 namespace Smash {
 
@@ -26,6 +31,10 @@ class Potentials {
   Potentials(Configuration conf);
   ~Potentials();
 
+  double potential(ThreeVector r, const ParticleList &plist, double gs_sigma);
+                            
+  ThreeVector potential_gradient(ThreeVector r, const ParticleList &plist,
+                                                             double gs_sigma);
  private:
   // Skyrme potential on/off
   bool use_skyrme_;

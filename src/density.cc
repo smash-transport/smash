@@ -12,15 +12,24 @@
 
 namespace Smash {
 
+bool particle_in_denstype(const PdgCode pdg, Density_type dens_type) {
+
+  if ( (dens_type == baryon  && (pdg.baryon_number() != 0) ) ||
+       (dens_type == proton  && pdg == 0x2212) ||
+       (dens_type == neutron && pdg == 0x2112) ) {
+    return true;
+  } else {
+    return false;
+  } 
+}
+
 FourVector four_current(ThreeVector r, const ParticleList &plist,
                    double gs_sigma, Density_type dens_type) {
   FourVector jmu(0.0, 0.0, 0.0, 0.0);
   double tmp;
 
   for (const auto &p : plist) {
-    if ( (dens_type == baryon  && !p.is_baryon() ) ||
-         (dens_type == proton  && p.pdgcode() != 0x2212) ||
-         (dens_type == neutron && p.pdgcode() != 0x2112) ) {
+    if (!particle_in_denstype(p.pdgcode(), dens_type)) {
       continue;
     }
     const ThreeVector ri = p.position().threevec();
@@ -51,20 +60,20 @@ FourVector four_current(ThreeVector r, const ParticleList &plist,
   return jmu;
 }
 
-ThreeVector rho_eckart_gradient(ThreeVector r, const ParticleList &plist,
+std::pair<double, ThreeVector> rho_eckart_gradient(ThreeVector r,
+                                         const ParticleList &plist,
                                 double gs_sigma, Density_type dens_type) {
-  // TODO: change the implementation for different density types
          
   // baryon four-current in computational frame
-  FourVector jbmu(0.0, 0.0, 0.0, 0.0);
+  FourVector jmu(0.0, 0.0, 0.0, 0.0);
   // derivatives of baryon four-current in computational frame
-  FourVector djbmu_dx(0.0, 0.0, 0.0, 0.0);
-  FourVector djbmu_dy(0.0, 0.0, 0.0, 0.0);
-  FourVector djbmu_dz(0.0, 0.0, 0.0, 0.0);
+  FourVector djmu_dx(0.0, 0.0, 0.0, 0.0);
+  FourVector djmu_dy(0.0, 0.0, 0.0, 0.0);
+  FourVector djmu_dz(0.0, 0.0, 0.0, 0.0);
   double tmp1, tmp2;
 
   for (const auto &p : plist) {
-    if (!p.is_baryon()) {
+    if (!particle_in_denstype(p.pdgcode(), dens_type)) {
       continue;
     }
     const ThreeVector ri = p.position().threevec();
@@ -80,27 +89,35 @@ ThreeVector rho_eckart_gradient(ThreeVector r, const ParticleList &plist,
     tmp1 = inv_gammai * (1. + inv_gammai);
     const ThreeVector dr_rest = r - ri + betai * (((r - ri) * betai) / tmp1);
 
-    tmp2 = 0.5 * dr_rest.sqr() / (gs_sigma * gs_sigma);
-    tmp2 = p.pdgcode().baryon_number() * std::exp(- tmp2) / inv_gammai;
-    jbmu += FourVector(1., betai) * tmp2;
-    djbmu_dx += FourVector(1., betai) * (tmp2 * dr_rest.x1() * (1.0 + betai.x1() * betai.x1() / tmp1));
-    djbmu_dy += FourVector(1., betai) * (tmp2 * dr_rest.x2() * (1.0 + betai.x2() * betai.x2() / tmp1));
-    djbmu_dx += FourVector(1., betai) * (tmp2 * dr_rest.x3() * (1.0 + betai.x3() * betai.x3() / tmp1));
+    tmp2 = std::exp(- 0.5 * dr_rest.sqr() / (gs_sigma*gs_sigma)) / inv_gammai;
+    if (dens_type == baryon) {    
+      tmp2 *= p.pdgcode().baryon_number();
+    }
+    jmu += FourVector(1., betai) * tmp2;
+
+    // Calculate the gradient: dr_rest/d \vec{r}
+    const ThreeVector drrest_grad(1.0 + betai.x1() * betai.x1() / tmp1,
+                                  1.0 + betai.x2() * betai.x2() / tmp1,
+                                  1.0 + betai.x3() * betai.x3() / tmp1);
+
+    djmu_dx += FourVector(1., betai) * (tmp2 * dr_rest.x1() * drrest_grad.x1());
+    djmu_dy += FourVector(1., betai) * (tmp2 * dr_rest.x2() * drrest_grad.x2());
+    djmu_dx += FourVector(1., betai) * (tmp2 * dr_rest.x3() * drrest_grad.x3());
   }
   const double norm1 = twopi * std::sqrt(twopi) * gs_sigma*gs_sigma*gs_sigma;
-  jbmu /= norm1;
+  jmu /= norm1;
   const double norm2 = - norm1 * gs_sigma*gs_sigma;
-  djbmu_dx /= norm2;
-  djbmu_dy /= norm2;
-  djbmu_dz /= norm2;
+  djmu_dx /= norm2;
+  djmu_dy /= norm2;
+  djmu_dz /= norm2;
 
-  // Eckart rest frame baryon density
-  const double rhob = jbmu.abs();
+  // Eckart rest frame density
+  const double rho = jmu.abs();
 
-  // Gradient of Eckart rest frame baryon density
-  return ThreeVector(jbmu.Dot(djbmu_dx),
-                     jbmu.Dot(djbmu_dy),
-                     jbmu.Dot(djbmu_dz)) / rhob;
+  // Eckart rest frame density and its gradient
+  return std::make_pair(rho, ThreeVector(jmu.Dot(djmu_dx),
+                                         jmu.Dot(djmu_dy),
+                                         jmu.Dot(djmu_dz)) / rho );
 
 }
 }  // namespace Smash

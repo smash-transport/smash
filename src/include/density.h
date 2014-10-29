@@ -14,11 +14,14 @@
 #include "fourvector.h"
 #include "threevector.h"
 #include "particledata.h"
+#include "pdgcode.h"
 #include "forwarddeclarations.h"
 
 namespace Smash {
 
   enum Density_type {baryon, proton, neutron};
+
+  bool particle_in_denstype(const PdgCode pdg, Density_type dens_type);
 
   /** Calculates 4-current in the computational frame.
    *  \f[j^{\mu} = (\sqrt{2\pi} \sigma )^{-3} \sum_{i=1}^N C_i u^{\mu}_i
@@ -43,7 +46,8 @@ namespace Smash {
   FourVector four_current(ThreeVector r, const ParticleList &plist,
                           double gs_sigma, Density_type dens_type);
 
-  ThreeVector rho_eckart_gradient(ThreeVector r, const ParticleList &plist,
+  std::pair<double, ThreeVector> rho_eckart_gradient(ThreeVector r,
+                                              const ParticleList &plist,
                                   double gs_sigma, Density_type dens_type);
 
   
