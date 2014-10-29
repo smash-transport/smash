@@ -35,24 +35,24 @@ Potentials::Potentials(Configuration conf)
    *      Parameter \f$\tau\f$ of Skyrme potent.
    */
   if (use_skyrme_) {
-    skyrme_a_ = conf.take({"Skyrme","Skyrme_A"});
-    skyrme_b_ = conf.take({"Skyrme","Skyrme_B"});
-    skyrme_tau_ = conf.take({"Skyrme","Skyrme_Tau"});
+    skyrme_a_ = conf.take({"Skyrme", "Skyrme_A"});
+    skyrme_b_ = conf.take({"Skyrme", "Skyrme_B"});
+    skyrme_tau_ = conf.take({"Skyrme", "Skyrme_Tau"});
   }
 
   /*!\Userguide
    * \page potentials Potentials
    * Symmetry potential:
    * -------------------
-   * \f[ U_{Sym} = \pm 2 S_{pot} \frac{\rho_n - \rho_p}{\rho_0} \,, \f]  
-   * where \f$ \rho_n\f$ is neutron density and \f$ \rho_p\f$ is proton 
+   * \f[ U_{Sym} = \pm 2 S_{pot} \frac{\rho_n - \rho_p}{\rho_0} \,, \f]
+   * where \f$ \rho_n\f$ is neutron density and \f$ \rho_p\f$ is proton
    * density. Definition and implementation are still to be worked out.
    *
    * \key S_pot (float, required): \n
    *      Parameter \f$S_{pot}\f$ of symmetry potential in MeV
    */
   if (use_symmetry_) {
-    symmetry_s_ = conf.take({"Symmetry","S_pot"});
+    symmetry_s_ = conf.take({"Symmetry", "S_pot"});
   }
 }
 
@@ -70,7 +70,7 @@ double Potentials::potential(ThreeVector r, const ParticleList &plist,
                        skyrme_b * std::pow(rho_eckart/rho0, skyrme_tau);
   }
   if (use_symmetry_) {
-    //TODO: use neutron-proton density here or isospin density?
+    // TODO(oliiny): use neutron-proton density here or isospin density?
     // total_potential +=
   }
   return total_potential;
@@ -84,22 +84,21 @@ ThreeVector Potentials::potential_gradient(ThreeVector r,
   if (use_skyrme_) {
     const Density_type dens_type = baryon;
     const auto density_and_gradient = rho_eckart_gradient(r, plist,
-                                                    gs_sigma, dens_type); 
+                                                    gs_sigma, dens_type);
     const double rho = density_and_gradient.first;
     const ThreeVector drho_dr = density_and_gradient.second;
 
     // Derivative of potential with respect to density
-    tmp = skyrme_tau * std::pow(rho/rho0, skyrme_tau - 1);    
+    tmp = skyrme_tau * std::pow(rho/rho0, skyrme_tau - 1);
     const double dpotential_drho = (skyrme_a  + skyrme_b * tmp) / rho0;
     total_gradient += drho_dr * dpotential_drho;
   }
 
   if (use_symmetry_) {
-    //TODO: use neutron-proton density here or isospin density?
-    // total_gradient +=                             
+    // TODO(oliiny): use neutron-proton density here or isospin density?
+    // total_gradient +=
   }
   return total_gradient;
-
 }
 
 

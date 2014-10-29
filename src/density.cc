@@ -13,14 +13,13 @@
 namespace Smash {
 
 bool particle_in_denstype(const PdgCode pdg, Density_type dens_type) {
-
   if ( (dens_type == baryon  && (pdg.baryon_number() != 0) ) ||
        (dens_type == proton  && pdg == 0x2212) ||
        (dens_type == neutron && pdg == 0x2112) ) {
     return true;
   } else {
     return false;
-  } 
+  }
 }
 
 FourVector four_current(ThreeVector r, const ParticleList &plist,
@@ -63,7 +62,6 @@ FourVector four_current(ThreeVector r, const ParticleList &plist,
 std::pair<double, ThreeVector> rho_eckart_gradient(ThreeVector r,
                                          const ParticleList &plist,
                                 double gs_sigma, Density_type dens_type) {
-         
   // baryon four-current in computational frame
   FourVector jmu(0.0, 0.0, 0.0, 0.0);
   // derivatives of baryon four-current in computational frame
@@ -90,7 +88,7 @@ std::pair<double, ThreeVector> rho_eckart_gradient(ThreeVector r,
     const ThreeVector dr_rest = r - ri + betai * (((r - ri) * betai) / tmp1);
 
     tmp2 = std::exp(- 0.5 * dr_rest.sqr() / (gs_sigma*gs_sigma)) / inv_gammai;
-    if (dens_type == baryon) {    
+    if (dens_type == baryon) {
       tmp2 *= p.pdgcode().baryon_number();
     }
     jmu += FourVector(1., betai) * tmp2;
@@ -117,7 +115,6 @@ std::pair<double, ThreeVector> rho_eckart_gradient(ThreeVector r,
   // Eckart rest frame density and its gradient
   return std::make_pair(rho, ThreeVector(jmu.Dot(djmu_dx),
                                          jmu.Dot(djmu_dy),
-                                         jmu.Dot(djmu_dz)) / rho );
-
+                                         jmu.Dot(djmu_dz)) / rho);
 }
 }  // namespace Smash

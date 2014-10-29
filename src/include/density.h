@@ -19,8 +19,19 @@
 
 namespace Smash {
 
+  /** Allows to choose wich kind of density to calculate.
+   *  For Fermi momenta and symmetry potential one needs
+   *  to know proton and neutron densities. Baryon density
+   *  is necessary for Skyrme potential.
+   */
   enum Density_type {baryon, proton, neutron};
 
+  /** A small check if particle PDG code belongs to a given type.
+   *  Currently checks for protons, neutrons and baryons.
+   *
+   *  \param[in] pdg PDG code of particle to be tested
+   *  \param[in] dens_type density type: baryon, proton, neutron
+   */
   bool particle_in_denstype(const PdgCode pdg, Density_type dens_type);
 
   /** Calculates 4-current in the computational frame.
@@ -40,17 +51,23 @@ namespace Smash {
    *            to density will be ignored.
    * \param[in] gs_sigma Width of the gaussian (\f$ \sigma \f$),
    *  which represents particle Wigner density.
-   * \param[in] type of four-currect to be calculated: baryon, proton or
-   *            neutron options are currently available
+   * \param[in] dens_type type of four-currect to be calculated:
+   *            baryon, proton or neutron options are currently available
    */
   FourVector four_current(ThreeVector r, const ParticleList &plist,
                           double gs_sigma, Density_type dens_type);
 
+  /** Calculates the gradient of Eckart rest frame density with
+   *  respect to computational frame coordinates using analytical formula.
+   *  \f[ \frac{d\rho_{Eck}}{d \vec r} = \frac{\frac{dj^{\mu}}{d \vec r}
+   *  j_{\mu}}{\sqrt{j^{\mu}j_{\mu}}} \f]
+   *  The formula \f$ j^{\mu}(\vec r) \f$ itself is given for the
+   *  four_current function. Input parameters are the same that for
+   *  four_current function.
+   */
   std::pair<double, ThreeVector> rho_eckart_gradient(ThreeVector r,
                                               const ParticleList &plist,
                                   double gs_sigma, Density_type dens_type);
-
-  
 
 }  // namespace Smash
 
