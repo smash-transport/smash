@@ -10,6 +10,7 @@
 #define SRC_INCLUDE_MODUSDEFAULT_H_
 
 #include "forwarddeclarations.h"
+#include "grid.h"
 
 #include <stdexcept>
 
@@ -58,6 +59,11 @@ class ModusDefault {
    */
   void propagate(Particles *particles, const ExperimentParameters &parameters,
                                        const OutputsList &);
+
+  template <typename T>
+  Grid<GridOptions::Normal> create_grid(T &&all_particles) const {
+    return {all_particles};
+  }
 
   /** \ingroup exception
    *  BadInput is an error to throw if the configuration options are invalid.

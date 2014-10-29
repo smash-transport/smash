@@ -68,6 +68,11 @@ class BoxModus : public ModusDefault {
   void propagate(Particles *particles, const ExperimentParameters &parameters,
                                        const OutputsList &output_list);
 
+  template <typename T>
+  Grid<GridOptions::PeriodicBoundaries> create_grid(T &&all_particles) const {
+    return {all_particles, {{0, 0, 0}, {length_, length_, length_}}};
+  }
+
  private:
   /** initial condition
    *
