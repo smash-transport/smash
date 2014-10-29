@@ -179,7 +179,7 @@ class Grid {
     auto &&build_neighbors_with_zy = [&](
         size_type y, size_type z, const std::initializer_list<int> &yoffsets,
         const std::initializer_list<int> &zoffsets) {
-      if (number_of_cells_[1] > 1) {
+      if (number_of_cells_[0] > 1) {
         call_closure(make_index(0, y, z), {0, 1}, yoffsets, zoffsets);
         for (size_type x = 1; x < number_of_cells_[0] - 1; ++x) {
           call_closure(make_index(x, y, z), {-1, 0, 1}, yoffsets, zoffsets);
