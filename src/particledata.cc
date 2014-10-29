@@ -27,8 +27,14 @@ std::ostream &operator<<(std::ostream &out, const ParticleData &p) {
 
 std::ostream &operator<<(std::ostream &out, const ParticleList &particle_list) {
   using namespace std;
+  auto column = out.tellp();
   out << '[';
   for (const auto &p : particle_list) {
+    if (out.tellp() - column >= 201) {
+      out << '\n';
+      column = out.tellp();
+      out << ' ';
+    }
     out << setw(5) << setprecision(3) << p.momentum().abs3() << p.type().name();
   }
   return out << ']';
