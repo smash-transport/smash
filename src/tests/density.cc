@@ -72,7 +72,7 @@ static void create_particle_list(Particles &P) {
 
 // create one particle moving along x axis and check density in comp. frame
 // check if density in the comp. frame gets contracted as expected
-TEST(density_number) {
+TEST(density_value) {
 
   ParticleData part_x = create_proton();
   part_x.set_4momentum(FourVector(1.0, 0.95, 0.0, 0.0));
@@ -96,6 +96,54 @@ TEST(density_number) {
   jmu = four_current(r, P, sigma, bar_dens);
   COMPARE_ABSOLUTE_ERROR(jmu.x0(), .12333338425608940690, 1.e-15);
 
+}
+
+// check that analytical and numerical results for gradient of density coincide
+TEST(density_gradient) {
+  // create two protons
+  ParticleData part1 = create_proton();
+  ParticleData part2 = create_proton();
+  double mass = 0.938;
+  // set momenta (just randomly):
+  part1.set_4momentum(mass, ThreeVector(1.0, 4.0, 3.0));
+  part2.set_4momentum(mass, ThreeVector(4.0, 2.0, 5.0));
+  // set coordinates (not too far from each other)
+  part1.set_4position(FourVector(0.0, -0.5, 0.0, 0.0));
+  part2.set_4position(FourVector(0.0, 0.5, 0.0, 0.0));
+  // make particle list out of them
+  ParticleList P;
+  P.push_back(part1);
+  P.push_back(part2);
+
+  double sigma = 1.0;
+  ThreeVector r,dr;
+  FourVector jmu;
+  Density_type dtype = baryon;
+  double rho;
+
+  ThreeVector num_grad, analit_grad;
+  r = ThreeVector(0.0, 0.0, 0.0);
+  std::pair<double, ThreeVector> tmp = rho_eckart_gradient(r, P, sigma, dtype);
+
+  // check if rho_Eck returned by four_current is the same
+  // that from rho_eckart_gradient(...).first
+  rho = four_current(r, P, sigma, dtype).abs();
+  COMPARE(rho, tmp.first);
+
+  // analytical gradient
+  analit_grad = tmp.second;
+  // numerical gradient
+  dr = ThreeVector(1.e-4, 0.0, 0.0);
+  num_grad.set_x1((four_current(r + dr, P, sigma, dtype).abs() - rho)/dr.x1());
+  dr = ThreeVector(0.0, 1.e-4, 0.0);
+  num_grad.set_x2((four_current(r + dr, P, sigma, dtype).abs() - rho)/dr.x2());
+  dr = ThreeVector(0.0, 0.0, 1.e-4);
+  num_grad.set_x3((four_current(r + dr, P, sigma, dtype).abs() - rho)/dr.x3());
+  // compare them with: accuracy should not be worse than 10 |dr|
+  std::cout << num_grad << analit_grad << std::endl;
+  COMPARE_ABSOLUTE_ERROR(num_grad.x1(), analit_grad.x1(), 1.e-4);
+  COMPARE_ABSOLUTE_ERROR(num_grad.x2(), analit_grad.x2(), 1.e-4);
+  COMPARE_ABSOLUTE_ERROR(num_grad.x3(), analit_grad.x3(), 1.e-4);
 }
 
 TEST(density_compframe) {

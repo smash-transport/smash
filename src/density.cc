@@ -93,14 +93,12 @@ std::pair<double, ThreeVector> rho_eckart_gradient(ThreeVector r,
     }
     jmu += FourVector(1., betai) * tmp2;
 
-    // Calculate the gradient: dr_rest/d \vec{r}
-    const ThreeVector drrest_grad(1.0 + betai.x1() * betai.x1() / tmp1,
-                                  1.0 + betai.x2() * betai.x2() / tmp1,
-                                  1.0 + betai.x3() * betai.x3() / tmp1);
+    // Calculate the gradient: d(0.5 * r_rest^2)/d \vec{r}
+    const ThreeVector drest2_dr = dr_rest + betai * ((dr_rest * betai) / tmp1);
 
-    djmu_dx += FourVector(1., betai) * (tmp2 * dr_rest.x1() * drrest_grad.x1());
-    djmu_dy += FourVector(1., betai) * (tmp2 * dr_rest.x2() * drrest_grad.x2());
-    djmu_dx += FourVector(1., betai) * (tmp2 * dr_rest.x3() * drrest_grad.x3());
+    djmu_dx += FourVector(1., betai) * (tmp2 * drest2_dr.x1());
+    djmu_dy += FourVector(1., betai) * (tmp2 * drest2_dr.x2());
+    djmu_dz += FourVector(1., betai) * (tmp2 * drest2_dr.x3());
   }
   const double norm1 = twopi * std::sqrt(twopi) * gs_sigma*gs_sigma*gs_sigma;
   jmu /= norm1;
