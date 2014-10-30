@@ -57,83 +57,35 @@ double two_to_one_formation(const ParticleType &type_particle1,
                             double mandelstam_s, double cm_momentum_squared) {
   /* Check for charge conservation */
   if (type_resonance.charge() != type_particle1.charge()
-                                 + type_particle2.charge())
-    return 0.0;
+                               + type_particle2.charge()) {
+    return 0.;
+  }
 
   /* Check for baryon number conservation */
-  if (type_particle1.spin() % 2 != 0 || type_particle2.spin() % 2 != 0) {
-    /* Step 1: We must have fermion */
-    if (type_resonance.spin() % 2 == 0) {
-      return 0.0;
-    }
-    /* Step 2: We must have antiparticle for antibaryon
-     * (and non-antiparticle for baryon)
-     */
-    if (type_particle1.pdgcode().baryon_number() != 0
-        && (type_particle1.pdgcode().baryon_number()
-            != type_resonance.pdgcode().baryon_number())) {
-      return 0.0;
-    } else if (type_particle2.pdgcode().baryon_number() != 0
-        && (type_particle2.pdgcode().baryon_number()
-        != type_resonance.pdgcode().baryon_number())) {
-      return 0.0;
-    }
+  if (type_resonance.baryon_number() != type_particle1.baryon_number()
+                                      + type_particle2.baryon_number()) {
+    return 0.;
   }
 
-  double isospin_factor
-    = isospin_clebsch_gordan(type_particle1, type_particle2, type_resonance);
-
-  /* If Clebsch-Gordan coefficient is zero, don't bother with the rest */
-  if (std::abs(isospin_factor) < really_small)
-    return 0.0;
-
-  /* Check the decay modes of this resonance */
-  const std::vector<DecayBranch> &decaymodes =
-      DecayModes::find(type_resonance.pdgcode()).decay_mode_list();
-  bool not_enough_energy = false;
-  /* Detailed balance required: Formation only possible if
-   * the resonance can decay back to these particles
-   */
-  bool not_balanced = true;
-  for (const auto &mode : decaymodes) {
-    size_t decay_particles = mode.pdg_list().size();
-    if ( decay_particles > 3 ) {
-      logger<LogArea::Resonances>().warn("Not a 1->2 or 1->3 process!\n",
-                                         "Number of decay particles: ",
-                                         decay_particles);
-    } else {
-      /* There must be enough energy to produce all decay products */
-      if (std::sqrt(mandelstam_s) < mode.threshold())
-        not_enough_energy = true;
-      /* Initial state is also a possible final state;
-       * weigh the cross section with the ratio of this branch
-       * XXX: For now, assuming only 2-particle initial states
-       */
-      if (decay_particles == 2
-          && ((mode.pdg_list().at(0) == type_particle1.pdgcode()
-               && mode.pdg_list().at(1) == type_particle2.pdgcode())
-              || (mode.pdg_list().at(0) == type_particle2.pdgcode()
-                  && mode.pdg_list().at(1) == type_particle1.pdgcode()))
-          && (mode.weight() > 0.0))
-        not_balanced = false;
-    }
-  }
-  if (not_enough_energy || not_balanced) {
-    return 0.0;
+  /* Calculate partial width. */
+  double srts = std::sqrt(mandelstam_s);
+  float partial_width = type_resonance.get_partial_width(srts,
+                        type_particle1.pdgcode(), type_particle2.pdgcode());
+  if (partial_width <= 0.) {
+    return 0.;
   }
 
   /* Calculate spin factor */
   const double spinfactor = (type_resonance.spin() + 1)
     / ((type_particle1.spin() + 1) * (type_particle2.spin() + 1));
-  float resonance_width = type_resonance.total_width(std::sqrt(mandelstam_s));
+  float resonance_width = type_resonance.total_width(srts);
   float resonance_mass = type_resonance.mass();
   /* Calculate resonance production cross section
-   * using the Breit-Wigner distribution as probability amplitude
-   * See Eq. (176) in Buss et al., Physics Reports 512, 1 (2012)
-   */
-  return isospin_factor * isospin_factor * spinfactor
-         * 4.0 * M_PI / cm_momentum_squared
+   * using the Breit-Wigner distribution as probability amplitude.
+   * See Eq. (176) in Buss et al., Physics Reports 512, 1 (2012). */
+  return spinfactor * 4.0 * M_PI / cm_momentum_squared
          * breit_wigner(mandelstam_s, resonance_mass, resonance_width)
+         * partial_width/resonance_width
          * hbarc * hbarc / fm2_mb;
 }
 

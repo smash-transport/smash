@@ -202,14 +202,32 @@ float ParticleType::partial_width(const float m,
   float partial_width_at_pole = width_at_pole()*mode.weight();
   const ParticleType &t1 = ParticleType::find(mode.pdg_list()[0]);
   const ParticleType &t2 = ParticleType::find(mode.pdg_list()[1]);
-  if (mode.pdg_list().size() == 2 && t1.is_stable() && t2.is_stable()) {
-    /* mass-dependent width for 2-body decays with stable decay products */
-    return width_Manley_stable(m, mass(), t1.mass(), t2.mass(),
-                               mode.angular_momentum(),
-                               partial_width_at_pole);
+  if (mode.pdg_list().size() == 2) {
+    /* two-body decays */
+    if (t1.is_stable() && t2.is_stable()) {
+      /* mass-dependent width for stable decay products */
+      return width_Manley_stable(m, mass(), t1.mass(), t2.mass(),
+                                 mode.angular_momentum(),
+                                 partial_width_at_pole);
+    }
+    else if (t1.is_stable()) {
+      /* mass-dependent width for one unstable daughter */
+      return width_Manley_semistable(m, mass(), t1.mass(), &t2,
+                                     mode.angular_momentum(),
+                                     partial_width_at_pole);
+    }
+    else if (t2.is_stable()) {
+      /* mass-dependent width for one unstable daughter */
+      return width_Manley_semistable(m, mass(), t2.mass(), &t1,
+                                     mode.angular_momentum(),
+                                     partial_width_at_pole);
+    }
+    else {
+      /* two unstable decay products: assume constant width */
+      return partial_width_at_pole;
+    }
   } else {
-    /* constant width for three-body decays
-     * (and two-body decays with unstable products) */
+    /* three-body decays: asssume constant width */
     return partial_width_at_pole;
   }
 }
@@ -244,6 +262,30 @@ ProcessBranchList ParticleType::get_partial_widths(const float m) const {
     }
   }
   return std::move(partial);
+}
+
+float ParticleType::get_partial_width(const float m, const PdgCode pdg1,
+                                      const PdgCode pdg2) const {
+  /* Get all decay modes. */
+  const auto &decaymodes = DecayModes::find(pdgcode()).decay_mode_list();
+
+  /* Find the right one. */
+  for (const auto &mode : decaymodes) {
+    size_t decay_particles = mode.pdg_list().size();
+    if ( decay_particles > 3 ) {
+      logger<LogArea::ParticleType>().warn("Not a 1->2 or 1->3 process!\n",
+                                           "Number of decay particles: ",
+                                           decay_particles);
+    } else {
+      if (decay_particles == 2
+          && ((mode.pdg_list()[0] == pdg1 && mode.pdg_list()[1] == pdg2) ||
+              (mode.pdg_list()[0] == pdg2 && mode.pdg_list()[1] == pdg1)))
+        /* Found: calculate width. */
+        return partial_width(m, mode);
+    }
+  }
+  /* Decay mode not found: width is zero. */
+  return 0.;
 }
 
 std::ostream &operator<<(std::ostream &out, const ParticleType &type) {

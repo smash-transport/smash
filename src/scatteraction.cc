@@ -166,15 +166,6 @@ ProcessBranchList ScatterAction::resonance_cross_sections() {
   ParticleType type_particle1 = incoming_particles_[0].type(),
                type_particle2 = incoming_particles_[1].type();
 
-  /* Isospin symmetry factor, by default 1 */
-  int symmetryfactor = 1;
-  /* The isospin symmetry factor is 2 if both particles are in the same
-   * isospin multiplet. */
-  if (type_particle1.pdgcode().iso_multiplet()
-      == type_particle2.pdgcode().iso_multiplet()) {
-    symmetryfactor = 2;
-  }
-
   const double s = mandelstam_s();
   const double p_cm_sqr = cm_momentum_squared();
 
@@ -193,9 +184,8 @@ ProcessBranchList ScatterAction::resonance_cross_sections() {
       continue;
     }
 
-    float resonance_xsection
-      = symmetryfactor * two_to_one_formation(type_particle1, type_particle2,
-                                              type_resonance, s, p_cm_sqr);
+    float resonance_xsection = two_to_one_formation(type_particle1,
+                                 type_particle2, type_resonance, s, p_cm_sqr);
 
     /* If cross section is non-negligible, add resonance to the list */
     if (resonance_xsection > really_small) {
@@ -418,9 +408,16 @@ ProcessBranchList ScatterActionBaryonBaryon::nuc_nuc_to_nuc_res (
         continue;
       }
 
+      /* Calculate matrix element. */
+      const float matrix_element = nn_to_resonance_matrix_element(s,
+                                                   type_resonance, second_type);
+      if (matrix_element <= 0.) {
+        continue;
+      }
+
       /* Calculate resonance production cross section
-      * using the Breit-Wigner distribution as probability amplitude.
-      * Integrate over the allowed resonance mass range. */
+       * using the Breit-Wigner distribution as probability amplitude.
+       * Integrate over the allowed resonance mass range. */
       IntegrandParameters params = {&type_resonance, second_type.mass(), s};
       log.debug("Process: ", type_particle1, type_particle2," -> ",
                 second_type, type_resonance);
@@ -435,10 +432,8 @@ ProcessBranchList ScatterActionBaryonBaryon::nuc_nuc_to_nuc_res (
       /* Cross section for 2->2 process with one resonance in final state.
        * Based on Eq. (46) in PhD thesis of J. Weil
        * (https://gibuu.hepforge.org/trac/chrome/site/files/phd/weil.pdf) */
-      float xsection
-           = isospin_factor * isospin_factor
-             * resonance_integral / (s * std::sqrt(cm_momentum_squared()))
-             * nn_to_resonance_matrix_element(s, type_resonance, second_type);
+      float xsection = isospin_factor * isospin_factor * matrix_element
+                * resonance_integral / (s * std::sqrt(cm_momentum_squared()));
 
       if (xsection > really_small) {
         process_list.push_back(ProcessBranch(type_resonance.pdgcode(),
@@ -508,15 +503,21 @@ ProcessBranchList ScatterActionBaryonBaryon::nuc_res_to_nuc_nuc (
         continue;
       }
 
+      /* Calculate matrix element. */
+      const float matrix_element = nn_to_resonance_matrix_element(s,
+                                                *type_resonance, *type_nucleon);
+      if (matrix_element <= 0.) {
+        continue;
+      }
+
       /* Cross section for 2->2 resonance absorption, obtained via detailed
        * balance from the inverse reaction.
        * See eqs. (B.6), (B.9) and (181) in the GiBUU review paper.
        * There is a symmetry factor 1/2 and a spin factor 2/(2S+1) involved,
        * which combine to 1/(2S+1). */
-      float xsection
-        = isospin_factor * isospin_factor * p_cm_final
-          / ((type_resonance->spin()+1) * s * std::sqrt(cm_momentum_squared()))
-          * nn_to_resonance_matrix_element(s, *type_resonance, *type_nucleon);
+      float xsection = isospin_factor * isospin_factor
+        * p_cm_final * matrix_element
+        / ((type_resonance->spin()+1) * s * std::sqrt(cm_momentum_squared()));
 
       if (xsection > really_small) {
         process_list.push_back(ProcessBranch(nuc1.pdgcode(), nuc2.pdgcode(),
