@@ -56,6 +56,7 @@ class Clock;
 class Configuration;
 class CrossSections;
 class FourVector;
+class ThreeVector;
 class ModusDefault;
 class OutputInterface;
 class ParticleData;

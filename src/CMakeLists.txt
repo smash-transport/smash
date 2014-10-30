@@ -55,6 +55,7 @@ set(smash_src
         distributions.cc
         experiment.cc
         fourvector.cc
+        grid.cc
         inputfunctions.cc
         logging.cc
         modusdefault.cc
