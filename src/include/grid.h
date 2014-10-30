@@ -28,9 +28,6 @@ class GridBase {
   typedef int size_type;
 
  protected:
-  static constexpr std::array<float, 3> max_interaction_length = {
-      {2.5f, 2.5f, 2.5f}};
-
   static std::pair<std::array<float, 3>, std::array<float, 3>>
       find_min_and_length(const ParticleList &all_particles);
 

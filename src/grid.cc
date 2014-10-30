@@ -66,8 +66,6 @@ namespace Smash {
 ////////////////////////////////////////////////////////////////////////////////
 // GridBase
 
-constexpr std::array<float, 3> GridBase::max_interaction_length;
-
 std::pair<std::array<float, 3>, std::array<float, 3>>
 GridBase::find_min_and_length(const ParticleList &all_particles) {
   std::pair<std::array<float, 3>, std::array<float, 3>> r;
@@ -99,6 +97,8 @@ GridBase::determine_cell_sizes(size_type particle_count,
   std::tuple<std::array<float, 3>, std::array<int, 3> > r;
   auto &index_factor = std::get<0>(r);
   auto &number_of_cells = std::get<1>(r);
+
+  constexpr float max_interaction_length[3] = {2.5f, 2.5f, 2.5f};
 
   // The number of cells is determined by the min and max coordinates where
   // particles are positioned and the maximal interaction length (which equals
@@ -178,9 +178,8 @@ void Grid<GridOptions::PeriodicBoundaries>::build_cells(
   number_of_cells_[1] += 2;
   number_of_cells_[2] += 1;  // ghost cells only at one side
 
-  log.debug("min: ", min_position_, "\nlength: ",
-            length, "\ncells: ", number_of_cells_, "\ninteraction length: ",
-            max_interaction_length, "\nindex_factor: ", index_factor_);
+  log.debug("min: ", min_position_, "\nlength: ", length, "\ncells: ",
+            number_of_cells_, "\nindex_factor: ", index_factor_);
 
   // After the grid parameters are determined, we can start placing the
   // particles in cells.
@@ -200,8 +199,7 @@ void Grid<GridOptions::PeriodicBoundaries>::build_cells(
                 "particle ",
                 p, "\nfor a grid with the following parameters:\nmin: ",
                 min_position_, "\nlength: ", length, "\ncells: ",
-                number_of_cells_, "\ninteraction length: ",
-                max_interaction_length, "\nindex_factor: ", index_factor_,
+                number_of_cells_, "\nindex_factor: ", index_factor_,
                 "\ncells_.size: ", cells_.size(), "\nrequested index: ", idx);
       throw std::runtime_error("out-of-bounds grid access on construction");
     }
@@ -280,8 +278,7 @@ void Grid<GridOptions::Normal>::build_cells(
   } else {
     // construct a normal grid
     log.debug("min: ", min_position_, "\nlength: ", length, "\ncells: ",
-              number_of_cells_, "\ninteraction length: ",
-              max_interaction_length, "\nindex_factor: ", index_factor_);
+              number_of_cells_, "\nindex_factor: ", index_factor_);
 
     // After the grid parameters are determined, we can start placing the
     // particles in cells.
@@ -297,8 +294,7 @@ void Grid<GridOptions::Normal>::build_cells(
                   "particle ",
                   p, "\nfor a grid with the following parameters:\nmin: ",
                   min_position_, "\nlength: ", length, "\ncells: ",
-                  number_of_cells_, "\ninteraction length: ",
-                  max_interaction_length, "\nindex_factor: ", index_factor_,
+                  number_of_cells_, "\nindex_factor: ", index_factor_,
                   "\ncells_.size: ", cells_.size(), "\nrequested index: ", idx);
         throw std::runtime_error("out-of-bounds grid access on construction");
       }
