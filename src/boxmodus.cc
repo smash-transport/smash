@@ -148,6 +148,8 @@ int BoxModus::sanity_check(Particles *particles) {
     }
     data.set_4position(p);
   }
+  const auto &log = logger<LogArea::Box>();
+  log.debug("moved ", wraps, " particles back into the box");
   return wraps;
 }
 

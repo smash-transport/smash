@@ -320,6 +320,8 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
       log.debug("no actions performed");
     }
 
+    modus_.sanity_check(&particles_);
+
     /* (3) Do propagation. */
     modus_.propagate(&particles_, parameters_, outputs_);
 
