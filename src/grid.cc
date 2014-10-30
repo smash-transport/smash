@@ -213,8 +213,13 @@ void Grid<GridOptions::PeriodicBoundaries>::build_cells(
   // copying the position of the ParticleData objects needs to be modified
   // accordingly
   for (size_type z = 0; z < number_of_cells_[2]; ++z) {
-    for (size_type y = 0; y < number_of_cells_[1]; ++y) {
-      for (size_type x = 0; x < number_of_cells_[0]; ++x) {
+    // At z == 0:
+    // - the complete y == 0 line is unused.
+    // - the x == 0, y == 1 cell is unused. (at (.,1,0) the next ghost cell is
+    //   at x_max)
+    for (size_type y = (z > 0 ? 0 : 1); y < number_of_cells_[1]; ++y) {
+      for (size_type x = (z == 0 && y == 1 ? number_of_cells_[0] - 1 : 0);
+           x < number_of_cells_[0]; ++x) {
         if (is_ghost_cell(x, y, z)) {
           const auto idx = make_index(x, y, z);
           auto &cell = cells_[idx];
