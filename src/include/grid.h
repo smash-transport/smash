@@ -18,25 +18,55 @@
 
 namespace Smash {
 
+/**
+ * Identifies the mode of the Grid.
+ */
 enum class GridOptions : char {
+  /// without ghost cells
   Normal = 0,
+  /// with ghost cells for periodic boundaries
   PeriodicBoundaries = 1
 };
 
+/**
+ * Base class for Grid to host common functions that do not depend on the
+ * GridOptions parameter.
+ */
 class GridBase {
  public:
   typedef int size_type;
 
  protected:
+  /**
+   * Returns the minimum x,y,z coordinates and the largest dx,dy,dz distances of
+   * the particles in \p all_particles.
+   */
   static std::pair<std::array<float, 3>, std::array<float, 3>>
       find_min_and_length(const ParticleList &all_particles);
 
+  /**
+   * Calculates the factor that, if multiplied with a x/y/z
+   * coordinate, yields the 3-dim cell index and the required number of cells
+   * (without ghost cells).
+   */
   static std::tuple<std::array<float, 3>, std::array<int, 3>>
       determine_cell_sizes(size_type particle_count,
                            const std::array<float, 3> &length);
 
 };
 
+/**
+ * Abstracts a list of cells that partition the particles in the experiment into
+ * regions of space that can interact / cannot interact.
+ *
+ * This class is used to construct a helper data structure to reduce the
+ * combinatorics of finding particle pairs that could interact (scatter). It
+ * takes a list of ParticleData objects and sorts them in such a way that it is
+ * easy to look only at lists of particles that have a chance of interacting.
+ *
+ * \tparam Options This policy parameter determines whether ghost cells are
+ * created to support periodic boundaries, or not.
+ */
 template <GridOptions Options = GridOptions::Normal>
 class Grid : public GridBase {
  public:
@@ -44,6 +74,8 @@ class Grid : public GridBase {
    * Constructs a grid from the given particle list \p all_particles. It
    * automatically determines the necessary size for the grid from the positions
    * of the particles.
+   *
+   * \param all_particles The particles to place onto the grid.
    */
   Grid(ParticleList &&all_particles)
       : Grid{find_min_and_length(all_particles), std::move(all_particles)} {}
@@ -52,6 +84,10 @@ class Grid : public GridBase {
    * Constructs a grid with the given minimum grid coordinates and grid length.
    * If you need periodic boundaries you have to use this constructor to set the
    * correct length to use for wrapping particles around the borders.
+   *
+   * \param min_and_length A pair consisting of the three min coordinates and
+   * the three lengths.
+   * \param all_particles The particles to place onto the grid.
    */
   Grid(const std::pair<std::array<float, 3>, std::array<float, 3>> &
            min_and_length,
@@ -68,6 +104,15 @@ class Grid : public GridBase {
   /**
    * Iterates over all cells in the grid and calls \p call_finder with a search
    * cell and 0 to 13 neighbor cells.
+   *
+   * The neighbor cells are constructed like this:
+   * - one cell at x+1
+   * - three cells (x-1,x,x+1) at y+1
+   * - nine cells (x-1, y-1)...(x+1, y+1) at z+1
+   *
+   * \param call_finder A lambda (or other functor) that is called as often as
+   * there are search cells. Experiment uses it to call the Action finders from
+   * it.
    */
   void iterate_cells(const std::function<
       void(const ParticleList &, const std::vector<const ParticleList *> &)> &
@@ -76,6 +121,8 @@ class Grid : public GridBase {
  private:
   /**
    * Allocates the cells and fills them with ParticleData objects.
+   *
+   * This is different for the Normal and PeriodicBoundaries cases.
    */
   void build_cells(ParticleList &&all_particles,
                    const std::array<float, 3> &length);
@@ -88,7 +135,14 @@ class Grid : public GridBase {
 
   /**
    * Returns the one-dimensional cell-index from the position vector inside the
-   * grid
+   * grid.
+   *
+   * In Normal mode this simply calculates the distance to min_position_ and
+   * multiplies it with index_factor_ to determine the 3 x,y,z indexes to pass
+   * to the make_index overload above.
+   *
+   * In PeriodicBoundaries mode the x and y indexes are incremented by one to
+   * adjust for the ghost cells.
    */
   size_type make_index(const ThreeVector &position) const;
 
