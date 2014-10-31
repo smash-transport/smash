@@ -114,7 +114,7 @@ smash_add_test(sphere_steps smash smash -e 2.0 -c "General: {Delta_Time: 0.1}" -
 find_program(CTEST_MEMORYCHECK_COMMAND valgrind)
 if(CTEST_MEMORYCHECK_COMMAND)
    message(STATUS "valgrind found at ${CTEST_MEMORYCHECK_COMMAND}")
-   set(CTEST_MEMORYCHECK_COMMAND_OPTIONS "-v")
+   set(CTEST_MEMORYCHECK_COMMAND_OPTIONS "-v" "--error-exitcode=1")
    smash_add_test(memcheck_box smash ${CTEST_MEMORYCHECK_COMMAND}
       ${CTEST_MEMORYCHECK_COMMAND_OPTIONS}
       ${PROJECT_BINARY_DIR}/smash -c "General: {End_Time: 1.0, Modus: Box}" ${SMASH_OPTIONS})
