@@ -87,15 +87,15 @@ TEST(density_value) {
   Density_type bar_dens = baryon;
 
   r = ThreeVector(1.0, 0.0, 0.0);
-  jmu = four_current(r, P, sigma, bar_dens);
+  jmu = four_current(r, P, sigma, bar_dens, 1);
   COMPARE_ABSOLUTE_ERROR(jmu.x0(), .00120524877950247448, 1.e-15);
 
   r = ThreeVector(0.0, 1.0, 0.0);
-  jmu = four_current(r, P, sigma, bar_dens);
+  jmu = four_current(r, P, sigma, bar_dens, 1);
   COMPARE_ABSOLUTE_ERROR(jmu.x0(), .12333338425608940690, 1.e-15);
 
   r = ThreeVector(0.0, 0.0, 1.0);
-  jmu = four_current(r, P, sigma, bar_dens);
+  jmu = four_current(r, P, sigma, bar_dens, 1);
   COMPARE_ABSOLUTE_ERROR(jmu.x0(), .12333338425608940690, 1.e-15);
 
 }
@@ -125,22 +125,22 @@ TEST(density_gradient) {
 
   ThreeVector num_grad, analit_grad;
   r = ThreeVector(0.0, 0.0, 0.0);
-  std::pair<double, ThreeVector> tmp = rho_eckart_gradient(r, P, sigma, dtype);
+  std::pair<double, ThreeVector> tmp = rho_eckart_gradient(r, P, sigma, dtype, 1);
 
   // check if rho_Eck returned by four_current is the same
   // that from rho_eckart_gradient(...).first
-  rho = four_current(r, P, sigma, dtype).abs();
+  rho = four_current(r, P, sigma, dtype, 1).abs();
   COMPARE(rho, tmp.first);
 
   // analytical gradient
   analit_grad = tmp.second;
   // numerical gradient
   dr = ThreeVector(1.e-4, 0.0, 0.0);
-  num_grad.set_x1((four_current(r + dr, P, sigma, dtype).abs() - rho)/dr.x1());
+  num_grad.set_x1((four_current(r + dr, P, sigma, dtype, 1).abs() - rho)/dr.x1());
   dr = ThreeVector(0.0, 1.e-4, 0.0);
-  num_grad.set_x2((four_current(r + dr, P, sigma, dtype).abs() - rho)/dr.x2());
+  num_grad.set_x2((four_current(r + dr, P, sigma, dtype, 1).abs() - rho)/dr.x2());
   dr = ThreeVector(0.0, 0.0, 1.e-4);
-  num_grad.set_x3((four_current(r + dr, P, sigma, dtype).abs() - rho)/dr.x3());
+  num_grad.set_x3((four_current(r + dr, P, sigma, dtype, 1).abs() - rho)/dr.x3());
   // compare them with: accuracy should not be worse than |dr|
   std::cout << num_grad << analit_grad << std::endl;
   COMPARE_ABSOLUTE_ERROR(num_grad.x1(), analit_grad.x1(), 1.e-4);
@@ -175,7 +175,7 @@ TEST(density_eckart_frame) {
   for (auto it = 0; it < 30; it++) {
     plist = ParticleList(Pdef.data().begin(), Pdef.data().end());
     vtk_density_map( ("bdens.vtk." + std::to_string(it)).c_str(),
-                     plist, sigma, bar_dens,
+                     plist, sigma, bar_dens, 1,
                      nx, ny, nz, dx, dy, dz);
     m.propagate(&Pdef, param, out);
   }
@@ -187,7 +187,7 @@ TEST(density_eckart_frame) {
 */
 TEST(nucleus_density) {
   // Lead nuclei with 10000 test-particles
-  std::map<PdgCode, int> lead_list = {{0x2212, 82}, {0x2112, 126}};
+  std::map<PdgCode, int> lead_list = {{0x2212, 79}, {0x2112, 118}};
   int Ntest = 10000;
   Nucleus lead;
   lead.fill_from_list(lead_list, Ntest);
@@ -202,22 +202,22 @@ TEST(nucleus_density) {
 
   // write density profile to file, time-consuming!
   Density_type dens_type = baryon;
-  double sigma = 0.7; // fm
-//  vtk_density_map("lead_density.vtk", plist, sigma, dens_type,
+  double sigma = 0.5; // fm
+//  vtk_density_map("lead_density.vtk", plist, sigma, dens_type, Ntest,
 //                     20, 20, 20, 0.5, 0.5, 0.5);
   ThreeVector lstart(-10.0, 0.0, 0.0);
   ThreeVector lend(10.0, 0.0, 0.0);
   const int npoints = 100;
-  density_along_line("lead_densityX.dat", plist, sigma, dens_type,
+  density_along_line("lead_densityX.dat", plist, sigma, dens_type, Ntest,
                       lstart, lend, npoints);
 
   lstart = ThreeVector(0.0, -10.0, 0.0);
   lend = ThreeVector(0.0, 10.0, 0.0);
-  density_along_line("lead_densityY.dat", plist, sigma, dens_type,
+  density_along_line("lead_densityY.dat", plist, sigma, dens_type, Ntest,
                       lstart, lend, npoints);
 
   lstart = ThreeVector(0.0, 0.0, -10.0);
   lend = ThreeVector(0.0, 0.0, 10.0);
-  density_along_line("lead_densityZ.dat", plist, sigma, dens_type,
+  density_along_line("lead_densityZ.dat", plist, sigma, dens_type, Ntest,
                       lstart, lend, npoints);
 }

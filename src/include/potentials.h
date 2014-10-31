@@ -13,6 +13,7 @@
 #include <vector>
 
 #include "configuration.h"
+#include "experimentparameters.h"
 #include "forwarddeclarations.h"
 #include "particledata.h"
 #include "threevector.h"
@@ -28,7 +29,7 @@ namespace Smash {
  */
 class Potentials {
  public:
-  explicit Potentials(Configuration conf);
+  Potentials(Configuration conf, const ExperimentParameters &parameters);
   ~Potentials();
   /** Evaluates potential at point r. Potential is always taken in the local
    * Eckart rest frame, but point r is in the computational frame.
@@ -38,11 +39,8 @@ class Potentials {
    *            calculation. If the distance between particle and calculation
    *            point r, \f$ |r-r_i| > 6 \sigma \f$ then particle input
    *            to density will be ignored.
-   * \param[in] gs_sigma Width of the gaussian (\f$ \sigma \f$),
-   *  which represents particle Wigner density.
    **/
-  double potential(const ThreeVector &r, const ParticleList &plist,
-                                                double gs_sigma) const;
+  double potential(const ThreeVector &r, const ParticleList &plist) const;
 
   /** Evaluates potential gradient at point r. Potential is always taken in
    * the local Eckart rest frame, but point r is in the computational frame.
@@ -52,11 +50,9 @@ class Potentials {
    *            calculation. If the distance between particle and calculation
    *            point r, \f$ |r-r_i| > 6 \sigma \f$ then particle input
    *            to density will be ignored.
-   * \param[in] gs_sigma Width of the gaussian (\f$ \sigma \f$),
-   *  which represents particle Wigner density.
    **/
   ThreeVector potential_gradient(const ThreeVector &r,
-                          const ParticleList &plist, double gs_sigma) const;
+                                 const ParticleList &plist) const;
  private:
   // Skyrme potential on/off
   bool use_skyrme_;
@@ -64,11 +60,18 @@ class Potentials {
   // Symmetry potential on/off
   bool use_symmetry_;
 
+  // Number of test particles
+  int ntest_;
+
+  // sigma of gaussian smearing
+  double sigma_;
+
   // Parameters of skyrme potentials
   double skyrme_a_, skyrme_b_, skyrme_tau_;
 
   // Parameters of symmetry potential
   double symmetry_s_;
+
 };
 }  // namespace Smash
 

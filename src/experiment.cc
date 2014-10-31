@@ -221,10 +221,11 @@ Experiment<Modus>::Experiment(Configuration config)
     action_finders_.emplace_back(new ScatterActionsFinder(parameters_));
   }
 
-  //TODO: check also that "Potentials" is not empty
+  //TODO(oliiny,mkretz): check also that "Potentials" is not empty
   if (config.has_value({"Potentials"})) {
     log.info() << "Potentials are ON.";
-    potentials_ = new Potentials(config["Potentials"]);
+    // potentials need testparticles and gaussian sigma from parameters_
+    potentials_ = new Potentials(config["Potentials"], parameters_);
   }
 }
 

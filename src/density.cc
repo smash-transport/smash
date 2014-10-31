@@ -25,7 +25,7 @@ bool particle_in_denstype(const PdgCode pdg, Density_type dens_type) {
 }
 
 FourVector four_current(const ThreeVector &r, const ParticleList &plist,
-                        double gs_sigma, Density_type dens_type) {
+                        double gs_sigma, Density_type dens_type, int ntest) {
   FourVector jmu(0.0, 0.0, 0.0, 0.0);
   double tmp;
 
@@ -58,12 +58,12 @@ FourVector four_current(const ThreeVector &r, const ParticleList &plist,
 
   // j^0 = jmu.x0() is computational frame density
   // jmu.abs() = sqrt(j^mu j_mu) is Eckart rest frame density
-  return jmu;
+  return jmu / ntest;
 }
 
 std::pair<double, ThreeVector> rho_eckart_gradient(const ThreeVector &r,
                                 const ParticleList &plist, double gs_sigma,
-                                Density_type dens_type) {
+                                Density_type dens_type, int ntest) {
   // baryon four-current in computational frame
   FourVector jmu(0.0, 0.0, 0.0, 0.0);
   // derivatives of baryon four-current in computational frame
@@ -113,13 +113,13 @@ std::pair<double, ThreeVector> rho_eckart_gradient(const ThreeVector &r,
   const double rho = jmu.abs();
 
   // Eckart rest frame density and its gradient
-  return std::make_pair(rho, ThreeVector(jmu.Dot(djmu_dx),
-                                         jmu.Dot(djmu_dy),
-                                         jmu.Dot(djmu_dz)) / rho);
+  return std::make_pair(rho / ntest, ThreeVector(jmu.Dot(djmu_dx),
+                                           jmu.Dot(djmu_dy),
+                                           jmu.Dot(djmu_dz)) / (rho * ntest));
 }
 
 void vtk_density_map(const char * file_name, const ParticleList &plist,
-                     double gs_sigma, Density_type dens_type,
+                     double gs_sigma, Density_type dens_type, int ntest,
                      int nx, int ny, int nz, double dx, double dy, double dz) {
   ThreeVector r;
   double rho_eck;
@@ -142,7 +142,7 @@ void vtk_density_map(const char * file_name, const ParticleList &plist,
     for (auto iy = -ny; iy <= ny; iy++) {
       for (auto ix = -nx; ix <= nx; ix++) {
         r = ThreeVector(ix*dx, iy*dy, iz*dz);
-        rho_eck = four_current(r, plist, gs_sigma, dens_type).abs();
+        rho_eck = four_current(r, plist, gs_sigma, dens_type, ntest).abs();
         a_file << rho_eck << " ";
       }
       a_file << "\n";
@@ -152,7 +152,7 @@ void vtk_density_map(const char * file_name, const ParticleList &plist,
 }
 
 void density_along_line(const char * file_name, const ParticleList &plist,
-                        double gs_sigma, Density_type dens_type,
+                        double gs_sigma, Density_type dens_type, int ntest,
                         const ThreeVector &line_start,
                         const ThreeVector &line_end, int n_points) {
   ThreeVector r;
@@ -162,7 +162,7 @@ void density_along_line(const char * file_name, const ParticleList &plist,
 
   for (int i = 0; i <= n_points; i++) {
     r = line_start + (line_end - line_start) * (1.0 * i / n_points);
-    rho_eck = four_current(r, plist, gs_sigma, dens_type).abs();
+    rho_eck = four_current(r, plist, gs_sigma, dens_type, ntest).abs();
     a_file << r.x1() << " " <<
               r.x2() << " " <<
               r.x3() << " " << rho_eck << "\n";

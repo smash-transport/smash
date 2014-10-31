@@ -53,9 +53,10 @@ namespace Smash {
    *  which represents particle Wigner density.
    * \param[in] dens_type type of four-currect to be calculated:
    *            baryon, proton or neutron options are currently available
+   * \param[in] ntest Number of test-particles
    */
   FourVector four_current(const ThreeVector &r, const ParticleList &plist,
-                          double gs_sigma, Density_type dens_type);
+                          double gs_sigma, Density_type dens_type, int ntest);
 
   /** Calculates the gradient of Eckart rest frame density with
    *  respect to computational frame coordinates using analytical formula.
@@ -67,21 +68,21 @@ namespace Smash {
    */
   std::pair<double, ThreeVector> rho_eckart_gradient(const ThreeVector &r,
                                const ParticleList &plist, double gs_sigma,
-                               Density_type dens_type);
+                               Density_type dens_type, int ntest);
 
   /** Prints 3D density map in vtk format on a grid [-nx;nx]x[-ny;ny]x[-nz;nz]
    *  with steps dx, dy, dz. This allows to look at density profiles and
    *  make easy plots.
    */
   void vtk_density_map(const char * file_name, const ParticleList &plist,
-                      double gs_sigma, Density_type dens_type,
+                      double gs_sigma, Density_type dens_type, int ntest,
                       int nx, int ny, int nz, double dx, double dy, double dz);
 
   /** Prints density along the specified line. Useful to make 1D plots of
     * density profiles.
    */
   void density_along_line(const char * file_name, const ParticleList &plist,
-                        double gs_sigma, Density_type dens_type,
+                        double gs_sigma, Density_type dens_type, int ntest,
                         const ThreeVector &line_start,
                         const ThreeVector &line_end, int n_points);
 }  // namespace Smash

@@ -15,9 +15,12 @@ namespace Smash {
 /**
  * Potentials constructor. Gets parameters of potentials from configuration.
  */
-Potentials::Potentials(Configuration conf)
+Potentials::Potentials(Configuration conf, const ExperimentParameters &param)
     : use_skyrme_(conf.has_value({"Skyrme"})),
       use_symmetry_(conf.has_value({"Symmetry", "Enable"})) {
+  ntest_ = param.testparticles;
+  sigma_ = param.gaussian_sigma;
+
   /*!\Userguide
    * \page potentials Potentials
    * Skyrme potential:
@@ -59,13 +62,14 @@ Potentials::Potentials(Configuration conf)
 Potentials::~Potentials() {
 }
 
-double Potentials::potential(const ThreeVector &r, const ParticleList &plist,
-                                                    double gs_sigma) const {
+double Potentials::potential(const ThreeVector &r,
+                             const ParticleList &plist) const {
   double total_potential = 0.0;
 
   if (use_skyrme_) {
     const Density_type dens_type = baryon;
-    const double rho_eckart = four_current(r, plist, gs_sigma, dens_type).abs();
+    const double rho_eckart = four_current(r, plist, sigma_,
+                                           dens_type, ntest_).abs();
     total_potential += skyrme_a * (rho_eckart/rho0) +
                        skyrme_b * std::pow(rho_eckart/rho0, skyrme_tau);
   }
@@ -77,14 +81,14 @@ double Potentials::potential(const ThreeVector &r, const ParticleList &plist,
 }
 
 ThreeVector Potentials::potential_gradient(const ThreeVector &r,
-                            const ParticleList &plist, double gs_sigma) const {
+                                           const ParticleList &plist) const {
   ThreeVector total_gradient(0.0, 0.0, 0.0);
   double tmp;
 
   if (use_skyrme_) {
     const Density_type dens_type = baryon;
     const auto density_and_gradient = rho_eckart_gradient(r, plist,
-                                                    gs_sigma, dens_type);
+                                                 sigma_, dens_type, ntest_);
     const double rho = density_and_gradient.first;
     const ThreeVector drho_dr = density_and_gradient.second;
 
