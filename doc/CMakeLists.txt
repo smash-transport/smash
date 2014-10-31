@@ -70,6 +70,7 @@ if(DOXYGEN)
 
       add_custom_target(undocumented ${DOXYGEN}
          ${CMAKE_CURRENT_BINARY_DIR}/DoxyfileOnlyDocumented 2>&1 |
+         ${GREP} -v 3rdparty |
          ${SORT} -u |
          ${GREP} -ic warning: |
          ${XARGS} ${PRINTF} "============ There are %d undocumented entities ============\\n"
