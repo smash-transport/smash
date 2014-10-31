@@ -139,14 +139,19 @@ TEST(density_gradient) {
   num_grad.set_x2((four_current(r + dr, P, sigma, dtype).abs() - rho)/dr.x2());
   dr = ThreeVector(0.0, 0.0, 1.e-4);
   num_grad.set_x3((four_current(r + dr, P, sigma, dtype).abs() - rho)/dr.x3());
-  // compare them with: accuracy should not be worse than 10 |dr|
+  // compare them with: accuracy should not be worse than |dr|
   std::cout << num_grad << analit_grad << std::endl;
   COMPARE_ABSOLUTE_ERROR(num_grad.x1(), analit_grad.x1(), 1.e-4);
   COMPARE_ABSOLUTE_ERROR(num_grad.x2(), analit_grad.x2(), 1.e-4);
   COMPARE_ABSOLUTE_ERROR(num_grad.x3(), analit_grad.x3(), 1.e-4);
 }
 
-TEST(density_compframe) {
+/*
+   This test does not compare anything. It only prints density map versus
+   time to vtk files, so that one can open it with paraview and make sure
+   that Lorentz contraction works properly for density.
+*/
+TEST(density_eckart_frame) {
   ModusDefault m;
   Particles Pdef;
   create_particle_list(Pdef);
@@ -161,47 +166,14 @@ TEST(density_compframe) {
   int nz = 20;
   double sigma = 0.8;
   ThreeVector r;
-  FourVector jmu;
   Density_type bar_dens = baryon;
-  FILE * pFile;
   ParticleList plist;
-  /*
-  for (const auto &p : plist) {
-    printf("Momentum: %10.2f  %10.2f  %10.2f %10.2f\n", p.momentum().x0(),
-                   p.momentum().x1(), p.momentum().x2(), p.momentum().x3());
-  }
-  */
-  printf("Ready to write vtk files.\n");
 
   for (auto it = 0; it < 30; it++) {
     plist = ParticleList(Pdef.data().begin(), Pdef.data().end());
-
-    pFile = fopen(("bdens.vtk." + std::to_string(it)).c_str(), "w");
-    // printf("Writing a header to file %d, pointer %p.\n", it, pFile);
-    fprintf(pFile, "# vtk DataFile Version 2.0\n");
-    fprintf(pFile, "baryon density\n");
-    fprintf(pFile, "ASCII\n");
-    fprintf(pFile, "DATASET STRUCTURED_POINTS\n");
-    // printf("Continue writing a header to file %d.\n", it);
-    fprintf(pFile, "DIMENSIONS %d %d %d\n", 2*nx+1, 2*ny+1, 2*nz+1);
-    fprintf(pFile, "SPACING 1 1 1\n");
-    fprintf(pFile, "ORIGIN %d %d %d\n", -nx, -ny, -nz);
-    fprintf(pFile, "POINT_DATA %d\n", (2*nx+1)*(2*ny+1)*(2*nz+1) );
-    fprintf(pFile, "SCALARS baryon_density float 1\n");
-    fprintf(pFile, "LOOKUP_TABLE default\n");
-
-    // printf("it = %d.\n", it);
-    for (auto iz = -nz; iz <= nz; iz++) {
-      for (auto iy = -ny; iy <= ny; iy++) {
-        for (auto ix = -nx; ix <= nx; ix++) {
-          r = ThreeVector(ix*dx, iy*dy, iz*dz);
-          jmu = four_current(r, plist, sigma, bar_dens);
-          fprintf(pFile,"%f ", jmu.x0());
-        }
-        fprintf(pFile,"\n");
-      }
-    }
-    fclose(pFile);
+    vtk_density_map( ("bdens.vtk." + std::to_string(it)).c_str(),
+                     plist, sigma, bar_dens,
+                     nx, ny, nz, dx, dy, dz);
     m.propagate(&Pdef, param, out);
   }
 }

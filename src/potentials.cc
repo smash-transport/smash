@@ -59,8 +59,8 @@ Potentials::Potentials(Configuration conf)
 Potentials::~Potentials() {
 }
 
-double Potentials::potential(ThreeVector r, const ParticleList &plist,
-                                                    double gs_sigma) {
+double Potentials::potential(const ThreeVector &r, const ParticleList &plist,
+                                                    double gs_sigma) const {
   double total_potential = 0.0;
 
   if (use_skyrme_) {
@@ -76,8 +76,8 @@ double Potentials::potential(ThreeVector r, const ParticleList &plist,
   return total_potential;
 }
 
-ThreeVector Potentials::potential_gradient(ThreeVector r,
-                            const ParticleList &plist, double gs_sigma) {
+ThreeVector Potentials::potential_gradient(const ThreeVector &r,
+                            const ParticleList &plist, double gs_sigma) const {
   ThreeVector total_gradient(0.0, 0.0, 0.0);
   double tmp;
 

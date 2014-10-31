@@ -41,7 +41,8 @@ class Potentials {
    * \param[in] gs_sigma Width of the gaussian (\f$ \sigma \f$),
    *  which represents particle Wigner density.
    **/
-  double potential(ThreeVector r, const ParticleList &plist, double gs_sigma);
+  double potential(const ThreeVector &r, const ParticleList &plist,
+                                                double gs_sigma) const;
 
   /** Evaluates potential gradient at point r. Potential is always taken in
    * the local Eckart rest frame, but point r is in the computational frame.
@@ -54,17 +55,17 @@ class Potentials {
    * \param[in] gs_sigma Width of the gaussian (\f$ \sigma \f$),
    *  which represents particle Wigner density.
    **/
-  ThreeVector potential_gradient(ThreeVector r, const ParticleList &plist,
-                                                             double gs_sigma);
+  ThreeVector potential_gradient(const ThreeVector &r,
+                          const ParticleList &plist, double gs_sigma) const;
  private:
   // Skyrme potential on/off
   bool use_skyrme_;
 
-  // Parameters of skyrme potentials
-  double skyrme_a_, skyrme_b_, skyrme_tau_;
-
   // Symmetry potential on/off
   bool use_symmetry_;
+
+  // Parameters of skyrme potentials
+  double skyrme_a_, skyrme_b_, skyrme_tau_;
 
   // Parameters of symmetry potential
   double symmetry_s_;

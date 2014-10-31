@@ -7,6 +7,7 @@
  *
  */
 
+#include <fstream>
 #include "include/constants.h"
 #include "include/density.h"
 
@@ -22,8 +23,8 @@ bool particle_in_denstype(const PdgCode pdg, Density_type dens_type) {
   }
 }
 
-FourVector four_current(ThreeVector r, const ParticleList &plist,
-                   double gs_sigma, Density_type dens_type) {
+FourVector four_current(const ThreeVector &r, const ParticleList &plist,
+                        double gs_sigma, Density_type dens_type) {
   FourVector jmu(0.0, 0.0, 0.0, 0.0);
   double tmp;
 
@@ -59,9 +60,9 @@ FourVector four_current(ThreeVector r, const ParticleList &plist,
   return jmu;
 }
 
-std::pair<double, ThreeVector> rho_eckart_gradient(ThreeVector r,
-                                         const ParticleList &plist,
-                                double gs_sigma, Density_type dens_type) {
+std::pair<double, ThreeVector> rho_eckart_gradient(const ThreeVector &r,
+                                const ParticleList &plist, double gs_sigma,
+                                Density_type dens_type) {
   // baryon four-current in computational frame
   FourVector jmu(0.0, 0.0, 0.0, 0.0);
   // derivatives of baryon four-current in computational frame
@@ -115,4 +116,36 @@ std::pair<double, ThreeVector> rho_eckart_gradient(ThreeVector r,
                                          jmu.Dot(djmu_dy),
                                          jmu.Dot(djmu_dz)) / rho);
 }
+
+void vtk_density_map(const char * file_name, const ParticleList &plist,
+                     double gs_sigma, Density_type dens_type,
+                     int nx, int ny, int nz, double dx, double dy, double dz) {
+  ThreeVector r;
+  double rho_eck;
+  std::ofstream a_file;
+  a_file.open(file_name, std::ios::app);
+  a_file << "# vtk DataFile Version 2.0\n" <<
+            "density\n" <<
+            "ASCII\n" <<
+            "DATASET STRUCTURED_POINTS\n" <<
+            "DIMENSIONS " << 2*nx+1 << " " << 2*ny+1 << " " << 2*nz+1 <<"\n" <<
+            "SPACING 1 1 1\n"
+            "ORIGIN " << -nx << " " << -ny << " " << -nz << "\n" <<
+            "POINT_DATA " << (2*nx+1)*(2*ny+1)*(2*nz+1) << "\n" <<
+            "SCALARS density float 1\n" <<
+            "LOOKUP_TABLE default\n";
+
+  for (auto iz = -nz; iz <= nz; iz++) {
+    for (auto iy = -ny; iy <= ny; iy++) {
+      for (auto ix = -nx; ix <= nx; ix++) {
+        r = ThreeVector(ix*dx, iy*dy, iz*dz);
+        rho_eck = four_current(r, plist, gs_sigma, dens_type).abs();
+        a_file << rho_eck << " ";
+      }
+      a_file << "\n";
+    }
+  }
+  a_file.close();
+}
+
 }  // namespace Smash

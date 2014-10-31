@@ -54,7 +54,7 @@ namespace Smash {
    * \param[in] dens_type type of four-currect to be calculated:
    *            baryon, proton or neutron options are currently available
    */
-  FourVector four_current(ThreeVector r, const ParticleList &plist,
+  FourVector four_current(const ThreeVector &r, const ParticleList &plist,
                           double gs_sigma, Density_type dens_type);
 
   /** Calculates the gradient of Eckart rest frame density with
@@ -65,10 +65,17 @@ namespace Smash {
    *  four_current function. Input parameters are the same that for
    *  four_current function.
    */
-  std::pair<double, ThreeVector> rho_eckart_gradient(ThreeVector r,
-                                              const ParticleList &plist,
-                                  double gs_sigma, Density_type dens_type);
+  std::pair<double, ThreeVector> rho_eckart_gradient(const ThreeVector &r,
+                               const ParticleList &plist, double gs_sigma,
+                               Density_type dens_type);
 
+  /** Prints 3D density map in vtk format on a grid [-nx;nx]x[-ny;ny]x[-nz;nz]
+   *  with steps dx, dy, dz. This allows to look at density profiles and
+   *  make easy plots.
+   */
+  void vtk_density_map(const char * file_name, const ParticleList &plist,
+                      double gs_sigma, Density_type dens_type,
+                      int nx, int ny, int nz, double dx, double dy, double dz);
 }  // namespace Smash
 
 #endif  // SRC_INCLUDE_DENSITY_H_
