@@ -7,20 +7,22 @@
  *
  */
 
+#include <map>
 #include "unittest.h"
+
 #include "../include/configuration.h"
+#include "../include/density.h"
 #include "../include/experiment.h"
 #include "../include/modusdefault.h"
-#include "../include/density.h"
-
-#include <boost/filesystem.hpp>
+#include "../include/nucleus.h"
 
 using namespace Smash;
 
 TEST(init_particle_types) {
   ParticleType::create_type_list(
       "# NAME MASS[GEV] WIDTH[GEV] PDG\n"
-      "proton 0.938 0.0 2212\n");
+      "proton 0.938 0.0 2212\n"
+      "neutron 0.938 0.0 2112\n");
 }
 
 static ParticleData create_proton(int id = -1) {
@@ -150,7 +152,8 @@ TEST(density_gradient) {
    This test does not compare anything. It only prints density map versus
    time to vtk files, so that one can open it with paraview and make sure
    that Lorentz contraction works properly for density.
-*/
+ */
+/*
 TEST(density_eckart_frame) {
   ModusDefault m;
   Particles Pdef;
@@ -176,4 +179,45 @@ TEST(density_eckart_frame) {
                      nx, ny, nz, dx, dy, dz);
     m.propagate(&Pdef, param, out);
   }
+}
+*/
+
+/*
+  Generates nuclei and prints their density profiles to vtk files
+*/
+TEST(nucleus_density) {
+  // Lead nuclei with 10000 test-particles
+  std::map<PdgCode, int> lead_list = {{0x2212, 82}, {0x2112, 126}};
+  int Ntest = 10000;
+  Nucleus lead;
+  lead.fill_from_list(lead_list, Ntest);
+  lead.set_parameters_automatic();
+  lead.arrange_nucleons();
+
+  // make particle list out of generated nucleus
+  Particles p;
+  lead.copy_particles(&p);
+  ParticleList plist;
+  plist = ParticleList(p.data().begin(), p.data().end());
+
+  // write density profile to file, time-consuming!
+  Density_type dens_type = baryon;
+  double sigma = 0.7; // fm
+//  vtk_density_map("lead_density.vtk", plist, sigma, dens_type,
+//                     20, 20, 20, 0.5, 0.5, 0.5);
+  ThreeVector lstart(-10.0, 0.0, 0.0);
+  ThreeVector lend(10.0, 0.0, 0.0);
+  const int npoints = 100;
+  density_along_line("lead_densityX.dat", plist, sigma, dens_type,
+                      lstart, lend, npoints);
+
+  lstart = ThreeVector(0.0, -10.0, 0.0);
+  lend = ThreeVector(0.0, 10.0, 0.0);
+  density_along_line("lead_densityY.dat", plist, sigma, dens_type,
+                      lstart, lend, npoints);
+
+  lstart = ThreeVector(0.0, 0.0, -10.0);
+  lend = ThreeVector(0.0, 0.0, 10.0);
+  density_along_line("lead_densityZ.dat", plist, sigma, dens_type,
+                      lstart, lend, npoints);
 }
