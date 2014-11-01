@@ -55,7 +55,7 @@ void usage(const int rc, const std::string &progname) {
   printf("Calculate transport box\n"
     "  -h, --help              usage information\n"
     "\n"
-    "  -i, --inputfile <file>  path to input configuration file\n"
+    "  -i, --inputfile <file>  path to input configuration file (default: ./config.yaml)\n"
     "  -d, --decaymodes <file> override default decay modes from file\n"
     "  -p, --particles <file>  override default particles from file\n"
     "\n"
@@ -64,7 +64,7 @@ void usage(const int rc, const std::string &progname) {
     "  -e, --endtime <time>    shortcut for -c 'General: { End_Time: <time> }'"
     "\n"
     "\n"
-    "  -o, --output <dir>      output directory (default: $PWD/data/<runid>)\n"
+    "  -o, --output <dir>      output directory (default: ./data/<runid>)\n"
     "  -f, --force             force overwriting files in the output directory"
     "\n"
     "  -v, --version\n\n");
@@ -151,40 +151,39 @@ int main(int argc, char *argv[]) {
 
   try {
     bool force_overwrite = false;
-    bf::path output_path = default_output_path();
+    bf::path output_path = default_output_path(),
+             input_path("./config.yaml");
+    char *config = NULL, *particles = NULL, *decaymodes = NULL,
+         *modus = NULL, *end_time = NULL;
 
-    /* read in config file */
-    Configuration configuration(".");
-
-    /* check for overriding command line arguments */
+    /* parse command-line arguments */
     int opt;
     while ((opt = getopt_long(argc, argv, "c:d:e:fhi:m:p:o:v", longopts,
                               nullptr)) != -1) {
       switch (opt) {
         case 'c':
-          configuration.merge_yaml(optarg);
+          config = optarg;
           break;
-        case 'd': {
-          configuration["decaymodes"] = read_all(bf::ifstream{optarg});
-        } break;
+        case 'd':
+          decaymodes = optarg;
+          break;
         case 'f':
           force_overwrite = true;
           break;
-        case 'i': {
-          const bf::path file(optarg);
-          configuration = Configuration(file.parent_path(), file.filename());
-        } break;
+        case 'i':
+          input_path = optarg;
+          break;
         case 'h':
           usage(EXIT_SUCCESS, progname);
           break;
         case 'm':
-          configuration["General"]["Modus"] = std::string(optarg);
+          modus = optarg;
           break;
-        case 'p': {
-          configuration["particles"] = read_all(bf::ifstream{optarg});
-        } break;
+        case 'p':
+          particles = optarg;
+          break;
         case 'e':
-          configuration["General"]["End_Time"] = abs(atof(optarg));
+          end_time = optarg;
           break;
         case 'o':
           output_path = optarg;
@@ -196,13 +195,29 @@ int main(int argc, char *argv[]) {
           usage(EXIT_FAILURE, progname);
       }
     }
+
+    /* read in config file */
+    Configuration configuration(input_path.parent_path(),
+                                input_path.filename());
+    if (config)
+      configuration.merge_yaml(config);
+    if (particles)
+      configuration["particles"] = read_all(bf::ifstream{particles});
+    if (decaymodes)
+      configuration["decaymodes"] = read_all(bf::ifstream{decaymodes});
+    if (modus)
+      configuration["General"]["Modus"] = std::string(modus);
+    if (end_time)
+      configuration["General"]["End_Time"] = abs(atof(end_time));
+
+    /* set up logging */
     set_default_loglevel(configuration.take({"Logging", "default"}, einhard::ALL));
     create_all_loggers(configuration["Logging"]);
     log.info(progname, " (", VERSION_MAJOR, ')');
 
+    /* check output path*/
     ensure_path_is_valid(output_path);
     log.debug("output path: ", output_path);
-
     if (!force_overwrite && bf::exists(output_path / "config.yaml")) {
       throw std::runtime_error(
           "Output directory would get overwritten. Select a different output "
