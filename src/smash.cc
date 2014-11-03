@@ -143,7 +143,7 @@ int main(int argc, char *argv[]) {
     { "particles",  required_argument,      0, 'p' },
     { "output",     required_argument,      0, 'o' },
     { "version",    no_argument,            0, 'v' },
-    { NULL,         0, 0, 0 }
+    { nullptr,      0,                      0,  0  }
   };
 
   /* strip any path to progname */
@@ -153,8 +153,8 @@ int main(int argc, char *argv[]) {
     bool force_overwrite = false;
     bf::path output_path = default_output_path(),
              input_path("./config.yaml");
-    char *config = NULL, *particles = NULL, *decaymodes = NULL,
-         *modus = NULL, *end_time = NULL;
+    char *config = nullptr, *particles = nullptr, *decaymodes = nullptr,
+         *modus = nullptr, *end_time = nullptr;
 
     /* parse command-line arguments */
     int opt;
