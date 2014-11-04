@@ -115,7 +115,7 @@ TEST(outputfile) {
     outputfile >> item;
     COMPARE(item, "POINTS");
     outputfile >> item;
-    COMPARE(std::atoi(item.c_str()), particles.size());
+    COMPARE(std::stoul(item), particles.size());
     outputfile >> item;
     COMPARE(item, "double");
     for (int i = 0; i < number_of_particles; i++) {
@@ -131,9 +131,9 @@ TEST(outputfile) {
     outputfile >> item;
     COMPARE(item, "CELLS");
     outputfile >> item;
-    COMPARE(std::atoi(item.c_str()), particles.size());
+    COMPARE(std::stoul(item), particles.size());
     outputfile >> item;
-    COMPARE(std::atoi(item.c_str()), particles.size() * 2);
+    COMPARE(std::stoul(item), particles.size() * 2);
     for (int i = 0; i < number_of_particles; i++) {
       outputfile >> item;
       COMPARE(std::atoi(item.c_str()), 1);
@@ -143,7 +143,7 @@ TEST(outputfile) {
     outputfile >> item;
     COMPARE(item, "CELL_TYPES");
     outputfile >> item;
-    COMPARE(std::atoi(item.c_str()), particles.size());
+    COMPARE(std::stoul(item), particles.size());
     for (int i = 0; i < number_of_particles; i++) {
       outputfile >> item;
       COMPARE(std::atoi(item.c_str()), 1);
@@ -152,7 +152,7 @@ TEST(outputfile) {
     outputfile >> item;
     COMPARE(item, "POINT_DATA");
     outputfile >> item;
-    COMPARE(std::atoi(item.c_str()), particles.size());
+    COMPARE(std::stoul(item), particles.size());
     outputfile >> item;
     COMPARE(item, "SCALARS");
     outputfile >> item;

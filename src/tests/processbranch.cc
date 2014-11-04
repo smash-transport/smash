@@ -41,12 +41,12 @@ TEST(lists) {
   PdgCode smashino("1234568");
   ProcessBranch branch(smashon, smashino, 2.345);
   std::vector<PdgCode> list = branch.pdg_list();
-  COMPARE(list.size(), 2);
+  COMPARE(list.size(), 2u);
   COMPARE(list.at(0), smashon);
   COMPARE(list.at(1), smashino);
 
   ParticleList particles = branch.particle_list();
-  COMPARE(particles.size(), 2);
+  COMPARE(particles.size(), 2u);
   COMPARE(particles.at(0).pdgcode(), smashon);
   COMPARE(particles.at(1).pdgcode(), smashino);
   COMPARE(particles.at(0).momentum().x0(), 0.0);
@@ -61,7 +61,7 @@ TEST(lists) {
   branch.clear();
 
   std::vector<PdgCode> new_list = branch.pdg_list();
-  COMPARE(new_list.size(), 0);
+  COMPARE(new_list.size(), 0u);
 }
 
 TEST(add_particle) {
@@ -70,7 +70,7 @@ TEST(add_particle) {
   PdgCode anti_smashino("-1234568");
   ProcessBranch branch(smashon, smashino, 1.2);
   branch.add_particle(anti_smashino);
-  COMPARE(branch.pdg_list().size(), 3);
+  COMPARE(branch.pdg_list().size(), 3u);
 }
 TEST(set_particles) {
   PdgCode smashon("9876542");
@@ -79,7 +79,7 @@ TEST(set_particles) {
   std::vector<PdgCode> list = {smashon, smashino, anti_smashino};
   ProcessBranch branch;
   branch.set_particles(list);
-  COMPARE(branch.pdg_list().size(), 3);
+  COMPARE(branch.pdg_list().size(), 3u);
 }
 
 TEST(weights) {

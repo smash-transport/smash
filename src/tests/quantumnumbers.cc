@@ -20,7 +20,7 @@ TEST(init_particle_types) {
 }
 
 TEST(size) {
-  COMPARE(sizeof(QuantumNumbers), 56);
+  COMPARE(sizeof(QuantumNumbers), 56u);
 }
 
 TEST(assign_empty) {

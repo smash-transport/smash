@@ -62,7 +62,7 @@ class ParticleType {
   PdgCode pdgcode() const { return pdgcode_; }
 
   /// \copydoc PdgCode::isospin_total
-  int isospin() const { return isospin_; }
+  unsigned int isospin() const { return isospin_; }
 
   /// \copydoc PdgCode::isospin3
   int isospin3() const { return pdgcode_.isospin3(); }
@@ -71,7 +71,7 @@ class ParticleType {
   int charge() const { return charge_; }
 
   /// \copydoc PdgCode::spin
-  int spin() const { return pdgcode_.spin(); }
+  unsigned int spin() const { return pdgcode_.spin(); }
 
   /// \copydoc PdgCode::is_hadron
   bool is_hadron() const { return pdgcode_.is_hadron(); }
@@ -182,7 +182,7 @@ class ParticleType {
    *
    * This is filled automatically from pdgcode_.
    */
-  int isospin_;
+  unsigned int isospin_;
   /** charge of the particle
    *
    * This is filled automatically from pdgcode_.

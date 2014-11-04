@@ -39,7 +39,7 @@ TEST(initialize_box) {
   Particles P;
   // should return START_TIME and set P:
   COMPARE(b.initial_conditions(&P, param), 0.2f);
-  COMPARE(P.size(), 724);
+  COMPARE(P.size(), 724u);
   COMPARE(P.data(67).pdgcode(), 0x661);
   // we might also look at other properties of Particles, like total
   // momentum and such.
@@ -73,7 +73,7 @@ TEST(initialize_collider_normal) {
                   param);
   Particles P;
   COMPARE(n.initial_conditions(&P, param), 0.f);
-  COMPARE(P.size(), 9);
+  COMPARE(P.size(), 9u);
   for (auto p : P.data()) {
     // velocity should be +- sqrt(3/4)
     COMPARE_RELATIVE_ERROR(p.velocity().sqr(), 0.75, 1e-6);
@@ -145,7 +145,7 @@ TEST(initialize_sphere) {
   Particles P;
 //Is the correct number of particles in the map?
   COMPARE(s.initial_conditions(&P, param), 0.0f);
-  COMPARE(P.size(), 500);
+  COMPARE(P.size(), 500u);
   COMPARE(P.data(67).pdgcode(), 0x661);
 // total momentum check
   FourVector momentum(0.0, 0.0, 0.0, 0.0);
