@@ -109,7 +109,7 @@ namespace {
  * \key Delta_Time (float, required): \n
  * Time step for the calculation, in fm/c.
  *
- * \key Testparticles (int, required): \n
+ * \key Testparticles (int, optional, default = 1): \n
  * How many test particles per real particles should be simulated.
  *
  * \key Sigma (float, required): \n
@@ -129,10 +129,17 @@ namespace {
 ExperimentParameters create_experiment_parameters(Configuration config) {
   const auto &log = logger<LogArea::Experiment>();
   log.trace() << source_location;
-  const int testparticles = config.take({"General", "Testparticles"});
+  
+  const int testparticles;
+  if (config.has_value({"General", "Testparticles"})) { 
+    testparticles = config.take({"General", "Testparticles"});
+  } else {
+    testparticles = 1; 
+  }
+    
   float cross_section = config.take({"General", "Sigma"});
 
-  /* reducing cross section according to number of test particle */
+/* reducing cross section according to number of test particle */
   if (testparticles > 1) {
     log.info() << "IC test particle: " << testparticles;
     cross_section /= testparticles;
@@ -144,7 +151,7 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
   return {{0.0f, config.read({"General", "Delta_Time"})},
            config.take({"General", "Output_Interval"}),
            cross_section, testparticles};
-}
+  }
 }  // unnamed namespace
 
 /**
@@ -209,7 +216,12 @@ Experiment<Modus>::Experiment(Configuration config)
       || config.take({"Collision_Term", "Collisions"})) {
     action_finders_.emplace_back(new ScatterActionsFinder(parameters_));
   }
-
+/*  if (!config.has_value({"Collision_Term", "Sigma"})
+	   || config.take({"Collision_Term", "Sigma"})) {
+	action_finders_.emplace_back(ScatterActionsFinder(parameters_));
+    }
+*/
+  	   
 }
 
 /* This method reads the particle type and cross section information

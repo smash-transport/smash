@@ -55,9 +55,6 @@ General:
     # elastic cross section
     Sigma:         10.0
 
-    # number of test particle
-    Testparticles: 1
-
     # number of events
     Nevents:       1
 
