@@ -133,7 +133,7 @@ void Action::sample_cms_momenta() {
   }
 
   /* If one of the particles is a resonance, sample its mass. */
-  /* XXX: Other particle assumed stable! */
+  /* TODO: Other particle assumed stable! */
   if (!t1.is_stable()) {
     mass1 = sample_resonance_mass(t1, t2, cms_energy);
   } else if (!t2.is_stable()) {
@@ -146,7 +146,7 @@ void Action::sample_cms_momenta() {
   if (!(momentum_radial > 0.0)) {
     log.warn("radial momenta ", momentum_radial);
   }
-  /* XXX: Angles should be sampled from differential cross section
+  /* TODO : Angles should be sampled from differential cross section
    * of this process. */
   Angles phitheta;
   phitheta.distribute_isotropically();
