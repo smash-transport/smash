@@ -31,6 +31,10 @@ BinaryOutputParticles::BinaryOutputParticles(bf::path path,
    * \page input_binary_particles Binary_particles
    * Writes the particle list at fixed times in binary format.
    *
+   * \key Enable (bool, optional, default = false):\n
+   * true - binary particle list output enabled\n
+   * false - no binary particle list output 
+   * 
    * \key only_final (bool, optional, default = true): \n
    * true - only final particle list at the end of each event \n
    * false - particle list output at every output interval including initial 

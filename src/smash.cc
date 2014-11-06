@@ -236,7 +236,7 @@ int main(int argc, char *argv[]) {
     log.trace(source_location, " create OutputInterface objects");
     OutputsList output_list;
     /*!\Userguide
-     * \page input_general_ General
+     * \page input_output_options_ Output
      *
      * \key Output: \n
      * Below this key the configuration for the different output formats is
@@ -250,7 +250,7 @@ int main(int argc, char *argv[]) {
      * \li \subpage input_binary_particles
      * \li \subpage input_root
      */
-    auto output_conf = configuration["General"]["Output"];
+    auto output_conf = configuration["Output"];
 
     /*!\Userguide
      * \page output_general_ Output files

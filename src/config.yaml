@@ -22,48 +22,44 @@ General:
     # end time of simulation
     End_Time:      20.0
 
-    # output formats
-    Output:
-        Oscar_Collisions:
-            Enable:             True
-            2013_Format:        True
-            Print_Start_End:    False
-        Oscar_Particlelist:
-            Enable:             True
-            2013_Format:        True
-            Only_Final:         True
-        Vtk:
-            Enable:             True
-        Root:
-            Enable:             True
-            Write_Collisions:   True
-            Write_Particles:    True
-            Autosave_Frequency: 1000
-        Binary_Collisions:
-            Enable:             True
-            Print_Start_End:    True
-        Binary_Particles:
-            Enable:             True
-            Only_Final:         False
-
     # how much time before recording measurables
     Output_Interval:  1.0
 
     # initial random seed (auto-generated if negative)
     Randomseed:    1
 
-    # elastic cross section
-    Sigma:         10.0
-
-    # number of test particle
-    Testparticles: 1
-
     # number of events
     Nevents:       1
+
+ # output formats
+Output:
+    Oscar_Collisions:
+        Enable:             True
+        2013_Format:        True
+        Print_Start_End:    False
+    Oscar_Particlelist:
+        Enable:             True
+        2013_Format:        True
+        Only_Final:         True
+    Vtk:
+        Enable:             True
+    Root:
+        Enable:             True
+        Write_Collisions:   True
+        Write_Particles:    True
+        Autosave_Frequency: 1000
+    Binary_Collisions:
+        Enable:             True
+        Print_Start_End:    True
+    Binary_Particles:
+        Enable:             True
+        Only_Final:         False
 
 Collision_Term:
     Decays:        True
     Collisions:    True
+   # elastic cross section
+    Sigma:         10.0
 
 Modi:
     Box:

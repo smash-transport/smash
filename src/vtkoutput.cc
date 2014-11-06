@@ -28,7 +28,11 @@ VtkOutput::VtkOutput(bf::path path, Configuration&& /*conf*/)
  * \f$\Delta t\f$ is controlled by an option.
  * Produced output can be opened by paraview
  * and used for an easy visualization of the simulation.
- *
+ * 
+ * \key Enable (bool, optional, default = false):\n
+ * true - VTK output enabled\n
+ * false - no VTK output 
+ * 
  * For details on VTK output format see \ref format_vtk.
  */
 

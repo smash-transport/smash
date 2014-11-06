@@ -26,7 +26,7 @@ TEST(init_particle_types) {
 
 TEST(initialize_box) {
   einhard::Logger<> log(einhard::ALL);
-  ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};
+  ExperimentParameters param{{0.f, 1.f}, 1.f, 1};
   BoxModus b({"Box:\n"
               "  Initial_Condition: 1\n"
               "  Length: 7.9615\n"
@@ -59,7 +59,7 @@ TEST(initialize_box) {
 }
 
 TEST(initialize_collider_normal) {
-  ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};
+  ExperimentParameters param{{0.f, 1.f}, 1.f, 1};
   ColliderModus n({"Collider:\n"
                    "  Sqrtsnn: 1.6\n"
                    "  Projectile:\n"
@@ -90,7 +90,7 @@ TEST(initialize_collider_normal) {
 }
 
 TEST_CATCH(initialize_collider_low_energy, ModusDefault::InvalidEnergy) {
-  ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};
+  ExperimentParameters param{{0.f, 1.f}, 1.f, 1};
   ColliderModus n({"Collider:\n"
                    "  Sqrtsnn: 0.5\n"
                    "  Projectile:\n"
@@ -105,7 +105,7 @@ TEST_CATCH(initialize_collider_low_energy, ModusDefault::InvalidEnergy) {
 }
 
 TEST_CATCH(initialize_nucleus_empty_projectile, ColliderModus::ColliderEmpty) {
-  ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};
+  ExperimentParameters param{{0.f, 1.f}, 1.f, 1};
   ColliderModus n({"Collider:\n"
                    "  Sqrtsnn: 1.6\n"
                    "  Projectile:\n"
@@ -120,7 +120,7 @@ TEST_CATCH(initialize_nucleus_empty_projectile, ColliderModus::ColliderEmpty) {
 }
 
 TEST_CATCH(initialize_nucleus_empty_target, ColliderModus::ColliderEmpty) {
-  ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};
+  ExperimentParameters param{{0.f, 1.f}, 1.f, 1};
   ColliderModus n({"Collider:\n"
                    "  Sqrtsnn: 1.6\n"
                    "  Projectile:\n"
@@ -135,7 +135,7 @@ TEST_CATCH(initialize_nucleus_empty_target, ColliderModus::ColliderEmpty) {
 }
 
 TEST(initialize_sphere) {
-  ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1};
+  ExperimentParameters param{{0.f, 1.f}, 1.f, 1};
   SphereModus s({"Sphere:\n"
                  "  Radius: 10\n"
                  "  Start_Time: 0.0\n"

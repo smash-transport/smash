@@ -109,11 +109,8 @@ namespace {
  * \key Delta_Time (float, required): \n
  * Time step for the calculation, in fm/c.
  *
- * \key Testparticles (int, required): \n
+ * \key Testparticles (int, optional, default = 1): \n
  * How many test particles per real particles should be simulated.
- *
- * \key Sigma (float, required): \n
- * Elastic cross-section.
  *
  * \key Output_Interval (float, required): \n
  * Defines the period of intermediate output of the status of the simulated
@@ -129,22 +126,19 @@ namespace {
 ExperimentParameters create_experiment_parameters(Configuration config) {
   const auto &log = logger<LogArea::Experiment>();
   log.trace() << source_location;
-  const int testparticles = config.take({"General", "Testparticles"});
-  float cross_section = config.take({"General", "Sigma"});
-
-  /* reducing cross section according to number of test particle */
-  if (testparticles > 1) {
-    log.info() << "IC test particle: " << testparticles;
-    cross_section /= testparticles;
-    log.info() << "Elastic cross section: " << cross_section << " mb";
+  
+  int testparticles;
+  if (config.has_value({"General", "Testparticles"})) { 
+    testparticles = config.take({"General", "Testparticles"});
+  } else {
+    testparticles = 1; 
   }
-
   // The clock initializers are only read here and taken later when
   // assigning initial_clock_.
   return {{0.0f, config.read({"General", "Delta_Time"})},
-           config.take({"General", "Output_Interval"}),
-           cross_section, testparticles};
-}
+           config.take({"General", "Output_Interval"}), 
+           testparticles};
+  }
 }  // unnamed namespace
 
 /**
@@ -152,7 +146,6 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
  */
 template <typename Modus>
 std::ostream &operator<<(std::ostream &out, const Experiment<Modus> &e) {
-  out << "Elastic cross section: " << e.parameters_.cross_section << " mb\n";
   out << "Starting with temporal stepsize: " << e.parameters_.timestep_duration()
       << " fm/c\n";
   out << "End time: " << e.end_time_ << " fm/c\n";
@@ -207,9 +200,8 @@ Experiment<Modus>::Experiment(Configuration config)
   }
   if (!config.has_value({"Collision_Term", "Collisions"})
       || config.take({"Collision_Term", "Collisions"})) {
-    action_finders_.emplace_back(new ScatterActionsFinder(parameters_));
-  }
-
+    action_finders_.emplace_back(new ScatterActionsFinder(config, parameters_));
+  }   
 }
 
 /* This method reads the particle type and cross section information

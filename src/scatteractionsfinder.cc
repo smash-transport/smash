@@ -10,6 +10,7 @@
 #include "include/scatteractionsfinder.h"
 
 #include "include/action.h"
+#include "include/configuration.h"
 #include "include/constants.h"
 #include "include/cxx14compat.h"
 #include "include/experimentparameters.h"
@@ -19,12 +20,21 @@
 #include "include/resonances.h"
 
 namespace Smash {
+/*!\Userguide
+* \page input_collision_term_ Collision_Term
+* \key Sigma (float, optional, default = 0.0 [mb]) \n
+* Elastic cross section parameter
+*/
 
 ScatterActionsFinder::ScatterActionsFinder(
-    const ExperimentParameters &parameters)
-    : ActionFinderInterface(parameters.timestep_duration()),
-      elastic_parameter_(parameters.cross_section) {}
-
+    Configuration config, const ExperimentParameters &parameters)
+    : ActionFinderInterface(parameters.timestep_duration()) {
+/*read in parameter for elastic cross section */ 
+  if (config.has_value({"Collision_Term", "Sigma"})) {
+	elastic_parameter_ =  config.take({"Collision_Term", "Sigma"});
+  } 
+}
+  
 double ScatterActionsFinder::collision_time(const ParticleData &p1,
                                             const ParticleData &p2) {
   const auto &log = logger<LogArea::FindScatter>();
