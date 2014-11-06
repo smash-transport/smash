@@ -22,17 +22,18 @@ General:
     # end time of simulation
     End_Time:      20.0
 
-    # how much time before recording measurables
-    Output_Interval:  1.0
-
     # initial random seed (auto-generated if negative)
     Randomseed:    1
 
     # number of events
     Nevents:       1
 
- # output formats
 Output:
+
+    # how much time before recording measurables
+    Output_Interval:  1.0
+   
+    # output formats
     Oscar_Collisions:
         Enable:             True
         2013_Format:        True

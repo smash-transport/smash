@@ -112,6 +112,7 @@ namespace {
  * \key Testparticles (int, optional, default = 1): \n
  * How many test particles per real particles should be simulated.
  *
+ * \page input_output_options_ Output
  * \key Output_Interval (float, required): \n
  * Defines the period of intermediate output of the status of the simulated
  * system in Standard Output and other output formats which support this
@@ -136,7 +137,7 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
   // The clock initializers are only read here and taken later when
   // assigning initial_clock_.
   return {{0.0f, config.read({"General", "Delta_Time"})},
-           config.take({"General", "Output_Interval"}), 
+           config.take({"Output", "Output_Interval"}),
            testparticles};
   }
 }  // unnamed namespace
