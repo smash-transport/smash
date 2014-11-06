@@ -34,6 +34,10 @@ BinaryOutputCollisions::BinaryOutputCollisions(bf::path path,
    * wall crossing in a binary format. Optionally initial and 
    * final particle configurations can be written out.
    *
+   * \key Enable (bool, optional, default = false):\n
+   * true - binary collision output enabled\n
+   * false - no binary collision output 
+   *  
    * \key Print_Start_End (bool, optional, default = false): \n
    * false - only information about collisions, decays and
    * box wall crossings during the whole evolution \n
