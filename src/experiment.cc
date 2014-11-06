@@ -133,16 +133,6 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
   } else {
     testparticles = 1; 
   }
-    
-  float cross_section = config.take({"General", "Sigma"});
-
-/* reducing cross section according to number of test particle */
-  if (testparticles > 1) {
-    log.info() << "IC test particle: " << testparticles;
-    cross_section /= testparticles;
-    log.info() << "Elastic cross section: " << cross_section << " mb";
-  }
-
   // The clock initializers are only read here and taken later when
   // assigning initial_clock_.
   return {{0.0f, config.read({"General", "Delta_Time"})},
