@@ -250,7 +250,7 @@ int main(int argc, char *argv[]) {
      * \li \subpage input_binary_particles
      * \li \subpage input_root
      */
-    auto output_conf = configuration["General"]["Output"];
+    auto output_conf = configuration["Output"];
 
     /*!\Userguide
      * \page output_general_ Output files
