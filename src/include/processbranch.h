@@ -51,7 +51,7 @@ class ProcessBranch {
   /// Constructor with 1 particle
   inline ProcessBranch(PdgCode p, float w);
   /// Constructor with 2 particles
-  inline ProcessBranch(PdgCode p1, PdgCode p2, float w);
+  inline ProcessBranch(PdgCode p_a, PdgCode p_b, float w);
   /// Constructor with particle vector
   inline ProcessBranch(std::vector<PdgCode> pdg_list, float w);
 
@@ -120,10 +120,10 @@ ProcessBranch::ProcessBranch (PdgCode p, float w) : branch_weight_(w) {
 }
 
 // Constructor with 2 particles
-ProcessBranch::ProcessBranch (PdgCode p1, PdgCode p2, float w)
+ProcessBranch::ProcessBranch (PdgCode p_a, PdgCode p_b, float w)
                           : branch_weight_(w) {
-  add_particle(p1);
-  add_particle(p2);
+  add_particle(p_a);
+  add_particle(p_b);
 }
 
 // Constructor with particle vector

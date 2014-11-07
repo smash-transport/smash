@@ -26,7 +26,7 @@ struct IntegrandParameters {
   /// Type of the resonance
   const ParticleType *type;
   /// Mass of second particle
-  double m2;
+  double m_b;
   /// Mandelstam s
   double s;
 };
@@ -34,29 +34,29 @@ struct IntegrandParameters {
 /**
  * Calculate Clebsch-Gordan coefficient
  *
- * \f$(-1)^{j_1 - j_2 + m_3} \sqrt(2 j_3 + 1) \cdot [Wigner 3J symbol] \f$
+ * \f$(-1)^{j_a - j_b + m_c} \sqrt(2 j_c + 1) \cdot [Wigner 3J symbol] \f$
  * Note that the calculation assumes that the spin/isospin values (j/m)
  * have been multiplied by two (in order to be integer). */
-double clebsch_gordan(const int j1, const int j2, const int j3,
-                      const int m1, const int m2, const int m3);
+double clebsch_gordan(const int j_a, const int j_b, const int j_c,
+                      const int m_a, const int m_b, const int m_c);
 
 
-/* Calculate isospin Clebsch-Gordan coefficient for two particles p1 and p2
+/* Calculate isospin Clebsch-Gordan coefficient for two particles p_a and p_b
  * coupling to a total isospin (I_tot, I_z). */
-inline double isospin_clebsch_gordan(const ParticleType p1,
-                                     const ParticleType p2,
+inline double isospin_clebsch_gordan(const ParticleType p_a,
+                                     const ParticleType p_b,
                                      const int I_tot, const int I_z) {
-  return clebsch_gordan (p1.isospin(), p2.isospin(), I_tot,
-                         p1.isospin3(), p2.isospin3(), I_z);
+  return clebsch_gordan (p_a.isospin(), p_b.isospin(), I_tot,
+                         p_a.isospin3(), p_b.isospin3(), I_z);
 }
 
-/* Calculate isospin Clebsch-Gordan coefficient for two particles p1 and p2
+/* Calculate isospin Clebsch-Gordan coefficient for two particles p_a and p_b
  * coupling to a resonance Res. */
-inline double isospin_clebsch_gordan(const ParticleType p1,
-                                     const ParticleType p2,
+inline double isospin_clebsch_gordan(const ParticleType p_a,
+                                     const ParticleType p_b,
                                      const ParticleType Res) {
-  return clebsch_gordan (p1.isospin(), p2.isospin(), Res.isospin(),
-                         p1.isospin3(), p2.isospin3(), Res.isospin3());
+  return clebsch_gordan (p_a.isospin(), p_b.isospin(), Res.isospin(),
+                         p_a.isospin3(), p_b.isospin3(), Res.isospin3());
 }
 
 
@@ -71,8 +71,8 @@ inline double isospin_clebsch_gordan(const ParticleType p1,
  * 4. Enough energy for all decay channels to be available for the resonance
  * 5. Detailed balance (reverse process exists)
  *
- * \param[in] type_particle1 Type information for the first initial particle.
- * \param[in] type_particle2 Type information for the second initial particle.
+ * \param[in] type_particle_a Type information for the first initial particle.
+ * \param[in] type_particle_b Type information for the second initial particle.
  * \param[in] type_resonance Type information for the resonance to be produced.
  * \param[in] mandelstam_s Mandelstam-s of the collision
  * of the two initial particles.
@@ -80,10 +80,10 @@ inline double isospin_clebsch_gordan(const ParticleType p1,
  * two initial particles.
  *
  * \return The cross section for the process
- * [initial particle 1] + [initial particle 2] -> resonance.
+ * [initial particle a] + [initial particle b] -> resonance.
  */
-double two_to_one_formation(const ParticleType &type_particle1,
-                            const ParticleType &type_particle2,
+double two_to_one_formation(const ParticleType &type_particle_a,
+                            const ParticleType &type_particle_b,
                             const ParticleType &type_resonance,
                             double mandelstam_s, double cm_momentum_squared);
 

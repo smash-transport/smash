@@ -120,11 +120,11 @@ class ColliderModus : public ModusDefault {
    * the current reference frame. \see frame_
    *
    * @param mandelstam_s The total center-of-mass energy of the system.
-   * @param m1 The mass of the projectile.
-   * @param m2 The mass of the target.
-   * @return < v1, v2 > Velocities of the nuclei.
+   * @param m_a The mass of the projectile.
+   * @param m_b The mass of the target.
+   * @return < v_a, v_b > Velocities of the nuclei.
    **/
-  std::pair<double, double> get_velocities(float mandelstam_s, float m1, float m2);
+  std::pair<double, double> get_velocities(float mandelstam_s, float m_a, float m_b);
 
   /**\ingroup logging
    * Writes the initial state for the ColliderModus to the output stream.
