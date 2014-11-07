@@ -114,35 +114,35 @@ void Action::sample_cms_momenta() {
   /* This function only operates on 2-particle final states. */
   assert(outgoing_particles_.size() == 2);
 
-  ParticleData *p1 = &outgoing_particles_[0];
-  ParticleData *p2 = &outgoing_particles_[1];
+  ParticleData *p_a = &outgoing_particles_[0];
+  ParticleData *p_b = &outgoing_particles_[1];
 
-  const ParticleType &t1 = p1->type();
-  const ParticleType &t2 = p2->type();
+  const ParticleType &t_a = p_a->type();
+  const ParticleType &t_b = p_b->type();
 
-  double mass1 = t1.mass();
-  double mass2 = t2.mass();
+  double mass_a = t_a.mass();
+  double mass_b = t_b.mass();
 
   const double cms_energy = sqrt_s();
 
-  if (cms_energy < t1.minimum_mass() + t2.minimum_mass()) {
+  if (cms_energy < t_a.minimum_mass() + t_b.minimum_mass()) {
     throw InvalidResonanceFormation("resonance_formation: not enough energy! " +
-      std::to_string(cms_energy) + " " + std::to_string(t1.minimum_mass()) +
-      " " + std::to_string(t2.minimum_mass()) + " " +
-      p1->pdgcode().string() + " " + p2->pdgcode().string());
+      std::to_string(cms_energy) + " " + std::to_string(t_a.minimum_mass()) +
+      " " + std::to_string(t_b.minimum_mass()) + " " +
+      p_a->pdgcode().string() + " " + p_b->pdgcode().string());
   }
 
   /* If one of the particles is a resonance, sample its mass. */
   /* TODO: Other particle assumed stable! */
-  if (!t1.is_stable()) {
-    mass1 = sample_resonance_mass(t1, t2, cms_energy);
-  } else if (!t2.is_stable()) {
-    mass2 = sample_resonance_mass(t2, t1, cms_energy);
+  if (!t_a.is_stable()) {
+    mass_a = sample_resonance_mass(t_a, t_b, cms_energy);
+  } else if (!t_b.is_stable()) {
+    mass_b = sample_resonance_mass(t_b, t_a, cms_energy);
   }
 
-  double energy1 = (cms_energy * cms_energy + mass1 * mass1 - mass2 * mass2) /
+  double energy_a = (cms_energy * cms_energy + mass_a * mass_a - mass_b * mass_b) /
                    (2.0 * cms_energy);
-  double momentum_radial = std::sqrt(energy1 * energy1 - mass1 * mass1);
+  double momentum_radial = std::sqrt(energy_a * energy_a - mass_a * mass_a);
   if (!(momentum_radial > 0.0)) {
     log.warn("radial momenta ", momentum_radial);
   }
@@ -150,18 +150,18 @@ void Action::sample_cms_momenta() {
    * of this process. */
   Angles phitheta;
   phitheta.distribute_isotropically();
-  if (!(energy1 > mass1)) {
-    log.info("Particle ", t1.pdgcode(), " radial momenta ", momentum_radial,
+  if (!(energy_a > mass_a)) {
+    log.info("Particle ", t_a.pdgcode(), " radial momenta ", momentum_radial,
              phitheta);
-    log.info("Etot: ", cms_energy, " m_a: ", mass1, " m_b: ", mass2, " E_a: ",
-             energy1);
+    log.info("Etot: ", cms_energy, " m_a: ", mass_a, " m_b: ", mass_b, " E_a: ",
+             energy_a);
   }
 
-  p1->set_4momentum(FourVector(energy1, phitheta.threevec() * momentum_radial));
-  p2->set_4momentum(FourVector(cms_energy - energy1,
+  p_a->set_4momentum(FourVector(energy_a, phitheta.threevec() * momentum_radial));
+  p_b->set_4momentum(FourVector(cms_energy - energy_a,
                                -phitheta.threevec() * momentum_radial));
 
-  log.debug("p1: ", *p1, "\np2: ", *p2);
+  log.debug("p_a: ", *p_a, "\np_b: ", *p_b);
 }
 
 

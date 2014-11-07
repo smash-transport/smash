@@ -35,49 +35,49 @@
 namespace Smash {
 
 
-double clebsch_gordan(const int j1, const int j2, const int j3,
-                      const int m1, const int m2, const int m3) {
+double clebsch_gordan(const int j_a, const int j_b, const int j_c,
+                      const int m_a, const int m_b, const int m_c) {
   const auto &log = logger<LogArea::Resonances>();
-  double wigner_3j =  gsl_sf_coupling_3j(j1, j2, j3, m1, m2, -m3);
+  double wigner_3j =  gsl_sf_coupling_3j(j_a, j_b, j_c, m_a, m_b, -m_c);
   double result = 0.;
   if (std::abs(wigner_3j) > really_small)
-    result = std::pow(-1, (j1-j2+m3)/2.) * std::sqrt(j3 + 1) * wigner_3j;
+    result = std::pow(-1, (j_a-j_b+m_c)/2.) * std::sqrt(j_c + 1) * wigner_3j;
 
-  log.debug("CG: ", result, " I1: ", j1, " I2: ", j2, " IR: ", j3, " iz1: ", m1,
-            " iz2: ", m2, " izR: ", m3);
+  log.debug("CG: ", result, " I1: ", j_a, " I2: ", j_b, " IR: ", j_c, " iz1: ", m_a,
+            " iz2: ", m_b, " izR: ", m_c);
 
   return result;
 }
 
 
 /* two_to_one_formation -- only the resonance in the final state */
-double two_to_one_formation(const ParticleType &type_particle1,
-                            const ParticleType &type_particle2,
+double two_to_one_formation(const ParticleType &type_particle_a,
+                            const ParticleType &type_particle_b,
                             const ParticleType &type_resonance,
                             double mandelstam_s, double cm_momentum_squared) {
   /* Check for charge conservation */
-  if (type_resonance.charge() != type_particle1.charge()
-                               + type_particle2.charge()) {
+  if (type_resonance.charge() != type_particle_a.charge()
+                               + type_particle_b.charge()) {
     return 0.;
   }
 
   /* Check for baryon number conservation */
-  if (type_resonance.baryon_number() != type_particle1.baryon_number()
-                                      + type_particle2.baryon_number()) {
+  if (type_resonance.baryon_number() != type_particle_a.baryon_number()
+                                      + type_particle_b.baryon_number()) {
     return 0.;
   }
 
   /* Calculate partial width. */
   double srts = std::sqrt(mandelstam_s);
   float partial_width = type_resonance.get_partial_width(srts,
-                        type_particle1.pdgcode(), type_particle2.pdgcode());
+                        type_particle_a.pdgcode(), type_particle_b.pdgcode());
   if (partial_width <= 0.) {
     return 0.;
   }
 
   /* Calculate spin factor */
   const double spinfactor = (type_resonance.spin() + 1)
-    / ((type_particle1.spin() + 1) * (type_particle2.spin() + 1));
+    / ((type_particle_a.spin() + 1) * (type_particle_b.spin() + 1));
   float resonance_width = type_resonance.total_width(srts);
   float resonance_mass = type_resonance.mass();
   /* Calculate resonance production cross section

@@ -26,7 +26,7 @@ struct IntegrandParameters {
   /// Type of the resonance
   const ParticleType *type;
   /// Mass of second particle
-  double m_b;
+  double m2;
   /// Mandelstam s
   double s;
 };

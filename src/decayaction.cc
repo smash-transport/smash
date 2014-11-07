@@ -34,18 +34,18 @@ void DecayAction::one_to_two() {
 
 void DecayAction::one_to_three() {
   const auto &log = logger<LogArea::DecayModes>();
-  ParticleData &outgoing0 = outgoing_particles_[0];
-  ParticleData &outgoing1 = outgoing_particles_[1];
-  ParticleData &outgoing2 = outgoing_particles_[2];
-  const ParticleType &outgoing0_type = outgoing0.type();
-  const ParticleType &outgoing1_type = outgoing1.type();
-  const ParticleType &outgoing2_type = outgoing2.type();
+  ParticleData &outgoing_a = outgoing_particles_[0];
+  ParticleData &outgoing_b = outgoing_particles_[1];
+  ParticleData &outgoing_c = outgoing_particles_[2];
+  const ParticleType &outgoing_a_type = outgoing_a.type();
+  const ParticleType &outgoing_b_type = outgoing_b.type();
+  const ParticleType &outgoing_c_type = outgoing_c.type();
 
   log.debug("Note: Doing 1->3 decay!");
 
-  const double mass_a = outgoing0_type.mass();
-  const double mass_b = outgoing1_type.mass();
-  const double mass_c = outgoing2_type.mass();
+  const double mass_a = outgoing_a_type.mass();
+  const double mass_b = outgoing_b_type.mass();
+  const double mass_c = outgoing_c_type.mass();
   const double mass_resonance = incoming_particles_[0].effective_mass();
 
   /* mandelstam-s limits for pairs ab and bc */
@@ -108,7 +108,7 @@ void DecayAction::one_to_three() {
   Angles phitheta;
   phitheta.distribute_isotropically();
   /* This is the angle of the plane of the three decay particles */
-  outgoing0.set_4momentum(mass_a, phitheta.threevec() * momentum_a);
+  outgoing_a.set_4momentum(mass_a, phitheta.threevec() * momentum_a);
 
   /* Angle between a and b */
   double theta_ab = acos(
@@ -117,7 +117,7 @@ void DecayAction::one_to_three() {
   log.debug("theta_ab: ", theta_ab, " Ea: ", energy_a, " Eb: ", energy_b,
             " sab: ", s_ab, " pa: ", momentum_a, " pb: ", momentum_b);
   bool phi_has_changed = phitheta.add_to_theta(theta_ab);
-  outgoing1.set_4momentum(mass_b, phitheta.threevec() * momentum_b);
+  outgoing_b.set_4momentum(mass_b, phitheta.threevec() * momentum_b);
 
   /* Angle between b and c */
   double theta_bc = acos(
@@ -128,11 +128,11 @@ void DecayAction::one_to_three() {
   // pass information on whether phi has changed during the last adding
   // on to add_to_theta:
   phitheta.add_to_theta(theta_bc, phi_has_changed);
-  outgoing2.set_4momentum(mass_c, phitheta.threevec() * momentum_c);
+  outgoing_c.set_4momentum(mass_c, phitheta.threevec() * momentum_c);
 
   /* Momentum check */
-  FourVector ptot = outgoing0.momentum() + outgoing1.momentum() +
-                    outgoing2.momentum();
+  FourVector ptot = outgoing_a.momentum() + outgoing_b.momentum() +
+                    outgoing_c.momentum();
 
   if (fabs(ptot.x0() - total_energy) > really_small) {
     log.warn("1->3 energy not conserved! Before: ", total_energy, " After: ",
@@ -143,9 +143,9 @@ void DecayAction::one_to_three() {
     log.warn("1->3 momentum check failed. Total momentum: ", ptot.threevec());
   }
 
-  log.debug(  "outgoing0: ", outgoing0.momentum(),
-            "\noutgoing1: ", outgoing1.momentum(),
-            "\noutgoing2: ", outgoing2.momentum());
+  log.debug(  "outgoing_a: ", outgoing_a.momentum(),
+            "\noutgoing_b: ", outgoing_b.momentum(),
+            "\noutgoing_c: ", outgoing_c.momentum());
 }
 
 

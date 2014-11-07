@@ -25,15 +25,15 @@ namespace Smash {
  * given sqrt(s) and their masses.
  *
  * \param srts sqrt(s) of the process [GeV].
- * \param mass1 Mass of first particle [GeV].
- * \param mass2 Mass of second particle [GeV].
+ * \param mass_a Mass of first particle [GeV].
+ * \param mass_b Mass of second particle [GeV].
  */
-static float pCM(const float srts, const float mass1, const float mass2) {
-  float s, mass12, x;
+static float pCM(const float srts, const float mass_a, const float mass_b) {
+  float s, mass_a2, x;
   s = srts*srts;
-  mass12 = mass1*mass1;
-  x = s + mass12 - mass2*mass2;
-  return std::sqrt(x*x / (4. * s) - mass12);
+  mass_a2 = mass_a*mass_a;
+  x = s + mass_a2 - mass_b*mass_b;
+  return std::sqrt(x*x / (4. * s) - mass_a2);
 }
 
 
@@ -78,16 +78,16 @@ static float BlattWeisskopf(const float x, const int L) {
 
 
 float width_Manley_stable(const float mass, const float poleMass,
-                          const float mass1, const float mass2,
+                          const float mass_a, const float mass_b,
                           const int L, const float partialWidth_pole) {
 
-  if (mass <= mass1 + mass2) {
+  if (mass <= mass_a + mass_b) {
     return 0.;
   }
 
   // Determine momentum of outgoing particles in Restframe of Resonance
-  const float p_ab_mass = pCM(mass, mass1, mass2);
-  const float p_ab_pole = pCM(poleMass, mass1, mass2);
+  const float p_ab_mass = pCM(mass, mass_a, mass_b);
+  const float p_ab_pole = pCM(poleMass, mass_a, mass_b);
 
   // Evaluate rho_ab according to equ. (2.76) in Effenberger's thesis
   // rho_ab(mu)=p_ab/mu * BlattWeisskopf(pab*interactionRadius,L)
