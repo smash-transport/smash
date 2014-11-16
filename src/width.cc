@@ -29,11 +29,11 @@ namespace Smash {
  * \param mass_b Mass of second particle [GeV].
  */
 static float pCM(const float srts, const float mass_a, const float mass_b) {
-  float s, mass_a2, x;
+  float s, mass_a_sqr, x;
   s = srts*srts;
-  mass_a2 = mass_a*mass_a;
-  x = s + mass_a2 - mass_b*mass_b;
-  return std::sqrt(x*x / (4. * s) - mass_a2);
+  mass_a_sqr = mass_a*mass_a;
+  x = s + mass_a_sqr - mass_b*mass_b;
+  return std::sqrt(x*x / (4. * s) - mass_a_sqr);
 }
 
 
