@@ -94,7 +94,7 @@ class ParticleType {
   float minimum_mass() const;
 
   /**
-   * Get the mass-dependent partial width of a particle with mass m
+   * Get the mass-dependent partial decay width of a particle with mass m
    * in a particular decay mode.
    *
    * \param m Invariant mass of the decaying particle.
@@ -110,7 +110,7 @@ class ParticleType {
   float total_width(const float m) const;
 
   /**
-   * Get the mass-dependent partial widths of a particle with mass m.
+   * Get the mass-dependent partial decay widths of a particle with mass m.
    * Returns a list of process branches, whose weights correspond to the
    * actual partial widths.
    *
@@ -119,15 +119,17 @@ class ParticleType {
   ProcessBranchList get_partial_widths(const float m) const;
 
   /**
-   * Get the mass-dependent partial width of a particle with mass m,
-   * decaying into two given daughter particles.
+   * Get the mass-dependent partial in-width of a resonance with mass m,
+   * decaying into two given daughter particles. For stable daughter
+   * particles, the in-width equals the 'normal' partial decay width
+   * (i.e. the 'out-width').
    *
-   * \param m Invariant mass of the decaying particle.
-   * \param pdg1 PdgCode of first daughter particle.
-   * \param pdg2 PdgCode of second daughter particle.
+   * \param m Invariant mass of the decaying resonance.
+   * \param p_a First daughter particle.
+   * \param p_b Second daughter particle.
    */
-  float get_partial_width(const float m,
-                          const PdgCode pdg1,const PdgCode pdg2) const;
+  float get_partial_width_in(const float m, const ParticleData &p_a,
+                                            const ParticleData &p_b) const;
 
   /**
    * Returns a list of all ParticleType objects.

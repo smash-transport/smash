@@ -189,4 +189,22 @@ float width_Manley_semistable(const float mass, const float poleMass,
                         mass_stable+type_unstable->minimum_mass(), Lambda);
 }
 
+
+float in_width_Manley_semistable(const float mass, const float poleMass,
+                                 const float mass_stable,
+                                 const float mass_unstable,
+                                 const ParticleType *type_unstable,
+                                 const int L, const float partialWidth_pole) {
+  double p_f = pCM(mass, mass_stable, mass_unstable);
+  IntegParam ip;
+  ip.type = type_unstable;
+  ip.m2 = mass_stable;
+  ip.L = L;
+  ip.srts = poleMass;
+
+  return partialWidth_pole * p_f * BlattWeisskopf(p_f*interactionRadius, L)
+         / ( mass * rho_Manley(&ip) );
+}
+
+
 }  // namespace Smash

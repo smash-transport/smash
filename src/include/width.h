@@ -42,6 +42,25 @@ float width_Manley_semistable(const float mass, const float poleMass,
                               const ParticleType *type_unstable,
                               const int L, const float partialWidth_pole);
 
+/**
+ * Get the mass-dependent in-width for a resonance formation process from one
+ * stable and one unstable particle according to Manley/Saleski (PRD45),
+ * see also PhD thesis Effenberger, eq. (2.77).
+ *
+ * \param mass Actual mass of the produced resonance [GeV].
+ * \param poleMass Pole mass of the produced resonance [GeV].
+ * \param mass_stable Mass of the stable incoming particle [GeV].
+ * \param mass_unstable Mass of the unstable incoming particle [GeV].
+ * \param type_unstable Type of the unstable incoming particle [GeV].
+ * \param L Angular momentum of the corresponding decay.
+ * \param partialWidth_pole Partial width at the pole mass [GeV].
+ */
+float in_width_Manley_semistable(const float mass, const float poleMass,
+                                 const float mass_stable,
+                                 const float mass_unstable,
+                                 const ParticleType *type_unstable,
+                                 const int L, const float partialWidth_pole);
+
 }  // namespace Smash
 
 #endif  // SRC_INCLUDE_WIDTH_H_

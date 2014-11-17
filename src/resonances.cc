@@ -51,10 +51,12 @@ double clebsch_gordan(const int j_a, const int j_b, const int j_c,
 
 
 /* two_to_one_formation -- only the resonance in the final state */
-double two_to_one_formation(const ParticleType &type_particle_a,
-                            const ParticleType &type_particle_b,
+double two_to_one_formation(const ParticleData &particle_a,
+                            const ParticleData &particle_b,
                             const ParticleType &type_resonance,
                             double mandelstam_s, double cm_momentum_squared) {
+  ParticleType type_particle_a = particle_a.type(),
+               type_particle_b = particle_b.type();
   /* Check for charge conservation */
   if (type_resonance.charge() != type_particle_a.charge()
                                + type_particle_b.charge()) {
@@ -69,8 +71,8 @@ double two_to_one_formation(const ParticleType &type_particle_a,
 
   /* Calculate partial width. */
   double srts = std::sqrt(mandelstam_s);
-  float partial_width = type_resonance.get_partial_width(srts,
-                        type_particle_a.pdgcode(), type_particle_b.pdgcode());
+  float partial_width = type_resonance.get_partial_width_in(srts,
+                                                      particle_a, particle_b);
   if (partial_width <= 0.) {
     return 0.;
   }
