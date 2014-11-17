@@ -78,12 +78,14 @@ double two_to_one_formation(const ParticleType &type_particle_a,
   /* Calculate spin factor */
   const double spinfactor = (type_resonance.spin() + 1)
     / ((type_particle_a.spin() + 1) * (type_particle_b.spin() + 1));
+  const int sym_factor = (type_particle_a.pdgcode()==type_particle_b.pdgcode())
+                       ? 2 : 1;
   float resonance_width = type_resonance.total_width(srts);
   float resonance_mass = type_resonance.mass();
   /* Calculate resonance production cross section
    * using the Breit-Wigner distribution as probability amplitude.
    * See Eq. (176) in Buss et al., Physics Reports 512, 1 (2012). */
-  return spinfactor * 4.0 * M_PI / cm_momentum_squared
+  return spinfactor * sym_factor * 4.0 * M_PI / cm_momentum_squared
          * breit_wigner(mandelstam_s, resonance_mass, resonance_width)
          * partial_width/resonance_width
          * hbarc * hbarc / fm2_mb;
