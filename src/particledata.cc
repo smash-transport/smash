@@ -21,7 +21,7 @@ std::ostream &operator<<(std::ostream &out, const ParticleData &p) {
   out.fill(' ');
   return out << p.type().name() << right
              << "{id:" << field<6> << p.id()
-             << ", pos [fm]:"  // XXX: is fm correct?
+             << ", pos [fm]:"  // TODO: is fm correct?
              << p.position() << ", mom [GeV]:" << p.momentum() << "}";
 }
 
