@@ -28,8 +28,8 @@ namespace Smash {
  * \param mass_a Mass of first particle [GeV].
  * \param mass_b Mass of second particle [GeV].
  */
-static float pCM(const float srts, const float mass_a, const float mass_b) {
-  float s, mass_a_sqr, x;
+static double pCM(const double srts, const double mass_a, const double mass_b) {
+  double s, mass_a_sqr, x;
   s = srts*srts;
   mass_a_sqr = mass_a*mass_a;
   x = s + mass_a_sqr - mass_b*mass_b;
@@ -120,15 +120,9 @@ static double integrand_rho_Manley(double mass, void *parameters) {
     return 0.;
   }
 
-  double mandelstam_s = srts*srts;
   double resonance_width = ip->type->total_width(srts);
   /* center-of-mass momentum of final state particles */
-  double p_f
-    = std::sqrt((mandelstam_s - (stable_mass + mass)
-            * (stable_mass + mass))
-            * (mandelstam_s - (stable_mass - mass)
-              * (stable_mass - mass))
-            / (4 * mandelstam_s));
+  double p_f = pCM(srts, stable_mass, mass);
 
   return p_f/srts * BlattWeisskopf(p_f*interaction_radius, ip->L) * 2.*srts
           * spectral_function(mass, ip->type->mass(), resonance_width);
