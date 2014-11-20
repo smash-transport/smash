@@ -264,7 +264,7 @@ ProcessBranchList ParticleType::get_partial_widths(const float m) const {
   return std::move(partial);
 }
 
-float ParticleType::get_partial_width_in(const float m,
+float ParticleType::get_partial_in_width(const float m,
                                          const ParticleData &p_a,
                                          const ParticleData &p_b) const {
   PdgCode pdg_a = p_a.type().pdgcode();

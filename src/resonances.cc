@@ -69,9 +69,9 @@ double two_to_one_formation(const ParticleData &particle_a,
     return 0.;
   }
 
-  /* Calculate partial width. */
+  /* Calculate partial in-width. */
   double srts = std::sqrt(mandelstam_s);
-  float partial_width = type_resonance.get_partial_width_in(srts,
+  float partial_width = type_resonance.get_partial_in_width(srts,
                                                       particle_a, particle_b);
   if (partial_width <= 0.) {
     return 0.;

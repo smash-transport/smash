@@ -128,7 +128,7 @@ class ParticleType {
    * \param p_a First daughter particle.
    * \param p_b Second daughter particle.
    */
-  float get_partial_width_in(const float m, const ParticleData &p_a,
+  float get_partial_in_width(const float m, const ParticleData &p_a,
                                             const ParticleData &p_b) const;
 
   /**
