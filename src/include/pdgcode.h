@@ -440,7 +440,11 @@ class PdgCode {
    * This is used by std::map
    */
   inline bool operator<(const PdgCode rhs) const {
-    return (code() < rhs.code());
+    return dump_ < rhs.dump_;
+    // the complex thing to do here is to calculate:
+    //   code() < rhs.code()
+    // but for getting a total order that's overkill. The uint32_t value in
+    // dump_ works just fine.
   }
   /// returns if the codes are equal
   inline bool operator==(const PdgCode rhs) const {
