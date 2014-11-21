@@ -7,6 +7,7 @@
  *
  */
 
+#include <iostream>
 #include <fstream>
 #include <iomanip>
 #include "include/constants.h"
@@ -41,6 +42,7 @@ FourVector four_current(const ThreeVector &r, const ParticleList &plist,
 
     const ThreeVector betai = p.velocity();
     const double inv_gammai = p.inverse_gamma();
+
 
     // Get distance between particle and r in the particle rest frame
     tmp = ((r - ri) * betai) / (inv_gammai * (1. + inv_gammai));
@@ -83,7 +85,9 @@ std::pair<double, ThreeVector> rho_eckart_gradient(const ThreeVector &r,
     }
 
     const ThreeVector betai = p.velocity();
+    // std::cout << "Velocity: " << betai << std::endl;
     const double inv_gammai = p.inverse_gamma();
+    // std::cout << "1/gamma: " << inv_gammai << std::endl;
 
     // Get distance between particle and r in the particle rest frame
     tmp1 = inv_gammai * (1. + inv_gammai);
@@ -112,10 +116,16 @@ std::pair<double, ThreeVector> rho_eckart_gradient(const ThreeVector &r,
   // Eckart rest frame density
   const double rho = jmu.abs();
 
+  // std::cout << "Dens: " << jmu << " " << djmu_dz << std::endl;
+
   // Eckart rest frame density and its gradient
-  return std::make_pair(rho / ntest, ThreeVector(jmu.Dot(djmu_dx),
+  if (rho) {
+    return std::make_pair(rho / ntest, ThreeVector(jmu.Dot(djmu_dx),
                                            jmu.Dot(djmu_dy),
                                            jmu.Dot(djmu_dz)) / (rho * ntest));
+  } else {
+    return std::make_pair(0.0, ThreeVector(0.0, 0.0, 0.0));
+  }
 }
 
 void vtk_density_map(const char * file_name, const ParticleList &plist,

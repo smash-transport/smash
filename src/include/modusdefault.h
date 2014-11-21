@@ -13,6 +13,8 @@
 
 #include <stdexcept>
 
+#include "potentials.h"
+
 namespace Smash {
 
 /**
@@ -57,7 +59,8 @@ class ModusDefault {
    * \param[in] parameters parameters for the experiment
    */
   void propagate(Particles *particles, const ExperimentParameters &parameters,
-                                       const OutputsList &);
+                                       const OutputsList &,
+                                       const Potentials* pot);
 
   /** \ingroup exception
    *  BadInput is an error to throw if the configuration options are invalid.

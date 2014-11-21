@@ -155,7 +155,7 @@ int BoxModus::sanity_check(Particles *particles) {
 /* propagate all particles */
 void BoxModus::propagate(Particles *particles,
                          const ExperimentParameters &parameters,
-                         const OutputsList &output_list) {
+                         const OutputsList &output_list, const Potentials* pot) {
   const auto &log = logger<LogArea::Box>();
   FourVector distance, position;
   for (ParticleData &data : particles->data()) {

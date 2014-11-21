@@ -14,6 +14,7 @@
 #include "../include/experiment.h"
 #include "../include/modusdefault.h"
 #include "../include/nucleusmodus.h"
+#include "../include/potentials.h"
 #include "../include/spheremodus.h"
 
 #include <boost/filesystem.hpp>
@@ -81,7 +82,8 @@ TEST(propagate_default) {
   OutputsList out;
   // clock, output interval, cross-section, testparticles
   ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1, 1.0};
-  m.propagate(&Pdef, param, out);
+  Potentials* pot = NULL;
+  m.propagate(&Pdef, param, out, pot);
   // after propagation: Momenta should be unchanged.
   COMPARE(Pdef.data(0).momentum(), FourVector(4.0, 0.0, 0.0, 0.0));
   COMPARE(Pdef.data(1).momentum(), FourVector(sqrt(0.02), 0.1, -.1, 0.0));
@@ -115,8 +117,9 @@ TEST(propagate_box) {
   create_particle_list(Pbox);
   OutputsList out;
   // clock, output interval, cross-section, testparticles
-  m.propagate(&Pdef, param, out);
-  b.propagate(&Pbox, param, out);
+  Potentials* pot = NULL;
+  m.propagate(&Pdef, param, out, pot);
+  b.propagate(&Pbox, param, out, pot);
   // Box and Default modus should do the same to momentum:
   COMPARE(Pdef.data(0).momentum(), Pbox.data(0).momentum());
   COMPARE(Pdef.data(1).momentum(), Pbox.data(1).momentum());
@@ -149,8 +152,9 @@ TEST(propagate_collider) {
   create_particle_list(Pdef);
   create_particle_list(Pcol);
   OutputsList out;
-  m.propagate(&Pdef, param, out);
-  c.propagate(&Pcol, param, out);
+  Potentials* pot = NULL;
+  m.propagate(&Pdef, param, out, pot);
+  c.propagate(&Pcol, param, out, pot);
   // Collider and Default modus should do the same everywhere:
   COMPARE(Pdef.data(0).momentum(), Pcol.data(0).momentum());
   COMPARE(Pdef.data(1).momentum(), Pcol.data(1).momentum());
@@ -182,8 +186,9 @@ TEST(propagate_nucleus) {
   create_particle_list(Pdef);
   create_particle_list(Pnuc);
   OutputsList out;
-  m.propagate(&Pdef, param, out);
-  n.propagate(&Pnuc, param, out);
+  Potentials* pot = NULL;
+  m.propagate(&Pdef, param, out, pot);
+  n.propagate(&Pnuc, param, out, pot);
   // Nucleus and Default modus should do the same everywhere:
   COMPARE(Pdef.data(0).momentum(), Pnuc.data(0).momentum());
   COMPARE(Pdef.data(1).momentum(), Pnuc.data(1).momentum());
@@ -213,8 +218,9 @@ TEST(propagate_sphere) {
    create_particle_list(Pdef);
    create_particle_list(Psph);
    OutputsList out;
-   m.propagate(&Pdef, param, out);
-   s.propagate(&Psph, param, out);
+   Potentials* pot = NULL;
+   m.propagate(&Pdef, param, out, pot);
+   s.propagate(&Psph, param, out, pot);
    // Sphere and Default modus should do the same everywhere:
    COMPARE(Pdef.data(0).momentum(), Psph.data(0).momentum());
    COMPARE(Pdef.data(1).momentum(), Psph.data(1).momentum());

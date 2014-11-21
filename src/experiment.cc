@@ -226,6 +226,8 @@ Experiment<Modus>::Experiment(Configuration config)
     log.info() << "Potentials are ON.";
     // potentials need testparticles and gaussian sigma from parameters_
     potentials_ = new Potentials(config["Potentials"], parameters_);
+  } else {
+    potentials_ = NULL;
   }
 }
 
@@ -338,7 +340,7 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
     }
 
     /* (3) Do propagation. */
-    modus_.propagate(&particles_, parameters_, outputs_);
+    modus_.propagate(&particles_, parameters_, outputs_, potentials_);
 
     /* (4) Physics output during the run. */
     // if the timestep of labclock is different in the next tick than
