@@ -18,7 +18,11 @@ TEST(assign) {
   // there is a double for mass and a float for width. This is
   // intentional.
   ParticleType A("smashon", 3.243, 0.234f, smashon);
+#ifdef NDEBUG
+  COMPARE(A.name(), std::string{});
+#else
   COMPARE(A.name(), "smashon");
+#endif
   COMPARE(A.mass(), 3.243f);
   COMPARE(A.width_at_pole(), 0.234f);
   COMPARE(A.pdgcode(), smashon);
