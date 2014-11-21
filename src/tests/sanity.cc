@@ -9,11 +9,10 @@
 
 #include "unittest.h"
 #include "../include/boxmodus.h"
-#include "../include/collidermodus.h"
 #include "../include/configuration.h"
+#include "../include/collidermodus.h"
 #include "../include/experiment.h"
 #include "../include/modusdefault.h"
-#include "../include/nucleusmodus.h"
 #include "../include/spheremodus.h"
 
 #include <boost/filesystem.hpp>
@@ -87,7 +86,7 @@ TEST(sanity_box) {
   conf["Modi"]["Box"]["Length"] = 5.0;
   conf["Modi"]["Box"]["Temperature"] = 0.13;
   conf["Modi"]["Box"]["Start_Time"] = 0.2;
-  ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1, 1.0};
+  ExperimentParameters param{{0.f, 1.f}, 1.f, 1, 1.0};
   BoxModus b(conf["Modi"], param);
   Particles P;
   create_particle_list(P);
@@ -96,27 +95,15 @@ TEST(sanity_box) {
 
 TEST(sanity_collider) {
   Configuration conf(TEST_CONFIG_PATH);
-  conf["Modi"]["Collider"]["Sqrts"] = 1.0;
-  conf["Modi"]["Collider"]["Projectile"] = "661";
-  conf["Modi"]["Collider"]["Target"] = "661";
-  ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1, 1.0};
-  ColliderModus c(conf["Modi"], param);
-  Particles P;
-  create_particle_list(P);
-  COMPARE(c.sanity_check(&P), 0);
-}
-
-TEST(sanity_nucleus) {
-  Configuration conf(TEST_CONFIG_PATH);
-  conf.take({"Modi", "Nucleus", "Projectile"});
-  conf.take({"Modi", "Nucleus", "Target"});
-  conf["Modi"]["Nucleus"]["Sqrtsnn"] = 1.0;
-  conf["Modi"]["Nucleus"]["Sqrts_Reps"][0] = "661";
-  conf["Modi"]["Nucleus"]["Sqrts_Reps"][1] = "661";
-  conf["Modi"]["Nucleus"]["Projectile"]["Particles"]["661"] = 1;
-  conf["Modi"]["Nucleus"]["Target"]["Particles"]["661"] = 1;
-  ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1, 1.0};
-  NucleusModus n(conf["Modi"], param);
+  conf.take({"Modi", "Collider", "Projectile"});
+  conf.take({"Modi", "Collider", "Target"});
+  conf["Modi"]["Collider"]["Sqrtsnn"] = 1.0;
+  conf["Modi"]["Collider"]["Sqrts_Reps"][0] = "661";
+  conf["Modi"]["Collider"]["Sqrts_Reps"][1] = "661";
+  conf["Modi"]["Collider"]["Projectile"]["Particles"]["661"] = 1;
+  conf["Modi"]["Collider"]["Target"]["Particles"]["661"] = 1;
+  ExperimentParameters param{{0.f, 1.f}, 1.f, 1, 1.0};
+  ColliderModus n(conf["Modi"], param);
   Particles P;
   create_particle_list(P);
   COMPARE(n.sanity_check(&P), 0);
@@ -129,9 +116,9 @@ TEST(sanity_sphere) {
   conf["Modi"]["Sphere"]["Start_Time"] = 0.0;
   conf.take({"Modi", "Sphere", "Init_Multiplicities"});
   conf["Modi"]["Sphere"]["Init_Multiplicities"]["661"] = 500;
-  ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1, 1.0};
+  ExperimentParameters param{{0.f, 1.f}, 1.f, 1, 1.0};
   SphereModus s(conf["Modi"], param);
-  Particles P;  
+  Particles P;
   create_particle_list(P);
   COMPARE(s.sanity_check(&P), 0);
 }

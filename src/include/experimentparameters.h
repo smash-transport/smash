@@ -44,8 +44,6 @@ struct ExperimentParameters {
   }
   /// time interval between SMASH giving measurables
   const float output_interval;
-  /// cross section of the elastic scattering
-  const float cross_section;
   /// number of test particle
   int testparticles;
   /// width if gaussian Wigner density of particles

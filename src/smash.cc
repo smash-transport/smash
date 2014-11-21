@@ -55,7 +55,7 @@ void usage(const int rc, const std::string &progname) {
   printf("Calculate transport box\n"
     "  -h, --help              usage information\n"
     "\n"
-    "  -i, --inputfile <file>  path to input configuration file\n"
+    "  -i, --inputfile <file>  path to input configuration file (default: ./config.yaml)\n"
     "  -d, --decaymodes <file> override default decay modes from file\n"
     "  -p, --particles <file>  override default particles from file\n"
     "\n"
@@ -64,7 +64,7 @@ void usage(const int rc, const std::string &progname) {
     "  -e, --endtime <time>    shortcut for -c 'General: { End_Time: <time> }'"
     "\n"
     "\n"
-    "  -o, --output <dir>      output directory (default: $PWD/data/<runid>)\n"
+    "  -o, --output <dir>      output directory (default: ./data/<runid>)\n"
     "  -f, --force             force overwriting files in the output directory"
     "\n"
     "  -v, --version\n\n");
@@ -143,7 +143,7 @@ int main(int argc, char *argv[]) {
     { "particles",  required_argument,      0, 'p' },
     { "output",     required_argument,      0, 'o' },
     { "version",    no_argument,            0, 'v' },
-    { NULL,         0, 0, 0 }
+    { nullptr,      0,                      0,  0  }
   };
 
   /* strip any path to progname */
@@ -151,57 +151,73 @@ int main(int argc, char *argv[]) {
 
   try {
     bool force_overwrite = false;
-    bf::path output_path = default_output_path();
+    bf::path output_path = default_output_path(),
+             input_path("./config.yaml");
+    char *config = nullptr, *particles = nullptr, *decaymodes = nullptr,
+         *modus = nullptr, *end_time = nullptr;
 
-    /* read in config file */
-    Configuration configuration(".");
-
-    /* check for overriding command line arguments */
+    /* parse command-line arguments */
     int opt;
     while ((opt = getopt_long(argc, argv, "c:d:e:fhi:m:p:o:v", longopts,
                               nullptr)) != -1) {
       switch (opt) {
         case 'c':
-          configuration.merge_yaml(optarg);
+          config = optarg;
           break;
-        case 'd': {
-          configuration["decaymodes"] = read_all(bf::ifstream{optarg});
-        } break;
+        case 'd':
+          decaymodes = optarg;
+          break;
         case 'f':
           force_overwrite = true;
           break;
-        case 'i': {
-          const bf::path file(optarg);
-          configuration = Configuration(file.parent_path(), file.filename());
-        } break;
+        case 'i':
+          input_path = optarg;
+          break;
         case 'h':
           usage(EXIT_SUCCESS, progname);
           break;
         case 'm':
-          configuration["General"]["Modus"] = std::string(optarg);
+          modus = optarg;
           break;
-        case 'p': {
-          configuration["particles"] = read_all(bf::ifstream{optarg});
-        } break;
+        case 'p':
+          particles = optarg;
+          break;
         case 'e':
-          configuration["General"]["End_Time"] = abs(atof(optarg));
+          end_time = optarg;
           break;
         case 'o':
           output_path = optarg;
           break;
         case 'v':
+          printf("%s\n", VERSION_MAJOR);
           exit(EXIT_SUCCESS);
         default:
           usage(EXIT_FAILURE, progname);
       }
     }
+
+    /* read in config file */
+    Configuration configuration(input_path.parent_path(),
+                                input_path.filename());
+    if (config)
+      configuration.merge_yaml(config);
+    if (particles)
+      configuration["particles"] = read_all(bf::ifstream{particles});
+    if (decaymodes)
+      configuration["decaymodes"] = read_all(bf::ifstream{decaymodes});
+    if (modus)
+      configuration["General"]["Modus"] = std::string(modus);
+    if (end_time)
+      configuration["General"]["End_Time"] = abs(atof(end_time));
+
+    /* set up logging */
     set_default_loglevel(configuration.take({"Logging", "default"}, einhard::ALL));
     create_all_loggers(configuration["Logging"]);
     log.info(progname, " (", VERSION_MAJOR, ')');
 
+    /* check output path*/
     ensure_path_is_valid(output_path);
     log.debug("output path: ", output_path);
-
     if (!force_overwrite && bf::exists(output_path / "config.yaml")) {
       throw std::runtime_error(
           "Output directory would get overwritten. Select a different output "
@@ -220,13 +236,13 @@ int main(int argc, char *argv[]) {
     log.trace(source_location, " create OutputInterface objects");
     OutputsList output_list;
     /*!\Userguide
-     * \page input_general_ General
+     * \page input_output_options_ Output
      *
      * \key Output: \n
      * Below this key the configuration for the different output formats is
-     * defined. All the \key Enable entries must be present. This \key Enable
-     * setting is used to select the desired output formats/files. The following
-     * outputs exist:
+     * defined. To enable a certain output, set the 'Enable' key below the 
+     * selected format identifier. The identifiers are described below.
+     * The following outputs exist:
      * \li \subpage input_oscar_particlelist
      * \li \subpage input_oscar_collisions
      * \li \subpage input_vtk
@@ -234,7 +250,7 @@ int main(int argc, char *argv[]) {
      * \li \subpage input_binary_particles
      * \li \subpage input_root
      */
-    auto output_conf = configuration["General"]["Output"];
+    auto output_conf = configuration["Output"];
 
     /*!\Userguide
      * \page output_general_ Output files
@@ -242,11 +258,11 @@ int main(int argc, char *argv[]) {
      * below in more detail. Per default, the selected output files will be
      * saved in the directory ./data/\<run_id\>, where \<run_id\> is an integer
      * number starting from 0. At the beginning
-     * of run SMASH checks if there exists ./data/0 directory, if no then it
+     * of a run SMASH checks, if the ./data/0 directory exists. If it does not exist, it
      * is created and all output files are written there. If the directory
      * already exists, SMASH tries for ./data/1, ./data/2 and so on until it
-     * finds a free number. User can change output directory by a command
-     * line option:
+     * finds a free number. The user can change output directory by a command
+     * line option, if desired:
      * \code smash -o <user_output_dir> \endcode
      * SMASH supports several kinds of configurable output formats.
      * They are called OSCAR1999, OSCAR2013, binary OSCAR2013, VTK and ROOT

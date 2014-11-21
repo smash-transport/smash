@@ -5,7 +5,6 @@ Logging:
   #Experiment: ALL
   #Box: ALL
   #Collider: ALL
-  #Nucleus: ALL
   #Sphere: ALL
   #ParticleType: ALL
   #Action: ALL
@@ -15,40 +14,13 @@ Logging:
 
 General:
     # Modus decision
-    Modus:         Nucleus
+    Modus:         Collider
 
     # temporal grid spacing
-    Delta_Time:    0.01
+    Delta_Time:    0.1
 
     # end time of simulation
-    End_Time:      1.0
-
-    # output formats
-    Output:
-        Oscar_Collisions:
-            Enable:             True
-            2013_Format:        True
-            Print_Start_End:    False
-        Oscar_Particlelist:
-            Enable:             True
-            2013_Format:        True
-            Only_Final:         True
-        Vtk:
-            Enable:             False
-        Root:
-            Enable:             True
-            Write_Collisions:   True
-            Write_Particles:    True
-            Autosave_Frequency: 1000
-        Binary_Collisions:
-            Enable:             True
-            Print_Start_End:    True
-        Binary_Particles:
-            Enable:             True
-            Only_Final:         False
-
-    # how much time before recording measurables
-    Output_Interval:  1.0
+    End_Time:      20.0
 
     # initial random seed (auto-generated if negative)
     Randomseed:    1
@@ -65,9 +37,39 @@ General:
     # number of events
     Nevents:       1
 
+Output:
+
+    # how much time before recording measurables
+    Output_Interval:  1.0
+
+    # output formats
+    Oscar_Collisions:
+        Enable:             True
+        2013_Format:        True
+        Print_Start_End:    False
+    Oscar_Particlelist:
+        Enable:             True
+        2013_Format:        True
+        Only_Final:         True
+    Vtk:
+        Enable:             True
+    Root:
+        Enable:             True
+        Write_Collisions:   True
+        Write_Particles:    True
+        Autosave_Frequency: 1000
+    Binary_Collisions:
+        Enable:             True
+        Print_Start_End:    True
+    Binary_Particles:
+        Enable:             True
+        Only_Final:         False
+
 Collision_Term:
     Decays:        True
     Collisions:    True
+   # elastic cross section
+    Sigma:         10.0
 
 Potentials:
     Skyrme:
@@ -115,36 +117,27 @@ Modi:
 
 
     Collider:
-        # Projectile particle
-        Projectile: 211
-
-        # Target particle
-        Target: -211
-
-        # center-of-mass energy in GeV
-        Sqrts: 1.0
-
-    Nucleus:
         # Definitions for the projectile:
-        # Deuteron
         Projectile:
-            Particles: {2212: 1, 2112: 1}
-            # very hard Woods-Saxon distribution.
-            Diffusiveness: .001
-            Automatic: false
+            Particles: {2212: 29, 2112: 34}  # Copper63
+            Automatic: true
             Deformed: false
         # Definitions for the target:
-        # Lead
         Target:
-            Particles: {2212: 82, 2112: 126}
+            Particles: {2212: 29, 2112: 34}  # Copper63
             Automatic: true
             Deformed: false
 
-        # Collision energy (E_LAB, P_LAB, SQRTSNN).
-        Sqrtsnn: 2
+        # Collision energy (E_Kin, P_Lab, Sqrtsnn).
+        Sqrtsnn: 3.0
         # The representative particles (two PDG IDs) determining the
         # subsystem "NN" in sqrt(s_NN). Let's try neutron-neutron.
         Sqrts_Reps: [2112, 2112]
+
         # The reference frame in which to do the calculation.
         # (1 = center of velocity, 2 = center of mass, 3 = fixed target)
         Calculation_Frame: 1
+
+        # Specify an impact parameter
+        Impact:
+            Value: 0.0

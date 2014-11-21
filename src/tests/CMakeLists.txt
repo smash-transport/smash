@@ -55,7 +55,7 @@ else()
    message(WARNING "cpplint.py was not found. The cclint test will be disabled.\nDownload from: http://google-styleguide.googlecode.com/svn/trunk/cpplint/cpplint.py")
 endif()
 
-add_definitions("-DTEST_CONFIG_PATH=\"${PROJECT_SOURCE_DIR}/src\"")
+add_definitions("-DTEST_CONFIG_PATH=bf::path(\"${PROJECT_SOURCE_DIR}/src\")")
 add_definitions("-DBUILD_TESTS")
 
 # compile-only tests
@@ -104,29 +104,24 @@ smash_add_test(mash_help smash smash -h)
 smash_add_test(mash_run smash smash ${SMASH_OPTIONS})
 smash_add_test(box_run smash smash -m Box ${SMASH_OPTIONS})
 smash_add_test(collider_run smash smash -m Collider ${SMASH_OPTIONS})
-smash_add_test(nucleus_run smash smash -m Nucleus ${SMASH_OPTIONS})
 smash_add_test(sphere_run smash smash -m Sphere ${SMASH_OPTIONS})
 
 # verify that binary runs certain time (this corresponds to 20 steps)
 smash_add_test(box_steps smash smash -e 2.0 -c "General: {Delta_Time: 0.1}" -m Box ${SMASH_OPTIONS})
 smash_add_test(collider_steps smash smash -e 2.0 -c "General: {Delta_Time: 0.1}" -m Collider ${SMASH_OPTIONS})
-smash_add_test(nucleus_steps smash smash -e 2.0 -c "General: {Delta_Time: 0.1}" -m Nucleus ${SMASH_OPTIONS})
 smash_add_test(sphere_steps smash smash -e 2.0 -c "General: {Delta_Time: 0.1}" -m Sphere ${SMASH_OPTIONS})
 
 # verify that default run has no mem leaks
 find_program(CTEST_MEMORYCHECK_COMMAND valgrind)
 if(CTEST_MEMORYCHECK_COMMAND)
    message(STATUS "valgrind found at ${CTEST_MEMORYCHECK_COMMAND}")
-   set(CTEST_MEMORYCHECK_COMMAND_OPTIONS "-v")
+   set(CTEST_MEMORYCHECK_COMMAND_OPTIONS "-v" "--error-exitcode=1")
    smash_add_test(memcheck_box smash ${CTEST_MEMORYCHECK_COMMAND}
       ${CTEST_MEMORYCHECK_COMMAND_OPTIONS}
       ${PROJECT_BINARY_DIR}/smash -c "General: {End_Time: 1.0, Modus: Box}" ${SMASH_OPTIONS})
    smash_add_test(memcheck_collider smash ${CTEST_MEMORYCHECK_COMMAND}
       ${CTEST_MEMORYCHECK_COMMAND_OPTIONS}
       ${PROJECT_BINARY_DIR}/smash -c "General: {End_Time: 5.0, Delta_Time: 0.1}" -m Collider ${SMASH_OPTIONS})
-   smash_add_test(memcheck_nucleus smash ${CTEST_MEMORYCHECK_COMMAND}
-      ${CTEST_MEMORYCHECK_COMMAND_OPTIONS}
-      ${PROJECT_BINARY_DIR}/smash -c "General: {End_Time: 5.0, Delta_Time: 0.1}" -m Nucleus ${SMASH_OPTIONS})
    smash_add_test(memcheck_sphere smash ${CTEST_MEMORYCHECK_COMMAND}
       ${CTEST_MEMORYCHECK_COMMAND_OPTIONS}
       ${PROJECT_BINARY_DIR}/smash -c "General: {End_Time: 5.0, Delta_Time: 0.1}" -m Sphere ${SMASH_OPTIONS})
@@ -137,6 +132,5 @@ endif()
 if(HAVE_SANITIZER)
    smash_add_test(sanitizer_box      smash_sanitizer smash_sanitizer -e 5.0 -m Box ${SMASH_OPTIONS})
    smash_add_test(sanitizer_collider smash_sanitizer smash_sanitizer -e 5.0 -m Collider ${SMASH_OPTIONS})
-   smash_add_test(sanitizer_nucleus  smash_sanitizer smash_sanitizer -e 5.0 -m Nucleus ${SMASH_OPTIONS})
    smash_add_test(sanitizer_sphere   smash_sanitizer smash_sanitizer -e 5.0 -m Sphere ${SMASH_OPTIONS})
 endif()

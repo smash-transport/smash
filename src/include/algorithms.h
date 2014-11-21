@@ -10,7 +10,8 @@
 #ifndef SRC_INCLUDE_ALGORITHMS_H_
 #define SRC_INCLUDE_ALGORITHMS_H_
 
-#include<cmath>
+#include <algorithm>
+#include <cmath>
 
 /**
  * \file
@@ -62,6 +63,19 @@ static bool enforce_periodic_boundaries(
     }
   }
   return had_to_wrap;
+}
+
+/**
+ * Convenience wrapper for \c std::all_of that operates on a complete container.
+ *
+ * Returns whether all elements in \p c return \c true when passed to \p p.
+ * \param c A container of elements to examine.
+ * \param p unary predicate.
+ */
+template <typename Container, typename UnaryPredicate>
+inline bool all_of(Container &&c, UnaryPredicate &&p) {
+  return std::all_of(std::begin(c), std::end(c),
+                     std::forward<UnaryPredicate>(p));
 }
 
 }  // namespace Smash

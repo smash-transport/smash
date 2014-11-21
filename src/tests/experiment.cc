@@ -36,12 +36,6 @@ TEST(create_collider) {
   VERIFY(!!ExperimentBase::create(conf));
 }
 
-TEST(create_nucleus) {
-  Configuration conf(TEST_CONFIG_PATH);
-  conf["General"]["Modus"] = "Nucleus";
-  VERIFY(!!ExperimentBase::create(conf));
-}
-
 TEST(create_sphere) {
   Configuration conf(TEST_CONFIG_PATH);
   conf["General"]["Modus"] = "Sphere";

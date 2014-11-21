@@ -25,7 +25,6 @@
 #include "include/grid.h"
 #include "include/logging.h"
 #include "include/macros.h"
-#include "include/nucleusmodus.h"
 #include "include/potentials.h"
 #include "include/random.h"
 #include "include/spheremodus.h"
@@ -72,22 +71,19 @@ std::unique_ptr<ExperimentBase> ExperimentBase::create(Configuration config) {
    * Selects a modus for the calculation, e.g.\ infinite matter
    * calculation, collision of two particles or collision of nuclei. The modus
    * will be configured in \ref input_modi_. Recognized values are:
-   * \li \key Nucleus for collisions of nuclei or compound objects. See \ref
-   *     \NucleusModus
+   * \li \key Collider for collisions of nuclei or compound objects. See \ref
+   *     \ColliderModus
    * \li \key Sphere for calculations of the expansion of a thermalized sphere. See
    *     \ref \SphereModus
-   * \li \key Collider for testing elementary cross-sections. See \ref
-   *     \ColliderModus
    * \li \key Box for infinite matter calculation in a rectangular box. See \ref
    *     \BoxModus
    */
 
   /*!\Userguide
    * \page input_modi_ Modi
-   * \li \subpage input_modi_nucleus_
+   * \li \subpage input_modi_collider_
    * \li \subpage input_modi_sphere_
    * \li \subpage input_modi_box_
-   * \li \subpage input_modi_collider_
    */
   const std::string modus_chooser = config.take({"General", "Modus"});
   log.info() << "Modus for this calculation: " << modus_chooser;
@@ -99,9 +95,7 @@ std::unique_ptr<ExperimentBase> ExperimentBase::create(Configuration config) {
   if (modus_chooser.compare("Box") == 0) {
     return ExperimentPointer(new Experiment<BoxModus>(config));
   } else if (modus_chooser.compare("Collider") == 0) {
-    return ExperimentPointer(new Experiment<ColliderModus>(config));
-  } else if (modus_chooser.compare("Nucleus") == 0) {
-      return ExperimentPointer(new Experiment<NucleusModus>(config));
+      return ExperimentPointer(new Experiment<ColliderModus>(config));
   } else if (modus_chooser.compare("Sphere") == 0) {
       return ExperimentPointer(new Experiment<SphereModus>(config));
   } else {
@@ -116,12 +110,10 @@ namespace {
  * \key Delta_Time (float, required): \n
  * Time step for the calculation, in fm/c.
  *
- * \key Testparticles (int, required): \n
+ * \key Testparticles (int, optional, default = 1): \n
  * How many test particles per real particles should be simulated.
  *
- * \key Sigma (float, required): \n
- * Elastic cross-section.
- *
+ * \page input_output_options_ Output
  * \key Output_Interval (float, required): \n
  * Defines the period of intermediate output of the status of the simulated
  * system in Standard Output and other output formats which support this
@@ -139,21 +131,19 @@ namespace {
 ExperimentParameters create_experiment_parameters(Configuration config) {
   const auto &log = logger<LogArea::Experiment>();
   log.trace() << source_location;
-  const int testparticles = config.take({"General", "Testparticles"});
-  float cross_section = config.take({"General", "Sigma"});
 
-  /* reducing cross section according to number of test particle */
-  if (testparticles > 1) {
-    log.info() << "IC test particle: " << testparticles;
-    cross_section /= testparticles;
-    log.info() << "Elastic cross section: " << cross_section << " mb";
+  int testparticles;
+  if (config.has_value({"General", "Testparticles"})) {
+    testparticles = config.take({"General", "Testparticles"});
+  } else {
+    testparticles = 1;
   }
 
   // The clock initializers are only read here and taken later when
   // assigning initial_clock_.
   return {{0.0f, config.read({"General", "Delta_Time"})},
-           config.take({"General", "Output_Interval"}),
-           cross_section, testparticles,
+           config.take({"Output", "Output_Interval"}),
+           testparticles,
            config.take({"General", "Gaussian_Sigma"})};
 }
 }  // unnamed namespace
@@ -163,7 +153,6 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
  */
 template <typename Modus>
 std::ostream &operator<<(std::ostream &out, const Experiment<Modus> &e) {
-  out << "Elastic cross section: " << e.parameters_.cross_section << " mb\n";
   out << "Starting with temporal stepsize: " << e.parameters_.timestep_duration()
       << " fm/c\n";
   out << "End time: " << e.end_time_ << " fm/c\n";
@@ -218,7 +207,7 @@ Experiment<Modus>::Experiment(Configuration config)
   }
   if (!config.has_value({"Collision_Term", "Collisions"})
       || config.take({"Collision_Term", "Collisions"})) {
-    action_finders_.emplace_back(new ScatterActionsFinder(parameters_));
+    action_finders_.emplace_back(new ScatterActionsFinder(config, parameters_));
   }
 
   //TODO(oliiny,mkretz): check also that "Potentials" is not empty
@@ -293,12 +282,12 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
       conserved_initial_, time_start_, parameters_.labclock.current_time());
 
   while (!(++parameters_.labclock > end_time_)) {
-    std::vector<ActionPtr> actions;  // XXX: a std::list might be better suited
+    std::vector<ActionPtr> actions;  // TODO: a std::list might be better suited
                                      // for the task: lots of appending, then
                                      // sorting and finally a single linear
                                      // iteration
 
-    Grid<GridOptions::Normal> grid(
+    const auto &grid = modus_.create_grid(
         ParticleList{particles_.data().begin(), particles_.data().end()});
     grid.iterate_cells([&](
         const ParticleList &search_list,  // a list of particles where each pair
@@ -338,6 +327,8 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
     } else {
       log.debug("no actions performed");
     }
+
+    modus_.sanity_check(&particles_);
 
     /* (3) Do propagation. */
     modus_.propagate(&particles_, parameters_, outputs_, potentials_);

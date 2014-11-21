@@ -19,18 +19,18 @@
 
 namespace Smash {
 
-ScatterAction::ScatterAction(const ParticleData &in_part1,
-                             const ParticleData &in_part2,
+ScatterAction::ScatterAction(const ParticleData &in_part_a,
+                             const ParticleData &in_part_b,
                              float time_of_execution)
-    : Action({in_part1, in_part2}, time_of_execution) {}
+    : Action({in_part_a, in_part_b}, time_of_execution) {}
 
 
 void ScatterAction::perform(Particles *particles, size_t &id_process) {
   const auto &log = logger<LogArea::ScatterAction>();
 
   /* Relevant particle IDs for the collision. */
-  int id1 = incoming_particles_[0].id();
-  int id2 = incoming_particles_[1].id();
+  int id_a = incoming_particles_[0].id();
+  int id_b = incoming_particles_[1].id();
 
   log.debug("Process ", id_process, " particles:\n", incoming_particles_[0],
             incoming_particles_[1]);
@@ -48,8 +48,8 @@ void ScatterAction::perform(Particles *particles, size_t &id_process) {
     outgoing_particles_[0].set_id_process(id_process);
     outgoing_particles_[1].set_id_process(id_process);
 
-    particles->data(id1) = outgoing_particles_[0];
-    particles->data(id2) = outgoing_particles_[1];
+    particles->data(id_a) = outgoing_particles_[0];
+    particles->data(id_b) = outgoing_particles_[1];
   } else {
     /* resonance formation */
     log.debug("Process: Resonance formation.");
@@ -78,8 +78,8 @@ void ScatterAction::perform(Particles *particles, size_t &id_process) {
     }
 
     /* Remove the initial particles */
-    particles->remove(id1);
-    particles->remove(id2);
+    particles->remove(id_a);
+    particles->remove(id_b);
 
     log.debug("Particle map now has ", particles->size(), " elements.");
   }
@@ -120,14 +120,14 @@ double ScatterAction::cm_momentum_squared() const {
 double ScatterAction::particle_distance() const {
   const auto &log = logger<LogArea::ScatterAction>();
   // local copy of particles (since we need to boost them)
-  ParticleData p1 = incoming_particles_[0];
-  ParticleData p2 = incoming_particles_[1];
+  ParticleData p_a = incoming_particles_[0];
+  ParticleData p_b = incoming_particles_[1];
   /* Boost particles to center-of-momentum frame. */
   ThreeVector velocity = beta_cm();
-  p1.boost(velocity);
-  p2.boost(velocity);
-  ThreeVector pos_diff = p1.position().threevec() - p2.position().threevec();
-  ThreeVector mom_diff = p1.momentum().threevec() - p2.momentum().threevec();
+  p_a.boost(velocity);
+  p_b.boost(velocity);
+  ThreeVector pos_diff = p_a.position().threevec() - p_b.position().threevec();
+  ThreeVector mom_diff = p_a.momentum().threevec() - p_b.momentum().threevec();
   log.debug("Particle ", incoming_particles_, " position difference [fm]: ",
             pos_diff, ", momentum difference [GeV]: ", mom_diff);
   /* Zero momentum leads to infite distance. */
@@ -163,17 +163,8 @@ ProcessBranch ScatterAction::elastic_cross_section(float elast_par) {
 ProcessBranchList ScatterAction::resonance_cross_sections() {
   const auto &log = logger<LogArea::ScatterAction>();
   ProcessBranchList resonance_process_list;
-  ParticleType type_particle1 = incoming_particles_[0].type(),
-               type_particle2 = incoming_particles_[1].type();
-
-  /* Isospin symmetry factor, by default 1 */
-  int symmetryfactor = 1;
-  /* The isospin symmetry factor is 2 if both particles are in the same
-   * isospin multiplet. */
-  if (type_particle1.pdgcode().iso_multiplet()
-      == type_particle2.pdgcode().iso_multiplet()) {
-    symmetryfactor = 2;
-  }
+  ParticleType type_particle_a = incoming_particles_[0].type(),
+               type_particle_b = incoming_particles_[1].type();
 
   const double s = mandelstam_s();
   const double p_cm_sqr = cm_momentum_squared();
@@ -186,16 +177,15 @@ ProcessBranchList ScatterAction::resonance_cross_sections() {
     }
 
     /* Same resonance as in the beginning, ignore */
-    if ((!type_particle1.is_stable()
-         && type_resonance.pdgcode() == type_particle1.pdgcode())
-        || (!type_particle2.is_stable()
-            && type_resonance.pdgcode() == type_particle2.pdgcode())) {
+    if ((!type_particle_a.is_stable()
+         && type_resonance.pdgcode() == type_particle_a.pdgcode())
+        || (!type_particle_b.is_stable()
+            && type_resonance.pdgcode() == type_particle_b.pdgcode())) {
       continue;
     }
 
-    float resonance_xsection
-      = symmetryfactor * two_to_one_formation(type_particle1, type_particle2,
-                                              type_resonance, s, p_cm_sqr);
+    float resonance_xsection = two_to_one_formation(type_particle_a,
+                                 type_particle_b, type_resonance, s, p_cm_sqr);
 
     /* If cross section is non-negligible, add resonance to the list */
     if (resonance_xsection > really_small) {
@@ -203,8 +193,8 @@ ProcessBranchList ScatterAction::resonance_cross_sections() {
                                                      resonance_xsection));
 
       log.debug("Found resonance: ", type_resonance);
-      log.debug("2->1 with original particles: ", type_particle1,
-                type_particle2);
+      log.debug("2->1 with original particles: ", type_particle_a,
+                type_particle_b);
     }
   }
   return resonance_process_list;
@@ -216,24 +206,24 @@ void ScatterAction::momenta_exchange() {
   outgoing_particles_[0] = incoming_particles_[0];
   outgoing_particles_[1] = incoming_particles_[1];
 
-  ParticleData *p1 = &outgoing_particles_[0];
-  ParticleData *p2 = &outgoing_particles_[1];
+  ParticleData *p_a = &outgoing_particles_[0];
+  ParticleData *p_b = &outgoing_particles_[1];
 
   /* Boost to CM frame. */
   ThreeVector velocity_CM = beta_cm();
-  p1->boost(velocity_CM);
-  p2->boost(velocity_CM);
+  p_a->boost(velocity_CM);
+  p_b->boost(velocity_CM);
 
   /* debug output */
-  log.debug("center of momenta 1", p1->momentum());
-  log.debug("center of momenta 2", p2->momentum());
+  log.debug("center of momenta a", p_a->momentum());
+  log.debug("center of momenta b", p_b->momentum());
 
   /* We are in the center of momentum,
      hence this is equal for both particles. */
-  const double momentum_radial = p1->momentum().abs3();
+  const double momentum_radial = p_a->momentum().abs3();
 
   /* Particle exchange momenta and scatter to random direction.
-   * XXX: Angles should be sampled from differential cross section
+   * TODO: Angles should be sampled from differential cross section
    * of this process. */
   Angles phitheta;
   phitheta.distribute_isotropically();
@@ -242,16 +232,16 @@ void ScatterAction::momenta_exchange() {
   /* Only direction of 3-momentum, not magnitude, changes in CM frame.
    * Thus particle energies remain the same (Lorentz boost will change them for
    * computational frame, however). */
-  p1->set_3momentum(phitheta.threevec() * momentum_radial);
-  p2->set_3momentum(-phitheta.threevec() * momentum_radial);
+  p_a->set_3momentum(phitheta.threevec() * momentum_radial);
+  p_b->set_3momentum(-phitheta.threevec() * momentum_radial);
 
   /* debug output */
-  log.debug("exchanged momenta 1", p1->momentum());
-  log.debug("exchanged momenta 2", p2->momentum());
+  log.debug("exchanged momenta a", p_a->momentum());
+  log.debug("exchanged momenta b", p_b->momentum());
 
   /* Boost back. */
-  p1->boost(-velocity_CM);
-  p2->boost(-velocity_CM);
+  p_a->boost(-velocity_CM);
+  p_b->boost(-velocity_CM);
 }
 
 
@@ -285,29 +275,29 @@ void ScatterAction::resonance_formation() {
 
 ProcessBranch ScatterActionBaryonBaryon::elastic_cross_section(float elast_par) {
 
-  const PdgCode &pdg1 = incoming_particles_[0].type().pdgcode();
-  const PdgCode &pdg2 = incoming_particles_[1].type().pdgcode();
+  const PdgCode &pdg_a = incoming_particles_[0].type().pdgcode();
+  const PdgCode &pdg_b = incoming_particles_[1].type().pdgcode();
 
   const double s = mandelstam_s();
 
-  if ((pdg1.iso_multiplet() == 0x1112) &&
-      (pdg2.iso_multiplet() == 0x1112)) {
+  if ((pdg_a.iso_multiplet() == 0x1112) &&
+      (pdg_b.iso_multiplet() == 0x1112)) {
     /* Nucleon-Nucleon scattering: use parametrized cross sections. */
     float sig_el;
-    if (pdg1 == pdg2) {                          /* pp */
+    if (pdg_a == pdg_b) {                          /* pp */
       sig_el = pp_elastic(s);
-    } else if (pdg1.is_antiparticle_of(pdg2)) {  /* ppbar */
+    } else if (pdg_a.is_antiparticle_of(pdg_b)) {  /* ppbar */
       sig_el = ppbar_elastic(s);
     } else {                                     /* np */
       sig_el = np_elastic(s);
     }
     if (sig_el>0.) {
-      return ProcessBranch(pdg1, pdg2, sig_el);
+      return ProcessBranch(pdg_a, pdg_b, sig_el);
     } else {
       std::stringstream ss;
-      ss << "problem in CrossSections::elastic: " << pdg1.string().c_str()
-        << " " << pdg2.string().c_str() << " " << pdg1.spin() << " "
-        << pdg2.spin() << " " << sig_el << " " << s;
+      ss << "problem in CrossSections::elastic: " << pdg_a.string().c_str()
+        << " " << pdg_b.string().c_str() << " " << pdg_a.spin() << " "
+        << pdg_b.spin() << " " << sig_el << " " << s;
       throw std::runtime_error(ss.str());
     }
   } else {
@@ -318,17 +308,17 @@ ProcessBranch ScatterActionBaryonBaryon::elastic_cross_section(float elast_par) 
 
 ProcessBranchList ScatterActionBaryonBaryon::two_to_two_cross_sections() {
   ProcessBranchList process_list;
-  ParticleType type_particle1 = incoming_particles_[0].type(),
-               type_particle2 = incoming_particles_[1].type();
+  ParticleType type_particle_a = incoming_particles_[0].type(),
+               type_particle_b = incoming_particles_[1].type();
 
-  if (type_particle1.pdgcode().iso_multiplet() == 0x1112 &&
-      type_particle2.pdgcode().iso_multiplet() == 0x1112) {
+  if (type_particle_a.pdgcode().iso_multiplet() == 0x1112 &&
+      type_particle_b.pdgcode().iso_multiplet() == 0x1112) {
     /* Nucleon+Nucleon: find all resonance production channels */
-      process_list = nuc_nuc_to_nuc_res (type_particle1, type_particle2);
-  } else if (type_particle1.pdgcode().iso_multiplet() == 0x1112 ||
-             type_particle2.pdgcode().iso_multiplet() == 0x1112) {
+      process_list = nuc_nuc_to_nuc_res (type_particle_a, type_particle_b);
+  } else if (type_particle_a.pdgcode().iso_multiplet() == 0x1112 ||
+             type_particle_b.pdgcode().iso_multiplet() == 0x1112) {
     /* Nucleon+Resonance: absorption */
-    process_list = nuc_res_to_nuc_nuc (type_particle1, type_particle2);
+    process_list = nuc_res_to_nuc_nuc (type_particle_a, type_particle_b);
   }
 
   return process_list;
@@ -365,8 +355,8 @@ static float nn_to_resonance_matrix_element(const double mandelstam_s,
 
 
 ProcessBranchList ScatterActionBaryonBaryon::nuc_nuc_to_nuc_res (
-                            const ParticleType &type_particle1,
-                            const ParticleType &type_particle2) {
+                            const ParticleType &type_particle_a,
+                            const ParticleType &type_particle_b) {
 
   const auto &log = logger<LogArea::ScatterAction>();
   ProcessBranchList process_list;
@@ -380,7 +370,7 @@ ProcessBranchList ScatterActionBaryonBaryon::nuc_nuc_to_nuc_res (
 
       /* Check for charge conservation. */
       if (type_resonance.charge() + second_type.charge()
-          != type_particle1.charge() + type_particle2.charge()) {
+          != type_particle_a.charge() + type_particle_b.charge()) {
         continue;
       }
 
@@ -388,11 +378,11 @@ ProcessBranchList ScatterActionBaryonBaryon::nuc_nuc_to_nuc_res (
 
       /* Compute total isospin range with given initial and final particles. */
       int I_max = std::min(type_resonance.isospin() + second_type.isospin(),
-                          type_particle1.isospin() + type_particle2.isospin());
+                          type_particle_a.isospin() + type_particle_b.isospin());
       int I_min = std::max(abs(type_resonance.isospin()
                               - second_type.isospin()),
-                          abs(type_particle1.isospin()
-                              - type_particle2.isospin()));
+                          abs(type_particle_a.isospin()
+                              - type_particle_b.isospin()));
       I_min = std::max(I_min, abs(I_z));
 
       /* Loop over total isospin in allowed range.
@@ -400,7 +390,7 @@ ProcessBranchList ScatterActionBaryonBaryon::nuc_nuc_to_nuc_res (
       double isospin_factor = 0.;
       for (int I_tot = I_max; I_tot >= I_min; I_tot -= 2) {
         isospin_factor = isospin_factor +
-            isospin_clebsch_gordan(type_particle1, type_particle2, I_tot, I_z)
+            isospin_clebsch_gordan(type_particle_a, type_particle_b, I_tot, I_z)
           * isospin_clebsch_gordan(type_resonance, second_type, I_tot, I_z);
       }
 
@@ -418,11 +408,18 @@ ProcessBranchList ScatterActionBaryonBaryon::nuc_nuc_to_nuc_res (
         continue;
       }
 
+      /* Calculate matrix element. */
+      const float matrix_element = nn_to_resonance_matrix_element(s,
+                                                   type_resonance, second_type);
+      if (matrix_element <= 0.) {
+        continue;
+      }
+
       /* Calculate resonance production cross section
-      * using the Breit-Wigner distribution as probability amplitude.
-      * Integrate over the allowed resonance mass range. */
+       * using the Breit-Wigner distribution as probability amplitude.
+       * Integrate over the allowed resonance mass range. */
       IntegrandParameters params = {&type_resonance, second_type.mass(), s};
-      log.debug("Process: ", type_particle1, type_particle2," -> ",
+      log.debug("Process: ", type_particle_a, type_particle_b," -> ",
                 second_type, type_resonance);
       log.debug("Limits: ", lower_limit, upper_limit);
       double resonance_integral, integral_error;
@@ -435,10 +432,8 @@ ProcessBranchList ScatterActionBaryonBaryon::nuc_nuc_to_nuc_res (
       /* Cross section for 2->2 process with one resonance in final state.
        * Based on Eq. (46) in PhD thesis of J. Weil
        * (https://gibuu.hepforge.org/trac/chrome/site/files/phd/weil.pdf) */
-      float xsection
-           = isospin_factor * isospin_factor
-             * resonance_integral / (s * std::sqrt(cm_momentum_squared()))
-             * nn_to_resonance_matrix_element(s, type_resonance, second_type);
+      float xsection = isospin_factor * isospin_factor * matrix_element
+                * resonance_integral / (s * std::sqrt(cm_momentum_squared()));
 
       if (xsection > really_small) {
         process_list.push_back(ProcessBranch(type_resonance.pdgcode(),
@@ -446,7 +441,7 @@ ProcessBranchList ScatterActionBaryonBaryon::nuc_nuc_to_nuc_res (
         log.debug("Found 2->2 creation process for resonance ",
                   type_resonance);
         log.debug("2->2 with original particles: ",
-                  type_particle1, type_particle2);
+                  type_particle_a, type_particle_b);
       }
     }
   }
@@ -455,18 +450,18 @@ ProcessBranchList ScatterActionBaryonBaryon::nuc_nuc_to_nuc_res (
 
 
 ProcessBranchList ScatterActionBaryonBaryon::nuc_res_to_nuc_nuc (
-                            const ParticleType &type_particle1,
-                            const ParticleType &type_particle2) {
+                            const ParticleType &type_particle_a,
+                            const ParticleType &type_particle_b) {
 
   const ParticleType *type_resonance, *type_nucleon;
   ProcessBranchList process_list;
 
-  if (type_particle1.pdgcode().iso_multiplet() == 0x1112) {
-    type_nucleon = &type_particle1;
-    type_resonance = &type_particle2;
-  } else if (type_particle2.pdgcode().iso_multiplet() == 0x1112) {
-    type_nucleon = &type_particle2;
-    type_resonance = &type_particle1;
+  if (type_particle_a.pdgcode().iso_multiplet() == 0x1112) {
+    type_nucleon = &type_particle_a;
+    type_resonance = &type_particle_b;
+  } else if (type_particle_b.pdgcode().iso_multiplet() == 0x1112) {
+    type_nucleon = &type_particle_b;
+    type_resonance = &type_particle_a;
   } else {
     throw std::runtime_error("Error: no nucleon found in nuc_res_to_nuc_nuc!");
   }
@@ -476,11 +471,11 @@ ProcessBranchList ScatterActionBaryonBaryon::nuc_res_to_nuc_nuc (
   double p_cm_final = sqrt(s - 4.*type_nucleon->mass_sqr())/2.;
 
   /* Loop over all nucleon charge states. */
-  for (const ParticleType &nuc1 : ParticleType::list_nucleons()) {
-    for (const ParticleType &nuc2 : ParticleType::list_nucleons()) {
+  for (const ParticleType &nuc_a : ParticleType::list_nucleons()) {
+    for (const ParticleType &nuc_b : ParticleType::list_nucleons()) {
       /* Check for charge conservation. */
       if (type_resonance->charge() + type_nucleon->charge()
-          != nuc1.charge() + nuc2.charge()) {
+          != nuc_a.charge() + nuc_b.charge()) {
         continue;
       }
 
@@ -488,10 +483,10 @@ ProcessBranchList ScatterActionBaryonBaryon::nuc_res_to_nuc_nuc (
 
       /* Compute total isospin range with given initial and final particles. */
       int I_max = std::min(type_resonance->isospin() + type_nucleon->isospin(),
-                          nuc1.isospin() + nuc2.isospin());
+                          nuc_a.isospin() + nuc_b.isospin());
       int I_min = std::max(abs(type_resonance->isospin()
                                - type_nucleon->isospin()),
-                          abs(nuc1.isospin() - nuc2.isospin()));
+                          abs(nuc_a.isospin() - nuc_b.isospin()));
       I_min = std::max(I_min, abs(I_z));
 
       /* Loop over total isospin in allowed range.
@@ -499,7 +494,7 @@ ProcessBranchList ScatterActionBaryonBaryon::nuc_res_to_nuc_nuc (
       double isospin_factor = 0.;
       for (int I_tot = I_max; I_tot >= I_min; I_tot -= 2) {
         isospin_factor = isospin_factor +
-            isospin_clebsch_gordan(nuc1, nuc2, I_tot, I_z)
+            isospin_clebsch_gordan(nuc_a, nuc_b, I_tot, I_z)
           * isospin_clebsch_gordan(*type_resonance, *type_nucleon, I_tot, I_z);
       }
 
@@ -508,24 +503,30 @@ ProcessBranchList ScatterActionBaryonBaryon::nuc_res_to_nuc_nuc (
         continue;
       }
 
+      /* Calculate matrix element. */
+      const float matrix_element = nn_to_resonance_matrix_element(s,
+                                                *type_resonance, *type_nucleon);
+      if (matrix_element <= 0.) {
+        continue;
+      }
+
       /* Cross section for 2->2 resonance absorption, obtained via detailed
        * balance from the inverse reaction.
        * See eqs. (B.6), (B.9) and (181) in the GiBUU review paper.
        * There is a symmetry factor 1/2 and a spin factor 2/(2S+1) involved,
        * which combine to 1/(2S+1). */
-      float xsection
-        = isospin_factor * isospin_factor * p_cm_final
-          / ((type_resonance->spin()+1) * s * std::sqrt(cm_momentum_squared()))
-          * nn_to_resonance_matrix_element(s, *type_resonance, *type_nucleon);
+      float xsection = isospin_factor * isospin_factor
+        * p_cm_final * matrix_element
+        / ((type_resonance->spin()+1) * s * std::sqrt(cm_momentum_squared()));
 
       if (xsection > really_small) {
-        process_list.push_back(ProcessBranch(nuc1.pdgcode(), nuc2.pdgcode(),
+        process_list.push_back(ProcessBranch(nuc_a.pdgcode(), nuc_b.pdgcode(),
                                              xsection));
         const auto &log = logger<LogArea::ScatterAction>();
         log.debug("Found 2->2 absoption process for resonance ",
                   type_resonance);
         log.debug("2->2 with original particles: ",
-                  type_particle1, type_particle2);
+                  type_particle_a, type_particle_b);
       }
     }
   }

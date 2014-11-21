@@ -11,6 +11,7 @@
 #define SRC_INCLUDE_SCATTERACTIONSFINDER_H_
 
 #include "actionfinderfactory.h"
+#include "configuration.h"
 
 namespace Smash {
 
@@ -21,9 +22,10 @@ namespace Smash {
 class ScatterActionsFinder : public ActionFinderInterface {
  public:
   /** Initialize the finder with the given parameters. */
-  ScatterActionsFinder(const ExperimentParameters &parameters);
+  ScatterActionsFinder(Configuration config, 
+					   const ExperimentParameters &parameters);
   /** Determine the collision time of the two particles. */
-  static double collision_time(const ParticleData &p1, const ParticleData &p2);
+  static double collision_time(const ParticleData &p_a, const ParticleData &p_b);
   /** Check the whole particle list for collisions
    * and return a list with the corrsponding Action objects. */
   ActionList find_possible_actions(
@@ -36,7 +38,7 @@ class ScatterActionsFinder : public ActionFinderInterface {
   ActionPtr check_collision(const ParticleData &data_a,
                             const ParticleData &data_b) const;
   /** Elastic cross section parameter (in mb). */
-  const float elastic_parameter_ = 0.0;
+  float elastic_parameter_ = 0.0;
 };
 
 #if 0

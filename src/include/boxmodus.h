@@ -69,6 +69,11 @@ class BoxModus : public ModusDefault {
                                        const OutputsList &output_list,
                                        const Potentials* pot);
 
+  Grid<GridOptions::PeriodicBoundaries> create_grid(
+      ParticleList &&all_particles) const {
+    return {{{0, 0, 0}, {length_, length_, length_}}, std::move(all_particles)};
+  }
+
  private:
   /** initial condition
    *

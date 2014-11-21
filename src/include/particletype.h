@@ -62,7 +62,7 @@ class ParticleType {
   PdgCode pdgcode() const { return pdgcode_; }
 
   /// \copydoc PdgCode::isospin_total
-  int isospin() const { return isospin_; }
+  unsigned int isospin() const { return isospin_; }
 
   /// \copydoc PdgCode::isospin3
   int isospin3() const { return pdgcode_.isospin3(); }
@@ -71,10 +71,13 @@ class ParticleType {
   int charge() const { return charge_; }
 
   /// \copydoc PdgCode::spin
-  int spin() const { return pdgcode_.spin(); }
+  unsigned int spin() const { return pdgcode_.spin(); }
 
   /// \copydoc PdgCode::is_hadron
   bool is_hadron() const { return pdgcode_.is_hadron(); }
+
+  /// \copydoc PdgCode::baryon_number
+  int baryon_number() const { return pdgcode_.baryon_number(); }
 
   /// Check if the particle is stable
   inline bool is_stable() const;
@@ -114,6 +117,17 @@ class ParticleType {
    * \param m Invariant mass of the decaying particle.
    */
   ProcessBranchList get_partial_widths(const float m) const;
+
+  /**
+   * Get the mass-dependent partial width of a particle with mass m,
+   * decaying into two given daughter particles.
+   *
+   * \param m Invariant mass of the decaying particle.
+   * \param pdg1 PdgCode of first daughter particle.
+   * \param pdg2 PdgCode of second daughter particle.
+   */
+  float get_partial_width(const float m,
+                          const PdgCode pdg1,const PdgCode pdg2) const;
 
   /**
    * Returns a list of all ParticleType objects.
@@ -168,7 +182,7 @@ class ParticleType {
    *
    * This is filled automatically from pdgcode_.
    */
-  int isospin_;
+  unsigned int isospin_;
   /** charge of the particle
    *
    * This is filled automatically from pdgcode_.

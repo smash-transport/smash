@@ -10,225 +10,150 @@
 #ifndef SRC_INCLUDE_GRID_H_
 #define SRC_INCLUDE_GRID_H_
 
-#include <algorithm>
-#include <stdexcept>
+#include <functional>
 #include <vector>
 #include <array>
-#include <assert.h>
 
 #include "forwarddeclarations.h"
-#include "fourvector.h"
-#include "logging.h"
-#include "particledata.h"
-#include "threevector.h"
-
-namespace std {
-template <typename T>
-std::ostream &operator<<(std::ostream &out, const std::vector<T> &v) {
-  auto column = out.tellp();
-  out << "vector{";
-  for (const auto &x : v) {
-    if (out.tellp() - column >= 100) {
-      out << '\n';
-      column = out.tellp();
-    }
-    out << x << ' ';
-  }
-  return out << '}';
-}
-
-template <typename T>
-std::ostream &operator<<(std::ostream &out, const std::initializer_list<T> &v) {
-  auto column = out.tellp();
-  out << "initializer_list{";
-  for (const auto &x : v) {
-    if (out.tellp() - column >= 100) {
-      out << '\n';
-      column = out.tellp();
-    }
-    out << x << ' ';
-  }
-  return out << '}';
-}
-
-template <typename T, std::size_t N>
-std::ostream &operator<<(std::ostream &out, const std::array<T, N> &a) {
-  out << "array{";
-  for (const auto &x : a) {
-    out << x << ' ';
-  }
-  return out << '}';
-}
-}  // namespace std
 
 namespace Smash {
 
+/**
+ * Identifies the mode of the Grid.
+ */
 enum class GridOptions : char {
+  /// without ghost cells
   Normal = 0,
+  /// with ghost cells for periodic boundaries
   PeriodicBoundaries = 1
 };
 
-template <GridOptions Options = GridOptions::Normal>
-class Grid {
-  static constexpr std::array<float, 3> max_interaction_length = {
-      {2.5f, 2.5f, 2.5f}};
-
+/**
+ * Base class for Grid to host common functions that do not depend on the
+ * GridOptions parameter.
+ */
+class GridBase {
  public:
-  template <typename T>
-  Grid(const T &all_particles){
-    const auto &log = logger<LogArea::Grid>();
+  typedef int size_type;
 
-    const auto particle_count = all_particles.size();
-    assert(particle_count > 0);
+ protected:
+  /**
+   * Returns the minimum x,y,z coordinates and the largest dx,dy,dz distances of
+   * the particles in \p all_particles.
+   */
+  static std::pair<std::array<float, 3>, std::array<float, 3>>
+      find_min_and_length(const ParticleList &all_particles);
 
-    // intialize min and max position arrays with the position of the first
-    // particle in the list
-    const auto first = all_particles.begin()->position().threevec();
-    min_position_ = {{static_cast<float>(first[0]),
-                      static_cast<float>(first[1]),
-                      static_cast<float>(first[2])}};
-    auto max_position = min_position_;
-    for (const auto &p : all_particles) {
-      const auto pos = p.position().threevec();
-      min_position_[0] = std::min(min_position_[0], static_cast<float>(pos[0]));
-      min_position_[1] = std::min(min_position_[1], static_cast<float>(pos[1]));
-      min_position_[2] = std::min(min_position_[2], static_cast<float>(pos[2]));
-      max_position [0] = std::max(max_position [0], static_cast<float>(pos[0]));
-      max_position [1] = std::max(max_position [1], static_cast<float>(pos[1]));
-      max_position [2] = std::max(max_position [2], static_cast<float>(pos[2]));
-    }
+  /**
+   * Calculates the factor that, if multiplied with a x/y/z
+   * coordinate, yields the 3-dim cell index and the required number of cells
+   * (without ghost cells).
+   */
+  static std::tuple<std::array<float, 3>, std::array<int, 3>>
+      determine_cell_sizes(size_type particle_count,
+                           const std::array<float, 3> &length);
 
-    // The number of cells is determined by the min and max coordinates where
-    // particles are positioned and the maximal interaction length (which equals
-    // the length of a cell).
-    // But don't let the number of cells exceed the actual number of particles.
-    // That would be overkill. Let max_cells³ ≤ particle_count (conversion to
-    // int truncates).
-    const int max_cells = std::cbrt(particle_count);
-    for (std::size_t i = 0; i < number_of_cells_.size(); ++i) {
-      index_factor_[i] = 1.f / max_interaction_length[i];
-      number_of_cells_[i] = std::max(
-          1, static_cast<int>(std::ceil((max_position[i] - min_position_[i]) *
-                                        index_factor_[i])));
-      if (number_of_cells_[i] > max_cells) {
-        number_of_cells_[i] = max_cells;
-        index_factor_[i] = (max_cells - 0.1f)  // -0.1 for safety margin
-                           / (max_position[i] - min_position_[i]);
-      }
-    }
+};
 
-    log.debug("min: ", min_position_, "\nmax: ", max_position, "\ncells: ",
-              number_of_cells_, "\ninteraction length: ",
-              max_interaction_length, "\nindex_factor: ", index_factor_);
+/**
+ * Abstracts a list of cells that partition the particles in the experiment into
+ * regions of space that can interact / cannot interact.
+ *
+ * This class is used to construct a helper data structure to reduce the
+ * combinatorics of finding particle pairs that could interact (scatter). It
+ * takes a list of ParticleData objects and sorts them in such a way that it is
+ * easy to look only at lists of particles that have a chance of interacting.
+ *
+ * \tparam Options This policy parameter determines whether ghost cells are
+ * created to support periodic boundaries, or not.
+ */
+template <GridOptions Options = GridOptions::Normal>
+class Grid : public GridBase {
+ public:
+  /**
+   * Constructs a grid from the given particle list \p all_particles. It
+   * automatically determines the necessary size for the grid from the positions
+   * of the particles.
+   *
+   * \param all_particles The particles to place onto the grid.
+   */
+  Grid(ParticleList &&all_particles)
+      : Grid{find_min_and_length(all_particles), std::move(all_particles)} {}
 
-    // After the grid parameters are determined, we can start placing the
-    // particles in cells.
-    cells_.resize(number_of_cells_[0] * number_of_cells_[1] *
-                  number_of_cells_[2]);
+  /**
+   * Constructs a grid with the given minimum grid coordinates and grid length.
+   * If you need periodic boundaries you have to use this constructor to set the
+   * correct length to use for wrapping particles around the borders.
+   *
+   * \param min_and_length A pair consisting of the three min coordinates and
+   * the three lengths.
+   * \param all_particles The particles to place onto the grid.
+   */
+  Grid(const std::pair<std::array<float, 3>, std::array<float, 3>> &
+           min_and_length,
+       ParticleList &&all_particles)
+      : min_position_(min_and_length.first) {
+    const auto &length = min_and_length.second;
 
-    for (const auto &p : all_particles) {
-      const auto idx = make_index(p.position().threevec());
-      if (idx >= cells_.size()) {
-        log.fatal(source_location,
-            "\nan out-of-bounds access would be necessary for the particle ", p,
-            "\nfor a grid with the following parameters:\nmin: ", min_position_,
-            "\nmax: ", max_position, "\ncells: ", number_of_cells_,
-            "\ninteraction length: ", max_interaction_length,
-            "\nindex_factor: ", index_factor_, "\ncells_.size: ", cells_.size(),
-            "\nrequested index: ", idx);
-        throw std::runtime_error("out-of-bounds grid access on construction");
-      }
-      cells_[idx].push_back(p);
-    }
-    log.debug(cells_);
+    std::tie(index_factor_, number_of_cells_) =
+        determine_cell_sizes(all_particles.size(), length);
+
+    build_cells(std::move(all_particles), length);
   }
 
-  using size_type = std::size_t;
-
-  template <typename F>
-  void iterate_cells(F &&call_finder) {
-    const auto &log = logger<LogArea::Grid>();
-    std::vector<const ParticleList *> neighbors;
-    neighbors.reserve(13);
-
-    auto &&call_closure = [&](size_type cell_index,
-                              const std::initializer_list<int> &xoffsets,
-                              const std::initializer_list<int> &yoffsets,
-                              const std::initializer_list<int> &zoffsets) {
-      neighbors.clear();
-      log.debug("call_closure(", cell_index, ", ", xoffsets, ", ", yoffsets,
-                ", ", zoffsets, ")");
-      for (auto dz : zoffsets) {
-        const auto cell_index_dz =
-            cell_index + dz * number_of_cells_[1] * number_of_cells_[0];
-        for (auto dy : yoffsets) {
-          const auto cell_index_dzdy = cell_index_dz + dy * number_of_cells_[0];
-          for (auto dx : xoffsets) {
-            const auto cell_index_dzdydx = cell_index_dzdy + dx;
-            if (cell_index_dzdydx > cell_index) {
-              neighbors.emplace_back(&cells_[cell_index_dzdydx]);
-            }
-          }
-        }
-      }
-      log.debug("iterate_cells calls closure with search_list: ", cells_[cell_index],
-                " and neighbors_list: ", neighbors);
-      call_finder(cells_[cell_index], neighbors);
-    };
-
-    auto &&build_neighbors_with_zy = [&](
-        size_type y, size_type z, const std::initializer_list<int> &yoffsets,
-        const std::initializer_list<int> &zoffsets) {
-      if (number_of_cells_[1] > 1) {
-        call_closure(make_index(0, y, z), {0, 1}, yoffsets, zoffsets);
-        for (size_type x = 1; x < number_of_cells_[0] - 1; ++x) {
-          call_closure(make_index(x, y, z), {-1, 0, 1}, yoffsets, zoffsets);
-        }
-        call_closure(make_index(number_of_cells_[0] - 1, y, z), {-1, 0},
-                     yoffsets, zoffsets);
-      } else {
-        call_closure(make_index(0, y, z), {0}, yoffsets, zoffsets);
-      }
-    };
-
-    auto &&build_neighbors_with_z = [&](
-        size_type z, const std::initializer_list<int> &zoffsets) {
-      if (number_of_cells_[1] > 1) {
-        build_neighbors_with_zy(0, z, {0, 1}, zoffsets);
-        for (size_type y = 1; y < number_of_cells_[1] - 1; ++y) {
-          build_neighbors_with_zy(y, z, {-1, 0, 1}, zoffsets);
-        }
-        build_neighbors_with_zy(number_of_cells_[1] - 1, z, {-1, 0}, zoffsets);
-      } else {
-        build_neighbors_with_zy(0, z, {0}, zoffsets);
-      }
-    };
-
-    if (Options == GridOptions::PeriodicBoundaries) {
-    } else {
-      for (size_type z = 0; z < number_of_cells_[2] - 1; ++z) {
-        build_neighbors_with_z(z, {0, 1});
-      }
-      build_neighbors_with_z(number_of_cells_[2] - 1, {0});
-    }
-  }
+  /**
+   * Iterates over all cells in the grid and calls \p call_finder with a search
+   * cell and 0 to 13 neighbor cells.
+   *
+   * The neighbor cells are constructed like this:
+   * - one cell at x+1
+   * - three cells (x-1,x,x+1) at y+1
+   * - nine cells (x-1, y-1)...(x+1, y+1) at z+1
+   *
+   * \param call_finder A lambda (or other functor) that is called as often as
+   * there are search cells. Experiment uses it to call the Action finders from
+   * it.
+   */
+  void iterate_cells(const std::function<
+      void(const ParticleList &, const std::vector<const ParticleList *> &)> &
+                         call_finder) const;
 
  private:
-  std::size_t make_index(std::size_t x, std::size_t y, std::size_t z) {
-    return (z * number_of_cells_[1] + y) * number_of_cells_[0] + x;
-  }
+  /**
+   * Allocates the cells and fills them with ParticleData objects.
+   *
+   * This is different for the Normal and PeriodicBoundaries cases.
+   */
+  void build_cells(ParticleList &&all_particles,
+                   const std::array<float, 3> &length);
 
-  std::size_t make_index(const ThreeVector &position) {
-    return make_index(
-        std::floor((static_cast<float>(position[0]) - min_position_[0]) *
-                   index_factor_[0]),
-        std::floor((static_cast<float>(position[1]) - min_position_[1]) *
-                   index_factor_[1]),
-        std::floor((static_cast<float>(position[2]) - min_position_[2]) *
-                   index_factor_[2]));
-  }
+  /**
+   * Returns the one-dimensional cell-index from the 3-dim index \p x, \p y, \p
+   * z.
+   */
+  size_type make_index(size_type x, size_type y, size_type z) const;
 
-  std::array<float, 3> min_position_;
+  /**
+   * Returns the one-dimensional cell-index from the position vector inside the
+   * grid.
+   *
+   * In Normal mode this simply calculates the distance to min_position_ and
+   * multiplies it with index_factor_ to determine the 3 x,y,z indexes to pass
+   * to the make_index overload above.
+   *
+   * In PeriodicBoundaries mode the x and y indexes are incremented by one to
+   * adjust for the ghost cells.
+   */
+  size_type make_index(const ThreeVector &position) const;
+
+  /**
+   * Returns whether the cell at the given 3-dim index \p x, \p y, \p z is a
+   * ghost cell.
+   */
+  bool is_ghost_cell(size_type x, size_type y, size_type z) const;
+
+  /// The lower bound of the cell coordinates.
+  const std::array<float, 3> min_position_;
 
   /**
    * This normally equals 1/max_interaction_length, but if the number of cells
@@ -236,12 +161,12 @@ class Grid {
    */
   std::array<float, 3> index_factor_;
 
+  /// The number of cells in x, y, and z direction.
   std::array<int, 3> number_of_cells_;
+
+  /// The cell storage.
   std::vector<ParticleList> cells_;
 };
-
-template <GridOptions Options>
-constexpr std::array<float, 3> Grid<Options>::max_interaction_length;
 
 }  // namespace Smash
 

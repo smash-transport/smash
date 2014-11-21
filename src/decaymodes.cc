@@ -96,7 +96,7 @@ void DecayModes::load_decaymodes(const std::string &input) {
       throw MissingDecays("No decay modes found for particle " +
                           pdgcode.string());
     }
-    // XXX: why not just unconditionally call renormalize? (mkretz)
+    // TODO: why not just unconditionally call renormalize? (mkretz)
     /* Check if ratios add to 1 */
     if (fabs(ratio_sum - 1.0) > really_small) {
       /* They didn't; renormalize */

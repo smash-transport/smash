@@ -9,11 +9,10 @@
 
 #include "unittest.h"
 #include "../include/boxmodus.h"
-#include "../include/collidermodus.h"
 #include "../include/configuration.h"
+#include "../include/collidermodus.h"
 #include "../include/experiment.h"
 #include "../include/modusdefault.h"
-#include "../include/nucleusmodus.h"
 #include "../include/potentials.h"
 #include "../include/spheremodus.h"
 
@@ -81,7 +80,7 @@ TEST(propagate_default) {
   create_particle_list(Pdef);
   OutputsList out;
   // clock, output interval, cross-section, testparticles
-  ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1, 1.0};
+  ExperimentParameters param{{0.f, 1.f}, 1.f, 1, 1.0};
   Potentials* pot = NULL;
   m.propagate(&Pdef, param, out, pot);
   // after propagation: Momenta should be unchanged.
@@ -110,7 +109,7 @@ TEST(propagate_box) {
   conf["Modi"]["Box"]["Length"] = 5.0;
   conf["Modi"]["Box"]["Temperature"] = 0.13;
   conf["Modi"]["Box"]["Start_Time"] = 0.2;
-  ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1, 1.0};
+  ExperimentParameters param{{0.f, 1.f}, 1.f, 1, 1.0};
   BoxModus b(conf["Modi"], param);
   Particles Pdef, Pbox;
   create_particle_list(Pdef);
@@ -143,10 +142,14 @@ TEST(propagate_box) {
 TEST(propagate_collider) {
   ModusDefault m;
   Configuration conf(TEST_CONFIG_PATH);
-  conf["Modi"]["Collider"]["Sqrts"] = 1.0;
-  conf["Modi"]["Collider"]["Projectile"] = "661";
-  conf["Modi"]["Collider"]["Target"] = "661";
-  ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1, 1.0};
+  conf["Modi"]["Collider"]["Sqrtsnn"] = 1.0;
+  conf.take({"Modi", "Collider", "Projectile"});
+  conf.take({"Modi", "Collider", "Target"});
+  conf["Modi"]["Collider"]["Projectile"]["Particles"]["661"] = 1;
+  conf["Modi"]["Collider"]["Target"]["Particles"]["661"] = 1;
+  conf["Modi"]["Collider"]["Sqrts_Reps"][0] = "661";
+  conf["Modi"]["Collider"]["Sqrts_Reps"][1] = "661";
+  ExperimentParameters param{{0.f, 1.f}, 1.f, 1, 1.0};
   ColliderModus c(conf["Modi"], param);
   Particles Pdef, Pcol;
   create_particle_list(Pdef);
@@ -170,40 +173,6 @@ TEST(propagate_collider) {
   COMPARE(Pdef.data(5).position(), Pcol.data(5).position());
 }
 
-TEST(propagate_nucleus) {
-  ModusDefault m;
-  Configuration conf(TEST_CONFIG_PATH);
-  conf["Modi"]["Nucleus"]["Sqrtsnn"] = 1.0;
-  conf.take({"Modi", "Nucleus", "Projectile"});
-  conf.take({"Modi", "Nucleus", "Target"});
-  conf["Modi"]["Nucleus"]["Projectile"]["Particles"]["661"] = 1;
-  conf["Modi"]["Nucleus"]["Target"]["Particles"]["661"] = 1;
-  conf["Modi"]["Nucleus"]["Sqrts_Reps"][0] = "661";
-  conf["Modi"]["Nucleus"]["Sqrts_Reps"][1] = "661";
-  ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1, 1.0};
-  NucleusModus n(conf["Modi"], param);
-  Particles Pdef, Pnuc;
-  create_particle_list(Pdef);
-  create_particle_list(Pnuc);
-  OutputsList out;
-  Potentials* pot = NULL;
-  m.propagate(&Pdef, param, out, pot);
-  n.propagate(&Pnuc, param, out, pot);
-  // Nucleus and Default modus should do the same everywhere:
-  COMPARE(Pdef.data(0).momentum(), Pnuc.data(0).momentum());
-  COMPARE(Pdef.data(1).momentum(), Pnuc.data(1).momentum());
-  COMPARE(Pdef.data(2).momentum(), Pnuc.data(2).momentum());
-  COMPARE(Pdef.data(3).momentum(), Pnuc.data(3).momentum());
-  COMPARE(Pdef.data(4).momentum(), Pnuc.data(4).momentum());
-  COMPARE(Pdef.data(5).momentum(), Pnuc.data(5).momentum());
-  COMPARE(Pdef.data(0).position(), Pnuc.data(0).position());
-  COMPARE(Pdef.data(1).position(), Pnuc.data(1).position());
-  COMPARE(Pdef.data(2).position(), Pnuc.data(2).position());
-  COMPARE(Pdef.data(3).position(), Pnuc.data(3).position());
-  COMPARE(Pdef.data(4).position(), Pnuc.data(4).position());
-  COMPARE(Pdef.data(5).position(), Pnuc.data(5).position());
-}
-
 TEST(propagate_sphere) {
    ModusDefault m;
    Configuration conf(TEST_CONFIG_PATH);
@@ -212,7 +181,7 @@ TEST(propagate_sphere) {
    conf["Modi"]["Sphere"]["Start_Time"] = 0.0;
    conf.take({"Modi", "Sphere", "Init_Multiplicities"});
    conf["Modi"]["Sphere"]["Init_Multiplicities"]["661"] = 500;
-   ExperimentParameters param{{0.f, 1.f}, 1.f, 0.0, 1, 1.0};
+   ExperimentParameters param{{0.f, 1.f}, 1.f, 1, 1.0};
    SphereModus s(conf["Modi"], param);
    Particles Pdef, Psph;
    create_particle_list(Pdef);

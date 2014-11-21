@@ -149,7 +149,7 @@ TEST(fullhistory_format) {
     outputfile >> item;
     COMPARE(std::atoi(item.c_str()), 0);
     outputfile >> item;
-    COMPARE(std::atoi(item.c_str()), initial_particles.size());
+    COMPARE(std::stoul(item), initial_particles.size());
     outputfile >> item;
     COMPARE(std::atoi(item.c_str()), event_id + 1);
     /* Check initial particle data lines item by item */
@@ -162,9 +162,9 @@ TEST(fullhistory_format) {
     }
     /* Check interaction block */
     outputfile >> item;
-    COMPARE(std::atoi(item.c_str()), initial_particles.size());
+    COMPARE(std::stoul(item), initial_particles.size());
     outputfile >> item;
-    COMPARE(std::atoi(item.c_str()), final_particles.size());
+    COMPARE(std::stoul(item), final_particles.size());
     for (ParticleData &data : initial_particles) {
       std::array<std::string,12> datastring;
       for (int j = 0; j < 12; j++) {
@@ -181,7 +181,7 @@ TEST(fullhistory_format) {
     }
     /* Check final particle list */
     outputfile >> item;
-    COMPARE(std::atoi(item.c_str()), final_particles.size());
+    COMPARE(std::stoul(item), final_particles.size());
     outputfile >> item;
     COMPARE(std::atoi(item.c_str()), 0);
     outputfile >> item;
@@ -269,7 +269,7 @@ TEST(particlelist_format) {
     COMPARE(output_header, header);
     /* Check final particle list */
     outputfile >> item;
-    COMPARE(std::atoi(item.c_str()), particles.size());
+    COMPARE(std::stoul(item), particles.size());
     outputfile >> item;
     COMPARE(std::atoi(item.c_str()), 0);
     outputfile >> item;
