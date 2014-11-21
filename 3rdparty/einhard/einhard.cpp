@@ -206,7 +206,7 @@ void UnconditionalOutput::checkColorReset()
 	}
 }
 
-void UnconditionalOutput::doCleanup() noexcept
+void UnconditionalOutput::doCleanup(std::FILE *outfile) noexcept
 {
 	*out << '\n';
 	std::string s = out->str();
@@ -223,8 +223,8 @@ void UnconditionalOutput::doCleanup() noexcept
 		start = pos;
 	}
 	s2.append( s, start, pos - start );
-	std::fwrite( s2.c_str(), s2.size(), 1, stdout );
-	std::fflush( stdout );  // FIXME: don't want to flush too often, what's the right logic here?
+	std::fwrite( s2.c_str(), s2.size(), 1, outfile );
+	std::fflush( outfile );  // FIXME: don't want to flush too often, what's the right logic here?
 }
 }  // namespace einhard
 
