@@ -584,7 +584,8 @@ class PdgCode {
 
   /// takes a string and sets the fields.
   inline void set_from_string(const std::string& codestring) {
-    digits_.antiparticle_ = false;
+    dump_ = 0;
+    // implicit with the above: digits_.antiparticle_ = false;
     digits_.n_ = digits_.n_R_ = digits_.n_L_ = digits_.n_q1_ = digits_.n_q2_ =
                                 digits_.n_q3_ = digits_.n_J_ = 0;
     size_t length = codestring.size();
