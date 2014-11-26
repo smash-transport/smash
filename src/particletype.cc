@@ -264,8 +264,11 @@ ProcessBranchList ParticleType::get_partial_widths(const float m) const {
   return std::move(partial);
 }
 
-float ParticleType::get_partial_width(const float m, const PdgCode pdg_a,
-                                      const PdgCode pdg_b) const {
+float ParticleType::get_partial_in_width(const float m,
+                                         const ParticleData &p_a,
+                                         const ParticleData &p_b) const {
+  PdgCode pdg_a = p_a.type().pdgcode();
+  PdgCode pdg_b = p_b.type().pdgcode();
   /* Get all decay modes. */
   const auto &decaymodes = DecayModes::find(pdgcode()).decay_mode_list();
 
@@ -279,9 +282,45 @@ float ParticleType::get_partial_width(const float m, const PdgCode pdg_a,
     } else {
       if (decay_particles == 2
           && ((mode.pdg_list()[0] == pdg_a && mode.pdg_list()[1] == pdg_b) ||
-              (mode.pdg_list()[0] == pdg_b && mode.pdg_list()[1] == pdg_a)))
+              (mode.pdg_list()[0] == pdg_b && mode.pdg_list()[1] == pdg_a))) {
         /* Found: calculate width. */
-        return partial_width(m, mode);
+        if (m < mode.threshold()) {
+          return 0.;
+        }
+        float partial_width_at_pole = width_at_pole()*mode.weight();
+        const ParticleType &t_a = ParticleType::find(pdg_a);
+        const ParticleType &t_b = ParticleType::find(pdg_b);
+        if (mode.pdg_list().size() == 2) {
+          /* two-body decays */
+          if (t_a.is_stable() && t_b.is_stable()) {
+            /* mass-dependent width for stable decay products */
+            return width_Manley_stable(m, mass(), t_a.mass(), t_b.mass(),
+                                      mode.angular_momentum(),
+                                      partial_width_at_pole);
+          }
+          else if (t_a.is_stable()) {
+            /* mass-dependent in-width for one unstable daughter */
+            return in_width_Manley_semistable(m, mass(), t_a.mass(),
+                                              p_b.effective_mass(), &t_b,
+                                              mode.angular_momentum(),
+                                              partial_width_at_pole);
+          }
+          else if (t_b.is_stable()) {
+            /* mass-dependent in-width for one unstable daughter */
+            return in_width_Manley_semistable(m, mass(), t_b.mass(),
+                                              p_a.effective_mass(), &t_a,
+                                              mode.angular_momentum(),
+                                              partial_width_at_pole);
+          }
+          else {
+            /* two unstable decay products: assume constant width */
+            return partial_width_at_pole;
+          }
+        } else {
+          /* three-body decays: asssume constant width */
+          return partial_width_at_pole;
+        }
+      }
     }
   }
   /* Decay mode not found: width is zero. */

@@ -184,8 +184,10 @@ ProcessBranchList ScatterAction::resonance_cross_sections() {
       continue;
     }
 
-    float resonance_xsection = two_to_one_formation(type_particle_a,
-                                 type_particle_b, type_resonance, s, p_cm_sqr);
+    float resonance_xsection = two_to_one_formation(incoming_particles_[0],
+                                                    incoming_particles_[1],
+                                                    type_resonance,
+                                                    s, p_cm_sqr);
 
     /* If cross section is non-negligible, add resonance to the list */
     if (resonance_xsection > really_small) {

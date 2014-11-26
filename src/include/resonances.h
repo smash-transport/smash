@@ -71,8 +71,8 @@ inline double isospin_clebsch_gordan(const ParticleType p_a,
  * 4. Enough energy for all decay channels to be available for the resonance
  * 5. Detailed balance (reverse process exists)
  *
- * \param[in] type_particle_a Type information for the first initial particle.
- * \param[in] type_particle_b Type information for the second initial particle.
+ * \param[in] particle_a First initial particle.
+ * \param[in] particle_b Second initial particle.
  * \param[in] type_resonance Type information for the resonance to be produced.
  * \param[in] mandelstam_s Mandelstam-s of the collision
  * of the two initial particles.
@@ -82,8 +82,8 @@ inline double isospin_clebsch_gordan(const ParticleType p_a,
  * \return The cross section for the process
  * [initial particle a] + [initial particle b] -> resonance.
  */
-double two_to_one_formation(const ParticleType &type_particle_a,
-                            const ParticleType &type_particle_b,
+double two_to_one_formation(const ParticleData &particle_a,
+                            const ParticleData &particle_b,
                             const ParticleType &type_resonance,
                             double mandelstam_s, double cm_momentum_squared);
 
