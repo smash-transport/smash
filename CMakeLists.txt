@@ -12,7 +12,7 @@ cmake_minimum_required(VERSION 2.8)
 # Tell cmake where to find our modules
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
-# Set the default for CMAKE_BUILD_TYPE to Release, otherwise we get something
+# Set a default value for CMAKE_BUILD_TYPE, otherwise we get something
 # which is none of the options.
 if(NOT CMAKE_BUILD_TYPE)
    # Change RelWithDebInfo below to Release for SMASH releases

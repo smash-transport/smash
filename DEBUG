@@ -1,19 +1,45 @@
 /**
 \page debug Debugging
 
-Debug build:
+Choosing a build type
+---------------------
+
+There are different build types available, which compile the SMASH code for
+different situations.
+
+For a debug build (with all warnings, but no optimization) use:
 
       cmake .. -DCMAKE_BUILD_TYPE=Debug
 
-Find cmake build errors (best debugged with full compiler output):
+For a release build (full optimization and no warnings) use:
+
+      cmake .. -DCMAKE_BUILD_TYPE=Release
+
+For a profiling build use:
+
+      cmake .. -DCMAKE_BUILD_TYPE=Profiling
+
+The default build type is 'RelWithDebInfo', which provides both optimization
+and debug info.
+
+Enhancing build verbosity
+-------------------------
+
+To find cmake build errors (best debugged with full compiler output) use:
 
       make VERBOSE=1
 
-smash binary is regularly checked by:
+Runtime memory checking with valgrind
+-------------------------------------
+
+The SMASH binary is regularly checked by:
 
       valgrind -v ./smash
 
-smash src is checked by:
+Static code analysis & coding style
+-----------------------------------
+
+The SMASH source code can be checked via:
 
       cpplint.py *cc include/ *h
       cppcheck --enable=all -I include/ .
