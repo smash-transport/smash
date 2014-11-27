@@ -26,6 +26,7 @@
 #include <iomanip>
 #include <iostream>
 #include <limits>
+#include <memory>
 #include <sstream>
 #include <string>
 #include <tuple>
@@ -685,6 +686,15 @@ class _UnitTest_Compare {  // {{{1
     }
   }
 
+  template <typename T,
+            typename = decltype(std::declval<std::ostream &>() << std::declval<T>())>
+  static std::true_type has_ostream_operator_impl(int);
+  template <typename T>
+  static std::false_type has_ostream_operator_impl(...);
+  template <typename T>
+  struct has_ostream_operator
+      : public decltype(has_ostream_operator_impl<T>(1)) {};
+
  public:
   struct Fuzzy {};
   struct AbsoluteError {};
@@ -901,13 +911,37 @@ class _UnitTest_Compare {  // {{{1
 #endif
     return _ip;
   }
+  static char hexChar(char x) { return x + (x > 9 ? 87 : 48); }
+  template <typename T>
+  static void printMem(const T &x)  // {{{2
+  {
+    constexpr std::size_t length = sizeof(T) * 2 + sizeof(T) / 4;
+    std::unique_ptr<char[]> s{new char[length + 1]};
+    std::memset(s.get(), '\'', length - 1);
+    s[length - 1] = '\0';
+    s[length] = '\0';
+    const auto bytes = reinterpret_cast<const std::uint8_t *>(&x);
+    for (std::size_t i = 0; i < sizeof(T); ++i) {
+      s[i * 2 + i / 4] = hexChar(bytes[i] >> 4);
+      s[i * 2 + 1 + i / 4] = hexChar(bytes[i] & 0xf);
+    }
+    std::cout << s.get();
+  }
   static void printFirst() {  // {{{2
     std::cout << _unittest_fail() << "┍ ";
   }
   // print overloads {{{2
   template <typename T>
-  static inline void print(const T &x) {
+  static inline typename std::enable_if<has_ostream_operator<T>::value,
+                                        void>::type
+  print(const T &x) {
     std::cout << x;
+  }
+  template <typename T>
+  static inline typename std::enable_if<!has_ostream_operator<T>::value,
+                                        void>::type
+  print(const T &x) {
+    printMem(x);
   }
   static void print(const std::type_info &x) {
     std::cout << x.name();
