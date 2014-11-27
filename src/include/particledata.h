@@ -103,7 +103,7 @@ class ParticleData {
    * A reference to the ParticleType object for this particle (this contains
    * all the static information).
    */
-  const ParticleType *type_ = nullptr;
+  ParticleTypePtr type_ = nullptr;
 
   /// counter of the last collision/decay
   int id_process_ = -1;

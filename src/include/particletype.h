@@ -11,7 +11,9 @@
 #include "macros.h"
 #include "pdgcode.h"
 
+#include <assert.h>
 #include <string>
+#include <vector>
 
 namespace Smash {
 
@@ -167,6 +169,8 @@ class ParticleType {
    */
   static void create_type_list(const std::string &particles);
 
+  ParticleTypePtr operator&() const;
+
  private:
 #ifndef NDEBUG
   /// name of the particle
@@ -202,6 +206,28 @@ inline bool ParticleType::is_stable() const {
    * less than 10 keV. */
   return width_ < 1E-5f;
 }
+
+class ParticleTypePtr {
+ public:
+  const ParticleType &operator*() const {
+    return lookup();
+  }
+  const ParticleType *operator->() const {
+    return std::addressof(lookup());
+  }
+
+  ParticleTypePtr() = default;
+  ParticleTypePtr(std::nullptr_t) {}
+
+ private:
+  friend ParticleTypePtr ParticleType::operator&() const;
+  ParticleTypePtr(std::uint16_t i) : index_(i) {}
+  const ParticleType &lookup() const {
+    assert(index_ != 0xffff);
+    return ParticleType::list_all().at(index_);
+  }
+  std::uint16_t index_= 0xffff;
+};
 
 }  // namespace Smash
 

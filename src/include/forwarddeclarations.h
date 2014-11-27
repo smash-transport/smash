@@ -62,6 +62,7 @@ class OutputInterface;
 class ParticleData;
 class Particles;
 class ParticleType;
+class ParticleTypePtr;
 class PdgCode;
 class ProcessBranch;
 class DecayBranch;

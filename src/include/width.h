@@ -39,7 +39,7 @@ float width_Manley_stable(const float mass, const float poleMass,
  */
 float width_Manley_semistable(const float mass, const float poleMass,
                               const float mass_stable,
-                              const ParticleType *type_unstable,
+                              const ParticleType &type_unstable,
                               const int L, const float partial_width_at_pole);
 
 /**
@@ -58,7 +58,7 @@ float width_Manley_semistable(const float mass, const float poleMass,
 float in_width_Manley_semistable(const float mass, const float poleMass,
                                  const float mass_stable,
                                  const float mass_unstable,
-                                 const ParticleType *type_unstable,
+                                 const ParticleType &type_unstable,
                                  const int L,
                                  const float partial_width_at_pole);
 

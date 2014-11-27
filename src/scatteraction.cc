@@ -455,7 +455,7 @@ ProcessBranchList ScatterActionBaryonBaryon::nuc_res_to_nuc_nuc (
                             const ParticleType &type_particle_a,
                             const ParticleType &type_particle_b) {
 
-  const ParticleType *type_resonance, *type_nucleon;
+  ParticleTypePtr type_resonance, type_nucleon;
   ProcessBranchList process_list;
 
   if (type_particle_a.pdgcode().iso_multiplet() == 0x1112) {

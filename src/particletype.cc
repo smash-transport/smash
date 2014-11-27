@@ -34,6 +34,12 @@ const ParticleTypeList &ParticleType::list_all() {
   return *all_particle_types;
 }
 
+ParticleTypePtr ParticleType::operator&() const {
+  const auto offset = this - std::addressof(list_all()[0]);
+  assert(offset >= 0 && offset < 0xffff);
+  return {static_cast<uint16_t>(offset)};
+}
+
 const ParticleTypeList ParticleType::list_nucleons() {
   return {find(0x2212), find(0x2112)};
 }
@@ -212,13 +218,13 @@ float ParticleType::partial_width(const float m,
     }
     else if (t_a.is_stable()) {
       /* mass-dependent width for one unstable daughter */
-      return width_Manley_semistable(m, mass(), t_a.mass(), &t_b,
+      return width_Manley_semistable(m, mass(), t_a.mass(), t_b,
                                      mode.angular_momentum(),
                                      partial_width_at_pole);
     }
     else if (t_b.is_stable()) {
       /* mass-dependent width for one unstable daughter */
-      return width_Manley_semistable(m, mass(), t_b.mass(), &t_a,
+      return width_Manley_semistable(m, mass(), t_b.mass(), t_a,
                                      mode.angular_momentum(),
                                      partial_width_at_pole);
     }
@@ -301,14 +307,14 @@ float ParticleType::get_partial_in_width(const float m,
           else if (t_a.is_stable()) {
             /* mass-dependent in-width for one unstable daughter */
             return in_width_Manley_semistable(m, mass(), t_a.mass(),
-                                              p_b.effective_mass(), &t_b,
+                                              p_b.effective_mass(), t_b,
                                               mode.angular_momentum(),
                                               partial_width_at_pole);
           }
           else if (t_b.is_stable()) {
             /* mass-dependent in-width for one unstable daughter */
             return in_width_Manley_semistable(m, mass(), t_b.mass(),
-                                              p_a.effective_mass(), &t_a,
+                                              p_a.effective_mass(), t_a,
                                               mode.angular_momentum(),
                                               partial_width_at_pole);
           }
