@@ -44,4 +44,24 @@ The SMASH source code can be checked via:
       cpplint.py *cc include/ *h
       cppcheck --enable=all -I include/ .
 
+\section debug_profiling Profiling / Benchmarking
+
+\subsection profiling_gprof GPROF
+
+You can tell cmake to create a build for profiling with the \c Profiling build
+type:
+
+    cmake -DCMAKE_BUILD_TYPE=Profiling ..
+
+This will compile the smash code like \c Release mode, but with the \c -pg flag
+to instrument the code and create a \c gmon.out file whenever you run a binary.
+You can look at the \c gmon.out information with gprof.
+
+    # first run smash to create the gmon.out file
+    ./smash
+    # now run gprof to see the profile information
+    gprof smash|less
+
+\subsection profiling_perf Perf
+
 */
