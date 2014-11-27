@@ -68,9 +68,9 @@ TEST(load_decay_modes) {
     const auto &modelist = rho0.decay_mode_list();
     COMPARE(modelist.size(), 1u);
     COMPARE(modelist[0].weight(), 1.);
-    COMPARE(modelist[0].pdg_list().size(), 2u);
-    COMPARE(modelist[0].pdg_list()[0].dump(), 0x211u);
-    COMPARE(modelist[0].pdg_list()[1].dump(), 0x80000211u);
+    COMPARE(modelist[0].particle_types().size(), 2u);
+    COMPARE(modelist[0].particle_types()[0]->pdgcode().dump(), 0x211u);
+    COMPARE(modelist[0].particle_types()[1]->pdgcode().dump(), 0x80000211u);
   }
   {
     const auto &rhoplus = DecayModes::find(0x213);
@@ -78,9 +78,9 @@ TEST(load_decay_modes) {
     const auto &modelist = rhoplus.decay_mode_list();
     COMPARE(modelist.size(), 1u);
     COMPARE(modelist[0].weight(), 1.);
-    COMPARE(modelist[0].pdg_list().size(), 2u);
-    COMPARE(modelist[0].pdg_list()[0].dump(), 0x211u);
-    COMPARE(modelist[0].pdg_list()[1].dump(), 0x111u);
+    COMPARE(modelist[0].particle_types().size(), 2u);
+    COMPARE(modelist[0].particle_types()[0]->pdgcode().dump(), 0x211u);
+    COMPARE(modelist[0].particle_types()[1]->pdgcode().dump(), 0x111u);
   }
   {
     // the rho- decay is auto-generated from the rho+ decay
@@ -89,9 +89,9 @@ TEST(load_decay_modes) {
     const auto &modelist = rhominus.decay_mode_list();
     COMPARE(modelist.size(), 1u);
     COMPARE(modelist[0].weight(), 1.);
-    COMPARE(modelist[0].pdg_list().size(), 2u);
-    COMPARE(modelist[0].pdg_list()[0].dump(), 0x80000211u);
-    COMPARE(modelist[0].pdg_list()[1].dump(), 0x111u);
+    COMPARE(modelist[0].particle_types().size(), 2u);
+    COMPARE(modelist[0].particle_types()[0]->pdgcode().dump(), 0x80000211u);
+    COMPARE(modelist[0].particle_types()[1]->pdgcode().dump(), 0x111u);
   }
   {
     const auto &omega = DecayModes::find(0x223);
@@ -101,15 +101,15 @@ TEST(load_decay_modes) {
     FUZZY_COMPARE(float(modelist[0].weight()), 1.f/3.f);
     FUZZY_COMPARE(float(modelist[1].weight()), 1.f/3.f);
     FUZZY_COMPARE(float(modelist[2].weight()), 1.f/3.f);
-    COMPARE(modelist[0].pdg_list().size(), 2u);
-    COMPARE(modelist[0].pdg_list()[0].dump(), 0x111u);
-    COMPARE(modelist[0].pdg_list()[1].dump(), 0x113u);
-    COMPARE(modelist[1].pdg_list().size(), 2u);
-    COMPARE(modelist[1].pdg_list()[0].dump(), 0x211u);
-    COMPARE(modelist[1].pdg_list()[1].dump(), 0x80000213u);
-    COMPARE(modelist[2].pdg_list().size(), 2u);
-    COMPARE(modelist[2].pdg_list()[0].dump(), 0x80000211u);
-    COMPARE(modelist[2].pdg_list()[1].dump(), 0x213u);
+    COMPARE(modelist[0].particle_types().size(), 2u);
+    COMPARE(modelist[0].particle_types()[0]->pdgcode().dump(), 0x111u);
+    COMPARE(modelist[0].particle_types()[1]->pdgcode().dump(), 0x113u);
+    COMPARE(modelist[1].particle_types().size(), 2u);
+    COMPARE(modelist[1].particle_types()[0]->pdgcode().dump(), 0x211u);
+    COMPARE(modelist[1].particle_types()[1]->pdgcode().dump(), 0x80000213u);
+    COMPARE(modelist[2].particle_types().size(), 2u);
+    COMPARE(modelist[2].particle_types()[0]->pdgcode().dump(), 0x80000211u);
+    COMPARE(modelist[2].particle_types()[1]->pdgcode().dump(), 0x213u);
   }
 }
 
@@ -121,12 +121,13 @@ TEST_CATCH(add_no_particles, DecayModes::InvalidDecay) {
 
 TEST_CATCH(add_one_particle, DecayModes::InvalidDecay) {
   DecayModes m;
-  m.add_mode(1.f, 0, {0});
+  m.add_mode(1.f, 0, {&ParticleType::list_all()[0]});
 }
 
 TEST(add_two_particles) {
   DecayModes m;
   VERIFY(m.is_empty());
-  m.add_mode(1.f, 0, {0, 1});
+  m.add_mode(1.f, 0,
+             {&ParticleType::list_all()[0], &ParticleType::list_all()[1]});
   VERIFY(!m.is_empty());
 }

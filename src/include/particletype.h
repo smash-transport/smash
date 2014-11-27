@@ -63,6 +63,12 @@ class ParticleType {
   /// Returns the PDG code of the particle.
   PdgCode pdgcode() const { return pdgcode_; }
 
+  /// \copydoc PdgCode::has_antiparticle
+  bool has_antiparticle() const { return pdgcode_.has_antiparticle(); }
+
+  /// Return a pointer to the corresponding antiparticle ParticleType object.
+  ParticleTypePtr get_antiparticle() const;
+
   /// \copydoc PdgCode::isospin_total
   unsigned int isospin() const { return isospin_; }
 
@@ -228,6 +234,11 @@ class ParticleTypePtr {
   }
   std::uint16_t index_= 0xffff;
 };
+
+inline ParticleTypePtr ParticleType::get_antiparticle() const {
+  assert(has_antiparticle());
+  return &find(pdgcode_.get_antiparticle());
+}
 
 }  // namespace Smash
 

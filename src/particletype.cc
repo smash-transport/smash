@@ -206,9 +206,9 @@ float ParticleType::partial_width(const float m,
     return 0.;
   }
   float partial_width_at_pole = width_at_pole()*mode.weight();
-  const ParticleType &t_a = ParticleType::find(mode.pdg_list()[0]);
-  const ParticleType &t_b = ParticleType::find(mode.pdg_list()[1]);
-  if (mode.pdg_list().size() == 2) {
+  const ParticleType &t_a = *mode.particle_types()[0];
+  const ParticleType &t_b = *mode.particle_types()[1];
+  if (mode.particle_types().size() == 2) {
     /* two-body decays */
     if (t_a.is_stable() && t_b.is_stable()) {
       /* mass-dependent width for stable decay products */
@@ -264,7 +264,7 @@ ProcessBranchList ParticleType::get_partial_widths(const float m) const {
   for (const auto &mode : decay_mode_list) {
     w = partial_width(m, mode);
     if (w > 0.) {
-      partial.emplace_back(mode.pdg_list(), w);
+      partial.emplace_back(mode.particle_types(), w);
     }
   }
   return std::move(partial);
@@ -280,15 +280,17 @@ float ParticleType::get_partial_in_width(const float m,
 
   /* Find the right one. */
   for (const auto &mode : decaymodes) {
-    size_t decay_particles = mode.pdg_list().size();
+    size_t decay_particles = mode.particle_types().size();
     if ( decay_particles > 3 ) {
       logger<LogArea::ParticleType>().warn("Not a 1->2 or 1->3 process!\n",
                                            "Number of decay particles: ",
                                            decay_particles);
     } else {
-      if (decay_particles == 2
-          && ((mode.pdg_list()[0] == pdg_a && mode.pdg_list()[1] == pdg_b) ||
-              (mode.pdg_list()[0] == pdg_b && mode.pdg_list()[1] == pdg_a))) {
+      if (decay_particles == 2 &&
+          ((mode.particle_types()[0]->pdgcode() == pdg_a &&
+            mode.particle_types()[1]->pdgcode() == pdg_b) ||
+           (mode.particle_types()[0]->pdgcode() == pdg_b &&
+            mode.particle_types()[1]->pdgcode() == pdg_a))) {
         /* Found: calculate width. */
         if (m < mode.threshold()) {
           return 0.;
@@ -296,7 +298,7 @@ float ParticleType::get_partial_in_width(const float m,
         float partial_width_at_pole = width_at_pole()*mode.weight();
         const ParticleType &t_a = ParticleType::find(pdg_a);
         const ParticleType &t_b = ParticleType::find(pdg_b);
-        if (mode.pdg_list().size() == 2) {
+        if (mode.particle_types().size() == 2) {
           /* two-body decays */
           if (t_a.is_stable() && t_b.is_stable()) {
             /* mass-dependent width for stable decay products */

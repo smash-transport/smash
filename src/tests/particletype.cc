@@ -63,34 +63,34 @@ TEST(create_type_list) {
 
   COMPARE(ParticleType::list_all().size(), 23u);
 
-  ParticleType type = ParticleType::find(0x661);
-  COMPARE(type.mass(), 0.135f);
-  COMPARE(type.width_at_pole(), -1.f);
-  COMPARE(type.pdgcode(), PdgCode(0x661));
-  type = ParticleType::find(0x663);
-  COMPARE(type.mass(), 0.135f);
-  COMPARE(type.width_at_pole(), -2.f);
-  COMPARE(type.pdgcode(), PdgCode(0x663));
-  type = ParticleType::find(0x665);
-  COMPARE(type.mass(), 0.135f);
-  COMPARE(type.width_at_pole(), -3.f);
-  COMPARE(type.pdgcode(), PdgCode(0x665));
+  ParticleTypePtr type = &ParticleType::find(0x661);
+  COMPARE(type->mass(), 0.135f);
+  COMPARE(type->width_at_pole(), -1.f);
+  COMPARE(type->pdgcode(), PdgCode(0x661));
+  type = &ParticleType::find(0x663);
+  COMPARE(type->mass(), 0.135f);
+  COMPARE(type->width_at_pole(), -2.f);
+  COMPARE(type->pdgcode(), PdgCode(0x663));
+  type = &ParticleType::find(0x665);
+  COMPARE(type->mass(), 0.135f);
+  COMPARE(type->width_at_pole(), -3.f);
+  COMPARE(type->pdgcode(), PdgCode(0x665));
 
-  type = ParticleType::find(-0x1114);
-  COMPARE(type.mass(), 1.232f);
-  COMPARE(type.width_at_pole(), .117f);
-  COMPARE(type.pdgcode().dump(), 0x80001114);
-  COMPARE(type.isospin(), 3u);
-  COMPARE(type.charge(), 1);
-  COMPARE(type.spin(), 3u);
+  type = &ParticleType::find(-0x1114);
+  COMPARE(type->mass(), 1.232f);
+  COMPARE(type->width_at_pole(), .117f);
+  COMPARE(type->pdgcode().dump(), 0x80001114);
+  COMPARE(type->isospin(), 3u);
+  COMPARE(type->charge(), 1);
+  COMPARE(type->spin(), 3u);
 
-  type = ParticleType::find(0x2112);
-  COMPARE(type.mass(), .9396f);
-  COMPARE(type.width_at_pole(), -1.f);
-  COMPARE(type.pdgcode().dump(), 0x2112u);
-  COMPARE(type.isospin(), 1u);
-  COMPARE(type.charge(), 0);
-  COMPARE(type.spin(), 1u);
+  type = &ParticleType::find(0x2112);
+  COMPARE(type->mass(), .9396f);
+  COMPARE(type->width_at_pole(), -1.f);
+  COMPARE(type->pdgcode().dump(), 0x2112u);
+  COMPARE(type->isospin(), 1u);
+  COMPARE(type->charge(), 0);
+  COMPARE(type->spin(), 1u);
 }
 
 TEST(exists) {
