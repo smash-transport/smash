@@ -44,6 +44,18 @@ class ParticleType {
    */
   ParticleType(std::string n, float m, float w, PdgCode id);
 
+  /**
+   * Copies are not allowed as they break intended use. Instead use a const-ref
+   * or ParticleTypePtr (as returned from operator&).
+   */
+  ParticleType(const ParticleType &) = delete;
+  /// assignment is not allowed, see copy constructor above
+  ParticleType &operator=(const ParticleType &) = delete;
+
+  // move ctors are needed for std::sort
+  ParticleType(ParticleType &&) = default;
+  ParticleType &operator=(ParticleType &&) = default;
+
   /// Returns the name of the particle (for debug output only).
 #ifdef NDEBUG
   std::string name() const { return {}; }
@@ -148,9 +160,9 @@ class ParticleType {
   static const ParticleTypeList &list_all();
 
   /** Returns a list of all nucleons (i.e. proton and neutron). */
-  static const ParticleTypeList list_nucleons();
+  static std::vector<ParticleTypePtr> list_nucleons();
   /** Returns a list of all baryon resonances, i.e. unstable baryons (not including antibaryons). */
-  static const ParticleTypeList list_baryon_resonances();
+  static std::vector<ParticleTypePtr> list_baryon_resonances();
 
   /**
    * Returns the ParticleType object for the given \p pdgcode.

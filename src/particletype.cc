@@ -40,12 +40,12 @@ ParticleTypePtr ParticleType::operator&() const {
   return {static_cast<uint16_t>(offset)};
 }
 
-const ParticleTypeList ParticleType::list_nucleons() {
-  return {find(0x2212), find(0x2112)};
+std::vector<ParticleTypePtr> ParticleType::list_nucleons() {
+  return {&find(0x2212), &find(0x2112)};
 }
 
-const ParticleTypeList ParticleType::list_baryon_resonances() {
-  ParticleTypeList list;
+std::vector<ParticleTypePtr> ParticleType::list_baryon_resonances() {
+  std::vector<ParticleTypePtr> list;
   list.reserve(4);  // currently we have only the Delta (with four charge states)
 
   for (const ParticleType &type_resonance : ParticleType::list_all()) {
@@ -54,7 +54,7 @@ const ParticleTypeList ParticleType::list_baryon_resonances() {
         || type_resonance.pdgcode().baryon_number() != 1) {
       continue;
     }
-   list.push_back(type_resonance);
+   list.emplace_back(&type_resonance);
   }
   return list;
 }
