@@ -225,6 +225,13 @@ class ParticleTypePtr {
   ParticleTypePtr() = default;
   ParticleTypePtr(std::nullptr_t) {}
 
+  bool operator==(const ParticleTypePtr &rhs) const {
+    return index_ == rhs.index_;
+  }
+  bool operator!=(const ParticleTypePtr &rhs) const {
+    return index_ != rhs.index_;
+  }
+
  private:
   friend ParticleTypePtr ParticleType::operator&() const;
   ParticleTypePtr(std::uint16_t i) : index_(i) {}
