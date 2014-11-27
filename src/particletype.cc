@@ -24,6 +24,9 @@
 
 namespace Smash {
 
+#ifdef SMASH_INLINE_LIST_ALL
+const ParticleTypeList *all_particle_types = nullptr;
+#else
 namespace {
 /// Global pointer to the Particle Type list.
 const ParticleTypeList *all_particle_types = nullptr;
@@ -39,6 +42,7 @@ ParticleTypePtr ParticleType::operator&() const {
   assert(offset >= 0 && offset < 0xffff);
   return {static_cast<uint16_t>(offset)};
 }
+#endif
 
 std::vector<ParticleTypePtr> ParticleType::list_nucleons() {
   return {&find(0x2212), &find(0x2112)};
