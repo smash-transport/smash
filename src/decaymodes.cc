@@ -22,12 +22,7 @@
 
 namespace Smash {
 
-using DecayModesMap = std::map<PdgCode, DecayModes>;
-
-namespace {
-  /// a map between pdg and corresponding decay modes
-  const DecayModesMap *all_decay_modes = nullptr;
-}  // unnamed namespace
+const std::vector<DecayModes> *DecayModes::all_decay_modes = nullptr;
 
 void DecayModes::add_mode(float ratio, int L,
                           std::vector<ParticleTypePtr> particle_types) {
@@ -72,15 +67,18 @@ void DecayModes::renormalize(float renormalization_constant) {
   }
 }
 
-/* return the decay modes of specific type */
-const DecayModes &DecayModes::find(PdgCode pdg) {
-  return all_decay_modes->at(pdg);
+namespace {
+inline std::size_t find_offset(PdgCode pdg) {
+  return std::addressof(ParticleType::find(pdg)) -
+         std::addressof(ParticleType::list_all()[0]);
 }
-
+}  // unnamed namespace
 
 void DecayModes::load_decaymodes(const std::string &input) {
-  static DecayModesMap decaymodes;
+  static std::vector<DecayModes> decaymodes;
   decaymodes.clear();  // in case an exception was thrown and should try again
+  decaymodes.resize(ParticleType::list_all().size());
+
   PdgCode pdgcode = PdgCode::invalid();
   DecayModes decay_modes_to_add;
   float ratio_sum = 0.0;
@@ -114,12 +112,12 @@ void DecayModes::load_decaymodes(const std::string &input) {
         decay_modes_anti.add_mode(mode.weight(), mode.angular_momentum(),
                                   list);
       }
-      decaymodes.insert(std::make_pair(pdgcode.get_antiparticle(),
-                                       std::move(decay_modes_anti)));
+      decaymodes[find_offset(pdgcode.get_antiparticle())] =
+          std::move(decay_modes_anti);
     }
 
     /* Add the list of decay modes for this particle type */
-    decaymodes.insert(std::make_pair(pdgcode, std::move(decay_modes_to_add)));
+    decaymodes[find_offset(pdgcode)] = std::move(decay_modes_to_add);
 
     /* Clean up the list for the next particle type */
     decay_modes_to_add.clear();

@@ -55,6 +55,7 @@ class BoxModus;
 class Clock;
 class Configuration;
 class CrossSections;
+class DecayModes;
 class FourVector;
 class ThreeVector;
 class ModusDefault;

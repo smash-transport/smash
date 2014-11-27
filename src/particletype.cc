@@ -197,7 +197,7 @@ float ParticleType::minimum_mass() const {
     return minmass;
   }
   /* Otherwise, find the lowest mass value needed in any decay mode */
-  for (const auto &mode : DecayModes::find(pdgcode()).decay_mode_list()) {
+  for (const auto &mode : decay_modes().decay_mode_list()) {
     minmass = std::min(minmass, mode.threshold());
   }
   return minmass;
@@ -242,6 +242,10 @@ float ParticleType::partial_width(const float m,
   }
 }
 
+const DecayModes &ParticleType::decay_modes() const {
+  const auto offset = this - std::addressof(list_all()[0]);
+  return (*DecayModes::all_decay_modes)[offset];
+}
 
 float ParticleType::total_width(const float m) const {
   float w = 0.;
@@ -249,7 +253,7 @@ float ParticleType::total_width(const float m) const {
     return w;
   }
   /* Loop over decay modes and sum up all partial widths. */
-  for (const auto &mode : DecayModes::find(pdgcode()).decay_mode_list()) {
+  for (const auto &mode : decay_modes().decay_mode_list()) {
     w = w + partial_width(m, mode);
   }
   return w;
@@ -262,7 +266,7 @@ ProcessBranchList ParticleType::get_partial_widths(const float m) const {
     return {};
   }
   /* Loop over decay modes and calculate all partial widths. */
-  const auto &decay_mode_list = DecayModes::find(pdgcode()).decay_mode_list();
+  const auto &decay_mode_list = decay_modes().decay_mode_list();
   ProcessBranchList partial;
   partial.reserve(decay_mode_list.size());
   for (const auto &mode : decay_mode_list) {
@@ -280,7 +284,7 @@ float ParticleType::get_partial_in_width(const float m,
   PdgCode pdg_a = p_a.type().pdgcode();
   PdgCode pdg_b = p_b.type().pdgcode();
   /* Get all decay modes. */
-  const auto &decaymodes = DecayModes::find(pdgcode()).decay_mode_list();
+  const auto &decaymodes = decay_modes().decay_mode_list();
 
   /* Find the right one. */
   for (const auto &mode : decaymodes) {

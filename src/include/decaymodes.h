@@ -16,6 +16,9 @@ namespace Smash {
 
 /**
  * \ingroup data
+ *
+ * If you want to find a DecayModes object for a specific particle type use
+ * ParticleType::decay_modes().
  */
 class DecayModes {
  public:
@@ -36,9 +39,6 @@ class DecayModes {
   const std::vector<DecayBranch> &decay_mode_list(void) const {
     return decay_modes_;
   }
-
-  /// Return decay modes of this particle type
-  static const DecayModes &find(PdgCode pdg);
 
   /**
    * Loads the DecayModes map as described in the \p input string.
@@ -71,6 +71,15 @@ class DecayModes {
    * and a ratio of this decay mode compared to all possible modes
    */
   std::vector<DecayBranch> decay_modes_;
+
+  /// allow ParticleType::decay_modes to access all_decay_modes
+  friend const DecayModes &ParticleType::decay_modes() const;
+
+  /**
+   * A list of all DecayModes objects using the same indexing as
+   * all_particle_types.
+   */
+  static const std::vector<DecayModes> *all_decay_modes;
 };
 
 }  // namespace Smash

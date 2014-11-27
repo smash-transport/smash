@@ -56,6 +56,9 @@ class ParticleType {
   ParticleType(ParticleType &&) = default;
   ParticleType &operator=(ParticleType &&) = default;
 
+  /// Returns the DecayModes object for this particle type.
+  const DecayModes &decay_modes() const;
+
   /// Returns the name of the particle (for debug output only).
 #ifdef NDEBUG
   std::string name() const { return {}; }
