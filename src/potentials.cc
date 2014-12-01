@@ -77,7 +77,8 @@ double Potentials::potential(const ThreeVector &r,
     // TODO(oliiny): use neutron-proton density here or isospin density?
     // total_potential +=
   }
-  return total_potential;
+  // Return in GeV
+  return total_potential * 1.0e-3;
 }
 
 ThreeVector Potentials::potential_gradient(const ThreeVector &r,
@@ -102,7 +103,8 @@ ThreeVector Potentials::potential_gradient(const ThreeVector &r,
     // TODO(oliiny): use neutron-proton density here or isospin density?
     // total_gradient +=
   }
-  return total_gradient;
+  // Return in GeV
+  return total_gradient * 1.0e-3;
 }
 
 

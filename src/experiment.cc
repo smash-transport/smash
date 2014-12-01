@@ -354,7 +354,8 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
     std::string err_msg = conserved_initial_.report_deviations(particles_);
     if (!err_msg.empty()) {
       log.error() << err_msg;
-      throw std::runtime_error("Violation of conserved quantities!");
+      // oliiny: comment this out for checks with potentials
+      // throw std::runtime_error("Violation of conserved quantities!");
     }
   }
   // make sure the experiment actually ran (note: we should compare this
