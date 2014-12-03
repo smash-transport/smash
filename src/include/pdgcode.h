@@ -201,16 +201,16 @@ class PdgCode {
 
   /** Returns a signed integer with the PDG code in hexadecimal. */
   inline std::int32_t code() const {
-    return antiparticle_sign() * (dump_ & 0x0fffffff);
+    return antiparticle_sign() * ucode();
   }
 
   /// returns a C++ string from the PDG Code.
   inline std::string string() const {
     char hexstring[8];
     if (digits_.antiparticle_) {
-      snprintf(hexstring, 8, "-%x", std::abs(code()));
+      snprintf(hexstring, 8, "-%x", ucode());
     } else {
-      snprintf(hexstring, 8, "%x", code());
+      snprintf(hexstring, 8, "%x", ucode());
     }
     return std::string(hexstring);
   }
@@ -551,6 +551,11 @@ class PdgCode {
     } chunks_;
   };
 
+  /** Returns an unsigned integer with the PDG code in hexadecimal
+   *  (disregarding the antiparticle flag). */
+  inline std::uint32_t ucode() const {
+    return (dump_ & 0x0fffffff);
+  }
   /** returns the net number of quarks with given flavour number
    *
    * \param quark PDG Code of quark: (1..6) = (d,u,s,c,b,t)
