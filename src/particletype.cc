@@ -38,8 +38,14 @@ const ParticleTypeList &ParticleType::list_all() {
 }
 
 ParticleTypePtr ParticleType::operator&() const {
+  // Calculate the offset via pointer subtraction:
   const auto offset = this - std::addressof(list_all()[0]);
+  // Since we're using uint16_t for storing the index better be safe than sorry:
+  // The offset must fit into the data type. If this ever fails we got a lot
+  // more particle types than initially expected and you have to increase the
+  // ParticleTypePtr storage to uint32_t.
   assert(offset >= 0 && offset < 0xffff);
+  // After the assertion above the down-cast to uint16_t is safe:
   return {static_cast<uint16_t>(offset)};
 }
 #endif

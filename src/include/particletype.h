@@ -190,6 +190,43 @@ class ParticleType {
    */
   static void create_type_list(const std::string &particles);
 
+  /**
+   * Returns an object that acts like a pointer, except that it requires only 2
+   * bytes and inhibits pointer arithmetics.
+   *
+   * This is an optimization for creating references to ParticleType objects.
+   * With a normal pointer you would require the original object to stay in its
+   * place in memory, as otherwise the pointer would dangle. The ParticleTypePtr
+   * does not have this problem as it only stores the index of the ParticleType
+   * in the global vector of ParticleType objects.
+   *
+   * In addition to returning a more efficient reference type, the overload of
+   * operator& effectively inhibits passing ParticleType objects by pointer.
+   * This is an intended restriction since ParticleType objects should only be
+   * passed by const-ref. (You can now pass by ParticleTypePtr instead, but
+   * please prefer not to. It might be useful when you want to store a reference
+   * inside the function anyway, but that can just as well be done with a
+   * const-ref parameter. A ParticleTypePtr can be invalid, a const-ref
+   * is always a valid reference semantically.)
+   *
+   * \par Pre-condition:
+   * The operator expects that the ParticleType object is stored in the vector
+   * returned by ParticleType::list_all. Therefore, never create new ParticleType
+   * objects (that includes copies and moves)!
+   *
+   * \par Note on distributed execution:
+   * At some point we might want to have several copies of the ParticleType
+   * vector - on different machines or NUMA nodes. In that case
+   * ParticleType::list_all will return the local vector. This operator will
+   * continue to work as expected as long as the ParticleType object is an entry
+   * of this local vector. The ParticleTypePtr can then be used to communicate a
+   * ParticleType over node / NUMA boundaries (an actual pointer would not work,
+   * though).
+   *
+   * \return A pointer-like object referencing this ParticleType object.
+   *
+   * \see ParticleTypePtr
+   */
   ParticleTypePtr operator&() const;
 
  private:
@@ -228,32 +265,70 @@ inline bool ParticleType::is_stable() const {
   return width_ < 1E-5f;
 }
 
+/**
+ * \ingroup data
+ *
+ * A pointer-like interface to global references to ParticleType objects.
+ */
 class ParticleTypePtr {
  public:
+  /// Dereferences the pointer and returns the ParticleType object.
   const ParticleType &operator*() const {
     return lookup();
   }
+
+  /// Dereferences the pointer and returns the ParticleType object.
   const ParticleType *operator->() const {
+    // this requires std::addressof because &lookup() would call
+    // ParticleType::operator& and return ParticleTypePtr again
     return std::addressof(lookup());
   }
 
+  /// Default construction initializes with an invalid index.
   ParticleTypePtr() = default;
+
+  /// Initialization with \c nullptr constructs an object with an invalid index.
   ParticleTypePtr(std::nullptr_t) {}
 
+  /// Returns whether the two objects reference the same ParticleType object.
   bool operator==(const ParticleTypePtr &rhs) const {
     return index_ == rhs.index_;
   }
+
+  /// Returns whether the two objects reference different ParticleType objects.
   bool operator!=(const ParticleTypePtr &rhs) const {
     return index_ != rhs.index_;
   }
 
+  /// Returns whether the objects stores a valid ParticleType reference.
+  operator bool() const { return index_ != 0xffff; }
+
  private:
+  /// ParticleType::operator& is a friend in order to call the constructor
   friend ParticleTypePtr ParticleType::operator&() const;
+
+  /// Constructs a pointer to the ParticleType object at offset \p i.
   ParticleTypePtr(std::uint16_t i) : index_(i) {}
+
+  /**
+   * Helper function that does the ParticleType lookup from the stored index.
+   *
+   * \par Implementation:
+   * In debug builds this function asserts that the index is valid.
+   * It then asks for the vector of all ParticleType objects
+   * (ParticleType::list_all) and uses vector::operator[] to return an lvalue
+   * reference to the ParticleType object at the offset \p index_.
+   */
   const ParticleType &lookup() const {
     assert(index_ != 0xffff);
     return ParticleType::list_all()[index_];
   }
+
+  /**
+   * Stores the index of the references ParticleType object in the global
+   * vector. The value 0xffff is used to denote an invalid index (similar to a
+   * null pointer).
+   */
   std::uint16_t index_= 0xffff;
 };
 
