@@ -252,7 +252,7 @@ class ParticleTypePtr {
   ParticleTypePtr(std::uint16_t i) : index_(i) {}
   const ParticleType &lookup() const {
     assert(index_ != 0xffff);
-    return ParticleType::list_all().at(index_);
+    return ParticleType::list_all()[index_];
   }
   std::uint16_t index_= 0xffff;
 };
