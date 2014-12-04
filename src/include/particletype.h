@@ -26,7 +26,10 @@ namespace Smash {
  * (\ref list_all). After construction these values are immutable.
  *
  * The list of particles is stored in such a way that look up of a ParticleType
- * object (\ref find) is efficient for PDG codes (\f$\mathcal O(\log N)\f$).
+ * object (\ref find) for a given PDG code is as efficient as possible
+ * (\f$\mathcal O(\log N)\f$). This is still not efficient enough to use PdgCode
+ * as a substitute for storing information about a particle type, though. Use
+ * ParticleTypePtr instead.
  */
 class ParticleType {
  public:
@@ -170,7 +173,10 @@ class ParticleType {
   /**
    * Returns the ParticleType object for the given \p pdgcode.
    *
-   * \note The complexity of the search is \f$\mathcal O(\log N)\f$.
+   * \note The complexity of the search is \f$\mathcal O(\log N)\f$. Therefore,
+   * do not use this function except for user input that selects a particle
+   * type. All other internal references for a particle type should use
+   * ParticleTypePtr instead.
    */
   static const ParticleType &find(PdgCode pdgcode) SMASH_CONST;
 
@@ -269,6 +275,8 @@ inline bool ParticleType::is_stable() const {
  * \ingroup data
  *
  * A pointer-like interface to global references to ParticleType objects.
+ *
+ * \see ParticleType::operator&
  */
 class ParticleTypePtr {
  public:
