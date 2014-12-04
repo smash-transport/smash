@@ -29,6 +29,7 @@
 /* Outputs */
 #include "include/binaryoutputcollisions.h"
 #include "include/binaryoutputparticles.h"
+#include "include/densityoutput.h"
 #include "include/oscaroutput.h"
 #ifdef SMASH_USE_ROOT
 #  include "include/rootoutput.h"
@@ -322,6 +323,15 @@ int main(int argc, char *argv[]) {
 #endif
     } else {
       output_conf.take({"Root"});
+    }
+    if (static_cast<bool>(output_conf.take({"Density", "Enable"}))) {
+      output_list.emplace_back(new DensityOutput(output_path,
+                               output_conf["Density"],
+                               1.0, // todo(oliiny): read sigma from config
+             //todo(oliiny): output_conf.read({"General", "Testparticles"})
+                               1));
+    } else {
+      output_conf.take({"Density"});
     }
 
     // create an experiment

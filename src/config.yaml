@@ -32,7 +32,7 @@ Output:
 
     # how much time before recording measurables
     Output_Interval:  1.0
-   
+
     # output formats
     Oscar_Collisions:
         Enable:             True
@@ -55,6 +55,9 @@ Output:
     Binary_Particles:
         Enable:             True
         Only_Final:         False
+    Density:
+        Enable:             True
+        {x: 0.0}, {y: 0.0}, {z: 0.0}
 
 Collision_Term:
     Decays:        True
