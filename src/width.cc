@@ -189,8 +189,12 @@ float in_width_Manley_semistable(const float mass, const float poleMass,
   double p_f = pCM(mass, mass_stable, mass_unstable);
   IntegParam ip = {type_unstable, mass_stable, poleMass, L};
 
+  double Lambda = (type_unstable.pdgcode().baryon_number()!=0) ? 2.0 : 1.6;
+
   return partial_width_at_pole * p_f
          * BlattWeisskopf(p_f*interaction_radius, L)
+         * Post_FF_sqr (mass, poleMass,
+                        mass_stable+type_unstable.minimum_mass(), Lambda)
          / ( mass * rho_Manley(&ip) );
 }
 
