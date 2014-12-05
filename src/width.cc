@@ -49,31 +49,33 @@ const float interaction_radius = 1. / hbarc;
  *        R = interaction radius
  * \param L Angular momentum of outgoing particles AB.
  */
-static float BlattWeisskopf(const float x, const int L) {
-  float bw;
+static float BlattWeisskopf(const float x, const int L)
+#ifdef NDEBUG
+    noexcept
+#endif
+{
+  const auto x2 = x * x;
+  const auto x4 = x2 * x2;
   switch (L) {
     case 0:
-      bw = 1.;
-      break;
+      return 1.f;
     case 1:
-      bw = x / std::sqrt(1. + x*x);
-      break;
+      return x2 / (1.f + x2);
     case 2:
-      bw = x*x / std::sqrt(9. + 3. * x*x + x*x*x*x);
-      break;
+      return x4 / (9.f + 3.f * x2 + x4);
     case 3:
-      bw = x*x*x / std::sqrt(225. + 45. * x*x + 6.*x*x*x*x + x*x*x*x*x*x);
-      break;
+      return x4 * x2 / (225.f + 45.f * x2 + 6.f * x4 + x4 * x2);
     case 4:
-      bw = x*x*x*x / std::sqrt(11025. + 1575. * x*x + 135. * x*x*x*x
-                               + 10. * x*x*x*x*x*x + x*x*x*x*x*x*x*x);
-      break;
+      return x4 * x4 /
+             (11025.f + 1575.f * x2 + 135.f * x4 + 10.f * x2 * x4 + x4 * x4);
+#ifndef NDEBUG
     default:
       throw std::invalid_argument(
-        std::string("Wrong angular momentum in BlattWeisskopf: ")
-        + std::to_string(L));
+          std::string("Wrong angular momentum in BlattWeisskopf: ") +
+          std::to_string(L));
+#endif
   }
-  return bw*bw;
+  return 0.f;
 }
 
 
