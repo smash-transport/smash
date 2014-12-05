@@ -21,9 +21,9 @@ if(NOT CMAKE_BUILD_TYPE)
       FORCE)
 endif(NOT CMAKE_BUILD_TYPE)
 
-# RelWithDebInfo normally uses "-O2 -g -DNDEBUG" but we want -O3 and keep
-# assertions enabled.
-set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O3 -g" CACHE
+# RelWithDebInfo is just like Release, it only adds -g to add debug symbols
+# (useful for better debug and profiling information on Release builds)
+set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELEASE} -g" CACHE
    STRING "Flags used by the compiler during Release with Debug Info builds." FORCE)
 set(CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}" CACHE
    STRING "Flags used by the compiler during Release with Debug Info builds." FORCE)
