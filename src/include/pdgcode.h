@@ -459,7 +459,7 @@ class PdgCode {
   }
   /// returns if the codes are equal
   inline bool operator==(const PdgCode rhs) const {
-    return (code() == rhs.code());
+    return dump_ == rhs.dump_;
   }
   /// returns if the codes are not equal.
   inline bool operator!=(const PdgCode rhs) const {
