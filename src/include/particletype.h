@@ -196,6 +196,15 @@ class ParticleType {
    */
   static void create_type_list(const std::string &particles);
 
+  /// Returns whether the two ParticleType objects have the same PDG code.
+  bool operator==(const ParticleType &rhs) const {
+    return pdgcode() == rhs.pdgcode();
+  }
+  /// Returns whether the two ParticleType objects have different PDG codes.
+  bool operator!=(const ParticleType &rhs) const {
+    return pdgcode() != rhs.pdgcode();
+  }
+
   /**
    * Check if unstable particles have any decay modes and throw errors.
    */
