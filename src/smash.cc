@@ -241,7 +241,7 @@ int main(int argc, char *argv[]) {
      *
      * \key Output: \n
      * Below this key the configuration for the different output formats is
-     * defined. To enable a certain output, set the 'Enable' key below the 
+     * defined. To enable a certain output, set the 'Enable' key below the
      * selected format identifier. The identifiers are described below.
      * The following outputs exist:
      * \li \subpage input_oscar_particlelist
@@ -275,7 +275,7 @@ int main(int argc, char *argv[]) {
      *
      * \key Details of output formats are explained here: \n
      * \li General block structure of OSCAR formats: \n
-     *     \subpage oscar_general_ 
+     *     \subpage oscar_general_
      * \li A family of OSCAR ASCII outputs.\n
      *     \subpage format_oscar_particlelist\n
      *     \subpage format_oscar_collisions
@@ -285,7 +285,7 @@ int main(int argc, char *argv[]) {
      *     visualization using paraview software:\n \subpage format_vtk
      * \li Formatted binary output that uses ROOT software
      *     (http://root.cern.ch).\n Fast to read and write, requires less
-     *     disk space.\n \subpage format_root 
+     *     disk space.\n \subpage format_root
      */
 
     // loop until all OSCAR outputs are created (create_oscar_output will return
@@ -325,11 +325,15 @@ int main(int argc, char *argv[]) {
       output_conf.take({"Root"});
     }
     if (static_cast<bool>(output_conf.take({"Density", "Enable"}))) {
+      const int testparticles =
+          configuration.has_value({"General", "Testparticles"}) ?
+          configuration.read({"General", "Testparticles"}) : 1;
+      const double gauss_sigma =
+          configuration.has_value({"General", "Gaussian_Sigma"}) ?
+          configuration.read({"General", "Gaussian_Sigma"}) : 1.0;
       output_list.emplace_back(new DensityOutput(output_path,
                                output_conf["Density"],
-                               1.0, // todo(oliiny): read sigma from config
-             //todo(oliiny): output_conf.read({"General", "Testparticles"})
-                               1));
+                               gauss_sigma, testparticles));
     } else {
       output_conf.take({"Density"});
     }

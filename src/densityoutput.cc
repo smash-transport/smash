@@ -39,7 +39,7 @@ DensityOutput::~DensityOutput() {
 
 void DensityOutput::at_eventstart(const Particles &/*particles*/,
                                const int event_number) {
-  fprintf(file_.get(), "event %i\n", event_number);
+  fprintf(file_.get(), "# event %i\n", event_number);
 }
 
 void DensityOutput::at_eventend(const Particles &/*particles*/,

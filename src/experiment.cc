@@ -127,12 +127,12 @@ namespace {
 ExperimentParameters create_experiment_parameters(Configuration config) {
   const auto &log = logger<LogArea::Experiment>();
   log.trace() << source_location;
-  
+
   int testparticles;
-  if (config.has_value({"General", "Testparticles"})) { 
+  if (config.has_value({"General", "Testparticles"})) {
     testparticles = config.take({"General", "Testparticles"});
   } else {
-    testparticles = 1; 
+    testparticles = 1;
   }
   // The clock initializers are only read here and taken later when
   // assigning initial_clock_.
@@ -202,7 +202,7 @@ Experiment<Modus>::Experiment(Configuration config)
   if (!config.has_value({"Collision_Term", "Collisions"})
       || config.take({"Collision_Term", "Collisions"})) {
     action_finders_.emplace_back(new ScatterActionsFinder(config, parameters_));
-  }   
+  }
 }
 
 /* This method reads the particle type and cross section information
