@@ -112,6 +112,9 @@ namespace {
  * \key Testparticles (int, optional, default = 1): \n
  * How many test particles per real particles should be simulated.
  *
+ * \key Gaussian_Sigma (float, required): \n
+ * Width of gaussians that represent Wigner density of particles.
+ *
  * \page input_output_options_ Output
  * \key Output_Interval (float, required): \n
  * Defines the period of intermediate output of the status of the simulated
@@ -138,7 +141,7 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
   // assigning initial_clock_.
   return {{0.0f, config.read({"General", "Delta_Time"})},
            config.take({"Output", "Output_Interval"}),
-           testparticles};
+           testparticles, config.take({"General", "Gaussian_Sigma"})};
   }
 }  // unnamed namespace
 

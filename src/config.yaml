@@ -28,6 +28,10 @@ General:
     # number of events
     Nevents:       1
 
+    # width of gaussians representing particles, fm
+    Gaussian_Sigma: 1.0
+
+
 Output:
 
     # how much time before recording measurables
@@ -57,12 +61,14 @@ Output:
         Only_Final:         False
     Density:
         Enable:             True
-        {x: 0.0}, {y: 0.0}, {z: 0.0}
+        x: 0.0
+        y: 0.0
+        z: 0.0
 
 Collision_Term:
     Decays:        True
     Collisions:    True
-   # elastic cross section
+    # elastic cross section, mb (= 0.1 fm^2)
     Sigma:         10.0
 
 Modi:

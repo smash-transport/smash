@@ -79,7 +79,7 @@ TEST(propagate_default) {
   create_particle_list(Pdef);
   OutputsList out;
   // clock, output interval, cross-section, testparticles
-  ExperimentParameters param{{0.f, 1.f}, 1.f, 1};
+  ExperimentParameters param{{0.f, 1.f}, 1.f, 1, 1.0};
   m.propagate(&Pdef, param, out);
   // after propagation: Momenta should be unchanged.
   COMPARE(Pdef.data(0).momentum(), FourVector(4.0, 0.0, 0.0, 0.0));
@@ -107,7 +107,7 @@ TEST(propagate_box) {
   conf["Modi"]["Box"]["Length"] = 5.0;
   conf["Modi"]["Box"]["Temperature"] = 0.13;
   conf["Modi"]["Box"]["Start_Time"] = 0.2;
-  ExperimentParameters param{{0.f, 1.f}, 1.f, 1};
+  ExperimentParameters param{{0.f, 1.f}, 1.f, 1, 1.0};
   BoxModus b(conf["Modi"], param);
   Particles Pdef, Pbox;
   create_particle_list(Pdef);
@@ -146,7 +146,7 @@ TEST(propagate_collider) {
   conf["Modi"]["Collider"]["Target"]["Particles"]["661"] = 1;
   conf["Modi"]["Collider"]["Sqrts_Reps"][0] = "661";
   conf["Modi"]["Collider"]["Sqrts_Reps"][1] = "661";
-  ExperimentParameters param{{0.f, 1.f}, 1.f, 1};
+  ExperimentParameters param{{0.f, 1.f}, 1.f, 1, 1.0};
   ColliderModus n(conf["Modi"], param);
   Particles Pdef, Pnuc;
   create_particle_list(Pdef);
@@ -177,7 +177,7 @@ TEST(propagate_sphere) {
    conf["Modi"]["Sphere"]["Start_Time"] = 0.0;
    conf.take({"Modi", "Sphere", "Init_Multiplicities"});
    conf["Modi"]["Sphere"]["Init_Multiplicities"]["661"] = 500;
-   ExperimentParameters param{{0.f, 1.f}, 1.f, 1};
+   ExperimentParameters param{{0.f, 1.f}, 1.f, 1, 1.0};
    SphereModus s(conf["Modi"], param);
    Particles Pdef, Psph;
    create_particle_list(Pdef);
