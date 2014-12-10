@@ -188,7 +188,7 @@ TEST(density_eckart_frame) {
 TEST(nucleus_density) {
   // Lead nuclei with 10000 test-particles
   std::map<PdgCode, int> lead_list = {{0x2212, 79}, {0x2112, 118}};
-  int Ntest = 10000;
+  int Ntest = 100;
   Nucleus lead;
   lead.fill_from_list(lead_list, Ntest);
   lead.set_parameters_automatic();
@@ -202,7 +202,7 @@ TEST(nucleus_density) {
 
   // write density profile to file, time-consuming!
   Density_type dens_type = baryon;
-  double sigma = 0.5; // fm
+  double sigma = 1.0; // fm
 //  vtk_density_map("lead_density.vtk", plist, sigma, dens_type, Ntest,
 //                     20, 20, 20, 0.5, 0.5, 0.5);
   ThreeVector lstart(-10.0, 0.0, 0.0);

@@ -8,9 +8,11 @@
  */
 
 #include <map>
+#include <fstream>
 #include "unittest.h"
 
 #include "../include/configuration.h"
+#include "../include/collidermodus.h"
 #include "../include/potentials.h"
 #include "../include/experiment.h"
 #include "../include/modusdefault.h"
@@ -83,4 +85,81 @@ TEST(potential_gradient) {
   COMPARE_ABSOLUTE_ERROR(num_grad.x1(), analit_grad.x1(), 1.e-4);
   COMPARE_ABSOLUTE_ERROR(num_grad.x2(), analit_grad.x2(), 1.e-4);
   COMPARE_ABSOLUTE_ERROR(num_grad.x3(), analit_grad.x3(), 1.e-4);
+}
+
+// Create nuclear potential profile in XY plane
+TEST(nucleus_potential_profile) {
+  // Create a nucleus
+  std::map<PdgCode, int> nuc_list = {{0x2212, 79}, {0x2112, 118}};
+  const int Ntest = 1;
+  const double sigma = 1.0;
+  const double dt = 0.1;
+
+  // Create a nucleus
+  Configuration conf(TEST_CONFIG_PATH);
+  // All interactions off
+  conf["Collision_Term"]["Decays"] = "False";
+  conf["Collision_Term"]["Collisions"] = "False";
+  conf["Collision_Term"]["Sigma"] = 0.0;
+  // Fixed target: Copper
+  conf["Modi"]["Collider"]["Calculation_Frame"] = 3;
+  conf["Modi"]["Collider"]["E_Kin"] = 1.23;
+  conf.take({"Modi", "Collider", "Sqrtsnn"});
+  conf.take({"Modi", "Collider", "Projectile"});
+  conf.take({"Modi", "Collider", "Target"});
+  conf["Modi"]["Collider"]["Projectile"]["Particles"]["211"] = 1;
+  conf["Modi"]["Collider"]["Target"]["Particles"]["2212"] = 29;
+  conf["Modi"]["Collider"]["Target"]["Particles"]["2112"] = 34;
+  conf["Modi"]["Collider"]["Target"]["Automatic"] = "True";
+
+  ExperimentParameters param{{0.f, dt}, 1.f, Ntest, sigma};
+  ColliderModus c(conf["Modi"], param);
+  Particles P;
+  c.initial_conditions(&P, param);
+  OutputsList out;
+  ParticleList plist;
+
+  // Create potentials
+  conf["Potentials"]["Skyrme"]["Skyrme_A"] = -209.2;
+  conf["Potentials"]["Skyrme"]["Skyrme_B"] = 156.4;
+  conf["Potentials"]["Skyrme"]["Skyrme_Tau"] = 1.35;
+  Potentials* pot = new Potentials(conf["Potentials"], param);
+
+  // Write potential XY map in a vtk output
+  ThreeVector r;
+  const int nx = 50, ny = 50;
+  const double dx = 0.2, dy = 0.2;
+  double pot_value;
+
+  std::ofstream a_file;
+  for (auto it = 0; it < 20; it++) {
+    a_file.open(("Nucleus_U_xy.vtk." + std::to_string(it)).c_str(),
+                                                     std::ios::out);
+    plist = ParticleList(P.data().begin(), P.data().end());
+    a_file << "# vtk DataFile Version 2.0\n" <<
+              "potential\n" <<
+              "ASCII\n" <<
+              "DATASET STRUCTURED_POINTS\n" <<
+              "DIMENSIONS " << 2*nx+1 << " " << 2*ny+1 << " 1\n" <<
+              "SPACING 1 1 1\n" <<
+              "ORIGIN " << -nx << " " << -ny << " 0\n" <<
+              "POINT_DATA " << (2*nx+1)*(2*ny+1) << "\n" <<
+              "SCALARS potential float 1\n" <<
+              "LOOKUP_TABLE default\n";
+
+    a_file << std::setprecision(8);
+    a_file << std::fixed;
+    for (auto iy = -ny; iy <= ny; iy++) {
+      for (auto ix = -nx; ix <= nx; ix++) {
+        r = ThreeVector(ix*dx, iy*dy, 8.0);
+        pot_value = pot->potential(r, plist);
+        a_file << pot_value << " ";
+      }
+      a_file << "\n";
+    }
+    a_file.close();
+    for (auto i = 0; i < 50; i++) {
+      c.propagate(&P, param, out, pot);
+    }
+  }
 }

@@ -44,8 +44,8 @@ void ModusDefault::propagate(Particles *particles,
         dU_dr = ThreeVector(0.0, 0.0, 0.0);
       }
       pot_value = pot->potential(data.position().threevec(), plist);
-      std::cout << "Modusdef: dU/dr = " << dU_dr << std::endl;
-      std::cout << "Modusdef: U(r_i) = " << pot_value << std::endl;
+      // std::cout << "Modusdef: dU/dr = " << dU_dr << std::endl;
+      // std::cout << "Modusdef: U(r_i) = " << pot_value << std::endl;
       v = data.velocity();
       // predictor step assuming momentum-indep. potential, dU/dp = 0
       // then for momentum predictor = corrector
