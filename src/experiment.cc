@@ -175,6 +175,10 @@ std::ostream &operator<<(std::ostream &out, const Experiment<Modus> &e) {
  * \key Collisions (bool, optional, default = true): \n
  * true - collisions are enabled\n
  * false - all collisions are disabled
+ *
+ * \key Force_Decays_At_End (bool, required): \n
+ * true - force all resonances to decay after last timestep \n
+ * false - don't force decays (final output can contain resonances)
  */
 template <typename Modus>
 Experiment<Modus>::Experiment(Configuration config)
@@ -183,7 +187,8 @@ Experiment<Modus>::Experiment(Configuration config)
       particles_(),
       nevents_(config.take({"General", "Nevents"})),
       end_time_(config.take({"General", "End_Time"})),
-      delta_time_startup_(config.take({"General", "Delta_Time"})) {
+      delta_time_startup_(config.take({"General", "Delta_Time"})),
+      force_decays_(config.take({"Collision_Term", "Force_Decays_At_End"})) {
   const auto &log = logger<LogArea::Experiment>();
   int64_t seed_ = config.take({"General",  "Randomseed"});
   if (seed_ < 0) {
@@ -254,6 +259,33 @@ static std::string format_measurements(const Particles &particles,
   return std::string(buffer);
 }
 
+
+template <typename Modus>
+void Experiment<Modus>::perform_actions(ActionList &actions,
+                                        size_t &interactions_total) {
+  const auto &log = logger<LogArea::Experiment>();
+  if (!actions.empty()) {
+    for (const auto &action : actions) {
+      if (action->is_valid(particles_)) {
+        const ParticleList incoming_particles = action->incoming_particles();
+        action->perform(&particles_, interactions_total);
+        const ParticleList outgoing_particles = action->outgoing_particles();
+        for (const auto &output : outputs_) {
+          output->at_interaction(incoming_particles, outgoing_particles);
+        }
+        log.debug(~einhard::Green(), "✔ ", action);
+      } else {
+        log.debug(~einhard::DRed(), "✘ ", action, " (discarded: invalid)");
+      }
+    }
+    actions.clear();
+    log.debug(~einhard::Blue(), particles_);
+  } else {
+    log.debug("no actions performed");
+  }
+}
+
+
 /* This is the loop over timesteps, carrying out collisions and decays
  * and propagating particles. */
 template <typename Modus>
@@ -272,8 +304,10 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
                                      // sorting and finally a single linear
                                      // iteration
 
+    /* (1.a) Create grid. */
     const auto &grid = modus_.create_grid(
         ParticleList{particles_.data().begin(), particles_.data().end()});
+    /* (1.b) Iterate over cells and find actions. */
     grid.iterate_cells([&](
         const ParticleList &search_list,  // a list of particles where each pair
                                           // needs to be tested for possible
@@ -287,32 +321,12 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
         actions += finder->find_possible_actions(search_list, neighbors_list);
       }
     });
-
     /* (1.c) Sort action list by time. */
     std::sort(actions.begin(), actions.end(),
               [](const ActionPtr &a, const ActionPtr &b) { return *a < *b; });
 
-    /* (2.a) Perform actions. */
-    if (!actions.empty()) {
-      for (const auto &action : actions) {
-        if (action->is_valid(particles_)) {
-          const ParticleList incoming_particles = action->incoming_particles();
-          action->perform(&particles_, interactions_total);
-          const ParticleList outgoing_particles = action->outgoing_particles();
-          for (const auto &output : outputs_) {
-            output->at_interaction(incoming_particles, outgoing_particles);
-          }
-          log.debug(~einhard::Green(), "✔ ", action);
-        } else {
-          log.debug(~einhard::DRed(), "✘ ", action, " (discarded: invalid)");
-        }
-      }
-      actions.clear();
-      log.debug(~einhard::Blue(), particles_);
-    } else {
-      log.debug("no actions performed");
-    }
-
+    /* (2) Perform actions. */
+    perform_actions(actions, interactions_total);
     modus_.sanity_check(&particles_);
 
     /* (3) Do propagation. */
@@ -342,6 +356,28 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
       throw std::runtime_error("Violation of conserved quantities!");
     }
   }
+
+  if (force_decays_) {
+    // at end of time evolution: force all resonances to decay
+    std::vector<ActionPtr> actions;
+    /* (1.a) Create grid. */
+    const auto &grid = modus_.create_grid(
+        ParticleList{particles_.data().begin(), particles_.data().end()});
+    /* (1.b) Iterate over cells and find actions. */
+    grid.iterate_cells([&](
+        const ParticleList &search_list,
+        const std::vector<const ParticleList *> &
+        ) {
+      for (const auto &finder : action_finders_) {
+        actions += finder->find_final_actions(search_list);
+      }
+    });
+    /* (2) Perform actions. */
+    perform_actions(actions, interactions_total);
+    /* (3) Do propagation. */
+    modus_.propagate(&particles_, parameters_, outputs_);
+  }
+
   // make sure the experiment actually ran (note: we should compare this
   // to the start time, but we don't know that. Therefore, we check that
   // the time is positive, which should heuristically be the same).

@@ -27,6 +27,8 @@ class DecayActionsFinder : public ActionFinderInterface {
   ActionList find_possible_actions(
       const ParticleList &search_list,
       const std::vector<const ParticleList *> &neighbors_list) const override;
+  /** Force all resonances to decay at the end of the simulation. */
+  ActionList find_final_actions(const ParticleList &search_list) const override;
 };
 
 }  // namespace Smash
