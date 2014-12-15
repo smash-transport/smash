@@ -64,6 +64,16 @@ class OutputInterface {
    */
   virtual void at_intermediate_time(const Particles &, const int,
                                   const Clock &) = 0;
+
+  /**
+   * Output intended for writing out thermodynamics.
+   * It is launched after every N'th timestep. N is controlled by an option.
+   */
+  virtual void thermodynamics_output(const Particles &particles,
+                                     const ExperimentParameters &param) {
+    SMASH_UNUSED(particles);
+    SMASH_UNUSED(param);
+  }
 };
 
 }  // namespace Smash

@@ -325,15 +325,8 @@ int main(int argc, char *argv[]) {
       output_conf.take({"Root"});
     }
     if (static_cast<bool>(output_conf.take({"Density", "Enable"}))) {
-      const int testparticles =
-          configuration.has_value({"General", "Testparticles"}) ?
-          configuration.read({"General", "Testparticles"}) : 1;
-      const double gauss_sigma =
-          configuration.has_value({"General", "Gaussian_Sigma"}) ?
-          configuration.read({"General", "Gaussian_Sigma"}) : 1.0;
       output_list.emplace_back(new DensityOutput(output_path,
-                               output_conf["Density"],
-                               gauss_sigma, testparticles));
+                               output_conf["Density"]));
     } else {
       output_conf.take({"Density"});
     }

@@ -15,20 +15,18 @@
 
 #include "include/clock.h"
 #include "include/density.h"
+#include "include/experimentparameters.h"
 #include "include/filedeleter.h"
 #include "include/forwarddeclarations.h"
 #include "include/particles.h"
 
 namespace Smash {
 
-DensityOutput::DensityOutput(bf::path path,
-                             Configuration &&config,
-                             const double sigma,
-                             const int ntest)
+DensityOutput::DensityOutput(bf::path path, Configuration &&config)
     : file_{std::fopen((path / ("density_out.dat")).native().c_str(), "w")},
-      r_(ThreeVector(config.take({"x"}), config.take({"y"}), config.take({"z"}))),
-      sigma_(sigma),
-      ntest_(ntest) {
+      r_(ThreeVector(config.take({"x"}),
+                     config.take({"y"}),
+                     config.take({"z"}))) {
   fprintf(file_.get(), "# %s density output\n", VERSION_MAJOR);
   fprintf(file_.get(), "# time[fm/c] density[fm^-3] @ (%6.2f, %6.2f, %6.2f)\n",
                                r_.x1(), r_.x2(), r_.x3());
@@ -47,13 +45,18 @@ void DensityOutput::at_eventend(const Particles &/*particles*/,
   std::fflush(file_.get());
 }
 
-void DensityOutput::at_intermediate_time(const Particles &particles,
+void DensityOutput::at_intermediate_time(const Particles &/*particles*/,
                                       const int /*event_number*/,
-                                      const Clock &t) {
-  Density_type dens_type = baryon;
-  const ParticleList plist = ParticleList(particles.data().begin(),
-                                          particles.data().end());
-  const double rho = four_current(r_, plist, sigma_, dens_type, ntest_).abs();
-  fprintf(file_.get(), "%g %g\n", t.current_time(), rho);
+                                      const Clock &/*t*/) {
+}
+
+void DensityOutput::thermodynamics_output(const Particles &particles,
+                                          const ExperimentParameters &param) {
+ Density_type dens_type = baryon;
+ const ParticleList plist = ParticleList(particles.data().begin(),
+                                         particles.data().end());
+ const double rho = four_current(r_, plist, param.gaussian_sigma, dens_type,
+                                 param.testparticles).abs();
+ fprintf(file_.get(), "%g %g\n", param.labclock.current_time(), rho);
 }
 }  // namespace Smash

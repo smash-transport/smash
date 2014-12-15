@@ -341,6 +341,7 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
       /* save evolution data */
       for (const auto &output : outputs_) {
         output->at_intermediate_time(particles_, evt_num, parameters_.labclock);
+        output->thermodynamics_output(particles_, parameters_);
       }
     }
     // check conservation of conserved quantities:

@@ -12,6 +12,7 @@
 
 #include <string>
 
+#include "experimentparameters.h"
 #include "filedeleter.h"
 #include "outputinterface.h"
 #include "forwarddeclarations.h"
@@ -29,8 +30,7 @@ namespace Smash {
 class DensityOutput : public OutputInterface {
  public:
 
-  DensityOutput(bf::path path, Configuration&& conf,
-                const double sigma, const int ntest);
+  DensityOutput(bf::path path, Configuration&& conf);
   ~DensityOutput();
 
   /// writes the initial particle information of an event
@@ -43,17 +43,15 @@ class DensityOutput : public OutputInterface {
   /// writes particles every time interval fixed by option Output_Interval
   void at_intermediate_time(const Particles &particles, const int event_number,
                           const Clock &clock) override;
+
+  /// writes thermodynamics every time interval fixed by option Output_Interval
+  void thermodynamics_output(const Particles &particles,
+                             const ExperimentParameters &param) override;
  private:
   FilePtr file_;
 
   /// Point, where density is calculated
   const ThreeVector r_;
-
-  /// Sigma of Gaussian smearing for density
-  const double sigma_;
-
-  /// Number of testparticles
-  const int ntest_;
 };
 
 
