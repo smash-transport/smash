@@ -100,13 +100,16 @@ static bool compare_interaction_block_header(const int &nin,
                                              const int &nout,
                                              FILE* file) {
   int nin_read, nout_read;
+  double rho;
   char c_read;
   VERIFY(std::fread(&c_read, sizeof(char), 1, file) == 1);
   read_binary(nin_read, file);
   read_binary(nout_read, file);
+  VERIFY(std::fread(&rho, sizeof(double), 1, file) == 1);
   // std::cout << c_read << std::endl;
   // std::cout << nin_read << " " << nin << std::endl;
   // std::cout << nout_read << " " << nout << std::endl;
+  // std::cout << rho << std::endl;
   return (c_read == 'i') && (nin_read == nin) && (nout_read == nout);
 }
 
@@ -151,7 +154,7 @@ TEST(fullhistory_format) {
   ParticleData final_particle = create_smashon_particle();
   particles.add_data(final_particle);
   final_particles.push_back(particles.data(particles.id_max()));
-  bin_output->at_interaction(initial_particles, final_particles);
+  bin_output->at_interaction(initial_particles, final_particles, 0.0);
 
   /* Final state output */
   bin_output->at_eventend(particles, event_id);
@@ -176,7 +179,7 @@ TEST(fullhistory_format) {
   read_binary(smash_version, binF);  // smash version
 
   VERIFY(magic == "SMSH");
-  VERIFY(format_version_number == 0);
+  VERIFY(format_version_number == 1);
   VERIFY(smash_version == VERSION_MAJOR);
 
   // particles at event atart: expect two smashons
@@ -186,7 +189,7 @@ TEST(fullhistory_format) {
   VERIFY(compare_particle(initial_particles[0], binF));
   VERIFY(compare_particle(initial_particles[1], binF));
 
-  // ineration:2 smashoms -> 1 smashon
+  // interaction:2 smashons -> 1 smashon
   nin = 2;
   nout = 1;
   VERIFY(compare_interaction_block_header(nin, nout, binF));

@@ -52,9 +52,11 @@ class OutputInterface {
    *                          performed.
    */
   virtual void at_interaction(const ParticleList &incoming_particles,
-                                 const ParticleList &outgoing_particles) {
+                              const ParticleList &outgoing_particles,
+                              const double density) {
     SMASH_UNUSED(incoming_particles);
     SMASH_UNUSED(outgoing_particles);
+    SMASH_UNUSED(density);
   }
 
   /**

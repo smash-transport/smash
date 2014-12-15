@@ -46,7 +46,8 @@ class BinaryOutputParticles : public BinaryOutputBase {
   void at_eventend(const Particles &particles, const int event_number) override;
 
   void at_interaction(const ParticleList &incoming_particles,
-                         const ParticleList &outgoing_particles) override;
+                      const ParticleList &outgoing_particles,
+                      const double density) override;
   /// writes particles every time interval fixed by option OUTPUT_INTERVAL
   void at_intermediate_time(const Particles &particles, const int event_number,
                           const Clock &clock) override;

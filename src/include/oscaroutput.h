@@ -66,7 +66,8 @@ class OscarOutput : public OutputInterface {
 
   /// Write a prefix line and a line per particle to OSCAR output.
   void at_interaction(const ParticleList &incoming_particles,
-                      const ParticleList &outgoing_particles) override;
+                      const ParticleList &outgoing_particles,
+                      const double density) override;
 
   void at_intermediate_time(const Particles &particles, const int event_number,
                             const Clock &clock) override;

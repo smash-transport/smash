@@ -20,6 +20,7 @@
 #include "include/clock.h"
 #include "include/collidermodus.h"
 #include "include/configuration.h"
+#include "include/density.h"
 #include "include/experiment.h"
 #include "include/forwarddeclarations.h"
 #include "include/grid.h"
@@ -303,7 +304,11 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
           action->perform(&particles_, interactions_total);
           const ParticleList outgoing_particles = action->outgoing_particles();
           for (const auto &output : outputs_) {
-            output->at_interaction(incoming_particles, outgoing_particles);
+            Density_type dens_type = baryon;
+            const double rho = action->density_at_interaction(particles_,
+                                                    parameters_, dens_type);
+            output->at_interaction(incoming_particles,
+                                   outgoing_particles, rho);
           }
           log.debug(~einhard::Green(), "✔ ", action);
         } else {

@@ -98,7 +98,8 @@ class RootOutput : public OutputInterface {
                           const int event_number,
                           const Clock &) override;
   void at_interaction(const ParticleList &incoming_particles,
-                         const ParticleList &outgoing_particles) override;
+                      const ParticleList &outgoing_particles,
+                      const double density) override;
 
  private:
   const boost::filesystem::path base_path_;

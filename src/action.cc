@@ -82,6 +82,22 @@ ParticleList Action::incoming_particles() const {
   return std::move(l);
 }
 
+double Action::density_at_interaction(const Particles &particles,
+                                      const ExperimentParameters &param,
+                                      const Density_type dens_type) {
+  // Estimate for the interaction point in the calculational frame
+  ThreeVector density_where = ThreeVector(0.0, 0.0, 0.0);
+  for (const auto &part : incoming_particles_) {
+    density_where += part.position().threevec();
+  }
+  density_where /= incoming_particles_.size();
+  const ParticleList plist = ParticleList(particles.data().begin(),
+                                          particles.data().end());
+  // Eckart rest frame density
+  return four_current(density_where, plist, param.gaussian_sigma,
+                      dens_type, param.testparticles).abs();
+}
+
 
 ParticleList Action::choose_channel() {
   if (total_weight_ < really_small) {
