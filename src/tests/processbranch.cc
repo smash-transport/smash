@@ -27,28 +27,28 @@ TEST(assign_default) {
 }
 TEST(assign_1_particle) {
   PdgCode smashon("9876542");
-  ProcessBranch branch(smashon, 1.234f);
+  ProcessBranch branch(ParticleType::find(smashon), 1.234f);
   FUZZY_COMPARE(branch.weight(), 1.234f);
 }
 TEST(assign_2_particle) {
   PdgCode smashon("9876542");
-  ProcessBranch branch(smashon, smashon, 2.345);
+  ProcessBranch branch(ParticleType::find(smashon), ParticleType::find(smashon), 2.345);
   FUZZY_COMPARE(branch.weight(), 2.345f);
 }
 
 TEST(lists) {
-  PdgCode smashon("9876542");
-  PdgCode smashino("1234568");
+  const ParticleType &smashon(ParticleType::find({"9876542"}));
+  const ParticleType &smashino(ParticleType::find({"1234568"}));
   ProcessBranch branch(smashon, smashino, 2.345);
-  std::vector<PdgCode> list = branch.pdg_list();
+  const auto &list = branch.particle_types();
   COMPARE(list.size(), 2u);
-  COMPARE(list.at(0), smashon);
-  COMPARE(list.at(1), smashino);
+  COMPARE(list.at(0), &smashon);
+  COMPARE(list.at(1), &smashino);
 
   ParticleList particles = branch.particle_list();
   COMPARE(particles.size(), 2u);
-  COMPARE(particles.at(0).pdgcode(), smashon);
-  COMPARE(particles.at(1).pdgcode(), smashino);
+  COMPARE(particles.at(0).pdgcode(), smashon.pdgcode());
+  COMPARE(particles.at(1).pdgcode(), smashino.pdgcode());
   COMPARE(particles.at(0).momentum().x0(), 0.0);
   COMPARE(particles.at(0).momentum().x1(), 0.0);
   COMPARE(particles.at(0).momentum().x2(), 0.0);
@@ -60,26 +60,17 @@ TEST(lists) {
 
   branch.clear();
 
-  std::vector<PdgCode> new_list = branch.pdg_list();
+  const auto &new_list = branch.particle_types();
   COMPARE(new_list.size(), 0u);
 }
 
 TEST(add_particle) {
-  PdgCode smashon("9876542");
-  PdgCode smashino("1234568");
-  PdgCode anti_smashino("-1234568");
-  ProcessBranch branch(smashon, smashino, 1.2);
-  branch.add_particle(anti_smashino);
-  COMPARE(branch.pdg_list().size(), 3u);
-}
-TEST(set_particles) {
-  PdgCode smashon("9876542");
-  PdgCode smashino("1234568");
-  PdgCode anti_smashino("-1234568");
-  std::vector<PdgCode> list = {smashon, smashino, anti_smashino};
-  ProcessBranch branch;
-  branch.set_particles(list);
-  COMPARE(branch.pdg_list().size(), 3u);
+  std::vector<ParticleTypePtr> list = {
+      &ParticleType::find({"9876542"}), &ParticleType::find({"1234568"}),
+      &ParticleType::find({"-1234568"}),
+  };
+  ProcessBranch branch(list, 1.2);
+  COMPARE(branch.particle_types().size(), 3u);
 }
 
 TEST(weights) {

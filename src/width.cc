@@ -103,7 +103,7 @@ float width_Manley_stable(const float mass, const float poleMass,
 
 /** Parameters for GSL integration. */
 struct IntegParam {
-  const ParticleType *type;  // type of daughter resonance
+  const ParticleType &type;  // type of daughter resonance
   double m2;                 // mass of stable particle
   double srts;               // sqrt(s) = mass of decaying resonance
   int L;                     // angular momentum
@@ -120,12 +120,12 @@ static double integrand_rho_Manley(double mass, void *parameters) {
     return 0.;
   }
 
-  double resonance_width = ip->type->total_width(srts);
+  double resonance_width = ip->type.total_width(srts);
   /* center-of-mass momentum of final state particles */
   double p_f = pCM(srts, stable_mass, mass);
 
   return p_f/srts * BlattWeisskopf(p_f*interaction_radius, ip->L) * 2.*srts
-          * spectral_function(mass, ip->type->mass(), resonance_width);
+          * spectral_function(mass, ip->type.mass(), resonance_width);
 }
 
 
@@ -141,7 +141,7 @@ static double rho_Manley(IntegParam *ip) {
   double accuracy_relative = 1.0e-4;
   double integral_value, integral_error;
 
-  gsl_integration_qag(&integrand, ip->type->minimum_mass(), ip->srts - ip->m2,
+  gsl_integration_qag(&integrand, ip->type.minimum_mass(), ip->srts - ip->m2,
                       accuracy_absolute, accuracy_relative,
                       subintervals_max, gauss_points, workspace,
                       &integral_value, &integral_error);
@@ -161,17 +161,13 @@ static double Post_FF_sqr (double m, double M0, double s0, double L) {
 
 float width_Manley_semistable(const float mass, const float poleMass,
                               const float mass_stable,
-                              const ParticleType *type_unstable, const int L,
+                              const ParticleType &type_unstable, const int L,
                               const float partial_width_at_pole) {
-  IntegParam ip;
-  ip.type = type_unstable;
-  ip.m2 = mass_stable;
-  ip.L = L;
+  IntegParam ip = {type_unstable, mass_stable, mass, L};
 
-  double Lambda = (type_unstable->pdgcode().baryon_number()!=0) ? 2.0 : 1.6;
+  double Lambda = (type_unstable.pdgcode().baryon_number()!=0) ? 2.0 : 1.6;
 
   // calculate rho function at off-shell mass
-  ip.srts = mass;
   double rho_off = rho_Manley(&ip);
 
   // calculate rho function at pole mass
@@ -180,25 +176,25 @@ float width_Manley_semistable(const float mass, const float poleMass,
 
   return partial_width_at_pole * rho_off / rho_pole
          * Post_FF_sqr (mass, poleMass,
-                        mass_stable+type_unstable->minimum_mass(), Lambda);
+                        mass_stable+type_unstable.minimum_mass(), Lambda);
 }
 
 
 float in_width_Manley_semistable(const float mass, const float poleMass,
                                  const float mass_stable,
                                  const float mass_unstable,
-                                 const ParticleType *type_unstable,
+                                 const ParticleType &type_unstable,
                                  const int L,
                                  const float partial_width_at_pole) {
   double p_f = pCM(mass, mass_stable, mass_unstable);
-  IntegParam ip;
-  ip.type = type_unstable;
-  ip.m2 = mass_stable;
-  ip.L = L;
-  ip.srts = poleMass;
+  IntegParam ip = {type_unstable, mass_stable, poleMass, L};
+
+  double Lambda = (type_unstable.pdgcode().baryon_number()!=0) ? 2.0 : 1.6;
 
   return partial_width_at_pole * p_f
          * BlattWeisskopf(p_f*interaction_radius, L)
+         * Post_FF_sqr (mass, poleMass,
+                        mass_stable+type_unstable.minimum_mass(), Lambda)
          / ( mass * rho_Manley(&ip) );
 }
 

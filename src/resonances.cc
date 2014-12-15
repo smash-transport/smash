@@ -55,8 +55,8 @@ double two_to_one_formation(const ParticleData &particle_a,
                             const ParticleData &particle_b,
                             const ParticleType &type_resonance,
                             double mandelstam_s, double cm_momentum_squared) {
-  ParticleType type_particle_a = particle_a.type(),
-               type_particle_b = particle_b.type();
+  const ParticleType &type_particle_a = particle_a.type();
+  const ParticleType &type_particle_b = particle_b.type();
   /* Check for charge conservation */
   if (type_resonance.charge() != type_particle_a.charge()
                                + type_particle_b.charge()) {

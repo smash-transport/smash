@@ -2,8 +2,8 @@
 # anything after a # is a comment and will be ignored
 # The decays for a given particle are given as:
 # <PDG>
-# <ratio> <PDGs of decay particles>
-# <ratio> <PDGs of decay particles>
+# <ratio> <angular momentum L> <PDGs of decay particles>
+# <ratio> <angular momentum L> <PDGs of decay particles>
 # ...
 # A line with a single integer (or end of file) marks the end of the list of
 # possible decays

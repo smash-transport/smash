@@ -8,7 +8,7 @@
 #define SRC_INCLUDE_PROCESSBRANCH_H_
 
 #include "forwarddeclarations.h"
-#include "pdgcode.h"
+#include "particletype.h"
 
 #include <vector>
 
@@ -30,15 +30,8 @@ namespace Smash {
  * \code
  * std::vector<ProcessBranch> deltaplus_decay_modes;
  * ProcessBranch branch;
- * // Adding particle codes one by one
- * branch.add_particles(0x2212);
- * branch.add_particles(0x111)
  * branch.set_weight(2);
  * deltaplus_decay_modes.push_back(branch);
- * // Using already existing particle list
- * std::vector<PdgCode> pdg_list(0x2112, 0x211);
- * // set_particles erases the previous list
- * branch.set_particles(pdg_list);
  * // set_weight erases the previous weight
  * branch.set_weight(1);
  * deltaplus_decay_modes.push_back(branch);
@@ -46,32 +39,35 @@ namespace Smash {
  */
 class ProcessBranch {
  public:
-  /// Default constructor
+  /// Create a ProcessBranch without final states
   ProcessBranch() : branch_weight_(-1.0) {}
+
   /// Constructor with 1 particle
-  inline ProcessBranch(PdgCode p, float w);
+  ProcessBranch(const ParticleType &type, float w) : branch_weight_(w) {
+    particle_types_.reserve(1);
+    particle_types_.push_back(&type);
+  }
+
   /// Constructor with 2 particles
-  inline ProcessBranch(PdgCode p_a, PdgCode p_b, float w);
-  /// Constructor with particle vector
-  inline ProcessBranch(std::vector<PdgCode> pdg_list, float w);
+  ProcessBranch(const ParticleType &type_a, const ParticleType &type_b, float w)
+      : branch_weight_(w) {
+    particle_types_.reserve(2);
+    particle_types_.push_back(&type_a);
+    particle_types_.push_back(&type_b);
+  }
+
+  /// Create a ProcessBranch from a list of ParticleType objects
+  ProcessBranch(std::vector<ParticleTypePtr> new_types, float w)
+      : particle_types_(std::move(new_types)), branch_weight_(w) {}
 
   /// Copying is disabled. Use std::move or create a new object.
   ProcessBranch(const ProcessBranch &) = delete;
 
   /// The move constructor efficiently moves the PDG list member.
   ProcessBranch(ProcessBranch &&rhs)
-      : pdg_list_(std::move(rhs.pdg_list_)),
+      : particle_types_(std::move(rhs.particle_types_)),
         branch_weight_(rhs.branch_weight_) {}
 
-  /// Add one particle to the list
-  inline void add_particle(PdgCode particle_pdg);
-  /**
-   * Create a particle list.
-   * This will remove any previously added particles,
-   * but more members can be added to list afterwards
-   * with add_particle(int)
-   */
-  inline void set_particles(std::vector<PdgCode> pdg_list);
   /**
    * Set the weight of the branch.
    * In other words, how probable this branch is
@@ -80,12 +76,14 @@ class ProcessBranch {
   inline void set_weight(float process_weight);
   /// Clear all information from the branch
   inline void clear(void);
-  /// Return the particle list
-  const std::vector<PdgCode> &pdg_list() const { return pdg_list_; }
+  /// Return the particle types associated with this branch.
+  const std::vector<ParticleTypePtr> &particle_types() const {
+    return particle_types_;
+  }
 
   /**
-   * Return a list of ParticleData initialized with the ParticleType for the PDG
-   * codes from pdg_list.
+   * Return a list of ParticleData initialized with the stored ParticleType
+   * objects.
    */
   ParticleList particle_list() const;
 
@@ -109,43 +107,10 @@ class ProcessBranch {
    * which is somewhere on the heap. Also the alignment of ints is only half
    * that of size_t/void*. (I was obviously talking about 64bit here...)
    */
-  std::vector<PdgCode> pdg_list_;
+  std::vector<ParticleTypePtr> particle_types_;
   /// Weight of the branch, typically a cross section or a branching ratio
   float branch_weight_;
 };
-
-// Constructor with 1 particle
-ProcessBranch::ProcessBranch (PdgCode p, float w) : branch_weight_(w) {
-  add_particle(p);
-}
-
-// Constructor with 2 particles
-ProcessBranch::ProcessBranch (PdgCode p_a, PdgCode p_b, float w)
-                          : branch_weight_(w) {
-  add_particle(p_a);
-  add_particle(p_b);
-}
-
-// Constructor with particle vector
-ProcessBranch::ProcessBranch (std::vector<PdgCode> new_pdg_list, float w)
-                          : branch_weight_(w) {
-  set_particles(std::move(new_pdg_list));
-}
-
-/// Add one particle to the list
-inline void ProcessBranch::add_particle(PdgCode particle_pdg) {
-  pdg_list_.push_back(particle_pdg);
-}
-
-/**
- * Create a particle list.
- * This will remove any previously added particles,
- * but more members can be added to list afterwards
- * with add_particle(int)
- */
-inline void ProcessBranch::set_particles(std::vector<PdgCode> new_pdg_list) {
-  pdg_list_ = std::move(new_pdg_list);
-}
 
 /**
  * Set the weight of the branch.
@@ -158,7 +123,7 @@ inline void ProcessBranch::set_weight(float process_weight) {
 
 /// Clear all information from the branch
 inline void ProcessBranch::clear(void) {
-  pdg_list_.clear();
+  particle_types_.clear();
   branch_weight_ = -1.0;
 }
 
@@ -188,6 +153,10 @@ inline float total_weight(const ProcessBranchList &l) {
  */
 class DecayBranch : public ProcessBranch {
  public:
+  template <typename... Ts>
+  DecayBranch(int l, Ts &&... args)
+      : ProcessBranch{std::forward<Ts>(args)...}, angular_momentum_(l) {}
+
   /// Get the angular momentum of this branch.
   inline int angular_momentum() const;
   /** Set the angular momentum of this branch.

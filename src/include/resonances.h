@@ -24,7 +24,7 @@ namespace Smash {
 /** Parameters for spectral-function integration via GSL. */
 struct IntegrandParameters {
   /// Type of the resonance
-  const ParticleType *type;
+  ParticleTypePtr type;
   /// Mass of second particle
   double m2;
   /// Mandelstam s
@@ -43,8 +43,8 @@ double clebsch_gordan(const int j_a, const int j_b, const int j_c,
 
 /* Calculate isospin Clebsch-Gordan coefficient for two particles p_a and p_b
  * coupling to a total isospin (I_tot, I_z). */
-inline double isospin_clebsch_gordan(const ParticleType p_a,
-                                     const ParticleType p_b,
+inline double isospin_clebsch_gordan(const ParticleType &p_a,
+                                     const ParticleType &p_b,
                                      const int I_tot, const int I_z) {
   return clebsch_gordan (p_a.isospin(), p_b.isospin(), I_tot,
                          p_a.isospin3(), p_b.isospin3(), I_z);
@@ -52,9 +52,9 @@ inline double isospin_clebsch_gordan(const ParticleType p_a,
 
 /* Calculate isospin Clebsch-Gordan coefficient for two particles p_a and p_b
  * coupling to a resonance Res. */
-inline double isospin_clebsch_gordan(const ParticleType p_a,
-                                     const ParticleType p_b,
-                                     const ParticleType Res) {
+inline double isospin_clebsch_gordan(const ParticleType &p_a,
+                                     const ParticleType &p_b,
+                                     const ParticleType &Res) {
   return clebsch_gordan (p_a.isospin(), p_b.isospin(), Res.isospin(),
                          p_a.isospin3(), p_b.isospin3(), Res.isospin3());
 }

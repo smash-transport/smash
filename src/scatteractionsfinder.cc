@@ -48,16 +48,17 @@ double ScatterActionsFinder::collision_time(const ParticleData &p1,
    */
   ThreeVector pos_diff = p1.position().threevec() - p2.position().threevec();
   ThreeVector velo_diff = p1.velocity() - p2.velocity();
+  double vsqr = velo_diff.sqr();
   log.trace(source_location, "\n"
             "Scatter ", p1, "\n"
             "    <-> ", p2, "\n"
             "=> position difference: ", pos_diff, " [fm]",
             ", velocity difference: ", velo_diff, " [GeV]");
   /* Zero momentum leads to infite distance, particles are not approaching. */
-  if (fabs(velo_diff.sqr()) < really_small) {
+  if (vsqr < really_small) {
     return -1.0;
   } else {
-    return -pos_diff * velo_diff / velo_diff.sqr();
+    return -pos_diff * velo_diff / vsqr;
   }
 }
 
