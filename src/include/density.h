@@ -70,14 +70,6 @@ namespace Smash {
                                const ParticleList &plist, double gs_sigma,
                                Density_type dens_type, int ntest);
 
-  /** Prints 3D density map in vtk format on a grid [-nx;nx]x[-ny;ny]x[-nz;nz]
-   *  with steps dx, dy, dz. This allows to look at density profiles and
-   *  make easy plots.
-   */
-  void vtk_density_map(const char * file_name, const ParticleList &plist,
-                      double gs_sigma, Density_type dens_type, int ntest,
-                      int nx, int ny, int nz, double dx, double dy, double dz);
-
   /** Prints density along the specified line. Useful to make 1D plots of
     * density profiles.
    */
