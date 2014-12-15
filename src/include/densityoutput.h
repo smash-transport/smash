@@ -12,6 +12,7 @@
 
 #include <string>
 
+#include "density.h"
 #include "experimentparameters.h"
 #include "filedeleter.h"
 #include "outputinterface.h"
@@ -24,7 +25,12 @@ namespace Smash {
 /**
  * \ingroup output
  *
- * \brief Writes the density at a specified point
+ * \brief Writes the density at a specified point versus time
+ *
+ * This class is a temporary solution to write thermodynamic
+ * quantities out. Calculations are called directly inside the
+ * output functions. In future it should be substituted by some
+ * more general output.
  *
  **/
 class DensityOutput : public OutputInterface {
@@ -47,6 +53,15 @@ class DensityOutput : public OutputInterface {
   /// writes thermodynamics every time interval fixed by option Output_Interval
   void thermodynamics_output(const Particles &particles,
                              const ExperimentParameters &param) override;
+
+  /** Prints density along the specified line. Useful to make 1D plots of
+    * density profiles.
+   */
+  void density_along_line(const char * file_name, const ParticleList &plist,
+                        double gs_sigma, Density_type dens_type, int ntest,
+                        const ThreeVector &line_start,
+                        const ThreeVector &line_end, int n_points);
+
  private:
   FilePtr file_;
 

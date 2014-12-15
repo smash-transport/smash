@@ -69,14 +69,6 @@ namespace Smash {
   std::pair<double, ThreeVector> rho_eckart_gradient(const ThreeVector &r,
                                const ParticleList &plist, double gs_sigma,
                                Density_type dens_type, int ntest);
-
-  /** Prints density along the specified line. Useful to make 1D plots of
-    * density profiles.
-   */
-  void density_along_line(const char * file_name, const ParticleList &plist,
-                        double gs_sigma, Density_type dens_type, int ntest,
-                        const ThreeVector &line_start,
-                        const ThreeVector &line_end, int n_points);
 }  // namespace Smash
 
 #endif  // SRC_INCLUDE_DENSITY_H_

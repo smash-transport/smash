@@ -10,6 +10,7 @@
 #include "include/densityoutput.h"
 
 #include <boost/filesystem.hpp>
+#include <fstream>
 #include <memory>
 #include <include/config.h>
 
@@ -59,4 +60,25 @@ void DensityOutput::thermodynamics_output(const Particles &particles,
                                  param.testparticles).abs();
  fprintf(file_.get(), "%g %g\n", param.labclock.current_time(), rho);
 }
+
+void DensityOutput::density_along_line(const char * file_name,
+                        const ParticleList &plist,
+                        double gs_sigma, Density_type dens_type, int ntest,
+                        const ThreeVector &line_start,
+                        const ThreeVector &line_end, int n_points) {
+  ThreeVector r;
+  double rho_eck;
+  std::ofstream a_file;
+  a_file.open(file_name, std::ios::out);
+
+  for (int i = 0; i <= n_points; i++) {
+    r = line_start + (line_end - line_start) * (1.0 * i / n_points);
+    rho_eck = four_current(r, plist, gs_sigma, dens_type, ntest).abs();
+    a_file << r.x1() << " " <<
+              r.x2() << " " <<
+              r.x3() << " " << rho_eck << "\n";
+  }
+  a_file.close();
+}
+
 }  // namespace Smash
