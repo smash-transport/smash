@@ -360,18 +360,11 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
   if (force_decays_) {
     // at end of time evolution: force all resonances to decay
     std::vector<ActionPtr> actions;
-    /* (1.a) Create grid. */
-    const auto &grid = modus_.create_grid(
-        ParticleList{particles_.data().begin(), particles_.data().end()});
-    /* (1.b) Iterate over cells and find actions. */
-    grid.iterate_cells([&](
-        const ParticleList &search_list,
-        const std::vector<const ParticleList *> &
-        ) {
-      for (const auto &finder : action_finders_) {
-        actions += finder->find_final_actions(search_list);
-      }
-    });
+    /* (1) Find actions. */
+    for (const auto &finder : action_finders_) {
+      actions += finder->find_final_actions(ParticleList{particles_.data().begin(),
+                                                         particles_.data().end()});
+    }
     /* (2) Perform actions. */
     perform_actions(actions, interactions_total);
     /* (3) Do propagation. */
