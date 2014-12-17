@@ -93,12 +93,14 @@ GridBase::find_min_and_length(const ParticleList &all_particles) {
 
 std::tuple<std::array<float, 3>, std::array<int, 3>>
 GridBase::determine_cell_sizes(size_type particle_count,
-                               const std::array<float, 3> &length) {
+                               const std::array<float, 3> &length,
+                               const int testparticles) {
   std::tuple<std::array<float, 3>, std::array<int, 3> > r;
   auto &index_factor = std::get<0>(r);
   auto &number_of_cells = std::get<1>(r);
 
-  constexpr float max_interaction_length[3] = {2.5f, 2.5f, 2.5f};
+  // 2.5 fm corresponds to 200 mb
+  float max_interaction_length = 2.5f / testparticles;
 
   // The number of cells is determined by the min and max coordinates where
   // particles are positioned and the maximal interaction length (which equals
@@ -109,13 +111,13 @@ GridBase::determine_cell_sizes(size_type particle_count,
   // --------------------
   // TODO:
   // The last cell in each direction can be smaller than
-  // max_interaction_length[i]. In that case periodic boundaries will not work
+  // max_interaction_length. In that case periodic boundaries will not work
   // correctly. Thus, we need to reduce the number of cells in that direction
   // by one and make the last cell larger. This basically merges a smaller
   // boundary cell into a full cell inside the grid.
   const int max_cells = std::cbrt(particle_count);
   for (std::size_t i = 0; i < number_of_cells.size(); ++i) {
-    index_factor[i] = 1.f / max_interaction_length[i];
+    index_factor[i] = 1.f / max_interaction_length;
     number_of_cells[i] =
         std::max(1, static_cast<int>(std::ceil(length[i] * index_factor[i])));
     if (number_of_cells[i] > max_cells) {

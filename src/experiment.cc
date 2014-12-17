@@ -127,7 +127,7 @@ namespace {
 ExperimentParameters create_experiment_parameters(Configuration config) {
   const auto &log = logger<LogArea::Experiment>();
   log.trace() << source_location;
-  
+
   int testparticles;
   if (config.has_value({"General", "Testparticles"})) { 
     testparticles = config.take({"General", "Testparticles"});
@@ -273,7 +273,8 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
                                      // iteration
 
     const auto &grid = modus_.create_grid(
-        ParticleList{particles_.data().begin(), particles_.data().end()});
+        ParticleList{particles_.data().begin(), particles_.data().end()},
+        parameters_.testparticles);
     grid.iterate_cells([&](
         const ParticleList &search_list,  // a list of particles where each pair
                                           // needs to be tested for possible

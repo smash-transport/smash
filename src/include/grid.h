@@ -51,7 +51,8 @@ class GridBase {
    */
   static std::tuple<std::array<float, 3>, std::array<int, 3>>
       determine_cell_sizes(size_type particle_count,
-                           const std::array<float, 3> &length);
+                           const std::array<float, 3> &length,
+                           const int testparticles);
 
 };
 
@@ -77,8 +78,9 @@ class Grid : public GridBase {
    *
    * \param all_particles The particles to place onto the grid.
    */
-  Grid(ParticleList &&all_particles)
-      : Grid{find_min_and_length(all_particles), std::move(all_particles)} {}
+  Grid(ParticleList &&all_particles, const int testparticles)
+      : Grid{find_min_and_length(all_particles), std::move(all_particles),
+	     testparticles} {}
 
   /**
    * Constructs a grid with the given minimum grid coordinates and grid length.
@@ -91,12 +93,12 @@ class Grid : public GridBase {
    */
   Grid(const std::pair<std::array<float, 3>, std::array<float, 3>> &
            min_and_length,
-       ParticleList &&all_particles)
+       ParticleList &&all_particles, const int testparticles)
       : min_position_(min_and_length.first) {
     const auto &length = min_and_length.second;
 
     std::tie(index_factor_, number_of_cells_) =
-        determine_cell_sizes(all_particles.size(), length);
+        determine_cell_sizes(all_particles.size(), length, testparticles);
 
     build_cells(std::move(all_particles), length);
   }
