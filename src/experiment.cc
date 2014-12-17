@@ -127,18 +127,12 @@ namespace {
 ExperimentParameters create_experiment_parameters(Configuration config) {
   const auto &log = logger<LogArea::Experiment>();
   log.trace() << source_location;
-  
-  int testparticles;
-  if (config.has_value({"General", "Testparticles"})) { 
-    testparticles = config.take({"General", "Testparticles"});
-  } else {
-    testparticles = 1; 
-  }
+
   // The clock initializers are only read here and taken later when
   // assigning initial_clock_.
   return {{0.0f, config.read({"General", "Delta_Time"})},
-           config.take({"Output", "Output_Interval"}),
-           testparticles};
+          config.take({"Output", "Output_Interval"}),
+          config.take({"General", "Testparticles"}, 1)};
   }
 }  // unnamed namespace
 
@@ -176,7 +170,7 @@ std::ostream &operator<<(std::ostream &out, const Experiment<Modus> &e) {
  * true - collisions are enabled\n
  * false - all collisions are disabled
  *
- * \key Force_Decays_At_End (bool, required): \n
+ * \key Force_Decays_At_End (bool, optional, default = true): \n
  * true - force all resonances to decay after last timestep \n
  * false - don't force decays (final output can contain resonances)
  */
@@ -188,7 +182,7 @@ Experiment<Modus>::Experiment(Configuration config)
       nevents_(config.take({"General", "Nevents"})),
       end_time_(config.take({"General", "End_Time"})),
       delta_time_startup_(config.take({"General", "Delta_Time"})),
-      force_decays_(config.take({"Collision_Term", "Force_Decays_At_End"})) {
+      force_decays_(config.take({"Collision_Term", "Force_Decays_At_End"}, true)) {
   const auto &log = logger<LogArea::Experiment>();
   int64_t seed_ = config.take({"General",  "Randomseed"});
   if (seed_ < 0) {
@@ -200,14 +194,12 @@ Experiment<Modus>::Experiment(Configuration config)
   log.info() << "Random number seed: " << seed_;
   log.info() << *this;
 
-  if (!config.has_value({"Collision_Term", "Decays"})
-      || config.take({"Collision_Term", "Decays"})) {
+  if (config.take({"Collision_Term", "Decays"}, true)) {
     action_finders_.emplace_back(new DecayActionsFinder(parameters_));
   }
-  if (!config.has_value({"Collision_Term", "Collisions"})
-      || config.take({"Collision_Term", "Collisions"})) {
+  if (config.take({"Collision_Term", "Collisions"}, true)) {
     action_finders_.emplace_back(new ScatterActionsFinder(config, parameters_));
-  }   
+  }
 }
 
 /* This method reads the particle type and cross section information
