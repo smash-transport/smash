@@ -12,12 +12,12 @@ cmake_minimum_required(VERSION 2.8)
 # Tell cmake where to find our modules
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
-# Set the default for CMAKE_BUILD_TYPE to Release, otherwise we get something
+# Set a default value for CMAKE_BUILD_TYPE, otherwise we get something
 # which is none of the options.
 if(NOT CMAKE_BUILD_TYPE)
    # Change RelWithDebInfo below to Release for SMASH releases
    set(CMAKE_BUILD_TYPE RelWithDebInfo CACHE STRING
-      "Choose the type of build, options are: None(CMAKE_CXX_FLAGS or CMAKE_C_FLAGS used) Debug Release RelWithDebInfo MinSizeRel."
+      "Choose the type of build, options are: Debug Release RelWithDebInfo Profiling."
       FORCE)
 endif(NOT CMAKE_BUILD_TYPE)
 
@@ -27,6 +27,12 @@ set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O3 -g" CACHE
    STRING "Flags used by the compiler during Release with Debug Info builds." FORCE)
 set(CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}" CACHE
    STRING "Flags used by the compiler during Release with Debug Info builds." FORCE)
+
+# set up the profiling build type
+set(CMAKE_CXX_FLAGS_PROFILING "-O3 -DNDEBUG -pg" CACHE STRING "Flags used by the compiler during profile builds." FORCE)
+set(CMAKE_C_FLAGS_PROFILING "-O3 -DNDEBUG -pg" CACHE STRING "Flags used by the compiler during profile builds." FORCE)
+set(CMAKE_EXE_LINKER_FLAGS_PROFILING "${CMAKE_EXE_LINKER_FLAGS_RELEASE} -pg" CACHE STRING "Flags used by the compiler during profile builds." FORCE)
+mark_as_advanced(CMAKE_CXX_FLAGS_PROFILING CMAKE_C_FLAGS_PROFILING CMAKE_EXE_LINKER_FLAGS_RELEASE)
 
 # Set the relevant generic g++ flags (optimisation + warnings)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
@@ -51,12 +57,6 @@ int main() {
 if(NOT CXX11_COMPILES)
    message(FATAL_ERROR "Your compiler did not manage to compile a simple C++11 program. Please get a newer C++ compiler.")
 endif()
-
-option(Profile "Profile" OFF)
-if(Profile)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg -O0")
-  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pg -O0")
-endif(Profile)
 
 # have binary in the build directory
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR})

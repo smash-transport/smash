@@ -92,8 +92,8 @@ ParticleList Action::choose_channel() {
   /* Loop through all subprocesses and select one by Monte Carlo, based on
    * their weights.  */
   for (const auto &proc : subprocesses_) {
-    if (proc.pdg_list().size() < 1
-        || proc.pdg_list()[0] == PdgCode::invalid()) {
+    if (proc.particle_types().size() < 1 ||
+        proc.particle_types()[0]->pdgcode() == PdgCode::invalid()) {
       continue;
     }
     interaction_probability += proc.weight() / total_weight_;

@@ -22,40 +22,32 @@
 
 namespace Smash {
 
-using DecayModesMap = std::map<PdgCode, DecayModes>;
+const std::vector<DecayModes> *DecayModes::all_decay_modes = nullptr;
 
-namespace {
-  /// a map between pdg and corresponding decay modes
-  const DecayModesMap *all_decay_modes = nullptr;
-}  // unnamed namespace
-
-void DecayModes::add_mode(float ratio, int L, std::vector<PdgCode> pdg_list) {
-  switch (pdg_list.size()) {
+void DecayModes::add_mode(float ratio, int L,
+                          std::vector<ParticleTypePtr> particle_types) {
+  switch (particle_types.size()) {
   case 2:
-    if (!pdg_list[0].is_hadron() || !pdg_list[1].is_hadron()) {
-      logger<LogArea::DecayModes>().warn("decay products A: ", pdg_list[0],
-                                         " B: ", pdg_list[1]);
+    if (!particle_types[0]->is_hadron() || !particle_types[1]->is_hadron()) {
+      logger<LogArea::DecayModes>().warn(
+          "decay products A: ", *particle_types[0], " B: ", *particle_types[1]);
     }
     break;
   case 3:
-    if (!pdg_list[0].is_hadron() || !pdg_list[1].is_hadron() ||
-        !pdg_list[2].is_hadron()) {
-      logger<LogArea::DecayModes>().warn("decay products A: ", pdg_list[0],
-                                         " B: ", pdg_list[1], " C: ",
-                                         pdg_list[2]);
+    if (!particle_types[0]->is_hadron() || !particle_types[1]->is_hadron() ||
+        !particle_types[2]->is_hadron()) {
+      logger<LogArea::DecayModes>().warn(
+          "decay products A: ", *particle_types[0], " B: ", *particle_types[1],
+          " C: ", *particle_types[2]);
     }
     break;
   default:
     throw InvalidDecay(
         "DecayModes::add_mode was instructed to add a decay mode with " +
-        std::to_string(pdg_list.size()) +
+        std::to_string(particle_types.size()) +
         " particles. This is an invalid input.");
   }
-  DecayBranch branch;
-  branch.set_weight(ratio);
-  branch.set_angular_momentum(L);
-  branch.set_particles(std::move(pdg_list));
-  decay_modes_.emplace_back(std::move(branch));
+  decay_modes_.emplace_back(L, std::move(particle_types), ratio);
 }
 
 void DecayModes::renormalize(float renormalization_constant) {
@@ -75,15 +67,18 @@ void DecayModes::renormalize(float renormalization_constant) {
   }
 }
 
-/* return the decay modes of specific type */
-const DecayModes &DecayModes::find(PdgCode pdg) {
-  return all_decay_modes->at(pdg);
+namespace {
+inline std::size_t find_offset(PdgCode pdg) {
+  return std::addressof(ParticleType::find(pdg)) -
+         std::addressof(ParticleType::list_all()[0]);
 }
-
+}  // unnamed namespace
 
 void DecayModes::load_decaymodes(const std::string &input) {
-  static DecayModesMap decaymodes;
+  static std::vector<DecayModes> decaymodes;
   decaymodes.clear();  // in case an exception was thrown and should try again
+  decaymodes.resize(ParticleType::list_all().size());
+
   PdgCode pdgcode = PdgCode::invalid();
   DecayModes decay_modes_to_add;
   float ratio_sum = 0.0;
@@ -108,21 +103,21 @@ void DecayModes::load_decaymodes(const std::string &input) {
       /* Construct and add the list of decay modes for the antiparticle.  */
       DecayModes decay_modes_anti;
       for (const auto &mode : decay_modes_to_add.decay_mode_list()) {
-        std::vector<PdgCode> list = mode.pdg_list();
-        for (auto &code : list) {
-          if (code.has_antiparticle()) {
-            code = code.get_antiparticle();
+        std::vector<ParticleTypePtr> list = mode.particle_types();
+        for (auto &type : list) {
+          if (type->has_antiparticle()) {
+            type = type->get_antiparticle();
           }
         }
         decay_modes_anti.add_mode(mode.weight(), mode.angular_momentum(),
                                   list);
       }
-      decaymodes.insert(std::make_pair(pdgcode.get_antiparticle(),
-                                       std::move(decay_modes_anti)));
+      decaymodes[find_offset(pdgcode.get_antiparticle())] =
+          std::move(decay_modes_anti);
     }
 
     /* Add the list of decay modes for this particle type */
-    decaymodes.insert(std::make_pair(pdgcode, std::move(decay_modes_to_add)));
+    decaymodes[find_offset(pdgcode)] = std::move(decay_modes_to_add);
 
     /* Clean up the list for the next particle type */
     decay_modes_to_add.clear();
@@ -150,7 +145,7 @@ void DecayModes::load_decaymodes(const std::string &input) {
       assert(pdgcode != PdgCode::invalid());  // special value for start of file
     } else {
       std::istringstream lineinput(line.text);
-      std::vector<PdgCode> decay_particles;
+      std::vector<ParticleTypePtr> decay_particles;
       decay_particles.reserve(4);
       float ratio;
       lineinput >> ratio;
@@ -161,19 +156,20 @@ void DecayModes::load_decaymodes(const std::string &input) {
       PdgCode pdg;
       lineinput >> pdg;
       while (lineinput) {
-        if (!ParticleType::exists(pdg)) {
+        try {
+          decay_particles.emplace_back(&ParticleType::find(pdg));
+          lineinput >> pdg;
+        }
+        catch (const std::runtime_error &) {
           throw ReferencedParticleNotFound(build_error_string(
-              "Inconsistency: The particle with PDG id " +
-                  pdg.string() +
+              "Inconsistency: The particle with PDG id " + pdg.string() +
                   " was not registered through particles.txt, but "
                   "decaymodes.txt referenced it.",
               line));
         }
-        decay_particles.push_back(pdg);
-        lineinput >> pdg;
       }
       if (pdg != PdgCode::invalid()) {
-        decay_particles.push_back(pdg);
+        decay_particles.emplace_back(&ParticleType::find(pdg));
       }
       if (lineinput.fail() && !lineinput.eof()) {
         throw LoadFailure(

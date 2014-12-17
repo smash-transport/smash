@@ -201,16 +201,16 @@ class PdgCode {
 
   /** Returns a signed integer with the PDG code in hexadecimal. */
   inline std::int32_t code() const {
-    return antiparticle_sign() * (dump_ & 0x0fffffff);
+    return antiparticle_sign() * ucode();
   }
 
   /// returns a C++ string from the PDG Code.
   inline std::string string() const {
     char hexstring[8];
     if (digits_.antiparticle_) {
-      snprintf(hexstring, 8, "-%x", std::abs(code()));
+      snprintf(hexstring, 8, "-%x", ucode());
     } else {
-      snprintf(hexstring, 8, "%x", code());
+      snprintf(hexstring, 8, "%x", ucode());
     }
     return std::string(hexstring);
   }
@@ -440,7 +440,11 @@ class PdgCode {
    * This is used by std::map
    */
   inline bool operator<(const PdgCode rhs) const {
-    return (code() < rhs.code());
+    return dump_ < rhs.dump_;
+    // the complex thing to do here is to calculate:
+    //   code() < rhs.code()
+    // but for getting a total order that's overkill. The uint32_t value in
+    // dump_ works just fine.
   }
   /// returns if the codes are equal
   inline bool operator==(const PdgCode rhs) const {
@@ -547,6 +551,11 @@ class PdgCode {
     } chunks_;
   };
 
+  /** Returns an unsigned integer with the PDG code in hexadecimal
+   *  (disregarding the antiparticle flag). */
+  inline std::uint32_t ucode() const {
+    return (dump_ & 0x0fffffff);
+  }
   /** returns the net number of quarks with given flavour number
    *
    * \param quark PDG Code of quark: (1..6) = (d,u,s,c,b,t)
@@ -580,7 +589,8 @@ class PdgCode {
 
   /// takes a string and sets the fields.
   inline void set_from_string(const std::string& codestring) {
-    digits_.antiparticle_ = false;
+    dump_ = 0;
+    // implicit with the above: digits_.antiparticle_ = false;
     digits_.n_ = digits_.n_R_ = digits_.n_L_ = digits_.n_q1_ = digits_.n_q2_ =
                                 digits_.n_q3_ = digits_.n_J_ = 0;
     size_t length = codestring.size();

@@ -29,48 +29,11 @@ static ParticleData create_proton(int id = -1) {
   return ParticleData{ParticleType::find(0x2212), id};
 }
 
+/*
 static ParticleData create_antiproton(int id = -1) {
   return ParticleData{ParticleType::find(-0x2212), id};
 }
-
-
-// create a particle list with particles moving in different directions.
-static void create_particle_list(Particles &P) {
-  // proton that moves along the x axis:
-  ParticleData proton_x = create_proton();
-  // proton that moves along the y axis:
-  ParticleData proton_y = create_proton();
-  // proton that moves along the z axis:
-  ParticleData proton_z = create_proton();
-  // proton that moves in neither of xyz planes, v = v0:
-  ParticleData proton = create_proton();
-  // proton that moves in neither of xyz planes, v = - v0:
-  ParticleData antiproton = create_antiproton();
-
-  double mass = 0.938;
-  // set momenta:
-  proton_x.set_4momentum(mass, ThreeVector(2.0, 0.0, 0.0));
-  proton_y.set_4momentum(mass, ThreeVector(0.0, -2.0, 0.0));
-  proton_z.set_4momentum(mass, ThreeVector(0.0, 0.0, 2.0));
-  proton.set_4momentum(mass, ThreeVector(0.4, 0.5, 0.7));
-  antiproton.set_4momentum(mass, ThreeVector(-0.4, -0.5, -0.7));
-
-  // set positions:
-  proton_x.set_4position(FourVector(0.0, -5.0, 0.0, 0.0));
-  proton_y.set_4position(FourVector(0.0, 0.0, 5.0, 0.0));
-  proton_z.set_4position(FourVector(0.0, 0.0, 0.0, -5.0));
-  proton.set_4position(FourVector(0.0,-4.0,-5.0,-7.0));
-  antiproton.set_4position(FourVector(0.0, 4.0, 5.0, 7.0));
-
-  // add particles (and make sure the particles get the correct ID):
-  COMPARE(P.add_data(proton_x), 0);
-  COMPARE(P.add_data(proton_y), 1);
-  COMPARE(P.add_data(proton_z), 2);
-  COMPARE(P.add_data(proton), 3);
-  COMPARE(P.add_data(antiproton), 4);
-
-  return;
-}
+*/
 
 // create one particle moving along x axis and check density in comp. frame
 // check if density in the comp. frame gets contracted as expected
@@ -155,6 +118,43 @@ TEST(density_gradient) {
  */
 /*
 TEST(density_eckart_frame) {
+
+  // create a particle list with particles moving in different directions.
+
+  // proton that moves along the x axis:
+  ParticleData proton_x = create_proton();
+  // proton that moves along the y axis:
+  ParticleData proton_y = create_proton();
+  // proton that moves along the z axis:
+  ParticleData proton_z = create_proton();
+  // proton that moves in neither of xyz planes, v = v0:
+  ParticleData proton = create_proton();
+  // proton that moves in neither of xyz planes, v = - v0:
+  ParticleData antiproton = create_antiproton();
+
+  double mass = 0.938;
+  // set momenta:
+  proton_x.set_4momentum(mass, ThreeVector(2.0, 0.0, 0.0));
+  proton_y.set_4momentum(mass, ThreeVector(0.0, -2.0, 0.0));
+  proton_z.set_4momentum(mass, ThreeVector(0.0, 0.0, 2.0));
+  proton.set_4momentum(mass, ThreeVector(0.4, 0.5, 0.7));
+  antiproton.set_4momentum(mass, ThreeVector(-0.4, -0.5, -0.7));
+
+  // set positions:
+  proton_x.set_4position(FourVector(0.0, -5.0, 0.0, 0.0));
+  proton_y.set_4position(FourVector(0.0, 0.0, 5.0, 0.0));
+  proton_z.set_4position(FourVector(0.0, 0.0, 0.0, -5.0));
+  proton.set_4position(FourVector(0.0,-4.0,-5.0,-7.0));
+  antiproton.set_4position(FourVector(0.0, 4.0, 5.0, 7.0));
+
+  // add particles (and make sure the particles get the correct ID):
+  COMPARE(P.add_data(proton_x), 0);
+  COMPARE(P.add_data(proton_y), 1);
+  COMPARE(P.add_data(proton_z), 2);
+  COMPARE(P.add_data(proton), 3);
+  COMPARE(P.add_data(antiproton), 4);
+
+
   ModusDefault m;
   Particles Pdef;
   create_particle_list(Pdef);
@@ -188,7 +188,7 @@ TEST(density_eckart_frame) {
 TEST(nucleus_density) {
   // Lead nuclei with 10000 test-particles
   std::map<PdgCode, int> lead_list = {{0x2212, 79}, {0x2112, 118}};
-  int Ntest = 100;
+  int Ntest = 10000;
   Nucleus lead;
   lead.fill_from_list(lead_list, Ntest);
   lead.set_parameters_automatic();
@@ -202,7 +202,7 @@ TEST(nucleus_density) {
 
   // write density profile to file, time-consuming!
   Density_type dens_type = baryon;
-  double sigma = 1.0; // fm
+  double sigma = 0.5; // fm
 //  vtk_density_map("lead_density.vtk", plist, sigma, dens_type, Ntest,
 //                     20, 20, 20, 0.5, 0.5, 0.5);
   ThreeVector lstart(-10.0, 0.0, 0.0);

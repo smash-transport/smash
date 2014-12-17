@@ -7,9 +7,7 @@
 #
 *.o
 *.S
-*~
 *.bak
-.directory
 *.kate-swp
 *.orig
 *.rej

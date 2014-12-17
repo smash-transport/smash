@@ -24,7 +24,7 @@ namespace Smash {
 /** Parameters for spectral-function integration via GSL. */
 struct IntegrandParameters {
   /// Type of the resonance
-  const ParticleType *type;
+  ParticleTypePtr type;
   /// Mass of second particle
   double m2;
   /// Mandelstam s
@@ -43,8 +43,8 @@ double clebsch_gordan(const int j_a, const int j_b, const int j_c,
 
 /* Calculate isospin Clebsch-Gordan coefficient for two particles p_a and p_b
  * coupling to a total isospin (I_tot, I_z). */
-inline double isospin_clebsch_gordan(const ParticleType p_a,
-                                     const ParticleType p_b,
+inline double isospin_clebsch_gordan(const ParticleType &p_a,
+                                     const ParticleType &p_b,
                                      const int I_tot, const int I_z) {
   return clebsch_gordan (p_a.isospin(), p_b.isospin(), I_tot,
                          p_a.isospin3(), p_b.isospin3(), I_z);
@@ -52,9 +52,9 @@ inline double isospin_clebsch_gordan(const ParticleType p_a,
 
 /* Calculate isospin Clebsch-Gordan coefficient for two particles p_a and p_b
  * coupling to a resonance Res. */
-inline double isospin_clebsch_gordan(const ParticleType p_a,
-                                     const ParticleType p_b,
-                                     const ParticleType Res) {
+inline double isospin_clebsch_gordan(const ParticleType &p_a,
+                                     const ParticleType &p_b,
+                                     const ParticleType &Res) {
   return clebsch_gordan (p_a.isospin(), p_b.isospin(), Res.isospin(),
                          p_a.isospin3(), p_b.isospin3(), Res.isospin3());
 }
@@ -71,8 +71,8 @@ inline double isospin_clebsch_gordan(const ParticleType p_a,
  * 4. Enough energy for all decay channels to be available for the resonance
  * 5. Detailed balance (reverse process exists)
  *
- * \param[in] type_particle_a Type information for the first initial particle.
- * \param[in] type_particle_b Type information for the second initial particle.
+ * \param[in] particle_a First initial particle.
+ * \param[in] particle_b Second initial particle.
  * \param[in] type_resonance Type information for the resonance to be produced.
  * \param[in] mandelstam_s Mandelstam-s of the collision
  * of the two initial particles.
@@ -82,8 +82,8 @@ inline double isospin_clebsch_gordan(const ParticleType p_a,
  * \return The cross section for the process
  * [initial particle a] + [initial particle b] -> resonance.
  */
-double two_to_one_formation(const ParticleType &type_particle_a,
-                            const ParticleType &type_particle_b,
+double two_to_one_formation(const ParticleData &particle_a,
+                            const ParticleData &particle_b,
                             const ParticleType &type_resonance,
                             double mandelstam_s, double cm_momentum_squared);
 
