@@ -303,10 +303,17 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
           const ParticleList incoming_particles = action->incoming_particles();
           action->perform(&particles_, interactions_total);
           const ParticleList outgoing_particles = action->outgoing_particles();
+
+          // Calculate Eckart rest frame density at the interaction point
+          Density_type dens_type = baryon;
+          const ThreeVector r_interaction = action->get_interaction_point();
+          const ParticleList plist = ParticleList(particles_.data().begin(),
+                                                    particles_.data().end());
+          const double rho = four_current(r_interaction, plist,
+                                       parameters_.gaussian_sigma, dens_type,
+                                       parameters_.testparticles).abs();
+
           for (const auto &output : outputs_) {
-            Density_type dens_type = baryon;
-            const double rho = action->density_at_interaction(particles_,
-                                                    parameters_, dens_type);
             output->at_interaction(incoming_particles,
                                    outgoing_particles, rho);
           }

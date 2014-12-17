@@ -99,9 +99,8 @@ class Action {
   /** Check various conservation laws. */
   void check_conservation(const size_t &id_process) const;
 
-  /** Calculate density at the interaction point */
-  double density_at_interaction(const Particles &, const ExperimentParameters &,
-                                const Density_type);
+  /** Get the interaction point */
+  ThreeVector get_interaction_point();
 
   /**
    * \ingroup exception
