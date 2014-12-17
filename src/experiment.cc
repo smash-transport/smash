@@ -179,6 +179,11 @@ std::ostream &operator<<(std::ostream &out, const Experiment<Modus> &e) {
  * \key Collisions (bool, optional, default = true): \n
  * true - collisions are enabled\n
  * false - all collisions are disabled
+ *
+ * \key Density_Type (int, optional, default = 0): \n
+ * 0 - net baryon density
+ * 1 - proton density
+ * 2 - neutron density
  */
 template <typename Modus>
 Experiment<Modus>::Experiment(Configuration config)
@@ -206,6 +211,21 @@ Experiment<Modus>::Experiment(Configuration config)
   if (!config.has_value({"Collision_Term", "Collisions"})
       || config.take({"Collision_Term", "Collisions"})) {
     action_finders_.emplace_back(new ScatterActionsFinder(config, parameters_));
+  }
+  if (config.has_value({"Thermodynamics", "Density_Type"})) {
+    const int dens_opt = config.take({"Thermodynamics", "Density_Type"});
+    if (dens_opt == 0) {
+      dens_type_ = baryon;
+    } else if (dens_opt == 1) {
+      dens_type_ = proton;
+    } else if (dens_opt == 2) {
+      dens_type_ = neutron;
+    } else {
+      log.error() << "Unknown Density_Type specified. Taking default.";
+      dens_type_ = baryon;
+    }
+  } else {
+    dens_type_ = baryon;
   }
 }
 
@@ -297,6 +317,11 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
               [](const ActionPtr &a, const ActionPtr &b) { return *a < *b; });
 
     /* (2.a) Perform actions. */
+
+    // Particle list before all actions will be used for density calculation
+    const ParticleList plist = ParticleList(particles_.data().begin(),
+                                            particles_.data().end());
+
     if (!actions.empty()) {
       for (const auto &action : actions) {
         if (action->is_valid(particles_)) {
@@ -305,12 +330,9 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
           const ParticleList outgoing_particles = action->outgoing_particles();
 
           // Calculate Eckart rest frame density at the interaction point
-          Density_type dens_type = baryon;
           const ThreeVector r_interaction = action->get_interaction_point();
-          const ParticleList plist = ParticleList(particles_.data().begin(),
-                                                    particles_.data().end());
           const double rho = four_current(r_interaction, plist,
-                                       parameters_.gaussian_sigma, dens_type,
+                                       parameters_.gaussian_sigma, dens_type_,
                                        parameters_.testparticles).abs();
 
           for (const auto &output : outputs_) {

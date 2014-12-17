@@ -71,6 +71,11 @@ Collision_Term:
     # elastic cross section, mb (= 0.1 fm^2)
     Sigma:         10.0
 
+Thermodynamics:
+   # Which density is written to collision headers:
+   # 0 - net baryon, 1 - proton, 2 - neutron
+   Density_Type:   0
+
 Modi:
     Box:
         # Cube size
