@@ -19,12 +19,12 @@
 
 namespace Smash {
 
-  /** Allows to choose wich kind of density to calculate.
+  /** Allows to choose which kind of density to calculate.
    *  For Fermi momenta and symmetry potential one needs
    *  to know proton and neutron densities. Baryon density
    *  is necessary for Skyrme potential.
    */
-  enum Density_type {baryon, proton, neutron};
+  enum Density_type {baryon = 0, proton = 1, neutron = 2};
 
   /** A small check if particle PDG code belongs to a given type.
    *  Currently checks for protons, neutrons and baryons.

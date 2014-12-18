@@ -213,7 +213,11 @@ Experiment<Modus>::Experiment(Configuration config)
     action_finders_.emplace_back(new ScatterActionsFinder(config, parameters_));
   }
   dens_type_ = static_cast<Density_type>(
-             config.take({"Output", "Density", "Density_Type"}, 0));
+              config.take({"Output", "Density", "Density_Type"}, 0));
+  if (dens_type_ < 0 || dens_type_ > 2) {
+    log.error() << "Unknown Density_Type specified. Taking default.";
+    dens_type_ = baryon;
+  }
   log.info() << "Density type written to headers: " << dens_type_;
 }
 
