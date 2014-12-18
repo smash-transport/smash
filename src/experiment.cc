@@ -212,21 +212,9 @@ Experiment<Modus>::Experiment(Configuration config)
       || config.take({"Collision_Term", "Collisions"})) {
     action_finders_.emplace_back(new ScatterActionsFinder(config, parameters_));
   }
-  if (config.has_value({"Thermodynamics", "Density_Type"})) {
-    const int dens_opt = config.take({"Thermodynamics", "Density_Type"});
-    if (dens_opt == 0) {
-      dens_type_ = baryon;
-    } else if (dens_opt == 1) {
-      dens_type_ = proton;
-    } else if (dens_opt == 2) {
-      dens_type_ = neutron;
-    } else {
-      log.error() << "Unknown Density_Type specified. Taking default.";
-      dens_type_ = baryon;
-    }
-  } else {
-    dens_type_ = baryon;
-  }
+  dens_type_ = static_cast<Density_type>(
+             config.take({"Output", "Density", "Density_Type"}, 0));
+  log.info() << "Density type written to headers: " << dens_type_;
 }
 
 /* This method reads the particle type and cross section information

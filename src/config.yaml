@@ -64,17 +64,15 @@ Output:
         x: 0.0
         y: 0.0
         z: 0.0
+        # Which density is written to collision headers:
+        # 0 - net baryon, 1 - proton, 2 - neutron
+        Density_Type:   0
 
 Collision_Term:
     Decays:        True
     Collisions:    True
     # elastic cross section, mb (= 0.1 fm^2)
     Sigma:         10.0
-
-Thermodynamics:
-   # Which density is written to collision headers:
-   # 0 - net baryon, 1 - proton, 2 - neutron
-   Density_Type:   0
 
 Modi:
     Box:
