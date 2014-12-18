@@ -33,7 +33,6 @@ General:
 
 
 Output:
-
     # how much time before recording measurables
     Output_Interval:  1.0
 
@@ -71,6 +70,7 @@ Output:
 Collision_Term:
     Decays:        True
     Collisions:    True
+    Force_Decays_At_End:  True
     # elastic cross section, mb (= 0.1 fm^2)
     Sigma:         10.0
 

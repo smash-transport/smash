@@ -68,4 +68,19 @@ ActionList DecayActionsFinder::find_possible_actions(
   return std::move(actions);
 }
 
+ActionList DecayActionsFinder::find_final_actions
+    (const ParticleList &search_list) const {
+  ActionList actions;
+
+  for (const auto &p : search_list) {
+    if (p.type().is_stable()) {
+      continue;      /* particle doesn't decay */
+    }
+    auto act = make_unique<DecayAction>(p, 0.f);
+    act->add_processes(p.type().get_partial_widths(p.effective_mass()));
+    actions.emplace_back(std::move(act));
+  }
+  return std::move(actions);
+}
+
 }  // namespace Smash

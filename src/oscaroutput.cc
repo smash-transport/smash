@@ -452,7 +452,8 @@ std::unique_ptr<OutputInterface> create_oscar_output(bf::path path,
         return create_select_format<OscarParticlesAtEventend>(
             std::move(path), std::move(subconfig), "particle_lists");
       } else {
-        return create_select_format<OscarTimesteps | OscarAtEventstart>(
+        return create_select_format<OscarTimesteps | OscarAtEventstart |
+                                    OscarParticlesAtEventend>(
             std::move(path), std::move(subconfig), "particle_lists");
       }
     }
