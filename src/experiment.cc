@@ -406,7 +406,7 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
     } while (interactions_total > interactions_old);  // loop until no more decays occur
 
     /* Do one final propagation step. */
-    modus_.propagate(&particles_, parameters_, outputs_);
+    modus_.propagate(&particles_, parameters_, outputs_, potentials_);
   }
 
   // make sure the experiment actually ran (note: we should compare this
