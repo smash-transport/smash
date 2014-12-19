@@ -10,13 +10,25 @@
 #include <map>
 #include "unittest.h"
 
+#include <boost/filesystem.hpp>
+#include <boost/filesystem/fstream.hpp>
+
 #include "../include/configuration.h"
 #include "../include/density.h"
+#include "../include/densityoutput.h"
 #include "../include/experiment.h"
 #include "../include/modusdefault.h"
 #include "../include/nucleus.h"
 
+
 using namespace Smash;
+
+static const bf::path testoutputpath = bf::absolute(SMASH_TEST_OUTPUT_PATH);
+
+TEST(directory_is_created) {
+  bf::create_directory(testoutputpath);
+  VERIFY(bf::exists(testoutputpath));
+}
 
 TEST(init_particle_types) {
   ParticleType::create_type_list(
@@ -186,9 +198,13 @@ TEST(density_eckart_frame) {
   Generates nuclei and prints their density profiles to vtk files
 */
 TEST(nucleus_density) {
-  // Lead nuclei with 10000 test-particles
+  std::string configfilename = "densconfig.yaml";
+  bf::ofstream(testoutputpath / configfilename) << "x: 0\ny: 0\nz: 0\n";
+  VERIFY(bf::exists(testoutputpath / configfilename));
+
+  // Lead nuclei with 1000 test-particles
   std::map<PdgCode, int> lead_list = {{0x2212, 79}, {0x2112, 118}};
-  int Ntest = 10000;
+  int Ntest = 1000;
   Nucleus lead;
   lead.fill_from_list(lead_list, Ntest);
   lead.set_parameters_automatic();
@@ -208,16 +224,19 @@ TEST(nucleus_density) {
   ThreeVector lstart(-10.0, 0.0, 0.0);
   ThreeVector lend(10.0, 0.0, 0.0);
   const int npoints = 100;
-  density_along_line("lead_densityX.dat", plist, sigma, dens_type, Ntest,
-                      lstart, lend, npoints);
+
+  Configuration&& conf{testoutputpath, configfilename};
+  DensityOutput *out = new DensityOutput(testoutputpath, std::move(conf));
+  out->density_along_line("lead_densityX.dat", plist, sigma, dens_type,
+                          Ntest, lstart, lend, npoints);
 
   lstart = ThreeVector(0.0, -10.0, 0.0);
   lend = ThreeVector(0.0, 10.0, 0.0);
-  density_along_line("lead_densityY.dat", plist, sigma, dens_type, Ntest,
-                      lstart, lend, npoints);
+  out->density_along_line("lead_densityY.dat", plist, sigma, dens_type,
+                          Ntest, lstart, lend, npoints);
 
   lstart = ThreeVector(0.0, 0.0, -10.0);
   lend = ThreeVector(0.0, 0.0, 10.0);
-  density_along_line("lead_densityZ.dat", plist, sigma, dens_type, Ntest,
-                      lstart, lend, npoints);
+  out->density_along_line("lead_densityZ.dat", plist, sigma, dens_type,
+                          Ntest, lstart, lend, npoints);
 }

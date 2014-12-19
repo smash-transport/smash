@@ -175,7 +175,7 @@ void BoxModus::propagate(Particles *particles,
     data.set_4position(position);
     if (wall_hit) {
       for (const auto &output : output_list) {
-        output->at_interaction(incoming_particle, {1, data});
+        output->at_interaction(incoming_particle, {1, data}, 0.0);
       }
     }
     log.debug() << data;

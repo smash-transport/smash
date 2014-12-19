@@ -215,7 +215,8 @@ void RootOutput::at_eventend(const Particles &/*particles*/,
  * Writes interactions to ROOT-file
  */
 void RootOutput::at_interaction(const ParticleList &incoming,
-                                   const ParticleList &outgoing) {
+                                const ParticleList &outgoing,
+                                const double /*density*/) {
   if (write_collisions_) {
     collisions_to_tree(incoming, outgoing);
   }

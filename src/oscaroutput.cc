@@ -194,11 +194,13 @@ void OscarOutput<Format, Contents>::at_eventend(const Particles &particles,
 template <OscarOutputFormat Format, int Contents>
 void OscarOutput<Format, Contents>::at_interaction(
     const ParticleList &incoming_particles,
-    const ParticleList &outgoing_particles) {
+    const ParticleList &outgoing_particles,
+    const double density) {
   if (Contents & OscarInteractions) {
     if (Format == OscarFormat2013) {
-      fprintf(file_.get(), "# interaction in %zu out %zu\n",
-              incoming_particles.size(), outgoing_particles.size());
+      fprintf(file_.get(), "# interaction in %zu out %zu rho %12.7f\n",
+              incoming_particles.size(), outgoing_particles.size(),
+              density);
     } else {
       /* OSCAR line prefix : initial final
        * particle creation: 0 1
@@ -207,8 +209,8 @@ void OscarOutput<Format, Contents>::at_interaction(
        * resonance decay: 1 2
        * etc.
        */
-      fprintf(file_.get(), "%zu %zu\n", incoming_particles.size(),
-              outgoing_particles.size());
+      fprintf(file_.get(), "%zu %zu %12.7f\n", incoming_particles.size(),
+              outgoing_particles.size(), density);
     }
     for (const auto &p : incoming_particles) {
       write_particledata(p);
@@ -450,7 +452,8 @@ std::unique_ptr<OutputInterface> create_oscar_output(bf::path path,
         return create_select_format<OscarParticlesAtEventend>(
             std::move(path), std::move(subconfig), "particle_lists");
       } else {
-        return create_select_format<OscarTimesteps | OscarAtEventstart>(
+        return create_select_format<OscarTimesteps | OscarAtEventstart |
+                                    OscarParticlesAtEventend>(
             std::move(path), std::move(subconfig), "particle_lists");
       }
     }

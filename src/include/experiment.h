@@ -14,6 +14,7 @@
 #include <vector>
 
 #include "chrono.h"
+#include "density.h"
 #include "decayactionsfinder.h"
 #include "experimentparameters.h"
 #include "forwarddeclarations.h"
@@ -148,6 +149,9 @@ class Experiment : public ExperimentBase {
    */
   void initialize_new_event();
 
+  /** Perform all actions in the given list. */
+  void perform_actions(ActionList &actions, size_t &interactions_total);
+
   /** Runs the time evolution of an event
    *
    * Here, the time steps are looped over, collisions and decays are
@@ -213,6 +217,12 @@ class Experiment : public ExperimentBase {
    * Stored here so that the next event will remember this.
    */
   const float delta_time_startup_;
+
+  /**
+   * This indicates whether we force all resonances to decay in the last timestep.
+   */
+  const bool force_decays_;
+
   /** The conserved quantities of the system.
    *
    * This struct carries the sums of the single particle's various
@@ -223,6 +233,9 @@ class Experiment : public ExperimentBase {
   QuantumNumbers conserved_initial_;
   /// system starting time of the simulation
   SystemTimePoint time_start_ = SystemClock::now();
+
+  /// Type of density to be written to collision headers
+  Density_type dens_type_;
 
   /**\ingroup logging
    * Writes the initial state for the Experiment to the output stream.

@@ -20,6 +20,7 @@
 #include "include/clock.h"
 #include "include/collidermodus.h"
 #include "include/configuration.h"
+#include "include/density.h"
 #include "include/experiment.h"
 #include "include/forwarddeclarations.h"
 #include "include/grid.h"
@@ -113,6 +114,9 @@ namespace {
  * \key Testparticles (int, optional, default = 1): \n
  * How many test particles per real particles should be simulated.
  *
+ * \key Gaussian_Sigma (float, required): \n
+ * Width of gaussians that represent Wigner density of particles.
+ *
  * \page input_output_options_ Output
  * \key Output_Interval (float, required): \n
  * Defines the period of intermediate output of the status of the simulated
@@ -132,20 +136,13 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
   const auto &log = logger<LogArea::Experiment>();
   log.trace() << source_location;
 
-  int testparticles;
-  if (config.has_value({"General", "Testparticles"})) {
-    testparticles = config.take({"General", "Testparticles"});
-  } else {
-    testparticles = 1;
-  }
-
   // The clock initializers are only read here and taken later when
   // assigning initial_clock_.
   return {{0.0f, config.read({"General", "Delta_Time"})},
-           config.take({"Output", "Output_Interval"}),
-           testparticles,
-           config.take({"General", "Gaussian_Sigma"})};
-}
+          config.take({"Output", "Output_Interval"}),
+          config.take({"General", "Testparticles"}, 1),
+          config.take({"General", "Gaussian_Sigma"})};
+  }
 }  // unnamed namespace
 
 /**
@@ -181,6 +178,15 @@ std::ostream &operator<<(std::ostream &out, const Experiment<Modus> &e) {
  * \key Collisions (bool, optional, default = true): \n
  * true - collisions are enabled\n
  * false - all collisions are disabled
+ *
+ * \key Density_Type (int, optional, default = 0): \n
+ * 0 - net baryon density
+ * 1 - proton density
+ * 2 - neutron density
+ *
+ * \key Force_Decays_At_End (bool, optional, default = true): \n
+ * true - force all resonances to decay after last timestep \n
+ * false - don't force decays (final output can contain resonances)
  */
 template <typename Modus>
 Experiment<Modus>::Experiment(Configuration config)
@@ -189,7 +195,8 @@ Experiment<Modus>::Experiment(Configuration config)
       particles_(),
       nevents_(config.take({"General", "Nevents"})),
       end_time_(config.take({"General", "End_Time"})),
-      delta_time_startup_(config.take({"General", "Delta_Time"})) {
+      delta_time_startup_(config.take({"General", "Delta_Time"})),
+      force_decays_(config.take({"Collision_Term", "Force_Decays_At_End"}, true)) {
   const auto &log = logger<LogArea::Experiment>();
   int64_t seed_ = config.take({"General",  "Randomseed"});
   if (seed_ < 0) {
@@ -201,12 +208,10 @@ Experiment<Modus>::Experiment(Configuration config)
   log.info() << "Random number seed: " << seed_;
   log.info() << *this;
 
-  if (!config.has_value({"Collision_Term", "Decays"})
-      || config.take({"Collision_Term", "Decays"})) {
+  if (config.take({"Collision_Term", "Decays"}, true)) {
     action_finders_.emplace_back(new DecayActionsFinder(parameters_));
   }
-  if (!config.has_value({"Collision_Term", "Collisions"})
-      || config.take({"Collision_Term", "Collisions"})) {
+  if (config.take({"Collision_Term", "Collisions"}, true)) {
     action_finders_.emplace_back(new ScatterActionsFinder(config, parameters_));
   }
 
@@ -218,6 +223,14 @@ Experiment<Modus>::Experiment(Configuration config)
   } else {
     potentials_ = NULL;
   }
+
+  dens_type_ = static_cast<Density_type>(
+              config.take({"Output", "Density", "Density_Type"}, 0));
+  if (dens_type_ < 0 || dens_type_ > 2) {
+    log.error() << "Unknown Density_Type specified. Taking default.";
+    dens_type_ = baryon;
+  }
+  log.info() << "Density type written to headers: " << dens_type_;
 }
 
 /* This method reads the particle type and cross section information
@@ -269,6 +282,41 @@ static std::string format_measurements(const Particles &particles,
   return std::string(buffer);
 }
 
+
+template <typename Modus>
+void Experiment<Modus>::perform_actions(ActionList &actions,
+                                        size_t &interactions_total) {
+  const auto &log = logger<LogArea::Experiment>();
+  // Particle list before all actions will be used for density calculation
+  const ParticleList plist = ParticleList(particles_.data().begin(),
+                                          particles_.data().end());
+  if (!actions.empty()) {
+    for (const auto &action : actions) {
+      if (action->is_valid(particles_)) {
+        const ParticleList incoming_particles = action->incoming_particles();
+        action->perform(&particles_, interactions_total);
+        const ParticleList outgoing_particles = action->outgoing_particles();
+        // Calculate Eckart rest frame density at the interaction point
+        const ThreeVector r_interaction = action->get_interaction_point();
+        const double rho = four_current(r_interaction, plist,
+                                     parameters_.gaussian_sigma, dens_type_,
+                                     parameters_.testparticles).abs();
+        for (const auto &output : outputs_) {
+          output->at_interaction(incoming_particles, outgoing_particles, rho);
+        }
+        log.debug(~einhard::Green(), "✔ ", action);
+      } else {
+        log.debug(~einhard::DRed(), "✘ ", action, " (discarded: invalid)");
+      }
+    }
+    actions.clear();
+    log.debug(~einhard::Blue(), particles_);
+  } else {
+    log.debug("no actions performed");
+  }
+}
+
+
 /* This is the loop over timesteps, carrying out collisions and decays
  * and propagating particles. */
 template <typename Modus>
@@ -287,8 +335,10 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
                                      // sorting and finally a single linear
                                      // iteration
 
+    /* (1.a) Create grid. */
     const auto &grid = modus_.create_grid(
         ParticleList{particles_.data().begin(), particles_.data().end()});
+    /* (1.b) Iterate over cells and find actions. */
     grid.iterate_cells([&](
         const ParticleList &search_list,  // a list of particles where each pair
                                           // needs to be tested for possible
@@ -302,32 +352,12 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
         actions += finder->find_possible_actions(search_list, neighbors_list);
       }
     });
-
     /* (1.c) Sort action list by time. */
     std::sort(actions.begin(), actions.end(),
               [](const ActionPtr &a, const ActionPtr &b) { return *a < *b; });
 
-    /* (2.a) Perform actions. */
-    if (!actions.empty()) {
-      for (const auto &action : actions) {
-        if (action->is_valid(particles_)) {
-          const ParticleList incoming_particles = action->incoming_particles();
-          action->perform(&particles_, interactions_total);
-          const ParticleList outgoing_particles = action->outgoing_particles();
-          for (const auto &output : outputs_) {
-            output->at_interaction(incoming_particles, outgoing_particles);
-          }
-          log.debug(~einhard::Green(), "✔ ", action);
-        } else {
-          log.debug(~einhard::DRed(), "✘ ", action, " (discarded: invalid)");
-        }
-      }
-      actions.clear();
-      log.debug(~einhard::Blue(), particles_);
-    } else {
-      log.debug("no actions performed");
-    }
-
+    /* (2) Perform actions. */
+    perform_actions(actions, interactions_total);
     modus_.sanity_check(&particles_);
 
     /* (3) Do propagation. */
@@ -348,6 +378,7 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
       /* save evolution data */
       for (const auto &output : outputs_) {
         output->at_intermediate_time(particles_, evt_num, parameters_.labclock);
+        output->thermodynamics_output(particles_, parameters_);
       }
     }
     // check conservation of conserved quantities:
@@ -358,6 +389,26 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
       // throw std::runtime_error("Violation of conserved quantities!");
     }
   }
+
+  if (force_decays_) {
+    // at end of time evolution: force all resonances to decay
+    size_t interactions_old;
+    do {
+      std::vector<ActionPtr> actions;
+      interactions_old = interactions_total;
+      /* Find actions. */
+      for (const auto &finder : action_finders_) {
+        actions += finder->find_final_actions(ParticleList{particles_.data().begin(),
+                                                           particles_.data().end()});
+      }
+      /* Perform actions. */
+      perform_actions(actions, interactions_total);
+    } while (interactions_total > interactions_old);  // loop until no more decays occur
+
+    /* Do one final propagation step. */
+    modus_.propagate(&particles_, parameters_, outputs_);
+  }
+
   // make sure the experiment actually ran (note: we should compare this
   // to the start time, but we don't know that. Therefore, we check that
   // the time is positive, which should heuristically be the same).

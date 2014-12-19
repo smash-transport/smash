@@ -14,6 +14,8 @@
 #include <vector>
 #include <memory>
 
+#include "density.h"
+#include "experimentparameters.h"
 #include "particles.h"
 #include "processbranch.h"
 
@@ -96,6 +98,9 @@ class Action {
 
   /** Check various conservation laws. */
   void check_conservation(const size_t &id_process) const;
+
+  /** Get the interaction point */
+  ThreeVector get_interaction_point();
 
   /**
    * \ingroup exception

@@ -52,9 +52,11 @@ class OutputInterface {
    *                          performed.
    */
   virtual void at_interaction(const ParticleList &incoming_particles,
-                                 const ParticleList &outgoing_particles) {
+                              const ParticleList &outgoing_particles,
+                              const double density) {
     SMASH_UNUSED(incoming_particles);
     SMASH_UNUSED(outgoing_particles);
+    SMASH_UNUSED(density);
   }
 
   /**
@@ -62,6 +64,16 @@ class OutputInterface {
    */
   virtual void at_intermediate_time(const Particles &, const int,
                                   const Clock &) = 0;
+
+  /**
+   * Output intended for writing out thermodynamics.
+   * It is launched after every N'th timestep. N is controlled by an option.
+   */
+  virtual void thermodynamics_output(const Particles &particles,
+                                     const ExperimentParameters &param) {
+    SMASH_UNUSED(particles);
+    SMASH_UNUSED(param);
+  }
 };
 
 }  // namespace Smash

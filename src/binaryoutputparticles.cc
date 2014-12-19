@@ -140,7 +140,8 @@ void BinaryOutputParticles::at_eventend(const Particles &particles,
 }
 
 void BinaryOutputParticles::at_interaction(const ParticleList &/*incoming*/,
-                                     const ParticleList &/*outgoing*/) {
+                                     const ParticleList &/*outgoing*/,
+                                     const double /*density*/) {
   /* No output of this kind in particles output */
 }
 

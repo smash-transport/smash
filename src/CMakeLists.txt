@@ -53,6 +53,7 @@ set(smash_src
         decaymodes.cc
         deformednucleus.cc
         density.cc
+        densityoutput.cc
         distributions.cc
         experiment.cc
         fourvector.cc

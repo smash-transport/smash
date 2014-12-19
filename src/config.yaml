@@ -37,8 +37,11 @@ General:
     # number of events
     Nevents:       1
 
-Output:
+    # width of gaussians representing particles, fm
+    Gaussian_Sigma: 1.0
 
+
+Output:
     # how much time before recording measurables
     Output_Interval:  1.0
 
@@ -64,11 +67,20 @@ Output:
     Binary_Particles:
         Enable:             True
         Only_Final:         False
+    Density:
+        Enable:             True
+        x: 0.0
+        y: 0.0
+        z: 0.0
+        # Which density is written to collision headers:
+        # 0 - net baryon, 1 - proton, 2 - neutron
+        Density_Type:   0
 
 Collision_Term:
     Decays:        True
     Collisions:    True
-   # elastic cross section
+    Force_Decays_At_End:  True
+    # elastic cross section, mb (= 0.1 fm^2)
     Sigma:         10.0
 
 Potentials:

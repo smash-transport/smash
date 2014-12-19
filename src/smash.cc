@@ -29,6 +29,7 @@
 /* Outputs */
 #include "include/binaryoutputcollisions.h"
 #include "include/binaryoutputparticles.h"
+#include "include/densityoutput.h"
 #include "include/oscaroutput.h"
 #ifdef SMASH_USE_ROOT
 #  include "include/rootoutput.h"
@@ -240,7 +241,7 @@ int main(int argc, char *argv[]) {
      *
      * \key Output: \n
      * Below this key the configuration for the different output formats is
-     * defined. To enable a certain output, set the 'Enable' key below the 
+     * defined. To enable a certain output, set the 'Enable' key below the
      * selected format identifier. The identifiers are described below.
      * The following outputs exist:
      * \li \subpage input_oscar_particlelist
@@ -274,7 +275,7 @@ int main(int argc, char *argv[]) {
      *
      * \key Details of output formats are explained here: \n
      * \li General block structure of OSCAR formats: \n
-     *     \subpage oscar_general_ 
+     *     \subpage oscar_general_
      * \li A family of OSCAR ASCII outputs.\n
      *     \subpage format_oscar_particlelist\n
      *     \subpage format_oscar_collisions
@@ -284,7 +285,7 @@ int main(int argc, char *argv[]) {
      *     visualization using paraview software:\n \subpage format_vtk
      * \li Formatted binary output that uses ROOT software
      *     (http://root.cern.ch).\n Fast to read and write, requires less
-     *     disk space.\n \subpage format_root 
+     *     disk space.\n \subpage format_root
      */
 
     // loop until all OSCAR outputs are created (create_oscar_output will return
@@ -322,6 +323,12 @@ int main(int argc, char *argv[]) {
 #endif
     } else {
       output_conf.take({"Root"});
+    }
+    if (static_cast<bool>(output_conf.take({"Density", "Enable"}))) {
+      output_list.emplace_back(new DensityOutput(output_path,
+                               output_conf["Density"]));
+    } else {
+      output_conf.take({"Density"});
     }
 
     // create an experiment

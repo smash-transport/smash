@@ -39,6 +39,12 @@ class ActionFinderInterface {
       const ParticleList &search_list,
       const std::vector<const ParticleList *> &neighbors_list) const = 0;
 
+  /**
+   * This abstract function finds 'final' actions
+   * (for cleaning up at the end of the simulation).
+   */
+  virtual ActionList find_final_actions(const ParticleList &) const = 0;
+
  protected:
   /** Timestep duration. */
   float dt_;

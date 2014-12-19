@@ -121,7 +121,7 @@ TEST(fullhistory_format) {
   ParticleData final_particle = create_smashon_particle();
   particles.add_data(final_particle);
   final_particles.push_back(particles.data(particles.id_max()));
-  oscfull->at_interaction(initial_particles, final_particles);
+  oscfull->at_interaction(initial_particles, final_particles, 0.0);
   /* Final state output */
   oscfull->at_eventend(particles, event_id);
 
@@ -164,6 +164,8 @@ TEST(fullhistory_format) {
     outputfile >> item;
     COMPARE(std::stoul(item), initial_particles.size());
     outputfile >> item;
+    // Additional fields are allowed: take rest of the line
+    std::getline(outputfile, line);
     COMPARE(std::stoul(item), final_particles.size());
     for (ParticleData &data : initial_particles) {
       std::array<std::string,12> datastring;
@@ -243,7 +245,7 @@ TEST(particlelist_format) {
   final_particles.push_back(particles.data(0));
   final_particles.push_back(particles.data(1));
   /* As with initial state output, this should not do anything */
-  oscfinal->at_interaction(initial_particles, final_particles);
+  oscfinal->at_interaction(initial_particles, final_particles, 0.0);
   /* Final state output; this is the only thing we expect to find in file */
   oscfinal->at_eventend(particles, event_id);
 
