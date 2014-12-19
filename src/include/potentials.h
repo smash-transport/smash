@@ -18,6 +18,12 @@
 #include "particledata.h"
 #include "threevector.h"
 
+#ifdef BUILD_TESTS
+#define VIRTUAL_FOR_TESTS virtual
+#else
+#define VIRTUAL_FOR_TESTS
+#endif
+
 namespace Smash {
 
 /**
@@ -40,6 +46,7 @@ class Potentials {
    *            point r, \f$ |r-r_i| > 6 \sigma \f$ then particle input
    *            to density will be ignored.
    **/
+  VIRTUAL_FOR_TESTS
   double potential(const ThreeVector &r, const ParticleList &plist) const;
 
   /** Evaluates potential gradient at point r. Potential is always taken in
@@ -51,6 +58,7 @@ class Potentials {
    *            point r, \f$ |r-r_i| > 6 \sigma \f$ then particle input
    *            to density will be ignored.
    **/
+  VIRTUAL_FOR_TESTS
   ThreeVector potential_gradient(const ThreeVector &r,
                                  const ParticleList &plist) const;
  private:
