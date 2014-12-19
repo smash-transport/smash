@@ -70,8 +70,8 @@ double Potentials::potential(const ThreeVector &r,
     const Density_type dens_type = baryon;
     const double rho_eckart = four_current(r, plist, sigma_,
                                            dens_type, ntest_).abs();
-    total_potential += skyrme_a * (rho_eckart/rho0) +
-                       skyrme_b * std::pow(rho_eckart/rho0, skyrme_tau);
+    total_potential += skyrme_a_ * (rho_eckart/rho0) +
+                       skyrme_b_ * std::pow(rho_eckart/rho0, skyrme_tau_);
   }
   if (use_symmetry_) {
     // TODO(oliiny): use neutron-proton density here or isospin density?
@@ -94,8 +94,8 @@ ThreeVector Potentials::potential_gradient(const ThreeVector &r,
     const ThreeVector drho_dr = density_and_gradient.second;
 
     // Derivative of potential with respect to density
-    tmp = skyrme_tau * std::pow(rho/rho0, skyrme_tau - 1);
-    const double dpotential_drho = (skyrme_a  + skyrme_b * tmp) / rho0;
+    tmp = skyrme_tau_ * std::pow(rho/rho0, skyrme_tau_ - 1);
+    const double dpotential_drho = (skyrme_a_  + skyrme_b_ * tmp) / rho0;
     total_gradient += drho_dr * dpotential_drho;
   }
 

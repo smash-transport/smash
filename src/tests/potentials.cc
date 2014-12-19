@@ -11,12 +11,13 @@
 #include <fstream>
 #include "unittest.h"
 
-#include "../include/configuration.h"
 #include "../include/collidermodus.h"
-#include "../include/potentials.h"
+#include "../include/configuration.h"
 #include "../include/experiment.h"
 #include "../include/modusdefault.h"
 #include "../include/nucleus.h"
+#include "../include/potentials.h"
+#include "../include/spheremodus.h"
 
 #include <boost/filesystem.hpp>
 
@@ -37,7 +38,7 @@ static ParticleData create_proton(int id = -1) {
 static ParticleData create_pion(int id = -1) {
   return ParticleData{ParticleType::find(0x211), id};
 }
-
+/*
 // check that analytical and numerical results for gradient of potential coincide
 TEST(potential_gradient) {
   // create two protons
@@ -162,4 +163,51 @@ TEST(nucleus_potential_profile) {
       c.propagate(&P, param, out, pot);
     }
   }
+}
+*/
+TEST(propagation_in_test_potential) {
+/* A dummy potential is created: U(x) = U_0/(1 + exp(x/d))
+   A particle is propagated through this potential and
+   it's momentum and energy are checked against analytically expected.
+ */
+
+  // Create a dummy potential
+  class Dummy_Pot: public Potentials{
+   public:
+    Dummy_Pot(Configuration conf, const ExperimentParameters &param) :
+      Potentials(conf, param) {}
+    double potential(const ThreeVector &/*r*/,
+                    const ParticleList &/*plist*/) const {
+      return 0.42;
+    }
+
+    ThreeVector potential_gradient(const ThreeVector &/*r*/,
+                        const ParticleList &/*plist*/) const {
+      std::cout << "Dummy potential gradient is called!" << std::endl;
+      return ThreeVector(0.42, 0.42, 0.42);
+    }
+  };
+
+  // Create spheremodus with arbitrary parameters
+  // Do not initialize particles: just artificially put one particle to list
+  const int Ntest = 1;
+  const double sigma = 1.0;
+  const double dt = 0.1;
+  const double p_mass = 0.938;
+  Configuration conf(TEST_CONFIG_PATH);
+  ExperimentParameters param{{0.f, dt}, 1.f, Ntest, sigma};
+  SphereModus c(conf["Modi"], param);
+  // Create one particle
+  ParticleData part = create_proton();
+  part.set_4momentum(p_mass, ThreeVector(2.0, -1.0, 1.0));
+  part.set_4position(FourVector(0.0, -100.0, 0.0, 0.0));
+  Particles P;
+  COMPARE(P.add_data(part), 0);
+
+  // Create dummy outputs and our test potential
+  OutputsList out;
+  Dummy_Pot* pot = new Dummy_Pot(conf["Potentials"], param);
+
+  // Propagate, until particle is at x>>d, where d is parameter of potential
+  c.propagate(&P, param, out, pot);
 }
