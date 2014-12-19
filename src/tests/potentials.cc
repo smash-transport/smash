@@ -38,7 +38,7 @@ static ParticleData create_proton(int id = -1) {
 static ParticleData create_pion(int id = -1) {
   return ParticleData{ParticleType::find(0x211), id};
 }
-/*
+
 // check that analytical and numerical results for gradient of potential coincide
 TEST(potential_gradient) {
   // create two protons
@@ -164,7 +164,7 @@ TEST(nucleus_potential_profile) {
     }
   }
 }
-*/
+
 TEST(propagation_in_test_potential) {
 /* A dummy potential is created: U(x) = U_0/(1 + exp(x/d))
    A particle is propagated through this potential and
@@ -174,18 +174,22 @@ TEST(propagation_in_test_potential) {
   // Create a dummy potential
   class Dummy_Pot: public Potentials{
    public:
-    Dummy_Pot(Configuration conf, const ExperimentParameters &param) :
-      Potentials(conf, param) {}
-    double potential(const ThreeVector &/*r*/,
+    Dummy_Pot(Configuration conf, const ExperimentParameters &param,
+              const double U0, const double d) :
+       Potentials(conf, param),
+       U0_(U0), d_(d) {}
+    double potential(const ThreeVector &r,
                     const ParticleList &/*plist*/) const {
-      return 0.42;
+      return U0_/(1.0 + std::exp(r.x1()/d_));
     }
 
-    ThreeVector potential_gradient(const ThreeVector &/*r*/,
+    ThreeVector potential_gradient(const ThreeVector &r,
                         const ParticleList &/*plist*/) const {
-      std::cout << "Dummy potential gradient is called!" << std::endl;
-      return ThreeVector(0.42, 0.42, 0.42);
+      const double tmp = std::exp(r.x1()/d_);
+      return ThreeVector(- U0_/d_ * tmp / ((1.0 + tmp)*(1.0 + tmp)), 0.0, 0.0);
     }
+   private:
+    const double U0_, d_;
   };
 
   // Create spheremodus with arbitrary parameters
@@ -197,17 +201,40 @@ TEST(propagation_in_test_potential) {
   Configuration conf(TEST_CONFIG_PATH);
   ExperimentParameters param{{0.f, dt}, 1.f, Ntest, sigma};
   SphereModus c(conf["Modi"], param);
-  // Create one particle
-  ParticleData part = create_proton();
-  part.set_4momentum(p_mass, ThreeVector(2.0, -1.0, 1.0));
-  part.set_4position(FourVector(0.0, -100.0, 0.0, 0.0));
-  Particles P;
-  COMPARE(P.add_data(part), 0);
 
   // Create dummy outputs and our test potential
   OutputsList out;
-  Dummy_Pot* pot = new Dummy_Pot(conf["Potentials"], param);
+  const double U0 = 0.5;
+  const double d = 4.0;
+  Dummy_Pot* pot = new Dummy_Pot(conf["Potentials"], param, U0, d);
+
+  // Create one particle
+  ParticleData part = create_proton();
+  part.set_4momentum(p_mass, ThreeVector(2.0, -1.0, 1.0));
+  part.set_4position(FourVector(0.0, -20*d, 0.0, 0.0));
+  Particles P;
+  COMPARE(P.add_data(part), 0);
 
   // Propagate, until particle is at x>>d, where d is parameter of potential
-  c.propagate(&P, param, out, pot);
+  while (P.data(0).position().x1() < 20*d) {
+    c.propagate(&P, param, out, pot);
+  }
+  // Calculate 4-momentum, expected from conservation laws
+  const FourVector pm = part.momentum();
+  FourVector expected_p = FourVector(
+         pm.x0() + U0,
+         std::sqrt(pm.x1()*pm.x1() + 2*pm.x0()*U0 + U0*U0),
+         pm.x2(),
+         pm.x3());
+
+  COMPARE_ABSOLUTE_ERROR(expected_p.x0(), P.data(0).momentum().x0(), 1.e-4)<<
+    "Expected energy " << expected_p.x0() <<
+    ", obtained " << P.data(0).momentum().x0();
+  COMPARE_ABSOLUTE_ERROR(expected_p.x1(), P.data(0).momentum().x1(), 1.e-4)<<
+    "Expected px " << expected_p.x1() <<
+    ", obtained " << P.data(0).momentum().x1();
+  // y and z components did not have to change at all, so check is precise
+  COMPARE(expected_p.x2(), P.data(0).momentum().x2());
+  COMPARE(expected_p.x3(), P.data(0).momentum().x3());
+
 }
