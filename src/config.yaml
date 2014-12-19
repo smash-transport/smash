@@ -25,9 +25,6 @@ General:
     # initial random seed (auto-generated if negative)
     Randomseed:    1
 
-    # elastic cross section, mb (= 0.1 fm^2)
-    Sigma:         10.0
-
     # number of test particles
     Testparticles: 1
 
