@@ -98,10 +98,10 @@ smash_add_unittest(yamltest)
 set(SMASH_OPTIONS -o "data" -f)
 
 # verify that the binary has a cli help
-smash_add_test(mash_help smash smash -h)
+smash_add_test(smash_help smash smash -h)
 
 # verify that the binary runs with the various modi:
-smash_add_test(mash_run smash smash ${SMASH_OPTIONS})
+smash_add_test(smash_run smash smash ${SMASH_OPTIONS})
 smash_add_test(box_run smash smash -m Box ${SMASH_OPTIONS})
 smash_add_test(collider_run smash smash -m Collider ${SMASH_OPTIONS})
 smash_add_test(sphere_run smash smash -m Sphere ${SMASH_OPTIONS})
