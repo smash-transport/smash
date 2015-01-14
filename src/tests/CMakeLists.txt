@@ -64,6 +64,7 @@ smash_add_exe(angles_zero)
 smash_add_exe(woods-saxon)
 
 # unit tests for classes:
+smash_add_unittest(action)
 smash_add_unittest(angles)
 smash_add_unittest(binaryoutput)
 smash_add_unittest(clebschgordan)

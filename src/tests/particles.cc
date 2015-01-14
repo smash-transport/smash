@@ -1,8 +1,10 @@
 /*
- *    Copyright (c) 2013-2014
- *      maximilian attems <attems@fias.uni-frankfurt.de>
- *      Jussi Auvinen <auvinen@fias.uni-frankfurt.de>
- *    GNU General Public License (GPLv3)
+ *
+ *    Copyright (c) 2013-2015
+ *      SMASH Team
+ *
+ *    GNU General Public License (GPLv3 or later)
+ *
  */
 
 #include "unittest.h"
@@ -15,8 +17,6 @@
 #include "../include/pdgcode.h"
 #include "../include/logging.h"
 #include "../include/macros.h"
-#include "../include/action.h"
-#include "../include/scatteractionsfinder.h"
 #include <algorithm>
 
 using namespace Smash;
@@ -45,7 +45,6 @@ static ParticleData create_smashon_particle(int id = -1) {
 
 TEST(everything) {
   const einhard::Logger<> log(einhard::ALL);
-  /* checks for geometric distance criteria */
   ParticleData particle_a = create_smashon_particle(0),
                particle_b = create_smashon_particle(1);
 
@@ -55,53 +54,34 @@ TEST(everything) {
   particle_a.set_4position(FourVector(1., 1., 1., 1.));
   particle_b.set_4position(FourVector(2., 2., 2., 2.));
 
-  /* check return of particle distance of null momenta particles */
-  ScatterAction *act = new ScatterAction(particle_a, particle_b, 0.);
-  double distance_squared = act->particle_distance();
-  VERIFY(!(distance_squared < 0.0));
-  /* XXX: does this test NaN?? */
-  VERIFY(!(distance_squared > 1000.0));
-  delete(act);
-
-  /* check collision_time for parallel momenta => impossible collision */
-  particle_a.set_4momentum(0.1, 0.3, -0.1, 0.2);
-  particle_b.set_4momentum(0.1, 0.3, -0.1, 0.2);
-  double time = ScatterActionsFinder::collision_time(particle_a, particle_b);
-  VERIFY(!(time >= 0.0));
-
-  /* reset momenta for possible collision and compare to Particle class */
-  particle_a.set_4momentum(0.1, 10.0, 9.0, 8.0);
-  particle_b.set_4momentum(0.1, -10.0, -90.0, -80.0);
-  act = new ScatterAction(particle_a, particle_b, 0.);
-  distance_squared = act->particle_distance();
-  VERIFY(!(distance_squared < 0.0));
-  delete act;
-
-  /* now check the Particles class itself */
+  /* check the Particles class itself */
   Particles particles;
 
   /* check addition of particles */
   particles.add_data(particle_a);
-  VERIFY(!(particles.size() != 1));
+  VERIFY(particles.size() == 1);
   particles.add_data(particle_b);
-  VERIFY(!(particles.size() != 2));
+  VERIFY(particles.size() == 2);
   int data_size = 0;
   for (const ParticleData &data : particles.data()) {
     log.debug("id ", data.id(), ": pdg ", data.pdgcode());
     SMASH_UNUSED(data);
     data_size++;
   }
-  VERIFY(!(data_size != 2));
-  VERIFY(!(particles.empty()));
+  VERIFY(data_size == 2);
+  VERIFY(!particles.empty());
+  VERIFY(particles.has_data(0));
   VERIFY(particles.has_data(1));
 
-  /* check usage particle data */
-  act = new ScatterAction(particles.data(0), particles.data(1), 0.);
-  double distance_squared_2 = act->particle_distance();
-  log.debug(distance_squared, " versus ", distance_squared_2);
-  VERIFY(!(distance_squared_2 < 0.0));
-  VERIFY(!(distance_squared_2 - distance_squared > really_small));
-  delete act;
+  /* check usage of particles.data */
+  VERIFY(particles.data(0).id()==particle_a.id());
+  VERIFY(particles.data(1).id()==particle_b.id());
+  VERIFY(particles.data(0).pdgcode()==particle_a.pdgcode());
+  VERIFY(particles.data(1).pdgcode()==particle_b.pdgcode());
+  VERIFY(particles.data(0).momentum()==particle_a.momentum());
+  VERIFY(particles.data(1).momentum()==particle_b.momentum());
+  VERIFY(particles.data(0).position()==particle_a.position());
+  VERIFY(particles.data(1).position()==particle_b.position());
 }
 
 template <typename T>
