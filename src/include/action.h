@@ -288,11 +288,12 @@ class ScatterAction : public Action {
   /** Find all inelastic 2->2 processes for this reaction. */
   virtual ProcessBranchList two_to_two_cross_sections() { return ProcessBranchList(); }
 
+  /// determine the total energy in the center-of-mass frame, i.e. sqrt of Mandelstam s
+  double sqrt_s() const override;
+
  protected:
   /// determine the Mandelstam s variable, s = (p_a + p_b)^2 = square of CMS energy
   double mandelstam_s() const;
-  /// determine the total energy in the center-of-mass frame, i.e. sqrt of Mandelstam s
-  double sqrt_s() const override;
   /// determine the squared momenta of the incoming particles in the center-of-mass system
   double cm_momentum_squared() const;
 
