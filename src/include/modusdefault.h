@@ -60,8 +60,9 @@ class ModusDefault {
   void propagate(Particles *particles, const ExperimentParameters &parameters,
                                        const OutputsList &);
 
-  Grid<GridOptions::Normal> create_grid(ParticleList &&all_particles) const {
-    return {std::move(all_particles)};
+  Grid<GridOptions::Normal> create_grid(ParticleList &&all_particles,
+      const int testparticles) const {
+    return {std::move(all_particles), testparticles};
   }
 
   /** \ingroup exception

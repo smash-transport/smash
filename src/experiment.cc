@@ -323,7 +323,8 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
 
     /* (1.a) Create grid. */
     const auto &grid = modus_.create_grid(
-        ParticleList{particles_.data().begin(), particles_.data().end()});
+        ParticleList{particles_.data().begin(), particles_.data().end()},
+        parameters_.testparticles);
     /* (1.b) Iterate over cells and find actions. */
     grid.iterate_cells([&](
         const ParticleList &search_list,  // a list of particles where each pair
