@@ -291,7 +291,6 @@ std::ostream &operator<<(std::ostream &out, const ColliderModus &m) {
   return out << "-- Collider Modus:\n"
                 "sqrt(S) (nucleus-nucleus) = "
              << format(std::sqrt(m.total_s_), "GeV")
-             << "\nImpact parameter = " << format(m.impact_, "fm")
              << "\nInitial distance between nuclei: "
              << format(2 * m.initial_z_displacement_, "fm")
              << "\nProjectile:\n" << *m.projectile_
@@ -300,9 +299,11 @@ std::ostream &operator<<(std::ostream &out, const ColliderModus &m) {
 
 float ColliderModus::initial_conditions(Particles *particles,
                                       const ExperimentParameters&) {
+  const auto &log = logger<LogArea::Collider>();
   // Sample impact parameter distribution.
   sample_impact();
 
+  log.info() << "Impact parameter = " << format(impact_, "fm");
   // Populate the nuclei with appropriately distributed nucleons.
   // If deformed, this includes rotating the nucleus.
   projectile_->arrange_nucleons();
