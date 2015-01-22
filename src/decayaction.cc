@@ -172,8 +172,9 @@ void DecayAction::perform(Particles *particles, size_t &id_process) {
   default:
     throw InvalidDecay(
         "DecayAction::perform: Only 1->2 or 1->3 processes are supported. "
-        "Decay from 1->" +
-        std::to_string(outgoing_particles_.size()) + " was requested.");
+        "Decay from 1->" + std::to_string(outgoing_particles_.size()) +
+        " was requested. (PDGcode=" + incoming_particles_[0].pdgcode().string()
+        + ")");
   }
 
   /* Set positions and boost back. */
