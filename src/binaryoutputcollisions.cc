@@ -47,7 +47,7 @@ BinaryOutputCollisions::BinaryOutputCollisions(bf::path path,
    * \ref format_binary_
    */
   fwrite("SMSH", 4, 1, file_.get());  // magic number
-  write(1);              // file format version number
+  write(2);              // file format version number
   write(VERSION_MAJOR);  // SMASH version
 }
 
@@ -102,6 +102,7 @@ void BinaryOutputCollisions::at_interaction(const ParticleList &incoming,
   write(incoming.size());
   write(outgoing.size());
   std::fwrite(&density, sizeof(double), 1, file_.get());
+  std::fwrite(&total_cross_section, sizeof(double), 1, file_.get());
   write(incoming);
   write(outgoing);
 }
