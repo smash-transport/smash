@@ -25,7 +25,7 @@ OscarOutput<Format, Contents>::OscarOutput(bf::path path, std::string name)
     : file_{std::fopen((path / (name + ".oscar")).native().c_str(), "w")} {
   /*!\Userguide
    * \page input_oscar_particlelist Oscar_Particlelist
-   * Enables OSCAR particles output. 
+   * Enables OSCAR particles output.
    * OSCAR particles output provides the particle list at the output intervals. The text format
    * is either OSCAR1999 or OSCAR2013, this is controlled by an option.
    * Fixed moments of output can be: event start, event end, every next
@@ -35,7 +35,7 @@ OscarOutput<Format, Contents>::OscarOutput(bf::path path, std::string name)
    *
    * \key Enable (bool, optional, default = false):\n
    * true - OSCAR particle list output enabled\n
-   * false - no OSCAR particle list output 
+   * false - no OSCAR particle list output
    *
    * \key 2013_Format (bool, optional, default = false): \n
    * true - output will be in OSCAR2013 format\n
@@ -55,8 +55,8 @@ OscarOutput<Format, Contents>::OscarOutput(bf::path path, std::string name)
    *
    * \key Enable (bool, optional, default = false):\n
    * true - OSCAR collision output enabled
-   * false - no OSCAR collision output  
-   * 
+   * false - no OSCAR collision output
+   *
    * \key 2013_Format (bool, optional, default = false): \n
    * true - output will be in OSCAR2013 format\n
    * false - output will be in OSCAR1999 format
@@ -78,11 +78,11 @@ OscarOutput<Format, Contents>::OscarOutput(bf::path path, std::string name)
    * output blocks and special event end line that marks the end of event. One
    * output block consists of output block header and N particle lines, N is
    * specified in the output block  header. \n
-   * File structure can be visualized in the following way: 
+   * File structure can be visualized in the following way:
    * \code
    * Header
    * Event block 1
-   *   output block 1 
+   *   output block 1
    *       output block header
    *       particle line 1
    *       particle line 2
@@ -195,12 +195,14 @@ template <OscarOutputFormat Format, int Contents>
 void OscarOutput<Format, Contents>::at_interaction(
     const ParticleList &incoming_particles,
     const ParticleList &outgoing_particles,
-    const double density) {
+    const double density,
+    const double total_cross_section) {
   if (Contents & OscarInteractions) {
     if (Format == OscarFormat2013) {
-      fprintf(file_.get(), "# interaction in %zu out %zu rho %12.7f\n",
+      fprintf(file_.get(),
+              "# interaction in %zu out %zu rho %12.7f sigma %12.7f\n",
               incoming_particles.size(), outgoing_particles.size(),
-              density);
+              density, total_cross_section);
     } else {
       /* OSCAR line prefix : initial final
        * particle creation: 0 1
@@ -209,8 +211,8 @@ void OscarOutput<Format, Contents>::at_interaction(
        * resonance decay: 1 2
        * etc.
        */
-      fprintf(file_.get(), "%zu %zu %12.7f\n", incoming_particles.size(),
-              outgoing_particles.size(), density);
+      fprintf(file_.get(), "%zu %zu %12.7f %12.7f\n", incoming_particles.size(),
+              outgoing_particles.size(), density, total_cross_section);
     }
     for (const auto &p : incoming_particles) {
       write_particledata(p);
@@ -241,7 +243,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
   /*!\Userguide
    * \page format_oscar_particlelist Oscar particles format
    * The format follows general block structure of OSCAR format:
-   * \ref oscar_general_. There are two kinds of this format - 
+   * \ref oscar_general_. There are two kinds of this format -
    * OSCAR2013 and OSCAR1999. Information about OSCAR standard can be found at
    * https://karman.physics.purdue.edu/OSCAR and
    * http://phy.duke.edu/~jeb65/oscar2013. SMASH OSCAR particles output
@@ -325,7 +327,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
    *
    * \page format_oscar_collisions Oscar collisions format
    * The format follows general block structure of OSCAR format:
-   * \ref oscar_general_. There are two kinds of this format - 
+   * \ref oscar_general_. There are two kinds of this format -
    * OSCAR2013 and OSCAR1999. Information about OSCAR standard can be found at
    * https://karman.physics.purdue.edu/OSCAR and
    * http://phy.duke.edu/~jeb65/oscar2013. SMASH OSCAR collisions output
@@ -388,7 +390,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
    * At interaction:
    * \code
    * # interaction in nin out nout
-   * \endcode 
+   * \endcode
    *
    * **Particle line**
    * \code

@@ -31,13 +31,13 @@ BinaryOutputCollisions::BinaryOutputCollisions(bf::path path,
   /*!\Userguide
    * \page input_binary_collisions Binary_collisions
    * Saves information about every collision, decay and box
-   * wall crossing in a binary format. Optionally initial and 
+   * wall crossing in a binary format. Optionally initial and
    * final particle configurations can be written out.
    *
    * \key Enable (bool, optional, default = false):\n
    * true - binary collision output enabled\n
-   * false - no binary collision output 
-   *  
+   * false - no binary collision output
+   *
    * \key Print_Start_End (bool, optional, default = false): \n
    * false - only information about collisions, decays and
    * box wall crossings during the whole evolution \n
@@ -95,7 +95,8 @@ void BinaryOutputCollisions::at_eventend(const Particles &particles,
 
 void BinaryOutputCollisions::at_interaction(const ParticleList &incoming,
                                             const ParticleList &outgoing,
-                                            const double density) {
+                                            const double density,
+                                            const double total_cross_section) {
   char ichar = 'i';
   std::fwrite(&ichar, sizeof(char), 1, file_.get());
   write(incoming.size());
