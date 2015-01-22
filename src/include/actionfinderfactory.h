@@ -10,6 +10,7 @@
 #ifndef SRC_INCLUDE_ACTIONFINDERFACTORY_H_
 #define SRC_INCLUDE_ACTIONFINDERFACTORY_H_
 
+#include "clock.h"
 #include "forwarddeclarations.h"
 #include <vector>
 
@@ -23,7 +24,7 @@ namespace Smash {
 class ActionFinderInterface {
  public:
   /** Initialize the finder with the given parameters. */
-  ActionFinderInterface(float dt) : dt_(dt) {}
+  ActionFinderInterface(Clock labclock) : labclock_(labclock) {}
 
   /**
    * Abstract function for finding actions, given a list of particles.
@@ -47,7 +48,7 @@ class ActionFinderInterface {
 
  protected:
   /** Timestep duration. */
-  float dt_;
+  Clock labclock_;
 };
 
 }  // namespace Smash

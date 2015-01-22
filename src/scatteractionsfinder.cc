@@ -28,14 +28,14 @@ namespace Smash {
 
 ScatterActionsFinder::ScatterActionsFinder(
     Configuration config, const ExperimentParameters &parameters)
-    : ActionFinderInterface(parameters.timestep_duration()),
+    : ActionFinderInterface(parameters.labclock),
       testparticles_(parameters.testparticles) {
-/*read in parameter for elastic cross section */ 
+/*read in parameter for elastic cross section */
   if (config.has_value({"Collision_Term", "Sigma"})) {
 	elastic_parameter_ =  config.take({"Collision_Term", "Sigma"});
-  } 
+  }
 }
-  
+
 double ScatterActionsFinder::collision_time(const ParticleData &p1,
                                             const ParticleData &p2) {
   const auto &log = logger<LogArea::FindScatter>();
@@ -78,7 +78,8 @@ ActionPtr ScatterActionsFinder::check_collision(
 
   /* check according timestep: positive and smaller */
   const float time_until_collision = collision_time(data_a, data_b);
-  if (time_until_collision < 0.f || time_until_collision >= dt_) {
+  if (time_until_collision < 0.f
+          || time_until_collision >= labclock_.timestep_duration()) {
     return nullptr;
   }
 

@@ -19,7 +19,7 @@
 namespace Smash {
 
 DecayActionsFinder::DecayActionsFinder(const ExperimentParameters &parameters)
-    : ActionFinderInterface(parameters.timestep_duration()) {}
+    : ActionFinderInterface(parameters.labclock) {}
 
 ActionList DecayActionsFinder::find_possible_actions(
     const ParticleList &search_list,
@@ -57,7 +57,7 @@ ActionList DecayActionsFinder::find_possible_actions(
                              // resonance
           * width));
 
-    if (decay_time < dt_) {
+    if (decay_time < labclock_.timestep_duration()) {
       // => decay_time ∈ [0, dt_[
       // => the particle decays in this timestep.
       auto act = make_unique<DecayAction>(p, decay_time);
