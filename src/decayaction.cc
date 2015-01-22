@@ -181,7 +181,7 @@ void DecayAction::perform(Particles *particles, size_t &id_process) {
   ThreeVector velocity_CM = incoming_particles_[0].velocity();
   for (auto &p : outgoing_particles_) {
     log.debug("particle momenta in lrf ", p);
-    p.set_4momentum(p.momentum().LorentzBoost(-velocity_CM));
+    p.boost_momentum(-velocity_CM);
     p.set_4position(incoming_particles_[0].position());
     log.debug("particle momenta in comp ", p);
     // store the process id in the Particle data
