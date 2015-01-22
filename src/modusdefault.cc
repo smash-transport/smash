@@ -38,14 +38,12 @@ void ModusDefault::propagate(Particles *particles,
     ParticleList plist(particles->data().begin(), particles->data().end());
 
     for (ParticleData &data : particles->data()) {
-      if (data.is_baryon()) {
-        dU_dr = pot->potential_gradient(data.position().threevec(), plist);
-      } else {
-        dU_dr = ThreeVector(0.0, 0.0, 0.0);
-      }
-      pot_value = pot->potential(data.position().threevec(), plist);
-      // std::cout << "Modusdef: dU/dr = " << dU_dr << std::endl;
-      // std::cout << "Modusdef: U(r_i) = " << pot_value << std::endl;
+      dU_dr = pot->potential_gradient(data.position().threevec(),
+                                           plist, data.pdgcode());
+      pot_value = pot->potential(data.position().threevec(),
+                                           plist, data.pdgcode());
+      log.debug("Modusdef: dU/dr = ", dU_dr);
+      log.debug("Modusdef: U(r_i) = ", pot_value);
       v = data.velocity();
       // predictor step assuming momentum-indep. potential, dU/dp = 0
       // then for momentum predictor = corrector

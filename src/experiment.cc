@@ -95,6 +95,11 @@ std::unique_ptr<ExperimentBase> ExperimentBase::create(Configuration config) {
 
   typedef std::unique_ptr<ExperimentBase> ExperimentPointer;
   if (modus_chooser.compare("Box") == 0) {
+    if (config.has_value({"Potentials"})) {
+      log.error() << "Box modus does not work with potentials for now: "
+                  << "periodic boundaries are not taken into account "
+                  << "in the density calculation";
+    }
     return ExperimentPointer(new Experiment<BoxModus>(config));
   } else if (modus_chooser.compare("Collider") == 0) {
       return ExperimentPointer(new Experiment<ColliderModus>(config));
@@ -379,12 +384,14 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
         output->thermodynamics_output(particles_, parameters_);
       }
     }
-    // check conservation of conserved quantities:
-    std::string err_msg = conserved_initial_.report_deviations(particles_);
-    if (!err_msg.empty()) {
-      log.error() << err_msg;
-      // oliiny: comment this out for checks with potentials
-      // throw std::runtime_error("Violation of conserved quantities!");
+    // Check conservation of conserved quantities if potentials are off.
+    // If potentials are on then momentum is conserved only in average
+    if (!potentials_) {
+      std::string err_msg = conserved_initial_.report_deviations(particles_);
+      if (!err_msg.empty()) {
+        log.error() << err_msg;
+        throw std::runtime_error("Violation of conserved quantities!");
+      }
     }
   }
 

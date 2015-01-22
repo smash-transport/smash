@@ -17,7 +17,7 @@ namespace Smash {
  */
 Potentials::Potentials(Configuration conf, const ExperimentParameters &param)
     : use_skyrme_(conf.has_value({"Skyrme"})),
-      use_symmetry_(conf.has_value({"Symmetry", "Enable"})) {
+      use_symmetry_(conf.has_value({"Symmetry"})) {
   ntest_ = param.testparticles;
   sigma_ = param.gaussian_sigma;
 
@@ -55,7 +55,7 @@ Potentials::Potentials(Configuration conf, const ExperimentParameters &param)
    *      Parameter \f$S_{pot}\f$ of symmetry potential in MeV
    */
   if (use_symmetry_) {
-    symmetry_s_ = conf.take({"Symmetry", "S_pot"});
+    symmetry_s_ = conf.take({"Symmetry", "S_Pot"});
   }
 }
 
@@ -63,8 +63,13 @@ Potentials::~Potentials() {
 }
 
 double Potentials::potential(const ThreeVector &r,
-                             const ParticleList &plist) const {
+                             const ParticleList &plist,
+                             const PdgCode acts_on) const {
   double total_potential = 0.0;
+
+  if (!acts_on.is_baryon()) {
+    return 0.0;
+  }
 
   if (use_skyrme_) {
     const Density_type dens_type = baryon;
@@ -73,18 +78,34 @@ double Potentials::potential(const ThreeVector &r,
     total_potential += skyrme_a_ * (rho_eckart/rho0) +
                        skyrme_b_ * std::pow(rho_eckart/rho0, skyrme_tau_);
   }
-  if (use_symmetry_) {
-    // TODO(oliiny): use neutron-proton density here or isospin density?
-    // total_potential +=
+  if (use_symmetry_ && (acts_on == 0x2212 || acts_on == 0x2112)) {
+    // use neutron-proton density, not isospin density
+    const Density_type n_dens_type = neutron;
+    const Density_type p_dens_type = proton;
+    const double rho_eckart_n = four_current(r, plist, sigma_,
+                                             n_dens_type, ntest_).abs();
+    const double rho_eckart_p = four_current(r, plist, sigma_,
+                                             p_dens_type, ntest_).abs();
+    const double sym_pot = 2.0*symmetry_s_*(rho_eckart_n - rho_eckart_p)/rho0;
+    if (acts_on == 0x2212) { // proton
+      total_potential += sym_pot;
+    } else if (acts_on == 0x2112) { // neutron
+      total_potential -= sym_pot;
+    }
   }
   // Return in GeV
   return total_potential * 1.0e-3;
 }
 
 ThreeVector Potentials::potential_gradient(const ThreeVector &r,
-                                           const ParticleList &plist) const {
+                                           const ParticleList &plist,
+                                           const PdgCode acts_on) const {
   ThreeVector total_gradient(0.0, 0.0, 0.0);
   double tmp;
+
+  if (!acts_on.is_baryon()) {
+    return total_gradient;
+  }
 
   if (use_skyrme_) {
     const Density_type dens_type = baryon;
@@ -99,9 +120,21 @@ ThreeVector Potentials::potential_gradient(const ThreeVector &r,
     total_gradient += drho_dr * dpotential_drho;
   }
 
-  if (use_symmetry_) {
-    // TODO(oliiny): use neutron-proton density here or isospin density?
-    // total_gradient +=
+  if (use_symmetry_ && (acts_on == 0x2212 || acts_on == 0x2112)) {
+    // use neutron-proton density, not isospin density
+    const Density_type n_dens_type = neutron;
+    const Density_type p_dens_type = proton;
+    const ThreeVector n_rho_grad = rho_eckart_gradient(r, plist,
+                                           sigma_, n_dens_type, ntest_).second;
+    const ThreeVector p_rho_grad = rho_eckart_gradient(r, plist,
+                                           sigma_, p_dens_type, ntest_).second;
+    const ThreeVector dUsym_dr = (n_rho_grad - p_rho_grad) *
+                                 (2.0*symmetry_s_/rho0);
+    if (acts_on == 0x2212) { // proton
+      total_gradient += dUsym_dr;
+    } else if (acts_on == 0x2112) { // neutron
+      total_gradient -= dUsym_dr;
+    }
   }
   // Return in GeV
   return total_gradient * 1.0e-3;

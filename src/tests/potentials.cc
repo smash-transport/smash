@@ -72,15 +72,15 @@ TEST(potential_gradient) {
   r = ThreeVector(0.2, 0.0, 0.0);
 
   // analytical gradient
-  analit_grad = pot->potential_gradient(r, P);
+  analit_grad = pot->potential_gradient(r, P, 0x2212);
   // numerical gradient
-  const double U = pot->potential(r, P);
+  const double U = pot->potential(r, P, 0x2212);
   dr = ThreeVector(1.e-4, 0.0, 0.0);
-  num_grad.set_x1((pot->potential(r + dr, P) - U)/dr.x1());
+  num_grad.set_x1((pot->potential(r + dr, P, 0x2212) - U)/dr.x1());
   dr = ThreeVector(0.0, 1.e-4, 0.0);
-  num_grad.set_x2((pot->potential(r + dr, P) - U)/dr.x2());
+  num_grad.set_x2((pot->potential(r + dr, P, 0x2212) - U)/dr.x2());
   dr = ThreeVector(0.0, 0.0, 1.e-4);
-  num_grad.set_x3((pot->potential(r + dr, P) - U)/dr.x3());
+  num_grad.set_x3((pot->potential(r + dr, P, 0x2212) - U)/dr.x3());
   // compare them with: accuracy should not be worse than |dr|
   std::cout << num_grad << analit_grad << std::endl;
   COMPARE_ABSOLUTE_ERROR(num_grad.x1(), analit_grad.x1(), 1.e-4);
@@ -153,7 +153,7 @@ TEST(nucleus_potential_profile) {
     for (auto iy = -ny; iy <= ny; iy++) {
       for (auto ix = -nx; ix <= nx; ix++) {
         r = ThreeVector(ix*dx, iy*dy, 8.0);
-        pot_value = pot->potential(r, plist);
+        pot_value = pot->potential(r, plist, 0x2212);
         a_file << pot_value << " ";
       }
       a_file << "\n";
@@ -180,12 +180,14 @@ TEST(propagation_in_test_potential) {
        Potentials(conf, param),
        U0_(U0), d_(d) {}
     double potential(const ThreeVector &r,
-                    const ParticleList &/*plist*/) const {
+                     const ParticleList &/*plist*/,
+                     const PdgCode /*acts_on*/) const {
       return U0_/(1.0 + std::exp(r.x1()/d_));
     }
 
     ThreeVector potential_gradient(const ThreeVector &r,
-                        const ParticleList &/*plist*/) const {
+                        const ParticleList &/*plist*/,
+                        const PdgCode /*acts_on*/) const {
       const double tmp = std::exp(r.x1()/d_);
       return ThreeVector(- U0_/d_ * tmp / ((1.0 + tmp)*(1.0 + tmp)), 0.0, 0.0);
     }
