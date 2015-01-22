@@ -183,7 +183,7 @@ class Experiment : public ExperimentBase {
    * An instance of potentials class, that stores parameters of potentials,
    * calculates them and their gradients.
    */
-  Potentials* potentials_;
+  std::unique_ptr<Potentials> potentials_;
 
   /**
    * A list of output formaters. They will be called to write the state of the

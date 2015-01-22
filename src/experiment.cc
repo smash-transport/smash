@@ -20,6 +20,7 @@
 #include "include/clock.h"
 #include "include/collidermodus.h"
 #include "include/configuration.h"
+#include "include/cxx14compat.h"
 #include "include/density.h"
 #include "include/experiment.h"
 #include "include/forwarddeclarations.h"
@@ -215,13 +216,10 @@ Experiment<Modus>::Experiment(Configuration config)
     action_finders_.emplace_back(new ScatterActionsFinder(config, parameters_));
   }
 
-  //TODO(oliiny,mkretz): check also that "Potentials" is not empty
   if (config.has_value({"Potentials"})) {
     log.info() << "Potentials are ON.";
     // potentials need testparticles and gaussian sigma from parameters_
-    potentials_ = new Potentials(config["Potentials"], parameters_);
-  } else {
-    potentials_ = NULL;
+    potentials_ = make_unique<Potentials>(config["Potentials"], parameters_);
   }
 
   dens_type_ = static_cast<Density_type>(
@@ -361,7 +359,7 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
     modus_.sanity_check(&particles_);
 
     /* (3) Do propagation. */
-    modus_.propagate(&particles_, parameters_, outputs_, potentials_);
+    modus_.propagate(&particles_, parameters_, outputs_, potentials_.get());
 
     /* (4) Physics output during the run. */
     // if the timestep of labclock is different in the next tick than
@@ -406,7 +404,7 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
     } while (interactions_total > interactions_old);  // loop until no more decays occur
 
     /* Do one final propagation step. */
-    modus_.propagate(&particles_, parameters_, outputs_, potentials_);
+    modus_.propagate(&particles_, parameters_, outputs_, potentials_.get());
   }
 
   // make sure the experiment actually ran (note: we should compare this

@@ -168,7 +168,8 @@ TEST(nucleus_potential_profile) {
 TEST(propagation_in_test_potential) {
 /* A dummy potential is created: U(x) = U_0/(1 + exp(x/d))
    A particle is propagated through this potential and
-   it's momentum and energy are checked against analytically expected.
+   it's momentum and energy are checked against analytically expected
+   from conservation laws.
  */
 
   // Create a dummy potential
