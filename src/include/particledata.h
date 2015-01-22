@@ -86,8 +86,10 @@ class ParticleData {
                          (momentum_.x0() * momentum_.x0()));
   }
 
-  /// do a Lorentz-boost
+  /// do a full Lorentz-boost
   inline void boost (const ThreeVector &v);
+  /// do a Lorentz-boost of the momentum
+  inline void boost_momentum (const ThreeVector &v);
 
   /* overloaded operators */
   inline bool operator==(const ParticleData &a) const;
@@ -189,12 +191,16 @@ inline void ParticleData::set_4position(const FourVector &pos) {
 inline void ParticleData::set_3position(const ThreeVector &pos) {
   position_ = FourVector(position_.x0(), pos);
 }
-
+/// full Lorentz boost of momentum and position
 inline void ParticleData::boost (const ThreeVector &v)
 {
-  set_4momentum(momentum_.LorentzBoost(v));
-  // we also need to boost the position
-  set_4position(position_.LorentzBoost(v));
+    set_4momentum(momentum_.LorentzBoost(v));
+    set_4position(position_.LorentzBoost(v));
+}
+/// Boost only the momentum
+inline void ParticleData::boost_momentum (const ThreeVector &v)
+{
+    set_4momentum(momentum_.LorentzBoost(v));
 }
 
 /// check if the particles are identical

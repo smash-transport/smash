@@ -330,7 +330,7 @@ void Nucleus::boost(double beta_scalar) {
     i->set_4position(this_position);
     // for momenta, though, we CAN do normal Lorentz Boosts, since we
     // *do* want to transform the zero-component (i.e., the energy).
-    i->set_4momentum(i->momentum().LorentzBoost(beta));
+    i->boost_momentum(beta);
   }
   // we also need to update r_max_:
   r_max_ *= one_over_gamma;

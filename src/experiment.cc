@@ -147,7 +147,7 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
   return {{0.0f, config.read({"General", "Delta_Time"})},
           config.take({"Output", "Output_Interval"}),
           config.take({"General", "Testparticles"}, 1),
-          config.take({"General", "Gaussian_Sigma"})};
+          config.take({"General", "Gaussian_Sigma"}, 1.0)};
   }
 }  // unnamed namespace
 
@@ -340,7 +340,8 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
 
     /* (1.a) Create grid. */
     const auto &grid = modus_.create_grid(
-        ParticleList{particles_.data().begin(), particles_.data().end()});
+        ParticleList{particles_.data().begin(), particles_.data().end()},
+        parameters_.testparticles);
     /* (1.b) Iterate over cells and find actions. */
     grid.iterate_cells([&](
         const ParticleList &search_list,  // a list of particles where each pair

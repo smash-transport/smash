@@ -63,8 +63,9 @@ class ModusDefault {
                                        const OutputsList &,
                                        const Potentials* pot);
 
-  Grid<GridOptions::Normal> create_grid(ParticleList &&all_particles) const {
-    return {std::move(all_particles)};
+  Grid<GridOptions::Normal> create_grid(ParticleList &&all_particles,
+      const int testparticles) const {
+    return {std::move(all_particles), testparticles};
   }
 
   /** \ingroup exception

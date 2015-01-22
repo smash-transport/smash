@@ -44,6 +44,8 @@ class ScatterActionsFinder : public ActionFinderInterface {
                             const ParticleData &data_b) const;
   /** Elastic cross section parameter (in mb). */
   float elastic_parameter_ = 0.0;
+  /** Number of test particles. */
+  int testparticles_ = 1;
 };
 
 #if 0
