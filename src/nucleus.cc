@@ -13,6 +13,7 @@
 #include <string>
 
 #include "include/angles.h"
+#include "include/constants.h"
 #include "include/logging.h"
 #include "include/numerics.h"
 #include "include/particles.h"
@@ -245,6 +246,7 @@ void Nucleus::arrange_nucleons() {
     double r_tmp = pos.abs();
     r_max_ = (r_tmp > r_max_) ? r_tmp : r_max_;
   }
+
   // Recenter and rotate
   align_center();
   rotate();
@@ -286,7 +288,8 @@ void Nucleus::set_parameters_automatic() {
       // set_nuclear_radius(4.28);
       break;
     default:
-      throw std::domain_error("Mass number not listed in Nucleus::set_parameters_automatic.");
+      throw std::domain_error("Mass number not listed in"
+                              " Nucleus::set_parameters_automatic.");
   }
 }
 
@@ -303,6 +306,44 @@ void Nucleus::set_parameters_from_config(const char *nucleus_type,
                        {nucleus_type, "Radius"})));
   } else {
     set_nuclear_radius(default_nuclear_radius());
+  }
+}
+
+void Nucleus::generate_fermi_momenta() {
+  double r, rho, p;
+  const int N_n = std::count_if(begin(), end(),
+                  [](const ParticleData i) {return i.pdgcode() == 0x2112;});
+  const int N_p = std::count_if(begin(), end(),
+                  [](const ParticleData i) {return i.pdgcode() == 0x2212;});
+  const FourVector nucleus_center = center();
+  const int A = N_n + N_p;
+  const double pi2_3 = 3.0 * M_PI * M_PI;
+  Angles phitheta;
+  const auto &log = logger<LogArea::Nucleus>();
+
+  log.debug() << N_n << " neutrons, " << N_p << " protons.";
+
+  for (auto i = begin(); i != end(); i++) {
+    if (i->pdgcode() != 0x2212 && i->pdgcode() != 0x2112) {
+      log.error() << "No rule to calculate Fermi momentum " <<
+                     "for particle " << i->pdgcode();
+      continue;
+    }
+    r = (i->position() - nucleus_center).abs3();
+    rho = rho0 /(std::exp((r - nuclear_radius_)/diffusiveness_) + 1.0);
+    if (i->pdgcode() == 0x2212) { // proton
+      rho = rho * N_p / A;
+    }
+    if (i->pdgcode() == 0x2112) { // neutron
+      rho = rho * N_n / A;
+    }
+    p = hbarc * std::pow(pi2_3 * rho * Random::uniform(0.0, 1.0), 1.0/3.0);
+    phitheta.distribute_isotropically();
+    i->set_4momentum(i->pole_mass(), phitheta.threevec() * p);
+    log.debug() << "Particle: " << *i <<
+               ", pF[GeV]: " << hbarc * std::pow(pi2_3 * rho, 1.0/3.0) <<
+               " r[fm]: " << r <<
+               " Nuclear radius[fm]: " << nuclear_radius_;
   }
 }
 

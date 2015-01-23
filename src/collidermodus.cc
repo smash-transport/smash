@@ -117,9 +117,12 @@ namespace Smash {
  *
  * Note that this distance is applied before the Lorentz boost
  * to chosen calculation frame, and thus the actual distance may be different.
+ *
+ * \key Fermi_Motion (bool, optional, default = false): \n
+ * Defines if Fermi motion is included.
  */
-    
- 
+
+
 ColliderModus::ColliderModus(Configuration modus_config,
                            const ExperimentParameters &params) {
   Configuration modus_cfg = modus_config["Collider"];
@@ -170,6 +173,9 @@ ColliderModus::ColliderModus(Configuration modus_config,
   } else {
     target_->set_parameters_from_config("Target", modus_cfg);
   }
+
+  // Consider an option to include Fermi-motion
+  fermi_motion_ = modus_cfg.take({"Fermi_Motion"}, false);
 
   // Get the total nucleus-nucleus collision energy. Since there is
   // no meaningful choice for a default energy, we require the user to
@@ -333,6 +339,13 @@ float ColliderModus::initial_conditions(Particles *particles,
                      simulation_time);
   target_->shift(false, initial_z_displacement_, -impact_/2.0,
                  simulation_time);
+
+  // Generate Fermi momenta if necessary
+  if (fermi_motion_) {
+    log.info() << "Fermi motion is ON";
+    projectile_->generate_fermi_momenta();
+    target_->generate_fermi_momenta();
+  }
 
   // Boost the nuclei to the appropriate velocity.
   projectile_->boost(v_a);

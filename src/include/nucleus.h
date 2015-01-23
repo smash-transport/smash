@@ -74,6 +74,16 @@ class Nucleus {
                                           Configuration &config);
 
   /**
+   * Generates momenta of the Fermi motion of the nucleus constituents.
+   * For neutrons and protons Fermi momenta are calculated as
+   * \f$ p_{F} = (3 \pi^2 \rho)^{1/3}\f$, where \f$ rho \f$ is
+   * neutron density for neutrons and proton density for protons.
+   * Actual momenta \f$p_x\f$, \f$p_y\f$, \f$p_z\f$ are uniformly distributed
+   * with \f$p_{xyz}\f$ in range \f$[-p_F, p_F]\f$.
+   **/
+  void generate_fermi_momenta();
+
+  /**
    * Boosts the nuclei so that the nucleons have the appropriate
    * momentum and the nuclei are lorentz-contracted.
    *

@@ -96,13 +96,14 @@ DECLARE_LOGAREA(13, ScatterAction);
 DECLARE_LOGAREA(14, Distributions);
 DECLARE_LOGAREA(15, ModusDefault);
 DECLARE_LOGAREA(16, Grid);
+DECLARE_LOGAREA(17, Nucleus);
 
 /// This type collects all existing log areas so they will be created with the
 /// correct log level automatically.
 using AreaTuple = std::tuple<Main, Experiment, Box, Collider, Sphere,
                              Action, InputParser, ParticleType, FindScatter,
-                             Legacy, Clock, DecayModes, Resonances,
-                             ScatterAction, Distributions, ModusDefault, Grid>;
+                             Legacy, Clock, DecayModes, Resonances, ScatterAction,
+                             Distributions, ModusDefault, Grid, Nucleus>;
 }  // namespace LogArea
 
 /**
