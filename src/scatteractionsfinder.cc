@@ -35,6 +35,11 @@ ScatterActionsFinder::ScatterActionsFinder(
   }
 }
 
+ScatterActionsFinder::ScatterActionsFinder(
+    float elastic_parameter, int testparticles)
+    : elastic_parameter_(elastic_parameter),
+      testparticles_(testparticles) {}
+
 double ScatterActionsFinder::collision_time(const ParticleData &p1,
                                             const ParticleData &p2) {
   const auto &log = logger<LogArea::FindScatter>();
