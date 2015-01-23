@@ -308,6 +308,37 @@ ProcessBranch ScatterActionBaryonBaryon::elastic_cross_section(float elast_par) 
   }
 }
 
+ProcessBranch ScatterActionBaryonBaryon::string_excitation_cross_section() {
+  const PdgCode &pdg_a = incoming_particles_[0].type().pdgcode();
+  const PdgCode &pdg_b = incoming_particles_[1].type().pdgcode();
+  const double s = mandelstam_s();
+    
+  if(pdg_a.iso_multiplet() == 0x1112 &&
+     pdg_b.iso_multiplet() == 0x1112) {
+    /* Nucleon+Nucleon: calculate total minus other channels cross section */
+  float sig_string;
+  int string_type = 56789;
+   /* Threshold for string production */
+    if (s >= 1.6) {
+      if (pdg_a == pdg_b) { /* pp */
+          sig_string = pp_total(s) - pp_elastic(s);
+      } else if (pdg_a.is_antiparticle_of(pdg_b)) {  /* ppbar */
+          sig_string = ppbar_total(s) - ppbar_elastic(s);
+      } else {                                     /* np */
+          sig_string = np_total(s) - np_elastic(s);
+      }
+    }
+    if (sig_string>0.) {
+          return ProcessBranch(string_type, string_type, sig_string);
+    } else {
+      std::stringstream ss;
+      ss << "problem in CrossSections::string excitation: " << pdg_a.string().c_str()
+          << " " << pdg_b.string().c_str() << " " << pdg_a.spin() << " "
+          << pdg_b.spin() << " " << sig_string << " " << s;
+          throw std::runtime_error(ss.str());
+  }
+}
+    
 ProcessBranchList ScatterActionBaryonBaryon::two_to_two_cross_sections() {
   ProcessBranchList process_list;
   const ParticleType &type_particle_a = incoming_particles_[0].type();

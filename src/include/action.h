@@ -271,6 +271,9 @@ class ScatterAction : public Action {
    */
   virtual ProcessBranch elastic_cross_section(float elast_par);
 
+  /* string excitation start up */
+  virtual ProcessBranch string_excitation_cross_section();
+    
   /**
   * Find all resonances that can be produced in a 2->1 collision of the two
   * input particles and the production cross sections of these resonances.
@@ -342,6 +345,10 @@ class ScatterActionBaryonBaryon : public ScatterAction {
    * final-state IDs.
    */
   ProcessBranch elastic_cross_section(float elast_par) override;
+  /* Strings are currently just added for all remaining total cross section 
+     Returns currently a random string_ID instead of unknown outgoing particle 
+     types. */
+  ProcessBranch string_excitation_cross_section() override;
   /* There is no resonance formation out of two baryons: Return empty list. */
   ProcessBranchList resonance_cross_sections() override {
     return ProcessBranchList();

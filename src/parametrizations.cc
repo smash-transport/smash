@@ -40,8 +40,11 @@ float pp_elastic(double mandelstam_s) {
  * Nuclear Instruments and Methods at Physics Research B 111, 215 (1996)
  * highest-p:  O. Buss et al., Physics Reports 512, 1 (2012)
  */
-float pp_total(double p_lab) {
-
+float pp_total(double mandelstam_s) {
+  const double mN = 0.938;    // nucleon mass
+  const double mNsqr = mN*mN;
+  double p_lab = sqrt((mandelstam_s - 2*mNsqr) * (mandelstam_s - 2*mNsqr)
+                        - 4 * mNsqr * mNsqr) / (2 * mN);
   if (p_lab < 0.4) {
     return 34 * pow(p_lab / 0.4, -2.104);
   } else if (p_lab < 0.8) {
@@ -83,7 +86,11 @@ float np_elastic(double mandelstam_s) {
  * Nuclear Instruments and Methods at Physics Research B 111, 215 (1996)
  * highest-p:  O. Buss et al., Physics Reports 512, 1 (2012)
  */
-float np_total(double p_lab) {
+float np_total(double mandelstam_s) {
+  const double mN = 0.938;    // nucleon mass
+  const double mNsqr = mN*mN;
+  double p_lab = sqrt((mandelstam_s - 2*mNsqr) * (mandelstam_s - 2*mNsqr)
+                        - 4 * mNsqr * mNsqr) / (2 * mN);
   if (p_lab < 0.4) {
     return 6.3555 * pow(p_lab, -3.2481) * exp(-0.377 * log(p_lab) * log(p_lab));
   } else if (p_lab < 1.0) {
@@ -116,7 +123,11 @@ float ppbar_elastic(double mandelstam_s) {
 
 /* ppbar total cross section parametrization */
 /* Source: S. Bass et al., Prog.Part.Nucl.Phys. 41, 255 (1998) */
-float ppbar_total(double p_lab) {
+float ppbar_total(double mandelstam_s) {
+  const double mN = 0.938;    // nucleon mass
+  const double mNsqr = mN*mN;
+  double p_lab = sqrt((mandelstam_s - 2*mNsqr) * (mandelstam_s - 2*mNsqr)
+                      - 4 * mNsqr * mNsqr) / (2 * mN);
   if (p_lab < 0.3) {
     return 271.6 * exp(-1.1 * p_lab * p_lab);
   } else if (p_lab < 5.0) {
