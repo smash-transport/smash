@@ -28,8 +28,7 @@ namespace Smash {
 
 ScatterActionsFinder::ScatterActionsFinder(
     Configuration config, const ExperimentParameters &parameters)
-    : ActionFinderInterface(parameters.labclock),
-      testparticles_(parameters.testparticles) {
+    : testparticles_(parameters.testparticles) {
 /*read in parameter for elastic cross section */
   if (config.has_value({"Collision_Term", "Sigma"})) {
 	elastic_parameter_ =  config.take({"Collision_Term", "Sigma"});
@@ -64,7 +63,7 @@ double ScatterActionsFinder::collision_time(const ParticleData &p1,
 }
 
 ActionPtr ScatterActionsFinder::check_collision(
-    const ParticleData &data_a, const ParticleData &data_b) const {
+    const ParticleData &data_a, const ParticleData &data_b, float dt) const {
   const auto &log = logger<LogArea::FindScatter>();
 
   /* just collided with this particle */
@@ -79,7 +78,7 @@ ActionPtr ScatterActionsFinder::check_collision(
   /* check according timestep: positive and smaller */
   const float time_until_collision = collision_time(data_a, data_b);
   if (time_until_collision < 0.f
-          || time_until_collision >= labclock_.timestep_duration()) {
+          || time_until_collision >= dt) {
     return nullptr;
   }
 
@@ -148,13 +147,13 @@ inline void iterate_all_pairs(
 
 std::vector<ActionPtr> ScatterActionsFinder::find_possible_actions(
     const ParticleList &search_list,
-    const std::vector<const ParticleList *> &neighbors_list) const {
+    const std::vector<const ParticleList *> &neighbors_list, float dt) const {
   std::vector<ActionPtr> actions;
 
   iterate_all_pairs(search_list, neighbors_list,
                     [&](const ParticleData &p1, const ParticleData &p2) {
     /* Check if collision is possible. */
-    ActionPtr act = check_collision(p1, p2);
+    ActionPtr act = check_collision(p1, p2, dt);
 
     /* Add to collision list. */
     if (act != nullptr) {

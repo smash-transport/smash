@@ -18,13 +18,13 @@
 
 namespace Smash {
 
-DecayActionsFinder::DecayActionsFinder(const ExperimentParameters &parameters)
-    : ActionFinderInterface(parameters.labclock) {}
+DecayActionsFinder::DecayActionsFinder(const ExperimentParameters &parameters){}
 
 ActionList DecayActionsFinder::find_possible_actions(
     const ParticleList &search_list,
-    const std::vector<const ParticleList *> &  // the list of neighbors is
+    const std::vector<const ParticleList *> &,  // the list of neighbors is
                                                // irrelevant for decays
+    float dt
     ) const {
   ActionList actions;
   actions.reserve(10);  // for short time steps this seems reasonable to expect
@@ -57,7 +57,7 @@ ActionList DecayActionsFinder::find_possible_actions(
                              // resonance
           * width));
 
-    if (decay_time < labclock_.timestep_duration()) {
+    if (decay_time < dt) {
       // => decay_time ∈ [0, dt_[
       // => the particle decays in this timestep.
       auto act = make_unique<DecayAction>(p, decay_time);

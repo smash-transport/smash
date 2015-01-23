@@ -23,9 +23,6 @@ namespace Smash {
  */
 class ActionFinderInterface {
  public:
-  /** Initialize the finder with the given parameters. */
-  ActionFinderInterface(Clock labclock) : labclock_(labclock) {}
-
   /**
    * Abstract function for finding actions, given a list of particles.
    *
@@ -38,17 +35,14 @@ class ActionFinderInterface {
    */
   virtual ActionList find_possible_actions(
       const ParticleList &search_list,
-      const std::vector<const ParticleList *> &neighbors_list) const = 0;
+      const std::vector<const ParticleList *> &neighbors_list,
+      float dt) const = 0;
 
   /**
    * This abstract function finds 'final' actions
    * (for cleaning up at the end of the simulation).
    */
   virtual ActionList find_final_actions(const ParticleList &) const = 0;
-
- protected:
-  /** Timestep duration. */
-  Clock labclock_;
 };
 
 }  // namespace Smash
