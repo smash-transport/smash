@@ -25,7 +25,7 @@ namespace Smash {
  * \li \key Beta_2 (double, optional, default = 0.0):\n
  * The deformation coefficient for the spherical harmonic Y_2_0 in the
  * beta decomposition of the nuclear radius in the deformed woods-saxon distribution.
- * \li \key Beta_4 (double, optional, default = 0.0):\n 
+ * \li \key Beta_4 (double, optional, default = 0.0):\n
  * The deformation coefficient for the spherical harmonic Y_4_0.
  * \li \key Saturation_Density (float, optional, default = .168f)\n
  * The normalization coefficient in the Woods-Saxon distribution,
@@ -36,7 +36,7 @@ namespace Smash {
  * \li \key Phi (double, optional):\n
  * The azimuthal angle by which to rotate the nucleus.
  */
-    
+
 DeformedNucleus::DeformedNucleus() {}
 
 double DeformedNucleus::deformed_woods_saxon(double r, double cosx) const {
@@ -137,6 +137,11 @@ void DeformedNucleus::rotate() {
     three_pos.rotate(nuclear_orientation_.phi(), nuclear_orientation_.theta(), 0.0);
     particle.set_3position(three_pos);
   }
+}
+
+void DeformedNucleus::generate_fermi_momenta() {
+  throw std::domain_error("Fermi momenta currently not implemented"
+                          " for a deformed nucleus.");
 }
 
 double DeformedNucleus::y_l_0(int l, double cosx) const {
