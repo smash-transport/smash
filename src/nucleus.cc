@@ -255,7 +255,6 @@ void Nucleus::set_parameters_automatic() {
     case 1: // single particle
       set_nuclear_radius(0.);
       set_diffusiveness(-1.);
-      set_saturation_density(0.168);
       break;
     case 238:  // Uranium
       // Default values.
@@ -291,10 +290,9 @@ void Nucleus::set_parameters_automatic() {
       // set_nuclear_radius(4.28);
       break;
     default:
-      // rough guess for all nuclei not listed explicitly
+      // radius: rough guess for all nuclei not listed explicitly
       set_nuclear_radius(1.2*std::cbrt(A));
-      set_diffusiveness(0.5);
-      set_saturation_density(0.168);
+      // diffusiveness and saturation density already have reasonable defaults
   }
 }
 
