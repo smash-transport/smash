@@ -265,6 +265,15 @@ float ParticleType::total_width(const float m) const {
   return w;
 }
 
+void ParticleType::check_consistency() {
+  for (const ParticleType &ptype : ParticleType::list_all()) {
+    if (!ptype.is_stable() && ptype.decay_modes().is_empty()) {
+      throw std::runtime_error("Unstable particle " +
+                                ptype.pdgcode().string() +
+                               " has no decay chanels!");
+    }
+  }
+}
 
 ProcessBranchList ParticleType::get_partial_widths(const float m) const {
   float w = 0.;
