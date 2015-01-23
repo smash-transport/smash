@@ -79,7 +79,7 @@ class Nucleus {
    * \f$ p_{F} = (3 \pi^2 \rho)^{1/3}\f$, where \f$ rho \f$ is
    * neutron density for neutrons and proton density for protons.
    * Actual momenta \f$p_x\f$, \f$p_y\f$, \f$p_z\f$ are uniformly distributed
-   * with \f$p_{xyz}\f$ in range \f$[-p_F, p_F]\f$.
+   * in the sphere with radius \f$p_F\f$.
    **/
   void generate_fermi_momenta();
 
