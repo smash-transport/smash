@@ -23,7 +23,7 @@
 #include "include/random.h"
 
 namespace Smash {
-  
+
 /*!\Userguide
  * \page input_modi_collider_ Collider
  *
@@ -119,7 +119,9 @@ namespace Smash {
  * to chosen calculation frame, and thus the actual distance may be different.
  *
  * \key Fermi_Motion (bool, optional, default = false): \n
- * Defines if Fermi motion is included.
+ * Defines if Fermi motion is included. Note that Fermi motion
+ * is senseless physicswise if potentials are off: without potentials
+ * nucleons will just fly apart. 
  */
 
 
