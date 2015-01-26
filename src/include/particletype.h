@@ -197,6 +197,12 @@ class ParticleType {
   static void create_type_list(const std::string &particles);
 
   /**
+   * Check if unstable particles have any decay modes and throw errors.
+   */
+  static void check_consistency();
+
+
+  /**
    * Returns an object that acts like a pointer, except that it requires only 2
    * bytes and inhibits pointer arithmetics.
    *

@@ -232,6 +232,7 @@ int main(int argc, char *argv[]) {
     log.trace(source_location, " create ParticleType and DecayModes");
     ParticleType::create_type_list(configuration.take({"particles"}));
     DecayModes::load_decaymodes(configuration.take({"decaymodes"}));
+    ParticleType::check_consistency();
 
     // create outputs
     log.trace(source_location, " create OutputInterface objects");
