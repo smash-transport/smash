@@ -57,6 +57,7 @@ namespace Smash {
  * \li \ref ColliderModus
  * \li \ref BoxModus
  * \li \ref SphereModus
+ * \li \ref ListModus
  * \endif
  */
 

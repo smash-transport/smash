@@ -59,6 +59,7 @@ set(smash_src
         fourvector.cc
         grid.cc
         inputfunctions.cc
+        listmodus.cc
         logging.cc
         modusdefault.cc
         nucleus.cc

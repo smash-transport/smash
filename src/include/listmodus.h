@@ -21,7 +21,7 @@ namespace Smash {
  * ListModus: Provides a modus for hydro afterburner calculations
 *
 *Particle-list is given with data format in OSCAR2013, it's the same as the output in build/data/{eventid}/particles.oscar
-*The detailed information is as follows: 
+*The detailed information is as follows:
 *#!OSCAR2013 particle_lists SMASH-0.50-70-gc203fad t x y z mass p0 px py pz pdg ID
 # Units: fm fm fm fm GeV GeV GeV GeV GeV none none
 * To use this modus, chose
@@ -52,13 +52,21 @@ class ListModus : public ModusDefault {
    */
   float initial_conditions(Particles *particles,
                           const ExperimentParameters &parameters);
+
  private:
   /// File directory of the particle list
-  const std::string particle_list_file_directory_;
+  // const std::string particle_list_file_directory_;
   /// File prefix of the particle list
-  const std::string particle_list_file_prefix_;
+  // const std::string particle_list_file_prefix_;
+
   /// Starting time for the List
   const float start_time_ = 0.0f;
+
+  /// shift_id is the start number of event_id
+  const int shift_id_;
+
+  /// event_id_ = the unique id of the current even
+  int event_id_;
   /**\ingroup logging
    * Writes the initial state for the List to the output stream.
    */

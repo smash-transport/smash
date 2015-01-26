@@ -28,6 +28,7 @@
 #include "include/macros.h"
 #include "include/random.h"
 #include "include/spheremodus.h"
+#include "include/listmodus.h"
 
 namespace std {
 /**
@@ -77,6 +78,8 @@ std::unique_ptr<ExperimentBase> ExperimentBase::create(Configuration config) {
    *     \ref \SphereModus
    * \li \key Box for infinite matter calculation in a rectangular box. See \ref
    *     \BoxModus
+   * \li \key List for given external particle list. See \ref
+   *     \ListModus
    */
 
   /*!\Userguide
@@ -84,6 +87,7 @@ std::unique_ptr<ExperimentBase> ExperimentBase::create(Configuration config) {
    * \li \subpage input_modi_collider_
    * \li \subpage input_modi_sphere_
    * \li \subpage input_modi_box_
+   * \li \subpage input_modi_list_
    */
   const std::string modus_chooser = config.take({"General", "Modus"});
   log.info() << "Modus for this calculation: " << modus_chooser;
@@ -94,6 +98,8 @@ std::unique_ptr<ExperimentBase> ExperimentBase::create(Configuration config) {
   typedef std::unique_ptr<ExperimentBase> ExperimentPointer;
   if (modus_chooser.compare("Box") == 0) {
     return ExperimentPointer(new Experiment<BoxModus>(config));
+  } else if (modus_chooser.compare("List") == 0) {
+      return ExperimentPointer(new Experiment<ListModus>(config));
   } else if (modus_chooser.compare("Collider") == 0) {
       return ExperimentPointer(new Experiment<ColliderModus>(config));
   } else if (modus_chooser.compare("Sphere") == 0) {
