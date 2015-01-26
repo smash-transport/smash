@@ -190,7 +190,9 @@ int main(int argc, char *argv[]) {
           output_path = optarg;
           break;
         case 'v':
-          printf("%s\n", VERSION_MAJOR);
+          printf("%s\nSystem   : %s\nCompiler : %s %s\nBuild    : %s\n",
+                 VERSION_MAJOR, CMAKE_SYSTEM, CMAKE_CXX_COMPILER_ID,
+                 CMAKE_CXX_COMPILER_VERSION, CMAKE_BUILD_TYPE);
           exit(EXIT_SUCCESS);
         default:
           usage(EXIT_FAILURE, progname);
