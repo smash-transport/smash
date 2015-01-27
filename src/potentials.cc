@@ -88,9 +88,9 @@ double Potentials::potential(const ThreeVector &r,
                                              p_dens_type, ntest_).abs();
     const double sym_pot = 2.0*symmetry_s_*(rho_eckart_n - rho_eckart_p)/rho0;
     if (acts_on == 0x2212) { // proton
-      total_potential += sym_pot;
-    } else if (acts_on == 0x2112) { // neutron
       total_potential -= sym_pot;
+    } else if (acts_on == 0x2112) { // neutron
+      total_potential += sym_pot;
     }
   }
   // Return in GeV
@@ -131,9 +131,9 @@ ThreeVector Potentials::potential_gradient(const ThreeVector &r,
     const ThreeVector dUsym_dr = (n_rho_grad - p_rho_grad) *
                                  (2.0*symmetry_s_/rho0);
     if (acts_on == 0x2212) { // proton
-      total_gradient += dUsym_dr;
-    } else if (acts_on == 0x2112) { // neutron
       total_gradient -= dUsym_dr;
+    } else if (acts_on == 0x2112) { // neutron
+      total_gradient += dUsym_dr;
     }
   }
   // Return in GeV
