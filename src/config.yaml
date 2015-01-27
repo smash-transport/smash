@@ -137,8 +137,8 @@ Modi:
         Impact:
             Value: 0.0
     List:
-        # path of external particle list == File_Directory/File_Prefix{eventid}.oscar
-        File_Directory: "particle_list_ini"
+        # path of external particle list == File_Directory/File_Prefix{eventid}
+        File_Directory: "particle_lists_in"
         File_Prefix: "event"
 
         # starting number of event_id in event-by-event simulation
