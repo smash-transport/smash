@@ -34,16 +34,12 @@ void ModusDefault::propagate(Particles *particles,
     }
   } else {
     ThreeVector dU_dr, v, v_pred;
-    double pot_value;
     ParticleList plist(particles->data().begin(), particles->data().end());
 
     for (ParticleData &data : particles->data()) {
       dU_dr = pot->potential_gradient(data.position().threevec(),
                                            plist, data.pdgcode());
-      pot_value = pot->potential(data.position().threevec(),
-                                           plist, data.pdgcode());
       log.debug("Modusdef: dU/dr = ", dU_dr);
-      log.debug("Modusdef: U(r_i) = ", pot_value);
       v = data.velocity();
       // predictor step assuming momentum-indep. potential, dU/dp = 0
       // then for momentum predictor = corrector
