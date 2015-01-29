@@ -55,9 +55,10 @@ class ListModus : public ModusDefault {
 
  private:
   /// File directory of the particle list
-  // const std::string particle_list_file_directory_;
+  std::string particle_list_file_directory_;
+
   /// File prefix of the particle list
-  // const std::string particle_list_file_prefix_;
+  std::string particle_list_file_prefix_;
 
   /// Starting time for the List
   const float start_time_ = 0.0f;
@@ -67,6 +68,7 @@ class ListModus : public ModusDefault {
 
   /// event_id_ = the unique id of the current even
   int event_id_;
+
   /**\ingroup logging
    * Writes the initial state for the List to the output stream.
    */
