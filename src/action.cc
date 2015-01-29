@@ -94,9 +94,6 @@ ThreeVector Action::get_interaction_point() {
 
 
 ParticleList Action::choose_channel() {
-  if (total_weight_ < really_small) {
-    return ParticleList();
-  }
   double random_interaction = Random::canonical();
   float interaction_probability = 0.0;
   /* Loop through all subprocesses and select one by Monte Carlo, based on
