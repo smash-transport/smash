@@ -54,6 +54,11 @@ class ListModus : public ModusDefault {
   float initial_conditions(Particles *particles,
                           const ExperimentParameters &parameters);
 
+  /// \ingroup exception
+  struct LoadFailure : public std::runtime_error {
+    using std::runtime_error::runtime_error;
+  };
+
  private:
   /// File directory of the particle list
   std::string particle_list_file_directory_;

@@ -33,6 +33,7 @@
 #include "include/random.h"
 #include "include/listmodus.h"
 #include "include/threevector.h"
+#include "include/inputfunctions.h"
 
 namespace Smash {
 
@@ -117,31 +118,40 @@ namespace Smash {
             exit(EXIT_FAILURE);
         }
 
-        bf::ifstream fin(fpath);
+        std::string particle_lists = read_all( bf::ifstream{fpath} );
 
-        std::string line, pdg;
-        float t, x, y, z, mass, E, px, py, pz, id;
+        for (const Line &line : line_parser(particle_lists)) {
+            std::istringstream lineinput(line.text);
+            float t, x, y, z, mass, E, px, py, pz, id;
+            PdgCode pdgcode;
+            lineinput >> t >> x >> y >> z >> mass >> E
+                >> px >> py >> pz >> pdgcode >> id;
 
-        while ( fin.good() ) {
-            std::getline(fin, line);
-            if ( fin.eof() ) {
-                break;
+            if (lineinput.fail() ) {
+                throw LoadFailure(build_error_string(
+                            "While loading external particle lists data:\n"
+                            "Failed to convert the input string to the "
+                            "expected data types.", line));
             }
-            if ( line.length() != 0 && line[0] !='#' ) {
-                /** \todo test the data format of particle list*/
 
-                std::stringstream(line) >> t >> x >> y >> z
-                    >> mass >> E >> px >> py >> pz >> pdg >> id;
-                log.debug() << "Particle " << pdg << " (x,y,z)= " << "( ";
-                log.debug() <<  x << "," << y << "," << z << ")\n";
+            log.debug() << "Particle " << pdgcode << " (x,y,z)= " << "( ";
+            log.debug() <<  x << "," << y << "," << z << ")\n";
 
-                ParticleData particle(ParticleType::find(PdgCode(pdg)));
+
+            try {
+                const ParticleType & t_i = ParticleType::find( pdgcode );
+                ParticleData particle(t_i);
                 particle.set_4momentum(FourVector(E, px, py, pz));
                 particle.set_4position(FourVector(start_time_, x, y, z));
                 particles->add_data(particle);
             }
+            catch (const std::runtime_error & e ) {
+                throw LoadFailure( build_error_string(
+                            "While loading external particle lists data:\n"
+                            "PDG code not found for the particle."
+                            , line));
+            }
         }
-        fin.close();
 
         event_id_++;
 
