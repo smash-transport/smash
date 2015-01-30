@@ -119,7 +119,7 @@ GridBase::determine_cell_sizes(size_type particle_count,
   for (std::size_t i = 0; i < number_of_cells.size(); ++i) {
     index_factor[i] = 1.f / max_interaction_length;
     number_of_cells[i] =
-        std::max(1, static_cast<int>(std::ceil(length[i] * index_factor[i])));
+        static_cast<int>(std::floor(length[i] * index_factor[i])) + 1;
     if (number_of_cells[i] > max_cells) {
       number_of_cells[i] = max_cells;
       index_factor[i] = (max_cells - 0.1f)  // -0.1 for safety margin
