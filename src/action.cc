@@ -94,6 +94,7 @@ ThreeVector Action::get_interaction_point() {
 
 
 ParticleList Action::choose_channel() {
+  const auto &log = logger<LogArea::Action>();
   double random_interaction = Random::canonical();
   float interaction_probability = 0.0;
   /* Loop through all subprocesses and select one by Monte Carlo, based on
@@ -109,10 +110,10 @@ ParticleList Action::choose_channel() {
     }
   }
   /* Should never get here. */
-  std::stringstream ss;
-  ss << "problem in choose_channel: " << subprocesses_.size() << " " <<
-         interaction_probability << " " << total_weight_;
-  throw std::runtime_error(ss.str());
+  log.fatal(source_location, "Problem in choose_channel: ",
+            subprocesses_.size(), " ", interaction_probability, " ",
+            total_weight, "\n", *this);
+  throw std::runtime_error("problem in choose_channel");
 }
 
 
