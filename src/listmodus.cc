@@ -68,15 +68,14 @@ namespace Smash {
             const ExperimentParameters &)
         :start_time_(modus_config.take({"List", "Start_Time"})),
         shift_id_(modus_config.take({"List", "Shift_Id"})) {
+            std::string fd = modus_config.take({"List", "File_Directory"});
+            particle_list_file_directory_ = fd;
 
-      std::string fd = modus_config.take({"List", "File_Directory"});
-      particle_list_file_directory_ = fd;
+            std::string fp = modus_config.take({"List", "File_Prefix"});
+            particle_list_file_prefix_ = fp;
 
-      std::string fp = modus_config.take({"List", "File_Prefix"});
-      particle_list_file_prefix_ = fp;
-
-      event_id_ = shift_id_;
-    }
+            event_id_ = shift_id_;
+        }
 
 
     /* console output on startup of List specific parameters */
@@ -84,7 +83,7 @@ namespace Smash {
         out << "\nStarting time for List calculation: "
             << m.start_time_ << '\n';
         out << "\nInput directory for external particle lists:"
-            << m.particle_list_file_directory_<<"\n";
+            << m.particle_list_file_directory_ << "\n";
         return out;
     }
 
@@ -98,20 +97,21 @@ namespace Smash {
         std::stringstream fname;
         fname << particle_list_file_prefix_ << event_id_;
 
-        const bf::path default_path = bf::absolute(particle_list_file_directory_);
+        const bf::path default_path = bf::absolute(
+                particle_list_file_directory_);
 
         const bf::path fpath = default_path/fname.str();
-	
-	log.debug() << fpath.filename().native() << '\n';
-	
+
+        log.debug() << fpath.filename().native() << '\n';
+
         if ( !bf::exists(fpath) ) {
             log.fatal() << fpath.filename().native()
                 << " does not exist! \n"
                 <<"\n Usage of smash with external particle lists:\n"
-                <<"1. Create particle_lists_in/ directory in build/\n"
-                <<"2. Put the external particle lists in file \n"
-                <<"particle_lists_in/event{id} where {id} traversal [Shift_Id, Nevent-1]\n"
-                <<"3. Each row should contains t x y z mass p0 px py pz pdg ID \n"
+                <<"1. Put the external particle lists in file \n"
+                <<"File_Directory/File_Prefix{id} where {id} "
+                <<"traversal [Shift_Id, Nevent-1]\n"
+                <<"2. Particles info: t x y z mass p0 px py pz pdg ID \n"
                 <<"in units of: fm fm fm fm GeV GeV GeV GeV GeV none none \n";
 
             exit(EXIT_FAILURE);
@@ -129,11 +129,11 @@ namespace Smash {
             }
             if ( line.length() != 0 && line[0] !='#' ) {
                 /** \todo test the data format of particle list*/
-	      
-	      std::stringstream(line) >> t >> x >> y >> z
-                   >> mass >> E >> px >> py >> pz >> pdg >> id;
-                log.debug() << "Particle " << pdg << " (mass,x,y,z)= " << "( ";
-                log.debug() << mass << "," << x << "," << y << "," << z << ")\n";
+
+                std::stringstream(line) >> t >> x >> y >> z
+                    >> mass >> E >> px >> py >> pz >> pdg >> id;
+                log.debug() << "Particle " << pdg << " (x,y,z)= " << "( ";
+                log.debug() <<  x << "," << y << "," << z << ")\n";
 
                 ParticleData particle(ParticleType::find(PdgCode(pdg)));
                 particle.set_4momentum(FourVector(E, px, py, pz));

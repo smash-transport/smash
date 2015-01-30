@@ -10,6 +10,7 @@
 #include <stdint.h>
 #include <cmath>
 #include <list>
+#include <string>
 
 #include "forwarddeclarations.h"
 #include "modusdefault.h"
