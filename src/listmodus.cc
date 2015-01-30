@@ -118,7 +118,7 @@ namespace Smash {
             exit(EXIT_FAILURE);
         }
 
-        std::string particle_lists = read_all( bf::ifstream{fpath} );
+        std::string particle_lists = read_all(bf::ifstream{fpath});
 
         for (const Line &line : line_parser(particle_lists)) {
             std::istringstream lineinput(line.text);
@@ -127,7 +127,7 @@ namespace Smash {
             lineinput >> t >> x >> y >> z >> mass >> E
                 >> px >> py >> pz >> pdgcode >> id;
 
-            if (lineinput.fail() ) {
+            if ( lineinput.fail() ) {
                 throw LoadFailure(build_error_string(
                             "While loading external particle lists data:\n"
                             "Failed to convert the input string to the "
@@ -139,17 +139,17 @@ namespace Smash {
 
 
             try {
-                const ParticleType & t_i = ParticleType::find( pdgcode );
+                const ParticleType & t_i = ParticleType::find(pdgcode);
                 ParticleData particle(t_i);
                 particle.set_4momentum(FourVector(E, px, py, pz));
                 particle.set_4position(FourVector(start_time_, x, y, z));
                 particles->add_data(particle);
             }
             catch (const std::runtime_error & e ) {
-                throw LoadFailure( build_error_string(
+                throw LoadFailure(build_error_string(
                             "While loading external particle lists data:\n"
-                            "PDG code not found for the particle."
-                            , line));
+                            "PDG code not found for the particle. In " +
+                            fpath.filename().native(), line));
             }
         }
 

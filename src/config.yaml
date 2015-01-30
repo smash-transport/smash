@@ -14,7 +14,7 @@ Logging:
 
 General:
     # Modus decision
-    Modus:         Box
+    Modus:         Collider
 
     # temporal grid spacing
     Delta_Time:    0.1
