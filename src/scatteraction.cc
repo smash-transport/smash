@@ -66,8 +66,7 @@ void ScatterAction::perform(Particles *particles, size_t &id_process) {
     for (ParticleData &new_particle : outgoing_particles_) {
       new_particle.set_4position(middle_point);
 
-      new_particle.set_4momentum(
-          new_particle.momentum().LorentzBoost(-beta_cm()));
+      new_particle.boost_momentum(-beta_cm());
 
       // store the process id in the Particle data
       new_particle.set_id_process(id_process);
@@ -213,8 +212,8 @@ void ScatterAction::momenta_exchange() {
 
   /* Boost to CM frame. */
   ThreeVector velocity_CM = beta_cm();
-  p_a->boost(velocity_CM);
-  p_b->boost(velocity_CM);
+  p_a->boost_momentum(velocity_CM);
+  p_b->boost_momentum(velocity_CM);
 
   /* debug output */
   log.debug("center of momenta a", p_a->momentum());
@@ -242,8 +241,8 @@ void ScatterAction::momenta_exchange() {
   log.debug("exchanged momenta b", p_b->momentum());
 
   /* Boost back. */
-  p_a->boost(-velocity_CM);
-  p_b->boost(-velocity_CM);
+  p_a->boost_momentum(-velocity_CM);
+  p_b->boost_momentum(-velocity_CM);
 }
 
 
@@ -425,7 +424,7 @@ ProcessBranchList ScatterActionBaryonBaryon::nuc_nuc_to_nuc_res (
       IntegrandParameters params = {type_resonance, second_type->mass(), s};
       log.debug("Process: ", type_particle_a, type_particle_b," -> ",
                 *second_type, *type_resonance);
-      log.debug("Limits: ", lower_limit, upper_limit);
+      log.debug("Limits: ", lower_limit," ", upper_limit);
       double resonance_integral, integral_error;
       quadrature_1d(&spectral_function_integrand, &params,
                     lower_limit, upper_limit,

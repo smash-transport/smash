@@ -172,15 +172,17 @@ void DecayAction::perform(Particles *particles, size_t &id_process) {
   default:
     throw InvalidDecay(
         "DecayAction::perform: Only 1->2 or 1->3 processes are supported. "
-        "Decay from 1->" +
-        std::to_string(outgoing_particles_.size()) + " was requested.");
+        "Decay from 1->" + std::to_string(outgoing_particles_.size()) +
+        " was requested. (PDGcode=" + incoming_particles_[0].pdgcode().string()
+        + ", mass=" + std::to_string(incoming_particles_[0].effective_mass())
+        + ")");
   }
 
   /* Set positions and boost back. */
   ThreeVector velocity_CM = incoming_particles_[0].velocity();
   for (auto &p : outgoing_particles_) {
     log.debug("particle momenta in lrf ", p);
-    p.set_4momentum(p.momentum().LorentzBoost(-velocity_CM));
+    p.boost_momentum(-velocity_CM);
     p.set_4position(incoming_particles_[0].position());
     log.debug("particle momenta in comp ", p);
     // store the process id in the Particle data

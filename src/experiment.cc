@@ -143,7 +143,7 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
   return {{0.0f, config.read({"General", "Delta_Time"})},
           config.take({"Output", "Output_Interval"}),
           config.take({"General", "Testparticles"}, 1),
-          config.take({"General", "Gaussian_Sigma"})};
+          config.take({"General", "Gaussian_Sigma"}, 1.0)};
   }
 }  // unnamed namespace
 

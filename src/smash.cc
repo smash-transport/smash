@@ -190,7 +190,10 @@ int main(int argc, char *argv[]) {
           output_path = optarg;
           break;
         case 'v':
-          printf("%s\n", VERSION_MAJOR);
+          printf("%s\nSystem   : %s\nCompiler : %s %s\n"
+                     "Build    : %s\nDate     : %s\n",
+                 VERSION_MAJOR, CMAKE_SYSTEM, CMAKE_CXX_COMPILER_ID,
+                 CMAKE_CXX_COMPILER_VERSION, CMAKE_BUILD_TYPE, BUILD_DATE);
           exit(EXIT_SUCCESS);
         default:
           usage(EXIT_FAILURE, progname);
@@ -232,6 +235,7 @@ int main(int argc, char *argv[]) {
     log.trace(source_location, " create ParticleType and DecayModes");
     ParticleType::create_type_list(configuration.take({"particles"}));
     DecayModes::load_decaymodes(configuration.take({"decaymodes"}));
+    ParticleType::check_consistency();
 
     // create outputs
     log.trace(source_location, " create OutputInterface objects");

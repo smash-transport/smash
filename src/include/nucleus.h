@@ -179,7 +179,7 @@ class Nucleus {
    **/
   float diffusiveness_ = .545f;
   /// Saturation density of this nucleus.
-  float saturation_density_ = .168f;
+  float saturation_density_ = rho0;
   /// Nuclear radius of this nucleus
   float nuclear_radius_;
   /** single-proton-radius
