@@ -189,8 +189,7 @@ ThreeVector Nucleus::distribute_nucleon() const {
   dir.distribute_isotropically();
   // diffusiveness_ zero or negative? Use hard sphere.
   if (almost_equal(diffusiveness_, 0.f)) {
-    return dir.threevec() * nuclear_radius_
-           * pow(Random::canonical(), 1./3.);
+    return dir.threevec() * nuclear_radius_ * std::cbrt(Random::canonical());
   }
   float radius_scaled = nuclear_radius_/diffusiveness_;
   float prob_range1 = 1.0;
@@ -203,7 +202,7 @@ ThreeVector Nucleus::distribute_nucleon() const {
   do {
     float which_range = Random::uniform(-prob_range1, ranges234);
     if (which_range < 0.0) {
-      t = radius_scaled * (pow(Random::canonical(), 1./3.) - 1.);
+      t = radius_scaled * (std::cbrt(Random::canonical()) - 1.);
     } else {
       t = -log(Random::canonical());
       if (which_range >= prob_range2) {
@@ -251,7 +250,12 @@ void Nucleus::arrange_nucleons() {
 }
 
 void Nucleus::set_parameters_automatic() {
-  switch (Nucleus::number_of_particles()) {
+  int A = Nucleus::number_of_particles();
+  switch (A) {
+    case 1: // single particle
+      set_nuclear_radius(0.);
+      set_diffusiveness(-1.);
+      break;
     case 238:  // Uranium
       // Default values.
       set_diffusiveness(0.556);
@@ -286,7 +290,9 @@ void Nucleus::set_parameters_automatic() {
       // set_nuclear_radius(4.28);
       break;
     default:
-      throw std::domain_error("Mass number not listed in Nucleus::set_parameters_automatic.");
+      // radius: rough guess for all nuclei not listed explicitly
+      set_nuclear_radius(1.2*std::cbrt(A));
+      // diffusiveness and saturation density already have reasonable defaults
   }
 }
 

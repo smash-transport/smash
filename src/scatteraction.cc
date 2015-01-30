@@ -424,7 +424,7 @@ ProcessBranchList ScatterActionBaryonBaryon::nuc_nuc_to_nuc_res (
       IntegrandParameters params = {type_resonance, second_type->mass(), s};
       log.debug("Process: ", type_particle_a, type_particle_b," -> ",
                 *second_type, *type_resonance);
-      log.debug("Limits: ", lower_limit, upper_limit);
+      log.debug("Limits: ", lower_limit," ", upper_limit);
       double resonance_integral, integral_error;
       quadrature_1d(&spectral_function_integrand, &params,
                     lower_limit, upper_limit,

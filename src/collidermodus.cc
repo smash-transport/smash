@@ -259,6 +259,8 @@ ColliderModus::ColliderModus(Configuration modus_config,
   // Unspecified means 0 impact parameter.
   if (modus_cfg.has_value({"Impact", "Value"})) {
     impact_ = modus_cfg.take({"Impact", "Value"});
+    imp_min_ = impact_;
+    imp_max_ = impact_;
   } else {
     // If impact is not supplied by value, inspect sampling parameters:
     if (modus_cfg.has_value({"Impact", "Sample"})) {

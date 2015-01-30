@@ -174,6 +174,7 @@ void DecayAction::perform(Particles *particles, size_t &id_process) {
         "DecayAction::perform: Only 1->2 or 1->3 processes are supported. "
         "Decay from 1->" + std::to_string(outgoing_particles_.size()) +
         " was requested. (PDGcode=" + incoming_particles_[0].pdgcode().string()
+        + ", mass=" + std::to_string(incoming_particles_[0].effective_mass())
         + ")");
   }
 
