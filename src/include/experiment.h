@@ -20,6 +20,7 @@
 #include "forwarddeclarations.h"
 #include "outputinterface.h"
 #include "particles.h"
+#include "potentials.h"
 #include "quantumnumbers.h"
 #include "scatteractionsfinder.h"
 
@@ -177,6 +178,12 @@ class Experiment : public ExperimentBase {
    * The particles interacting in the experiment.
    */
   Particles particles_;
+
+  /**
+   * An instance of potentials class, that stores parameters of potentials,
+   * calculates them and their gradients.
+   */
+  std::unique_ptr<Potentials> potentials_;
 
   /**
    * A list of output formaters. They will be called to write the state of the

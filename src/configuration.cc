@@ -150,7 +150,8 @@ void Configuration::remove_all_but(const std::string &key) {
 }
 
 bool Configuration::has_value(std::initializer_list<const char *> keys) const {
-  return find_node_at(root_node_, keys).IsDefined();
+  const auto n = find_node_at(root_node_, keys);
+  return n.IsDefined() && (!n.IsNull());
 }
 
 std::string Configuration::unused_values_report() const {

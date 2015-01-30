@@ -20,12 +20,14 @@
 #include "include/clock.h"
 #include "include/collidermodus.h"
 #include "include/configuration.h"
+#include "include/cxx14compat.h"
 #include "include/density.h"
 #include "include/experiment.h"
 #include "include/forwarddeclarations.h"
 #include "include/grid.h"
 #include "include/logging.h"
 #include "include/macros.h"
+#include "include/potentials.h"
 #include "include/random.h"
 #include "include/spheremodus.h"
 
@@ -93,6 +95,11 @@ std::unique_ptr<ExperimentBase> ExperimentBase::create(Configuration config) {
 
   typedef std::unique_ptr<ExperimentBase> ExperimentPointer;
   if (modus_chooser.compare("Box") == 0) {
+    if (config.has_value({"Potentials"})) {
+      log.error() << "Box modus does not work with potentials for now: "
+                  << "periodic boundaries are not taken into account "
+                  << "in the density calculation";
+    }
     return ExperimentPointer(new Experiment<BoxModus>(config));
   } else if (modus_chooser.compare("Collider") == 0) {
       return ExperimentPointer(new Experiment<ColliderModus>(config));
@@ -121,6 +128,9 @@ namespace {
  * Defines the period of intermediate output of the status of the simulated
  * system in Standard Output and other output formats which support this
  * functionality.
+ *
+ * \key Gaussian_Sigma (float, required): \n
+ * Width of gaussians that represent Wigner density of particles.
  */
 /** Gathers all general Experiment parameters
  *
@@ -210,6 +220,13 @@ Experiment<Modus>::Experiment(Configuration config)
   if (config.take({"Collision_Term", "Collisions"}, true)) {
     action_finders_.emplace_back(new ScatterActionsFinder(config, parameters_));
   }
+
+  if (config.has_value({"Potentials"})) {
+    log.info() << "Potentials are ON.";
+    // potentials need testparticles and gaussian sigma from parameters_
+    potentials_ = make_unique<Potentials>(config["Potentials"], parameters_);
+  }
+
   dens_type_ = static_cast<Density_type>(
               config.take({"Output", "Density", "Density_Type"}, 0));
   if (dens_type_ < 0 || dens_type_ > 2) {
@@ -348,7 +365,7 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
     modus_.sanity_check(&particles_);
 
     /* (3) Do propagation. */
-    modus_.propagate(&particles_, parameters_, outputs_);
+    modus_.propagate(&particles_, parameters_, outputs_, potentials_.get());
 
     /* (4) Physics output during the run. */
     // if the timestep of labclock is different in the next tick than
@@ -368,11 +385,14 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
         output->thermodynamics_output(particles_, parameters_);
       }
     }
-    // check conservation of conserved quantities:
-    std::string err_msg = conserved_initial_.report_deviations(particles_);
-    if (!err_msg.empty()) {
-      log.error() << err_msg;
-      throw std::runtime_error("Violation of conserved quantities!");
+    // Check conservation of conserved quantities if potentials are off.
+    // If potentials are on then momentum is conserved only in average
+    if (!potentials_) {
+      std::string err_msg = conserved_initial_.report_deviations(particles_);
+      if (!err_msg.empty()) {
+        log.error() << err_msg;
+        throw std::runtime_error("Violation of conserved quantities!");
+      }
     }
   }
 
@@ -392,7 +412,7 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
     } while (interactions_total > interactions_old);  // loop until no more decays occur
 
     /* Do one final propagation step. */
-    modus_.propagate(&particles_, parameters_, outputs_);
+    modus_.propagate(&particles_, parameters_, outputs_, potentials_.get());
   }
 
   // make sure the experiment actually ran (note: we should compare this

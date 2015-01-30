@@ -90,7 +90,6 @@ class ParticleData {
   inline void boost (const ThreeVector &v);
   /// do a Lorentz-boost of the momentum
   inline void boost_momentum (const ThreeVector &v);
-    
 
   /* overloaded operators */
   inline bool operator==(const ParticleData &a) const;

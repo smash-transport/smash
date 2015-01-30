@@ -66,7 +66,8 @@ class BoxModus : public ModusDefault {
    * case, the OutputsList will be used.
    */
   void propagate(Particles *particles, const ExperimentParameters &parameters,
-                                       const OutputsList &output_list);
+                                       const OutputsList &output_list,
+                                       const Potentials* pot);
 
   Grid<GridOptions::PeriodicBoundaries> create_grid(
       ParticleList &&all_particles, const int testparticles) const {

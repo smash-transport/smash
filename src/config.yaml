@@ -25,6 +25,9 @@ General:
     # initial random seed (auto-generated if negative)
     Randomseed:    1
 
+    # number of test particles
+    Testparticles: 1
+
     # number of events
     Nevents:       1
 
@@ -73,6 +76,14 @@ Collision_Term:
     Force_Decays_At_End:  True
     # elastic cross section, mb (= 0.1 fm^2)
     Sigma:         10.0
+
+Potentials:
+    Skyrme:
+        Skyrme_A: -209.2
+        Skyrme_B: 156.4
+        Skyrme_Tau: 1.35
+    Symmetry:
+        S_Pot: 18.0
 
 Modi:
     Box:

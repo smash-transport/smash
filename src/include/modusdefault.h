@@ -14,6 +14,8 @@
 
 #include <stdexcept>
 
+#include "potentials.h"
+
 namespace Smash {
 
 /**
@@ -58,7 +60,8 @@ class ModusDefault {
    * \param[in] parameters parameters for the experiment
    */
   void propagate(Particles *particles, const ExperimentParameters &parameters,
-                                       const OutputsList &);
+                                       const OutputsList &,
+                                       const Potentials* pot);
 
   Grid<GridOptions::Normal> create_grid(ParticleList &&all_particles,
       const int testparticles) const {
