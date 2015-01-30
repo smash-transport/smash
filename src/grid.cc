@@ -108,6 +108,14 @@ GridBase::determine_cell_sizes(size_type particle_count,
   // But don't let the number of cells exceed the actual number of particles.
   // That would be overkill. Let max_cells³ ≤ particle_count (conversion to
   // int truncates).
+  // Consider that particle placement into cells uses half-open intervals. Thus
+  // a cell includes particles in [0, a[. The next cell [a, 2a[. And so on. This
+  // is important for calculating the number of cells. If length * index_factor
+  // (equivalent to length / max_interaction_length) is integral, then
+  // length * index_factor + 1 determines the number of required cells. That's
+  // because the last cell will then store particles in the interval
+  // [length, length + max_interaction_length[. The code below achieves this
+  // effect by rounding down (floor) and adding 1 afterwards.
   // --------------------
   // TODO:
   // The last cell in each direction can be smaller than
