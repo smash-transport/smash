@@ -105,7 +105,7 @@ ParticleList Action::choose_channel() {
       continue;
     }
     interaction_probability += proc.weight() / total_weight_;
-    if (random_interaction < interaction_probability) {
+    if (random_interaction <= interaction_probability) {
       return proc.particle_list();
     }
   }
