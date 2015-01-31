@@ -112,7 +112,7 @@ ParticleList Action::choose_channel() {
   /* Should never get here. */
   log.fatal(source_location, "Problem in choose_channel: ",
             subprocesses_.size(), " ", interaction_probability, " ",
-            total_weight, "\n", *this);
+            total_weight_, "\n", *this);
   throw std::runtime_error("problem in choose_channel");
 }
 
