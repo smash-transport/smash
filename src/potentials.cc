@@ -72,21 +72,16 @@ double Potentials::potential(const ThreeVector &r,
   }
 
   if (use_skyrme_) {
-    const Density_type dens_type = baryon;
     const double rho_eckart = four_current(r, plist, sigma_,
-                                           dens_type, ntest_).abs();
+                                           baryon_density, ntest_).abs();
     total_potential += skyrme_a_ * (rho_eckart/rho0) +
                        skyrme_b_ * std::pow(rho_eckart/rho0, skyrme_tau_);
   }
   if (use_symmetry_) {
-    // use neutron-proton density, not isospin density
-    const Density_type n_dens_type = neutron;
-    const Density_type p_dens_type = proton;
-    const double rho_eckart_n = four_current(r, plist, sigma_,
-                                             n_dens_type, ntest_).abs();
-    const double rho_eckart_p = four_current(r, plist, sigma_,
-                                             p_dens_type, ntest_).abs();
-    const double sym_pot = 2.*symmetry_s_ * (rho_eckart_p-rho_eckart_n)/rho0
+    // use isospin density
+    const double rho_iso = four_current(r, plist, sigma_,
+                                        isospin_density, ntest_).abs();
+    const double sym_pot = 2.*symmetry_s_ * rho_iso/rho0
                            * float(acts_on.isospin3())/acts_on.isospin_total();
     total_potential += sym_pot;
   }
@@ -104,9 +99,8 @@ ThreeVector Potentials::potential_gradient(const ThreeVector &r,
   }
 
   if (use_skyrme_) {
-    const Density_type dens_type = baryon;
     const auto density_and_gradient = rho_eckart_gradient(r, plist,
-                                                 sigma_, dens_type, ntest_);
+                                                 sigma_, baryon_density, ntest_);
     const double rho = density_and_gradient.first;
     const ThreeVector drho_dr = density_and_gradient.second;
 
@@ -117,14 +111,10 @@ ThreeVector Potentials::potential_gradient(const ThreeVector &r,
   }
 
   if (use_symmetry_) {
-    // use neutron-proton density, not isospin density
-    const Density_type n_dens_type = neutron;
-    const Density_type p_dens_type = proton;
-    const ThreeVector n_rho_grad = rho_eckart_gradient(r, plist,
-                                           sigma_, n_dens_type, ntest_).second;
-    const ThreeVector p_rho_grad = rho_eckart_gradient(r, plist,
-                                           sigma_, p_dens_type, ntest_).second;
-    const ThreeVector dUsym_dr = 2.*symmetry_s_ * (p_rho_grad-n_rho_grad)/rho0
+    // use isospin density
+    const ThreeVector p_iso = rho_eckart_gradient(r, plist, sigma_,
+                                                  isospin_density, ntest_).second;
+    const ThreeVector dUsym_dr = 2.*symmetry_s_ * p_iso/rho0
                                  * float(acts_on.isospin3())/acts_on.isospin_total();
     total_gradient += dUsym_dr;
   }
