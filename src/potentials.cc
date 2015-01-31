@@ -86,8 +86,9 @@ double Potentials::potential(const ThreeVector &r,
                                              n_dens_type, ntest_).abs();
     const double rho_eckart_p = four_current(r, plist, sigma_,
                                              p_dens_type, ntest_).abs();
-    const double sym_pot = 2.0*symmetry_s_*(rho_eckart_n - rho_eckart_p)/rho0;
-    total_potential -= sym_pot * acts_on.isospin3();
+    const double sym_pot = 2.*symmetry_s_ * (rho_eckart_p-rho_eckart_n)/rho0
+                           * acts_on.isospin3();
+    total_potential += sym_pot;
   }
   // Return in GeV
   return total_potential * 1.0e-3;
@@ -124,9 +125,9 @@ ThreeVector Potentials::potential_gradient(const ThreeVector &r,
                                            sigma_, n_dens_type, ntest_).second;
     const ThreeVector p_rho_grad = rho_eckart_gradient(r, plist,
                                            sigma_, p_dens_type, ntest_).second;
-    const ThreeVector dUsym_dr = (n_rho_grad - p_rho_grad) *
-                                 (2.0*symmetry_s_/rho0);
-    total_gradient -= dUsym_dr * acts_on.isospin3();
+    const ThreeVector dUsym_dr = 2.*symmetry_s_ * (p_rho_grad-n_rho_grad)/rho0
+                                 * acts_on.isospin3();
+    total_gradient += dUsym_dr;
   }
   // Return in GeV
   return total_gradient * 1.0e-3;
