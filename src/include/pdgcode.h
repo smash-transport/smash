@@ -261,6 +261,17 @@ class PdgCode {
    * always positive.
    */
   unsigned int isospin_total() const;
+  /*
+   * Returns the isospin-3 component relative to the total isospin.
+   */
+  float isospin3_rel() const {
+    unsigned int I = isospin_total();
+    if (I==0) {
+      return 0; }
+    else {
+      return static_cast<float>(isospin3())/I;
+    }
+  }
   /** returns the net number of \f$\bar s\f$ quarks.
    *
    * For particles with one strange quark, -1 is returned.

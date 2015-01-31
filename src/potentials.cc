@@ -80,9 +80,9 @@ double Potentials::potential(const ThreeVector &r,
   if (use_symmetry_) {
     // use isospin density
     const double rho_iso = four_current(r, plist, sigma_,
-                                        isospin_density, ntest_).abs();
+                                        baryonic_isospin_density, ntest_).abs();
     const double sym_pot = 2.*symmetry_s_ * rho_iso/rho0
-                           * float(acts_on.isospin3())/acts_on.isospin_total();
+                           * acts_on.isospin3_rel();
     total_potential += sym_pot;
   }
   // Return in GeV
@@ -113,9 +113,10 @@ ThreeVector Potentials::potential_gradient(const ThreeVector &r,
   if (use_symmetry_) {
     // use isospin density
     const ThreeVector p_iso = rho_eckart_gradient(r, plist, sigma_,
-                                                  isospin_density, ntest_).second;
+                                                  baryonic_isospin_density,
+                                                  ntest_).second;
     const ThreeVector dUsym_dr = 2.*symmetry_s_ * p_iso/rho0
-                                 * float(acts_on.isospin3())/acts_on.isospin_total();
+                                 * acts_on.isospin3_rel();
     total_gradient += dUsym_dr;
   }
   // Return in GeV

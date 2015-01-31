@@ -23,7 +23,7 @@ namespace Smash {
    *  The baryon density is necessary for the Skyrme potential.
    *  For the symmetry potential one needs to know the isospin density.
    */
-  enum Density_type {baryon_density = 0, isospin_density = 1};
+  enum Density_type {baryon_density = 0, baryonic_isospin_density = 1};
 
   /** A small check if particle PDG code belongs to a given type.
    *  Currently checks for protons, neutrons and baryons.

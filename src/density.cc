@@ -15,7 +15,7 @@ namespace Smash {
 bool particle_in_denstype(const PdgCode pdg, Density_type dens_type) {
   switch (dens_type) {
   case baryon_density:
-  case isospin_density:
+  case baryonic_isospin_density:
     return pdg.is_baryon();
   default:
     return false;
@@ -50,8 +50,8 @@ FourVector four_current(const ThreeVector &r, const ParticleList &plist,
     case baryon_density:
       tmp *= p.pdgcode().baryon_number();
       break;
-    case isospin_density:
-      tmp *= float(p.pdgcode().isospin3())/p.pdgcode().isospin_total();
+    case baryonic_isospin_density:
+      tmp *= p.pdgcode().isospin3_rel();
       break;
     default:
       break;
@@ -102,8 +102,8 @@ std::pair<double, ThreeVector> rho_eckart_gradient(const ThreeVector &r,
     case baryon_density:
       tmp2 *= p.pdgcode().baryon_number();
       break;
-    case isospin_density:
-      tmp2 *= float(p.pdgcode().isospin3())/p.pdgcode().isospin_total();
+    case baryonic_isospin_density:
+      tmp2 *= p.pdgcode().isospin3_rel();
       break;
     default:
       break;

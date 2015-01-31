@@ -67,7 +67,7 @@ Output:
         y: 0.0
         z: 0.0
         # Which density is written to collision headers:
-        # 0 - net baryon, 1 - proton, 2 - neutron
+        # 0 - net baryon density, 1 - baryonic isospin density
         Density_Type:   0
 
 Collision_Term:
