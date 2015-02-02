@@ -28,6 +28,13 @@ static ParticleData create_smashon_particle(int id = -1) {
   return ParticleData{ParticleType::find(0x661), id};
 }
 
+static void simple_propagate(Particles& particles, float dt) {
+  for (ParticleData& data : particles.data()) {
+    FourVector distance = FourVector(dt, data.velocity() * dt);
+    data.set_4position(data.position() + distance);
+  }
+}
+
 TEST(collision_order) {
   // create particles. The type doesn't matter at all because we will set a
   // different mass anyway and decays are switched off
