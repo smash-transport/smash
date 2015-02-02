@@ -68,30 +68,22 @@ double Potentials::potential(const ThreeVector &r,
   double total_potential = 0.0;
 
   if (!acts_on.is_baryon()) {
-    return 0.0;
+    return total_potential;
   }
 
   if (use_skyrme_) {
-    const Density_type dens_type = baryon;
     const double rho_eckart = four_current(r, plist, sigma_,
-                                           dens_type, ntest_).abs();
+                                           baryon_density, ntest_).abs();
     total_potential += skyrme_a_ * (rho_eckart/rho0) +
                        skyrme_b_ * std::pow(rho_eckart/rho0, skyrme_tau_);
   }
-  if (use_symmetry_ && (acts_on == 0x2212 || acts_on == 0x2112)) {
-    // use neutron-proton density, not isospin density
-    const Density_type n_dens_type = neutron;
-    const Density_type p_dens_type = proton;
-    const double rho_eckart_n = four_current(r, plist, sigma_,
-                                             n_dens_type, ntest_).abs();
-    const double rho_eckart_p = four_current(r, plist, sigma_,
-                                             p_dens_type, ntest_).abs();
-    const double sym_pot = 2.0*symmetry_s_*(rho_eckart_n - rho_eckart_p)/rho0;
-    if (acts_on == 0x2212) { // proton
-      total_potential -= sym_pot;
-    } else if (acts_on == 0x2112) { // neutron
-      total_potential += sym_pot;
-    }
+  if (use_symmetry_) {
+    // use isospin density
+    const double rho_iso = four_current(r, plist, sigma_,
+                                        baryonic_isospin_density, ntest_).abs();
+    const double sym_pot = 2.*symmetry_s_ * rho_iso/rho0
+                           * acts_on.isospin3_rel();
+    total_potential += sym_pot;
   }
   // Return in GeV
   return total_potential * 1.0e-3;
@@ -101,40 +93,31 @@ ThreeVector Potentials::potential_gradient(const ThreeVector &r,
                                            const ParticleList &plist,
                                            const PdgCode acts_on) const {
   ThreeVector total_gradient(0.0, 0.0, 0.0);
-  double tmp;
 
   if (!acts_on.is_baryon()) {
     return total_gradient;
   }
 
   if (use_skyrme_) {
-    const Density_type dens_type = baryon;
     const auto density_and_gradient = rho_eckart_gradient(r, plist,
-                                                 sigma_, dens_type, ntest_);
+                                                 sigma_, baryon_density, ntest_);
     const double rho = density_and_gradient.first;
     const ThreeVector drho_dr = density_and_gradient.second;
 
     // Derivative of potential with respect to density
-    tmp = skyrme_tau_ * std::pow(rho/rho0, skyrme_tau_ - 1);
+    double tmp = skyrme_tau_ * std::pow(rho/rho0, skyrme_tau_ - 1);
     const double dpotential_drho = (skyrme_a_  + skyrme_b_ * tmp) / rho0;
     total_gradient += drho_dr * dpotential_drho;
   }
 
-  if (use_symmetry_ && (acts_on == 0x2212 || acts_on == 0x2112)) {
-    // use neutron-proton density, not isospin density
-    const Density_type n_dens_type = neutron;
-    const Density_type p_dens_type = proton;
-    const ThreeVector n_rho_grad = rho_eckart_gradient(r, plist,
-                                           sigma_, n_dens_type, ntest_).second;
-    const ThreeVector p_rho_grad = rho_eckart_gradient(r, plist,
-                                           sigma_, p_dens_type, ntest_).second;
-    const ThreeVector dUsym_dr = (n_rho_grad - p_rho_grad) *
-                                 (2.0*symmetry_s_/rho0);
-    if (acts_on == 0x2212) { // proton
-      total_gradient -= dUsym_dr;
-    } else if (acts_on == 0x2112) { // neutron
-      total_gradient += dUsym_dr;
-    }
+  if (use_symmetry_) {
+    // use isospin density
+    const ThreeVector p_iso = rho_eckart_gradient(r, plist, sigma_,
+                                                  baryonic_isospin_density,
+                                                  ntest_).second;
+    const ThreeVector dUsym_dr = 2.*symmetry_s_ * p_iso/rho0
+                                 * acts_on.isospin3_rel();
+    total_gradient += dUsym_dr;
   }
   // Return in GeV
   return total_gradient * 1.0e-3;

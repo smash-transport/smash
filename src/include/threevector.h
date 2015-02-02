@@ -178,6 +178,11 @@ inline ThreeVector operator* (ThreeVector a, const double &b) {
   return a;
 }
 
+inline ThreeVector operator* (const double &a, ThreeVector b) {
+  b *= a;
+  return b;
+}
+
 inline double operator* (ThreeVector a, const ThreeVector &b) {
   return a.x1()*b.x1() + a.x2()*b.x2() + a.x3()*b.x3();
 }

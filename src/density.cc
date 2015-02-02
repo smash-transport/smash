@@ -13,11 +13,11 @@
 namespace Smash {
 
 bool particle_in_denstype(const PdgCode pdg, Density_type dens_type) {
-  if ( (dens_type == baryon  && (pdg.baryon_number() != 0) ) ||
-       (dens_type == proton  && pdg == 0x2212) ||
-       (dens_type == neutron && pdg == 0x2112) ) {
-    return true;
-  } else {
+  switch (dens_type) {
+  case baryon_density:
+  case baryonic_isospin_density:
+    return pdg.is_baryon();
+  default:
     return false;
   }
 }
@@ -46,8 +46,15 @@ FourVector four_current(const ThreeVector &r, const ParticleList &plist,
     const ThreeVector dr_rest = r - ri + betai * tmp;
 
     tmp = std::exp(- 0.5 * dr_rest.sqr() / (gs_sigma * gs_sigma)) / inv_gammai;
-    if (dens_type == baryon) {
+    switch (dens_type) {
+    case baryon_density:
       tmp *= p.pdgcode().baryon_number();
+      break;
+    case baryonic_isospin_density:
+      tmp *= p.pdgcode().isospin3_rel();
+      break;
+    default:
+      break;
     }
     jmu += FourVector(1., betai) * tmp;
   }
@@ -91,8 +98,15 @@ std::pair<double, ThreeVector> rho_eckart_gradient(const ThreeVector &r,
     const ThreeVector dr_rest = r - ri + betai * (((r - ri) * betai) / tmp1);
 
     tmp2 = std::exp(- 0.5 * dr_rest.sqr() / (gs_sigma*gs_sigma)) / inv_gammai;
-    if (dens_type == baryon) {
+    switch (dens_type) {
+    case baryon_density:
       tmp2 *= p.pdgcode().baryon_number();
+      break;
+    case baryonic_isospin_density:
+      tmp2 *= p.pdgcode().isospin3_rel();
+      break;
+    default:
+      break;
     }
     jmu += FourVector(1., betai) * tmp2;
 

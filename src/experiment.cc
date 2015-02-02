@@ -187,8 +187,7 @@ std::ostream &operator<<(std::ostream &out, const Experiment<Modus> &e) {
  *
  * \key Density_Type (int, optional, default = 0): \n
  * 0 - net baryon density
- * 1 - proton density
- * 2 - neutron density
+ * 1 - baryonic isospin density
  *
  * \key Force_Decays_At_End (bool, optional, default = true): \n
  * true - force all resonances to decay after last timestep \n
@@ -229,9 +228,9 @@ Experiment<Modus>::Experiment(Configuration config)
 
   dens_type_ = static_cast<Density_type>(
               config.take({"Output", "Density", "Density_Type"}, 0));
-  if (dens_type_ < 0 || dens_type_ > 2) {
+  if (dens_type_ < baryon_density || dens_type_ > baryonic_isospin_density) {
     log.error() << "Unknown Density_Type specified. Taking default.";
-    dens_type_ = baryon;
+    dens_type_ = baryon_density;
   }
   log.info() << "Density type written to headers: " << dens_type_;
 }
