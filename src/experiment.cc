@@ -309,8 +309,10 @@ void Experiment<Modus>::perform_actions(ActionList &actions,
         const double rho = four_current(r_interaction, plist,
                                      parameters_.gaussian_sigma, dens_type_,
                                      parameters_.testparticles).abs();
+        const double total_cross_section = action->weight();
         for (const auto &output : outputs_) {
-          output->at_interaction(incoming_particles, outgoing_particles, rho);
+          output->at_interaction(incoming_particles, outgoing_particles, rho,
+                                    total_cross_section);
         }
         log.debug(~einhard::Green(), "✔ ", action);
       } else {
