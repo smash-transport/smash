@@ -145,8 +145,7 @@ namespace Smash {
                 particle.set_4position(FourVector(start_time_, x, y, z));
                 particles->add_data(particle);
             }
-            //catch ( ParticleType::PdgNotFoundFailure ) {
-            catch ( const std::runtime_error & e ) {
+            catch ( ParticleType::PdgNotFoundFailure ) {
                 throw LoadFailure(build_error_string(
                             "While loading external particle lists data:\n"
                             "PDG code not found for the particle. In " +
