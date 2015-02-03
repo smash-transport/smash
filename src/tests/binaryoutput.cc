@@ -159,7 +159,7 @@ TEST(fullhistory_format) {
   particles.add_data(final_particle);
   final_particles.push_back(particles.data(particles.id_max()));
   double rho = 0.123;
-  double weight = 0.123;
+  double weight = 3.21;
   bin_output->at_interaction(initial_particles, final_particles, rho, weight);
 
   /* Final state output */
