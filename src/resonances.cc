@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2013-2014
+ *    Copyright (c) 2013-2015
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
