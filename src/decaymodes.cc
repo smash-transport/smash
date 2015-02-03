@@ -160,7 +160,7 @@ void DecayModes::load_decaymodes(const std::string &input) {
           decay_particles.emplace_back(&ParticleType::find(pdg));
           lineinput >> pdg;
         }
-        catch (const std::runtime_error &) {
+        catch ( ParticleType::PdgNotFoundFailure ) {
           throw ReferencedParticleNotFound(build_error_string(
               "Inconsistency: The particle with PDG id " + pdg.string() +
                   " was not registered through particles.txt, but "

@@ -180,6 +180,12 @@ class ParticleType {
    */
   static const ParticleType &find(PdgCode pdgcode) SMASH_CONST;
 
+  /// \ingroup exception
+  struct PdgNotFoundFailure : public std::runtime_error {
+    using std::runtime_error::runtime_error;
+  };
+
+
   /**
    * Returns whether the ParticleType with the given \p pdgcode exists.
    *
@@ -269,6 +275,7 @@ class ParticleType {
    * Writes all information about the particle type to the output stream.
    */
   friend std::ostream &operator<<(std::ostream &out, const ParticleType &type);
+
 };
 
 inline bool ParticleType::is_stable() const {

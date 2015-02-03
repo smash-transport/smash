@@ -74,9 +74,8 @@ SMASH_CONST const ParticleType &ParticleType::find(PdgCode pdgcode) {
       all_particle_types->begin(), all_particle_types->end(), pdgcode,
       [](const ParticleType &l, const PdgCode &r) { return l.pdgcode() < r; });
   if (found == all_particle_types->end() || found->pdgcode() != pdgcode) {
-    throw std::runtime_error("PDG code "+pdgcode.string()+ " not found!");
+    throw PdgNotFoundFailure("PDG code " + pdgcode.string() + " not found!");
   }
-  //assert(found->pdgcode() == pdgcode);
   return *found;
 }
 
