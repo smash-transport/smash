@@ -101,11 +101,13 @@ static bool compare_interaction_block_header(const int &nin,
                                              FILE* file) {
   int nin_read, nout_read;
   double rho;
+  double weight;
   char c_read;
   VERIFY(std::fread(&c_read, sizeof(char), 1, file) == 1);
   read_binary(nin_read, file);
   read_binary(nout_read, file);
   VERIFY(std::fread(&rho, sizeof(double), 1, file) == 1);
+  VERIFY(std::fread(&weight, sizeof(double), 1, file) == 1);
   // std::cout << c_read << std::endl;
   // std::cout << nin_read << " " << nin << std::endl;
   // std::cout << nout_read << " " << nout << std::endl;
@@ -179,7 +181,7 @@ TEST(fullhistory_format) {
   read_binary(smash_version, binF);  // smash version
 
   VERIFY(magic == "SMSH");
-  VERIFY(format_version_number == 1);
+  VERIFY(format_version_number == 2);
   VERIFY(smash_version == VERSION_MAJOR);
 
   // particles at event atart: expect two smashons
