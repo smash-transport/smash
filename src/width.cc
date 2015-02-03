@@ -55,12 +55,15 @@ static float BlattWeisskopf(const float x, const int L)
 #endif
 {
   const auto x2 = x * x;
-  const auto x4 = x2 * x2;
   switch (L) {
     case 0:
       return 1.f;
     case 1:
       return x2 / (1.f + x2);
+    /* The following lines should be correct. But since nothing in SMASH uses
+     * L > 1 this code is untested and dead. Therefore we only keep it as a
+     * reference for later. (x4 = x2 * x2)
+     * See also input sanitization in load_decaymodes in decaymodes.cc.
     case 2:
       return x4 / (9.f + 3.f * x2 + x4);
     case 3:
@@ -68,6 +71,7 @@ static float BlattWeisskopf(const float x, const int L)
     case 4:
       return x4 * x4 /
              (11025.f + 1575.f * x2 + 135.f * x4 + 10.f * x2 * x4 + x4 * x4);
+    */
 #ifndef NDEBUG
     default:
       throw std::invalid_argument(
