@@ -154,7 +154,7 @@ TEST(fullhistory_format) {
   ParticleData final_particle = create_smashon_particle();
   particles.add_data(final_particle);
   final_particles.push_back(particles.data(particles.id_max()));
-  bin_output->at_interaction(initial_particles, final_particles, 0.0);
+  bin_output->at_interaction(initial_particles, final_particles, 0.0, 0.0);
 
   /* Final state output */
   bin_output->at_eventend(particles, event_id);

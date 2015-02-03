@@ -33,13 +33,13 @@ BinaryOutputParticles::BinaryOutputParticles(bf::path path,
    *
    * \key Enable (bool, optional, default = false):\n
    * true - binary particle list output enabled\n
-   * false - no binary particle list output 
-   * 
+   * false - no binary particle list output
+   *
    * \key only_final (bool, optional, default = true): \n
    * true - only final particle list at the end of each event \n
-   * false - particle list output at every output interval including initial 
+   * false - particle list output at every output interval including initial
    * time
-   * 
+   *
    * Detailed specification of the binary format can be found here:
    * \ref format_binary_
    */
@@ -141,7 +141,8 @@ void BinaryOutputParticles::at_eventend(const Particles &particles,
 
 void BinaryOutputParticles::at_interaction(const ParticleList &/*incoming*/,
                                      const ParticleList &/*outgoing*/,
-                                     const double /*density*/) {
+                                     const double /*density*/,
+                                     const double /*total_cross_section*/) {
   /* No output of this kind in particles output */
 }
 

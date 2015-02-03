@@ -31,7 +31,7 @@ namespace Smash {
  * Time interval \f$\Delta t \f$ is also regulated by an option.
  * Output file is binary and has a block structure.
  *
- * Details of the output format can be found 
+ * Details of the output format can be found
  * on the wiki in User Guide section, look for binary output.
  **/
 class BinaryOutputParticles : public BinaryOutputBase {
@@ -47,7 +47,8 @@ class BinaryOutputParticles : public BinaryOutputBase {
 
   void at_interaction(const ParticleList &incoming_particles,
                       const ParticleList &outgoing_particles,
-                      const double density) override;
+                      const double density,
+                      const double total_cross_section) override;
   /// writes particles every time interval fixed by option OUTPUT_INTERVAL
   void at_intermediate_time(const Particles &particles, const int event_number,
                           const Clock &clock) override;

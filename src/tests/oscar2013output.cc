@@ -122,7 +122,7 @@ TEST(full2013_format) {
   ParticleData final_particle = create_smashon_particle();
   particles.add_data(final_particle);
   final_particles.push_back(particles.data(particles.id_max()));
-  osc2013full->at_interaction(initial_particles, final_particles, 0.0);
+  osc2013full->at_interaction(initial_particles, final_particles, 0.0, 0.0);
   /* Final state output */
   osc2013full->at_eventend(particles, event_id);
 
@@ -244,7 +244,7 @@ TEST(final2013_format) {
   final_particles.push_back(particles.data(0));
   final_particles.push_back(particles.data(1));
   /* As with initial state output, this should not do anything */
-  osc2013final->at_interaction(initial_particles, final_particles, 0.0);
+  osc2013final->at_interaction(initial_particles, final_particles, 0.0, 0.0);
   /* Final state output; this is the only thing we expect to find in file */
   osc2013final->at_eventend(particles, event_id);
 
