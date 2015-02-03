@@ -25,8 +25,8 @@ TEST(init_particle_types) {
 }
 
 TEST(initialize_box) {
-  einhard::Logger<> log(einhard::ALL);
   ExperimentParameters param{{0.f, 1.f}, 1.f, 1, 1.0};
+  einhard::Logger<> log(einhard::ALL);
   BoxModus b({"Box:\n"
               "  Initial_Condition: 1\n"
               "  Length: 7.9615\n"
@@ -154,7 +154,7 @@ TEST(initialize_sphere) {
   for (auto p : P.data()) {
     momentum += p.momentum();
     radius = sqrt(p.position().x1()*p.position().x1()+
-    p.position().x2()*p.position().x2()+p.position().x3()*p.position().x3()); 
+    p.position().x2()*p.position().x2()+p.position().x3()*p.position().x3());
     VERIFY(radius <  10.0);
   }
   COMPARE_ABSOLUTE_ERROR(momentum.x1(), 0.0, 1e-12);

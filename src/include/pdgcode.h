@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014
+ *    Copyright (c) 2014-2015
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -261,6 +261,17 @@ class PdgCode {
    * always positive.
    */
   unsigned int isospin_total() const;
+  /*
+   * Returns the isospin-3 component relative to the total isospin.
+   */
+  float isospin3_rel() const {
+    unsigned int I = isospin_total();
+    if (I==0) {
+      return 0; }
+    else {
+      return static_cast<float>(isospin3())/I;
+    }
+  }
   /** returns the net number of \f$\bar s\f$ quarks.
    *
    * For particles with one strange quark, -1 is returned.
@@ -448,7 +459,7 @@ class PdgCode {
   }
   /// returns if the codes are equal
   inline bool operator==(const PdgCode rhs) const {
-    return (code() == rhs.code());
+    return dump_ == rhs.dump_;
   }
   /// returns if the codes are not equal.
   inline bool operator!=(const PdgCode rhs) const {

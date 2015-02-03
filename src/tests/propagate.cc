@@ -13,6 +13,7 @@
 #include "../include/collidermodus.h"
 #include "../include/experiment.h"
 #include "../include/modusdefault.h"
+#include "../include/potentials.h"
 #include "../include/spheremodus.h"
 
 #include <boost/filesystem.hpp>
@@ -80,7 +81,8 @@ TEST(propagate_default) {
   OutputsList out;
   // clock, output interval, cross-section, testparticles
   ExperimentParameters param{{0.f, 1.f}, 1.f, 1, 1.0};
-  m.propagate(&Pdef, param, out);
+  Potentials* pot = NULL;
+  m.propagate(&Pdef, param, out, pot);
   // after propagation: Momenta should be unchanged.
   COMPARE(Pdef.data(0).momentum(), FourVector(4.0, 0.0, 0.0, 0.0));
   COMPARE(Pdef.data(1).momentum(), FourVector(sqrt(0.02), 0.1, -.1, 0.0));
@@ -114,8 +116,9 @@ TEST(propagate_box) {
   create_particle_list(Pbox);
   OutputsList out;
   // clock, output interval, cross-section, testparticles
-  m.propagate(&Pdef, param, out);
-  b.propagate(&Pbox, param, out);
+  Potentials* pot = NULL;
+  m.propagate(&Pdef, param, out, pot);
+  b.propagate(&Pbox, param, out, pot);
   // Box and Default modus should do the same to momentum:
   COMPARE(Pdef.data(0).momentum(), Pbox.data(0).momentum());
   COMPARE(Pdef.data(1).momentum(), Pbox.data(1).momentum());
@@ -147,26 +150,27 @@ TEST(propagate_collider) {
   conf["Modi"]["Collider"]["Sqrts_Reps"][0] = "661";
   conf["Modi"]["Collider"]["Sqrts_Reps"][1] = "661";
   ExperimentParameters param{{0.f, 1.f}, 1.f, 1, 1.0};
-  ColliderModus n(conf["Modi"], param);
-  Particles Pdef, Pnuc;
+  ColliderModus c(conf["Modi"], param);
+  Particles Pdef, Pcol;
   create_particle_list(Pdef);
-  create_particle_list(Pnuc);
+  create_particle_list(Pcol);
   OutputsList out;
-  m.propagate(&Pdef, param, out);
-  n.propagate(&Pnuc, param, out);
+  Potentials* pot = NULL;
+  m.propagate(&Pdef, param, out, pot);
+  c.propagate(&Pcol, param, out, pot);
   // Collider and Default modus should do the same everywhere:
-  COMPARE(Pdef.data(0).momentum(), Pnuc.data(0).momentum());
-  COMPARE(Pdef.data(1).momentum(), Pnuc.data(1).momentum());
-  COMPARE(Pdef.data(2).momentum(), Pnuc.data(2).momentum());
-  COMPARE(Pdef.data(3).momentum(), Pnuc.data(3).momentum());
-  COMPARE(Pdef.data(4).momentum(), Pnuc.data(4).momentum());
-  COMPARE(Pdef.data(5).momentum(), Pnuc.data(5).momentum());
-  COMPARE(Pdef.data(0).position(), Pnuc.data(0).position());
-  COMPARE(Pdef.data(1).position(), Pnuc.data(1).position());
-  COMPARE(Pdef.data(2).position(), Pnuc.data(2).position());
-  COMPARE(Pdef.data(3).position(), Pnuc.data(3).position());
-  COMPARE(Pdef.data(4).position(), Pnuc.data(4).position());
-  COMPARE(Pdef.data(5).position(), Pnuc.data(5).position());
+  COMPARE(Pdef.data(0).momentum(), Pcol.data(0).momentum());
+  COMPARE(Pdef.data(1).momentum(), Pcol.data(1).momentum());
+  COMPARE(Pdef.data(2).momentum(), Pcol.data(2).momentum());
+  COMPARE(Pdef.data(3).momentum(), Pcol.data(3).momentum());
+  COMPARE(Pdef.data(4).momentum(), Pcol.data(4).momentum());
+  COMPARE(Pdef.data(5).momentum(), Pcol.data(5).momentum());
+  COMPARE(Pdef.data(0).position(), Pcol.data(0).position());
+  COMPARE(Pdef.data(1).position(), Pcol.data(1).position());
+  COMPARE(Pdef.data(2).position(), Pcol.data(2).position());
+  COMPARE(Pdef.data(3).position(), Pcol.data(3).position());
+  COMPARE(Pdef.data(4).position(), Pcol.data(4).position());
+  COMPARE(Pdef.data(5).position(), Pcol.data(5).position());
 }
 
 TEST(propagate_sphere) {
@@ -183,8 +187,9 @@ TEST(propagate_sphere) {
    create_particle_list(Pdef);
    create_particle_list(Psph);
    OutputsList out;
-   m.propagate(&Pdef, param, out);
-   s.propagate(&Psph, param, out);
+   Potentials* pot = NULL;
+   m.propagate(&Pdef, param, out, pot);
+   s.propagate(&Psph, param, out, pot);
    // Sphere and Default modus should do the same everywhere:
    COMPARE(Pdef.data(0).momentum(), Psph.data(0).momentum());
    COMPARE(Pdef.data(1).momentum(), Psph.data(1).momentum());

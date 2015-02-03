@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2014
+ *    Copyright (c) 2014-2015
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -80,6 +80,11 @@ class DeformedNucleus : public Nucleus {
    * and nucleus_azimuthal_angle_ and updates nucleon positions.
    */
   virtual void rotate();
+
+  /**
+   * Does not allow to generate Fermi-momenta for a deformed nucleus.
+   **/
+  virtual void generate_fermi_momenta();
 
   /// Spherical harmonics Y_2_0 and Y_4_0.
   double y_l_0(int l, double cosx) const;

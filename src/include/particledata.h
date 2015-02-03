@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2012-2014
+ *    Copyright (c) 2012-2015
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -90,7 +90,6 @@ class ParticleData {
   inline void boost (const ThreeVector &v);
   /// do a Lorentz-boost of the momentum
   inline void boost_momentum (const ThreeVector &v);
-    
 
   /* overloaded operators */
   inline bool operator==(const ParticleData &a) const;

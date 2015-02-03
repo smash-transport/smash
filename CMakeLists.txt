@@ -21,9 +21,9 @@ if(NOT CMAKE_BUILD_TYPE)
       FORCE)
 endif(NOT CMAKE_BUILD_TYPE)
 
-# RelWithDebInfo normally uses "-O2 -g -DNDEBUG" but we want -O3 and keep
-# assertions enabled.
-set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O3 -g" CACHE
+# RelWithDebInfo is just like Release, it only adds -g to add debug symbols
+# (useful for better debug and profiling information on Release builds)
+set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELEASE} -g" CACHE
    STRING "Flags used by the compiler during Release with Debug Info builds." FORCE)
 set(CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}" CACHE
    STRING "Flags used by the compiler during Release with Debug Info builds." FORCE)
@@ -37,6 +37,10 @@ mark_as_advanced(CMAKE_CXX_FLAGS_PROFILING CMAKE_C_FLAGS_PROFILING CMAKE_EXE_LIN
 # Set the relevant generic g++ flags (optimisation + warnings)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W -Wall -Wextra -Wmissing-declarations -Wpointer-arith -Wshadow -Wuninitialized -Winit-self -Wfloat-equal -Wundef -Wcast-align -Wformat=2 -Wold-style-cast -std=c++11 -mfpmath=sse")
+
+# Tell the compiler to ignore errno setting of math functions. This can help the compiler
+# considerably in optimizing mathematical expressions.
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-math-errno")
 
 if(CMAKE_CXX_COMPILER MATCHES "clang\\+\\+$" OR "${_cxx_compiler_version}" MATCHES "clang")
    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-missing-braces")

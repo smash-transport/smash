@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014
+ *    Copyright (c) 2014-2015
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -53,10 +53,9 @@ void DensityOutput::at_intermediate_time(const Particles &/*particles*/,
 
 void DensityOutput::thermodynamics_output(const Particles &particles,
                                           const ExperimentParameters &param) {
- Density_type dens_type = baryon;
  const ParticleList plist = ParticleList(particles.data().begin(),
                                          particles.data().end());
- const double rho = four_current(r_, plist, param.gaussian_sigma, dens_type,
+ const double rho = four_current(r_, plist, param.gaussian_sigma, baryon_density,
                                  param.testparticles).abs();
  fprintf(file_.get(), "%g %g\n", param.labclock.current_time(), rho);
 }

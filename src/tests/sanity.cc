@@ -118,7 +118,7 @@ TEST(sanity_sphere) {
   conf["Modi"]["Sphere"]["Init_Multiplicities"]["661"] = 500;
   ExperimentParameters param{{0.f, 1.f}, 1.f, 1, 1.0};
   SphereModus s(conf["Modi"], param);
-  Particles P;  
+  Particles P;
   create_particle_list(P);
   COMPARE(s.sanity_check(&P), 0);
 }

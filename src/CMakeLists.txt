@@ -71,6 +71,7 @@ set(smash_src
         particles.cc
         particletype.cc
         pdgcode.cc
+        potentials.cc
         processbranch.cc
         random.cc
         resonances.cc
@@ -155,18 +156,24 @@ if(BUILD_TESTING)
       AddCompilerFlag(${SANITIZER_FLAG} CXX_RESULT HAVE_SANITIZER)
    endif()
    set(CMAKE_REQUIRED_FLAGS "${_tmp}")
+
+   # define BUILD_TESTS for smash_lib in order to enable small code changes for the unit tests.
+   # It is an unfortunate side effect that the sanitzer build now also compiles to slightly different code.
+   # To fix this we'd have to compile all source files a third time... not sure we prefer that.
    if(HAVE_SANITIZER)
       set_target_properties(smash_lib PROPERTIES
-         COMPILE_FLAGS ${SANITIZER_FLAG}
+         COMPILE_FLAGS "${SANITIZER_FLAG} -DBUILD_TESTS"
          LINK_FLAGS ${SANITIZER_FLAG}
          )
 
       add_executable(smash_sanitizer smash.cc)
       set_target_properties(smash_sanitizer PROPERTIES
-         COMPILE_FLAGS ${SANITIZER_FLAG}
+         COMPILE_FLAGS "${SANITIZER_FLAG} -DBUILD_TESTS"
          LINK_FLAGS ${SANITIZER_FLAG}
          )
       target_link_libraries(smash_sanitizer smash_lib ${SMASH_LIBRARIES})
+   else()
+      set_target_properties(smash_lib PROPERTIES COMPILE_FLAGS "-DBUILD_TESTS")
    endif()
 
    add_subdirectory(tests)

@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2012-2014
+ *    Copyright (c) 2012-2015
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -201,6 +201,15 @@ class ParticleType {
    *                  be created.
    */
   static void create_type_list(const std::string &particles);
+
+  /// Returns whether the two ParticleType objects have the same PDG code.
+  bool operator==(const ParticleType &rhs) const {
+    return pdgcode() == rhs.pdgcode();
+  }
+  /// Returns whether the two ParticleType objects have different PDG codes.
+  bool operator!=(const ParticleType &rhs) const {
+    return pdgcode() != rhs.pdgcode();
+  }
 
   /**
    * Check if unstable particles have any decay modes and throw errors.

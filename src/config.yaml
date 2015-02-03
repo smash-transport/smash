@@ -25,6 +25,9 @@ General:
     # initial random seed (auto-generated if negative)
     Randomseed:    1
 
+    # number of test particles
+    Testparticles: 1
+
     # number of events
     Nevents:       1
 
@@ -64,7 +67,7 @@ Output:
         y: 0.0
         z: 0.0
         # Which density is written to collision headers:
-        # 0 - net baryon, 1 - proton, 2 - neutron
+        # 0 - net baryon density, 1 - baryonic isospin density
         Density_Type:   0
 
 Collision_Term:
@@ -73,6 +76,14 @@ Collision_Term:
     Force_Decays_At_End:  True
     # elastic cross section, mb (= 0.1 fm^2)
     Sigma:         10.0
+
+Potentials:
+    Skyrme:
+        Skyrme_A: -209.2
+        Skyrme_B: 156.4
+        Skyrme_Tau: 1.35
+    Symmetry:
+        S_Pot: 18.0
 
 Modi:
     Box:
@@ -136,6 +147,10 @@ Modi:
         # Specify an impact parameter
         Impact:
             Value: 0.0
+
+        # Include Fermi motion
+        Fermi_Motion: false
+
     List:
         # path of external particle list == File_Directory/File_Prefix{eventid}
         File_Directory: "particle_lists_in"
@@ -146,4 +161,3 @@ Modi:
 
         # start time of simulation
         Start_Time: 0.0
-

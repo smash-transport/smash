@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2013-2014
+ *    Copyright (c) 2013-2015
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -157,7 +157,8 @@ int BoxModus::sanity_check(Particles *particles) {
 /* propagate all particles */
 void BoxModus::propagate(Particles *particles,
                          const ExperimentParameters &parameters,
-                         const OutputsList &output_list) {
+                         const OutputsList &output_list,
+                         const Potentials* /*pot*/) {
   const auto &log = logger<LogArea::Box>();
   FourVector distance, position;
   for (ParticleData &data : particles->data()) {
