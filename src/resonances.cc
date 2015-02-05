@@ -162,9 +162,9 @@ double spectral_function_integrand(double resonance_mass,
 }
 
 /* Resonance mass sampling for 2-particle final state */
-double sample_resonance_mass(const ParticleType &type_resonance,
-                             const ParticleType &type_stable,
-                             const float cms_energy) {
+float sample_resonance_mass(const ParticleType &type_resonance,
+                            const ParticleType &type_stable,
+                            const float cms_energy) {
   /* Define distribution parameters */
   float mass_stable = type_stable.mass();
   IntegrandParameters params = {&type_resonance, mass_stable,
