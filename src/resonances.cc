@@ -78,9 +78,9 @@ double spectral_function(double resonance_mass, double resonance_pole,
   /* breit_wigner is essentially pi * mass * width * spectral function
    * (mass^2 is called mandelstam_s in breit_wigner)
    */
-  return breit_wigner(resonance_mass * resonance_mass,
-                      resonance_pole, resonance_width)
-         / M_PI / resonance_mass / resonance_width;
+  return breit_wigner(resonance_mass * resonance_mass, resonance_pole,
+                      resonance_width) /
+         (M_PI * resonance_mass * resonance_width);
 }
 
 /* Spectral function integrand for GSL integration */
