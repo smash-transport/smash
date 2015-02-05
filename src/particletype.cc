@@ -285,8 +285,9 @@ ProcessBranchList ParticleType::get_partial_widths(const float m) const {
   partial.reserve(decay_mode_list.size());
   for (const auto &mode : decay_mode_list) {
     w = partial_width(m, mode);
+    const int process_id = 5;
     if (w > 0.) {
-      partial.emplace_back(mode.particle_types(), w);
+      partial.emplace_back(mode.particle_types(), w, process_id);
     }
   }
   return std::move(partial);

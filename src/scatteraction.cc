@@ -154,8 +154,9 @@ bool ScatterAction::is_elastic() const {
 
 
 ProcessBranch ScatterAction::elastic_cross_section(float elast_par) {
+  const int process_id = 1;	
   return ProcessBranch(incoming_particles_[0].type(),
-                       incoming_particles_[1].type(), elast_par);
+                       incoming_particles_[1].type(), elast_par, process_id);
 }
 
 
@@ -189,9 +190,10 @@ ProcessBranchList ScatterAction::resonance_cross_sections() {
                                                     s, p_cm_sqr);
 
     /* If cross section is non-negligible, add resonance to the list */
+    const int process_id = 2; 
     if (resonance_xsection > really_small) {
       resonance_process_list.push_back(ProcessBranch(type_resonance,
-                                                     resonance_xsection));
+                                         resonance_xsection, process_id));
 
       log.debug("Found resonance: ", type_resonance);
       log.debug("2->1 with original particles: ", type_particle_a,
@@ -292,9 +294,10 @@ ProcessBranch ScatterActionBaryonBaryon::elastic_cross_section(float elast_par) 
     } else {                                     /* np */
       sig_el = np_elastic(s);
     }
+    const int process_id = 1; 
     if (sig_el>0.) {
       return ProcessBranch(incoming_particles_[0].type(),
-                           incoming_particles_[1].type(), sig_el);
+                           incoming_particles_[1].type(), sig_el, process_id);
     } else {
       std::stringstream ss;
       ss << "problem in CrossSections::elastic: " << pdg_a.string().c_str()
@@ -316,8 +319,7 @@ ProcessBranch ScatterActionBaryonBaryon::string_excitation_cross_section() {
   if(pdg_a.iso_multiplet() == 0x1112 &&
      pdg_b.iso_multiplet() == 0x1112) {
     /* Nucleon+Nucleon: calculate total minus other channels cross section */
-  float sig_string;
-  int string_type = 56789;
+   float sig_string = 0.0;
    /* Threshold for string production */
     if (s >= 1.6) {
       if (pdg_a == pdg_b) { /* pp */
@@ -327,15 +329,17 @@ ProcessBranch ScatterActionBaryonBaryon::string_excitation_cross_section() {
       } else {                                     /* np */
           sig_string = np_total(s) - np_elastic(s);
       }
-    }
-    if (sig_string>0.) {
-          return ProcessBranch(string_type, string_type, sig_string);
+    } 
+    const int process_id = 4;
+    if (sig_string>really_small) {
+          return ProcessBranch(sig_string, process_id);
     } else {
-      std::stringstream ss;
-      ss << "problem in CrossSections::string excitation: " << pdg_a.string().c_str()
-          << " " << pdg_b.string().c_str() << " " << pdg_a.spin() << " "
-          << pdg_b.spin() << " " << sig_string << " " << s;
-          throw std::runtime_error(ss.str());
+		/* empty process branch for s < 1.6 GeV */  
+	      return ProcessBranch(-1.0,0);  
+    }	
+  } else {
+	/* empty process branch for non-nucleons */  
+	return ProcessBranch(-1.0,0);   
   }
 }
     
@@ -469,9 +473,10 @@ ProcessBranchList ScatterActionBaryonBaryon::nuc_nuc_to_nuc_res (
       float xsection = isospin_factor * isospin_factor * matrix_element
                 * resonance_integral / (s * std::sqrt(cm_momentum_squared()));
 
+      const int process_id = 3;  
       if (xsection > really_small) {
         process_list.push_back(
-            ProcessBranch(*type_resonance, *second_type, xsection));
+            ProcessBranch(*type_resonance, *second_type, xsection, process_id));
         log.debug("Found 2->2 creation process for resonance ",
                   *type_resonance);
         log.debug("2->2 with original particles: ",
@@ -553,8 +558,9 @@ ProcessBranchList ScatterActionBaryonBaryon::nuc_res_to_nuc_nuc (
         * p_cm_final * matrix_element
         / ((type_resonance->spin()+1) * s * std::sqrt(cm_momentum_squared()));
 
+      const int process_id = 3; 
       if (xsection > really_small) {
-        process_list.push_back(ProcessBranch(*nuc_a, *nuc_b, xsection));
+        process_list.push_back(ProcessBranch(*nuc_a, *nuc_b, xsection, process_id));
         const auto &log = logger<LogArea::ScatterAction>();
         log.debug("Found 2->2 absoption process for resonance ",
                   *type_resonance);

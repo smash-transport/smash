@@ -274,7 +274,7 @@ class ScatterAction : public Action {
   /**
    * The cross section for string excitations is currently defined to
    * be the difference between the parametrized total cross section and from PDG 
-   * and all other channels that are implemented
+   * and the parametrized elastic cross section above  1.6 GeV
    * 
    * TODO: implement an actual parametrization of this cross-section or 
    * at least a ramp up compared to the resonance formation at lower energies
@@ -359,7 +359,8 @@ class ScatterActionBaryonBaryon : public ScatterAction {
   /**
    * The cross section for string excitations is currently defined to
    * be the difference between the parametrized total cross section and from PDG 
-   * and all other channels that are implemented
+   * and the parametrized elastic cross section above sqrts 1.6 GeV
+   * TODO it should fill up the total cross section above all other implemented channels
    */
   ProcessBranch string_excitation_cross_section() override;
   /* There is no resonance formation out of two baryons: Return empty list. */

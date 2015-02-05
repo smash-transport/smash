@@ -40,25 +40,28 @@ namespace Smash {
 class ProcessBranch {
  public:
   /// Create a ProcessBranch without final states
-  ProcessBranch() : branch_weight_(-1.0) {}
+  ProcessBranch() : branch_weight_(-1.0), process_id_(0) {}
+  /// Constructor without outgoing particles
+  ProcessBranch(float w, int p_id) : branch_weight_(w), process_id_(p_id) {}
 
   /// Constructor with 1 particle
-  ProcessBranch(const ParticleType &type, float w) : branch_weight_(w) {
+  ProcessBranch(const ParticleType &type, float w, int p_id) 
+      : branch_weight_(w), process_id_(p_id) {
     particle_types_.reserve(1);
     particle_types_.push_back(&type);
   }
 
   /// Constructor with 2 particles
-  ProcessBranch(const ParticleType &type_a, const ParticleType &type_b, float w)
-      : branch_weight_(w) {
+  ProcessBranch(const ParticleType &type_a, const ParticleType &type_b, float w, int p_id)
+      : branch_weight_(w), process_id_(p_id) {
     particle_types_.reserve(2);
     particle_types_.push_back(&type_a);
     particle_types_.push_back(&type_b);
   }
 
   /// Create a ProcessBranch from a list of ParticleType objects
-  ProcessBranch(std::vector<ParticleTypePtr> new_types, float w)
-      : particle_types_(std::move(new_types)), branch_weight_(w) {}
+  ProcessBranch(std::vector<ParticleTypePtr> new_types, float w, int p_id)
+      : particle_types_(std::move(new_types)), branch_weight_(w), process_id_(p_id) {}
 
   /// Copying is disabled. Use std::move or create a new object.
   ProcessBranch(const ProcessBranch &) = delete;
@@ -66,7 +69,8 @@ class ProcessBranch {
   /// The move constructor efficiently moves the PDG list member.
   ProcessBranch(ProcessBranch &&rhs)
       : particle_types_(std::move(rhs.particle_types_)),
-        branch_weight_(rhs.branch_weight_) {}
+        branch_weight_(rhs.branch_weight_),
+        process_id_(rhs.process_id_) {}
 
   /**
    * Set the weight of the branch.
@@ -74,6 +78,8 @@ class ProcessBranch {
    * compared to other branches
    */
   inline void set_weight(float process_weight);
+  /** Set the Process ID */
+  inline void set_id(int process_id);
   /// Clear all information from the branch
   inline void clear(void);
   /// Return the particle types associated with this branch.
@@ -89,6 +95,9 @@ class ProcessBranch {
 
   /// Return the branch weight
   inline float weight(void) const;
+  
+  /// Return the process ID
+  inline int id(void) const;
 
   /**
    * Determine the threshold for this branch, i.e. the minimum energy that is
@@ -111,11 +120,12 @@ class ProcessBranch {
   /// Weight of the branch, typically a cross section or a branching ratio
   float branch_weight_;
   /** Process_ID's are used to identify the type of the process, 
-   * currently we have 4 of these: 
+   * currently we have 5 of these: 
    * (1) elastic 
    * (2) resonance formation (2->1) 
    * (3) 2->2 (inelastic) 
-   * (4) string excitation */ 
+   * (4) string excitation 
+   * (5) resonance decays*/ 
   int process_id_;  
 
 };
@@ -141,7 +151,7 @@ inline float ProcessBranch::weight(void) const {
 }
 
 /** Set the process id */
-inline int ProcessBranch::set_id(int process_id){
+inline void ProcessBranch::set_id(int process_id) {
   process_id_ = process_id;	
 }
 
