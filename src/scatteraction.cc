@@ -159,6 +159,10 @@ ProcessBranch ScatterAction::elastic_cross_section(float elast_par) {
                        incoming_particles_[1].type(), elast_par, process_id);
 }
 
+ProcessBranch ScatterAction::string_excitation_cross_section() {
+  const int process_id = 4; 
+  return ProcessBranch(-1.0, 0);
+}   	
 
 ProcessBranchList ScatterAction::resonance_cross_sections() {
   const auto &log = logger<LogArea::ScatterAction>();
