@@ -94,8 +94,8 @@ double spectral_function_integrand(double resonance_mass,
   double resonance_width = params->type->total_width(resonance_mass);
 
   /* center-of-mass momentum of final state particles */
-  if (mandelstam_s - (stable_mass + resonance_mass)
-      * (stable_mass + resonance_mass) > 0.0) {
+  if (mandelstam_s >
+      (stable_mass + resonance_mass) * (stable_mass + resonance_mass)) {
     double cm_momentum_final
       = std::sqrt((mandelstam_s - (stable_mass + resonance_mass)
               * (stable_mass + resonance_mass))
