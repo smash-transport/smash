@@ -110,6 +110,14 @@ class ProcessBranch {
   std::vector<ParticleTypePtr> particle_types_;
   /// Weight of the branch, typically a cross section or a branching ratio
   float branch_weight_;
+  /** Process_ID's are used to identify the type of the process, 
+   * currently we have 4 of these: 
+   * (1) elastic 
+   * (2) resonance formation (2->1) 
+   * (3) 2->2 (inelastic) 
+   * (4) string excitation */ 
+  int process_id_;  
+
 };
 
 /**
@@ -130,6 +138,16 @@ inline void ProcessBranch::clear(void) {
 /// Return the branch weight
 inline float ProcessBranch::weight(void) const {
   return branch_weight_;
+}
+
+/** Set the process id */
+inline int ProcessBranch::set_id(int process_id){
+  process_id_ = process_id;	
+}
+
+/** Return the process id */
+inline int ProcessBranch::id(void) const {
+  return process_id_;	
 }
 
 /** \relates ProcessBranch

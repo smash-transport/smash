@@ -271,7 +271,18 @@ class ScatterAction : public Action {
    */
   virtual ProcessBranch elastic_cross_section(float elast_par);
 
-  /* string excitation start up */
+  /**
+   * The cross section for string excitations is currently defined to
+   * be the difference between the parametrized total cross section and from PDG 
+   * and all other channels that are implemented
+   * 
+   * TODO: implement an actual parametrization of this cross-section or 
+   * at least a ramp up compared to the resonance formation at lower energies
+   * 
+   * TODO: at this point there is always one string excited, one needs the 
+   * possibility to excite 2 strings as well, then it will become a ProcessBranchList
+   *  
+   */
   virtual ProcessBranch string_excitation_cross_section();
     
   /**
@@ -345,9 +356,11 @@ class ScatterActionBaryonBaryon : public ScatterAction {
    * final-state IDs.
    */
   ProcessBranch elastic_cross_section(float elast_par) override;
-  /* Strings are currently just added for all remaining total cross section 
-     Returns currently a random string_ID instead of unknown outgoing particle 
-     types. */
+  /**
+   * The cross section for string excitations is currently defined to
+   * be the difference between the parametrized total cross section and from PDG 
+   * and all other channels that are implemented
+   */
   ProcessBranch string_excitation_cross_section() override;
   /* There is no resonance formation out of two baryons: Return empty list. */
   ProcessBranchList resonance_cross_sections() override {
