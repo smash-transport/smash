@@ -1,2 +1,7 @@
 /* the configured options and settings from cmake */
 #define VERSION_MAJOR "@VERSION_MAJOR@"
+#define CMAKE_SYSTEM "@CMAKE_SYSTEM@"
+#define CMAKE_CXX_COMPILER_ID "@CMAKE_CXX_COMPILER_ID@"
+#define CMAKE_CXX_COMPILER_VERSION "@CMAKE_CXX_COMPILER_VERSION@"
+#define CMAKE_BUILD_TYPE "@CMAKE_BUILD_TYPE@"
+#define BUILD_DATE "@BUILD_DATE@"

@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2012-2014
+ *    Copyright (c) 2012-2015
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -180,6 +180,12 @@ class ParticleType {
    */
   static const ParticleType &find(PdgCode pdgcode) SMASH_CONST;
 
+  /// \ingroup exception
+  struct PdgNotFoundFailure : public std::runtime_error {
+    using std::runtime_error::runtime_error;
+  };
+
+
   /**
    * Returns whether the ParticleType with the given \p pdgcode exists.
    *
@@ -195,6 +201,15 @@ class ParticleType {
    *                  be created.
    */
   static void create_type_list(const std::string &particles);
+
+  /// Returns whether the two ParticleType objects have the same PDG code.
+  bool operator==(const ParticleType &rhs) const {
+    return pdgcode() == rhs.pdgcode();
+  }
+  /// Returns whether the two ParticleType objects have different PDG codes.
+  bool operator!=(const ParticleType &rhs) const {
+    return pdgcode() != rhs.pdgcode();
+  }
 
   /**
    * Check if unstable particles have any decay modes and throw errors.
@@ -269,6 +284,7 @@ class ParticleType {
    * Writes all information about the particle type to the output stream.
    */
   friend std::ostream &operator<<(std::ostream &out, const ParticleType &type);
+
 };
 
 inline bool ParticleType::is_stable() const {

@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2014
+ *    Copyright (c) 2014-2015
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -72,6 +72,16 @@ class Nucleus {
    **/
   virtual void set_parameters_from_config(const char *nucleus_type,
                                           Configuration &config);
+
+  /**
+   * Generates momenta of the Fermi motion of the nucleus constituents.
+   * For neutrons and protons Fermi momenta are calculated as
+   * \f$ p_{F} = (3 \pi^2 \rho)^{1/3}\f$, where \f$ rho \f$ is
+   * neutron density for neutrons and proton density for protons.
+   * Actual momenta \f$p_x\f$, \f$p_y\f$, \f$p_z\f$ are uniformly distributed
+   * in the sphere with radius \f$p_F\f$.
+   **/
+  virtual void generate_fermi_momenta();
 
   /**
    * Boosts the nuclei so that the nucleons have the appropriate
@@ -179,7 +189,7 @@ class Nucleus {
    **/
   float diffusiveness_ = .545f;
   /// Saturation density of this nucleus.
-  float saturation_density_ = .168f;
+  float saturation_density_ = rho0;
   /// Nuclear radius of this nucleus
   float nuclear_radius_;
   /** single-proton-radius

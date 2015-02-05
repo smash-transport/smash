@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2014
+ *    Copyright (c) 2014-2015
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -116,6 +116,10 @@ class ColliderModus : public ModusDefault {
    * 3 = Fixed target<br>
    **/
   int frame_ = 1;
+  /**
+   * An option to include Fermi motion
+   */
+  bool fermi_motion_;
   /** Get the frame dependent velocity for each nucleus, using
    * the current reference frame. \see frame_
    *

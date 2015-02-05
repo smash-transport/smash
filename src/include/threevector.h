@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014
+ *    Copyright (c) 2014-2015
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -176,6 +176,11 @@ ThreeVector inline ThreeVector::operator*= (const double &a) {
 inline ThreeVector operator* (ThreeVector a, const double &b) {
   a *= b;
   return a;
+}
+
+inline ThreeVector operator* (const double &a, ThreeVector b) {
+  b *= a;
+  return b;
 }
 
 inline double operator* (ThreeVector a, const ThreeVector &b) {

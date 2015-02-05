@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2012-2014
+ *    Copyright (c) 2012-2015
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -190,7 +190,10 @@ int main(int argc, char *argv[]) {
           output_path = optarg;
           break;
         case 'v':
-          printf("%s\n", VERSION_MAJOR);
+          printf("%s\nSystem   : %s\nCompiler : %s %s\n"
+                     "Build    : %s\nDate     : %s\n",
+                 VERSION_MAJOR, CMAKE_SYSTEM, CMAKE_CXX_COMPILER_ID,
+                 CMAKE_CXX_COMPILER_VERSION, CMAKE_BUILD_TYPE, BUILD_DATE);
           exit(EXIT_SUCCESS);
         default:
           usage(EXIT_FAILURE, progname);

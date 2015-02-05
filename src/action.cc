@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014
+ *    Copyright (c) 2014-2015
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -94,11 +94,9 @@ ThreeVector Action::get_interaction_point() {
 
 
 ParticleList Action::choose_channel() {
-  if (total_weight_ < really_small) {
-    return ParticleList();
-  }
-  double random_interaction = Random::canonical();
-  float interaction_probability = 0.0;
+  const auto &log = logger<LogArea::Action>();
+  float random_weight = Random::uniform(0.f,total_weight_);
+  float weight_sum = 0.;
   /* Loop through all subprocesses and select one by Monte Carlo, based on
    * their weights.  */
   for (const auto &proc : subprocesses_) {
@@ -106,16 +104,16 @@ ParticleList Action::choose_channel() {
         proc.particle_types()[0]->pdgcode() == PdgCode::invalid()) {
       continue;
     }
-    interaction_probability += proc.weight() / total_weight_;
-    if (random_interaction < interaction_probability) {
+    weight_sum += proc.weight();
+    if (random_weight <= weight_sum) {
       return proc.particle_list();
     }
   }
   /* Should never get here. */
-  std::stringstream ss;
-  ss << "problem in choose_channel: " << subprocesses_.size() << " " <<
-         interaction_probability << " " << total_weight_;
-  throw std::runtime_error(ss.str());
+  log.fatal(source_location, "Problem in choose_channel: ",
+            subprocesses_.size(), " ", weight_sum, " ", total_weight_, " ",
+            random_weight, "\n", *this);
+  throw std::runtime_error("problem in choose_channel");
 }
 
 

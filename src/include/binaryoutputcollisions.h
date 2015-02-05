@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014
+ *    Copyright (c) 2014-2015
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -44,10 +44,10 @@ class BinaryOutputBase : public OutputInterface {
  *
  * This class writes every collision, decay and box wall crossing
  * to the output file. Optionally one can also write
- * initial and final particle lists to the same file. 
+ * initial and final particle lists to the same file.
  * Output file is binary and has a block structure.
  *
- * Details of the output format can be found 
+ * Details of the output format can be found
  * on the wiki in User Guide section, look for binary output.
  */
 class BinaryOutputCollisions : public BinaryOutputBase {
@@ -63,7 +63,8 @@ class BinaryOutputCollisions : public BinaryOutputBase {
 
   void at_interaction(const ParticleList &incoming_particles,
                       const ParticleList &outgoing_particles,
-                      const double density) override;
+                      const double density,
+                      const double total_cross_section) override;
   /// writes particles every time interval fixed by option OUTPUT_INTERVAL
   void at_intermediate_time(const Particles &particles, const int event_number,
                           const Clock &clock) override;

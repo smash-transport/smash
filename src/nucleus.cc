@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2014
+ *    Copyright (c) 2014-2015
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -13,6 +13,7 @@
 #include <string>
 
 #include "include/angles.h"
+#include "include/constants.h"
 #include "include/logging.h"
 #include "include/numerics.h"
 #include "include/particles.h"
@@ -189,8 +190,7 @@ ThreeVector Nucleus::distribute_nucleon() const {
   dir.distribute_isotropically();
   // diffusiveness_ zero or negative? Use hard sphere.
   if (almost_equal(diffusiveness_, 0.f)) {
-    return dir.threevec() * nuclear_radius_
-           * pow(Random::canonical(), 1./3.);
+    return dir.threevec() * nuclear_radius_ * std::cbrt(Random::canonical());
   }
   float radius_scaled = nuclear_radius_/diffusiveness_;
   float prob_range1 = 1.0;
@@ -203,7 +203,7 @@ ThreeVector Nucleus::distribute_nucleon() const {
   do {
     float which_range = Random::uniform(-prob_range1, ranges234);
     if (which_range < 0.0) {
-      t = radius_scaled * (pow(Random::canonical(), 1./3.) - 1.);
+      t = radius_scaled * (std::cbrt(Random::canonical()) - 1.);
     } else {
       t = -log(Random::canonical());
       if (which_range >= prob_range2) {
@@ -245,13 +245,19 @@ void Nucleus::arrange_nucleons() {
     double r_tmp = pos.abs();
     r_max_ = (r_tmp > r_max_) ? r_tmp : r_max_;
   }
+
   // Recenter and rotate
   align_center();
   rotate();
 }
 
 void Nucleus::set_parameters_automatic() {
-  switch (Nucleus::number_of_particles()) {
+  int A = Nucleus::number_of_particles();
+  switch (A) {
+    case 1: // single particle
+      set_nuclear_radius(0.);
+      set_diffusiveness(-1.);
+      break;
     case 238:  // Uranium
       // Default values.
       set_diffusiveness(0.556);
@@ -286,7 +292,9 @@ void Nucleus::set_parameters_automatic() {
       // set_nuclear_radius(4.28);
       break;
     default:
-      throw std::domain_error("Mass number not listed in Nucleus::set_parameters_automatic.");
+      // radius: rough guess for all nuclei not listed explicitly
+      set_nuclear_radius(1.2*std::cbrt(A));
+      // diffusiveness and saturation density already have reasonable defaults
   }
 }
 
@@ -303,6 +311,44 @@ void Nucleus::set_parameters_from_config(const char *nucleus_type,
                        {nucleus_type, "Radius"})));
   } else {
     set_nuclear_radius(default_nuclear_radius());
+  }
+}
+
+void Nucleus::generate_fermi_momenta() {
+  double r, rho, p;
+  const int N_n = std::count_if(begin(), end(),
+                  [](const ParticleData i) {return i.pdgcode() == 0x2112;});
+  const int N_p = std::count_if(begin(), end(),
+                  [](const ParticleData i) {return i.pdgcode() == 0x2212;});
+  const FourVector nucleus_center = center();
+  const int A = N_n + N_p;
+  const double pi2_3 = 3.0 * M_PI * M_PI;
+  Angles phitheta;
+  const auto &log = logger<LogArea::Nucleus>();
+
+  log.debug() << N_n << " neutrons, " << N_p << " protons.";
+
+  for (auto i = begin(); i != end(); i++) {
+    if (i->pdgcode() != 0x2212 && i->pdgcode() != 0x2112) {
+      log.error() << "No rule to calculate Fermi momentum " <<
+                     "for particle " << i->pdgcode();
+      continue;
+    }
+    r = (i->position() - nucleus_center).abs3();
+    rho = rho0 /(std::exp((r - nuclear_radius_)/diffusiveness_) + 1.0);
+    if (i->pdgcode() == 0x2212) { // proton
+      rho = rho * N_p / A;
+    }
+    if (i->pdgcode() == 0x2112) { // neutron
+      rho = rho * N_n / A;
+    }
+    p = hbarc * std::pow(pi2_3 * rho * Random::uniform(0.0, 1.0), 1.0/3.0);
+    phitheta.distribute_isotropically();
+    i->set_4momentum(i->pole_mass(), phitheta.threevec() * p);
+    log.debug() << "Particle: " << *i <<
+               ", pF[GeV]: " << hbarc * std::pow(pi2_3 * rho, 1.0/3.0) <<
+               " r[fm]: " << r <<
+               " Nuclear radius[fm]: " << nuclear_radius_;
   }
 }
 

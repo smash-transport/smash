@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2013-2014
+ *    Copyright (c) 2013-2015
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -13,6 +13,8 @@
 #include "grid.h"
 
 #include <stdexcept>
+
+#include "potentials.h"
 
 namespace Smash {
 
@@ -58,7 +60,8 @@ class ModusDefault {
    * \param[in] parameters parameters for the experiment
    */
   void propagate(Particles *particles, const ExperimentParameters &parameters,
-                                       const OutputsList &);
+                                       const OutputsList &,
+                                       const Potentials* pot);
 
   Grid<GridOptions::Normal> create_grid(ParticleList &&all_particles,
       const int testparticles) const {

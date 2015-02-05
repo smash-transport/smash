@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2012-2014
+ *    Copyright (c) 2012-2015
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -28,12 +28,12 @@ namespace Smash {
  * \param mass_a Mass of first particle [GeV].
  * \param mass_b Mass of second particle [GeV].
  */
-static double pCM(const double srts, const double mass_a, const double mass_b) {
-  double s, mass_a_sqr, x;
-  s = srts*srts;
-  mass_a_sqr = mass_a*mass_a;
-  x = s + mass_a_sqr - mass_b*mass_b;
-  return std::sqrt(x*x / (4. * s) - mass_a_sqr);
+template <typename T>
+static T pCM(const T srts, const T mass_a, const T mass_b) noexcept {
+  const auto s = srts * srts;
+  const auto mass_a_sqr = mass_a * mass_a;
+  const auto x = s + mass_a_sqr - mass_b * mass_b;
+  return std::sqrt(x * x * (T(0.25) / s) - mass_a_sqr);
 }
 
 
@@ -49,31 +49,37 @@ const float interaction_radius = 1. / hbarc;
  *        R = interaction radius
  * \param L Angular momentum of outgoing particles AB.
  */
-static float BlattWeisskopf(const float x, const int L) {
-  float bw;
+static float BlattWeisskopf(const float x, const int L)
+#ifdef NDEBUG
+    noexcept
+#endif
+{
+  const auto x2 = x * x;
   switch (L) {
     case 0:
-      bw = 1.;
-      break;
+      return 1.f;
     case 1:
-      bw = x / std::sqrt(1. + x*x);
-      break;
+      return x2 / (1.f + x2);
+    /* The following lines should be correct. But since nothing in SMASH uses
+     * L > 1 this code is untested and dead. Therefore we only keep it as a
+     * reference for later. (x4 = x2 * x2)
+     * See also input sanitization in load_decaymodes in decaymodes.cc.
     case 2:
-      bw = x*x / std::sqrt(9. + 3. * x*x + x*x*x*x);
-      break;
+      return x4 / (9.f + 3.f * x2 + x4);
     case 3:
-      bw = x*x*x / std::sqrt(225. + 45. * x*x + 6.*x*x*x*x + x*x*x*x*x*x);
-      break;
+      return x4 * x2 / (225.f + 45.f * x2 + 6.f * x4 + x4 * x2);
     case 4:
-      bw = x*x*x*x / std::sqrt(11025. + 1575. * x*x + 135. * x*x*x*x
-                               + 10. * x*x*x*x*x*x + x*x*x*x*x*x*x*x);
-      break;
+      return x4 * x4 /
+             (11025.f + 1575.f * x2 + 135.f * x4 + 10.f * x2 * x4 + x4 * x4);
+    */
+#ifndef NDEBUG
     default:
       throw std::invalid_argument(
-        std::string("Wrong angular momentum in BlattWeisskopf: ")
-        + std::to_string(L));
+          std::string("Wrong angular momentum in BlattWeisskopf: ") +
+          std::to_string(L));
+#endif
   }
-  return bw*bw;
+  return 0.f;
 }
 
 

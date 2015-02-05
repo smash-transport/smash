@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2013-2014
+ *    Copyright (c) 2013-2015
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -20,11 +20,10 @@
 namespace Smash {
 
   /** Allows to choose which kind of density to calculate.
-   *  For Fermi momenta and symmetry potential one needs
-   *  to know proton and neutron densities. Baryon density
-   *  is necessary for Skyrme potential.
+   *  The baryon density is necessary for the Skyrme potential.
+   *  For the symmetry potential one needs to know the isospin density.
    */
-  enum Density_type {baryon = 0, proton = 1, neutron = 2};
+  enum Density_type {baryon_density = 0, baryonic_isospin_density = 1};
 
   /** A small check if particle PDG code belongs to a given type.
    *  Currently checks for protons, neutrons and baryons.

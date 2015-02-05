@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014
+ *    Copyright (c) 2014-2015
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -57,6 +57,7 @@ namespace Smash {
  * \li \ref ColliderModus
  * \li \ref BoxModus
  * \li \ref SphereModus
+ * \li \ref ListModus
  * \endif
  */
 
@@ -356,7 +357,7 @@ class Configuration {
   }
 
   /**
-   * Returns whether there is a value behind the requested \p keys.
+   * Returns whether there is a non-empty value behind the requested \p keys.
    */
   bool has_value(std::initializer_list<const char *> keys) const;
 

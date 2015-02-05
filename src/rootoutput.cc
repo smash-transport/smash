@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014
+ *    Copyright (c) 2014-2015
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -42,7 +42,7 @@ RootOutput::RootOutput(bf::path path, Configuration&& conf)
    *
    * \key Enable (bool, optional, default = false):\n
    * true - Root output enabled\n
-   * false - no Root output 
+   * false - no Root output
    *
    * \key Write_Collisions (bool, optional, default = false): \n
    * true - information about collisions, decays and box wall
@@ -51,7 +51,7 @@ RootOutput::RootOutput(bf::path path, Configuration&& conf)
    *
    * \key Write_Particles (bool, optional, default = true): \n
    * true - particle list at output interval is written out \n
-   * false - particle list is not written out 
+   * false - particle list is not written out
    *
    * \key Autosave_Frequency (int, optional, default = 1000): \n
    * Root file cannot be read if it was not properly closed and finalized.
@@ -81,7 +81,7 @@ RootOutput::RootOutput(bf::path path, Configuration&& conf)
    * SMASH philosophy is being a self-contained software, so by default SMASH
    * does not need ROOT to compile and run. To produce ROOT output one has to
    * compile SMASH in a special way:
-   * \code 
+   * \code
    * cmake -D USE_ROOT=ON <source_dir>
    * make
    * \endcode
@@ -90,7 +90,7 @@ RootOutput::RootOutput(bf::path path, Configuration&& conf)
    * contains TTree called \c particles and a TTree \c collisions.
    * The latter can be switched on and off by an option (see \ref input_root).
    * Particles tree contains the same information as OSCAR particles output
-   * and collisions tree contains the same information as OSCAR collision output. 
+   * and collisions tree contains the same information as OSCAR collision output.
    *
    * Every physical quantity is in separate TBranch.\n
    * One entry in the particles TTree is:
@@ -101,7 +101,7 @@ RootOutput::RootOutput(bf::path path, Configuration&& conf)
    * One tree entry is analogous to OSCAR output block, but maximal size of
    * ROOT entry is limited to 10000. This is done to limit buffer size needed
    * for root output. If number of particles in one block exceeds 10000,
-   * then they are written in separate blocks with the same tcounter and ev. 
+   * then they are written in separate blocks with the same tcounter and ev.
    *
    * \li ev is event number
    * \li tcounter is number of output block in a given event in terms of OSCAR
@@ -216,7 +216,8 @@ void RootOutput::at_eventend(const Particles &/*particles*/,
  */
 void RootOutput::at_interaction(const ParticleList &incoming,
                                 const ParticleList &outgoing,
-                                const double /*density*/) {
+                                const double /*density*/,
+                                const double /*total_cross_section*/) {
   if (write_collisions_) {
     collisions_to_tree(incoming, outgoing);
   }

@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014
+ *    Copyright (c) 2014-2015
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -152,6 +152,12 @@ void DecayModes::load_decaymodes(const std::string &input) {
 
       int L;
       lineinput >> L;
+      if (L < 0 || L > 1) {  // at some point we want to support L up to 4 (cf.
+                             // BlattWeisskopf in width.cc)
+        throw LoadFailure("Invalid angular momentum '" + std::to_string(L) +
+                          "' in decaymodes.txt:" + std::to_string(line.number) +
+                          ": '" + line.text + "'");
+      }
 
       PdgCode pdg;
       lineinput >> pdg;
@@ -160,7 +166,7 @@ void DecayModes::load_decaymodes(const std::string &input) {
           decay_particles.emplace_back(&ParticleType::find(pdg));
           lineinput >> pdg;
         }
-        catch (const std::runtime_error &) {
+        catch ( ParticleType::PdgNotFoundFailure ) {
           throw ReferencedParticleNotFound(build_error_string(
               "Inconsistency: The particle with PDG id " + pdg.string() +
                   " was not registered through particles.txt, but "

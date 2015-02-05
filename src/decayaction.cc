@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014
+ *    Copyright (c) 2014-2015
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -174,6 +174,7 @@ void DecayAction::perform(Particles *particles, size_t &id_process) {
         "DecayAction::perform: Only 1->2 or 1->3 processes are supported. "
         "Decay from 1->" + std::to_string(outgoing_particles_.size()) +
         " was requested. (PDGcode=" + incoming_particles_[0].pdgcode().string()
+        + ", mass=" + std::to_string(incoming_particles_[0].effective_mass())
         + ")");
   }
 
@@ -204,7 +205,8 @@ void DecayAction::perform(Particles *particles, size_t &id_process) {
 }
 
 void DecayAction::format_debug_output(std::ostream &out) const {
-  out << "Decay of " << incoming_particles_ << " to " << outgoing_particles_;
+  out << "Decay of " << incoming_particles_ << " to " << outgoing_particles_ <<
+  ", sqrt(s)=" << format(sqrt_s(), "GeV", 11, 9);
 }
 
 }  // namespace Smash

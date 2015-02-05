@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014
+ *    Copyright (c) 2014-2015
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -59,7 +59,7 @@ TEST(density_value) {
   ThreeVector r;
   double sigma = 1.0;
   FourVector jmu;
-  Density_type bar_dens = baryon;
+  Density_type bar_dens = baryon_density;
 
   r = ThreeVector(1.0, 0.0, 0.0);
   jmu = four_current(r, P, sigma, bar_dens, 1);
@@ -95,7 +95,7 @@ TEST(density_gradient) {
   double sigma = 1.0;
   ThreeVector r,dr;
   FourVector jmu;
-  Density_type dtype = baryon;
+  Density_type dtype = baryon_density;
   double rho;
 
   ThreeVector num_grad, analit_grad;
@@ -217,7 +217,7 @@ TEST(nucleus_density) {
   plist = ParticleList(p.data().begin(), p.data().end());
 
   // write density profile to file, time-consuming!
-  Density_type dens_type = baryon;
+  Density_type dens_type = baryon_density;
   double sigma = 0.5; // fm
 //  vtk_density_map("lead_density.vtk", plist, sigma, dens_type, Ntest,
 //                     20, 20, 20, 0.5, 0.5, 0.5);

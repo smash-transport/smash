@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014
+ *    Copyright (c) 2014-2015
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -99,7 +99,8 @@ class RootOutput : public OutputInterface {
                           const Clock &) override;
   void at_interaction(const ParticleList &incoming_particles,
                       const ParticleList &outgoing_particles,
-                      const double density) override;
+                      const double density,
+                      const double total_cross_section) override;
 
  private:
   const boost::filesystem::path base_path_;

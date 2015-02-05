@@ -259,7 +259,7 @@ namespace einhard
 			return *this;
 		}
 
-		void doCleanup() noexcept;
+		void doCleanup(std::FILE *outfile = stdout) noexcept;
 
 	protected:
 		EINHARD_ALWAYS_INLINE_ UnconditionalOutput( bool colorize_ ) : colorize( colorize_ )
@@ -274,6 +274,8 @@ namespace einhard
 	class OutputFormatter : public UnconditionalOutput
 	{
 		private:
+			// the output file (normally used to switch from stdout to stderr)
+			std::FILE *const outfile;
 			// Whether output is enabled
 			const bool enabled;
 
@@ -284,8 +286,9 @@ namespace einhard
 			template <LogLevel VERBOSITY>
 			EINHARD_ALWAYS_INLINE_ OutputFormatter( bool enabled_, bool const colorize_,
 								const char *areaName,
-								std::integral_constant<LogLevel, VERBOSITY> )
-			    : UnconditionalOutput( colorize_ ), enabled( enabled_ )
+								std::integral_constant<LogLevel, VERBOSITY>,
+								std::FILE *outfile_ = stdout )
+			    : UnconditionalOutput( colorize_ ), enabled( enabled_ ), outfile( outfile_ )
 			{
 				if( enabled )
 				{
@@ -325,7 +328,7 @@ namespace einhard
 			{
 				if( enabled )
 				{
-					doCleanup();
+					doCleanup( outfile );
 				}
 			}
 	};
@@ -344,7 +347,8 @@ namespace einhard
 		private:
 			char areaName[32 - sizeof( LogLevel ) - sizeof( bool )] = {'\0'};
 			LogLevel verbosity;
-			bool colorize;
+			bool colorize_stdout;
+			bool colorize_stderr;
 
 		public:
 			/**
@@ -357,7 +361,8 @@ namespace einhard
 			{
 				// use some, sadly not c++-ways to figure out whether we are writing ot a terminal
 				// only colorize when we are writing ot a terminal
-				colorize = isatty( fileno( stdout ) );
+				colorize_stdout = isatty( fileno( stdout ) );
+				colorize_stderr = isatty( fileno( stderr ) );
 			};
 			/**
 			 * Create a new Logger object explicitly selecting whether to colorize the output or not.
@@ -366,7 +371,7 @@ namespace einhard
 			 * output is to a non tty.
 			 */
 			Logger( const LogLevel verbosity, const bool colorize )
-			    : verbosity( verbosity ), colorize( colorize ) {};
+			    : verbosity( verbosity ), colorize_stdout( colorize ), colorize_stderr( colorize ) {};
 
 			/**
 			 * Set an area name. This will be printed after the LogLevel to identify the
@@ -402,7 +407,7 @@ namespace einhard
 #else
 			OutputFormatter trace() const
 			{
-				return {isEnabled<TRACE>(), colorize, areaName,
+				return {isEnabled<TRACE>(), colorize_stdout, areaName,
 					std::integral_constant<LogLevel, TRACE>()};
 			}
 
@@ -410,7 +415,7 @@ namespace einhard
 			{
 				if( isEnabled<TRACE>() )
 				{
-					UnconditionalOutput o{colorize, areaName,
+					UnconditionalOutput o{colorize_stdout, areaName,
 							      std::integral_constant<LogLevel, TRACE>()};
 					auto &&unused = {&( o << args )...};
 					o.doCleanup();
@@ -429,14 +434,14 @@ namespace einhard
 #else
 			OutputFormatter debug() const
 			{
-				return {isEnabled<DEBUG>(), colorize, areaName,
+				return {isEnabled<DEBUG>(), colorize_stdout, areaName,
 					std::integral_constant<LogLevel, DEBUG>()};
 			}
 			template <typename... Ts> void debug( Ts &&... args ) const noexcept
 			{
 				if( isEnabled<DEBUG>() )
 				{
-					UnconditionalOutput o{colorize, areaName,
+					UnconditionalOutput o{colorize_stdout, areaName,
 							  std::integral_constant<LogLevel, DEBUG>()};
 					auto &&unused = {&( o << args )...};
 					o.doCleanup();
@@ -446,14 +451,14 @@ namespace einhard
 			/** Access to the info message stream. */
 			OutputFormatter info() const
 			{
-				return {isEnabled<INFO>(), colorize, areaName,
+				return {isEnabled<INFO>(), colorize_stdout, areaName,
 					std::integral_constant<LogLevel, INFO>()};
 			}
 			template <typename... Ts> void info( Ts &&... args ) const noexcept
 			{
 				if( isEnabled<INFO>() )
 				{
-					UnconditionalOutput o{colorize, areaName,
+					UnconditionalOutput o{colorize_stdout, areaName,
 							  std::integral_constant<LogLevel, INFO>()};
 					auto &&unused = {&( o << args )...};
 					o.doCleanup();
@@ -462,49 +467,49 @@ namespace einhard
 			/** Access to the warning message stream. */
 			OutputFormatter warn() const
 			{
-				return {isEnabled<WARN>(), colorize, areaName,
-					std::integral_constant<LogLevel, WARN>()};
+				return {isEnabled<WARN>(), colorize_stderr, areaName,
+					std::integral_constant<LogLevel, WARN>(), stderr};
 			}
 			template <typename... Ts> void warn( Ts &&... args ) const noexcept
 			{
 				if( isEnabled<WARN>() )
 				{
-					UnconditionalOutput o{colorize, areaName,
+					UnconditionalOutput o{colorize_stderr, areaName,
 							  std::integral_constant<LogLevel, WARN>()};
 					auto &&unused = {&( o << args )...};
-					o.doCleanup();
+					o.doCleanup(stderr);
 				}
 			}
 			/** Access to the error message stream. */
 			OutputFormatter error() const
 			{
-				return {isEnabled<ERROR>(), colorize, areaName,
-					std::integral_constant<LogLevel, ERROR>()};
+				return {isEnabled<ERROR>(), colorize_stderr, areaName,
+					std::integral_constant<LogLevel, ERROR>(), stderr};
 			}
 			template <typename... Ts> void error( Ts &&... args ) const noexcept
 			{
 				if( isEnabled<ERROR>() )
 				{
-					UnconditionalOutput o{colorize, areaName,
+					UnconditionalOutput o{colorize_stderr, areaName,
 							  std::integral_constant<LogLevel, ERROR>()};
 					auto &&unused = {&( o << args )...};
-					o.doCleanup();
+					o.doCleanup(stderr);
 				}
 			}
 			/** Access to the fatal message stream. */
 			OutputFormatter fatal() const
 			{
-				return {isEnabled<FATAL>(), colorize, areaName,
-					std::integral_constant<LogLevel, FATAL>()};
+				return {isEnabled<FATAL>(), colorize_stderr, areaName,
+					std::integral_constant<LogLevel, FATAL>(), stderr};
 			}
 			template <typename... Ts> void fatal( Ts &&... args ) const noexcept
 			{
 				if( isEnabled<FATAL>() )
 				{
-					UnconditionalOutput o{colorize, areaName,
+					UnconditionalOutput o{colorize_stderr, areaName,
 							  std::integral_constant<LogLevel, FATAL>()};
 					auto &&unused = {&( o << args )...};
-					o.doCleanup();
+					o.doCleanup(stderr);
 				}
 			}
 
@@ -549,14 +554,15 @@ namespace einhard
 			 */
 			void setColorize( bool colorize ) noexcept
 			{
-				this->colorize = colorize;
+				this->colorize_stdout = colorize;
+				this->colorize_stderr = colorize;
 			}
 			/**
 			 * Check whether the output stream is colorized.
 			 */
 			void getColorize() const noexcept
 			{
-				return this->colorize;
+				return this->colorize_stdout || this->colorize_stderr;
 			}
 	};
 }
