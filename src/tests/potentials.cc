@@ -94,7 +94,7 @@ TEST(nucleus_potential_profile) {
   std::map<PdgCode, int> nuc_list = {{0x2212, 79}, {0x2112, 118}};
   const int Ntest = 1;
   const double sigma = 1.0;
-  const double dt = 0.1;
+  const float dt = 0.1;
 
   // Create a nucleus
   Configuration conf(TEST_CONFIG_PATH);
@@ -199,7 +199,7 @@ TEST(propagation_in_test_potential) {
   // Do not initialize particles: just artificially put one particle to list
   const int Ntest = 1;
   const double sigma = 1.0;
-  const double dt = 0.1;
+  const float dt = 0.1;
   const double p_mass = 0.938;
   Configuration conf(TEST_CONFIG_PATH);
   ExperimentParameters param{{0.f, dt}, 1.f, Ntest, sigma};
