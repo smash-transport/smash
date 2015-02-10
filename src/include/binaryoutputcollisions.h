@@ -36,6 +36,10 @@ class BinaryOutputBase : public OutputInterface {
 
   /// Binary particles output
   FilePtr file_;
+
+ private:
+  /// file format version number
+  const int format_version_ = 2; 
 };
 
 /**
