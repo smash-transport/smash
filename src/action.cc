@@ -95,29 +95,22 @@ ThreeVector Action::get_interaction_point() {
 }
 
 
-ParticleList Action::choose_channel() {
+const ProcessBranch* Action::choose_channel() {
   const auto &log = logger<LogArea::Action>();
   float random_weight = Random::uniform(0.f,total_weight_);
   float weight_sum = 0.;
   /* Loop through all subprocesses and select one by Monte Carlo, based on
    * their weights.  */
   for (const auto &proc : subprocesses_) {
-      log.debug("Choosing processes here", proc.particle_types().size(), proc.id(), proc.weight());
+/* All processes apart from strings should have a well-defined final state */
     if ((proc.particle_types().size() < 1 ||
          proc.particle_types()[0]->pdgcode() == PdgCode::invalid()) && proc.id() != 4) {
-        log.debug("Process without types detected");
       continue;
     }
-      log.debug("Where do I get stuck?");
     weight_sum += proc.weight();
-      log.debug ("Still choosing a channel: ", random_weight, weight_sum);
     if (random_weight <= weight_sum) {
-      if (proc.particle_types().size() >= 1){
-          log.debug("Why am I here at all?");
-        return proc.particle_list();
-      } else {
-        log.debug("I would like to become a string please");
-      }
+/* Return the full process information */
+       return &proc; 
     }
   }
   /* Should never get here. */

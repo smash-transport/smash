@@ -23,7 +23,7 @@ TEST(init_particle_types) {
 
 TEST(assign_default) {
   ProcessBranch branch;
-  FUZZY_COMPARE(branch.weight(), -1.f);
+  FUZZY_COMPARE(branch.weight(), 0.f);
 }
 TEST(assign_1_particle) {
   PdgCode smashon("9876542");

@@ -36,11 +36,13 @@ void ScatterAction::perform(Particles *particles, size_t &id_process) {
             incoming_particles_[1]);
 
   /* Decide for a particular final state. */
-  outgoing_particles_ = choose_channel();
-
-  if (is_elastic()) {
+  ProcessBranch proc; 
+  choose_channel();
+  outgoing_particles_ = proc.particle_list();
+  
+  if (proc.id() == 1) {
     /* 2->2 elastic scattering */
-    log.debug("Process: Elastic collision.");
+    log.debug("Process: Elastic collision.", proc.id());
 
     momenta_exchange();
 
@@ -50,9 +52,15 @@ void ScatterAction::perform(Particles *particles, size_t &id_process) {
 
     particles->data(id_a) = outgoing_particles_[0];
     particles->data(id_b) = outgoing_particles_[1];
-  } else {
+  } else if (proc.id() == 4) {
+	/* string excitation */ 
+	log.debug("Process: String Excitation.");
+	
+	/// string_excitation(incoming_particles_, outgoing_particles_);  
+  }
+  else {
     /* resonance formation */
-    log.debug("Process: Resonance formation.");
+    log.debug("Process: Resonance formation.", proc.id());
 
     /* The starting point of resonance is between the two initial particles:
      * x_middle = (x_a + x_b) / 2   */

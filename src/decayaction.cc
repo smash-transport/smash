@@ -152,7 +152,7 @@ void DecayAction::one_to_three() {
 void DecayAction::perform(Particles *particles, size_t &id_process) {
   const auto &log = logger<LogArea::DecayModes>();
   log.debug("Process: Resonance decay. ");
-
+  ProcessBranch proc;  
   /*
    * Execute a decay process for the selected particle.
    *
@@ -160,8 +160,9 @@ void DecayAction::perform(Particles *particles, size_t &id_process) {
    * according to their relative weights. Then decay the particle
    * by calling function one_to_two or one_to_three.
    */
-  outgoing_particles_ = choose_channel();
-
+   choose_channel(); 
+   outgoing_particles_ = proc.particle_list();
+  
   switch (outgoing_particles_.size()) {
   case 2:
     one_to_two();

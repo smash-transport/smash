@@ -134,10 +134,9 @@ class Action {
 
   /**
    * Decide for a particular final-state channel via Monte-Carlo
-   * and return it as a list of particles that are only initialized
-   * with their PDG code.
+   * and return it as a ProcessBranch
    */
-  ParticleList choose_channel();
+  const ProcessBranch* choose_channel();
 
   /**
    * Sample final state momenta (and masses) in general X->2 process.
