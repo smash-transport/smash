@@ -46,9 +46,6 @@ BinaryOutputCollisions::BinaryOutputCollisions(bf::path path,
    * Detailed specification of the binary format can be found here:
    * \ref format_binary_
    */
-  fwrite("SMSH", 4, 1, file_.get());  // magic number
-  write(2);              // file format version number
-  write(VERSION_MAJOR);  // SMASH version
 }
 
   /*!\Userguide
@@ -113,6 +110,14 @@ void BinaryOutputCollisions::at_intermediate_time(
                                       const Clock &) {
   /* No output of this kind in collisions output */
 }
+
+
+BinaryOutputBase::BinaryOutputBase(FILE *f) : file_{f} {
+  fwrite("SMSH", 4, 1, file_.get());  // magic number
+  write(format_version_);             // file format version number
+  write(VERSION_MAJOR);               // SMASH version
+}
+
 
 // write functions:
 void BinaryOutputBase::write(const std::string &s) {
