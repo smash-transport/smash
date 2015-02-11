@@ -39,8 +39,10 @@ float Action::weight() const {
 }
 
 void Action::add_process(ProcessBranch p) {
-  total_weight_ += p.weight();
-  subprocesses_.emplace_back(std::move(p));
+  if (p.weight() > really_small) {
+    total_weight_ += p.weight();
+    subprocesses_.emplace_back(std::move(p));
+  }
 }
 
 void Action::add_processes(ProcessBranchList pv) {
@@ -100,13 +102,22 @@ ParticleList Action::choose_channel() {
   /* Loop through all subprocesses and select one by Monte Carlo, based on
    * their weights.  */
   for (const auto &proc : subprocesses_) {
-    if (proc.particle_types().size() < 1 ||
-        proc.particle_types()[0]->pdgcode() == PdgCode::invalid()) {
+      log.debug("Choosing processes here", proc.particle_types().size(), proc.id(), proc.weight());
+    if ((proc.particle_types().size() < 1 ||
+         proc.particle_types()[0]->pdgcode() == PdgCode::invalid()) && proc.id() != 4) {
+        log.debug("Process without types detected");
       continue;
     }
+      log.debug("Where do I get stuck?");
     weight_sum += proc.weight();
+      log.debug ("Still choosing a channel: ", random_weight, weight_sum);
     if (random_weight <= weight_sum) {
-      return proc.particle_list();
+      if (proc.particle_types().size() >= 1){
+          log.debug("Why am I here at all?");
+        return proc.particle_list();
+      } else {
+        log.debug("I would like to become a string please");
+      }
     }
   }
   /* Should never get here. */

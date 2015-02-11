@@ -25,6 +25,9 @@ namespace Smash {
  * 2. The weight of this state, i.e. how probable this outcome is
  * compared to other possible outcomes. Depending on context,
  * this can be either a cross section or a branching ratio.
+ * 3. The process id that identifies a certain class of processes.
+ * If the outgoing particles are not known yet, e.g. for strings
+ * there will be only the weight and the process id.
  *
  * For example, create a list of decay modes for \f$\Delta^+\f$ resonance:
  * \code
@@ -40,7 +43,7 @@ namespace Smash {
 class ProcessBranch {
  public:
   /// Create a ProcessBranch without final states
-  ProcessBranch() : branch_weight_(-1.0), process_id_(0) {}
+  ProcessBranch() : branch_weight_(0.0), process_id_(0) {}
   /// Constructor without outgoing particles
   ProcessBranch(float w, int p_id) : branch_weight_(w), process_id_(p_id) {}
 

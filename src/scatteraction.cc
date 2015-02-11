@@ -161,7 +161,7 @@ ProcessBranch ScatterAction::elastic_cross_section(float elast_par) {
 
 ProcessBranch ScatterAction::string_excitation_cross_section() {
   const int process_id = 4; 
-  return ProcessBranch(-1.0, 0);
+  return ProcessBranch(0.0, process_id);
 }   	
 
 ProcessBranchList ScatterAction::resonance_cross_sections() {
@@ -281,7 +281,6 @@ void ScatterAction::resonance_formation() {
 
 
 ProcessBranch ScatterActionBaryonBaryon::elastic_cross_section(float elast_par) {
-
   const PdgCode &pdg_a = incoming_particles_[0].type().pdgcode();
   const PdgCode &pdg_b = incoming_particles_[1].type().pdgcode();
 
@@ -316,9 +315,11 @@ ProcessBranch ScatterActionBaryonBaryon::elastic_cross_section(float elast_par) 
 }
 
 ProcessBranch ScatterActionBaryonBaryon::string_excitation_cross_section() {
+  const auto &log = logger<LogArea::ScatterAction>();
   const PdgCode &pdg_a = incoming_particles_[0].type().pdgcode();
   const PdgCode &pdg_b = incoming_particles_[1].type().pdgcode();
   const double s = mandelstam_s();
+  const int process_id = 4;
     
   if(pdg_a.iso_multiplet() == 0x1112 &&
      pdg_b.iso_multiplet() == 0x1112) {
@@ -328,22 +329,25 @@ ProcessBranch ScatterActionBaryonBaryon::string_excitation_cross_section() {
     if (s >= 1.6) {
       if (pdg_a == pdg_b) { /* pp */
           sig_string = pp_total(s) - pp_elastic(s);
+          log.debug("pp string xsection: ", sig_string);
       } else if (pdg_a.is_antiparticle_of(pdg_b)) {  /* ppbar */
           sig_string = ppbar_total(s) - ppbar_elastic(s);
+          log.debug("ppbar string xsection: ", sig_string);
       } else {                                     /* np */
           sig_string = np_total(s) - np_elastic(s);
+          log.debug("pn string xsection: ", sig_string);
       }
     } 
-    const int process_id = 4;
+    
     if (sig_string>really_small) {
           return ProcessBranch(sig_string, process_id);
     } else {
 		/* empty process branch for s < 1.6 GeV */  
-	      return ProcessBranch(-1.0,0);  
+        return ProcessBranch(0.0, process_id);
     }	
   } else {
 	/* empty process branch for non-nucleons */  
-	return ProcessBranch(-1.0,0);   
+      return ProcessBranch(0.0, process_id);
   }
 }
     
