@@ -28,42 +28,47 @@ static ParticleData create_smashon_particle(int id = -1) {
   return ParticleData{ParticleType::find(0x661), id};
 }
 
-static void simple_propagate(Particles& particles, float dt) {
-  for (ParticleData& data : particles.data()) {
-    FourVector distance = FourVector(dt, data.velocity() * dt);
-    data.set_4position(data.position() + distance);
-  }
-}
-
 TEST(collision_order) {
-  // create particles. The type doesn't matter at all because we will set a
+  // create particles, the type doesn't matter at all because we will set a
   // different mass anyway and decays are switched off
   auto particle_a = create_smashon_particle(0);
   auto particle_b = create_smashon_particle(1);
   auto particle_c = create_smashon_particle(2);
+  auto particle_d = create_smashon_particle(3);
+  auto particle_e = create_smashon_particle(4);
 
   // set positions
+  // particle a is set such that it will miss particles b and c by 0.1 fm
   particle_a.set_4position(FourVector(0., 1., 0.1, 0.));
   particle_b.set_4position(FourVector(0., 0., 1., 0.));
   particle_c.set_4position(FourVector(0.,-1., 2., 0.));
+  // particles d and e will also miss by 0.1 fm
+  particle_d.set_4position(FourVector(0., 1.5, 0., 1.));
+  particle_e.set_4position(FourVector(0.,-0.1, 1.5, 1.));
 
-  // set momenta, velocity should be very close to speed of light
+  // set momenta
+  // velocity should be very close to speed of light to make calculations easier
   particle_a.set_4momentum(0.01, 0., 1., 0.);
   particle_b.set_4momentum(0.01, 1., 0., 0.);
   particle_c.set_4momentum(0.01, 1., 0., 0.);
+  particle_d.set_4momentum(0.01, 0., 1., 0.);
+  particle_e.set_4momentum(0.01, 1., 0., 0.);
 
   // put particles into list
   Particles particles;
-  int id_a = particles.add_data(particle_a);
-  int id_b = particles.add_data(particle_b);
-  int id_c = particles.add_data(particle_c);
+  particles.add_data(particle_a);
+  particles.add_data(particle_b);
+  particles.add_data(particle_c);
+  particles.add_data(particle_d);
+  particles.add_data(particle_e);
 
   // prepare scatteractionsfinder
-  float elastic_parameter = 0.4;
-  int testparticles = 1;
+  const float radius = 0.11; // in fm
+  const float elastic_parameter = radius*radius*M_PI/fm2_mb; // in mb
+  const int testparticles = 1;
   ScatterActionsFinder finder(elastic_parameter, testparticles);
 
-  // lists
+  // prepare lists
   ParticleList search_list{particles.data().begin(), particles.data().end()};
   std::vector<const ParticleList*> neighbors_list; // empty for now
 
@@ -72,25 +77,48 @@ TEST(collision_order) {
 
   // test for different times
   dt = 0.9;
-  auto actions_1 = finder.find_possible_actions(search_list, neighbors_list, dt);
-  COMPARE(actions_1.size(), 0) << "there shouldn't be a collision yet";
+  auto actions_1 = finder.find_possible_actions(search_list,neighbors_list, dt);
+  COMPARE(actions_1.size(), 0) << "timestep 0.9, expect no collision";
 
   dt = 1.0;
-  auto actions_2 = finder.find_possible_actions(search_list, neighbors_list, dt);
-  COMPARE(actions_2.size(), 1) << "there should already be a collision";
+  auto actions_2 = finder.find_possible_actions(search_list,neighbors_list, dt);
+  COMPARE(actions_2.size(), 1) << "timestep 1.0, expect 1 collision";
 
   dt = 2.0;
-  auto actions_3 = finder.find_possible_actions(search_list, neighbors_list, dt);
-  COMPARE(actions_3.size(), 2) << "there should be two collisions now";
+  auto actions_3 = finder.find_possible_actions(search_list,neighbors_list, dt);
+  COMPARE(actions_3.size(), 3) << "timestep 2.0, expect 3 collisions";
 
   // perform actions from actions_3
-  VERIFY(actions_3[0]->is_valid(particles)) << "first interaction is valid";
-  size_t num_interactions = 0;
-  actions_3[0]->perform(&particles, num_interactions);
-  VERIFY(!actions_3[1]->is_valid(particles)) << "second interaction is not valid";
-  COMPARE(num_interactions, 1)
-      << "only one interaction should have been performed";
 
-  // the position doesn't change from "perform", only the momenta
-  //FourVector mom_a = particles.data(id_a).momentum();
+  size_t num_interactions = 0;
+
+  // first action
+  // verify that first action involves particle b
+  const auto action_prtcls_1 = actions_3[0]->incoming_particles();
+  VERIFY(std::find(action_prtcls_1.begin(), action_prtcls_1.end(), particle_b)
+          != action_prtcls_1.end());
+  // check if action is valid
+  VERIFY(actions_3[0]->is_valid(particles))
+      << "expected: first interaction is valid";
+  // perform action
+  actions_3[0]->perform(&particles, num_interactions);
+
+  // second action
+  // verify that second action is *not* valid anymore
+  VERIFY(!actions_3[1]->is_valid(particles))
+      << "expected: second interaction is not valid";
+
+  // third action
+  // verify that third action involves particle d
+  const auto action_prtcls_2 = actions_3[2]->incoming_particles();
+  VERIFY(std::find(action_prtcls_2.begin(), action_prtcls_2.end(), particle_d)
+          != action_prtcls_2.end());
+  // check if action is valid
+  VERIFY(actions_3[2]->is_valid(particles))
+      << "expected: third interaction is valid";
+  // perform action
+  actions_3[0]->perform(&particles, num_interactions);
+
+  // final check
+  COMPARE(num_interactions, 2);
 }
