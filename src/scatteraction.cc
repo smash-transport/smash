@@ -39,7 +39,9 @@ void ScatterAction::perform(Particles *particles, size_t &id_process) {
   const ProcessBranch* proc = choose_channel();
   outgoing_particles_ = proc->particle_list();
   
-  if (proc->id() == 1) {
+  log.debug("Chosen channel: ", proc->id(), proc->particle_list()); 
+  
+  if (proc->type() == ELASTIC) {
     /* 2->2 elastic scattering */
     log.debug("Process: Elastic collision.", proc->id());
 
@@ -51,7 +53,7 @@ void ScatterAction::perform(Particles *particles, size_t &id_process) {
 
     particles->data(id_a) = outgoing_particles_[0];
     particles->data(id_b) = outgoing_particles_[1];
-  } else if (proc->id() == 4) {
+  } else if (proc->type() == STRING) {
 	/* string excitation */ 
 	log.debug("Process: String Excitation.");
 	
@@ -59,7 +61,7 @@ void ScatterAction::perform(Particles *particles, size_t &id_process) {
   }
   else {
     /* resonance formation */
-    log.debug("Process: Resonance formation.", proc->id());
+    log.debug("Process: Resonance formation.", proc->type());
 
     /* The starting point of resonance is between the two initial particles:
      * x_middle = (x_a + x_b) / 2   */

@@ -104,7 +104,7 @@ const ProcessBranch* Action::choose_channel() {
   for (const auto &proc : subprocesses_) {
 /* All processes apart from strings should have a well-defined final state */
     if ((proc.particle_types().size() < 1 ||
-         proc.particle_types()[0]->pdgcode() == PdgCode::invalid()) && proc.id() != 4) {
+         proc.particle_types()[0]->pdgcode() == PdgCode::invalid()) && proc.type() != STRING) {
       continue;
     }
     weight_sum += proc.weight();
