@@ -46,6 +46,9 @@ namespace Smash {
  * on this never changing, though; the interface user should be totally
  * oblivious to this.
  *
+ * We use double precision in order to be compatible with the ThreeVector class
+ * (conversion via Angles::threevec).
+ *
  * Possible future improvements
  * ----------------------------
  *
