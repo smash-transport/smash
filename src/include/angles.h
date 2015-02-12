@@ -29,12 +29,12 @@ namespace Smash {
  *
  * Angles direction;
  *
- * direction.distribute_isotropously();
- * float azimuthal_angle = direction.phi();
- * float cosine_of_polar_angle = direction.costheta();
- * float x_projection_of_vector = direction.x();
+ * direction.distribute_isotropically();
+ * double azimuthal_angle = direction.phi();
+ * double cosine_of_polar_angle = direction.costheta();
+ * double x_projection_of_vector = direction.x();
  * direction.set_phi(0);
- * float new_azimuthal_angle = direction.phi();
+ * double new_azimuthal_angle = direction.phi();
  * // new_azimuthal_angle == 0.
  * \endcode
  *
@@ -70,7 +70,7 @@ class Angles {
    * @param phi any real number to set the azimuthal angle \f$\varphi\f$
    * to.
    **/
-  void set_phi(const float phi);
+  void set_phi(const double phi);
   /** update polar angle from its cosine.
    *
    * sets the polar angle and leaves the azimuthal angle untouched.
@@ -80,7 +80,7 @@ class Angles {
    * in range [-1 .. 1], else an Exception is thrown.
    *
    **/
-  void set_costheta(const float cos);
+  void set_costheta(const double cos);
   /** update polar angle from itself
    *
    * sets the polar angle and leaves the azimuthal angle untouched.
@@ -96,18 +96,18 @@ class Angles {
    * @param theta any real number to set the polar angle \f$\vartheta\f$
    * to.
    */
-  void set_theta(const float theta);
+  void set_theta(const double theta);
   /** advance polar angle
    *
    * polar angle is advanced. A positive addition means that we go
    * towards the southpole.
    *
-   * \see add_to_theta(const float& delta, const bool& reverse)
+   * \see add_to_theta(const double& delta, const bool& reverse)
    *
    * @param delta angle increment
    * @return true if pole has been crossed.
    **/
-  bool add_to_theta(const float delta);
+  bool add_to_theta(const double delta);
   /** advance polar angle
    *
    * polar angle is advanced. When crossing a pole, azimuthal angle is
@@ -121,32 +121,32 @@ class Angles {
    * @return returns true if we end up in the far hemisphere, false if
    * we end up in the original hemisphere.
    **/
-  bool add_to_theta(const float delta, const bool reverse);
+  bool add_to_theta(const double delta, const bool reverse);
   /// get azimuthal angle
-  float phi() const;
+  double phi() const;
   /// get cosine of polar angle
-  float costheta() const;
+  double costheta() const;
   /// get sine of polar angle
-  float sintheta() const;
+  double sintheta() const;
   /** get x projection of the direction
    *
    * \f$x = \sin\vartheta \cos\varphi\f$
    **/
-  float x() const;
+  double x() const;
   /** get y projection of the direction
    *
    * \f$y = \sin\vartheta \sin\varphi\f$
    **/
-  float y() const;
+  double y() const;
   /** get z projection of the direction
    *
    * \f$z = \cos\vartheta\f$
    **/
-  float z() const;
+  double z() const;
   /// get the three-vector
   ThreeVector inline threevec() const;
   /// returns the polar angle
-  float theta() const;
+  double theta() const;
 
   /// \ingroup exception
   /// thrown for invalid values for theta
@@ -156,9 +156,9 @@ class Angles {
 
  private:
   /// azimuthal angle \f$\varphi\f$
-  float phi_;
+  double phi_;
   /// cosine of polar angle \f$\cos\varphi\f$
-  float costheta_;
+  double costheta_;
 };
 
 /** \ingroup logging
@@ -176,7 +176,7 @@ void inline Angles::distribute_isotropically() {
   costheta_ = Random::uniform(-1.0, 1.0);
 }
 
-void inline Angles::set_phi (const float newphi) {
+void inline Angles::set_phi (const double newphi) {
   /* Make sure that phi is in the range [0,2pi).  */
     phi_ = newphi;
   if (newphi < 0 || newphi >= twopi) {
@@ -184,7 +184,7 @@ void inline Angles::set_phi (const float newphi) {
   }
 }
 
-void inline Angles::set_costheta(const float newcos) {
+void inline Angles::set_costheta(const double newcos) {
   costheta_ = newcos;
   /* check if costheta_ is in -1..1. If not, well. Error handling here
    * is a lot harder than in the above. Still, I will silently do the
@@ -196,19 +196,19 @@ void inline Angles::set_costheta(const float newcos) {
                        std::to_string(costheta_));
   }
 }
-void inline Angles::set_theta(const float newtheta) {
+void inline Angles::set_theta(const double newtheta) {
   /* no error handling necessary, because this gives a sensible answer
    * for every real number.
    */
   set_costheta(cos(newtheta));
 }
 
-bool inline Angles::add_to_theta(const float delta) {
+bool inline Angles::add_to_theta(const double delta) {
   if (delta < -M_PI || delta > M_PI) {
     throw InvalidTheta("Cannot advance polar angle by " +
                        std::to_string(delta));
   }
-  float theta_plus_delta = delta + theta();
+  double theta_plus_delta = delta + theta();
   /* if sum is not in [0, PI], force it to be there:
    * "upper" overflow:
    * theta + delta + the_new_angle = 2*M_PI
@@ -229,8 +229,8 @@ bool inline Angles::add_to_theta(const float delta) {
   }
   return false;  // meaning "we did NOT change phi"
 }
-bool inline Angles::add_to_theta(const float delta, const bool reverse) {
-  float plusminus_one = reverse ? -1.0 : +1.0;
+bool inline Angles::add_to_theta(const double delta, const bool reverse) {
+  double plusminus_one = reverse ? -1.0 : +1.0;
   bool this_reverse = add_to_theta(plusminus_one*delta);
   /* if we had to reverse first time and now reverse again OR if we
    * didn't reverse in either part, we do not reverse in total.
@@ -240,20 +240,20 @@ bool inline Angles::add_to_theta(const float delta, const bool reverse) {
   return this_reverse ^ reverse;
 }
 
-float inline Angles::costheta() const { return costheta_; }
-float inline Angles::phi() const { return phi_; }
-float inline Angles::sintheta() const {
+double inline Angles::costheta() const { return costheta_; }
+double inline Angles::phi() const { return phi_; }
+double inline Angles::sintheta() const {
   return sqrt(1.0 - costheta_*costheta_);
 }
-float inline Angles::x() const { return sintheta()*cos(phi_); }
-float inline Angles::y() const { return sintheta()*sin(phi_); }
-float inline Angles::z() const { return costheta_; }
+double inline Angles::x() const { return sintheta()*cos(phi_); }
+double inline Angles::y() const { return sintheta()*sin(phi_); }
+double inline Angles::z() const { return costheta_; }
 
 ThreeVector inline Angles::threevec() const {
   return ThreeVector(x(),y(),z());
 }
 
-float inline Angles::theta() const { return acos(costheta_); }
+double inline Angles::theta() const { return acos(costheta_); }
 
 }  // namespace Smash
 
