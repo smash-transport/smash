@@ -9,9 +9,12 @@
 
 #include <cmath>
 
+#include "constants.h"
 #include "particletype.h"
 
 namespace Smash {
+
+const float interaction_radius = 1. / hbarc;
 
 /**
  * Return the center-of-mass momentum of two particles,
@@ -29,57 +32,23 @@ T pCM(const T srts, const T mass_a, const T mass_b) noexcept {
   return std::sqrt(x * x * (T(0.25) / s) - mass_a_sqr);
 }
 
-
 /**
- * Get the mass-dependent width of a two-body decay into stable particles
- * according to Manley/Saleski, Phys. Rev. D 45 (1992) 4002.
+ * Returns the squared Blatt-Weisskopf functions,
+ * which govern the mass dependence of the width of a resonance
+ * decaying into two particles A and B. See e.g. Effenberger's thesis, page 28.
  *
- * \param mass Actual mass of the decaying particle [GeV].
- * \param poleMass Pole mass of the decaying particle [GeV].
- * \param mass_a Mass of the first daughter particle [GeV].
- * \param mass_b Mass of the second daughter particle [GeV].
- * \param L Angular momentum of the decay.
- * \param partial_width_at_pole Partial width at the pole mass [GeV].
+ * \param x = p_ab*R  with
+ *        p_ab = relative momentum of outgoing particles AB and
+ *        R = interaction radius
+ * \param L Angular momentum of outgoing particles AB.
  */
-float width_Manley_stable(const float mass, const float poleMass,
-                          const float mass_a, const float mass_b,
-                          const int L, const float partial_width_at_pole);
+float BlattWeisskopf(const float x, const int L)
+#ifdef NDEBUG
+    noexcept
+#endif
+;
 
-/**
- * Get the mass-dependent width of a two-body decay into one stable and one
- * unstable particle according to Manley/Saleski, Phys. Rev. D 45 (1992) 4002.
- *
- * \param mass Actual mass of the decaying particle [GeV].
- * \param poleMass Pole mass of the decaying particle [GeV].
- * \param mass_stable Mass of the stable daughter particle [GeV].
- * \param type_unstable Type of the unstable daughter particle [GeV].
- * \param L Angular momentum of the decay.
- * \param partial_width_at_pole Partial width at the pole mass [GeV].
- */
-float width_Manley_semistable(const float mass, const float poleMass,
-                              const float mass_stable,
-                              const ParticleType &type_unstable,
-                              const int L, const float partial_width_at_pole);
-
-/**
- * Get the mass-dependent in-width for a resonance formation process from one
- * stable and one unstable particle according to Manley/Saleski (PRD45),
- * see also PhD thesis Effenberger, eq. (2.77).
- *
- * \param mass Actual mass of the produced resonance [GeV].
- * \param poleMass Pole mass of the produced resonance [GeV].
- * \param mass_stable Mass of the stable incoming particle [GeV].
- * \param mass_unstable Mass of the unstable incoming particle [GeV].
- * \param type_unstable Type of the unstable incoming particle [GeV].
- * \param L Angular momentum of the corresponding decay.
- * \param partial_width_at_pole Partial width at the pole mass [GeV].
- */
-float in_width_Manley_semistable(const float mass, const float poleMass,
-                                 const float mass_stable,
-                                 const float mass_unstable,
-                                 const ParticleType &type_unstable,
-                                 const int L,
-                                 const float partial_width_at_pole);
+double Post_FF_sqr (double m, double M0, double s0, double L);
 
 }  // namespace Smash
 

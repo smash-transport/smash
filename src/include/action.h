@@ -64,7 +64,7 @@ class Action {
   float weight() const;
 
   /** Add a new subprocess.  */
-  void add_process(ProcessBranch p);
+  void add_process(ProcessBranch *p);
   /** Add several new subprocesses at once.  */
   void add_processes(ProcessBranchList pv);
 
@@ -123,7 +123,7 @@ class Action {
    */
   ParticleList outgoing_particles_;
   /** list of possible subprocesses  */
-  std::vector<ProcessBranch> subprocesses_;
+  std::vector<ProcessBranch*> subprocesses_;
   /** time at which the action is supposed to be performed  */
   float time_of_execution_;
   /** sum of all subprocess weights  */
@@ -269,7 +269,7 @@ class ScatterAction : public Action {
    * \return A ProcessBranch object containing the cross section and
    * final-state IDs.
    */
-  virtual ProcessBranch elastic_cross_section(float elast_par);
+  virtual CollisionBranch* elastic_cross_section(float elast_par);
 
   /**
   * Find all resonances that can be produced in a 2->1 collision of the two
@@ -341,7 +341,7 @@ class ScatterActionBaryonBaryon : public ScatterAction {
    * \return A ProcessBranch object containing the cross section and
    * final-state IDs.
    */
-  ProcessBranch elastic_cross_section(float elast_par) override;
+  CollisionBranch* elastic_cross_section(float elast_par) override;
   /* There is no resonance formation out of two baryons: Return empty list. */
   ProcessBranchList resonance_cross_sections() override {
     return ProcessBranchList();

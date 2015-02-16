@@ -22,15 +22,23 @@
 
 namespace Smash {
 
-const std::vector<DecayModes> *DecayModes::all_decay_modes = nullptr;
+std::vector<DecayModes> *DecayModes::all_decay_modes = nullptr;
 
 void DecayModes::add_mode(float ratio, int L,
-                          std::vector<ParticleTypePtr> particle_types) {
+                          ParticleTypePtrList particle_types) {
+  DecayType *type = NULL;
   switch (particle_types.size()) {
   case 2:
     if (!particle_types[0]->is_hadron() || !particle_types[1]->is_hadron()) {
       logger<LogArea::DecayModes>().warn(
           "decay products A: ", *particle_types[0], " B: ", *particle_types[1]);
+    }
+    if (particle_types[0]->is_stable() && particle_types[1]->is_stable()) {
+      type = new TwoBodyDecayStable(particle_types, L);
+    } else if (particle_types[0]->is_stable() || particle_types[1]->is_stable()) {
+      type = new TwoBodyDecaySemistable(particle_types, L);
+    } else {
+      type = new TwoBodyDecayUnstable(particle_types, L);
     }
     break;
   case 3:
@@ -39,6 +47,7 @@ void DecayModes::add_mode(float ratio, int L,
       logger<LogArea::DecayModes>().warn(
           "decay products A: ", *particle_types[0], " B: ", *particle_types[1],
           " C: ", *particle_types[2]);
+      type = new ThreeBodyDecay(particle_types, L);
     }
     break;
   default:
@@ -47,7 +56,7 @@ void DecayModes::add_mode(float ratio, int L,
         std::to_string(particle_types.size()) +
         " particles. This is an invalid input.");
   }
-  decay_modes_.emplace_back(L, std::move(particle_types), ratio);
+  decay_modes_.emplace_back(new DecayBranch(type, ratio));
 }
 
 void DecayModes::renormalize(float renormalization_constant) {
@@ -60,8 +69,8 @@ void DecayModes::renormalize(float renormalization_constant) {
     log.info("Renormalizing decay modes with ", renormalization_constant);
     float new_sum = 0.0;
     for (auto &mode : decay_modes_) {
-      mode.set_weight(mode.weight() / renormalization_constant);
-      new_sum += mode.weight();
+      mode->set_weight(mode->weight() / renormalization_constant);
+      new_sum += mode->weight();
     }
     log.info("After renormalization sum of ratios is ", new_sum);
   }
@@ -103,13 +112,13 @@ void DecayModes::load_decaymodes(const std::string &input) {
       /* Construct and add the list of decay modes for the antiparticle.  */
       DecayModes decay_modes_anti;
       for (const auto &mode : decay_modes_to_add.decay_mode_list()) {
-        std::vector<ParticleTypePtr> list = mode.particle_types();
+        ParticleTypePtrList list = mode->particle_types();
         for (auto &type : list) {
           if (type->has_antiparticle()) {
             type = type->get_antiparticle();
           }
         }
-        decay_modes_anti.add_mode(mode.weight(), mode.angular_momentum(),
+        decay_modes_anti.add_mode(mode->weight(), mode->angular_momentum(),
                                   list);
       }
       decaymodes[find_offset(pdgcode.get_antiparticle())] =
@@ -145,7 +154,7 @@ void DecayModes::load_decaymodes(const std::string &input) {
       assert(pdgcode != PdgCode::invalid());  // special value for start of file
     } else {
       std::istringstream lineinput(line.text);
-      std::vector<ParticleTypePtr> decay_particles;
+      ParticleTypePtrList decay_particles;
       decay_particles.reserve(4);
       float ratio;
       lineinput >> ratio;
@@ -189,6 +198,23 @@ void DecayModes::load_decaymodes(const std::string &input) {
   end_of_decaymodes();
   assert(nullptr == all_decay_modes);
   all_decay_modes = &decaymodes;
+}
+
+
+void DecayModes::clear() {
+  for (auto &mode : decay_modes_) {
+    mode->clear();
+    delete mode;
+  }
+  decay_modes_.clear();
+}
+
+
+void DecayModes::clear_decaymodes() {
+  // clean up all decay modes
+  for (auto &mode : *all_decay_modes) {
+    mode.clear();
+  }
 }
 
 
