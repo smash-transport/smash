@@ -40,58 +40,78 @@ void ScatterAction::perform(Particles *particles, size_t &id_process) {
   outgoing_particles_ = proc->particle_list();
   
   log.debug("Chosen channel: ", proc->get_type(), proc->particle_list()); 
-  
-  if (proc->get_type() == ProcessBranch::ELASTIC) {
-    /* 2->2 elastic scattering */
-    log.debug("Process: Elastic collision.", proc->get_type());
+  /* The starting point of resonance is between the two initial particles:
+       * x_middle = (x_a + x_b) / 2   */
+  FourVector middle_point = (incoming_particles_[0].position()
+                           + incoming_particles_[1].position()) / 2.;
 
-    momenta_exchange();
+  switch(proc->get_type()) {
+	case ProcessBranch::ELASTIC:  
+      /* 2->2 elastic scattering */
+      log.debug("Process: Elastic collision.", proc->get_type());
 
-    // store the process id in the Particle data
-    outgoing_particles_[0].set_id_process(id_process);
-    outgoing_particles_[1].set_id_process(id_process);
-
-    particles->data(id_a) = outgoing_particles_[0];
-    particles->data(id_b) = outgoing_particles_[1];
-  } else if (proc->get_type() == ProcessBranch::STRING) {
-	/* string excitation */ 
-	log.debug("Process: String Excitation.");
-	
-	/// string_excitation(incoming_particles_, outgoing_particles_);  
-  }
-  else {
-    /* resonance formation */
-    log.debug("Process: Resonance formation.", proc->get_type());
-
-    /* The starting point of resonance is between the two initial particles:
-     * x_middle = (x_a + x_b) / 2   */
-    FourVector middle_point = (incoming_particles_[0].position()
-                               + incoming_particles_[1].position()) / 2.;
-
-    /* processes computed in the center of momenta */
-    resonance_formation();
-
-    /* Set positions & boost to computational frame. */
-    for (ParticleData &new_particle : outgoing_particles_) {
-      new_particle.set_4position(middle_point);
-
-      new_particle.boost_momentum(-beta_cm());
-
+      momenta_exchange();  
       // store the process id in the Particle data
-      new_particle.set_id_process(id_process);
+      outgoing_particles_[0].set_id_process(id_process);
+      outgoing_particles_[1].set_id_process(id_process);
 
-      log.debug("Resonance: ", new_particle);
+      particles->data(id_a) = outgoing_particles_[0];
+      particles->data(id_b) = outgoing_particles_[1];
+    
+      break; 
+    case ProcessBranch::STRING: 
+	  /* string excitation */ 
+	  log.debug("Process: String Excitation.");
+	
+	  /// string_excitation(incoming_particles_, outgoing_particles_);  
+      break;
+    case ProcessBranch::TWO_TO_ONE:
+      /* resonance formation */
+      log.debug("Process: Resonance formation.", proc->get_type());
 
-      new_particle.set_id(particles->add_data(new_particle));
-    }
+     
+      /* processes computed in the center of momenta */
+      resonance_formation();
 
-    /* Remove the initial particles */
-    particles->remove(id_a);
-    particles->remove(id_b);
+      /* Set positions & boost to computational frame. */
+      for (ParticleData &new_particle : outgoing_particles_) {
+        new_particle.set_4position(middle_point);
 
-    log.debug("Particle map now has ", particles->size(), " elements.");
+        new_particle.boost_momentum(-beta_cm());
+
+        // store the process id in the Particle data
+        new_particle.set_id_process(id_process);
+
+        log.debug("Resonance: ", new_particle);
+
+        new_particle.set_id(particles->add_data(new_particle));
+      }
+
+      /* Remove the initial particles */
+      particles->remove(id_a);
+      particles->remove(id_b);
+
+      log.debug("Particle map now has ", particles->size(), " elements.");
+      break; 
+    case ProcessBranch::TWO_TO_TWO:
+      log.debug("TWO_TO_TWO only exists for Baryon Baryon");
+      break;
+    case ProcessBranch::NONE:
+      log.debug("ProcessType NONE should not have been selected");
+      break;
+    case ProcessBranch::DECAY: 
+      log.debug("ProcessType DECAY should have been handled as DecayAction");
+      break;      
+    default: 
+      throw InvalidScatterAction(
+        "ScatterAction::perform: Only ELASTIC, STRING or TWO_TO_ONE are supported. "
+        "ProcessType " + std::to_string(proc->get_type()) +
+        " was requested. (PDGcode1=" + incoming_particles_[0].pdgcode().string()
+        + ", PDGcode2=" + incoming_particles_[1].pdgcode().string()
+        + ")");
+    
   }
-
+  
   check_conservation(id_process);
 
   id_process++;
@@ -152,13 +172,6 @@ double ScatterAction::particle_distance() const {
    */
   return pos_diff.sqr()
          - (pos_diff * mom_diff) * (pos_diff * mom_diff) / mom_diff.sqr();
-}
-
-
-bool ScatterAction::is_elastic() const {
-  return outgoing_particles_.size() == 2 &&
-         outgoing_particles_[0].pdgcode() == incoming_particles_[0].pdgcode() &&
-         outgoing_particles_[1].pdgcode() == incoming_particles_[1].pdgcode();
 }
 
 

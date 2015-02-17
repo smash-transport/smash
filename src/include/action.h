@@ -303,6 +303,13 @@ class ScatterAction : public Action {
 
   /// determine the total energy in the center-of-mass frame, i.e. sqrt of Mandelstam s
   double sqrt_s() const override;
+  /**
+   * \ingroup exception
+   * Thrown when ScatterAction is called to perform with unknown ProcessType.
+   */
+  class InvalidScatterAction : public std::invalid_argument {
+    using std::invalid_argument::invalid_argument;
+  };
 
  protected:
   /// determine the Mandelstam s variable, s = (p_a + p_b)^2 = square of CMS energy
