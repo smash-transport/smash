@@ -24,8 +24,7 @@ ActionList DecayActionsFinder::find_possible_actions(
     const ParticleList &search_list,
     const std::vector<const ParticleList *> &,  // the list of neighbors is
                                                // irrelevant for decays
-    float dt
-    ) const {
+    float dt) const {
   ActionList actions;
   actions.reserve(10);  // for short time steps this seems reasonable to expect
                         // less than 10 decays in most time steps
@@ -58,7 +57,7 @@ ActionList DecayActionsFinder::find_possible_actions(
           * width));
 
     if (decay_time < dt) {
-      // => decay_time ∈ [0, dt_[
+      // => decay_time ∈ [0, dt[
       // => the particle decays in this timestep.
       auto act = make_unique<DecayAction>(p, decay_time);
       act->add_processes(std::move(processes));

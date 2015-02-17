@@ -30,6 +30,7 @@ class ActionFinderInterface {
    *                    for possible interaction
    * \param neighbors_list a list of particles that need to be tested against
    *                       particles in search_list for possible interaction
+   * \param dt duration of the current time step in fm/c
    * \return The function returns a list (std::vector) of Action objects that
    *         could possibly be executed in this time step.
    */
