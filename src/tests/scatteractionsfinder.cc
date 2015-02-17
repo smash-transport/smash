@@ -78,15 +78,15 @@ TEST(collision_order) {
   // test for different times
   dt = 0.9;
   auto actions_1 = finder.find_possible_actions(search_list,neighbors_list, dt);
-  COMPARE(actions_1.size(), 0) << "timestep 0.9, expect no collision";
+  COMPARE(actions_1.size(), 0u) << "timestep 0.9, expect no collision";
 
   dt = 1.0;
   auto actions_2 = finder.find_possible_actions(search_list,neighbors_list, dt);
-  COMPARE(actions_2.size(), 1) << "timestep 1.0, expect 1 collision";
+  COMPARE(actions_2.size(), 1u) << "timestep 1.0, expect 1 collision";
 
   dt = 2.0;
   auto actions_3 = finder.find_possible_actions(search_list,neighbors_list, dt);
-  COMPARE(actions_3.size(), 3) << "timestep 2.0, expect 3 collisions";
+  COMPARE(actions_3.size(), 3u) << "timestep 2.0, expect 3 collisions";
 
   // perform actions from actions_3
 
@@ -120,5 +120,5 @@ TEST(collision_order) {
   actions_3[0]->perform(&particles, num_interactions);
 
   // final check
-  COMPARE(num_interactions, 2);
+  COMPARE(num_interactions, 2u);
 }
