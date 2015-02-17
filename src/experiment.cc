@@ -227,6 +227,7 @@ Experiment<Modus>::Experiment(Configuration config)
     action_finders_.emplace_back(new ScatterActionsFinder(config, parameters_));
   }
   if (config.has_value({"Collision_Term", "Pauli_Blocking"})) {
+    log.info() << "Pauli blocking is ON.";
     pauli_blocker_ = make_unique<PauliBlocker>(
                 config["Collision_Term"]["Pauli_Blocking"], parameters_);
   }

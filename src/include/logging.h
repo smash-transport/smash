@@ -99,13 +99,15 @@ DECLARE_LOGAREA(16, Grid);
 ///List is a new modus like Box, Sphere and Collider
 DECLARE_LOGAREA(17, List);
 DECLARE_LOGAREA(18, Nucleus);
+DECLARE_LOGAREA(19, PauliBlocking);
 
 /// This type collects all existing log areas so they will be created with the
 /// correct log level automatically.
 using AreaTuple = std::tuple<Main, Experiment, Box, Collider, Sphere,
                              Action, InputParser, ParticleType, FindScatter,
                              Legacy, Clock, DecayModes, Resonances, ScatterAction,
-                             Distributions, ModusDefault, Grid, List, Nucleus>;
+                             Distributions, ModusDefault, Grid, List, Nucleus,
+                             PauliBlocking>;
 }  // namespace LogArea
 
 /**

@@ -13,6 +13,8 @@
 #include "configuration.h"
 #include "experimentparameters.h"
 #include "forwarddeclarations.h"
+#include "particles.h"
+#include "pdgcode.h"
 #include "threevector.h"
 
 namespace Smash {
@@ -37,10 +39,13 @@ class PauliBlocker {
   PauliBlocker(Configuration conf, const ExperimentParameters &parameters);
   ~PauliBlocker();
 
-  // Returns phase-space density at the point (r,p)
+  // Returns phase-space densityof particle pdg at the point (r,p)
   float phasespace_dens(const ThreeVector r, const ThreeVector p,
-                        const Particles* particles) const;
+                        const Particles &particles, const PdgCode pdg) const;
  private:
+
+  // Tabulate integrals for weights
+  void init_weights();
 
   // Sigma of the gaussian used for smearing
   float sig_;
@@ -56,6 +61,9 @@ class PauliBlocker {
 
   // Testparticles number
   int ntest_;
+
+  // Weights: tabulated results of numerical integration
+  std::array<float, 30> weights_;
 };
 }  // namespace Smash
 
