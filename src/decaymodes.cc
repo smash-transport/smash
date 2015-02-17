@@ -47,8 +47,8 @@ void DecayModes::add_mode(float ratio, int L,
         std::to_string(particle_types.size()) +
         " particles. This is an invalid input.");
   }
-  const int process_id = 5;
-  decay_modes_.emplace_back(L, std::move(particle_types), ratio, process_id);
+  const ProcessBranch::ProcessType process_type = ProcessBranch::DECAY;
+  decay_modes_.emplace_back(L, std::move(particle_types), ratio, process_type);
 }
 
 void DecayModes::renormalize(float renormalization_constant) {

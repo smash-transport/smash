@@ -14,6 +14,7 @@
 
 namespace Smash {
 
+
 /**
  * \ingroup data
  *
@@ -42,20 +43,35 @@ namespace Smash {
  */
 class ProcessBranch {
  public:
+ /** Process Types are used to identify the type of the process, 
+   * currently we have 5 of these: 
+   * (1) elastic (ELASTIC)
+   * (2) resonance formation (2->1) (TWO_TO_ONE) 
+   * (3) 2->2 (inelastic) (TWO_TO_TWO)
+   * (4) string excitation (STRING)
+   * (5) resonance decays (DECAY) */  
+  enum ProcessType {
+	  NONE=0,
+	  ELASTIC=1, 
+	  TWO_TO_ONE=2, 
+	  TWO_TO_TWO=3, 
+	  STRING=4, 
+	  DECAY=5
+   };  
   /// Create a ProcessBranch without final states
   ProcessBranch() : branch_weight_(0.0), process_type_(NONE) {}
   /// Constructor without outgoing particles
-  ProcessBranch(float w, enum p_type) : branch_weight_(w), process_type_(p_type) {}
+  ProcessBranch(float w, ProcessType p_type) : branch_weight_(w), process_type_(p_type) {}
 
   /// Constructor with 1 particle
-  ProcessBranch(const ParticleType &type, float w, enum p_type) 
+  ProcessBranch(const ParticleType &type, float w, ProcessType p_type) 
       : branch_weight_(w), process_type_(p_type) {
     particle_types_.reserve(1);
     particle_types_.push_back(&type);
   }
 
   /// Constructor with 2 particles
-  ProcessBranch(const ParticleType &type_a, const ParticleType &type_b, float w, enum p_type)
+  ProcessBranch(const ParticleType &type_a, const ParticleType &type_b, float w, ProcessType p_type)
       : branch_weight_(w), process_type_(p_type) {
     particle_types_.reserve(2);
     particle_types_.push_back(&type_a);
@@ -63,7 +79,7 @@ class ProcessBranch {
   }
 
   /// Create a ProcessBranch from a list of ParticleType objects
-  ProcessBranch(std::vector<ParticleTypePtr> new_types, float w, enum p_type)
+  ProcessBranch(std::vector<ParticleTypePtr> new_types, float w, ProcessType p_type)
       : particle_types_(std::move(new_types)), branch_weight_(w), process_type_(p_type) {}
 
   /// Copying is disabled. Use std::move or create a new object.
@@ -82,7 +98,9 @@ class ProcessBranch {
    */
   inline void set_weight(float process_weight);
   /** Set the Process ID */
-  inline void set_type(int process_type);
+  inline void set_type(enum ProcessType);
+  /// Return the process type
+  inline ProcessType get_type(void) const;
   /// Clear all information from the branch
   inline void clear(void);
   /// Return the particle types associated with this branch.
@@ -99,9 +117,7 @@ class ProcessBranch {
   /// Return the branch weight
   inline float weight(void) const;
   
-  /// Return the process ID
-  inline int id(void) const;
-
+  
   /**
    * Determine the threshold for this branch, i.e. the minimum energy that is
    * required to produce all final-state particles.
@@ -121,15 +137,9 @@ class ProcessBranch {
    */
   std::vector<ParticleTypePtr> particle_types_;
   /// Weight of the branch, typically a cross section or a branching ratio
-  float branch_weight_;
-  /** Process Types are used to identify the type of the process, 
-   * currently we have 5 of these: 
-   * (1) elastic (ELASTIC)
-   * (2) resonance formation (2->1) (TWO_TO_ONE) 
-   * (3) 2->2 (inelastic) (TWO_TO_TWO)
-   * (4) string excitation (STRING)
-   * (5) resonance decays (DECAY) */ 
-  enum process_type_ {NONE, ELASTIC, TWO_TO_ONE, TWO_TO_TWO, STRING, DECAY}; 
+  float branch_weight_; 
+  /// Process type internal variable
+  ProcessType process_type_;
 
 };
 
@@ -153,13 +163,13 @@ inline float ProcessBranch::weight(void) const {
   return branch_weight_;
 }
 
-/** Set the process id */
-inline void ProcessBranch::set_type(int p_type) {
+/** Set the process type */
+inline void ProcessBranch::set_type(ProcessType p_type) {
   process_type_ = p_type;	
 }
 
-/** Return the process id */
-inline int ProcessBranch::type(void) const {
+/** Return the process type */
+inline ProcessBranch::ProcessType ProcessBranch::get_type() const {
   return process_type_;	
 }
 

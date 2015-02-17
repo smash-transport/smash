@@ -27,19 +27,19 @@ TEST(assign_default) {
 }
 TEST(assign_1_particle) {
   PdgCode smashon("9876542");
-  ProcessBranch branch(ParticleType::find(smashon), 1.234f, 1);
+  ProcessBranch branch(ParticleType::find(smashon), 1.234f, ProcessBranch::ELASTIC);
   FUZZY_COMPARE(branch.weight(), 1.234f);
 }
 TEST(assign_2_particle) {
   PdgCode smashon("9876542");
-  ProcessBranch branch(ParticleType::find(smashon), ParticleType::find(smashon), 2.345, 1);
+  ProcessBranch branch(ParticleType::find(smashon), ParticleType::find(smashon), 2.345, ProcessBranch::ELASTIC);
   FUZZY_COMPARE(branch.weight(), 2.345f);
 }
 
 TEST(lists) {
   const ParticleType &smashon(ParticleType::find({"9876542"}));
   const ParticleType &smashino(ParticleType::find({"1234568"}));
-  ProcessBranch branch(smashon, smashino, 2.345, 1);
+  ProcessBranch branch(smashon, smashino, 2.345, ProcessBranch::ELASTIC);
   const auto &list = branch.particle_types();
   COMPARE(list.size(), 2u);
   COMPARE(list.at(0), &smashon);
@@ -69,7 +69,7 @@ TEST(add_particle) {
       &ParticleType::find({"9876542"}), &ParticleType::find({"1234568"}),
       &ParticleType::find({"-1234568"}),
   };
-  ProcessBranch branch(list, 1.2, 1);
+  ProcessBranch branch(list, 1.2, ProcessBranch::ELASTIC);
   COMPARE(branch.particle_types().size(), 3u);
 }
 

@@ -15,6 +15,7 @@
 #include "include/angles.h"
 #include "include/constants.h"
 #include "include/logging.h"
+#include "include/processbranch.h"
 #include "include/random.h"
 #include "include/resonances.h"
 
@@ -104,7 +105,8 @@ const ProcessBranch* Action::choose_channel() {
   for (const auto &proc : subprocesses_) {
 /* All processes apart from strings should have a well-defined final state */
     if ((proc.particle_types().size() < 1 ||
-         proc.particle_types()[0]->pdgcode() == PdgCode::invalid()) && proc.type() != STRING) {
+         proc.particle_types()[0]->pdgcode() == PdgCode::invalid()) && 
+         proc.get_type() != ProcessBranch::STRING) {
       continue;
     }
     weight_sum += proc.weight();

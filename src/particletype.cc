@@ -19,6 +19,7 @@
 #include "include/iomanipulators.h"
 #include "include/logging.h"
 #include "include/pdgcode.h"
+#include "include/processbranch.h"
 #include "include/stringfunctions.h"
 #include "include/width.h"
 
@@ -285,9 +286,9 @@ ProcessBranchList ParticleType::get_partial_widths(const float m) const {
   partial.reserve(decay_mode_list.size());
   for (const auto &mode : decay_mode_list) {
     w = partial_width(m, mode);
-    const int process_id = 5;
+    const ProcessBranch::ProcessType process_type = ProcessBranch::DECAY;
     if (w > 0.) {
-      partial.emplace_back(mode.particle_types(), w, process_id);
+      partial.emplace_back(mode.particle_types(), w, process_type);
     }
   }
   return std::move(partial);
