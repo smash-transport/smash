@@ -16,6 +16,7 @@
 
 #include "density.h"
 #include "experimentparameters.h"
+#include "pauliblocking.h"
 #include "particles.h"
 #include "processbranch.h"
 
@@ -85,6 +86,15 @@ class Action {
    * apply anymore and should be discarded.
    */
   bool is_valid(const Particles &) const;
+
+  /**
+   *  Check if the action is pauli-bloked. If there are baryons in the final
+   *  state then blocking probability is \f$ 1 - \Pi (1-f_i) \f$, where
+   *  product is taken by all fermions in the final state and \f$ f_i \f$
+   *  denotes phase-space density at the position of i-th final-state
+   *  fermion.
+   */
+  bool is_pauliblocked(const Particles &, const PauliBlocker *) const;
 
   /**
    * Return the list of particles that go into the interaction.

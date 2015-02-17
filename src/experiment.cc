@@ -27,6 +27,7 @@
 #include "include/grid.h"
 #include "include/logging.h"
 #include "include/macros.h"
+#include "include/pauliblocking.h"
 #include "include/potentials.h"
 #include "include/random.h"
 #include "include/spheremodus.h"
@@ -225,6 +226,10 @@ Experiment<Modus>::Experiment(Configuration config)
   if (config.take({"Collision_Term", "Collisions"}, true)) {
     action_finders_.emplace_back(new ScatterActionsFinder(config, parameters_));
   }
+  if (config.has_value({"Collision_Term", "Pauli_Blocking"})) {
+    pauli_blocker_ = make_unique<PauliBlocker>(
+                config["Collision_Term"]["Pauli_Blocking"], parameters_);
+  }
 
   if (config.has_value({"Potentials"})) {
     log.info() << "Potentials are ON.";
@@ -303,6 +308,10 @@ void Experiment<Modus>::perform_actions(ActionList &actions,
       if (action->is_valid(particles_)) {
         const ParticleList incoming_particles = action->incoming_particles();
         action->perform(&particles_, interactions_total);
+        if (pauli_blocker_ &&
+            action->is_pauliblocked(particles_, pauli_blocker_.get())) {
+          // action->undo(&particles_, interactions_total);
+        }
         const ParticleList outgoing_particles = action->outgoing_particles();
         // Calculate Eckart rest frame density at the interaction point
         const ThreeVector r_interaction = action->get_interaction_point();

@@ -66,6 +66,7 @@ set(smash_src
         modusdefault.cc
         nucleus.cc
         oscaroutput.cc
+        pauliblocking.cc
         parametrizations.cc
         particledata.cc
         particles.cc

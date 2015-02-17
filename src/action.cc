@@ -15,6 +15,7 @@
 #include "include/angles.h"
 #include "include/constants.h"
 #include "include/logging.h"
+#include "include/pauliblocking.h"
 #include "include/random.h"
 #include "include/resonances.h"
 
@@ -72,6 +73,12 @@ bool Action::is_valid(const Particles &particles) const {
     }
   }
   return true;
+}
+
+bool Action::is_pauliblocked(const Particles & particles,
+                             const PauliBlocker* p_bl) const {
+  // dummy return
+  return false;
 }
 
 ParticleList Action::incoming_particles() const {

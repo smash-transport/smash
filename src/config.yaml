@@ -76,6 +76,10 @@ Collision_Term:
     Force_Decays_At_End:  True
     # elastic cross section, mb (= 0.1 fm^2)
     Sigma:         10.0
+    PauliBlocking:
+        Rr:        1.86
+        Rc:        2.2
+        Rp:        0.08
 
 Potentials:
     Skyrme:

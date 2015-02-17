@@ -20,6 +20,7 @@
 #include "forwarddeclarations.h"
 #include "outputinterface.h"
 #include "particles.h"
+#include "pauliblocking.h"
 #include "potentials.h"
 #include "quantumnumbers.h"
 #include "scatteractionsfinder.h"
@@ -184,6 +185,12 @@ class Experiment : public ExperimentBase {
    * calculates them and their gradients.
    */
   std::unique_ptr<Potentials> potentials_;
+
+  /**
+   * An instance of PauliBlocker class that stores parameters needed
+   * for Pauli blocking calculations and computes phase-space density.
+   */
+  std::unique_ptr<PauliBlocker> pauli_blocker_;
 
   /**
    * A list of output formaters. They will be called to write the state of the
