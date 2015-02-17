@@ -18,6 +18,7 @@
 #include "include/pauliblocking.h"
 #include "include/random.h"
 #include "include/resonances.h"
+#include "include/width.h"
 
 
 namespace Smash {
@@ -155,26 +156,18 @@ void Action::sample_cms_momenta() {
     mass_b = sample_resonance_mass(t_b, t_a, cms_energy);
   }
 
-  double energy_a = (cms_energy * cms_energy + mass_a * mass_a - mass_b * mass_b) /
-                   (2.0 * cms_energy);
-  double momentum_radial = std::sqrt(energy_a * energy_a - mass_a * mass_a);
+  double momentum_radial = pCM (cms_energy, mass_a, mass_b);
   if (!(momentum_radial > 0.0)) {
-    log.warn("radial momenta ", momentum_radial);
+    log.warn("Particle: ", t_a.pdgcode(), " radial momentum: ", momentum_radial);
+    log.warn("Etot: ", cms_energy, " m_a: ", mass_a, " m_b: ", mass_b);
   }
   /* TODO : Angles should be sampled from differential cross section
    * of this process. */
   Angles phitheta;
   phitheta.distribute_isotropically();
-  if (!(energy_a > mass_a)) {
-    log.info("Particle ", t_a.pdgcode(), " radial momenta ", momentum_radial,
-             phitheta);
-    log.info("Etot: ", cms_energy, " m_a: ", mass_a, " m_b: ", mass_b, " E_a: ",
-             energy_a);
-  }
 
-  p_a->set_4momentum(FourVector(energy_a, phitheta.threevec() * momentum_radial));
-  p_b->set_4momentum(FourVector(cms_energy - energy_a,
-                               -phitheta.threevec() * momentum_radial));
+  p_a->set_4momentum(mass_a,  phitheta.threevec() * momentum_radial);
+  p_b->set_4momentum(mass_b, -phitheta.threevec() * momentum_radial);
 
   log.debug("p_a: ", *p_a, "\np_b: ", *p_b);
 }

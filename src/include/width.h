@@ -7,9 +7,28 @@
 #ifndef SRC_INCLUDE_WIDTH_H_
 #define SRC_INCLUDE_WIDTH_H_
 
+#include <cmath>
+
 #include "particletype.h"
 
 namespace Smash {
+
+/**
+ * Return the center-of-mass momentum of two particles,
+ * given sqrt(s) and their masses.
+ *
+ * \param srts sqrt(s) of the process [GeV].
+ * \param mass_a Mass of first particle [GeV].
+ * \param mass_b Mass of second particle [GeV].
+ */
+template <typename T>
+T pCM(const T srts, const T mass_a, const T mass_b) noexcept {
+  const auto s = srts * srts;
+  const auto mass_a_sqr = mass_a * mass_a;
+  const auto x = s + mass_a_sqr - mass_b * mass_b;
+  return std::sqrt(x * x * (T(0.25) / s) - mass_a_sqr);
+}
+
 
 /**
  * Get the mass-dependent width of a two-body decay into stable particles

@@ -164,7 +164,7 @@ double spectral_function_integrand(double resonance_mass,
 /* Resonance mass sampling for 2-particle final state */
 float sample_resonance_mass(const ParticleType &type_resonance,
                             const ParticleType &type_stable,
-                            const float cms_energy) {
+                            const double cms_energy) {
   /* Define distribution parameters */
   float mass_stable = type_stable.mass();
   IntegrandParameters params = {&type_resonance, mass_stable,
@@ -173,15 +173,14 @@ float sample_resonance_mass(const ParticleType &type_resonance,
   /* Sample resonance mass from the distribution
    * used for calculating the cross section. */
   float mass_resonance = 0.;
-  float maximum_mass = cms_energy - mass_stable;
+  float maximum_mass = std::nextafter(static_cast<float>(cms_energy - mass_stable), 0.f);
   double random_number = 1.0;
   double distribution_max
     = spectral_function_integrand(params.type->mass(), &params);
   double distribution_value = 0.0;
   while (random_number > distribution_value) {
     random_number = Random::uniform(0.0, distribution_max);
-    mass_resonance = Random::uniform(std::nextafter(type_resonance.minimum_mass(),
-                                                    maximum_mass),
+    mass_resonance = Random::uniform(type_resonance.minimum_mass(),
                                      maximum_mass);
     distribution_value = spectral_function_integrand(mass_resonance, &params);
   }
