@@ -360,7 +360,8 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
                             // interaction
         ) {
       for (const auto &finder : action_finders_) {
-        actions += finder->find_possible_actions(search_list, neighbors_list);
+        actions += finder->find_possible_actions(search_list, neighbors_list,
+                                parameters_.timestep_duration());
       }
     });
     /* (1.c) Sort action list by time. */
