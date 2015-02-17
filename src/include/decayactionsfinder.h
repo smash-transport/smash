@@ -20,8 +20,8 @@ namespace Smash {
  * Just loops through all particles and checks if they can decay during the next timestep.  */
 class DecayActionsFinder : public ActionFinderInterface {
  public:
-  /** Initialize the finder with the given parameters. */
-  DecayActionsFinder(const ExperimentParameters &parameters);
+  /** Initialize the finder */
+  DecayActionsFinder() {}
   /** Check the whole particle list for decays
    * and return a list with the corrsponding Action objects. */
   ActionList find_possible_actions(

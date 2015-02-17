@@ -18,8 +18,6 @@
 
 namespace Smash {
 
-DecayActionsFinder::DecayActionsFinder(const ExperimentParameters &parameters){}
-
 ActionList DecayActionsFinder::find_possible_actions(
     const ParticleList &search_list,
     const std::vector<const ParticleList *> &,  // the list of neighbors is

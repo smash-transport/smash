@@ -220,7 +220,7 @@ Experiment<Modus>::Experiment(Configuration config)
   log.info() << *this;
 
   if (config.take({"Collision_Term", "Decays"}, true)) {
-    action_finders_.emplace_back(new DecayActionsFinder(parameters_));
+    action_finders_.emplace_back(new DecayActionsFinder());
   }
   if (config.take({"Collision_Term", "Collisions"}, true)) {
     action_finders_.emplace_back(new ScatterActionsFinder(config, parameters_));
