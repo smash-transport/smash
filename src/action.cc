@@ -78,7 +78,15 @@ bool Action::is_valid(const Particles &particles) const {
 
 bool Action::is_pauliblocked(const Particles & particles,
                              const PauliBlocker* p_bl) const {
-  // dummy return
+  for (const auto &p : outgoing_particles_) {
+    if (p.is_baryon() &&
+        p_bl->phasespace_dens(p.position().threevec(),
+                              p.momentum().threevec(),
+                              particles, p.pdgcode()) >
+              Random::uniform(0.f,1.f)) {
+      return true;
+    }
+  }
   return false;
 }
 
