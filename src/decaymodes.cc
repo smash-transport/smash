@@ -87,6 +87,7 @@ void DecayModes::load_decaymodes(const std::string &input) {
   static std::vector<DecayModes> decaymodes;
   decaymodes.clear();  // in case an exception was thrown and should try again
   decaymodes.resize(ParticleType::list_all().size());
+  all_decay_modes = &decaymodes;
 
   PdgCode pdgcode = PdgCode::invalid();
   DecayModes decay_modes_to_add;
@@ -161,7 +162,7 @@ void DecayModes::load_decaymodes(const std::string &input) {
 
       int L;
       lineinput >> L;
-      if (L < 0 || L > 1) {  // at some point we want to support L up to 4 (cf.
+      if (L < 0 || L > 2) {  // at some point we want to support L up to 4 (cf.
                              // BlattWeisskopf in width.cc)
         throw LoadFailure("Invalid angular momentum '" + std::to_string(L) +
                           "' in decaymodes.txt:" + std::to_string(line.number) +
@@ -196,8 +197,6 @@ void DecayModes::load_decaymodes(const std::string &input) {
     }
   }
   end_of_decaymodes();
-  assert(nullptr == all_decay_modes);
-  all_decay_modes = &decaymodes;
 }
 
 

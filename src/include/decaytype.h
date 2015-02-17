@@ -128,6 +128,11 @@ class TwoBodyDecaySemistable : public TwoBodyDecay {
   float in_width (float m0, float G0, float m, float m1, float m2) const override;
  protected:
   float rho (float m) const override;
+  float calc_rho (float m) const;
+  std::vector<float> tabulation_;  // vector for storing tabulated values
+  float M_min_, dM_;               // minimum mass and step size for tabulation
+  float Lambda_;
+  void init_tabulation(float range, unsigned int N);
 };
 
 

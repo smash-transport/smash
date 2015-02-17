@@ -14,6 +14,7 @@
 #include "include/constants.h"
 #include "include/width.h"
 #include "include/resonances.h"
+#include "include/logging.h"
 
 namespace Smash {
 
@@ -87,6 +88,9 @@ TwoBodyDecaySemistable::TwoBodyDecaySemistable(ParticleTypePtrList part_types,
       particle_types_[0]->pdgcode().string() + " " +
       particle_types_[1]->pdgcode().string());
   }
+  Lambda_ = (particle_types_[1]->baryon_number()!=0) ? 2.0 : 1.6;
+  // initialize tabulation
+  init_tabulation(1., 50);
 }
 
 /** Parameters for GSL integration. */
@@ -115,7 +119,7 @@ static double integrand_rho_Manley(double mass, void *parameters) {
           * spectral_function(mass, ip->type.mass(), resonance_width);
 }
 
-float TwoBodyDecaySemistable::rho (float m) const {
+float TwoBodyDecaySemistable::calc_rho (float m) const {
   gsl_integration_workspace *workspace
     = gsl_integration_workspace_alloc(1000);
   IntegParam ip = {*particle_types_[1], particle_types_[0]->mass(), m, L_};
@@ -138,22 +142,44 @@ float TwoBodyDecaySemistable::rho (float m) const {
   return integral_value;
 }
 
-float TwoBodyDecaySemistable::width (float m0, float G0, float m) const {
-  double Lambda = (particle_types_[1]->baryon_number()!=0) ? 2.0 : 1.6;
+void TwoBodyDecaySemistable::init_tabulation(float range, unsigned int N) {
+  const auto &log = logger<LogArea::DecayType>();
+  M_min_ = particle_types_[0]->mass()+particle_types_[1]->minimum_mass();
+  log.info("Tabulating width for decay into ",
+           particle_types_[0]->name(), " ",
+           particle_types_[1]->name(), " (L=", L_,", M_min=", M_min_, ")");
+  dM_ = range/N;
+  tabulation_.resize(N);
+  for (unsigned int i=0; i<N; i++) {
+    tabulation_[i] = calc_rho(M_min_ + i*dM_);
+  }
+}
 
+float TwoBodyDecaySemistable::rho (float m) const {
+  if (m<M_min_) {
+    return 0.;
+  }
+  // lookup tabulated values
+  unsigned int n = static_cast<unsigned int>(round((m-M_min_)/dM_));
+  if (n>=tabulation_.size()) {
+    return tabulation_.back();
+  } else {
+    return tabulation_[n];
+  }
+}
+
+float TwoBodyDecaySemistable::width (float m0, float G0, float m) const {
   return G0 * rho(m) / rho(m0)
          * Post_FF_sqr (m, m0, particle_types_[0]->mass()
-                               + particle_types_[1]->minimum_mass(), Lambda);
+                               + particle_types_[1]->minimum_mass(), Lambda_);
 }
 
 float TwoBodyDecaySemistable::in_width (float m0, float G0, float m, float m1, float m2) const {
   double p_f = pCM(m, m1, m2);
 
-  double Lambda = (particle_types_[1]->baryon_number()!=0) ? 2.0 : 1.6;
-
   return G0 * p_f * BlattWeisskopf(p_f*interaction_radius, L_)
          * Post_FF_sqr (m, m0, particle_types_[0]->mass()
-                               + particle_types_[1]->minimum_mass(), Lambda)
+                               + particle_types_[1]->minimum_mass(), Lambda_)
          / ( m * rho(m0) );
 }
 
