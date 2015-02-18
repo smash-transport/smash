@@ -23,6 +23,7 @@
 #include "../include/clock.h"
 #include "../include/outputinterface.h"
 #include "../include/particles.h"
+#include "../include/processbranch.h"
 #include "../include/random.h"
 
 using namespace Smash;
@@ -100,6 +101,7 @@ static bool compare_interaction_block_header(const int &nin,
                                              const int &nout,
                                              double rho,
                                              double weight,
+                                             ProcessBranch::ProcessType process_type,
                                              FILE* file) {
   int nin_read, nout_read;
   double rho_read, weight_read;
@@ -109,6 +111,7 @@ static bool compare_interaction_block_header(const int &nin,
   read_binary(nout_read, file);
   VERIFY(std::fread(&rho_read, sizeof(double), 1, file) == 1);
   VERIFY(std::fread(&weight_read, sizeof(double), 1, file) == 1);
+///  VERIFY(std::fread(&process_type_read, sizeof(int), 1, file == 1);
   // std::cout << c_read << std::endl;
   // std::cout << nin_read << " " << nin << std::endl;
   // std::cout << nout_read << " " << nout << std::endl;
@@ -160,7 +163,8 @@ TEST(fullhistory_format) {
   final_particles.push_back(particles.data(particles.id_max()));
   double rho = 0.123;
   double weight = 3.21;
-  bin_output->at_interaction(initial_particles, final_particles, rho, weight);
+  ProcessBranch::ProcessType process_type = ProcessBranch::NONE;
+  bin_output->at_interaction(initial_particles, final_particles, rho, weight, process_type);
 
   /* Final state output */
   bin_output->at_eventend(particles, event_id);
@@ -198,7 +202,7 @@ TEST(fullhistory_format) {
   // interaction:2 smashons -> 1 smashon
   nin = 2;
   nout = 1;
-  VERIFY(compare_interaction_block_header(nin, nout, rho, weight, binF));
+  VERIFY(compare_interaction_block_header(nin, nout, rho, weight, process_type, binF));
   VERIFY(compare_particle(initial_particles[0], binF));
   VERIFY(compare_particle(initial_particles[1], binF));
   VERIFY(compare_particle(final_particles[0], binF));

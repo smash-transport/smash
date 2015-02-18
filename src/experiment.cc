@@ -301,8 +301,10 @@ void Experiment<Modus>::perform_actions(ActionList &actions,
   if (!actions.empty()) {
     for (const auto &action : actions) {
       if (action->is_valid(particles_)) {
+        ProcessBranch::ProcessType process_type = ProcessBranch::NONE; 
         const ParticleList incoming_particles = action->incoming_particles();
-        action->perform(&particles_, interactions_total);
+        process_type = action->perform(&particles_, interactions_total, process_type);
+        log.debug("Process Type is: ", process_type);
         const ParticleList outgoing_particles = action->outgoing_particles();
         // Calculate Eckart rest frame density at the interaction point
         const ThreeVector r_interaction = action->get_interaction_point();
@@ -312,7 +314,7 @@ void Experiment<Modus>::perform_actions(ActionList &actions,
         const double total_cross_section = action->weight();
         for (const auto &output : outputs_) {
           output->at_interaction(incoming_particles, outgoing_particles, rho,
-                                    total_cross_section);
+                                    total_cross_section, process_type);
         }
         log.debug(~einhard::Green(), "✔ ", action);
       } else {

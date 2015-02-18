@@ -21,6 +21,7 @@
 #include "outputinterface.h"
 #include "particles.h"
 #include "potentials.h"
+#include "processbranch.h"
 #include "quantumnumbers.h"
 #include "scatteractionsfinder.h"
 

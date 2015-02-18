@@ -25,7 +25,8 @@ ScatterAction::ScatterAction(const ParticleData &in_part_a,
     : Action({in_part_a, in_part_b}, time_of_execution) {}
 
 
-void ScatterAction::perform(Particles *particles, size_t &id_process) {
+ProcessBranch::ProcessType ScatterAction::perform(Particles *particles, size_t &id_process, 
+                            ProcessBranch::ProcessType process_type) {
   const auto &log = logger<LogArea::ScatterAction>();
 
   /* Relevant particle IDs for the collision. */
@@ -43,7 +44,9 @@ void ScatterAction::perform(Particles *particles, size_t &id_process) {
  
   /*Variable declaration needs to happen before switch-case structure*/
   FourVector middle_point;
-
+  
+  return process_type = proc->get_type();
+  
   switch(proc->get_type()) {
 	case ProcessBranch::ELASTIC:  
       /* 2->2 elastic scattering */
@@ -96,7 +99,33 @@ void ScatterAction::perform(Particles *particles, size_t &id_process) {
       log.debug("Particle map now has ", particles->size(), " elements.");
       break; 
     case ProcessBranch::TWO_TO_TWO:
-      log.debug("TWO_TO_TWO only exists for Baryon Baryon");
+      /* 2->2 inelastic scattering*/
+      log.debug("Process: Inelastic scattering.", proc->get_type());
+      /* The starting point of the new particles is between the two initial particles:
+       * x_middle = (x_a + x_b) / 2   */
+      middle_point = (incoming_particles_[0].position()
+                   + incoming_particles_[1].position()) / 2.;
+      /* 2 particles in final state: Sample the particle momenta in CM system. */
+      sample_cms_momenta();
+      /* Set positions & boost to computational frame. */
+      for (ParticleData &new_particle : outgoing_particles_) {
+        new_particle.set_4position(middle_point);
+
+        new_particle.boost_momentum(-beta_cm());
+
+        // store the process id in the Particle data
+        new_particle.set_id_process(id_process);
+
+        log.debug("Resonance: ", new_particle);
+
+        new_particle.set_id(particles->add_data(new_particle));
+      }
+
+      /* Remove the initial particles */
+      particles->remove(id_a);
+      particles->remove(id_b);
+
+      log.debug("Particle map now has ", particles->size(), " elements.");
       break;
     case ProcessBranch::NONE:
       log.debug("ProcessType NONE should not have been selected");
@@ -114,12 +143,7 @@ void ScatterAction::perform(Particles *particles, size_t &id_process) {
     
   }
   
-  
-  
-  
-  
   check_conservation(id_process);
-
   id_process++;
 }
 
@@ -293,10 +317,7 @@ void ScatterAction::resonance_formation() {
     log.debug("Momentum of the new particle: ",
               outgoing_particles_[0].momentum());
     break;
-  case 2:
-    /* 2 particles in final state: Sample the particle momenta. */
-    sample_cms_momenta();
-    break;
+  
   default:
     std::string s = "resonance_formation: "
                     "Incorrect number of particles in final state: ";
@@ -343,31 +364,35 @@ ProcessBranch ScatterActionBaryonBaryon::elastic_cross_section(float elast_par) 
 }
 
 ProcessBranch ScatterActionBaryonBaryon::string_excitation_cross_section() {
-  const auto &log = logger<LogArea::ScatterAction>();
+/*Avoid unused variable warning
+ * const auto &log = logger<LogArea::ScatterAction>();
+ */
   const PdgCode &pdg_a = incoming_particles_[0].type().pdgcode();
   const PdgCode &pdg_b = incoming_particles_[1].type().pdgcode();
-  const double s = mandelstam_s();
-  
+/* Avoid unused variable warning 
+*  const double s = mandelstam_s();
+*/ 
     
   if(pdg_a.iso_multiplet() == 0x1112 &&
      pdg_b.iso_multiplet() == 0x1112) {
     /* Nucleon+Nucleon: calculate total minus other channels cross section */
    float sig_string = 0.0;
    const ProcessBranch::ProcessType process_type = ProcessBranch::STRING;
-   /* Threshold for string production */
-    if (s >= 1.6) {
-      if (pdg_a == pdg_b) { /* pp */
-          sig_string = pp_total(s) - pp_elastic(s);
-          log.debug("pp string xsection: ", sig_string);
-      } else if (pdg_a.is_antiparticle_of(pdg_b)) {  /* ppbar */
-          sig_string = ppbar_total(s) - ppbar_elastic(s);
-          log.debug("ppbar string xsection: ", sig_string);
-      } else {                                     /* np */
-          sig_string = np_total(s) - np_elastic(s);
-          log.debug("pn string xsection: ", sig_string);
-      }
-    } 
-    
+   /* Threshold for string production, disabled for the moment /TODO 
+    *   if (s >= 1.6) {
+    *     if (pdg_a == pdg_b) {  pp 
+    *         sig_string = pp_total(s) - pp_elastic(s);
+    *      log.debug("pp string xsection: ", sig_string);
+    *  } else if (pdg_a.is_antiparticle_of(pdg_b)) {  ppbar 
+    *         sig_string = ppbar_total(s) - ppbar_elastic(s);
+    *      log.debug("ppbar string xsection: ", sig_string);
+    *  } else {                                     np 
+    *         sig_string = np_total(s) - np_elastic(s);
+    *      log.debug("pn string xsection: ", sig_string);
+    * }
+    *} 
+    */
+       
     if (sig_string>really_small) {
           return ProcessBranch(sig_string, process_type);
     } else {

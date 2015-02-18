@@ -68,7 +68,8 @@ class OscarOutput : public OutputInterface {
   void at_interaction(const ParticleList &incoming_particles,
                       const ParticleList &outgoing_particles,
                       const double density,
-                      const double total_cross_section) override;
+                      const double total_cross_section,
+                      const ProcessBranch::ProcessType process_type) override;
 
   void at_intermediate_time(const Particles &particles, const int event_number,
                             const Clock &clock) override;

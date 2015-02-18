@@ -74,7 +74,8 @@ class Action {
    * This method does not do any sanity checks, but assumes that is_valid has
    * been called to determine if the action is still valid.
    */
-  virtual void perform(Particles *particles, size_t &id_process) = 0;
+  virtual ProcessBranch::ProcessType perform(Particles *particles, size_t &id_process, 
+                       ProcessBranch::ProcessType process_type) = 0;
 
   /**
    * Check whether the action still applies.
@@ -186,7 +187,8 @@ class DecayAction : public Action {
    *
    * \throws InvalidDecay
    */
-  void perform(Particles *particles, size_t &id_process) override;
+  ProcessBranch::ProcessType perform(Particles *particles, size_t &id_process, 
+               ProcessBranch::ProcessType process_type) override;
 
   /**
    * \ingroup exception
@@ -256,7 +258,8 @@ class ScatterAction : public Action {
    *
    * \throws InvalidResonanceFormation
    */
-  void perform(Particles *particles, size_t &id_process) override;
+  ProcessBranch::ProcessType perform(Particles *particles, size_t &id_process,
+               ProcessBranch::ProcessType process_type) override;
 
   /**
    * Determine the elastic cross section for this collision. This routine
