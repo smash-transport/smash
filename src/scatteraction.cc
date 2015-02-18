@@ -40,10 +40,9 @@ void ScatterAction::perform(Particles *particles, size_t &id_process) {
   outgoing_particles_ = proc->particle_list();
   
   log.debug("Chosen channel: ", proc->get_type(), proc->particle_list()); 
-  /* The starting point of resonance is between the two initial particles:
-       * x_middle = (x_a + x_b) / 2   */
-  FourVector middle_point = (incoming_particles_[0].position()
-                           + incoming_particles_[1].position()) / 2.;
+ 
+  /*Variable declaration needs to happen before switch-case structure*/
+  FourVector middle_point;
 
   switch(proc->get_type()) {
 	case ProcessBranch::ELASTIC:  
@@ -68,8 +67,11 @@ void ScatterAction::perform(Particles *particles, size_t &id_process) {
     case ProcessBranch::TWO_TO_ONE:
       /* resonance formation */
       log.debug("Process: Resonance formation.", proc->get_type());
+      /* The starting point of resonance is between the two initial particles:
+       * x_middle = (x_a + x_b) / 2   */
+      middle_point = (incoming_particles_[0].position()
+                   + incoming_particles_[1].position()) / 2.;
 
-     
       /* processes computed in the center of momenta */
       resonance_formation();
 
@@ -111,6 +113,10 @@ void ScatterAction::perform(Particles *particles, size_t &id_process) {
         + ")");
     
   }
+  
+  
+  
+  
   
   check_conservation(id_process);
 
