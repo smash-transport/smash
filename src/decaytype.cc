@@ -145,9 +145,9 @@ float TwoBodyDecaySemistable::calc_rho (float m) const {
 void TwoBodyDecaySemistable::init_tabulation(float range, unsigned int N) {
   const auto &log = logger<LogArea::DecayType>();
   M_min_ = particle_types_[0]->mass()+particle_types_[1]->minimum_mass();
-  log.info("Tabulating width for decay into ",
-           particle_types_[0]->name(), " ",
-           particle_types_[1]->name(), " (L=", L_,", M_min=", M_min_, ")");
+  log.debug("Tabulating width for decay into ",
+            particle_types_[0]->name(), " ", particle_types_[1]->name(),
+            " (L=", L_,", M_min=", M_min_, ")");
   dM_ = range/N;
   tabulation_.resize(N);
   for (unsigned int i=0; i<N; i++) {
