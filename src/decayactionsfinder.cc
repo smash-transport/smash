@@ -32,10 +32,8 @@ ActionList DecayActionsFinder::find_possible_actions(
       continue;      /* particle doesn't decay */
     }
 
-    ProcessBranchList processes =
-        p.type().get_partial_widths(p.effective_mass());
-    const float width =
-        total_weight(processes);  // total decay width (mass-dependent)
+    ProcessBranchList processes = p.type().get_partial_widths(p.effective_mass());
+    const float width = total_weight(processes);  // total decay width (mass-dependent)
 
     /* Exponential decay. Lifetime tau = 1 / width
      * t / tau = width * t (remember GeV-fm conversion)

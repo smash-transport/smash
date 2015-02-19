@@ -39,8 +39,8 @@ float Action::weight() const {
   return total_weight_;
 }
 
-void Action::add_process(ProcessBranch p) {
-  total_weight_ += p.weight();
+void Action::add_process(ProcessBranch *p) {
+  total_weight_ += p->weight();
   subprocesses_.emplace_back(std::move(p));
 }
 
@@ -48,12 +48,12 @@ void Action::add_processes(ProcessBranchList pv) {
   if (subprocesses_.empty()) {
     subprocesses_ = std::move(pv);
     for (auto &proc : subprocesses_) {
-      total_weight_ += proc.weight();
+      total_weight_ += proc->weight();
     }
   } else {
     subprocesses_.reserve(subprocesses_.size() + pv.size());
     for (auto &proc : pv) {
-      total_weight_ += proc.weight();
+      total_weight_ += proc->weight();
       subprocesses_.emplace_back(std::move(proc));
     }
   }
@@ -101,13 +101,12 @@ ParticleList Action::choose_channel() {
   /* Loop through all subprocesses and select one by Monte Carlo, based on
    * their weights.  */
   for (const auto &proc : subprocesses_) {
-    if (proc.particle_types().size() < 1 ||
-        proc.particle_types()[0]->pdgcode() == PdgCode::invalid()) {
+    if (proc->particle_number() < 1) {
       continue;
     }
-    weight_sum += proc.weight();
+    weight_sum += proc->weight();
     if (random_weight <= weight_sum) {
-      return proc.particle_list();
+      return proc->particle_list();
     }
   }
   /* Should never get here. */
