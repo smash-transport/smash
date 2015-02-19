@@ -12,6 +12,7 @@
 #include "decaytype.h"
 
 #include <vector>
+#include <memory>
 
 namespace Smash {
 

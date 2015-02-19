@@ -71,12 +71,17 @@ struct ExperimentParameters;
 
 using ActionPtr = build_unique_ptr_<Action>;
 using ActionList = build_vector_<ActionPtr>;
+
 using OutputsList = build_vector_<build_unique_ptr_<OutputInterface>>;
 using ParticleList = build_vector_<ParticleData>;
+
 using ParticleTypeList = build_vector_<ParticleType>;
 using ParticleTypePtrList = build_vector_<ParticleTypePtr>;
-using ProcessBranchList = build_vector_<ProcessBranch*>;
-using DecayBranchList = build_vector_<DecayBranch*>;
+
+using ProcessBranchPtr = build_unique_ptr_<ProcessBranch>;
+using ProcessBranchList = build_vector_<ProcessBranchPtr>;
+using DecayBranchPtr = build_unique_ptr_<DecayBranch>;
+using DecayBranchList = build_vector_<DecayBranchPtr>;
 
 namespace bf = boost::filesystem;
 

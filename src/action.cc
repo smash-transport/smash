@@ -33,12 +33,7 @@ Action::Action(Action &&a)
       time_of_execution_(a.time_of_execution_),
       total_weight_(a.total_weight_) {}
 
-Action::~Action() {
-  // clean up all sub-processes
-  for (auto &proc : subprocesses_) {
-    delete proc;
-  }
-}
+Action::~Action() = default;
 
 float Action::weight() const {
   return total_weight_;

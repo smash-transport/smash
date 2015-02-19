@@ -61,11 +61,6 @@ ActionList DecayActionsFinder::find_possible_actions(
       auto act = make_unique<DecayAction>(p, decay_time);
       act->add_processes(std::move(processes));
       actions.emplace_back(std::move(act));
-    } else {
-      // clean up processes for partial weights
-      for (auto &proc : processes) {
-	delete proc;
-      }
     }
   }
   return std::move(actions);

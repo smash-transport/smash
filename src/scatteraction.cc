@@ -9,6 +9,8 @@
 
 #include "include/action.h"
 
+#include <memory>
+
 #include "include/angles.h"
 #include "include/constants.h"
 #include "include/logging.h"
@@ -16,6 +18,7 @@
 #include "include/pdgcode.h"
 #include "include/random.h"
 #include "include/resonances.h"
+#include "include/cxx14compat.h"
 
 namespace Smash {
 
@@ -190,8 +193,8 @@ ProcessBranchList ScatterAction::resonance_cross_sections() {
 
     /* If cross section is non-negligible, add resonance to the list */
     if (resonance_xsection > really_small) {
-      resonance_process_list.push_back(new CollisionBranch(type_resonance,
-                                                           resonance_xsection));
+      resonance_process_list.push_back(make_unique<CollisionBranch>
+                                       (type_resonance, resonance_xsection));
 
       log.debug("Found resonance: ", type_resonance);
       log.debug("2->1 with original particles: ", type_particle_a,
@@ -439,8 +442,8 @@ ProcessBranchList ScatterActionBaryonBaryon::nuc_nuc_to_nuc_res (
                 * resonance_integral / (s * std::sqrt(cm_momentum_squared()));
 
       if (xsection > really_small) {
-        process_list.push_back(
-            new CollisionBranch(*type_resonance, *second_type, xsection));
+        process_list.push_back(make_unique<CollisionBranch>
+                               (*type_resonance, *second_type, xsection));
         log.debug("Found 2->2 creation process for resonance ",
                   *type_resonance);
         log.debug("2->2 with original particles: ",
@@ -523,7 +526,8 @@ ProcessBranchList ScatterActionBaryonBaryon::nuc_res_to_nuc_nuc (
         / ((type_resonance->spin()+1) * s * std::sqrt(cm_momentum_squared()));
 
       if (xsection > really_small) {
-        process_list.push_back(new CollisionBranch(*nuc_a, *nuc_b, xsection));
+        process_list.push_back(make_unique<CollisionBranch>(*nuc_a, *nuc_b,
+                                                            xsection));
         const auto &log = logger<LogArea::ScatterAction>();
         log.debug("Found 2->2 absoption process for resonance ",
                   *type_resonance);

@@ -19,6 +19,7 @@
 #include "include/pdgcode.h"
 #include "include/processbranch.h"
 #include "include/stringfunctions.h"
+#include "include/cxx14compat.h"
 
 namespace Smash {
 
@@ -56,7 +57,7 @@ void DecayModes::add_mode(float ratio, int L,
         std::to_string(particle_types.size()) +
         " particles. This is an invalid input.");
   }
-  decay_modes_.emplace_back(new DecayBranch(type, ratio));
+  decay_modes_.push_back(make_unique<DecayBranch>(type, ratio));
 }
 
 void DecayModes::renormalize(float renormalization_constant) {
@@ -203,7 +204,6 @@ void DecayModes::load_decaymodes(const std::string &input) {
 void DecayModes::clear() {
   for (auto &mode : decay_modes_) {
     mode->clear();
-    delete mode;
   }
   decay_modes_.clear();
 }

@@ -123,7 +123,7 @@ class Action {
    */
   ParticleList outgoing_particles_;
   /** list of possible subprocesses  */
-  std::vector<ProcessBranch*> subprocesses_;
+  ProcessBranchList subprocesses_;
   /** time at which the action is supposed to be performed  */
   float time_of_execution_;
   /** sum of all subprocess weights  */
@@ -427,8 +427,6 @@ class ScatterActionMesonMeson : public ScatterAction {
   void format_debug_output(std::ostream &out) const override;
 };
 
-using ActionPtr = std::unique_ptr<Action>;
-using ScatterActionPtr = std::unique_ptr<ScatterAction>;
 
 inline std::vector<ActionPtr> &operator+=(std::vector<ActionPtr> &lhs,
                                           std::vector<ActionPtr> &&rhs) {

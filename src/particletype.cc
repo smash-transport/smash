@@ -21,6 +21,7 @@
 #include "include/pdgcode.h"
 #include "include/stringfunctions.h"
 #include "include/width.h"
+#include "include/cxx14compat.h"
 
 namespace Smash {
 
@@ -229,8 +230,9 @@ float ParticleType::total_width(const float m) const {
     return w;
   }
   /* Loop over decay modes and sum up all partial widths. */
-  for (const auto &mode : decay_modes().decay_mode_list()) {
-    w = w + partial_width(m, mode);
+  const auto &modes = decay_modes().decay_mode_list();
+  for (unsigned int i=0; i<modes.size(); i++) {
+    w = w + partial_width(m, modes[i].get());
   }
   return w;
 }
@@ -254,10 +256,10 @@ ProcessBranchList ParticleType::get_partial_widths(const float m) const {
   const auto &decay_mode_list = decay_modes().decay_mode_list();
   ProcessBranchList partial;
   partial.reserve(decay_mode_list.size());
-  for (const auto &mode : decay_mode_list) {
-    w = partial_width(m, mode);
+  for (unsigned int i=0; i<decay_mode_list.size(); i++) {
+    w = partial_width(m, decay_mode_list[i].get());
     if (w > 0.) {
-      partial.emplace_back(new DecayBranch(&mode->type(), w));
+      partial.push_back(make_unique<DecayBranch>(&decay_mode_list[i]->type(),w));
     }
   }
   return std::move(partial);
