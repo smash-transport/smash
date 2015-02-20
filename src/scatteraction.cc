@@ -49,7 +49,7 @@ ProcessBranch::ProcessType ScatterAction::perform(Particles *particles,
   FourVector middle_point;
 
   switch(proc->get_type()) {
-    case ProcessBranch::ELASTIC:  
+    case ProcessBranch::Elastic:  
       /* 2->2 elastic scattering */
       log.debug("Process: Elastic collision.", proc->get_type());
 
@@ -62,12 +62,12 @@ ProcessBranch::ProcessType ScatterAction::perform(Particles *particles,
       particles->data(id_b) = outgoing_particles_[1];
 
       break; 
-    case ProcessBranch::STRING: 
+    case ProcessBranch::String: 
       /* string excitation */ 
       log.debug("Process: String Excitation.");
       /// string_excitation(incoming_particles_, outgoing_particles_);  
       break;
-    case ProcessBranch::TWO_TO_ONE:
+    case ProcessBranch::TwoToOne:
       /* resonance formation */
       log.debug("Process: Resonance formation.", proc->get_type());
       /* The starting point of resonance is between the two initial particles:
@@ -98,7 +98,7 @@ ProcessBranch::ProcessType ScatterAction::perform(Particles *particles,
 
       log.debug("Particle map now has ", particles->size(), " elements.");
       break; 
-    case ProcessBranch::TWO_TO_TWO:
+    case ProcessBranch::TwoToTwo:
       /* 2->2 inelastic scattering*/
       log.debug("Process: Inelastic scattering.", proc->get_type());
       /* The starting point of the new particles is between the two initial particles:
@@ -127,15 +127,15 @@ ProcessBranch::ProcessType ScatterAction::perform(Particles *particles,
 
       log.debug("Particle map now has ", particles->size(), " elements.");
       break;
-    case ProcessBranch::NONE:
-      log.debug("ProcessType NONE should not have been selected");
+    case ProcessBranch::None:
+      log.debug("ProcessType None should not have been selected");
       break;
-    case ProcessBranch::DECAY: 
-      log.debug("ProcessType DECAY should have been handled as DecayAction");
+    case ProcessBranch::Decay: 
+      log.debug("ProcessType Decay should have been handled as DecayAction");
       break;      
     default: 
       throw InvalidScatterAction(
-        "ScatterAction::perform: Only ELASTIC, STRING or TWO_TO_ONE are supported. "
+        "ScatterAction::perform: Unknown Process Type. "
         "ProcessType " + std::to_string(proc->get_type()) +
         " was requested. (PDGcode1=" + incoming_particles_[0].pdgcode().string()
         + ", PDGcode2=" + incoming_particles_[1].pdgcode().string()
@@ -205,21 +205,14 @@ double ScatterAction::particle_distance() const {
 }
 
 
-bool ScatterAction::is_elastic() const {
-  return outgoing_particles_.size() == 2 &&
-         outgoing_particles_[0].pdgcode() == incoming_particles_[0].pdgcode() &&
-         outgoing_particles_[1].pdgcode() == incoming_particles_[1].pdgcode();
-}
-
-
 CollisionBranch* ScatterAction::elastic_cross_section(float elast_par) {
   return new CollisionBranch(incoming_particles_[0].type(),
                              incoming_particles_[1].type(),
-                             elast_par, ProcessBranch::ELASTIC);
+                             elast_par, ProcessBranch::Elastic);
 }
 
 CollisionBranch* ScatterAction::string_excitation_cross_section() {
-  return new CollisionBranch(0., ProcessBranch::STRING);
+  return new CollisionBranch(0., ProcessBranch::String);
 }
 
 ProcessBranchList ScatterAction::resonance_cross_sections() {
@@ -255,7 +248,7 @@ ProcessBranchList ScatterAction::resonance_cross_sections() {
     if (resonance_xsection > really_small) {
       resonance_process_list.push_back(make_unique<CollisionBranch>
                                        (type_resonance, resonance_xsection,
-                                        ProcessBranch::TWO_TO_ONE));
+                                        ProcessBranch::TwoToOne));
       log.debug("Found resonance: ", type_resonance);
       log.debug("2->1 with original particles: ", type_particle_a,
                 type_particle_b);
@@ -354,7 +347,7 @@ CollisionBranch* ScatterActionBaryonBaryon::elastic_cross_section(float elast_pa
     if (sig_el>0.) {
       return new CollisionBranch(incoming_particles_[0].type(),
                                  incoming_particles_[1].type(),
-                                 sig_el, ProcessBranch::ELASTIC);
+                                 sig_el, ProcessBranch::Elastic);
     } else {
       std::stringstream ss;
       ss << "problem in CrossSections::elastic: " << pdg_a.string().c_str()
@@ -398,14 +391,14 @@ CollisionBranch* ScatterActionBaryonBaryon::string_excitation_cross_section() {
     */
 
     if (sig_string>really_small) {
-      return new CollisionBranch(sig_string, ProcessBranch::STRING);
+      return new CollisionBranch(sig_string, ProcessBranch::String);
     } else {
       /* empty process branch for s < 1.6 GeV */
-      return new CollisionBranch(0.0, ProcessBranch::NONE);
+      return new CollisionBranch(0.0, ProcessBranch::None);
     }
   } else {
     /* empty process branch for non-nucleons */  
-    return new CollisionBranch(0.0, ProcessBranch::NONE);
+    return new CollisionBranch(0.0, ProcessBranch::None);
   }
 }
 
@@ -542,7 +535,7 @@ ProcessBranchList ScatterActionBaryonBaryon::nuc_nuc_to_nuc_res (
       if (xsection > really_small) {
         process_list.push_back(make_unique<CollisionBranch>
                                (*type_resonance, *second_type, xsection,
-                                ProcessBranch::TWO_TO_TWO));
+                                ProcessBranch::TwoToTwo));
         log.debug("Found 2->2 creation process for resonance ",
                   *type_resonance);
         log.debug("2->2 with original particles: ",
@@ -627,7 +620,7 @@ ProcessBranchList ScatterActionBaryonBaryon::nuc_res_to_nuc_nuc (
       if (xsection > really_small) {
         process_list.push_back(make_unique<CollisionBranch>
                                (*nuc_a, *nuc_b, xsection,
-                                ProcessBranch::TWO_TO_TWO));
+                                ProcessBranch::TwoToTwo));
         const auto &log = logger<LogArea::ScatterAction>();
         log.debug("Found 2->2 absoption process for resonance ",
                   *type_resonance);

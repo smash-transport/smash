@@ -106,7 +106,7 @@ const ProcessBranch* Action::choose_channel() {
   for (const auto &proc : subprocesses_) {
     /* All processes apart from strings should have a well-defined final state. */
     if (proc->particle_number() < 1
-        && proc->get_type() != ProcessBranch::STRING) {
+        && proc->get_type() != ProcessBranch::String) {
       continue;
     }
     weight_sum += proc->weight();

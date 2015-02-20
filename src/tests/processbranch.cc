@@ -22,28 +22,28 @@ TEST(init_particle_types) {
 }
 
 TEST(assign_default) {
-  CollisionBranch branch(0.f, ProcessBranch::STRING);
+  CollisionBranch branch(0.f, ProcessBranch::String);
   FUZZY_COMPARE(branch.weight(), 0.f);
-  COMPARE(branch.get_type(), ProcessBranch::STRING);
+  COMPARE(branch.get_type(), ProcessBranch::String);
 }
 TEST(assign_1_particle) {
   PdgCode smashon("9876542");
   CollisionBranch branch(ParticleType::find(smashon), 1.234f,
-                         ProcessBranch::ELASTIC);
+                         ProcessBranch::Elastic);
   FUZZY_COMPARE(branch.weight(), 1.234f);
 }
 TEST(assign_2_particle) {
   PdgCode smashon("9876542");
   CollisionBranch branch(ParticleType::find(smashon),
                          ParticleType::find(smashon),
-                         2.345, ProcessBranch::ELASTIC);
+                         2.345, ProcessBranch::Elastic);
   FUZZY_COMPARE(branch.weight(), 2.345f);
 }
 
 TEST(lists) {
   const ParticleType &smashon(ParticleType::find({"9876542"}));
   const ParticleType &smashino(ParticleType::find({"1234568"}));
-  CollisionBranch branch(smashon, smashino, 2.345, ProcessBranch::ELASTIC);
+  CollisionBranch branch(smashon, smashino, 2.345, ProcessBranch::Elastic);
   const auto &list = branch.particle_types();
   COMPARE(list.size(), 2u);
   COMPARE(list.at(0), &smashon);
@@ -73,12 +73,12 @@ TEST(add_particle) {
       &ParticleType::find({"9876542"}), &ParticleType::find({"1234568"}),
       &ParticleType::find({"-1234568"}),
   };
-  CollisionBranch branch(list, 1.2, ProcessBranch::ELASTIC);
+  CollisionBranch branch(list, 1.2, ProcessBranch::Elastic);
   COMPARE(branch.particle_types().size(), 3u);
 }
 
 TEST(weights) {
-  CollisionBranch branch(0.f,ProcessBranch::ELASTIC);
+  CollisionBranch branch(0.f,ProcessBranch::Elastic);
   branch.set_weight(0.34f);
   COMPARE(branch.weight(), 0.34f);
   // double is intentional here.

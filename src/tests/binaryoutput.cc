@@ -43,7 +43,7 @@ static std::string pdg_str = "661";
 static std::string smashon_str = "smashon " + mass_str + " "
     + width_str + " " + pdg_str + "\n";
 static const int zero = 0;
-static const int current_format_version = 2;
+static const int current_format_version = 3;
 
 static ParticleData create_smashon_particle() {
   ParticleData particle = ParticleData{ParticleType::find(0x661)};
@@ -102,9 +102,9 @@ static bool compare_interaction_block_header(const int &nin,
                                              const int &nout,
                                              double rho,
                                              double weight,
-                                             ProcessBranch::ProcessType process_type,
+                                             int process_type,
                                              FILE* file) {
-  int nin_read, nout_read;
+  int nin_read, nout_read, process_type_read;
   double rho_read, weight_read;
   char c_read;
   VERIFY(std::fread(&c_read, sizeof(char), 1, file) == 1);
@@ -112,13 +112,13 @@ static bool compare_interaction_block_header(const int &nin,
   read_binary(nout_read, file);
   VERIFY(std::fread(&rho_read, sizeof(double), 1, file) == 1);
   VERIFY(std::fread(&weight_read, sizeof(double), 1, file) == 1);
-///  VERIFY(std::fread(&process_type_read, sizeof(int), 1, file == 1);
+  read_binary(process_type_read, file);
   // std::cout << c_read << std::endl;
   // std::cout << nin_read << " " << nin << std::endl;
   // std::cout << nout_read << " " << nout << std::endl;
   // std::cout << rho << std::endl;
   return (c_read == 'i') && (nin_read == nin) && (nout_read == nout)
-      && (rho_read == rho) && (weight_read == weight);
+      && (rho_read == rho) && (weight_read == weight) && (process_type_read == process_type);
 }
 
 /* function to read and compare event end line */
@@ -164,7 +164,7 @@ TEST(fullhistory_format) {
   final_particles.push_back(particles.data(particles.id_max()));
   double rho = 0.123;
   double weight = 3.21;
-  ProcessBranch::ProcessType process_type = ProcessBranch::NONE;
+  ProcessBranch::ProcessType process_type = ProcessBranch::None;
   bin_output->at_interaction(initial_particles, final_particles, rho, weight, process_type);
 
   /* Final state output */

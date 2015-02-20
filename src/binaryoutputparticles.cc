@@ -81,8 +81,8 @@ BinaryOutputParticles::BinaryOutputParticles(bf::path path,
    *
    * At interaction:
    * \code
-   * char int int
-   * 'i'  nin nout
+   * char int int double double int
+   * 'i'  nin nout density xsection    process_type
    * \endcode
    * \li \c nin, \c nout are numbers of incoming and outgoing particles
    *

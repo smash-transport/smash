@@ -46,19 +46,22 @@ namespace Smash {
 class ProcessBranch {
  public:
  /** Process Types are used to identify the type of the process, 
-   * currently we have 5 of these: 
-   * (1) elastic (ELASTIC)
-   * (2) resonance formation (2->1) (TWO_TO_ONE) 
-   * (3) 2->2 (inelastic) (TWO_TO_TWO)
-   * (4) string excitation (STRING)
-   * (5) resonance decays (DECAY) */  
+   * currently we have 7 of these: 
+   * (0) nothing (None)
+   * (1) elastic (Elastic)
+   * (2) resonance formation (2->1) (TwoToOne) 
+   * (3) 2->2 (inelastic) (TwoToTwo)
+   * (4) string excitation (String)
+   * (5) resonance decays (Decay) 
+   * (6) Wall transition (Wall)*/  
   enum ProcessType {
-	  NONE=0,
-	  ELASTIC=1, 
-	  TWO_TO_ONE=2, 
-	  TWO_TO_TWO=3, 
-	  STRING=4, 
-	  DECAY=5
+	  None = 0,
+	  Elastic = 1, 
+	  TwoToOne = 2, 
+	  TwoToTwo = 3, 
+	  String = 4, 
+	  Decay = 5,
+	  Wall = 6
    };
   /// Create a ProcessBranch without final states
   ProcessBranch() : branch_weight_(0.) {}
@@ -236,7 +239,7 @@ class DecayBranch : public ProcessBranch {
   }
   /// Return the process type
   inline ProcessType get_type(void) const override {
-    return ProcessBranch::DECAY;
+    return ProcessBranch::Decay;
   }
   /// Clear all information from the branch
   inline void clear(void) {

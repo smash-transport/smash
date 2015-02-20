@@ -39,7 +39,7 @@ class BinaryOutputBase : public OutputInterface {
 
  private:
   /// file format version number
-  const int format_version_ = 2; 
+  const int format_version_ = 3; 
 };
 
 /**
