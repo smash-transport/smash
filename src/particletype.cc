@@ -22,6 +22,7 @@
 #include "include/processbranch.h"
 #include "include/stringfunctions.h"
 #include "include/width.h"
+#include "include/cxx14compat.h"
 
 namespace Smash {
 
@@ -204,48 +205,19 @@ float ParticleType::minimum_mass() const {
   }
   /* Otherwise, find the lowest mass value needed in any decay mode */
   for (const auto &mode : decay_modes().decay_mode_list()) {
-    minmass = std::min(minmass, mode.threshold());
+    minmass = std::min(minmass, mode->threshold());
   }
   return minmass;
 }
 
 
 float ParticleType::partial_width(const float m,
-                                  const DecayBranch &mode) const {
-  if (m < mode.threshold()) {
+                                  const DecayBranch *mode) const {
+  if (m < mode->threshold()) {
     return 0.;
   }
-  float partial_width_at_pole = width_at_pole()*mode.weight();
-  const ParticleType &t_a = *mode.particle_types()[0];
-  const ParticleType &t_b = *mode.particle_types()[1];
-  if (mode.particle_types().size() == 2) {
-    /* two-body decays */
-    if (t_a.is_stable() && t_b.is_stable()) {
-      /* mass-dependent width for stable decay products */
-      return width_Manley_stable(m, mass(), t_a.mass(), t_b.mass(),
-                                 mode.angular_momentum(),
-                                 partial_width_at_pole);
-    }
-    else if (t_a.is_stable()) {
-      /* mass-dependent width for one unstable daughter */
-      return width_Manley_semistable(m, mass(), t_a.mass(), t_b,
-                                     mode.angular_momentum(),
-                                     partial_width_at_pole);
-    }
-    else if (t_b.is_stable()) {
-      /* mass-dependent width for one unstable daughter */
-      return width_Manley_semistable(m, mass(), t_b.mass(), t_a,
-                                     mode.angular_momentum(),
-                                     partial_width_at_pole);
-    }
-    else {
-      /* two unstable decay products: assume constant width */
-      return partial_width_at_pole;
-    }
-  } else {
-    /* three-body decays: asssume constant width */
-    return partial_width_at_pole;
-  }
+  float partial_width_at_pole = width_at_pole()*mode->weight();
+  return mode->type().width(mass(), partial_width_at_pole, m);
 }
 
 const DecayModes &ParticleType::decay_modes() const {
@@ -259,8 +231,9 @@ float ParticleType::total_width(const float m) const {
     return w;
   }
   /* Loop over decay modes and sum up all partial widths. */
-  for (const auto &mode : decay_modes().decay_mode_list()) {
-    w = w + partial_width(m, mode);
+  const auto &modes = decay_modes().decay_mode_list();
+  for (unsigned int i=0; i<modes.size(); i++) {
+    w = w + partial_width(m, modes[i].get());
   }
   return w;
 }
@@ -284,11 +257,10 @@ ProcessBranchList ParticleType::get_partial_widths(const float m) const {
   const auto &decay_mode_list = decay_modes().decay_mode_list();
   ProcessBranchList partial;
   partial.reserve(decay_mode_list.size());
-  for (const auto &mode : decay_mode_list) {
-    w = partial_width(m, mode);
-    const ProcessBranch::ProcessType process_type = ProcessBranch::DECAY;
+  for (unsigned int i=0; i<decay_mode_list.size(); i++) {
+    w = partial_width(m, decay_mode_list[i].get());
     if (w > 0.) {
-      partial.emplace_back(mode.particle_types(), w, process_type);
+      partial.push_back(make_unique<DecayBranch>(&decay_mode_list[i]->type(),w));
     }
   }
   return std::move(partial);
@@ -297,59 +269,15 @@ ProcessBranchList ParticleType::get_partial_widths(const float m) const {
 float ParticleType::get_partial_in_width(const float m,
                                          const ParticleData &p_a,
                                          const ParticleData &p_b) const {
-  const auto &t_a = p_a.type();
-  const auto &t_b = p_b.type();
   /* Get all decay modes. */
   const auto &decaymodes = decay_modes().decay_mode_list();
 
   /* Find the right one. */
   for (const auto &mode : decaymodes) {
-    size_t decay_particles = mode.particle_types().size();
-    if ( decay_particles > 3 ) {
-      logger<LogArea::ParticleType>().warn("Not a 1->2 or 1->3 process!\n",
-                                           "Number of decay particles: ",
-                                           decay_particles);
-    } else {
-      if (decay_particles == 2 && ((*mode.particle_types()[0] == t_a &&
-                                    *mode.particle_types()[1] == t_b) ||
-                                   (*mode.particle_types()[0] == t_b &&
-                                    *mode.particle_types()[1] == t_a))) {
-        /* Found: calculate width. */
-        if (m < mode.threshold()) {
-          return 0.;
-        }
-        float partial_width_at_pole = width_at_pole()*mode.weight();
-        if (mode.particle_types().size() == 2) {
-          /* two-body decays */
-          if (t_a.is_stable() && t_b.is_stable()) {
-            /* mass-dependent width for stable decay products */
-            return width_Manley_stable(m, mass(), t_a.mass(), t_b.mass(),
-                                      mode.angular_momentum(),
-                                      partial_width_at_pole);
-          }
-          else if (t_a.is_stable()) {
-            /* mass-dependent in-width for one unstable daughter */
-            return in_width_Manley_semistable(m, mass(), t_a.mass(),
-                                              p_b.effective_mass(), t_b,
-                                              mode.angular_momentum(),
-                                              partial_width_at_pole);
-          }
-          else if (t_b.is_stable()) {
-            /* mass-dependent in-width for one unstable daughter */
-            return in_width_Manley_semistable(m, mass(), t_b.mass(),
-                                              p_a.effective_mass(), t_a,
-                                              mode.angular_momentum(),
-                                              partial_width_at_pole);
-          }
-          else {
-            /* two unstable decay products: assume constant width */
-            return partial_width_at_pole;
-          }
-        } else {
-          /* three-body decays: asssume constant width */
-          return partial_width_at_pole;
-        }
-      }
+    float partial_width_at_pole = width_at_pole()*mode->weight();
+    if (mode->type().has_particles(p_a.type(),p_b.type())) {
+      return mode->type().in_width(mass(), partial_width_at_pole, m,
+                                   p_a.effective_mass(), p_b.effective_mass());
     }
   }
   /* Decay mode not found: width is zero. */

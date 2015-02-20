@@ -25,7 +25,7 @@ namespace Smash {
  **/
 class BinaryOutputBase : public OutputInterface {
  protected:
-  BinaryOutputBase(FILE *f) : file_{f} {}
+  BinaryOutputBase(FILE *f);
   void write(const std::string &s);
   void write(const FourVector &v);
   void write(std::int32_t x) {
@@ -36,6 +36,10 @@ class BinaryOutputBase : public OutputInterface {
 
   /// Binary particles output
   FilePtr file_;
+
+ private:
+  /// file format version number
+  const int format_version_ = 2; 
 };
 
 /**

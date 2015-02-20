@@ -64,7 +64,7 @@ class Action {
   float weight() const;
 
   /** Add a new subprocess.  */
-  void add_process(ProcessBranch p);
+  void add_process(ProcessBranch *p);
   /** Add several new subprocesses at once.  */
   void add_processes(ProcessBranchList pv);
 
@@ -74,8 +74,8 @@ class Action {
    * This method does not do any sanity checks, but assumes that is_valid has
    * been called to determine if the action is still valid.
    */
-  virtual ProcessBranch::ProcessType perform(Particles *particles, size_t &id_process, 
-                       ProcessBranch::ProcessType process_type) = 0;
+  virtual ProcessBranch::ProcessType perform(Particles *particles,
+                                             size_t &id_process) = 0;
 
   /**
    * Check whether the action still applies.
@@ -124,7 +124,7 @@ class Action {
    */
   ParticleList outgoing_particles_;
   /** list of possible subprocesses  */
-  std::vector<ProcessBranch> subprocesses_;
+  ProcessBranchList subprocesses_;
   /** time at which the action is supposed to be performed  */
   float time_of_execution_;
   /** sum of all subprocess weights  */
@@ -187,8 +187,8 @@ class DecayAction : public Action {
    *
    * \throws InvalidDecay
    */
-  ProcessBranch::ProcessType perform(Particles *particles, size_t &id_process, 
-               ProcessBranch::ProcessType process_type) override;
+  ProcessBranch::ProcessType perform(Particles *particles, size_t &id_process)
+                             override;
 
   /**
    * \ingroup exception
@@ -258,8 +258,8 @@ class ScatterAction : public Action {
    *
    * \throws InvalidResonanceFormation
    */
-  ProcessBranch::ProcessType perform(Particles *particles, size_t &id_process,
-               ProcessBranch::ProcessType process_type) override;
+  ProcessBranch::ProcessType perform(Particles *particles, size_t &id_process)
+                             override;
 
   /**
    * Determine the elastic cross section for this collision. This routine
@@ -271,7 +271,7 @@ class ScatterAction : public Action {
    * \return A ProcessBranch object containing the cross section and
    * final-state IDs.
    */
-  virtual ProcessBranch elastic_cross_section(float elast_par);
+  virtual CollisionBranch* elastic_cross_section(float elast_par);
 
   /**
    * The cross section for string excitations is currently defined to
@@ -285,8 +285,8 @@ class ScatterAction : public Action {
    * possibility to excite 2 strings as well, then it will become a ProcessBranchList
    *  
    */
-  virtual ProcessBranch string_excitation_cross_section();
-    
+  virtual CollisionBranch* string_excitation_cross_section();
+
   /**
   * Find all resonances that can be produced in a 2->1 collision of the two
   * input particles and the production cross sections of these resonances.
@@ -364,14 +364,14 @@ class ScatterActionBaryonBaryon : public ScatterAction {
    * \return A ProcessBranch object containing the cross section and
    * final-state IDs.
    */
-  ProcessBranch elastic_cross_section(float elast_par) override;
+  CollisionBranch* elastic_cross_section(float elast_par) override;
   /**
    * The cross section for string excitations is currently defined to
    * be the difference between the parametrized total cross section and from PDG 
    * and the parametrized elastic cross section above sqrts 1.6 GeV
    * TODO it should fill up the total cross section above all other implemented channels
    */
-  ProcessBranch string_excitation_cross_section() override;
+  CollisionBranch* string_excitation_cross_section() override;
   /* There is no resonance formation out of two baryons: Return empty list. */
   ProcessBranchList resonance_cross_sections() override {
     return ProcessBranchList();
@@ -457,8 +457,6 @@ class ScatterActionMesonMeson : public ScatterAction {
   void format_debug_output(std::ostream &out) const override;
 };
 
-using ActionPtr = std::unique_ptr<Action>;
-using ScatterActionPtr = std::unique_ptr<ScatterAction>;
 
 inline std::vector<ActionPtr> &operator+=(std::vector<ActionPtr> &lhs,
                                           std::vector<ActionPtr> &&rhs) {

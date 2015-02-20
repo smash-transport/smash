@@ -41,8 +41,8 @@ static ScatterAction* set_up_action(const ParticleData &proj,
          act->sqrt_s(), act->weight(), proc_list.size());
 
   for (auto &proc: proc_list) {
-    printf("-> %s %s (%f mb) \n", proc.particle_list()[0].pdgcode().string().c_str(),
-           proc.particle_list()[1].pdgcode().string().c_str(), proc.weight());
+    printf("-> %s %s (%f mb) \n", proc->particle_list()[0].pdgcode().string().c_str(),
+           proc->particle_list()[1].pdgcode().string().c_str(), proc->weight());
   };
 
   return act;
@@ -79,12 +79,12 @@ TEST(NN_NDelta) {
   VERIFY(proc_list_np.size()==2);
 
   // check isospin ratios
-  FUZZY_COMPARE(3*proc_list_pp[0].weight(),proc_list_pp[1].weight());  // ratio 1:3
-  FUZZY_COMPARE(proc_list_pn[0].weight(),proc_list_pn[1].weight());    // ratio 1:1
-  FUZZY_COMPARE(proc_list_pn[0].weight(),proc_list_np[1].weight());    // ratio 1:1
+  FUZZY_COMPARE(3*proc_list_pp[0]->weight(),proc_list_pp[1]->weight());  // ratio 1:3
+  FUZZY_COMPARE(proc_list_pn[0]->weight(),proc_list_pn[1]->weight());    // ratio 1:1
+  FUZZY_COMPARE(proc_list_pn[0]->weight(),proc_list_np[1]->weight());    // ratio 1:1
 
-  FUZZY_COMPARE(proc_list_pp[0].weight(),proc_list_pn[0].weight());    // ratio 1:1
-  FUZZY_COMPARE(proc_list_pp[0].weight(),proc_list_np[0].weight());    // ratio 1:1
+  FUZZY_COMPARE(proc_list_pp[0]->weight(),proc_list_pn[0]->weight());    // ratio 1:1
+  FUZZY_COMPARE(proc_list_pp[0]->weight(),proc_list_np[0]->weight());    // ratio 1:1
 
 //   FUZZY_COMPARE(act_pp->weight(),2*act_pn->weight());                  // ratio 2:1
 
@@ -129,9 +129,9 @@ TEST(NDelta_NN) {
   VERIFY(proc_list_DDn.size()==1);
 
   // check isospin ratios
-  FUZZY_COMPARE(proc_list_Dn[0].weight(),proc_list_Dn[1].weight());     // ratio 1:1
-  FUZZY_COMPARE(proc_list_Dp[0].weight(),proc_list_Dn[0].weight());     // ratio 1:1
-  FUZZY_COMPARE(3*proc_list_Dp[0].weight(),proc_list_DDn[0].weight());  // ratio 1:3
+  FUZZY_COMPARE(proc_list_Dn[0]->weight(),proc_list_Dn[1]->weight());     // ratio 1:1
+  FUZZY_COMPARE(proc_list_Dp[0]->weight(),proc_list_Dn[0]->weight());     // ratio 1:1
+  FUZZY_COMPARE(3*proc_list_Dp[0]->weight(),proc_list_DDn[0]->weight());  // ratio 1:3
 
 //   FUZZY_COMPARE(2*act_Dp->weight(),act_Dn->weight());                  // ratio 1:2
 

@@ -43,9 +43,6 @@ BinaryOutputParticles::BinaryOutputParticles(bf::path path,
    * Detailed specification of the binary format can be found here:
    * \ref format_binary_
    */
-  fwrite("SMSH", 4, 1, file_.get());  // magic number
-  write(0);              // file format version number
-  write(VERSION_MAJOR);  // version
 }
 
   /*!\Userguide

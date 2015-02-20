@@ -53,6 +53,7 @@ set(smash_src
         decayaction.cc
         decayactionsfinder.cc
         decaymodes.cc
+        decaytype.cc
         deformednucleus.cc
         density.cc
         densityoutput.cc

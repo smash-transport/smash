@@ -126,7 +126,7 @@ class ParticleType {
    * \param m Invariant mass of the decaying particle.
    * \param mode Decay mode to consider.
    */
-  float partial_width(const float m, const DecayBranch &mode) const;
+  float partial_width(const float m, const DecayBranch *mode) const;
 
   /**
    * Get the mass-dependent total width of a particle with mass m.

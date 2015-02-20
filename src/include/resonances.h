@@ -123,7 +123,7 @@ double spectral_function_integrand(double resonance_mass, void * parameters);
  */
 float sample_resonance_mass(const ParticleType &type_resonance,
                             const ParticleType &type_stable,
-                            const float cms_energy);
+                            const double cms_energy);
 
 /**
  * Function for 1-dimensional GSL integration.

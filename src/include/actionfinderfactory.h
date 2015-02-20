@@ -10,6 +10,7 @@
 #ifndef SRC_INCLUDE_ACTIONFINDERFACTORY_H_
 #define SRC_INCLUDE_ACTIONFINDERFACTORY_H_
 
+#include "clock.h"
 #include "forwarddeclarations.h"
 #include <vector>
 
@@ -22,9 +23,6 @@ namespace Smash {
  */
 class ActionFinderInterface {
  public:
-  /** Initialize the finder with the given parameters. */
-  ActionFinderInterface(float dt) : dt_(dt) {}
-
   /**
    * Abstract function for finding actions, given a list of particles.
    *
@@ -32,22 +30,20 @@ class ActionFinderInterface {
    *                    for possible interaction
    * \param neighbors_list a list of particles that need to be tested against
    *                       particles in search_list for possible interaction
+   * \param dt duration of the current time step in fm/c
    * \return The function returns a list (std::vector) of Action objects that
    *         could possibly be executed in this time step.
    */
   virtual ActionList find_possible_actions(
       const ParticleList &search_list,
-      const std::vector<const ParticleList *> &neighbors_list) const = 0;
+      const std::vector<const ParticleList *> &neighbors_list,
+      float dt) const = 0;
 
   /**
    * This abstract function finds 'final' actions
    * (for cleaning up at the end of the simulation).
    */
   virtual ActionList find_final_actions(const ParticleList &) const = 0;
-
- protected:
-  /** Timestep duration. */
-  float dt_;
 };
 
 }  // namespace Smash

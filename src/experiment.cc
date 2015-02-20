@@ -220,7 +220,7 @@ Experiment<Modus>::Experiment(Configuration config)
   log.info() << *this;
 
   if (config.take({"Collision_Term", "Decays"}, true)) {
-    action_finders_.emplace_back(new DecayActionsFinder(parameters_));
+    action_finders_.emplace_back(new DecayActionsFinder());
   }
   if (config.take({"Collision_Term", "Collisions"}, true)) {
     action_finders_.emplace_back(new ScatterActionsFinder(config, parameters_));
@@ -301,9 +301,9 @@ void Experiment<Modus>::perform_actions(ActionList &actions,
   if (!actions.empty()) {
     for (const auto &action : actions) {
       if (action->is_valid(particles_)) {
-        ProcessBranch::ProcessType process_type = ProcessBranch::NONE; 
         const ParticleList incoming_particles = action->incoming_particles();
-        process_type = action->perform(&particles_, interactions_total, process_type);
+        ProcessBranch::ProcessType process_type =
+            action->perform(&particles_, interactions_total);
         log.debug("Process Type is: ", process_type);
         const ParticleList outgoing_particles = action->outgoing_particles();
         // Calculate Eckart rest frame density at the interaction point
@@ -314,7 +314,7 @@ void Experiment<Modus>::perform_actions(ActionList &actions,
         const double total_cross_section = action->weight();
         for (const auto &output : outputs_) {
           output->at_interaction(incoming_particles, outgoing_particles, rho,
-                                    total_cross_section, process_type);
+                                 total_cross_section, process_type);
         }
         log.debug(~einhard::Green(), "✔ ", action);
       } else {
@@ -362,7 +362,8 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
                             // interaction
         ) {
       for (const auto &finder : action_finders_) {
-        actions += finder->find_possible_actions(search_list, neighbors_list);
+        actions += finder->find_possible_actions(search_list, neighbors_list,
+                                parameters_.timestep_duration());
       }
     });
     /* (1.c) Sort action list by time. */

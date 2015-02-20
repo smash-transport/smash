@@ -43,6 +43,7 @@ static std::string pdg_str = "661";
 static std::string smashon_str = "smashon " + mass_str + " "
     + width_str + " " + pdg_str + "\n";
 static const int zero = 0;
+static const int current_format_version = 2;
 
 static ParticleData create_smashon_particle() {
   ParticleData particle = ParticleData{ParticleType::find(0x661)};
@@ -189,7 +190,7 @@ TEST(fullhistory_format) {
   read_binary(smash_version, binF);  // smash version
 
   VERIFY(magic == "SMSH");
-  VERIFY(format_version_number == 2);
+  VERIFY(format_version_number == current_format_version);
   VERIFY(smash_version == VERSION_MAJOR);
 
   // particles at event atart: expect two smashons
@@ -275,7 +276,7 @@ TEST(particles_format) {
   read_binary(smash_version, binF);  // smash version
 
   VERIFY(magic == "SMSH");
-  VERIFY(format_version_number == 0);
+  VERIFY(format_version_number == current_format_version);
   VERIFY(smash_version == VERSION_MAJOR);
 
   int npart;

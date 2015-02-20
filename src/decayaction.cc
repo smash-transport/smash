@@ -149,8 +149,8 @@ void DecayAction::one_to_three() {
 }
 
 
-ProcessBranch::ProcessType DecayAction::perform(Particles *particles, size_t &id_process,
-						  ProcessBranch::ProcessType process_type) {
+ProcessBranch::ProcessType DecayAction::perform(Particles *particles,
+                                                size_t &id_process) {
   const auto &log = logger<LogArea::DecayModes>();
   log.debug("Process: Resonance decay. ");
  /*
@@ -162,7 +162,6 @@ ProcessBranch::ProcessType DecayAction::perform(Particles *particles, size_t &id
    */
   const ProcessBranch* proc = choose_channel();
   outgoing_particles_ = proc->particle_list();
-  return process_type = proc->get_type();
   switch (outgoing_particles_.size()) {
   case 2:
     one_to_two();
@@ -203,6 +202,7 @@ ProcessBranch::ProcessType DecayAction::perform(Particles *particles, size_t &id
     p.set_id(particles->add_data(p));
   }
   log.debug("Particle map now has ", particles->size(), " elements.");
+  return proc->get_type();
 }
 
 void DecayAction::format_debug_output(std::ostream &out) const {

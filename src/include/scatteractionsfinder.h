@@ -25,13 +25,16 @@ class ScatterActionsFinder : public ActionFinderInterface {
   /** Initialize the finder with the given parameters. */
   ScatterActionsFinder(Configuration config,
                        const ExperimentParameters &parameters);
+  ScatterActionsFinder(float elastic_parameter, int testparticles);
+
   /** Determine the collision time of the two particles. */
   static double collision_time(const ParticleData &p_a, const ParticleData &p_b);
   /** Check the whole particle list for collisions
    * and return a list with the corrsponding Action objects. */
   ActionList find_possible_actions(
       const ParticleList &search_list,
-      const std::vector<const ParticleList *> &neighbors_list) const override;
+      const std::vector<const ParticleList *> &neighbors_list,
+      float dt) const override;
   /** Find some final collisions at the end of the simulation.
    * Currently does nothing. */
   ActionList find_final_actions(const ParticleList &) const override
@@ -41,7 +44,7 @@ class ScatterActionsFinder : public ActionFinderInterface {
   /** Check for a single pair of particles (id_a, id_b) if a collision will happen
    * in the next timestep and create a corresponding Action object in that case. */
   ActionPtr check_collision(const ParticleData &data_a,
-                            const ParticleData &data_b) const;
+                            const ParticleData &data_b, float dt) const;
   /** Elastic cross section parameter (in mb). */
   float elastic_parameter_ = 0.0;
   /** Number of test particles. */

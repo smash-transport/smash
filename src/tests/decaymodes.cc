@@ -67,20 +67,20 @@ TEST(load_decay_modes) {
     VERIFY(!rho0.is_empty());
     const auto &modelist = rho0.decay_mode_list();
     COMPARE(modelist.size(), 1u);
-    COMPARE(modelist[0].weight(), 1.);
-    COMPARE(modelist[0].particle_types().size(), 2u);
-    COMPARE(modelist[0].particle_types()[0]->pdgcode().dump(), 0x211u);
-    COMPARE(modelist[0].particle_types()[1]->pdgcode().dump(), 0x80000211u);
+    COMPARE(modelist[0]->weight(), 1.);
+    COMPARE(modelist[0]->particle_number(), 2u);
+    COMPARE(modelist[0]->particle_types()[0]->pdgcode().dump(), 0x211u);
+    COMPARE(modelist[0]->particle_types()[1]->pdgcode().dump(), 0x80000211u);
   }
   {
     const auto &rhoplus = ParticleType::find(0x213).decay_modes();
     VERIFY(!rhoplus.is_empty());
     const auto &modelist = rhoplus.decay_mode_list();
     COMPARE(modelist.size(), 1u);
-    COMPARE(modelist[0].weight(), 1.);
-    COMPARE(modelist[0].particle_types().size(), 2u);
-    COMPARE(modelist[0].particle_types()[0]->pdgcode().dump(), 0x211u);
-    COMPARE(modelist[0].particle_types()[1]->pdgcode().dump(), 0x111u);
+    COMPARE(modelist[0]->weight(), 1.);
+    COMPARE(modelist[0]->particle_number(), 2u);
+    COMPARE(modelist[0]->particle_types()[0]->pdgcode().dump(), 0x211u);
+    COMPARE(modelist[0]->particle_types()[1]->pdgcode().dump(), 0x111u);
   }
   {
     // the rho- decay is auto-generated from the rho+ decay
@@ -88,28 +88,28 @@ TEST(load_decay_modes) {
     VERIFY(!rhominus.is_empty());
     const auto &modelist = rhominus.decay_mode_list();
     COMPARE(modelist.size(), 1u);
-    COMPARE(modelist[0].weight(), 1.);
-    COMPARE(modelist[0].particle_types().size(), 2u);
-    COMPARE(modelist[0].particle_types()[0]->pdgcode().dump(), 0x80000211u);
-    COMPARE(modelist[0].particle_types()[1]->pdgcode().dump(), 0x111u);
+    COMPARE(modelist[0]->weight(), 1.);
+    COMPARE(modelist[0]->particle_number(), 2u);
+    COMPARE(modelist[0]->particle_types()[0]->pdgcode().dump(), 0x80000211u);
+    COMPARE(modelist[0]->particle_types()[1]->pdgcode().dump(), 0x111u);
   }
   {
     const auto &omega = ParticleType::find(0x223).decay_modes();
     VERIFY(!omega.is_empty());
     const auto &modelist = omega.decay_mode_list();
     COMPARE(modelist.size(), 3u);
-    FUZZY_COMPARE(float(modelist[0].weight()), 1.f/3.f);
-    FUZZY_COMPARE(float(modelist[1].weight()), 1.f/3.f);
-    FUZZY_COMPARE(float(modelist[2].weight()), 1.f/3.f);
-    COMPARE(modelist[0].particle_types().size(), 2u);
-    COMPARE(modelist[0].particle_types()[0]->pdgcode().dump(), 0x111u);
-    COMPARE(modelist[0].particle_types()[1]->pdgcode().dump(), 0x113u);
-    COMPARE(modelist[1].particle_types().size(), 2u);
-    COMPARE(modelist[1].particle_types()[0]->pdgcode().dump(), 0x211u);
-    COMPARE(modelist[1].particle_types()[1]->pdgcode().dump(), 0x80000213u);
-    COMPARE(modelist[2].particle_types().size(), 2u);
-    COMPARE(modelist[2].particle_types()[0]->pdgcode().dump(), 0x80000211u);
-    COMPARE(modelist[2].particle_types()[1]->pdgcode().dump(), 0x213u);
+    FUZZY_COMPARE(float(modelist[0]->weight()), 1.f/3.f);
+    FUZZY_COMPARE(float(modelist[1]->weight()), 1.f/3.f);
+    FUZZY_COMPARE(float(modelist[2]->weight()), 1.f/3.f);
+    COMPARE(modelist[0]->particle_number(), 2u);
+    COMPARE(modelist[0]->particle_types()[0]->pdgcode().dump(), 0x111u);
+    COMPARE(modelist[0]->particle_types()[1]->pdgcode().dump(), 0x113u);
+    COMPARE(modelist[1]->particle_number(), 2u);
+    COMPARE(modelist[1]->particle_types()[0]->pdgcode().dump(), 0x211u);
+    COMPARE(modelist[1]->particle_types()[1]->pdgcode().dump(), 0x80000213u);
+    COMPARE(modelist[2]->particle_number(), 2u);
+    COMPARE(modelist[2]->particle_types()[0]->pdgcode().dump(), 0x80000211u);
+    COMPARE(modelist[2]->particle_types()[1]->pdgcode().dump(), 0x213u);
   }
 }
 
