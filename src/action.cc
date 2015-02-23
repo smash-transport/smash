@@ -173,6 +173,8 @@ void Action::sample_cms_momenta() {
 
 void Action::check_conservation(const size_t &id_process) const {
   const auto &log = logger<LogArea::Action>();
+  bool problem = false;
+
   /* Check momentum conservation */
   FourVector momentum_difference;
   for (const auto &part : incoming_particles_) {
@@ -182,22 +184,29 @@ void Action::check_conservation(const size_t &id_process) const {
     momentum_difference -= p.momentum();
   }
 
-  /* TODO: throw an exception */
   if (fabs(momentum_difference.x0()) > really_small) {
-    log.warn("Process ", id_process, "\nE conservation violation ",
-             momentum_difference.x0());
+    problem = true;
+    log.error("E conservation violation ", momentum_difference.x0());
   }
   if (fabs(momentum_difference.x1()) > really_small) {
-    log.warn("px conservation violation ", momentum_difference.x1());
+    problem = true;
+    log.error("px conservation violation ", momentum_difference.x1());
   }
   if (fabs(momentum_difference.x2()) > really_small) {
-    log.warn("py conservation violation ", momentum_difference.x2());
+    problem = true;
+    log.error("py conservation violation ", momentum_difference.x2());
   }
   if (fabs(momentum_difference.x3()) > really_small) {
-    log.warn("pz conservation violation ", momentum_difference.x3());
+    problem = true;
+    log.error("pz conservation violation ", momentum_difference.x3());
   }
 
-  // TODO: check other conservation laws (baryon number etc)
+  // TODO: check other conservation laws (charge, baryon number, etc)
+
+  if (problem) {
+    throw std::runtime_error("Conservation laws violated in process " +
+                             std::to_string(id_process));
+  }
 }
 
 std::ostream &operator<<(std::ostream &out, const ActionList &actions) {

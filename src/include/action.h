@@ -262,6 +262,14 @@ class ScatterAction : public Action {
                              override;
 
   /**
+   * Determine the (parametrized) total cross section for this collision. This
+   * is currently only used for calculating the string excitation cross section.
+   */
+  virtual float total_cross_section() const {
+    return 0.;
+  }
+
+  /**
    * Determine the elastic cross section for this collision. This routine
    * by default just gives a constant cross section (corresponding to
    * elast_par) but can be overriden in child classes for a different behavior.
@@ -274,16 +282,11 @@ class ScatterAction : public Action {
   virtual CollisionBranch* elastic_cross_section(float elast_par);
 
   /**
-   * The cross section for string excitations is currently defined to
-   * be the difference between the parametrized total cross section and from PDG 
-   * and the parametrized elastic cross section above  1.6 GeV
-   * 
-   * TODO: implement an actual parametrization of this cross-section or 
-   * at least a ramp up compared to the resonance formation at lower energies
-   * 
-   * TODO: at this point there is always one string excited, one needs the 
-   * possibility to excite 2 strings as well, then it will become a ProcessBranchList
-   *  
+   * Determine the cross section for string excitations, which is given by the
+   * difference between the parametrized total cross section and all the
+   * explicitly implemented channels at low energy (elastic, resonance
+   * excitation, etc). This method has to be called after all other processes
+   * have been added to the Action object.
    */
   virtual CollisionBranch* string_excitation_cross_section();
 
@@ -354,6 +357,8 @@ class ScatterActionBaryonBaryon : public ScatterAction {
  public:
   /* Inherit constructor. */
   using ScatterAction::ScatterAction;
+  /** Determine the parametrized total cross section for a baryon-baryon collision. */
+  virtual float total_cross_section() const override;
   /**
    * Determine the elastic cross section for a baryon-baryon collision.
    * It is given by a parametrization of exp. data for NN collisions and is
@@ -365,13 +370,6 @@ class ScatterActionBaryonBaryon : public ScatterAction {
    * final-state IDs.
    */
   CollisionBranch* elastic_cross_section(float elast_par) override;
-  /**
-   * The cross section for string excitations is currently defined to
-   * be the difference between the parametrized total cross section and from PDG 
-   * and the parametrized elastic cross section above sqrts 1.6 GeV
-   * TODO it should fill up the total cross section above all other implemented channels
-   */
-  CollisionBranch* string_excitation_cross_section() override;
   /* There is no resonance formation out of two baryons: Return empty list. */
   ProcessBranchList resonance_cross_sections() override {
     return ProcessBranchList();

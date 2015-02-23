@@ -109,7 +109,7 @@ ActionPtr ScatterActionsFinder::check_collision(
   act->add_processes(act->two_to_two_cross_sections());
   /* (4) string excitation */
   act->add_process(act->string_excitation_cross_section());
-    
+
   {
     /* distance criteria according to cross_section */
     const double distance_squared = act->particle_distance();

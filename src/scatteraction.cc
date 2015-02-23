@@ -212,7 +212,12 @@ CollisionBranch* ScatterAction::elastic_cross_section(float elast_par) {
 }
 
 CollisionBranch* ScatterAction::string_excitation_cross_section() {
-  return new CollisionBranch(0., ProcessBranch::String);
+  /* Calculate string-excitation cross section:
+   * Parametrized total minus all other present channels. */
+  /* TODO: This is currently set to zero, since Pythia is not yet implemented. */
+  float sig_string = 0.f;  // std::max(0.f, total_cross_section() - total_weight_);
+
+  return new CollisionBranch(sig_string, ProcessBranch::String);
 }
 
 ProcessBranchList ScatterAction::resonance_cross_sections() {
@@ -327,6 +332,24 @@ void ScatterAction::resonance_formation() {
 }
 
 
+/***** ScatterActionBaryonBaryon **********************************************/
+
+float ScatterActionBaryonBaryon::total_cross_section() const {
+  const PdgCode &pdg_a = incoming_particles_[0].type().pdgcode();
+  const PdgCode &pdg_b = incoming_particles_[1].type().pdgcode();
+  const double s = mandelstam_s();
+
+   /* Currently all BB collisions use the nucleon-nucleon parametrizations. */
+  if (pdg_a == pdg_b) {
+    return pp_total(s);     // pp, nn
+  } else if (pdg_a.is_antiparticle_of(pdg_b)) {
+    return ppbar_total(s);  // NNbar
+  } else {
+    return np_total(s);     // np
+  }
+}
+
+
 CollisionBranch* ScatterActionBaryonBaryon::elastic_cross_section(float elast_par) {
   const PdgCode &pdg_a = incoming_particles_[0].type().pdgcode();
   const PdgCode &pdg_b = incoming_particles_[1].type().pdgcode();
@@ -361,46 +384,6 @@ CollisionBranch* ScatterActionBaryonBaryon::elastic_cross_section(float elast_pa
   }
 }
 
-CollisionBranch* ScatterActionBaryonBaryon::string_excitation_cross_section() {
-/*Avoid unused variable warning
- * const auto &log = logger<LogArea::ScatterAction>();
- */
-  const PdgCode &pdg_a = incoming_particles_[0].type().pdgcode();
-  const PdgCode &pdg_b = incoming_particles_[1].type().pdgcode();
-/* Avoid unused variable warning 
-*  const double s = mandelstam_s();
-*/ 
-
-  if(pdg_a.iso_multiplet() == 0x1112 &&
-     pdg_b.iso_multiplet() == 0x1112) {
-    /* Nucleon+Nucleon: calculate total minus other channels cross section */
-   float sig_string = 0.0;
-   /* Threshold for string production, disabled for the moment /TODO 
-    *   if (s >= 1.6) {
-    *     if (pdg_a == pdg_b) {  pp 
-    *         sig_string = pp_total(s) - pp_elastic(s);
-    *      log.debug("pp string xsection: ", sig_string);
-    *  } else if (pdg_a.is_antiparticle_of(pdg_b)) {  ppbar 
-    *         sig_string = ppbar_total(s) - ppbar_elastic(s);
-    *      log.debug("ppbar string xsection: ", sig_string);
-    *  } else {                                     np 
-    *         sig_string = np_total(s) - np_elastic(s);
-    *      log.debug("pn string xsection: ", sig_string);
-    * }
-    *} 
-    */
-
-    if (sig_string>really_small) {
-      return new CollisionBranch(sig_string, ProcessBranch::String);
-    } else {
-      /* empty process branch for s < 1.6 GeV */
-      return new CollisionBranch(0.0, ProcessBranch::None);
-    }
-  } else {
-    /* empty process branch for non-nucleons */  
-    return new CollisionBranch(0.0, ProcessBranch::None);
-  }
-}
 
 ProcessBranchList ScatterActionBaryonBaryon::two_to_two_cross_sections() {
   ProcessBranchList process_list;
