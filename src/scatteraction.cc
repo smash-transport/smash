@@ -28,7 +28,8 @@ ScatterAction::ScatterAction(const ParticleData &in_part_a,
     : Action({in_part_a, in_part_b}, time_of_execution) {}
 
 
-void ScatterAction::perform(Particles *particles, size_t &id_process) {
+ProcessBranch::ProcessType ScatterAction::perform(Particles *particles,
+                                                  size_t &id_process) {
   const auto &log = logger<LogArea::ScatterAction>();
 
   /* Relevant particle IDs for the collision. */
@@ -39,56 +40,78 @@ void ScatterAction::perform(Particles *particles, size_t &id_process) {
             incoming_particles_[1]);
 
   /* Decide for a particular final state. */
-  outgoing_particles_ = choose_channel();
+  const ProcessBranch* proc = choose_channel();
+  outgoing_particles_ = proc->particle_list();
 
-  if (is_elastic()) {
-    /* 2->2 elastic scattering */
-    log.debug("Process: Elastic collision.");
+  log.debug("Chosen channel: ", proc->get_type(), proc->particle_list()); 
 
-    momenta_exchange();
+  /* The production point of the new particles.  */
+  FourVector middle_point = get_interaction_point();
 
-    // store the process id in the Particle data
-    outgoing_particles_[0].set_id_process(id_process);
-    outgoing_particles_[1].set_id_process(id_process);
+  switch(proc->get_type()) {
+    case ProcessBranch::Elastic:
+      /* 2->2 elastic scattering */
+      log.debug("Process: Elastic collision.", proc->get_type());
 
-    particles->data(id_a) = outgoing_particles_[0];
-    particles->data(id_b) = outgoing_particles_[1];
-  } else {
-    /* resonance formation */
-    log.debug("Process: Resonance formation.");
+      momenta_exchange();
+      // store the process id in the Particle data
+      outgoing_particles_[0].set_id_process(id_process);
+      outgoing_particles_[1].set_id_process(id_process);
 
-    /* The starting point of resonance is between the two initial particles:
-     * x_middle = (x_a + x_b) / 2   */
-    FourVector middle_point = (incoming_particles_[0].position()
-                               + incoming_particles_[1].position()) / 2.;
+      particles->data(id_a) = outgoing_particles_[0];
+      particles->data(id_b) = outgoing_particles_[1];
 
-    /* processes computed in the center of momenta */
-    resonance_formation();
+      break; 
+    case ProcessBranch::TwoToOne:
+      /* resonance formation */
+      log.debug("Process: Resonance formation.", proc->get_type());
+      /* processes computed in the center of momenta */
+      resonance_formation();
+      break; 
+    case ProcessBranch::TwoToTwo:
+      /* 2->2 inelastic scattering*/
+      log.debug("Process: Inelastic scattering.", proc->get_type());
+      /* 2 particles in final state: Sample the particle momenta in CM system. */
+      sample_cms_momenta();
+      break;
+    case ProcessBranch::String:
+      /* string excitation */
+      log.debug("Process: String Excitation.");
+      /// string_excitation(incoming_particles_, outgoing_particles_);  
+      break;
+    case ProcessBranch::None:
+      log.debug("ProcessType None should not have been selected");
+      break;
+    case ProcessBranch::Decay: 
+      log.debug("ProcessType Decay should have been handled as DecayAction");
+      break;
+    default: 
+      throw InvalidScatterAction(
+        "ScatterAction::perform: Unknown Process Type. "
+        "ProcessType " + std::to_string(proc->get_type()) +
+        " was requested. (PDGcode1=" + incoming_particles_[0].pdgcode().string()
+        + ", PDGcode2=" + incoming_particles_[1].pdgcode().string()
+        + ")");
+  }
 
+  if (proc->get_type() != ProcessBranch::Elastic) {
     /* Set positions & boost to computational frame. */
     for (ParticleData &new_particle : outgoing_particles_) {
       new_particle.set_4position(middle_point);
-
       new_particle.boost_momentum(-beta_cm());
-
       // store the process id in the Particle data
       new_particle.set_id_process(id_process);
-
-      log.debug("Resonance: ", new_particle);
-
       new_particle.set_id(particles->add_data(new_particle));
     }
-
     /* Remove the initial particles */
     particles->remove(id_a);
     particles->remove(id_b);
-
     log.debug("Particle map now has ", particles->size(), " elements.");
   }
 
   check_conservation(id_process);
-
   id_process++;
+  return proc->get_type();
 }
 
 
@@ -149,18 +172,20 @@ double ScatterAction::particle_distance() const {
 }
 
 
-bool ScatterAction::is_elastic() const {
-  return outgoing_particles_.size() == 2 &&
-         outgoing_particles_[0].pdgcode() == incoming_particles_[0].pdgcode() &&
-         outgoing_particles_[1].pdgcode() == incoming_particles_[1].pdgcode();
-}
-
-
 CollisionBranch* ScatterAction::elastic_cross_section(float elast_par) {
   return new CollisionBranch(incoming_particles_[0].type(),
-                             incoming_particles_[1].type(), elast_par);
+                             incoming_particles_[1].type(),
+                             elast_par, ProcessBranch::Elastic);
 }
 
+CollisionBranch* ScatterAction::string_excitation_cross_section() {
+  /* Calculate string-excitation cross section:
+   * Parametrized total minus all other present channels. */
+  /* TODO: This is currently set to zero, since Pythia is not yet implemented. */
+  float sig_string = 0.f;  // std::max(0.f, total_cross_section() - total_weight_);
+
+  return new CollisionBranch(sig_string, ProcessBranch::String);
+}
 
 ProcessBranchList ScatterAction::resonance_cross_sections() {
   const auto &log = logger<LogArea::ScatterAction>();
@@ -194,8 +219,8 @@ ProcessBranchList ScatterAction::resonance_cross_sections() {
     /* If cross section is non-negligible, add resonance to the list */
     if (resonance_xsection > really_small) {
       resonance_process_list.push_back(make_unique<CollisionBranch>
-                                       (type_resonance, resonance_xsection));
-
+                                       (type_resonance, resonance_xsection,
+                                        ProcessBranch::TwoToOne));
       log.debug("Found resonance: ", type_resonance);
       log.debug("2->1 with original particles: ", type_particle_a,
                 type_particle_b);
@@ -252,21 +277,7 @@ void ScatterAction::momenta_exchange() {
 void ScatterAction::resonance_formation() {
   const auto &log = logger<LogArea::ScatterAction>();
 
-  switch (outgoing_particles_.size()) {
-  case 1:
-    /* 1 particle in final state: Center-of-momentum frame of initial
-     * particles is the rest frame of the resonance.
-     */
-    outgoing_particles_[0].set_4momentum(FourVector(sqrt_s(), 0., 0., 0.));
-
-    log.debug("Momentum of the new particle: ",
-              outgoing_particles_[0].momentum());
-    break;
-  case 2:
-    /* 2 particles in final state: Sample the particle momenta. */
-    sample_cms_momenta();
-    break;
-  default:
+  if (outgoing_particles_.size() != 1) {
     std::string s = "resonance_formation: "
                     "Incorrect number of particles in final state: ";
     s += std::to_string(outgoing_particles_.size()) + " (";
@@ -274,11 +285,35 @@ void ScatterAction::resonance_formation() {
     s += incoming_particles_[1].pdgcode().string() + ")";
     throw InvalidResonanceFormation(s);
   }
+
+  /* 1 particle in final state: Center-of-momentum frame of initial particles
+   * is the rest frame of the resonance.  */
+  outgoing_particles_[0].set_4momentum(FourVector(sqrt_s(), 0., 0., 0.));
+
+  log.debug("Momentum of the new particle: ",
+            outgoing_particles_[0].momentum());
+}
+
+
+/***** ScatterActionBaryonBaryon **********************************************/
+
+float ScatterActionBaryonBaryon::total_cross_section() const {
+  const PdgCode &pdg_a = incoming_particles_[0].type().pdgcode();
+  const PdgCode &pdg_b = incoming_particles_[1].type().pdgcode();
+  const double s = mandelstam_s();
+
+   /* Currently all BB collisions use the nucleon-nucleon parametrizations. */
+  if (pdg_a == pdg_b) {
+    return pp_total(s);     // pp, nn
+  } else if (pdg_a.is_antiparticle_of(pdg_b)) {
+    return ppbar_total(s);  // NNbar
+  } else {
+    return np_total(s);     // np
+  }
 }
 
 
 CollisionBranch* ScatterActionBaryonBaryon::elastic_cross_section(float elast_par) {
-
   const PdgCode &pdg_a = incoming_particles_[0].type().pdgcode();
   const PdgCode &pdg_b = incoming_particles_[1].type().pdgcode();
 
@@ -297,7 +332,8 @@ CollisionBranch* ScatterActionBaryonBaryon::elastic_cross_section(float elast_pa
     }
     if (sig_el>0.) {
       return new CollisionBranch(incoming_particles_[0].type(),
-                                 incoming_particles_[1].type(), sig_el);
+                                 incoming_particles_[1].type(),
+                                 sig_el, ProcessBranch::Elastic);
     } else {
       std::stringstream ss;
       ss << "problem in CrossSections::elastic: " << pdg_a.string().c_str()
@@ -310,6 +346,7 @@ CollisionBranch* ScatterActionBaryonBaryon::elastic_cross_section(float elast_pa
     return ScatterAction::elastic_cross_section(elast_par);
   }
 }
+
 
 ProcessBranchList ScatterActionBaryonBaryon::two_to_two_cross_sections() {
   ProcessBranchList process_list;
@@ -443,7 +480,8 @@ ProcessBranchList ScatterActionBaryonBaryon::nuc_nuc_to_nuc_res (
 
       if (xsection > really_small) {
         process_list.push_back(make_unique<CollisionBranch>
-                               (*type_resonance, *second_type, xsection));
+                               (*type_resonance, *second_type, xsection,
+                                ProcessBranch::TwoToTwo));
         log.debug("Found 2->2 creation process for resonance ",
                   *type_resonance);
         log.debug("2->2 with original particles: ",
@@ -526,8 +564,9 @@ ProcessBranchList ScatterActionBaryonBaryon::nuc_res_to_nuc_nuc (
         / ((type_resonance->spin()+1) * s * std::sqrt(cm_momentum_squared()));
 
       if (xsection > really_small) {
-        process_list.push_back(make_unique<CollisionBranch>(*nuc_a, *nuc_b,
-                                                            xsection));
+        process_list.push_back(make_unique<CollisionBranch>
+                               (*nuc_a, *nuc_b, xsection,
+                                ProcessBranch::TwoToTwo));
         const auto &log = logger<LogArea::ScatterAction>();
         log.debug("Found 2->2 absoption process for resonance ",
                   *type_resonance);

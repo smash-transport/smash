@@ -149,19 +149,19 @@ void DecayAction::one_to_three() {
 }
 
 
-void DecayAction::perform(Particles *particles, size_t &id_process) {
+ProcessBranch::ProcessType DecayAction::perform(Particles *particles,
+                                                size_t &id_process) {
   const auto &log = logger<LogArea::DecayModes>();
   log.debug("Process: Resonance decay. ");
-
-  /*
+ /*
    * Execute a decay process for the selected particle.
    *
    * Randomly select one of the decay modes of the particle
    * according to their relative weights. Then decay the particle
    * by calling function one_to_two or one_to_three.
    */
-  outgoing_particles_ = choose_channel();
-
+  const ProcessBranch* proc = choose_channel();
+  outgoing_particles_ = proc->particle_list();
   switch (outgoing_particles_.size()) {
   case 2:
     one_to_two();
@@ -202,6 +202,7 @@ void DecayAction::perform(Particles *particles, size_t &id_process) {
     p.set_id(particles->add_data(p));
   }
   log.debug("Particle map now has ", particles->size(), " elements.");
+  return proc->get_type();
 }
 
 void DecayAction::format_debug_output(std::ostream &out) const {

@@ -12,13 +12,19 @@
 
 namespace Smash {
 
+const double mN = 0.938;    // nucleon mass
+
+/* Convert mandelstam-s to p_lab in a nucleon-nucleon collision. */
+static inline double plab_from_s_NN (double mandelstam_s) {
+  const double mNsqr = mN*mN;
+  return std::sqrt((mandelstam_s - 2*mNsqr) * (mandelstam_s - 2*mNsqr)
+                   - 4 * mNsqr * mNsqr) / (2 * mN);
+}
+
 /* pp elastic cross section parametrization.
  * Source: J. Weil, PhD thesis, eq. (44) */
 float pp_elastic(double mandelstam_s) {
-  const double mN = 0.938;    // nucleon mass
-  const double mNsqr = mN*mN;
-  double p_lab = sqrt((mandelstam_s - 2*mNsqr) * (mandelstam_s - 2*mNsqr)
-                       - 4 * mNsqr * mNsqr) / (2 * mN);
+  double p_lab = plab_from_s_NN(mandelstam_s);
   if (p_lab < 0.435) {
     return 5.12 * mN / (mandelstam_s - 4 * mN * mN) + 1.67;
   } else if (p_lab < 0.8) {
@@ -40,8 +46,8 @@ float pp_elastic(double mandelstam_s) {
  * Nuclear Instruments and Methods at Physics Research B 111, 215 (1996)
  * highest-p:  O. Buss et al., Physics Reports 512, 1 (2012)
  */
-float pp_total(double p_lab) {
-
+float pp_total(double mandelstam_s) {
+  double p_lab = plab_from_s_NN(mandelstam_s);
   if (p_lab < 0.4) {
     return 34 * pow(p_lab / 0.4, -2.104);
   } else if (p_lab < 0.8) {
@@ -59,10 +65,7 @@ float pp_total(double p_lab) {
 /* np elastic cross section parametrization.
  * Source: J. Weil, PhD thesis, eq. (45) */
 float np_elastic(double mandelstam_s) {
-  const double mN = 0.938;    // nucleon mass
-  const double mNsqr = mN*mN;
-  double p_lab = sqrt((mandelstam_s - 2*mNsqr) * (mandelstam_s - 2*mNsqr)
-                       - 4 * mNsqr * mNsqr) / (2 * mN);
+  double p_lab = plab_from_s_NN(mandelstam_s);
   if (p_lab < 0.525) {
     return 17.05 * mN / (mandelstam_s - 4 * mN * mN) - 6.83;
   } else if (p_lab < 0.8) {
@@ -83,7 +86,8 @@ float np_elastic(double mandelstam_s) {
  * Nuclear Instruments and Methods at Physics Research B 111, 215 (1996)
  * highest-p:  O. Buss et al., Physics Reports 512, 1 (2012)
  */
-float np_total(double p_lab) {
+float np_total(double mandelstam_s) {
+  double p_lab = plab_from_s_NN(mandelstam_s);
   if (p_lab < 0.4) {
     return 6.3555 * pow(p_lab, -3.2481) * exp(-0.377 * log(p_lab) * log(p_lab));
   } else if (p_lab < 1.0) {
@@ -100,10 +104,7 @@ float np_total(double p_lab) {
 /* ppbar elastic cross section parametrization */
 /* Source: S. Bass et al., Prog.Part.Nucl.Phys. 41, 255 (1998) */
 float ppbar_elastic(double mandelstam_s) {
-  const double mN = 0.938;    // nucleon mass
-  const double mNsqr = mN*mN;
-  double p_lab = sqrt((mandelstam_s - 2*mNsqr) * (mandelstam_s - 2*mNsqr)
-                       - 4 * mNsqr * mNsqr) / (2 * mN);
+  double p_lab = plab_from_s_NN(mandelstam_s);
   if (p_lab < 0.3) {
     return 78.6;
   } else if (p_lab < 5.0) {
@@ -116,7 +117,8 @@ float ppbar_elastic(double mandelstam_s) {
 
 /* ppbar total cross section parametrization */
 /* Source: S. Bass et al., Prog.Part.Nucl.Phys. 41, 255 (1998) */
-float ppbar_total(double p_lab) {
+float ppbar_total(double mandelstam_s) {
+  double p_lab = plab_from_s_NN(mandelstam_s);
   if (p_lab < 0.3) {
     return 271.6 * exp(-1.1 * p_lab * p_lab);
   } else if (p_lab < 5.0) {

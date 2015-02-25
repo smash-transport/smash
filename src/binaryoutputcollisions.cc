@@ -93,13 +93,15 @@ void BinaryOutputCollisions::at_eventend(const Particles &particles,
 void BinaryOutputCollisions::at_interaction(const ParticleList &incoming,
                                             const ParticleList &outgoing,
                                             const double density,
-                                            const double total_cross_section) {
+                                            const double total_cross_section,
+                                            const ProcessBranch::ProcessType process_type) {
   char ichar = 'i';
   std::fwrite(&ichar, sizeof(char), 1, file_.get());
   write(incoming.size());
   write(outgoing.size());
   std::fwrite(&density, sizeof(double), 1, file_.get());
   std::fwrite(&total_cross_section, sizeof(double), 1, file_.get());
+  std::fwrite(&process_type, sizeof(int), 1, file_.get());
   write(incoming);
   write(outgoing);
 }

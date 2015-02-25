@@ -14,6 +14,7 @@
 
 #include "forwarddeclarations.h"
 #include "macros.h"
+#include "processbranch.h"
 
 namespace Smash {
 
@@ -54,11 +55,13 @@ class OutputInterface {
   virtual void at_interaction(const ParticleList &incoming_particles,
                               const ParticleList &outgoing_particles,
                               const double density,
-                              const double total_cross_section) {
+                              const double total_cross_section,
+                              const ProcessBranch::ProcessType process_type) {
     SMASH_UNUSED(incoming_particles);
     SMASH_UNUSED(outgoing_particles);
     SMASH_UNUSED(density);
     SMASH_UNUSED(total_cross_section);
+    SMASH_UNUSED(process_type);
   }
 
   /**

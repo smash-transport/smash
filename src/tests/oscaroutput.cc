@@ -20,6 +20,7 @@
 #include "../include/outputinterface.h"
 #include "../include/oscaroutput.h"
 #include "../include/particles.h"
+#include "../include/processbranch.h"
 #include "../include/random.h"
 #include "../include/configuration.h"
 
@@ -121,7 +122,7 @@ TEST(fullhistory_format) {
   ParticleData final_particle = create_smashon_particle();
   particles.add_data(final_particle);
   final_particles.push_back(particles.data(particles.id_max()));
-  oscfull->at_interaction(initial_particles, final_particles, 0.0, 0.0);
+  oscfull->at_interaction(initial_particles, final_particles, 0.0, 0.0, ProcessBranch::None);
   /* Final state output */
   oscfull->at_eventend(particles, event_id);
 
@@ -245,7 +246,7 @@ TEST(particlelist_format) {
   final_particles.push_back(particles.data(0));
   final_particles.push_back(particles.data(1));
   /* As with initial state output, this should not do anything */
-  oscfinal->at_interaction(initial_particles, final_particles, 0.0, 0.0);
+  oscfinal->at_interaction(initial_particles, final_particles, 0.0, 0.0, ProcessBranch::None);
   /* Final state output; this is the only thing we expect to find in file */
   oscfinal->at_eventend(particles, event_id);
 

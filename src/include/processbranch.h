@@ -16,6 +16,7 @@
 
 namespace Smash {
 
+
 /**
  * \ingroup data
  *
@@ -27,6 +28,9 @@ namespace Smash {
  * 2. The weight of this state, i.e. how probable this outcome is
  * compared to other possible outcomes. Depending on context,
  * this can be either a cross section or a branching ratio.
+ * 3. The process id that identifies a certain class of processes.
+ * If the outgoing particles are not known yet, e.g. for strings
+ * there will be only the weight and the process id.
  *
  * For example, create a list of decay modes for \f$\Delta^+\f$ resonance:
  * \code
@@ -41,8 +45,26 @@ namespace Smash {
  */
 class ProcessBranch {
  public:
+ /** Process Types are used to identify the type of the process, 
+   * currently we have 7 of these: 
+   * (0) nothing (None)
+   * (1) elastic (Elastic)
+   * (2) resonance formation (2->1) (TwoToOne) 
+   * (3) 2->2 (inelastic) (TwoToTwo)
+   * (4) string excitation (String)
+   * (5) resonance decays (Decay) 
+   * (6) Wall transition (Wall)*/  
+  enum ProcessType {
+	  None = 0,
+	  Elastic = 1, 
+	  TwoToOne = 2, 
+	  TwoToTwo = 3, 
+	  String = 4, 
+	  Decay = 5,
+	  Wall = 6
+   };
   /// Create a ProcessBranch without final states
-  ProcessBranch() : branch_weight_(-1.0) {}
+  ProcessBranch() : branch_weight_(0.) {}
   ProcessBranch(float w) : branch_weight_(w) {}
 
   /// Copying is disabled. Use std::move or create a new object.
@@ -59,6 +81,8 @@ class ProcessBranch {
    * compared to other branches
    */
   inline void set_weight(float process_weight);
+  /// Return the process type
+  virtual ProcessType get_type(void) const = 0;
   /// Clear all information from the branch
   inline void clear(void);
 
@@ -83,7 +107,7 @@ class ProcessBranch {
   virtual unsigned int particle_number() const = 0;
  protected:
   /// Weight of the branch, typically a cross section or a branching ratio
-  float branch_weight_;
+  float branch_weight_; 
 };
 
 /**
@@ -126,29 +150,42 @@ inline float total_weight(const ProcessBranchList &l) {
  */
 class CollisionBranch : public ProcessBranch {
  public:
-   CollisionBranch() : ProcessBranch() {}
+   CollisionBranch(float w, ProcessType p_type) : ProcessBranch(w),
+                                                  process_type_(p_type) {}
   /// Constructor with 1 particle
-  CollisionBranch(const ParticleType &type, float w) : ProcessBranch(w) {
+  CollisionBranch(const ParticleType &type, float w, ProcessType p_type)
+                 : ProcessBranch(w), process_type_(p_type) {
     particle_types_.reserve(1);
     particle_types_.push_back(&type);
   }
   /// Constructor with 2 particles
-  CollisionBranch(const ParticleType &type_a, const ParticleType &type_b, float w)
-      : ProcessBranch(w) {
+  CollisionBranch(const ParticleType &type_a, const ParticleType &type_b,
+                  float w, ProcessType p_type)
+      : ProcessBranch(w), process_type_(p_type) {
     particle_types_.reserve(2);
     particle_types_.push_back(&type_a);
     particle_types_.push_back(&type_b);
   }
   /// Constructor with a list of particles
-  CollisionBranch(ParticleTypePtrList new_types, float w)
-      : ProcessBranch(w), particle_types_(std::move(new_types)) {}
+  CollisionBranch(ParticleTypePtrList new_types, float w, ProcessType p_type)
+      : ProcessBranch(w), particle_types_(std::move(new_types)),
+        process_type_(p_type) {}
   /// The move constructor efficiently moves the particle-type list member.
   CollisionBranch(CollisionBranch &&rhs)
       : ProcessBranch(rhs.branch_weight_),
-        particle_types_(std::move(rhs.particle_types_)) {}
+        particle_types_(std::move(rhs.particle_types_)),
+        process_type_(rhs.process_type_) {}
   /// Return the particle types associated with this branch.
   const ParticleTypePtrList &particle_types() const override {
     return particle_types_;
+  }
+  //// Set the process type
+  inline void set_type(ProcessType p_type) {
+    process_type_ = p_type;
+  }
+  /// Return the process type
+  inline ProcessType get_type(void) const override {
+    return process_type_;
   }
   /// Clear all information from the branch
   inline void clear(void) {
@@ -170,6 +207,8 @@ class CollisionBranch : public ProcessBranch {
    * that of size_t/void*. (I was obviously talking about 64bit here...)
    */
   ParticleTypePtrList particle_types_;
+  /// Process type internal variable
+  ProcessType process_type_;
 };
 
 
@@ -197,6 +236,10 @@ class DecayBranch : public ProcessBranch {
   }
   inline const DecayType& type() const {
     return *type_;
+  }
+  /// Return the process type
+  inline ProcessType get_type(void) const override {
+    return ProcessBranch::Decay;
   }
   /// Clear all information from the branch
   inline void clear(void) {
