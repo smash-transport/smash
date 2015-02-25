@@ -25,7 +25,7 @@ namespace Smash {
  **/
 class BinaryOutputBase : public OutputInterface {
  protected:
-  BinaryOutputBase(FILE *f);
+  explicit BinaryOutputBase(FILE *f);
   void write(const std::string &s);
   void write(const FourVector &v);
   void write(std::int32_t x) {

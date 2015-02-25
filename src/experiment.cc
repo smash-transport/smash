@@ -283,13 +283,13 @@ static std::string format_measurements(const Particles &particles,
 
   char buffer[81];
   if (likely(time > 0))
-    snprintf(buffer, 81, "%6.2f %12g %12g %12g %10zu %12zu %12g", time,
-             difference.momentum().x0(), difference.momentum().abs3(),
+    snprintf(buffer, sizeof(buffer), "%6.2f %12g %12g %12g %10zu %12zu %12g",
+             time, difference.momentum().x0(), difference.momentum().abs3(),
              scatterings_total * 2 / (particles.size() * time),
              scatterings_this_interval, particles.size(),
              elapsed_seconds.count());
   else
-    snprintf(buffer, 81, "%+6.2f %12g %12g %12g %10i %12zu %12g", time,
+    snprintf(buffer, sizeof(buffer), "%+6.2f %12g %12g %12g %10i %12zu %12g", time,
              difference.momentum().x0(), difference.momentum().abs3(), 0.0, 0,
              particles.size(), elapsed_seconds.count());
   return std::string(buffer);

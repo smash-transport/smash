@@ -212,9 +212,9 @@ class PdgCode {
   inline std::string string() const {
     char hexstring[8];
     if (digits_.antiparticle_) {
-      snprintf(hexstring, 8, "-%x", ucode());
+      snprintf(hexstring, sizeof(hexstring), "-%x", ucode());
     } else {
-      snprintf(hexstring, 8, "%x", ucode());
+      snprintf(hexstring, sizeof(hexstring), "%x", ucode());
     }
     return std::string(hexstring);
   }
