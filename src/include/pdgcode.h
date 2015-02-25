@@ -584,14 +584,14 @@ class PdgCode {
     // this checks if the first four digits are 0011 (as they should be
     // for ASCII digits).
     if ((inp & 0xf0) ^ 0x30) {
-      throw InvalidPdgCode("Invalid character " + std::to_string(inp)
+      throw InvalidPdgCode("PdgCode: Invalid character " + std::to_string(inp)
                          + " found.\n");
     }
     // the last four digits are the number; they should not be > 9
     // (i.e., one of [:;<=>?])
     if ((inp & 0x0f) > 9) {
-      throw InvalidPdgCode("Invalid digit " + std::to_string(inp)
-                         + " found.\n");
+      throw InvalidPdgCode("PdgCode: Invalid digit " + std::string(&inp, 1)
+                           + " found.\n");
     }
     // now that we've checked that the first bits are correct and the
     // last bits are a number, we can return the last bits.

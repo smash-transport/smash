@@ -16,6 +16,7 @@
 #include "include/constants.h"
 #include "include/logging.h"
 #include "include/pauliblocking.h"
+#include "include/processbranch.h"
 #include "include/random.h"
 #include "include/resonances.h"
 #include "include/width.h"
@@ -40,21 +41,23 @@ float Action::weight() const {
   return total_weight_;
 }
 
-void Action::add_process(ProcessBranch p) {
-  total_weight_ += p.weight();
-  subprocesses_.emplace_back(std::move(p));
+void Action::add_process(ProcessBranch *p) {
+  if (p->weight() > really_small) {
+    total_weight_ += p->weight();
+    subprocesses_.emplace_back(std::move(p));
+  }
 }
 
 void Action::add_processes(ProcessBranchList pv) {
   if (subprocesses_.empty()) {
     subprocesses_ = std::move(pv);
     for (auto &proc : subprocesses_) {
-      total_weight_ += proc.weight();
+      total_weight_ += proc->weight();
     }
   } else {
     subprocesses_.reserve(subprocesses_.size() + pv.size());
     for (auto &proc : pv) {
-      total_weight_ += proc.weight();
+      total_weight_ += proc->weight();
       subprocesses_.emplace_back(std::move(proc));
     }
   }
@@ -98,31 +101,33 @@ ParticleList Action::incoming_particles() const {
   return std::move(l);
 }
 
-ThreeVector Action::get_interaction_point() {
+FourVector Action::get_interaction_point() {
   // Estimate for the interaction point in the calculational frame
-  ThreeVector interaction_point = ThreeVector(0.0, 0.0, 0.0);
+  FourVector interaction_point = FourVector(0., 0., 0., 0.);
   for (const auto &part : incoming_particles_) {
-    interaction_point += part.position().threevec();
+    interaction_point += part.position();
   }
   interaction_point /= incoming_particles_.size();
   return interaction_point;
 }
 
 
-ParticleList Action::choose_channel() {
+const ProcessBranch* Action::choose_channel() {
   const auto &log = logger<LogArea::Action>();
   float random_weight = Random::uniform(0.f,total_weight_);
   float weight_sum = 0.;
   /* Loop through all subprocesses and select one by Monte Carlo, based on
    * their weights.  */
   for (const auto &proc : subprocesses_) {
-    if (proc.particle_types().size() < 1 ||
-        proc.particle_types()[0]->pdgcode() == PdgCode::invalid()) {
+    /* All processes apart from strings should have a well-defined final state. */
+    if (proc->particle_number() < 1
+        && proc->get_type() != ProcessBranch::String) {
       continue;
     }
-    weight_sum += proc.weight();
+    weight_sum += proc->weight();
     if (random_weight <= weight_sum) {
-      return proc.particle_list();
+      /* Return the full process information. */
+       return proc.get();
     }
   }
   /* Should never get here. */
@@ -183,6 +188,8 @@ void Action::sample_cms_momenta() {
 
 void Action::check_conservation(const size_t &id_process) const {
   const auto &log = logger<LogArea::Action>();
+  bool violation = false;
+
   /* Check momentum conservation */
   FourVector momentum_difference;
   for (const auto &part : incoming_particles_) {
@@ -192,22 +199,29 @@ void Action::check_conservation(const size_t &id_process) const {
     momentum_difference -= p.momentum();
   }
 
-  /* TODO: throw an exception */
   if (fabs(momentum_difference.x0()) > really_small) {
-    log.warn("Process ", id_process, "\nE conservation violation ",
-             momentum_difference.x0());
+    violation = true;
+    log.error("E conservation violation ", momentum_difference.x0());
   }
   if (fabs(momentum_difference.x1()) > really_small) {
-    log.warn("px conservation violation ", momentum_difference.x1());
+    violation = true;
+    log.error("px conservation violation ", momentum_difference.x1());
   }
   if (fabs(momentum_difference.x2()) > really_small) {
-    log.warn("py conservation violation ", momentum_difference.x2());
+    violation = true;
+    log.error("py conservation violation ", momentum_difference.x2());
   }
   if (fabs(momentum_difference.x3()) > really_small) {
-    log.warn("pz conservation violation ", momentum_difference.x3());
+    violation = true;
+    log.error("pz conservation violation ", momentum_difference.x3());
   }
 
-  // TODO: check other conservation laws (baryon number etc)
+  // TODO: check other conservation laws (charge, baryon number, etc)
+
+  if (violation) {
+    throw std::runtime_error("Conservation laws violated in process " +
+                             std::to_string(id_process));
+  }
 }
 
 std::ostream &operator<<(std::ostream &out, const ActionList &actions) {

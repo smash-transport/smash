@@ -22,6 +22,7 @@
 #include "particles.h"
 #include "pauliblocking.h"
 #include "potentials.h"
+#include "processbranch.h"
 #include "quantumnumbers.h"
 #include "scatteractionsfinder.h"
 

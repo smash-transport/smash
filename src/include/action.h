@@ -65,7 +65,7 @@ class Action {
   float weight() const;
 
   /** Add a new subprocess.  */
-  void add_process(ProcessBranch p);
+  void add_process(ProcessBranch *p);
   /** Add several new subprocesses at once.  */
   void add_processes(ProcessBranchList pv);
 
@@ -75,7 +75,8 @@ class Action {
    * This method does not do any sanity checks, but assumes that is_valid has
    * been called to determine if the action is still valid.
    */
-  virtual void perform(Particles *particles, size_t &id_process) = 0;
+  virtual ProcessBranch::ProcessType perform(Particles *particles,
+                                             size_t &id_process) = 0;
 
   /**
    * Check whether the action still applies.
@@ -110,7 +111,7 @@ class Action {
   void check_conservation(const size_t &id_process) const;
 
   /** Get the interaction point */
-  ThreeVector get_interaction_point();
+  FourVector get_interaction_point();
 
   /**
    * \ingroup exception
@@ -133,7 +134,7 @@ class Action {
    */
   ParticleList outgoing_particles_;
   /** list of possible subprocesses  */
-  std::vector<ProcessBranch> subprocesses_;
+  ProcessBranchList subprocesses_;
   /** time at which the action is supposed to be performed  */
   float time_of_execution_;
   /** sum of all subprocess weights  */
@@ -144,10 +145,9 @@ class Action {
 
   /**
    * Decide for a particular final-state channel via Monte-Carlo
-   * and return it as a list of particles that are only initialized
-   * with their PDG code.
+   * and return it as a ProcessBranch
    */
-  ParticleList choose_channel();
+  const ProcessBranch* choose_channel();
 
   /**
    * Sample final state momenta (and masses) in general X->2 process.
@@ -197,7 +197,8 @@ class DecayAction : public Action {
    *
    * \throws InvalidDecay
    */
-  void perform(Particles *particles, size_t &id_process) override;
+  ProcessBranch::ProcessType perform(Particles *particles, size_t &id_process)
+                             override;
 
   /**
    * \ingroup exception
@@ -267,7 +268,16 @@ class ScatterAction : public Action {
    *
    * \throws InvalidResonanceFormation
    */
-  void perform(Particles *particles, size_t &id_process) override;
+  ProcessBranch::ProcessType perform(Particles *particles, size_t &id_process)
+                             override;
+
+  /**
+   * Determine the (parametrized) total cross section for this collision. This
+   * is currently only used for calculating the string excitation cross section.
+   */
+  virtual float total_cross_section() const {
+    return 0.;
+  }
 
   /**
    * Determine the elastic cross section for this collision. This routine
@@ -279,7 +289,16 @@ class ScatterAction : public Action {
    * \return A ProcessBranch object containing the cross section and
    * final-state IDs.
    */
-  virtual ProcessBranch elastic_cross_section(float elast_par);
+  virtual CollisionBranch* elastic_cross_section(float elast_par);
+
+  /**
+   * Determine the cross section for string excitations, which is given by the
+   * difference between the parametrized total cross section and all the
+   * explicitly implemented channels at low energy (elastic, resonance
+   * excitation, etc). This method has to be called after all other processes
+   * have been added to the Action object.
+   */
+  virtual CollisionBranch* string_excitation_cross_section();
 
   /**
   * Find all resonances that can be produced in a 2->1 collision of the two
@@ -300,6 +319,13 @@ class ScatterAction : public Action {
 
   /// determine the total energy in the center-of-mass frame, i.e. sqrt of Mandelstam s
   double sqrt_s() const override;
+  /**
+   * \ingroup exception
+   * Thrown when ScatterAction is called to perform with unknown ProcessType.
+   */
+  class InvalidScatterAction : public std::invalid_argument {
+    using std::invalid_argument::invalid_argument;
+  };
 
  protected:
   /// determine the Mandelstam s variable, s = (p_a + p_b)^2 = square of CMS energy
@@ -323,11 +349,7 @@ class ScatterAction : public Action {
   /** Perform an elastic two-body scattering, i.e. just exchange momentum. */
   void momenta_exchange();
 
-  /**
-   * Resonance formation process.
-   *
-   * Creates one or two new particles, one of which is a resonance.
-   */
+  /** Perform a 2->1 resonance-formation process. */
   void resonance_formation();
 };
 
@@ -341,6 +363,8 @@ class ScatterActionBaryonBaryon : public ScatterAction {
  public:
   /* Inherit constructor. */
   using ScatterAction::ScatterAction;
+  /** Determine the parametrized total cross section for a baryon-baryon collision. */
+  virtual float total_cross_section() const override;
   /**
    * Determine the elastic cross section for a baryon-baryon collision.
    * It is given by a parametrization of exp. data for NN collisions and is
@@ -351,7 +375,7 @@ class ScatterActionBaryonBaryon : public ScatterAction {
    * \return A ProcessBranch object containing the cross section and
    * final-state IDs.
    */
-  ProcessBranch elastic_cross_section(float elast_par) override;
+  CollisionBranch* elastic_cross_section(float elast_par) override;
   /* There is no resonance formation out of two baryons: Return empty list. */
   ProcessBranchList resonance_cross_sections() override {
     return ProcessBranchList();
@@ -437,8 +461,6 @@ class ScatterActionMesonMeson : public ScatterAction {
   void format_debug_output(std::ostream &out) const override;
 };
 
-using ActionPtr = std::unique_ptr<Action>;
-using ScatterActionPtr = std::unique_ptr<ScatterAction>;
 
 inline std::vector<ActionPtr> &operator+=(std::vector<ActionPtr> &lhs,
                                           std::vector<ActionPtr> &&rhs) {

@@ -18,14 +18,11 @@
 
 namespace Smash {
 
-DecayActionsFinder::DecayActionsFinder(const ExperimentParameters &parameters)
-    : ActionFinderInterface(parameters.timestep_duration()) {}
-
 ActionList DecayActionsFinder::find_possible_actions(
     const ParticleList &search_list,
-    const std::vector<const ParticleList *> &  // the list of neighbors is
+    const std::vector<const ParticleList *> &,  // the list of neighbors is
                                                // irrelevant for decays
-    ) const {
+    float dt) const {
   ActionList actions;
   actions.reserve(10);  // for short time steps this seems reasonable to expect
                         // less than 10 decays in most time steps
@@ -35,10 +32,8 @@ ActionList DecayActionsFinder::find_possible_actions(
       continue;      /* particle doesn't decay */
     }
 
-    ProcessBranchList processes =
-        p.type().get_partial_widths(p.effective_mass());
-    const float width =
-        total_weight(processes);  // total decay width (mass-dependent)
+    ProcessBranchList processes = p.type().get_partial_widths(p.effective_mass());
+    const float width = total_weight(processes);  // total decay width (mass-dependent)
 
     /* Exponential decay. Lifetime tau = 1 / width
      * t / tau = width * t (remember GeV-fm conversion)
@@ -57,8 +52,8 @@ ActionList DecayActionsFinder::find_possible_actions(
                              // resonance
           * width));
 
-    if (decay_time < dt_) {
-      // => decay_time ∈ [0, dt_[
+    if (decay_time < dt) {
+      // => decay_time ∈ [0, dt[
       // => the particle decays in this timestep.
       auto act = make_unique<DecayAction>(p, decay_time);
       act->add_processes(std::move(processes));

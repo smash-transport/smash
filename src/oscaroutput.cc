@@ -196,13 +196,14 @@ void OscarOutput<Format, Contents>::at_interaction(
     const ParticleList &incoming_particles,
     const ParticleList &outgoing_particles,
     const double density,
-    const double total_cross_section) {
+    const double total_cross_section,
+    const ProcessBranch::ProcessType process_type) {
   if (Contents & OscarInteractions) {
     if (Format == OscarFormat2013) {
       fprintf(file_.get(),
-              "# interaction in %zu out %zu rho %12.7f weight %12.7f\n",
+              "# interaction in %zu out %zu rho %12.7f weight %12.7f type %5i \n",
               incoming_particles.size(), outgoing_particles.size(),
-              density, total_cross_section);
+              density, total_cross_section, process_type);
     } else {
       /* OSCAR line prefix : initial final
        * particle creation: 0 1
@@ -211,8 +212,8 @@ void OscarOutput<Format, Contents>::at_interaction(
        * resonance decay: 1 2
        * etc.
        */
-      fprintf(file_.get(), "%zu %zu %12.7f %12.7f\n", incoming_particles.size(),
-              outgoing_particles.size(), density, total_cross_section);
+      fprintf(file_.get(), "%zu %zu %12.7f %12.7f %5i \n", incoming_particles.size(),
+              outgoing_particles.size(), density, total_cross_section, process_type);
     }
     for (const auto &p : incoming_particles) {
       write_particledata(p);

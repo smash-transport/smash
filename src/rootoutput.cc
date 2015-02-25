@@ -217,7 +217,8 @@ void RootOutput::at_eventend(const Particles &/*particles*/,
 void RootOutput::at_interaction(const ParticleList &incoming,
                                 const ParticleList &outgoing,
                                 const double /*density*/,
-                                const double /*total_cross_section*/) {
+                                const double /*total_cross_section*/
+                                ProcessBranch::ProcessType /*process_type*/) {
   if (write_collisions_) {
     collisions_to_tree(incoming, outgoing);
   }
