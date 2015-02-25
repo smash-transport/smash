@@ -253,7 +253,7 @@ class DecayBranch : public ProcessBranch {
 
 inline int DecayBranch::angular_momentum() const {
   return type_->angular_momentum();
-};
+}
 
 
 }  // namespace Smash

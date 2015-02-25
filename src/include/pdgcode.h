@@ -217,7 +217,7 @@ class PdgCode {
 
   /// Construct the antiparticle to a given PDG code.
   PdgCode get_antiparticle() const {
-    // TODO: more efficient implementation
+    // TODO(mkretz): more efficient implementation
     return PdgCode(-code());
   }
 
@@ -267,8 +267,8 @@ class PdgCode {
   float isospin3_rel() const {
     unsigned int I = isospin_total();
     if (I==0) {
-      return 0; }
-    else {
+      return 0;
+    } else {
       return static_cast<float>(isospin3())/I;
     }
   }
@@ -694,6 +694,6 @@ std::istream& operator>>(std::istream& is, PdgCode& code);
  */
 std::ostream& operator<<(std::ostream& is, const PdgCode& code);
 
-}  // namespace SMASH
+}  // namespace Smash
 
 #endif  // SRC_INCLUDE_PDGCODE_H_

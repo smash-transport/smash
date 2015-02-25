@@ -334,6 +334,6 @@ class QuantumNumbers {
   int baryon_number_;
 };
 
-}  // namespace SMASH
+}  // namespace Smash
 
 #endif  // SRC_INCLUDE_PDGCODE_H_

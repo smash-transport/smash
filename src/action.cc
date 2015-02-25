@@ -201,7 +201,7 @@ void Action::check_conservation(const size_t &id_process) const {
     log.error("pz conservation violation ", momentum_difference.x3());
   }
 
-  // TODO: check other conservation laws (charge, baryon number, etc)
+  // TODO(weil): check other conservation laws (charge, baryon number, etc)
 
   if (violation) {
     throw std::runtime_error("Conservation laws violated in process " +

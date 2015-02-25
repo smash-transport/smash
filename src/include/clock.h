@@ -72,7 +72,7 @@ namespace Smash {
 class Clock {
  public:
   /// default initializer: Timestep size is set to 0!
-  Clock() : counter_(0), timestep_duration_(0.f), reset_time_(0.f) {};
+  Clock() : counter_(0), timestep_duration_(0.f), reset_time_(0.f) {}
   /** initialize with base time and time step size.
    *
    * \param time base time

@@ -135,7 +135,7 @@ class Nucleus {
   /** Rotates the nucleus. (Spherical symmetry of nondeformed nuclei
    * means there is nothing to do.)
    **/
-  virtual void rotate() {};
+  virtual void rotate() {}
 
   /// copies the particles from this nucleus into the particle list.
   void copy_particles(Particles* particles);

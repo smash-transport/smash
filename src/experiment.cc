@@ -342,7 +342,7 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
       conserved_initial_, time_start_, parameters_.labclock.current_time());
 
   while (!(++parameters_.labclock > end_time_)) {
-    std::vector<ActionPtr> actions;  // TODO: a std::list might be better suited
+    std::vector<ActionPtr> actions;  // TODO(mkretz): a std::list might be better suited
                                      // for the task: lots of appending, then
                                      // sorting and finally a single linear
                                      // iteration

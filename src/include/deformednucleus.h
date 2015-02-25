@@ -116,6 +116,6 @@ class DeformedNucleus : public Nucleus {
 
 };
 
-}
+}  // namespace Smash
 
 #endif /* SRC_INCLUDE_DEFORMEDNUCLEUS_H_ */

@@ -152,7 +152,7 @@ static std::string antiname(const std::string &name, PdgCode code) {
   } else {
     return basename+bar+charge;  // neutral meson
   }
-};
+}
 
 void ParticleType::create_type_list(const std::string &input) {  //{{{
   const auto &log = logger<LogArea::ParticleType>();
