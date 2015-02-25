@@ -210,7 +210,6 @@ class DecayAction : public Action {
   void format_debug_output(std::ostream &out) const override;
 
  private:
-
   /**
    * Kinematics of a 1-to-2 decay process.
    *
@@ -390,8 +389,8 @@ class ScatterActionBaryonBaryon : public ScatterAction {
   * of the two nucleons. Each element in the list contains the type(s) of the
   * final state particle(s) and the cross section for that particular process.
   */
-  ProcessBranchList nuc_nuc_to_nuc_res (const ParticleType &type_particle1,
-                                      const ParticleType &type_particle2);
+  ProcessBranchList nuc_nuc_to_nuc_res(const ParticleType &type_particle1,
+                                       const ParticleType &type_particle2);
 
   /**
   * Calculate cross sections for resonance absorption on a nucleon
@@ -404,8 +403,8 @@ class ScatterActionBaryonBaryon : public ScatterAction {
   * with a nucleon. Each element in the list contains the type(s) of the
   * final state particle(s) and the cross section for that particular process.
   */
-  ProcessBranchList nuc_res_to_nuc_nuc (const ParticleType &type_particle1,
-                                      const ParticleType &type_particle2);
+  ProcessBranchList nuc_res_to_nuc_nuc(const ParticleType &type_particle1,
+                                       const ParticleType &type_particle2);
 
  protected:
   /**

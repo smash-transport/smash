@@ -242,7 +242,7 @@ class Experiment : public ExperimentBase {
    * Writes the initial state for the Experiment to the output stream.
    * It automatically appends the output of the current Modus.
    */
-  friend std::ostream &operator<<<>(std::ostream &out, const Experiment &e);
+  friend std::ostream &operator<< <>(std::ostream &out, const Experiment &e);
 };
 }  // namespace Smash
 

@@ -91,7 +91,7 @@ class OscarOutput : public OutputInterface {
  */
 std::unique_ptr<OutputInterface> create_oscar_output(bf::path path, Configuration config);
 
-//@}
+// @}
 }  // namespace Smash
 
 #endif  // SRC_INCLUDE_OSCAROUTPUT_H_

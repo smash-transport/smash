@@ -58,7 +58,7 @@ class QuantumNumbers {
  public:
   /// construct QuantumNumbers collection with all fields 0.
   QuantumNumbers()
-        : momentum_(0,0,0,0),
+        : momentum_(0., 0., 0., 0.),
           charge_(0),
           isospin3_(0),
           strangeness_(0),
@@ -99,7 +99,7 @@ class QuantumNumbers {
    * (sets everything to 0 at the beginning)
    */
   void count_conserved_values(const Particles &particles) {
-    momentum_ = FourVector(0,0,0,0);
+    momentum_ = FourVector(0., 0., 0., 0.);
     charge_ = isospin3_ = strangeness_ = charmness_
             = bottomness_ = baryon_number_ = 0;
     for (const ParticleData &data : particles.data()) {
@@ -264,7 +264,7 @@ class QuantumNumbers {
               rhs_iter = rhs.momentum_.cbegin();
          mu < 4;
          ++here_iter, ++rhs_iter, ++mu) {
-      if (! almost_equal(*here_iter, *rhs_iter)) {
+      if (!almost_equal(*here_iter, *rhs_iter)) {
         error_msg << " P_" << mu << ": " << *here_iter << " vs. " << *rhs_iter
                   << "; Δ = " << (*here_iter - *rhs_iter) << "\n";
       }

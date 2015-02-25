@@ -42,7 +42,7 @@ class OutputInterface {
    * Output launched at event end. Event end is determined by maximal timestep
    * option.
    */
-  virtual void at_eventend(const Particles &, const int ) = 0;
+  virtual void at_eventend(const Particles &, const int) = 0;
 
   /**
    * Called whenever an action modified one or more particles.

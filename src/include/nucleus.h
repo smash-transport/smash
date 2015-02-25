@@ -61,7 +61,7 @@ class Nucleus {
   * Ref. for nuclear radii is Atom. Data Nucl. Data Tabl. by H. De Vries et. al.
   * For diffusiveness and saturation density, see [insert reference].
   */
-   virtual void set_parameters_automatic();
+  virtual void set_parameters_automatic();
 
   /** Sets the parameters of the Woods-Saxon according to
    * manually added values in the configuration file.
@@ -203,6 +203,7 @@ class Nucleus {
   size_t testparticles_ = 1;
   /// particles associated with this nucleus.
   std::vector<ParticleData> particles_;
+
  public:
   /// for iterators over the particle list:
   inline std::vector<ParticleData>::iterator begin() {

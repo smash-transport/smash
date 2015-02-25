@@ -35,7 +35,6 @@ namespace Smash {
  **/
 class DensityOutput : public OutputInterface {
  public:
-
   DensityOutput(bf::path path, Configuration&& conf);
   ~DensityOutput();
 

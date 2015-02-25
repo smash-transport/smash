@@ -56,11 +56,11 @@ class ScatterActionsFinder : public ActionFinderInterface {
  * Sets up a grid and sorts the particles into grid cells. */
 class GridScatterFinder : public ScatterActionsFinder {
  public:
-  GridScatterFinder (float length);
-  void find_possible_actions (std::vector<ActionPtr> &actions,
-                              Particles *particles,
-                              const ExperimentParameters &parameters,
-                              CrossSections *cross_sections = nullptr) const override;
+  GridScatterFinder(float length);
+  void find_possible_actions(std::vector<ActionPtr> &actions,
+                             Particles *particles,
+                             const ExperimentParameters &parameters,
+                             CrossSections *cross_sections = nullptr) const override;
  private:
   /* Cube edge length. */
   const float length_;

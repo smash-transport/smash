@@ -140,7 +140,6 @@ ColliderModus::ColliderModus(Configuration modus_config,
     projectile_ = std::unique_ptr<DeformedNucleus>(new DeformedNucleus());
   } else {
     projectile_ = std::unique_ptr<Nucleus>(new Nucleus());
-
   }
   if (modus_cfg.has_value({"Target", "Deformed"}) &&
       modus_cfg.take({"Target", "Deformed"})) {
@@ -247,7 +246,7 @@ ColliderModus::ColliderModus(Configuration modus_config,
       if (p_lab < 0) {
         throw ModusDefault::InvalidEnergy("Input Error: P_Lab must be nonnegative.");
       }
-      float p_proj = p_lab * projectile_->number_of_particles(); // momentum of projectile nucleus
+      float p_proj = p_lab * projectile_->number_of_particles();  // momentum of projectile nucleus
       // Set the total nucleus-nucleus collision energy.
       total_s_ = (mass_projec * mass_projec) + (mass_target * mass_target)
                   + 2 * mass_target *
@@ -258,7 +257,7 @@ ColliderModus::ColliderModus(Configuration modus_config,
     throw std::domain_error("Input Error: Non-existent collision energy. "
                             "Please provide one of Sqrtsnn/E_Kin/P_Lab.");
   }
-  if (energy_input > 1){
+  if (energy_input > 1) {
     throw std::domain_error("Input Error: Redundant collision energy. "
                             "Please provide only one of Sqrtsnn/E_Kin/P_Lab.");
   }
@@ -367,8 +366,8 @@ void ColliderModus::sample_impact() {
     // the correct distribution (only that canonical() = 0 then is the
     // upper end, not the lower).
     impact_ = sqrt(imp_min_*imp_min_
-		   + Random::canonical()
-		   * (imp_max_*imp_max_ - imp_min_*imp_min_));
+                   + Random::canonical()
+                   * (imp_max_*imp_max_ - imp_min_*imp_min_));
   } else {
     // linear sampling. Still, min > max works fine.
     impact_ = Random::uniform(imp_min_, imp_max_);

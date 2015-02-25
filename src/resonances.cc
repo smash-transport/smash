@@ -80,8 +80,8 @@ double two_to_one_formation(const ParticleData &particle_a,
   /* Calculate spin factor */
   const double spinfactor = (type_resonance.spin() + 1)
     / ((type_particle_a.spin() + 1) * (type_particle_b.spin() + 1));
-  const int sym_factor = (type_particle_a.pdgcode()==type_particle_b.pdgcode())
-                       ? 2 : 1;
+  const int sym_factor = (type_particle_a.pdgcode() ==
+                          type_particle_b.pdgcode()) ? 2 : 1;
   float resonance_width = type_resonance.total_width(srts);
   float resonance_mass = type_resonance.mass();
   /* Calculate resonance production cross section

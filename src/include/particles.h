@@ -206,7 +206,6 @@ class Particles {
   void reset();
 
  private:
-
   /// Highest id of a given particle
   int id_max_ = -1;
   /**

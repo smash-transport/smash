@@ -57,7 +57,6 @@ ThreeVector DeformedNucleus::distribute_nucleon() const {
   do {
     a_direction.distribute_isotropically();
     a_radius = Random::uniform(0.0, radius_max);
-
   } while (Random::canonical() > deformed_woods_saxon(a_radius,
            a_direction.costheta()));
 
@@ -154,4 +153,4 @@ double DeformedNucleus::y_l_0(int l, double cosx) const {
   }
 }
 
-} // namespace Smash
+}  // namespace Smash

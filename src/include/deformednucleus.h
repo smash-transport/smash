@@ -113,7 +113,6 @@ class DeformedNucleus : public Nucleus {
   double beta4_ = 0.0;
   /// Nucleus orientation (initial profile in xz plane).
   Angles nuclear_orientation_;
-
 };
 
 }  // namespace Smash

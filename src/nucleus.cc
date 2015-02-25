@@ -254,7 +254,7 @@ void Nucleus::arrange_nucleons() {
 void Nucleus::set_parameters_automatic() {
   int A = Nucleus::number_of_particles();
   switch (A) {
-    case 1: // single particle
+    case 1:  // single particle
       set_nuclear_radius(0.);
       set_diffusiveness(-1.);
       break;
@@ -336,10 +336,10 @@ void Nucleus::generate_fermi_momenta() {
     }
     r = (i->position() - nucleus_center).abs3();
     rho = rho0 /(std::exp((r - nuclear_radius_)/diffusiveness_) + 1.0);
-    if (i->pdgcode() == 0x2212) { // proton
+    if (i->pdgcode() == 0x2212) {  // proton
       rho = rho * N_p / A;
     }
-    if (i->pdgcode() == 0x2112) { // neutron
+    if (i->pdgcode() == 0x2112) {  // neutron
       rho = rho * N_n / A;
     }
     p = hbarc * std::pow(pi2_3 * rho * Random::uniform(0.0, 1.0), 1.0/3.0);
@@ -365,7 +365,7 @@ void Nucleus::boost(double beta_scalar) {
   //       a system that moves with -beta. Now in this frame, it seems
   //       like p has been accelerated with +beta.
   //     )
-  ThreeVector beta (0., 0., - beta_scalar);
+  ThreeVector beta(0., 0., -beta_scalar);
   for (auto i = begin(); i != end(); i++) {
     // a real Lorentz Transformation would leave the particles at
     // different times here, which we would then have to propagate back

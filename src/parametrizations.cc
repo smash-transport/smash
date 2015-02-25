@@ -15,7 +15,7 @@ namespace Smash {
 const double mN = 0.938;    // nucleon mass
 
 /* Convert mandelstam-s to p_lab in a nucleon-nucleon collision. */
-static inline double plab_from_s_NN (double mandelstam_s) {
+static inline double plab_from_s_NN(double mandelstam_s) {
   const double mNsqr = mN*mN;
   return std::sqrt((mandelstam_s - 2*mNsqr) * (mandelstam_s - 2*mNsqr)
                    - 4 * mNsqr * mNsqr) / (2 * mN);

@@ -48,7 +48,7 @@ template <typename T> class uniform_dist {
     : distribution(min, max) {
   }
   /** returns a random number in the interval */
-  T operator ()() {
+  T operator()() {
     return distribution(engine);
   }
   /** the distribution object that is being used. */

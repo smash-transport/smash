@@ -79,16 +79,16 @@ class Configuration;
  * code. Then add the name to the end of the AreaTuple.
  */
 namespace LogArea {
-DECLARE_LOGAREA( 0, Main);
-DECLARE_LOGAREA( 1, Experiment);
-DECLARE_LOGAREA( 2, Box);
-DECLARE_LOGAREA( 3, Collider);
-DECLARE_LOGAREA( 4, Sphere);
-DECLARE_LOGAREA( 5, Action);
-DECLARE_LOGAREA( 6, InputParser);
-DECLARE_LOGAREA( 7, ParticleType);
-DECLARE_LOGAREA( 8, FindScatter);
-DECLARE_LOGAREA( 9, Legacy);
+DECLARE_LOGAREA(0, Main);
+DECLARE_LOGAREA(1, Experiment);
+DECLARE_LOGAREA(2, Box);
+DECLARE_LOGAREA(3, Collider);
+DECLARE_LOGAREA(4, Sphere);
+DECLARE_LOGAREA(5, Action);
+DECLARE_LOGAREA(6, InputParser);
+DECLARE_LOGAREA(7, ParticleType);
+DECLARE_LOGAREA(8, FindScatter);
+DECLARE_LOGAREA(9, Legacy);
 DECLARE_LOGAREA(10, Clock);
 DECLARE_LOGAREA(11, DecayModes);
 DECLARE_LOGAREA(12, Resonances);
@@ -96,7 +96,7 @@ DECLARE_LOGAREA(13, ScatterAction);
 DECLARE_LOGAREA(14, Distributions);
 DECLARE_LOGAREA(15, ModusDefault);
 DECLARE_LOGAREA(16, Grid);
-DECLARE_LOGAREA(17, List);    ///List is a new modus like Box, Sphere and Collider
+DECLARE_LOGAREA(17, List);    // List is a new modus like Box, Sphere and Collider
 DECLARE_LOGAREA(18, Nucleus);
 DECLARE_LOGAREA(19, DecayType);
 

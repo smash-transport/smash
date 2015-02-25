@@ -99,7 +99,7 @@ FourVector Action::get_interaction_point() {
 
 const ProcessBranch* Action::choose_channel() {
   const auto &log = logger<LogArea::Action>();
-  float random_weight = Random::uniform(0.f,total_weight_);
+  float random_weight = Random::uniform(0.f, total_weight_);
   float weight_sum = 0.;
   /* Loop through all subprocesses and select one by Monte Carlo, based on
    * their weights.  */
@@ -154,7 +154,7 @@ void Action::sample_cms_momenta() {
     mass_b = sample_resonance_mass(t_b, t_a, cms_energy);
   }
 
-  double momentum_radial = pCM (cms_energy, mass_a, mass_b);
+  double momentum_radial = pCM(cms_energy, mass_a, mass_b);
   if (!(momentum_radial > 0.0)) {
     log.warn("Particle: ", t_a.pdgcode(), " radial momentum: ", momentum_radial);
     log.warn("Etot: ", cms_energy, " m_a: ", mass_a, " m_b: ", mass_b);

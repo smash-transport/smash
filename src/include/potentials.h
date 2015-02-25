@@ -65,6 +65,7 @@ class Potentials {
   ThreeVector potential_gradient(const ThreeVector &r,
                                  const ParticleList &plist,
                                  const PdgCode acts_on) const;
+
  private:
   // Skyrme potential on/off
   bool use_skyrme_;
@@ -83,8 +84,8 @@ class Potentials {
 
   // Parameters of symmetry potential
   double symmetry_s_;
-
 };
+
 }  // namespace Smash
 
 #endif  // SRC_INCLUDE_POTENTIALS_H_

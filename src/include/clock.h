@@ -214,6 +214,7 @@ class Clock {
   bool operator>(const float& time) const {
     return current_time() > time;
   }
+
  private:
   /// clock tick. This is purely internal and will be reset when the
   /// timestep size is changed

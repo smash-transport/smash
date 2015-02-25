@@ -143,7 +143,7 @@ void DecayAction::one_to_three() {
     log.warn("1->3 momentum check failed. Total momentum: ", ptot.threevec());
   }
 
-  log.debug(  "outgoing_a: ", outgoing_a.momentum(),
+  log.debug("outgoing_a: ", outgoing_a.momentum(),
             "\noutgoing_b: ", outgoing_b.momentum(),
             "\noutgoing_c: ", outgoing_c.momentum());
 }

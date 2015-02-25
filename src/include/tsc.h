@@ -28,49 +28,45 @@
 #pragma intrinsic(__rdtsc)
 #endif
 
-class TimeStampCounter
-{
-    public:
+class TimeStampCounter {
+ public:
         void start();
         void stop();
         unsigned long long cycles() const;
 
-    private:
+ private:
         union Data {
             unsigned long long a;
             unsigned int b[2];
         } m_start, m_end;
 };
 
-inline void TimeStampCounter::start()
-{
+inline void TimeStampCounter::start() {
 #ifdef VC_IMPL_MIC
-    asm volatile("xor %%eax,%%eax\n\tcpuid\n\trdtsc" : "=a"(m_start.b[0]), "=d"(m_start.b[1]) :: "ebx", "ecx" );
+    asm volatile("xor %%eax,%%eax\n\tcpuid\n\trdtsc" : "=a"(m_start.b[0]), "=d"(m_start.b[1]) :: "ebx", "ecx");
 #elif defined _MSC_VER
-	unsigned int tmp;
+    unsigned int tmp;
     m_start.a = __rdtscp(&tmp);
 #else
-    asm volatile("rdtscp" : "=a"(m_start.b[0]), "=d"(m_start.b[1]) :: "ecx" );
+    asm volatile("rdtscp" : "=a"(m_start.b[0]), "=d"(m_start.b[1]) :: "ecx");
 #endif
 }
 
-inline void TimeStampCounter::stop()
-{
+inline void TimeStampCounter::stop() {
 #ifdef VC_IMPL_MIC
-    asm volatile("xor %%eax,%%eax\n\tcpuid\n\trdtsc" : "=a"(m_end.b[0]), "=d"(m_end.b[1]) :: "ebx", "ecx" );
+    asm volatile("xor %%eax,%%eax\n\tcpuid\n\trdtsc" : "=a"(m_end.b[0]), "=d"(m_end.b[1]) :: "ebx", "ecx");
 #elif defined _MSC_VER
-	unsigned int tmp;
+    unsigned int tmp;
     m_end.a = __rdtscp(&tmp);
 #else
-    asm volatile("rdtscp" : "=a"(m_end.b[0]), "=d"(m_end.b[1]) :: "ecx" );
+    asm volatile("rdtscp" : "=a"(m_end.b[0]), "=d"(m_end.b[1]) :: "ecx");
 #endif
 }
 
-inline unsigned long long TimeStampCounter::cycles() const
-{
+inline unsigned long long TimeStampCounter::cycles() const {
     return m_end.a - m_start.a;
 }
 
 std::ostream &operator<<(std::ostream &out, const TimeStampCounter &tsc);
 
-#endif // TSC_H
+#endif  // TSC_H
