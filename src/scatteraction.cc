@@ -45,11 +45,11 @@ ProcessBranch::ProcessType ScatterAction::perform(Particles *particles,
 
   log.debug("Chosen channel: ", proc->get_type(), proc->particle_list()); 
 
-  /*Variable declaration needs to happen before switch-case structure*/
-  FourVector middle_point;
+  /* The production point of the new particles.  */
+  FourVector middle_point = get_interaction_point();
 
   switch(proc->get_type()) {
-    case ProcessBranch::Elastic:  
+    case ProcessBranch::Elastic:
       /* 2->2 elastic scattering */
       log.debug("Process: Elastic collision.", proc->get_type());
 
@@ -62,77 +62,29 @@ ProcessBranch::ProcessType ScatterAction::perform(Particles *particles,
       particles->data(id_b) = outgoing_particles_[1];
 
       break; 
-    case ProcessBranch::String: 
-      /* string excitation */ 
-      log.debug("Process: String Excitation.");
-      /// string_excitation(incoming_particles_, outgoing_particles_);  
-      break;
     case ProcessBranch::TwoToOne:
       /* resonance formation */
       log.debug("Process: Resonance formation.", proc->get_type());
-      /* The starting point of resonance is between the two initial particles:
-       * x_middle = (x_a + x_b) / 2   */
-      middle_point = (incoming_particles_[0].position()
-                   + incoming_particles_[1].position()) / 2.;
-
       /* processes computed in the center of momenta */
       resonance_formation();
-
-      /* Set positions & boost to computational frame. */
-      for (ParticleData &new_particle : outgoing_particles_) {
-        new_particle.set_4position(middle_point);
-
-        new_particle.boost_momentum(-beta_cm());
-
-        // store the process id in the Particle data
-        new_particle.set_id_process(id_process);
-
-        log.debug("Resonance: ", new_particle);
-
-        new_particle.set_id(particles->add_data(new_particle));
-      }
-
-      /* Remove the initial particles */
-      particles->remove(id_a);
-      particles->remove(id_b);
-
-      log.debug("Particle map now has ", particles->size(), " elements.");
       break; 
     case ProcessBranch::TwoToTwo:
       /* 2->2 inelastic scattering*/
       log.debug("Process: Inelastic scattering.", proc->get_type());
-      /* The starting point of the new particles is between the two initial particles:
-       * x_middle = (x_a + x_b) / 2   */
-      middle_point = (incoming_particles_[0].position()
-                   + incoming_particles_[1].position()) / 2.;
       /* 2 particles in final state: Sample the particle momenta in CM system. */
       sample_cms_momenta();
-      /* Set positions & boost to computational frame. */
-      for (ParticleData &new_particle : outgoing_particles_) {
-        new_particle.set_4position(middle_point);
-
-        new_particle.boost_momentum(-beta_cm());
-
-        // store the process id in the Particle data
-        new_particle.set_id_process(id_process);
-
-        log.debug("Resonance: ", new_particle);
-
-        new_particle.set_id(particles->add_data(new_particle));
-      }
-
-      /* Remove the initial particles */
-      particles->remove(id_a);
-      particles->remove(id_b);
-
-      log.debug("Particle map now has ", particles->size(), " elements.");
+      break;
+    case ProcessBranch::String:
+      /* string excitation */
+      log.debug("Process: String Excitation.");
+      /// string_excitation(incoming_particles_, outgoing_particles_);  
       break;
     case ProcessBranch::None:
       log.debug("ProcessType None should not have been selected");
       break;
     case ProcessBranch::Decay: 
       log.debug("ProcessType Decay should have been handled as DecayAction");
-      break;      
+      break;
     default: 
       throw InvalidScatterAction(
         "ScatterAction::perform: Unknown Process Type. "
@@ -140,6 +92,21 @@ ProcessBranch::ProcessType ScatterAction::perform(Particles *particles,
         " was requested. (PDGcode1=" + incoming_particles_[0].pdgcode().string()
         + ", PDGcode2=" + incoming_particles_[1].pdgcode().string()
         + ")");
+  }
+
+  if (proc->get_type() != ProcessBranch::Elastic) {
+    /* Set positions & boost to computational frame. */
+    for (ParticleData &new_particle : outgoing_particles_) {
+      new_particle.set_4position(middle_point);
+      new_particle.boost_momentum(-beta_cm());
+      // store the process id in the Particle data
+      new_particle.set_id_process(id_process);
+      new_particle.set_id(particles->add_data(new_particle));
+    }
+    /* Remove the initial particles */
+    particles->remove(id_a);
+    particles->remove(id_b);
+    log.debug("Particle map now has ", particles->size(), " elements.");
   }
 
   check_conservation(id_process);
@@ -310,18 +277,7 @@ void ScatterAction::momenta_exchange() {
 void ScatterAction::resonance_formation() {
   const auto &log = logger<LogArea::ScatterAction>();
 
-  switch (outgoing_particles_.size()) {
-  case 1:
-    /* 1 particle in final state: Center-of-momentum frame of initial
-     * particles is the rest frame of the resonance.
-     */
-    outgoing_particles_[0].set_4momentum(FourVector(sqrt_s(), 0., 0., 0.));
-
-    log.debug("Momentum of the new particle: ",
-              outgoing_particles_[0].momentum());
-    break;
-  
-  default:
+  if (outgoing_particles_.size() != 1) {
     std::string s = "resonance_formation: "
                     "Incorrect number of particles in final state: ";
     s += std::to_string(outgoing_particles_.size()) + " (";
@@ -329,6 +285,13 @@ void ScatterAction::resonance_formation() {
     s += incoming_particles_[1].pdgcode().string() + ")";
     throw InvalidResonanceFormation(s);
   }
+
+  /* 1 particle in final state: Center-of-momentum frame of initial particles
+   * is the rest frame of the resonance.  */
+  outgoing_particles_[0].set_4momentum(FourVector(sqrt_s(), 0., 0., 0.));
+
+  log.debug("Momentum of the new particle: ",
+            outgoing_particles_[0].momentum());
 }
 
 

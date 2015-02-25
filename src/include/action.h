@@ -101,7 +101,7 @@ class Action {
   void check_conservation(const size_t &id_process) const;
 
   /** Get the interaction point */
-  ThreeVector get_interaction_point();
+  FourVector get_interaction_point();
 
   /**
    * \ingroup exception
@@ -339,11 +339,7 @@ class ScatterAction : public Action {
   /** Perform an elastic two-body scattering, i.e. just exchange momentum. */
   void momenta_exchange();
 
-  /**
-   * Resonance formation process.
-   *
-   * Creates one or two new particles, one of which is a resonance.
-   */
+  /** Perform a 2->1 resonance-formation process. */
   void resonance_formation();
 };
 

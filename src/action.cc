@@ -86,11 +86,11 @@ ParticleList Action::incoming_particles() const {
   return std::move(l);
 }
 
-ThreeVector Action::get_interaction_point() {
+FourVector Action::get_interaction_point() {
   // Estimate for the interaction point in the calculational frame
-  ThreeVector interaction_point = ThreeVector(0.0, 0.0, 0.0);
+  FourVector interaction_point = FourVector(0., 0., 0., 0.);
   for (const auto &part : incoming_particles_) {
-    interaction_point += part.position().threevec();
+    interaction_point += part.position();
   }
   interaction_point /= incoming_particles_.size();
   return interaction_point;

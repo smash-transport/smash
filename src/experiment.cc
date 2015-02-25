@@ -307,8 +307,8 @@ void Experiment<Modus>::perform_actions(ActionList &actions,
         log.debug("Process Type is: ", process_type);
         const ParticleList outgoing_particles = action->outgoing_particles();
         // Calculate Eckart rest frame density at the interaction point
-        const ThreeVector r_interaction = action->get_interaction_point();
-        const double rho = four_current(r_interaction, plist,
+        const FourVector r_interaction = action->get_interaction_point();
+        const double rho = four_current(r_interaction.threevec(), plist,
                                      parameters_.gaussian_sigma, dens_type_,
                                      parameters_.testparticles).abs();
         const double total_cross_section = action->weight();
