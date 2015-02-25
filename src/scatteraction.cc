@@ -18,6 +18,7 @@
 #include "include/pdgcode.h"
 #include "include/random.h"
 #include "include/resonances.h"
+#include "include/width.h"
 #include "include/cxx14compat.h"
 
 namespace Smash {
@@ -69,9 +70,9 @@ ProcessBranch::ProcessType ScatterAction::perform(Particles *particles,
       resonance_formation();
       break;
     case ProcessBranch::TwoToTwo:
-      /* 2->2 inelastic scattering*/
+      /* 2->2 inelastic scattering */
       log.debug("Process: Inelastic scattering.", proc->get_type());
-      /* 2 particles in final state: Sample the particle momenta in CM system. */
+      /* Sample the particle momenta in CM system. */
       sample_cms_momenta();
       break;
     case ProcessBranch::String:
@@ -135,10 +136,10 @@ double ScatterAction::sqrt_s() const {
 
 
 double ScatterAction::cm_momentum_squared() const {
-  return (incoming_particles_[0].momentum().Dot(incoming_particles_[1].momentum())
-       * incoming_particles_[0].momentum().Dot(incoming_particles_[1].momentum())
-       - incoming_particles_[0].type().mass_sqr()
-       * incoming_particles_[1].type().mass_sqr()) / mandelstam_s();
+  const double m1 = incoming_particles_[0].effective_mass();
+  const double m2 = incoming_particles_[1].effective_mass();
+  const double mom = pCM(sqrt_s(), m1, m2);
+  return mom*mom;
 }
 
 
@@ -181,8 +182,9 @@ CollisionBranch* ScatterAction::elastic_cross_section(float elast_par) {
 CollisionBranch* ScatterAction::string_excitation_cross_section() {
   /* Calculate string-excitation cross section:
    * Parametrized total minus all other present channels. */
-  /* TODO: This is currently set to zero, since Pythia is not yet implemented. */
-  float sig_string = 0.f;  // std::max(0.f, total_cross_section() - total_weight_);
+  // TODO: This is currently set to zero, since Pythia is not yet implemented.
+  float sig_string = 0.f;
+  // = std::max(0.f, total_cross_section() - total_weight_);
 
   return new CollisionBranch(sig_string, ProcessBranch::String);
 }
@@ -313,7 +315,8 @@ float ScatterActionBaryonBaryon::total_cross_section() const {
 }
 
 
-CollisionBranch* ScatterActionBaryonBaryon::elastic_cross_section(float elast_par) {
+CollisionBranch* ScatterActionBaryonBaryon::elastic_cross_section(
+                                                              float elast_par) {
   const PdgCode &pdg_a = incoming_particles_[0].type().pdgcode();
   const PdgCode &pdg_b = incoming_particles_[1].type().pdgcode();
 

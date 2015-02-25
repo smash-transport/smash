@@ -28,7 +28,8 @@ class ScatterActionsFinder : public ActionFinderInterface {
   ScatterActionsFinder(float elastic_parameter, int testparticles);
 
   /** Determine the collision time of the two particles. */
-  static double collision_time(const ParticleData &p_a, const ParticleData &p_b);
+  static double collision_time(const ParticleData &p_a,
+                               const ParticleData &p_b);
   /** Check the whole particle list for collisions
    * and return a list with the corrsponding Action objects. */
   ActionList find_possible_actions(
@@ -60,7 +61,8 @@ class GridScatterFinder : public ScatterActionsFinder {
   void find_possible_actions(std::vector<ActionPtr> &actions,
                              Particles *particles,
                              const ExperimentParameters &parameters,
-                             CrossSections *cross_sections = nullptr) const override;
+                             CrossSections *cross_sections = nullptr)
+                             const override;
  private:
   /* Cube edge length. */
   const float length_;

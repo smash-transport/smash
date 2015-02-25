@@ -175,11 +175,13 @@ class PdgCode {
       if (baryon_number() == 0) {
         // mesons: special cases K0_L=0x130 and K0_S=0x310
         if ((digits_.n_J_ % 2 == 0) && dump() != 0x130 && dump() != 0x310) {
-          throw InvalidPdgCode("Invalid PDG code " + string() + " (meson with even n_J)");
+          throw InvalidPdgCode("Invalid PDG code " + string()
+                               + " (meson with even n_J)");
         }
       } else {
         if ((digits_.n_J_ % 2 != 0) || digits_.n_J_ == 0) {
-          throw InvalidPdgCode("Invalid PDG code " + string() + " (baryon with odd n_J)");
+          throw InvalidPdgCode("Invalid PDG code " + string()
+                               + " (baryon with odd n_J)");
         }
       }
     } else {
@@ -187,9 +189,11 @@ class PdgCode {
         throw InvalidPdgCode("Invalid PDG code " + string() + " (n_J==0)");
       }
     }
-    // antiparticle flag only makes sense for particle types that have an antiparticle
+    /* The antiparticle flag only makes sense for particle types
+     * that have an antiparticle. */
     if (digits_.antiparticle_ && !has_antiparticle()) {
-      throw InvalidPdgCode("Invalid PDG code " + string() + " (cannot be negative)");
+      throw InvalidPdgCode("Invalid PDG code " + string()
+                           + " (cannot be negative)");
     }
   }
 

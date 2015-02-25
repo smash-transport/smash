@@ -87,7 +87,8 @@ float SphereModus::initial_conditions(Particles *particles,
   /* Create NUMBER OF PARTICLES according to configuration */
   for (const auto &p : init_multipl_) {
     particles->create(p.second*parameters.testparticles, p.first);
-    log.debug() << "Particle " << p.first << " initial multiplicity " << p.second;
+    log.debug() << "Particle " << p.first
+                << " initial multiplicity " << p.second;
   }
   /* loop over particle data to fill in momentum and position information */
   for (ParticleData &data : particles->data()) {

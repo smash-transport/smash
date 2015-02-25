@@ -128,7 +128,8 @@ class ColliderModus : public ModusDefault {
    * @param m_b The mass of the target.
    * @return < v_a, v_b > Velocities of the nuclei.
    **/
-  std::pair<double, double> get_velocities(float mandelstam_s, float m_a, float m_b);
+  std::pair<double, double> get_velocities(float mandelstam_s,
+                                           float m_a, float m_b);
 
   /**\ingroup logging
    * Writes the initial state for the ColliderModus to the output stream.

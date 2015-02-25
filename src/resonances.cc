@@ -43,8 +43,8 @@ double clebsch_gordan(const int j_a, const int j_b, const int j_c,
   if (std::abs(wigner_3j) > really_small)
     result = std::pow(-1, (j_a-j_b+m_c)/2.) * std::sqrt(j_c + 1) * wigner_3j;
 
-  log.debug("CG: ", result, " I1: ", j_a, " I2: ", j_b, " IR: ", j_c, " iz1: ", m_a,
-            " iz2: ", m_b, " izR: ", m_c);
+  log.debug("CG: ", result, " I1: ", j_a, " I2: ", j_b, " IR: ", j_c,
+            " iz1: ", m_a, " iz2: ", m_b, " izR: ", m_c);
 
   return result;
 }
@@ -173,7 +173,8 @@ float sample_resonance_mass(const ParticleType &type_resonance,
   /* Sample resonance mass from the distribution
    * used for calculating the cross section. */
   float mass_resonance = 0.;
-  float maximum_mass = std::nextafter(static_cast<float>(cms_energy - mass_stable), 0.f);
+  float maximum_mass = std::nextafter(static_cast<float>(cms_energy -
+                                                         mass_stable), 0.f);
   double random_number = 1.0;
   double distribution_max
     = spectral_function_integrand(params.type->mass(), &params);

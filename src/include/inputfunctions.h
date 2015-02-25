@@ -38,10 +38,10 @@ struct Line {/*{{{*/
  * \param[in] message Error message
  * \param[in] line Line object containing line number and line content.
  */
-inline std::string build_error_string(std::string message, const Line &line) {/*{{{*/
+inline std::string build_error_string(std::string message, const Line &line) {
   return message + " (on line " + std::to_string(line.number) + ": \"" +
          line.text + "\")";
-}/*}}}*/
+}
 
 /**
  * Helper function for parsing particles.txt and decaymodes.txt.

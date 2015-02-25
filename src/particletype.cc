@@ -58,8 +58,7 @@ std::vector<ParticleTypePtr> ParticleType::list_nucleons() {
 
 std::vector<ParticleTypePtr> ParticleType::list_baryon_resonances() {
   std::vector<ParticleTypePtr> list;
-  list.reserve(4);  // currently we have only the Delta (with four charge states)
-
+  list.reserve(10);
   for (const ParticleType &type_resonance : ParticleType::list_all()) {
     /* Only loop over baryon resonances. */
     if (type_resonance.is_stable()

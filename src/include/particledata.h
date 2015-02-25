@@ -66,7 +66,9 @@ class ParticleData {
   inline void set_4position(const FourVector &pos);
   inline void set_3position(const ThreeVector &pos);
   /// get the velocity 3-vector
-  inline ThreeVector velocity (void) const { return momentum_.threevec() / momentum_.x0(); }
+  inline ThreeVector velocity(void) const {
+    return momentum_.threevec() / momentum_.x0();
+  }
 
   /**
    * Returns the inverse of the gamma factor from the current velocity of the
@@ -155,7 +157,8 @@ inline void ParticleData::set_4momentum(const FourVector &momentum_vector) {
  * \param[in] new_mass the mass of the particle
  * \param[in] mom the three-momentum of the particle
  */
-inline void ParticleData::set_4momentum(double new_mass, const ThreeVector &mom) {
+inline void ParticleData::set_4momentum(double new_mass,
+                                        const ThreeVector &mom) {
   momentum_ = FourVector(std::sqrt(new_mass * new_mass + mom * mom), mom);
 }
 

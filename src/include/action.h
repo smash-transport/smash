@@ -304,9 +304,12 @@ class ScatterAction : public Action {
   virtual ProcessBranchList resonance_cross_sections();
 
   /** Find all inelastic 2->2 processes for this reaction. */
-  virtual ProcessBranchList two_to_two_cross_sections() { return ProcessBranchList(); }
+  virtual ProcessBranchList two_to_two_cross_sections() {
+    return ProcessBranchList();
+  }
 
-  /// determine the total energy in the center-of-mass frame, i.e. sqrt of Mandelstam s
+  /** Determine the total energy in the center-of-mass frame,
+   * i.e. sqrt of Mandelstam s.  */
   double sqrt_s() const override;
   /**
    * \ingroup exception
@@ -317,9 +320,11 @@ class ScatterAction : public Action {
   };
 
  protected:
-  /// determine the Mandelstam s variable, s = (p_a + p_b)^2 = square of CMS energy
+  /** Determine the Mandelstam s variable,
+   * s = (p_a + p_b)^2 = square of CMS energy.  */
   double mandelstam_s() const;
-  /// determine the squared momenta of the incoming particles in the center-of-mass system
+  /** Determine the squared momenta of the incoming particles in the
+   * center-of-mass system.  */
   double cm_momentum_squared() const;
 
   /**
@@ -352,7 +357,8 @@ class ScatterActionBaryonBaryon : public ScatterAction {
  public:
   /* Inherit constructor. */
   using ScatterAction::ScatterAction;
-  /** Determine the parametrized total cross section for a baryon-baryon collision. */
+  /** Determine the parametrized total cross section
+   * for a baryon-baryon collision. */
   virtual float total_cross_section() const override;
   /**
    * Determine the elastic cross section for a baryon-baryon collision.

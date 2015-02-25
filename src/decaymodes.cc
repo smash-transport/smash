@@ -36,7 +36,8 @@ void DecayModes::add_mode(float ratio, int L,
     }
     if (particle_types[0]->is_stable() && particle_types[1]->is_stable()) {
       type = new TwoBodyDecayStable(particle_types, L);
-    } else if (particle_types[0]->is_stable() || particle_types[1]->is_stable()) {
+    } else if (particle_types[0]->is_stable() ||
+               particle_types[1]->is_stable()) {
       type = new TwoBodyDecaySemistable(particle_types, L);
     } else {
       type = new TwoBodyDecayUnstable(particle_types, L);

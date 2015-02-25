@@ -76,7 +76,9 @@ Configuration::Configuration(const bf::path &path)
 Configuration::Configuration(const bf::path &path, const bf::path &filename) {
   const auto file_path = path / filename;
   if (!bf::exists(file_path)) {
-    throw FileDoesNotExist("The configuration file was expected at '" + file_path.native() + "', but the file does not exist.");
+    throw FileDoesNotExist("The configuration file was expected at '"
+                           + file_path.native()
+                           + "', but the file does not exist.");
   }
   try {
     root_node_ = YAML::LoadFile(file_path.native());

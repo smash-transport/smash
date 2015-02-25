@@ -187,12 +187,12 @@ ColliderModus::ColliderModus(Configuration modus_config,
   // Option 1: Center of mass energy.
   if (modus_cfg.has_value({"Sqrtsnn"})) {
       float sqrt_s_NN = modus_cfg.take({"Sqrtsnn"});
-      // Note that \f$\sqrt{s_{NN}}\f$ is different for neutron-neutron and
-      // proton-proton collisions (because of the different masses).
-      // Therefore,representative particles are needed to specify which
-      // two particles' collisions have this \f$\sqrt{s_{NN}}\f$. The vector
-      // specifies a pair of PDG codes for the two particle species we want to use.
-      // The default is otherwise the average nucleon mass for each nucleus.
+      /* Note that \f$\sqrt{s_{NN}}\f$ is different for neutron-neutron and
+       * proton-proton collisions (because of the different masses). Therefore,
+       * representative particles are needed to specify which two particles'
+       * collisions have this \f$\sqrt{s_{NN}}\f$. The vector specifies a pair
+       * of PDG codes for the two particle species we want to use. The default
+       * is otherwise the average nucleon mass for each nucleus.  */
       PdgCode id_a = 0, id_b = 0;
       if (modus_cfg.has_value({"Sqrts_Reps"})) {
         std::vector<PdgCode> sqrts_reps = modus_cfg.take({"Sqrts_Reps"});
@@ -226,12 +226,14 @@ ColliderModus::ColliderModus(Configuration modus_config,
                 + mass_projec * mass_projec + mass_target * mass_target;
       energy_input++;
   }
-  // Option 2: Kinetic energy per nucleon of the projectile nucleus (target at rest).
+  /* Option 2: Kinetic energy per nucleon of the projectile nucleus
+   * (target at rest).  */
   if (modus_cfg.has_value({"E_Kin"})) {
       float e_kin = modus_cfg.take({"E_Kin"});
       // Check that energy is nonnegative.
       if (e_kin < 0) {
-        throw ModusDefault::InvalidEnergy("Input Error: E_Kin must be nonnegative.");
+        throw ModusDefault::InvalidEnergy("Input Error: "
+                                          "E_Kin must be nonnegative.");
       }
       // Set the total nucleus-nucleus collision energy.
       total_s_ = (mass_projec * mass_projec) + (mass_target * mass_target)
@@ -244,9 +246,11 @@ ColliderModus::ColliderModus(Configuration modus_config,
       float p_lab = modus_cfg.take({"P_Lab"});
       // Check that p_lab is nonnegative.
       if (p_lab < 0) {
-        throw ModusDefault::InvalidEnergy("Input Error: P_Lab must be nonnegative.");
+        throw ModusDefault::InvalidEnergy("Input Error: "
+                                          "P_Lab must be nonnegative.");
       }
-      float p_proj = p_lab * projectile_->number_of_particles();  // momentum of projectile nucleus
+      // momentum of projectile nucleus
+      float p_proj = p_lab * projectile_->number_of_particles();
       // Set the total nucleus-nucleus collision energy.
       total_s_ = (mass_projec * mass_projec) + (mass_target * mass_target)
                   + 2 * mass_target *
@@ -321,13 +325,15 @@ float ColliderModus::initial_conditions(Particles *particles,
   // Use the total mandelstam variable to get the frame-dependent velocity for
   // each nucleus. Position a is projectile, position b is target.
   double v_a, v_b;
-  std::tie(v_a, v_b) = get_velocities(total_s_, projectile_->mass(), target_->mass());
+  std::tie(v_a, v_b) = get_velocities(total_s_,
+                                      projectile_->mass(), target_->mass());
 
   // If velocities are too close to 1 for our calculations, throw an exception.
   if (almost_equal(std::abs(1.0 - v_a), 0.0)
       || almost_equal(std::abs(1.0 - v_b), 0.0)) {
-    throw std::domain_error("Found velocity equal to 1 in nucleusmodus::initial_conditions.\n"
-                            "Consider using the center of velocity reference frame.");
+    throw std::domain_error("Found velocity equal to 1 in "
+                            "nucleusmodus::initial_conditions.\nConsider using"
+                            "the center of velocity reference frame.");
   }
 
   // Shift the nuclei into starting positions. Keep the pair separated
@@ -374,7 +380,8 @@ void ColliderModus::sample_impact() {
   }
 }
 
-std::pair<double, double> ColliderModus::get_velocities(float s, float m_a, float m_b) {
+std::pair<double, double> ColliderModus::get_velocities(float s,
+                                                        float m_a, float m_b) {
   double v_a = 0.0;
   double v_b = 0.0;
   // Frame dependent calculations of velocities. Assume v_a >= 0, v_b <= 0.
@@ -386,9 +393,12 @@ std::pair<double, double> ColliderModus::get_velocities(float s, float m_a, floa
       break;
     case 2:  // Center of mass.
       {
-        double A = (s -(m_a - m_b) * (m_a - m_b)) * (s -(m_a + m_b) * (m_a + m_b));
-        double B = - 8 * (m_a * m_a) * m_a * (m_b * m_b) * m_b - ((m_a * m_a) + (m_b * m_b))
-                   * (s - (m_a * m_a) - (m_b * m_b)) * (s - (m_a * m_a) - (m_b * m_b));
+        double A = (s -(m_a - m_b) * (m_a - m_b))
+                 * (s -(m_a + m_b) * (m_a + m_b));
+        double B = - 8 * (m_a * m_a) * m_a * (m_b * m_b) * m_b
+                   - ((m_a * m_a) + (m_b * m_b))
+                   * (s - (m_a * m_a) - (m_b * m_b))
+                   * (s - (m_a * m_a) - (m_b * m_b));
         double C = (m_a * m_a) * (m_b * m_b) * A;
         // Compute positive center of mass momentum.
         double abs_p = sqrt((-B - sqrt(B * B - 4 * A * C)) / (2 * A));
@@ -397,11 +407,13 @@ std::pair<double, double> ColliderModus::get_velocities(float s, float m_a, floa
       }
       break;
     case 3:  // Target at rest.
-      v_a = sqrt(1 - 4 * (m_a * m_a) * (m_b * m_b) / ((s - (m_a * m_a) - (m_b * m_b))
-                * (s - (m_a * m_a) - (m_b * m_b))));
+      v_a = sqrt(1 - 4 * (m_a * m_a) * (m_b * m_b)
+                 / ((s - (m_a * m_a) - (m_b * m_b))
+                    * (s - (m_a * m_a) - (m_b * m_b))));
       break;
     default:
-      throw std::domain_error("Invalid reference frame in ColliderModus::get_velocities.");
+      throw std::domain_error("Invalid reference frame in "
+                              "ColliderModus::get_velocities.");
   }
   return std::make_pair(v_a, v_b);
 }

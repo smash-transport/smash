@@ -95,7 +95,8 @@ float BoxModus::initial_conditions(Particles *particles,
   /* Create NUMBER OF PARTICLES according to configuration */
   for (const auto &p : init_multipl_) {
     particles->create(p.second*parameters.testparticles, p.first);
-    log.debug() << "Particle " << p.first << " initial multiplicity " << p.second;
+    log.debug() << "Particle " << p.first
+                << " initial multiplicity " << p.second;
   }
   number_density_initial_ = particles->size()/(length_*length_*length_);
 
@@ -109,8 +110,8 @@ float BoxModus::initial_conditions(Particles *particles,
       momentum_radial = 3.0 * this->temperature_;
     }
     phitheta.distribute_isotropically();
-    log.debug() << data << ", radial momentum:" << field << momentum_radial << ", "
-                << phitheta;
+    log.debug() << data << ", radial momentum:" << field << momentum_radial
+                << ", " << phitheta;
     data.set_4momentum(data.pole_mass(), phitheta.threevec() * momentum_radial);
     momentum_total += data.momentum();
 
@@ -177,7 +178,8 @@ void BoxModus::propagate(Particles *particles,
     data.set_4position(position);
     if (wall_hit) {
       for (const auto &output : output_list) {
-        output->at_interaction(incoming_particle, {1, data}, 0.0, 0.0, ProcessBranch::Wall);
+        output->at_interaction(incoming_particle, {1, data},
+                               0., 0., ProcessBranch::Wall);
       }
     }
     log.debug() << data;

@@ -104,7 +104,8 @@ const ProcessBranch* Action::choose_channel() {
   /* Loop through all subprocesses and select one by Monte Carlo, based on
    * their weights.  */
   for (const auto &proc : subprocesses_) {
-    /* All processes apart from strings should have a well-defined final state. */
+    /* All processes apart from strings should have
+     * a well-defined final state. */
     if (proc->particle_number() < 1
         && proc->get_type() != ProcessBranch::String) {
       continue;
@@ -156,7 +157,8 @@ void Action::sample_cms_momenta() {
 
   double momentum_radial = pCM(cms_energy, mass_a, mass_b);
   if (!(momentum_radial > 0.0)) {
-    log.warn("Particle: ", t_a.pdgcode(), " radial momentum: ", momentum_radial);
+    log.warn("Particle: ", t_a.pdgcode(),
+             " radial momentum: ", momentum_radial);
     log.warn("Etot: ", cms_energy, " m_a: ", mass_a, " m_b: ", mass_b);
   }
   /* TODO : Angles should be sampled from differential cross section

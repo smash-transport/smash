@@ -144,7 +144,8 @@ class Clock {
     if (interval <= timestep_duration_) {
       return true;
     }
-    return (next_multiple(interval) < find_next_multiple(next_time(), interval));
+    return (next_multiple(interval) < find_next_multiple(next_time(),
+                                                         interval));
   }
   /** returns the next multiple of a given interval
    *

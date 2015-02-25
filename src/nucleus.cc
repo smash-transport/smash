@@ -442,7 +442,8 @@ FourVector Nucleus::center() const {
 }
 
 std::ostream &operator<<(std::ostream &out, const Nucleus &n) {
-  return out << "  #particles   #testparticles   mass [GeV]   radius [fm]  diffusiveness [fm]\n"
+  return out << "  #particles   #testparticles   mass [GeV]   "
+                "radius [fm]  diffusiveness [fm]\n"
              << format(n.number_of_particles(), nullptr, 12)
              << format(n.size(), nullptr, 17)
              << format(n.mass(), nullptr, 13)

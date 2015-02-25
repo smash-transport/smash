@@ -89,7 +89,8 @@ class OscarOutput : public OutputInterface {
  *             placed.
  * \param config A Configuration object that has direct entries for OSCAR.
  */
-std::unique_ptr<OutputInterface> create_oscar_output(bf::path path, Configuration config);
+std::unique_ptr<OutputInterface> create_oscar_output(bf::path path,
+                                                     Configuration config);
 
 // @}
 }  // namespace Smash

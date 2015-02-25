@@ -56,7 +56,8 @@ void usage(const int rc, const std::string &progname) {
   printf("Calculate transport box\n"
     "  -h, --help              usage information\n"
     "\n"
-    "  -i, --inputfile <file>  path to input configuration file (default: ./config.yaml)\n"
+    "  -i, --inputfile <file>  path to input configuration file "
+                               "(default: ./config.yaml)\n"
     "  -d, --decaymodes <file> override default decay modes from file\n"
     "  -p, --particles <file>  override default particles from file\n"
     "\n"
@@ -215,7 +216,8 @@ int main(int argc, char *argv[]) {
       configuration["General"]["End_Time"] = abs(atof(end_time));
 
     /* set up logging */
-    set_default_loglevel(configuration.take({"Logging", "default"}, einhard::ALL));
+    set_default_loglevel(configuration.take({"Logging", "default"},
+                                            einhard::ALL));
     create_all_loggers(configuration["Logging"]);
     log.info(progname, " (", VERSION_MAJOR, ')');
 
