@@ -14,12 +14,12 @@
 #include <map>
 
 #include "include/constants.h"
+#include "include/cxx14compat.h"
 #include "include/inputfunctions.h"
 #include "include/logging.h"
 #include "include/pdgcode.h"
 #include "include/processbranch.h"
 #include "include/stringfunctions.h"
-#include "include/cxx14compat.h"
 
 namespace Smash {
 

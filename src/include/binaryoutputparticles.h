@@ -13,9 +13,9 @@
 #include <string>
 
 #include "binaryoutputcollisions.h"
+#include "configuration.h"
 #include "filedeleter.h"
 #include "forwarddeclarations.h"
-#include "configuration.h"
 
 namespace Smash {
 

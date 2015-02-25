@@ -10,8 +10,10 @@
 #ifndef SRC_INCLUDE_SCATTERACTIONSFINDER_H_
 #define SRC_INCLUDE_SCATTERACTIONSFINDER_H_
 
-#include "actionfinderfactory.h"
+#include <vector>
+
 #include "action.h"
+#include "actionfinderfactory.h"
 #include "configuration.h"
 
 namespace Smash {

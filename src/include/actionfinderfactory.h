@@ -10,9 +10,10 @@
 #ifndef SRC_INCLUDE_ACTIONFINDERFACTORY_H_
 #define SRC_INCLUDE_ACTIONFINDERFACTORY_H_
 
+#include <vector>
+
 #include "clock.h"
 #include "forwarddeclarations.h"
-#include <vector>
 
 namespace Smash {
 

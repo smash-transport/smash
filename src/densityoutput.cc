@@ -12,9 +12,9 @@
 #include <boost/filesystem.hpp>
 #include <fstream>
 #include <memory>
-#include <include/config.h>
 
 #include "include/clock.h"
+#include "include/config.h"
 #include "include/density.h"
 #include "include/experimentparameters.h"
 #include "include/filedeleter.h"

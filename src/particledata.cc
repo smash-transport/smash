@@ -9,10 +9,11 @@
 
 #include "include/particledata.h"
 
-#include "include/iomanipulators.h"
-#include <iostream>
 #include <iomanip>
+#include <iostream>
 #include <vector>
+
+#include "include/iomanipulators.h"
 
 namespace Smash {
 

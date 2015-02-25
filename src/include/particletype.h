@@ -7,13 +7,13 @@
 #ifndef SRC_INCLUDE_PARTICLETYPE_H_
 #define SRC_INCLUDE_PARTICLETYPE_H_
 
-#include "forwarddeclarations.h"
-#include "macros.h"
-#include "pdgcode.h"
-
 #include <assert.h>
 #include <string>
 #include <vector>
+
+#include "forwarddeclarations.h"
+#include "macros.h"
+#include "pdgcode.h"
 
 namespace Smash {
 

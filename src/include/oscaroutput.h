@@ -12,10 +12,10 @@
 
 #include <string>
 
-#include "outputinterface.h"
+#include "configuration.h"
 #include "filedeleter.h"
 #include "forwarddeclarations.h"
-#include "configuration.h"
+#include "outputinterface.h"
 
 namespace Smash {
 

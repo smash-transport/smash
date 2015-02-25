@@ -9,10 +9,10 @@
 #ifndef SRC_INCLUDE_MODUSDEFAULT_H_
 #define SRC_INCLUDE_MODUSDEFAULT_H_
 
+#include <stdexcept>
+
 #include "forwarddeclarations.h"
 #include "grid.h"
-
-#include <stdexcept>
 
 #include "potentials.h"
 

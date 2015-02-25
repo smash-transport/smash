@@ -10,9 +10,9 @@
 #ifndef SRC_INCLUDE_ACTION_H_
 #define SRC_INCLUDE_ACTION_H_
 
+#include <memory>
 #include <stdexcept>
 #include <vector>
-#include <memory>
 
 #include "density.h"
 #include "experimentparameters.h"

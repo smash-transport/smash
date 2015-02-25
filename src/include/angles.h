@@ -10,8 +10,9 @@
 #ifndef SRC_INCLUDE_ANGLES_H_
 #define SRC_INCLUDE_ANGLES_H_
 
-#include <stdexcept>
 #include <iostream>
+#include <stdexcept>
+
 #include "constants.h"
 #include "iomanipulators.h"
 #include "random.h"

@@ -18,8 +18,8 @@
 
 */
 
-#ifndef TSC_H
-#define TSC_H
+#ifndef SRC_INCLUDE_TSC_H_
+#define SRC_INCLUDE_TSC_H_
 
 #include <iosfwd>
 
@@ -71,4 +71,4 @@ inline unsigned long long TimeStampCounter::cycles() const {
 
 std::ostream &operator<<(std::ostream &out, const TimeStampCounter &tsc);
 
-#endif  // TSC_H
+#endif  // SRC_INCLUDE_TSC_H_

@@ -12,6 +12,7 @@
 
 #include<iostream>
 #include<sstream>
+#include<string>
 
 #include "fourvector.h"
 #include "numerics.h"
@@ -336,4 +337,4 @@ class QuantumNumbers {
 
 }  // namespace Smash
 
-#endif  // SRC_INCLUDE_PDGCODE_H_
+#endif  // SRC_INCLUDE_QUANTUMNUMBERS_H_

@@ -46,4 +46,4 @@ bool almost_equal(const N x, const N y) {
 
 }  // namespace Smash
 
-#endif  // SRC_INCLUDE_ALGORITHMS_H_
+#endif  // SRC_INCLUDE_NUMERICS_H_

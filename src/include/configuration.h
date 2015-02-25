@@ -10,11 +10,12 @@
 #ifndef SRC_INCLUDE_CONFIGURATION_H_
 #define SRC_INCLUDE_CONFIGURATION_H_
 
+#include <yaml-cpp/yaml.h>
+
 #include <stdexcept>
 #include <string>
 #include <vector>
 
-#include <yaml-cpp/yaml.h>
 #include "forwarddeclarations.h"
 
 namespace YAML {

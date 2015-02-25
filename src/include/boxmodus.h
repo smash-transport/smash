@@ -8,8 +8,9 @@
 #define SRC_INCLUDE_BOXMODUS_H_
 
 #include <map>
-#include "modusdefault.h"
+
 #include "forwarddeclarations.h"
+#include "modusdefault.h"
 
 namespace Smash {
 

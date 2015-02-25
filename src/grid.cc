@@ -9,13 +9,13 @@
 
 #include "include/grid.h"
 
+#include <stdexcept>
+
 #include "include/algorithms.h"
 #include "include/fourvector.h"
 #include "include/logging.h"
 #include "include/particledata.h"
 #include "include/threevector.h"
-
-#include <stdexcept>
 
 namespace std {
 template <typename T>

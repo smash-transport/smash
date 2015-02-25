@@ -10,9 +10,10 @@
 #ifndef SRC_INCLUDE_GRID_H_
 #define SRC_INCLUDE_GRID_H_
 
-#include <functional>
-#include <vector>
 #include <array>
+#include <functional>
+#include <utility>
+#include <vector>
 
 #include "forwarddeclarations.h"
 

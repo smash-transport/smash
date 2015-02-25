@@ -4,6 +4,9 @@
  *
  *    GNU General Public License (GPLv3 or later)
  */
+
+#include "include/collidermodus.h"
+
 #include <cmath>
 #include <cstdlib>
 #include <cstring>
@@ -12,7 +15,6 @@
 #include <tuple>
 #include <utility>
 
-#include "include/collidermodus.h"
 #include "include/angles.h"
 #include "include/configuration.h"
 #include "include/experimentparameters.h"

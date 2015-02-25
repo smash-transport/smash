@@ -9,10 +9,10 @@
 
 #include "include/inputfunctions.h"
 
-#include "include/logging.h"
-
 #include <sstream>
 #include <vector>
+
+#include "include/logging.h"
 
 namespace Smash {
 

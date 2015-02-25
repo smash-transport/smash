@@ -7,11 +7,11 @@
 #ifndef SRC_INCLUDE_DEFORMEDNUCLEUS_H_
 #define SRC_INCLUDE_DEFORMEDNUCLEUS_H_
 
+#include "angles.h"
 #include "configuration.h"
 #include "forwarddeclarations.h"
 #include "nucleus.h"
 #include "threevector.h"
-#include "angles.h"
 
 namespace Smash {
 
@@ -117,4 +117,4 @@ class DeformedNucleus : public Nucleus {
 
 }  // namespace Smash
 
-#endif /* SRC_INCLUDE_DEFORMEDNUCLEUS_H_ */
+#endif  // SRC_INCLUDE_DEFORMEDNUCLEUS_H_

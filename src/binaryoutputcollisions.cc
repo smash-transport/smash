@@ -12,8 +12,8 @@
 #include <boost/filesystem.hpp>
 #include <string>
 
-#include <include/config.h>
 #include "include/clock.h"
+#include "include/config.h"
 #include "include/configuration.h"
 #include "include/forwarddeclarations.h"
 #include "include/inputfunctions.h"

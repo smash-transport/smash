@@ -14,6 +14,7 @@
 #include <map>
 #include <vector>
 
+#include "include/cxx14compat.h"
 #include "include/decaymodes.h"
 #include "include/inputfunctions.h"
 #include "include/iomanipulators.h"
@@ -22,7 +23,6 @@
 #include "include/processbranch.h"
 #include "include/stringfunctions.h"
 #include "include/width.h"
-#include "include/cxx14compat.h"
 
 namespace Smash {
 

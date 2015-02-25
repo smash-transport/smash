@@ -7,10 +7,11 @@
 #ifndef SRC_INCLUDE_DECAYMODES_H_
 #define SRC_INCLUDE_DECAYMODES_H_
 
-#include "processbranch.h"
-
 #include <stdexcept>
+#include <string>
 #include <vector>
+
+#include "processbranch.h"
 
 namespace Smash {
 

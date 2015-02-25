@@ -10,6 +10,8 @@
 #ifndef SRC_INCLUDE_DECAYACTIONSFINDER_H_
 #define SRC_INCLUDE_DECAYACTIONSFINDER_H_
 
+#include <vector>
+
 #include "actionfinderfactory.h"
 
 namespace Smash {

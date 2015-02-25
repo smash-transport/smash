@@ -8,10 +8,11 @@
  */
 #include "include/width.h"
 
-#include <cstdio>
-#include <stdexcept>
-#include <istream>
 #include <gsl/gsl_integration.h>
+
+#include <cstdio>
+#include <istream>
+#include <stdexcept>
 
 #include "include/resonances.h"
 

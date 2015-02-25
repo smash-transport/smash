@@ -7,10 +7,12 @@
  *
  */
 
-#include "include/configuration.h"
 #include "include/logging.h"
-#include "include/stringfunctions.h"
+
 #include <array>
+
+#include "include/configuration.h"
+#include "include/stringfunctions.h"
 
 namespace Smash {
 

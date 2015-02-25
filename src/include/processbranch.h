@@ -7,12 +7,12 @@
 #ifndef SRC_INCLUDE_PROCESSBRANCH_H_
 #define SRC_INCLUDE_PROCESSBRANCH_H_
 
+#include <memory>
+#include <vector>
+
+#include "decaytype.h"
 #include "forwarddeclarations.h"
 #include "particletype.h"
-#include "decaytype.h"
-
-#include <vector>
-#include <memory>
 
 namespace Smash {
 

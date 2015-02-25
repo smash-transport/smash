@@ -9,13 +9,14 @@
 #ifndef SRC_INCLUDE_DENSITY_H_
 #define SRC_INCLUDE_DENSITY_H_
 
+#include <utility>
 #include <vector>
 
+#include "forwarddeclarations.h"
 #include "fourvector.h"
-#include "threevector.h"
 #include "particledata.h"
 #include "pdgcode.h"
-#include "forwarddeclarations.h"
+#include "threevector.h"
 
 namespace Smash {
 

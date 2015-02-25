@@ -10,10 +10,11 @@
 #ifndef SRC_INCLUDE_LOGGING_H_
 #define SRC_INCLUDE_LOGGING_H_
 
-#include <einhard.hpp>
-#include <tuple>
 #include <yaml-cpp/yaml.h>
+
+#include <einhard.hpp>
 #include <stdexcept>
+#include <tuple>
 
 #include "macros.h"
 

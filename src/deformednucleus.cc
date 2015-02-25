@@ -6,6 +6,9 @@
  */
 #include "include/deformednucleus.h"
 
+#include <cmath>
+#include <stdexcept>
+
 #include "include/angles.h"
 #include "include/configuration.h"
 #include "include/constants.h"
@@ -13,9 +16,6 @@
 #include "include/particledata.h"
 #include "include/random.h"
 #include "include/threevector.h"
-
-#include <cmath>
-#include <stdexcept>
 
 namespace Smash {
 

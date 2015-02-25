@@ -7,19 +7,18 @@
  *
  */
 
-#include "include/action.h"
-
 #include <memory>
 
+#include "include/action.h"
 #include "include/angles.h"
 #include "include/constants.h"
+#include "include/cxx14compat.h"
 #include "include/logging.h"
 #include "include/parametrizations.h"
 #include "include/pdgcode.h"
 #include "include/random.h"
 #include "include/resonances.h"
 #include "include/width.h"
-#include "include/cxx14compat.h"
 
 namespace Smash {
 
@@ -182,7 +181,8 @@ CollisionBranch* ScatterAction::elastic_cross_section(float elast_par) {
 CollisionBranch* ScatterAction::string_excitation_cross_section() {
   /* Calculate string-excitation cross section:
    * Parametrized total minus all other present channels. */
-  // TODO: This is currently set to zero, since Pythia is not yet implemented.
+  /* TODO(weil): This is currently set to zero,
+   * since Pythia is not yet implemented. */
   float sig_string = 0.f;
   // = std::max(0.f, total_cross_section() - total_weight_);
 

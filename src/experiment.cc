@@ -7,6 +7,7 @@
  *
  */
 
+#include "include/experiment.h"
 
 #include <algorithm>
 #include <cinttypes>
@@ -22,15 +23,14 @@
 #include "include/configuration.h"
 #include "include/cxx14compat.h"
 #include "include/density.h"
-#include "include/experiment.h"
 #include "include/forwarddeclarations.h"
 #include "include/grid.h"
+#include "include/listmodus.h"
 #include "include/logging.h"
 #include "include/macros.h"
 #include "include/potentials.h"
 #include "include/random.h"
 #include "include/spheremodus.h"
-#include "include/listmodus.h"
 
 namespace std {
 /**

@@ -8,8 +8,9 @@
  */
 
 #include "include/particles.h"
-#include <iostream>
+
 #include <iomanip>
+#include <iostream>
 
 namespace Smash {
 
