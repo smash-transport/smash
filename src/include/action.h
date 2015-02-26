@@ -10,9 +10,9 @@
 #ifndef SRC_INCLUDE_ACTION_H_
 #define SRC_INCLUDE_ACTION_H_
 
+#include <memory>
 #include <stdexcept>
 #include <vector>
-#include <memory>
 
 #include "density.h"
 #include "experimentparameters.h"
@@ -220,7 +220,6 @@ class DecayAction : public Action {
   void format_debug_output(std::ostream &out) const override;
 
  private:
-
   /**
    * Kinematics of a 1-to-2 decay process.
    *
@@ -315,9 +314,12 @@ class ScatterAction : public Action {
   virtual ProcessBranchList resonance_cross_sections();
 
   /** Find all inelastic 2->2 processes for this reaction. */
-  virtual ProcessBranchList two_to_two_cross_sections() { return ProcessBranchList(); }
+  virtual ProcessBranchList two_to_two_cross_sections() {
+    return ProcessBranchList();
+  }
 
-  /// determine the total energy in the center-of-mass frame, i.e. sqrt of Mandelstam s
+  /** Determine the total energy in the center-of-mass frame,
+   * i.e. sqrt of Mandelstam s.  */
   double sqrt_s() const override;
   /**
    * \ingroup exception
@@ -328,9 +330,11 @@ class ScatterAction : public Action {
   };
 
  protected:
-  /// determine the Mandelstam s variable, s = (p_a + p_b)^2 = square of CMS energy
+  /** Determine the Mandelstam s variable,
+   * s = (p_a + p_b)^2 = square of CMS energy.  */
   double mandelstam_s() const;
-  /// determine the squared momenta of the incoming particles in the center-of-mass system
+  /** Determine the squared momenta of the incoming particles in the
+   * center-of-mass system.  */
   double cm_momentum_squared() const;
 
   /**
@@ -363,7 +367,8 @@ class ScatterActionBaryonBaryon : public ScatterAction {
  public:
   /* Inherit constructor. */
   using ScatterAction::ScatterAction;
-  /** Determine the parametrized total cross section for a baryon-baryon collision. */
+  /** Determine the parametrized total cross section
+   * for a baryon-baryon collision. */
   virtual float total_cross_section() const override;
   /**
    * Determine the elastic cross section for a baryon-baryon collision.
@@ -400,8 +405,8 @@ class ScatterActionBaryonBaryon : public ScatterAction {
   * of the two nucleons. Each element in the list contains the type(s) of the
   * final state particle(s) and the cross section for that particular process.
   */
-  ProcessBranchList nuc_nuc_to_nuc_res (const ParticleType &type_particle1,
-                                      const ParticleType &type_particle2);
+  ProcessBranchList nuc_nuc_to_nuc_res(const ParticleType &type_particle1,
+                                       const ParticleType &type_particle2);
 
   /**
   * Calculate cross sections for resonance absorption on a nucleon
@@ -414,8 +419,8 @@ class ScatterActionBaryonBaryon : public ScatterAction {
   * with a nucleon. Each element in the list contains the type(s) of the
   * final state particle(s) and the cross section for that particular process.
   */
-  ProcessBranchList nuc_res_to_nuc_nuc (const ParticleType &type_particle1,
-                                      const ParticleType &type_particle2);
+  ProcessBranchList nuc_res_to_nuc_nuc(const ParticleType &type_particle1,
+                                       const ParticleType &type_particle2);
 
  protected:
   /**

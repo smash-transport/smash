@@ -7,13 +7,13 @@
 #ifndef SRC_INCLUDE_PARTICLETYPE_H_
 #define SRC_INCLUDE_PARTICLETYPE_H_
 
-#include "forwarddeclarations.h"
-#include "macros.h"
-#include "pdgcode.h"
-
 #include <assert.h>
 #include <string>
 #include <vector>
+
+#include "forwarddeclarations.h"
+#include "macros.h"
+#include "pdgcode.h"
 
 namespace Smash {
 
@@ -167,7 +167,8 @@ class ParticleType {
 
   /** Returns a list of all nucleons (i.e. proton and neutron). */
   static std::vector<ParticleTypePtr> list_nucleons();
-  /** Returns a list of all baryon resonances, i.e. unstable baryons (not including antibaryons). */
+  /** Returns a list of all baryon resonances,
+   * i.e. unstable baryons (not including antibaryons). */
   static std::vector<ParticleTypePtr> list_baryon_resonances();
 
   /**
@@ -284,7 +285,6 @@ class ParticleType {
    * Writes all information about the particle type to the output stream.
    */
   friend std::ostream &operator<<(std::ostream &out, const ParticleType &type);
-
 };
 
 inline bool ParticleType::is_stable() const {
@@ -362,7 +362,7 @@ class ParticleTypePtr {
   std::uint16_t index_= 0xffff;
 };
 
-//#define SMASH_INLINE_LIST_ALL 1
+// #define SMASH_INLINE_LIST_ALL 1
 #ifdef SMASH_INLINE_LIST_ALL
 extern const ParticleTypeList *all_particle_types;
 inline const ParticleTypeList &ParticleType::list_all() {

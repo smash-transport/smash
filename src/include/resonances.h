@@ -13,11 +13,11 @@
 #ifndef SRC_INCLUDE_RESONANCES_H_
 #define SRC_INCLUDE_RESONANCES_H_
 
-#include "forwarddeclarations.h"
-#include "particletype.h"
-
 #include <cstddef>
 #include <cstdint>
+
+#include "forwarddeclarations.h"
+#include "particletype.h"
 
 namespace Smash {
 

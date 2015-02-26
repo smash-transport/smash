@@ -7,10 +7,11 @@
 #ifndef SRC_INCLUDE_DECAYMODES_H_
 #define SRC_INCLUDE_DECAYMODES_H_
 
-#include "processbranch.h"
-
 #include <stdexcept>
+#include <string>
 #include <vector>
+
+#include "processbranch.h"
 
 namespace Smash {
 
@@ -24,7 +25,9 @@ class DecayModes {
  public:
   /* Add a decay mode */
   void add_mode(float ratio, int L, ParticleTypePtrList particle_types);
-  void add_mode(DecayBranchPtr branch) { decay_modes_.push_back(std::move(branch)); }
+  void add_mode(DecayBranchPtr branch) {
+    decay_modes_.push_back(std::move(branch));
+  }
 
   /* Make sure ratios add to 1 */
   void renormalize(float renormalization_constant);

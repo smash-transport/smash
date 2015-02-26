@@ -17,8 +17,8 @@
 
 #include "include/algorithms.h"
 #include "include/angles.h"
-#include "include/constants.h"
 #include "include/configuration.h"
+#include "include/constants.h"
 #include "include/distributions.h"
 #include "include/experimentparameters.h"
 #include "include/fourvector.h"
@@ -84,10 +84,11 @@ float SphereModus::initial_conditions(Particles *particles,
   const ExperimentParameters &parameters) {
   const auto &log = logger<LogArea::Sphere>();
   FourVector momentum_total(0, 0, 0, 0);
- /* Create NUMBER OF PARTICLES according to configuration */
+  /* Create NUMBER OF PARTICLES according to configuration */
   for (const auto &p : init_multipl_) {
     particles->create(p.second*parameters.testparticles, p.first);
-    log.debug() << "Particle " << p.first << " initial multiplicity " << p.second;
+    log.debug() << "Particle " << p.first
+                << " initial multiplicity " << p.second;
   }
   /* loop over particle data to fill in momentum and position information */
   for (ParticleData &data : particles->data()) {
@@ -108,7 +109,7 @@ float SphereModus::initial_conditions(Particles *particles,
     pos_phitheta.distribute_isotropically();
     data.set_4position(FourVector(start_time_,
                                   pos_phitheta.threevec() * position_radial));
- }
+  }
   /* Make total 3-momentum 0 */
   for (ParticleData &data : particles->data()) {
     data.set_4momentum(data.pole_mass(), data.momentum().threevec() -

@@ -72,7 +72,7 @@ namespace Smash {
 class Clock {
  public:
   /// default initializer: Timestep size is set to 0!
-  Clock() : counter_(0), timestep_duration_(0.f), reset_time_(0.f) {};
+  Clock() : counter_(0), timestep_duration_(0.f), reset_time_(0.f) {}
   /** initialize with base time and time step size.
    *
    * \param time base time
@@ -144,7 +144,8 @@ class Clock {
     if (interval <= timestep_duration_) {
       return true;
     }
-    return (next_multiple(interval) < find_next_multiple(next_time(), interval));
+    return (next_multiple(interval) < find_next_multiple(next_time(),
+                                                         interval));
   }
   /** returns the next multiple of a given interval
    *
@@ -214,6 +215,7 @@ class Clock {
   bool operator>(const float& time) const {
     return current_time() > time;
   }
+
  private:
   /// clock tick. This is purely internal and will be reset when the
   /// timestep size is changed

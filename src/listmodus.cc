@@ -6,34 +6,35 @@
  *    GNU General Public License (GPLv3 or later)
  *
  */
+
+#include "include/listmodus.h"
+
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
-
 
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
+#include <fstream>
 #include <list>
 #include <map>
+#include <sstream>
 #include <utility>
 #include <vector>
-#include <sstream>
-#include <fstream>
 
 #include "include/algorithms.h"
 #include "include/angles.h"
-#include "include/constants.h"
 #include "include/configuration.h"
+#include "include/constants.h"
 #include "include/distributions.h"
 #include "include/experimentparameters.h"
 #include "include/fourvector.h"
+#include "include/inputfunctions.h"
 #include "include/logging.h"
 #include "include/macros.h"
 #include "include/particles.h"
 #include "include/random.h"
-#include "include/listmodus.h"
 #include "include/threevector.h"
-#include "include/inputfunctions.h"
 
 namespace Smash {
 

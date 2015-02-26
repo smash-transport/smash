@@ -137,8 +137,8 @@ void inline ThreeVector::set_x3(const double z) {
   x_[2] = z;
 }
 
-ThreeVector inline ThreeVector::operator- () const{
-  ThreeVector neg(-x_[0],-x_[1],-x_[2]);
+ThreeVector inline ThreeVector::operator- () const {
+  ThreeVector neg(-x_[0], -x_[1], -x_[2]);
   return neg;
 }
 

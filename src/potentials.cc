@@ -99,8 +99,8 @@ ThreeVector Potentials::potential_gradient(const ThreeVector &r,
   }
 
   if (use_skyrme_) {
-    const auto density_and_gradient = rho_eckart_gradient(r, plist,
-                                                 sigma_, baryon_density, ntest_);
+    const auto density_and_gradient = rho_eckart_gradient(r, plist, sigma_,
+                                                        baryon_density, ntest_);
     const double rho = density_and_gradient.first;
     const ThreeVector drho_dr = density_and_gradient.second;
 

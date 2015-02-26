@@ -7,16 +7,15 @@
 #ifndef SRC_INCLUDE_COLLIDERMODUS_H_
 #define SRC_INCLUDE_COLLIDERMODUS_H_
 
-#include "modusdefault.h"
-
-#include "forwarddeclarations.h"
-#include "nucleus.h"
-#include "deformednucleus.h"
-#include "pdgcode.h"
-
 #include <cstring>
 #include <memory>
 #include <utility>
+
+#include "deformednucleus.h"
+#include "forwarddeclarations.h"
+#include "modusdefault.h"
+#include "nucleus.h"
+#include "pdgcode.h"
 
 namespace Smash {
 
@@ -128,7 +127,8 @@ class ColliderModus : public ModusDefault {
    * @param m_b The mass of the target.
    * @return < v_a, v_b > Velocities of the nuclei.
    **/
-  std::pair<double, double> get_velocities(float mandelstam_s, float m_a, float m_b);
+  std::pair<double, double> get_velocities(float mandelstam_s,
+                                           float m_a, float m_b);
 
   /**\ingroup logging
    * Writes the initial state for the ColliderModus to the output stream.

@@ -12,8 +12,9 @@
 
 #include <boost/filesystem.hpp>
 #include <vector>
-#include "outputinterface.h"
+
 #include "configuration.h"
+#include "outputinterface.h"
 #include "TFile.h"
 #include "TTree.h"
 

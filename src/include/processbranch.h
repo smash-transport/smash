@@ -7,12 +7,12 @@
 #ifndef SRC_INCLUDE_PROCESSBRANCH_H_
 #define SRC_INCLUDE_PROCESSBRANCH_H_
 
+#include <memory>
+#include <vector>
+
+#include "decaytype.h"
 #include "forwarddeclarations.h"
 #include "particletype.h"
-#include "decaytype.h"
-
-#include <vector>
-#include <memory>
 
 namespace Smash {
 
@@ -55,14 +55,14 @@ class ProcessBranch {
    * (5) resonance decays (Decay) 
    * (6) Wall transition (Wall)*/  
   enum ProcessType {
-	  None = 0,
-	  Elastic = 1, 
-	  TwoToOne = 2, 
-	  TwoToTwo = 3, 
-	  String = 4, 
-	  Decay = 5,
-	  Wall = 6
-   };
+    None = 0,
+    Elastic = 1,
+    TwoToOne = 2,
+    TwoToTwo = 3,
+    String = 4,
+    Decay = 5,
+    Wall = 6
+  };
   /// Create a ProcessBranch without final states
   ProcessBranch() : branch_weight_(0.) {}
   ProcessBranch(float w) : branch_weight_(w) {}
@@ -105,9 +105,10 @@ class ProcessBranch {
   float threshold() const;
 
   virtual unsigned int particle_number() const = 0;
+
  protected:
   /// Weight of the branch, typically a cross section or a branching ratio
-  float branch_weight_; 
+  float branch_weight_;
 };
 
 /**
@@ -150,8 +151,8 @@ inline float total_weight(const ProcessBranchList &l) {
  */
 class CollisionBranch : public ProcessBranch {
  public:
-   CollisionBranch(float w, ProcessType p_type) : ProcessBranch(w),
-                                                  process_type_(p_type) {}
+  CollisionBranch(float w, ProcessType p_type) : ProcessBranch(w),
+                                                 process_type_(p_type) {}
   /// Constructor with 1 particle
   CollisionBranch(const ParticleType &type, float w, ProcessType p_type)
                  : ProcessBranch(w), process_type_(p_type) {
@@ -195,6 +196,7 @@ class CollisionBranch : public ProcessBranch {
   unsigned int particle_number() const override {
     return particle_types_.size();
   }
+
  private:
   /**
    * List of particles appearing in this process outcome.
@@ -221,7 +223,7 @@ class CollisionBranch : public ProcessBranch {
  */
 class DecayBranch : public ProcessBranch {
  public:
-   DecayBranch(const DecayType *t, float w) : ProcessBranch(w), type_(t) {}
+  DecayBranch(const DecayType *t, float w) : ProcessBranch(w), type_(t) {}
   /// The move constructor efficiently moves the particle-type list member.
   DecayBranch(DecayBranch &&rhs) : ProcessBranch(rhs.branch_weight_),
                                    type_(rhs.type_) {}
@@ -246,6 +248,7 @@ class DecayBranch : public ProcessBranch {
     delete type_;
     ProcessBranch::clear();
   }
+
  private:
   // decay type (including final-state particles and angular momentum
   const DecayType *type_;
@@ -253,7 +256,7 @@ class DecayBranch : public ProcessBranch {
 
 inline int DecayBranch::angular_momentum() const {
   return type_->angular_momentum();
-};
+}
 
 
 }  // namespace Smash

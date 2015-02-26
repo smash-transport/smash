@@ -7,15 +7,15 @@
 #ifndef SRC_INCLUDE_NUCLEUS_H_
 #define SRC_INCLUDE_NUCLEUS_H_
 
+#include <map>
+#include <stdexcept>
+#include <vector>
+
 #include "configuration.h"
 #include "forwarddeclarations.h"
 #include "fourvector.h"
 #include "particledata.h"
 #include "threevector.h"
-
-#include <map>
-#include <stdexcept>
-#include <vector>
 
 namespace Smash {
 
@@ -61,7 +61,7 @@ class Nucleus {
   * Ref. for nuclear radii is Atom. Data Nucl. Data Tabl. by H. De Vries et. al.
   * For diffusiveness and saturation density, see [insert reference].
   */
-   virtual void set_parameters_automatic();
+  virtual void set_parameters_automatic();
 
   /** Sets the parameters of the Woods-Saxon according to
    * manually added values in the configuration file.
@@ -135,7 +135,7 @@ class Nucleus {
   /** Rotates the nucleus. (Spherical symmetry of nondeformed nuclei
    * means there is nothing to do.)
    **/
-  virtual void rotate() {};
+  virtual void rotate() {}
 
   /// copies the particles from this nucleus into the particle list.
   void copy_particles(Particles* particles);
@@ -203,6 +203,7 @@ class Nucleus {
   size_t testparticles_ = 1;
   /// particles associated with this nucleus.
   std::vector<ParticleData> particles_;
+
  public:
   /// for iterators over the particle list:
   inline std::vector<ParticleData>::iterator begin() {

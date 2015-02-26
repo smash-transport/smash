@@ -12,9 +12,9 @@
 #include <stdexcept>
 
 #include "include/constants.h"
-#include "include/width.h"
-#include "include/resonances.h"
 #include "include/logging.h"
+#include "include/resonances.h"
+#include "include/width.h"
 
 namespace Smash {
 

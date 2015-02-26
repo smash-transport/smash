@@ -7,6 +7,7 @@
  *
  */
 
+#include "include/experiment.h"
 
 #include <algorithm>
 #include <cinttypes>
@@ -22,16 +23,15 @@
 #include "include/configuration.h"
 #include "include/cxx14compat.h"
 #include "include/density.h"
-#include "include/experiment.h"
 #include "include/forwarddeclarations.h"
 #include "include/grid.h"
+#include "include/listmodus.h"
 #include "include/logging.h"
 #include "include/macros.h"
 #include "include/pauliblocking.h"
 #include "include/potentials.h"
 #include "include/random.h"
 #include "include/spheremodus.h"
-#include "include/listmodus.h"
 
 namespace std {
 /**
@@ -163,8 +163,8 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
  */
 template <typename Modus>
 std::ostream &operator<<(std::ostream &out, const Experiment<Modus> &e) {
-  out << "Starting with temporal stepsize: " << e.parameters_.timestep_duration()
-      << " fm/c\n";
+  out << "Starting with temporal stepsize: "
+      << e.parameters_.timestep_duration() << " fm/c\n";
   out << "End time: " << e.end_time_ << " fm/c\n";
   out << e.modus_;
   return out;
@@ -208,7 +208,8 @@ Experiment<Modus>::Experiment(Configuration config)
       nevents_(config.take({"General", "Nevents"})),
       end_time_(config.take({"General", "End_Time"})),
       delta_time_startup_(config.take({"General", "Delta_Time"})),
-      force_decays_(config.take({"Collision_Term", "Force_Decays_At_End"}, true)) {
+      force_decays_(config.take({"Collision_Term", "Force_Decays_At_End"},
+                                true)) {
   const auto &log = logger<LogArea::Experiment>();
   int64_t seed_ = config.take({"General",  "Randomseed"});
   if (seed_ < 0) {
@@ -247,6 +248,9 @@ Experiment<Modus>::Experiment(Configuration config)
   log.info() << "Density type written to headers: " << dens_type_;
 }
 
+const std::string hline("----------------------------------------"
+                        "----------------------------------------");
+
 /* This method reads the particle type and cross section information
  * and does the initialization of the system (fill the particles map)
  */
@@ -266,9 +270,10 @@ void Experiment<Modus>::initialize_new_event() {
    * the system for conservation checks */
   conserved_initial_.count_conserved_values(particles_);
   /* Print output headers */
-  log.info() << "--------------------------------------------------------------------------------";
-  log.info() << " Time       <Ediff>      <pdiff>  <scattrate>    <scatt>  <particles>   <timing>";
-  log.info() << "--------------------------------------------------------------------------------";
+  log.info() << hline;
+  log.info() << " Time       <Ediff>      <pdiff>  <scattrate>    <scatt>  "
+                "<particles>   <timing>";
+  log.info() << hline;
 }
 
 static std::string format_measurements(const Particles &particles,
@@ -284,13 +289,13 @@ static std::string format_measurements(const Particles &particles,
 
   char buffer[81];
   if (likely(time > 0))
-    snprintf(buffer, 81, "%6.2f %12g %12g %12g %10zu %12zu %12g", time,
-             difference.momentum().x0(), difference.momentum().abs3(),
+    snprintf(buffer, sizeof(buffer), "%6.2f %12g %12g %12g %10zu %12zu %12g",
+             time, difference.momentum().x0(), difference.momentum().abs3(),
              scatterings_total * 2 / (particles.size() * time),
              scatterings_this_interval, particles.size(),
              elapsed_seconds.count());
   else
-    snprintf(buffer, 81, "%+6.2f %12g %12g %12g %10i %12zu %12g", time,
+    snprintf(buffer, sizeof(buffer), "%+6.2f %12g %12g %12g %10i %12zu %12g", time,
              difference.momentum().x0(), difference.momentum().abs3(), 0.0, 0,
              particles.size(), elapsed_seconds.count());
   return std::string(buffer);
@@ -353,10 +358,9 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
       conserved_initial_, time_start_, parameters_.labclock.current_time());
 
   while (!(++parameters_.labclock > end_time_)) {
-    std::vector<ActionPtr> actions;  // TODO: a std::list might be better suited
-                                     // for the task: lots of appending, then
-                                     // sorting and finally a single linear
-                                     // iteration
+    /* TODO(mkretz): std::list might be better suited for the task:
+     * lots of appending, then sorting and finally a single linear iteration. */
+    std::vector<ActionPtr> actions;
 
     /* (1.a) Create grid. */
     const auto &grid = modus_.create_grid(
@@ -425,12 +429,13 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
       interactions_old = interactions_total;
       /* Find actions. */
       for (const auto &finder : action_finders_) {
-        actions += finder->find_final_actions(ParticleList{particles_.data().begin(),
-                                                           particles_.data().end()});
+        actions += finder->find_final_actions(
+            ParticleList{particles_.data().begin(), particles_.data().end()});
       }
       /* Perform actions. */
       perform_actions(actions, interactions_total);
-    } while (interactions_total > interactions_old);  // loop until no more decays occur
+      // loop until no more decays occur
+    } while (interactions_total > interactions_old);
 
     /* Do one final propagation step. */
     modus_.propagate(&particles_, parameters_, outputs_, potentials_.get());
@@ -440,7 +445,7 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
   // to the start time, but we don't know that. Therefore, we check that
   // the time is positive, which should heuristically be the same).
   if (likely(parameters_.labclock > 0)) {
-    log.info() << "--------------------------------------------------------------------------------";
+    log.info() << hline;
     log.info() << "Time real: " << SystemClock::now() - time_start_;
     /* if there are no particles no interactions happened */
     log.info() << "Final scattering rate: "

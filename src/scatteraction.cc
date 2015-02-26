@@ -7,18 +7,18 @@
  *
  */
 
-#include "include/action.h"
-
 #include <memory>
 
+#include "include/action.h"
 #include "include/angles.h"
 #include "include/constants.h"
+#include "include/cxx14compat.h"
 #include "include/logging.h"
 #include "include/parametrizations.h"
 #include "include/pdgcode.h"
 #include "include/random.h"
 #include "include/resonances.h"
-#include "include/cxx14compat.h"
+#include "include/width.h"
 
 namespace Smash {
 
@@ -43,12 +43,12 @@ ProcessBranch::ProcessType ScatterAction::perform(Particles *particles,
   const ProcessBranch* proc = choose_channel();
   outgoing_particles_ = proc->particle_list();
 
-  log.debug("Chosen channel: ", proc->get_type(), proc->particle_list()); 
+  log.debug("Chosen channel: ", proc->get_type(), proc->particle_list());
 
   /* The production point of the new particles.  */
   FourVector middle_point = get_interaction_point();
 
-  switch(proc->get_type()) {
+  switch (proc->get_type()) {
     case ProcessBranch::Elastic:
       /* 2->2 elastic scattering */
       log.debug("Process: Elastic collision.", proc->get_type());
@@ -61,31 +61,31 @@ ProcessBranch::ProcessType ScatterAction::perform(Particles *particles,
       particles->data(id_a) = outgoing_particles_[0];
       particles->data(id_b) = outgoing_particles_[1];
 
-      break; 
+      break;
     case ProcessBranch::TwoToOne:
       /* resonance formation */
       log.debug("Process: Resonance formation.", proc->get_type());
       /* processes computed in the center of momenta */
       resonance_formation();
-      break; 
+      break;
     case ProcessBranch::TwoToTwo:
-      /* 2->2 inelastic scattering*/
+      /* 2->2 inelastic scattering */
       log.debug("Process: Inelastic scattering.", proc->get_type());
-      /* 2 particles in final state: Sample the particle momenta in CM system. */
+      /* Sample the particle momenta in CM system. */
       sample_cms_momenta();
       break;
     case ProcessBranch::String:
       /* string excitation */
       log.debug("Process: String Excitation.");
-      /// string_excitation(incoming_particles_, outgoing_particles_);  
+      /// string_excitation(incoming_particles_, outgoing_particles_);
       break;
     case ProcessBranch::None:
       log.debug("ProcessType None should not have been selected");
       break;
-    case ProcessBranch::Decay: 
+    case ProcessBranch::Decay:
       log.debug("ProcessType Decay should have been handled as DecayAction");
       break;
-    default: 
+    default:
       throw InvalidScatterAction(
         "ScatterAction::perform: Unknown Process Type. "
         "ProcessType " + std::to_string(proc->get_type()) +
@@ -135,10 +135,10 @@ double ScatterAction::sqrt_s() const {
 
 
 double ScatterAction::cm_momentum_squared() const {
-  return (incoming_particles_[0].momentum().Dot(incoming_particles_[1].momentum())
-       * incoming_particles_[0].momentum().Dot(incoming_particles_[1].momentum())
-       - incoming_particles_[0].type().mass_sqr()
-       * incoming_particles_[1].type().mass_sqr()) / mandelstam_s();
+  const double m1 = incoming_particles_[0].effective_mass();
+  const double m2 = incoming_particles_[1].effective_mass();
+  const double mom = pCM(sqrt_s(), m1, m2);
+  return mom*mom;
 }
 
 
@@ -181,8 +181,10 @@ CollisionBranch* ScatterAction::elastic_cross_section(float elast_par) {
 CollisionBranch* ScatterAction::string_excitation_cross_section() {
   /* Calculate string-excitation cross section:
    * Parametrized total minus all other present channels. */
-  /* TODO: This is currently set to zero, since Pythia is not yet implemented. */
-  float sig_string = 0.f;  // std::max(0.f, total_cross_section() - total_weight_);
+  /* TODO(weil): This is currently set to zero,
+   * since Pythia is not yet implemented. */
+  float sig_string = 0.f;
+  // = std::max(0.f, total_cross_section() - total_weight_);
 
   return new CollisionBranch(sig_string, ProcessBranch::String);
 }
@@ -302,7 +304,7 @@ float ScatterActionBaryonBaryon::total_cross_section() const {
   const PdgCode &pdg_b = incoming_particles_[1].type().pdgcode();
   const double s = mandelstam_s();
 
-   /* Currently all BB collisions use the nucleon-nucleon parametrizations. */
+  /* Currently all BB collisions use the nucleon-nucleon parametrizations. */
   if (pdg_a == pdg_b) {
     return pp_total(s);     // pp, nn
   } else if (pdg_a.is_antiparticle_of(pdg_b)) {
@@ -313,7 +315,8 @@ float ScatterActionBaryonBaryon::total_cross_section() const {
 }
 
 
-CollisionBranch* ScatterActionBaryonBaryon::elastic_cross_section(float elast_par) {
+CollisionBranch* ScatterActionBaryonBaryon::elastic_cross_section(
+                                                              float elast_par) {
   const PdgCode &pdg_a = incoming_particles_[0].type().pdgcode();
   const PdgCode &pdg_b = incoming_particles_[1].type().pdgcode();
 
@@ -330,7 +333,7 @@ CollisionBranch* ScatterActionBaryonBaryon::elastic_cross_section(float elast_pa
     } else {                                     /* np */
       sig_el = np_elastic(s);
     }
-    if (sig_el>0.) {
+    if (sig_el > 0.) {
       return new CollisionBranch(incoming_particles_[0].type(),
                                  incoming_particles_[1].type(),
                                  sig_el, ProcessBranch::Elastic);
@@ -356,11 +359,11 @@ ProcessBranchList ScatterActionBaryonBaryon::two_to_two_cross_sections() {
   if (type_particle_a.pdgcode().iso_multiplet() == 0x1112 &&
       type_particle_b.pdgcode().iso_multiplet() == 0x1112) {
     /* Nucleon+Nucleon: find all resonance production channels */
-      process_list = nuc_nuc_to_nuc_res (type_particle_a, type_particle_b);
+      process_list = nuc_nuc_to_nuc_res(type_particle_a, type_particle_b);
   } else if (type_particle_a.pdgcode().iso_multiplet() == 0x1112 ||
              type_particle_b.pdgcode().iso_multiplet() == 0x1112) {
     /* Nucleon+Resonance: absorption */
-    process_list = nuc_res_to_nuc_nuc (type_particle_a, type_particle_b);
+    process_list = nuc_res_to_nuc_nuc(type_particle_a, type_particle_b);
   }
 
   return process_list;
@@ -396,10 +399,9 @@ static float nn_to_resonance_matrix_element(const double mandelstam_s,
 }
 
 
-ProcessBranchList ScatterActionBaryonBaryon::nuc_nuc_to_nuc_res (
+ProcessBranchList ScatterActionBaryonBaryon::nuc_nuc_to_nuc_res(
                             const ParticleType &type_particle_a,
                             const ParticleType &type_particle_b) {
-
   const auto &log = logger<LogArea::ScatterAction>();
   ProcessBranchList process_list;
   const double s = mandelstam_s();
@@ -462,15 +464,15 @@ ProcessBranchList ScatterActionBaryonBaryon::nuc_nuc_to_nuc_res (
        * using the Breit-Wigner distribution as probability amplitude.
        * Integrate over the allowed resonance mass range. */
       IntegrandParameters params = {type_resonance, second_type->mass(), s};
-      log.debug("Process: ", type_particle_a, type_particle_b," -> ",
+      log.debug("Process: ", type_particle_a, type_particle_b, " -> ",
                 *second_type, *type_resonance);
-      log.debug("Limits: ", lower_limit," ", upper_limit);
+      log.debug("Limits: ", lower_limit, " ", upper_limit);
       double resonance_integral, integral_error;
       quadrature_1d(&spectral_function_integrand, &params,
                     lower_limit, upper_limit,
                     &resonance_integral, &integral_error);
       log.debug("Integral value: ", resonance_integral,
-                " Error: ",integral_error);
+                " Error: ", integral_error);
 
       /* Cross section for 2->2 process with one resonance in final state.
        * Based on Eq. (46) in PhD thesis of J. Weil
@@ -493,10 +495,9 @@ ProcessBranchList ScatterActionBaryonBaryon::nuc_nuc_to_nuc_res (
 }
 
 
-ProcessBranchList ScatterActionBaryonBaryon::nuc_res_to_nuc_nuc (
+ProcessBranchList ScatterActionBaryonBaryon::nuc_res_to_nuc_nuc(
                             const ParticleType &type_particle_a,
                             const ParticleType &type_particle_b) {
-
   ParticleTypePtr type_resonance, type_nucleon;
   ProcessBranchList process_list;
 

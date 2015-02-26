@@ -6,6 +6,9 @@
  */
 #include "include/deformednucleus.h"
 
+#include <cmath>
+#include <stdexcept>
+
 #include "include/angles.h"
 #include "include/configuration.h"
 #include "include/constants.h"
@@ -13,9 +16,6 @@
 #include "include/particledata.h"
 #include "include/random.h"
 #include "include/threevector.h"
-
-#include <cmath>
-#include <stdexcept>
 
 namespace Smash {
 
@@ -42,22 +42,25 @@ DeformedNucleus::DeformedNucleus() {}
 double DeformedNucleus::deformed_woods_saxon(double r, double cosx) const {
   // Return the deformed woods-saxon calculation
   // at the given location for the current system.
-  return Nucleus::get_saturation_density() / (1 + std::exp(r - Nucleus::get_nuclear_radius() *
-         (1 + beta2_ * y_l_0(2, cosx) + beta4_ * y_l_0(4, cosx)) / Nucleus::get_diffusiveness()));
+  return Nucleus::get_saturation_density() /
+         (1 + std::exp(r - Nucleus::get_nuclear_radius() *
+          (1 + beta2_ * y_l_0(2, cosx) + beta4_ * y_l_0(4, cosx))
+          / Nucleus::get_diffusiveness()));
 }
 
 ThreeVector DeformedNucleus::distribute_nucleon() const {
   double a_radius;
   Angles a_direction;
   // Set a sensible max bound for radial sampling.
-  double radius_max = Nucleus::get_nuclear_radius() / Nucleus::get_diffusiveness() +
-                      Nucleus::get_nuclear_radius() * Nucleus::get_diffusiveness();
+  double radius_max = Nucleus::get_nuclear_radius() /
+                      Nucleus::get_diffusiveness() +
+                      Nucleus::get_nuclear_radius() *
+                      Nucleus::get_diffusiveness();
 
   // Sample the distribution.
   do {
     a_direction.distribute_isotropically();
     a_radius = Random::uniform(0.0, radius_max);
-
   } while (Random::canonical() > deformed_woods_saxon(a_radius,
            a_direction.costheta()));
 
@@ -92,7 +95,8 @@ void DeformedNucleus::set_parameters_automatic() {
       set_beta_4(-0.006);
       break;
     default:
-      throw std::domain_error("Mass number not listed in DeformedNucleus::set_parameters_automatic.");
+      throw std::domain_error("Mass number not listed in"
+                              " DeformedNucleus::set_parameters_automatic.");
   }
 
   // Set a random nuclear rotation.
@@ -114,7 +118,8 @@ void DeformedNucleus::set_parameters_from_config(const char *nucleus_type,
 
   // Saturation density (normalization for accept/reject sampling)
   if (config.has_value({nucleus_type, "Saturation_Density"})) {
-    Nucleus::set_saturation_density(static_cast<double>(config.take({nucleus_type, "Saturation_Density"})));
+    Nucleus::set_saturation_density(
+        static_cast<double>(config.take({nucleus_type, "Saturation_Density"})));
   }
 
   // Polar angle
@@ -123,7 +128,8 @@ void DeformedNucleus::set_parameters_from_config(const char *nucleus_type,
   }
   // Azimuth
   if (config.has_value({nucleus_type, "Phi"})) {
-    set_azimuthal_angle(static_cast<double>(config.take({nucleus_type, "Phi"})));
+    set_azimuthal_angle(static_cast<double>(config.take({nucleus_type,
+                                                         "Phi"})));
   }
 }
 
@@ -134,7 +140,8 @@ void DeformedNucleus::rotate() {
     // rotation of phi about z, followed by the matrix for a rotation
     // theta about the rotated x axis. The third angle psi is 0 by symmetry.
     ThreeVector three_pos = particle.position().threevec();
-    three_pos.rotate(nuclear_orientation_.phi(), nuclear_orientation_.theta(), 0.0);
+    three_pos.rotate(nuclear_orientation_.phi(),
+                     nuclear_orientation_.theta(), 0.);
     particle.set_3position(three_pos);
   }
 }
@@ -148,10 +155,12 @@ double DeformedNucleus::y_l_0(int l, double cosx) const {
   if (l == 2) {
     return (1./4) * std::sqrt(5/M_PI) * (3. * (cosx * cosx) - 1);
   } else if (l == 4) {
-    return (3./16) * std::sqrt(1/M_PI) * (35. * (cosx * cosx) * (cosx * cosx) - 30. * (cosx * cosx) + 3);
+    return (3./16) * std::sqrt(1/M_PI) * (35. * (cosx * cosx) * (cosx * cosx) -
+                                          30. * (cosx * cosx) + 3);
   } else {
-    throw std::domain_error("Not a valid angular momentum quantum number in DeformedNucleus::y_l_0.");
+    throw std::domain_error("Not a valid angular momentum quantum number in"
+                            "DeformedNucleus::y_l_0.");
   }
 }
 
-} // namespace Smash
+}  // namespace Smash

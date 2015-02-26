@@ -10,8 +10,9 @@
 #ifndef SRC_INCLUDE_ANGLES_H_
 #define SRC_INCLUDE_ANGLES_H_
 
-#include <stdexcept>
 #include <iostream>
+#include <stdexcept>
+
 #include "constants.h"
 #include "iomanipulators.h"
 #include "random.h"
@@ -179,7 +180,7 @@ void inline Angles::distribute_isotropically() {
   costheta_ = Random::uniform(-1.0, 1.0);
 }
 
-void inline Angles::set_phi (const double newphi) {
+void inline Angles::set_phi(const double newphi) {
   /* Make sure that phi is in the range [0,2pi).  */
     phi_ = newphi;
   if (newphi < 0 || newphi >= twopi) {
@@ -253,7 +254,7 @@ double inline Angles::y() const { return sintheta()*sin(phi_); }
 double inline Angles::z() const { return costheta_; }
 
 ThreeVector inline Angles::threevec() const {
-  return ThreeVector(x(),y(),z());
+  return ThreeVector(x(), y(), z());
 }
 
 double inline Angles::theta() const { return acos(costheta_); }

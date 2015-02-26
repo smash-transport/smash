@@ -12,10 +12,10 @@
 
 #include <string>
 
-#include "outputinterface.h"
+#include "configuration.h"
 #include "filedeleter.h"
 #include "forwarddeclarations.h"
-#include "configuration.h"
+#include "outputinterface.h"
 
 namespace Smash {
 
@@ -25,7 +25,7 @@ namespace Smash {
  **/
 class BinaryOutputBase : public OutputInterface {
  protected:
-  BinaryOutputBase(FILE *f);
+  explicit BinaryOutputBase(FILE *f);
   void write(const std::string &s);
   void write(const FourVector &v);
   void write(std::int32_t x) {
@@ -39,7 +39,7 @@ class BinaryOutputBase : public OutputInterface {
 
  private:
   /// file format version number
-  const int format_version_ = 3; 
+  const int format_version_ = 3;
 };
 
 /**

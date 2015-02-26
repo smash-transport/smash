@@ -9,13 +9,13 @@
 
 #include "include/grid.h"
 
+#include <stdexcept>
+
 #include "include/algorithms.h"
 #include "include/fourvector.h"
 #include "include/logging.h"
 #include "include/particledata.h"
 #include "include/threevector.h"
-
-#include <stdexcept>
 
 namespace std {
 template <typename T>
@@ -117,7 +117,7 @@ GridBase::determine_cell_sizes(size_type particle_count,
   // [length, length + max_interaction_length[. The code below achieves this
   // effect by rounding down (floor) and adding 1 afterwards.
   // --------------------
-  // TODO:
+  // TODO(mkretz):
   // The last cell in each direction can be smaller than
   // max_interaction_length. In that case periodic boundaries will not work
   // correctly. Thus, we need to reduce the number of cells in that direction

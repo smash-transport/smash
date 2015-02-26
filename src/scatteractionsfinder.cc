@@ -29,9 +29,9 @@ namespace Smash {
 ScatterActionsFinder::ScatterActionsFinder(
     Configuration config, const ExperimentParameters &parameters)
     : testparticles_(parameters.testparticles) {
-/*read in parameter for elastic cross section */
+  /* Read in parameter for elastic cross section. */
   if (config.has_value({"Collision_Term", "Sigma"})) {
-	elastic_parameter_ =  config.take({"Collision_Term", "Sigma"});
+    elastic_parameter_ =  config.take({"Collision_Term", "Sigma"});
   }
 }
 
@@ -113,7 +113,8 @@ ActionPtr ScatterActionsFinder::check_collision(
   {
     /* distance criteria according to cross_section */
     const double distance_squared = act->particle_distance();
-    if (distance_squared >= act->weight() * fm2_mb * M_1_PI / float(testparticles_)) {
+    if (distance_squared >= act->weight() * fm2_mb * M_1_PI
+                            / static_cast<float>(testparticles_)) {
       return nullptr;
     }
     log.debug("particle distance squared: ", distance_squared,

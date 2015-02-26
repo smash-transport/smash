@@ -7,15 +7,15 @@
 #ifndef SRC_INCLUDE_EXPERIMENT_H_
 #define SRC_INCLUDE_EXPERIMENT_H_
 
+#include <map>
 #include <memory>
 #include <stdexcept>
 #include <string>
-#include <map>
 #include <vector>
 
 #include "chrono.h"
-#include "density.h"
 #include "decayactionsfinder.h"
+#include "density.h"
 #include "experimentparameters.h"
 #include "forwarddeclarations.h"
 #include "outputinterface.h"
@@ -249,7 +249,7 @@ class Experiment : public ExperimentBase {
    * Writes the initial state for the Experiment to the output stream.
    * It automatically appends the output of the current Modus.
    */
-  friend std::ostream &operator<<<>(std::ostream &out, const Experiment &e);
+  friend std::ostream &operator<< <>(std::ostream &out, const Experiment &e);
 };
 }  // namespace Smash
 

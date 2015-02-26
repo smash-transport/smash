@@ -8,10 +8,11 @@
  */
 #include "include/width.h"
 
-#include <cstdio>
-#include <stdexcept>
-#include <istream>
 #include <gsl/gsl_integration.h>
+
+#include <cstdio>
+#include <istream>
+#include <stdexcept>
 
 #include "include/resonances.h"
 
@@ -53,7 +54,7 @@ float BlattWeisskopf(const float x, const int L)
 }
 
 
-double Post_FF_sqr (double m, double M0, double s0, double L) {
+double Post_FF_sqr(double m, double M0, double s0, double L) {
   double FF = (L*L*L*L + (s0-M0*M0)*(s0-M0*M0)/4.) /
               (L*L*L*L + (m*m-(s0+M0*M0)/2.) * (m*m-(s0+M0*M0)/2.));
   return FF*FF;

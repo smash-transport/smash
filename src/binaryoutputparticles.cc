@@ -12,8 +12,8 @@
 #include <boost/filesystem.hpp>
 #include <string>
 
-#include <include/config.h>
 #include "include/clock.h"
+#include "include/config.h"
 #include "include/configuration.h"
 #include "include/forwarddeclarations.h"
 #include "include/inputfunctions.h"
@@ -137,10 +137,10 @@ void BinaryOutputParticles::at_eventend(const Particles &particles,
 }
 
 void BinaryOutputParticles::at_interaction(const ParticleList &/*incoming*/,
-                                     const ParticleList &/*outgoing*/,
-                                     const double /*density*/,
-                                     const double /*total_cross_section*/,
-                                     const ProcessBranch::ProcessType /*process_type*/ ) {
+                          const ParticleList &/*outgoing*/,
+                          const double /*density*/,
+                          const double /*total_cross_section*/,
+                          const ProcessBranch::ProcessType /*process_type*/ ) {
   /* No output of this kind in particles output */
 }
 

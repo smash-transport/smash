@@ -7,11 +7,11 @@
 #ifndef SRC_INCLUDE_DEFORMEDNUCLEUS_H_
 #define SRC_INCLUDE_DEFORMEDNUCLEUS_H_
 
+#include "angles.h"
 #include "configuration.h"
 #include "forwarddeclarations.h"
 #include "nucleus.h"
 #include "threevector.h"
-#include "angles.h"
 
 namespace Smash {
 
@@ -113,9 +113,8 @@ class DeformedNucleus : public Nucleus {
   double beta4_ = 0.0;
   /// Nucleus orientation (initial profile in xz plane).
   Angles nuclear_orientation_;
-
 };
 
-}
+}  // namespace Smash
 
-#endif /* SRC_INCLUDE_DEFORMEDNUCLEUS_H_ */
+#endif  // SRC_INCLUDE_DEFORMEDNUCLEUS_H_

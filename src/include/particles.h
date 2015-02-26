@@ -7,12 +7,12 @@
 #ifndef SRC_INCLUDE_PARTICLES_H_
 #define SRC_INCLUDE_PARTICLES_H_
 
+#include <map>
+
 #include "macros.h"
 #include "particledata.h"
 #include "particletype.h"
 #include "pdgcode.h"
-
-#include <map>
 
 namespace Smash {
 
@@ -206,7 +206,6 @@ class Particles {
   void reset();
 
  private:
-
   /// Highest id of a given particle
   int id_max_ = -1;
   /**

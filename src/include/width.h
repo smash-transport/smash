@@ -48,7 +48,7 @@ float BlattWeisskopf(const float x, const int L)
 #endif
 ;
 
-double Post_FF_sqr (double m, double M0, double s0, double L);
+double Post_FF_sqr(double m, double M0, double s0, double L);
 
 }  // namespace Smash
 

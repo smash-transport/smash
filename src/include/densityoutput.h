@@ -12,12 +12,12 @@
 
 #include <string>
 
+#include "configuration.h"
 #include "density.h"
 #include "experimentparameters.h"
 #include "filedeleter.h"
-#include "outputinterface.h"
 #include "forwarddeclarations.h"
-#include "configuration.h"
+#include "outputinterface.h"
 #include "threevector.h"
 
 namespace Smash {
@@ -35,7 +35,6 @@ namespace Smash {
  **/
 class DensityOutput : public OutputInterface {
  public:
-
   DensityOutput(bf::path path, Configuration&& conf);
   ~DensityOutput();
 

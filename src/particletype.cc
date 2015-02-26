@@ -14,6 +14,7 @@
 #include <map>
 #include <vector>
 
+#include "include/cxx14compat.h"
 #include "include/decaymodes.h"
 #include "include/inputfunctions.h"
 #include "include/iomanipulators.h"
@@ -22,7 +23,6 @@
 #include "include/processbranch.h"
 #include "include/stringfunctions.h"
 #include "include/width.h"
-#include "include/cxx14compat.h"
 
 namespace Smash {
 
@@ -58,15 +58,14 @@ std::vector<ParticleTypePtr> ParticleType::list_nucleons() {
 
 std::vector<ParticleTypePtr> ParticleType::list_baryon_resonances() {
   std::vector<ParticleTypePtr> list;
-  list.reserve(4);  // currently we have only the Delta (with four charge states)
-
+  list.reserve(10);
   for (const ParticleType &type_resonance : ParticleType::list_all()) {
     /* Only loop over baryon resonances. */
     if (type_resonance.is_stable()
         || type_resonance.pdgcode().baryon_number() != 1) {
       continue;
     }
-   list.emplace_back(&type_resonance);
+    list.emplace_back(&type_resonance);
   }
   return list;
 }
@@ -152,9 +151,9 @@ static std::string antiname(const std::string &name, PdgCode code) {
   } else {
     return basename+bar+charge;  // neutral meson
   }
-};
+}
 
-void ParticleType::create_type_list(const std::string &input) {  //{{{
+void ParticleType::create_type_list(const std::string &input) {  // {{{
   const auto &log = logger<LogArea::ParticleType>();
   static ParticleTypeList type_list;
   type_list.clear();  // in case LoadFailure was thrown and caught and we should
@@ -232,7 +231,7 @@ float ParticleType::total_width(const float m) const {
   }
   /* Loop over decay modes and sum up all partial widths. */
   const auto &modes = decay_modes().decay_mode_list();
-  for (unsigned int i=0; i<modes.size(); i++) {
+  for (unsigned int i = 0; i < modes.size(); i++) {
     w = w + partial_width(m, modes[i].get());
   }
   return w;
@@ -257,10 +256,11 @@ ProcessBranchList ParticleType::get_partial_widths(const float m) const {
   const auto &decay_mode_list = decay_modes().decay_mode_list();
   ProcessBranchList partial;
   partial.reserve(decay_mode_list.size());
-  for (unsigned int i=0; i<decay_mode_list.size(); i++) {
+  for (unsigned int i = 0; i < decay_mode_list.size(); i++) {
     w = partial_width(m, decay_mode_list[i].get());
     if (w > 0.) {
-      partial.push_back(make_unique<DecayBranch>(&decay_mode_list[i]->type(),w));
+      partial.push_back(make_unique<DecayBranch>(&decay_mode_list[i]->type(),
+                                                 w));
     }
   }
   return std::move(partial);
@@ -275,7 +275,7 @@ float ParticleType::get_partial_in_width(const float m,
   /* Find the right one. */
   for (const auto &mode : decaymodes) {
     float partial_width_at_pole = width_at_pole()*mode->weight();
-    if (mode->type().has_particles(p_a.type(),p_b.type())) {
+    if (mode->type().has_particles(p_a.type(), p_b.type())) {
       return mode->type().in_width(mass(), partial_width_at_pole, m,
                                    p_a.effective_mass(), p_b.effective_mass());
     }

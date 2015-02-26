@@ -172,14 +172,16 @@ class PdgCode {
   void check() const {
     // n_J must be odd for mesons and even for baryons (and cannot be zero)
     if (is_hadron()) {
-      if (baryon_number()==0) {
+      if (baryon_number() == 0) {
         // mesons: special cases K0_L=0x130 and K0_S=0x310
         if ((digits_.n_J_ % 2 == 0) && dump() != 0x130 && dump() != 0x310) {
-          throw InvalidPdgCode("Invalid PDG code " + string() + " (meson with even n_J)");
+          throw InvalidPdgCode("Invalid PDG code " + string()
+                               + " (meson with even n_J)");
         }
       } else {
         if ((digits_.n_J_ % 2 != 0) || digits_.n_J_ == 0) {
-          throw InvalidPdgCode("Invalid PDG code " + string() + " (baryon with odd n_J)");
+          throw InvalidPdgCode("Invalid PDG code " + string()
+                               + " (baryon with odd n_J)");
         }
       }
     } else {
@@ -187,9 +189,11 @@ class PdgCode {
         throw InvalidPdgCode("Invalid PDG code " + string() + " (n_J==0)");
       }
     }
-    // antiparticle flag only makes sense for particle types that have an antiparticle
+    /* The antiparticle flag only makes sense for particle types
+     * that have an antiparticle. */
     if (digits_.antiparticle_ && !has_antiparticle()) {
-      throw InvalidPdgCode("Invalid PDG code " + string() + " (cannot be negative)");
+      throw InvalidPdgCode("Invalid PDG code " + string()
+                           + " (cannot be negative)");
     }
   }
 
@@ -208,16 +212,16 @@ class PdgCode {
   inline std::string string() const {
     char hexstring[8];
     if (digits_.antiparticle_) {
-      snprintf(hexstring, 8, "-%x", ucode());
+      snprintf(hexstring, sizeof(hexstring), "-%x", ucode());
     } else {
-      snprintf(hexstring, 8, "%x", ucode());
+      snprintf(hexstring, sizeof(hexstring), "%x", ucode());
     }
     return std::string(hexstring);
   }
 
   /// Construct the antiparticle to a given PDG code.
   PdgCode get_antiparticle() const {
-    // TODO: more efficient implementation
+    // TODO(mkretz): more efficient implementation
     return PdgCode(-code());
   }
 
@@ -232,7 +236,7 @@ class PdgCode {
   }
   /// returns the baryon number of the particle.
   inline int baryon_number() const {
-    if (! is_hadron() || digits_.n_q1_ == 0) {
+    if (!is_hadron() || digits_.n_q1_ == 0) {
       return  0;
     }
     return antiparticle_sign();
@@ -266,9 +270,9 @@ class PdgCode {
    */
   float isospin3_rel() const {
     unsigned int I = isospin_total();
-    if (I==0) {
-      return 0; }
-    else {
+    if (I == 0) {
+      return 0;
+    } else {
       return static_cast<float>(isospin3())/I;
     }
   }
@@ -363,7 +367,7 @@ class PdgCode {
   }
   /// returns an integer with only the quark numbers set.
   inline std::int32_t quarks() const {
-    if (! is_hadron()) {
+    if (!is_hadron()) {
       return 0;
     }
     return chunks_.quarks_;
@@ -383,7 +387,7 @@ class PdgCode {
    * check if two particles are in the same multiplet!
    */
   inline std::int32_t multiplet() const {
-    if (! is_hadron()) {
+    if (!is_hadron()) {
       return 0;
     }
     // the multiplet code is the antiparticle_*( baryon number +
@@ -415,7 +419,7 @@ class PdgCode {
    *
    */
   inline std::int32_t iso_multiplet() const {
-    if (! is_hadron()) {
+    if (!is_hadron()) {
       return 0;
     }
     // the η meson is NOT in the same multiplet as the π, and Λ and Σ.
@@ -463,7 +467,7 @@ class PdgCode {
   }
   /// returns if the codes are not equal.
   inline bool operator!=(const PdgCode rhs) const {
-    return ! (*this == rhs);
+    return !(*this == rhs);
   }
   /// returns if the code of rhs is the inverse of this one.
   inline bool is_antiparticle_of(const PdgCode rhs) const {
@@ -500,7 +504,7 @@ class PdgCode {
 #define SMASH_BITFIELD_ORDER_ 1
 // put your compiler here if the bit field order is reversed w.r.t. gnu
 // c compiler for 64 bit.
-#elif (defined(__OTHER_COMPILER__))
+#elif defined(__OTHER_COMPILER__)
 #define SMASH_BITFIELD_ORDER_ 2
 #else
 #error "Please determine the correct bit-field order for your target/compiler"
@@ -641,21 +645,21 @@ class PdgCode {
     // 4th from last is n_q1_.
     if (length > 3 + sign) {
       digits_.n_q1_ = get_digit_from_char(codestring[c++]);
-      if (digits_.n_q1_>6) {
+      if (digits_.n_q1_ > 6) {
         throw InvalidPdgCode("Invalid PDG code " + codestring + " (n_q1>6)");
       }
     }
     // 3rd from last is n_q2_.
     if (length > 2 + sign) {
       digits_.n_q2_ = get_digit_from_char(codestring[c++]);
-      if (digits_.n_q2_>6) {
+      if (digits_.n_q2_ > 6) {
         throw InvalidPdgCode("Invalid PDG code " + codestring + " (n_q2>6)");
       }
     }
     // next to last is n_q3_.
     if (length > 1 + sign) {
       digits_.n_q3_ = get_digit_from_char(codestring[c++]);
-      if (digits_.n_q3_>6) {
+      if (digits_.n_q3_ > 6) {
         throw InvalidPdgCode("Invalid PDG code " + codestring + " (n_q3>6)");
       }
     }
@@ -685,7 +689,6 @@ class PdgCode {
     }
     check();
   }
-
 };
 
 std::istream& operator>>(std::istream& is, PdgCode& code);
@@ -694,6 +697,6 @@ std::istream& operator>>(std::istream& is, PdgCode& code);
  */
 std::ostream& operator<<(std::ostream& is, const PdgCode& code);
 
-}  // namespace SMASH
+}  // namespace Smash
 
 #endif  // SRC_INCLUDE_PDGCODE_H_

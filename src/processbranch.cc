@@ -8,9 +8,10 @@
  */
 
 #include "include/processbranch.h"
-#include "include/particledata.h"
 
 #include <limits>
+
+#include "include/particledata.h"
 
 namespace Smash {
 

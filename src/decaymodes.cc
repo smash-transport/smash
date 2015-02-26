@@ -14,12 +14,12 @@
 #include <map>
 
 #include "include/constants.h"
+#include "include/cxx14compat.h"
 #include "include/inputfunctions.h"
 #include "include/logging.h"
 #include "include/pdgcode.h"
 #include "include/processbranch.h"
 #include "include/stringfunctions.h"
-#include "include/cxx14compat.h"
 
 namespace Smash {
 
@@ -36,7 +36,8 @@ void DecayModes::add_mode(float ratio, int L,
     }
     if (particle_types[0]->is_stable() && particle_types[1]->is_stable()) {
       type = new TwoBodyDecayStable(particle_types, L);
-    } else if (particle_types[0]->is_stable() || particle_types[1]->is_stable()) {
+    } else if (particle_types[0]->is_stable() ||
+               particle_types[1]->is_stable()) {
       type = new TwoBodyDecaySemistable(particle_types, L);
     } else {
       type = new TwoBodyDecayUnstable(particle_types, L);
@@ -102,7 +103,7 @@ void DecayModes::load_decaymodes(const std::string &input) {
       throw MissingDecays("No decay modes found for particle " +
                           pdgcode.string());
     }
-    // TODO: why not just unconditionally call renormalize? (mkretz)
+    // TODO(mkretz): why not just unconditionally call renormalize?
     /* Check if ratios add to 1 */
     if (fabs(ratio_sum - 1.0) > really_small) {
       /* They didn't; renormalize */

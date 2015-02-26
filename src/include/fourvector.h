@@ -205,7 +205,7 @@ void inline FourVector::set_x3(const double z) {
 }
 
 ThreeVector inline FourVector::threevec() const {
-  return ThreeVector(x_[1],x_[2],x_[3]);
+  return ThreeVector(x_[1], x_[2], x_[3]);
 }
 
 // check if all four vector components are equal
@@ -223,7 +223,8 @@ bool inline FourVector::operator!=(const FourVector &a) const {
 
 // all four vector components are below comparison vector
 bool inline FourVector::operator<(const FourVector &a) const {
-  return (x_[0] < a.x_[0]) && (x_[1] < a.x_[1]) && (x_[2] < a.x_[2]) && (x_[3] < a.x_[3]);
+  return (x_[0] < a.x_[0]) && (x_[1] < a.x_[1]) &&
+         (x_[2] < a.x_[2]) && (x_[3] < a.x_[3]);
 }
 
 // use < operator for the inverse by switching arguments

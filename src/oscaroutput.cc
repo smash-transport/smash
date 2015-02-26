@@ -11,12 +11,12 @@
 #include <boost/filesystem.hpp>
 #include <string>
 
-#include <include/config.h>
 #include "include/clock.h"
-#include "include/forwarddeclarations.h"
-#include "include/particles.h"
+#include "include/config.h"
 #include "include/configuration.h"
 #include "include/cxx14compat.h"
+#include "include/forwarddeclarations.h"
+#include "include/particles.h"
 
 namespace Smash {
 
@@ -128,7 +128,8 @@ OscarOutput<Format, Contents>::OscarOutput(bf::path path, std::string name)
                               // the string on the second line tell, and why
                               // does it have to be this specific string?
     }
-    fprintf(file_.get(), "# OSC1999A\n# %s\n# %s\n", name.c_str(), VERSION_MAJOR);
+    fprintf(file_.get(), "# OSC1999A\n# %s\n# %s\n",
+            name.c_str(), VERSION_MAJOR);
     fprintf(file_.get(), "# Block format:\n");
     fprintf(file_.get(), "# nin nout event_number\n");
     fprintf(file_.get(), "# id pdg 0 px py pz p0 mass x y z t\n");
@@ -201,9 +202,9 @@ void OscarOutput<Format, Contents>::at_interaction(
   if (Contents & OscarInteractions) {
     if (Format == OscarFormat2013) {
       fprintf(file_.get(),
-              "# interaction in %zu out %zu rho %12.7f weight %12.7f type %5i \n",
-              incoming_particles.size(), outgoing_particles.size(),
-              density, total_cross_section, process_type);
+            "# interaction in %zu out %zu rho %12.7f weight %12.7f type %5i \n",
+            incoming_particles.size(), outgoing_particles.size(),
+            density, total_cross_section, process_type);
     } else {
       /* OSCAR line prefix : initial final
        * particle creation: 0 1
@@ -212,8 +213,9 @@ void OscarOutput<Format, Contents>::at_interaction(
        * resonance decay: 1 2
        * etc.
        */
-      fprintf(file_.get(), "%zu %zu %12.7f %12.7f %5i \n", incoming_particles.size(),
-              outgoing_particles.size(), density, total_cross_section, process_type);
+      fprintf(file_.get(), "%zu %zu %12.7f %12.7f %5i \n",
+              incoming_particles.size(), outgoing_particles.size(), density,
+              total_cross_section, process_type);
     }
     for (const auto &p : incoming_particles) {
       write_particledata(p);

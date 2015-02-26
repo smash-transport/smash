@@ -66,7 +66,9 @@ class ParticleData {
   inline void set_4position(const FourVector &pos);
   inline void set_3position(const ThreeVector &pos);
   /// get the velocity 3-vector
-  inline ThreeVector velocity (void) const { return momentum_.threevec() / momentum_.x0(); }
+  inline ThreeVector velocity(void) const {
+    return momentum_.threevec() / momentum_.x0();
+  }
 
   /**
    * Returns the inverse of the gamma factor from the current velocity of the
@@ -87,9 +89,9 @@ class ParticleData {
   }
 
   /// do a full Lorentz-boost
-  inline void boost (const ThreeVector &v);
+  inline void boost(const ThreeVector &v);
   /// do a Lorentz-boost of the momentum
-  inline void boost_momentum (const ThreeVector &v);
+  inline void boost_momentum(const ThreeVector &v);
 
   /* overloaded operators */
   inline bool operator==(const ParticleData &a) const;
@@ -155,7 +157,8 @@ inline void ParticleData::set_4momentum(const FourVector &momentum_vector) {
  * \param[in] new_mass the mass of the particle
  * \param[in] mom the three-momentum of the particle
  */
-inline void ParticleData::set_4momentum(double new_mass, const ThreeVector &mom) {
+inline void ParticleData::set_4momentum(double new_mass,
+                                        const ThreeVector &mom) {
   momentum_ = FourVector(std::sqrt(new_mass * new_mass + mom * mom), mom);
 }
 
@@ -192,14 +195,12 @@ inline void ParticleData::set_3position(const ThreeVector &pos) {
   position_ = FourVector(position_.x0(), pos);
 }
 /// full Lorentz boost of momentum and position
-inline void ParticleData::boost (const ThreeVector &v)
-{
+inline void ParticleData::boost(const ThreeVector &v) {
     set_4momentum(momentum_.LorentzBoost(v));
     set_4position(position_.LorentzBoost(v));
 }
 /// Boost only the momentum
-inline void ParticleData::boost_momentum (const ThreeVector &v)
-{
+inline void ParticleData::boost_momentum(const ThreeVector &v) {
     set_4momentum(momentum_.LorentzBoost(v));
 }
 

@@ -12,10 +12,10 @@
 
 #include <string>
 
-#include "outputinterface.h"
+#include "configuration.h"
 #include "filedeleter.h"
 #include "forwarddeclarations.h"
-#include "configuration.h"
+#include "outputinterface.h"
 
 namespace Smash {
 
@@ -89,9 +89,10 @@ class OscarOutput : public OutputInterface {
  *             placed.
  * \param config A Configuration object that has direct entries for OSCAR.
  */
-std::unique_ptr<OutputInterface> create_oscar_output(bf::path path, Configuration config);
+std::unique_ptr<OutputInterface> create_oscar_output(bf::path path,
+                                                     Configuration config);
 
-//@}
+// @}
 }  // namespace Smash
 
 #endif  // SRC_INCLUDE_OSCAROUTPUT_H_

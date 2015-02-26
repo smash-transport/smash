@@ -10,9 +10,10 @@
 #ifndef SRC_INCLUDE_GRID_H_
 #define SRC_INCLUDE_GRID_H_
 
-#include <functional>
-#include <vector>
 #include <array>
+#include <functional>
+#include <utility>
+#include <vector>
 
 #include "forwarddeclarations.h"
 
@@ -53,7 +54,6 @@ class GridBase {
       determine_cell_sizes(size_type particle_count,
                            const std::array<float, 3> &length,
                            const int testparticles);
-
 };
 
 /**
@@ -80,7 +80,7 @@ class Grid : public GridBase {
    */
   Grid(ParticleList &&all_particles, const int testparticles)
       : Grid{find_min_and_length(all_particles), std::move(all_particles),
-	     testparticles} {}
+             testparticles} {}
 
   /**
    * Constructs a grid with the given minimum grid coordinates and grid length.

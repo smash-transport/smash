@@ -6,10 +6,12 @@
  *    GNU General Public License (GPLv3 or later)
  *
  */
+
+#include "include/modusdefault.h"
+
 #include <cinttypes>
 #include <list>
 
-#include "include/modusdefault.h"
 #include "include/experiment.h"
 #include "include/logging.h"
 

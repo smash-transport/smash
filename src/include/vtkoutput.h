@@ -13,10 +13,10 @@
 
 #include <boost/filesystem.hpp>
 
-#include "density.h"
-#include "outputinterface.h"
-#include "forwarddeclarations.h"
 #include "configuration.h"
+#include "density.h"
+#include "forwarddeclarations.h"
+#include "outputinterface.h"
 
 namespace Smash {
 
