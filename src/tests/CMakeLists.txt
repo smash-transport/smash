@@ -60,6 +60,17 @@ else()
    message(WARNING "cpplint.py was not found. The cclint test will be disabled.\nDownload from: http://google-styleguide.googlecode.com/svn/trunk/cpplint/cpplint.py")
 endif()
 
+# generate git statistics, requires gitstats in the path
+find_program(GITSTATS gitstats)
+if(GITSTATS)
+   message(STATUS "gitstats found at ${GITSTATS}")
+   add_custom_target(stats
+                     COMMAND ${GITSTATS} ${PROJECT_SOURCE_DIR} ${PROJECT_BINARY_DIR}/gitstats
+                     COMMENT "Generating git statistics")
+else()
+   message(WARNING "gitstats was not found. The gitstats support will be disabled.")
+endif()
+
 add_definitions("-DTEST_CONFIG_PATH=bf::path(\"${PROJECT_SOURCE_DIR}/src\")")
 add_definitions("-DBUILD_TESTS")
 
