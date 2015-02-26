@@ -42,15 +42,20 @@ endmacro()
 # test source code to be clean, requires cpplint in the path
 find_program(CPPLINT cpplint.py)
 if(CPPLINT)
-   file(GLOB_RECURSE CPPLINT_ARGS ${PROJECT_SOURCE_DIR}/src/*.h
-      ${PROJECT_SOURCE_DIR}/src/*.cc)
-   set(CPPLINT_ARGS --filter=-build/include_order,-readability/streams,-build/include ${CPPLINT_ARGS})
    message(STATUS "cpplint.py found at ${CPPLINT}")
-   add_custom_target(run_cclint
-      COMMAND ${CPPLINT} ${CPPLINT_ARGS}
-      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-      COMMENT "Executing test cclint"
-      )
+   set(CPPLINT_ARGS --filter=-build/include,-readability/streams --counting=detailed)
+   file(GLOB CPPLINT_FILES
+        ${PROJECT_SOURCE_DIR}/src/include/*.h ${PROJECT_SOURCE_DIR}/src/*.cc)
+   add_custom_target(cpplint
+                     COMMAND ${CPPLINT} ${CPPLINT_ARGS} ${CPPLINT_FILES}
+                     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+                     COMMENT "Executing test cpplint")
+   file(GLOB_RECURSE CPPLINT_FILES_FULL
+        ${PROJECT_SOURCE_DIR}/src/*.h ${PROJECT_SOURCE_DIR}/src/*.cc)
+   add_custom_target(cpplint_full
+                     COMMAND ${CPPLINT} ${CPPLINT_ARGS} ${CPPLINT_FILES_FULL}
+                     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+                     COMMENT "Executing test cpplint_full")
 else()
    message(WARNING "cpplint.py was not found. The cclint test will be disabled.\nDownload from: http://google-styleguide.googlecode.com/svn/trunk/cpplint/cpplint.py")
 endif()
