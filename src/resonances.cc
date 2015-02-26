@@ -30,7 +30,6 @@
 #include "include/particletype.h"
 #include "include/processbranch.h"
 #include "include/random.h"
-#include "include/width.h"
 
 namespace Smash {
 
@@ -47,50 +46,6 @@ double clebsch_gordan(const int j_a, const int j_b, const int j_c,
             " iz1: ", m_a, " iz2: ", m_b, " izR: ", m_c);
 
   return result;
-}
-
-
-/* two_to_one_formation -- only the resonance in the final state */
-double two_to_one_formation(const ParticleData &particle_a,
-                            const ParticleData &particle_b,
-                            const ParticleType &type_resonance,
-                            double mandelstam_s, double cm_momentum_squared) {
-  const ParticleType &type_particle_a = particle_a.type();
-  const ParticleType &type_particle_b = particle_b.type();
-  /* Check for charge conservation */
-  if (type_resonance.charge() != type_particle_a.charge()
-                               + type_particle_b.charge()) {
-    return 0.;
-  }
-
-  /* Check for baryon number conservation */
-  if (type_resonance.baryon_number() != type_particle_a.baryon_number()
-                                      + type_particle_b.baryon_number()) {
-    return 0.;
-  }
-
-  /* Calculate partial in-width. */
-  double srts = std::sqrt(mandelstam_s);
-  float partial_width = type_resonance.get_partial_in_width(srts,
-                                                      particle_a, particle_b);
-  if (partial_width <= 0.) {
-    return 0.;
-  }
-
-  /* Calculate spin factor */
-  const double spinfactor = (type_resonance.spin() + 1)
-    / ((type_particle_a.spin() + 1) * (type_particle_b.spin() + 1));
-  const int sym_factor = (type_particle_a.pdgcode() ==
-                          type_particle_b.pdgcode()) ? 2 : 1;
-  float resonance_width = type_resonance.total_width(srts);
-  float resonance_mass = type_resonance.mass();
-  /* Calculate resonance production cross section
-   * using the Breit-Wigner distribution as probability amplitude.
-   * See Eq. (176) in Buss et al., Physics Reports 512, 1 (2012). */
-  return spinfactor * sym_factor * 4.0 * M_PI / cm_momentum_squared
-         * breit_wigner(mandelstam_s, resonance_mass, resonance_width)
-         * partial_width/resonance_width
-         * hbarc * hbarc / fm2_mb;
 }
 
 

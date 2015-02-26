@@ -22,7 +22,6 @@
 #include "include/pdgcode.h"
 #include "include/processbranch.h"
 #include "include/stringfunctions.h"
-#include "include/width.h"
 
 namespace Smash {
 
