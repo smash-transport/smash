@@ -18,6 +18,7 @@
 #include "include/angles.h"
 #include "include/configuration.h"
 #include "include/experimentparameters.h"
+#include "include/kinematics.h"
 #include "include/logging.h"
 #include "include/numerics.h"
 #include "include/particles.h"
@@ -223,7 +224,7 @@ ColliderModus::ColliderModus(Configuration modus_config,
                 + std::to_string(mass_b) + " GeV.");
       }
       // Set the total nucleus-nucleus collision energy.
-      total_s_= (sqrt_s_NN * sqrt_s_NN - mass_a * mass_a - mass_b * mass_b)
+      total_s_ = (sqrt_s_NN * sqrt_s_NN - mass_a * mass_a - mass_b * mass_b)
                 * mass_projec * mass_target / (mass_a * mass_b)
                 + mass_projec * mass_projec + mass_target * mass_target;
       energy_input++;
@@ -238,9 +239,8 @@ ColliderModus::ColliderModus(Configuration modus_config,
                                           "E_Kin must be nonnegative.");
       }
       // Set the total nucleus-nucleus collision energy.
-      total_s_ = (mass_projec * mass_projec) + (mass_target * mass_target)
-                 + 2 * mass_target *
-                   (mass_projec + e_kin*projectile_->number_of_particles());
+      total_s_ = s_from_Ekin(e_kin*projectile_->number_of_particles(),
+                             mass_projec, mass_target);
       energy_input++;
   }
   // Option 3: Momentum of the projectile nucleus (target at rest).
@@ -251,12 +251,9 @@ ColliderModus::ColliderModus(Configuration modus_config,
         throw ModusDefault::InvalidEnergy("Input Error: "
                                           "P_Lab must be nonnegative.");
       }
-      // momentum of projectile nucleus
-      float p_proj = p_lab * projectile_->number_of_particles();
       // Set the total nucleus-nucleus collision energy.
-      total_s_ = (mass_projec * mass_projec) + (mass_target * mass_target)
-                  + 2 * mass_target *
-                    sqrt(mass_projec*mass_projec + p_proj*p_proj);
+      total_s_ = s_from_plab(p_lab * projectile_->number_of_particles(),
+                             mass_projec, mass_target);
       energy_input++;
   }
   if (energy_input == 0) {

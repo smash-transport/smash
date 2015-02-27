@@ -55,6 +55,22 @@ inline double plab_from_s_NN(double mandelstam_s) {
 }
 
 
+/* Convert E_kin to mandelstam-s for a fixed-target setup,
+ * with a projectile of mass m_P and a kinetic energy e_kin
+ * and a target of mass m_T at rest. */
+inline double s_from_Ekin(double e_kin, double m_P, double m_T) {
+  return m_P*m_P + m_T*m_T + 2 * m_T * (m_P + e_kin);
+}
+
+
+/* Convert p_lab to mandelstam-s for a fixed-target setup,
+ * with a projectile of mass m_P and momentum plab
+ * and a target of mass m_T at rest. */
+inline double s_from_plab(double plab, double m_P, double m_T) {
+  return m_P*m_P + m_T*m_T + 2 * m_T * std::sqrt(m_P*m_P + plab*plab);
+}
+
+
 }  // namespace Smash
 
 #endif  // SRC_INCLUDE_KINEMATICS_H_
