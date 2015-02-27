@@ -8,6 +8,8 @@
 #ifndef SRC_INCLUDE_KINEMATICS_H_
 #define SRC_INCLUDE_KINEMATICS_H_
 
+#include "constants.h"
+
 namespace Smash {
 
 
@@ -43,10 +45,6 @@ T pCM_sqr(const T srts, const T mass_a, const T mass_b) noexcept {
   const auto x = s + mass_a_sqr - mass_b * mass_b;
   return x * x * (T(0.25) / s) - mass_a_sqr;
 }
-
-
-/// nucleon mass
-const double mN = 0.938;
 
 
 /** Convert mandelstam-s to p_lab in a nucleon-nucleon collision. */

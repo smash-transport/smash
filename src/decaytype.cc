@@ -18,23 +18,21 @@
 
 namespace Smash {
 
-const float interaction_radius = 1. / hbarc;
-
 /**
  * Returns the squared Blatt-Weisskopf functions,
  * which influence the mass dependence of the decay widths.
  * See e.g. Effenberger's thesis, page 28.
  *
- * \param x = p_ab*R  with
- *        p_ab = relative momentum of outgoing particles AB and
- *        R = interaction radius
- * \param L Angular momentum of outgoing particles AB.
+ * \param p_ab Momentum of outgoing particles A and B in center-of-mass frame.
+ * \param L Angular momentum of outgoing particles A and B.
  */
-static float BlattWeisskopf(const float x, const int L)
+static float BlattWeisskopf(const float p_ab, const int L)
 #ifdef NDEBUG
     noexcept
 #endif
 {
+  const float R = 1. / hbarc;  /* interaction radius = 1 fm */
+  const auto x = p_ab * R;
   const auto x2 = x * x;
   switch (L) {
     case 0:
@@ -66,9 +64,18 @@ static float BlattWeisskopf(const float x, const int L)
 }
 
 
+/**
+ * An additional form factor for unstable final states as used in GiBUU,
+ * according to M. Post.
+ * Reference: Buss et al., Phys. Rept. 512 (2012), eq. (174).
+ * The function returns the squared value of the form factor.
+ */
 static double Post_FF_sqr(double m, double M0, double s0, double L) {
-  double FF = (L*L*L*L + (s0-M0*M0)*(s0-M0*M0)/4.) /
-              (L*L*L*L + (m*m-(s0+M0*M0)/2.) * (m*m-(s0+M0*M0)/2.));
+  const auto L4 = L*L*L*L;
+  const auto m2 = m*m;
+  const auto M2 = M0*M0;
+  double FF = (L4 + (s0-M2)*(s0-M2)/4.) /
+              (L4 + (m2-(s0+M2)/2.) * (m2-(s0+M2)/2.));
   return FF*FF;
 }
 
@@ -113,7 +120,7 @@ float TwoBodyDecayStable::rho(float m) const {
   const float p_ab = pCM(m, particle_types_[0]->mass(),
                             particle_types_[1]->mass());
   // determine rho(m)
-  return p_ab / m * BlattWeisskopf(p_ab*interaction_radius, L_);
+  return p_ab / m * BlattWeisskopf(p_ab, L_);
 }
 
 float TwoBodyDecayStable::width(float m0, float G0, float m) const {
@@ -173,7 +180,7 @@ static double integrand_rho_Manley(double mass, void *parameters) {
   /* center-of-mass momentum of final state particles */
   double p_f = pCM(srts, stable_mass, mass);
 
-  return p_f/srts * BlattWeisskopf(p_f*interaction_radius, ip->L) * 2.*srts
+  return p_f/srts * BlattWeisskopf(p_f, ip->L) * 2.*srts
           * spectral_function(mass, ip->type.mass(), resonance_width);
 }
 
@@ -236,7 +243,7 @@ float TwoBodyDecaySemistable::in_width(float m0, float G0, float m,
                                        float m1, float m2) const {
   double p_f = pCM(m, m1, m2);
 
-  return G0 * p_f * BlattWeisskopf(p_f*interaction_radius, L_)
+  return G0 * p_f * BlattWeisskopf(p_f, L_)
          * Post_FF_sqr(m, m0, particle_types_[0]->mass()
                               + particle_types_[1]->minimum_mass(), Lambda_)
          / (m * rho(m0));
