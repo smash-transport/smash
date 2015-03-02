@@ -35,9 +35,6 @@ Action::Action(Action &&a)
 
 Action::~Action() = default;
 
-float Action::weight() const {
-  return total_weight_;
-}
 
 void Action::add_process(ProcessBranch *p) {
   if (p->weight() > really_small) {
@@ -120,6 +117,27 @@ const ProcessBranch* Action::choose_channel() {
             subprocesses_.size(), " ", weight_sum, " ", total_weight_, " ",
             random_weight, "\n", *this);
   throw std::runtime_error("problem in choose_channel");
+}
+
+
+void Action::perform(Particles *particles, size_t &id_process) {
+  const auto &log = logger<LogArea::Action>();
+
+  /* Remove the initial state. */
+  for (auto &p : incoming_particles_) {
+    particles->remove(p.id());
+  }
+
+  /* Insert the final state. */
+  for (ParticleData &p : outgoing_particles_) {
+    p.set_id_process(id_process);    // store the process id
+    p.set_id(particles->add_data(p));
+  }
+
+  log.debug("Particle map now has ", particles->size(), " elements.");
+
+  check_conservation(id_process);
+  id_process++;
 }
 
 

@@ -61,7 +61,14 @@ class Action {
 
   /** Returns the total weight, which is a cross section in case of a ScatterAction
    * and a decay width in case of a DecayAction. */
-  float weight() const;
+  float weight() const {
+    return total_weight_;
+  }
+
+  /** Return the process type. */
+  ProcessBranch::ProcessType get_type() const {
+    return process_type_;
+  }
 
   /** Add a new subprocess.  */
   void add_process(ProcessBranch *p);
@@ -69,13 +76,23 @@ class Action {
   void add_processes(ProcessBranchList pv);
 
   /**
-   * Actually perform the action, e.g. carry out a decay or scattering.
+   * Generate the final state for this action.
    *
-   * This method does not do any sanity checks, but assumes that is_valid has
-   * been called to determine if the action is still valid.
+   * This function selects a subprocess by Monte-Carlo decision and sets up
+   * the final-state particles in phase space.
    */
-  virtual ProcessBranch::ProcessType perform(Particles *particles,
-                                             size_t &id_process) = 0;
+  virtual void generate_final_state() = 0;
+
+  /**
+   * Actually perform the action, e.g. carry out a decay or scattering by
+   * updating the particle list.
+   *
+   * This function removes the initial-state particles from the particle list
+   * and then inserts the final-state particles. It does not do any sanity
+   * checks, but assumes that is_valid has been called to determine if the
+   * action is still valid.
+   */
+  virtual void perform(Particles *particles, size_t &id_process);
 
   /**
    * Check whether the action still applies.
@@ -129,6 +146,8 @@ class Action {
   float time_of_execution_;
   /** sum of all subprocess weights  */
   float total_weight_;
+  /** type of process */
+  ProcessBranch::ProcessType process_type_;
 
   /// determine the total energy in the center-of-mass frame
   virtual double sqrt_s() const = 0;
@@ -182,13 +201,12 @@ class DecayAction : public Action {
    */
   DecayAction(const ParticleData &p, float time_of_execution);
 
-  /** Carry out the action, i.e. do the decay.
+  /** Generate the final state of the decay process.
    * Performs a decay of one particle to two or three particles.
    *
    * \throws InvalidDecay
    */
-  ProcessBranch::ProcessType perform(Particles *particles, size_t &id_process)
-                             override;
+  void generate_final_state() override;
 
   /**
    * \ingroup exception
@@ -252,13 +270,12 @@ class ScatterAction : public Action {
   double particle_distance() const;
 
   /**
-   * Carry out the action, i.e. do the scattering.
+   * Generate the final-state of the scattering process.
    * Performs either elastic or inelastic scattering.
    *
    * \throws InvalidResonanceFormation
    */
-  ProcessBranch::ProcessType perform(Particles *particles, size_t &id_process)
-                             override;
+ void generate_final_state() override;
 
   /**
    * Determine the (parametrized) total cross section for this collision. This
