@@ -61,34 +61,6 @@ inline double isospin_clebsch_gordan(const ParticleType &p_a,
 
 
 /**
- * Given the types of the two initial particles and a resonance,
- * return the 2-to-1 resonance production cross section.
- *
- * Checks are processed in the following order:
- * 1. Charge conservation
- * 2. Baryon number conservation
- * 3. Clebsch-Gordan
- * 4. Enough energy for all decay channels to be available for the resonance
- * 5. Detailed balance (reverse process exists)
- *
- * \param[in] particle_a First initial particle.
- * \param[in] particle_b Second initial particle.
- * \param[in] type_resonance Type information for the resonance to be produced.
- * \param[in] mandelstam_s Mandelstam-s of the collision
- * of the two initial particles.
- * \param[in] cm_momentum_squared Square of the center-of-mass momentum of the
- * two initial particles.
- *
- * \return The cross section for the process
- * [initial particle a] + [initial particle b] -> resonance.
- */
-double two_to_one_formation(const ParticleData &particle_a,
-                            const ParticleData &particle_b,
-                            const ParticleType &type_resonance,
-                            double mandelstam_s, double cm_momentum_squared);
-
-
-/**
  * Spectral function
  * \f$A(m)=\frac{1}{\pi}\frac{m\Gamma(m)}{(m^2-m_0^2)^2+(m\Gamma(m))^2}\f$
  * of the resonance.

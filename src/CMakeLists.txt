@@ -83,7 +83,6 @@ set(smash_src
         threevector.cc
         tsc.cc
         vtkoutput.cc
-        width.cc
         )
 
 if(USE_ROOT)

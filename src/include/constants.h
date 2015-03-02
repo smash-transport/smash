@@ -20,6 +20,8 @@ constexpr double really_small = 1.0e-6;
 constexpr double twopi = 2. * M_PI;
 /* Ground state density of symmetric nuclear matter, fm^-3*/
 constexpr double rho0 = 0.168;
+/* nucleon mass in GeV */
+const double mN = 0.938;
 
 }  // namespace Smash
 

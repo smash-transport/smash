@@ -14,12 +14,11 @@
 
 #include "include/angles.h"
 #include "include/constants.h"
+#include "include/kinematics.h"
 #include "include/logging.h"
 #include "include/processbranch.h"
 #include "include/random.h"
 #include "include/resonances.h"
-#include "include/width.h"
-
 
 namespace Smash {
 

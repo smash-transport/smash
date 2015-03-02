@@ -13,12 +13,13 @@
 #include "include/angles.h"
 #include "include/constants.h"
 #include "include/cxx14compat.h"
+#include "include/distributions.h"
+#include "include/kinematics.h"
 #include "include/logging.h"
 #include "include/parametrizations.h"
 #include "include/pdgcode.h"
 #include "include/random.h"
 #include "include/resonances.h"
-#include "include/width.h"
 
 namespace Smash {
 
@@ -127,18 +128,21 @@ double ScatterAction::mandelstam_s() const {
           incoming_particles_[1].momentum()).sqr();
 }
 
-
 double ScatterAction::sqrt_s() const {
   return (incoming_particles_[0].momentum() +
           incoming_particles_[1].momentum()).abs();
 }
 
+double ScatterAction::cm_momentum() const {
+  const double m1 = incoming_particles_[0].effective_mass();
+  const double m2 = incoming_particles_[1].effective_mass();
+  return pCM(sqrt_s(), m1, m2);
+}
 
 double ScatterAction::cm_momentum_squared() const {
   const double m1 = incoming_particles_[0].effective_mass();
   const double m2 = incoming_particles_[1].effective_mass();
-  const double mom = pCM(sqrt_s(), m1, m2);
-  return mom*mom;
+  return pCM_sqr(sqrt_s(), m1, m2);
 }
 
 
@@ -189,6 +193,48 @@ CollisionBranch* ScatterAction::string_excitation_cross_section() {
   return new CollisionBranch(sig_string, ProcessBranch::String);
 }
 
+
+double ScatterAction::two_to_one_formation(const ParticleType &type_resonance,
+                                           double s, double cm_momentum_sqr) {
+  const ParticleType &type_particle_a = incoming_particles_[0].type();
+  const ParticleType &type_particle_b = incoming_particles_[1].type();
+  /* Check for charge conservation. */
+  if (type_resonance.charge() != type_particle_a.charge()
+                               + type_particle_b.charge()) {
+    return 0.;
+  }
+
+  /* Check for baryon-number conservation. */
+  if (type_resonance.baryon_number() != type_particle_a.baryon_number()
+                                      + type_particle_b.baryon_number()) {
+    return 0.;
+  }
+
+  /* Calculate partial in-width. */
+  double srts = std::sqrt(s);
+  float partial_width = type_resonance.get_partial_in_width(srts,
+                                incoming_particles_[0], incoming_particles_[1]);
+  if (partial_width <= 0.) {
+    return 0.;
+  }
+
+  /* Calculate spin factor */
+  const double spinfactor = (type_resonance.spin() + 1)
+    / ((type_particle_a.spin() + 1) * (type_particle_b.spin() + 1));
+  const int sym_factor = (type_particle_a.pdgcode() ==
+                          type_particle_b.pdgcode()) ? 2 : 1;
+  float resonance_width = type_resonance.total_width(srts);
+  float resonance_mass = type_resonance.mass();
+  /* Calculate resonance production cross section
+   * using the Breit-Wigner distribution as probability amplitude.
+   * See Eq. (176) in Buss et al., Physics Reports 512, 1 (2012). */
+  return spinfactor * sym_factor * 4.0 * M_PI / cm_momentum_sqr
+         * breit_wigner(s, resonance_mass, resonance_width)
+         * partial_width/resonance_width
+         * hbarc * hbarc / fm2_mb;
+}
+
+
 ProcessBranchList ScatterAction::resonance_cross_sections() {
   const auto &log = logger<LogArea::ScatterAction>();
   ProcessBranchList resonance_process_list;
@@ -213,9 +259,7 @@ ProcessBranchList ScatterAction::resonance_cross_sections() {
       continue;
     }
 
-    float resonance_xsection = two_to_one_formation(incoming_particles_[0],
-                                                    incoming_particles_[1],
-                                                    type_resonance,
+    float resonance_xsection = two_to_one_formation(type_resonance,
                                                     s, p_cm_sqr);
 
     /* If cross section is non-negligible, add resonance to the list */
@@ -478,7 +522,7 @@ ProcessBranchList ScatterActionBaryonBaryon::nuc_nuc_to_nuc_res(
        * Based on Eq. (46) in PhD thesis of J. Weil
        * (https://gibuu.hepforge.org/trac/chrome/site/files/phd/weil.pdf) */
       float xsection = isospin_factor * isospin_factor * matrix_element
-                * resonance_integral / (s * std::sqrt(cm_momentum_squared()));
+                     * resonance_integral / (s * cm_momentum());
 
       if (xsection > really_small) {
         process_list.push_back(make_unique<CollisionBranch>
@@ -561,8 +605,8 @@ ProcessBranchList ScatterActionBaryonBaryon::nuc_res_to_nuc_nuc(
        * There is a symmetry factor 1/2 and a spin factor 2/(2S+1) involved,
        * which combine to 1/(2S+1). */
       float xsection = isospin_factor * isospin_factor
-        * p_cm_final * matrix_element
-        / ((type_resonance->spin()+1) * s * std::sqrt(cm_momentum_squared()));
+                     * p_cm_final * matrix_element
+                     / ((type_resonance->spin()+1) * s * cm_momentum());
 
       if (xsection > really_small) {
         process_list.push_back(make_unique<CollisionBranch>

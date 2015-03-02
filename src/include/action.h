@@ -303,6 +303,21 @@ class ScatterAction : public Action {
   */
   virtual ProcessBranchList resonance_cross_sections();
 
+  /**
+   * Return the 2-to-1 resonance production cross section for a given resonance.
+   *
+   * \param[in] type_resonance Type information for the resonance to be produced.
+   * \param[in] s Mandelstam-s of the collision
+   * of the two initial particles.
+   * \param[in] cm_momentum_squared Square of the center-of-mass momentum of the
+   * two initial particles.
+   *
+   * \return The cross section for the process
+   * [initial particle a] + [initial particle b] -> resonance.
+   */
+  double two_to_one_formation(const ParticleType &type_resonance,
+                              double s, double cm_momentum_sqr);
+
   /** Find all inelastic 2->2 processes for this reaction. */
   virtual ProcessBranchList two_to_two_cross_sections() {
     return ProcessBranchList();
@@ -323,6 +338,9 @@ class ScatterAction : public Action {
   /** Determine the Mandelstam s variable,
    * s = (p_a + p_b)^2 = square of CMS energy.  */
   double mandelstam_s() const;
+  /** Determine the momenta of the incoming particles in the
+   * center-of-mass system.  */
+  double cm_momentum() const;
   /** Determine the squared momenta of the incoming particles in the
    * center-of-mass system.  */
   double cm_momentum_squared() const;
