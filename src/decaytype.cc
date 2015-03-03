@@ -12,13 +12,76 @@
 #include <stdexcept>
 
 #include "include/constants.h"
+#include "include/kinematics.h"
 #include "include/logging.h"
 #include "include/resonances.h"
-#include "include/width.h"
 
 namespace Smash {
 
-// TwoBodyDecayStable
+/**
+ * Returns the squared Blatt-Weisskopf functions,
+ * which influence the mass dependence of the decay widths.
+ * See e.g. Effenberger's thesis, page 28.
+ *
+ * \param p_ab Momentum of outgoing particles A and B in center-of-mass frame.
+ * \param L Angular momentum of outgoing particles A and B.
+ */
+static float BlattWeisskopf(const float p_ab, const int L)
+#ifdef NDEBUG
+    noexcept
+#endif
+{
+  const float R = 1. / hbarc;  /* interaction radius = 1 fm */
+  const auto x = p_ab * R;
+  const auto x2 = x * x;
+  switch (L) {
+    case 0:
+      return 1.f;
+    case 1:
+      return x2 / (1.f + x2);
+    case 2: {
+      const auto x4 = x2 * x2;
+      return x4 / (9.f + 3.f * x2 + x4);
+    }
+    /* The following lines should be correct. But since nothing in SMASH uses
+     * L > 2, this code is untested and dead. Therefore we only keep it as a
+     * reference for later.
+     * See also input sanitization in load_decaymodes in decaymodes.cc.
+    case 3:
+      return x4 * x2 / (225.f + 45.f * x2 + 6.f * x4 + x4 * x2);
+    case 4:
+      return x4 * x4 /
+             (11025.f + 1575.f * x2 + 135.f * x4 + 10.f * x2 * x4 + x4 * x4);
+    */
+#ifndef NDEBUG
+    default:
+      throw std::invalid_argument(
+          std::string("Wrong angular momentum in BlattWeisskopf: ") +
+          std::to_string(L));
+#endif
+  }
+  return 0.f;
+}
+
+
+/**
+ * An additional form factor for unstable final states as used in GiBUU,
+ * according to M. Post.
+ * Reference: Buss et al., Phys. Rept. 512 (2012), eq. (174).
+ * The function returns the squared value of the form factor.
+ */
+static double Post_FF_sqr(double m, double M0, double s0, double L) {
+  const auto L4 = L*L*L*L;
+  const auto m2 = m*m;
+  const auto M2 = M0*M0;
+  double FF = (L4 + (s0-M2)*(s0-M2)/4.) /
+              (L4 + (m2-(s0+M2)/2.) * (m2-(s0+M2)/2.));
+  return FF*FF;
+}
+
+
+
+// TwoBodyDecay
 
 TwoBodyDecay::TwoBodyDecay(ParticleTypePtrList part_types, int l)
                           : DecayType(part_types, l) {
@@ -57,7 +120,7 @@ float TwoBodyDecayStable::rho(float m) const {
   const float p_ab = pCM(m, particle_types_[0]->mass(),
                             particle_types_[1]->mass());
   // determine rho(m)
-  return p_ab / m * BlattWeisskopf(p_ab*interaction_radius, L_);
+  return p_ab / m * BlattWeisskopf(p_ab, L_);
 }
 
 float TwoBodyDecayStable::width(float m0, float G0, float m) const {
@@ -117,7 +180,7 @@ static double integrand_rho_Manley(double mass, void *parameters) {
   /* center-of-mass momentum of final state particles */
   double p_f = pCM(srts, stable_mass, mass);
 
-  return p_f/srts * BlattWeisskopf(p_f*interaction_radius, ip->L) * 2.*srts
+  return p_f/srts * BlattWeisskopf(p_f, ip->L) * 2.*srts
           * spectral_function(mass, ip->type.mass(), resonance_width);
 }
 
@@ -180,7 +243,7 @@ float TwoBodyDecaySemistable::in_width(float m0, float G0, float m,
                                        float m1, float m2) const {
   double p_f = pCM(m, m1, m2);
 
-  return G0 * p_f * BlattWeisskopf(p_f*interaction_radius, L_)
+  return G0 * p_f * BlattWeisskopf(p_f, L_)
          * Post_FF_sqr(m, m0, particle_types_[0]->mass()
                               + particle_types_[1]->minimum_mass(), Lambda_)
          / (m * rho(m0));

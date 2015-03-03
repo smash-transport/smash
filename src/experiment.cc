@@ -313,15 +313,15 @@ void Experiment<Modus>::perform_actions(ActionList &actions,
     for (const auto &action : actions) {
       if (action->is_valid(particles_)) {
         const ParticleList incoming_particles = action->incoming_particles();
-
-        ProcessBranch::ProcessType process_type =
-            action->perform(&particles_, interactions_total);
+        action->generate_final_state();
+        ProcessBranch::ProcessType process_type = action->get_type();
+        log.debug("Process Type is: ", process_type);
         if (pauli_blocker_ &&
             action->is_pauliblocked(particles_, pauli_blocker_.get())) {
-          // action->undo(&particles_, interactions_total);
+          continue;
         }
-        log.debug("Process Type is: ", process_type);
         const ParticleList outgoing_particles = action->outgoing_particles();
+        action->perform(&particles_, interactions_total);
         // Calculate Eckart rest frame density at the interaction point
         const FourVector r_interaction = action->get_interaction_point();
         const double rho = four_current(r_interaction.threevec(), plist,

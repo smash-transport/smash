@@ -101,6 +101,7 @@ TEST(collision_order) {
   VERIFY(actions_3[0]->is_valid(particles))
       << "expected: first interaction is valid";
   // perform action
+  actions_3[0]->generate_final_state();
   actions_3[0]->perform(&particles, num_interactions);
 
   // second action
@@ -117,6 +118,7 @@ TEST(collision_order) {
   VERIFY(actions_3[2]->is_valid(particles))
       << "expected: third interaction is valid";
   // perform action
+  actions_3[0]->generate_final_state();
   actions_3[0]->perform(&particles, num_interactions);
 
   // final check

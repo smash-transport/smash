@@ -149,11 +149,10 @@ void DecayAction::one_to_three() {
 }
 
 
-ProcessBranch::ProcessType DecayAction::perform(Particles *particles,
-                                                size_t &id_process) {
+void DecayAction::generate_final_state() {
   const auto &log = logger<LogArea::DecayModes>();
   log.debug("Process: Resonance decay. ");
- /*
+  /*
    * Execute a decay process for the selected particle.
    *
    * Randomly select one of the decay modes of the particle
@@ -162,6 +161,8 @@ ProcessBranch::ProcessType DecayAction::perform(Particles *particles,
    */
   const ProcessBranch* proc = choose_channel();
   outgoing_particles_ = proc->particle_list();
+  process_type_ = proc->get_type();
+
   switch (outgoing_particles_.size()) {
   case 2:
     one_to_two();
@@ -185,25 +186,9 @@ ProcessBranch::ProcessType DecayAction::perform(Particles *particles,
     p.boost_momentum(-velocity_CM);
     p.set_4position(incoming_particles_[0].position());
     log.debug("particle momenta in comp ", p);
-    // store the process id in the Particle data
-    p.set_id_process(id_process);
   }
-
-  id_process++;
-
-  check_conservation(id_process);
-
-  /* Remove decayed particle */
-  particles->remove(incoming_particles_[0].id());
-  log.debug("ID ", incoming_particles_[0].id(),
-            " has decayed and removed from the list.");
-
-  for (auto &p : outgoing_particles_) {
-    p.set_id(particles->add_data(p));
-  }
-  log.debug("Particle map now has ", particles->size(), " elements.");
-  return proc->get_type();
 }
+
 
 void DecayAction::format_debug_output(std::ostream &out) const {
   out << "Decay of " << incoming_particles_ << " to " << outgoing_particles_ <<
