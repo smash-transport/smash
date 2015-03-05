@@ -196,11 +196,24 @@ void Action::check_conservation(const size_t &id_process) const {
 
   /* Check momentum conservation */
   FourVector momentum_difference;
+  /* Check charge, baryon number and strangeness conservation */
+  int charge_difference = 0; 
+  int baryon_difference = 0;
+  int strangeness_difference = 0; 
+  
   for (const auto &part : incoming_particles_) {
+	const ParticleType &type = part.type();  
     momentum_difference += part.momentum();
+    charge_difference += type.charge();
+    baryon_difference += type.baryon_number();
+    strangeness_difference += part.pdgcode().strangeness();
   }
   for (const auto &p : outgoing_particles_) {
+    const ParticleType &type = p.type();
     momentum_difference -= p.momentum();
+    charge_difference -= type.charge();
+    baryon_difference -= type.baryon_number();
+    strangeness_difference -= p.pdgcode().strangeness();
   }
 
   if (fabs(momentum_difference.x0()) > really_small) {
@@ -219,9 +232,19 @@ void Action::check_conservation(const size_t &id_process) const {
     violation = true;
     log.error("pz conservation violation ", momentum_difference.x3());
   }
-
-  // TODO(weil): check other conservation laws (charge, baryon number, etc)
-
+  if (fabs(charge_difference) > really_small) {
+	violation = true;  
+    log.error("Charge conservation violation ", charge_difference); 
+  }
+  if (fabs(baryon_difference) > really_small) {
+	violation = true;  
+    log.error("Baryon number conservation violation ", baryon_difference); 
+  }
+  if (fabs(strangeness_difference) > really_small) {
+	violation = true;  
+    log.error("Strangeness conservation violation ", strangeness_difference); 
+  }
+  
   if (violation) {
     throw std::runtime_error("Conservation laws violated in process " +
                              std::to_string(id_process));
