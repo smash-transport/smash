@@ -94,7 +94,6 @@ class QuantumNumbers {
   QuantumNumbers(const Particles &particles) {
     count_conserved_values(particles);
   }
-
   /** sum up all conserved quantities from \p particles
    *
    * (sets everything to 0 at the beginning)
@@ -111,6 +110,32 @@ class QuantumNumbers {
       charmness_     += data.pdgcode().charmness();
       bottomness_    += data.pdgcode().bottomness();
       baryon_number_ += data.pdgcode().baryon_number();
+    }
+  }
+  /** TODO: avoid code duplication with template? */
+  
+  /** Construct QuantumNumbers from a subset of Particles, from 
+   * a particle list
+   */
+  QuantumNumbers(const ParticleList &part) {
+	count_conserved_values(part);
+  }	   
+ /** sum up all conserved quantities from particle list
+   *
+   * (sets everything to 0 at the beginning)
+   */
+  void count_conserved_values(const ParticleList &part) {
+    momentum_ = FourVector(0., 0., 0., 0.);
+    charge_ = isospin3_ = strangeness_ = charmness_
+            = bottomness_ = baryon_number_ = 0;
+    for (const auto &p : part) {
+      momentum_      += p.momentum();
+      charge_        += p.pdgcode().charge();
+      isospin3_      += p.pdgcode().isospin3();
+      strangeness_   += p.pdgcode().strangeness();
+      charmness_     += p.pdgcode().charmness();
+      bottomness_    += p.pdgcode().bottomness();
+      baryon_number_ += p.pdgcode().baryon_number();
     }
   }
 

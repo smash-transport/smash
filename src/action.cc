@@ -17,6 +17,7 @@
 #include "include/kinematics.h"
 #include "include/logging.h"
 #include "include/processbranch.h"
+#include "include/quantumnumbers.h"
 #include "include/random.h"
 #include "include/resonances.h"
 
@@ -191,62 +192,16 @@ void Action::sample_cms_momenta() {
 
 
 void Action::check_conservation(const size_t &id_process) const {
-  const auto &log = logger<LogArea::Action>();
-  bool violation = false;
-
-  /* Check momentum conservation */
-  FourVector momentum_difference;
-  /* Check charge, baryon number and strangeness conservation */
-  int charge_difference = 0; 
-  int baryon_difference = 0;
-  int strangeness_difference = 0; 
+/**  const auto &log = logger<LogArea::Action>(); not used yet*/
   
-  for (const auto &part : incoming_particles_) {
-	const ParticleType &type = part.type();  
-    momentum_difference += part.momentum();
-    charge_difference += type.charge();
-    baryon_difference += type.baryon_number();
-    strangeness_difference += part.pdgcode().strangeness();
-  }
-  for (const auto &p : outgoing_particles_) {
-    const ParticleType &type = p.type();
-    momentum_difference -= p.momentum();
-    charge_difference -= type.charge();
-    baryon_difference -= type.baryon_number();
-    strangeness_difference -= p.pdgcode().strangeness();
-  }
-
-  if (fabs(momentum_difference.x0()) > really_small) {
-    violation = true;
-    log.error("E conservation violation ", momentum_difference.x0());
-  }
-  if (fabs(momentum_difference.x1()) > really_small) {
-    violation = true;
-    log.error("px conservation violation ", momentum_difference.x1());
-  }
-  if (fabs(momentum_difference.x2()) > really_small) {
-    violation = true;
-    log.error("py conservation violation ", momentum_difference.x2());
-  }
-  if (fabs(momentum_difference.x3()) > really_small) {
-    violation = true;
-    log.error("pz conservation violation ", momentum_difference.x3());
-  }
-  if (fabs(charge_difference) > really_small) {
-	violation = true;  
-    log.error("Charge conservation violation ", charge_difference); 
-  }
-  if (fabs(baryon_difference) > really_small) {
-	violation = true;  
-    log.error("Baryon number conservation violation ", baryon_difference); 
-  }
-  if (fabs(strangeness_difference) > really_small) {
-	violation = true;  
-    log.error("Strangeness conservation violation ", strangeness_difference); 
-  }
-  
-  if (violation) {
-    throw std::runtime_error("Conservation laws violated in process " +
+  QuantumNumbers before(incoming_particles_); 
+  QuantumNumbers after(outgoing_particles_);
+  /** TODO Report deviations could be in the logging structure */
+    
+  printf("%s", before.report_deviations(after).c_str());
+  if (before != after) {
+    throw std::runtime_error(before.report_deviations(after) +
+    "Conservation laws violated in process " +
                              std::to_string(id_process));
   }
 }
