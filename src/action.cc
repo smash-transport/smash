@@ -192,12 +192,12 @@ void Action::sample_cms_momenta() {
 
 
 void Action::check_conservation(const size_t &id_process) const {
-  const auto &log = logger<LogArea::Action>(); 
-  QuantumNumbers before(incoming_particles_); 
+  const auto &log = logger<LogArea::Action>();
+  QuantumNumbers before(incoming_particles_);
   QuantumNumbers after(outgoing_particles_);
   std::string err_msg = before.report_deviations(after);
   if (before != after) {
-    log.error() <<err_msg; 
+    log.error() << err_msg;
     throw std::runtime_error("Conservation laws violated in process " +
                              std::to_string(id_process));
   }

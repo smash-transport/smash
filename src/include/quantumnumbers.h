@@ -66,6 +66,7 @@ class QuantumNumbers {
           charmness_(0),
           bottomness_(0),
           baryon_number_(0) {}
+
   /** construct QuantumNumbers collection
    *
    * \param m Momentum FourVector
@@ -88,55 +89,30 @@ class QuantumNumbers {
           bottomness_(b),
           baryon_number_(B) {}
 
-  /** construct QuantumNumbers collection from the conserved quantities
-   * found in \p particles
-   */
-  QuantumNumbers(const Particles &particles) {
-    count_conserved_values(particles);
-  }
-  /** sum up all conserved quantities from \p particles
-   *
-   * (sets everything to 0 at the beginning)
-   */
-  void count_conserved_values(const Particles &particles) {
-    momentum_ = FourVector(0., 0., 0., 0.);
-    charge_ = isospin3_ = strangeness_ = charmness_
-            = bottomness_ = baryon_number_ = 0;
+  /** Construct QuantumNumbers collection from the conserved quantities
+   * found in \p particles. */
+  explicit QuantumNumbers(const Particles &particles) : QuantumNumbers() {
     for (const ParticleData &data : particles.data()) {
-      momentum_      += data.momentum();
-      charge_        += data.pdgcode().charge();
-      isospin3_      += data.pdgcode().isospin3();
-      strangeness_   += data.pdgcode().strangeness();
-      charmness_     += data.pdgcode().charmness();
-      bottomness_    += data.pdgcode().bottomness();
-      baryon_number_ += data.pdgcode().baryon_number();
+      add_values(data);
     }
   }
-  /** TODO: avoid code duplication with template? */
-  
-  /** Construct QuantumNumbers from a subset of Particles, from 
-   * a particle list
-   */
-  QuantumNumbers(const ParticleList &part) {
-	count_conserved_values(part);
-  }	   
- /** sum up all conserved quantities from particle list
-   *
-   * (sets everything to 0 at the beginning)
-   */
-  void count_conserved_values(const ParticleList &part) {
-    momentum_ = FourVector(0., 0., 0., 0.);
-    charge_ = isospin3_ = strangeness_ = charmness_
-            = bottomness_ = baryon_number_ = 0;
+
+  /** Construct QuantumNumbers collection from a particle list. */
+  explicit QuantumNumbers(const ParticleList &part) : QuantumNumbers() {
     for (const auto &p : part) {
-      momentum_      += p.momentum();
-      charge_        += p.pdgcode().charge();
-      isospin3_      += p.pdgcode().isospin3();
-      strangeness_   += p.pdgcode().strangeness();
-      charmness_     += p.pdgcode().charmness();
-      bottomness_    += p.pdgcode().bottomness();
-      baryon_number_ += p.pdgcode().baryon_number();
+      add_values(p);
     }
+  }
+
+  /* Add the quantum numbers of a single particle to the collection. */
+  void add_values(const ParticleData &p) {
+    momentum_      += p.momentum();
+    charge_        += p.pdgcode().charge();
+    isospin3_      += p.pdgcode().isospin3();
+    strangeness_   += p.pdgcode().strangeness();
+    charmness_     += p.pdgcode().charmness();
+    bottomness_    += p.pdgcode().bottomness();
+    baryon_number_ += p.pdgcode().baryon_number();
   }
 
   /** returns the total momentum four-vector \f$P^\mu = \sum_{i \in
