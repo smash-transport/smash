@@ -17,6 +17,7 @@
 #include "include/kinematics.h"
 #include "include/logging.h"
 #include "include/processbranch.h"
+#include "include/quantumnumbers.h"
 #include "include/random.h"
 #include "include/resonances.h"
 
@@ -192,37 +193,11 @@ void Action::sample_cms_momenta() {
 
 void Action::check_conservation(const size_t &id_process) const {
   const auto &log = logger<LogArea::Action>();
-  bool violation = false;
-
-  /* Check momentum conservation */
-  FourVector momentum_difference;
-  for (const auto &part : incoming_particles_) {
-    momentum_difference += part.momentum();
-  }
-  for (const auto &p : outgoing_particles_) {
-    momentum_difference -= p.momentum();
-  }
-
-  if (fabs(momentum_difference.x0()) > really_small) {
-    violation = true;
-    log.error("E conservation violation ", momentum_difference.x0());
-  }
-  if (fabs(momentum_difference.x1()) > really_small) {
-    violation = true;
-    log.error("px conservation violation ", momentum_difference.x1());
-  }
-  if (fabs(momentum_difference.x2()) > really_small) {
-    violation = true;
-    log.error("py conservation violation ", momentum_difference.x2());
-  }
-  if (fabs(momentum_difference.x3()) > really_small) {
-    violation = true;
-    log.error("pz conservation violation ", momentum_difference.x3());
-  }
-
-  // TODO(weil): check other conservation laws (charge, baryon number, etc)
-
-  if (violation) {
+  QuantumNumbers before(incoming_particles_);
+  QuantumNumbers after(outgoing_particles_);
+  std::string err_msg = before.report_deviations(after);
+  if (before != after) {
+    log.error() << err_msg;
     throw std::runtime_error("Conservation laws violated in process " +
                              std::to_string(id_process));
   }
