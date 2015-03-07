@@ -20,7 +20,7 @@ namespace Smash {
 PauliBlocker::PauliBlocker(Configuration conf, const ExperimentParameters &param)
     : sig_(param.gaussian_sigma),
       rc_(conf.take({"Gaussian_Cutoff"}, 2.2)),
-      rr_(conf.take({"Spacial_Averaging_Radius"}, 1.86)),
+      rr_(conf.take({"Spatial_Averaging_Radius"}, 1.86)),
       rp_(conf.take({"Momentum_Averaging_Radius"}, 0.08)),
       ntest_(param.testparticles) {
 
@@ -62,8 +62,8 @@ float PauliBlocker::phasespace_dens(const ThreeVector r, const ThreeVector p,
       continue;
     }
     rdist_sqr = (part.position().threevec() - r).sqr();
-    // Only consider coordinates in sphere of radius rr_ with center at r
-    if (rdist_sqr > rr_*rr_) {
+    // Only consider coordinates in sphere of radius rr_+rc_ with center at r
+    if (rdist_sqr > (rr_+rc_)*(rr_+rc_)) {
       continue;
     }
     // 0th order interpolation using tabulated values
@@ -102,8 +102,8 @@ void PauliBlocker::init_weights() {
 
   // Running variables of integration
   float rdist, r, cos_theta;
-  // |vec(r) - vec(rdist)|
-  float distance;
+  // |vec(r) - vec(rdist)|^2
+  float distance_sqr;
   // integration result
   float integral;
 
@@ -117,9 +117,9 @@ void PauliBlocker::init_weights() {
       for (auto m = 0; m < steps_r; m++) {
         // integral over r = 0 ... rr_ (position cut)
         r = (m + 0.5) * dr;
-        distance = std::sqrt(r*r + rdist*rdist - 2.*r*rdist*cos_theta);
-        if (distance < rc_) {
-          integral += r*r * std::exp(- distance*distance/2./sig_/sig_);
+        distance_sqr = r*r + rdist*rdist - 2.*r*rdist*cos_theta;
+        if (distance_sqr < rc_*rc_) {
+          integral += r*r * std::exp(- distance_sqr/2./sig_/sig_);
         }
       }
     }

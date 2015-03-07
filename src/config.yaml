@@ -77,17 +77,17 @@ Collision_Term:
     # elastic cross section, mb (= 0.1 fm^2)
     Sigma:         10.0
     Pauli_Blocking:
-        Spacial_Averaging_Radius:   1.86
+        Spatial_Averaging_Radius:   1.86
         Momentum_Averaging_Radius:  0.08
         Gaussian_Cutoff:            2.2
 
-Potentials:
-    Skyrme:
-        Skyrme_A: -209.2
-        Skyrme_B: 156.4
-        Skyrme_Tau: 1.35
-    Symmetry:
-        S_Pot: 18.0
+#Potentials:
+#    Skyrme:
+#        Skyrme_A: -209.2
+#        Skyrme_B: 156.4
+#        Skyrme_Tau: 1.35
+#    Symmetry:
+#        S_Pot: 18.0
 
 Modi:
     Box:
