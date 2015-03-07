@@ -37,8 +37,22 @@ PauliBlocker::PauliBlocker(Configuration conf, const ExperimentParameters &param
    * Radius [GeV/c] of sphere for averaging in the momentum space
    */
 
-  init_weights();
+  const auto &log = logger<LogArea::PauliBlocking>();
 
+  if (ntest_ < 20) {
+    log.error("Phase-space density calculation in Pauli blocking"
+              " will not work reasonably for small number of testparticles."
+              " Recommended number of testparticles is 200.");
+  }
+
+  if (rc_ < rr_ || rr_ < 0.0 || rp_ < 0) {
+    log.error("Please choose reasonable parameters for Pauli blocking:"
+              "All radii have to be positive and Gaussian_Cutoff should"
+              "be larger than Spatial_Averaging_Radius");
+  }
+
+  init_weights();
+  init_weights_analytical();
 }
 
 PauliBlocker::~PauliBlocker() {
@@ -75,12 +89,6 @@ float PauliBlocker::phasespace_dens(const ThreeVector r, const ThreeVector p,
 
 void PauliBlocker::init_weights() {
   const auto &log = logger<LogArea::PauliBlocking>();
-
-  if (ntest_ < 20) {
-    log.error("Phase-space density calculation in Pauli blocking"
-              " will not work reasonably for small number of testparticles."
-              " Recommended number of testparticles is 200.");
-  }
 
   // Number of integration steps for radial integration
   const int steps_r = 2000;
@@ -125,7 +133,50 @@ void PauliBlocker::init_weights() {
     }
     integral *= 2.*M_PI*d_cos_theta*dr / std::pow(2.*M_PI*sig_*sig_, 3./2.);
     weights_[k] = integral / norm / phase_volume;
-    log.debug("Weights[",k,"] = ", weights_[k]);
+    log.debug("Numerical weights[",k,"] = ", weights_[k]);
+  }
+}
+
+void PauliBlocker::init_weights_analytical() {
+  const auto &log = logger<LogArea::PauliBlocking>();
+
+  // Volume of the phase-space area; Factor 2 stands for spin.
+  const float phase_volume = 2. * (4./3.*M_PI*rr_*rr_*rr_) *
+                                  (4./3.*M_PI*rp_*rp_*rp_) /
+                                  ((2*M_PI*hbarc)*(2*M_PI*hbarc)*(2*M_PI*hbarc));
+  // Analytical expression for integral in denominator
+  const float norm = std::erf(rc_/std::sqrt(2)/sig_) -
+                     rc_* std::sqrt(2./M_PI) / sig_ * std::exp(-rc_*rc_/2./sig_/sig_);
+
+  float rj, integral;
+  // Step of the table for tabulated integral
+  const float d_pos = (rr_ + rc_) / static_cast<float>(weights_.size());
+
+  for (size_t k = 0; k < weights_.size(); k++) {
+    // rdist = 0 ... rc_ (gauss cut) + rr_ (position cut)
+    rj = d_pos * k;
+    if (rj < really_small) {
+      // Assuming rc_ > rr_
+      const float A = rr_/std::sqrt(2.0)/sig_;
+      integral = std::sqrt(2.0*M_PI)*sig_*std::erf(A) - 2.0*rr_*std::exp(-A*A);
+      integral *= sig_*sig_;
+    } else if (rc_ > rj + rr_) {
+      const float A = (rj+rr_)/std::sqrt(2.0)/sig_;
+      const float B = (rj-rr_)/std::sqrt(2.0)/sig_;
+      integral = sig_ / rj * (std::exp(-A*A) - std::exp(-B*B)) +
+                 std::sqrt(M_PI/2.0)*(std::erf(A) - std::erf(B));
+      integral *= sig_*sig_*sig_;
+    } else {
+      const float A = rc_/std::sqrt(2.0)/sig_;
+      const float B = (rj-rr_)/std::sqrt(2.0)/sig_;
+      const float C = (rc_-rj)*(rc_-rj) - rr_*rr_ + 2.0*sig_*sig_;
+      integral = (0.5*std::exp(-A*A)*C - sig_*sig_*std::exp(-B*B)) / rj +
+                 std::sqrt(M_PI/2.0)*sig_*(std::erf(A) - std::erf(B));
+      integral *= sig_*sig_;
+    }
+    integral *= 2.*M_PI / std::pow(2.*M_PI*sig_*sig_, 3./2.);
+    weights_[k] = integral / norm / phase_volume;
+    log.debug("Analytical weights[",k,"] = ", weights_[k]);
   }
 }
 

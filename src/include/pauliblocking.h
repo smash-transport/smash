@@ -47,6 +47,9 @@ class PauliBlocker {
   // Tabulate integrals for weights
   void init_weights();
 
+  // Analytical calculation of weights
+  void init_weights_analytical();
+
   // Sigma of the gaussian used for smearing
   float sig_;
 
