@@ -27,13 +27,13 @@ PauliBlocker::PauliBlocker(Configuration conf, const ExperimentParameters &param
   /*!\Userguide
    * \page potentials PauliBlocker
    *
-   * \key Rr (float, optional, default = 1.86): \n
+   * \key Spatial_Averaging_Radius (float, optional, default = 1.86): \n
    * Radius [fm] of sphere for averaging in the coordinate space
    *
-   * \key Rc (float, optional, default = 2.2): \n
+   * \key Gaussian_Cutoff (float, optional, default = 2.2): \n
    * Radius [fm] at which gaussians used for smoothing are cut
    *
-   * \key Rp (float, optional, default = 0.08): \n
+   * \key Momentum_Averaging_Radius (float, optional, default = 0.08): \n
    * Radius [GeV/c] of sphere for averaging in the momentum space
    */
 
@@ -51,7 +51,6 @@ PauliBlocker::PauliBlocker(Configuration conf, const ExperimentParameters &param
               "be larger than Spatial_Averaging_Radius");
   }
 
-  init_weights();
   init_weights_analytical();
 }
 
