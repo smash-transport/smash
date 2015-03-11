@@ -304,7 +304,7 @@ static std::string format_measurements(const Particles &particles,
 
 template <typename Modus>
 void Experiment<Modus>::perform_actions(ActionList &actions,
-                                        size_t &interactions_total) {
+                     size_t &interactions_total, size_t &total_pauliblocked) {
   const auto &log = logger<LogArea::Experiment>();
   // Particle list before all actions will be used for density calculation
   const ParticleList plist = ParticleList(particles_.data().begin(),
@@ -318,6 +318,7 @@ void Experiment<Modus>::perform_actions(ActionList &actions,
         log.debug("Process Type is: ", process_type);
         if (pauli_blocker_ &&
             action->is_pauliblocked(particles_, pauli_blocker_.get())) {
+            total_pauliblocked++;
           continue;
         }
         const ParticleList outgoing_particles = action->outgoing_particles();
@@ -352,7 +353,7 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
   const auto &log = logger<LogArea::Experiment>();
   modus_.sanity_check(&particles_);
   size_t interactions_total = 0, previous_interactions_total = 0,
-         interactions_this_interval = 0;
+         interactions_this_interval = 0, total_pauliblocked = 0;
   log.info() << format_measurements(
       particles_, interactions_total, interactions_this_interval,
       conserved_initial_, time_start_, parameters_.labclock.current_time());
@@ -386,7 +387,7 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
               [](const ActionPtr &a, const ActionPtr &b) { return *a < *b; });
 
     /* (2) Perform actions. */
-    perform_actions(actions, interactions_total);
+    perform_actions(actions, interactions_total, total_pauliblocked);
     modus_.sanity_check(&particles_);
 
     /* (3) Do propagation. */
@@ -421,6 +422,11 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
     }
   }
 
+  if (pauli_blocker_) {
+    log.info("Collisions: pauliblocked/total = ", total_pauliblocked, "/",
+                                                        interactions_total);
+  }
+
   if (force_decays_) {
     // at end of time evolution: force all resonances to decay
     size_t interactions_old;
@@ -433,7 +439,7 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
             ParticleList{particles_.data().begin(), particles_.data().end()});
       }
       /* Perform actions. */
-      perform_actions(actions, interactions_total);
+      perform_actions(actions, interactions_total, total_pauliblocked);
       // loop until no more decays occur
     } while (interactions_total > interactions_old);
 

@@ -64,7 +64,7 @@ TEST(phase_space_density_nucleus) {
 
   // Gold nuclei with 1000 test-particles
   std::map<PdgCode, int> lead_list = {{0x2212, 79}, {0x2112, 118}};
-  int Ntest = 2000;
+  int Ntest = 100;
   Nucleus Au;
   Au.fill_from_list(lead_list, Ntest);
   Au.set_parameters_automatic();
