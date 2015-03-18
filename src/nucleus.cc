@@ -329,7 +329,7 @@ void Nucleus::generate_fermi_momenta() {
   log.debug() << N_n << " neutrons, " << N_p << " protons.";
 
   for (auto i = begin(); i != end(); i++) {
-    if (i->pdgcode() != 0x2212 && i->pdgcode() != 0x2112) {
+    if (i->is_baryon() && i->pdgcode() != 0x2212 && i->pdgcode() != 0x2112) {
       log.error() << "No rule to calculate Fermi momentum " <<
                      "for particle " << i->pdgcode();
       continue;
