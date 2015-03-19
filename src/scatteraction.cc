@@ -200,6 +200,7 @@ CollisionBranchPtr ScatterAction::elastic_cross_section(float elast_par) {
 }
 
 CollisionBranchPtr ScatterAction::string_excitation_cross_section() {
+  const auto &log = logger<LogArea::ScatterAction>();
   /* Calculate string-excitation cross section:
    * Parametrized total minus all other present channels. */
   float sig_string = std::max(0.f, total_cross_section() - total_weight_);
