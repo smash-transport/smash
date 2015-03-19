@@ -10,7 +10,8 @@ Logging:
   #Action: ALL
   #FindScatter: ALL
   #DecayModes: ALL
-  #ScatterAction: ALL
+  ScatterAction: ALL
+  Pythia: ALL
 
 General:
     # Modus decision
