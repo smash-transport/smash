@@ -100,6 +100,7 @@ DECLARE_LOGAREA(16, Grid);
 DECLARE_LOGAREA(17, List);    // ListModus
 DECLARE_LOGAREA(18, Nucleus);
 DECLARE_LOGAREA(19, DecayType);
+DECLARE_LOGAREA(20, Density);
 
 /// This type collects all existing log areas so they will be created with the
 /// correct log level automatically.
@@ -107,7 +108,7 @@ using AreaTuple = std::tuple<Main, Experiment, Box, Collider, Sphere, Action,
                              InputParser, ParticleType, FindScatter, Legacy,
                              Clock, DecayModes, Resonances, ScatterAction,
                              Distributions, ModusDefault, Grid, List, Nucleus,
-                             DecayType>;
+                             DecayType, Density>;
 }  // namespace LogArea
 
 /**

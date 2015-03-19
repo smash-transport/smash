@@ -9,6 +9,7 @@
 
 #include "include/constants.h"
 #include "include/density.h"
+#include "include/logging.h"
 
 namespace Smash {
 
@@ -70,6 +71,8 @@ FourVector four_current(const ThreeVector &r, const ParticleList &plist,
 std::pair<double, ThreeVector> rho_eckart_gradient(const ThreeVector &r,
                                 const ParticleList &plist, double gs_sigma,
                                 Density_type dens_type, int ntest) {
+  const auto &log = logger<LogArea::Density>();
+
   // baryon four-current in computational frame
   FourVector jmu(0.0, 0.0, 0.0, 0.0);
   // derivatives of baryon four-current in computational frame
@@ -108,7 +111,13 @@ std::pair<double, ThreeVector> rho_eckart_gradient(const ThreeVector &r,
     default:
       break;
     }
+    log.debug("Summand to jmu: ", FourVector(1., betai) * tmp2, "² = ",
+              (FourVector(1., betai) * tmp2).sqr(), "\n      with jmu: ", jmu,
+              "² = ", jmu.sqr());
     jmu += FourVector(1., betai) * tmp2;
+    if (jmu.sqr() < 0.) {
+      log.debug("negative jmu²: ", jmu.sqr(), ", jmu = ", jmu);
+    }
 
     // Calculate the gradient: d(0.5 * r_rest^2)/d \vec{r}
     const ThreeVector drest2_dr = dr_rest + betai * ((dr_rest * betai) / tmp1);
@@ -125,9 +134,12 @@ std::pair<double, ThreeVector> rho_eckart_gradient(const ThreeVector &r,
   djmu_dz /= norm2;
 
   // Eckart rest frame density
-  const double rho = jmu.abs();
-
-  // std::cout << "Dens: " << jmu << " " << djmu_dz << std::endl;
+  const double rho2 = jmu.sqr();
+  // Due to numerical reasons it can happen that rho2 is (slighly) smaller than
+  // zero, while analytically it should be positive. Negative values can be
+  // reached only for numerical reasons and are thus small. Therefore, forced
+  // nullification is justified in this case.
+  const double rho = (rho2 > 0.0) ? std::sqrt(rho2) : 0.0;
 
   // Eckart rest frame density and its gradient
   if (fabs(rho) > really_small) {
