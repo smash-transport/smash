@@ -35,6 +35,9 @@ namespace Smash {
 *
 * \key Isotropic (bool, optional, default = false) \n
 * Do all collisions isotropically.
+* \key Strings (bool, optional, default = true): \n
+* true - string excitation is enabled\n
+* false - string excitation is disabled
 */
 
 ScatterActionsFinder::ScatterActionsFinder(
@@ -52,6 +55,10 @@ ScatterActionsFinder::ScatterActionsFinder(
              " using ", elastic_parameter_, " mb as maximal cross-section.");
   }
 }
+
+    /* Read in switch to turn off strings. */
+      strings_switch_(config.take({"Collision_Term", "Strings"}, false)) {}
+	   
 
 ScatterActionsFinder::ScatterActionsFinder(
     float elastic_parameter, int testparticles)
@@ -129,6 +136,10 @@ ActionPtr ScatterActionsFinder::check_collision(
 
   /* Add various subprocesses.  */
   act->add_all_processes(elastic_parameter_, two_to_one_, two_to_two_);
+  /* (4) string excitation */
+  if (strings_switch_) {
+    act->add_process(act->string_excitation_cross_section());
+  }
 
   /* distance criterion according to cross_section */
   if (distance_squared >= act->cross_section() * fm2_mb * M_1_PI
@@ -136,6 +147,7 @@ ActionPtr ScatterActionsFinder::check_collision(
                           * data_b.cross_section_scaling_factor()
                           / static_cast<float>(testparticles_)) {
     return nullptr;
+  
   }
 
 #ifndef NDEBUG

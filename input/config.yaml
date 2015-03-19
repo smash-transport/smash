@@ -90,6 +90,7 @@ Output:
 Collision_Term:
     Two_to_One:             True
     Two_to_Two:             True
+    Strings:	   			True
     Force_Decays_At_End:    True
     Isotropic:              False
     Elastic_Cross_Section:  -1.0  # Globally used if non-negative, [mb]
