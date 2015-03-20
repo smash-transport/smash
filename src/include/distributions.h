@@ -42,6 +42,7 @@ double density_integrand(const double energy, const double momentum,
 /** samples a momentum from the Maxwell-Boltzmann distribution
  *
  * \todo rename this function to make clear what it is
+ *
  * \see density_integrand
  * \param[in] temperature Temperature \f$T\f$
  * \param[in] mass Mass of the particle: \f$m = \sqrt{E^2 - p^2}\f$
