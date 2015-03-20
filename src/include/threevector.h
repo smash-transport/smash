@@ -24,6 +24,18 @@ namespace Smash {
  * It is related to the classes FourVector and Angles,
  * both of which can be converted into a ThreeVector using
  * the 'threevec()' method.
+ *
+ * \fpPrecision
+ * \li The \c ThreeVector class, like the \ref FourVector class, uses \c double
+ * for storage, calculations, and in the interface. This is necessary because
+ * most particles are close to light speed and thus the low-order bits in the
+ * mantissa of the momentum make large differences in energy. If they are
+ * discarded by rounding to single-precision, e.g. boosting to/from the
+ * center-of-mass frame breaks.
+ * \li It might be sufficient for \c ThreeVector of other quantities to use
+ * single-precision, though. This could be implemented by making \c ThreeVector a
+ * class template and use \c ThreeVector<double> for momenta and \c
+ * ThreeVector<float> for the rest.
  */
 class ThreeVector {
  public:

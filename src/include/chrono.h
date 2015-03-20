@@ -11,6 +11,13 @@
 
 namespace Smash {
 using SystemTimePoint = std::chrono::time_point<std::chrono::system_clock>;
+/**
+ * The time duration type used for measuring run times.
+ *
+ * \fpPrecision Why \c double? I (Matthias) think the representation should use
+ * the same type as SystemClock uses. I.e. have SystemTimeSpan =
+ * SystemClock::duration.
+ */
 using SystemTimeSpan  = std::chrono::duration<double>;
 using SystemClock     = std::chrono::system_clock;
 }

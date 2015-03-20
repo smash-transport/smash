@@ -43,6 +43,7 @@ class DeformedNucleus : public Nucleus {
 
   /** Return the deformed Woods-Saxon probability for the given position.
    *
+   * \fpPrecision
    * Double-precision is used for safety, no effort was made to check whether
    * single-precision works.
    *
