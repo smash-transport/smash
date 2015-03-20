@@ -1,3 +1,9 @@
+#############################################################
+# Cmake code to integrate Pythia contributed by 
+# K. Gallmeister, Goethe University, March 2015
+# <gallmei@th.physik.uni-frankfurt.de>
+###########################################################
+
 # Try to find a Pythia 8.x installation
 #
 # Relies on info given by the executable 'pythia8-config'
