@@ -201,12 +201,9 @@ class CollisionBranch : public ProcessBranch {
   /**
    * List of particles appearing in this process outcome.
    *
-   * \todo Is there a maximum to the number of particles? If not, a std::vector
-   * is fine, otherwise (I assume 4 may be a useful limit?) switch to
-   * std::array<int, 4>. std::vector<int> stores one size_t and one pointer,
-   * which is as big as 4 ints. And then there's still the data of the vector
-   * which is somewhere on the heap. Also the alignment of ints is only half
-   * that of size_t/void*. (I was obviously talking about 64bit here...)
+   * \note This currently uses a std::vector and thus works for any number of
+   * particles. But this number is bounded (4?) and a std::array may therefore
+   * be more efficient.
    */
   ParticleTypePtrList particle_types_;
   /// Process type internal variable
