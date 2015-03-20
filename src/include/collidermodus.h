@@ -106,6 +106,8 @@ class ColliderModus : public ModusDefault {
    * Each nucleus is shifted so that
    * the outermost particle on the side facing the other nucleus is at
    * \f$\pm\f$ this value.
+   *
+   * \fpPrecision Why \c double?
    **/
   double initial_z_displacement_ = 1.0;
   /** Reference frame for the system.
@@ -126,6 +128,8 @@ class ColliderModus : public ModusDefault {
    * @param m_a The mass of the projectile.
    * @param m_b The mass of the target.
    * @return < v_a, v_b > Velocities of the nuclei.
+   *
+   * \fpPrecision Why \c double?
    **/
   std::pair<double, double> get_velocities(float mandelstam_s,
                                            float m_a, float m_b);

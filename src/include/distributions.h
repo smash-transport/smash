@@ -22,6 +22,8 @@ namespace Smash {
  * \param[in] resonance_width resonance width in GeV
  *
  * \return \f$\frac{s \Gamma^2}{(s-m^2)^2 + s\Gamma^2}\f$
+ *
+ * \fpPrecision Why \c double?
  */
 float breit_wigner(const double mandelstam_s, const float resonance_mass,
                     const float resonance_width);
@@ -35,6 +37,8 @@ float breit_wigner(const double mandelstam_s, const float resonance_mass,
  * \param[in] temperature \f$T\f$ (in GeV)
  *
  * \return \f$4\pi p^2 \exp{-\frac{E}{T}}\f$
+ *
+ * \fpPrecision Why \c double?
  */
 double density_integrand(const double energy, const double momentum,
                          const double temperature);
@@ -48,6 +52,8 @@ double density_integrand(const double energy, const double momentum,
  * \param[in] mass Mass of the particle: \f$m = \sqrt{E^2 - p^2}\f$
  *
  * \return one possible momentum between mass and 50 GeV
+ *
+ * \fpPrecision Why \c double?
  */
 double sample_momenta(const double temperature, const double mass);
 
@@ -63,6 +69,8 @@ double sample_momenta(const double temperature, const double mass);
  * \return \f$\frac{1}{2\pi^2} m^2 T K_2\left(\frac{m}{T}\right)\f$
  *
  * where \f$K_2\f$ is the modified Bessel function of the second kind.
+ *
+ * \fpPrecision Why \c double?
  */
 inline double number_density_maxwellboltzmann(double mass, double temperature) {
   return mass * mass * temperature * gsl_sf_bessel_Knu(2, mass / temperature)

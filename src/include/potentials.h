@@ -46,6 +46,8 @@ class Potentials {
    *            point r, \f$ |r-r_i| > 6 \sigma \f$ then particle input
    *            to density will be ignored.
    * \param[in] acts_on pdg code of particle on which potential is going to act
+   *
+   * \fpPrecision Why \c double?
    **/
   VIRTUAL_FOR_TESTS
   double potential(const ThreeVector &r, const ParticleList &plist,
@@ -76,13 +78,19 @@ class Potentials {
   // Number of test particles
   int ntest_;
 
-  // sigma of gaussian smearing
+  /** sigma of gaussian smearing
+   * \fpPrecision Why \c double?
+   */
   double sigma_;
 
-  // Parameters of skyrme potentials
+  /** Parameters of skyrme potentials
+   * \fpPrecision Why \c double?
+   */
   double skyrme_a_, skyrme_b_, skyrme_tau_;
 
-  // Parameters of symmetry potential
+  /** Parameters of symmetry potential
+   * \fpPrecision Why \c double?
+   */
   double symmetry_s_;
 };
 

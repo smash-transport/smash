@@ -47,7 +47,10 @@ T pCM_sqr(const T srts, const T mass_a, const T mass_b) noexcept {
 }
 
 
-/** Convert mandelstam-s to p_lab in a nucleon-nucleon collision. */
+/** Convert mandelstam-s to p_lab in a nucleon-nucleon collision.
+ *
+ * \fpPrecision Why \c double?
+ */
 inline double plab_from_s_NN(double mandelstam_s) {
   const double mNsqr = mN*mN;
   return std::sqrt((mandelstam_s - 2*mNsqr) * (mandelstam_s - 2*mNsqr)
@@ -55,17 +58,25 @@ inline double plab_from_s_NN(double mandelstam_s) {
 }
 
 
-/* Convert E_kin to mandelstam-s for a fixed-target setup,
+/**
+ * Convert E_kin to mandelstam-s for a fixed-target setup,
  * with a projectile of mass m_P and a kinetic energy e_kin
- * and a target of mass m_T at rest. */
+ * and a target of mass m_T at rest.
+ *
+ * \fpPrecision Why \c double?
+ */
 inline double s_from_Ekin(double e_kin, double m_P, double m_T) {
   return m_P*m_P + m_T*m_T + 2 * m_T * (m_P + e_kin);
 }
 
 
-/* Convert p_lab to mandelstam-s for a fixed-target setup,
+/**
+ * Convert p_lab to mandelstam-s for a fixed-target setup,
  * with a projectile of mass m_P and momentum plab
- * and a target of mass m_T at rest. */
+ * and a target of mass m_T at rest.
+ *
+ * \fpPrecision Why \c double?
+ */
 inline double s_from_plab(double plab, double m_P, double m_T) {
   return m_P*m_P + m_T*m_T + 2 * m_T * std::sqrt(m_P*m_P + plab*plab);
 }

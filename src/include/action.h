@@ -150,6 +150,7 @@ class Action {
   ProcessBranch::ProcessType process_type_;
 
   /// determine the total energy in the center-of-mass frame
+  /// \fpPrecision Why \c double?
   virtual double sqrt_s() const = 0;
 
   /**
@@ -266,6 +267,8 @@ class ScatterAction : public Action {
   /**
    * Measure distance between incoming particles in center-of-momentum frame.
    * Returns the squared distance.
+   *
+   * \fpPrecision Why \c double?
    */
   double particle_distance() const;
 
@@ -331,6 +334,8 @@ class ScatterAction : public Action {
    *
    * \return The cross section for the process
    * [initial particle a] + [initial particle b] -> resonance.
+   *
+   * \fpPrecision Why \c double?
    */
   double two_to_one_formation(const ParticleType &type_resonance,
                               double s, double cm_momentum_sqr);
@@ -353,13 +358,20 @@ class ScatterAction : public Action {
 
  protected:
   /** Determine the Mandelstam s variable,
-   * s = (p_a + p_b)^2 = square of CMS energy.  */
+   * s = (p_a + p_b)^2 = square of CMS energy.
+   *
+   * \fpPrecision Why \c double?
+   */
   double mandelstam_s() const;
   /** Determine the momenta of the incoming particles in the
-   * center-of-mass system.  */
+   * center-of-mass system.
+   * \fpPrecision Why \c double?
+   */
   double cm_momentum() const;
   /** Determine the squared momenta of the incoming particles in the
-   * center-of-mass system.  */
+   * center-of-mass system.
+   * \fpPrecision Why \c double?
+   */
   double cm_momentum_squared() const;
 
   /**

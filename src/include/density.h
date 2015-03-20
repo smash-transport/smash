@@ -54,6 +54,8 @@ namespace Smash {
    * \param[in] dens_type type of four-currect to be calculated:
    *            baryon, proton or neutron options are currently available
    * \param[in] ntest Number of test-particles
+   *
+   * \fpPrecision Why \c double?
    */
   FourVector four_current(const ThreeVector &r, const ParticleList &plist,
                           double gs_sigma, Density_type dens_type, int ntest);
@@ -65,6 +67,8 @@ namespace Smash {
    *  The formula \f$ j^{\mu}(\vec r) \f$ itself is given for the
    *  four_current function. Input parameters are the same that for
    *  four_current function.
+   *
+   * \fpPrecision Why \c double?
    */
   std::pair<double, ThreeVector> rho_eckart_gradient(const ThreeVector &r,
                                const ParticleList &plist, double gs_sigma,

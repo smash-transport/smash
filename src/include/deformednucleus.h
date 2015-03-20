@@ -31,6 +31,8 @@ namespace Smash {
  * All options from the nucleus will still apply. The deformed nucleus adds new or updated
  * features which are outlined below.
  *
+ * \fpPrecision Why \c double?
+ *
  * The following deformed nucleus directives are understood:
  * -------------
  */

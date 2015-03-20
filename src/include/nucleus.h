@@ -89,6 +89,8 @@ class Nucleus {
    *
    * @param beta_scalar magnitude (with sign) of the z
    * component velocity used for boosting.
+   *
+   * \fpPrecision Why \c double?
    **/
   void boost(double beta_scalar);
 
@@ -128,6 +130,8 @@ class Nucleus {
    * setting).
    *
    * @param simulation_time set the time of each particle to this value.
+   *
+   * \fpPrecision Why \c double?
    **/
   void shift(bool is_projectile, double initial_z_displacement,
                      double x_offset, float simulation_time);

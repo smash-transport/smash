@@ -51,6 +51,8 @@ class OutputInterface {
    *                          performed.
    * \param outgoing_particles   The list of particles after the Action was
    *                          performed.
+   *
+   * \fpPrecision Why \c double?
    */
   virtual void at_interaction(const ParticleList &incoming_particles,
                               const ParticleList &outgoing_particles,
