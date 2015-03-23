@@ -155,8 +155,9 @@ int main(int argc, char *argv[]) {
     bool force_overwrite = false;
     bf::path output_path = default_output_path(),
              input_path("./config.yaml");
-    char *config = nullptr, *particles = nullptr, *decaymodes = nullptr,
-         *modus = nullptr, *end_time = nullptr;
+    std::vector<std::string> extra_config;
+    char *particles = nullptr, *decaymodes = nullptr, *modus = nullptr,
+         *end_time = nullptr;
 
     /* parse command-line arguments */
     int opt;
@@ -164,7 +165,7 @@ int main(int argc, char *argv[]) {
                               nullptr)) != -1) {
       switch (opt) {
         case 'c':
-          config = optarg;
+          extra_config.emplace_back(optarg);
           break;
         case 'd':
           decaymodes = optarg;
@@ -204,8 +205,9 @@ int main(int argc, char *argv[]) {
     /* read in config file */
     Configuration configuration(input_path.parent_path(),
                                 input_path.filename());
-    if (config)
+    for (const auto &config : extra_config) {
       configuration.merge_yaml(config);
+    }
     if (particles)
       configuration["particles"] = read_all(bf::ifstream{particles});
     if (decaymodes)
