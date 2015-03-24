@@ -137,8 +137,9 @@ std::pair<double, ThreeVector> rho_eckart_gradient(const ThreeVector &r,
   const double rho2 = jmu.sqr();
   // Due to numerical reasons it can happen that rho2 is (slighly) smaller than
   // zero, while analytically it should be positive. Negative values can be
-  // reached only for numerical reasons and are thus small. Therefore, forced
-  // nullification is justified in this case.
+  // reached only for numerical reasons and are thus small. Therefore I(oliiny)
+  // set rho to zero if rho is negative. This is done under the assumption that
+  // discarding small jmu^2 values doesn't introduce a bias.
   const double rho = (rho2 > 0.0) ? std::sqrt(rho2) : 0.0;
 
   // Eckart rest frame density and its gradient
