@@ -46,7 +46,10 @@ struct ExperimentParameters {
   const float output_interval;
   /// number of test particle
   int testparticles;
-  /// width if gaussian Wigner density of particles
+  /** width if gaussian Wigner density of particles
+   *
+   * \fpPrecision Why \c double?
+   */
   double gaussian_sigma;
 };
 

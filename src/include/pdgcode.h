@@ -270,11 +270,7 @@ class PdgCode {
    */
   float isospin3_rel() const {
     unsigned int I = isospin_total();
-    if (I == 0) {
-      return 0;
-    } else {
-      return static_cast<float>(isospin3())/I;
-    }
+    return (I == 0) ? 0 : static_cast<float>(isospin3())/I;
   }
   /** returns the net number of \f$\bar s\f$ quarks.
    *

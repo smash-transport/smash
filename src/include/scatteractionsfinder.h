@@ -29,7 +29,10 @@ class ScatterActionsFinder : public ActionFinderInterface {
                        const ExperimentParameters &parameters);
   ScatterActionsFinder(float elastic_parameter, int testparticles);
 
-  /** Determine the collision time of the two particles. */
+  /** Determine the collision time of the two particles.
+   *
+   * \fpPrecision Why \c double?
+   */
   static double collision_time(const ParticleData &p_a,
                                const ParticleData &p_b);
   /** Check the whole particle list for collisions

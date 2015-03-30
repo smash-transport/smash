@@ -31,6 +31,8 @@ namespace Smash {
  * All options from the nucleus will still apply. The deformed nucleus adds new or updated
  * features which are outlined below.
  *
+ * \fpPrecision Why \c double?
+ *
  * The following deformed nucleus directives are understood:
  * -------------
  */
@@ -41,6 +43,7 @@ class DeformedNucleus : public Nucleus {
 
   /** Return the deformed Woods-Saxon probability for the given position.
    *
+   * \fpPrecision
    * Double-precision is used for safety, no effort was made to check whether
    * single-precision works.
    *

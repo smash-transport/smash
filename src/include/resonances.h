@@ -25,9 +25,13 @@ namespace Smash {
 struct IntegrandParameters {
   /// Type of the resonance
   ParticleTypePtr type;
-  /// Mass of second particle
+  /** Mass of second particle
+   * \fpPrecision Why \c double?
+   */
   double m2;
-  /// Mandelstam s
+  /** Mandelstam s
+   * \fpPrecision Why \c double?
+   */
   double s;
 };
 
@@ -36,13 +40,19 @@ struct IntegrandParameters {
  *
  * \f$(-1)^{j_a - j_b + m_c} \sqrt(2 j_c + 1) \cdot [Wigner 3J symbol] \f$
  * Note that the calculation assumes that the spin/isospin values (j/m)
- * have been multiplied by two (in order to be integer). */
+ * have been multiplied by two (in order to be integer).
+ *
+ * \fpPrecision Why \c double?
+ */
 double clebsch_gordan(const int j_a, const int j_b, const int j_c,
                       const int m_a, const int m_b, const int m_c);
 
 
 /* Calculate isospin Clebsch-Gordan coefficient for two particles p_a and p_b
- * coupling to a total isospin (I_tot, I_z). */
+ * coupling to a total isospin (I_tot, I_z).
+ *
+ * \fpPrecision Why \c double?
+ */
 inline double isospin_clebsch_gordan(const ParticleType &p_a,
                                      const ParticleType &p_b,
                                      const int I_tot, const int I_z) {
@@ -51,7 +61,10 @@ inline double isospin_clebsch_gordan(const ParticleType &p_a,
 }
 
 /* Calculate isospin Clebsch-Gordan coefficient for two particles p_a and p_b
- * coupling to a resonance Res. */
+ * coupling to a resonance Res.
+ *
+ * \fpPrecision Why \c double?
+ */
 inline double isospin_clebsch_gordan(const ParticleType &p_a,
                                      const ParticleType &p_b,
                                      const ParticleType &Res) {
@@ -64,6 +77,8 @@ inline double isospin_clebsch_gordan(const ParticleType &p_a,
  * Spectral function
  * \f$A(m)=\frac{1}{\pi}\frac{m\Gamma(m)}{(m^2-m_0^2)^2+(m\Gamma(m))^2}\f$
  * of the resonance.
+ *
+ * \fpPrecision Why \c double?
  */
 double spectral_function(double resonance_mass, double resonance_pole,
                          double resonance_width);
@@ -80,6 +95,8 @@ double spectral_function(double resonance_mass, double resonance_pole,
  * by the spectral function: Width of the resonance,
  * pole mass of the resonance, mass of the stable particle in the final state
  * and mandelstam-s of the process.
+ *
+ * \fpPrecision Why \c double?
  */
 double spectral_function_integrand(double resonance_mass, void * parameters);
 
@@ -92,6 +109,8 @@ double spectral_function_integrand(double resonance_mass, void * parameters);
  * \param[in] cms_energy center-of-mass energy of the 2-particle final state.
  *
  * \return The mass of the resonance particle.
+ *
+ * \fpPrecision Why \c double?
  */
 float sample_resonance_mass(const ParticleType &type_resonance,
                             const ParticleType &type_stable,
@@ -107,6 +126,8 @@ float sample_resonance_mass(const ParticleType &type_resonance,
  * \param[in] upper_limit Upper limit of the integral.
  * \param[out] integral_value Result of integration.
  * \param[out] integral_error Uncertainty of the result.
+ *
+ * \fpPrecision Why \c double?
  */
 void quadrature_1d(double (*integrand_function)(double, void *),
                           IntegrandParameters *parameters, double lower_limit,

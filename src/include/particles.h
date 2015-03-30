@@ -188,7 +188,12 @@ class Particles {
   inline bool empty(void) const;
   /// check the existence of an element in the ParticleData map
   inline bool has_data(int id) const;
-  /// return time of the computational frame
+  /** return time of the computational frame
+   *
+   * \return computation time which is reduced by the start up time
+   *
+   * \fpPrecision Why \c double?
+   */
   inline double time(void) const;
 
   /// \ingroup exception
@@ -283,7 +288,6 @@ inline bool Particles::has_data(int id) const {
   return data_.find(id) != data_.end();
 }
 
-/* return computation time which is reduced by the start up time */
 inline double Particles::time() const {
   return data_.begin()->second.position().x0();
 }

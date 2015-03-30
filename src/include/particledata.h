@@ -59,8 +59,21 @@ class ParticleData {
   inline void set_id_process(const int id);
   inline const FourVector &momentum(void) const;
   inline void set_4momentum(const FourVector &momentum_vector);
+  /**
+   * Set the momentum of the particle.
+   *
+   * \fpPrecision The momentum FourVector requires double-precision.
+   */
   inline void set_4momentum(double mass, const ThreeVector &mom);
+  /**
+   * Set the momentum of the particle.
+   *
+   * \fpPrecision The momentum FourVector requires double-precision.
+   */
   inline void set_4momentum(double mass, double px, double py, double pz);
+  /**
+   * Set the momentum of the particle without modifying the currently set mass.
+   */
   inline void set_3momentum(const ThreeVector &mom);
   inline const FourVector &position(void) const;
   inline void set_4position(const FourVector &pos);
@@ -79,6 +92,10 @@ class ParticleData {
    * This functions is more efficient than calculating the gamma factor from
    * \ref velocity, since the \ref velocity function must execute three
    * divisions (for every space component of the momentum vector).
+   *
+   * \fpPrecision This function must use double-precision for the calculation of
+   * \f$ \beta \f$ and \f$ 1-\beta \f$ as the latter results in a value close to
+   * zero and thus exhibits catastrophic cancelation.
    */
   double inverse_gamma() const {
     return std::sqrt(1. -

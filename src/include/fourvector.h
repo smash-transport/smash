@@ -29,6 +29,17 @@ namespace Smash {
  * a copy of it's result. + and friends are non-members, while
  * the compound assignment counterparts, changing the left
  * argument, are a member of the FourVector class.
+ *
+ * \fpPrecision
+ * \li The \c FourVector class uses \c double for storage, calculations, and in
+ * the interface. This is necessary because most particles are close to light
+ * speed and thus the low-order bits in the mantissa of the momentum make large
+ * differences in energy. If they are discarded by rounding to single-precision,
+ * e.g. boosting to/from the center-of-mass frame breaks. \n
+ * \li It might be sufficient for \c FourVectors of other quantities to use
+ * single-precision, though. This could be implemented by making \c FourVector a
+ * class template and use \c FourVector<double> for momenta and \c
+ * FourVector<float> for the rest.
  */
 class FourVector {
  public:

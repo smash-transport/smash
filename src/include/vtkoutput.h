@@ -39,6 +39,8 @@ class VtkOutput : public OutputInterface {
   /** Prints 3D density map in vtk format on a grid [-nx;nx]x[-ny;ny]x[-nz;nz]
    *  with steps dx, dy, dz. This allows to look at density profiles and
    *  make easy plots.
+   *
+   * \fpPrecision Why \c double?
    */
   void vtk_density_map(const char * file_name, const ParticleList &plist,
                       double gs_sigma, Density_type dens_type, int ntest,
