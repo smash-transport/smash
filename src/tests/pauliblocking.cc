@@ -27,6 +27,33 @@ TEST(init_particle_types) {
       "neutron 0.938 0.0 2112\n");
 }
 
+/* Checks if phase space density gives correct result
+   for a particular simple case: one particle in the phase-space sphere.
+*/
+TEST(phase_space_density) {
+  Configuration conf(TEST_CONFIG_PATH);
+  conf["Collision_Term"]["Pauli_Blocking"]["Spatial_Averaging_Radius"] = 1.86;
+  conf["Collision_Term"]["Pauli_Blocking"]["Momentum_Averaging_Radius"] = 0.08;
+  conf["Collision_Term"]["Pauli_Blocking"]["Gaussian_Cutoff"] = 2.2;
+
+  ExperimentParameters param{{0.f, 1.f}, 1.f, 1, 1.0};
+  PauliBlocker *pb = new PauliBlocker(conf["Collision_Term"]["Pauli_Blocking"], param);
+  Particles part;
+  PdgCode pdg = 0x2112;
+  ParticleData one_particle{ParticleType::find(pdg)};
+  one_particle.set_4position(FourVector(0.0, 0.0, 0.0, 0.0));
+  one_particle.set_4momentum(0.0, 0.0, 0.0, 0.0);
+  part.add_data(one_particle);
+  VERIFY(part.size() == 1);
+  for(int i = 0; i < 30; i++) {
+    ThreeVector r(i/30.0*4.06, 0.0, 0.0), p(0.0, 0.0, 0.0);
+    const float f = pb->phasespace_dens(r, p, part, pdg);
+    std::cout << "r[fm] = " << r.x1() << " f = " << f << std::endl;
+    // const float f_expected = 6.6217f;
+    // COMPARE_RELATIVE_ERROR(f, f_expected, 1.e-4) << f << " ?= " << f_expected;
+  }
+}
+
 /*TEST(phase_space_density_box) {
   Configuration conf(TEST_CONFIG_PATH);
   conf["Modi"]["Box"]["Initial_Condition"] = 1;

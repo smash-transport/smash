@@ -112,7 +112,7 @@ class Action {
    *  denotes phase-space density at the position of i-th final-state
    *  fermion.
    */
-  bool is_pauliblocked(const Particles &, const PauliBlocker *) const;
+  bool is_pauli_blocked(const Particles &, const PauliBlocker &) const;
 
   /**
    * Return the list of particles that go into the interaction.
