@@ -201,6 +201,7 @@ ALIASES                = "NucleusModus=Smash::NucleusModus" \
                          "SphereModus=Smash::SphereModus" \
                          "BoxModus=Smash::BoxModus" \
                          "ColliderModus=Smash::ColliderModus" \
+                         "ListModus=Smash::ListModus" \
                          "fpPrecision=\xrefitem float_precision \"Floating-Point Precision\" \"Floating-Point Precision\"" \
                          "key=\c" \
                          "Userguide=" \

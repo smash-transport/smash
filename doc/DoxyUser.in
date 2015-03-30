@@ -201,6 +201,7 @@ ALIASES                = "NucleusModus=input_modi_nucleus_" \
                          "SphereModus=input_modi_sphere_" \
                          "BoxModus=input_modi_box_" \
                          "ColliderModus=input_modi_collider_" \
+                         "ListModus=input_modi_list_" \
                          "fpPrecision=\par Floating-Point Precision" \
                          "key=\c" \
                          "Userguide="
