@@ -53,16 +53,66 @@ namespace {
  * the exit status is EXIT_FAIL.
  */
 void usage(const int rc, const std::string &progname) {
+  /*!\Userguide
+   * \page page_smash_invocation SMASH Invocation
+   *
+   * SMASH can be run simply by executing the binary without any options (i.e.
+   * there are no required arguments). It does require an input file, though
+   * (see \ref inputoptions).
+   * Per default, the input file is expected in the current working directory
+   * with the name '`config.yaml`'.
+   *
+   * The following options are supported:
+   *
+   * <table>
+   * <tr><th>Short&nbsp;Variant <th>Long&nbsp;Variant <th>Documentation
+   * <tr><td>`-h` <td>`--help`
+   * <td>Prints usage information and quits the program.
+   * <tr><td>`-v` <td>`--version`
+   * <td>Prints the version of SMASH and quits the program.
+   * <tr><td>`-i <file>` <td>`--inputfile <file>`
+   * <td>Overrides the location of the default '`config.yaml`' input file. The
+   *     input settings will be read from the specified file instead.
+   * <tr><td>`-d <file>` <td>`--decaymodes <file>`
+   * <td>The default decay modes are compiled in. With this argument you can
+   *     override the decay modes to the exact set defined in the file. Multiple
+   *     `-d` arguments are not supported.
+   * <tr><td>`-p <file>` <td>`--particles <file>`
+   * <td>The default particle data is compiled in. With this argument you can
+   *     override the particles to the exact set defined in the file. Multiple
+   *     `-p` arguments are not supported.
+   * <tr><td>`-c <YAML string>` <td>`--config <YAML string>`
+   * <td>The string argument to `-c` containts YAML markup to override input
+   *     options from the input file (`-i`). Multiple `-c` arguments are
+   *     supported. (Later settings may override preceding settings.) This can
+   *     be a handy way to test different scenarios from a script.
+   * <tr><td>`-m <modus>` <td>`--modus <modus>`
+   * <td>This is a shortcut for `-c 'General: { Modus: <modus> }'`. Note that
+   *     `-m` always overrides `-c`.
+   * <tr><td>`-e <time>` <td>`--endtime <time>`
+   * <td>This is a shortcut for -c 'General: { End_Time: <time> }'. Note that
+   *     `-e` always overrides `-c`.
+   * <tr><td>`-o <dir>` <td>`--output <dir>`
+   * <td>Sets the output directory. The default output directory is
+   *     `./data/<runid>`, where `<rundid>` is an automatically incrementing
+   *     integer.
+   * <tr><td>`-f` <td>`--force`
+   * <td>Forces overwriting files in the output directory. Normally, if you
+   *     specifiy an output directory with `-o`, the directory must be empty.
+   *     With `-f` this check is skipped.
+   * </table>
+   */
   printf("\nUsage: %s [option]\n\n", progname.c_str());
   printf("Calculate transport box\n"
     "  -h, --help              usage information\n"
     "\n"
-    "  -i, --inputfile <file>  path to input configuration file "
-                               "(default: ./config.yaml)\n"
+    "  -i, --inputfile <file>  path to input configuration file\n"
+    "                          (default: ./config.yaml)\n"
     "  -d, --decaymodes <file> override default decay modes from file\n"
     "  -p, --particles <file>  override default particles from file\n"
     "\n"
     "  -c, --config <YAML>     specify config value overrides\n"
+    "                          (multiple -c arguments are supported)\n"
     "  -m, --modus <modus>     shortcut for -c 'General: { Modus: <modus> }'\n"
     "  -e, --endtime <time>    shortcut for -c 'General: { End_Time: <time> }'"
     "\n"
