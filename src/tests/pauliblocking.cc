@@ -45,13 +45,10 @@ TEST(phase_space_density) {
   one_particle.set_4momentum(0.0, 0.0, 0.0, 0.0);
   part.add_data(one_particle);
   VERIFY(part.size() == 1);
-  for(int i = 0; i < 30; i++) {
-    ThreeVector r(i/30.0*4.06, 0.0, 0.0), p(0.0, 0.0, 0.0);
-    const float f = pb->phasespace_dens(r, p, part, pdg);
-    std::cout << "r[fm] = " << r.x1() << " f = " << f << std::endl;
-    // const float f_expected = 6.6217f;
-    // COMPARE_RELATIVE_ERROR(f, f_expected, 1.e-4) << f << " ?= " << f_expected;
-  }
+  ThreeVector r(1.218, 0.0, 0.0), p(0.0, 0.0, 0.0);
+  const float f = pb->phasespace_dens(r, p, part, pdg);
+  const float f_expected = 9.12726f;
+  COMPARE_RELATIVE_ERROR(f, f_expected, 1.e-3) << f << " ?= " << f_expected;
 }
 
 /*TEST(phase_space_density_box) {

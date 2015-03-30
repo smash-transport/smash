@@ -98,7 +98,7 @@ void PauliBlocker::init_weights_analytical() {
                                  ((2*pi*hbarc)*(2*pi*hbarc)*(2*pi*hbarc));
   // Analytical expression for integral in denominator
   const float norm = std::erf(rc_/sqrt2/sig_) -
-            rc_* 0.5f*sqrt_2pi / sig_ * std::exp(-0.5f*rc_*rc_/sig_/sig_);
+            rc_* 2 / sqrt_2pi / sig_ * std::exp(-0.5f*rc_*rc_/sig_/sig_);
 
   float rj, integral;
   // Step of the table for tabulated integral
