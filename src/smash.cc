@@ -90,7 +90,7 @@ void usage(const int rc, const std::string &progname) {
    * <td>This is a shortcut for `-c 'General: { Modus: <modus> }'`. Note that
    *     `-m` always overrides `-c`.
    * <tr><td>`-e <time>` <td>`--endtime <time>`
-   * <td>This is a shortcut for -c 'General: { End_Time: <time> }'. Note that
+   * <td>This is a shortcut for `-c 'General: { End_Time: <time> }'`. Note that
    *     `-e` always overrides `-c`.
    * <tr><td>`-o <dir>` <td>`--output <dir>`
    * <td>Sets the output directory. The default output directory is
