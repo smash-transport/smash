@@ -13,7 +13,7 @@
 
 #include "../include/particledata.h"
 #include "../include/pdgcode.h"
-#include "../include/action.h"
+#include "../include/scatteraction.h"
 #include "../include/scatteractionsfinder.h"
 
 using namespace Smash;

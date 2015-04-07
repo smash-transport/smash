@@ -7,9 +7,8 @@
  *
  */
 
-#include <memory>
+#include "include/scatteraction.h"
 
-#include "include/action.h"
 #include "include/angles.h"
 #include "include/constants.h"
 #include "include/cxx14compat.h"

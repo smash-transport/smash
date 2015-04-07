@@ -9,7 +9,6 @@
 
 #include "include/scatteractionsfinder.h"
 
-#include "include/action.h"
 #include "include/configuration.h"
 #include "include/constants.h"
 #include "include/cxx14compat.h"
@@ -18,6 +17,7 @@
 #include "include/macros.h"
 #include "include/particles.h"
 #include "include/resonances.h"
+#include "include/scatteraction.h"
 
 namespace Smash {
 /*!\Userguide

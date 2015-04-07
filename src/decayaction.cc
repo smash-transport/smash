@@ -7,7 +7,7 @@
  *
  */
 
-#include "include/action.h"
+#include "include/decayaction.h"
 
 #include "include/angles.h"
 #include "include/decaymodes.h"
