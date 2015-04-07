@@ -62,7 +62,7 @@ float PauliBlocker::phasespace_dens(const ThreeVector r, const ThreeVector p,
 
   float f = 0.0;
   float rdist_sqr, pdist_sqr;
-  int index;
+  size_t index;
 
   // TODO(oliiny): looping over all particles is inefficient,
   // I need only particles within rp_ radius in momentum and
@@ -84,7 +84,9 @@ float PauliBlocker::phasespace_dens(const ThreeVector r, const ThreeVector p,
     }
     // 0th order interpolation using tabulated values
     index = std::round(std::sqrt(rdist_sqr) / (rr_ + rc_) * weights_.size());
-    f += weights_[index];
+    if (likely(index < weights_.size())) {
+      f += weights_.at(index);
+    }
   }
   return f / ntest_;
 };
