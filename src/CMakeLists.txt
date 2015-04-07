@@ -78,6 +78,9 @@ set(smash_src
         random.cc
         resonances.cc
         scatteraction.cc
+        scatteractionbaryonbaryon.cc
+        scatteractionbaryonmeson.cc
+        scatteractionmesonmeson.cc
         scatteractionsfinder.cc
         spheremodus.cc
         stringfunctions.cc

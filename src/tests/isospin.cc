@@ -11,7 +11,7 @@
 
 #include "../include/particledata.h"
 #include "../include/decaymodes.h"
-#include "../include/scatteraction.h"
+#include "../include/scatteractionbaryonbaryon.h"
 
 namespace particles_txt {
 #include <particles.txt.h>

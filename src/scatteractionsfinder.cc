@@ -18,6 +18,9 @@
 #include "include/particles.h"
 #include "include/resonances.h"
 #include "include/scatteraction.h"
+#include "include/scatteractionbaryonbaryon.h"
+#include "include/scatteractionbaryonmeson.h"
+#include "include/scatteractionmesonmeson.h"
 
 namespace Smash {
 /*!\Userguide
