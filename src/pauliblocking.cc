@@ -40,9 +40,9 @@ PauliBlocker::PauliBlocker(Configuration conf, const ExperimentParameters &param
   const auto &log = logger<LogArea::PauliBlocking>();
 
   if (ntest_ < 20) {
-    log.error("Phase-space density calculation in Pauli blocking"
-              " will not work reasonably for small number of testparticles."
-              " Recommended number of testparticles is 200.");
+    log.warn("Phase-space density calculation in Pauli blocking"
+             " will not work reasonably for small number of testparticles."
+             " Recommended number of testparticles is 200.");
   }
 
   if (rc_ < rr_ || rr_ < 0.0 || rp_ < 0) {

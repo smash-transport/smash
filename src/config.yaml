@@ -76,10 +76,10 @@ Collision_Term:
     Force_Decays_At_End:  True
     # elastic cross section, mb (= 0.1 fm^2)
     Sigma:         10.0
-    Pauli_Blocking:
-        Spatial_Averaging_Radius:   1.86
-        Momentum_Averaging_Radius:  0.08
-        Gaussian_Cutoff:            2.2
+#    Pauli_Blocking:
+#        Spatial_Averaging_Radius:   1.86
+#        Momentum_Averaging_Radius:  0.08
+#        Gaussian_Cutoff:            2.2
 
 #Potentials:
 #    Skyrme:
