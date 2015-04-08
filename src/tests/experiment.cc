@@ -8,42 +8,24 @@
  */
 
 #include "unittest.h"
-
-#include "../include/experiment.h"
-#include "../include/configuration.h"
-
-#include <boost/filesystem.hpp>
-
-namespace particles_txt {
-#include <particles.txt.h>
-}
+#include "setup.h"
 
 using namespace Smash;
 
-TEST(init_particle_types) {
-  ParticleType::create_type_list(particles_txt::data);
-}
+TEST(init_particle_types) { Test::create_actual_particletypes(); }
 
 TEST(create_box) {
-  Configuration conf(TEST_CONFIG_PATH);
-  conf["General"]["Modus"] = "Box";
-  VERIFY(!!ExperimentBase::create(conf));
+  VERIFY(!!Test::experiment("General: {Modus: Box}"));
 }
 
 TEST(create_collider) {
-  Configuration conf(TEST_CONFIG_PATH);
-  conf["General"]["Modus"] = "Collider";
-  VERIFY(!!ExperimentBase::create(conf));
+  VERIFY(!!Test::experiment("General: {Modus: Collider}"));
 }
 
 TEST(create_sphere) {
-  Configuration conf(TEST_CONFIG_PATH);
-  conf["General"]["Modus"] = "Sphere";
-  VERIFY(!!ExperimentBase::create(conf));
+  VERIFY(!!Test::experiment("General: {Modus: Sphere}"));
 }
 
 TEST_CATCH(create_invalid, ExperimentBase::InvalidModusRequest) {
-  Configuration conf(TEST_CONFIG_PATH);
-  conf["General"]["Modus"] = "Invalid";
-  ExperimentBase::create(conf);
+  Test::experiment("General: {Modus: Invalid}");
 }
