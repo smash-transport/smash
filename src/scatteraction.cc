@@ -255,9 +255,7 @@ void ScatterAction::momenta_exchange() {
   /* Determine absolute momentum in center-of-mass frame. */
   const double momentum_radial = cm_momentum();
 
-  /* Particle exchange momenta and scatter to random direction.
-   * TODO: Angles should be sampled from differential cross section
-   * of this process. */
+  /* Particles exchange momenta and scatter to random direction (isotropically). */
   Angles phitheta;
   phitheta.distribute_isotropically();
   log.debug("Random momentum: ", momentum_radial, " ", phitheta);

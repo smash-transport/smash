@@ -37,6 +37,10 @@ class ScatterActionNucleonNucleon : public ScatterActionBaryonBaryon {
   /** Find all inelastic 2->2 processes for this reaction. */
   ProcessBranchList two_to_two_cross_sections() override;
 
+ protected:
+  /** Perform an elastic two-body scattering with anisotropic angular distributions. */
+  virtual void momenta_exchange() override;
+
  private:
   /**
    * Calculate cross sections for single-resonance production from
@@ -44,8 +48,8 @@ class ScatterActionNucleonNucleon : public ScatterActionBaryonBaryon {
    *
    * Checks are processed in the following order:
    * 1. Charge conservation
-   * 3. Isospin factors (Clebsch-Gordan)
-   * 4. Enough energy for all decay channels to be available for the resonance
+   * 2. Isospin factors (Clebsch-Gordan)
+   * 3. Enough energy for all decay channels to be available for the resonance
    *
    * \param[in] type_particle1 Type information of the first incoming nucleon.
    * \param[in] type_particle2 Type information of the second incoming nucleon.

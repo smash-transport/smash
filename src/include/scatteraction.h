@@ -141,6 +141,11 @@ class ScatterAction : public Action {
    * \fpPrecision Why \c double?
    */
   double cm_momentum_squared() const;
+  /// determine the velocity of the center-of-mass frame in the lab
+  ThreeVector beta_cm() const;
+
+  /** Perform an elastic two-body scattering, i.e. just exchange momentum. */
+  virtual void momenta_exchange();
 
   /**
    * \ingroup logging
@@ -149,14 +154,8 @@ class ScatterAction : public Action {
   void format_debug_output(std::ostream &out) const override;
 
  private:
-  /// determine the velocity of the center-of-mass frame in the lab
-  ThreeVector beta_cm() const;
-
   /** Check if the scattering is elastic. */
   bool is_elastic() const;
-
-  /** Perform an elastic two-body scattering, i.e. just exchange momentum. */
-  void momenta_exchange();
 
   /** Perform a 2->1 resonance-formation process. */
   void resonance_formation();

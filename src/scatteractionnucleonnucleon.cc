@@ -10,7 +10,9 @@
 #include "include/scatteractionnucleonnucleon.h"
 
 #include "include/cxx14compat.h"
+#include "include/kinematics.h"
 #include "include/parametrizations.h"
+#include "include/random.h"
 #include "include/resonances.h"
 
 namespace Smash {
@@ -42,6 +44,117 @@ CollisionBranch* ScatterActionNucleonNucleon::elastic_cross_section(float) {
       << pdg_b.spin() << " " << sig_el << " " << s;
     throw std::runtime_error(ss.str());
   }
+}
+
+
+/**
+ * Computes the B coefficients from the Cugnon parametrization of the angular
+ * distribution in elastic pp scattering, see equ. (8) in:
+ * J. Cugnon et al., Nucl. Instr. and Meth. in Phys. Res. B 111 (1996) 215-220.
+ * \param[in] plab Lab momentum in GeV.
+ */
+static float Cugnon_bpp(float plab) {
+  if (plab < 2.) {
+    float p8 = std::pow(plab, 8);
+    return 5.5*p8 / (7.7+p8);
+  } else {
+    return 5.334 + 0.67*(plab-2.);
+  }
+}
+
+
+/**
+ * Computes the B coefficients from the Cugnon parametrization of the angular
+ * distribution in elastic np scattering, see equ. (10) in:
+ * J. Cugnon et al., Nucl. Instr. and Meth. in Phys. Res. B 111 (1996) 215-220.
+ * \param[in] plab Lab momentum in GeV.
+ */
+static float Cugnon_bnp(float plab) {
+  if (plab < 0.225) {
+    return 0.;
+  } else if (plab < 0.6) {
+    return 16.53*(plab-0.225);
+  } else if (plab < 1.6) {
+    return -1.63*plab + 7.16;
+  } else {
+    return Cugnon_bpp(plab);
+  }
+}
+
+
+void ScatterActionNucleonNucleon::momenta_exchange() {
+  const auto &log = logger<LogArea::ScatterAction>();
+  outgoing_particles_[0] = incoming_particles_[0];
+  outgoing_particles_[1] = incoming_particles_[1];
+
+  /* Determine absolute momentum in center-of-mass frame. */
+  const double momentum_radial = cm_momentum();
+
+  /* Choose angular distribution according to Cugnon parametrization, see:
+   * J. Cugnon et al., Nucl. Instr. and Meth. in Phys. Res. B 111 (1996) 215-220. */
+  double bb, a;
+  double plab = plab_from_s_NN(mandelstam_s());
+  if (incoming_particles_[0].type().charge() +
+      incoming_particles_[1].type().charge() == 1) {
+    // pn
+    bb = std::max(Cugnon_bnp(plab), really_small);
+    if (plab < 0.8) {
+      a = 1.;
+    } else {
+      a = 0.64/(plab*plab);
+    }
+  } else {
+    // pp or nn
+    bb = std::max(Cugnon_bpp(plab), really_small);
+    a = 1.;
+  }
+  double ta = -4.*momentum_radial*momentum_radial;
+  double t;
+  if (Random::canonical() <= 1./(1.+a)) {
+    t = Random::expo(bb, 0., ta);
+  } else {
+    t = ta - Random::expo(bb, 0., ta);
+  }
+  double c1 = 1. - 2.*t/ta;                       // cos(phi_1)
+  double s1 = std::sqrt(std::max(1.-c1*c1, 0.));  // sin(phi_1)
+  double t1 = 2.*M_PI*Random::canonical();        // theta_1
+  double ct1 = cos(t1);                           // cos(theta_1)
+  double st1 = sin(t1);                           // sin(theta_1)
+
+  // 3-momentum of first incoming particle in center-of-mass frame
+  ThreeVector pcm = incoming_particles_[0].momentum().
+                    LorentzBoost(beta_cm()).threevec();
+
+  double c2 = pcm.x3()/pcm.abs();                 // cos(phi_2)
+  double s2 = std::sqrt(std::max(1.-c2*c2, 0.));  // sin(phi_2)
+  double t2;                                      // theta_2
+  if (std::abs(pcm.x1()) < really_small && std::abs(pcm.x2()) < really_small) {
+    t2 = 0.;
+  } else {
+    t2 = std::atan2(pcm.x2(), pcm.x1());
+  }
+  double ct2 = cos(t2);                           // cos(theta_2)
+  double st2 = sin(t2);                           // sin(theta_2)
+  double ss = c2*s1*ct1 + s2*c1;
+
+  ThreeVector pscatt;
+  pscatt[0] = ss*ct2 - s1*st1*st2;
+  pscatt[1] = ss*st2 + s1*st1*ct2;
+  pscatt[2] = c1*c2  - s1*s2*ct1;
+
+  if (std::abs(pscatt.abs()-1.) > 1E-6) {
+    log.error("pscatt not normalized: ", pscatt.abs());
+  }
+
+  /* Set 4-momentum: Masses stay the same, 3-momentum changes. */
+  outgoing_particles_[0].set_4momentum(outgoing_particles_[0].effective_mass(),
+                                       pscatt * momentum_radial);
+  outgoing_particles_[1].set_4momentum(outgoing_particles_[1].effective_mass(),
+                                       - pscatt * momentum_radial);
+
+  /* debug output */
+  log.debug("exchanged momenta a", outgoing_particles_[0].momentum());
+  log.debug("exchanged momenta b", outgoing_particles_[1].momentum());
 }
 
 
