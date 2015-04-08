@@ -142,7 +142,7 @@ class ParticleType {
    *
    * \param m Invariant mass of the decaying particle.
    */
-  ProcessBranchList get_partial_widths(const float m) const;
+  DecayBranchList get_partial_widths(const float m) const;
 
   /**
    * Get the mass-dependent partial in-width of a resonance with mass m,

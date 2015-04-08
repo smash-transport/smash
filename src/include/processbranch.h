@@ -16,6 +16,24 @@
 
 namespace Smash {
 
+/** Process Types are used to identify the type of the process,
+ * currently we have 7 of these:
+ * (0) nothing (None)
+ * (1) elastic (Elastic)
+ * (2) resonance formation (2->1) (TwoToOne)
+ * (3) 2->2 (inelastic) (TwoToTwo)
+ * (4) string excitation (String)
+ * (5) resonance decays (Decay)
+ * (6) Wall transition (Wall)*/
+enum class ProcessType {
+  None = 0,
+  Elastic = 1,
+  TwoToOne = 2,
+  TwoToTwo = 3,
+  String = 4,
+  Decay = 5,
+  Wall = 6
+};
 
 /**
  * \ingroup data
@@ -45,24 +63,6 @@ namespace Smash {
  */
 class ProcessBranch {
  public:
- /** Process Types are used to identify the type of the process, 
-   * currently we have 7 of these: 
-   * (0) nothing (None)
-   * (1) elastic (Elastic)
-   * (2) resonance formation (2->1) (TwoToOne) 
-   * (3) 2->2 (inelastic) (TwoToTwo)
-   * (4) string excitation (String)
-   * (5) resonance decays (Decay) 
-   * (6) Wall transition (Wall)*/  
-  enum ProcessType {
-    None = 0,
-    Elastic = 1,
-    TwoToOne = 2,
-    TwoToTwo = 3,
-    String = 4,
-    Decay = 5,
-    Wall = 6
-  };
   /// Create a ProcessBranch without final states
   ProcessBranch() : branch_weight_(0.) {}
   ProcessBranch(float w) : branch_weight_(w) {}
@@ -134,7 +134,8 @@ inline float ProcessBranch::weight(void) const {
  * Calculates the total weight by summing all weights of the ProcessBranch
  * objects in the list \p l.
  */
-inline float total_weight(const ProcessBranchList &l) {
+template<typename Branch>
+inline float total_weight(const ProcessBranchList<Branch>& l) {
   float sum = 0.f;
   for (const auto &p : l) {
     sum += p->weight();
@@ -238,7 +239,7 @@ class DecayBranch : public ProcessBranch {
   }
   /// Return the process type
   inline ProcessType get_type(void) const override {
-    return ProcessBranch::Decay;
+    return ProcessType::Decay;
   }
   /// Clear all information from the branch
   inline void clear(void) {

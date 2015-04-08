@@ -198,7 +198,7 @@ void OscarOutput<Format, Contents>::at_interaction(
     const ParticleList &outgoing_particles,
     const double density,
     const double total_cross_section,
-    const ProcessBranch::ProcessType process_type) {
+    const ProcessType process_type) {
   if (Contents & OscarInteractions) {
     if (Format == OscarFormat2013) {
       fprintf(file_.get(),

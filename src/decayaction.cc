@@ -18,7 +18,11 @@
 namespace Smash {
 
 DecayAction::DecayAction(const ParticleData &p, float time_of_execution)
-    : Action({p}, time_of_execution) {
+    : Action({p}, time_of_execution),
+      total_width_(0.) {}
+
+void DecayAction::add_decays(DecayBranchList pv) {
+  add_processes<DecayBranch>(std::move(pv), decay_channels_, total_width_);
 }
 
 double DecayAction::sqrt_s() const {
@@ -30,7 +34,6 @@ void DecayAction::one_to_two() {
   /* Sample the masses and momenta. */
   sample_cms_momenta();
 }
-
 
 void DecayAction::one_to_three() {
   const auto &log = logger<LogArea::DecayModes>();
@@ -159,7 +162,8 @@ void DecayAction::generate_final_state() {
    * according to their relative weights. Then decay the particle
    * by calling function one_to_two or one_to_three.
    */
-  const ProcessBranch* proc = choose_channel();
+  const DecayBranch* proc = choose_channel<DecayBranch>(
+      decay_channels_, total_width_);
   outgoing_particles_ = proc->particle_list();
   process_type_ = proc->get_type();
 
@@ -187,6 +191,10 @@ void DecayAction::generate_final_state() {
     p.set_4position(incoming_particles_[0].position());
     log.debug("particle momenta in comp ", p);
   }
+}
+
+float DecayAction::raw_weight_value() const {
+  return total_width_;
 }
 
 

@@ -31,14 +31,14 @@ TEST(init_particle_types) {
 
 static ScatterAction* set_up_action(const ParticleData &proj,
                                     const ParticleData &targ,
-                                    ProcessBranchList &proc_list) {
+                                    CollisionBranchList &proc_list) {
   ScatterAction *act = new ScatterActionBaryonBaryon(proj, targ, 0.);
   proc_list = act->two_to_two_cross_sections();
 //   act->add_processes(proc_list);
 
   printf("%s+ %s, sqrt(s) = %f GeV, sigma = %f mb, %lu Channels \n",
          proj.type().name().c_str(), targ.type().name().c_str(),
-         act->sqrt_s(), act->weight(), proc_list.size());
+         act->sqrt_s(), act->cross_section(), proc_list.size());
 
   for (auto &proc: proc_list) {
     printf("-> %s %s (%f mb) \n", proc->particle_list()[0].pdgcode().string().c_str(),
@@ -63,7 +63,7 @@ TEST(NN_NDelta) {
   p2.set_4momentum(proton->mass(), 0., 0., -ptot);
 
   ScatterAction *act_pp, *act_pn, *act_np;
-  ProcessBranchList proc_list_pp, proc_list_pn, proc_list_np;
+  CollisionBranchList proc_list_pp, proc_list_pn, proc_list_np;
 
   // p p -> N Delta
   act_pp = set_up_action (p1, p2, proc_list_pp);
@@ -115,7 +115,7 @@ TEST(NDelta_NN) {
   n.set_4momentum  (proton->mass(),   0., 0., -ptot);
 
   ScatterAction *act_Dp, *act_Dn, *act_DDn;
-  ProcessBranchList proc_list_Dp, proc_list_Dn, proc_list_DDn;
+  CollisionBranchList proc_list_Dp, proc_list_Dn, proc_list_DDn;
 
   // Delta+ p -> N N
   act_Dp = set_up_action (Dp, p, proc_list_Dp);

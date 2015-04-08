@@ -19,6 +19,7 @@
 #include "pauliblocking.h"
 #include "particles.h"
 #include "processbranch.h"
+#include "random.h"
 
 namespace Smash {
 
@@ -39,16 +40,8 @@ class Action {
    */
   Action(const ParticleList &in_part, float time_of_execution);
 
-  /// Copying is disabled. Use std::move or create a new Action.
+  /** Copying is disabled. Use pointers or create a new Action. */
   Action(const Action &) = delete;
-
-  /**
-   * Move constructor for Action.
-   *
-   * The move constructor makes moving efficient since it can move the three
-   * std::vector member variables.
-   */
-  Action(Action &&);
 
   /** Virtual Destructor.
    * The declaration of the destructor is necessary to make it virtual.
@@ -60,21 +53,44 @@ class Action {
     return time_of_execution_ < rhs.time_of_execution_;
   }
 
-  /** Returns the total weight, which is a cross section in case of a ScatterAction
-   * and a decay width in case of a DecayAction. */
-  float weight() const {
-    return total_weight_;
-  }
+  /** Return the raw weight value, which is a cross section in case of a
+   * ScatterAction and a decay width in case of a DecayAction.
+   *
+   * Prefer to use a more specific function.
+   */
+  virtual float raw_weight_value() const = 0;
 
   /** Return the process type. */
-  ProcessBranch::ProcessType get_type() const {
+  ProcessType get_type() const {
     return process_type_;
   }
 
   /** Add a new subprocess.  */
-  void add_process(ProcessBranch *p);
+  template<typename Branch>
+  void add_process(Branch* p, ProcessBranchList<Branch>& subprocesses,
+      float& total_weight) {
+    if (p->weight() > really_small) {
+      total_weight += p->weight();
+      subprocesses.emplace_back(std::move(p));
+    }
+  }
   /** Add several new subprocesses at once.  */
-  void add_processes(ProcessBranchList pv);
+  template<typename Branch>
+  void add_processes(ProcessBranchList<Branch> pv,
+      ProcessBranchList<Branch>& subprocesses, float& total_weight) {
+    if (subprocesses.empty()) {
+      subprocesses = std::move(pv);
+      for (auto &proc : subprocesses) {
+        total_weight += proc->weight();
+      }
+    } else {
+      subprocesses.reserve(subprocesses.size() + pv.size());
+      for (auto &proc : pv) {
+        total_weight += proc->weight();
+        subprocesses.emplace_back(std::move(proc));
+      }
+    }
+  }
 
   /**
    * Generate the final state for this action.
@@ -150,14 +166,10 @@ class Action {
    * outgoing particles.
    */
   ParticleList outgoing_particles_;
-  /** list of possible subprocesses  */
-  ProcessBranchList subprocesses_;
   /** time at which the action is supposed to be performed  */
   float time_of_execution_;
-  /** sum of all subprocess weights  */
-  float total_weight_;
   /** type of process */
-  ProcessBranch::ProcessType process_type_;
+  ProcessType process_type_;
 
   /// determine the total energy in the center-of-mass frame
   /// \fpPrecision Why \c double?
@@ -167,7 +179,34 @@ class Action {
    * Decide for a particular final-state channel via Monte-Carlo
    * and return it as a ProcessBranch
    */
-  const ProcessBranch* choose_channel();
+  template<typename Branch>
+  const Branch* choose_channel(
+      const ProcessBranchList<Branch>& subprocesses, float total_weight) {
+    const auto &log = logger<LogArea::Action>();
+    float random_weight = Random::uniform(0.f, total_weight);
+    float weight_sum = 0.;
+    /* Loop through all subprocesses and select one by Monte Carlo, based on
+     * their weights.  */
+    for (const auto &proc : subprocesses) {
+      /* All processes apart from strings should have
+       * a well-defined final state. */
+      if (proc->particle_number() < 1
+          && proc->get_type() != ProcessType::String) {
+        continue;
+      }
+      weight_sum += proc->weight();
+      if (random_weight <= weight_sum) {
+        /* Return the full process information. */
+         return proc.get();
+      }
+    }
+    /* Should never get here. */
+    log.fatal(source_location, "Problem in choose_channel: ",
+              subprocesses.size(), " ", weight_sum, " ", total_weight, " ",
+    //          random_weight, "\n", *this);
+              random_weight, "\n");
+    throw std::runtime_error("problem in choose_channel");
+  }
 
   /**
    * Sample final state momenta (and masses) in general X->2 process.
@@ -212,12 +251,21 @@ class DecayAction : public Action {
    */
   DecayAction(const ParticleData &p, float time_of_execution);
 
+  /** Add several new decays at once. */
+  void add_decays(DecayBranchList pv);
+
   /** Generate the final state of the decay process.
    * Performs a decay of one particle to two or three particles.
    *
    * \throws InvalidDecay
    */
   void generate_final_state() override;
+
+  float raw_weight_value() const override;
+
+  float total_width() const {
+    return total_width_;
+  }
 
   /**
    * \ingroup exception
@@ -237,6 +285,12 @@ class DecayAction : public Action {
    * Writes information about this decay action to the \p out stream.
    */
   void format_debug_output(std::ostream &out) const override;
+
+  /** list of possible decays  */
+  DecayBranchList decay_channels_;
+
+  /** total decay width */
+  float total_width_;
 
  private:
   /**
@@ -274,6 +328,11 @@ class ScatterAction : public Action {
   ScatterAction(const ParticleData &in_part1, const ParticleData &in_part2,
                 float time_of_execution);
 
+  /** Add a new collision channel. */
+  void add_collision(CollisionBranch* p);
+  /** Add several new collision channels at once. */
+  void add_collisions(CollisionBranchList pv);
+
   /**
    * Measure distance between incoming particles in center-of-momentum frame.
    * Returns the squared distance.
@@ -290,6 +349,8 @@ class ScatterAction : public Action {
    */
  void generate_final_state() override;
 
+ float raw_weight_value() const override;
+
   /**
    * Determine the (parametrized) total cross section for this collision. This
    * is currently only used for calculating the string excitation cross section.
@@ -304,7 +365,7 @@ class ScatterAction : public Action {
    * elast_par) but can be overriden in child classes for a different behavior.
    *
    * \param[in] elast_par Elastic cross section parameter from the input file.
-   * 
+   *
    * \return A ProcessBranch object containing the cross section and
    * final-state IDs.
    */
@@ -331,7 +392,7 @@ class ScatterAction : public Action {
   * Each element in the list contains the type of the final-state particle
   * and the cross section for that particular process.
   */
-  virtual ProcessBranchList resonance_cross_sections();
+  virtual CollisionBranchList resonance_cross_sections();
 
   /**
    * Return the 2-to-1 resonance production cross section for a given resonance.
@@ -351,8 +412,8 @@ class ScatterAction : public Action {
                               double s, double cm_momentum_sqr);
 
   /** Find all inelastic 2->2 processes for this reaction. */
-  virtual ProcessBranchList two_to_two_cross_sections() {
-    return ProcessBranchList();
+  virtual CollisionBranchList two_to_two_cross_sections() {
+    return CollisionBranchList();
   }
 
   /** Determine the total energy in the center-of-mass frame,
@@ -365,6 +426,10 @@ class ScatterAction : public Action {
   class InvalidScatterAction : public std::invalid_argument {
     using std::invalid_argument::invalid_argument;
   };
+
+  float cross_section() const {
+    return total_cross_section_;
+  }
 
  protected:
   /** Determine the Mandelstam s variable,
@@ -389,6 +454,12 @@ class ScatterAction : public Action {
    * Writes information about this scatter action to the \p out stream.
    */
   void format_debug_output(std::ostream &out) const override;
+
+  /** List of possible collisions  */
+  CollisionBranchList collision_channels_;
+
+  /** Total cross section */
+  float total_cross_section_;
 
  private:
   /// determine the velocity of the center-of-mass frame in the lab
@@ -423,17 +494,17 @@ class ScatterActionBaryonBaryon : public ScatterAction {
    * constant otherwise.
    *
    * \param[in] elast_par Elastic cross section parameter from the input file.
-   * 
+   *
    * \return A ProcessBranch object containing the cross section and
    * final-state IDs.
    */
   CollisionBranch* elastic_cross_section(float elast_par) override;
   /* There is no resonance formation out of two baryons: Return empty list. */
-  ProcessBranchList resonance_cross_sections() override {
-    return ProcessBranchList();
+  CollisionBranchList resonance_cross_sections() override {
+    return CollisionBranchList();
   }
   /** Find all inelastic 2->2 processes for this reaction. */
-  ProcessBranchList two_to_two_cross_sections() override;
+  CollisionBranchList two_to_two_cross_sections() override;
 
  private:
   /**
@@ -452,7 +523,7 @@ class ScatterActionBaryonBaryon : public ScatterAction {
   * of the two nucleons. Each element in the list contains the type(s) of the
   * final state particle(s) and the cross section for that particular process.
   */
-  ProcessBranchList nuc_nuc_to_nuc_res(const ParticleType &type_particle1,
+  CollisionBranchList nuc_nuc_to_nuc_res(const ParticleType &type_particle1,
                                        const ParticleType &type_particle2);
 
   /**
@@ -466,7 +537,7 @@ class ScatterActionBaryonBaryon : public ScatterAction {
   * with a nucleon. Each element in the list contains the type(s) of the
   * final state particle(s) and the cross section for that particular process.
   */
-  ProcessBranchList nuc_res_to_nuc_nuc(const ParticleType &type_particle1,
+  CollisionBranchList nuc_res_to_nuc_nuc(const ParticleType &type_particle1,
                                        const ParticleType &type_particle2);
 
  protected:

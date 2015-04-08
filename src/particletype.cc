@@ -246,14 +246,14 @@ void ParticleType::check_consistency() {
   }
 }
 
-ProcessBranchList ParticleType::get_partial_widths(const float m) const {
+DecayBranchList ParticleType::get_partial_widths(const float m) const {
   float w = 0.;
   if (is_stable()) {
     return {};
   }
   /* Loop over decay modes and calculate all partial widths. */
   const auto &decay_mode_list = decay_modes().decay_mode_list();
-  ProcessBranchList partial;
+  DecayBranchList partial;
   partial.reserve(decay_mode_list.size());
   for (unsigned int i = 0; i < decay_mode_list.size(); i++) {
     w = partial_width(m, decay_mode_list[i].get());
