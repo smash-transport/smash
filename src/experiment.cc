@@ -287,18 +287,17 @@ static std::string format_measurements(const Particles &particles,
   QuantumNumbers current_values(particles);
   QuantumNumbers difference = conserved_initial - current_values;
 
-  char buffer[81];
-  if (likely(time > 0))
-    snprintf(buffer, sizeof(buffer), "%6.2f %12g %12g %12g %10zu %12zu %12g",
-             time, difference.momentum().x0(), difference.momentum().abs3(),
-             scatterings_total * 2 / (particles.size() * time),
-             scatterings_this_interval, particles.size(),
-             elapsed_seconds.count());
-  else
-    snprintf(buffer, sizeof(buffer), "%+6.2f %12g %12g %12g %10i %12zu %12g", time,
-             difference.momentum().x0(), difference.momentum().abs3(), 0.0, 0,
-             particles.size(), elapsed_seconds.count());
-  return std::string(buffer);
+  std::ostringstream ss;
+  ss << field<5> << time
+     << field<12> << difference.momentum().x0()
+     << field<12> << difference.momentum().abs3()
+     << field<12> << (scatterings_total
+                          ? scatterings_total * 2 / (particles.size() * time)
+                          : 0.)
+     << field<10> << scatterings_this_interval
+     << field<12> << particles.size()
+     << field<10> << elapsed_seconds;
+  return ss.str();
 }
 
 
