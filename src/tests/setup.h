@@ -10,10 +10,12 @@
 #ifndef SRC_TESTS_SETUP_H_
 #define SRC_TESTS_SETUP_H_
 
+#include "../include/cxx14compat.h"
 #include "../include/experiment.h"
 #include "../include/particles.h"
 #include "../include/particletype.h"
 #include "../include/particledata.h"
+#include "../include/random.h"
 
 #include <boost/filesystem.hpp>
 
@@ -25,14 +27,26 @@ inline void create_actual_particletypes() {
   ParticleType::create_type_list(data);
 }
 
+static constexpr float smashon_mass = 0.123f;
+static constexpr float smashon_width = 1.2f;
+
 inline void create_smashon_particletypes() {
   ParticleType::create_type_list(
       "# NAME MASS[GEV] WIDTH[GEV] PDG\n"
-      "smashon 0.123 1.2 661\n");
+      "smashon " +
+      std::to_string(smashon_mass) + ' ' + std::to_string(smashon_width) +
+      " 661\n");
 }
 
-inline ParticleData smashon(const FourVector &position,
-                            const FourVector &momentum, int id = -1) {
+auto random_value = Random::make_uniform_distribution(-15.0, +15.0);
+
+inline ParticleData smashon(const FourVector &position = {
+                                random_value(), random_value(), random_value(),
+                                random_value()},
+                            const FourVector &momentum = {
+                                smashon_mass, random_value(), random_value(),
+                                random_value()},
+                            int id = -1) {
   ParticleData p{ParticleType::find(0x661), id};
   p.set_4position(position);
   p.set_4momentum(momentum);
@@ -68,6 +82,16 @@ inline std::unique_ptr<ExperimentBase> experiment(
 
 inline std::unique_ptr<ExperimentBase> experiment(const char *configOverrides) {
   return ExperimentBase::create(configuration(configOverrides));
+}
+
+using ParticlesPtr = std::unique_ptr<Particles>;
+template <typename G>
+inline ParticlesPtr create_particles(int n, G &&generator) {
+  ParticlesPtr p = make_unique<Particles>();
+  for (auto i = n; i; --i) {
+    p->add_data(generator());
+  }
+  return p;
 }
 
 }  // namespace Test
