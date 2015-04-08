@@ -25,6 +25,20 @@ inline void create_actual_particletypes() {
   ParticleType::create_type_list(data);
 }
 
+inline void create_smashon_particletypes() {
+  ParticleType::create_type_list(
+      "# NAME MASS[GEV] WIDTH[GEV] PDG\n"
+      "smashon 0.123 1.2 661\n");
+}
+
+inline ParticleData smashon(const FourVector &position,
+                            const FourVector &momentum, int id = -1) {
+  ParticleData p{ParticleType::find(0x661), id};
+  p.set_4position(position);
+  p.set_4momentum(momentum);
+  return p;
+}
+
 /**
  * Return a configuration object filled with data from src/config.yaml. Note
  * that a change to that file may affect test results if you use it.
