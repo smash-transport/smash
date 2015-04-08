@@ -26,7 +26,7 @@
 namespace Smash {  
   /* This function will generate outgoing particles in CM frame from a hard process */
   ParticleList string_excitation(const ParticleList &incoming_particles_) {
-	const auto &log = logger<LogArea::Pythia>();  
+      const auto &log = logger<LogArea::Pythia>();  
     #ifdef PYTHIA_FOUND 
 	  /* set all necessary parameters for Pythia 
 	   * Create Pythia object */
@@ -66,11 +66,18 @@ namespace Smash {
       for (int i = 0; i< event.size(); i++) {
 		if (event[i].isFinal()) {
 		  if (event[i].isHadron()) {
-             ParticleData new_particle_;    
-             new_particle_.set_id() = event[i].id();
-             new_particle_.set_4momentum() = ( event[i].e(), 
-                event[i].px(), event[i].py(), event[i].pz() );                                
-             outgoing_particles_[i] = pushback (new_particle);   
+             const int pythia_id = event[i].id();
+             log.info("PDG ID from Pythia:", pythia_id);
+	     std::string s = std::to_string(pythia_id);
+             PdgCode pythia_code(s); 
+             ParticleData new_particle_(ParticleType::find(pythia_code));    
+             FourVector momentum;
+             momentum.set_x0(event[i].e());
+             momentum.set_x1(event[i].px());
+             momentum.set_x2(event[i].py());
+             momentum.set_x3(event[i].pz());
+             new_particle_.set_4momentum(momentum);                                
+             outgoing_particles_.push_back(new_particle_);   
 	      }
 	    }
 	  }  
