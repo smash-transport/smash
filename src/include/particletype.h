@@ -277,7 +277,13 @@ class ParticleType {
    * ParticleTypePtr instead.
    */
   static const ParticleType &find(PdgCode pdgcode);
-
+  /**
+   * Adjusted 'find' method for Pythia
+   *
+   * All particles that are not known to SMASH get the dummy 
+   * ParticleType 'PY' with pdgcode 661
+   */
+   static const ParticleType &pythiafind(PdgCode pdgcode);
   /// \ingroup exception
   struct PdgNotFoundFailure : public std::runtime_error {
     using std::runtime_error::runtime_error;

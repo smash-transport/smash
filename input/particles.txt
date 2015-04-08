@@ -118,3 +118,6 @@ e⁻ 0.000511 0.0 11
 μ⁻ 0.105 0.0 13
 
 γ  0.0  0.0  22
+
+########## dummy particle type for Pythia particles ###
+PY 0.010 0.0 661

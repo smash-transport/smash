@@ -64,13 +64,13 @@ namespace Smash {
       pythia.next();
       ParticleList outgoing_particles_;      
       for (int i = 0; i< event.size(); i++) {
-		if (event[i].isFinal()) {
-		  if (event[i].isHadron()) {
+	if (event[i].isFinal()) {
+	  if (event[i].isHadron()) {
              const int pythia_id = event[i].id();
              log.info("PDG ID from Pythia:", pythia_id);
 	     std::string s = std::to_string(pythia_id);
              PdgCode pythia_code(s); 
-             ParticleData new_particle_(ParticleType::find(pythia_code));    
+             ParticleData new_particle_(ParticleType::pythiafind(pythia_code));    
              FourVector momentum;
              momentum.set_x0(event[i].e());
              momentum.set_x1(event[i].px());
@@ -78,9 +78,9 @@ namespace Smash {
              momentum.set_x3(event[i].pz());
              new_particle_.set_4momentum(momentum);                                
              outgoing_particles_.push_back(new_particle_);   
-	      }
-	    }
-	  }  
+          }
+        }
+      }  
     #else
       std::string errMsg = "Pythia 8 not available for string excitation";
       throw std::runtime_error( errMsg );
