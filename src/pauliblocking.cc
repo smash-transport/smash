@@ -85,7 +85,7 @@ float PauliBlocker::phasespace_dens(const ThreeVector r, const ThreeVector p,
     // 0th order interpolation using tabulated values
     index = std::round(std::sqrt(rdist_sqr) / (rr_ + rc_) * weights_.size());
     if (likely(index < weights_.size())) {
-      f += weights_.at(index);
+      f += weights_[index];
     }
   }
   return f / ntest_;
