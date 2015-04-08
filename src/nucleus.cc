@@ -192,6 +192,9 @@ ThreeVector Nucleus::distribute_nucleon() const {
   if (almost_equal(diffusiveness_, 0.f)) {
     return dir.threevec() * nuclear_radius_ * std::cbrt(Random::canonical());
   }
+  if (almost_equal(nuclear_radius_, 0.f)) {
+    return Smash::ThreeVector();
+  }
   float radius_scaled = nuclear_radius_/diffusiveness_;
   float prob_range1 = 1.0;
   float prob_range2 = 3. / radius_scaled;
