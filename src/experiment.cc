@@ -289,14 +289,14 @@ static std::string format_measurements(const Particles &particles,
 
   std::ostringstream ss;
   ss << field<5> << time
-     << field<12> << difference.momentum().x0()
-     << field<12> << difference.momentum().abs3()
-     << field<12> << (scatterings_total
+     << field<12,3> << difference.momentum().x0()
+     << field<12,3> << difference.momentum().abs3()
+     << field<12,3> << (scatterings_total
                           ? scatterings_total * 2 / (particles.size() * time)
                           : 0.)
-     << field<10> << scatterings_this_interval
-     << field<12> << particles.size()
-     << field<10> << elapsed_seconds;
+     << field<10,3> << scatterings_this_interval
+     << field<12,3> << particles.size()
+     << field<10,3> << elapsed_seconds;
   return ss.str();
 }
 
