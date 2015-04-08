@@ -21,6 +21,7 @@
 #include "include/scatteractionbaryonbaryon.h"
 #include "include/scatteractionbaryonmeson.h"
 #include "include/scatteractionmesonmeson.h"
+#include "include/scatteractionnucleonnucleon.h"
 
 namespace Smash {
 /*!\Userguide
@@ -93,8 +94,14 @@ ActionPtr ScatterActionsFinder::check_collision(
   /* Create ScatterAction object. */
   std::unique_ptr<ScatterAction> act;
   if (data_a.is_baryon() && data_b.is_baryon()) {
-    act = make_unique<ScatterActionBaryonBaryon>(data_a, data_b,
-                                                 time_until_collision);
+    if (data_a.pdgcode().iso_multiplet() == 0x1112 &&
+        data_b.pdgcode().iso_multiplet() == 0x1112) {
+      act = make_unique<ScatterActionNucleonNucleon>(data_a, data_b,
+                                                     time_until_collision);
+    } else {
+      act = make_unique<ScatterActionBaryonBaryon>(data_a, data_b,
+                                                   time_until_collision);
+    }
   } else if (data_a.is_baryon() || data_b.is_baryon()) {
     act = make_unique<ScatterActionBaryonMeson>(data_a, data_b,
                                                 time_until_collision);

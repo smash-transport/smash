@@ -81,6 +81,7 @@ set(smash_src
         scatteractionbaryonbaryon.cc
         scatteractionbaryonmeson.cc
         scatteractionmesonmeson.cc
+        scatteractionnucleonnucleon.cc
         scatteractionsfinder.cc
         spheremodus.cc
         stringfunctions.cc
