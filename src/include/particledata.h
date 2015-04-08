@@ -33,9 +33,13 @@ class ParticleData {
   explicit ParticleData(const ParticleType &particle_type, int unique_id = -1)
       : id_(unique_id), type_(&particle_type) {}
 
-  inline int id(void) const;
-  inline void set_id(const int id);
-  inline PdgCode pdgcode(void) const;
+  /// look up the id of the particle
+  int id() const { return id_; }
+  /// set id of the particle
+  void set_id(int i) { id_ = i; }
+
+  /// look up the pdgcode of the particle
+  PdgCode pdgcode() const { return type_->pdgcode(); }
 
   // convenience accessors to PdgCode:
   /// \copydoc PdgCode::is_hadron
@@ -55,33 +59,60 @@ class ParticleData {
    */
   const ParticleType &type() const { return *type_; }
 
-  inline int id_process(void) const;
-  inline void set_id_process(const int id);
-  inline const FourVector &momentum(void) const;
-  inline void set_4momentum(const FourVector &momentum_vector);
+  /// look up the id of the collision process
+  int id_process() const { return id_process_; }
+  /// set the id of the collision process
+  void set_id_process(int i) { id_process_ = i; }
+
+  /// return the particle's 4-momentum
+  const FourVector &momentum() const { return momentum_; }
+  /// set the particle's 4-momentum directly
+  void set_4momentum(const FourVector &momentum_vector) {
+    momentum_ = momentum_vector;
+  }
   /**
    * Set the momentum of the particle.
    *
-   * \fpPrecision The momentum FourVector requires double-precision.
-   */
-  inline void set_4momentum(double mass, const ThreeVector &mom);
-  /**
-   * Set the momentum of the particle.
+   * \param[in] mass the mass of the particle (without E_kin contribution)
+   * \param[in] mom the three-momentum of the particle
    *
    * \fpPrecision The momentum FourVector requires double-precision.
    */
-  inline void set_4momentum(double mass, double px, double py, double pz);
+  void set_4momentum(double mass, const ThreeVector &mom) {
+    momentum_ = FourVector(std::sqrt(mass * mass + mom * mom), mom);
+  }
+  /**
+   * Set the momentum of the particle.
+   *
+   * \param[in] mass the mass of the particle (without E_kin contribution)
+   * \param[in] px x-component of the momentum
+   * \param[in] py y-component of the momentum
+   * \param[in] pz z-component of the momentum
+   *
+   * \fpPrecision The momentum FourVector requires double-precision.
+   */
+  void set_4momentum(double mass, double px, double py, double pz) {
+    momentum_ = FourVector(std::sqrt(mass * mass + px * px + py * py + pz * pz),
+                           px, py, pz);
+  }
   /**
    * Set the momentum of the particle without modifying the currently set mass.
    */
-  inline void set_3momentum(const ThreeVector &mom);
-  inline const FourVector &position(void) const;
-  inline void set_4position(const FourVector &pos);
-  inline void set_3position(const ThreeVector &pos);
-  /// get the velocity 3-vector
-  inline ThreeVector velocity(void) const {
-    return momentum_.threevec() / momentum_.x0();
+  void set_3momentum(const ThreeVector &mom) {
+    momentum_ = FourVector(momentum_.x0(), mom);
   }
+
+  /// The particle's position in Minkowski space
+  const FourVector &position() const { return position_; }
+  /// Set the particle's position directly
+  void set_4position(const FourVector &pos) { position_ = pos; }
+  /// Set the particle 3-position only (the time component is not changed)
+  void set_3position(const ThreeVector &pos) {
+    position_ = FourVector(position_.x0(), pos);
+  }
+
+  /// get the velocity 3-vector
+  ThreeVector velocity() const { return momentum_.threevec() / momentum_.x0(); }
 
   /**
    * Returns the inverse of the gamma factor from the current velocity of the
@@ -105,16 +136,26 @@ class ParticleData {
                          (momentum_.x0() * momentum_.x0()));
   }
 
-  /// do a full Lorentz-boost
-  inline void boost(const ThreeVector &v);
-  /// do a Lorentz-boost of the momentum
-  inline void boost_momentum(const ThreeVector &v);
+  /// Apply a full Lorentz boost of momentum and position
+  void boost(const ThreeVector &v) {
+    set_4momentum(momentum_.LorentzBoost(v));
+    set_4position(position_.LorentzBoost(v));
+  }
 
-  /* overloaded operators */
-  inline bool operator==(const ParticleData &a) const;
-  inline bool operator<(const ParticleData &a) const;
-  inline bool operator==(const int id_a) const;
-  inline bool operator<(const int id_a) const;
+  /// Apply a Lorentz-boost of only the momentum
+  void boost_momentum(const ThreeVector &v) {
+    set_4momentum(momentum_.LorentzBoost(v));
+  }
+
+  /// Returns whether the particles are identical
+  bool operator==(const ParticleData &a) const { return this->id_ == a.id_; }
+  /// Defines a total order of particles according to their id.
+  bool operator<(const ParticleData &a) const { return this->id_ < a.id_; }
+
+  /// check if the particles are identical to a given id
+  bool operator==(int id_a) const { return this->id_ == id_a; }
+  /// sort particles along to given id
+  bool operator<(int id_a) const { return this->id_ < id_a; }
 
  private:
   /// Each particle has a unique identifier
@@ -133,113 +174,6 @@ class ParticleData {
   /// position in space: x0, x1, x2, x3 as t, x, y, z
   FourVector position_;
 };
-
-/// look up the id of the particle
-inline int ParticleData::id(void) const {
-  return id_;
-}
-
-/// set id of the particle
-inline void ParticleData::set_id(const int i) {
-  id_ = i;
-}
-
-/// look up the pdgcode of the particle
-inline PdgCode ParticleData::pdgcode(void) const {
-  return type_->pdgcode();
-}
-
-/// look up the id of the collision process
-inline int ParticleData::id_process(void) const {
-  return id_process_;
-}
-
-/// set the id of the collision process
-inline void ParticleData::set_id_process(const int process_id) {
-  id_process_ = process_id;
-}
-
-/// return the particle 4-momentum
-inline const FourVector &ParticleData::momentum(void) const {
-  return momentum_;
-}
-
-/// set particle 4-momentum directly
-inline void ParticleData::set_4momentum(const FourVector &momentum_vector) {
-  momentum_ = momentum_vector;
-}
-
-/** set particle 4-momentum
- *
- * \param[in] new_mass the mass of the particle
- * \param[in] mom the three-momentum of the particle
- */
-inline void ParticleData::set_4momentum(double new_mass,
-                                        const ThreeVector &mom) {
-  momentum_ = FourVector(std::sqrt(new_mass * new_mass + mom * mom), mom);
-}
-
-/** set particle 4-momentum
- *
- * \param[in] new_mass the mass of the particle
- * \param[in] px x-component of the momentum
- * \param[in] py y-component of the momentum
- * \param[in] pz z-component of the momentum
- */
-inline void ParticleData::set_4momentum(double new_mass, double px, double py,
-                                       double pz) {
-  momentum_ = FourVector(
-      std::sqrt(new_mass * new_mass + px * px + py * py + pz * pz), px, py, pz);
-}
-
-/// set particle 3-momentum
-inline void ParticleData::set_3momentum(const ThreeVector &mom) {
-  momentum_ = FourVector(momentum_.x0(), mom);
-}
-
-/// particle position in Minkowski space
-inline const FourVector &ParticleData::position(void) const {
-  return position_;
-}
-
-/// set the particle position directly
-inline void ParticleData::set_4position(const FourVector &pos) {
-  position_ = pos;
-}
-
-/// set the particle 3-position only (time component is not changed)
-inline void ParticleData::set_3position(const ThreeVector &pos) {
-  position_ = FourVector(position_.x0(), pos);
-}
-/// full Lorentz boost of momentum and position
-inline void ParticleData::boost(const ThreeVector &v) {
-    set_4momentum(momentum_.LorentzBoost(v));
-    set_4position(position_.LorentzBoost(v));
-}
-/// Boost only the momentum
-inline void ParticleData::boost_momentum(const ThreeVector &v) {
-    set_4momentum(momentum_.LorentzBoost(v));
-}
-
-/// check if the particles are identical
-inline bool ParticleData::operator==(const ParticleData &a) const {
-  return this->id_ == a.id_;
-}
-
-/// sort particles along their id
-inline bool ParticleData::operator<(const ParticleData &a) const {
-  return this->id_ < a.id_;
-}
-
-/// check if the particles are identical to a given id
-inline bool ParticleData::operator==(const int id_a) const {
-  return this->id_ == id_a;
-}
-
-/// sort particles along to given id
-inline bool ParticleData::operator<(const int id_a) const {
-  return this->id_ < id_a;
-}
 
 /**\ingroup logging
  * Writes the state of the particle to the output stream.
