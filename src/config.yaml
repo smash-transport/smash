@@ -51,7 +51,7 @@ Output:
     Vtk:
         Enable:             True
     Root:
-        Enable:             True
+        Enable:             False
         Write_Collisions:   True
         Write_Particles:    True
         Autosave_Frequency: 1000
