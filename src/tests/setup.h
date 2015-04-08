@@ -94,6 +94,15 @@ inline ParticlesPtr create_particles(int n, G &&generator) {
   return p;
 }
 
+inline ParticlesPtr create_particles(
+    const std::initializer_list<ParticleData> &init) {
+  ParticlesPtr p = make_unique<Particles>();
+  for (const auto &data : init) {
+    p->add_data(data);
+  }
+  return p;
+}
+
 }  // namespace Test
 }  // namespace Smash
 
