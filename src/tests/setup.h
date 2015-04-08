@@ -103,6 +103,10 @@ inline ParticlesPtr create_particles(
   return p;
 }
 
+inline ExperimentParameters default_parameters(int testparticles = 1) {
+  return ExperimentParameters{{0.f, 1.f}, 1.f, testparticles, 1.0};
+}
+
 }  // namespace Test
 }  // namespace Smash
 
