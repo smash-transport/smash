@@ -900,6 +900,8 @@ uint64_t Experiment<Modus>::run_time_evolution_fixed_time_step(
     }
     // Check conservation of conserved quantities if potentials are off.
     // If potentials are on then momentum is conserved only in average
+
+    #ifdef PYTHIA_FOUND
     if (!potentials_) {
       std::string err_msg = conserved_initial_.report_deviations(particles_);
       if (!err_msg.empty()) {
@@ -907,7 +909,7 @@ uint64_t Experiment<Modus>::run_time_evolution_fixed_time_step(
         throw std::runtime_error("Violation of conserved quantities!");
       }
     }
-
+    #endif
     check_interactions_total(interactions_total);
   }
 
