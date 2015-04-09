@@ -17,6 +17,8 @@
 #include "../include/spheremodus.h"
 
 using namespace Smash;
+using Smash::Test::Position;
+using Smash::Test::Momentum;
 
 TEST(init_particle_types) {
   Test::create_smashon_particletypes();
@@ -28,17 +30,23 @@ TEST(init_particle_types) {
 static Test::ParticlesPtr create_box_particles() {
   return Test::create_particles(
       {// particle that doesn't move:
-       Test::smashon({0.0, 0.6, 0.7, 0.8}, {4.0, 0.0, 0.0, 0.0}),
+       Test::smashon(Position{0.0, 0.6, 0.7, 0.8},
+                     Momentum{4.0, 0.0, 0.0, 0.0}),
        // particle that moves with speed of light
-       Test::smashon({0.5, 0.7, 0.8, 0.9}, {sqrt(0.02), 0.1, -.1, 0.0}),
+       Test::smashon(Position{0.5, 0.7, 0.8, 0.9},
+                     Momentum{sqrt(0.02), 0.1, -.1, 0.0}),
        // particle that moves slowly:
-       Test::smashon({0.7, 0.1, 0.2, 0.3}, {sqrt(1.13), 0.1, 0.2, -.3}),
+       Test::smashon(Position{0.7, 0.1, 0.2, 0.3},
+                     Momentum{sqrt(1.13), 0.1, 0.2, -.3}),
        // particle that will cross a box boundary at high x:
-       Test::smashon({1.2, 4.5, 0.0, 0.0}, {0.1, 0.1, 0.0, 0.0}),
+       Test::smashon(Position{1.2, 4.5, 0.0, 0.0},
+                     Momentum{0.1, 0.1, 0.0, 0.0}),
        // particle that will cross a box boundary at low y:
-       Test::smashon({1.8, 0.0, 0.2, 0.0}, {0.1, 0.0, -.1, 0.0}),
+       Test::smashon(Position{1.8, 0.0, 0.2, 0.0},
+                     Momentum{0.1, 0.0, -.1, 0.0}),
        // particle that will cross a box boundary at low x and high z:
-       Test::smashon({2.2, 0.2, 0.0, 4.8}, {0.5, -.3, 0.0, 0.4})});
+       Test::smashon(Position{2.2, 0.2, 0.0, 4.8},
+                     Momentum{0.5, -.3, 0.0, 0.4})});
 }
 
 TEST(propagate_default) {

@@ -38,18 +38,48 @@ inline void create_smashon_particletypes() {
       " 661\n");
 }
 
-auto random_value = Random::make_uniform_distribution(-15.0, +15.0);
+struct Position : public FourVector {
+  using FourVector::FourVector;
+};
+struct Momentum : public FourVector {
+  using FourVector::FourVector;
+};
 
-inline ParticleData smashon(const FourVector &position = {
-                                random_value(), random_value(), random_value(),
-                                random_value()},
-                            const FourVector &momentum = {
-                                smashon_mass, random_value(), random_value(),
-                                random_value()},
+inline ParticleData smashon(int id = -1) {
+  ParticleData p{ParticleType::find(0x661), id};
+  return p;
+}
+inline ParticleData smashon(const Position &position, int id = -1) {
+  ParticleData p{ParticleType::find(0x661), id};
+  p.set_4position(position);
+  return p;
+}
+inline ParticleData smashon(const Momentum &momentum, int id = -1) {
+  ParticleData p{ParticleType::find(0x661), id};
+  p.set_4momentum(momentum);
+  return p;
+}
+inline ParticleData smashon(const Position &position, const Momentum &momentum,
                             int id = -1) {
   ParticleData p{ParticleType::find(0x661), id};
   p.set_4position(position);
   p.set_4momentum(momentum);
+  return p;
+}
+inline ParticleData smashon(const Momentum &momentum, const Position &position,
+                            int id = -1) {
+  ParticleData p{ParticleType::find(0x661), id};
+  p.set_4position(position);
+  p.set_4momentum(momentum);
+  return p;
+}
+inline ParticleData smashon_random(int id = -1) {
+  auto random_value = Random::make_uniform_distribution(-15.0, +15.0);
+  ParticleData p{ParticleType::find(0x661), id};
+  p.set_4position(
+      {random_value(), random_value(), random_value(), random_value()});
+  p.set_4momentum(
+      {smashon_mass, random_value(), random_value(), random_value()});
   return p;
 }
 

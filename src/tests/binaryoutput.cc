@@ -127,7 +127,7 @@ TEST(fullhistory_format) {
 
   /* create two smashon particles */
   const auto particles =
-      Test::create_particles(2, [] { return Test::smashon(); });
+      Test::create_particles(2, [] { return Test::smashon_random(); });
 
   int event_id = 0;
   /* Write initial state output: the two smashons we created */
@@ -139,7 +139,7 @@ TEST(fullhistory_format) {
   initial_particles.push_back(particles->data(1));
   particles->remove(0);
   particles->remove(1);
-  ParticleData final_particle = Test::smashon();
+  ParticleData final_particle = Test::smashon_random();
   particles->add_data(final_particle);
   final_particles.push_back(particles->data(particles->id_max()));
   double rho = 0.123;
@@ -211,7 +211,7 @@ TEST(particles_format) {
 
   /* create two smashon particles */
   const auto particles =
-      Test::create_particles(2, [] { return Test::smashon(); });
+      Test::create_particles(2, [] { return Test::smashon_random(); });
 
   int event_id = 0;
   /* Write initial state output: the two smashons we created */
@@ -223,7 +223,7 @@ TEST(particles_format) {
   initial_particles.push_back(particles->data(1));
   particles->remove(0);
   particles->remove(1);
-  ParticleData final_particle = Test::smashon();
+  ParticleData final_particle = Test::smashon_random();
   particles->add_data(final_particle);
   final_particles.push_back(particles->data(particles->id_max()));
   Clock clock;
