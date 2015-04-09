@@ -37,7 +37,7 @@ CollisionBranch* ScatterActionNucleonNucleon::elastic_cross_section(float) {
   if (sig_el > 0.) {
     return new CollisionBranch(incoming_particles_[0].type(),
                                 incoming_particles_[1].type(),
-                                sig_el, ProcessBranch::Elastic);
+                                sig_el, ProcessType::Elastic);
   } else {
     std::stringstream ss;
     ss << "problem in CrossSections::elastic: " << pdg_a.string().c_str()
@@ -139,23 +139,23 @@ void ScatterActionNucleonNucleon::elastic_scattering() {
 }
 
 
-ProcessBranchList ScatterActionNucleonNucleon::two_to_two_cross_sections() {
+CollisionBranchList ScatterActionNucleonNucleon::two_to_two_cross_sections() {
   const ParticleType &type_particle_a = incoming_particles_[0].type();
   const ParticleType &type_particle_b = incoming_particles_[1].type();
 
   /* Find all resonance-production channels. */
-  ProcessBranchList process_list = nuc_nuc_to_nuc_res(type_particle_a,
+  CollisionBranchList process_list = nuc_nuc_to_nuc_res(type_particle_a,
                                                       type_particle_b);
 
   return process_list;
 }
 
 
-ProcessBranchList ScatterActionNucleonNucleon::nuc_nuc_to_nuc_res(
+CollisionBranchList ScatterActionNucleonNucleon::nuc_nuc_to_nuc_res(
                             const ParticleType &type_particle_a,
                             const ParticleType &type_particle_b) {
   const auto &log = logger<LogArea::ScatterAction>();
-  ProcessBranchList process_list;
+  CollisionBranchList process_list;
   const double s = mandelstam_s();
 
   /* Loop over all baryon resonances. */
@@ -235,7 +235,7 @@ ProcessBranchList ScatterActionNucleonNucleon::nuc_nuc_to_nuc_res(
       if (xsection > really_small) {
         process_list.push_back(make_unique<CollisionBranch>
                                (*type_resonance, *second_type, xsection,
-                                ProcessBranch::TwoToTwo));
+                                ProcessType::TwoToTwo));
         log.debug("Found 2->2 creation process for resonance ",
                   *type_resonance);
         log.debug("2->2 with original particles: ",

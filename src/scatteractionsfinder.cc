@@ -128,9 +128,10 @@ ActionPtr ScatterActionsFinder::check_collision(
 
   /* distance criterion according to cross_section */
   const double distance_squared = act->particle_distance();
-  if (distance_squared >= act->weight() * fm2_mb * M_1_PI
+  if (distance_squared >= act->cross_section() * fm2_mb * M_1_PI
                           / static_cast<float>(testparticles_)) {
     return nullptr;
+
   }
   log.debug("particle distance squared: ", distance_squared,
             "\n    ", data_a,

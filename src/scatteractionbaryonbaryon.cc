@@ -32,8 +32,8 @@ float ScatterActionBaryonBaryon::total_cross_section() const {
 }
 
 
-ProcessBranchList ScatterActionBaryonBaryon::two_to_two_cross_sections() {
-  ProcessBranchList process_list;
+CollisionBranchList ScatterActionBaryonBaryon::two_to_two_cross_sections() {
+  CollisionBranchList process_list;
   const ParticleType &type_particle_a = incoming_particles_[0].type();
   const ParticleType &type_particle_b = incoming_particles_[1].type();
 
@@ -47,11 +47,11 @@ ProcessBranchList ScatterActionBaryonBaryon::two_to_two_cross_sections() {
 }
 
 
-ProcessBranchList ScatterActionBaryonBaryon::nuc_res_to_nuc_nuc(
+CollisionBranchList ScatterActionBaryonBaryon::nuc_res_to_nuc_nuc(
                             const ParticleType &type_particle_a,
                             const ParticleType &type_particle_b) {
   ParticleTypePtr type_resonance, type_nucleon;
-  ProcessBranchList process_list;
+  CollisionBranchList process_list;
 
   if (type_particle_a.pdgcode().iso_multiplet() == 0x1112) {
     type_nucleon = &type_particle_a;
@@ -119,7 +119,7 @@ ProcessBranchList ScatterActionBaryonBaryon::nuc_res_to_nuc_nuc(
       if (xsection > really_small) {
         process_list.push_back(make_unique<CollisionBranch>
                                (*nuc_a, *nuc_b, xsection,
-                                ProcessBranch::TwoToTwo));
+                                ProcessType::TwoToTwo));
         const auto &log = logger<LogArea::ScatterAction>();
         log.debug("Found 2->2 absoption process for resonance ",
                   *type_resonance);

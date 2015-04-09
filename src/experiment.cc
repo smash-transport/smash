@@ -287,18 +287,17 @@ static std::string format_measurements(const Particles &particles,
   QuantumNumbers current_values(particles);
   QuantumNumbers difference = conserved_initial - current_values;
 
-  char buffer[81];
-  if (likely(time > 0))
-    snprintf(buffer, sizeof(buffer), "%6.2f %12g %12g %12g %10zu %12zu %12g",
-             time, difference.momentum().x0(), difference.momentum().abs3(),
-             scatterings_total * 2 / (particles.size() * time),
-             scatterings_this_interval, particles.size(),
-             elapsed_seconds.count());
-  else
-    snprintf(buffer, sizeof(buffer), "%+6.2f %12g %12g %12g %10i %12zu %12g", time,
-             difference.momentum().x0(), difference.momentum().abs3(), 0.0, 0,
-             particles.size(), elapsed_seconds.count());
-  return std::string(buffer);
+  std::ostringstream ss;
+  ss << field<5> << time
+     << field<12,3> << difference.momentum().x0()
+     << field<12,3> << difference.momentum().abs3()
+     << field<12,3> << (scatterings_total
+                          ? scatterings_total * 2 / (particles.size() * time)
+                          : 0.)
+     << field<10,3> << scatterings_this_interval
+     << field<12,3> << particles.size()
+     << field<10,3> << elapsed_seconds;
+  return ss.str();
 }
 
 
@@ -314,7 +313,7 @@ void Experiment<Modus>::perform_actions(ActionList &actions,
       if (action->is_valid(particles_)) {
         const ParticleList incoming_particles = action->incoming_particles();
         action->generate_final_state();
-        ProcessBranch::ProcessType process_type = action->get_type();
+        ProcessType process_type = action->get_type();
         log.debug("Process Type is: ", process_type);
         if (pauli_blocker_ &&
             action->is_pauli_blocked(particles_, *pauli_blocker_.get())) {
@@ -328,10 +327,9 @@ void Experiment<Modus>::perform_actions(ActionList &actions,
         const double rho = four_current(r_interaction.threevec(), plist,
                                      parameters_.gaussian_sigma, dens_type_,
                                      parameters_.testparticles).abs();
-        const double total_cross_section = action->weight();
         for (const auto &output : outputs_) {
           output->at_interaction(incoming_particles, outgoing_particles, rho,
-                                 total_cross_section, process_type);
+                                 action->raw_weight_value(), process_type);
         }
         log.debug(~einhard::Green(), "✔ ", action);
       } else {

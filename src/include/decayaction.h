@@ -34,12 +34,21 @@ class DecayAction : public Action {
    */
   DecayAction(const ParticleData &p, float time_of_execution);
 
+  /** Add several new decays at once. */
+  void add_decays(DecayBranchList pv);
+
   /** Generate the final state of the decay process.
    * Performs a decay of one particle to two or three particles.
    *
    * \throws InvalidDecay
    */
   void generate_final_state() override;
+
+  float raw_weight_value() const override;
+
+  float total_width() const {
+    return total_width_;
+  }
 
   /**
    * \ingroup exception
@@ -59,6 +68,12 @@ class DecayAction : public Action {
    * Writes information about this decay action to the \p out stream.
    */
   void format_debug_output(std::ostream &out) const override;
+
+  /** list of possible decays  */
+  DecayBranchList decay_channels_;
+
+  /** total decay width */
+  float total_width_;
 
  private:
   /**

@@ -40,9 +40,9 @@ PauliBlocker::PauliBlocker(Configuration conf, const ExperimentParameters &param
   const auto &log = logger<LogArea::PauliBlocking>();
 
   if (ntest_ < 20) {
-    log.error("Phase-space density calculation in Pauli blocking"
-              " will not work reasonably for small number of testparticles."
-              " Recommended number of testparticles is 200.");
+    log.warn("Phase-space density calculation in Pauli blocking"
+             " will not work reasonably for small number of testparticles."
+             " Recommended number of testparticles is 200.");
   }
 
   if (rc_ < rr_ || rr_ < 0.0 || rp_ < 0) {
@@ -85,7 +85,7 @@ float PauliBlocker::phasespace_dens(const ThreeVector r, const ThreeVector p,
     // 0th order interpolation using tabulated values
     index = std::round(std::sqrt(rdist_sqr) / (rr_ + rc_) * weights_.size());
     if (likely(index < weights_.size())) {
-      f += weights_.at(index);
+      f += weights_[index];
     }
   }
   return f / ntest_;

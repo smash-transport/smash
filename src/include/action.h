@@ -16,6 +16,7 @@
 #include "pauliblocking.h"
 #include "particles.h"
 #include "processbranch.h"
+#include "random.h"
 
 namespace Smash {
 
@@ -36,16 +37,8 @@ class Action {
    */
   Action(const ParticleList &in_part, float time_of_execution);
 
-  /// Copying is disabled. Use std::move or create a new Action.
+  /** Copying is disabled. Use pointers or create a new Action. */
   Action(const Action &) = delete;
-
-  /**
-   * Move constructor for Action.
-   *
-   * The move constructor makes moving efficient since it can move the three
-   * std::vector member variables.
-   */
-  Action(Action &&);
 
   /** Virtual Destructor.
    * The declaration of the destructor is necessary to make it virtual.
@@ -57,21 +50,44 @@ class Action {
     return time_of_execution_ < rhs.time_of_execution_;
   }
 
-  /** Returns the total weight, which is a cross section in case of a ScatterAction
-   * and a decay width in case of a DecayAction. */
-  float weight() const {
-    return total_weight_;
-  }
+  /** Return the raw weight value, which is a cross section in case of a
+   * ScatterAction and a decay width in case of a DecayAction.
+   *
+   * Prefer to use a more specific function.
+   */
+  virtual float raw_weight_value() const = 0;
 
   /** Return the process type. */
-  ProcessBranch::ProcessType get_type() const {
+  ProcessType get_type() const {
     return process_type_;
   }
 
   /** Add a new subprocess.  */
-  void add_process(ProcessBranch *p);
+  template<typename Branch>
+  void add_process(Branch* p, ProcessBranchList<Branch>& subprocesses,
+      float& total_weight) {
+    if (p->weight() > really_small) {
+      total_weight += p->weight();
+      subprocesses.emplace_back(std::move(p));
+    }
+  }
   /** Add several new subprocesses at once.  */
-  void add_processes(ProcessBranchList pv);
+  template<typename Branch>
+  void add_processes(ProcessBranchList<Branch> pv,
+      ProcessBranchList<Branch>& subprocesses, float& total_weight) {
+    if (subprocesses.empty()) {
+      subprocesses = std::move(pv);
+      for (auto &proc : subprocesses) {
+        total_weight += proc->weight();
+      }
+    } else {
+      subprocesses.reserve(subprocesses.size() + pv.size());
+      for (auto &proc : pv) {
+        total_weight += proc->weight();
+        subprocesses.emplace_back(std::move(proc));
+      }
+    }
+  }
 
   /**
    * Generate the final state for this action.
@@ -147,14 +163,10 @@ class Action {
    * outgoing particles.
    */
   ParticleList outgoing_particles_;
-  /** list of possible subprocesses  */
-  ProcessBranchList subprocesses_;
   /** time at which the action is supposed to be performed  */
   float time_of_execution_;
-  /** sum of all subprocess weights  */
-  float total_weight_;
   /** type of process */
-  ProcessBranch::ProcessType process_type_;
+  ProcessType process_type_;
 
   /// determine the total energy in the center-of-mass frame
   /// \fpPrecision Why \c double?
@@ -164,7 +176,34 @@ class Action {
    * Decide for a particular final-state channel via Monte-Carlo
    * and return it as a ProcessBranch
    */
-  const ProcessBranch* choose_channel();
+  template<typename Branch>
+  const Branch* choose_channel(
+      const ProcessBranchList<Branch>& subprocesses, float total_weight) {
+    const auto &log = logger<LogArea::Action>();
+    float random_weight = Random::uniform(0.f, total_weight);
+    float weight_sum = 0.;
+    /* Loop through all subprocesses and select one by Monte Carlo, based on
+     * their weights.  */
+    for (const auto &proc : subprocesses) {
+      /* All processes apart from strings should have
+       * a well-defined final state. */
+      if (proc->particle_number() < 1
+          && proc->get_type() != ProcessType::String) {
+        continue;
+      }
+      weight_sum += proc->weight();
+      if (random_weight <= weight_sum) {
+        /* Return the full process information. */
+         return proc.get();
+      }
+    }
+    /* Should never get here. */
+    log.fatal(source_location, "Problem in choose_channel: ",
+              subprocesses.size(), " ", weight_sum, " ", total_weight, " ",
+    //          random_weight, "\n", *this);
+              random_weight, "\n");
+    throw std::runtime_error("problem in choose_channel");
+  }
 
   /**
    * Sample final state momenta (and masses) in general X->2 process.

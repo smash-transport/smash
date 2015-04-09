@@ -179,7 +179,7 @@ void BoxModus::propagate(Particles *particles,
     if (wall_hit) {
       for (const auto &output : output_list) {
         output->at_interaction(incoming_particle, {1, data},
-                               0., 0., ProcessBranch::Wall);
+                               0., 0., ProcessType::Wall);
       }
     }
     log.debug() << data;

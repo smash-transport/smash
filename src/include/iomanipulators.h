@@ -21,13 +21,13 @@ namespace Smash {
  *
  * \tparam w The number of characters the field should have in the output.
  */
-template <int w = 9, typename CharT, typename Traits>
+template <int w = 9, int p = w - 3, typename CharT, typename Traits>
 inline std::basic_ostream<CharT, Traits> &field(
     std::basic_ostream<CharT, Traits> &s) {
   s.put(s.widen(' '));
   s.setf(std::ios_base::fixed, std::ios_base::floatfield);
   s.width(w);
-  s.precision(w - 3);
+  s.precision(p);
   return s;
 }
 

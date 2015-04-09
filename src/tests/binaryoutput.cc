@@ -164,7 +164,7 @@ TEST(fullhistory_format) {
   final_particles.push_back(particles.data(particles.id_max()));
   double rho = 0.123;
   double weight = 3.21;
-  ProcessBranch::ProcessType process_type = ProcessBranch::None;
+  ProcessType process_type = ProcessType::None;
   bin_output->at_interaction(initial_particles, final_particles, rho, weight, process_type);
 
   /* Final state output */
@@ -203,7 +203,8 @@ TEST(fullhistory_format) {
   // interaction:2 smashons -> 1 smashon
   nin = 2;
   nout = 1;
-  VERIFY(compare_interaction_block_header(nin, nout, rho, weight, process_type, binF));
+  VERIFY(compare_interaction_block_header(nin, nout, rho, weight,
+        static_cast<int>(process_type), binF));
   VERIFY(compare_particle(initial_particles[0], binF));
   VERIFY(compare_particle(initial_particles[1], binF));
   VERIFY(compare_particle(final_particles[0], binF));

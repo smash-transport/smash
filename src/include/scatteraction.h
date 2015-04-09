@@ -32,6 +32,11 @@ class ScatterAction : public Action {
   ScatterAction(const ParticleData &in_part1, const ParticleData &in_part2,
                 float time_of_execution);
 
+  /** Add a new collision channel. */
+  void add_collision(CollisionBranch* p);
+  /** Add several new collision channels at once. */
+  void add_collisions(CollisionBranchList pv);
+
   /**
    * Measure distance between incoming particles in center-of-momentum frame.
    * Returns the squared distance.
@@ -47,6 +52,8 @@ class ScatterAction : public Action {
    * \throws InvalidResonanceFormation
    */
   void generate_final_state() override;
+
+  float raw_weight_value() const override;
 
   /**
    * Add all possible subprocesses for this action object. */
@@ -66,7 +73,7 @@ class ScatterAction : public Action {
    * elast_par) but can be overriden in child classes for a different behavior.
    *
    * \param[in] elast_par Elastic cross section parameter from the input file.
-   * 
+   *
    * \return A ProcessBranch object containing the cross section and
    * final-state IDs.
    */
@@ -93,7 +100,7 @@ class ScatterAction : public Action {
   * Each element in the list contains the type of the final-state particle
   * and the cross section for that particular process.
   */
-  virtual ProcessBranchList resonance_cross_sections();
+  virtual CollisionBranchList resonance_cross_sections();
 
   /**
    * Return the 2-to-1 resonance production cross section for a given resonance.
@@ -113,8 +120,8 @@ class ScatterAction : public Action {
                               double s, double cm_momentum_sqr);
 
   /** Find all inelastic 2->2 processes for this reaction. */
-  virtual ProcessBranchList two_to_two_cross_sections() {
-    return ProcessBranchList();
+  virtual CollisionBranchList two_to_two_cross_sections() {
+    return CollisionBranchList();
   }
 
   /** Determine the total energy in the center-of-mass frame,
@@ -127,6 +134,10 @@ class ScatterAction : public Action {
   class InvalidScatterAction : public std::invalid_argument {
     using std::invalid_argument::invalid_argument;
   };
+
+  float cross_section() const {
+    return total_cross_section_;
+  }
 
  protected:
   /** Determine the Mandelstam s variable,
@@ -156,6 +167,12 @@ class ScatterAction : public Action {
    * Writes information about this scatter action to the \p out stream.
    */
   void format_debug_output(std::ostream &out) const override;
+
+  /** List of possible collisions  */
+  CollisionBranchList collision_channels_;
+
+  /** Total cross section */
+  float total_cross_section_;
 
  private:
   /** Check if the scattering is elastic. */

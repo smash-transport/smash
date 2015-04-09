@@ -28,11 +28,11 @@ class ScatterActionBaryonBaryon : public ScatterAction {
    * for a baryon-baryon collision. */
   virtual float total_cross_section() const override;
   /* There is no resonance formation out of two baryons: Return empty list. */
-  ProcessBranchList resonance_cross_sections() override {
-    return ProcessBranchList();
+  CollisionBranchList resonance_cross_sections() override {
+    return CollisionBranchList();
   }
   /** Find all inelastic 2->2 processes for this reaction. */
-  ProcessBranchList two_to_two_cross_sections() override;
+  CollisionBranchList two_to_two_cross_sections() override;
 
  private:
   /**
@@ -46,7 +46,7 @@ class ScatterActionBaryonBaryon : public ScatterAction {
   * with a nucleon. Each element in the list contains the type(s) of the
   * final state particle(s) and the cross section for that particular process.
   */
-  ProcessBranchList nuc_res_to_nuc_nuc(const ParticleType &type_particle1,
+  CollisionBranchList nuc_res_to_nuc_nuc(const ParticleType &type_particle1,
                                        const ParticleType &type_particle2);
 
  protected:
