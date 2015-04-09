@@ -13,6 +13,8 @@
 #include <array>
 #include <cmath>
 
+#include "constants.h"
+
 namespace Smash {
 
 /**
@@ -69,13 +71,22 @@ class ThreeVector {
   double inline sqr() const;
   /// calculate the absolute value
   double inline abs() const;
+  /// calculate the azimuthal angle phi
+  double inline get_phi() const;
+  /// calculate the polar angle theta
+  double inline get_theta() const;
   /** Rotate vector by the given Euler angles phi, theta, psi. If we
    * assume the standard basis x, y, z then this means applying the
    * matrix for a rotation of phi about z, followed by the matrix for
    * a rotation theta about the rotated x axis. Last, psi is a rotation
-   * about the rotated z axis.
-   **/
+   * about the rotated z axis. */
   void inline rotate(double phi, double theta, double psi);
+  /** Rotate the vector around the y axis by the given angle theta. */
+  void inline rotate_around_y(double theta);
+  /** Rotate the vector around the z axis by the given angle theta. */
+  void inline rotate_around_z(double theta);
+  /** Rotate the z-axis onto the vector r. */
+  void inline rotate_to(ThreeVector &r);
   /// negation: Returns \f$-\vec x\f$
   ThreeVector inline operator- () const;
   /// increase this vector by \f$\vec v: \vec x^\prime = \vec x + \vec v\f$
@@ -219,7 +230,19 @@ double inline ThreeVector::abs() const {
   return std::sqrt((*this)*(*this));
 }
 
-void ThreeVector::rotate(double phi, double theta, double psi) {
+double inline ThreeVector::get_phi() const {
+  if (std::abs(x1()) < really_small && std::abs(x2()) < really_small) {
+    return 0.;
+  } else {
+    return std::atan2(x2(), x1());
+  }
+}
+
+double inline ThreeVector::get_theta() const {
+  return std::acos(x3()/abs());
+}
+
+void inline ThreeVector::rotate(double phi, double theta, double psi) {
   // Compute the cosine and sine for each angle.
   double cos_phi = std::cos(phi);
   double sin_phi = std::sin(phi);
@@ -239,6 +262,33 @@ void ThreeVector::rotate(double phi, double theta, double psi) {
   x_[2] = sin_phi * sin_theta * x_old[0]
         - cos_phi * sin_theta * x_old[1]
         + cos_theta * x_old[2];
+}
+
+void inline ThreeVector::rotate_around_y(double theta) {
+  double cost = std::cos(theta);
+  double sint = std::sin(theta);
+  // Get original coordinates.
+  std::array<double, 3> x_old = x_;
+  // Compute new coordinates.
+  x_[0] = cost*x_old[0] + sint*x_old[2];
+  // x_[1] is unchanged
+  x_[2] = -sint*x_old[0] + cost*x_old[2];
+}
+
+void inline ThreeVector::rotate_around_z(double theta) {
+  double cost = std::cos(theta);
+  double sint = std::sin(theta);
+  // Get original coordinates.
+  std::array<double, 3> x_old = x_;
+  // Compute new coordinates.
+  x_[0] = cost*x_old[0] - sint*x_old[1];
+  x_[1] = sint*x_old[0] + cost*x_old[1];
+  // x_[2] is unchanged
+}
+
+void inline ThreeVector::rotate_to(ThreeVector &r) {
+  rotate_around_y(r.get_theta());
+  rotate_around_z(r.get_phi());
 }
 
 }  // namespace Smash

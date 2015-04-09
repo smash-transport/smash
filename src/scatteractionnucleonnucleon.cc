@@ -9,6 +9,7 @@
 
 #include "include/scatteractionnucleonnucleon.h"
 
+#include "include/angles.h"
 #include "include/cxx14compat.h"
 #include "include/kinematics.h"
 #include "include/parametrizations.h"
@@ -108,43 +109,23 @@ void ScatterActionNucleonNucleon::elastic_scattering() {
     bb = std::max(Cugnon_bpp(plab), really_small);
     a = 1.;
   }
-  double ta = -4.*momentum_radial*momentum_radial;
+  double t_max = -4.*momentum_radial*momentum_radial;
   double t;
   if (Random::canonical() <= 1./(1.+a)) {
-    t = Random::expo(bb, 0., ta);
+    t = Random::expo(bb, 0., t_max);
   } else {
-    t = ta - Random::expo(bb, 0., ta);
+    t = t_max - Random::expo(bb, 0., t_max);
   }
-  double c1 = 1. - 2.*t/ta;                       // cos(phi_1)
-  double s1 = std::sqrt(std::max(1.-c1*c1, 0.));  // sin(phi_1)
-  double t1 = 2.*M_PI*Random::canonical();        // theta_1
-  double ct1 = cos(t1);                           // cos(theta_1)
-  double st1 = sin(t1);                           // sin(theta_1)
+
+  // determine scattering angles in center-of-mass frame
+  ThreeVector pscatt = Angles(2.*M_PI*Random::canonical(), 1. - 2.*t/t_max).
+                       threevec();
 
   // 3-momentum of first incoming particle in center-of-mass frame
   ThreeVector pcm = incoming_particles_[0].momentum().
                     LorentzBoost(beta_cm()).threevec();
 
-  double c2 = pcm.x3()/pcm.abs();                 // cos(phi_2)
-  double s2 = std::sqrt(std::max(1.-c2*c2, 0.));  // sin(phi_2)
-  double t2;                                      // theta_2
-  if (std::abs(pcm.x1()) < really_small && std::abs(pcm.x2()) < really_small) {
-    t2 = 0.;
-  } else {
-    t2 = std::atan2(pcm.x2(), pcm.x1());
-  }
-  double ct2 = cos(t2);                           // cos(theta_2)
-  double st2 = sin(t2);                           // sin(theta_2)
-  double ss = c2*s1*ct1 + s2*c1;
-
-  ThreeVector pscatt;
-  pscatt[0] = ss*ct2 - s1*st1*st2;
-  pscatt[1] = ss*st2 + s1*st1*ct2;
-  pscatt[2] = c1*c2  - s1*s2*ct1;
-
-  if (std::abs(pscatt.abs()-1.) > 1E-6) {
-    log.error("pscatt not normalized: ", pscatt.abs());
-  }
+  pscatt.rotate_to(pcm);
 
   /* Set 4-momentum: Masses stay the same, 3-momentum changes. */
   outgoing_particles_[0].set_4momentum(outgoing_particles_[0].effective_mass(),
