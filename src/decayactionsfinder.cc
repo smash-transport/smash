@@ -33,10 +33,10 @@ ActionList DecayActionsFinder::find_possible_actions(
       continue;      /* particle doesn't decay */
     }
 
-    ProcessBranchList processes =
+    DecayBranchList processes =
                       p.type().get_partial_widths(p.effective_mass());
     // total decay width (mass-dependent)
-    const float width = total_weight(processes);
+    const float width = total_weight<DecayBranch>(processes);
 
     /* Exponential decay. Lifetime tau = 1 / width
      * t / tau = width * t (remember GeV-fm conversion)
@@ -59,7 +59,7 @@ ActionList DecayActionsFinder::find_possible_actions(
       // => decay_time ∈ [0, dt[
       // => the particle decays in this timestep.
       auto act = make_unique<DecayAction>(p, decay_time);
-      act->add_processes(std::move(processes));
+      act->add_decays(std::move(processes));
       actions.emplace_back(std::move(act));
     }
   }
@@ -75,7 +75,7 @@ ActionList DecayActionsFinder::find_final_actions
       continue;      /* particle doesn't decay */
     }
     auto act = make_unique<DecayAction>(p, 0.f);
-    act->add_processes(p.type().get_partial_widths(p.effective_mass()));
+    act->add_decays(p.type().get_partial_widths(p.effective_mass()));
     actions.emplace_back(std::move(act));
   }
   return std::move(actions);

@@ -19,46 +19,15 @@
 #include "include/pauliblocking.h"
 #include "include/processbranch.h"
 #include "include/quantumnumbers.h"
-#include "include/random.h"
 #include "include/resonances.h"
 
 namespace Smash {
 
 Action::Action(const ParticleList &in_part, float time_of_execution)
-    : incoming_particles_(in_part), time_of_execution_(time_of_execution),
-      total_weight_(0.) {}
-
-Action::Action(Action &&a)
-    : incoming_particles_(std::move(a.incoming_particles_)),
-      outgoing_particles_(std::move(a.outgoing_particles_)),
-      subprocesses_(std::move(a.subprocesses_)),
-      time_of_execution_(a.time_of_execution_),
-      total_weight_(a.total_weight_) {}
+    : incoming_particles_(in_part), time_of_execution_(time_of_execution) {}
 
 Action::~Action() = default;
 
-
-void Action::add_process(ProcessBranch *p) {
-  if (p->weight() > really_small) {
-    total_weight_ += p->weight();
-    subprocesses_.emplace_back(std::move(p));
-  }
-}
-
-void Action::add_processes(ProcessBranchList pv) {
-  if (subprocesses_.empty()) {
-    subprocesses_ = std::move(pv);
-    for (auto &proc : subprocesses_) {
-      total_weight_ += proc->weight();
-    }
-  } else {
-    subprocesses_.reserve(subprocesses_.size() + pv.size());
-    for (auto &proc : pv) {
-      total_weight_ += proc->weight();
-      subprocesses_.emplace_back(std::move(proc));
-    }
-  }
-}
 
 bool Action::is_valid(const Particles &particles) const {
   for (const auto &part : incoming_particles_) {
@@ -110,34 +79,6 @@ FourVector Action::get_interaction_point() {
   interaction_point /= incoming_particles_.size();
   return interaction_point;
 }
-
-
-const ProcessBranch* Action::choose_channel() {
-  const auto &log = logger<LogArea::Action>();
-  float random_weight = Random::uniform(0.f, total_weight_);
-  float weight_sum = 0.;
-  /* Loop through all subprocesses and select one by Monte Carlo, based on
-   * their weights.  */
-  for (const auto &proc : subprocesses_) {
-    /* All processes apart from strings should have
-     * a well-defined final state. */
-    if (proc->particle_number() < 1
-        && proc->get_type() != ProcessBranch::String) {
-      continue;
-    }
-    weight_sum += proc->weight();
-    if (random_weight <= weight_sum) {
-      /* Return the full process information. */
-       return proc.get();
-    }
-  }
-  /* Should never get here. */
-  log.fatal(source_location, "Problem in choose_channel: ",
-            subprocesses_.size(), " ", weight_sum, " ", total_weight_, " ",
-            random_weight, "\n", *this);
-  throw std::runtime_error("problem in choose_channel");
-}
-
 
 void Action::perform(Particles *particles, size_t &id_process) {
   const auto &log = logger<LogArea::Action>();

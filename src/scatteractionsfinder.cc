@@ -102,18 +102,18 @@ ActionPtr ScatterActionsFinder::check_collision(
 
   /* Add various subprocesses.  */
   /* (1) elastic */
-  act->add_process(act->elastic_cross_section(elastic_parameter_));
+  act->add_collision(act->elastic_cross_section(elastic_parameter_));
   /* (2) resonance formation (2->1) */
-  act->add_processes(act->resonance_cross_sections());
+  act->add_collisions(act->resonance_cross_sections());
   /* (3) 2->2 (inelastic) */
-  act->add_processes(act->two_to_two_cross_sections());
+  act->add_collisions(act->two_to_two_cross_sections());
   /* (4) string excitation */
-  act->add_process(act->string_excitation_cross_section());
+  act->add_collision(act->string_excitation_cross_section());
 
   {
     /* distance criteria according to cross_section */
     const double distance_squared = act->particle_distance();
-    if (distance_squared >= act->weight() * fm2_mb * M_1_PI
+    if (distance_squared >= act->cross_section() * fm2_mb * M_1_PI
                             / static_cast<float>(testparticles_)) {
       return nullptr;
     }

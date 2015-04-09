@@ -58,7 +58,7 @@ class OutputInterface {
                               const ParticleList &outgoing_particles,
                               const double density,
                               const double total_cross_section,
-                              const ProcessBranch::ProcessType process_type) {
+                              const ProcessType process_type) {
     SMASH_UNUSED(incoming_particles);
     SMASH_UNUSED(outgoing_particles);
     SMASH_UNUSED(density);

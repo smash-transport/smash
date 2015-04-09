@@ -94,7 +94,7 @@ void BinaryOutputCollisions::at_interaction(const ParticleList &incoming,
                              const ParticleList &outgoing,
                              const double density,
                              const double total_cross_section,
-                             const ProcessBranch::ProcessType process_type) {
+                             const ProcessType process_type) {
   char ichar = 'i';
   std::fwrite(&ichar, sizeof(char), 1, file_.get());
   write(incoming.size());
