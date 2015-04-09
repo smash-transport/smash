@@ -38,8 +38,9 @@ class ScatterActionNucleonNucleon : public ScatterActionBaryonBaryon {
   ProcessBranchList two_to_two_cross_sections() override;
 
  protected:
-  /** Perform an elastic two-body scattering with anisotropic angular distributions. */
-  virtual void momenta_exchange() override;
+  /** Perform an elastic nucleon-nucleon scattering with
+   * anisotropic angular distributions. */
+  virtual void elastic_scattering() override;
 
  private:
   /**

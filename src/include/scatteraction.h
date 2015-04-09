@@ -145,7 +145,7 @@ class ScatterAction : public Action {
   ThreeVector beta_cm() const;
 
   /** Perform an elastic two-body scattering, i.e. just exchange momentum. */
-  virtual void momenta_exchange();
+  virtual void elastic_scattering();
 
   /**
    * \ingroup logging

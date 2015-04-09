@@ -82,7 +82,7 @@ static float Cugnon_bnp(float plab) {
 }
 
 
-void ScatterActionNucleonNucleon::momenta_exchange() {
+void ScatterActionNucleonNucleon::elastic_scattering() {
   const auto &log = logger<LogArea::ScatterAction>();
   outgoing_particles_[0] = incoming_particles_[0];
   outgoing_particles_[1] = incoming_particles_[1];

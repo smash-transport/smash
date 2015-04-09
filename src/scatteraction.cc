@@ -45,7 +45,7 @@ void ScatterAction::generate_final_state() {
     case ProcessBranch::Elastic:
       /* 2->2 elastic scattering */
       log.debug("Process: Elastic collision.", process_type_);
-      momenta_exchange();
+      elastic_scattering();
       break;
     case ProcessBranch::TwoToOne:
       /* resonance formation */
@@ -247,7 +247,7 @@ ProcessBranchList ScatterAction::resonance_cross_sections() {
 }
 
 
-void ScatterAction::momenta_exchange() {
+void ScatterAction::elastic_scattering() {
   const auto &log = logger<LogArea::ScatterAction>();
   outgoing_particles_[0] = incoming_particles_[0];
   outgoing_particles_[1] = incoming_particles_[1];
@@ -255,7 +255,8 @@ void ScatterAction::momenta_exchange() {
   /* Determine absolute momentum in center-of-mass frame. */
   const double momentum_radial = cm_momentum();
 
-  /* Particles exchange momenta and scatter to random direction (isotropically). */
+  /* Particles exchange momenta and scatter to random direction
+   * (isotropically). */
   Angles phitheta;
   phitheta.distribute_isotropically();
   log.debug("Random momentum: ", momentum_radial, " ", phitheta);
