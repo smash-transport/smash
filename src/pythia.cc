@@ -36,7 +36,7 @@ namespace Smash {
       /* select only inelastic events: */
       pythia.readString("SoftQCD:inelastic = on");
       /* suppress unnecessary output */
-      pythia.readString("Print:quiet = on");
+///      pythia.readString("Print:quiet = on");
       /* No resonance decays, since the resonances will be handled by SMASH */
       pythia.readString("HadronLevel:Decay = off");
       /* Set the random seed of the Pythia Random Number Generator.
@@ -44,19 +44,25 @@ namespace Smash {
        * SMASH, since every call of pythia.init should produce
        * different events. */
       pythia.readString("Random:setSeed = on");
-      std::stringstream buffer;
-      buffer << "Random:seed = " << Random::canonical() ;
-      pythia.readString(buffer.str());
+      std::stringstream buffer1;
+      buffer1 << "Random:seed = " << Random::canonical() ;
+      pythia.readString(buffer1.str());
       /* set the incoming particles */
-      buffer << "Beams:idA = " << incoming_particles_[0].type().pdgcode().dump();
-      pythia.readString(buffer.str());    
-      buffer << "Beams:idB = " << incoming_particles_[1].type().pdgcode().dump();
-      pythia.readString(buffer.str());
+      std::stringstream buffer2;
+      buffer2 << "Beams:idA = " << incoming_particles_[0].type().pdgcode().get_decimal();
+      pythia.readString(buffer2.str());
+      log.info("First particle in string excitation: ", incoming_particles_[0].type().pdgcode().get_decimal());    
+      std::stringstream buffer3; 
+      buffer3 << "Beams:idB = " << incoming_particles_[1].type().pdgcode().get_decimal();
+      log.info("Second particle in string excitation: ", incoming_particles_[1].type().pdgcode().get_decimal());
+      pythia.readString(buffer3.str());
       /* Calculate the center-of-mass energy of this collision */
       double sqrts = (incoming_particles_[0].momentum() +
              incoming_particles_[1].momentum()).abs();
-      buffer << "Beams:eCM = " << sqrts;
-      pythia.readString(buffer.str());
+      std::stringstream buffer4;
+      buffer4 << "Beams:eCM = " << sqrts;
+      pythia.readString(buffer4.str());
+      log.info("Pythia call with eCM = ", buffer4.str());
       /* Initialize. */
       pythia.init();
       /* Short notation for Pythia event */
@@ -67,7 +73,7 @@ namespace Smash {
 	if (event[i].isFinal()) {
 	  if (event[i].isHadron()) {
              const int pythia_id = event[i].id();
-             log.info("PDG ID from Pythia:", pythia_id);
+             log.debug("PDG ID from Pythia:", pythia_id);
 	     std::string s = std::to_string(pythia_id);
              PdgCode pythia_code(s); 
              ParticleData new_particle_(ParticleType::pythiafind(pythia_code));    
@@ -76,7 +82,8 @@ namespace Smash {
              momentum.set_x1(event[i].px());
              momentum.set_x2(event[i].py());
              momentum.set_x3(event[i].pz());
-             new_particle_.set_4momentum(momentum);                                
+             new_particle_.set_4momentum(momentum);
+             log.debug("4-momentum from Pythia: ", momentum);                                
              outgoing_particles_.push_back(new_particle_);   
           }
         }

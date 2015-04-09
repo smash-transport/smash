@@ -159,12 +159,12 @@ Modi:
     Collider:
         # Definitions for the projectile:
         Projectile:
-            Particles: {2212: 29, 2112: 34}  # Copper63
+            Particles: {2212: 1, 2112: 0}  # Copper63
             Automatic: true
             Deformed: false
         # Definitions for the target:
         Target:
-            Particles: {2212: 29, 2112: 34}  # Copper63
+            Particles: {2212: 1, 2112: 0}  # Copper63
             Automatic: true
             Deformed: false
 

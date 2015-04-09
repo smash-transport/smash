@@ -50,7 +50,6 @@ void ScatterAction::generate_final_state() {
   /* The production point of the new particles.  */
   FourVector middle_point = get_interaction_point();
 
-  ParticleList string_outgoing; 
   switch (process_type_) {
     case ProcessType::Elastic:
       /* 2->2 elastic scattering */
@@ -72,7 +71,7 @@ void ScatterAction::generate_final_state() {
     case ProcessType::String:
       /* string excitation */
       log.debug("Process: String Excitation.");
-      string_outgoing = string_excitation(incoming_particles_);
+      outgoing_particles_ = string_excitation(incoming_particles_);
       break;
     case ProcessType::None:
       log.debug("ProcessType None should not have been selected");
