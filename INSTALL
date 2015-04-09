@@ -24,6 +24,7 @@ Further tools that can be helpful (mainly for development):
 - valgrind
 - cpplint
 - cppcheck
+- PYTHIA, if string excitation is necessary
 
 Support for ROOT output is only enabled if a suitable version of ROOT is found
 on the system.
@@ -142,4 +143,18 @@ Let's assume Eigen headers will be unpacked in $HOME.
 - in smash/build/, create build files with
 
   cmake -DCMAKE_INSTALL_PREFIX=$HOME/[latest-eigen]/ ..
-*/
+
+Installing Pythia
+------------------------------
+
+- get the Pythia tarball from http://home.thep.lu.se/~torbjorn/Pythia.html
+
+- Unzip and expand it with tar xvfz pythia8205.tgz
+
+- Move to the created pythia8205 directory and compile as described there
+
+   ./configure
+   make
+
+- Set the path so that pythia8-config (in pythia8205/bin) is found and 
+  make it executable if necessary
