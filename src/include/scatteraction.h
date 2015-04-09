@@ -49,6 +49,10 @@ class ScatterAction : public Action {
   void generate_final_state() override;
 
   /**
+   * Add all possible subprocesses for this action object. */
+  void add_all_processes(float elastic_parameter);
+
+  /**
    * Determine the (parametrized) total cross section for this collision. This
    * is currently only used for calculating the string excitation cross section.
    */

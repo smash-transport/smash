@@ -87,6 +87,18 @@ void ScatterAction::generate_final_state() {
 }
 
 
+void ScatterAction::add_all_processes(float elastic_parameter) {
+  /* (1) elastic */
+  add_process(elastic_cross_section(elastic_parameter));
+  /* (2) resonance formation (2->1) */
+  add_processes(resonance_cross_sections());
+  /* (3) 2->2 (inelastic) */
+  add_processes(two_to_two_cross_sections());
+  /* (4) string excitation */
+  add_process(string_excitation_cross_section());
+}
+
+
 ThreeVector ScatterAction::beta_cm() const {
   FourVector mom = incoming_particles_[0].momentum() +
                    incoming_particles_[1].momentum();

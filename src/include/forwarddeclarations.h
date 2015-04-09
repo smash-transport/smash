@@ -53,6 +53,7 @@ template <typename T>
 using build_vector_ = std::vector<T, std::allocator<T>>;
 
 class Action;
+class ScatterAction;
 class BoxModus;
 class Clock;
 class Configuration;
@@ -72,6 +73,7 @@ class DecayBranch;
 struct ExperimentParameters;
 
 using ActionPtr = build_unique_ptr_<Action>;
+using ScatterActionPtr = build_unique_ptr_<ScatterAction>;
 using ActionList = build_vector_<ActionPtr>;
 
 using OutputsList = build_vector_<build_unique_ptr_<OutputInterface>>;

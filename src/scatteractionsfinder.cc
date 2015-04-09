@@ -71,28 +71,13 @@ double ScatterActionsFinder::collision_time(const ParticleData &p1,
   }
 }
 
-ActionPtr ScatterActionsFinder::check_collision(
-    const ParticleData &data_a, const ParticleData &data_b, float dt) const {
-  const auto &log = logger<LogArea::FindScatter>();
 
-  /* just collided with this particle */
-  if (data_a.id_process() >= 0 && data_a.id_process() == data_b.id_process()) {
-    log.debug("Skipping collided particles at time ", data_a.position().x0(),
-              " due to process ", data_a.id_process(),
-              "\n    ", data_a,
-              "\n<-> ", data_b);
-    return nullptr;
-  }
-
-  /* check according timestep: positive and smaller */
-  const float time_until_collision = collision_time(data_a, data_b);
-  if (time_until_collision < 0.f
-          || time_until_collision >= dt) {
-    return nullptr;
-  }
-
-  /* Create ScatterAction object. */
-  std::unique_ptr<ScatterAction> act;
+/* Construct a ScatterAction object,
+ * based on the types of the incoming particles. */
+static ScatterActionPtr construct_scatter_action(const ParticleData &data_a,
+                                                 const ParticleData &data_b,
+                                                 float time_until_collision) {
+  ScatterActionPtr act;
   if (data_a.is_baryon() && data_b.is_baryon()) {
     if (data_a.pdgcode().iso_multiplet() == 0x1112 &&
         data_b.pdgcode().iso_multiplet() == 0x1112) {
@@ -109,31 +94,51 @@ ActionPtr ScatterActionsFinder::check_collision(
     act = make_unique<ScatterActionMesonMeson>(data_a, data_b,
                                                time_until_collision);
   }
+  return std::move(act);
+}
 
-  /* Add various subprocesses.  */
-  /* (1) elastic */
-  act->add_process(act->elastic_cross_section(elastic_parameter_));
-  /* (2) resonance formation (2->1) */
-  act->add_processes(act->resonance_cross_sections());
-  /* (3) 2->2 (inelastic) */
-  act->add_processes(act->two_to_two_cross_sections());
-  /* (4) string excitation */
-  act->add_process(act->string_excitation_cross_section());
 
-  {
-    /* distance criteria according to cross_section */
-    const double distance_squared = act->particle_distance();
-    if (distance_squared >= act->weight() * fm2_mb * M_1_PI
-                            / static_cast<float>(testparticles_)) {
-      return nullptr;
-    }
-    log.debug("particle distance squared: ", distance_squared,
+ActionPtr ScatterActionsFinder::check_collision(
+    const ParticleData &data_a, const ParticleData &data_b, float dt) const {
+  const auto &log = logger<LogArea::FindScatter>();
+
+  /* just collided with this particle */
+  if (data_a.id_process() >= 0 && data_a.id_process() == data_b.id_process()) {
+    log.debug("Skipping collided particles at time ", data_a.position().x0(),
+              " due to process ", data_a.id_process(),
               "\n    ", data_a,
               "\n<-> ", data_b);
+    return nullptr;
   }
+
+  /* Determine time of collision. */
+  const float time_until_collision = collision_time(data_a, data_b);
+
+  /* Check that collision happens in this timestep. */
+  if (time_until_collision < 0.f || time_until_collision >= dt) {
+    return nullptr;
+  }
+
+  /* Create ScatterAction object. */
+  ScatterActionPtr act = construct_scatter_action(data_a, data_b,
+                                                  time_until_collision);
+
+  /* Add various subprocesses.  */
+  act->add_all_processes(elastic_parameter_);
+
+  /* distance criterion according to cross_section */
+  const double distance_squared = act->particle_distance();
+  if (distance_squared >= act->weight() * fm2_mb * M_1_PI
+                          / static_cast<float>(testparticles_)) {
+    return nullptr;
+  }
+  log.debug("particle distance squared: ", distance_squared,
+            "\n    ", data_a,
+            "\n<-> ", data_b);
 
   return std::move(act);
 }
+
 
 template <typename F>
 inline void iterate_all_pairs(
