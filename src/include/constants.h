@@ -36,6 +36,12 @@ constexpr double twopi = 2. * M_PI;
  */
 constexpr float nuclear_density = 0.168;
 /**
+ * Physical error tolerance
+ *
+ * \fpPrecision Why \c double?
+ */
+constexpr double small_number = 1.0e-4;
+/**
  * nucleon mass in GeV
  *
  * Note that this should be the same as in particles.txt.

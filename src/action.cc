@@ -94,6 +94,7 @@ void Action::perform(Particles *particles, uint32_t id_process) {
   log.debug("Particle map now has ", particles->size(), " elements.");
 
   check_conservation(id_process);
+
 }
 
 
@@ -162,15 +163,55 @@ void Action::sample_2body_phasespace() {
 }
 
 
+<<<<<<< HEAD
 void Action::check_conservation(const uint32_t &id_process) const {
+=======
+void Action::check_conservation(const size_t &id_process, const ProcessBranch::ProcessType &process_type) const {
+>>>>>>> Conservation checks adjusted for Pythia
   const auto &log = logger<LogArea::Action>();
-  QuantumNumbers before(incoming_particles_);
-  QuantumNumbers after(outgoing_particles_);
-  std::string err_msg = before.report_deviations(after);
-  if (before != after) {
-    log.error() << err_msg;
-    throw std::runtime_error("Conservation laws violated in process " +
+  /* If the process is not a string excitation, check all quantum numbers */
+   
+  if(process_type != ProcessBranch::String) {
+    QuantumNumbers before(incoming_particles_);
+    QuantumNumbers after(outgoing_particles_);
+    std::string err_msg = before.report_deviations(after);
+    if (before != after) {
+      log.error() << err_msg;
+      throw std::runtime_error("Conservation laws violated in process " +
                              std::to_string(id_process));
+    }
+  }
+  /* String excitations produce particles that are not known to SMASH and will 
+     therefore cause problems with quantum number consvervation, since they all
+     get the dummy type PY. Only energy and momentum should be conserved at this 
+     point. */
+  else {
+    FourVector incoming_momentum;
+    FourVector outgoing_momentum;
+    for (ParticleData pin : incoming_particles_) {
+      incoming_momentum += pin.momentum(); 
+    }
+    for (ParticleData pout : outgoing_particles_) {
+      outgoing_momentum += pout.momentum(); 
+    }
+    FourVector momentum_diff;
+    momentum_diff = incoming_momentum - outgoing_momentum; 
+    if (std::abs(momentum_diff.x0()) > small_number){
+      log.error("Energy is not conserved by: ", momentum_diff.x0());
+      throw std::runtime_error("Conservation laws violated in string excitation.");     
+    }
+    if (std::abs(momentum_diff.x1()) > small_number){
+      log.error("x-momentum is not conserved by: ", momentum_diff.x1());
+      throw std::runtime_error("Conservation laws violated in string excitation.");
+    }
+    if (std::abs(momentum_diff.x2()) > small_number){
+      log.error("y-momentum is not conserved by: ", momentum_diff.x2());
+      throw std::runtime_error("Conservation laws violated in string excitation.");
+    }
+    if (std::abs(momentum_diff.x3()) > small_number){
+      log.error("z-momentum is not conserved by: ", momentum_diff.x3());
+      throw std::runtime_error("Conservation laws violated in string excitation.");
+    }
   }
 }
 

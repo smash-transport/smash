@@ -36,7 +36,7 @@ namespace Smash {
       /* select only inelastic events: */
       pythia.readString("SoftQCD:inelastic = on");
       /* suppress unnecessary output */
-///      pythia.readString("Print:quiet = on");
+      pythia.readString("Print:quiet = on");
       /* No resonance decays, since the resonances will be handled by SMASH */
       pythia.readString("HadronLevel:Decay = off");
       /* Set the random seed of the Pythia Random Number Generator.
