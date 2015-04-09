@@ -666,6 +666,7 @@ INPUT                  = \
                          doc/ \
                          src/include/ \
                          src/tests/unittest.h \
+                         src/tests/setup.h \
                          src/ \
                          AUTHORS DEBUG INSTALL \
                          3rdparty/einhard/einhard.hpp
