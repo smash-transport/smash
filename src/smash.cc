@@ -305,7 +305,7 @@ int main(int argc, char *argv[]) {
     if (modus)
       configuration["General"]["Modus"] = std::string(modus);
     if (end_time)
-      configuration["General"]["End_Time"] = abs(atof(end_time));
+      configuration["General"]["End_Time"] = std::abs(atof(end_time));
 
     /* set up logging */
     set_default_loglevel(configuration.take({"Logging", "default"},
