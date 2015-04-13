@@ -8,15 +8,13 @@
  */
 
 #include "unittest.h"
-
-#include <cstdio>
+#include "setup.h"
 
 #include "../include/particles.h"
 #include "../include/constants.h"
 #include "../include/particledata.h"
 #include "../include/pdgcode.h"
 #include "../include/logging.h"
-#include "../include/macros.h"
 #include <algorithm>
 
 using namespace Smash;
@@ -39,20 +37,13 @@ TEST(init_particle_types) {
       "Delta- 1.232 0.117 1114\n");
 }
 
-static ParticleData create_smashon_particle(int id = -1) {
-  return ParticleData{ParticleType::find(0x661), id};
-}
-
 TEST(everything) {
   const einhard::Logger<> log(einhard::ALL);
-  ParticleData particle_a = create_smashon_particle(0),
-               particle_b = create_smashon_particle(1);
-
   /* 2 particles with null momenta */
-  particle_a.set_4momentum(0.1, 0.0, 0.0, 0.0);
-  particle_b.set_4momentum(0.1, 0.0, 0.0, 0.0);
-  particle_a.set_4position(FourVector(1., 1., 1., 1.));
-  particle_b.set_4position(FourVector(2., 2., 2., 2.));
+  const auto particle_a = Test::smashon(Test::Position{1., 1., 1., 1.},
+                                        Test::Momentum{0.1, 0.0, 0.0, 0.0}, 0);
+  const auto particle_b = Test::smashon(Test::Position{2., 2., 2., 2.},
+                                        Test::Momentum{0.1, 0.0, 0.0, 0.0}, 1);
 
   /* check the Particles class itself */
   Particles particles;

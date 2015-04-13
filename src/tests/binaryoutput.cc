@@ -7,6 +7,7 @@
  *
  */
 #include "unittest.h"
+#include "setup.h"
 
 #include <cstdio>
 #include <cstring>
@@ -15,44 +16,28 @@
 #include <fstream>
 #include <string>
 #include <vector>
-#include <boost/filesystem.hpp>
 #include <include/config.h>
 
 #include "../include/binaryoutputcollisions.h"
 #include "../include/binaryoutputparticles.h"
 #include "../include/clock.h"
 #include "../include/outputinterface.h"
-#include "../include/particles.h"
 #include "../include/processbranch.h"
-#include "../include/random.h"
 
 using namespace Smash;
 
 static const bf::path testoutputpath = bf::absolute(SMASH_TEST_OUTPUT_PATH);
-static auto random_value = Random::make_uniform_distribution(-15.0, +15.0);
 
 TEST(directory_is_created) {
   bf::create_directory(testoutputpath);
   VERIFY(bf::exists(testoutputpath));
 }
 
-static const float mass_smashon = 0.123;
-static std::string mass_str = std::to_string(mass_smashon);
-static std::string width_str = "1.200";
-static std::string pdg_str = "661";
-static std::string smashon_str = "smashon " + mass_str + " "
-    + width_str + " " + pdg_str + "\n";
-static const int zero = 0;
-static const int current_format_version = 3;
-
-static ParticleData create_smashon_particle() {
-  ParticleData particle = ParticleData{ParticleType::find(0x661)};
-  particle.set_4momentum(mass_smashon, random_value(), random_value(),
-                         random_value());
-  particle.set_4position(FourVector(random_value(), random_value(),
-                                    random_value(), random_value()));
-  return particle;
+TEST(init_particletypes) {
+  Test::create_smashon_particletypes();
 }
+
+static const int current_format_version = 3;
 
 /* A set of convienient functions to read binary */
 
@@ -141,34 +126,29 @@ TEST(fullhistory_format) {
   VERIFY(bf::exists(testoutputpath / "collisions_binary.bin"));
 
   /* create two smashon particles */
-  ParticleType::create_type_list(
-      "# NAME MASS[GEV] WIDTH[GEV] PDG\n" + smashon_str);
-  Particles particles;
-  ParticleData particle = create_smashon_particle();
-  particles.add_data(particle);
-  ParticleData second_particle = create_smashon_particle();
-  particles.add_data(second_particle);
+  const auto particles =
+      Test::create_particles(2, [] { return Test::smashon_random(); });
 
   int event_id = 0;
   /* Write initial state output: the two smashons we created */
-  bin_output->at_eventstart(particles, event_id);
+  bin_output->at_eventstart(*particles, event_id);
 
   /* Create interaction smashon + smashon -> smashon */
   std::vector<ParticleData> initial_particles, final_particles;
-  initial_particles.push_back(particles.data(0));
-  initial_particles.push_back(particles.data(1));
-  particles.remove(0);
-  particles.remove(1);
-  ParticleData final_particle = create_smashon_particle();
-  particles.add_data(final_particle);
-  final_particles.push_back(particles.data(particles.id_max()));
+  initial_particles.push_back(particles->data(0));
+  initial_particles.push_back(particles->data(1));
+  particles->remove(0);
+  particles->remove(1);
+  ParticleData final_particle = Test::smashon_random();
+  particles->add_data(final_particle);
+  final_particles.push_back(particles->data(particles->id_max()));
   double rho = 0.123;
   double weight = 3.21;
   ProcessType process_type = ProcessType::None;
   bin_output->at_interaction(initial_particles, final_particles, rho, weight, process_type);
 
   /* Final state output */
-  bin_output->at_eventend(particles, event_id);
+  bin_output->at_eventend(*particles, event_id);
 
   /*
    * Now we have an artificially generated binary output.
@@ -230,33 +210,28 @@ TEST(particles_format) {
   VERIFY(bf::exists(testoutputpath / "particles_binary.bin"));
 
   /* create two smashon particles */
-  /*ParticleType::create_type_list( // already created in a previous test
-       "# NAME MASS[GEV] WIDTH[GEV] PDG\n" + smashon_str); */
-  Particles particles;
-  ParticleData particle = create_smashon_particle();
-  particles.add_data(particle);
-  ParticleData second_particle = create_smashon_particle();
-  particles.add_data(second_particle);
+  const auto particles =
+      Test::create_particles(2, [] { return Test::smashon_random(); });
 
   int event_id = 0;
   /* Write initial state output: the two smashons we created */
-  bin_output->at_eventstart(particles, event_id);
+  bin_output->at_eventstart(*particles, event_id);
 
   /* Interaction smashon + smashon -> smashon */
   std::vector<ParticleData> initial_particles, final_particles;
-  initial_particles.push_back(particles.data(0));
-  initial_particles.push_back(particles.data(1));
-  particles.remove(0);
-  particles.remove(1);
-  ParticleData final_particle = create_smashon_particle();
-  particles.add_data(final_particle);
-  final_particles.push_back(particles.data(particles.id_max()));
+  initial_particles.push_back(particles->data(0));
+  initial_particles.push_back(particles->data(1));
+  particles->remove(0);
+  particles->remove(1);
+  ParticleData final_particle = Test::smashon_random();
+  particles->add_data(final_particle);
+  final_particles.push_back(particles->data(particles->id_max()));
   Clock clock;
 
-  bin_output->at_intermediate_time(particles, event_id, clock);
+  bin_output->at_intermediate_time(*particles, event_id, clock);
 
   /* Final state output */
-  bin_output->at_eventend(particles, event_id);
+  bin_output->at_eventend(*particles, event_id);
   /*
    * Now we have an artificially generated binary output.
    * Let us try if we can read and understand it.

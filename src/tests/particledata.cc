@@ -8,7 +8,7 @@
  */
 
 #include "unittest.h"
-#include "../include/particledata.h"
+#include "setup.h"
 #include "../include/pdgcode.h"
 
 using namespace Smash;
@@ -29,10 +29,6 @@ TEST(init_particle_types) {
       "Delta+ 1.232 0.117 2214\n"
       "Delta0 1.232 0.117 2114\n"
       "Delta- 1.232 0.117 1114\n");
-}
-
-static ParticleData create_smashon_particle(int id = -1) {
-  return ParticleData{ParticleType::find(0x661), id};
 }
 
 TEST(create_particledata_piplus) {
@@ -57,7 +53,7 @@ TEST(create_particledata_piplus) {
 
 TEST(set_get) {
   PdgCode smashon = 0x661;
-  ParticleData p = create_smashon_particle();
+  ParticleData p = Test::smashon();
   p.set_id(4);
   COMPARE(p.id(), 4);
   COMPARE(p.pdgcode(), smashon);
@@ -75,9 +71,7 @@ TEST(set_get) {
 }
 
 TEST(set_get2) {
-  ParticleData p = create_smashon_particle();
-  FourVector X(3.5, 3.6, 3.7, 2345.3);
-  p.set_4position(X);
+  ParticleData p = Test::smashon(Test::Position{3.5, 3.6, 3.7, 2345.3});
   COMPARE(p.position().x0(), 3.5);
   COMPARE(p.position().x1(), 3.6);
   COMPARE(p.position().x2(), 3.7);
@@ -100,9 +94,9 @@ TEST(set_get2) {
 }
 
 TEST(comparisons) {
-  ParticleData p = create_smashon_particle(1);
-  ParticleData q = create_smashon_particle(2);
-  ParticleData r = create_smashon_particle(1);
+  ParticleData p = Test::smashon(1);
+  ParticleData q = Test::smashon(2);
+  ParticleData r = Test::smashon(1);
   VERIFY(!(p == q));
   VERIFY(  p == r );
   VERIFY(  p == 1 );

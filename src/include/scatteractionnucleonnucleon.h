@@ -33,7 +33,7 @@ class ScatterActionNucleonNucleon : public ScatterActionBaryonBaryon {
    * \return A ProcessBranch object containing the cross section and
    * final-state IDs.
    */
-  CollisionBranch* elastic_cross_section(float elast_par) override;
+  CollisionBranchPtr elastic_cross_section(float elast_par) override;
   /** Find all inelastic 2->2 processes for this reaction. */
   CollisionBranchList two_to_two_cross_sections() override;
 

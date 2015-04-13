@@ -34,7 +34,7 @@ set(CMAKE_C_FLAGS_PROFILING "-O3 -DNDEBUG -pg" CACHE STRING "Flags used by the c
 set(CMAKE_EXE_LINKER_FLAGS_PROFILING "${CMAKE_EXE_LINKER_FLAGS_RELEASE} -pg" CACHE STRING "Flags used by the compiler during profile builds." FORCE)
 mark_as_advanced(CMAKE_CXX_FLAGS_PROFILING CMAKE_C_FLAGS_PROFILING CMAKE_EXE_LINKER_FLAGS_RELEASE)
 
-# Set the relevant generic g++ flags (optimisation + warnings)
+# Set the relevant generic compiler flags (optimisation + warnings)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W -Wall -Wextra -Wmissing-declarations -Wpointer-arith -Wshadow -Wuninitialized -Winit-self -Wfloat-equal -Wundef -Wcast-align -Wformat=2 -Wold-style-cast -std=c++11 -mfpmath=sse")
 
@@ -42,7 +42,8 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W -Wall -Wextra -Wmissing-declarations 
 # considerably in optimizing mathematical expressions.
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-math-errno")
 
-if(CMAKE_CXX_COMPILER MATCHES "clang\\+\\+$" OR "${_cxx_compiler_version}" MATCHES "clang")
+if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+   # Clang-specific compiler flags
    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-missing-braces")
 endif()
 

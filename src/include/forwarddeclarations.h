@@ -83,7 +83,9 @@ using ParticleTypeList = build_vector_<ParticleType>;
 using ParticleTypePtrList = build_vector_<ParticleTypePtr>;
 
 template<typename T>
-using ProcessBranchList = build_vector_<build_unique_ptr_<T>>;
+using ProcessBranchPtr = build_unique_ptr_<T>;
+template<typename T>
+using ProcessBranchList = build_vector_<ProcessBranchPtr<T>>;
 using DecayBranchPtr = build_unique_ptr_<DecayBranch>;
 using DecayBranchList = build_vector_<DecayBranchPtr>;
 using CollisionBranchPtr = build_unique_ptr_<CollisionBranch>;

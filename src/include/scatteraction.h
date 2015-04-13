@@ -33,7 +33,7 @@ class ScatterAction : public Action {
                 float time_of_execution);
 
   /** Add a new collision channel. */
-  void add_collision(CollisionBranch* p);
+  void add_collision(CollisionBranchPtr p);
   /** Add several new collision channels at once. */
   void add_collisions(CollisionBranchList pv);
 
@@ -77,7 +77,7 @@ class ScatterAction : public Action {
    * \return A ProcessBranch object containing the cross section and
    * final-state IDs.
    */
-  virtual CollisionBranch* elastic_cross_section(float elast_par);
+  virtual CollisionBranchPtr elastic_cross_section(float elast_par);
 
   /**
    * Determine the cross section for string excitations, which is given by the
@@ -86,7 +86,7 @@ class ScatterAction : public Action {
    * excitation, etc). This method has to be called after all other processes
    * have been added to the Action object.
    */
-  virtual CollisionBranch* string_excitation_cross_section();
+  virtual CollisionBranchPtr string_excitation_cross_section();
 
   /**
   * Find all resonances that can be produced in a 2->1 collision of the two

@@ -26,7 +26,7 @@ ScatterAction::ScatterAction(const ParticleData &in_part_a,
     : Action({in_part_a, in_part_b}, time_of_execution),
       total_cross_section_(0.) {}
 
-void ScatterAction::add_collision(CollisionBranch* p) {
+void ScatterAction::add_collision(CollisionBranchPtr p) {
   add_process<CollisionBranch>(p, collision_channels_, total_cross_section_);
 }
 
@@ -174,13 +174,13 @@ double ScatterAction::particle_distance() const {
 }
 
 
-CollisionBranch* ScatterAction::elastic_cross_section(float elast_par) {
-  return new CollisionBranch(incoming_particles_[0].type(),
-                             incoming_particles_[1].type(),
-                             elast_par, ProcessType::Elastic);
+CollisionBranchPtr ScatterAction::elastic_cross_section(float elast_par) {
+  return make_unique<CollisionBranch>(incoming_particles_[0].type(),
+                                      incoming_particles_[1].type(),
+                                      elast_par, ProcessType::Elastic);
 }
 
-CollisionBranch* ScatterAction::string_excitation_cross_section() {
+CollisionBranchPtr ScatterAction::string_excitation_cross_section() {
   /* Calculate string-excitation cross section:
    * Parametrized total minus all other present channels. */
   /* TODO(weil): This is currently set to zero,
@@ -188,7 +188,7 @@ CollisionBranch* ScatterAction::string_excitation_cross_section() {
   float sig_string = 0.f;
   // = std::max(0.f, total_cross_section() - total_weight_);
 
-  return new CollisionBranch(sig_string, ProcessType::String);
+  return make_unique<CollisionBranch>(sig_string, ProcessType::String);
 }
 
 
