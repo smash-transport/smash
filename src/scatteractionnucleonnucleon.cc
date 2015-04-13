@@ -93,24 +93,18 @@ void ScatterActionNucleonNucleon::elastic_scattering() {
 
   /* Choose angular distribution according to Cugnon parametrization, see:
    * J. Cugnon et al., Nucl. Instr. and Meth. in Phys. Res. B 111 (1996) 215-220. */
-  double bb, a;
-  double plab = plab_from_s_NN(mandelstam_s());
+  double bb, a, plab = plab_from_s_NN(mandelstam_s());
   if (incoming_particles_[0].type().charge() +
       incoming_particles_[1].type().charge() == 1) {
     // pn
     bb = std::max(Cugnon_bnp(plab), really_small);
-    if (plab < 0.8) {
-      a = 1.;
-    } else {
-      a = 0.64/(plab*plab);
-    }
+    a = (plab < 0.8) ? 1. : 0.64/(plab*plab);
   } else {
     // pp or nn
     bb = std::max(Cugnon_bpp(plab), really_small);
     a = 1.;
   }
-  double t_max = -4.*momentum_radial*momentum_radial;
-  double t;
+  double t, t_max = -4.*momentum_radial*momentum_radial;
   if (Random::canonical() <= 1./(1.+a)) {
     t = Random::expo(bb, 0., t_max);
   } else {

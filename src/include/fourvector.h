@@ -79,6 +79,8 @@ class FourVector {
   void inline set_x3(double z);
   /// get the three-vector (spatial components)
   ThreeVector inline threevec() const;
+  /// get the velocity (three-vector divided by zero component)
+  ThreeVector inline velocity() const;
   /** calculate the scalar product with another four-vector
    *
    * \return \f$x^\mu a_\mu\f$
@@ -107,14 +109,14 @@ class FourVector {
    * \return \f$\sqrt{\vec x \cdot \vec x}\f$
    */
   double inline abs3() const;
-  /** Returns the FourVector boosted with velocity.
+  /** Returns the FourVector boosted with velocity v.
    *
    * The current FourVector is not changed.
    *
-   * \param velocity (\f$\vec{v}\f$) is a ThreeVector representing the
+   * \param v (\f$\vec{v}\f$) is a ThreeVector representing the
    * boost velocity
    */
-  FourVector LorentzBoost(const ThreeVector &velocity) const;
+  FourVector LorentzBoost(const ThreeVector &v) const;
 
   /// checks component-wise equality (accuracy \f$10^{-12}\f$)
   bool inline operator==(const FourVector &a) const;
@@ -217,6 +219,10 @@ void inline FourVector::set_x3(const double z) {
 
 ThreeVector inline FourVector::threevec() const {
   return ThreeVector(x_[1], x_[2], x_[3]);
+}
+
+ThreeVector inline FourVector::velocity() const {
+  return threevec() / x0();
 }
 
 // check if all four vector components are equal

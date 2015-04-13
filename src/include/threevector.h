@@ -240,11 +240,7 @@ double inline ThreeVector::get_phi() const {
 
 double inline ThreeVector::get_theta() const {
   double r = abs();
-  if (r > 0.) {
-    return std::acos(x3()/r);
-  } else {
-    return 0.;
-  }
+  return (r > 0.) ? std::acos(x3()/r) : 0.;
 }
 
 void inline ThreeVector::rotate(double phi, double theta, double psi) {

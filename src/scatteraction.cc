@@ -115,9 +115,8 @@ float ScatterAction::raw_weight_value() const {
 
 
 ThreeVector ScatterAction::beta_cm() const {
-  FourVector mom = incoming_particles_[0].momentum() +
-                   incoming_particles_[1].momentum();
-  return mom.threevec() / mom.x0();
+  return (incoming_particles_[0].momentum() +
+          incoming_particles_[1].momentum()).velocity();
 }
 
 

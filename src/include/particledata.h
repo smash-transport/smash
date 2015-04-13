@@ -112,7 +112,7 @@ class ParticleData {
   }
 
   /// get the velocity 3-vector
-  ThreeVector velocity() const { return momentum_.threevec() / momentum_.x0(); }
+  ThreeVector velocity() const { return momentum_.velocity(); }
 
   /**
    * Returns the inverse of the gamma factor from the current velocity of the
