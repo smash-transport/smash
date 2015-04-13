@@ -37,19 +37,20 @@ einhard::Logger<> &retrieve_logger_impl(int id) {
   return global_logger_collection[id];
 }
 
-template <std::size_t index>
-constexpr typename std::enable_if<(index == 0), int>::type
+template <int index, int stop = 0>
+constexpr typename std::enable_if<(index == stop), int>::type
 find_longest_logger_name() {
-  return 0;
+  using LogAreaTag = typename std::remove_reference<
+      decltype(std::get<index>(std::declval<LogArea::AreaTuple &>()))>::type;
+  return LogAreaTag::textual_length();
 }
-template <std::size_t index>
-constexpr typename std::enable_if<(index != 0), int>::type
+template <int index, int stop = 0, int mid = (index + stop) / 2>
+constexpr typename std::enable_if<(index > stop), int>::type
 find_longest_logger_name() {
-  using LogAreaTag = typename std::remove_reference<decltype(
-      std::get<index - 1>(std::declval<LogArea::AreaTuple &>()))>::type;
-  return LogAreaTag::textual_length() > find_longest_logger_name<index - 1>()
-             ? LogAreaTag::textual_length()
-             : find_longest_logger_name<index - 1>();
+  return find_longest_logger_name<index, mid + 1>() >
+                 find_longest_logger_name<mid, stop>()
+             ? find_longest_logger_name<index, mid + 1>()
+             : find_longest_logger_name<mid, stop>();
 }
 
 template <std::size_t index, int>
@@ -65,7 +66,7 @@ inline typename std::enable_if<(index == 0)>::type create_all_loggers_impl(
  * global_logger_collection is set up with area name and verbosity.
  */
 template <std::size_t index,
-          int longest_name = find_longest_logger_name<index>()>
+          int longest_name = find_longest_logger_name<index - 1>()>
 inline typename std::enable_if<(index != 0)>::type create_all_loggers_impl(
     Configuration &config) {
   using LogAreaTag = typename std::remove_reference<decltype(
