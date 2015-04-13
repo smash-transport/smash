@@ -11,6 +11,7 @@
 #define SRC_INCLUDE_GRID_H_
 
 #include <array>
+#include <cmath>
 #include <functional>
 #include <utility>
 #include <vector>
@@ -36,6 +37,15 @@ enum class GridOptions : char {
 class GridBase {
  public:
   typedef int size_type;
+
+  /**
+   * The minimum cell length for the given testparticles (defaults to 1).
+   */
+  static constexpr float min_cell_length(int testparticles = 1) {
+    // 2.5 fm corresponds to maximal cross-section of 200 mb = 20 fm^2
+    // sqrt(20 fm^2/N_{test}/pi) is approximately 2.5/sqrt(N_{test})
+    return 2.5f / std::sqrt(static_cast<float>(testparticles));
+  }
 
  protected:
   /**
