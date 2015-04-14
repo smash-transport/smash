@@ -25,6 +25,7 @@
 #include "include/density.h"
 #include "include/forwarddeclarations.h"
 #include "include/grid.h"
+#include "include/kinematics.h"
 #include "include/listmodus.h"
 #include "include/logging.h"
 #include "include/macros.h"
@@ -100,11 +101,6 @@ std::unique_ptr<ExperimentBase> ExperimentBase::create(Configuration config) {
 
   typedef std::unique_ptr<ExperimentBase> ExperimentPointer;
   if (modus_chooser.compare("Box") == 0) {
-    if (config.has_value({"Potentials"})) {
-      log.error() << "Box modus does not work with potentials for now: "
-                  << "periodic boundaries are not taken into account "
-                  << "in the density calculation";
-    }
     return ExperimentPointer(new Experiment<BoxModus>(config));
   } else if (modus_chooser.compare("List") == 0) {
       return ExperimentPointer(new Experiment<ListModus>(config));
@@ -349,7 +345,7 @@ void Experiment<Modus>::perform_actions(ActionList &actions,
 template <typename Modus>
 void Experiment<Modus>::run_time_evolution(const int evt_num) {
   const auto &log = logger<LogArea::Experiment>();
-  modus_.sanity_check(&particles_);
+  modus_.impose_boundary_conditions(&particles_);
   size_t interactions_total = 0, previous_interactions_total = 0,
          interactions_this_interval = 0, total_pauli_blocked = 0;
   log.info() << format_measurements(
@@ -386,10 +382,15 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
 
     /* (2) Perform actions. */
     perform_actions(actions, interactions_total, total_pauli_blocked);
-    modus_.sanity_check(&particles_);
+    modus_.impose_boundary_conditions(&particles_);
 
     /* (3) Do propagation. */
-    modus_.propagate(&particles_, parameters_, outputs_, potentials_.get());
+    if(potentials_) {
+      propagate(&particles_, parameters_, outputs_, *potentials_, modus_);
+    } else {
+      propagate(&particles_, parameters_, outputs_);
+    }
+    modus_.impose_boundary_conditions(&particles_, outputs_);
 
     /* (4) Physics output during the run. */
     // if the timestep of labclock is different in the next tick than
@@ -442,7 +443,11 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
     } while (interactions_total > interactions_old);
 
     /* Do one final propagation step. */
-    modus_.propagate(&particles_, parameters_, outputs_, potentials_.get());
+    if(potentials_) {
+      propagate(&particles_, parameters_, outputs_, *potentials_, modus_);
+    } else {
+      propagate(&particles_, parameters_, outputs_);
+    }
   }
 
   // make sure the experiment actually ran (note: we should compare this

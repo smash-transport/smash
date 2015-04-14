@@ -14,6 +14,7 @@
 #include "../include/collidermodus.h"
 #include "../include/configuration.h"
 #include "../include/experiment.h"
+#include "../include/kinematics.h"
 #include "../include/modusdefault.h"
 #include "../include/nucleus.h"
 #include "../include/potentials.h"
@@ -160,7 +161,7 @@ TEST(nucleus_potential_profile) {
     }
     a_file.close();
     for (auto i = 0; i < 50; i++) {
-      c.propagate(&P, param, out, pot);
+      propagate(&P, param, out, *pot, c);
     }
   }
 }
@@ -220,7 +221,7 @@ TEST(propagation_in_test_potential) {
 
   // Propagate, until particle is at x>>d, where d is parameter of potential
   while (P.data(0).position().x1() < 20*d) {
-    c.propagate(&P, param, out, pot);
+    propagate(&P, param, out, *pot, c);
   }
   // Calculate 4-momentum, expected from conservation laws
   const FourVector pm = part.momentum();

@@ -62,9 +62,9 @@ set(smash_src
         fourvector.cc
         grid.cc
         inputfunctions.cc
+        kinematics.cc
         listmodus.cc
         logging.cc
-        modusdefault.cc
         nucleus.cc
         oscaroutput.cc
         pauliblocking.cc

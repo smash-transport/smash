@@ -95,7 +95,7 @@ DECLARE_LOGAREA(11, DecayModes);
 DECLARE_LOGAREA(12, Resonances);
 DECLARE_LOGAREA(13, ScatterAction);
 DECLARE_LOGAREA(14, Distributions);
-DECLARE_LOGAREA(15, ModusDefault);
+DECLARE_LOGAREA(15, Kinematics);
 DECLARE_LOGAREA(16, Grid);
 DECLARE_LOGAREA(17, List);    // ListModus
 DECLARE_LOGAREA(18, Nucleus);
@@ -108,7 +108,7 @@ DECLARE_LOGAREA(21, PauliBlocking);
 using AreaTuple = std::tuple<Main, Experiment, Box, Collider, Sphere,
                              Action, InputParser, ParticleType, FindScatter,
                              Legacy, Clock, DecayModes, Resonances, ScatterAction,
-                             Distributions, ModusDefault, Grid, List, Nucleus,
+                             Distributions, Kinematics, Grid, List, Nucleus,
                              DecayType, Density, PauliBlocking>;
 }  // namespace LogArea
 
