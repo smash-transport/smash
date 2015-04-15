@@ -10,6 +10,7 @@
 #include "include/constants.h"
 #include "include/density.h"
 #include "include/logging.h"
+#include "include/particles.h"
 
 namespace Smash {
 
@@ -23,8 +24,10 @@ bool particle_in_denstype(const PdgCode pdg, Density_type dens_type) {
   }
 }
 
-FourVector four_current(const ThreeVector &r, const ParticleList &plist,
-                        double gs_sigma, Density_type dens_type, int ntest) {
+template <typename /*ParticlesContainer*/ T>
+static FourVector four_current_impl(const ThreeVector &r, const T &plist,
+                                    double gs_sigma, Density_type dens_type,
+                                    int ntest) {
   FourVector jmu(0.0, 0.0, 0.0, 0.0);
 
   for (const auto &p : plist) {
@@ -69,6 +72,14 @@ FourVector four_current(const ThreeVector &r, const ParticleList &plist,
   // j^0 = jmu.x0() is computational frame density
   // jmu.abs() = sqrt(j^mu j_mu) is Eckart rest frame density
   return jmu / ntest;
+}
+FourVector four_current(const ThreeVector &r, const ParticleList &plist,
+                        double gs_sigma, Density_type dens_type, int ntest) {
+  return four_current_impl(r, plist, gs_sigma, dens_type, ntest);
+}
+FourVector four_current(const ThreeVector &r, const Particles &plist,
+                        double gs_sigma, Density_type dens_type, int ntest) {
+  return four_current_impl(r, plist, gs_sigma, dens_type, ntest);
 }
 
 std::pair<double, ThreeVector> rho_eckart_gradient(const ThreeVector &r,

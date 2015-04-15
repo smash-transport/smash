@@ -133,7 +133,7 @@ void BinaryOutputBase::write(const FourVector &v) {
 }
 
 void BinaryOutputBase::write(const Particles &particles) {
-  for (const auto &p : particles.data()) {
+  for (const auto &p : particles) {
     write(p.momentum());
     write(p.position());
     write(p.pdgcode().get_decimal());

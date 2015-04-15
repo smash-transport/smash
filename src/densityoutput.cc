@@ -54,9 +54,7 @@ void DensityOutput::at_intermediate_time(const Particles &/*particles*/,
 
 void DensityOutput::thermodynamics_output(const Particles &particles,
                                           const ExperimentParameters &param) {
-  const ParticleList plist = ParticleList(particles.data().begin(),
-                                          particles.data().end());
-  const double rho = four_current(r_, plist, param.gaussian_sigma,
+  const double rho = four_current(r_, particles, param.gaussian_sigma,
                                   baryon_density, param.testparticles).abs();
   std::fprintf(file_.get(), "%g %g\n", param.labclock.current_time(), rho);
 }

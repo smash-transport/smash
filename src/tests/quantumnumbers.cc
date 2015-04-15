@@ -132,7 +132,7 @@ TEST(count_from_particles) {
   particle.set_4momentum(P);
   // create particle list:
   Particles list;
-  list.add_data(particle);
+  list.insert(particle);
 
   QuantumNumbers onlyone(list);
   QuantumNumbers check1(P, 1, 2, 0, 0, 0, 0);
@@ -143,7 +143,7 @@ TEST(count_from_particles) {
   ParticleData particleQ(ParticleType::find(PdgCode("123")));
   FourVector Q(2,3,4,5);
   particleQ.set_4momentum(Q);
-  list.add_data(particleQ);
+  list.insert(particleQ);
 
   QuantumNumbers two(list);
   QuantumNumbers check2(P + Q, 2, 4, 0, 0, 0, 0);
@@ -153,7 +153,7 @@ TEST(count_from_particles) {
   ParticleData particleR(ParticleType::find(PdgCode("2346")));
   FourVector R(3,4,5,6);
   particleR.set_4momentum(R);
-  list.add_data(particleR);
+  list.insert(particleR);
 
   QuantumNumbers three(list);
   QuantumNumbers check3(P + Q + R, 3, 5, -1, 1, 0, 1);
@@ -163,7 +163,7 @@ TEST(count_from_particles) {
   ParticleData particleS(ParticleType::find(PdgCode("-1234568")));
   FourVector S(-6,-9,-12,-15);
   particleS.set_4momentum(S);
-  list.add_data(particleS);
+  list.insert(particleS);
 
   QuantumNumbers four(list);
   QuantumNumbers check4(P + Q + R + S, 2, 5, -1, 0, 1, 0);

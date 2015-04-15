@@ -141,7 +141,7 @@ OscarOutput<Format, Contents>::OscarOutput(bf::path path, std::string name)
 
 template <OscarOutputFormat Format, int Contents>
 inline void OscarOutput<Format, Contents>::write(const Particles &particles) {
-  for (const ParticleData &data : particles.data()) {
+  for (const ParticleData &data : particles) {
     write_particledata(data);
   }
 }

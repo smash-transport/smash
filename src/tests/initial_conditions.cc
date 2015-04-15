@@ -35,11 +35,13 @@ TEST(initialize_box) {
   // should return START_TIME and set P:
   COMPARE(b.initial_conditions(&P, Test::default_parameters()), 0.2f);
   COMPARE(P.size(), 724u);
-  COMPARE(P.data(67).pdgcode(), 0x661);
+  for (const auto &pd : P) {
+    COMPARE(pd.pdgcode(), 0x661);
+  }
   // we might also look at other properties of Particles, like total
   // momentum and such.
   FourVector momentum(0.0, 0.0, 0.0, 0.0);
-  for (auto p : P.data()) {
+  for (auto p : P) {
     momentum += p.momentum();
     VERIFY(p.position().x1() <  7.9615);
     VERIFY(p.position().x1() >= 0.0);
@@ -68,7 +70,7 @@ TEST(initialize_collider_normal) {
   Particles P;
   COMPARE(n.initial_conditions(&P, Test::default_parameters()), 0.f);
   COMPARE(P.size(), 9u);
-  for (auto p : P.data()) {
+  for (auto p : P) {
     // velocity should be +- sqrt(3/4)
     COMPARE_RELATIVE_ERROR(p.velocity().sqr(), 0.75, 1e-6);
     // this is the mass squared
@@ -136,12 +138,14 @@ TEST(initialize_sphere) {
   // Is the correct number of particles in the map?
   COMPARE(s.initial_conditions(&P, Test::default_parameters()), 0.0f);
   COMPARE(P.size(), 500u);
-  COMPARE(P.data(67).pdgcode(), 0x661);
+  for (const auto &pd : P) {
+    COMPARE(pd.pdgcode(), 0x661);
+  }
   // total momentum check
   FourVector momentum(0.0, 0.0, 0.0, 0.0);
   // position less than radius?
   float radius = 0.0;
-  for (auto p : P.data()) {
+  for (auto p : P) {
     momentum += p.momentum();
     radius = sqrt(p.position().x1() * p.position().x1() +
                   p.position().x2() * p.position().x2() +

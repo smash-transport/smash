@@ -136,7 +136,7 @@ TEST(nucleus_potential_profile) {
   for (auto it = 0; it < 20; it++) {
     a_file.open(("Nucleus_U_xy.vtk." + std::to_string(it)).c_str(),
                                                      std::ios::out);
-    plist = ParticleList(P.data().begin(), P.data().end());
+    plist = ParticleList(P.begin(), P.end());
     a_file << "# vtk DataFile Version 2.0\n" <<
               "potential\n" <<
               "ASCII\n" <<
@@ -214,10 +214,11 @@ TEST(propagation_in_test_potential) {
   part.set_4momentum(p_mass, ThreeVector(2.0, -1.0, 1.0));
   part.set_4position(FourVector(0.0, -20*d, 0.0, 0.0));
   Particles P;
-  COMPARE(P.add_data(part), 0);
+  P.insert(part);
+  COMPARE(P.back().id(), 0);
 
   // Propagate, until particle is at x>>d, where d is parameter of potential
-  while (P.data(0).position().x1() < 20*d) {
+  while (P.front().position().x1() < 20*d) {
     propagate(&P, param, *pot);
   }
   // Calculate 4-momentum, expected from conservation laws
@@ -228,14 +229,14 @@ TEST(propagation_in_test_potential) {
          pm.x2(),
          pm.x3());
 
-  COMPARE_ABSOLUTE_ERROR(expected_p.x0(), P.data(0).momentum().x0(), 1.e-4)<<
+  COMPARE_ABSOLUTE_ERROR(expected_p.x0(), P.front().momentum().x0(), 1.e-4)<<
     "Expected energy " << expected_p.x0() <<
-    ", obtained " << P.data(0).momentum().x0();
-  COMPARE_ABSOLUTE_ERROR(expected_p.x1(), P.data(0).momentum().x1(), 1.e-4)<<
+    ", obtained " << P.front().momentum().x0();
+  COMPARE_ABSOLUTE_ERROR(expected_p.x1(), P.front().momentum().x1(), 1.e-4)<<
     "Expected px " << expected_p.x1() <<
-    ", obtained " << P.data(0).momentum().x1();
+    ", obtained " << P.front().momentum().x1();
   // y and z components did not have to change at all, so check is precise
-  COMPARE(expected_p.x2(), P.data(0).momentum().x2());
-  COMPARE(expected_p.x3(), P.data(0).momentum().x3());
+  COMPARE(expected_p.x2(), P.front().momentum().x2());
+  COMPARE(expected_p.x3(), P.front().momentum().x3());
 
 }

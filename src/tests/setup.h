@@ -40,6 +40,7 @@ inline void create_actual_particletypes() {
 static constexpr float smashon_mass = 0.123f;
 /// The decay width of the smashon particle.
 static constexpr float smashon_width = 1.2f;
+static constexpr const char smashon_pdg_string[] = "661";
 
 /**
  * Creates a ParticleType list containing only the smashon test particle.
@@ -178,7 +179,7 @@ template <typename G>
 inline ParticlesPtr create_particles(int n, G &&generator) {
   ParticlesPtr p = make_unique<Particles>();
   for (auto i = n; i; --i) {
-    p->add_data(generator());
+    p->insert(generator());
   }
   return p;
 }
@@ -191,7 +192,7 @@ inline ParticlesPtr create_particles(
     const std::initializer_list<ParticleData> &init) {
   ParticlesPtr p = make_unique<Particles>();
   for (const auto &data : init) {
-    p->add_data(data);
+    p->insert(data);
   }
   return p;
 }

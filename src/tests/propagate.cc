@@ -54,20 +54,26 @@ TEST(propagate_default_no_potentials) {
   auto Pdef = create_box_particles();
   propagate_straight_line(Pdef.get(), param);
   // after propagation: Momenta should be unchanged.
-  COMPARE(Pdef->data(0).momentum(), FourVector(4.0, 0.0, 0.0, 0.0));
-  COMPARE(Pdef->data(1).momentum(), FourVector(sqrt(0.03), 0.1, -.1, 0.0));
-  COMPARE(Pdef->data(2).momentum(), FourVector(sqrt(1.14), 0.1, 0.2, -.3));
-  COMPARE(Pdef->data(3).momentum(), FourVector(0.11, 0.1, 0.0, 0.0));
-  COMPARE(Pdef->data(4).momentum(), FourVector(0.11, 0.0, -.1, 0.0));
-  COMPARE(Pdef->data(5).momentum(), FourVector(0.51, -.3, 0.0, 0.4));
-  // positions should be updated:
-  COMPARE(Pdef->data(0).position(), FourVector(0.0, 0.6, 0.7, 0.8));
-  COMPARE(Pdef->data(1).position(), FourVector(0.0, 0.7 + 0.1/std::sqrt(0.03),
+  // but positions should be updated.
+  auto it = Pdef->begin();
+  COMPARE(it->momentum(), FourVector(4.0, 0.0, 0.0, 0.0));
+  COMPARE(it->position(), FourVector(0.0, 0.6, 0.7, 0.8));
+  ++it;
+  COMPARE(it->momentum(), FourVector(sqrt(0.03), 0.1, -.1, 0.0));
+  COMPARE(it->position(), FourVector(0.0, 0.7 + 0.1/std::sqrt(0.03),
                                                    0.8 - 0.1/std::sqrt(0.03), 0.9));
-  COMPARE(Pdef->data(2).position(), FourVector(0., 0.1 + 0.1 / std::sqrt(1.14),
+  ++it;
+  COMPARE(it->momentum(), FourVector(sqrt(1.14), 0.1, 0.2, -.3));
+  COMPARE(it->position(), FourVector(0., 0.1 + 0.1 / std::sqrt(1.14),
                                                   0.2 + 0.2 / std::sqrt(1.14),
                                                   0.3 - 0.3 / std::sqrt(1.14)));
-  COMPARE(Pdef->data(3).position(), FourVector(0.0, 4.5 + 0.1/0.11, 0.0, 0.0));
-  COMPARE(Pdef->data(4).position(), FourVector(0.0, 0.0, 0.2 - 0.1/0.11, 0.0));
-  COMPARE(Pdef->data(5).position(), FourVector(0.0, 0.2 - 0.3/0.51, 0.0, 4.8 + 0.4/0.51));
+  ++it;
+  COMPARE(it->momentum(), FourVector(0.11, 0.1, 0.0, 0.0));
+  COMPARE(it->position(), FourVector(0.0, 4.5 + 0.1/0.11, 0.0, 0.0));
+  ++it;
+  COMPARE(it->momentum(), FourVector(0.11, 0.0, -.1, 0.0));
+  COMPARE(it->position(), FourVector(0.0, 0.0, 0.2 - 0.1/0.11, 0.0));
+  ++it;
+  COMPARE(it->momentum(), FourVector(0.51, -.3, 0.0, 0.4));
+  COMPARE(it->position(), FourVector(0.0, 0.2 - 0.3/0.51, 0.0, 4.8 + 0.4/0.51));
 }

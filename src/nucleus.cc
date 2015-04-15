@@ -422,7 +422,7 @@ void Nucleus::shift(bool is_projectile, double initial_z_displacement,
 
 void Nucleus::copy_particles(Particles* external_particles) {
   for (auto p = begin(); p != end(); p++) {
-    external_particles->add_data(*p);
+    external_particles->insert(*p);
   }
 }
 

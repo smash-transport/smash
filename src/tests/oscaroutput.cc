@@ -8,6 +8,7 @@
  */
 
 #include "unittest.h"
+#include "setup.h"
 #include <cstdio>
 #include <cstring>
 #include <array>
@@ -35,23 +36,6 @@ TEST(directory_is_created) {
   VERIFY(bf::exists(testoutputpath));
 }
 
-static const float mass_smashon = 0.123;
-static std::string mass_str = std::to_string(mass_smashon);
-static std::string width_str = "1.200";
-static std::string pdg_str = "661";
-static std::string smashon_str = "smashon " + mass_str + " "
-    + width_str + " " + pdg_str + "\n";
-static const int zero = 0;
-
-static ParticleData create_smashon_particle() {
-  ParticleData particle = ParticleData{ParticleType::find(0x661)};
-  particle.set_4momentum(mass_smashon, random_value(), random_value(),
-                         random_value());
-  particle.set_4position(FourVector(random_value(), random_value(),
-                                    random_value(), random_value()));
-  return particle;
-}
-
 static void compare_fourvector(const std::array<std::string,4> &stringarray,
                                const FourVector &fourvector) {
   COMPARE_ABSOLUTE_ERROR(std::atof(stringarray.at(0).c_str()), fourvector.x1(),
@@ -67,14 +51,14 @@ static void compare_fourvector(const std::array<std::string,4> &stringarray,
 static void compare_particledata(const std::array<std::string,12> &datastring,
                                  const ParticleData &particle, const int id) {
   COMPARE(std::atoi(datastring.at(0).c_str()), id);
-  COMPARE(datastring.at(1), pdg_str);
-  COMPARE(std::atoi(datastring.at(2).c_str()), zero);
+  COMPARE(datastring.at(1), Test::smashon_pdg_string);
+  COMPARE(std::atoi(datastring.at(2).c_str()), 0);
   std::array<std::string,4> momentum_string;
   for (int i = 0; i < 4 ; i++) {
     momentum_string.at(i) = datastring.at(i + 3);
   }
   compare_fourvector(momentum_string, particle.momentum());
-  COMPARE(float(std::atof(datastring.at(7).c_str())), mass_smashon);
+  COMPARE(float(std::atof(datastring.at(7).c_str())), Test::smashon_mass);
   std::array<std::string,4> position_string;
   for (int i = 0; i < 4 ; i++) {
     position_string.at(i) = datastring.at(i + 8);
@@ -99,29 +83,19 @@ TEST(fullhistory_format) {
   std::string outputfilename = "full_event_history.oscar";
   VERIFY(bf::exists(testoutputpath / outputfilename));
 
-  ParticleType::create_type_list(
-      "# NAME MASS[GEV] WIDTH[GEV] PDG\n" + smashon_str);
+  Test::create_smashon_particletypes();
 
   Particles particles;
-
-  ParticleData particle = create_smashon_particle();
-  particles.add_data(particle);
-
-  ParticleData second_particle = create_smashon_particle();
-  particles.add_data(second_particle);
+  particles.insert(Test::smashon_random());
+  particles.insert(Test::smashon_random());
 
   int event_id = 0;
   /* Initial state output */
   oscfull->at_eventstart(particles, event_id);
   /* Create interaction ("resonance formation") */
-  std::vector<ParticleData> initial_particles, final_particles;
-  initial_particles.push_back(particles.data(0));
-  initial_particles.push_back(particles.data(1));
-  particles.remove(0);
-  particles.remove(1);
-  ParticleData final_particle = create_smashon_particle();
-  particles.add_data(final_particle);
-  final_particles.push_back(particles.data(particles.id_max()));
+  ParticleList initial_particles{particles.begin(), particles.end()};
+  particles.replace(initial_particles, {Test::smashon_random()});
+  ParticleList final_particles{particles.begin(), particles.end()};
   oscfull->at_interaction(initial_particles, final_particles, 0.0, 0.0,
       ProcessType::None);
   /* Final state output */
@@ -190,7 +164,7 @@ TEST(fullhistory_format) {
     COMPARE(std::atoi(item.c_str()), 0);
     outputfile >> item;
     COMPARE(std::atoi(item.c_str()), event_id + 1);
-    for (ParticleData &data : particles.data()) {
+    for (ParticleData &data : particles) {
       std::array<std::string,12> datastring;
       for (int j = 0; j < 12; j++) {
         outputfile >> datastring.at(j);
@@ -228,24 +202,22 @@ TEST(particlelist_format) {
   Particles particles;
   /* Create 5 particles */
   for (int i = 0; i < 5; i++) {
-    ParticleData particle = create_smashon_particle();
-    particles.add_data(particle);
+    particles.insert(Test::smashon_random());
   }
   int event_id = 0;
 
   /* Initial state output (note that this should not do anything!) */
   oscfinal->at_eventstart(particles, event_id);
   /* Create interaction ("elastic scattering") */
-  std::vector<ParticleData> initial_particles, final_particles;
-  initial_particles.push_back(particles.data(0));
-  initial_particles.push_back(particles.data(1));
+  ParticleList initial_particles{particles.begin(), particles.end()};
+  ParticleList final_particles = initial_particles;
   /* Change the momenta */
-  particles.data(0).set_4momentum(mass_smashon, random_value(),
-                                  random_value(), random_value());
-  particles.data(1).set_4momentum(mass_smashon, random_value(),
-                                  random_value(), random_value());
-  final_particles.push_back(particles.data(0));
-  final_particles.push_back(particles.data(1));
+  final_particles[0].set_4momentum(Test::smashon_mass, random_value(),
+                                   random_value(), random_value());
+  final_particles[1].set_4momentum(Test::smashon_mass, random_value(),
+                                   random_value(), random_value());
+  particles.replace(initial_particles, {Test::smashon_random()});
+  final_particles = ParticleList{particles.begin(), particles.end()};
   /* As with initial state output, this should not do anything */
   oscfinal->at_interaction(initial_particles, final_particles, 0.0, 0.0,
       ProcessType::None);
@@ -279,7 +251,7 @@ TEST(particlelist_format) {
     COMPARE(std::atoi(item.c_str()), 0);
     outputfile >> item;
     COMPARE(std::atoi(item.c_str()), event_id + 1);
-    for (ParticleData &data : particles.data()) {
+    for (ParticleData &data : particles) {
       std::array<std::string,12> datastring;
       for (int j = 0; j < 12; j++) {
         outputfile >> datastring.at(j);

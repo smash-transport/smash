@@ -93,6 +93,17 @@ TEST(create_type_list) {
   COMPARE(type->spin(), 1u);
 }
 
+TEST(list_all_iteration) {
+  std::size_t count = 0;
+  for (const auto &type : ParticleType::list_all()) {
+    const PdgCode pdg = type.pdgcode();
+    const ParticleType &type2 = ParticleType::find(pdg);
+    COMPARE(&type, &type2);
+    ++count;
+  }
+  COMPARE(count, ParticleType::list_all().size());
+}
+
 TEST(exists) {
   VERIFY(ParticleType::exists(0x111));
   VERIFY(!ParticleType::exists(0x667));

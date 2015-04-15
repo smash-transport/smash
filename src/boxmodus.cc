@@ -99,7 +99,7 @@ float BoxModus::initial_conditions(Particles *particles,
                 << " initial multiplicity " << p.second;
   }
 
-  for (ParticleData &data : particles->data()) {
+  for (ParticleData &data : *particles) {
     /* Set MOMENTUM SPACE distribution */
     if (this->initial_condition_ != 2) {
       /* thermal momentum according Maxwell-Boltzmann distribution */
@@ -120,14 +120,14 @@ float BoxModus::initial_conditions(Particles *particles,
   }
 
   /* Make total 3-momentum 0 */
-  for (ParticleData &data : particles->data()) {
+  for (ParticleData &data : *particles) {
     data.set_4momentum(data.pole_mass(), data.momentum().threevec() -
                        momentum_total.threevec()/particles->size());
   }
 
   /* Recalculate total momentum */
   momentum_total = FourVector(0, 0, 0, 0);
-  for (ParticleData &data : particles->data()) {
+  for (ParticleData &data : *particles) {
     momentum_total += data.momentum();
     /* IC: debug checks */
     log.debug() << data;
@@ -144,7 +144,7 @@ int BoxModus::impose_boundary_conditions(Particles *particles,
   const auto &log = logger<LogArea::Box>();
   int wraps = 0;
 
-  for (ParticleData &data : particles->data()) {
+  for (ParticleData &data : *particles) {
     FourVector position = data.position();
     bool wall_hit = enforce_periodic_boundaries(position.begin() + 1,
                                                 position.end(), length_);

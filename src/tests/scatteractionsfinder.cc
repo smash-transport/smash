@@ -56,11 +56,11 @@ TEST(collision_order) {
 
   // put particles into list
   Particles particles;
-  particles.add_data(particle_a);
-  particles.add_data(particle_b);
-  particles.add_data(particle_c);
-  particles.add_data(particle_d);
-  particles.add_data(particle_e);
+  particles.insert(particle_a);
+  particles.insert(particle_b);
+  particles.insert(particle_c);
+  particles.insert(particle_d);
+  particles.insert(particle_e);
 
   // prepare scatteractionsfinder
   const float radius = 0.11; // in fm
@@ -69,7 +69,7 @@ TEST(collision_order) {
   ScatterActionsFinder finder(elastic_parameter, testparticles);
 
   // prepare lists
-  ParticleList search_list{particles.data().begin(), particles.data().end()};
+  ParticleList search_list{particles.begin(), particles.end()};
   std::vector<const ParticleList*> neighbors_list; // empty for now
 
   // delta t (in fermi)

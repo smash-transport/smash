@@ -22,7 +22,7 @@ void propagate_straight_line(Particles *particles,
                              const ExperimentParameters &parameters) {
   const auto &log = logger<LogArea::Propagation>();
   const double dt = parameters.timestep_duration();
-  for (ParticleData &data : particles->data()) {
+  for (ParticleData &data : *particles) {
     FourVector distance = FourVector(0.0, data.velocity() * dt);
     log.debug("Particle ", data, " motion: ", distance);
     FourVector position = data.position() + distance;
@@ -34,11 +34,11 @@ void propagate_straight_line(Particles *particles,
 void propagate(Particles *particles, const ExperimentParameters &parameters,
                const Potentials &pot) {
     // Copy particles before propagation to calculate potentials from them
-    ParticleList plist(particles->data().begin(), particles->data().end());
+  const ParticleList plist{particles->begin(), particles->end()};
     const double dt = parameters.timestep_duration();
     const auto &log = logger<LogArea::Propagation>();
 
-    for (ParticleData &data : particles->data()) {
+    for (ParticleData &data : *particles) {
       ThreeVector dU_dr = pot.potential_gradient(data.position().threevec(),
                                            plist, data.pdgcode());
       log.debug("Propagate: dU/dr = ", dU_dr);

@@ -134,14 +134,9 @@ TEST(fullhistory_format) {
   bin_output->at_eventstart(*particles, event_id);
 
   /* Create interaction smashon + smashon -> smashon */
-  std::vector<ParticleData> initial_particles, final_particles;
-  initial_particles.push_back(particles->data(0));
-  initial_particles.push_back(particles->data(1));
-  particles->remove(0);
-  particles->remove(1);
-  ParticleData final_particle = Test::smashon_random();
-  particles->add_data(final_particle);
-  final_particles.push_back(particles->data(particles->id_max()));
+  ParticleList initial_particles{particles->begin(), particles->end()};
+  particles->replace(initial_particles, {Test::smashon_random()});
+  ParticleList final_particles{particles->begin(), particles->end()};
   double rho = 0.123;
   double weight = 3.21;
   ProcessType process_type = ProcessType::None;
@@ -218,14 +213,9 @@ TEST(particles_format) {
   bin_output->at_eventstart(*particles, event_id);
 
   /* Interaction smashon + smashon -> smashon */
-  std::vector<ParticleData> initial_particles, final_particles;
-  initial_particles.push_back(particles->data(0));
-  initial_particles.push_back(particles->data(1));
-  particles->remove(0);
-  particles->remove(1);
-  ParticleData final_particle = Test::smashon_random();
-  particles->add_data(final_particle);
-  final_particles.push_back(particles->data(particles->id_max()));
+  ParticleList initial_particles{particles->begin(), particles->end()};
+  particles->replace(initial_particles, {Test::smashon_random()});
+  ParticleList final_particles{particles->begin(), particles->end()};
   Clock clock;
 
   bin_output->at_intermediate_time(*particles, event_id, clock);

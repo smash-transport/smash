@@ -8,6 +8,7 @@
  */
 
 #include "unittest.h"
+#include "setup.h"
 #include <cstdio>
 #include <cstring>
 #include <array>
@@ -35,22 +36,6 @@ TEST(directory_is_created) {
   VERIFY(bf::exists(testoutputpath));
 }
 
-static const float mass_smashon = 0.123;
-static std::string mass_str = std::to_string(mass_smashon);
-static std::string width_str = "1.200";
-static std::string pdg_str = "661";
-static std::string smashon_str = "smashon " + mass_str + " "
-    + width_str + " " + pdg_str + "\n";
-
-static ParticleData create_smashon_particle() {
-  ParticleData particle = ParticleData{ParticleType::find(0x661)};
-  particle.set_4momentum(mass_smashon, random_value(), random_value(),
-                         random_value());
-  particle.set_4position(FourVector(random_value(), random_value(),
-                                    random_value(), random_value()));
-  return particle;
-}
-
 static void compare_threevector(const std::array<std::string,3> &stringarray,
                                const ThreeVector &threevector) {
   COMPARE_ABSOLUTE_ERROR(std::atof(stringarray.at(0).c_str()), threevector.x1(),
@@ -63,14 +48,12 @@ static void compare_threevector(const std::array<std::string,3> &stringarray,
 
 TEST(outputfile) {
   /* Create particles */
-  ParticleType::create_type_list(
-      "# NAME MASS[GEV] WIDTH[GEV] PDG\n" + smashon_str);
+  Test::create_smashon_particletypes();
 
   Particles particles;
   const int number_of_particles = 5;
   for (int i = 0; i < number_of_particles; i++) {
-    ParticleData particle = create_smashon_particle();
-    particles.add_data(particle);
+    particles.insert(Test::smashon_random());
   }
 
   /* Create config file and object */
@@ -117,14 +100,14 @@ TEST(outputfile) {
     COMPARE(std::stoul(item), particles.size());
     outputfile >> item;
     COMPARE(item, "double");
-    for (int i = 0; i < number_of_particles; i++) {
+    COMPARE(particles.size(), size_t(number_of_particles));
+    for (const auto &pd : particles) {
       std::array<std::string, 3> position_string;
       for (int j = 0; j < 3; j++) {
         outputfile >> item;
         position_string[j] = item;
       }
-      compare_threevector(position_string,
-                          particles.data(i).position().threevec());
+      compare_threevector(position_string, pd.position().threevec());
     }
     /* Check cell information */
     outputfile >> item;
@@ -175,14 +158,14 @@ TEST(outputfile) {
     COMPARE(item, "momentum");
     outputfile >> item;
     COMPARE(item, "double");
-    for (int i = 0; i < number_of_particles; i++) {
+    COMPARE(particles.size(), size_t(number_of_particles));
+    for (const auto &pd : particles) {
       std::array<std::string, 3> momentum_string;
       for (int j = 0; j < 3; j++) {
         outputfile >> item;
         momentum_string[j] = item;
       }
-      compare_threevector(momentum_string,
-                          particles.data(i).momentum().threevec());
+      compare_threevector(momentum_string, pd.momentum().threevec());
     }
   }
 }

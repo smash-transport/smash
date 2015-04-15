@@ -94,7 +94,7 @@ void VtkOutput::write(const Particles &particles, const int event_number) {
   /* Unstructured data sets are composed of points, lines, polygons, .. */
   std::fprintf(file_.get(), "DATASET UNSTRUCTURED_GRID\n");
   std::fprintf(file_.get(), "POINTS %zu double\n", particles.size());
-  for (const auto &p : particles.data()) {
+  for (const auto &p : particles) {
     std::fprintf(file_.get(), "%g %g %g\n", p.position().x1(),
                  p.position().x2(), p.position().x3());
   }
@@ -110,11 +110,11 @@ void VtkOutput::write(const Particles &particles, const int event_number) {
   std::fprintf(file_.get(), "POINT_DATA %zu\n", particles.size());
   std::fprintf(file_.get(), "SCALARS pdg_codes int 1\n");
   std::fprintf(file_.get(), "LOOKUP_TABLE default\n");
-  for (const auto &p : particles.data()) {
+  for (const auto &p : particles) {
     std::fprintf(file_.get(), "%s\n", p.pdgcode().string().c_str());
   }
   std::fprintf(file_.get(), "VECTORS momentum double\n");
-  for (const auto &p : particles.data()) {
+  for (const auto &p : particles) {
     std::fprintf(file_.get(), "%g %g %g\n", p.momentum().x1(),
                  p.momentum().x2(), p.momentum().x3());
   }

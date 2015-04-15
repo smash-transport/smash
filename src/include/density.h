@@ -59,6 +59,9 @@ namespace Smash {
    */
   FourVector four_current(const ThreeVector &r, const ParticleList &plist,
                           double gs_sigma, Density_type dens_type, int ntest);
+  /// convenience overload of the above
+  FourVector four_current(const ThreeVector &r, const Particles &particles,
+                          double gs_sigma, Density_type dens_type, int ntest);
 
   /** Calculates the gradient of Eckart rest frame density with
    *  respect to computational frame coordinates using analytical formula.

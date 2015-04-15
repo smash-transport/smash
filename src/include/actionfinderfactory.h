@@ -44,7 +44,7 @@ class ActionFinderInterface {
    * This abstract function finds 'final' actions
    * (for cleaning up at the end of the simulation).
    */
-  virtual ActionList find_final_actions(const ParticleList &) const = 0;
+  virtual ActionList find_final_actions(const Particles &) const = 0;
 };
 
 }  // namespace Smash

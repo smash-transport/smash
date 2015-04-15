@@ -11,6 +11,7 @@
 #include "fourvector.h"
 #include "particletype.h"
 #include "pdgcode.h"
+#include <limits>
 
 namespace Smash {
 
@@ -157,9 +158,41 @@ class ParticleData {
   /// sort particles along to given id
   bool operator<(int id_a) const { return this->id_ < id_a; }
 
+  /**
+   * Construct a particle with the given type, id, and index in Particles.
+   * This constructor may only be called (directly or indirectly) from
+   * Particles. This constructor should be private, but can't be in order to
+   * support vector::emplace_back.
+   */
+  ParticleData(const ParticleType &ptype, int uid, int index)
+      : id_(uid), index_(index), type_(&ptype) {}
  private:
-  /// Each particle has a unique identifier
+  friend class Particles;
+  /**
+   * Each particle has a unique identifier. This identifier is used for
+   * identifying the particle in the output files. It is specifically not used
+   * for searching for ParticleData objects in lists of particles, though it may
+   * be used to identify two ParticleData objects as referencing the same
+   * particle. This is why the comparison operators depend only on the id_
+   * member.
+   */
   int id_ = -1;
+
+  /**
+   * Constant value used to identify an invalid index_ value and thus mark
+   * ParticleData objects that don't have an original in the Particles list.
+   * This number is chose to be positive for a simpler bounds check in
+   * Particles.
+   */
+  static constexpr int invalid_index = std::numeric_limits<int>::max();
+
+  /**
+   * Internal index in the \ref Particles list. This number is used to find the
+   * Experiment-wide original of this copy.
+   *
+   * The value is read and written from the Particles class.
+   */
+  int index_ = invalid_index;
 
   /**
    * A reference to the ParticleType object for this particle (this contains

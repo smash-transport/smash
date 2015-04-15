@@ -298,9 +298,6 @@ template <typename Modus>
 void Experiment<Modus>::perform_actions(ActionList &actions,
                      size_t &interactions_total, size_t &total_pauli_blocked) {
   const auto &log = logger<LogArea::Experiment>();
-  // Particle list before all actions will be used for density calculation
-  const ParticleList plist = ParticleList(particles_.data().begin(),
-                                          particles_.data().end());
   if (!actions.empty()) {
     for (const auto &action : actions) {
       if (action->is_valid(particles_)) {
@@ -317,7 +314,7 @@ void Experiment<Modus>::perform_actions(ActionList &actions,
         action->perform(&particles_, interactions_total);
         // Calculate Eckart rest frame density at the interaction point
         const FourVector r_interaction = action->get_interaction_point();
-        const double rho = four_current(r_interaction.threevec(), plist,
+        const double rho = four_current(r_interaction.threevec(), particles_,
                                      parameters_.gaussian_sigma, dens_type_,
                                      parameters_.testparticles).abs();
         for (const auto &output : outputs_) {
@@ -355,9 +352,11 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
     std::vector<ActionPtr> actions;
 
     /* (1.a) Create grid. */
-    const auto &grid = modus_.create_grid(
-        ParticleList{particles_.data().begin(), particles_.data().end()},
-        parameters_.testparticles);
+    const auto &grid =
+        // TODO(mkretz): avoid the copy. Grid could construct from Particles
+        // directly.
+        modus_.create_grid(ParticleList{particles_.begin(), particles_.end()},
+                           parameters_.testparticles);
     /* (1.b) Iterate over cells and find actions. */
     grid.iterate_cells([&](
         const ParticleList &search_list,  // a list of particles where each pair
@@ -431,8 +430,7 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
       interactions_old = interactions_total;
       /* Find actions. */
       for (const auto &finder : action_finders_) {
-        actions += finder->find_final_actions(
-            ParticleList{particles_.data().begin(), particles_.data().end()});
+        actions += finder->find_final_actions(particles_);
       }
       /* Perform actions. */
       perform_actions(actions, interactions_total, total_pauli_blocked);
@@ -455,9 +453,10 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
     log.info() << "Time real: " << SystemClock::now() - time_start_;
     /* if there are no particles no interactions happened */
     log.info() << "Final scattering rate: "
-               << (particles_.empty() ? 0 : (interactions_total * 2 /
-                                             particles_.time() /
-                                             particles_.size())) << " [fm-1]";
+               << (particles_.is_empty() ? 0 : (interactions_total * 2 /
+                                                particles_.time() /
+                                                particles_.size()))
+               << " [fm-1]";
   }
 }
 

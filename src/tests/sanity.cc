@@ -63,12 +63,18 @@ static void create_particle_list(Particles &P) {
   particle_xlzh.set_4position(FourVector(2.2, 0.2, 0.0, 4.8));
 
   // add particles (and make sure the particles get the correct ID):
-  COMPARE(P.add_data(particle_stop), 0);
-  COMPARE(P.add_data(particle_fast), 1);
-  COMPARE(P.add_data(particle_slow), 2);
-  COMPARE(P.add_data(particle_x_hi), 3);
-  COMPARE(P.add_data(particle_y_lo), 4);
-  COMPARE(P.add_data(particle_xlzh), 5);
+  P.insert(particle_stop);
+  COMPARE(P.back().id(), 0);
+  P.insert(particle_fast);
+  COMPARE(P.back().id(), 1);
+  P.insert(particle_slow);
+  COMPARE(P.back().id(), 2);
+  P.insert(particle_x_hi);
+  COMPARE(P.back().id(), 3);
+  P.insert(particle_y_lo);
+  COMPARE(P.back().id(), 4);
+  P.insert(particle_xlzh);
+  COMPARE(P.back().id(), 5);
 
   return;
 }

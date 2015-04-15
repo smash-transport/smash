@@ -8,6 +8,7 @@
  */
 
 #include "unittest.h"
+#include "setup.h"
 #include <cstdio>
 #include <cstring>
 #include <array>
@@ -36,22 +37,6 @@ TEST(directory_is_created) {
   VERIFY(bf::exists(testoutputpath));
 }
 
-static const float mass_smashon = 0.123;
-static std::string mass_str = std::to_string(mass_smashon);
-static std::string width_str = "1.200";
-static std::string pdg_str = "661";
-static std::string smashon_str = "smashon " + mass_str + " "
-    + width_str + " " + pdg_str + "\n";
-
-static ParticleData create_smashon_particle() {
-  ParticleData particle = ParticleData{ParticleType::find(0x661)};
-  particle.set_4momentum(mass_smashon, random_value(), random_value(),
-                         random_value());
-  particle.set_4position(FourVector(random_value(), random_value(),
-                                    random_value(), random_value()));
-  return particle;
-}
-
 static void compare_fourvector(const std::array<std::string,4> &stringarray,
                                const FourVector &fourvector) {
   COMPARE_ABSOLUTE_ERROR(std::atof(stringarray.at(0).c_str()), fourvector.x0(),
@@ -72,13 +57,13 @@ static void compare_particledata(
     position_string.at(i) = datastring.at(i);
   }
   compare_fourvector(position_string, particle.position());
-  COMPARE(float(std::atof(datastring.at(4).c_str())), mass_smashon);
+  COMPARE(float(std::atof(datastring.at(4).c_str())), Test::smashon_mass);
   std::array<std::string,4> momentum_string;
   for (int i = 0; i < 4 ; i++) {
     momentum_string.at(i) = datastring.at(i + 5);
   }
   compare_fourvector(momentum_string, particle.momentum());
-  COMPARE(datastring.at(9), pdg_str);
+  COMPARE(datastring.at(9), Test::smashon_pdg_string);
   COMPARE(std::atoi(datastring.at(10).c_str()), id);
 }
 
@@ -99,29 +84,19 @@ TEST(full2013_format) {
   std::string outputfilename = "full_event_history.oscar";
   VERIFY(bf::exists(testoutputpath / outputfilename));
 
-  ParticleType::create_type_list(
-      "# NAME MASS[GEV] WIDTH[GEV] PDG\n" + smashon_str);
+  Test::create_smashon_particletypes();
 
   Particles particles;
-
-  ParticleData particle = create_smashon_particle();
-  particles.add_data(particle);
-
-  ParticleData second_particle = create_smashon_particle();
-  particles.add_data(second_particle);
+  particles.insert(Test::smashon_random());
+  particles.insert(Test::smashon_random());
 
   int event_id = 0;
   /* Initial state output */
   osc2013full->at_eventstart(particles, event_id);
   /* Create interaction ("resonance formation") */
-  std::vector<ParticleData> initial_particles, final_particles;
-  initial_particles.push_back(particles.data(0));
-  initial_particles.push_back(particles.data(1));
-  particles.remove(0);
-  particles.remove(1);
-  ParticleData final_particle = create_smashon_particle();
-  particles.add_data(final_particle);
-  final_particles.push_back(particles.data(particles.id_max()));
+  ParticleList initial_particles{particles.begin(), particles.end()};
+  particles.replace(initial_particles, {Test::smashon_random()});
+  ParticleList final_particles{particles.begin(), particles.end()};
   osc2013full->at_interaction(initial_particles, final_particles, 0.0, 0.0,
       ProcessType::None);
   /* Final state output */
@@ -187,7 +162,7 @@ TEST(full2013_format) {
     std::string final_line = "# event " + std::to_string(event_id + 1)
       + " out " + std::to_string(particles.size());
     COMPARE(line, final_line);
-    for (ParticleData &data : particles.data()) {
+    for (ParticleData &data : particles) {
       std::array<std::string, data_elements> datastring;
       for (int j = 0; j < data_elements; j++) {
         outputfile >> datastring.at(j);
@@ -226,24 +201,22 @@ TEST(final2013_format) {
 
   /* Create 5 particles */
   for (int i = 0; i < 5; i++) {
-    ParticleData particle = create_smashon_particle();
-    particles.add_data(particle);
+    particles.insert(Test::smashon_random());
   }
   int event_id = 0;
 
   /* Initial state output (note that this should not do anything!) */
   osc2013final->at_eventstart(particles, event_id);
   /* Create interaction ("elastic scattering") */
-  std::vector<ParticleData> initial_particles, final_particles;
-  initial_particles.push_back(particles.data(0));
-  initial_particles.push_back(particles.data(1));
+  ParticleList initial_particles{particles.begin(), particles.end()};
+  ParticleList final_particles = initial_particles;
   /* Change the momenta */
-  particles.data(0).set_4momentum(mass_smashon, random_value(),
-                                  random_value(), random_value());
-  particles.data(1).set_4momentum(mass_smashon, random_value(),
-                                  random_value(), random_value());
-  final_particles.push_back(particles.data(0));
-  final_particles.push_back(particles.data(1));
+  final_particles[0].set_4momentum(Test::smashon_mass, random_value(),
+                                   random_value(), random_value());
+  final_particles[1].set_4momentum(Test::smashon_mass, random_value(),
+                                   random_value(), random_value());
+  particles.replace(initial_particles, final_particles);
+  final_particles = ParticleList{particles.begin(), particles.end()};
   /* As with initial state output, this should not do anything */
   osc2013final->at_interaction(initial_particles, final_particles, 0.0, 0.0,
       ProcessType::None);
@@ -272,7 +245,7 @@ TEST(final2013_format) {
     std::string final_line = "# event " + std::to_string(event_id + 1)
       + " out " + std::to_string(particles.size());
     COMPARE(line, final_line);
-    for (ParticleData &data : particles.data()) {
+    for (ParticleData &data : particles) {
       std::array<std::string, data_elements> datastring;
       for (int j = 0; j < data_elements; j++) {
         outputfile >> datastring.at(j);
