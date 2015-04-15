@@ -62,7 +62,6 @@ set(smash_src
         fourvector.cc
         grid.cc
         inputfunctions.cc
-        kinematics.cc
         listmodus.cc
         logging.cc
         nucleus.cc
@@ -75,6 +74,7 @@ set(smash_src
         pdgcode.cc
         potentials.cc
         processbranch.cc
+        propagation.cc
         random.cc
         resonances.cc
         scatteraction.cc

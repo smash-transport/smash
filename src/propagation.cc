@@ -7,7 +7,7 @@
  *
  */
 
-#include "include/kinematics.h"
+#include "include/propagation.h"
 
 #include "include/logging.h"
 #include "include/boxmodus.h"
@@ -18,9 +18,9 @@
 namespace Smash {
 
 /* Simple straight line propagation without potentials*/
-void propagate(Particles *particles, const ExperimentParameters &parameters,
-                                                        const OutputsList &) {
-  const auto &log = logger<LogArea::Kinematics>();
+void propagate_straight_line(Particles *particles,
+                             const ExperimentParameters &parameters) {
+  const auto &log = logger<LogArea::Propagation>();
   const double dt = parameters.timestep_duration();
   for (ParticleData &data : particles->data()) {
     FourVector distance = FourVector(0.0, data.velocity() * dt);
@@ -33,11 +33,11 @@ void propagate(Particles *particles, const ExperimentParameters &parameters,
 
 template<typename Modus>
 void propagate(Particles *particles, const ExperimentParameters &parameters,
-            const OutputsList &, const Potentials &pot, const Modus &/*modus*/) {
+               const Potentials &pot, const Modus &/*modus*/) {
     // Copy particles before propagation to calculate potentials from them
     ParticleList plist(particles->data().begin(), particles->data().end());
     const double dt = parameters.timestep_duration();
-    const auto &log = logger<LogArea::Kinematics>();
+    const auto &log = logger<LogArea::Propagation>();
 
     for (ParticleData &data : particles->data()) {
       ThreeVector dU_dr = pot.potential_gradient(data.position().threevec(),
@@ -59,16 +59,16 @@ void propagate(Particles *particles, const ExperimentParameters &parameters,
 }
 
 template void propagate<BoxModus>(Particles *particles,
-    const ExperimentParameters &parameters, const OutputsList &,
+    const ExperimentParameters &parameters,
     const Potentials &pot, const BoxModus &);
 template void propagate<ListModus>(Particles *particles,
-    const ExperimentParameters &parameters, const OutputsList &,
+    const ExperimentParameters &parameters,
     const Potentials &pot, const ListModus &);
 template void propagate<ColliderModus>(Particles *particles,
-    const ExperimentParameters &parameters, const OutputsList &,
+    const ExperimentParameters &parameters,
     const Potentials &pot, const ColliderModus &);
 template void propagate<SphereModus>(Particles *particles,
-    const ExperimentParameters &parameters, const OutputsList &,
+    const ExperimentParameters &parameters,
     const Potentials &pot, const SphereModus &);
 
 } // namespace Smash

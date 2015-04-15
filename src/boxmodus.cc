@@ -148,12 +148,12 @@ int BoxModus::impose_boundary_conditions(Particles *particles,
     FourVector position = data.position();
     bool wall_hit = enforce_periodic_boundaries(position.begin() + 1,
                                                 position.end(), length_);
-    const ParticleList incoming_particle{1, data};
     if (wall_hit) {
+      const ParticleList incoming_particle{1, data};
       data.set_4position(position);
       ++wraps;
       for (const auto &output : output_list) {
-        output->at_interaction(incoming_particle, {1, data},
+        output->at_interaction(incoming_particle, incoming_particle,
                                0., 0., ProcessType::Wall);
       }
     }

@@ -12,9 +12,9 @@
 
 #include "../include/boxmodus.h"
 #include "../include/collidermodus.h"
-#include "../include/kinematics.h"
 #include "../include/modusdefault.h"
 #include "../include/potentials.h"
+#include "../include/propagation.h"
 #include "../include/spheremodus.h"
 
 using namespace Smash;
@@ -61,8 +61,7 @@ static Potentials create_potential() {
 TEST(propagate_default_no_potentials) {
   ExperimentParameters param{{0.f, 1.f}, 1.f, 1, 1.0};
   auto Pdef = create_box_particles();
-  OutputsList out;
-  propagate(Pdef.get(), param, out);
+  propagate_straight_line(Pdef.get(), param);
   // after propagation: Momenta should be unchanged.
   COMPARE(Pdef->data(0).momentum(), FourVector(4.0, 0.0, 0.0, 0.0));
   COMPARE(Pdef->data(1).momentum(), FourVector(sqrt(0.03), 0.1, -.1, 0.0));
@@ -95,10 +94,9 @@ TEST(propagate_collider) {
 
   auto Pdef = create_box_particles();
   auto Pcol = create_box_particles();
-  OutputsList out;
   Potentials pot = create_potential();
-  propagate(Pdef.get(), param, out, pot, s);
-  propagate(Pcol.get(), param, out, pot, c);
+  propagate(Pdef.get(), param, pot, s);
+  propagate(Pcol.get(), param, pot, c);
   // Collider and Default modus should do the same everywhere:
   for (size_t i = 0; i < 6; i++) {
     COMPARE(Pdef->data(i).momentum(), Pcol->data(i).momentum());
@@ -118,10 +116,9 @@ TEST(propagate_box) {
       param);
   auto Pdef = create_box_particles();
   auto Pbox = create_box_particles();
-  OutputsList out;
   Potentials pot = create_potential();
-  propagate(Pdef.get(), param, out, pot, s);
-  propagate(Pbox.get(), param, out, pot, b);
+  propagate(Pdef.get(), param, pot, s);
+  propagate(Pbox.get(), param, pot, b);
   // Now wrapping, i.e. imposing initial conditions is separated from
   // propagation, so box should produce the same results that sphere
   for (size_t i = 0; i < 6; i++) {

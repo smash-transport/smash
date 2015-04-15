@@ -54,7 +54,14 @@ class BoxModus : public ModusDefault {
 
   /** Enforces that all particles are inside the box
    *
-   * \see enforce_periodic_boundaries
+   * \param[in] particles particles to check their position and possibly
+   *            move it
+   * \param[in] output_list output objects
+   * \param[out] number of particles that were moved
+   *
+   * In BoxModus if particle crosses the wall of the box, it is
+   * inserted from the opposite side. Wall crossings are written to
+   * collision output: this is where OutputsList is used.
    */
   int impose_boundary_conditions(Particles *particles,
                          const OutputsList &output_list = {});

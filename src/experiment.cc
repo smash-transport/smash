@@ -25,12 +25,12 @@
 #include "include/density.h"
 #include "include/forwarddeclarations.h"
 #include "include/grid.h"
-#include "include/kinematics.h"
 #include "include/listmodus.h"
 #include "include/logging.h"
 #include "include/macros.h"
 #include "include/pauliblocking.h"
 #include "include/potentials.h"
+#include "include/propagation.h"
 #include "include/random.h"
 #include "include/spheremodus.h"
 
@@ -101,6 +101,11 @@ std::unique_ptr<ExperimentBase> ExperimentBase::create(Configuration config) {
 
   typedef std::unique_ptr<ExperimentBase> ExperimentPointer;
   if (modus_chooser.compare("Box") == 0) {
+    if (config.has_value({"Potentials"})) {
+      log.error() << "Box modus does not work with potentials for now: "
+                  << "periodic boundaries are not taken into account "
+                  << "in the density calculation";
+    }
     return ExperimentPointer(new Experiment<BoxModus>(config));
   } else if (modus_chooser.compare("List") == 0) {
       return ExperimentPointer(new Experiment<ListModus>(config));
@@ -386,9 +391,9 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
 
     /* (3) Do propagation. */
     if(potentials_) {
-      propagate(&particles_, parameters_, outputs_, *potentials_, modus_);
+      propagate(&particles_, parameters_, *potentials_, modus_);
     } else {
-      propagate(&particles_, parameters_, outputs_);
+      propagate_straight_line(&particles_, parameters_);
     }
     modus_.impose_boundary_conditions(&particles_, outputs_);
 
@@ -444,9 +449,9 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
 
     /* Do one final propagation step. */
     if(potentials_) {
-      propagate(&particles_, parameters_, outputs_, *potentials_, modus_);
+      propagate(&particles_, parameters_, *potentials_, modus_);
     } else {
-      propagate(&particles_, parameters_, outputs_);
+      propagate_straight_line(&particles_, parameters_);
     }
   }
 
