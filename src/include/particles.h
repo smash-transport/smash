@@ -308,12 +308,29 @@ class Particles {
  private:
   /// Highest id of a given particle
   int id_max_ = -1;
+
   /**
-   * dynamic data of the particles a map between its id and data
+   * A std::vector of ParticleData objects storing the particles acting in an
+   * Experiment.
    *
-   * A map structure is used as particles decay and hence this
-   * a swiss cheese over the runtime of SMASH. Also we want direct
-   * lookup of the corresponding particle id with its data.
+   * Action classes may lead to particles getting removed and added, so over
+   * time the list must evolve. The strategy here is that removal of particles
+   * leaves holes in the list and adding particles will fill up those holes or
+   * append at the end. The indexes of the holes are stored in arbitrary order
+   * in the dirty_ member variable. Additionally, the holes are marked with
+   * ParticleData::invalid_index and thus no search through dirty_ is necessary
+   * to identify a hole.
+   *
+   * The last entry in data_ is a marker. Thus, if `data_.size() == 1` the list
+   * of actual particles is empty. This marker is necessary for implementing
+   * linear iteration over the complete list of particles correctly. The
+   * Particles::iterator class implements the increment and decrement operators
+   * in such a way that holes are skipped over. However, since the end()
+   * iterator of std::vector always points at the element behind the last valid
+   * entry (and therefore may never be dereferenced), the end() iterator of
+   * Particles points at the end marker. Thus the increment operator may
+   * dereference the entry to inspect whether the entry is a hole or not and
+   * continue to the next entry.
    */
   ParticleList data_;
 
