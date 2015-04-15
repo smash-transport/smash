@@ -71,4 +71,4 @@ template void propagate<SphereModus>(Particles *particles,
     const ExperimentParameters &parameters,
     const Potentials &pot, const SphereModus &);
 
-} // namespace Smash
+}  // namespace Smash

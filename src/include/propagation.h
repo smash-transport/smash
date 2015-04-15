@@ -5,8 +5,8 @@
  *    GNU General Public License (GPLv3 or later)
  */
 
-#ifndef SRC_INCLUDE_PROPAGATE_H_
-#define SRC_INCLUDE_PROPAGATE_H_
+#ifndef SRC_INCLUDE_PROPAGATION_H_
+#define SRC_INCLUDE_PROPAGATION_H_
 
 #include "experiment.h"
 
@@ -43,4 +43,4 @@ void propagate(Particles *particles, const ExperimentParameters &parameters,
                const Potentials &pot, const Modus &modus);
 
 }  // namespace Smash
-#endif  // SRC_INCLUDE_PROPAGATE_H_
+#endif  // SRC_INCLUDE_PROPAGATION_H_
