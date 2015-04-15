@@ -7,12 +7,21 @@ file(COPY ../decaymodes.txt DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 string(REPLACE " -Wfloat-equal" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 
+option(FORMAT_TEST_OUTPUT_FOR_VIM
+   "If ON the unit test output of run_* targets will work with the vim quickfix parser and vim will directly take you to the line that failed."
+   OFF)
+set(UNITTEST_ARGS "")
+if(FORMAT_TEST_OUTPUT_FOR_VIM)
+   set(UNITTEST_ARGS "-v")
+endif()
+
+
 # tests:
 # Helper macro that adds a run_<name> target
 macro(smash_add_test name depends)
    add_test(NAME ${name} COMMAND ${ARGN})
    add_custom_target(run_${name}
-      COMMAND ${ARGN}
+      COMMAND ${ARGN} ${UNITTEST_ARGS}
       DEPENDS ${depends}
       COMMENT "Executing test ${name}"
       VERBATIM
