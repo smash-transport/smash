@@ -10,6 +10,7 @@
 #include "include/action.h"
 
 #include <assert.h>
+#include <algorithm>
 #include <sstream>
 
 #include "include/angles.h"
@@ -30,12 +31,9 @@ Action::~Action() = default;
 
 
 bool Action::is_valid(const Particles &particles) const {
-  for (const auto &part : incoming_particles_) {
-    if (!particles.is_valid(part)) {
-      return false;
-    }
-  }
-  return true;
+  return std::all_of(
+      incoming_particles_.begin(), incoming_particles_.end(),
+      [&particles](const ParticleData &p) { return particles.is_valid(p); });
 }
 
 bool Action::is_pauli_blocked(const Particles & particles,
