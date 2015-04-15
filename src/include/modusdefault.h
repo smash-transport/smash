@@ -44,24 +44,11 @@ class ModusDefault {
    * Currently, this is only needed for BoxModus; the other Modi do
    * nothing.
    *
-   * \see BoxModus::sanity_check
+   * \see BoxModus::impose_boundary_conditions
    */
-  int sanity_check(Particles * /*p*/) { return 0; }
-
-  /** Propagates the positions of all particles on a straight line
-   * through the current time step.
-   *
-   * For each particle, the position is shifted:
-   * \f[\vec x^\prime = \vec x + \vec v \cdot \Delta t\f]
-   * where \f$\vec x\f$ is the current position, \f$\vec v\f$ its
-   * velocity and \f$\Delta t\f$ the duration of this timestep.
-   *
-   * \param[in,out] particles The particle list in the event
-   * \param[in] parameters parameters for the experiment
-   */
-  void propagate(Particles *particles, const ExperimentParameters &parameters,
-                                       const OutputsList &,
-                                       const Potentials* pot);
+  int impose_boundary_conditions(Particles * /*p*/,
+                         const OutputsList & /*out_list*/ = {})
+  { return 0;}
 
   Grid<GridOptions::Normal> create_grid(ParticleList &&all_particles,
       const int testparticles) const {

@@ -64,7 +64,6 @@ set(smash_src
         inputfunctions.cc
         listmodus.cc
         logging.cc
-        modusdefault.cc
         nucleus.cc
         oscaroutput.cc
         pauliblocking.cc
@@ -75,6 +74,7 @@ set(smash_src
         pdgcode.cc
         potentials.cc
         processbranch.cc
+        propagation.cc
         random.cc
         resonances.cc
         scatteraction.cc

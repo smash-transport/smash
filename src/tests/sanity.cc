@@ -77,7 +77,7 @@ TEST(sanity_default) {
   ModusDefault m;
   Particles P;
   create_particle_list(P);
-  COMPARE(m.sanity_check(&P), 0);
+  COMPARE(m.impose_boundary_conditions(&P), 0);
 }
 
 TEST(sanity_box) {
@@ -90,7 +90,7 @@ TEST(sanity_box) {
   BoxModus b(conf["Modi"], param);
   Particles P;
   create_particle_list(P);
-  COMPARE(b.sanity_check(&P), 4);
+  COMPARE(b.impose_boundary_conditions(&P), 4);
 }
 
 TEST(sanity_collider) {
@@ -106,7 +106,7 @@ TEST(sanity_collider) {
   ColliderModus n(conf["Modi"], param);
   Particles P;
   create_particle_list(P);
-  COMPARE(n.sanity_check(&P), 0);
+  COMPARE(n.impose_boundary_conditions(&P), 0);
 }
 
 TEST(sanity_sphere) {
@@ -120,5 +120,5 @@ TEST(sanity_sphere) {
   SphereModus s(conf["Modi"], param);
   Particles P;
   create_particle_list(P);
-  COMPARE(s.sanity_check(&P), 0);
+  COMPARE(s.impose_boundary_conditions(&P), 0);
 }

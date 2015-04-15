@@ -1,0 +1,45 @@
+/*
+ *    Copyright (c) 2015
+ *      SMASH Team
+ *
+ *    GNU General Public License (GPLv3 or later)
+ */
+
+#ifndef SRC_INCLUDE_PROPAGATION_H_
+#define SRC_INCLUDE_PROPAGATION_H_
+
+#include "experiment.h"
+
+namespace Smash {
+
+/** Propagates the positions of all particles on a straight line
+  * through the current time step.
+  *
+  * For each particle, the position is shifted:
+  * \f[\vec x^\prime = \vec x + \vec v \cdot \Delta t\f]
+  * where \f$\vec x\f$ is the current position, \f$\vec v\f$ its
+  * velocity and \f$\Delta t\f$ the duration of this timestep.
+  *
+  * \param[in,out] particles The particle list in the event
+  * \param[in] parameters parameters for the experiment
+  */
+void propagate_straight_line(Particles *particles,
+                             const ExperimentParameters &parameters);
+
+/**Propagates the positions and momenta of all particles
+  * through the current time step, according to the equations of motion.
+  *
+  * For each particle, the position is shifted:
+  * \f[\vec x^\prime = \vec x + \vec v \cdot \Delta t\f]
+  * where \f$\vec x\f$ is the current position, \f$\vec v\f$ its
+  * velocity and \f$\Delta t\f$ the duration of this timestep.
+  *
+  * The following equations of motion are solved:
+  * \f[ \frac{dr}{dt} = p/E \f]
+  * \f[ \frac{dp}{dt} = -dU(r)/dr \f]
+  */
+void propagate(Particles *particles, const ExperimentParameters &parameters,
+               const Potentials &pot);
+
+}  // namespace Smash
+#endif  // SRC_INCLUDE_PROPAGATION_H_

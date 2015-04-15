@@ -19,8 +19,8 @@ namespace Smash {
  * BoxModus: Provides a modus for infinite matter calculations
  *
  * Matter is confined in a cubical box. Depending on the initial
- * condition, particles are either reflected on the boundaries or
- * inserted on opposite positions.
+ * condition, particles are either reflected on the boundaries
+ * (not implemented now) or inserted on opposite positions.
  *
  * To use this modus, chose
  * \code
@@ -38,7 +38,8 @@ namespace Smash {
  *              # definitions here
  * \endcode
  *
- * The following configuration options are understood: \ref input_modi_box_
+ * The following configuration options are understood:
+ * \ref input_modi_box_
  */
 class BoxModus : public ModusDefault {
  public:
@@ -53,27 +54,22 @@ class BoxModus : public ModusDefault {
 
   /** Enforces that all particles are inside the box
    *
-   * \see enforce_periodic_boundaries
-   */
-  int sanity_check(Particles *particles);
-
-  /** Propagates all particles through the box.
-   *
-   * \copydetails ModusDefault::propagate()
+   * \param[in] particles particles to check their position and possibly
+   *            move it
    * \param[in] output_list output objects
+   * \param[out] number of particles that were moved
    *
-   * In addition to the usual propagation, particles can touch the wall
-   * in BoxModus and either be reflected or inserted opposite. In that
-   * case, the OutputsList will be used.
+   * In BoxModus if particle crosses the wall of the box, it is
+   * inserted from the opposite side. Wall crossings are written to
+   * collision output: this is where OutputsList is used.
    */
-  void propagate(Particles *particles, const ExperimentParameters &parameters,
-                                       const OutputsList &output_list,
-                                       const Potentials* pot);
+  int impose_boundary_conditions(Particles *particles,
+                         const OutputsList &output_list = {});
 
   Grid<GridOptions::PeriodicBoundaries> create_grid(
       ParticleList &&all_particles, const int testparticles) const {
-    return {{{0, 0, 0}, {length_, length_, length_}}, std::move(all_particles),
-            testparticles};
+    return {{{0, 0, 0}, {length_, length_, length_}},
+              std::move(all_particles), testparticles};
   }
 
  private:
@@ -90,9 +86,6 @@ class BoxModus : public ModusDefault {
   const float length_;
   /// Temperature of the Box in GeV
   const float temperature_;
-  /// initial number density of the Box as calculated from the
-  /// initialization.
-  float number_density_initial_ = 0.f;
   /// initial time of the box
   const float start_time_ = 0.0f;
   /// particle multiplicities at initialization

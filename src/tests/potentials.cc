@@ -17,6 +17,7 @@
 #include "../include/modusdefault.h"
 #include "../include/nucleus.h"
 #include "../include/potentials.h"
+#include "../include/propagation.h"
 #include "../include/spheremodus.h"
 
 #include <boost/filesystem.hpp>
@@ -117,7 +118,6 @@ TEST(nucleus_potential_profile) {
   ColliderModus c(conf["Modi"], param);
   Particles P;
   c.initial_conditions(&P, param);
-  OutputsList out;
   ParticleList plist;
 
   // Create potentials
@@ -160,7 +160,7 @@ TEST(nucleus_potential_profile) {
     }
     a_file.close();
     for (auto i = 0; i < 50; i++) {
-      c.propagate(&P, param, out, pot);
+      propagate(&P, param, *pot);
     }
   }
 }
@@ -203,10 +203,8 @@ TEST(propagation_in_test_potential) {
   const double p_mass = 0.938;
   Configuration conf(TEST_CONFIG_PATH);
   ExperimentParameters param{{0.f, dt}, 1.f, Ntest, sigma};
-  SphereModus c(conf["Modi"], param);
 
   // Create dummy outputs and our test potential
-  OutputsList out;
   const double U0 = 0.5;
   const double d = 4.0;
   Dummy_Pot* pot = new Dummy_Pot(conf["Potentials"], param, U0, d);
@@ -220,7 +218,7 @@ TEST(propagation_in_test_potential) {
 
   // Propagate, until particle is at x>>d, where d is parameter of potential
   while (P.data(0).position().x1() < 20*d) {
-    c.propagate(&P, param, out, pot);
+    propagate(&P, param, *pot);
   }
   // Calculate 4-momentum, expected from conservation laws
   const FourVector pm = part.momentum();

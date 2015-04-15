@@ -30,6 +30,7 @@
 #include "include/macros.h"
 #include "include/pauliblocking.h"
 #include "include/potentials.h"
+#include "include/propagation.h"
 #include "include/random.h"
 #include "include/spheremodus.h"
 
@@ -349,7 +350,7 @@ void Experiment<Modus>::perform_actions(ActionList &actions,
 template <typename Modus>
 void Experiment<Modus>::run_time_evolution(const int evt_num) {
   const auto &log = logger<LogArea::Experiment>();
-  modus_.sanity_check(&particles_);
+  modus_.impose_boundary_conditions(&particles_);
   size_t interactions_total = 0, previous_interactions_total = 0,
          interactions_this_interval = 0, total_pauli_blocked = 0;
   log.info() << format_measurements(
@@ -386,10 +387,15 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
 
     /* (2) Perform actions. */
     perform_actions(actions, interactions_total, total_pauli_blocked);
-    modus_.sanity_check(&particles_);
+    modus_.impose_boundary_conditions(&particles_);
 
     /* (3) Do propagation. */
-    modus_.propagate(&particles_, parameters_, outputs_, potentials_.get());
+    if(potentials_) {
+      propagate(&particles_, parameters_, *potentials_);
+    } else {
+      propagate_straight_line(&particles_, parameters_);
+    }
+    modus_.impose_boundary_conditions(&particles_, outputs_);
 
     /* (4) Physics output during the run. */
     // if the timestep of labclock is different in the next tick than
@@ -442,7 +448,11 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
     } while (interactions_total > interactions_old);
 
     /* Do one final propagation step. */
-    modus_.propagate(&particles_, parameters_, outputs_, potentials_.get());
+    if(potentials_) {
+      propagate(&particles_, parameters_, *potentials_);
+    } else {
+      propagate_straight_line(&particles_, parameters_);
+    }
   }
 
   // make sure the experiment actually ran (note: we should compare this
