@@ -31,9 +31,8 @@ void propagate_straight_line(Particles *particles,
   }
 }
 
-template<typename Modus>
 void propagate(Particles *particles, const ExperimentParameters &parameters,
-               const Potentials &pot, const Modus &/*modus*/) {
+               const Potentials &pot) {
     // Copy particles before propagation to calculate potentials from them
     ParticleList plist(particles->data().begin(), particles->data().end());
     const double dt = parameters.timestep_duration();
@@ -57,18 +56,5 @@ void propagate(Particles *particles, const ExperimentParameters &parameters,
       data.set_4position(position);
     }
 }
-
-template void propagate<BoxModus>(Particles *particles,
-    const ExperimentParameters &parameters,
-    const Potentials &pot, const BoxModus &);
-template void propagate<ListModus>(Particles *particles,
-    const ExperimentParameters &parameters,
-    const Potentials &pot, const ListModus &);
-template void propagate<ColliderModus>(Particles *particles,
-    const ExperimentParameters &parameters,
-    const Potentials &pot, const ColliderModus &);
-template void propagate<SphereModus>(Particles *particles,
-    const ExperimentParameters &parameters,
-    const Potentials &pot, const SphereModus &);
 
 }  // namespace Smash

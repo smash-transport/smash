@@ -38,9 +38,8 @@ void propagate_straight_line(Particles *particles,
   * \f[ \frac{dr}{dt} = p/E \f]
   * \f[ \frac{dp}{dt} = -dU(r)/dr \f]
   */
-template<typename Modus>
 void propagate(Particles *particles, const ExperimentParameters &parameters,
-               const Potentials &pot, const Modus &modus);
+               const Potentials &pot);
 
 }  // namespace Smash
 #endif  // SRC_INCLUDE_PROPAGATION_H_

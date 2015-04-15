@@ -160,7 +160,7 @@ TEST(nucleus_potential_profile) {
     }
     a_file.close();
     for (auto i = 0; i < 50; i++) {
-      propagate(&P, param, *pot, c);
+      propagate(&P, param, *pot);
     }
   }
 }
@@ -203,7 +203,6 @@ TEST(propagation_in_test_potential) {
   const double p_mass = 0.938;
   Configuration conf(TEST_CONFIG_PATH);
   ExperimentParameters param{{0.f, dt}, 1.f, Ntest, sigma};
-  SphereModus c(conf["Modi"], param);
 
   // Create dummy outputs and our test potential
   const double U0 = 0.5;
@@ -219,7 +218,7 @@ TEST(propagation_in_test_potential) {
 
   // Propagate, until particle is at x>>d, where d is parameter of potential
   while (P.data(0).position().x1() < 20*d) {
-    propagate(&P, param, *pot, c);
+    propagate(&P, param, *pot);
   }
   // Calculate 4-momentum, expected from conservation laws
   const FourVector pm = part.momentum();

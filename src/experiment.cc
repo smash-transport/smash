@@ -391,7 +391,7 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
 
     /* (3) Do propagation. */
     if(potentials_) {
-      propagate(&particles_, parameters_, *potentials_, modus_);
+      propagate(&particles_, parameters_, *potentials_);
     } else {
       propagate_straight_line(&particles_, parameters_);
     }
@@ -449,7 +449,7 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
 
     /* Do one final propagation step. */
     if(potentials_) {
-      propagate(&particles_, parameters_, *potentials_, modus_);
+      propagate(&particles_, parameters_, *potentials_);
     } else {
       propagate_straight_line(&particles_, parameters_);
     }

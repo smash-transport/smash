@@ -49,6 +49,7 @@ static Test::ParticlesPtr create_box_particles() {
                      Momentum{0.51, -.3, 0.0, 0.4})});
 }
 
+/*
 static Potentials create_potential() {
   Configuration conf(TEST_CONFIG_PATH);
   conf["Potentials"]["Skyrme"]["Skyrme_A"] = -209.2;
@@ -57,6 +58,7 @@ static Potentials create_potential() {
   ExperimentParameters param{{0.f, 1.f}, 1.f, 1, 1.0};
   return Potentials(conf["Potentials"], param);
 }
+*/
 
 TEST(propagate_default_no_potentials) {
   ExperimentParameters param{{0.f, 1.f}, 1.f, 1, 1.0};
@@ -81,6 +83,9 @@ TEST(propagate_default_no_potentials) {
   COMPARE(Pdef->data(5).position(), FourVector(0.0, 0.2 - 0.3/0.51, 0.0, 4.8 + 0.4/0.51));
 }
 
+// Now, when propagation does not depens on the modus, comparing propagation
+// in different modi has little sense.
+/*
 TEST(propagate_collider) {
   ExperimentParameters param{{0.f, 1.f}, 1.f, 1, 1.0};
   SphereModus s(
@@ -95,8 +100,8 @@ TEST(propagate_collider) {
   auto Pdef = create_box_particles();
   auto Pcol = create_box_particles();
   Potentials pot = create_potential();
-  propagate(Pdef.get(), param, pot, s);
-  propagate(Pcol.get(), param, pot, c);
+  propagate(Pdef.get(), param, pot);
+  propagate(Pcol.get(), param, pot);
   // Collider and Default modus should do the same everywhere:
   for (size_t i = 0; i < 6; i++) {
     COMPARE(Pdef->data(i).momentum(), Pcol->data(i).momentum());
@@ -117,12 +122,12 @@ TEST(propagate_box) {
   auto Pdef = create_box_particles();
   auto Pbox = create_box_particles();
   Potentials pot = create_potential();
-  propagate(Pdef.get(), param, pot, s);
-  propagate(Pbox.get(), param, pot, b);
+  propagate(Pdef.get(), param, pot);
+  propagate(Pbox.get(), param, pot);
   // Now wrapping, i.e. imposing initial conditions is separated from
   // propagation, so box should produce the same results that sphere
   for (size_t i = 0; i < 6; i++) {
     COMPARE(Pdef->data(i).momentum(), Pbox->data(i).momentum());
     COMPARE(Pdef->data(i).position(), Pbox->data(i).position());
   }
-}
+} */
