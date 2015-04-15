@@ -50,14 +50,14 @@ static void compare_fourvector(const std::array<std::string,4> &stringarray,
 }
 
 static void compare_particledata(
-  const std::array<std::string, data_elements> &datastring,
-  const ParticleData &particle, const int id) {
+    const std::array<std::string, data_elements> &datastring,
+    const ParticleData &particle, const int id) {
   std::array<std::string,4> position_string;
   for (int i = 0; i < 4 ; i++) {
     position_string.at(i) = datastring.at(i);
   }
   compare_fourvector(position_string, particle.position());
-  COMPARE(float(std::atof(datastring.at(4).c_str())), Test::smashon_mass);
+  COMPARE(float(std::atof(datastring.at(4).c_str())), Test::smashon_mass) << datastring.at(4);
   std::array<std::string,4> momentum_string;
   for (int i = 0; i < 4 ; i++) {
     momentum_string.at(i) = datastring.at(i + 5);
