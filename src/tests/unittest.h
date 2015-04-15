@@ -479,6 +479,7 @@ class UnitTester {  // {{{1
   float float_fuzzyness;
   double double_fuzzyness;
   const char *only_name;
+  bool vim_lines = false;
 
  private:
   bool m_finalized;
@@ -535,11 +536,13 @@ static void initTest(int argc, char **argv) {  // {{{1
   for (int i = 1; i < argc; ++i) {
     if (0 == std::strcmp(argv[i], "--help") ||
         0 == std::strcmp(argv[i], "-h")) {
-      std::cout << "Usage: " << argv[0] << " [-h|--help] [--only <testname>]\n";
+      std::cout << "Usage: " << argv[0] << " [-h|--help] [--only <testname>] [-v|--vim]\n";
       exit(0);
-    }
-    if (0 == std::strcmp(argv[i], "--only") && i + 1 < argc) {
+    } else if (0 == std::strcmp(argv[i], "--only") && i + 1 < argc) {
       global_unit_test_object_.only_name = argv[i + 1];
+    } else if (0 == std::strcmp(argv[i], "--vim") ||
+               0 == std::strcmp(argv[i], "-v")) {
+      global_unit_test_object_.vim_lines = true;
     }
   }
 }
@@ -591,7 +594,14 @@ void UnitTester::runTestInt(TestFunction fun, const char *name) {  // {{{1
     }
   } else {
     if (!global_unit_test_object_.status) {
-      std::cout << _unittest_fail() << "┕ " << name << std::endl;
+      std::cout << _unittest_fail();
+      if (!vim_lines) {
+        std::cout << "┕ ";
+      }
+      std::cout << name << std::endl;
+      if (vim_lines) {
+        std::cout << '\n';
+      }
       ++failedTests;
     } else {
       UnitTest::printPass();
@@ -708,7 +718,6 @@ class _UnitTest_Compare {  // {{{1
     if (IS_UNLIKELY(m_failed)) {
       printFirst();
       printPosition(_file, _line);
-      print(":\n");
       print(_a);
       print(" (");
       print(std::setprecision(10));
@@ -733,7 +742,6 @@ class _UnitTest_Compare {  // {{{1
     if (IS_UNLIKELY(m_failed)) {
       printFirst();
       printPosition(_file, _line);
-      print(":\n");
       print(_a);
       print(" (");
       print(std::setprecision(10));
@@ -759,7 +767,6 @@ class _UnitTest_Compare {  // {{{1
     if (IS_UNLIKELY(m_failed)) {
       printFirst();
       printPosition(_file, _line);
-      print(":\n");
       print(_a);
       print(" (");
       print(std::setprecision(10));
@@ -797,7 +804,6 @@ class _UnitTest_Compare {  // {{{1
     if (IS_UNLIKELY(m_failed)) {
       printFirst();
       printPosition(_file, _line);
-      print(":\n");
       print(_a);
       print(" (");
       print(std::setprecision(10));
@@ -840,7 +846,6 @@ class _UnitTest_Compare {  // {{{1
     if (IS_UNLIKELY(m_failed)) {
       printFirst();
       printPosition(_file, _line);
-      print(": ");
       print(cond);
     }
   }
@@ -850,7 +855,6 @@ class _UnitTest_Compare {  // {{{1
       : m_ip(getIp()), m_failed(true) {
     printFirst();
     printPosition(_file, _line);
-    print(":\n");
   }
 
   // stream operators {{{2
@@ -928,7 +932,9 @@ class _UnitTest_Compare {  // {{{1
     std::cout << s.get();
   }
   static void printFirst() {  // {{{2
-    std::cout << _unittest_fail() << "┍ ";
+    if (!global_unit_test_object_.vim_lines) {
+      std::cout << _unittest_fail() << "┍ ";
+    }
   }
   // print overloads {{{2
   template <typename T>
@@ -950,12 +956,20 @@ class _UnitTest_Compare {  // {{{1
     const char *pos = 0;
     if (0 != (pos = std::strchr(str, '\n'))) {
       if (pos == str) {
-        std::cout << '\n' << _unittest_fail() << "│ " << &str[1];
+        std::cout << '\n' << _unittest_fail();
+        if (!global_unit_test_object_.vim_lines) {
+          std::cout << "│ ";
+        }
+        print(&str[1]);
       } else {
         char *left = strdup(str);
         left[pos - str] = '\0';
-        std::cout << left << '\n' << _unittest_fail() << "│ " << &pos[1];
+        std::cout << left << '\n' << _unittest_fail();
+        if (!global_unit_test_object_.vim_lines) {
+          std::cout << "│ ";
+        }
         free(left);
+        print(&pos[1]);
       }
     } else {
       std::cout << str;
@@ -963,7 +977,10 @@ class _UnitTest_Compare {  // {{{1
   }
   static void print(const char ch) {
     if (ch == '\n') {
-      std::cout << '\n' << _unittest_fail() << "│ ";
+      std::cout << '\n' << _unittest_fail();
+      if (!global_unit_test_object_.vim_lines) {
+        std::cout << "│ ";
+      }
     } else {
       std::cout << ch;
     }
@@ -979,8 +996,14 @@ class _UnitTest_Compare {  // {{{1
   }
   // printPosition {{{2
   void printPosition(const char *_file, int _line) {
-    std::cout << "at " << _file << ':' << _line << " (0x" << std::hex << m_ip
-              << std::dec << ')';
+    if (global_unit_test_object_.vim_lines) {
+      std::cout << _file << ':' << _line << ": (0x" << std::hex << m_ip
+                << std::dec << "): ";
+    } else {
+      std::cout << "at: " << _file << ':' << _line << " (0x" << std::hex << m_ip
+                << std::dec;
+      print("):\n");
+    }
   }
   // printFuzzy... {{{2
   template <typename T>
