@@ -121,8 +121,8 @@ inline ParticleData smashon_random(int id = -1) {
   ParticleData p{ParticleType::find(0x661), id};
   p.set_4position(
       {random_value(), random_value(), random_value(), random_value()});
-  p.set_4momentum(
-      {smashon_mass, random_value(), random_value(), random_value()});
+  p.set_4momentum(smashon_mass,
+                  {random_value(), random_value(), random_value()});
   return p;
 }
 
