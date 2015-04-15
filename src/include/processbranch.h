@@ -9,6 +9,7 @@
 
 #include <memory>
 #include <vector>
+#include <iostream>
 
 #include "decaytype.h"
 #include "forwarddeclarations.h"
@@ -34,6 +35,8 @@ enum class ProcessType {
   Decay = 5,
   Wall = 6
 };
+
+std::ostream& operator<< (std::ostream& os, ProcessType process_type);
 
 /**
  * \ingroup data
