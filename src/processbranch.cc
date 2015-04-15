@@ -38,4 +38,18 @@ float ProcessBranch::threshold() const {
              : rounded;
 }
 
+std::ostream& operator<< (std::ostream& os, ProcessType process_type) {
+  switch (process_type) {
+    case ProcessType::None     : os << "None";     break;
+    case ProcessType::Elastic  : os << "Elastic";  break;
+    case ProcessType::TwoToOne : os << "TwoToOne"; break;
+    case ProcessType::TwoToTwo : os << "TwoToTwo"; break;
+    case ProcessType::String   : os << "String";   break;
+    case ProcessType::Decay    : os << "Decay";    break;
+    case ProcessType::Wall     : os << "Wall";     break;
+    default: os.setstate(std::ios_base::failbit);
+  }
+  return os;
+}
+
 }  // namespace Smash
