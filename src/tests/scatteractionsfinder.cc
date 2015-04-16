@@ -69,7 +69,7 @@ TEST(collision_order) {
   ScatterActionsFinder finder(elastic_parameter, testparticles);
 
   // prepare lists
-  ParticleList search_list{particles.begin(), particles.end()};
+  ParticleList search_list = particles.copy_to_vector();
   std::vector<const ParticleList*> neighbors_list; // empty for now
 
   // delta t (in fermi)

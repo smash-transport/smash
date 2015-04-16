@@ -34,7 +34,7 @@ void propagate_straight_line(Particles *particles,
 void propagate(Particles *particles, const ExperimentParameters &parameters,
                const Potentials &pot) {
     // Copy particles before propagation to calculate potentials from them
-  const ParticleList plist{particles->begin(), particles->end()};
+  const ParticleList plist = particles->copy_to_vector();
     const double dt = parameters.timestep_duration();
     const auto &log = logger<LogArea::Propagation>();
 

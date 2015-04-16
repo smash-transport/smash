@@ -136,7 +136,7 @@ TEST(nucleus_potential_profile) {
   for (auto it = 0; it < 20; it++) {
     a_file.open(("Nucleus_U_xy.vtk." + std::to_string(it)).c_str(),
                                                      std::ios::out);
-    plist = ParticleList(P.begin(), P.end());
+    plist = P.copy_to_vector();
     a_file << "# vtk DataFile Version 2.0\n" <<
               "potential\n" <<
               "ASCII\n" <<

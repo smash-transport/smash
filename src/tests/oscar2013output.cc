@@ -94,9 +94,9 @@ TEST(full2013_format) {
   /* Initial state output */
   osc2013full->at_eventstart(particles, event_id);
   /* Create interaction ("resonance formation") */
-  ParticleList initial_particles{particles.begin(), particles.end()};
+  ParticleList initial_particles = particles.copy_to_vector();
   particles.replace(initial_particles, {Test::smashon_random()});
-  ParticleList final_particles{particles.begin(), particles.end()};
+  ParticleList final_particles = particles.copy_to_vector();
   osc2013full->at_interaction(initial_particles, final_particles, 0.0, 0.0,
       ProcessType::None);
   /* Final state output */
@@ -208,7 +208,7 @@ TEST(final2013_format) {
   /* Initial state output (note that this should not do anything!) */
   osc2013final->at_eventstart(particles, event_id);
   /* Create interaction ("elastic scattering") */
-  ParticleList initial_particles{particles.begin(), particles.end()};
+  ParticleList initial_particles = particles.copy_to_vector();
   ParticleList final_particles = initial_particles;
   /* Change the momenta */
   final_particles[0].set_4momentum(Test::smashon_mass, random_value(),
@@ -216,7 +216,7 @@ TEST(final2013_format) {
   final_particles[1].set_4momentum(Test::smashon_mass, random_value(),
                                    random_value(), random_value());
   particles.replace(initial_particles, final_particles);
-  final_particles = ParticleList{particles.begin(), particles.end()};
+  final_particles = particles.copy_to_vector();
   /* As with initial state output, this should not do anything */
   osc2013final->at_interaction(initial_particles, final_particles, 0.0, 0.0,
       ProcessType::None);

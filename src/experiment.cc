@@ -357,7 +357,7 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
     const auto &grid =
         // TODO(mkretz): avoid the copy. Grid could construct from Particles
         // directly.
-        modus_.create_grid(ParticleList{particles_.begin(), particles_.end()},
+        modus_.create_grid(particles_.copy_to_vector(),
                            parameters_.testparticles);
     /* (1.b) Iterate over cells and find actions. */
     grid.iterate_cells([&](

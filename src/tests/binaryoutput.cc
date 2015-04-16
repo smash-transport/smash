@@ -134,9 +134,9 @@ TEST(fullhistory_format) {
   bin_output->at_eventstart(*particles, event_id);
 
   /* Create interaction smashon + smashon -> smashon */
-  ParticleList initial_particles{particles->begin(), particles->end()};
+  ParticleList initial_particles = particles->copy_to_vector();
   particles->replace(initial_particles, {Test::smashon_random()});
-  ParticleList final_particles{particles->begin(), particles->end()};
+  ParticleList final_particles = particles->copy_to_vector();
   double rho = 0.123;
   double weight = 3.21;
   ProcessType process_type = ProcessType::None;
@@ -213,9 +213,9 @@ TEST(particles_format) {
   bin_output->at_eventstart(*particles, event_id);
 
   /* Interaction smashon + smashon -> smashon */
-  ParticleList initial_particles{particles->begin(), particles->end()};
+  ParticleList initial_particles = particles->copy_to_vector();
   particles->replace(initial_particles, {Test::smashon_random()});
-  ParticleList final_particles{particles->begin(), particles->end()};
+  ParticleList final_particles = particles->copy_to_vector();
   Clock clock;
 
   bin_output->at_intermediate_time(*particles, event_id, clock);
