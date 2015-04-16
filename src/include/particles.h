@@ -253,18 +253,23 @@ class Particles {
   /////////////////////// deprecated functions ///////////////////////////
 
   SMASH_DEPRECATED("use the begin() and end() iterators of Particles directly")
-  std::vector<ParticleData> &data() { return data_; }
+  Particles &data() { return *this; }
   SMASH_DEPRECATED("use the begin() and end() iterators of Particles directly")
-  const std::vector<ParticleData> &data() const { return data_; }
+  const Particles &data() const { return *this; }
 
   SMASH_DEPRECATED("don't reference particles by id") ParticleData
       &data(int id) {
-    return data_.at(id);
+    for (ParticleData &x : data_) {
+      if (x.id() == id) {
+        return x;
+      }
+    }
+    throw std::out_of_range("missing particle id");
   }
 
   SMASH_DEPRECATED("don't reference particles by id") const ParticleData
       &data(int id) const {
-    for (auto &&x : data_) {
+    for (const ParticleData &x : data_) {
       if (x.id() == id) {
         return x;
       }
@@ -279,7 +284,7 @@ class Particles {
   SMASH_DEPRECATED("don't reference particles by id") void remove(int id) {
     for (auto it = data_.begin(); it != data_.end(); ++it) {
       if (it->id() == id) {
-        data_.erase(it);
+        remove(*it);
         return;
       }
     }
