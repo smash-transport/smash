@@ -299,6 +299,7 @@ void Experiment<Modus>::perform_actions(ActionList &actions,
                      size_t &interactions_total, size_t &total_pauli_blocked) {
   const auto &log = logger<LogArea::Experiment>();
   if (!actions.empty()) {
+    const auto particles_before_actions = particles_.copy_to_vector();
     for (const auto &action : actions) {
       if (action->is_valid(particles_)) {
         const ParticleList incoming_particles = action->incoming_particles();
@@ -314,9 +315,10 @@ void Experiment<Modus>::perform_actions(ActionList &actions,
         action->perform(&particles_, interactions_total);
         // Calculate Eckart rest frame density at the interaction point
         const FourVector r_interaction = action->get_interaction_point();
-        const double rho = four_current(r_interaction.threevec(), particles_,
-                                     parameters_.gaussian_sigma, dens_type_,
-                                     parameters_.testparticles).abs();
+        const double rho =
+            four_current(r_interaction.threevec(), particles_before_actions,
+                         parameters_.gaussian_sigma, dens_type_,
+                         parameters_.testparticles).abs();
         for (const auto &output : outputs_) {
           output->at_interaction(incoming_particles, outgoing_particles, rho,
                                  action->raw_weight_value(), process_type);
