@@ -116,37 +116,65 @@ TEST(multiple_small_increment) {
 }
 
 TEST(multiple_negative_times) {
-  Clock labtime(-12.0f, 1.0f);
-  float interval = 2.2f;
-  VERIFY(!labtime.multiple_is_in_next_tick(interval)) << labtime.current_time();
-  ++labtime; // time is -11, next multiple is -11.0: YES
-  VERIFY( labtime.multiple_is_in_next_tick(interval)) << labtime.current_time();
-  ++labtime; // -10, -8.8: NO
-  VERIFY(!labtime.multiple_is_in_next_tick(interval)) << labtime.current_time();
-  ++labtime; // -9; -8.8: YES
-  VERIFY( labtime.multiple_is_in_next_tick(interval)) << labtime.current_time();
-  ++labtime; // -8; -6.6: NO
-  VERIFY(!labtime.multiple_is_in_next_tick(interval)) << labtime.current_time();
-  ++labtime; // -7; -6.6: YES
-  VERIFY( labtime.multiple_is_in_next_tick(interval)) << labtime.current_time();
-  ++labtime; // -6; -4.4: NO
-  VERIFY(!labtime.multiple_is_in_next_tick(interval)) << labtime.current_time();
-  ++labtime; // -5; -4.4: YES
-  VERIFY( labtime.multiple_is_in_next_tick(interval)) << labtime.current_time();
-  ++labtime; // -4; -2.2: NO
-  VERIFY(!labtime.multiple_is_in_next_tick(interval)) << labtime.current_time();
-  ++labtime; // -3; -2.2: YES
-  VERIFY( labtime.multiple_is_in_next_tick(interval)) << labtime.current_time();
-  ++labtime; // -2;  0.0: NO
-  VERIFY(!labtime.multiple_is_in_next_tick(interval)) << labtime.current_time();
-  ++labtime; // -1;  0.0: NO
-  VERIFY(!labtime.multiple_is_in_next_tick(interval)) << labtime.current_time();
-  ++labtime; // 0;  0.0: YES
-  VERIFY( labtime.multiple_is_in_next_tick(interval)) << labtime.current_time();
-  ++labtime; // 1;  2.2: NO
-  VERIFY(!labtime.multiple_is_in_next_tick(interval)) << labtime.current_time();
-  ++labtime; // 2;  2.2: YES
-  VERIFY( labtime.multiple_is_in_next_tick(interval)) << labtime.current_time();
+  {
+    Clock labtime(-12.0f, 1.0f);
+    float interval = 2.2f;
+    VERIFY(!labtime.multiple_is_in_next_tick(interval)) << labtime.current_time();
+    ++labtime;  // time is -11, next multiple is -11.0: YES
+    VERIFY(labtime.multiple_is_in_next_tick(interval)) << labtime.current_time();
+    ++labtime;  // -10, -8.8: NO
+    VERIFY(!labtime.multiple_is_in_next_tick(interval)) << labtime.current_time();
+    ++labtime;  // -9; -8.8: YES
+    VERIFY(labtime.multiple_is_in_next_tick(interval)) << labtime.current_time();
+    ++labtime;  // -8; -6.6: NO
+    VERIFY(!labtime.multiple_is_in_next_tick(interval)) << labtime.current_time();
+    ++labtime;  // -7; -6.6: YES
+    VERIFY(labtime.multiple_is_in_next_tick(interval)) << labtime.current_time();
+    ++labtime;  // -6; -4.4: NO
+    VERIFY(!labtime.multiple_is_in_next_tick(interval)) << labtime.current_time();
+    ++labtime;  // -5; -4.4: YES
+    VERIFY(labtime.multiple_is_in_next_tick(interval)) << labtime.current_time();
+    ++labtime;  // -4; -2.2: NO
+    VERIFY(!labtime.multiple_is_in_next_tick(interval)) << labtime.current_time();
+    ++labtime;  // -3; -2.2: YES
+    VERIFY(labtime.multiple_is_in_next_tick(interval)) << labtime.current_time();
+    ++labtime;  // -2;  0.0: NO
+    VERIFY(!labtime.multiple_is_in_next_tick(interval)) << labtime.current_time();
+    ++labtime;  // -1;  0.0: NO
+    VERIFY(!labtime.multiple_is_in_next_tick(interval)) << labtime.current_time();
+    ++labtime;  // 0;  0.0: YES
+    VERIFY(labtime.multiple_is_in_next_tick(interval)) << labtime.current_time();
+    ++labtime;  // 1;  2.2: NO
+    VERIFY(!labtime.multiple_is_in_next_tick(interval)) << labtime.current_time();
+    ++labtime;  // 2;  2.2: YES
+    VERIFY(labtime.multiple_is_in_next_tick(interval)) << labtime.current_time();
+  }
+  {
+    Clock labtime(-1.4, 0.4);
+    const float interval = 1.3;
+    // t = -1.4, -1.3: YES
+    VERIFY( labtime.multiple_is_in_next_tick(interval)) << labtime.current_time() << ' ' << labtime.next_multiple(interval);
+    ++labtime;  // t = -1.0, 0.0: NO
+    VERIFY(!labtime.multiple_is_in_next_tick(interval)) << labtime.current_time() << ' ' << labtime.next_multiple(interval);
+    ++labtime;  // t = -0.6, 0.0: NO
+    VERIFY(!labtime.multiple_is_in_next_tick(interval)) << labtime.current_time() << ' ' << labtime.next_multiple(interval);
+    ++labtime;  // t = -0.2, 0.0: YES
+    VERIFY( labtime.multiple_is_in_next_tick(interval)) << labtime.current_time() << ' ' << labtime.next_multiple(interval);
+    ++labtime;  // t = +0.2, 1.3: NO
+    VERIFY(!labtime.multiple_is_in_next_tick(interval)) << labtime.current_time() << ' ' << labtime.next_multiple(interval);
+    ++labtime;  // t = +0.6, 1.3: NO
+    VERIFY(!labtime.multiple_is_in_next_tick(interval)) << labtime.current_time() << ' ' << labtime.next_multiple(interval);
+    ++labtime;  // t = +1.0, 1.3: YES
+    VERIFY( labtime.multiple_is_in_next_tick(interval)) << labtime.current_time() << ' ' << labtime.next_multiple(interval);
+    ++labtime;  // t = +1.4, 2.6: NO
+    VERIFY(!labtime.multiple_is_in_next_tick(interval)) << labtime.current_time() << ' ' << labtime.next_multiple(interval);
+    ++labtime;  // t = +1.8, 2.6: NO
+    VERIFY(!labtime.multiple_is_in_next_tick(interval)) << labtime.current_time() << ' ' << labtime.next_multiple(interval);
+    ++labtime;  // t = +2.2, 2.6: NO
+    VERIFY(!labtime.multiple_is_in_next_tick(interval)) << labtime.current_time() << ' ' << labtime.next_multiple(interval);
+    ++labtime;  // t = +2.6, 2.6: YES
+    VERIFY( labtime.multiple_is_in_next_tick(interval)) << labtime.current_time() << ' ' << labtime.next_multiple(interval);
+  }
 }
 
 TEST(next_multiple) {
@@ -171,7 +199,7 @@ TEST(next_multiple) {
   ++labtime;  // t = +2.2
   COMPARE(labtime.next_multiple(interval), interval * 2.f);
   ++labtime;  // t = +2.6
-  COMPARE(labtime.next_multiple(interval), interval * 2.f);
+  COMPARE(labtime.next_multiple(interval), interval * 2.f) << labtime.current_time();
   ++labtime;  // t = +3.0
   COMPARE(labtime.next_multiple(interval), interval * 3.f);
   ++labtime;  // t = +3.4
