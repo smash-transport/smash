@@ -44,6 +44,18 @@ class Particles {
   Particles &operator=(const Particles &) = delete;
 
   /**
+   * Return a copy of all particles as a std::vector<ParticleData>.
+   */
+  ParticleList copy_to_vector() const {
+    if (dirty_.empty()) {
+      ParticleList copy = data_;
+      copy.pop_back();  // drop the marker
+      return copy;
+    }
+    return {begin(), end()};
+  }
+
+  /**
    * Inserts the particle \p into the list of particles.
    * The argument \p will afterwards not be a valid copy of a particle of the
    * internal list. I.e.

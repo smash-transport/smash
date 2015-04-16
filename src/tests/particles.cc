@@ -225,3 +225,22 @@ TEST(reset) {
   COMPARE(p.size(), count);
   COMPARE(p.front().id(), 0);
 }
+
+TEST(copy_to_vector) {
+  Particles p;
+  p.create(100, 0x661);
+  auto copy = p.copy_to_vector();
+  COMPARE(copy.size(), 100u);
+  for (auto &&x : copy) {
+    VERIFY(p.is_valid(x));
+  }
+
+  p.remove(copy[5]);
+  p.remove(copy[40]);
+  p.remove(copy[41]);
+  copy = p.copy_to_vector();
+  COMPARE(copy.size(), 97u);
+  for (auto &&x : copy) {
+    VERIFY(p.is_valid(x));
+  }
+}
