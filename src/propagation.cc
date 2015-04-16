@@ -33,28 +33,28 @@ void propagate_straight_line(Particles *particles,
 
 void propagate(Particles *particles, const ExperimentParameters &parameters,
                const Potentials &pot) {
-    // Copy particles before propagation to calculate potentials from them
+  // Copy particles before propagation to calculate potentials from them
   const ParticleList plist = particles->copy_to_vector();
-    const double dt = parameters.timestep_duration();
-    const auto &log = logger<LogArea::Propagation>();
+  const double dt = parameters.timestep_duration();
+  const auto &log = logger<LogArea::Propagation>();
 
-    for (ParticleData &data : *particles) {
-      ThreeVector dU_dr = pot.potential_gradient(data.position().threevec(),
-                                           plist, data.pdgcode());
-      log.debug("Propagate: dU/dr = ", dU_dr);
-      ThreeVector v = data.velocity();
-      // predictor step assuming momentum-indep. potential, dU/dp = 0
-      // then for momentum predictor = corrector
-      data.set_4momentum(data.effective_mass(),
-                         data.momentum().threevec() - dU_dr * dt);
-      ThreeVector v_pred = data.velocity();
-      // corrector step
-      FourVector distance = FourVector(0.0, (v + v_pred) * (0.5 * dt));
-      log.debug("Particle ", data, " motion: ", distance);
-      FourVector position = data.position() + distance;
-      position.set_x0(parameters.new_particle_time());
-      data.set_4position(position);
-    }
+  for (ParticleData &data : *particles) {
+    ThreeVector dU_dr = pot.potential_gradient(data.position().threevec(),
+                                               plist, data.pdgcode());
+    log.debug("Propagate: dU/dr = ", dU_dr);
+    ThreeVector v = data.velocity();
+    // predictor step assuming momentum-indep. potential, dU/dp = 0
+    // then for momentum predictor = corrector
+    data.set_4momentum(data.effective_mass(),
+                       data.momentum().threevec() - dU_dr * dt);
+    ThreeVector v_pred = data.velocity();
+    // corrector step
+    FourVector distance = FourVector(0.0, (v + v_pred) * (0.5 * dt));
+    log.debug("Particle ", data, " motion: ", distance);
+    FourVector position = data.position() + distance;
+    position.set_x0(parameters.new_particle_time());
+    data.set_4position(position);
+  }
 }
 
 }  // namespace Smash
