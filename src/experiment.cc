@@ -212,14 +212,6 @@ Experiment<Modus>::Experiment(Configuration config)
       force_decays_(config.take({"Collision_Term", "Force_Decays_At_End"},
                                 true)) {
   const auto &log = logger<LogArea::Experiment>();
-  int64_t seed_ = config.take({"General",  "Randomseed"});
-  if (seed_ < 0) {
-    // Seed with a real random value, if available
-    std::random_device rd;
-    seed_ = rd();
-  }
-  Random::set_seed(seed_);
-  log.info() << "Random number seed: " << seed_;
   log.info() << *this;
 
   if (config.take({"Collision_Term", "Decays"}, true)) {

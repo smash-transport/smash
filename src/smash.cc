@@ -313,6 +313,14 @@ int main(int argc, char *argv[]) {
     create_all_loggers(configuration["Logging"]);
     log.info(progname, " (", VERSION_MAJOR, ')');
 
+    int64_t seed = configuration.read({"General",  "Randomseed"});
+    if (seed < 0) {
+      // Seed with a real random value, if available
+      std::random_device rd;
+      seed = rd();
+      configuration["General"]["Randomseed"] = seed;
+    }
+
     /* check output path*/
     ensure_path_is_valid(output_path);
     log.debug("output path: ", output_path);
@@ -325,6 +333,11 @@ int main(int argc, char *argv[]) {
     // keep a copy of the configuration that was used in the output directory
     bf::ofstream(output_path / "config.yaml") << configuration.to_string()
                                               << '\n';
+
+    // take the seed setting only after the configuration was stored to file
+    seed = configuration.take({"General",  "Randomseed"});
+    Random::set_seed(seed);
+    log.info() << "Random number seed: " << seed;
 
     log.trace(source_location, " create ParticleType and DecayModes");
     ParticleType::create_type_list(configuration.take({"particles"}));
