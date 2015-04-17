@@ -215,6 +215,8 @@ TEST(reset) {
     p.insert(Test::smashon());
   }
   COMPARE(p.size(), count);
+  p.remove(p.front());
+  COMPARE(p.size(), count - 1);
   VERIFY(!p.is_empty());
   p.reset();
   COMPARE(p.size(), 0u);
@@ -223,7 +225,11 @@ TEST(reset) {
     p.insert(Test::smashon());
   }
   COMPARE(p.size(), count);
-  COMPARE(p.front().id(), 0);
+  int n = 0;
+  for (auto &&pd : p) {
+    COMPARE(pd.id(), n);
+    ++n;
+  }
 }
 
 TEST(copy_to_vector) {
