@@ -168,6 +168,8 @@ class ParticleData {
       : id_(uid), index_(index), type_(&ptype) {}
  private:
   friend class Particles;
+  ParticleData() = default;
+
   /**
    * Each particle has a unique identifier. This identifier is used for
    * identifying the particle in the output files. It is specifically not used
@@ -179,20 +181,15 @@ class ParticleData {
   int id_ = -1;
 
   /**
-   * Constant value used to identify an invalid index_ value and thus mark
-   * ParticleData objects that don't have an original in the Particles list.
-   * This number is chose to be positive for a simpler bounds check in
-   * Particles.
-   */
-  static constexpr int invalid_index = std::numeric_limits<int>::max();
-
-  /**
    * Internal index in the \ref Particles list. This number is used to find the
    * Experiment-wide original of this copy.
    *
    * The value is read and written from the Particles class.
    */
-  int index_ = invalid_index;
+  unsigned index_ = std::numeric_limits<unsigned>::max();
+
+  /// counter of the last collision/decay
+  int id_process_ = -1;
 
   /**
    * A reference to the ParticleType object for this particle (this contains
@@ -200,8 +197,11 @@ class ParticleData {
    */
   ParticleTypePtr type_ = nullptr;
 
-  /// counter of the last collision/decay
-  int id_process_ = -1;
+  static_assert(sizeof(ParticleTypePtr) == 2,
+                "");  // this leaves us two Bytes padding to use for "free"
+  static_assert(sizeof(bool) <= 2, "");  // make sure we don't exceed that space
+  bool hole_ = false;
+
   /// momenta of the particle: x0, x1, x2, x3 as E, px, py, pz
   FourVector momentum_;
   /// position in space: x0, x1, x2, x3 as t, x, y, z

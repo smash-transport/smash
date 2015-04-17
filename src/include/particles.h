@@ -8,6 +8,7 @@
 #define SRC_INCLUDE_PARTICLES_H_
 
 #include <vector>
+#include <type_traits>
 
 #include "macros.h"
 #include "particledata.h"
@@ -48,9 +49,7 @@ class Particles {
    */
   ParticleList copy_to_vector() const {
     if (dirty_.empty()) {
-      ParticleList copy = data_;
-      copy.pop_back();  // drop the marker
-      return copy;
+      return {&data_[0], &data_[data_size_]};
     }
     return {begin(), end()};
   }
@@ -74,10 +73,10 @@ class Particles {
   ParticleData &create(const PdgCode pdg);
 
   /// Returns the current number of particles.
-  size_t size() const { return data_.size() - dirty_.size() - 1; }
+  size_t size() const { return data_size_ - dirty_.size(); }
 
   /// empty() check of the ParticleData map
-  bool is_empty() const { return data_.size() == 1; }
+  bool is_empty() const { return data_size_ == 0; }
 
   /** return time of the computational frame
    *
@@ -87,7 +86,7 @@ class Particles {
    */
   double time() const {
     assert(!is_empty());
-    return data_.front().position().x0();
+    return front().position().x0();
   }
 
   /// \ingroup exception
@@ -110,7 +109,7 @@ class Particles {
    * between the copy and the call to is_valid.
    */
   bool is_valid(const ParticleData &copy) const {
-    if (static_cast<int>(data_.size()) <= copy.index_) {
+    if (data_size_ <= copy.index_) {
       return false;
     }
     return data_[copy.index_].id() ==
@@ -146,13 +145,7 @@ class Particles {
    * valid copy obtained from Particles, i.e. a call to \ref is_valid must
    * return \c true.
    */
-  void remove(const ParticleData &p) {
-    assert(is_valid(p));
-    const std::size_t index = p.index_;
-    data_[index].set_id(-1);
-    data_[index].index_ = ParticleData::invalid_index;
-    dirty_.push_back(index);
-  }
+  void remove(const ParticleData &p);
 
   /**
    * Replace the particles in \p to_remove with the particles in \p to_add in
@@ -167,23 +160,26 @@ class Particles {
    * \internal
    * Iterator type that skips over the holes in data_.
    */
-  template <typename Base>
-  class iterator : public Base {
-    // TODO(mkretz): operator[] is wrong! And it's not a RandomAccessIterator
-    // either.
+  template <typename T>
+  class iterator : public std::iterator<std::bidirectional_iterator_tag, T> {
+    friend class Particles;
+
    public:
-    typedef ParticleData value_type;
-    typedef ParticleData *pointer;
-    typedef ParticleData &reference;
-    typedef const ParticleData *const_pointer;
-    typedef const ParticleData &const_reference;
+    using value_type = typename std::remove_const<T>::type;
+    using pointer = typename std::add_pointer<T>::type;
+    using reference = typename std::add_lvalue_reference<T>::type;
+    using const_pointer = typename std::add_const<pointer>::type;
+    using const_reference = typename std::add_const<reference>::type;
 
-    iterator(Base it) : Base(it) {}  // NOLINT(runtime/explicit)
+   private:
+    iterator(pointer p) : ptr_(p) {}  // NOLINT(runtime/explicit)
+    pointer ptr_;
 
+   public:
     iterator &operator++() {
       do {
-        Base::operator++();
-      } while ((*this)->index_ == ParticleData::invalid_index);
+        ++ptr_;
+      } while (ptr_->hole_);
       return *this;
     }
     iterator operator++(int) {
@@ -194,8 +190,8 @@ class Particles {
 
     iterator &operator--() {
       do {
-        Base::operator--();
-      } while ((*this)->index_ == ParticleData::invalid_index);
+        --ptr_;
+      } while (ptr_->hole_);
       return *this;
     }
     iterator operator--(int) {
@@ -203,6 +199,19 @@ class Particles {
       operator--();
       return old;
     }
+
+    reference operator*() { return *ptr_; }
+    const_reference operator*() const { return *ptr_; }
+
+    pointer operator->() { return ptr_; }
+    const_pointer operator->() const { return ptr_; }
+
+    bool operator==(const iterator &rhs) const { return ptr_ == rhs.ptr_; }
+    bool operator!=(const iterator &rhs) const { return ptr_ != rhs.ptr_; }
+    bool operator< (const iterator &rhs) const { return ptr_ <  rhs.ptr_; }
+    bool operator> (const iterator &rhs) const { return ptr_ >  rhs.ptr_; }
+    bool operator<=(const iterator &rhs) const { return ptr_ <= rhs.ptr_; }
+    bool operator>=(const iterator &rhs) const { return ptr_ >= rhs.ptr_; }
   };
 
   /// Returns a reference to the first particle in the list.
@@ -219,42 +228,34 @@ class Particles {
    * Returns an iterator pointing to the first particle in the list. Use it to
    * iterate over all particles in the list.
    */
-  iterator<ParticleList::iterator> begin() {
-    auto it = data_.begin();
-    if (size() != 0) {
-      while (it->index_ == ParticleData::invalid_index) {
-        ++it;
-      }
+  iterator<ParticleData> begin() {
+    ParticleData *first = &data_[0];
+    while (first->hole_) {
+      ++first;
     }
-    return it;
+    return first;
   }
   /// const overload of the above
-  iterator<ParticleList::const_iterator> begin() const {
-    auto it = data_.begin();
-    if (size() != 0) {
-      while (it->index_ == ParticleData::invalid_index) {
-        ++it;
-      }
+  iterator<const ParticleData> begin() const {
+    ParticleData *first = &data_[0];
+    while (first->hole_) {
+      ++first;
     }
-    return it;
+    return first;
   }
 
   /**
    * Returns an iterator pointing behind the last particle in the list. Use it
    * to iterate over all particles in the list.
    */
-  iterator<ParticleList::iterator> end() {
-    return --data_.end();
-  }
+  iterator<ParticleData> end() { return &data_[data_size_]; }
   /// const overload of the above
-  iterator<ParticleList::const_iterator> end() const {
-    return --data_.end();
-  }
+  iterator<const ParticleData> end() const { return &data_[data_size_]; }
 
   /// Returns a const begin iterator.
-  iterator<ParticleList::const_iterator> cbegin() const { return begin(); }
+  iterator<const ParticleData> cbegin() const { return begin(); }
   /// Returns a const end iterator.
-  iterator<ParticleList::const_iterator> cend() const { return end(); }
+  iterator<const ParticleData> cend() const { return end(); }
 
   /**
    * \ingroup logging
@@ -271,7 +272,7 @@ class Particles {
 
   SMASH_DEPRECATED("don't reference particles by id") ParticleData
       &data(int id) {
-    for (ParticleData &x : data_) {
+    for (ParticleData &x : *this) {
       if (x.id() == id) {
         return x;
       }
@@ -281,7 +282,7 @@ class Particles {
 
   SMASH_DEPRECATED("don't reference particles by id") const ParticleData
       &data(int id) const {
-    for (const ParticleData &x : data_) {
+    for (const ParticleData &x : *this) {
       if (x.id() == id) {
         return x;
       }
@@ -294,7 +295,7 @@ class Particles {
   }
 
   SMASH_DEPRECATED("don't reference particles by id") void remove(int id) {
-    for (auto it = data_.begin(); it != data_.end(); ++it) {
+    for (auto it = begin(); it != end(); ++it) {
       if (it->id() == id) {
         remove(*it);
         return;
@@ -304,7 +305,7 @@ class Particles {
 
   SMASH_DEPRECATED("don't reference particles by id") bool has_data(
       int id) const {
-    for (auto &&x : data_) {
+    for (auto &&x : *this) {
       if (x.id() == id) {
         return true;
       }
@@ -326,36 +327,19 @@ class Particles {
   /// Highest id of a given particle
   int id_max_ = -1;
 
-  /**
-   * A std::vector of ParticleData objects storing the particles acting in an
-   * Experiment.
-   *
-   * Action classes may lead to particles getting removed and added, so over
-   * time the list must evolve. The strategy here is that removal of particles
-   * leaves holes in the list and adding particles will fill up those holes or
-   * append at the end. The indexes of the holes are stored in arbitrary order
-   * in the dirty_ member variable. Additionally, the holes are marked with
-   * ParticleData::invalid_index and thus no search through dirty_ is necessary
-   * to identify a hole.
-   *
-   * The last entry in data_ is a marker. Thus, if `data_.size() == 1` the list
-   * of actual particles is empty. This marker is necessary for implementing
-   * linear iteration over the complete list of particles correctly. The
-   * Particles::iterator class implements the increment and decrement operators
-   * in such a way that holes are skipped over. However, since the end()
-   * iterator of std::vector always points at the element behind the last valid
-   * entry (and therefore may never be dereferenced), the end() iterator of
-   * Particles points at the end marker. Thus the increment operator may
-   * dereference the entry to inspect whether the entry is a hole or not and
-   * continue to the next entry.
-   */
-  ParticleList data_;
+  void increase_capacity(unsigned new_capacity);
+  inline void ensure_capacity(unsigned to_add);
+  inline void copy_in(ParticleData &to, const ParticleData &from);
+
+  unsigned data_size_ = 0u;
+  unsigned data_capacity_ = 100u;
+  std::unique_ptr<ParticleData[]> data_;
 
   /**
    * Stores the indexes in data_ that do not hold valid particle data and should
    * be reused when new particles are added.
    */
-  std::vector<int> dirty_;
+  std::vector<unsigned> dirty_;
 };
 
 }  // namespace Smash
