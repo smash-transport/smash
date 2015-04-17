@@ -22,7 +22,7 @@ endmacro()
 macro(smash_add_exe name)
   add_executable(${name} ${name}.cc)
   target_link_libraries(${name} smash_lib ${SMASH_LIBRARIES})
-   if(HAVE_SANITIZER)
+  if(USE_SANITIZER)
       set_target_properties(${name} PROPERTIES
          COMPILE_FLAGS "${SANITIZER_FLAG} -DSMASH_TEST_OUTPUT_PATH=\\\"${PROJECT_BINARY_DIR}/${name}_output/\\\""
          LINK_FLAGS ${SANITIZER_FLAG}
@@ -150,7 +150,7 @@ else()
    message(STATUS "valgrind not found. Memcheck tests are disabled!")
 endif()
 
-if(HAVE_SANITIZER)
+if(USE_SANITIZER)
    smash_add_test(sanitizer_box      smash_sanitizer smash_sanitizer -e 5.0 -m Box ${SMASH_OPTIONS})
    smash_add_test(sanitizer_collider smash_sanitizer smash_sanitizer -e 5.0 -m Collider ${SMASH_OPTIONS})
    smash_add_test(sanitizer_sphere   smash_sanitizer smash_sanitizer -e 5.0 -m Sphere ${SMASH_OPTIONS})
