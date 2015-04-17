@@ -250,3 +250,24 @@ TEST(copy_to_vector) {
     VERIFY(p.is_valid(x));
   }
 }
+
+TEST(exceed_capacity) {
+  Particles p;
+  p.create(50, 0x661);
+  COMPARE(p.size(), 50u);
+  p.create(150, 0x661);
+  COMPARE(p.size(), 200u);
+  p.create(450, 0x661);
+  COMPARE(p.size(), 650u);
+  p.create(1350, 0x661);
+  COMPARE(p.size(), 2000u);
+  p.create(4050, 0x661);
+  COMPARE(p.size(), 6050u);
+  p.create(12150, 0x661);
+  COMPARE(p.size(), 18200u);
+  int n = 0;
+  for (auto &&x : p) {
+    COMPARE(x.id(), n);
+    ++n;
+  }
+}
