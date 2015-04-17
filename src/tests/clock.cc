@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014
+ *    Copyright (c) 2014-2015
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -12,6 +12,11 @@
 
 using namespace Smash;
 
+// General remark:
+// There are rounding errors involved. But actually the precision of the clock
+// implementation is good enough that the largest expected error is only in the
+// last bit. Thus FUZZY_COMPARE with the default setting is used in those cases.
+
 TEST(size) {
   // if this fails, then either the internal structure in Clock is
   // changed (using other types or the addition of new variables) or the
@@ -19,15 +24,13 @@ TEST(size) {
   // cases, this test is meant to warn future developers to check if the
   // new behaviour is wanted or an unintendet side effect that should be
   // corrected.
-  size_t floatsize = sizeof(float);
-  size_t int32size = sizeof(uint32_t);
-  COMPARE(sizeof(Clock), 2 * floatsize + int32size);
+  COMPARE(sizeof(Clock), 3 * sizeof(Clock::Representation));
 }
 
 TEST(set_clock) {
   Clock labtime(0.123f, 0.234f);
   COMPARE(labtime.current_time(), 0.123f);
-  COMPARE(labtime.timestep_duration(), 0.234f);
+  FUZZY_COMPARE(labtime.timestep_duration(), 0.234f);
 }
 
 TEST(run_clock) {
@@ -37,7 +40,7 @@ TEST(run_clock) {
   FUZZY_COMPARE(labtime.current_time(), 0.1f);
   labtime += 0.5f;
   FUZZY_COMPARE(labtime.current_time(), 0.6f);
-  labtime += 2u;
+  labtime += 2;
   FUZZY_COMPARE(labtime.current_time(), 0.8f);
   Clock endtime(1.0f, 0.0f);
   while (labtime < endtime) {
@@ -119,7 +122,7 @@ TEST(multiple_negative_times) {
   {
     Clock labtime(-12.0f, 1.0f);
     float interval = 2.2f;
-    VERIFY(!labtime.multiple_is_in_next_tick(interval)) << labtime.current_time();
+    VERIFY(!labtime.multiple_is_in_next_tick(interval)) << labtime.current_time() << ' ' << labtime.next_multiple(interval);
     ++labtime;  // time is -11, next multiple is -11.0: YES
     VERIFY(labtime.multiple_is_in_next_tick(interval)) << labtime.current_time();
     ++labtime;  // -10, -8.8: NO
@@ -180,45 +183,45 @@ TEST(multiple_negative_times) {
 TEST(next_multiple) {
   Clock labtime(-1.4, 0.4);
   float interval = 1.3;
-  COMPARE(labtime.next_multiple(interval), -interval);
+  FUZZY_COMPARE(labtime.next_multiple(interval), -interval) << labtime.current_time();
   ++labtime;  // t = -1.0
-  COMPARE(labtime.next_multiple(interval), 0.f);
+  COMPARE(labtime.next_multiple(interval), 0.f) << labtime.current_time();
   ++labtime;  // t = -0.6
-  COMPARE(labtime.next_multiple(interval), 0.f);
+  COMPARE(labtime.next_multiple(interval), 0.f) << labtime.current_time();
   ++labtime;  // t = -0.2
-  COMPARE(labtime.next_multiple(interval), 0.f);
+  COMPARE(labtime.next_multiple(interval), 0.f) << labtime.current_time();
   ++labtime;  // t = +0.2
-  COMPARE(labtime.next_multiple(interval), interval);
+  FUZZY_COMPARE(labtime.next_multiple(interval), interval) << labtime.current_time();
   ++labtime;  // t = +0.6
-  COMPARE(labtime.next_multiple(interval), interval);
+  FUZZY_COMPARE(labtime.next_multiple(interval), interval) << labtime.current_time();
   ++labtime;  // t = +1.0
-  COMPARE(labtime.next_multiple(interval), interval);
+  FUZZY_COMPARE(labtime.next_multiple(interval), interval) << labtime.current_time();
   ++labtime;  // t = +1.4
-  COMPARE(labtime.next_multiple(interval), interval * 2.f);
+  FUZZY_COMPARE(labtime.next_multiple(interval), interval * 2.f) << labtime.current_time();
   ++labtime;  // t = +1.8
   ++labtime;  // t = +2.2
-  COMPARE(labtime.next_multiple(interval), interval * 2.f);
+  FUZZY_COMPARE(labtime.next_multiple(interval), interval * 2.f) << labtime.current_time();
   ++labtime;  // t = +2.6
-  COMPARE(labtime.next_multiple(interval), interval * 2.f) << labtime.current_time();
+  FUZZY_COMPARE(labtime.next_multiple(interval), interval * 3.f) << labtime.current_time();
   ++labtime;  // t = +3.0
-  COMPARE(labtime.next_multiple(interval), interval * 3.f);
+  FUZZY_COMPARE(labtime.next_multiple(interval), interval * 3.f) << labtime.current_time();
   ++labtime;  // t = +3.4
   ++labtime;  // t = +3.8
   ++labtime;  // t = +4.2
   ++labtime;  // t = +4.6
   ++labtime;  // t = +5.0
-  COMPARE(labtime.next_multiple(interval), interval * 4.f);
+  FUZZY_COMPARE(labtime.next_multiple(interval), interval * 4.f) << labtime.current_time();
   ++labtime;  // t = +5.4
   ++labtime;  // t = +5.8
   ++labtime;  // t = +6.2
   ++labtime;  // t = +6.6
   ++labtime;  // t = +7.0
   ++labtime;  // t = +7.4
-  COMPARE(labtime.next_multiple(interval), interval * 6.f);
+  FUZZY_COMPARE(labtime.next_multiple(interval), interval * 6.f) << labtime.current_time();
   ++labtime;  // t = +7.8
-  COMPARE(labtime.next_multiple(interval), interval * 6.f);
+  FUZZY_COMPARE(labtime.next_multiple(interval), interval * 7.f) << labtime.current_time();
   ++labtime;  // t = +8.2
-  COMPARE(labtime.next_multiple(interval), interval * 7.f);
+  FUZZY_COMPARE(labtime.next_multiple(interval), interval * 7.f) << labtime.current_time();
 }
 
 TEST(longtime_test) {
@@ -262,7 +265,7 @@ TEST_CATCH(big_timestep_negative, std::range_error) {
 
 TEST_CATCH(overflow_single_increment, std::overflow_error) {
   Clock labtime(0.0f, 1.0f);
-  labtime += (std::numeric_limits<uint32_t>::max() - 3);
+  labtime += (std::numeric_limits<Clock::Representation>::max() - 3);
   ++labtime;
   ++labtime;
   ++labtime;
@@ -277,5 +280,5 @@ TEST_CATCH(overflow_large_increment, std::overflow_error) {
   ++labtime;
   ++labtime;
   ++labtime;
-  labtime += (std::numeric_limits<uint32_t>::max() - 3);
+  labtime += (std::numeric_limits<Clock::Representation>::max() - 3);
 }
