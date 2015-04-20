@@ -84,13 +84,13 @@ class Clock {
    * \li The increased precision is necessery to determine the correctly rounded
    * inverse for \c from_float.
    */
-  static constexpr double resolution = 0.001;
+  static constexpr double resolution = 0.00001;
   static constexpr float to_float = static_cast<float>(resolution);
   static constexpr float from_float = static_cast<float>(1. / resolution);
 
  public:
   /// The type used for counting ticks/time.
-  using Representation = std::int32_t;
+  using Representation = std::int64_t;
   /// default initializer: Timestep size is set to 0!
   Clock() = default;
   /** initialize with base time and time step size.
