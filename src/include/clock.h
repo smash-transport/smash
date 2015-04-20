@@ -24,8 +24,8 @@ namespace Smash {
  *
  * The basic unit is 1 fm/c = \f$1 / 2.99798542 \cdot 10^{-23}\f$s
  * \f$\approx 0.33 \cdot 10^{-24}\f$ s.
- * The resolution of the clock is 0.001 fm/c. I.e. only multiples of 0.001 fm/c
- * are representable internally.
+ * The resolution of the clock is 0.000001 fm/c. I.e. only multiples of 0.000001
+ * fm/c are representable internally.
  *
  * Usage:
  * ------
@@ -83,14 +83,22 @@ class Clock {
    * all
    * \li The increased precision is necessery to determine the correctly rounded
    * inverse for \c from_float.
+   *
+   * The value 0.000001 is very well suited because
+   * \li It should be \f$10^{-n},\;n\in\mathbb{N}\f$. That's because we want to
+   * use it to convert user input/output and that's in decimal representation.
+   * \li The floating-point representation of the constant should have a small
+   * error. 0.000001 has the smallest error (i.e. 0.022 ulp) in the range
+   * \f$1\leq n \leq 10\f$. The small error helps to convert the internal
+   * integer representation as precise as possible to floating-point.
    */
-  static constexpr double resolution = 0.00001;
-  static constexpr float to_float = static_cast<float>(resolution);
-  static constexpr float from_float = static_cast<float>(1. / resolution);
+  static constexpr double resolution = 0.000001;
 
  public:
   /// The type used for counting ticks/time.
   using Representation = std::int64_t;
+
+ public:
   /// default initializer: Timestep size is set to 0!
   Clock() = default;
   /** initialize with base time and time step size.
@@ -100,14 +108,14 @@ class Clock {
    *
    */
   Clock(const float time, const float dt)
-      : timestep_duration_(dt * from_float), reset_time_(time * from_float) {
+      : timestep_duration_(convert(dt)), reset_time_(convert(time)) {
     if (dt < 0.f) {
       throw std::range_error("No negative time increment allowed");
     }
   }
   /// returns the current time
   float current_time() const {
-    return (reset_time_ + timestep_duration_ * counter_) * to_float;
+    return convert(reset_time_ + timestep_duration_ * counter_);
   }
   /** returns the time in the next tick
    *
@@ -120,10 +128,10 @@ class Clock {
         std::numeric_limits<Representation>::max() - timestep_duration_) {
       throw std::overflow_error("Too many timesteps, clock overflow imminent");
     }
-    return (reset_time_ + timestep_duration_ * (counter_ + 1)) * to_float;
+    return convert(reset_time_ + timestep_duration_ * (counter_ + 1));
   }
   /// returns the time step size.
-  float timestep_duration() const { return timestep_duration_ * to_float; }
+  float timestep_duration() const { return convert(timestep_duration_); }
   /** sets the time step size (and resets the counter)
    *
    * \param dt new time step size
@@ -135,7 +143,7 @@ class Clock {
     }
     reset_time_ += timestep_duration_ * counter_;
     counter_ = 0;
-    timestep_duration_ = dt * from_float;
+    timestep_duration_ = convert(dt);
   }
   /** checks if a multiple of a given interval is reached within the
    * next tick.
@@ -156,7 +164,7 @@ class Clock {
     if (interval < 0.f) {
       throw std::range_error("Negative interval makes no sense for clock");
     }
-    const Representation int_interval = interval * from_float;
+    const Representation int_interval = convert(interval);
     // if the interval is less than or equal to the time step size, one
     // multiple will surely be within the next tick!
     if (int_interval <= timestep_duration_) {
@@ -176,12 +184,12 @@ class Clock {
    * the current time.
    */
   float next_multiple(const float interval) const {
-    const Representation int_interval = interval * from_float;
+    const Representation int_interval = convert(interval);
     const auto current = reset_time_ + timestep_duration_ * counter_;
     if (unlikely(current < 0)) {
-      return current / int_interval * int_interval * to_float;
+      return convert(current / int_interval * int_interval);
     }
-    return (current / int_interval + 1) * int_interval * to_float;
+    return convert((current / int_interval + 1) * int_interval);
   }
   /** resets the time to a pre-defined value
    *
@@ -195,7 +203,7 @@ class Clock {
       logger<LogArea::Clock>().info("Resetting clock from", current_time(),
                                     " fm/c to ", reset_time, " fm/c");
     }
-    reset_time_ = reset_time * from_float;
+    reset_time_ = convert(reset_time);
     counter_ = 0;
   }
   /** advances the clock by one tick (\f$\Delta t\f$)
@@ -214,7 +222,7 @@ class Clock {
     return *this;
   }
   /**
-   * Advances the clock by an arbitrary timestep (multiple of 0.001 fm/c).
+   * Advances the clock by an arbitrary timestep (multiple of 0.000001 fm/c).
    *
    * \note It uses a template parameter only for disambiguation with the
    * overload below.
@@ -225,7 +233,7 @@ class Clock {
     if (big_timestep < 0.f) {
       throw std::range_error("The clock cannot be turned back.");
     }
-    reset_time_ += big_timestep * from_float;
+    reset_time_ += convert(big_timestep);
     return *this;
   }
   /// advances the clock by an arbitrary number of ticks.
@@ -249,6 +257,14 @@ class Clock {
   bool operator>(float time) const { return current_time() > time; }
 
  private:
+  static constexpr float to_float = static_cast<float>(resolution);
+  static constexpr float from_float = static_cast<float>(1. / resolution);
+
+  /// convert a float value into the internal int representation
+  static Representation convert(float x) { return std::round(x * from_float); }
+  /// convert an internal int value into the float representation
+  static float convert(Representation x) { return x * to_float; }
+
   /// clock tick. This is purely internal and will be reset when the
   /// timestep size is changed
   Representation counter_ = 0;
