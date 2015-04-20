@@ -101,7 +101,7 @@ void DecayAction::one_to_three() {
   const double momentum_b = std::sqrt(energy_b * energy_b - mass_b * mass_b);
 
   const double total_energy = sqrt_s();
-  if (fabs(energy_a + energy_b + energy_c - total_energy) > really_small) {
+  if (std::abs(energy_a + energy_b + energy_c - total_energy) > really_small) {
     log.warn("1->3: Ea + Eb + Ec: ", energy_a + energy_b + energy_c,
              " Total E: ", total_energy);
   }
@@ -114,7 +114,7 @@ void DecayAction::one_to_three() {
   outgoing_a.set_4momentum(mass_a, phitheta.threevec() * momentum_a);
 
   /* Angle between a and b */
-  double theta_ab = acos(
+  double theta_ab = std::acos(
       (energy_a * energy_b - 0.5 * (s_ab - mass_a * mass_a - mass_b * mass_b)) /
       (momentum_a * momentum_b));
   log.debug("theta_ab: ", theta_ab, " Ea: ", energy_a, " Eb: ", energy_b,
@@ -123,7 +123,7 @@ void DecayAction::one_to_three() {
   outgoing_b.set_4momentum(mass_b, phitheta.threevec() * momentum_b);
 
   /* Angle between b and c */
-  double theta_bc = acos(
+  double theta_bc = std::acos(
       (energy_b * energy_c - 0.5 * (s_bc - mass_b * mass_b - mass_c * mass_c)) /
       (momentum_b * momentum_c));
   log.debug("theta_bc: ", theta_bc, " Eb: ", energy_b, " Ec: ", energy_c,
@@ -137,12 +137,13 @@ void DecayAction::one_to_three() {
   FourVector ptot = outgoing_a.momentum() + outgoing_b.momentum() +
                     outgoing_c.momentum();
 
-  if (fabs(ptot.x0() - total_energy) > really_small) {
+  if (std::abs(ptot.x0() - total_energy) > really_small) {
     log.warn("1->3 energy not conserved! Before: ", total_energy, " After: ",
              ptot.x0());
   }
-  if (fabs(ptot.x1()) > really_small || fabs(ptot.x2()) > really_small ||
-      fabs(ptot.x3()) > really_small) {
+  if (std::abs(ptot.x1()) > really_small ||
+      std::abs(ptot.x2()) > really_small ||
+      std::abs(ptot.x3()) > really_small) {
     log.warn("1->3 momentum check failed. Total momentum: ", ptot.threevec());
   }
 

@@ -104,7 +104,7 @@ float SphereModus::initial_conditions(Particles *particles,
     momentum_total += data.momentum();
     /* uniform sampling in a sphere with radius r */
     double position_radial;
-    position_radial = cbrt(Random::canonical()) * radius_;
+    position_radial = std::cbrt(Random::canonical()) * radius_;
     Angles pos_phitheta;
     pos_phitheta.distribute_isotropically();
     data.set_4position(FourVector(start_time_,

@@ -188,7 +188,7 @@ void inline Angles::set_phi(const double newphi) {
   /* Make sure that phi is in the range [0,2pi).  */
     phi_ = newphi;
   if (newphi < 0 || newphi >= twopi) {
-    phi_ -= twopi * floor(newphi / twopi);
+    phi_ -= twopi * std::floor(newphi / twopi);
   }
 }
 
@@ -208,7 +208,7 @@ void inline Angles::set_theta(const double newtheta) {
   /* no error handling necessary, because this gives a sensible answer
    * for every real number.
    */
-  set_costheta(cos(newtheta));
+  set_costheta(std::cos(newtheta));
 }
 
 bool inline Angles::add_to_theta(const double delta) {
@@ -251,17 +251,17 @@ bool inline Angles::add_to_theta(const double delta, const bool reverse) {
 double inline Angles::costheta() const { return costheta_; }
 double inline Angles::phi() const { return phi_; }
 double inline Angles::sintheta() const {
-  return sqrt(1.0 - costheta_*costheta_);
+  return std::sqrt(1.0 - costheta_*costheta_);
 }
-double inline Angles::x() const { return sintheta()*cos(phi_); }
-double inline Angles::y() const { return sintheta()*sin(phi_); }
+double inline Angles::x() const { return sintheta()*std::cos(phi_); }
+double inline Angles::y() const { return sintheta()*std::sin(phi_); }
 double inline Angles::z() const { return costheta_; }
 
 ThreeVector inline Angles::threevec() const {
   return ThreeVector(x(), y(), z());
 }
 
-double inline Angles::theta() const { return acos(costheta_); }
+double inline Angles::theta() const { return std::acos(costheta_); }
 
 }  // namespace Smash
 

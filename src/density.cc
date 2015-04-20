@@ -149,7 +149,7 @@ std::pair<double, ThreeVector> rho_eckart_gradient(const ThreeVector &r,
   const double rho = (rho2 > 0.0) ? std::sqrt(rho2) : 0.0;
 
   // Eckart rest frame density and its gradient
-  if (fabs(rho) > really_small) {
+  if (std::abs(rho) > really_small) {
     return std::make_pair(rho / ntest, ThreeVector(jmu.Dot(djmu_dx),
                                            jmu.Dot(djmu_dy),
                                            jmu.Dot(djmu_dz)) / (rho * ntest));

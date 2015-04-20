@@ -28,9 +28,10 @@ DensityOutput::DensityOutput(bf::path path, Configuration &&config)
       r_(ThreeVector(config.take({"x"}),
                      config.take({"y"}),
                      config.take({"z"}))) {
-  fprintf(file_.get(), "# %s density output\n", VERSION_MAJOR);
-  fprintf(file_.get(), "# time[fm/c] density[fm^-3] @ (%6.2f, %6.2f, %6.2f)\n",
-                               r_.x1(), r_.x2(), r_.x3());
+  std::fprintf(file_.get(), "# %s density output\n", VERSION_MAJOR);
+  std::fprintf(file_.get(),
+               "# time[fm/c] density[fm^-3] @ (%6.2f, %6.2f, %6.2f)\n", r_.x1(),
+               r_.x2(), r_.x3());
 }
 
 DensityOutput::~DensityOutput() {
@@ -38,7 +39,7 @@ DensityOutput::~DensityOutput() {
 
 void DensityOutput::at_eventstart(const Particles &/*particles*/,
                                const int event_number) {
-  fprintf(file_.get(), "# event %i\n", event_number);
+  std::fprintf(file_.get(), "# event %i\n", event_number);
 }
 
 void DensityOutput::at_eventend(const Particles &/*particles*/,
@@ -57,7 +58,7 @@ void DensityOutput::thermodynamics_output(const Particles &particles,
                                           particles.data().end());
   const double rho = four_current(r_, plist, param.gaussian_sigma,
                                   baryon_density, param.testparticles).abs();
-  fprintf(file_.get(), "%g %g\n", param.labclock.current_time(), rho);
+  std::fprintf(file_.get(), "%g %g\n", param.labclock.current_time(), rho);
 }
 
 void DensityOutput::density_along_line(const char * file_name,

@@ -118,23 +118,24 @@ OscarOutput<Format, Contents>::OscarOutput(bf::path path, std::string name)
    */
 
   if (Format == OscarFormat2013) {
-    fprintf(file_.get(), "#!OSCAR2013 %s %s ", name.c_str(), VERSION_MAJOR);
-    fprintf(file_.get(), "t x y z mass p0 px py pz pdg ID\n");
-    fprintf(file_.get(),
-            "# Units: fm fm fm fm GeV GeV GeV GeV GeV none none\n");
+    std::fprintf(file_.get(), "#!OSCAR2013 %s %s ", name.c_str(),
+                 VERSION_MAJOR);
+    std::fprintf(file_.get(), "t x y z mass p0 px py pz pdg ID\n");
+    std::fprintf(file_.get(),
+                 "# Units: fm fm fm fm GeV GeV GeV GeV GeV none none\n");
   } else {
     if (name == "particle_lists") {
       name = "final_id_p_x";  // FIXME: why is this necessary? I.e. what does
                               // the string on the second line tell, and why
                               // does it have to be this specific string?
     }
-    fprintf(file_.get(), "# OSC1999A\n# %s\n# %s\n",
-            name.c_str(), VERSION_MAJOR);
-    fprintf(file_.get(), "# Block format:\n");
-    fprintf(file_.get(), "# nin nout event_number\n");
-    fprintf(file_.get(), "# id pdg 0 px py pz p0 mass x y z t\n");
-    fprintf(file_.get(), "# End of event: 0 0 event_number\n");
-    fprintf(file_.get(), "#\n");
+    std::fprintf(file_.get(), "# OSC1999A\n# %s\n# %s\n", name.c_str(),
+                 VERSION_MAJOR);
+    std::fprintf(file_.get(), "# Block format:\n");
+    std::fprintf(file_.get(), "# nin nout event_number\n");
+    std::fprintf(file_.get(), "# id pdg 0 px py pz p0 mass x y z t\n");
+    std::fprintf(file_.get(), "# End of event: 0 0 event_number\n");
+    std::fprintf(file_.get(), "#\n");
   }
 }
 
@@ -150,15 +151,15 @@ void OscarOutput<Format, Contents>::at_eventstart(const Particles &particles,
                                                   const int event_number) {
   if (Contents & OscarAtEventstart) {
     if (Format == OscarFormat2013) {
-      fprintf(file_.get(), "# event %i in %zu\n", event_number + 1,
-              particles.size());
+      std::fprintf(file_.get(), "# event %i in %zu\n", event_number + 1,
+                   particles.size());
     } else {
       /* OSCAR line prefix : initial particles; final particles; event id
        * First block of an event: initial = 0, final = number of particles
        */
       const size_t zero = 0;
-      fprintf(file_.get(), "%zu %zu %i\n", zero, particles.size(),
-              event_number + 1);
+      std::fprintf(file_.get(), "%zu %zu %i\n", zero, particles.size(),
+                   event_number + 1);
     }
     write(particles);
   }
@@ -169,24 +170,24 @@ void OscarOutput<Format, Contents>::at_eventend(const Particles &particles,
                                                 const int event_number) {
   if (Format == OscarFormat2013) {
     if (Contents & OscarParticlesAtEventend) {
-      fprintf(file_.get(), "# event %i out %zu\n", event_number + 1,
-              particles.size());
+      std::fprintf(file_.get(), "# event %i out %zu\n", event_number + 1,
+                   particles.size());
       write(particles);
     }
     // Comment end of an event
-    fprintf(file_.get(), "# event %i end\n", event_number + 1);
+    std::fprintf(file_.get(), "# event %i end\n", event_number + 1);
   } else {
     // OSCAR line prefix : initial particles; final particles; event id
     // Last block of an event: initial = number of particles, final = 0
     // Block ends with null interaction
     const size_t zero = 0;
     if (Contents & OscarParticlesAtEventend) {
-      fprintf(file_.get(), "%zu %zu %i\n", particles.size(), zero,
-              event_number + 1);
+      std::fprintf(file_.get(), "%zu %zu %i\n", particles.size(), zero,
+                   event_number + 1);
       write(particles);
     }
     // Null interaction marks the end of an event
-    fprintf(file_.get(), "%zu %zu %i\n", zero, zero, event_number + 1);
+    std::fprintf(file_.get(), "%zu %zu %i\n", zero, zero, event_number + 1);
   }
   // Flush to disk
   std::fflush(file_.get());
@@ -201,10 +202,11 @@ void OscarOutput<Format, Contents>::at_interaction(
     const ProcessType process_type) {
   if (Contents & OscarInteractions) {
     if (Format == OscarFormat2013) {
-      fprintf(file_.get(),
-            "# interaction in %zu out %zu rho %12.7f weight %12.7f type %5i \n",
-            incoming_particles.size(), outgoing_particles.size(),
-            density, total_cross_section, process_type);
+      std::fprintf(
+          file_.get(),
+          "# interaction in %zu out %zu rho %12.7f weight %12.7f type %5i \n",
+          incoming_particles.size(), outgoing_particles.size(), density,
+          total_cross_section, process_type);
     } else {
       /* OSCAR line prefix : initial final
        * particle creation: 0 1
@@ -213,9 +215,9 @@ void OscarOutput<Format, Contents>::at_interaction(
        * resonance decay: 1 2
        * etc.
        */
-      fprintf(file_.get(), "%zu %zu %12.7f %12.7f %5i \n",
-              incoming_particles.size(), outgoing_particles.size(), density,
-              total_cross_section, process_type);
+      std::fprintf(file_.get(), "%zu %zu %12.7f %12.7f %5i \n",
+                   incoming_particles.size(), outgoing_particles.size(),
+                   density, total_cross_section, process_type);
     }
     for (const auto &p : incoming_particles) {
       write_particledata(p);
@@ -232,12 +234,12 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
     const Clock & /*clock*/) {
   if (Contents & OscarTimesteps) {
     if (Format == OscarFormat2013) {
-      fprintf(file_.get(), "# event %i out %zu\n", event_number + 1,
-              particles.size());
+      std::fprintf(file_.get(), "# event %i out %zu\n", event_number + 1,
+                   particles.size());
     } else {
       const size_t zero = 0;
-      fprintf(file_.get(), "%zu %zu %i\n", particles.size(), zero,
-              event_number + 1);
+      std::fprintf(file_.get(), "%zu %zu %i\n", particles.size(), zero,
+                   event_number + 1);
     }
     write(particles);
   }
@@ -409,19 +411,19 @@ template <OscarOutputFormat Format, int Contents>
 void OscarOutput<Format, Contents>::write_particledata(
     const ParticleData &data) {
   if (Format == OscarFormat2013) {
-    fprintf(file_.get(), "%g %g %g %g %g %g %g %g %g %s %i\n",
-            data.position().x0(), data.position().x1(), data.position().x2(),
-            data.position().x3(),
-            std::sqrt(data.momentum().Dot(data.momentum())),
-            data.momentum().x0(), data.momentum().x1(), data.momentum().x2(),
-            data.momentum().x3(), data.pdgcode().string().c_str(), data.id());
+    std::fprintf(
+        file_.get(), "%g %g %g %g %g %g %g %g %g %s %i\n", data.position().x0(),
+        data.position().x1(), data.position().x2(), data.position().x3(),
+        std::sqrt(data.momentum().Dot(data.momentum())), data.momentum().x0(),
+        data.momentum().x1(), data.momentum().x2(), data.momentum().x3(),
+        data.pdgcode().string().c_str(), data.id());
   } else {
-    fprintf(file_.get(), "%i %s %i %g %g %g %g %g %g %g %g %g\n", data.id(),
-            data.pdgcode().string().c_str(), 0, data.momentum().x1(),
-            data.momentum().x2(), data.momentum().x3(), data.momentum().x0(),
-            std::sqrt(data.momentum().Dot(data.momentum())),
-            data.position().x1(), data.position().x2(), data.position().x3(),
-            data.position().x0());
+    std::fprintf(
+        file_.get(), "%i %s %i %g %g %g %g %g %g %g %g %g\n", data.id(),
+        data.pdgcode().string().c_str(), 0, data.momentum().x1(),
+        data.momentum().x2(), data.momentum().x3(), data.momentum().x0(),
+        std::sqrt(data.momentum().Dot(data.momentum())), data.position().x1(),
+        data.position().x2(), data.position().x3(), data.position().x0());
   }
 }
 

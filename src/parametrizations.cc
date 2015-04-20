@@ -65,9 +65,9 @@ float np_elastic(double mandelstam_s) {
   if (p_lab < 0.525) {
     return 17.05 * mN / (mandelstam_s - 4 * mN * mN) - 6.83;
   } else if (p_lab < 0.8) {
-    return 33 + 196 * std::pow(fabs(p_lab - 0.95), 2.5);
+    return 33 + 196 * std::pow(std::abs(p_lab - 0.95), 2.5);
   } else if (p_lab < 2.0) {
-    return 31 / sqrt(p_lab);
+    return 31 / std::sqrt(p_lab);
   } else if (p_lab < 2.776) {
     return 77 / (p_lab + 1.5);
   } else {
@@ -89,7 +89,7 @@ float np_total(double mandelstam_s) {
   if (p_lab < 0.4) {
     return 6.3555 * std::pow(p_lab, -3.2481) * std::exp(-0.377 * logp * logp);
   } else if (p_lab < 1.0) {
-    return 33 + 196 * std::pow(fabs(p_lab - 0.95), 2.5);
+    return 33 + 196 * std::pow(std::abs(p_lab - 0.95), 2.5);
   } else if (p_lab < 2.0) {
     return 24.2 + 8.9 * p_lab;
   } else if (p_lab < 5.0) {

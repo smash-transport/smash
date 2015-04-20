@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef SRC_INCLUDE_MATH_H_
-#define SRC_INCLUDE_MATH_H_
+#ifndef SRC_INCLUDE_DEPRECATE_C_FUNCTIONS_H_
+#define SRC_INCLUDE_DEPRECATE_C_FUNCTIONS_H_
 
 #include "forwarddeclarations.h"
 #include <cmath>
@@ -294,4 +294,4 @@ SMASH_DEPRECATE_NONSTD(wscanf)
 
 }  // namespace Smash
 
-#endif  // SRC_INCLUDE_MATH_H_
+#endif  // SRC_INCLUDE_DEPRECATE_C_FUNCTIONS_H_

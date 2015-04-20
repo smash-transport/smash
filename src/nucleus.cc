@@ -178,6 +178,9 @@ float Nucleus::mass() const {
  * \f$\tau\f$ yields \f$t\f$], integrated over all possible combinations
  * that have that property.
  *
+ * \fpPrecision
+ * Why does the `do-while` loop require double-precision?
+ *
  * From the beginning
  * ------------------
  *
@@ -208,11 +211,11 @@ ThreeVector Nucleus::distribute_nucleon() const {
     if (which_range < 0.0) {
       t = radius_scaled * (std::cbrt(Random::canonical()) - 1.);
     } else {
-      t = -log(Random::canonical());
+      t = -std::log(Random::canonical());
       if (which_range >= prob_range2) {
-        t -= log(Random::canonical());
+        t -= std::log(Random::canonical());
         if (which_range >= prob_range2 + prob_range3) {
-          t -= log(Random::canonical());
+          t -= std::log(Random::canonical());
         }
       }
     }
@@ -222,7 +225,7 @@ ThreeVector Nucleus::distribute_nucleon() const {
      * \f$1-(1+\exp(-|t|))^{-1}\f$ (the efficiency of this should be
      * \f$\gg \frac{1}{2}\f$)
      **/
-  } while (Random::canonical() > 1./(1. + exp(-fabs(t)) ) );
+  } while (Random::canonical() > 1. / (1. + std::exp(-std::abs(t))));
   /// \li shift and rescale \f$t\f$ to \f$r = d\cdot t + r_0\f$
   float position_scaled = t + radius_scaled;
   float position = position_scaled * diffusiveness_;
@@ -230,7 +233,7 @@ ThreeVector Nucleus::distribute_nucleon() const {
 }
 
 float Nucleus::woods_saxon(float r) {
-  return r*r/(exp((r-nuclear_radius_)/diffusiveness_)+1);
+  return r * r / (std::exp((r - nuclear_radius_) / diffusiveness_) + 1);
 }
 
 void Nucleus::arrange_nucleons() {

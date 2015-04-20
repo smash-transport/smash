@@ -115,7 +115,7 @@ void BinaryOutputCollisions::at_intermediate_time(
 
 
 BinaryOutputBase::BinaryOutputBase(FILE *f) : file_{f} {
-  fwrite("SMSH", 4, 1, file_.get());  // magic number
+  std::fwrite("SMSH", 4, 1, file_.get());  // magic number
   write(format_version_);             // file format version number
   write(VERSION_MAJOR);               // SMASH version
 }
