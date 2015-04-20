@@ -72,8 +72,21 @@ namespace Smash {
  *
  **/
 class Clock {
-  static constexpr float from_float = 1000;
-  static constexpr float to_float = 0.001f;
+  /**
+   * Defines the resolution of the clock (i.e. the smallest representable time
+   * difference).
+   *
+   * \fpPrecision
+   * This constant is only used to derive other constant expressions, which are
+   * in single-precision:
+   * \li It doesn't matter for the execution / data-representation of SMASH at
+   * all
+   * \li The increased precision is necessery to determine the correctly rounded
+   * inverse for \c from_float.
+   */
+  static constexpr double resolution = 0.001;
+  static constexpr float to_float = static_cast<float>(resolution);
+  static constexpr float from_float = static_cast<float>(1. / resolution);
 
  public:
   /// The type used for counting ticks/time.
