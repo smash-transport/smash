@@ -8,7 +8,6 @@
  */
 
 #include "unittest.h"
-#include "../include/particles.h"
 #include "../include/particletype.h"
 
 using namespace Smash;
@@ -31,11 +30,11 @@ TEST(assign) {
   COMPARE(A.spin(), smashon.spin());
 }
 
-TEST_CATCH(load_from_incorrect_string, Particles::LoadFailure) {
+TEST_CATCH(load_from_incorrect_string, ParticleType::LoadFailure) {
   ParticleType::create_type_list("Hallo Welt! (wave)");
 }
 
-TEST_CATCH(load_one_particle_with_incorrect_newline, Particles::LoadFailure) {
+TEST_CATCH(load_one_particle_with_incorrect_newline, ParticleType::LoadFailure) {
   const std::string parts("pi0 0.1350\n-1.0 111");
   ParticleType::create_type_list(parts);
 }

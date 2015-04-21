@@ -89,15 +89,6 @@ class Particles {
     return front().position().x0();
   }
 
-  /// \ingroup exception
-  struct LoadFailure : public std::runtime_error {
-    using std::runtime_error::runtime_error;
-  };
-  /// \ingroup exception
-  struct ParseError : public LoadFailure {
-    using LoadFailure::LoadFailure;
-  };
-
   /** Reset member data to the state the object had when the constructor
    * returned.
    */

@@ -257,6 +257,11 @@ class ParticleType {
    */
   ParticleTypePtr operator&() const;
 
+  /// \ingroup exception
+  struct LoadFailure : public std::runtime_error {
+    using std::runtime_error::runtime_error;
+  };
+
  private:
 #ifndef NDEBUG
   /// name of the particle
