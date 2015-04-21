@@ -7,8 +7,9 @@
 #ifndef SRC_INCLUDE_PARTICLES_H_
 #define SRC_INCLUDE_PARTICLES_H_
 
-#include <vector>
+#include <memory>
 #include <type_traits>
+#include <vector>
 
 #include "macros.h"
 #include "particledata.h"
