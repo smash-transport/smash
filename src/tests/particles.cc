@@ -148,8 +148,6 @@ void check_particle_data_iteration(T *p, std::size_t expected_size) {
   std::size_t count = 0;
   for (auto &data : *p) {
     VERIFY(p->is_valid(data)) << count;
-    auto &&data2 = p->original(data);
-    COMPARE(data, data2);
     ++count;
   }
   COMPARE(count, p->size());

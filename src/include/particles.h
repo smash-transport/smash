@@ -115,24 +115,6 @@ class Particles {
   }
 
   /**
-   * Returns a reference to the original particle in the list for the \p copy
-   * that originated from the Particles list.
-   *
-   * \param copy This object must be a valid copy from the Particles list. On
-   *             debug builds this is ensured via an assertion, on non-debug
-   *             builds an invalid copy will lead to undefined behavior.
-   */
-  ParticleData &original(const ParticleData &copy) {
-    assert(is_valid(copy));
-    return data_[copy.index_];
-  }
-  /// const overload of the above
-  const ParticleData &original(const ParticleData &copy) const {
-    assert(is_valid(copy));
-    return data_[copy.index_];
-  }
-
-  /**
    * Remove the given particle \p p from the list. The argument \p p must be a
    * valid copy obtained from Particles, i.e. a call to \ref is_valid must
    * return \c true.
