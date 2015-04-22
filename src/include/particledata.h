@@ -185,6 +185,8 @@ class ParticleData {
    * Experiment-wide original of this copy.
    *
    * The value is read and written from the Particles class.
+   *
+   * \see Particles::data_
    */
   unsigned index_ = std::numeric_limits<unsigned>::max();
 
@@ -200,6 +202,14 @@ class ParticleData {
   static_assert(sizeof(ParticleTypePtr) == 2,
                 "");  // this leaves us two Bytes padding to use for "free"
   static_assert(sizeof(bool) <= 2, "");  // make sure we don't exceed that space
+  /**
+   * If \c true, the object is an entry in Particles::data_ and does not hold
+   * valid particle data. Specifically iterations over Particles must skip
+   * objects with `hole_ == true`. All other ParticleData instances should set
+   * this member to \c false.
+   *
+   * \see Particles::data_
+   */
   bool hole_ = false;
 
   /// momenta of the particle: x0, x1, x2, x3 as E, px, py, pz

@@ -33,10 +33,7 @@ namespace Smash {
 class Particles {
  public:
   /**
-   * Set up the Particles object.
-   *
-   * This initializes all the members. The object is ready for usage right after
-   * construction.
+   * Creates a new (empty) Particles object.
    */
   Particles();
 
@@ -46,7 +43,7 @@ class Particles {
   Particles &operator=(const Particles &) = delete;
 
   /**
-   * Return a copy of all particles as a std::vector<ParticleData>.
+   * Returns a copy of all particles as a std::vector<ParticleData>.
    */
   ParticleList copy_to_vector() const {
     if (dirty_.empty()) {
@@ -60,28 +57,31 @@ class Particles {
    * The argument \p will afterwards not be a valid copy of a particle of the
    * internal list. I.e.
    * \code
-   * ParticleData pd(type);
-   * particles.insert(pd);
-   * particles.is_valid(pd); // returns false
+   * ParticleData particle(type);
+   * particles.insert(particle);
+   * particles.is_valid(particle);  // returns false
    * \endcode
    */
   void insert(const ParticleData &p);
 
-  /// Add \p number particles of the same type (\p pdg).
-  void create(size_t number, PdgCode pdg);
+  /// Add \p n particles of the same type (\p pdg) to the list.
+  void create(size_t n, PdgCode pdg);
 
   /// Add one particle of the given \p pdg code and return a reference to it
   ParticleData &create(const PdgCode pdg);
 
-  /// Returns the current number of particles.
+  /// Returns the number of particles in the list.
   size_t size() const { return data_size_ - dirty_.size(); }
 
-  /// empty() check of the ParticleData map
+  /// Returns whether the list of particles is empty.
   bool is_empty() const { return data_size_ == 0; }
 
-  /** return time of the computational frame
+  /** Returns the time of the computational frame.
    *
    * \return computation time which is reduced by the start up time
+   *
+   * \note This function may only be called if the list of particles is not
+   * empty.
    *
    * \fpPrecision Why \c double?
    */
@@ -90,15 +90,17 @@ class Particles {
     return front().position().x0();
   }
 
-  /** Reset member data to the state the object had when the constructor
-   * returned.
+  /**
+   * Reset the state of the Particles object to an empty list and a new id
+   * counter. The object is thus in the same state as right after construction.
    */
   void reset();
 
   /**
    * Return whether the ParticleData copy is still a valid copy of the one
-   * stored in the Particles object. If not, then the particle has interacted
-   * between the copy and the call to is_valid.
+   * stored in the Particles object. If not, then the particle either never was
+   * a valid copy or it has interacted (e.g. scatter, decay) since it was
+   * copied.
    */
   bool is_valid(const ParticleData &copy) const {
     if (data_size_ <= copy.index_) {
@@ -118,6 +120,8 @@ class Particles {
    * Remove the given particle \p p from the list. The argument \p p must be a
    * valid copy obtained from Particles, i.e. a call to \ref is_valid must
    * return \c true.
+   *
+   * \note The validity of \p p is only enforced in DEBUG builds.
    */
   void remove(const ParticleData &p);
 
@@ -125,14 +129,18 @@ class Particles {
    * Replace the particles in \p to_remove with the particles in \p to_add in
    * the list of current particles. The particles in \p to_remove must be valid
    * copies obtained from Particles. The particles in \p to_add will not be
-   * modified by this function call and therefore not be valid copies of the new
-   * particles in the Particles list.
+   * modified by this function call and therefore the ParticleData instances in
+   * \p to_add will not be valid copies of the new particles in the Particles
+   * list.
+   *
+   * \note The validity of \p to_remove is only enforced in DEBUG builds.
    */
   void replace(const ParticleList &to_remove, const ParticleList &to_add);
 
   /**
    * \internal
-   * Iterator type that skips over the holes in data_.
+   * Iterator type that skips over the holes in data_. It implements a standard
+   * bidirectional iterator over the ParticleData objects in Particles.
    */
   template <typename T>
   class iterator : public std::iterator<std::bidirectional_iterator_tag, T> {
@@ -146,45 +154,80 @@ class Particles {
     using const_reference = typename std::add_const<reference>::type;
 
    private:
+    /**
+     * Constructs an iterator pointing to the ParticleData pointed to by \p p.
+     * This constructor may only be called from the Particles class.
+     */
     iterator(pointer p) : ptr_(p) {}  // NOLINT(runtime/explicit)
+
+    /// The entry in Particles this iterator points to.
     pointer ptr_;
 
    public:
+    /**
+     * Advance the iterator to the next valid (not a hole) entry in Particles.
+     * Holes are identified by the ParticleData::hole_ member and thus the
+     * internal pointer is incremented until all holes are skipped. It is
+     * important that the Particles entry pointed to by Particles::end() is not
+     * identified as a hole as otherwise the iterator would advance too far.
+     */
     iterator &operator++() {
       do {
         ++ptr_;
       } while (ptr_->hole_);
       return *this;
     }
+    /// Postfix variant of the above prefix increment operator.
     iterator operator++(int) {
       iterator old = *this;
       operator++();
       return old;
     }
 
+    /**
+     * Advance the iterator to the previous valid (not a hole) entry in Particles.
+     * Holes are identified by the ParticleData::hole_ member and thus the
+     * internal pointer is decremented until all holes are skipped. It is
+     * irrelevant whether Particles::data_[0] is a hole because the iteration
+     * typically ends at Particles::begin(), which points to a non-hole entry in
+     * Particles::data_.
+     */
     iterator &operator--() {
       do {
         --ptr_;
       } while (ptr_->hole_);
       return *this;
     }
+    /// Postfix variant of the above prefix decrement operator.
     iterator operator--(int) {
       iterator old = *this;
       operator--();
       return old;
     }
 
+    /// Dereferences the iterator.
     reference operator*() { return *ptr_; }
+    /// Dereferences the iterator.
     const_reference operator*() const { return *ptr_; }
 
+    /// Dereferences the iterator.
     pointer operator->() { return ptr_; }
+    /// Dereferences the iterator.
     const_pointer operator->() const { return ptr_; }
 
+    /// Returns whether two iterators point to the same object.
     bool operator==(const iterator &rhs) const { return ptr_ == rhs.ptr_; }
+    /// Returns whether two iterators point to different objects.
     bool operator!=(const iterator &rhs) const { return ptr_ != rhs.ptr_; }
+    /// Returns whether this iterator comes before the iterator \p rhs.
     bool operator< (const iterator &rhs) const { return ptr_ <  rhs.ptr_; }
+    /// Returns whether this iterator comes after the iterator \p rhs.
     bool operator> (const iterator &rhs) const { return ptr_ >  rhs.ptr_; }
+    /// Returns whether this iterator comes before the iterator \p rhs or points
+    /// to the same object.
     bool operator<=(const iterator &rhs) const { return ptr_ <= rhs.ptr_; }
+    /// Returns whether this iterator comes after the iterator \p rhs or points
+    /// to the same object.
     bool operator>=(const iterator &rhs) const { return ptr_ >= rhs.ptr_; }
   };
 
@@ -298,15 +341,47 @@ class Particles {
   }
 
  private:
-  /// Highest id of a given particle
+  /// Highest id of a given particle. The first particle added to data_ will
+  /// have id 0.
   int id_max_ = -1;
 
+  /**\internal
+   * Increases the capacity of data_ to \p new_capacity. \p new_capacity is
+   * expected to be larger than data_capacity_. This is enforced in DEBUG
+   * builds.
+   */
   void increase_capacity(unsigned new_capacity);
+  /**\internal
+   * Ensure that the capacity of data_ is large enough to hold \p to_add more
+   * entries. If the capacity does not suffice increase_capacity is called.
+   */
   inline void ensure_capacity(unsigned to_add);
+  /**\internal
+   * Common implementation for copying the relevant data of a ParticleData
+   * object into data_. This does not implement a 1:1 copy, instead:
+   * \li The particle id in data_ is set to the next id for a new particle.
+   * \li The type, momentum, and position are copied from \p from.
+   * \li The ParticleData::index_ members is not modified since it already has
+   *     the correct value
+   * \li The ParticleData::hole_ member is not modified and might need
+   *     adjustment in the calling code.
+   */
   inline void copy_in(ParticleData &to, const ParticleData &from);
 
+  /**\internal
+   * The number of elements in data_ (including holes, but excluding entries
+   * behind the last valid particle)
+   */
   unsigned data_size_ = 0u;
+  /**\internal
+   * The capacity of the memory pointed to by data_.
+   */
   unsigned data_capacity_ = 100u;
+  /**
+   * Points to a dynamically allocated array of ParticleData objects. The
+   * allocated size is stored in data_capacity_ and the used range (starting
+   * from index 0) is stored in data_size_.
+   */
   std::unique_ptr<ParticleData[]> data_;
 
   /**
