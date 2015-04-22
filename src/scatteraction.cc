@@ -203,7 +203,7 @@ double ScatterAction::two_to_one_formation(const ParticleType &type_resonance,
   double srts = std::sqrt(s);
   float partial_width = type_resonance.get_partial_in_width(srts,
                                 incoming_particles_[0], incoming_particles_[1]);
-  if (partial_width <= 0.) {
+  if (partial_width <= 0.f) {
     return 0.;
   }
 
@@ -213,7 +213,7 @@ double ScatterAction::two_to_one_formation(const ParticleType &type_resonance,
   const int sym_factor = (type_particle_a.pdgcode() ==
                           type_particle_b.pdgcode()) ? 2 : 1;
   float resonance_width = type_resonance.total_width(srts);
-  if (resonance_width <= 0.) {
+  if (resonance_width <= 0.f) {
     return 0.;
   }
   /* Calculate resonance production cross section
