@@ -8,6 +8,7 @@
  */
 
 #include "unittest.h"
+#include "setup.h"
 
 #include <cstdio>
 
@@ -123,4 +124,41 @@ TEST(collision_order) {
 
   // final check
   COMPARE(num_interactions, 2u);
+}
+
+TEST(scatter_particle_pair_only_once) {
+  // create two particles colliding head-on
+  Particles p;
+  p.insert(Test::smashon(Test::Momentum{0.11, 0., .1, 0.},
+                         Test::Position{0., 1., .9, 1.}));
+  p.insert(Test::smashon(Test::Momentum{0.11, 0., -.1, 0.},
+                         Test::Position{0., 1., 1.1, 1.}));
+
+  // prepare scatteractionsfinder
+  const float radius = 0.11;                                        // in fm
+  const float elastic_parameter = radius * radius * M_PI / fm2_mb;  // in mb
+  const int testparticles = 1;
+  ScatterActionsFinder finder(elastic_parameter, testparticles);
+  ParticleList search_list = p.copy_to_vector();
+  std::vector<const ParticleList*> neighbors_list; // empty for now
+  float dt = 0.9;  // fm/c
+
+  // look for scatters, we expect one
+  auto actions = finder.find_possible_actions(search_list, neighbors_list, dt);
+  COMPARE(actions.size(), 1u);
+
+  // ok, the exepected Action exists, so let's perform it
+  Action &action = *actions.front();
+  action.generate_final_state();
+  size_t processes = 0;
+  action.perform(&p, processes);
+
+  // because afterwards, the particles in p may not scatter again (they just
+  // did)
+  search_list = p.copy_to_vector();
+  for (auto i = 10; i; --i) {  // make "sure" it's not the random numbers that
+                               // supress the problem
+    actions = finder.find_possible_actions(search_list, neighbors_list, dt);
+    COMPARE(actions.size(), 0u);
+  }
 }
