@@ -138,6 +138,29 @@ class Particles {
   void replace(const ParticleList &to_remove, const ParticleList &to_add);
 
   /**
+   * Updates the particle identified by \p p with the state stored in \p
+   * new_state. A reference to the resulting ParticleData object in the list is
+   * subsequently returned.
+   *
+   * The state update copies the id_process, momentum, and position from \p
+   * new_state.
+   *
+   * This function expects \p p to be a valid copy (i.e. is_valid returns \c
+   * true) and it expects the ParticleType of \p p and \p new_state to be
+   * equal. This is enforced in DEBUG builds.
+   */
+  const ParticleData &update(const ParticleData &p,
+                             const ParticleData &new_state) {
+    assert(is_valid(p));
+    assert(p.type() == new_state.type());
+    ParticleData &original = data_[p.index_];
+    original.id_process_ = new_state.id_process_;
+    original.momentum_ = new_state.momentum_;
+    original.position_ = new_state.position_;
+    return original;
+  }
+
+  /**
    * \internal
    * Iterator type that skips over the holes in data_. It implements a standard
    * bidirectional iterator over the ParticleData objects in Particles.
