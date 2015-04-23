@@ -156,6 +156,16 @@ TEST(scatter_particle_pair_only_once) {
   // because afterwards, the particles in p may not scatter again (they just
   // did)
   search_list = p.copy_to_vector();
+  if (action.get_type() == ProcessType::Elastic) {
+    // elastic scatters must keep the particle ids unchanged. Thus, the ids in
+    // search_list must be 0 and 1.
+    // TODO(weil): this test belongs into the Action unit tests, since this
+    // tests the correct behavior of the Action class(es).
+    COMPARE(action.outgoing_particles()[0].id(), 0);
+    COMPARE(action.outgoing_particles()[1].id(), 1);
+    COMPARE(search_list[0].id(), 0);
+    COMPARE(search_list[1].id(), 1);
+  }
   for (auto i = 10; i; --i) {  // make "sure" it's not the random numbers that
                                // supress the problem
     actions = finder.find_possible_actions(search_list, neighbors_list, dt);
