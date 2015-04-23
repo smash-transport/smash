@@ -20,10 +20,16 @@ namespace Smash {
 std::ostream &operator<<(std::ostream &out, const ParticleData &p) {
   using namespace std;
   out.fill(' ');
-  return out << p.type().name() << right
-             << "{id:" << field<6> << p.id()
-             << ", pos [fm]:"
-             << p.position() << ", mom [GeV]:" << p.momentum() << "}";
+  return out
+#ifdef NDEBUG
+         << setw(5) << p.type().pdgcode()
+#else
+         << p.type().name()
+#endif
+         << right << "{id:" << field<6> << p.id()
+         << ", process:" << field<4> << p.id_process()
+         << ", pos [fm]:" << p.position() << ", mom [GeV]:" << p.momentum()
+         << "}";
 }
 
 std::ostream &operator<<(std::ostream &out, const ParticleList &particle_list) {
