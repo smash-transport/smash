@@ -41,4 +41,20 @@ std::ostream &operator<<(std::ostream &out, const ParticleList &particle_list) {
   return out << ']';
 }
 
+std::ostream &operator<<(std::ostream &out,
+                         const PrintParticleListDetailed &particle_list) {
+  using namespace std;
+  bool first = true;
+  out << '[';
+  for (const auto &p : particle_list.list) {
+    if (first) {
+      first = false;
+    } else {
+      out << "\n ";
+    }
+    out << p;
+  }
+  return out << ']';
+}
+
 }  // namespace Smash

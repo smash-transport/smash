@@ -229,6 +229,28 @@ std::ostream &operator<<(std::ostream &s, const ParticleData &p);
  */
 std::ostream &operator<<(std::ostream &out, const ParticleList &particle_list);
 
+/**\ingroup logging
+ * \internal
+ * Helper type to attach the request for detailed printing to the type.
+ */
+struct PrintParticleListDetailed {
+  const ParticleList &list;
+};
+/**\ingroup loggingk
+ * Request the ParticleList to be printed in full detail (i.e. one full
+ * ParticleData printout per line).
+ */
+inline PrintParticleListDetailed detailed(const ParticleList &list) {
+  return {list};
+}
+
+/** \ingroup logging
+ * Writes a detailed overview over the particles in the \p particle_list argument
+ * to the stream. This overload is selected via the function \ref detailed.
+ */
+std::ostream &operator<<(std::ostream &out,
+                         const PrintParticleListDetailed &particle_list);
+
 }  // namespace Smash
 
 #endif  // SRC_INCLUDE_PARTICLEDATA_H_
