@@ -371,7 +371,7 @@ class Particles {
    * Common implementation for copying the relevant data of a ParticleData
    * object into data_. This does not implement a 1:1 copy, instead:
    * \li The particle id in data_ is set to the next id for a new particle.
-   * \li The type, momentum, and position are copied from \p from.
+   * \li The id_process, type, momentum, and position are copied from \p from.
    * \li The ParticleData::index_ members is not modified since it already has
    *     the correct value
    * \li The ParticleData::hole_ member is not modified and might need

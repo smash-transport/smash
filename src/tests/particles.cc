@@ -102,6 +102,14 @@ TEST(insert) {
   COMPARE(p.size(), 4u);
   VERIFY(p.is_valid(p.front()));
   VERIFY(p.is_valid(p.back()));
+
+  ParticleData smashon = Test::smashon();
+  smashon.set_id_process(1);
+  p.insert(smashon);
+  COMPARE(p.back().id_process(), 1);
+  smashon.set_id_process(2);
+  p.insert(smashon);
+  COMPARE(p.back().id_process(), 2);
 }
 
 TEST(insert_2) {
