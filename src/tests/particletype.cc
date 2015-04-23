@@ -79,7 +79,7 @@ TEST(create_type_list) {
   COMPARE(type->mass(), 1.232f);
   COMPARE(type->width_at_pole(), .117f);
   COMPARE(type->pdgcode().dump(), 0x80001114);
-  COMPARE(type->isospin(), 3u);
+  COMPARE(type->isospin(), 3);
   COMPARE(type->charge(), 1);
   COMPARE(type->spin(), 3u);
 
@@ -87,7 +87,7 @@ TEST(create_type_list) {
   COMPARE(type->mass(), .9396f);
   COMPARE(type->width_at_pole(), -1.f);
   COMPARE(type->pdgcode().dump(), 0x2112u);
-  COMPARE(type->isospin(), 1u);
+  COMPARE(type->isospin(), 1);
   COMPARE(type->charge(), 0);
   COMPARE(type->spin(), 1u);
 }

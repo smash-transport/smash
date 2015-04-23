@@ -264,7 +264,7 @@ class PdgCode {
    * This returns e.g. 2 for all pions and 3 for all Deltas. It is
    * always positive.
    */
-  unsigned int isospin_total() const;
+  int isospin_total() const;
   /*
    * Returns the isospin-3 component relative to the total isospin.
    */
