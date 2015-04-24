@@ -23,7 +23,7 @@ Particles::Particles() : data_(new ParticleData[data_capacity_]) {
 inline void Particles::ensure_capacity(unsigned to_add) {
   if (data_size_ + to_add >= data_capacity_) {
     increase_capacity((data_capacity_ + to_add) * 2u);
-    assert(data_size_ + to_add > data_capacity_);
+    assert(data_size_ + to_add < data_capacity_);
   }
 }
 
