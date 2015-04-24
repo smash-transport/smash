@@ -143,7 +143,8 @@ class Particles {
    * bidirectional iterator over the ParticleData objects in Particles.
    */
   template <typename T>
-  class iterator : public std::iterator<std::bidirectional_iterator_tag, T> {
+  class GenericIterator
+      : public std::iterator<std::bidirectional_iterator_tag, T> {
     friend class Particles;
 
    public:
@@ -158,7 +159,7 @@ class Particles {
      * Constructs an iterator pointing to the ParticleData pointed to by \p p.
      * This constructor may only be called from the Particles class.
      */
-    iterator(pointer p) : ptr_(p) {}  // NOLINT(runtime/explicit)
+    GenericIterator(pointer p) : ptr_(p) {}  // NOLINT(runtime/explicit)
 
     /// The entry in Particles this iterator points to.
     pointer ptr_;
@@ -171,15 +172,15 @@ class Particles {
      * important that the Particles entry pointed to by Particles::end() is not
      * identified as a hole as otherwise the iterator would advance too far.
      */
-    iterator &operator++() {
+    GenericIterator &operator++() {
       do {
         ++ptr_;
       } while (ptr_->hole_);
       return *this;
     }
     /// Postfix variant of the above prefix increment operator.
-    iterator operator++(int) {
-      iterator old = *this;
+    GenericIterator operator++(int) {
+      GenericIterator old = *this;
       operator++();
       return old;
     }
@@ -192,15 +193,15 @@ class Particles {
      * typically ends at Particles::begin(), which points to a non-hole entry in
      * Particles::data_.
      */
-    iterator &operator--() {
+    GenericIterator &operator--() {
       do {
         --ptr_;
       } while (ptr_->hole_);
       return *this;
     }
     /// Postfix variant of the above prefix decrement operator.
-    iterator operator--(int) {
-      iterator old = *this;
+    GenericIterator operator--(int) {
+      GenericIterator old = *this;
       operator--();
       return old;
     }
@@ -216,20 +217,30 @@ class Particles {
     const_pointer operator->() const { return ptr_; }
 
     /// Returns whether two iterators point to the same object.
-    bool operator==(const iterator &rhs) const { return ptr_ == rhs.ptr_; }
+    bool operator==(const GenericIterator &rhs) const {
+      return ptr_ == rhs.ptr_;
+    }
     /// Returns whether two iterators point to different objects.
-    bool operator!=(const iterator &rhs) const { return ptr_ != rhs.ptr_; }
+    bool operator!=(const GenericIterator &rhs) const {
+      return ptr_ != rhs.ptr_;
+    }
     /// Returns whether this iterator comes before the iterator \p rhs.
-    bool operator< (const iterator &rhs) const { return ptr_ <  rhs.ptr_; }
+    bool operator<(const GenericIterator &rhs) const { return ptr_ < rhs.ptr_; }
     /// Returns whether this iterator comes after the iterator \p rhs.
-    bool operator> (const iterator &rhs) const { return ptr_ >  rhs.ptr_; }
+    bool operator>(const GenericIterator &rhs) const { return ptr_ > rhs.ptr_; }
     /// Returns whether this iterator comes before the iterator \p rhs or points
     /// to the same object.
-    bool operator<=(const iterator &rhs) const { return ptr_ <= rhs.ptr_; }
+    bool operator<=(const GenericIterator &rhs) const {
+      return ptr_ <= rhs.ptr_;
+    }
     /// Returns whether this iterator comes after the iterator \p rhs or points
     /// to the same object.
-    bool operator>=(const iterator &rhs) const { return ptr_ >= rhs.ptr_; }
+    bool operator>=(const GenericIterator &rhs) const {
+      return ptr_ >= rhs.ptr_;
+    }
   };
+  using iterator = GenericIterator<ParticleData>;
+  using const_iterator = GenericIterator<const ParticleData>;
 
   /// Returns a reference to the first particle in the list.
   ParticleData &front() { return *begin(); }
@@ -245,7 +256,7 @@ class Particles {
    * Returns an iterator pointing to the first particle in the list. Use it to
    * iterate over all particles in the list.
    */
-  iterator<ParticleData> begin() {
+  iterator begin() {
     ParticleData *first = &data_[0];
     while (first->hole_) {
       ++first;
@@ -253,7 +264,7 @@ class Particles {
     return first;
   }
   /// const overload of the above
-  iterator<const ParticleData> begin() const {
+  const_iterator begin() const {
     ParticleData *first = &data_[0];
     while (first->hole_) {
       ++first;
@@ -265,14 +276,14 @@ class Particles {
    * Returns an iterator pointing behind the last particle in the list. Use it
    * to iterate over all particles in the list.
    */
-  iterator<ParticleData> end() { return &data_[data_size_]; }
+  iterator end() { return &data_[data_size_]; }
   /// const overload of the above
-  iterator<const ParticleData> end() const { return &data_[data_size_]; }
+  const_iterator end() const { return &data_[data_size_]; }
 
   /// Returns a const begin iterator.
-  iterator<const ParticleData> cbegin() const { return begin(); }
+  const_iterator cbegin() const { return begin(); }
   /// Returns a const end iterator.
-  iterator<const ParticleData> cend() const { return end(); }
+  const_iterator cend() const { return end(); }
 
   /**
    * \ingroup logging
