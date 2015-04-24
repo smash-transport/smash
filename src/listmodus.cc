@@ -116,7 +116,8 @@ namespace Smash {
                 <<"2. Particles info: t x y z mass p0 px py pz pdg ID \n"
                 <<"in units of: fm fm fm fm GeV GeV GeV GeV GeV none none \n";
 
-            exit(EXIT_FAILURE);
+            //TODO(pang): this shouldn't just exit but throw an exception.
+            std::exit(EXIT_FAILURE);
         }
 
         std::string particle_lists = read_all(bf::ifstream{fpath});
@@ -140,11 +141,9 @@ namespace Smash {
 
 
             try {
-                const ParticleType & t_i = ParticleType::find(pdgcode);
-                ParticleData particle(t_i);
-                particle.set_4momentum(FourVector(E, px, py, pz));
-                particle.set_4position(FourVector(start_time_, x, y, z));
-                particles->add_data(particle);
+              ParticleData &particle = particles->create(pdgcode);
+              particle.set_4momentum(FourVector(E, px, py, pz));
+              particle.set_4position(FourVector(start_time_, x, y, z));
             }
             catch ( ParticleType::PdgNotFoundFailure ) {
                 throw LoadFailure(build_error_string(

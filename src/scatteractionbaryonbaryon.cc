@@ -65,7 +65,7 @@ CollisionBranchList ScatterActionBaryonBaryon::nuc_res_to_nuc_nuc(
 
   const double s = mandelstam_s();
   /* CM momentum in final state */
-  double p_cm_final = sqrt(s - 4.*type_nucleon->mass_sqr())/2.;
+  double p_cm_final = std::sqrt(s - 4.*type_nucleon->mass_sqr())/2.;
 
   /* Loop over all nucleon charge states. */
   for (ParticleTypePtr nuc_a : ParticleType::list_nucleons()) {
@@ -81,10 +81,10 @@ CollisionBranchList ScatterActionBaryonBaryon::nuc_res_to_nuc_nuc(
       /* Compute total isospin range with given initial and final particles. */
       int I_max = std::min(type_resonance->isospin() + type_nucleon->isospin(),
                           nuc_a->isospin() + nuc_b->isospin());
-      int I_min = std::max(abs(type_resonance->isospin()
-                               - type_nucleon->isospin()),
-                          abs(nuc_a->isospin() - nuc_b->isospin()));
-      I_min = std::max(I_min, abs(I_z));
+      int I_min = std::max(
+          std::abs(type_resonance->isospin() - type_nucleon->isospin()),
+          std::abs(nuc_a->isospin() - nuc_b->isospin()));
+      I_min = std::max(I_min, std::abs(I_z));
 
       /* Loop over total isospin in allowed range.
       * Use decrement of 2, since isospin is multiplied by 2. */

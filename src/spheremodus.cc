@@ -91,7 +91,7 @@ float SphereModus::initial_conditions(Particles *particles,
                 << " initial multiplicity " << p.second;
   }
   /* loop over particle data to fill in momentum and position information */
-  for (ParticleData &data : particles->data()) {
+  for (ParticleData &data : *particles) {
     Angles phitheta;
     /* thermal momentum according Maxwell-Boltzmann distribution */
     double momentum_radial;
@@ -104,21 +104,21 @@ float SphereModus::initial_conditions(Particles *particles,
     momentum_total += data.momentum();
     /* uniform sampling in a sphere with radius r */
     double position_radial;
-    position_radial = cbrt(Random::canonical()) * radius_;
+    position_radial = std::cbrt(Random::canonical()) * radius_;
     Angles pos_phitheta;
     pos_phitheta.distribute_isotropically();
     data.set_4position(FourVector(start_time_,
                                   pos_phitheta.threevec() * position_radial));
   }
   /* Make total 3-momentum 0 */
-  for (ParticleData &data : particles->data()) {
+  for (ParticleData &data : *particles) {
     data.set_4momentum(data.pole_mass(), data.momentum().threevec() -
                        momentum_total.threevec()/particles->size());
   }
 
   /* Recalculate total momentum */
   momentum_total = FourVector(0, 0, 0, 0);
-  for (ParticleData &data : particles->data()) {
+  for (ParticleData &data : *particles) {
     momentum_total += data.momentum();
     /* IC: debug checks */
     log.debug() << data;

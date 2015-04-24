@@ -43,13 +43,15 @@ static ScatterAction* set_up_action(const ParticleData &proj,
   proc_list = act->two_to_two_cross_sections();
 //   act->add_processes(proc_list);
 
-  printf("%s+ %s, sqrt(s) = %f GeV, sigma = %f mb, %lu Channels \n",
-         proj.type().name().c_str(), targ.type().name().c_str(),
-         act->sqrt_s(), act->cross_section(), proc_list.size());
+  std::printf("%s+ %s, sqrt(s) = %f GeV, sigma = %f mb, %lu Channels \n",
+              proj.type().name().c_str(), targ.type().name().c_str(),
+              act->sqrt_s(), act->cross_section(), proc_list.size());
 
   for (auto &proc: proc_list) {
-    printf("-> %s %s (%f mb) \n", proc->particle_list()[0].pdgcode().string().c_str(),
-           proc->particle_list()[1].pdgcode().string().c_str(), proc->weight());
+    std::printf("-> %s %s (%f mb) \n",
+                proc->particle_list()[0].pdgcode().string().c_str(),
+                proc->particle_list()[1].pdgcode().string().c_str(),
+                proc->weight());
   };
 
   return act;

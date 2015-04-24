@@ -79,7 +79,14 @@ class ThreeVector {
    * assume the standard basis x, y, z then this means applying the
    * matrix for a rotation of phi about z, followed by the matrix for
    * a rotation theta about the rotated x axis. Last, psi is a rotation
-   * about the rotated z axis. */
+   * about the rotated z axis.
+   *
+   * Euler angles are used to make rotation of several (different) position
+   * vectors belonging to one rigid body easy. A ThreeVector could be rotated
+   * via only two angles, but then the angles for rotating a rigid body
+   * consisting of multiple particles would require a different pair of rotation
+   * angles for every position.
+   */
   void inline rotate(double phi, double theta, double psi);
   /** Rotate the vector around the y axis by the given angle theta. */
   void inline rotate_around_y(double theta);

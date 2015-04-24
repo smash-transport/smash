@@ -98,9 +98,8 @@ float BoxModus::initial_conditions(Particles *particles,
     log.debug() << "Particle " << p.first
                 << " initial multiplicity " << p.second;
   }
-  number_density_initial_ = particles->size()/(length_*length_*length_);
 
-  for (ParticleData &data : particles->data()) {
+  for (ParticleData &data : *particles) {
     /* Set MOMENTUM SPACE distribution */
     if (this->initial_condition_ != 2) {
       /* thermal momentum according Maxwell-Boltzmann distribution */
@@ -121,14 +120,14 @@ float BoxModus::initial_conditions(Particles *particles,
   }
 
   /* Make total 3-momentum 0 */
-  for (ParticleData &data : particles->data()) {
+  for (ParticleData &data : *particles) {
     data.set_4momentum(data.pole_mass(), data.momentum().threevec() -
                        momentum_total.threevec()/particles->size());
   }
 
   /* Recalculate total momentum */
   momentum_total = FourVector(0, 0, 0, 0);
-  for (ParticleData &data : particles->data()) {
+  for (ParticleData &data : *particles) {
     momentum_total += data.momentum();
     /* IC: debug checks */
     log.debug() << data;
@@ -139,51 +138,28 @@ float BoxModus::initial_conditions(Particles *particles,
   return start_time_;
 }
 
-/* evolve - the core of the box, stepping forward in time */
-int BoxModus::sanity_check(Particles *particles) {
+/* Enforce periodic boundaries and output wall hits to collision files */
+int BoxModus::impose_boundary_conditions(Particles *particles,
+                         const OutputsList &output_list) {
+  const auto &log = logger<LogArea::Box>();
   int wraps = 0;
-  /* fixup positions on startup, particles need to be *inside* the box */
-  for (ParticleData &data : particles->data()) {
-    FourVector p = data.position();
-    if (enforce_periodic_boundaries(p.begin() + 1, p.end(), length_)) {
-      ++wraps;
-    }
-    data.set_4position(p);
-  }
-  const auto &log = logger<LogArea::Box>();
-  log.debug("moved ", wraps, " particles back into the box");
-  return wraps;
-}
 
-
-/* propagate all particles */
-void BoxModus::propagate(Particles *particles,
-                         const ExperimentParameters &parameters,
-                         const OutputsList &output_list,
-                         const Potentials* /*pot*/) {
-  const auto &log = logger<LogArea::Box>();
-  FourVector distance, position;
-  for (ParticleData &data : particles->data()) {
-    /* propagation for this time step */
-    distance = FourVector(0.0,
-                          data.velocity() * parameters.timestep_duration());
-    log.debug() << data << " motion: " << distance;
-    /* treat the box boundaries */
-    position = data.position();
-    position += distance;
-    position.set_x0(parameters.new_particle_time());
+  for (ParticleData &data : *particles) {
+    FourVector position = data.position();
     bool wall_hit = enforce_periodic_boundaries(position.begin() + 1,
                                                 position.end(), length_);
-    const ParticleList incoming_particle{1, data};
-    data.set_4position(position);
     if (wall_hit) {
+      const ParticleList incoming_particle{1, data};
+      data.set_4position(position);
+      ++wraps;
       for (const auto &output : output_list) {
-        output->at_interaction(incoming_particle, {1, data},
+        output->at_interaction(incoming_particle, incoming_particle,
                                0., 0., ProcessType::Wall);
       }
     }
-    log.debug() << data;
   }
+  log.debug("Moved ", wraps, " particles back into the box.");
+  return wraps;
 }
 
 }  // namespace Smash

@@ -92,7 +92,7 @@ class QuantumNumbers {
   /** Construct QuantumNumbers collection from the conserved quantities
    * found in \p particles. */
   explicit QuantumNumbers(const Particles &particles) : QuantumNumbers() {
-    for (const ParticleData &data : particles.data()) {
+    for (const ParticleData &data : particles) {
       add_values(data);
     }
   }

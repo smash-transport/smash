@@ -199,32 +199,32 @@ TEST(isospin3) {
   COMPARE(   omega_bc.isospin3(),  0);
 }
 TEST(isospin_total) {
-  COMPARE(   electron.isospin_total(),  0u);
-  COMPARE(     antimu.isospin_total(),  0u);
-  COMPARE(     photon.isospin_total(),  0u);
-  COMPARE(       pion.isospin_total(), +2u);
-  COMPARE(        eta.isospin_total(),  0u);
-  COMPARE(         K0.isospin_total(),  1u);
-  COMPARE(        K0L.isospin_total(),  1u);
-  COMPARE(        K0S.isospin_total(),  1u);
-  COMPARE(     Kminus.isospin_total(),  1u);
-  COMPARE(     dminus.isospin_total(),  1u);
-  COMPARE(     bnulls.isospin_total(),  0u);
-  COMPARE(     bPcbar.isospin_total(),  0u);
-  COMPARE(     eta_pr.isospin_total(),  0u);
-  COMPARE(      j_psi.isospin_total(),  0u);
-  COMPARE(     proton.isospin_total(),  1u);
-  COMPARE(  antidelta.isospin_total(),  3u);
-  COMPARE(      sigma.isospin_total(), +2u);
-  COMPARE(     lambda.isospin_total(),  0u);
-  COMPARE(     antixi.isospin_total(), +1u);
-  COMPARE(  omega_bar.isospin_total(),  0u);
-  COMPARE(   lambda_c.isospin_total(),  0u);
-  COMPARE(sigma_c_bar.isospin_total(), +2u);
-  COMPARE(       xi_c.isospin_total(), +1u);
-  COMPARE(omega_c_bar.isospin_total(),  0u);
-  COMPARE(  xi_cc_bar.isospin_total(), +1u);
-  COMPARE(   omega_bc.isospin_total(),  0u);
+  COMPARE(   electron.isospin_total(),  0);
+  COMPARE(     antimu.isospin_total(),  0);
+  COMPARE(     photon.isospin_total(),  0);
+  COMPARE(       pion.isospin_total(), +2);
+  COMPARE(        eta.isospin_total(),  0);
+  COMPARE(         K0.isospin_total(),  1);
+  COMPARE(        K0L.isospin_total(),  1);
+  COMPARE(        K0S.isospin_total(),  1);
+  COMPARE(     Kminus.isospin_total(),  1);
+  COMPARE(     dminus.isospin_total(),  1);
+  COMPARE(     bnulls.isospin_total(),  0);
+  COMPARE(     bPcbar.isospin_total(),  0);
+  COMPARE(     eta_pr.isospin_total(),  0);
+  COMPARE(      j_psi.isospin_total(),  0);
+  COMPARE(     proton.isospin_total(),  1);
+  COMPARE(  antidelta.isospin_total(),  3);
+  COMPARE(      sigma.isospin_total(), +2);
+  COMPARE(     lambda.isospin_total(),  0);
+  COMPARE(     antixi.isospin_total(), +1);
+  COMPARE(  omega_bar.isospin_total(),  0);
+  COMPARE(   lambda_c.isospin_total(),  0);
+  COMPARE(sigma_c_bar.isospin_total(), +2);
+  COMPARE(       xi_c.isospin_total(), +1);
+  COMPARE(omega_c_bar.isospin_total(),  0);
+  COMPARE(  xi_cc_bar.isospin_total(), +1);
+  COMPARE(   omega_bc.isospin_total(),  0);
 }
 TEST(strangeness) {
   COMPARE(   electron.strangeness(),  0);

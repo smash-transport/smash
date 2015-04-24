@@ -8,7 +8,6 @@
  */
 
 #include "unittest.h"
-#include "../include/particles.h"
 #include "../include/particletype.h"
 
 using namespace Smash;
@@ -31,11 +30,11 @@ TEST(assign) {
   COMPARE(A.spin(), smashon.spin());
 }
 
-TEST_CATCH(load_from_incorrect_string, Particles::LoadFailure) {
+TEST_CATCH(load_from_incorrect_string, ParticleType::LoadFailure) {
   ParticleType::create_type_list("Hallo Welt! (wave)");
 }
 
-TEST_CATCH(load_one_particle_with_incorrect_newline, Particles::LoadFailure) {
+TEST_CATCH(load_one_particle_with_incorrect_newline, ParticleType::LoadFailure) {
   const std::string parts("pi0 0.1350\n-1.0 111");
   ParticleType::create_type_list(parts);
 }
@@ -80,7 +79,7 @@ TEST(create_type_list) {
   COMPARE(type->mass(), 1.232f);
   COMPARE(type->width_at_pole(), .117f);
   COMPARE(type->pdgcode().dump(), 0x80001114);
-  COMPARE(type->isospin(), 3u);
+  COMPARE(type->isospin(), 3);
   COMPARE(type->charge(), 1);
   COMPARE(type->spin(), 3u);
 
@@ -88,9 +87,20 @@ TEST(create_type_list) {
   COMPARE(type->mass(), .9396f);
   COMPARE(type->width_at_pole(), -1.f);
   COMPARE(type->pdgcode().dump(), 0x2112u);
-  COMPARE(type->isospin(), 1u);
+  COMPARE(type->isospin(), 1);
   COMPARE(type->charge(), 0);
   COMPARE(type->spin(), 1u);
+}
+
+TEST(list_all_iteration) {
+  std::size_t count = 0;
+  for (const auto &type : ParticleType::list_all()) {
+    const PdgCode pdg = type.pdgcode();
+    const ParticleType &type2 = ParticleType::find(pdg);
+    COMPARE(&type, &type2);
+    ++count;
+  }
+  COMPARE(count, ParticleType::list_all().size());
 }
 
 TEST(exists) {

@@ -340,8 +340,7 @@ float ColliderModus::initial_conditions(Particles *particles,
   // (Projectile is chosen to hit at positive x.)
   // After shifting, set the time component of the particles to
   // -initial_z_displacement_/average_velocity.
-  float avg_velocity = sqrt(v_a * v_a
-                            + v_b * v_b);
+  float avg_velocity = std::sqrt(v_a * v_a + v_b * v_b);
   float simulation_time = -initial_z_displacement_ / avg_velocity;
   projectile_->shift(true, -initial_z_displacement_, +impact_/2.0,
                      simulation_time);
@@ -370,9 +369,9 @@ void ColliderModus::sample_impact() {
     // quadratic sampling: Note that for bmin > bmax, this still yields
     // the correct distribution (only that canonical() = 0 then is the
     // upper end, not the lower).
-    impact_ = sqrt(imp_min_*imp_min_
-                   + Random::canonical()
-                   * (imp_max_*imp_max_ - imp_min_*imp_min_));
+    impact_ = std::sqrt(imp_min_ * imp_min_ +
+                        Random::canonical() *
+                            (imp_max_ * imp_max_ - imp_min_ * imp_min_));
   } else {
     // linear sampling. Still, min > max works fine.
     impact_ = Random::uniform(imp_min_, imp_max_);
@@ -386,9 +385,9 @@ std::pair<double, double> ColliderModus::get_velocities(float s,
   // Frame dependent calculations of velocities. Assume v_a >= 0, v_b <= 0.
   switch (frame_) {
     case 1:  // Center of velocity.
-        v_a = sqrt((s - (m_a + m_b) * (m_a + m_b))
-                  / (s - (m_a - m_b) * (m_a - m_b)));
-        v_b = - v_a;
+      v_a = std::sqrt((s - (m_a + m_b) * (m_a + m_b)) /
+                      (s - (m_a - m_b) * (m_a - m_b)));
+      v_b = -v_a;
       break;
     case 2:  // Center of mass.
       {
@@ -400,15 +399,16 @@ std::pair<double, double> ColliderModus::get_velocities(float s,
                    * (s - (m_a * m_a) - (m_b * m_b));
         double C = (m_a * m_a) * (m_b * m_b) * A;
         // Compute positive center of mass momentum.
-        double abs_p = sqrt((-B - sqrt(B * B - 4 * A * C)) / (2 * A));
+        double abs_p = std::sqrt((-B - std::sqrt(B * B - 4 * A * C)) / (2 * A));
         v_a = abs_p / m_a;
         v_b = -abs_p / m_b;
       }
       break;
     case 3:  // Target at rest.
-      v_a = sqrt(1 - 4 * (m_a * m_a) * (m_b * m_b)
-                 / ((s - (m_a * m_a) - (m_b * m_b))
-                    * (s - (m_a * m_a) - (m_b * m_b))));
+      v_a = std::sqrt(1 -
+                      4 * (m_a * m_a) * (m_b * m_b) /
+                          ((s - (m_a * m_a) - (m_b * m_b)) *
+                           (s - (m_a * m_a) - (m_b * m_b))));
       break;
     default:
       throw std::domain_error("Invalid reference frame in "

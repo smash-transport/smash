@@ -19,6 +19,7 @@
 #include "include/inputfunctions.h"
 #include "include/iomanipulators.h"
 #include "include/logging.h"
+#include "include/particledata.h"
 #include "include/pdgcode.h"
 #include "include/processbranch.h"
 #include "include/stringfunctions.h"
@@ -164,7 +165,7 @@ void ParticleType::create_type_list(const std::string &input) {  // {{{
     PdgCode pdgcode;
     lineinput >> name >> mass >> width >> pdgcode;
     if (lineinput.fail()) {
-      throw Particles::LoadFailure(build_error_string(
+      throw ParticleType::LoadFailure(build_error_string(
           "While loading the ParticleType data:\nFailed to convert the input "
           "string to the expected data types.",
           line));

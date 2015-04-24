@@ -67,7 +67,7 @@ ActionList DecayActionsFinder::find_possible_actions(
 }
 
 ActionList DecayActionsFinder::find_final_actions
-    (const ParticleList &search_list) const {
+    (const Particles &search_list) const {
   ActionList actions;
 
   for (const auto &p : search_list) {

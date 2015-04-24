@@ -14,7 +14,7 @@
 #include <string>
 
 #include "forwarddeclarations.h"
-#include "particles.h"
+#include "particletype.h"
 
 namespace Smash {
 
@@ -59,7 +59,7 @@ inline void ensure_all_read(std::istream &input, const Line &line) {/*{{{*/
   std::string tmp;
   input >> tmp;
   if (!input.eof()) {
-    throw Particles::LoadFailure(
+    throw ParticleType::LoadFailure(
         build_error_string("While loading the Particle data:\nGarbage (" + tmp +
                                ") at the remainder of the line.",
                            line));

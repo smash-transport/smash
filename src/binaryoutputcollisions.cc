@@ -115,7 +115,7 @@ void BinaryOutputCollisions::at_intermediate_time(
 
 
 BinaryOutputBase::BinaryOutputBase(FILE *f) : file_{f} {
-  fwrite("SMSH", 4, 1, file_.get());  // magic number
+  std::fwrite("SMSH", 4, 1, file_.get());  // magic number
   write(format_version_);             // file format version number
   write(VERSION_MAJOR);               // SMASH version
 }
@@ -133,7 +133,7 @@ void BinaryOutputBase::write(const FourVector &v) {
 }
 
 void BinaryOutputBase::write(const Particles &particles) {
-  for (const auto &p : particles.data()) {
+  for (const auto &p : particles) {
     write(p.momentum());
     write(p.position());
     write(p.pdgcode().get_decimal());

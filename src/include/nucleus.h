@@ -255,7 +255,7 @@ class Nucleus {
    * root of the number of nucleons.
    **/
   inline float default_nuclear_radius() {
-    return proton_radius_*pow(number_of_particles(), 1./3.);
+    return proton_radius_ * std::pow(number_of_particles(), 1. / 3.);
   }
   /// sets the nuclear radius
   ///

@@ -30,6 +30,7 @@
 #include "include/macros.h"
 #include "include/pauliblocking.h"
 #include "include/potentials.h"
+#include "include/propagation.h"
 #include "include/random.h"
 #include "include/spheremodus.h"
 
@@ -211,14 +212,6 @@ Experiment<Modus>::Experiment(Configuration config)
       force_decays_(config.take({"Collision_Term", "Force_Decays_At_End"},
                                 true)) {
   const auto &log = logger<LogArea::Experiment>();
-  int64_t seed_ = config.take({"General",  "Randomseed"});
-  if (seed_ < 0) {
-    // Seed with a real random value, if available
-    std::random_device rd;
-    seed_ = rd();
-  }
-  Random::set_seed(seed_);
-  log.info() << "Random number seed: " << seed_;
   log.info() << *this;
 
   if (config.take({"Collision_Term", "Decays"}, true)) {
@@ -305,10 +298,8 @@ template <typename Modus>
 void Experiment<Modus>::perform_actions(ActionList &actions,
                      size_t &interactions_total, size_t &total_pauli_blocked) {
   const auto &log = logger<LogArea::Experiment>();
-  // Particle list before all actions will be used for density calculation
-  const ParticleList plist = ParticleList(particles_.data().begin(),
-                                          particles_.data().end());
   if (!actions.empty()) {
+    const auto particles_before_actions = particles_.copy_to_vector();
     for (const auto &action : actions) {
       if (action->is_valid(particles_)) {
         const ParticleList incoming_particles = action->incoming_particles();
@@ -324,9 +315,10 @@ void Experiment<Modus>::perform_actions(ActionList &actions,
         action->perform(&particles_, interactions_total);
         // Calculate Eckart rest frame density at the interaction point
         const FourVector r_interaction = action->get_interaction_point();
-        const double rho = four_current(r_interaction.threevec(), plist,
-                                     parameters_.gaussian_sigma, dens_type_,
-                                     parameters_.testparticles).abs();
+        const double rho =
+            four_current(r_interaction.threevec(), particles_before_actions,
+                         parameters_.gaussian_sigma, dens_type_,
+                         parameters_.testparticles).abs();
         for (const auto &output : outputs_) {
           output->at_interaction(incoming_particles, outgoing_particles, rho,
                                  action->raw_weight_value(), process_type);
@@ -349,7 +341,7 @@ void Experiment<Modus>::perform_actions(ActionList &actions,
 template <typename Modus>
 void Experiment<Modus>::run_time_evolution(const int evt_num) {
   const auto &log = logger<LogArea::Experiment>();
-  modus_.sanity_check(&particles_);
+  modus_.impose_boundary_conditions(&particles_);
   size_t interactions_total = 0, previous_interactions_total = 0,
          interactions_this_interval = 0, total_pauli_blocked = 0;
   log.info() << format_measurements(
@@ -362,9 +354,11 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
     std::vector<ActionPtr> actions;
 
     /* (1.a) Create grid. */
-    const auto &grid = modus_.create_grid(
-        ParticleList{particles_.data().begin(), particles_.data().end()},
-        parameters_.testparticles);
+    const auto &grid =
+        // TODO(mkretz): avoid the copy. Grid could construct from Particles
+        // directly.
+        modus_.create_grid(particles_.copy_to_vector(),
+                           parameters_.testparticles);
     /* (1.b) Iterate over cells and find actions. */
     grid.iterate_cells([&](
         const ParticleList &search_list,  // a list of particles where each pair
@@ -386,10 +380,15 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
 
     /* (2) Perform actions. */
     perform_actions(actions, interactions_total, total_pauli_blocked);
-    modus_.sanity_check(&particles_);
+    modus_.impose_boundary_conditions(&particles_);
 
     /* (3) Do propagation. */
-    modus_.propagate(&particles_, parameters_, outputs_, potentials_.get());
+    if(potentials_) {
+      propagate(&particles_, parameters_, *potentials_);
+    } else {
+      propagate_straight_line(&particles_, parameters_);
+    }
+    modus_.impose_boundary_conditions(&particles_, outputs_);
 
     /* (4) Physics output during the run. */
     // if the timestep of labclock is different in the next tick than
@@ -433,8 +432,7 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
       interactions_old = interactions_total;
       /* Find actions. */
       for (const auto &finder : action_finders_) {
-        actions += finder->find_final_actions(
-            ParticleList{particles_.data().begin(), particles_.data().end()});
+        actions += finder->find_final_actions(particles_);
       }
       /* Perform actions. */
       perform_actions(actions, interactions_total, total_pauli_blocked);
@@ -442,7 +440,11 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
     } while (interactions_total > interactions_old);
 
     /* Do one final propagation step. */
-    modus_.propagate(&particles_, parameters_, outputs_, potentials_.get());
+    if(potentials_) {
+      propagate(&particles_, parameters_, *potentials_);
+    } else {
+      propagate_straight_line(&particles_, parameters_);
+    }
   }
 
   // make sure the experiment actually ran (note: we should compare this
@@ -453,9 +455,10 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
     log.info() << "Time real: " << SystemClock::now() - time_start_;
     /* if there are no particles no interactions happened */
     log.info() << "Final scattering rate: "
-               << (particles_.empty() ? 0 : (interactions_total * 2 /
-                                             particles_.time() /
-                                             particles_.size())) << " [fm-1]";
+               << (particles_.is_empty() ? 0 : (interactions_total * 2 /
+                                                particles_.time() /
+                                                particles_.size()))
+               << " [fm-1]";
   }
 }
 

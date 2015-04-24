@@ -27,7 +27,7 @@ std::istream& operator>>(std::istream& is, PdgCode& code) {
   return is;
 }
 
-unsigned int PdgCode::isospin_total() const {
+int PdgCode::isospin_total() const {
   // non-hadrons and η mesons (and ω and stuff):
   if (!is_hadron() || quarks() == 0x22) {
     return 0;

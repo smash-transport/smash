@@ -134,14 +134,9 @@ TEST(fullhistory_format) {
   bin_output->at_eventstart(*particles, event_id);
 
   /* Create interaction smashon + smashon -> smashon */
-  std::vector<ParticleData> initial_particles, final_particles;
-  initial_particles.push_back(particles->data(0));
-  initial_particles.push_back(particles->data(1));
-  particles->remove(0);
-  particles->remove(1);
-  ParticleData final_particle = Test::smashon_random();
-  particles->add_data(final_particle);
-  final_particles.push_back(particles->data(particles->id_max()));
+  ParticleList initial_particles = particles->copy_to_vector();
+  particles->replace(initial_particles, {Test::smashon_random()});
+  ParticleList final_particles = particles->copy_to_vector();
   double rho = 0.123;
   double weight = 3.21;
   ProcessType process_type = ProcessType::None;
@@ -164,7 +159,7 @@ TEST(fullhistory_format) {
   std::string magic, smash_version;
   int format_version_number;
 
-  VERIFY(fread(&buf[0], 1, 4, binF) == 4);  // magic number
+  VERIFY(std::fread(&buf[0], 1, 4, binF) == 4);  // magic number
   magic.assign(&buf[0], 4);
   read_binary(format_version_number, binF);  // format version number
   read_binary(smash_version, binF);  // smash version
@@ -218,14 +213,9 @@ TEST(particles_format) {
   bin_output->at_eventstart(*particles, event_id);
 
   /* Interaction smashon + smashon -> smashon */
-  std::vector<ParticleData> initial_particles, final_particles;
-  initial_particles.push_back(particles->data(0));
-  initial_particles.push_back(particles->data(1));
-  particles->remove(0);
-  particles->remove(1);
-  ParticleData final_particle = Test::smashon_random();
-  particles->add_data(final_particle);
-  final_particles.push_back(particles->data(particles->id_max()));
+  ParticleList initial_particles = particles->copy_to_vector();
+  particles->replace(initial_particles, {Test::smashon_random()});
+  ParticleList final_particles = particles->copy_to_vector();
   Clock clock;
 
   bin_output->at_intermediate_time(*particles, event_id, clock);
@@ -246,7 +236,7 @@ TEST(particles_format) {
   std::string magic, smash_version;
   int format_version_number;
 
-  VERIFY(fread(&buf[0], 1, 4, binF) == 4);  // magic number
+  VERIFY(std::fread(&buf[0], 1, 4, binF) == 4);  // magic number
   magic.assign(&buf[0], 4);
   read_binary(format_version_number, binF);  // format version number
   read_binary(smash_version, binF);  // smash version

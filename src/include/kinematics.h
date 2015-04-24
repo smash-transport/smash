@@ -9,6 +9,7 @@
 #define SRC_INCLUDE_KINEMATICS_H_
 
 #include "constants.h"
+#include "experiment.h"
 
 namespace Smash {
 
@@ -80,7 +81,6 @@ inline double s_from_Ekin(double e_kin, double m_P, double m_T) {
 inline double s_from_plab(double plab, double m_P, double m_T) {
   return m_P*m_P + m_T*m_T + 2 * m_T * std::sqrt(m_P*m_P + plab*plab);
 }
-
 
 }  // namespace Smash
 

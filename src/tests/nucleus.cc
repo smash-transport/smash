@@ -59,13 +59,14 @@ TEST_CATCH(initialize_testparticles_wrong, Nucleus::TestparticleConfusion) {
   // this should throw an error: list size is (N_TEST+1)*208 = 2288, not
   // divisible by N_TEST (unless someone set N_TEST to 1).
   size_t size = lead.size();
-  printf("size: %g\n", 0.0*size);
+  std::printf("size: %g\n", 0.0 * size);
 }
 
 TEST(nuclear_radius) {
   Nucleus lead;
   lead.fill_from_list(list, 1);
-  FUZZY_COMPARE(lead.default_nuclear_radius(), static_cast<float>(1.2f*pow(208,1./3.)));
+  FUZZY_COMPARE(lead.default_nuclear_radius(),
+                static_cast<float>(1.2f * std::pow(208, 1. / 3.)));
 }
 
 // check that center is at (0/0/0):
@@ -92,7 +93,7 @@ TEST(center) {
    *  x**2/(exp((x-7.2)/.001)+1),x=0..infinity))
    *  \code
    **/
-  double threesigma = 3*5.86817 / sqrt(N_TEST);
+  double threesigma = 3 * 5.86817 / std::sqrt(N_TEST);
   VERIFY(std::abs(middle.x1()) < threesigma) << " x=" << middle.x1() << " vs. 3σ=" << threesigma << " (chance 1 in 370)";
   VERIFY(std::abs(middle.x2()) < threesigma) << " x=" << middle.x2() << " vs. 3σ=" << threesigma << " (chance 1 in 370)";
   VERIFY(std::abs(middle.x3()) < threesigma) << " x=" << middle.x3() << " vs. 3σ=" << threesigma << " (chance 1 in 370)";
@@ -110,7 +111,8 @@ TEST(center_hard_sphere) {
    * Here, we can actually calculate the exact value for the width:
    * \f$\sigma = R\sqrt{\frac{3}{5}}\f$.
    **/
-  double threesigma = 3* lead.default_nuclear_radius() * sqrt(0.6) / sqrt(N_TEST);
+  double threesigma =
+      3 * lead.default_nuclear_radius() * std::sqrt(0.6) / std::sqrt(N_TEST);
   VERIFY(std::abs(middle.x1()) < threesigma) << " x=" << middle.x1() << " vs. 3σ=" << threesigma << " (chance 1 in 370)";
   VERIFY(std::abs(middle.x2()) < threesigma) << " x=" << middle.x2() << " vs. 3σ=" << threesigma << " (chance 1 in 370)";
   VERIFY(std::abs(middle.x3()) < threesigma) << " x=" << middle.x3() << " vs. 3σ=" << threesigma << " (chance 1 in 370)";
@@ -211,7 +213,7 @@ TEST(woods_saxon) {
     float expec = projectile.woods_saxon(probes[i])/expected_at_radius;
     // standard error we expect the histogram to have is 1/sqrt(N); we
     // give 3 sigma "space".
-    float margin = 3.0/sqrt(value);
+    float margin = 3.f / std::sqrt(value);
     VERIFY(std::abs(value - expec) < margin) << " x = " << probes[i]
             << ": simulated: " << value
             << " vs. calculated: " << expec

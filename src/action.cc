@@ -10,6 +10,7 @@
 #include "include/action.h"
 
 #include <assert.h>
+#include <algorithm>
 #include <sstream>
 
 #include "include/angles.h"
@@ -30,19 +31,9 @@ Action::~Action() = default;
 
 
 bool Action::is_valid(const Particles &particles) const {
-  for (const auto &part : incoming_particles_) {
-    // Check if the particles still exists. If it decayed or scattered
-    // inelastically it is gone.
-    if (!particles.has_data(part.id())) {
-      return false;
-    }
-    // If the particle has scattered elastically, its id_process has changed and
-    // we consider it invalid.
-    if (particles.data(part.id()).id_process() != part.id_process()) {
-      return false;
-    }
-  }
-  return true;
+  return std::all_of(
+      incoming_particles_.begin(), incoming_particles_.end(),
+      [&particles](const ParticleData &p) { return particles.is_valid(p); });
 }
 
 bool Action::is_pauli_blocked(const Particles & particles,
@@ -83,16 +74,10 @@ FourVector Action::get_interaction_point() {
 void Action::perform(Particles *particles, size_t &id_process) {
   const auto &log = logger<LogArea::Action>();
 
-  /* Remove the initial state. */
-  for (auto &p : incoming_particles_) {
-    particles->remove(p.id());
-  }
-
-  /* Insert the final state. */
   for (ParticleData &p : outgoing_particles_) {
-    p.set_id_process(id_process);    // store the process id
-    p.set_id(particles->add_data(p));
+    p.set_id_process(id_process);  // store the process id
   }
+  particles->replace(incoming_particles_, outgoing_particles_);
 
   log.debug("Particle map now has ", particles->size(), " elements.");
 

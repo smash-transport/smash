@@ -11,6 +11,7 @@
 #include "fourvector.h"
 #include "particletype.h"
 #include "pdgcode.h"
+#include <limits>
 
 namespace Smash {
 
@@ -157,9 +158,40 @@ class ParticleData {
   /// sort particles along to given id
   bool operator<(int id_a) const { return this->id_ < id_a; }
 
+  /**
+   * Construct a particle with the given type, id, and index in Particles.
+   * This constructor may only be called (directly or indirectly) from
+   * Particles. This constructor should be private, but can't be in order to
+   * support vector::emplace_back.
+   */
+  ParticleData(const ParticleType &ptype, int uid, int index)
+      : id_(uid), index_(index), type_(&ptype) {}
  private:
-  /// Each particle has a unique identifier
+  friend class Particles;
+  ParticleData() = default;
+
+  /**
+   * Each particle has a unique identifier. This identifier is used for
+   * identifying the particle in the output files. It is specifically not used
+   * for searching for ParticleData objects in lists of particles, though it may
+   * be used to identify two ParticleData objects as referencing the same
+   * particle. This is why the comparison operators depend only on the id_
+   * member.
+   */
   int id_ = -1;
+
+  /**
+   * Internal index in the \ref Particles list. This number is used to find the
+   * Experiment-wide original of this copy.
+   *
+   * The value is read and written from the Particles class.
+   *
+   * \see Particles::data_
+   */
+  unsigned index_ = std::numeric_limits<unsigned>::max();
+
+  /// counter of the last collision/decay
+  int id_process_ = -1;
 
   /**
    * A reference to the ParticleType object for this particle (this contains
@@ -167,8 +199,19 @@ class ParticleData {
    */
   ParticleTypePtr type_ = nullptr;
 
-  /// counter of the last collision/decay
-  int id_process_ = -1;
+  static_assert(sizeof(ParticleTypePtr) == 2,
+                "");  // this leaves us two Bytes padding to use for "free"
+  static_assert(sizeof(bool) <= 2, "");  // make sure we don't exceed that space
+  /**
+   * If \c true, the object is an entry in Particles::data_ and does not hold
+   * valid particle data. Specifically iterations over Particles must skip
+   * objects with `hole_ == true`. All other ParticleData instances should set
+   * this member to \c false.
+   *
+   * \see Particles::data_
+   */
+  bool hole_ = false;
+
   /// momenta of the particle: x0, x1, x2, x3 as E, px, py, pz
   FourVector momentum_;
   /// position in space: x0, x1, x2, x3 as t, x, y, z

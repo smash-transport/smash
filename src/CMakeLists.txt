@@ -64,7 +64,6 @@ set(smash_src
         inputfunctions.cc
         listmodus.cc
         logging.cc
-        modusdefault.cc
         nucleus.cc
         oscaroutput.cc
         pauliblocking.cc
@@ -75,6 +74,7 @@ set(smash_src
         pdgcode.cc
         potentials.cc
         processbranch.cc
+        propagation.cc
         random.cc
         resonances.cc
         scatteraction.cc
@@ -156,16 +156,24 @@ if(BUILD_TESTING)
                                                # also required with the link
                                                # command, though
    AddCompilerFlag(${SANITIZER_FLAG} CXX_RESULT HAVE_SANITIZER)
+   set(CMAKE_REQUIRED_FLAGS "${_tmp}")
    if(NOT HAVE_SANITIZER)
       set(SANITIZER_FLAG -fsanitize=address)
+      set(CMAKE_REQUIRED_FLAGS ${SANITIZER_FLAG})
       AddCompilerFlag(${SANITIZER_FLAG} CXX_RESULT HAVE_SANITIZER)
+      set(CMAKE_REQUIRED_FLAGS "${_tmp}")
    endif()
-   set(CMAKE_REQUIRED_FLAGS "${_tmp}")
+
+   if(HAVE_SANITIZER)
+      option(USE_SANITIZER "Use available address and undefined behavior sanitizers for test code." ON)
+   else()
+      set(USE_SANITIZER FALSE)
+   endif()
 
    # define BUILD_TESTS for smash_lib in order to enable small code changes for the unit tests.
    # It is an unfortunate side effect that the sanitzer build now also compiles to slightly different code.
    # To fix this we'd have to compile all source files a third time... not sure we prefer that.
-   if(HAVE_SANITIZER)
+   if(USE_SANITIZER)
       set_target_properties(smash_lib PROPERTIES
          COMPILE_FLAGS "${SANITIZER_FLAG} -DBUILD_TESTS"
          LINK_FLAGS ${SANITIZER_FLAG}

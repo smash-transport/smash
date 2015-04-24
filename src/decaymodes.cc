@@ -105,7 +105,7 @@ void DecayModes::load_decaymodes(const std::string &input) {
     }
     // TODO(mkretz): why not just unconditionally call renormalize?
     /* Check if ratios add to 1 */
-    if (fabs(ratio_sum - 1.0) > really_small) {
+    if (std::abs(ratio_sum - 1.0) > really_small) {
       /* They didn't; renormalize */
       logger<LogArea::DecayModes>().info("Particle ", pdgcode);
       decay_modes_to_add.renormalize(ratio_sum);

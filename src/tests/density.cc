@@ -213,8 +213,7 @@ TEST(nucleus_density) {
   // make particle list out of generated nucleus
   Particles p;
   lead.copy_particles(&p);
-  ParticleList plist;
-  plist = ParticleList(p.data().begin(), p.data().end());
+  ParticleList plist = p.copy_to_vector();
 
   // write density profile to file, time-consuming!
   Density_type dens_type = baryon_density;

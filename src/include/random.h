@@ -68,8 +68,8 @@ template <typename T> T uniform(T min, T max) {
 /** returns a uniformly distributed random number \f$\chi \in [0,1)\f$
  */
 template <typename T = double> T canonical() {
-  static uniform_dist<T> canonical(0.0, 1.0);
-  return canonical();
+  return std::generate_canonical<T, std::numeric_limits<double>::digits>(
+      engine);
 }
 /** returns a uniform_dist object */
 template <typename T>

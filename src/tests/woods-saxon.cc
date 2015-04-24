@@ -79,7 +79,7 @@ TEST(woods_saxon) {
       // margin we allow. The statistical error at each point is
       // sqrt(N) (= N/sqrt(N)); the statistical error for the difference
       // between two points is hence sqrt(N1 + N2).
-      double margin = sqrt(vanilla + centerd);
+      double margin = std::sqrt(vanilla + centerd);
       // we'll make another histogram from the errors divided by the
       // standard deviation (stored in margin).
       int diffbin = std::abs(vanilla - centerd)/margin;
@@ -90,7 +90,7 @@ TEST(woods_saxon) {
       ++total;
       // maybe we want to print the distributions:
       if (PRINT) {
-        printf("%d %7.3f %8d %8d\n", c, b.first*dx, vanilla, centerd);
+        std::printf("%d %7.3f %8d %8d\n", c, b.first * dx, vanilla, centerd);
       }
     }
     // if we don't want to print the distributions, then we want to

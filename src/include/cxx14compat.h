@@ -10,6 +10,8 @@
 #ifndef SRC_INCLUDE_CXX14COMPAT_H_
 #define SRC_INCLUDE_CXX14COMPAT_H_
 
+#include <memory>
+
 namespace Smash {
 
 /**

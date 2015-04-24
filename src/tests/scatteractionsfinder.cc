@@ -56,11 +56,11 @@ TEST(collision_order) {
 
   // put particles into list
   Particles particles;
-  particles.add_data(particle_a);
-  particles.add_data(particle_b);
-  particles.add_data(particle_c);
-  particles.add_data(particle_d);
-  particles.add_data(particle_e);
+  particles.insert(particle_a);
+  particles.insert(particle_b);
+  particles.insert(particle_c);
+  particles.insert(particle_d);
+  particles.insert(particle_e);
 
   // prepare scatteractionsfinder
   const float radius = 0.11; // in fm
@@ -69,7 +69,7 @@ TEST(collision_order) {
   ScatterActionsFinder finder(elastic_parameter, testparticles);
 
   // prepare lists
-  ParticleList search_list{particles.data().begin(), particles.data().end()};
+  ParticleList search_list = particles.copy_to_vector();
   std::vector<const ParticleList*> neighbors_list; // empty for now
 
   // delta t (in fermi)
@@ -118,8 +118,8 @@ TEST(collision_order) {
   VERIFY(actions_3[2]->is_valid(particles))
       << "expected: third interaction is valid";
   // perform action
-  actions_3[0]->generate_final_state();
-  actions_3[0]->perform(&particles, num_interactions);
+  actions_3[2]->generate_final_state();
+  actions_3[2]->perform(&particles, num_interactions);
 
   // final check
   COMPARE(num_interactions, 2u);

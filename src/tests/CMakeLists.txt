@@ -7,12 +7,21 @@ file(COPY ../decaymodes.txt DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 string(REPLACE " -Wfloat-equal" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 
+option(FORMAT_TEST_OUTPUT_FOR_VIM
+   "If ON the unit test output of run_* targets will work with the vim quickfix parser and vim will directly take you to the line that failed."
+   OFF)
+set(UNITTEST_ARGS "")
+if(FORMAT_TEST_OUTPUT_FOR_VIM)
+   set(UNITTEST_ARGS "-v")
+endif()
+
+
 # tests:
 # Helper macro that adds a run_<name> target
 macro(smash_add_test name depends)
    add_test(NAME ${name} COMMAND ${ARGN})
    add_custom_target(run_${name}
-      COMMAND ${ARGN}
+      COMMAND ${ARGN} ${UNITTEST_ARGS}
       DEPENDS ${depends}
       COMMENT "Executing test ${name}"
       VERBATIM
@@ -22,7 +31,7 @@ endmacro()
 macro(smash_add_exe name)
   add_executable(${name} ${name}.cc)
   target_link_libraries(${name} smash_lib ${SMASH_LIBRARIES})
-   if(HAVE_SANITIZER)
+  if(USE_SANITIZER)
       set_target_properties(${name} PROPERTIES
          COMPILE_FLAGS "${SANITIZER_FLAG} -DSMASH_TEST_OUTPUT_PATH=\\\"${PROJECT_BINARY_DIR}/${name}_output/\\\""
          LINK_FLAGS ${SANITIZER_FLAG}
@@ -150,7 +159,7 @@ else()
    message(STATUS "valgrind not found. Memcheck tests are disabled!")
 endif()
 
-if(HAVE_SANITIZER)
+if(USE_SANITIZER)
    smash_add_test(sanitizer_box      smash_sanitizer smash_sanitizer -e 5.0 -m Box ${SMASH_OPTIONS})
    smash_add_test(sanitizer_collider smash_sanitizer smash_sanitizer -e 5.0 -m Collider ${SMASH_OPTIONS})
    smash_add_test(sanitizer_sphere   smash_sanitizer smash_sanitizer -e 5.0 -m Sphere ${SMASH_OPTIONS})

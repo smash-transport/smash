@@ -225,7 +225,7 @@ float TwoBodyDecaySemistable::rho(float m) const {
     return 0.;
   }
   // lookup tabulated values
-  unsigned int n = static_cast<unsigned int>(round((m-M_min_)/dM_));
+  unsigned int n = static_cast<unsigned int>(std::round((m - M_min_) / dM_));
   if (n >= tabulation_.size()) {
     return tabulation_.back();
   } else {

@@ -102,8 +102,8 @@ void usage(const int rc, const std::string &progname) {
    *     With `-f` this check is skipped.
    * </table>
    */
-  printf("\nUsage: %s [option]\n\n", progname.c_str());
-  printf("Calculate transport box\n"
+  std::printf("\nUsage: %s [option]\n\n", progname.c_str());
+  std::printf("Calculate transport box\n"
     "  -h, --help              usage information\n"
     "\n"
     "  -i, --inputfile <file>  path to input configuration file\n"
@@ -121,7 +121,7 @@ void usage(const int rc, const std::string &progname) {
     "  -f, --force             force overwriting files in the output directory"
     "\n"
     "  -v, --version\n\n");
-  exit(rc);
+  std::exit(rc);
 }
 
 /** \ingroup exception
@@ -282,11 +282,13 @@ int main(int argc, char *argv[]) {
           output_path = optarg;
           break;
         case 'v':
-          printf("%s\nSystem   : %s\nCompiler : %s %s\n"
-                     "Build    : %s\nDate     : %s\n",
-                 VERSION_MAJOR, CMAKE_SYSTEM, CMAKE_CXX_COMPILER_ID,
-                 CMAKE_CXX_COMPILER_VERSION, CMAKE_BUILD_TYPE, BUILD_DATE);
-          exit(EXIT_SUCCESS);
+          std::printf(
+              "%s\n"
+              "System   : %s\nCompiler : %s %s\n"
+              "Build    : %s\nDate     : %s\n",
+              VERSION_MAJOR, CMAKE_SYSTEM, CMAKE_CXX_COMPILER_ID,
+              CMAKE_CXX_COMPILER_VERSION, CMAKE_BUILD_TYPE, BUILD_DATE);
+          std::exit(EXIT_SUCCESS);
         default:
           usage(EXIT_FAILURE, progname);
       }
@@ -305,13 +307,21 @@ int main(int argc, char *argv[]) {
     if (modus)
       configuration["General"]["Modus"] = std::string(modus);
     if (end_time)
-      configuration["General"]["End_Time"] = std::abs(atof(end_time));
+      configuration["General"]["End_Time"] = std::abs(std::atof(end_time));
 
     /* set up logging */
     set_default_loglevel(configuration.take({"Logging", "default"},
                                             einhard::ALL));
     create_all_loggers(configuration["Logging"]);
     log.info(progname, " (", VERSION_MAJOR, ')');
+
+    int64_t seed = configuration.read({"General",  "Randomseed"});
+    if (seed < 0) {
+      // Seed with a real random value, if available
+      std::random_device rd;
+      seed = rd();
+      configuration["General"]["Randomseed"] = seed;
+    }
 
     /* check output path*/
     ensure_path_is_valid(output_path);
@@ -325,6 +335,11 @@ int main(int argc, char *argv[]) {
     // keep a copy of the configuration that was used in the output directory
     bf::ofstream(output_path / "config.yaml") << configuration.to_string()
                                               << '\n';
+
+    // take the seed setting only after the configuration was stored to file
+    seed = configuration.take({"General",  "Randomseed"});
+    Random::set_seed(seed);
+    log.info() << "Random number seed: " << seed;
 
     log.trace(source_location, " create ParticleType and DecayModes");
     ParticleType::create_type_list(configuration.take({"particles"}));

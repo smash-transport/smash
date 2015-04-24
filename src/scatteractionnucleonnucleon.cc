@@ -169,10 +169,10 @@ CollisionBranchList ScatterActionNucleonNucleon::nuc_nuc_to_nuc_res(
       int I_max =
           std::min(type_resonance->isospin() + second_type->isospin(),
                    type_particle_a.isospin() + type_particle_b.isospin());
-      int I_min =
-          std::max(abs(type_resonance->isospin() - second_type->isospin()),
-                   abs(type_particle_a.isospin() - type_particle_b.isospin()));
-      I_min = std::max(I_min, abs(I_z));
+      int I_min = std::max(
+          std::abs(type_resonance->isospin() - second_type->isospin()),
+          std::abs(type_particle_a.isospin() - type_particle_b.isospin()));
+      I_min = std::max(I_min, std::abs(I_z));
 
       /* Loop over total isospin in allowed range.
       * Use decrement of 2, since isospin is multiplied by 2. */

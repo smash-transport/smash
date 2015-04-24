@@ -17,6 +17,7 @@
 #include "../include/modusdefault.h"
 #include "../include/nucleus.h"
 #include "../include/potentials.h"
+#include "../include/propagation.h"
 #include "../include/spheremodus.h"
 
 #include <boost/filesystem.hpp>
@@ -117,7 +118,6 @@ TEST(nucleus_potential_profile) {
   ColliderModus c(conf["Modi"], param);
   Particles P;
   c.initial_conditions(&P, param);
-  OutputsList out;
   ParticleList plist;
 
   // Create potentials
@@ -136,7 +136,7 @@ TEST(nucleus_potential_profile) {
   for (auto it = 0; it < 20; it++) {
     a_file.open(("Nucleus_U_xy.vtk." + std::to_string(it)).c_str(),
                                                      std::ios::out);
-    plist = ParticleList(P.data().begin(), P.data().end());
+    plist = P.copy_to_vector();
     a_file << "# vtk DataFile Version 2.0\n" <<
               "potential\n" <<
               "ASCII\n" <<
@@ -160,7 +160,7 @@ TEST(nucleus_potential_profile) {
     }
     a_file.close();
     for (auto i = 0; i < 50; i++) {
-      c.propagate(&P, param, out, pot);
+      propagate(&P, param, *pot);
     }
   }
 }
@@ -203,10 +203,8 @@ TEST(propagation_in_test_potential) {
   const double p_mass = 0.938;
   Configuration conf(TEST_CONFIG_PATH);
   ExperimentParameters param{{0.f, dt}, 1.f, Ntest, sigma};
-  SphereModus c(conf["Modi"], param);
 
   // Create dummy outputs and our test potential
-  OutputsList out;
   const double U0 = 0.5;
   const double d = 4.0;
   Dummy_Pot* pot = new Dummy_Pot(conf["Potentials"], param, U0, d);
@@ -216,11 +214,12 @@ TEST(propagation_in_test_potential) {
   part.set_4momentum(p_mass, ThreeVector(2.0, -1.0, 1.0));
   part.set_4position(FourVector(0.0, -20*d, 0.0, 0.0));
   Particles P;
-  COMPARE(P.add_data(part), 0);
+  P.insert(part);
+  COMPARE(P.back().id(), 0);
 
   // Propagate, until particle is at x>>d, where d is parameter of potential
-  while (P.data(0).position().x1() < 20*d) {
-    c.propagate(&P, param, out, pot);
+  while (P.front().position().x1() < 20*d) {
+    propagate(&P, param, *pot);
   }
   // Calculate 4-momentum, expected from conservation laws
   const FourVector pm = part.momentum();
@@ -230,14 +229,14 @@ TEST(propagation_in_test_potential) {
          pm.x2(),
          pm.x3());
 
-  COMPARE_ABSOLUTE_ERROR(expected_p.x0(), P.data(0).momentum().x0(), 1.e-4)<<
+  COMPARE_ABSOLUTE_ERROR(expected_p.x0(), P.front().momentum().x0(), 1.e-4)<<
     "Expected energy " << expected_p.x0() <<
-    ", obtained " << P.data(0).momentum().x0();
-  COMPARE_ABSOLUTE_ERROR(expected_p.x1(), P.data(0).momentum().x1(), 1.e-4)<<
+    ", obtained " << P.front().momentum().x0();
+  COMPARE_ABSOLUTE_ERROR(expected_p.x1(), P.front().momentum().x1(), 1.e-4)<<
     "Expected px " << expected_p.x1() <<
-    ", obtained " << P.data(0).momentum().x1();
+    ", obtained " << P.front().momentum().x1();
   // y and z components did not have to change at all, so check is precise
-  COMPARE(expected_p.x2(), P.data(0).momentum().x2());
-  COMPARE(expected_p.x3(), P.data(0).momentum().x3());
+  COMPARE(expected_p.x2(), P.front().momentum().x2());
+  COMPARE(expected_p.x3(), P.front().momentum().x3());
 
 }

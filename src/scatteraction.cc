@@ -157,7 +157,7 @@ double ScatterAction::particle_distance() const {
   log.debug("Particle ", incoming_particles_, " position difference [fm]: ",
             pos_diff, ", momentum difference [GeV]: ", mom_diff);
   /* Zero momentum leads to infite distance. */
-  if (fabs(mom_diff.sqr()) < really_small)
+  if (std::abs(mom_diff.sqr()) < really_small)
     return  pos_diff.sqr();
 
   /* UrQMD squared distance criteria:
@@ -211,7 +211,7 @@ double ScatterAction::two_to_one_formation(const ParticleType &type_resonance,
   double srts = std::sqrt(s);
   float partial_width = type_resonance.get_partial_in_width(srts,
                                 incoming_particles_[0], incoming_particles_[1]);
-  if (partial_width <= 0.) {
+  if (partial_width <= 0.f) {
     return 0.;
   }
 
@@ -221,12 +221,14 @@ double ScatterAction::two_to_one_formation(const ParticleType &type_resonance,
   const int sym_factor = (type_particle_a.pdgcode() ==
                           type_particle_b.pdgcode()) ? 2 : 1;
   float resonance_width = type_resonance.total_width(srts);
-  float resonance_mass = type_resonance.mass();
+  if (resonance_width <= 0.f) {
+    return 0.;
+  }
   /* Calculate resonance production cross section
    * using the Breit-Wigner distribution as probability amplitude.
    * See Eq. (176) in Buss et al., Physics Reports 512, 1 (2012). */
   return spinfactor * sym_factor * 4.0 * M_PI / cm_momentum_sqr
-         * breit_wigner(s, resonance_mass, resonance_width)
+         * breit_wigner(s, type_resonance.mass(), resonance_width)
          * partial_width/resonance_width
          * hbarc * hbarc / fm2_mb;
 }

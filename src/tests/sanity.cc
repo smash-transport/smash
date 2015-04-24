@@ -63,12 +63,18 @@ static void create_particle_list(Particles &P) {
   particle_xlzh.set_4position(FourVector(2.2, 0.2, 0.0, 4.8));
 
   // add particles (and make sure the particles get the correct ID):
-  COMPARE(P.add_data(particle_stop), 0);
-  COMPARE(P.add_data(particle_fast), 1);
-  COMPARE(P.add_data(particle_slow), 2);
-  COMPARE(P.add_data(particle_x_hi), 3);
-  COMPARE(P.add_data(particle_y_lo), 4);
-  COMPARE(P.add_data(particle_xlzh), 5);
+  P.insert(particle_stop);
+  COMPARE(P.back().id(), 0);
+  P.insert(particle_fast);
+  COMPARE(P.back().id(), 1);
+  P.insert(particle_slow);
+  COMPARE(P.back().id(), 2);
+  P.insert(particle_x_hi);
+  COMPARE(P.back().id(), 3);
+  P.insert(particle_y_lo);
+  COMPARE(P.back().id(), 4);
+  P.insert(particle_xlzh);
+  COMPARE(P.back().id(), 5);
 
   return;
 }
@@ -77,7 +83,7 @@ TEST(sanity_default) {
   ModusDefault m;
   Particles P;
   create_particle_list(P);
-  COMPARE(m.sanity_check(&P), 0);
+  COMPARE(m.impose_boundary_conditions(&P), 0);
 }
 
 TEST(sanity_box) {
@@ -90,7 +96,7 @@ TEST(sanity_box) {
   BoxModus b(conf["Modi"], param);
   Particles P;
   create_particle_list(P);
-  COMPARE(b.sanity_check(&P), 4);
+  COMPARE(b.impose_boundary_conditions(&P), 4);
 }
 
 TEST(sanity_collider) {
@@ -106,7 +112,7 @@ TEST(sanity_collider) {
   ColliderModus n(conf["Modi"], param);
   Particles P;
   create_particle_list(P);
-  COMPARE(n.sanity_check(&P), 0);
+  COMPARE(n.impose_boundary_conditions(&P), 0);
 }
 
 TEST(sanity_sphere) {
@@ -120,5 +126,5 @@ TEST(sanity_sphere) {
   SphereModus s(conf["Modi"], param);
   Particles P;
   create_particle_list(P);
-  COMPARE(s.sanity_check(&P), 0);
+  COMPARE(s.impose_boundary_conditions(&P), 0);
 }

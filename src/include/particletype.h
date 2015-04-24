@@ -88,7 +88,7 @@ class ParticleType {
   ParticleTypePtr get_antiparticle() const;
 
   /// \copydoc PdgCode::isospin_total
-  unsigned int isospin() const { return isospin_; }
+  int isospin() const { return isospin_; }
 
   /// \copydoc PdgCode::isospin3
   int isospin3() const { return pdgcode_.isospin3(); }
@@ -256,6 +256,11 @@ class ParticleType {
    * \see ParticleTypePtr
    */
   ParticleTypePtr operator&() const;
+
+  /// \ingroup exception
+  struct LoadFailure : public std::runtime_error {
+    using std::runtime_error::runtime_error;
+  };
 
  private:
 #ifndef NDEBUG

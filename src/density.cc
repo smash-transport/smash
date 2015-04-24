@@ -10,6 +10,7 @@
 #include "include/constants.h"
 #include "include/density.h"
 #include "include/logging.h"
+#include "include/particles.h"
 
 namespace Smash {
 
@@ -23,10 +24,11 @@ bool particle_in_denstype(const PdgCode pdg, Density_type dens_type) {
   }
 }
 
-FourVector four_current(const ThreeVector &r, const ParticleList &plist,
-                        double gs_sigma, Density_type dens_type, int ntest) {
+template <typename /*ParticlesContainer*/ T>
+static FourVector four_current_impl(const ThreeVector &r, const T &plist,
+                                    double gs_sigma, Density_type dens_type,
+                                    int ntest) {
   FourVector jmu(0.0, 0.0, 0.0, 0.0);
-  double tmp;
 
   for (const auto &p : plist) {
     if (!particle_in_denstype(p.pdgcode(), dens_type)) {
@@ -34,7 +36,7 @@ FourVector four_current(const ThreeVector &r, const ParticleList &plist,
     }
     const ThreeVector ri = p.position().threevec();
     // If particle is too far - reject it immediately: its input is too small
-    if ((r - ri).sqr() > (6*gs_sigma) * (6*gs_sigma)) {
+    if ((r - ri).sqr() > (4*gs_sigma) * (4*gs_sigma)) {
       continue;
     }
 
@@ -43,10 +45,14 @@ FourVector four_current(const ThreeVector &r, const ParticleList &plist,
 
 
     // Get distance between particle and r in the particle rest frame
-    tmp = ((r - ri) * betai) / (inv_gammai * (1. + inv_gammai));
+    double tmp = ((r - ri) * betai) / (inv_gammai * (1. + inv_gammai));
     const ThreeVector dr_rest = r - ri + betai * tmp;
+    const double drr_sqr = dr_rest.sqr();
+    if (drr_sqr > (4*gs_sigma) * (4*gs_sigma)) {
+      continue;
+    }
 
-    tmp = std::exp(- 0.5 * dr_rest.sqr() / (gs_sigma * gs_sigma)) / inv_gammai;
+    tmp = std::exp(- 0.5 * drr_sqr / (gs_sigma * gs_sigma)) / inv_gammai;
     switch (dens_type) {
     case baryon_density:
       tmp *= p.pdgcode().baryon_number();
@@ -67,6 +73,14 @@ FourVector four_current(const ThreeVector &r, const ParticleList &plist,
   // jmu.abs() = sqrt(j^mu j_mu) is Eckart rest frame density
   return jmu / ntest;
 }
+FourVector four_current(const ThreeVector &r, const ParticleList &plist,
+                        double gs_sigma, Density_type dens_type, int ntest) {
+  return four_current_impl(r, plist, gs_sigma, dens_type, ntest);
+}
+FourVector four_current(const ThreeVector &r, const Particles &plist,
+                        double gs_sigma, Density_type dens_type, int ntest) {
+  return four_current_impl(r, plist, gs_sigma, dens_type, ntest);
+}
 
 std::pair<double, ThreeVector> rho_eckart_gradient(const ThreeVector &r,
                                 const ParticleList &plist, double gs_sigma,
@@ -79,7 +93,6 @@ std::pair<double, ThreeVector> rho_eckart_gradient(const ThreeVector &r,
   FourVector djmu_dx(0.0, 0.0, 0.0, 0.0);
   FourVector djmu_dy(0.0, 0.0, 0.0, 0.0);
   FourVector djmu_dz(0.0, 0.0, 0.0, 0.0);
-  double tmp1, tmp2;
 
   for (const auto &p : plist) {
     if (!particle_in_denstype(p.pdgcode(), dens_type)) {
@@ -87,7 +100,7 @@ std::pair<double, ThreeVector> rho_eckart_gradient(const ThreeVector &r,
     }
     const ThreeVector ri = p.position().threevec();
     // If particle is too far - reject it immediately: its input is too small
-    if ((r - ri).sqr() > (6*gs_sigma) * (6*gs_sigma)) {
+    if ((r - ri).sqr() > (4*gs_sigma) * (4*gs_sigma)) {
       continue;
     }
 
@@ -97,10 +110,14 @@ std::pair<double, ThreeVector> rho_eckart_gradient(const ThreeVector &r,
     // std::cout << "1/gamma: " << inv_gammai << std::endl;
 
     // Get distance between particle and r in the particle rest frame
-    tmp1 = inv_gammai * (1. + inv_gammai);
+    double tmp1 = inv_gammai * (1. + inv_gammai);
     const ThreeVector dr_rest = r - ri + betai * (((r - ri) * betai) / tmp1);
+    const double drr_sqr = dr_rest.sqr();
+    if (drr_sqr > (4*gs_sigma) * (4*gs_sigma)) {
+      continue;
+    }
 
-    tmp2 = std::exp(- 0.5 * dr_rest.sqr() / (gs_sigma*gs_sigma)) / inv_gammai;
+    double tmp2 = std::exp(-0.5 * drr_sqr / (gs_sigma*gs_sigma)) / inv_gammai;
     switch (dens_type) {
     case baryon_density:
       tmp2 *= p.pdgcode().baryon_number();
@@ -143,7 +160,7 @@ std::pair<double, ThreeVector> rho_eckart_gradient(const ThreeVector &r,
   const double rho = (rho2 > 0.0) ? std::sqrt(rho2) : 0.0;
 
   // Eckart rest frame density and its gradient
-  if (fabs(rho) > really_small) {
+  if (std::abs(rho) > really_small) {
     return std::make_pair(rho / ntest, ThreeVector(jmu.Dot(djmu_dx),
                                            jmu.Dot(djmu_dy),
                                            jmu.Dot(djmu_dz)) / (rho * ntest));

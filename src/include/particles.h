@@ -7,7 +7,9 @@
 #ifndef SRC_INCLUDE_PARTICLES_H_
 #define SRC_INCLUDE_PARTICLES_H_
 
-#include <map>
+#include <memory>
+#include <type_traits>
+#include <vector>
 
 #include "macros.h"
 #include "particledata.h"
@@ -29,111 +31,9 @@ namespace Smash {
  * semantically. Move semantics make sense and can be implemented when needed.
  */
 class Particles {
-  /**
-   * Adapter class for making iterations over particle data and types easier to
-   * use.
-   *
-   * This is an implementation detail and need not be understood for use of the
-   * Particles class.
-   */
-  template <typename T>
-  class MapIterationAdapter {
-    /// the type T::begin() returns
-    using map_iterator = decltype(std::declval<T &>().begin());
-    /// the type T::cbegin() returns
-    using const_map_iterator = decltype(std::declval<T &>().cbegin());
-    /// the value type of T (with const added if T is const)
-    using mapped_type = typename std::conditional<
-        std::is_const<T>::value, const typename T::mapped_type,
-        typename T::mapped_type>::type;
-
-   public:
-    MapIterationAdapter(T *map) : map_(map) {}  // NOLINT(runtime/explicit)
-
-    /**
-     * Adapter class that modifies the normal map iterator to return only the
-     * value instead of the key/value pair.
-     */
-    class iterator : public map_iterator {
-     public:
-      typedef mapped_type value_type;
-      typedef mapped_type * pointer;
-      typedef mapped_type & reference;
-
-      iterator(map_iterator it)  // NOLINT(runtime/explicit)
-          : map_iterator(it) {}
-
-      /**
-       * overwritten dereference operator to return only the value instead of
-       * the
-       * key/value pair.
-       */
-      mapped_type &operator*() { return map_iterator::operator*().second; }
-      /// const overload of the above
-      const mapped_type &operator*() const {
-        return map_iterator::operator*().second;
-      }
-
-      mapped_type *operator->() { return &map_iterator::operator*().second; }
-      const mapped_type *operator->() const {
-        return &map_iterator::operator*().second;
-      }
-    };
-
-    /**
-     * Adapter class that modifies the normal map const_iterator to return only
-     * the value instead of the key/value pair.
-     */
-    class const_iterator : public const_map_iterator {
-     public:
-      typedef mapped_type value_type;
-      typedef const mapped_type * pointer;
-      typedef const mapped_type & reference;
-
-      const_iterator(const_map_iterator it)  // NOLINT(runtime/explicit)
-          : const_map_iterator(it) {}
-
-      /**
-       * overwritten dereference operator to return only the value instead of
-       * the key/value pair.
-       */
-      const mapped_type &operator*() const {
-        return const_map_iterator::operator*().second;
-      }
-
-      const mapped_type *operator->() const {
-        return &const_map_iterator::operator*().second;
-      }
-    };
-
-
-    /// returns an adapted iterator to the begin iterator of the map
-    iterator begin() const { return map_->begin(); }
-    /// returns an adapted iterator to the end iterator of the map
-    iterator end() const { return map_->end(); }
-
-    /// returns an adapted iterator to the begin iterator of the map
-    const_iterator cbegin() const { return map_->cbegin(); }
-    /// returns an adapted iterator to the end iterator of the map
-    const_iterator cend() const { return map_->cend(); }
-
-   private:
-    /// points to the map the adapter class wraps; needed for calls to begin/end
-    T *map_;
-  };
-
-  /** ParticleDataMap is the prime accessor for ParticleData
-   *
-   * It maps the unique Particle ID to its volatile data.
-   */
-  using ParticleDataMap = std::map<int, ParticleData>;
-
  public:
   /**
-   * Set up the Particles object.
-   *
-   * This initializes all the members. The object is ready for usage right after
-   * construction.
+   * Creates a new (empty) Particles object.
    */
   Particles();
 
@@ -143,154 +43,364 @@ class Particles {
   Particles &operator=(const Particles &) = delete;
 
   /**
-   * Use the returned object for iterating over all ParticleData objects.
-   *
-   * You can use this object for use with range-based for:
+   * Returns a copy of all particles as a std::vector<ParticleData>.
+   */
+  ParticleList copy_to_vector() const {
+    if (dirty_.empty()) {
+      return {&data_[0], &data_[data_size_]};
+    }
+    return {begin(), end()};
+  }
+
+  /**
+   * Inserts the particle \p into the list of particles.
+   * The argument \p will afterwards not be a valid copy of a particle of the
+   * internal list. I.e.
    * \code
-   * for (ParticleData &data : particles->data()) {
-   *   ...
-   * }
+   * ParticleData particle(type);
+   * particles.insert(particle);
+   * particles.is_valid(particle);  // returns false
    * \endcode
-   *
-   * \returns Opaque object that provides begin/end functions for iteration of
-   * all ParticleData objects.
    */
-  MapIterationAdapter<ParticleDataMap> data() { return &data_; }
-  /// const overload of the above
-  MapIterationAdapter<const ParticleDataMap> data() const { return &data_; }
+  void insert(const ParticleData &p);
 
-  /**
-   * Return the specific data of a particle according to its id
-   *
-   * \throws std::out_of_range If there is no particle with the given \p id.
-   */
-  inline ParticleData &data(int id) { return data_.at(id); }
-  /**
-   * Return the specific data of a particle according to its id
-   *
-   * \throws std::out_of_range If there is no particle with the given \p id.
-   */
-  inline const ParticleData &data(int id) const;
+  /// Add \p n particles of the same type (\p pdg) to the list.
+  void create(size_t n, PdgCode pdg);
 
-  /// return the highest used id
-  inline int id_max(void) const;
-  /// inserts a new particle and returns its id
-  inline int add_data(const ParticleData &particle_data);
-  /// add a range of particles
-  inline void create(size_t number, PdgCode pdg);
-  /* add one particle and return pointer to it */
-  inline ParticleData& create(const PdgCode pdg);
-  /// remove a specific particle
-  inline void remove(int id);
-  /// size() of the ParticleData map
-  inline size_t size(void) const;
-  /// empty() check of the ParticleData map
-  inline bool empty(void) const;
-  /// check the existence of an element in the ParticleData map
-  inline bool has_data(int id) const;
-  /** return time of the computational frame
+  /// Add one particle of the given \p pdg code and return a reference to it
+  ParticleData &create(const PdgCode pdg);
+
+  /// Returns the number of particles in the list.
+  size_t size() const { return data_size_ - dirty_.size(); }
+
+  /// Returns whether the list of particles is empty.
+  bool is_empty() const { return data_size_ == 0; }
+
+  /** Returns the time of the computational frame.
    *
    * \return computation time which is reduced by the start up time
    *
+   * \note This function may only be called if the list of particles is not
+   * empty.
+   *
    * \fpPrecision Why \c double?
    */
-  inline double time(void) const;
+  double time() const {
+    assert(!is_empty());
+    return front().position().x0();
+  }
 
-  /// \ingroup exception
-  struct LoadFailure : public std::runtime_error {
-    using std::runtime_error::runtime_error;
-  };
-  /// \ingroup exception
-  struct ParseError : public LoadFailure {
-    using LoadFailure::LoadFailure;
-  };
-
-  /** Reset member data to the state the object had when the constructor
-   * returned.
+  /**
+   * Reset the state of the Particles object to an empty list and a new id
+   * counter. The object is thus in the same state as right after construction.
    */
   void reset();
 
- private:
-  /// Highest id of a given particle
-  int id_max_ = -1;
   /**
-   * dynamic data of the particles a map between its id and data
-   *
-   * A map structure is used as particles decay and hence this
-   * a swiss cheese over the runtime of SMASH. Also we want direct
-   * lookup of the corresponding particle id with its data.
+   * Return whether the ParticleData copy is still a valid copy of the one
+   * stored in the Particles object. If not, then the particle either never was
+   * a valid copy or it has interacted (e.g. scatter, decay) since it was
+   * copied.
    */
-  ParticleDataMap data_;
-};
-
-/**
- * \ingroup logging
- * Print effective mass and type name for all particles to the stream.
- */
-std::ostream &operator<<(std::ostream &out, const Particles &p);
-
-/* return the data of a specific particle */
-inline const ParticleData &Particles::data(int particle_id) const {
-  return data_.at(particle_id);
-}
-
-/* add a new particle data and return the id of the new particle */
-inline int Particles::add_data(ParticleData const &particle_data) {
-  id_max_++;
-  data_.insert(std::make_pair(id_max_, particle_data));
-  data_.at(id_max_).set_id(id_max_);
-  return id_max_;
-}
-
-/* create a bunch of particles */
-inline void Particles::create(size_t number, PdgCode pdgcode) {
-  /* fixed pdgcode and no collision yet */
-  ParticleData particle(ParticleType::find(pdgcode));
-  for (size_t i = 0; i < number; i++) {
-    id_max_++;
-    particle.set_id(id_max_);
-    data_.insert(std::make_pair(id_max_, particle));
+  bool is_valid(const ParticleData &copy) const {
+    if (data_size_ <= copy.index_) {
+      return false;
+    }
+    return data_[copy.index_].id() ==
+               copy.id()  // Check if the particles still exists. If it decayed
+                          // or scattered inelastically it is gone.
+           &&
+           data_[copy.index_].id_process() ==
+               copy.id_process();  // If the particle has scattered elastically,
+                                   // its id_process has changed and we consider
+                                   // it invalid.
   }
-}
 
-/* create a bunch of particles */
-inline ParticleData& Particles::create(PdgCode pdgcode) {
-  /* fixed pdgcode and no collision yet */
-  ParticleData particle(ParticleType::find(pdgcode));
-  id_max_++;
-  particle.set_id(id_max_);
-  data_.insert(std::make_pair(id_max_, particle));
-  return data_.at(id_max_);
-}
+  /**
+   * Remove the given particle \p p from the list. The argument \p p must be a
+   * valid copy obtained from Particles, i.e. a call to \ref is_valid must
+   * return \c true.
+   *
+   * \note The validity of \p p is only enforced in DEBUG builds.
+   */
+  void remove(const ParticleData &p);
 
-/* return the highest used id */
-inline int Particles::id_max() const {
-  return id_max_;
-}
+  /**
+   * Replace the particles in \p to_remove with the particles in \p to_add in
+   * the list of current particles. The particles in \p to_remove must be valid
+   * copies obtained from Particles. The particles in \p to_add will not be
+   * modified by this function call and therefore the ParticleData instances in
+   * \p to_add will not be valid copies of the new particles in the Particles
+   * list.
+   *
+   * \note The validity of \p to_remove is only enforced in DEBUG builds.
+   */
+  void replace(const ParticleList &to_remove, const ParticleList &to_add);
 
-/* remove a particle */
-inline void Particles::remove(int id) {
-  data_.erase(id);
-}
+  /**
+   * \internal
+   * Iterator type that skips over the holes in data_. It implements a standard
+   * bidirectional iterator over the ParticleData objects in Particles.
+   */
+  template <typename T>
+  class GenericIterator
+      : public std::iterator<std::bidirectional_iterator_tag, T> {
+    friend class Particles;
 
-/* total number of particles */
-inline size_t Particles::size() const {
-  return data_.size();
-}
+   public:
+    using value_type = typename std::remove_const<T>::type;
+    using pointer = typename std::add_pointer<T>::type;
+    using reference = typename std::add_lvalue_reference<T>::type;
+    using const_pointer = typename std::add_const<pointer>::type;
+    using const_reference = typename std::add_const<reference>::type;
 
-/* check if we have particles */
-inline bool Particles::empty() const {
-  return data_.empty();
-}
+   private:
+    /**
+     * Constructs an iterator pointing to the ParticleData pointed to by \p p.
+     * This constructor may only be called from the Particles class.
+     */
+    GenericIterator(pointer p) : ptr_(p) {}  // NOLINT(runtime/explicit)
 
-/* check the existence of an element in the ParticleData map */
-inline bool Particles::has_data(int id) const {
-  return data_.find(id) != data_.end();
-}
+    /// The entry in Particles this iterator points to.
+    pointer ptr_;
 
-inline double Particles::time() const {
-  return data_.begin()->second.position().x0();
-}
+   public:
+    /**
+     * Advance the iterator to the next valid (not a hole) entry in Particles.
+     * Holes are identified by the ParticleData::hole_ member and thus the
+     * internal pointer is incremented until all holes are skipped. It is
+     * important that the Particles entry pointed to by Particles::end() is not
+     * identified as a hole as otherwise the iterator would advance too far.
+     */
+    GenericIterator &operator++() {
+      do {
+        ++ptr_;
+      } while (ptr_->hole_);
+      return *this;
+    }
+    /// Postfix variant of the above prefix increment operator.
+    GenericIterator operator++(int) {
+      GenericIterator old = *this;
+      operator++();
+      return old;
+    }
+
+    /**
+     * Advance the iterator to the previous valid (not a hole) entry in Particles.
+     * Holes are identified by the ParticleData::hole_ member and thus the
+     * internal pointer is decremented until all holes are skipped. It is
+     * irrelevant whether Particles::data_[0] is a hole because the iteration
+     * typically ends at Particles::begin(), which points to a non-hole entry in
+     * Particles::data_.
+     */
+    GenericIterator &operator--() {
+      do {
+        --ptr_;
+      } while (ptr_->hole_);
+      return *this;
+    }
+    /// Postfix variant of the above prefix decrement operator.
+    GenericIterator operator--(int) {
+      GenericIterator old = *this;
+      operator--();
+      return old;
+    }
+
+    /// Dereferences the iterator.
+    reference operator*() { return *ptr_; }
+    /// Dereferences the iterator.
+    const_reference operator*() const { return *ptr_; }
+
+    /// Dereferences the iterator.
+    pointer operator->() { return ptr_; }
+    /// Dereferences the iterator.
+    const_pointer operator->() const { return ptr_; }
+
+    /// Returns whether two iterators point to the same object.
+    bool operator==(const GenericIterator &rhs) const {
+      return ptr_ == rhs.ptr_;
+    }
+    /// Returns whether two iterators point to different objects.
+    bool operator!=(const GenericIterator &rhs) const {
+      return ptr_ != rhs.ptr_;
+    }
+    /// Returns whether this iterator comes before the iterator \p rhs.
+    bool operator<(const GenericIterator &rhs) const { return ptr_ < rhs.ptr_; }
+    /// Returns whether this iterator comes after the iterator \p rhs.
+    bool operator>(const GenericIterator &rhs) const { return ptr_ > rhs.ptr_; }
+    /// Returns whether this iterator comes before the iterator \p rhs or points
+    /// to the same object.
+    bool operator<=(const GenericIterator &rhs) const {
+      return ptr_ <= rhs.ptr_;
+    }
+    /// Returns whether this iterator comes after the iterator \p rhs or points
+    /// to the same object.
+    bool operator>=(const GenericIterator &rhs) const {
+      return ptr_ >= rhs.ptr_;
+    }
+  };
+  using iterator = GenericIterator<ParticleData>;
+  using const_iterator = GenericIterator<const ParticleData>;
+
+  /// Returns a reference to the first particle in the list.
+  ParticleData &front() { return *begin(); }
+  /// const overload of the above
+  const ParticleData &front() const { return *begin(); }
+
+  /// Returns a reference to the last particle in the list.
+  ParticleData &back() { return *(--end()); }
+  /// const overload of the above
+  const ParticleData &back() const { return *(--end()); }
+
+  /**
+   * Returns an iterator pointing to the first particle in the list. Use it to
+   * iterate over all particles in the list.
+   */
+  iterator begin() {
+    ParticleData *first = &data_[0];
+    while (first->hole_) {
+      ++first;
+    }
+    return first;
+  }
+  /// const overload of the above
+  const_iterator begin() const {
+    ParticleData *first = &data_[0];
+    while (first->hole_) {
+      ++first;
+    }
+    return first;
+  }
+
+  /**
+   * Returns an iterator pointing behind the last particle in the list. Use it
+   * to iterate over all particles in the list.
+   */
+  iterator end() { return &data_[data_size_]; }
+  /// const overload of the above
+  const_iterator end() const { return &data_[data_size_]; }
+
+  /// Returns a const begin iterator.
+  const_iterator cbegin() const { return begin(); }
+  /// Returns a const end iterator.
+  const_iterator cend() const { return end(); }
+
+  /**
+   * \ingroup logging
+   * Print effective mass and type name for all particles to the stream.
+   */
+  friend std::ostream &operator<<(std::ostream &out, const Particles &p);
+
+  /////////////////////// deprecated functions ///////////////////////////
+
+  SMASH_DEPRECATED("use the begin() and end() iterators of Particles directly")
+  Particles &data() { return *this; }
+  SMASH_DEPRECATED("use the begin() and end() iterators of Particles directly")
+  const Particles &data() const { return *this; }
+
+  SMASH_DEPRECATED("don't reference particles by id") ParticleData
+      &data(int id) {
+    for (ParticleData &x : *this) {
+      if (x.id() == id) {
+        return x;
+      }
+    }
+    throw std::out_of_range("missing particle id");
+  }
+
+  SMASH_DEPRECATED("don't reference particles by id") const ParticleData
+      &data(int id) const {
+    for (const ParticleData &x : *this) {
+      if (x.id() == id) {
+        return x;
+      }
+    }
+    throw std::out_of_range("missing particle id");
+  }
+
+  SMASH_DEPRECATED("don't reference particles by id") int id_max(void) const {
+    return id_max_;
+  }
+
+  SMASH_DEPRECATED("don't reference particles by id") void remove(int id) {
+    for (auto it = begin(); it != end(); ++it) {
+      if (it->id() == id) {
+        remove(*it);
+        return;
+      }
+    }
+  }
+
+  SMASH_DEPRECATED("don't reference particles by id") bool has_data(
+      int id) const {
+    for (auto &&x : *this) {
+      if (x.id() == id) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  SMASH_DEPRECATED("use insert instead") int add_data(
+      const ParticleData &particle_data) {
+    insert(particle_data);
+    return id_max_;
+  }
+
+  SMASH_DEPRECATED("use is_empty instead") bool empty() const {
+    return is_empty();
+  }
+
+ private:
+  /// Highest id of a given particle. The first particle added to data_ will
+  /// have id 0.
+  int id_max_ = -1;
+
+  /**\internal
+   * Increases the capacity of data_ to \p new_capacity. \p new_capacity is
+   * expected to be larger than data_capacity_. This is enforced in DEBUG
+   * builds.
+   */
+  void increase_capacity(unsigned new_capacity);
+  /**\internal
+   * Ensure that the capacity of data_ is large enough to hold \p to_add more
+   * entries. If the capacity does not suffice increase_capacity is called.
+   */
+  inline void ensure_capacity(unsigned to_add);
+  /**\internal
+   * Common implementation for copying the relevant data of a ParticleData
+   * object into data_. This does not implement a 1:1 copy, instead:
+   * \li The particle id in data_ is set to the next id for a new particle.
+   * \li The type, momentum, and position are copied from \p from.
+   * \li The ParticleData::index_ members is not modified since it already has
+   *     the correct value
+   * \li The ParticleData::hole_ member is not modified and might need
+   *     adjustment in the calling code.
+   */
+  inline void copy_in(ParticleData &to, const ParticleData &from);
+
+  /**\internal
+   * The number of elements in data_ (including holes, but excluding entries
+   * behind the last valid particle)
+   */
+  unsigned data_size_ = 0u;
+  /**\internal
+   * The capacity of the memory pointed to by data_.
+   */
+  unsigned data_capacity_ = 100u;
+  /**
+   * Points to a dynamically allocated array of ParticleData objects. The
+   * allocated size is stored in data_capacity_ and the used range (starting
+   * from index 0) is stored in data_size_.
+   */
+  std::unique_ptr<ParticleData[]> data_;
+
+  /**
+   * Stores the indexes in data_ that do not hold valid particle data and should
+   * be reused when new particles are added.
+   */
+  std::vector<unsigned> dirty_;
+};
 
 }  // namespace Smash
 

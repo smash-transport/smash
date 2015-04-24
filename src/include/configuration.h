@@ -139,8 +139,8 @@ class Configuration {
      */
     Value(const YAML::Node &n, const char *key) : node_(n), key_(key) {
       if (!(n.IsScalar() || n.IsSequence() || n.IsMap())) {
-        fprintf(stderr, "Configuration::Value fails at %s\n", key);
-        abort();
+        std::fprintf(stderr, "Configuration::Value fails at %s\n", key);
+        std::abort();
       }
     }
 
