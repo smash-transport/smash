@@ -113,6 +113,7 @@ class PdgCode {
   PdgCode(const std::string& codestring) {
     set_from_string(codestring);
   }
+
   /** receive a signed integer and process it into a PDG Code. The sign
    * is taken as antiparticle boolean, while the absolute value of the
    * integer is used as hexdigits.
@@ -224,6 +225,19 @@ class PdgCode {
     // TODO(mkretz): more efficient implementation
     return PdgCode(-code());
   }
+
+  /// Construct PDG code from decimal number
+  PdgCode set_from_decimal(const int pdgcode_decimal) {
+    int a = pdgcode_decimal;
+    int hex_pdg = 0, tmp = 1;
+    while (a) {
+      hex_pdg += (a % 10) * tmp;
+      tmp *= 16;
+      a = a / 10;
+    }
+    return PdgCode(hex_pdg);
+  }
+
 
   /****************************************************************************
    *                                                                          *
