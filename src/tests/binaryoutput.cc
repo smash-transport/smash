@@ -121,8 +121,8 @@ TEST(fullhistory_format) {
                        "test_binary_collisions.yaml"};
 
   /* Create an instance of binary output */
-  BinaryOutputCollisions *bin_output =
-                new BinaryOutputCollisions(testoutputpath, std::move(op));
+  std::unique_ptr<BinaryOutputCollisions> bin_output =
+            make_unique<BinaryOutputCollisions>(testoutputpath, std::move(op));
   VERIFY(bf::exists(testoutputpath / "collisions_binary.bin"));
 
   /* create two smashon particles */
@@ -200,8 +200,8 @@ TEST(particles_format) {
 
 
   /* Create an instance of binary output */
-  BinaryOutputParticles *bin_output =
-                     new BinaryOutputParticles(testoutputpath, std::move(op));
+  std::unique_ptr<BinaryOutputCollisions> bin_output =
+            make_unique<BinaryOutputCollisions>(testoutputpath, std::move(op));
   VERIFY(bf::exists(testoutputpath / "particles_binary.bin"));
 
   /* create two smashon particles */
