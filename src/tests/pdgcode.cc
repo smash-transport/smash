@@ -643,8 +643,7 @@ TEST(antiparticle) {
 }
 
 TEST(from_decimal) {
-  PdgCode my_pdg;
-  VERIFY(pion == my_pdg.set_from_decimal(211));
-  VERIFY(Kminus == my_pdg.set_from_decimal(-321));
-  VERIFY(antixi == my_pdg.set_from_decimal(-103312));
+  COMPARE(pion, PdgCode::from_decimal(211));
+  COMPARE(Kminus, PdgCode::from_decimal(-321));
+  COMPARE(antixi, PdgCode::from_decimal(-103312));
 }

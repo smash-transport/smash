@@ -227,7 +227,7 @@ class PdgCode {
   }
 
   /// Construct PDG code from decimal number
-  PdgCode set_from_decimal(const int pdgcode_decimal) {
+  static PdgCode from_decimal(const int pdgcode_decimal) {
     int a = pdgcode_decimal;
     int hex_pdg = 0, tmp = 1;
     while (a) {
