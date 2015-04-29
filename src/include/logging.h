@@ -107,9 +107,9 @@ DECLARE_LOGAREA(21, PauliBlocking);
 /// correct log level automatically.
 using AreaTuple = std::tuple<Main, Experiment, Box, Collider, Sphere,
                              Action, InputParser, ParticleType, FindScatter,
-                             Legacy, Clock, DecayModes, Resonances, ScatterAction,
-                             Distributions, Propagation, Grid, List, Nucleus,
-                             DecayType, Density, PauliBlocking>;
+                             Legacy, Clock, DecayModes, Resonances,
+                             ScatterAction, Distributions, Propagation, Grid,
+                             List, Nucleus, DecayType, Density, PauliBlocking>;
 }  // namespace LogArea
 
 /**
@@ -129,7 +129,8 @@ void create_all_loggers(Configuration config);
 einhard::Logger<> &retrieve_logger_impl(int id);
 
 /**
- * Returns the einhard::Logger object created for the named area (see the LogArea types).
+ * Returns the einhard::Logger object created for the named area
+ * (see the LogArea types).
  */
 template <typename LogAreaTag>
 inline einhard::Logger<> &logger() {

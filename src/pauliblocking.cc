@@ -17,7 +17,8 @@ namespace Smash {
  * PauliBlocker constructor. Gets parameters from configuration.
  * Tabulates necessary integrals.
  */
-PauliBlocker::PauliBlocker(Configuration conf, const ExperimentParameters &param)
+PauliBlocker::PauliBlocker(Configuration conf,
+                           const ExperimentParameters &param)
     : sig_(param.gaussian_sigma),
       rc_(conf.take({"Gaussian_Cutoff"}, 2.2)),
       rr_(conf.take({"Spatial_Averaging_Radius"}, 1.86)),
@@ -59,7 +60,6 @@ PauliBlocker::~PauliBlocker() {
 
 float PauliBlocker::phasespace_dens(const ThreeVector r, const ThreeVector p,
                         const Particles &particles, const PdgCode pdg) const {
-
   float f = 0.0;
   float rdist_sqr, pdist_sqr;
   size_t index;
@@ -89,7 +89,7 @@ float PauliBlocker::phasespace_dens(const ThreeVector r, const ThreeVector p,
     }
   }
   return f / ntest_;
-};
+}
 
 void PauliBlocker::init_weights_analytical() {
   const auto &log = logger<LogArea::PauliBlocking>();
@@ -133,7 +133,7 @@ void PauliBlocker::init_weights_analytical() {
     }
     integral *= 2*pi / std::pow(2*pi*sig_*sig_, 1.5f);
     weights_[k] = integral / norm / phase_volume;
-    log.debug("Analytical weights[",k,"] = ", weights_[k]);
+    log.debug("Analytical weights[", k, "] = ", weights_[k]);
   }
 }
 
