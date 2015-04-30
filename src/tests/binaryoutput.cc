@@ -200,8 +200,8 @@ TEST(particles_format) {
 
 
   /* Create an instance of binary output */
-  std::unique_ptr<BinaryOutputCollisions> bin_output =
-            make_unique<BinaryOutputCollisions>(testoutputpath, std::move(op));
+  std::unique_ptr<BinaryOutputParticles> bin_output =
+            make_unique<BinaryOutputParticles>(testoutputpath, std::move(op));
   VERIFY(bf::exists(testoutputpath / "particles_binary.bin"));
 
   /* create two smashon particles */
