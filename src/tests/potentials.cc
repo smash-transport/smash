@@ -13,6 +13,7 @@
 
 #include "../include/collidermodus.h"
 #include "../include/configuration.h"
+#include "../include/cxx14compat.h"
 #include "../include/experiment.h"
 #include "../include/modusdefault.h"
 #include "../include/nucleus.h"
@@ -67,7 +68,7 @@ TEST(potential_gradient) {
   conf["Potentials"]["Skyrme"]["Skyrme_B"] = 156.4;
   conf["Potentials"]["Skyrme"]["Skyrme_Tau"] = 1.35;
   ExperimentParameters param{{0.f, 1.f}, 1.f, 1, 1.0};
-  Potentials* pot = new Potentials(conf["Potentials"], param);
+  std::unique_ptr<Potentials> pot = make_unique<Potentials>(conf["Potentials"], param);
 
   ThreeVector num_grad, analit_grad;
   r = ThreeVector(0.2, 0.0, 0.0);
@@ -124,7 +125,7 @@ TEST(nucleus_potential_profile) {
   conf["Potentials"]["Skyrme"]["Skyrme_A"] = -209.2;
   conf["Potentials"]["Skyrme"]["Skyrme_B"] = 156.4;
   conf["Potentials"]["Skyrme"]["Skyrme_Tau"] = 1.35;
-  Potentials* pot = new Potentials(conf["Potentials"], param);
+  std::unique_ptr<Potentials> pot = make_unique<Potentials>(conf["Potentials"], param);
 
   // Write potential XY map in a vtk output
   ThreeVector r;
@@ -207,7 +208,7 @@ TEST(propagation_in_test_potential) {
   // Create dummy outputs and our test potential
   const double U0 = 0.5;
   const double d = 4.0;
-  Dummy_Pot* pot = new Dummy_Pot(conf["Potentials"], param, U0, d);
+  std::unique_ptr<Dummy_Pot> pot = make_unique<Dummy_Pot>(conf["Potentials"], param, U0, d);
 
   // Create one particle
   ParticleData part = create_proton();

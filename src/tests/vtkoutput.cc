@@ -65,7 +65,7 @@ TEST(outputfile) {
   cfgfile.close();
   Configuration&& op{testoutputpath, configfilename};
   /* Create output object */
-  VtkOutput *vtkop = new VtkOutput(testoutputpath, std::move(op));
+  std::unique_ptr<VtkOutput> vtkop = make_unique<VtkOutput>(testoutputpath, std::move(op));
   int event_id = 0;
   /* Initial output */
   vtkop->at_eventstart(particles, event_id);
