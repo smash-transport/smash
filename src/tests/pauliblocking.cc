@@ -8,8 +8,10 @@
  */
 
 #include "unittest.h"
+
 #include "../include/boxmodus.h"
 #include "../include/configuration.h"
+#include "../include/cxx14compat.h"
 #include "../include/experiment.h"
 #include "../include/nucleus.h"
 #include "../include/pauliblocking.h"
@@ -37,7 +39,7 @@ TEST(phase_space_density) {
   conf["Collision_Term"]["Pauli_Blocking"]["Gaussian_Cutoff"] = 2.2;
 
   ExperimentParameters param{{0.f, 1.f}, 1.f, 1, 1.0};
-  PauliBlocker *pb = new PauliBlocker(conf["Collision_Term"]["Pauli_Blocking"], param);
+  std::unique_ptr<PauliBlocker> pb = make_unique<PauliBlocker>(conf["Collision_Term"]["Pauli_Blocking"], param);
   Particles part;
   PdgCode pdg = 0x2112;
   ParticleData one_particle{ParticleType::find(pdg)};
@@ -99,7 +101,7 @@ TEST(phase_space_density_nucleus) {
   Au.copy_particles(&part_Au);
 
   ExperimentParameters param{{0.f, 1.f}, 1.f, Ntest, 1.0};
-  PauliBlocker *pb = new PauliBlocker(conf["Collision_Term"]["Pauli_Blocking"], param);
+  std::unique_ptr<PauliBlocker> pb = make_unique<PauliBlocker>(conf["Collision_Term"]["Pauli_Blocking"], param);
 
   ThreeVector r(0.0, 0.0, 0.0);
   ThreeVector p;

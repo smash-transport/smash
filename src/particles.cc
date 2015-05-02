@@ -43,6 +43,7 @@ void Particles::increase_capacity(unsigned new_capacity) {
 
 inline void Particles::copy_in(ParticleData &to, const ParticleData &from) {
   to.id_ = ++id_max_;
+  to.id_process_ = from.id_process_;
   to.type_ = from.type_;
   to.momentum_ = from.momentum_;
   to.position_ = from.position_;
