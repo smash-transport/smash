@@ -136,11 +136,12 @@ float TwoBodyDecayStable::width(float m0, float G0, float m) const {
                std::abs(particle_types_[1]->pdgcode().code()) == 0x13) {
       const float ml = particle_types_[0]->mass(); // lepton mass
       return (G0/m0)*(std::pow(m0,4.0)/std::pow(m,3.0))*
-             std::sqrt(1.0-(2.0*std::pow(ml,2.0)/std::pow(m,2.0)))*
-             (1.0+(4.0*std::pow(ml,2.0)/std::pow(m,2.0)));
-    } else
+             std::sqrt(1.0-(4.0*std::pow(ml,2.0)/std::pow(m,2.0)))*
+             (1.0+(2.0*std::pow(ml,2.0)/std::pow(m,2.0)));
+    } else {
     // hadronic decay
       return G0 * rho(m) / rho(m0);
+    }
   } else
     return 0;
 }
