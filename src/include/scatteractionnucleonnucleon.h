@@ -42,6 +42,14 @@ class ScatterActionNucleonNucleon : public ScatterActionBaryonBaryon {
    * anisotropic angular distributions. */
   virtual void elastic_scattering() override;
 
+  /**
+   * Sample final state momenta (and masses) in an inelastic 2->2 collision,
+   * possibly using anisotropic angular distributions.
+   *
+   * \throws InvalidResonanceFormation
+   */
+  virtual void sample_cms_momenta() override;
+
  private:
   /**
    * Calculate cross sections for single-resonance production from

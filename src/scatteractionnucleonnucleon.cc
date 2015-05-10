@@ -241,4 +241,76 @@ CollisionBranchList ScatterActionNucleonNucleon::nuc_nuc_to_nuc_res(
 }
 
 
+void ScatterActionNucleonNucleon::sample_cms_momenta() {
+  const auto &log = logger<LogArea::ScatterAction>();
+  /* This function only operates on 2-particle final states. */
+  assert(outgoing_particles_.size() == 2);
+
+  ParticleData *p_a = &outgoing_particles_[0];
+  ParticleData *p_b = &outgoing_particles_[1];
+
+  const ParticleType &t_a = p_a->type();
+  const ParticleType &t_b = p_b->type();
+
+  double mass_a = t_a.mass();
+  double mass_b = t_b.mass();
+
+  const double cms_energy = sqrt_s();
+
+  if (cms_energy < t_a.minimum_mass() + t_b.minimum_mass()) {
+    throw InvalidResonanceFormation("resonance_formation: not enough energy! " +
+      std::to_string(cms_energy) + " " + std::to_string(t_a.minimum_mass()) +
+      " " + std::to_string(t_b.minimum_mass()) + " " +
+      p_a->pdgcode().string() + " " + p_b->pdgcode().string());
+  }
+
+  /* If one of the particles is a resonance, sample its mass. */
+  /* TODO: Other particle assumed stable! */
+  if (!t_a.is_stable()) {
+    mass_a = sample_resonance_mass(t_a, t_b, cms_energy);
+  } else if (!t_b.is_stable()) {
+    mass_b = sample_resonance_mass(t_b, t_a, cms_energy);
+  }
+
+  double momentum_radial = pCM(cms_energy, mass_a, mass_b);
+  if (!(momentum_radial > 0.0)) {
+    log.warn("Particle: ", t_a.pdgcode(),
+             " radial momentum: ", momentum_radial);
+    log.warn("Etot: ", cms_energy, " m_a: ", mass_a, " m_b: ", mass_b);
+  }
+
+  Angles phitheta;
+  if (t_a.pdgcode().iso_multiplet()==0x1114 &&
+      t_b.pdgcode().iso_multiplet()==0x1112) {
+    /* NN->NDelta: Sample scattering angles in center-of-mass frame from an
+     * anisotropic angular distribution, using the same distribution as for
+     * elastic pp scattering, as suggested in:
+     * J. Cugnon et al., Nucl. Instr. and Meth. in Phys. Res. B 111 (1996) 215-220. */
+    double plab = plab_from_s_NN(mandelstam_s());
+    double bb = std::max(Cugnon_bpp(plab), really_small);
+    double t, t_max = -4.*momentum_radial*momentum_radial;
+    if (Random::canonical() <= 0.5) {
+      t = Random::expo(bb, 0., t_max);
+    } else {
+      t = t_max - Random::expo(bb, 0., t_max);
+    }
+    phitheta = Angles(2.*M_PI*Random::canonical(), 1. - 2.*t/t_max);
+  } else {
+    /* isotropic angular distribution */
+    phitheta.distribute_isotropically();
+  }
+  
+  // 3-momentum of first incoming particle in center-of-mass frame
+  ThreeVector pscatt = phitheta.threevec();
+  ThreeVector pcm = incoming_particles_[0].momentum().
+                    LorentzBoost(beta_cm()).threevec();
+  pscatt.rotate_to(pcm);
+
+  p_a->set_4momentum(mass_a,  pscatt * momentum_radial);
+  p_b->set_4momentum(mass_b, -pscatt * momentum_radial);
+
+  log.debug("p_a: ", *p_a, "\np_b: ", *p_b);
+}
+
+
 }  // namespace Smash

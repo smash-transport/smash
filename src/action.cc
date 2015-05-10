@@ -123,8 +123,7 @@ void Action::sample_cms_momenta() {
              " radial momentum: ", momentum_radial);
     log.warn("Etot: ", cms_energy, " m_a: ", mass_a, " m_b: ", mass_b);
   }
-  /* TODO : Angles should be sampled from differential cross section
-   * of this process. */
+  /* Here we assume an isotropic angular distribution. */
   Angles phitheta;
   phitheta.distribute_isotropically();
 

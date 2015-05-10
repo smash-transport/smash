@@ -206,11 +206,12 @@ class Action {
   }
 
   /**
-   * Sample final state momenta (and masses) in general X->2 process.
+   * Sample final state momenta (and masses) in general X->2 processes,
+   * using an isotropical angular distribution.
    *
    * \throws InvalidResonanceFormation
    */
-  void sample_cms_momenta();
+  virtual void sample_cms_momenta();
 
   /**
    * \ingroup logging
