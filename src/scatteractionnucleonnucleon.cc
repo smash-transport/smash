@@ -280,8 +280,8 @@ void ScatterActionNucleonNucleon::sample_cms_momenta() {
   }
 
   Angles phitheta;
-  if (t_a.pdgcode().iso_multiplet()==0x1114 &&
-      t_b.pdgcode().iso_multiplet()==0x1112) {
+  if (t_a.pdgcode().iso_multiplet() == 0x1114 &&
+      t_b.pdgcode().iso_multiplet() == 0x1112) {
     /* NN->NDelta: Sample scattering angles in center-of-mass frame from an
      * anisotropic angular distribution, using the same distribution as for
      * elastic pp scattering, as suggested in:
@@ -299,7 +299,7 @@ void ScatterActionNucleonNucleon::sample_cms_momenta() {
     /* isotropic angular distribution */
     phitheta.distribute_isotropically();
   }
-  
+
   // 3-momentum of first incoming particle in center-of-mass frame
   ThreeVector pscatt = phitheta.threevec();
   ThreeVector pcm = incoming_particles_[0].momentum().
