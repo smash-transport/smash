@@ -30,7 +30,7 @@ class ScatterAction : public Action {
    * \param[in] time_of_execution time at which the action is supposed to take place
    */
   ScatterAction(const ParticleData &in_part1, const ParticleData &in_part2,
-                float time_of_execution);
+                float time_of_execution, bool isotropic = false);
 
   /** Add a new collision channel. */
   void add_collision(CollisionBranchPtr p);
@@ -173,6 +173,9 @@ class ScatterAction : public Action {
 
   /** Total cross section */
   float total_cross_section_;
+
+  /** Do this collision isotropically. */
+  bool isotropic_ = false;
 
  private:
   /** Check if the scattering is elastic. */

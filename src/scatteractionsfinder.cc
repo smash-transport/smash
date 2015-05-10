@@ -28,16 +28,15 @@ namespace Smash {
 * \page input_collision_term_ Collision_Term
 * \key Sigma (float, optional, default = 0.0 [mb]) \n
 * Elastic cross section parameter
+* \key Isotropic (bool, optional, default = false) \n
+* Do all collisions isotropically
 */
 
 ScatterActionsFinder::ScatterActionsFinder(
     Configuration config, const ExperimentParameters &parameters)
-    : testparticles_(parameters.testparticles) {
-  /* Read in parameter for elastic cross section. */
-  if (config.has_value({"Collision_Term", "Sigma"})) {
-    elastic_parameter_ =  config.take({"Collision_Term", "Sigma"});
-  }
-}
+    : elastic_parameter_(config.take({"Collision_Term", "Sigma"}, 0.f)),
+      testparticles_(parameters.testparticles),
+      isotropic_(config.take({"Collision_Term", "Isotropic"}, false)) {}
 
 ScatterActionsFinder::ScatterActionsFinder(
     float elastic_parameter, int testparticles)
@@ -72,27 +71,26 @@ double ScatterActionsFinder::collision_time(const ParticleData &p1,
 }
 
 
-/* Construct a ScatterAction object,
- * based on the types of the incoming particles. */
-static ScatterActionPtr construct_scatter_action(const ParticleData &data_a,
-                                                 const ParticleData &data_b,
-                                                 float time_until_collision) {
+ScatterActionPtr ScatterActionsFinder::construct_scatter_action(
+                                            const ParticleData &data_a,
+                                            const ParticleData &data_b,
+                                            float time_until_collision) const {
   ScatterActionPtr act;
   if (data_a.is_baryon() && data_b.is_baryon()) {
     if (data_a.pdgcode().iso_multiplet() == 0x1112 &&
         data_b.pdgcode().iso_multiplet() == 0x1112) {
       act = make_unique<ScatterActionNucleonNucleon>(data_a, data_b,
-                                                     time_until_collision);
+                                              time_until_collision, isotropic_);
     } else {
       act = make_unique<ScatterActionBaryonBaryon>(data_a, data_b,
-                                                   time_until_collision);
+                                              time_until_collision, isotropic_);
     }
   } else if (data_a.is_baryon() || data_b.is_baryon()) {
     act = make_unique<ScatterActionBaryonMeson>(data_a, data_b,
-                                                time_until_collision);
+                                              time_until_collision, isotropic_);
   } else {
     act = make_unique<ScatterActionMesonMeson>(data_a, data_b,
-                                               time_until_collision);
+                                              time_until_collision, isotropic_);
   }
   return std::move(act);
 }

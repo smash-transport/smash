@@ -91,30 +91,35 @@ void ScatterActionNucleonNucleon::elastic_scattering() {
   /* Determine absolute momentum in center-of-mass frame. */
   const double momentum_radial = cm_momentum();
 
-  /* Choose angular distribution according to Cugnon parametrization, see:
-   * J. Cugnon et al., Nucl. Instr. and Meth. in Phys. Res. B 111 (1996) 215-220. */
-  double bb, a, plab = plab_from_s_NN(mandelstam_s());
-  if (incoming_particles_[0].type().charge() +
-      incoming_particles_[1].type().charge() == 1) {
-    // pn
-    bb = std::max(Cugnon_bnp(plab), really_small);
-    a = (plab < 0.8) ? 1. : 0.64/(plab*plab);
+  Angles phitheta;
+  if (isotropic_) {
+    phitheta.distribute_isotropically();
   } else {
-    // pp or nn
-    bb = std::max(Cugnon_bpp(plab), really_small);
-    a = 1.;
-  }
-  double t, t_max = -4.*momentum_radial*momentum_radial;
-  if (Random::canonical() <= 1./(1.+a)) {
-    t = Random::expo(bb, 0., t_max);
-  } else {
-    t = t_max - Random::expo(bb, 0., t_max);
+    /* Choose angular distribution according to Cugnon parametrization, see:
+    * J. Cugnon et al., Nucl. Instr. and Meth. in Phys. Res. B 111 (1996) 215-220. */
+    double bb, a, plab = plab_from_s_NN(mandelstam_s());
+    if (incoming_particles_[0].type().charge() +
+        incoming_particles_[1].type().charge() == 1) {
+      // pn
+      bb = std::max(Cugnon_bnp(plab), really_small);
+      a = (plab < 0.8) ? 1. : 0.64/(plab*plab);
+    } else {
+      // pp or nn
+      bb = std::max(Cugnon_bpp(plab), really_small);
+      a = 1.;
+    }
+    double t, t_max = -4.*momentum_radial*momentum_radial;
+    if (Random::canonical() <= 1./(1.+a)) {
+      t = Random::expo(bb, 0., t_max);
+    } else {
+      t = t_max - Random::expo(bb, 0., t_max);
+    }
+
+    // determine scattering angles in center-of-mass frame
+    phitheta = Angles(2.*M_PI*Random::canonical(), 1. - 2.*t/t_max);
   }
 
-  // determine scattering angles in center-of-mass frame
-  ThreeVector pscatt = Angles(2.*M_PI*Random::canonical(), 1. - 2.*t/t_max).
-                       threevec();
-
+  ThreeVector pscatt = phitheta.threevec();
   // 3-momentum of first incoming particle in center-of-mass frame
   ThreeVector pcm = incoming_particles_[0].momentum().
                     LorentzBoost(beta_cm()).threevec();
@@ -281,7 +286,7 @@ void ScatterActionNucleonNucleon::sample_cms_momenta() {
 
   Angles phitheta;
   if (t_a.pdgcode().iso_multiplet() == 0x1114 &&
-      t_b.pdgcode().iso_multiplet() == 0x1112) {
+      t_b.pdgcode().iso_multiplet() == 0x1112 && !isotropic_) {
     /* NN->NDelta: Sample scattering angles in center-of-mass frame from an
      * anisotropic angular distribution, using the same distribution as for
      * elastic pp scattering, as suggested in:
@@ -300,8 +305,8 @@ void ScatterActionNucleonNucleon::sample_cms_momenta() {
     phitheta.distribute_isotropically();
   }
 
-  // 3-momentum of first incoming particle in center-of-mass frame
   ThreeVector pscatt = phitheta.threevec();
+  // 3-momentum of first incoming particle in center-of-mass frame
   ThreeVector pcm = incoming_particles_[0].momentum().
                     LorentzBoost(beta_cm()).threevec();
   pscatt.rotate_to(pcm);
