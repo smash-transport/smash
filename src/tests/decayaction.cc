@@ -101,10 +101,11 @@ TEST(create_decayaction) {
         tmp1 = 2 * m0_A1 / m_H;
         tmp2 = 2 * m0_A1 / m0_H;
         width_expected = G0_H * std::sqrt((1.f - tmp1*tmp1)/(1.f - tmp2*tmp2));
-        COMPARE_RELATIVE_ERROR(width, width_expected, 1.e-6);
+        COMPARE_RELATIVE_ERROR(width, width_expected, 1.e-7);
         break;
       // three-body decay H -> A2 + A2 + A1
       case 2:
+        COMPARE_RELATIVE_ERROR(width, G0_H, 1.e-7);
         break;
       // Should never get here
       default: VERIFY(0 == 1);
