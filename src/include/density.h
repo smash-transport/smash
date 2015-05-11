@@ -11,6 +11,7 @@
 
 #include <utility>
 #include <vector>
+#include <iostream>
 
 #include "forwarddeclarations.h"
 #include "fourvector.h"
@@ -24,7 +25,12 @@ namespace Smash {
    *  The baryon density is necessary for the Skyrme potential.
    *  For the symmetry potential one needs to know the isospin density.
    */
-  enum Density_type {baryon_density = 0, baryonic_isospin_density = 1};
+  enum class DensityType {
+    baryon = 0,
+    baryonic_isospin = 1,
+  };
+
+  std::ostream& operator<<(std::ostream& os, DensityType dt);
 
   /** A small check if particle PDG code belongs to a given type.
    *  Currently checks for protons, neutrons and baryons.
@@ -32,7 +38,7 @@ namespace Smash {
    *  \param[in] pdg PDG code of particle to be tested
    *  \param[in] dens_type density type: baryon, proton, neutron
    */
-  bool particle_in_denstype(const PdgCode pdg, Density_type dens_type);
+  bool particle_in_denstype(const PdgCode pdg, DensityType dens_type);
 
   /** Calculates 4-current in the computational frame.
    *  \f[j^{\mu} = (\sqrt{2\pi} \sigma )^{-3} \sum_{i=1}^N C_i u^{\mu}_i
@@ -58,10 +64,10 @@ namespace Smash {
    * \fpPrecision Why \c double?
    */
   FourVector four_current(const ThreeVector &r, const ParticleList &plist,
-                          double gs_sigma, Density_type dens_type, int ntest);
+                          double gs_sigma, DensityType dens_type, int ntest);
   /// convenience overload of the above
   FourVector four_current(const ThreeVector &r, const Particles &particles,
-                          double gs_sigma, Density_type dens_type, int ntest);
+                          double gs_sigma, DensityType dens_type, int ntest);
 
   /** Calculates the gradient of Eckart rest frame density with
    *  respect to computational frame coordinates using analytical formula.
@@ -75,7 +81,7 @@ namespace Smash {
    */
   std::pair<double, ThreeVector> rho_eckart_gradient(const ThreeVector &r,
                                const ParticleList &plist, double gs_sigma,
-                               Density_type dens_type, int ntest);
+                               DensityType dens_type, int ntest);
 }  // namespace Smash
 
 #endif  // SRC_INCLUDE_DENSITY_H_

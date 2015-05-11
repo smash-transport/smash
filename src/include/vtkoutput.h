@@ -43,7 +43,7 @@ class VtkOutput : public OutputInterface {
    * \fpPrecision Why \c double?
    */
   void vtk_density_map(const char * file_name, const ParticleList &plist,
-                      double gs_sigma, Density_type dens_type, int ntest,
+                      double gs_sigma, DensityType dens_type, int ntest,
                       int nx, int ny, int nz, double dx, double dy, double dz);
 
 

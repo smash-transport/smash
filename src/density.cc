@@ -14,10 +14,10 @@
 
 namespace Smash {
 
-bool particle_in_denstype(const PdgCode pdg, Density_type dens_type) {
+bool particle_in_denstype(const PdgCode pdg, DensityType dens_type) {
   switch (dens_type) {
-  case baryon_density:
-  case baryonic_isospin_density:
+  case DensityType::baryon:
+  case DensityType::baryonic_isospin:
     return pdg.is_baryon();
   default:
     return false;
@@ -26,7 +26,7 @@ bool particle_in_denstype(const PdgCode pdg, Density_type dens_type) {
 
 template <typename /*ParticlesContainer*/ T>
 static FourVector four_current_impl(const ThreeVector &r, const T &plist,
-                                    double gs_sigma, Density_type dens_type,
+                                    double gs_sigma, DensityType dens_type,
                                     int ntest) {
   FourVector jmu(0.0, 0.0, 0.0, 0.0);
 
@@ -54,10 +54,10 @@ static FourVector four_current_impl(const ThreeVector &r, const T &plist,
 
     tmp = std::exp(- 0.5 * drr_sqr / (gs_sigma * gs_sigma)) / inv_gammai;
     switch (dens_type) {
-    case baryon_density:
+    case DensityType::baryon:
       tmp *= p.pdgcode().baryon_number();
       break;
-    case baryonic_isospin_density:
+    case DensityType::baryonic_isospin:
       tmp *= p.pdgcode().isospin3_rel();
       break;
     default:
@@ -74,17 +74,17 @@ static FourVector four_current_impl(const ThreeVector &r, const T &plist,
   return jmu / ntest;
 }
 FourVector four_current(const ThreeVector &r, const ParticleList &plist,
-                        double gs_sigma, Density_type dens_type, int ntest) {
+                        double gs_sigma, DensityType dens_type, int ntest) {
   return four_current_impl(r, plist, gs_sigma, dens_type, ntest);
 }
 FourVector four_current(const ThreeVector &r, const Particles &plist,
-                        double gs_sigma, Density_type dens_type, int ntest) {
+                        double gs_sigma, DensityType dens_type, int ntest) {
   return four_current_impl(r, plist, gs_sigma, dens_type, ntest);
 }
 
 std::pair<double, ThreeVector> rho_eckart_gradient(const ThreeVector &r,
                                 const ParticleList &plist, double gs_sigma,
-                                Density_type dens_type, int ntest) {
+                                DensityType dens_type, int ntest) {
   const auto &log = logger<LogArea::Density>();
 
   // baryon four-current in computational frame
@@ -119,10 +119,10 @@ std::pair<double, ThreeVector> rho_eckart_gradient(const ThreeVector &r,
 
     double tmp2 = std::exp(-0.5 * drr_sqr / (gs_sigma*gs_sigma)) / inv_gammai;
     switch (dens_type) {
-    case baryon_density:
+    case DensityType::baryon:
       tmp2 *= p.pdgcode().baryon_number();
       break;
-    case baryonic_isospin_density:
+    case DensityType::baryonic_isospin:
       tmp2 *= p.pdgcode().isospin3_rel();
       break;
     default:
@@ -167,6 +167,20 @@ std::pair<double, ThreeVector> rho_eckart_gradient(const ThreeVector &r,
   } else {
     return std::make_pair(0.0, ThreeVector(0.0, 0.0, 0.0));
   }
+}
+
+std::ostream& operator<<(std::ostream& os, DensityType dens_type) {
+  switch(dens_type) {
+    case DensityType::baryon:
+      os << "baryon density";
+      break;
+    case DensityType::baryonic_isospin:
+      os << "baryonic isospin density";
+      break;
+    default:
+      os.setstate(std::ios_base::failbit);
+  }
+  return os;
 }
 
 }  // namespace Smash

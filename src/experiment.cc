@@ -232,11 +232,12 @@ Experiment<Modus>::Experiment(Configuration config)
     potentials_ = make_unique<Potentials>(config["Potentials"], parameters_);
   }
 
-  dens_type_ = static_cast<Density_type>(
+  dens_type_ = static_cast<DensityType>(
               config.take({"Output", "Density", "Density_Type"}, 0));
-  if (dens_type_ < baryon_density || dens_type_ > baryonic_isospin_density) {
+  if (dens_type_ < DensityType::baryon
+      || dens_type_ > DensityType::baryonic_isospin) {
     log.error() << "Unknown Density_Type specified. Taking default.";
-    dens_type_ = baryon_density;
+    dens_type_ = DensityType::baryon;
   }
   log.info() << "Density type written to headers: " << dens_type_;
 }

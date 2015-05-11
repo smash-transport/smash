@@ -60,7 +60,7 @@ TEST(density_value) {
   ThreeVector r;
   double sigma = 1.0;
   FourVector jmu;
-  Density_type bar_dens = baryon_density;
+  DensityType bar_dens = DensityType::baryon;
 
   r = ThreeVector(1.0, 0.0, 0.0);
   jmu = four_current(r, P, sigma, bar_dens, 1);
@@ -96,7 +96,7 @@ TEST(density_gradient) {
   double sigma = 1.0;
   ThreeVector r,dr;
   FourVector jmu;
-  Density_type dtype = baryon_density;
+  DensityType dtype = DensityType::baryon;
   double rho;
 
   ThreeVector num_grad, analit_grad;
@@ -182,7 +182,7 @@ TEST(density_eckart_frame) {
   int nz = 20;
   double sigma = 0.8;
   ThreeVector r;
-  Density_type bar_dens = baryon;
+  DensityType bar_dens = baryon;
   ParticleList plist;
 
   for (auto it = 0; it < 30; it++) {
@@ -217,7 +217,7 @@ TEST(nucleus_density) {
   ParticleList plist = p.copy_to_vector();
 
   // write density profile to file, time-consuming!
-  Density_type dens_type = baryon_density;
+  DensityType dens_type = DensityType::baryon;
   double sigma = 0.5; // fm
 //  vtk_density_map("lead_density.vtk", plist, sigma, dens_type, Ntest,
 //                     20, 20, 20, 0.5, 0.5, 0.5);
