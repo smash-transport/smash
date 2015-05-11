@@ -16,6 +16,8 @@ namespace Smash {
 
 float density_factor(const PdgCode pdg, DensityType dens_type) {
   switch (dens_type) {
+    case DensityType::particle:
+      return 1.f;
     case DensityType::baryon:
       return static_cast<float>(pdg.baryon_number());
     case DensityType::baryonic_isospin:
@@ -23,6 +25,18 @@ float density_factor(const PdgCode pdg, DensityType dens_type) {
         return pdg.isospin3_rel();
       } else {
         return 0.f;
+      }
+    case DensityType::pion:
+      {
+        const auto pdg_code = pdg.code();
+        if (pdg_code == 0x111 // pi0
+            || pdg_code == 0x211 // pi+
+            || pdg_code == -0x211 // pi-
+          ) {
+          return 1.f;
+        } else {
+          return 0.f;
+        }
       }
     default:
       return 0.f;
@@ -160,11 +174,17 @@ std::pair<double, ThreeVector> rho_eckart_gradient(const ThreeVector &r,
 
 std::ostream& operator<<(std::ostream& os, DensityType dens_type) {
   switch(dens_type) {
+    case DensityType::particle:
+      os << "particle density";
+      break;
     case DensityType::baryon:
       os << "baryon density";
       break;
     case DensityType::baryonic_isospin:
       os << "baryonic isospin density";
+      break;
+    case DensityType::pion:
+      os << "pion density";
       break;
     default:
       os.setstate(std::ios_base::failbit);

@@ -234,8 +234,7 @@ Experiment<Modus>::Experiment(Configuration config)
 
   dens_type_ = static_cast<DensityType>(
               config.take({"Output", "Density", "Density_Type"}, 0));
-  if (dens_type_ < DensityType::baryon
-      || dens_type_ > DensityType::baryonic_isospin) {
+  if (dens_type_ < DensityType::particle || dens_type_ > DensityType::pion) {
     log.error() << "Unknown Density_Type specified. Taking default.";
     dens_type_ = DensityType::baryon;
   }

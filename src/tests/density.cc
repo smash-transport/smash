@@ -48,6 +48,37 @@ static ParticleData create_antiproton(int id = -1) {
 }
 */
 
+TEST(density_type) {
+  //pions
+  PdgCode pi0("111");
+  PdgCode pi_plus("211");
+  PdgCode pi_minus("-211");
+
+  // verify that pions are recognized as pions
+  COMPARE(density_factor(pi0, DensityType::pion), 1.f);
+  COMPARE(density_factor(pi_plus, DensityType::pion), 1.f);
+  COMPARE(density_factor(pi_minus, DensityType::pion), 1.f);
+
+  // verify that pions are not recognized as baryons
+  COMPARE(density_factor(pi0, DensityType::baryon), 0.f);
+
+  // baryons
+  PdgCode proton("2212");
+
+  // verify that protons are recognized as baryons
+  COMPARE(density_factor(proton, DensityType::baryon), 1.f);
+
+  // verify that protons are not recognized as pions
+  COMPARE(density_factor(proton, DensityType::pion), 0.f);
+
+  // verify that all are recognized as particles
+  VERIFY(density_factor(proton,   DensityType::particle) == 1.f
+      && density_factor(pi0,      DensityType::particle) == 1.f
+      && density_factor(pi_plus,  DensityType::particle) == 1.f
+      && density_factor(pi_minus, DensityType::particle) == 1.f
+      );
+}
+
 // create one particle moving along x axis and check density in comp. frame
 // check if density in the comp. frame gets contracted as expected
 TEST(density_value) {

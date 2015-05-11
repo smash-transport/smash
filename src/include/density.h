@@ -26,8 +26,10 @@ namespace Smash {
    *  For the symmetry potential one needs to know the isospin density.
    */
   enum class DensityType {
-    baryon = 0,
-    baryonic_isospin = 1,
+    particle = 0,
+    baryon = 1,
+    baryonic_isospin = 2,
+    pion = 3,
   };
 
   std::ostream& operator<<(std::ostream& os, DensityType dt);
