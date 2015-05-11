@@ -150,12 +150,23 @@ typename Container::const_iterator find(const Container &c, const T &value) {
   return std::find(std::begin(c), std::end(c), value);
 }
 
+namespace std {
+template <typename T, typename U>
+std::ostream &operator<<(std::ostream &s,
+                         const std::vector<std::pair<T, U>> &l) {
+  for (auto &&p : l) {
+    s << "\n<" << p.first << ", " << p.second << '>';
+  }
+  return s;
+}
+}  // namespace std
+
 TEST(periodic_grid) {
   using Test::Position;
   using Test::Momentum;
   for (const int testparticles : {1, 5}) {
-    for (const int nparticles : {124, 125}) {
-      //const double cellsize = GridBase::min_cell_length(testparticles);
+    for (const int nparticles : {1, 5, 20, 75, 124, 125}) {
+      const double cellsize = GridBase::min_cell_length(testparticles);
       ParticleList list;
       auto random_value = Random::make_uniform_distribution(0., 9.99);
       for (auto n = nparticles; n; --n) {
@@ -170,36 +181,97 @@ TEST(periodic_grid) {
                     std::array<float, 3>{10, 10, 10}),
           ParticleList(list),  // make a temp copy which gets moved
           testparticles);
+
+      // stores the neighbor pairs found via the grid:
+      std::vector<std::pair<ParticleData, ParticleData>> neighbor_pairs;
+
       grid.iterate_cells([&](
           const ParticleList &search,
           const std::vector<const ParticleList *> &neighborLists) {
+        // combine all neighbor particles into a single list
+        ParticleList combinedNeighbors;
+        for (auto &&neighbors : neighborLists) {
+          if (neighbors) {
+            for (auto &&n : *neighbors) {
+              combinedNeighbors.push_back(n);
+            }
+          }
+        }
+
+        // for each particle in neighborLists, find the same particle in list
+        auto &&compareDiff = [](double d) {
+          if (d < 0.) {
+            FUZZY_COMPARE(d, -10.);
+          } else if (d > 0.) {
+            FUZZY_COMPARE(d, 10.);
+          } else {
+            COMPARE(d, 0.);
+          }
+        };
+        for (const ParticleData &p : combinedNeighbors) {
+          const auto it = find(list, p);
+          VERIFY(it != list.end());
+          COMPARE(it->id(), p.id());
+          if (it->position() != p.position()) {
+            // then the cell was wrapped around
+            const auto diff = it->position() - p.position();
+            COMPARE(diff[0], 0.);
+            compareDiff(diff[1]);
+            compareDiff(diff[2]);
+            compareDiff(diff[3]);
+            VERIFY(diff != FourVector(0, 0, 0, 0));
+          }
+        }
+
         // for each particle in search, find the same particle in list
         for (const ParticleData &p : search) {
           const auto it = find(list, p);
           VERIFY(it != list.end());
           COMPARE(it->id(), p.id());
           COMPARE(it->position(), p.position());
+          combinedNeighbors.push_back(p);
         }
-        // for each particle in neighborLists, find the same particle in list
-        for (auto &&neighbors : neighborLists) {
-          if (neighbors) {
-            for (const ParticleData &p : *neighbors) {
-              const auto it = find(list, p);
-              VERIFY(it != list.end());
-              COMPARE(it->id(), p.id());
-              if (it->position() != p.position()) {
-                // then the cell was wrapped around
-                const auto diff = it->position() - p.position();
-                COMPARE(diff[0], 0.);
-                VERIFY(diff[1] == 10. || diff[1] == 0. || diff[1] == -10.);
-                VERIFY(diff[2] == 10. || diff[2] == 0. || diff[2] == -10.);
-                VERIFY(diff[3] == 10. || diff[3] == 0. || diff[3] == -10.);
-                VERIFY(diff != FourVector(0, 0, 0, 0));
+
+        // for each particle in search, search through the complete list to find
+        // those closer than 2.5fm
+        for (const ParticleData &p : search) {
+          for (const ParticleData &q : combinedNeighbors) {
+            if (p == q) {
+              continue;
+            }
+            const auto sqrDistance =
+                (p.position().threevec() - q.position().threevec()).sqr();
+            if (sqrDistance <= cellsize * cellsize) {
+              if (p.id() < q.id()) {
+                neighbor_pairs.emplace_back(p, q);
+              } else {
+                neighbor_pairs.emplace_back(q, p);
               }
             }
           }
         }
       });
+
+      std::sort(neighbor_pairs.begin(), neighbor_pairs.end());
+      for (const ParticleData &p : list) {
+        for (const ParticleData &q : list) {
+          if (p == q) {
+            continue;
+          }
+          const auto sqrDistance =
+              (p.position().threevec() - q.position().threevec()).sqr();
+          if (sqrDistance <= cellsize * cellsize) {
+            // (p,q) must be in neighbor_pairs
+            auto pair =
+                p.id() > q.id() ? std::make_pair(q, p) : std::make_pair(p, q);
+            const auto it = find(neighbor_pairs, pair);
+            VERIFY(it != neighbor_pairs.end())
+                << "\ntestparticles: " << testparticles
+                << "\nnparticles: " << nparticles << "\np: " << p
+                << "\nq: " << q;// << "\n" << neighbor_pairs;
+          }
+        }
+      }
     }
   }
 }
