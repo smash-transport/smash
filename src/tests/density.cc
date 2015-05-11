@@ -14,6 +14,7 @@
 #include <boost/filesystem/fstream.hpp>
 
 #include "../include/configuration.h"
+#include "../include/cxx14compat.h"
 #include "../include/density.h"
 #include "../include/densityoutput.h"
 #include "../include/experiment.h"
@@ -225,7 +226,7 @@ TEST(nucleus_density) {
   const int npoints = 100;
 
   Configuration&& conf{testoutputpath, configfilename};
-  DensityOutput *out = new DensityOutput(testoutputpath, std::move(conf));
+  std::unique_ptr<DensityOutput> out = make_unique<DensityOutput>(testoutputpath, std::move(conf));
   out->density_along_line("lead_densityX.dat", plist, sigma, dens_type,
                           Ntest, lstart, lend, npoints);
 

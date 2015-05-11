@@ -282,14 +282,14 @@ static std::string format_measurements(const Particles &particles,
 
   std::ostringstream ss;
   ss << field<5> << time
-     << field<12,3> << difference.momentum().x0()
-     << field<12,3> << difference.momentum().abs3()
-     << field<12,3> << (scatterings_total
+     << field<12, 3> << difference.momentum().x0()
+     << field<12, 3> << difference.momentum().abs3()
+     << field<12, 3> << (scatterings_total
                           ? scatterings_total * 2 / (particles.size() * time)
                           : 0.)
-     << field<10,3> << scatterings_this_interval
-     << field<12,3> << particles.size()
-     << field<10,3> << elapsed_seconds;
+     << field<10, 3> << scatterings_this_interval
+     << field<12, 3> << particles.size()
+     << field<10, 3> << elapsed_seconds;
   return ss.str();
 }
 
@@ -383,7 +383,7 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
     modus_.impose_boundary_conditions(&particles_);
 
     /* (3) Do propagation. */
-    if(potentials_) {
+    if (potentials_) {
       propagate(&particles_, parameters_, *potentials_);
     } else {
       propagate_straight_line(&particles_, parameters_);
@@ -440,7 +440,7 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
     } while (interactions_total > interactions_old);
 
     /* Do one final propagation step. */
-    if(potentials_) {
+    if (potentials_) {
       propagate(&particles_, parameters_, *potentials_);
     } else {
       propagate_straight_line(&particles_, parameters_);

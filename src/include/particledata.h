@@ -166,6 +166,7 @@ class ParticleData {
    */
   ParticleData(const ParticleType &ptype, int uid, int index)
       : id_(uid), index_(index), type_(&ptype) {}
+
  private:
   friend class Particles;
   ParticleData() = default;

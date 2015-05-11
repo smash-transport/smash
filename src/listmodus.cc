@@ -116,7 +116,7 @@ namespace Smash {
                 <<"2. Particles info: t x y z mass p0 px py pz pdg ID \n"
                 <<"in units of: fm fm fm fm GeV GeV GeV GeV GeV none none \n";
 
-            //TODO(pang): this shouldn't just exit but throw an exception.
+            // TODO(pang): this shouldn't just exit but throw an exception.
             std::exit(EXIT_FAILURE);
         }
 
