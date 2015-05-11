@@ -144,3 +144,62 @@ TEST(grid_construction) {
     }
   }
 }
+
+template <typename Container, typename T>
+typename Container::const_iterator find(const Container &c, const T &value) {
+  return std::find(std::begin(c), std::end(c), value);
+}
+
+TEST(periodic_grid) {
+  using Test::Position;
+  using Test::Momentum;
+  for (const int testparticles : {1, 5}) {
+    for (const int nparticles : {124, 125}) {
+      //const double cellsize = GridBase::min_cell_length(testparticles);
+      ParticleList list;
+      auto random_value = Random::make_uniform_distribution(0., 9.99);
+      for (auto n = nparticles; n; --n) {
+        list.push_back(Test::smashon(
+            Position{0., random_value(), random_value(), random_value()},
+            Momentum{Test::smashon_mass,
+                     {random_value(), random_value(), random_value()}},
+            n));
+      }
+      Grid<GridOptions::PeriodicBoundaries> grid(
+          make_pair(std::array<float, 3>{0, 0, 0},
+                    std::array<float, 3>{10, 10, 10}),
+          ParticleList(list),  // make a temp copy which gets moved
+          testparticles);
+      grid.iterate_cells([&](
+          const ParticleList &search,
+          const std::vector<const ParticleList *> &neighborLists) {
+        // for each particle in search, find the same particle in list
+        for (const ParticleData &p : search) {
+          const auto it = find(list, p);
+          VERIFY(it != list.end());
+          COMPARE(it->id(), p.id());
+          COMPARE(it->position(), p.position());
+        }
+        // for each particle in neighborLists, find the same particle in list
+        for (auto &&neighbors : neighborLists) {
+          if (neighbors) {
+            for (const ParticleData &p : *neighbors) {
+              const auto it = find(list, p);
+              VERIFY(it != list.end());
+              COMPARE(it->id(), p.id());
+              if (it->position() != p.position()) {
+                // then the cell was wrapped around
+                const auto diff = it->position() - p.position();
+                COMPARE(diff[0], 0.);
+                VERIFY(diff[1] == 10. || diff[1] == 0. || diff[1] == -10.);
+                VERIFY(diff[2] == 10. || diff[2] == 0. || diff[2] == -10.);
+                VERIFY(diff[3] == 10. || diff[3] == 0. || diff[3] == -10.);
+                VERIFY(diff != FourVector(0, 0, 0, 0));
+              }
+            }
+          }
+        }
+      });
+    }
+  }
+}
