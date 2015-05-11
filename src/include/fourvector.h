@@ -79,7 +79,10 @@ class FourVector {
   void inline set_x3(double z);
   /// get the three-vector (spatial components)
   ThreeVector inline threevec() const;
-  /// get the velocity (three-vector divided by zero component)
+  /**
+   * Get the velocity (3-vector divided by zero component).
+   * Should only be used with momentum 4-vectors (not with space-time ones).
+   */
   ThreeVector inline velocity() const;
   /** calculate the scalar product with another four-vector
    *
