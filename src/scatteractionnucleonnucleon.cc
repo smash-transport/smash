@@ -52,6 +52,9 @@ CollisionBranchPtr ScatterActionNucleonNucleon::elastic_cross_section(float) {
  * Computes the B coefficients from the Cugnon parametrization of the angular
  * distribution in elastic pp scattering, see equ. (8) in:
  * J. Cugnon et al., Nucl. Instr. and Meth. in Phys. Res. B 111 (1996) 215-220.
+ * Note: The original Cugnon parametrization is only applicable for
+ * plab < 6 GeV and keeps rising above that. We add an upper limit of b <= 9,
+ * in order to be compatible with high-energy data (up to plab ~ 25 GeV).
  * \param[in] plab Lab momentum in GeV.
  */
 static float Cugnon_bpp(float plab) {
@@ -59,7 +62,7 @@ static float Cugnon_bpp(float plab) {
     float p8 = std::pow(plab, 8);
     return 5.5*p8 / (7.7+p8);
   } else {
-    return 5.334 + 0.67*(plab-2.);
+    return std::min(9.0, 5.334 + 0.67*(plab-2.));
   }
 }
 
