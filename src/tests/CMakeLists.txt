@@ -1,3 +1,12 @@
+########################################################
+#
+#    Copyright (c) 2014-2015
+#      SMASH Team
+#
+#    BSD 3-clause license
+# 
+######################################################### 
+
 # remove -Winline for test code
 string(REPLACE "-Winline " "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 

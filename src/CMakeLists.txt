@@ -1,3 +1,12 @@
+########################################################
+#
+#    Copyright (c) 2014-2015
+#      SMASH Team
+#
+#    BSD 3-clause license
+# 
+######################################################### 
+
 include(CheckLibraryExists)
 include(AddCompilerFlag)
 include(FindPkgConfig)
