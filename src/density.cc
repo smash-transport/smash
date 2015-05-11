@@ -14,13 +14,18 @@
 
 namespace Smash {
 
-bool particle_in_denstype(const PdgCode pdg, DensityType dens_type) {
+float density_factor(const PdgCode pdg, DensityType dens_type) {
   switch (dens_type) {
-  case DensityType::baryon:
-  case DensityType::baryonic_isospin:
-    return pdg.is_baryon();
-  default:
-    return false;
+    case DensityType::baryon:
+      return static_cast<float>(pdg.baryon_number());
+    case DensityType::baryonic_isospin:
+      if (pdg.is_baryon()) {
+        return pdg.isospin3_rel();
+      } else {
+        return 0.f;
+      }
+    default:
+      return 0.f;
   }
 }
 
@@ -31,7 +36,8 @@ static FourVector four_current_impl(const ThreeVector &r, const T &plist,
   FourVector jmu(0.0, 0.0, 0.0, 0.0);
 
   for (const auto &p : plist) {
-    if (!particle_in_denstype(p.pdgcode(), dens_type)) {
+    const float factor = density_factor(p.pdgcode(), dens_type);
+    if (std::abs(factor) < really_small) {
       continue;
     }
     const ThreeVector ri = p.position().threevec();
@@ -53,16 +59,7 @@ static FourVector four_current_impl(const ThreeVector &r, const T &plist,
     }
 
     tmp = std::exp(- 0.5 * drr_sqr / (gs_sigma * gs_sigma)) / inv_gammai;
-    switch (dens_type) {
-    case DensityType::baryon:
-      tmp *= p.pdgcode().baryon_number();
-      break;
-    case DensityType::baryonic_isospin:
-      tmp *= p.pdgcode().isospin3_rel();
-      break;
-    default:
-      break;
-    }
+    tmp *= factor;
     jmu += FourVector(1., betai) * tmp;
   }
 
@@ -95,7 +92,8 @@ std::pair<double, ThreeVector> rho_eckart_gradient(const ThreeVector &r,
   FourVector djmu_dz(0.0, 0.0, 0.0, 0.0);
 
   for (const auto &p : plist) {
-    if (!particle_in_denstype(p.pdgcode(), dens_type)) {
+    const float factor = density_factor(p.pdgcode(), dens_type);
+    if (std::abs(factor) < really_small) {
       continue;
     }
     const ThreeVector ri = p.position().threevec();
@@ -118,16 +116,7 @@ std::pair<double, ThreeVector> rho_eckart_gradient(const ThreeVector &r,
     }
 
     double tmp2 = std::exp(-0.5 * drr_sqr / (gs_sigma*gs_sigma)) / inv_gammai;
-    switch (dens_type) {
-    case DensityType::baryon:
-      tmp2 *= p.pdgcode().baryon_number();
-      break;
-    case DensityType::baryonic_isospin:
-      tmp2 *= p.pdgcode().isospin3_rel();
-      break;
-    default:
-      break;
-    }
+    tmp2 *= factor;
     log.debug("Summand to jmu: ", FourVector(1., betai) * tmp2, "² = ",
               (FourVector(1., betai) * tmp2).sqr(), "\n      with jmu: ", jmu,
               "² = ", jmu.sqr());

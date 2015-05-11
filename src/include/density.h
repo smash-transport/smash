@@ -32,13 +32,16 @@ namespace Smash {
 
   std::ostream& operator<<(std::ostream& os, DensityType dt);
 
-  /** A small check if particle PDG code belongs to a given type.
-   *  Currently checks for protons, neutrons and baryons.
+  /** Get the factor that determines how much a particle contributes to the
+   *  density type that is computed.
    *
-   *  \param[in] pdg PDG code of particle to be tested
-   *  \param[in] dens_type density type: baryon, proton, neutron
+   *  \param pdg PDG code of particle to be tested
+   *  \param dens_type The density type
+   *
+   *  \return The corresponding factor (0 if the particle doesn't
+   *          contribute at all).
    */
-  bool particle_in_denstype(const PdgCode pdg, DensityType dens_type);
+  float density_factor(const PdgCode pdg, DensityType dens_type);
 
   /** Calculates 4-current in the computational frame.
    *  \f[j^{\mu} = (\sqrt{2\pi} \sigma )^{-3} \sum_{i=1}^N C_i u^{\mu}_i
