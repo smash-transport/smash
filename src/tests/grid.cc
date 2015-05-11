@@ -62,7 +62,8 @@ TEST(grid_construction) {
     return Test::smashon(Test::Position{0., x, y, z}, id);
   };
   for (const int testparticles : {1, 5, 20, 100}) {
-    const double cellsize = GridBase::min_cell_length(testparticles);
+    const double max_interaction_length =
+        GridBase::min_cell_length(testparticles);
     for (const Parameter &param : std::vector<Parameter>{
              {{make_particle(0., 0., 0., 1), make_particle(1.9, 1.9, 1.9, 2)},
               {1, 1, 1},
@@ -116,7 +117,7 @@ TEST(grid_construction) {
       ParticleList list;
       list.reserve(param.particles.size());
       for (auto p : param.particles) {
-        p.set_4position(cellsize * p.position());
+        p.set_4position(max_interaction_length * p.position());
         list.push_back(std::move(p));
       }
       Grid<GridOptions::Normal> grid(std::move(list), testparticles);
@@ -165,8 +166,10 @@ TEST(periodic_grid) {
   using Test::Position;
   using Test::Momentum;
   for (const int testparticles : {1, 5}) {
-    for (const int nparticles : {1, 5, 20, 75, 124, 125}) {
-      const double cellsize = GridBase::min_cell_length(testparticles);
+    for (const int nparticles : {1,/* 5, 20, 75,*/ 124, 125}) {
+      const double max_interaction_length =
+          GridBase::min_cell_length(testparticles);
+      constexpr float length = 10;
       ParticleList list;
       auto random_value = Random::make_uniform_distribution(0., 9.99);
       for (auto n = nparticles; n; --n) {
@@ -178,7 +181,7 @@ TEST(periodic_grid) {
       }
       Grid<GridOptions::PeriodicBoundaries> grid(
           make_pair(std::array<float, 3>{0, 0, 0},
-                    std::array<float, 3>{10, 10, 10}),
+                    std::array<float, 3>{length, length, length}),
           ParticleList(list),  // make a temp copy which gets moved
           testparticles);
 
@@ -199,11 +202,11 @@ TEST(periodic_grid) {
         }
 
         // for each particle in neighborLists, find the same particle in list
-        auto &&compareDiff = [](double d) {
+        auto &&compareDiff = [](float d) {
           if (d < 0.) {
-            FUZZY_COMPARE(d, -10.);
+            FUZZY_COMPARE(d, -length);
           } else if (d > 0.) {
-            FUZZY_COMPARE(d, 10.);
+            FUZZY_COMPARE(d, length);
           } else {
             COMPARE(d, 0.);
           }
@@ -232,8 +235,8 @@ TEST(periodic_grid) {
           combinedNeighbors.push_back(p);
         }
 
-        // for each particle in search, search through the complete list to find
-        // those closer than 2.5fm
+        // for each particle in search, search through the complete list of
+        // neighbors to find those closer than 2.5fm
         for (const ParticleData &p : search) {
           for (const ParticleData &q : combinedNeighbors) {
             if (p == q) {
@@ -241,7 +244,8 @@ TEST(periodic_grid) {
             }
             const auto sqrDistance =
                 (p.position().threevec() - q.position().threevec()).sqr();
-            if (sqrDistance <= cellsize * cellsize) {
+            if (sqrDistance <=
+                max_interaction_length * max_interaction_length) {
               if (p.id() < q.id()) {
                 neighbor_pairs.emplace_back(p, q);
               } else {
@@ -252,23 +256,118 @@ TEST(periodic_grid) {
         }
       });
 
-      std::sort(neighbor_pairs.begin(), neighbor_pairs.end());
-      for (const ParticleData &p : list) {
-        for (const ParticleData &q : list) {
-          if (p == q) {
-            continue;
+      // Now search through the original list to verify the grid search found
+      // everything.
+      auto &&wrap = [&length](ParticleData p, int i) {
+        auto pos = p.position();
+        if (i > 0) {
+          pos[i] += length;
+        } else {
+          pos[-i] -= length;
+        }
+        p.set_4position(pos);
+        return p;
+      };
+      for (ParticleData p0 : list) {
+        ParticleList p_periodic;
+        p_periodic.push_back(p0);
+        if (p0.position()[3] < max_interaction_length) {
+          p_periodic.push_back(wrap(p0, 3));
+        }
+        if (p0.position()[3] > length - max_interaction_length) {
+          p_periodic.push_back(wrap(p0, -3));
+        }
+        if (p0.position()[2] < max_interaction_length) {
+          p_periodic.push_back(wrap(p0, 2));
+          if (p0.position()[3] < max_interaction_length) {
+            p_periodic.push_back(wrap(p0, 3));
           }
-          const auto sqrDistance =
-              (p.position().threevec() - q.position().threevec()).sqr();
-          if (sqrDistance <= cellsize * cellsize) {
-            // (p,q) must be in neighbor_pairs
-            auto pair =
-                p.id() > q.id() ? std::make_pair(q, p) : std::make_pair(p, q);
-            const auto it = find(neighbor_pairs, pair);
-            VERIFY(it != neighbor_pairs.end())
-                << "\ntestparticles: " << testparticles
-                << "\nnparticles: " << nparticles << "\np: " << p
-                << "\nq: " << q;// << "\n" << neighbor_pairs;
+          if (p0.position()[3] > length - max_interaction_length) {
+            p_periodic.push_back(wrap(p0, -3));
+          }
+        }
+        if (p0.position()[2] > length - max_interaction_length) {
+          p_periodic.push_back(wrap(p0, -2));
+          if (p0.position()[3] < max_interaction_length) {
+            p_periodic.push_back(wrap(p0, 3));
+          }
+          if (p0.position()[3] > length - max_interaction_length) {
+            p_periodic.push_back(wrap(p0, -3));
+          }
+        }
+        if (p0.position()[1] < max_interaction_length) {
+          p_periodic.push_back(wrap(p0, 1));
+          if (p0.position()[3] < max_interaction_length) {
+            p_periodic.push_back(wrap(p0, 3));
+          }
+          if (p0.position()[3] > length - max_interaction_length) {
+            p_periodic.push_back(wrap(p0, -3));
+          }
+          if (p0.position()[2] < max_interaction_length) {
+            p_periodic.push_back(wrap(p0, 2));
+            if (p0.position()[3] < max_interaction_length) {
+              p_periodic.push_back(wrap(p0, 3));
+            }
+            if (p0.position()[3] > length - max_interaction_length) {
+              p_periodic.push_back(wrap(p0, -3));
+            }
+          }
+          if (p0.position()[2] > length - max_interaction_length) {
+            p_periodic.push_back(wrap(p0, -2));
+            if (p0.position()[3] < max_interaction_length) {
+              p_periodic.push_back(wrap(p0, 3));
+            }
+            if (p0.position()[3] > length - max_interaction_length) {
+              p_periodic.push_back(wrap(p0, -3));
+            }
+          }
+        }
+        if (p0.position()[1] > length - max_interaction_length) {
+          p_periodic.push_back(wrap(p0, -1));
+          if (p0.position()[3] < max_interaction_length) {
+            p_periodic.push_back(wrap(p0, 3));
+          }
+          if (p0.position()[3] > length - max_interaction_length) {
+            p_periodic.push_back(wrap(p0, -3));
+          }
+          if (p0.position()[2] < max_interaction_length) {
+            p_periodic.push_back(wrap(p0, 2));
+            if (p0.position()[3] < max_interaction_length) {
+              p_periodic.push_back(wrap(p0, 3));
+            }
+            if (p0.position()[3] > length - max_interaction_length) {
+              p_periodic.push_back(wrap(p0, -3));
+            }
+          }
+          if (p0.position()[2] > length - max_interaction_length) {
+            p_periodic.push_back(wrap(p0, -2));
+            if (p0.position()[3] < max_interaction_length) {
+              p_periodic.push_back(wrap(p0, 3));
+            }
+            if (p0.position()[3] > length - max_interaction_length) {
+              p_periodic.push_back(wrap(p0, -3));
+            }
+          }
+        }
+
+        for (const ParticleData &p : p_periodic) {
+          for (const ParticleData &q : list) {
+            if (p == q) {
+              continue;
+            }
+            const auto sqrDistance =
+                (p.position().threevec() - q.position().threevec()).sqr();
+            if (sqrDistance <=
+                max_interaction_length * max_interaction_length) {
+              // (p,q) must be in neighbor_pairs
+              auto pair =
+                  p.id() > q.id() ? std::make_pair(q, p) : std::make_pair(p, q);
+              const auto it = find(neighbor_pairs, pair);
+              VERIFY(it != neighbor_pairs.end())
+                  << "\ntestparticles: " << testparticles
+                  << "\nnparticles: " << nparticles << "\np: " << p
+                  << "\nq: " << q;  // << "\n" << neighbor_pairs;
+            }
           }
         }
       }
