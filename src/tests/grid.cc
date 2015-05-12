@@ -232,13 +232,12 @@ TEST(periodic_grid) {
           VERIFY(it != list.end());
           COMPARE(it->id(), p.id());
           COMPARE(it->position(), p.position());
-          combinedNeighbors.push_back(p);
         }
 
         // for each particle in search, search through the complete list of
         // neighbors to find those closer than 2.5fm
         for (const ParticleData &p : search) {
-          for (const ParticleData &q : combinedNeighbors) {
+          for (const ParticleData &q : search) {
             if (p == q) {
               continue;
             }
@@ -246,11 +245,24 @@ TEST(periodic_grid) {
                 (p.position().threevec() - q.position().threevec()).sqr();
             if (sqrDistance <=
                 max_interaction_length * max_interaction_length) {
-              if (p.id() < q.id()) {
-                neighbor_pairs.emplace_back(p, q);
-              } else {
-                neighbor_pairs.emplace_back(q, p);
-              }
+              const auto pair =
+                  p.id() < q.id() ? std::make_pair(p, q) : std::make_pair(q, p);
+              neighbor_pairs.emplace_back(std::move(pair));
+            }
+          }
+          for (const ParticleData &q : combinedNeighbors) {
+            VERIFY(!(p == q)) << "\np: " << p << "\nq: " << q << '\n' << search
+                              << '\n' << combinedNeighbors;
+            const auto sqrDistance =
+                (p.position().threevec() - q.position().threevec()).sqr();
+            if (sqrDistance <=
+                max_interaction_length * max_interaction_length) {
+              auto pair =
+                  p.id() < q.id() ? std::make_pair(p, q) : std::make_pair(q, p);
+              const auto it = find(neighbor_pairs, pair);
+              COMPARE(it, neighbor_pairs.end()) << "\np: " << p << "\nq: " << q
+                                                << '\n' << neighbor_pairs;
+              neighbor_pairs.emplace_back(std::move(pair));
             }
           }
         }
