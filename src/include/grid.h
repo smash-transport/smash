@@ -174,12 +174,6 @@ class Grid : public GridBase {
    */
   size_type make_index(const ThreeVector &position) const;
 
-  /**
-   * Returns whether the cell at the given 3-dim index \p x, \p y, \p z is a
-   * ghost cell.
-   */
-  bool is_ghost_cell(size_type x, size_type y, size_type z) const;
-
   /// The lower bound of the cell coordinates.
   const std::array<float, 3> min_position_;
 

@@ -150,9 +150,9 @@ inline typename Grid<Options>::size_type Grid<Options>::make_index(
   return (z * number_of_cells_[1] + y) * number_of_cells_[0] + x;
 }
 
-template <>
-inline typename Grid<GridOptions::Normal>::size_type
-Grid<GridOptions::Normal>::make_index(const ThreeVector &position) const {
+template <GridOptions Options>
+inline typename Grid<Options>::size_type Grid<Options>::make_index(
+    const ThreeVector &position) const {
   return make_index(
       std::floor((static_cast<float>(position[0]) - min_position_[0]) *
                  index_factor_[0]),
@@ -161,122 +161,10 @@ Grid<GridOptions::Normal>::make_index(const ThreeVector &position) const {
       std::floor((static_cast<float>(position[2]) - min_position_[2]) *
                  index_factor_[2]));
 }
-template <>
-inline typename Grid<GridOptions::PeriodicBoundaries>::size_type
-Grid<GridOptions::PeriodicBoundaries>::make_index(
-    const ThreeVector &position) const {
-  return make_index(
-      1 + std::floor((static_cast<float>(position[0]) - min_position_[0]) *
-                     index_factor_[0]),
-      1 + std::floor((static_cast<float>(position[1]) - min_position_[1]) *
-                     index_factor_[1]),
-      std::floor((static_cast<float>(position[2]) - min_position_[2]) *
-                 index_factor_[2]));
-}
 
-template <>
-inline bool Grid<GridOptions::PeriodicBoundaries>::is_ghost_cell(size_type x,
-                                                          size_type y,
-                                                          size_type z) const {
-  return z + 1 == number_of_cells_[2] || y == 0 ||
-         y + 1 == number_of_cells_[1] || x == 0 || x + 1 == number_of_cells_[0];
-}
-
-template <>
-void Grid<GridOptions::PeriodicBoundaries>::build_cells(
-    ParticleList &&all_particles, const std::array<float, 3> &length) {
-  const auto &log = logger<LogArea::Grid>();
-
-  // construct a grid with ghost cells in x ± 1, y ± 1, and z + 1
-  number_of_cells_[0] += 2;
-  number_of_cells_[1] += 2;
-  number_of_cells_[2] += 1;  // ghost cells only at one side
-
-  log.debug("min: ", min_position_, "\nlength: ", length, "\ncells: ",
-            number_of_cells_, "\nindex_factor: ", index_factor_);
-
-  // After the grid parameters are determined, we can start placing the
-  // particles in cells.
-  cells_.resize(number_of_cells_[0] * number_of_cells_[1] *
-                number_of_cells_[2]);
-
-  // first fill the non-ghost cells
-  for (const auto &p : all_particles) {
-    const auto idx = make_index(p.position().threevec());
-#ifndef NDEBUG
-    if (idx < make_index(1, 1, 0) ||
-        idx >= make_index(number_of_cells_[0] - 1, number_of_cells_[1] - 1,
-                          number_of_cells_[2] - 1) ||
-        idx >= size_type(cells_.size())) {
-      log.fatal(source_location,
-                "\nan out-of-bounds access would be necessary for the "
-                "particle ",
-                p, "\nfor a grid with the following parameters:\nmin: ",
-                min_position_, "\nlength: ", length, "\ncells: ",
-                number_of_cells_, "\nindex_factor: ", index_factor_,
-                "\ncells_.size: ", cells_.size(), "\nrequested index: ", idx);
-      throw std::runtime_error("out-of-bounds grid access on construction");
-    }
-#endif
-    cells_[idx].push_back(p);
-  }
-
-  // Now fill the ghost cells, using copies of a non-ghost cell. After
-  // copying the position of the ParticleData objects needs to be modified
-  // accordingly
-  for (size_type z = 0; z < number_of_cells_[2]; ++z) {
-    // At z == 0:
-    // - the complete y == 0 line is unused.
-    // - the x == 0, y == 1 cell is unused. (at (.,1,0) the next ghost cell is
-    //   at x_max)
-    for (size_type y = (z > 0 ? 0 : 1); y < number_of_cells_[1]; ++y) {
-      for (size_type x = (z == 0 && y == 1 ? number_of_cells_[0] - 1 : 0);
-           x < number_of_cells_[0]; ++x) {
-        if (is_ghost_cell(x, y, z)) {
-          const auto idx = make_index(x, y, z);
-          auto &cell = cells_[idx];
-
-          auto copy_idx = idx;
-          FourVector position_shift{};  // zero-initialized
-          if (x == 0) {
-            copy_idx += number_of_cells_[0] - 2;
-            position_shift[1] = -length[0];
-          } else if (x == number_of_cells_[0] - 1) {
-            copy_idx -= number_of_cells_[0] - 2;
-            position_shift[1] = length[0];
-          }
-          if (y == 0) {
-            copy_idx += (number_of_cells_[1] - 2) * number_of_cells_[0];
-            position_shift[2] = -length[1];
-          } else if (y == number_of_cells_[1] - 1) {
-            copy_idx -= (number_of_cells_[1] - 2) * number_of_cells_[0];
-            position_shift[2] = length[1];
-          }
-          if (z == number_of_cells_[2] - 1) {
-            copy_idx -= (number_of_cells_[2] - 1) *
-                        (number_of_cells_[0] * number_of_cells_[1]);
-            position_shift[3] = length[2];
-          }
-
-          // copy the cell from a non-ghost cell
-          cell = cells_[copy_idx];
-
-          // modify the position vectors to correspond to the position of
-          // the ghost-cell
-          for (ParticleData &p : cell) {
-            p.set_4position(p.position() + position_shift);
-          }
-        }
-      }
-    }
-  }
-
-  log.debug(cells_);
-}
-
-template <>
-void Grid<GridOptions::Normal>::build_cells(
-    ParticleList &&all_particles, const std::array<float, 3> &length) {
+template <GridOptions O>
+void Grid<O>::build_cells(ParticleList &&all_particles,
+                          const std::array<float, 3> &length) {
   const auto &log = logger<LogArea::Grid>();
   if (all_of(number_of_cells_, [](size_type n) { return n <= 2; })) {
     // dilute limit:
@@ -417,4 +305,9 @@ template std::tuple<std::array<float, 3>, std::array<int, 3>> Grid<
 template std::tuple<std::array<float, 3>, std::array<int, 3>>
     Grid<GridOptions::PeriodicBoundaries>::determine_cell_sizes(
         size_type, const std::array<float, 3> &, const int);
+
+template void Grid<GridOptions::Normal>::build_cells(
+    ParticleList &&, const std::array<float, 3> &);
+template void Grid<GridOptions::PeriodicBoundaries>::build_cells(
+    ParticleList &&, const std::array<float, 3> &);
 }  // namespace Smash
