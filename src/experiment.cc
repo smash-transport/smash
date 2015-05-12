@@ -360,20 +360,20 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
         modus_.create_grid(particles_.copy_to_vector(),
                            parameters_.testparticles);
     /* (1.b) Iterate over cells and find actions. */
-    grid.iterate_cells([&](
-        const ParticleList &search_list,  // a list of particles where each pair
-                                          // needs to be tested for possible
-                                          // interaction
-        const std::vector<const ParticleList *> &
-            neighbors_list  // a list of particles that need to be tested
-                            // against particles in search_list for possible
-                            // interaction
-        ) {
-      for (const auto &finder : action_finders_) {
-        actions += finder->find_possible_actions(search_list, neighbors_list,
-                                parameters_.timestep_duration());
-      }
-    });
+    grid.iterate_cells([&](const ParticleList &search_list) {
+                         for (const auto &finder : action_finders_) {
+                           actions += finder->find_possible_actions(
+                               search_list, parameters_.timestep_duration());
+                         }
+                       },
+                       [&](const ParticleList &search_list,
+                           const ParticleList &neighbors_list) {
+                         for (const auto &finder : action_finders_) {
+                           actions += finder->find_possible_actions(
+                               search_list, neighbors_list,
+                               parameters_.timestep_duration());
+                         }
+                       });
     /* (1.c) Sort action list by time. */
     std::sort(actions.begin(), actions.end(),
               [](const ActionPtr &a, const ActionPtr &b) { return *a < *b; });

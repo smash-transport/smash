@@ -130,21 +130,25 @@ class Grid : public GridBase {
                            const int testparticles);
 
   /**
-   * Iterates over all cells in the grid and calls \p call_finder with a search
-   * cell and 0 to 13 neighbor cells.
+   * Iterates over all cells in the grid and calls the callback arguments with a
+   * search cell and 0 to 13 neighbor cells.
    *
    * The neighbor cells are constructed like this:
    * - one cell at x+1
    * - three cells (x-1,x,x+1) at y+1
    * - nine cells (x-1, y-1)...(x+1, y+1) at z+1
    *
-   * \param call_finder A lambda (or other functor) that is called as often as
-   * there are search cells. Experiment uses it to call the Action finders from
-   * it.
+   * \param search_cell_callback A callable called for/with every non-empty cell
+   *                             in the grid.
+   * \param neighbor_cell_callback A callable called for/with every non-empty
+   *                               cell and adjacent cell combination. For a
+   *                               periodic grid, the first argument will be
+   *                               adjusted to wrap around the grid.
    */
-  void iterate_cells(const std::function<
-      void(const ParticleList &, const std::vector<const ParticleList *> &)> &
-                         call_finder) const;
+  void iterate_cells(
+      const std::function<void(const ParticleList &)> &search_cell_callback,
+      const std::function<void(const ParticleList &, const ParticleList &)> &
+          neighbor_cell_callback) const;
 
  private:
   /**

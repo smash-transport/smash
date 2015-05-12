@@ -209,94 +209,20 @@ void Grid<O>::build_cells(ParticleList &&all_particles,
 }
 
 template <GridOptions Options>
-void Grid<Options>::iterate_cells(const std::function<
-    void(const ParticleList &, const std::vector<const ParticleList *> &)> &
-                                      call_finder) const {
-  const auto &log = logger<LogArea::Grid>();
-  std::vector<const ParticleList *> neighbors;
-  neighbors.reserve(13);
-
-  auto &&call_closure = [&](size_type cell_index,
-                            const std::initializer_list<int> &xoffsets,
-                            const std::initializer_list<int> &yoffsets,
-                            const std::initializer_list<int> &zoffsets) {
-    neighbors.clear();
-    log.debug("call_closure(", cell_index, ", ", xoffsets, ", ", yoffsets, ", ",
-              zoffsets, ")");
-    for (auto dz : zoffsets) {
-      const auto cell_index_dz =
-          cell_index + dz * number_of_cells_[1] * number_of_cells_[0];
-      for (auto dy : yoffsets) {
-        const auto cell_index_dzdy = cell_index_dz + dy * number_of_cells_[0];
-        for (auto dx : xoffsets) {
-          const auto cell_index_dzdydx = cell_index_dzdy + dx;
-          if (cell_index_dzdydx > cell_index) {
-            neighbors.emplace_back(&cells_[cell_index_dzdydx]);
-          }
-        }
-      }
-    }
-    log.debug("iterate_cells calls closure with search_list: ",
-              cells_[cell_index], " and neighbors_list: ", neighbors);
-    call_finder(cells_[cell_index], neighbors);
-  };
-
-  auto &&build_neighbors_with_zy = [&](
-      size_type y, size_type z, const std::initializer_list<int> &yoffsets,
-      const std::initializer_list<int> &zoffsets) {
-    if (number_of_cells_[0] > 1) {
-      call_closure(make_index(0, y, z), {0, 1}, yoffsets, zoffsets);
-      for (size_type x = 1; x < number_of_cells_[0] - 1; ++x) {
-        call_closure(make_index(x, y, z), {-1, 0, 1}, yoffsets, zoffsets);
-      }
-      call_closure(make_index(number_of_cells_[0] - 1, y, z), {-1, 0}, yoffsets,
-                   zoffsets);
-    } else {
-      call_closure(make_index(0, y, z), {0}, yoffsets, zoffsets);
-    }
-  };
-
-  auto &&build_neighbors_with_z = [&](
-      size_type z, const std::initializer_list<int> &zoffsets) {
-    if (number_of_cells_[1] > 1) {
-      build_neighbors_with_zy(0, z, {0, 1}, zoffsets);
-      for (size_type y = 1; y < number_of_cells_[1] - 1; ++y) {
-        build_neighbors_with_zy(y, z, {-1, 0, 1}, zoffsets);
-      }
-      build_neighbors_with_zy(number_of_cells_[1] - 1, z, {-1, 0}, zoffsets);
-    } else {
-      build_neighbors_with_zy(0, z, {0}, zoffsets);
-    }
-  };
-
-  if (Options == GridOptions::PeriodicBoundaries) {
-    // iterate over the inner (non-ghost) cells. The ghost cells are
-    // constructed such that the requested offsets are always valid cells
-    const auto max_x = number_of_cells_[0] - 1;
-    const auto max_y = number_of_cells_[1] - 1;
-    const auto max_z = number_of_cells_[2] - 1;
-    for (size_type z = 0; z < max_z; ++z) {
-      for (size_type y = 1; y < max_y; ++y) {
-        for (size_type x = 1; x < max_x; ++x) {
-          call_closure(make_index(x, y, z), {-1, 0, 1}, {-1, 0, 1}, {0, 1});
-        }
-      }
-    }
-  } else {
-    for (size_type z = 0; z < number_of_cells_[2] - 1; ++z) {
-      build_neighbors_with_z(z, {0, 1});
-    }
-    build_neighbors_with_z(number_of_cells_[2] - 1, {0});
-  }
+void Grid<Options>::iterate_cells(
+    const std::function<void(const ParticleList &)> &search_cell_callback,
+    const std::function<void(const ParticleList &, const ParticleList &)> &
+        neighbor_cell_callback) const {
 }
 
-template void Grid<GridOptions::Normal>::iterate_cells(const std::function<
-    void(const ParticleList &, const std::vector<const ParticleList *> &)> &
-                                                           call_finder) const;
+template void Grid<GridOptions::Normal>::iterate_cells(
+    const std::function<void(const ParticleList &)> &,
+    const std::function<void(const ParticleList &, const ParticleList &)> &)
+    const;
 template void Grid<GridOptions::PeriodicBoundaries>::iterate_cells(
-    const std::function<
-        void(const ParticleList &, const std::vector<const ParticleList *> &)> &
-        call_finder) const;
+    const std::function<void(const ParticleList &)> &,
+    const std::function<void(const ParticleList &, const ParticleList &)> &)
+    const;
 
 template std::tuple<std::array<float, 3>, std::array<int, 3>> Grid<
     GridOptions::Normal>::determine_cell_sizes(size_type,

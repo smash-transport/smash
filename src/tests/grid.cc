@@ -31,6 +31,14 @@ ostream &operator<<(ostream &s, const set<T> &set) {
   }
   return s << '}';
 }
+template <typename T>
+static inline ostream &operator<<(ostream &s, const unordered_set<T> &data) {
+  s << '{';
+  for (auto &&x : data) {
+    s << x << ' ';
+  }
+  return s << '}';
+}
 }  // namespace std
 
 TEST(init) {
@@ -123,24 +131,27 @@ TEST(grid_construction) {
       Grid<GridOptions::Normal> grid(std::move(list), testparticles);
       auto idsIt = param.ids.begin();
       auto neighbors = param.neighbors;
-      grid.iterate_cells([&](
-          const ParticleList &search,
-          const std::vector<const ParticleList *> &neighborLists) {
-        auto ids = *idsIt++;
-        for (const auto &p : search) {
-          for (const auto &n : neighborLists) {
-            for (const auto &p2 : *n) {
-              COMPARE(neighbors.erase({std::min(p.id(), p2.id()),
-                                       std::max(p.id(), p2.id())}),
-                      1u)
-                  << "<id|id>: <" << std::min(p.id(), p2.id()) << '|'
-                  << std::max(p.id(), p2.id()) << '>';
-            }
-          }
-          COMPARE(ids.erase(p.id()), 1u) << "p.id() = " << p.id();
-        }
-        COMPARE(ids.size(), 0u);
-      });
+      grid.iterate_cells([&](const ParticleList &search) {
+                           auto ids = *idsIt++;
+                           for (const auto &p : search) {
+                             COMPARE(ids.erase(p.id()), 1u)
+                                 << "p.id() = " << p.id() << ", ids = " << ids;
+                           }
+                           COMPARE(ids.size(), 0u);
+                         },
+                         [&](const ParticleList &search,
+                             const ParticleList &n) {
+                           for (const auto &p : search) {
+                             for (const auto &p2 : n) {
+                               COMPARE(
+                                   neighbors.erase({std::min(p.id(), p2.id()),
+                                                    std::max(p.id(), p2.id())}),
+                                   1u)
+                                   << "<id|id>: <" << std::min(p.id(), p2.id())
+                                   << '|' << std::max(p.id(), p2.id()) << '>';
+                             }
+                           }
+                         });
       COMPARE(neighbors.size(), 0u) << neighbors;
     }
   }
