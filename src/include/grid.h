@@ -54,30 +54,6 @@ class GridBase {
    */
   static std::pair<std::array<float, 3>, std::array<float, 3>>
       find_min_and_length(const ParticleList &all_particles);
-
-  /**
-   * Calculates the factor that, if multiplied with a x/y/z
-   * coordinate, yields the 3-dim cell index and the required number of cells
-   * (without ghost cells).
-   *
-   * \return A tuple of two 3-dim values:
-   * \li The first tuple entry stores the conversion factors to turn a
-   * normalized coordinate (particle position minus minimum position) into a
-   * cell index.
-   * \li The second tuple entry stores the dimensions of the grid (i.e. the
-   * number of cells in each spatial direction).
-   *
-   * \param particle_count The number of particles to be placed in the grid.
-   * \param length         Three lengths that identify the total dimensions of
-   *                       the grid.
-   * \param testparticles  The number of testparticles is used to scale the cell
-   *                       size down, since the interaction length is also
-   *                       reduced.
-   */
-  static std::tuple<std::array<float, 3>, std::array<int, 3>>
-      determine_cell_sizes(size_type particle_count,
-                           const std::array<float, 3> &length,
-                           const int testparticles);
 };
 
 /**
@@ -128,6 +104,30 @@ class Grid : public GridBase {
 
     build_cells(std::move(all_particles), length);
   }
+
+  /**
+   * Calculates the factor that, if multiplied with a x/y/z
+   * coordinate, yields the 3-dim cell index and the required number of cells
+   * (without ghost cells).
+   *
+   * \return A tuple of two 3-dim values:
+   * \li The first tuple entry stores the conversion factors to turn a
+   * normalized coordinate (particle position minus minimum position) into a
+   * cell index.
+   * \li The second tuple entry stores the dimensions of the grid (i.e. the
+   * number of cells in each spatial direction).
+   *
+   * \param particle_count The number of particles to be placed in the grid.
+   * \param length         Three lengths that identify the total dimensions of
+   *                       the grid.
+   * \param testparticles  The number of testparticles is used to scale the cell
+   *                       size down, since the interaction length is also
+   *                       reduced.
+   */
+  static std::tuple<std::array<float, 3>, std::array<int, 3>>
+      determine_cell_sizes(size_type particle_count,
+                           const std::array<float, 3> &length,
+                           const int testparticles);
 
   /**
    * Iterates over all cells in the grid and calls \p call_finder with a search

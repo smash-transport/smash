@@ -91,10 +91,11 @@ GridBase::find_min_and_length(const ParticleList &all_particles) {
   return r;
 }
 
+template <GridOptions O>
 std::tuple<std::array<float, 3>, std::array<int, 3>>
-GridBase::determine_cell_sizes(size_type particle_count,
-                               const std::array<float, 3> &length,
-                               const int testparticles) {
+Grid<O>::determine_cell_sizes(size_type particle_count,
+                              const std::array<float, 3> &length,
+                              const int testparticles) {
   std::tuple<std::array<float, 3>, std::array<int, 3> > r;
   auto &index_factor = std::get<0>(r);
   auto &number_of_cells = std::get<1>(r);
@@ -131,6 +132,10 @@ GridBase::determine_cell_sizes(size_type particle_count,
       number_of_cells[i] = max_cells;
       index_factor[i] = (max_cells - 0.1f)  // -0.1 for safety margin
                         / length[i];
+    }
+    if (O == GridOptions::PeriodicBoundaries && number_of_cells[i] == 1) {
+      number_of_cells[i] = 2;
+      index_factor[i] = 1.999f / length[i];
     }
   }
   return r;
@@ -405,4 +410,11 @@ template void Grid<GridOptions::PeriodicBoundaries>::iterate_cells(
         void(const ParticleList &, const std::vector<const ParticleList *> &)> &
         call_finder) const;
 
+template std::tuple<std::array<float, 3>, std::array<int, 3>> Grid<
+    GridOptions::Normal>::determine_cell_sizes(size_type,
+                                               const std::array<float, 3> &,
+                                               const int);
+template std::tuple<std::array<float, 3>, std::array<int, 3>>
+    Grid<GridOptions::PeriodicBoundaries>::determine_cell_sizes(
+        size_type, const std::array<float, 3> &, const int);
 }  // namespace Smash
