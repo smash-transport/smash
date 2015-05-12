@@ -49,8 +49,8 @@ void DecayModes::add_mode(float ratio, int L,
       logger<LogArea::DecayModes>().warn(
           "decay products A: ", *particle_types[0], " B: ", *particle_types[1],
           " C: ", *particle_types[2]);
-      type = new ThreeBodyDecay(particle_types, L);
     }
+    type = new ThreeBodyDecay(particle_types, L);
     break;
   default:
     throw InvalidDecay(

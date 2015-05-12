@@ -113,6 +113,7 @@ class PdgCode {
   PdgCode(const std::string& codestring) {
     set_from_string(codestring);
   }
+
   /** receive a signed integer and process it into a PDG Code. The sign
    * is taken as antiparticle boolean, while the absolute value of the
    * integer is used as hexdigits.
@@ -224,6 +225,19 @@ class PdgCode {
     // TODO(mkretz): more efficient implementation
     return PdgCode(-code());
   }
+
+  /// Construct PDG code from decimal number
+  static PdgCode from_decimal(const int pdgcode_decimal) {
+    int a = pdgcode_decimal;
+    int hex_pdg = 0, tmp = 1;
+    while (a) {
+      hex_pdg += (a % 10) * tmp;
+      tmp *= 16;
+      a = a / 10;
+    }
+    return PdgCode(hex_pdg);
+  }
+
 
   /****************************************************************************
    *                                                                          *
@@ -496,7 +510,8 @@ class PdgCode {
 // bit field order is like in the gnu c compiler for 64 bit
 // architectures (if you are unsure, try one and check the pdgcode
 // test).
-#if defined(__GNUC__) && (defined(__x86_64__) || defined(__i386__)) || defined(DOXYGEN)
+#if defined(__GNUC__) && (defined(__x86_64__) || \
+    defined(__i386__)) || defined(DOXYGEN)
 #define SMASH_BITFIELD_ORDER_ 1
 // put your compiler here if the bit field order is reversed w.r.t. gnu
 // c compiler for 64 bit.

@@ -102,6 +102,14 @@ TEST(insert) {
   COMPARE(p.size(), 4u);
   VERIFY(p.is_valid(p.front()));
   VERIFY(p.is_valid(p.back()));
+
+  ParticleData smashon = Test::smashon();
+  smashon.set_id_process(1);
+  p.insert(smashon);
+  COMPARE(p.back().id_process(), 1);
+  smashon.set_id_process(2);
+  p.insert(smashon);
+  COMPARE(p.back().id_process(), 2);
 }
 
 TEST(insert_2) {
@@ -268,4 +276,26 @@ TEST(exceed_capacity) {
     COMPARE(x.id(), n);
     ++n;
   }
+}
+
+TEST(update) {
+  Particles p;
+  auto pd =
+      Test::smashon(Test::Momentum{1, 1, 1, 1}, Test::Position{1, 1, 1, 1});
+  pd.set_id_process(1);
+  p.insert(pd);
+  p.insert(pd);
+  p.insert(pd);
+  COMPARE(p.size(), 3u);
+  COMPARE(p.front().momentum(), FourVector(1, 1, 1, 1));
+  COMPARE(p.front().position(), FourVector(1, 1, 1, 1));
+  COMPARE(p.front().id_process(), 1);
+  pd.set_id_process(2);
+  pd.set_4momentum({2, 2, 2, 2});
+  pd.set_4position({3, 3, 3, 3});
+  p.update(p.front(), pd);
+  COMPARE(p.size(), 3u);
+  COMPARE(p.front().momentum(), FourVector(2, 2, 2, 2));
+  COMPARE(p.front().position(), FourVector(3, 3, 3, 3));
+  COMPARE(p.front().id_process(), 2);
 }

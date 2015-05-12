@@ -148,3 +148,7 @@ TEST(NDelta_NN) {
   delete act_Dn;
   delete act_DDn;
 }
+
+TEST(cleanup) {
+  DecayModes::clear_decaymodes();
+}
