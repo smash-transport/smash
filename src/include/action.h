@@ -401,7 +401,7 @@ class ScatterAction : public Action {
    * \param[in] type_resonance Type information for the resonance to be produced.
    * \param[in] s Mandelstam-s of the collision
    * of the two initial particles.
-   * \param[in] cm_momentum_squared Square of the center-of-mass momentum of the
+   * \param[in] cm_momentum_sqr Square of the center-of-mass momentum of the
    * two initial particles.
    *
    * \return The cross section for the process
