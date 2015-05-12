@@ -280,10 +280,11 @@ void ScatterActionNucleonNucleon::sample_cms_momenta() {
     mass_b = sample_resonance_mass(t_b, t_a, cms_energy);
   }
 
-  double momentum_radial = pCM(cms_energy, mass_a, mass_b);
-  if (!(momentum_radial > 0.0)) {
+  double p_i = pCM(cms_energy, mN, mN);          // initial-state CM momentum
+  double p_f = pCM(cms_energy, mass_a, mass_b);  // final-state CM momentum
+  if (!(p_f > 0.0)) {
     log.warn("Particle: ", t_a.pdgcode(),
-             " radial momentum: ", momentum_radial);
+             " radial momentum: ", p_f);
     log.warn("Etot: ", cms_energy, " m_a: ", mass_a, " m_b: ", mass_b);
   }
 
@@ -296,13 +297,17 @@ void ScatterActionNucleonNucleon::sample_cms_momenta() {
      * J. Cugnon et al., Nucl. Instr. and Meth. in Phys. Res. B 111 (1996) 215-220. */
     double plab = plab_from_s_NN(mandelstam_s());
     double bb = std::max(Cugnon_bpp(plab), really_small);
-    double t, t_max = -4.*momentum_radial*momentum_radial;
+    double t0 = (mass_a*mass_a-mass_b*mass_b)*(mass_a*mass_a-mass_b*mass_b)
+                /(4.*mandelstam_s());
+    double t, t_min = t0 - (p_i-p_f)*(p_i-p_f),
+           t_max = t0 - (p_i+p_f)*(p_i+p_f);
     if (Random::canonical() <= 0.5) {
-      t = Random::expo(bb, 0., t_max);
+      t = Random::expo(bb, t_min, t_max);
     } else {
-      t = t_max - Random::expo(bb, 0., t_max);
+      t = t_max + t_min - Random::expo(bb, t_min, t_max);
     }
-    phitheta = Angles(2.*M_PI*Random::canonical(), 1. - 2.*t/t_max);
+    phitheta = Angles(2.*M_PI*Random::canonical(),
+                      1. - 2.*(t-t_min)/(t_max-t_min));
   } else {
     /* isotropic angular distribution */
     phitheta.distribute_isotropically();
@@ -314,8 +319,8 @@ void ScatterActionNucleonNucleon::sample_cms_momenta() {
                     LorentzBoost(beta_cm()).threevec();
   pscatt.rotate_to(pcm);
 
-  p_a->set_4momentum(mass_a,  pscatt * momentum_radial);
-  p_b->set_4momentum(mass_b, -pscatt * momentum_radial);
+  p_a->set_4momentum(mass_a,  pscatt * p_f);
+  p_b->set_4momentum(mass_b, -pscatt * p_f);
 
   log.debug("p_a: ", *p_a, "\np_b: ", *p_b);
 }

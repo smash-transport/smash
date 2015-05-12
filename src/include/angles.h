@@ -66,7 +66,10 @@ class Angles {
   /// Standard initializer, points in x-direction.
   Angles() : phi_(0), costheta_(0) {}
   /// initializer with given phi and cos(theta)
-  Angles(double ph, double cost) : phi_(ph), costheta_(cost) {}
+  Angles(double ph, double cost) {
+    set_phi(ph);
+    set_costheta(cost);
+  }
   /** populate the object with a new direction
    *
    * the direction is taken randomly from a homogeneous distribution,
