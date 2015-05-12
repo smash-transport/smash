@@ -142,7 +142,7 @@ class PdgCode {
    * test function and export functions                                       *
    *                                                                          *
    ****************************************************************************/
-  /** Checks the integer for invalid hex digits.
+  /** Checks the integer for invalid hex digitsc
    *
    * Usually all digits are at least <= 9. The n_q digits are even <= 6
    * (because there are only six quarks).
@@ -692,6 +692,15 @@ std::istream& operator>>(std::istream& is, PdgCode& code);
  * Writes the textual representation of the PDG code to the output stream.
  */
 std::ostream& operator<<(std::ostream& is, const PdgCode& code);
+
+// checks if two particles are a lepton pair (only electrons and muons) 
+// with opposite charges (dilepton)
+inline bool is_dilepton_pair(const PdgCode pdg1,const PdgCode pdg2) {
+  return ( (pdg1 == 0x11 && pdg2 == -0x11) ||
+           (pdg1 == -0x11 && pdg2 == 0x11) ||
+           (pdg1 == 0x13 && pdg2 == -0x13) ||
+           (pdg1 == -0x13 && pdg2 == 0x13) ); 
+}
 
 }  // namespace Smash
 
