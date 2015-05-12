@@ -194,10 +194,9 @@ TEST(periodic_grid) {
         // combine all neighbor particles into a single list
         ParticleList combinedNeighbors;
         for (auto &&neighbors : neighborLists) {
-          if (neighbors) {
-            for (auto &&n : *neighbors) {
-              combinedNeighbors.push_back(n);
-            }
+          VERIFY(neighbors);
+          for (auto &&n : *neighbors) {
+            combinedNeighbors.push_back(n);
           }
         }
 
