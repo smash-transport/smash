@@ -1,0 +1,61 @@
+/*
+ *
+ *    Copyright (c) 2015
+ *      SMASH Team
+ *
+ *    GNU General Public License (GPLv3 or later)
+ *
+ */
+
+#include "unittest.h"
+#include "setup.h"
+
+#include <algorithm>
+
+#include "../include/actions.h"
+#include "../include/decayaction.h"
+
+using namespace Smash;
+
+TEST(construct_and_insert) {
+  // create arbitrary particle
+  Test::create_smashon_particletypes();
+  ParticleData testparticle = Test::smashon(Test::Momentum{0.2, 0., .1, 0.},
+                                            Test::Position{0., 1., .9, 1.});
+
+  // use different times for different actions
+  constexpr float time_1 = 1.f;
+  constexpr float time_2 = 2.f;
+  constexpr float time_3 = 3.f;
+  constexpr float time_4 = 4.f;
+  constexpr float time_5 = 5.f;
+
+  constexpr float current_time = 0.f;
+
+  // add actions to list
+  ActionList action_vec;
+  action_vec.push_back(make_unique<DecayAction>(testparticle, time_4));
+  action_vec.push_back(make_unique<DecayAction>(testparticle, time_1));
+
+  // construct the Actions object
+  Actions actions(std::move(action_vec), current_time);
+  VERIFY(!actions.is_empty());
+
+  // create new actions that are then inserted into the Actions object
+  ActionList new_actions;
+  new_actions.push_back(make_unique<DecayAction>(testparticle, time_5));
+  new_actions.push_back(make_unique<DecayAction>(testparticle, time_2));
+  new_actions.push_back(make_unique<DecayAction>(testparticle, time_3));
+
+  // insert actions
+  actions.insert(std::move(new_actions), current_time);
+
+  // verify that the actions are in the right order
+  COMPARE(actions.pop()->time_of_execution(), time_1);
+  COMPARE(actions.pop()->time_of_execution(), time_2);
+  COMPARE(actions.pop()->time_of_execution(), time_3);
+  COMPARE(actions.pop()->time_of_execution(), time_4);
+  COMPARE(actions.pop()->time_of_execution(), time_5);
+
+  VERIFY(actions.is_empty());
+}
