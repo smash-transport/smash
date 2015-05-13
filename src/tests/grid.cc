@@ -237,12 +237,13 @@ TEST(periodic_grid) {
               COMPARE(it->position(), p.position());
             }
             auto &&compareDiff = [](float d) {
-              if (d < 0.) {
+              if (d < -0.1f * length) {
                 FUZZY_COMPARE(d, -length);
-              } else if (d > 0.) {
+              } else if (d > 0.1f * length) {
                 FUZZY_COMPARE(d, length);
               } else {
-                COMPARE(d, 0.);
+                COMPARE_ABSOLUTE_ERROR(
+                    d, 0.f, length * std::numeric_limits<double>::epsilon());
               }
             };
             // for each particle in search, find the same particle in list
