@@ -105,6 +105,9 @@ class ThreeVector {
   /// divide this vector by \f$a: \vec x^\prime = \frac{1}{a} \cdot \vec x\f$
   ThreeVector inline operator/= (const double &a);
 
+  bool operator==(const ThreeVector &rhs) const { return x_ == rhs.x_; }
+  bool operator!=(const ThreeVector &rhs) const { return x_ != rhs.x_; }
+
   /// iterates over the components
   using iterator = std::array<double, 3>::iterator;
   /// iterates over the components
