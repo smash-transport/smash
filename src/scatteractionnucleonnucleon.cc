@@ -226,9 +226,8 @@ CollisionBranchList ScatterActionNucleonNucleon::nuc_nuc_to_nuc_res(
       log.debug("Integral value: ", resonance_integral,
                 " Error: ", integral_error);
 
-      /* Cross section for 2->2 process with one resonance in final state.
-       * Based on Eq. (46) in PhD thesis of J. Weil
-       * (https://gibuu.hepforge.org/trac/chrome/site/files/phd/weil.pdf) */
+      /** Cross section for 2->2 process with one resonance in final state.
+       * Based on Eq. (46) in \iref{Weil:2013mya}. */
       float xsection = isospin_factor * isospin_factor * matrix_element
                      * resonance_integral / (s * cm_momentum());
 

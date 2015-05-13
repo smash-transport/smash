@@ -66,8 +66,7 @@ static float BlattWeisskopf(const float p_ab, const int L)
 
 /**
  * An additional form factor for unstable final states as used in GiBUU,
- * according to M. Post.
- * Reference: Buss et al., Phys. Rept. 512 (2012), eq. (174).
+ * according to M. Post. Reference: \iref{Buss:2011mx}, eq. (174).
  * The function returns the squared value of the form factor.
  */
 static double Post_FF_sqr(double m, double M0, double s0, double L) {
