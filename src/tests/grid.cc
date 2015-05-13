@@ -402,3 +402,22 @@ TEST(periodic_grid) {
     }
   }
 }
+
+TEST(max_positions_periodic_grid) {
+  constexpr int testparticles = 1;
+  const double max_interaction_length =
+      GridBase::min_cell_length(testparticles);
+  using Test::Position;
+  ParticleList list = {Test::smashon(Position{0, 0, 0, 0}),
+                       Test::smashon(Position{0, 0, 0, 0}),
+                       Test::smashon(Position{0, 0, 0, 0}),
+                       Test::smashon(Position{0, 0, 0, 0}),
+                       Test::smashon(Position{0, 0, 0, 0}),
+                       Test::smashon(Position{0, 0, 0, 0}),
+                       Test::smashon(Position{0, 0, 0, 0}),
+                       Test::smashon(Position{0, 0, 0, 0}),
+                       Test::smashon(Position{0, 2 * max_interaction_length,
+                                              2 * max_interaction_length,
+                                              2 * max_interaction_length})};
+  Grid<GridOptions::PeriodicBoundaries> grid(std::move(list), testparticles);
+}
