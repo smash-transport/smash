@@ -103,3 +103,11 @@ TEST(comparisons) {
   VERIFY(  p <  2 );
   VERIFY(  p <  q );
 }
+
+TEST(translation) {
+  ParticleData p = Test::smashon(Test::Position{0, 0, 0, 0});
+  COMPARE(p.position(), FourVector(0, 0, 0, 0));
+  COMPARE(p.translated({1, 0, 0}).position(), FourVector(0, 1, 0, 0));
+  COMPARE(p.translated({1, 2, 0}).position(), FourVector(0, 1, 2, 0));
+  COMPARE(p.translated({1, 2, 3}).position(), FourVector(0, 1, 2, 3));
+}
