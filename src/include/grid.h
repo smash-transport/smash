@@ -101,6 +101,7 @@ class Grid : public GridBase {
    * of the particles.
    *
    * \param all_particles The particles to place onto the grid.
+   * \param testparticles Number of testparticles used in this event
    */
   Grid(ParticleList &&all_particles, const int testparticles)
       : Grid{find_min_and_length(all_particles), std::move(all_particles),
@@ -114,6 +115,7 @@ class Grid : public GridBase {
    * \param min_and_length A pair consisting of the three min coordinates and
    * the three lengths.
    * \param all_particles The particles to place onto the grid.
+   * \param testparticles Number of testparticles used in this event
    */
   Grid(const std::pair<std::array<float, 3>, std::array<float, 3>> &
            min_and_length,
