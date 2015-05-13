@@ -78,6 +78,15 @@ inline bool all_of(Container &&c, UnaryPredicate &&p) {
                      std::forward<UnaryPredicate>(p));
 }
 
+/**
+ * Convenience wrapper for \c std::for_each that operates on a complete container.
+ */
+template <typename Container, typename UnaryFunction>
+inline UnaryFunction for_each(Container &&c, UnaryFunction &&f) {
+  return std::for_each(std::begin(c), std::end(c),
+                       std::forward<UnaryFunction>(f));
+}
+
 }  // namespace Smash
 
 #endif  // SRC_INCLUDE_ALGORITHMS_H_
