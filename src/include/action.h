@@ -131,7 +131,7 @@ class Action {
   /**
    * Return the list of particles that go into the interaction.
    */
-  ParticleList incoming_particles() const;
+  const ParticleList& incoming_particles() const;
 
   /**
    * Return the list of particles that resulted from the interaction.

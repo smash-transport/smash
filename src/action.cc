@@ -53,12 +53,8 @@ bool Action::is_pauli_blocked(const Particles & particles,
   return false;
 }
 
-ParticleList Action::incoming_particles() const {
-  ParticleList l;
-  for (const auto &part : incoming_particles_) {
-    l.emplace_back(part);
-  }
-  return std::move(l);
+const ParticleList& Action::incoming_particles() const {
+  return incoming_particles_;
 }
 
 FourVector Action::get_interaction_point() {
