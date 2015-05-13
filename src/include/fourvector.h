@@ -35,7 +35,9 @@ namespace Smash {
  * the interface. This is necessary because most particles are close to light
  * speed and thus the low-order bits in the mantissa of the momentum make large
  * differences in energy. If they are discarded by rounding to single-precision,
- * e.g. boosting to/from the center-of-mass frame breaks. \n
+ * e.g. boosting to/from the center-of-mass frame breaks. (see also
+ * https://fias.uni-frankfurt.de/pm/projects/smash/wiki/Precision_considerations)
+ * \n
  * \li It might be sufficient for \c FourVectors of other quantities to use
  * single-precision, though. This could be implemented by making \c FourVector a
  * class template and use \c FourVector<double> for momenta and \c
