@@ -335,7 +335,11 @@ FourVector inline FourVector::operator*=(const double &a) {
  *
  * \return \f$x^\mu = b \cdot a^\mu\f$
  */
-inline FourVector operator*(FourVector a, const double &b) {
+inline FourVector operator*(FourVector a, double b) {
+  a *= b;
+  return a;
+}
+inline FourVector operator*(double b, FourVector a) {
   a *= b;
   return a;
 }
