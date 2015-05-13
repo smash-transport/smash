@@ -28,6 +28,7 @@ class ScatterAction : public Action {
    * \param[in] in_part1 first scattering partner
    * \param[in] in_part2 second scattering partner
    * \param[in] time_of_execution time at which the action is supposed to take place
+   * \param[in] isotropic if true, do the collision isotropically
    */
   ScatterAction(const ParticleData &in_part1, const ParticleData &in_part2,
                 float time_of_execution, bool isotropic = false);
