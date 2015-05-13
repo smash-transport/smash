@@ -96,13 +96,11 @@ class Grid : public GridBase {
   Grid(const std::pair<std::array<float, 3>, std::array<float, 3>> &
            min_and_length,
        ParticleList &&all_particles, const int testparticles)
-      : min_position_(min_and_length.first) {
-    const auto &length = min_and_length.second;
-
+      : min_position_(min_and_length.first), length_(min_and_length.second) {
     std::tie(index_factor_, number_of_cells_) =
-        determine_cell_sizes(all_particles.size(), length, testparticles);
+        determine_cell_sizes(all_particles.size(), length_, testparticles);
 
-    build_cells(std::move(all_particles), length);
+    build_cells(std::move(all_particles));
   }
 
   /**
@@ -156,14 +154,21 @@ class Grid : public GridBase {
    *
    * This is different for the Normal and PeriodicBoundaries cases.
    */
-  void build_cells(ParticleList &&all_particles,
-                   const std::array<float, 3> &length);
+  void build_cells(ParticleList &&all_particles);
 
   /**
    * Returns the one-dimensional cell-index from the 3-dim index \p x, \p y, \p
    * z.
    */
   size_type make_index(size_type x, size_type y, size_type z) const;
+
+  /**
+   * Returns the one-dimensional cell-index from the 3-dim index \p idx.
+   * This is a convenience overload for the above function.
+   */
+  size_type make_index(std::array<size_type, 3> idx) const {
+    return make_index(idx[0], idx[1], idx[2]);
+  }
 
   /**
    * Returns the one-dimensional cell-index from the position vector inside the
@@ -180,6 +185,9 @@ class Grid : public GridBase {
 
   /// The lower bound of the cell coordinates.
   const std::array<float, 3> min_position_;
+
+  /// The 3 lengths of the complete grid. Used for periodic boundary wrapping.
+  const std::array<float, 3> length_;
 
   /**
    * This normally equals 1/max_interaction_length, but if the number of cells
