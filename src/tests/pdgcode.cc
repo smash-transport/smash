@@ -641,3 +641,9 @@ TEST(equal) {
 TEST(antiparticle) {
   VERIFY(pion.is_antiparticle_of(piminus));
 }
+
+TEST(from_decimal) {
+  COMPARE(pion, PdgCode::from_decimal(211));
+  COMPARE(Kminus, PdgCode::from_decimal(-321));
+  COMPARE(antixi, PdgCode::from_decimal(-103312));
+}

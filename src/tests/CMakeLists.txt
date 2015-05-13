@@ -1,3 +1,12 @@
+########################################################
+#
+#    Copyright (c) 2014-2015
+#      SMASH Team
+#
+#    BSD 3-clause license
+# 
+######################################################### 
+
 # remove -Winline for test code
 string(REPLACE "-Winline " "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 
@@ -101,6 +110,7 @@ smash_add_unittest(density)
 smash_add_unittest(distributions)
 smash_add_unittest(experiment)
 smash_add_unittest(fourvector)
+smash_add_unittest(grid)
 smash_add_unittest(initial_conditions)
 smash_add_unittest(isospin)
 smash_add_unittest(lorentzboost)

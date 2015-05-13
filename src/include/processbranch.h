@@ -184,7 +184,7 @@ class CollisionBranch : public ProcessBranch {
   const ParticleTypePtrList &particle_types() const override {
     return particle_types_;
   }
-  //// Set the process type
+  /// Set the process type
   inline void set_type(ProcessType p_type) {
     process_type_ = p_type;
   }
@@ -210,7 +210,11 @@ class CollisionBranch : public ProcessBranch {
    * be more efficient.
    */
   ParticleTypePtrList particle_types_;
-  /// Process type internal variable
+  /** 
+   * Process type are used to distinguish different types of processes, 
+   * e.g. string formation, resonance formation, elastic scattering and so on. 
+   *  
+   */
   ProcessType process_type_;
 };
 

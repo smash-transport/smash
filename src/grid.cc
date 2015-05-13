@@ -99,10 +99,7 @@ GridBase::determine_cell_sizes(size_type particle_count,
   auto &index_factor = std::get<0>(r);
   auto &number_of_cells = std::get<1>(r);
 
-  // 2.5 fm corresponds to maximal cross-section of 200 mb = 20 fm^2
-  // sqrt(20 fm^2/N_{test}/pi) is approximately 2.5/sqrt(N_{test})
-  float max_interaction_length = 2.5f /
-                                 std::sqrt(static_cast<float>(testparticles));
+  float max_interaction_length = min_cell_length(testparticles);
 
   // The number of cells is determined by the min and max coordinates where
   // particles are positioned and the maximal interaction length (which equals

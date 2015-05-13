@@ -27,7 +27,6 @@
 #include "include/macros.h"
 #include "include/particledata.h"
 #include "include/particles.h"
-#include "include/particletype.h"
 #include "include/processbranch.h"
 #include "include/random.h"
 
@@ -142,6 +141,35 @@ float sample_resonance_mass(const ParticleType &type_resonance,
   }
 
   return mass_resonance;
+}
+
+
+/**
+ * Scattering matrix amplitude squared for \f$NN \rightarrow NR\f$ processes,
+ * where R is a baryon resonance (Delta, N*, Delta*).
+ *
+ * \param[in] mandelstam_s Mandelstam-s, i.e. collision CMS energy squared.
+ * \param[in] type_final_a Type information for the first final state particle.
+ * \param[in] type_final_b Type information for the second final state particle.
+ *
+ * \return Matrix amplitude squared \f$|\mathcal{M}(\sqrt{s})|^2/16\pi\f$.
+ */
+float nn_to_resonance_matrix_element(const double mandelstam_s,
+  const ParticleType &type_final_a, const ParticleType &type_final_b) {
+  PdgCode delta = PdgCode("2224");
+  if (type_final_a.pdgcode().iso_multiplet()
+      != type_final_b.pdgcode().iso_multiplet()) {
+    /* N + N -> N + Delta: fit to Dmitriev OBE model,
+     * Nucl. Phys. A 459, 503 (1986) */
+    if (type_final_a.pdgcode().iso_multiplet() == delta.iso_multiplet()
+        || type_final_b.pdgcode().iso_multiplet() == delta.iso_multiplet()) {
+      return 459. / std::pow(std::sqrt(mandelstam_s) - 1.104, 1.951);
+    } else {
+      return 0.0;
+    }
+  } else {
+    return 0.0;
+  }
 }
 
 

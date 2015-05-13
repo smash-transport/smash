@@ -117,7 +117,6 @@ class TwoBodyDecaySemistable : public TwoBodyDecay {
    * \param m0 Pole mass of the decaying particle [GeV].
    * \param G0 Partial width at the pole mass [GeV].
    * \param m Actual mass of the decaying particle [GeV].
-   * \param m_uns Actual mass of the unstable incoming particle [GeV].
    */
   float width(float m0, float G0, float m) const override;
   /**

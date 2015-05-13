@@ -168,6 +168,19 @@ inline std::unique_ptr<ExperimentBase> experiment(const char *configOverrides) {
   return ExperimentBase::create(configuration(configOverrides));
 }
 
+/**
+ * Generate a list of particles from the given generator function.
+ */
+template <typename G>
+inline ParticleList create_particle_list(std::size_t n, G &&generator) {
+  ParticleList list;
+  list.reserve(n);
+  for (auto i = n; i; --i) {
+    list.emplace_back(generator());
+  }
+  return list;
+}
+
 /// A type alias for a unique_ptr of Particles.
 using ParticlesPtr = std::unique_ptr<Particles>;
 
