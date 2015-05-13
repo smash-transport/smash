@@ -152,11 +152,13 @@ if(BUILD_TESTING)
                                                # also required with the link
                                                # command, though
    AddCompilerFlag(${SANITIZER_FLAG} CXX_RESULT HAVE_SANITIZER)
+   set(CMAKE_REQUIRED_FLAGS "${_tmp}")
    if(NOT HAVE_SANITIZER)
       set(SANITIZER_FLAG -fsanitize=address)
+      set(CMAKE_REQUIRED_FLAGS ${SANITIZER_FLAG})
       AddCompilerFlag(${SANITIZER_FLAG} CXX_RESULT HAVE_SANITIZER)
+      set(CMAKE_REQUIRED_FLAGS "${_tmp}")
    endif()
-   set(CMAKE_REQUIRED_FLAGS "${_tmp}")
 
    if(HAVE_SANITIZER)
       option(USE_SANITIZER "Use available address and undefined behavior sanitizers for test code." ON)

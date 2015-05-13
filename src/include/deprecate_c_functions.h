@@ -47,12 +47,13 @@ namespace Smash {
  * C++ code is to use the C++ interface. This may enable additional optimization
  * opportunities.
  */
-#define SMASH_DEPRECATE_NONSTD(fun__)                                               \
-  template <typename... Ts>                                                         \
-  SMASH_DEPRECATED(                                                                 \
-      "Please add the std:: namespace for this function.") auto fun__(Ts&&... args) \
-      ->decltype(std::fun__(args...)) {                                             \
-    return std::fun__(args...);                                                     \
+#define SMASH_DEPRECATE_NONSTD(fun__)                                 \
+  template <typename... Ts>                                           \
+  SMASH_DEPRECATED(                                                   \
+      "Please add the std:: namespace for this function.")            \
+                                             auto fun__(Ts&&... args) \
+      ->decltype(std::fun__(args...)) {                               \
+    return std::fun__(args...);                                       \
   }
 SMASH_DEPRECATE_NONSTD(abort)
 SMASH_DEPRECATE_NONSTD(abs)

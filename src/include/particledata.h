@@ -166,6 +166,7 @@ class ParticleData {
    */
   ParticleData(const ParticleType &ptype, int uid, int index)
       : id_(uid), index_(index), type_(&ptype) {}
+
  private:
   friend class Particles;
   ParticleData() = default;
@@ -228,6 +229,28 @@ std::ostream &operator<<(std::ostream &s, const ParticleData &p);
  * to the stream.
  */
 std::ostream &operator<<(std::ostream &out, const ParticleList &particle_list);
+
+/**\ingroup logging
+ * \internal
+ * Helper type to attach the request for detailed printing to the type.
+ */
+struct PrintParticleListDetailed {
+  const ParticleList &list;
+};
+/**\ingroup loggingk
+ * Request the ParticleList to be printed in full detail (i.e. one full
+ * ParticleData printout per line).
+ */
+inline PrintParticleListDetailed detailed(const ParticleList &list) {
+  return {list};
+}
+
+/** \ingroup logging
+ * Writes a detailed overview over the particles in the \p particle_list argument
+ * to the stream. This overload is selected via the function \ref detailed.
+ */
+std::ostream &operator<<(std::ostream &out,
+                         const PrintParticleListDetailed &particle_list);
 
 }  // namespace Smash
 

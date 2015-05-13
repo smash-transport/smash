@@ -42,8 +42,8 @@ class PauliBlocker {
   // Returns phase-space densityof particle pdg at the point (r,p)
   float phasespace_dens(const ThreeVector r, const ThreeVector p,
                         const Particles &particles, const PdgCode pdg) const;
- private:
 
+ private:
   // Tabulate integrals for weights
   void init_weights();
 

@@ -67,7 +67,8 @@ class Action {
 
   /** Add a new subprocess.  */
   template<typename Branch>
-  void add_process(ProcessBranchPtr<Branch> &p, ProcessBranchList<Branch>& subprocesses,
+  void add_process(ProcessBranchPtr<Branch> &p,
+                   ProcessBranchList<Branch>& subprocesses,
       float& total_weight) {
     if (p->weight() > really_small) {
       total_weight += p->weight();
@@ -347,9 +348,9 @@ class ScatterAction : public Action {
    *
    * \throws InvalidResonanceFormation
    */
- void generate_final_state() override;
+  void generate_final_state() override;
 
- float raw_weight_value() const override;
+  float raw_weight_value() const override;
 
   /**
    * Determine the (parametrized) total cross section for this collision. This

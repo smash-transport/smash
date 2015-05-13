@@ -23,7 +23,7 @@ Particles::Particles() : data_(new ParticleData[data_capacity_]) {
 inline void Particles::ensure_capacity(unsigned to_add) {
   if (data_size_ + to_add >= data_capacity_) {
     increase_capacity((data_capacity_ + to_add) * 2u);
-    assert(data_size_ + to_add > data_capacity_);
+    assert(data_size_ + to_add < data_capacity_);
   }
 }
 
@@ -43,6 +43,7 @@ void Particles::increase_capacity(unsigned new_capacity) {
 
 inline void Particles::copy_in(ParticleData &to, const ParticleData &from) {
   to.id_ = ++id_max_;
+  to.id_process_ = from.id_process_;
   to.type_ = from.type_;
   to.momentum_ = from.momentum_;
   to.position_ = from.position_;
