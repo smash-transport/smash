@@ -181,7 +181,7 @@ class Grid : public GridBase {
    * In PeriodicBoundaries mode the x and y indexes are incremented by one to
    * adjust for the ghost cells.
    */
-  size_type make_index(const ThreeVector &position) const;
+  size_type make_index(const FourVector &position) const;
 
   /// The lower bound of the cell coordinates.
   const std::array<float, 3> min_position_;

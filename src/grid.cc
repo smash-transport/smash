@@ -69,25 +69,28 @@ namespace Smash {
 std::pair<std::array<float, 3>, std::array<float, 3>>
 GridBase::find_min_and_length(const ParticleList &all_particles) {
   std::pair<std::array<float, 3>, std::array<float, 3>> r;
+  auto &min_position = r.first;
+  auto &length = r.second;
 
   // intialize min and max position arrays with the position of the first
   // particle in the list
-  const auto first = all_particles.begin()->position().threevec();
-  r.first = {{static_cast<float>(first[0]), static_cast<float>(first[1]),
-              static_cast<float>(first[2])}};
-  r.second = r.first;
+  const auto &first_position = all_particles.front().position();
+  min_position = {{static_cast<float>(first_position[1]),
+                   static_cast<float>(first_position[2]),
+                   static_cast<float>(first_position[3])}};
+  auto max_position = min_position;
   for (const auto &p : all_particles) {
-    const auto pos = p.position().threevec();
-    r.first[0] = std::min(r.first[0], static_cast<float>(pos[0]));
-    r.first[1] = std::min(r.first[1], static_cast<float>(pos[1]));
-    r.first[2] = std::min(r.first[2], static_cast<float>(pos[2]));
-    r.second[0] = std::max(r.second[0], static_cast<float>(pos[0]));
-    r.second[1] = std::max(r.second[1], static_cast<float>(pos[1]));
-    r.second[2] = std::max(r.second[2], static_cast<float>(pos[2]));
+    const auto &pos = p.position();
+    min_position[0] = std::min(min_position[0], static_cast<float>(pos[1]));
+    min_position[1] = std::min(min_position[1], static_cast<float>(pos[2]));
+    min_position[2] = std::min(min_position[2], static_cast<float>(pos[3]));
+    max_position[0] = std::max(max_position[0], static_cast<float>(pos[1]));
+    max_position[1] = std::max(max_position[1], static_cast<float>(pos[2]));
+    max_position[2] = std::max(max_position[2], static_cast<float>(pos[3]));
   }
-  r.second[0] = r.second[0] - r.first[0];
-  r.second[1] = r.second[1] - r.first[1];
-  r.second[2] = r.second[2] - r.first[2];
+  length[0] = max_position[0] - min_position[0];
+  length[1] = max_position[1] - min_position[1];
+  length[2] = max_position[2] - min_position[2];
   return r;
 }
 
@@ -168,13 +171,13 @@ inline typename Grid<Options>::size_type Grid<Options>::make_index(
 
 template <GridOptions Options>
 inline typename Grid<Options>::size_type Grid<Options>::make_index(
-    const ThreeVector &position) const {
+    const FourVector &position) const {
   return make_index(
-      std::floor((static_cast<float>(position[0]) - min_position_[0]) *
+      std::floor((static_cast<float>(position[1]) - min_position_[0]) *
                  index_factor_[0]),
-      std::floor((static_cast<float>(position[1]) - min_position_[1]) *
+      std::floor((static_cast<float>(position[2]) - min_position_[1]) *
                  index_factor_[1]),
-      std::floor((static_cast<float>(position[2]) - min_position_[2]) *
+      std::floor((static_cast<float>(position[3]) - min_position_[2]) *
                  index_factor_[2]));
 }
 
@@ -206,7 +209,7 @@ void Grid<O>::build_cells(ParticleList &&all_particles) {
                   number_of_cells_[2]);
 
     for (const auto &p : all_particles) {
-      const auto idx = make_index(p.position().threevec());
+      const auto idx = make_index(p.position());
 #ifndef NDEBUG
       if (idx >= size_type(cells_.size())) {
         log.fatal(source_location,
