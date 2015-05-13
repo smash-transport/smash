@@ -116,7 +116,9 @@ Grid<O>::determine_cell_sizes(size_type particle_count,
   // because the last cell will then store particles in the interval
   // [length, length + max_interaction_length[. The code below achieves this
   // effect by rounding down (floor) and adding 1 afterwards.
-  const int max_cells = std::cbrt(particle_count);
+  const int max_cells = O == GridOptions::Normal
+                            ? std::cbrt(particle_count)
+                            : std::max(2, int(std::cbrt(particle_count)));
   for (std::size_t i = 0; i < number_of_cells.size(); ++i) {
     index_factor[i] = 1.f / max_interaction_length;
     number_of_cells[i] =
@@ -131,14 +133,17 @@ Grid<O>::determine_cell_sizes(size_type particle_count,
         // just make the default number of cells one less than for non-periodic
         // boundaries.
         (O == GridOptions::Normal ? 1 : 0);
+
+    // std::nextafter implements a safety margin so that no valid position
+    // inside the grid can reference an out-of-bounds cell
     if (number_of_cells[i] > max_cells) {
       number_of_cells[i] = max_cells;
-      index_factor[i] = (max_cells - 0.1f)  // -0.1 for safety margin
-                        / length[i];
-    }
-    if (O == GridOptions::PeriodicBoundaries && number_of_cells[i] == 1) {
-      number_of_cells[i] = 2;
-      index_factor[i] = 1.999f / length[i];
+      index_factor[i] = std::nextafter(number_of_cells[i] / length[i], 0.f);
+    } else if (O == GridOptions::PeriodicBoundaries) {
+      if (number_of_cells[i] == 1) {
+        number_of_cells[i] = 2;
+      }
+      index_factor[i] = std::nextafter(number_of_cells[i] / length[i], 0.f);
     }
   }
   return r;

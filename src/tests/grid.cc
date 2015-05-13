@@ -419,5 +419,11 @@ TEST(max_positions_periodic_grid) {
                        Test::smashon(Position{0, 2 * max_interaction_length,
                                               2 * max_interaction_length,
                                               2 * max_interaction_length})};
+  // This grid construction is fragile because there are particles at 0 and 2 *
+  // cell_length. A Normal grid simply would try to create a 3x3x3 grid and be
+  // fine. The PeriodicBoundaries grid cannot do so as it must fit the cells to
+  // the total length. Thus it would create a 2x2x2 grid and the last particle
+  // might result in an out-of-bounds cell index. This constructor call ensures
+  // that no assertion/exception in the construction code is hit.
   Grid<GridOptions::PeriodicBoundaries> grid(std::move(list), testparticles);
 }
