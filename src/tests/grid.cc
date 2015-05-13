@@ -427,3 +427,21 @@ TEST(max_positions_periodic_grid) {
   // that no assertion/exception in the construction code is hit.
   Grid<GridOptions::PeriodicBoundaries> grid(std::move(list), testparticles);
 }
+
+TEST(max_positions_normal_grid) {
+  constexpr int testparticles = 1;
+  const double max_interaction_length =
+      GridBase::min_cell_length(testparticles);
+  using Test::Position;
+  ParticleList list = {Test::smashon(Position{0, 0, 0, -6.2470569610595703125}),
+                       Test::smashon(Position{0, 2.5 * max_interaction_length,
+                                              2.5 * max_interaction_length,
+                                              8.0611705780029296875})};
+  for (int i = 5 * 5 * 5; i; --i) {
+    list.push_back(Test::smashon(Position(0, 0, 0, 0)));
+  }
+  // This grid construction uses fragile numbers in the z min/max coordinates,
+  // which lead to an index_factor_ that even after one std::nextafter call
+  // still generates an out-of-bounds cell index.
+  Grid<GridOptions::Normal> grid2(std::move(list),testparticles);
+}

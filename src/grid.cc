@@ -138,12 +138,20 @@ Grid<O>::determine_cell_sizes(size_type particle_count,
     // inside the grid can reference an out-of-bounds cell
     if (number_of_cells[i] > max_cells) {
       number_of_cells[i] = max_cells;
-      index_factor[i] = std::nextafter(number_of_cells[i] / length[i], 0.f);
+      index_factor[i] = number_of_cells[i] / length[i];
+      while (index_factor[i] * length[i] >= number_of_cells[i]) {
+        index_factor[i] = std::nextafter(index_factor[i], 0.f);
+      }
+      assert(index_factor[i] * length[i] < number_of_cells[i]);
     } else if (O == GridOptions::PeriodicBoundaries) {
       if (number_of_cells[i] == 1) {
         number_of_cells[i] = 2;
       }
-      index_factor[i] = std::nextafter(number_of_cells[i] / length[i], 0.f);
+      index_factor[i] = number_of_cells[i] / length[i];
+      while (index_factor[i] * length[i] >= number_of_cells[i]) {
+        index_factor[i] = std::nextafter(index_factor[i], 0.f);
+      }
+      assert(index_factor[i] * length[i] < number_of_cells[i]);
     }
   }
   return r;
