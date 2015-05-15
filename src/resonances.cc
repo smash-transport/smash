@@ -23,6 +23,7 @@
 #include "include/decaymodes.h"
 #include "include/distributions.h"
 #include "include/fourvector.h"
+#include "include/kinematics.h"
 #include "include/logging.h"
 #include "include/macros.h"
 #include "include/particledata.h"
@@ -89,18 +90,12 @@ double spectral_function_integrand(double resonance_mass,
     = reinterpret_cast<IntegrandParameters*>(parameters);
   double resonance_pole_mass = params->type->mass();
   double stable_mass = params->m2;
-  double mandelstam_s = params->s;
   double resonance_width = params->type->total_width(resonance_mass);
 
-  /* center-of-mass momentum of final state particles */
-  if (mandelstam_s >
-      (stable_mass + resonance_mass) * (stable_mass + resonance_mass)) {
-    double cm_momentum_final
-      = std::sqrt((mandelstam_s - (stable_mass + resonance_mass)
-              * (stable_mass + resonance_mass))
-             * (mandelstam_s - (stable_mass - resonance_mass)
-                * (stable_mass - resonance_mass))
-             / (4 * mandelstam_s));
+  double srts = std::sqrt(params->s);
+  if (srts > stable_mass + resonance_mass) {
+    /* center-of-mass momentum of final state particles */
+    double cm_momentum_final = pCM(srts, stable_mass, resonance_mass);
 
     /* Integrand is the spectral function weighted by the
      * CM momentum of final state
