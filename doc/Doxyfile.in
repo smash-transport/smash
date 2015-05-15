@@ -206,7 +206,7 @@ ALIASES                = "NucleusModus=Smash::NucleusModus" \
                          "key=\c" \
                          "Userguide=" \
                          "mocking=\xrefitem unittest_mocking \"\" \"\"" \
-                         "iref{1}=<a href="http://inspirehep.net/search?p=\1">\1</a>"
+                         "iref{1}=<a href="http://inspirehep.net/search?p=\1&of=hd">\1</a>"
 
 # This tag can be used to specify a number of word-keyword mappings (TCL only).
 # A mapping has the form "name=value". For example adding
