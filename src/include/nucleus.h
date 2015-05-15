@@ -58,7 +58,7 @@ class Nucleus {
  /** Sets the deformation parameters of the Woods-Saxon distribution
   * according to the current mass number.
   *
-  * Ref. for nuclear radii is Atom. Data Nucl. Data Tabl. by H. De Vries et. al.
+  * Ref. for nuclear radii is \iref{De_Jager:1987qc}.
   * For diffusiveness and saturation density, see [insert reference].
   */
   virtual void set_parameters_automatic();
