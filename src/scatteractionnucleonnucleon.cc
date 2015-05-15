@@ -159,6 +159,7 @@ CollisionBranchList ScatterActionNucleonNucleon::nuc_nuc_to_nuc_res(
   const auto &log = logger<LogArea::ScatterAction>();
   CollisionBranchList process_list;
   const double s = mandelstam_s();
+  const double srts = sqrt_s();
 
   /* Loop over all baryon resonances. */
   for (ParticleTypePtr type_resonance :
@@ -200,7 +201,7 @@ CollisionBranchList ScatterActionNucleonNucleon::nuc_nuc_to_nuc_res(
 
       /* Integration limits. */
       double lower_limit = type_resonance->minimum_mass();
-      double upper_limit = std::sqrt(s) - second_type->mass();
+      double upper_limit = srts - second_type->mass();
       /* Check the available energy (requiring it to be a little above the
       * threshold, because the integration will not work if it's too close). */
       if (upper_limit - lower_limit < 1E-3) {
@@ -217,7 +218,7 @@ CollisionBranchList ScatterActionNucleonNucleon::nuc_nuc_to_nuc_res(
       /* Calculate resonance production cross section
        * using the Breit-Wigner distribution as probability amplitude.
        * Integrate over the allowed resonance mass range. */
-      IntegrandParameters params = {type_resonance, second_type->mass(), s};
+      IntegrandParameters params = {type_resonance, second_type->mass(), srts};
       log.debug("Process: ", type_particle_a, type_particle_b, " -> ",
                 *second_type, *type_resonance);
       log.debug("Limits: ", lower_limit, " ", upper_limit);

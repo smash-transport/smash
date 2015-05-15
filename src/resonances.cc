@@ -91,8 +91,8 @@ double spectral_function_integrand(double resonance_mass,
   double resonance_pole_mass = params->type->mass();
   double stable_mass = params->m2;
   double resonance_width = params->type->total_width(resonance_mass);
+  double srts = params->srts;
 
-  double srts = std::sqrt(params->s);
   if (srts > stable_mass + resonance_mass) {
     /* center-of-mass momentum of final state particles */
     double cm_momentum_final = pCM(srts, stable_mass, resonance_mass);
@@ -116,8 +116,7 @@ float sample_resonance_mass(const ParticleType &type_resonance,
                             const double cms_energy) {
   /* Define distribution parameters */
   float mass_stable = type_stable.mass();
-  IntegrandParameters params = {&type_resonance, mass_stable,
-                                cms_energy * cms_energy};
+  IntegrandParameters params = {&type_resonance, mass_stable, cms_energy};
 
   /* Sample resonance mass from the distribution
    * used for calculating the cross section. */

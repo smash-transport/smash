@@ -29,10 +29,10 @@ struct IntegrandParameters {
    * \fpPrecision Why \c double?
    */
   double m2;
-  /** Mandelstam s
+  /** Square root of Mandelstam s
    * \fpPrecision Why \c double?
    */
-  double s;
+  double srts;
 };
 
 /**
