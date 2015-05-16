@@ -41,7 +41,7 @@ float Nucleus::mass() const {
  *
  *
  * Nucleons in nuclei are distributed according to a
- * Woods-Saxon-distribution[See Phys. Rev. 95, 577 (1954)]
+ * Woods-Saxon-distribution (see \iref{Woods:1954zz})
  *
  * \f[\frac{dN}{d^3r} = \frac{\rho_0}{\exp\left(\frac{r-r_0}{d}\right)
  * +1},\f]

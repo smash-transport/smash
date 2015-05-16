@@ -160,8 +160,8 @@ double ScatterAction::particle_distance() const {
   if (std::abs(mom_diff.sqr()) < really_small)
     return  pos_diff.sqr();
 
-  /* UrQMD squared distance criteria:
-   * arXiv:nucl-th/9803035 (3.27): in center of momemtum frame
+  /** UrQMD squared distance criterion:
+   * \iref{Bass:1998ca} (3.27): in center of momemtum frame
    * position of particle a: x_a
    * position of particle b: x_b
    * velocity of particle a: v_a
@@ -224,9 +224,9 @@ double ScatterAction::two_to_one_formation(const ParticleType &type_resonance,
   if (resonance_width <= 0.f) {
     return 0.;
   }
-  /* Calculate resonance production cross section
+  /** Calculate resonance production cross section
    * using the Breit-Wigner distribution as probability amplitude.
-   * See Eq. (176) in Buss et al., Physics Reports 512, 1 (2012). */
+   * See Eq. (176) in \iref{Buss:2011mx}. */
   return spinfactor * sym_factor * 4.0 * M_PI / cm_momentum_sqr
          * breit_wigner(s, type_resonance.mass(), resonance_width)
          * partial_width/resonance_width

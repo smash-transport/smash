@@ -50,8 +50,7 @@ CollisionBranchPtr ScatterActionNucleonNucleon::elastic_cross_section(float) {
 
 /**
  * Computes the B coefficients from the Cugnon parametrization of the angular
- * distribution in elastic pp scattering, see equ. (8) in:
- * J. Cugnon et al., Nucl. Instr. and Meth. in Phys. Res. B 111 (1996) 215-220.
+ * distribution in elastic pp scattering, see equation (8) in \iref{Cugnon:1996kh}.
  * Note: The original Cugnon parametrization is only applicable for
  * plab < 6 GeV and keeps rising above that. We add an upper limit of b <= 9,
  * in order to be compatible with high-energy data (up to plab ~ 25 GeV).
@@ -69,8 +68,7 @@ static float Cugnon_bpp(float plab) {
 
 /**
  * Computes the B coefficients from the Cugnon parametrization of the angular
- * distribution in elastic np scattering, see equ. (10) in:
- * J. Cugnon et al., Nucl. Instr. and Meth. in Phys. Res. B 111 (1996) 215-220.
+ * distribution in elastic np scattering, see equation (10) in \iref{Cugnon:1996kh}.
  * \param[in] plab Lab momentum in GeV.
  */
 static float Cugnon_bnp(float plab) {
@@ -98,8 +96,8 @@ void ScatterActionNucleonNucleon::elastic_scattering() {
   if (isotropic_) {
     phitheta.distribute_isotropically();
   } else {
-    /* Choose angular distribution according to Cugnon parametrization, see:
-    * J. Cugnon et al., Nucl. Instr. and Meth. in Phys. Res. B 111 (1996) 215-220. */
+    /** Choose angular distribution according to Cugnon parametrization,
+     * see \iref{Cugnon:1996kh}. */
     double bb, a, plab = plab_from_s_NN(mandelstam_s());
     if (incoming_particles_[0].type().charge() +
         incoming_particles_[1].type().charge() == 1) {
@@ -228,9 +226,8 @@ CollisionBranchList ScatterActionNucleonNucleon::nuc_nuc_to_nuc_res(
       log.debug("Integral value: ", resonance_integral,
                 " Error: ", integral_error);
 
-      /* Cross section for 2->2 process with one resonance in final state.
-       * Based on Eq. (46) in PhD thesis of J. Weil
-       * (https://gibuu.hepforge.org/trac/chrome/site/files/phd/weil.pdf) */
+      /** Cross section for 2->2 process with one resonance in final state.
+       * Based on Eq. (46) in \iref{Weil:2013mya}. */
       float xsection = isospin_factor * isospin_factor * matrix_element
                      * resonance_integral / (s * cm_momentum());
 
@@ -291,10 +288,9 @@ void ScatterActionNucleonNucleon::sample_cms_momenta() {
   Angles phitheta;
   if (t_a.pdgcode().iso_multiplet() == 0x1114 &&
       t_b.pdgcode().iso_multiplet() == 0x1112 && !isotropic_) {
-    /* NN->NDelta: Sample scattering angles in center-of-mass frame from an
+    /** NN->NDelta: Sample scattering angles in center-of-mass frame from an
      * anisotropic angular distribution, using the same distribution as for
-     * elastic pp scattering, as suggested in:
-     * J. Cugnon et al., Nucl. Instr. and Meth. in Phys. Res. B 111 (1996) 215-220. */
+     * elastic pp scattering, as suggested in \iref{Cugnon:1996kh}. */
     double plab = plab_from_s_NN(mandelstam_s());
     double bb = std::max(Cugnon_bpp(plab), really_small);
     double t0 = (mass_a*mass_a-mass_b*mass_b)*(mass_a*mass_a-mass_b*mass_b)

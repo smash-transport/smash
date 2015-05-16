@@ -159,8 +159,7 @@ float nn_to_resonance_matrix_element(const double mandelstam_s,
   PdgCode delta = PdgCode("2224");
   if (type_final_a.pdgcode().iso_multiplet()
       != type_final_b.pdgcode().iso_multiplet()) {
-    /* N + N -> N + Delta: fit to Dmitriev OBE model,
-     * Nucl. Phys. A 459, 503 (1986) */
+    /** N + N -> N + Delta: fit to OBE model (\iref{Dmitriev:1986st}) */
     if (type_final_a.pdgcode().iso_multiplet() == delta.iso_multiplet()
         || type_final_b.pdgcode().iso_multiplet() == delta.iso_multiplet()) {
       return 459. / std::pow(std::sqrt(mandelstam_s) - 1.104, 1.951);
