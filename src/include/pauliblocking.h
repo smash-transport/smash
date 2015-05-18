@@ -29,10 +29,9 @@ namespace Smash {
  * and momentum of a final-state fermion. Effective reduction
  * of cross-section is done via random rejection of reaction
  * with probability \f$ 1 - f\f$. More details can be found in
- * T. Gaitanos, A.B. Larionov, H. Lenske, U. Mosel,
- * Phys. Rev. C 81 (2010) 054316., section III B. Our implementation
+ * \iref{Gaitanos:2010fd}, section III B. Our implementation
  * mainly follows this article (and therefore GiBUU, see
- * gibuu.hepforge.org).
+ * http://gibuu.hepforge.org).
  */
 class PauliBlocker {
  public:

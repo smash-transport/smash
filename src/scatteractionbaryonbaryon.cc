@@ -107,9 +107,9 @@ CollisionBranchList ScatterActionBaryonBaryon::nuc_res_to_nuc_nuc(
         continue;
       }
 
-      /* Cross section for 2->2 resonance absorption, obtained via detailed
+      /** Cross section for 2->2 resonance absorption, obtained via detailed
        * balance from the inverse reaction.
-       * See eqs. (B.6), (B.9) and (181) in the GiBUU review paper.
+       * See eqs. (B.6), (B.9) and (181) in \iref{Buss:2011mx}.
        * There is a symmetry factor 1/2 and a spin factor 2/(2S+1) involved,
        * which combine to 1/(2S+1). */
       float xsection = isospin_factor * isospin_factor
