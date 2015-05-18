@@ -168,6 +168,16 @@ class Experiment : public ExperimentBase {
    */
   size_t run_time_evolution(const int evt_num);
 
+  /** Runs the time evolution of an event without time steps
+   *
+   * Here, all actions are looped over, collisions and decays are
+   * carried out and particles are propagated.
+   *
+   * \param evt_num Running number of the event
+   * \return The number of interactions from the event
+   */
+  size_t run_time_evolution_without_time_steps(const int evt_num);
+
   /** Performs the final decays of an event
    *
    * \param interactions_total The number of interactions so far

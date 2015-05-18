@@ -17,6 +17,7 @@
 #include <vector>
 
 #include "include/action.h"
+#include "include/actions.h"
 #include "include/boxmodus.h"
 #include "include/clock.h"
 #include "include/collidermodus.h"
@@ -394,6 +395,86 @@ void Experiment<Modus>::perform_action(
   }
 }
 
+template <typename Modus>
+size_t Experiment<Modus>::run_time_evolution_without_time_steps(
+    const int evt_num) {
+  const auto &log = logger<LogArea::Experiment>();
+  modus_.impose_boundary_conditions(&particles_);
+  size_t interactions_total = 0, previous_interactions_total = 0,
+         total_pauli_blocked = 0;
+  log.info() << format_measurements(
+      particles_, interactions_total, 0u,
+      conserved_initial_, time_start_, parameters_.labclock.current_time());
+
+  const float start_time = parameters_.labclock.current_time();
+  float time_left = end_time_ - start_time;
+
+  // find actions for the initial list
+  ParticleList search_list = particles_.copy_to_vector();
+  ActionList action_list;
+  for (const auto &finder : action_finders_) {
+    action_list += finder->find_actions_in_cell(search_list, time_left);
+  }
+  Actions actions(std::move(action_list), start_time);
+
+  // iterate over all actions
+  while (!actions.is_empty()) {
+    // get next action
+    ActionPtr act = actions.pop();
+    if (!act->is_valid(particles_)) {
+      //log.info() << "invalid!";
+      continue;
+    }
+
+    // update the current time
+    const float current_time = act->time_of_execution();
+    const float dt = current_time - parameters_.labclock.current_time();
+    if (dt < 0.f) {
+      log.info() << act->time_of_execution()
+                 << parameters_.labclock.current_time()
+                 << act->get_interaction_point()
+                 << act->get_type();
+      throw std::runtime_error("negative time step!");
+    }
+    parameters_.labclock.reset(current_time);
+
+    // propagate to next action
+    parameters_.labclock.set_timestep_duration(dt);
+    propagate_straight_line(&particles_, parameters_);
+    modus_.impose_boundary_conditions(&particles_, outputs_);
+
+    // perform next action
+    perform_action(act, interactions_total, total_pauli_blocked, particles_);
+    const ParticleList& outgoing_particles = act->outgoing_particles();
+    modus_.impose_boundary_conditions(&particles_);
+
+    // find new actions
+    time_left = end_time_ - current_time;
+    ActionList new_actions;
+    for (const auto &finder : action_finders_) {
+      new_actions +=
+          finder->find_actions_in_cell(outgoing_particles, time_left);
+      new_actions += finder->find_actions_with_neighbors(
+          outgoing_particles, particles_, time_left);
+    }
+    actions.insert(std::move(new_actions), current_time);
+
+    // output
+    if (parameters_.need_intermediate_output()) {
+      intermediate_output(evt_num, interactions_total,
+                          previous_interactions_total);
+    }
+
+    // check conservation laws
+    std::string err_msg = conserved_initial_.report_deviations(particles_);
+    if (!err_msg.empty()) {
+      log.error() << err_msg;
+      throw std::runtime_error("Violation of conserved quantities!");
+    }
+  }
+  return interactions_total;
+}
+
 /* This is the loop over timesteps, carrying out collisions and decays
  * and propagating particles. */
 template <typename Modus>
@@ -598,7 +679,9 @@ void Experiment<Modus>::run() {
     }
 
     /* the time evolution of the relevant subsystem */
-    size_t interactions_total = run_time_evolution(j);
+    size_t interactions_total = use_time_steps_
+                                    ? run_time_evolution(j)
+                                    : run_time_evolution_without_time_steps(j);
     if (force_decays_) {
       do_final_decays(interactions_total);
     }
