@@ -129,8 +129,8 @@ ActionPtr ScatterActionsFinder::check_collision(
   if (distance_squared >= act->cross_section() * fm2_mb * M_1_PI
                           / static_cast<float>(testparticles_)) {
     return nullptr;
-
   }
+
   log.debug("particle distance squared: ", distance_squared,
             "\n    ", data_a,
             "\n<-> ", data_b);

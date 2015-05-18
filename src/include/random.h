@@ -88,7 +88,7 @@ template <typename T = double> T exponential() {
 /** Evaluates a random number x according to an exponential distribution exp(A*x).
  *  x is restricted to lie between x1 and x2 (it doesn't matter which one of
  * the two is larger). */
-template <typename T = double> T expo (T A, T x1, T x2) {
+template <typename T = double> T expo(T A, T x1, T x2) {
   T r1 = std::exp(A*x1);
   T r2 = std::exp(A*x2);
   return std::log(r2+canonical()*(r1-r2))/A;

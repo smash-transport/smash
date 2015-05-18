@@ -364,7 +364,7 @@ class ParticleTypePtr {
    * vector. The value 0xffff is used to denote an invalid index (similar to a
    * null pointer).
    */
-  std::uint16_t index_= 0xffff;
+  std::uint16_t index_ = 0xffff;
 };
 
 // #define SMASH_INLINE_LIST_ALL 1
