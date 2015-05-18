@@ -26,7 +26,7 @@ class ScatterActionBaryonBaryon : public ScatterAction {
   using ScatterAction::ScatterAction;
   /** Determine the parametrized total cross section
    * for a baryon-baryon collision. */
-  virtual float total_cross_section() const override;
+  float total_cross_section() const override;
   /* There is no resonance formation out of two baryons: Return empty list. */
   CollisionBranchList resonance_cross_sections() override {
     return CollisionBranchList();

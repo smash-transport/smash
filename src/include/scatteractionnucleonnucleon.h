@@ -40,7 +40,7 @@ class ScatterActionNucleonNucleon : public ScatterActionBaryonBaryon {
  protected:
   /** Perform an elastic nucleon-nucleon scattering with
    * anisotropic angular distributions. */
-  virtual void elastic_scattering() override;
+  void elastic_scattering() override;
 
   /**
    * Sample final state momenta (and masses) in an inelastic 2->2 collision,
@@ -48,7 +48,7 @@ class ScatterActionNucleonNucleon : public ScatterActionBaryonBaryon {
    *
    * \throws InvalidResonanceFormation
    */
-  virtual void sample_cms_momenta() override;
+  void sample_cms_momenta() override;
 
  private:
   /**
