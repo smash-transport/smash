@@ -71,7 +71,8 @@ static float BlattWeisskopf(const float p_ab, const int L)
  * \param m Actual mass of the decaying resonance [GeV].
  * \param M0 Pole mass of the decaying resonance [GeV].
  * \param srts0 Threshold of the reaction, i.e. minimum possible sqrt(s) [GeV].
- * \param L Lambda parameter of the form factor [GeV].
+ * \param L Lambda parameter of the form factor [GeV]. This is a cut-off
+ * parameter that can be different for baryons and mesons.
  */
 static double Post_FF_sqr(double m, double M0, double srts0, double L) {
   const auto L4 = L*L*L*L;
