@@ -64,9 +64,23 @@ class EnergyMomentumTensor {
   using const_iterator = std::array<double, 10>::const_iterator;
 
   /**
-   * Find the Landau frame 4-velocity from energy-momentum tensor
+   * Find the Landau frame 4-velocity from energy-momentum tensor.
+   * IMPORTANT: resulting 4-velocity is fourvector with LOWER index
    */
   FourVector landau_frame_4velocity() const;
+
+  /**
+   * Boost to a given 4-velocity.
+   * IMPORTANT: boost 4-velocity is fourvector with LOWER index
+   */
+  EnergyMomentumTensor boost(const FourVector u) const;
+
+  /**
+    * Given momentum p of the particle adds \f$ p^{\mu}p^{\mu}/p^0\f$
+    * to the energy momentum tensor.
+    * Input momentum is fourvector with upper index, as all 4-momenta in SMASH
+    */
+  void add_particle(const FourVector mom);
 
   /**
    * Returns an iterator starting at the (0,0)th component.

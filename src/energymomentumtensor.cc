@@ -78,6 +78,42 @@ FourVector EnergyMomentumTensor::landau_frame_4velocity() const {
   return u;
 }
 
+EnergyMomentumTensor EnergyMomentumTensor::boost(const FourVector u) const {
+ using namespace Eigen;
+ Matrix4d A, L, R;
+ // Energy-momentum tensor
+ A <<  Tmn_[0], Tmn_[1], Tmn_[2], Tmn_[3],
+       Tmn_[1], Tmn_[4], Tmn_[5], Tmn_[6],
+       Tmn_[2], Tmn_[5], Tmn_[7], Tmn_[8],
+       Tmn_[3], Tmn_[6], Tmn_[8], Tmn_[9];
+ // Compute Lorentz matrix of boost
+ const ThreeVector tmp = u.threevec()/ (1.0 + u[0]);
+ L <<  u[0], u[1],                u[2],                 u[3],
+       u[1], u[1]*tmp.x1() + 1.0, u[2]*tmp.x1(),        u[3]*tmp.x1(),
+       u[2], u[1]*tmp.x2(),       u[2]*tmp.x2() + 1.0,  u[3]*tmp.x2(),
+       u[3], u[1]*tmp.x3(),       u[2]*tmp.x3(),        u[3]*tmp.x3() + 1.0;
+ // Boost
+ R = L * A * L;
+ return EnergyMomentumTensor({R(0,0), R(0,1), R(0,2), R(0,3),
+                                      R(1,1), R(1,2), R(1,3),
+                                              R(2,2), R(2,3),
+                                                      R(3,3)});
+}
+
+void EnergyMomentumTensor::add_particle(const FourVector mom) {
+  const ThreeVector tmp = mom.threevec() / mom[0];
+  Tmn_[0] += mom[0];
+  Tmn_[1] += mom[1];
+  Tmn_[2] += mom[2];
+  Tmn_[3] += mom[3];
+  Tmn_[4] += mom[1] * tmp.x1();
+  Tmn_[5] += mom[1] * tmp.x2();
+  Tmn_[6] += mom[1] * tmp.x3();
+  Tmn_[7] += mom[2] * tmp.x2();
+  Tmn_[8] += mom[2] * tmp.x3();
+  Tmn_[9] += mom[3] * tmp.x3();
+}
+
 std::ostream &operator<<(std::ostream &out, const EnergyMomentumTensor &Tmn) {
   using namespace std;
   out.width(12);
