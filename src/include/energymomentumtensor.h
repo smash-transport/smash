@@ -49,12 +49,18 @@ class EnergyMomentumTensor {
   double operator[](std::size_t i) const { return Tmn_[i]; }
 
   /// access the index of component \f$ (\mu, \nu) \f$.
-  static std::int8_t tmn_index(std::size_t mu, std::size_t nu) {
-    const std::array<std::int8_t, 16> indices = {0, 1, 2, 3,
-                                                 1, 4, 5, 6,
-                                                 2, 5, 7, 8,
-                                                 3, 6, 8, 9};
+  static std::int8_t tmn_index(std::int8_t mu, std::int8_t nu) {
+    constexpr std::array<std::int8_t, 16> indices = {0, 1, 2, 3,
+                                                     1, 4, 5, 6,
+                                                     2, 5, 7, 8,
+                                                     3, 6, 8, 9};
     return indices[mu + 4*nu];
+    /* Another possibility (by lpang):
+       inline inx(int i, int j){
+         return (i<j) ? (7*i+2*j-i*i)>>1 : (7*j+2*i-j*j)>>1;
+       }
+    */
+}
   }
 
   /// increase this tensor by \f$T^{\mu \nu}_0\f$

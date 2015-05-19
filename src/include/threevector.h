@@ -101,9 +101,9 @@ class ThreeVector {
   /// decrease this vector by \f$\vec v: \vec x^\prime = \vec x - \vec v\f$
   ThreeVector inline operator-= (const ThreeVector &v);
   /// scale this vector by \f$a: \vec x^\prime = a \cdot \vec x\f$
-  ThreeVector inline operator*= (const double a);
+  ThreeVector inline operator*= (const double &a);
   /// divide this vector by \f$a: \vec x^\prime = \frac{1}{a} \cdot \vec x\f$
-  ThreeVector inline operator/= (const double a);
+  ThreeVector inline operator/= (const double &a);
 
   /// iterates over the components
   using iterator = std::array<double, 3>::iterator;
