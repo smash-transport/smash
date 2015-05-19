@@ -46,6 +46,7 @@ FourVector EnergyMomentumTensor::landau_frame_4velocity() const {
   // Here and further I assume that eigenvalues are given in
   // descending order. TODO(oliiny): check Eigen documentation
   // to make sure this is always true.
+#ifndef NDEBUG
   Vector4d eig_im = es.eigenvalues().imag();
   Vector4d eig_re = es.eigenvalues().real();
   for (size_t i = 0; i < 4; i++){
@@ -56,8 +57,14 @@ FourVector EnergyMomentumTensor::landau_frame_4velocity() const {
       assert(eig_re(i) < really_small);
     }
   }
+  // Make sure that 0th eigenvalue is really the largest one
+  assert(eig_re(0) >= eig_re(1));
+  assert(eig_re(0) >= eig_re(2));
+  assert(eig_re(0) >= eig_re(3));
+#endif
 
-  auto tmp = es.eigenvectors().col(0).real();
+  Vector4d tmp = es.eigenvectors().col(0).real();
+  // Choose sign so that zeroth component is positive
   if (tmp(0) < 0.0) {
     tmp = -tmp;
   }
@@ -78,7 +85,7 @@ FourVector EnergyMomentumTensor::landau_frame_4velocity() const {
   return u;
 }
 
-EnergyMomentumTensor EnergyMomentumTensor::boost(const FourVector u) const {
+EnergyMomentumTensor EnergyMomentumTensor::boosted(const FourVector& u) const {
  using namespace Eigen;
  Matrix4d A, L, R;
  // Energy-momentum tensor
@@ -100,7 +107,7 @@ EnergyMomentumTensor EnergyMomentumTensor::boost(const FourVector u) const {
                                                       R(3,3)});
 }
 
-void EnergyMomentumTensor::add_particle(const FourVector mom) {
+void EnergyMomentumTensor::add_particle(const FourVector& mom) {
   const ThreeVector tmp = mom.threevec() / mom[0];
   Tmn_[0] += mom[0];
   Tmn_[1] += mom[1];

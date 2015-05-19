@@ -22,30 +22,38 @@ namespace Smash {
  *
  * The EnergyMomentumTensor class represents a symmetric positive
  * semidifinite energy-momentum tensor \f$ T^{\mu \nu}\f$.
+ *
+ * \fpPrecision
+ * Energy-momentum tensor is basically constructed from particle
+ * momenta, which are instances of the \ref FourVector class, their
+ * components being \c double. Also boosting and going to Landau frame
+ * require good precision if the Landau frame velocity of the system
+ * is close to the speed of light.
  */
 class EnergyMomentumTensor {
  public:
+  typedef tmn_type = std::array<double, 10>;
   /// default constructor (nulls all components)
   EnergyMomentumTensor() {
     Tmn_.fill(0.);
   }
 
   /// copy constructor
-  EnergyMomentumTensor(std::array<double, 10>Tmn) {
+  EnergyMomentumTensor(const tmn_type& Tmn) {
     for (size_t i = 0; i < 10; i++) {
       Tmn_[i] = Tmn[i];
     }
   }
 
-  double &operator[](std::size_t i) { return Tmn_[i]; }
+  const double &operator[](std::size_t i) { return Tmn_[i]; }
   double operator[](std::size_t i) const { return Tmn_[i]; }
 
   /// access the index of component \f$ (\mu, \nu) \f$.
-  static size_t tmn_index(std::size_t mu, std::size_t nu) {
-    const std::array<size_t, 16> indices = {0, 1, 2, 3,
-                                            1, 4, 5, 6,
-                                            2, 5, 7, 8,
-                                            3, 6, 8, 9};
+  static std::int8_t tmn_index(std::size_t mu, std::size_t nu) {
+    const std::array<std::int8_t, 16> indices = {0, 1, 2, 3,
+                                                 1, 4, 5, 6,
+                                                 2, 5, 7, 8,
+                                                 3, 6, 8, 9};
     return indices[mu + 4*nu];
   }
 
@@ -54,14 +62,14 @@ class EnergyMomentumTensor {
   /// decrease this tensor by \f$T^{\mu \nu}_0f$
   EnergyMomentumTensor inline operator-= (const EnergyMomentumTensor &Tmn0);
   /// scale this tensor by scalar \f$a\f$
-  EnergyMomentumTensor inline operator*= (const double &a);
+  EnergyMomentumTensor inline operator*= (double a);
   /// divide this tensor by scalar \f$a\f$
-  EnergyMomentumTensor inline operator/= (const double &a);
+  EnergyMomentumTensor inline operator/= (double a);
 
   /// iterates over the components
-  using iterator = std::array<double, 10>::iterator;
+  using iterator = tmn_type::iterator;
   /// iterates over the components
-  using const_iterator = std::array<double, 10>::const_iterator;
+  using const_iterator = tmn_type::const_iterator;
 
   /**
    * Find the Landau frame 4-velocity from energy-momentum tensor.
@@ -73,14 +81,14 @@ class EnergyMomentumTensor {
    * Boost to a given 4-velocity.
    * IMPORTANT: boost 4-velocity is fourvector with LOWER index
    */
-  EnergyMomentumTensor boost(const FourVector u) const;
+  EnergyMomentumTensor boosted(const FourVector& u) const;
 
   /**
     * Given momentum p of the particle adds \f$ p^{\mu}p^{\mu}/p^0\f$
     * to the energy momentum tensor.
     * Input momentum is fourvector with upper index, as all 4-momenta in SMASH
     */
-  void add_particle(const FourVector mom);
+  void add_particle(const FourVector& mom);
 
   /**
    * Returns an iterator starting at the (0,0)th component.
@@ -106,10 +114,11 @@ class EnergyMomentumTensor {
   const_iterator cend() const { return Tmn_.cend(); }
 
  private:
-  /// the internal storage of the components.
-  /* Tensor has 16 components, but it is symmetric, so number
-     of independent components reduces to 10 */
-  std::array<double, 10> Tmn_;
+  /** The internal storage of the components.
+    * Tensor has 16 components, but it is symmetric, so number
+    * of independent components reduces to 10.
+    */
+  tmn_type Tmn_;
 };
 
 /**\ingroup logging
