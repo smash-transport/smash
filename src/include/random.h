@@ -89,14 +89,14 @@ template <typename T = double> T exponential() {
  *  x is restricted to lie between x1 and x2 (it doesn't matter which one of
  * the two is larger). */
 template <typename T = double> T expo(T A, T x1, T x2) {
-  T a1 = A*x1, a2 = A*x2;
-  T a_min = std::log(std::numeric_limits<T>::min());
-  T r1 = a1 > a_min ? std::exp(a1) : 0.;  // prevent underflow
-  T r2 = a2 > a_min ? std::exp(a2) : 0.;  // prevent underflow
+  const T a1 = A * x1, a2 = A * x2;
+  constexpr T a_min = std::log(std::numeric_limits<T>::min());
+  const T r1 = a1 > a_min ? std::exp(a1) : T(0.);  // prevent underflow
+  const T r2 = a2 > a_min ? std::exp(a2) : T(0.);  // prevent underflow
   T x;
   do {
-    x = std::log(uniform(r1,r2))/A;
-  } while ((x<x1) + (x<x2) != 1);  // make sure that x is between x1 and x2
+    x = std::log(uniform(r1, r2)) / A;
+  } while ((x < x1) + (x < x2) != 1);  // make sure that x is between x1 and x2
   return x;
 }
 
