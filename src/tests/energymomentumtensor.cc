@@ -71,6 +71,18 @@ TEST(indices) {
   }
 }
 
+TEST(add_particle) {
+  using se = Smash::EnergyMomentumTensor;
+  EnergyMomentumTensor T;
+  const FourVector p = FourVector(1.0, 0.1, 0.2, 0.3);
+  T.add_particle(p);
+  for (std::int8_t i = 0; i < 4; i++) {
+    for (std::int8_t j = 0; j < 4; j++) {
+      VERIFY(T[se::tmn_index(i,j)] == p[i]*p[j]/p[0]);
+    }
+  }
+}
+
 TEST(Landau_frame) {
   const FourVector p1 = FourVector(1.0, 0.1, 0.2, 0.3);
   EnergyMomentumTensor T1, T3;
@@ -92,4 +104,46 @@ TEST(Landau_frame) {
   for (size_t i = 1; i < 4; i++) {
     COMPARE_ABSOLUTE_ERROR(T3L[i], 0.0, 1.e-15);
   }
+}
+
+TEST(Landau_frame_values) {
+  EnergyMomentumTensor T({100., 1.0, 10., 3.3, 30.0, 4.3, 5.5, 29.9, 11.0, 40.0});
+  /* Executing this mathematica code:
+
+     T = SetPrecision[{{100., 1.0, 10., 3.3}, {1.0, 30.0, 4.3, 5.5},
+          {10.0, 4.3, 29.9, 11.0}, {3.3, 5.5, 11.0, 40.0}}, 20]
+     g = SetPrecision[DiagonalMatrix[{1.0, -1.0, -1.0, -1.0}], 20]
+     u = Eigenvectors[g.T][[1]]
+     u = -u/Sqrt[u.g.u]
+
+     results in u = {1.0030526944248855612, -0.004483908837502199607,
+                    -0.07605947885039531450, -0.017594261324820867270}
+   */
+  const FourVector u = T.landau_frame_4velocity();
+  // Allow 8ulp, seen to fail for 3 ulp
+  UnitTest::setFuzzyness<double>(8);
+  FUZZY_COMPARE(u[0], 1.0030526944248855612);
+  FUZZY_COMPARE(u[1],-0.004483908837502199607);
+  FUZZY_COMPARE(u[2],-0.07605947885039531450);
+  FUZZY_COMPARE(u[3],-0.017594261324820867270);
+
+  /* Executing further mathematica code:
+
+     a = SetPrecision[Flatten[{1.0, u[[2 ;; 4]]/(1.0 + u[[1]])}], 20]
+     L = SetPrecision[{u, u[[2]]*a, u[[3]]*a, u[[4]]*a} +
+                      DiagonalMatrix[{0.0, 1.0, 1.0, 1.0}], 20]
+     L.T.L
+
+     results in the values I compare */
+  EnergyMomentumTensor TL = T.boosted(u);
+  FUZZY_COMPARE(TL[0], 99.17936538699464299);
+  COMPARE_ABSOLUTE_ERROR(TL[1], 0.0, 1.e-14) << TL[1];
+  COMPARE_ABSOLUTE_ERROR(TL[2], 0.0, 1.e-14) << TL[2];
+  COMPARE_ABSOLUTE_ERROR(TL[3], 0.0, 1.e-14) << TL[3];
+  FUZZY_COMPARE(TL[4], 29.995527036975529013);
+  FUZZY_COMPARE(TL[5], 4.239712597343882893);
+  FUZZY_COMPARE(TL[6], 5.483845238049431987);
+  FUZZY_COMPARE(TL[7], 29.141747611031320028);
+  FUZZY_COMPARE(TL[8], 10.787129594442447275);
+  FUZZY_COMPARE(TL[9], 39.94209073898776673);
 }
