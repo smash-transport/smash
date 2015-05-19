@@ -32,14 +32,14 @@ namespace Smash {
  */
 class EnergyMomentumTensor {
  public:
-  typedef tmn_type = std::array<double, 10>;
+  typedef std::array<double, 10> tmn_type;
   /// default constructor (nulls all components)
   EnergyMomentumTensor() {
     Tmn_.fill(0.);
   }
 
   /// copy constructor
-  EnergyMomentumTensor(const tmn_type& Tmn) {
+  explicit EnergyMomentumTensor(const tmn_type& Tmn) {
     for (size_t i = 0; i < 10; i++) {
       Tmn_[i] = Tmn[i];
     }
@@ -60,7 +60,6 @@ class EnergyMomentumTensor {
          return (i<j) ? (7*i+2*j-i*i)>>1 : (7*j+2*i-j*j)>>1;
        }
     */
-}
   }
 
   /// increase this tensor by \f$T^{\mu \nu}_0\f$
@@ -161,7 +160,7 @@ EnergyMomentumTensor inline operator- (EnergyMomentumTensor a,
 }
 
 EnergyMomentumTensor inline EnergyMomentumTensor::operator*= (
-                                               const double &a) {
+                                               const double a) {
   for (size_t i = 0; i < 10; i++) {
     Tmn_[i] *= a;
   }
@@ -169,19 +168,19 @@ EnergyMomentumTensor inline EnergyMomentumTensor::operator*= (
 }
 
 inline EnergyMomentumTensor operator* (EnergyMomentumTensor a,
-                                               const double &b) {
+                                               const double b) {
   a *= b;
   return a;
 }
 
-inline EnergyMomentumTensor operator* (const double &a,
+inline EnergyMomentumTensor operator* (const double a,
                                          EnergyMomentumTensor b) {
   b *= a;
   return b;
 }
 
 EnergyMomentumTensor inline EnergyMomentumTensor::operator/= (
-                                                const double &a) {
+                                                const double a) {
   for (size_t i = 0; i < 10; i++) {
     Tmn_[i] /= a;
   }
@@ -189,7 +188,7 @@ EnergyMomentumTensor inline EnergyMomentumTensor::operator/= (
 }
 
 EnergyMomentumTensor inline operator/ (EnergyMomentumTensor a,
-                                                const double &b) {
+                                                const double b) {
   a /= b;
   return a;
 }

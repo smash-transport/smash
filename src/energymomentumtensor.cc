@@ -8,15 +8,18 @@
  */
 
 #include "include/energymomentumtensor.h"
-#include "include/numerics.h"
+
 #include <iostream>
 #include <iomanip>
 #include <Eigen/Dense>
+#include "include/numerics.h"
+#include "include/logging.h"
 
 namespace Smash {
 
 FourVector EnergyMomentumTensor::landau_frame_4velocity() const {
   using namespace Eigen;
+  const auto &log = logger<LogArea::Tmn>();
   /* We want to solve the generalized eigenvalue problem
      T^{\mu \nu} h_{nu} = \lambda g^{\mu \nu} h_{nu}, or in the other way
      T_{\mu}^{\nu} h_{nu} = \lambda h_{mu}. Eigenvector
@@ -38,7 +41,7 @@ FourVector EnergyMomentumTensor::landau_frame_4velocity() const {
        -Tmn_[2], -Tmn_[5], -Tmn_[7], -Tmn_[8],
        -Tmn_[3], -Tmn_[6], -Tmn_[8], -Tmn_[9];
 
-  // log.debug("Looking for Landau frame for T_{mu}^{nu} ", A);
+  log.debug("Looking for Landau frame for T_{mu}^{nu} ", A);
   EigenSolver<Matrix4d> es(A);
 
   // Eigen values should be strictly real and non-negative.
@@ -49,7 +52,7 @@ FourVector EnergyMomentumTensor::landau_frame_4velocity() const {
 #ifndef NDEBUG
   Vector4d eig_im = es.eigenvalues().imag();
   Vector4d eig_re = es.eigenvalues().real();
-  for (size_t i = 0; i < 4; i++){
+  for (size_t i = 0; i < 4; i++) {
     assert(std::abs(eig_im(i)) < really_small);
     if (i == 0) {
       assert(eig_re(i) > -really_small);
@@ -61,6 +64,7 @@ FourVector EnergyMomentumTensor::landau_frame_4velocity() const {
   assert(eig_re(0) >= eig_re(1));
   assert(eig_re(0) >= eig_re(2));
   assert(eig_re(0) >= eig_re(3));
+  log.debug("eigenvalues: ", eig_re);
 #endif
 
   Vector4d tmp = es.eigenvectors().col(0).real();
@@ -74,37 +78,35 @@ FourVector EnergyMomentumTensor::landau_frame_4velocity() const {
   if (u_sqr > really_small) {
     u /= std::sqrt(u_sqr);
   } else {
-/*    log.error("Landau frame is not defined.",
+    log.error("Landau frame is not defined.",
               " Eigen vector", u, " of ", A, " is not time-like and",
               " cannot be 4-velocity. This may happen if energy-momentum",
-              " tensor was constructed for a massless particle.");*/
+              " tensor was constructed for a massless particle.");
     u = FourVector(1., 0., 0., 0.);
   }
-//  std::cout << "Eigen values: " << eig_re << std::endl;
-//  std::cout << "Eigen vectors: " << es.eigenvectors().real() << std::endl;
   return u;
 }
 
 EnergyMomentumTensor EnergyMomentumTensor::boosted(const FourVector& u) const {
- using namespace Eigen;
- Matrix4d A, L, R;
- // Energy-momentum tensor
- A <<  Tmn_[0], Tmn_[1], Tmn_[2], Tmn_[3],
-       Tmn_[1], Tmn_[4], Tmn_[5], Tmn_[6],
-       Tmn_[2], Tmn_[5], Tmn_[7], Tmn_[8],
-       Tmn_[3], Tmn_[6], Tmn_[8], Tmn_[9];
- // Compute Lorentz matrix of boost
- const ThreeVector tmp = u.threevec()/ (1.0 + u[0]);
- L <<  u[0], u[1],                u[2],                 u[3],
-       u[1], u[1]*tmp.x1() + 1.0, u[2]*tmp.x1(),        u[3]*tmp.x1(),
-       u[2], u[1]*tmp.x2(),       u[2]*tmp.x2() + 1.0,  u[3]*tmp.x2(),
-       u[3], u[1]*tmp.x3(),       u[2]*tmp.x3(),        u[3]*tmp.x3() + 1.0;
- // Boost
- R = L * A * L;
- return EnergyMomentumTensor({R(0,0), R(0,1), R(0,2), R(0,3),
-                                      R(1,1), R(1,2), R(1,3),
-                                              R(2,2), R(2,3),
-                                                      R(3,3)});
+  using namespace Eigen;
+  Matrix4d A, L, R;
+  // Energy-momentum tensor
+  A <<  Tmn_[0], Tmn_[1], Tmn_[2], Tmn_[3],
+        Tmn_[1], Tmn_[4], Tmn_[5], Tmn_[6],
+        Tmn_[2], Tmn_[5], Tmn_[7], Tmn_[8],
+        Tmn_[3], Tmn_[6], Tmn_[8], Tmn_[9];
+  // Compute Lorentz matrix of boost
+  const ThreeVector tmp = u.threevec()/ (1.0 + u[0]);
+  L <<  u[0], u[1],                u[2],                 u[3],
+        u[1], u[1]*tmp.x1() + 1.0, u[2]*tmp.x1(),        u[3]*tmp.x1(),
+        u[2], u[1]*tmp.x2(),       u[2]*tmp.x2() + 1.0,  u[3]*tmp.x2(),
+        u[3], u[1]*tmp.x3(),       u[2]*tmp.x3(),        u[3]*tmp.x3() + 1.0;
+  // Boost
+  R = L * A * L;
+  return EnergyMomentumTensor({R(0, 0), R(0, 1), R(0, 2), R(0, 3),
+                                        R(1, 1), R(1, 2), R(1, 3),
+                                                 R(2, 2), R(2, 3),
+                                                          R(3, 3)});
 }
 
 void EnergyMomentumTensor::add_particle(const FourVector& mom) {
@@ -127,7 +129,7 @@ std::ostream &operator<<(std::ostream &out, const EnergyMomentumTensor &Tmn) {
   for (size_t mu = 0; mu < 4; mu++) {
     for (size_t nu = 0; nu < 4; nu++) {
       out << setprecision(3) << setw(12) << fixed <<
-             Tmn[EnergyMomentumTensor::tmn_index(mu,nu)];
+             Tmn[EnergyMomentumTensor::tmn_index(mu, nu)];
     }
     out << endl;
   }
