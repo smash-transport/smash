@@ -14,24 +14,44 @@
 
 namespace Smash {
 
-bool particle_in_denstype(const PdgCode pdg, Density_type dens_type) {
+float density_factor(const PdgCode pdg, DensityType dens_type) {
   switch (dens_type) {
-  case baryon_density:
-  case baryonic_isospin_density:
-    return pdg.is_baryon();
-  default:
-    return false;
+    case DensityType::particle:
+      return 1.f;
+    case DensityType::baryon:
+      return static_cast<float>(pdg.baryon_number());
+    case DensityType::baryonic_isospin:
+      if (pdg.is_baryon()) {
+        return pdg.isospin3_rel();
+      } else {
+        return 0.f;
+      }
+    case DensityType::pion:
+      {
+        const auto pdg_code = pdg.code();
+        if (pdg_code == 0x111      // pi0
+            || pdg_code == 0x211   // pi+
+            || pdg_code == -0x211  // pi-
+          ) {
+          return 1.f;
+        } else {
+          return 0.f;
+        }
+      }
+    default:
+      return 0.f;
   }
 }
 
 template <typename /*ParticlesContainer*/ T>
 static FourVector four_current_impl(const ThreeVector &r, const T &plist,
-                                    double gs_sigma, Density_type dens_type,
+                                    double gs_sigma, DensityType dens_type,
                                     int ntest) {
   FourVector jmu(0.0, 0.0, 0.0, 0.0);
 
   for (const auto &p : plist) {
-    if (!particle_in_denstype(p.pdgcode(), dens_type)) {
+    const float factor = density_factor(p.pdgcode(), dens_type);
+    if (std::abs(factor) < really_small) {
       continue;
     }
     const ThreeVector ri = p.position().threevec();
@@ -53,16 +73,7 @@ static FourVector four_current_impl(const ThreeVector &r, const T &plist,
     }
 
     tmp = std::exp(- 0.5 * drr_sqr / (gs_sigma * gs_sigma)) / inv_gammai;
-    switch (dens_type) {
-    case baryon_density:
-      tmp *= p.pdgcode().baryon_number();
-      break;
-    case baryonic_isospin_density:
-      tmp *= p.pdgcode().isospin3_rel();
-      break;
-    default:
-      break;
-    }
+    tmp *= factor;
     jmu += FourVector(1., betai) * tmp;
   }
 
@@ -74,17 +85,17 @@ static FourVector four_current_impl(const ThreeVector &r, const T &plist,
   return jmu / ntest;
 }
 FourVector four_current(const ThreeVector &r, const ParticleList &plist,
-                        double gs_sigma, Density_type dens_type, int ntest) {
+                        double gs_sigma, DensityType dens_type, int ntest) {
   return four_current_impl(r, plist, gs_sigma, dens_type, ntest);
 }
 FourVector four_current(const ThreeVector &r, const Particles &plist,
-                        double gs_sigma, Density_type dens_type, int ntest) {
+                        double gs_sigma, DensityType dens_type, int ntest) {
   return four_current_impl(r, plist, gs_sigma, dens_type, ntest);
 }
 
 std::pair<double, ThreeVector> rho_eckart_gradient(const ThreeVector &r,
                                 const ParticleList &plist, double gs_sigma,
-                                Density_type dens_type, int ntest) {
+                                DensityType dens_type, int ntest) {
   const auto &log = logger<LogArea::Density>();
 
   // baryon four-current in computational frame
@@ -95,7 +106,8 @@ std::pair<double, ThreeVector> rho_eckart_gradient(const ThreeVector &r,
   FourVector djmu_dz(0.0, 0.0, 0.0, 0.0);
 
   for (const auto &p : plist) {
-    if (!particle_in_denstype(p.pdgcode(), dens_type)) {
+    const float factor = density_factor(p.pdgcode(), dens_type);
+    if (std::abs(factor) < really_small) {
       continue;
     }
     const ThreeVector ri = p.position().threevec();
@@ -118,16 +130,7 @@ std::pair<double, ThreeVector> rho_eckart_gradient(const ThreeVector &r,
     }
 
     double tmp2 = std::exp(-0.5 * drr_sqr / (gs_sigma*gs_sigma)) / inv_gammai;
-    switch (dens_type) {
-    case baryon_density:
-      tmp2 *= p.pdgcode().baryon_number();
-      break;
-    case baryonic_isospin_density:
-      tmp2 *= p.pdgcode().isospin3_rel();
-      break;
-    default:
-      break;
-    }
+    tmp2 *= factor;
     log.debug("Summand to jmu: ", FourVector(1., betai) * tmp2, "² = ",
               (FourVector(1., betai) * tmp2).sqr(), "\n      with jmu: ", jmu,
               "² = ", jmu.sqr());
@@ -167,6 +170,26 @@ std::pair<double, ThreeVector> rho_eckart_gradient(const ThreeVector &r,
   } else {
     return std::make_pair(0.0, ThreeVector(0.0, 0.0, 0.0));
   }
+}
+
+std::ostream& operator<<(std::ostream& os, DensityType dens_type) {
+  switch (dens_type) {
+    case DensityType::particle:
+      os << "particle density";
+      break;
+    case DensityType::baryon:
+      os << "baryon density";
+      break;
+    case DensityType::baryonic_isospin:
+      os << "baryonic isospin density";
+      break;
+    case DensityType::pion:
+      os << "pion density";
+      break;
+    default:
+      os.setstate(std::ios_base::failbit);
+  }
+  return os;
 }
 
 }  // namespace Smash

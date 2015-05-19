@@ -89,7 +89,7 @@ class TwoBodyDecayStable : public TwoBodyDecay {
   TwoBodyDecayStable(ParticleTypePtrList part_types, int l);
   /**
    * Get the mass-dependent width of a two-body decay into stable particles
-   * according to Manley/Saleski, Phys. Rev. D 45 (1992) 4002.
+   * according to \iref{Manley:1992yb}.
    *
    * \param m0 Pole mass of the decaying particle [GeV].
    * \param G0 Partial width at the pole mass [GeV].
@@ -112,17 +112,16 @@ class TwoBodyDecaySemistable : public TwoBodyDecay {
   TwoBodyDecaySemistable(ParticleTypePtrList part_types, int l);
   /**
    * Get the mass-dependent width of a two-body decay into one stable and one
-   * unstable particle according to Manley/Saleski, Phys. Rev. D 45 (1992) 4002.
+   * unstable particle according to \iref{Manley:1992yb}.
    *
    * \param m0 Pole mass of the decaying particle [GeV].
    * \param G0 Partial width at the pole mass [GeV].
    * \param m Actual mass of the decaying particle [GeV].
-   * \param m_uns Actual mass of the unstable incoming particle [GeV].
    */
   float width(float m0, float G0, float m) const override;
   /**
    * Get the mass-dependent in-width for a resonance formation process from one
-   * stable and one unstable particle according to Manley/Saleski (PRD45),
+   * stable and one unstable particle according to \iref{Manley:1992yb},
    * see also PhD thesis Effenberger, eq. (2.77).
    *
    * \param m0 Pole mass of the produced resonance [GeV].

@@ -90,6 +90,10 @@ set(smash_src
         random.cc
         resonances.cc
         scatteraction.cc
+        scatteractionbaryonbaryon.cc
+        scatteractionbaryonmeson.cc
+        scatteractionmesonmeson.cc
+        scatteractionnucleonnucleon.cc
         scatteractionsfinder.cc
         spheremodus.cc
         stringfunctions.cc

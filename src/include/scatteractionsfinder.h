@@ -48,6 +48,11 @@ class ScatterActionsFinder : public ActionFinderInterface {
   }
 
  private:
+  /* Construct a ScatterAction object,
+   * based on the types of the incoming particles. */
+  ScatterActionPtr construct_scatter_action(const ParticleData &data_a,
+                                            const ParticleData &data_b,
+                                            float time_until_collision) const;
   /** Check for a single pair of particles (id_a, id_b) if a collision will happen
    * in the next timestep and create a corresponding Action object in that case. */
   ActionPtr check_collision(const ParticleData &data_a,
@@ -56,6 +61,8 @@ class ScatterActionsFinder : public ActionFinderInterface {
   float elastic_parameter_ = 0.0;
   /** Number of test particles. */
   int testparticles_ = 1;
+  /** Do all collisions isotropically. */
+  bool isotropic_ = false;
 };
 
 #if 0

@@ -11,7 +11,8 @@
 
 #include "../include/particledata.h"
 #include "../include/decaymodes.h"
-#include "../include/action.h"
+#include "../include/scatteractionbaryonbaryon.h"
+#include "../include/scatteractionnucleonnucleon.h"
 
 namespace particles_txt {
 #include <particles.txt.h>
@@ -32,7 +33,13 @@ TEST(init_particle_types) {
 static ScatterAction* set_up_action(const ParticleData &proj,
                                     const ParticleData &targ,
                                     CollisionBranchList &proc_list) {
-  ScatterAction *act = new ScatterActionBaryonBaryon(proj, targ, 0.);
+  ScatterAction *act;
+  if (proj.pdgcode().iso_multiplet() == 0x1112 &&
+      targ.pdgcode().iso_multiplet() == 0x1112) {
+    act = new ScatterActionNucleonNucleon(proj, targ, 0.);
+  } else {
+    act = new ScatterActionBaryonBaryon(proj, targ, 0.);
+  }
   proc_list = act->two_to_two_cross_sections();
 //   act->add_processes(proc_list);
 

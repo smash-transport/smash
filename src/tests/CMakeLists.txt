@@ -68,6 +68,22 @@ if(CPPLINT)
                      COMMAND ${CPPLINT} ${CPPLINT_ARGS} ${CPPLINT_FILES}
                      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
                      COMMENT "Executing test cpplint")
+   add_custom_target(cpplint_build
+                     COMMAND ${CPPLINT} ${CPPLINT_ARGS} --filter=-build/include,-readability,-runtime,-whitespace ${CPPLINT_FILES}
+                     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+                     COMMENT "Executing test cpplint_build")
+   add_custom_target(cpplint_readability
+                     COMMAND ${CPPLINT} ${CPPLINT_ARGS} --filter=-build,-readability/streams,-runtime,-whitespace ${CPPLINT_FILES}
+                     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+                     COMMENT "Executing test cpplint_readability")
+   add_custom_target(cpplint_runtime
+                     COMMAND ${CPPLINT} ${CPPLINT_ARGS} --filter=-build,-readability,-whitespace ${CPPLINT_FILES}
+                     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+                     COMMENT "Executing test cpplint_runtime")
+   add_custom_target(cpplint_whitespace
+                     COMMAND ${CPPLINT} ${CPPLINT_ARGS} --filter=-build,-readability,-runtime ${CPPLINT_FILES}
+                     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+                     COMMENT "Executing test cpplint_whitespace")
    file(GLOB_RECURSE CPPLINT_FILES_FULL
         ${PROJECT_SOURCE_DIR}/src/*.h ${PROJECT_SOURCE_DIR}/src/*.cc)
    add_custom_target(cpplint_full
@@ -111,6 +127,7 @@ smash_add_unittest(distributions)
 smash_add_unittest(experiment)
 smash_add_unittest(energymomentumtensor)
 smash_add_unittest(fourvector)
+smash_add_unittest(grid)
 smash_add_unittest(initial_conditions)
 smash_add_unittest(isospin)
 smash_add_unittest(lorentzboost)

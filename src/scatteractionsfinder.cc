@@ -9,7 +9,6 @@
 
 #include "include/scatteractionsfinder.h"
 
-#include "include/action.h"
 #include "include/configuration.h"
 #include "include/constants.h"
 #include "include/cxx14compat.h"
@@ -18,22 +17,26 @@
 #include "include/macros.h"
 #include "include/particles.h"
 #include "include/resonances.h"
+#include "include/scatteraction.h"
+#include "include/scatteractionbaryonbaryon.h"
+#include "include/scatteractionbaryonmeson.h"
+#include "include/scatteractionmesonmeson.h"
+#include "include/scatteractionnucleonnucleon.h"
 
 namespace Smash {
 /*!\Userguide
 * \page input_collision_term_ Collision_Term
 * \key Sigma (float, optional, default = 0.0 [mb]) \n
 * Elastic cross section parameter
+* \key Isotropic (bool, optional, default = false) \n
+* Do all collisions isotropically
 */
 
 ScatterActionsFinder::ScatterActionsFinder(
     Configuration config, const ExperimentParameters &parameters)
-    : testparticles_(parameters.testparticles) {
-  /* Read in parameter for elastic cross section. */
-  if (config.has_value({"Collision_Term", "Sigma"})) {
-    elastic_parameter_ =  config.take({"Collision_Term", "Sigma"});
-  }
-}
+    : elastic_parameter_(config.take({"Collision_Term", "Sigma"}, 0.f)),
+      testparticles_(parameters.testparticles),
+      isotropic_(config.take({"Collision_Term", "Isotropic"}, false)) {}
 
 ScatterActionsFinder::ScatterActionsFinder(
     float elastic_parameter, int testparticles)
@@ -43,8 +46,8 @@ ScatterActionsFinder::ScatterActionsFinder(
 double ScatterActionsFinder::collision_time(const ParticleData &p1,
                                             const ParticleData &p2) {
   const auto &log = logger<LogArea::FindScatter>();
-  /* UrQMD collision time
-   * arXiv:1203.4418 (5.15): in computational frame
+  /** UrQMD collision time
+   * \iref{Hirano:2012yy} (5.15): in computational frame
    * position of particle a: x_a
    * position of particle b: x_b
    * momentum of particle a: p_a
@@ -67,6 +70,32 @@ double ScatterActionsFinder::collision_time(const ParticleData &p1,
   }
 }
 
+
+ScatterActionPtr ScatterActionsFinder::construct_scatter_action(
+                                            const ParticleData &data_a,
+                                            const ParticleData &data_b,
+                                            float time_until_collision) const {
+  ScatterActionPtr act;
+  if (data_a.is_baryon() && data_b.is_baryon()) {
+    if (data_a.pdgcode().iso_multiplet() == 0x1112 &&
+        data_b.pdgcode().iso_multiplet() == 0x1112) {
+      act = make_unique<ScatterActionNucleonNucleon>(data_a, data_b,
+                                              time_until_collision, isotropic_);
+    } else {
+      act = make_unique<ScatterActionBaryonBaryon>(data_a, data_b,
+                                              time_until_collision, isotropic_);
+    }
+  } else if (data_a.is_baryon() || data_b.is_baryon()) {
+    act = make_unique<ScatterActionBaryonMeson>(data_a, data_b,
+                                              time_until_collision, isotropic_);
+  } else {
+    act = make_unique<ScatterActionMesonMeson>(data_a, data_b,
+                                              time_until_collision, isotropic_);
+  }
+  return std::move(act);
+}
+
+
 ActionPtr ScatterActionsFinder::check_collision(
     const ParticleData &data_a, const ParticleData &data_b, float dt) const {
   const auto &log = logger<LogArea::FindScatter>();
@@ -80,50 +109,35 @@ ActionPtr ScatterActionsFinder::check_collision(
     return nullptr;
   }
 
-  /* check according timestep: positive and smaller */
+  /* Determine time of collision. */
   const float time_until_collision = collision_time(data_a, data_b);
-  if (time_until_collision < 0.f
-          || time_until_collision >= dt) {
+
+  /* Check that collision happens in this timestep. */
+  if (time_until_collision < 0.f || time_until_collision >= dt) {
     return nullptr;
   }
 
   /* Create ScatterAction object. */
-  std::unique_ptr<ScatterAction> act;
-  if (data_a.is_baryon() && data_b.is_baryon()) {
-    act = make_unique<ScatterActionBaryonBaryon>(data_a, data_b,
-                                                 time_until_collision);
-  } else if (data_a.is_baryon() || data_b.is_baryon()) {
-    act = make_unique<ScatterActionBaryonMeson>(data_a, data_b,
-                                                time_until_collision);
-  } else {
-    act = make_unique<ScatterActionMesonMeson>(data_a, data_b,
-                                               time_until_collision);
-  }
+  ScatterActionPtr act = construct_scatter_action(data_a, data_b,
+                                                  time_until_collision);
 
   /* Add various subprocesses.  */
-  /* (1) elastic */
-  act->add_collision(act->elastic_cross_section(elastic_parameter_));
-  /* (2) resonance formation (2->1) */
-  act->add_collisions(act->resonance_cross_sections());
-  /* (3) 2->2 (inelastic) */
-  act->add_collisions(act->two_to_two_cross_sections());
-  /* (4) string excitation */
-  act->add_collision(act->string_excitation_cross_section());
+  act->add_all_processes(elastic_parameter_);
 
-  {
-    /* distance criteria according to cross_section */
-    const double distance_squared = act->particle_distance();
-    if (distance_squared >= act->cross_section() * fm2_mb * M_1_PI
-                            / static_cast<float>(testparticles_)) {
-      return nullptr;
-    }
-    log.debug("particle distance squared: ", distance_squared,
-              "\n    ", data_a,
-              "\n<-> ", data_b);
+  /* distance criterion according to cross_section */
+  const double distance_squared = act->particle_distance();
+  if (distance_squared >= act->cross_section() * fm2_mb * M_1_PI
+                          / static_cast<float>(testparticles_)) {
+    return nullptr;
   }
+
+  log.debug("particle distance squared: ", distance_squared,
+            "\n    ", data_a,
+            "\n<-> ", data_b);
 
   return std::move(act);
 }
+
 
 template <typename F>
 inline void iterate_all_pairs(

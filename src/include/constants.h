@@ -25,10 +25,8 @@ constexpr double hbarc = 0.197327053;
 constexpr double fm2_mb = 0.1;
 /**
  * Numerical error tolerance
- *
- * \fpPrecision Why \c double?
  */
-constexpr double really_small = 1.0e-6;
+constexpr float really_small = 1.0e-6;
 /**
  * \f$ 2\pi \f$
  *
