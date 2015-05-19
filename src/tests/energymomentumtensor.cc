@@ -52,6 +52,25 @@ TEST(arithmetic) {
   FUZZY_COMPARE(D[9], A[9]);
 }
 
+TEST(indices) {
+  using se = Smash::EnergyMomentumTensor;
+  VERIFY(se::tmn_index(0,0) == 0);
+  VERIFY(se::tmn_index(0,1) == 1);
+  VERIFY(se::tmn_index(0,2) == 2);
+  VERIFY(se::tmn_index(0,3) == 3);
+  VERIFY(se::tmn_index(1,1) == 4);
+  VERIFY(se::tmn_index(1,2) == 5);
+  VERIFY(se::tmn_index(1,3) == 6);
+  VERIFY(se::tmn_index(2,2) == 7);
+  VERIFY(se::tmn_index(2,3) == 8);
+  VERIFY(se::tmn_index(3,3) == 9);
+  for (std::int8_t i = 0; i < 4; i++) {
+    for (std::int8_t j = 0; j < i; j++) {
+      VERIFY(se::tmn_index(i,j) == se::tmn_index(j,i));
+    }
+  }
+}
+
 TEST(Landau_frame) {
   const FourVector p1 = FourVector(1.0, 0.1, 0.2, 0.3);
   EnergyMomentumTensor T1, T3;
