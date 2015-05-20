@@ -90,9 +90,12 @@ template <typename T = double> T exponential() {
  * the two is larger). */
 template <typename T = double> T expo(T A, T x1, T x2) {
   const T a1 = A * x1, a2 = A * x2;
-  constexpr T a_min = std::log(std::numeric_limits<T>::min());
+  T a_min = std::log(std::numeric_limits<T>::min());
   const T r1 = a1 > a_min ? std::exp(a1) : T(0.);  // prevent underflow
   const T r2 = a2 > a_min ? std::exp(a2) : T(0.);  // prevent underflow
+  /* In case of underflow, the result is not guaranteed to respect the limiting
+   * values x1 and x2 any more. Therefore we need a loop to continue sampling
+   * until it does. */
   T x;
   do {
     x = std::log(uniform(r1, r2)) / A;
