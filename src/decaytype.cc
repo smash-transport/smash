@@ -129,22 +129,20 @@ float TwoBodyDecayStable::rho(float m) const {
 }
 
 float TwoBodyDecayStable::width(float m0, float G0, float m) const {
-  if (m > particle_types_[0]->mass() + particle_types_[1]->mass()) {
-    // dilepton decays
-    if (is_dilepton_pair(particle_types_[0]->pdgcode().code(),
-                         particle_types_[1]->pdgcode().code())) {
-      const float ml = particle_types_[0]->mass();  // lepton mass
-      const float ml_to_m_sqr = (ml/m) * (ml/m);
-      const float m0_to_m_cubed = (m0/m) * (m0/m) * (m0/m);
-      /// for formula see in \iref{Li:1996mi}, equation (19)
-      return G0 * m0_to_m_cubed * std::sqrt(1.0f - 4.0f * ml_to_m_sqr)*
-             (1.0f + 2.0f * ml_to_m_sqr);
-    } else {
-    // hadronic decay
-      return G0 * rho(m) / rho(m0);
-    }
-  } else {
+  if (m <= particle_types_[0]->mass() + particle_types_[1]->mass()) {
     return 0;
+  }
+  if (is_dilepton(particle_types_[0]->pdgcode(),
+                  particle_types_[1]->pdgcode())) {
+    /// dilepton decays: use width from \iref{Li:1996mi}, equation (19)
+    const float ml = particle_types_[0]->mass();  // lepton mass
+    const float ml_to_m_sqr = (ml/m) * (ml/m);
+    const float m0_to_m_cubed = (m0/m) * (m0/m) * (m0/m);
+    return G0 * m0_to_m_cubed * std::sqrt(1.0f - 4.0f * ml_to_m_sqr) *
+           (1.0f + 2.0f * ml_to_m_sqr);
+  } else {
+    // hadronic decays
+    return G0 * rho(m) / rho(m0);
   }
 }
 

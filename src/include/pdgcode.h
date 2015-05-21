@@ -708,13 +708,12 @@ std::istream& operator>>(std::istream& is, PdgCode& code);
  */
 std::ostream& operator<<(std::ostream& is, const PdgCode& code);
 
-// checks if two particles are a lepton pair (only electrons and muons)
-// with opposite charges (dilepton)
-inline bool is_dilepton_pair(const PdgCode pdg1, const PdgCode pdg2) {
-  return ( (pdg1 == 0x11 && pdg2 == -0x11) ||
-           (pdg1 == -0x11 && pdg2 == 0x11) ||
-           (pdg1 == 0x13 && pdg2 == -0x13) ||
-           (pdg1 == -0x13 && pdg2 == 0x13) );
+/** Checks if two given particles represent a lepton pair (e+e- or mu+mu-). */
+inline bool is_dilepton(const PdgCode pdg1, const PdgCode pdg2) {
+  return (pdg1 ==  0x11 && pdg2 == -0x11) ||
+         (pdg1 == -0x11 && pdg2 ==  0x11) ||
+         (pdg1 ==  0x13 && pdg2 == -0x13) ||
+         (pdg1 == -0x13 && pdg2 ==  0x13);
 }
 
 }  // namespace Smash
