@@ -21,7 +21,7 @@ namespace Smash {
  * \ingroup data
  *
  * The EnergyMomentumTensor class represents a symmetric positive
- * semidifinite energy-momentum tensor \f$ T^{\mu \nu}\f$.
+ * semi-definite energy-momentum tensor \f$ T^{\mu \nu}\f$.
  *
  * \fpPrecision
  * Energy-momentum tensor is basically constructed from particle
