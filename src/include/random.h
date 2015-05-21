@@ -85,21 +85,21 @@ template <typename T = double> T exponential() {
   return std::exponential_distribution<T>(1)(engine);
 }
 
-/** Evaluates a random number x according to an exponential distribution exp(A*x).
- *  x is restricted to lie between x1 and x2 (it doesn't matter which one of
- * the two is larger). */
+/** Evaluates a random number x according to an exponential distribution
+ * exp(A*x), where A is assumed to be positive, and x is typically negative.
+ * The result x is restricted to lie between x1 and x2 (with x2 < x <= x1). */
 template <typename T = double> T expo(T A, T x1, T x2) {
   const T a1 = A * x1, a2 = A * x2;
   T a_min = std::log(std::numeric_limits<T>::min());
-  const T r1 = a1 > a_min ? std::exp(a1) : T(0.);  // prevent underflow
+  const T r1 = std::exp(a1);
   const T r2 = a2 > a_min ? std::exp(a2) : T(0.);  // prevent underflow
   /* In case of underflow, the result is not guaranteed to respect the limiting
-   * values x1 and x2 any more. Therefore we need a loop to continue sampling
+   * value x2 any more. Therefore we need a loop to continue sampling
    * until it does. */
   T x;
   do {
     x = std::log(uniform(r1, r2)) / A;
-  } while ((x < x1) + (x < x2) != 1);  // make sure that x is between x1 and x2
+  } while (x <= x2);   // make sure that x is larger than x2
   return x;
 }
 
