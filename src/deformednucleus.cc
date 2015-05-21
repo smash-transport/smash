@@ -76,9 +76,11 @@ void DeformedNucleus::set_parameters_automatic() {
   switch (Nucleus::number_of_particles()) {
     case 238:  // Uranium
       // Moeller et al. - Default.
+      // TODO: add proper reference
       set_beta_2(0.215);
       set_beta_4(0.093);
       // Kuhlman, Heinz - Correction.
+      // TODO: add proper reference
       // set_beta_2(0.28);
       // set_beta_4(0.093);
       break;
