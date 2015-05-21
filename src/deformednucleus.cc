@@ -42,7 +42,7 @@ DeformedNucleus::DeformedNucleus() {}
 double DeformedNucleus::deformed_woods_saxon(double r, double cosx) const {
   // Return the deformed woods-saxon calculation
   // at the given location for the current system.
-  return Nucleus::get_saturation_density() /
+  return r*r*Nucleus::get_saturation_density() /
          (1 + std::exp(r - Nucleus::get_nuclear_radius() *
           (1 + beta2_ * y_l_0(2, cosx) + beta4_ * y_l_0(4, cosx))
           / Nucleus::get_diffusiveness()));
