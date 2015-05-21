@@ -122,7 +122,7 @@ class Experiment : public ExperimentBase {
   friend class ExperimentBase;
 
  public:
-  virtual void run() override;
+  void run() override;
   void set_outputs(OutputsList &&output_list) override {
     outputs_ = std::move(output_list);
   }

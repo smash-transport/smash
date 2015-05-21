@@ -68,11 +68,17 @@ static float BlattWeisskopf(const float p_ab, const int L)
  * An additional form factor for unstable final states as used in GiBUU,
  * according to M. Post. Reference: \iref{Buss:2011mx}, eq. (174).
  * The function returns the squared value of the form factor.
+ * \param m Actual mass of the decaying resonance [GeV].
+ * \param M0 Pole mass of the decaying resonance [GeV].
+ * \param srts0 Threshold of the reaction, i.e. minimum possible sqrt(s) [GeV].
+ * \param L Lambda parameter of the form factor [GeV]. This is a cut-off
+ * parameter that can be different for baryons and mesons.
  */
-static double Post_FF_sqr(double m, double M0, double s0, double L) {
+static double Post_FF_sqr(double m, double M0, double srts0, double L) {
   const auto L4 = L*L*L*L;
   const auto m2 = m*m;
   const auto M2 = M0*M0;
+  const auto s0 = srts0*srts0;
   double FF = (L4 + (s0-M2)*(s0-M2)/4.) /
               (L4 + (m2-(s0+M2)/2.) * (m2-(s0+M2)/2.));
   return FF*FF;

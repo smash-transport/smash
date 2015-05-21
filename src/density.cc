@@ -29,9 +29,9 @@ float density_factor(const PdgCode pdg, DensityType dens_type) {
     case DensityType::pion:
       {
         const auto pdg_code = pdg.code();
-        if (pdg_code == 0x111 // pi0
-            || pdg_code == 0x211 // pi+
-            || pdg_code == -0x211 // pi-
+        if (pdg_code == 0x111      // pi0
+            || pdg_code == 0x211   // pi+
+            || pdg_code == -0x211  // pi-
           ) {
           return 1.f;
         } else {
@@ -173,7 +173,7 @@ std::pair<double, ThreeVector> rho_eckart_gradient(const ThreeVector &r,
 }
 
 std::ostream& operator<<(std::ostream& os, DensityType dens_type) {
-  switch(dens_type) {
+  switch (dens_type) {
     case DensityType::particle:
       os << "particle density";
       break;
