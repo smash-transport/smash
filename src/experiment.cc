@@ -315,10 +315,11 @@ void Experiment<Modus>::perform_actions(ActionList &actions,
         action->perform(&particles_, interactions_total);
         // Calculate Eckart rest frame density at the interaction point
         const FourVector r_interaction = action->get_interaction_point();
+        const bool compute_grad = false;
         const double rho =
-            four_current(r_interaction.threevec(), particles_before_actions,
+            rho_eckart(r_interaction.threevec(), particles_before_actions,
                          parameters_.gaussian_sigma, dens_type_,
-                         parameters_.testparticles).abs();
+                         parameters_.testparticles, compute_grad).first;
         for (const auto &output : outputs_) {
           output->at_interaction(incoming_particles, outgoing_particles, rho,
                                  action->raw_weight_value(), process_type);

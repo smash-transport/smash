@@ -125,7 +125,7 @@ void VtkOutput::vtk_density_map(const char * file_name,
                      DensityType dens_type, int ntest,
                      int nx, int ny, int nz, double dx, double dy, double dz) {
   ThreeVector r;
-  double rho_eck;
+  double rho;
   std::ofstream a_file;
   a_file.open(file_name, std::ios::out);
   a_file << "# vtk DataFile Version 2.0\n" <<
@@ -145,8 +145,8 @@ void VtkOutput::vtk_density_map(const char * file_name,
     for (auto iy = -ny; iy <= ny; iy++) {
       for (auto ix = -nx; ix <= nx; ix++) {
         r = ThreeVector(ix*dx, iy*dy, iz*dz);
-        rho_eck = four_current(r, plist, gs_sigma, dens_type, ntest).abs();
-        a_file << rho_eck << " ";
+        rho = rho_eckart(r, plist, gs_sigma, dens_type, ntest, false).first;
+        a_file << rho << " ";
       }
       a_file << "\n";
     }
