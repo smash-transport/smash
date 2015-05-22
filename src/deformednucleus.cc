@@ -42,7 +42,7 @@ DeformedNucleus::DeformedNucleus() {}
 double DeformedNucleus::deformed_woods_saxon(double r, double cosx) const {
   // Return the deformed woods-saxon calculation
   // at the given location for the current system.
-  return r*r*Nucleus::get_saturation_density() /
+  return Nucleus::get_saturation_density() /
          (1 + std::exp(r - Nucleus::get_nuclear_radius() *
           (1 + beta2_ * y_l_0(2, cosx) + beta4_ * y_l_0(4, cosx))
           / Nucleus::get_diffusiveness()));
@@ -60,9 +60,9 @@ ThreeVector DeformedNucleus::distribute_nucleon() const {
   // Sample the distribution.
   do {
     a_direction.distribute_isotropically();
-    a_radius = Random::uniform(0.0, radius_max);
+    a_radius = radius_max * std::cbrt(Random::canonical());  // sample r**2 dr
   } while (Random::canonical() > deformed_woods_saxon(a_radius,
-           a_direction.costheta()));
+           a_direction.costheta()) / Nucleus::get_saturation_density());
 
   // Update (x, y, z).
   return a_direction.threevec() * a_radius;
@@ -75,10 +75,12 @@ void DeformedNucleus::set_parameters_automatic() {
   // Set the deformation parameters.
   switch (Nucleus::number_of_particles()) {
     case 238:  // Uranium
-      // Moeller et. al. - Default.
+      // Moeller et al. - Default.
+      // TODO: add proper reference
       set_beta_2(0.215);
       set_beta_4(0.093);
       // Kuhlman, Heinz - Correction.
+      // TODO: add proper reference
       // set_beta_2(0.28);
       // set_beta_4(0.093);
       break;
