@@ -61,20 +61,22 @@ void DecayModes::add_mode(float ratio, int L,
   decay_modes_.push_back(make_unique<DecayBranch>(type, ratio));
 }
 
-void DecayModes::renormalize(float renormalization_constant) {
+void DecayModes::renormalize(PdgCode pdgcode, float renormalization_constant) {
   const auto &log = logger<LogArea::DecayModes>();
   if (renormalization_constant < really_small) {
-    log.warn("Extremely small renormalization constant: ",
+    log.warn("Particle ", pdgcode,
+             ": Extremely small renormalization constant: ",
              renormalization_constant,
              "\n=> Skipping the renormalization.");
   } else {
-    log.info("Renormalizing decay modes with ", renormalization_constant);
+    log.info("Particle ", pdgcode, ": Renormalizing decay modes with ",
+             renormalization_constant);
     float new_sum = 0.0;
     for (auto &mode : decay_modes_) {
       mode->set_weight(mode->weight() / renormalization_constant);
       new_sum += mode->weight();
     }
-    log.info("After renormalization sum of ratios is ", new_sum);
+    log.debug("After renormalization sum of ratios is ", new_sum);
   }
 }
 
@@ -107,8 +109,7 @@ void DecayModes::load_decaymodes(const std::string &input) {
     /* Check if ratios add to 1 */
     if (std::abs(ratio_sum - 1.0) > really_small) {
       /* They didn't; renormalize */
-      logger<LogArea::DecayModes>().info("Particle ", pdgcode);
-      decay_modes_to_add.renormalize(ratio_sum);
+      decay_modes_to_add.renormalize(pdgcode, ratio_sum);
     }
 
     if (pdgcode.has_antiparticle()) {
