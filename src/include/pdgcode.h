@@ -599,8 +599,8 @@ class PdgCode {
     // this checks if the first four digits are 0011 (as they should be
     // for ASCII digits).
     if ((inp & 0xf0) ^ 0x30) {
-      throw InvalidPdgCode("PdgCode: Invalid character " + std::to_string(inp)
-                         + " found.\n");
+      throw InvalidPdgCode("PdgCode: Invalid character " + std::string(&inp, 1)
+                           + " found.\n");
     }
     // the last four digits are the number; they should not be > 9
     // (i.e., one of [:;<=>?])
