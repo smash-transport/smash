@@ -112,9 +112,9 @@ TEST(density_value) {
 }
 
 TEST(density_eckart_special_cases) {
-/*This one checks one especially nasty case:
+  /* This one checks one especially nasty case:
   Eckart rest frame of baryon density for proton and antiproton
-  flying with the same speed in the opposite directions.*/
+  flying with the same speed in the opposite directions. */
   ParticleData pr = create_proton();
   ParticleData apr = create_antiproton();
   pr.set_4position(FourVector(0.0, 0.0, 0.0, 0.0));
