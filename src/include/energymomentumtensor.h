@@ -54,7 +54,12 @@ class EnergyMomentumTensor {
                                                      1, 4, 5, 6,
                                                      2, 5, 7, 8,
                                                      3, 6, 8, 9};
-    return indices[mu + 4*nu];
+    if (mu < 4 && nu < 4) {
+      return indices[mu + 4*nu];
+    } else {
+      throw std::invalid_argument("Invalid indices: " +
+                         std::to_string(mu) + ", " + std::to_string(nu));
+    }
     /* Another possibility (by lpang):
        inline inx(int i, int j){
          return (i<j) ? (7*i+2*j-i*i)>>1 : (7*j+2*i-j*j)>>1;

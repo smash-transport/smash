@@ -71,6 +71,16 @@ TEST(indices) {
   }
 }
 
+TEST_CATCH(invalid_index1, std::invalid_argument) {
+  using se = Smash::EnergyMomentumTensor;
+  se::tmn_index(4,0);
+}
+
+TEST_CATCH(invalid_index2, std::invalid_argument) {
+  using se = Smash::EnergyMomentumTensor;
+  se::tmn_index(0,4);
+}
+
 TEST(add_particle) {
   using se = Smash::EnergyMomentumTensor;
   EnergyMomentumTensor T;
