@@ -54,7 +54,7 @@ class EnergyMomentumTensor {
                                                      1, 4, 5, 6,
                                                      2, 5, 7, 8,
                                                      3, 6, 8, 9};
-    if (mu < 4 && nu < 4) {
+    if (mu < 4 && nu < 4 && mu >= 0 && nu >= 0) {
       return indices[mu + 4*nu];
     } else {
       throw std::invalid_argument("Invalid indices: " +
