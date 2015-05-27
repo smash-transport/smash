@@ -32,7 +32,10 @@ namespace Test {
  * uses.
  */
 inline void create_actual_particletypes() {
+#ifndef DOXYGEN
+/// not visible to doxygen, but compiled
 #include <particles.txt.h>
+#endif
   ParticleType::create_type_list(data);
 }
 

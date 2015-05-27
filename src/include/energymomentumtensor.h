@@ -25,7 +25,7 @@ namespace Smash {
  *
  * \fpPrecision
  * Energy-momentum tensor is basically constructed from particle
- * momenta, which are instances of the \ref FourVector class, their
+ * momenta, which are instances of the \c FourVector class, their
  * components being \c double. Also boosting and going to Landau frame
  * require good precision if the Landau frame velocity of the system
  * is close to the speed of light.
@@ -69,7 +69,7 @@ class EnergyMomentumTensor {
 
   /// increase this tensor by \f$T^{\mu \nu}_0\f$
   EnergyMomentumTensor inline operator+= (const EnergyMomentumTensor &Tmn0);
-  /// decrease this tensor by \f$T^{\mu \nu}_0f$
+  /// decrease this tensor by \f$T^{\mu \nu}_0\f$
   EnergyMomentumTensor inline operator-= (const EnergyMomentumTensor &Tmn0);
   /// scale this tensor by scalar \f$a\f$
   EnergyMomentumTensor inline operator*= (double a);
