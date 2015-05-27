@@ -57,13 +57,14 @@ TEST(init) {
 // itself masking actual errors in the grid code.
 
 TEST(grid_construction) {
+  using NeighborsSet = std::set<std::pair<int, int>>;
   struct Parameter {
     // input:
     ParticleList particles;
 
     // expected results:
     std::size_t cellcount[3];  // per direction
-    std::set<std::pair<int,int>> neighbors;
+    NeighborsSet neighbors;
     std::vector<std::unordered_set<int>> ids;
   };
   auto &&make_particle = [](double x, double y, double z, int id) {
@@ -73,9 +74,10 @@ TEST(grid_construction) {
     const double max_interaction_length =
         GridBase::min_cell_length(testparticles);
     for (const Parameter &param : std::vector<Parameter>{
-             {{make_particle(0., 0., 0., 1), make_particle(1.9, 1.9, 1.9, 2)},
+             Parameter{
+              {make_particle(0., 0., 0., 1), make_particle(1.9, 1.9, 1.9, 2)},
               {1, 1, 1},
-              {},
+              NeighborsSet{},
               {{1, 2}}},
              {{make_particle(0, 0, 0, 1), make_particle(0, 0, 1, 2),
                make_particle(0, 0, 2, 3), make_particle(0, 1, 0, 4),
