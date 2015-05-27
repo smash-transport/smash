@@ -12,6 +12,7 @@
 
 #include <array>
 #include <cmath>
+#include <string>
 
 #include "fourvector.h"
 
