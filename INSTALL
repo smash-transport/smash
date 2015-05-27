@@ -136,8 +136,6 @@ Let's assume Eigen headers will be unpacked in $HOME.
 
 - unpack: tar -xf [latest-eigen].tar.gz -C $HOME
 
-- copy FindEigen3.cmake file from $HOME/[latest-eigen]/cmake/ to smash/cmake/
-
 - in smash/build/, create build files with
 
   cmake -DCMAKE_INSTALL_PREFIX=$HOME/[latest-eigen]/ ..
