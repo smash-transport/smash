@@ -54,6 +54,9 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-math-errno")
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
    # Clang-specific compiler flags
    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-missing-braces")
+
+   include(cmake/AddCompilerFlag.cmake)
+   AddCompilerFlag(-stdlib=libc++ CXX_FLAGS CMAKE_CXX_FLAGS)
 endif()
 
 # check that C++11 code compiles
