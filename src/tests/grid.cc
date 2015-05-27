@@ -236,7 +236,7 @@ TEST(periodic_grid) {
               COMPARE(it->id(), p.id());
               COMPARE(it->position(), p.position());
             }
-            auto &&compareDiff = [](float d) {
+            auto &&compareDiff = [length](float d) {
               if (d < -0.1f * length) {
                 FUZZY_COMPARE(d, -length);
               } else if (d > 0.1f * length) {
