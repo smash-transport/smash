@@ -57,6 +57,13 @@ const ParticleList& Action::incoming_particles() const {
   return incoming_particles_;
 }
 
+void Action::update_incoming(const Particles &particles) {
+  for (auto it = incoming_particles_.begin();
+      it != incoming_particles_.end(); ++it) {
+    *it = particles.lookup(*it);
+  }
+}
+
 FourVector Action::get_interaction_point() {
   // Estimate for the interaction point in the calculational frame
   FourVector interaction_point = FourVector(0., 0., 0., 0.);

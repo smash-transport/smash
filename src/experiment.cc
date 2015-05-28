@@ -443,6 +443,9 @@ size_t Experiment<Modus>::run_time_evolution_without_time_steps(
     propagate_straight_line(&particles_, parameters_);
     modus_.impose_boundary_conditions(&particles_, outputs_);
 
+    // update the ParticleData that is stored in the action
+    act->update_incoming(particles_);
+
     // perform next action
     perform_action(act, interactions_total, total_pauli_blocked, particles_);
     const ParticleList& outgoing_particles = act->outgoing_particles();

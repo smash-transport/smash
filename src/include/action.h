@@ -134,6 +134,12 @@ class Action {
   const ParticleList& incoming_particles() const;
 
   /**
+   * Update the incoming particles that are stored in this action to the state
+   * they have in the global particle list.
+   */
+  void update_incoming(const Particles &particles);
+
+  /**
    * Return the list of particles that resulted from the interaction.
    */
   const ParticleList &outgoing_particles() const { return outgoing_particles_; }
