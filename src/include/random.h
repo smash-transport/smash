@@ -81,8 +81,8 @@ uniform_dist<T> make_uniform_distribution(T min, T max) {
  * Probability for a given return value \f$\chi\f$ is \f$p(\chi) =
  * \Theta(\chi) \cdot \exp(-t)\f$
  */
-template <typename T = double> T exponential() {
-  return std::exponential_distribution<T>(1)(engine);
+template <typename T = double> T exponential(T lambda) {
+  return std::exponential_distribution<T>(lambda)(engine);
 }
 
 /** Evaluates a random number x according to an exponential distribution
