@@ -269,10 +269,6 @@ TwoBodyDecayUnstable::TwoBodyDecayUnstable(ParticleTypePtrList part_types,
   }
 }
 
-float TwoBodyDecayUnstable::rho(float) const {
-  return 1.;
-}
-
 float TwoBodyDecayUnstable::width(float, float G0, float) const {
   return G0;  // use on-shell width
 }
@@ -334,10 +330,6 @@ int ThreeBodyDecay::particle_number() const {
 bool ThreeBodyDecay::has_particles(const ParticleType &,
                                    const ParticleType &) const {
   return false;
-}
-
-float ThreeBodyDecay::rho(float) const {
-  return 1.;
 }
 
 float ThreeBodyDecay::width(float, float G0, float) const {

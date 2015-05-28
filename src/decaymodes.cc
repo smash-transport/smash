@@ -34,7 +34,11 @@ void DecayModes::add_mode(float ratio, int L,
       logger<LogArea::DecayModes>().warn(
           "decay products A: ", *particle_types[0], " B: ", *particle_types[1]);
     }
-    if (particle_types[0]->is_stable() && particle_types[1]->is_stable()) {
+    if (is_dilepton(particle_types[0]->pdgcode(),
+                    particle_types[1]->pdgcode())) {
+      type = new TwoBodyDecayDilepton(particle_types, L);
+    } else if (particle_types[0]->is_stable() &&
+               particle_types[1]->is_stable()) {
       type = new TwoBodyDecayStable(particle_types, L);
     } else if (particle_types[0]->is_stable() ||
                particle_types[1]->is_stable()) {
