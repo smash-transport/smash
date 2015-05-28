@@ -131,17 +131,7 @@ float TwoBodyDecayStable::rho(float m) const {
 float TwoBodyDecayStable::width(float m0, float G0, float m) const {
   if (m <= particle_types_[0]->mass() + particle_types_[1]->mass()) {
     return 0;
-  }
-  if (is_dilepton(particle_types_[0]->pdgcode(),
-                  particle_types_[1]->pdgcode())) {
-    /// dilepton decays: use width from \iref{Li:1996mi}, equation (19)
-    const float ml = particle_types_[0]->mass();  // lepton mass
-    const float ml_to_m_sqr = (ml/m) * (ml/m);
-    const float m0_to_m_cubed = (m0/m) * (m0/m) * (m0/m);
-    return G0 * m0_to_m_cubed * std::sqrt(1.0f - 4.0f * ml_to_m_sqr) *
-           (1.0f + 2.0f * ml_to_m_sqr);
   } else {
-    // hadronic decays
     return G0 * rho(m) / rho(m0);
   }
 }
@@ -292,6 +282,32 @@ float TwoBodyDecayUnstable::in_width(float, float G0, float,
   return G0;  // use on-shell width
 }
 
+// TwoBodyDecayDilepton
+
+TwoBodyDecayDilepton::TwoBodyDecayDilepton(ParticleTypePtrList part_types,
+                                           int l)
+                                      : TwoBodyDecay(part_types, l) {
+  if (!is_dilepton(particle_types_[0]->pdgcode(),
+                  particle_types_[1]->pdgcode())) {
+    throw std::runtime_error(
+      "Error: No dilepton in TwoBodyDecayDilepton constructor: " +
+      part_types[0]->pdgcode().string() + " " +
+      part_types[1]->pdgcode().string());
+  }
+}
+
+float TwoBodyDecayDilepton::width(float m0, float G0, float m) const {
+  if (m <= particle_types_[0]->mass() + particle_types_[1]->mass()) {
+    return 0;
+  } else {
+    /// dilepton decays: use width from \iref{Li:1996mi}, equation (19)
+    const float ml = particle_types_[0]->mass();  // lepton mass
+    const float ml_to_m_sqr = (ml/m) * (ml/m);
+    const float m0_to_m_cubed = (m0/m) * (m0/m) * (m0/m);
+    return G0 * m0_to_m_cubed * std::sqrt(1.0f - 4.0f * ml_to_m_sqr) *
+           (1.0f + 2.0f * ml_to_m_sqr);
+  }
+}
 
 // ThreeBodyDecay
 

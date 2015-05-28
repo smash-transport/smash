@@ -156,6 +156,15 @@ class TwoBodyDecayUnstable : public TwoBodyDecay {
   float rho(float m) const override;
 };
 
+/**
+ * TwoBodyDecayDilepton represents a decay with a lepton and it's antilepton
+ * as the final state particles.
+ */
+class TwoBodyDecayDilepton : public TwoBodyDecay {
+  public:
+    TwoBodyDecayDilepton(ParticleTypePtrList part_types, int l);
+    float width(float m0, float G0, float m) const override;
+};
 
 /**
  * ThreeBodyDecay represents a decay type with three final-state particles.
