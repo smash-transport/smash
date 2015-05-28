@@ -10,10 +10,10 @@
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 
-#include <fenv.h>
-#include <getopt.h>
+#include <cfenv>
 #include <cstdio>
 #include <cstdlib>
+#include <getopt.h>
 #include <iterator>
 #include <list>
 #include <stdexcept>

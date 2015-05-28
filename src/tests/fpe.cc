@@ -8,7 +8,7 @@
  */
 
 #include "unittest.h"
-#include "../include/disablefpe.h"
+#include "../include/disablefloattraps.h"
 
 #include <csignal>
 
@@ -44,7 +44,7 @@ TEST(div_by_zero) {
   divisor = 0.f;
 
   // temporarily disable the trap
-  Smash::float_environment_no_traps([&] {
+  Smash::without_float_traps([&] {
     blackhole = 3.f / divisor;
     COMPARE(got_fpe, false);
   });
