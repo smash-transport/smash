@@ -62,7 +62,7 @@ class Particles {
    * particles.is_valid(particle);  // returns false
    * \endcode
    */
-  void insert(const ParticleData &p);
+  const ParticleData& insert(const ParticleData &p);
 
   /// Add \p n particles of the same type (\p pdg) to the list.
   void create(size_t n, PdgCode pdg);
@@ -135,7 +135,7 @@ class Particles {
    *
    * \note The validity of \p to_remove is only enforced in DEBUG builds.
    */
-  void replace(const ParticleList &to_remove, const ParticleList &to_add);
+  ParticleList replace(const ParticleList &to_remove, ParticleList &&to_add);
 
   /**
    * Updates the particle identified by \p p with the state stored in \p

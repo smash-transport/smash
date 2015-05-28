@@ -311,8 +311,8 @@ void Experiment<Modus>::perform_actions(ActionList &actions,
             total_pauli_blocked++;
           continue;
         }
-        const ParticleList outgoing_particles = action->outgoing_particles();
         action->perform(&particles_, interactions_total);
+        const ParticleList outgoing_particles = action->outgoing_particles();
         // Calculate Eckart rest frame density at the interaction point
         const FourVector r_interaction = action->get_interaction_point();
         const double rho =
