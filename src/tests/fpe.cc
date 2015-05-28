@@ -10,12 +10,16 @@
 #include "unittest.h"
 #include "../include/disablefloattraps.h"
 
+#include <atomic>
 #include <csignal>
 
 float blackhole = 0.f;
 float divisor = 0.f;
 
-static bool got_fpe = false;
+// this is atomic to enable the signal handler to change the value without the
+// compiler assuming it cannot change between the two COMPAREs.
+std::atomic<bool> got_fpe;
+
 static void handle_fpe(int s) {
   if (s == SIGFPE) {
     got_fpe = true;
@@ -30,14 +34,14 @@ TEST(setup_signal_handler) {
 }
 
 TEST(div_by_zero) {
-  float a = 1.f;
+  got_fpe = false;
 
   // default is no trap
-  blackhole = a / divisor;
+  blackhole = 1.f / divisor;
   COMPARE(got_fpe, false);
 
   // now it must trap
-  feenableexcept(FE_DIVBYZERO);
+  Smash::enable_float_traps(FE_DIVBYZERO);
   blackhole = 2.f / divisor;
   COMPARE(got_fpe, true);
   got_fpe = false;

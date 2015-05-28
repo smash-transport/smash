@@ -72,6 +72,7 @@ set(smash_src
         energymomentumtensor.cc
         experiment.cc
         fourvector.cc
+        fpenvironment.cc
         grid.cc
         inputfunctions.cc
         listmodus.cc

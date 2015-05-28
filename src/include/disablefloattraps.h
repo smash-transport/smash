@@ -11,6 +11,7 @@
 #define SRC_INCLUDE_DISABLEFPE_H_
 
 #include <cfenv>
+#include "fpenvironment.h"
 #include "logging.h"
 
 namespace Smash {
@@ -52,7 +53,7 @@ class DisableFloatTraps {
   DisableFloatTraps(int reenable = 0) {
     std::feholdexcept(&environment_);
     if (reenable != 0) {
-      if (-1 == feenableexcept(reenable)) {
+      if (!enable_float_traps(reenable)) {
         const auto &log = logger<LogArea::Fpe>();
         log.warn("Failed to setup traps on ", reenable);
       }
