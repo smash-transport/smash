@@ -309,6 +309,13 @@ float TwoBodyDecayDilepton::width(float m0, float G0, float m) const {
   }
 }
 
+float TwoBodyDecayDilepton::in_width(float m0, float G0, float m,
+                                   float, float) const {
+  // in-width = out-width
+  return width(m0, G0, m);
+}
+
+
 // ThreeBodyDecay
 
 ThreeBodyDecay::ThreeBodyDecay(ParticleTypePtrList part_types, int l)

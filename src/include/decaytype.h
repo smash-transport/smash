@@ -164,6 +164,8 @@ class TwoBodyDecayDilepton : public TwoBodyDecay {
   public:
     TwoBodyDecayDilepton(ParticleTypePtrList part_types, int l);
     float width(float m0, float G0, float m) const override;
+    float in_width(float m0, float G0, float m,
+                 float m1, float m2) const override;
 };
 
 /**
