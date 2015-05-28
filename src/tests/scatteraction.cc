@@ -83,6 +83,7 @@ TEST(elastic_collision) {
 
 TEST(outgoing_valid) {
   Test::create_actual_particletypes();
+  Test::create_actual_decaymodes();
   // create two protons
   ParticleData p1{ParticleType::find(0x2212)};
   ParticleData p2{ParticleType::find(0x2212)};

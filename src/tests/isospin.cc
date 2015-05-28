@@ -8,25 +8,17 @@
  */
 
 #include "unittest.h"
+#include "setup.h"
 
-#include "../include/particledata.h"
-#include "../include/decaymodes.h"
 #include "../include/scatteractionbaryonbaryon.h"
 #include "../include/scatteractionnucleonnucleon.h"
 
-namespace particles_txt {
-#include <particles.txt.h>
-}
-
-namespace decaymodes_txt {
-#include <decaymodes.txt.h>
-}
-
 using namespace Smash;
 
+
 TEST(init_particle_types) {
-  ParticleType::create_type_list(particles_txt::data);
-  DecayModes::load_decaymodes(decaymodes_txt::data);
+  Test::create_actual_particletypes();
+  Test::create_actual_decaymodes();
 }
 
 
