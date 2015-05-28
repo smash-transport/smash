@@ -11,6 +11,7 @@
 #include "setup.h"
 
 #include "../include/scatteraction.h"
+#include "../include/scatteractionnucleonnucleon.h"
 
 using namespace Smash;
 using Smash::Test::Position;
@@ -78,4 +79,40 @@ TEST(elastic_collision) {
   // verify that the particles don't change in the particle list
   VERIFY((in[0] == particles.front() && in[1] == particles.back())
          || (in[0] == particles.back() && in[1] == particles.front()));
+}
+
+TEST(outgoing_valid) {
+  Test::create_actual_particletypes();
+  // create two protons
+  ParticleData p1{ParticleType::find(0x2212)};
+  ParticleData p2{ParticleType::find(0x2212)};
+  // set position
+  p1.set_4position(Position{0., -0.1, 0., 0.});
+  p2.set_4position(Position{0., 0.1, 0., 0.});
+  // set momenta
+  constexpr double p_x = 0.1;
+  const double mass = p1.pole_mass();
+  const double energy = std::sqrt(mass*mass+p_x*p_x);
+  p1.set_4momentum(Momentum{energy, p_x, 0., 0.});
+  p2.set_4momentum(Momentum{energy, -p_x, 0., 0.});
+
+  // put in particles object
+  Particles particles;
+  particles.insert(p1);
+  particles.insert(p2);
+
+  // get valid copies back
+  ParticleList plist = particles.copy_to_vector();
+  auto p1_copy = plist[0];
+  auto p2_copy = plist[1];
+  VERIFY(particles.is_valid(p1_copy) && particles.is_valid(p2_copy));
+
+  // construct action
+  ScatterActionPtr act;
+  act = make_unique<ScatterActionNucleonNucleon>(p1_copy, p2_copy, 0.2f);
+  VERIFY(act != nullptr);
+  COMPARE(p2_copy.type(), ParticleType::find(0x2212));
+
+  // add processes
+  CollisionBranchList branches = act->two_to_two_cross_sections();
 }
