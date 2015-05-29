@@ -129,4 +129,6 @@ TEST(outgoing_valid) {
   const ParticleList& outgoing_particles = act->outgoing_particles();
   VERIFY(outgoing_particles.size() > 0u);  // should be at least one
   VERIFY(particles.is_valid(outgoing_particles[0]));
+  VERIFY(outgoing_particles[0].id() > p1_copy.id());
+  VERIFY(outgoing_particles[0].id() > p2_copy.id());
 }
