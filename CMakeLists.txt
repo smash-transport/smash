@@ -55,8 +55,14 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
    # Clang-specific compiler flags
    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-missing-braces")
 
-   include(cmake/AddCompilerFlag.cmake)
-   AddCompilerFlag(-stdlib=libc++ CXX_FLAGS CMAKE_CXX_FLAGS)
+   option(CLANG_USE_LIBCXX "If turned on clang will explicitly be asked to use libc++ (otherwise it uses the system default)" OFF)
+   if(CLANG_USE_LIBCXX)
+      include(cmake/AddCompilerFlag.cmake)
+      AddCompilerFlag(-stdlib=libc++ CXX_FLAGS CMAKE_CXX_FLAGS CXX_RESULT _use_libcxx)
+      if(_use_libcxx AND "${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
+         link_libraries(c++abi supc++)
+      endif()
+   endif()
 endif()
 
 # check that C++11 code compiles
