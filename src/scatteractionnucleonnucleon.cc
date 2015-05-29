@@ -208,7 +208,7 @@ CollisionBranchList ScatterActionNucleonNucleon::nuc_nuc_to_nuc_res(
 
       /* Calculate matrix element. */
       const float matrix_element =
-          nn_to_resonance_matrix_element(s, *type_resonance, *second_type);
+            nn_to_resonance_matrix_element(srts, *type_resonance, *second_type);
       if (matrix_element <= 0.) {
         continue;
       }
