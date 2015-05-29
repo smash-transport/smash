@@ -52,10 +52,10 @@ inline void Particles::copy_in(ParticleData &to, const ParticleData &from) {
 const ParticleData& Particles::insert(const ParticleData &p) {
   if (likely(dirty_.empty())) {
     ensure_capacity(1);
-    copy_in(data_[data_size_], p);
-    const unsigned index = data_size_;
+    ParticleData &in_vector = data_[data_size_];
+    copy_in(in_vector, p);
     ++data_size_;
-    return data_[index];
+    return in_vector;
   } else {
     const auto offset = dirty_.back();
     dirty_.pop_back();
