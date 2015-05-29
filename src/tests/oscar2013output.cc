@@ -215,8 +215,9 @@ TEST(final2013_format) {
                                    random_value(), random_value());
   final_particles[1].set_4momentum(Test::smashon_mass, random_value(),
                                    random_value(), random_value());
-  particles.replace(initial_particles, final_particles);
-  final_particles = particles.copy_to_vector();
+  final_particles =
+      particles.replace(initial_particles, std::move(final_particles));
+  COMPARE(final_particles, particles.copy_to_vector());
   /* As with initial state output, this should not do anything */
   osc2013final->at_interaction(initial_particles, final_particles, 0.0, 0.0,
       ProcessType::None);
