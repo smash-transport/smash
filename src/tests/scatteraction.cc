@@ -10,7 +10,6 @@
 #include "unittest.h"
 #include "setup.h"
 
-#include "../include/scatteraction.h"
 #include "../include/scatteractionbaryonmeson.h"
 
 using namespace Smash;
@@ -52,7 +51,7 @@ TEST(elastic_collision) {
 
   // add elastic channel
   constexpr float sigma = 10.0;
-  act.add_collision(act.elastic_cross_section(sigma));
+  act.add_all_processes(sigma);
 
   // check cross section
   COMPARE(act.cross_section(), sigma);
@@ -88,14 +87,13 @@ TEST(outgoing_valid) {
   ParticleData p1{ParticleType::find(0x2212)};
   ParticleData p2{ParticleType::find(0x111)};
   // set position
-  p1.set_4position(Position{0., -0.1, 0., 0.});
-  p2.set_4position(Position{0., 0.1, 0., 0.});
+  constexpr double r_x = 0.1;
+  p1.set_4position(Position{0., -r_x, 0., 0.});
+  p2.set_4position(Position{0., r_x, 0., 0.});
   // set momenta
   constexpr double p_x = 0.1;
-  const double mass = p1.pole_mass();
-  const double energy = std::sqrt(mass*mass+p_x*p_x);
-  p1.set_4momentum(Momentum{energy, p_x, 0., 0.});
-  p2.set_4momentum(Momentum{energy, -p_x, 0., 0.});
+  p1.set_4momentum(p1.pole_mass(), p_x, 0., 0.);
+  p2.set_4momentum(p2.pole_mass(), -p_x, 0., 0.);
 
   // put in particles object
   Particles particles;
