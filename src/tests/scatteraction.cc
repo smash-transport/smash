@@ -11,7 +11,7 @@
 #include "setup.h"
 
 #include "../include/scatteraction.h"
-#include "../include/scatteractionnucleonnucleon.h"
+#include "../include/scatteractionbaryonmeson.h"
 
 using namespace Smash;
 using Smash::Test::Position;
@@ -84,9 +84,9 @@ TEST(elastic_collision) {
 TEST(outgoing_valid) {
   Test::create_actual_particletypes();
   Test::create_actual_decaymodes();
-  // create two protons
+  // create a proton and a pion
   ParticleData p1{ParticleType::find(0x2212)};
-  ParticleData p2{ParticleType::find(0x2212)};
+  ParticleData p2{ParticleType::find(0x111)};
   // set position
   p1.set_4position(Position{0., -0.1, 0., 0.});
   p2.set_4position(Position{0., 0.1, 0., 0.});
@@ -110,10 +110,25 @@ TEST(outgoing_valid) {
 
   // construct action
   ScatterActionPtr act;
-  act = make_unique<ScatterActionNucleonNucleon>(p1_copy, p2_copy, 0.2f);
+  act = make_unique<ScatterActionBaryonMeson>(p1_copy, p2_copy, 0.2f);
   VERIFY(act != nullptr);
-  COMPARE(p2_copy.type(), ParticleType::find(0x2212));
+  COMPARE(p2_copy.type(), ParticleType::find(0x111));
 
   // add processes
-  CollisionBranchList branches = act->two_to_two_cross_sections();
+  constexpr float elastic_parameter = 0.f;  // don't include elastic scattering
+  act->add_all_processes(elastic_parameter);
+  VERIFY(act->cross_section() > 0.f);
+
+  // perform actions
+  VERIFY(act->is_valid(particles));
+  act->generate_final_state();
+  VERIFY(act->get_type() != ProcessType::Elastic);
+  size_t id_process = 0u;
+  act->perform(&particles, id_process);
+  COMPARE(id_process, 1u);
+
+  // check the outgoing particles
+  const ParticleList& outgoing_particles = act->outgoing_particles();
+  VERIFY(outgoing_particles.size() > 0u);  // should be at least one
+  VERIFY(particles.is_valid(outgoing_particles[0]));
 }
