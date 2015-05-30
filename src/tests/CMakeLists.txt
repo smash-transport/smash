@@ -150,6 +150,7 @@ smash_add_unittest(scatteraction)
 smash_add_unittest(scatteractionsfinder)
 smash_add_unittest(threevector)
 smash_add_unittest(vtkoutput)
+smash_add_unittest(without_float_traps)
 smash_add_unittest(yamltest)
 
 # for now -o has to be "data", because OSCAR output still expects to output to
