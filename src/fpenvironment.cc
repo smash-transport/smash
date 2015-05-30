@@ -8,6 +8,7 @@
  */
 
 #include "include/fpenvironment.h"
+#include "include/logging.h"
 
 #if defined __SSE__
 #include <xmmintrin.h>
@@ -49,5 +50,12 @@ bool enable_float_traps(int femask) {
   return true;
 }
 #endif
+
+void DisableFloatTraps::reenable_traps(int mask) {
+  if (!enable_float_traps(mask)) {
+    const auto &log = logger<LogArea::Fpe>();
+    log.warn("Failed to setup traps on ", mask);
+  }
+}
 
 }  // namespace Smash

@@ -8,7 +8,7 @@
  */
 
 #include "unittest.h"
-#include "../include/disablefloattraps.h"
+#include "../include/fpenvironment.h"
 
 #include <atomic>
 #include <csignal>
