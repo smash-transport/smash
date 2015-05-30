@@ -7,13 +7,8 @@
 
 #include "include/decaytype.h"
 
-#include <gsl/gsl_integration.h>
-#include <algorithm>
-#include <stdexcept>
-
-#include "include/constants.h"
+#include "include/cxx14compat.h"
 #include "include/kinematics.h"
-#include "include/logging.h"
 #include "include/resonances.h"
 
 namespace Smash {
@@ -155,33 +150,6 @@ float TwoBodyDecayStable::in_width(float m0, float G0, float m,
 
 // TwoBodyDecaySemistable
 
-TwoBodyDecaySemistable::TwoBodyDecaySemistable(ParticleTypePtrList part_types,
-                                               int l)
-                                              : TwoBodyDecay(part_types, l) {
-  // mark sure that the first particle is the stable one
-  if (particle_types_[1]->is_stable()) {
-    std::swap(particle_types_[0], particle_types_[1]);
-  }
-  // make sure that this is really a "semi-stable" decay
-  if (!particle_types_[0]->is_stable() || particle_types_[1]->is_stable()) {
-    throw std::runtime_error(
-      "Error in TwoBodyDecaySemistable constructor: " +
-      particle_types_[0]->pdgcode().string() + " " +
-      particle_types_[1]->pdgcode().string());
-  }
-  Lambda_ = (particle_types_[1]->baryon_number() != 0) ? 2.0 : 1.6;
-  // initialize tabulation
-  init_tabulation(1., 50);
-}
-
-/** Parameters for GSL integration. */
-struct IntegParam {
-  const ParticleType &type;  // type of daughter resonance
-  double m2;                 // mass of stable particle
-  double srts;               // sqrt(s) = mass of decaying resonance
-  int L;                     // angular momentum
-};
-
 static double integrand_rho_Manley(double mass, void *parameters) {
   IntegParam *ip = reinterpret_cast<IntegParam*>(parameters);
 
@@ -200,53 +168,30 @@ static double integrand_rho_Manley(double mass, void *parameters) {
           * spectral_function(mass, ip->type.mass(), resonance_width);
 }
 
-float TwoBodyDecaySemistable::calc_rho(float m) const {
-  gsl_integration_workspace *workspace
-    = gsl_integration_workspace_alloc(1000);
-  IntegParam ip = {*particle_types_[1], particle_types_[0]->mass(), m, L_};
-  gsl_function integrand;
-  integrand.function = integrand_rho_Manley;
-  integrand.params = &ip;
-  size_t subintervals_max = 100;
-  int gauss_points = 2;
-  double accuracy_absolute = 1.0e-6;
-  double accuracy_relative = 1.0e-4;
-  double integral_value, integral_error;
-
-  gsl_integration_qag(&integrand, ip.type.minimum_mass(), ip.srts - ip.m2,
-                      accuracy_absolute, accuracy_relative,
-                      subintervals_max, gauss_points, workspace,
-                      &integral_value, &integral_error);
-
-  gsl_integration_workspace_free(workspace);
-
-  return integral_value;
-}
-
-void TwoBodyDecaySemistable::init_tabulation(float range, unsigned int N) {
-  const auto &log = logger<LogArea::DecayType>();
-  M_min_ = particle_types_[0]->mass()+particle_types_[1]->minimum_mass();
-  log.debug("Tabulating width for decay into ",
-            particle_types_[0]->name(), " ", particle_types_[1]->name(),
-            " (L=", L_, ", M_min=", M_min_, ")");
-  dM_ = range/N;
-  tabulation_.resize(N);
-  for (unsigned int i = 0; i < N; i++) {
-    tabulation_[i] = calc_rho(M_min_ + i*dM_);
+TwoBodyDecaySemistable::TwoBodyDecaySemistable(ParticleTypePtrList part_types,
+                                               int l)
+                                              : TwoBodyDecay(part_types, l) {
+  // make sure that the first particle is the stable one
+  if (particle_types_[1]->is_stable()) {
+    std::swap(particle_types_[0], particle_types_[1]);
   }
+  // make sure that this is really a "semi-stable" decay
+  if (!particle_types_[0]->is_stable() || particle_types_[1]->is_stable()) {
+    throw std::runtime_error(
+      "Error in TwoBodyDecaySemistable constructor: " +
+      particle_types_[0]->pdgcode().string() + " " +
+      particle_types_[1]->pdgcode().string());
+  }
+  Lambda_ = (particle_types_[1]->baryon_number() != 0) ? 2.0 : 1.6;
+  // initialize tabulation
+  IntegParam ip = {*particle_types_[1], particle_types_[0]->mass(), 0., L_};
+  tabulation_ = make_unique<Tabulation>(
+                  particle_types_[0]->mass()+particle_types_[1]->minimum_mass(),
+                  1.f, 50u, ip, integrand_rho_Manley);
 }
 
 float TwoBodyDecaySemistable::rho(float m) const {
-  if (m < M_min_) {
-    return 0.;
-  }
-  // lookup tabulated values
-  unsigned int n = static_cast<unsigned int>(std::round((m - M_min_) / dM_));
-  if (n >= tabulation_.size()) {
-    return tabulation_.back();
-  } else {
-    return tabulation_[n];
-  }
+  return tabulation_->get_value(m);
 }
 
 float TwoBodyDecaySemistable::width(float m0, float G0, float m) const {

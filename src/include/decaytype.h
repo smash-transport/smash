@@ -9,9 +9,11 @@
 #define SRC_INCLUDE_DECAYTYPE_H_
 
 #include <vector>
+#include <memory>
 
 #include "forwarddeclarations.h"
 #include "particletype.h"
+#include "tabulation.h"
 
 namespace Smash {
 
@@ -135,11 +137,8 @@ class TwoBodyDecaySemistable : public TwoBodyDecay {
 
  protected:
   float rho(float m) const override;
-  float calc_rho(float m) const;
-  std::vector<float> tabulation_;  // vector for storing tabulated values
-  float M_min_, dM_;               // minimum mass and step size for tabulation
+  TabulationPtr tabulation_;
   float Lambda_;
-  void init_tabulation(float range, unsigned int N);
 };
 
 
