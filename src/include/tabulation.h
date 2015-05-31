@@ -9,17 +9,20 @@
 #define SRC_INCLUDE_TABULATION_H_
 
 #include <vector>
+#include <map>
+#include <memory>
 
+#include "forwarddeclarations.h"
 #include "particletype.h"
 
 namespace Smash {
 
 /** Parameters for GSL integration. */
 struct IntegParam {
-  const ParticleType &type;  // type of daughter resonance
-  double m2;                 // mass of stable particle
-  double srts;               // sqrt(s) = mass of decaying resonance
-  int L;                     // angular momentum
+  const ParticleTypePtr type;  // type of final-state resonance
+  double m2;                   // mass of stable final-state particle
+  double srts;                 // sqrt(s)
+  int L;                       // angular momentum
 };
 
 typedef double (*IntegrandFunction)(double, void*);
@@ -51,6 +54,11 @@ class Tabulation {
   IntegParam ip_;              // integration parameters
   IntegrandFunction func_;     // integrand function
 };
+
+
+// a map for storing the integral tabulation used for the NN->NR cross sections
+static std::map<int, TabulationPtr> XS_tabulation;
+
 
 }  // namespace Smash
 

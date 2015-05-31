@@ -21,20 +21,6 @@
 
 namespace Smash {
 
-/** Parameters for spectral-function integration via GSL. */
-struct IntegrandParameters {
-  /// Type of the resonance
-  ParticleTypePtr type;
-  /** Mass of second particle
-   * \fpPrecision Why \c double?
-   */
-  double m2;
-  /** Square root of Mandelstam s
-   * \fpPrecision Why \c double?
-   */
-  double srts;
-};
-
 /**
  * Calculate Clebsch-Gordan coefficient
  *
@@ -115,25 +101,6 @@ double spectral_function_integrand(double resonance_mass, void * parameters);
 float sample_resonance_mass(const ParticleType &type_resonance,
                             const ParticleType &type_stable,
                             const double cms_energy);
-
-/**
- * Function for 1-dimensional GSL integration.
- *
- * \param[in] integrand_function Function of 1 variable to be integrated over.
- * \param[in] parameters Container for possible parameters
- * needed by the integrand.
- * \param[in] lower_limit Lower limit of the integral.
- * \param[in] upper_limit Upper limit of the integral.
- * \param[out] integral_value Result of integration.
- * \param[out] integral_error Uncertainty of the result.
- *
- * \fpPrecision Why \c double?
- */
-void quadrature_1d(double (*integrand_function)(double, void *),
-                          IntegrandParameters *parameters, double lower_limit,
-                          double upper_limit, double *integral_value,
-                          double *integral_error);
-
 
 }  // namespace Smash
 

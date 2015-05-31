@@ -8,29 +8,10 @@
  */
 #include "include/resonances.h"
 
-#include <gsl/gsl_integration.h>
-#include <gsl/gsl_math.h>
 #include <gsl/gsl_sf_coupling.h>
-#include <gsl/gsl_errno.h>
-#include <algorithm>
-#include <cmath>
-#include <cstdio>
-#include <cstdlib>
-#include <map>
-#include <utility>
-#include <vector>
 
-#include "include/constants.h"
-#include "include/decaymodes.h"
 #include "include/distributions.h"
-#include "include/fourvector.h"
 #include "include/kinematics.h"
-#include "include/logging.h"
-#include "include/macros.h"
-#include "include/particledata.h"
-#include "include/particles.h"
-#include "include/processbranch.h"
-#include "include/random.h"
 
 namespace Smash {
 
@@ -49,32 +30,6 @@ double clebsch_gordan(const int j_a, const int j_b, const int j_c,
   return result;
 }
 
-
-/* Function for 1-dimensional GSL integration  */
-void quadrature_1d(double (*integrand_function)(double, void*),
-                     IntegrandParameters *parameters,
-                     double lower_limit, double upper_limit,
-                     double *integral_value, double *integral_error) {
-  gsl_integration_workspace *workspace
-    = gsl_integration_workspace_alloc(1000);
-  gsl_function integrand;
-  integrand.function = integrand_function;
-  integrand.params = parameters;
-  size_t subintervals_max = 100;
-  int gauss_points = 2;
-  double accuracy_absolute = 1.0e-6;
-  double accuracy_relative = 1.0e-4;
-
-  gsl_set_error_handler_off();
-
-  gsl_integration_qag(&integrand, lower_limit, upper_limit,
-                      accuracy_absolute, accuracy_relative,
-                      subintervals_max, gauss_points, workspace,
-                      integral_value, integral_error);
-
-  gsl_integration_workspace_free(workspace);
-}
-
 /* Spectral function of the resonance */
 double spectral_function(double resonance_mass, double resonance_pole,
                          double resonance_width) {
@@ -86,32 +41,25 @@ double spectral_function(double resonance_mass, double resonance_pole,
          (M_PI * resonance_mass * resonance_width);
 }
 
-/* Spectral function integrand for GSL integration */
+/* Integrand for spectral-function integration */
 double spectral_function_integrand(double resonance_mass,
                                    void *parameters) {
-  IntegrandParameters *params
-    = reinterpret_cast<IntegrandParameters*>(parameters);
-  double resonance_pole_mass = params->type->mass();
-  double stable_mass = params->m2;
-  double resonance_width = params->type->total_width(resonance_mass);
-  double srts = params->srts;
+  IntegParam *params = reinterpret_cast<IntegParam*>(parameters);
+  const double stable_mass = params->m2;
+  const double resonance_width = params->type->total_width(resonance_mass);
+  const double srts = params->srts;
 
-  if (srts > stable_mass + resonance_mass &&
-      resonance_width > really_small) {
-    /* center-of-mass momentum of final state particles */
-    double cm_momentum_final = pCM(srts, stable_mass, resonance_mass);
-
-    /* Integrand is the spectral function weighted by the
-     * CM momentum of final state
-     * In addition, dm^2 = 2*m*dm
-     */
-    return spectral_function(resonance_mass, resonance_pole_mass,
-                             resonance_width)
-           * cm_momentum_final
-           * 2 * resonance_mass;
-  } else {
+  if (srts < stable_mass + resonance_mass
+      || resonance_width < really_small) {
     return 0.0;
   }
+
+  /* Integrand is the spectral function weighted by the CM momentum of the
+    * final state. In addition, dm^2 = 2*m*dm. */
+  const double res_pole_mass = params->type->mass();
+  return spectral_function(resonance_mass, res_pole_mass, resonance_width)
+          * pCM(srts, stable_mass, resonance_mass)
+          * 2 * resonance_mass;
 }
 
 /* Resonance mass sampling for 2-particle final state */
@@ -119,8 +67,8 @@ float sample_resonance_mass(const ParticleType &type_resonance,
                             const ParticleType &type_stable,
                             const double cms_energy) {
   /* Define distribution parameters */
-  float mass_stable = type_stable.mass();
-  IntegrandParameters params = {&type_resonance, mass_stable, cms_energy};
+  const float mass_stable = type_stable.mass();
+  IntegParam params = {&type_resonance, mass_stable, cms_energy, 0};
 
   /* Sample resonance mass from the distribution
    * used for calculating the cross section. */

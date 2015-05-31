@@ -153,19 +153,19 @@ float TwoBodyDecayStable::in_width(float m0, float G0, float m,
 static double integrand_rho_Manley(double mass, void *parameters) {
   IntegParam *ip = reinterpret_cast<IntegParam*>(parameters);
 
-  double stable_mass = ip->m2;
-  double srts = ip->srts;
+  const double stable_mass = ip->m2;
+  const double srts = ip->srts;
 
-  if (srts < mass + stable_mass) {
+  if (srts <= mass + stable_mass) {
     return 0.;
   }
 
-  double resonance_width = ip->type.total_width(srts);
+  const double resonance_width = ip->type->total_width(srts);
   /* center-of-mass momentum of final state particles */
-  double p_f = pCM(srts, stable_mass, mass);
+  const double p_f = pCM(srts, stable_mass, mass);
 
   return p_f/srts * BlattWeisskopf(p_f, ip->L) * 2.*srts
-          * spectral_function(mass, ip->type.mass(), resonance_width);
+         * spectral_function(mass, ip->type->mass(), resonance_width);
 }
 
 TwoBodyDecaySemistable::TwoBodyDecaySemistable(ParticleTypePtrList part_types,
@@ -184,7 +184,8 @@ TwoBodyDecaySemistable::TwoBodyDecaySemistable(ParticleTypePtrList part_types,
   }
   Lambda_ = (particle_types_[1]->baryon_number() != 0) ? 2.0 : 1.6;
   // initialize tabulation
-  IntegParam ip = {*particle_types_[1], particle_types_[0]->mass(), 0., L_};
+  const IntegParam ip = {particle_types_[1], particle_types_[0]->mass(),
+                         0., L_};
   tabulation_ = make_unique<Tabulation>(
                   particle_types_[0]->mass()+particle_types_[1]->minimum_mass(),
                   1.f, 50u, ip, integrand_rho_Manley);
