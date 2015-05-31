@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef SRC_INCLUDE_DISABLEFPE_H_
-#define SRC_INCLUDE_DISABLEFPE_H_
+#ifndef SRC_INCLUDE_DISABLEFLOATTRAPS_H_
+#define SRC_INCLUDE_DISABLEFLOATTRAPS_H_
 
 #include <cfenv>
 #include "fpenvironment.h"
@@ -93,4 +93,4 @@ void without_float_traps(F &&f) {
 
 }  // namespace Smash
 
-#endif  // SRC_INCLUDE_DISABLEFPE_H_
+#endif  // SRC_INCLUDE_DISABLEFLOATTRAPS_H_
