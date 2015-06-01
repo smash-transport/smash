@@ -320,6 +320,10 @@ void Experiment<Modus>::perform_actions(ActionList &actions,
             rho_eckart(r_interaction.threevec(), particles_before_actions,
                          parameters_.gaussian_sigma, dens_type_,
                          parameters_.testparticles, compute_grad).first;
+        /* Note that in Box modus coordinates of particles in this output
+             may be out of box bounds. Boundary conditions are intentionally
+             NOT imposed here to allow finding interaction points from
+             output files. */
         for (const auto &output : outputs_) {
           output->at_interaction(incoming_particles, outgoing_particles, rho,
                                  action->raw_weight_value(), process_type);
