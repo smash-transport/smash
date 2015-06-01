@@ -71,7 +71,8 @@ namespace Smash {
    * \param[in] two_sigma_sqr 2*sigma^2, sigma - width of gaussian smearing
    */
   inline double smearing_factor_norm(const double two_sigma_sqr) {
-    return std::pow(two_sigma_sqr * M_PI, 1.5);
+    const double tmp = two_sigma_sqr * M_PI;
+    return tmp * std::sqrt(tmp);
   }
 
   /**
@@ -81,7 +82,8 @@ namespace Smash {
    * \param[in] two_sigma_sqr 2*sigma^2, sigma - width of gaussian smearing
    */
   inline double smearing_factor_grad_norm(const double two_sigma_sqr) {
-    return std::pow(two_sigma_sqr * M_PI, 1.5) * 0.5 * two_sigma_sqr;
+    const double tmp = two_sigma_sqr * M_PI;
+    return tmp * std::sqrt(tmp) * 0.5 * two_sigma_sqr;
   }
 
   /** Calculates Eckart rest frame density and optionally its gradient.

@@ -100,7 +100,7 @@ ThreeVector Potentials::potential_gradient(const ThreeVector &r,
     return total_gradient;
   }
 
-  const bool compute_gradient = false;
+  const bool compute_gradient = true;
   if (use_skyrme_) {
     const auto density_and_gradient = rho_eckart(r, plist, sigma_,
                            DensityType::baryon, ntest_, compute_gradient);

@@ -108,16 +108,16 @@ std::pair<double, ThreeVector> rho_eckart_impl(const ThreeVector &r,
     if (dens_factor > 0.f) {
       jmu_pos[0] += tmp * sf_and_grad.first;
       if (compute_gradient) {
-        jmu_pos[1] += tmp * sf_and_grad.second[0];
-        jmu_pos[2] += tmp * sf_and_grad.second[1];
-        jmu_pos[3] += tmp * sf_and_grad.second[2];
+        for (int k = 1; k <= 3; k++) {
+          jmu_pos[k] += tmp * sf_and_grad.second[k-1];
+        }
       }
     } else {
       jmu_neg[0] += tmp * sf_and_grad.first;
       if (compute_gradient) {
-        jmu_neg[1] += tmp * sf_and_grad.second[0];
-        jmu_neg[2] += tmp * sf_and_grad.second[1];
-        jmu_neg[3] += tmp * sf_and_grad.second[2];
+        for (int k = 1; k <= 3; k++) {
+          jmu_neg[k] += tmp * sf_and_grad.second[k-1];
+        }
       }
     }
   }
