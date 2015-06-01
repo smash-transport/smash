@@ -91,7 +91,19 @@ if(CPPLINT)
                      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
                      COMMENT "Executing test cpplint_full")
 else()
-   message(WARNING "cpplint.py was not found. The cclint test will be disabled.\nDownload from: http://google-styleguide.googlecode.com/svn/trunk/cpplint/cpplint.py")
+   message(WARNING "cpplint.py was not found. The cpplint test will be disabled.\nDownload from: http://google-styleguide.googlecode.com/svn/trunk/cpplint/cpplint.py")
+endif()
+
+# static code analysis with cppcheck
+find_program(CPPCHECK cppcheck)
+if(CPPCHECK)
+   message(STATUS "cppcheck found at ${CPPCHECK}")
+   add_custom_target(cppcheck
+                     COMMAND ${CPPCHECK} "--enable=all" "-q" "-I" "include/" "."
+                     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/src/
+                     COMMENT "Executing test cppcheck")
+else()
+   message(WARNING "cppcheck was not found. The cppcheck test will be disabled.")
 endif()
 
 # generate git statistics, requires gitstats in the path
