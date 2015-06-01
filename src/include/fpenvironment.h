@@ -34,6 +34,15 @@ inline bool enable_float_traps(int) { return false; }
 #endif
 
 /**
+ * Setup the floating-point traps used throughout SMASH.
+ *
+ * If possible, this function additionally installs a signal handler that prints
+ * what kind of condition triggered the trap. This requires POSIX.1-2001 to
+ * work.
+ */
+void setup_default_float_traps();
+
+/**
  * Guard type that safely disables floating point traps for the scope in which
  * it is placed.
  *
