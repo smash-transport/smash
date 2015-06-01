@@ -36,23 +36,23 @@ class Tabulation {
   /** Construct a new tabulation object.
    * \param x_min lower bound of tabulation domain
    * \param range range (x_max-x_min) of tabulation domain
-   * \param N number of tabulation points
+   * \param num_points number of tabulation points
    * \param ip integration parameters
    * \param f integrand function
    */
-  Tabulation(float x_min, float range, unsigned int N,
+  Tabulation(float x_min, float range, int num_points,
              IntegParam ip, IntegrandFunction f);
-  /// Look up a value from the tabulation.
+  /** Look up a value from the tabulation. If x is below the lower tabulation
+   * bound we return 0, if it is above the upper bound we return the tabulated
+   * value at the upper bound. */
   float get_value(float x) const;
 
  protected:
   /** Calculate a value to be stored in the table
    * (by numerically solving an integral). */
-  float calculate_value(float x);
-  std::vector<float> values_;  // vector for storing tabulated values
-  float x_min_, dx_;           // minimum mass and step size for tabulation
-  IntegParam ip_;              // integration parameters
-  IntegrandFunction func_;     // integrand function
+  float calculate_value(float x, IntegParam ip, IntegrandFunction f);
+  std::vector<float> values_;   // vector for storing tabulated values
+  const float x_min_, inv_dx_;  // lower bound and inverse step size 1/dx for tabulation
 };
 
 

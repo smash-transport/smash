@@ -224,7 +224,7 @@ CollisionBranchList ScatterActionNucleonNucleon::nuc_nuc_to_nuc_res(
                                    srts, 0};
         XS_tabulation[res_id] = make_unique<Tabulation>(
                             type_resonance->minimum_mass()+second_type->mass(),
-                            2.f, 100u, params, spectral_function_integrand);
+                            2.f, 100, params, spectral_function_integrand);
       }
       const double resonance_integral = XS_tabulation[res_id]->get_value(srts);
 

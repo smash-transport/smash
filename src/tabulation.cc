@@ -12,26 +12,27 @@
 
 namespace Smash {
 
-Tabulation::Tabulation(float x_min, float range, unsigned int N,
+Tabulation::Tabulation(float x_min, float range, int num_points,
                        IntegParam ip, IntegrandFunction f)
-                      : x_min_(x_min), dx_(range/N), ip_(ip), func_(f) {
-  values_.resize(N);
-  for (unsigned int i = 0; i < N; i++) {
-    values_[i] = calculate_value(x_min_ + i*dx_);
+                      : x_min_(x_min), inv_dx_(num_points/range) {
+  values_.resize(num_points);
+  const float dx = range/num_points;
+  for (int i = 0; i < num_points; i++) {
+    values_[i] = calculate_value(x_min_ + i*dx, ip, f);
   }
 }
 
-float Tabulation::calculate_value(float x) {
+float Tabulation::calculate_value(float x, IntegParam ip, IntegrandFunction f) {
   gsl_integration_workspace *workspace = gsl_integration_workspace_alloc(1000);
-  ip_.srts = x;
-  const gsl_function integrand = {func_, &ip_};
+  ip.srts = x;
+  const gsl_function integrand = {f, &ip};
   const size_t subintervals_max = 500;
   const int gauss_points = 2;
   const double accuracy_absolute = 1.0e-5;
   const double accuracy_relative = 1.0e-3;
   double integral_value, integral_error;
 
-  gsl_integration_qag(&integrand, ip_.type->minimum_mass(), ip_.srts - ip_.m2,
+  gsl_integration_qag(&integrand, ip.type->minimum_mass(), ip.srts - ip.m2,
                       accuracy_absolute, accuracy_relative,
                       subintervals_max, gauss_points, workspace,
                       &integral_value, &integral_error);
@@ -45,8 +46,8 @@ float Tabulation::get_value(float x) const {
   if (x < x_min_) {
     return 0.;
   }
-  // look up tabulated values
-  unsigned int n = static_cast<unsigned int>(std::round((x - x_min_) / dx_));
+  // this rounds correctly because float -> int conversion truncates
+  const unsigned int n = (x - x_min_) * inv_dx_ + 0.5f;
   if (n >= values_.size()) {
     return values_.back();
   } else {
