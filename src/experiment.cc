@@ -242,9 +242,7 @@ Experiment<Modus>::Experiment(Configuration config)
   log.info() << "Density type written to headers: " << dens_type_;
 }
 
-const std::string hline(
-    "----------------------------------------"
-    "----------------------------------------");
+const std::string hline(80, '-');
 
 /* This method reads the particle type and cross section information
  * and does the initialization of the system (fill the particles map)
@@ -283,12 +281,15 @@ static std::string format_measurements(const Particles &particles,
   QuantumNumbers difference = conserved_initial - current_values;
 
   std::ostringstream ss;
-  ss << field<5> << time << field<12, 3> << difference.momentum().x0()
+  ss << field<5> << time
+     << field<12, 3> << difference.momentum().x0()
      << field<12, 3> << difference.momentum().abs3()
      << field<12, 3> << (scatterings_total
-                             ? scatterings_total * 2 / (particles.size() * time)
-                             : 0.) << field<10, 3> << scatterings_this_interval
-     << field<12, 3> << particles.size() << field<10, 3> << elapsed_seconds;
+                          ? scatterings_total * 2 / (particles.size() * time)
+                          : 0.)
+     << field<10, 3> << scatterings_this_interval
+     << field<12, 3> << particles.size()
+     << field<10, 3> << elapsed_seconds;
   return ss.str();
 }
 
