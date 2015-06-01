@@ -13,7 +13,7 @@
 #include "setup.h"
 
 #include "../include/decaymodes.h"
-#include "../include/action.h"
+#include "../include/decayaction.h"
 #include "../include/cxx14compat.h"
 
 using namespace Smash;
