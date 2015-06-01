@@ -28,7 +28,7 @@ namespace Smash {
  * the 'threevec()' method.
  *
  * \fpPrecision
- * \li The \c ThreeVector class, like the \ref FourVector class, uses \c double
+ * \li The \c ThreeVector class, like the \c FourVector class, uses \c double
  * for storage, calculations, and in the interface. This is necessary because
  * most particles are close to light speed and thus the low-order bits in the
  * mantissa of the momentum make large differences in energy. If they are
@@ -104,6 +104,9 @@ class ThreeVector {
   ThreeVector inline operator*= (const double &a);
   /// divide this vector by \f$a: \vec x^\prime = \frac{1}{a} \cdot \vec x\f$
   ThreeVector inline operator/= (const double &a);
+
+  bool operator==(const ThreeVector &rhs) const { return x_ == rhs.x_; }
+  bool operator!=(const ThreeVector &rhs) const { return x_ != rhs.x_; }
 
   /// iterates over the components
   using iterator = std::array<double, 3>::iterator;

@@ -599,8 +599,8 @@ class PdgCode {
     // this checks if the first four digits are 0011 (as they should be
     // for ASCII digits).
     if ((inp & 0xf0) ^ 0x30) {
-      throw InvalidPdgCode("PdgCode: Invalid character " + std::to_string(inp)
-                         + " found.\n");
+      throw InvalidPdgCode("PdgCode: Invalid character " + std::string(&inp, 1)
+                           + " found.\n");
     }
     // the last four digits are the number; they should not be > 9
     // (i.e., one of [:;<=>?])
@@ -707,6 +707,14 @@ std::istream& operator>>(std::istream& is, PdgCode& code);
  * Writes the textual representation of the PDG code to the output stream.
  */
 std::ostream& operator<<(std::ostream& is, const PdgCode& code);
+
+/** Checks if two given particles represent a lepton pair (e+e- or mu+mu-). */
+inline bool is_dilepton(const PdgCode pdg1, const PdgCode pdg2) {
+  return (pdg1 ==  0x11 && pdg2 == -0x11) ||
+         (pdg1 == -0x11 && pdg2 ==  0x11) ||
+         (pdg1 ==  0x13 && pdg2 == -0x13) ||
+         (pdg1 == -0x13 && pdg2 ==  0x13);
+}
 
 }  // namespace Smash
 

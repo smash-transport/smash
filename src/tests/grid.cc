@@ -31,6 +31,14 @@ ostream &operator<<(ostream &s, const set<T> &set) {
   }
   return s << '}';
 }
+template <typename T>
+static inline ostream &operator<<(ostream &s, const unordered_set<T> &data) {
+  s << '{';
+  for (auto &&x : data) {
+    s << x << ' ';
+  }
+  return s << '}';
+}
 }  // namespace std
 
 TEST(init) {
@@ -49,13 +57,14 @@ TEST(init) {
 // itself masking actual errors in the grid code.
 
 TEST(grid_construction) {
+  using NeighborsSet = std::set<std::pair<int, int>>;
   struct Parameter {
     // input:
     ParticleList particles;
 
     // expected results:
     std::size_t cellcount[3];  // per direction
-    std::set<std::pair<int,int>> neighbors;
+    NeighborsSet neighbors;
     std::vector<std::unordered_set<int>> ids;
   };
   auto &&make_particle = [](double x, double y, double z, int id) {
@@ -65,9 +74,10 @@ TEST(grid_construction) {
     const double max_interaction_length =
         GridBase::min_cell_length(testparticles);
     for (const Parameter &param : std::vector<Parameter>{
-             {{make_particle(0., 0., 0., 1), make_particle(1.9, 1.9, 1.9, 2)},
+             Parameter{
+              {make_particle(0., 0., 0., 1), make_particle(1.9, 1.9, 1.9, 2)},
               {1, 1, 1},
-              {},
+              NeighborsSet{},
               {{1, 2}}},
              {{make_particle(0, 0, 0, 1), make_particle(0, 0, 1, 2),
                make_particle(0, 0, 2, 3), make_particle(0, 1, 0, 4),
@@ -123,24 +133,27 @@ TEST(grid_construction) {
       Grid<GridOptions::Normal> grid(std::move(list), testparticles);
       auto idsIt = param.ids.begin();
       auto neighbors = param.neighbors;
-      grid.iterate_cells([&](
-          const ParticleList &search,
-          const std::vector<const ParticleList *> &neighborLists) {
-        auto ids = *idsIt++;
-        for (const auto &p : search) {
-          for (const auto &n : neighborLists) {
-            for (const auto &p2 : *n) {
-              COMPARE(neighbors.erase({std::min(p.id(), p2.id()),
-                                       std::max(p.id(), p2.id())}),
-                      1u)
-                  << "<id|id>: <" << std::min(p.id(), p2.id()) << '|'
-                  << std::max(p.id(), p2.id()) << '>';
-            }
-          }
-          COMPARE(ids.erase(p.id()), 1u) << "p.id() = " << p.id();
-        }
-        COMPARE(ids.size(), 0u);
-      });
+      grid.iterate_cells([&](const ParticleList &search) {
+                           auto ids = *idsIt++;
+                           for (const auto &p : search) {
+                             COMPARE(ids.erase(p.id()), 1u)
+                                 << "p.id() = " << p.id() << ", ids = " << ids;
+                           }
+                           COMPARE(ids.size(), 0u);
+                         },
+                         [&](const ParticleList &search,
+                             const ParticleList &n) {
+                           for (const auto &p : search) {
+                             for (const auto &p2 : n) {
+                               COMPARE(
+                                   neighbors.erase({std::min(p.id(), p2.id()),
+                                                    std::max(p.id(), p2.id())}),
+                                   1u)
+                                   << "<id|id>: <" << std::min(p.id(), p2.id())
+                                   << '|' << std::max(p.id(), p2.id()) << '>';
+                             }
+                           }
+                         });
       COMPARE(neighbors.size(), 0u) << neighbors;
     }
   }
@@ -166,7 +179,7 @@ TEST(periodic_grid) {
   using Test::Position;
   using Test::Momentum;
   for (const int testparticles : {1, 5}) {
-    for (const int nparticles : {1,/* 5, 20, 75,*/ 124, 125}) {
+    for (const int nparticles : {1, 5, 20, 75, 124, 125}) {
       const double max_interaction_length =
           GridBase::min_cell_length(testparticles);
       constexpr float length = 10;
@@ -188,84 +201,89 @@ TEST(periodic_grid) {
       // stores the neighbor pairs found via the grid:
       std::vector<std::pair<ParticleData, ParticleData>> neighbor_pairs;
 
-      grid.iterate_cells([&](
-          const ParticleList &search,
-          const std::vector<const ParticleList *> &neighborLists) {
-        // combine all neighbor particles into a single list
-        ParticleList combinedNeighbors;
-        for (auto &&neighbors : neighborLists) {
-          VERIFY(neighbors);
-          for (auto &&n : *neighbors) {
-            combinedNeighbors.push_back(n);
-          }
-        }
+      grid.iterate_cells(
+          [&](const ParticleList &search) {
+            for (const ParticleData &p : search) {
+              {
+                const auto it = find(list, p);
+                VERIFY(it != list.end());
+                COMPARE(it->id(), p.id());
+                COMPARE(it->position(), p.position());
+              }
 
-        // for each particle in neighborLists, find the same particle in list
-        auto &&compareDiff = [](float d) {
-          if (d < 0.) {
-            FUZZY_COMPARE(d, -length);
-          } else if (d > 0.) {
-            FUZZY_COMPARE(d, length);
-          } else {
-            COMPARE(d, 0.);
-          }
-        };
-        for (const ParticleData &p : combinedNeighbors) {
-          const auto it = find(list, p);
-          VERIFY(it != list.end());
-          COMPARE(it->id(), p.id());
-          if (it->position() != p.position()) {
-            // then the cell was wrapped around
-            const auto diff = it->position() - p.position();
-            COMPARE(diff[0], 0.);
-            compareDiff(diff[1]);
-            compareDiff(diff[2]);
-            compareDiff(diff[3]);
-            VERIFY(diff != FourVector(0, 0, 0, 0));
-          }
-        }
+              for (const ParticleData &q : search) {
+                if (p.id() <= q.id()) {
+                  continue;
+                }
+                const auto sqrDistance =
+                    (p.position().threevec() - q.position().threevec()).sqr();
+                if (sqrDistance <=
+                    max_interaction_length * max_interaction_length) {
+                  const auto pair = p.id() < q.id() ? std::make_pair(p, q)
+                                                    : std::make_pair(q, p);
+                  const auto it = find(neighbor_pairs, pair);
+                  VERIFY(it == neighbor_pairs.end()) << "\np: " << p
+                                                     << "\nq: " << q << '\n'
+                                                     << detailed(search);
+                  neighbor_pairs.emplace_back(std::move(pair));
+                }
+              }
+            }
+          },
+          [&](const ParticleList &search, const ParticleList &neighbors) {
+            // for each particle in neighbors, find the same particle in list
+            for (const ParticleData &p : neighbors) {
+              const auto it = find(list, p);
+              VERIFY(it != list.end());
+              COMPARE(it->id(), p.id());
+              COMPARE(it->position(), p.position());
+            }
+            auto &&compareDiff = [length](float d) {
+              if (d < -0.1f * length) {
+                FUZZY_COMPARE(d, -length);
+              } else if (d > 0.1f * length) {
+                FUZZY_COMPARE(d, length);
+              } else {
+                COMPARE_ABSOLUTE_ERROR(
+                    d, 0.f, length * std::numeric_limits<double>::epsilon());
+              }
+            };
+            // for each particle in search, find the same particle in list
+            for (const ParticleData &p : search) {
+              const auto it = find(list, p);
+              VERIFY(it != list.end());
+              COMPARE(it->id(), p.id());
+              if (it->position() != p.position()) {
+                // then the cell was wrapped around
+                const auto diff = it->position() - p.position();
+                COMPARE(diff[0], 0.);
+                compareDiff(diff[1]);
+                compareDiff(diff[2]);
+                compareDiff(diff[3]);
+                VERIFY(diff != FourVector(0, 0, 0, 0));
+              }
+            }
 
-        // for each particle in search, find the same particle in list
-        for (const ParticleData &p : search) {
-          const auto it = find(list, p);
-          VERIFY(it != list.end());
-          COMPARE(it->id(), p.id());
-          COMPARE(it->position(), p.position());
-        }
-
-        // for each particle in search, search through the complete list of
-        // neighbors to find those closer than 2.5fm
-        for (const ParticleData &p : search) {
-          for (const ParticleData &q : search) {
-            if (p == q) {
-              continue;
+            // for each particle in search, search through the complete list of
+            // neighbors to find those closer than 2.5fm
+            for (const ParticleData &p : search) {
+              for (const ParticleData &q : neighbors) {
+                VERIFY(!(p == q)) << "\np: " << p << "\nq: " << q << '\n'
+                                  << search << '\n' << neighbors;
+                const auto sqrDistance =
+                    (p.position().threevec() - q.position().threevec()).sqr();
+                if (sqrDistance <=
+                    max_interaction_length * max_interaction_length) {
+                  auto pair = p.id() < q.id() ? std::make_pair(p, q)
+                                              : std::make_pair(q, p);
+                  const auto it = find(neighbor_pairs, pair);
+                  VERIFY(it == neighbor_pairs.end())
+                      << "\np: " << p << "\nq: " << q << '\n' << neighbor_pairs;
+                  neighbor_pairs.emplace_back(std::move(pair));
+                }
+              }
             }
-            const auto sqrDistance =
-                (p.position().threevec() - q.position().threevec()).sqr();
-            if (sqrDistance <=
-                max_interaction_length * max_interaction_length) {
-              const auto pair =
-                  p.id() < q.id() ? std::make_pair(p, q) : std::make_pair(q, p);
-              neighbor_pairs.emplace_back(std::move(pair));
-            }
-          }
-          for (const ParticleData &q : combinedNeighbors) {
-            VERIFY(!(p == q)) << "\np: " << p << "\nq: " << q << '\n' << search
-                              << '\n' << combinedNeighbors;
-            const auto sqrDistance =
-                (p.position().threevec() - q.position().threevec()).sqr();
-            if (sqrDistance <=
-                max_interaction_length * max_interaction_length) {
-              auto pair =
-                  p.id() < q.id() ? std::make_pair(p, q) : std::make_pair(q, p);
-              const auto it = find(neighbor_pairs, pair);
-              COMPARE(it, neighbor_pairs.end()) << "\np: " << p << "\nq: " << q
-                                                << '\n' << neighbor_pairs;
-              neighbor_pairs.emplace_back(std::move(pair));
-            }
-          }
-        }
-      });
+          });
 
       // Now search through the original list to verify the grid search found
       // everything.
@@ -361,6 +379,7 @@ TEST(periodic_grid) {
           }
         }
 
+        sort(neighbor_pairs.begin(), neighbor_pairs.end());
         for (const ParticleData &p : p_periodic) {
           for (const ParticleData &q : list) {
             if (p == q) {
@@ -377,11 +396,54 @@ TEST(periodic_grid) {
               VERIFY(it != neighbor_pairs.end())
                   << "\ntestparticles: " << testparticles
                   << "\nnparticles: " << nparticles << "\np: " << p
-                  << "\nq: " << q;  // << "\n" << neighbor_pairs;
+                  << "\nq: " << q << "\n" << neighbor_pairs;
             }
           }
         }
       }
     }
   }
+}
+
+TEST(max_positions_periodic_grid) {
+  constexpr int testparticles = 1;
+  const double max_interaction_length =
+      GridBase::min_cell_length(testparticles);
+  using Test::Position;
+  ParticleList list = {Test::smashon(Position{0, 0, 0, 0}),
+                       Test::smashon(Position{0, 0, 0, 0}),
+                       Test::smashon(Position{0, 0, 0, 0}),
+                       Test::smashon(Position{0, 0, 0, 0}),
+                       Test::smashon(Position{0, 0, 0, 0}),
+                       Test::smashon(Position{0, 0, 0, 0}),
+                       Test::smashon(Position{0, 0, 0, 0}),
+                       Test::smashon(Position{0, 0, 0, 0}),
+                       Test::smashon(Position{0, 2 * max_interaction_length,
+                                              2 * max_interaction_length,
+                                              2 * max_interaction_length})};
+  // This grid construction is fragile because there are particles at 0 and 2 *
+  // cell_length. A Normal grid simply would try to create a 3x3x3 grid and be
+  // fine. The PeriodicBoundaries grid cannot do so as it must fit the cells to
+  // the total length. Thus it would create a 2x2x2 grid and the last particle
+  // might result in an out-of-bounds cell index. This constructor call ensures
+  // that no assertion/exception in the construction code is hit.
+  Grid<GridOptions::PeriodicBoundaries> grid(std::move(list), testparticles);
+}
+
+TEST(max_positions_normal_grid) {
+  constexpr int testparticles = 1;
+  const double max_interaction_length =
+      GridBase::min_cell_length(testparticles);
+  using Test::Position;
+  ParticleList list = {Test::smashon(Position{0, 0, 0, -6.2470569610595703125}),
+                       Test::smashon(Position{0, 2.5 * max_interaction_length,
+                                              2.5 * max_interaction_length,
+                                              8.0611705780029296875})};
+  for (int i = 5 * 5 * 5; i; --i) {
+    list.push_back(Test::smashon(Position(0, 0, 0, 0)));
+  }
+  // This grid construction uses fragile numbers in the z min/max coordinates,
+  // which lead to an index_factor_ that even after one std::nextafter call
+  // still generates an out-of-bounds cell index.
+  Grid<GridOptions::Normal> grid2(std::move(list),testparticles);
 }

@@ -34,21 +34,21 @@ static float BlattWeisskopf(const float p_ab, const int L)
   const float R = 1. / hbarc;  /* interaction radius = 1 fm */
   const auto x = p_ab * R;
   const auto x2 = x * x;
+  const auto x4 = x2 * x2;
   switch (L) {
     case 0:
       return 1.f;
     case 1:
       return x2 / (1.f + x2);
     case 2: {
-      const auto x4 = x2 * x2;
       return x4 / (9.f + 3.f * x2 + x4);
-    }
-    /* The following lines should be correct. But since nothing in SMASH uses
-     * L > 2, this code is untested and dead. Therefore we only keep it as a
-     * reference for later.
-     * See also input sanitization in load_decaymodes in decaymodes.cc.
     case 3:
       return x4 * x2 / (225.f + 45.f * x2 + 6.f * x4 + x4 * x2);
+    }
+    /* The following lines should be correct. But since nothing in SMASH uses
+     * L > 3, this code is untested and dead. Therefore we only keep it as a
+     * reference for later.
+     * See also input sanitization in load_decaymodes in decaymodes.cc.
     case 4:
       return x4 * x4 /
              (11025.f + 1575.f * x2 + 135.f * x4 + 10.f * x2 * x4 + x4 * x4);
@@ -129,10 +129,21 @@ float TwoBodyDecayStable::rho(float m) const {
 }
 
 float TwoBodyDecayStable::width(float m0, float G0, float m) const {
-  if (m > particle_types_[0]->mass() + particle_types_[1]->mass())
-    return G0 * rho(m) / rho(m0);
-  else
+  if (m <= particle_types_[0]->mass() + particle_types_[1]->mass()) {
     return 0;
+  }
+  if (is_dilepton(particle_types_[0]->pdgcode(),
+                  particle_types_[1]->pdgcode())) {
+    /// dilepton decays: use width from \iref{Li:1996mi}, equation (19)
+    const float ml = particle_types_[0]->mass();  // lepton mass
+    const float ml_to_m_sqr = (ml/m) * (ml/m);
+    const float m0_to_m_cubed = (m0/m) * (m0/m) * (m0/m);
+    return G0 * m0_to_m_cubed * std::sqrt(1.0f - 4.0f * ml_to_m_sqr) *
+           (1.0f + 2.0f * ml_to_m_sqr);
+  } else {
+    // hadronic decays
+    return G0 * rho(m) / rho(m0);
+  }
 }
 
 float TwoBodyDecayStable::in_width(float m0, float G0, float m,

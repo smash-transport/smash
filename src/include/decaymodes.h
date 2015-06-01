@@ -30,7 +30,7 @@ class DecayModes {
   }
 
   /* Make sure ratios add to 1 */
-  void renormalize(float renormalization_constant);
+  void renormalize(PdgCode pdgcode, float renormalization_constant);
 
   /* Remove all modes */
   void clear();

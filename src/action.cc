@@ -79,7 +79,8 @@ void Action::perform(Particles *particles, size_t &id_process) {
           particles->update(incoming_particles_[i], outgoing_particles_[i]);
     }
   } else {
-    particles->replace(incoming_particles_, outgoing_particles_);
+    outgoing_particles_ = particles->replace(incoming_particles_,
+                                             std::move(outgoing_particles_));
   }
 
   log.debug("Particle map now has ", particles->size(), " elements.");
