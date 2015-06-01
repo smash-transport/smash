@@ -1,3 +1,12 @@
+########################################################
+#
+#    Copyright (c) 2014-2015
+#      SMASH Team
+#
+#    BSD 3-clause license
+# 
+######################################################### 
+
 include(CheckLibraryExists)
 include(AddCompilerFlag)
 include(FindPkgConfig)
@@ -8,6 +17,7 @@ git_describe(VERSION_MAJOR)
 string(TIMESTAMP BUILD_DATE)
 
 find_package(GSL REQUIRED)
+find_package(Eigen3 REQUIRED)
 find_package(Boost 1.49.0 REQUIRED COMPONENTS filesystem system)
 pkg_check_modules(YAML REQUIRED yaml-cpp>=0.5.1)
 
@@ -30,6 +40,7 @@ include_directories(
 include_directories(SYSTEM
     "${GSL_INCLUDES}"
     ${Boost_INCLUDE_DIRS}
+    ${EIGEN3_INCLUDE_DIR}
     ${YAML_INCLUDE_DIRS}
     )
 
@@ -58,8 +69,10 @@ set(smash_src
         density.cc
         densityoutput.cc
         distributions.cc
+        energymomentumtensor.cc
         experiment.cc
         fourvector.cc
+        fpenvironment.cc
         grid.cc
         inputfunctions.cc
         listmodus.cc
@@ -78,6 +91,10 @@ set(smash_src
         random.cc
         resonances.cc
         scatteraction.cc
+        scatteractionbaryonbaryon.cc
+        scatteractionbaryonmeson.cc
+        scatteractionmesonmeson.cc
+        scatteractionnucleonnucleon.cc
         scatteractionsfinder.cc
         spheremodus.cc
         stringfunctions.cc

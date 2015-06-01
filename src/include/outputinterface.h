@@ -51,6 +51,11 @@ class OutputInterface {
    *                          performed.
    * \param outgoing_particles   The list of particles after the Action was
    *                          performed.
+   * \param density The density at the interaction point 
+   * \param total_cross_section The total cross section of this interaction 
+   *                           or total width in case of decays
+   * \param process_type Identifier for the type of process, e.g. 
+   *  		elastic scattering, resonance formation,... 
    *
    * \fpPrecision Why \c double?
    */

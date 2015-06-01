@@ -57,7 +57,6 @@ class BoxModus : public ModusDefault {
    * \param[in] particles particles to check their position and possibly
    *            move it
    * \param[in] output_list output objects
-   * \param[out] number of particles that were moved
    *
    * In BoxModus if particle crosses the wall of the box, it is
    * inserted from the opposite side. Wall crossings are written to

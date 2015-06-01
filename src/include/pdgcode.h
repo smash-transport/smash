@@ -113,6 +113,7 @@ class PdgCode {
   PdgCode(const std::string& codestring) {
     set_from_string(codestring);
   }
+
   /** receive a signed integer and process it into a PDG Code. The sign
    * is taken as antiparticle boolean, while the absolute value of the
    * integer is used as hexdigits.
@@ -224,6 +225,19 @@ class PdgCode {
     // TODO(mkretz): more efficient implementation
     return PdgCode(-code());
   }
+
+  /// Construct PDG code from decimal number
+  static PdgCode from_decimal(const int pdgcode_decimal) {
+    int a = pdgcode_decimal;
+    int hex_pdg = 0, tmp = 1;
+    while (a) {
+      hex_pdg += (a % 10) * tmp;
+      tmp *= 16;
+      a = a / 10;
+    }
+    return PdgCode(hex_pdg);
+  }
+
 
   /****************************************************************************
    *                                                                          *
@@ -585,8 +599,8 @@ class PdgCode {
     // this checks if the first four digits are 0011 (as they should be
     // for ASCII digits).
     if ((inp & 0xf0) ^ 0x30) {
-      throw InvalidPdgCode("PdgCode: Invalid character " + std::to_string(inp)
-                         + " found.\n");
+      throw InvalidPdgCode("PdgCode: Invalid character " + std::string(&inp, 1)
+                           + " found.\n");
     }
     // the last four digits are the number; they should not be > 9
     // (i.e., one of [:;<=>?])
@@ -693,6 +707,14 @@ std::istream& operator>>(std::istream& is, PdgCode& code);
  * Writes the textual representation of the PDG code to the output stream.
  */
 std::ostream& operator<<(std::ostream& is, const PdgCode& code);
+
+/** Checks if two given particles represent a lepton pair (e+e- or mu+mu-). */
+inline bool is_dilepton(const PdgCode pdg1, const PdgCode pdg2) {
+  return (pdg1 ==  0x11 && pdg2 == -0x11) ||
+         (pdg1 == -0x11 && pdg2 ==  0x11) ||
+         (pdg1 ==  0x13 && pdg2 == -0x13) ||
+         (pdg1 == -0x13 && pdg2 ==  0x13);
+}
 
 }  // namespace Smash
 

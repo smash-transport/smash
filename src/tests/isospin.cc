@@ -8,31 +8,30 @@
  */
 
 #include "unittest.h"
+#include "setup.h"
 
-#include "../include/particledata.h"
-#include "../include/decaymodes.h"
-#include "../include/action.h"
-
-namespace particles_txt {
-#include <particles.txt.h>
-}
-
-namespace decaymodes_txt {
-#include <decaymodes.txt.h>
-}
+#include "../include/scatteractionbaryonbaryon.h"
+#include "../include/scatteractionnucleonnucleon.h"
 
 using namespace Smash;
 
+
 TEST(init_particle_types) {
-  ParticleType::create_type_list(particles_txt::data);
-  DecayModes::load_decaymodes(decaymodes_txt::data);
+  Test::create_actual_particletypes();
+  Test::create_actual_decaymodes();
 }
 
 
 static ScatterAction* set_up_action(const ParticleData &proj,
                                     const ParticleData &targ,
                                     CollisionBranchList &proc_list) {
-  ScatterAction *act = new ScatterActionBaryonBaryon(proj, targ, 0.);
+  ScatterAction *act;
+  if (proj.pdgcode().iso_multiplet() == 0x1112 &&
+      targ.pdgcode().iso_multiplet() == 0x1112) {
+    act = new ScatterActionNucleonNucleon(proj, targ, 0.);
+  } else {
+    act = new ScatterActionBaryonBaryon(proj, targ, 0.);
+  }
   proc_list = act->two_to_two_cross_sections();
 //   act->add_processes(proc_list);
 

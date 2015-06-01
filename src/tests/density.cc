@@ -42,11 +42,41 @@ static ParticleData create_proton(int id = -1) {
   return ParticleData{ParticleType::find(0x2212), id};
 }
 
-/*
+
 static ParticleData create_antiproton(int id = -1) {
   return ParticleData{ParticleType::find(-0x2212), id};
 }
-*/
+
+TEST(density_type) {
+  //pions
+  PdgCode pi0("111");
+  PdgCode pi_plus("211");
+  PdgCode pi_minus("-211");
+
+  // verify that pions are recognized as pions
+  COMPARE(density_factor(pi0, DensityType::pion), 1.f);
+  COMPARE(density_factor(pi_plus, DensityType::pion), 1.f);
+  COMPARE(density_factor(pi_minus, DensityType::pion), 1.f);
+
+  // verify that pions are not recognized as baryons
+  COMPARE(density_factor(pi0, DensityType::baryon), 0.f);
+
+  // baryons
+  PdgCode proton("2212");
+
+  // verify that protons are recognized as baryons
+  COMPARE(density_factor(proton, DensityType::baryon), 1.f);
+
+  // verify that protons are not recognized as pions
+  COMPARE(density_factor(proton, DensityType::pion), 0.f);
+
+  // verify that all are recognized as particles
+  VERIFY(density_factor(proton,   DensityType::particle) == 1.f
+      && density_factor(pi0,      DensityType::particle) == 1.f
+      && density_factor(pi_plus,  DensityType::particle) == 1.f
+      && density_factor(pi_minus, DensityType::particle) == 1.f
+      );
+}
 
 // create one particle moving along x axis and check density in comp. frame
 // check if density in the comp. frame gets contracted as expected
@@ -58,22 +88,51 @@ TEST(density_value) {
   ParticleList P;
   P.push_back(part_x);
   ThreeVector r;
-  double sigma = 1.0;
-  FourVector jmu;
-  Density_type bar_dens = baryon_density;
+  const double sigma = 1.0;
+  double rho;
+  DensityType bar_dens = DensityType::baryon;
+
+  /* Got numbers executing mathematica code:
+     rhoYZ = SetPrecision[Exp[-1.0/2.0]/(2*Pi)^(3/2), 16]
+     rhoX = SetPrecision[Exp[-1.0/2.0/(1.0 - 0.95*0.95)]/(2*Pi)^(3/2), 16]
+   */
 
   r = ThreeVector(1.0, 0.0, 0.0);
-  jmu = four_current(r, P, sigma, bar_dens, 1);
-  COMPARE_ABSOLUTE_ERROR(jmu.x0(), .00120524877950247448, 1.e-15);
+  rho = rho_eckart(r, P, sigma, bar_dens, 1, false).first;
+  COMPARE_ABSOLUTE_ERROR(rho, 0.0003763388107782538, 1.e-15);
 
   r = ThreeVector(0.0, 1.0, 0.0);
-  jmu = four_current(r, P, sigma, bar_dens, 1);
-  COMPARE_ABSOLUTE_ERROR(jmu.x0(), .12333338425608940690, 1.e-15);
+  rho = rho_eckart(r, P, sigma, bar_dens, 1, false).first;
+  COMPARE_ABSOLUTE_ERROR(rho, 0.03851083689074894, 1.e-15);
 
   r = ThreeVector(0.0, 0.0, 1.0);
-  jmu = four_current(r, P, sigma, bar_dens, 1);
-  COMPARE_ABSOLUTE_ERROR(jmu.x0(), .12333338425608940690, 1.e-15);
+  rho = rho_eckart(r, P, sigma, bar_dens, 1, false).first;
+  COMPARE_ABSOLUTE_ERROR(rho, 0.03851083689074894, 1.e-15);
 
+}
+
+TEST(density_eckart_special_cases) {
+  /* This one checks one especially nasty case:
+  Eckart rest frame of baryon density for proton and antiproton
+  flying with the same speed in the opposite directions. */
+  ParticleData pr = create_proton();
+  ParticleData apr = create_antiproton();
+  pr.set_4position(FourVector(0.0, 0.0, 0.0, 0.0));
+  apr.set_4position(FourVector(0.0, 0.0, 0.0, 0.0));
+  pr.set_4momentum(FourVector(1.0, 0.95, 0.0, 0.0));
+  apr.set_4momentum(FourVector(1.0, -0.95, 0.0, 0.0));
+  ParticleList P;
+  P.push_back(pr);
+  P.push_back(apr);
+  ThreeVector r(1.0, 0.0, 0.0);
+  const double sigma = 1.0;
+  double rho = rho_eckart(r, P, sigma, DensityType::baryon, 1, false).first;
+  COMPARE_ABSOLUTE_ERROR(rho, 0.0, 1.e-15) << rho;
+
+  /* Now check for negative baryon density from antiproton */
+  P.erase(P.begin()); // Remove proton
+  rho = rho_eckart(r, P, sigma, DensityType::baryon, 1, false).first;
+  COMPARE_ABSOLUTE_ERROR(rho, -0.0003763388107782538, 1.e-15) << rho;
 }
 
 // check that analytical and numerical results for gradient of density coincide
@@ -96,27 +155,26 @@ TEST(density_gradient) {
   double sigma = 1.0;
   ThreeVector r,dr;
   FourVector jmu;
-  Density_type dtype = baryon_density;
-  double rho;
+  DensityType dtype = DensityType::baryon;
 
   ThreeVector num_grad, analit_grad;
   r = ThreeVector(0.0, 0.0, 0.0);
-  std::pair<double, ThreeVector> tmp = rho_eckart_gradient(r, P, sigma, dtype, 1);
-
-  // check if rho_Eck returned by four_current is the same
-  // that from rho_eckart_gradient(...).first
-  rho = four_current(r, P, sigma, dtype, 1).abs();
-  COMPARE(rho, tmp.first);
+  std::pair<double, ThreeVector> rho_and_grad =
+                             rho_eckart(r, P, sigma, dtype, 1, true);
+  double rho_r = rho_and_grad.first;
 
   // analytical gradient
-  analit_grad = tmp.second;
+  analit_grad = rho_and_grad.second;
   // numerical gradient
   dr = ThreeVector(1.e-4, 0.0, 0.0);
-  num_grad.set_x1((four_current(r + dr, P, sigma, dtype, 1).abs() - rho)/dr.x1());
+  double rho_rdr = rho_eckart(r + dr, P, sigma, dtype, 1, false).first;
+  num_grad.set_x1((rho_rdr - rho_r)/dr.x1());
   dr = ThreeVector(0.0, 1.e-4, 0.0);
-  num_grad.set_x2((four_current(r + dr, P, sigma, dtype, 1).abs() - rho)/dr.x2());
+  rho_rdr = rho_eckart(r + dr, P, sigma, dtype, 1, false).first;
+  num_grad.set_x2((rho_rdr - rho_r)/dr.x2());
   dr = ThreeVector(0.0, 0.0, 1.e-4);
-  num_grad.set_x3((four_current(r + dr, P, sigma, dtype, 1).abs() - rho)/dr.x3());
+  rho_rdr = rho_eckart(r + dr, P, sigma, dtype, 1, false).first;
+  num_grad.set_x3((rho_rdr - rho_r)/dr.x3());
   // compare them with: accuracy should not be worse than |dr|
   std::cout << num_grad << analit_grad << std::endl;
   COMPARE_ABSOLUTE_ERROR(num_grad.x1(), analit_grad.x1(), 1.e-4);
@@ -182,7 +240,7 @@ TEST(density_eckart_frame) {
   int nz = 20;
   double sigma = 0.8;
   ThreeVector r;
-  Density_type bar_dens = baryon;
+  DensityType bar_dens = baryon;
   ParticleList plist;
 
   for (auto it = 0; it < 30; it++) {
@@ -198,6 +256,7 @@ TEST(density_eckart_frame) {
 /*
   Generates nuclei and prints their density profiles to vtk files
 */
+/*
 TEST(nucleus_density) {
   std::string configfilename = "densconfig.yaml";
   bf::ofstream(testoutputpath / configfilename) << "x: 0\ny: 0\nz: 0\n";
@@ -217,7 +276,7 @@ TEST(nucleus_density) {
   ParticleList plist = p.copy_to_vector();
 
   // write density profile to file, time-consuming!
-  Density_type dens_type = baryon_density;
+  DensityType dens_type = DensityType::baryon;
   double sigma = 0.5; // fm
 //  vtk_density_map("lead_density.vtk", plist, sigma, dens_type, Ntest,
 //                     20, 20, 20, 0.5, 0.5, 0.5);
@@ -239,4 +298,4 @@ TEST(nucleus_density) {
   lend = ThreeVector(0.0, 0.0, 10.0);
   out->density_along_line("lead_densityZ.dat", plist, sigma, dens_type,
                           Ntest, lstart, lend, npoints);
-}
+}*/

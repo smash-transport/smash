@@ -1,3 +1,12 @@
+########################################################
+#
+#    Copyright (c) 2014-2015
+#      SMASH Team
+#
+#    BSD 3-clause license
+# 
+######################################################### 
+
 file(READ "${INPUT_FILE}" TEXT)
 string(REPLACE ";" "\\;" TEXT "${TEXT}")
 string(REPLACE "\n" ";" TEXT "${TEXT}")

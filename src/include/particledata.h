@@ -112,8 +112,17 @@ class ParticleData {
     position_ = FourVector(position_.x0(), pos);
   }
 
+  /// Translate the particle position by \p delta.
+  ParticleData translated(const ThreeVector &delta) const {
+    ParticleData p = *this;
+    p.position_[1] += delta[0];
+    p.position_[2] += delta[1];
+    p.position_[3] += delta[2];
+    return p;
+  }
+
   /// get the velocity 3-vector
-  ThreeVector velocity() const { return momentum_.threevec() / momentum_.x0(); }
+  ThreeVector velocity() const { return momentum_.velocity(); }
 
   /**
    * Returns the inverse of the gamma factor from the current velocity of the

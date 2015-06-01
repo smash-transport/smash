@@ -9,9 +9,9 @@
 
 #include "include/decayactionsfinder.h"
 
-#include "include/action.h"
 #include "include/constants.h"
 #include "include/cxx14compat.h"
+#include "include/decayaction.h"
 #include "include/experimentparameters.h"
 #include "include/fourvector.h"
 #include "include/particles.h"
@@ -20,10 +20,7 @@
 namespace Smash {
 
 ActionList DecayActionsFinder::find_possible_actions(
-    const ParticleList &search_list,
-    const std::vector<const ParticleList *> &,  // the list of neighbors is
-                                               // irrelevant for decays
-    float dt) const {
+    const ParticleList &search_list, float dt) const {
   ActionList actions;
   actions.reserve(10);  // for short time steps this seems reasonable to expect
                         // less than 10 decays in most time steps

@@ -15,8 +15,8 @@
 
 namespace Smash {
 
-/* pp elastic cross section parametrization.
- * Source: J. Weil, PhD thesis, eq. (44) */
+/** pp elastic cross section parametrization.
+ * Source: \iref{Weil:2013mya}, eq. (44) */
 float pp_elastic(double mandelstam_s) {
   double p_lab = plab_from_s_NN(mandelstam_s);
   if (p_lab < 0.435) {
@@ -35,11 +35,10 @@ float pp_elastic(double mandelstam_s) {
   }
 }
 
-/* pp total cross section parametrization */
-/* Sources:
- * low-p: J. Cugnon, D. L'Hote, J. Vandermeulen,
- * Nuclear Instruments and Methods at Physics Research B 111, 215 (1996)
- * highest-p:  O. Buss et al., Physics Reports 512, 1 (2012)
+/** pp total cross section parametrization.
+ * Sources:
+ * low-p: \iref{Cugnon:1996kh}
+ * highest-p: \iref{Buss:2011mx}
  */
 float pp_total(double mandelstam_s) {
   double p_lab = plab_from_s_NN(mandelstam_s);
@@ -58,8 +57,8 @@ float pp_total(double mandelstam_s) {
   }
 }
 
-/* np elastic cross section parametrization.
- * Source: J. Weil, PhD thesis, eq. (45) */
+/** np elastic cross section parametrization.
+ * Source: \iref{Weil:2013mya}, eq. (45) */
 float np_elastic(double mandelstam_s) {
   double p_lab = plab_from_s_NN(mandelstam_s);
   if (p_lab < 0.525) {
@@ -77,11 +76,10 @@ float np_elastic(double mandelstam_s) {
   }
 }
 
-/* np total cross section parametrization */
-/* Sources:
- * low-p: J. Cugnon, D. L'Hote, J. Vandermeulen,
- * Nuclear Instruments and Methods at Physics Research B 111, 215 (1996)
- * highest-p:  O. Buss et al., Physics Reports 512, 1 (2012)
+/** np total cross section parametrization.
+ * Sources:
+ * low-p: \iref{Cugnon:1996kh}
+ * highest-p: \iref{Buss:2011mx}
  */
 float np_total(double mandelstam_s) {
   double p_lab = plab_from_s_NN(mandelstam_s);
@@ -99,8 +97,8 @@ float np_total(double mandelstam_s) {
   }
 }
 
-/* ppbar elastic cross section parametrization */
-/* Source: S. Bass et al., Prog.Part.Nucl.Phys. 41, 255 (1998) */
+/** ppbar elastic cross section parametrization.
+ * Source: \iref{Bass:1998ca} */
 float ppbar_elastic(double mandelstam_s) {
   double p_lab = plab_from_s_NN(mandelstam_s);
   if (p_lab < 0.3) {
@@ -114,8 +112,8 @@ float ppbar_elastic(double mandelstam_s) {
   }
 }
 
-/* ppbar total cross section parametrization */
-/* Source: S. Bass et al., Prog.Part.Nucl.Phys. 41, 255 (1998) */
+/** ppbar total cross section parametrization.
+ * Source: \iref{Bass:1998ca} */
 float ppbar_total(double mandelstam_s) {
   double p_lab = plab_from_s_NN(mandelstam_s);
   if (p_lab < 0.3) {

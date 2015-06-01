@@ -232,11 +232,11 @@ Experiment<Modus>::Experiment(Configuration config)
     potentials_ = make_unique<Potentials>(config["Potentials"], parameters_);
   }
 
-  dens_type_ = static_cast<Density_type>(
+  dens_type_ = static_cast<DensityType>(
               config.take({"Output", "Density", "Density_Type"}, 0));
-  if (dens_type_ < baryon_density || dens_type_ > baryonic_isospin_density) {
+  if (dens_type_ < DensityType::particle || dens_type_ > DensityType::pion) {
     log.error() << "Unknown Density_Type specified. Taking default.";
-    dens_type_ = baryon_density;
+    dens_type_ = DensityType::baryon;
   }
   log.info() << "Density type written to headers: " << dens_type_;
 }
@@ -311,14 +311,15 @@ void Experiment<Modus>::perform_actions(ActionList &actions,
             total_pauli_blocked++;
           continue;
         }
-        const ParticleList outgoing_particles = action->outgoing_particles();
         action->perform(&particles_, interactions_total);
+        const ParticleList outgoing_particles = action->outgoing_particles();
         // Calculate Eckart rest frame density at the interaction point
         const FourVector r_interaction = action->get_interaction_point();
+        constexpr bool compute_grad = false;
         const double rho =
-            four_current(r_interaction.threevec(), particles_before_actions,
+            rho_eckart(r_interaction.threevec(), particles_before_actions,
                          parameters_.gaussian_sigma, dens_type_,
-                         parameters_.testparticles).abs();
+                         parameters_.testparticles, compute_grad).first;
         for (const auto &output : outputs_) {
           output->at_interaction(incoming_particles, outgoing_particles, rho,
                                  action->raw_weight_value(), process_type);
@@ -360,20 +361,20 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
         modus_.create_grid(particles_.copy_to_vector(),
                            parameters_.testparticles);
     /* (1.b) Iterate over cells and find actions. */
-    grid.iterate_cells([&](
-        const ParticleList &search_list,  // a list of particles where each pair
-                                          // needs to be tested for possible
-                                          // interaction
-        const std::vector<const ParticleList *> &
-            neighbors_list  // a list of particles that need to be tested
-                            // against particles in search_list for possible
-                            // interaction
-        ) {
-      for (const auto &finder : action_finders_) {
-        actions += finder->find_possible_actions(search_list, neighbors_list,
-                                parameters_.timestep_duration());
-      }
-    });
+    grid.iterate_cells([&](const ParticleList &search_list) {
+                         for (const auto &finder : action_finders_) {
+                           actions += finder->find_possible_actions(
+                               search_list, parameters_.timestep_duration());
+                         }
+                       },
+                       [&](const ParticleList &search_list,
+                           const ParticleList &neighbors_list) {
+                         for (const auto &finder : action_finders_) {
+                           actions += finder->find_possible_actions(
+                               search_list, neighbors_list,
+                               parameters_.timestep_duration());
+                         }
+                       });
     /* (1.c) Sort action list by time. */
     std::sort(actions.begin(), actions.end(),
               [](const ActionPtr &a, const ActionPtr &b) { return *a < *b; });

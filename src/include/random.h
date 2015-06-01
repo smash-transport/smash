@@ -85,6 +85,20 @@ template <typename T = double> T exponential() {
   return std::exponential_distribution<T>(1)(engine);
 }
 
+/** Evaluates a random number x according to an exponential distribution
+ * exp(A*x), where A is assumed to be positive, and x is typically negative.
+ * The result x is restricted to lie between x1 and x2 (with x2 < x <= x1). */
+template <typename T = double> T expo(T A, T x1, T x2) {
+  const T a1 = A * x1, a2 = A * x2;
+  const T a_min = std::log(std::numeric_limits<T>::min());
+#ifndef NDEBUG
+  assert(A > T(0.) && T(0.) >= x1 && x1 > x2 && a1 > a_min);
+#endif
+  const T r1 = std::exp(a1);
+  const T r2 = a2 > a_min ? std::exp(a2) : T(0.);  // prevent underflow
+  return std::log(uniform(r1, r2)) / A;
+}
+
 }  // namespace Random
 }  // namespace Smash
 

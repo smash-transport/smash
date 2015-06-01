@@ -53,12 +53,8 @@ bool Action::is_pauli_blocked(const Particles & particles,
   return false;
 }
 
-ParticleList Action::incoming_particles() const {
-  ParticleList l;
-  for (const auto &part : incoming_particles_) {
-    l.emplace_back(part);
-  }
-  return std::move(l);
+const ParticleList& Action::incoming_particles() const {
+  return incoming_particles_;
 }
 
 FourVector Action::get_interaction_point() {
@@ -83,7 +79,8 @@ void Action::perform(Particles *particles, size_t &id_process) {
           particles->update(incoming_particles_[i], outgoing_particles_[i]);
     }
   } else {
-    particles->replace(incoming_particles_, outgoing_particles_);
+    outgoing_particles_ = particles->replace(incoming_particles_,
+                                             std::move(outgoing_particles_));
   }
 
   log.debug("Particle map now has ", particles->size(), " elements.");
@@ -130,8 +127,7 @@ void Action::sample_cms_momenta() {
              " radial momentum: ", momentum_radial);
     log.warn("Etot: ", cms_energy, " m_a: ", mass_a, " m_b: ", mass_b);
   }
-  /* TODO : Angles should be sampled from differential cross section
-   * of this process. */
+  /* Here we assume an isotropic angular distribution. */
   Angles phitheta;
   phitheta.distribute_isotropically();
 

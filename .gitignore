@@ -10,3 +10,5 @@
 build
 .directory
 *.diff
+*.orig
+*.rej

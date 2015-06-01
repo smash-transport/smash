@@ -13,6 +13,8 @@
 #include <array>
 #include <cmath>
 
+#include "constants.h"
+
 namespace Smash {
 
 /**
@@ -26,7 +28,7 @@ namespace Smash {
  * the 'threevec()' method.
  *
  * \fpPrecision
- * \li The \c ThreeVector class, like the \ref FourVector class, uses \c double
+ * \li The \c ThreeVector class, like the \c FourVector class, uses \c double
  * for storage, calculations, and in the interface. This is necessary because
  * most particles are close to light speed and thus the low-order bits in the
  * mantissa of the momentum make large differences in energy. If they are
@@ -69,6 +71,10 @@ class ThreeVector {
   double inline sqr() const;
   /// calculate the absolute value
   double inline abs() const;
+  /// calculate the azimuthal angle phi
+  double inline get_phi() const;
+  /// calculate the polar angle theta
+  double inline get_theta() const;
   /** Rotate vector by the given Euler angles phi, theta, psi. If we
    * assume the standard basis x, y, z then this means applying the
    * matrix for a rotation of phi about z, followed by the matrix for
@@ -82,6 +88,12 @@ class ThreeVector {
    * angles for every position.
    */
   void inline rotate(double phi, double theta, double psi);
+  /** Rotate the vector around the y axis by the given angle theta. */
+  void inline rotate_around_y(double theta);
+  /** Rotate the vector around the z axis by the given angle theta. */
+  void inline rotate_around_z(double theta);
+  /** Rotate the z-axis onto the vector r. */
+  void inline rotate_to(ThreeVector &r);
   /// negation: Returns \f$-\vec x\f$
   ThreeVector inline operator- () const;
   /// increase this vector by \f$\vec v: \vec x^\prime = \vec x + \vec v\f$
@@ -92,6 +104,9 @@ class ThreeVector {
   ThreeVector inline operator*= (const double &a);
   /// divide this vector by \f$a: \vec x^\prime = \frac{1}{a} \cdot \vec x\f$
   ThreeVector inline operator/= (const double &a);
+
+  bool operator==(const ThreeVector &rhs) const { return x_ == rhs.x_; }
+  bool operator!=(const ThreeVector &rhs) const { return x_ != rhs.x_; }
 
   /// iterates over the components
   using iterator = std::array<double, 3>::iterator;
@@ -225,7 +240,20 @@ double inline ThreeVector::abs() const {
   return std::sqrt((*this)*(*this));
 }
 
-void ThreeVector::rotate(double phi, double theta, double psi) {
+double inline ThreeVector::get_phi() const {
+  if (std::abs(x1()) < really_small && std::abs(x2()) < really_small) {
+    return 0.;
+  } else {
+    return std::atan2(x2(), x1());
+  }
+}
+
+double inline ThreeVector::get_theta() const {
+  double r = abs();
+  return (r > 0.) ? std::acos(x3()/r) : 0.;
+}
+
+void inline ThreeVector::rotate(double phi, double theta, double psi) {
   // Compute the cosine and sine for each angle.
   double cos_phi = std::cos(phi);
   double sin_phi = std::sin(phi);
@@ -245,6 +273,33 @@ void ThreeVector::rotate(double phi, double theta, double psi) {
   x_[2] = sin_phi * sin_theta * x_old[0]
         - cos_phi * sin_theta * x_old[1]
         + cos_theta * x_old[2];
+}
+
+void inline ThreeVector::rotate_around_y(double theta) {
+  double cost = std::cos(theta);
+  double sint = std::sin(theta);
+  // Get original coordinates.
+  std::array<double, 3> x_old = x_;
+  // Compute new coordinates.
+  x_[0] = cost*x_old[0] + sint*x_old[2];
+  // x_[1] is unchanged
+  x_[2] = -sint*x_old[0] + cost*x_old[2];
+}
+
+void inline ThreeVector::rotate_around_z(double theta) {
+  double cost = std::cos(theta);
+  double sint = std::sin(theta);
+  // Get original coordinates.
+  std::array<double, 3> x_old = x_;
+  // Compute new coordinates.
+  x_[0] = cost*x_old[0] - sint*x_old[1];
+  x_[1] = sint*x_old[0] + cost*x_old[1];
+  // x_[2] is unchanged
+}
+
+void inline ThreeVector::rotate_to(ThreeVector &r) {
+  rotate_around_y(r.get_theta());
+  rotate_around_z(r.get_phi());
 }
 
 }  // namespace Smash

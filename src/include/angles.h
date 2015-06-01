@@ -49,7 +49,7 @@ namespace Smash {
  *
  * \fpPrecision
  * The \c Angles class uses double precision in order to be compatible with the
- * \ref ThreeVector class (conversion via \ref Angles::threevec).
+ * \c ThreeVector class (conversion via \c Angles::threevec).
  * \todo
  * What does it mean "to be compatible with the ThreeVector class"? A conversion
  * from \c float to \c double is just as compatible.
@@ -64,7 +64,12 @@ namespace Smash {
 class Angles {
  public:
   /// Standard initializer, points in x-direction.
-  Angles();
+  Angles() : phi_(0), costheta_(0) {}
+  /// initializer with given phi and cos(theta)
+  Angles(double ph, double cost) {
+    set_phi(ph);
+    set_costheta(cost);
+  }
   /** populate the object with a new direction
    *
    * the direction is taken randomly from a homogeneous distribution,
@@ -175,8 +180,6 @@ class Angles {
 inline std::ostream &operator<<(std::ostream &out, const Angles &a) {
   return out << "φ:" << field << a.phi() << ", cos ϑ:" << field << a.costheta();
 }
-
-inline Angles::Angles() : phi_(0), costheta_(0) {}
 
 void inline Angles::distribute_isotropically() {
   /* isotropic distribution: phi in [0, 2pi) and cos(theta) in [-1,1] */

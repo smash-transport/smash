@@ -1,3 +1,12 @@
+########################################################
+#
+#    Copyright (c) 2014-2015
+#      SMASH Team
+#
+#    BSD 3-clause license
+# 
+######################################################### 
+
 # remove -Winline for test code
 string(REPLACE "-Winline " "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 
@@ -52,13 +61,29 @@ endmacro()
 find_program(CPPLINT cpplint.py)
 if(CPPLINT)
    message(STATUS "cpplint.py found at ${CPPLINT}")
-   set(CPPLINT_ARGS --filter=-build/include,-readability/streams --counting=detailed)
+   set(CPPLINT_ARGS --filter=-build/c++11,-build/include,-readability/streams,-runtime/references --counting=detailed)
    file(GLOB CPPLINT_FILES
         ${PROJECT_SOURCE_DIR}/src/include/*.h ${PROJECT_SOURCE_DIR}/src/*.cc)
    add_custom_target(cpplint
                      COMMAND ${CPPLINT} ${CPPLINT_ARGS} ${CPPLINT_FILES}
                      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
                      COMMENT "Executing test cpplint")
+   add_custom_target(cpplint_build
+                     COMMAND ${CPPLINT} ${CPPLINT_ARGS} --filter=-build/c++11,-build/include,-readability,-runtime,-whitespace ${CPPLINT_FILES}
+                     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+                     COMMENT "Executing test cpplint_build")
+   add_custom_target(cpplint_readability
+                     COMMAND ${CPPLINT} ${CPPLINT_ARGS} --filter=-build,-readability/streams,-runtime,-whitespace ${CPPLINT_FILES}
+                     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+                     COMMENT "Executing test cpplint_readability")
+   add_custom_target(cpplint_runtime
+                     COMMAND ${CPPLINT} ${CPPLINT_ARGS} --filter=-build,-readability,-runtime/references,-whitespace ${CPPLINT_FILES}
+                     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+                     COMMENT "Executing test cpplint_runtime")
+   add_custom_target(cpplint_whitespace
+                     COMMAND ${CPPLINT} ${CPPLINT_ARGS} --filter=-build,-readability,-runtime ${CPPLINT_FILES}
+                     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+                     COMMENT "Executing test cpplint_whitespace")
    file(GLOB_RECURSE CPPLINT_FILES_FULL
         ${PROJECT_SOURCE_DIR}/src/*.h ${PROJECT_SOURCE_DIR}/src/*.cc)
    add_custom_target(cpplint_full
@@ -100,8 +125,11 @@ smash_add_unittest(decaymodes)
 smash_add_unittest(deformednucleus)
 smash_add_unittest(density)
 smash_add_unittest(distributions)
+smash_add_unittest(enable_float_traps)
+smash_add_unittest(energymomentumtensor)
 smash_add_unittest(experiment)
 smash_add_unittest(fourvector)
+smash_add_unittest(grid)
 smash_add_unittest(initial_conditions)
 smash_add_unittest(isospin)
 smash_add_unittest(lorentzboost)
@@ -119,9 +147,11 @@ smash_add_unittest(propagate)
 smash_add_unittest(quantumnumbers)
 smash_add_unittest(random)
 smash_add_unittest(sanity)
+smash_add_unittest(scatteraction)
 smash_add_unittest(scatteractionsfinder)
 smash_add_unittest(threevector)
 smash_add_unittest(vtkoutput)
+smash_add_unittest(without_float_traps)
 smash_add_unittest(yamltest)
 
 # for now -o has to be "data", because OSCAR output still expects to output to

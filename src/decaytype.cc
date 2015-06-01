@@ -34,21 +34,21 @@ static float BlattWeisskopf(const float p_ab, const int L)
   const float R = 1. / hbarc;  /* interaction radius = 1 fm */
   const auto x = p_ab * R;
   const auto x2 = x * x;
+  const auto x4 = x2 * x2;
   switch (L) {
     case 0:
       return 1.f;
     case 1:
       return x2 / (1.f + x2);
     case 2: {
-      const auto x4 = x2 * x2;
       return x4 / (9.f + 3.f * x2 + x4);
-    }
-    /* The following lines should be correct. But since nothing in SMASH uses
-     * L > 2, this code is untested and dead. Therefore we only keep it as a
-     * reference for later.
-     * See also input sanitization in load_decaymodes in decaymodes.cc.
     case 3:
       return x4 * x2 / (225.f + 45.f * x2 + 6.f * x4 + x4 * x2);
+    }
+    /* The following lines should be correct. But since nothing in SMASH uses
+     * L > 3, this code is untested and dead. Therefore we only keep it as a
+     * reference for later.
+     * See also input sanitization in load_decaymodes in decaymodes.cc.
     case 4:
       return x4 * x4 /
              (11025.f + 1575.f * x2 + 135.f * x4 + 10.f * x2 * x4 + x4 * x4);
@@ -66,14 +66,19 @@ static float BlattWeisskopf(const float p_ab, const int L)
 
 /**
  * An additional form factor for unstable final states as used in GiBUU,
- * according to M. Post.
- * Reference: Buss et al., Phys. Rept. 512 (2012), eq. (174).
+ * according to M. Post. Reference: \iref{Buss:2011mx}, eq. (174).
  * The function returns the squared value of the form factor.
+ * \param m Actual mass of the decaying resonance [GeV].
+ * \param M0 Pole mass of the decaying resonance [GeV].
+ * \param srts0 Threshold of the reaction, i.e. minimum possible sqrt(s) [GeV].
+ * \param L Lambda parameter of the form factor [GeV]. This is a cut-off
+ * parameter that can be different for baryons and mesons.
  */
-static double Post_FF_sqr(double m, double M0, double s0, double L) {
+static double Post_FF_sqr(double m, double M0, double srts0, double L) {
   const auto L4 = L*L*L*L;
   const auto m2 = m*m;
   const auto M2 = M0*M0;
+  const auto s0 = srts0*srts0;
   double FF = (L4 + (s0-M2)*(s0-M2)/4.) /
               (L4 + (m2-(s0+M2)/2.) * (m2-(s0+M2)/2.));
   return FF*FF;
@@ -124,10 +129,21 @@ float TwoBodyDecayStable::rho(float m) const {
 }
 
 float TwoBodyDecayStable::width(float m0, float G0, float m) const {
-  if (m > particle_types_[0]->mass() + particle_types_[1]->mass())
-    return G0 * rho(m) / rho(m0);
-  else
+  if (m <= particle_types_[0]->mass() + particle_types_[1]->mass()) {
     return 0;
+  }
+  if (is_dilepton(particle_types_[0]->pdgcode(),
+                  particle_types_[1]->pdgcode())) {
+    /// dilepton decays: use width from \iref{Li:1996mi}, equation (19)
+    const float ml = particle_types_[0]->mass();  // lepton mass
+    const float ml_to_m_sqr = (ml/m) * (ml/m);
+    const float m0_to_m_cubed = (m0/m) * (m0/m) * (m0/m);
+    return G0 * m0_to_m_cubed * std::sqrt(1.0f - 4.0f * ml_to_m_sqr) *
+           (1.0f + 2.0f * ml_to_m_sqr);
+  } else {
+    // hadronic decays
+    return G0 * rho(m) / rho(m0);
+  }
 }
 
 float TwoBodyDecayStable::in_width(float m0, float G0, float m,
