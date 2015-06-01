@@ -342,7 +342,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
    * a list of collisions/decays/box wall crossings plus optionally
    * initial and final configuration.**
    *
-   * **NOTE**: When SMASH is running in the box modus, particle coordinates in the
+   * \note When SMASH is running in the box modus, particle coordinates in the
    * collision output can be out of the box. This is not an error.
    * Box boundary conditions are intentionally not imposed before collision
    * output to allow unambiguous finding of the interaction point.
