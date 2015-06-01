@@ -78,7 +78,8 @@ std::unique_ptr<ExperimentBase> ExperimentBase::create(Configuration config) {
    * will be configured in \ref input_modi_. Recognized values are:
    * \li \key Collider for collisions of nuclei or compound objects. See \ref
    *     \ColliderModus
-   * \li \key Sphere for calculations of the expansion of a thermalized sphere. See
+   * \li \key Sphere for calculations of the expansion of a thermalized sphere.
+   * See
    *     \ref \SphereModus
    * \li \key Box for infinite matter calculation in a rectangular box. See \ref
    *     \BoxModus
@@ -108,11 +109,11 @@ std::unique_ptr<ExperimentBase> ExperimentBase::create(Configuration config) {
     }
     return ExperimentPointer(new Experiment<BoxModus>(config));
   } else if (modus_chooser.compare("List") == 0) {
-      return ExperimentPointer(new Experiment<ListModus>(config));
+    return ExperimentPointer(new Experiment<ListModus>(config));
   } else if (modus_chooser.compare("Collider") == 0) {
-      return ExperimentPointer(new Experiment<ColliderModus>(config));
+    return ExperimentPointer(new Experiment<ColliderModus>(config));
   } else if (modus_chooser.compare("Sphere") == 0) {
-      return ExperimentPointer(new Experiment<SphereModus>(config));
+    return ExperimentPointer(new Experiment<SphereModus>(config));
   } else {
     throw InvalidModusRequest("Invalid Modus (" + modus_chooser +
                               ") requested from ExperimentBase::create.");
@@ -156,7 +157,7 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
           config.take({"Output", "Output_Interval"}),
           config.take({"General", "Testparticles"}, 1),
           config.take({"General", "Gaussian_Sigma"}, 1.0)};
-  }
+}
 }  // unnamed namespace
 
 /**
@@ -209,8 +210,8 @@ Experiment<Modus>::Experiment(Configuration config)
       nevents_(config.take({"General", "Nevents"})),
       end_time_(config.take({"General", "End_Time"})),
       delta_time_startup_(config.take({"General", "Delta_Time"})),
-      force_decays_(config.take({"Collision_Term", "Force_Decays_At_End"},
-                                true)) {
+      force_decays_(
+          config.take({"Collision_Term", "Force_Decays_At_End"}, true)) {
   const auto &log = logger<LogArea::Experiment>();
   log.info() << *this;
 
@@ -223,7 +224,7 @@ Experiment<Modus>::Experiment(Configuration config)
   if (config.has_value({"Collision_Term", "Pauli_Blocking"})) {
     log.info() << "Pauli blocking is ON.";
     pauli_blocker_ = make_unique<PauliBlocker>(
-                config["Collision_Term"]["Pauli_Blocking"], parameters_);
+        config["Collision_Term"]["Pauli_Blocking"], parameters_);
   }
 
   if (config.has_value({"Potentials"})) {
@@ -233,7 +234,7 @@ Experiment<Modus>::Experiment(Configuration config)
   }
 
   dens_type_ = static_cast<DensityType>(
-              config.take({"Output", "Density", "Density_Type"}, 0));
+      config.take({"Output", "Density", "Density_Type"}, 0));
   if (dens_type_ < DensityType::particle || dens_type_ > DensityType::pion) {
     log.error() << "Unknown Density_Type specified. Taking default.";
     dens_type_ = DensityType::baryon;
@@ -241,8 +242,7 @@ Experiment<Modus>::Experiment(Configuration config)
   log.info() << "Density type written to headers: " << dens_type_;
 }
 
-const std::string hline("----------------------------------------"
-                        "----------------------------------------");
+const std::string hline(80, '-');
 
 /* This method reads the particle type and cross section information
  * and does the initialization of the system (fill the particles map)
@@ -293,10 +293,10 @@ static std::string format_measurements(const Particles &particles,
   return ss.str();
 }
 
-
 template <typename Modus>
 void Experiment<Modus>::perform_actions(ActionList &actions,
-                     size_t &interactions_total, size_t &total_pauli_blocked) {
+                                        size_t &interactions_total,
+                                        size_t &total_pauli_blocked) {
   const auto &log = logger<LogArea::Experiment>();
   if (!actions.empty()) {
     const auto particles_before_actions = particles_.copy_to_vector();
@@ -308,7 +308,7 @@ void Experiment<Modus>::perform_actions(ActionList &actions,
         log.debug("Process Type is: ", process_type);
         if (pauli_blocker_ &&
             action->is_pauli_blocked(particles_, *pauli_blocker_.get())) {
-            total_pauli_blocked++;
+          total_pauli_blocked++;
           continue;
         }
         action->perform(&particles_, interactions_total);
@@ -318,8 +318,24 @@ void Experiment<Modus>::perform_actions(ActionList &actions,
         constexpr bool compute_grad = false;
         const double rho =
             rho_eckart(r_interaction.threevec(), particles_before_actions,
-                         parameters_.gaussian_sigma, dens_type_,
-                         parameters_.testparticles, compute_grad).first;
+                       parameters_.gaussian_sigma, dens_type_,
+                       parameters_.testparticles, compute_grad).first;
+        /*!\Userguide
+         * \page collisions_output_in_box_modus_ Collision output in box modus
+         * \note When SMASH is running in the box modus, particle coordinates
+         * in the collision output can be out of the box. This is not an error.
+         * Box boundary conditions are intentionally not imposed before
+         * collision output to allow unambiguous finding of the interaction
+         * point.
+         * <I>Example</I>: two particles in the box have x coordinates 0.1 and
+         * 9.9 fm, while box L = 10 fm. Suppose these particles collide.
+         * For calculating collision the first one is wrapped to 10.1 fm.
+         * Then output contains coordinates of 9.9 fm and 10.1 fm.
+         * From this one can infer interaction point at x = 10 fm.
+         * Were boundary conditions imposed before output,
+         * their x coordinates would be 0.1 and 9.9 fm and interaction point
+         * position could be either at 10 fm or at 5 fm.
+         */
         for (const auto &output : outputs_) {
           output->at_interaction(incoming_particles, outgoing_particles, rho,
                                  action->raw_weight_value(), process_type);
@@ -335,7 +351,6 @@ void Experiment<Modus>::perform_actions(ActionList &actions,
     log.debug("no actions performed");
   }
 }
-
 
 /* This is the loop over timesteps, carrying out collisions and decays
  * and propagating particles. */
@@ -422,7 +437,7 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
 
   if (pauli_blocker_) {
     log.info("Collisions: pauliblocked/total = ", total_pauli_blocked, "/",
-                                                        interactions_total);
+             interactions_total);
   }
 
   if (force_decays_) {

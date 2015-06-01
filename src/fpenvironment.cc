@@ -10,6 +10,8 @@
 #include "include/fpenvironment.h"
 #include "include/logging.h"
 
+#include <csignal>
+
 #if defined __SSE__
 #include <xmmintrin.h>
 #endif
@@ -56,6 +58,82 @@ void DisableFloatTraps::reenable_traps(int mask) {
     const auto &log = logger<LogArea::Fpe>();
     log.warn("Failed to setup traps on ", mask);
   }
+}
+
+void setup_default_float_traps() {
+  {
+    const auto &log = logger<LogArea::Fpe>();
+
+    // pole error occurred in a floating-point operation:
+    if (!enable_float_traps(FE_DIVBYZERO)) {
+      log.warn("Failed to setup trap on pole error.");
+    }
+
+    // domain error occurred in an earlier floating-point operation:
+    if (!enable_float_traps(FE_INVALID)) {
+      log.warn("Failed to setup trap on domain error.");
+    }
+
+    // the result of the earlier floating-point operation was too large to be
+    // representable:
+    if (!enable_float_traps(FE_OVERFLOW)) {
+      log.warn("Failed to setup trap on overflow.");
+    }
+
+    // the result of the earlier floating-point operation was subnormal with a
+    // loss of precision:
+    if (!enable_float_traps(FE_UNDERFLOW)) {
+      log.warn("Failed to setup trap on underflow.");
+    }
+
+    // there's also FE_INEXACT, but this traps if "rounding was necessary to
+    // store
+    // the result of an earlier floating-point operation". This is common and
+    // not
+    // really an error condition.
+  }
+
+  // Install the signal handler if we have the functionality.
+#if (defined _POSIX_C_SOURCE && _POSIX_C_SOURCE >= 199309L) || \
+    (defined _XOPEN_SOURCE && _XOPEN_SOURCE) ||                \
+    (defined _POSIX_SOURCE && _POSIX_SOURCE)
+  struct sigaction action = {};
+  action.sa_flags = SA_SIGINFO;
+  action.sa_sigaction = [](int signal, siginfo_t *info, void *) {
+    const auto &log = logger<LogArea::Fpe>();
+    if (signal == SIGFPE) {
+      const char *msg = nullptr;
+      switch (info->si_code) {
+        case FPE_FLTDIV:
+          msg = "Division by Zero (NaN)";
+          break;
+        case FPE_FLTUND:
+          msg = "Underflow (result was subnormal with a loss of precision)";
+          break;
+        case FPE_FLTOVF:
+          msg = "Overflow (result was too large to be representable)";
+          break;
+        case FPE_FLTINV:
+          msg = "Invalid (domain error occurred)";
+          break;
+        case FPE_FLTRES:
+          msg =
+              "Inexact Result (rounding was necessary to store the result of "
+              "an earlier floating-point operation)";
+          break;
+        default:
+          msg = "unknown";
+          break;
+      }
+      log.fatal("Floating point trap was raised: ", msg);
+    } else {
+      log.fatal("Unexpected Signal ", signal,
+                " received in the FPE signal handler. Aborting.");
+    }
+    abort();
+  };
+  sigaction(SIGFPE, &action, nullptr);
+#endif
 }
 
 }  // namespace Smash

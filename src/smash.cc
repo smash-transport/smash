@@ -177,36 +177,6 @@ void ensure_path_is_valid(const bf::path &path) {
   }
 }
 
-void setup_floatingpoint_traps() {
-  const auto &log = logger<LogArea::Main>();
-
-  // pole error occurred in a floating-point operation:
-  if (!enable_float_traps(FE_DIVBYZERO)) {
-    log.warn("Failed to setup trap on pole error.");
-  }
-
-  // domain error occurred in an earlier floating-point operation:
-  if (!enable_float_traps(FE_INVALID)) {
-    log.warn("Failed to setup trap on domain error.");
-  }
-
-  // the result of the earlier floating-point operation was too large to be
-  // representable:
-  if (!enable_float_traps(FE_OVERFLOW)) {
-    log.warn("Failed to setup trap on overflow.");
-  }
-
-  // the result of the earlier floating-point operation was subnormal with a
-  // loss of precision:
-  if (!enable_float_traps(FE_UNDERFLOW)) {
-    log.warn("Failed to setup trap on underflow.");
-  }
-
-  // there's also FE_INEXACT, but this traps if "rounding was necessary to store
-  // the result of an earlier floating-point operation". This is common and not
-  // really an error condition.
-}
-
 }  // unnamed namespace
 
 }  // namespace Smash
@@ -214,7 +184,7 @@ void setup_floatingpoint_traps() {
 /* main - do command line parsing and hence decides modus */
 int main(int argc, char *argv[]) {
   using namespace Smash;
-  setup_floatingpoint_traps();
+  setup_default_float_traps();
 
   const auto &log = logger<LogArea::Main>();
 
