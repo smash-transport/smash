@@ -153,10 +153,10 @@ float ScatterActionBaryonBaryon::nn_to_resonance_matrix_element(
   } else if (type_a.isospin() == 1 && type_b.isospin() == 1) {
     /** \f$ NN \rightarrow NN^* \f$:
       * constant matrix element, cf. \iref{Bass:1998ca}, equ. (3.35). */
-    return 30. * spin_factor / (m_plus * m_plus + m_minus * m_minus);
+    return 25. * spin_factor / (m_plus * m_plus + m_minus * m_minus);
   } else if (type_a.isospin() == 3 || type_b.isospin() == 3) {
     /** \f$ NN \rightarrow N\Delta^* \f$:
-      * constant matrix element, cf. [\iref{Bass:1998ca}, equ. (3.35)]. */
+      * constant matrix element, cf. \iref{Bass:1998ca}, equ. (3.35). */
     return 30. * spin_factor / (m_plus * m_plus + m_minus * m_minus);
   } else {
     return 0.0;
