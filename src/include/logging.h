@@ -104,6 +104,7 @@ DECLARE_LOGAREA(20, Density);
 DECLARE_LOGAREA(21, PauliBlocking);
 DECLARE_LOGAREA(22, Tmn);
 DECLARE_LOGAREA(23, Fpe);
+DECLARE_LOGAREA(24, Lattice);
 
 /// This type collects all existing log areas so they will be created with the
 /// correct log level automatically.
@@ -112,7 +113,7 @@ using AreaTuple = std::tuple<Main, Experiment, Box, Collider, Sphere,
                              Legacy, Clock, DecayModes, Resonances,
                              ScatterAction, Distributions, Propagation, Grid,
                              List, Nucleus, DecayType, Density, PauliBlocking,
-                             Tmn, Fpe>;
+                             Tmn, Fpe, Lattice>;
 }  // namespace LogArea
 
 /**
