@@ -93,6 +93,22 @@ Collision_Term:
 #    Symmetry:
 #        S_Pot: 18.0
 
+Lattice:
+    Enable: True  # True - construct necessary lattices, False - forbid any lattices
+    Type: CartesianXYZ         # Possible types: CartesianXYZ
+    Origin: [0.0, 0.0, 0.0]    # Coordinates of the left, down, near corner of the lattice
+    Sizes: [10.0, 10.0, 10.0]  # Sizes in x, y, z directions in fm
+    CellNumber: [20, 20, 20]   # Number of cells in x, y, z directions
+    Periodic: True             # Periodic continuation: x + i * lx is equivalent to x, same for y, z
+    Printout:
+        # 0 - particle density
+        # 1 - net baryon density
+        # 2 - baryonic isospin density
+        # 3 - pion density
+        Density: 1
+        LandauEnergyDensity: False
+        LandauVelocity: False
+
 Modi:
     Box:
         # Cube size

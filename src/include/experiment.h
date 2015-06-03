@@ -19,6 +19,7 @@
 #include "experimentparameters.h"
 #include "forwarddeclarations.h"
 #include "outputinterface.h"
+#include "lattice.h"
 #include "particles.h"
 #include "pauliblocking.h"
 #include "potentials.h"
@@ -202,6 +203,15 @@ class Experiment : public ExperimentBase {
 
   /// The Action finder objects
   std::vector<std::unique_ptr<ActionFinderInterface>> action_finders_;
+
+  /// Lattices holding different physical quantities
+
+  /** First FourVector is intended for positive summands and second -
+   * for negative. This division is necessary to calculate density of
+   * positive and negative charges separately: without separation there arise
+   * problems with the definition of Eckart rest frame.
+   */
+  std::unique_ptr<RectangularLattice<std::array<FourVector, 2>>> jmu_lattice;
 
   /**
    * Number of events.

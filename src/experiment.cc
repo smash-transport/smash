@@ -240,6 +240,21 @@ Experiment<Modus>::Experiment(Configuration config)
     dens_type_ = DensityType::baryon;
   }
   log.info() << "Density type written to headers: " << dens_type_;
+
+  // Create lattices
+  if (config.has_value({"Lattice"}) &&
+      config.take({"Lattice", "Enable"}, true)) {
+    // Take lattice properties from config to assign them to all lattices
+    std::vector<float> tmp = config.take({"Lattice", "Sizes"});
+    const std::array<float, 3> l{tmp[0], tmp[1], tmp[2]};
+    std::vector<int> tmp2 = config.take({"Lattice", "CellNumber"});
+    const std::array<int, 3> n{tmp2[0], tmp2[1], tmp2[2]};
+    std::vector<float> tmp3 = config.take({"Lattice", "Origin"});
+    const std::array<float, 3> origin{tmp3[0], tmp3[1], tmp3[2]};
+    const bool periodic = config.take({"Lattice", "Periodic"});
+    jmu_lattice = make_unique<RectangularLattice<std::array<FourVector, 2>>>(
+        l, n, origin, periodic, LatticeUpdate::EveryTimestep);
+  }
 }
 
 const std::string hline(80, '-');

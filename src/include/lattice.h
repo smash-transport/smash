@@ -26,13 +26,11 @@ namespace Smash {
  *  Lattice update is a costly operation and should be performed only if
  *  necessary. Possible needs are: output - then it is enough to update
  *  lattice just before output, need for physics - update every timestep
- *  is unavoidable.
+ *  is unavoidable. Other needs may occur - that's why enum, not bool.
  */
 enum class LatticeUpdate {
-  None = 0,
-  AtOutput = 1,
-  EveryTimestep = 2,
-  AtEventEnd = 3
+  AtOutput = 0,
+  EveryTimestep = 1
 };
 
 /**
