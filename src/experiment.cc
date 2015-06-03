@@ -365,8 +365,9 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
       conserved_initial_, time_start_, parameters_.labclock.current_time());
 
   while (!(++parameters_.labclock > end_time_)) {
-    /* TODO(mkretz): std::list might be better suited for the task:
-     * lots of appending, then sorting and finally a single linear iteration. */
+    // vector is likely the best container type here. Because std::sort requires
+    // random access iterators. Any linked data structure (e.g. list) thus
+    // requires a less efficient sort algorithm.
     std::vector<ActionPtr> actions;
 
     /* (1.a) Create grid. */
