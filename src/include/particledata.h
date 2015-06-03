@@ -121,6 +121,18 @@ class ParticleData {
     return p;
   }
 
+  /// Return formation time of the particle
+  const float &formation_time() const { return formation_time_; }
+  /// Set the formation time
+  void set_formation_time(const float &form_time) { formation_time_ = form_time; }
+  
+  /// Return cross section scaling factor
+  const float &cross_section_scaling_factor() const { 
+	return cross_section_scaling_factor_;}
+  /// Set the cross_section_scaling_factor
+  void set_cross_section_scaling_factor(const float &xsec_scal) {
+	cross_section_scaling_factor_ = xsec_scal; }
+
   /// get the velocity 3-vector
   ThreeVector velocity() const { return momentum_.velocity(); }
 
@@ -226,6 +238,10 @@ class ParticleData {
   FourVector momentum_;
   /// position in space: x0, x1, x2, x3 as t, x, y, z
   FourVector position_;
+  /// formation time of the particle
+  float formation_time_ = 0.0;
+  /// cross section scaling factor
+  float cross_section_scaling_factor_ = 1.0; 
 };
 
 /**\ingroup logging

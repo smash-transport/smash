@@ -47,6 +47,8 @@ inline void Particles::copy_in(ParticleData &to, const ParticleData &from) {
   to.type_ = from.type_;
   to.momentum_ = from.momentum_;
   to.position_ = from.position_;
+  to.formation_time_ = from.formation_time_;
+  to.cross_section_scaling_factor_ = from.cross_section_scaling_factor_;
 }
 
 const ParticleData& Particles::insert(const ParticleData &p) {

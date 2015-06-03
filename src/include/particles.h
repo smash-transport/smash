@@ -175,6 +175,8 @@ class Particles {
     original.id_process_ = new_state.id_process_;
     original.momentum_ = new_state.momentum_;
     original.position_ = new_state.position_;
+    original.formation_time_ = new_state.formation_time_;
+    original.cross_section_scaling_factor_ = new_state.cross_section_scaling_factor_;
     return original;
   }
 
