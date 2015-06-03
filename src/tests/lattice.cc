@@ -18,7 +18,8 @@ static std::unique_ptr<RectangularLattice<FourVector>> create_lattice(bool p) {
   const std::array<float,3> l = {10.0f, 6.0f, 2.0f};
   const std::array<int,3> n = {4, 8, 3};
   const std::array<float, 3> origin = {0.0f, 0.0f, 0.0f};
-  return make_unique<RectangularLattice<FourVector> >(l, n, origin, p);
+  return make_unique<RectangularLattice<FourVector> >(l, n, origin, p,
+                                                  LatticeUpdate::EveryTimestep);
 }
 
 TEST(getters) {

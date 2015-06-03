@@ -22,6 +22,19 @@
 
 namespace Smash {
 
+/** Enumerator option for lattice updates.
+ *  Lattice update is a costly operation and should be performed only if
+ *  necessary. Possible needs are: output - then it is enough to update
+ *  lattice just before output, need for physics - update every timestep
+ *  is unavoidable.
+ */
+enum class LatticeUpdate {
+  None = 0,
+  AtOutput = 1,
+  EveryTimestep = 2,
+  AtEventEnd = 3
+};
+
 /**
   * A container class to hold all the arrays on the lattice and access them.
   */
@@ -36,12 +49,14 @@ class RectangularLattice {
     */
   RectangularLattice(const std::array<float, 3> &l,
                      const std::array<int, 3> &n,
-                     const std::array<float, 3> &origin, bool per)
+                     const std::array<float, 3> &origin, bool per,
+                     const LatticeUpdate upd)
   : l_(l),
     n_(n),
     csize_{l[0]/n[0], l[1]/n[1], l[2]/n[2]},
     origin_(origin),
-    periodic_(per) {
+    periodic_(per),
+    when_update_(upd) {
     lattice_.resize(n_[0]*n_[1]*n_[2]);
     const auto &log = logger<LogArea::Lattice>();
     log.info("Rectangular lattice created: sizes[fm] = (",
@@ -82,6 +97,9 @@ class RectangularLattice {
 
   /// Getter for periodicity
   bool periodic() const { return periodic_; }
+
+  /// Getter for update case
+  LatticeUpdate when_update() const { return when_update_; }
 
   /// Iterators and accessors
   using iterator = typename std::vector<T>::iterator;
@@ -187,6 +205,8 @@ class RectangularLattice {
   const std::array<float, 3> origin_;
   /// Periodicity
   const bool periodic_;
+  /// when lattice should be recalculated
+  const LatticeUpdate when_update_;
 
  private:
   /// Returns ceiling as integer
