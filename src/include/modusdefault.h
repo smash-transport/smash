@@ -50,9 +50,18 @@ class ModusDefault {
                          const OutputsList & /*out_list*/ = {})
   { return 0;}
 
-  Grid<GridOptions::Normal> create_grid(ParticleList &&all_particles,
-      const int testparticles) const {
-    return {std::move(all_particles), testparticles};
+  /**
+   * Creates the Grid with normal boundary conditions.
+   *
+   * \param particles The Particles object containing all particles of the
+   *                  currently running Experiment.
+   * \param testparticles The number of testparticles.
+   *
+   * \see Grid::Grid
+   */
+  Grid<GridOptions::Normal> create_grid(const Particles &particles,
+                                        int testparticles) const {
+    return {particles, testparticles};
   }
 
   /** \ingroup exception
