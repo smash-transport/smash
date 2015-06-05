@@ -91,6 +91,7 @@ using CollisionBranchList = build_vector_<CollisionBranchPtr>;
 
 namespace bf = boost::filesystem;
 
+
 }  // namespace Smash
 
 #endif  // DOXYGEN

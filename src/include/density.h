@@ -136,14 +136,14 @@ namespace Smash {
  *  positive and negative parts of jmu is necessary to avoid
  *  problems with the definition of Eckart rest frame.
  */
-class Density_on_lattice {
+class DensityOnLattice {
  public:
   /// Default constructor
-  Density_on_lattice() : jmu_pos_(FourVector()),
-                         jmu_neg_(FourVector()),
-                         density_(0.0) {}
+  DensityOnLattice() : jmu_pos_(FourVector()),
+                       jmu_neg_(FourVector()),
+                       density_(0.0) {}
   /// Adds particle to 4-current: \f$j^{\mu} += p^{\mu}/p^0 * factor \f$
-  void add_particle(ParticleData &part, double factor) {
+  void add_particle(const ParticleData &part, double factor) {
     const ThreeVector v = part.momentum().threevec()/part.momentum().x0();
     if (factor > 0.0) {
       jmu_pos_ += FourVector(factor, v * factor);
@@ -152,8 +152,8 @@ class Density_on_lattice {
     }
   }
   /// Computes density from jmu
-  void compute_density() {
-    density_ = jmu_pos_.abs() - jmu_neg_.abs();
+  void compute_density(const double norm) {
+    density_ = (jmu_pos_.abs() - jmu_neg_.abs()) / norm;
   }
   /// Getter for density
   double density() const { return density_; }

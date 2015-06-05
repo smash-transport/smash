@@ -274,6 +274,42 @@ Experiment<Modus>::Experiment(Configuration config)
   }
 }
 
+template <typename Modus>
+void Experiment<Modus>::update_density_lattice(density_lattice* lat,
+                                        const LatticeUpdate update,
+                                        const DensityType dens_type) {
+  // Do not proceed if lattice does not exists/update not required
+  if (lat == NULL || lat->when_update() != update) {
+    return;
+  }
+  // Add particles to lattice jmus
+  lat->reset();
+  const double sig = parameters_.gaussian_sigma;
+  const double two_sig_sqr = 2 * sig * sig;
+  const double r_cut = 3 * sig;
+  const double r_cut_sqr = r_cut * r_cut;
+  for (const auto &part: particles_) {
+    const float dens_factor = density_factor(part.pdgcode(), dens_type);
+    if (std::abs(dens_factor) < really_small) {
+      continue;
+    }
+    const ThreeVector pos = part.position().threevec();
+    lat->iterate_in_radius(pos, r_cut,
+      [&](DensityOnLattice node, int ix, int iy, int iz){
+        const ThreeVector r = lat->cell_center(ix, iy, iz);
+        const double sf = unnormalized_smearing_factor(pos - r,
+                               part.momentum(), two_sig_sqr, r_cut_sqr);
+        if (sf > really_small) {
+          node.add_particle(part, sf * dens_factor);
+        }
+      });
+  }
+  // Compute density from jmus, take care about smearing factor normalization
+  for (auto &node: *lat) {
+    node.compute_density(smearing_factor_norm(two_sig_sqr));
+  }
+}
+
 const std::string hline(80, '-');
 
 /* This method reads the particle type and cross section information
