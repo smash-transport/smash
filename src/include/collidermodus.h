@@ -21,6 +21,11 @@ namespace Smash {
 
 struct ExperimentParameters;
 
+enum class Sampling {
+    UNIFORM,
+    QUADRATIC,
+};
+
 /**
  * \ingroup modus
  * ColliderModus: Provides a modus for colliding nuclei.
@@ -85,17 +90,17 @@ class ColliderModus : public ModusDefault {
    * distance apart from each other.
    **/
   float impact_ = 0.f;
-  /// Flag for quadratic sampling of impact parameter.
-  bool sampling_quadratically_ = true;
+  /// Method used for sampling of impact parameter.
+  Sampling sampling_ = Sampling::QUADRATIC;
   /// Minimum value of impact parameter.
   float imp_min_ = 0.0;
   /// Maximum value of impact parameter.
   float imp_max_ = 0.0;
   /** Sample impact parameter.
    *
-   * Samples the impact parameter from values between imp_min_ and imp_max_.
-   * Sampling is either quadratic or linear, depending if
-   * sampling_quadratically_ is true or false.
+   * Samples the impact parameter from values between imp_min_ and imp_max_, if
+   * linear or quadratic sampling is used. This depends on the value of
+   * sampling_.
    *
    * Note that imp_max_ less than imp_min_ also works fine.
    *

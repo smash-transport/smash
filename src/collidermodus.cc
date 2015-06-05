@@ -276,7 +276,7 @@ ColliderModus::ColliderModus(Configuration modus_config,
     if (modus_cfg.has_value({"Impact", "Sample"})) {
       std::string sampling_method = modus_cfg.take({"Impact", "Sample"});
       if (sampling_method.compare(0, 7, "uniform") == 0) {
-        sampling_quadratically_ = false;
+        sampling_ = Sampling::UNIFORM;
       }
     }
     if (modus_cfg.has_value({"Impact", "Range"})) {
@@ -365,7 +365,7 @@ float ColliderModus::initial_conditions(Particles *particles,
 }
 
 void ColliderModus::sample_impact() {
-  if (sampling_quadratically_) {
+  if (sampling_ == Sampling::QUADRATIC) {
     // quadratic sampling: Note that for bmin > bmax, this still yields
     // the correct distribution (only that canonical() = 0 then is the
     // upper end, not the lower).
