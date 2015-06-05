@@ -126,6 +126,44 @@ namespace Smash {
                     const Particles &plist,
                     double gs_sigma, DensityType dens_type, int ntest,
                     bool compute_gradient);
+
+/** A class for time-efficient (time-memory trade-off) calculation of density
+ *  on the lattice. It holds two FourVectors - positive and negative
+ *  summands of 4-current, and the density itself. Four-currents are
+ *  additive by particles, density is not. That is why such structure is
+ *  used. It is efficient to calculate additive jmu's in one loop over
+ *  particles and then calculate density from jmu's. Splitting into
+ *  positive and negative parts of jmu is necessary to avoid
+ *  problems with the definition of Eckart rest frame.
+ */
+class Density_on_lattice {
+ public:
+  /// Default constructor
+  Density_on_lattice() : jmu_pos_(FourVector()),
+                         jmu_neg_(FourVector()),
+                         density_(0.0) {}
+  /// Adds particle to 4-current: \f$j^{\mu} += p^{\mu}/p^0 * factor \f$
+  void add_particle(ParticleData &part, double factor) {
+    const ThreeVector v = part.momentum().threevec()/part.momentum().x0();
+    if (factor > 0.0) {
+      jmu_pos_ += FourVector(factor, v * factor);
+    } else {
+      jmu_neg_ += FourVector(factor, v * factor);
+    }
+  }
+  /// Computes density from jmu
+  void compute_density() {
+    density_ = jmu_pos_.abs() - jmu_neg_.abs();
+  }
+  /// Getter for density
+  double density() const { return density_; }
+ private:
+  /// Positive and negative parts of four-current
+  FourVector jmu_pos_, jmu_neg_;
+  /// The density itself
+  double density_;
+};
+
 }  // namespace Smash
 
 #endif  // SRC_INCLUDE_DENSITY_H_

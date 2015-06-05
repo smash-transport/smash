@@ -206,24 +206,13 @@ class Experiment : public ExperimentBase {
 
   /// Lattices holding different physical quantities
 
-  /** First FourVector is intended for positive summands of jmu and second -
-   * for negative. This division is necessary to calculate density of
-   * positive and negative charges separately: without separation there arise
-   * problems with the definition of Eckart rest frame.
-   */
-  struct Density_on_lattice {
-    FourVector pos;
-    FourVector neg;
-    double density;
-  };
-  /// Pointer to the lattice for density calculations
-  typedef RectangularLattice<Density_on_lattice> density_lattice;
   /** Baryon density, isospin projection density, custom density.
    *  In the config user asks for some kind of density for printout.
    *  Baryon and isospin projection density are anyway needed for potentials.
    *  If user asks for some other density type for printout, it will be handled
    *  using jmu_custom variable.
    */
+  typedef RectangularLattice<Density_on_lattice> density_lattice;
   std::unique_ptr<density_lattice> jmu_B_lat_, jmu_I3_lat_, jmu_custom_lat_;
   /// Type of density for lattice printout
   DensityType dens_type_lattice_printout_;
