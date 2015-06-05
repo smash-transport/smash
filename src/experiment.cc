@@ -298,7 +298,7 @@ void Experiment<Modus>::update_density_lattice(density_lattice* lat,
       [&](DensityOnLattice node, int ix, int iy, int iz){
         const ThreeVector r = lat->cell_center(ix, iy, iz);
         const double sf = unnormalized_smearing_factor(pos - r,
-                               part.momentum(), two_sig_sqr, r_cut_sqr);
+                               part.momentum(), two_sig_sqr, r_cut_sqr).first;
         if (sf > really_small) {
           node.add_particle(part, sf * dens_factor);
         }
@@ -468,6 +468,10 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
 
     /* (3) Do propagation. */
     if (potentials_) {
+      update_density_lattice(jmu_B_lat_.get(), LatticeUpdate::EveryTimestep,
+                             DensityType::baryon);
+      update_density_lattice(jmu_B_lat_.get(), LatticeUpdate::EveryTimestep,
+                             DensityType::baryonic_isospin);
       propagate(&particles_, parameters_, *potentials_);
     } else {
       propagate_straight_line(&particles_, parameters_);
@@ -486,6 +490,13 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
       log.info() << format_measurements(
           particles_, interactions_total, interactions_this_interval,
           conserved_initial_, time_start_, parameters_.labclock.current_time());
+      // Update lattices for output
+      const LatticeUpdate lat_upd = LatticeUpdate::AtOutput;
+      update_density_lattice(jmu_B_lat_.get(), lat_upd, DensityType::baryon);
+      update_density_lattice(jmu_I3_lat_.get(), lat_upd,
+                                              DensityType::baryonic_isospin);
+      update_density_lattice(jmu_custom_lat_.get(), lat_upd,
+                                                dens_type_lattice_printout_);
       /* save evolution data */
       for (const auto &output : outputs_) {
         output->at_intermediate_time(particles_, evt_num, parameters_.labclock);
