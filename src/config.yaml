@@ -95,7 +95,6 @@ Collision_Term:
 
 Lattice:
     Enable: True  # True - construct necessary lattices, False - forbid any lattices
-    Type: CartesianXYZ         # Possible types: CartesianXYZ
     Origin: [0.0, 0.0, 0.0]    # Coordinates of the left, down, near corner of the lattice
     Sizes: [10.0, 10.0, 10.0]  # Sizes in x, y, z directions in fm
     CellNumber: [20, 20, 20]   # Number of cells in x, y, z directions
@@ -106,8 +105,8 @@ Lattice:
         # 2 - baryonic isospin density
         # 3 - pion density
         Density: 1
-        LandauEnergyDensity: False
-        LandauVelocity: False
+        #LandauEnergyDensity: False, not implemented
+        #LandauVelocity: False, not implemented
 
 Modi:
     Box:
