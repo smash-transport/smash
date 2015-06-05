@@ -47,12 +47,12 @@ class RectangularLattice {
     */
   RectangularLattice(const std::array<float, 3> &l,
                      const std::array<int, 3> &n,
-                     const std::array<float, 3> &origin, bool per,
+                     const std::array<float, 3> &orig, bool per,
                      const LatticeUpdate upd)
   : l_(l),
     n_(n),
     csize_{l[0]/n[0], l[1]/n[1], l[2]/n[2]},
-    origin_(origin),
+    origin_(orig),
     periodic_(per),
     when_update_(upd) {
     lattice_.resize(n_[0]*n_[1]*n_[2]);
@@ -92,6 +92,9 @@ class RectangularLattice {
 
   /// Getter for cell sizes
   const std::array<float, 3>& cell_sizes() const { return csize_; }
+
+  /// Getter for origin
+  const std::array<float, 3>& origin() const { return origin_; }
 
   /// Getter for periodicity
   bool periodic() const { return periodic_; }

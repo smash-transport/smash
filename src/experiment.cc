@@ -501,6 +501,21 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
       for (const auto &output : outputs_) {
         output->at_intermediate_time(particles_, evt_num, parameters_.labclock);
         output->thermodynamics_output(particles_, parameters_);
+        switch (dens_type_lattice_printout_) {
+          case DensityType::baryon:
+            output->thermodynamics_output(std::string("rhoB"), *jmu_B_lat_,
+                                                                     evt_num);
+            break;
+          case DensityType::baryonic_isospin:
+            output->thermodynamics_output(std::string("rhoI3"), *jmu_I3_lat_,
+                                                                     evt_num);
+            break;
+          case DensityType::none:
+            break;
+          default:
+            output->thermodynamics_output(std::string("rho"), *jmu_custom_lat_,
+                                                                      evt_num);
+        }
       }
     }
     // Check conservation of conserved quantities if potentials are off.

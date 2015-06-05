@@ -13,6 +13,8 @@
 #include <map>
 
 #include "forwarddeclarations.h"
+#include "density.h"
+#include "lattice.h"
 #include "macros.h"
 #include "processbranch.h"
 
@@ -51,11 +53,11 @@ class OutputInterface {
    *                          performed.
    * \param outgoing_particles   The list of particles after the Action was
    *                          performed.
-   * \param density The density at the interaction point 
-   * \param total_cross_section The total cross section of this interaction 
+   * \param density The density at the interaction point
+   * \param total_cross_section The total cross section of this interaction
    *                           or total width in case of decays
-   * \param process_type Identifier for the type of process, e.g. 
-   *  		elastic scattering, resonance formation,... 
+   * \param process_type Identifier for the type of process, e.g.
+   *  		elastic scattering, resonance formation,...
    *
    * \fpPrecision Why \c double?
    */
@@ -86,6 +88,18 @@ class OutputInterface {
     SMASH_UNUSED(particles);
     SMASH_UNUSED(param);
   }
+
+  /**
+   * Output to write thermodynamics from the lattice.
+   */
+  virtual void thermodynamics_output(const std::string varname,
+                            RectangularLattice<DensityOnLattice> &lattice,
+                            const int event_number) {
+    SMASH_UNUSED(varname);
+    SMASH_UNUSED(lattice);
+    SMASH_UNUSED(event_number);
+  }
+
 };
 
 }  // namespace Smash
