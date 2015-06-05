@@ -252,8 +252,25 @@ Experiment<Modus>::Experiment(Configuration config)
     std::vector<float> tmp3 = config.take({"Lattice", "Origin"});
     const std::array<float, 3> origin{tmp3[0], tmp3[1], tmp3[2]};
     const bool periodic = config.take({"Lattice", "Periodic"});
-    jmu_lattice = make_unique<RectangularLattice<std::array<FourVector, 2>>>(
-        l, n, origin, periodic, LatticeUpdate::EveryTimestep);
+    dens_type_lattice_printout_ = static_cast<DensityType>(
+         config.take({"Lattice", "Printout", "Density"},
+                     static_cast<int>(DensityType::none)));
+    if (potentials_) {
+      /* Create baryon and isospin density lattices regardless of config
+         if potentials are on. This is because they allow to compute
+         potentials faster */
+      jmu_B_lat_ = make_unique<density_lattice>(l, n, origin, periodic,
+                                            LatticeUpdate::EveryTimestep);
+      jmu_I3_lat_ = make_unique<density_lattice>(l, n, origin, periodic,
+                                            LatticeUpdate::EveryTimestep);
+    }
+    if (dens_type_lattice_printout_ != DensityType::none &&
+        ((potentials_ &&
+          dens_type_lattice_printout_ != DensityType::baryon &&
+          dens_type_lattice_printout_ != DensityType::baryonic_isospin) ||
+         !potentials_))
+      jmu_custom_lat_ = make_unique<density_lattice>(l, n, origin,
+                              periodic, LatticeUpdate::AtOutput);
   }
 }
 

@@ -30,6 +30,7 @@ namespace Smash {
     baryon = 1,
     baryonic_isospin = 2,
     pion = 3,
+    none = 4,
   };
 
   std::ostream& operator<<(std::ostream& os, DensityType dt);
