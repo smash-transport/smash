@@ -71,6 +71,15 @@ class BoxModus : public ModusDefault {
     return {{{0, 0, 0}, {length_, length_, length_}}, particles, testparticles};
   }
 
+  ///\copydoc Smash::ModusDefault::create_pseudo_grid
+  Grid<GridOptions::PeriodicBoundaries> create_pseudo_grid(
+      const Particles &particles, int testparticles) const {
+    return {{{0, 0, 0}, {length_, length_, length_}},
+            particles,
+            testparticles,
+            CellSizeStrategy::Largest};
+  }
+
  private:
   const BoxInitialCondition initial_condition_;
   /// length of the cube's edge in fm/c

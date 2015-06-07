@@ -218,7 +218,8 @@ Experiment<Modus>::Experiment(Configuration config)
       end_time_(config.take({"General", "End_Time"})),
       delta_time_startup_(config.take({"General", "Delta_Time"})),
       force_decays_(
-          config.take({"Collision_Term", "Force_Decays_At_End"}, true)) {
+          config.take({"Collision_Term", "Force_Decays_At_End"}, true)),
+      use_grid_(config.take({"General", "Use_Grid"}, true)) {
   const auto &log = logger<LogArea::Experiment>();
   log.info() << *this;
 
@@ -410,9 +411,9 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
 
     /* (1.a) Create grid. */
     const auto &grid =
-        // TODO(mkretz): avoid the copy. Grid could construct from Particles
-        // directly.
-        modus_.create_grid(particles_, parameters_.testparticles);
+        use_grid_
+            ? modus_.create_grid(particles_, parameters_.testparticles)
+            : modus_.create_pseudo_grid(particles_, parameters_.testparticles);
     /* (1.b) Iterate over cells and find actions. */
     grid.iterate_cells([&](const ParticleList &search_list) {
                          for (const auto &finder : action_finders_) {

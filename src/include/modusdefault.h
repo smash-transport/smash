@@ -64,6 +64,20 @@ class ModusDefault {
     return {particles, testparticles};
   }
 
+  /**
+   * Creates a pseudo grid with normal boundary conditions.
+   *
+   * This grid only contains one cell.
+   *
+   * \param particles The Particles object containing all particles of the
+   *                  currently running Experiment.
+   * \param testparticles The number of testparticles.
+   */
+  Grid<GridOptions::Normal> create_pseudo_grid(const Particles &particles,
+                                               int testparticles) const {
+    return {particles, testparticles, CellSizeStrategy::Largest};
+  }
+
   /** \ingroup exception
    *  BadInput is an error to throw if the configuration options are invalid.
    *

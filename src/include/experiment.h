@@ -245,6 +245,11 @@ class Experiment : public ExperimentBase {
    */
   const bool force_decays_;
 
+  /**
+   * This indicates whether to use the grid.
+   */
+  const bool use_grid_;
+
   /** The conserved quantities of the system.
    *
    * This struct carries the sums of the single particle's various
