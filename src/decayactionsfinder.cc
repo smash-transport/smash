@@ -32,8 +32,9 @@ ActionList DecayActionsFinder::find_possible_actions(
 
     DecayBranchList processes =
                       p.type().get_partial_widths(p.effective_mass());
-    // total decay width (mass-dependent)
-    const float width = total_weight<DecayBranch>(processes);
+    // total decay width (mass-dependent), reduced during formation time
+    const float width = total_weight<DecayBranch>(processes)
+                        * p.cross_section_scaling_factor();
 
     /* Exponential decay. Lifetime tau = 1 / width
      * t / tau = width * t (remember GeV-fm conversion)

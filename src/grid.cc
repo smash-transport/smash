@@ -198,8 +198,7 @@ void Grid<O>::build_cells(ParticleList &&all_particles) {
     number_of_cells_ = {1, 1, 1};
     cells_.reserve(1);
     for (const auto &p : all_particles) {
-	  if (p.formation_time() < p.position().x0() &&
-	      p.cross_section_scaling_factor() > 0.0) {	
+	  if (p.cross_section_scaling_factor() > 0.0) {
 		  const auto idx = make_index(p.position());
 #ifndef NDEBUG
         if (idx >= size_type(cells_.size())) {
@@ -229,8 +228,7 @@ void Grid<O>::build_cells(ParticleList &&all_particles) {
                   number_of_cells_[2]);
 
     for (const auto &p : all_particles) {
-      if (p.formation_time() < p.position().x0() &&
-	      p.cross_section_scaling_factor() > 0.0) {	
+      if (p.cross_section_scaling_factor() > 0.0) {	
         const auto idx = make_index(p.position());
 #ifndef NDEBUG
         if (idx >= size_type(cells_.size())) {
