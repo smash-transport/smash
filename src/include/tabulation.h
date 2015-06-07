@@ -42,10 +42,13 @@ class Tabulation {
    */
   Tabulation(float x_min, float range, int num_points,
              IntegParam ip, IntegrandFunction f);
-  /** Look up a value from the tabulation. If x is below the lower tabulation
+  /** Look up a value from the tabulation (without any interpolation, simply
+   * using the closest tabulated value). If x is below the lower tabulation
    * bound we return 0, if it is above the upper bound we return the tabulated
    * value at the upper bound. */
-  float get_value(float x) const;
+  float get_value_step(float x) const;
+  /** Look up a value from the tabulation using linear interpolation. */
+  float get_value_linear(float x) const;
 
  protected:
   /** Calculate a value to be stored in the table

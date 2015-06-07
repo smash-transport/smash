@@ -192,7 +192,7 @@ TwoBodyDecaySemistable::TwoBodyDecaySemistable(ParticleTypePtrList part_types,
 }
 
 float TwoBodyDecaySemistable::rho(float m) const {
-  return tabulation_->get_value(m);
+  return tabulation_->get_value_linear(m);
 }
 
 float TwoBodyDecaySemistable::width(float m0, float G0, float m) const {

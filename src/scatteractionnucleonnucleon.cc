@@ -226,7 +226,8 @@ CollisionBranchList ScatterActionNucleonNucleon::nuc_nuc_to_nuc_res(
                             type_resonance->minimum_mass()+second_type->mass(),
                             2.f, 100, params, spectral_function_integrand);
       }
-      const double resonance_integral = XS_tabulation[res_id]->get_value(srts);
+      const double resonance_integral = 
+                    XS_tabulation[res_id]->get_value_linear(srts);
 
       /** Cross section for 2->2 process with one resonance in final state.
        * Based on Eq. (46) in \iref{Weil:2013mya}. */

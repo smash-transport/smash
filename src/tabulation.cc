@@ -42,7 +42,7 @@ float Tabulation::calculate_value(float x, IntegParam ip, IntegrandFunction f) {
   return integral_value;
 }
 
-float Tabulation::get_value(float x) const {
+float Tabulation::get_value_step(float x) const {
   if (x < x_min_) {
     return 0.;
   }
@@ -52,6 +52,20 @@ float Tabulation::get_value(float x) const {
     return values_.back();
   } else {
     return values_[n];
+  }
+}
+
+float Tabulation::get_value_linear(float x) const {
+  if (x < x_min_) {
+    return 0.;
+  }
+  // here n is the lower index
+  const unsigned int n = (x - x_min_) * inv_dx_;
+  const float r = (x - x_min_) * inv_dx_ - n;
+  if (n >= values_.size() - 1) {
+    return values_.back();
+  } else {
+    return values_[n]*(1.-r) + values_[n+1]*r;
   }
 }
 
