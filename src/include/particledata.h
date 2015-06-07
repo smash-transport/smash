@@ -238,9 +238,11 @@ class ParticleData {
   FourVector momentum_;
   /// position in space: x0, x1, x2, x3 as t, x, y, z
   FourVector position_;
-  /// formation time of the particle
+  /** Formation time of the particle in the computational frame
+   *  given as an absolute value
+   */
   float formation_time_ = 0.0;
-  /// cross section scaling factor
+  /// cross section scaling factor for unformed particles
   float cross_section_scaling_factor_ = 1.0; 
 };
 

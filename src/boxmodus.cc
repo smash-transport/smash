@@ -117,6 +117,8 @@ float BoxModus::initial_conditions(Particles *particles,
     /* Set COORDINATE SPACE distribution */
     ThreeVector pos{uniform_length(), uniform_length(), uniform_length()};
     data.set_4position(FourVector(start_time_, pos));
+    /// Initialize formation time
+    data.set_formation_time(start_time_);
   }
 
   /* Make total 3-momentum 0 */
