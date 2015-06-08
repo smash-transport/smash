@@ -14,7 +14,7 @@
 TEST(interpolate_linear) {
     std::vector<double> x = {1, 2, 3, 4, 5, 6, 7, 8, 9};
     std::vector<double> y = {1, 2, 0, 0, 0, 0, 0, 8, 9};
-    InterpolateData f(x, y);
+    InterpolateData<double> f(x, y);
     COMPARE(f(1.5), 1.5);
     COMPARE(f(0), 0.0);
     COMPARE(f(10), 10.0);
