@@ -29,6 +29,8 @@ std::ostream &operator<<(std::ostream &out, const ParticleData &p) {
          << right << "{id:" << field<6> << p.id()
          << ", process:" << field<4> << p.id_process()
          << ", pos [fm]:" << p.position() << ", mom [GeV]:" << p.momentum()
+         << ", formation time [fm]:" << p.formation_time() 
+         << ", cross section scaling factor:" << p.cross_section_scaling_factor()
          << "}";
 }
 
