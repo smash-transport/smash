@@ -24,8 +24,8 @@
 
 namespace Smash {
 
-Action::Action(const ParticleList &in_part, float time_of_execution)
-    : incoming_particles_(in_part), time_of_execution_(time_of_execution) {}
+Action::Action(const ParticleList &in_part, float time)
+    : incoming_particles_(in_part), time_of_execution_(time) {}
 
 Action::~Action() = default;
 

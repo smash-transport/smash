@@ -33,9 +33,9 @@ class Action {
    * Construct an action object.
    *
    * \param[in] in_part list of incoming particles
-   * \param[in] time_of_execution time at which the action is supposed to take place
+   * \param[in] time Time at which the action is supposed to take place
    */
-  Action(const ParticleList &in_part, float time_of_execution);
+  Action(const ParticleList &in_part, float time);
 
   /** Copying is disabled. Use pointers or create a new Action. */
   Action(const Action &) = delete;
@@ -137,6 +137,22 @@ class Action {
    * Return the list of particles that resulted from the interaction.
    */
   const ParticleList &outgoing_particles() const { return outgoing_particles_; }
+
+  /**
+   * Return the time at which the action is supposed to be performed.
+   */
+  float time_of_execution() const { return time_of_execution_; }
+
+  /**
+   * Convert the time of execution from relative time to global time.
+   *
+   * This function should only be called once per action.
+   *
+   * \param current_global_time The current global time
+   */
+  void make_time_global(float current_global_time) {
+    time_of_execution_ += current_global_time;
+  }
 
   /** Check various conservation laws. */
   void check_conservation(const size_t &id_process) const;
