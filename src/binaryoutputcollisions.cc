@@ -59,6 +59,8 @@ BinaryOutputCollisions::BinaryOutputCollisions(bf::path path,
    * time-ordered fashion, in 'i' blocks. Initial and final states
    * are written as 'p' blocks. For options of this output see
    * \ref input_general_, \ref input_binary_collisions.
+   *
+   * See also \ref collisions_output_in_box_modus_.
    **/
 
 

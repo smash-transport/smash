@@ -341,6 +341,9 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
    * and at \ref input_general_. **Collision output always gives
    * a list of collisions/decays/box wall crossings plus optionally
    * initial and final configuration.**
+   *
+   * See also \ref collisions_output_in_box_modus_.
+   *
    * Oscar1999
    * ---------
    * Format specifics are the following:\n
