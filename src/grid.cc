@@ -197,7 +197,7 @@ void Grid<O>::build_cells(const Particles &particles) {
               "particle list.");
     number_of_cells_ = {1, 1, 1};
     cells_.reserve(1);
-    for (const auto &p : all_particles) {
+    for (const auto &p : particles) {
 	  if (p.cross_section_scaling_factor() > 0.0) {
 		  const auto idx = make_index(p.position());
 #ifndef NDEBUG
