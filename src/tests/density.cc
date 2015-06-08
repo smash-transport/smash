@@ -13,6 +13,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 
+#include "../include/boxmodus.h"
 #include "../include/configuration.h"
 #include "../include/cxx14compat.h"
 #include "../include/density.h"
@@ -298,4 +299,32 @@ TEST(nucleus_density) {
   lend = ThreeVector(0.0, 0.0, 10.0);
   out->density_along_line("lead_densityZ.dat", plist, sigma, dens_type,
                           Ntest, lstart, lend, npoints);
+}*/
+
+/*TEST(box_density) {
+ParticleType::create_type_list(
+    "# NAME MASS[GEV] WIDTH[GEV] PDG\n"
+    "proton 0.938 0.0 2212\n");
+const int Ntest = 1000;
+const float L = 10.0f;
+Configuration conf(TEST_CONFIG_PATH);
+conf["Modus"] = "Box";
+conf.take({"Modi", "Box", "Init_Multiplicities"});
+conf["Modi"]["Box"]["Init_Multiplicities"]["2212"] = 1000;
+conf["Modi"]["Box"]["Length"] = L;
+const ExperimentParameters par{{0.f, 1.f}, 1.f, Ntest, 1.0};
+std::unique_ptr<BoxModus> b = make_unique<BoxModus>(conf["Modi"], par);
+Particles P;
+b->initial_conditions(&P, par);
+ParticleList plist = P.copy_to_vector();
+conf["Output"]["Density"]["x"] = 0.0;
+conf["Output"]["Density"]["y"] = 0.0;
+conf["Output"]["Density"]["z"] = 0.0;
+std::unique_ptr<DensityOutput> out = make_unique<DensityOutput>(testoutputpath,
+                                         conf["Output"]["Density"]);
+const ThreeVector lstart = ThreeVector(0.0, 0.0, 0.0);
+const ThreeVector lend = ThreeVector(L, L, L);
+const int npoints = 100;
+out->density_along_line("box_density.dat", plist, 1.0, DensityType::baryon,
+                        Ntest, lstart, lend, npoints);
 }*/

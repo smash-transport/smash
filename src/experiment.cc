@@ -294,7 +294,7 @@ void Experiment<Modus>::update_density_lattice(density_lattice* lat,
   lat->reset();
   const double sig = parameters_.gaussian_sigma;
   const double two_sig_sqr = 2 * sig * sig;
-  const double r_cut = 3 * sig;
+  const double r_cut = 4 * sig;
   const double r_cut_sqr = r_cut * r_cut;
   for (const auto &part: particles_) {
     const float dens_factor = density_factor(part.pdgcode(), dens_type);
@@ -317,7 +317,8 @@ void Experiment<Modus>::update_density_lattice(density_lattice* lat,
   }
   // Compute density from jmus, take care about smearing factor normalization
   for (auto &node: *lat) {
-    node.compute_density(smearing_factor_norm(two_sig_sqr));
+    node.compute_density(smearing_factor_norm(two_sig_sqr) *
+                         parameters_.testparticles);
   }
 }
 
