@@ -10,6 +10,8 @@
 #include <gsl/gsl_integration.h>
 #include <algorithm>
 
+#include "include/integrate.h"
+
 namespace Smash {
 
 Tabulation::Tabulation(float x_min, float range, int num_points,
@@ -23,23 +25,10 @@ Tabulation::Tabulation(float x_min, float range, int num_points,
 }
 
 float Tabulation::calculate_value(float x, IntegParam ip, IntegrandFunction f) {
-  gsl_integration_workspace *workspace = gsl_integration_workspace_alloc(1000);
   ip.srts = x;
-  const gsl_function integrand = {f, &ip};
-  const size_t subintervals_max = 500;
-  const int gauss_points = 2;
-  const double accuracy_absolute = 1.0e-5;
-  const double accuracy_relative = 1.0e-3;
-  double integral_value, integral_error;
 
-  gsl_integration_qag(&integrand, ip.type->minimum_mass(), ip.srts - ip.m2,
-                      accuracy_absolute, accuracy_relative,
-                      subintervals_max, gauss_points, workspace,
-                      &integral_value, &integral_error);
-
-  gsl_integration_workspace_free(workspace);
-
-  return integral_value;
+  Integrator integrate;
+  return integrate(ip.type->minimum_mass(), ip.srts - ip.m2, [&](float y) {return f(y, &ip);});
 }
 
 float Tabulation::get_value_step(float x) const {
