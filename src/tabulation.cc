@@ -19,16 +19,12 @@ Tabulation::Tabulation(float x_min, float range, int num_points,
                       : x_min_(x_min), inv_dx_(num_points/range) {
   values_.resize(num_points);
   const float dx = range/num_points;
-  for (int i = 0; i < num_points; i++) {
-    values_[i] = calculate_value(x_min_ + i*dx, ip, f);
-  }
-}
-
-float Tabulation::calculate_value(float x, IntegParam ip, IntegrandFunction f) {
-  ip.srts = x;
-
   Integrator integrate;
-  return integrate(ip.type->minimum_mass(), ip.srts - ip.m2, [&](float y) {return f(y, &ip);});
+  for (int i = 0; i < num_points; i++) {
+    ip.srts = x_min_ + i*dx;
+    values_[i] = integrate(ip.type->minimum_mass(), ip.srts - ip.m2,
+                           [&](float y) {return f(y, &ip);});
+  }
 }
 
 float Tabulation::get_value_step(float x) const {

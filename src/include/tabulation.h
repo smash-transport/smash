@@ -51,9 +51,6 @@ class Tabulation {
   float get_value_linear(float x) const;
 
  protected:
-  /** Calculate a value to be stored in the table
-   * (by numerically solving an integral). */
-  float calculate_value(float x, IntegParam ip, IntegrandFunction f);
   std::vector<float> values_;   // vector for storing tabulated values
   const float x_min_, inv_dx_;  // lower bound and inverse step size 1/dx for tabulation
 };
