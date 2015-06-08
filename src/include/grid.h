@@ -17,6 +17,7 @@
 #include <vector>
 
 #include "forwarddeclarations.h"
+#include "particles.h"
 
 namespace Smash {
 
@@ -50,10 +51,10 @@ class GridBase {
  protected:
   /**
    * Returns the minimum x,y,z coordinates and the largest dx,dy,dz distances of
-   * the particles in \p all_particles.
+   * the particles in \p particles.
    */
   static std::pair<std::array<float, 3>, std::array<float, 3>>
-      find_min_and_length(const ParticleList &all_particles);
+  find_min_and_length(const Particles &particles);
 };
 
 /**
@@ -72,15 +73,15 @@ template <GridOptions Options = GridOptions::Normal>
 class Grid : public GridBase {
  public:
   /**
-   * Constructs a grid from the given particle list \p all_particles. It
+   * Constructs a grid from the given particle list \p particles. It
    * automatically determines the necessary size for the grid from the positions
    * of the particles.
    *
-   * \param all_particles The particles to place onto the grid.
+   * \param particles The particles to place onto the grid.
    * \param testparticles Number of testparticles used in this event
    */
-  Grid(ParticleList &&all_particles, const int testparticles)
-      : Grid{find_min_and_length(all_particles), std::move(all_particles),
+  Grid(const Particles &particles, int testparticles)
+      : Grid{find_min_and_length(particles), std::move(particles),
              testparticles} {}
 
   /**
@@ -90,17 +91,17 @@ class Grid : public GridBase {
    *
    * \param min_and_length A pair consisting of the three min coordinates and
    * the three lengths.
-   * \param all_particles The particles to place onto the grid.
+   * \param particles The particles to place onto the grid.
    * \param testparticles Number of testparticles used in this event
    */
   Grid(const std::pair<std::array<float, 3>, std::array<float, 3>> &
            min_and_length,
-       ParticleList &&all_particles, const int testparticles)
+       const Particles &particles, int testparticles)
       : min_position_(min_and_length.first), length_(min_and_length.second) {
     std::tie(index_factor_, number_of_cells_) =
-        determine_cell_sizes(all_particles.size(), length_, testparticles);
+        determine_cell_sizes(particles.size(), length_, testparticles);
 
-    build_cells(std::move(all_particles));
+    build_cells(particles);
   }
 
   /**
@@ -154,7 +155,7 @@ class Grid : public GridBase {
    *
    * This is different for the Normal and PeriodicBoundaries cases.
    */
-  void build_cells(ParticleList &&all_particles);
+  void build_cells(const Particles &particles);
 
   /**
    * Returns the one-dimensional cell-index from the 3-dim index \p x, \p y, \p
