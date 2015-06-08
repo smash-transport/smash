@@ -144,11 +144,10 @@ class DensityOnLattice {
                        density_(0.0) {}
   /// Adds particle to 4-current: \f$j^{\mu} += p^{\mu}/p^0 * factor \f$
   void add_particle(const ParticleData &part, double factor) {
-    const ThreeVector v = part.momentum().threevec()/part.momentum().x0();
     if (factor > 0.0) {
-      jmu_pos_ += FourVector(factor, v * factor);
+      jmu_pos_ += FourVector(factor, part.velocity() * factor);
     } else {
-      jmu_neg_ += FourVector(factor, v * factor);
+      jmu_neg_ += FourVector(factor, part.velocity() * factor);
     }
   }
   /// Computes density from jmu
@@ -157,6 +156,10 @@ class DensityOnLattice {
   }
   /// Getter for density
   double density() const { return density_; }
+  /// Getter for jmu_pos
+  FourVector jmu_pos() const { return jmu_pos_; }
+  /// Getter for jmu_neg
+  FourVector jmu_neg() const { return jmu_neg_; }
  private:
   /// Positive and negative parts of four-current
   FourVector jmu_pos_, jmu_neg_;

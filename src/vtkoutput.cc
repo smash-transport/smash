@@ -147,7 +147,7 @@ void VtkOutput::thermodynamics_output(const std::string varname,
     file << std::fixed;
   lattice.iterate_sublattice({0, 0, 0}, dim,
     [&](DensityOnLattice &node, int ix, int, int) {
-      file << node.density();
+      file << node.density() << " ";
       if (ix > 0 && ix % dim[0] == 0) {
         file << "\n";
       }

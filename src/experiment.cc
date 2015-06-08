@@ -255,22 +255,30 @@ Experiment<Modus>::Experiment(Configuration config)
     dens_type_lattice_printout_ = static_cast<DensityType>(
          config.take({"Lattice", "Printout", "Density"},
                      static_cast<int>(DensityType::none)));
+    /* Create baryon and isospin density lattices regardless of config
+       if potentials are on. This is because they allow to compute
+       potentials faster */
     if (potentials_) {
-      /* Create baryon and isospin density lattices regardless of config
-         if potentials are on. This is because they allow to compute
-         potentials faster */
       jmu_B_lat_ = make_unique<density_lattice>(l, n, origin, periodic,
                                             LatticeUpdate::EveryTimestep);
       jmu_I3_lat_ = make_unique<density_lattice>(l, n, origin, periodic,
-                                            LatticeUpdate::EveryTimestep);
+                                              LatticeUpdate::EveryTimestep);
+    } else {
+      if (dens_type_lattice_printout_ == DensityType::baryon) {
+        jmu_B_lat_ = make_unique<density_lattice>(l, n, origin, periodic,
+                                                  LatticeUpdate::AtOutput);
+      }
+      if (dens_type_lattice_printout_ == DensityType::baryonic_isospin) {
+        jmu_I3_lat_ = make_unique<density_lattice>(l, n, origin, periodic,
+                                             LatticeUpdate::AtOutput);
+      }
     }
     if (dens_type_lattice_printout_ != DensityType::none &&
-        ((potentials_ &&
-          dens_type_lattice_printout_ != DensityType::baryon &&
-          dens_type_lattice_printout_ != DensityType::baryonic_isospin) ||
-         !potentials_))
-      jmu_custom_lat_ = make_unique<density_lattice>(l, n, origin,
-                              periodic, LatticeUpdate::AtOutput);
+        dens_type_lattice_printout_ != DensityType::baryonic_isospin &&
+        dens_type_lattice_printout_ != DensityType::baryon) {
+        jmu_custom_lat_ = make_unique<density_lattice>(l, n, origin,
+                                          periodic, LatticeUpdate::AtOutput);
+    }
   }
 }
 
@@ -295,11 +303,14 @@ void Experiment<Modus>::update_density_lattice(density_lattice* lat,
     }
     const ThreeVector pos = part.position().threevec();
     lat->iterate_in_radius(pos, r_cut,
-      [&](DensityOnLattice node, int ix, int iy, int iz){
+      [&](DensityOnLattice &node, int ix, int iy, int iz){
         const ThreeVector r = lat->cell_center(ix, iy, iz);
         const double sf = unnormalized_smearing_factor(pos - r,
                                part.momentum(), two_sig_sqr, r_cut_sqr).first;
         if (sf > really_small) {
+          /*std::cout << "Adding particle " << part << " to lattice with"
+                    << " smearing factor " << sf <<
+                    " and density factor " << dens_factor << std::endl;*/
           node.add_particle(part, sf * dens_factor);
         }
       });
