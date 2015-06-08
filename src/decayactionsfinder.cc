@@ -26,15 +26,14 @@ ActionList DecayActionsFinder::find_possible_actions(
                         // less than 10 decays in most time steps
 
   for (const auto &p : search_list) {
-    if (p.type().is_stable()) {
-      continue;      /* particle doesn't decay */
+    if (p.type().is_stable() || p.formation_time() > p.position().x0()) {
+      continue;      /* particle doesn't decay or is not yet formed*/
     }
 
     DecayBranchList processes =
                       p.type().get_partial_widths(p.effective_mass());
-    // total decay width (mass-dependent), reduced during formation time
-    const float width = total_weight<DecayBranch>(processes)
-                        * p.cross_section_scaling_factor();
+    // total decay width (mass-dependent)
+    const float width = total_weight<DecayBranch>(processes);
 
     /* Exponential decay. Lifetime tau = 1 / width
      * t / tau = width * t (remember GeV-fm conversion)
