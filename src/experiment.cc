@@ -334,9 +334,10 @@ static std::string format_measurements(const Particles &particles,
 }
 
 template <typename Modus>
+template <typename Container>
 void Experiment<Modus>::perform_action(
     const ActionPtr &action, size_t &interactions_total,
-    size_t &total_pauli_blocked, const ParticleList &particles_before_actions) {
+    size_t &total_pauli_blocked, const Container &particles_before_actions) {
   const auto &log = logger<LogArea::Experiment>();
   if (action->is_valid(particles_)) {
     const ParticleList incoming_particles = action->incoming_particles();
@@ -408,14 +409,14 @@ size_t Experiment<Modus>::run_time_evolution(const int evt_num) {
     /* (1.b) Iterate over cells and find actions. */
     grid.iterate_cells([&](const ParticleList &search_list) {
                          for (const auto &finder : action_finders_) {
-                           actions += finder->find_possible_actions(
+                           actions += finder->find_actions_in_cell(
                                search_list, parameters_.timestep_duration());
                          }
                        },
                        [&](const ParticleList &search_list,
                            const ParticleList &neighbors_list) {
                          for (const auto &finder : action_finders_) {
-                           actions += finder->find_possible_actions(
+                           actions += finder->find_actions_with_neighbors(
                                search_list, neighbors_list,
                                parameters_.timestep_duration());
                          }

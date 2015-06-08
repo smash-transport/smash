@@ -77,15 +77,15 @@ TEST(collision_order) {
 
   // test for different times
   dt = 0.9;
-  auto actions_1 = finder.find_possible_actions(search_list, dt);
+  auto actions_1 = finder.find_actions_in_cell(search_list, dt);
   COMPARE(actions_1.size(), 0u) << "timestep 0.9, expect no collision";
 
   dt = 1.0;
-  auto actions_2 = finder.find_possible_actions(search_list, dt);
+  auto actions_2 = finder.find_actions_in_cell(search_list, dt);
   COMPARE(actions_2.size(), 1u) << "timestep 1.0, expect 1 collision";
 
   dt = 2.0;
-  auto actions_3 = finder.find_possible_actions(search_list, dt);
+  auto actions_3 = finder.find_actions_in_cell(search_list, dt);
   COMPARE(actions_3.size(), 3u) << "timestep 2.0, expect 3 collisions";
 
   // perform actions from actions_3
@@ -142,7 +142,7 @@ TEST(scatter_particle_pair_only_once) {
   float dt = 0.9;  // fm/c
 
   // look for scatters, we expect one
-  auto actions = finder.find_possible_actions(search_list, dt);
+  auto actions = finder.find_actions_in_cell(search_list, dt);
   COMPARE(actions.size(), 1u);
 
   // ok, the exepected Action exists, so let's perform it
@@ -166,7 +166,7 @@ TEST(scatter_particle_pair_only_once) {
   }
   for (auto i = 10; i; --i) {  // make "sure" it's not the random numbers that
                                // supress the problem
-    actions = finder.find_possible_actions(search_list, dt);
+    actions = finder.find_actions_in_cell(search_list, dt);
     COMPARE(actions.size(), 0u);
   }
 }
@@ -205,7 +205,7 @@ TEST(find_next_action) {
   const ParticleList search_list = particles.copy_to_vector();
   // find next action for the first particle
   ActionList action_list =
-      finder.find_possible_actions(particle_list, search_list, 10000.f);
+      finder.find_actions_with_neighbors(particle_list, search_list, 10000.f);
   // we expect to find an action
   COMPARE(action_list.size(), 1);
   ActionPtr action = std::move(action_list[0]);

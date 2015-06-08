@@ -37,11 +37,14 @@ class ScatterActionsFinder : public ActionFinderInterface {
                                const ParticleData &p_b);
   /** Check the whole particle list for collisions
    * and return a list with the corrsponding Action objects. */
-  ActionList find_possible_actions(const ParticleList &search_list,
-                                   float dt) const override;
-  ActionList find_possible_actions(const ParticleList &search_list,
-                                   const ParticleList &neighbors_list,
-                                   float dt) const override;
+  ActionList find_actions_in_cell(const ParticleList &search_list,
+                                  float dt) const override;
+  ActionList find_actions_with_neighbors(const ParticleList &search_list,
+                                         const ParticleList &neighbors_list,
+                                         float dt) const override;
+  ActionList find_actions_with_neighbors(const ParticleList &search_list,
+                                         const Particles &neighbors_list,
+                                         float dt) const override;
   /** Find some final collisions at the end of the simulation.
    * Currently does nothing. */
   ActionList find_final_actions(const Particles &) const override {
@@ -58,6 +61,10 @@ class ScatterActionsFinder : public ActionFinderInterface {
    * in the next timestep and create a corresponding Action object in that case. */
   ActionPtr check_collision(const ParticleData &data_a,
                             const ParticleData &data_b, float dt) const;
+  template <typename Container, bool Assertion>
+  ActionList find_actions_with_neighbors_impl(
+      const ParticleList &search_list, const Container &neighbors_list,
+      float dt) const;
   /** Elastic cross section parameter (in mb). */
   float elastic_parameter_ = 0.0;
   /** Number of test particles. */

@@ -19,7 +19,7 @@
 
 namespace Smash {
 
-ActionList DecayActionsFinder::find_possible_actions(
+ActionList DecayActionsFinder::find_actions_in_cell(
     const ParticleList &search_list, float dt) const {
   ActionList actions;
   actions.reserve(10);  // for short time steps this seems reasonable to expect

@@ -153,9 +153,10 @@ class Experiment : public ExperimentBase {
   void initialize_new_event();
 
   /** Perform the given action. */
+  template <typename Container>
   void perform_action(const ActionPtr &action, size_t &interactions_total,
                       size_t &total_pauliblocked,
-                      const ParticleList &particles_before_actions);
+                      const Container &particles_before_actions);
 
   /** Runs the time evolution of an event
    *

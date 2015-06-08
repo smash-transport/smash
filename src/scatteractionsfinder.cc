@@ -140,7 +140,7 @@ ActionPtr ScatterActionsFinder::check_collision(
   return std::move(act);
 }
 
-std::vector<ActionPtr> ScatterActionsFinder::find_possible_actions(
+ActionList ScatterActionsFinder::find_actions_in_cell(
     const ParticleList &search_list, float dt) const {
   std::vector<ActionPtr> actions;
   for (const ParticleData &p1 : search_list) {
@@ -157,13 +157,21 @@ std::vector<ActionPtr> ScatterActionsFinder::find_possible_actions(
   return actions;
 }
 
-std::vector<ActionPtr> ScatterActionsFinder::find_possible_actions(
-    const ParticleList &search_list, const ParticleList &neighbors_list,
+template <typename Container, bool Assertion>
+ActionList ScatterActionsFinder::find_actions_with_neighbors_impl(
+    const ParticleList &search_list, const Container &neighbors_list,
     float dt) const {
   std::vector<ActionPtr> actions;
   for (const ParticleData &p1 : search_list) {
     for (const ParticleData &p2 : neighbors_list) {
-      assert(p1.id() != p2.id());
+      if (Assertion) {
+        assert(p1.id() != p2.id());
+      } else {
+        // don't look for collisions of a particle with itself
+        if (p1.id() == p2.id()) {
+          continue;
+        }
+      }
       // Check if a collision is possible.
       ActionPtr act = check_collision(p1, p2, dt);
       if (act) {
@@ -172,6 +180,20 @@ std::vector<ActionPtr> ScatterActionsFinder::find_possible_actions(
     }
   }
   return actions;
+}
+
+ActionList ScatterActionsFinder::find_actions_with_neighbors(
+    const ParticleList &search_list, const ParticleList &neighbors_list,
+    float dt) const {
+  return find_actions_with_neighbors_impl<ParticleList, true>(
+      search_list, neighbors_list, dt);
+}
+
+ActionList ScatterActionsFinder::find_actions_with_neighbors(
+    const ParticleList &search_list, const Particles &neighbors_list,
+    float dt) const {
+  return find_actions_with_neighbors_impl<Particles, false>(search_list,
+                                                            neighbors_list, dt);
 }
 
 }  // namespace Smash
