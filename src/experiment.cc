@@ -107,6 +107,12 @@ std::unique_ptr<ExperimentBase> ExperimentBase::create(Configuration config) {
                   << "periodic boundaries are not taken into account "
                   << "in the density calculation";
     }
+    if (config.has_value({"General", "Use_Time_Steps"}) &&
+        !config.read({"General", "Use_Time_Steps"})) {
+      log.error() << "Box modus does not work correctly without time steps for "
+                  << "now: periodic boundaries are not taken into account when "
+                  << "looking for interactions.";
+    }
     return ExperimentPointer(new Experiment<BoxModus>(config));
   } else if (modus_chooser.compare("List") == 0) {
     return ExperimentPointer(new Experiment<ListModus>(config));
@@ -172,8 +178,12 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
  */
 template <typename Modus>
 std::ostream &operator<<(std::ostream &out, const Experiment<Modus> &e) {
-  out << "Starting with temporal stepsize: "
-      << e.parameters_.timestep_duration() << " fm/c\n";
+  if (e.use_time_steps_) {
+    out << "Starting with temporal stepsize: "
+        << e.parameters_.timestep_duration() << " fm/c\n";
+  } else {
+    out << "Not using time steps\n";
+  }
   out << "End time: " << e.end_time_ << " fm/c\n";
   out << e.modus_;
   return out;
@@ -219,7 +229,8 @@ Experiment<Modus>::Experiment(Configuration config)
       delta_time_startup_(config.take({"General", "Delta_Time"})),
       force_decays_(
           config.take({"Collision_Term", "Force_Decays_At_End"}, true)),
-      use_grid_(config.take({"General", "Use_Grid"}, true)) {
+      use_grid_(config.take({"General", "Use_Grid"}, true)),
+      use_time_steps_(config.take({"General", "Use_Time_Steps"}, true)) {
   const auto &log = logger<LogArea::Experiment>();
   log.info() << *this;
 

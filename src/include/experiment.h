@@ -276,6 +276,11 @@ class Experiment : public ExperimentBase {
    */
   const bool use_grid_;
 
+  /**
+   * This indicates whether to use time steps.
+   */
+  const bool use_time_steps_;
+
   /** The conserved quantities of the system.
    *
    * This struct carries the sums of the single particle's various
