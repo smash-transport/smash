@@ -105,8 +105,9 @@ class ColliderModus : public ModusDefault {
   /** Sample impact parameter.
    *
    * Samples the impact parameter from values between imp_min_ and imp_max_, if
-   * linear or quadratic sampling is used. This depends on the value of
-   * sampling_.
+   * linear or quadratic sampling is used. By specifying impact parameters and
+   * corresponding yields, custom sampling can be used.
+   * This depends on the value of sampling_.
    *
    * Note that imp_max_ less than imp_min_ also works fine.
    *
