@@ -163,15 +163,11 @@ void Action::sample_2body_phasespace() {
 }
 
 
-<<<<<<< HEAD
-void Action::check_conservation(const uint32_t &id_process) const {
-=======
-void Action::check_conservation(const size_t &id_process, const ProcessBranch::ProcessType &process_type) const {
->>>>>>> Conservation checks adjusted for Pythia
+void Action::check_conservation(const uint32_t &id_process, const ProcessBranch::ProcessType &process_type) const {
   const auto &log = logger<LogArea::Action>();
   /* If the process is not a string excitation, check all quantum numbers */
    
-  if(process_type != ProcessBranch::String) {
+  if(process_type != ProcessType::String) {
     QuantumNumbers before(incoming_particles_);
     QuantumNumbers after(outgoing_particles_);
     std::string err_msg = before.report_deviations(after);

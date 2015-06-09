@@ -57,8 +57,9 @@ ScatterActionsFinder::ScatterActionsFinder(
 }
 
     /* Read in switch to turn off strings. */
-      strings_switch_(config.take({"Collision_Term", "Strings"}, false)) {}
-	   
+    if (config.has_value({"Collision_Term", "Strings"})) {
+      strings_switch_ = config.take({"Collision_Term", "Strings"});
+    }
 
 ScatterActionsFinder::ScatterActionsFinder(
     float elastic_parameter, int testparticles)
@@ -135,12 +136,17 @@ ActionPtr ScatterActionsFinder::check_collision(
   }
 
   /* Add various subprocesses.  */
+<<<<<<< HEAD
   act->add_all_processes(elastic_parameter_, two_to_one_, two_to_two_);
   /* (4) string excitation */
   if (strings_switch_) {
     act->add_process(act->string_excitation_cross_section());
   }
 
+=======
+  act->add_all_processes(elastic_parameter_, strings_switch_);
+  
+>>>>>>> Small fixes to make the branch compile again
   /* distance criterion according to cross_section */
   if (distance_squared >= act->cross_section() * fm2_mb * M_1_PI
                           * data_a.cross_section_scaling_factor()

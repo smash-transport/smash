@@ -12,6 +12,7 @@
 
 #include "action.h"
 
+
 namespace Smash {
 
 
@@ -60,7 +61,7 @@ class ScatterAction : public Action {
 
   /** Add all possible subprocesses for this action object. */
   void add_all_processes(float elastic_parameter,
-                         bool two_to_one, bool two_to_two);
+                         bool two_to_one, bool two_to_two, bool strings_switch);
 
   /**
    * Determine the (parametrized) total cross section for this collision. This
@@ -194,6 +195,7 @@ class ScatterAction : public Action {
 
   /** Perform a 2->1 resonance-formation process. */
   void resonance_formation();
+    
 };
 
 
