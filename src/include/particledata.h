@@ -193,6 +193,19 @@ class ParticleData {
   ParticleData() = default;
 
   /**
+   * Called from Particles to copy parts of ParticleData into its list of
+   * particles. Specifically it avoids to copy id_, index_, and type_. These
+   * three are handled by Particles.
+   */
+  void copy_to(ParticleData &dst) const {
+    dst.id_process_ = id_process_;
+    dst.momentum_ = momentum_;
+    dst.position_ = position_;
+    dst.formation_time_ = formation_time_;
+    dst.cross_section_scaling_factor_ = cross_section_scaling_factor_;
+  }
+
+  /**
    * Each particle has a unique identifier. This identifier is used for
    * identifying the particle in the output files. It is specifically not used
    * for searching for ParticleData objects in lists of particles, though it may
