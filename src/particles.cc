@@ -73,6 +73,7 @@ void Particles::create(size_t number, PdgCode pdg) {
     const auto offset = dirty_.back();
     dirty_.pop_back();
     data_[offset].id_ = ++id_max_;
+    data_[offset].id_process_ = -1;
     data_[offset].type_ = &type;
     data_[offset].hole_ = false;
     --number;
@@ -82,6 +83,7 @@ void Particles::create(size_t number, PdgCode pdg) {
     const auto end_ptr = &data_[data_size_ + number];
     for (auto ptr = &data_[data_size_]; ptr < end_ptr; ++ptr) {
       ptr->id_ = ++id_max_;
+      ptr->id_process_ = -1;
       ptr->type_ = &type;
     }
     data_size_ += number;
@@ -102,6 +104,7 @@ ParticleData &Particles::create(const PdgCode pdg) {
     ptr->hole_ = false;
   }
   ptr->id_ = ++id_max_;
+  ptr->id_process_ = -1;
   ptr->type_ = &type;
   return *ptr;
 }
