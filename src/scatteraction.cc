@@ -18,9 +18,6 @@
 #include "include/random.h"
 
 namespace Smash {
-/*!\Userguide
- * \page input_collision_term_ Collision_Term
- */
      
 ScatterAction::ScatterAction(const ParticleData &in_part_a,
                              const ParticleData &in_part_b,
