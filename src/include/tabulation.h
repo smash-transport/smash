@@ -17,14 +17,6 @@
 
 namespace Smash {
 
-/** Parameters for GSL integration. */
-struct IntegParam {
-  const ParticleTypePtr type;  // type of final-state resonance
-  double m2;                   // mass of stable final-state particle
-  double srts;                 // sqrt(s)
-  int L;                       // angular momentum
-};
-
 /**
  * A class for storing a one-dimensional lookup table of floating-point values.
  */

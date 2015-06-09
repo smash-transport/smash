@@ -77,14 +77,14 @@ double spectral_function(double resonance_mass, double resonance_pole,
  *  and \f$p_{cm}^f\f$ is the center-of-mass momentum of the final state.
  *
  * \param[in] resonance_mass Actual mass of the resonance.
- * \param[in] parameters Container for the parameters needed
- * by the spectral function: Width of the resonance,
- * pole mass of the resonance, mass of the stable particle in the final state
- * and mandelstam-s of the process.
+ * \param[in] srts sqrt(s) of the process
+ * \param[in] stable_mass mass of the stable particle in the final state
+ * \param[in] type type of the resonance
  *
  * \fpPrecision Why \c double?
  */
-double spectral_function_integrand(double resonance_mass, void * parameters);
+double spectral_function_integrand(double resonance_mass, double srts,
+                                   double stable_mass, ParticleTypePtr type);
 
 /**
  * Resonance mass sampling for 2-particle final state
@@ -98,8 +98,8 @@ double spectral_function_integrand(double resonance_mass, void * parameters);
  *
  * \fpPrecision Why \c double?
  */
-float sample_resonance_mass(const ParticleType &type_resonance,
-                            const ParticleType &type_stable,
+float sample_resonance_mass(const ParticleTypePtr type_resonance,
+                            const ParticleTypePtr type_stable,
                             const double cms_energy);
 
 }  // namespace Smash

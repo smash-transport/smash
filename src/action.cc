@@ -98,32 +98,32 @@ void Action::sample_cms_momenta() {
   ParticleData *p_a = &outgoing_particles_[0];
   ParticleData *p_b = &outgoing_particles_[1];
 
-  const ParticleType &t_a = p_a->type();
-  const ParticleType &t_b = p_b->type();
+  const ParticleTypePtr t_a = &p_a->type();
+  const ParticleTypePtr t_b = &p_b->type();
 
-  double mass_a = t_a.mass();
-  double mass_b = t_b.mass();
+  double mass_a = t_a->mass();
+  double mass_b = t_b->mass();
 
   const double cms_energy = sqrt_s();
 
-  if (cms_energy < t_a.minimum_mass() + t_b.minimum_mass()) {
+  if (cms_energy < t_a->minimum_mass() + t_b->minimum_mass()) {
     throw InvalidResonanceFormation("resonance_formation: not enough energy! " +
-      std::to_string(cms_energy) + " " + std::to_string(t_a.minimum_mass()) +
-      " " + std::to_string(t_b.minimum_mass()) + " " +
+      std::to_string(cms_energy) + " " + std::to_string(t_a->minimum_mass()) +
+      " " + std::to_string(t_b->minimum_mass()) + " " +
       p_a->pdgcode().string() + " " + p_b->pdgcode().string());
   }
 
   /* If one of the particles is a resonance, sample its mass. */
   /* TODO: Other particle assumed stable! */
-  if (!t_a.is_stable()) {
+  if (!t_a->is_stable()) {
     mass_a = sample_resonance_mass(t_a, t_b, cms_energy);
-  } else if (!t_b.is_stable()) {
+  } else if (!t_b->is_stable()) {
     mass_b = sample_resonance_mass(t_b, t_a, cms_energy);
   }
 
   double momentum_radial = pCM(cms_energy, mass_a, mass_b);
   if (!(momentum_radial > 0.0)) {
-    log.warn("Particle: ", t_a.pdgcode(),
+    log.warn("Particle: ", t_a->pdgcode(),
              " radial momentum: ", momentum_radial);
     log.warn("Etot: ", cms_energy, " m_a: ", mass_a, " m_b: ", mass_b);
   }

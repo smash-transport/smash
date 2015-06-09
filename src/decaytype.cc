@@ -151,22 +151,17 @@ float TwoBodyDecayStable::in_width(float m0, float G0, float m,
 
 // TwoBodyDecaySemistable
 
-static double integrand_rho_Manley(double mass, void *parameters) {
-  IntegParam *ip = reinterpret_cast<IntegParam*>(parameters);
-
-  const double stable_mass = ip->m2;
-  const double srts = ip->srts;
-
+static double integrand_rho_Manley(double mass, double srts, double stable_mass,
+                                   ParticleTypePtr type, int L) {
   if (srts <= mass + stable_mass) {
     return 0.;
   }
 
-  const double resonance_width = ip->type->total_width(srts);
   /* center-of-mass momentum of final state particles */
   const double p_f = pCM(srts, stable_mass, mass);
 
-  return p_f/srts * BlattWeisskopf(p_f, ip->L) * 2.*srts
-         * spectral_function(mass, ip->type->mass(), resonance_width);
+  return p_f/srts * BlattWeisskopf(p_f, L) * 2.*srts
+         * spectral_function(mass, type->mass(), type->total_width(srts));
 }
 
 TwoBodyDecaySemistable::TwoBodyDecaySemistable(ParticleTypePtrList part_types,
@@ -185,18 +180,18 @@ TwoBodyDecaySemistable::TwoBodyDecaySemistable(ParticleTypePtrList part_types,
   }
   Lambda_ = (particle_types_[1]->baryon_number() != 0) ? 2.0 : 1.6;
   // initialize tabulation
-  IntegParam ip = {particle_types_[1], particle_types_[0]->mass(),0., L_};
   Integrator integrate;
   tabulation_ = make_unique<Tabulation>(
-                  particle_types_[0]->mass()+particle_types_[1]->minimum_mass(),
-                  1.f, 50,
-                  [&](float x) {
-                    ip.srts = x;
-                    return integrate(ip.type->minimum_mass(), ip.srts - ip.m2,
-                                     [&](float y) {
-                                       return integrand_rho_Manley(y, &ip);
-                                     });
-                  });
+        particle_types_[0]->mass()+particle_types_[1]->minimum_mass(), 1.f, 50,
+        [&](float srts) {
+          return integrate(particle_types_[1]->minimum_mass(),
+                            srts - particle_types_[0]->mass(),
+                            [&](float m) {
+                              return integrand_rho_Manley(m, srts,
+                                          particle_types_[0]->mass(),
+                                          particle_types_[1], L_);
+                            });
+        });
 }
 
 float TwoBodyDecaySemistable::rho(float m) const {
