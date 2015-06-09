@@ -288,16 +288,19 @@ ColliderModus::ColliderModus(Configuration modus_config,
           throw std::domain_error("Input Error: Need impact parameter spectrum for custom sampling. "
                                   "Please provide Values and Yields.");
         }
-        std::vector<float> b = modus_cfg.take({"Impact", "Values"});
-        std::vector<float> N = modus_cfg.take({"Impact", "Yields"});
-        std::swap(b, impacts_);
-        std::swap(N, yields_);
-        if (b.size() != N.size()) {
+        std::vector<float> impacts = modus_cfg.take({"Impact", "Values"});
+        std::vector<float> yields = modus_cfg.take({"Impact", "Yields"});
+        if (impacts.size() != yields.size()) {
           throw std::domain_error("Input Error: Need as many impact parameter values as yields. "
                                   "Please make sure that Values and Yields have the same length.");
         }
         impact_interpolation_ = make_unique<InterpolateData<float>>(
-                InterpolateData<float>(impacts_, yields_));
+                InterpolateData<float>(impacts, yields));
+
+        auto imp_minmax = std::minmax_element(impacts.begin(), impacts.end());
+        imp_min_ = *imp_minmax.first;
+        imp_max_ = *imp_minmax.second;
+        yield_max_ = *std::max_element(yields.begin(), yields.end());
       }
     }
     if (modus_cfg.has_value({"Impact", "Range"})) {
@@ -396,17 +399,12 @@ void ColliderModus::sample_impact() {
   } else if (sampling_ == Sampling::CUSTOM) {
     // rejection sampling based on given distribution
     assert(impact_interpolation_ != nullptr);
-    auto minmax_b = std::minmax_element(impacts_.begin(), impacts_.end());
-    float min_b = *minmax_b.first;
-    float max_b = *minmax_b.second;
-    float max_N = *std::max_element(yields_.begin(), yields_.end());
-
     float probability_random = 1;
     float probability = 0;
     float b;
     while (probability_random > probability) {
-      b = Random::uniform(min_b, max_b);
-      probability = (*impact_interpolation_)(b) / max_N;
+      b = Random::uniform(imp_min_, imp_max_);
+      probability = (*impact_interpolation_)(b) / yield_max_;
       assert(probability < 1.0f);
       probability_random = Random::uniform(0.f, 1.f);
     }

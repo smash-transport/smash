@@ -98,10 +98,8 @@ class ColliderModus : public ModusDefault {
   float imp_min_ = 0.0;
   /// Maximum value of impact parameter.
   float imp_max_ = 0.0;
-  /// Impact parameters used for custom sampling.
-  std::vector<float> impacts_ = {};
-  /// Yields used for custom sampling.
-  std::vector<float> yields_ = {};
+  /// Maximum value of yield. Needed for custom impact parameter sampling.
+  float yield_max_ = 0.0;
   /// Pointer to the impact parameter interpolation.
   std::unique_ptr<InterpolateData<float>> impact_interpolation_ = nullptr;
   /** Sample impact parameter.
