@@ -68,9 +68,13 @@ InterpolateData<T>::InterpolateData(const std::vector<T>& x, const std::vector<T
 
 template <typename T>
 T InterpolateData<T>::operator()(T x0) const {
+    // Find the piecewise linear interpolation corresponding to x0.
     size_t i = 0;
-    while (x_[i] > x0 && i < x_.size() - 2) {
+    while (x_[i] <= x0 && i < f_.size()) {
         i++;
+    }
+    if (i != 0) {
+        i--;
     }
     return f_[i](x0);
 }
