@@ -8,6 +8,7 @@
 #include "include/decaytype.h"
 
 #include "include/cxx14compat.h"
+#include "include/integrate.h"
 #include "include/kinematics.h"
 #include "include/resonances.h"
 
@@ -184,11 +185,18 @@ TwoBodyDecaySemistable::TwoBodyDecaySemistable(ParticleTypePtrList part_types,
   }
   Lambda_ = (particle_types_[1]->baryon_number() != 0) ? 2.0 : 1.6;
   // initialize tabulation
-  const IntegParam ip = {particle_types_[1], particle_types_[0]->mass(),
-                         0., L_};
+  IntegParam ip = {particle_types_[1], particle_types_[0]->mass(),0., L_};
+  Integrator integrate;
   tabulation_ = make_unique<Tabulation>(
                   particle_types_[0]->mass()+particle_types_[1]->minimum_mass(),
-                  1.f, 50, ip, integrand_rho_Manley);
+                  1.f, 50,
+                  [&](float x) {
+                    ip.srts = x;
+                    return integrate(ip.type->minimum_mass(), ip.srts - ip.m2,
+                                     [&](float y) {
+                                       return integrand_rho_Manley(y, &ip);
+                                     });
+                  });
 }
 
 float TwoBodyDecaySemistable::rho(float m) const {

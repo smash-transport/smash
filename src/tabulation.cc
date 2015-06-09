@@ -7,23 +7,15 @@
 
 #include "include/tabulation.h"
 
-#include <gsl/gsl_integration.h>
-#include <algorithm>
-
-#include "include/integrate.h"
-
 namespace Smash {
 
 Tabulation::Tabulation(float x_min, float range, int num_points,
-                       IntegParam ip, IntegrandFunction f)
+                       std::function<double(float)> f)
                       : x_min_(x_min), inv_dx_(num_points/range) {
   values_.resize(num_points);
   const float dx = range/num_points;
-  Integrator integrate;
   for (int i = 0; i < num_points; i++) {
-    ip.srts = x_min_ + i*dx;
-    values_[i] = integrate(ip.type->minimum_mass(), ip.srts - ip.m2,
-                           [&](float y) {return f(y, &ip);});
+    values_[i] = f(x_min_ + i*dx);
   }
 }
 

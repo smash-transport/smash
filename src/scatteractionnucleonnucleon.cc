@@ -11,6 +11,7 @@
 
 #include "include/angles.h"
 #include "include/cxx14compat.h"
+#include "include/integrate.h"
 #include "include/kinematics.h"
 #include "include/parametrizations.h"
 #include "include/random.h"
@@ -220,11 +221,19 @@ CollisionBranchList ScatterActionNucleonNucleon::nuc_nuc_to_nuc_res(
       const int res_id = type_resonance->pdgcode().iso_multiplet();
       if (XS_tabulation[res_id] == NULL) {
         // initialize tabulation, we need one per resonance multiplet
-        const IntegParam params = {type_resonance, second_type->mass(),
-                                   srts, 0};
+        IntegParam params = {type_resonance, second_type->mass(), srts, 0};
+        Integrator integrate;
         XS_tabulation[res_id] = make_unique<Tabulation>(
-                            type_resonance->minimum_mass()+second_type->mass(),
-                            2.f, 100, params, spectral_function_integrand);
+          type_resonance->minimum_mass()+second_type->mass(),
+          2.f, 100,
+          [&](float x) {
+            params.srts = x;
+            return integrate(params.type->minimum_mass(),
+                              params.srts - params.m2,
+                              [&](float y) {
+                                return spectral_function_integrand(y, &params);
+                              });
+          });
       }
       const double resonance_integral = 
                     XS_tabulation[res_id]->get_value_linear(srts);

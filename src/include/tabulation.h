@@ -25,11 +25,8 @@ struct IntegParam {
   int L;                       // angular momentum
 };
 
-typedef double (*IntegrandFunction)(double, void*);
-
 /**
- * A class for storing a one-dimensional lookup table of floating-point values,
- * which are obtained by integration.
+ * A class for storing a one-dimensional lookup table of floating-point values.
  */
 class Tabulation {
  public:
@@ -37,11 +34,10 @@ class Tabulation {
    * \param x_min lower bound of tabulation domain
    * \param range range (x_max-x_min) of tabulation domain
    * \param num_points number of tabulation points
-   * \param ip integration parameters
-   * \param f integrand function
+   * \param f one-dimensional function f(x) which is supposed to be tabulated
    */
   Tabulation(float x_min, float range, int num_points,
-             IntegParam ip, IntegrandFunction f);
+             std::function<double(float)> f);
   /** Look up a value from the tabulation (without any interpolation, simply
    * using the closest tabulated value). If x is below the lower tabulation
    * bound we return 0, if it is above the upper bound we return the tabulated
@@ -56,7 +52,7 @@ class Tabulation {
 };
 
 
-// a map for storing the integral tabulation used for the NN->NR cross sections
+// a map for storing the tabulation used for the NN->NR cross sections
 static std::map<int, TabulationPtr> XS_tabulation;
 
 
