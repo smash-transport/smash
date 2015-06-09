@@ -76,7 +76,7 @@ namespace Smash {
              log.debug("PDG ID from Pythia:", pythia_id);
 	     std::string s = std::to_string(pythia_id);
              PdgCode pythia_code(s); 
-             ParticleData new_particle_(ParticleType::pythiafind(pythia_code));    
+             ParticleData new_particle_(ParticleType::pythiafind());    
              FourVector momentum;
              momentum.set_x0(event[i].e());
              momentum.set_x1(event[i].px());
