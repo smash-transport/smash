@@ -155,7 +155,7 @@ int BoxModus::impose_boundary_conditions(Particles *particles,
       data.set_4position(position);
       ++wraps;
       for (const auto &output : output_list) {
-        output->at_interaction(incoming_particle, incoming_particle,
+        output->at_interaction(incoming_particle, {1, data},
                                0., 0., ProcessType::Wall);
       }
     }
