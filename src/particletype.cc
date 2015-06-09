@@ -95,16 +95,9 @@ const ParticleType &ParticleType::find(PdgCode pdgcode) {
   return *found;
 }
 
-bool ParticleType::exists(PdgCode pdgcode) {
- const ParticleType &ParticleType::pythiafind(PdgCode pdgcode) {
-  const auto found = std::lower_bound(
-      all_particle_types->begin(), all_particle_types->end(), pdgcode,
-      [](const ParticleType &l, const PdgCode &r) { return l.pdgcode() < r; }); 
-  if (found == all_particle_types->end() || found->pdgcode() != pdgcode) {
-     std::string s = std::to_string(661);
-     ParticleType::find(s); 
-  }
-  return *found;
+const ParticleType &ParticleType::pythiafind() {
+  static ParticleType pythia_type("PY", 0.01f, 0.f, 0x661);
+  return pythia_type;
 }
 
 bool ParticleType::exists(PdgCode pdgcode) {
