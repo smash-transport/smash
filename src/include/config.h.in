@@ -6,3 +6,5 @@
 #define CMAKE_BUILD_TYPE "@CMAKE_BUILD_TYPE@"
 #define BUILD_DATE "@BUILD_DATE@"
 #define GIT_BRANCH "@GIT_BRANCH@"
+#cmakedefine Pythia_FOUND
+#define PYTHIA_XML_DIR "${Pythia_xmldoc_PATH}"

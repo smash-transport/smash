@@ -14,6 +14,7 @@
 #include "include/kinematics.h"
 #include "include/logging.h"
 #include "include/pdgcode.h"
+#include "include/pythia.h"
 #include "include/random.h"
 
 namespace Smash {
@@ -49,6 +50,7 @@ void ScatterAction::generate_final_state() {
   /* The production point of the new particles.  */
   FourVector middle_point = get_interaction_point();
 
+  ParticleList string_outgoing; 
   switch (process_type_) {
     case ProcessType::Elastic:
       /* 2->2 elastic scattering */
@@ -70,7 +72,7 @@ void ScatterAction::generate_final_state() {
     case ProcessType::String:
       /* string excitation */
       log.debug("Process: String Excitation.");
-      /// string_excitation(incoming_particles_, outgoing_particles_);
+      string_outgoing = string_excitation(incoming_particles_);
       break;
     case ProcessType::None:
       log.debug("ProcessType None should not have been selected");
@@ -200,11 +202,8 @@ CollisionBranchPtr ScatterAction::elastic_cross_section(float elast_par) {
 CollisionBranchPtr ScatterAction::string_excitation_cross_section() {
   /* Calculate string-excitation cross section:
    * Parametrized total minus all other present channels. */
-  /* TODO(weil): This is currently set to zero,
-   * since Pythia is not yet implemented. */
-  float sig_string = 0.f;
-  // = std::max(0.f, total_cross_section() - total_weight_);
-
+  float sig_string = std::max(0.f, total_cross_section() - total_weight_);
+  log.debug("String cross section is: ", sig_string);
   return make_unique<CollisionBranch>(sig_string, ProcessType::String);
 }
 
