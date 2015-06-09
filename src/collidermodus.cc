@@ -7,6 +7,7 @@
 
 #include "include/collidermodus.h"
 
+#include <algorithm>
 #include <cmath>
 #include <cstdlib>
 #include <cstring>
@@ -17,7 +18,9 @@
 
 #include "include/angles.h"
 #include "include/configuration.h"
+#include "include/cxx14compat.h"
 #include "include/experimentparameters.h"
+#include "include/interpolation.h"
 #include "include/kinematics.h"
 #include "include/logging.h"
 #include "include/numerics.h"
@@ -277,6 +280,24 @@ ColliderModus::ColliderModus(Configuration modus_config,
       std::string sampling_method = modus_cfg.take({"Impact", "Sample"});
       if (sampling_method.compare(0, 7, "uniform") == 0) {
         sampling_ = Sampling::UNIFORM;
+      } else if (sampling_method.compare(0, 6, "custom") == 0) {
+        sampling_ = Sampling::CUSTOM;
+        if (!(   modus_cfg.has_value({"Impact", "Values"})
+              || modus_cfg.has_value({"Impact", "Yields"})
+           )) {
+          throw std::domain_error("Input Error: Need impact parameter spectrum for custom sampling. "
+                                  "Please provide Values and Yields.");
+        }
+        std::vector<float> b = modus_cfg.take({"Impact", "Values"});
+        std::vector<float> N = modus_cfg.take({"Impact", "Yields"});
+        std::swap(b, impacts_);
+        std::swap(N, yields_);
+        if (b.size() != N.size()) {
+          throw std::domain_error("Input Error: Need as many impact parameter values as yields. "
+                                  "Please make sure that Values and Yields have the same length.");
+        }
+        impact_interpolation_ = make_unique<InterpolateData<float>>(
+                InterpolateData<float>(impacts_, yields_));
       }
     }
     if (modus_cfg.has_value({"Impact", "Range"})) {
@@ -372,6 +393,24 @@ void ColliderModus::sample_impact() {
     impact_ = std::sqrt(imp_min_ * imp_min_ +
                         Random::canonical() *
                             (imp_max_ * imp_max_ - imp_min_ * imp_min_));
+  } else if (sampling_ == Sampling::CUSTOM) {
+    // rejection sampling based on given distribution
+    assert(impact_interpolation_ != nullptr);
+    auto minmax_b = std::minmax_element(impacts_.begin(), impacts_.end());
+    float min_b = *minmax_b.first;
+    float max_b = *minmax_b.second;
+    float max_N = *std::max_element(yields_.begin(), yields_.end());
+
+    float probability_random = 1;
+    float probability = 0;
+    float b;
+    while (probability_random > probability) {
+      b = Random::uniform(min_b, max_b);
+      probability = (*impact_interpolation_)(b) / max_N;
+      assert(probability < 1.0f);
+      probability_random = Random::uniform(0.f, 1.f);
+    }
+    impact_ = b;
   } else {
     // linear sampling. Still, min > max works fine.
     impact_ = Random::uniform(imp_min_, imp_max_);

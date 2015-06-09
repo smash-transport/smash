@@ -13,6 +13,7 @@
 
 #include "deformednucleus.h"
 #include "forwarddeclarations.h"
+#include "interpolation.h"
 #include "modusdefault.h"
 #include "nucleus.h"
 #include "pdgcode.h"
@@ -24,6 +25,7 @@ struct ExperimentParameters;
 enum class Sampling {
     UNIFORM,
     QUADRATIC,
+    CUSTOM,
 };
 
 /**
@@ -96,6 +98,12 @@ class ColliderModus : public ModusDefault {
   float imp_min_ = 0.0;
   /// Maximum value of impact parameter.
   float imp_max_ = 0.0;
+  /// Impact parameters used for custom sampling.
+  std::vector<float> impacts_ = {};
+  /// Yields used for custom sampling.
+  std::vector<float> yields_ = {};
+  /// Pointer to the impact parameter interpolation.
+  std::unique_ptr<InterpolateData<float>> impact_interpolation_ = nullptr;
   /** Sample impact parameter.
    *
    * Samples the impact parameter from values between imp_min_ and imp_max_, if
