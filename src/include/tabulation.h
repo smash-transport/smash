@@ -39,8 +39,10 @@ class Tabulation {
   float get_value_linear(float x) const;
 
  protected:
-  std::vector<float> values_;   // vector for storing tabulated values
-  const float x_min_, inv_dx_;  // lower bound and inverse step size 1/dx for tabulation
+  // vector for storing tabulated values
+  std::vector<float> values_;
+  // lower bound and inverse step size 1/dx for tabulation
+  const float x_min_, inv_dx_;
 };
 
 

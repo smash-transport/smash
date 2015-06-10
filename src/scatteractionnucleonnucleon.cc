@@ -223,7 +223,7 @@ CollisionBranchList ScatterActionNucleonNucleon::nuc_nuc_to_nuc_res(
         // initialize tabulation, we need one per resonance multiplet
         Integrator integrate;
         XS_tabulation[res_id] = make_unique<Tabulation>(
-              type_resonance->minimum_mass()+second_type->mass(), 2.f, 100,
+              type_resonance->minimum_mass() + second_type->mass(), 2.f, 100,
               [&](float sqrts) {
                 return integrate(type_resonance->minimum_mass(),
                                   sqrts - second_type->mass(),

@@ -42,7 +42,7 @@ float Tabulation::get_value_linear(float x) const {
   if (n >= values_.size() - 1) {
     return values_.back();
   } else {
-    return values_[n]*(1.-r) + values_[n+1]*r;
+    return values_[n] * (1. - r) + values_[n + 1] * r;
   }
 }
 

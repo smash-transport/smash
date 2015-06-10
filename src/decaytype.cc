@@ -182,16 +182,16 @@ TwoBodyDecaySemistable::TwoBodyDecaySemistable(ParticleTypePtrList part_types,
   // initialize tabulation
   Integrator integrate;
   tabulation_ = make_unique<Tabulation>(
-        particle_types_[0]->mass()+particle_types_[1]->minimum_mass(), 1.f, 50,
-        [&](float srts) {
-          return integrate(particle_types_[1]->minimum_mass(),
-                            srts - particle_types_[0]->mass(),
-                            [&](float m) {
-                              return integrand_rho_Manley(m, srts,
-                                          particle_types_[0]->mass(),
-                                          particle_types_[1], L_);
-                            });
-        });
+      particle_types_[0]->mass() + particle_types_[1]->minimum_mass(), 1.f, 50,
+      [&](float srts) {
+        return integrate(particle_types_[1]->minimum_mass(),
+                          srts - particle_types_[0]->mass(),
+                          [&](float m) {
+                            return integrand_rho_Manley(m, srts,
+                                        particle_types_[0]->mass(),
+                                        particle_types_[1], L_);
+                          });
+      });
 }
 
 float TwoBodyDecaySemistable::rho(float m) const {
