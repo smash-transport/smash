@@ -99,7 +99,7 @@ std::tuple<std::array<float, 3>, std::array<int, 3>>
 Grid<O>::determine_cell_sizes(size_type particle_count,
                               const std::array<float, 3> &length,
                               const int testparticles) {
-  std::tuple<std::array<float, 3>, std::array<int, 3> > r;
+  std::tuple<std::array<float, 3>, std::array<int, 3>> r;
   auto &index_factor = std::get<0>(r);
   auto &number_of_cells = std::get<1>(r);
 
@@ -199,24 +199,25 @@ void Grid<O>::build_cells(const Particles &particles) {
     index_factor_ = {0, 0, 0};
     cells_.resize(1);
     for (const auto &p : particles) {
-	  if (p.cross_section_scaling_factor() > 0.0) {
-		  const auto idx = make_index(p.position());
+      if (p.cross_section_scaling_factor() > 0.0) {
+        const auto idx = make_index(p.position());
 #ifndef NDEBUG
         if (idx >= size_type(cells_.size())) {
           log.fatal(source_location,
-                  "\nan out-of-bounds access would be necessary for the "
-                  "particle ",
-                  p, "\nfor a grid with the following parameters:\nmin: ",
-                  min_position_, "\nlength: ", length_, "\ncells: ",
-                  number_of_cells_, "\nindex_factor: ", index_factor_,
-                  "\ncells_.size: ", cells_.size(), "\nrequested index: ", idx);
+                    "\nan out-of-bounds access would be necessary for the "
+                    "particle ",
+                    p, "\nfor a grid with the following parameters:\nmin: ",
+                    min_position_, "\nlength: ", length_, "\ncells: ",
+                    number_of_cells_, "\nindex_factor: ", index_factor_,
+                    "\ncells_.size: ", cells_.size(), "\nrequested index: ",
+                    idx);
           throw std::runtime_error("out-of-bounds grid access on construction");
         }
 #endif
         cells_[idx].push_back(p);
       } else {
-		continue;
-	  }
+        continue;
+      }
     }
   } else {
     // construct a normal grid
@@ -229,23 +230,24 @@ void Grid<O>::build_cells(const Particles &particles) {
                   number_of_cells_[2]);
 
     for (const auto &p : particles) {
-      if (p.cross_section_scaling_factor() > 0.0) {	
+      if (p.cross_section_scaling_factor() > 0.0) {
         const auto idx = make_index(p.position());
 #ifndef NDEBUG
-      if (idx >= size_type(cells_.size())) {
-        log.fatal(source_location,
-                  "\nan out-of-bounds access would be necessary for the "
-                  "particle ",
-                  p, "\nfor a grid with the following parameters:\nmin: ",
-                  min_position_, "\nlength: ", length_, "\ncells: ",
-                  number_of_cells_, "\nindex_factor: ", index_factor_,
-                  "\ncells_.size: ", cells_.size(), "\nrequested index: ", idx);
+        if (idx >= size_type(cells_.size())) {
+          log.fatal(source_location,
+                    "\nan out-of-bounds access would be necessary for the "
+                    "particle ",
+                    p, "\nfor a grid with the following parameters:\nmin: ",
+                    min_position_, "\nlength: ", length_, "\ncells: ",
+                    number_of_cells_, "\nindex_factor: ", index_factor_,
+                    "\ncells_.size: ", cells_.size(), "\nrequested index: ",
+                    idx);
           throw std::runtime_error("out-of-bounds grid access on construction");
         }
 #endif
         cells_[idx].push_back(p);
       } else {
-		continue;    
+        continue;
       }
     }
   }
@@ -436,13 +438,13 @@ void Grid<GridOptions::PeriodicBoundaries>::iterate_cells(
   }
 }
 
-template std::tuple<std::array<float, 3>, std::array<int, 3>> Grid<
-    GridOptions::Normal>::determine_cell_sizes(size_type,
-                                               const std::array<float, 3> &,
-                                               const int);
 template std::tuple<std::array<float, 3>, std::array<int, 3>>
-    Grid<GridOptions::PeriodicBoundaries>::determine_cell_sizes(
-        size_type, const std::array<float, 3> &, const int);
+Grid<GridOptions::Normal>::determine_cell_sizes(size_type,
+                                                const std::array<float, 3> &,
+                                                const int);
+template std::tuple<std::array<float, 3>, std::array<int, 3>>
+Grid<GridOptions::PeriodicBoundaries>::determine_cell_sizes(
+    size_type, const std::array<float, 3> &, const int);
 
 template void Grid<GridOptions::Normal>::build_cells(const Particles &);
 template void Grid<GridOptions::PeriodicBoundaries>::build_cells(
