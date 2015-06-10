@@ -164,38 +164,42 @@ static double integrand_rho_Manley(double mass, double srts, double stable_mass,
          * spectral_function(mass, type->mass(), type->total_width(srts));
 }
 
-TwoBodyDecaySemistable::TwoBodyDecaySemistable(ParticleTypePtrList part_types,
-                                               int l)
-                                              : TwoBodyDecay(part_types, l) {
-  // make sure that the first particle is the stable one
-  if (particle_types_[1]->is_stable()) {
-    std::swap(particle_types_[0], particle_types_[1]);
+static ParticleTypePtrList arrange_particles(ParticleTypePtrList part_types) {
+  // re-arrange the particle list such that the first particle is the stable one
+  if (part_types[1]->is_stable()) {
+    std::swap(part_types[0], part_types[1]);
   }
-  // make sure that this is really a "semi-stable" decay
-  if (!particle_types_[0]->is_stable() || particle_types_[1]->is_stable()) {
+  /* verify that this is really a "semi-stable" decay,
+   * i.e. the first particle is stable and the second unstable */
+  if (!part_types[0]->is_stable() || part_types[1]->is_stable()) {
     throw std::runtime_error(
       "Error in TwoBodyDecaySemistable constructor: " +
-      particle_types_[0]->pdgcode().string() + " " +
-      particle_types_[1]->pdgcode().string());
+      part_types[0]->pdgcode().string() + " " +
+      part_types[1]->pdgcode().string());
   }
-  Lambda_ = (particle_types_[1]->baryon_number() != 0) ? 2.0 : 1.6;
-  // initialize tabulation
-  Integrator integrate;
-  tabulation_ = make_unique<Tabulation>(
-      particle_types_[0]->mass() + particle_types_[1]->minimum_mass(), 1.f, 50,
-      [&](float srts) {
-        return integrate(particle_types_[1]->minimum_mass(),
-                          srts - particle_types_[0]->mass(),
-                          [&](float m) {
-                            return integrand_rho_Manley(m, srts,
-                                        particle_types_[0]->mass(),
-                                        particle_types_[1], L_);
-                          });
-      });
+  return part_types;
 }
 
+TwoBodyDecaySemistable::TwoBodyDecaySemistable(ParticleTypePtrList part_types,
+                                               int l)
+  : TwoBodyDecay(arrange_particles(part_types), l),
+    Lambda_((particle_types_[1]->baryon_number() != 0) ? 2.0 : 1.6),
+    tabulation_(particle_types_[0]->mass() + particle_types_[1]->minimum_mass(),
+                1.f, 50,
+                [&](float srts) {
+                  Integrator integrate;
+                  return integrate(particle_types_[1]->minimum_mass(),
+                                    srts - particle_types_[0]->mass(),
+                                    [&](float m) {
+                                      return integrand_rho_Manley(m, srts,
+                                                  particle_types_[0]->mass(),
+                                                  particle_types_[1], L_);
+                                    });
+                })
+{}
+
 float TwoBodyDecaySemistable::rho(float m) const {
-  return tabulation_->get_value_linear(m);
+  return tabulation_.get_value_linear(m);
 }
 
 float TwoBodyDecaySemistable::width(float m0, float G0, float m) const {
