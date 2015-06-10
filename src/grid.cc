@@ -196,29 +196,12 @@ void Grid<O>::build_cells(const Particles &particles) {
               " cells. Therefore the Grid falls back to a single cell / "
               "particle list.");
     number_of_cells_ = {1, 1, 1};
-    index_factor_ = {0, 0, 0};
     cells_.resize(1);
-    for (const auto &p : particles) {
-      if (p.cross_section_scaling_factor() > 0.0) {
-        const auto idx = make_index(p.position());
-#ifndef NDEBUG
-        if (idx >= size_type(cells_.size())) {
-          log.fatal(source_location,
-                    "\nan out-of-bounds access would be necessary for the "
-                    "particle ",
-                    p, "\nfor a grid with the following parameters:\nmin: ",
-                    min_position_, "\nlength: ", length_, "\ncells: ",
-                    number_of_cells_, "\nindex_factor: ", index_factor_,
-                    "\ncells_.size: ", cells_.size(), "\nrequested index: ",
-                    idx);
-          throw std::runtime_error("out-of-bounds grid access on construction");
-        }
-#endif
-        cells_[idx].push_back(p);
-      } else {
-        continue;
-      }
-    }
+    cells_.front().reserve(particles.size());
+    std::copy_if(particles.begin(), particles.end(),
+                 std::back_inserter(cells_.front()), [](const ParticleData &p) {
+                   return p.cross_section_scaling_factor() > 0.0;
+                 });  // filter out the particles that can not interact
   } else {
     // construct a normal grid
     log.debug("min: ", min_position_, "\nlength: ", length_, "\ncells: ",
@@ -246,8 +229,6 @@ void Grid<O>::build_cells(const Particles &particles) {
         }
 #endif
         cells_[idx].push_back(p);
-      } else {
-        continue;
       }
     }
   }
