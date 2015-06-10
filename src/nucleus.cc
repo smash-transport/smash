@@ -417,6 +417,7 @@ void Nucleus::shift(bool is_projectile, double initial_z_displacement,
     this_position.set_x1(this_position.x1() + x_offset);
     this_position.set_x0(simulation_time);
     i->set_4position(this_position);
+    i->set_formation_time(simulation_time);
   }
 }
 

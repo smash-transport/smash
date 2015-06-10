@@ -197,7 +197,26 @@ void Grid<O>::build_cells(const Particles &particles) {
               "particle list.");
     number_of_cells_ = {1, 1, 1};
     cells_.reserve(1);
-    cells_.emplace_back(particles.copy_to_vector());
+    for (const auto &p : particles) {
+	  if (p.cross_section_scaling_factor() > 0.0) {
+		  const auto idx = make_index(p.position());
+#ifndef NDEBUG
+        if (idx >= size_type(cells_.size())) {
+          log.fatal(source_location,
+                  "\nan out-of-bounds access would be necessary for the "
+                  "particle ",
+                  p, "\nfor a grid with the following parameters:\nmin: ",
+                  min_position_, "\nlength: ", length_, "\ncells: ",
+                  number_of_cells_, "\nindex_factor: ", index_factor_,
+                  "\ncells_.size: ", cells_.size(), "\nrequested index: ", idx);
+          throw std::runtime_error("out-of-bounds grid access on construction");
+        }
+#endif
+        cells_[idx].push_back(p);	  
+      } else {
+		continue;
+	  }	  
+    }     
   } else {
     // construct a normal grid
     log.debug("min: ", min_position_, "\nlength: ", length_, "\ncells: ",
@@ -209,7 +228,8 @@ void Grid<O>::build_cells(const Particles &particles) {
                   number_of_cells_[2]);
 
     for (const auto &p : particles) {
-      const auto idx = make_index(p.position());
+      if (p.cross_section_scaling_factor() > 0.0) {	
+        const auto idx = make_index(p.position());
 #ifndef NDEBUG
       if (idx >= size_type(cells_.size())) {
         log.fatal(source_location,
@@ -219,10 +239,13 @@ void Grid<O>::build_cells(const Particles &particles) {
                   min_position_, "\nlength: ", length_, "\ncells: ",
                   number_of_cells_, "\nindex_factor: ", index_factor_,
                   "\ncells_.size: ", cells_.size(), "\nrequested index: ", idx);
-        throw std::runtime_error("out-of-bounds grid access on construction");
-      }
+          throw std::runtime_error("out-of-bounds grid access on construction");
+        }
 #endif
-      cells_[idx].push_back(p);
+        cells_[idx].push_back(p);
+      } else {
+		continue;    
+      }
     }
   }
 

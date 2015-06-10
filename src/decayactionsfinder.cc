@@ -26,8 +26,8 @@ ActionList DecayActionsFinder::find_possible_actions(
                         // less than 10 decays in most time steps
 
   for (const auto &p : search_list) {
-    if (p.type().is_stable()) {
-      continue;      /* particle doesn't decay */
+    if (p.type().is_stable() || p.formation_time() > p.position().x0()) {
+      continue;      /* particle doesn't decay or is not yet formed*/
     }
 
     DecayBranchList processes =
