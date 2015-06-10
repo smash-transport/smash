@@ -25,6 +25,10 @@ void DecayAction::add_decays(DecayBranchList pv) {
   add_processes<DecayBranch>(std::move(pv), decay_channels_, total_width_);
 }
 
+void DecayAction::add_decay(DecayBranchPtr p) {
+  add_process<DecayBranch>(p, decay_channels_, total_width_);
+}
+
 double DecayAction::sqrt_s() const {
   return incoming_particles_[0].momentum().abs();
 }

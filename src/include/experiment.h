@@ -13,8 +13,8 @@
 #include <string>
 #include <vector>
 
+#include "actionfinderfactory.h"
 #include "chrono.h"
-#include "decayactionsfinder.h"
 #include "density.h"
 #include "experimentparameters.h"
 #include "forwarddeclarations.h"
@@ -24,7 +24,7 @@
 #include "potentials.h"
 #include "processbranch.h"
 #include "quantumnumbers.h"
-#include "scatteractionsfinder.h"
+#include "random.h"
 
 namespace Smash {
 

@@ -22,7 +22,9 @@
 #include "include/collidermodus.h"
 #include "include/configuration.h"
 #include "include/cxx14compat.h"
+#include "include/decayactionsfinder.h"
 #include "include/density.h"
+#include "include/dileptondecayactionsfinder.h"
 #include "include/forwarddeclarations.h"
 #include "include/grid.h"
 #include "include/listmodus.h"
@@ -32,6 +34,7 @@
 #include "include/potentials.h"
 #include "include/propagation.h"
 #include "include/random.h"
+#include "include/scatteractionsfinder.h"
 #include "include/spheremodus.h"
 
 namespace std {
@@ -216,6 +219,7 @@ Experiment<Modus>::Experiment(Configuration config)
 
   if (config.take({"Collision_Term", "Decays"}, true)) {
     action_finders_.emplace_back(new DecayActionsFinder());
+    action_finders_.emplace_back(new DileptonDecayActionsFinder());  // will be changed later
   }
   if (config.take({"Collision_Term", "Collisions"}, true)) {
     action_finders_.emplace_back(new ScatterActionsFinder(config, parameters_));

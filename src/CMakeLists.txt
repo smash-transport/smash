@@ -66,6 +66,8 @@ set(smash_src
         deformednucleus.cc
         density.cc
         densityoutput.cc
+        dileptondecayaction.cc
+        dileptondecayactionsfinder.cc
         distributions.cc
         experiment.cc
         fourvector.cc

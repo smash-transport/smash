@@ -37,6 +37,9 @@ class DecayAction : public Action {
   /** Add several new decays at once. */
   void add_decays(DecayBranchList pv);
 
+  /** Add one new decay.*/
+  void add_decay(DecayBranchPtr p);
+
   /** Generate the final state of the decay process.
    * Performs a decay of one particle to two or three particles.
    *
