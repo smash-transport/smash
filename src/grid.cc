@@ -196,7 +196,8 @@ void Grid<O>::build_cells(const Particles &particles) {
               " cells. Therefore the Grid falls back to a single cell / "
               "particle list.");
     number_of_cells_ = {1, 1, 1};
-    cells_.reserve(1);
+    index_factor_ = {0, 0, 0};
+    cells_.resize(1);
     for (const auto &p : particles) {
 	  if (p.cross_section_scaling_factor() > 0.0) {
 		  const auto idx = make_index(p.position());
@@ -212,11 +213,11 @@ void Grid<O>::build_cells(const Particles &particles) {
           throw std::runtime_error("out-of-bounds grid access on construction");
         }
 #endif
-        cells_[idx].push_back(p);	  
+        cells_[idx].push_back(p);
       } else {
 		continue;
-	  }	  
-    }     
+	  }
+    }
   } else {
     // construct a normal grid
     log.debug("min: ", min_position_, "\nlength: ", length_, "\ncells: ",
