@@ -43,8 +43,9 @@ double spectral_function(double resonance_mass, double resonance_pole,
 
 /* Integrand for spectral-function integration */
 double spectral_function_integrand(double resonance_mass, double srts,
-                                   double stable_mass, ParticleTypePtr type) {
-  const double resonance_width = type->total_width(resonance_mass);
+                                   double stable_mass,
+                                   const ParticleType &type) {
+  const double resonance_width = type.total_width(resonance_mass);
 
   if (srts < stable_mass + resonance_mass
       || resonance_width < really_small) {
@@ -53,32 +54,28 @@ double spectral_function_integrand(double resonance_mass, double srts,
 
   /* Integrand is the spectral function weighted by the CM momentum of the
     * final state. In addition, dm^2 = 2*m*dm. */
-  const double res_pole_mass = type->mass();
+  const double res_pole_mass = type.mass();
   return spectral_function(resonance_mass, res_pole_mass, resonance_width)
           * pCM(srts, stable_mass, resonance_mass)
           * 2 * resonance_mass;
 }
 
 /* Resonance mass sampling for 2-particle final state */
-float sample_resonance_mass(const ParticleTypePtr type_resonance,
-                            const ParticleTypePtr type_stable,
-                            const double cms_energy) {
-  /* Define distribution parameters */
-  const float mass_stable = type_stable->mass();
-
+float sample_resonance_mass(const ParticleType &type_resonance,
+                            const float mass_stable, const double cms_energy) {
   /* Sample resonance mass from the distribution
    * used for calculating the cross section. */
   float mass_resonance = 0.;
   float maximum_mass = std::nextafter(static_cast<float>(cms_energy -
                                                          mass_stable), 0.f);
   double random_number = 1.0;
-  double distribution_max = spectral_function_integrand(type_resonance->mass(),
+  double distribution_max = spectral_function_integrand(type_resonance.mass(),
                                                         cms_energy, mass_stable,
                                                         type_resonance);
   double distribution_value = 0.0;
   while (random_number > distribution_value) {
     random_number = Random::uniform(0.0, distribution_max);
-    mass_resonance = Random::uniform(type_resonance->minimum_mass(),
+    mass_resonance = Random::uniform(type_resonance.minimum_mass(),
                                      maximum_mass);
     distribution_value = spectral_function_integrand(mass_resonance, cms_energy,
                                                      mass_stable,

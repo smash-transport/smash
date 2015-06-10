@@ -84,7 +84,8 @@ double spectral_function(double resonance_mass, double resonance_pole,
  * \fpPrecision Why \c double?
  */
 double spectral_function_integrand(double resonance_mass, double srts,
-                                   double stable_mass, ParticleTypePtr type);
+                                   double stable_mass,
+                                   const ParticleType &type);
 
 /**
  * Resonance mass sampling for 2-particle final state
@@ -98,9 +99,8 @@ double spectral_function_integrand(double resonance_mass, double srts,
  *
  * \fpPrecision Why \c double?
  */
-float sample_resonance_mass(const ParticleTypePtr type_resonance,
-                            const ParticleTypePtr type_stable,
-                            const double cms_energy);
+float sample_resonance_mass(const ParticleType &type_resonance,
+                            const float mass_stable, const double cms_energy);
 
 }  // namespace Smash
 

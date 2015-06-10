@@ -230,7 +230,7 @@ CollisionBranchList ScatterActionNucleonNucleon::nuc_nuc_to_nuc_res(
                                   [&](float m) {
                                     return spectral_function_integrand(m, sqrts,
                                                             second_type->mass(),
-                                                            type_resonance);
+                                                            *type_resonance);
                                   });
               });
       }
@@ -265,40 +265,40 @@ void ScatterActionNucleonNucleon::sample_cms_momenta() {
   ParticleData *p_a = &outgoing_particles_[0];
   ParticleData *p_b = &outgoing_particles_[1];
 
-  const ParticleTypePtr t_a = &p_a->type();
-  const ParticleTypePtr t_b = &p_b->type();
+  const ParticleType &t_a = p_a->type();
+  const ParticleType &t_b = p_b->type();
 
-  double mass_a = t_a->mass();
-  double mass_b = t_b->mass();
+  double mass_a = t_a.mass();
+  double mass_b = t_b.mass();
 
   const double cms_energy = sqrt_s();
 
-  if (cms_energy < t_a->minimum_mass() + t_b->minimum_mass()) {
+  if (cms_energy < t_a.minimum_mass() + t_b.minimum_mass()) {
     throw InvalidResonanceFormation("resonance_formation: not enough energy! " +
-      std::to_string(cms_energy) + " " + std::to_string(t_a->minimum_mass()) +
-      " " + std::to_string(t_b->minimum_mass()) + " " +
+      std::to_string(cms_energy) + " " + std::to_string(t_a.minimum_mass()) +
+      " " + std::to_string(t_b.minimum_mass()) + " " +
       p_a->pdgcode().string() + " " + p_b->pdgcode().string());
   }
 
   /* If one of the particles is a resonance, sample its mass. */
   /* TODO: Other particle assumed stable! */
-  if (!t_a->is_stable()) {
-    mass_a = sample_resonance_mass(t_a, t_b, cms_energy);
-  } else if (!t_b->is_stable()) {
-    mass_b = sample_resonance_mass(t_b, t_a, cms_energy);
+  if (!t_a.is_stable()) {
+    mass_a = sample_resonance_mass(t_a, t_b.mass(), cms_energy);
+  } else if (!t_b.is_stable()) {
+    mass_b = sample_resonance_mass(t_b, t_a.mass(), cms_energy);
   }
 
   double p_i = pCM(cms_energy, mN, mN);          // initial-state CM momentum
   double p_f = pCM(cms_energy, mass_a, mass_b);  // final-state CM momentum
   if (!(p_f > 0.0)) {
-    log.warn("Particle: ", t_a->pdgcode(),
+    log.warn("Particle: ", t_a.pdgcode(),
              " radial momentum: ", p_f);
     log.warn("Etot: ", cms_energy, " m_a: ", mass_a, " m_b: ", mass_b);
   }
 
   Angles phitheta;
-  if (t_a->pdgcode().iso_multiplet() == 0x1114 &&
-      t_b->pdgcode().iso_multiplet() == 0x1112 && !isotropic_) {
+  if (t_a.pdgcode().iso_multiplet() == 0x1114 &&
+      t_b.pdgcode().iso_multiplet() == 0x1112 && !isotropic_) {
     /** NN->NDelta: Sample scattering angles in center-of-mass frame from an
      * anisotropic angular distribution, using the same distribution as for
      * elastic pp scattering, as suggested in \iref{Cugnon:1996kh}. */
