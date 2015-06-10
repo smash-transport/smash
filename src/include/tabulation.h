@@ -25,10 +25,10 @@ class Tabulation {
   /** Construct a new tabulation object.
    * \param x_min lower bound of tabulation domain
    * \param range range (x_max-x_min) of tabulation domain
-   * \param num_points number of tabulation points
+   * \param num number of intervals (the number of tabulated points is actually num+1)
    * \param f one-dimensional function f(x) which is supposed to be tabulated
    */
-  Tabulation(float x_min, float range, int num_points,
+  Tabulation(float x_min, float range, int num,
              std::function<double(float)> f);
   /** Look up a value from the tabulation (without any interpolation, simply
    * using the closest tabulated value). If x is below the lower tabulation

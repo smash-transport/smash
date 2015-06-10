@@ -9,12 +9,12 @@
 
 namespace Smash {
 
-Tabulation::Tabulation(float x_min, float range, int num_points,
+Tabulation::Tabulation(float x_min, float range, int num,
                        std::function<double(float)> f)
-                      : x_min_(x_min), inv_dx_(num_points/range) {
-  values_.resize(num_points);
-  const float dx = range/num_points;
-  for (int i = 0; i < num_points; i++) {
+                      : x_min_(x_min), inv_dx_(num/range) {
+  values_.resize(num+1);
+  const float dx = range/num;
+  for (int i = 0; i <= num; i++) {
     values_[i] = f(x_min_ + i*dx);
   }
 }
