@@ -129,7 +129,8 @@ void DecayModes::load_decaymodes(const std::string &input) {
 
     if (pdgcode.has_antiparticle()) {
       /* Construct and add the list of decay modes for the antiparticle.  */
-      DecayModes decay_modes_anti;
+      DecayModes &decay_modes_anti =
+          decaymodes[find_offset(pdgcode.get_antiparticle())];
       for (const auto &mode : decay_modes_to_add.decay_mode_list()) {
         ParticleTypePtrList list = mode->particle_types();
         for (auto &type : list) {
@@ -140,8 +141,6 @@ void DecayModes::load_decaymodes(const std::string &input) {
         decay_modes_anti.add_mode(mode->weight(), mode->angular_momentum(),
                                   list);
       }
-      decaymodes[find_offset(pdgcode.get_antiparticle())] =
-          std::move(decay_modes_anti);
     }
     /* Add the list of decay modes for this particle type */
     decaymodes[find_offset(pdgcode)] = std::move(decay_modes_to_add);
