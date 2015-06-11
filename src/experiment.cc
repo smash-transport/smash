@@ -245,12 +245,9 @@ Experiment<Modus>::Experiment(Configuration config)
   if (config.has_value({"Lattice"}) &&
       config.take({"Lattice", "Enable"}, true)) {
     // Take lattice properties from config to assign them to all lattices
-    std::vector<float> tmp = config.take({"Lattice", "Sizes"});
-    const std::array<float, 3> l{tmp[0], tmp[1], tmp[2]};
-    std::vector<int> tmp2 = config.take({"Lattice", "CellNumber"});
-    const std::array<int, 3> n{tmp2[0], tmp2[1], tmp2[2]};
-    std::vector<float> tmp3 = config.take({"Lattice", "Origin"});
-    const std::array<float, 3> origin{tmp3[0], tmp3[1], tmp3[2]};
+    const std::array<float, 3> l = config.take({"Lattice", "Sizes"});
+    const std::array<int, 3> n = config.take({"Lattice", "CellNumber"});
+    const std::array<float, 3> origin = config.take({"Lattice", "Origin"});
     const bool periodic = config.take({"Lattice", "Periodic"});
     dens_type_lattice_printout_ = static_cast<DensityType>(
          config.take({"Lattice", "Printout", "Density"},
