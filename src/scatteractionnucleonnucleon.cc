@@ -221,6 +221,8 @@ CollisionBranchList ScatterActionNucleonNucleon::nuc_nuc_to_nuc_res(
       const int res_id = type_resonance->pdgcode().iso_multiplet();
       if (XS_tabulation[res_id] == NULL) {
         // initialize tabulation, we need one per resonance multiplet
+        /* TODO(weil): Move this lazy init to a global initialization function,
+         * in order to avoid race conditions in multi-threading. */
         Integrator integrate;
         XS_tabulation[res_id] = make_unique<Tabulation>(
               type_resonance->minimum_mass() + second_type->mass(), 2.f, 100,
