@@ -27,7 +27,8 @@ T pCM(const T srts, const T mass_a, const T mass_b) noexcept {
   const auto s = srts * srts;
   const auto mass_a_sqr = mass_a * mass_a;
   const auto x = s + mass_a_sqr - mass_b * mass_b;
-  return std::sqrt(x * x * (T(0.25) / s) - mass_a_sqr);
+  const auto psqr = x * x * (T(0.25) / s) - mass_a_sqr;
+  return psqr > 0. ? std::sqrt(psqr) : 0.;
 }
 
 

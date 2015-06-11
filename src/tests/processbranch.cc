@@ -61,11 +61,6 @@ TEST(lists) {
   COMPARE(particles.at(1).momentum().x1(), 0.0);
   COMPARE(particles.at(1).momentum().x2(), 0.0);
   COMPARE(particles.at(1).momentum().x3(), 0.0);
-
-  branch.clear();
-
-  const auto &new_list = branch.particle_types();
-  COMPARE(new_list.size(), 0u);
 }
 
 TEST(add_particle) {

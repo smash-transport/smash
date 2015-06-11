@@ -98,6 +98,7 @@ set(smash_src
         scatteractionsfinder.cc
         spheremodus.cc
         stringfunctions.cc
+        tabulation.cc
         threevector.cc
         tsc.cc
         vtkoutput.cc

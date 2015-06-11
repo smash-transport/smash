@@ -64,6 +64,7 @@ CollisionBranchList ScatterActionBaryonBaryon::nuc_res_to_nuc_nuc(
   }
 
   const double s = mandelstam_s();
+  const double srts = sqrt_s();
   /* CM momentum in final state */
   double p_cm_final = std::sqrt(s - 4.*type_nucleon->mass_sqr())/2.;
 
@@ -100,9 +101,9 @@ CollisionBranchList ScatterActionBaryonBaryon::nuc_res_to_nuc_nuc(
         continue;
       }
 
-      /* Calculate matrix element. */
-      const float matrix_element = nn_to_resonance_matrix_element(s,
-                                                *type_resonance, *type_nucleon);
+      /* Calculate matrix element for inverse process. */
+      const float matrix_element =
+          nn_to_resonance_matrix_element(srts, *type_resonance, *type_nucleon);
       if (matrix_element <= 0.) {
         continue;
       }
@@ -129,6 +130,37 @@ CollisionBranchList ScatterActionBaryonBaryon::nuc_res_to_nuc_nuc(
     }
   }
   return process_list;
+}
+
+
+float ScatterActionBaryonBaryon::nn_to_resonance_matrix_element(
+      const double srts,
+      const ParticleType &type_a, const ParticleType &type_b) const {
+  if (type_a.pdgcode().iso_multiplet() == type_b.pdgcode().iso_multiplet()) {
+    return 0.;
+  }
+
+  int delta = PdgCode("2224").iso_multiplet();
+  float spin_factor = (type_a.spin()+1) * (type_b.spin()+1);
+  float m_plus = type_a.mass() + type_b.mass();
+  float m_minus = type_a.mass() - type_b.mass();
+
+  if (type_a.pdgcode().iso_multiplet() == delta
+      || type_b.pdgcode().iso_multiplet() == delta) {
+    /** \f$ NN \rightarrow N\Delta \f$:
+      * fit sqrt(s)-dependence to OBE model [\iref{Dmitriev:1986st}] */
+    return 57.375 * spin_factor / std::pow(srts - 1.104, 1.951);
+  } else if (type_a.isospin() == 1 && type_b.isospin() == 1) {
+    /** \f$ NN \rightarrow NN^* \f$:
+      * constant matrix element, cf. \iref{Bass:1998ca}, equ. (3.35). */
+    return 25. * spin_factor / (m_plus * m_plus + m_minus * m_minus);
+  } else if (type_a.isospin() == 3 || type_b.isospin() == 3) {
+    /** \f$ NN \rightarrow N\Delta^* \f$:
+      * constant matrix element, cf. \iref{Bass:1998ca}, equ. (3.35). */
+    return 30. * spin_factor / (m_plus * m_plus + m_minus * m_minus);
+  } else {
+    return 0.0;
+  }
 }
 
 
