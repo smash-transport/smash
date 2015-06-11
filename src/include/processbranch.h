@@ -86,8 +86,6 @@ class ProcessBranch {
   inline void set_weight(float process_weight);
   /// Return the process type
   virtual ProcessType get_type() const = 0;
-  /// Clear all information from the branch
-  inline void clear();
 
   /// Return the particle types associated with this branch.
   virtual const ParticleTypePtrList &particle_types() const = 0;
@@ -121,11 +119,6 @@ class ProcessBranch {
  */
 inline void ProcessBranch::set_weight(float process_weight) {
   branch_weight_ = process_weight;
-}
-
-/// Clear all information from the branch
-inline void ProcessBranch::clear() {
-  branch_weight_ = -1.0;
 }
 
 /// Return the branch weight
@@ -192,11 +185,6 @@ class CollisionBranch : public ProcessBranch {
   inline ProcessType get_type() const override {
     return process_type_;
   }
-  /// Clear all information from the branch
-  inline void clear() {
-    particle_types_.clear();
-    ProcessBranch::clear();
-  }
   unsigned int particle_number() const override {
     return particle_types_.size();
   }
@@ -228,7 +216,7 @@ class CollisionBranch : public ProcessBranch {
  */
 class DecayBranch : public ProcessBranch {
  public:
-  DecayBranch(const DecayType *t, float w) : ProcessBranch(w), type_(t) {}
+  DecayBranch(const DecayType &t, float w) : ProcessBranch(w), type_(t) {}
   /// The move constructor efficiently moves the particle-type list member.
   DecayBranch(DecayBranch &&rhs) : ProcessBranch(rhs.branch_weight_),
                                    type_(rhs.type_) {}
@@ -236,31 +224,26 @@ class DecayBranch : public ProcessBranch {
   inline int angular_momentum() const;
   /// Return the particle types associated with this branch.
   const ParticleTypePtrList &particle_types() const override {
-    return type_->particle_types();
+    return type_.particle_types();
   }
   unsigned int particle_number() const override {
-    return type_->particle_number();
+    return type_.particle_number();
   }
   inline const DecayType& type() const {
-    return *type_;
+    return type_;
   }
   /// Return the process type
   inline ProcessType get_type() const override {
     return ProcessType::Decay;
   }
-  /// Clear all information from the branch
-  inline void clear() {
-    delete type_;
-    ProcessBranch::clear();
-  }
 
  private:
   // decay type (including final-state particles and angular momentum
-  const DecayType *type_;
+  const DecayType &type_;
 };
 
 inline int DecayBranch::angular_momentum() const {
-  return type_->angular_momentum();
+  return type_.angular_momentum();
 }
 
 

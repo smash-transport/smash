@@ -169,20 +169,9 @@ inline typename Grid<Options>::size_type Grid<Options>::make_index(
   return (z * number_of_cells_[1] + y) * number_of_cells_[0] + x;
 }
 
-template <GridOptions Options>
-inline typename Grid<Options>::size_type Grid<Options>::make_index(
-    const FourVector &position) const {
-  return make_index(
-      std::floor((static_cast<float>(position[1]) - min_position_[0]) *
-                 index_factor_[0]),
-      std::floor((static_cast<float>(position[2]) - min_position_[1]) *
-                 index_factor_[1]),
-      std::floor((static_cast<float>(position[3]) - min_position_[2]) *
-                 index_factor_[2]));
-}
-
 template <GridOptions O>
-void Grid<O>::build_cells(const Particles &particles) {
+void Grid<O>::build_cells(const std::array<float, 3> &index_factor,
+                          const Particles &particles) {
   const auto &log = logger<LogArea::Grid>();
   if (O == GridOptions::Normal &&
       all_of(number_of_cells_, [](size_type n) { return n <= 2; })) {
@@ -205,16 +194,30 @@ void Grid<O>::build_cells(const Particles &particles) {
   } else {
     // construct a normal grid
     log.debug("min: ", min_position_, "\nlength: ", length_, "\ncells: ",
-              number_of_cells_, "\nindex_factor: ", index_factor_);
+              number_of_cells_, "\nindex_factor: ", index_factor);
 
     // After the grid parameters are determined, we can start placing the
     // particles in cells.
     cells_.resize(number_of_cells_[0] * number_of_cells_[1] *
                   number_of_cells_[2]);
 
+    // Returns the one-dimensional cell-index from the position vector inside
+    // the grid.
+    // This simply calculates the distance to min_position_ and multiplies it
+    // with index_factor to determine the 3 x,y,z indexes to pass to make_index.
+    auto &&cell_index_for = [&](const ParticleData &p) {
+      return make_index(
+          std::floor((static_cast<float>(p.position()[1]) - min_position_[0]) *
+                     index_factor[0]),
+          std::floor((static_cast<float>(p.position()[2]) - min_position_[1]) *
+                     index_factor[1]),
+          std::floor((static_cast<float>(p.position()[3]) - min_position_[2]) *
+                     index_factor[2]));
+    };
+
     for (const auto &p : particles) {
       if (p.cross_section_scaling_factor() > 0.0) {
-        const auto idx = make_index(p.position());
+        const auto idx = cell_index_for(p);
 #ifndef NDEBUG
         if (idx >= size_type(cells_.size())) {
           log.fatal(source_location,
@@ -222,7 +225,7 @@ void Grid<O>::build_cells(const Particles &particles) {
                     "particle ",
                     p, "\nfor a grid with the following parameters:\nmin: ",
                     min_position_, "\nlength: ", length_, "\ncells: ",
-                    number_of_cells_, "\nindex_factor: ", index_factor_,
+                    number_of_cells_, "\nindex_factor: ", index_factor,
                     "\ncells_.size: ", cells_.size(), "\nrequested index: ",
                     idx);
           throw std::runtime_error("out-of-bounds grid access on construction");
@@ -427,7 +430,8 @@ template std::tuple<std::array<float, 3>, std::array<int, 3>>
 Grid<GridOptions::PeriodicBoundaries>::determine_cell_sizes(
     size_type, const std::array<float, 3> &, const int);
 
-template void Grid<GridOptions::Normal>::build_cells(const Particles &);
+template void Grid<GridOptions::Normal>::build_cells(
+    const std::array<float, 3> &, const Particles &);
 template void Grid<GridOptions::PeriodicBoundaries>::build_cells(
-    const Particles &);
+    const std::array<float, 3> &, const Particles &);
 }  // namespace Smash

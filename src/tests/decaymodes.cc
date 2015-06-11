@@ -117,13 +117,11 @@ TEST(load_decay_modes) {
 TEST_CATCH(add_no_particles, DecayModes::InvalidDecay) {
   DecayModes m;
   m.add_mode(1.f, 0, {});
-  m.clear();
 }
 
 TEST_CATCH(add_one_particle, DecayModes::InvalidDecay) {
   DecayModes m;
   m.add_mode(1.f, 0, {&ParticleType::list_all()[0]});
-  m.clear();
 }
 
 TEST(add_two_particles) {
@@ -132,9 +130,4 @@ TEST(add_two_particles) {
   m.add_mode(1.f, 0,
              {&ParticleType::list_all()[0], &ParticleType::list_all()[1]});
   VERIFY(!m.is_empty());
-  m.clear();
-}
-
-TEST(cleanup) {
-  DecayModes::clear_decaymodes();
 }
