@@ -219,7 +219,9 @@ Experiment<Modus>::Experiment(Configuration config)
 
   if (config.take({"Collision_Term", "Decays"}, true)) {
     action_finders_.emplace_back(new DecayActionsFinder());
-    action_finders_.emplace_back(new DileptonDecayActionsFinder());  // will be changed later
+  }
+  if (config.take({"Collison_Term", "Dileptons"}, true)) {
+  action_finders_.emplace_back(new DileptonDecayActionsFinder());
   }
   if (config.take({"Collision_Term", "Collisions"}, true)) {
     action_finders_.emplace_back(new ScatterActionsFinder(config, parameters_));
