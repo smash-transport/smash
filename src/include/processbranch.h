@@ -85,9 +85,9 @@ class ProcessBranch {
    */
   inline void set_weight(float process_weight);
   /// Return the process type
-  virtual ProcessType get_type(void) const = 0;
+  virtual ProcessType get_type() const = 0;
   /// Clear all information from the branch
-  inline void clear(void);
+  inline void clear();
 
   /// Return the particle types associated with this branch.
   virtual const ParticleTypePtrList &particle_types() const = 0;
@@ -99,7 +99,7 @@ class ProcessBranch {
   ParticleList particle_list() const;
 
   /// Return the branch weight
-  inline float weight(void) const;
+  inline float weight() const;
 
   /**
    * Determine the threshold for this branch, i.e. the minimum energy that is
@@ -124,12 +124,12 @@ inline void ProcessBranch::set_weight(float process_weight) {
 }
 
 /// Clear all information from the branch
-inline void ProcessBranch::clear(void) {
+inline void ProcessBranch::clear() {
   branch_weight_ = -1.0;
 }
 
 /// Return the branch weight
-inline float ProcessBranch::weight(void) const {
+inline float ProcessBranch::weight() const {
   return branch_weight_;
 }
 
@@ -189,11 +189,11 @@ class CollisionBranch : public ProcessBranch {
     process_type_ = p_type;
   }
   /// Return the process type
-  inline ProcessType get_type(void) const override {
+  inline ProcessType get_type() const override {
     return process_type_;
   }
   /// Clear all information from the branch
-  inline void clear(void) {
+  inline void clear() {
     particle_types_.clear();
     ProcessBranch::clear();
   }
@@ -245,11 +245,11 @@ class DecayBranch : public ProcessBranch {
     return *type_;
   }
   /// Return the process type
-  inline ProcessType get_type(void) const override {
+  inline ProcessType get_type() const override {
     return ProcessType::Decay;
   }
   /// Clear all information from the branch
-  inline void clear(void) {
+  inline void clear() {
     delete type_;
     ProcessBranch::clear();
   }
