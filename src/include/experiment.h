@@ -129,9 +129,6 @@ class Experiment : public ExperimentBase {
   }
 
  private:
-  /// Conveniency typedef for lattice of density
-  typedef RectangularLattice<DensityOnLattice> density_lattice;
-
   /**
    * Create a new Experiment.
    *
@@ -167,15 +164,6 @@ class Experiment : public ExperimentBase {
    * \param evt_num Running number of the event
    */
   void run_time_evolution(const int evt_num);
-
-  /** Calculates density on the lattice.
-   *  \param lat pointer to the lattice
-   *  \param update tells if called for update at printout or at timestep
-   *  \param dens_type density type to be computed on the lattice
-   */
-  void update_density_lattice(density_lattice* lat,
-                              const LatticeUpdate update,
-                              const DensityType dens_type);
 
   /**
    * Struct of several member variables.
@@ -224,9 +212,9 @@ class Experiment : public ExperimentBase {
    *  If user asks for some other density type for printout, it will be handled
    *  using jmu_custom variable.
    */
-  std::unique_ptr<density_lattice> jmu_B_lat_, jmu_I3_lat_, jmu_custom_lat_;
+  std::unique_ptr<DensityLattice> jmu_B_lat_, jmu_I3_lat_, jmu_custom_lat_;
   /// Type of density for lattice printout
-  DensityType dens_type_lattice_printout_;
+  DensityType dens_type_lattice_printout_ = DensityType::none;
 
   /**
    * Number of events.

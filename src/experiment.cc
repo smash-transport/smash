@@ -242,8 +242,7 @@ Experiment<Modus>::Experiment(Configuration config)
   log.info() << "Density type written to headers: " << dens_type_;
 
   // Create lattices
-  if (config.has_value({"Lattice"}) &&
-      config.take({"Lattice", "Enable"}, true)) {
+  if (config.has_value({"Lattice"})) {
     // Take lattice properties from config to assign them to all lattices
     const std::array<float, 3> l = config.take({"Lattice", "Sizes"});
     const std::array<int, 3> n = config.take({"Lattice", "CellNumber"});
@@ -256,66 +255,26 @@ Experiment<Modus>::Experiment(Configuration config)
        if potentials are on. This is because they allow to compute
        potentials faster */
     if (potentials_) {
-      jmu_B_lat_ = make_unique<density_lattice>(l, n, origin, periodic,
+      jmu_B_lat_ = make_unique<DensityLattice>(l, n, origin, periodic,
                                             LatticeUpdate::EveryTimestep);
-      jmu_I3_lat_ = make_unique<density_lattice>(l, n, origin, periodic,
+      jmu_I3_lat_ = make_unique<DensityLattice>(l, n, origin, periodic,
                                               LatticeUpdate::EveryTimestep);
     } else {
       if (dens_type_lattice_printout_ == DensityType::baryon) {
-        jmu_B_lat_ = make_unique<density_lattice>(l, n, origin, periodic,
+        jmu_B_lat_ = make_unique<DensityLattice>(l, n, origin, periodic,
                                                   LatticeUpdate::AtOutput);
       }
       if (dens_type_lattice_printout_ == DensityType::baryonic_isospin) {
-        jmu_I3_lat_ = make_unique<density_lattice>(l, n, origin, periodic,
+        jmu_I3_lat_ = make_unique<DensityLattice>(l, n, origin, periodic,
                                              LatticeUpdate::AtOutput);
       }
     }
     if (dens_type_lattice_printout_ != DensityType::none &&
         dens_type_lattice_printout_ != DensityType::baryonic_isospin &&
         dens_type_lattice_printout_ != DensityType::baryon) {
-        jmu_custom_lat_ = make_unique<density_lattice>(l, n, origin,
+        jmu_custom_lat_ = make_unique<DensityLattice>(l, n, origin,
                                           periodic, LatticeUpdate::AtOutput);
     }
-  }
-}
-
-template <typename Modus>
-void Experiment<Modus>::update_density_lattice(density_lattice* lat,
-                                        const LatticeUpdate update,
-                                        const DensityType dens_type) {
-  // Do not proceed if lattice does not exists/update not required
-  if (lat == NULL || lat->when_update() != update) {
-    return;
-  }
-  // Add particles to lattice jmus
-  lat->reset();
-  const double sig = parameters_.gaussian_sigma;
-  const double two_sig_sqr = 2 * sig * sig;
-  const double r_cut = 4 * sig;
-  const double r_cut_sqr = r_cut * r_cut;
-  for (const auto &part: particles_) {
-    const float dens_factor = density_factor(part.pdgcode(), dens_type);
-    if (std::abs(dens_factor) < really_small) {
-      continue;
-    }
-    const ThreeVector pos = part.position().threevec();
-    lat->iterate_in_radius(pos, r_cut,
-      [&](DensityOnLattice &node, int ix, int iy, int iz){
-        const ThreeVector r = lat->cell_center(ix, iy, iz);
-        const double sf = unnormalized_smearing_factor(pos - r,
-                               part.momentum(), two_sig_sqr, r_cut_sqr).first;
-        if (sf > really_small) {
-          /*std::cout << "Adding particle " << part << " to lattice with"
-                    << " smearing factor " << sf <<
-                    " and density factor " << dens_factor << std::endl;*/
-          node.add_particle(part, sf * dens_factor);
-        }
-      });
-  }
-  // Compute density from jmus, take care about smearing factor normalization
-  for (auto &node: *lat) {
-    node.compute_density(smearing_factor_norm(two_sig_sqr) *
-                         parameters_.testparticles);
   }
 }
 
@@ -478,9 +437,9 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
     /* (3) Do propagation. */
     if (potentials_) {
       update_density_lattice(jmu_B_lat_.get(), LatticeUpdate::EveryTimestep,
-                             DensityType::baryon);
-      update_density_lattice(jmu_B_lat_.get(), LatticeUpdate::EveryTimestep,
-                             DensityType::baryonic_isospin);
+                       DensityType::baryon, parameters_, particles_);
+      update_density_lattice(jmu_I3_lat_.get(), LatticeUpdate::EveryTimestep,
+                       DensityType::baryonic_isospin, parameters_, particles_);
       propagate(&particles_, parameters_, *potentials_);
     } else {
       propagate_straight_line(&particles_, parameters_);
@@ -501,11 +460,12 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
           conserved_initial_, time_start_, parameters_.labclock.current_time());
       // Update lattices for output
       const LatticeUpdate lat_upd = LatticeUpdate::AtOutput;
-      update_density_lattice(jmu_B_lat_.get(), lat_upd, DensityType::baryon);
+      update_density_lattice(jmu_B_lat_.get(), lat_upd, DensityType::baryon,
+                             parameters_, particles_);
       update_density_lattice(jmu_I3_lat_.get(), lat_upd,
-                                              DensityType::baryonic_isospin);
+                DensityType::baryonic_isospin, parameters_, particles_);
       update_density_lattice(jmu_custom_lat_.get(), lat_upd,
-                                                dens_type_lattice_printout_);
+                dens_type_lattice_printout_, parameters_, particles_);
       /* save evolution data */
       for (const auto &output : outputs_) {
         output->at_intermediate_time(particles_, evt_num, parameters_.labclock);

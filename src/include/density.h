@@ -13,8 +13,10 @@
 #include <vector>
 #include <iostream>
 
+#include "experimentparameters.h"
 #include "forwarddeclarations.h"
 #include "fourvector.h"
+#include "lattice.h"
 #include "particledata.h"
 #include "pdgcode.h"
 #include "threevector.h"
@@ -36,7 +38,10 @@ namespace Smash {
   std::ostream& operator<<(std::ostream& os, DensityType dt);
 
   /** Get the factor that determines how much a particle contributes to the
-   *  density type that is computed.
+   *  density type that is computed. E.g. positive pion contributes with
+   *  factor 1 to total particle density and with factor 0 to baryon density.
+   *  Proton contributes with factor 1 to baryon density, anti-proton - with
+   *  factor -1 to baryon density, and so on.
    *
    *  \param pdg PDG code of particle to be tested
    *  \param dens_type The density type
@@ -127,6 +132,7 @@ namespace Smash {
                     double gs_sigma, DensityType dens_type, int ntest,
                     bool compute_gradient);
 
+
 /** A class for time-efficient (time-memory trade-off) calculation of density
  *  on the lattice. It holds two FourVectors - positive and negative
  *  summands of 4-current, and the density itself. Four-currents are
@@ -142,7 +148,12 @@ class DensityOnLattice {
   DensityOnLattice() : jmu_pos_(FourVector()),
                        jmu_neg_(FourVector()),
                        density_(0.0) {}
-  /// Adds particle to 4-current: \f$j^{\mu} += p^{\mu}/p^0 * factor \f$
+  /** Adds particle to 4-current: \f$j^{\mu} += p^{\mu}/p^0 * factor \f$
+   *  Factor can in principle be any scalar multiplier. Physics-wise it
+   *  accounts for smearing on the lattice and for particle contribution
+   *  to given density type (e.g. anti-proton contributes with factor -1
+   *  to baryon density, proton - with factor 1).
+   */
   void add_particle(const ParticleData &part, double factor) {
     if (factor > 0.0) {
       jmu_pos_ += FourVector(factor, part.velocity() * factor);
@@ -167,6 +178,21 @@ class DensityOnLattice {
   double density_;
 };
 
+  /// Conveniency typedef for lattice of density
+  typedef RectangularLattice<DensityOnLattice> DensityLattice;
+
+  /** Calculates density on the lattice in an time-efficient way.
+   *  \param lat pointer to the lattice
+   *  \param update tells if called for update at printout or at timestep
+   *  \param dens_type density type to be computed on the lattice
+   *  \param ntest testparticles number
+   *  \param particles the particles vector
+   */
+  void update_density_lattice(DensityLattice* lat,
+                            const LatticeUpdate update,
+                            const DensityType dens_type,
+                            const ExperimentParameters &par,
+                            const Particles &particles);
 }  // namespace Smash
 
 #endif  // SRC_INCLUDE_DENSITY_H_
