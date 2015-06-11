@@ -49,7 +49,7 @@ class Particles;
   *
   * Here is an example of ROOT macro to read the ROOT output of SMASH:
   * \code
-  * int rootfile_analysis_example(void) {
+  * int rootfile_analysis_example() {
   *   // open SMASH output file to be read in
   *   TFile *input_file = TFile::Open("../build/data/0/smash_run.root");
   *   if (input_file->IsOpen()) {

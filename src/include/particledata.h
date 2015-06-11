@@ -121,6 +121,18 @@ class ParticleData {
     return p;
   }
 
+  /// Return formation time of the particle
+  const float &formation_time() const { return formation_time_; }
+  /// Set the formation time
+  void set_formation_time(const float &form_time) { formation_time_ = form_time; }
+  
+  /// Return cross section scaling factor
+  const float &cross_section_scaling_factor() const { 
+	return cross_section_scaling_factor_;}
+  /// Set the cross_section_scaling_factor
+  void set_cross_section_scaling_factor(const float &xsec_scal) {
+	cross_section_scaling_factor_ = xsec_scal; }
+
   /// get the velocity 3-vector
   ThreeVector velocity() const { return momentum_.velocity(); }
 
@@ -181,6 +193,19 @@ class ParticleData {
   ParticleData() = default;
 
   /**
+   * Called from Particles to copy parts of ParticleData into its list of
+   * particles. Specifically it avoids to copy id_, index_, and type_. These
+   * three are handled by Particles.
+   */
+  void copy_to(ParticleData &dst) const {
+    dst.id_process_ = id_process_;
+    dst.momentum_ = momentum_;
+    dst.position_ = position_;
+    dst.formation_time_ = formation_time_;
+    dst.cross_section_scaling_factor_ = cross_section_scaling_factor_;
+  }
+
+  /**
    * Each particle has a unique identifier. This identifier is used for
    * identifying the particle in the output files. It is specifically not used
    * for searching for ParticleData objects in lists of particles, though it may
@@ -226,6 +251,12 @@ class ParticleData {
   FourVector momentum_;
   /// position in space: x0, x1, x2, x3 as t, x, y, z
   FourVector position_;
+  /** Formation time at which the particle is fully formed 
+   *  given as an absolute value in the computational frame
+   */
+  float formation_time_ = 0.0;
+  /// cross section scaling factor for unformed particles
+  float cross_section_scaling_factor_ = 1.0; 
 };
 
 /**\ingroup logging

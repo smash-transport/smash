@@ -117,6 +117,8 @@ float BoxModus::initial_conditions(Particles *particles,
     /* Set COORDINATE SPACE distribution */
     ThreeVector pos{uniform_length(), uniform_length(), uniform_length()};
     data.set_4position(FourVector(start_time_, pos));
+    /// Initialize formation time
+    data.set_formation_time(start_time_);
   }
 
   /* Make total 3-momentum 0 */
@@ -153,7 +155,7 @@ int BoxModus::impose_boundary_conditions(Particles *particles,
       data.set_4position(position);
       ++wraps;
       for (const auto &output : output_list) {
-        output->at_interaction(incoming_particle, incoming_particle,
+        output->at_interaction(incoming_particle, {1, data},
                                0., 0., ProcessType::Wall);
       }
     }

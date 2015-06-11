@@ -68,6 +68,7 @@ class ParticleTypePtr;
 class PdgCode;
 class DecayBranch;
 class CollisionBranch;
+class Tabulation;
 struct ExperimentParameters;
 
 using ActionPtr = build_unique_ptr_<Action>;
@@ -88,6 +89,8 @@ using DecayBranchPtr = build_unique_ptr_<DecayBranch>;
 using DecayBranchList = build_vector_<DecayBranchPtr>;
 using CollisionBranchPtr = build_unique_ptr_<CollisionBranch>;
 using CollisionBranchList = build_vector_<CollisionBranchPtr>;
+
+using TabulationPtr = build_unique_ptr_<Tabulation>;
 
 namespace bf = boost::filesystem;
 

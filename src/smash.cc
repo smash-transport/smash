@@ -429,8 +429,6 @@ int main(int argc, char *argv[]) {
     return EXIT_FAILURE;
   }
 
-  DecayModes::clear_decaymodes();
-
   log.trace() << source_location << " about to return from main";
   return 0;
 }

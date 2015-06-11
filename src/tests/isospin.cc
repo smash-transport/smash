@@ -17,8 +17,30 @@ using namespace Smash;
 
 
 TEST(init_particle_types) {
-  Test::create_actual_particletypes();
-  Test::create_actual_decaymodes();
+  ParticleType::create_type_list(
+      "# NAME MASS[GEV] WIDTH[GEV] PDG\n"
+      "π⁺  0.138 0.0   211\n"
+      "π⁰  0.138 0.0   111\n"
+      "p   0.938 0.0   2212\n"
+      "n   0.938 0.0   2112\n"
+      "Δ⁺⁺ 1.232 0.117 2224\n"
+      "Δ⁺  1.232 0.117 2214\n"
+      "Δ⁰  1.232 0.117 2114\n"
+      "Δ⁻  1.232 0.117 1114\n");
+  DecayModes::load_decaymodes(
+    "2224                  # Δ⁺⁺ →\n"
+    "1.     1 2212 211     #   p π⁺\n"
+    "\n"
+    "2214                  # Δ⁺ →\n"
+    "0.6667 1 2212 111     #   p π⁰\n"
+    "0.3333 1 2112 211     #   n π⁺\n"
+    "\n"
+    "2114                  # Δ⁰ →\n"
+    "0.3333 1 2212 -211    #   p π⁻\n"
+    "0.6667 1 2112 111     #   n π⁰\n"
+    "\n"
+    "1114                  # Δ⁻ →\n"
+    "1.     1 2112 -211    #   n π⁻\n");
 }
 
 
@@ -139,8 +161,4 @@ TEST(NDelta_NN) {
   delete act_Dp;
   delete act_Dn;
   delete act_DDn;
-}
-
-TEST(cleanup) {
-  DecayModes::clear_decaymodes();
 }

@@ -51,6 +51,21 @@ class ScatterActionBaryonBaryon : public ScatterAction {
 
  protected:
   /**
+   * Scattering matrix amplitude squared for \f$ NN \rightarrow NR \f$ processes,
+   * where R is a baryon resonance (\f$ \Delta, N^*, \Delta^* \f$).
+   * Includes a spin factor \f$ (2S_a+1)(2S_b+1) \f$, but no isospin factors.
+   *
+   * \param[in] srts sqrt(Mandelstam-s), i.e. collision CMS energy.
+   * \param[in] type_a Type information for the first final state particle.
+   * \param[in] type_b Type information for the second final state particle.
+   *
+   * \return Matrix amplitude squared \f$ |\mathcal{M}(\sqrt{s})|^2/16\pi \f$.
+   */
+  float nn_to_resonance_matrix_element(const double srts,
+                                       const ParticleType &type_a,
+                                       const ParticleType &type_b) const;
+
+  /**
    * \ingroup logging
    * Writes information about this scatter action to the \p out stream.
    */

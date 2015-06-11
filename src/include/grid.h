@@ -98,10 +98,15 @@ class Grid : public GridBase {
            min_and_length,
        const Particles &particles, int testparticles)
       : min_position_(min_and_length.first), length_(min_and_length.second) {
-    std::tie(index_factor_, number_of_cells_) =
+    /**
+     * This normally equals 1/max_interaction_length, but if the number of cells
+     * is reduced (because of low density) then this value is smaller.
+     */
+    std::array<float, 3> index_factor;
+    std::tie(index_factor, number_of_cells_) =
         determine_cell_sizes(particles.size(), length_, testparticles);
 
-    build_cells(particles);
+    build_cells(index_factor, particles);
   }
 
   /**
@@ -155,7 +160,8 @@ class Grid : public GridBase {
    *
    * This is different for the Normal and PeriodicBoundaries cases.
    */
-  void build_cells(const Particles &particles);
+  void build_cells(const std::array<float, 3> &index_factor,
+                   const Particles &particles);
 
   /**
    * Returns the one-dimensional cell-index from the 3-dim index \p x, \p y, \p
@@ -171,30 +177,11 @@ class Grid : public GridBase {
     return make_index(idx[0], idx[1], idx[2]);
   }
 
-  /**
-   * Returns the one-dimensional cell-index from the position vector inside the
-   * grid.
-   *
-   * In Normal mode this simply calculates the distance to min_position_ and
-   * multiplies it with index_factor_ to determine the 3 x,y,z indexes to pass
-   * to the make_index overload above.
-   *
-   * In PeriodicBoundaries mode the x and y indexes are incremented by one to
-   * adjust for the ghost cells.
-   */
-  size_type make_index(const FourVector &position) const;
-
   /// The lower bound of the cell coordinates.
   const std::array<float, 3> min_position_;
 
   /// The 3 lengths of the complete grid. Used for periodic boundary wrapping.
   const std::array<float, 3> length_;
-
-  /**
-   * This normally equals 1/max_interaction_length, but if the number of cells
-   * is reduced (because of low density) then this value is smaller.
-   */
-  std::array<float, 3> index_factor_;
 
   /// The number of cells in x, y, and z direction.
   std::array<int, 3> number_of_cells_;
