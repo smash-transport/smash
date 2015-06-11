@@ -11,6 +11,7 @@
 
 #include "include/angles.h"
 #include "include/cxx14compat.h"
+#include "include/integrate.h"
 #include "include/kinematics.h"
 #include "include/parametrizations.h"
 #include "include/random.h"
@@ -208,7 +209,7 @@ CollisionBranchList ScatterActionNucleonNucleon::nuc_nuc_to_nuc_res(
 
       /* Calculate matrix element. */
       const float matrix_element =
-          nn_to_resonance_matrix_element(s, *type_resonance, *second_type);
+            nn_to_resonance_matrix_element(srts, *type_resonance, *second_type);
       if (matrix_element <= 0.) {
         continue;
       }
@@ -216,16 +217,27 @@ CollisionBranchList ScatterActionNucleonNucleon::nuc_nuc_to_nuc_res(
       /* Calculate resonance production cross section
        * using the Breit-Wigner distribution as probability amplitude.
        * Integrate over the allowed resonance mass range. */
-      IntegrandParameters params = {type_resonance, second_type->mass(), srts};
-      log.debug("Process: ", type_particle_a, type_particle_b, " -> ",
-                *second_type, *type_resonance);
-      log.debug("Limits: ", lower_limit, " ", upper_limit);
-      double resonance_integral, integral_error;
-      quadrature_1d(&spectral_function_integrand, &params,
-                    lower_limit, upper_limit,
-                    &resonance_integral, &integral_error);
-      log.debug("Integral value: ", resonance_integral,
-                " Error: ", integral_error);
+
+      const int res_id = type_resonance->pdgcode().iso_multiplet();
+      if (XS_tabulation[res_id] == NULL) {
+        // initialize tabulation, we need one per resonance multiplet
+        /* TODO(weil): Move this lazy init to a global initialization function,
+         * in order to avoid race conditions in multi-threading. */
+        Integrator integrate;
+        XS_tabulation[res_id] = make_unique<Tabulation>(
+              type_resonance->minimum_mass() + second_type->mass(), 2.f, 100,
+              [&](float sqrts) {
+                return integrate(type_resonance->minimum_mass(),
+                                  sqrts - second_type->mass(),
+                                  [&](float m) {
+                                    return spectral_function_integrand(m, sqrts,
+                                                            second_type->mass(),
+                                                            *type_resonance);
+                                  });
+              });
+      }
+      const double resonance_integral =
+                    XS_tabulation[res_id]->get_value_linear(srts);
 
       /** Cross section for 2->2 process with one resonance in final state.
        * Based on Eq. (46) in \iref{Weil:2013mya}. */
@@ -273,9 +285,9 @@ void ScatterActionNucleonNucleon::sample_cms_momenta() {
   /* If one of the particles is a resonance, sample its mass. */
   /* TODO: Other particle assumed stable! */
   if (!t_a.is_stable()) {
-    mass_a = sample_resonance_mass(t_a, t_b, cms_energy);
+    mass_a = sample_resonance_mass(t_a, t_b.mass(), cms_energy);
   } else if (!t_b.is_stable()) {
-    mass_b = sample_resonance_mass(t_b, t_a, cms_energy);
+    mass_b = sample_resonance_mass(t_b, t_a.mass(), cms_energy);
   }
 
   double p_i = pCM(cms_energy, mN, mN);          // initial-state CM momentum
