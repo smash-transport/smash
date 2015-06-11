@@ -94,7 +94,6 @@ Collision_Term:
 #        S_Pot: 18.0
 
 Lattice:
-    Enable: True  # True - construct necessary lattices, False - forbid any lattices
     Origin: [0.0, 0.0, 0.0]    # Coordinates of the left, down, near corner of the lattice
     Sizes: [10.0, 10.0, 10.0]  # Sizes in x, y, z directions in fm
     CellNumber: [20, 20, 20]   # Number of cells in x, y, z directions
