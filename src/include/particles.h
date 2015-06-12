@@ -357,7 +357,7 @@ class Particles {
     throw std::out_of_range("missing particle id");
   }
 
-  SMASH_DEPRECATED("don't reference particles by id") int id_max(void) const {
+  SMASH_DEPRECATED("don't reference particles by id") int id_max() const {
     return id_max_;
   }
 
