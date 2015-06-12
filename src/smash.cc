@@ -258,6 +258,12 @@ int main(int argc, char *argv[]) {
       }
     }
 
+    // Abort if there are unhandled arguments left.
+    if (optind < argc) {
+      std::cout << argv[0] << ": invalid argument -- '" << argv[optind] << "'\n";
+      usage(EXIT_FAILURE, progname);
+    }
+
     /* read in config file */
     Configuration configuration(input_path.parent_path(),
                                 input_path.filename());
