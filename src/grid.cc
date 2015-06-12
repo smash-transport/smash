@@ -19,7 +19,7 @@
 
 namespace std {
 template <typename T>
-std::ostream &operator<<(std::ostream &out, const std::vector<T> &v) {
+static std::ostream &operator<<(std::ostream &out, const std::vector<T> &v) {
   auto column = out.tellp();
   out << "{ ";
   for (const auto &x : v) {
@@ -33,7 +33,7 @@ std::ostream &operator<<(std::ostream &out, const std::vector<T> &v) {
 }
 
 template <typename T>
-std::ostream &operator<<(std::ostream &out, const std::initializer_list<T> &v) {
+static std::ostream &operator<<(std::ostream &out, const std::initializer_list<T> &v) {
   auto column = out.tellp();
   out << "{ ";
   for (const auto &x : v) {
@@ -47,7 +47,7 @@ std::ostream &operator<<(std::ostream &out, const std::initializer_list<T> &v) {
 }
 
 template <typename T, std::size_t N>
-std::ostream &operator<<(std::ostream &out, const std::array<T, N> &a) {
+static std::ostream &operator<<(std::ostream &out, const std::array<T, N> &a) {
   auto column = out.tellp();
   out << "{ ";
   for (const auto &x : a) {
@@ -93,6 +93,9 @@ GridBase::find_min_and_length(const Particles &particles) {
   length[2] = max_position[2] - min_position[2];
   return r;
 }
+
+////////////////////////////////////////////////////////////////////////////////
+// Grid
 
 template <GridOptions O>
 Grid<O>::Grid(
@@ -238,9 +241,6 @@ Grid<O>::Grid(
 
   log.debug(cells_);
 }
-
-////////////////////////////////////////////////////////////////////////////////
-// Grid<Options>
 
 template <GridOptions Options>
 inline typename Grid<Options>::SizeType Grid<Options>::make_index(
