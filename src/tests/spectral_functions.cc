@@ -19,17 +19,19 @@ TEST(spectral_functions) {
   Test::create_actual_decaymodes();
 
   Integrator integrate;
-  const float max_mass = 100.;         // upper limit for integration
-  const float error_tolerance = 0.07;  // error tolerance (max. deviation from one)
+  /* Upper limit for integration in GeV. Hadron masses are usually a few GeV,
+   * so this should really be on the safe side. */
+  const float max_mass = 100.;
+  // error tolerance (max. deviation from one)
+  const float error_tolerance = 0.07;
 
   /* Loop over all resonances. */
   for (const ParticleType &type : ParticleType::list_all()) {
     if (type.is_stable()) {
       continue;
     }
-    /* Integrate spectral function. */
-    const float min_mass = type.minimum_mass();
-    const auto result = integrate(min_mass, max_mass,
+    /* Integrate spectral function. The factor 2m comes from dm^2 = 2m dm. */
+    const auto result = integrate(type.minimum_mass(), max_mass,
                           [&](double m) {
                             const float m0 = type.mass();
                             const double width = type.total_width(m0);
