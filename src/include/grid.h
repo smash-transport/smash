@@ -13,11 +13,9 @@
 #include <array>
 #include <cmath>
 #include <functional>
-#include <stdexcept>
 #include <utility>
 #include <vector>
 
-#include "constants.h"
 #include "forwarddeclarations.h"
 #include "particles.h"
 
@@ -106,65 +104,7 @@ class Grid : public GridBase {
   Grid(const std::pair<std::array<float, 3>, std::array<float, 3>> &
            min_and_length,
        const Particles &particles, float min_cell_length,
-       CellSizeStrategy strategy = CellSizeStrategy::Optimal)
-      : min_position_(min_and_length.first), length_(min_and_length.second) {
-    /**
-     * This normally equals 1/max_interaction_length, but if the number of cells
-     * is reduced (because of low density) then this value is smaller.
-     */
-    std::array<float, 3> index_factor;
-
-    switch (strategy) {
-      case CellSizeStrategy::Optimal:
-        std::tie(index_factor, number_of_cells_) =
-            determine_cell_sizes(particles.size(), length_, min_cell_length);
-        break;
-      case CellSizeStrategy::Largest:
-        // set number of cells
-        if (Options == GridOptions::PeriodicBoundaries) {
-          number_of_cells_ = {2, 2, 2};
-        } else {
-          number_of_cells_ = {1, 1, 1};
-        }
-
-        // set index factor
-        for (std::size_t i = 0; i < index_factor.size(); ++i) {
-          index_factor[i] = number_of_cells_[i] / length_[i];
-          while (index_factor[i] * length_[i] >= number_of_cells_[i]) {
-            index_factor[i] = std::nextafter(index_factor[i], 0.f);
-          }
-          assert(index_factor[i] * length_[i] < number_of_cells_[i]);
-        }
-        break;
-      default:
-        throw std::domain_error("Unhandled CellSizeStrategy!");
-    }
-
-    build_cells(index_factor, particles);
-  }
-
-  /**
-   * Calculates the factor that, if multiplied with a x/y/z
-   * coordinate, yields the 3-dim cell index and the required number of cells
-   * (without ghost cells).
-   *
-   * \return A tuple of two 3-dim values:
-   * \li The first tuple entry stores the conversion factors to turn a
-   * normalized coordinate (particle position minus minimum position) into a
-   * cell index.
-   * \li The second tuple entry stores the dimensions of the grid (i.e. the
-   * number of cells in each spatial direction).
-   *
-   * \param particle_count  The number of particles to be placed in the grid.
-   * \param length          Three lengths that identify the total dimensions of
-   *                        the grid.
-   * \param min_cell_length The minimal length a cell must have such that all
-   *                        relevant interactions are included.
-   */
-  static std::tuple<std::array<float, 3>, std::array<int, 3>>
-      determine_cell_sizes(size_type particle_count,
-                           const std::array<float, 3> &length,
-                           const float min_cell_length);
+       CellSizeStrategy strategy = CellSizeStrategy::Optimal);
 
   /**
    * Iterates over all cells in the grid and calls the callback arguments with a
@@ -189,14 +129,6 @@ class Grid : public GridBase {
 
  private:
   /**
-   * Allocates the cells and fills them with ParticleData objects.
-   *
-   * This is different for the Normal and PeriodicBoundaries cases.
-   */
-  void build_cells(const std::array<float, 3> &index_factor,
-                   const Particles &particles);
-
-  /**
    * Returns the one-dimensional cell-index from the 3-dim index \p x, \p y, \p
    * z.
    */
@@ -209,9 +141,6 @@ class Grid : public GridBase {
   size_type make_index(std::array<size_type, 3> idx) const {
     return make_index(idx[0], idx[1], idx[2]);
   }
-
-  /// The lower bound of the cell coordinates.
-  const std::array<float, 3> min_position_;
 
   /// The 3 lengths of the complete grid. Used for periodic boundary wrapping.
   const std::array<float, 3> length_;
