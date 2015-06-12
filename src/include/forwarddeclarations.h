@@ -76,6 +76,17 @@ enum class CalculationFrame {
     FixedTarget,
 };
 
+/** Allows to choose which kind of density to calculate.
+*  The baryon density is necessary for the Skyrme potential.
+*  For the symmetry potential one needs to know the isospin density.
+*/
+enum class DensityType {
+  particle = 0,
+  baryon = 1,
+  baryonic_isospin = 2,
+  pion = 3,
+};
+
 
 using ActionPtr = build_unique_ptr_<Action>;
 using ScatterActionPtr = build_unique_ptr_<ScatterAction>;

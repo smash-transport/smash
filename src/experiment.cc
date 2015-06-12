@@ -233,12 +233,8 @@ Experiment<Modus>::Experiment(Configuration config)
     potentials_ = make_unique<Potentials>(config["Potentials"], parameters_);
   }
 
-  dens_type_ = static_cast<DensityType>(
-      config.take({"Output", "Density", "Density_Type"}, 0));
-  if (dens_type_ < DensityType::particle || dens_type_ > DensityType::pion) {
-    log.error() << "Unknown Density_Type specified. Taking default.";
-    dens_type_ = DensityType::baryon;
-  }
+  dens_type_ =
+      config.take({"Output", "Density", "Density_Type"}, DensityType::particle);
   log.info() << "Density type written to headers: " << dens_type_;
 }
 
