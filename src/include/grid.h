@@ -50,7 +50,7 @@ enum class CellSizeStrategy : char {
  */
 class GridBase {
  public:
-  typedef int size_type;
+  typedef int SizeType;
 
  protected:
   /**
@@ -132,13 +132,13 @@ class Grid : public GridBase {
    * Returns the one-dimensional cell-index from the 3-dim index \p x, \p y, \p
    * z.
    */
-  size_type make_index(size_type x, size_type y, size_type z) const;
+  SizeType make_index(SizeType x, SizeType y, SizeType z) const;
 
   /**
    * Returns the one-dimensional cell-index from the 3-dim index \p idx.
    * This is a convenience overload for the above function.
    */
-  size_type make_index(std::array<size_type, 3> idx) const {
+  SizeType make_index(std::array<SizeType, 3> idx) const {
     return make_index(idx[0], idx[1], idx[2]);
   }
 

@@ -100,7 +100,7 @@ Grid<O>::Grid(
     const Particles &particles, float max_interaction_length, CellSizeStrategy strategy)
     : length_(min_and_length.second) {
   const auto min_position = min_and_length.first;
-  const size_type particle_count = particles.size();
+  const SizeType particle_count = particles.size();
 
   // very simple setup for non-periodic boundaries and largest cellsize strategy
   if (O == GridOptions::Normal && strategy == CellSizeStrategy::Largest) {
@@ -174,7 +174,7 @@ Grid<O>::Grid(
 
   const auto &log = logger<LogArea::Grid>();
   if (O == GridOptions::Normal &&
-      all_of(number_of_cells_, [](size_type n) { return n <= 2; })) {
+      all_of(number_of_cells_, [](SizeType n) { return n <= 2; })) {
     // dilute limit:
     // the grid would have <= 2x2x2 cells, meaning every particle has to be
     // compared with every other particle anyway. Then we can just as well
@@ -219,7 +219,7 @@ Grid<O>::Grid(
       if (p.cross_section_scaling_factor() > 0.0) {
         const auto idx = cell_index_for(p);
 #ifndef NDEBUG
-        if (idx >= size_type(cells_.size())) {
+        if (idx >= SizeType(cells_.size())) {
           log.fatal(source_location,
                     "\nan out-of-bounds access would be necessary for the "
                     "particle ",
@@ -243,8 +243,8 @@ Grid<O>::Grid(
 // Grid<Options>
 
 template <GridOptions Options>
-inline typename Grid<Options>::size_type Grid<Options>::make_index(
-    size_type x, size_type y, size_type z) const {
+inline typename Grid<Options>::SizeType Grid<Options>::make_index(
+    SizeType x, SizeType y, SizeType z) const {
   return (z * number_of_cells_[1] + y) * number_of_cells_[0] + x;
 }
 
@@ -253,40 +253,40 @@ void Grid<GridOptions::Normal>::iterate_cells(
     const std::function<void(const ParticleList &)> &search_cell_callback,
     const std::function<void(const ParticleList &, const ParticleList &)> &
         neighbor_cell_callback) const {
-  std::array<size_type, 3> search_index;
-  size_type &x = search_index[0];
-  size_type &y = search_index[1];
-  size_type &z = search_index[2];
-  size_type search_cell_index = 0;
+  std::array<SizeType, 3> search_index;
+  SizeType &x = search_index[0];
+  SizeType &y = search_index[1];
+  SizeType &z = search_index[2];
+  SizeType search_cell_index = 0;
   for (z = 0; z < number_of_cells_[2]; ++z) {
     for (y = 0; y < number_of_cells_[1]; ++y) {
       for (x = 0; x < number_of_cells_[0]; ++x, ++search_cell_index) {
         assert(search_cell_index == make_index(search_index));
         assert(search_cell_index >= 0);
-        assert(search_cell_index < size_type(cells_.size()));
+        assert(search_cell_index < SizeType(cells_.size()));
         const ParticleList &search = cells_[search_cell_index];
         search_cell_callback(search);
 
         const auto dz_list = z == number_of_cells_[2] - 1
-                                 ? std::initializer_list<size_type>{0}
-                                 : std::initializer_list<size_type>{0, 1};
+                                 ? std::initializer_list<SizeType>{0}
+                                 : std::initializer_list<SizeType>{0, 1};
         const auto dy_list =
             number_of_cells_[1] == 1
-                ? std::initializer_list<size_type>{0}
-                : y == 0 ? std::initializer_list<size_type>{0, 1}
+                ? std::initializer_list<SizeType>{0}
+                : y == 0 ? std::initializer_list<SizeType>{0, 1}
                          : y == number_of_cells_[1] - 1
-                               ? std::initializer_list<size_type>{-1, 0}
-                               : std::initializer_list<size_type>{-1, 0, 1};
+                               ? std::initializer_list<SizeType>{-1, 0}
+                               : std::initializer_list<SizeType>{-1, 0, 1};
         const auto dx_list =
             number_of_cells_[0] == 1
-                ? std::initializer_list<size_type>{0}
-                : x == 0 ? std::initializer_list<size_type>{0, 1}
+                ? std::initializer_list<SizeType>{0}
+                : x == 0 ? std::initializer_list<SizeType>{0, 1}
                          : x == number_of_cells_[0] - 1
-                               ? std::initializer_list<size_type>{-1, 0}
-                               : std::initializer_list<size_type>{-1, 0, 1};
-        for (size_type dz : dz_list) {
-          for (size_type dy : dy_list) {
-            for (size_type dx : dx_list) {
+                               ? std::initializer_list<SizeType>{-1, 0}
+                               : std::initializer_list<SizeType>{-1, 0, 1};
+        for (SizeType dz : dz_list) {
+          for (SizeType dy : dy_list) {
+            for (SizeType dx : dx_list) {
               const auto di = make_index(dx, dy, dz);
               if (di > 0) {
                 neighbor_cell_callback(search, cells_[search_cell_index + di]);
@@ -301,7 +301,7 @@ void Grid<GridOptions::Normal>::iterate_cells(
 
 enum class NeedsToWrap { PlusLength, No, MinusLength };
 struct NeighborLookup {
-  typename Grid<GridOptions::PeriodicBoundaries>::size_type index = 0;
+  typename Grid<GridOptions::PeriodicBoundaries>::SizeType index = 0;
   NeedsToWrap wrap = NeedsToWrap::No;
 };
 
@@ -312,11 +312,11 @@ void Grid<GridOptions::PeriodicBoundaries>::iterate_cells(
         neighbor_cell_callback) const {
   const auto &log = logger<LogArea::Grid>();
 
-  std::array<size_type, 3> search_index;
-  size_type &x = search_index[0];
-  size_type &y = search_index[1];
-  size_type &z = search_index[2];
-  size_type search_cell_index = 0;
+  std::array<SizeType, 3> search_index;
+  SizeType &x = search_index[0];
+  SizeType &y = search_index[1];
+  SizeType &z = search_index[2];
+  SizeType search_cell_index = 0;
 
   // defaults:
   std::array<NeighborLookup, 2> dz_list;
@@ -364,7 +364,7 @@ void Grid<GridOptions::PeriodicBoundaries>::iterate_cells(
 
         assert(search_cell_index == make_index(search_index));
         assert(search_cell_index >= 0);
-        assert(search_cell_index < size_type(cells_.size()));
+        assert(search_cell_index < SizeType(cells_.size()));
         ParticleList search = cells_[search_cell_index];
         search_cell_callback(search);
 
@@ -405,7 +405,7 @@ void Grid<GridOptions::PeriodicBoundaries>::iterate_cells(
               const auto neighbor_cell_index =
                   make_index(dx.index, dy.index, dz.index);
               assert(neighbor_cell_index >= 0);
-              assert(neighbor_cell_index < size_type(cells_.size()));
+              assert(neighbor_cell_index < SizeType(cells_.size()));
               if (neighbor_cell_index <= make_index(virtual_search_index)) {
                 continue;
               }
