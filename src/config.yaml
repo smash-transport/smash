@@ -149,8 +149,8 @@ Modi:
         Sqrts_Reps: [2112, 2112]
 
         # The reference frame in which to do the calculation.
-        # (1 = center of velocity, 2 = center of mass, 3 = fixed target)
-        Calculation_Frame: 1
+        # ("center of velocity", "center of mass", "fixed target")
+        Calculation_Frame: "center of velocity"
 
         # Specify an impact parameter
         Impact:

@@ -220,6 +220,20 @@ class Configuration {
             "expected but apparently not found.");
       }
     }
+
+    operator CalculationFrame() {
+      std::string s = operator std::string();
+      if (s == "center of velocity")
+        return CalculationFrame::CenterOfVelocity;
+      if (s == "center of mass")
+        return CalculationFrame::CenterOfMass;
+      if (s == "fixed target")
+        return CalculationFrame::FixedTarget;
+      throw IncorrectTypeInAssignment(
+          "The value for key \"" + std::string(key_) +
+          "\" should be \"center of velocity\" or \"center of mass\" "
+          "or \"fixed target\"");
+    }
   };
 
   /**

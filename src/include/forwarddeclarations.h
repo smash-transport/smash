@@ -70,6 +70,12 @@ class DecayBranch;
 class CollisionBranch;
 class Tabulation;
 struct ExperimentParameters;
+enum class CalculationFrame {
+    CenterOfVelocity,
+    CenterOfMass,
+    FixedTarget,
+};
+
 
 using ActionPtr = build_unique_ptr_<Action>;
 using ScatterActionPtr = build_unique_ptr_<ScatterAction>;
