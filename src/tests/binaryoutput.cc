@@ -152,8 +152,10 @@ TEST(fullhistory_format) {
 
   // Open file as a binary
   FILE * binF;
-  binF = fopen((testoutputpath / "collisions_binary.bin").native().c_str(),
-                                                                        "rb");
+  const auto filename
+      = (testoutputpath / "collisions_binary.bin").native();
+  binF = fopen(filename.c_str(), "rb");
+  VERIFY(binF);
   // Header
   std::vector<char> buf(4);
   std::string magic, smash_version;
@@ -191,6 +193,10 @@ TEST(fullhistory_format) {
 
   // event end line
   VERIFY(compare_final_block_header(event_id, binF));
+
+  // remove file
+  VERIFY(!std::fclose(binF));
+  VERIFY(!std::remove(filename.c_str()));
 }
 
 TEST(particles_format) {
@@ -229,8 +235,10 @@ TEST(particles_format) {
 
   // Open file as a binary
   FILE * binF;
-  binF = fopen((testoutputpath / "particles_binary.bin").native().c_str(),
-                                                                        "rb");
+  const auto filename
+      = (testoutputpath / "particles_binary.bin").native();
+  binF = fopen(filename.c_str(), "rb");
+  VERIFY(binF);
   // Header
   std::vector<char> buf(4);
   std::string magic, smash_version;
@@ -261,4 +269,8 @@ TEST(particles_format) {
 
   // after end of event
   VERIFY(compare_final_block_header(event_id, binF));
+
+  // remove file
+  VERIFY(!std::fclose(binF));
+  VERIFY(!std::remove(filename.c_str()));
 }
