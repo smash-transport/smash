@@ -9,6 +9,7 @@
 
 #include <map>
 #include "unittest.h"
+#include "setup.h"
 
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
@@ -89,7 +90,7 @@ TEST(density_value) {
   ParticleList P;
   P.push_back(part_x);
   ThreeVector r;
-  const double sigma = 1.0;
+  const ExperimentParameters par = Smash::Test::default_parameters();
   double rho;
   DensityType bar_dens = DensityType::baryon;
 
@@ -99,15 +100,15 @@ TEST(density_value) {
    */
 
   r = ThreeVector(1.0, 0.0, 0.0);
-  rho = rho_eckart(r, P, sigma, bar_dens, 1, false).first;
+  rho = rho_eckart(r, P, par, bar_dens, false).first;
   COMPARE_ABSOLUTE_ERROR(rho, 0.0003763388107782538, 1.e-15);
 
   r = ThreeVector(0.0, 1.0, 0.0);
-  rho = rho_eckart(r, P, sigma, bar_dens, 1, false).first;
+  rho = rho_eckart(r, P, par, bar_dens, false).first;
   COMPARE_ABSOLUTE_ERROR(rho, 0.03851083689074894, 1.e-15);
 
   r = ThreeVector(0.0, 0.0, 1.0);
-  rho = rho_eckart(r, P, sigma, bar_dens, 1, false).first;
+  rho = rho_eckart(r, P, par, bar_dens, false).first;
   COMPARE_ABSOLUTE_ERROR(rho, 0.03851083689074894, 1.e-15);
 
 }
@@ -126,13 +127,13 @@ TEST(density_eckart_special_cases) {
   P.push_back(pr);
   P.push_back(apr);
   ThreeVector r(1.0, 0.0, 0.0);
-  const double sigma = 1.0;
-  double rho = rho_eckart(r, P, sigma, DensityType::baryon, 1, false).first;
+  const ExperimentParameters par = Smash::Test::default_parameters();
+  double rho = rho_eckart(r, P, par, DensityType::baryon, false).first;
   COMPARE_ABSOLUTE_ERROR(rho, 0.0, 1.e-15) << rho;
 
   /* Now check for negative baryon density from antiproton */
   P.erase(P.begin()); // Remove proton
-  rho = rho_eckart(r, P, sigma, DensityType::baryon, 1, false).first;
+  rho = rho_eckart(r, P, par, DensityType::baryon, false).first;
   COMPARE_ABSOLUTE_ERROR(rho, -0.0003763388107782538, 1.e-15) << rho;
 }
 
@@ -153,7 +154,7 @@ TEST(density_gradient) {
   P.push_back(part1);
   P.push_back(part2);
 
-  double sigma = 1.0;
+  const ExperimentParameters par = Smash::Test::default_parameters();
   ThreeVector r,dr;
   FourVector jmu;
   DensityType dtype = DensityType::baryon;
@@ -161,20 +162,20 @@ TEST(density_gradient) {
   ThreeVector num_grad, analit_grad;
   r = ThreeVector(0.0, 0.0, 0.0);
   std::pair<double, ThreeVector> rho_and_grad =
-                             rho_eckart(r, P, sigma, dtype, 1, true);
+                             rho_eckart(r, P, par, dtype, true);
   double rho_r = rho_and_grad.first;
 
   // analytical gradient
   analit_grad = rho_and_grad.second;
   // numerical gradient
   dr = ThreeVector(1.e-4, 0.0, 0.0);
-  double rho_rdr = rho_eckart(r + dr, P, sigma, dtype, 1, false).first;
+  double rho_rdr = rho_eckart(r + dr, P, par, dtype, false).first;
   num_grad.set_x1((rho_rdr - rho_r)/dr.x1());
   dr = ThreeVector(0.0, 1.e-4, 0.0);
-  rho_rdr = rho_eckart(r + dr, P, sigma, dtype, 1, false).first;
+  rho_rdr = rho_eckart(r + dr, P, par, dtype, false).first;
   num_grad.set_x2((rho_rdr - rho_r)/dr.x2());
   dr = ThreeVector(0.0, 0.0, 1.e-4);
-  rho_rdr = rho_eckart(r + dr, P, sigma, dtype, 1, false).first;
+  rho_rdr = rho_eckart(r + dr, P, par, dtype, false).first;
   num_grad.set_x3((rho_rdr - rho_r)/dr.x3());
   // compare them with: accuracy should not be worse than |dr|
   std::cout << num_grad << analit_grad << std::endl;
@@ -232,7 +233,7 @@ TEST(density_eckart_frame) {
   create_particle_list(Pdef);
   OutputsList out;
   // clock, output interval, cross-section, testparticles, gauss. sigma
-  ExperimentParameters param{{0.f, 1.0f}, 1.f, 0.0, 1, 1.0};
+  ExperimentParameters param = Smash::Test::default_parameters();
   double dx = 0.3;
   double dy = 0.3;
   double dz = 0.3;
@@ -286,19 +287,20 @@ TEST(nucleus_density) {
   const int npoints = 100;
 
   Configuration&& conf{testoutputpath, configfilename};
+  ExperimentParameters par = Smash::Test::default_parameters(Ntest);
   std::unique_ptr<DensityOutput> out = make_unique<DensityOutput>(testoutputpath, std::move(conf));
-  out->density_along_line("lead_densityX.dat", plist, sigma, dens_type,
-                          Ntest, lstart, lend, npoints);
+  out->density_along_line("lead_densityX.dat", plist, par, dens_type,
+                          lstart, lend, npoints);
 
   lstart = ThreeVector(0.0, -10.0, 0.0);
   lend = ThreeVector(0.0, 10.0, 0.0);
-  out->density_along_line("lead_densityY.dat", plist, sigma, dens_type,
-                          Ntest, lstart, lend, npoints);
+  out->density_along_line("lead_densityY.dat", plist, par, dens_type,
+                          lstart, lend, npoints);
 
   lstart = ThreeVector(0.0, 0.0, -10.0);
   lend = ThreeVector(0.0, 0.0, 10.0);
-  out->density_along_line("lead_densityZ.dat", plist, sigma, dens_type,
-                          Ntest, lstart, lend, npoints);
+  out->density_along_line("lead_densityZ.dat", plist, par, dens_type,
+                          lstart, lend, npoints);
 }*/
 
 /*TEST(box_density) {
@@ -312,7 +314,7 @@ conf["Modus"] = "Box";
 conf.take({"Modi", "Box", "Init_Multiplicities"});
 conf["Modi"]["Box"]["Init_Multiplicities"]["2212"] = 1000;
 conf["Modi"]["Box"]["Length"] = L;
-const ExperimentParameters par{{0.f, 1.f}, 1.f, Ntest, 1.0};
+const ExperimentParameters par = Smash::Test::default_parameters(Ntest);
 std::unique_ptr<BoxModus> b = make_unique<BoxModus>(conf["Modi"], par);
 Particles P;
 b->initial_conditions(&P, par);
@@ -325,6 +327,7 @@ std::unique_ptr<DensityOutput> out = make_unique<DensityOutput>(testoutputpath,
 const ThreeVector lstart = ThreeVector(0.0, 0.0, 0.0);
 const ThreeVector lend = ThreeVector(L, L, L);
 const int npoints = 100;
-out->density_along_line("box_density.dat", plist, 1.0, DensityType::baryon,
-                        Ntest, lstart, lend, npoints);
+ExperimentParameters par = Smash::Test::default_parameters(Ntest);
+out->density_along_line("box_density.dat", plist, par, DensityType::baryon,
+                        lstart, lend, npoints);
 }*/

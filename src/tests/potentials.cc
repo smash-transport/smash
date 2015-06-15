@@ -10,6 +10,7 @@
 #include <map>
 #include <fstream>
 #include "unittest.h"
+#include "setup.h"
 
 #include "../include/collidermodus.h"
 #include "../include/configuration.h"
@@ -67,7 +68,7 @@ TEST(potential_gradient) {
   conf["Potentials"]["Skyrme"]["Skyrme_A"] = -209.2;
   conf["Potentials"]["Skyrme"]["Skyrme_B"] = 156.4;
   conf["Potentials"]["Skyrme"]["Skyrme_Tau"] = 1.35;
-  ExperimentParameters param{{0.f, 1.f}, 1.f, 1, 1.0};
+  ExperimentParameters param = Smash::Test::default_parameters();
   std::unique_ptr<Potentials> pot = make_unique<Potentials>(conf["Potentials"], param);
 
   ThreeVector num_grad, analit_grad;
@@ -94,9 +95,6 @@ TEST(potential_gradient) {
 TEST(nucleus_potential_profile) {
   // Create a nucleus
   std::map<PdgCode, int> nuc_list = {{0x2212, 79}, {0x2112, 118}};
-  const int Ntest = 1;
-  const double sigma = 1.0;
-  const float dt = 0.1;
 
   // Create a nucleus
   Configuration conf(TEST_CONFIG_PATH);
@@ -115,7 +113,7 @@ TEST(nucleus_potential_profile) {
   conf["Modi"]["Collider"]["Target"]["Particles"]["2112"] = 34;
   conf["Modi"]["Collider"]["Target"]["Automatic"] = "True";
 
-  ExperimentParameters param{{0.f, dt}, 1.f, Ntest, sigma};
+  ExperimentParameters param = Smash::Test::default_parameters();
   ColliderModus c(conf["Modi"], param);
   Particles P;
   c.initial_conditions(&P, param);
@@ -198,12 +196,9 @@ TEST(propagation_in_test_potential) {
 
   // Create spheremodus with arbitrary parameters
   // Do not initialize particles: just artificially put one particle to list
-  const int Ntest = 1;
-  const double sigma = 1.0;
-  const float dt = 0.1;
   const double p_mass = 0.938;
   Configuration conf(TEST_CONFIG_PATH);
-  ExperimentParameters param{{0.f, dt}, 1.f, Ntest, sigma};
+  ExperimentParameters param = Smash::Test::default_parameters();
 
   // Create dummy outputs and our test potential
   const double U0 = 0.5;

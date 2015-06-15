@@ -76,9 +76,10 @@ std::pair<double, ThreeVector> unnormalized_smearing_factor(
 
 template <typename /*ParticlesContainer*/ T>
 std::pair<double, ThreeVector> rho_eckart_impl(const ThreeVector &r,
-                                   const T &plist, double gs_sigma,
+                                   const T &plist,
+                                   const ExperimentParameters &par,
                                    DensityType dens_type,
-                                   int ntest, bool compute_gradient) {
+                                   bool compute_gradient) {
   /* In the array first FourVector is jmu and next 3 are d jmu / dr.
    Division into positive and negative charges is necessary to avoid
    problems with the Eckart frame definition. Example of problem:
@@ -90,6 +91,11 @@ std::pair<double, ThreeVector> rho_eckart_impl(const ThreeVector &r,
    it gives no such problem.
   */
   std::array<FourVector, 4> jmu_pos, jmu_neg;
+  const int ntest = par.testparticles;
+  const double sig = par.gaussian_sigma;
+  const double two_sig_sqr = 2 * sig * sig;
+  const double r_cut = par.gauss_cutoff_in_sigma * sig;
+  const double r_cut_sqr = r_cut * r_cut;
 
   for (const auto &p : plist) {
     const float dens_factor = density_factor(p.pdgcode(), dens_type);
@@ -99,7 +105,7 @@ std::pair<double, ThreeVector> rho_eckart_impl(const ThreeVector &r,
     const auto sf_and_grad = unnormalized_smearing_factor(
                             p.position().threevec() -r,
                             p.momentum(),
-                            2*gs_sigma*gs_sigma, (4*gs_sigma)*(4*gs_sigma),
+                            two_sig_sqr, r_cut_sqr,
                             compute_gradient);
     if (sf_and_grad.first < really_small) {
       continue;
@@ -123,7 +129,7 @@ std::pair<double, ThreeVector> rho_eckart_impl(const ThreeVector &r,
   }
 
   const double rho_eck = (jmu_pos[0].abs() - jmu_neg[0].abs()) /
-            smearing_factor_norm(2*gs_sigma*gs_sigma) / ntest;
+            smearing_factor_norm(two_sig_sqr) / ntest;
 
   ThreeVector rho_eck_grad;
   if (compute_gradient) {
@@ -136,24 +142,20 @@ std::pair<double, ThreeVector> rho_eckart_impl(const ThreeVector &r,
         rho_eck_grad[i-1] -= jmu_neg[i].Dot(jmu_neg[0]) / jmu_neg[0].abs();
       }
     }
-    rho_eck_grad /= smearing_factor_grad_norm(2*gs_sigma*gs_sigma) * ntest;
+    rho_eck_grad /= smearing_factor_grad_norm(two_sig_sqr) * ntest;
   }
   return std::make_pair(rho_eck, rho_eck_grad);
 }
 
 std::pair<double, ThreeVector> rho_eckart(const ThreeVector &r,
-                  const ParticleList &plist,
-                  double gs_sigma, DensityType dens_type, int ntest,
-                  bool compute_gradient) {
-  return rho_eckart_impl(r, plist, gs_sigma, dens_type, ntest,
-                         compute_gradient);
+               const ParticleList &plist, const ExperimentParameters &par,
+               DensityType dens_type, bool compute_gradient) {
+  return rho_eckart_impl(r, plist, par, dens_type, compute_gradient);
 }
 std::pair<double, ThreeVector> rho_eckart(const ThreeVector &r,
-                  const Particles &plist,
-                  double gs_sigma, DensityType dens_type, int ntest,
-                  bool compute_gradient) {
-  return rho_eckart_impl(r, plist, gs_sigma, dens_type, ntest,
-                         compute_gradient);
+               const Particles &plist, const ExperimentParameters &par,
+               DensityType dens_type, bool compute_gradient) {
+  return rho_eckart_impl(r, plist, par, dens_type, compute_gradient);
 }
 
 void update_density_lattice(DensityLattice* lat,
@@ -170,7 +172,7 @@ void update_density_lattice(DensityLattice* lat,
   const int ntest = par.testparticles;
   const double sig = par.gaussian_sigma;
   const double two_sig_sqr = 2 * sig * sig;
-  const double r_cut = 4 * sig;
+  const double r_cut = par.gauss_cutoff_in_sigma * sig;
   const double r_cut_sqr = r_cut * r_cut;
   for (const auto &part : particles) {
     const float dens_factor = density_factor(part.pdgcode(), dens_type);

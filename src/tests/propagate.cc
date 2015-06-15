@@ -50,7 +50,7 @@ static Test::ParticlesPtr create_box_particles() {
 }
 
 TEST(propagate_default_no_potentials) {
-  ExperimentParameters param{{0.f, 1.f}, 1.f, 1, 1.0};
+  ExperimentParameters param = Smash::Test::default_parameters();
   auto Pdef = create_box_particles();
   propagate_straight_line(Pdef.get(), param);
   // after propagation: Momenta should be unchanged.

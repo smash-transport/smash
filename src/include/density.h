@@ -109,13 +109,16 @@ namespace Smash {
    * \param[in] r Arbitrary space point where 4-current is calculated
    * \param[in] plist List of all particles to be used in \f$j^{\mu}\f$
    *            calculation. If the distance between particle and calculation
-   *            point r, \f$ |r-r_i| > 6 \sigma \f$ then particle input
+   *            point r, \f$ |r-r_i| > r_{cut} \f$ then particle input
    *            to density will be ignored.
+   *
+   * Next three values are taken from ExperimentalParameters structure:
    * \param[in] gs_sigma Width of the gaussian (\f$ \sigma \f$),
    *  which represents particle Wigner density.
+   * \param[in] r_cut \f$ r_{cut} / \sigma \f$
+   * \param[in] ntest Number of test-particles
    * \param[in] dens_type type of four-currect to be calculated:
    *            baryon, proton or neutron options are currently available
-   * \param[in] ntest Number of test-particles
    * \param[in] compute_gradient true - compute gradient, false - no
    * \fpPrecision Density gradient is returned as double, because it is
    *   ThreeVector and ThreeVector currently comes only as double.
@@ -123,14 +126,12 @@ namespace Smash {
    *   density should also be.
    */
   std::pair<double, ThreeVector> rho_eckart(const ThreeVector &r,
-                    const ParticleList &plist,
-                    double gs_sigma, DensityType dens_type, int ntest,
-                    bool compute_gradient);
+                const ParticleList &plist, const ExperimentParameters &par,
+                DensityType dens_type, bool compute_gradient);
   /// convenience overload of the above
   std::pair<double, ThreeVector> rho_eckart(const ThreeVector &r,
-                    const Particles &plist,
-                    double gs_sigma, DensityType dens_type, int ntest,
-                    bool compute_gradient);
+                const Particles &plist, const ExperimentParameters &par,
+                DensityType dens_type, bool compute_gradient);
 
 
 /** A class for time-efficient (time-memory trade-off) calculation of density

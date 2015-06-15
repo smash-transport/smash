@@ -129,8 +129,11 @@ namespace {
  * \key Testparticles (int, optional, default = 1): \n
  * How many test particles per real particles should be simulated.
  *
- * \key Gaussian_Sigma (float, required): \n
- * Width of gaussians that represent Wigner density of particles.
+ * \key Gaussian_Sigma (float, optional, default 1.0): \n
+ * Width [fm] of gaussians that represent Wigner density of particles.
+ *
+ * \key Gaussian_Cutoff (float, optional, default 4.0)
+ * Distance in sigma at which gaussian is considered 0.
  *
  * \page input_output_options_ Output
  * \key Output_Interval (float, required): \n
@@ -138,8 +141,11 @@ namespace {
  * system in Standard Output and other output formats which support this
  * functionality.
  *
- * \key Gaussian_Sigma (float, required): \n
- * Width of gaussians that represent Wigner density of particles.
+ * \key Gaussian_Sigma (float, optional, default 1.0): \n
+ * Width [fm] of gaussians that represent Wigner density of particles.
+ *
+ * \key Gaussian_Cutoff (float, optional, default 4.0)
+ * Distance in sigma at which gaussian is considered 0.
  */
 /** Gathers all general Experiment parameters
  *
@@ -156,7 +162,8 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
   return {{0.0f, config.read({"General", "Delta_Time"})},
           config.take({"Output", "Output_Interval"}),
           config.take({"General", "Testparticles"}, 1),
-          config.take({"General", "Gaussian_Sigma"}, 1.0)};
+          config.take({"General", "Gaussian_Sigma"}, 1.0),
+          config.take({"General", "Gauss_Cutoff_In_Sigma"}, 4.0)};
 }
 }  // unnamed namespace
 
@@ -354,8 +361,7 @@ void Experiment<Modus>::perform_actions(ActionList &actions,
         constexpr bool compute_grad = false;
         const double rho =
             rho_eckart(r_interaction.threevec(), particles_before_actions,
-                       parameters_.gaussian_sigma, dens_type_,
-                       parameters_.testparticles, compute_grad).first;
+                       parameters_, dens_type_, compute_grad).first;
         /*!\Userguide
          * \page collisions_output_in_box_modus_ Collision output in box modus
          * \note When SMASH is running in the box modus, particle coordinates

@@ -57,7 +57,8 @@ class DensityOutput : public OutputInterface {
     * density profiles.
    */
   void density_along_line(const char * file_name, const ParticleList &plist,
-                        double gs_sigma, DensityType dens_type, int ntest,
+                        const ExperimentParameters &param,
+                        DensityType dens_type,
                         const ThreeVector &line_start,
                         const ThreeVector &line_end, int n_points);
 

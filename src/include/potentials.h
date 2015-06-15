@@ -43,7 +43,7 @@ class Potentials {
    * \param[in] r Arbitrary space point where potential is calculated
    * \param[in] plist List of all particles to be used in \f$j^{\mu}\f$
    *            calculation. If the distance between particle and calculation
-   *            point r, \f$ |r-r_i| > 6 \sigma \f$ then particle input
+   *            point r, \f$ |r-r_i| > r_{cut} \f$ then particle input
    *            to density will be ignored.
    * \param[in] acts_on pdg code of particle on which potential is going to act
    *
@@ -59,7 +59,7 @@ class Potentials {
    * \param[in] r Arbitrary space point where potential gradient is calculated
    * \param[in] plist List of all particles to be used in \f$j^{\mu}\f$
    *            calculation. If the distance between particle and calculation
-   *            point r, \f$ |r-r_i| > 6 \sigma \f$ then particle input
+   *            point r, \f$ |r-r_i| > r_{cut} \f$ then particle input
    *            to density will be ignored.
    * \param[in] acts_on pdg code of particle on which potential is going to act
    **/
@@ -69,19 +69,16 @@ class Potentials {
                                  const PdgCode acts_on) const;
 
  private:
+  /** Struct that contains gaussian sigma, cutoff and testparticle number
+   *  needed for calculation
+   */
+  const ExperimentParameters param_;
+
   // Skyrme potential on/off
   bool use_skyrme_;
 
   // Symmetry potential on/off
   bool use_symmetry_;
-
-  // Number of test particles
-  int ntest_;
-
-  /** sigma of gaussian smearing
-   * \fpPrecision Why \c double?
-   */
-  double sigma_;
 
   /** Parameters of skyrme potentials
    * \fpPrecision Why \c double?
