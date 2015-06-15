@@ -103,7 +103,7 @@ Lattice:
         # 1 - net baryon density
         # 2 - baryonic isospin density
         # 3 - pion density
-        Density: 1
+        #Density: 1
         #LandauEnergyDensity: False, not implemented
         #LandauVelocity: False, not implemented
 

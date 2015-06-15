@@ -161,7 +161,6 @@ class RectangularLattice {
         }
       }
     }
-
   };
 
   /**
@@ -178,9 +177,9 @@ class RectangularLattice {
     // where i is index in any direction. Therefore we want cells with condition
     // (r-r_cut)*csize - 0.5 < i < (r+r_cut)*csize - 0.5, r = r_center - r_0
     for (int i = 0; i < 3; i++) {
-      l_bounds[i] = std::ceil( (point[i] - origin_[i] - r_cut) / cell_sizes_[i]
+      l_bounds[i] = std::ceil((point[i] - origin_[i] - r_cut) / cell_sizes_[i]
                                - 0.5f);
-      u_bounds[i] = std::ceil( (point[i] - origin_[i] + r_cut) / cell_sizes_[i]
+      u_bounds[i] = std::ceil((point[i] - origin_[i] + r_cut) / cell_sizes_[i]
                                - 0.5f);
     }
 

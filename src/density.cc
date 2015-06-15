@@ -172,7 +172,7 @@ void update_density_lattice(DensityLattice* lat,
   const double two_sig_sqr = 2 * sig * sig;
   const double r_cut = 4 * sig;
   const double r_cut_sqr = r_cut * r_cut;
-  for (const auto &part: particles) {
+  for (const auto &part : particles) {
     const float dens_factor = density_factor(part.pdgcode(), dens_type);
     if (std::abs(dens_factor) < really_small) {
       continue;
@@ -192,7 +192,7 @@ void update_density_lattice(DensityLattice* lat,
       });
   }
   // Compute density from jmus, take care about smearing factor normalization
-  for (auto &node: *lat) {
+  for (auto &node : *lat) {
     node.compute_density(smearing_factor_norm(two_sig_sqr) * ntest);
   }
 }

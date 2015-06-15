@@ -178,6 +178,7 @@ class DensityOnLattice {
   FourVector jmu_pos() const { return jmu_pos_; }
   /// Returns negative part of current four-vector
   FourVector jmu_neg() const { return jmu_neg_; }
+
  private:
   /// Positive and negative parts of four-current
   FourVector jmu_pos_, jmu_neg_;
