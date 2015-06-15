@@ -141,6 +141,13 @@ namespace Smash {
  *  particles and then calculate density from jmu's. Splitting into
  *  positive and negative parts of jmu is necessary to avoid
  *  problems with the definition of Eckart rest frame.
+ *
+ *  Intended usage of the class:
+ *  1) Add particles from some list using add_particle(...). This sets
+ *     jmu_pos and jmu_neg
+ *  2) Compute density from jmus using compute_density(...).
+ *  3) Get jmus and density whenever necessary via density(),
+ *     jmu_pos(), jmu_neg()
  */
 class DensityOnLattice {
  public:
@@ -165,11 +172,11 @@ class DensityOnLattice {
   void compute_density(const double norm) {
     density_ = (jmu_pos_.abs() - jmu_neg_.abs()) / norm;
   }
-  /// Getter for density
+  /// Returns the density if it was previously computed
   double density() const { return density_; }
-  /// Getter for jmu_pos
+  /// Returns positive part of current four-vector
   FourVector jmu_pos() const { return jmu_pos_; }
-  /// Getter for jmu_neg
+  /// Returns negative part of current four-vector
   FourVector jmu_neg() const { return jmu_neg_; }
  private:
   /// Positive and negative parts of four-current

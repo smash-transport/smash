@@ -131,7 +131,7 @@ class RectangularLattice {
   template <typename F>
   void iterate_sublattice(const std::array<int, 3> &lower_bounds,
                           const std::array<int, 3> &upper_bounds,
-                          const F &func) {
+                          F &&func) {
     const auto &log = logger<LogArea::Lattice>();
     log.debug("Iterating sublattice with lower bound index (",
               lower_bounds[0], ",", lower_bounds[1], ",", lower_bounds[2],
@@ -171,7 +171,7 @@ class RectangularLattice {
    */
   template <typename F>
   void iterate_in_radius(const ThreeVector& point, const double r_cut,
-                         const F &func) {
+                         F &&func) {
     std::array<int, 3> l_bounds, u_bounds;
 
     // Array holds value at the cell center: r_center = r_0 + (i+0.5)cell_size,
@@ -197,7 +197,7 @@ class RectangularLattice {
         }
       }
     }
-    iterate_sublattice(l_bounds, u_bounds, func);
+    iterate_sublattice(l_bounds, u_bounds, std::forward<F>(func));
   };
 
  protected:
