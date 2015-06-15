@@ -17,7 +17,7 @@
 template <typename T>
 class InterpolateLinear {
  public:
-  T m, n;
+  T slope_, yintercept_;
   /// Linear interpolation given two points (x0, y0) and (x1, y1).
   ///
   /// Returns the interpolation function.
@@ -48,13 +48,13 @@ class InterpolateData {
 template <typename T>
 InterpolateLinear<T>::InterpolateLinear(T x0, T y0, T x1, T y1) {
   assert(x0 != x1);
-  m = (y1 - y0) / (x1 - x0);
-  n = y0 - m * x0;
+  slope_ = (y1 - y0) / (x1 - x0);
+  yintercept_ = y0 - slope_ * x0;
 }
 
 template <typename T>
 T InterpolateLinear<T>::operator()(T x) const {
-  return m * x + n;
+  return slope_ * x + yintercept_;
 }
 
 template <typename T>
