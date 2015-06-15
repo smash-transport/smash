@@ -14,7 +14,7 @@ using namespace Smash;
 
 TEST(constant) {
   // tabulate a constant function
-  Tabulation tab(0., 10., 10, [](double) { return 1.; });
+  const Tabulation tab(0., 10., 10, [](double) { return 1.; });
   // check closest-point values
   FUZZY_COMPARE(tab.get_value_step(-1.), 0.f);
   FUZZY_COMPARE(tab.get_value_step( 0.), 1.f);
@@ -33,7 +33,7 @@ TEST(constant) {
 
 TEST(linear) {
   // tabulate a linear function
-  Tabulation tab(0., 10., 10, [](double x) { return x; });
+  const Tabulation tab(0., 10., 10, [](double x) { return x; });
   // check closest-point values
   FUZZY_COMPARE(tab.get_value_step(-1.),  0.f);
   FUZZY_COMPARE(tab.get_value_step( 0.),  0.f);
@@ -55,13 +55,14 @@ TEST(linear) {
 
 TEST(quadratic) {
   // tabulate a quadratic function
-  Tabulation tab(-2., 4., 20, [](double x) { return x*x; });
+  const Tabulation tab(-2., 4., 20, [](double x) { return x*x; });
+  const float error = 1E-6f;
   // check closest-point values
   FUZZY_COMPARE(tab.get_value_step(-3.), 0.f);
   FUZZY_COMPARE(tab.get_value_step(-2.), 4.f);
   FUZZY_COMPARE(tab.get_value_step(-1.), 1.f);
-  FUZZY_COMPARE(tab.get_value_step( 0.), 0.f);
-  COMPARE_ABSOLUTE_ERROR(tab.get_value_step(0.5), 0.36f, 1E-6f); 
+  COMPARE_ABSOLUTE_ERROR(tab.get_value_step( 0.), 0.f, error);
+  COMPARE_ABSOLUTE_ERROR(tab.get_value_step(0.5), 0.36f, error);
   FUZZY_COMPARE(tab.get_value_step( 1.), 1.f);
   FUZZY_COMPARE(tab.get_value_step(1.2), 1.44f);
   FUZZY_COMPARE(tab.get_value_step( 2.), 4.f);
@@ -70,8 +71,8 @@ TEST(quadratic) {
   FUZZY_COMPARE(tab.get_value_linear(-3.), 0.f);
   FUZZY_COMPARE(tab.get_value_linear(-2.), 4.f);
   FUZZY_COMPARE(tab.get_value_linear(-1.), 1.f);
-  FUZZY_COMPARE(tab.get_value_linear( 0.), 0.f);
-  COMPARE_ABSOLUTE_ERROR(tab.get_value_linear(0.5), 0.26f, 1E-6f);
+  COMPARE_ABSOLUTE_ERROR(tab.get_value_linear( 0.), 0.f, error);
+  COMPARE_ABSOLUTE_ERROR(tab.get_value_linear(0.5), 0.26f, error);
   FUZZY_COMPARE(tab.get_value_linear( 1.), 1.f);
   FUZZY_COMPARE(tab.get_value_linear(1.2), 1.44f);
   FUZZY_COMPARE(tab.get_value_linear( 2.), 4.f);
