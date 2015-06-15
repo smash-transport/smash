@@ -7,19 +7,19 @@
  *
  */
 
-#ifndef SRC_INCLUDE_DILEPTONDECAYACTION_H_
-#define SRC_INCLUDE_DILEPTONDECAYACTION_H_
+#ifndef SRC_INCLUDE_DECAYACTIONDILEPTON_H_
+#define SRC_INCLUDE_DECAYACTIONDILEPTON_H_
 
 #include "decayaction.h"
 
 namespace Smash {
 
-class DileptonDecayAction : public DecayAction {
+class DecayActionDilepton : public DecayAction {
  public:
-   DileptonDecayAction(const ParticleData &p, float time_of_execution);
+   DecayActionDilepton(const ParticleData &p, float time_of_execution);
 
    // do not perform any dilepton actions = leave it empty
-   void perform(Particles *particles, size_t &id_process) override {};
+   void perform(Particles *, size_t &) override {};
 
    /* generate_final_state stays the same for a first version
       maybe one can later add some output modifications and
@@ -29,4 +29,4 @@ class DileptonDecayAction : public DecayAction {
 
 }  // namespace Smash
 
-#endif  // SRC_INCLUDE_DILEPTONDECAYACTION_H_
+#endif  // SRC_INCLUDE_DECAYACTIONDILEPTON_H_

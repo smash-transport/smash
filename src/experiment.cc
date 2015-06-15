@@ -23,8 +23,8 @@
 #include "include/configuration.h"
 #include "include/cxx14compat.h"
 #include "include/decayactionsfinder.h"
+#include "include/decayactionsfinderdilepton.h"
 #include "include/density.h"
-#include "include/dileptondecayactionsfinder.h"
 #include "include/forwarddeclarations.h"
 #include "include/grid.h"
 #include "include/listmodus.h"
@@ -220,8 +220,8 @@ Experiment<Modus>::Experiment(Configuration config)
   if (config.take({"Collision_Term", "Decays"}, true)) {
     action_finders_.emplace_back(new DecayActionsFinder());
   }
-  if (config.take({"Collison_Term", "Dileptons"}, true)) {
-  action_finders_.emplace_back(new DileptonDecayActionsFinder());
+  if (config.take({"Collision_Term", "Dileptons"}, false)) {
+  action_finders_.emplace_back(new DecayActionsFinderDilepton());
   }
   if (config.take({"Collision_Term", "Collisions"}, true)) {
     action_finders_.emplace_back(new ScatterActionsFinder(config, parameters_));

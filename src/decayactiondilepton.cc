@@ -8,11 +8,11 @@
  */
 
 
-#include "include/dileptondecayaction.h"
+#include "include/decayactiondilepton.h"
 
 namespace Smash {
 
-DileptonDecayAction::DileptonDecayAction(const ParticleData &p,
+DecayActionDilepton::DecayActionDilepton(const ParticleData &p,
                                          float time_of_execution)
     : DecayAction({p}, time_of_execution) {}
 

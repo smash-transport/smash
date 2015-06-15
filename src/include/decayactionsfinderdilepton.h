@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef SRC_INCLUDE_DILEPTONDECAYACTIONSFINDER_H_
-#define SRC_INCLUDE_DILEPTONDECAYACTIONSFINDER_H_
+#ifndef SRC_INCLUDE_DECAYACTIONSFINDERDILEPTON_H_
+#define SRC_INCLUDE_DECAYACTIONSFINDERDILEPTON_H_
 
 #include <vector>
 
@@ -21,10 +21,10 @@ namespace Smash {
  * A simple dilepton decay finder:
  * Just loops through all particles and checks if they can decay into dileptons.
  */
-class DileptonDecayActionsFinder : public ActionFinderInterface {
+class DecayActionsFinderDilepton : public ActionFinderInterface {
  public:
   /** Initialize the finder */
-  DileptonDecayActionsFinder() {}
+  DecayActionsFinderDilepton() {}
   /** Check the whole particle list for decays
    * and return a list with the corrsponding Action objects. */
   ActionList find_possible_actions(
@@ -37,5 +37,5 @@ class DileptonDecayActionsFinder : public ActionFinderInterface {
 
 }  // namespace Smash
 
-#endif  // SRC_INCLUDE_DILEPTONDECAYACTIONSFINDER_H_
+#endif  // SRC_INCLUDE_DECAYACTIONSFINDERDILEPTON_H_
 
