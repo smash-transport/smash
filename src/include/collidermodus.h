@@ -24,12 +24,12 @@ struct ExperimentParameters;
 
 /// Possible methods of impact parameter sampling.
 enum class Sampling {
-    /// Sample from uniform distribution.
-    UNIFORM,
-    /// Sample from areal / quadratic distribution.
-    QUADRATIC,
-    /// Sample from custom, user-defined distribution.
-    CUSTOM,
+  /// Sample from uniform distribution.
+  UNIFORM,
+  /// Sample from areal / quadratic distribution.
+  QUADRATIC,
+  /// Sample from custom, user-defined distribution.
+  CUSTOM,
 };
 
 /**
@@ -56,14 +56,14 @@ class ColliderModus : public ModusDefault {
    * object (only contains configuration for this modus).
    **/
   explicit ColliderModus(Configuration modus_config,
-           const ExperimentParameters &parameters);
+                         const ExperimentParameters &parameters);
 
   /** Creates initial conditions from the particles.
    *
    * In particular, it initializes the nuclei.
    */
   float initial_conditions(Particles *particles,
-                          const ExperimentParameters &parameters);
+                           const ExperimentParameters &parameters);
 
   /// \ingroup exception
   /// Thrown when either \a projectile_ or \a target_ nuclei are empty.
@@ -147,8 +147,8 @@ class ColliderModus : public ModusDefault {
    *
    * \fpPrecision Why \c double?
    **/
-  std::pair<double, double> get_velocities(float mandelstam_s,
-                                           float m_a, float m_b);
+  std::pair<double, double> get_velocities(float mandelstam_s, float m_a,
+                                           float m_b);
 
   /**\ingroup logging
    * Writes the initial state for the ColliderModus to the output stream.
