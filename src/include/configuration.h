@@ -232,7 +232,7 @@ class Configuration {
       throw IncorrectTypeInAssignment(
           "The value for key \"" + std::string(key_) +
           "\" should be \"center of velocity\" or \"center of mass\" "
-          "or \"fixed target\"");
+          "or \"fixed target\".");
     }
 
     operator DensityType() {
@@ -248,7 +248,7 @@ class Configuration {
       throw IncorrectTypeInAssignment(
           "The value for key \"" + std::string(key_) +
           "\" should be \"particle\" or \"baryon\" "
-          "or \"baryonic isospin\" or \"pion\"");
+          "or \"baryonic isospin\" or \"pion\".");
     }
 
     operator BoxInitialCondition() {
@@ -259,7 +259,7 @@ class Configuration {
           return BoxInitialCondition::PeakedMomenta;
       throw IncorrectTypeInAssignment(
           "The value for key \"" + std::string(key_) +
-          "\" should be \"thermal momenta\" or \"peaked momenta\"");
+          "\" should be \"thermal momenta\" or \"peaked momenta\".");
     }
   };
 
