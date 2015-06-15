@@ -297,8 +297,8 @@ ColliderModus::ColliderModus(Configuration modus_config,
           throw std::domain_error("Input Error: Need impact parameter spectrum for custom sampling. "
                                   "Please provide Values and Yields.");
         }
-        std::vector<float> impacts = modus_cfg.take({"Impact", "Values"});
-        std::vector<float> yields = modus_cfg.take({"Impact", "Yields"});
+        const std::vector<float> impacts = modus_cfg.take({"Impact", "Values"});
+        const std::vector<float> yields = modus_cfg.take({"Impact", "Yields"});
         if (impacts.size() != yields.size()) {
           throw std::domain_error("Input Error: Need as many impact parameter values as yields. "
                                   "Please make sure that Values and Yields have the same length.");
