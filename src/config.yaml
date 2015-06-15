@@ -99,11 +99,8 @@ Modi:
         Temperature: 0.2
 
         # initial condition
-        #
-        # 1:  random position box + thermal momenta
-        # 2:  random position box + peaked momenta
-        #
-        Initial_Condition: 1
+        # ("peaked momenta", "thermal momenta")
+        Initial_Condition: "thermal momenta"
 
         # start time of simulation
         Start_Time:    0.0

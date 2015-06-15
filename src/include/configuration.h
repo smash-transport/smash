@@ -250,6 +250,17 @@ class Configuration {
           "\" should be \"particle\" or \"baryon\" "
           "or \"baryonic isospin\" or \"pion\"");
     }
+
+    operator BoxInitialCondition() {
+      std::string s = operator std::string();
+      if (s == "thermal momenta")
+          return BoxInitialCondition::ThermalMomenta;
+      if (s == "peaked momenta")
+          return BoxInitialCondition::PeakedMomenta;
+      throw IncorrectTypeInAssignment(
+          "The value for key \"" + std::string(key_) +
+          "\" should be \"thermal momenta\" or \"peaked momenta\"");
+    }
   };
 
   /**
