@@ -22,9 +22,13 @@ namespace Smash {
 
 struct ExperimentParameters;
 
+/// Possible methods of impact parameter sampling.
 enum class Sampling {
+    /// Sample from uniform distribution.
     UNIFORM,
+    /// Sample from areal / quadratic distribution.
     QUADRATIC,
+    /// Sample from custom, user-defined distribution.
     CUSTOM,
 };
 

@@ -99,11 +99,20 @@ namespace Smash {
  *
  * \li \key Value (float, optional, optional, default = 0.f): fixed value for
  * the impact parameter. No other \key Impact: directive is looked at.
- * \li \key Sample (string, optional, default = quadratic sampling): \n
- * if \key uniform, use uniform sampling of the impact parameter 
- * (\f$dP(b) = db\f$). Otherwise use areal (aka quadratic) input sampling
+ * \li \key Sample (string, optional, default = \key quadratic): \n
+ * if \key uniform, use uniform sampling of the impact parameter
+ * (\f$dP(b) = db\f$). If \key quadratic use areal (aka quadratic) input sampling
  * (the probability of an input parameter range is proportional to the
- * area corresponding to that range, \f$dP(b) = b\cdot db\f$).
+ * area corresponding to that range, \f$dP(b) = b\cdot db\f$). If \key custom,
+ * use \key Values and \key Yields to interpolate the impact parameter
+ * distribution and use rejection sampling.
+ * \li \key Values (floats, optional):
+ * Values of the impact parameter, corresponding to \key Yields. Must be same
+ * length as \key Yields. Required for \key Sample = "custom".
+ * \li \key Yields (floats, optional):
+ * Values of the particle yields, corresponding to \key Values. Must be same
+ * lenght as \key Values. Required for \key Sample = "custom".
+ *
  * \li \key Range (float, float, optional, default = 0.0f):\n
  * A vector of minimal and maximal impact parameters
  * between which b should be chosen. (The order of these is not
@@ -268,7 +277,7 @@ ColliderModus::ColliderModus(Configuration modus_config,
                             "Please provide only one of Sqrtsnn/E_Kin/P_Lab.");
   }
 
-  // Impact parameter setting: Either "Value", "Range", or "Max".
+  // Impact parameter setting: Either "Value", "Range", "Max" or "Sample".
   // Unspecified means 0 impact parameter.
   if (modus_cfg.has_value({"Impact", "Value"})) {
     impact_ = modus_cfg.take({"Impact", "Value"});
