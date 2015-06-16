@@ -9,14 +9,11 @@
 
 #include "unittest.h"
 #include "setup.h"
-#include <cstdio>
-#include <cstring>
 #include <array>
 #include <iostream>
-#include <fstream>
-#include <string>
 #include <vector>
 #include <boost/filesystem.hpp>
+#include <boost/filesystem/fstream.hpp>
 #include <include/config.h>
 #include "../include/clock.h"
 #include "../include/configuration.h"
@@ -36,8 +33,8 @@ TEST(directory_is_created) {
   VERIFY(bf::exists(testoutputpath));
 }
 
-static void compare_threevector(const std::array<std::string,3> &stringarray,
-                               const ThreeVector &threevector) {
+static void compare_threevector(const std::array<std::string, 3> &stringarray,
+                                const ThreeVector &threevector) {
   COMPARE_ABSOLUTE_ERROR(std::atof(stringarray.at(0).c_str()), threevector.x1(),
                          accuracy);
   COMPARE_ABSOLUTE_ERROR(std::atof(stringarray.at(1).c_str()), threevector.x2(),
@@ -46,7 +43,7 @@ static void compare_threevector(const std::array<std::string,3> &stringarray,
                          accuracy);
 }
 
-TEST(outputfile) {
+TEST(vtkoutputfile) {
   /* Create particles */
   Test::create_smashon_particletypes();
 
@@ -57,37 +54,41 @@ TEST(outputfile) {
   }
 
   /* Create config file and object */
-  std::string configfilename = "vtkconfig.yaml";
-  std::ofstream cfgfile;
-  cfgfile.open((testoutputpath / configfilename).native().c_str(),
-               std::ios::out);
+  const bf::path configfilename = "vtkconfig.yaml";
+  const bf::path configfilepath = testoutputpath / configfilename;
+  bf::ofstream cfgfile;
+  cfgfile.open(configfilepath, std::ios::out);
   cfgfile << "Options: None" << std::endl;
   cfgfile.close();
-  Configuration&& op{testoutputpath, configfilename};
+  Configuration &&op{testoutputpath, configfilename};
   /* Create output object */
-  std::unique_ptr<VtkOutput> vtkop = make_unique<VtkOutput>(testoutputpath, std::move(op));
+  std::unique_ptr<VtkOutput> vtkop =
+      make_unique<VtkOutput>(testoutputpath, std::move(op));
   int event_id = 0;
   /* Initial output */
   vtkop->at_eventstart(particles, event_id);
-  std::string outputfilename = "pos_ev00000_tstep00000.vtk";
-  VERIFY(bf::exists(testoutputpath / outputfilename));
+  const bf::path outputfilename = "pos_ev00000_tstep00000.vtk";
+  const bf::path outputfilepath = testoutputpath / outputfilename;
+  VERIFY(bf::exists(outputfilepath));
   /* Time step output */
   Clock clock(0.0, 1.0);
   vtkop->at_intermediate_time(particles, event_id, clock);
-  VERIFY(bf::exists(testoutputpath / "pos_ev00000_tstep00001.vtk"));
+  const bf::path outputfile2path =
+      testoutputpath / "pos_ev00000_tstep00001.vtk";
+  VERIFY(bf::exists(outputfile2path));
 
-  std::fstream outputfile;
-  outputfile.open((testoutputpath / outputfilename)
-                  .native().c_str(), std::ios_base::in);
+  bf::fstream outputfile;
+  outputfile.open(outputfilepath, std::ios_base::in);
   if (outputfile.good()) {
     std::string line, item;
     /* Check header */
     std::string output_header = "";
-    std::string header = "# vtk DataFile Version 2.0\n"
-                         "Generated from molecular-offset data "
-                         VERSION_MAJOR "\n"
-                         "ASCII\n"
-                         "DATASET UNSTRUCTURED_GRID\n";
+    std::string header =
+        "# vtk DataFile Version 2.0\n"
+        "Generated from molecular-offset data " VERSION_MAJOR
+        "\n"
+        "ASCII\n"
+        "DATASET UNSTRUCTURED_GRID\n";
     do {
       std::getline(outputfile, line);
       output_header += line + '\n';
@@ -168,4 +169,8 @@ TEST(outputfile) {
       compare_threevector(momentum_string, pd.momentum().threevec());
     }
   }
+  outputfile.close();
+  VERIFY(bf::remove(outputfilepath));
+  VERIFY(bf::remove(outputfile2path));
+  VERIFY(bf::remove(configfilepath));
 }

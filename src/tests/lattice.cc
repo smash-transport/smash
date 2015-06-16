@@ -124,3 +124,52 @@ TEST(iterators) {
                            std::ceil(r_cut / lattice->cell_sizes()[2] - 0.5));
   VERIFY(count_nodes == nodes_expect) << count_nodes << " " << nodes_expect;
 }
+
+TEST(iterate_in_radius) {
+  // 1) Lattice is not periodic
+  auto lattice = create_lattice(false);
+  // Set all FourVectors to zeros
+  lattice->reset();
+  FourVector mark = FourVector(1.0, 2.0, 3.0, 4.0);
+  ThreeVector r0 = ThreeVector(2.0, 2.0, 1.0), r;
+  double r_cut = 1.0;
+  lattice->iterate_in_radius(
+    r0, r_cut, [&](FourVector &node, int, int, int) { node = mark; });
+  /* Iterate all the lattice and check that marked nodes are within r_cut cube,
+     while not marked nodes are out of r_cut cube */
+  lattice->iterate_sublattice({0, 0, 0}, lattice->dimensions(),
+             [&](FourVector &node, int ix, int iy, int iz){
+    r = lattice->cell_center(ix, iy, iz);
+    if (std::abs(r[0] - r0[0]) <= r_cut &&
+        std::abs(r[1] - r0[1]) <= r_cut &&
+        std::abs(r[2] - r0[2]) <= r_cut) {
+      VERIFY(node == mark) << ix << " " << iy << " " << iz;
+    } else {
+      VERIFY(node == FourVector()) << ix << " " << iy << " " << iz;
+    }
+  });
+
+  // 2) Lattice is periodic: here d(x1, x2) = |x2 - x1 - int((x2-x1)/l)*l|
+  lattice = create_lattice(true);
+  lattice->reset();
+  r_cut = 2.0;
+  lattice->iterate_in_radius(
+    r0, r_cut, [&](FourVector &node, int, int, int) { node = mark; });
+  double l;
+  std::array<double, 3> d;
+  lattice->iterate_sublattice({0, 0, 0}, lattice->dimensions(),
+             [&](FourVector &node, int ix, int iy, int iz){
+    r = lattice->cell_center(ix, iy, iz);
+    for (int i = 0; i < 3; i++) {
+      d[i] = r[i] - r0[i];
+      l = lattice->lattice_sizes()[i];
+      d[i] -= static_cast<int>(d[i]/l)*l;
+      d[i] = std::abs(d[i]);
+    }
+    if (d[0] <= r_cut && d[1] <= r_cut && d[2] <= r_cut) {
+      VERIFY(node == mark) << ix << " " << iy << " " << iz;
+    } else {
+      VERIFY(node == FourVector()) << ix << " " << iy << " " << iz;
+    }
+  });
+}
