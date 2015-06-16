@@ -9,10 +9,7 @@
 
 #include "unittest.h"
 #include "setup.h"
-#include <cstdio>
-#include <cstring>
 #include <array>
-#include <iostream>
 #include <string>
 #include <vector>
 #include <boost/filesystem.hpp>
