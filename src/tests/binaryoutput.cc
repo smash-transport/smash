@@ -123,7 +123,8 @@ TEST(fullhistory_format) {
   /* Create an instance of binary output */
   std::unique_ptr<BinaryOutputCollisions> bin_output =
             make_unique<BinaryOutputCollisions>(testoutputpath, std::move(op));
-  VERIFY(bf::exists(testoutputpath / "collisions_binary.bin"));
+  const bf::path collisionsoutputfilepath = testoutputpath / "collisions_binary.bin";
+  VERIFY(bf::exists(collisionsoutputfilepath));
 
   /* create two smashon particles */
   const auto particles =
@@ -137,8 +138,8 @@ TEST(fullhistory_format) {
   ParticleList initial_particles = particles->copy_to_vector();
   particles->replace(initial_particles, {Test::smashon_random()});
   ParticleList final_particles = particles->copy_to_vector();
-  double rho = 0.123;
-  double weight = 3.21;
+  const double rho = 0.123;
+  const double weight = 3.21;
   ProcessType process_type = ProcessType::None;
   bin_output->at_interaction(initial_particles, final_particles, rho, weight, process_type);
 
@@ -152,8 +153,7 @@ TEST(fullhistory_format) {
 
   // Open file as a binary
   FILE * binF;
-  const auto filename
-      = (testoutputpath / "collisions_binary.bin").native();
+  const auto filename = collisionsoutputfilepath.native();
   binF = fopen(filename.c_str(), "rb");
   VERIFY(binF);
   // Header
@@ -203,7 +203,6 @@ TEST(particles_format) {
   /* Set the most verbose option */
   Configuration&& op {bf::path {TEST_CONFIG_PATH} / "tests",
                        "test_binary_particles.yaml"};
-
 
   /* Create an instance of binary output */
   std::unique_ptr<BinaryOutputParticles> bin_output =
