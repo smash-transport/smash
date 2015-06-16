@@ -49,6 +49,31 @@ T pCM_sqr(const T srts, const T mass_a, const T mass_b) noexcept {
 }
 
 
+/**
+ * Get the range of mandelstam-t values allowed in a particular 2->2 process,
+ * see PDG 2014 booklet, equ. (46.34).
+ * \param srts sqrt(s) of the process [GeV].
+ * \param m1 Mass of first  incoming particle [GeV].
+ * \param m2 Mass of second incoming particle [GeV].
+ * \param m3 Mass of first  outgoing particle [GeV].
+ * \param m4 Mass of second outgoing particle [GeV].
+ * \return array consisiting of {t_min, t_max}
+ * Note that both t_min and t_max are negative,
+ * with |t_min| < |t_max|, i.e. t_min > t_max.
+ */
+template <typename T>
+std::array<T,2> get_t_range(const T srts, const T m1, const T m2,
+                                          const T m3, const T m4) {
+  const T p_i = pCM(srts, m1, m2);  // initial-state CM momentum
+  const T p_f = pCM(srts, m3, m4);  // final-state CM momentum
+  const T sqrt_t0 = (m1*m1 - m2*m2 - m3*m3 + m4*m4) / (2.*srts);
+  const T t0 = sqrt_t0 * sqrt_t0;
+  const T t_min = t0 - (p_i-p_f)*(p_i-p_f),
+          t_max = t0 - (p_i+p_f)*(p_i+p_f);
+  return {t_min, t_max};
+}
+
+
 /** Convert mandelstam-s to p_lab in a nucleon-nucleon collision.
  *
  * \fpPrecision Why \c double?
