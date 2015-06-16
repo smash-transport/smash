@@ -236,6 +236,56 @@ class Configuration {
       std::copy_n(vec.begin(), N, arr.begin());
       return arr;
     }
+
+    operator CalculationFrame() {
+      std::string s = operator std::string();
+      if (s == "center of velocity") {
+        return CalculationFrame::CenterOfVelocity;
+      }
+      if (s == "center of mass") {
+        return CalculationFrame::CenterOfMass;
+      }
+      if (s == "fixed target") {
+        return CalculationFrame::FixedTarget;
+      }
+      throw IncorrectTypeInAssignment(
+          "The value for key \"" + std::string(key_) +
+          "\" should be \"center of velocity\" or \"center of mass\" "
+          "or \"fixed target\".");
+    }
+
+    operator DensityType() {
+      std::string s = operator std::string();
+      if (s == "particle") {
+        return DensityType::particle;
+      }
+      if (s == "baryon") {
+        return DensityType::baryon;
+      }
+      if (s == "baryonic isospin") {
+        return DensityType::baryonic_isospin;
+      }
+      if (s == "pion") {
+        return DensityType::pion;
+      }
+      throw IncorrectTypeInAssignment(
+          "The value for key \"" + std::string(key_) +
+          "\" should be \"particle\" or \"baryon\" "
+          "or \"baryonic isospin\" or \"pion\".");
+    }
+
+    operator BoxInitialCondition() {
+      std::string s = operator std::string();
+      if (s == "thermal momenta") {
+          return BoxInitialCondition::ThermalMomenta;
+      }
+      if (s == "peaked momenta") {
+          return BoxInitialCondition::PeakedMomenta;
+      }
+      throw IncorrectTypeInAssignment(
+          "The value for key \"" + std::string(key_) +
+          "\" should be \"thermal momenta\" or \"peaked momenta\".");
+    }
   };
 
   /**
