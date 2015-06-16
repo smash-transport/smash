@@ -72,15 +72,7 @@ class BoxModus : public ModusDefault {
   }
 
  private:
-  /** initial condition
-   *
-   * If initial_condition_ == 2, all particles have the same momentum
-   * \f$p = 3 \cdot T\f$ with T the temperature.
-   *
-   * Else, a thermalized ensemble is generated (the momenta are sampled
-   * from a Maxwell-Boltzmann distribution).
-   */
-  const int initial_condition_;
+  const BoxInitialCondition initial_condition_;
   /// length of the cube's edge in fm/c
   const float length_;
   /// Temperature of the Box in GeV

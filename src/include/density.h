@@ -23,18 +23,6 @@
 
 namespace Smash {
 
-  /** Allows to choose which kind of density to calculate.
-   *  The baryon density is necessary for the Skyrme potential.
-   *  For the symmetry potential one needs to know the isospin density.
-   */
-  enum class DensityType {
-    particle = 0,
-    baryon = 1,
-    baryonic_isospin = 2,
-    pion = 3,
-    none = 4,
-  };
-
   std::ostream& operator<<(std::ostream& os, DensityType dt);
 
   /** Get the factor that determines how much a particle contributes to the
