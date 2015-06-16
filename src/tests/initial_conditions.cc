@@ -23,7 +23,7 @@ TEST(init_particle_types) {
 TEST(initialize_box) {
   einhard::Logger<> log(einhard::ALL);
   BoxModus b({"Box:\n"
-              "  Initial_Condition: 1\n"
+              "  Initial_Condition: \"peaked momenta\"\n"
               "  Length: 7.9615\n"
               "  Temperature: 0.5\n"
               "  Start_Time: 0.2\n"

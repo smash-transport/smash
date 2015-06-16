@@ -105,7 +105,7 @@ TEST(nucleus_potential_profile) {
   conf["Collision_Term"]["Collisions"] = "False";
   conf["Collision_Term"]["Sigma"] = 0.0;
   // Fixed target: Copper
-  conf["Modi"]["Collider"]["Calculation_Frame"] = 3;
+  conf["Modi"]["Collider"]["Calculation_Frame"] = "fixed target";
   conf["Modi"]["Collider"]["E_Kin"] = 1.23;
   conf.take({"Modi", "Collider", "Sqrtsnn"});
   conf.take({"Modi", "Collider", "Projectile"});
