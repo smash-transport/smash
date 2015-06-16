@@ -156,6 +156,48 @@ std::pair<double, ThreeVector> rho_eckart(const ThreeVector &r,
                          compute_gradient);
 }
 
+void update_density_lattice(DensityLattice* lat,
+                            const LatticeUpdate update,
+                            const DensityType dens_type,
+                            const ExperimentParameters &par,
+                            const Particles &particles) {
+  // Do not proceed if lattice does not exists/update not required
+  if (lat == nullptr || lat->when_update() != update) {
+    return;
+  }
+  // Add particles to lattice jmus
+  lat->reset();
+  const int ntest = par.testparticles;
+  const double sig = par.gaussian_sigma;
+  const double two_sig_sqr = 2 * sig * sig;
+  const double r_cut = 4 * sig;
+  const double r_cut_sqr = r_cut * r_cut;
+  for (const auto &part : particles) {
+    const float dens_factor = density_factor(part.pdgcode(), dens_type);
+    if (std::abs(dens_factor) < really_small) {
+      continue;
+    }
+    const ThreeVector pos = part.position().threevec();
+    lat->iterate_in_radius(pos, r_cut,
+      [&](DensityOnLattice &node, int ix, int iy, int iz){
+        const ThreeVector r = lat->cell_center(ix, iy, iz);
+        const double sf = unnormalized_smearing_factor(pos - r,
+                               part.momentum(), two_sig_sqr, r_cut_sqr).first;
+        if (sf > really_small) {
+          /*std::cout << "Adding particle " << part << " to lattice with"
+                    << " smearing factor " << sf <<
+                    " and density factor " << dens_factor << std::endl;*/
+          node.add_particle(part, sf * dens_factor);
+        }
+      });
+  }
+  // Compute density from jmus, take care about smearing factor normalization
+  for (auto &node : *lat) {
+    node.compute_density(smearing_factor_norm(two_sig_sqr) * ntest);
+  }
+}
+
+
 std::ostream& operator<<(std::ostream& os, DensityType dens_type) {
   switch (dens_type) {
     case DensityType::particle:

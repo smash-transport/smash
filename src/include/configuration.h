@@ -220,6 +220,72 @@ class Configuration {
             "expected but apparently not found.");
       }
     }
+
+    template <typename T, size_t N>
+    operator std::array<T, N>() {
+      std::vector<T> vec = operator std::vector<T>();
+      const size_t n_read = vec.size();
+      // Alert if size does not match
+      if (n_read != N) {
+        throw IncorrectTypeInAssignment(
+            "Wrong number of values in array \"" + std::string(key_) +
+            "\". Expected " + std::to_string(N) + " values,"
+            " found " + std::to_string(n_read) + ".");
+      }
+      std::array<T, N> arr;
+      std::copy_n(vec.begin(), N, arr.begin());
+      return arr;
+    }
+
+    operator CalculationFrame() {
+      std::string s = operator std::string();
+      if (s == "center of velocity") {
+        return CalculationFrame::CenterOfVelocity;
+      }
+      if (s == "center of mass") {
+        return CalculationFrame::CenterOfMass;
+      }
+      if (s == "fixed target") {
+        return CalculationFrame::FixedTarget;
+      }
+      throw IncorrectTypeInAssignment(
+          "The value for key \"" + std::string(key_) +
+          "\" should be \"center of velocity\" or \"center of mass\" "
+          "or \"fixed target\".");
+    }
+
+    operator DensityType() {
+      std::string s = operator std::string();
+      if (s == "particle") {
+        return DensityType::particle;
+      }
+      if (s == "baryon") {
+        return DensityType::baryon;
+      }
+      if (s == "baryonic isospin") {
+        return DensityType::baryonic_isospin;
+      }
+      if (s == "pion") {
+        return DensityType::pion;
+      }
+      throw IncorrectTypeInAssignment(
+          "The value for key \"" + std::string(key_) +
+          "\" should be \"particle\" or \"baryon\" "
+          "or \"baryonic isospin\" or \"pion\".");
+    }
+
+    operator BoxInitialCondition() {
+      std::string s = operator std::string();
+      if (s == "thermal momenta") {
+          return BoxInitialCondition::ThermalMomenta;
+      }
+      if (s == "peaked momenta") {
+          return BoxInitialCondition::PeakedMomenta;
+      }
+      throw IncorrectTypeInAssignment(
+          "The value for key \"" + std::string(key_) +
+          "\" should be \"thermal momenta\" or \"peaked momenta\".");
+    }
   };
 
   /**

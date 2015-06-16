@@ -88,7 +88,7 @@ TEST(sanity_default) {
 
 TEST(sanity_box) {
   Configuration conf(TEST_CONFIG_PATH);
-  conf["Modi"]["Box"]["Initial_Condition"] = 1;
+  conf["Modi"]["Box"]["Initial_Condition"] = "peaked momenta";
   conf["Modi"]["Box"]["Length"] = 5.0;
   conf["Modi"]["Box"]["Temperature"] = 0.13;
   conf["Modi"]["Box"]["Start_Time"] = 0.2;

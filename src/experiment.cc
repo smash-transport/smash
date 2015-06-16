@@ -233,13 +233,45 @@ Experiment<Modus>::Experiment(Configuration config)
     potentials_ = make_unique<Potentials>(config["Potentials"], parameters_);
   }
 
-  dens_type_ = static_cast<DensityType>(
-      config.take({"Output", "Density", "Density_Type"}, 0));
-  if (dens_type_ < DensityType::particle || dens_type_ > DensityType::pion) {
-    log.error() << "Unknown Density_Type specified. Taking default.";
-    dens_type_ = DensityType::baryon;
-  }
+  dens_type_ =
+      config.take({"Output", "Density", "Density_Type"}, DensityType::particle);
   log.info() << "Density type written to headers: " << dens_type_;
+
+  // Create lattices
+  if (config.has_value({"Lattice"})) {
+    // Take lattice properties from config to assign them to all lattices
+    const std::array<float, 3> l = config.take({"Lattice", "Sizes"});
+    const std::array<int, 3> n = config.take({"Lattice", "CellNumber"});
+    const std::array<float, 3> origin = config.take({"Lattice", "Origin"});
+    const bool periodic = config.take({"Lattice", "Periodic"});
+    dens_type_lattice_printout_ = static_cast<DensityType>(
+         config.take({"Lattice", "Printout", "Density"},
+                     static_cast<int>(DensityType::none)));
+    /* Create baryon and isospin density lattices regardless of config
+       if potentials are on. This is because they allow to compute
+       potentials faster */
+    if (potentials_) {
+      jmu_B_lat_ = make_unique<DensityLattice>(l, n, origin, periodic,
+                                            LatticeUpdate::EveryTimestep);
+      jmu_I3_lat_ = make_unique<DensityLattice>(l, n, origin, periodic,
+                                              LatticeUpdate::EveryTimestep);
+    } else {
+      if (dens_type_lattice_printout_ == DensityType::baryon) {
+        jmu_B_lat_ = make_unique<DensityLattice>(l, n, origin, periodic,
+                                                  LatticeUpdate::AtOutput);
+      }
+      if (dens_type_lattice_printout_ == DensityType::baryonic_isospin) {
+        jmu_I3_lat_ = make_unique<DensityLattice>(l, n, origin, periodic,
+                                             LatticeUpdate::AtOutput);
+      }
+    }
+    if (dens_type_lattice_printout_ != DensityType::none &&
+        dens_type_lattice_printout_ != DensityType::baryonic_isospin &&
+        dens_type_lattice_printout_ != DensityType::baryon) {
+        jmu_custom_lat_ = make_unique<DensityLattice>(l, n, origin,
+                                          periodic, LatticeUpdate::AtOutput);
+    }
+  }
 }
 
 const std::string hline(80, '-');
@@ -400,6 +432,10 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
 
     /* (3) Do propagation. */
     if (potentials_) {
+      update_density_lattice(jmu_B_lat_.get(), LatticeUpdate::EveryTimestep,
+                       DensityType::baryon, parameters_, particles_);
+      update_density_lattice(jmu_I3_lat_.get(), LatticeUpdate::EveryTimestep,
+                       DensityType::baryonic_isospin, parameters_, particles_);
       propagate(&particles_, parameters_, *potentials_);
     } else {
       propagate_straight_line(&particles_, parameters_);
@@ -418,10 +454,33 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
       log.info() << format_measurements(
           particles_, interactions_total, interactions_this_interval,
           conserved_initial_, time_start_, parameters_.labclock.current_time());
+      // Update lattices for output
+      const LatticeUpdate lat_upd = LatticeUpdate::AtOutput;
+      update_density_lattice(jmu_B_lat_.get(), lat_upd, DensityType::baryon,
+                             parameters_, particles_);
+      update_density_lattice(jmu_I3_lat_.get(), lat_upd,
+                DensityType::baryonic_isospin, parameters_, particles_);
+      update_density_lattice(jmu_custom_lat_.get(), lat_upd,
+                dens_type_lattice_printout_, parameters_, particles_);
       /* save evolution data */
       for (const auto &output : outputs_) {
         output->at_intermediate_time(particles_, evt_num, parameters_.labclock);
         output->thermodynamics_output(particles_, parameters_);
+        switch (dens_type_lattice_printout_) {
+          case DensityType::baryon:
+            output->thermodynamics_output(std::string("rhoB"), *jmu_B_lat_,
+                                                                     evt_num);
+            break;
+          case DensityType::baryonic_isospin:
+            output->thermodynamics_output(std::string("rhoI3"), *jmu_I3_lat_,
+                                                                     evt_num);
+            break;
+          case DensityType::none:
+            break;
+          default:
+            output->thermodynamics_output(std::string("rho"), *jmu_custom_lat_,
+                                                                      evt_num);
+        }
       }
     }
     // Check conservation of conserved quantities if potentials are off.

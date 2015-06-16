@@ -19,6 +19,7 @@
 #include "experimentparameters.h"
 #include "forwarddeclarations.h"
 #include "outputinterface.h"
+#include "lattice.h"
 #include "particles.h"
 #include "pauliblocking.h"
 #include "potentials.h"
@@ -202,6 +203,18 @@ class Experiment : public ExperimentBase {
 
   /// The Action finder objects
   std::vector<std::unique_ptr<ActionFinderInterface>> action_finders_;
+
+  /// Lattices holding different physical quantities
+
+  /** Baryon density, isospin projection density, custom density.
+   *  In the config user asks for some kind of density for printout.
+   *  Baryon and isospin projection density are anyway needed for potentials.
+   *  If user asks for some other density type for printout, it will be handled
+   *  using jmu_custom variable.
+   */
+  std::unique_ptr<DensityLattice> jmu_B_lat_, jmu_I3_lat_, jmu_custom_lat_;
+  /// Type of density for lattice printout
+  DensityType dens_type_lattice_printout_ = DensityType::none;
 
   /**
    * Number of events.
