@@ -94,15 +94,32 @@ InterpolateData<T>::InterpolateData(const std::vector<T>& x,
   }
 }
 
+/// Find the index in v that corresponds to the last value smaller than x.
+///
+/// This assumes v is sorted and uses a binary search.
+template <typename T>
+size_t find_index(const std::vector<T> v, T x) {
+  const auto it = std::lower_bound(v.begin(), v.end(), x);
+  if (it == v.begin()) {
+    return 0;
+  } else if (it == v.end()) {
+    return v.size() - 1;
+  } else {
+    if (*it == x) {
+      return it - v.begin();
+    }
+    return it - 1 - v.begin();
+  }
+}
+
 template <typename T>
 T InterpolateData<T>::operator()(T x0) const {
   // Find the piecewise linear interpolation corresponding to x0.
-  size_t i = 0;
-  while (x_[i] <= x0 && i < f_.size()) {
-    i++;
-  }
-  if (i != 0) {
-    i--;
+  size_t i = find_index(x_, x0);
+  if (i >= f_.size()) {
+    // We don't have a linear interpolation beyond the last point in x_.
+    // Use the last linear interpolation instead.
+    i = f_.size() - 1;
   }
   return f_[i](x0);
 }
