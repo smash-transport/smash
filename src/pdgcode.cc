@@ -27,6 +27,38 @@ std::istream& operator>>(std::istream& is, PdgCode& code) {
   return is;
 }
 
+bool PdgCode::is_Nstar() const {
+  std::int32_t multi = multiplet();
+  if (multi == 0x10102 ||
+      multi == 0x10122 ||
+      multi == 0x10202 ||
+      multi == 0x10212 ||
+      multi == 0x10104 ||
+      multi == 0x10114 ||
+      multi == 0x10204 ||
+      multi == 0x10214 ||
+      multi == 0x10106 ||
+      multi == 0x10206) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+bool PdgCode::is_Deltastar() const {
+  std::int32_t multi = multiplet();
+  if (multi == 0x10112 ||
+      multi == 0x10222 ||
+      multi == 0x10124 ||
+      multi == 0x10224 ||
+      multi == 0x10216 ||
+      multi == 0x10208) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
 int PdgCode::isospin_total() const {
   // non-hadrons and η mesons (and ω and stuff):
   if (!is_hadron() || quarks() == 0x22) {

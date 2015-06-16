@@ -298,6 +298,11 @@ void ScatterActionNucleonNucleon::sample_cms_momenta() {
     log.warn("Etot: ", cms_energy, " m_a: ", mass_a, " m_b: ", mass_b);
   }
 
+  double t, t0 = (mass_a*mass_a-mass_b*mass_b)*(mass_a*mass_a-mass_b*mass_b)
+                 /(4.*mandelstam_s());
+  double t_min = t0 - (p_i-p_f)*(p_i-p_f),
+         t_max = t0 - (p_i+p_f)*(p_i+p_f);
+
   Angles phitheta;
   if (t_a.pdgcode().iso_multiplet() == 0x1114 &&
       t_b.pdgcode().iso_multiplet() == 0x1112 && !isotropic_) {
@@ -306,14 +311,21 @@ void ScatterActionNucleonNucleon::sample_cms_momenta() {
      * elastic pp scattering, as suggested in \iref{Cugnon:1996kh}. */
     double plab = plab_from_s_NN(mandelstam_s());
     double bb = std::max(Cugnon_bpp(plab), really_small);
-    double t0 = (mass_a*mass_a-mass_b*mass_b)*(mass_a*mass_a-mass_b*mass_b)
-                /(4.*mandelstam_s());
-    double t, t_min = t0 - (p_i-p_f)*(p_i-p_f),
-           t_max = t0 - (p_i+p_f)*(p_i+p_f);
-    if (Random::canonical() <= 0.5) {
-      t = Random::expo(bb, t_min, t_max);
-    } else {
-      t = t_max + t_min - Random::expo(bb, t_min, t_max);
+    t = Random::expo(bb, t_min, t_max);
+    if (Random::canonical() > 0.5) {
+      t = t_max + t_min - t;  // symmetrize
+    }
+    phitheta = Angles(2.*M_PI*Random::canonical(),
+                      1. - 2.*(t-t_min)/(t_max-t_min));
+  } else if (t_b.pdgcode().iso_multiplet() == 0x1112 && !isotropic_ &&
+             (t_a.pdgcode().is_Nstar() || t_a.pdgcode().is_Deltastar())) {
+    /** NN->NR: Fit to HADES data, see \iref{Agakishiev:2014wqa}. */
+    const std::array<float,4> p { 1.46434, 5.80311, -6.89358, 1.94302 };
+    const double a = p[0] + p[1]*mass_a + p[2]*mass_a*mass_a +
+                     p[3]*mass_a*mass_a*mass_a;
+    t = Random::power (-a, t_min, t_max);
+    if (Random::canonical() > 0.5) {
+      t = t_max + t_min - t;  // symmetrize
     }
     phitheta = Angles(2.*M_PI*Random::canonical(),
                       1. - 2.*(t-t_min)/(t_max-t_min));

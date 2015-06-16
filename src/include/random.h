@@ -99,6 +99,31 @@ template <typename T = double> T expo(T A, T x1, T x2) {
   return std::log(uniform(r1, r2)) / A;
 }
 
+// signum function
+template <typename T> int sgn(T val) {
+    return (T(0) < val) - (val < T(0));
+}
+
+/**
+ * Draws a random number according to a power-law distribution ~ x^n.
+ * \param n exponent in power law (arbitrary real number)
+ * \param xMin minimum value
+ * \param xMax maximum value
+ * \return random number between xMin and xMax
+ */
+template <typename T = double> T power(T n, T xMin, T xMax) {
+    const T n1 = n + 1;
+    if (std::abs(n1)<1E-3) {
+      return xMin * std::pow(xMax/xMin, canonical());
+    } else if (xMin>0. && xMax>0.) {
+      return std::pow(uniform(std::pow(xMin, n1), std::pow(xMax, n1)), 1./n1);
+    } else {
+      return sgn(xMin) *
+             std::pow(uniform(std::pow(std::abs(xMin), n1),
+                              std::pow(std::abs(xMax), n1)), 1./n1);
+    }
+}
+
 }  // namespace Random
 }  // namespace Smash
 
