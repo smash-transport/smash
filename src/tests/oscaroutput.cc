@@ -33,7 +33,7 @@ TEST(directory_is_created) {
   VERIFY(bf::exists(testoutputpath));
 }
 
-static void compare_fourvector(const std::array<std::string,4> &stringarray,
+static void compare_fourvector(const std::array<std::string, 4> &stringarray,
                                const FourVector &fourvector) {
   COMPARE_ABSOLUTE_ERROR(std::atof(stringarray.at(0).c_str()), fourvector.x1(),
                          accuracy);
@@ -45,19 +45,19 @@ static void compare_fourvector(const std::array<std::string,4> &stringarray,
                          accuracy);
 }
 
-static void compare_particledata(const std::array<std::string,12> &datastring,
+static void compare_particledata(const std::array<std::string, 12> &datastring,
                                  const ParticleData &particle, const int id) {
   COMPARE(std::atoi(datastring.at(0).c_str()), id);
   COMPARE(datastring.at(1), Test::smashon_pdg_string);
   COMPARE(std::atoi(datastring.at(2).c_str()), 0);
-  std::array<std::string,4> momentum_string;
-  for (int i = 0; i < 4 ; i++) {
+  std::array<std::string, 4> momentum_string;
+  for (int i = 0; i < 4; i++) {
     momentum_string.at(i) = datastring.at(i + 3);
   }
   compare_fourvector(momentum_string, particle.momentum());
   COMPARE(float(std::atof(datastring.at(7).c_str())), Test::smashon_mass);
-  std::array<std::string,4> position_string;
-  for (int i = 0; i < 4 ; i++) {
+  std::array<std::string, 4> position_string;
+  for (int i = 0; i < 4; i++) {
     position_string.at(i) = datastring.at(i + 8);
   }
   compare_fourvector(position_string, particle.position());
@@ -67,11 +67,10 @@ TEST(fullhistory_format) {
   // Set options
   const bf::path configfilename = "oscar_1999.yaml";
   const bf::path configfilepath = testoutputpath / configfilename;
-  bf::ofstream(configfilepath)
-      << "Oscar_Collisions:\n"
-         "    Enable:          True\n"
-         "    Print_Start_End: True\n"
-         "    2013_Format:     False\n";
+  bf::ofstream(configfilepath) << "Oscar_Collisions:\n"
+                                  "    Enable:          True\n"
+                                  "    Print_Start_End: True\n"
+                                  "    2013_Format:     False\n";
   VERIFY(bf::exists(configfilepath));
 
   std::unique_ptr<OutputInterface> oscfull = create_oscar_output(
@@ -95,11 +94,11 @@ TEST(fullhistory_format) {
   particles.replace(initial_particles, {Test::smashon_random()});
   ParticleList final_particles = particles.copy_to_vector();
   oscfull->at_interaction(initial_particles, final_particles, 0.0, 0.0,
-      ProcessType::None);
+                          ProcessType::None);
   /* Final state output */
   oscfull->at_eventend(particles, event_id);
 
-  //const std::string outputfilename
+  // const std::string outputfilename
   //    = (testoutputpath / outputfilename).native();
   bf::fstream outputfile;
   outputfile.open(outputfilepath, std::ios_base::in);
@@ -107,14 +106,16 @@ TEST(fullhistory_format) {
     std::string line, item;
     /* Check header */
     std::string output_header = "";
-    std::string header = "# OSC1999A\n"
-                         "# full_event_history\n"
-                         "# " VERSION_MAJOR "\n"
-                         "# Block format:\n"
-                         "# nin nout event_number\n"
-                         "# id pdg 0 px py pz p0 mass x y z t\n"
-                         "# End of event: 0 0 event_number\n"
-                         "#\n";
+    std::string header =
+        "# OSC1999A\n"
+        "# full_event_history\n"
+        "# " VERSION_MAJOR
+        "\n"
+        "# Block format:\n"
+        "# nin nout event_number\n"
+        "# id pdg 0 px py pz p0 mass x y z t\n"
+        "# End of event: 0 0 event_number\n"
+        "#\n";
     do {
       std::getline(outputfile, line);
       output_header += line + '\n';
@@ -129,7 +130,7 @@ TEST(fullhistory_format) {
     COMPARE(std::atoi(item.c_str()), event_id + 1);
     /* Check initial particle data lines item by item */
     for (ParticleData &data : initial_particles) {
-      std::array<std::string,12> datastring;
+      std::array<std::string, 12> datastring;
       for (int j = 0; j < 12; j++) {
         outputfile >> datastring.at(j);
       }
@@ -143,14 +144,14 @@ TEST(fullhistory_format) {
     std::getline(outputfile, line);
     COMPARE(std::stoul(item), final_particles.size());
     for (ParticleData &data : initial_particles) {
-      std::array<std::string,12> datastring;
+      std::array<std::string, 12> datastring;
       for (int j = 0; j < 12; j++) {
         outputfile >> datastring.at(j);
       }
       compare_particledata(datastring, data, data.id());
     }
     for (ParticleData &data : final_particles) {
-      std::array<std::string,12> datastring;
+      std::array<std::string, 12> datastring;
       for (int j = 0; j < 12; j++) {
         outputfile >> datastring.at(j);
       }
@@ -164,7 +165,7 @@ TEST(fullhistory_format) {
     outputfile >> item;
     COMPARE(std::atoi(item.c_str()), event_id + 1);
     for (ParticleData &data : particles) {
-      std::array<std::string,12> datastring;
+      std::array<std::string, 12> datastring;
       for (int j = 0; j < 12; j++) {
         outputfile >> datastring.at(j);
       }
@@ -182,16 +183,14 @@ TEST(fullhistory_format) {
   VERIFY(bf::remove(outputfilepath));
 }
 
-
 TEST(particlelist_format) {
   // Set options
   const bf::path configfilename = "oscar_1999.yaml";
   const bf::path configfilepath = testoutputpath / configfilename;
-  bf::ofstream(configfilepath)
-      << "Oscar_Particlelist:\n"
-         "    Enable:          True\n"
-         "    Only_Final:      True\n"
-         "    2013_Format:     False\n";
+  bf::ofstream(configfilepath) << "Oscar_Particlelist:\n"
+                                  "    Enable:          True\n"
+                                  "    Only_Final:      True\n"
+                                  "    2013_Format:     False\n";
   VERIFY(bf::exists(configfilepath));
 
   std::unique_ptr<OutputInterface> oscfinal = create_oscar_output(
@@ -222,7 +221,7 @@ TEST(particlelist_format) {
   final_particles = particles.copy_to_vector();
   /* As with initial state output, this should not do anything */
   oscfinal->at_interaction(initial_particles, final_particles, 0.0, 0.0,
-      ProcessType::None);
+                           ProcessType::None);
   /* Final state output; this is the only thing we expect to find in file */
   oscfinal->at_eventend(particles, event_id);
 
@@ -232,14 +231,16 @@ TEST(particlelist_format) {
     std::string line, item;
     /* Check header */
     std::string output_header = "";
-    std::string header = "# OSC1999A\n"
-                         "# final_id_p_x\n"
-                         "# " VERSION_MAJOR "\n"
-                         "# Block format:\n"
-                         "# nin nout event_number\n"
-                         "# id pdg 0 px py pz p0 mass x y z t\n"
-                         "# End of event: 0 0 event_number\n"
-                         "#\n";
+    std::string header =
+        "# OSC1999A\n"
+        "# final_id_p_x\n"
+        "# " VERSION_MAJOR
+        "\n"
+        "# Block format:\n"
+        "# nin nout event_number\n"
+        "# id pdg 0 px py pz p0 mass x y z t\n"
+        "# End of event: 0 0 event_number\n"
+        "#\n";
     do {
       std::getline(outputfile, line);
       output_header += line + '\n';
@@ -253,7 +254,7 @@ TEST(particlelist_format) {
     outputfile >> item;
     COMPARE(std::atoi(item.c_str()), event_id + 1);
     for (ParticleData &data : particles) {
-      std::array<std::string,12> datastring;
+      std::array<std::string, 12> datastring;
       for (int j = 0; j < 12; j++) {
         outputfile >> datastring.at(j);
       }

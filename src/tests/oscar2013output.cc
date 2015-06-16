@@ -34,7 +34,7 @@ TEST(directory_is_created) {
   VERIFY(bf::exists(testoutputpath));
 }
 
-static void compare_fourvector(const std::array<std::string,4> &stringarray,
+static void compare_fourvector(const std::array<std::string, 4> &stringarray,
                                const FourVector &fourvector) {
   COMPARE_ABSOLUTE_ERROR(std::atof(stringarray.at(0).c_str()), fourvector.x0(),
                          accuracy);
@@ -49,14 +49,15 @@ static void compare_fourvector(const std::array<std::string,4> &stringarray,
 static void compare_particledata(
     const std::array<std::string, data_elements> &datastring,
     const ParticleData &particle, const int id) {
-  std::array<std::string,4> position_string;
-  for (int i = 0; i < 4 ; i++) {
+  std::array<std::string, 4> position_string;
+  for (int i = 0; i < 4; i++) {
     position_string.at(i) = datastring.at(i);
   }
   compare_fourvector(position_string, particle.position());
-  COMPARE(float(std::atof(datastring.at(4).c_str())), Test::smashon_mass) << datastring.at(4);
-  std::array<std::string,4> momentum_string;
-  for (int i = 0; i < 4 ; i++) {
+  COMPARE(float(std::atof(datastring.at(4).c_str())), Test::smashon_mass)
+      << datastring.at(4);
+  std::array<std::string, 4> momentum_string;
+  for (int i = 0; i < 4; i++) {
     momentum_string.at(i) = datastring.at(i + 5);
   }
   compare_fourvector(momentum_string, particle.momentum());
@@ -68,11 +69,10 @@ TEST(full2013_format) {
   // Set options
   const bf::path configfilename = "oscar_2013.yaml";
   const bf::path configfilepath = testoutputpath / configfilename;
-  bf::ofstream(configfilepath)
-      << "Oscar_Collisions:\n"
-         "    Enable:          True\n"
-         "    Print_Start_End: True\n"
-         "    2013_Format:     True\n";
+  bf::ofstream(configfilepath) << "Oscar_Collisions:\n"
+                                  "    Enable:          True\n"
+                                  "    Print_Start_End: True\n"
+                                  "    2013_Format:     True\n";
   VERIFY(bf::exists(configfilepath));
 
   std::unique_ptr<OutputInterface> osc2013full = create_oscar_output(
@@ -97,7 +97,7 @@ TEST(full2013_format) {
   particles.replace(initial_particles, {Test::smashon_random()});
   ParticleList final_particles = particles.copy_to_vector();
   osc2013full->at_interaction(initial_particles, final_particles, 0.0, 0.0,
-      ProcessType::None);
+                              ProcessType::None);
   /* Final state output */
   osc2013full->at_eventend(particles, event_id);
 
@@ -108,18 +108,21 @@ TEST(full2013_format) {
     std::string line, item;
     /* Check header */
     std::string output_header = "";
-    std::string header = "#!OSCAR2013 "
-                         "full_event_history " VERSION_MAJOR " "
-                         "t x y z mass p0 px py pz pdg ID\n"
-                         "# Units: fm fm fm fm GeV GeV GeV GeV GeV none none\n";
+    std::string header =
+        "#!OSCAR2013 "
+        "full_event_history " VERSION_MAJOR
+        " "
+        "t x y z mass p0 px py pz pdg ID\n"
+        "# Units: fm fm fm fm GeV GeV GeV GeV GeV none none\n";
     do {
       std::getline(outputfile, line);
       output_header += line + '\n';
     } while (line != "# Units: fm fm fm fm GeV GeV GeV GeV GeV none none");
     COMPARE(output_header, header);
     /* Check initial particle list description line */
-    std::string initial_line = "# event " + std::to_string(event_id + 1)
-      + " in " + std::to_string(initial_particles.size());
+    std::string initial_line = "# event " + std::to_string(event_id + 1) +
+                               " in " +
+                               std::to_string(initial_particles.size());
     std::getline(outputfile, line);
     COMPARE(line, initial_line);
     /* Check initial particle data lines item by item */
@@ -134,9 +137,9 @@ TEST(full2013_format) {
     outputfile.get();
     /* Check interaction block */
     std::getline(outputfile, line);
-    std::string interaction_line = "# interaction in "
-      + std::to_string(initial_particles.size())
-      + " out " + std::to_string(final_particles.size());
+    std::string interaction_line =
+        "# interaction in " + std::to_string(initial_particles.size()) +
+        " out " + std::to_string(final_particles.size());
     // Allow additional fields
     COMPARE(line.substr(0, interaction_line.size()), interaction_line);
     for (ParticleData &data : initial_particles) {
@@ -157,8 +160,8 @@ TEST(full2013_format) {
     outputfile.get();
     /* Check final particle list */
     std::getline(outputfile, line);
-    std::string final_line = "# event " + std::to_string(event_id + 1)
-      + " out " + std::to_string(particles.size());
+    std::string final_line = "# event " + std::to_string(event_id + 1) +
+                             " out " + std::to_string(particles.size());
     COMPARE(line, final_line);
     for (ParticleData &data : particles) {
       std::array<std::string, data_elements> datastring;
@@ -171,8 +174,7 @@ TEST(full2013_format) {
     outputfile.get();
     /* Check for event end line */
     std::getline(outputfile, line);
-    std::string end_line = "# event " + std::to_string(event_id + 1)
-      + " end";
+    std::string end_line = "# event " + std::to_string(event_id + 1) + " end";
     COMPARE(line, end_line);
   }
   outputfile.close();
@@ -180,16 +182,14 @@ TEST(full2013_format) {
   VERIFY(bf::remove(configfilepath));
 }
 
-
 TEST(final2013_format) {
   // Set options
   const bf::path configfilename = "oscar_2013.yaml";
   const bf::path configfilepath = testoutputpath / configfilename;
-  bf::ofstream(configfilepath)
-      << "Oscar_Particlelist:\n"
-         "    Enable:          True\n"
-         "    Only_Final:      True\n"
-         "    2013_Format:     True\n";
+  bf::ofstream(configfilepath) << "Oscar_Particlelist:\n"
+                                  "    Enable:          True\n"
+                                  "    Only_Final:      True\n"
+                                  "    2013_Format:     True\n";
   VERIFY(bf::exists(configfilepath));
 
   std::unique_ptr<OutputInterface> osc2013final = create_oscar_output(
@@ -223,7 +223,7 @@ TEST(final2013_format) {
   COMPARE(final_particles, particles.copy_to_vector());
   /* As with initial state output, this should not do anything */
   osc2013final->at_interaction(initial_particles, final_particles, 0.0, 0.0,
-      ProcessType::None);
+                               ProcessType::None);
   /* Final state output; this is the only thing we expect to find in file */
   osc2013final->at_eventend(particles, event_id);
 
@@ -234,10 +234,12 @@ TEST(final2013_format) {
     std::string line, item;
     /* Check header */
     std::string output_header = "";
-    std::string header = "#!OSCAR2013 "
-                         "particle_lists " VERSION_MAJOR " "
-                         "t x y z mass p0 px py pz pdg ID\n"
-                         "# Units: fm fm fm fm GeV GeV GeV GeV GeV none none\n";
+    std::string header =
+        "#!OSCAR2013 "
+        "particle_lists " VERSION_MAJOR
+        " "
+        "t x y z mass p0 px py pz pdg ID\n"
+        "# Units: fm fm fm fm GeV GeV GeV GeV GeV none none\n";
     do {
       std::getline(outputfile, line);
       output_header += line + '\n';
@@ -245,8 +247,8 @@ TEST(final2013_format) {
     COMPARE(output_header, header);
     /* Check final particle list */
     std::getline(outputfile, line);
-    std::string final_line = "# event " + std::to_string(event_id + 1)
-      + " out " + std::to_string(particles.size());
+    std::string final_line = "# event " + std::to_string(event_id + 1) +
+                             " out " + std::to_string(particles.size());
     COMPARE(line, final_line);
     for (ParticleData &data : particles) {
       std::array<std::string, data_elements> datastring;
@@ -259,8 +261,7 @@ TEST(final2013_format) {
     outputfile.get();
     /* Check for event end line */
     std::getline(outputfile, line);
-    std::string end_line = "# event " + std::to_string(event_id + 1)
-      + " end";
+    std::string end_line = "# event " + std::to_string(event_id + 1) + " end";
     COMPARE(line, end_line);
   }
   outputfile.close();

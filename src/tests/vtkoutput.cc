@@ -33,8 +33,8 @@ TEST(directory_is_created) {
   VERIFY(bf::exists(testoutputpath));
 }
 
-static void compare_threevector(const std::array<std::string,3> &stringarray,
-                               const ThreeVector &threevector) {
+static void compare_threevector(const std::array<std::string, 3> &stringarray,
+                                const ThreeVector &threevector) {
   COMPARE_ABSOLUTE_ERROR(std::atof(stringarray.at(0).c_str()), threevector.x1(),
                          accuracy);
   COMPARE_ABSOLUTE_ERROR(std::atof(stringarray.at(1).c_str()), threevector.x2(),
@@ -60,9 +60,10 @@ TEST(vtkoutputfile) {
   cfgfile.open(configfilepath, std::ios::out);
   cfgfile << "Options: None" << std::endl;
   cfgfile.close();
-  Configuration&& op{testoutputpath, configfilename};
+  Configuration &&op{testoutputpath, configfilename};
   /* Create output object */
-  std::unique_ptr<VtkOutput> vtkop = make_unique<VtkOutput>(testoutputpath, std::move(op));
+  std::unique_ptr<VtkOutput> vtkop =
+      make_unique<VtkOutput>(testoutputpath, std::move(op));
   int event_id = 0;
   /* Initial output */
   vtkop->at_eventstart(particles, event_id);
@@ -72,7 +73,8 @@ TEST(vtkoutputfile) {
   /* Time step output */
   Clock clock(0.0, 1.0);
   vtkop->at_intermediate_time(particles, event_id, clock);
-  const bf::path outputfile2path = testoutputpath / "pos_ev00000_tstep00001.vtk";
+  const bf::path outputfile2path =
+      testoutputpath / "pos_ev00000_tstep00001.vtk";
   VERIFY(bf::exists(outputfile2path));
 
   bf::fstream outputfile;
@@ -81,11 +83,12 @@ TEST(vtkoutputfile) {
     std::string line, item;
     /* Check header */
     std::string output_header = "";
-    std::string header = "# vtk DataFile Version 2.0\n"
-                         "Generated from molecular-offset data "
-                         VERSION_MAJOR "\n"
-                         "ASCII\n"
-                         "DATASET UNSTRUCTURED_GRID\n";
+    std::string header =
+        "# vtk DataFile Version 2.0\n"
+        "Generated from molecular-offset data " VERSION_MAJOR
+        "\n"
+        "ASCII\n"
+        "DATASET UNSTRUCTURED_GRID\n";
     do {
       std::getline(outputfile, line);
       output_header += line + '\n';
