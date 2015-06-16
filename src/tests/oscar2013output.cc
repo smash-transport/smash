@@ -69,20 +69,22 @@ static void compare_particledata(
 
 TEST(full2013_format) {
   // Set options
-  std::string configfilename = "oscar_2013.yaml";
-  bf::ofstream(testoutputpath / configfilename)
+  const bf::path configfilename = "oscar_2013.yaml";
+  const bf::path configfilepath = testoutputpath / configfilename;
+  bf::ofstream(configfilepath)
       << "Oscar_Collisions:\n"
          "    Enable:          True\n"
          "    Print_Start_End: True\n"
          "    2013_Format:     True\n";
-  VERIFY(bf::exists(testoutputpath / configfilename));
+  VERIFY(bf::exists(configfilepath));
 
   std::unique_ptr<OutputInterface> osc2013full = create_oscar_output(
       testoutputpath, Configuration{testoutputpath, configfilename});
   VERIFY(bool(osc2013full));
 
-  std::string outputfilename = "full_event_history.oscar";
-  VERIFY(bf::exists(testoutputpath / outputfilename));
+  const bf::path outputfilename = "full_event_history.oscar";
+  const bf::path outputfilepath = testoutputpath / outputfilename;
+  VERIFY(bf::exists(outputfilepath));
 
   Test::create_smashon_particletypes();
 
@@ -102,9 +104,8 @@ TEST(full2013_format) {
   /* Final state output */
   osc2013full->at_eventend(particles, event_id);
 
-  std::fstream outputfile;
-  outputfile.open((testoutputpath / outputfilename)
-                  .native().c_str(), std::ios_base::in);
+  bf::fstream outputfile;
+  outputfile.open(outputfilepath, std::ios_base::in);
   VERIFY(outputfile.good());
   if (outputfile.good()) {
     std::string line, item;
@@ -177,25 +178,30 @@ TEST(full2013_format) {
       + " end";
     COMPARE(line, end_line);
   }
+  outputfile.close();
+  VERIFY(bf::remove(outputfilepath));
+  VERIFY(bf::remove(configfilepath));
 }
 
 
 TEST(final2013_format) {
   // Set options
-  std::string configfilename = "oscar_2013.yaml";
-  bf::ofstream(testoutputpath / configfilename)
+  const bf::path configfilename = "oscar_2013.yaml";
+  const bf::path configfilepath = testoutputpath / configfilename;
+  bf::ofstream(configfilepath)
       << "Oscar_Particlelist:\n"
          "    Enable:          True\n"
          "    Only_Final:      True\n"
          "    2013_Format:     True\n";
-  VERIFY(bf::exists(testoutputpath / configfilename));
+  VERIFY(bf::exists(configfilepath));
 
   std::unique_ptr<OutputInterface> osc2013final = create_oscar_output(
       testoutputpath, Configuration{testoutputpath, configfilename});
   VERIFY(bool(osc2013final));
 
-  std::string outputfilename = "particle_lists.oscar";
-  VERIFY(bf::exists(testoutputpath / outputfilename));
+  const bf::path outputfilename = "particle_lists.oscar";
+  const bf::path outputfilepath = testoutputpath / outputfilename;
+  VERIFY(bf::exists(outputfilepath));
 
   Particles particles;
 
@@ -224,9 +230,8 @@ TEST(final2013_format) {
   /* Final state output; this is the only thing we expect to find in file */
   osc2013final->at_eventend(particles, event_id);
 
-  std::fstream outputfile;
-  outputfile.open((testoutputpath / outputfilename)
-                  .native().c_str(), std::ios_base::in);
+  bf::fstream outputfile;
+  outputfile.open(outputfilepath, std::ios_base::in);
   VERIFY(outputfile.good());
   if (outputfile.good()) {
     std::string line, item;
@@ -261,4 +266,7 @@ TEST(final2013_format) {
       + " end";
     COMPARE(line, end_line);
   }
+  outputfile.close();
+  VERIFY(bf::remove(outputfilepath));
+  VERIFY(bf::remove(configfilepath));
 }
