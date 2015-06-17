@@ -70,10 +70,12 @@ Permutation generate_sort_permutation(std::vector<T> const& v, Cmp compare) {
   return p;
 }
 
-/// Apply a permutation to a vector in place.
+/// Apply a permutation to a vector.
 template <typename T>
-void apply_permutation(std::vector<T>& v, const Permutation& p) {
-  std::transform(p.begin(), p.end(), v.begin(), [&](size_t i) { return v[i]; });
+std::vector<T> apply_permutation(const std::vector<T>& v, const Permutation& p) {
+  std::vector<T> copied_v = v;
+  std::transform(p.begin(), p.end(), copied_v.begin(), [&](size_t i) { return v[i]; });
+  return copied_v;
 }
 
 template <typename T>
@@ -81,12 +83,10 @@ InterpolateData<T>::InterpolateData(const std::vector<T>& x,
                                     const std::vector<T>& y) {
   assert(x.size() == y.size());
   const size_t n = x.size();
-  x_ = x;
-  std::vector<T> y_sorted = y;
   const auto p = generate_sort_permutation(
       x, [&](T const& a, T const& b) { return a < b; });
-  apply_permutation(x_, p);
-  apply_permutation(y_sorted, p);
+  x_ = std::move(apply_permutation(x, p));
+  std::vector<T> y_sorted = std::move(apply_permutation(y, p));
   f_.reserve(n - 1);
   for (size_t i = 0; i < n - 1; i++) {
     f_.emplace_back(
