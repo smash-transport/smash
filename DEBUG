@@ -41,8 +41,8 @@ Static code analysis & coding style
 
 The SMASH source code can be checked via:
 
-      cpplint.py *cc include/ *h
-      cppcheck --enable=all -I include/ .
+      make cpplint
+      make cppcheck
 
 \section debug_profiling Profiling / Benchmarking
 

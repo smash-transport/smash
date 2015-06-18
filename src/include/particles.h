@@ -172,9 +172,7 @@ class Particles {
     assert(is_valid(p));
     assert(p.type() == new_state.type());
     ParticleData &original = data_[p.index_];
-    original.id_process_ = new_state.id_process_;
-    original.momentum_ = new_state.momentum_;
-    original.position_ = new_state.position_;
+    new_state.copy_to(original);
     return original;
   }
 
@@ -359,7 +357,7 @@ class Particles {
     throw std::out_of_range("missing particle id");
   }
 
-  SMASH_DEPRECATED("don't reference particles by id") int id_max(void) const {
+  SMASH_DEPRECATED("don't reference particles by id") int id_max() const {
     return id_max_;
   }
 

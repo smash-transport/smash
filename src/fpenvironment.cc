@@ -97,6 +97,10 @@ void setup_default_float_traps() {
 #if (defined _POSIX_C_SOURCE && _POSIX_C_SOURCE >= 199309L) || \
     (defined _XOPEN_SOURCE && _XOPEN_SOURCE) ||                \
     (defined _POSIX_SOURCE && _POSIX_SOURCE)
+// The missing-fields-initializers warning says that not all fields of this
+// struct were explicitly initialized. That's exactly what is the intention
+// here, because then they are default-initialized, which is zero.
+#pragma GCC diagnostic ignored "-Wmissing-field-initializers"
   struct sigaction action = {};
   action.sa_flags = SA_SIGINFO;
   action.sa_sigaction = [](int signal, siginfo_t *info, void *) {

@@ -259,8 +259,8 @@ DecayBranchList ParticleType::get_partial_widths(const float m) const {
   for (unsigned int i = 0; i < decay_mode_list.size(); i++) {
     w = partial_width(m, decay_mode_list[i].get());
     if (w > 0.) {
-      partial.push_back(make_unique<DecayBranch>(&decay_mode_list[i]->type(),
-                                                 w));
+      partial.push_back(
+          make_unique<DecayBranch>(decay_mode_list[i]->type(), w));
     }
   }
   return std::move(partial);

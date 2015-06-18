@@ -219,6 +219,39 @@ TEST(erase_particle) {
   }
 }
 
+TEST(id_process) {
+  Particles p;
+  p.create(1000, Test::smashon().pdgcode());
+  int id = -1;
+  for (auto &pd : p) {
+    COMPARE(pd.id_process(), -1);
+    pd.set_id_process(++id);
+  }
+  id = -1;
+  for (auto &pd : p) {
+    COMPARE(pd.id_process(), ++id);
+  }
+  p.reset();
+  p.create(Test::smashon().pdgcode());
+  p.create(999, Test::smashon().pdgcode());
+  id = -1;
+  for (auto &pd : p) {
+    COMPARE(pd.id_process(), -1);
+    pd.set_id_process(++id);
+  }
+  id = -1;
+  for (auto &pd : p) {
+    COMPARE(pd.id_process(), ++id);
+  }
+  p.reset();
+  for (int i = 0; i < 1000; ++i) {
+    p.insert(Test::smashon());
+  }
+  for (auto &pd : p) {
+    COMPARE(pd.id_process(), -1);
+  }
+}
+
 TEST(reset) {
   Particles p;
   std::size_t count = 1000;

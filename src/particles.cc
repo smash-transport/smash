@@ -43,10 +43,8 @@ void Particles::increase_capacity(unsigned new_capacity) {
 
 inline void Particles::copy_in(ParticleData &to, const ParticleData &from) {
   to.id_ = ++id_max_;
-  to.id_process_ = from.id_process_;
   to.type_ = from.type_;
-  to.momentum_ = from.momentum_;
-  to.position_ = from.position_;
+  from.copy_to(to);
 }
 
 const ParticleData& Particles::insert(const ParticleData &p) {
@@ -66,12 +64,13 @@ const ParticleData& Particles::insert(const ParticleData &p) {
 }
 
 void Particles::create(size_t number, PdgCode pdg) {
-  const auto &type = ParticleType::find(pdg);
+  const ParticleData pd(ParticleType::find(pdg));
   while (number && !dirty_.empty()) {
     const auto offset = dirty_.back();
     dirty_.pop_back();
+    pd.copy_to(data_[offset]);
     data_[offset].id_ = ++id_max_;
-    data_[offset].type_ = &type;
+    data_[offset].type_ = pd.type_;
     data_[offset].hole_ = false;
     --number;
   }
@@ -79,15 +78,16 @@ void Particles::create(size_t number, PdgCode pdg) {
     ensure_capacity(number);
     const auto end_ptr = &data_[data_size_ + number];
     for (auto ptr = &data_[data_size_]; ptr < end_ptr; ++ptr) {
+      pd.copy_to(*ptr);
       ptr->id_ = ++id_max_;
-      ptr->type_ = &type;
+      ptr->type_ = pd.type_;
     }
     data_size_ += number;
   }
 }
 
 ParticleData &Particles::create(const PdgCode pdg) {
-  const auto &type = ParticleType::find(pdg);
+  const ParticleData pd(ParticleType::find(pdg));
   ParticleData *ptr;
   if (likely(dirty_.empty())) {
     ensure_capacity(1);
@@ -99,8 +99,9 @@ ParticleData &Particles::create(const PdgCode pdg) {
     ptr = &data_[offset];
     ptr->hole_ = false;
   }
+  pd.copy_to(*ptr);
   ptr->id_ = ++id_max_;
-  ptr->type_ = &type;
+  ptr->type_ = pd.type_;
   return *ptr;
 }
 

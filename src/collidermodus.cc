@@ -384,12 +384,12 @@ std::pair<double, double> ColliderModus::get_velocities(float s,
   double v_b = 0.0;
   // Frame dependent calculations of velocities. Assume v_a >= 0, v_b <= 0.
   switch (frame_) {
-    case 1:  // Center of velocity.
+    case CalculationFrame::CenterOfVelocity:
       v_a = std::sqrt((s - (m_a + m_b) * (m_a + m_b)) /
                       (s - (m_a - m_b) * (m_a - m_b)));
       v_b = -v_a;
       break;
-    case 2:  // Center of mass.
+    case CalculationFrame::CenterOfMass:
       {
         double A = (s -(m_a - m_b) * (m_a - m_b))
                  * (s -(m_a + m_b) * (m_a + m_b));
@@ -404,7 +404,7 @@ std::pair<double, double> ColliderModus::get_velocities(float s,
         v_b = -abs_p / m_b;
       }
       break;
-    case 3:  // Target at rest.
+    case CalculationFrame::FixedTarget:
       v_a = std::sqrt(1 -
                       4 * (m_a * m_a) * (m_b * m_b) /
                           ((s - (m_a * m_a) - (m_b * m_b)) *

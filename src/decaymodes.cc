@@ -25,9 +25,11 @@ namespace Smash {
 
 std::vector<DecayModes> *DecayModes::all_decay_modes = nullptr;
 
+std::vector<std::unique_ptr<DecayType>> *all_decay_types = nullptr;
+
 void DecayModes::add_mode(float ratio, int L,
                           ParticleTypePtrList particle_types) {
-  DecayType *type = NULL;
+  assert(all_decay_types != nullptr);
   switch (particle_types.size()) {
   case 2:
     if (!particle_types[0]->is_hadron() || !particle_types[1]->is_hadron()) {
@@ -35,12 +37,15 @@ void DecayModes::add_mode(float ratio, int L,
           "decay products A: ", *particle_types[0], " B: ", *particle_types[1]);
     }
     if (particle_types[0]->is_stable() && particle_types[1]->is_stable()) {
-      type = new TwoBodyDecayStable(particle_types, L);
+      all_decay_types->emplace_back(
+          make_unique<TwoBodyDecayStable>(particle_types, L));
     } else if (particle_types[0]->is_stable() ||
                particle_types[1]->is_stable()) {
-      type = new TwoBodyDecaySemistable(particle_types, L);
+      all_decay_types->emplace_back(
+          make_unique<TwoBodyDecaySemistable>(particle_types, L));
     } else {
-      type = new TwoBodyDecayUnstable(particle_types, L);
+      all_decay_types->emplace_back(
+          make_unique<TwoBodyDecayUnstable>(particle_types, L));
     }
     break;
   case 3:
@@ -50,7 +55,8 @@ void DecayModes::add_mode(float ratio, int L,
           "decay products A: ", *particle_types[0], " B: ", *particle_types[1],
           " C: ", *particle_types[2]);
     }
-    type = new ThreeBodyDecay(particle_types, L);
+    all_decay_types->emplace_back(
+        make_unique<ThreeBodyDecay>(particle_types, L));
     break;
   default:
     throw InvalidDecay(
@@ -58,7 +64,8 @@ void DecayModes::add_mode(float ratio, int L,
         std::to_string(particle_types.size()) +
         " particles. This is an invalid input.");
   }
-  decay_modes_.push_back(make_unique<DecayBranch>(type, ratio));
+  decay_modes_.push_back(
+      make_unique<DecayBranch>(*all_decay_types->back(), ratio));
 }
 
 void DecayModes::renormalize(PdgCode pdgcode, float renormalization_constant) {
@@ -88,6 +95,14 @@ inline std::size_t find_offset(PdgCode pdg) {
 }  // unnamed namespace
 
 void DecayModes::load_decaymodes(const std::string &input) {
+  // create the DecayType vector first, then it outlives the DecayModes vector,
+  // which references the DecayType objects.
+  static std::vector<std::unique_ptr<DecayType>> decaytypes;
+  decaytypes.clear();  // in case an exception was thrown and should try again
+  // ten decay types per decay mode should be a good guess.
+  decaytypes.reserve(10 * ParticleType::list_all().size());
+  all_decay_types = &decaytypes;
+
   static std::vector<DecayModes> decaymodes;
   decaymodes.clear();  // in case an exception was thrown and should try again
   decaymodes.resize(ParticleType::list_all().size());
@@ -114,7 +129,8 @@ void DecayModes::load_decaymodes(const std::string &input) {
 
     if (pdgcode.has_antiparticle()) {
       /* Construct and add the list of decay modes for the antiparticle.  */
-      DecayModes decay_modes_anti;
+      DecayModes &decay_modes_anti =
+          decaymodes[find_offset(pdgcode.get_antiparticle())];
       for (const auto &mode : decay_modes_to_add.decay_mode_list()) {
         ParticleTypePtrList list = mode->particle_types();
         for (auto &type : list) {
@@ -125,15 +141,10 @@ void DecayModes::load_decaymodes(const std::string &input) {
         decay_modes_anti.add_mode(mode->weight(), mode->angular_momentum(),
                                   list);
       }
-      decaymodes[find_offset(pdgcode.get_antiparticle())] =
-          std::move(decay_modes_anti);
     }
-
     /* Add the list of decay modes for this particle type */
     decaymodes[find_offset(pdgcode)] = std::move(decay_modes_to_add);
 
-    /* Clean up the list for the next particle type */
-    decay_modes_to_add.clear();
     ratio_sum = 0.0;
   };
 
@@ -201,22 +212,5 @@ void DecayModes::load_decaymodes(const std::string &input) {
   }
   end_of_decaymodes();
 }
-
-
-void DecayModes::clear() {
-  for (auto &mode : decay_modes_) {
-    mode->clear();
-  }
-  decay_modes_.clear();
-}
-
-
-void DecayModes::clear_decaymodes() {
-  // clean up all decay modes
-  for (auto &mode : *all_decay_modes) {
-    mode.clear();
-  }
-}
-
 
 }  // namespace Smash

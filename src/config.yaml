@@ -34,6 +34,9 @@ General:
     # width of gaussians representing particles, fm
     Gaussian_Sigma: 1.0
 
+    # distance at which gaussian values are small enough to set them zero
+    Gauss_Cutoff_In_Sigma: 4.0
+
 
 Output:
     # how much time before recording measurables
@@ -67,11 +70,8 @@ Output:
         y: 0.0
         z: 0.0
         # Which density is written to collision headers:
-        # 0 - particle density
-        # 1 - net baryon density
-        # 2 - baryonic isospin density
-        # 3 - pion density
-        Density_Type:   1
+        # ("particle", "baryon", "baryonic isospin", "pion")
+        Density_Type:      "baryon"
 
 Collision_Term:
     Decays:        True
@@ -93,6 +93,17 @@ Collision_Term:
 #    Symmetry:
 #        S_Pot: 18.0
 
+Lattice:
+    Origin: [0.0, 0.0, 0.0]    # Coordinates of the left, down, near corner of the lattice
+    Sizes: [10.0, 10.0, 10.0]  # Sizes in x, y, z directions in fm
+    CellNumber: [20, 20, 20]   # Number of cells in x, y, z directions
+    Periodic: True             # Periodic continuation: x + i * lx is equivalent to x, same for y, z
+    Printout:
+        # ("particle", "baryon", "baryonic isospin", "pion")
+        #Density: "baryon"
+        #LandauEnergyDensity: False, not implemented
+        #LandauVelocity: False, not implemented
+
 Modi:
     Box:
         # Cube size
@@ -102,11 +113,8 @@ Modi:
         Temperature: 0.2
 
         # initial condition
-        #
-        # 1:  random position box + thermal momenta
-        # 2:  random position box + peaked momenta
-        #
-        Initial_Condition: 1
+        # ("peaked momenta", "thermal momenta")
+        Initial_Condition: "thermal momenta"
 
         # start time of simulation
         Start_Time:    0.0
@@ -149,8 +157,8 @@ Modi:
         Sqrts_Reps: [2112, 2112]
 
         # The reference frame in which to do the calculation.
-        # (1 = center of velocity, 2 = center of mass, 3 = fixed target)
-        Calculation_Frame: 1
+        # ("center of velocity", "center of mass", "fixed target")
+        Calculation_Frame: "center of velocity"
 
         # Specify an impact parameter
         Impact:

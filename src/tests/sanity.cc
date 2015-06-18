@@ -8,6 +8,7 @@
  */
 
 #include "unittest.h"
+#include "setup.h"
 #include "../include/boxmodus.h"
 #include "../include/configuration.h"
 #include "../include/collidermodus.h"
@@ -88,11 +89,11 @@ TEST(sanity_default) {
 
 TEST(sanity_box) {
   Configuration conf(TEST_CONFIG_PATH);
-  conf["Modi"]["Box"]["Initial_Condition"] = 1;
+  conf["Modi"]["Box"]["Initial_Condition"] = "peaked momenta";
   conf["Modi"]["Box"]["Length"] = 5.0;
   conf["Modi"]["Box"]["Temperature"] = 0.13;
   conf["Modi"]["Box"]["Start_Time"] = 0.2;
-  ExperimentParameters param{{0.f, 1.f}, 1.f, 1, 1.0};
+  ExperimentParameters param = Smash::Test::default_parameters();
   BoxModus b(conf["Modi"], param);
   Particles P;
   create_particle_list(P);
@@ -108,7 +109,7 @@ TEST(sanity_collider) {
   conf["Modi"]["Collider"]["Sqrts_Reps"][1] = "661";
   conf["Modi"]["Collider"]["Projectile"]["Particles"]["661"] = 1;
   conf["Modi"]["Collider"]["Target"]["Particles"]["661"] = 1;
-  ExperimentParameters param{{0.f, 1.f}, 1.f, 1, 1.0};
+  ExperimentParameters param = Smash::Test::default_parameters();
   ColliderModus n(conf["Modi"], param);
   Particles P;
   create_particle_list(P);
@@ -122,7 +123,7 @@ TEST(sanity_sphere) {
   conf["Modi"]["Sphere"]["Start_Time"] = 0.0;
   conf.take({"Modi", "Sphere", "Init_Multiplicities"});
   conf["Modi"]["Sphere"]["Init_Multiplicities"]["661"] = 500;
-  ExperimentParameters param{{0.f, 1.f}, 1.f, 1, 1.0};
+  ExperimentParameters param = Smash::Test::default_parameters();
   SphereModus s(conf["Modi"], param);
   Particles P;
   create_particle_list(P);

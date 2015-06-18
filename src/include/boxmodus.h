@@ -65,22 +65,14 @@ class BoxModus : public ModusDefault {
   int impose_boundary_conditions(Particles *particles,
                          const OutputsList &output_list = {});
 
-  Grid<GridOptions::PeriodicBoundaries> create_grid(
-      ParticleList &&all_particles, const int testparticles) const {
-    return {{{0, 0, 0}, {length_, length_, length_}},
-              std::move(all_particles), testparticles};
+  ///\copydoc Smash::ModusDefault::create_grid
+  Grid<GridOptions::PeriodicBoundaries> create_grid(const Particles &particles,
+                                                    int testparticles) const {
+    return {{{0, 0, 0}, {length_, length_, length_}}, particles, testparticles};
   }
 
  private:
-  /** initial condition
-   *
-   * If initial_condition_ == 2, all particles have the same momentum
-   * \f$p = 3 \cdot T\f$ with T the temperature.
-   *
-   * Else, a thermalized ensemble is generated (the momenta are sampled
-   * from a Maxwell-Boltzmann distribution).
-   */
-  const int initial_condition_;
+  const BoxInitialCondition initial_condition_;
   /// length of the cube's edge in fm/c
   const float length_;
   /// Temperature of the Box in GeV

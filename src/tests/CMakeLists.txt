@@ -91,7 +91,19 @@ if(CPPLINT)
                      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
                      COMMENT "Executing test cpplint_full")
 else()
-   message(WARNING "cpplint.py was not found. The cclint test will be disabled.\nDownload from: http://google-styleguide.googlecode.com/svn/trunk/cpplint/cpplint.py")
+   message(WARNING "cpplint.py was not found. The cpplint test will be disabled.\nDownload from: http://google-styleguide.googlecode.com/svn/trunk/cpplint/cpplint.py")
+endif()
+
+# static code analysis with cppcheck
+find_program(CPPCHECK cppcheck)
+if(CPPCHECK)
+   message(STATUS "cppcheck found at ${CPPCHECK}")
+   add_custom_target(cppcheck
+                     COMMAND ${CPPCHECK} "--enable=all" "-q" "-I" "include/" "."
+                     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/src/
+                     COMMENT "Executing test cppcheck")
+else()
+   message(WARNING "cppcheck was not found. The cppcheck test will be disabled.")
 endif()
 
 # generate git statistics, requires gitstats in the path
@@ -131,7 +143,9 @@ smash_add_unittest(experiment)
 smash_add_unittest(fourvector)
 smash_add_unittest(grid)
 smash_add_unittest(initial_conditions)
+smash_add_unittest(integrate)
 smash_add_unittest(isospin)
+smash_add_unittest(lattice)
 smash_add_unittest(lorentzboost)
 smash_add_unittest(nucleus)
 smash_add_unittest(oscar2013output)
@@ -149,6 +163,8 @@ smash_add_unittest(random)
 smash_add_unittest(sanity)
 smash_add_unittest(scatteraction)
 smash_add_unittest(scatteractionsfinder)
+smash_add_unittest(spectral_functions)
+smash_add_unittest(tabulation)
 smash_add_unittest(threevector)
 smash_add_unittest(vtkoutput)
 smash_add_unittest(without_float_traps)

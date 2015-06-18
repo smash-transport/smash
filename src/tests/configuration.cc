@@ -10,6 +10,7 @@
 #include "unittest.h"
 #include "../include/configuration.h"
 #include "../include/forwarddeclarations.h"
+#include "../include/macros.h"
 
 #include <boost/filesystem.hpp>
 
@@ -262,4 +263,18 @@ TEST_CATCH(incorrect_indent, Configuration::ParseError) {
   conf.merge_yaml("fireballs:\n foo: 1\n  test: 1\n");
   int x = conf.read({"fireballs", "test"});
   COMPARE(x, 1);
+}
+
+TEST(take_array) {
+  Configuration conf = make_test_configuration();
+  conf.merge_yaml("{test: [123, 456, 789]}");
+  std::array<int, 3> x = conf.take({"test"});
+  VERIFY(x[0] == 123 && x[1] == 456 && x[2] == 789);
+}
+
+TEST_CATCH(take_array_wrong_n, Configuration::IncorrectTypeInAssignment) {
+  Configuration conf = make_test_configuration();
+  conf.merge_yaml("{test: [123, 456, 789]}");
+  std::array<int, 4> x = conf.take({"test"});
+  SMASH_UNUSED(x);
 }
