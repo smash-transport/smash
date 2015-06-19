@@ -526,6 +526,7 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
     } else {
       propagate_straight_line(&particles_, parameters_);
     }
+    modus_.impose_boundary_conditions(&particles_, outputs_);
   }
 
   // make sure the experiment actually ran (note: we should compare this
