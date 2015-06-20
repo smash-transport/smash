@@ -37,10 +37,11 @@ class ScatterActionsFinder : public ActionFinderInterface {
                                const ParticleData &p_b);
   /** Check the whole particle list for collisions
    * and return a list with the corrsponding Action objects. */
-  ActionList find_possible_actions(
-      const ParticleList &search_list,
-      const std::vector<const ParticleList *> &neighbors_list,
-      float dt) const override;
+  ActionList find_possible_actions(const ParticleList &search_list,
+                                   float dt) const override;
+  ActionList find_possible_actions(const ParticleList &search_list,
+                                   const ParticleList &neighbors_list,
+                                   float dt) const override;
   /** Find some final collisions at the end of the simulation.
    * Currently does nothing. */
   ActionList find_final_actions(const Particles &) const override {

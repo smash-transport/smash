@@ -43,134 +43,162 @@ float density_factor(const PdgCode pdg, DensityType dens_type) {
   }
 }
 
-template <typename /*ParticlesContainer*/ T>
-static FourVector four_current_impl(const ThreeVector &r, const T &plist,
-                                    double gs_sigma, DensityType dens_type,
-                                    int ntest) {
-  FourVector jmu(0.0, 0.0, 0.0, 0.0);
-
-  for (const auto &p : plist) {
-    const float factor = density_factor(p.pdgcode(), dens_type);
-    if (std::abs(factor) < really_small) {
-      continue;
-    }
-    const ThreeVector ri = p.position().threevec();
-    // If particle is too far - reject it immediately: its input is too small
-    if ((r - ri).sqr() > (4*gs_sigma) * (4*gs_sigma)) {
-      continue;
-    }
-
-    const ThreeVector betai = p.velocity();
-    const double inv_gammai = p.inverse_gamma();
-
-
-    // Get distance between particle and r in the particle rest frame
-    double tmp = ((r - ri) * betai) / (inv_gammai * (1. + inv_gammai));
-    const ThreeVector dr_rest = r - ri + betai * tmp;
-    const double drr_sqr = dr_rest.sqr();
-    if (drr_sqr > (4*gs_sigma) * (4*gs_sigma)) {
-      continue;
-    }
-
-    tmp = std::exp(- 0.5 * drr_sqr / (gs_sigma * gs_sigma)) / inv_gammai;
-    tmp *= factor;
-    jmu += FourVector(1., betai) * tmp;
-  }
-
-  const double norm = twopi * std::sqrt(twopi) * gs_sigma*gs_sigma*gs_sigma;
-  jmu /= norm;
-
-  // j^0 = jmu.x0() is computational frame density
-  // jmu.abs() = sqrt(j^mu j_mu) is Eckart rest frame density
-  return jmu / ntest;
-}
-FourVector four_current(const ThreeVector &r, const ParticleList &plist,
-                        double gs_sigma, DensityType dens_type, int ntest) {
-  return four_current_impl(r, plist, gs_sigma, dens_type, ntest);
-}
-FourVector four_current(const ThreeVector &r, const Particles &plist,
-                        double gs_sigma, DensityType dens_type, int ntest) {
-  return four_current_impl(r, plist, gs_sigma, dens_type, ntest);
-}
-
-std::pair<double, ThreeVector> rho_eckart_gradient(const ThreeVector &r,
-                                const ParticleList &plist, double gs_sigma,
-                                DensityType dens_type, int ntest) {
-  const auto &log = logger<LogArea::Density>();
-
-  // baryon four-current in computational frame
-  FourVector jmu(0.0, 0.0, 0.0, 0.0);
-  // derivatives of baryon four-current in computational frame
-  FourVector djmu_dx(0.0, 0.0, 0.0, 0.0);
-  FourVector djmu_dy(0.0, 0.0, 0.0, 0.0);
-  FourVector djmu_dz(0.0, 0.0, 0.0, 0.0);
-
-  for (const auto &p : plist) {
-    const float factor = density_factor(p.pdgcode(), dens_type);
-    if (std::abs(factor) < really_small) {
-      continue;
-    }
-    const ThreeVector ri = p.position().threevec();
-    // If particle is too far - reject it immediately: its input is too small
-    if ((r - ri).sqr() > (4*gs_sigma) * (4*gs_sigma)) {
-      continue;
-    }
-
-    const ThreeVector betai = p.velocity();
-    // std::cout << "Velocity: " << betai << std::endl;
-    const double inv_gammai = p.inverse_gamma();
-    // std::cout << "1/gamma: " << inv_gammai << std::endl;
-
-    // Get distance between particle and r in the particle rest frame
-    double tmp1 = inv_gammai * (1. + inv_gammai);
-    const ThreeVector dr_rest = r - ri + betai * (((r - ri) * betai) / tmp1);
-    const double drr_sqr = dr_rest.sqr();
-    if (drr_sqr > (4*gs_sigma) * (4*gs_sigma)) {
-      continue;
-    }
-
-    double tmp2 = std::exp(-0.5 * drr_sqr / (gs_sigma*gs_sigma)) / inv_gammai;
-    tmp2 *= factor;
-    log.debug("Summand to jmu: ", FourVector(1., betai) * tmp2, "² = ",
-              (FourVector(1., betai) * tmp2).sqr(), "\n      with jmu: ", jmu,
-              "² = ", jmu.sqr());
-    jmu += FourVector(1., betai) * tmp2;
-    if (jmu.sqr() < 0.) {
-      log.debug("negative jmu²: ", jmu.sqr(), ", jmu = ", jmu);
-    }
-
-    // Calculate the gradient: d(0.5 * r_rest^2)/d \vec{r}
-    const ThreeVector drest2_dr = dr_rest + betai * ((dr_rest * betai) / tmp1);
-
-    djmu_dx += FourVector(1., betai) * (tmp2 * drest2_dr.x1());
-    djmu_dy += FourVector(1., betai) * (tmp2 * drest2_dr.x2());
-    djmu_dz += FourVector(1., betai) * (tmp2 * drest2_dr.x3());
-  }
-  const double norm1 = twopi * std::sqrt(twopi) * gs_sigma*gs_sigma*gs_sigma;
-  jmu /= norm1;
-  const double norm2 = - norm1 * gs_sigma*gs_sigma;
-  djmu_dx /= norm2;
-  djmu_dy /= norm2;
-  djmu_dz /= norm2;
-
-  // Eckart rest frame density
-  const double rho2 = jmu.sqr();
-  // Due to numerical reasons it can happen that rho2 is (slighly) smaller than
-  // zero, while analytically it should be positive. Negative values can be
-  // reached only for numerical reasons and are thus small. Therefore I(oliiny)
-  // set rho to zero if rho is negative. This is done under the assumption that
-  // discarding small jmu^2 values doesn't introduce a bias.
-  const double rho = (rho2 > 0.0) ? std::sqrt(rho2) : 0.0;
-
-  // Eckart rest frame density and its gradient
-  if (std::abs(rho) > really_small) {
-    return std::make_pair(rho / ntest, ThreeVector(jmu.Dot(djmu_dx),
-                                           jmu.Dot(djmu_dy),
-                                           jmu.Dot(djmu_dz)) / (rho * ntest));
-  } else {
+std::pair<double, ThreeVector> unnormalized_smearing_factor(
+                       const ThreeVector &r, const FourVector &p,
+                       const double two_sigma_sqr, const double r_cut_sqr,
+                       const bool compute_gradient) {
+  const double r_sqr = r.sqr();
+  if (r_sqr > r_cut_sqr) {
+    // Distance from particle to point of interest > r_cut
     return std::make_pair(0.0, ThreeVector(0.0, 0.0, 0.0));
   }
+  const double m_sqr = p.sqr();
+  if (m_sqr < really_small) {
+    const auto &log = logger<LogArea::Density>();
+    log.warn("Gaussian smearing is undefined for momentum ", p);
+    return std::make_pair(0.0, ThreeVector(0.0, 0.0, 0.0));
+  }
+
+  const FourVector u = p / std::sqrt(m_sqr);
+  const double u_r_scalar = r * u.threevec();
+  const double r_rest_sqr = r_sqr + u_r_scalar * u_r_scalar;
+
+  if (r_rest_sqr > r_cut_sqr) {
+  // Lorentz contracted distance from particle to point of interest > r_cut
+    return std::make_pair(0.0, ThreeVector(0.0, 0.0, 0.0));
+  }
+  const double sf = std::exp(- r_rest_sqr / two_sigma_sqr) * u.x0();
+  const ThreeVector sf_grad = compute_gradient ?
+            sf * (r + u.threevec() * u_r_scalar) : ThreeVector(0.0, 0.0, 0.0);
+
+  return std::make_pair(sf, sf_grad);
 }
+
+template <typename /*ParticlesContainer*/ T>
+std::pair<double, ThreeVector> rho_eckart_impl(const ThreeVector &r,
+                                   const T &plist,
+                                   const ExperimentParameters &par,
+                                   DensityType dens_type,
+                                   bool compute_gradient) {
+  /* In the array first FourVector is jmu and next 3 are d jmu / dr.
+   Division into positive and negative charges is necessary to avoid
+   problems with the Eckart frame definition. Example of problem:
+   get Eckart frame for two identical oppositely flying bunches of
+   electrons and positrons. For this case jmu = (0, 0, 0, non-zero),
+   so jmu.abs does not exist and Eckart frame is not defined.
+   If one takes rho = jmu_pos.abs - jmu_neg.abs, it is still Lorentz-
+   invariant and gives the right limit in non-relativistic case, but
+   it gives no such problem.
+  */
+  std::array<FourVector, 4> jmu_pos, jmu_neg;
+  const int ntest = par.testparticles;
+  const double sig = par.gaussian_sigma;
+  const double two_sig_sqr = 2 * sig * sig;
+  const double r_cut = par.gauss_cutoff_in_sigma * sig;
+  const double r_cut_sqr = r_cut * r_cut;
+
+  for (const auto &p : plist) {
+    const float dens_factor = density_factor(p.pdgcode(), dens_type);
+    if (std::abs(dens_factor) < really_small) {
+      continue;
+    }
+    const auto sf_and_grad = unnormalized_smearing_factor(
+                            p.position().threevec() -r,
+                            p.momentum(),
+                            two_sig_sqr, r_cut_sqr,
+                            compute_gradient);
+    if (sf_and_grad.first < really_small) {
+      continue;
+    }
+    const FourVector tmp = p.momentum() * (dens_factor / p.momentum().x0());
+    if (dens_factor > 0.f) {
+      jmu_pos[0] += tmp * sf_and_grad.first;
+      if (compute_gradient) {
+        for (int k = 1; k <= 3; k++) {
+          jmu_pos[k] += tmp * sf_and_grad.second[k-1];
+        }
+      }
+    } else {
+      jmu_neg[0] += tmp * sf_and_grad.first;
+      if (compute_gradient) {
+        for (int k = 1; k <= 3; k++) {
+          jmu_neg[k] += tmp * sf_and_grad.second[k-1];
+        }
+      }
+    }
+  }
+
+  const double rho_eck = (jmu_pos[0].abs() - jmu_neg[0].abs()) /
+            smearing_factor_norm(two_sig_sqr) / ntest;
+
+  ThreeVector rho_eck_grad;
+  if (compute_gradient) {
+    for (int i = 1; i < 4; i++) {
+      rho_eck_grad[i-1] = 0.;
+      if (jmu_pos[0].x0() > really_small) {
+        rho_eck_grad[i-1] += jmu_pos[i].Dot(jmu_pos[0]) / jmu_pos[0].abs();
+      }
+      if (jmu_pos[0].x0() < -really_small) {
+        rho_eck_grad[i-1] -= jmu_neg[i].Dot(jmu_neg[0]) / jmu_neg[0].abs();
+      }
+    }
+    rho_eck_grad /= smearing_factor_grad_norm(two_sig_sqr) * ntest;
+  }
+  return std::make_pair(rho_eck, rho_eck_grad);
+}
+
+std::pair<double, ThreeVector> rho_eckart(const ThreeVector &r,
+               const ParticleList &plist, const ExperimentParameters &par,
+               DensityType dens_type, bool compute_gradient) {
+  return rho_eckart_impl(r, plist, par, dens_type, compute_gradient);
+}
+std::pair<double, ThreeVector> rho_eckart(const ThreeVector &r,
+               const Particles &plist, const ExperimentParameters &par,
+               DensityType dens_type, bool compute_gradient) {
+  return rho_eckart_impl(r, plist, par, dens_type, compute_gradient);
+}
+
+void update_density_lattice(DensityLattice* lat,
+                            const LatticeUpdate update,
+                            const DensityType dens_type,
+                            const ExperimentParameters &par,
+                            const Particles &particles) {
+  // Do not proceed if lattice does not exists/update not required
+  if (lat == nullptr || lat->when_update() != update) {
+    return;
+  }
+  // Add particles to lattice jmus
+  lat->reset();
+  const int ntest = par.testparticles;
+  const double sig = par.gaussian_sigma;
+  const double two_sig_sqr = 2 * sig * sig;
+  const double r_cut = par.gauss_cutoff_in_sigma * sig;
+  const double r_cut_sqr = r_cut * r_cut;
+  for (const auto &part : particles) {
+    const float dens_factor = density_factor(part.pdgcode(), dens_type);
+    if (std::abs(dens_factor) < really_small) {
+      continue;
+    }
+    const ThreeVector pos = part.position().threevec();
+    lat->iterate_in_radius(pos, r_cut,
+      [&](DensityOnLattice &node, int ix, int iy, int iz){
+        const ThreeVector r = lat->cell_center(ix, iy, iz);
+        const double sf = unnormalized_smearing_factor(pos - r,
+                               part.momentum(), two_sig_sqr, r_cut_sqr).first;
+        if (sf > really_small) {
+          /*std::cout << "Adding particle " << part << " to lattice with"
+                    << " smearing factor " << sf <<
+                    " and density factor " << dens_factor << std::endl;*/
+          node.add_particle(part, sf * dens_factor);
+        }
+      });
+  }
+  // Compute density from jmus, take care about smearing factor normalization
+  for (auto &node : *lat) {
+    node.compute_density(smearing_factor_norm(two_sig_sqr) * ntest);
+  }
+}
+
 
 std::ostream& operator<<(std::ostream& os, DensityType dens_type) {
   switch (dens_type) {

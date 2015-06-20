@@ -68,7 +68,41 @@ class ParticleTypePtr;
 class PdgCode;
 class DecayBranch;
 class CollisionBranch;
+class Tabulation;
 struct ExperimentParameters;
+enum class CalculationFrame {
+    CenterOfVelocity,
+    CenterOfMass,
+    FixedTarget,
+};
+
+/** Allows to choose which kind of density to calculate.
+*  The baryon density is necessary for the Skyrme potential.
+*  For the symmetry potential one needs to know the isospin density.
+*/
+enum class DensityType {
+  particle = 0,
+  baryon = 1,
+  baryonic_isospin = 2,
+  pion = 3,
+  none = 4,
+};
+
+/** Initial condition for a particle in a box.
+*
+* If PeakedMomenta is used, all particles have the same momentum
+* \f$p = 3 \cdot T\f$ with T the temperature.
+*
+* Else, a thermalized ensemble is generated (the momenta are sampled
+* from a Maxwell-Boltzmann distribution).
+*
+* In either case, the positions in space are chosen randomly.
+*/
+enum class BoxInitialCondition {
+  ThermalMomenta,
+  PeakedMomenta,
+};
+
 
 using ActionPtr = build_unique_ptr_<Action>;
 using ScatterActionPtr = build_unique_ptr_<ScatterAction>;
@@ -89,7 +123,10 @@ using DecayBranchList = build_vector_<DecayBranchPtr>;
 using CollisionBranchPtr = build_unique_ptr_<CollisionBranch>;
 using CollisionBranchList = build_vector_<CollisionBranchPtr>;
 
+using TabulationPtr = build_unique_ptr_<Tabulation>;
+
 namespace bf = boost::filesystem;
+
 
 }  // namespace Smash
 

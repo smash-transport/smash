@@ -67,35 +67,39 @@ namespace Smash {
 // GridBase
 
 std::pair<std::array<float, 3>, std::array<float, 3>>
-GridBase::find_min_and_length(const ParticleList &all_particles) {
+GridBase::find_min_and_length(const Particles &particles) {
   std::pair<std::array<float, 3>, std::array<float, 3>> r;
+  auto &min_position = r.first;
+  auto &length = r.second;
 
   // intialize min and max position arrays with the position of the first
   // particle in the list
-  const auto first = all_particles.begin()->position().threevec();
-  r.first = {{static_cast<float>(first[0]), static_cast<float>(first[1]),
-              static_cast<float>(first[2])}};
-  r.second = r.first;
-  for (const auto &p : all_particles) {
-    const auto pos = p.position().threevec();
-    r.first[0] = std::min(r.first[0], static_cast<float>(pos[0]));
-    r.first[1] = std::min(r.first[1], static_cast<float>(pos[1]));
-    r.first[2] = std::min(r.first[2], static_cast<float>(pos[2]));
-    r.second[0] = std::max(r.second[0], static_cast<float>(pos[0]));
-    r.second[1] = std::max(r.second[1], static_cast<float>(pos[1]));
-    r.second[2] = std::max(r.second[2], static_cast<float>(pos[2]));
+  const auto &first_position = particles.front().position();
+  min_position = {{static_cast<float>(first_position[1]),
+                   static_cast<float>(first_position[2]),
+                   static_cast<float>(first_position[3])}};
+  auto max_position = min_position;
+  for (const auto &p : particles) {
+    const auto &pos = p.position();
+    min_position[0] = std::min(min_position[0], static_cast<float>(pos[1]));
+    min_position[1] = std::min(min_position[1], static_cast<float>(pos[2]));
+    min_position[2] = std::min(min_position[2], static_cast<float>(pos[3]));
+    max_position[0] = std::max(max_position[0], static_cast<float>(pos[1]));
+    max_position[1] = std::max(max_position[1], static_cast<float>(pos[2]));
+    max_position[2] = std::max(max_position[2], static_cast<float>(pos[3]));
   }
-  r.second[0] = r.second[0] - r.first[0];
-  r.second[1] = r.second[1] - r.first[1];
-  r.second[2] = r.second[2] - r.first[2];
+  length[0] = max_position[0] - min_position[0];
+  length[1] = max_position[1] - min_position[1];
+  length[2] = max_position[2] - min_position[2];
   return r;
 }
 
+template <GridOptions O>
 std::tuple<std::array<float, 3>, std::array<int, 3>>
-GridBase::determine_cell_sizes(size_type particle_count,
-                               const std::array<float, 3> &length,
-                               const int testparticles) {
-  std::tuple<std::array<float, 3>, std::array<int, 3> > r;
+Grid<O>::determine_cell_sizes(size_type particle_count,
+                              const std::array<float, 3> &length,
+                              const int testparticles) {
+  std::tuple<std::array<float, 3>, std::array<int, 3>> r;
   auto &index_factor = std::get<0>(r);
   auto &number_of_cells = std::get<1>(r);
 
@@ -115,22 +119,42 @@ GridBase::determine_cell_sizes(size_type particle_count,
   // because the last cell will then store particles in the interval
   // [length, length + max_interaction_length[. The code below achieves this
   // effect by rounding down (floor) and adding 1 afterwards.
-  // --------------------
-  // TODO(mkretz):
-  // The last cell in each direction can be smaller than
-  // max_interaction_length. In that case periodic boundaries will not work
-  // correctly. Thus, we need to reduce the number of cells in that direction
-  // by one and make the last cell larger. This basically merges a smaller
-  // boundary cell into a full cell inside the grid.
-  const int max_cells = std::cbrt(particle_count);
+  const int max_cells = O == GridOptions::Normal
+                            ? std::cbrt(particle_count)
+                            : std::max(2, int(std::cbrt(particle_count)));
   for (std::size_t i = 0; i < number_of_cells.size(); ++i) {
     index_factor[i] = 1.f / max_interaction_length;
     number_of_cells[i] =
-        static_cast<int>(std::floor(length[i] * index_factor[i])) + 1;
+        static_cast<int>(std::floor(length[i] * index_factor[i])) +
+        // The last cell in each direction can be smaller than
+        // max_interaction_length. In that case periodic boundaries will not
+        // work correctly. Thus, we need to reduce the number of cells in that
+        // direction by one and make the last cell larger. This basically merges
+        // a smaller boundary cell into a full cell inside the grid.
+        // There's a ~0% chance that the given boundaries create an integral
+        // number of cells with length of max_interaction_length. Therefore,
+        // just make the default number of cells one less than for non-periodic
+        // boundaries.
+        (O == GridOptions::Normal ? 1 : 0);
+
+    // std::nextafter implements a safety margin so that no valid position
+    // inside the grid can reference an out-of-bounds cell
     if (number_of_cells[i] > max_cells) {
       number_of_cells[i] = max_cells;
-      index_factor[i] = (max_cells - 0.1f)  // -0.1 for safety margin
-                        / length[i];
+      index_factor[i] = number_of_cells[i] / length[i];
+      while (index_factor[i] * length[i] >= number_of_cells[i]) {
+        index_factor[i] = std::nextafter(index_factor[i], 0.f);
+      }
+      assert(index_factor[i] * length[i] < number_of_cells[i]);
+    } else if (O == GridOptions::PeriodicBoundaries) {
+      if (number_of_cells[i] == 1) {
+        number_of_cells[i] = 2;
+      }
+      index_factor[i] = number_of_cells[i] / length[i];
+      while (index_factor[i] * length[i] >= number_of_cells[i]) {
+        index_factor[i] = std::nextafter(index_factor[i], 0.f);
+      }
+      assert(index_factor[i] * length[i] < number_of_cells[i]);
     }
   }
   return r;
@@ -145,264 +169,269 @@ inline typename Grid<Options>::size_type Grid<Options>::make_index(
   return (z * number_of_cells_[1] + y) * number_of_cells_[0] + x;
 }
 
-template <>
-inline typename Grid<GridOptions::Normal>::size_type
-Grid<GridOptions::Normal>::make_index(const ThreeVector &position) const {
-  return make_index(
-      std::floor((static_cast<float>(position[0]) - min_position_[0]) *
-                 index_factor_[0]),
-      std::floor((static_cast<float>(position[1]) - min_position_[1]) *
-                 index_factor_[1]),
-      std::floor((static_cast<float>(position[2]) - min_position_[2]) *
-                 index_factor_[2]));
-}
-template <>
-inline typename Grid<GridOptions::PeriodicBoundaries>::size_type
-Grid<GridOptions::PeriodicBoundaries>::make_index(
-    const ThreeVector &position) const {
-  return make_index(
-      1 + std::floor((static_cast<float>(position[0]) - min_position_[0]) *
-                     index_factor_[0]),
-      1 + std::floor((static_cast<float>(position[1]) - min_position_[1]) *
-                     index_factor_[1]),
-      std::floor((static_cast<float>(position[2]) - min_position_[2]) *
-                 index_factor_[2]));
-}
-
-template <>
-inline bool Grid<GridOptions::PeriodicBoundaries>::is_ghost_cell(size_type x,
-                                                          size_type y,
-                                                          size_type z) const {
-  return z + 1 == number_of_cells_[2] || y == 0 ||
-         y + 1 == number_of_cells_[1] || x == 0 || x + 1 == number_of_cells_[0];
-}
-
-template <>
-void Grid<GridOptions::PeriodicBoundaries>::build_cells(
-    ParticleList &&all_particles, const std::array<float, 3> &length) {
+template <GridOptions O>
+void Grid<O>::build_cells(const std::array<float, 3> &index_factor,
+                          const Particles &particles) {
   const auto &log = logger<LogArea::Grid>();
-
-  // construct a grid with ghost cells in x ± 1, y ± 1, and z + 1
-  number_of_cells_[0] += 2;
-  number_of_cells_[1] += 2;
-  number_of_cells_[2] += 1;  // ghost cells only at one side
-
-  log.debug("min: ", min_position_, "\nlength: ", length, "\ncells: ",
-            number_of_cells_, "\nindex_factor: ", index_factor_);
-
-  // After the grid parameters are determined, we can start placing the
-  // particles in cells.
-  cells_.resize(number_of_cells_[0] * number_of_cells_[1] *
-                number_of_cells_[2]);
-
-  // first fill the non-ghost cells
-  for (const auto &p : all_particles) {
-    const auto idx = make_index(p.position().threevec());
-#ifndef NDEBUG
-    if (idx < make_index(1, 1, 0) ||
-        idx >= make_index(number_of_cells_[0] - 1, number_of_cells_[1] - 1,
-                          number_of_cells_[2] - 1) ||
-        idx >= size_type(cells_.size())) {
-      log.fatal(source_location,
-                "\nan out-of-bounds access would be necessary for the "
-                "particle ",
-                p, "\nfor a grid with the following parameters:\nmin: ",
-                min_position_, "\nlength: ", length, "\ncells: ",
-                number_of_cells_, "\nindex_factor: ", index_factor_,
-                "\ncells_.size: ", cells_.size(), "\nrequested index: ", idx);
-      throw std::runtime_error("out-of-bounds grid access on construction");
-    }
-#endif
-    cells_[idx].push_back(p);
-  }
-
-  // Now fill the ghost cells, using copies of a non-ghost cell. After
-  // copying the position of the ParticleData objects needs to be modified
-  // accordingly
-  for (size_type z = 0; z < number_of_cells_[2]; ++z) {
-    // At z == 0:
-    // - the complete y == 0 line is unused.
-    // - the x == 0, y == 1 cell is unused. (at (.,1,0) the next ghost cell is
-    //   at x_max)
-    for (size_type y = (z > 0 ? 0 : 1); y < number_of_cells_[1]; ++y) {
-      for (size_type x = (z == 0 && y == 1 ? number_of_cells_[0] - 1 : 0);
-           x < number_of_cells_[0]; ++x) {
-        if (is_ghost_cell(x, y, z)) {
-          const auto idx = make_index(x, y, z);
-          auto &cell = cells_[idx];
-
-          auto copy_idx = idx;
-          FourVector position_shift{};  // zero-initialized
-          if (x == 0) {
-            copy_idx += number_of_cells_[0] - 2;
-            position_shift[1] = -length[0];
-          } else if (x == number_of_cells_[0] - 1) {
-            copy_idx -= number_of_cells_[0] - 2;
-            position_shift[1] = length[0];
-          }
-          if (y == 0) {
-            copy_idx += (number_of_cells_[1] - 2) * number_of_cells_[0];
-            position_shift[2] = -length[1];
-          } else if (y == number_of_cells_[1] - 1) {
-            copy_idx -= (number_of_cells_[1] - 2) * number_of_cells_[0];
-            position_shift[2] = length[1];
-          }
-          if (z == number_of_cells_[2] - 1) {
-            copy_idx -= (number_of_cells_[2] - 1) *
-                        (number_of_cells_[0] * number_of_cells_[1]);
-            position_shift[3] = length[2];
-          }
-
-          // copy the cell from a non-ghost cell
-          cell = cells_[copy_idx];
-
-          // modify the position vectors to correspond to the position of
-          // the ghost-cell
-          for (ParticleData &p : cell) {
-            p.set_4position(p.position() + position_shift);
-          }
-        }
-      }
-    }
-  }
-
-  log.debug(cells_);
-}
-
-template <>
-void Grid<GridOptions::Normal>::build_cells(
-    ParticleList &&all_particles, const std::array<float, 3> &length) {
-  const auto &log = logger<LogArea::Grid>();
-  if (all_of(number_of_cells_, [](size_type n) { return n <= 2; })) {
+  if (O == GridOptions::Normal &&
+      all_of(number_of_cells_, [](size_type n) { return n <= 2; })) {
     // dilute limit:
     // the grid would have <= 2x2x2 cells, meaning every particle has to be
     // compared with every other particle anyway. Then we can just as well
     // fall back to not using the grid at all
+    // For a grid with periodic boundaries the situation is different and we
+    // never want to have a grid smaller than 2x2x2.
     log.debug("There would only be ", number_of_cells_,
               " cells. Therefore the Grid falls back to a single cell / "
               "particle list.");
     number_of_cells_ = {1, 1, 1};
-    cells_.reserve(1);
-    cells_.emplace_back(std::move(all_particles));
+    cells_.resize(1);
+    cells_.front().reserve(particles.size());
+    std::copy_if(particles.begin(), particles.end(),
+                 std::back_inserter(cells_.front()), [](const ParticleData &p) {
+                   return p.cross_section_scaling_factor() > 0.0;
+                 });  // filter out the particles that can not interact
   } else {
     // construct a normal grid
-    log.debug("min: ", min_position_, "\nlength: ", length, "\ncells: ",
-              number_of_cells_, "\nindex_factor: ", index_factor_);
+    log.debug("min: ", min_position_, "\nlength: ", length_, "\ncells: ",
+              number_of_cells_, "\nindex_factor: ", index_factor);
 
     // After the grid parameters are determined, we can start placing the
     // particles in cells.
     cells_.resize(number_of_cells_[0] * number_of_cells_[1] *
                   number_of_cells_[2]);
 
-    for (const auto &p : all_particles) {
-      const auto idx = make_index(p.position().threevec());
+    // Returns the one-dimensional cell-index from the position vector inside
+    // the grid.
+    // This simply calculates the distance to min_position_ and multiplies it
+    // with index_factor to determine the 3 x,y,z indexes to pass to make_index.
+    auto &&cell_index_for = [&](const ParticleData &p) {
+      return make_index(
+          std::floor((static_cast<float>(p.position()[1]) - min_position_[0]) *
+                     index_factor[0]),
+          std::floor((static_cast<float>(p.position()[2]) - min_position_[1]) *
+                     index_factor[1]),
+          std::floor((static_cast<float>(p.position()[3]) - min_position_[2]) *
+                     index_factor[2]));
+    };
+
+    for (const auto &p : particles) {
+      if (p.cross_section_scaling_factor() > 0.0) {
+        const auto idx = cell_index_for(p);
 #ifndef NDEBUG
-      if (idx >= size_type(cells_.size())) {
-        log.fatal(source_location,
-                  "\nan out-of-bounds access would be necessary for the "
-                  "particle ",
-                  p, "\nfor a grid with the following parameters:\nmin: ",
-                  min_position_, "\nlength: ", length, "\ncells: ",
-                  number_of_cells_, "\nindex_factor: ", index_factor_,
-                  "\ncells_.size: ", cells_.size(), "\nrequested index: ", idx);
-        throw std::runtime_error("out-of-bounds grid access on construction");
-      }
+        if (idx >= size_type(cells_.size())) {
+          log.fatal(source_location,
+                    "\nan out-of-bounds access would be necessary for the "
+                    "particle ",
+                    p, "\nfor a grid with the following parameters:\nmin: ",
+                    min_position_, "\nlength: ", length_, "\ncells: ",
+                    number_of_cells_, "\nindex_factor: ", index_factor,
+                    "\ncells_.size: ", cells_.size(), "\nrequested index: ",
+                    idx);
+          throw std::runtime_error("out-of-bounds grid access on construction");
+        }
 #endif
-      cells_[idx].push_back(p);
+        cells_[idx].push_back(p);
+      }
     }
   }
 
   log.debug(cells_);
 }
 
-template <GridOptions Options>
-void Grid<Options>::iterate_cells(const std::function<
-    void(const ParticleList &, const std::vector<const ParticleList *> &)> &
-                                      call_finder) const {
-  const auto &log = logger<LogArea::Grid>();
-  std::vector<const ParticleList *> neighbors;
-  neighbors.reserve(13);
+template <>
+void Grid<GridOptions::Normal>::iterate_cells(
+    const std::function<void(const ParticleList &)> &search_cell_callback,
+    const std::function<void(const ParticleList &, const ParticleList &)> &
+        neighbor_cell_callback) const {
+  std::array<size_type, 3> search_index;
+  size_type &x = search_index[0];
+  size_type &y = search_index[1];
+  size_type &z = search_index[2];
+  size_type search_cell_index = 0;
+  for (z = 0; z < number_of_cells_[2]; ++z) {
+    for (y = 0; y < number_of_cells_[1]; ++y) {
+      for (x = 0; x < number_of_cells_[0]; ++x, ++search_cell_index) {
+        assert(search_cell_index == make_index(search_index));
+        assert(search_cell_index >= 0);
+        assert(search_cell_index < size_type(cells_.size()));
+        const ParticleList &search = cells_[search_cell_index];
+        search_cell_callback(search);
 
-  auto &&call_closure = [&](size_type cell_index,
-                            const std::initializer_list<int> &xoffsets,
-                            const std::initializer_list<int> &yoffsets,
-                            const std::initializer_list<int> &zoffsets) {
-    neighbors.clear();
-    log.debug("call_closure(", cell_index, ", ", xoffsets, ", ", yoffsets, ", ",
-              zoffsets, ")");
-    for (auto dz : zoffsets) {
-      const auto cell_index_dz =
-          cell_index + dz * number_of_cells_[1] * number_of_cells_[0];
-      for (auto dy : yoffsets) {
-        const auto cell_index_dzdy = cell_index_dz + dy * number_of_cells_[0];
-        for (auto dx : xoffsets) {
-          const auto cell_index_dzdydx = cell_index_dzdy + dx;
-          if (cell_index_dzdydx > cell_index) {
-            neighbors.emplace_back(&cells_[cell_index_dzdydx]);
+        const auto dz_list = z == number_of_cells_[2] - 1
+                                 ? std::initializer_list<size_type>{0}
+                                 : std::initializer_list<size_type>{0, 1};
+        const auto dy_list =
+            number_of_cells_[1] == 1
+                ? std::initializer_list<size_type>{0}
+                : y == 0 ? std::initializer_list<size_type>{0, 1}
+                         : y == number_of_cells_[1] - 1
+                               ? std::initializer_list<size_type>{-1, 0}
+                               : std::initializer_list<size_type>{-1, 0, 1};
+        const auto dx_list =
+            number_of_cells_[0] == 1
+                ? std::initializer_list<size_type>{0}
+                : x == 0 ? std::initializer_list<size_type>{0, 1}
+                         : x == number_of_cells_[0] - 1
+                               ? std::initializer_list<size_type>{-1, 0}
+                               : std::initializer_list<size_type>{-1, 0, 1};
+        for (size_type dz : dz_list) {
+          for (size_type dy : dy_list) {
+            for (size_type dx : dx_list) {
+              const auto di = make_index(dx, dy, dz);
+              if (di > 0) {
+                neighbor_cell_callback(search, cells_[search_cell_index + di]);
+              }
+            }
           }
         }
       }
     }
-    log.debug("iterate_cells calls closure with search_list: ",
-              cells_[cell_index], " and neighbors_list: ", neighbors);
-    call_finder(cells_[cell_index], neighbors);
-  };
-
-  auto &&build_neighbors_with_zy = [&](
-      size_type y, size_type z, const std::initializer_list<int> &yoffsets,
-      const std::initializer_list<int> &zoffsets) {
-    if (number_of_cells_[0] > 1) {
-      call_closure(make_index(0, y, z), {0, 1}, yoffsets, zoffsets);
-      for (size_type x = 1; x < number_of_cells_[0] - 1; ++x) {
-        call_closure(make_index(x, y, z), {-1, 0, 1}, yoffsets, zoffsets);
-      }
-      call_closure(make_index(number_of_cells_[0] - 1, y, z), {-1, 0}, yoffsets,
-                   zoffsets);
-    } else {
-      call_closure(make_index(0, y, z), {0}, yoffsets, zoffsets);
-    }
-  };
-
-  auto &&build_neighbors_with_z = [&](
-      size_type z, const std::initializer_list<int> &zoffsets) {
-    if (number_of_cells_[1] > 1) {
-      build_neighbors_with_zy(0, z, {0, 1}, zoffsets);
-      for (size_type y = 1; y < number_of_cells_[1] - 1; ++y) {
-        build_neighbors_with_zy(y, z, {-1, 0, 1}, zoffsets);
-      }
-      build_neighbors_with_zy(number_of_cells_[1] - 1, z, {-1, 0}, zoffsets);
-    } else {
-      build_neighbors_with_zy(0, z, {0}, zoffsets);
-    }
-  };
-
-  if (Options == GridOptions::PeriodicBoundaries) {
-    // iterate over the inner (non-ghost) cells. The ghost cells are
-    // constructed such that the requested offsets are always valid cells
-    const auto max_x = number_of_cells_[0] - 1;
-    const auto max_y = number_of_cells_[1] - 1;
-    const auto max_z = number_of_cells_[2] - 1;
-    for (size_type z = 0; z < max_z; ++z) {
-      for (size_type y = 1; y < max_y; ++y) {
-        for (size_type x = 1; x < max_x; ++x) {
-          call_closure(make_index(x, y, z), {-1, 0, 1}, {-1, 0, 1}, {0, 1});
-        }
-      }
-    }
-  } else {
-    for (size_type z = 0; z < number_of_cells_[2] - 1; ++z) {
-      build_neighbors_with_z(z, {0, 1});
-    }
-    build_neighbors_with_z(number_of_cells_[2] - 1, {0});
   }
 }
 
-template void Grid<GridOptions::Normal>::iterate_cells(const std::function<
-    void(const ParticleList &, const std::vector<const ParticleList *> &)> &
-                                                           call_finder) const;
-template void Grid<GridOptions::PeriodicBoundaries>::iterate_cells(
-    const std::function<
-        void(const ParticleList &, const std::vector<const ParticleList *> &)> &
-        call_finder) const;
+enum class NeedsToWrap { PlusLength, No, MinusLength };
+struct NeighborLookup {
+  typename Grid<GridOptions::PeriodicBoundaries>::size_type index = 0;
+  NeedsToWrap wrap = NeedsToWrap::No;
+};
 
+template <>
+void Grid<GridOptions::PeriodicBoundaries>::iterate_cells(
+    const std::function<void(const ParticleList &)> &search_cell_callback,
+    const std::function<void(const ParticleList &, const ParticleList &)> &
+        neighbor_cell_callback) const {
+  const auto &log = logger<LogArea::Grid>();
+
+  std::array<size_type, 3> search_index;
+  size_type &x = search_index[0];
+  size_type &y = search_index[1];
+  size_type &z = search_index[2];
+  size_type search_cell_index = 0;
+
+  // defaults:
+  std::array<NeighborLookup, 2> dz_list;
+  std::array<NeighborLookup, 3> dy_list;
+  std::array<NeighborLookup, 3> dx_list;
+
+  assert(number_of_cells_[2] >= 2);
+  assert(number_of_cells_[1] >= 2);
+  assert(number_of_cells_[0] >= 2);
+
+  for (z = 0; z < number_of_cells_[2]; ++z) {
+    dz_list[0].index = z;
+    dz_list[1].index = z + 1;
+    if (dz_list[1].index == number_of_cells_[2]) {
+      dz_list[1].index = 0;
+      // last z in the loop, so no need to reset wrap again
+      dz_list[1].wrap = NeedsToWrap::MinusLength;
+    }
+    for (y = 0; y < number_of_cells_[1]; ++y) {
+      dy_list[0].index = y;
+      dy_list[1].index = y - 1;
+      dy_list[2].index = y + 1;
+      dy_list[2].wrap = NeedsToWrap::No;
+      if (y == 0) {
+        dy_list[1] = dy_list[2];
+        dy_list[2].index = number_of_cells_[1] - 1;
+        dy_list[2].wrap = NeedsToWrap::PlusLength;
+      } else if (dy_list[2].index == number_of_cells_[1]) {
+        dy_list[2].index = 0;
+        dy_list[2].wrap = NeedsToWrap::MinusLength;
+      }
+      for (x = 0; x < number_of_cells_[0]; ++x, ++search_cell_index) {
+        dx_list[0].index = x;
+        dx_list[1].index = x - 1;
+        dx_list[2].index = x + 1;
+        dx_list[2].wrap = NeedsToWrap::No;
+        if (x == 0) {
+          dx_list[1] = dx_list[2];
+          dx_list[2].index = number_of_cells_[0] - 1;
+          dx_list[2].wrap = NeedsToWrap::PlusLength;
+        } else if (dx_list[2].index == number_of_cells_[0]) {
+          dx_list[2].index = 0;
+          dx_list[2].wrap = NeedsToWrap::MinusLength;
+        }
+
+        assert(search_cell_index == make_index(search_index));
+        assert(search_cell_index >= 0);
+        assert(search_cell_index < size_type(cells_.size()));
+        ParticleList search = cells_[search_cell_index];
+        search_cell_callback(search);
+
+        auto virtual_search_index = search_index;
+        ThreeVector wrap_vector = {};  // no change
+        auto current_wrap_vector = wrap_vector;
+
+        for (const auto &dz : dz_list) {
+          if (dz.wrap == NeedsToWrap::MinusLength) {
+            // last dz in the loop, so no need to undo the wrap
+            wrap_vector[2] = -length_[2];
+            virtual_search_index[2] = -1;
+          }
+          for (const auto &dy : dy_list) {
+            // only the last dy in dy_list can wrap
+            if (dy.wrap == NeedsToWrap::MinusLength) {
+              wrap_vector[1] = -length_[1];
+              virtual_search_index[1] = -1;
+            } else if (dy.wrap == NeedsToWrap::PlusLength) {
+              wrap_vector[1] = length_[1];
+              virtual_search_index[1] = number_of_cells_[1];
+            }
+            for (const auto &dx : dx_list) {
+              // only the last dx in dx_list can wrap
+              if (dx.wrap == NeedsToWrap::MinusLength) {
+                wrap_vector[0] = -length_[0];
+                virtual_search_index[0] = -1;
+              } else if (dx.wrap == NeedsToWrap::PlusLength) {
+                wrap_vector[0] = length_[0];
+                virtual_search_index[0] = number_of_cells_[0];
+              }
+              assert(dx.index >= 0);
+              assert(dx.index < number_of_cells_[0]);
+              assert(dy.index >= 0);
+              assert(dy.index < number_of_cells_[1]);
+              assert(dz.index >= 0);
+              assert(dz.index < number_of_cells_[2]);
+              const auto neighbor_cell_index =
+                  make_index(dx.index, dy.index, dz.index);
+              assert(neighbor_cell_index >= 0);
+              assert(neighbor_cell_index < size_type(cells_.size()));
+              if (neighbor_cell_index <= make_index(virtual_search_index)) {
+                continue;
+              }
+
+              if (wrap_vector != current_wrap_vector) {
+                log.debug("translating search cell by ",
+                          wrap_vector - current_wrap_vector);
+                for_each(search, [&](ParticleData &p) {
+                  p = p.translated(wrap_vector - current_wrap_vector);
+                });
+                current_wrap_vector = wrap_vector;
+              }
+              neighbor_cell_callback(search, cells_[neighbor_cell_index]);
+            }
+            virtual_search_index[0] = search_index[0];
+            wrap_vector[0] = 0;
+          }
+          virtual_search_index[1] = search_index[1];
+          wrap_vector[1] = 0;
+        }
+      }
+    }
+  }
+}
+
+template std::tuple<std::array<float, 3>, std::array<int, 3>>
+Grid<GridOptions::Normal>::determine_cell_sizes(size_type,
+                                                const std::array<float, 3> &,
+                                                const int);
+template std::tuple<std::array<float, 3>, std::array<int, 3>>
+Grid<GridOptions::PeriodicBoundaries>::determine_cell_sizes(
+    size_type, const std::array<float, 3> &, const int);
+
+template void Grid<GridOptions::Normal>::build_cells(
+    const std::array<float, 3> &, const Particles &);
+template void Grid<GridOptions::PeriodicBoundaries>::build_cells(
+    const std::array<float, 3> &, const Particles &);
 }  // namespace Smash

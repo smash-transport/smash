@@ -64,6 +64,7 @@ VtkOutput::~VtkOutput() {
 void VtkOutput::at_eventstart(const Particles &particles,
                               const int event_number) {
   vtk_output_counter_ = 0;
+  vtk_thermodynamics_output_counter_ = 0;
   write(particles, event_number);
   vtk_output_counter_++;
 }
@@ -120,38 +121,39 @@ void VtkOutput::write(const Particles &particles, const int event_number) {
   }
 }
 
-void VtkOutput::vtk_density_map(const char * file_name,
-                     const ParticleList &plist, double gs_sigma,
-                     DensityType dens_type, int ntest,
-                     int nx, int ny, int nz, double dx, double dy, double dz) {
-  ThreeVector r;
-  double rho_eck;
-  std::ofstream a_file;
-  a_file.open(file_name, std::ios::out);
-  a_file << "# vtk DataFile Version 2.0\n" <<
-            "density\n" <<
-            "ASCII\n" <<
-            "DATASET STRUCTURED_POINTS\n" <<
-            "DIMENSIONS " << 2*nx+1 << " " << 2*ny+1 << " " << 2*nz+1 <<"\n" <<
-            "SPACING 1 1 1\n"
-            "ORIGIN " << -nx << " " << -ny << " " << -nz << "\n" <<
-            "POINT_DATA " << (2*nx+1)*(2*ny+1)*(2*nz+1) << "\n" <<
-            "SCALARS density float 1\n" <<
-            "LOOKUP_TABLE default\n";
+void VtkOutput::thermodynamics_output(const std::string varname,
+                               RectangularLattice<DensityOnLattice> &lattice,
+                               const int event_number) {
+  std::ofstream file;
+  char suffix[22];
+  snprintf(suffix, sizeof(suffix), "_%05i_tstep%05i.vtk",
+                        event_number, vtk_thermodynamics_output_counter_);
+  const auto dim = lattice.dimensions();
+  const auto cs = lattice.cell_sizes();
+  const auto orig = lattice.origin();
 
-  a_file << std::setprecision(8);
-  a_file << std::fixed;
-  for (auto iz = -nz; iz <= nz; iz++) {
-    for (auto iy = -ny; iy <= ny; iy++) {
-      for (auto ix = -nx; ix <= nx; ix++) {
-        r = ThreeVector(ix*dx, iy*dy, iz*dz);
-        rho_eck = four_current(r, plist, gs_sigma, dens_type, ntest).abs();
-        a_file << rho_eck << " ";
+  file.open(base_path_.string() + std::string("/") + varname +
+                std::string(suffix), std::ios::out);
+  file  << "# vtk DataFile Version 2.0\n" << varname << "\n" <<
+           "ASCII\n" <<
+           "DATASET STRUCTURED_POINTS\n"
+           "DIMENSIONS " << dim[0] << " " << dim[1] << " " << dim[2] << "\n" <<
+           "SPACING " << cs[0] << " " << cs[1] << " " << cs[2] << "\n" <<
+           "ORIGIN " << orig[0] << " " << orig[1] << " " << orig[2] << "\n" <<
+           "POINT_DATA " << lattice.size() << "\n" <<
+           "SCALARS " << varname << " float 1\n" <<
+           "LOOKUP_TABLE default\n";
+    file << std::setprecision(3);
+    file << std::fixed;
+  lattice.iterate_sublattice({0, 0, 0}, dim,
+    [&](DensityOnLattice &node, int ix, int, int) {
+      file << node.density() << " ";
+      if (ix == dim[0] - 1) {
+        file << "\n";
       }
-      a_file << "\n";
-    }
-  }
-  a_file.close();
+    });
+  file.close();
+  vtk_thermodynamics_output_counter_++;
 }
 
 }  // namespace Smash

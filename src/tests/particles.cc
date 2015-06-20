@@ -69,17 +69,18 @@ TEST(replace) {
 
   COMPARE(to_remove.front().id(), 0);
   COMPARE(to_add.front().id(), -1);
-  p.replace(to_remove, to_add);
+  to_add = p.replace(to_remove, std::move(to_add));
   COMPARE(p.size(), 1u);
-  COMPARE(to_add.front().id(), -1);
+  COMPARE(to_add.front().id(), 1);
   COMPARE(p.front().id(), 1);
-  VERIFY(!p.is_valid(to_add.front()));
+  COMPARE(to_add.front(), p.front());
+  VERIFY(p.is_valid(to_add.front()));
   VERIFY(!p.is_valid(to_remove.front()));
   VERIFY(p.is_valid(p.front()));
 
   to_remove = {p.front()};
   to_add = {Test::smashon(), Test::smashon(), Test::smashon()};
-  p.replace(to_remove, to_add);
+  p.replace(to_remove, std::move(to_add));
   COMPARE(p.size(), 3u);
   COMPARE(p.front().id(), 2);
   COMPARE(p.back().id(), 4);
@@ -87,13 +88,17 @@ TEST(replace) {
 
 TEST(insert) {
   Particles p;
-  p.insert(Test::smashon());
+  ParticleData pd = p.insert(Test::smashon());
   COMPARE(p.size(), 1u);
   VERIFY(p.is_valid(p.front()));
-  p.insert(Test::smashon());
+  COMPARE(pd, p.front());
+  VERIFY(p.is_valid(pd));
+  pd = p.insert(Test::smashon());
   COMPARE(p.size(), 2u);
   VERIFY(p.is_valid(p.front()));
   VERIFY(p.is_valid(p.back()));
+  COMPARE(pd, p.back());
+  VERIFY(p.is_valid(pd));
   p.create(0x661);
   COMPARE(p.size(), 3u);
   VERIFY(p.is_valid(p.front()));
@@ -211,6 +216,39 @@ TEST(erase_particle) {
   VERIFY(!p.is_valid(copy2));
   for (auto &&x : p) {
     VERIFY(p.is_valid(x));
+  }
+}
+
+TEST(id_process) {
+  Particles p;
+  p.create(1000, Test::smashon().pdgcode());
+  int id = -1;
+  for (auto &pd : p) {
+    COMPARE(pd.id_process(), -1);
+    pd.set_id_process(++id);
+  }
+  id = -1;
+  for (auto &pd : p) {
+    COMPARE(pd.id_process(), ++id);
+  }
+  p.reset();
+  p.create(Test::smashon().pdgcode());
+  p.create(999, Test::smashon().pdgcode());
+  id = -1;
+  for (auto &pd : p) {
+    COMPARE(pd.id_process(), -1);
+    pd.set_id_process(++id);
+  }
+  id = -1;
+  for (auto &pd : p) {
+    COMPARE(pd.id_process(), ++id);
+  }
+  p.reset();
+  for (int i = 0; i < 1000; ++i) {
+    p.insert(Test::smashon());
+  }
+  for (auto &pd : p) {
+    COMPARE(pd.id_process(), -1);
   }
 }
 
