@@ -97,14 +97,19 @@ void ScatterAction::generate_final_state() {
 }
 
 
-void ScatterAction::add_all_processes(float elastic_parameter) {
-  /* (1) elastic */
-  add_collision(elastic_cross_section(elastic_parameter));
-  /* (2) resonance formation (2->1) */
-  add_collisions(resonance_cross_sections());
-  /* (3) 2->2 (inelastic) */
-  add_collisions(two_to_two_cross_sections());
-  /* (4) string excitation */
+void ScatterAction::add_all_processes(float elastic_parameter,
+                                      bool two_to_one, bool two_to_two) {
+  if (two_to_one) {
+    /* resonance formation (2->1) */
+    add_collisions(resonance_cross_sections());
+  }
+  if (two_to_two) {
+    /* elastic */
+    add_collision(elastic_cross_section(elastic_parameter));
+    /* 2->2 (inelastic) */
+    add_collisions(two_to_two_cross_sections());
+  }
+  /* string excitation */
   add_collision(string_excitation_cross_section());
 }
 

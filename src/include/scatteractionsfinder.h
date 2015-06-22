@@ -64,6 +64,10 @@ class ScatterActionsFinder : public ActionFinderInterface {
   int testparticles_ = 1;
   /** Do all collisions isotropically. */
   bool isotropic_ = false;
+  /** Enable 2->1 processes. */
+  bool two_to_one_ = true;
+  /** Enable 2->2 processes. */
+  bool two_to_two_ = true;
 };
 
 #if 0

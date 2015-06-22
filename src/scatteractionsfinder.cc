@@ -30,13 +30,19 @@ namespace Smash {
 * Elastic cross section parameter
 * \key Isotropic (bool, optional, default = false) \n
 * Do all collisions isotropically
+* * \key Two_to_One (bool, optional, default = true) \n
+* Enable 2->1 processes
+* * \key Two_to_Two (bool, optional, default = true) \n
+* Enable 2->2 processes
 */
 
 ScatterActionsFinder::ScatterActionsFinder(
     Configuration config, const ExperimentParameters &parameters)
     : elastic_parameter_(config.take({"Collision_Term", "Sigma"}, 0.f)),
       testparticles_(parameters.testparticles),
-      isotropic_(config.take({"Collision_Term", "Isotropic"}, false)) {}
+      isotropic_(config.take({"Collision_Term", "Isotropic"}, false)),
+      two_to_one_(config.take({"Collision_Term", "Two_to_One"}, true)), 
+      two_to_two_(config.take({"Collision_Term", "Two_to_Two"}, true)) {}
 
 ScatterActionsFinder::ScatterActionsFinder(
     float elastic_parameter, int testparticles)
@@ -122,7 +128,7 @@ ActionPtr ScatterActionsFinder::check_collision(
                                                   time_until_collision);
 
   /* Add various subprocesses.  */
-  act->add_all_processes(elastic_parameter_);
+  act->add_all_processes(elastic_parameter_, two_to_one_, two_to_two_);
 
   /* distance criterion according to cross_section */
   const double distance_squared = act->particle_distance();

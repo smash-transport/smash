@@ -51,7 +51,7 @@ TEST(elastic_collision) {
 
   // add elastic channel
   constexpr float sigma = 10.0;
-  act.add_all_processes(sigma);
+  act.add_all_processes(sigma, true, true);
 
   // check cross section
   COMPARE(act.cross_section(), sigma);
@@ -114,7 +114,7 @@ TEST(outgoing_valid) {
 
   // add processes
   constexpr float elastic_parameter = 0.f;  // don't include elastic scattering
-  act->add_all_processes(elastic_parameter);
+  act->add_all_processes(elastic_parameter, true, true);
   VERIFY(act->cross_section() > 0.f);
 
   // perform actions
