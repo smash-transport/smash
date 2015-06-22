@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2013-2014
+ *    Copyright (c) 2013-2015
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -43,32 +43,34 @@ void Particles::increase_capacity(unsigned new_capacity) {
 
 inline void Particles::copy_in(ParticleData &to, const ParticleData &from) {
   to.id_ = ++id_max_;
-  to.id_process_ = from.id_process_;
   to.type_ = from.type_;
-  to.momentum_ = from.momentum_;
-  to.position_ = from.position_;
+  from.copy_to(to);
 }
 
-void Particles::insert(const ParticleData &p) {
+const ParticleData& Particles::insert(const ParticleData &p) {
   if (likely(dirty_.empty())) {
     ensure_capacity(1);
-    copy_in(data_[data_size_], p);
+    ParticleData &in_vector = data_[data_size_];
+    copy_in(in_vector, p);
     ++data_size_;
+    return in_vector;
   } else {
     const auto offset = dirty_.back();
     dirty_.pop_back();
     copy_in(data_[offset], p);
     data_[offset].hole_ = false;
+    return data_[offset];
   }
 }
 
 void Particles::create(size_t number, PdgCode pdg) {
-  const auto &type = ParticleType::find(pdg);
+  const ParticleData pd(ParticleType::find(pdg));
   while (number && !dirty_.empty()) {
     const auto offset = dirty_.back();
     dirty_.pop_back();
+    pd.copy_to(data_[offset]);
     data_[offset].id_ = ++id_max_;
-    data_[offset].type_ = &type;
+    data_[offset].type_ = pd.type_;
     data_[offset].hole_ = false;
     --number;
   }
@@ -76,15 +78,16 @@ void Particles::create(size_t number, PdgCode pdg) {
     ensure_capacity(number);
     const auto end_ptr = &data_[data_size_ + number];
     for (auto ptr = &data_[data_size_]; ptr < end_ptr; ++ptr) {
+      pd.copy_to(*ptr);
       ptr->id_ = ++id_max_;
-      ptr->type_ = &type;
+      ptr->type_ = pd.type_;
     }
     data_size_ += number;
   }
 }
 
 ParticleData &Particles::create(const PdgCode pdg) {
-  const auto &type = ParticleType::find(pdg);
+  const ParticleData pd(ParticleType::find(pdg));
   ParticleData *ptr;
   if (likely(dirty_.empty())) {
     ensure_capacity(1);
@@ -96,8 +99,9 @@ ParticleData &Particles::create(const PdgCode pdg) {
     ptr = &data_[offset];
     ptr->hole_ = false;
   }
+  pd.copy_to(*ptr);
   ptr->id_ = ++id_max_;
-  ptr->type_ = &type;
+  ptr->type_ = pd.type_;
   return *ptr;
 }
 
@@ -113,20 +117,25 @@ void Particles::remove(const ParticleData &p) {
   }
 }
 
-void Particles::replace(const ParticleList &to_remove,
-                        const ParticleList &to_add) {
+ParticleList Particles::replace(const ParticleList &to_remove,
+                                ParticleList &&to_add) {
   std::size_t i = 0;
   for (; i < std::min(to_remove.size(), to_add.size()); ++i) {
     assert(is_valid(to_remove[i]));
     const auto index = to_remove[i].index_;
     copy_in(data_[index], to_add[i]);
+    to_add[i].id_ = data_[index].id_;
+    to_add[i].index_ = index;
   }
   for (; i < to_remove.size(); ++i) {
     remove(to_remove[i]);
   }
   for (; i < to_add.size(); ++i) {
-    insert(to_add[i]);
+    const ParticleData& p = insert(to_add[i]);
+    to_add[i].id_ = p.id_;
+    to_add[i].index_ = p.index_;
   }
+  return std::move(to_add);
 }
 
 void Particles::reset() {

@@ -64,19 +64,19 @@ class FourVector {
   double operator[](std::size_t i) const { return x_[i]; }
 
   /// retrieve time-like component
-  double inline x0(void) const;
+  double inline x0() const;
   /// set time-like component
   void inline set_x0(double t);
   /// retrieve first space-like component
-  double inline x1(void) const;
+  double inline x1() const;
   /// set first space-like component
   void inline set_x1(double x);
   /// retrieve second space-like component
-  double inline x2(void) const;
+  double inline x2() const;
   /// set second space-like component
   void inline set_x2(double y);
   /// set third space-like component
-  double inline x3(void) const;
+  double inline x3() const;
   /// set third space-like component
   void inline set_x3(double z);
   /// get the three-vector (spatial components)
@@ -198,7 +198,7 @@ void inline FourVector::set_x0(const double t) {
   x_[0] = t;
 }
 
-double inline FourVector::x1(void) const {
+double inline FourVector::x1() const {
   return x_[1];
 }
 
@@ -206,7 +206,7 @@ void inline FourVector::set_x1(const double x) {
   x_[1] = x;
 }
 
-double inline FourVector::x2(void) const {
+double inline FourVector::x2() const {
   return x_[2];
 }
 
@@ -214,7 +214,7 @@ void inline FourVector::set_x2(const double y) {
   x_[2] = y;
 }
 
-double inline FourVector::x3(void) const {
+double inline FourVector::x3() const {
   return x_[3];
 }
 

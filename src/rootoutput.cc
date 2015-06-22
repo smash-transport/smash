@@ -114,6 +114,8 @@ RootOutput::RootOutput(bf::path path, Configuration&& conf)
    * fields \c nin and \c nout are added to characterize number of incoming
    * and outgoing particles in the reaction, nin + nout = npart. Currently
    * writing initial and final configuration to collisions tree is not supported.
+   *
+   * See also \ref collisions_output_in_box_modus_.
    **/
 
   if (write_particles_) {

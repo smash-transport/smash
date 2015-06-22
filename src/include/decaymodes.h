@@ -30,10 +30,7 @@ class DecayModes {
   }
 
   /* Make sure ratios add to 1 */
-  void renormalize(float renormalization_constant);
-
-  /* Remove all modes */
-  void clear();
+  void renormalize(PdgCode pdgcode, float renormalization_constant);
 
   /* Check if empty */
   bool is_empty() const { return decay_modes_.empty(); }
@@ -50,8 +47,6 @@ class DecayModes {
    * ParticleType map.
    */
   static void load_decaymodes(const std::string &input);
-
-  static void clear_decaymodes();
 
   /// \ingroup exception
   struct InvalidDecay : public std::invalid_argument {

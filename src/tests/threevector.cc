@@ -168,3 +168,21 @@ TEST(rotations) {
   COMPARE_ABSOLUTE_ERROR(C.x2(), R.x2()/R.abs(), 1.e-15);
   COMPARE_ABSOLUTE_ERROR(C.x3(), R.x3()/R.abs(), 1.e-15);
 }
+
+TEST(compares) {
+  ThreeVector a = {};
+  const auto b = a;
+  VERIFY(a == b);
+  VERIFY(!(a != b));
+  a[2] += 1;
+  VERIFY(!(a == b));
+  VERIFY(a != b);
+  a = b;
+  a[1] += 1;
+  VERIFY(!(a == b));
+  VERIFY(a != b);
+  a = b;
+  a[0] += 1;
+  VERIFY(!(a == b));
+  VERIFY(a != b);
+}

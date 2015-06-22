@@ -63,13 +63,11 @@ class DeformedNucleus : public Nucleus {
   /** Sets the deformation parameters of the Woods-Saxon distribution
    * according to the current mass number.
    *
-   * Ref. for deformation parameters is "Nuclear Ground-State Masses and Deformations"
-   * by P. Möller, J. R. Nix, W. D. Myers, and W. J. Swiatecki.
-   * Corrections to deformation parameter beta2 in Uranium come from
-   * arxiv:nuclth/0506088 by A. Kuhlman and U. Heinz.
-   * For finite nucleon size corrections to the nuclear density and radius, see ref.
-   * arxiv:0904.4080 [nucl-th] by T. Hirano and Y. Nara for copper and gold, and
-   * arxiv:1010.6222 [nucl-th] by T. Hirano, P. Huovinen, and Y. Nara for uranium.
+   * The deformation parameters are taken from \iref{Moller:1993ed}.
+   * Corrections to the deformation parameter beta2 in Uranium come from
+   * \iref{Kuhlman:2005ts}. For finite nucleon size corrections to the nuclear
+   * density and radius, see \iref{Hirano:2009ah} for copper and gold,
+   * and \iref{Hirano:2010jg} for uranium.
    */
   virtual void set_parameters_automatic();
 

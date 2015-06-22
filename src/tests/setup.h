@@ -11,6 +11,7 @@
 #define SRC_TESTS_SETUP_H_
 
 #include "../include/cxx14compat.h"
+#include "../include/decaymodes.h"
 #include "../include/experiment.h"
 #include "../include/particles.h"
 #include "../include/particletype.h"
@@ -32,9 +33,25 @@ namespace Test {
  * uses.
  */
 inline void create_actual_particletypes() {
+#ifndef DOXYGEN
+/// not visible to doxygen, but compiled
 #include <particles.txt.h>
+#endif
   ParticleType::create_type_list(data);
 }
+
+/**
+ * Creates the DecayModes list containing the actual decay modes that SMASH
+ * uses.
+ */
+inline void create_actual_decaymodes() {
+#ifndef DOXYGEN
+/// not visible to doxygen, but compiled
+#include <decaymodes.txt.h>
+#endif
+  DecayModes::load_decaymodes(data);
+}
+
 
 /// The mass of the smashon particle.
 static constexpr float smashon_mass = 0.123f;
@@ -48,7 +65,7 @@ static constexpr const char smashon_pdg_string[] = "661";
 inline void create_smashon_particletypes() {
   ParticleType::create_type_list(
       "# NAME MASS[GEV] WIDTH[GEV] PDG\n"
-      "smashon " +
+      "⨳ " +
       std::to_string(smashon_mass) + ' ' + std::to_string(smashon_width) +
       " 661\n");
 }

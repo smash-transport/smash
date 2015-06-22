@@ -109,6 +109,7 @@ float SphereModus::initial_conditions(Particles *particles,
     pos_phitheta.distribute_isotropically();
     data.set_4position(FourVector(start_time_,
                                   pos_phitheta.threevec() * position_radial));
+    data.set_formation_time(start_time_);
   }
   /* Make total 3-momentum 0 */
   for (ParticleData &data : *particles) {

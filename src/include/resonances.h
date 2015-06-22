@@ -21,20 +21,6 @@
 
 namespace Smash {
 
-/** Parameters for spectral-function integration via GSL. */
-struct IntegrandParameters {
-  /// Type of the resonance
-  ParticleTypePtr type;
-  /** Mass of second particle
-   * \fpPrecision Why \c double?
-   */
-  double m2;
-  /** Square root of Mandelstam s
-   * \fpPrecision Why \c double?
-   */
-  double srts;
-};
-
 /**
  * Calculate Clebsch-Gordan coefficient
  *
@@ -91,14 +77,15 @@ double spectral_function(double resonance_mass, double resonance_pole,
  *  and \f$p_{cm}^f\f$ is the center-of-mass momentum of the final state.
  *
  * \param[in] resonance_mass Actual mass of the resonance.
- * \param[in] parameters Container for the parameters needed
- * by the spectral function: Width of the resonance,
- * pole mass of the resonance, mass of the stable particle in the final state
- * and mandelstam-s of the process.
+ * \param[in] srts sqrt(s) of the process
+ * \param[in] stable_mass mass of the stable particle in the final state
+ * \param[in] type type of the resonance
  *
  * \fpPrecision Why \c double?
  */
-double spectral_function_integrand(double resonance_mass, void * parameters);
+double spectral_function_integrand(double resonance_mass, double srts,
+                                   double stable_mass,
+                                   const ParticleType &type);
 
 /**
  * Resonance mass sampling for 2-particle final state
@@ -113,41 +100,7 @@ double spectral_function_integrand(double resonance_mass, void * parameters);
  * \fpPrecision Why \c double?
  */
 float sample_resonance_mass(const ParticleType &type_resonance,
-                            const ParticleType &type_stable,
-                            const double cms_energy);
-
-/**
- * Function for 1-dimensional GSL integration.
- *
- * \param[in] integrand_function Function of 1 variable to be integrated over.
- * \param[in] parameters Container for possible parameters
- * needed by the integrand.
- * \param[in] lower_limit Lower limit of the integral.
- * \param[in] upper_limit Upper limit of the integral.
- * \param[out] integral_value Result of integration.
- * \param[out] integral_error Uncertainty of the result.
- *
- * \fpPrecision Why \c double?
- */
-void quadrature_1d(double (*integrand_function)(double, void *),
-                          IntegrandParameters *parameters, double lower_limit,
-                          double upper_limit, double *integral_value,
-                          double *integral_error);
-
-/**
- * Scattering matrix amplitude squared for \f$NN \rightarrow NR\f$ processes,
- * where R is a baryon resonance (Delta, N*, Delta*).
- *
- * \param[in] mandelstam_s Mandelstam-s, i.e. collision CMS energy squared.
- * \param[in] type_final_a Type information for the first final state particle.
- * \param[in] type_final_b Type information for the second final state particle.
- *
- * \return Matrix amplitude squared \f$|\mathcal{M}(\sqrt{s})|^2/16\pi\f$.
- */
-float nn_to_resonance_matrix_element(const double mandelstam_s,
-                                     const ParticleType &type_final_a,
-                                     const ParticleType &type_final_b);
-
+                            const float mass_stable, const double cms_energy);
 
 }  // namespace Smash
 

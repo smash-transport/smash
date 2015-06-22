@@ -35,10 +35,11 @@ class ActionFinderInterface {
    * \return The function returns a list (std::vector) of Action objects that
    *         could possibly be executed in this time step.
    */
-  virtual ActionList find_possible_actions(
-      const ParticleList &search_list,
-      const std::vector<const ParticleList *> &neighbors_list,
-      float dt) const = 0;
+  virtual ActionList find_possible_actions(const ParticleList &search_list,
+                                           float dt) const = 0;
+  virtual ActionList find_possible_actions(const ParticleList &search_list,
+                                           const ParticleList &neighbors_list,
+                                           float dt) const = 0;
 
   /**
    * This abstract function finds 'final' actions

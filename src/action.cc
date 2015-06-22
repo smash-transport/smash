@@ -79,7 +79,8 @@ void Action::perform(Particles *particles, size_t &id_process) {
           particles->update(incoming_particles_[i], outgoing_particles_[i]);
     }
   } else {
-    particles->replace(incoming_particles_, outgoing_particles_);
+    outgoing_particles_ = particles->replace(incoming_particles_,
+                                             std::move(outgoing_particles_));
   }
 
   log.debug("Particle map now has ", particles->size(), " elements.");
@@ -115,9 +116,9 @@ void Action::sample_cms_momenta() {
   /* If one of the particles is a resonance, sample its mass. */
   /* TODO: Other particle assumed stable! */
   if (!t_a.is_stable()) {
-    mass_a = sample_resonance_mass(t_a, t_b, cms_energy);
+    mass_a = sample_resonance_mass(t_a, t_b.mass(), cms_energy);
   } else if (!t_b.is_stable()) {
-    mass_b = sample_resonance_mass(t_b, t_a, cms_energy);
+    mass_b = sample_resonance_mass(t_b, t_a.mass(), cms_energy);
   }
 
   double momentum_radial = pCM(cms_energy, mass_a, mass_b);

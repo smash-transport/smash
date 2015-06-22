@@ -10,10 +10,10 @@
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 
-#include <fenv.h>
-#include <getopt.h>
+#include <cfenv>
 #include <cstdio>
 #include <cstdlib>
+#include <getopt.h>
 #include <iterator>
 #include <list>
 #include <stdexcept>
@@ -23,6 +23,7 @@
 #include "include/decaymodes.h"
 #include "include/experiment.h"
 #include "include/forwarddeclarations.h"
+#include "include/fpenvironment.h"
 #include "include/inputfunctions.h"
 #include "include/logging.h"
 #include "include/macros.h"
@@ -176,43 +177,6 @@ void ensure_path_is_valid(const bf::path &path) {
   }
 }
 
-void setup_floatingpoint_traps() {
-  const auto &log = logger<LogArea::Main>();
-
-  // standard C/C++ don't have a function to modify the trapping behavior. You
-  // can only save and restore the setup. With glibc you can change it via
-  // feenableexcept and fedisableexcept.
-#ifdef _GNU_SOURCE
-  // pole error occurred in a floating-point operation:
-  if (-1 == feenableexcept(FE_DIVBYZERO)) {
-    log.warn("Failed to setup trap on pole error.");
-  }
-
-  // domain error occurred in an earlier floating-point operation:
-  if (-1 == feenableexcept(FE_INVALID)) {
-    log.warn("Failed to setup trap on domain error.");
-  }
-
-  // the result of the earlier floating-point operation was too large to be
-  // representable:
-  if (-1 == feenableexcept(FE_OVERFLOW)) {
-    log.warn("Failed to setup trap on overflow.");
-  }
-
-  // the result of the earlier floating-point operation was subnormal with a
-  // loss of precision:
-  if (-1 == feenableexcept(FE_UNDERFLOW)) {
-    log.warn("Failed to setup trap on underflow.");
-  }
-
-  // there's also FE_INEXACT, but this traps if "rounding was necessary to store
-  // the result of an earlier floating-point operation". This is common and not
-  // really an error condition.
-#else
-  log.warn("Failed to setup floating-point traps.");
-#endif
-}
-
 }  // unnamed namespace
 
 }  // namespace Smash
@@ -220,7 +184,7 @@ void setup_floatingpoint_traps() {
 /* main - do command line parsing and hence decides modus */
 int main(int argc, char *argv[]) {
   using namespace Smash;
-  setup_floatingpoint_traps();
+  setup_default_float_traps();
 
   const auto &log = logger<LogArea::Main>();
 
@@ -464,8 +428,6 @@ int main(int argc, char *argv[]) {
     log.fatal() << "SMASH failed with the following error:\n" << e.what();
     return EXIT_FAILURE;
   }
-
-  DecayModes::clear_decaymodes();
 
   log.trace() << source_location << " about to return from main";
   return 0;
