@@ -8,6 +8,7 @@
  */
 
 #include "unittest.h"
+#include "setup.h"
 
 #include "../include/boxmodus.h"
 #include "../include/configuration.h"
@@ -38,7 +39,7 @@ TEST(phase_space_density) {
   conf["Collision_Term"]["Pauli_Blocking"]["Momentum_Averaging_Radius"] = 0.08;
   conf["Collision_Term"]["Pauli_Blocking"]["Gaussian_Cutoff"] = 2.2;
 
-  ExperimentParameters param{{0.f, 1.f}, 1.f, 1, 1.0};
+  ExperimentParameters param = Smash::Test::default_parameters();
   std::unique_ptr<PauliBlocker> pb = make_unique<PauliBlocker>(conf["Collision_Term"]["Pauli_Blocking"], param);
   Particles part;
   PdgCode pdg = 0x2112;
@@ -66,7 +67,7 @@ TEST(phase_space_density) {
   conf["Collision_Term"]["Pauli_Blocking"]["Gaussian_Cutoff"] = 2.2;
   // Number of test-particles
   const size_t ntest = 10;
-  ExperimentParameters param{{0.f, 1.f}, 1.f, ntest, 1.0};
+  ExperimentParameters param = Smash::Test::default_parameters(ntest);
   PauliBlocker *pb = new PauliBlocker(conf["Collision_Term"]["Pauli_Blocking"], param);
   BoxModus *b = new BoxModus(conf["Modi"], param);
   Particles Pbox;
@@ -100,7 +101,7 @@ TEST(phase_space_density_nucleus) {
   Particles part_Au;
   Au.copy_particles(&part_Au);
 
-  ExperimentParameters param{{0.f, 1.f}, 1.f, Ntest, 1.0};
+  ExperimentParameters param = Smash::Test::default_parameters(Ntest);
   std::unique_ptr<PauliBlocker> pb = make_unique<PauliBlocker>(conf["Collision_Term"]["Pauli_Blocking"], param);
 
   ThreeVector r(0.0, 0.0, 0.0);

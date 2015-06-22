@@ -126,13 +126,10 @@ class ColliderModus : public ModusDefault {
    * \fpPrecision Why \c double?
    **/
   double initial_z_displacement_ = 1.0;
-  /** Reference frame for the system.
-   *
-   * 1 = Center of velocity<br>
-   * 2 = Center of mass<br>
-   * 3 = Fixed target<br>
-   **/
-  int frame_ = 1;
+  /**
+   * Reference frame for the system.
+   */
+  CalculationFrame frame_ = CalculationFrame::CenterOfVelocity;
   /**
    * An option to include Fermi motion
    */

@@ -33,7 +33,7 @@ namespace Smash {
 std::ostream &operator<<(std::ostream &out, const BoxModus &m) {
   out << "-- Box Modus:\nSize of the box: (" << m.length_ << " fm)³"
       << "\nInitial temperature: " << m.temperature_ << " GeV"
-      << "\nInitial condition type " << m.initial_condition_ << "\n";
+      << "\nInitial condition type " << static_cast<int>(m.initial_condition_) << "\n";
   for (const auto &p : m.init_multipl_) {
     out << "Particle " << p.first << " initial multiplicity "
                        << p.second << '\n';
@@ -101,12 +101,12 @@ float BoxModus::initial_conditions(Particles *particles,
 
   for (ParticleData &data : *particles) {
     /* Set MOMENTUM SPACE distribution */
-    if (this->initial_condition_ != 2) {
+    if (this->initial_condition_ == BoxInitialCondition::PeakedMomenta) {
+      /* initial thermal momentum is the average 3T */
+      momentum_radial = 3.0 * this->temperature_;
+    } else {
       /* thermal momentum according Maxwell-Boltzmann distribution */
       momentum_radial = sample_momenta(this->temperature_, data.pole_mass());
-    } else {
-      /* IC == 2 initial thermal momentum is the average 3T */
-      momentum_radial = 3.0 * this->temperature_;
     }
     phitheta.distribute_isotropically();
     log.debug() << data << ", radial momentum:" << field << momentum_radial
