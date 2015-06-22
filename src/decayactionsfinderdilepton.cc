@@ -27,7 +27,6 @@ namespace Smash {
 
 ActionList DecayActionsFinderDilepton::find_possible_actions(
       const ParticleList &search_list,
-      const std::vector<const ParticleList *> &,  // neighbors irrelevant
       float) const {
 
   std::FILE* dilep_out;

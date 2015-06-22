@@ -52,14 +52,14 @@ std::pair<double, ThreeVector> unnormalized_smearing_factor(
     // Distance from particle to point of interest > r_cut
     return std::make_pair(0.0, ThreeVector(0.0, 0.0, 0.0));
   }
-  const double m_sqr = p.sqr();
-  if (m_sqr < really_small) {
+  const double m = p.abs();
+  if (m < really_small) {
     const auto &log = logger<LogArea::Density>();
     log.warn("Gaussian smearing is undefined for momentum ", p);
     return std::make_pair(0.0, ThreeVector(0.0, 0.0, 0.0));
   }
 
-  const FourVector u = p / std::sqrt(m_sqr);
+  const FourVector u = p / m;
   const double u_r_scalar = r * u.threevec();
   const double r_rest_sqr = r_sqr + u_r_scalar * u_r_scalar;
 
