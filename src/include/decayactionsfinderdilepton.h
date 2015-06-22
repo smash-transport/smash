@@ -29,8 +29,15 @@ class DecayActionsFinderDilepton : public ActionFinderInterface {
    * and return a list with the corrsponding Action objects. */
   ActionList find_possible_actions(
       const ParticleList &search_list,
-      const std::vector<const ParticleList *> &neighbors_list,
       float dt) const override;
+
+  /// Ignore the neighbor searches for (dilepton) decays
+  ActionList find_possible_actions(const ParticleList &, const ParticleList &,
+                                   float) const override {
+    return {};
+  }
+
+
   /** Force all resonances to decay at the end of the simulation. */
   ActionList find_final_actions(const Particles &search_list) const override;
 };
