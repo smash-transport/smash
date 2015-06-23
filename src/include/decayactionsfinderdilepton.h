@@ -12,7 +12,7 @@
 
 #include <vector>
 
-#include "actionfinderfactory.h"
+#include "decayactionsfinder.h"
 
 namespace Smash {
 
@@ -21,7 +21,7 @@ namespace Smash {
  * A simple dilepton decay finder:
  * Just loops through all particles and checks if they can decay into dileptons.
  */
-class DecayActionsFinderDilepton : public ActionFinderInterface {
+class DecayActionsFinderDilepton : public DecayActionsFinder {
  public:
   /** Initialize the finder */
   DecayActionsFinderDilepton() {}
@@ -30,13 +30,6 @@ class DecayActionsFinderDilepton : public ActionFinderInterface {
   ActionList find_possible_actions(
       const ParticleList &search_list,
       float dt) const override;
-
-  /// Ignore the neighbor searches for (dilepton) decays
-  ActionList find_possible_actions(const ParticleList &, const ParticleList &,
-                                   float) const override {
-    return {};
-  }
-
 
   /** Force all resonances to decay at the end of the simulation. */
   ActionList find_final_actions(const Particles &search_list) const override;
