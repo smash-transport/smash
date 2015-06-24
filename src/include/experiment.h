@@ -152,9 +152,10 @@ class Experiment : public ExperimentBase {
    */
   void initialize_new_event();
 
-  /** Perform all actions in the given list. */
-  void perform_actions(ActionList &actions, size_t &interactions_total,
-                                            size_t &total_pauliblocked);
+  /** Perform the given action. */
+  void perform_action(const ActionPtr &action, size_t &interactions_total,
+                      size_t &total_pauliblocked,
+                      const ParticleList &particles_before_actions);
 
   /** Runs the time evolution of an event
    *

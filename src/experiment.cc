@@ -333,60 +333,51 @@ static std::string format_measurements(const Particles &particles,
 }
 
 template <typename Modus>
-void Experiment<Modus>::perform_actions(ActionList &actions,
-                                        size_t &interactions_total,
-                                        size_t &total_pauli_blocked) {
+void Experiment<Modus>::perform_action(
+    const ActionPtr &action, size_t &interactions_total,
+    size_t &total_pauli_blocked, const ParticleList &particles_before_actions) {
   const auto &log = logger<LogArea::Experiment>();
-  if (!actions.empty()) {
-    const auto particles_before_actions = particles_.copy_to_vector();
-    for (const auto &action : actions) {
-      if (action->is_valid(particles_)) {
-        const ParticleList incoming_particles = action->incoming_particles();
-        action->generate_final_state();
-        ProcessType process_type = action->get_type();
-        log.debug("Process Type is: ", process_type);
-        if (pauli_blocker_ &&
-            action->is_pauli_blocked(particles_, *pauli_blocker_.get())) {
-          total_pauli_blocked++;
-          continue;
-        }
-        action->perform(&particles_, interactions_total);
-        const ParticleList outgoing_particles = action->outgoing_particles();
-        // Calculate Eckart rest frame density at the interaction point
-        const FourVector r_interaction = action->get_interaction_point();
-        constexpr bool compute_grad = false;
-        const double rho =
-            rho_eckart(r_interaction.threevec(), particles_before_actions,
-                       parameters_, dens_type_, compute_grad).first;
-        /*!\Userguide
-         * \page collisions_output_in_box_modus_ Collision output in box modus
-         * \note When SMASH is running in the box modus, particle coordinates
-         * in the collision output can be out of the box. This is not an error.
-         * Box boundary conditions are intentionally not imposed before
-         * collision output to allow unambiguous finding of the interaction
-         * point.
-         * <I>Example</I>: two particles in the box have x coordinates 0.1 and
-         * 9.9 fm, while box L = 10 fm. Suppose these particles collide.
-         * For calculating collision the first one is wrapped to 10.1 fm.
-         * Then output contains coordinates of 9.9 fm and 10.1 fm.
-         * From this one can infer interaction point at x = 10 fm.
-         * Were boundary conditions imposed before output,
-         * their x coordinates would be 0.1 and 9.9 fm and interaction point
-         * position could be either at 10 fm or at 5 fm.
-         */
-        for (const auto &output : outputs_) {
-          output->at_interaction(incoming_particles, outgoing_particles, rho,
-                                 action->raw_weight_value(), process_type);
-        }
-        log.debug(~einhard::Green(), "✔ ", action);
-      } else {
-        log.debug(~einhard::DRed(), "✘ ", action, " (discarded: invalid)");
-      }
+  if (action->is_valid(particles_)) {
+    const ParticleList incoming_particles = action->incoming_particles();
+    action->generate_final_state();
+    ProcessType process_type = action->get_type();
+    log.debug("Process Type is: ", process_type);
+    if (pauli_blocker_ &&
+        action->is_pauli_blocked(particles_, *pauli_blocker_.get())) {
+      total_pauli_blocked++;
+      return;
     }
-    actions.clear();
-    log.debug(~einhard::Blue(), particles_);
+    action->perform(&particles_, interactions_total);
+    const ParticleList outgoing_particles = action->outgoing_particles();
+    // Calculate Eckart rest frame density at the interaction point
+    const FourVector r_interaction = action->get_interaction_point();
+    constexpr bool compute_grad = false;
+    const double rho =
+        rho_eckart(r_interaction.threevec(), particles_before_actions,
+                   parameters_, dens_type_, compute_grad).first;
+    /*!\Userguide
+     * \page collisions_output_in_box_modus_ Collision output in box modus
+     * \note When SMASH is running in the box modus, particle coordinates
+     * in the collision output can be out of the box. This is not an error.
+     * Box boundary conditions are intentionally not imposed before
+     * collision output to allow unambiguous finding of the interaction
+     * point.
+     * <I>Example</I>: two particles in the box have x coordinates 0.1 and
+     * 9.9 fm, while box L = 10 fm. Suppose these particles collide.
+     * For calculating collision the first one is wrapped to 10.1 fm.
+     * Then output contains coordinates of 9.9 fm and 10.1 fm.
+     * From this one can infer interaction point at x = 10 fm.
+     * Were boundary conditions imposed before output,
+     * their x coordinates would be 0.1 and 9.9 fm and interaction point
+     * position could be either at 10 fm or at 5 fm.
+     */
+    for (const auto &output : outputs_) {
+      output->at_interaction(incoming_particles, outgoing_particles, rho,
+                             action->raw_weight_value(), process_type);
+    }
+    log.debug(~einhard::Green(), "✔ ", action);
   } else {
-    log.debug("no actions performed");
+    log.debug(~einhard::DRed(), "✘ ", action, " (discarded: invalid)");
   }
 }
 
@@ -402,11 +393,11 @@ size_t Experiment<Modus>::run_time_evolution(const int evt_num) {
       particles_, interactions_total, 0u,
       conserved_initial_, time_start_, parameters_.labclock.current_time());
 
+  std::vector<ActionPtr> actions;
   while (!(++parameters_.labclock > end_time_)) {
     // vector is likely the best container type here. Because std::sort requires
     // random access iterators. Any linked data structure (e.g. list) thus
     // requires a less efficient sort algorithm.
-    std::vector<ActionPtr> actions;
 
     /* (1.a) Create grid. */
     const auto &grid =
@@ -433,7 +424,17 @@ size_t Experiment<Modus>::run_time_evolution(const int evt_num) {
               [](const ActionPtr &a, const ActionPtr &b) { return *a < *b; });
 
     /* (2) Perform actions. */
-    perform_actions(actions, interactions_total, total_pauli_blocked);
+    if (!actions.empty()) {
+      const auto particles_before_actions = particles_.copy_to_vector();
+      for (const auto &action : actions) {
+        perform_action(action, interactions_total, total_pauli_blocked,
+                       particles_before_actions);
+      }
+      actions.clear();
+      log.debug(~einhard::Blue(), particles_);
+    } else {
+      log.debug("no actions performed");
+    }
     modus_.impose_boundary_conditions(&particles_);
 
     /* (3) Do propagation. */
@@ -529,7 +530,11 @@ void Experiment<Modus>::final_decays(size_t &interactions_total) {
       actions += finder->find_final_actions(particles_);
     }
     /* Perform actions. */
-    perform_actions(actions, interactions_total, total_pauli_blocked);
+    const auto particles_before_actions = particles_.copy_to_vector();
+    for (const auto &action : actions) {
+      perform_action(action, interactions_total, total_pauli_blocked,
+                     particles_before_actions);
+    }
     // loop until no more decays occur
   } while (interactions_total > interactions_old);
 
