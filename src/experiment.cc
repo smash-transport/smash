@@ -393,13 +393,13 @@ void Experiment<Modus>::perform_actions(ActionList &actions,
 /* This is the loop over timesteps, carrying out collisions and decays
  * and propagating particles. */
 template <typename Modus>
-void Experiment<Modus>::run_time_evolution(const int evt_num) {
+size_t Experiment<Modus>::run_time_evolution(const int evt_num) {
   const auto &log = logger<LogArea::Experiment>();
   modus_.impose_boundary_conditions(&particles_);
   size_t interactions_total = 0, previous_interactions_total = 0,
-         interactions_this_interval = 0, total_pauli_blocked = 0;
+         total_pauli_blocked = 0;
   log.info() << format_measurements(
-      particles_, interactions_total, interactions_this_interval,
+      particles_, interactions_total, 0u,
       conserved_initial_, time_start_, parameters_.labclock.current_time());
 
   while (!(++parameters_.labclock > end_time_)) {
@@ -454,40 +454,8 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
     // case, I know what the next tick is and I can check whether the
     // output time is crossed within the next tick.
     if (parameters_.need_intermediate_output()) {
-      interactions_this_interval =
-          interactions_total - previous_interactions_total;
-      previous_interactions_total = interactions_total;
-      log.info() << format_measurements(
-          particles_, interactions_total, interactions_this_interval,
-          conserved_initial_, time_start_, parameters_.labclock.current_time());
-      // Update lattices for output
-      const LatticeUpdate lat_upd = LatticeUpdate::AtOutput;
-      update_density_lattice(jmu_B_lat_.get(), lat_upd, DensityType::baryon,
-                             parameters_, particles_);
-      update_density_lattice(jmu_I3_lat_.get(), lat_upd,
-                DensityType::baryonic_isospin, parameters_, particles_);
-      update_density_lattice(jmu_custom_lat_.get(), lat_upd,
-                dens_type_lattice_printout_, parameters_, particles_);
-      /* save evolution data */
-      for (const auto &output : outputs_) {
-        output->at_intermediate_time(particles_, evt_num, parameters_.labclock);
-        output->thermodynamics_output(particles_, parameters_);
-        switch (dens_type_lattice_printout_) {
-          case DensityType::baryon:
-            output->thermodynamics_output(std::string("rhoB"), *jmu_B_lat_,
-                                                                     evt_num);
-            break;
-          case DensityType::baryonic_isospin:
-            output->thermodynamics_output(std::string("rhoI3"), *jmu_I3_lat_,
-                                                                     evt_num);
-            break;
-          case DensityType::none:
-            break;
-          default:
-            output->thermodynamics_output(std::string("rho"), *jmu_custom_lat_,
-                                                                      evt_num);
-        }
-      }
+      intermediate_output(evt_num, interactions_total,
+                          previous_interactions_total);
     }
     // Check conservation of conserved quantities if potentials are off.
     // If potentials are on then momentum is conserved only in average
@@ -504,31 +472,79 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
     log.info("Collisions: pauliblocked/total = ", total_pauli_blocked, "/",
              interactions_total);
   }
+  return interactions_total;
+}
 
-  if (force_decays_) {
-    // at end of time evolution: force all resonances to decay
-    size_t interactions_old;
-    do {
-      std::vector<ActionPtr> actions;
-      interactions_old = interactions_total;
-      /* Find actions. */
-      for (const auto &finder : action_finders_) {
-        actions += finder->find_final_actions(particles_);
-      }
-      /* Perform actions. */
-      perform_actions(actions, interactions_total, total_pauli_blocked);
-      // loop until no more decays occur
-    } while (interactions_total > interactions_old);
-
-    /* Do one final propagation step. */
-    if (potentials_) {
-      propagate(&particles_, parameters_, *potentials_);
-    } else {
-      propagate_straight_line(&particles_, parameters_);
+template<typename Modus>
+void Experiment<Modus>::intermediate_output(const int evt_num,
+    size_t& interactions_total, size_t& previous_interactions_total) {
+  const auto &log = logger<LogArea::Experiment>();
+  const size_t interactions_this_interval =
+      interactions_total - previous_interactions_total;
+  previous_interactions_total = interactions_total;
+  log.info() << format_measurements(
+      particles_, interactions_total, interactions_this_interval,
+      conserved_initial_, time_start_, parameters_.labclock.current_time());
+  // Update lattices for output
+  const LatticeUpdate lat_upd = LatticeUpdate::AtOutput;
+  update_density_lattice(jmu_B_lat_.get(), lat_upd, DensityType::baryon,
+                         parameters_, particles_);
+  update_density_lattice(jmu_I3_lat_.get(), lat_upd,
+            DensityType::baryonic_isospin, parameters_, particles_);
+  update_density_lattice(jmu_custom_lat_.get(), lat_upd,
+            dens_type_lattice_printout_, parameters_, particles_);
+  /* save evolution data */
+  for (const auto &output : outputs_) {
+    output->at_intermediate_time(particles_, evt_num, parameters_.labclock);
+    output->thermodynamics_output(particles_, parameters_);
+    switch (dens_type_lattice_printout_) {
+      case DensityType::baryon:
+        output->thermodynamics_output(std::string("rhoB"), *jmu_B_lat_,
+                                                                 evt_num);
+        break;
+      case DensityType::baryonic_isospin:
+        output->thermodynamics_output(std::string("rhoI3"), *jmu_I3_lat_,
+                                                                 evt_num);
+        break;
+      case DensityType::none:
+        break;
+      default:
+        output->thermodynamics_output(std::string("rho"), *jmu_custom_lat_,
+                                                                  evt_num);
     }
-    modus_.impose_boundary_conditions(&particles_, outputs_);
   }
+}
 
+template <typename Modus>
+void Experiment<Modus>::final_decays(size_t &interactions_total) {
+  size_t total_pauli_blocked = 0;
+
+  // at end of time evolution: force all resonances to decay
+  size_t interactions_old;
+  do {
+    std::vector<ActionPtr> actions;
+    interactions_old = interactions_total;
+    /* Find actions. */
+    for (const auto &finder : action_finders_) {
+      actions += finder->find_final_actions(particles_);
+    }
+    /* Perform actions. */
+    perform_actions(actions, interactions_total, total_pauli_blocked);
+    // loop until no more decays occur
+  } while (interactions_total > interactions_old);
+
+  /* Do one final propagation step. */
+  if (potentials_) {
+    propagate(&particles_, parameters_, *potentials_);
+  } else {
+    propagate_straight_line(&particles_, parameters_);
+  }
+  modus_.impose_boundary_conditions(&particles_, outputs_);
+}
+
+template <typename Modus>
+void Experiment<Modus>::final_output(size_t interactions_total) {
+  const auto &log = logger<LogArea::Experiment>();
   // make sure the experiment actually ran (note: we should compare this
   // to the start time, but we don't know that. Therefore, we check that
   // the time is positive, which should heuristically be the same).
@@ -559,7 +575,11 @@ void Experiment<Modus>::run() {
     }
 
     /* the time evolution of the relevant subsystem */
-    run_time_evolution(j);
+    size_t interactions_total = run_time_evolution(j);
+    if (force_decays_) {
+      final_decays(interactions_total);
+    }
+    final_output(interactions_total);
 
     /* Output at event end */
     for (const auto &output : outputs_) {

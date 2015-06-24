@@ -162,8 +162,30 @@ class Experiment : public ExperimentBase {
    * carried out and particles are propagated.
    *
    * \param evt_num Running number of the event
+   * \return The number of interactions from the event
    */
-  void run_time_evolution(const int evt_num);
+  size_t run_time_evolution(const int evt_num);
+
+  /** Performs the final decays of an event
+   *
+   * \param interactions_total The number of interactions so far
+   */
+  void final_decays(size_t &interactions_total);
+
+  /** Output at the end of an event
+   *
+   * \param interactions_total The number of interactions from the event
+   */
+  void final_output(size_t interactions_total);
+
+  /** Intermediate output during an event
+   *
+   * \param interactions_total The total number of interactions so far
+   * \param previous_interactions_total The number of interactions at the
+   *                                    previous output
+   */
+  void intermediate_output(const int evt_num, size_t& interactions_total,
+                           size_t& previous_interactions_total);
 
   /**
    * Struct of several member variables.
