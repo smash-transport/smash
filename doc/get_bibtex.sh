@@ -17,5 +17,5 @@ for line in `grep -hor '\iref{.*}' ../src | sort -u | sed 's/iref{//' | sed 's/}
   echo "fetching $line ..."
   # search for bibtex key on Inspire, extract bib entry and append it to bibtex file
   wget -q -O - "http://inspirehep.net/search?p=$line&of=hx" | \
-      sed -n "/<pre>/,/<\/pre>/p" | head -n -1 | tail -n +2 >> smash.bib
+      sed -n "/<pre>/,/<\/pre>/p" | tail -r | tail -n +2 | tail -r | tail -n +2 >> smash.bib
 done
