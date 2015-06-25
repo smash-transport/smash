@@ -94,20 +94,23 @@ InterpolateData<T>::InterpolateData(const std::vector<T>& x,
   }
 }
 
-/// Find the index in v that corresponds to the last value smaller than x.
+/// Find the index in v that corresponds to the last value strictly smaller than x.
+/// If no such value exists, the first value is returned.
 ///
 /// This assumes v is sorted and uses a binary search.
+///
+/// Example:
+/// >>> std::vector<int> x = { 0, 2, 4, 6, 8, 10 };
+/// >>> find_index(x, 2)
+/// 0
+/// >>> find_index(x, 3)
+/// 1
 template <typename T>
 size_t find_index(const std::vector<T> v, T x) {
   const auto it = std::lower_bound(v.begin(), v.end(), x);
   if (it == v.begin()) {
     return 0;
-  } else if (it == v.end()) {
-    return v.size() - 1;
   } else {
-    if (*it == x) {
-      return it - v.begin();
-    }
     return it - 1 - v.begin();
   }
 }

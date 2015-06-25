@@ -31,8 +31,9 @@ TEST(interpolate_data) {
 TEST(find_index) {
   const std::vector<float> data = { 0.0, 0.2, 0.4, 0.6, 0.8, 1.0 };
   COMPARE(find_index(data, -1.0f), 0);
-  COMPARE(find_index(data, 0.2f), 1);
+  COMPARE(find_index(data, 0.2f), 0);
   COMPARE(find_index(data, 0.3f), 1);
-  COMPARE(find_index(data, 0.4f), 2);
+  COMPARE(find_index(data, 0.4f), 1);
+  COMPARE(find_index(data, 0.5f), 2);
   COMPARE(find_index(data, 10.0f), 5);
 }
