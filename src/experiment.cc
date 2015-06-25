@@ -517,7 +517,7 @@ void Experiment<Modus>::intermediate_output(const int evt_num,
 }
 
 template <typename Modus>
-void Experiment<Modus>::final_decays(size_t &interactions_total) {
+void Experiment<Modus>::do_final_decays(size_t &interactions_total) {
   size_t total_pauli_blocked = 0;
 
   // at end of time evolution: force all resonances to decay
@@ -548,7 +548,8 @@ void Experiment<Modus>::final_decays(size_t &interactions_total) {
 }
 
 template <typename Modus>
-void Experiment<Modus>::final_output(size_t interactions_total) {
+void Experiment<Modus>::final_output(size_t interactions_total,
+                                     const int evt_num) {
   const auto &log = logger<LogArea::Experiment>();
   // make sure the experiment actually ran (note: we should compare this
   // to the start time, but we don't know that. Therefore, we check that
@@ -562,6 +563,10 @@ void Experiment<Modus>::final_output(size_t interactions_total) {
                                                 particles_.time() /
                                                 particles_.size()))
                << " [fm-1]";
+  }
+
+  for (const auto &output : outputs_) {
+    output->at_eventend(particles_, evt_num);
   }
 }
 
@@ -582,14 +587,11 @@ void Experiment<Modus>::run() {
     /* the time evolution of the relevant subsystem */
     size_t interactions_total = run_time_evolution(j);
     if (force_decays_) {
-      final_decays(interactions_total);
+      do_final_decays(interactions_total);
     }
-    final_output(interactions_total);
 
     /* Output at event end */
-    for (const auto &output : outputs_) {
-      output->at_eventend(particles_, j);
-    }
+    final_output(interactions_total, j);
   }
 }
 

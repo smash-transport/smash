@@ -171,16 +171,18 @@ class Experiment : public ExperimentBase {
    *
    * \param interactions_total The number of interactions so far
    */
-  void final_decays(size_t &interactions_total);
+  void do_final_decays(size_t &interactions_total);
 
   /** Output at the end of an event
    *
    * \param interactions_total The number of interactions from the event
+   * \param evt_num Number of the event
    */
-  void final_output(size_t interactions_total);
+  void final_output(size_t interactions_total, const int evt_num);
 
   /** Intermediate output during an event
    *
+   * \param evt_num Number of the event
    * \param interactions_total The total number of interactions so far
    * \param previous_interactions_total The number of interactions at the
    *                                    previous output
