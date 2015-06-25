@@ -188,7 +188,9 @@ void ParticleType::create_type_list(const std::string &input) {  // {{{
             [](const ParticleType &l,
                const ParticleType &r) { return l.pdgcode() < r.pdgcode(); });
 
-  assert(nullptr == all_particle_types);
+  if (all_particle_types != nullptr) {
+    throw std::runtime_error("Error: Type list was already built!");
+  }
   all_particle_types = &type_list;  // note that type_list is a function-local
                                     // static and thus will live on until after
                                     // main().
