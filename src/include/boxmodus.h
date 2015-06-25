@@ -66,18 +66,13 @@ class BoxModus : public ModusDefault {
                          const OutputsList &output_list = {});
 
   ///\copydoc Smash::ModusDefault::create_grid
-  Grid<GridOptions::PeriodicBoundaries> create_grid(const Particles &particles,
-                                                    int testparticles) const {
-    return {{{0, 0, 0}, {length_, length_, length_}}, particles, testparticles};
-  }
-
-  ///\copydoc Smash::ModusDefault::create_pseudo_grid
-  Grid<GridOptions::PeriodicBoundaries> create_pseudo_grid(
-      const Particles &particles, int testparticles) const {
+  Grid<GridOptions::PeriodicBoundaries> create_grid(
+      const Particles &particles, int testparticles,
+      CellSizeStrategy strategy = CellSizeStrategy::Optimal) const {
     return {{{0, 0, 0}, {length_, length_, length_}},
             particles,
             testparticles,
-            CellSizeStrategy::Largest};
+            strategy};
   }
 
  private:

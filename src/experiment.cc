@@ -411,9 +411,9 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
 
     /* (1.a) Create grid. */
     const auto &grid =
-        use_grid_
-            ? modus_.create_grid(particles_, parameters_.testparticles)
-            : modus_.create_pseudo_grid(particles_, parameters_.testparticles);
+        use_grid_ ? modus_.create_grid(particles_, parameters_.testparticles)
+                  : modus_.create_grid(particles_, parameters_.testparticles,
+                                       CellSizeStrategy::Largest);
     /* (1.b) Iterate over cells and find actions. */
     grid.iterate_cells([&](const ParticleList &search_list) {
                          for (const auto &finder : action_finders_) {
