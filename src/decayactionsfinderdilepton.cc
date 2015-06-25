@@ -61,7 +61,7 @@ ActionList DecayActionsFinderDilepton::find_possible_actions(
           if (act->total_width() > 0.0) {  // check if their are any (dil.) decays
              act->generate_final_state();  
            
-             // SHINNING
+             // SHINNING \iref{Schmidt:2008hm}, chapter 2D
              float sh_weight = dt * partial_width * inv_gamma;
            
              /* for a first version the finder writes its own dilepton output
