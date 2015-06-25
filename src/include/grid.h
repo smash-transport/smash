@@ -13,6 +13,7 @@
 #include <array>
 #include <cmath>
 #include <functional>
+#include <stdexcept>
 #include <utility>
 #include <vector>
 
@@ -35,9 +36,14 @@ enum class GridOptions : char {
  * Indentifies the strategy of determining the cell size.
  */
 enum class CellSizeStrategy : char {
-  /// look for optimal cell size
+
+  /// Look for optimal cell size.
   Optimal,
-  /// make cells as large as possible
+
+  /// Make cells as large as possible.
+  ///
+  /// This means a single cell for normal boundary conditions and 8 cells
+  /// for periodic boundary conditions.
   Largest
 };
 
@@ -116,25 +122,31 @@ class Grid : public GridBase {
      * is reduced (because of low density) then this value is smaller.
      */
     std::array<float, 3> index_factor;
-    if (strategy == CellSizeStrategy::Optimal) {
-      std::tie(index_factor, number_of_cells_) =
-          determine_cell_sizes(particles.size(), length_, testparticles);
-    } else if (strategy == CellSizeStrategy::Largest) {
-      // set number of cells
-      if (Options == GridOptions::PeriodicBoundaries) {
-        number_of_cells_ = {2, 2, 2};
-      } else {
-        number_of_cells_ = {1, 1, 1};
-      }
 
-      // set index factor
-      for (std::size_t i = 0; i < index_factor.size(); ++i) {
-        index_factor[i] = number_of_cells_[i] / length_[i];
-        while (index_factor[i] * length_[i] >= number_of_cells_[i]) {
-          index_factor[i] = std::nextafter(index_factor[i], 0.f);
+    switch (strategy) {
+      case CellSizeStrategy::Optimal:
+        std::tie(index_factor, number_of_cells_) =
+            determine_cell_sizes(particles.size(), length_, testparticles);
+        break;
+      case CellSizeStrategy::Largest:
+        // set number of cells
+        if (Options == GridOptions::PeriodicBoundaries) {
+          number_of_cells_ = {2, 2, 2};
+        } else {
+          number_of_cells_ = {1, 1, 1};
         }
-        assert(index_factor[i] * length_[i] < number_of_cells_[i]);
-      }
+
+        // set index factor
+        for (std::size_t i = 0; i < index_factor.size(); ++i) {
+          index_factor[i] = number_of_cells_[i] / length_[i];
+          while (index_factor[i] * length_[i] >= number_of_cells_[i]) {
+            index_factor[i] = std::nextafter(index_factor[i], 0.f);
+          }
+          assert(index_factor[i] * length_[i] < number_of_cells_[i]);
+        }
+        break;
+      default:
+        throw std::domain_error("Unhandled CellSizeStrategy!");
     }
 
     build_cells(index_factor, particles);
