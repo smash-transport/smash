@@ -13,9 +13,9 @@ cd `dirname \`which "$0"\``
 rm -f smash.bib
 
 # extract all bibtex keys from the source files
-for line in `grep -hor '\iref{.*}' ../src | sort -u | sed 's/iref{//' | sed 's/}//'`; do
+for line in `grep -hor '\iref{.*}' ../src | sort -u | sed 's/iref{//; s/}//'`; do
   echo "fetching $line ..."
   # search for bibtex key on Inspire, extract bib entry and append it to bibtex file
   wget -q -O - "http://inspirehep.net/search?p=$line&of=hx" | \
-      sed -n "/<pre>/,/<\/pre>/p" | head -n -1 | tail -n +2 >> smash.bib
+      sed -n "/<pre>/,/<\/pre>/p" | sed '$ d; 1d' >> smash.bib
 done
