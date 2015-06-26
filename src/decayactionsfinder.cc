@@ -35,6 +35,11 @@ ActionList DecayActionsFinder::find_possible_actions(
     // total decay width (mass-dependent)
     const float width = total_weight<DecayBranch>(processes);
 
+    // check if check if there are any (hadronic) decays
+    if (!(width > 0.0)) {
+      continue;
+    }
+
     /* Exponential decay. Lifetime tau = 1 / width
      * t / tau = width * t (remember GeV-fm conversion)
      * P(decay at Delta_t) = width * Delta_t

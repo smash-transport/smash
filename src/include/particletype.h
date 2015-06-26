@@ -138,11 +138,29 @@ class ParticleType {
   /**
    * Get the mass-dependent partial decay widths of a particle with mass m.
    * Returns a list of process branches, whose weights correspond to the
-   * actual partial widths.
+   * actual partial widths. The list contains all branches.
    *
    * \param m Invariant mass of the decaying particle.
    */
   DecayBranchList get_partial_widths(const float m) const;
+
+  /**
+  * Get the mass-dependent partial decay widths of a particle with mass m.
+  * Returns a list of process branches, whose weights correspond to the
+  * actual partial widths. The list contains all but the dilepton branches.
+  *
+  * \param m Invariant mass of the decaying particle.
+  */
+  DecayBranchList get_partial_widths_hadronic(const float m) const;
+
+  /**
+  * Get the mass-dependent partial decay widths of a particle with mass m.
+  * Returns a list of process branches, whose weights correspond to the
+  * actual partial widths. The list contains only the dilepton branches.
+  *
+  * \param m Invariant mass of the decaying particle.
+  */
+  DecayBranchList get_partial_widths_dilepton(const float m) const;
 
   /**
    * Get the mass-dependent partial in-width of a resonance with mass m,

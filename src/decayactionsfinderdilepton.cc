@@ -7,7 +7,6 @@
  *
  */
 
-
 #include "include/decayactionsfinderdilepton.h"
 
 
@@ -47,50 +46,44 @@ ActionList DecayActionsFinderDilepton::find_possible_actions(
 
      float inv_gamma = p.inverse_gamma();
 
-    DecayBranchList all_modes = p.type().get_partial_widths(p.effective_mass());
+    DecayBranchList all_modes =
+                  p.type().get_partial_widths_dilepton(p.effective_mass());
 
     for (DecayBranchPtr & mode : all_modes) {
-        if (is_dilepton(mode->type().particle_types()[0]->pdgcode(),
-                        mode->type().particle_types()[1]->pdgcode())) {
-          /* TODO dileptons should be radiated at the end of the timestep,
-              so they wont radiate if the resonance decays (so dt)*/
-          auto act = make_unique<DecayAction>(p, 0.f);
-          float partial_width = mode->weight();
-          act->add_decay(std::move(mode));
+      /* TODO dileptons should be radiated at the end of the timestep,
+          so they wont radiate if the resonance decays (so dt)*/
+      auto act = make_unique<DecayAction>(p, 0.f);
+      float partial_width = mode->weight();
+      act->add_decay(std::move(mode));
 
-          if (act->total_width() > 0.0) {  // check if their are any (dil.) decays
-             act->generate_final_state();  
-           
-             // SHINNING
-             float sh_weight = dt * partial_width * inv_gamma;
-           
-             /* for a first version the finder writes its own dilepton output
-              * current outputformat pdg p0 p1 p2 p3
-              * and shinning weigths last parent particle item
-              */
-             std::fprintf(dilep_out, "# parent particle %s %g weigth: %g\n",
-                          act->incoming_particles()[0].pdgcode().string().c_str(),
-                          act->incoming_particles()[0].effective_mass(),
-                          sh_weight);
-             std::fprintf(dilep_out, "%s %g %g %g %g\n",
-                      act->outgoing_particles()[0].pdgcode().string().c_str(),
-                      act->outgoing_particles()[0].momentum().x0(),
-                      act->outgoing_particles()[0].momentum().x1(),
-                      act->outgoing_particles()[0].momentum().x2(),
-                      act->outgoing_particles()[0].momentum().x3());
-             std::fprintf(dilep_out, "%s %g %g %g %g\n",
-                      act->outgoing_particles()[1].pdgcode().string().c_str(),
-                      act->outgoing_particles()[1].momentum().x0(),
-                      act->outgoing_particles()[1].momentum().x1(),
-                      act->outgoing_particles()[1].momentum().x2(),
-                      act->outgoing_particles()[1].momentum().x3());
-           } 
+      if (act->total_width() > 0.0) {  // check if their are any (dil.) decays
+         act->generate_final_state();
+
+         // SHINNING as described in \iref{Schmidt:2008hm}, chapter 2D
+         float sh_weight = dt * partial_width * inv_gamma;
+
+         /* for a first version the finder writes its own dilepton output
+          * current outputformat pdg p0 p1 p2 p3
+          * and shinning weigths last parent particle item
+          */
+         std::fprintf(dilep_out, "# parent particle %s %g weigth: %g\n",
+                      act->incoming_particles()[0].pdgcode().string().c_str(),
+                      act->incoming_particles()[0].effective_mass(),
+                      sh_weight);
+         std::fprintf(dilep_out, "%s %g %g %g %g\n",
+                  act->outgoing_particles()[0].pdgcode().string().c_str(),
+                  act->outgoing_particles()[0].momentum().x0(),
+                  act->outgoing_particles()[0].momentum().x1(),
+                  act->outgoing_particles()[0].momentum().x2(),
+                  act->outgoing_particles()[0].momentum().x3());
+         std::fprintf(dilep_out, "%s %g %g %g %g\n",
+                  act->outgoing_particles()[1].pdgcode().string().c_str(),
+                  act->outgoing_particles()[1].momentum().x0(),
+                  act->outgoing_particles()[1].momentum().x1(),
+                  act->outgoing_particles()[1].momentum().x2(),
+                  act->outgoing_particles()[1].momentum().x3());
       }
     }
-
-
-
-    
   }
 
   fclose(dilep_out);
