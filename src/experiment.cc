@@ -334,80 +334,71 @@ static std::string format_measurements(const Particles &particles,
 }
 
 template <typename Modus>
-void Experiment<Modus>::perform_actions(ActionList &actions,
-                                        size_t &interactions_total,
-                                        size_t &total_pauli_blocked) {
+void Experiment<Modus>::perform_action(
+    const ActionPtr &action, size_t &interactions_total,
+    size_t &total_pauli_blocked, const ParticleList &particles_before_actions) {
   const auto &log = logger<LogArea::Experiment>();
-  if (!actions.empty()) {
-    const auto particles_before_actions = particles_.copy_to_vector();
-    for (const auto &action : actions) {
-      if (action->is_valid(particles_)) {
-        const ParticleList incoming_particles = action->incoming_particles();
-        action->generate_final_state();
-        ProcessType process_type = action->get_type();
-        log.debug("Process Type is: ", process_type);
-        if (pauli_blocker_ &&
-            action->is_pauli_blocked(particles_, *pauli_blocker_.get())) {
-          total_pauli_blocked++;
-          continue;
-        }
-        action->perform(&particles_, interactions_total);
-        const ParticleList outgoing_particles = action->outgoing_particles();
-        // Calculate Eckart rest frame density at the interaction point
-        const FourVector r_interaction = action->get_interaction_point();
-        constexpr bool compute_grad = false;
-        const double rho =
-            rho_eckart(r_interaction.threevec(), particles_before_actions,
-                       parameters_, dens_type_, compute_grad).first;
-        /*!\Userguide
-         * \page collisions_output_in_box_modus_ Collision output in box modus
-         * \note When SMASH is running in the box modus, particle coordinates
-         * in the collision output can be out of the box. This is not an error.
-         * Box boundary conditions are intentionally not imposed before
-         * collision output to allow unambiguous finding of the interaction
-         * point.
-         * <I>Example</I>: two particles in the box have x coordinates 0.1 and
-         * 9.9 fm, while box L = 10 fm. Suppose these particles collide.
-         * For calculating collision the first one is wrapped to 10.1 fm.
-         * Then output contains coordinates of 9.9 fm and 10.1 fm.
-         * From this one can infer interaction point at x = 10 fm.
-         * Were boundary conditions imposed before output,
-         * their x coordinates would be 0.1 and 9.9 fm and interaction point
-         * position could be either at 10 fm or at 5 fm.
-         */
-        for (const auto &output : outputs_) {
-          output->at_interaction(incoming_particles, outgoing_particles, rho,
-                                 action->raw_weight_value(), process_type);
-        }
-        log.debug(~einhard::Green(), "✔ ", action);
-      } else {
-        log.debug(~einhard::DRed(), "✘ ", action, " (discarded: invalid)");
-      }
+  if (action->is_valid(particles_)) {
+    const ParticleList incoming_particles = action->incoming_particles();
+    action->generate_final_state();
+    ProcessType process_type = action->get_type();
+    log.debug("Process Type is: ", process_type);
+    if (pauli_blocker_ &&
+        action->is_pauli_blocked(particles_, *pauli_blocker_.get())) {
+      total_pauli_blocked++;
+      return;
     }
-    actions.clear();
-    log.debug(~einhard::Blue(), particles_);
+    action->perform(&particles_, interactions_total);
+    const ParticleList outgoing_particles = action->outgoing_particles();
+    // Calculate Eckart rest frame density at the interaction point
+    const FourVector r_interaction = action->get_interaction_point();
+    constexpr bool compute_grad = false;
+    const double rho =
+        rho_eckart(r_interaction.threevec(), particles_before_actions,
+                   parameters_, dens_type_, compute_grad).first;
+    /*!\Userguide
+     * \page collisions_output_in_box_modus_ Collision output in box modus
+     * \note When SMASH is running in the box modus, particle coordinates
+     * in the collision output can be out of the box. This is not an error.
+     * Box boundary conditions are intentionally not imposed before
+     * collision output to allow unambiguous finding of the interaction
+     * point.
+     * <I>Example</I>: two particles in the box have x coordinates 0.1 and
+     * 9.9 fm, while box L = 10 fm. Suppose these particles collide.
+     * For calculating collision the first one is wrapped to 10.1 fm.
+     * Then output contains coordinates of 9.9 fm and 10.1 fm.
+     * From this one can infer interaction point at x = 10 fm.
+     * Were boundary conditions imposed before output,
+     * their x coordinates would be 0.1 and 9.9 fm and interaction point
+     * position could be either at 10 fm or at 5 fm.
+     */
+    for (const auto &output : outputs_) {
+      output->at_interaction(incoming_particles, outgoing_particles, rho,
+                             action->raw_weight_value(), process_type);
+    }
+    log.debug(~einhard::Green(), "✔ ", action);
   } else {
-    log.debug("no actions performed");
+    log.debug(~einhard::DRed(), "✘ ", action, " (discarded: invalid)");
   }
 }
 
 /* This is the loop over timesteps, carrying out collisions and decays
  * and propagating particles. */
 template <typename Modus>
-void Experiment<Modus>::run_time_evolution(const int evt_num) {
+size_t Experiment<Modus>::run_time_evolution(const int evt_num) {
   const auto &log = logger<LogArea::Experiment>();
   modus_.impose_boundary_conditions(&particles_);
   size_t interactions_total = 0, previous_interactions_total = 0,
-         interactions_this_interval = 0, total_pauli_blocked = 0;
+         total_pauli_blocked = 0;
   log.info() << format_measurements(
-      particles_, interactions_total, interactions_this_interval,
+      particles_, interactions_total, 0u,
       conserved_initial_, time_start_, parameters_.labclock.current_time());
 
+  std::vector<ActionPtr> actions;
   while (!(++parameters_.labclock > end_time_)) {
     // vector is likely the best container type here. Because std::sort requires
     // random access iterators. Any linked data structure (e.g. list) thus
     // requires a less efficient sort algorithm.
-    std::vector<ActionPtr> actions;
 
     /* (1.a) Create grid. */
     const auto &grid =
@@ -434,7 +425,17 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
               [](const ActionPtr &a, const ActionPtr &b) { return *a < *b; });
 
     /* (2) Perform actions. */
-    perform_actions(actions, interactions_total, total_pauli_blocked);
+    if (!actions.empty()) {
+      const auto particles_before_actions = particles_.copy_to_vector();
+      for (const auto &action : actions) {
+        perform_action(action, interactions_total, total_pauli_blocked,
+                       particles_before_actions);
+      }
+      actions.clear();
+      log.debug(~einhard::Blue(), particles_);
+    } else {
+      log.debug("no actions performed");
+    }
     modus_.impose_boundary_conditions(&particles_);
 
     /* (3) Do propagation. */
@@ -455,40 +456,8 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
     // case, I know what the next tick is and I can check whether the
     // output time is crossed within the next tick.
     if (parameters_.need_intermediate_output()) {
-      interactions_this_interval =
-          interactions_total - previous_interactions_total;
-      previous_interactions_total = interactions_total;
-      log.info() << format_measurements(
-          particles_, interactions_total, interactions_this_interval,
-          conserved_initial_, time_start_, parameters_.labclock.current_time());
-      // Update lattices for output
-      const LatticeUpdate lat_upd = LatticeUpdate::AtOutput;
-      update_density_lattice(jmu_B_lat_.get(), lat_upd, DensityType::baryon,
-                             parameters_, particles_);
-      update_density_lattice(jmu_I3_lat_.get(), lat_upd,
-                DensityType::baryonic_isospin, parameters_, particles_);
-      update_density_lattice(jmu_custom_lat_.get(), lat_upd,
-                dens_type_lattice_printout_, parameters_, particles_);
-      /* save evolution data */
-      for (const auto &output : outputs_) {
-        output->at_intermediate_time(particles_, evt_num, parameters_.labclock);
-        output->thermodynamics_output(particles_, parameters_);
-        switch (dens_type_lattice_printout_) {
-          case DensityType::baryon:
-            output->thermodynamics_output(std::string("rhoB"), *jmu_B_lat_,
-                                                                     evt_num);
-            break;
-          case DensityType::baryonic_isospin:
-            output->thermodynamics_output(std::string("rhoI3"), *jmu_I3_lat_,
-                                                                     evt_num);
-            break;
-          case DensityType::none:
-            break;
-          default:
-            output->thermodynamics_output(std::string("rho"), *jmu_custom_lat_,
-                                                                      evt_num);
-        }
-      }
+      intermediate_output(evt_num, interactions_total,
+                          previous_interactions_total);
     }
     // Check conservation of conserved quantities if potentials are off.
     // If potentials are on then momentum is conserved only in average
@@ -505,31 +474,84 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
     log.info("Collisions: pauliblocked/total = ", total_pauli_blocked, "/",
              interactions_total);
   }
+  return interactions_total;
+}
 
-  if (force_decays_) {
-    // at end of time evolution: force all resonances to decay
-    size_t interactions_old;
-    do {
-      std::vector<ActionPtr> actions;
-      interactions_old = interactions_total;
-      /* Find actions. */
-      for (const auto &finder : action_finders_) {
-        actions += finder->find_final_actions(particles_);
-      }
-      /* Perform actions. */
-      perform_actions(actions, interactions_total, total_pauli_blocked);
-      // loop until no more decays occur
-    } while (interactions_total > interactions_old);
-
-    /* Do one final propagation step. */
-    if (potentials_) {
-      propagate(&particles_, parameters_, *potentials_);
-    } else {
-      propagate_straight_line(&particles_, parameters_);
+template<typename Modus>
+void Experiment<Modus>::intermediate_output(const int evt_num,
+    size_t& interactions_total, size_t& previous_interactions_total) {
+  const auto &log = logger<LogArea::Experiment>();
+  const size_t interactions_this_interval =
+      interactions_total - previous_interactions_total;
+  previous_interactions_total = interactions_total;
+  log.info() << format_measurements(
+      particles_, interactions_total, interactions_this_interval,
+      conserved_initial_, time_start_, parameters_.labclock.current_time());
+  // Update lattices for output
+  const LatticeUpdate lat_upd = LatticeUpdate::AtOutput;
+  update_density_lattice(jmu_B_lat_.get(), lat_upd, DensityType::baryon,
+                         parameters_, particles_);
+  update_density_lattice(jmu_I3_lat_.get(), lat_upd,
+            DensityType::baryonic_isospin, parameters_, particles_);
+  update_density_lattice(jmu_custom_lat_.get(), lat_upd,
+            dens_type_lattice_printout_, parameters_, particles_);
+  /* save evolution data */
+  for (const auto &output : outputs_) {
+    output->at_intermediate_time(particles_, evt_num, parameters_.labclock);
+    output->thermodynamics_output(particles_, parameters_);
+    switch (dens_type_lattice_printout_) {
+      case DensityType::baryon:
+        output->thermodynamics_output(std::string("rhoB"), *jmu_B_lat_,
+                                                                 evt_num);
+        break;
+      case DensityType::baryonic_isospin:
+        output->thermodynamics_output(std::string("rhoI3"), *jmu_I3_lat_,
+                                                                 evt_num);
+        break;
+      case DensityType::none:
+        break;
+      default:
+        output->thermodynamics_output(std::string("rho"), *jmu_custom_lat_,
+                                                                  evt_num);
     }
-    modus_.impose_boundary_conditions(&particles_, outputs_);
   }
+}
 
+template <typename Modus>
+void Experiment<Modus>::do_final_decays(size_t &interactions_total) {
+  size_t total_pauli_blocked = 0;
+
+  // at end of time evolution: force all resonances to decay
+  size_t interactions_old;
+  do {
+    std::vector<ActionPtr> actions;
+    interactions_old = interactions_total;
+    /* Find actions. */
+    for (const auto &finder : action_finders_) {
+      actions += finder->find_final_actions(particles_);
+    }
+    /* Perform actions. */
+    const auto particles_before_actions = particles_.copy_to_vector();
+    for (const auto &action : actions) {
+      perform_action(action, interactions_total, total_pauli_blocked,
+                     particles_before_actions);
+    }
+    // loop until no more decays occur
+  } while (interactions_total > interactions_old);
+
+  /* Do one final propagation step. */
+  if (potentials_) {
+    propagate(&particles_, parameters_, *potentials_);
+  } else {
+    propagate_straight_line(&particles_, parameters_);
+  }
+  modus_.impose_boundary_conditions(&particles_, outputs_);
+}
+
+template <typename Modus>
+void Experiment<Modus>::final_output(size_t interactions_total,
+                                     const int evt_num) {
+  const auto &log = logger<LogArea::Experiment>();
   // make sure the experiment actually ran (note: we should compare this
   // to the start time, but we don't know that. Therefore, we check that
   // the time is positive, which should heuristically be the same).
@@ -542,6 +564,10 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
                                                 particles_.time() /
                                                 particles_.size()))
                << " [fm-1]";
+  }
+
+  for (const auto &output : outputs_) {
+    output->at_eventend(particles_, evt_num);
   }
 }
 
@@ -560,12 +586,13 @@ void Experiment<Modus>::run() {
     }
 
     /* the time evolution of the relevant subsystem */
-    run_time_evolution(j);
+    size_t interactions_total = run_time_evolution(j);
+    if (force_decays_) {
+      do_final_decays(interactions_total);
+    }
 
     /* Output at event end */
-    for (const auto &output : outputs_) {
-      output->at_eventend(particles_, j);
-    }
+    final_output(interactions_total, j);
   }
 }
 
