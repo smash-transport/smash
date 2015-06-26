@@ -426,22 +426,31 @@ size_t Experiment<Modus>::run_time_evolution_without_time_steps(
       continue;
     }
 
-    // update the current time
-    const float current_time = act->time_of_execution();
+    // find dt
+    float current_time = act->time_of_execution();
     const float dt = current_time - parameters_.labclock.current_time();
-    if (dt < 0.f) {
-      log.info() << act->time_of_execution()
-                 << parameters_.labclock.current_time()
-                 << act->get_interaction_point()
-                 << act->get_type();
-      throw std::runtime_error("negative time step!");
-    }
-    parameters_.labclock.reset(current_time);
 
-    // propagate to next action
-    parameters_.labclock.set_timestep_duration(dt);
-    propagate_straight_line(&particles_, parameters_);
-    modus_.impose_boundary_conditions(&particles_, outputs_);
+    // we allow a very small negative time step that can result from imprecise
+    // addition
+    if (dt < -really_small) {
+      log.error() << "dt = " << dt;
+      throw std::runtime_error("Negative time step!");
+    }
+
+    // only propagate the particles if dt is significantly larger than 0
+    if (dt > really_small) {
+      // update the current time
+      parameters_.labclock.reset(current_time);
+
+      // propagate to next action
+      parameters_.labclock.set_timestep_duration(dt);
+      propagate_straight_line(&particles_, parameters_);
+      modus_.impose_boundary_conditions(&particles_, outputs_);
+    } else {
+      // otherwise just keep the current time
+      current_time = parameters_.labclock.current_time();
+      parameters_.labclock.set_timestep_duration(0.f);
+    }
 
     // update the ParticleData that is stored in the action
     act->update_incoming(particles_);
