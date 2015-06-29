@@ -50,12 +50,12 @@ TEST(elastic_collision) {
   b.set_4position(Position{0., 0.1, 0., 0.});
   b.set_4momentum(Momentum{1.1, 1.0, 0., 0.});
 
-  particles.insert(a);
-  particles.insert(b);
+  a = particles.insert(a);
+  b = particles.insert(b);
 
   // create action
   constexpr float time = 1.f;
-  ScatterAction act(particles.front(), particles.back(), time);
+  ScatterAction act(a, b, time);
   VERIFY(act.is_valid(particles));
 
   // add elastic channel
