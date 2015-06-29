@@ -88,8 +88,7 @@ TEST(collision_order) {
   COMPARE(actions_3.size(), 3u) << "timestep 2.0, expect 3 collisions";
 
   // perform actions from actions_3
-
-  size_t num_interactions = 0;
+  uint32_t id_process = 1;
 
   // first action
   // verify that first action involves particle b
@@ -101,7 +100,8 @@ TEST(collision_order) {
       << "expected: first interaction is valid";
   // perform action
   actions_3[0]->generate_final_state();
-  actions_3[0]->perform(&particles, num_interactions);
+  actions_3[0]->perform(&particles, id_process);
+  id_process++;
 
   // second action
   // verify that second action is *not* valid anymore
@@ -118,10 +118,11 @@ TEST(collision_order) {
       << "expected: third interaction is valid";
   // perform action
   actions_3[2]->generate_final_state();
-  actions_3[2]->perform(&particles, num_interactions);
+  actions_3[2]->perform(&particles, id_process);
+  id_process++;
 
   // final check
-  COMPARE(num_interactions, 2u);
+  COMPARE(id_process, 3u);
 }
 
 TEST(scatter_particle_pair_only_once) {
@@ -147,8 +148,8 @@ TEST(scatter_particle_pair_only_once) {
   // ok, the exepected Action exists, so let's perform it
   Action &action = *actions.front();
   action.generate_final_state();
-  size_t processes = 0;
-  action.perform(&p, processes);
+  const uint32_t id_process = 1;
+  action.perform(&p, id_process);
 
   // because afterwards, the particles in p may not scatter again (they just
   // did)

@@ -37,7 +37,7 @@ TEST(create_particledata_piplus) {
 
   COMPARE(p.id(), -1);
   COMPARE(p.pdgcode(), pdg);
-  COMPARE(p.id_process(), -1);
+  COMPARE(p.id_process(), 0);
   COMPARE(p.momentum().x0(), 0.0);
   COMPARE(p.momentum().x1(), 0.0);
   COMPARE(p.momentum().x2(), 0.0);

@@ -90,7 +90,7 @@ ActionPtr ScatterActionsFinder::check_collision(
 #endif
 
   /* just collided with this particle */
-  if (data_a.id_process() >= 0 && data_a.id_process() == data_b.id_process()) {
+  if (data_a.id_process() > 0 && data_a.id_process() == data_b.id_process()) {
 #ifndef NDEBUG
     log.debug("Skipping collided particles at time ", data_a.position().x0(),
               " due to process ", data_a.id_process(),

@@ -83,8 +83,9 @@ TEST(elastic_collision) {
 
   // perform the action
   COMPARE(particles.front().id_process(), 1);
-  size_t id_process = 2u;
+  uint32_t id_process = 2;
   act.perform(&particles, id_process);
+  id_process++;
   COMPARE(particles.front().id_process(), 2);
   COMPARE(particles.back().id_process(), 2);
   COMPARE(id_process, 3u);
@@ -137,7 +138,7 @@ TEST(outgoing_valid) {
   VERIFY(act->is_valid(particles));
   act->generate_final_state();
   VERIFY(act->get_type() != ProcessType::Elastic);
-  size_t id_process = 0u;
+  const uint32_t id_process = 1;
   act->perform(&particles, id_process);
   COMPARE(id_process, 1u);
 

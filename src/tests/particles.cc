@@ -222,24 +222,24 @@ TEST(erase_particle) {
 TEST(id_process) {
   Particles p;
   p.create(1000, Test::smashon().pdgcode());
-  int id = -1;
+  uint32_t id = 0;
   for (auto &pd : p) {
-    COMPARE(pd.id_process(), -1);
+    COMPARE(pd.id_process(), 0);
     pd.set_id_process(++id);
   }
-  id = -1;
+  id = 0;
   for (auto &pd : p) {
     COMPARE(pd.id_process(), ++id);
   }
   p.reset();
   p.create(Test::smashon().pdgcode());
   p.create(999, Test::smashon().pdgcode());
-  id = -1;
+  id = 0;
   for (auto &pd : p) {
-    COMPARE(pd.id_process(), -1);
+    COMPARE(pd.id_process(), 0);
     pd.set_id_process(++id);
   }
-  id = -1;
+  id = 0;
   for (auto &pd : p) {
     COMPARE(pd.id_process(), ++id);
   }
@@ -248,7 +248,7 @@ TEST(id_process) {
     p.insert(Test::smashon());
   }
   for (auto &pd : p) {
-    COMPARE(pd.id_process(), -1);
+    COMPARE(pd.id_process(), 0);
   }
 }
 

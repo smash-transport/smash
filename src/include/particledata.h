@@ -61,9 +61,9 @@ class ParticleData {
   const ParticleType &type() const { return *type_; }
 
   /// look up the id of the collision process
-  int id_process() const { return id_process_; }
+  uint32_t id_process() const { return id_process_; }
   /// set the id of the collision process
-  void set_id_process(int i) { id_process_ = i; }
+  void set_id_process(uint32_t i) { id_process_ = i; }
 
   /// return the particle's 4-momentum
   const FourVector &momentum() const { return momentum_; }
@@ -230,7 +230,7 @@ class ParticleData {
   unsigned index_ = std::numeric_limits<unsigned>::max();
 
   /// counter of the last collision/decay
-  int id_process_ = -1;
+  uint32_t id_process_ = 0;
 
   /**
    * A reference to the ParticleType object for this particle (this contains

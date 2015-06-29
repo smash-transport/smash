@@ -74,7 +74,8 @@ FourVector Action::get_interaction_point() {
   return interaction_point;
 }
 
-void Action::perform(Particles *particles, size_t &id_process) {
+void Action::perform(Particles *particles, uint32_t id_process) {
+  assert(id_process != 0);
   const auto &log = logger<LogArea::Action>();
 
   for (ParticleData &p : outgoing_particles_) {
@@ -93,7 +94,6 @@ void Action::perform(Particles *particles, size_t &id_process) {
   log.debug("Particle map now has ", particles->size(), " elements.");
 
   check_conservation(id_process);
-  id_process++;
 }
 
 
@@ -162,7 +162,7 @@ void Action::sample_2body_phasespace() {
 }
 
 
-void Action::check_conservation(const size_t &id_process) const {
+void Action::check_conservation(const uint32_t &id_process) const {
   const auto &log = logger<LogArea::Action>();
   QuantumNumbers before(incoming_particles_);
   QuantumNumbers after(outgoing_particles_);
