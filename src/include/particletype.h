@@ -196,7 +196,8 @@ class ParticleType {
 
   /**
    * Initialize the global ParticleType list (list_all) from the given input
-   * data.
+   * data. This function must only be called once (will fail on second
+   * invocation).
    *
    * \param particles A string that contains the definition of ParticleTypes to
    *                  be created.
