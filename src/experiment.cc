@@ -427,8 +427,8 @@ size_t Experiment<Modus>::run_time_evolution_without_time_steps(
     }
 
     // find dt
-    float current_time = act->time_of_execution();
-    const float dt = current_time - parameters_.labclock.current_time();
+    const float action_time = act->time_of_execution();
+    const float dt = action_time - parameters_.labclock.current_time();
 
     // we allow a very small negative time step that can result from imprecise
     // addition
@@ -437,13 +437,39 @@ size_t Experiment<Modus>::run_time_evolution_without_time_steps(
       throw std::runtime_error("Negative time step!");
     }
 
+    float current_time;
+
     // only propagate the particles if dt is significantly larger than 0
     if (dt > really_small) {
+      // set the time step according to our plan
+      parameters_.labclock.set_timestep_duration(dt);
+
+      // check if we need to do the intermediate output in the time until the
+      // next action
+      if (parameters_.need_intermediate_output()) {
+        // calculate the output time
+        const float output_time =
+            parameters_.labclock.next_multiple(parameters_.output_interval);
+        // adjust the clock
+        parameters_.labclock.set_timestep_duration(
+            output_time - parameters_.labclock.current_time());
+        parameters_.labclock.reset(output_time);
+        // propagate
+        propagate_straight_line(&particles_, parameters_);
+        modus_.impose_boundary_conditions(&particles_, outputs_);
+        // do output
+        intermediate_output(evt_num, interactions_total,
+                            previous_interactions_total);
+        // set dt to the remainder of the time
+        const float remaining_dt = action_time - output_time;
+        parameters_.labclock.set_timestep_duration(remaining_dt);
+      }
+
       // update the current time
-      parameters_.labclock.reset(current_time);
+      parameters_.labclock.reset(action_time);
+      current_time = action_time;
 
       // propagate to next action
-      parameters_.labclock.set_timestep_duration(dt);
       propagate_straight_line(&particles_, parameters_);
       modus_.impose_boundary_conditions(&particles_, outputs_);
     } else {
@@ -470,12 +496,6 @@ size_t Experiment<Modus>::run_time_evolution_without_time_steps(
           outgoing_particles, particles_, time_left);
     }
     actions.insert(std::move(new_actions), current_time);
-
-    // output
-    if (parameters_.need_intermediate_output()) {
-      intermediate_output(evt_num, interactions_total,
-                          previous_interactions_total);
-    }
 
     // check conservation laws
     std::string err_msg = conserved_initial_.report_deviations(particles_);
