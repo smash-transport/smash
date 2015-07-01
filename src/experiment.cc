@@ -252,9 +252,8 @@ Experiment<Modus>::Experiment(Configuration config)
     const std::array<int, 3> n = config.take({"Lattice", "CellNumber"});
     const std::array<float, 3> origin = config.take({"Lattice", "Origin"});
     const bool periodic = config.take({"Lattice", "Periodic"});
-    dens_type_lattice_printout_ = static_cast<DensityType>(
-         config.take({"Lattice", "Printout", "Density"},
-                     static_cast<int>(DensityType::none)));
+    dens_type_lattice_printout_ = config.take(
+                  {"Lattice", "Printout", "Density"}, DensityType::none);
     /* Create baryon and isospin density lattices regardless of config
        if potentials are on. This is because they allow to compute
        potentials faster */
@@ -487,30 +486,31 @@ void Experiment<Modus>::intermediate_output(const int evt_num,
   log.info() << format_measurements(
       particles_, interactions_total, interactions_this_interval,
       conserved_initial_, time_start_, parameters_.labclock.current_time());
-  // Update lattices for output
   const LatticeUpdate lat_upd = LatticeUpdate::AtOutput;
-  update_density_lattice(jmu_B_lat_.get(), lat_upd, DensityType::baryon,
-                         parameters_, particles_);
-  update_density_lattice(jmu_I3_lat_.get(), lat_upd,
-            DensityType::baryonic_isospin, parameters_, particles_);
-  update_density_lattice(jmu_custom_lat_.get(), lat_upd,
-            dens_type_lattice_printout_, parameters_, particles_);
   /* save evolution data */
   for (const auto &output : outputs_) {
     output->at_intermediate_time(particles_, evt_num, parameters_.labclock);
+    // Thermodynamic output at some point versus time
     output->thermodynamics_output(particles_, parameters_);
+    // Thermodynamic output on the lattice versus time
     switch (dens_type_lattice_printout_) {
       case DensityType::baryon:
+        update_density_lattice(jmu_B_lat_.get(), lat_upd,
+                               DensityType::baryon, parameters_, particles_);
         output->thermodynamics_output(std::string("rhoB"), *jmu_B_lat_,
                                                                  evt_num);
         break;
       case DensityType::baryonic_isospin:
+        update_density_lattice(jmu_I3_lat_.get(), lat_upd,
+                     DensityType::baryonic_isospin, parameters_, particles_);
         output->thermodynamics_output(std::string("rhoI3"), *jmu_I3_lat_,
                                                                  evt_num);
         break;
       case DensityType::none:
         break;
       default:
+        update_density_lattice(jmu_custom_lat_.get(), lat_upd,
+                       dens_type_lattice_printout_, parameters_, particles_);
         output->thermodynamics_output(std::string("rho"), *jmu_custom_lat_,
                                                                   evt_num);
     }
