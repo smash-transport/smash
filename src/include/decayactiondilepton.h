@@ -16,7 +16,8 @@ namespace Smash {
 
 class DecayActionDilepton : public DecayAction {
  public:
-   DecayActionDilepton(const ParticleData &p, float time_of_execution);
+   DecayActionDilepton(const ParticleData &p, float time_of_execution,
+                        float shining_weight_);
 
    // do not perform any dilepton actions = leave it empty
    void perform(Particles *, size_t &) override {};
@@ -25,6 +26,13 @@ class DecayActionDilepton : public DecayAction {
       maybe one can later add some output modifications and
       minor tweaks
     */
+
+    float raw_weight_value() const override {
+      return shining_weight_;
+    }
+
+ private:
+   float shining_weight_;
 };
 
 }  // namespace Smash

@@ -100,6 +100,16 @@ class OutputInterface {
     SMASH_UNUSED(event_number);
   }
 
+  // probably not necassary and will be removed
+  // at_interaction could be used for dileptons in finder
+  virtual void dileptons(const ParticleList &incoming_particles,
+                         const ParticleList &outgoing_particles,
+                         float shining_weight) {
+    SMASH_UNUSED(incoming_particles);
+    SMASH_UNUSED(outgoing_particles);
+    SMASH_UNUSED(shining_weight);
+  }
+
 };
 
 }  // namespace Smash

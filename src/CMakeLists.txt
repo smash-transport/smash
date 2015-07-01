@@ -4,8 +4,8 @@
 #      SMASH Team
 #
 #    BSD 3-clause license
-# 
-######################################################### 
+#
+#########################################################
 
 include(CheckLibraryExists)
 include(AddCompilerFlag)
@@ -70,6 +70,7 @@ set(smash_src
         densityoutput.cc
         decayactiondilepton.cc
         decayactionsfinderdilepton.cc
+        dileptonoutput.cc
         distributions.cc
         energymomentumtensor.cc
         experiment.cc
