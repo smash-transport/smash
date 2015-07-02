@@ -150,14 +150,12 @@ class Action {
   float time_of_execution() const { return time_of_execution_; }
 
   /**
-   * Convert the time of execution from relative time to global time.
+   * Add an offset to the time of execution of the action.
    *
-   * This function should only be called once per action.
-   *
-   * \param current_global_time The current global time
+   * \param time_to_add The amount of time that should be added.
    */
-  void make_time_global(float current_global_time) {
-    time_of_execution_ += current_global_time;
+  void add_to_time_of_execution(float time_to_add) {
+    time_of_execution_ += time_to_add;
   }
 
   /** Check various conservation laws. */

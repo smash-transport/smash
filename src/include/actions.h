@@ -9,7 +9,7 @@
 
 #include <algorithm>
 #include <stdexcept>
-#include <forward_list>
+#include <vector>
 
 #include "forwarddeclarations.h"
 
@@ -34,18 +34,12 @@ class Actions {
    *
    * \param action_list The ActionList from which to construct the Actions
    *                    object
+   * \param current_time The current simulation time.
    */
-  Actions(ActionList&& action_list, float current_time) {
-    // sort the actions
-    std::sort(action_list.begin(), action_list.end(),
-          [](const ActionPtr &a, const ActionPtr &b) { return *a < *b; });
-
-    // move the ActionPtrs from action_list to data_
-    // and make the internal time of the actions global
-    for (auto it = action_list.rbegin(); it != action_list.rend(); ++it) {
-      (*it)->make_time_global(current_time);
-      data_.push_front(std::move(*it));
-    }
+  Actions(ActionList&& action_list, float current_time)
+      : data_(std::move(action_list)) {
+    sort(data_);
+    update_time(data_, current_time);
   }
 
   /**
@@ -68,12 +62,11 @@ class Actions {
    * Throws runtime_error if the list is empty.
    */
   ActionPtr pop() {
-    auto it = data_.begin();
-    if (it == data_.end()) {
+    if (data_.empty()) {
       throw std::runtime_error("Empty actions list!");
     }
-    ActionPtr act = std::move(*it);
-    data_.pop_front();
+    ActionPtr act = std::move(data_.back());
+    data_.pop_back();
     return std::move(act);
   }
 
@@ -86,54 +79,47 @@ class Actions {
    */
   void insert(ActionList&& new_acts, float current_time) {
     if (new_acts.empty()) {
-      // nothing to do
       return;
     }
-    // sort first
-    std::sort(new_acts.begin(), new_acts.end(),
-          [](const ActionPtr &a, const ActionPtr &b) { return *a < *b; });
+    sort(new_acts);
+    update_time(new_acts, current_time);
 
-    // correctly set the time of execution
-    for (const auto &act : new_acts) {
-      act->make_time_global(current_time);
-    }
+    const size_t old_end = data_.size();
+    data_.insert(data_.end(), std::make_move_iterator(new_acts.begin()),
+                 std::make_move_iterator(new_acts.end()));
 
-    // iterator that points at before the beginning
-    // this is necessary because there is only a function insert_after
-    // for which we need the element before the place where we want to insert
-    auto before_it0 = data_.before_begin();
-
-    // first action of the list
-    auto new_it = new_acts.begin();
-    float new_time = (*new_it)->time_of_execution();
-
-    for (auto it0 = data_.begin(); it0 != data_.end(); ++it0) {
-      if (new_time < (*it0)->time_of_execution()) {
-        // the action at it0 is after our action -> insert it before it0
-        it0 = data_.insert_after(before_it0, std::move(*new_it));
-        new_acts.erase(new_it);
-        // check if there are actions left
-        if (new_acts.empty()) {
-          return;
-        }
-        // look at the next action of the list
-        new_it = new_acts.begin();
-        new_time = (*new_it)->time_of_execution();
-      }
-      ++before_it0;
-    }
-    // insert the rest
-    for (new_it = new_acts.begin(); new_it != new_acts.end(); ++new_it) {
-      data_.insert_after(before_it0, std::move(*new_it));
-      ++before_it0;
-    }
+    // merge the two list while preserving the ordering
+    std::inplace_merge(data_.begin(), data_.begin() + old_end, data_.end(),
+                       [](const ActionPtr &a,
+                          const ActionPtr &b) { return *b < *a; });
   }
 
  private:
   /**
+   * Set the time of the actions correctly.
+   *
+   * \param action_list List of the actions.
+   * \param current_time The current simulation time.
+   */
+  static void update_time(ActionList& action_list, float current_time) {
+    for (auto &act : action_list) {
+      act->add_to_time_of_execution(current_time);
+    }
+  }
+  /**
+   * Sort the actions such that the first action is at the end of the list.
+   *
+   * \param action_list The list to sort.
+   */
+  static void sort(ActionList& action_list) {
+    std::sort(action_list.begin(), action_list.end(),
+          [](const ActionPtr &a, const ActionPtr &b) { return *b < *a; });
+  }
+
+  /**
    * Dynamic data.
    */
-  std::forward_list<ActionPtr> data_;
+  std::vector<ActionPtr> data_;
 };
 
 }  // namespace Smash

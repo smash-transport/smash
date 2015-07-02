@@ -29,13 +29,15 @@ TEST(construct_and_insert) {
   constexpr float time_3 = 3.f;
   constexpr float time_4 = 4.f;
   constexpr float time_5 = 5.f;
+  constexpr float time_6 = 6.f;
 
-  constexpr float current_time = 0.f;
+  constexpr float current_time = 10.5f;
 
   // add actions to list
   ActionList action_vec;
   action_vec.push_back(make_unique<DecayAction>(testparticle, time_4));
   action_vec.push_back(make_unique<DecayAction>(testparticle, time_1));
+  action_vec.push_back(make_unique<DecayAction>(testparticle, time_6));
 
   // construct the Actions object
   Actions actions(std::move(action_vec), current_time);
@@ -51,11 +53,12 @@ TEST(construct_and_insert) {
   actions.insert(std::move(new_actions), current_time);
 
   // verify that the actions are in the right order
-  COMPARE(actions.pop()->time_of_execution(), time_1);
-  COMPARE(actions.pop()->time_of_execution(), time_2);
-  COMPARE(actions.pop()->time_of_execution(), time_3);
-  COMPARE(actions.pop()->time_of_execution(), time_4);
-  COMPARE(actions.pop()->time_of_execution(), time_5);
+  COMPARE(actions.pop()->time_of_execution(), current_time + time_1);
+  COMPARE(actions.pop()->time_of_execution(), current_time + time_2);
+  COMPARE(actions.pop()->time_of_execution(), current_time + time_3);
+  COMPARE(actions.pop()->time_of_execution(), current_time + time_4);
+  COMPARE(actions.pop()->time_of_execution(), current_time + time_5);
+  COMPARE(actions.pop()->time_of_execution(), current_time + time_6);
 
   VERIFY(actions.is_empty());
 }
