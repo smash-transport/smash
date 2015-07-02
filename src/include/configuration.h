@@ -292,11 +292,16 @@ class Configuration {
       std::string s = operator std::string();
       if (s == "quadratic") {
           return Sampling::QUADRATIC;
-      } else if (s == "custom") {
+      }
+      if (s == "custom") {
           return Sampling::CUSTOM;
-      } else {
+      }
+      if (s == "uniform") {
           return Sampling::UNIFORM;
       }
+      throw IncorrectTypeInAssignment(
+          "The value for key \"" + std::string(key_) +
+          "\" should be \"quadratic\", \"uniform\" or \"custom\".");
     }
   };
 
