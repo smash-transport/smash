@@ -51,6 +51,8 @@ namespace Smash {
  * \li \subpage input_collision_term_
  * \li \subpage input_modi_
  * \li \subpage input_output_options_
+ * \li \subpage input_lattice_
+ * \li \subpage input_potentials_
  *
  * \ifnot user
  * \par The relevant functions and classes for input are:

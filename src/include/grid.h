@@ -95,6 +95,7 @@ class Grid : public GridBase {
    *
    * \param particles The particles to place onto the grid.
    * \param testparticles Number of testparticles used in this event
+   * \param strategy The strategy for determining the cell size
    */
   Grid(const Particles &particles, int testparticles,
        CellSizeStrategy strategy = CellSizeStrategy::Optimal)

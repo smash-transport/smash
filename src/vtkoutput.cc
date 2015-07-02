@@ -38,6 +38,18 @@ VtkOutput::VtkOutput(bf::path path, Configuration&& /*conf*/)
  * For details on VTK output format see \ref format_vtk.
  */
 
+/*!\Userguide
+ * \page input_vtk_lattice_ Vtk lattice
+ *
+ * User can print thermodynamical quantities on the lattice to vtk output.
+ * For this one has to use "Lattice: Output" section of configuration.
+ * Currently printing of custom density to vtk file is available.
+ *
+ * \key Lattice: Output: Density
+ *      (DensityType, optional, default = DensityType::None): \n
+ * Chooses which density to print.
+ */
+
 VtkOutput::~VtkOutput() {
 }
 
@@ -59,6 +71,9 @@ VtkOutput::~VtkOutput() {
    * software. Files of this format are supposed to be used as a black box
    * and opened with paraview, but at the same time they are
    * human-readable text files.
+   *
+   * There is also a possibility to print a lattice with thermodynamical
+   * quantities to vtk files, see \ref output_vtk_lattice_.
    **/
 
 void VtkOutput::at_eventstart(const Particles &particles,
@@ -120,6 +135,17 @@ void VtkOutput::write(const Particles &particles, const int event_number) {
                  p.momentum().x2(), p.momentum().x3());
   }
 }
+
+/*!\Userguide
+ * \page output_vtk_lattice_ Thermodynamics vtk output
+ * Density on the lattice can be printed out in the VTK format of
+ * structured grid. At every output moment a new file vtk file is created.
+ * The name format is
+ * \<density_name\>_\<event_number\>_tstep\<number_of_output_moment\>.vtk,
+ * where \<density_name\> is "rhoB" for baryon density, "rhoI3" for baryon
+ * isospin density and "rho" for other density types. Files can be opened
+ * directly with paraview (paraview.org).
+ */
 
 void VtkOutput::thermodynamics_output(const std::string varname,
                                RectangularLattice<DensityOnLattice> &lattice,

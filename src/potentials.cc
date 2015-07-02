@@ -19,6 +19,14 @@ Potentials::Potentials(Configuration conf, const ExperimentParameters &param)
     : param_(param),
       use_skyrme_(conf.has_value({"Skyrme"})),
       use_symmetry_(conf.has_value({"Symmetry"})) {
+  /*!\Userguide
+   * \page input_potentials_ Potentials
+   * To switch potentials on / off one can just uncomment/comment the
+   * section, to switch on only Skyrme or Symmetry potentials uncomment
+   * only the part you want to switch on.
+   *
+   * Parameters are described at the \ref potentials page.
+   */
 
   /*!\Userguide
    * \page potentials Potentials
@@ -56,6 +64,7 @@ Potentials::Potentials(Configuration conf, const ExperimentParameters &param)
   if (use_symmetry_) {
     symmetry_s_ = conf.take({"Symmetry", "S_Pot"});
   }
+
 }
 
 Potentials::~Potentials() {

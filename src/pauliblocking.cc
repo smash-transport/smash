@@ -26,7 +26,7 @@ PauliBlocker::PauliBlocker(Configuration conf,
       ntest_(param.testparticles) {
 
   /*!\Userguide
-   * \page potentials PauliBlocker
+   * \page pauliblocker PauliBlocker
    *
    * \key Spatial_Averaging_Radius (float, optional, default = 1.86): \n
    * Radius [fm] of sphere for averaging in the coordinate space
