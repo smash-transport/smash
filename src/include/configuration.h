@@ -287,6 +287,17 @@ class Configuration {
           "The value for key \"" + std::string(key_) +
           "\" should be \"thermal momenta\" or \"peaked momenta\".");
     }
+
+    operator Sampling() {
+      std::string s = operator std::string();
+      if (s == "quadratic") {
+          return Sampling::QUADRATIC;
+      } else if (s == "custom") {
+          return Sampling::CUSTOM;
+      } else {
+          return Sampling::UNIFORM;
+      }
+    }
   };
 
   /**

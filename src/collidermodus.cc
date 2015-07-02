@@ -289,11 +289,8 @@ ColliderModus::ColliderModus(Configuration modus_config,
   } else {
     // If impact is not supplied by value, inspect sampling parameters:
     if (modus_cfg.has_value({"Impact", "Sample"})) {
-      std::string sampling_method = modus_cfg.take({"Impact", "Sample"});
-      if (sampling_method.compare(0, 7, "uniform") == 0) {
-        sampling_ = Sampling::UNIFORM;
-      } else if (sampling_method.compare(0, 6, "custom") == 0) {
-        sampling_ = Sampling::CUSTOM;
+      sampling_ = modus_cfg.take({"Impact", "Sample"});
+      if (sampling_ == Sampling::CUSTOM) {
         if (!(modus_cfg.has_value({"Impact", "Values"}) ||
               modus_cfg.has_value({"Impact", "Yields"}))) {
           throw std::domain_error(
@@ -318,9 +315,9 @@ ColliderModus::ColliderModus(Configuration modus_config,
       }
     }
     if (modus_cfg.has_value({"Impact", "Range"})) {
-      std::vector<float> range = modus_cfg.take({"Impact", "Range"});
-      imp_min_ = range.at(0);
-      imp_max_ = range.at(1);
+      std::array<float,2> range = modus_cfg.take({"Impact", "Range"});
+      imp_min_ = range[0];
+      imp_max_ = range[1];
     }
     if (modus_cfg.has_value({"Impact", "Max"})) {
       imp_min_ = 0.0;
