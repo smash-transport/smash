@@ -12,10 +12,13 @@
 
 #include <boost/filesystem.hpp>
 #include <vector>
+#include <string>
+#include <memory>
 
 #include "decayactionsfinder.h"
-#include "dileptonoutput.h"
+#include "oscaroutput.h"
 #include "forwarddeclarations.h"
+#include "cxx14compat.h"
 
 namespace Smash {
 
@@ -26,9 +29,13 @@ namespace Smash {
  */
 class DecayActionsFinderDilepton : public DecayActionsFinder {
  public:
+
   /** Initialize the finder */
-  DecayActionsFinderDilepton(bf::path output_path)
-     :dil_out_{new DileptonOutput(output_path)} {}
+  DecayActionsFinderDilepton(bf::path output_path, Configuration config, std::string name)
+     {
+       dil_out_=create_select_format<OscarInteractions>(std::move(output_path), std::move(config), "full_event_history")
+       //dil_out_=make_unique<OscarOutput<OscarFormat2013, OscarInteractions>>(std::move(output_path), std::move(name));
+     }
   /** Check the whole particle list for decays
    * and return a list with the corrsponding Action objects. */
   ActionList find_possible_actions(
@@ -39,7 +46,7 @@ class DecayActionsFinderDilepton : public DecayActionsFinder {
   ActionList find_final_actions(const Particles &search_list) const override;
 
  private:
-  DileptonOutput* dil_out_;
+  build_unique_ptr_<OutputInterface> dil_out_;
 };
 
 }  // namespace Smash

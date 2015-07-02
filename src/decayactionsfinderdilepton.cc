@@ -9,6 +9,7 @@
 
 #include "include/decayactionsfinderdilepton.h"
 
+#include <boost/filesystem.hpp>
 
 #include "include/constants.h"
 #include "include/cxx14compat.h"
@@ -56,9 +57,11 @@ ActionList DecayActionsFinderDilepton::find_possible_actions(
 
         act->generate_final_state();
 
-        dil_out_->dileptons(act->incoming_particles(),
-                           act->outgoing_particles(),
-                           act->raw_weight_value());
+        dil_out_->at_interaction(act->incoming_particles(),
+                                 act->outgoing_particles(),
+                                 0.0,
+                                 act->raw_weight_value(),
+                                 act->get_type());
       }
     }
   }

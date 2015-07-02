@@ -229,8 +229,8 @@ Experiment<Modus>::Experiment(Configuration config)
     action_finders_.emplace_back(new DecayActionsFinder());
   }
   if (config.take({"Collision_Term", "Dileptons"}, false)) {
-  action_finders_.emplace_back(new DecayActionsFinderDilepton(bf::path(bf::current_path())));
-  }
+  action_finders_.emplace_back(new DecayActionsFinderDilepton(bf::path(bf::current_path()),config.take({"Collision_Term", "Dileptons"}, "dileptons"));
+} // worst hack ever for config value
   if (config.take({"Collision_Term", "Collisions"}, true)) {
     action_finders_.emplace_back(new ScatterActionsFinder(config, parameters_));
   }
