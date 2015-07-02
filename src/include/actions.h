@@ -8,6 +8,7 @@
 #define SRC_INCLUDE_ACTIONS_H_
 
 #include <algorithm>
+#include <stdexcept>
 #include <forward_list>
 
 #include "forwarddeclarations.h"
@@ -62,12 +63,14 @@ class Actions {
   bool is_empty() const { return data_.empty(); }
 
   /**
-   * Returns the first action in the list.
+   * Returns the first action in the list and removes it from the list.
+   *
+   * Throws runtime_error if the list is empty.
    */
   ActionPtr pop() {
     auto it = data_.begin();
     if (it == data_.end()) {
-      return nullptr;
+      throw std::runtime_error("Empty actions list!");
     }
     ActionPtr act = std::move(*it);
     data_.pop_front();

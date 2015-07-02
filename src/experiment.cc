@@ -426,7 +426,8 @@ size_t Experiment<Modus>::run_time_evolution_without_time_steps(
       continue;
     }
 
-    // find dt
+    /* (1) Propagate to the next action. */
+
     const float action_time = act->time_of_execution();
     const float dt = action_time - parameters_.labclock.current_time();
 
@@ -447,29 +448,30 @@ size_t Experiment<Modus>::run_time_evolution_without_time_steps(
       // check if we need to do the intermediate output in the time until the
       // next action
       if (parameters_.need_intermediate_output()) {
-        // calculate the output time
+        // we now set the clock to the output time and propagate the particles
+        // until that time; then we do the output
         const float output_time =
             parameters_.labclock.next_multiple(parameters_.output_interval);
-        // adjust the clock
         parameters_.labclock.set_timestep_duration(
             output_time - parameters_.labclock.current_time());
         parameters_.labclock.reset(output_time);
-        // propagate
         propagate_straight_line(&particles_, parameters_);
         modus_.impose_boundary_conditions(&particles_, outputs_);
-        // do output
+
         intermediate_output(evt_num, interactions_total,
                             previous_interactions_total);
-        // set dt to the remainder of the time
+
+        // after the output, the particles need to be propagated until the
+        // action time
         const float remaining_dt = action_time - output_time;
         parameters_.labclock.set_timestep_duration(remaining_dt);
       }
 
-      // update the current time
+      // set the clock manually instead of advancing the with the time step
+      // to avoid loss of precision
       parameters_.labclock.reset(action_time);
       current_time = action_time;
 
-      // propagate to next action
       propagate_straight_line(&particles_, parameters_);
       modus_.impose_boundary_conditions(&particles_, outputs_);
     } else {
@@ -478,16 +480,27 @@ size_t Experiment<Modus>::run_time_evolution_without_time_steps(
       parameters_.labclock.set_timestep_duration(0.f);
     }
 
-    // update the ParticleData that is stored in the action
+    /* (2) Perform action. */
+
+    // update ParticleData because the stored information about the incoming
+    // particles will be outdated
     act->update_incoming(particles_);
 
-    // perform next action
     perform_action(act, interactions_total, total_pauli_blocked, particles_);
-    const ParticleList& outgoing_particles = act->outgoing_particles();
     modus_.impose_boundary_conditions(&particles_);
 
-    // find new actions
+    /* (3) Check conservation laws. */
+
+    std::string err_msg = conserved_initial_.report_deviations(particles_);
+    if (!err_msg.empty()) {
+      log.error() << err_msg;
+      throw std::runtime_error("Violation of conserved quantities!");
+    }
+
+    /* (4) Find new actions. */
+
     time_left = end_time_ - current_time;
+    const ParticleList& outgoing_particles = act->outgoing_particles();
     ActionList new_actions;
     for (const auto &finder : action_finders_) {
       new_actions +=
@@ -496,13 +509,6 @@ size_t Experiment<Modus>::run_time_evolution_without_time_steps(
           outgoing_particles, particles_, time_left);
     }
     actions.insert(std::move(new_actions), current_time);
-
-    // check conservation laws
-    std::string err_msg = conserved_initial_.report_deviations(particles_);
-    if (!err_msg.empty()) {
-      log.error() << err_msg;
-      throw std::runtime_error("Violation of conserved quantities!");
-    }
   }
   return interactions_total;
 }

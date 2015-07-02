@@ -58,9 +58,8 @@ const ParticleList& Action::incoming_particles() const {
 }
 
 void Action::update_incoming(const Particles &particles) {
-  for (auto it = incoming_particles_.begin();
-      it != incoming_particles_.end(); ++it) {
-    *it = particles.lookup(*it);
+  for (auto &p : incoming_particles_) {
+    p = particles.lookup(p);
   }
 }
 
