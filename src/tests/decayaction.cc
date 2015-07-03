@@ -74,15 +74,17 @@ TEST(create_decayaction) {
       // Semistable two-body decay H -> A3 + A2
       case 0:
         // Here the following mathematica code was used for check:
-        /* mA2 = 1.5; m0A3 = 3.0; G0A3 = 0.2; m0H = 8.0; mH = 11.0;
+        /* mA2 = 1.5; mA1 = 1.0; m0A3 = 3.0; G0A3 = 0.2; m0H = 8.0; mH = 11.0;
            mA3min = 2.5; G0H = 1.0; L = 1.6;
-           PostCutoff[m_] := (L^4 + ((mA3min + mA2)^2 - m0H^2)^2/4)/
-                      (L^4 + (m^2 - ((mA3min + mA2)^2 + m0H^2)/2)^2)
-          rho[m_] :=  NIntegrate[
-             2 mA3*( mA3*G0A3/Pi)/((mA3^2 - m0A3^2)^2 + mA3^2 G0A3^2)*
-             Sqrt[(m^2 + mA2^2 - mA3^2)^2/m^2/4 - mA2^2], {mA3, mA3min,
-             m - mA2} ]
-          rho[mH]/rho[m0H]*PostCutoff[mH]^2*G0H  // results in 0.0122167
+           PostCutoff[m_] := (L^4 + ((mA3min + mA2)^2 - m0H^2)^2/
+           4)/(L^4 + (m^2 - ((mA3min + mA2)^2 + m0H^2)/2)^2)
+           GA3[mA3_] := G0A3*Sqrt[((1 + (mA1/mA3)^2 - (mA2/mA3)^2)^2 -
+           4 (mA1/mA3)^2)/((1 + (mA1/m0A3)^2 - (mA2/m0A3)^2)^2 -
+           4 (mA1/m0A3)^2)]
+           rho[m_] :=  NIntegrate[
+           2 mA3*(mA3*GA3[mA3]/Pi)/((mA3^2 - m0A3^2)^2 + mA3^2 GA3[mA3]^2)*
+           Sqrt[(m^2 + mA2^2 - mA3^2)^2/m^2/4 - mA2^2], {mA3, mA3min, m - mA2}]
+           rho[mH]/rho[m0H]*PostCutoff[mH]^2*G0H // results in 0.12323
         */
         /* It might seem weird that resulting width is so unphysically
            small. This is because of the Post form-factor, which is intended
@@ -90,7 +92,7 @@ TEST(create_decayaction) {
            does not give physically reasonable results. But this is only
            code test, so we can live with it.
         */
-        COMPARE_RELATIVE_ERROR(width, 0.0122167f, 1.e-7);
+        COMPARE_RELATIVE_ERROR(width, 0.012323f, 1.e-6);
         break;
       // Stable two-body decay H -> A1 + A1
       case 1:
