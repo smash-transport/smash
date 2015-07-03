@@ -99,7 +99,7 @@ Collision_Term:
 Lattice:
     Origin: [0.0, 0.0, 0.0]    # Coordinates of the left, down, near corner of the lattice
     Sizes: [10.0, 10.0, 10.0]  # Sizes in x, y, z directions in fm
-    CellNumber: [20, 20, 20]   # Number of cells in x, y, z directions
+    Cell_Number: [20, 20, 20]   # Number of cells in x, y, z directions
     Periodic: True             # Periodic continuation: x + i * lx is equivalent to x, same for y, z
     Printout:
         # ("particle", "baryon", "baryonic isospin", "pion")
