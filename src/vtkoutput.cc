@@ -139,7 +139,7 @@ void VtkOutput::write(const Particles &particles, const int event_number) {
 /*!\Userguide
  * \page output_vtk_lattice_ Thermodynamics vtk output
  * Density on the lattice can be printed out in the VTK format of
- * structured grid. At every output moment a new file vtk file is created.
+ * structured grid. At every output moment a new vtk file is created.
  * The name format is
  * \<density_name\>_\<event_number\>_tstep\<number_of_output_moment\>.vtk,
  * where \<density_name\> is "rhoB" for baryon density, "rhoI3" for baryon
