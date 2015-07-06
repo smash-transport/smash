@@ -17,8 +17,7 @@ TEST(init_particle_types) {
   ParticleType::create_type_list(
       "# NAME MASS[GEV] WIDTH[GEV] PDG\n"
       "smashon 1.1 1.1 9876542\n"
-      "smashino 1.1 1.1 1234568\n"
-      "anti_smashino 1.1 1.1 -1234568\n");
+      "smashino 1.1 1.1 1234568\n");
 }
 
 TEST(assign_default) {
