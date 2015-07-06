@@ -62,8 +62,8 @@ T pCM_sqr(const T srts, const T mass_a, const T mass_b) noexcept {
  * with |t_min| < |t_max|, i.e. t_min > t_max.
  */
 template <typename T>
-std::array<T,2> get_t_range(const T srts, const T m1, const T m2,
-                                          const T m3, const T m4) {
+std::array<T, 2> get_t_range(const T srts, const T m1, const T m2,
+                                           const T m3, const T m4) {
   const T p_i = pCM(srts, m1, m2);  // initial-state CM momentum
   const T p_f = pCM(srts, m3, m4);  // final-state CM momentum
   const T sqrt_t0 = (m1*m1 - m2*m2 - m3*m3 + m4*m4) / (2.*srts);

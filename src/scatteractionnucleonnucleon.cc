@@ -290,8 +290,8 @@ void ScatterActionNucleonNucleon::sample_cms_momenta() {
     mass_b = sample_resonance_mass(t_b, t_a.mass(), cms_energy);
   }
 
-  const std::array<double,2> t_range = get_t_range(cms_energy, mN, mN,
-                                                   mass_a, mass_b);
+  const std::array<double, 2> t_range = get_t_range(cms_energy, mN, mN,
+                                                    mass_a, mass_b);
   Angles phitheta;
   if (t_a.pdgcode().iso_multiplet() == 0x1114 &&
       t_b.pdgcode().iso_multiplet() == 0x1112 && !isotropic_) {
@@ -309,9 +309,9 @@ void ScatterActionNucleonNucleon::sample_cms_momenta() {
   } else if (t_b.pdgcode().iso_multiplet() == 0x1112 && !isotropic_ &&
              (t_a.pdgcode().is_Nstar() || t_a.pdgcode().is_Deltastar())) {
     /** NN->NR: Fit to HADES data, see \iref{Agakishiev:2014wqa}. */
-    const std::array<float,4> p { 1.46434, 5.80311, -6.89358, 1.94302 };
+    const std::array<float, 4> p { 1.46434, 5.80311, -6.89358, 1.94302 };
     const double a = p[0] + mass_a * (p[1] + mass_a * (p[2] + mass_a * p[3]));
-    double t = Random::power (-a, t_range[0], t_range[1]);
+    double t = Random::power(-a, t_range[0], t_range[1]);
     if (Random::canonical() > 0.5) {
       t = t_range[0] + t_range[1] - t;  // symmetrize
     }
@@ -328,7 +328,8 @@ void ScatterActionNucleonNucleon::sample_cms_momenta() {
                     LorentzBoost(beta_cm()).threevec();
   pscatt.rotate_to(pcm);
 
-  const double p_f = pCM(cms_energy, mass_a, mass_b);  // final-state CM momentum
+  // final-state CM momentum
+  const double p_f = pCM(cms_energy, mass_a, mass_b);
   if (!(p_f > 0.0)) {
     log.warn("Particle: ", t_a.pdgcode(),
              " radial momentum: ", p_f);

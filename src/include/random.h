@@ -113,9 +113,9 @@ template <typename T> int sgn(T val) {
  */
 template <typename T = double> T power(T n, T xMin, T xMax) {
     const T n1 = n + 1;
-    if (std::abs(n1)<1E-3) {
+    if (std::abs(n1) < 1E-3) {
       return xMin * std::pow(xMax/xMin, canonical());
-    } else if (xMin>0. && xMax>0.) {
+    } else if (xMin > 0. && xMax > 0.) {
       return std::pow(uniform(std::pow(xMin, n1), std::pow(xMax, n1)), 1./n1);
     } else {
       return sgn(xMin) *

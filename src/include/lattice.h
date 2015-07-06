@@ -161,7 +161,7 @@ class RectangularLattice {
         }
       }
     }
-  };
+  }
 
   /**
    * Iterates only nodes, whose cell centers lie not further than r_cut in
@@ -197,7 +197,7 @@ class RectangularLattice {
       }
     }
     iterate_sublattice(l_bounds, u_bounds, std::forward<F>(func));
-  };
+  }
 
  protected:
   /// The lattice itself, array containing physical quantities
