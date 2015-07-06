@@ -31,11 +31,8 @@ class DecayActionsFinderDilepton : public DecayActionsFinder {
  public:
 
   /** Initialize the finder */
-  DecayActionsFinderDilepton(bf::path output_path, Configuration config, std::string name)
-     {
-       dil_out_=create_select_format<OscarInteractions>(std::move(output_path), std::move(config), "full_event_history")
-       //dil_out_=make_unique<OscarOutput<OscarFormat2013, OscarInteractions>>(std::move(output_path), std::move(name));
-     }
+  DecayActionsFinderDilepton(bf::path output_path, std::string name)
+     :dil_out_{create_dilepton_output(output_path, name)}{}
   /** Check the whole particle list for decays
    * and return a list with the corrsponding Action objects. */
   ActionList find_possible_actions(
@@ -46,7 +43,7 @@ class DecayActionsFinderDilepton : public DecayActionsFinder {
   ActionList find_final_actions(const Particles &search_list) const override;
 
  private:
-  build_unique_ptr_<OutputInterface> dil_out_;
+  std::unique_ptr<OutputInterface> dil_out_;
 };
 
 }  // namespace Smash

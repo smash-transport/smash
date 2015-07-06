@@ -57,6 +57,7 @@ ActionList DecayActionsFinderDilepton::find_possible_actions(
 
         act->generate_final_state();
 
+        // output in oscar format
         dil_out_->at_interaction(act->incoming_particles(),
                                  act->outgoing_particles(),
                                  0.0,
