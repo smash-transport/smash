@@ -76,6 +76,16 @@ enum class CalculationFrame {
     FixedTarget,
 };
 
+/// Possible methods of impact parameter sampling.
+enum class Sampling {
+  /// Sample from uniform distribution.
+  UNIFORM,
+  /// Sample from areal / quadratic distribution.
+  QUADRATIC,
+  /// Sample from custom, user-defined distribution.
+  CUSTOM,
+};
+
 /** Allows to choose which kind of density to calculate.
 *  The baryon density is necessary for the Skyrme potential.
 *  For the symmetry potential one needs to know the isospin density.

@@ -14,13 +14,13 @@ Logging:
 
 General:
     # Modus decision
-    Modus:         Collider
+    Modus:         Box
 
     # temporal grid spacing
     Delta_Time:    0.1
 
     # end time of simulation
-    End_Time:      20.0
+    End_Time:      200.0
 
     # initial random seed (auto-generated if negative)
     Randomseed:    1
@@ -37,6 +37,9 @@ General:
     # distance at which gaussian values are small enough to set them zero
     Gauss_Cutoff_In_Sigma: 4.0
 
+    # reduce the combinatorics by placing the particles in a grid structure
+    Use_Grid: True
+
 
 Output:
     # how much time before recording measurables
@@ -44,7 +47,7 @@ Output:
 
     # output formats
     Oscar_Collisions:
-        Enable:             True
+        Enable:             False
         2013_Format:        True
         Print_Start_End:    False
     Oscar_Particlelist:
@@ -52,20 +55,20 @@ Output:
         2013_Format:        True
         Only_Final:         True
     Vtk:
-        Enable:             True
+        Enable:             False
     Root:
         Enable:             False
         Write_Collisions:   True
         Write_Particles:    True
         Autosave_Frequency: 1000
     Binary_Collisions:
-        Enable:             True
+        Enable:             False
         Print_Start_End:    True
     Binary_Particles:
-        Enable:             True
+        Enable:             False
         Only_Final:         False
     Density:
-        Enable:             True
+        Enable:             False
         x: 0.0
         y: 0.0
         z: 0.0
@@ -121,9 +124,11 @@ Modi:
         Start_Time:    0.0
 
         Init_Multiplicities:
-            221:    100
+            211:    200
+            -211:   200
             111:    200
-            2112:   20
+            321:    200
+            -321:   200
 
     Sphere:
         # Sphere size
