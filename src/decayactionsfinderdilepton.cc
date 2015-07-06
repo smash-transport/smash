@@ -104,7 +104,7 @@ ActionList DecayActionsFinderDilepton::find_final_actions(
         // output in oscar format
         dil_out_->at_interaction(act->incoming_particles(),
                                  act->outgoing_particles(),
-                                 0.0,
+                                 1.0,
                                  act->raw_weight_value(),
                                  act->get_type());
       }
