@@ -92,7 +92,7 @@ double spectral_function_integrand(double resonance_mass, double srts,
  * with *one resonance* and one *stable* particle.
  *
  * \param[in] type_resonance Type of the resonance particle.
- * \param[in] type_stable Type of the stable particle.
+ * \param[in] mass_stable Mass of the stable particle.
  * \param[in] cms_energy center-of-mass energy of the 2-particle final state.
  *
  * \return The mass of the resonance particle.
