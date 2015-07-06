@@ -411,11 +411,10 @@ size_t Experiment<Modus>::run_time_evolution_without_time_steps(
 
   // find actions for the initial list
   ParticleList search_list = particles_.copy_to_vector();
-  ActionList action_list;
+  Actions actions;
   for (const auto &finder : action_finders_) {
-    action_list += finder->find_actions_in_cell(search_list, time_left);
+    actions.insert(finder->find_actions_in_cell(search_list, time_left));
   }
-  Actions actions(std::move(action_list));
 
   // iterate over all actions
   while (!actions.is_empty()) {
@@ -501,14 +500,12 @@ size_t Experiment<Modus>::run_time_evolution_without_time_steps(
 
     time_left = end_time_ - current_time;
     const ParticleList& outgoing_particles = act->outgoing_particles();
-    ActionList new_actions;
     for (const auto &finder : action_finders_) {
-      new_actions +=
-          finder->find_actions_in_cell(outgoing_particles, time_left);
-      new_actions += finder->find_actions_with_neighbors(
-          outgoing_particles, particles_, time_left);
+      actions.insert(
+          finder->find_actions_in_cell(outgoing_particles, time_left));
+      actions.insert(finder->find_actions_with_neighbors(
+          outgoing_particles, particles_, time_left));
     }
-    actions.insert(std::move(new_actions));
   }
   return interactions_total;
 }
@@ -525,7 +522,7 @@ size_t Experiment<Modus>::run_time_evolution(const int evt_num) {
       particles_, interactions_total, 0u,
       conserved_initial_, time_start_, parameters_.labclock.current_time());
 
-  std::vector<ActionPtr> actions;
+  Actions actions;
   while (!(++parameters_.labclock > end_time_)) {
     // vector is likely the best container type here. Because std::sort requires
     // random access iterators. Any linked data structure (e.g. list) thus
@@ -539,30 +536,26 @@ size_t Experiment<Modus>::run_time_evolution(const int evt_num) {
     /* (1.b) Iterate over cells and find actions. */
     grid.iterate_cells([&](const ParticleList &search_list) {
                          for (const auto &finder : action_finders_) {
-                           actions += finder->find_actions_in_cell(
-                               search_list, parameters_.timestep_duration());
+                           actions.insert(finder->find_actions_in_cell(
+                               search_list, parameters_.timestep_duration()));
                          }
                        },
                        [&](const ParticleList &search_list,
                            const ParticleList &neighbors_list) {
                          for (const auto &finder : action_finders_) {
-                           actions += finder->find_actions_with_neighbors(
+                           actions.insert(finder->find_actions_with_neighbors(
                                search_list, neighbors_list,
-                               parameters_.timestep_duration());
+                               parameters_.timestep_duration()));
                          }
                        });
-    /* (1.c) Sort action list by time. */
-    std::sort(actions.begin(), actions.end(),
-              [](const ActionPtr &a, const ActionPtr &b) { return *a < *b; });
 
     /* (2) Perform actions. */
-    if (!actions.empty()) {
+    if (!actions.is_empty()) {
       const auto particles_before_actions = particles_.copy_to_vector();
-      for (const auto &action : actions) {
-        perform_action(action, interactions_total, total_pauli_blocked,
+      while (!actions.is_empty()) {
+        perform_action(actions.pop(), interactions_total, total_pauli_blocked,
                        particles_before_actions);
       }
-      actions.clear();
       log.debug(~einhard::Blue(), particles_);
     } else {
       log.debug("no actions performed");

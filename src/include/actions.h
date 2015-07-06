@@ -26,6 +26,8 @@ namespace Smash {
  */
 class Actions {
  public:
+  /** Default constructor, creating an empty Actions object. */
+   Actions() {}
   /**
    * Creates a new Actions object from an ActionList.
    *
