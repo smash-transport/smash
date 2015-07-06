@@ -65,7 +65,7 @@ class BoxModus : public ModusDefault {
   int impose_boundary_conditions(Particles *particles,
                          const OutputsList &output_list = {});
 
-  ///\copydoc Smash::ModusDefault::create_grid
+  /// \copydoc Smash::ModusDefault::create_grid
   Grid<GridOptions::PeriodicBoundaries> create_grid(
       const Particles &particles, int testparticles,
       CellSizeStrategy strategy = CellSizeStrategy::Optimal) const {

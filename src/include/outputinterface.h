@@ -99,7 +99,6 @@ class OutputInterface {
     SMASH_UNUSED(lattice);
     SMASH_UNUSED(event_number);
   }
-
 };
 
 }  // namespace Smash

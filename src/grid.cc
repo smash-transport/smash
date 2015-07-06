@@ -119,9 +119,9 @@ Grid<O>::determine_cell_sizes(size_type particle_count,
   // because the last cell will then store particles in the interval
   // [length, length + max_interaction_length[. The code below achieves this
   // effect by rounding down (floor) and adding 1 afterwards.
-  const int max_cells = O == GridOptions::Normal
-                            ? std::cbrt(particle_count)
-                            : std::max(2, int(std::cbrt(particle_count)));
+  const int max_cells = (O == GridOptions::Normal)
+                    ? std::cbrt(particle_count)
+                    : std::max(2, static_cast<int>(std::cbrt(particle_count)));
   for (std::size_t i = 0; i < number_of_cells.size(); ++i) {
     index_factor[i] = 1.f / max_interaction_length;
     number_of_cells[i] =

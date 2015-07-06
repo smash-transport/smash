@@ -290,14 +290,8 @@ void ScatterActionNucleonNucleon::sample_cms_momenta() {
     mass_b = sample_resonance_mass(t_b, t_a.mass(), cms_energy);
   }
 
-  double p_i = pCM(cms_energy, mN, mN);          // initial-state CM momentum
-  double p_f = pCM(cms_energy, mass_a, mass_b);  // final-state CM momentum
-  if (!(p_f > 0.0)) {
-    log.warn("Particle: ", t_a.pdgcode(),
-             " radial momentum: ", p_f);
-    log.warn("Etot: ", cms_energy, " m_a: ", mass_a, " m_b: ", mass_b);
-  }
-
+  const std::array<double, 2> t_range = get_t_range(cms_energy, mN, mN,
+                                                    mass_a, mass_b);
   Angles phitheta;
   if (t_a.pdgcode().iso_multiplet() == 0x1114 &&
       t_b.pdgcode().iso_multiplet() == 0x1112 && !isotropic_) {
@@ -306,17 +300,23 @@ void ScatterActionNucleonNucleon::sample_cms_momenta() {
      * elastic pp scattering, as suggested in \iref{Cugnon:1996kh}. */
     double plab = plab_from_s_NN(mandelstam_s());
     double bb = std::max(Cugnon_bpp(plab), really_small);
-    double t0 = (mass_a*mass_a-mass_b*mass_b)*(mass_a*mass_a-mass_b*mass_b)
-                /(4.*mandelstam_s());
-    double t, t_min = t0 - (p_i-p_f)*(p_i-p_f),
-           t_max = t0 - (p_i+p_f)*(p_i+p_f);
-    if (Random::canonical() <= 0.5) {
-      t = Random::expo(bb, t_min, t_max);
-    } else {
-      t = t_max + t_min - Random::expo(bb, t_min, t_max);
+    double t = Random::expo(bb, t_range[0], t_range[1]);
+    if (Random::canonical() > 0.5) {
+      t = t_range[0] + t_range[1] - t;  // symmetrize
     }
     phitheta = Angles(2.*M_PI*Random::canonical(),
-                      1. - 2.*(t-t_min)/(t_max-t_min));
+                      1. - 2.*(t-t_range[0])/(t_range[1]-t_range[0]));
+  } else if (t_b.pdgcode().iso_multiplet() == 0x1112 && !isotropic_ &&
+             (t_a.pdgcode().is_Nstar() || t_a.pdgcode().is_Deltastar())) {
+    /** NN->NR: Fit to HADES data, see \iref{Agakishiev:2014wqa}. */
+    const std::array<float, 4> p { 1.46434, 5.80311, -6.89358, 1.94302 };
+    const double a = p[0] + mass_a * (p[1] + mass_a * (p[2] + mass_a * p[3]));
+    double t = Random::power(-a, t_range[0], t_range[1]);
+    if (Random::canonical() > 0.5) {
+      t = t_range[0] + t_range[1] - t;  // symmetrize
+    }
+    phitheta = Angles(2.*M_PI*Random::canonical(),
+                      1. - 2.*(t-t_range[0])/(t_range[1]-t_range[0]));
   } else {
     /* isotropic angular distribution */
     phitheta.distribute_isotropically();
@@ -328,6 +328,13 @@ void ScatterActionNucleonNucleon::sample_cms_momenta() {
                     LorentzBoost(beta_cm()).threevec();
   pscatt.rotate_to(pcm);
 
+  // final-state CM momentum
+  const double p_f = pCM(cms_energy, mass_a, mass_b);
+  if (!(p_f > 0.0)) {
+    log.warn("Particle: ", t_a.pdgcode(),
+             " radial momentum: ", p_f);
+    log.warn("Etot: ", cms_energy, " m_a: ", mass_a, " m_b: ", mass_b);
+  }
   p_a->set_4momentum(mass_a,  pscatt * p_f);
   p_b->set_4momentum(mass_b, -pscatt * p_f);
 
