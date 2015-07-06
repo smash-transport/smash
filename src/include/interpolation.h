@@ -14,6 +14,7 @@
 #include <cassert>
 #include <cstddef>
 #include <algorithm>
+#include <numeric>
 
 template <typename T>
 class InterpolateLinear {
