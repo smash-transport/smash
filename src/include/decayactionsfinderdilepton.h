@@ -10,9 +10,15 @@
 #ifndef SRC_INCLUDE_DECAYACTIONSFINDERDILEPTON_H_
 #define SRC_INCLUDE_DECAYACTIONSFINDERDILEPTON_H_
 
+#include <boost/filesystem.hpp>
 #include <vector>
+#include <string>
+#include <memory>
 
 #include "decayactionsfinder.h"
+#include "oscaroutput.h"
+#include "forwarddeclarations.h"
+#include "cxx14compat.h"
 
 namespace Smash {
 
@@ -23,8 +29,10 @@ namespace Smash {
  */
 class DecayActionsFinderDilepton : public DecayActionsFinder {
  public:
+
   /** Initialize the finder */
-  DecayActionsFinderDilepton() {}
+  DecayActionsFinderDilepton(bf::path output_path, std::string name)
+     :dil_out_{create_dilepton_output(output_path, name)}{}
   /** Check the whole particle list for decays
    * and return a list with the corrsponding Action objects. */
   ActionList find_possible_actions(
@@ -33,9 +41,11 @@ class DecayActionsFinderDilepton : public DecayActionsFinder {
 
   /** Force all resonances to decay at the end of the simulation. */
   ActionList find_final_actions(const Particles &search_list) const override;
+
+ private:
+  std::unique_ptr<OutputInterface> dil_out_;
 };
 
 }  // namespace Smash
 
 #endif  // SRC_INCLUDE_DECAYACTIONSFINDERDILEPTON_H_
-
