@@ -41,7 +41,7 @@ ActionList DecayActionsFinderDilepton::find_possible_actions(
      * file.
      */
 
-     float inv_gamma = p.inverse_gamma();
+    float inv_gamma = p.inverse_gamma();
 
     DecayBranchList all_modes =
                   p.type().get_partial_widths_dilepton(p.effective_mass());
@@ -76,8 +76,42 @@ ActionList DecayActionsFinderDilepton::find_possible_actions(
 }
 
 ActionList DecayActionsFinderDilepton::find_final_actions(
-                  const Particles &) const {   // temp. rmvd search_list (warn.)
-  // not done yet
+                  const Particles &search_list) const {
+  for (const auto &p : search_list) {
+    if (p.type().is_stable()) {
+      continue;      /* particle doesn't decay */
+    }
+    float inv_gamma = p.inverse_gamma();
+
+    DecayBranchList dil_modes =
+                  p.type().get_partial_widths_dilepton(p.effective_mass());
+
+    // total decay width, also hadronic decays
+    const float width_tot = total_weight<DecayBranch>(
+                               p.type().get_partial_widths(p.effective_mass()));
+
+    for (DecayBranchPtr & mode : dil_modes) {
+      float partial_width = mode->weight();
+
+      float sh_weight = partial_width * inv_gamma / width_tot;
+      auto act = make_unique<DecayActionDilepton>(p, 0.f, sh_weight);
+      act->add_decay(std::move(mode));
+
+      if (act->total_width() > 0.0) {  // check if their are any (dil.) decays
+
+        act->generate_final_state();
+
+        // output in oscar format
+        dil_out_->at_interaction(act->incoming_particles(),
+                                 act->outgoing_particles(),
+                                 0.0,
+                                 act->raw_weight_value(),
+                                 act->get_type());
+      }
+    }
+
+  }
+
   ActionList empty_actionlist;
 
   return std::move(empty_actionlist);
