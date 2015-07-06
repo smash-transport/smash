@@ -415,7 +415,7 @@ size_t Experiment<Modus>::run_time_evolution_without_time_steps(
   for (const auto &finder : action_finders_) {
     action_list += finder->find_actions_in_cell(search_list, time_left);
   }
-  Actions actions(std::move(action_list), start_time);
+  Actions actions(std::move(action_list));
 
   // iterate over all actions
   while (!actions.is_empty()) {
@@ -508,7 +508,7 @@ size_t Experiment<Modus>::run_time_evolution_without_time_steps(
       new_actions += finder->find_actions_with_neighbors(
           outgoing_particles, particles_, time_left);
     }
-    actions.insert(std::move(new_actions), current_time);
+    actions.insert(std::move(new_actions));
   }
   return interactions_total;
 }

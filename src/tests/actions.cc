@@ -18,10 +18,7 @@
 using namespace Smash;
 
 TEST(construct_and_insert) {
-  // create arbitrary particle
   Test::create_smashon_particletypes();
-  ParticleData testparticle = Test::smashon(Test::Momentum{0.2, 0., .1, 0.},
-                                            Test::Position{0., 1., .9, 1.});
 
   // use different times for different actions
   constexpr float time_1 = 1.f;
@@ -33,6 +30,10 @@ TEST(construct_and_insert) {
 
   constexpr float current_time = 10.5f;
 
+  // create arbitrary particle
+  ParticleData testparticle = Test::smashon(Test::Momentum{0.2, 0., .1, 0.},
+                                            Test::Position{current_time, 1., .9, 1.});
+
   // add actions to list
   ActionList action_vec;
   action_vec.push_back(make_unique<DecayAction>(testparticle, time_4));
@@ -40,7 +41,7 @@ TEST(construct_and_insert) {
   action_vec.push_back(make_unique<DecayAction>(testparticle, time_6));
 
   // construct the Actions object
-  Actions actions(std::move(action_vec), current_time);
+  Actions actions(std::move(action_vec));
   VERIFY(!actions.is_empty());
 
   // create new actions that are then inserted into the Actions object
@@ -50,7 +51,7 @@ TEST(construct_and_insert) {
   new_actions.push_back(make_unique<DecayAction>(testparticle, time_3));
 
   // insert actions
-  actions.insert(std::move(new_actions), current_time);
+  actions.insert(std::move(new_actions));
 
   // verify that the actions are in the right order
   COMPARE(actions.pop()->time_of_execution(), current_time + time_1);

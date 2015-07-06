@@ -34,12 +34,10 @@ class Actions {
    *
    * \param action_list The ActionList from which to construct the Actions
    *                    object
-   * \param current_time The current simulation time.
    */
-  Actions(ActionList&& action_list, float current_time)
+  Actions(ActionList&& action_list)
       : data_(std::move(action_list)) {
     sort(data_);
-    update_time(data_, current_time);
   }
 
   /**
@@ -77,12 +75,11 @@ class Actions {
    *
    * \param new_acts The actions that will be inserted.
    */
-  void insert(ActionList&& new_acts, float current_time) {
+  void insert(ActionList&& new_acts) {
     if (new_acts.empty()) {
       return;
     }
     sort(new_acts);
-    update_time(new_acts, current_time);
 
     const size_t old_end = data_.size();
     data_.insert(data_.end(), std::make_move_iterator(new_acts.begin()),
@@ -95,17 +92,6 @@ class Actions {
   }
 
  private:
-  /**
-   * Set the time of the actions correctly.
-   *
-   * \param action_list List of the actions.
-   * \param current_time The current simulation time.
-   */
-  static void update_time(ActionList& action_list, float current_time) {
-    for (auto &act : action_list) {
-      act->add_to_time_of_execution(current_time);
-    }
-  }
   /**
    * Sort the actions such that the first action is at the end of the list.
    *
