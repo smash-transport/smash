@@ -29,6 +29,8 @@ ActionList DecayActionsFinderDilepton::find_possible_actions(
       const ParticleList &search_list,
       float dt) const {
 
+  ActionList actions;
+
   for (const auto &p : search_list) {
     if (p.type().is_stable()) {
       continue;
@@ -41,7 +43,7 @@ ActionList DecayActionsFinderDilepton::find_possible_actions(
      * file.
      */
 
-     float inv_gamma = p.inverse_gamma();
+    float inv_gamma = p.inverse_gamma();
 
     DecayBranchList all_modes =
                   p.type().get_partial_widths_dilepton(p.effective_mass());
@@ -53,27 +55,14 @@ ActionList DecayActionsFinderDilepton::find_possible_actions(
       auto act = make_unique<DecayActionDilepton>(p, 0.f, sh_weight);
       act->add_decay(std::move(mode));
 
-      if (act->total_width() > 0.0) {  // check if their are any (dil.) decays
+      actions.emplace_back(std::move(act));
 
-        act->generate_final_state();
-
-        // output in oscar format
-        dil_out_->at_interaction(act->incoming_particles(),
-                                 act->outgoing_particles(),
-                                 0.0,
-                                 act->raw_weight_value(),
-                                 act->get_type());
-      }
     }
   }
 
-
-  /** in the current impl. nothing else should be done by the experiment,
-      so I return an empty action list*/
-  ActionList empty_actionlist;
-
-  return std::move(empty_actionlist);
+  return std::move(actions);
 }
+
 
 ActionList DecayActionsFinderDilepton::find_final_actions(
                   const Particles &) const {   // temp. rmvd search_list (warn.)

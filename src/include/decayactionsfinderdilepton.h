@@ -31,8 +31,8 @@ class DecayActionsFinderDilepton : public DecayActionsFinder {
  public:
 
   /** Initialize the finder */
-  DecayActionsFinderDilepton(bf::path output_path, std::string name)
-     :dil_out_{create_dilepton_output(output_path, name)}{}
+  DecayActionsFinderDilepton() {}
+
   /** Check the whole particle list for decays
    * and return a list with the corrsponding Action objects. */
   ActionList find_possible_actions(
@@ -42,9 +42,7 @@ class DecayActionsFinderDilepton : public DecayActionsFinder {
   /** Force all resonances to decay at the end of the simulation. */
   ActionList find_final_actions(const Particles &search_list) const override;
 
- private:
-  std::unique_ptr<OutputInterface> dil_out_;
-};
+ };
 
 }  // namespace Smash
 

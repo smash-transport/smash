@@ -72,6 +72,8 @@ Output:
         # Which density is written to collision headers:
         # ("particle", "baryon", "baryonic isospin", "pion")
         Density_Type:      "baryon"
+    Dileptons:
+        Enable:             True
 
 Collision_Term:
     Decays:        True

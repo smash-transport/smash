@@ -313,6 +313,7 @@ int main(int argc, char *argv[]) {
     // create outputs
     log.trace(source_location, " create OutputInterface objects");
     OutputsList output_list;
+    std::unique_ptr<OutputInterface> dil_out;
     /*!\Userguide
      * \page input_output_options_ Output
      *
@@ -407,6 +408,11 @@ int main(int argc, char *argv[]) {
     } else {
       output_conf.take({"Density"});
     }
+    if (static_cast<bool>(output_conf.take({"Dileptons", "Enable"}))) {
+      dil_out = create_dilepton_output(output_path, "DileptonOutput");
+    } else {
+      output_conf.take({"Dileptons"});
+    }
 
     // create an experiment
     log.trace(source_location, " create Experiment");
@@ -418,7 +424,7 @@ int main(int argc, char *argv[]) {
     }
 
     // set outputs to experiment
-    experiment->set_outputs(std::move(output_list));
+    experiment->set_outputs(std::move(output_list), std::move(dil_out));
 
     // run the experiment
     log.trace(source_location, " run the Experiment");

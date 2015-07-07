@@ -229,9 +229,7 @@ Experiment<Modus>::Experiment(Configuration config)
     action_finders_.emplace_back(new DecayActionsFinder());
   }
   if (config.take({"Collision_Term", "Dileptons"}, false)) {
-  action_finders_.emplace_back(new DecayActionsFinderDilepton(
-                                                bf::path(bf::current_path()),
-                                                "DileptonsOutput"));
+    dilepton_finder_ = make_unique<DecayActionsFinderDilepton>();
   }
   if (config.take({"Collision_Term", "Collisions"}, true)) {
     action_finders_.emplace_back(new ScatterActionsFinder(config, parameters_));
@@ -415,6 +413,7 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
     // random access iterators. Any linked data structure (e.g. list) thus
     // requires a less efficient sort algorithm.
     std::vector<ActionPtr> actions;
+    std::vector<ActionPtr> dilepton_actions;
 
     /* (1.a) Create grid. */
     const auto &grid =
@@ -427,6 +426,7 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
                            actions += finder->find_possible_actions(
                                search_list, parameters_.timestep_duration());
                          }
+                         dilepton_actions += dilepton_finder_->find_possible_actions(search_list, parameters_.timestep_duration());
                        },
                        [&](const ParticleList &search_list,
                            const ParticleList &neighbors_list) {
@@ -439,6 +439,38 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
     /* (1.c) Sort action list by time. */
     std::sort(actions.begin(), actions.end(),
               [](const ActionPtr &a, const ActionPtr &b) { return *a < *b; });
+
+    /* DILEPTONS (draft)*/
+    if (1) { // insert switch
+
+    /*  grid.iterate_cells([&](const ParticleList &search_list) {
+        dilepton_actions = dilepton_finder_->find_possible_actions(search_list, parameters_.timestep_duration());},
+        [&](const ParticleList &, const ParticleList &) {});
+    */
+    
+      // LOGGING??? const auto &log = logger<LogArea::Experiment>();
+      if (!dilepton_actions.empty()) {
+        const auto particles_before_actions = particles_.copy_to_vector();
+        for (const auto &action : dilepton_actions) {
+          if (action->is_valid(particles_)) {
+            const ParticleList incoming_particles = action->incoming_particles();
+            action->generate_final_state();
+            ProcessType process_type = action->get_type();
+            action->perform(&particles_, interactions_total);
+            const ParticleList outgoing_particles = action->outgoing_particles();
+            // Calculate Eckart rest frame density at the interaction point
+            const FourVector r_interaction = action->get_interaction_point();
+            constexpr bool compute_grad = false;
+            const double rho =
+                rho_eckart(r_interaction.threevec(), particles_before_actions,
+                           parameters_, dens_type_, compute_grad).first;
+
+            dilepton_output_->at_interaction(incoming_particles, outgoing_particles, rho, action->raw_weight_value(), process_type);
+          }
+        }
+        dilepton_actions.clear();
+      }
+    }  
 
     /* (2) Perform actions. */
     perform_actions(actions, interactions_total, total_pauli_blocked);

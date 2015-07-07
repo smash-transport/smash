@@ -77,7 +77,8 @@ class ExperimentBase {
   /**
    * Sets list of outputs
    */
-  virtual void set_outputs(OutputsList &&output_list) = 0;
+  virtual void set_outputs(OutputsList &&output_list,
+                       std::unique_ptr<OutputInterface> &&dilepton_output) = 0;
 
   /**
    * \ingroup exception
@@ -124,8 +125,10 @@ class Experiment : public ExperimentBase {
 
  public:
   void run() override;
-  void set_outputs(OutputsList &&output_list) override {
+  void set_outputs(OutputsList &&output_list,
+                std::unique_ptr<OutputInterface> &&dilepton_output) override {
     outputs_ = std::move(output_list);
+    dilepton_output_ = std::move(dilepton_output);
   }
 
  private:
@@ -201,8 +204,14 @@ class Experiment : public ExperimentBase {
    */
   OutputsList outputs_;
 
+  /// The Dilepton output
+  std::unique_ptr<OutputInterface> dilepton_output_;
+
   /// The Action finder objects
   std::vector<std::unique_ptr<ActionFinderInterface>> action_finders_;
+
+  /// The Dilepton Action Finder
+  std::unique_ptr<ActionFinderInterface> dilepton_finder_;
 
   /// Lattices holding different physical quantities
 

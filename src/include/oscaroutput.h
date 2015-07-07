@@ -92,7 +92,6 @@ class OscarOutput : public OutputInterface {
 std::unique_ptr<OutputInterface> create_oscar_output(bf::path path,
                                                      Configuration config);
 
-// @}
 
 /**
  * Returns a OscarOutput for the dilepton output routine in the
@@ -104,6 +103,9 @@ std::unique_ptr<OutputInterface> create_oscar_output(bf::path path,
  */
 std::unique_ptr<OutputInterface> create_dilepton_output(bf::path path,
                                                         std::string name);
+
+// @}
+
 
 }  // namespace Smash
 
