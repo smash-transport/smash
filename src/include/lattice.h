@@ -38,6 +38,26 @@ enum class LatticeUpdate {
   */
 template <typename T>
 class RectangularLattice {
+  /*!\Userguide
+   * \page input_lattice_ Lattice
+   *
+   * \key Origin (array<float,3>, required): \n
+   *      Coordinates of the left, down, near corner of the lattice in fm.
+   *
+   * \key Sizes (array<float,3>, required): \n
+   *      Sizes of lattice in x, y, z directions in fm.
+   *
+   * \key Cell_Number (array<int,3>, required): \n
+   *      Number of cells in x, y, z directions.
+   *
+   * \key Periodic (bool, required): \n
+   *      Use periodic continuation or not. With periodic continuation
+   *      x + i * lx is equivalent to x, same for y, z.
+   * \key Printout: \n
+   *      Lattices to print. For options see \ref input_vtk_lattice_. For
+   *      format of lattice output see \ref output_vtk_lattice_.
+   */
+
  public:
   /**
     * Creates rectangular lattice of sizes (lx,ly,lz) fm with
@@ -161,7 +181,7 @@ class RectangularLattice {
         }
       }
     }
-  };
+  }
 
   /**
    * Iterates only nodes, whose cell centers lie not further than r_cut in
@@ -197,7 +217,7 @@ class RectangularLattice {
       }
     }
     iterate_sublattice(l_bounds, u_bounds, std::forward<F>(func));
-  };
+  }
 
  protected:
   /// The lattice itself, array containing physical quantities

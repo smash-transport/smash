@@ -255,9 +255,12 @@ class PdgCode {
     }
     return antiparticle_sign();
   }
-
   /// Returns whether this PDG code identifies a baryon.
   bool is_baryon() const { return is_hadron() && digits_.n_q1_ != 0; }
+  /// Is this a nucleon resonance (N*)?
+  bool is_Nstar() const;
+  /// Is this a Delta resonance (Delta*)?
+  bool is_Deltastar() const;
 
   /** Determine whether a particle has a distinct antiparticle
     * (or whether it is its own antiparticle). */

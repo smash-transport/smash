@@ -217,7 +217,8 @@ void OscarOutput<Format, Contents>::at_interaction(
        */
       std::fprintf(file_.get(), "%zu %zu %12.7f %12.7f %5i \n",
                    incoming_particles.size(), outgoing_particles.size(),
-                   density, total_cross_section, static_cast<int>(process_type));
+                   density, total_cross_section,
+                   static_cast<int>(process_type));
     }
     for (const auto &p : incoming_particles) {
       write_particledata(p);

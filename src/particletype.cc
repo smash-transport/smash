@@ -184,11 +184,25 @@ void ParticleType::create_type_list(const std::string &input) {  // {{{
   }
   type_list.shrink_to_fit();
 
+  /* Sort the type list by PDG code. */
   std::sort(type_list.begin(), type_list.end(),
-            [](const ParticleType &l,
-               const ParticleType &r) { return l.pdgcode() < r.pdgcode(); });
+            [](const ParticleType &l, const ParticleType &r) {
+              return l.pdgcode() < r.pdgcode();
+            });
 
-  assert(nullptr == all_particle_types);
+  /* Look for duplicates. */
+  PdgCode prev_pdg = 0;
+  for (const auto& t : type_list) {
+    if (t.pdgcode() == prev_pdg) {
+      throw ParticleType::LoadFailure("Duplicate PdgCode in particles.txt: " +
+                                      t.pdgcode().string());
+    }
+    prev_pdg = t.pdgcode();
+  }
+
+  if (all_particle_types != nullptr) {
+    throw std::runtime_error("Error: Type list was already built!");
+  }
   all_particle_types = &type_list;  // note that type_list is a function-local
                                     // static and thus will live on until after
                                     // main().

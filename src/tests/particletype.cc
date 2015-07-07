@@ -39,6 +39,10 @@ TEST_CATCH(load_one_particle_with_incorrect_newline, ParticleType::LoadFailure) 
   ParticleType::create_type_list(parts);
 }
 
+TEST_CATCH(load_duplicate_particle, ParticleType::LoadFailure) {
+  ParticleType::create_type_list("π⁺ 0.138 0.0 211\nπ⁺ 0.138 0.0 211\n");
+}
+
 TEST(create_type_list) {
   ParticleType::create_type_list(
       "test0 0.1350 -1.0 661\n"

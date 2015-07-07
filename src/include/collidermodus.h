@@ -13,6 +13,7 @@
 
 #include "deformednucleus.h"
 #include "forwarddeclarations.h"
+#include "interpolation.h"
 #include "modusdefault.h"
 #include "nucleus.h"
 #include "pdgcode.h"
@@ -45,14 +46,14 @@ class ColliderModus : public ModusDefault {
    * object (only contains configuration for this modus).
    **/
   explicit ColliderModus(Configuration modus_config,
-           const ExperimentParameters &parameters);
+                         const ExperimentParameters &parameters);
 
   /** Creates initial conditions from the particles.
    *
    * In particular, it initializes the nuclei.
    */
   float initial_conditions(Particles *particles,
-                          const ExperimentParameters &parameters);
+                           const ExperimentParameters &parameters);
 
   /// \ingroup exception
   /// Thrown when either \a projectile_ or \a target_ nuclei are empty.
@@ -85,17 +86,22 @@ class ColliderModus : public ModusDefault {
    * distance apart from each other.
    **/
   float impact_ = 0.f;
-  /// Flag for quadratic sampling of impact parameter.
-  bool sampling_quadratically_ = true;
+  /// Method used for sampling of impact parameter.
+  Sampling sampling_ = Sampling::QUADRATIC;
   /// Minimum value of impact parameter.
   float imp_min_ = 0.0;
   /// Maximum value of impact parameter.
   float imp_max_ = 0.0;
+  /// Maximum value of yield. Needed for custom impact parameter sampling.
+  float yield_max_ = 0.0;
+  /// Pointer to the impact parameter interpolation.
+  std::unique_ptr<InterpolateData<float>> impact_interpolation_ = nullptr;
   /** Sample impact parameter.
    *
-   * Samples the impact parameter from values between imp_min_ and imp_max_.
-   * Sampling is either quadratic or linear, depending if
-   * sampling_quadratically_ is true or false.
+   * Samples the impact parameter from values between imp_min_ and imp_max_, if
+   * linear or quadratic sampling is used. By specifying impact parameters and
+   * corresponding yields, custom sampling can be used.
+   * This depends on the value of sampling_.
    *
    * Note that imp_max_ less than imp_min_ also works fine.
    *
@@ -128,8 +134,8 @@ class ColliderModus : public ModusDefault {
    *
    * \fpPrecision Why \c double?
    **/
-  std::pair<double, double> get_velocities(float mandelstam_s,
-                                           float m_a, float m_b);
+  std::pair<double, double> get_velocities(float mandelstam_s, float m_a,
+                                           float m_b);
 
   /**\ingroup logging
    * Writes the initial state for the ColliderModus to the output stream.
