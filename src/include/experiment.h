@@ -121,14 +121,6 @@ class Experiment : public ExperimentBase {
 
  public:
   void run() override;
-<<<<<<< HEAD
-  void set_outputs(OutputsList &&output_list,
-                std::unique_ptr<OutputInterface> &&dilepton_output) override {
-    outputs_ = std::move(output_list);
-    dilepton_output_ = std::move(dilepton_output);
-  }
-=======
->>>>>>> master
 
  private:
   /**
@@ -158,6 +150,9 @@ class Experiment : public ExperimentBase {
   void perform_action(const ActionPtr &action, size_t &interactions_total,
                       size_t &total_pauliblocked,
                       const ParticleList &particles_before_actions);
+
+  void perform_dilepton_action(const ActionPtr &action,
+                               const ParticleList &particles_before_actions);
 
   /** Runs the time evolution of an event
    *

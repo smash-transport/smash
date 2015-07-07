@@ -204,7 +204,7 @@ void OscarOutput<Format, Contents>::at_interaction(
     if (Format == OscarFormat2013) {
       std::fprintf(
           file_.get(),
-          "# interaction in %zu out %zu rho %12.7f weight %12.7f type %5i \n",
+          "# interaction in %zu out %zu rho %12.7f weight %g type %5i \n",
           incoming_particles.size(), outgoing_particles.size(), density,
           total_cross_section, static_cast<int>(process_type));
     } else {

@@ -240,7 +240,7 @@ Experiment<Modus>::Experiment(Configuration config, bf::path output_path)
   if (config.take({"Collision_Term", "Decays"}, true)) {
     action_finders_.emplace_back(new DecayActionsFinder());
   }
-  if (config.take({"Collision_Term", "Dileptons"}, false)) {
+  if (1) {  // DILEPTON SWITCH
     dilepton_finder_ = make_unique<DecayActionsFinderDilepton>();
   }
   if (config.take({"Collision_Term", "Collisions"}, true)) {
@@ -346,6 +346,10 @@ Experiment<Modus>::Experiment(Configuration config, bf::path output_path)
                               std::move(output_conf["Density"])));
   } else {
     output_conf.take({"Density"});
+  }
+  
+  if (1) { // DILEPTON SWITCH
+    dilepton_output_ = create_dilepton_output(output_path, "DileptonOutput");
   }
 
   if (config.has_value({"Potentials"})) {
@@ -494,6 +498,26 @@ void Experiment<Modus>::perform_action(
   }
 }
 
+template <typename Modus>
+void Experiment<Modus>::perform_dilepton_action(const ActionPtr &action,
+                                 const ParticleList &particles_before_actions) {
+  if (action->is_valid(particles_)) {
+    const ParticleList incoming_particles = action->incoming_particles();
+    action->generate_final_state();
+    ProcessType process_type = action->get_type();
+    const ParticleList outgoing_particles = action->outgoing_particles();
+    // Calculate Eckart rest frame density at the interaction point
+    const FourVector r_interaction = action->get_interaction_point();
+    constexpr bool compute_grad = false;
+    const double rho =
+        rho_eckart(r_interaction.threevec(), particles_before_actions,
+                   parameters_, dens_type_, compute_grad).first;
+    
+    dilepton_output_->at_interaction(incoming_particles, outgoing_particles, rho, action->raw_weight_value(), process_type);
+  }
+}
+
+
 /* This is the loop over timesteps, carrying out collisions and decays
  * and propagating particles. */
 template <typename Modus>
@@ -525,7 +549,6 @@ size_t Experiment<Modus>::run_time_evolution(const int evt_num) {
                            actions += finder->find_possible_actions(
                                search_list, parameters_.timestep_duration());
                          }
-                         dilepton_actions += dilepton_finder_->find_possible_actions(search_list, parameters_.timestep_duration());
                        },
                        [&](const ParticleList &search_list,
                            const ParticleList &neighbors_list) {
@@ -540,32 +563,18 @@ size_t Experiment<Modus>::run_time_evolution(const int evt_num) {
               [](const ActionPtr &a, const ActionPtr &b) { return *a < *b; });
 
     /* DILEPTONS (draft)*/
-    if (1) { // insert switch
+    if (1) { // insert DILEPTON SWITCH
 
-    /*  grid.iterate_cells([&](const ParticleList &search_list) {
+      grid.iterate_cells([&](const ParticleList &search_list) {
         dilepton_actions = dilepton_finder_->find_possible_actions(search_list, parameters_.timestep_duration());},
         [&](const ParticleList &, const ParticleList &) {});
-    */
+    
     
       // LOGGING??? const auto &log = logger<LogArea::Experiment>();
       if (!dilepton_actions.empty()) {
         const auto particles_before_actions = particles_.copy_to_vector();
         for (const auto &action : dilepton_actions) {
-          if (action->is_valid(particles_)) {
-            const ParticleList incoming_particles = action->incoming_particles();
-            action->generate_final_state();
-            ProcessType process_type = action->get_type();
-            action->perform(&particles_, interactions_total);
-            const ParticleList outgoing_particles = action->outgoing_particles();
-            // Calculate Eckart rest frame density at the interaction point
-            const FourVector r_interaction = action->get_interaction_point();
-            constexpr bool compute_grad = false;
-            const double rho =
-                rho_eckart(r_interaction.threevec(), particles_before_actions,
-                           parameters_, dens_type_, compute_grad).first;
-
-            dilepton_output_->at_interaction(incoming_particles, outgoing_particles, rho, action->raw_weight_value(), process_type);
-          }
+          perform_dilepton_action(action, particles_before_actions);
         }
         dilepton_actions.clear();
       }

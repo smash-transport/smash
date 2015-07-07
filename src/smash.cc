@@ -301,7 +301,6 @@ int main(int argc, char *argv[]) {
     DecayModes::load_decaymodes(configuration.take({"decaymodes"}));
     ParticleType::check_consistency();
 
-
     // create an experiment
     log.trace(source_location, " create Experiment");
     auto experiment = ExperimentBase::create(configuration, output_path);
