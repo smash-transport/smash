@@ -315,7 +315,7 @@ ColliderModus::ColliderModus(Configuration modus_config,
       }
     }
     if (modus_cfg.has_value({"Impact", "Range"})) {
-      std::array<float,2> range = modus_cfg.take({"Impact", "Range"});
+      std::array<float, 2> range = modus_cfg.take({"Impact", "Range"});
       imp_min_ = range[0];
       imp_max_ = range[1];
     }
