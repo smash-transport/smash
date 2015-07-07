@@ -40,8 +40,8 @@ class ActionFinderInterface {
    * Abstract function for finding actions between a list of particles and
    * neighboring particles.
    *
-   * \param search_list a list of particles where each pair needs to be tested
-   *                    for possible interaction
+   * \param search_list a list of particles where each particle needs to be
+   *                    tested for possible interactions with the neighbors
    * \param neighbors_list a list of particles that need to be tested against
    *                       particles in search_list for possible interaction
    * \param dt duration of the current time step in fm/c
@@ -53,10 +53,22 @@ class ActionFinderInterface {
       float dt) const = 0;
 
   /**
-   * Convenient overload of the above.
+   * Abstract function for finding actions between a list of particles and
+   * the surrounding particles.
+   *
+   * Note: The first list can be a subset of the second list.
+   *
+   * \param search_list a list of particles where each particle needs to be
+   *                    tested for possible interactions with the surrounding
+   *                    particles
+   * \param surrounding_list a list of particles that need to be tested against
+   *                         particles in search_list for possible interaction
+   * \param dt duration of the current time step in fm/c
+   * \return The function returns a list (std::vector) of Action objects that
+   *         could possibly be executed in this time step.
    */
-  virtual ActionList find_actions_with_neighbors(
-      const ParticleList &search_list, const Particles &neighbors_list,
+  virtual ActionList find_actions_with_surrounding_particles(
+      const ParticleList &search_list, const Particles &surrounding_list,
       float dt) const = 0;
 
   /**

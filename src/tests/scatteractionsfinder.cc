@@ -185,7 +185,7 @@ TEST(find_next_action) {
 
   // create particles
   Particles particles;
-  particles.insert(Test::smashon(Test::Momentum{energy, energy*v, 0., 0.},
+  particles.insert(Test::smashon(Test::Momentum{energy, energy * v, 0., 0.},
                                  Test::Position{0., x_pos_1, 1., 1.}));
   particles.insert(Test::smashon(Test::Momentum{energy, -energy*v, 0., 0.},
                                  Test::Position{0., x_pos_1+delta_x, 1., 1.}));
@@ -198,15 +198,16 @@ TEST(find_next_action) {
   ScatterActionsFinder finder(elastic_parameter, testparticles);
 
   // prepare list of particles that will be checked for possible actions
-  // this list only contains one particle
-  ParticleList particle_list;
-  particle_list.push_back(particles.front());
-  // prepare search list
-  const ParticleList search_list = particles.copy_to_vector();
-  // find next action for the first particle
-  ActionList action_list =
-      finder.find_actions_with_neighbors(particle_list, search_list, 10000.f);
-  // we expect to find an action
+  ParticleList particle_list = particles.copy_to_vector();
+  ActionList action_list = finder.find_actions_with_surrounding_particles(
+      particle_list, particles, 10000.f);
+  // we expect to find no actions because there are no surrounding particles
+  COMPARE(action_list.size(), 0);
+  // remove one particle from the list so that the interaction can be found
+  particle_list.pop_back();
+  action_list = finder.find_actions_with_surrounding_particles(
+      particle_list, particles, 10000.f);
+  // we expect to find one collision between the two particles
   COMPARE(action_list.size(), 1);
   ActionPtr action = std::move(action_list[0]);
 

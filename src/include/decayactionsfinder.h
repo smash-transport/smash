@@ -35,10 +35,10 @@ class DecayActionsFinder : public ActionFinderInterface {
                                          float) const override {
     return {};
   }
-  /// Ignore the neighbor searches for decays
-  ActionList find_actions_with_neighbors(const ParticleList &,
-                                         const Particles &,
-                                         float) const override {
+  /// Ignore the surrounding searches for decays
+  ActionList find_actions_with_surrounding_particles(const ParticleList &,
+                                                     const Particles &,
+                                                     float) const override {
     return {};
   }
 

@@ -42,9 +42,9 @@ class ScatterActionsFinder : public ActionFinderInterface {
   ActionList find_actions_with_neighbors(const ParticleList &search_list,
                                          const ParticleList &neighbors_list,
                                          float dt) const override;
-  ActionList find_actions_with_neighbors(const ParticleList &search_list,
-                                         const Particles &neighbors_list,
-                                         float dt) const override;
+  ActionList find_actions_with_surrounding_particles(
+      const ParticleList &search_list, const Particles &surrounding_list,
+      float dt) const override;
   /** Find some final collisions at the end of the simulation.
    * Currently does nothing. */
   ActionList find_final_actions(const Particles &) const override {

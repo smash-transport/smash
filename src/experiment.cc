@@ -505,7 +505,7 @@ size_t Experiment<Modus>::run_time_evolution_without_time_steps(
     for (const auto &finder : action_finders_) {
       new_actions +=
           finder->find_actions_in_cell(outgoing_particles, time_left);
-      new_actions += finder->find_actions_with_neighbors(
+      new_actions += finder->find_actions_with_surrounding_particles(
           outgoing_particles, particles_, time_left);
     }
     actions.insert(std::move(new_actions), current_time);
