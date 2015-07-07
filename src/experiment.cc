@@ -33,6 +33,15 @@
 #include "include/propagation.h"
 #include "include/random.h"
 #include "include/spheremodus.h"
+/* Outputs */
+#include "include/binaryoutputcollisions.h"
+#include "include/binaryoutputparticles.h"
+#include "include/densityoutput.h"
+#include "include/oscaroutput.h"
+#ifdef SMASH_USE_ROOT
+#  include "include/rootoutput.h"
+#endif
+#include "include/vtkoutput.h"
 
 namespace std {
 /**
@@ -67,7 +76,8 @@ static ostream &operator<<(ostream &out,
 namespace Smash {
 
 /* ExperimentBase carries everything that is needed for the evolution */
-std::unique_ptr<ExperimentBase> ExperimentBase::create(Configuration config) {
+std::unique_ptr<ExperimentBase> ExperimentBase::create(Configuration config,
+                                                       bf::path output_path) {
   const auto &log = logger<LogArea::Experiment>();
   log.trace() << source_location;
   /*!\Userguide
@@ -107,13 +117,13 @@ std::unique_ptr<ExperimentBase> ExperimentBase::create(Configuration config) {
                   << "periodic boundaries are not taken into account "
                   << "in the density calculation";
     }
-    return ExperimentPointer(new Experiment<BoxModus>(config));
+    return ExperimentPointer(new Experiment<BoxModus>(config, output_path));
   } else if (modus_chooser.compare("List") == 0) {
-    return ExperimentPointer(new Experiment<ListModus>(config));
+    return ExperimentPointer(new Experiment<ListModus>(config, output_path));
   } else if (modus_chooser.compare("Collider") == 0) {
-    return ExperimentPointer(new Experiment<ColliderModus>(config));
+    return ExperimentPointer(new Experiment<ColliderModus>(config, output_path));
   } else if (modus_chooser.compare("Sphere") == 0) {
-    return ExperimentPointer(new Experiment<SphereModus>(config));
+    return ExperimentPointer(new Experiment<SphereModus>(config, output_path));
   } else {
     throw InvalidModusRequest("Invalid Modus (" + modus_chooser +
                               ") requested from ExperimentBase::create.");
@@ -210,7 +220,7 @@ std::ostream &operator<<(std::ostream &out, const Experiment<Modus> &e) {
  * false - don't force decays (final output can contain resonances)
  */
 template <typename Modus>
-Experiment<Modus>::Experiment(Configuration config)
+Experiment<Modus>::Experiment(Configuration config, bf::path output_path)
     : parameters_(create_experiment_parameters(config)),
       modus_(config["Modi"], parameters_),
       particles_(),
@@ -223,6 +233,7 @@ Experiment<Modus>::Experiment(Configuration config)
   const auto &log = logger<LogArea::Experiment>();
   log.info() << *this;
 
+  // create finders
   if (config.take({"Collision_Term", "Decays"}, true)) {
     action_finders_.emplace_back(new DecayActionsFinder());
   }
@@ -233,6 +244,102 @@ Experiment<Modus>::Experiment(Configuration config)
     log.info() << "Pauli blocking is ON.";
     pauli_blocker_ = make_unique<PauliBlocker>(
         config["Collision_Term"]["Pauli_Blocking"], parameters_);
+  }
+
+  // create outputs
+  log.trace(source_location, " create OutputInterface objects");
+  /*!\Userguide
+    * \page input_output_options_ Output
+    *
+    * \key Output: \n
+    * Below this key the configuration for the different output formats is
+    * defined. To enable a certain output, set the 'Enable' key below the
+    * selected format identifier. The identifiers are described below.
+    * The following outputs exist:
+    * \li \subpage input_oscar_particlelist
+    * \li \subpage input_oscar_collisions
+    * \li \subpage input_vtk
+    * \li \subpage input_binary_collisions
+    * \li \subpage input_binary_particles
+    * \li \subpage input_root
+    */
+  auto output_conf = config["Output"];
+  /*!\Userguide
+    * \page output_general_ Output files
+    * There are different optional formats for SMASH output that are explained
+    * below in more detail. Per default, the selected output files will be
+    * saved in the directory ./data/\<run_id\>, where \<run_id\> is an integer
+    * number starting from 0. At the beginning
+    * of a run SMASH checks, if the ./data/0 directory exists. If it does not exist, it
+    * is created and all output files are written there. If the directory
+    * already exists, SMASH tries for ./data/1, ./data/2 and so on until it
+    * finds a free number. The user can change output directory by a command
+    * line option, if desired:
+    * \code smash -o <user_output_dir> \endcode
+    * SMASH supports several kinds of configurable output formats.
+    * They are called OSCAR1999, OSCAR2013, binary OSCAR2013, VTK and ROOT
+    * outputs. Every format can be switched on/off using option Enable in the
+    * configuration file config.yaml. For more information on configuring the
+    * output see corresponding pages: \ref input_oscar_particlelist,
+    * \ref input_oscar_collisions, \ref input_binary_collisions,
+    * \ref input_binary_particles, \ref input_root, \ref input_vtk.
+    *
+    * \key Details of output formats are explained here: \n
+    * \li General block structure of OSCAR formats: \n
+    *     \subpage oscar_general_
+    * \li A family of OSCAR ASCII outputs.\n
+    *     \subpage format_oscar_particlelist\n
+    *     \subpage format_oscar_collisions
+    * \li Binary outputs analoguous to OSCAR format\n
+    *     \subpage format_binary_\n
+    * \li Output in vtk format suitable for an easy
+    *     visualization using paraview software:\n \subpage format_vtk
+    * \li Formatted binary output that uses ROOT software
+    *     (http://root.cern.ch).\n Fast to read and write, requires less
+    *     disk space.\n \subpage format_root
+    */
+
+  // loop until all OSCAR outputs are created (create_oscar_output will return
+  // nullptr then).
+  while (std::unique_ptr<OutputInterface> oscar =
+              create_oscar_output(output_path, output_conf)) {
+    outputs_.emplace_back(std::move(oscar));
+  }
+  if (static_cast<bool>(output_conf.take({"Vtk", "Enable"}))) {
+    outputs_.emplace_back(new VtkOutput(output_path, std::move(output_conf["Vtk"])));
+  } else {
+    output_conf.take({"Vtk"});
+  }
+  if (static_cast<bool>(output_conf.take({"Binary_Collisions", "Enable"}))) {
+    outputs_.emplace_back(new BinaryOutputCollisions(output_path,
+                                      std::move(output_conf["Binary_Collisions"])));
+  } else {
+    output_conf.take({"Binary_Collisions"});
+  }
+  if (static_cast<bool>(output_conf.take({"Binary_Particles", "Enable"}))) {
+    outputs_.emplace_back(new BinaryOutputParticles(output_path,
+                                      std::move(output_conf["Binary_Particles"])));
+  } else {
+    output_conf.take({"Binary_Particles"});
+  }
+  if (static_cast<bool>(output_conf.take({"Root", "Enable"}))) {
+#ifdef SMASH_USE_ROOT
+    outputs_.emplace_back(new RootOutput(
+                              output_path, output_conf["Root"]));
+#else
+    log.error() << "You requested Root output, but Root support has not been "
+                    "compiled in. To enable Root support call: cmake -D "
+                    "USE_ROOT=ON <path>.";
+    output_conf.take({"Root"});
+#endif
+  } else {
+    output_conf.take({"Root"});
+  }
+  if (static_cast<bool>(output_conf.take({"Density", "Enable"}))) {
+    outputs_.emplace_back(new DensityOutput(output_path,
+                              std::move(output_conf["Density"])));
+  } else {
+    output_conf.take({"Density"});
   }
 
   if (config.has_value({"Potentials"})) {

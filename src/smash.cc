@@ -28,15 +28,6 @@
 #include "include/logging.h"
 #include "include/macros.h"
 #include "include/particletype.h"
-/* Outputs */
-#include "include/binaryoutputcollisions.h"
-#include "include/binaryoutputparticles.h"
-#include "include/densityoutput.h"
-#include "include/oscaroutput.h"
-#ifdef SMASH_USE_ROOT
-#  include "include/rootoutput.h"
-#endif
-#include "include/vtkoutput.h"
 /* build dependent variables */
 #include "include/config.h"
 
@@ -310,115 +301,14 @@ int main(int argc, char *argv[]) {
     DecayModes::load_decaymodes(configuration.take({"decaymodes"}));
     ParticleType::check_consistency();
 
-    // create outputs
-    log.trace(source_location, " create OutputInterface objects");
-    OutputsList output_list;
-    /*!\Userguide
-     * \page input_output_options_ Output
-     *
-     * \key Output: \n
-     * Below this key the configuration for the different output formats is
-     * defined. To enable a certain output, set the 'Enable' key below the
-     * selected format identifier. The identifiers are described below.
-     * The following outputs exist:
-     * \li \subpage input_oscar_particlelist
-     * \li \subpage input_oscar_collisions
-     * \li \subpage input_vtk
-     * \li \subpage input_binary_collisions
-     * \li \subpage input_binary_particles
-     * \li \subpage input_root
-     */
-    auto output_conf = configuration["Output"];
-
-    /*!\Userguide
-     * \page output_general_ Output files
-     * There are different optional formats for SMASH output that are explained
-     * below in more detail. Per default, the selected output files will be
-     * saved in the directory ./data/\<run_id\>, where \<run_id\> is an integer
-     * number starting from 0. At the beginning
-     * of a run SMASH checks, if the ./data/0 directory exists. If it does not exist, it
-     * is created and all output files are written there. If the directory
-     * already exists, SMASH tries for ./data/1, ./data/2 and so on until it
-     * finds a free number. The user can change output directory by a command
-     * line option, if desired:
-     * \code smash -o <user_output_dir> \endcode
-     * SMASH supports several kinds of configurable output formats.
-     * They are called OSCAR1999, OSCAR2013, binary OSCAR2013, VTK and ROOT
-     * outputs. Every format can be switched on/off using option Enable in the
-     * configuration file config.yaml. For more information on configuring the
-     * output see corresponding pages: \ref input_oscar_particlelist,
-     * \ref input_oscar_collisions, \ref input_binary_collisions,
-     * \ref input_binary_particles, \ref input_root, \ref input_vtk.
-     *
-     * \key Details of output formats are explained here: \n
-     * \li General block structure of OSCAR formats: \n
-     *     \subpage oscar_general_
-     * \li A family of OSCAR ASCII outputs.\n
-     *     \subpage format_oscar_particlelist\n
-     *     \subpage format_oscar_collisions
-     * \li Binary outputs analoguous to OSCAR format\n
-     *     \subpage format_binary_\n
-     * \li Output in vtk format suitable for an easy
-     *     visualization using paraview software:\n \subpage format_vtk
-     * \li Formatted binary output that uses ROOT software
-     *     (http://root.cern.ch).\n Fast to read and write, requires less
-     *     disk space.\n \subpage format_root
-     */
-
-    // loop until all OSCAR outputs are created (create_oscar_output will return
-    // nullptr then).
-    while (std::unique_ptr<OutputInterface> oscar =
-               create_oscar_output(output_path, output_conf)) {
-      output_list.emplace_back(std::move(oscar));
-    }
-    if (static_cast<bool>(output_conf.take({"Vtk", "Enable"}))) {
-      output_list.emplace_back(new VtkOutput(output_path, output_conf["Vtk"]));
-    } else {
-      output_conf.take({"Vtk"});
-    }
-    if (static_cast<bool>(output_conf.take({"Binary_Collisions", "Enable"}))) {
-      output_list.emplace_back(new BinaryOutputCollisions(output_path,
-                                       output_conf["Binary_Collisions"]));
-    } else {
-      output_conf.take({"Binary_Collisions"});
-    }
-    if (static_cast<bool>(output_conf.take({"Binary_Particles", "Enable"}))) {
-      output_list.emplace_back(new BinaryOutputParticles(output_path,
-                                       output_conf["Binary_Particles"]));
-    } else {
-      output_conf.take({"Binary_Particles"});
-    }
-    if (static_cast<bool>(output_conf.take({"Root", "Enable"}))) {
-#ifdef SMASH_USE_ROOT
-      output_list.emplace_back(new RootOutput(
-                               output_path, output_conf["Root"]));
-#else
-      log.error() << "You requested Root output, but Root support has not been "
-                     "compiled in. To enable Root support call: cmake -D "
-                     "USE_ROOT=ON <path>.";
-      output_conf.take({"Root"});
-#endif
-    } else {
-      output_conf.take({"Root"});
-    }
-    if (static_cast<bool>(output_conf.take({"Density", "Enable"}))) {
-      output_list.emplace_back(new DensityOutput(output_path,
-                               output_conf["Density"]));
-    } else {
-      output_conf.take({"Density"});
-    }
-
     // create an experiment
     log.trace(source_location, " create Experiment");
-    auto experiment = ExperimentBase::create(configuration);
+    auto experiment = ExperimentBase::create(configuration, output_path);
     const std::string report = configuration.unused_values_report();
     if (report != "{}") {
       log.warn() << "The following configuration values were not used:\n"
                  << report;
     }
-
-    // set outputs to experiment
-    experiment->set_outputs(std::move(output_list));
 
     // run the experiment
     log.trace(source_location, " run the Experiment");

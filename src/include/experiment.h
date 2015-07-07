@@ -7,6 +7,7 @@
 #ifndef SRC_INCLUDE_EXPERIMENT_H_
 #define SRC_INCLUDE_EXPERIMENT_H_
 
+#include <boost/filesystem.hpp>
 #include <map>
 #include <memory>
 #include <stdexcept>
@@ -64,7 +65,8 @@ class ExperimentBase {
    * Most of the Configuration values are read starting from this function. The
    * configuration itself is documented in \subpage input_general_
    */
-  static std::unique_ptr<ExperimentBase> create(Configuration config);
+  static std::unique_ptr<ExperimentBase> create(Configuration config,
+                                                bf::path output_path);
 
   /**
    * Runs the experiment.
@@ -73,11 +75,6 @@ class ExperimentBase {
    * the complete experiment.
    */
   virtual void run() = 0;
-
-  /**
-   * Sets list of outputs
-   */
-  virtual void set_outputs(OutputsList &&output_list) = 0;
 
   /**
    * \ingroup exception
@@ -124,9 +121,6 @@ class Experiment : public ExperimentBase {
 
  public:
   void run() override;
-  void set_outputs(OutputsList &&output_list) override {
-    outputs_ = std::move(output_list);
-  }
 
  private:
   /**
@@ -143,7 +137,7 @@ class Experiment : public ExperimentBase {
    *                but actually taken out of the object. Thus, all values that
    *                remain were not used.
    */
-  explicit Experiment(Configuration config);
+  explicit Experiment(Configuration config, bf::path output_path);
 
   /** Reads particle type information and cross sections information and
    * does the initialization of the system

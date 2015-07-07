@@ -174,7 +174,7 @@ inline Configuration configuration(std::string overrides = {}) {
  */
 inline std::unique_ptr<ExperimentBase> experiment(
     const Configuration &c = configuration()) {
-  return ExperimentBase::create(c);
+  return ExperimentBase::create(c, ".");
 }
 
 /**
@@ -182,7 +182,7 @@ inline std::unique_ptr<ExperimentBase> experiment(
  * configOverrides.
  */
 inline std::unique_ptr<ExperimentBase> experiment(const char *configOverrides) {
-  return ExperimentBase::create(configuration(configOverrides));
+  return ExperimentBase::create(configuration(configOverrides), ".");
 }
 
 /**
