@@ -65,6 +65,7 @@ class ParticleData;
 class Particles;
 class ParticleType;
 class ParticleTypePtr;
+class IsoParticleType;
 class PdgCode;
 class DecayBranch;
 class CollisionBranch;
@@ -123,6 +124,7 @@ using ParticleList = build_vector_<ParticleData>;
 
 using ParticleTypeList = build_vector_<ParticleType>;
 using ParticleTypePtrList = build_vector_<ParticleTypePtr>;
+using IsoParticleTypeList = build_vector_<IsoParticleType>;
 
 template<typename T>
 using ProcessBranchPtr = build_unique_ptr_<T>;

@@ -18,6 +18,7 @@
 #include "include/decaymodes.h"
 #include "include/inputfunctions.h"
 #include "include/iomanipulators.h"
+#include "include/isoparticletype.h"
 #include "include/logging.h"
 #include "include/particledata.h"
 #include "include/pdgcode.h"
@@ -90,13 +91,8 @@ SMASH_CONST bool ParticleType::exists(PdgCode pdgcode) {
   return false;
 }
 
-#ifdef NDEBUG
-ParticleType::ParticleType(std::string, float m, float w, PdgCode id)
-    :
-#else
 ParticleType::ParticleType(std::string n, float m, float w, PdgCode id)
-    : name_(fill_right(n, 3)),
-#endif
+    : name_(n),
       mass_(m),
       width_(w),
       pdgcode_(id),
@@ -108,49 +104,33 @@ ParticleType::ParticleType(std::string n, float m, float w, PdgCode id)
 static std::string antiname(const std::string &name, PdgCode code) {
   std::string basename, charge;
 
-  if (name.find("++") != std::string::npos) {
-    basename = name.substr(0, name.length()-2);
-    charge = "--";
-  } else if (name.find("⁺⁺") != std::string::npos) {
+  if (name.find("⁺⁺") != std::string::npos) {
     basename = name.substr(0, name.length() - sizeof("⁺⁺") + 1);
     charge = "⁻⁻";
-  } else if (name.find("+") != std::string::npos) {
-    basename = name.substr(0, name.length()-1);
-    charge = "-";
   } else if (name.find("⁺") != std::string::npos) {
     basename = name.substr(0, name.length() - sizeof("⁺") + 1);
     charge = "⁻";
-  } else if (name.find("0") != std::string::npos) {
-    basename = name.substr(0, name.length()-1);
-    charge = "0";
-  } else if (name.find("⁰") != std::string::npos) {
-    basename = name.substr(0, name.length() - sizeof("⁰") + 1);
-    charge = "⁰";
-  } else if (name.find("-") != std::string::npos) {
-    basename = name.substr(0, name.length()-1);
-    charge = "+";
-  } else if (name.find("⁻") != std::string::npos) {
-    basename = name.substr(0, name.length() - sizeof("⁻") + 1);
-    charge = "⁺";
-  } else if (name.find("--") != std::string::npos) {
-    basename = name.substr(0, name.length()-2);
-    charge = "++";
   } else if (name.find("⁻⁻") != std::string::npos) {
     basename = name.substr(0, name.length() - sizeof("⁻⁻") + 1);
     charge = "⁺⁺";
+  } else if (name.find("⁻") != std::string::npos) {
+    basename = name.substr(0, name.length() - sizeof("⁻") + 1);
+    charge = "⁺";
+  } else if (name.find("⁰") != std::string::npos) {
+    basename = name.substr(0, name.length() - sizeof("⁰") + 1);
+    charge = "⁰";
   } else {
     basename = name;
     charge = "";
   }
 
   constexpr char bar[] = "\u0305";
-  if (code.baryon_number() != 0) {
-    return basename+bar+charge;  // baryon
-  } else if (code.charge() != 0) {
-    return basename+charge;        // charged meson
-  } else {
-    return basename+bar+charge;  // neutral meson
+  if (code.baryon_number() != 0 || code.charge() == 0) {
+    // baryons & neutral mesons: insert a bar
+    basename.insert(1, bar);
   }
+
+  return basename+charge;
 }
 
 void ParticleType::create_type_list(const std::string &input) {  // {{{
@@ -206,6 +186,11 @@ void ParticleType::create_type_list(const std::string &input) {  // {{{
   all_particle_types = &type_list;  // note that type_list is a function-local
                                     // static and thus will live on until after
                                     // main().
+
+  // create all isospin multiplets
+  for (const auto& t : type_list) {
+    IsoParticleType::create_multiplet(t);
+  }
 }/*}}}*/
 
 
