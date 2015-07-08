@@ -22,7 +22,9 @@ IsoParticleType::IsoParticleType(std::string n, float m, float w, int i)
 SMASH_CONST const IsoParticleType& IsoParticleType::find(std::string name) {
   const auto found = std::lower_bound(
       iso_type_list.begin(), iso_type_list.end(), name,
-      [](const IsoParticleType &l, const std::string &r) { return l.name() < r; });
+      [](const IsoParticleType &l, const std::string &r) {
+        return l.name() < r;
+      });
   if (found == iso_type_list.end() || found->name() != name) {
     throw std::runtime_error("Isospin multiplet " + name + " not found!");
   }
@@ -32,9 +34,12 @@ SMASH_CONST const IsoParticleType& IsoParticleType::find(std::string name) {
 IsoParticleType& IsoParticleType::find_private(std::string name) {
   auto found = std::lower_bound(
       iso_type_list.begin(), iso_type_list.end(), name,
-      [](const IsoParticleType &l, const std::string &r) { return l.name() < r; });
+      [](const IsoParticleType &l, const std::string &r) {
+        return l.name() < r;
+      });
   if (found == iso_type_list.end() || found->name() != name) {
-    throw std::runtime_error("Isospin multiplet " + name + " not found (privately)!");
+    throw std::runtime_error("Isospin multiplet " + name +
+                             " not found (privately)!");
   }
   return *found;
 }
@@ -42,7 +47,9 @@ IsoParticleType& IsoParticleType::find_private(std::string name) {
 SMASH_CONST bool IsoParticleType::exists(std::string name) {
   const auto found = std::lower_bound(
       iso_type_list.begin(), iso_type_list.end(), name,
-      [](const IsoParticleType &l, const std::string &r) { return l.name() < r; });
+      [](const IsoParticleType &l, const std::string &r) {
+        return l.name() < r;
+      });
   if (found != iso_type_list.end()) {
     return found->name() == name;
   }

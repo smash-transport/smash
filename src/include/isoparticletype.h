@@ -76,6 +76,7 @@ class IsoParticleType {
    * the type t. If the multiplet exists already, the type t will be added to it.
    */
   static void create_multiplet(const ParticleType &type);
+
  private:
   /// name of the multiplet
   std::string name_;
