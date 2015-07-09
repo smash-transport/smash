@@ -87,7 +87,7 @@ class Actions {
     data_.insert(data_.end(), std::make_move_iterator(new_acts.begin()),
                  std::make_move_iterator(new_acts.end()));
 
-    // merge the two list while preserving the ordering
+    // merge the two lists while preserving the ordering
     std::inplace_merge(data_.begin(), data_.begin() + old_end, data_.end(),
                        [](const ActionPtr &a,
                           const ActionPtr &b) { return *b < *a; });

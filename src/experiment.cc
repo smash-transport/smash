@@ -466,7 +466,7 @@ size_t Experiment<Modus>::run_time_evolution_without_time_steps(
         parameters_.labclock.set_timestep_duration(remaining_dt);
       }
 
-      // set the clock manually instead of advancing the with the time step
+      // set the clock manually instead of advancing it with the time step
       // to avoid loss of precision
       parameters_.labclock.reset(action_time);
       current_time = action_time;
