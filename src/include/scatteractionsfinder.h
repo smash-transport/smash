@@ -61,10 +61,6 @@ class ScatterActionsFinder : public ActionFinderInterface {
    * in the next timestep and create a corresponding Action object in that case. */
   ActionPtr check_collision(const ParticleData &data_a,
                             const ParticleData &data_b, float dt) const;
-  template <typename Container, bool Assertion>
-  ActionList find_actions_with_neighbors_impl(
-      const ParticleList &search_list, const Container &neighbors_list,
-      float dt) const;
   /** Elastic cross section parameter (in mb). */
   float elastic_parameter_ = 0.0;
   /** Number of test particles. */

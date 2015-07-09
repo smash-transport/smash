@@ -159,25 +159,13 @@ ActionList ScatterActionsFinder::find_actions_in_cell(
   return actions;
 }
 
-template <typename Container, bool ExpectDuplicates>
-ActionList ScatterActionsFinder::find_actions_with_neighbors_impl(
-    const ParticleList &search_list, const Container &neighbors_list,
+ActionList ScatterActionsFinder::find_actions_with_neighbors(
+    const ParticleList &search_list, const ParticleList &neighbors_list,
     float dt) const {
   std::vector<ActionPtr> actions;
   for (const ParticleData &p1 : search_list) {
     for (const ParticleData &p2 : neighbors_list) {
-      if (ExpectDuplicates) {
-        // don't look for collisions if the particle from the neighbor list is
-        // also in the search list
-        auto result = std::find_if(
-            search_list.begin(), search_list.end(),
-            [&p2](const ParticleData &p) { return p.id() == p2.id(); });
-        if (result != search_list.end()) {
-          continue;
-        }
-      } else {
-        assert(p1.id() != p2.id());
-      }
+      assert(p1.id() != p2.id());
       // Check if a collision is possible.
       ActionPtr act = check_collision(p1, p2, dt);
       if (act) {
@@ -188,18 +176,28 @@ ActionList ScatterActionsFinder::find_actions_with_neighbors_impl(
   return actions;
 }
 
-ActionList ScatterActionsFinder::find_actions_with_neighbors(
-    const ParticleList &search_list, const ParticleList &neighbors_list,
-    float dt) const {
-  return find_actions_with_neighbors_impl<ParticleList, false>(
-      search_list, neighbors_list, dt);
-}
-
 ActionList ScatterActionsFinder::find_actions_with_surrounding_particles(
     const ParticleList &search_list, const Particles &surrounding_list,
     float dt) const {
-  return find_actions_with_neighbors_impl<Particles, true>(
-      search_list, surrounding_list, dt);
+  std::vector<ActionPtr> actions;
+  for (const ParticleData &p2 : surrounding_list) {
+    // don't look for collisions if the particle from the surrounding list is
+    // also in the search list
+    auto result = std::find_if(
+        search_list.begin(), search_list.end(),
+        [&p2](const ParticleData &p) { return p.id() == p2.id(); });
+    if (result != search_list.end()) {
+      continue;
+    }
+    for (const ParticleData &p1 : search_list) {
+      // Check if a collision is possible.
+      ActionPtr act = check_collision(p1, p2, dt);
+      if (act) {
+        actions.push_back(std::move(act));
+      }
+    }
+  }
+  return actions;
 }
 
 }  // namespace Smash
