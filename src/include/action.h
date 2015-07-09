@@ -34,6 +34,7 @@ class Action {
    *
    * \param[in] in_part list of incoming particles
    * \param[in] time Time at which the action is supposed to take place
+   *                 (relative to the current time of the incoming particles)
    */
   Action(const ParticleList &in_part, float time);
 
@@ -145,18 +146,10 @@ class Action {
   const ParticleList &outgoing_particles() const { return outgoing_particles_; }
 
   /**
-   * Return the time at which the action is supposed to be performed.
+   * Return the time at which the action is supposed to be performed
+   * (absolute time in the lab frame in fm/c).
    */
   float time_of_execution() const { return time_of_execution_; }
-
-  /**
-   * Add an offset to the time of execution of the action.
-   *
-   * \param time_to_add The amount of time that should be added.
-   */
-  void add_to_time_of_execution(float time_to_add) {
-    time_of_execution_ += time_to_add;
-  }
 
   /** Check various conservation laws. */
   void check_conservation(const size_t &id_process) const;
@@ -184,8 +177,10 @@ class Action {
    * outgoing particles.
    */
   ParticleList outgoing_particles_;
-  /** time at which the action is supposed to be performed  */
-  float time_of_execution_;
+  /**
+   * Time at which the action is supposed to be performed
+   * (absolute time in the lab frame in fm/c). */
+  const float time_of_execution_;
   /** type of process */
   ProcessType process_type_;
 
