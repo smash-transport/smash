@@ -17,4 +17,14 @@ DecayActionDilepton::DecayActionDilepton(const ParticleData &p,
                                          float shining_weight)
     : DecayAction({p}, time_of_execution), shining_weight_(shining_weight) {}
 
+
+void DecayActionDilepton::dalitz_cinematics() {
+
+}
+
+void DecayActionDilepton::generate_final_state() {
+
+}
+
+
 }  // namespace Smash

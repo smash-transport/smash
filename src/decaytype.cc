@@ -293,5 +293,20 @@ float ThreeBodyDecay::in_width(float, float G0, float, float, float) const {
   return G0;  // use on-shell width
 }
 
+// ThreeBodyDecayDilepton
+
+ThreeBodyDecayDilepton::ThreeBodyDecayDilepton(ParticleTypePtrList part_types,
+                                           int l)
+                                      : ThreeBodyDecay(part_types, l) {
+ // checks
+}
+
+float ThreeBodyDecayDilepton::diff_width() {
+
+}
+
+
+
+
 
 }  // namespace Smash

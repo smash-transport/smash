@@ -58,11 +58,18 @@ void DecayModes::add_mode(float ratio, int L,
     if (!particle_types[0]->is_hadron() || !particle_types[1]->is_hadron() ||
         !particle_types[2]->is_hadron()) {
       logger<LogArea::DecayModes>().warn(
-          "decay products A: ", *particle_types[0], " B: ", *particle_types[1],
+          "decay products are no hadrons A: ", *particle_types[0], " B: ", *particle_types[1],
           " C: ", *particle_types[2]);
     }
+    if (has_lepton_pair(particle_types[0]->pdgcode(),
+                        particle_types[1]->pdgcode(),
+                        particle_types[2]->pdgcode())) {
+      all_decay_types->emplace_back(
+      make_unique<ThreeBodyDecayDilepton>(particle_types, L));
+    } else {
     all_decay_types->emplace_back(
         make_unique<ThreeBodyDecay>(particle_types, L));
+    }
     break;
   default:
     throw InvalidDecay(

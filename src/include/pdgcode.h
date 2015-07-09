@@ -719,6 +719,23 @@ inline bool is_dilepton(const PdgCode pdg1, const PdgCode pdg2) {
          (pdg1 == -0x13 && pdg2 ==  0x13);
 }
 
+/** Checks if two of three given particle are leptons (electrons or muons).*/
+inline bool has_lepton_pair(const PdgCode pdg1, const PdgCode pdg2,
+                            const PdgCode pdg3) {
+return (pdg1 ==  0x11 && pdg2 == -0x11) ||
+       (pdg1 == -0x11 && pdg2 ==  0x11) ||
+       (pdg1 ==  0x13 && pdg2 == -0x13) ||
+       (pdg1 == -0x13 && pdg2 ==  0x13) ||
+       (pdg3 ==  0x11 && pdg2 == -0x11) ||
+       (pdg3 == -0x11 && pdg2 ==  0x11) ||
+       (pdg3 ==  0x13 && pdg2 == -0x13) ||
+       (pdg3 == -0x13 && pdg2 ==  0x13) ||
+       (pdg1 ==  0x11 && pdg3 == -0x11) ||
+       (pdg1 == -0x11 && pdg3 ==  0x11) ||
+       (pdg1 ==  0x13 && pdg3 == -0x13) ||
+       (pdg1 == -0x13 && pdg3 ==  0x13);
+}
+
 }  // namespace Smash
 
 #endif  // SRC_INCLUDE_PDGCODE_H_

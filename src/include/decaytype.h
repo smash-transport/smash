@@ -183,6 +183,12 @@ class ThreeBodyDecay : public DecayType {
                  float m1, float m2) const override;
 };
 
+class ThreeBodyDecayDilepton : public ThreeBodyDecay {
+ public:
+  ThreeBodyDecayDilepton(ParticleTypePtrList part_types, int l);
+  float diff_width();
+};
+
 
 }  // namespace Smash
 

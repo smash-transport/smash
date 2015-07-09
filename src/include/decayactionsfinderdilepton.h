@@ -42,7 +42,7 @@ class DecayActionsFinderDilepton : public DecayActionsFinder {
   /** Force all resonances to decay at the end of the simulation. */
   ActionList find_final_actions(const Particles &search_list) const override;
 
- };
+  };
 
 }  // namespace Smash
 
