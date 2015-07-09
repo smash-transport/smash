@@ -45,10 +45,10 @@ ActionList DecayActionsFinderDilepton::find_possible_actions(
 
     float inv_gamma = p.inverse_gamma();
 
-    DecayBranchList all_modes =
+    DecayBranchList dil_modes =
                   p.type().get_partial_widths_dilepton(p.effective_mass());
 
-    for (DecayBranchPtr & mode : all_modes) {
+    for (DecayBranchPtr & mode : dil_modes) {
       float partial_width = mode->weight();
       // SHINNING as described in \iref{Schmidt:2008hm}, chapter 2D
       float sh_weight = dt * partial_width * inv_gamma;
@@ -65,11 +65,36 @@ ActionList DecayActionsFinderDilepton::find_possible_actions(
 
 
 ActionList DecayActionsFinderDilepton::find_final_actions(
-                  const Particles &) const {   // temp. rmvd search_list (warn.)
-  // not done yet
-  ActionList empty_actionlist;
+                  const Particles &search_list) const {
+  ActionList actions;
 
-  return std::move(empty_actionlist);
+  for (const auto &p : search_list) {
+    if (p.type().is_stable()) {
+      continue;      /* particle doesn't decay */
+    }
+
+    float inv_gamma = p.inverse_gamma();
+
+    DecayBranchList dil_modes =
+                  p.type().get_partial_widths_dilepton(p.effective_mass());
+
+    // total decay width, also hadronic decays
+    const float width_tot = total_weight<DecayBranch>(
+                               p.type().get_partial_widths(p.effective_mass()));
+
+    for (DecayBranchPtr & mode : dil_modes) {
+      float partial_width = mode->weight();
+
+      float sh_weight = partial_width * inv_gamma / width_tot;
+      auto act = make_unique<DecayActionDilepton>(p, 0.f, sh_weight);
+      act->add_decay(std::move(mode));
+
+      actions.emplace_back(std::move(act));
+
+    }
+  }
+
+  return std::move(actions);
 }
 
 }  // namespace Smash

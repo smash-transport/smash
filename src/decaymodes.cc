@@ -34,13 +34,14 @@ void DecayModes::add_mode(float ratio, int L,
   case 2:
     if (!particle_types[0]->is_hadron() || !particle_types[1]->is_hadron()) {
       logger<LogArea::DecayModes>().warn(
-          "decay products A: ", *particle_types[0], " B: ", *particle_types[1]);
+          "decay products are no hadrons A: ", *particle_types[0],
+                                       " B: ", *particle_types[1]);
     }
     if (is_dilepton(particle_types[0]->pdgcode(),
                     particle_types[1]->pdgcode())) {
       all_decay_types->emplace_back(
           make_unique<TwoBodyDecayDilepton>(particle_types, L));
-    } else if (particle_types[0]->is_stable() && 
+    } else if (particle_types[0]->is_stable() &&
                particle_types[1]->is_stable()) {
       all_decay_types->emplace_back(
           make_unique<TwoBodyDecayStable>(particle_types, L));
