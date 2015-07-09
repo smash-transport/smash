@@ -492,10 +492,9 @@ std::unique_ptr<OutputInterface> create_oscar_output(bf::path path,
               // config file
 }
 
-std::unique_ptr<OutputInterface> create_dilepton_output(bf::path path,
-                                                        std::string name) {
+std::unique_ptr<OutputInterface> create_dilepton_output(bf::path path) {
   return make_unique<OscarOutput<OscarFormat2013, OscarInteractions>>(
-                                            std::move(path),std::move(name));
+                                            std::move(path), "DileptonOutput");
 }
 
 }  // namespace Smash

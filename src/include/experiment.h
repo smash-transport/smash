@@ -151,7 +151,7 @@ class Experiment : public ExperimentBase {
                       size_t &total_pauliblocked,
                       const ParticleList &particles_before_actions);
 
-  void perform_dilepton_action(const ActionPtr &action,
+  void write_dilepton_action(const ActionPtr &action,
                                const ParticleList &particles_before_actions);
 
   /** Runs the time evolution of an event

@@ -236,11 +236,17 @@ Experiment<Modus>::Experiment(Configuration config, bf::path output_path)
   const auto &log = logger<LogArea::Experiment>();
   log.info() << *this;
 
+  // dilepton switch
+  bool dileptons_switch = false;
+  if (config.take({"Output", "Dileptons","Enable"}, false)) {
+    dileptons_switch = true;
+  }
+
   // create finders
   if (config.take({"Collision_Term", "Decays"}, true)) {
     action_finders_.emplace_back(new DecayActionsFinder());
   }
-  if (1) {  // DILEPTON SWITCH
+  if (dileptons_switch) {
     dilepton_finder_ = make_unique<DecayActionsFinderDilepton>();
   }
   if (config.take({"Collision_Term", "Collisions"}, true)) {
@@ -347,9 +353,9 @@ Experiment<Modus>::Experiment(Configuration config, bf::path output_path)
   } else {
     output_conf.take({"Density"});
   }
-  
-  if (1) { // DILEPTON SWITCH
-    dilepton_output_ = create_dilepton_output(output_path, "DileptonOutput");
+
+  if (dileptons_switch) {
+    dilepton_output_ = create_dilepton_output(output_path);
   }
 
   if (config.has_value({"Potentials"})) {
@@ -499,21 +505,22 @@ void Experiment<Modus>::perform_action(
 }
 
 template <typename Modus>
-void Experiment<Modus>::perform_dilepton_action(const ActionPtr &action,
+void Experiment<Modus>::write_dilepton_action(const ActionPtr &action,
                                  const ParticleList &particles_before_actions) {
   if (action->is_valid(particles_)) {
-    const ParticleList incoming_particles = action->incoming_particles();
     action->generate_final_state();
-    ProcessType process_type = action->get_type();
-    const ParticleList outgoing_particles = action->outgoing_particles();
     // Calculate Eckart rest frame density at the interaction point
     const FourVector r_interaction = action->get_interaction_point();
     constexpr bool compute_grad = false;
     const double rho =
         rho_eckart(r_interaction.threevec(), particles_before_actions,
                    parameters_, dens_type_, compute_grad).first;
-    
-    dilepton_output_->at_interaction(incoming_particles, outgoing_particles, rho, action->raw_weight_value(), process_type);
+    // write dilepton output
+    dilepton_output_->at_interaction(action->incoming_particles(),
+                                     action->outgoing_particles(),
+                                     rho,
+                                     action->raw_weight_value(),
+                                     action->get_type());
   }
 }
 
@@ -532,7 +539,7 @@ size_t Experiment<Modus>::run_time_evolution(const int evt_num) {
 
   std::vector<ActionPtr> actions;
   std::vector<ActionPtr> dilepton_actions;
-  
+
   while (!(++parameters_.labclock > end_time_)) {
     // vector is likely the best container type here. Because std::sort requires
     // random access iterators. Any linked data structure (e.g. list) thus
@@ -562,27 +569,24 @@ size_t Experiment<Modus>::run_time_evolution(const int evt_num) {
     std::sort(actions.begin(), actions.end(),
               [](const ActionPtr &a, const ActionPtr &b) { return *a < *b; });
 
-    /* DILEPTONS (draft)*/
-    if (1) { // insert DILEPTON SWITCH
+    const auto particles_before_actions = particles_.copy_to_vector();
 
-      grid.iterate_cells([&](const ParticleList &search_list) {
-        dilepton_actions = dilepton_finder_->find_possible_actions(search_list, parameters_.timestep_duration());},
-        [&](const ParticleList &, const ParticleList &) {});
-    
-    
-      // LOGGING??? const auto &log = logger<LogArea::Experiment>();
+    /* (1.5) Dileptons */
+    if (dilepton_finder_ != nullptr) {
+      dilepton_actions = dilepton_finder_->find_possible_actions(
+                                              particles_before_actions,
+                                              parameters_.timestep_duration());
+
       if (!dilepton_actions.empty()) {
-        const auto particles_before_actions = particles_.copy_to_vector();
         for (const auto &action : dilepton_actions) {
-          perform_dilepton_action(action, particles_before_actions);
+          write_dilepton_action(action, particles_before_actions);
         }
-        dilepton_actions.clear();
       }
-    }  
+      dilepton_actions.clear();
+    }
 
     /* (2) Perform actions. */
     if (!actions.empty()) {
-      const auto particles_before_actions = particles_.copy_to_vector();
       for (const auto &action : actions) {
         perform_action(action, interactions_total, total_pauli_blocked,
                        particles_before_actions);
@@ -682,16 +686,27 @@ void Experiment<Modus>::do_final_decays(size_t &interactions_total) {
   size_t interactions_old;
   do {
     std::vector<ActionPtr> actions;
+    std::vector<ActionPtr> dilepton_actions;
     interactions_old = interactions_total;
+    const auto particles_before_actions = particles_.copy_to_vector();
     /* Find actions. */
     for (const auto &finder : action_finders_) {
       actions += finder->find_final_actions(particles_);
     }
     /* Perform actions. */
-    const auto particles_before_actions = particles_.copy_to_vector();
     for (const auto &action : actions) {
       perform_action(action, interactions_total, total_pauli_blocked,
                      particles_before_actions);
+    }
+    /* Dileptons*/
+    if (dilepton_finder_ != nullptr) {
+      dilepton_actions = dilepton_finder_->find_final_actions(particles_);
+
+      if (!dilepton_actions.empty()) {
+        for (const auto &action : dilepton_actions) {
+          write_dilepton_action(action, particles_before_actions);
+        }
+      }
     }
     // loop until no more decays occur
   } while (interactions_total > interactions_old);

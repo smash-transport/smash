@@ -101,8 +101,7 @@ std::unique_ptr<OutputInterface> create_oscar_output(bf::path path,
  *             placed.
  * \param name The name of the output file.
  */
-std::unique_ptr<OutputInterface> create_dilepton_output(bf::path path,
-                                                        std::string name);
+std::unique_ptr<OutputInterface> create_dilepton_output(bf::path path);
 
 // @}
 
