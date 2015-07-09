@@ -689,15 +689,7 @@ void Experiment<Modus>::do_final_decays(size_t &interactions_total) {
     std::vector<ActionPtr> dilepton_actions;
     interactions_old = interactions_total;
     const auto particles_before_actions = particles_.copy_to_vector();
-    /* Find actions. */
-    for (const auto &finder : action_finders_) {
-      actions += finder->find_final_actions(particles_);
-    }
-    /* Perform actions. */
-    for (const auto &action : actions) {
-      perform_action(action, interactions_total, total_pauli_blocked,
-                     particles_before_actions);
-    }
+
     /* Dileptons*/
     if (dilepton_finder_ != nullptr) {
       dilepton_actions = dilepton_finder_->find_final_actions(particles_);
@@ -707,6 +699,15 @@ void Experiment<Modus>::do_final_decays(size_t &interactions_total) {
           write_dilepton_action(action, particles_before_actions);
         }
       }
+    }
+    /* Find actions. */
+    for (const auto &finder : action_finders_) {
+      actions += finder->find_final_actions(particles_);
+    }
+    /* Perform actions. */
+    for (const auto &action : actions) {
+      perform_action(action, interactions_total, total_pauli_blocked,
+                     particles_before_actions);
     }
     // loop until no more decays occur
   } while (interactions_total > interactions_old);
