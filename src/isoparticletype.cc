@@ -59,11 +59,32 @@ SMASH_CONST bool IsoParticleType::exists(std::string name) {
 /* Construct the name-string for an isospin multiplet from the given
  * name-string for the particle. */
 static std::string multiplet_name(std::string name) {
-  char charges[] = "⁺⁻⁰";
-  for (unsigned int i = 0; i < strlen(charges); ++i) {
-    name.erase (std::remove(name.begin(), name.end(), charges[i]), name.end());
+  if (name.find("⁺⁺") != std::string::npos) {
+    return name.substr(0, name.length() - sizeof("⁺⁺") + 1);
+  } else if (name.find("⁺") != std::string::npos) {
+    return name.substr(0, name.length() - sizeof("⁺") + 1);
+  } else if (name.find("⁻⁻") != std::string::npos) {
+    return name.substr(0, name.length() - sizeof("⁻⁻") + 1);
+  } else if (name.find("⁻") != std::string::npos) {
+    return name.substr(0, name.length() - sizeof("⁻") + 1);
+  } else if (name.find("⁰") != std::string::npos) {
+    return name.substr(0, name.length() - sizeof("⁰") + 1);
+  } else {
+    return name;
   }
-  return name;
+}
+
+SMASH_CONST const ParticleTypePtr IsoParticleType::find_state(std::string n) {
+  const IsoParticleType &multiplet = IsoParticleType::find(multiplet_name(n));
+  auto found = std::find_if(
+    multiplet.states_.begin(), multiplet.states_.end(),
+    [&n](ParticleTypePtr p) {
+      return p->name() == n;
+    });
+  if (found == multiplet.states_.end() || (*found)->name() != n) {
+    throw std::runtime_error("Isospin state " + n + " not found!");
+  }
+  return *found;
 }
 
 void IsoParticleType::create_multiplet(const ParticleType &type) {
@@ -74,8 +95,9 @@ void IsoParticleType::create_multiplet(const ParticleType &type) {
   if (!exists(multiname)) {
     iso_type_list.emplace_back(multiname, type.mass(), type.width_at_pole(),
                                type.isospin());
-    log.info() << "Creating isospin multiplet " << multiname
-               << " [ I = " << type.isospin() << "/2 ]";
+    log.debug() << "Creating isospin multiplet " << multiname
+                << " [ I = " << type.isospin() << "/2, m = " << type.mass()
+                << ", Γ = " << type.width_at_pole() << " ]";
   }
 
   // sort the iso-type list by name

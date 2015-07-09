@@ -54,6 +54,8 @@ class IsoParticleType {
   /// Returns the (average) multiplet width.
   float width() const { return width_; }
 
+  ParticleTypePtrList get_states() const { return states_; }
+
   /// Add a new state to an existing multiplet.
   void add_state(const ParticleType &type) { states_.push_back(&type); }
 
@@ -70,6 +72,12 @@ class IsoParticleType {
    * \note The complexity of the search is \f$\mathcal O(\log N)\f$.
    */
   static bool exists(std::string name) SMASH_CONST;
+
+  /**
+   * Returns the ParticleType object for the given \p name, by first finding the
+   * correct multiplet and then looking for the desired state.
+   */
+  static const ParticleTypePtr find_state(std::string name) SMASH_CONST;
 
   /**
    * Add a new multiplet to the global list of IsoParticleTypes, which contains

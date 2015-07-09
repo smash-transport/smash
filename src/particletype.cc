@@ -125,8 +125,8 @@ static std::string antiname(const std::string &name, PdgCode code) {
   }
 
   constexpr char bar[] = "\u0305";
-  if (code.baryon_number() != 0 || code.charge() == 0) {
-    // baryons & neutral mesons: insert a bar
+  if (code.baryon_number() != 0 || code.strangeness() != 0) {
+    // baryons & strange mesons: insert a bar
     basename.insert(1, bar);
   }
 
@@ -239,8 +239,7 @@ float ParticleType::total_width(const float m) const {
 void ParticleType::check_consistency() {
   for (const ParticleType &ptype : ParticleType::list_all()) {
     if (!ptype.is_stable() && ptype.decay_modes().is_empty()) {
-      throw std::runtime_error("Unstable particle " +
-                                ptype.pdgcode().string() +
+      throw std::runtime_error("Unstable particle " + ptype.name() +
                                " has no decay chanels!");
     }
   }
