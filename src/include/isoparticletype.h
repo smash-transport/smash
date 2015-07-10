@@ -31,7 +31,7 @@ class IsoParticleType {
    * \param w The (average) width of the multiplet.
    * \param i Twice the total isospin of the multiplet.
    */
-  IsoParticleType(std::string n, float m, float w, int i);
+  IsoParticleType(const std::string &n, float m, float w, int i);
 
   /**
    * Copies are not allowed as they break intended use. Instead use a const-ref
@@ -70,7 +70,7 @@ class IsoParticleType {
    *
    * \note The complexity of the search is \f$\mathcal O(\log N)\f$.
    */
-  static const IsoParticleType& find(std::string name) SMASH_CONST;
+  static const IsoParticleType& find(const std::string &name) SMASH_CONST;
 
   /// \ingroup exception
   struct ParticleNotFoundFailure : public std::runtime_error {
@@ -82,13 +82,13 @@ class IsoParticleType {
    *
    * \note The complexity of the search is \f$\mathcal O(\log N)\f$.
    */
-  static bool exists(std::string name) SMASH_CONST;
+  static bool exists(const std::string &name) SMASH_CONST;
 
   /**
    * Returns the ParticleType object for the given \p name, by first finding the
    * correct multiplet and then looking for the desired state.
    */
-  static const ParticleTypePtr find_state(std::string name) SMASH_CONST;
+  static const ParticleTypePtr find_state(const std::string &name) SMASH_CONST;
 
   /**
    * Add a new multiplet to the global list of IsoParticleTypes, which contains
@@ -110,7 +110,7 @@ class IsoParticleType {
   /**
    * Private version of the 'find' method that returns a non-const reference.
    */
-  static IsoParticleType& find_private(std::string name);
+  static IsoParticleType& find_private(const std::string &name);
 };
 
 }  // namespace Smash
