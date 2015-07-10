@@ -121,7 +121,7 @@ void DecayModes::load_decaymodes(const std::string &input) {
       return;
     }
     // Loop over all states in the mother multiplet and add modes
-    for (unsigned int m = 0; m < mother_states.size(); m++) {
+    for (size_t m = 0; m < mother_states.size(); m++) {
       if (decay_modes_to_add[m].is_empty()) {
         throw MissingDecays("No decay modes found for particle " +
                             mother_states[m]->name());
@@ -135,8 +135,8 @@ void DecayModes::load_decaymodes(const std::string &input) {
       /* Construct the decay modes for the anti-multiplet.  */
       log.debug("generating decay modes for anti-multiplet: " +
                 isotype_mother->name());
-      for (unsigned int m = 0; m < mother_states.size(); m++) {
-        PdgCode pdg = mother_states[m]->pdgcode();
+      for (const auto &state : mother_states) {
+        PdgCode pdg = state->pdgcode();
         PdgCode pdg_anti = pdg.get_antiparticle();
         DecayModes &decay_modes_orig = decaymodes[find_offset(pdg)];
         DecayModes &decay_modes_anti = decaymodes[find_offset(pdg_anti)];
@@ -192,14 +192,19 @@ void DecayModes::load_decaymodes(const std::string &input) {
         lineinput >> name;
       }
       if (multi) {
-        // set up multiplet types
-        assert(decay_particles.size() == 2);
+        /* References to isospin multiplets: Automatically determine all valid
+         * combinations and calculate Clebsch-Gordan factors
+         * (requires two-body decays). */
+        if (decay_particles.size() != 2) {
+          throw std::runtime_error("References to isospin multiplets only "
+                                   "allowed in two-body decays: " + line.text);
+        }
         const IsoParticleType &isotype_daughter_1
                               = IsoParticleType::find(decay_particles[0]);
         const IsoParticleType &isotype_daughter_2
                               = IsoParticleType::find(decay_particles[1]);
         // loop through multiplets
-        for (unsigned int m = 0; m < mother_states.size(); m++) {
+        for (size_t m = 0; m < mother_states.size(); m++) {
           for (const auto daughter1 : isotype_daughter_1.get_states()) {
             for (const auto daughter2 : isotype_daughter_2.get_states()) {
               // calculate Clebsch-Gordan factor
@@ -212,16 +217,21 @@ void DecayModes::load_decaymodes(const std::string &input) {
                           " -> " + daughter1->name() + " " + daughter2->name() +
                           " (" + std::to_string(ratio*cg_sqr) + ")");
                 decay_modes_to_add[m].add_mode(ratio*cg_sqr, L,
-                                            {daughter1, daughter2});
+                                               {daughter1, daughter2});
               }
             }
           }
         }
       } else {
-        assert(mother_states.size() == 1);
+        /* references to particular states, not multiplets
+         * (requires the mother particle to be an isospin singlet) */
+        if (mother_states.size() != 1) {
+          throw std::runtime_error("Decay only allowed for isospin singlets: " +
+                                   line.text);
+        }
         ParticleTypePtrList types;
-        for (unsigned int i = 0; i < decay_particles.size(); i++) {
-          types.push_back(IsoParticleType::find_state(decay_particles[i]));
+        for (auto part: decay_particles) {
+          types.push_back(IsoParticleType::find_state(part));
         }
         log.debug("decay mode found: " + isotype_mother->name() + " -> " +
                   std::to_string(decay_particles.size()));
