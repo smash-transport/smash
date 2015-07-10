@@ -230,7 +230,7 @@ void DecayModes::load_decaymodes(const std::string &input) {
                                    line.text);
         }
         ParticleTypePtrList types;
-        for (auto part: decay_particles) {
+        for (auto part : decay_particles) {
           types.push_back(IsoParticleType::find_state(part));
         }
         log.debug("decay mode found: " + isotype_mother->name() + " -> " +

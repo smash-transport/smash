@@ -51,9 +51,13 @@ TEST(load_decay_modes) {
       "\n"
       "ω      # omega\n"
       "1. 0 π ρ   # pi rho\n"
+      "\n"
+      "Δ\n"
+      "1.  1  N π\n"
       );
   DecayModes::load_decaymodes(decays_input);
 
+  // check that the decays of the rho and omega are generated correctly
   {
     const auto &rho0 = ParticleType::find(0x113).decay_modes();
     VERIFY(!rho0.is_empty());
@@ -101,18 +105,71 @@ TEST(load_decay_modes) {
     VERIFY(!omega.is_empty());
     const auto &modelist = omega.decay_mode_list();
     COMPARE(modelist.size(), 3u);
-    FUZZY_COMPARE(float(modelist[0]->weight()), 1.f/3.f);
-    FUZZY_COMPARE(float(modelist[1]->weight()), 1.f/3.f);
-    FUZZY_COMPARE(float(modelist[2]->weight()), 1.f/3.f);
+    COMPARE(modelist[0]->weight(), 1.f/3.f);
     COMPARE(modelist[0]->particle_number(), 2u);
     COMPARE(modelist[0]->particle_types()[0]->pdgcode(), 0x111);
     COMPARE(modelist[0]->particle_types()[1]->pdgcode(), 0x113);
+    COMPARE(modelist[1]->weight(), 1.f/3.f);
     COMPARE(modelist[1]->particle_number(), 2u);
     COMPARE(modelist[1]->particle_types()[0]->pdgcode(),  0x211);
     COMPARE(modelist[1]->particle_types()[1]->pdgcode(), -0x213);
+    COMPARE(modelist[2]->weight(), 1.f/3.f);
     COMPARE(modelist[2]->particle_number(), 2u);
     COMPARE(modelist[2]->particle_types()[0]->pdgcode(), -0x211);
     COMPARE(modelist[2]->particle_types()[1]->pdgcode(),  0x213);
+  }
+  // check that the decays of the anti-Delta multiplet are generated correctly
+  {
+    // anti-Delta--
+    const auto &Delta = ParticleType::find(-0x2224).decay_modes();
+    VERIFY(!Delta.is_empty());
+    const auto &modelist = Delta.decay_mode_list();
+    COMPARE(modelist.size(), 1u);
+    COMPARE(modelist[0]->weight(), 1.);
+    COMPARE(modelist[0]->particle_number(), 2u);
+    COMPARE(modelist[0]->particle_types()[0]->pdgcode(), -0x2212);
+    COMPARE(modelist[0]->particle_types()[1]->pdgcode(),  -0x211);
+  }
+  {
+    // anti-Delta-
+    const auto &Delta = ParticleType::find(-0x2214).decay_modes();
+    VERIFY(!Delta.is_empty());
+    const auto &modelist = Delta.decay_mode_list();
+    COMPARE(modelist.size(), 2u);
+    COMPARE(modelist[0]->weight(), 1.f/3.f);
+    COMPARE(modelist[0]->particle_number(), 2u);
+    COMPARE(modelist[0]->particle_types()[0]->pdgcode(), -0x2112);
+    COMPARE(modelist[0]->particle_types()[1]->pdgcode(),  -0x211);
+    COMPARE(modelist[1]->weight(), 2.f/3.f);
+    COMPARE(modelist[1]->particle_number(), 2u);
+    COMPARE(modelist[1]->particle_types()[0]->pdgcode(), -0x2212);
+    COMPARE(modelist[1]->particle_types()[1]->pdgcode(),   0x111);
+  }
+  {
+    // anti-Delta0
+    const auto &Delta = ParticleType::find(-0x2114).decay_modes();
+    VERIFY(!Delta.is_empty());
+    const auto &modelist = Delta.decay_mode_list();
+    COMPARE(modelist.size(), 2u);
+    COMPARE(modelist[0]->weight(), 2.f/3.f);
+    COMPARE(modelist[0]->particle_number(), 2u);
+    COMPARE(modelist[0]->particle_types()[0]->pdgcode(), -0x2112);
+    COMPARE(modelist[0]->particle_types()[1]->pdgcode(),   0x111);
+    COMPARE(modelist[1]->weight(), 1.f/3.f);
+    COMPARE(modelist[1]->particle_number(), 2u);
+    COMPARE(modelist[1]->particle_types()[0]->pdgcode(), -0x2212);
+    COMPARE(modelist[1]->particle_types()[1]->pdgcode(),   0x211);
+  }
+  {
+    // anti-Delta+
+    const auto &Delta = ParticleType::find(-0x1114).decay_modes();
+    VERIFY(!Delta.is_empty());
+    const auto &modelist = Delta.decay_mode_list();
+    COMPARE(modelist.size(), 1u);
+    COMPARE(modelist[0]->weight(), 1.);
+    COMPARE(modelist[0]->particle_number(), 2u);
+    COMPARE(modelist[0]->particle_types()[0]->pdgcode(), -0x2112);
+    COMPARE(modelist[0]->particle_types()[1]->pdgcode(),   0x211);
   }
 }
 
