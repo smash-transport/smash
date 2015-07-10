@@ -124,10 +124,10 @@ static std::string antiname(const std::string &name, PdgCode code) {
     charge = "";
   }
 
+  // baryons & strange mesons: insert a bar
   constexpr char bar[] = "\u0305";
   if (code.baryon_number() != 0 || code.strangeness() != 0) {
-    // baryons & strange mesons: insert a bar
-    basename.insert(1, bar);
+    basename.insert(utf8::sequence_length(basename.begin()), bar);
   }
 
   return basename+charge;
