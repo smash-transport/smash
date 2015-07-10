@@ -26,7 +26,7 @@ SMASH_CONST const IsoParticleType& IsoParticleType::find(std::string name) {
         return l.name() < r;
       });
   if (found == iso_type_list.end() || found->name() != name) {
-    throw std::runtime_error("Isospin multiplet " + name + " not found!");
+    throw ParticleNotFoundFailure("Isospin multiplet " + name + " not found!");
   }
   return *found;
 }
@@ -71,6 +71,15 @@ static std::string multiplet_name(std::string name) {
     return name.substr(0, name.length() - sizeof("⁰") + 1);
   } else {
     return name;
+  }
+}
+
+bool IsoParticleType::has_anti_multiplet() const {
+  if (states_[0]->has_antiparticle()) {
+    ParticleTypePtr anti = states_[0]->get_antiparticle();
+    return multiplet_name(states_[0]->name()) != multiplet_name(anti->name());
+  } else {
+    return false;
   }
 }
 

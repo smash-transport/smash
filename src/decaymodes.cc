@@ -31,12 +31,13 @@ std::vector<std::unique_ptr<DecayType>> *all_decay_types = nullptr;
 
 void DecayModes::add_mode(float ratio, int L,
                           ParticleTypePtrList particle_types) {
+  const auto &log = logger<LogArea::DecayModes>();
   assert(all_decay_types != nullptr);
   switch (particle_types.size()) {
   case 2:
     if (!particle_types[0]->is_hadron() || !particle_types[1]->is_hadron()) {
-      logger<LogArea::DecayModes>().warn(
-          "decay products A: ", *particle_types[0], " B: ", *particle_types[1]);
+      log.warn("decay products A: ", *particle_types[0],
+               " B: ", *particle_types[1]);
     }
     if (particle_types[0]->is_stable() && particle_types[1]->is_stable()) {
       all_decay_types->emplace_back(
@@ -53,9 +54,8 @@ void DecayModes::add_mode(float ratio, int L,
   case 3:
     if (!particle_types[0]->is_hadron() || !particle_types[1]->is_hadron() ||
         !particle_types[2]->is_hadron()) {
-      logger<LogArea::DecayModes>().warn(
-          "decay products A: ", *particle_types[0], " B: ", *particle_types[1],
-          " C: ", *particle_types[2]);
+      log.warn("decay products A: ", *particle_types[0],
+               " B: ", *particle_types[1], " C: ", *particle_types[2]);
     }
     all_decay_types->emplace_back(
         make_unique<ThreeBodyDecay>(particle_types, L));
@@ -77,9 +77,8 @@ void DecayModes::renormalize(std::string name) {
     sum += mode->weight();
   }
   if (std::abs(sum - 1.) < really_small) {
-    log.debug("Particle ", name,
-             ": Extremely small renormalization constant: ", sum,
-             "\n=> Skipping the renormalization.");
+    log.debug("Particle ", name, ": Extremely small renormalization constant: ",
+              sum, "\n=> Skipping the renormalization.");
   } else {
     log.warn("Particle ", name, ": Renormalizing decay modes with ", sum);
     float new_sum = 0.0;
@@ -121,19 +120,27 @@ void DecayModes::load_decaymodes(const std::string &input) {
     if (isotype_mother == NULL) {  // at the start of the file
       return;
     }
+    // Loop over all states in the mother multiplet and add modes
     for (unsigned int m = 0; m < mother_states.size(); m++) {
       if (decay_modes_to_add[m].is_empty()) {
         throw MissingDecays("No decay modes found for particle " +
                             mother_states[m]->name());
       }
       decay_modes_to_add[m].renormalize(mother_states[m]->name());
-
       PdgCode pdgcode = mother_states[m]->pdgcode();
-      if (pdgcode.has_antiparticle()) {
-        /* Construct and add the list of decay modes for the antiparticle.  */
-        DecayModes &decay_modes_anti =
-            decaymodes[find_offset(pdgcode.get_antiparticle())];
-        for (const auto &mode : decay_modes_to_add[m].decay_mode_list()) {
+      /* Add the list of decay modes for this particle type */
+      decaymodes[find_offset(pdgcode)] = std::move(decay_modes_to_add[m]);
+    }
+    if (isotype_mother->has_anti_multiplet()) {
+      /* Construct the decay modes for the anti-multiplet.  */
+      log.debug("generating decay modes for anti-multiplet: " +
+                isotype_mother->name());
+      for (unsigned int m = 0; m < mother_states.size(); m++) {
+        PdgCode pdg = mother_states[m]->pdgcode();
+        PdgCode pdg_anti = pdg.get_antiparticle();
+        DecayModes &decay_modes_orig = decaymodes[find_offset(pdg)];
+        DecayModes &decay_modes_anti = decaymodes[find_offset(pdg_anti)];
+        for (const auto &mode : decay_modes_orig.decay_mode_list()) {
           ParticleTypePtrList list = mode->particle_types();
           for (auto &type : list) {
             if (type->has_antiparticle()) {
@@ -144,8 +151,6 @@ void DecayModes::load_decaymodes(const std::string &input) {
                                     list);
         }
       }
-      /* Add the list of decay modes for this particle type */
-      decaymodes[find_offset(pdgcode)] = std::move(decay_modes_to_add[m]);
     }
   };
 

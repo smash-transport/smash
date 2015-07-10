@@ -60,11 +60,22 @@ class IsoParticleType {
   void add_state(const ParticleType &type) { states_.push_back(&type); }
 
   /**
+   * Check if there is a multiplet of antiparticles, which is different from
+   * the original multiplet.
+   */
+  bool has_anti_multiplet() const;
+
+  /**
    * Returns the IsoParticleType object for the given \p name.
    *
    * \note The complexity of the search is \f$\mathcal O(\log N)\f$.
    */
   static const IsoParticleType& find(std::string name) SMASH_CONST;
+
+  /// \ingroup exception
+  struct ParticleNotFoundFailure : public std::runtime_error {
+    using std::runtime_error::runtime_error;
+  };
 
   /**
    * Returns whether the ParticleType with the given \p pdgcode exists.
