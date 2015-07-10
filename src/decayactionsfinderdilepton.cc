@@ -50,7 +50,7 @@ ActionList DecayActionsFinderDilepton::find_possible_actions(
 
     for (DecayBranchPtr & mode : dil_modes) {
       float partial_width = mode->weight();
-      // SHINNING as described in \iref{Schmidt:2008hm}, chapter 2D
+      // SHINING as described in \iref{Schmidt:2008hm}, chapter 2D
       float sh_weight = dt * partial_width * inv_gamma;
       auto act = make_unique<DecayActionDilepton>(p, 0.f, sh_weight);
       act->add_decay(std::move(mode));
