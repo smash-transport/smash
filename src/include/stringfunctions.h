@@ -22,6 +22,8 @@ std::string fill_both(const std::string &s, int width, char fill = ' ');
 std::string trim(const std::string &s);
 
 namespace utf8 {
+    // The functions here were taken from the Boost-licensed library UTF8-CPP.
+    // See http://utfcpp.sourceforge.net/.
 
     /// Extract the first byte from a given value.
     template <typename octet_type>
