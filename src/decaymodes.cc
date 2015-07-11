@@ -31,14 +31,9 @@ std::vector<std::unique_ptr<DecayType>> *all_decay_types = nullptr;
 
 void DecayModes::add_mode(float ratio, int L,
                           ParticleTypePtrList particle_types) {
-  const auto &log = logger<LogArea::DecayModes>();
   assert(all_decay_types != nullptr);
   switch (particle_types.size()) {
   case 2:
-    if (!particle_types[0]->is_hadron() || !particle_types[1]->is_hadron()) {
-      log.warn("decay products A: ", *particle_types[0],
-               " B: ", *particle_types[1]);
-    }
     if (particle_types[0]->is_stable() && particle_types[1]->is_stable()) {
       all_decay_types->emplace_back(
           make_unique<TwoBodyDecayStable>(particle_types, L));
@@ -52,11 +47,6 @@ void DecayModes::add_mode(float ratio, int L,
     }
     break;
   case 3:
-    if (!particle_types[0]->is_hadron() || !particle_types[1]->is_hadron() ||
-        !particle_types[2]->is_hadron()) {
-      log.warn("decay products A: ", *particle_types[0],
-               " B: ", *particle_types[1], " C: ", *particle_types[2]);
-    }
     all_decay_types->emplace_back(
         make_unique<ThreeBodyDecay>(particle_types, L));
     break;
@@ -223,19 +213,21 @@ void DecayModes::load_decaymodes(const std::string &input) {
           }
         }
       } else {
-        /* references to particular states, not multiplets
-         * (requires the mother particle to be an isospin singlet) */
-        if (mother_states.size() != 1) {
-          throw std::runtime_error("Decay only allowed for isospin singlets: " +
-                                   line.text);
-        }
+        /* References to specific states, not multiplets:
+         * Loop over all mother states and check charge conservation. */
         ParticleTypePtrList types;
+        int charge = 0;
         for (auto part : decay_particles) {
           types.push_back(IsoParticleType::find_state(part));
+          charge += types.back()->charge();
         }
-        log.debug("decay mode found: " + isotype_mother->name() + " -> " +
-                  std::to_string(decay_particles.size()));
-        decay_modes_to_add[0].add_mode(ratio, L, types);
+        for (size_t m = 0; m < mother_states.size(); m++) {
+          if (mother_states[m]->charge() == charge) {
+            log.debug("decay mode found: " + mother_states[m]->name() + " -> " +
+                      std::to_string(decay_particles.size()));
+            decay_modes_to_add[m].add_mode(ratio, L, types);
+          }
+        }
       }
     }
   }
