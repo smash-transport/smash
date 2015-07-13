@@ -46,7 +46,8 @@ TEST(load_decay_modes) {
   const std::string decays_input(
       " ρ\t# rho\n"
       "\n"
-      " 1.0\t1\tπ π\t# pi pi \n"
+      "0.99\t1\tπ π\t# pi pi \n"
+      "0.01  1  e⁻ e⁺\n"
       "\n"
       "\n"
       "ω      # omega\n"
@@ -62,15 +63,19 @@ TEST(load_decay_modes) {
     const auto &rho0 = ParticleType::find(0x113).decay_modes();
     VERIFY(!rho0.is_empty());
     const auto &modelist = rho0.decay_mode_list();
-    COMPARE(modelist.size(), 2u);
-    COMPARE(modelist[0]->weight(), 0.5);
+    COMPARE(modelist.size(), 3u);
+    COMPARE(modelist[0]->weight(), 0.495f);
     COMPARE(modelist[0]->particle_number(), 2u);
     COMPARE(modelist[0]->particle_types()[0]->pdgcode(),  0x211);
     COMPARE(modelist[0]->particle_types()[1]->pdgcode(), -0x211);
-    COMPARE(modelist[1]->weight(), 0.5);
+    COMPARE(modelist[1]->weight(), 0.495f);
     COMPARE(modelist[1]->particle_number(), 2u);
     COMPARE(modelist[1]->particle_types()[0]->pdgcode(), -0x211);
     COMPARE(modelist[1]->particle_types()[1]->pdgcode(),  0x211);
+    COMPARE(modelist[2]->weight(), 0.01f);
+    COMPARE(modelist[2]->particle_number(), 2u);
+    COMPARE(modelist[2]->particle_types()[0]->pdgcode(),  0x11);
+    COMPARE(modelist[2]->particle_types()[1]->pdgcode(), -0x11);
   }
   {
     const auto &rhoplus = ParticleType::find(0x213).decay_modes();
