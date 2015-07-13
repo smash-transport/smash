@@ -9,6 +9,7 @@
 
 #include "include/fpenvironment.h"
 #include "include/logging.h"
+#include "include/stacktrace.h"
 
 #include <csignal>
 
@@ -134,6 +135,7 @@ void setup_default_float_traps() {
       log.fatal("Unexpected Signal ", signal,
                 " received in the FPE signal handler. Aborting.");
     }
+    print_stacktrace();
     abort();
   };
   sigaction(SIGFPE, &action, nullptr);
