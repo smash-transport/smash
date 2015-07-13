@@ -19,7 +19,8 @@ static IsoParticleTypeList iso_type_list;
 IsoParticleType::IsoParticleType(const std::string &n, float m, float w, int i)
                                 : name_(n), mass_(m), width_(w), isospin_(i) {}
 
-SMASH_CONST const IsoParticleType& IsoParticleType::find(const std::string &name) {
+SMASH_CONST const IsoParticleType& IsoParticleType::find(
+                                                      const std::string &name) {
   const auto found = std::lower_bound(
       iso_type_list.begin(), iso_type_list.end(), name,
       [](const IsoParticleType &l, const std::string &r) {
@@ -83,7 +84,8 @@ bool IsoParticleType::has_anti_multiplet() const {
   }
 }
 
-SMASH_CONST const ParticleTypePtr IsoParticleType::find_state(const std::string &n) {
+SMASH_CONST const ParticleTypePtr IsoParticleType::find_state(
+                                                        const std::string &n) {
   const IsoParticleType &multiplet = IsoParticleType::find(multiplet_name(n));
   auto found = std::find_if(
     multiplet.states_.begin(), multiplet.states_.end(),
