@@ -19,12 +19,8 @@ class DecayActionDilepton : public DecayAction {
    DecayActionDilepton(const ParticleData &p, float time_of_execution,
                         float shining_weight_);
 
-   // do not perform any dilepton actions = leave it empty
-   void perform(Particles *, size_t &) override {};
-
-   /* generate_final_state stays the same for a first version
-      maybe one can later add some output modifications and
-      minor tweaks
+   /* generate_final_state from DecayAction can be used for
+    * dilepton decays, too.
     */
 
     float raw_weight_value() const override {

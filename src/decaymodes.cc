@@ -58,7 +58,8 @@ void DecayModes::add_mode(float ratio, int L,
     if (!particle_types[0]->is_hadron() || !particle_types[1]->is_hadron() ||
         !particle_types[2]->is_hadron()) {
       logger<LogArea::DecayModes>().warn(
-          "decay products A: ", *particle_types[0], " B: ", *particle_types[1],
+          "decay products are no hadrons A: ", *particle_types[0],
+          " B: ", *particle_types[1],
           " C: ", *particle_types[2]);
     }
     all_decay_types->emplace_back(

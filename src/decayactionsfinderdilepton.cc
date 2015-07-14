@@ -36,25 +36,19 @@ ActionList DecayActionsFinderDilepton::find_possible_actions(
       continue;
     }
 
-    // work in progress //
-
-    /* current (first) implementation: everything happens in finder
-     * It slows down smash probably because of the extra output
-     * file.
-     */
-
-    float inv_gamma = p.inverse_gamma();
+    const float inv_gamma = p.inverse_gamma();
 
     DecayBranchList dil_modes =
                   p.type().get_partial_widths_dilepton(p.effective_mass());
 
     for (DecayBranchPtr & mode : dil_modes) {
-      float partial_width = mode->weight();
+
+      const float partial_width = mode->weight();
       // SHINING as described in \iref{Schmidt:2008hm}, chapter 2D
-      float sh_weight = dt * partial_width * inv_gamma;
+      const float sh_weight = dt * partial_width * inv_gamma;
+
       auto act = make_unique<DecayActionDilepton>(p, 0.f, sh_weight);
       act->add_decay(std::move(mode));
-
       actions.emplace_back(std::move(act));
 
     }
@@ -70,10 +64,10 @@ ActionList DecayActionsFinderDilepton::find_final_actions(
 
   for (const auto &p : search_list) {
     if (p.type().is_stable()) {
-      continue;      /* particle doesn't decay */
+      continue;
     }
 
-    float inv_gamma = p.inverse_gamma();
+    const float inv_gamma = p.inverse_gamma();
 
     DecayBranchList dil_modes =
                   p.type().get_partial_widths_dilepton(p.effective_mass());
@@ -83,12 +77,12 @@ ActionList DecayActionsFinderDilepton::find_final_actions(
                                p.type().get_partial_widths(p.effective_mass()));
 
     for (DecayBranchPtr & mode : dil_modes) {
-      float partial_width = mode->weight();
 
-      float sh_weight = partial_width * inv_gamma / width_tot;
+      const float partial_width = mode->weight();
+      const float sh_weight = partial_width * inv_gamma / width_tot;
+
       auto act = make_unique<DecayActionDilepton>(p, 0.f, sh_weight);
       act->add_decay(std::move(mode));
-
       actions.emplace_back(std::move(act));
 
     }
