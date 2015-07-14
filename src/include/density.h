@@ -101,10 +101,10 @@ namespace Smash {
    *            to density will be ignored.
    *
    * Next three values are taken from ExperimentalParameters structure:
-   * \param[in] gs_sigma Width of the gaussian (\f$ \sigma \f$),
-   *  which represents particle Wigner density.
-   * \param[in] r_cut \f$ r_{cut} / \sigma \f$
-   * \param[in] ntest Number of test-particles
+   * \param[in] par Set of parameters packed in one structure.
+   *            From them the cutting radius r_cut \f$ r_{cut} / \sigma \f$,
+   *            number of test-particles ntest and the gaussian width
+   *            gs_sigma are needed.
    * \param[in] dens_type type of four-currect to be calculated:
    *            baryon, proton or neutron options are currently available
    * \param[in] compute_gradient true - compute gradient, false - no
@@ -182,7 +182,8 @@ class DensityOnLattice {
    *  \param lat pointer to the lattice
    *  \param update tells if called for update at printout or at timestep
    *  \param dens_type density type to be computed on the lattice
-   *  \param ntest testparticles number
+   *  \param par a structure containing testparticles number and gaussian
+   *         smearing parameters.
    *  \param particles the particles vector
    */
   void update_density_lattice(DensityLattice* lat,

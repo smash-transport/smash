@@ -7,6 +7,7 @@
 
 #include "include/collidermodus.h"
 
+#include <algorithm>
 #include <cmath>
 #include <cstdlib>
 #include <cstring>
@@ -17,7 +18,9 @@
 
 #include "include/angles.h"
 #include "include/configuration.h"
+#include "include/cxx14compat.h"
 #include "include/experimentparameters.h"
+#include "include/interpolation.h"
 #include "include/kinematics.h"
 #include "include/logging.h"
 #include "include/numerics.h"
@@ -48,7 +51,8 @@ namespace Smash {
  *
  * \key P_Lab (float, optional, no default): \n
  * Defines the energy of the collision by the initial momentum per nucleon
- * of the projectile nucleus (in AGeV). This assumes the target nucleus is at rest.
+ * of the projectile nucleus (in AGeV). This assumes the target nucleus is at
+ * rest.
  *
  * \key Calculation_Frame (int, required, default = 1): \n
  * The frame in which the collision is calculated.\n
@@ -96,11 +100,20 @@ namespace Smash {
  *
  * \li \key Value (float, optional, optional, default = 0.f): fixed value for
  * the impact parameter. No other \key Impact: directive is looked at.
- * \li \key Sample (string, optional, default = quadratic sampling): \n
- * if \key uniform, use uniform sampling of the impact parameter 
- * (\f$dP(b) = db\f$). Otherwise use areal (aka quadratic) input sampling
- * (the probability of an input parameter range is proportional to the
- * area corresponding to that range, \f$dP(b) = b\cdot db\f$).
+ * \li \key Sample (string, optional, default = \key quadratic): \n
+ * if \key uniform, use uniform sampling of the impact parameter
+ * (\f$dP(b) = db\f$). If \key quadratic use areal (aka quadratic) input
+ * sampling (the probability of an input parameter range is proportional to the
+ * area corresponding to that range, \f$dP(b) = b\cdot db\f$). If \key custom,
+ * use \key Values and \key Yields to interpolate the impact parameter
+ * distribution and use rejection sampling.
+ * \li \key Values (floats, optional):
+ * Values of the impact parameter, corresponding to \key Yields. Must be same
+ * length as \key Yields. Required for \key Sample = "custom".
+ * \li \key Yields (floats, optional):
+ * Values of the particle yields, corresponding to \key Values. Must be same
+ * lenght as \key Values. Required for \key Sample = "custom".
+ *
  * \li \key Range (float, float, optional, default = 0.0f):\n
  * A vector of minimal and maximal impact parameters
  * between which b should be chosen. (The order of these is not
@@ -124,12 +137,11 @@ namespace Smash {
  * \key Fermi_Motion (bool, optional, default = false): \n
  * Defines if Fermi motion is included. Note that Fermi motion
  * is senseless physicswise if potentials are off: without potentials
- * nucleons will just fly apart. 
+ * nucleons will just fly apart.
  */
 
-
 ColliderModus::ColliderModus(Configuration modus_config,
-                           const ExperimentParameters &params) {
+                             const ExperimentParameters &params) {
   Configuration modus_cfg = modus_config["Collider"];
 
   // Get the reference frame for the collision calculation.
@@ -189,83 +201,86 @@ ColliderModus::ColliderModus(Configuration modus_config,
   float mass_target = target_->mass();
   // Option 1: Center of mass energy.
   if (modus_cfg.has_value({"Sqrtsnn"})) {
-      float sqrt_s_NN = modus_cfg.take({"Sqrtsnn"});
-      /* Note that \f$\sqrt{s_{NN}}\f$ is different for neutron-neutron and
-       * proton-proton collisions (because of the different masses). Therefore,
-       * representative particles are needed to specify which two particles'
-       * collisions have this \f$\sqrt{s_{NN}}\f$. The vector specifies a pair
-       * of PDG codes for the two particle species we want to use. The default
-       * is otherwise the average nucleon mass for each nucleus.  */
-      PdgCode id_a = 0, id_b = 0;
-      if (modus_cfg.has_value({"Sqrts_Reps"})) {
-        std::vector<PdgCode> sqrts_reps = modus_cfg.take({"Sqrts_Reps"});
-        id_a = sqrts_reps[0];
-        id_b = sqrts_reps[1];
-      }
-      float mass_a, mass_b;
-      if (id_a != 0) {
-        // If PDG Code is given, use mass of this particle type.
-        mass_a = ParticleType::find(id_a).mass();
-      } else {
-        // else, use average mass of a particle in that nucleus
-        mass_a = projectile_->mass()/projectile_->size();
-      }
-      if (id_b != 0) {
-        mass_b = ParticleType::find(id_b).mass();
-      } else {
-        mass_b = target_->mass()/target_->size();
-      }
-      // Check that input satisfies the lower bound (everything at rest).
-      if (sqrt_s_NN < mass_a + mass_b) {
-        throw ModusDefault::InvalidEnergy(
-                "Input Error: sqrt(s_NN) is smaller than masses:\n"
-                + std::to_string(sqrt_s_NN) + " GeV < "
-                + std::to_string(mass_a) + " GeV + "
-                + std::to_string(mass_b) + " GeV.");
-      }
-      // Set the total nucleus-nucleus collision energy.
-      total_s_ = (sqrt_s_NN * sqrt_s_NN - mass_a * mass_a - mass_b * mass_b)
-                * mass_projec * mass_target / (mass_a * mass_b)
-                + mass_projec * mass_projec + mass_target * mass_target;
-      energy_input++;
+    float sqrt_s_NN = modus_cfg.take({"Sqrtsnn"});
+    /* Note that \f$\sqrt{s_{NN}}\f$ is different for neutron-neutron and
+     * proton-proton collisions (because of the different masses). Therefore,
+     * representative particles are needed to specify which two particles'
+     * collisions have this \f$\sqrt{s_{NN}}\f$. The vector specifies a pair
+     * of PDG codes for the two particle species we want to use. The default
+     * is otherwise the average nucleon mass for each nucleus.  */
+    PdgCode id_a = 0, id_b = 0;
+    if (modus_cfg.has_value({"Sqrts_Reps"})) {
+      std::vector<PdgCode> sqrts_reps = modus_cfg.take({"Sqrts_Reps"});
+      id_a = sqrts_reps[0];
+      id_b = sqrts_reps[1];
+    }
+    float mass_a, mass_b;
+    if (id_a != 0) {
+      // If PDG Code is given, use mass of this particle type.
+      mass_a = ParticleType::find(id_a).mass();
+    } else {
+      // else, use average mass of a particle in that nucleus
+      mass_a = projectile_->mass() / projectile_->size();
+    }
+    if (id_b != 0) {
+      mass_b = ParticleType::find(id_b).mass();
+    } else {
+      mass_b = target_->mass() / target_->size();
+    }
+    // Check that input satisfies the lower bound (everything at rest).
+    if (sqrt_s_NN < mass_a + mass_b) {
+      throw ModusDefault::InvalidEnergy(
+          "Input Error: sqrt(s_NN) is smaller than masses:\n" +
+          std::to_string(sqrt_s_NN) + " GeV < " + std::to_string(mass_a) +
+          " GeV + " + std::to_string(mass_b) + " GeV.");
+    }
+    // Set the total nucleus-nucleus collision energy.
+    total_s_ = (sqrt_s_NN * sqrt_s_NN - mass_a * mass_a - mass_b * mass_b) *
+                   mass_projec * mass_target / (mass_a * mass_b) +
+               mass_projec * mass_projec + mass_target * mass_target;
+    energy_input++;
   }
   /* Option 2: Kinetic energy per nucleon of the projectile nucleus
    * (target at rest).  */
   if (modus_cfg.has_value({"E_Kin"})) {
-      float e_kin = modus_cfg.take({"E_Kin"});
-      // Check that energy is nonnegative.
-      if (e_kin < 0) {
-        throw ModusDefault::InvalidEnergy("Input Error: "
-                                          "E_Kin must be nonnegative.");
-      }
-      // Set the total nucleus-nucleus collision energy.
-      total_s_ = s_from_Ekin(e_kin*projectile_->number_of_particles(),
-                             mass_projec, mass_target);
-      energy_input++;
+    float e_kin = modus_cfg.take({"E_Kin"});
+    // Check that energy is nonnegative.
+    if (e_kin < 0) {
+      throw ModusDefault::InvalidEnergy(
+          "Input Error: "
+          "E_Kin must be nonnegative.");
+    }
+    // Set the total nucleus-nucleus collision energy.
+    total_s_ = s_from_Ekin(e_kin * projectile_->number_of_particles(),
+                           mass_projec, mass_target);
+    energy_input++;
   }
   // Option 3: Momentum of the projectile nucleus (target at rest).
   if (modus_cfg.has_value({"P_Lab"})) {
-      float p_lab = modus_cfg.take({"P_Lab"});
-      // Check that p_lab is nonnegative.
-      if (p_lab < 0) {
-        throw ModusDefault::InvalidEnergy("Input Error: "
-                                          "P_Lab must be nonnegative.");
-      }
-      // Set the total nucleus-nucleus collision energy.
-      total_s_ = s_from_plab(p_lab * projectile_->number_of_particles(),
-                             mass_projec, mass_target);
-      energy_input++;
+    float p_lab = modus_cfg.take({"P_Lab"});
+    // Check that p_lab is nonnegative.
+    if (p_lab < 0) {
+      throw ModusDefault::InvalidEnergy(
+          "Input Error: "
+          "P_Lab must be nonnegative.");
+    }
+    // Set the total nucleus-nucleus collision energy.
+    total_s_ = s_from_plab(p_lab * projectile_->number_of_particles(),
+                           mass_projec, mass_target);
+    energy_input++;
   }
   if (energy_input == 0) {
-    throw std::domain_error("Input Error: Non-existent collision energy. "
-                            "Please provide one of Sqrtsnn/E_Kin/P_Lab.");
+    throw std::domain_error(
+        "Input Error: Non-existent collision energy. "
+        "Please provide one of Sqrtsnn/E_Kin/P_Lab.");
   }
   if (energy_input > 1) {
-    throw std::domain_error("Input Error: Redundant collision energy. "
-                            "Please provide only one of Sqrtsnn/E_Kin/P_Lab.");
+    throw std::domain_error(
+        "Input Error: Redundant collision energy. "
+        "Please provide only one of Sqrtsnn/E_Kin/P_Lab.");
   }
 
-  // Impact parameter setting: Either "Value", "Range", or "Max".
+  // Impact parameter setting: Either "Value", "Range", "Max" or "Sample".
   // Unspecified means 0 impact parameter.
   if (modus_cfg.has_value({"Impact", "Value"})) {
     impact_ = modus_cfg.take({"Impact", "Value"});
@@ -274,19 +289,39 @@ ColliderModus::ColliderModus(Configuration modus_config,
   } else {
     // If impact is not supplied by value, inspect sampling parameters:
     if (modus_cfg.has_value({"Impact", "Sample"})) {
-      std::string sampling_method = modus_cfg.take({"Impact", "Sample"});
-      if (sampling_method.compare(0, 7, "uniform") == 0) {
-        sampling_quadratically_ = false;
+      sampling_ = modus_cfg.take({"Impact", "Sample"});
+      if (sampling_ == Sampling::CUSTOM) {
+        if (!(modus_cfg.has_value({"Impact", "Values"}) ||
+              modus_cfg.has_value({"Impact", "Yields"}))) {
+          throw std::domain_error(
+              "Input Error: Need impact parameter spectrum for custom "
+              "sampling. "
+              "Please provide Values and Yields.");
+        }
+        const std::vector<float> impacts = modus_cfg.take({"Impact", "Values"});
+        const std::vector<float> yields = modus_cfg.take({"Impact", "Yields"});
+        if (impacts.size() != yields.size()) {
+          throw std::domain_error(
+              "Input Error: Need as many impact parameter values as yields. "
+              "Please make sure that Values and Yields have the same length.");
+        }
+        impact_interpolation_ = make_unique<InterpolateData<float>>(
+            InterpolateData<float>(impacts, yields));
+
+        auto imp_minmax = std::minmax_element(impacts.begin(), impacts.end());
+        imp_min_ = *imp_minmax.first;
+        imp_max_ = *imp_minmax.second;
+        yield_max_ = *std::max_element(yields.begin(), yields.end());
       }
     }
     if (modus_cfg.has_value({"Impact", "Range"})) {
-       std::vector<float> range = modus_cfg.take({"Impact", "Range"});
-       imp_min_ = range.at(0);
-       imp_max_ = range.at(1);
+      std::array<float, 2> range = modus_cfg.take({"Impact", "Range"});
+      imp_min_ = range[0];
+      imp_max_ = range[1];
     }
     if (modus_cfg.has_value({"Impact", "Max"})) {
-       imp_min_ = 0.0;
-       imp_max_ = modus_cfg.take({"Impact", "Max"});
+      imp_min_ = 0.0;
+      imp_max_ = modus_cfg.take({"Impact", "Max"});
     }
   }
 
@@ -304,13 +339,12 @@ std::ostream &operator<<(std::ostream &out, const ColliderModus &m) {
                 "sqrt(S) (nucleus-nucleus) = "
              << format(std::sqrt(m.total_s_), "GeV")
              << "\nInitial distance between nuclei: "
-             << format(2 * m.initial_z_displacement_, "fm")
-             << "\nProjectile:\n" << *m.projectile_
-             << "\nTarget:\n" << *m.target_;
+             << format(2 * m.initial_z_displacement_, "fm") << "\nProjectile:\n"
+             << *m.projectile_ << "\nTarget:\n" << *m.target_;
 }
 
 float ColliderModus::initial_conditions(Particles *particles,
-                                      const ExperimentParameters&) {
+                                        const ExperimentParameters &) {
   const auto &log = logger<LogArea::Collider>();
   // Sample impact parameter distribution.
   sample_impact();
@@ -324,15 +358,16 @@ float ColliderModus::initial_conditions(Particles *particles,
   // Use the total mandelstam variable to get the frame-dependent velocity for
   // each nucleus. Position a is projectile, position b is target.
   double v_a, v_b;
-  std::tie(v_a, v_b) = get_velocities(total_s_,
-                                      projectile_->mass(), target_->mass());
+  std::tie(v_a, v_b) =
+      get_velocities(total_s_, projectile_->mass(), target_->mass());
 
   // If velocities are too close to 1 for our calculations, throw an exception.
-  if (almost_equal(std::abs(1.0 - v_a), 0.0)
-      || almost_equal(std::abs(1.0 - v_b), 0.0)) {
-    throw std::domain_error("Found velocity equal to 1 in "
-                            "nucleusmodus::initial_conditions.\nConsider using"
-                            "the center of velocity reference frame.");
+  if (almost_equal(std::abs(1.0 - v_a), 0.0) ||
+      almost_equal(std::abs(1.0 - v_b), 0.0)) {
+    throw std::domain_error(
+        "Found velocity equal to 1 in "
+        "nucleusmodus::initial_conditions.\nConsider using"
+        "the center of velocity reference frame.");
   }
 
   // Shift the nuclei into starting positions. Keep the pair separated
@@ -342,9 +377,9 @@ float ColliderModus::initial_conditions(Particles *particles,
   // -initial_z_displacement_/average_velocity.
   float avg_velocity = std::sqrt(v_a * v_a + v_b * v_b);
   float simulation_time = -initial_z_displacement_ / avg_velocity;
-  projectile_->shift(true, -initial_z_displacement_, +impact_/2.0,
+  projectile_->shift(true, -initial_z_displacement_, +impact_ / 2.0,
                      simulation_time);
-  target_->shift(false, initial_z_displacement_, -impact_/2.0,
+  target_->shift(false, initial_z_displacement_, -impact_ / 2.0,
                  simulation_time);
 
   // Generate Fermi momenta if necessary
@@ -365,21 +400,34 @@ float ColliderModus::initial_conditions(Particles *particles,
 }
 
 void ColliderModus::sample_impact() {
-  if (sampling_quadratically_) {
+  if (sampling_ == Sampling::QUADRATIC) {
     // quadratic sampling: Note that for bmin > bmax, this still yields
     // the correct distribution (only that canonical() = 0 then is the
     // upper end, not the lower).
     impact_ = std::sqrt(imp_min_ * imp_min_ +
                         Random::canonical() *
                             (imp_max_ * imp_max_ - imp_min_ * imp_min_));
+  } else if (sampling_ == Sampling::CUSTOM) {
+    // rejection sampling based on given distribution
+    assert(impact_interpolation_ != nullptr);
+    float probability_random = 1;
+    float probability = 0;
+    float b;
+    while (probability_random > probability) {
+      b = Random::uniform(imp_min_, imp_max_);
+      probability = (*impact_interpolation_)(b) / yield_max_;
+      assert(probability < 1.0f);
+      probability_random = Random::uniform(0.f, 1.f);
+    }
+    impact_ = b;
   } else {
     // linear sampling. Still, min > max works fine.
     impact_ = Random::uniform(imp_min_, imp_max_);
   }
 }
 
-std::pair<double, double> ColliderModus::get_velocities(float s,
-                                                        float m_a, float m_b) {
+std::pair<double, double> ColliderModus::get_velocities(float s, float m_a,
+                                                        float m_b) {
   double v_a = 0.0;
   double v_b = 0.0;
   // Frame dependent calculations of velocities. Assume v_a >= 0, v_b <= 0.
@@ -411,8 +459,9 @@ std::pair<double, double> ColliderModus::get_velocities(float s,
                            (s - (m_a * m_a) - (m_b * m_b))));
       break;
     default:
-      throw std::domain_error("Invalid reference frame in "
-                              "ColliderModus::get_velocities.");
+      throw std::domain_error(
+          "Invalid reference frame in "
+          "ColliderModus::get_velocities.");
   }
   return std::make_pair(v_a, v_b);
 }

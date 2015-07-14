@@ -29,14 +29,24 @@ class ActionFinderInterface {
    *
    * \param search_list a list of particles where each pair needs to be tested
    *                    for possible interaction
-   * \param neighbors_list a list of particles that need to be tested against
-   *                       particles in search_list for possible interaction
    * \param dt duration of the current time step in fm/c
    * \return The function returns a list (std::vector) of Action objects that
    *         could possibly be executed in this time step.
    */
   virtual ActionList find_possible_actions(const ParticleList &search_list,
                                            float dt) const = 0;
+  /**
+   * Abstract function for finding actions, given two lists of particles,
+   * a search list and a neighbors list.
+   *
+   * \param search_list a list of particles where each pair needs to be tested
+   *                    for possible interaction
+   * \param neighbors_list a list of particles that need to be tested against
+   *                       particles in search_list for possible interaction
+   * \param dt duration of the current time step in fm/c
+   * \return The function returns a list (std::vector) of Action objects that
+   *         could possibly be executed in this time step.
+   */
   virtual ActionList find_possible_actions(const ParticleList &search_list,
                                            const ParticleList &neighbors_list,
                                            float dt) const = 0;

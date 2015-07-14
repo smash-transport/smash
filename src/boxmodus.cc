@@ -33,7 +33,8 @@ namespace Smash {
 std::ostream &operator<<(std::ostream &out, const BoxModus &m) {
   out << "-- Box Modus:\nSize of the box: (" << m.length_ << " fm)³"
       << "\nInitial temperature: " << m.temperature_ << " GeV"
-      << "\nInitial condition type " << static_cast<int>(m.initial_condition_) << "\n";
+      << "\nInitial condition type " << static_cast<int>(m.initial_condition_)
+      << "\n";
   for (const auto &p : m.init_multipl_) {
     out << "Particle " << p.first << " initial multiplicity "
                        << p.second << '\n';

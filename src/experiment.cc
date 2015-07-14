@@ -33,6 +33,15 @@
 #include "include/propagation.h"
 #include "include/random.h"
 #include "include/spheremodus.h"
+/* Outputs */
+#include "include/binaryoutputcollisions.h"
+#include "include/binaryoutputparticles.h"
+#include "include/densityoutput.h"
+#include "include/oscaroutput.h"
+#ifdef SMASH_USE_ROOT
+#  include "include/rootoutput.h"
+#endif
+#include "include/vtkoutput.h"
 
 namespace std {
 /**
@@ -67,7 +76,8 @@ static ostream &operator<<(ostream &out,
 namespace Smash {
 
 /* ExperimentBase carries everything that is needed for the evolution */
-std::unique_ptr<ExperimentBase> ExperimentBase::create(Configuration config) {
+std::unique_ptr<ExperimentBase> ExperimentBase::create(Configuration config,
+                                                       bf::path output_path) {
   const auto &log = logger<LogArea::Experiment>();
   log.trace() << source_location;
   /*!\Userguide
@@ -107,13 +117,14 @@ std::unique_ptr<ExperimentBase> ExperimentBase::create(Configuration config) {
                   << "periodic boundaries are not taken into account "
                   << "in the density calculation";
     }
-    return ExperimentPointer(new Experiment<BoxModus>(config));
+    return ExperimentPointer(new Experiment<BoxModus>(config, output_path));
   } else if (modus_chooser.compare("List") == 0) {
-    return ExperimentPointer(new Experiment<ListModus>(config));
+    return ExperimentPointer(new Experiment<ListModus>(config, output_path));
   } else if (modus_chooser.compare("Collider") == 0) {
-    return ExperimentPointer(new Experiment<ColliderModus>(config));
+    return ExperimentPointer(new Experiment<ColliderModus>(config,
+                                                           output_path));
   } else if (modus_chooser.compare("Sphere") == 0) {
-    return ExperimentPointer(new Experiment<SphereModus>(config));
+    return ExperimentPointer(new Experiment<SphereModus>(config, output_path));
   } else {
     throw InvalidModusRequest("Invalid Modus (" + modus_chooser +
                               ") requested from ExperimentBase::create.");
@@ -210,7 +221,7 @@ std::ostream &operator<<(std::ostream &out, const Experiment<Modus> &e) {
  * false - don't force decays (final output can contain resonances)
  */
 template <typename Modus>
-Experiment<Modus>::Experiment(Configuration config)
+Experiment<Modus>::Experiment(Configuration config, bf::path output_path)
     : parameters_(create_experiment_parameters(config)),
       modus_(config["Modi"], parameters_),
       particles_(),
@@ -218,10 +229,12 @@ Experiment<Modus>::Experiment(Configuration config)
       end_time_(config.take({"General", "End_Time"})),
       delta_time_startup_(config.take({"General", "Delta_Time"})),
       force_decays_(
-          config.take({"Collision_Term", "Force_Decays_At_End"}, true)) {
+          config.take({"Collision_Term", "Force_Decays_At_End"}, true)),
+      use_grid_(config.take({"General", "Use_Grid"}, true)) {
   const auto &log = logger<LogArea::Experiment>();
   log.info() << *this;
 
+  // create finders
   if (config.take({"Collision_Term", "Decays"}, true)) {
     action_finders_.emplace_back(new DecayActionsFinder());
   }
@@ -232,6 +245,103 @@ Experiment<Modus>::Experiment(Configuration config)
     log.info() << "Pauli blocking is ON.";
     pauli_blocker_ = make_unique<PauliBlocker>(
         config["Collision_Term"]["Pauli_Blocking"], parameters_);
+  }
+
+  // create outputs
+  log.trace(source_location, " create OutputInterface objects");
+  /*!\Userguide
+    * \page input_output_options_ Output
+    *
+    * \key Output: \n
+    * Below this key the configuration for the different output formats is
+    * defined. To enable a certain output, set the 'Enable' key below the
+    * selected format identifier. The identifiers are described below.
+    * The following outputs exist:
+    * \li \subpage input_oscar_particlelist
+    * \li \subpage input_oscar_collisions
+    * \li \subpage input_vtk
+    * \li \subpage input_binary_collisions
+    * \li \subpage input_binary_particles
+    * \li \subpage input_root
+    */
+  auto output_conf = config["Output"];
+  /*!\Userguide
+    * \page output_general_ Output files
+    * There are different optional formats for SMASH output that are explained
+    * below in more detail. Per default, the selected output files will be
+    * saved in the directory ./data/\<run_id\>, where \<run_id\> is an integer
+    * number starting from 0. At the beginning
+    * of a run SMASH checks, if the ./data/0 directory exists. If it does not exist, it
+    * is created and all output files are written there. If the directory
+    * already exists, SMASH tries for ./data/1, ./data/2 and so on until it
+    * finds a free number. The user can change output directory by a command
+    * line option, if desired:
+    * \code smash -o <user_output_dir> \endcode
+    * SMASH supports several kinds of configurable output formats.
+    * They are called OSCAR1999, OSCAR2013, binary OSCAR2013, VTK and ROOT
+    * outputs. Every format can be switched on/off using option Enable in the
+    * configuration file config.yaml. For more information on configuring the
+    * output see corresponding pages: \ref input_oscar_particlelist,
+    * \ref input_oscar_collisions, \ref input_binary_collisions,
+    * \ref input_binary_particles, \ref input_root, \ref input_vtk.
+    *
+    * \key Details of output formats are explained here: \n
+    * \li General block structure of OSCAR formats: \n
+    *     \subpage oscar_general_
+    * \li A family of OSCAR ASCII outputs.\n
+    *     \subpage format_oscar_particlelist\n
+    *     \subpage format_oscar_collisions
+    * \li Binary outputs analoguous to OSCAR format\n
+    *     \subpage format_binary_\n
+    * \li Output in vtk format suitable for an easy
+    *     visualization using paraview software:\n \subpage format_vtk
+    * \li Formatted binary output that uses ROOT software
+    *     (http://root.cern.ch).\n Fast to read and write, requires less
+    *     disk space.\n \subpage format_root
+    */
+
+  // loop until all OSCAR outputs are created (create_oscar_output will return
+  // nullptr then).
+  while (std::unique_ptr<OutputInterface> oscar =
+              create_oscar_output(output_path, output_conf)) {
+    outputs_.emplace_back(std::move(oscar));
+  }
+  if (static_cast<bool>(output_conf.take({"Vtk", "Enable"}))) {
+    outputs_.emplace_back(new VtkOutput(output_path,
+                                        std::move(output_conf["Vtk"])));
+  } else {
+    output_conf.take({"Vtk"});
+  }
+  if (static_cast<bool>(output_conf.take({"Binary_Collisions", "Enable"}))) {
+    outputs_.emplace_back(new BinaryOutputCollisions(output_path,
+                                  std::move(output_conf["Binary_Collisions"])));
+  } else {
+    output_conf.take({"Binary_Collisions"});
+  }
+  if (static_cast<bool>(output_conf.take({"Binary_Particles", "Enable"}))) {
+    outputs_.emplace_back(new BinaryOutputParticles(output_path,
+                                  std::move(output_conf["Binary_Particles"])));
+  } else {
+    output_conf.take({"Binary_Particles"});
+  }
+  if (static_cast<bool>(output_conf.take({"Root", "Enable"}))) {
+#ifdef SMASH_USE_ROOT
+    outputs_.emplace_back(new RootOutput(
+                              output_path, output_conf["Root"]));
+#else
+    log.error() << "You requested Root output, but Root support has not been "
+                    "compiled in. To enable Root support call: cmake -D "
+                    "USE_ROOT=ON <path>.";
+    output_conf.take({"Root"});
+#endif
+  } else {
+    output_conf.take({"Root"});
+  }
+  if (static_cast<bool>(output_conf.take({"Density", "Enable"}))) {
+    outputs_.emplace_back(new DensityOutput(output_path,
+                              std::move(output_conf["Density"])));
+  } else {
+    output_conf.take({"Density"});
   }
 
   if (config.has_value({"Potentials"})) {
@@ -248,12 +358,11 @@ Experiment<Modus>::Experiment(Configuration config)
   if (config.has_value({"Lattice"})) {
     // Take lattice properties from config to assign them to all lattices
     const std::array<float, 3> l = config.take({"Lattice", "Sizes"});
-    const std::array<int, 3> n = config.take({"Lattice", "CellNumber"});
+    const std::array<int, 3> n = config.take({"Lattice", "Cell_Number"});
     const std::array<float, 3> origin = config.take({"Lattice", "Origin"});
     const bool periodic = config.take({"Lattice", "Periodic"});
-    dens_type_lattice_printout_ = static_cast<DensityType>(
-         config.take({"Lattice", "Printout", "Density"},
-                     static_cast<int>(DensityType::none)));
+    dens_type_lattice_printout_ = config.take(
+                  {"Lattice", "Printout", "Density"}, DensityType::none);
     /* Create baryon and isospin density lattices regardless of config
        if potentials are on. This is because they allow to compute
        potentials faster */
@@ -333,86 +442,77 @@ static std::string format_measurements(const Particles &particles,
 }
 
 template <typename Modus>
-void Experiment<Modus>::perform_actions(ActionList &actions,
-                                        size_t &interactions_total,
-                                        size_t &total_pauli_blocked) {
+void Experiment<Modus>::perform_action(
+    const ActionPtr &action, size_t &interactions_total,
+    size_t &total_pauli_blocked, const ParticleList &particles_before_actions) {
   const auto &log = logger<LogArea::Experiment>();
-  if (!actions.empty()) {
-    const auto particles_before_actions = particles_.copy_to_vector();
-    for (const auto &action : actions) {
-      if (action->is_valid(particles_)) {
-        const ParticleList incoming_particles = action->incoming_particles();
-        action->generate_final_state();
-        ProcessType process_type = action->get_type();
-        log.debug("Process Type is: ", process_type);
-        if (pauli_blocker_ &&
-            action->is_pauli_blocked(particles_, *pauli_blocker_.get())) {
-          total_pauli_blocked++;
-          continue;
-        }
-        action->perform(&particles_, interactions_total);
-        const ParticleList outgoing_particles = action->outgoing_particles();
-        // Calculate Eckart rest frame density at the interaction point
-        const FourVector r_interaction = action->get_interaction_point();
-        constexpr bool compute_grad = false;
-        const double rho =
-            rho_eckart(r_interaction.threevec(), particles_before_actions,
-                       parameters_, dens_type_, compute_grad).first;
-        /*!\Userguide
-         * \page collisions_output_in_box_modus_ Collision output in box modus
-         * \note When SMASH is running in the box modus, particle coordinates
-         * in the collision output can be out of the box. This is not an error.
-         * Box boundary conditions are intentionally not imposed before
-         * collision output to allow unambiguous finding of the interaction
-         * point.
-         * <I>Example</I>: two particles in the box have x coordinates 0.1 and
-         * 9.9 fm, while box L = 10 fm. Suppose these particles collide.
-         * For calculating collision the first one is wrapped to 10.1 fm.
-         * Then output contains coordinates of 9.9 fm and 10.1 fm.
-         * From this one can infer interaction point at x = 10 fm.
-         * Were boundary conditions imposed before output,
-         * their x coordinates would be 0.1 and 9.9 fm and interaction point
-         * position could be either at 10 fm or at 5 fm.
-         */
-        for (const auto &output : outputs_) {
-          output->at_interaction(incoming_particles, outgoing_particles, rho,
-                                 action->raw_weight_value(), process_type);
-        }
-        log.debug(~einhard::Green(), "✔ ", action);
-      } else {
-        log.debug(~einhard::DRed(), "✘ ", action, " (discarded: invalid)");
-      }
+  if (action->is_valid(particles_)) {
+    const ParticleList incoming_particles = action->incoming_particles();
+    action->generate_final_state();
+    ProcessType process_type = action->get_type();
+    log.debug("Process Type is: ", process_type);
+    if (pauli_blocker_ &&
+        action->is_pauli_blocked(particles_, *pauli_blocker_.get())) {
+      total_pauli_blocked++;
+      return;
     }
-    actions.clear();
-    log.debug(~einhard::Blue(), particles_);
+    action->perform(&particles_, interactions_total);
+    const ParticleList outgoing_particles = action->outgoing_particles();
+    // Calculate Eckart rest frame density at the interaction point
+    const FourVector r_interaction = action->get_interaction_point();
+    constexpr bool compute_grad = false;
+    const double rho =
+        rho_eckart(r_interaction.threevec(), particles_before_actions,
+                   parameters_, dens_type_, compute_grad).first;
+    /*!\Userguide
+     * \page collisions_output_in_box_modus_ Collision output in box modus
+     * \note When SMASH is running in the box modus, particle coordinates
+     * in the collision output can be out of the box. This is not an error.
+     * Box boundary conditions are intentionally not imposed before
+     * collision output to allow unambiguous finding of the interaction
+     * point.
+     * <I>Example</I>: two particles in the box have x coordinates 0.1 and
+     * 9.9 fm, while box L = 10 fm. Suppose these particles collide.
+     * For calculating collision the first one is wrapped to 10.1 fm.
+     * Then output contains coordinates of 9.9 fm and 10.1 fm.
+     * From this one can infer interaction point at x = 10 fm.
+     * Were boundary conditions imposed before output,
+     * their x coordinates would be 0.1 and 9.9 fm and interaction point
+     * position could be either at 10 fm or at 5 fm.
+     */
+    for (const auto &output : outputs_) {
+      output->at_interaction(incoming_particles, outgoing_particles, rho,
+                             action->raw_weight_value(), process_type);
+    }
+    log.debug(~einhard::Green(), "✔ ", action);
   } else {
-    log.debug("no actions performed");
+    log.debug(~einhard::DRed(), "✘ ", action, " (discarded: invalid)");
   }
 }
 
 /* This is the loop over timesteps, carrying out collisions and decays
  * and propagating particles. */
 template <typename Modus>
-void Experiment<Modus>::run_time_evolution(const int evt_num) {
+size_t Experiment<Modus>::run_time_evolution(const int evt_num) {
   const auto &log = logger<LogArea::Experiment>();
   modus_.impose_boundary_conditions(&particles_);
   size_t interactions_total = 0, previous_interactions_total = 0,
-         interactions_this_interval = 0, total_pauli_blocked = 0;
+         total_pauli_blocked = 0;
   log.info() << format_measurements(
-      particles_, interactions_total, interactions_this_interval,
+      particles_, interactions_total, 0u,
       conserved_initial_, time_start_, parameters_.labclock.current_time());
 
+  std::vector<ActionPtr> actions;
   while (!(++parameters_.labclock > end_time_)) {
     // vector is likely the best container type here. Because std::sort requires
     // random access iterators. Any linked data structure (e.g. list) thus
     // requires a less efficient sort algorithm.
-    std::vector<ActionPtr> actions;
 
     /* (1.a) Create grid. */
     const auto &grid =
-        // TODO(mkretz): avoid the copy. Grid could construct from Particles
-        // directly.
-        modus_.create_grid(particles_, parameters_.testparticles);
+        use_grid_ ? modus_.create_grid(particles_, parameters_.testparticles)
+                  : modus_.create_grid(particles_, parameters_.testparticles,
+                                       CellSizeStrategy::Largest);
     /* (1.b) Iterate over cells and find actions. */
     grid.iterate_cells([&](const ParticleList &search_list) {
                          for (const auto &finder : action_finders_) {
@@ -433,7 +533,17 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
               [](const ActionPtr &a, const ActionPtr &b) { return *a < *b; });
 
     /* (2) Perform actions. */
-    perform_actions(actions, interactions_total, total_pauli_blocked);
+    if (!actions.empty()) {
+      const auto particles_before_actions = particles_.copy_to_vector();
+      for (const auto &action : actions) {
+        perform_action(action, interactions_total, total_pauli_blocked,
+                       particles_before_actions);
+      }
+      actions.clear();
+      log.debug(~einhard::Blue(), particles_);
+    } else {
+      log.debug("no actions performed");
+    }
     modus_.impose_boundary_conditions(&particles_);
 
     /* (3) Do propagation. */
@@ -454,40 +564,8 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
     // case, I know what the next tick is and I can check whether the
     // output time is crossed within the next tick.
     if (parameters_.need_intermediate_output()) {
-      interactions_this_interval =
-          interactions_total - previous_interactions_total;
-      previous_interactions_total = interactions_total;
-      log.info() << format_measurements(
-          particles_, interactions_total, interactions_this_interval,
-          conserved_initial_, time_start_, parameters_.labclock.current_time());
-      // Update lattices for output
-      const LatticeUpdate lat_upd = LatticeUpdate::AtOutput;
-      update_density_lattice(jmu_B_lat_.get(), lat_upd, DensityType::baryon,
-                             parameters_, particles_);
-      update_density_lattice(jmu_I3_lat_.get(), lat_upd,
-                DensityType::baryonic_isospin, parameters_, particles_);
-      update_density_lattice(jmu_custom_lat_.get(), lat_upd,
-                dens_type_lattice_printout_, parameters_, particles_);
-      /* save evolution data */
-      for (const auto &output : outputs_) {
-        output->at_intermediate_time(particles_, evt_num, parameters_.labclock);
-        output->thermodynamics_output(particles_, parameters_);
-        switch (dens_type_lattice_printout_) {
-          case DensityType::baryon:
-            output->thermodynamics_output(std::string("rhoB"), *jmu_B_lat_,
-                                                                     evt_num);
-            break;
-          case DensityType::baryonic_isospin:
-            output->thermodynamics_output(std::string("rhoI3"), *jmu_I3_lat_,
-                                                                     evt_num);
-            break;
-          case DensityType::none:
-            break;
-          default:
-            output->thermodynamics_output(std::string("rho"), *jmu_custom_lat_,
-                                                                      evt_num);
-        }
-      }
+      intermediate_output(evt_num, interactions_total,
+                          previous_interactions_total);
     }
     // Check conservation of conserved quantities if potentials are off.
     // If potentials are on then momentum is conserved only in average
@@ -504,30 +582,85 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
     log.info("Collisions: pauliblocked/total = ", total_pauli_blocked, "/",
              interactions_total);
   }
+  return interactions_total;
+}
 
-  if (force_decays_) {
-    // at end of time evolution: force all resonances to decay
-    size_t interactions_old;
-    do {
-      std::vector<ActionPtr> actions;
-      interactions_old = interactions_total;
-      /* Find actions. */
-      for (const auto &finder : action_finders_) {
-        actions += finder->find_final_actions(particles_);
-      }
-      /* Perform actions. */
-      perform_actions(actions, interactions_total, total_pauli_blocked);
-      // loop until no more decays occur
-    } while (interactions_total > interactions_old);
-
-    /* Do one final propagation step. */
-    if (potentials_) {
-      propagate(&particles_, parameters_, *potentials_);
-    } else {
-      propagate_straight_line(&particles_, parameters_);
+template<typename Modus>
+void Experiment<Modus>::intermediate_output(const int evt_num,
+    size_t& interactions_total, size_t& previous_interactions_total) {
+  const auto &log = logger<LogArea::Experiment>();
+  const size_t interactions_this_interval =
+      interactions_total - previous_interactions_total;
+  previous_interactions_total = interactions_total;
+  log.info() << format_measurements(
+      particles_, interactions_total, interactions_this_interval,
+      conserved_initial_, time_start_, parameters_.labclock.current_time());
+  const LatticeUpdate lat_upd = LatticeUpdate::AtOutput;
+  /* save evolution data */
+  for (const auto &output : outputs_) {
+    output->at_intermediate_time(particles_, evt_num, parameters_.labclock);
+    // Thermodynamic output at some point versus time
+    output->thermodynamics_output(particles_, parameters_);
+    // Thermodynamic output on the lattice versus time
+    switch (dens_type_lattice_printout_) {
+      case DensityType::baryon:
+        update_density_lattice(jmu_B_lat_.get(), lat_upd,
+                               DensityType::baryon, parameters_, particles_);
+        output->thermodynamics_output(std::string("rhoB"), *jmu_B_lat_,
+                                                                 evt_num);
+        break;
+      case DensityType::baryonic_isospin:
+        update_density_lattice(jmu_I3_lat_.get(), lat_upd,
+                     DensityType::baryonic_isospin, parameters_, particles_);
+        output->thermodynamics_output(std::string("rhoI3"), *jmu_I3_lat_,
+                                                                 evt_num);
+        break;
+      case DensityType::none:
+        break;
+      default:
+        update_density_lattice(jmu_custom_lat_.get(), lat_upd,
+                       dens_type_lattice_printout_, parameters_, particles_);
+        output->thermodynamics_output(std::string("rho"), *jmu_custom_lat_,
+                                                                  evt_num);
     }
   }
+}
 
+template <typename Modus>
+void Experiment<Modus>::do_final_decays(size_t &interactions_total) {
+  size_t total_pauli_blocked = 0;
+
+  // at end of time evolution: force all resonances to decay
+  size_t interactions_old;
+  do {
+    std::vector<ActionPtr> actions;
+    interactions_old = interactions_total;
+    /* Find actions. */
+    for (const auto &finder : action_finders_) {
+      actions += finder->find_final_actions(particles_);
+    }
+    /* Perform actions. */
+    const auto particles_before_actions = particles_.copy_to_vector();
+    for (const auto &action : actions) {
+      perform_action(action, interactions_total, total_pauli_blocked,
+                     particles_before_actions);
+    }
+    // loop until no more decays occur
+  } while (interactions_total > interactions_old);
+
+  /* Do one final propagation step. */
+  if (potentials_) {
+    propagate(&particles_, parameters_, *potentials_);
+  } else {
+    propagate_straight_line(&particles_, parameters_);
+  }
+  modus_.impose_boundary_conditions(&particles_, outputs_);
+}
+
+template <typename Modus>
+void Experiment<Modus>::final_output(size_t interactions_total,
+                                     const int evt_num) {
+  const auto &log = logger<LogArea::Experiment>();
   // make sure the experiment actually ran (note: we should compare this
   // to the start time, but we don't know that. Therefore, we check that
   // the time is positive, which should heuristically be the same).
@@ -540,6 +673,10 @@ void Experiment<Modus>::run_time_evolution(const int evt_num) {
                                                 particles_.time() /
                                                 particles_.size()))
                << " [fm-1]";
+  }
+
+  for (const auto &output : outputs_) {
+    output->at_eventend(particles_, evt_num);
   }
 }
 
@@ -558,12 +695,13 @@ void Experiment<Modus>::run() {
     }
 
     /* the time evolution of the relevant subsystem */
-    run_time_evolution(j);
+    size_t interactions_total = run_time_evolution(j);
+    if (force_decays_) {
+      do_final_decays(interactions_total);
+    }
 
     /* Output at event end */
-    for (const auto &output : outputs_) {
-      output->at_eventend(particles_, j);
-    }
+    final_output(interactions_total, j);
   }
 }
 

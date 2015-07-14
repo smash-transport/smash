@@ -31,9 +31,9 @@ void propagate_straight_line(Particles *particles,
     /* Test, if particle is formed and reset cross_section_scaling_factor
        TODO: Is there a way to only do that for particles that were unformed 
        in the previous timestep? */
-    if (data.formation_time() < data.position().x0()) { 
-		data.set_cross_section_scaling_factor(1.0);
-	}	    
+    if (data.formation_time() < data.position().x0()) {
+      data.set_cross_section_scaling_factor(1.0);
+    }
   }
 }
 

@@ -18,6 +18,7 @@
 #include "include/decaymodes.h"
 #include "include/inputfunctions.h"
 #include "include/iomanipulators.h"
+#include "include/isoparticletype.h"
 #include "include/logging.h"
 #include "include/particledata.h"
 #include "include/pdgcode.h"
@@ -90,13 +91,8 @@ SMASH_CONST bool ParticleType::exists(PdgCode pdgcode) {
   return false;
 }
 
-#ifdef NDEBUG
-ParticleType::ParticleType(std::string, float m, float w, PdgCode id)
-    :
-#else
 ParticleType::ParticleType(std::string n, float m, float w, PdgCode id)
-    : name_(fill_right(n, 3)),
-#endif
+    : name_(n),
       mass_(m),
       width_(w),
       pdgcode_(id),
@@ -108,49 +104,33 @@ ParticleType::ParticleType(std::string n, float m, float w, PdgCode id)
 static std::string antiname(const std::string &name, PdgCode code) {
   std::string basename, charge;
 
-  if (name.find("++") != std::string::npos) {
-    basename = name.substr(0, name.length()-2);
-    charge = "--";
-  } else if (name.find("⁺⁺") != std::string::npos) {
+  if (name.find("⁺⁺") != std::string::npos) {
     basename = name.substr(0, name.length() - sizeof("⁺⁺") + 1);
     charge = "⁻⁻";
-  } else if (name.find("+") != std::string::npos) {
-    basename = name.substr(0, name.length()-1);
-    charge = "-";
   } else if (name.find("⁺") != std::string::npos) {
     basename = name.substr(0, name.length() - sizeof("⁺") + 1);
     charge = "⁻";
-  } else if (name.find("0") != std::string::npos) {
-    basename = name.substr(0, name.length()-1);
-    charge = "0";
-  } else if (name.find("⁰") != std::string::npos) {
-    basename = name.substr(0, name.length() - sizeof("⁰") + 1);
-    charge = "⁰";
-  } else if (name.find("-") != std::string::npos) {
-    basename = name.substr(0, name.length()-1);
-    charge = "+";
-  } else if (name.find("⁻") != std::string::npos) {
-    basename = name.substr(0, name.length() - sizeof("⁻") + 1);
-    charge = "⁺";
-  } else if (name.find("--") != std::string::npos) {
-    basename = name.substr(0, name.length()-2);
-    charge = "++";
   } else if (name.find("⁻⁻") != std::string::npos) {
     basename = name.substr(0, name.length() - sizeof("⁻⁻") + 1);
     charge = "⁺⁺";
+  } else if (name.find("⁻") != std::string::npos) {
+    basename = name.substr(0, name.length() - sizeof("⁻") + 1);
+    charge = "⁺";
+  } else if (name.find("⁰") != std::string::npos) {
+    basename = name.substr(0, name.length() - sizeof("⁰") + 1);
+    charge = "⁰";
   } else {
     basename = name;
     charge = "";
   }
 
+  // baryons & strange mesons: insert a bar
   constexpr char bar[] = "\u0305";
-  if (code.baryon_number() != 0) {
-    return basename+bar+charge;  // baryon
-  } else if (code.charge() != 0) {
-    return basename+charge;        // charged meson
-  } else {
-    return basename+bar+charge;  // neutral meson
+  if (code.baryon_number() != 0 || code.strangeness() != 0) {
+    basename.insert(utf8::sequence_length(basename.begin()), bar);
   }
+
+  return basename+charge;
 }
 
 void ParticleType::create_type_list(const std::string &input) {  // {{{
@@ -184,14 +164,33 @@ void ParticleType::create_type_list(const std::string &input) {  // {{{
   }
   type_list.shrink_to_fit();
 
+  /* Sort the type list by PDG code. */
   std::sort(type_list.begin(), type_list.end(),
-            [](const ParticleType &l,
-               const ParticleType &r) { return l.pdgcode() < r.pdgcode(); });
+            [](const ParticleType &l, const ParticleType &r) {
+              return l.pdgcode() < r.pdgcode();
+            });
 
-  assert(nullptr == all_particle_types);
+  /* Look for duplicates. */
+  PdgCode prev_pdg = 0;
+  for (const auto& t : type_list) {
+    if (t.pdgcode() == prev_pdg) {
+      throw ParticleType::LoadFailure("Duplicate PdgCode in particles.txt: " +
+                                      t.pdgcode().string());
+    }
+    prev_pdg = t.pdgcode();
+  }
+
+  if (all_particle_types != nullptr) {
+    throw std::runtime_error("Error: Type list was already built!");
+  }
   all_particle_types = &type_list;  // note that type_list is a function-local
                                     // static and thus will live on until after
                                     // main().
+
+  // create all isospin multiplets
+  for (const auto& t : type_list) {
+    IsoParticleType::create_multiplet(t);
+  }
 }/*}}}*/
 
 
@@ -240,8 +239,7 @@ float ParticleType::total_width(const float m) const {
 void ParticleType::check_consistency() {
   for (const ParticleType &ptype : ParticleType::list_all()) {
     if (!ptype.is_stable() && ptype.decay_modes().is_empty()) {
-      throw std::runtime_error("Unstable particle " +
-                                ptype.pdgcode().string() +
+      throw std::runtime_error("Unstable particle " + ptype.name() +
                                " has no decay chanels!");
     }
   }

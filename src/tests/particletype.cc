@@ -17,11 +17,7 @@ TEST(assign) {
   // there is a double for mass and a float for width. This is
   // intentional.
   ParticleType A("smashon", 3.243, 0.234f, smashon);
-#ifdef NDEBUG
-  COMPARE(A.name(), std::string{});
-#else
   COMPARE(A.name(), "smashon");
-#endif
   COMPARE(A.mass(), 3.243f);
   COMPARE(A.width_at_pole(), 0.234f);
   COMPARE(A.pdgcode(), smashon);
@@ -37,6 +33,10 @@ TEST_CATCH(load_from_incorrect_string, ParticleType::LoadFailure) {
 TEST_CATCH(load_one_particle_with_incorrect_newline, ParticleType::LoadFailure) {
   const std::string parts("pi0 0.1350\n-1.0 111");
   ParticleType::create_type_list(parts);
+}
+
+TEST_CATCH(load_duplicate_particle, ParticleType::LoadFailure) {
+  ParticleType::create_type_list("π⁺ 0.138 0.0 211\nπ⁺ 0.138 0.0 211\n");
 }
 
 TEST(create_type_list) {

@@ -13,6 +13,7 @@
 #include <array>
 #include <cmath>
 #include <functional>
+#include <stdexcept>
 #include <utility>
 #include <vector>
 
@@ -29,6 +30,19 @@ enum class GridOptions : char {
   Normal = 0,
   /// with ghost cells for periodic boundaries
   PeriodicBoundaries = 1
+};
+
+/**
+ * Indentifies the strategy of determining the cell size.
+ */
+enum class CellSizeStrategy : char {
+  /// Look for optimal cell size.
+  Optimal,
+  /// Make cells as large as possible.
+  ///
+  /// This means a single cell for normal boundary conditions and 8 cells
+  /// for periodic boundary conditions.
+  Largest
 };
 
 /**
@@ -79,10 +93,12 @@ class Grid : public GridBase {
    *
    * \param particles The particles to place onto the grid.
    * \param testparticles Number of testparticles used in this event
+   * \param strategy The strategy for determining the cell size
    */
-  Grid(const Particles &particles, int testparticles)
+  Grid(const Particles &particles, int testparticles,
+       CellSizeStrategy strategy = CellSizeStrategy::Optimal)
       : Grid{find_min_and_length(particles), std::move(particles),
-             testparticles} {}
+             testparticles, strategy} {}
 
   /**
    * Constructs a grid with the given minimum grid coordinates and grid length.
@@ -93,18 +109,44 @@ class Grid : public GridBase {
    * the three lengths.
    * \param particles The particles to place onto the grid.
    * \param testparticles Number of testparticles used in this event
+   * \param strategy The strategy for determining the cell size
    */
   Grid(const std::pair<std::array<float, 3>, std::array<float, 3>> &
            min_and_length,
-       const Particles &particles, int testparticles)
+       const Particles &particles, int testparticles,
+       CellSizeStrategy strategy = CellSizeStrategy::Optimal)
       : min_position_(min_and_length.first), length_(min_and_length.second) {
     /**
      * This normally equals 1/max_interaction_length, but if the number of cells
      * is reduced (because of low density) then this value is smaller.
      */
     std::array<float, 3> index_factor;
-    std::tie(index_factor, number_of_cells_) =
-        determine_cell_sizes(particles.size(), length_, testparticles);
+
+    switch (strategy) {
+      case CellSizeStrategy::Optimal:
+        std::tie(index_factor, number_of_cells_) =
+            determine_cell_sizes(particles.size(), length_, testparticles);
+        break;
+      case CellSizeStrategy::Largest:
+        // set number of cells
+        if (Options == GridOptions::PeriodicBoundaries) {
+          number_of_cells_ = {2, 2, 2};
+        } else {
+          number_of_cells_ = {1, 1, 1};
+        }
+
+        // set index factor
+        for (std::size_t i = 0; i < index_factor.size(); ++i) {
+          index_factor[i] = number_of_cells_[i] / length_[i];
+          while (index_factor[i] * length_[i] >= number_of_cells_[i]) {
+            index_factor[i] = std::nextafter(index_factor[i], 0.f);
+          }
+          assert(index_factor[i] * length_[i] < number_of_cells_[i]);
+        }
+        break;
+      default:
+        throw std::domain_error("Unhandled CellSizeStrategy!");
+    }
 
     build_cells(index_factor, particles);
   }

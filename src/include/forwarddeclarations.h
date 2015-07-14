@@ -65,6 +65,7 @@ class ParticleData;
 class Particles;
 class ParticleType;
 class ParticleTypePtr;
+class IsoParticleType;
 class PdgCode;
 class DecayBranch;
 class CollisionBranch;
@@ -74,6 +75,16 @@ enum class CalculationFrame {
     CenterOfVelocity,
     CenterOfMass,
     FixedTarget,
+};
+
+/// Possible methods of impact parameter sampling.
+enum class Sampling {
+  /// Sample from uniform distribution.
+  UNIFORM,
+  /// Sample from areal / quadratic distribution.
+  QUADRATIC,
+  /// Sample from custom, user-defined distribution.
+  CUSTOM,
 };
 
 /** Allows to choose which kind of density to calculate.
@@ -113,6 +124,8 @@ using ParticleList = build_vector_<ParticleData>;
 
 using ParticleTypeList = build_vector_<ParticleType>;
 using ParticleTypePtrList = build_vector_<ParticleTypePtr>;
+using IsoParticleTypeList = build_vector_<IsoParticleType>;
+using IsoParticleTypeRefList = build_vector_<const IsoParticleType&>;
 
 template<typename T>
 using ProcessBranchPtr = build_unique_ptr_<T>;
