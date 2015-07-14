@@ -66,6 +66,8 @@
 #include <sstream>
 #include <bitset>
 
+#include "stacktrace.h"
+
 // This C header is sadly required to check whether writing to a terminal or a file
 #include <cstdio>
 
@@ -502,6 +504,7 @@ namespace einhard
 				return {isEnabled<FATAL>(), colorize_stderr, areaName,
 					std::integral_constant<LogLevel, FATAL>(), stderr};
 			}
+			/** Will print stacktrace. */
 			template <typename... Ts> void fatal( Ts &&... args ) const noexcept
 			{
 				if( isEnabled<FATAL>() )
@@ -510,6 +513,7 @@ namespace einhard
 							  std::integral_constant<LogLevel, FATAL>()};
 					auto &&unused = {&( o << args )...};
 					o.doCleanup(stderr);
+					print_stacktrace(stderr, 63, 2);
 				}
 			}
 
