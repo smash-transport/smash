@@ -237,10 +237,8 @@ Experiment<Modus>::Experiment(Configuration config, bf::path output_path)
   log.info() << *this;
 
   // dilepton switch
-  bool dileptons_switch = false;
-  if (config.take({"Output", "Dileptons","Enable"}, false)) {
-    dileptons_switch = true;
-  }
+  const bool dileptons_switch = config.take(
+                                       {"Output", "Dileptons","Enable"}, false);
 
   // create finders
   if (config.take({"Collision_Term", "Decays"}, true)) {
