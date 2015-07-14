@@ -33,14 +33,14 @@ float breit_wigner(const double mandelstam_s, const float resonance_mass,
  * \todo rename this function to make clear what it is
  *
  * \param[in] energy \f$E\f$ (in GeV)
- * \param[in] momentum \f$p\f$ (in GeV)
+ * \param[in] momentum squared \f$p\f$ (in GeV\f$^2\f$)
  * \param[in] temperature \f$T\f$ (in GeV)
  *
  * \return \f$4\pi p^2 \exp{-\frac{E}{T}}\f$
  *
  * \fpPrecision Why \c double?
  */
-double density_integrand(const double energy, const double momentum,
+double density_integrand(const double energy, const double momentum_sqr,
                          const double temperature);
 
 /** samples a momentum from the Maxwell-Boltzmann distribution
