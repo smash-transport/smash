@@ -22,21 +22,21 @@ TEST(init_particle_types) {
   ParticleType::create_type_list(
       "# NAME MASS[GEV] WIDTH[GEV] PDG\n"
       "H 8.000 1.0 50661\n"
-      "A1 1.000 -1.0 10661\n"
-      "A2 1.500 -1.0 20661\n"
-      "A3 3.000 0.2 30661");
+      "A1⁰ 1.000 -1.0 10661\n"
+      "A2⁰ 1.500 -1.0 20661\n"
+      "A3⁰ 3.000 0.2 30661");
 }
 
 TEST(init_decay_channels) {
   // A3 -> A1 + A2
   // H -> A3 + A2, A1 + A1, A2 + A2 + A1
   const std::string decays_input(
-      "30661 \t# A3\n"
-      "2.0\t0\t20661 10661\t# A2 A1 \n \n"
-      " 50661\t# H\n \n"
-      " 0.5 \t0\t30661 20661\t# A3 A2 \n \n"
-      " 1.0 \t0\t10661 10661\t# A1 A1 \n \n"
-      " 1.5 \t0\t20661 20661 10661\t# A2 A2 A1\n");
+      "A3 \n"
+      "2.0\t0\tA2 A1\n \n"
+      "H\n \n"
+      " 0.5 \t0\tA3 A2\n \n"
+      " 1.0 \t0\tA1 A1\n \n"
+      " 1.5 \t0\tA2⁰ A1⁰ A1⁰\n");
   DecayModes::load_decaymodes(decays_input);
   ParticleType::check_consistency();
 }
@@ -73,7 +73,8 @@ TEST(create_decayaction) {
     switch (decaymodes_counter) {
       // Semistable two-body decay H -> A3 + A2
       case 0:
-        // Here the following mathematica code was used for check:
+        // Check consistency for width at pole
+        COMPARE(mode->type().width(m0_H, G0_H, m0_H), G0_H);
         /* mA2 = 1.5; mA1 = 1.0; m0A3 = 3.0; G0A3 = 0.2; m0H = 8.0; mH = 11.0;
            mA3min = 2.5; G0H = 1.0; L = 1.6;
            PostCutoff[m_] := (L^4 + ((mA3min + mA2)^2 - m0H^2)^2/
