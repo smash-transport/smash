@@ -513,7 +513,7 @@ namespace einhard
 							  std::integral_constant<LogLevel, FATAL>()};
 					auto &&unused = {&( o << args )...};
 					o.doCleanup(stderr);
-					print_stacktrace();
+					print_stacktrace(stderr, 63, 2);
 				}
 			}
 
