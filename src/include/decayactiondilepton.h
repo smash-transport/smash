@@ -17,30 +17,21 @@ namespace Smash {
 class DecayActionDilepton : public DecayAction {
  public:
    DecayActionDilepton(const ParticleData &p, float time_of_execution,
-                        float shining_weight_);
+                        float shining_weight, float dilepton_mass);
 
    // do not perform any dilepton actions = leave it empty
    void perform(Particles *, size_t &) override {};
 
-   /* generate_final_state stayed the same for a first version
-      but now for the dalitz decays one have to change it for
-      new three body decay behaviours
-    */
-    void generate_final_state() override;
 
-    float raw_weight_value() const override {
-      return shining_weight_;
-    }
+  float raw_weight_value() const override {
+    return shining_weight_;
+  }
+
+  void one_to_three() override;
 
  private:
    float shining_weight_;
-
-   void dalitz_cinematics();
-
-   void one_to_two() {
-     /* Sample the masses and momenta. */
-     sample_cms_momenta();
-   }
+   float dilepton_mass_;
 };
 
 }  // namespace Smash

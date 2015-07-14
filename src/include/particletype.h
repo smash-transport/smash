@@ -102,6 +102,9 @@ class ParticleType {
   /// \copydoc PdgCode::is_hadron
   bool is_hadron() const { return pdgcode_.is_hadron(); }
 
+  /// \copydoc PdgCode::is_lepton
+  bool is_lepton() const { return pdgcode_.is_lepton(); }
+
   /// \copydoc PdgCode::baryon_number
   int baryon_number() const { return pdgcode_.baryon_number(); }
 

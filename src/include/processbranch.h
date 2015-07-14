@@ -33,7 +33,8 @@ enum class ProcessType {
   TwoToTwo = 3,
   String = 4,
   Decay = 5,
-  Wall = 6
+  Wall = 6,
+  DileptonDecay = 7
 };
 
 std::ostream& operator<< (std::ostream& os, ProcessType process_type);
@@ -198,10 +199,10 @@ class CollisionBranch : public ProcessBranch {
    * be more efficient.
    */
   ParticleTypePtrList particle_types_;
-  /** 
-   * Process type are used to distinguish different types of processes, 
-   * e.g. string formation, resonance formation, elastic scattering and so on. 
-   *  
+  /**
+   * Process type are used to distinguish different types of processes,
+   * e.g. string formation, resonance formation, elastic scattering and so on.
+   *
    */
   ProcessType process_type_;
 };

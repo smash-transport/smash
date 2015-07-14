@@ -20,7 +20,7 @@ General:
     Delta_Time:    0.1
 
     # end time of simulation
-    End_Time:      200.0
+    End_Time:      20.0
 
     # initial random seed (auto-generated if negative)
     Randomseed:    1

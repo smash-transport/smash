@@ -7,6 +7,8 @@
 
 #include "include/decaytype.h"
 
+#include <math.h>
+
 #include "include/cxx14compat.h"
 #include "include/integrate.h"
 #include "include/kinematics.h"
@@ -78,6 +80,11 @@ static double Post_FF_sqr(double m, double M0, double srts0, double L) {
   double FF = (L4 + (s0-M2)*(s0-M2)/4.) /
               (L4 + (m2-(s0+M2)/2.) * (m2-(s0+M2)/2.));
   return FF*FF;
+}
+
+// #CleanUp
+float DecayType::diff_width(float, float, PdgCode) const {
+  return 0.f;
 }
 
 
@@ -298,11 +305,41 @@ float ThreeBodyDecay::in_width(float, float G0, float, float, float) const {
 ThreeBodyDecayDilepton::ThreeBodyDecayDilepton(ParticleTypePtrList part_types,
                                            int l)
                                       : ThreeBodyDecay(part_types, l) {
- // checks
+ // checks #CleanUp
 }
 
-float ThreeBodyDecayDilepton::diff_width() {
 
+float ThreeBodyDecayDilepton::diff_width(float m_parent, float m_final_part, PdgCode pdg) const {
+  float m_par = m_parent;
+  float m_dil = m_final_part;
+
+  float gamma = 0.0;
+  float ff = 0.0;
+  switch (pdg.get_decimal()) {
+    case 111: /*pi0*/
+      gamma = 78e-10;
+      ff = 1.+5.5*m_dil*m_dil;
+
+      return (4./(137.*3.*M_PI))*gamma/m_dil*pow(1.-m_dil/m_par*m_dil/m_par,3.)*ff*ff;
+
+    case 221: /*eta*/
+      gamma = 46e-8;
+      ff = 1./(1.-(m_dil*m_dil/0.676));
+
+      return (4./(137.*3.*M_PI))*gamma/m_dil*pow(1.-m_dil/m_par*m_dil/m_par,3.)*ff*ff;
+
+    case 223: /*omega*/
+
+    // WRONG WRONG WRONG #CleanUp
+    gamma = 46e-8;
+    ff = 1./(1.-(m_dil*m_dil/0.676));
+
+    return (4./(137.*3.*M_PI))*gamma/m_dil*pow(1.-m_dil/m_par*m_dil/m_par,3.)*ff*ff;
+
+     /* missing: Delta, Delta* and N* */
+    default:
+      throw std::runtime_error("Error in ThreeBodyDecayDilepton");
+  }
 }
 
 

@@ -248,6 +248,15 @@ class PdgCode {
   inline bool is_hadron() const {
     return (digits_.n_q3_ != 0 && digits_.n_q2_ != 0);
   }
+  /// returns true if this is a lepton.
+  inline bool is_lepton() const {
+    return (ucode() == 0x11 ||
+            ucode() == 0x12 ||
+            ucode() == 0x13 ||  // #CleanUp
+            ucode() == 0x14 ||
+            ucode() == 0x15 ||
+            ucode() == 0x16);
+  }
   /// returns the baryon number of the particle.
   inline int baryon_number() const {
     if (!is_hadron() || digits_.n_q1_ == 0) {
@@ -729,7 +738,7 @@ return (pdg1 ==  0x11 && pdg2 == -0x11) ||
        (pdg3 ==  0x11 && pdg2 == -0x11) ||
        (pdg3 == -0x11 && pdg2 ==  0x11) ||
        (pdg3 ==  0x13 && pdg2 == -0x13) ||
-       (pdg3 == -0x13 && pdg2 ==  0x13) ||
+       (pdg3 == -0x13 && pdg2 ==  0x13) ||  // #CleanUp
        (pdg1 ==  0x11 && pdg3 == -0x11) ||
        (pdg1 == -0x11 && pdg3 ==  0x11) ||
        (pdg1 ==  0x13 && pdg3 == -0x13) ||
