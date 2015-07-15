@@ -28,7 +28,6 @@ namespace Smash {
 ActionList DecayActionsFinderDilepton::find_possible_actions(
       const ParticleList &search_list,
       float dt) const {
-
   ActionList actions;
 
   for (const auto &p : search_list) {
@@ -42,7 +41,6 @@ ActionList DecayActionsFinderDilepton::find_possible_actions(
                   p.type().get_partial_widths_dilepton(p.effective_mass());
 
     for (DecayBranchPtr & mode : dil_modes) {
-
       const float partial_width = mode->weight();
       // SHINING as described in \iref{Schmidt:2008hm}, chapter 2D
       const float sh_weight = dt * partial_width * inv_gamma;
@@ -50,7 +48,6 @@ ActionList DecayActionsFinderDilepton::find_possible_actions(
       auto act = make_unique<DecayActionDilepton>(p, 0.f, sh_weight);
       act->add_decay(std::move(mode));
       actions.emplace_back(std::move(act));
-
     }
   }
 
@@ -77,14 +74,12 @@ ActionList DecayActionsFinderDilepton::find_final_actions(
                                p.type().get_partial_widths(p.effective_mass()));
 
     for (DecayBranchPtr & mode : dil_modes) {
-
       const float partial_width = mode->weight();
       const float sh_weight = partial_width * inv_gamma / width_tot;
 
       auto act = make_unique<DecayActionDilepton>(p, 0.f, sh_weight);
       act->add_decay(std::move(mode));
       actions.emplace_back(std::move(act));
-
     }
   }
 

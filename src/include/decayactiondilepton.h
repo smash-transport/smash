@@ -16,19 +16,18 @@ namespace Smash {
 
 class DecayActionDilepton : public DecayAction {
  public:
-   DecayActionDilepton(const ParticleData &p, float time_of_execution,
+  DecayActionDilepton(const ParticleData &p, float time_of_execution,
                         float shining_weight_);
 
-   /* generate_final_state from DecayAction can be used for
-    * dilepton decays, too.
-    */
-
-    float raw_weight_value() const override {
-      return shining_weight_;
-    }
+  /* generate_final_state from DecayAction can be used for
+   * dilepton decays, too.
+   */
+  float raw_weight_value() const override {
+     return shining_weight_;
+  }
 
  private:
-   float shining_weight_;
+  float shining_weight_;
 };
 
 }  // namespace Smash

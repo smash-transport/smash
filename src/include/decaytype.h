@@ -163,9 +163,9 @@ class TwoBodyDecayUnstable : public TwoBodyDecay {
  * as the final state particles.
  */
 class TwoBodyDecayDilepton : public TwoBodyDecayStable {
-  public:
-    TwoBodyDecayDilepton(ParticleTypePtrList part_types, int l);
-    float width(float m0, float G0, float m) const override;
+ public:
+  TwoBodyDecayDilepton(ParticleTypePtrList part_types, int l);
+  float width(float m0, float G0, float m) const override;
 };
 
 /**

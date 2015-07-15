@@ -38,7 +38,6 @@ namespace Smash {
 
 class DecayActionsFinderDilepton : public DecayActionsFinder {
  public:
-
   /** Initialize the finder */
   DecayActionsFinderDilepton() {}
 
@@ -52,8 +51,7 @@ class DecayActionsFinderDilepton : public DecayActionsFinder {
    * weight for the remaining time.
    */
   ActionList find_final_actions(const Particles &search_list) const override;
-
- };
+};
 
 }  // namespace Smash
 
