@@ -151,6 +151,10 @@ class Experiment : public ExperimentBase {
                       size_t &total_pauliblocked,
                       const ParticleList &particles_before_actions);
 
+  /** It generates the final state with the right kinematics and then writes
+   * the given dilepton action in the dilepton output file, instead of
+   * actually performing the action.
+   */
   void write_dilepton_action(const ActionPtr &action,
                                const ParticleList &particles_before_actions);
 

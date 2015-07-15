@@ -35,7 +35,7 @@ ActionList DecayActionsFinder::find_possible_actions(
     // total decay width (mass-dependent)
     const float width = total_weight<DecayBranch>(processes);
 
-    // check if check if there are any (hadronic) decays
+    // check if there are any (hadronic) decays
     if (!(width > 0.0)) {
       continue;
     }

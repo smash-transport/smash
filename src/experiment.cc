@@ -569,7 +569,7 @@ size_t Experiment<Modus>::run_time_evolution(const int evt_num) {
 
     const auto particles_before_actions = particles_.copy_to_vector();
 
-    /* (1.5) Dileptons */
+    /* (1.d) Dileptons */
     if (dilepton_finder_ != nullptr) {
       dilepton_actions = dilepton_finder_->find_possible_actions(
                                               particles_before_actions,
@@ -688,7 +688,7 @@ void Experiment<Modus>::do_final_decays(size_t &interactions_total) {
     interactions_old = interactions_total;
     const auto particles_before_actions = particles_.copy_to_vector();
 
-    /* Dileptons*/
+    /* Dileptons */
     if (dilepton_finder_ != nullptr) {
       dilepton_actions = dilepton_finder_->find_final_actions(particles_);
 
