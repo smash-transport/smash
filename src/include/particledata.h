@@ -54,8 +54,9 @@ class ParticleData {
   /** Returns the particle's effective mass
    * (as determined from the 4-momentum, possibly "off-shell"). */
   float effective_mass() const {
-    if (pdgcode() == 0x22) {
-      return 0.;   // photon: prevent numerical problems
+    const float m_pole = pole_mass();
+    if (m_pole < really_small) {
+      return m_pole;  // prevent numerical problems with massless or very light particles
     } else {
       return momentum().abs();
     }
