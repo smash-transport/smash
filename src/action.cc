@@ -24,8 +24,9 @@
 
 namespace Smash {
 
-Action::Action(const ParticleList &in_part, float time_of_execution)
-    : incoming_particles_(in_part), time_of_execution_(time_of_execution) {}
+Action::Action(const ParticleList &in_part, float time)
+              : incoming_particles_(in_part),
+                time_of_execution_(time+in_part[0].position().x0()) {}
 
 Action::~Action() = default;
 
@@ -55,6 +56,12 @@ bool Action::is_pauli_blocked(const Particles & particles,
 
 const ParticleList& Action::incoming_particles() const {
   return incoming_particles_;
+}
+
+void Action::update_incoming(const Particles &particles) {
+  for (auto &p : incoming_particles_) {
+    p = particles.lookup(p);
+  }
 }
 
 FourVector Action::get_interaction_point() {

@@ -16,6 +16,9 @@ General:
     # Modus decision
     Modus:         Collider
 
+    # determine whether to use time steps (necessary for potentials)
+    Use_Time_Steps: True
+
     # temporal grid spacing
     Delta_Time:    0.1
 
