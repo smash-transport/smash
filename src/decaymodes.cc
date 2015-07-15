@@ -34,7 +34,6 @@ void DecayModes::add_mode(float ratio, int L,
   assert(all_decay_types != nullptr);
   switch (particle_types.size()) {
   case 2:
-<<<<<<< HEAD
     if (!particle_types[0]->is_hadron() || !particle_types[1]->is_hadron()) {
       logger<LogArea::DecayModes>().warn(
           "decay products are no hadrons A: ", *particle_types[0],
@@ -46,9 +45,6 @@ void DecayModes::add_mode(float ratio, int L,
           make_unique<TwoBodyDecayDilepton>(particle_types, L));
     } else if (particle_types[0]->is_stable() &&
                particle_types[1]->is_stable()) {
-=======
-    if (particle_types[0]->is_stable() && particle_types[1]->is_stable()) {
->>>>>>> master
       all_decay_types->emplace_back(
           make_unique<TwoBodyDecayStable>(particle_types, L));
     } else if (particle_types[0]->is_stable() ||
@@ -61,7 +57,7 @@ void DecayModes::add_mode(float ratio, int L,
     }
     break;
   case 3:
-<<<<<<< HEAD
+
     if (!particle_types[0]->is_hadron() || !particle_types[1]->is_hadron() ||
         !particle_types[2]->is_hadron()) {
       logger<LogArea::DecayModes>().warn(
@@ -69,8 +65,6 @@ void DecayModes::add_mode(float ratio, int L,
           " B: ", *particle_types[1],
           " C: ", *particle_types[2]);
     }
-=======
->>>>>>> master
     all_decay_types->emplace_back(
         make_unique<ThreeBodyDecay>(particle_types, L));
     break;
