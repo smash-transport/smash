@@ -112,12 +112,12 @@ void DecayModes::load_decaymodes(const std::string &input) {
   decaymodes.resize(ParticleType::list_all().size());
   all_decay_modes = &decaymodes;
 
-  const IsoParticleType *isotype_mother = NULL;
+  const IsoParticleType *isotype_mother = nullptr;
   ParticleTypePtrList mother_states;
   std::vector<DecayModes> decay_modes_to_add;  // one for each mother state
 
   const auto end_of_decaymodes = [&]() {
-    if (isotype_mother == NULL) {  // at the start of the file
+    if (isotype_mother == nullptr) {  // at the start of the file
       return;
     }
     // Loop over all states in the mother multiplet and add modes
