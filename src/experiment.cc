@@ -421,9 +421,10 @@ size_t Experiment<Modus>::run_time_evolution_without_time_steps(
     // get next action
     ActionPtr act = actions.pop();
     if (!act->is_valid(particles_)) {
-      //log.info() << "invalid!";
+      log.debug(~einhard::DRed(), "✘ ", act, " (discarded: invalid)");
       continue;
     }
+    log.debug(~einhard::Green(), "✔ ", act);
 
     /* (1) Propagate to the next action. */
 
@@ -481,8 +482,9 @@ size_t Experiment<Modus>::run_time_evolution_without_time_steps(
 
     /* (2) Perform action. */
 
-    // update ParticleData because the stored information about the incoming
-    // particles will be outdated
+    // Update the positions of the incoming particles, because the information
+    // in the action object will be outdated as the particles have been
+    // propagated since the construction of the action.
     act->update_incoming(particles_);
 
     perform_action(act, interactions_total, total_pauli_blocked, particles_);

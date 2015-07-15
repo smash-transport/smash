@@ -27,7 +27,7 @@ namespace Smash {
 class Actions {
  public:
   /** Default constructor, creating an empty Actions object. */
-   Actions() {}
+  Actions() {}
   /**
    * Creates a new Actions object from an ActionList.
    *
@@ -37,7 +37,7 @@ class Actions {
    * \param action_list The ActionList from which to construct the Actions
    *                    object
    */
-  Actions(ActionList&& action_list)
+  explicit Actions(ActionList&& action_list)
       : data_(std::move(action_list)) {
     sort(data_);
   }
