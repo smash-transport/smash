@@ -29,8 +29,8 @@ class DecayModes {
     decay_modes_.push_back(std::move(branch));
   }
 
-  /* Make sure ratios add to 1 */
-  void renormalize(PdgCode pdgcode, float renormalization_constant);
+  /* Make sure branching ratios add up to 1. */
+  void renormalize(std::string name);
 
   /* Check if empty */
   bool is_empty() const { return decay_modes_.empty(); }

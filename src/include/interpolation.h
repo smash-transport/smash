@@ -73,9 +73,11 @@ Permutation generate_sort_permutation(std::vector<T> const& v, Cmp compare) {
 
 /// Apply a permutation to a vector.
 template <typename T>
-std::vector<T> apply_permutation(const std::vector<T>& v, const Permutation& p) {
+std::vector<T> apply_permutation(const std::vector<T>& v,
+                                 const Permutation& p) {
   std::vector<T> copied_v = v;
-  std::transform(p.begin(), p.end(), copied_v.begin(), [&](size_t i) { return v[i]; });
+  std::transform(p.begin(), p.end(), copied_v.begin(),
+                 [&](size_t i) { return v[i]; });
   return copied_v;
 }
 
@@ -95,8 +97,8 @@ InterpolateData<T>::InterpolateData(const std::vector<T>& x,
   }
 }
 
-/// Find the index in v that corresponds to the last value strictly smaller than x.
-/// If no such value exists, the first value is returned.
+/// Find the index in v that corresponds to the last value strictly smaller
+/// than x. If no such value exists, the first value is returned.
 ///
 /// This assumes v is sorted and uses a binary search.
 ///

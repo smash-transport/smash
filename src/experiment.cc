@@ -124,7 +124,8 @@ std::unique_ptr<ExperimentBase> ExperimentBase::create(Configuration config,
   } else if (modus_chooser.compare("List") == 0) {
     return ExperimentPointer(new Experiment<ListModus>(config, output_path));
   } else if (modus_chooser.compare("Collider") == 0) {
-    return ExperimentPointer(new Experiment<ColliderModus>(config, output_path));
+    return ExperimentPointer(new Experiment<ColliderModus>(config,
+                                                           output_path));
   } else if (modus_chooser.compare("Sphere") == 0) {
     return ExperimentPointer(new Experiment<SphereModus>(config, output_path));
   } else {
@@ -316,19 +317,20 @@ Experiment<Modus>::Experiment(Configuration config, bf::path output_path)
     outputs_.emplace_back(std::move(oscar));
   }
   if (static_cast<bool>(output_conf.take({"Vtk", "Enable"}))) {
-    outputs_.emplace_back(new VtkOutput(output_path, std::move(output_conf["Vtk"])));
+    outputs_.emplace_back(new VtkOutput(output_path,
+                                        std::move(output_conf["Vtk"])));
   } else {
     output_conf.take({"Vtk"});
   }
   if (static_cast<bool>(output_conf.take({"Binary_Collisions", "Enable"}))) {
     outputs_.emplace_back(new BinaryOutputCollisions(output_path,
-                                      std::move(output_conf["Binary_Collisions"])));
+                                  std::move(output_conf["Binary_Collisions"])));
   } else {
     output_conf.take({"Binary_Collisions"});
   }
   if (static_cast<bool>(output_conf.take({"Binary_Particles", "Enable"}))) {
     outputs_.emplace_back(new BinaryOutputParticles(output_path,
-                                      std::move(output_conf["Binary_Particles"])));
+                                  std::move(output_conf["Binary_Particles"])));
   } else {
     output_conf.take({"Binary_Particles"});
   }

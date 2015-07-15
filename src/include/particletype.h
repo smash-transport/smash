@@ -36,7 +36,7 @@ class ParticleType {
   /**
    * Creates a fully initialized ParticleType object.
    *
-   * \param n The name of the particle (only used for debug output).
+   * \param n The name of the particle.
    * \param m The mass of the particle.
    * \param w The width of the particle.
    * \param id The PDG code of the particle.
@@ -62,12 +62,8 @@ class ParticleType {
   /// Returns the DecayModes object for this particle type.
   const DecayModes &decay_modes() const;
 
-  /// Returns the name of the particle (for debug output only).
-#ifdef NDEBUG
-  std::string name() const { return {}; }
-#else
+  /// Returns the name of the particle.
   const std::string &name() const { return name_; }
-#endif
 
   /// Returns the particle mass.
   float mass() const { return mass_; }
@@ -282,12 +278,8 @@ class ParticleType {
   };
 
  private:
-#ifndef NDEBUG
   /// name of the particle
-  /// This variable is only used for debug output. Non-debug builds save the
-  /// memory to be more cache-efficient.
   std::string name_;
-#endif
   /// mass of the particle
   float mass_;
   /// width of the particle

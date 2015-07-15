@@ -70,13 +70,13 @@ static float BlattWeisskopf(const float p_ab, const int L)
  * \param L Lambda parameter of the form factor [GeV]. This is a cut-off
  * parameter that can be different for baryons and mesons.
  */
-static double Post_FF_sqr(double m, double M0, double srts0, double L) {
+static float Post_FF_sqr(float m, float M0, float srts0, float L) {
   const auto L4 = L*L*L*L;
   const auto m2 = m*m;
   const auto M2 = M0*M0;
   const auto s0 = srts0*srts0;
-  double FF = (L4 + (s0-M2)*(s0-M2)/4.) /
-              (L4 + (m2-(s0+M2)/2.) * (m2-(s0+M2)/2.));
+  const float FF = (L4 + (s0-M2)*(s0-M2)/4.) /
+                   (L4 + (m2-(s0+M2)/2.) * (m2-(s0+M2)/2.));
   return FF*FF;
 }
 
@@ -141,14 +141,14 @@ float TwoBodyDecayStable::in_width(float m0, float G0, float m,
 
 // TwoBodyDecaySemistable
 
-static double integrand_rho_Manley(double mass, double srts, double stable_mass,
-                                   ParticleTypePtr type, int L) {
+static float integrand_rho_Manley(float mass, float srts, float stable_mass,
+                                  ParticleTypePtr type, int L) {
   if (srts <= mass + stable_mass) {
     return 0.;
   }
 
   /* center-of-mass momentum of final state particles */
-  const double p_f = pCM(srts, stable_mass, mass);
+  const float p_f = pCM(srts, stable_mass, mass);
 
   return p_f/srts * BlattWeisskopf(p_f, L) * 2.*srts
          * spectral_function(mass, type->mass(), type->total_width(srts));
@@ -200,7 +200,7 @@ float TwoBodyDecaySemistable::width(float m0, float G0, float m) const {
 
 float TwoBodyDecaySemistable::in_width(float m0, float G0, float m,
                                        float m1, float m2) const {
-  double p_f = pCM(m, m1, m2);
+  const float p_f = pCM(m, m1, m2);
 
   return G0 * p_f * BlattWeisskopf(p_f, L_)
          * Post_FF_sqr(m, m0, particle_types_[0]->mass()
