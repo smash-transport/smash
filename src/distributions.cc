@@ -23,9 +23,9 @@ namespace Smash {
  */
 float breit_wigner(const double mandelstam_s, const float resonance_mass,
                     const float resonance_width) {
-  const float G2 = resonance_width * resonance_width;
-  const float s_minus_m = mandelstam_s - resonance_mass * resonance_mass;
-  return mandelstam_s * G2 / (s_minus_m * s_minus_m + mandelstam_s * G2);
+  const double tmp = (mandelstam_s - resonance_mass * resonance_mass) /
+                     resonance_width;
+  return 1.f / (tmp * tmp / mandelstam_s + 1.f);
 }
 
 /* density_integrand - Maxwell-Boltzmann distribution */
