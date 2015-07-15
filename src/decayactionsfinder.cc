@@ -31,7 +31,7 @@ ActionList DecayActionsFinder::find_possible_actions(
     }
 
     DecayBranchList processes =
-                      p.type().get_partial_widths(p.effective_mass());
+                      p.type().get_partial_widths_hadronic(p.effective_mass());
     // total decay width (mass-dependent)
     const float width = total_weight<DecayBranch>(processes);
 
