@@ -61,6 +61,12 @@ struct ExperimentParameters {
   float gauss_cutoff_in_sigma;
 };
 
+struct AdaptiveParameters {
+  float smoothing_factor;
+  float target_rate;
+  float allowed_deviation;
+};
+
 }  // namespace Smash
 
 #endif  // SRC_INCLUDE_EXPERIMENTPARAMETERS_H_

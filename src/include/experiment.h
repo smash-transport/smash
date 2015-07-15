@@ -166,6 +166,19 @@ class Experiment : public ExperimentBase {
    */
   size_t run_time_evolution_without_time_steps(const int evt_num);
 
+  /** Runs the time evolution of an event with adaptive time steps
+   *
+   * Here, the time steps are looped over, collisions and decays are carried
+   * out and particles are propagated while the size of the time step is adapted
+   * to the state of the system.
+   *
+   * \param evt_num Running number of the event
+   * \param adaptive_parameters Additional parameters for adaptive time steps
+   * \return The number of interactions from the event
+   */
+  size_t run_time_evolution_adaptive_time_steps(
+      const int evt_num, AdaptiveParameters adaptive_parameters);
+
   /** Performs the final decays of an event
    *
    * \param interactions_total The number of interactions so far
@@ -312,6 +325,11 @@ class Experiment : public ExperimentBase {
 
   /// Type of density to be written to collision headers
   DensityType dens_type_ = DensityType::None;
+
+  /**
+   * Pointer to additional parameters that are needed for adaptive time steps.
+   */
+  std::unique_ptr<AdaptiveParameters> adaptive_parameters_ = nullptr;
 
   /**\ingroup logging
    * Writes the initial state for the Experiment to the output stream.

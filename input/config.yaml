@@ -16,9 +16,15 @@ General:
     # Modus decision
     Modus:         Collider
 
-    # Mode of the time evolution:
-    # ("Fixed": fixed-sized time steps, "None": no time steps)
+    # use of time steps for the time evolution
+    # ("None", "Fixed", "Adaptive")
     Time_Step_Mode: Fixed
+
+    # additional parameters for the adaptive time step mode
+    #Adaptive_Time_Step:
+    #    Smoothing_Factor: 0.1
+    #    Target_Rate: 0.3
+    #    Allowed_Deviation: 4
 
     # temporal grid spacing
     Delta_Time:    0.1

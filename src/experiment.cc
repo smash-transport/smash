@@ -198,6 +198,9 @@ std::ostream &operator<<(std::ostream &out, const Experiment<Modus> &e) {
       out << "Using fixed time step size: "
           << e.parameters_.timestep_duration() << " fm/c\n";
       break;
+    case TimeStepMode::Adaptive:
+      out << "Adaptive time step mode\n";
+      break;
   }
   out << "End time: " << e.end_time_ << " fm/c\n";
   out << e.modus_;
@@ -267,6 +270,18 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     log.info() << "Pauli blocking is ON.";
     pauli_blocker_ = make_unique<PauliBlocker>(
         config["Collision_Term"]["Pauli_Blocking"], parameters_);
+  }
+
+  // get adaptive time step parameters
+  if (time_step_mode_ == TimeStepMode::Adaptive) {
+    float smoothing_factor =
+        config.take({"General", "Adaptive_Time_Step", "Smoothing_Factor"});
+    float rate_target =
+        config.take({"General", "Adaptive_Time_Step", "Target_Rate"});
+    float allowed_deviation =
+        config.take({"General", "Adaptive_Time_Step", "Allowed_Deviation"});
+    adaptive_parameters_ = make_unique<AdaptiveParameters>(
+        smoothing_factor, rate_target, allowed_deviation);
   }
 
   // create outputs
@@ -846,6 +861,16 @@ size_t Experiment<Modus>::run_time_evolution_fixed_time_step(
   return interactions_total;
 }
 
+/* This is the loop over timesteps, carrying out collisions and decays
+ * and propagating particles. */
+template <typename Modus>
+size_t Experiment<Modus>::run_time_evolution_adaptive_time_steps(
+    const int evt_num, AdaptiveParameters adaptive_parameters) {
+  size_t interactions_total = 0;
+  // TODO: implement adaptive time step mode
+  return interactions_total;
+}
+
 template<typename Modus>
 void Experiment<Modus>::intermediate_output(const int evt_num,
     size_t& interactions_total, size_t& previous_interactions_total) {
@@ -1008,6 +1033,10 @@ void Experiment<Modus>::run() {
         break;
       case TimeStepMode::Fixed:
         interactions_total = run_time_evolution_fixed_time_step(j);
+        break;
+      case TimeStepMode::Adaptive:
+        interactions_total =
+            run_time_evolution_adaptive_time_steps(j, *adaptive_parameters_);
         break;
     }
 
