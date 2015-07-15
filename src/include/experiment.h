@@ -54,6 +54,7 @@ class ExperimentBase {
    *
    * \param config The configuration object that sets all initial conditions of
    *               the experiment.
+   * \param output_path The directory where the output files are written.
    *
    * \return An owning pointer to the Experiment object, using the
    *         ExperimentBase interface.
@@ -136,6 +137,7 @@ class Experiment : public ExperimentBase {
    *                is only necessary for bookkeeping: Values are not only read,
    *                but actually taken out of the object. Thus, all values that
    *                remain were not used.
+   * \param output_path The directory where the output files are written.
    */
   explicit Experiment(Configuration config, bf::path output_path);
 

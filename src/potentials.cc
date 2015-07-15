@@ -64,7 +64,6 @@ Potentials::Potentials(Configuration conf, const ExperimentParameters &param)
   if (use_symmetry_) {
     symmetry_s_ = conf.take({"Symmetry", "S_Pot"});
   }
-
 }
 
 Potentials::~Potentials() {

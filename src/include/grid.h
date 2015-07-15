@@ -36,10 +36,8 @@ enum class GridOptions : char {
  * Indentifies the strategy of determining the cell size.
  */
 enum class CellSizeStrategy : char {
-
   /// Look for optimal cell size.
   Optimal,
-
   /// Make cells as large as possible.
   ///
   /// This means a single cell for normal boundary conditions and 8 cells
