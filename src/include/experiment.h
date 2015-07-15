@@ -298,7 +298,7 @@ class Experiment : public ExperimentBase {
   /**
    * This indicates whether to use time steps.
    */
-  const bool use_time_steps_;
+  const TimeStepMode time_step_mode_;
 
   /** The conserved quantities of the system.
    *

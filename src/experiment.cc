@@ -120,8 +120,8 @@ std::unique_ptr<ExperimentBase> ExperimentBase::create(Configuration config,
                   << "periodic boundaries are not taken into account "
                   << "in the density calculation";
     }
-    if (config.has_value({"General", "Use_Time_Steps"}) &&
-        !config.read({"General", "Use_Time_Steps"})) {
+    if (config.has_value({"General", "Time_Step_Mode"}) &&
+        config.read({"General", "Time_Step_Mode"}) == TimeStepMode::None) {
       log.error() << "Box modus does not work correctly without time steps for "
                   << "now: periodic boundaries are not taken into account when "
                   << "looking for interactions.";
@@ -200,11 +200,14 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
  */
 template <typename Modus>
 std::ostream &operator<<(std::ostream &out, const Experiment<Modus> &e) {
-  if (e.use_time_steps_) {
-    out << "Starting with temporal stepsize: "
-        << e.parameters_.timestep_duration() << " fm/c\n";
-  } else {
-    out << "Not using time steps\n";
+  switch(e.time_step_mode_) {
+    case TimeStepMode::None:
+      out << "Not using time steps\n";
+      break;
+    case TimeStepMode::Fixed:
+      out << "Starting with temporal stepsize: "
+          << e.parameters_.timestep_duration() << " fm/c\n";
+      break;
   }
   out << "End time: " << e.end_time_ << " fm/c\n";
   out << e.modus_;
@@ -250,7 +253,8 @@ Experiment<Modus>::Experiment(Configuration config, bf::path output_path)
       force_decays_(
           config.take({"Collision_Term", "Force_Decays_At_End"}, true)),
       use_grid_(config.take({"General", "Use_Grid"}, true)),
-      use_time_steps_(config.take({"General", "Use_Time_Steps"}, true)) {
+      time_step_mode_(
+          config.take({"General", "Time_Step_Mode"}, TimeStepMode::Fixed)) {
   const auto &log = logger<LogArea::Experiment>();
   log.info() << *this;
 
@@ -925,9 +929,16 @@ void Experiment<Modus>::run() {
     }
 
     /* the time evolution of the relevant subsystem */
-    size_t interactions_total = use_time_steps_
-                                    ? run_time_evolution(j)
-                                    : run_time_evolution_without_time_steps(j);
+    size_t interactions_total;
+    switch(time_step_mode_) {
+      case TimeStepMode::None:
+        interactions_total = run_time_evolution_without_time_steps(j);
+        break;
+      case TimeStepMode::Fixed:
+        interactions_total = run_time_evolution(j);
+        break;
+    }
+
     if (force_decays_) {
       do_final_decays(interactions_total);
     }
