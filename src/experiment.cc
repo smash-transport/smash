@@ -123,6 +123,7 @@ std::unique_ptr<ExperimentBase> ExperimentBase::create(Configuration config,
       log.error() << "Box modus does not work correctly without time steps for "
                   << "now: periodic boundaries are not taken into account when "
                   << "looking for interactions.";
+      throw std::invalid_argument("Can't use box modus without time steps!");
     }
     return ExperimentPointer(new Experiment<BoxModus>(config, output_path));
   } else if (modus_chooser.compare("List") == 0) {
