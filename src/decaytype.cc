@@ -235,7 +235,7 @@ float TwoBodyDecayUnstable::in_width(float, float G0, float,
 
 TwoBodyDecayDilepton::TwoBodyDecayDilepton(ParticleTypePtrList part_types,
                                            int l)
-                                      : TwoBodyDecay(part_types, l) {
+                                      : TwoBodyDecayStable(part_types, l) {
   if (!is_dilepton(particle_types_[0]->pdgcode(),
                   particle_types_[1]->pdgcode())) {
     throw std::runtime_error(

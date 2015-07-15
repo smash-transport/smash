@@ -76,7 +76,7 @@ Output:
         # ("particle", "baryon", "baryonic isospin", "pion")
         Density_Type:      "baryon"
     Dileptons:
-        Enable:             True
+        Enable:             False
 
 Collision_Term:
     Decays:        True
