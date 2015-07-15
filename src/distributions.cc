@@ -42,8 +42,7 @@ double sample_momenta(const double temperature, const double mass) {
   float energy_average = 3 * temperature
                            + mass * gsl_sf_bessel_K1(mass / temperature)
                                   / gsl_sf_bessel_Kn(2, mass / temperature);
-  // TODO(oliiny): Why is it E * E + m * m here, not with minus?
-  float momentum_average_sqr = energy_average * energy_average + mass * mass;
+  float momentum_average_sqr = (energy_average - mass) * (energy_average + mass);
   float energy_min = mass;
   float energy_max = 50.0f * temperature;
   /* double the massless peak value to be above maximum of the distribution */
