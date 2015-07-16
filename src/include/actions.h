@@ -106,6 +106,10 @@ class Actions {
 
   /**
    * Dynamic data.
+   *
+   * Vector is likely the best container type here. Because std::sort requires
+   * random access iterators. Any linked data structure (e.g. list) thus
+   * requires a less efficient sort algorithm.
    */
   std::vector<ActionPtr> data_;
 };

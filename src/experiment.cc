@@ -635,10 +635,6 @@ size_t Experiment<Modus>::run_time_evolution(const int evt_num) {
 
   Actions actions;
   while (!(++parameters_.labclock > end_time_)) {
-    // vector is likely the best container type here. Because std::sort requires
-    // random access iterators. Any linked data structure (e.g. list) thus
-    // requires a less efficient sort algorithm.
-
     /* (1.a) Create grid. */
     const auto &grid =
         use_grid_ ? modus_.create_grid(particles_, parameters_.testparticles)
