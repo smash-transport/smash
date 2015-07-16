@@ -62,7 +62,8 @@ class DecayType {
                          float m1, float m2) const = 0;
 
   // TODO doc
-  virtual float diff_width(float m_parent, float m_final_part, PdgCode pdg) const;
+  virtual float diff_width(float m_parent, float m_dil,
+                           float m_other, PdgCode pdg) const;
 
 
  protected:
@@ -190,7 +191,8 @@ class ThreeBodyDecay : public DecayType {
 class ThreeBodyDecayDilepton : public ThreeBodyDecay {
  public:
   ThreeBodyDecayDilepton(ParticleTypePtrList part_types, int l);
-  float diff_width(float m_parent, float m_final_part, PdgCode pdg) const override;
+  float diff_width(float m_parent, float m_dil,
+                   float m_other, PdgCode pdg) const override;
 };
 
 

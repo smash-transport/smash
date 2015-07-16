@@ -136,8 +136,7 @@ void DecayModes::load_decaymodes(const std::string &input) {
     // Loop over all states in the mother multiplet and add modes
     for (size_t m = 0; m < mother_states.size(); m++) {
       if (decay_modes_to_add[m].is_empty()) {
-        throw MissingDecays("No decay modes found for particle " +
-                            mother_states[m]->name());
+        continue;
       }
       decay_modes_to_add[m].renormalize(mother_states[m]->name());
       PdgCode pdgcode = mother_states[m]->pdgcode();

@@ -61,23 +61,26 @@ ActionList DecayActionsFinderDilepton::find_possible_actions(
           {
           float partial_width = mode->weight();
           // SHINNING as described in \iref{Schmidt:2008hm}, chapter 2D
-          sh_weight = dt * partial_width * inv_gamma;
+          sh_weight = dt * inv_gamma * partial_width;
           break;
           }
         case 3:
           {
-          float ml = 0.0;
-          // find mass of leptons involved in ThreeBodyDecay Dilepton (e or mu)
-          if (mode->particle_types()[0]->is_lepton()) {
-            ml = mode->particle_types()[0]->mass();
-          } else {
-            ml = mode->particle_types()[1]->mass();
+          // find the non lepton particle position
+          int non_lepton_position = -1;
+          for (int i=0; i<3; ++i) {
+            if (!(mode->particle_types()[i]->is_lepton())) {
+              non_lepton_position = i;
+              break;
+            }
           }
+          float m_nl = mode->particle_types()[non_lepton_position]->mass();  // mass of non-lepton final state particle
+          float m_l = mode->particle_types()[(non_lepton_position+1)%3]->mass(); // mass of leptons in final state
           // randomly select a mass
-          dilepton_mass = Random::uniform(2*ml,p.effective_mass());
-          float diff_width = mode->type().diff_width(p.effective_mass(), dilepton_mass,
+          dilepton_mass = Random::uniform(2*m_l,p.effective_mass());
+          float diff_width = mode->type().diff_width(p.effective_mass(), dilepton_mass, m_nl,
                                               p.type().pdgcode());  // #CleanUp
-          sh_weight = diff_width; // TODO
+          sh_weight = dt * inv_gamma * diff_width;
           break;
           }
         default:
@@ -125,30 +128,30 @@ ActionList DecayActionsFinderDilepton::find_final_actions(
           }
         case 3:
           {
-      // TODO not finished
-          float ml = 0.0;
-          // find mass of leptons involved in ThreeBodyDecay Dilepton (e or mu)
-          if (mode->particle_types()[0]->is_lepton()) {
-            ml = mode->particle_types()[0]->mass();
-          } else {
-            ml = mode->particle_types()[1]->mass();
+          // find the non lepton particle position
+          int non_lepton_position = -1;
+          for (int i=0; i<3; ++i) {
+            if (!(mode->particle_types()[i]->is_lepton())) {
+              non_lepton_position = i;
+              break;
+            }
           }
+          float m_nl = mode->particle_types()[non_lepton_position]->mass();  // mass of non-lepton final state particle
+          float m_l = mode->particle_types()[(non_lepton_position+1)%3]->mass(); // mass of leptons in final state
           // randomly select a mass
-          dilepton_mass = Random::uniform(2*ml,p.effective_mass());
-          float diff_width = mode->type().diff_width(p.effective_mass(), dilepton_mass,
+          dilepton_mass = Random::uniform(2*m_l,p.effective_mass());
+          float diff_width = mode->type().diff_width(p.effective_mass(), dilepton_mass, m_nl,
                                               p.type().pdgcode());  // #CleanUp
-          sh_weight = diff_width; // TODO
+          sh_weight = diff_width * inv_gamma / width_tot;;
           break;
           }
         default:
           throw std::runtime_error("Error in DecayActionFinderDilepton");
       }
 
-
       auto act = make_unique<DecayActionDilepton>(p, 0.f, sh_weight, dilepton_mass);
       act->add_decay(std::move(mode));
       actions.emplace_back(std::move(act));
-
     }
   }
 

@@ -274,9 +274,13 @@ DecayBranchList ParticleType::get_partial_widths_hadronic(const float m) const {
   DecayBranchList partial;
   partial.reserve(decay_mode_list.size());
   for (unsigned int i = 0; i < decay_mode_list.size(); i++) {
-    if (!(is_dilepton(
+    if ((!(is_dilepton(
              decay_mode_list[i]->type().particle_types()[0]->pdgcode(),
-             decay_mode_list[i]->type().particle_types()[1]->pdgcode()))) {
+             decay_mode_list[i]->type().particle_types()[1]->pdgcode()))) &&
+        (!(has_lepton_pair(
+                      decay_mode_list[i]->type().particle_types()[0]->pdgcode(),
+                      decay_mode_list[i]->type().particle_types()[1]->pdgcode(),
+                      decay_mode_list[i]->type().particle_types()[2]->pdgcode())))) {
       w = partial_width(m, decay_mode_list[i].get());
       if (w > 0.) {
         partial.push_back(
