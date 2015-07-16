@@ -17,8 +17,8 @@
 
 namespace Smash {
 
-DecayAction::DecayAction(const ParticleData &p, float time_of_execution)
-    : Action({p}, time_of_execution),
+DecayAction::DecayAction(const ParticleData &p, float time)
+    : Action({p}, time),
       total_width_(0.) {}
 
 void DecayAction::add_decays(DecayBranchList pv) {

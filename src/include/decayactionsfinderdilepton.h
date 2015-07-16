@@ -43,7 +43,7 @@ class DecayActionsFinderDilepton : public DecayActionsFinder {
 
   /** Check the whole particle list for possible dilepton decays
    * and return a list with the corrsponding Action objects. */
-  ActionList find_possible_actions(
+  ActionList find_actions_in_cell(
       const ParticleList &search_list,
       float dt) const override;
 

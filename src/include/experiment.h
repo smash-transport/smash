@@ -149,9 +149,10 @@ class Experiment : public ExperimentBase {
   void initialize_new_event();
 
   /** Perform the given action. */
+  template <typename Container>
   void perform_action(const ActionPtr &action, size_t &interactions_total,
                       size_t &total_pauliblocked,
-                      const ParticleList &particles_before_actions);
+                      const Container &particles_before_actions);
 
   /** It generates the final state with the right kinematics and then writes
    * the given dilepton action in the dilepton output file, instead of
@@ -169,6 +170,16 @@ class Experiment : public ExperimentBase {
    * \return The number of interactions from the event
    */
   size_t run_time_evolution(const int evt_num);
+
+  /** Runs the time evolution of an event without time steps
+   *
+   * Here, all actions are looped over, collisions and decays are
+   * carried out and particles are propagated.
+   *
+   * \param evt_num Running number of the event
+   * \return The number of interactions from the event
+   */
+  size_t run_time_evolution_without_time_steps(const int evt_num);
 
   /** Performs the final decays of an event
    *
@@ -283,6 +294,11 @@ class Experiment : public ExperimentBase {
    * This indicates whether to use the grid.
    */
   const bool use_grid_;
+
+  /**
+   * This indicates whether to use time steps.
+   */
+  const bool use_time_steps_;
 
   /** The conserved quantities of the system.
    *

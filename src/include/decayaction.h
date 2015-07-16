@@ -30,9 +30,9 @@ class DecayAction : public Action {
    * call add_processes after construction.
    *
    * \param[in] p The particle that should decay if the action is performed.
-   * \param[in] time_of_execution time at which the action is supposed to take place
+   * \param[in] time Time at which the action is supposed to take place
    */
-  DecayAction(const ParticleData &p, float time_of_execution);
+  DecayAction(const ParticleData &p, float time);
 
   /** Add several new decays at once. */
   void add_decays(DecayBranchList pv);

@@ -26,7 +26,7 @@ TEST(exponential) {
   std::map<int, int> hist {};
   constexpr float dx = 0.10;
   for (int i = 0; i < N_TEST; i++) {
-    double chi = Random::exponential();
+    double chi = Random::exponential(1.0);
     ++hist[chi/dx];
   }
   int diffbad[sigmabins] = {0};
@@ -72,8 +72,8 @@ TEST(x_exponential) {
   std::map<int, int> hist {};
   constexpr float dx = 0.10;
   for (int i = 0; i < N_TEST; i++) {
-    double chi = Random::exponential();
-    chi += Random::exponential();
+    double chi = Random::exponential(1.0);
+    chi += Random::exponential(1.0);
     ++hist[chi/dx];
   }
   int diffbad[sigmabins] = {0};
@@ -111,9 +111,9 @@ TEST(xsquared_exponential) {
   std::map<int, int> hist {};
   constexpr float dx = 0.10;
   for (int i = 0; i < N_TEST; i++) {
-    double chi  = Random::exponential();
-           chi += Random::exponential();
-           chi += Random::exponential();
+    double chi  = Random::exponential(1.0);
+           chi += Random::exponential(1.0);
+           chi += Random::exponential(1.0);
     ++hist[chi/dx];
   }
   int diffbad[sigmabins] = {0};

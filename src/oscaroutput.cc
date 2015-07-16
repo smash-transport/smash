@@ -418,7 +418,7 @@ void OscarOutput<Format, Contents>::write_particledata(
     std::fprintf(
         file_.get(), "%g %g %g %g %g %g %g %g %g %s %i\n", data.position().x0(),
         data.position().x1(), data.position().x2(), data.position().x3(),
-        std::sqrt(data.momentum().Dot(data.momentum())), data.momentum().x0(),
+        data.effective_mass(), data.momentum().x0(),
         data.momentum().x1(), data.momentum().x2(), data.momentum().x3(),
         data.pdgcode().string().c_str(), data.id());
   } else {
@@ -426,7 +426,7 @@ void OscarOutput<Format, Contents>::write_particledata(
         file_.get(), "%i %s %i %g %g %g %g %g %g %g %g %g\n", data.id(),
         data.pdgcode().string().c_str(), 0, data.momentum().x1(),
         data.momentum().x2(), data.momentum().x3(), data.momentum().x0(),
-        std::sqrt(data.momentum().Dot(data.momentum())), data.position().x1(),
+        data.effective_mass(), data.position().x1(),
         data.position().x2(), data.position().x3(), data.position().x0());
   }
 }
