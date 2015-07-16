@@ -13,7 +13,7 @@
 namespace Smash {
 
 DecayActionDilepton::DecayActionDilepton(const ParticleData &p,
-                                         float time_of_execution,
+                                         float time,
                                          float shining_weight)
     : DecayAction({p}, time), shining_weight_(shining_weight) {}
 

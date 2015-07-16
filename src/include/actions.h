@@ -12,6 +12,7 @@
 #include <vector>
 
 #include "forwarddeclarations.h"
+#include "action.h"
 
 namespace Smash {
 

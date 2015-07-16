@@ -25,7 +25,7 @@
 
 namespace Smash {
 
-ActionList DecayActionsFinderDilepton::find_possible_actions(
+ActionList DecayActionsFinderDilepton::find_actions_in_cell(
       const ParticleList &search_list,
       float dt) const {
   ActionList actions;

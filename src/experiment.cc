@@ -538,6 +538,7 @@ void Experiment<Modus>::write_dilepton_action(const ActionPtr &action,
   }
 }
 
+template <typename Modus>
 size_t Experiment<Modus>::run_time_evolution_without_time_steps(
     const int evt_num) {
   const auto &log = logger<LogArea::Experiment>();
@@ -695,16 +696,15 @@ size_t Experiment<Modus>::run_time_evolution(const int evt_num) {
 
     /* (1.d) Dileptons */
     if (dilepton_finder_ != nullptr) {
-      dilepton_actions = dilepton_finder_->ffind_actions_in_cell(
+      dilepton_actions.insert(dilepton_finder_->find_actions_in_cell(
                                               particles_before_actions,
-                                              parameters_.timestep_duration());
+                                              parameters_.timestep_duration()));
 
-      if (!dilepton_actions.empty()) {
-        for (const auto &action : dilepton_actions) {
-          write_dilepton_action(action, particles_before_actions);
+      if (!dilepton_actions.is_empty()) {
+        while (!dilepton_actions.is_empty()) {
+          write_dilepton_action(dilepton_actions.pop(), particles_before_actions);
         }
       }
-      dilepton_actions.clear();
     }
 
     /* (2) Perform actions. */
@@ -814,11 +814,11 @@ void Experiment<Modus>::do_final_decays(size_t &interactions_total) {
 
     /* Dileptons */
     if (dilepton_finder_ != nullptr) {
-      dilepton_actions = dilepton_finder_->find_final_actions(particles_);
+      dilepton_actions.insert(dilepton_finder_->find_final_actions(particles_));
 
-      if (!dilepton_actions.empty()) {
-        for (const auto &action : dilepton_actions) {
-          write_dilepton_action(action, particles_before_actions);
+      if (!dilepton_actions.is_empty()) {
+        while (!dilepton_actions.is_empty()) {
+          write_dilepton_action(actions.pop(), particles_before_actions);
         }
       }
     }
@@ -829,7 +829,6 @@ void Experiment<Modus>::do_final_decays(size_t &interactions_total) {
     /* Perform actions. */
     while (!actions.is_empty()) {
       perform_action(actions.pop(), interactions_total, total_pauli_blocked,
-
                      particles_before_actions);
     }
     // loop until no more decays occur
