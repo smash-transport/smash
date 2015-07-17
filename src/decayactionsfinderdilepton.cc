@@ -9,19 +9,11 @@
 
 #include "include/decayactionsfinderdilepton.h"
 
-#include <boost/filesystem.hpp>
-
 #include "include/constants.h"
 #include "include/cxx14compat.h"
 #include "include/decayactiondilepton.h"
-#include "include/experimentparameters.h"
-#include "include/fourvector.h"
 #include "include/particles.h"
-#include "include/random.h"
 
-#include <typeinfo>
-#include <iostream>
-#include <fstream>
 
 namespace Smash {
 

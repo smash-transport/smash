@@ -310,7 +310,6 @@ int main(int argc, char *argv[]) {
                  << report;
     }
 
-
     // run the experiment
     log.trace(source_location, " run the Experiment");
     experiment->run();

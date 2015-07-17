@@ -246,7 +246,6 @@ void ParticleType::check_consistency() {
 }
 
 DecayBranchList ParticleType::get_partial_widths(const float m) const {
-  float w = 0.;
   if (is_stable()) {
     return {};
   }
@@ -255,7 +254,7 @@ DecayBranchList ParticleType::get_partial_widths(const float m) const {
   DecayBranchList partial;
   partial.reserve(decay_mode_list.size());
   for (unsigned int i = 0; i < decay_mode_list.size(); i++) {
-    w = partial_width(m, decay_mode_list[i].get());
+    const float w = partial_width(m, decay_mode_list[i].get());
     if (w > 0.) {
       partial.push_back(
           make_unique<DecayBranch>(decay_mode_list[i]->type(), w));
@@ -265,7 +264,6 @@ DecayBranchList ParticleType::get_partial_widths(const float m) const {
 }
 
 DecayBranchList ParticleType::get_partial_widths_hadronic(const float m) const {
-  float w = 0.;
   if (is_stable()) {
     return {};
   }
@@ -277,7 +275,7 @@ DecayBranchList ParticleType::get_partial_widths_hadronic(const float m) const {
     if (!(is_dilepton(
              decay_mode_list[i]->type().particle_types()[0]->pdgcode(),
              decay_mode_list[i]->type().particle_types()[1]->pdgcode()))) {
-      w = partial_width(m, decay_mode_list[i].get());
+      const float w = partial_width(m, decay_mode_list[i].get());
       if (w > 0.) {
         partial.push_back(
             make_unique<DecayBranch>(decay_mode_list[i]->type(), w));
@@ -288,7 +286,6 @@ DecayBranchList ParticleType::get_partial_widths_hadronic(const float m) const {
 }
 
 DecayBranchList ParticleType::get_partial_widths_dilepton(const float m) const {
-  float w = 0.;
   if (is_stable()) {
     return {};
   }
@@ -300,7 +297,7 @@ DecayBranchList ParticleType::get_partial_widths_dilepton(const float m) const {
     if (is_dilepton(
                 decay_mode_list[i]->type().particle_types()[0]->pdgcode(),
                 decay_mode_list[i]->type().particle_types()[1]->pdgcode())) {
-      w = partial_width(m, decay_mode_list[i].get());
+      const float w = partial_width(m, decay_mode_list[i].get());
       if (w > 0.) {
         partial.push_back(
             make_unique<DecayBranch>(decay_mode_list[i]->type(), w));

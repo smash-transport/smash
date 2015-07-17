@@ -10,15 +10,7 @@
 #ifndef SRC_INCLUDE_DECAYACTIONSFINDERDILEPTON_H_
 #define SRC_INCLUDE_DECAYACTIONSFINDERDILEPTON_H_
 
-#include <boost/filesystem.hpp>
-#include <vector>
-#include <string>
-#include <memory>
-
 #include "decayactionsfinder.h"
-#include "oscaroutput.h"
-#include "forwarddeclarations.h"
-#include "cxx14compat.h"
 
 namespace Smash {
 

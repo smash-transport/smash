@@ -702,7 +702,8 @@ size_t Experiment<Modus>::run_time_evolution(const int evt_num) {
 
       if (!dilepton_actions.is_empty()) {
         while (!dilepton_actions.is_empty()) {
-          write_dilepton_action(dilepton_actions.pop(), particles_before_actions);
+          write_dilepton_action(dilepton_actions.pop(),
+                                particles_before_actions);
         }
       }
     }
@@ -818,7 +819,8 @@ void Experiment<Modus>::do_final_decays(size_t &interactions_total) {
 
       if (!dilepton_actions.is_empty()) {
         while (!dilepton_actions.is_empty()) {
-          write_dilepton_action(actions.pop(), particles_before_actions);
+          write_dilepton_action(dilepton_actions.pop(),
+                                particles_before_actions);
         }
       }
     }

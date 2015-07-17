@@ -19,14 +19,15 @@ class DecayActionDilepton : public DecayAction {
   DecayActionDilepton(const ParticleData &p, float time_of_execution,
                         float shining_weight_);
 
-  /* generate_final_state from DecayAction can be used for
-   * dilepton decays, too.
-   */
   float raw_weight_value() const override {
      return shining_weight_;
   }
 
  private:
+  /** The shining weight is a weight you apply to every Dilepton Decay. Because
+   * we radiate dileptons at every timestep to increase statistics, we
+   * afterwards weight them to correct the dilepton decay yields.
+   */
   float shining_weight_;
 };
 
