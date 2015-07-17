@@ -647,3 +647,15 @@ TEST(from_decimal) {
   COMPARE(Kminus, PdgCode::from_decimal(-321));
   COMPARE(antixi, PdgCode::from_decimal(-103312));
 }
+
+TEST(antiparticles) {
+  COMPARE(pion.has_antiparticle(), true);
+  COMPARE(pinull.has_antiparticle(), false);
+  COMPARE(K0.has_antiparticle(), true);
+  COMPARE(proton.has_antiparticle(), true);
+  COMPARE(delta.has_antiparticle(), true);
+  COMPARE(lambda.has_antiparticle(), true);
+  COMPARE(electron.has_antiparticle(), true);
+  COMPARE(antimu.has_antiparticle(), true);
+  COMPARE(photon.has_antiparticle(), false);
+}

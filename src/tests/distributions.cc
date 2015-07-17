@@ -42,7 +42,7 @@ TEST(maxwell) {
     double fourpie2 = (4.0 * M_PI) * (energy * energy);
     for (int t_i = 10; t_i < 1000; ++t_i) {
       double temperature = t_i * 0.001;
-      FUZZY_COMPARE(density_integrand(energy, energy, temperature),
+      FUZZY_COMPARE(density_integrand(energy, energy*energy, temperature),
               fourpie2 * exp(-energy / temperature)) << "E = " << energy
                                                      << ", T = " << temperature;
     }

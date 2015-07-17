@@ -62,7 +62,6 @@ class ParticleData {
     }
   }
 
-
   /**
    * Return the ParticleType object associated to this particle.
    */

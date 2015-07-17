@@ -177,6 +177,18 @@ class Particles {
   }
 
   /**
+   * Returns the particle that is currently stored in this object given an old
+   * copy of that particle.
+   *
+   * This function expects \p old_state to be a valid copy (i.e. is_valid
+   * returns \c true). This is enforced in DEBUG builds.
+   */
+  const ParticleData &lookup(const ParticleData &old_state) const {
+    assert(is_valid(old_state));
+    return data_[old_state.index_];
+  }
+
+  /**
    * \internal
    * Iterator type that skips over the holes in data_. It implements a standard
    * bidirectional iterator over the ParticleData objects in Particles.

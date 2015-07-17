@@ -22,8 +22,8 @@ namespace Smash {
 
 ScatterAction::ScatterAction(const ParticleData &in_part_a,
                              const ParticleData &in_part_b,
-                             float time_of_execution, bool isotropic)
-    : Action({in_part_a, in_part_b}, time_of_execution),
+                             float time, bool isotropic)
+    : Action({in_part_a, in_part_b}, time),
       total_cross_section_(0.), isotropic_(isotropic) {}
 
 void ScatterAction::add_collision(CollisionBranchPtr p) {

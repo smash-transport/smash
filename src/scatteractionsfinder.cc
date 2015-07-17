@@ -9,6 +9,8 @@
 
 #include "include/scatteractionsfinder.h"
 
+#include <algorithm>
+
 #include "include/configuration.h"
 #include "include/constants.h"
 #include "include/cxx14compat.h"
@@ -140,7 +142,7 @@ ActionPtr ScatterActionsFinder::check_collision(
   return std::move(act);
 }
 
-std::vector<ActionPtr> ScatterActionsFinder::find_possible_actions(
+ActionList ScatterActionsFinder::find_actions_in_cell(
     const ParticleList &search_list, float dt) const {
   std::vector<ActionPtr> actions;
   for (const ParticleData &p1 : search_list) {
@@ -157,13 +159,37 @@ std::vector<ActionPtr> ScatterActionsFinder::find_possible_actions(
   return actions;
 }
 
-std::vector<ActionPtr> ScatterActionsFinder::find_possible_actions(
+ActionList ScatterActionsFinder::find_actions_with_neighbors(
     const ParticleList &search_list, const ParticleList &neighbors_list,
     float dt) const {
   std::vector<ActionPtr> actions;
   for (const ParticleData &p1 : search_list) {
     for (const ParticleData &p2 : neighbors_list) {
       assert(p1.id() != p2.id());
+      // Check if a collision is possible.
+      ActionPtr act = check_collision(p1, p2, dt);
+      if (act) {
+        actions.push_back(std::move(act));
+      }
+    }
+  }
+  return actions;
+}
+
+ActionList ScatterActionsFinder::find_actions_with_surrounding_particles(
+    const ParticleList &search_list, const Particles &surrounding_list,
+    float dt) const {
+  std::vector<ActionPtr> actions;
+  for (const ParticleData &p2 : surrounding_list) {
+    // don't look for collisions if the particle from the surrounding list is
+    // also in the search list
+    auto result = std::find_if(
+        search_list.begin(), search_list.end(),
+        [&p2](const ParticleData &p) { return p.id() == p2.id(); });
+    if (result != search_list.end()) {
+      continue;
+    }
+    for (const ParticleData &p1 : search_list) {
       // Check if a collision is possible.
       ActionPtr act = check_collision(p1, p2, dt);
       if (act) {
