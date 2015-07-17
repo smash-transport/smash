@@ -702,7 +702,7 @@ size_t Experiment<Modus>::run_time_evolution(const int evt_num) {
                                               parameters_.timestep_duration()));
 
       if (!dilepton_actions.is_empty()) {
-        while (!actions.is_empty()) {
+        while (!dilepton_actions.is_empty()) {
           write_dilepton_action(dilepton_actions.pop(), particles_before_actions);
         }
       }
