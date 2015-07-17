@@ -70,7 +70,12 @@ void DecayModes::renormalize(std::string name) {
     log.debug("Particle ", name, ": Extremely small renormalization constant: ",
               sum, "\n=> Skipping the renormalization.");
   } else {
-    log.warn("Particle ", name, ": Renormalizing decay modes with ", sum);
+    if (std::abs(sum - 1.) < 0.01) {
+      // Reasonably small correction: do not warn, only give a debug message
+      log.debug("Particle ", name, ": Renormalizing decay modes with ", sum);
+    } else {
+      log.warn("Particle ", name, ": Renormalizing decay modes with ", sum);
+    }
     float new_sum = 0.0;
     for (auto &mode : decay_modes_) {
       mode->set_weight(mode->weight() / sum);
