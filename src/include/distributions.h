@@ -33,7 +33,7 @@ float breit_wigner(const double mandelstam_s, const float resonance_mass,
  * \todo rename this function to make clear what it is
  *
  * \param[in] energy \f$E\f$ (in GeV)
- * \param[in] momentum squared \f$p\f$ (in GeV\f$^2\f$)
+ * \param[in] momentum_sqr squared \f$p\f$ (in GeV\f$^2\f$)
  * \param[in] temperature \f$T\f$ (in GeV)
  *
  * \return \f$4\pi p^2 \exp{-\frac{E}{T}}\f$
