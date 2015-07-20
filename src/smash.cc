@@ -88,7 +88,9 @@ void usage(const int rc, const std::string &progname) {
    * <tr><td>`-o <dir>` <td>`--output <dir>`
    * <td>Sets the output directory. The default output directory is
    *     `./data/<runid>`, where `<rundid>` is an automatically incrementing
-   *     integer.
+   *     integer. Note that this might cause races if several instances of SMASH
+   *     run in parallel. In that case, make sure to specify a different output
+   *     directory for every instance of SMASH.
    * <tr><td>`-f` <td>`--force`
    * <td>Forces overwriting files in the output directory. Normally, if you
    *     specifiy an output directory with `-o`, the directory must be empty.
