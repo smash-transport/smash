@@ -286,6 +286,7 @@ Experiment<Modus>::Experiment(Configuration config, bf::path output_path)
     * \li \subpage input_binary_collisions
     * \li \subpage input_binary_particles
     * \li \subpage input_root
+    * \li \subpage input_dileptons
     */
   auto output_conf = config["Output"];
   /*!\Userguide
@@ -321,6 +322,8 @@ Experiment<Modus>::Experiment(Configuration config, bf::path output_path)
     * \li Formatted binary output that uses ROOT software
     *     (http://root.cern.ch).\n Fast to read and write, requires less
     *     disk space.\n \subpage format_root
+    * \li Dilepton output in Oscar format: \n
+    *     \subpage format_dilepton_output
     */
 
   // loop until all OSCAR outputs are created (create_oscar_output will return
