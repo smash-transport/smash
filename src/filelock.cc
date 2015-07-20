@@ -21,6 +21,8 @@ bool FileLock::acquire() {
     throw std::runtime_error("FileLock \"" + path_.native() +
                              "\" was already acquired.");
   }
+  // The following POSIX syscall fails if the file already exists and creates it
+  // otherwise. This is atomic, so there cannot be a race.
   const int fd = open(path_.native().c_str(), O_EXCL | O_CREAT);
   if (fd < 0) {
     return false;
