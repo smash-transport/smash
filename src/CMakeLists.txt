@@ -73,6 +73,7 @@ set(smash_src
         distributions.cc
         energymomentumtensor.cc
         experiment.cc
+        filelock.cc
         fourvector.cc
         fpenvironment.cc
         grid.cc
