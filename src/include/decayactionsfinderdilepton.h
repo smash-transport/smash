@@ -23,7 +23,7 @@ namespace Smash {
  * write_dilepton_action routine in experiment.cc these decays are written
  * in the DileptonOutput. Because too many dileptons are produced this way,
  * every decay is weighted with the so called "shining_weight".
- * see \iref{Schmidt:2008hm}, chapter 2D
+ * See \iref{Schmidt:2008hm}, chapter 2D.
  * Currently the finder only works with two-body-dilepton decays.
  * Dalitz dilepton decays are not supported.
  */

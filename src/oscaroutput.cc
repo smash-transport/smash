@@ -494,7 +494,7 @@ std::unique_ptr<OutputInterface> create_oscar_output(bf::path path,
 
   /*!\Userguide
    * \page input_dileptons Dilepton Output
-   * Enables Dilepton Output togehter with Dilepton Decay Action Finder.
+   * Enables Dilepton Output togehter with Dilepton DecayActionFinder.
    * Dilepton Output saves information about decays, which include Dileptons,
    * at every timestep. The output is formatted in the
    * \ref format_oscar_collisions (OSCAR2013 format).
@@ -508,11 +508,11 @@ std::unique_ptr<OutputInterface> create_oscar_output(bf::path path,
    * and afterwards you weight them properly with a "shining weight" to compensate
    * the over production.
    * \li The shining weight can be found in the weight element of the ouput.
-   * \li The he shining method is implemented in the DecayActionFinderDilepton,
+   * \li The shining method is implemented in the DecayActionFinderDilepton,
    * which is enabled together with the dilepton output.
    *
    * \note If you want dilepton decays, you also have to modify decaymodes.txt.
-   * Dilepton decays are commented out in default.
+   * Dilepton decays are commented out by default.
    *
    * \key Enable (bool, optional, default = false):\n
    * true - Dilepton Output and Dilepton Action Finder enabled\n
