@@ -508,7 +508,7 @@ std::unique_ptr<OutputInterface> create_oscar_output(bf::path path,
    * and afterwards you weight them properly with a "shining weight" to
    * compensate for the over production.
    * \li The shining weight can be found in the weight element of the ouput.
-   * \li The shining method is implemented in the DecayActionFinderDilepton,
+   * \li The shining method is implemented in the DecayActionsFinderDilepton,
    * which is enabled together with the dilepton output.
    *
    * \note If you want dilepton decays, you also have to modify decaymodes.txt.
