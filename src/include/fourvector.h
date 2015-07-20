@@ -102,7 +102,7 @@ class FourVector {
    *
    * Note that this will fail for space-like vectors.
    */
-  double inline abs() const;
+  double /* inline */ abs() const;
   /** calculate the square of the spatial three-vector
    *
    * \return \f$\vec x \cdot \vec x\f$
@@ -382,9 +382,17 @@ double inline FourVector::sqr() const {
   return x_[0] * x_[0] - x_[1] * x_[1] - x_[2] * x_[2] - x_[3] * x_[3];
 }
 
+/*
+//inline
 double inline FourVector::abs() const {
-  return std::sqrt(this->sqr());
+  double sqr = this->sqr();
+  if (sqr < 0.0) {
+    throw std::runtime_error("NEGATIVE FV_SQR in FourVector::abs()!");
+  } else {
+    return std::sqrt(sqr);
+  }
 }
+*/
 
 double inline FourVector::sqr3() const {
   return this->threevec().sqr();

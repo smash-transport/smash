@@ -9,6 +9,7 @@
 
 #include "include/fourvector.h"
 #include "include/iomanipulators.h"
+#include "include/logging.h"
 
 namespace Smash {
 
@@ -57,6 +58,20 @@ std::ostream& operator<<(std::ostream& out, const FourVector& vec) {
     out << field<8> << x;
   }
   return out << ')';
+}
+
+
+// for non-inlineing and just warning
+double FourVector::abs() const {
+  const auto &log = logger<LogArea::Main>();
+  double sqr = this->sqr();
+  if (sqr < 0.0) {
+    log.warn("NEGATIVE fv_sqr!!! fv_sqr is ", sqr);
+    log.warn("correcting it to 0.0");
+    return 0.0;
+  } else {
+    return std::sqrt(sqr);
+  }
 }
 
 }  // namespace Smash
