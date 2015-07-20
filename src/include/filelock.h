@@ -38,9 +38,9 @@ class FileLock {
   /// Will throw an std::runtime_error if called another time after returning
   /// true or if the lockfile cannot be closed.
   bool acquire();
-  bf::path path_;
 
  private:
+  bf::path path_;
   bool acquired_;
 };
 
