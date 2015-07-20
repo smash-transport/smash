@@ -204,7 +204,7 @@ void OscarOutput<Format, Contents>::at_interaction(
     if (Format == OscarFormat2013) {
       std::fprintf(
           file_.get(),
-          "# interaction in %zu out %zu rho %12.7f weight %g type %5i \n",
+          "# interaction in %zu out %zu rho %12.7f weight %12.7g type %5i \n",
           incoming_particles.size(), outgoing_particles.size(), density,
           total_cross_section, static_cast<int>(process_type));
     } else {
@@ -493,8 +493,8 @@ std::unique_ptr<OutputInterface> create_oscar_output(bf::path path,
 }
 
   /*!\Userguide
-   * \page input_dileptons Dilepton Output
-   * Enables Dilepton Output togehter with Dilepton DecayActionFinder.
+   * \page input_dileptons Dileptons
+   * Enables Dilepton Output together with DecayActionsFinderDilepton.
    * Dilepton Output saves information about decays, which include Dileptons,
    * at every timestep. The output is formatted in the
    * \ref format_oscar_collisions (OSCAR2013 format).
@@ -505,8 +505,8 @@ std::unique_ptr<OutputInterface> create_oscar_output(bf::path path,
    * shining method as described in \iref{Schmidt:2008hm}, chapter 2D.
    * This means that, because dilepton decays are so rare , possible decays are
    * written in the ouput every single timestep without ever performing them
-   * and afterwards you weight them properly with a "shining weight" to compensate
-   * the over production.
+   * and afterwards you weight them properly with a "shining weight" to
+   * compensate for the over production.
    * \li The shining weight can be found in the weight element of the ouput.
    * \li The shining method is implemented in the DecayActionFinderDilepton,
    * which is enabled together with the dilepton output.
@@ -515,8 +515,8 @@ std::unique_ptr<OutputInterface> create_oscar_output(bf::path path,
    * Dilepton decays are commented out by default.
    *
    * \key Enable (bool, optional, default = false):\n
-   * true - Dilepton Output and Dilepton Action Finder enabled\n
-   * false - no Dilepton Output and no Dilepton Action Finder
+   * true - Dilepton Output and DecayActionsFinderDilepton enabled\n
+   * false - no Dilepton Output and no DecayActionsFinderDilepton
    **/
 
    /*!\Userguide
