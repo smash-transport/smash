@@ -77,7 +77,7 @@ ActionList DecayActionsFinderDilepton::find_actions_in_cell(
           float m_nl = mode->particle_types()[non_lepton_position]->mass();  // mass of non-lepton final state particle
           float m_l = mode->particle_types()[(non_lepton_position+1)%3]->mass(); // mass of leptons in final state
           // randomly select a mass
-          dilepton_mass = Random::uniform(2*m_l,p.effective_mass());
+          dilepton_mass = Random::uniform(2*m_l,p.effective_mass()-m_nl);
           float diff_width = mode->type().diff_width(p.effective_mass(), dilepton_mass, m_nl,
                                               p.type().pdgcode());  // #CleanUp
           sh_weight = dt * inv_gamma * diff_width;
@@ -87,9 +87,11 @@ ActionList DecayActionsFinderDilepton::find_actions_in_cell(
           throw std::runtime_error("Error in DecayActionFinderDilepton");
       }
 
-      auto act = make_unique<DecayActionDilepton>(p, 0.f, sh_weight, dilepton_mass);
-      act->add_decay(std::move(mode));
-      actions.emplace_back(std::move(act));
+      if (sh_weight > 0.0) {  // decays that can happen
+        auto act = make_unique<DecayActionDilepton>(p, 0.f, sh_weight, dilepton_mass);
+        act->add_decay(std::move(mode));
+        actions.emplace_back(std::move(act));
+      }
     }
   }
 

@@ -310,54 +310,65 @@ ThreeBodyDecayDilepton::ThreeBodyDecayDilepton(ParticleTypePtrList part_types,
 
 
 float ThreeBodyDecayDilepton::diff_width(float m_parent, float m_dil, float m_other, PdgCode pdg) const {
-  float m_par = m_parent;
+  if (m_parent < m_dil + m_other) {
+    return 0;
+  } else {
+    float m_par = m_parent;
 
-  // #CleanUp
+    // #CleanUp
 
-  float gamma = 0.0;
-  float ff = 0.0;
-  float alpha = 1.0/137.0;
-  switch (pdg.get_decimal()) {
-    case 111: /*pi0*/
-      gamma = 78e-10;
-      ff = 1.+5.5*m_dil*m_dil;
+    float gamma = 0.0;
+    float ff = 0.0;
+    float alpha = 1.0/137.0;
+    switch (pdg.get_decimal()) {
+      case 111: /*pi0*/
+        gamma = 78e-10;
+        ff = 1.+5.5*m_dil*m_dil;
 
-      return (alpha*4./(3.*M_PI))*gamma/m_dil*pow(1.-m_dil/m_par*m_dil/m_par,3.)*ff*ff;
+        return (alpha*4./(3.*M_PI))*gamma/m_dil*pow(1.-m_dil/m_par*m_dil/m_par,3.)*ff*ff;
 
-    case 221: /*eta*/
-      gamma = 46e-8;
-      ff = 1./(1.-(m_dil*m_dil/0.676));
+      case 221: /*eta*/
+        gamma = 46e-8;
+        ff = 1./(1.-(m_dil*m_dil/0.676));
 
-      return (4.*alpha/(3.*M_PI))*gamma/m_dil*pow(1.-m_dil/m_par*m_dil/m_par,3.)*ff*ff;
+        return (4.*alpha/(3.*M_PI))*gamma/m_dil*pow(1.-m_dil/m_par*m_dil/m_par,3.)*ff*ff;
 
-    case 223: /*omega*/ {
-      gamma = 0.703e-3;
-      float lambda = 0.65;
-      float gamma_w = 0.075;
-      float m_dil_sqr = m_dil * m_dil;
-      float m_par_sqr = m_par * m_par;
+      case 223: /*omega*/ {
+        gamma = 0.703e-3;
+        float lambda = 0.65;
+        float gamma_w = 0.075;
+        float m_dil_sqr = m_dil * m_dil;
+        float m_par_sqr = m_par * m_par;
 
 
-      float n1 = (pow(lambda*lambda - m_dil_sqr, 2.) + lambda*gamma_w * lambda*gamma_w);
-      float n2 = (m_par_sqr - m_other*m_other);
-      float n3 = ((m_par_sqr - m_other*m_other)*(m_par_sqr - m_other*m_other));
+        float n1 = (pow(lambda*lambda - m_dil_sqr, 2.) + lambda*gamma_w * lambda*gamma_w);
+        float n2 = (m_par_sqr - m_other*m_other);
+        float n3 = ((m_par_sqr - m_other*m_other)*(m_par_sqr - m_other*m_other));
 
-      if (n1 == 0.0 || n2 == 0.0 || n3 == 0.0) {
-        throw std::runtime_error(" one of the n's is zero in diff width");
+        float rad = pow(1+ m_dil_sqr / n2, 2.)  -  4*m_par_sqr*m_dil_sqr / n3;
+
+        if (n1 == 0.0 || n2 == 0.0 || n3 == 0.0) {
+          throw std::runtime_error(" one of the n's is zero in diff width");
+        }
+
+        if (rad < 0.0) {
+          throw std::runtime_error("rad negative " +  std::to_string(rad) +
+                               " \ndilepton mass is " + std::to_string(m_dil) +
+                                "\nm_other mass is " + std::to_string(m_other));
+        }
+
+
+        ff = pow(lambda, 4.) / n1;
+
+
+
+        return (2.*alpha/(3.*M_PI))  *  gamma/m_dil  *   pow(sqrt(rad), 3.) * ff;
       }
-
-
-      ff = pow(lambda, 4.) / n1;
-
-      return (4.*alpha/(3.*M_PI))*gamma/m_dil*pow(1.-m_dil/m_par*m_dil/m_par,3.)*ff*ff;
-
-
-     // return (2.*alpha/(3.*M_PI))  *  gamma/m_dil  *   pow(std::sqrt(pow(1+ m_dil_sqr / n2, 2.)  -  4*m_par_sqr*m_dil_sqr / n3), 3.) * ff;
+       /* missing: Delta, Delta* and N* */
+      default:
+        throw std::runtime_error("Error in ThreeBodyDecayDilepton");
     }
-     /* missing: Delta, Delta* and N* */
-    default:
-      throw std::runtime_error("Error in ThreeBodyDecayDilepton");
-  }
+  }  // else
 }
 
 
