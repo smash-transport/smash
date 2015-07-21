@@ -38,13 +38,13 @@ constexpr double twopi = 2. * M_PI;
  *
  * \fpPrecision Why \c double?
  */
-constexpr double rho0 = 0.168;
+constexpr double nuclear_density = 0.168;
 /**
  * nucleon mass in GeV
  *
  * \fpPrecision Why \c double?
  */
-const double mN = 0.938;
+constexpr double nucleon_mass = 0.938;
 
 }  // namespace Smash
 

@@ -290,8 +290,8 @@ void ScatterActionNucleonNucleon::sample_cms_momenta() {
     mass_b = sample_resonance_mass(t_b, t_a.mass(), cms_energy);
   }
 
-  const std::array<double, 2> t_range = get_t_range(cms_energy, mN, mN,
-                                                    mass_a, mass_b);
+  const std::array<double, 2> t_range
+      = get_t_range(cms_energy, nucleon_mass, nucleon_mass, mass_a, mass_b);
   Angles phitheta;
   if (t_a.pdgcode().iso_multiplet() == 0x1114 &&
       t_b.pdgcode().iso_multiplet() == 0x1112 && !isotropic_) {
