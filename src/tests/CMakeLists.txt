@@ -173,9 +173,7 @@ smash_add_unittest(vtkoutput)
 smash_add_unittest(without_float_traps)
 smash_add_unittest(yamltest)
 
-# for now -o has to be "data", because OSCAR output still expects to output to
-# $PWD/data. In the future we want to use "${PROJECT_BINARY_DIR}/test_output"
-set(SMASH_OPTIONS -o "data" -f)
+set(SMASH_OPTIONS -o "${PROJECT_BINARY_DIR}/test_output" -f)
 
 # verify that the binary has a cli help
 smash_add_test(smash_help smash smash -h)
