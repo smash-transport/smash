@@ -48,7 +48,7 @@ Output:
     # how much time before recording measurables
     Output_Interval:  1.0
     # Which density is written to collision headers:
-    # ("particle", "baryon", "baryonic isospin", "pion")
+    # ("hadron", "baryon", "baryonic isospin", "pion")
     Density_Type:      "baryon"
     # output formats
     Oscar_Collisions:

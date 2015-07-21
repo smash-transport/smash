@@ -384,8 +384,7 @@ Experiment<Modus>::Experiment(Configuration config, bf::path output_path)
     potentials_ = make_unique<Potentials>(config["Potentials"], parameters_);
   }
 
-  dens_type_ =
-      config.take({"Output", "Density_Type"}, DensityType::particle);
+  dens_type_ = config.take({"Output", "Density_Type"}, DensityType::hadron);
   log.info() << "Density type written to headers: " << dens_type_;
 
   // Create lattices

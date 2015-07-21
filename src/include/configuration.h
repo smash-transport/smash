@@ -256,8 +256,8 @@ class Configuration {
 
     operator DensityType() {
       std::string s = operator std::string();
-      if (s == "particle") {
-        return DensityType::particle;
+      if (s == "hadron") {
+        return DensityType::hadron;
       }
       if (s == "baryon") {
         return DensityType::baryon;
@@ -270,7 +270,7 @@ class Configuration {
       }
       throw IncorrectTypeInAssignment("The value for key \"" +
                                       std::string(key_) +
-                                      "\" should be \"particle\" or \"baryon\" "
+                                      "\" should be \"hadron\" or \"baryon\" "
                                       "or \"baryonic isospin\" or \"pion\".");
     }
 

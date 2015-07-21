@@ -92,11 +92,11 @@ enum class Sampling {
 *  For the symmetry potential one needs to know the isospin density.
 */
 enum class DensityType {
-  particle = 0,
-  baryon = 1,
-  baryonic_isospin = 2,
-  pion = 3,
-  none = 4,
+  none = 0,
+  hadron = 1,
+  baryon = 2,
+  baryonic_isospin = 3,
+  pion = 4,
 };
 
 /** Initial condition for a particle in a box.
