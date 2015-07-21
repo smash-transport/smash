@@ -252,7 +252,7 @@ Experiment<Modus>::Experiment(Configuration config, bf::path output_path)
 
   // dilepton switch
   const bool dileptons_switch = config.take(
-                                      {"Output", "Dileptons","Enable"}, false);
+                                      {"Output", "Dileptons", "Enable"}, false);
 
   // create finders
   if (config.take({"Collision_Term", "Decays"}, true)) {
@@ -286,6 +286,7 @@ Experiment<Modus>::Experiment(Configuration config, bf::path output_path)
     * \li \subpage input_binary_collisions
     * \li \subpage input_binary_particles
     * \li \subpage input_root
+    * \li \subpage input_dileptons
     */
   auto output_conf = config["Output"];
   /*!\Userguide
@@ -321,6 +322,8 @@ Experiment<Modus>::Experiment(Configuration config, bf::path output_path)
     * \li Formatted binary output that uses ROOT software
     *     (http://root.cern.ch).\n Fast to read and write, requires less
     *     disk space.\n \subpage format_root
+    * \li Dilepton output in Oscar format: \n
+    *     \subpage format_dilepton_output
     */
 
   // loop until all OSCAR outputs are created (create_oscar_output will return
@@ -667,7 +670,6 @@ size_t Experiment<Modus>::run_time_evolution(const int evt_num) {
       particles_, interactions_total, 0u,
       conserved_initial_, time_start_, parameters_.labclock.current_time());
 
-
   Actions actions;
   Actions dilepton_actions;
 
@@ -695,7 +697,7 @@ size_t Experiment<Modus>::run_time_evolution(const int evt_num) {
 
     const auto particles_before_actions = particles_.copy_to_vector();
 
-    /* (1.5) Dileptons */
+    /* (1.d) Dileptons */
     if (dilepton_finder_ != nullptr) {
       dilepton_actions.insert(dilepton_finder_->find_actions_in_cell(
                                               particles_before_actions,
@@ -703,7 +705,8 @@ size_t Experiment<Modus>::run_time_evolution(const int evt_num) {
 
       if (!dilepton_actions.is_empty()) {
         while (!dilepton_actions.is_empty()) {
-          write_dilepton_action(dilepton_actions.pop(), particles_before_actions);
+          write_dilepton_action(dilepton_actions.pop(),
+                                particles_before_actions);
         }
       }
     }
@@ -813,13 +816,14 @@ void Experiment<Modus>::do_final_decays(size_t &interactions_total) {
     interactions_old = interactions_total;
     const auto particles_before_actions = particles_.copy_to_vector();
 
-    /* Dileptons*/
+    /* Dileptons */
     if (dilepton_finder_ != nullptr) {
       dilepton_actions.insert(dilepton_finder_->find_final_actions(particles_));
 
       if (!dilepton_actions.is_empty()) {
         while (!dilepton_actions.is_empty()) {
-          write_dilepton_action(dilepton_actions.pop(), particles_before_actions);
+          write_dilepton_action(dilepton_actions.pop(),
+                                particles_before_actions);
         }
       }
     }

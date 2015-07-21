@@ -52,7 +52,8 @@ class Action {
   }
 
   /** Return the raw weight value, which is a cross section in case of a
-   * ScatterAction and a decay width in case of a DecayAction.
+   * ScatterAction, a decay width in case of a DecayAction and a shining
+   * weight in case of a DecayActionDilepton.
    *
    * Prefer to use a more specific function.
    */

@@ -42,12 +42,12 @@ macro(smash_add_exe name)
   target_link_libraries(${name} smash_lib ${SMASH_LIBRARIES})
   if(USE_SANITIZER)
       set_target_properties(${name} PROPERTIES
-         COMPILE_FLAGS "${SANITIZER_FLAG} -DSMASH_TEST_OUTPUT_PATH=\\\"${PROJECT_BINARY_DIR}/${name}_output/\\\""
+         COMPILE_FLAGS "${SANITIZER_FLAG} -DSMASH_TEST_OUTPUT_PATH=\\\"${PROJECT_BINARY_DIR}/test_output/${name}\\\""
          LINK_FLAGS ${SANITIZER_FLAG}
          )
    else()
       set_target_properties(${name} PROPERTIES
-         COMPILE_FLAGS "-DSMASH_TEST_OUTPUT_PATH=\\\"${PROJECT_BINARY_DIR}/${name}_output/\\\""
+         COMPILE_FLAGS "-DSMASH_TEST_OUTPUT_PATH=\\\"${PROJECT_BINARY_DIR}/test_output/${name}\\\""
          )
    endif()
 endmacro()
@@ -55,6 +55,11 @@ endmacro()
 macro(smash_add_unittest name)
    smash_add_exe(${name})
    smash_add_test(${name} ${name} ${name})
+endmacro()
+
+# helper macro to run smash with certain arguments, choosing an output directory according to the test name
+macro(smash_add_runtest name depends)
+   smash_add_test(${name} ${depends} ${ARGN} -o "${PROJECT_BINARY_DIR}/test_output/${name}" -f)
 endmacro()
 
 # test source code to be clean, requires cpplint in the path
@@ -140,6 +145,7 @@ smash_add_unittest(distributions)
 smash_add_unittest(enable_float_traps)
 smash_add_unittest(energymomentumtensor)
 smash_add_unittest(experiment)
+smash_add_unittest(filelock)
 smash_add_unittest(fourvector)
 smash_add_unittest(grid)
 smash_add_unittest(initial_conditions)
@@ -172,44 +178,40 @@ smash_add_unittest(vtkoutput)
 smash_add_unittest(without_float_traps)
 smash_add_unittest(yamltest)
 
-# for now -o has to be "data", because OSCAR output still expects to output to
-# $PWD/data. In the future we want to use "${PROJECT_BINARY_DIR}/test_output"
-set(SMASH_OPTIONS -o "data" -f)
-
 # verify that the binary has a cli help
-smash_add_test(smash_help smash smash -h)
+smash_add_runtest(smash_help smash smash -h)
 
 # verify that the binary runs with the various modi:
-smash_add_test(smash_run smash smash ${SMASH_OPTIONS})
-smash_add_test(box_run smash smash -m Box ${SMASH_OPTIONS})
-smash_add_test(collider_run smash smash -m Collider ${SMASH_OPTIONS})
-smash_add_test(sphere_run smash smash -m Sphere ${SMASH_OPTIONS})
+smash_add_runtest(smash_run smash smash)
+smash_add_runtest(box_run smash smash -m Box)
+smash_add_runtest(collider_run smash smash -m Collider)
+smash_add_runtest(sphere_run smash smash -m Sphere)
 
 # verify that binary runs certain time (this corresponds to 20 steps)
-smash_add_test(box_steps smash smash -e 2.0 -c "General: {Delta_Time: 0.1}" -m Box ${SMASH_OPTIONS})
-smash_add_test(collider_steps smash smash -e 2.0 -c "General: {Delta_Time: 0.1}" -m Collider ${SMASH_OPTIONS})
-smash_add_test(sphere_steps smash smash -e 2.0 -c "General: {Delta_Time: 0.1}" -m Sphere ${SMASH_OPTIONS})
+smash_add_runtest(box_steps smash smash -e 2.0 -c "General: {Delta_Time: 0.1}" -m Box)
+smash_add_runtest(collider_steps smash smash -e 2.0 -c "General: {Delta_Time: 0.1}" -m Collider)
+smash_add_runtest(sphere_steps smash smash -e 2.0 -c "General: {Delta_Time: 0.1}" -m Sphere)
 
 # verify that default run has no mem leaks
 find_program(CTEST_MEMORYCHECK_COMMAND valgrind)
 if(CTEST_MEMORYCHECK_COMMAND)
    message(STATUS "valgrind found at ${CTEST_MEMORYCHECK_COMMAND}")
    set(CTEST_MEMORYCHECK_COMMAND_OPTIONS "-v" "--error-exitcode=1")
-   smash_add_test(memcheck_box smash ${CTEST_MEMORYCHECK_COMMAND}
+   smash_add_runtest(memcheck_box smash ${CTEST_MEMORYCHECK_COMMAND}
       ${CTEST_MEMORYCHECK_COMMAND_OPTIONS}
-      ${PROJECT_BINARY_DIR}/smash -c "General: {End_Time: 1.0, Modus: Box}" ${SMASH_OPTIONS})
-   smash_add_test(memcheck_collider smash ${CTEST_MEMORYCHECK_COMMAND}
+      ${PROJECT_BINARY_DIR}/smash -c "General: {End_Time: 1.0, Modus: Box}")
+   smash_add_runtest(memcheck_collider smash ${CTEST_MEMORYCHECK_COMMAND}
       ${CTEST_MEMORYCHECK_COMMAND_OPTIONS}
-      ${PROJECT_BINARY_DIR}/smash -c "General: {End_Time: 5.0, Delta_Time: 0.1}" -m Collider ${SMASH_OPTIONS})
-   smash_add_test(memcheck_sphere smash ${CTEST_MEMORYCHECK_COMMAND}
+      ${PROJECT_BINARY_DIR}/smash -c "General: {End_Time: 5.0, Delta_Time: 0.1}" -m Collider)
+   smash_add_runtest(memcheck_sphere smash ${CTEST_MEMORYCHECK_COMMAND}
       ${CTEST_MEMORYCHECK_COMMAND_OPTIONS}
-      ${PROJECT_BINARY_DIR}/smash -c "General: {End_Time: 5.0, Delta_Time: 0.1}" -m Sphere ${SMASH_OPTIONS})
+      ${PROJECT_BINARY_DIR}/smash -c "General: {End_Time: 5.0, Delta_Time: 0.1}" -m Sphere)
 else()
    message(STATUS "valgrind not found. Memcheck tests are disabled!")
 endif()
 
 if(USE_SANITIZER)
-   smash_add_test(sanitizer_box      smash_sanitizer smash_sanitizer -e 5.0 -m Box ${SMASH_OPTIONS})
-   smash_add_test(sanitizer_collider smash_sanitizer smash_sanitizer -e 5.0 -m Collider ${SMASH_OPTIONS})
-   smash_add_test(sanitizer_sphere   smash_sanitizer smash_sanitizer -e 5.0 -m Sphere ${SMASH_OPTIONS})
+   smash_add_runtest(sanitizer_box      smash_sanitizer smash_sanitizer -e 5.0 -m Box)
+   smash_add_runtest(sanitizer_collider smash_sanitizer smash_sanitizer -e 5.0 -m Collider)
+   smash_add_runtest(sanitizer_sphere   smash_sanitizer smash_sanitizer -e 5.0 -m Sphere)
 endif()

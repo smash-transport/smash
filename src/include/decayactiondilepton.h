@@ -19,10 +19,6 @@ class DecayActionDilepton : public DecayAction {
    DecayActionDilepton(const ParticleData &p, float time_of_execution,
                         float shining_weight, float dilepton_mass);
 
-   // do not perform any dilepton actions = leave it empty
-   void perform(Particles *, size_t &) override {};
-
-
   float raw_weight_value() const override {
     return shining_weight_;
   }
@@ -30,7 +26,12 @@ class DecayActionDilepton : public DecayAction {
   void one_to_three() override;
 
  private:
+   /** The shining weight is a weight you apply to every Dilepton Decay. Because
+   * we radiate dileptons at every timestep to increase statistics, we
+   * afterwards weight them to correct the dilepton decay yields.
+   */
    float shining_weight_;
+   // #CleanUp (doc)
    float dilepton_mass_;
 };
 

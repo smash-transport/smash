@@ -9,28 +9,17 @@
 
 #include "include/decayactionsfinderdilepton.h"
 
-#include <boost/filesystem.hpp>
-
 #include "include/constants.h"
 #include "include/cxx14compat.h"
 #include "include/decayactiondilepton.h"
-#include "include/decaymodes.h"
-#include "include/experimentparameters.h"
-#include "include/logging.h"
-#include "include/fourvector.h"
 #include "include/particles.h"
-#include "include/random.h"
 
-#include <typeinfo>
-#include <iostream>
-#include <fstream>
 
 namespace Smash {
 
 ActionList DecayActionsFinderDilepton::find_actions_in_cell(
       const ParticleList &search_list,
       float dt) const {
-
   ActionList actions;
 
   for (const auto &p : search_list) {
@@ -38,14 +27,7 @@ ActionList DecayActionsFinderDilepton::find_actions_in_cell(
       continue;
     }
 
-    // work in progress // #CleanUp
-
-    /* current (first) implementation: everything happens in finder
-     * It slows down smash probably because of the extra output
-     * file.
-     */
-
-    float inv_gamma = p.inverse_gamma();
+    const float inv_gamma = p.inverse_gamma();
 
   // for three body decays partial wodth = on_shell width (dummy)
 
@@ -59,7 +41,7 @@ ActionList DecayActionsFinderDilepton::find_actions_in_cell(
       switch (mode->particle_number()) {
         case 2:
           {
-          float partial_width = mode->weight();
+          const float partial_width = mode->weight();
           // SHINNING as described in \iref{Schmidt:2008hm}, chapter 2D
           sh_weight = dt * inv_gamma * partial_width;
           break;
@@ -74,11 +56,11 @@ ActionList DecayActionsFinderDilepton::find_actions_in_cell(
               break;
             }
           }
-          float m_nl = mode->particle_types()[non_lepton_position]->mass();  // mass of non-lepton final state particle
-          float m_l = mode->particle_types()[(non_lepton_position+1)%3]->mass(); // mass of leptons in final state
+          const float m_nl = mode->particle_types()[non_lepton_position]->mass();  // mass of non-lepton final state particle
+          const float m_l = mode->particle_types()[(non_lepton_position+1)%3]->mass(); // mass of leptons in final state
           // randomly select a mass
           dilepton_mass = Random::uniform(2*m_l,p.effective_mass()-m_nl);
-          float diff_width = mode->type().diff_width(p.effective_mass(), dilepton_mass, m_nl,
+          const float diff_width = mode->type().diff_width(p.effective_mass(), dilepton_mass, m_nl,
                                               p.type().pdgcode());  // #CleanUp
           sh_weight = dt * inv_gamma * diff_width;
           break;
@@ -105,10 +87,10 @@ ActionList DecayActionsFinderDilepton::find_final_actions(
 
   for (const auto &p : search_list) {
     if (p.type().is_stable()) {
-      continue;      /* particle doesn't decay */
+      continue;
     }
 
-    float inv_gamma = p.inverse_gamma();
+    const float inv_gamma = p.inverse_gamma();
 
     DecayBranchList dil_modes =
                   p.type().get_partial_widths_dilepton(p.effective_mass());
@@ -124,7 +106,7 @@ ActionList DecayActionsFinderDilepton::find_final_actions(
       switch (mode->particle_number()) {
         case 2:
           {
-          float partial_width = mode->weight();
+          const float partial_width = mode->weight();
           sh_weight = partial_width * inv_gamma / width_tot;
           break;
           }
@@ -138,11 +120,11 @@ ActionList DecayActionsFinderDilepton::find_final_actions(
               break;
             }
           }
-          float m_nl = mode->particle_types()[non_lepton_position]->mass();  // mass of non-lepton final state particle
-          float m_l = mode->particle_types()[(non_lepton_position+1)%3]->mass(); // mass of leptons in final state
+          const float m_nl = mode->particle_types()[non_lepton_position]->mass();  // mass of non-lepton final state particle
+          const float m_l = mode->particle_types()[(non_lepton_position+1)%3]->mass(); // mass of leptons in final state
           // randomly select a mass
-          dilepton_mass = Random::uniform(2*m_l,p.effective_mass());
-          float diff_width = mode->type().diff_width(p.effective_mass(), dilepton_mass, m_nl,
+          dilepton_mass = Random::uniform(2*m_l,p.effective_mass()-m_nl);
+          const float diff_width = mode->type().diff_width(p.effective_mass(), dilepton_mass, m_nl,
                                               p.type().pdgcode());  // #CleanUp
           sh_weight = diff_width * inv_gamma / width_tot;;
           break;
@@ -150,10 +132,11 @@ ActionList DecayActionsFinderDilepton::find_final_actions(
         default:
           throw std::runtime_error("Error in DecayActionFinderDilepton");
       }
-
-      auto act = make_unique<DecayActionDilepton>(p, 0.f, sh_weight, dilepton_mass);
-      act->add_decay(std::move(mode));
-      actions.emplace_back(std::move(act));
+      if (sh_weight > 0.0) {  // decays that can happen
+        auto act = make_unique<DecayActionDilepton>(p, 0.f, sh_weight, dilepton_mass);
+        act->add_decay(std::move(mode));
+        actions.emplace_back(std::move(act));
+      }
     }
   }
 

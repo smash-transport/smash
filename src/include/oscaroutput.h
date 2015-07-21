@@ -99,7 +99,6 @@ std::unique_ptr<OutputInterface> create_oscar_output(bf::path path,
  *
  * \param path The path to the output directory where the file(s) will be
  *             placed.
- * \param name The name of the output file.
  */
 std::unique_ptr<OutputInterface> create_dilepton_output(bf::path path);
 

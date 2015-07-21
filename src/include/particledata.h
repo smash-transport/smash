@@ -56,7 +56,8 @@ class ParticleData {
   float effective_mass() const {
     const float m_pole = pole_mass();
     if (m_pole < really_small) {
-      return m_pole;  // prevent numerical problems with massless or very light particles
+      // prevent numerical problems with massless or very light particles
+      return m_pole;
     } else {
       return momentum().abs();
     }

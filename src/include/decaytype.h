@@ -167,12 +167,10 @@ class TwoBodyDecayUnstable : public TwoBodyDecay {
  * TwoBodyDecayDilepton represents a decay with a lepton and it's antilepton
  * as the final state particles.
  */
-class TwoBodyDecayDilepton : public TwoBodyDecay {
-  public:
-    TwoBodyDecayDilepton(ParticleTypePtrList part_types, int l);
-    float width(float m0, float G0, float m) const override;
-    float in_width(float m0, float G0, float m,
-                 float m1, float m2) const override;
+class TwoBodyDecayDilepton : public TwoBodyDecayStable {
+ public:
+  TwoBodyDecayDilepton(ParticleTypePtrList part_types, int l);
+  float width(float m0, float G0, float m) const override;
 };
 
 /**

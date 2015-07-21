@@ -22,6 +22,7 @@
 #include "include/configuration.h"
 #include "include/decaymodes.h"
 #include "include/experiment.h"
+#include "include/filelock.h"
 #include "include/forwarddeclarations.h"
 #include "include/fpenvironment.h"
 #include "include/inputfunctions.h"
@@ -87,7 +88,9 @@ void usage(const int rc, const std::string &progname) {
    * <tr><td>`-o <dir>` <td>`--output <dir>`
    * <td>Sets the output directory. The default output directory is
    *     `./data/<runid>`, where `<rundid>` is an automatically incrementing
-   *     integer.
+   *     integer. Note that this might cause races if several instances of SMASH
+   *     run in parallel. In that case, make sure to specify a different output
+   *     directory for every instance of SMASH.
    * <tr><td>`-f` <td>`--force`
    * <td>Forces overwriting files in the output directory. Normally, if you
    *     specifiy an output directory with `-o`, the directory must be empty.
@@ -280,6 +283,14 @@ int main(int argc, char *argv[]) {
 
     /* check output path*/
     ensure_path_is_valid(output_path);
+    const bf::path lock_path = output_path / "smash.lock";
+    FileLock lock(lock_path);
+    if (!lock.acquire()) {
+      throw std::runtime_error(
+          "Another instance of SMASH is already writing to the specified "
+          "output directory. If you are sure this is not the case, remove \""
+          + lock_path.native() + "\".");
+    }
     log.debug("output path: ", output_path);
     if (!force_overwrite && bf::exists(output_path / "config.yaml")) {
       throw std::runtime_error(
@@ -309,7 +320,6 @@ int main(int argc, char *argv[]) {
       log.warn() << "The following configuration values were not used:\n"
                  << report;
     }
-
 
     // run the experiment
     log.trace(source_location, " run the Experiment");

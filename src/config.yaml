@@ -14,7 +14,7 @@ Logging:
 
 General:
     # Modus decision
-    Modus:         Box
+    Modus:         Collider
 
     # determine whether to use time steps (necessary for potentials)
     Use_Time_Steps: True
@@ -50,7 +50,7 @@ Output:
 
     # output formats
     Oscar_Collisions:
-        Enable:             False
+        Enable:             True
         2013_Format:        True
         Print_Start_End:    False
     Oscar_Particlelist:
@@ -58,20 +58,20 @@ Output:
         2013_Format:        True
         Only_Final:         True
     Vtk:
-        Enable:             False
+        Enable:             True
     Root:
         Enable:             False
         Write_Collisions:   True
         Write_Particles:    True
         Autosave_Frequency: 1000
     Binary_Collisions:
-        Enable:             False
+        Enable:             True
         Print_Start_End:    True
     Binary_Particles:
-        Enable:             False
+        Enable:             True
         Only_Final:         False
     Density:
-        Enable:             False
+        Enable:             True
         x: 0.0
         y: 0.0
         z: 0.0
@@ -79,7 +79,7 @@ Output:
         # ("particle", "baryon", "baryonic isospin", "pion")
         Density_Type:      "baryon"
     Dileptons:
-        Enable:             True
+        Enable:             False
 
 Collision_Term:
     Decays:        True
@@ -128,11 +128,9 @@ Modi:
         Start_Time:    0.0
 
         Init_Multiplicities:
-            211:    200
-            -211:   200
+            221:    100
             111:    200
-            321:    200
-            -321:   200
+            2112:   20
 
     Sphere:
         # Sphere size

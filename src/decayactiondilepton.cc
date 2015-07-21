@@ -19,7 +19,7 @@ DecayActionDilepton::DecayActionDilepton(const ParticleData &p,
                                          float time,
                                          float shining_weight,
                                          float dilepton_mass)
-    : DecayAction({p}, time), shining_weight_(shining_weight), dilepton_mass_(dilepton_mass) {}
+  : DecayAction({p}, time), shining_weight_(shining_weight), dilepton_mass_(dilepton_mass) {}  // #CleanUp
 
 
 void DecayActionDilepton::one_to_three() {
@@ -84,7 +84,5 @@ void DecayActionDilepton::one_to_three() {
   l2.boost_momentum(-velocity_CM);
 
 }
-
-
 
 }  // namespace Smash

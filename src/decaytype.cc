@@ -242,7 +242,7 @@ float TwoBodyDecayUnstable::in_width(float, float G0, float,
 
 TwoBodyDecayDilepton::TwoBodyDecayDilepton(ParticleTypePtrList part_types,
                                            int l)
-                                      : TwoBodyDecay(part_types, l) {
+                                      : TwoBodyDecayStable(part_types, l) {
   if (!is_dilepton(particle_types_[0]->pdgcode(),
                   particle_types_[1]->pdgcode())) {
     throw std::runtime_error(
@@ -264,13 +264,6 @@ float TwoBodyDecayDilepton::width(float m0, float G0, float m) const {
            (1.0f + 2.0f * ml_to_m_sqr);
   }
 }
-
-float TwoBodyDecayDilepton::in_width(float m0, float G0, float m,
-                                   float, float) const {
-  // in-width = out-width
-  return width(m0, G0, m);
-}
-
 
 // ThreeBodyDecay
 
