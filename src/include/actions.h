@@ -13,7 +13,6 @@
 
 #include "action.h"
 #include "forwarddeclarations.h"
-#include "action.h"
 
 namespace Smash {
 
