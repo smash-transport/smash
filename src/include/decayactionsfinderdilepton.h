@@ -24,8 +24,8 @@ namespace Smash {
  * in the DileptonOutput. Because too many dileptons are produced this way,
  * every decay is weighted with the so called "shining_weight".
  * See \iref{Schmidt:2008hm}, chapter 2D.
- * Currently the finder only works with two-body-dilepton decays.
- * Dalitz dilepton decays are not supported.
+ * The finder works with two body dilepton decays as well as with dalitz
+ * dilepton decays.
  */
 
 class DecayActionsFinderDilepton : public DecayActionsFinder {

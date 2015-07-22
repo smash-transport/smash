@@ -45,6 +45,10 @@ constexpr double rho0 = 0.168;
  * \fpPrecision Why \c double?
  */
 const double mN = 0.938;
+/**
+ * Fine struture constant
+ */
+constexpr float alpha = 1.0/137.0;
 
 }  // namespace Smash
 

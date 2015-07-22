@@ -9,6 +9,7 @@
 
 #include <math.h>
 
+#include "include/constants.h"
 #include "include/cxx14compat.h"
 #include "include/integrate.h"
 #include "include/kinematics.h"
@@ -292,96 +293,85 @@ float ThreeBodyDecay::in_width(float, float G0, float, float, float) const {
 ThreeBodyDecayDilepton::ThreeBodyDecayDilepton(ParticleTypePtrList part_types,
                                            int l)
                                       : ThreeBodyDecay(part_types, l) {
- // checks #CleanUp
+  if (!has_lepton_pair(particle_types_[0]->pdgcode(),
+                       particle_types_[1]->pdgcode(),
+                       particle_types_[2]->pdgcode())) {
+   throw std::runtime_error(
+     "Error: No dilepton in ThreeBodyDecayDilepton constructor: " +
+     part_types[0]->pdgcode().string() + " " +
+     part_types[1]->pdgcode().string() + " " +
+     part_types[2]->pdgcode().string());
+  }
+}
+
+// Little helper functions for the form factor of the dilepton dalitz decays
+
+float form_factor_pi(float mass) {
+  return 1.+5.5*mass*mass;
+}
+
+float form_factor_eta(float mass) {
+  return 1./(1.-(mass*mass/0.676));
+}
+
+float form_factor_sqr_omega(float mass) {
+  float lambda = 0.65;
+  float gamma_w = 0.075;
+  float n = pow(lambda*lambda - mass*mass, 2.) +
+             lambda*gamma_w * lambda*gamma_w;
+  return pow(lambda, 4.) / n;
+}
+
+float form_factor_sqr_delta(float) {
+  return 1.0;  // no form factor implemented
 }
 
 
-float ThreeBodyDecayDilepton::diff_width(float m_parent, float m_dil, float m_other, PdgCode pdg) const {
-  if (m_parent < m_dil + m_other) {
+float ThreeBodyDecayDilepton::diff_width(float m_par, float m_dil, float m_other, PdgCode pdg) const {
+  if (m_par < m_dil + m_other) {
     return 0;
   } else {
-    float m_par = m_parent;
-
-    // #CleanUp
-
     float gamma = 0.0;
-    float ff = 0.0;
-    const float alpha = 1.0/137.0;  // move to constans.h
+    // abbreviations
+    float m_dil_sqr = m_dil * m_dil;
+    float m_par_sqr = m_par * m_par;
+    float m_par_cubed = m_par * m_par*m_par;
+    float m_other_sqr = m_other*m_other;
 
     switch (pdg.get_decimal()) {
-      case 111: /*pi0*/
+      case 111: /*pi0*/ {
         gamma = 78e-10;
-        ff = 1.+5.5*m_dil*m_dil;
-
-        return (alpha*4./(3.*M_PI))*gamma/m_dil*pow(1.-m_dil/m_par*m_dil/m_par,3.)*ff*ff;
-
-      case 221: /*eta*/
-        gamma = 46e-8;
-        ff = 1./(1.-(m_dil*m_dil/0.676));
-
-        return (4.*alpha/(3.*M_PI))*gamma/m_dil*pow(1.-m_dil/m_par*m_dil/m_par,3.)*ff*ff;
-
-      case 223: /*omega*/
-      {
-        gamma = 0.703e-3;
-        float lambda = 0.65;
-        float gamma_w = 0.075;
-        float m_dil_sqr = m_dil * m_dil;
-        float m_par_sqr = m_par * m_par;
-        float m_other_sqr = m_other*m_other;
-
-
-        float n1 = (pow(lambda*lambda - m_dil_sqr, 2.) + lambda*gamma_w * lambda*gamma_w);
-        float n2 = (m_par_sqr -m_other_sqr);
-        float n3 = ((m_par_sqr -m_other_sqr)*(m_par_sqr -m_other_sqr));
-
-        float rad = pow(1+ m_dil_sqr / n2, 2.)  -  4*m_par_sqr*m_dil_sqr / n3;
-
-        if (n1 == 0.0 || n2 == 0.0 || n3 == 0.0) {
-          throw std::runtime_error(" one of the n's is zero in diff width");
-        }
-
-        if (rad < 0.0) {
-          throw std::runtime_error("rad negative " +  std::to_string(rad) +
-                               " \ndilepton mass is " + std::to_string(m_dil) +
-                                "\nm_other mass is " + std::to_string(m_other));
-        }
-
-
-        ff = pow(lambda, 4.) / n1;
-
-
-
-        return (2.*alpha/(3.*M_PI))  *  gamma/m_dil  *   pow(sqrt(rad), 3.) * ff;
+        float ff = form_factor_pi(m_dil);
+        return (alpha*4./(3.*M_PI)) * gamma/m_dil *
+                                   pow(1.-m_dil/m_par*m_dil/m_par,3.) * ff*ff;
       }
-
-      case 2214:  case 2114:
-      {
-        float m_dil_sqr = m_dil * m_dil;
-        float m_par_cubed = m_par * m_par*m_par;
-        float m_other_sqr = m_other*m_other;
-
-
-        float t1 = alpha/16. * (m_par+m_other)*(m_par+m_other)/(m_par_cubed*m_other_sqr) *
+      case 221: /*eta*/ {
+        gamma = 46e-8;
+        float ff = form_factor_eta(m_dil);
+        return (4.*alpha/(3.*M_PI)) * gamma/m_dil *
+                                   pow(1.-m_dil/m_par*m_dil/m_par,3.) * ff*ff;
+      }
+      case 223: /*omega*/ {
+        gamma = 0.703e-3;
+        float n1 = (m_par_sqr - m_other_sqr);
+        float n2 = ((m_par_sqr -m_other_sqr)*(m_par_sqr -m_other_sqr));
+        float rad = pow(1+ m_dil_sqr / n1, 2.)  -  4*m_par_sqr*m_dil_sqr / n2;
+        return (2.*alpha/(3.*M_PI))  *  gamma/m_dil  *   pow(sqrt(rad), 3.) *
+                                                   form_factor_sqr_omega(m_dil);
+      }
+      case 2214: case 2114: /* Delta+ and Delta0 */ {
+        float t1 = alpha/16. *
+                   (m_par+m_other)*(m_par+m_other)/(m_par_cubed*m_other_sqr) *
                    std::sqrt((m_par+m_other)*(m_par+m_other) - m_dil_sqr);
-
-        float t2 = pow( std::sqrt((m_par-m_other)*(m_par-m_other) - m_dil_sqr) , 3.0);
-
-        ff = 1.;  // discussions
-
-        float gamma_vi = t1 * t2 *ff;
-
+        float t2 =
+              pow(std::sqrt((m_par-m_other)*(m_par-m_other) - m_dil_sqr), 3.0);
+        float gamma_vi = t1 * t2 * form_factor_sqr_delta(m_dil);
         return 2.*alpha/(3.*M_PI) * gamma_vi/m_dil;
       }
-
       default:
         throw std::runtime_error("Error in ThreeBodyDecayDilepton");
     }
   }  // else
 }
-
-
-
-
 
 }  // namespace Smash
