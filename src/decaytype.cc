@@ -82,12 +82,6 @@ static float Post_FF_sqr(float m, float M0, float srts0, float L) {
   return FF*FF;
 }
 
-// #CleanUp
-float DecayType::diff_width(float, float, float, PdgCode) const {
-  return 0.f;
-}
-
-
 
 // TwoBodyDecay
 
@@ -379,7 +373,7 @@ float ThreeBodyDecayDilepton::diff_width(float m_parent, float m_dil, float m_ot
 
         return 2.*alpha/(3.*M_PI) * gamma_vi/m_dil;
       }
-      
+
       default:
         throw std::runtime_error("Error in ThreeBodyDecayDilepton");
     }

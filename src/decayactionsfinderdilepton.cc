@@ -40,15 +40,13 @@ ActionList DecayActionsFinderDilepton::find_actions_in_cell(
       float dilepton_mass = 0.f;
 
       switch (mode->particle_number()) {
-        case 2:
-          {
+        case 2: {
           const float partial_width = mode->weight();
           // SHINNING as described in \iref{Schmidt:2008hm}, chapter 2D
           sh_weight = dt * inv_gamma * partial_width;
           break;
-          }
-        case 3:
-          {
+        }
+        case 3: {
           // find the non lepton particle position
           int non_lepton_position = -1;
           for (int i=0; i<3; ++i) {
@@ -57,12 +55,18 @@ ActionList DecayActionsFinderDilepton::find_actions_in_cell(
               break;
             }
           }
+
           const float m_nl = mode->particle_types()[non_lepton_position]->mass();  // mass of non-lepton final state particle
           const float m_l = mode->particle_types()[(non_lepton_position+1)%3]->mass(); // mass of leptons in final state
+
           // randomly select a mass
           dilepton_mass = Random::uniform(2*m_l,p.effective_mass()-m_nl);
-          const float diff_width = mode->type().diff_width(p.effective_mass(), dilepton_mass, m_nl,
+
+          // #CleanUp Is this a good idea?
+          const ThreeBodyDecayDilepton &modetype = dynamic_cast<const ThreeBodyDecayDilepton&>(mode->type());
+          const float diff_width = modetype.diff_width(p.effective_mass(), dilepton_mass, m_nl,
                                               p.type().pdgcode());  // #CleanUp
+
           sh_weight = dt * inv_gamma * diff_width;
           break;
           }
