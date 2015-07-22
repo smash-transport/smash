@@ -21,6 +21,50 @@
 namespace Smash {
 class Configuration;
 
+
+/*!\Userguide
+ * \page input_logging_ Logging
+ * This section controls the logging levels for different areas of the code.
+ * It contains the following keys, all of which have string values and are
+ * optional:
+ * \li default (determines the default logging level for all areas)
+ * \li Main
+ * \li Experiment
+ * \li Box
+ * \li Collider
+ * \li Sphere
+ * \li Action
+ * \li InputParser
+ * \li ParticleType
+ * \li FindScatter
+ * \li Legacy
+ * \li Clock
+ * \li DecayModes
+ * \li Resonances
+ * \li ScatterAction
+ * \li Distributions
+ * \li Propagation
+ * \li Grid
+ * \li List
+ * \li Nucleus
+ * \li DecayType
+ * \li Density
+ * \li PauliBlocking
+ * \li Tmn
+ * \li Fpe
+ * \li Lattice
+ *
+ * Each key can have one of the following values:
+ * \li ALL   - Log all messages (default)
+ * \li TRACE - The lowest severity for messages describing the program flow
+ * \li DEBUG - Debug messages
+ * \li INFO  - Messages of informational nature
+ * \li WARN  - Warning messages
+ * \li ERROR - Non-fatal errors
+ * \li FATAL - Messages that indicate terminal application failure
+ * \li OFF   - If selected no messages will be output
+ */
+
 /** \addtogroup logging
  * @{
  *
