@@ -42,7 +42,7 @@ Potentials::Potentials(Configuration conf, const ExperimentParameters &param)
    *      Parameter B of Skyrme potential in MeV
    *
    * \key Skyrme_Tau (float, required): \n
-   *      Parameter \f$\tau\f$ of Skyrme potent.
+   *      Parameter \f$\tau\f$ of Skyrme potential.
    */
   if (use_skyrme_) {
     skyrme_a_ = conf.take({"Skyrme", "Skyrme_A"});
