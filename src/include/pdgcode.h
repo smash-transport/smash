@@ -252,7 +252,7 @@ class PdgCode {
   inline bool is_lepton() const {
     return (ucode() == 0x11 ||
             ucode() == 0x12 ||
-            ucode() == 0x13 ||  // #CleanUp
+            ucode() == 0x13 ||
             ucode() == 0x14 ||
             ucode() == 0x15 ||
             ucode() == 0x16);
@@ -742,7 +742,7 @@ return (pdg1 ==  0x11 && pdg2 == -0x11) ||
        (pdg3 ==  0x11 && pdg2 == -0x11) ||
        (pdg3 == -0x11 && pdg2 ==  0x11) ||
        (pdg3 ==  0x13 && pdg2 == -0x13) ||
-       (pdg3 == -0x13 && pdg2 ==  0x13) ||  // #CleanUp
+       (pdg3 == -0x13 && pdg2 ==  0x13) ||
        (pdg1 ==  0x11 && pdg3 == -0x11) ||
        (pdg1 == -0x11 && pdg3 ==  0x11) ||
        (pdg1 ==  0x13 && pdg3 == -0x13) ||

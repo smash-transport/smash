@@ -26,12 +26,17 @@ class DecayActionDilepton : public DecayAction {
   void one_to_three() override;
 
  private:
-  /** The shining weight is a weight you apply to every Dilepton Decay. Because
+  /**
+   * The shining weight is a weight you apply to every Dilepton Decay. Because
    * we radiate dileptons at every timestep to increase statistics, we
    * afterwards weight them to correct the dilepton decay yields.
    */
   float shining_weight_;
-  // #CleanUp (doc)
+  /**
+   * For dalitz dilepton decays we sample randomly the possible dilepton_mass_
+   * first and then apply the differential width.
+   * For two body dilepton decays we do not need this member. It is zero.
+   */
   float dilepton_mass_;
 };
 

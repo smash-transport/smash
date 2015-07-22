@@ -56,16 +56,21 @@ ActionList DecayActionsFinderDilepton::find_actions_in_cell(
             }
           }
 
-          const float m_nl = mode->particle_types()[non_lepton_position]->mass();  // mass of non-lepton final state particle
-          const float m_l = mode->particle_types()[(non_lepton_position+1)%3]->mass(); // mass of leptons in final state
+          // mass of non-lepton final state particle
+          const float m_nl =
+                            mode->particle_types()[non_lepton_position]->mass();
+          // mass of leptons in final state
+          const float m_l =
+                      mode->particle_types()[(non_lepton_position+1)%3]->mass();
 
           // randomly select a mass
           dilepton_mass = Random::uniform(2*m_l,p.effective_mass()-m_nl);
 
-          // #CleanUp Is this a good idea?
-          const ThreeBodyDecayDilepton &modetype = dynamic_cast<const ThreeBodyDecayDilepton&>(mode->type());
-          const float diff_width = modetype.diff_width(p.effective_mass(), dilepton_mass, m_nl,
-                                              p.type().pdgcode());  // #CleanUp
+          // Is this a good idea?
+          const ThreeBodyDecayDilepton &modetype =
+                      dynamic_cast<const ThreeBodyDecayDilepton&>(mode->type());
+          const float diff_width = modetype.diff_width(p.effective_mass(),
+                                       dilepton_mass, m_nl, p.type().pdgcode());
 
           sh_weight = dt * inv_gamma * diff_width;
           break;
@@ -75,7 +80,8 @@ ActionList DecayActionsFinderDilepton::find_actions_in_cell(
       }
 
       if (sh_weight > 0.0) {  // decays that can happen
-        auto act = make_unique<DecayActionDilepton>(p, 0.f, sh_weight, dilepton_mass);
+        auto act = make_unique<DecayActionDilepton>(p, 0.f, sh_weight,
+                                                                 dilepton_mass);
         act->add_decay(std::move(mode));
         actions.emplace_back(std::move(act));
       }
@@ -123,17 +129,22 @@ ActionList DecayActionsFinderDilepton::find_final_actions(
               break;
             }
           }
-
-          const float m_nl = mode->particle_types()[non_lepton_position]->mass();  // mass of non-lepton final state particle
-          const float m_l = mode->particle_types()[(non_lepton_position+1)%3]->mass(); // mass of leptons in final state
+          // mass of non-lepton final state particle
+          const float m_nl =
+                            mode->particle_types()[non_lepton_position]->mass();
+          // mass of leptons in final state
+          const float m_l =
+                      mode->particle_types()[(non_lepton_position+1)%3]->mass();
 
           // randomly select a mass
           dilepton_mass = Random::uniform(2*m_l,p.effective_mass()-m_nl);
 
-          // #CleanUp Is this a good idea?
-          const ThreeBodyDecayDilepton &modetype = dynamic_cast<const ThreeBodyDecayDilepton&>(mode->type());
-          const float diff_width = modetype.diff_width(p.effective_mass(), dilepton_mass, m_nl,
-                                              p.type().pdgcode());  // #CleanUp
+          // Is this a good idea?
+          const ThreeBodyDecayDilepton &modetype =
+                      dynamic_cast<const ThreeBodyDecayDilepton&>(mode->type());
+          const float diff_width = modetype.diff_width(p.effective_mass(),
+                                       dilepton_mass, m_nl, p.type().pdgcode());
+
           sh_weight = diff_width * inv_gamma / width_tot;;
           break;
         }
@@ -141,7 +152,8 @@ ActionList DecayActionsFinderDilepton::find_final_actions(
           throw std::runtime_error("Error in DecayActionFinderDilepton");
       }
       if (sh_weight > 0.0) {  // decays that can happen
-        auto act = make_unique<DecayActionDilepton>(p, 0.f, sh_weight, dilepton_mass);
+        auto act = make_unique<DecayActionDilepton>(p, 0.f, sh_weight,
+                                                                 dilepton_mass);
         act->add_decay(std::move(mode));
         actions.emplace_back(std::move(act));
       }

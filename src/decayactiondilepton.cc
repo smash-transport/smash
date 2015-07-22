@@ -19,7 +19,8 @@ DecayActionDilepton::DecayActionDilepton(const ParticleData &p,
                                          float time,
                                          float shining_weight,
                                          float dilepton_mass)
-  : DecayAction({p}, time), shining_weight_(shining_weight), dilepton_mass_(dilepton_mass) {}  // #CleanUp
+  : DecayAction({p}, time), shining_weight_(shining_weight)
+                                              , dilepton_mass_(dilepton_mass) {}
 
 
 void DecayActionDilepton::one_to_three() {
@@ -51,12 +52,12 @@ void DecayActionDilepton::one_to_three() {
 
   double cms_energy = sqrt_s();
 
-
-// perform non_dilepton/virtual photon decay (checks from onetotwo missing)
+// perform non_dilepton/virtual photon decay
 
   double momentum_radial = pCM(cms_energy, double(dilepton_mass_), mass_nl);
 
-  const double p0_v_pho = std::sqrt(dilepton_mass_*dilepton_mass_ + momentum_radial * momentum_radial);
+  const double p0_v_pho =
+   std::sqrt(dilepton_mass_*dilepton_mass_ + momentum_radial * momentum_radial);
 
   /* Here we assume an isotropic angular distribution. */
   Angles phitheta;
