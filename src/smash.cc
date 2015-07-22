@@ -34,7 +34,7 @@
 #include "include/densityoutput.h"
 #include "include/oscaroutput.h"
 #ifdef SMASH_USE_ROOT
-#  include "include/rootoutput.h"
+#include "include/rootoutput.h"
 #endif
 #include "include/vtkoutput.h"
 /* build dependent variables */
@@ -104,24 +104,28 @@ void usage(const int rc, const std::string &progname) {
    * </table>
    */
   std::printf("\nUsage: %s [option]\n\n", progname.c_str());
-  std::printf("Calculate transport box\n"
-    "  -h, --help              usage information\n"
-    "\n"
-    "  -i, --inputfile <file>  path to input configuration file\n"
-    "                          (default: ./config.yaml)\n"
-    "  -d, --decaymodes <file> override default decay modes from file\n"
-    "  -p, --particles <file>  override default particles from file\n"
-    "\n"
-    "  -c, --config <YAML>     specify config value overrides\n"
-    "                          (multiple -c arguments are supported)\n"
-    "  -m, --modus <modus>     shortcut for -c 'General: { Modus: <modus> }'\n"
-    "  -e, --endtime <time>    shortcut for -c 'General: { End_Time: <time> }'"
-    "\n"
-    "\n"
-    "  -o, --output <dir>      output directory (default: ./data/<runid>)\n"
-    "  -f, --force             force overwriting files in the output directory"
-    "\n"
-    "  -v, --version\n\n");
+  std::printf(
+      "Calculate transport box\n"
+      "  -h, --help              usage information\n"
+      "\n"
+      "  -i, --inputfile <file>  path to input configuration file\n"
+      "                          (default: ./config.yaml)\n"
+      "  -d, --decaymodes <file> override default decay modes from file\n"
+      "  -p, --particles <file>  override default particles from file\n"
+      "\n"
+      "  -c, --config <YAML>     specify config value overrides\n"
+      "                          (multiple -c arguments are supported)\n"
+      "  -m, --modus <modus>     shortcut for -c 'General: { Modus: <modus> "
+      "}'\n"
+      "  -e, --endtime <time>    shortcut for -c 'General: { End_Time: <time> "
+      "}'"
+      "\n"
+      "\n"
+      "  -o, --output <dir>      output directory (default: ./data/<runid>)\n"
+      "  -f, --force             force overwriting files in the output "
+      "directory"
+      "\n"
+      "  -v, --version\n\n");
   std::exit(rc);
 }
 
@@ -188,27 +192,24 @@ int main(int argc, char *argv[]) {
 
   const auto &log = logger<LogArea::Main>();
 
-  constexpr option longopts[] = {
-    { "config",     required_argument,      0, 'c' },
-    { "decaymodes", required_argument,      0, 'd' },
-    { "endtime",    required_argument,      0, 'e' },
-    { "force",      no_argument,            0, 'f' },
-    { "help",       no_argument,            0, 'h' },
-    { "inputfile",  required_argument,      0, 'i' },
-    { "modus",      required_argument,      0, 'm' },
-    { "particles",  required_argument,      0, 'p' },
-    { "output",     required_argument,      0, 'o' },
-    { "version",    no_argument,            0, 'v' },
-    { nullptr,      0,                      0,  0  }
-  };
+  constexpr option longopts[] = {{"config", required_argument, 0, 'c'},
+                                 {"decaymodes", required_argument, 0, 'd'},
+                                 {"endtime", required_argument, 0, 'e'},
+                                 {"force", no_argument, 0, 'f'},
+                                 {"help", no_argument, 0, 'h'},
+                                 {"inputfile", required_argument, 0, 'i'},
+                                 {"modus", required_argument, 0, 'm'},
+                                 {"particles", required_argument, 0, 'p'},
+                                 {"output", required_argument, 0, 'o'},
+                                 {"version", no_argument, 0, 'v'},
+                                 {nullptr, 0, 0, 0}};
 
   /* strip any path to progname */
   const std::string progname = bf::path(argv[0]).filename().native();
 
   try {
     bool force_overwrite = false;
-    bf::path output_path = default_output_path(),
-             input_path("./config.yaml");
+    bf::path output_path = default_output_path(), input_path("./config.yaml");
     std::vector<std::string> extra_config;
     char *particles = nullptr, *decaymodes = nullptr, *modus = nullptr,
          *end_time = nullptr;
@@ -260,7 +261,8 @@ int main(int argc, char *argv[]) {
 
     // Abort if there are unhandled arguments left.
     if (optind < argc) {
-      std::cout << argv[0] << ": invalid argument -- '" << argv[optind] << "'\n";
+      std::cout << argv[0] << ": invalid argument -- '" << argv[optind]
+                << "'\n";
       usage(EXIT_FAILURE, progname);
     }
 
@@ -280,12 +282,12 @@ int main(int argc, char *argv[]) {
       configuration["General"]["End_Time"] = std::abs(std::atof(end_time));
 
     /* set up logging */
-    set_default_loglevel(configuration.take({"Logging", "default"},
-                                            einhard::ALL));
+    set_default_loglevel(
+        configuration.take({"Logging", "default"}, einhard::ALL));
     create_all_loggers(configuration["Logging"]);
     log.info(progname, " (", VERSION_MAJOR, ')');
 
-    int64_t seed = configuration.read({"General",  "Randomseed"});
+    int64_t seed = configuration.read({"General", "Randomseed"});
     if (seed < 0) {
       // Seed with a real random value, if available
       std::random_device rd;
@@ -307,7 +309,7 @@ int main(int argc, char *argv[]) {
                                               << '\n';
 
     // take the seed setting only after the configuration was stored to file
-    seed = configuration.take({"General",  "Randomseed"});
+    seed = configuration.take({"General", "Randomseed"});
     Random::set_seed(seed);
     log.info() << "Random number seed: " << seed;
 
@@ -337,16 +339,15 @@ int main(int argc, char *argv[]) {
     auto output_conf = configuration["Output"];
 
     /*!\Userguide
-     * \page output_general_ Output files
-     * There are different optional formats for SMASH output that are explained
-     * below in more detail. Per default, the selected output files will be
-     * saved in the directory ./data/\<run_id\>, where \<run_id\> is an integer
-     * number starting from 0. At the beginning
-     * of a run SMASH checks, if the ./data/0 directory exists. If it does not exist, it
-     * is created and all output files are written there. If the directory
-     * already exists, SMASH tries for ./data/1, ./data/2 and so on until it
-     * finds a free number. The user can change output directory by a command
-     * line option, if desired:
+     * \page output_general_ Output files There are different optional formats
+     * for SMASH output that are explained below in more detail. Per default,
+     * the selected output files will be saved in the directory
+     * ./data/\<run_id\>, where \<run_id\> is an integer number starting from 0.
+     * At the beginning of a run SMASH checks, if the ./data/0 directory exists.
+     * If it does not exist, it is created and all output files are written
+     * there. If the directory already exists, SMASH tries for ./data/1,
+     * ./data/2 and so on until it finds a free number. The user can change
+     * output directory by a command line option, if desired:
      * \code smash -o <user_output_dir> \endcode
      * SMASH supports several kinds of configurable output formats.
      * They are called OSCAR1999, OSCAR2013, binary OSCAR2013, VTK and ROOT
@@ -383,33 +384,33 @@ int main(int argc, char *argv[]) {
       output_conf.take({"Vtk"});
     }
     if (static_cast<bool>(output_conf.take({"Binary_Collisions", "Enable"}))) {
-      output_list.emplace_back(new BinaryOutputCollisions(output_path,
-                                       output_conf["Binary_Collisions"]));
+      output_list.emplace_back(new BinaryOutputCollisions(
+          output_path, output_conf["Binary_Collisions"]));
     } else {
       output_conf.take({"Binary_Collisions"});
     }
     if (static_cast<bool>(output_conf.take({"Binary_Particles", "Enable"}))) {
-      output_list.emplace_back(new BinaryOutputParticles(output_path,
-                                       output_conf["Binary_Particles"]));
+      output_list.emplace_back(new BinaryOutputParticles(
+          output_path, output_conf["Binary_Particles"]));
     } else {
       output_conf.take({"Binary_Particles"});
     }
     if (static_cast<bool>(output_conf.take({"Root", "Enable"}))) {
-#ifdef SMASH_USE_ROOT
-      output_list.emplace_back(new RootOutput(
-                               output_path, output_conf["Root"]));
-#else
+      #ifdef SMASH_USE_ROOT
+      output_list.emplace_back(
+          new RootOutput(output_path, output_conf["Root"]));
+      #else
       log.error() << "You requested Root output, but Root support has not been "
                      "compiled in. To enable Root support call: cmake -D "
                      "USE_ROOT=ON <path>.";
       output_conf.take({"Root"});
-#endif
+      #endif
     } else {
       output_conf.take({"Root"});
     }
     if (static_cast<bool>(output_conf.take({"Density", "Enable"}))) {
-      output_list.emplace_back(new DensityOutput(output_path,
-                               output_conf["Density"]));
+      output_list.emplace_back(
+          new DensityOutput(output_path, output_conf["Density"]));
     } else {
       output_conf.take({"Density"});
     }
@@ -429,8 +430,7 @@ int main(int argc, char *argv[]) {
     // run the experiment
     log.trace(source_location, " run the Experiment");
     experiment->run();
-  }
-  catch(std::exception &e) {
+  } catch (std::exception &e) {
     log.fatal() << "SMASH failed with the following error:\n" << e.what();
     return EXIT_FAILURE;
   }
@@ -438,4 +438,3 @@ int main(int argc, char *argv[]) {
   log.trace() << source_location << " about to return from main";
   return 0;
 }
-
