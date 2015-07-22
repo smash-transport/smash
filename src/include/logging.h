@@ -37,7 +37,6 @@ class Configuration;
  * \li InputParser
  * \li ParticleType
  * \li FindScatter
- * \li Legacy
  * \li Clock
  * \li DecayModes
  * \li Resonances
@@ -47,7 +46,6 @@ class Configuration;
  * \li Grid
  * \li List
  * \li Nucleus
- * \li DecayType
  * \li Density
  * \li PauliBlocking
  * \li Tmn
@@ -133,31 +131,28 @@ DECLARE_LOGAREA(5, Action);
 DECLARE_LOGAREA(6, InputParser);
 DECLARE_LOGAREA(7, ParticleType);
 DECLARE_LOGAREA(8, FindScatter);
-DECLARE_LOGAREA(9, Legacy);
-DECLARE_LOGAREA(10, Clock);
-DECLARE_LOGAREA(11, DecayModes);
-DECLARE_LOGAREA(12, Resonances);
-DECLARE_LOGAREA(13, ScatterAction);
-DECLARE_LOGAREA(14, Distributions);
-DECLARE_LOGAREA(15, Propagation);
-DECLARE_LOGAREA(16, Grid);
-DECLARE_LOGAREA(17, List);    // ListModus
-DECLARE_LOGAREA(18, Nucleus);
-DECLARE_LOGAREA(19, DecayType);
-DECLARE_LOGAREA(20, Density);
-DECLARE_LOGAREA(21, PauliBlocking);
-DECLARE_LOGAREA(22, Tmn);
-DECLARE_LOGAREA(23, Fpe);
-DECLARE_LOGAREA(24, Lattice);
+DECLARE_LOGAREA(9, Clock);
+DECLARE_LOGAREA(10, DecayModes);
+DECLARE_LOGAREA(11, Resonances);
+DECLARE_LOGAREA(12, ScatterAction);
+DECLARE_LOGAREA(13, Distributions);
+DECLARE_LOGAREA(14, Propagation);
+DECLARE_LOGAREA(15, Grid);
+DECLARE_LOGAREA(16, List);    // ListModus
+DECLARE_LOGAREA(17, Nucleus);
+DECLARE_LOGAREA(18, Density);
+DECLARE_LOGAREA(19, PauliBlocking);
+DECLARE_LOGAREA(20, Tmn);
+DECLARE_LOGAREA(21, Fpe);
+DECLARE_LOGAREA(22, Lattice);
 
 /// This type collects all existing log areas so they will be created with the
 /// correct log level automatically.
-using AreaTuple = std::tuple<Main, Experiment, Box, Collider, Sphere,
-                             Action, InputParser, ParticleType, FindScatter,
-                             Legacy, Clock, DecayModes, Resonances,
-                             ScatterAction, Distributions, Propagation, Grid,
-                             List, Nucleus, DecayType, Density, PauliBlocking,
-                             Tmn, Fpe, Lattice>;
+using AreaTuple = std::tuple<Main, Experiment, Box, Collider, Sphere, Action,
+                             InputParser, ParticleType, FindScatter, Clock,
+                             DecayModes, Resonances, ScatterAction,
+                             Distributions, Propagation, Grid, List, Nucleus,
+                             Density, PauliBlocking, Tmn, Fpe, Lattice>;
 }  // namespace LogArea
 
 /**
