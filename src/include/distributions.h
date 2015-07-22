@@ -7,11 +7,6 @@
 #ifndef SRC_INCLUDE_DISTRIBUTIONS_H_
 #define SRC_INCLUDE_DISTRIBUTIONS_H_
 
-#include <gsl/gsl_sf_bessel.h>
-#include <cmath>
-
-#include "constants.h"
-
 namespace Smash {
 
 /** Returns a Breit-Wigner distribution
@@ -56,26 +51,6 @@ double density_integrand(const double energy, const double momentum_sqr,
  * \fpPrecision Why \c double?
  */
 double sample_momenta(const double temperature, const double mass);
-
-/** return number density from a Maxwell-Boltzmann distribution
- *
- * \todo rename this function to make clear what it is
- *
- * \see density_integrand
- *
- * \param[in] temperature Temperature
- * \param[in] mass Mass of the particle: \f$m = \sqrt{E^2 - p^2}\f$
- *
- * \return \f$\frac{1}{2\pi^2} m^2 T K_2\left(\frac{m}{T}\right)\f$
- *
- * where \f$K_2\f$ is the modified Bessel function of the second kind.
- *
- * \fpPrecision Why \c double?
- */
-inline double number_density_maxwellboltzmann(double mass, double temperature) {
-  return mass * mass * temperature * gsl_sf_bessel_Knu(2, mass / temperature)
-    * 0.5 * M_1_PI * M_1_PI / hbarc / hbarc / hbarc;
-}
 
 }  // namespace Smash
 

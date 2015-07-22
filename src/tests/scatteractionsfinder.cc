@@ -12,9 +12,10 @@
 
 #include <cstdio>
 
+#include "../include/action.h"
+#include "../include/constants.h"
 #include "../include/particledata.h"
 #include "../include/pdgcode.h"
-#include "../include/action.h"
 #include "../include/scatteractionsfinder.h"
 
 using namespace Smash;

@@ -8,6 +8,8 @@
 */
 
 #include "include/potentials.h"
+
+#include "include/constants.h"
 #include "include/density.h"
 
 namespace Smash {

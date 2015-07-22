@@ -12,6 +12,7 @@
 #include <vector>
 
 #include "configuration.h"
+#include "constants.h"
 #include "forwarddeclarations.h"
 #include "fourvector.h"
 #include "particledata.h"

@@ -8,8 +8,9 @@
 #ifndef SRC_INCLUDE_KINEMATICS_H_
 #define SRC_INCLUDE_KINEMATICS_H_
 
+#include <array>
+
 #include "constants.h"
-#include "experiment.h"
 
 namespace Smash {
 
