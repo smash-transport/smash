@@ -290,9 +290,6 @@ DecayBranchList ParticleType::get_partial_widths_hadronic(const float m) const {
 }
 
 DecayBranchList ParticleType::get_partial_widths_dilepton(const float m) const {
-  if (is_stable()) {
-    return {};
-  }
   /* Loop over decay modes and calculate all partial widths. */
   const auto &decay_mode_list = decay_modes().decay_mode_list();
   if (decay_mode_list.size() == 0) {
