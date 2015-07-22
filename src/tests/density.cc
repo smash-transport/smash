@@ -29,7 +29,7 @@ using namespace Smash;
 static const bf::path testoutputpath = bf::absolute(SMASH_TEST_OUTPUT_PATH);
 
 TEST(directory_is_created) {
-  bf::create_directory(testoutputpath);
+  bf::create_directories(testoutputpath);
   VERIFY(bf::exists(testoutputpath));
 }
 
