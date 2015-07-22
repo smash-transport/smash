@@ -83,7 +83,6 @@ void ThreeVector::rotate_to(ThreeVector &r) {
 }
 
 std::ostream &operator<<(std::ostream &out, const ThreeVector &v) {
-  using namespace std;
   out.put('(');
   out.fill(' ');
   for (auto x : v) {

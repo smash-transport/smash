@@ -12,7 +12,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-using namespace Smash;
+namespace Smash {
 
 FileLock::FileLock(bf::path path) : path_(path), acquired_(false) {}
 
@@ -40,3 +40,5 @@ FileLock::~FileLock() {
     bf::remove(path_);
   }
 }
+
+}  // namespace Smash

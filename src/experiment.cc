@@ -61,10 +61,9 @@ namespace std {
 template <typename T, typename Ratio>
 static ostream &operator<<(ostream &out,
                            const chrono::duration<T, Ratio> &seconds) {
-  using namespace chrono;
-  using Seconds = duration<float>;
-  using Minutes = duration<float, std::ratio<60>>;
-  using Hours = duration<float, std::ratio<60 * 60>>;
+  using Seconds = chrono::duration<float>;
+  using Minutes = chrono::duration<float, std::ratio<60>>;
+  using Hours = chrono::duration<float, std::ratio<60 * 60>>;
   constexpr Minutes threshold_for_minutes{10};
   constexpr Hours threshold_for_hours{3};
   if (seconds < threshold_for_minutes) {

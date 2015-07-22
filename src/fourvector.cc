@@ -60,7 +60,6 @@ bool FourVector::operator==(const FourVector &a) const {
 }
 
 std::ostream& operator<<(std::ostream& out, const FourVector& vec) {
-  using namespace std;
   out.put('(');
   out.fill(' ');
   for (auto x : vec) {
