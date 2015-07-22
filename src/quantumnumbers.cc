@@ -69,4 +69,4 @@ std::string QuantumNumbers::report_deviations(const QuantumNumbers& rhs) const {
   return error_msg.str();
 }
 
-}
+}  // namespace Smash
