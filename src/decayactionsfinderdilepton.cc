@@ -12,6 +12,7 @@
 #include "include/constants.h"
 #include "include/cxx14compat.h"
 #include "include/decayactiondilepton.h"
+#include "include/decaymodes.h"
 #include "include/particles.h"
 
 

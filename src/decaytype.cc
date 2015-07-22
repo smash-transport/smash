@@ -312,7 +312,8 @@ float ThreeBodyDecayDilepton::diff_width(float m_parent, float m_dil, float m_ot
 
     float gamma = 0.0;
     float ff = 0.0;
-    float alpha = 1.0/137.0;
+    const float alpha = 1.0/137.0;  // move to constans.h
+
     switch (pdg.get_decimal()) {
       case 111: /*pi0*/
         gamma = 78e-10;
@@ -326,17 +327,19 @@ float ThreeBodyDecayDilepton::diff_width(float m_parent, float m_dil, float m_ot
 
         return (4.*alpha/(3.*M_PI))*gamma/m_dil*pow(1.-m_dil/m_par*m_dil/m_par,3.)*ff*ff;
 
-      case 223: /*omega*/ {
+      case 223: /*omega*/
+      {
         gamma = 0.703e-3;
         float lambda = 0.65;
         float gamma_w = 0.075;
         float m_dil_sqr = m_dil * m_dil;
         float m_par_sqr = m_par * m_par;
+        float m_other_sqr = m_other*m_other;
 
 
         float n1 = (pow(lambda*lambda - m_dil_sqr, 2.) + lambda*gamma_w * lambda*gamma_w);
-        float n2 = (m_par_sqr - m_other*m_other);
-        float n3 = ((m_par_sqr - m_other*m_other)*(m_par_sqr - m_other*m_other));
+        float n2 = (m_par_sqr -m_other_sqr);
+        float n3 = ((m_par_sqr -m_other_sqr)*(m_par_sqr -m_other_sqr));
 
         float rad = pow(1+ m_dil_sqr / n2, 2.)  -  4*m_par_sqr*m_dil_sqr / n3;
 
@@ -357,7 +360,26 @@ float ThreeBodyDecayDilepton::diff_width(float m_parent, float m_dil, float m_ot
 
         return (2.*alpha/(3.*M_PI))  *  gamma/m_dil  *   pow(sqrt(rad), 3.) * ff;
       }
-       /* missing: Delta, Delta* and N* */
+
+      case 2214:  case 2114:
+      {
+        float m_dil_sqr = m_dil * m_dil;
+        float m_par_cubed = m_par * m_par*m_par;
+        float m_other_sqr = m_other*m_other;
+
+
+        float t1 = alpha/16. * (m_par+m_other)*(m_par+m_other)/(m_par_cubed*m_other_sqr) *
+                   std::sqrt((m_par+m_other)*(m_par+m_other) - m_dil_sqr);
+
+        float t2 = pow( std::sqrt((m_par-m_other)*(m_par-m_other) - m_dil_sqr) , 3.0);
+
+        ff = 1.;  // discussions
+
+        float gamma_vi = t1 * t2 *ff;
+
+        return 2.*alpha/(3.*M_PI) * gamma_vi/m_dil;
+      }
+      
       default:
         throw std::runtime_error("Error in ThreeBodyDecayDilepton");
     }
