@@ -27,30 +27,30 @@ class Configuration;
  * This section controls the logging levels for different areas of the code.
  * It contains the following keys, all of which have string values and are
  * optional:
- * \li default (determines the default logging level for all areas)
- * \li Main
- * \li Experiment
- * \li Box
- * \li Collider
- * \li Sphere
- * \li Action
- * \li InputParser
- * \li ParticleType
- * \li FindScatter
- * \li Clock
- * \li DecayModes
- * \li Resonances
- * \li ScatterAction
- * \li Distributions
- * \li Propagation
- * \li Grid
- * \li List
- * \li Nucleus
- * \li Density
- * \li PauliBlocking
- * \li Tmn
- * \li Fpe
- * \li Lattice
+ * \li \key default (determines the default logging level for all areas)
+ * \li \key Main
+ * \li \key Experiment
+ * \li \key Box
+ * \li \key Collider
+ * \li \key Sphere
+ * \li \key Action
+ * \li \key InputParser
+ * \li \key ParticleType
+ * \li \key FindScatter
+ * \li \key Clock
+ * \li \key DecayModes
+ * \li \key Resonances
+ * \li \key ScatterAction
+ * \li \key Distributions
+ * \li \key Propagation
+ * \li \key Grid
+ * \li \key List
+ * \li \key Nucleus
+ * \li \key Density
+ * \li \key PauliBlocking
+ * \li \key Tmn
+ * \li \key Fpe
+ * \li \key Lattice
  *
  * Each key can have one of the following values:
  * \li ALL   - Log all messages (default)
