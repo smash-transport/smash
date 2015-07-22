@@ -20,7 +20,8 @@ namespace Smash {
 float pp_elastic(double mandelstam_s) {
   double p_lab = plab_from_s_NN(mandelstam_s);
   if (p_lab < 0.435) {
-    return 5.12 * mN / (mandelstam_s - 4 * mN * mN) + 1.67;
+    return 5.12 * nucleon_mass
+        / (mandelstam_s - 4 * nucleon_mass * nucleon_mass) + 1.67;
   } else if (p_lab < 0.8) {
     return 23.5 + 1000 * (p_lab - 0.7) * (p_lab - 0.7)
       * (p_lab - 0.7) *(p_lab - 0.7);
@@ -62,7 +63,8 @@ float pp_total(double mandelstam_s) {
 float np_elastic(double mandelstam_s) {
   double p_lab = plab_from_s_NN(mandelstam_s);
   if (p_lab < 0.525) {
-    return 17.05 * mN / (mandelstam_s - 4 * mN * mN) - 6.83;
+    return 17.05 * nucleon_mass
+        / (mandelstam_s - 4 * nucleon_mass * nucleon_mass) - 6.83;
   } else if (p_lab < 0.8) {
     return 33 + 196 * std::pow(std::abs(p_lab - 0.95), 2.5);
   } else if (p_lab < 2.0) {
