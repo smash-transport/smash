@@ -85,7 +85,8 @@ double Potentials::potential(const ThreeVector &r,
     const double rho_eck = rho_eckart(r, plist, param_, DensityType::baryon,
                                       compute_gradient).first;
     total_potential += skyrme_a_ * (rho_eck/nuclear_density) +
-                       skyrme_b_ * std::pow(rho_eck/nuclear_density, skyrme_tau_);
+                       skyrme_b_ * std::pow(rho_eck/nuclear_density,
+                                            skyrme_tau_);
   }
   if (use_symmetry_) {
     // use isospin density
@@ -118,8 +119,7 @@ ThreeVector Potentials::potential_gradient(const ThreeVector &r,
 
     // Derivative of potential with respect to density
     double tmp = skyrme_tau_ * std::pow(rho/nuclear_density, skyrme_tau_ - 1);
-    const double dpotential_drho = (skyrme_a_  + skyrme_b_ * tmp) / nuclear_density;
-    total_gradient += drho_dr * dpotential_drho;
+    total_gradient += drho_dr * (skyrme_a_ + skyrme_b_*tmp) / nuclear_density;
   }
 
   if (use_symmetry_) {
