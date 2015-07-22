@@ -92,6 +92,7 @@ set(smash_src
         potentials.cc
         processbranch.cc
         propagation.cc
+        quantumnumbers.cc
         random.cc
         resonances.cc
         scatteraction.cc

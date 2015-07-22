@@ -13,6 +13,7 @@
 #include <cstdio>
 #include <cstdlib>
 
+#include "include/constants.h"
 #include "include/logging.h"
 #include "include/random.h"
 

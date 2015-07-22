@@ -13,9 +13,20 @@
 #include <iostream>
 #include <vector>
 
+#include "include/constants.h"
 #include "include/iomanipulators.h"
 
 namespace Smash {
+
+float ParticleData::effective_mass() const {
+  const float m_pole = pole_mass();
+  if (m_pole < really_small) {
+    // prevent numerical problems with massless or very light particles
+    return m_pole;
+  } else {
+    return momentum().abs();
+  }
+}
 
 std::ostream &operator<<(std::ostream &out, const ParticleData &p) {
   using namespace std;
