@@ -154,7 +154,7 @@ namespace {
  * \key Gaussian_Sigma (float, optional, default 1.0): \n
  * Width [fm] of gaussians that represent Wigner density of particles.
  *
- * \key Gaussian_Cutoff (float, optional, default 4.0)
+ * \key Gauss_Cutoff_In_Sigma (float, optional, default 4.0)
  * Distance in sigma at which gaussian is considered 0.
  *
  * \page input_output_options_ Output
@@ -163,19 +163,13 @@ namespace {
  * system in Standard Output and other output formats which support this
  * functionality.
  *
- * \key Density_Type (string, optional, default = "particle"): \n
+ * \key Density_Type (string, optional, default = "hadron"): \n
  * Determines which kind of density is written into the collision files.
  * Possible values:\n
- * \li "particle"         - total particle density \n
+ * \li "hadron"           - total hadronic density \n
  * \li "baryon"           - net baryon density \n
  * \li "baryonic isospin" - baryonic isospin density \n
  * \li "pion"             - pion density
- *
- * \key Gaussian_Sigma (float, optional, default 1.0): \n
- * Width [fm] of gaussians that represent Wigner density of particles.
- *
- * \key Gaussian_Cutoff (float, optional, default 4.0)
- * Distance in sigma at which gaussian is considered 0.
  */
 /** Gathers all general Experiment parameters
  *
