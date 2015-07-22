@@ -17,31 +17,13 @@ namespace Smash {
 float density_factor(const PdgCode pdg, DensityType dens_type) {
   switch (dens_type) {
     case DensityType::hadron:
-      if (pdg.is_hadron()) {
-        return 1.f;
-      } else {
-        return 0.f;
-      }
+      return pdg.is_hadron() ? 1.f : 0.f;
     case DensityType::baryon:
       return static_cast<float>(pdg.baryon_number());
     case DensityType::baryonic_isospin:
-      if (pdg.is_baryon()) {
-        return pdg.isospin3_rel();
-      } else {
-        return 0.f;
-      }
+      return pdg.is_baryon() ? pdg.isospin3_rel() : 0.f;
     case DensityType::pion:
-      {
-        const auto pdg_code = pdg.code();
-        if (pdg_code == 0x111      // pi0
-            || pdg_code == 0x211   // pi+
-            || pdg_code == -0x211  // pi-
-          ) {
-          return 1.f;
-        } else {
-          return 0.f;
-        }
-      }
+      return pdg.is_pion() ? 1.f : 0.f;
     default:
       return 0.f;
   }
