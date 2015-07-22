@@ -61,6 +61,9 @@ class Configuration;
  * \li ERROR - Non-fatal errors
  * \li FATAL - Messages that indicate terminal application failure
  * \li OFF   - If selected no messages will be output
+ *
+ * Note that the logging levels TRACE and DEBUG are only available in
+ * debugging builds (i.e. with -DCMAKE_BUILD_TYPE=Debug).
  */
 
 /** \addtogroup logging
