@@ -15,7 +15,6 @@
 #include <numeric>
 #include <vector>
 
-
 #include "include/constants.h"
 #include "include/cxx14compat.h"
 #include "include/inputfunctions.h"
@@ -36,33 +35,33 @@ void DecayModes::add_mode(float ratio, int L,
                           ParticleTypePtrList particle_types) {
   assert(all_decay_types != nullptr);
   switch (particle_types.size()) {
-  case 2:
-    if (is_dilepton(particle_types[0]->pdgcode(),
-                    particle_types[1]->pdgcode())) {
+    case 2:
+      if (is_dilepton(particle_types[0]->pdgcode(),
+                      particle_types[1]->pdgcode())) {
+        all_decay_types->emplace_back(
+            make_unique<TwoBodyDecayDilepton>(particle_types, L));
+      } else if (particle_types[0]->is_stable() &&
+                 particle_types[1]->is_stable()) {
+        all_decay_types->emplace_back(
+            make_unique<TwoBodyDecayStable>(particle_types, L));
+      } else if (particle_types[0]->is_stable() ||
+                 particle_types[1]->is_stable()) {
+        all_decay_types->emplace_back(
+            make_unique<TwoBodyDecaySemistable>(particle_types, L));
+      } else {
+        all_decay_types->emplace_back(
+            make_unique<TwoBodyDecayUnstable>(particle_types, L));
+      }
+      break;
+    case 3:
       all_decay_types->emplace_back(
-          make_unique<TwoBodyDecayDilepton>(particle_types, L));
-    } else if (particle_types[0]->is_stable() &&
-               particle_types[1]->is_stable()) {
-      all_decay_types->emplace_back(
-          make_unique<TwoBodyDecayStable>(particle_types, L));
-    } else if (particle_types[0]->is_stable() ||
-               particle_types[1]->is_stable()) {
-      all_decay_types->emplace_back(
-          make_unique<TwoBodyDecaySemistable>(particle_types, L));
-    } else {
-      all_decay_types->emplace_back(
-          make_unique<TwoBodyDecayUnstable>(particle_types, L));
-    }
-    break;
-  case 3:
-    all_decay_types->emplace_back(
-        make_unique<ThreeBodyDecay>(particle_types, L));
-    break;
-  default:
-    throw InvalidDecay(
-        "DecayModes::add_mode was instructed to add a decay mode with " +
-        std::to_string(particle_types.size()) +
-        " particles. This is an invalid input.");
+          make_unique<ThreeBodyDecay>(particle_types, L));
+      break;
+    default:
+      throw InvalidDecay(
+          "DecayModes::add_mode was instructed to add a decay mode with " +
+          std::to_string(particle_types.size()) +
+          " particles. This is an invalid input.");
   }
   decay_modes_.push_back(
       make_unique<DecayBranch>(*all_decay_types->back(), ratio));
@@ -198,89 +197,99 @@ void DecayModes::load_decaymodes(const std::string &input) {
         /* References to isospin multiplets: Automatically determine all valid
          * combinations and calculate Clebsch-Gordan factors */
         switch (decay_particles.size()) {
-        case 2: {
-          const IsoParticleType &isotype_daughter_1
-                                = IsoParticleType::find(decay_particles[0]);
-          const IsoParticleType &isotype_daughter_2
-                                = IsoParticleType::find(decay_particles[1]);
-          // loop through multiplets
-          for (size_t m = 0; m < mother_states.size(); m++) {
-            for (const auto& daughter1 : isotype_daughter_1.get_states()) {
-              for (const auto& daughter2 : isotype_daughter_2.get_states()) {
-                // calculate Clebsch-Gordan factor
-                const double cg = isospin_clebsch_gordan(*daughter1, *daughter2,
-                                                         *mother_states[m]);
-                const double cg_sqr = cg*cg;
-                if (cg_sqr > 0.) {
-                  // add mode
-                  log.debug("decay mode generated: " + mother_states[m]->name() +
-                            " -> " + daughter1->name() + " " + daughter2->name() +
-                            " (" + std::to_string(ratio*cg_sqr) + ")");
-                  decay_modes_to_add[m].add_mode(ratio*cg_sqr, L,
-                                                 {daughter1, daughter2});
-                }
-              }
-            }
-          }
-          break;
-        }
-        case 3: {
-          const IsoParticleType &isotype_daughter_1
-                                = IsoParticleType::find(decay_particles[0]);
-          const IsoParticleType &isotype_daughter_2
-                                = IsoParticleType::find(decay_particles[1]);
-          const IsoParticleType &isotype_daughter_3
-                                = IsoParticleType::find(decay_particles[2]);
-          // loop through multiplets
-          for (size_t m = 0; m < mother_states.size(); m++) {
-            for (const auto& daughter1 : isotype_daughter_1.get_states()) {
-              for (const auto& daughter2 : isotype_daughter_2.get_states()) {
-                for (const auto& daughter3 : isotype_daughter_3.get_states()) {
-                  // calculate allowed I_12
-                  const auto min_I_12 = std::abs(daughter1->isospin() - daughter2->isospin());
-                  const auto max_I_12 = daughter1->isospin() + daughter2->isospin();
-                  std::vector<int> possible_I_12(max_I_12 - min_I_12 + 1);
-                  std::iota(possible_I_12.begin(), possible_I_12.end(), min_I_12);
-                  std::vector<int> allowed_I_12;
-                  allowed_I_12.reserve(possible_I_12.size());
-                  const int target_J = 0;
-                  for (const auto I_12 : possible_I_12) {
-                    const auto min_J = std::abs(I_12 - daughter3->isospin());
-                    const auto max_J = I_12 + daughter3->isospin();
-                    if (min_J <= target_J && target_J <= max_J) {
-                      allowed_I_12.push_back(I_12);
-                    }
-                  }
-                  if (allowed_I_12.size() != 1) {
-                    throw std::runtime_error(
-                        "The coupled 3-body isospin state is not uniquely defined for "
-                        + mother_states[m]->name() + " -> "
-                        + daughter1->name() + " " + daughter2->name() + " " + daughter3->name());
-                  }
-                  const auto I_12 = allowed_I_12[0];
-                  const auto& mother = *mother_states[m];
+          case 2: {
+            const IsoParticleType &isotype_daughter_1 =
+                IsoParticleType::find(decay_particles[0]);
+            const IsoParticleType &isotype_daughter_2 =
+                IsoParticleType::find(decay_particles[1]);
+            // loop through multiplets
+            for (size_t m = 0; m < mother_states.size(); m++) {
+              for (const auto &daughter1 : isotype_daughter_1.get_states()) {
+                for (const auto &daughter2 : isotype_daughter_2.get_states()) {
+                  // calculate Clebsch-Gordan factor
                   const double cg = isospin_clebsch_gordan(
-                          *daughter1, *daughter2, *daughter3,
-                          mother.isospin(), mother.isospin3(), I_12);
-                  const double cg_sqr = cg*cg;
+                      *daughter1, *daughter2, *mother_states[m]);
+                  const double cg_sqr = cg * cg;
                   if (cg_sqr > 0.) {
                     // add mode
-                    log.debug("decay mode generated: " + mother_states[m]->name() +
-                              " -> " + daughter1->name() + " " + daughter2->name() +
-                              " " + daughter3->name() + " (" +
-                              std::to_string(ratio*cg_sqr) + ")");
-                    decay_modes_to_add[m].add_mode(ratio*cg_sqr, L,
-                                                   {daughter1, daughter2, daughter3});
+                    log.debug("decay mode generated: " +
+                              mother_states[m]->name() + " -> " +
+                              daughter1->name() + " " + daughter2->name() +
+                              " (" + std::to_string(ratio * cg_sqr) + ")");
+                    decay_modes_to_add[m].add_mode(ratio * cg_sqr, L,
+                                                   {daughter1, daughter2});
                   }
                 }
               }
             }
+            break;
           }
-          break;
-        }
-        default:
-          throw std::runtime_error("References to isospin multiplets only "
-                                   "allowed in two-body or three-body decays: " + line.text);
+          case 3: {
+            const IsoParticleType &isotype_daughter_1 =
+                IsoParticleType::find(decay_particles[0]);
+            const IsoParticleType &isotype_daughter_2 =
+                IsoParticleType::find(decay_particles[1]);
+            const IsoParticleType &isotype_daughter_3 =
+                IsoParticleType::find(decay_particles[2]);
+            // loop through multiplets
+            for (size_t m = 0; m < mother_states.size(); m++) {
+              for (const auto &daughter1 : isotype_daughter_1.get_states()) {
+                for (const auto &daughter2 : isotype_daughter_2.get_states()) {
+                  for (const auto &daughter3 :
+                       isotype_daughter_3.get_states()) {
+                    // calculate allowed I_12
+                    const auto min_I_12 =
+                        std::abs(daughter1->isospin() - daughter2->isospin());
+                    const auto max_I_12 =
+                        daughter1->isospin() + daughter2->isospin();
+                    std::vector<int> possible_I_12(max_I_12 - min_I_12 + 1);
+                    std::iota(possible_I_12.begin(), possible_I_12.end(),
+                              min_I_12);
+                    std::vector<int> allowed_I_12;
+                    allowed_I_12.reserve(possible_I_12.size());
+                    const int target_J = 0;
+                    for (const auto I_12 : possible_I_12) {
+                      const auto min_J = std::abs(I_12 - daughter3->isospin());
+                      const auto max_J = I_12 + daughter3->isospin();
+                      if (min_J <= target_J && target_J <= max_J) {
+                        allowed_I_12.push_back(I_12);
+                      }
+                    }
+                    if (allowed_I_12.size() != 1) {
+                      throw std::runtime_error(
+                          "The coupled 3-body isospin state is not uniquely "
+                          "defined for " +
+                          mother_states[m]->name() + " -> " +
+                          daughter1->name() + " " + daughter2->name() + " " +
+                          daughter3->name());
+                    }
+                    const auto I_12 = allowed_I_12[0];
+                    const auto &mother = *mother_states[m];
+                    const double cg = isospin_clebsch_gordan(
+                        *daughter1, *daughter2, *daughter3, mother.isospin(),
+                        mother.isospin3(), I_12);
+                    const double cg_sqr = cg * cg;
+                    if (cg_sqr > 0.) {
+                      // add mode
+                      log.debug("decay mode generated: " +
+                                mother_states[m]->name() + " -> " +
+                                daughter1->name() + " " + daughter2->name() +
+                                " " + daughter3->name() + " (" +
+                                std::to_string(ratio * cg_sqr) + ")");
+                      decay_modes_to_add[m].add_mode(
+                          ratio * cg_sqr, L, {daughter1, daughter2, daughter3});
+                    }
+                  }
+                }
+              }
+            }
+            break;
+          }
+          default:
+            throw std::runtime_error(
+                "References to isospin multiplets only "
+                "allowed in two-body or three-body decays: " +
+                line.text);
         }
       } else {
         /* References to specific states, not multiplets:
