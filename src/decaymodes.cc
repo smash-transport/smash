@@ -300,12 +300,19 @@ void DecayModes::load_decaymodes(const std::string &input) {
           types.push_back(IsoParticleType::find_state(part));
           charge += types.back()->charge();
         }
+        bool no_decays = true;
         for (size_t m = 0; m < mother_states.size(); m++) {
           if (mother_states[m]->charge() == charge) {
             log.debug("decay mode found: " + mother_states[m]->name() + " -> " +
                       std::to_string(decay_particles.size()));
             decay_modes_to_add[m].add_mode(ratio, L, types);
+            no_decays = false;
           }
+        }
+        if (no_decays) {
+          throw InvalidDecay(isotype_mother->name() +
+                             " decay mode violates charge conservation: \"" +
+                             line.text + "\"");
         }
       }
     }
