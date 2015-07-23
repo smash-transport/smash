@@ -174,7 +174,14 @@ TwoBodyDecaySemistable::TwoBodyDecaySemistable(ParticleTypePtrList part_types,
                                                int l)
   : TwoBodyDecay(arrange_particles(part_types), l),
     Lambda_((particle_types_[1]->baryon_number() != 0) ? 2.0 : 1.6),
-    tabulation_(particle_types_[0]->mass() + particle_types_[1]->minimum_mass(),
+    tabulation_(nullptr)
+{}
+
+float TwoBodyDecaySemistable::rho(float mass) const {
+  if (tabulation_ == nullptr) {
+    const_cast<TwoBodyDecaySemistable*>(this)->tabulation_
+        = make_unique<Tabulation>(
+                particle_types_[0]->mass() + particle_types_[1]->minimum_mass(),
                 1.f, 50,
                 [&](float srts) {
                   Integrator integrate;
@@ -185,11 +192,9 @@ TwoBodyDecaySemistable::TwoBodyDecaySemistable(ParticleTypePtrList part_types,
                                                   particle_types_[0]->mass(),
                                                   particle_types_[1], L_);
                                     });
-                })
-{}
-
-float TwoBodyDecaySemistable::rho(float m) const {
-  return tabulation_.get_value_linear(m);
+                });
+  }
+  return tabulation_->get_value_linear(mass);
 }
 
 float TwoBodyDecaySemistable::width(float m0, float G0, float m) const {
