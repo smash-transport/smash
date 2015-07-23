@@ -61,10 +61,9 @@ namespace std {
 template <typename T, typename Ratio>
 static ostream &operator<<(ostream &out,
                            const chrono::duration<T, Ratio> &seconds) {
-  using namespace chrono;
-  using Seconds = duration<float>;
-  using Minutes = duration<float, std::ratio<60>>;
-  using Hours = duration<float, std::ratio<60 * 60>>;
+  using Seconds = chrono::duration<float>;
+  using Minutes = chrono::duration<float, std::ratio<60>>;
+  using Hours = chrono::duration<float, std::ratio<60 * 60>>;
   constexpr Minutes threshold_for_minutes{10};
   constexpr Hours threshold_for_hours{3};
   if (seconds < threshold_for_minutes) {
@@ -154,7 +153,7 @@ namespace {
  * \key Gaussian_Sigma (float, optional, default 1.0): \n
  * Width [fm] of gaussians that represent Wigner density of particles.
  *
- * \key Gaussian_Cutoff (float, optional, default 4.0)
+ * \key Gauss_Cutoff_In_Sigma (float, optional, default 4.0)
  * Distance in sigma at which gaussian is considered 0.
  *
  * \page input_output_options_ Output
@@ -163,11 +162,13 @@ namespace {
  * system in Standard Output and other output formats which support this
  * functionality.
  *
- * \key Gaussian_Sigma (float, optional, default 1.0): \n
- * Width [fm] of gaussians that represent Wigner density of particles.
- *
- * \key Gaussian_Cutoff (float, optional, default 4.0)
- * Distance in sigma at which gaussian is considered 0.
+ * \key Density_Type (string, optional, default = "hadron"): \n
+ * Determines which kind of density is written into the collision files.
+ * Possible values:\n
+ * \li "hadron"           - total hadronic density \n
+ * \li "baryon"           - net baryon density \n
+ * \li "baryonic isospin" - baryonic isospin density \n
+ * \li "pion"             - pion density
  */
 /** Gathers all general Experiment parameters
  *
@@ -226,10 +227,6 @@ std::ostream &operator<<(std::ostream &out, const Experiment<Modus> &e) {
  * \key Collisions (bool, optional, default = true): \n
  * true - collisions are enabled\n
  * false - all collisions are disabled
- *
- * \key Density_Type (int, optional, default = 0): \n
- * 0 - net baryon density
- * 1 - baryonic isospin density
  *
  * \key Force_Decays_At_End (bool, optional, default = true): \n
  * true - force all resonances to decay after last timestep \n
@@ -380,8 +377,7 @@ Experiment<Modus>::Experiment(Configuration config, bf::path output_path)
     potentials_ = make_unique<Potentials>(config["Potentials"], parameters_);
   }
 
-  dens_type_ =
-      config.take({"Output", "Density", "Density_Type"}, DensityType::particle);
+  dens_type_ = config.take({"Output", "Density_Type"}, DensityType::hadron);
   log.info() << "Density type written to headers: " << dens_type_;
 
   // Create lattices

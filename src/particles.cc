@@ -148,14 +148,13 @@ void Particles::reset() {
 }
 
 std::ostream &operator<<(std::ostream &out, const Particles &particles) {
-  using namespace std;
   out << particles.size() << " Particles:\n";
   for (unsigned i = 0; i < particles.data_size_; ++i) {
     const auto &p = particles.data_[i];
     if (p.id() < 0) {
       out << "------  ";
     } else {
-      out << setw(5) << setprecision(3) << p.momentum().abs3()
+      out << std::setw(5) << std::setprecision(3) << p.momentum().abs3()
           << p.type().name();
     }
     if ((i & 15) == 0) {

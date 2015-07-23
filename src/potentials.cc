@@ -8,6 +8,8 @@
 */
 
 #include "include/potentials.h"
+
+#include "include/constants.h"
 #include "include/density.h"
 
 namespace Smash {
@@ -82,15 +84,16 @@ double Potentials::potential(const ThreeVector &r,
   if (use_skyrme_) {
     const double rho_eck = rho_eckart(r, plist, param_, DensityType::baryon,
                                       compute_gradient).first;
-    total_potential += skyrme_a_ * (rho_eck/rho0) +
-                       skyrme_b_ * std::pow(rho_eck/rho0, skyrme_tau_);
+    total_potential += skyrme_a_ * (rho_eck/nuclear_density) +
+                       skyrme_b_ * std::pow(rho_eck/nuclear_density,
+                                            skyrme_tau_);
   }
   if (use_symmetry_) {
     // use isospin density
     const double rho_iso = rho_eckart(r, plist, param_,
                                       DensityType::baryonic_isospin,
                                       compute_gradient).first;
-    const double sym_pot = 2.*symmetry_s_ * rho_iso/rho0
+    const double sym_pot = 2.*symmetry_s_ * rho_iso/nuclear_density
                            * acts_on.isospin3_rel();
     total_potential += sym_pot;
   }
@@ -115,9 +118,8 @@ ThreeVector Potentials::potential_gradient(const ThreeVector &r,
     const ThreeVector drho_dr = density_and_gradient.second;
 
     // Derivative of potential with respect to density
-    double tmp = skyrme_tau_ * std::pow(rho/rho0, skyrme_tau_ - 1);
-    const double dpotential_drho = (skyrme_a_  + skyrme_b_ * tmp) / rho0;
-    total_gradient += drho_dr * dpotential_drho;
+    double tmp = skyrme_tau_ * std::pow(rho/nuclear_density, skyrme_tau_ - 1);
+    total_gradient += drho_dr * (skyrme_a_ + skyrme_b_*tmp) / nuclear_density;
   }
 
   if (use_symmetry_) {
@@ -125,7 +127,7 @@ ThreeVector Potentials::potential_gradient(const ThreeVector &r,
     const ThreeVector p_iso = rho_eckart(r, plist, param_,
                                          DensityType::baryonic_isospin,
                                          compute_gradient).second;
-    const ThreeVector dUsym_dr = 2.*symmetry_s_ * p_iso/rho0
+    const ThreeVector dUsym_dr = 2.*symmetry_s_ * p_iso/nuclear_density
                                  * acts_on.isospin3_rel();
     total_gradient += dUsym_dr;
   }

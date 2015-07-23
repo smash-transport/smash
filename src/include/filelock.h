@@ -6,6 +6,10 @@
  *    GNU General Public License (GPLv3 or later)
  *
  */
+
+#ifndef SRC_INCLUDE_FILELOCK_H_
+#define SRC_INCLUDE_FILELOCK_H_
+
 #include <boost/filesystem.hpp>
 
 #include "forwarddeclarations.h"
@@ -45,3 +49,5 @@ class FileLock {
 };
 
 }  // namespace Smash
+
+#endif  // SRC_INCLUDE_FILELOCK_H_

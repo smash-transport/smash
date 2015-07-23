@@ -341,7 +341,8 @@ void Nucleus::generate_fermi_momenta() {
       continue;
     }
     r = (i->position() - nucleus_center).abs3();
-    rho = rho0 /(std::exp((r - nuclear_radius_)/diffusiveness_) + 1.0);
+    rho = nuclear_density
+          / (std::exp((r - nuclear_radius_)/diffusiveness_) + 1.);
     if (i->pdgcode() == 0x2212) {  // proton
       rho = rho * N_p / A;
     }

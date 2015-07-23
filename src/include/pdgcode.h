@@ -261,6 +261,8 @@ class PdgCode {
   bool is_Nstar() const;
   /// Is this a Delta resonance (Delta*)?
   bool is_Deltastar() const;
+  /// Is this a pion (pi+/pi0/pi-)?
+  bool is_pion() const;
 
   /** Determine whether a particle has a distinct antiparticle
     * (or whether it is its own antiparticle). */

@@ -73,10 +73,10 @@ TEST(density_type) {
   COMPARE(density_factor(proton, DensityType::pion), 0.f);
 
   // verify that all are recognized as particles
-  VERIFY(density_factor(proton,   DensityType::particle) == 1.f
-      && density_factor(pi0,      DensityType::particle) == 1.f
-      && density_factor(pi_plus,  DensityType::particle) == 1.f
-      && density_factor(pi_minus, DensityType::particle) == 1.f
+  VERIFY(density_factor(proton,   DensityType::hadron) == 1.f
+      && density_factor(pi0,      DensityType::hadron) == 1.f
+      && density_factor(pi_plus,  DensityType::hadron) == 1.f
+      && density_factor(pi_minus, DensityType::hadron) == 1.f
       );
 }
 
