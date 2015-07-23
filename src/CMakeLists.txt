@@ -73,6 +73,7 @@ set(smash_src
         distributions.cc
         energymomentumtensor.cc
         experiment.cc
+        filelock.cc
         fourvector.cc
         fpenvironment.cc
         grid.cc
@@ -91,6 +92,7 @@ set(smash_src
         potentials.cc
         processbranch.cc
         propagation.cc
+        quantumnumbers.cc
         random.cc
         resonances.cc
         scatteraction.cc

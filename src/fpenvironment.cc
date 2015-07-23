@@ -20,11 +20,16 @@ namespace Smash {
 
 #if !defined _GNU_SOURCE && defined __SSE__
 bool enable_float_traps(int femask) {
-  static_assert(FE_INVALID == 0x01, "incorrect assumption that FE_INVALID == 0x01");
-  static_assert(FE_DIVBYZERO == 0x04, "incorrect assumption that FE_DIVBYZERO == 0x04");
-  static_assert(FE_OVERFLOW == 0x08, "incorrect assumption that FE_OVERFLOW == 0x08");
-  static_assert(FE_UNDERFLOW == 0x10, "incorrect assumption that FE_UNDERFLOW == 0x10");
-  static_assert(FE_INEXACT == 0x20, "incorrect assumption that FE_INEXACT == 0x20");
+  static_assert(FE_INVALID == 0x01,
+                "incorrect assumption that FE_INVALID == 0x01");
+  static_assert(FE_DIVBYZERO == 0x04,
+                "incorrect assumption that FE_DIVBYZERO == 0x04");
+  static_assert(FE_OVERFLOW == 0x08,
+                "incorrect assumption that FE_OVERFLOW == 0x08");
+  static_assert(FE_UNDERFLOW == 0x10,
+                "incorrect assumption that FE_UNDERFLOW == 0x10");
+  static_assert(FE_INEXACT == 0x20,
+                "incorrect assumption that FE_INEXACT == 0x20");
 
   // only accept supported values
   femask &= FE_ALL_EXCEPT;

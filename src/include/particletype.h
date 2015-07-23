@@ -354,7 +354,7 @@ class ParticleTypePtr {
   friend ParticleTypePtr ParticleType::operator&() const;
 
   /// Constructs a pointer to the ParticleType object at offset \p i.
-  ParticleTypePtr(std::uint16_t i) : index_(i) {}
+  explicit ParticleTypePtr(std::uint16_t i) : index_(i) {}
 
   /**
    * Helper function that does the ParticleType lookup from the stored index.
