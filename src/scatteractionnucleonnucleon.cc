@@ -20,7 +20,13 @@
 namespace Smash {
 
 
-CollisionBranchPtr ScatterActionNucleonNucleon::elastic_cross_section(float) {
+CollisionBranchPtr ScatterActionNucleonNucleon::elastic_cross_section
+                                                    (float elast_par) {
+  if (elast_par > 0.) {
+    // use constant elastic cross section from config file
+    return ScatterAction::elastic_cross_section(elast_par);
+  }
+
   const PdgCode &pdg_a = incoming_particles_[0].type().pdgcode();
   const PdgCode &pdg_b = incoming_particles_[1].type().pdgcode();
 

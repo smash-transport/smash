@@ -29,9 +29,11 @@ namespace Smash {
 /*!\Userguide
 * \page input_collision_term_ Collision_Term
 * \key Sigma (float, optional, default = 0.0 [mb]) \n
-* Elastic cross section parameter
+* Elastic cross section parameter. Will override the parametrized elastic
+* cross sections, if given.
+*
 * \key Isotropic (bool, optional, default = false) \n
-* Do all collisions isotropically
+* Do all collisions isotropically.
 */
 
 ScatterActionsFinder::ScatterActionsFinder(
