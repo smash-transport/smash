@@ -29,9 +29,9 @@ namespace Smash {
 /*!\Userguide
 * \page input_collision_term_ Collision_Term
 * \key Elastic_Cross_Section (float, optional, default = 0.0 [mb]) \n
-* If a positive value is given, it will override the parametrized elastic cross
-* sections (which are energy-dependent) with a constant value. This constant
-* elastic cross section is used for all collisions.
+* If a positive (non-zero) value is given, it will override the parametrized
+* elastic cross sections (which are energy-dependent) with a constant value.
+* This constant elastic cross section is used for all collisions.
 *
 * \key Isotropic (bool, optional, default = false) \n
 * Do all collisions isotropically.
