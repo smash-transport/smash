@@ -178,6 +178,22 @@ TEST(load_decay_modes) {
   }
 }
 
+TEST(load_decaymodes_3body) {
+  const std::string decays_input(
+      "Λ(1520)\n"
+      "1.0 1 Λ π π\n"
+      );
+  DecayModes::load_decaymodes(decays_input);
+  const auto &Lambda = ParticleType::find(-0x3124).decay_modes();
+  VERIFY(!Lambda.is_empty());
+  const auto &modelist = Lambda.decay_mode_list();
+  COMPARE(modelist.size(), 3u);
+  for (int i = 0; i < 3; i++) {
+    COMPARE(modelist[i]->weight(), 1.f/3.f);
+    COMPARE(modelist[i]->particle_types()[0]->pdgcode(), -0x3122);
+  }
+}
+
 
 TEST_CATCH(add_no_particles, DecayModes::InvalidDecay) {
   DecayModes m;
