@@ -247,11 +247,11 @@ void DecayModes::load_decaymodes(const std::string &input) {
                               min_I_12);
                     std::vector<int> allowed_I_12;
                     allowed_I_12.reserve(possible_I_12.size());
-                    const int target_J = 0;
+                    const int target_I = 0;
                     for (const auto I_12 : possible_I_12) {
-                      const auto min_J = std::abs(I_12 - daughter3->isospin());
-                      const auto max_J = I_12 + daughter3->isospin();
-                      if (min_J <= target_J && target_J <= max_J) {
+                      const auto min_I = std::abs(I_12 - daughter3->isospin());
+                      const auto max_I = I_12 + daughter3->isospin();
+                      if (min_I <= target_I && target_I <= max_I) {
                         allowed_I_12.push_back(I_12);
                       }
                     }
