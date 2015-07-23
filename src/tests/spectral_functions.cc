@@ -23,7 +23,7 @@ TEST(spectral_functions) {
    * so this should really be on the safe side. */
   const float max_mass = 100.;
   // error tolerance (max. deviation from one)
-  const float error_tolerance = 0.07;
+  const float error_tolerance = 0.08;
 
   /* Loop over all resonances. */
   for (const ParticleType &type : ParticleType::list_all()) {
