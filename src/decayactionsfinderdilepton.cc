@@ -29,9 +29,6 @@ ActionList DecayActionsFinderDilepton::find_actions_in_cell(
     }
 
     const float inv_gamma = p.inverse_gamma();
-
-
-
     DecayBranchList dil_modes =
                   p.type().get_partial_widths_dilepton(p.effective_mass());
 
@@ -43,7 +40,7 @@ ActionList DecayActionsFinderDilepton::find_actions_in_cell(
         case 2: {
           const float partial_width = mode->weight();
           // SHINNING as described in \iref{Schmidt:2008hm}, chapter 2D
-          sh_weight = dt * inv_gamma * partial_width;
+          sh_weight = dt * inv_gamma * partial_width / hbarc;
           break;
         }
         case 3: {
@@ -66,13 +63,11 @@ ActionList DecayActionsFinderDilepton::find_actions_in_cell(
           // randomly select a mass
           dilepton_mass = Random::uniform(2*m_l,p.effective_mass()-m_nl);
 
-          // Is this a good idea?
-          const ThreeBodyDecayDilepton &modetype =
-                      dynamic_cast<const ThreeBodyDecayDilepton&>(mode->type());
-          const float diff_width = modetype.diff_width(p.effective_mass(),
-                                       dilepton_mass, m_nl, p.type().pdgcode());
+          const float diff_width = ThreeBodyDecayDilepton::diff_width(
+                                              p.effective_mass(), dilepton_mass,
+                                              m_nl, p.type().pdgcode());
 
-          sh_weight = dt * inv_gamma * diff_width;
+          sh_weight = dt * inv_gamma * diff_width / hbarc;
           break;
           }
         default:
@@ -97,11 +92,9 @@ ActionList DecayActionsFinderDilepton::find_final_actions(
   ActionList actions;
 
   for (const auto &p : search_list) {
-    if (p.type().is_stable()) {
+    if (p.type().decay_modes().decay_mode_list().size() == 0) {
       continue;
     }
-
-    const float inv_gamma = p.inverse_gamma();
 
     DecayBranchList dil_modes =
                   p.type().get_partial_widths_dilepton(p.effective_mass());
@@ -111,13 +104,13 @@ ActionList DecayActionsFinderDilepton::find_final_actions(
                                p.type().get_partial_widths(p.effective_mass()));
 
     for (DecayBranchPtr & mode : dil_modes) {
-      float sh_weight = 0.0;
+      float sh_weight;
       float dilepton_mass = 0.f;
 
       switch (mode->particle_number()) {
         case 2: {
           const float partial_width = mode->weight();
-          sh_weight = partial_width * inv_gamma / width_tot;
+          sh_weight = partial_width / width_tot;
           break;
         }
         case 3: {
@@ -139,13 +132,11 @@ ActionList DecayActionsFinderDilepton::find_final_actions(
           // randomly select a mass
           dilepton_mass = Random::uniform(2*m_l,p.effective_mass()-m_nl);
 
-          // Is this a good idea?
-          const ThreeBodyDecayDilepton &modetype =
-                      dynamic_cast<const ThreeBodyDecayDilepton&>(mode->type());
-          const float diff_width = modetype.diff_width(p.effective_mass(),
-                                       dilepton_mass, m_nl, p.type().pdgcode());
+          const float diff_width = ThreeBodyDecayDilepton::diff_width(
+                                              p.effective_mass(), dilepton_mass,
+                                              m_nl, p.type().pdgcode());
 
-          sh_weight = diff_width * inv_gamma / width_tot;;
+          sh_weight = diff_width / width_tot;
           break;
         }
         default:

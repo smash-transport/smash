@@ -246,11 +246,12 @@ void ParticleType::check_consistency() {
 }
 
 DecayBranchList ParticleType::get_partial_widths(const float m) const {
-  if (is_stable()) {
+  const auto &decay_mode_list = decay_modes().decay_mode_list();
+  if (decay_mode_list.size() == 0) {
     return {};
   }
+
   /* Loop over decay modes and calculate all partial widths. */
-  const auto &decay_mode_list = decay_modes().decay_mode_list();
   DecayBranchList partial;
   partial.reserve(decay_mode_list.size());
   for (unsigned int i = 0; i < decay_mode_list.size(); i++) {
@@ -276,9 +277,9 @@ DecayBranchList ParticleType::get_partial_widths_hadronic(const float m) const {
              decay_mode_list[i]->type().particle_types()[0]->pdgcode(),
              decay_mode_list[i]->type().particle_types()[1]->pdgcode()))) &&
         (!(has_lepton_pair(
-                      decay_mode_list[i]->type().particle_types()[0]->pdgcode(),
-                      decay_mode_list[i]->type().particle_types()[1]->pdgcode(),
-                      decay_mode_list[i]->type().particle_types()[2]->pdgcode())))) {
+                decay_mode_list[i]->type().particle_types()[0]->pdgcode(),
+                decay_mode_list[i]->type().particle_types()[1]->pdgcode(),
+                decay_mode_list[i]->type().particle_types()[2]->pdgcode())))) {
       const float w = partial_width(m, decay_mode_list[i].get());
       if (w > 0.) {
         partial.push_back(
@@ -290,12 +291,11 @@ DecayBranchList ParticleType::get_partial_widths_hadronic(const float m) const {
 }
 
 DecayBranchList ParticleType::get_partial_widths_dilepton(const float m) const {
-  /* Loop over decay modes and calculate all partial widths. */
   const auto &decay_mode_list = decay_modes().decay_mode_list();
   if (decay_mode_list.size() == 0) {
     return {};
   }
-
+ /* Loop over decay modes and calculate all partial widths. */
   DecayBranchList partial;
   partial.reserve(decay_mode_list.size());
   for (unsigned int i = 0; i < decay_mode_list.size(); i++) {

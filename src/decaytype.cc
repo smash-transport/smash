@@ -327,7 +327,8 @@ float form_factor_sqr_delta(float) {
 }
 
 
-float ThreeBodyDecayDilepton::diff_width(float m_par, float m_dil, float m_other, PdgCode pdg) const {
+float ThreeBodyDecayDilepton::diff_width(float m_par, float m_dil,
+                                             float m_other, PdgCode pdg) {
   if (m_par < m_dil + m_other) {
     return 0;
   } else {
@@ -340,7 +341,7 @@ float ThreeBodyDecayDilepton::diff_width(float m_par, float m_dil, float m_other
 
     switch (pdg.get_decimal()) {
       case 111: /*pi0*/ {
-        gamma = 78e-10;
+        gamma = 7.8e-9;
         float ff = form_factor_pi(m_dil);
         return (alpha*4./(3.*M_PI)) * gamma/m_dil *
                                    pow(1.-m_dil/m_par*m_dil/m_par,3.) * ff*ff;

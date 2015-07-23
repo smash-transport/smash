@@ -195,8 +195,8 @@ class ThreeBodyDecayDilepton : public ThreeBodyDecay {
    * width directly for the shinin weights. The differential width is calculated
    * according to PhD thesis Weil, eq. (30) - (36).
    */
-  float diff_width(float m_parent, float m_dil,
-                   float m_other, PdgCode pdg) const;
+  static float diff_width(float m_parent, float m_dil,
+                   float m_other, PdgCode pdg);
 };
 
 
