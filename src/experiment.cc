@@ -180,11 +180,16 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
   const auto &log = logger<LogArea::Experiment>();
   log.trace() << source_location;
 
+  const int ntest = config.take({"General", "Testparticles"}, 1);
+  if (ntest <= 0) {
+    throw std::invalid_argument("Invalid number of Testparticles "
+                                "in config file!");
+  }
+
   // The clock initializers are only read here and taken later when
   // assigning initial_clock_.
   return {{0.0f, config.read({"General", "Delta_Time"})},
-          config.take({"Output", "Output_Interval"}),
-          config.take({"General", "Testparticles"}, 1),
+          config.take({"Output", "Output_Interval"}), ntest,
           config.take({"General", "Gaussian_Sigma"}, 1.0),
           config.take({"General", "Gauss_Cutoff_In_Sigma"}, 4.0)};
 }

@@ -42,7 +42,12 @@ ScatterActionsFinder::ScatterActionsFinder(
     : elastic_parameter_(config.take({"Collision_Term",
                                       "Elastic_Cross_Section"}, 0.f)),
       testparticles_(parameters.testparticles),
-      isotropic_(config.take({"Collision_Term", "Isotropic"}, false)) {}
+      isotropic_(config.take({"Collision_Term", "Isotropic"}, false)) {
+  if (elastic_parameter_ < 0.) {
+    throw std::invalid_argument("Elastic_Cross_Section is negative "
+                                "in config file!");
+  }
+}
 
 ScatterActionsFinder::ScatterActionsFinder(
     float elastic_parameter, int testparticles)
