@@ -28,9 +28,10 @@
 namespace Smash {
 /*!\Userguide
 * \page input_collision_term_ Collision_Term
-* \key Sigma (float, optional, default = 0.0 [mb]) \n
-* Elastic cross section parameter. Will override the parametrized elastic
-* cross sections, if given.
+* \key Elastic_Cross_Section (float, optional, default = 0.0 [mb]) \n
+* If a positive value is given, it will override the parametrized elastic cross
+* sections (which are energy-dependent) with a constant value. This constant
+* elastic cross section is used for all collisions.
 *
 * \key Isotropic (bool, optional, default = false) \n
 * Do all collisions isotropically.
@@ -38,7 +39,8 @@ namespace Smash {
 
 ScatterActionsFinder::ScatterActionsFinder(
     Configuration config, const ExperimentParameters &parameters)
-    : elastic_parameter_(config.take({"Collision_Term", "Sigma"}, 0.f)),
+    : elastic_parameter_(config.take({"Collision_Term",
+                                      "Elastic_Cross_Section"}, 0.f)),
       testparticles_(parameters.testparticles),
       isotropic_(config.take({"Collision_Term", "Isotropic"}, false)) {}
 

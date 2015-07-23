@@ -81,12 +81,11 @@ Output:
         Enable:             False
 
 Collision_Term:
-    Decays:        True
-    Collisions:    True
-    Isotropic:     False
-    Force_Decays_At_End:  True
-    # elastic cross section [mb]
-    Sigma:         0.
+    Decays:                 True
+    Collisions:             True
+    Force_Decays_At_End:    True
+    Isotropic:              False
+    Elastic_Cross_Section:  0.     # [mb]
 #    Pauli_Blocking:
 #        Spatial_Averaging_Radius:   1.86
 #        Momentum_Averaging_Radius:  0.08
