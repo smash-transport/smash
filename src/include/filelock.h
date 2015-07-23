@@ -31,7 +31,7 @@ class FileLock {
   /// Construct a file lock guard with a lock file at the given path.
   ///
   /// This will not create a file, use acquire() for that.
-  FileLock(bf::path path);
+  explicit FileLock(bf::path path);
   /// Delete the lock file when the guard is destroyed.
   ~FileLock();
   /// Try to acquire the file lock.

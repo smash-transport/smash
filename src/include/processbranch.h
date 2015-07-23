@@ -68,7 +68,7 @@ class ProcessBranch {
  public:
   /// Create a ProcessBranch without final states
   ProcessBranch() : branch_weight_(0.) {}
-  ProcessBranch(float w) : branch_weight_(w) {}
+  explicit ProcessBranch(float w) : branch_weight_(w) {}
 
   /// Copying is disabled. Use std::move or create a new object.
   ProcessBranch(const ProcessBranch &) = delete;

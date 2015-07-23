@@ -40,8 +40,8 @@ TEST(assign_2_particle) {
 }
 
 TEST(lists) {
-  const ParticleType &smashon(ParticleType::find({"9876542"}));
-  const ParticleType &smashino(ParticleType::find({"1234568"}));
+  const ParticleType &smashon(ParticleType::find(PdgCode("9876542")));
+  const ParticleType &smashino(ParticleType::find(PdgCode("1234568")));
   CollisionBranch branch(smashon, smashino, 2.345, ProcessType::Elastic);
   const auto &list = branch.particle_types();
   COMPARE(list.size(), 2u);
@@ -64,8 +64,9 @@ TEST(lists) {
 
 TEST(add_particle) {
   std::vector<ParticleTypePtr> list = {
-      &ParticleType::find({"9876542"}), &ParticleType::find({"1234568"}),
-      &ParticleType::find({"-1234568"}),
+      &ParticleType::find(PdgCode("9876542")),
+      &ParticleType::find(PdgCode("1234568")),
+      &ParticleType::find(PdgCode("-1234568")),
   };
   CollisionBranch branch(list, 1.2, ProcessType::Elastic);
   COMPARE(branch.particle_types().size(), 3u);
