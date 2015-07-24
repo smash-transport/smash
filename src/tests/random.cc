@@ -53,18 +53,16 @@ TEST(exponential) {
     ++diffbad[diffbin];
     ++total;
   }
-  if (!PRINT) {
-    // the integral (in each loop, this holds how many particles have a
-    // normalized deviation less than this).
-    int totalbad = 0;
-    for (int unit = 0; unit < sigmabins - 1; ++unit) {
-      totalbad += diffbad[unit];
-      double fraction = (totalbad + 0.0) / (total + 0.0);
-      VERIFY(fraction > allowed[unit]) << " too few entries have less than "
-                << unit+1 << " sigma deviation ("
-                << totalbad << "/" << total << "=" << fraction
-                << ", required minimal fraction: " << allowed[unit];
-    }
+  // the integral (in each loop, this holds how many particles have a
+  // normalized deviation less than this).
+  int totalbad = 0;
+  for (int unit = 0; unit < sigmabins - 1; ++unit) {
+    totalbad += diffbad[unit];
+    double fraction = (totalbad + 0.0) / (total + 0.0);
+    VERIFY(fraction > allowed[unit]) << " too few entries have less than "
+              << unit+1 << " sigma deviation ("
+              << totalbad << "/" << total << "=" << fraction
+              << ", required minimal fraction: " << allowed[unit];
   }
 }
 
@@ -94,16 +92,14 @@ TEST(x_exponential) {
     ++diffbad[diffbin];
     ++total;
   }
-  if (!PRINT) {
-    int totalbad = 0;
-    for (int unit = 0; unit < sigmabins - 1; ++unit) {
-      totalbad += diffbad[unit];
-      double fraction = (totalbad + 0.0) / (total + 0.0);
-      VERIFY(fraction > allowed[unit]) << " too few entries have less than "
-                << unit+1 << " sigma deviation ("
-                << totalbad << "/" << total << "=" << fraction
-                << ", required minimal fraction: " << allowed[unit];
-    }
+  int totalbad = 0;
+  for (int unit = 0; unit < sigmabins - 1; ++unit) {
+    totalbad += diffbad[unit];
+    double fraction = (totalbad + 0.0) / (total + 0.0);
+    VERIFY(fraction > allowed[unit]) << " too few entries have less than "
+              << unit+1 << " sigma deviation ("
+              << totalbad << "/" << total << "=" << fraction
+              << ", required minimal fraction: " << allowed[unit];
   }
 }
 
@@ -137,16 +133,14 @@ TEST(xsquared_exponential) {
     ++diffbad[diffbin];
     ++total;
   }
-  if (!PRINT) {
-    int totalbad = 0;
-    for (int unit = 0; unit < sigmabins - 1; ++unit) {
-      totalbad += diffbad[unit];
-      double fraction = (totalbad + 0.0) / (total + 0.0);
-      VERIFY(fraction > allowed[unit]) << " too few entries have less than "
-                << unit+1 << " sigma deviation ("
-                << totalbad << "/" << total << "=" << fraction
-                << ", required minimal fraction: " << allowed[unit];
-    }
+  int totalbad = 0;
+  for (int unit = 0; unit < sigmabins - 1; ++unit) {
+    totalbad += diffbad[unit];
+    double fraction = (totalbad + 0.0) / (total + 0.0);
+    VERIFY(fraction > allowed[unit]) << " too few entries have less than "
+              << unit+1 << " sigma deviation ("
+              << totalbad << "/" << total << "=" << fraction
+              << ", required minimal fraction: " << allowed[unit];
   }
 }
 
@@ -172,16 +166,14 @@ TEST(canonical) {
     ++diffbad[diffbin];
     ++total;
   }
-  if (!PRINT) {
-    int totalbad = 0;
-    for (int unit = 0; unit < sigmabins - 1; ++unit) {
-      totalbad += diffbad[unit];
-      double fraction = (totalbad + 0.0) / (total + 0.0);
-      VERIFY(fraction > allowed[unit]) << " too few entries have less than "
-                << unit+1 << " sigma deviation ("
-                << totalbad << "/" << total << "=" << fraction
-                << ", required minimal fraction: " << allowed[unit];
-    }
+  int totalbad = 0;
+  for (int unit = 0; unit < sigmabins - 1; ++unit) {
+    totalbad += diffbad[unit];
+    double fraction = (totalbad + 0.0) / (total + 0.0);
+    VERIFY(fraction > allowed[unit]) << " too few entries have less than "
+              << unit+1 << " sigma deviation ("
+              << totalbad << "/" << total << "=" << fraction
+              << ", required minimal fraction: " << allowed[unit];
   }
 }
 
@@ -208,16 +200,14 @@ TEST(uniform) {
     ++diffbad[diffbin];
     ++total;
   }
-  if (!PRINT) {
-    int totalbad = 0;
-    for (int unit = 0; unit < sigmabins - 1; ++unit) {
-      totalbad += diffbad[unit];
-      double fraction = (totalbad + 0.0) / (total + 0.0);
-      VERIFY(fraction > allowed[unit]) << " too few entries have less than "
-                << unit+1 << " sigma deviation ("
-                << totalbad << "/" << total << "=" << fraction
-                << ", required minimal fraction: " << allowed[unit];
-    }
+  int totalbad = 0;
+  for (int unit = 0; unit < sigmabins - 1; ++unit) {
+    totalbad += diffbad[unit];
+    double fraction = (totalbad + 0.0) / (total + 0.0);
+    VERIFY(fraction > allowed[unit]) << " too few entries have less than "
+              << unit+1 << " sigma deviation ("
+              << totalbad << "/" << total << "=" << fraction
+              << ", required minimal fraction: " << allowed[unit];
   }
 }
 
@@ -244,16 +234,14 @@ TEST(cos_like) {
     ++diffbad[diffbin];
     ++total;
   }
-  if (!PRINT) {
-    int totalbad = 0;
-    for (int unit = 0; unit < sigmabins - 1; ++unit) {
-      totalbad += diffbad[unit];
-      double fraction = (totalbad + 0.0) / (total + 0.0);
-      VERIFY(fraction > allowed[unit]) << " too few entries have less than "
-                << unit+1 << " sigma deviation ("
-                << totalbad << "/" << total << "=" << fraction
-                << ", required minimal fraction: " << allowed[unit];
-    }
+  int totalbad = 0;
+  for (int unit = 0; unit < sigmabins - 1; ++unit) {
+    totalbad += diffbad[unit];
+    double fraction = (totalbad + 0.0) / (total + 0.0);
+    VERIFY(fraction > allowed[unit]) << " too few entries have less than "
+              << unit+1 << " sigma deviation ("
+              << totalbad << "/" << total << "=" << fraction
+              << ", required minimal fraction: " << allowed[unit];
   }
 }
 
@@ -280,15 +268,13 @@ TEST(phi_like) {
     ++diffbad[diffbin];
     ++total;
   }
-  if (!PRINT) {
-    int totalbad = 0;
-    for (int unit = 0; unit < sigmabins - 1; ++unit) {
-      totalbad += diffbad[unit];
-      double fraction = (totalbad + 0.0) / (total + 0.0);
-      VERIFY(fraction > allowed[unit]) << " too few entries have less than "
-                << unit+1 << " sigma deviation ("
-                << totalbad << "/" << total << "=" << fraction
-                << ", required minimal fraction: " << allowed[unit];
-    }
+  int totalbad = 0;
+  for (int unit = 0; unit < sigmabins - 1; ++unit) {
+    totalbad += diffbad[unit];
+    double fraction = (totalbad + 0.0) / (total + 0.0);
+    VERIFY(fraction > allowed[unit]) << " too few entries have less than "
+              << unit+1 << " sigma deviation ("
+              << totalbad << "/" << total << "=" << fraction
+              << ", required minimal fraction: " << allowed[unit];
   }
 }
