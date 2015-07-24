@@ -21,7 +21,7 @@ float pp_elastic(double mandelstam_s);
  *
  * \fpPrecision Why \c double?
  */
-float pp_total(double p_lab);
+float pp_total(double mandelstam_s);
 
 /* np elastic cross section parametrization
  *
@@ -33,7 +33,7 @@ float np_elastic(double mandelstam_s);
  *
  * \fpPrecision Why \c double?
  */
-float np_total(double p_lab);
+float np_total(double mandelstam_s);
 
 /* ppbar elastic cross section parametrization
  *
@@ -45,7 +45,7 @@ float ppbar_elastic(double mandelstam_s);
  *
  * \fpPrecision Why \c double?
  */
-float ppbar_total(double p_lab);
+float ppbar_total(double mandelstam_s);
 
 }  // namespace Smash
 

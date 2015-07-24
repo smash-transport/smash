@@ -23,7 +23,7 @@ TEST(spectral_functions) {
    * so this should really be on the safe side. */
   const float max_mass = 100.;
   // error tolerance (max. deviation from one)
-  const float error_tolerance = 0.07;
+  const float error_tolerance = 0.08;
 
   /* Loop over all resonances. */
   for (const ParticleType &type : ParticleType::list_all()) {
@@ -37,7 +37,7 @@ TEST(spectral_functions) {
                             const double width = type.total_width(m0);
                             return spectral_function(m, m0, width) * 2.*m;
                           });
-    std::cout << type.pdgcode() << ": " << result.value() << " ± "
+    std::cout << type.name() << ": " << result.value() << " ± "
               << result.error() << "\n";
     // check if integral is approximately equal to one
     COMPARE_ABSOLUTE_ERROR(result.value(), 1., error_tolerance);

@@ -220,7 +220,9 @@ float ParticleType::partial_width(const float m,
 
 const DecayModes &ParticleType::decay_modes() const {
   const auto offset = this - std::addressof(list_all()[0]);
-  return (*DecayModes::all_decay_modes)[offset];
+  const auto &modes = (*DecayModes::all_decay_modes)[offset];
+  assert(is_stable() || !modes.is_empty());
+  return modes;
 }
 
 float ParticleType::total_width(const float m) const {
