@@ -24,10 +24,9 @@ DecayActionDilepton::DecayActionDilepton(const ParticleData &p,
 
 
 void DecayActionDilepton::one_to_three() {
-
-// find the non lepton particle position
+  // find the non-lepton particle position
   int non_lepton_position = -1;
-  for (int i=0; i<3; ++i) {
+  for (int i = 0; i < 3; ++i) {
     if (!(outgoing_particles_[i].type().is_lepton())) {
       non_lepton_position = i;
       break;
@@ -52,12 +51,11 @@ void DecayActionDilepton::one_to_three() {
 
   double cms_energy = sqrt_s();
 
-// perform non_dilepton/virtual photon decay
-
+  // perform non_dilepton/virtual photon decay
   double momentum_radial = pCM(cms_energy, double(dilepton_mass_), mass_nl);
 
-  const double p0_v_pho =
-   std::sqrt(dilepton_mass_*dilepton_mass_ + momentum_radial * momentum_radial);
+  const double p0_v_pho = std::sqrt(dilepton_mass_*dilepton_mass_ +
+                                    momentum_radial * momentum_radial);
 
   /* Here we assume an isotropic angular distribution. */
   Angles phitheta;
@@ -66,8 +64,7 @@ void DecayActionDilepton::one_to_three() {
   FourVector virtual_pho_4mom(p0_v_pho,  phitheta.threevec() * momentum_radial);
   nl.set_4momentum(mass_nl, -phitheta.threevec() * momentum_radial);
 
-// perform virtual photon -> dilepton decay
-
+  // perform virtual photon -> dilepton decay
   cms_energy = virtual_pho_4mom.abs();
 
   momentum_radial = pCM(cms_energy, mass_l1, mass_l2);
@@ -78,12 +75,10 @@ void DecayActionDilepton::one_to_three() {
   l1.set_4momentum(mass_l1,  phitheta.threevec() * momentum_radial);
   l2.set_4momentum(mass_l2, -phitheta.threevec() * momentum_radial);
 
-// Boost Dileptons back in parent particle rest frame
-
+  // Boost Dileptons back in parent particle rest frame
   ThreeVector velocity_CM = virtual_pho_4mom.velocity();
   l1.boost_momentum(-velocity_CM);
   l2.boost_momentum(-velocity_CM);
-
 }
 
 }  // namespace Smash

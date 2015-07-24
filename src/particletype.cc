@@ -295,7 +295,7 @@ DecayBranchList ParticleType::get_partial_widths_dilepton(const float m) const {
   if (decay_mode_list.size() == 0) {
     return {};
   }
- /* Loop over decay modes and calculate all partial widths. */
+  /* Loop over decay modes and calculate all partial widths. */
   DecayBranchList partial;
   partial.reserve(decay_mode_list.size());
   for (unsigned int i = 0; i < decay_mode_list.size(); i++) {

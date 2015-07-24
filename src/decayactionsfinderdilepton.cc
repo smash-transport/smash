@@ -53,7 +53,7 @@ ActionList DecayActionsFinderDilepton::find_actions_in_cell(
         case 3: {
           // find the non lepton particle position
           int non_lepton_position = -1;
-          for (int i=0; i<3; ++i) {
+          for (int i = 0; i < 3; ++i) {
             if (!(mode->particle_types()[i]->is_lepton())) {
               non_lepton_position = i;
               break;
@@ -68,7 +68,7 @@ ActionList DecayActionsFinderDilepton::find_actions_in_cell(
                       mode->particle_types()[(non_lepton_position+1)%3]->mass();
 
           // randomly select a mass
-          dilepton_mass = Random::uniform(2*m_l,p.effective_mass()-m_nl);
+          dilepton_mass = Random::uniform(2*m_l, p.effective_mass()-m_nl);
 
           const float diff_width = ThreeBodyDecayDilepton::diff_width(
                                               p.effective_mass(), dilepton_mass,
@@ -123,7 +123,7 @@ ActionList DecayActionsFinderDilepton::find_final_actions(
         case 3: {
           // find the non lepton particle position
           int non_lepton_position = -1;
-          for (int i=0; i<3; ++i) {
+          for (int i = 0; i < 3; ++i) {
             if (!(mode->particle_types()[i]->is_lepton())) {
               non_lepton_position = i;
               break;
@@ -137,7 +137,7 @@ ActionList DecayActionsFinderDilepton::find_final_actions(
                       mode->particle_types()[(non_lepton_position+1)%3]->mass();
 
           // randomly select a mass
-          dilepton_mass = Random::uniform(2*m_l,p.effective_mass()-m_nl);
+          dilepton_mass = Random::uniform(2*m_l, p.effective_mass()-m_nl);
 
           const float diff_width = ThreeBodyDecayDilepton::diff_width(
                                               p.effective_mass(), dilepton_mass,

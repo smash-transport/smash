@@ -296,7 +296,7 @@ ThreeBodyDecayDilepton::ThreeBodyDecayDilepton(ParticleTypePtrList part_types,
   if (!has_lepton_pair(particle_types_[0]->pdgcode(),
                        particle_types_[1]->pdgcode(),
                        particle_types_[2]->pdgcode())) {
-   throw std::runtime_error(
+    throw std::runtime_error(
      "Error: No dilepton in ThreeBodyDecayDilepton constructor: " +
      part_types[0]->pdgcode().string() + " " +
      part_types[1]->pdgcode().string() + " " +
@@ -344,13 +344,13 @@ float ThreeBodyDecayDilepton::diff_width(float m_par, float m_dil,
         gamma = 7.8e-9;
         float ff = form_factor_pi(m_dil);
         return (alpha*4./(3.*M_PI)) * gamma/m_dil *
-                                   pow(1.-m_dil/m_par*m_dil/m_par,3.) * ff*ff;
+                                    pow(1.-m_dil/m_par*m_dil/m_par, 3.) * ff*ff;
       }
       case 0x221: /*eta*/ {
         gamma = 46e-8;
         float ff = form_factor_eta(m_dil);
         return (4.*alpha/(3.*M_PI)) * gamma/m_dil *
-                                   pow(1.-m_dil/m_par*m_dil/m_par,3.) * ff*ff;
+                                    pow(1.-m_dil/m_par*m_dil/m_par, 3.) * ff*ff;
       }
       case 0x223: /*omega*/ {
         gamma = 0.703e-3;

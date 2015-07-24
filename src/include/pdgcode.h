@@ -250,12 +250,7 @@ class PdgCode {
   }
   /// returns true if this is a lepton.
   inline bool is_lepton() const {
-    return (ucode() == 0x11 ||
-            ucode() == 0x12 ||
-            ucode() == 0x13 ||
-            ucode() == 0x14 ||
-            ucode() == 0x15 ||
-            ucode() == 0x16);
+    return (digits_.n_q1_ == 0 && digits_.n_q2_ == 0 && digits_.n_q3_ == 1);
   }
   /// returns the baryon number of the particle.
   inline int baryon_number() const {
@@ -728,27 +723,19 @@ std::ostream& operator<<(std::ostream& is, const PdgCode& code);
 
 /** Checks if two given particles represent a lepton pair (e+e- or mu+mu-). */
 inline bool is_dilepton(const PdgCode pdg1, const PdgCode pdg2) {
-  return (pdg1 ==  0x11 && pdg2 == -0x11) ||
-         (pdg1 == -0x11 && pdg2 ==  0x11) ||
-         (pdg1 ==  0x13 && pdg2 == -0x13) ||
-         (pdg1 == -0x13 && pdg2 ==  0x13);
+  const auto min = std::min(pdg1, pdg2);
+  const auto max = std::max(pdg1, pdg2);
+  return (max ==  0x11 && min == -0x11) ||
+         (max ==  0x13 && min == -0x13);
 }
 
-/** Checks if two of three given particle are leptons (electrons or muons).*/
+/** Checks if two of the three given particles represent a lepton pair
+ * (e+e- or mu+mu-).*/
 inline bool has_lepton_pair(const PdgCode pdg1, const PdgCode pdg2,
                             const PdgCode pdg3) {
-return (pdg1 ==  0x11 && pdg2 == -0x11) ||
-       (pdg1 == -0x11 && pdg2 ==  0x11) ||
-       (pdg1 ==  0x13 && pdg2 == -0x13) ||
-       (pdg1 == -0x13 && pdg2 ==  0x13) ||
-       (pdg3 ==  0x11 && pdg2 == -0x11) ||
-       (pdg3 == -0x11 && pdg2 ==  0x11) ||
-       (pdg3 ==  0x13 && pdg2 == -0x13) ||
-       (pdg3 == -0x13 && pdg2 ==  0x13) ||
-       (pdg1 ==  0x11 && pdg3 == -0x11) ||
-       (pdg1 == -0x11 && pdg3 ==  0x11) ||
-       (pdg1 ==  0x13 && pdg3 == -0x13) ||
-       (pdg1 == -0x13 && pdg3 ==  0x13);
+  return is_dilepton(pdg1, pdg2) ||
+         is_dilepton(pdg1, pdg3) ||
+         is_dilepton(pdg2, pdg3);
 }
 
 }  // namespace Smash
