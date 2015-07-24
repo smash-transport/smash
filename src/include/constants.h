@@ -38,11 +38,11 @@ constexpr float nuclear_density = 0.168;
 /**
  * nucleon mass in GeV
  */
- constexpr float nucleon_mass = 0.938;
+constexpr float nucleon_mass = 0.938;
 /**
- * Fine struture constant
+ * Fine-struture constant, approximately 1/137
  */
-constexpr float alpha = 7.2973525698e-3;
+constexpr double alpha = 7.2973525698e-3;
 
 
 
