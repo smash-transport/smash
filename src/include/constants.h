@@ -14,15 +14,13 @@ namespace Smash {
 /**
  * GeV <-> fm conversion factor
  *
- * \fpPrecision Why \c double?
+ * \fpPrecision  This is \c double to make sure to always have sufficient precision.
  */
 constexpr double hbarc = 0.197327053;
 /**
  * mb <-> fm^2 conversion factor
- *
- * \fpPrecision Why \c double?
  */
-constexpr double fm2_mb = 0.1;
+constexpr float fm2_mb = 0.1;
 /**
  * Numerical error tolerance
  */
@@ -30,25 +28,24 @@ constexpr float really_small = 1.0e-6;
 /**
  * \f$ 2\pi \f$
  *
- * \fpPrecision Why \c double?
+ * \fpPrecision  This is \c double to make sure to always have sufficient precision.
  */
 constexpr double twopi = 2. * M_PI;
 /**
  * Ground state density of symmetric nuclear matter, fm^-3
- *
- * \fpPrecision Why \c double?
  */
-constexpr double rho0 = 0.168;
+constexpr float nuclear_density = 0.168;
 /**
  * nucleon mass in GeV
- *
- * \fpPrecision Why \c double?
  */
-const double mN = 0.938;
+ constexpr float nucleon_mass = 0.938;
 /**
  * Fine struture constant
  */
 constexpr float alpha = 7.2973525698e-3;
+
+
+
 
 }  // namespace Smash
 

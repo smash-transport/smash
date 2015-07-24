@@ -98,24 +98,28 @@ void usage(const int rc, const std::string &progname) {
    * </table>
    */
   std::printf("\nUsage: %s [option]\n\n", progname.c_str());
-  std::printf("Calculate transport box\n"
-    "  -h, --help              usage information\n"
-    "\n"
-    "  -i, --inputfile <file>  path to input configuration file\n"
-    "                          (default: ./config.yaml)\n"
-    "  -d, --decaymodes <file> override default decay modes from file\n"
-    "  -p, --particles <file>  override default particles from file\n"
-    "\n"
-    "  -c, --config <YAML>     specify config value overrides\n"
-    "                          (multiple -c arguments are supported)\n"
-    "  -m, --modus <modus>     shortcut for -c 'General: { Modus: <modus> }'\n"
-    "  -e, --endtime <time>    shortcut for -c 'General: { End_Time: <time> }'"
-    "\n"
-    "\n"
-    "  -o, --output <dir>      output directory (default: ./data/<runid>)\n"
-    "  -f, --force             force overwriting files in the output directory"
-    "\n"
-    "  -v, --version\n\n");
+  std::printf(
+      "Calculate transport box\n"
+      "  -h, --help              usage information\n"
+      "\n"
+      "  -i, --inputfile <file>  path to input configuration file\n"
+      "                          (default: ./config.yaml)\n"
+      "  -d, --decaymodes <file> override default decay modes from file\n"
+      "  -p, --particles <file>  override default particles from file\n"
+      "\n"
+      "  -c, --config <YAML>     specify config value overrides\n"
+      "                          (multiple -c arguments are supported)\n"
+      "  -m, --modus <modus>     shortcut for -c 'General: { Modus: <modus> "
+      "}'\n"
+      "  -e, --endtime <time>    shortcut for -c 'General: { End_Time: <time> "
+      "}'"
+      "\n"
+      "\n"
+      "  -o, --output <dir>      output directory (default: ./data/<runid>)\n"
+      "  -f, --force             force overwriting files in the output "
+      "directory"
+      "\n"
+      "  -v, --version\n\n");
   std::exit(rc);
 }
 
@@ -182,27 +186,24 @@ int main(int argc, char *argv[]) {
 
   const auto &log = logger<LogArea::Main>();
 
-  constexpr option longopts[] = {
-    { "config",     required_argument,      0, 'c' },
-    { "decaymodes", required_argument,      0, 'd' },
-    { "endtime",    required_argument,      0, 'e' },
-    { "force",      no_argument,            0, 'f' },
-    { "help",       no_argument,            0, 'h' },
-    { "inputfile",  required_argument,      0, 'i' },
-    { "modus",      required_argument,      0, 'm' },
-    { "particles",  required_argument,      0, 'p' },
-    { "output",     required_argument,      0, 'o' },
-    { "version",    no_argument,            0, 'v' },
-    { nullptr,      0,                      0,  0  }
-  };
+  constexpr option longopts[] = {{"config", required_argument, 0, 'c'},
+                                 {"decaymodes", required_argument, 0, 'd'},
+                                 {"endtime", required_argument, 0, 'e'},
+                                 {"force", no_argument, 0, 'f'},
+                                 {"help", no_argument, 0, 'h'},
+                                 {"inputfile", required_argument, 0, 'i'},
+                                 {"modus", required_argument, 0, 'm'},
+                                 {"particles", required_argument, 0, 'p'},
+                                 {"output", required_argument, 0, 'o'},
+                                 {"version", no_argument, 0, 'v'},
+                                 {nullptr, 0, 0, 0}};
 
   /* strip any path to progname */
   const std::string progname = bf::path(argv[0]).filename().native();
 
   try {
     bool force_overwrite = false;
-    bf::path output_path = default_output_path(),
-             input_path("./config.yaml");
+    bf::path output_path = default_output_path(), input_path("./config.yaml");
     std::vector<std::string> extra_config;
     char *particles = nullptr, *decaymodes = nullptr, *modus = nullptr,
          *end_time = nullptr;
@@ -252,6 +253,13 @@ int main(int argc, char *argv[]) {
       }
     }
 
+    // Abort if there are unhandled arguments left.
+    if (optind < argc) {
+      std::cout << argv[0] << ": invalid argument -- '" << argv[optind]
+                << "'\n";
+      usage(EXIT_FAILURE, progname);
+    }
+
     /* read in config file */
     Configuration configuration(input_path.parent_path(),
                                 input_path.filename());
@@ -268,12 +276,12 @@ int main(int argc, char *argv[]) {
       configuration["General"]["End_Time"] = std::abs(std::atof(end_time));
 
     /* set up logging */
-    set_default_loglevel(configuration.take({"Logging", "default"},
-                                            einhard::ALL));
+    set_default_loglevel(
+        configuration.take({"Logging", "default"}, einhard::ALL));
     create_all_loggers(configuration["Logging"]);
     log.info(progname, " (", VERSION_MAJOR, ')');
 
-    int64_t seed = configuration.read({"General",  "Randomseed"});
+    int64_t seed = configuration.read({"General", "Randomseed"});
     if (seed < 0) {
       // Seed with a real random value, if available
       std::random_device rd;
@@ -303,7 +311,7 @@ int main(int argc, char *argv[]) {
                                               << '\n';
 
     // take the seed setting only after the configuration was stored to file
-    seed = configuration.take({"General",  "Randomseed"});
+    seed = configuration.take({"General", "Randomseed"});
     Random::set_seed(seed);
     log.info() << "Random number seed: " << seed;
 
@@ -324,8 +332,7 @@ int main(int argc, char *argv[]) {
     // run the experiment
     log.trace(source_location, " run the Experiment");
     experiment->run();
-  }
-  catch(std::exception &e) {
+  } catch (std::exception &e) {
     log.fatal() << "SMASH failed with the following error:\n" << e.what();
     return EXIT_FAILURE;
   }
@@ -333,4 +340,3 @@ int main(int argc, char *argv[]) {
   log.trace() << source_location << " about to return from main";
   return 0;
 }
-

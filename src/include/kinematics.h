@@ -8,8 +8,9 @@
 #ifndef SRC_INCLUDE_KINEMATICS_H_
 #define SRC_INCLUDE_KINEMATICS_H_
 
+#include <array>
+
 #include "constants.h"
-#include "experiment.h"
 
 namespace Smash {
 
@@ -79,9 +80,9 @@ std::array<T, 2> get_t_range(const T srts, const T m1, const T m2,
  * \fpPrecision Why \c double?
  */
 inline double plab_from_s_NN(double mandelstam_s) {
-  const double mNsqr = mN*mN;
+  const double mNsqr = nucleon_mass * nucleon_mass;
   return std::sqrt((mandelstam_s - 2*mNsqr) * (mandelstam_s - 2*mNsqr)
-                   - 4 * mNsqr * mNsqr) / (2 * mN);
+                   - 4 * mNsqr * mNsqr) / (2 * nucleon_mass);
 }
 
 

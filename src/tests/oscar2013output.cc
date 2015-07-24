@@ -30,7 +30,7 @@ static const bf::path testoutputpath = bf::absolute(SMASH_TEST_OUTPUT_PATH);
 static auto random_value = Random::make_uniform_distribution(-15.0, +15.0);
 
 TEST(directory_is_created) {
-  bf::create_directory(testoutputpath);
+  bf::create_directories(testoutputpath);
   VERIFY(bf::exists(testoutputpath));
 }
 

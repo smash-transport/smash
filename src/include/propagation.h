@@ -8,7 +8,9 @@
 #ifndef SRC_INCLUDE_PROPAGATION_H_
 #define SRC_INCLUDE_PROPAGATION_H_
 
-#include "experiment.h"
+#include "experimentparameters.h"
+#include "particles.h"
+#include "potentials.h"
 
 namespace Smash {
 

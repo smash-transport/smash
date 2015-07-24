@@ -59,6 +59,13 @@ bool PdgCode::is_Deltastar() const {
   }
 }
 
+bool PdgCode::is_pion() const {
+  const auto c = code();
+  return (c == 0x111)    // pi0
+      || (c == 0x211)    // pi+
+      || (c == -0x211);  // pi-
+}
+
 int PdgCode::isospin_total() const {
   // non-hadrons and η mesons (and ω and stuff):
   if (!is_hadron() || quarks() == 0x22) {

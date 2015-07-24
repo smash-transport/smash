@@ -49,7 +49,7 @@ ParticleTypePtr ParticleType::operator&() const {
   // ParticleTypePtr storage to uint32_t.
   assert(offset >= 0 && offset < 0xffff);
   // After the assertion above the down-cast to uint16_t is safe:
-  return {static_cast<uint16_t>(offset)};
+  return ParticleTypePtr(static_cast<uint16_t>(offset));
 }
 #endif
 

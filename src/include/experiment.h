@@ -312,7 +312,7 @@ class Experiment : public ExperimentBase {
   SystemTimePoint time_start_ = SystemClock::now();
 
   /// Type of density to be written to collision headers
-  DensityType dens_type_;
+  DensityType dens_type_ = DensityType::none;
 
   /**\ingroup logging
    * Writes the initial state for the Experiment to the output stream.

@@ -9,6 +9,7 @@
 
 #include "include/scatteractionbaryonbaryon.h"
 
+#include "include/constants.h"
 #include "include/cxx14compat.h"
 #include "include/parametrizations.h"
 #include "include/resonances.h"
