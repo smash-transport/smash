@@ -156,6 +156,15 @@ TEST(lepton) {
   VERIFY(!proton.is_lepton());
 }
 
+TEST(dilepton) {
+  VERIFY(is_dilepton(0x11, -0x11));
+  VERIFY(is_dilepton(-0x11, 0x11));
+  VERIFY(is_dilepton(0x13, -0x13));
+  VERIFY(!is_dilepton(0x11, 0x11));
+  VERIFY(!is_dilepton(-0x13, -0x13));
+  VERIFY(!is_dilepton(0x211, -0x211));
+}
+
 TEST(baryon_number) {
   COMPARE(   electron.baryon_number(),  0);
   COMPARE(     antimu.baryon_number(),  0);

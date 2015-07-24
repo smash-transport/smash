@@ -723,8 +723,10 @@ std::ostream& operator<<(std::ostream& is, const PdgCode& code);
 
 /** Checks if two given particles represent a lepton pair (e+e- or mu+mu-). */
 inline bool is_dilepton(const PdgCode pdg1, const PdgCode pdg2) {
-  const auto min = std::min(pdg1, pdg2);
-  const auto max = std::max(pdg1, pdg2);
+  const auto c1 = pdg1.code();
+  const auto c2 = pdg2.code();
+  const auto min = std::min(c1, c2);
+  const auto max = std::max(c1, c2);
   return (max ==  0x11 && min == -0x11) ||
          (max ==  0x13 && min == -0x13);
 }
