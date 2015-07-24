@@ -12,6 +12,7 @@
 #include "include/constants.h"
 #include "include/cxx14compat.h"
 #include "include/decayactiondilepton.h"
+#include "include/decaymodes.h"
 #include "include/particles.h"
 
 
@@ -23,14 +24,20 @@ ActionList DecayActionsFinderDilepton::find_actions_in_cell(
   ActionList actions;
 
   for (const auto &p : search_list) {
-    if (p.type().is_stable()) {
+    unsigned long n_all_modes = p.type().decay_modes().decay_mode_list().size();
+    if (n_all_modes == 0) {
       continue;
     }
 
     const float inv_gamma = p.inverse_gamma();
-
     DecayBranchList dil_modes =
                   p.type().get_partial_widths_dilepton(p.effective_mass());
+
+    // if particle can only decay into dileptons, use shining in only in
+    // find_final_actions and ignore them here
+    if (dil_modes.size() == n_all_modes) {
+      continue;
+    }
 
     for (DecayBranchPtr & mode : dil_modes) {
       const float partial_width = mode->weight();
@@ -55,8 +62,6 @@ ActionList DecayActionsFinderDilepton::find_final_actions(
     if (p.type().is_stable()) {
       continue;
     }
-
-    const float inv_gamma = p.inverse_gamma();
 
     DecayBranchList dil_modes =
                   p.type().get_partial_widths_dilepton(p.effective_mass());
