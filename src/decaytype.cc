@@ -306,15 +306,15 @@ ThreeBodyDecayDilepton::ThreeBodyDecayDilepton(ParticleTypePtrList part_types,
 
 // Little helper functions for the form factor of the dilepton dalitz decays
 
-float form_factor_pi(float mass) {
+static float form_factor_pi(float mass) {
   return 1.+5.5*mass*mass;
 }
 
-float form_factor_eta(float mass) {
+static float form_factor_eta(float mass) {
   return 1./(1.-(mass*mass/0.676));
 }
 
-float form_factor_sqr_omega(float mass) {
+static float form_factor_sqr_omega(float mass) {
   float lambda = 0.65;
   float gamma_w = 0.075;
   float n = pow(lambda*lambda - mass*mass, 2.) +
@@ -322,8 +322,8 @@ float form_factor_sqr_omega(float mass) {
   return pow(lambda, 4.) / n;
 }
 
-float form_factor_sqr_delta(float) {
-  return 1.0;  // no form factor implemented
+static float form_factor_sqr_delta(float) {
+  return 1.0;  /// not done yet see \iref{Krivoruchenko:2001hs}
 }
 
 
@@ -339,20 +339,20 @@ float ThreeBodyDecayDilepton::diff_width(float m_par, float m_dil,
     float m_par_cubed = m_par * m_par*m_par;
     float m_other_sqr = m_other*m_other;
 
-    switch (pdg.get_decimal()) {
-      case 111: /*pi0*/ {
+    switch (pdg.code()) {
+      case 0x111: /*pi0*/ {
         gamma = 7.8e-9;
         float ff = form_factor_pi(m_dil);
         return (alpha*4./(3.*M_PI)) * gamma/m_dil *
                                    pow(1.-m_dil/m_par*m_dil/m_par,3.) * ff*ff;
       }
-      case 221: /*eta*/ {
+      case 0x221: /*eta*/ {
         gamma = 46e-8;
         float ff = form_factor_eta(m_dil);
         return (4.*alpha/(3.*M_PI)) * gamma/m_dil *
                                    pow(1.-m_dil/m_par*m_dil/m_par,3.) * ff*ff;
       }
-      case 223: /*omega*/ {
+      case 0x223: /*omega*/ {
         gamma = 0.703e-3;
         float n1 = (m_par_sqr - m_other_sqr);
         float n2 = ((m_par_sqr -m_other_sqr)*(m_par_sqr -m_other_sqr));
@@ -360,7 +360,7 @@ float ThreeBodyDecayDilepton::diff_width(float m_par, float m_dil,
         return (2.*alpha/(3.*M_PI))  *  gamma/m_dil  *   pow(sqrt(rad), 3.) *
                                                    form_factor_sqr_omega(m_dil);
       }
-      case 2214: case 2114: /* Delta+ and Delta0 */ {
+      case 0x2214: case 0x2114: /* Delta+ and Delta0 */ {
         float t1 = alpha/16. *
                    (m_par+m_other)*(m_par+m_other)/(m_par_cubed*m_other_sqr) *
                    std::sqrt((m_par+m_other)*(m_par+m_other) - m_dil_sqr);

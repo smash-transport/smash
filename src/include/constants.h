@@ -48,7 +48,7 @@ const double mN = 0.938;
 /**
  * Fine struture constant
  */
-constexpr float alpha = 1.0/137.0;
+constexpr float alpha = 7.2973525698e-3;
 
 }  // namespace Smash
 
