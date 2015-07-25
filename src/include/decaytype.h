@@ -144,7 +144,7 @@ class TwoBodyDecaySemistable : public TwoBodyDecay {
  protected:
   float rho(float m) const override;
   float Lambda_;
-  Tabulation tabulation_;
+  std::unique_ptr<Tabulation> tabulation_;
 };
 
 
