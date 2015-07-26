@@ -492,7 +492,7 @@ static std::string format_measurements(const Particles &particles,
   ss << field<5> << time
      << field<12, 3> << difference.momentum().x0()
      << field<12, 3> << difference.momentum().abs3()
-     << field<12, 3> << (scatterings_total
+     << field<12, 3> << ((scatterings_total && time > really_small)
                           ? scatterings_total * 2 / (particles.size() * time)
                           : 0.)
      << field<10, 3> << scatterings_this_interval
