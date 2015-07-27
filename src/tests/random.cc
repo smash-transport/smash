@@ -18,20 +18,17 @@ constexpr bool PRINT = false;
 
 constexpr int N_TEST = 10000000;
 constexpr int sigmabins = 4;
-constexpr double allowed[sigmabins] = {.682*.99, .954*.99, .997*.99, 1.0};
+constexpr double allowed[sigmabins] = {.682 * .99, .954 * .99, .997 * .99, 1.0};
 
-template <
-    typename Dx,
-    typename Normalization,
-    typename Chi,
-    typename Analytical
->
-void test_distribution(Dx get_dx, Normalization norm, Chi get_chi, Analytical get_analyt) {
-  std::map<int, int> hist {};
+template <typename Dx, typename Normalization, typename Chi,
+          typename Analytical>
+void test_distribution(Dx get_dx, Normalization norm, Chi get_chi,
+                       Analytical get_analyt) {
+  std::map<int, int> hist{};
   const double dx = get_dx();
   for (int i = 0; i < N_TEST; i++) {
     const double chi = get_chi();
-    ++hist[chi/dx];
+    ++hist[chi / dx];
   }
   int diffbad[sigmabins] = {0};
   int total = 0;
@@ -52,7 +49,7 @@ void test_distribution(Dx get_dx, Normalization norm, Chi get_chi, Analytical ge
       printf("%7.3f %7d %7.3f %7.3f\n", x, result, stat_err, analyt);
     }
     // normalize the deviation
-    int diffbin = std::abs(result - analyt)/stat_err;
+    int diffbin = std::abs(result - analyt) / stat_err;
     diffbin = (diffbin >= sigmabins) ? sigmabins - 1 : diffbin;
     // this will be checked: how many points have been correct up to
     // one, two, three, ... sigmas?
@@ -65,96 +62,84 @@ void test_distribution(Dx get_dx, Normalization norm, Chi get_chi, Analytical ge
   for (int unit = 0; unit < sigmabins - 1; ++unit) {
     totalbad += diffbad[unit];
     double fraction = (totalbad + 0.0) / (total + 0.0);
-    VERIFY(fraction > allowed[unit]) << " too few entries have less than "
-              << unit+1 << " sigma deviation ("
-              << totalbad << "/" << total << "=" << fraction
-              << ", required minimal fraction: " << allowed[unit];
+    VERIFY(fraction > allowed[unit])
+        << " too few entries have less than " << unit + 1
+        << " sigma deviation (" << totalbad << "/" << total << "=" << fraction
+        << ", required minimal fraction: " << allowed[unit];
   }
 }
 
 TEST(exponential) {
-    constexpr double dx = 0.1;
-    test_distribution(
-        [] () { return dx; },
-        [] (double) { return (1 - exp(-dx)) * N_TEST; },
-        [] () { return Random::exponential(1.0); },
-        [] (double x) { return exp(-x); }
-    );
+  constexpr double dx = 0.1;
+  test_distribution([]() { return dx; },
+                    [](double) { return (1 - exp(-dx)) * N_TEST; },
+                    []() { return Random::exponential(1.0); },
+                    [](double x) { return exp(-x); });
 }
 
 TEST(x_exponential) {
-    constexpr double dx = 0.05;
-    test_distribution(
-        [] () { return dx; },
-        [] (double x) {
-            const double normalize_1 = (1 - exp(-dx)) * N_TEST;
-            const double normalize_2 = (1 + dx) * normalize_1 - dx * N_TEST;
-            return x*normalize_1 + normalize_2;
-        },
-        [] () { return Random::exponential(1.0) + Random::exponential(1.0); },
-        [] (double x) { return exp(-x); }
-    );
+  constexpr double dx = 0.05;
+  test_distribution(
+      []() { return dx; },
+      [](double x) {
+        const double normalize_1 = (1 - exp(-dx)) * N_TEST;
+        const double normalize_2 = (1 + dx) * normalize_1 - dx * N_TEST;
+        return x * normalize_1 + normalize_2;
+      },
+      []() { return Random::exponential(1.0) + Random::exponential(1.0); },
+      [](double x) { return exp(-x); });
 }
 
 TEST(xsquared_exponential) {
-    constexpr double dx = 0.1;
-    test_distribution(
-        [] () { return dx; },
-        [] (double x) {
-            const double normalize_1 = (1 - exp(-dx)) * N_TEST / 2.0;
-            const double normalize_2 = 2.0 * (dx + 1.0);
-            const double normalize_3 = N_TEST * (1.0 - exp(-dx) * ( dx * (dx / 2.0 + 1.0) + 1.0));
-            return (normalize_1 * (x * x + x * normalize_2)
-                    - x * dx * N_TEST + normalize_3);
-        },
-        [] () {
-            return Random::exponential(1.0)
-                   + Random::exponential(1.0)
-                   + Random::exponential(1.0);
-        },
-        [] (double x) { return exp(-x); }
-    );
+  constexpr double dx = 0.1;
+  test_distribution(
+      []() { return dx; },
+      [](double x) {
+        const double normalize_1 = (1 - exp(-dx)) * N_TEST / 2.0;
+        const double normalize_2 = 2.0 * (dx + 1.0);
+        const double normalize_3 =
+            N_TEST * (1.0 - exp(-dx) * (dx * (dx / 2.0 + 1.0) + 1.0));
+        return (normalize_1 * (x * x + x * normalize_2) - x * dx * N_TEST +
+                normalize_3);
+      },
+      []() {
+        return Random::exponential(1.0) + Random::exponential(1.0) +
+               Random::exponential(1.0);
+      },
+      [](double x) { return exp(-x); });
 }
 
 TEST(canonical) {
-    constexpr double dx = 0.001;
-    test_distribution(
-        [] () { return dx; },
-        [] (double) { return N_TEST * dx; },
-        [] () { return Random::canonical(); },
-        [] (double) { return 1.0; }
-    );
+  constexpr double dx = 0.0001;
+  test_distribution([]() { return dx; },
+                    [](double) { return N_TEST * dx; },
+                    []() { return Random::canonical(); },
+                    [](double) { return 1.0; });
 }
 
 TEST(uniform) {
-    constexpr double dx = 0.01;
-    auto random_4_6 = Random::make_uniform_distribution(-4.0, 6.0);
-    test_distribution(
-        [] () { return dx; },
-        [] (double) { return N_TEST * dx / 10.0; },
-        [&] () { return random_4_6(); },
-        [] (double) { return 1.0; }
-    );
+  constexpr double dx = 0.01;
+  auto random_4_6 = Random::make_uniform_distribution(-4.0, 6.0);
+  test_distribution([]() { return dx; },
+                    [](double) { return N_TEST * dx / 10.0; },
+                    [&]() { return random_4_6(); },
+                    [](double) { return 1.0; });
 }
 
 TEST(cos_like) {
-    constexpr double dx = 0.001;
-    auto cos_like = Random::make_uniform_distribution(-1.0, +1.0);
-    test_distribution(
-        [] () { return dx; },
-        [] (double) { return N_TEST * dx / 2.0; },
-        [&] () { return cos_like(); },
-        [] (double) { return 1.0; }
-    );
+  constexpr double dx = 0.001;
+  auto cos_like = Random::make_uniform_distribution(-1.0, +1.0);
+  test_distribution([]() { return dx; },
+                    [](double) { return N_TEST * dx / 2.0; },
+                    [&]() { return cos_like(); },
+                    [](double) { return 1.0; });
 }
 
 TEST(phi_like) {
-    constexpr double dx = 2*M_PI / 10000.0;
-    auto phi_like = Random::make_uniform_distribution(0.0, 2*M_PI);
-    test_distribution(
-        [] () { return dx; },
-        [] (double) { return N_TEST * dx / (2.0*M_PI); },
-        [&] () { return phi_like(); },
-        [] (double) { return 1.0; }
-    );
+  constexpr double dx = 2 * M_PI / 10000.0;
+  auto phi_like = Random::make_uniform_distribution(0.0, 2 * M_PI);
+  test_distribution([]() { return dx; },
+                    [](double) { return N_TEST * dx / (2.0 * M_PI); },
+                    [&]() { return phi_like(); },
+                    [](double) { return 1.0; });
 }
