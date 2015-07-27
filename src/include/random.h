@@ -82,7 +82,10 @@ uniform_dist<T> make_uniform_distribution(T min, T max) {
  * \Theta(\chi) \cdot \exp(-t)\f$
  */
 template <typename T = double> T exponential(T lambda) {
-  return std::exponential_distribution<T>(lambda)(engine);
+  /* Work around a libstdc++ bug in std::exponential_distribution:
+   * If canonical() is in [0,1) then 1.-canonical() is in (0,1] and it's safe
+   * to call the log. */
+  return -std::log(1.-canonical()) / lambda;
 }
 
 /** Evaluates a random number x according to an exponential distribution
