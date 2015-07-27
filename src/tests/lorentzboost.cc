@@ -77,6 +77,10 @@ TEST(keep_invariant_angle) {
 
 // Lorentz transformation and back should get the same vector:
 TEST(back_and_forth) {
+  // We need to use a lower accuracy here, otherwise the tolerated absolute
+  // error would get much smaller than 1e-16, which does not make sense for
+  // doubles.
+  constexpr double my_accuracy = 1e-7;
   for(int i = 0; i < 1000; i++) {
     ThreeVector velocity = random_velocity();
     for(int j = 0; j < 1000; j++) {
@@ -86,13 +90,13 @@ TEST(back_and_forth) {
                   , cos_like());
       FourVector forward  = a.LorentzBoost(velocity);
       FourVector backward = forward.LorentzBoost(-velocity);
-      COMPARE_RELATIVE_ERROR(backward.x0(), a.x0(), accuracy) << " at loop "
+      COMPARE_RELATIVE_ERROR(backward.x0(), a.x0(), my_accuracy) << " at loop "
                                                         << i << "*" << j;
-      COMPARE_RELATIVE_ERROR(backward.x1(), a.x1(), accuracy) << " at loop "
+      COMPARE_RELATIVE_ERROR(backward.x1(), a.x1(), my_accuracy) << " at loop "
                                                         << i << "*" << j;
-      COMPARE_RELATIVE_ERROR(backward.x2(), a.x2(), accuracy) << " at loop "
+      COMPARE_RELATIVE_ERROR(backward.x2(), a.x2(), my_accuracy) << " at loop "
                                                         << i << "*" << j;
-      COMPARE_RELATIVE_ERROR(backward.x3(), a.x3(), accuracy) << " at loop "
+      COMPARE_RELATIVE_ERROR(backward.x3(), a.x3(), my_accuracy) << " at loop "
                                                         << i << "*" << j;
     }
   }
