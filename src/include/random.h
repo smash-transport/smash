@@ -19,7 +19,7 @@ namespace Smash {
 
 namespace Random {
 
-/// The random number engine used is std::randlux48
+/// The random number engine used is the Mersenne Twister.
 using Engine = std::mt19937_64;
 
 /// The engine that is used commonly by all distributions.
