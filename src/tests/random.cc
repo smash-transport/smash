@@ -125,21 +125,3 @@ TEST(uniform) {
                     [&]() { return random_4_6(); },
                     [](double) { return 1.0; });
 }
-
-TEST(cos_like) {
-  constexpr double dx = 0.001;
-  auto cos_like = Random::make_uniform_distribution(-1.0, +1.0);
-  test_distribution([]() { return dx; },
-                    [](double) { return N_TEST * dx / 2.0; },
-                    [&]() { return cos_like(); },
-                    [](double) { return 1.0; });
-}
-
-TEST(phi_like) {
-  constexpr double dx = 2 * M_PI / 10000.0;
-  auto phi_like = Random::make_uniform_distribution(0.0, 2 * M_PI);
-  test_distribution([]() { return dx; },
-                    [](double) { return N_TEST * dx / (2.0 * M_PI); },
-                    [&]() { return phi_like(); },
-                    [](double) { return 1.0; });
-}
