@@ -18,6 +18,8 @@ constexpr bool PRINT = false;
 
 constexpr int N_TEST = 10000000;
 constexpr int sigmabins = 4;
+// We will check that at least the following ratios of numbers of samples lie
+// within the corresponding sigma environment.
 constexpr double allowed[sigmabins] = {.682 * .99, .954 * .99, .997 * .99, 1.0};
 
 template <typename Dx, typename Normalization, typename Chi,
@@ -61,7 +63,7 @@ void test_distribution(Dx get_dx, Normalization norm, Chi get_chi,
   int totalbad = 0;
   for (int unit = 0; unit < sigmabins - 1; ++unit) {
     totalbad += diffbad[unit];
-    double fraction = (totalbad + 0.0) / (total + 0.0);
+    const double fraction = (totalbad + 0.0) / (total + 0.0);
     VERIFY(fraction > allowed[unit])
         << " too few entries have less than " << unit + 1
         << " sigma deviation (" << totalbad << "/" << total << "=" << fraction
