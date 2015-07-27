@@ -22,12 +22,10 @@ constexpr int sigmabins = 4;
 // within the corresponding sigma environment.
 constexpr double allowed[sigmabins] = {.682 * .99, .954 * .99, .997 * .99, 1.0};
 
-template <typename Dx, typename Normalization, typename Chi,
-          typename Analytical>
-void test_distribution(Dx get_dx, Normalization norm, Chi get_chi,
+template <typename Normalization, typename Chi, typename Analytical>
+void test_distribution(double dx, Normalization norm, Chi get_chi,
                        Analytical get_analyt) {
   std::map<int, int> hist{};
-  const double dx = get_dx();
   for (int i = 0; i < N_TEST; i++) {
     const double chi = get_chi();
     ++hist[chi / dx];
@@ -73,7 +71,7 @@ void test_distribution(Dx get_dx, Normalization norm, Chi get_chi,
 
 TEST(exponential) {
   constexpr double dx = 0.1;
-  test_distribution([]() { return dx; },
+  test_distribution(dx,
                     [](double) { return (1 - exp(-dx)) * N_TEST; },
                     []() { return Random::exponential(1.0); },
                     [](double x) { return exp(-x); });
@@ -82,7 +80,7 @@ TEST(exponential) {
 TEST(x_exponential) {
   constexpr double dx = 0.05;
   test_distribution(
-      []() { return dx; },
+      dx,
       [](double x) {
         const double normalize_1 = (1 - exp(-dx)) * N_TEST;
         const double normalize_2 = (1 + dx) * normalize_1 - dx * N_TEST;
@@ -95,7 +93,7 @@ TEST(x_exponential) {
 TEST(xsquared_exponential) {
   constexpr double dx = 0.1;
   test_distribution(
-      []() { return dx; },
+      dx,
       [](double x) {
         const double normalize_1 = (1 - exp(-dx)) * N_TEST / 2.0;
         const double normalize_2 = 2.0 * (dx + 1.0);
@@ -113,7 +111,7 @@ TEST(xsquared_exponential) {
 
 TEST(canonical) {
   constexpr double dx = 0.0001;
-  test_distribution([]() { return dx; },
+  test_distribution(dx,
                     [](double) { return N_TEST * dx; },
                     []() { return Random::canonical(); },
                     [](double) { return 1.0; });
@@ -122,7 +120,7 @@ TEST(canonical) {
 TEST(uniform) {
   constexpr double dx = 0.01;
   auto random_4_6 = Random::make_uniform_distribution(-4.0, 6.0);
-  test_distribution([]() { return dx; },
+  test_distribution(dx,
                     [](double) { return N_TEST * dx / 10.0; },
                     [&]() { return random_4_6(); },
                     [](double) { return 1.0; });
