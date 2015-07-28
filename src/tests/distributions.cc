@@ -34,10 +34,11 @@ TEST(breitwigner) {
 }
 
 TEST(maxwell) {
-  // tests the Maxwell-Boltzmann implementation for energies between 0.05
-  // and 10 GeV and Temperatures between 0.01 and 1 GeV.
+  // tests the Maxwell-Boltzmann implementation for energies between 0
+  // and 7 GeV and Temperatures between 0.01 and 1 GeV.
+  // (Energies higher than 7 GeV trigger and underflow in exp.)
   UnitTest::setFuzzyness<double>(2);
-  for (int e_i = 0; e_i < 200; ++e_i) {
+  for (int e_i = 0; e_i < 140; ++e_i) {
     double energy = e_i * 0.05;
     double fourpie2 = (4.0 * M_PI) * (energy * energy);
     for (int t_i = 10; t_i < 1000; ++t_i) {
