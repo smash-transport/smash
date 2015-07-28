@@ -33,6 +33,8 @@
 #include <typeinfo>
 #include <vector>
 
+#include "../include/fpenvironment.h"
+
 #if defined(__GNUC__) && !defined(_WIN32) && defined(_GLIBCXX_OSTREAM)
 #define HACK_OSTREAM_FOR_TTY 1
 #endif
@@ -1281,6 +1283,7 @@ UnitTest::Test2<F, Typelist...> hackTypelist(void (*)(Typelist...));
 
 // main {{{1
 int main(int argc, char **argv) {
+  Smash::setup_default_float_traps();
   UnitTest::initTest(argc, argv);
   UnitTest::runAll();
   return UnitTest::global_unit_test_object_.finalize();
