@@ -102,7 +102,7 @@ class ParticleType {
   int baryon_number() const { return pdgcode_.baryon_number(); }
 
   /// Check if the particle is stable
-  inline bool is_stable() const;
+  bool is_stable() const;
 
   /**
    * The minimum mass of the resonance.
@@ -302,12 +302,6 @@ class ParticleType {
    */
   friend std::ostream &operator<<(std::ostream &out, const ParticleType &type);
 };
-
-inline bool ParticleType::is_stable() const {
-  /* We currently regard a particle type as stable if its on-shell width is
-   * less than 10 keV. */
-  return width_ < 1E-5f;
-}
 
 /**
  * \ingroup data
