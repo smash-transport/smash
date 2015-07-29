@@ -35,17 +35,21 @@ TEST(breitwigner) {
 
 TEST(maxwell) {
   // tests the Maxwell-Boltzmann implementation for energies between 0
-  // and 7 GeV and Temperatures between 0.01 and 1 GeV.
-  // (Energies higher than 7 GeV trigger and underflow in exp.)
+  // and 10 GeV and Temperatures between 0.01 and 1 GeV.
   UnitTest::setFuzzyness<double>(2);
-  for (int e_i = 0; e_i < 140; ++e_i) {
-    double energy = e_i * 0.05;
-    double fourpie2 = (4.0 * M_PI) * (energy * energy);
+  for (int e_i = 0; e_i < 200; ++e_i) {
+    const double energy = e_i * 0.05;
+    const double fourpie2 = (4.0 * M_PI) * (energy * energy);
     for (int t_i = 10; t_i < 1000; ++t_i) {
-      double temperature = t_i * 0.001;
-      FUZZY_COMPARE(density_integrand(energy, energy*energy, temperature),
-              fourpie2 * exp(-energy / temperature)) << "E = " << energy
-                                                     << ", T = " << temperature;
+      const double temperature = t_i * 0.001;
+      const double ratio = energy / temperature;
+      // avoid underflows in the exponential
+      if (ratio > 700) {
+        continue;
+      };
+      COMPARE_ABSOLUTE_ERROR(density_integrand(energy, energy*energy, temperature),
+                             fourpie2 * exp(-ratio), 1e-16)
+          << "E = " << energy << ", T = " << temperature;
     }
   }
 }
