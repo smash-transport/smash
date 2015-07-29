@@ -225,16 +225,6 @@ const DecayModes &ParticleType::decay_modes() const {
   return modes;
 }
 
-static bool width_is_stable(float width) {
-  /* We currently regard a particle type as stable if its on-shell width is
-   * less than 10 keV. */
-  return width < 1E-5f;
-}
-
-bool ParticleType::is_stable() const {
-  return width_is_stable(width_);
-}
-
 float ParticleType::total_width(const float m) const {
   float w = 0.;
   if (is_stable()) {
