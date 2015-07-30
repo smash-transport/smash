@@ -18,10 +18,10 @@ TEST(interpolate_linear) {
   COMPARE(f(0.5), 1);
 }
 
-TEST(interpolate_data) {
+TEST(interpolate_data_linear) {
   std::vector<double> x = {1, 2, 3, 4, 5, 6, 7, 8, 9};
   std::vector<double> y = {1, 2, 0, 0, 0, 0, 0, 8, 9};
-  InterpolateData<double> f(x, y);
+  InterpolateDataLinear<double> f(x, y);
   COMPARE(f(1.5), 1.5);
   COMPARE(f(5), 0.0);
   COMPARE(f(0), 0.0);
@@ -36,4 +36,13 @@ TEST(find_index) {
   COMPARE(find_index(data, 0.4f), 1ul);
   COMPARE(find_index(data, 0.5f), 2ul);
   COMPARE(find_index(data, 10.0f), 5ul);
+}
+
+TEST(interpolate_data_spline) {
+  const std::vector<double> x = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+  const std::vector<double> y = x;
+  InterpolateDataSpline f(x, y);
+  COMPARE(f(1.5), 1.5);
+  COMPARE(f(0), 1.0);
+  COMPARE(f(10), 9.0);
 }

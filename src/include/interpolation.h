@@ -15,6 +15,15 @@
 #include <cstddef>
 #include <algorithm>
 #include <numeric>
+#include <stdexcept>
+
+#include <gsl/gsl_errno.h>
+#include <gsl/gsl_spline.h>
+
+
+/*
+ * Linear interpolation.
+ */
 
 template <typename T>
 class InterpolateLinear {
@@ -29,16 +38,16 @@ class InterpolateLinear {
 };
 
 template <typename T>
-class InterpolateData {
+class InterpolateDataLinear {
  public:
   /// Interpolate function f given discrete samples f(x_i) = y_i.
-  //
+  ///
   /// Returns the interpolation function.
   ///
   /// Piecewise linear interpolation is used.
   /// Values outside the given samples will use the outmost linear
   /// interpolation.
-  InterpolateData(const std::vector<T>& x, const std::vector<T>& y);
+  InterpolateDataLinear(const std::vector<T>& x, const std::vector<T>& y);
   /// Calculate interpolation of f at x.
   T operator()(T x) const;
 
@@ -85,7 +94,7 @@ std::vector<T> apply_permutation(const std::vector<T>& v,
 }
 
 template <typename T>
-InterpolateData<T>::InterpolateData(const std::vector<T>& x,
+InterpolateDataLinear<T>::InterpolateDataLinear(const std::vector<T>& x,
                                     const std::vector<T>& y) {
   assert(x.size() == y.size());
   const size_t n = x.size();
@@ -122,7 +131,7 @@ size_t find_index(const std::vector<T> v, T x) {
 }
 
 template <typename T>
-T InterpolateData<T>::operator()(T x0) const {
+T InterpolateDataLinear<T>::operator()(T x0) const {
   // Find the piecewise linear interpolation corresponding to x0.
   size_t i = find_index(x_, x0);
   if (i >= f_.size()) {
@@ -132,5 +141,31 @@ T InterpolateData<T>::operator()(T x0) const {
   }
   return f_[i](x0);
 }
+
+
+/*
+ * Spline interpolation.
+ */
+
+class InterpolateDataSpline {
+ public:
+  /// Interpolate function f given discrete samples f(x_i) = y_i.
+  ///
+  /// Returns the interpolation function.
+  ///
+  /// Cubic spline interpolation is used.
+  /// Values outside the given samples will use the outmost sample
+  /// as a constant extrapolation.
+  InterpolateDataSpline(const std::vector<double>& x, const std::vector<double>& y);
+  ~InterpolateDataSpline();
+  double operator()(double x) const;
+ private:
+  const double first_x_;
+  const double last_x_;
+  const double first_y_;
+  const double last_y_;
+  gsl_interp_accel* acc_;
+  gsl_spline* spline_;
+};
 
 #endif  // SRC_INCLUDE_INTERPOLATION_H_

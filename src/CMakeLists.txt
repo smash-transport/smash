@@ -79,6 +79,7 @@ set(smash_src
         fpenvironment.cc
         grid.cc
         inputfunctions.cc
+        interpolation.cc
         isoparticletype.cc
         listmodus.cc
         logging.cc
