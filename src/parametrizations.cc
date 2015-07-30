@@ -156,7 +156,7 @@ float kplusn_elastic(double mandelstam_s) {
 /** K- p elastic cross section parametrization.
  * Source: \iref{Buss:2011mx}, B.3.9 */
 float kminusp_elastic(double mandelstam_s) {
-  if (mandelstam_s < 1.7) {
+  if (std::sqrt(mandelstam_s) < 1.7) {
     // The parametrization here also works for anti-K0 n, Lambda pi0,
     // Sigma+ pi-, Sigma- pi+, Sigma0 pi0 with different parameters a0, a1, a2.
     constexpr double a0 = 150;  // mb GeV^2
@@ -171,7 +171,7 @@ float kminusp_elastic(double mandelstam_s) {
     return a0 * p_f / (p_i * mandelstam_s) * std::pow(ratio, a2);
   } else {
     // TODO: Use spline interpolation of experimental data.
-    throw std::runtime_error("not implemented");
+    throw std::runtime_error("K- p cross section not implemented for sqrt(s) >= 1.7 GeV");
   }
 }
 

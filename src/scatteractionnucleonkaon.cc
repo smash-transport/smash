@@ -69,7 +69,7 @@ CollisionBranchPtr ScatterActionNucleonKaon::elastic_cross_section(float) {
       }
       break;
     default:
-      throw std::runtime_error("not implemented");
+      throw std::runtime_error("elastic cross section for antinucleon-kaon not implemented");
   }
 
   if (sig_el > 0) {
