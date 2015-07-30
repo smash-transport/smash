@@ -129,4 +129,84 @@ float ppbar_total(double mandelstam_s) {
   }
 }
 
+/** K+ p elastic cross section parametrization.
+ * sigma(K+n->K+n) = sigma(K+n->K0p) = 0.5 * sigma(K+p->K+p)
+ * Source: \iref{Buss:2011mx}, B.3.8 */
+float kplusp_elastic(double mandelstam_s) {
+  constexpr double a0 = 10.508;  // mb
+  constexpr double a1 = -3.716;  // mb/GeV
+  constexpr double a2 = 1.845;  // mb/GeV^2
+  constexpr double a3 = -0.764;  // GeV^-1
+  constexpr double a4 = 0.508;  // GeV^-2
+
+  const double p_lab = plab_from_s_NN(mandelstam_s);
+  const double p_lab2 = p_lab*p_lab;
+
+  return (a0 + a1*p_lab + a2*p_lab2) / (1 + a3*p_lab + a4*p_lab2);
+}
+
+/** K+ n elastic cross section parametrization.
+ * sigma(K+n->K+n) = sigma(K+n->K0p) = 0.5 * sigma(K+p->K+p)
+ * Source: \iref{Buss:2011mx}, B.3.8 */
+float kplusn_elastic(double mandelstam_s) {
+  return 0.5 * kplusp_elastic(mandelstam_s);
+}
+
+
+/** K- p elastic cross section parametrization.
+ * Source: \iref{Buss:2011mx}, B.3.9 */
+float kminusp_elastic(double mandelstam_s) {
+  if (mandelstam_s < 1.7) {
+    // The parametrization here also works for anti-K0 n, Lambda pi0,
+    // Sigma+ pi-, Sigma- pi+, Sigma0 pi0 with different parameters a0, a1, a2.
+    constexpr double a0 = 150;  // mb GeV^2
+    constexpr double a1 = 0.35;  // Gev
+    constexpr int a2 = 2;
+
+    const double p_lab = plab_from_s_NN(mandelstam_s);
+    const double p_i = p_lab;
+    const double p_f = p_lab;
+
+    const double ratio = a1*a1 / (a1*a1 + p_f*p_f);
+    return a0 * p_f / (p_i * mandelstam_s) * std::pow(ratio, a2);
+  } else {
+    // TODO: Use spline interpolation of experimental data.
+    throw std::runtime_error("not implemented");
+  }
+}
+
+/** K- n elastic cross section parametrization.
+ * Source: \iref{Buss:2011mx}, B.3.9 */
+float kminusn_elastic(double) {
+    return 4.0;
+}
+
+/** K0 p elastic cross section parametrization.
+ * Source: \iref{Buss:2011mx}, B.3.9 */
+float k0p_elastic(double mandelstam_s) {
+    // by isospin symmetry
+    return kplusn_elastic(mandelstam_s);
+}
+
+/** K0 n elastic cross section parametrization.
+ * Source: \iref{Buss:2011mx}, B.3.9 */
+float k0n_elastic(double mandelstam_s) {
+    // by isospin symmetry
+    return kplusp_elastic(mandelstam_s);
+}
+
+/** Kbar0 p elastic cross section parametrization.
+ * Source: \iref{Buss:2011mx}, B.3.9 */
+float kbar0p_elastic(double mandelstam_s) {
+    // by isospin symmetry
+    return kminusn_elastic(mandelstam_s);
+}
+
+/** Kbar0 n elastic cross section parametrization.
+ * Source: \iref{Buss:2011mx}, B.3.9 */
+float kbar0n_elastic(double mandelstam_s) {
+    // by isospin symmetry
+    return kminusp_elastic(mandelstam_s);
+}
+
 }  // namespace Smash

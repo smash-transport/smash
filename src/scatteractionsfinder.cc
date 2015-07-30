@@ -22,6 +22,7 @@
 #include "include/scatteractionbaryonbaryon.h"
 #include "include/scatteractionbaryonmeson.h"
 #include "include/scatteractionmesonmeson.h"
+#include "include/scatteractionnucleonkaon.h"
 #include "include/scatteractionnucleonnucleon.h"
 
 namespace Smash {
@@ -53,14 +54,47 @@ ScatterActionsFinder::ScatterActionsFinder(
     : elastic_parameter_(elastic_parameter),
       testparticles_(testparticles) {}
 
+double ScatterActionsFinder::collision_time(const ParticleData &p1,
+                                            const ParticleData &p2) {
+  const auto &log = logger<LogArea::FindScatter>();
+  /** UrQMD collision time
+   * \iref{Hirano:2012yy} (5.15): in computational frame
+   * position of particle a: x_a
+   * position of particle b: x_b
+   * momentum of particle a: p_a
+   * momentum of particle b: p_b
+   * t_{coll} = - (x_a - x_b) . (p_a - p_b) / (p_a - p_b)^2
+   */
+  ThreeVector pos_diff = p1.position().threevec() - p2.position().threevec();
+  ThreeVector velo_diff = p1.velocity() - p2.velocity();
+  double vsqr = velo_diff.sqr();
+  log.trace(source_location, "\n"
+            "Scatter ", p1, "\n"
+            "    <-> ", p2, "\n"
+            "=> position difference: ", pos_diff, " [fm]",
+            ", velocity difference: ", velo_diff, " [GeV]");
+  /* Zero momentum leads to infite distance, particles are not approaching. */
+  if (vsqr < really_small) {
+    return -1.0;
+  } else {
+    return -pos_diff * velo_diff / vsqr;
+  }
+}
+
+static inline bool is_kaon(const PdgCode &pdg) {
+    const auto code = std::abs(pdg.code());
+    return (code == 0x321) || (code == 0x311);
+}
+
 ScatterActionPtr ScatterActionsFinder::construct_scatter_action(
                                             const ParticleData &data_a,
                                             const ParticleData &data_b,
                                             float time_until_collision) const {
+  const auto &pdg_a = data_a.pdgcode();
+  const auto &pdg_b = data_b.pdgcode();
   ScatterActionPtr act;
   if (data_a.is_baryon() && data_b.is_baryon()) {
-    if (data_a.pdgcode().iso_multiplet() == 0x1112 &&
-        data_b.pdgcode().iso_multiplet() == 0x1112) {
+    if (pdg_a.iso_multiplet() == 0x1112 && pdg_b.iso_multiplet() == 0x1112) {
       act = make_unique<ScatterActionNucleonNucleon>(data_a, data_b,
                                               time_until_collision, isotropic_);
     } else {
@@ -68,11 +102,17 @@ ScatterActionPtr ScatterActionsFinder::construct_scatter_action(
                                               time_until_collision, isotropic_);
     }
   } else if (data_a.is_baryon() || data_b.is_baryon()) {
-    act = make_unique<ScatterActionBaryonMeson>(data_a, data_b,
-                                              time_until_collision, isotropic_);
+    if ((pdg_a.iso_multiplet() == 0x1112 && is_kaon(pdg_b)) ||
+        (pdg_b.iso_multiplet() == 0x1112 && is_kaon(pdg_a))) {
+      act = make_unique<ScatterActionNucleonKaon>(data_a, data_b,
+                                                  time_until_collision, isotropic_);
+    } else {
+      act = make_unique<ScatterActionBaryonMeson>(data_a, data_b,
+                                                  time_until_collision, isotropic_);
+    }
   } else {
     act = make_unique<ScatterActionMesonMeson>(data_a, data_b,
-                                              time_until_collision, isotropic_);
+                                               time_until_collision, isotropic_);
   }
   return std::move(act);
 }
