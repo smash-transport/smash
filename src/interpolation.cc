@@ -3,8 +3,7 @@
 #include <iostream>
 
 InterpolateDataSpline::InterpolateDataSpline(const std::vector<double>& x,
-                                             const std::vector<double>& y)
-    : first_x_(x.front()), last_x_(x.back()), first_y_(y.front()), last_y_(y.back()) {
+                                             const std::vector<double>& y) {
     const auto N = x.size();
     if (y.size() != N) {
       throw std::runtime_error("Need two vectors of equal length for interpolation.");
@@ -12,9 +11,25 @@ InterpolateDataSpline::InterpolateDataSpline(const std::vector<double>& x,
     if (N < 3) {
       throw std::runtime_error("Need at least 3 data points for cubic spline interpolation.");
     }
+    const auto p = generate_sort_permutation(
+        x, [&](double const& a, double const& b) {
+          #pragma GCC diagnostic push
+          #pragma GCC diagnostic ignored "-Wfloat-equal"
+          if (a == b) {
+          #pragma GCC diagnostic pop
+            throw std::runtime_error("InterpolateDataSpline: Each x value must be unique.");
+          }
+          return a < b;
+        });
+    const std::vector<double> sorted_x = std::move(apply_permutation(x, p));
+    const std::vector<double> sorted_y = std::move(apply_permutation(y, p));
+    first_x_ = sorted_x.front();
+    last_x_ = sorted_x.back();
+    first_y_ = sorted_y.front();
+    last_y_ = sorted_y.back();
     acc_ = gsl_interp_accel_alloc();
     spline_ = gsl_spline_alloc(gsl_interp_cspline, N);
-    gsl_spline_init(spline_, &(*x.begin()), &(*y.begin()), N);
+    gsl_spline_init(spline_, &(*sorted_x.begin()), &(*sorted_y.begin()), N);
 }
 
 InterpolateDataSpline::~InterpolateDataSpline() {

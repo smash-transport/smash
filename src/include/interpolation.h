@@ -99,13 +99,21 @@ InterpolateDataLinear<T>::InterpolateDataLinear(const std::vector<T>& x,
   assert(x.size() == y.size());
   const size_t n = x.size();
   const auto p = generate_sort_permutation(
-      x, [&](T const& a, T const& b) { return a < b; });
+      x, [&](T const& a, T const& b) {
+        #pragma GCC diagnostic push
+        #pragma GCC diagnostic ignored "-Wfloat-equal"
+        if (a == b) {
+        #pragma GCC diagnostic pop
+          throw std::runtime_error("InterpolateDataLinear: Each x value must be unique.");
+        }
+        return a < b;
+      });
   x_ = std::move(apply_permutation(x, p));
   std::vector<T> y_sorted = std::move(apply_permutation(y, p));
   f_.reserve(n - 1);
   for (size_t i = 0; i < n - 1; i++) {
     f_.emplace_back(
-        InterpolateLinear<T>(x[i], y_sorted[i], x[i + 1], y_sorted[i + 1]));
+        InterpolateLinear<T>(x_[i], y_sorted[i], x_[i + 1], y_sorted[i + 1]));
   }
 }
 
@@ -160,10 +168,10 @@ class InterpolateDataSpline {
   ~InterpolateDataSpline();
   double operator()(double x) const;
  private:
-  const double first_x_;
-  const double last_x_;
-  const double first_y_;
-  const double last_y_;
+  double first_x_;
+  double last_x_;
+  double first_y_;
+  double last_y_;
   gsl_interp_accel* acc_;
   gsl_spline* spline_;
 };
