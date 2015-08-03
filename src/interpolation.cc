@@ -1,6 +1,7 @@
 #include "include/interpolation.h"
 
 #include <iostream>
+#include <sstream>
 
 InterpolateDataSpline::InterpolateDataSpline(const std::vector<double>& x,
                                              const std::vector<double>& y) {
@@ -13,16 +14,21 @@ InterpolateDataSpline::InterpolateDataSpline(const std::vector<double>& x,
     }
     const auto p = generate_sort_permutation(
         x, [&](double const& a, double const& b) {
-          #pragma GCC diagnostic push
-          #pragma GCC diagnostic ignored "-Wfloat-equal"
-          if (a == b) {
-          #pragma GCC diagnostic pop
-            throw std::runtime_error("InterpolateDataSpline: Each x value must be unique.");
-          }
           return a < b;
         });
     const std::vector<double> sorted_x = std::move(apply_permutation(x, p));
     const std::vector<double> sorted_y = std::move(apply_permutation(y, p));
+    for (size_t i = 0; i < sorted_x.size() - 1; i++) {
+        #pragma GCC diagnostic push
+        #pragma GCC diagnostic ignored "-Wfloat-equal"
+        if (sorted_x[i] == sorted_x[i + 1]) {
+        #pragma GCC diagnostic pop
+          std::stringstream error_msg;
+          error_msg << "InterpolateDataSpline: Each x value must be unique. \""
+                    << sorted_x[i] << "\" was found twice.";
+          throw std::runtime_error(error_msg.str());
+        }
+    }
     first_x_ = sorted_x.front();
     last_x_ = sorted_x.back();
     first_y_ = sorted_y.front();
