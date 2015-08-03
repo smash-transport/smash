@@ -40,6 +40,11 @@ constexpr float nuclear_density = 0.168;
  */
 constexpr float nucleon_mass = 0.938;
 /**
+ * kaon mass in GeV
+ */
+constexpr float kaon_mass = 0.496;
+
+/**
  * Fine-struture constant, approximately 1/137
  */
 constexpr double alpha = 7.2973525698e-3;

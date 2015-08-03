@@ -9,6 +9,7 @@
 #define SRC_INCLUDE_KINEMATICS_H_
 
 #include <array>
+#include <sstream>
 
 #include "constants.h"
 
@@ -122,13 +123,52 @@ std::array<T, 2> get_t_range(const T srts, const T m1, const T m2,
 }
 
 
-/** Convert mandelstam-s to p_lab in a nucleon-nucleon collision.
+/** Convert mandelstam-s to p_lab in a fixed-target collision.
+ * This assumes both particles have the given mass.
  *
  * \fpPrecision Why \c double?
  */
-inline double plab_from_s_NN(double s_NN) {
-  const double tmp = s_NN * (s_NN - 4 * nucleon_mass * nucleon_mass);
-  return std::sqrt(tmp) / (2 * nucleon_mass);
+inline double plab_from_s(double mandelstam_s, double mass) {
+  const double radicand = mandelstam_s * (mandelstam_s - 4 * mass * mass);
+#ifndef NDEBUG
+  if (radicand < 0) {
+      std::stringstream err;
+      err << "plab_from_s: negative radicand: " << mandelstam_s;
+      throw std::runtime_error(err.str());
+  };
+#endif
+  return std::sqrt(radicand) / (2 * mass);
+}
+/** Convert mandelstam-s to p_lab in a fixed-target collision.
+ * This assumes both particles have the mass of a nucleon.
+ *
+ * \fpPrecision Why \c double?
+ */
+inline double plab_from_s(double mandelstam_s) {
+  return plab_from_s(mandelstam_s, nucleon_mass);
+}
+/** Convert mandelstam-s to p_lab in a fixed-target collision.
+ * The mass of the projectile and the mass of the target have to be given.
+ *
+ * \fpPrecision Why \c double?
+ */
+inline double plab_from_s(double mandelstam_s,
+                          double m_projectile, double m_target) {
+  const auto &m_a = m_projectile;
+  const auto &m_b = m_target;
+  const double m_a_sq = m_a * m_a;
+  const double m_b_sq = m_b * m_b;
+  const double radicand
+      = (mandelstam_s - m_a_sq - m_b_sq) * (mandelstam_s - m_a_sq - m_b_sq)
+        - 4 * m_a_sq * m_b_sq;
+#ifndef NDEBUG
+  if (radicand < 0) {
+      std::stringstream err;
+      err << "plab_from_s: negative radicand: " << mandelstam_s;
+      throw std::runtime_error(err.str());
+  };
+#endif
+  return std::sqrt(radicand) / (2 * m_b);
 }
 
 

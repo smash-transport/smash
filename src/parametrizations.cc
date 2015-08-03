@@ -23,7 +23,7 @@ namespace Smash {
 /** pp elastic cross section parametrization.
  * Source: \iref{Weil:2013mya}, eq. (44) */
 float pp_elastic(double mandelstam_s) {
-  double p_lab = plab_from_s_NN(mandelstam_s);
+  double p_lab = plab_from_s(mandelstam_s);
   if (p_lab < 0.435) {
     return 5.12 * nucleon_mass
         / (mandelstam_s - 4 * nucleon_mass * nucleon_mass) + 1.67;
@@ -47,7 +47,7 @@ float pp_elastic(double mandelstam_s) {
  * highest-p: \iref{Buss:2011mx}
  */
 float pp_total(double mandelstam_s) {
-  double p_lab = plab_from_s_NN(mandelstam_s);
+  double p_lab = plab_from_s(mandelstam_s);
   if (p_lab < 0.4) {
     return 34 * std::pow(p_lab / 0.4, -2.104);
   } else if (p_lab < 0.8) {
@@ -66,7 +66,7 @@ float pp_total(double mandelstam_s) {
 /** np elastic cross section parametrization.
  * Source: \iref{Weil:2013mya}, eq. (45) */
 float np_elastic(double mandelstam_s) {
-  double p_lab = plab_from_s_NN(mandelstam_s);
+  double p_lab = plab_from_s(mandelstam_s);
   if (p_lab < 0.525) {
     return 17.05 * nucleon_mass
         / (mandelstam_s - 4 * nucleon_mass * nucleon_mass) - 6.83;
@@ -89,7 +89,7 @@ float np_elastic(double mandelstam_s) {
  * highest-p: \iref{Buss:2011mx}
  */
 float np_total(double mandelstam_s) {
-  double p_lab = plab_from_s_NN(mandelstam_s);
+  double p_lab = plab_from_s(mandelstam_s);
   const auto logp = std::log(p_lab);
   if (p_lab < 0.4) {
     return 6.3555 * std::pow(p_lab, -3.2481) * std::exp(-0.377 * logp * logp);
@@ -107,7 +107,7 @@ float np_total(double mandelstam_s) {
 /** ppbar elastic cross section parametrization.
  * Source: \iref{Bass:1998ca} */
 float ppbar_elastic(double mandelstam_s) {
-  double p_lab = plab_from_s_NN(mandelstam_s);
+  double p_lab = plab_from_s(mandelstam_s);
   if (p_lab < 0.3) {
     return 78.6;
   } else if (p_lab < 5.0) {
@@ -122,7 +122,7 @@ float ppbar_elastic(double mandelstam_s) {
 /** ppbar total cross section parametrization.
  * Source: \iref{Bass:1998ca} */
 float ppbar_total(double mandelstam_s) {
-  double p_lab = plab_from_s_NN(mandelstam_s);
+  double p_lab = plab_from_s(mandelstam_s);
   if (p_lab < 0.3) {
     return 271.6 * std::exp(-1.1 * p_lab * p_lab);
   } else if (p_lab < 5.0) {
@@ -144,7 +144,7 @@ float kplusp_elastic(double mandelstam_s) {
   constexpr double a3 = -0.764;  // GeV^-1
   constexpr double a4 = 0.508;  // GeV^-2
 
-  const double p_lab = plab_from_s_NN(mandelstam_s);
+  const double p_lab = plab_from_s(mandelstam_s, kaon_mass);
   const double p_lab2 = p_lab*p_lab;
 
   return (a0 + a1*p_lab + a2*p_lab2) / (1 + a3*p_lab + a4*p_lab2);
@@ -249,7 +249,7 @@ float kminusp_elastic_pdg(double mandelstam_s) {
         std::tie(dedup_x, dedup_y) = dedup_avg(x, y);
         kminusp_elastic_interpolation = make_unique<InterpolateDataSpline>(dedup_x, dedup_y);
     }
-    const double p_lab = plab_from_s_NN(mandelstam_s);
+    const double p_lab = plab_from_s(mandelstam_s, kaon_mass);
     return (*kminusp_elastic_interpolation)(p_lab);
 }
 
@@ -263,7 +263,7 @@ float kminusp_elastic(double mandelstam_s) {
     constexpr double a1 = 0.35;  // Gev
     constexpr int a2 = 2;
 
-    const double p_lab = plab_from_s_NN(mandelstam_s);
+    const double p_lab = plab_from_s(mandelstam_s, kaon_mass);
     const double p_i = p_lab;
     const double p_f = p_lab;
 

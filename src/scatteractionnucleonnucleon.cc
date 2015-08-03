@@ -97,7 +97,7 @@ void ScatterActionNucleonNucleon::elastic_scattering() {
   } else {
     /** Choose angular distribution according to Cugnon parametrization,
      * see \iref{Cugnon:1996kh}. */
-    double bb, a, plab = plab_from_s_NN(mandelstam_s());
+    double bb, a, plab = plab_from_s(mandelstam_s());
     if (incoming_particles_[0].type().charge() +
         incoming_particles_[1].type().charge() == 1) {
       // pn
@@ -297,7 +297,7 @@ void ScatterActionNucleonNucleon::sample_cms_momenta() {
     /** NN->NDelta: Sample scattering angles in center-of-mass frame from an
      * anisotropic angular distribution, using the same distribution as for
      * elastic pp scattering, as suggested in \iref{Cugnon:1996kh}. */
-    double plab = plab_from_s_NN(mandelstam_s());
+    double plab = plab_from_s(mandelstam_s());
     double bb = std::max(Cugnon_bpp(plab), really_small);
     double t = Random::expo(bb, t_range[0], t_range[1]);
     if (Random::canonical() > 0.5) {
