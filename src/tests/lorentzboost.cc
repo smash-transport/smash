@@ -80,7 +80,7 @@ TEST(back_and_forth) {
   // We need to use a lower accuracy here, otherwise the tolerated absolute
   // error would get much smaller than 1e-16, which does not make sense for
   // doubles.
-  constexpr double my_accuracy = 1e-7;
+  constexpr double my_accuracy = 1e-6;
   for(int i = 0; i < 1000; i++) {
     ThreeVector velocity = random_velocity();
     for(int j = 0; j < 1000; j++) {
