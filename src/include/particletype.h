@@ -34,6 +34,14 @@ namespace Smash {
 class ParticleType {
  public:
   /**
+   * Decay width cutoff for considering a particle as stable.
+   *
+   * We currently regard a particle type as stable if its on-shell width is less
+   * than 10 keV.
+   */
+  static constexpr float width_cutoff_onshell = 1e-5f;
+
+  /**
    * Creates a fully initialized ParticleType object.
    *
    * \param n The name of the particle.
@@ -103,7 +111,7 @@ class ParticleType {
 
   /// Check if the particle is stable
   inline bool is_stable() const {
-    return width_is_stable(width_);
+    return width_ < width_cutoff_onshell;
   };
 
   /**
@@ -305,8 +313,6 @@ class ParticleType {
   friend std::ostream &operator<<(std::ostream &out, const ParticleType &type);
 
   static inline bool width_is_stable(float width) {
-    /* We currently regard a particle type as stable if its on-shell width is
-     * less than 10 keV. */
     return width < 1E-5f;
   }
 
