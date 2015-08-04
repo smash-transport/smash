@@ -9,6 +9,7 @@
 #define SRC_INCLUDE_AVERAGE_H_
 
 #include <cstdint>
+#include <sstream>
 #include <stdexcept>
 #include <utility>
 #include <vector>
@@ -52,7 +53,10 @@ template <typename T>
 std::pair<std::vector<T>, std::vector<T>> dedup_avg(
         const std::vector<T>& x, const std::vector<T>& y) {
     if (x.size() != y.size()) {
-        throw std::runtime_error("x and y have to be of same size.");
+        std::stringstream ss;
+        ss << "x and y have to be of same size: "
+           << x.size() << " != " << y.size();
+        throw std::runtime_error(ss.str());
     }
     if (x.size() < 1) {
         throw std::runtime_error("x cannot be empty.");
