@@ -8,6 +8,7 @@
 #ifndef SRC_INCLUDE_AVERAGE_H_
 #define SRC_INCLUDE_AVERAGE_H_
 
+#include <cassert>
 #include <cstdint>
 #include <sstream>
 #include <stdexcept>
@@ -74,10 +75,11 @@ std::pair<std::vector<T>, std::vector<T>> dedup_avg(
         #pragma GCC diagnostic pop
             avg.add(y[i]);
         } else {
+            assert(i != 0);
             new_x.push_back(x[i - 1]);
             new_y.push_back(avg.average());
             avg.clear();
-            avg.add(x[i]);
+            avg.add(y[i]);
             prev_x = x[i];
         }
     }
