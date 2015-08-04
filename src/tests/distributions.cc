@@ -43,8 +43,10 @@ TEST(maxwell) {
     for (int t_i = 10; t_i < 1000; ++t_i) {
       const double temperature = t_i * 0.001;
       const double ratio = energy / temperature;
-      // avoid underflows in the exponential
-      if (ratio > 700) {
+      // Avoid underflows in the exponential
+      // (the estimate of maxratio does not work without the -1).
+      const double maxratio = std::log(std::numeric_limits<double>::max()) - 1;
+      if (ratio > maxratio) {
         continue;
       };
       COMPARE_ABSOLUTE_ERROR(density_integrand(energy, energy*energy, temperature),
