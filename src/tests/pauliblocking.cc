@@ -34,7 +34,7 @@ TEST(init_particle_types) {
    for a particular simple case: one particle in the phase-space sphere.
 */
 TEST(phase_space_density) {
-  Configuration conf(TEST_CONFIG_PATH);
+  Configuration conf = Test::configuration();
   conf["Collision_Term"]["Pauli_Blocking"]["Spatial_Averaging_Radius"] = 1.86;
   conf["Collision_Term"]["Pauli_Blocking"]["Momentum_Averaging_Radius"] = 0.08;
   conf["Collision_Term"]["Pauli_Blocking"]["Gaussian_Cutoff"] = 2.2;
@@ -84,7 +84,7 @@ TEST(phase_space_density) {
 }*/
 
 TEST(phase_space_density_nucleus) {
-  Configuration conf(TEST_CONFIG_PATH);
+  Configuration conf = Test::configuration();
   conf["Collision_Term"]["Pauli_Blocking"]["Spatial_Averaging_Radius"] = 1.86;
   conf["Collision_Term"]["Pauli_Blocking"]["Momentum_Averaging_Radius"] = 0.08;
   conf["Collision_Term"]["Pauli_Blocking"]["Gaussian_Cutoff"] = 2.2;
