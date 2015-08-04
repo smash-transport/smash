@@ -125,24 +125,26 @@ configure_file (
 )
 
 # directly copy config files to build directory
-configure_file(config.yaml ${PROJECT_BINARY_DIR}/config.yaml COPYONLY)
+configure_file(${CMAKE_SOURCE_DIR}/input/config.yaml
+               ${PROJECT_BINARY_DIR}/config.yaml
+               COPYONLY)
 set(generated_headers)
 macro(copy_at_make)
    foreach(filename ${ARGN})
       configure_file(
-         ${CMAKE_CURRENT_SOURCE_DIR}/${filename}
+         ${CMAKE_SOURCE_DIR}/input/${filename}
          ${PROJECT_BINARY_DIR}/${filename}
          COPYONLY)
       list(APPEND generated_headers "${CMAKE_CURRENT_BINARY_DIR}/${filename}.h")
       add_custom_command(
          OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${filename}.h
          COMMAND ${CMAKE_COMMAND}
-         -D INPUT_FILE=${CMAKE_CURRENT_SOURCE_DIR}/${filename}
+         -D INPUT_FILE=${CMAKE_SOURCE_DIR}/input/${filename}
          -D OUTPUT_FILE=${CMAKE_CURRENT_BINARY_DIR}/${filename}.h
          -D NAME=data
          -P ${PROJECT_SOURCE_DIR}/cmake/copy_file_contents_to_string.cmake
-         DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${filename}
-         COMMENT "Convert ${CMAKE_CURRENT_SOURCE_DIR}/${filename} to ${CMAKE_CURRENT_BINARY_DIR}/${filename}.h"
+         DEPENDS ${CMAKE_SOURCE_DIR}/input/${filename}
+         COMMENT "Convert ${CMAKE_SOURCE_DIR}/input/${filename} to ${CMAKE_CURRENT_BINARY_DIR}/${filename}.h"
          VERBATIM)
       add_custom_target(copy_${filename} ALL DEPENDS
          ${CMAKE_CURRENT_BINARY_DIR}/${filename}.h)
