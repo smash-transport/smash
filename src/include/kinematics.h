@@ -131,6 +131,13 @@ std::array<T, 2> get_t_range(const T srts, const T m1, const T m2,
 inline double plab_from_s(double mandelstam_s, double mass) {
   const double radicand = mandelstam_s * (mandelstam_s - 4 * mass * mass);
 #ifndef NDEBUG
+  const double m_sum = 2*mass;
+  if (mandelstam_s < m_sum*m_sum) {
+      std::stringstream err;
+      err << "plab_from_s: s too small: "
+          << mandelstam_s << " < " << m_sum*m_sum;
+      throw std::runtime_error(err.str());
+  }
   if (radicand < 0) {
       std::stringstream err;
       err << "plab_from_s: negative radicand: " << mandelstam_s;
@@ -154,21 +161,29 @@ inline double plab_from_s(double mandelstam_s) {
  */
 inline double plab_from_s(double mandelstam_s,
                           double m_projectile, double m_target) {
-  const auto &m_a = m_projectile;
-  const auto &m_b = m_target;
-  const double m_a_sq = m_a * m_a;
-  const double m_b_sq = m_b * m_b;
+  const double m_sum = m_projectile + m_target;
+  const double m_diff = m_projectile - m_target;
+  const double radicand
+      = (mandelstam_s - m_sum*m_sum) * (mandelstam_s - m_diff*m_diff);
+  /* This is equivalent to:
   const double radicand
       = (mandelstam_s - m_a_sq - m_b_sq) * (mandelstam_s - m_a_sq - m_b_sq)
         - 4 * m_a_sq * m_b_sq;
+  */
 #ifndef NDEBUG
+  if (mandelstam_s < m_sum*m_sum) {
+      std::stringstream err;
+      err << "plab_from_s: s too small: "
+          << mandelstam_s << " < " << m_sum*m_sum;
+      throw std::runtime_error(err.str());
+  }
   if (radicand < 0) {
       std::stringstream err;
-      err << "plab_from_s: negative radicand: " << mandelstam_s;
+      err << "plab_from_s: negative radicand: " << radicand;
       throw std::runtime_error(err.str());
-  };
+  }
 #endif
-  return std::sqrt(radicand) / (2 * m_b);
+  return std::sqrt(radicand) / (2 * m_target);
 }
 
 

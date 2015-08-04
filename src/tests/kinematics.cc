@@ -9,6 +9,7 @@
 #include "unittest.h"
 
 #include "../include/kinematics.h"
+#include "../include/constants.h"
 
 using namespace Smash;
 
@@ -47,14 +48,22 @@ TEST(pCM) {
   COMPARE(pCM_from_s(srts*srts, ma, mb), pcm);
 }
 
-TEST(plab_from_sNN) {
+TEST(plab_from_s_NN) {
   const double s = 2.9*2.9;
   const double mN = 0.938;
-  const double plab = plab_from_s_NN(s);
+  const double plab = plab_from_s(s);
   const double E = std::sqrt(plab*plab + mN*mN) + mN;
   // Requiring more precision makes test fail
   COMPARE_RELATIVE_ERROR(s, E*E - plab*plab, 1.e-7);
   COMPARE_RELATIVE_ERROR(s, s_from_plab(plab, mN, mN), 1.e-7);
+}
+
+TEST(plab_from_s_KN) {
+  // At this value plab should vanish, but the function is very steep there.
+  const double s = (kaon_mass + nucleon_mass) * (kaon_mass + nucleon_mass);
+  // We add a small constant to avoid numerical issue with the assert.
+  COMPARE_ABSOLUTE_ERROR(plab_from_s(s + 1e-7, kaon_mass, nucleon_mass), 0.0, 1e-4);
+  //std::cout << plab_from_s(1.7, kaon_mass, nucleon_mass) << std::endl;
 }
 
 TEST(s_from_Ekin) {
