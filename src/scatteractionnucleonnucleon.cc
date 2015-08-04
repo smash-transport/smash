@@ -39,9 +39,11 @@ float ScatterActionNucleonNucleon::elastic_parametrization() {
     return sig_el;
   } else {
     std::stringstream ss;
-    ss << "problem in CrossSections::elastic: " << pdg_a.string().c_str()
-      << " " << pdg_b.string().c_str() << " " << pdg_a.spin() << " "
-      << pdg_b.spin() << " " << sig_el << " " << s;
+    const auto name_a = incoming_particles_[0].type().name();
+    const auto name_b = incoming_particles_[1].type().name();
+    ss << "problem in CrossSections::elastic: a=" << name_a
+       << " b=" << name_b << " j_a=" << pdg_a.spin() << " j_b="
+       << pdg_b.spin() << " sigma=" << sig_el << " s=" << s;
     throw std::runtime_error(ss.str());
   }
 }
