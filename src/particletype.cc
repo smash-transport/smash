@@ -235,7 +235,7 @@ float ParticleType::total_width(const float m) const {
   for (unsigned int i = 0; i < modes.size(); i++) {
     w = w + partial_width(m, modes[i].get());
   }
-  if (w < width_cutoff_onshell) {
+  if (w < width_cutoff) {
     return 0.;
   }
   return w;

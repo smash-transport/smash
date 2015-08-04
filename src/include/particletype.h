@@ -39,7 +39,7 @@ class ParticleType {
    * We currently regard a particle type as stable if its on-shell width is less
    * than 10 keV.
    */
-  static constexpr float width_cutoff_onshell = 1e-5f;
+  static constexpr float width_cutoff = 1e-5f;
 
   /**
    * Creates a fully initialized ParticleType object.
@@ -111,7 +111,7 @@ class ParticleType {
 
   /// Check if the particle is stable
   inline bool is_stable() const {
-    return width_ < width_cutoff_onshell;
+    return width_ < width_cutoff;
   };
 
   /**
@@ -311,11 +311,6 @@ class ParticleType {
    * Writes all information about the particle type to the output stream.
    */
   friend std::ostream &operator<<(std::ostream &out, const ParticleType &type);
-
-  static inline bool width_is_stable(float width) {
-    return width < 1E-5f;
-  }
-
 };
 
 /**
