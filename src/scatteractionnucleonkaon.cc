@@ -14,22 +14,12 @@
 
 namespace Smash {
 
-static inline bool is_kaon(const PdgCode &pdg) {
-    const auto code = std::abs(pdg.code());
-    return (code == 0x321) || (code == 0x311);
-}
-
-static inline bool is_nucleon(const PdgCode &pdg) {
-    const auto code = std::abs(pdg.code());
-    return (code == 0x2212) || (code == 0x2112);
-}
-
 CollisionBranchPtr ScatterActionNucleonKaon::elastic_cross_section(float) {
   const PdgCode &pdg_a = incoming_particles_[0].type().pdgcode();
   const PdgCode &pdg_b = incoming_particles_[1].type().pdgcode();
 
-  const PdgCode &nucleon = is_nucleon(pdg_a) ? pdg_a : pdg_b;
-  const PdgCode &kaon = is_kaon(pdg_a) ? pdg_a : pdg_b;
+  const PdgCode &nucleon = pdg_a.is_nucleon() ? pdg_a : pdg_b;
+  const PdgCode &kaon = pdg_a.is_nucleon() ? pdg_a : pdg_b;
   assert(kaon != nucleon);
 
   const double s = mandelstam_s();

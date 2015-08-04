@@ -81,11 +81,6 @@ double ScatterActionsFinder::collision_time(const ParticleData &p1,
   }
 }
 
-static inline bool is_kaon(const PdgCode &pdg) {
-    const auto code = std::abs(pdg.code());
-    return (code == 0x321) || (code == 0x311);
-}
-
 ScatterActionPtr ScatterActionsFinder::construct_scatter_action(
                                             const ParticleData &data_a,
                                             const ParticleData &data_b,
@@ -94,7 +89,7 @@ ScatterActionPtr ScatterActionsFinder::construct_scatter_action(
   const auto &pdg_b = data_b.pdgcode();
   ScatterActionPtr act;
   if (data_a.is_baryon() && data_b.is_baryon()) {
-    if (pdg_a.iso_multiplet() == 0x1112 && pdg_b.iso_multiplet() == 0x1112) {
+    if (pdg_a.is_nucleon() && pdg_b.is_nucleon()) {
       act = make_unique<ScatterActionNucleonNucleon>(data_a, data_b,
                                               time_until_collision, isotropic_);
     } else {
@@ -102,8 +97,8 @@ ScatterActionPtr ScatterActionsFinder::construct_scatter_action(
                                               time_until_collision, isotropic_);
     }
   } else if (data_a.is_baryon() || data_b.is_baryon()) {
-    if ((pdg_a.iso_multiplet() == 0x1112 && is_kaon(pdg_b)) ||
-        (pdg_b.iso_multiplet() == 0x1112 && is_kaon(pdg_a))) {
+    if ((pdg_a.is_nucleon() && pdg_b.is_kaon()) ||
+        (pdg_b.is_nucleon() && pdg_a.is_kaon())) {
       act = make_unique<ScatterActionNucleonKaon>(data_a, data_b,
                                                   time_until_collision, isotropic_);
     } else {

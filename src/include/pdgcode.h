@@ -260,15 +260,65 @@ class PdgCode {
     return antiparticle_sign();
   }
   /// Returns whether this PDG code identifies a baryon.
-  bool is_baryon() const { return is_hadron() && digits_.n_q1_ != 0; }
+  inline bool is_baryon() const { return is_hadron() && digits_.n_q1_ != 0; }
+
+  /// Is this a nucleon (p, n)?
+  inline bool is_nucleon() const {
+      const auto code = multiplet();
+      return (code == 0x2212) || (code == 0x2112);
+  }
+  /// Is this a kaon (K+, K-, K0, Kbar0)?
+  inline bool is_kaon() const {
+      const auto code = multiplet();
+      return (code == 0x321) || (code == 0x311);
+  }
   /// Is this a nucleon resonance (N*)?
-  bool is_Nstar() const;
+  inline bool is_Nstar() const {
+      std::int32_t multi = multiplet();
+      if (multi == 0x10102 ||
+          multi == 0x10122 ||
+          multi == 0x10202 ||
+          multi == 0x10212 ||
+          multi == 0x10104 ||
+          multi == 0x10114 ||
+          multi == 0x10204 ||
+          multi == 0x10214 ||
+          multi == 0x10106 ||
+          multi == 0x10206) {
+        return true;
+      } else {
+        return false;
+      }
+  }
   /// Is this a Delta resonance (Delta*)?
-  bool is_Deltastar() const;
+  inline bool is_Deltastar() const {
+      std::int32_t multi = multiplet();
+      if (multi == 0x10112 ||
+          multi == 0x10222 ||
+          multi == 0x10124 ||
+          multi == 0x10224 ||
+          multi == 0x10216 ||
+          multi == 0x10208) {
+        return true;
+      } else {
+        return false;
+      }
+  }
   /// Is this a pion (pi+/pi0/pi-)?
-  bool is_pion() const;
+  inline bool is_pion() const {
+      const auto c = code();
+      return (c == 0x111)    // pi0
+          || (c == 0x211)    // pi+
+          || (c == -0x211);  // pi-
+  }
   /// Is this a rho meson (rho+/rho0/rho-)?
-  bool is_rho() const;
+  inline bool is_rho() const {
+    const auto c = code();
+    return (c == 0x113)    // rho0
+        || (c == 0x213)    // rho+
+        || (c == -0x213);  // rho-
+
+  }
 
   /** Determine whether a particle has a distinct antiparticle
     * (or whether it is its own antiparticle). */
