@@ -248,6 +248,18 @@ float kminusp_elastic_pdg(double mandelstam_s) {
         std::vector<double> dedup_y;
         std::tie(dedup_x, dedup_y) = dedup_avg(x, y);
         kminusp_elastic_interpolation = make_unique<InterpolateDataSpline>(dedup_x, dedup_y);
+        /*
+        // Output interpolation for plotting.
+        constexpr int N = 10000;
+        const double x_min = 0.1;
+        const double x_max = 100;
+        std::cout << "\n-------------------\n";
+        for (int i = 0; i < N; i++) {
+            const double xi = x_min + (x_max - x_min) * (i / static_cast<double>(N));
+            std::cout << xi << " " << (*kminusp_elastic_interpolation)(xi) << "\n";
+        }
+        std::cout << "-------------------" << std::endl;
+        */
     }
     const double p_lab = plab_from_s(mandelstam_s, kaon_mass);
     return (*kminusp_elastic_interpolation)(p_lab);
@@ -270,7 +282,9 @@ float kminusp_elastic(double mandelstam_s) {
     const double ratio = a1*a1 / (a1*a1 + p_f*p_f);
     return a0 * p_f / (p_i * mandelstam_s) * std::pow(ratio, a2);
   } else {
-    return kminusp_elastic_pdg(mandelstam_s);
+    const double sigma = kminusp_elastic_pdg(mandelstam_s);
+    assert(sigma >= 0);
+    return sigma;
   }
 }
 
