@@ -16,28 +16,14 @@ namespace Smash {
 
 float density_factor(const PdgCode pdg, DensityType dens_type) {
   switch (dens_type) {
-    case DensityType::particle:
-      return 1.f;
+    case DensityType::hadron:
+      return pdg.is_hadron() ? 1.f : 0.f;
     case DensityType::baryon:
       return static_cast<float>(pdg.baryon_number());
     case DensityType::baryonic_isospin:
-      if (pdg.is_baryon()) {
-        return pdg.isospin3_rel();
-      } else {
-        return 0.f;
-      }
+      return pdg.is_baryon() ? pdg.isospin3_rel() : 0.f;
     case DensityType::pion:
-      {
-        const auto pdg_code = pdg.code();
-        if (pdg_code == 0x111      // pi0
-            || pdg_code == 0x211   // pi+
-            || pdg_code == -0x211  // pi-
-          ) {
-          return 1.f;
-        } else {
-          return 0.f;
-        }
-      }
+      return pdg.is_pion() ? 1.f : 0.f;
     default:
       return 0.f;
   }
@@ -52,14 +38,14 @@ std::pair<double, ThreeVector> unnormalized_smearing_factor(
     // Distance from particle to point of interest > r_cut
     return std::make_pair(0.0, ThreeVector(0.0, 0.0, 0.0));
   }
-  const double m_sqr = p.sqr();
-  if (m_sqr < really_small) {
+  const double m = p.abs();
+  if (m < really_small) {
     const auto &log = logger<LogArea::Density>();
     log.warn("Gaussian smearing is undefined for momentum ", p);
     return std::make_pair(0.0, ThreeVector(0.0, 0.0, 0.0));
   }
 
-  const FourVector u = p / std::sqrt(m_sqr);
+  const FourVector u = p / m;
   const double u_r_scalar = r * u.threevec();
   const double r_rest_sqr = r_sqr + u_r_scalar * u_r_scalar;
 
@@ -202,8 +188,8 @@ void update_density_lattice(DensityLattice* lat,
 
 std::ostream& operator<<(std::ostream& os, DensityType dens_type) {
   switch (dens_type) {
-    case DensityType::particle:
-      os << "particle density";
+    case DensityType::hadron:
+      os << "hadron density";
       break;
     case DensityType::baryon:
       os << "baryon density";

@@ -19,7 +19,7 @@
 
 namespace Smash {
 
-ActionList DecayActionsFinder::find_possible_actions(
+ActionList DecayActionsFinder::find_actions_in_cell(
     const ParticleList &search_list, float dt) const {
   ActionList actions;
   actions.reserve(10);  // for short time steps this seems reasonable to expect
@@ -31,9 +31,16 @@ ActionList DecayActionsFinder::find_possible_actions(
     }
 
     DecayBranchList processes =
-                      p.type().get_partial_widths(p.effective_mass());
+                      p.type().get_partial_widths_hadronic(p.effective_mass());
     // total decay width (mass-dependent)
     const float width = total_weight<DecayBranch>(processes);
+
+    // check if there are any (hadronic) decays
+    if (!(width > 0.0)) {
+      continue;
+    }
+
+    constexpr float one_over_hbarc = 1.f/static_cast<float>(hbarc);
 
     /* Exponential decay. Lifetime tau = 1 / width
      * t / tau = width * t (remember GeV-fm conversion)
@@ -41,16 +48,12 @@ ActionList DecayActionsFinder::find_possible_actions(
      * P(alive after n steps) = (1 - width * Delta_t)^n
      * = (1 - width * Delta_t)^(t / Delta_t)
      * -> exp(-width * t) when Delta_t -> 0
-     *
-     * A uniform distribution is not really correct, but good enough for small
-     * time steps.
      */
-    const float decay_time =
-        Random::canonical<float>() *
-        (static_cast<float>(hbarc) /
-         (p.inverse_gamma()  // The clock goes slower in the rest frame of the
-                             // resonance
-          * width));
+    const float decay_time = Random::exponential<float>(
+        one_over_hbarc *
+        p.inverse_gamma()  // The clock goes slower in the rest frame of the
+                           // resonance
+        * width);
 
     if (decay_time < dt) {
       // => decay_time ∈ [0, dt[

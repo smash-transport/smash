@@ -18,7 +18,8 @@
 namespace Smash {
 
 FourVector EnergyMomentumTensor::landau_frame_4velocity() const {
-  using namespace Eigen;
+  using Eigen::Matrix4d;
+  using Eigen::Vector4d;
   const auto &log = logger<LogArea::Tmn>();
   /* We want to solve the generalized eigenvalue problem
      T^{\mu \nu} h_{nu} = \lambda g^{\mu \nu} h_{nu}, or in the other way
@@ -42,7 +43,7 @@ FourVector EnergyMomentumTensor::landau_frame_4velocity() const {
        -Tmn_[3], -Tmn_[6], -Tmn_[8], -Tmn_[9];
 
   log.debug("Looking for Landau frame for T_{mu}^{nu} ", A);
-  EigenSolver<Matrix4d> es(A);
+  Eigen::EigenSolver<Matrix4d> es(A);
 
   // Eigen values should be strictly real and non-negative.
 
@@ -88,7 +89,7 @@ FourVector EnergyMomentumTensor::landau_frame_4velocity() const {
 }
 
 EnergyMomentumTensor EnergyMomentumTensor::boosted(const FourVector& u) const {
-  using namespace Eigen;
+  using Eigen::Matrix4d;
   Matrix4d A, L, R;
   // Energy-momentum tensor
   A <<  Tmn_[0], Tmn_[1], Tmn_[2], Tmn_[3],
@@ -124,14 +125,13 @@ void EnergyMomentumTensor::add_particle(const FourVector& mom) {
 }
 
 std::ostream &operator<<(std::ostream &out, const EnergyMomentumTensor &Tmn) {
-  using namespace std;
   out.width(12);
   for (size_t mu = 0; mu < 4; mu++) {
     for (size_t nu = 0; nu < 4; nu++) {
-      out << setprecision(3) << setw(12) << fixed <<
+      out << std::setprecision(3) << std::setw(12) << std::fixed <<
              Tmn[EnergyMomentumTensor::tmn_index(mu, nu)];
     }
-    out << endl;
+    out << std::endl;
   }
   return out;
 }

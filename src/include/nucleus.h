@@ -12,6 +12,7 @@
 #include <vector>
 
 #include "configuration.h"
+#include "constants.h"
 #include "forwarddeclarations.h"
 #include "fourvector.h"
 #include "particledata.h"
@@ -193,7 +194,7 @@ class Nucleus {
    **/
   float diffusiveness_ = .545f;
   /// Saturation density of this nucleus.
-  float saturation_density_ = rho0;
+  float saturation_density_ = nuclear_density;
   /// Nuclear radius of this nucleus
   float nuclear_radius_;
   /** single-proton-radius

@@ -34,17 +34,24 @@ TEST(breitwigner) {
 }
 
 TEST(maxwell) {
-  // tests the Maxwell-Boltzmann implementation for energies between 0.05
+  // tests the Maxwell-Boltzmann implementation for energies between 0
   // and 10 GeV and Temperatures between 0.01 and 1 GeV.
   UnitTest::setFuzzyness<double>(2);
   for (int e_i = 0; e_i < 200; ++e_i) {
-    double energy = e_i * 0.05;
-    double fourpie2 = (4.0 * M_PI) * (energy * energy);
+    const double energy = e_i * 0.05;
+    const double fourpie2 = (4.0 * M_PI) * (energy * energy);
     for (int t_i = 10; t_i < 1000; ++t_i) {
-      double temperature = t_i * 0.001;
-      FUZZY_COMPARE(density_integrand(energy, energy, temperature),
-              fourpie2 * exp(-energy / temperature)) << "E = " << energy
-                                                     << ", T = " << temperature;
+      const double temperature = t_i * 0.001;
+      const double ratio = energy / temperature;
+      // Avoid underflows in the exponential
+      // (the estimate of maxratio does not work without the -1).
+      const double maxratio = std::log(std::numeric_limits<double>::max()) - 1;
+      if (ratio > maxratio) {
+        continue;
+      };
+      COMPARE_ABSOLUTE_ERROR(density_integrand(energy, energy*energy, temperature),
+                             fourpie2 * exp(-ratio), 1e-16)
+          << "E = " << energy << ", T = " << temperature;
     }
   }
 }

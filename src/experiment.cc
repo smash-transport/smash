@@ -17,11 +17,14 @@
 #include <vector>
 
 #include "include/action.h"
+#include "include/actions.h"
 #include "include/boxmodus.h"
 #include "include/clock.h"
 #include "include/collidermodus.h"
 #include "include/configuration.h"
 #include "include/cxx14compat.h"
+#include "include/decayactionsfinder.h"
+#include "include/decayactionsfinderdilepton.h"
 #include "include/density.h"
 #include "include/forwarddeclarations.h"
 #include "include/grid.h"
@@ -32,6 +35,7 @@
 #include "include/potentials.h"
 #include "include/propagation.h"
 #include "include/random.h"
+#include "include/scatteractionsfinder.h"
 #include "include/spheremodus.h"
 /* Outputs */
 #include "include/binaryoutputcollisions.h"
@@ -57,10 +61,9 @@ namespace std {
 template <typename T, typename Ratio>
 static ostream &operator<<(ostream &out,
                            const chrono::duration<T, Ratio> &seconds) {
-  using namespace chrono;
-  using Seconds = duration<float>;
-  using Minutes = duration<float, std::ratio<60>>;
-  using Hours = duration<float, std::ratio<60 * 60>>;
+  using Seconds = chrono::duration<float>;
+  using Minutes = chrono::duration<float, std::ratio<60>>;
+  using Hours = chrono::duration<float, std::ratio<60 * 60>>;
   constexpr Minutes threshold_for_minutes{10};
   constexpr Hours threshold_for_hours{3};
   if (seconds < threshold_for_minutes) {
@@ -117,6 +120,13 @@ std::unique_ptr<ExperimentBase> ExperimentBase::create(Configuration config,
                   << "periodic boundaries are not taken into account "
                   << "in the density calculation";
     }
+    if (config.has_value({"General", "Use_Time_Steps"}) &&
+        !config.read({"General", "Use_Time_Steps"})) {
+      log.error() << "Box modus does not work correctly without time steps for "
+                  << "now: periodic boundaries are not taken into account when "
+                  << "looking for interactions.";
+      throw std::invalid_argument("Can't use box modus without time steps!");
+    }
     return ExperimentPointer(new Experiment<BoxModus>(config, output_path));
   } else if (modus_chooser.compare("List") == 0) {
     return ExperimentPointer(new Experiment<ListModus>(config, output_path));
@@ -143,7 +153,7 @@ namespace {
  * \key Gaussian_Sigma (float, optional, default 1.0): \n
  * Width [fm] of gaussians that represent Wigner density of particles.
  *
- * \key Gaussian_Cutoff (float, optional, default 4.0)
+ * \key Gauss_Cutoff_In_Sigma (float, optional, default 4.0)
  * Distance in sigma at which gaussian is considered 0.
  *
  * \page input_output_options_ Output
@@ -152,11 +162,13 @@ namespace {
  * system in Standard Output and other output formats which support this
  * functionality.
  *
- * \key Gaussian_Sigma (float, optional, default 1.0): \n
- * Width [fm] of gaussians that represent Wigner density of particles.
- *
- * \key Gaussian_Cutoff (float, optional, default 4.0)
- * Distance in sigma at which gaussian is considered 0.
+ * \key Density_Type (string, optional, default = "hadron"): \n
+ * Determines which kind of density is written into the collision files.
+ * Possible values:\n
+ * \li "hadron"           - total hadronic density \n
+ * \li "baryon"           - net baryon density \n
+ * \li "baryonic isospin" - baryonic isospin density \n
+ * \li "pion"             - pion density
  */
 /** Gathers all general Experiment parameters
  *
@@ -183,8 +195,12 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
  */
 template <typename Modus>
 std::ostream &operator<<(std::ostream &out, const Experiment<Modus> &e) {
-  out << "Starting with temporal stepsize: "
-      << e.parameters_.timestep_duration() << " fm/c\n";
+  if (e.use_time_steps_) {
+    out << "Starting with temporal stepsize: "
+        << e.parameters_.timestep_duration() << " fm/c\n";
+  } else {
+    out << "Not using time steps\n";
+  }
   out << "End time: " << e.end_time_ << " fm/c\n";
   out << e.modus_;
   return out;
@@ -212,13 +228,11 @@ std::ostream &operator<<(std::ostream &out, const Experiment<Modus> &e) {
  * true - collisions are enabled\n
  * false - all collisions are disabled
  *
- * \key Density_Type (int, optional, default = 0): \n
- * 0 - net baryon density
- * 1 - baryonic isospin density
- *
  * \key Force_Decays_At_End (bool, optional, default = true): \n
  * true - force all resonances to decay after last timestep \n
  * false - don't force decays (final output can contain resonances)
+ *
+ * \subpage pauliblocker
  */
 template <typename Modus>
 Experiment<Modus>::Experiment(Configuration config, bf::path output_path)
@@ -230,13 +244,21 @@ Experiment<Modus>::Experiment(Configuration config, bf::path output_path)
       delta_time_startup_(config.take({"General", "Delta_Time"})),
       force_decays_(
           config.take({"Collision_Term", "Force_Decays_At_End"}, true)),
-      use_grid_(config.take({"General", "Use_Grid"}, true)) {
+      use_grid_(config.take({"General", "Use_Grid"}, true)),
+      use_time_steps_(config.take({"General", "Use_Time_Steps"}, true)) {
   const auto &log = logger<LogArea::Experiment>();
   log.info() << *this;
+
+  // dilepton switch
+  const bool dileptons_switch = config.take(
+                                      {"Output", "Dileptons", "Enable"}, false);
 
   // create finders
   if (config.take({"Collision_Term", "Decays"}, true)) {
     action_finders_.emplace_back(new DecayActionsFinder());
+  }
+  if (dileptons_switch) {
+    dilepton_finder_ = make_unique<DecayActionsFinderDilepton>();
   }
   if (config.take({"Collision_Term", "Collisions"}, true)) {
     action_finders_.emplace_back(new ScatterActionsFinder(config, parameters_));
@@ -263,6 +285,7 @@ Experiment<Modus>::Experiment(Configuration config, bf::path output_path)
     * \li \subpage input_binary_collisions
     * \li \subpage input_binary_particles
     * \li \subpage input_root
+    * \li \subpage input_dileptons
     */
   auto output_conf = config["Output"];
   /*!\Userguide
@@ -298,6 +321,10 @@ Experiment<Modus>::Experiment(Configuration config, bf::path output_path)
     * \li Formatted binary output that uses ROOT software
     *     (http://root.cern.ch).\n Fast to read and write, requires less
     *     disk space.\n \subpage format_root
+    * \li Dilepton output in Oscar format: \n
+    *     \subpage format_dilepton_output
+    * \li \subpage collisions_output_in_box_modus_
+    * \li \subpage output_vtk_lattice_
     */
 
   // loop until all OSCAR outputs are created (create_oscar_output will return
@@ -344,15 +371,48 @@ Experiment<Modus>::Experiment(Configuration config, bf::path output_path)
     output_conf.take({"Density"});
   }
 
+  if (dileptons_switch) {
+    dilepton_output_ = create_dilepton_output(output_path);
+  }
+
   if (config.has_value({"Potentials"})) {
     log.info() << "Potentials are ON.";
     // potentials need testparticles and gaussian sigma from parameters_
     potentials_ = make_unique<Potentials>(config["Potentials"], parameters_);
   }
 
-  dens_type_ =
-      config.take({"Output", "Density", "Density_Type"}, DensityType::particle);
+  dens_type_ = config.take({"Output", "Density_Type"}, DensityType::hadron);
   log.info() << "Density type written to headers: " << dens_type_;
+
+  /*!\Userguide
+   * \page input_lattice_ Lattice
+   *
+   * \key Sizes (array<float,3>, required): \n
+   *      Sizes of lattice in x, y, z directions in fm.
+   *
+   * \key Cell_Number (array<int,3>, required): \n
+   *      Number of cells in x, y, z directions.
+   *
+   * \key Origin (array<float,3>, required): \n
+   *      Coordinates of the left, down, near corner of the lattice in fm.
+   *
+   * \key Periodic (bool, required): \n
+   *      Use periodic continuation or not. With periodic continuation
+   *      x + i * lx is equivalent to x, same for y, z.
+   *
+   * \subpage input_vtk_lattice_
+   *
+   * For format of lattice output see \ref output_vtk_lattice_.
+   *
+   * \page input_vtk_lattice_ Printout
+   *
+   * User can print thermodynamical quantities on the lattice to vtk output.
+   * For this one has to use the "Lattice: Printout" section of configuration.
+   * Currently printing of custom density to vtk file is available.
+   *
+   * \key Density (DensityType, optional, default = DensityType::None): \n
+   * Chooses which density to print.
+   */
 
   // Create lattices
   if (config.has_value({"Lattice"})) {
@@ -432,7 +492,7 @@ static std::string format_measurements(const Particles &particles,
   ss << field<5> << time
      << field<12, 3> << difference.momentum().x0()
      << field<12, 3> << difference.momentum().abs3()
-     << field<12, 3> << (scatterings_total
+     << field<12, 3> << ((scatterings_total && time > really_small)
                           ? scatterings_total * 2 / (particles.size() * time)
                           : 0.)
      << field<10, 3> << scatterings_this_interval
@@ -442,9 +502,10 @@ static std::string format_measurements(const Particles &particles,
 }
 
 template <typename Modus>
+template <typename Container>
 void Experiment<Modus>::perform_action(
     const ActionPtr &action, size_t &interactions_total,
-    size_t &total_pauli_blocked, const ParticleList &particles_before_actions) {
+    size_t &total_pauli_blocked, const Container &particles_before_actions) {
   const auto &log = logger<LogArea::Experiment>();
   if (action->is_valid(particles_)) {
     const ParticleList incoming_particles = action->incoming_particles();
@@ -490,6 +551,143 @@ void Experiment<Modus>::perform_action(
   }
 }
 
+template <typename Modus>
+void Experiment<Modus>::write_dilepton_action(const ActionPtr &action,
+                                 const ParticleList &particles_before_actions) {
+  if (action->is_valid(particles_)) {
+    action->generate_final_state();
+    // Calculate Eckart rest frame density at the interaction point
+    const FourVector r_interaction = action->get_interaction_point();
+    constexpr bool compute_grad = false;
+    const double rho =
+        rho_eckart(r_interaction.threevec(), particles_before_actions,
+                   parameters_, dens_type_, compute_grad).first;
+    // write dilepton output
+    dilepton_output_->at_interaction(action->incoming_particles(),
+                                     action->outgoing_particles(),
+                                     rho,
+                                     action->raw_weight_value(),
+                                     action->get_type());
+  }
+}
+
+template <typename Modus>
+size_t Experiment<Modus>::run_time_evolution_without_time_steps(
+    const int evt_num) {
+  const auto &log = logger<LogArea::Experiment>();
+  modus_.impose_boundary_conditions(&particles_);
+  size_t interactions_total = 0, previous_interactions_total = 0,
+         total_pauli_blocked = 0;
+  log.info() << format_measurements(
+      particles_, interactions_total, 0u,
+      conserved_initial_, time_start_, parameters_.labclock.current_time());
+
+  const float start_time = parameters_.labclock.current_time();
+  float time_left = end_time_ - start_time;
+
+  // find actions for the initial list
+  ParticleList search_list = particles_.copy_to_vector();
+  Actions actions;
+  for (const auto &finder : action_finders_) {
+    actions.insert(finder->find_actions_in_cell(search_list, time_left));
+  }
+
+  // iterate over all actions
+  while (!actions.is_empty()) {
+    // get next action
+    ActionPtr act = actions.pop();
+    if (!act->is_valid(particles_)) {
+      log.debug(~einhard::DRed(), "✘ ", act, " (discarded: invalid)");
+      continue;
+    }
+    log.debug(~einhard::Green(), "✔ ", act);
+
+    /* (1) Propagate to the next action. */
+
+    const float action_time = act->time_of_execution();
+    const float dt = action_time - parameters_.labclock.current_time();
+
+    // we allow a very small negative time step that can result from imprecise
+    // addition
+    if (dt < -really_small) {
+      log.error() << "dt = " << dt;
+      throw std::runtime_error("Negative time step!");
+    }
+
+    float current_time;
+
+    // only propagate the particles if dt is significantly larger than 0
+    if (dt > really_small) {
+      // set the time step according to our plan
+      parameters_.labclock.set_timestep_duration(dt);
+
+      // check if we need to do the intermediate output in the time until the
+      // next action
+      if (parameters_.need_intermediate_output()) {
+        // we now set the clock to the output time and propagate the particles
+        // until that time; then we do the output
+        const float output_time =
+            parameters_.labclock.next_multiple(parameters_.output_interval);
+        parameters_.labclock.set_timestep_duration(
+            output_time - parameters_.labclock.current_time());
+        parameters_.labclock.reset(output_time);
+        propagate_straight_line(&particles_, parameters_);
+        modus_.impose_boundary_conditions(&particles_, outputs_);
+
+        intermediate_output(evt_num, interactions_total,
+                            previous_interactions_total);
+
+        // after the output, the particles need to be propagated until the
+        // action time
+        const float remaining_dt = action_time - output_time;
+        parameters_.labclock.set_timestep_duration(remaining_dt);
+      }
+
+      // set the clock manually instead of advancing it with the time step
+      // to avoid loss of precision
+      parameters_.labclock.reset(action_time);
+      current_time = action_time;
+
+      propagate_straight_line(&particles_, parameters_);
+      modus_.impose_boundary_conditions(&particles_, outputs_);
+    } else {
+      // otherwise just keep the current time
+      current_time = parameters_.labclock.current_time();
+      parameters_.labclock.set_timestep_duration(0.f);
+    }
+
+    /* (2) Perform action. */
+
+    // Update the positions of the incoming particles, because the information
+    // in the action object will be outdated as the particles have been
+    // propagated since the construction of the action.
+    act->update_incoming(particles_);
+
+    perform_action(act, interactions_total, total_pauli_blocked, particles_);
+    modus_.impose_boundary_conditions(&particles_);
+
+    /* (3) Check conservation laws. */
+
+    std::string err_msg = conserved_initial_.report_deviations(particles_);
+    if (!err_msg.empty()) {
+      log.error() << err_msg;
+      throw std::runtime_error("Violation of conserved quantities!");
+    }
+
+    /* (4) Find new actions. */
+
+    time_left = end_time_ - current_time;
+    const ParticleList& outgoing_particles = act->outgoing_particles();
+    for (const auto &finder : action_finders_) {
+      actions.insert(
+          finder->find_actions_in_cell(outgoing_particles, time_left));
+      actions.insert(finder->find_actions_with_surrounding_particles(
+          outgoing_particles, particles_, time_left));
+    }
+  }
+  return interactions_total;
+}
+
 /* This is the loop over timesteps, carrying out collisions and decays
  * and propagating particles. */
 template <typename Modus>
@@ -502,12 +700,10 @@ size_t Experiment<Modus>::run_time_evolution(const int evt_num) {
       particles_, interactions_total, 0u,
       conserved_initial_, time_start_, parameters_.labclock.current_time());
 
-  std::vector<ActionPtr> actions;
-  while (!(++parameters_.labclock > end_time_)) {
-    // vector is likely the best container type here. Because std::sort requires
-    // random access iterators. Any linked data structure (e.g. list) thus
-    // requires a less efficient sort algorithm.
+  Actions actions;
+  Actions dilepton_actions;
 
+  while (!(++parameters_.labclock > end_time_)) {
     /* (1.a) Create grid. */
     const auto &grid =
         use_grid_ ? modus_.create_grid(particles_, parameters_.testparticles)
@@ -516,30 +712,41 @@ size_t Experiment<Modus>::run_time_evolution(const int evt_num) {
     /* (1.b) Iterate over cells and find actions. */
     grid.iterate_cells([&](const ParticleList &search_list) {
                          for (const auto &finder : action_finders_) {
-                           actions += finder->find_possible_actions(
-                               search_list, parameters_.timestep_duration());
+                           actions.insert(finder->find_actions_in_cell(
+                               search_list, parameters_.timestep_duration()));
                          }
                        },
                        [&](const ParticleList &search_list,
                            const ParticleList &neighbors_list) {
                          for (const auto &finder : action_finders_) {
-                           actions += finder->find_possible_actions(
+                           actions.insert(finder->find_actions_with_neighbors(
                                search_list, neighbors_list,
-                               parameters_.timestep_duration());
+                               parameters_.timestep_duration()));
                          }
                        });
-    /* (1.c) Sort action list by time. */
-    std::sort(actions.begin(), actions.end(),
-              [](const ActionPtr &a, const ActionPtr &b) { return *a < *b; });
+
+    const auto particles_before_actions = particles_.copy_to_vector();
+
+    /* (1.d) Dileptons */
+    if (dilepton_finder_ != nullptr) {
+      dilepton_actions.insert(dilepton_finder_->find_actions_in_cell(
+                                              particles_before_actions,
+                                              parameters_.timestep_duration()));
+
+      if (!dilepton_actions.is_empty()) {
+        while (!dilepton_actions.is_empty()) {
+          write_dilepton_action(dilepton_actions.pop(),
+                                particles_before_actions);
+        }
+      }
+    }
 
     /* (2) Perform actions. */
-    if (!actions.empty()) {
-      const auto particles_before_actions = particles_.copy_to_vector();
-      for (const auto &action : actions) {
-        perform_action(action, interactions_total, total_pauli_blocked,
+    if (!actions.is_empty()) {
+      while (!actions.is_empty()) {
+        perform_action(actions.pop(), interactions_total, total_pauli_blocked,
                        particles_before_actions);
       }
-      actions.clear();
       log.debug(~einhard::Blue(), particles_);
     } else {
       log.debug("no actions performed");
@@ -633,16 +840,30 @@ void Experiment<Modus>::do_final_decays(size_t &interactions_total) {
   // at end of time evolution: force all resonances to decay
   size_t interactions_old;
   do {
-    std::vector<ActionPtr> actions;
+    Actions actions;
+    Actions dilepton_actions;
+
     interactions_old = interactions_total;
+    const auto particles_before_actions = particles_.copy_to_vector();
+
+    /* Dileptons */
+    if (dilepton_finder_ != nullptr) {
+      dilepton_actions.insert(dilepton_finder_->find_final_actions(particles_));
+
+      if (!dilepton_actions.is_empty()) {
+        while (!dilepton_actions.is_empty()) {
+          write_dilepton_action(dilepton_actions.pop(),
+                                particles_before_actions);
+        }
+      }
+    }
     /* Find actions. */
     for (const auto &finder : action_finders_) {
-      actions += finder->find_final_actions(particles_);
+      actions.insert(finder->find_final_actions(particles_));
     }
     /* Perform actions. */
-    const auto particles_before_actions = particles_.copy_to_vector();
-    for (const auto &action : actions) {
-      perform_action(action, interactions_total, total_pauli_blocked,
+    while (!actions.is_empty()) {
+      perform_action(actions.pop(), interactions_total, total_pauli_blocked,
                      particles_before_actions);
     }
     // loop until no more decays occur
@@ -695,7 +916,9 @@ void Experiment<Modus>::run() {
     }
 
     /* the time evolution of the relevant subsystem */
-    size_t interactions_total = run_time_evolution(j);
+    size_t interactions_total = use_time_steps_
+                                    ? run_time_evolution(j)
+                                    : run_time_evolution_without_time_steps(j);
     if (force_decays_) {
       do_final_decays(interactions_total);
     }

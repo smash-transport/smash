@@ -62,8 +62,6 @@ class DecayType {
                          float m1, float m2) const = 0;
 
  protected:
-  // Evaluate rho_ab according to equ. (2.76) in Effenberger's thesis.
-  virtual float rho(float m) const = 0;
   /// final-state particles of the decay
   ParticleTypePtrList particle_types_;
   /// angular momentum of the decay
@@ -80,6 +78,13 @@ class TwoBodyDecay : public DecayType {
   int particle_number() const override;
   bool has_particles(const ParticleType &t_a,
                      const ParticleType &t_b) const override;
+
+ protected:
+  /* This is a virtual helper method which is used to write the width as
+   * Gamma(m) = Gamma_0 * rho(m) / rho(m_0). This ensures that the width is
+   * properly normalized at the pole mass to Gamma(m_0) = Gamma_0.
+   * By default rho simply equals one, which corresponds to a constant width. */
+  virtual float rho(float) const { return 1.; }
 };
 
 
@@ -138,7 +143,7 @@ class TwoBodyDecaySemistable : public TwoBodyDecay {
  protected:
   float rho(float m) const override;
   float Lambda_;
-  Tabulation tabulation_;
+  std::unique_ptr<Tabulation> tabulation_;
 };
 
 
@@ -151,10 +156,17 @@ class TwoBodyDecayUnstable : public TwoBodyDecay {
   float width(float m0, float G0, float m) const override;
   float in_width(float m0, float G0, float m,
                  float m1, float m2) const override;
- protected:
-  float rho(float m) const override;
 };
 
+/**
+ * TwoBodyDecayDilepton represents a decay with a lepton and it's antilepton
+ * as the final state particles.
+ */
+class TwoBodyDecayDilepton : public TwoBodyDecayStable {
+ public:
+  TwoBodyDecayDilepton(ParticleTypePtrList part_types, int l);
+  float width(float m0, float G0, float m) const override;
+};
 
 /**
  * ThreeBodyDecay represents a decay type with three final-state particles.
@@ -167,8 +179,6 @@ class ThreeBodyDecay : public DecayType {
   float width(float m0, float G0, float m) const override;
   float in_width(float m0, float G0, float m,
                  float m1, float m2) const override;
- protected:
-  float rho(float m) const override;
 };
 
 

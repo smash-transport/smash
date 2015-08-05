@@ -70,13 +70,13 @@ static float BlattWeisskopf(const float p_ab, const int L)
  * \param L Lambda parameter of the form factor [GeV]. This is a cut-off
  * parameter that can be different for baryons and mesons.
  */
-static double Post_FF_sqr(double m, double M0, double srts0, double L) {
+static float Post_FF_sqr(float m, float M0, float srts0, float L) {
   const auto L4 = L*L*L*L;
   const auto m2 = m*m;
   const auto M2 = M0*M0;
   const auto s0 = srts0*srts0;
-  double FF = (L4 + (s0-M2)*(s0-M2)/4.) /
-              (L4 + (m2-(s0+M2)/2.) * (m2-(s0+M2)/2.));
+  const float FF = (L4 + (s0-M2)*(s0-M2)/4.) /
+                   (L4 + (m2-(s0+M2)/2.) * (m2-(s0+M2)/2.));
   return FF*FF;
 }
 
@@ -127,17 +127,7 @@ float TwoBodyDecayStable::rho(float m) const {
 float TwoBodyDecayStable::width(float m0, float G0, float m) const {
   if (m <= particle_types_[0]->mass() + particle_types_[1]->mass()) {
     return 0;
-  }
-  if (is_dilepton(particle_types_[0]->pdgcode(),
-                  particle_types_[1]->pdgcode())) {
-    /// dilepton decays: use width from \iref{Li:1996mi}, equation (19)
-    const float ml = particle_types_[0]->mass();  // lepton mass
-    const float ml_to_m_sqr = (ml/m) * (ml/m);
-    const float m0_to_m_cubed = (m0/m) * (m0/m) * (m0/m);
-    return G0 * m0_to_m_cubed * std::sqrt(1.0f - 4.0f * ml_to_m_sqr) *
-           (1.0f + 2.0f * ml_to_m_sqr);
   } else {
-    // hadronic decays
     return G0 * rho(m) / rho(m0);
   }
 }
@@ -151,14 +141,14 @@ float TwoBodyDecayStable::in_width(float m0, float G0, float m,
 
 // TwoBodyDecaySemistable
 
-static double integrand_rho_Manley(double mass, double srts, double stable_mass,
-                                   ParticleTypePtr type, int L) {
+static float integrand_rho_Manley(float mass, float srts, float stable_mass,
+                                  ParticleTypePtr type, int L) {
   if (srts <= mass + stable_mass) {
     return 0.;
   }
 
   /* center-of-mass momentum of final state particles */
-  const double p_f = pCM(srts, stable_mass, mass);
+  const float p_f = pCM(srts, stable_mass, mass);
 
   return p_f/srts * BlattWeisskopf(p_f, L) * 2.*srts
          * spectral_function(mass, type->mass(), type->total_width(srts));
@@ -184,7 +174,14 @@ TwoBodyDecaySemistable::TwoBodyDecaySemistable(ParticleTypePtrList part_types,
                                                int l)
   : TwoBodyDecay(arrange_particles(part_types), l),
     Lambda_((particle_types_[1]->baryon_number() != 0) ? 2.0 : 1.6),
-    tabulation_(particle_types_[0]->mass() + particle_types_[1]->minimum_mass(),
+    tabulation_(nullptr)
+{}
+
+float TwoBodyDecaySemistable::rho(float mass) const {
+  if (tabulation_ == nullptr) {
+    const_cast<TwoBodyDecaySemistable*>(this)->tabulation_
+        = make_unique<Tabulation>(
+                particle_types_[0]->mass() + particle_types_[1]->minimum_mass(),
                 1.f, 50,
                 [&](float srts) {
                   Integrator integrate;
@@ -195,11 +192,9 @@ TwoBodyDecaySemistable::TwoBodyDecaySemistable(ParticleTypePtrList part_types,
                                                   particle_types_[0]->mass(),
                                                   particle_types_[1], L_);
                                     });
-                })
-{}
-
-float TwoBodyDecaySemistable::rho(float m) const {
-  return tabulation_.get_value_linear(m);
+                });
+  }
+  return tabulation_->get_value_linear(mass);
 }
 
 float TwoBodyDecaySemistable::width(float m0, float G0, float m) const {
@@ -210,7 +205,7 @@ float TwoBodyDecaySemistable::width(float m0, float G0, float m) const {
 
 float TwoBodyDecaySemistable::in_width(float m0, float G0, float m,
                                        float m1, float m2) const {
-  double p_f = pCM(m, m1, m2);
+  const float p_f = pCM(m, m1, m2);
 
   return G0 * p_f * BlattWeisskopf(p_f, L_)
          * Post_FF_sqr(m, m0, particle_types_[0]->mass()
@@ -232,10 +227,6 @@ TwoBodyDecayUnstable::TwoBodyDecayUnstable(ParticleTypePtrList part_types,
   }
 }
 
-float TwoBodyDecayUnstable::rho(float) const {
-  return 1.;
-}
-
 float TwoBodyDecayUnstable::width(float, float G0, float) const {
   return G0;  // use on-shell width
 }
@@ -245,6 +236,32 @@ float TwoBodyDecayUnstable::in_width(float, float G0, float,
   return G0;  // use on-shell width
 }
 
+// TwoBodyDecayDilepton
+
+TwoBodyDecayDilepton::TwoBodyDecayDilepton(ParticleTypePtrList part_types,
+                                           int l)
+                                      : TwoBodyDecayStable(part_types, l) {
+  if (!is_dilepton(particle_types_[0]->pdgcode(),
+                  particle_types_[1]->pdgcode())) {
+    throw std::runtime_error(
+      "Error: No dilepton in TwoBodyDecayDilepton constructor: " +
+      part_types[0]->pdgcode().string() + " " +
+      part_types[1]->pdgcode().string());
+  }
+}
+
+float TwoBodyDecayDilepton::width(float m0, float G0, float m) const {
+  if (m <= particle_types_[0]->mass() + particle_types_[1]->mass()) {
+    return 0;
+  } else {
+    /// dilepton decays: use width from \iref{Li:1996mi}, equation (19)
+    const float ml = particle_types_[0]->mass();  // lepton mass
+    const float ml_to_m_sqr = (ml/m) * (ml/m);
+    const float m0_to_m_cubed = (m0/m) * (m0/m) * (m0/m);
+    return G0 * m0_to_m_cubed * std::sqrt(1.0f - 4.0f * ml_to_m_sqr) *
+           (1.0f + 2.0f * ml_to_m_sqr);
+  }
+}
 
 // ThreeBodyDecay
 
@@ -264,10 +281,6 @@ int ThreeBodyDecay::particle_number() const {
 bool ThreeBodyDecay::has_particles(const ParticleType &,
                                    const ParticleType &) const {
   return false;
-}
-
-float ThreeBodyDecay::rho(float) const {
-  return 1.;
 }
 
 float ThreeBodyDecay::width(float, float G0, float) const {

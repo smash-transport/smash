@@ -38,18 +38,6 @@ VtkOutput::VtkOutput(bf::path path, Configuration&& /*conf*/)
  * For details on VTK output format see \ref format_vtk.
  */
 
-/*!\Userguide
- * \page input_vtk_lattice_ Vtk lattice
- *
- * User can print thermodynamical quantities on the lattice to vtk output.
- * For this one has to use "Lattice: Output" section of configuration.
- * Currently printing of custom density to vtk file is available.
- *
- * \key Lattice: Output: Density
- *      (DensityType, optional, default = DensityType::None): \n
- * Chooses which density to print.
- */
-
 VtkOutput::~VtkOutput() {
 }
 

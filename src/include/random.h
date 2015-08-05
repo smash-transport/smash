@@ -19,8 +19,8 @@ namespace Smash {
 
 namespace Random {
 
-/// The random number engine used is std::randlux48
-using Engine = std::ranlux48;
+/// The random number engine used is the Mersenne Twister.
+using Engine = std::mt19937_64;
 
 /// The engine that is used commonly by all distributions.
 extern /*thread_local*/ Engine engine;
@@ -81,8 +81,11 @@ uniform_dist<T> make_uniform_distribution(T min, T max) {
  * Probability for a given return value \f$\chi\f$ is \f$p(\chi) =
  * \Theta(\chi) \cdot \exp(-t)\f$
  */
-template <typename T = double> T exponential() {
-  return std::exponential_distribution<T>(1)(engine);
+template <typename T = double> T exponential(T lambda) {
+  /* Work around a libstdc++ bug in std::exponential_distribution:
+   * If canonical() is in [0,1) then 1.-canonical() is in (0,1] and it's safe
+   * to call the log. */
+  return -std::log(1.-canonical()) / lambda;
 }
 
 /** Evaluates a random number x according to an exponential distribution

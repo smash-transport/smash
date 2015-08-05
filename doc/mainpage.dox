@@ -6,7 +6,7 @@
 - \ref Smash::Configuration
 
 \par Configuration options
-- \subpage inputoptions
+- \ref inputoptions
 
 \par Unit Testing
 - \ref unittest_page

@@ -34,6 +34,14 @@ namespace Smash {
 class ParticleType {
  public:
   /**
+   * Decay width cutoff for considering a particle as stable.
+   *
+   * We currently regard a particle type as stable if its on-shell width is less
+   * than 10 keV.
+   */
+  static constexpr float width_cutoff = 1e-5f;
+
+  /**
    * Creates a fully initialized ParticleType object.
    *
    * \param n The name of the particle.
@@ -102,7 +110,9 @@ class ParticleType {
   int baryon_number() const { return pdgcode_.baryon_number(); }
 
   /// Check if the particle is stable
-  inline bool is_stable() const;
+  inline bool is_stable() const {
+    return width_ < width_cutoff;
+  };
 
   /**
    * The minimum mass of the resonance.
@@ -134,11 +144,29 @@ class ParticleType {
   /**
    * Get the mass-dependent partial decay widths of a particle with mass m.
    * Returns a list of process branches, whose weights correspond to the
-   * actual partial widths.
+   * actual partial widths. The list contains all branches.
    *
    * \param m Invariant mass of the decaying particle.
    */
   DecayBranchList get_partial_widths(const float m) const;
+
+  /**
+  * Get the mass-dependent partial decay widths of a particle with mass m.
+  * Returns a list of process branches, whose weights correspond to the
+  * actual partial widths. The list contains all but the dilepton branches.
+  *
+  * \param m Invariant mass of the decaying particle.
+  */
+  DecayBranchList get_partial_widths_hadronic(const float m) const;
+
+  /**
+  * Get the mass-dependent partial decay widths of a particle with mass m.
+  * Returns a list of process branches, whose weights correspond to the
+  * actual partial widths. The list contains only the dilepton branches.
+  *
+  * \param m Invariant mass of the decaying particle.
+  */
+  DecayBranchList get_partial_widths_dilepton(const float m) const;
 
   /**
    * Get the mass-dependent partial in-width of a resonance with mass m,
@@ -285,12 +313,6 @@ class ParticleType {
   friend std::ostream &operator<<(std::ostream &out, const ParticleType &type);
 };
 
-inline bool ParticleType::is_stable() const {
-  /* We currently regard a particle type as stable if its on-shell width is
-   * less than 10 keV. */
-  return width_ < 1E-5f;
-}
-
 /**
  * \ingroup data
  *
@@ -336,7 +358,7 @@ class ParticleTypePtr {
   friend ParticleTypePtr ParticleType::operator&() const;
 
   /// Constructs a pointer to the ParticleType object at offset \p i.
-  ParticleTypePtr(std::uint16_t i) : index_(i) {}
+  explicit ParticleTypePtr(std::uint16_t i) : index_(i) {}
 
   /**
    * Helper function that does the ParticleType lookup from the stored index.

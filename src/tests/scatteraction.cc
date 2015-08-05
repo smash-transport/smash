@@ -139,3 +139,35 @@ TEST(outgoing_valid) {
   VERIFY(outgoing_particles[0].id() > p1_copy.id());
   VERIFY(outgoing_particles[0].id() > p2_copy.id());
 }
+
+TEST(update_incoming) {
+  // put particles in list
+  Particles particles;
+  ParticleData a{ParticleType::find(0x211)};  // pi+
+  a.set_4position(Position{0., -0.1, 0., 0.});
+  a.set_4momentum(Momentum{1.1, 1.0, 0., 0.});
+
+  ParticleData b{ParticleType::find(0x211)};  // pi+
+  b.set_4position(Position{0., 0.1, 0., 0.});
+  b.set_4momentum(Momentum{1.1, -1.0, 0., 0.});
+
+  a = particles.insert(a);
+  b = particles.insert(b);
+
+  // create action
+  constexpr float time = 0.2f;
+  ScatterAction act(a, b, time);
+  VERIFY(act.is_valid(particles));
+
+  // add elastic channel
+  constexpr float sigma = 10.0;
+  act.add_all_processes(sigma);
+
+  // change the position of one of the particles
+  const FourVector new_position(0.1, 0., 0., 0.);
+  particles.front().set_4position(new_position);
+
+  // update the action
+  act.update_incoming(particles);
+  COMPARE(act.incoming_particles()[0].position(), new_position);
+}

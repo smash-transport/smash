@@ -4,8 +4,8 @@
 #      SMASH Team
 #
 #    BSD 3-clause license
-# 
-######################################################### 
+#
+#########################################################
 
 include(CheckLibraryExists)
 include(AddCompilerFlag)
@@ -68,9 +68,12 @@ set(smash_src
         deformednucleus.cc
         density.cc
         densityoutput.cc
+        decayactiondilepton.cc
+        decayactionsfinderdilepton.cc
         distributions.cc
         energymomentumtensor.cc
         experiment.cc
+        filelock.cc
         fourvector.cc
         fpenvironment.cc
         grid.cc
@@ -89,6 +92,7 @@ set(smash_src
         potentials.cc
         processbranch.cc
         propagation.cc
+        quantumnumbers.cc
         random.cc
         resonances.cc
         scatteraction.cc

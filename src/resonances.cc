@@ -12,6 +12,8 @@
 
 #include "include/distributions.h"
 #include "include/kinematics.h"
+#include "include/logging.h"
+#include "include/random.h"
 
 namespace Smash {
 
@@ -36,6 +38,11 @@ double spectral_function(double resonance_mass, double resonance_pole,
   /* breit_wigner is essentially pi * mass * width * spectral function
    * (mass^2 is called mandelstam_s in breit_wigner)
    */
+  #pragma GCC diagnostic push
+  #pragma GCC diagnostic ignored "-Wfloat-equal"
+  assert(resonance_mass != 0);
+  assert(resonance_width != 0);
+  #pragma GCC diagnostic pop
   return breit_wigner(resonance_mass * resonance_mass, resonance_pole,
                       resonance_width) /
          (M_PI * resonance_mass * resonance_width);

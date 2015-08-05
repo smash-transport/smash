@@ -110,7 +110,7 @@ class PdgCode {
    * The string is interpreted as a hexadecimal number, i.e., \c 211 is
    * interpreted as \c 0x211 = \f$529_{10}\f$.
    */
-  PdgCode(const std::string& codestring) {
+  explicit PdgCode(const std::string& codestring) {
     set_from_string(codestring);
   }
 
@@ -132,7 +132,7 @@ class PdgCode {
   /** receive an unsigned integer and process it into a PDG Code. The
    *  first bit is taken and used as antiparticle boolean.
    */
-  PdgCode(const std::uint32_t abscode) : dump_(0x0) {
+  explicit PdgCode(const std::uint32_t abscode) : dump_(0x0) {
     // use the first bit for the antiparticle_ boolean.
     digits_.antiparticle_ = ((abscode & 0x80000000u) != 0);
     set_fields(abscode);
@@ -261,11 +261,17 @@ class PdgCode {
   bool is_Nstar() const;
   /// Is this a Delta resonance (Delta*)?
   bool is_Deltastar() const;
+  /// Is this a pion (pi+/pi0/pi-)?
+  bool is_pion() const;
 
   /** Determine whether a particle has a distinct antiparticle
     * (or whether it is its own antiparticle). */
   bool has_antiparticle() const {
-    return (baryon_number() != 0) || (digits_.n_q2_ != digits_.n_q3_);
+    if (is_hadron()) {
+      return (baryon_number() != 0) || (digits_.n_q2_ != digits_.n_q3_);
+    } else {
+      return digits_.n_q3_ == 1;  // leptons!
+    }
   }
   /** returns twice the isospin-3 component \f$I_3\f$.
    *

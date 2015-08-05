@@ -49,7 +49,7 @@ ParticleTypePtr ParticleType::operator&() const {
   // ParticleTypePtr storage to uint32_t.
   assert(offset >= 0 && offset < 0xffff);
   // After the assertion above the down-cast to uint16_t is safe:
-  return {static_cast<uint16_t>(offset)};
+  return ParticleTypePtr(static_cast<uint16_t>(offset));
 }
 #endif
 
@@ -220,7 +220,9 @@ float ParticleType::partial_width(const float m,
 
 const DecayModes &ParticleType::decay_modes() const {
   const auto offset = this - std::addressof(list_all()[0]);
-  return (*DecayModes::all_decay_modes)[offset];
+  const auto &modes = (*DecayModes::all_decay_modes)[offset];
+  assert(is_stable() || !modes.is_empty());
+  return modes;
 }
 
 float ParticleType::total_width(const float m) const {
@@ -232,6 +234,9 @@ float ParticleType::total_width(const float m) const {
   const auto &modes = decay_modes().decay_mode_list();
   for (unsigned int i = 0; i < modes.size(); i++) {
     w = w + partial_width(m, modes[i].get());
+  }
+  if (w < width_cutoff) {
+    return 0.;
   }
   return w;
 }
@@ -246,7 +251,6 @@ void ParticleType::check_consistency() {
 }
 
 DecayBranchList ParticleType::get_partial_widths(const float m) const {
-  float w = 0.;
   if (is_stable()) {
     return {};
   }
@@ -255,10 +259,54 @@ DecayBranchList ParticleType::get_partial_widths(const float m) const {
   DecayBranchList partial;
   partial.reserve(decay_mode_list.size());
   for (unsigned int i = 0; i < decay_mode_list.size(); i++) {
-    w = partial_width(m, decay_mode_list[i].get());
+    const float w = partial_width(m, decay_mode_list[i].get());
     if (w > 0.) {
       partial.push_back(
           make_unique<DecayBranch>(decay_mode_list[i]->type(), w));
+    }
+  }
+  return std::move(partial);
+}
+
+DecayBranchList ParticleType::get_partial_widths_hadronic(const float m) const {
+  if (is_stable()) {
+    return {};
+  }
+  /* Loop over decay modes and calculate all partial widths. */
+  const auto &decay_mode_list = decay_modes().decay_mode_list();
+  DecayBranchList partial;
+  partial.reserve(decay_mode_list.size());
+  for (unsigned int i = 0; i < decay_mode_list.size(); i++) {
+    if (!(is_dilepton(
+             decay_mode_list[i]->type().particle_types()[0]->pdgcode(),
+             decay_mode_list[i]->type().particle_types()[1]->pdgcode()))) {
+      const float w = partial_width(m, decay_mode_list[i].get());
+      if (w > 0.) {
+        partial.push_back(
+            make_unique<DecayBranch>(decay_mode_list[i]->type(), w));
+      }
+    }
+  }
+  return std::move(partial);
+}
+
+DecayBranchList ParticleType::get_partial_widths_dilepton(const float m) const {
+  if (is_stable()) {
+    return {};
+  }
+  /* Loop over decay modes and calculate all partial widths. */
+  const auto &decay_mode_list = decay_modes().decay_mode_list();
+  DecayBranchList partial;
+  partial.reserve(decay_mode_list.size());
+  for (unsigned int i = 0; i < decay_mode_list.size(); i++) {
+    if (is_dilepton(
+                decay_mode_list[i]->type().particle_types()[0]->pdgcode(),
+                decay_mode_list[i]->type().particle_types()[1]->pdgcode())) {
+      const float w = partial_width(m, decay_mode_list[i].get());
+      if (w > 0.) {
+        partial.push_back(
+            make_unique<DecayBranch>(decay_mode_list[i]->type(), w));
+      }
     }
   }
   return std::move(partial);
@@ -270,16 +318,16 @@ float ParticleType::get_partial_in_width(const float m,
   /* Get all decay modes. */
   const auto &decaymodes = decay_modes().decay_mode_list();
 
-  /* Find the right one. */
+  /* Find the right one(s) and add up corresponding widths. */
+  float w = 0.;
   for (const auto &mode : decaymodes) {
     float partial_width_at_pole = width_at_pole()*mode->weight();
     if (mode->type().has_particles(p_a.type(), p_b.type())) {
-      return mode->type().in_width(mass(), partial_width_at_pole, m,
-                                   p_a.effective_mass(), p_b.effective_mass());
+      w += mode->type().in_width(mass(), partial_width_at_pole, m,
+                                 p_a.effective_mass(), p_b.effective_mass());
     }
   }
-  /* Decay mode not found: width is zero. */
-  return 0.;
+  return w;
 }
 
 std::ostream &operator<<(std::ostream &out, const ParticleType &type) {

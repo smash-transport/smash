@@ -8,6 +8,8 @@
 */
 
 #include "include/potentials.h"
+
+#include "include/constants.h"
 #include "include/density.h"
 
 namespace Smash {
@@ -25,13 +27,12 @@ Potentials::Potentials(Configuration conf, const ExperimentParameters &param)
    * section, to switch on only Skyrme or Symmetry potentials uncomment
    * only the part you want to switch on.
    *
-   * Parameters are described at the \ref potentials page.
-   */
-
-  /*!\Userguide
-   * \page potentials Potentials
-   * Skyrme potential:
-   * -----------------
+   * \li \subpage potentials_skyrme_
+   * \li \subpage potentials_sym_
+   *
+   * \page potentials_skyrme_ Skyrme
+   *
+   * The Skyrme potential has the form
    * \f[ U_{Sk} = A(\rho/\rho_0) + B (\rho/\rho_0)^{\tau} \,, \f]
    * where \f$ \rho \f$ is baryon density in the local Eckart rest frame.
    *
@@ -42,7 +43,7 @@ Potentials::Potentials(Configuration conf, const ExperimentParameters &param)
    *      Parameter B of Skyrme potential in MeV
    *
    * \key Skyrme_Tau (float, required): \n
-   *      Parameter \f$\tau\f$ of Skyrme potent.
+   *      Parameter \f$\tau\f$ of Skyrme potential.
    */
   if (use_skyrme_) {
     skyrme_a_ = conf.take({"Skyrme", "Skyrme_A"});
@@ -51,9 +52,9 @@ Potentials::Potentials(Configuration conf, const ExperimentParameters &param)
   }
 
   /*!\Userguide
-   * \page potentials Potentials
-   * Symmetry potential:
-   * -------------------
+   * \page potentials_sym_ Symmetry
+   *
+   * The symmetry potential has the form
    * \f[ U_{Sym} = \pm 2 S_{pot} \frac{\rho_n - \rho_p}{\rho_0} \,, \f]
    * where \f$ \rho_n\f$ is neutron density and \f$ \rho_p\f$ is proton
    * density. Definition and implementation are still to be worked out.
@@ -82,15 +83,16 @@ double Potentials::potential(const ThreeVector &r,
   if (use_skyrme_) {
     const double rho_eck = rho_eckart(r, plist, param_, DensityType::baryon,
                                       compute_gradient).first;
-    total_potential += skyrme_a_ * (rho_eck/rho0) +
-                       skyrme_b_ * std::pow(rho_eck/rho0, skyrme_tau_);
+    total_potential += skyrme_a_ * (rho_eck/nuclear_density) +
+                       skyrme_b_ * std::pow(rho_eck/nuclear_density,
+                                            skyrme_tau_);
   }
   if (use_symmetry_) {
     // use isospin density
     const double rho_iso = rho_eckart(r, plist, param_,
                                       DensityType::baryonic_isospin,
                                       compute_gradient).first;
-    const double sym_pot = 2.*symmetry_s_ * rho_iso/rho0
+    const double sym_pot = 2.*symmetry_s_ * rho_iso/nuclear_density
                            * acts_on.isospin3_rel();
     total_potential += sym_pot;
   }
@@ -115,9 +117,8 @@ ThreeVector Potentials::potential_gradient(const ThreeVector &r,
     const ThreeVector drho_dr = density_and_gradient.second;
 
     // Derivative of potential with respect to density
-    double tmp = skyrme_tau_ * std::pow(rho/rho0, skyrme_tau_ - 1);
-    const double dpotential_drho = (skyrme_a_  + skyrme_b_ * tmp) / rho0;
-    total_gradient += drho_dr * dpotential_drho;
+    double tmp = skyrme_tau_ * std::pow(rho/nuclear_density, skyrme_tau_ - 1);
+    total_gradient += drho_dr * (skyrme_a_ + skyrme_b_*tmp) / nuclear_density;
   }
 
   if (use_symmetry_) {
@@ -125,7 +126,7 @@ ThreeVector Potentials::potential_gradient(const ThreeVector &r,
     const ThreeVector p_iso = rho_eckart(r, plist, param_,
                                          DensityType::baryonic_isospin,
                                          compute_gradient).second;
-    const ThreeVector dUsym_dr = 2.*symmetry_s_ * p_iso/rho0
+    const ThreeVector dUsym_dr = 2.*symmetry_s_ * p_iso/nuclear_density
                                  * acts_on.isospin3_rel();
     total_gradient += dUsym_dr;
   }

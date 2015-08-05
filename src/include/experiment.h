@@ -14,8 +14,8 @@
 #include <string>
 #include <vector>
 
+#include "actionfinderfactory.h"
 #include "chrono.h"
-#include "decayactionsfinder.h"
 #include "density.h"
 #include "experimentparameters.h"
 #include "forwarddeclarations.h"
@@ -26,7 +26,7 @@
 #include "potentials.h"
 #include "processbranch.h"
 #include "quantumnumbers.h"
-#include "scatteractionsfinder.h"
+#include "random.h"
 
 namespace Smash {
 
@@ -149,9 +149,17 @@ class Experiment : public ExperimentBase {
   void initialize_new_event();
 
   /** Perform the given action. */
+  template <typename Container>
   void perform_action(const ActionPtr &action, size_t &interactions_total,
                       size_t &total_pauliblocked,
-                      const ParticleList &particles_before_actions);
+                      const Container &particles_before_actions);
+
+  /** It generates the final state with the right kinematics and then writes
+   * the given dilepton action in the dilepton output file, instead of
+   * actually performing the action.
+   */
+  void write_dilepton_action(const ActionPtr &action,
+                               const ParticleList &particles_before_actions);
 
   /** Runs the time evolution of an event
    *
@@ -162,6 +170,16 @@ class Experiment : public ExperimentBase {
    * \return The number of interactions from the event
    */
   size_t run_time_evolution(const int evt_num);
+
+  /** Runs the time evolution of an event without time steps
+   *
+   * Here, all actions are looped over, collisions and decays are
+   * carried out and particles are propagated.
+   *
+   * \param evt_num Running number of the event
+   * \return The number of interactions from the event
+   */
+  size_t run_time_evolution_without_time_steps(const int evt_num);
 
   /** Performs the final decays of an event
    *
@@ -222,8 +240,14 @@ class Experiment : public ExperimentBase {
    */
   OutputsList outputs_;
 
+  /// The Dilepton output
+  std::unique_ptr<OutputInterface> dilepton_output_;
+
   /// The Action finder objects
   std::vector<std::unique_ptr<ActionFinderInterface>> action_finders_;
+
+  /// The Dilepton Action Finder
+  std::unique_ptr<ActionFinderInterface> dilepton_finder_;
 
   /// Lattices holding different physical quantities
 
@@ -271,6 +295,11 @@ class Experiment : public ExperimentBase {
    */
   const bool use_grid_;
 
+  /**
+   * This indicates whether to use time steps.
+   */
+  const bool use_time_steps_;
+
   /** The conserved quantities of the system.
    *
    * This struct carries the sums of the single particle's various
@@ -283,7 +312,7 @@ class Experiment : public ExperimentBase {
   SystemTimePoint time_start_ = SystemClock::now();
 
   /// Type of density to be written to collision headers
-  DensityType dens_type_;
+  DensityType dens_type_ = DensityType::none;
 
   /**\ingroup logging
    * Writes the initial state for the Experiment to the output stream.

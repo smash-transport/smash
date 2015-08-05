@@ -178,6 +178,45 @@ TEST(load_decay_modes) {
   }
 }
 
+TEST(load_decaymodes_3body) {
+  const std::string decays_input(
+      "Λ(1520)\n"
+      "1.0 1 Λ π π\n"
+      "\n"
+      "Λ(1690)\n"
+      "1.0 1 Σ π π\n"
+      );
+  DecayModes::load_decaymodes(decays_input);
+  {
+    const auto &Lambda = ParticleType::find(-0x3124).decay_modes();
+    VERIFY(!Lambda.is_empty());
+    const auto &modelist = Lambda.decay_mode_list();
+    COMPARE(modelist.size(), 3u);
+    for (int i = 0; i < 3; i++) {
+      COMPARE(modelist[i]->weight(), 1.f/3.f);
+      COMPARE(modelist[i]->particle_types()[0]->pdgcode(), -0x3122);
+    }
+  }
+  {
+    const auto &Lambda = ParticleType::find(-0x13124).decay_modes();
+    VERIFY(!Lambda.is_empty());
+    const auto &modelist = Lambda.decay_mode_list();
+    COMPARE(modelist.size(), 6u);
+    for (int i = 0; i < 6; i++) {
+      COMPARE(modelist[i]->weight(), 1.f/6.f);
+      int charge = 0;
+      // 3 neutral particles are forbidden by isospin.
+      bool all_charges_are_zero = true;
+      for (const auto &p : modelist[i]->particle_types()) {
+        charge += p->charge();
+        all_charges_are_zero &= (p->charge() == 0);
+      }
+      VERIFY(!all_charges_are_zero);
+      COMPARE(charge, 0);
+    }
+  }
+}
+
 
 TEST_CATCH(add_no_particles, DecayModes::InvalidDecay) {
   DecayModes m;

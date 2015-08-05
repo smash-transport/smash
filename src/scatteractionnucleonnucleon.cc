@@ -219,7 +219,7 @@ CollisionBranchList ScatterActionNucleonNucleon::nuc_nuc_to_nuc_res(
        * Integrate over the allowed resonance mass range. */
 
       const int res_id = type_resonance->pdgcode().iso_multiplet();
-      if (XS_tabulation[res_id] == NULL) {
+      if (XS_tabulation[res_id] == nullptr) {
         // initialize tabulation, we need one per resonance multiplet
         /* TODO(weil): Move this lazy init to a global initialization function,
          * in order to avoid race conditions in multi-threading. */
@@ -290,8 +290,9 @@ void ScatterActionNucleonNucleon::sample_cms_momenta() {
     mass_b = sample_resonance_mass(t_b, t_a.mass(), cms_energy);
   }
 
-  const std::array<double, 2> t_range = get_t_range(cms_energy, mN, mN,
-                                                    mass_a, mass_b);
+  const std::array<double, 2> t_range
+      = get_t_range<double>(cms_energy, nucleon_mass, nucleon_mass,
+                            mass_a, mass_b);
   Angles phitheta;
   if (t_a.pdgcode().iso_multiplet() == 0x1114 &&
       t_b.pdgcode().iso_multiplet() == 0x1112 && !isotropic_) {
