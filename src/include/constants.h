@@ -37,12 +37,16 @@ constexpr double twopi = 2. * M_PI;
 constexpr float nuclear_density = 0.168;
 /**
  * nucleon mass in GeV
+ *
+ * Note that this should be the same as in particles.txt.
  */
 constexpr float nucleon_mass = 0.938;
 /**
  * kaon mass in GeV
+ *
+ * Note that this should be the same as in particles.txt.
  */
-constexpr float kaon_mass = 0.496;
+constexpr float kaon_mass = 0.494;
 
 /**
  * Fine-struture constant, approximately 1/137

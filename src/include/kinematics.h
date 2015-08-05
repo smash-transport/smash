@@ -174,7 +174,8 @@ inline double plab_from_s(double mandelstam_s,
   if (mandelstam_s < m_sum*m_sum) {
       std::stringstream err;
       err << "plab_from_s: s too small: "
-          << mandelstam_s << " < " << m_sum*m_sum;
+          << mandelstam_s << " < " << m_sum*m_sum
+          << " = (" << m_a << " + " << m_b << ")^2";
       throw std::runtime_error(err.str());
   }
   if (radicand < 0) {
