@@ -35,7 +35,9 @@ class Tabulation {
    * bound we return 0, if it is above the upper bound we return the tabulated
    * value at the upper bound. */
   float get_value_step(float x) const;
-  /** Look up a value from the tabulation using linear interpolation. */
+  /** Look up a value from the tabulation using linear interpolation.
+   * If x is above the upper bound, we use linear extrapolation of the two
+   * highest tabulated points. */
   float get_value_linear(float x) const;
 
  protected:
