@@ -64,7 +64,7 @@ TEST(potential_gradient) {
   P.push_back(part3);
 
   ThreeVector r,dr;
-  Configuration conf(TEST_CONFIG_PATH);
+  Configuration conf = Test::configuration();
   conf["Potentials"]["Skyrme"]["Skyrme_A"] = -209.2;
   conf["Potentials"]["Skyrme"]["Skyrme_B"] = 156.4;
   conf["Potentials"]["Skyrme"]["Skyrme_Tau"] = 1.35;
@@ -97,7 +97,7 @@ TEST(nucleus_potential_profile) {
   std::map<PdgCode, int> nuc_list = {{0x2212, 79}, {0x2112, 118}};
 
   // Create a nucleus
-  Configuration conf(TEST_CONFIG_PATH);
+  Configuration conf = Test::configuration();
   // All interactions off
   conf["Collision_Term"]["Decays"] = "False";
   conf["Collision_Term"]["Collisions"] = "False";
@@ -197,7 +197,7 @@ TEST(propagation_in_test_potential) {
   // Create spheremodus with arbitrary parameters
   // Do not initialize particles: just artificially put one particle to list
   const double p_mass = 0.938;
-  Configuration conf(TEST_CONFIG_PATH);
+  Configuration conf = Test::configuration();
   ExperimentParameters param = Smash::Test::default_parameters();
 
   // Create dummy outputs and our test potential
