@@ -19,7 +19,7 @@ CollisionBranchPtr ScatterActionNucleonKaon::elastic_cross_section(float) {
   const PdgCode &pdg_b = incoming_particles_[1].type().pdgcode();
 
   const PdgCode &nucleon = pdg_a.is_nucleon() ? pdg_a : pdg_b;
-  const PdgCode &kaon = pdg_a.is_nucleon() ? pdg_a : pdg_b;
+  const PdgCode &kaon = pdg_a.is_nucleon() ? pdg_b : pdg_a;
   assert(kaon != nucleon);
 
   const double s = mandelstam_s();
