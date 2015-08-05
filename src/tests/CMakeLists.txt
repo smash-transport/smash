@@ -11,8 +11,6 @@
 string(REPLACE "-Winline " "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 
 file(COPY ../../input/config.yaml DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-file(COPY ../../input/particles.txt DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-file(COPY ../../input/decaymodes.txt DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 string(REPLACE " -Wfloat-equal" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 

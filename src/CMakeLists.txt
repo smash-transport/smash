@@ -124,17 +124,14 @@ configure_file (
   "${CMAKE_CURRENT_BINARY_DIR}/include/config.h"
 )
 
-# directly copy config files to build directory
+# copy config file to build directory
 configure_file(${CMAKE_SOURCE_DIR}/input/config.yaml
                ${PROJECT_BINARY_DIR}/config.yaml
                COPYONLY)
+# generate headers from input files
 set(generated_headers)
-macro(copy_at_make)
+macro(generate_headers)
    foreach(filename ${ARGN})
-      configure_file(
-         ${CMAKE_SOURCE_DIR}/input/${filename}
-         ${PROJECT_BINARY_DIR}/${filename}
-         COPYONLY)
       list(APPEND generated_headers "${CMAKE_CURRENT_BINARY_DIR}/${filename}.h")
       add_custom_command(
          OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${filename}.h
@@ -146,11 +143,11 @@ macro(copy_at_make)
          DEPENDS ${CMAKE_SOURCE_DIR}/input/${filename}
          COMMENT "Convert ${CMAKE_SOURCE_DIR}/input/${filename} to ${CMAKE_CURRENT_BINARY_DIR}/${filename}.h"
          VERBATIM)
-      add_custom_target(copy_${filename} ALL DEPENDS
+      add_custom_target(generate_${filename}.h ALL DEPENDS
          ${CMAKE_CURRENT_BINARY_DIR}/${filename}.h)
    endforeach()
 endmacro()
-copy_at_make(particles.txt decaymodes.txt)
+generate_headers(particles.txt decaymodes.txt)
 
 set_source_files_properties(experiment.cc PROPERTIES OBJECT_DEPENDS "${generated_headers}")
 
