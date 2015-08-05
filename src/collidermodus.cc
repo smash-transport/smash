@@ -8,6 +8,7 @@
 #include "include/collidermodus.h"
 
 #include <algorithm>
+#include <cassert>
 #include <cmath>
 #include <cstdlib>
 #include <cstring>
@@ -228,10 +229,10 @@ ColliderModus::ColliderModus(Configuration modus_config,
       mass_b = target_->mass() / target_->size();
     }
     // Check that input satisfies the lower bound (everything at rest).
-    if (sqrt_s_NN < mass_a + mass_b) {
+    if (sqrt_s_NN <= mass_a + mass_b) {
       throw ModusDefault::InvalidEnergy(
-          "Input Error: sqrt(s_NN) is smaller than masses:\n" +
-          std::to_string(sqrt_s_NN) + " GeV < " + std::to_string(mass_a) +
+          "Input Error: sqrt(s_NN) is not larger than masses:\n" +
+          std::to_string(sqrt_s_NN) + " GeV <= " + std::to_string(mass_a) +
           " GeV + " + std::to_string(mass_b) + " GeV.");
     }
     // Set the total nucleus-nucleus collision energy.
@@ -439,15 +440,24 @@ std::pair<double, double> ColliderModus::get_velocities(float s, float m_a,
       break;
     case CalculationFrame::CenterOfMass:
       {
-        double A = (s -(m_a - m_b) * (m_a - m_b))
-                 * (s -(m_a + m_b) * (m_a + m_b));
-        double B = - 8 * (m_a * m_a) * m_a * (m_b * m_b) * m_b
-                   - ((m_a * m_a) + (m_b * m_b))
-                   * (s - (m_a * m_a) - (m_b * m_b))
-                   * (s - (m_a * m_a) - (m_b * m_b));
-        double C = (m_a * m_a) * (m_b * m_b) * A;
+        const double A =   (s -(m_a - m_b) * (m_a - m_b))
+                         * (s -(m_a + m_b) * (m_a + m_b));
+        #pragma GCC diagnostic push
+        #pragma GCC diagnostic ignored "-Wfloat-equal"
+        if (A == 0) {
+            // velocities are zero
+            break;
+        }
+        #pragma GCC diagnostic pop
+        const double B = - 8 * (m_a * m_a) * m_a * (m_b * m_b) * m_b
+                         - ((m_a * m_a) + (m_b * m_b))
+                         * (s - (m_a * m_a) - (m_b * m_b))
+                         * (s - (m_a * m_a) - (m_b * m_b));
+        const double C = (m_a * m_a) * (m_b * m_b) * A;
         // Compute positive center of mass momentum.
-        double abs_p = std::sqrt((-B - std::sqrt(B * B - 4 * A * C)) / (2 * A));
+        const double radicand1 = B * B - 4 * A * C;
+        const double radicand2 = (-B - std::sqrt(radicand1)) / (2 * A);
+        double abs_p = std::sqrt(radicand2);
         v_a = abs_p / m_a;
         v_b = -abs_p / m_b;
       }
