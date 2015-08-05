@@ -264,13 +264,12 @@ class PdgCode {
 
   /// Is this a nucleon (p, n)?
   inline bool is_nucleon() const {
-      const auto code = multiplet();
-      return (code == 0x2212) || (code == 0x2112);
+      return (code() == 0x2212) || (code() == 0x2112);
   }
   /// Is this a kaon (K+, K-, K0, Kbar0)?
   inline bool is_kaon() const {
-      const auto code = multiplet();
-      return (code == 0x321) || (code == 0x311);
+      const auto abs_code = std::abs(code());
+      return (abs_code == 0x321) || (abs_code == 0x311);
   }
   /// Is this a nucleon resonance (N*)?
   inline bool is_Nstar() const {
