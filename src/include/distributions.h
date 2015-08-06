@@ -52,6 +52,32 @@ double density_integrand(const double energy, const double momentum_sqr,
  */
 double sample_momenta(const double temperature, const double mass);
 
+double sample_momenta1(const double temperature, const double mass);
+
+
+
+/**\param[in] lam +/-1 or 0 to determine the distribution type
+ * lam=0,  for juttner distribution
+ * lam=-1, for bose-einstein distribution
+ * lam=1,  for fermi-dirac distribution
+ * juttner_distribution_func is used in Adaptive rejection sampling to sample
+ * momentum_radial
+ * Notice: "const double &" is dangerous here because if we define:
+ * float lam = 1.0;
+ * and use juttner_distribution_func( p, m, T, muB, lam );
+ * the lam will be not correct.
+ */
+double juttner_distribution_func(const double momentum_radial, \
+        const double mass, const double temperature, const double  \
+        baryon_chemical_potential, const double lam);
+
+
+
+/** wookds-saxon distribution function  */
+double woods_saxon_dist_func(const double r,  const double radius, \
+        const double diffusion);
+
+
 }  // namespace Smash
 
 #endif  // SRC_INCLUDE_DISTRIBUTIONS_H_

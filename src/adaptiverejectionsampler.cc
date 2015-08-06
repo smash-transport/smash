@@ -1,0 +1,404 @@
+/*
+ *
+ *    Copyright (c) 2013-2014
+ *      SMASH Team
+ *
+ *    GNU General Public License (GPLv3 or later)
+ *
+ */
+#include<iostream>
+#include<cmath>
+#include<exception>
+
+#include "include/logging.h"
+#include "include/adaptiverejectionsampler.h"
+#include "include/constants.h"
+#include "include/fpenvironment.h"
+
+namespace Smash {
+
+namespace Rejection {
+    std::ostream &operator<<(std::ostream &out, const Point &p) {
+        out << "Point= (" << p.x << ',' << p.y << ',' << p.expy << ")\n";
+        return out;
+    }
+
+    std::ostream &operator<<(std::ostream &out, const Line &l) {
+        out << "Line= " << l.m << " * x + " << l.b << "\n";
+        return out;
+    }
+
+    auto ran = Random::uniform_dist<float>(0.0, 1.0);
+    /** contrustructor for AdaptiveRejectionSampler
+     * param: func distribution function f_(x)
+     */
+    AdaptiveRejectionSampler::AdaptiveRejectionSampler(
+            std::function<float(float)> func, float xmin, float xmax):
+        f_(func), xmin_(xmin), xmax_(xmax) {
+
+        const auto &log = logger<LogArea::Sampling>();
+        /** judge if f_(xmin_)<1.0E-37 or f_(xmax_)<1.0E-37, 
+         * change the range automatically to make it work 
+         * in ARS since FLT_MIN=1.0E-37*/
+        int nloop = 1;
+
+        {
+            /** disable float traps here since probability can goes to 
+             * really small as we expected; we need to judge it and 
+             * shrink the range (xmin, xmax) to get ride of it */
+            DisableFloatTraps guard(FE_DIVBYZERO | FE_INVALID);
+
+            while ( f_(xmin_) < 1.0E-37 ) {
+                xmin_ += nloop*really_small;
+                nloop *= 2;
+                log.debug() << "xmin_ is changed to " << xmin_ << std::endl;
+                if ( xmin_ > xmax_ ) {
+                    log.fatal() << "xmin_ > xmax_ " << std::endl;
+                }
+            }
+
+            nloop = 1;
+            while ( f_(xmax_) < 1.0E-37 ) {
+                xmax_ -= nloop*really_small;
+                nloop *= 2;
+                log.debug() << "xmax_ is changed to " << xmax_ << std::endl;
+                if ( xmin_ > xmax_ ) {
+                    log.fatal() << "xmax_ < xmin_ " << std::endl;
+                }
+            }
+        } // only disable underflow float traps inside the brackets
+
+        float dx = (xmax_ - xmin_)/static_cast<float>(init_npoint_-1);
+
+        Point p;
+        for ( int i=0; i < init_npoint_; i++ ) {
+            p.x = xmin_+i*dx;
+            p.expy = f_(p.x);
+            p.y = std::log(p.expy);
+            points_.push_back(p);
+        }
+
+        init_scant();
+        init_inter();
+        update_area();
+        std::cout << "initialize finished!" << std::endl;
+    }
+
+
+    /** create initial upper bounds with user provided nodes*/
+    void AdaptiveRejectionSampler::reset_init_xlist(std::vector<float> xlist) {
+        int length = xlist.size();
+        Point p;
+        points_.clear();
+
+        const auto &log = logger<LogArea::Sampling>();
+
+        for (int i = 0; i < length; i++) {
+            p.x = xlist.at(i);
+            p.expy = f_(p.x);
+            p.y = std::log(p.expy);
+            if ( isinf(p.y) ) {
+                p.x = p.x + small_shift;
+                p.expy = f_(p.x);
+                p.y = std::log(p.expy);
+                log.debug() << "In reset_init_xlist():";
+                log.debug() << " the node gives log(f(x))==inf" << std::endl;
+            }
+            points_.push_back(p);
+        }
+
+        init_scant();
+        init_inter();
+        update_area();
+    }
+
+
+    /** Set max_refine_loops by hand */
+    void AdaptiveRejectionSampler::reset_max_refine_loops(const int \
+            new_max_refine_loops){
+        max_refine_loops_ = new_max_refine_loops;
+    }
+
+
+    inline Line AdaptiveRejectionSampler::create_line(Point p0, Point p1) {
+        Line l1;
+        const auto &log = logger<LogArea::Sampling>();
+
+        if ( std::abs((p1).x-(p0).x) < really_small ) {
+             log.fatal() << "the slope is too big" << std::endl;
+             log.fatal() << "p1.x=" << p1.x << " p0.x=" << p0.x << std::endl;
+             exit(EXIT_FAILURE);
+        }
+
+        l1.m = ((p1).y - (p0).y)/((p1).x-(p0).x);
+        l1.b = (p0).y - l1.m*(p0).x;
+        return l1;
+    }
+
+    /** Get scants_ according to points_ */
+    void AdaptiveRejectionSampler::init_scant() {
+        for ( auto p0=points_.begin(); \
+                p0 != std::prev(points_.end(), 1); p0++ ) {
+            auto p1 = std::next(p0, 1);
+            scants_.emplace_back(create_line(*p0, *p1));
+        }
+    }
+
+    /** Calc intersection of two scants_ */
+    inline Point AdaptiveRejectionSampler::create_inter(Line l0, Line l2) {
+        Point p;
+        const auto &log = logger<LogArea::Sampling>();
+        if ( std::abs((l0).m-(l2).m) < really_small ) {
+             log.fatal() << "two parallel lines don't cross" << std::endl;
+             exit(EXIT_FAILURE);
+        }
+
+        p.x = ((l2).b-(l0).b)/((l0).m-(l2).m);
+        p.y = (l0).b+(l0).m*p.x;
+        p.expy = std::exp(p.y);
+        return p;
+    }
+
+    /** leftmost point in upper bounds */
+    inline void AdaptiveRejectionSampler::create_leftend() {
+        auto l1 = std::next(scants_.begin(), 1);
+        Point p0;
+        p0.x = (*points_.begin()).x;
+        p0.y = (*l1).b + (*l1).m*p0.x;
+        p0.expy = std::exp(p0.y);
+        inters_.insert(inters_.begin(), p0);
+    }
+
+    /** rightmost point in upper bounds */
+    inline void AdaptiveRejectionSampler::create_rihtend() {
+        Point p0;
+        auto l1 = std::prev(scants_.end(), 2);
+        p0.x = (*std::prev(points_.end(), 1)).x;
+        p0.y = (*l1).b + (*l1).m*p0.x;
+        p0.expy = std::exp(p0.y);
+        inters_.emplace_back(std::move(p0));
+    }
+
+    /** get all intersection point in upper bounds */
+    void AdaptiveRejectionSampler::init_inter() {
+        for (auto l0=scants_.begin(); l0 != std::prev(scants_.end(), 2); l0++) {
+            auto l2 = std::next(l0, 2);
+            inters_.emplace_back(std::move(create_inter(*l0, *l2)));
+        }
+        create_leftend();
+        create_rihtend();
+    }
+
+    /// construct the jth upper bounds from scants_
+    inline Line AdaptiveRejectionSampler::upper(int j) {
+        // j&1 == j%2, while j&1 should be faster
+        return (j&1) ? scants_.at((j+1)/2-1) : scants_.at((j+1)/2+1);
+    }
+
+    /// construct the jth lower bounds from scants_
+    Line AdaptiveRejectionSampler::lower(int j) {
+        return scants_.at((j+1)/2);
+    }
+
+
+    /** get areas_ below piecewise exponential upper bounds
+     */
+    void AdaptiveRejectionSampler::update_area() {
+        const auto & log = logger<LogArea::Sampling>();
+        areas_.resize(0);
+        upper_bounds_.resize(0);
+        auto it0 = inters_.begin();
+        auto it1 = std::next(points_.begin(), 1);
+        int j = 0;
+
+        for (; it0 != std::prev(inters_.end(), 1); it0++, it1++) {
+            // (left) intersection--->(right) point
+            if ( std::abs(upper(j).m) < really_small ) {
+                log.fatal() << "slope too small = " << upper(j).m << std::endl;
+                exit(EXIT_FAILURE);
+            }
+
+            float Aj = ((*it1).expy-(*it0).expy)/upper(j).m;
+            areas_.push_back(Aj);
+            upper_bounds_.push_back({*it0, *it1, upper(j)});
+            j++;
+            // (left) point--->(right) intersection
+            Aj = ((*std::next(it0, 1)).expy-(*it1).expy)/upper(j).m;
+            areas_.push_back(Aj);
+            upper_bounds_.push_back({*it1, *std::next(it0, 1), upper(j)});
+            j++;
+        }
+        discrete_distribution_.reset_weights(areas_);
+    }
+
+
+    /** refine scants_, intersections, upper and lowers bounds with
+    * the new rejected point, recalculate area sequence
+    * param: j the id of the scant, not the id of area
+    */
+    void AdaptiveRejectionSampler::adaptive_update(
+            const int j, const Point & new_rejection) {
+        const int nscants = scants_.size();
+        const auto & log = logger<LogArea::Sampling>();
+        Line l[2];
+        Point ints[4];
+
+        // don't update if the new point is too close to existing points
+        // and intersections
+
+        if ( std::fabs(new_rejection.x - points_.at(j).x) < really_small ||
+             std::fabs(new_rejection.x - points_.at(j+1).x) < really_small ||
+             std::fabs(new_rejection.x - inters_.at(j).x) < really_small ) {
+             log.debug() << "the new rejection point at (x=" << new_rejection.x << ")";
+             log.debug() << " is too close to existing ones" << std::endl;
+             log.debug() << "old points with x in (" << points_.at(j).x << ",";
+             log.debug() << points_.at(j+1).x << "," << inters_.at(j).x << ")";
+             log.debug() << std::endl;
+            return ;
+        }
+
+        points_.insert(std::next(points_.begin(), j+1), new_rejection);
+
+        /// scants_ -1 +2 for all cases with the new rejection
+        auto it = points_.begin();
+        auto p0 = std::next(it, j);
+        auto p1 = std::next(it, j+1);
+        auto p2 = std::next(it, j+2);
+        l[0] = create_line(*p0, *p1);
+        l[1] = create_line(*p1, *p2);
+        scants_.insert(std::next(scants_.begin(), j), {l[0], l[1]});
+        scants_.erase(std::next(scants_.begin(), j+2));
+
+        auto it0 = inters_.begin();
+        auto it1 = inters_.begin();
+
+        /// for left most piece, boundary intersections -2 +3
+        if ( j == 0 ) {
+            ints[0] = create_inter(l[0], *std::next(scants_.begin(), j+2));
+            ints[1] = create_inter(l[1], *std::next(scants_.begin(), j+3));
+            inters_.insert(std::next(inters_.begin(), j), {ints[0], ints[1]});
+            it0 = std::next(inters_.begin(), j+2);
+            it1 = std::next(inters_.begin(), j+4);
+            inters_.erase(it0, it1);
+            create_leftend();
+        } else if ( j == 1 ) {
+            /// for next to left most piece, intersections -3 +4
+            ints[1] = create_inter(l[1], *std::next(scants_.begin(), j-1));
+            ints[2] = create_inter(l[0], *std::next(scants_.begin(), j+2));
+            ints[3] = create_inter(l[1], *std::next(scants_.begin(), j+3));
+            inters_.insert(std::next(inters_.begin(), j-1),
+                    {ints[1], ints[2], ints[3]});
+            it0 = std::next(inters_.begin(), j+2);
+            it1 = std::next(inters_.begin(), j+5);
+            inters_.erase(it0, it1);
+            create_leftend();
+        } else if ( j == nscants-2 ) {
+            /// for prev to right most piece, intersections -3 +4
+            ints[0] = create_inter(l[0], *std::next(scants_.begin(), j-2));
+            ints[1] = create_inter(l[1], *std::next(scants_.begin(), j-1));
+            ints[2] = create_inter(l[0], *std::next(scants_.begin(), j+2));
+            inters_.insert(std::next(inters_.begin(), j-1),
+                    {ints[0], ints[1], ints[2]});
+            it0 = std::next(inters_.begin(), j+2);
+            it1 = std::next(inters_.begin(), j+5);
+            inters_.erase(it0, it1);
+            create_rihtend();
+        } else if ( j == nscants-1 ) {
+            /// for right most piece, intersections -2 +3
+            ints[0] = create_inter(l[0], *std::next(scants_.begin(), j-2));
+            ints[1] = create_inter(l[1], *std::next(scants_.begin(), j-1));
+            inters_.insert(std::next(inters_.begin(), j-1), {ints[0], ints[1]});
+            it0 = std::next(inters_.begin(), j+1);
+            it1 = std::next(inters_.begin(), j+3);
+            inters_.erase(it0, it1);
+            create_rihtend();
+        } else if ( j > 1 && j < nscants-2 ) {
+            /// for other pieces, intersections -3 +4
+            ints[0] = create_inter(l[0], *std::next(scants_.begin(), j-2));
+            ints[1] = create_inter(l[1], *std::next(scants_.begin(), j-1));
+            ints[2] = create_inter(l[0], *std::next(scants_.begin(), j+2));
+            ints[3] = create_inter(l[1], *std::next(scants_.begin(), j+3));
+            inters_.insert(std::next(inters_.begin(), j-1),
+                    {ints[0], ints[1], ints[2], ints[3]});
+            it0 = std::next(inters_.begin(), j+3);
+            it1 = std::next(inters_.begin(), j+6);
+            inters_.erase(it0, it1);
+        } else {
+            log.fatal() << "The rejection point is not in the range\n";
+        }
+        update_area();
+    }
+
+
+    /** draw region from discrete distribution with weight areas_ */
+    inline int AdaptiveRejectionSampler::sample_j() {
+        /*used to sample j from area list*/
+        return discrete_distribution_();
+    }
+
+    /** sampler x in range [xj, xj+1) */
+    inline float AdaptiveRejectionSampler::sample_x(int j) {
+        const auto & log = logger<LogArea::Sampling>();
+        float r = Random::canonical<float>();
+        float m = upper_bounds_.at(j).piecewise_linear_line.m;
+        if ( std::abs(m) < really_small ) {
+            log.fatal() << "slope is too small" << std::endl;
+            exit(EXIT_FAILURE);
+        }
+        return std::log(r*std::exp(m*upper_bounds_.at(j).right_point.x)+
+                (1.0f-r)*std::exp(m*upper_bounds_.at(j).left_point.x))/m;
+    }
+
+
+    /** if squeezing_test==true, do not need rejection_test (time save) */
+    inline bool AdaptiveRejectionSampler::squeezing_test(const float & x,
+            const int & j, const float & rand) {
+        return rand <= std::exp(lower(j).eval(x) -
+                upper_bounds_.at(j).piecewise_linear_line.eval(x));
+    }
+
+    /** if squeezing_test==false, do rejection_test
+     * if rejection_test=true, keep the sampling*/
+    inline bool AdaptiveRejectionSampler::rejection_test(const float & x,
+            const int & j, const float & rand) {
+        return rand*std::exp(upper_bounds_.at(j).piecewise_linear_line.eval(x)) \
+            <= f_(x);
+    }
+
+
+    /** get one x from distribution function f_(x)*/
+    float AdaptiveRejectionSampler::get_one_sample() {
+        const auto & log = logger<LogArea::Sampling>();
+
+        int rejections = 0;
+        float x;
+        while ( true ) {
+            int j = sample_j();
+            x = sample_x(j);
+            float rand = Random::canonical<float>();
+            if ( squeezing_test(x, j, rand) ) {
+                return x;
+            } else if ( rejection_test(x, j, rand) ) {
+                return x;
+            } else {
+                if ( rejections < max_refine_loops_ ) {
+                    Point rej;
+                    rej.x = x;
+                    rej.expy = f_(x);
+                    rej.y = std::log(rej.expy);
+                    adaptive_update((j+1)/2, rej);
+                    rejections++;
+                }
+            }
+
+            if ( rejections == max_refine_loops_) {
+                log.fatal() << "In AdaptiveRejectionSampler:";
+                log.fatal() << "reject too many time!\n";
+                exit(EXIT_FAILURE);
+            }
+        }
+    }
+
+
+}  // end namespace Rejection
+}  // end namespace Smash

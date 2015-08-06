@@ -127,6 +127,47 @@ template <typename T = double> T power(T n, T xMin, T xMax) {
     }
 }
 
+/** returns an poisson distributed random number
+ *
+ * Probability for a given return value \f$\chi\f$ is \f$p(\chi) =
+ * \chi^i/i! \cdot \exp(-\chi)\f$
+ */
+template <typename T> int poisson(const T & lam ){
+    return std::poisson_distribution<int>(lam)(engine);
+}
+
+/// \return: a interger number from discrete distribution with appropriate weight
+template <typename T>
+class discrete_dist {
+ public:
+  /** default discrete distribution */
+  discrete_dist()
+    : distribution({1.0}){
+  }
+
+  /** creates the object from probability vector */
+  discrete_dist(const std::vector<T> & plist)
+    : distribution(plist.begin(), plist.end()){
+  }
+
+  /** creates the object from probability list */
+  discrete_dist(std::initializer_list<T> l)
+    : distribution(l){
+  }
+
+  /** reset the discrete distribution with new list*/
+  void reset_weights(const std::vector<T> & plist){
+    distribution = std::discrete_distribution<>(plist.begin(), plist.end());
+  }
+  /** returns a random number in the interval */
+  int operator ()() {
+    return distribution(engine);
+  }
+  /** the distribution object that is being used. */
+ private:
+  std::discrete_distribution<> distribution;
+};
+
 }  // namespace Random
 }  // namespace Smash
 
