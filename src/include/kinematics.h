@@ -9,7 +9,6 @@
 #define SRC_INCLUDE_KINEMATICS_H_
 
 #include <array>
-#include <iostream>
 
 #include "constants.h"
 
