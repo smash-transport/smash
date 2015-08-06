@@ -78,8 +78,9 @@ TEST(juttner_distribution_adaptive_rejection_sampling) {
      * double r = sample_momenta1(temperature, mass);
      * change to the following code to do unittest for native rejection
      * double r = sample_momenta(temperature, mass);
-     * notice that the native rejection is very slow, for 10million samplings
-     * it may take longer than 400s */
+     * notice that the native rejection is slow, for 10million samplings
+     * it may take longer than 16s with the new random generator; (and
+     * the native rejection can not pass this test) */
     for(int i=0; i<10000000; i++){
         double r = juttner_sampler.get_one_sample();
         //double r = sample_momenta(temperature, mass);
