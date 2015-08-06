@@ -1,3 +1,13 @@
+/*
+ *
+ *    Copyright (c) 2015
+ *      SMASH Team
+ *
+ *    GNU General Public License (GPLv3 or later)
+ *
+ */
+
+
 #include "unittest.h"
 
 #include <cstdio>
@@ -83,7 +93,7 @@ TEST(juttner_distribution_adaptive_rejection_sampling) {
      * the native rejection can not pass this test) */
     for(int i=0; i<10000000; i++){
         double r = juttner_sampler.get_one_sample();
-        //double r = sample_momenta(temperature, mass);
+        //double r = sample_momenta1(temperature, mass);
         int bin = r/dx;
         ++histogram[bin];
     }

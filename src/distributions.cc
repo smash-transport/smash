@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2013-2014
+ *    Copyright (c) 2013-2015
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -85,6 +85,7 @@ double sample_momenta(const double temperature, const double mass) {
 }
 
 /* A much faster sampler for thermal distribution from Scott
+* (see \iref{Pratt:2014vja}) APPENDIX: ALGORITHM FOR GENERATING PARTICLES
 * math trick: for \f$ x^{n-1}e^{-x} \f$ distribution, sample x by:
 * \f$ x = -ln(r_1 r_2 r_3 ... r_n) \f$
 * where \f$ r_i \f$ are uniform random numbers between [0,1)
