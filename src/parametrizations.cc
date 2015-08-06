@@ -268,12 +268,17 @@ float kminusp_elastic_pdg(double mandelstam_s) {
 /** K- p elastic cross section parametrization.
  * Source: \iref{Buss:2011mx}, B.3.9 */
 float kminusp_elastic(double mandelstam_s) {
+  // TODO(steinberg):
+  // The elastic contributions from decays still need to be substracted.
   if (std::sqrt(mandelstam_s) < 1.7) {
     // The parametrization here also works for anti-K0 n, Lambda pi0,
     // Sigma+ pi-, Sigma- pi+, Sigma0 pi0 with different parameters a0, a1, a2.
-    constexpr double a0 = 150;  // mb GeV^2
-    constexpr double a1 = 0.35;  // Gev
-    constexpr int a2 = 2;
+    //
+    // The values of the parameters are *not* taken from the source above,
+    // they come from a fit to PDG data.
+    constexpr double a0 = 186.03567644;  // mb GeV^2
+    constexpr double a1 = 0.22002795;  // Gev
+    constexpr double a2 = 0.64907116;
 
     const double p_lab = plab_from_s(mandelstam_s, kaon_mass);
     const double p_i = p_lab;
