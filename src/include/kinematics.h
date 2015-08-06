@@ -14,6 +14,61 @@
 
 namespace Smash {
 
+/**
+ * Return velocity in the center of velocities frame of two particles given
+ * their mandelstam s and masses
+ *
+ * \param mandelstamm s of the collision [GeV^2]
+ * \param ma Mass of the first particle [GeV]
+ * \param ma Mass of the second particle [GeV]
+ */
+inline double center_of_velocity_v(float s, float ma, float mb) {
+  const float m_sum = ma + mb;
+  const float m_dif = ma - mb;
+  return std::sqrt((s - m_sum*m_sum) / (s - m_dif*m_dif));
+}
+
+/**
+ * Return velocity of projectile in the fixed target frame given
+ * their mandelstam s of projectile and target and their masses
+ *
+ * \param mandelstamm s of the collision [GeV^2]
+ * \param ma Mass of the projectile [GeV]
+ * \param ma Mass of the target [GeV]
+ */
+inline double fixed_target_projectile_v(float s, float ma, float mb) {
+  const float inv_gamma = 2 * ma * mb / (s - ma * ma);
+  return std::sqrt(1.0 - inv_gamma*inv_gamma);
+}
+
+/**
+ * Return the squared center-of-mass momentum of two particles,
+ * given s and their masses.
+ *
+ * \param s mandelstamm s of the process [GeV^2].
+ * \param mass_a Mass of first particle [GeV].
+ * \param mass_b Mass of second particle [GeV].
+ */
+template <typename T>
+T pCM_sqr_from_s(const T s, const T mass_a, const T mass_b) noexcept {
+  const auto mass_a_sqr = mass_a * mass_a;
+  const auto x = s + mass_a_sqr - mass_b * mass_b;
+  return x * x * (T(0.25) / s) - mass_a_sqr;
+}
+
+/**
+ * Return the center-of-mass momentum of two particles,
+ * given s and their masses.
+ *
+ * \param s mandelstamm s of the process [GeV^2].
+ * \param mass_a Mass of first particle [GeV].
+ * \param mass_b Mass of second particle [GeV].
+ */
+template <typename T>
+T pCM_from_s(const T s, const T mass_a, const T mass_b) noexcept {
+  const auto psqr = pCM_sqr_from_s(s, mass_a, mass_b);
+  return psqr > T(0.) ? std::sqrt(psqr) : T(0.);
+}
 
 /**
  * Return the center-of-mass momentum of two particles,
@@ -25,13 +80,9 @@ namespace Smash {
  */
 template <typename T>
 T pCM(const T srts, const T mass_a, const T mass_b) noexcept {
-  const auto s = srts * srts;
-  const auto mass_a_sqr = mass_a * mass_a;
-  const auto x = s + mass_a_sqr - mass_b * mass_b;
-  const auto psqr = x * x * (T(0.25) / s) - mass_a_sqr;
-  return psqr > 0. ? std::sqrt(psqr) : 0.;
+  const auto psqr = pCM_sqr_from_s(srts*srts, mass_a, mass_b);
+  return psqr > T(0.) ? std::sqrt(psqr) : T(0.);
 }
-
 
 /**
  * Return the squared center-of-mass momentum of two particles,
@@ -43,12 +94,8 @@ T pCM(const T srts, const T mass_a, const T mass_b) noexcept {
  */
 template <typename T>
 T pCM_sqr(const T srts, const T mass_a, const T mass_b) noexcept {
-  const auto s = srts * srts;
-  const auto mass_a_sqr = mass_a * mass_a;
-  const auto x = s + mass_a_sqr - mass_b * mass_b;
-  return x * x * (T(0.25) / s) - mass_a_sqr;
+  return pCM_sqr_from_s(srts * srts, mass_a, mass_b);
 }
-
 
 /**
  * Get the range of mandelstam-t values allowed in a particular 2->2 process,
@@ -79,10 +126,9 @@ std::array<T, 2> get_t_range(const T srts, const T m1, const T m2,
  *
  * \fpPrecision Why \c double?
  */
-inline double plab_from_s_NN(double mandelstam_s) {
-  const double mNsqr = nucleon_mass * nucleon_mass;
-  return std::sqrt((mandelstam_s - 2*mNsqr) * (mandelstam_s - 2*mNsqr)
-                   - 4 * mNsqr * mNsqr) / (2 * nucleon_mass);
+inline double plab_from_s_NN(double s_NN) {
+  const double tmp = s_NN * (s_NN - 4 * nucleon_mass * nucleon_mass);
+  return std::sqrt(tmp) / (2 * nucleon_mass);
 }
 
 
