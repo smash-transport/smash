@@ -439,9 +439,9 @@ std::pair<double, double> ColliderModus::get_velocities(float s, float m_a,
     case CalculationFrame::CenterOfMass:
       {
         // Compute center of mass momentum.
-        double abs_p = pCM_from_s(s, m_a, m_b);
-        v_a = abs_p / m_a;
-        v_b = -abs_p / m_b;
+        double pCM = pCM_from_s(s, m_a, m_b);
+        v_a = pCM / std::sqrt(m_a*m_a + pCM*pCM);
+        v_b = -pCM / std::sqrt(m_b*m_b + pCM*pCM);
       }
       break;
     case CalculationFrame::FixedTarget:
