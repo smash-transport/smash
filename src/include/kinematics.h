@@ -9,6 +9,7 @@
 #define SRC_INCLUDE_KINEMATICS_H_
 
 #include <array>
+#include <iostream>
 
 #include "constants.h"
 
@@ -37,7 +38,7 @@ inline double center_of_velocity_v(float s, float ma, float mb) {
  * \param ma Mass of the target [GeV]
  */
 inline double fixed_target_projectile_v(float s, float ma, float mb) {
-  const float inv_gamma = 2 * ma * mb / (s - ma * ma);
+  const float inv_gamma = 2 * ma * mb / (s - ma * ma - mb * mb);
   return std::sqrt(1.0 - inv_gamma*inv_gamma);
 }
 
