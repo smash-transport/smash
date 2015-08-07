@@ -89,6 +89,14 @@ float sample_resonance_mass(const ParticleType &type_resonance,
                                                      type_resonance);
   }
 
+  if (distribution_value > distribution_max) {
+    const auto &log = logger<LogArea::Resonances>();
+    log.error("distribution value too large in sample_resonance_mass: ",
+              distribution_value, " ", distribution_max, " ",
+              type_resonance.pdgcode(), " ", mass_stable, " ", cms_energy, " ",
+              mass_resonance);
+  }
+
   return mass_resonance;
 }
 
