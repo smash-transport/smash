@@ -71,6 +71,14 @@ template <typename T = double> T canonical() {
   return std::generate_canonical<T, std::numeric_limits<double>::digits>(
       engine);
 }
+/** returns a uniformly distributed random number \f$\chi \in (0,1]\f$
+ */
+template <typename T = double> T canonical_nonzero() {
+  return std::nextafter(
+      std::generate_canonical<T, std::numeric_limits<double>::digits>(engine),
+      T(1)
+  );
+}
 /** returns a uniform_dist object */
 template <typename T>
 uniform_dist<T> make_uniform_distribution(T min, T max) {
@@ -85,7 +93,7 @@ template <typename T = double> T exponential(T lambda) {
   /* Work around a libstdc++ bug in std::exponential_distribution:
    * If canonical() is in [0,1) then 1.-canonical() is in (0,1] and it's safe
    * to call the log. */
-  return -std::log(1.-canonical()) / lambda;
+  return -std::log(canonical_nonzero()) / lambda;
 }
 
 /** Evaluates a random number x according to an exponential distribution
