@@ -48,8 +48,8 @@ ScatterActionsFinder::ScatterActionsFinder(
 double ScatterActionsFinder::collision_time(const ParticleData &p1,
                                             const ParticleData &p2) {
   const auto &log = logger<LogArea::FindScatter>();
-  /** UrQMD collision time
-   * \iref{Hirano:2012yy} (5.15): in computational frame
+  /** UrQMD collision time in computational frame,
+   * see \iref{Bass:1998ca} (3.28):
    * position of particle a: x_a [fm]
    * position of particle b: x_b [fm]
    * velocity of particle a: v_a
