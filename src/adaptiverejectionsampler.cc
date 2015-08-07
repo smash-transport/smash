@@ -36,9 +36,9 @@ namespace Rejection {
             std::function<float(float)> func, float xmin, float xmax):
         f_(func), xmin_(xmin), xmax_(xmax) {
         const auto &log = logger<LogArea::Sampling>();
-        /** judge if f_(xmin_)<1.0E-37 or f_(xmax_)<1.0E-37, 
+        /** judge if f_(xmin_)<FLT_MIN or f_(xmax_)<FLT_MIN,
          * change the range automatically to make it work 
-         * in ARS since FLT_MIN=1.0E-37*/
+         * in ARS since we need log(f_(x))*/
         int nloop = 1;
 
         {
@@ -47,22 +47,26 @@ namespace Rejection {
              * shrink the range (xmin, xmax) to get ride of it */
             DisableFloatTraps guard(FE_DIVBYZERO | FE_INVALID);
 
-            while ( f_(xmin_) < 1.0E-37 ) {
+            while ( f_(xmin_) < std::numeric_limits<float>::min() ) {
                 xmin_ += nloop*really_small;
                 nloop *= 2;
                 log.debug() << "xmin_ is changed to " << xmin_ << std::endl;
                 if ( xmin_ > xmax_ ) {
                     log.fatal() << "xmin_ > xmax_ " << std::endl;
+                    throw std::runtime_error(
+                      "Error: xmin_ > xmax_ in ARS during shrinking range");
                 }
             }
 
             nloop = 1;
-            while ( f_(xmax_) < 1.0E-37 ) {
+            while ( f_(xmax_) < std::numeric_limits<float>::min() ) {
                 xmax_ -= nloop*really_small;
                 nloop *= 2;
                 log.debug() << "xmax_ is changed to " << xmax_ << std::endl;
                 if ( xmin_ > xmax_ ) {
                     log.fatal() << "xmax_ < xmin_ " << std::endl;
+                    throw std::runtime_error(
+                      "Error: xmin_ > xmax_ in ARS during shrinking range");
                 }
             }
         }  // only disable underflow float traps inside the brackets
@@ -84,34 +88,6 @@ namespace Rejection {
     }
 
 
-    /** create initial upper bounds with user provided nodes*/
-    void AdaptiveRejectionSampler::reset_init_xlist(std::vector<float> xlist) {
-        int length = xlist.size();
-        Point p;
-        points_.clear();
-
-        const auto &log = logger<LogArea::Sampling>();
-
-        for (int i = 0; i < length; i++) {
-            p.x = xlist.at(i);
-            p.expy = f_(p.x);
-            p.y = std::log(p.expy);
-            if ( isinf(p.y) ) {
-                p.x = p.x + small_shift;
-                p.expy = f_(p.x);
-                p.y = std::log(p.expy);
-                log.debug() << "In reset_init_xlist():";
-                log.debug() << " the node gives log(f(x))==inf" << std::endl;
-            }
-            points_.push_back(p);
-        }
-
-        init_scant();
-        init_inter();
-        update_area();
-    }
-
-
     /** Set max_refine_loops by hand */
     void AdaptiveRejectionSampler::reset_max_refine_loops(const int
             new_max_refine_loops) {
@@ -126,7 +102,9 @@ namespace Rejection {
         if ( std::abs((p1).x-(p0).x) < really_small ) {
              log.fatal() << "the slope is too big" << std::endl;
              log.fatal() << "p1.x=" << p1.x << " p0.x=" << p0.x << std::endl;
-             exit(EXIT_FAILURE);
+             throw std::runtime_error(
+               "Error: unsafe to create scant from 2 points "
+               "whose position are too close since we need the slope.");
         }
 
         l1.m = ((p1).y - (p0).y)/((p1).x-(p0).x);
@@ -149,7 +127,9 @@ namespace Rejection {
         const auto &log = logger<LogArea::Sampling>();
         if ( std::abs((l0).m-(l2).m) < really_small ) {
              log.fatal() << "two parallel lines don't cross" << std::endl;
-             exit(EXIT_FAILURE);
+             throw std::runtime_error(
+               "Error: unable to get intersection of 2 lines "
+               "that are parallel to each other.");
         }
 
         p.x = ((l2).b-(l0).b)/((l0).m-(l2).m);
@@ -203,26 +183,34 @@ namespace Rejection {
     /** get areas_ below piecewise exponential upper bounds
      */
     void AdaptiveRejectionSampler::update_area() {
-        const auto & log = logger<LogArea::Sampling>();
         areas_.resize(0);
         upper_bounds_.resize(0);
         auto it0 = inters_.begin();
         auto it1 = std::next(points_.begin(), 1);
         int j = 0;
 
+        // Aj: The area under the jth piece exponential function
+        float Aj;
+
         for (; it0 != std::prev(inters_.end(), 1); it0++, it1++) {
             // (left) intersection--->(right) point
-            if ( std::abs(upper(j).m) < really_small ) {
-                log.fatal() << "slope too small = " << upper(j).m << std::endl;
-                exit(EXIT_FAILURE);
+            if ( std::abs(upper(j).m) > std::numeric_limits<float>::min() ) {
+                Aj = ((*it1).expy-(*it0).expy)/upper(j).m;
+            } else {
+                // if it happens in really tiny opportunity that the slope == 0
+                Aj = (*it1).expy * ((*it1).x - (*it0).x);
             }
-
-            float Aj = ((*it1).expy-(*it0).expy)/upper(j).m;
             areas_.push_back(Aj);
             upper_bounds_.push_back({*it0, *it1, upper(j)});
+
             j++;
             // (left) point--->(right) intersection
-            Aj = ((*std::next(it0, 1)).expy-(*it1).expy)/upper(j).m;
+            if ( std::abs(upper(j).m) > std::numeric_limits<float>::min() ) {
+                Aj = ((*std::next(it0, 1)).expy-(*it1).expy)/upper(j).m;
+            } else {
+                // if it happens in really tiny opportunity that the slope == 0
+                Aj = (*it1).expy * ((*std::next(it0, 1)).x - (*it1).x);
+            }
             areas_.push_back(Aj);
             upper_bounds_.push_back({*it1, *std::next(it0, 1), upper(j)});
             j++;
@@ -338,15 +326,18 @@ namespace Rejection {
 
     /** sampler x in range [xj, xj+1) */
     inline float AdaptiveRejectionSampler::sample_x(int j) {
-        const auto & log = logger<LogArea::Sampling>();
         float r = Random::canonical<float>();
         float m = upper_bounds_.at(j).piecewise_linear_line.m;
-        if ( std::abs(m) < really_small ) {
-            log.fatal() << "slope is too small" << std::endl;
-            exit(EXIT_FAILURE);
-        }
-        return std::log(r*std::exp(m*upper_bounds_.at(j).right_point.x)+
+        // m != 0, sample from piecewise exponential distribution
+        if ( m > std::numeric_limits<float>::min() ) {
+            return std::log(r*std::exp(m*upper_bounds_.at(j).right_point.x)+
                 (1.0f-r)*std::exp(m*upper_bounds_.at(j).left_point.x))/m;
+        } else {
+            // if it happens in really tiny opportunity that the slope m == 0
+            // sample from unifrom distribution
+            return r*upper_bounds_.at(j).right_point.x +
+                (1.0f-r)*upper_bounds_.at(j).left_point.x;
+        }
     }
 
 
@@ -394,7 +385,9 @@ namespace Rejection {
             if ( rejections == max_refine_loops_ ) {
                 log.fatal() << "In AdaptiveRejectionSampler:";
                 log.fatal() << "reject too many time!\n";
-                exit(EXIT_FAILURE);
+                throw std::runtime_error(
+                  "Error: Reject more than 40 times to get one sample "
+                  "is not resonable in ARS method!");
             }
         }
     }
