@@ -18,10 +18,6 @@
 namespace Smash {
 
 namespace Rejection {
-/*shift x to x + small_shift when f(x) is too close to 0 which makes
- * log(f(x))=-INFINITY*/
-const float small_shift = 1.0E-20;
-
 /*x, expy=f(x), y=log(f(x)) coordinates used in AdaptiveRejectionSampler*/
 typedef struct point {
     float x, y;
@@ -122,10 +118,6 @@ class AdaptiveRejectionSampler {
       */
      AdaptiveRejectionSampler(std::function<float(float)> func,
              float xmin, float xmax);
-
-     /*reset initial points for the upper bound calculations by hand.
-      *The end points in the list will be treated as xmin and xmax*/
-     void reset_init_xlist(std::vector<float> xlist);
 
      /*reset max refine loops for AdaptiveRejectionSampler*/
      void reset_max_refine_loops(const int new_max_refine_loops);
