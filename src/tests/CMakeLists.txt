@@ -10,9 +10,7 @@
 # remove -Winline for test code
 string(REPLACE "-Winline " "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 
-file(COPY ../config.yaml DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-file(COPY ../particles.txt DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-file(COPY ../decaymodes.txt DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY ../../input/config.yaml DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 string(REPLACE " -Wfloat-equal" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 
@@ -122,7 +120,7 @@ else()
    message(WARNING "gitstats was not found. The gitstats support will be disabled.")
 endif()
 
-add_definitions("-DTEST_CONFIG_PATH=bf::path(\"${PROJECT_SOURCE_DIR}/src\")")
+add_definitions("-DTEST_CONFIG_PATH=bf::path(\"${PROJECT_SOURCE_DIR}\")")
 add_definitions("-DBUILD_TESTS")
 
 # compile-only tests
@@ -152,6 +150,7 @@ smash_add_unittest(initial_conditions)
 smash_add_unittest(integrate)
 smash_add_unittest(interpolation)
 smash_add_unittest(isospin)
+smash_add_unittest(kinematics)
 smash_add_unittest(lattice)
 smash_add_unittest(lorentzboost)
 smash_add_unittest(nucleus)

@@ -433,39 +433,19 @@ std::pair<double, double> ColliderModus::get_velocities(float s, float m_a,
   // Frame dependent calculations of velocities. Assume v_a >= 0, v_b <= 0.
   switch (frame_) {
     case CalculationFrame::CenterOfVelocity:
-      v_a = std::sqrt((s - (m_a + m_b) * (m_a + m_b)) /
-                      (s - (m_a - m_b) * (m_a - m_b)));
+      v_a = center_of_velocity_v(s, m_a, m_b);
       v_b = -v_a;
       break;
     case CalculationFrame::CenterOfMass:
       {
-        const double A =   (s -(m_a - m_b) * (m_a - m_b))
-                         * (s -(m_a + m_b) * (m_a + m_b));
-        #pragma GCC diagnostic push
-        #pragma GCC diagnostic ignored "-Wfloat-equal"
-        if (A == 0) {
-            // velocities are zero
-            break;
-        }
-        #pragma GCC diagnostic pop
-        const double B = - 8 * (m_a * m_a) * m_a * (m_b * m_b) * m_b
-                         - ((m_a * m_a) + (m_b * m_b))
-                         * (s - (m_a * m_a) - (m_b * m_b))
-                         * (s - (m_a * m_a) - (m_b * m_b));
-        const double C = (m_a * m_a) * (m_b * m_b) * A;
-        // Compute positive center of mass momentum.
-        const double radicand1 = B * B - 4 * A * C;
-        const double radicand2 = (-B - std::sqrt(radicand1)) / (2 * A);
-        double abs_p = std::sqrt(radicand2);
-        v_a = abs_p / m_a;
-        v_b = -abs_p / m_b;
+        // Compute center of mass momentum.
+        double pCM = pCM_from_s(s, m_a, m_b);
+        v_a = pCM / std::sqrt(m_a*m_a + pCM*pCM);
+        v_b = -pCM / std::sqrt(m_b*m_b + pCM*pCM);
       }
       break;
     case CalculationFrame::FixedTarget:
-      v_a = std::sqrt(1 -
-                      4 * (m_a * m_a) * (m_b * m_b) /
-                          ((s - (m_a * m_a) - (m_b * m_b)) *
-                           (s - (m_a * m_a) - (m_b * m_b))));
+      v_a = fixed_target_projectile_v(s, m_a, m_b);
       break;
     default:
       throw std::domain_error(
