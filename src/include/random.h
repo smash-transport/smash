@@ -60,17 +60,20 @@ template <typename T> class uniform_dist {
 template <typename T> void set_seed(T &&seed) {
   engine.seed(std::forward<T>(seed));
 }
+
 /** returns a uniformly distributed random number \f$\chi \in [{\rm
  * min}, {\rm max})\f$ */
 template <typename T> T uniform(T min, T max) {
   return std::uniform_real_distribution<T>(min, max)(engine);
 }
+
 /** returns a uniformly distributed random number \f$\chi \in [0,1)\f$
  */
 template <typename T = double> T canonical() {
   return std::generate_canonical<T, std::numeric_limits<double>::digits>(
       engine);
 }
+
 /** returns a uniformly distributed random number \f$\chi \in (0,1]\f$
  */
 template <typename T = double> T canonical_nonzero() {
@@ -79,20 +82,21 @@ template <typename T = double> T canonical_nonzero() {
       T(1)
   );
 }
+
 /** returns a uniform_dist object */
 template <typename T>
 uniform_dist<T> make_uniform_distribution(T min, T max) {
   return uniform_dist<T>(min, max);
 }
+
 /** returns an exponentially distributed random number
  *
  * Probability for a given return value \f$\chi\f$ is \f$p(\chi) =
  * \Theta(\chi) \cdot \exp(-t)\f$
  */
 template <typename T = double> T exponential(T lambda) {
-  /* Work around a libstdc++ bug in std::exponential_distribution:
-   * If canonical() is in [0,1) then 1.-canonical() is in (0,1] and it's safe
-   * to call the log. */
+  // We are not using std::exponential_distribution because of a bug in the
+  // implementations by clang and gcc.
   return -std::log(canonical_nonzero()) / lambda;
 }
 
