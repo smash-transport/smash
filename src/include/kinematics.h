@@ -18,9 +18,9 @@ namespace Smash {
  * Return velocity in the center of velocities frame of two particles given
  * their mandelstam s and masses
  *
- * \param mandelstamm s of the collision [GeV^2]
+ * \param s mandelstamm s of the collision [GeV^2]
  * \param ma Mass of the first particle [GeV]
- * \param ma Mass of the second particle [GeV]
+ * \param mb Mass of the second particle [GeV]
  */
 inline double center_of_velocity_v(float s, float ma, float mb) {
   const float m_sum = ma + mb;
@@ -32,9 +32,9 @@ inline double center_of_velocity_v(float s, float ma, float mb) {
  * Return velocity of projectile in the fixed target frame given
  * their mandelstam s of projectile and target and their masses
  *
- * \param mandelstamm s of the collision [GeV^2]
+ * \param s mandelstamm s of the collision [GeV^2]
  * \param ma Mass of the projectile [GeV]
- * \param ma Mass of the target [GeV]
+ * \param mb Mass of the target [GeV]
  */
 inline double fixed_target_projectile_v(float s, float ma, float mb) {
   const float inv_gamma = 2 * ma * mb / (s - ma * ma - mb * mb);
