@@ -87,7 +87,6 @@ AdaptiveRejectionSampler::AdaptiveRejectionSampler(
     std::cout << "initialize finished!" << std::endl;
 }
 
-
 /** Set max_refine_loops by hand */
 void AdaptiveRejectionSampler::reset_max_refine_loops(const int
         new_max_refine_loops) {
@@ -98,7 +97,6 @@ void AdaptiveRejectionSampler::reset_max_refine_loops(const int
 inline Line AdaptiveRejectionSampler::create_line(Point p0, Point p1) {
     Line l1;
     const auto &log = logger<LogArea::Sampling>();
-
     if ( std::abs((p1).x-(p0).x) < really_small ) {
          log.fatal() << "the slope is too big" << std::endl;
          log.fatal() << "p1.x=" << p1.x << " p0.x=" << p0.x << std::endl;
