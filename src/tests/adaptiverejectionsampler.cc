@@ -8,12 +8,11 @@
  */
 
 
-#include "unittest.h"
-
 #include <cstdio>
 #include <iostream>
 #include <map>
 
+#include "unittest.h"
 #include "../include/adaptiverejectionsampler.h"
 #include "../include/distributions.h"
 
@@ -33,7 +32,7 @@ TEST(woods_saxon_distribution_adaptive_rejection_sampling) {
     // binning width for the distribution:
     constexpr float dx = 0.01;
 
-    for(int i=0; i<1000000; i++){
+    for ( int i = 0; i < 1000000; i++ ) {
         float r = woods_saxon_sampler.get_one_sample();
         int bin = r/dx;
         ++histogram[bin];
@@ -41,16 +40,16 @@ TEST(woods_saxon_distribution_adaptive_rejection_sampling) {
 
     float R = radius;
     float value_at_radius = histogram.at(R/dx);
-    float expected_at_radius = R*R*woods_saxon_dist_func(R, \
-                radius, diffusiveness);
+    float expected_at_radius = R*R*woods_saxon_dist_func(R,
+            radius, diffusiveness);
 
-    float probes[9] = { 1.0, 5.0, 7.2, 8.0, 8.5, .5f*R, 1.1f*R, 1.2f*R, 1.3f*R };
+    float probes[9] = {1.0, 5.0, 7.2, 8.0, 8.5, .5f*R, 1.1f*R, 1.2f*R, 1.3f*R};
     // now do probe these values:
     for (int i = 0; i < 9; ++i) {
         // value we have simulated:
         float value = histogram.at(probes[i]/dx)/value_at_radius;
         // value we have expected:
-        float expec = probes[i]*probes[i]*woods_saxon_dist_func(probes[i], \
+        float expec = probes[i]*probes[i]*woods_saxon_dist_func(probes[i],
                 radius, diffusiveness)/expected_at_radius;
         // standard error we expect the histogram to have is 1/sqrt(N); we
         // give 3 sigma "space".
@@ -73,9 +72,9 @@ TEST(juttner_distribution_adaptive_rejection_sampling) {
     double highlim = 15.0;
     Rejection::AdaptiveRejectionSampler juttner_sampler(
             [&](double x) {
-            return x*x*juttner_distribution_func(x, mass, temperature, \
+            return x*x*juttner_distribution_func(x, mass, temperature,
                 baryon_chemical_potential, fermion_boson_factor);}
-            ,lowlim, highlim);
+            , lowlim, highlim);
 
     // this is where we store the distribution.
     std::map<int, int> histogram {};
@@ -91,26 +90,27 @@ TEST(juttner_distribution_adaptive_rejection_sampling) {
      * notice that the native rejection is slow, for 10million samplings
      * it may take longer than 16s with the new random generator; (and
      * the native rejection can not pass this test) */
-    for(int i=0; i<10000000; i++){
+    for ( int i = 0; i < 10000000; i++ ) {
         double r = juttner_sampler.get_one_sample();
-        //double r = sample_momenta1(temperature, mass);
+        // double r = sample_momenta_fast(temperature, mass);
         int bin = r/dx;
         ++histogram[bin];
     }
 
     double R = 1.0;
     double value_at_radius = histogram.at(R/dx);
-    double expected_at_radius = R*R*juttner_distribution_func(R, mass, temperature, \
-            baryon_chemical_potential, fermion_boson_factor);
+    double expected_at_radius = R*R*juttner_distribution_func(R, mass,
+            temperature, baryon_chemical_potential, fermion_boson_factor);
 
-    double probes[9] = {0.1, 0.5, 0.7, 1.0, 1.5, 0.0001f*R, 2.0f*R, 2.5f*R, 3.0f*R};
+    double probes[9] = {0.1, 0.5, 0.7, 1.0, 1.5,
+        0.0001f*R, 2.0f*R, 2.5f*R, 3.0f*R};
     // now do probe these values:
     for (int i = 0; i < 9; ++i) {
         // value we have simulated:
         double value = histogram.at(probes[i]/dx)/value_at_radius;
         // value we have expected:
-        double expec = probes[i]*probes[i]*juttner_distribution_func( \
-                probes[i], mass, temperature, baryon_chemical_potential, \
+        double expec = probes[i]*probes[i]*juttner_distribution_func(
+                probes[i], mass, temperature, baryon_chemical_potential,
                 fermion_boson_factor)/expected_at_radius;
 
         std::cout << "x=" << probes[i] << " expec(x)=" << expec << std::endl;

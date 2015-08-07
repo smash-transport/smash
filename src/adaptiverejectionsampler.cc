@@ -35,7 +35,6 @@ namespace Rejection {
     AdaptiveRejectionSampler::AdaptiveRejectionSampler(
             std::function<float(float)> func, float xmin, float xmax):
         f_(func), xmin_(xmin), xmax_(xmax) {
-
         const auto &log = logger<LogArea::Sampling>();
         /** judge if f_(xmin_)<1.0E-37 or f_(xmax_)<1.0E-37, 
          * change the range automatically to make it work 
@@ -66,7 +65,7 @@ namespace Rejection {
                     log.fatal() << "xmax_ < xmin_ " << std::endl;
                 }
             }
-        } // only disable underflow float traps inside the brackets
+        }  // only disable underflow float traps inside the brackets
 
         float dx = (xmax_ - xmin_)/static_cast<float>(init_npoint_-1);
 
@@ -114,8 +113,8 @@ namespace Rejection {
 
 
     /** Set max_refine_loops by hand */
-    void AdaptiveRejectionSampler::reset_max_refine_loops(const int \
-            new_max_refine_loops){
+    void AdaptiveRejectionSampler::reset_max_refine_loops(const int
+            new_max_refine_loops) {
         max_refine_loops_ = new_max_refine_loops;
     }
 
@@ -137,8 +136,8 @@ namespace Rejection {
 
     /** Get scants_ according to points_ */
     void AdaptiveRejectionSampler::init_scant() {
-        for ( auto p0=points_.begin(); \
-                p0 != std::prev(points_.end(), 1); p0++ ) {
+        for ( auto p0=points_.begin(); p0 != std::prev(points_.end(), 1);
+                p0++ ) {
             auto p1 = std::next(p0, 1);
             scants_.emplace_back(create_line(*p0, *p1));
         }
@@ -170,7 +169,7 @@ namespace Rejection {
     }
 
     /** rightmost point in upper bounds */
-    inline void AdaptiveRejectionSampler::create_rihtend() {
+    inline void AdaptiveRejectionSampler::create_rightend() {
         Point p0;
         auto l1 = std::prev(scants_.end(), 2);
         p0.x = (*std::prev(points_.end(), 1)).x;
@@ -186,7 +185,7 @@ namespace Rejection {
             inters_.emplace_back(std::move(create_inter(*l0, *l2)));
         }
         create_leftend();
-        create_rihtend();
+        create_rightend();
     }
 
     /// construct the jth upper bounds from scants_
@@ -249,12 +248,13 @@ namespace Rejection {
         if ( std::fabs(new_rejection.x - points_.at(j).x) < really_small ||
              std::fabs(new_rejection.x - points_.at(j+1).x) < really_small ||
              std::fabs(new_rejection.x - inters_.at(j).x) < really_small ) {
-             log.debug() << "the new rejection point at (x=" << new_rejection.x << ")";
+             log.debug() << "the new rejection point at (x="
+                         << new_rejection.x << ")";
              log.debug() << " is too close to existing ones" << std::endl;
              log.debug() << "old points with x in (" << points_.at(j).x << ",";
              log.debug() << points_.at(j+1).x << "," << inters_.at(j).x << ")";
              log.debug() << std::endl;
-            return ;
+            return;
         }
 
         points_.insert(std::next(points_.begin(), j+1), new_rejection);
@@ -272,8 +272,19 @@ namespace Rejection {
         auto it0 = inters_.begin();
         auto it1 = inters_.begin();
 
-        /// for left most piece, boundary intersections -2 +3
-        if ( j == 0 ) {
+        if ( j > 1 && j < nscants-2 ) {
+            /// most of the case, intersections -3 +4
+            ints[0] = create_inter(l[0], *std::next(scants_.begin(), j-2));
+            ints[1] = create_inter(l[1], *std::next(scants_.begin(), j-1));
+            ints[2] = create_inter(l[0], *std::next(scants_.begin(), j+2));
+            ints[3] = create_inter(l[1], *std::next(scants_.begin(), j+3));
+            inters_.insert(std::next(inters_.begin(), j-1),
+                    {ints[0], ints[1], ints[2], ints[3]});
+            it0 = std::next(inters_.begin(), j+3);
+            it1 = std::next(inters_.begin(), j+6);
+            inters_.erase(it0, it1);
+        } else if ( j == 0 ) {
+            /// for left most piece, boundary intersections -2 +3
             ints[0] = create_inter(l[0], *std::next(scants_.begin(), j+2));
             ints[1] = create_inter(l[1], *std::next(scants_.begin(), j+3));
             inters_.insert(std::next(inters_.begin(), j), {ints[0], ints[1]});
@@ -302,7 +313,7 @@ namespace Rejection {
             it0 = std::next(inters_.begin(), j+2);
             it1 = std::next(inters_.begin(), j+5);
             inters_.erase(it0, it1);
-            create_rihtend();
+            create_rightend();
         } else if ( j == nscants-1 ) {
             /// for right most piece, intersections -2 +3
             ints[0] = create_inter(l[0], *std::next(scants_.begin(), j-2));
@@ -311,19 +322,8 @@ namespace Rejection {
             it0 = std::next(inters_.begin(), j+1);
             it1 = std::next(inters_.begin(), j+3);
             inters_.erase(it0, it1);
-            create_rihtend();
-        } else if ( j > 1 && j < nscants-2 ) {
-            /// for other pieces, intersections -3 +4
-            ints[0] = create_inter(l[0], *std::next(scants_.begin(), j-2));
-            ints[1] = create_inter(l[1], *std::next(scants_.begin(), j-1));
-            ints[2] = create_inter(l[0], *std::next(scants_.begin(), j+2));
-            ints[3] = create_inter(l[1], *std::next(scants_.begin(), j+3));
-            inters_.insert(std::next(inters_.begin(), j-1),
-                    {ints[0], ints[1], ints[2], ints[3]});
-            it0 = std::next(inters_.begin(), j+3);
-            it1 = std::next(inters_.begin(), j+6);
-            inters_.erase(it0, it1);
-        } else {
+            create_rightend();
+        }  else {
             log.fatal() << "The rejection point is not in the range\n";
         }
         update_area();
@@ -361,8 +361,8 @@ namespace Rejection {
      * if rejection_test=true, keep the sampling*/
     inline bool AdaptiveRejectionSampler::rejection_test(const float & x,
             const int & j, const float & rand) {
-        return rand*std::exp(upper_bounds_.at(j).piecewise_linear_line.eval(x)) \
-            <= f_(x);
+        return rand*std::exp(upper_bounds_.at(j).piecewise_linear_line.eval(x))
+                    <= f_(x);
     }
 
 
@@ -391,7 +391,7 @@ namespace Rejection {
                 }
             }
 
-            if ( rejections == max_refine_loops_) {
+            if ( rejections == max_refine_loops_ ) {
                 log.fatal() << "In AdaptiveRejectionSampler:";
                 log.fatal() << "reject too many time!\n";
                 exit(EXIT_FAILURE);

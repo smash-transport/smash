@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014
+ *    Copyright (c) 2015
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -39,7 +39,7 @@ typedef struct line {
 }Line;
 
 /** Envelope to hold one piece of upper bounds*/
-typedef struct envelope{
+typedef struct envelope {
     Point left_point, right_point;
     Line  piecewise_linear_line;
 }Envelope;
@@ -49,7 +49,8 @@ std::ostream &operator<<(std::ostream &out, const Line &l);
 /**
  *Adaptive Rjection Sampling used for thermal, juttner,
  *bose-einstein, fermi-dirac and woods-saxon
- *distributions. They are all log concave distributions
+ *distributions. They are all log concave distributions.
+ *<a href="https://en.wikipedia.org/wiki/Rejection_sampling">see wikipedia</a>.
  *Here is an example of AdaptiveRejectionSampler usage:
  *\code
  *
@@ -133,10 +134,6 @@ class AdaptiveRejectionSampler {
      float get_one_sample();
 
  private:
-     /*shift x to x + small_shift when f(x) is too close to 0
-      * which makes log(f(x)) infinity */
-     inline void shift_x(const Point & p);
-
      /*initialize scants with 10 points between xmin and xmax by
       * default or with user provided xlist
       * */
@@ -176,7 +173,7 @@ class AdaptiveRejectionSampler {
 
      /// calc left and right most points in upper bounds
      inline void create_leftend();
-     inline void create_rihtend();
+     inline void create_rightend();
 
      // refine scants, intersections, after one rejection
      void adaptive_update(const int j, const Point & new_rejection);

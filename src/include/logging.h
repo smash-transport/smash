@@ -156,7 +156,8 @@ using AreaTuple = std::tuple<Main, Experiment, Box, Collider, Sphere, Action,
                              InputParser, ParticleType, FindScatter, Clock,
                              DecayModes, Resonances, ScatterAction,
                              Distributions, Propagation, Grid, List, Nucleus,
-                             Density, PauliBlocking, Tmn, Fpe, Lattice, Sampling>;
+                             Density, PauliBlocking, Tmn, Fpe, Lattice,
+                             Sampling>;
 }  // namespace LogArea
 
 /**

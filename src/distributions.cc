@@ -28,9 +28,8 @@ float breit_wigner(const double mandelstam_s, const float resonance_mass,
 }
 
 /** woods-saxon distribution function  */
-double woods_saxon_dist_func(const double r,  const double radius, \
-        const double diffusion)
-{
+double woods_saxon_dist_func(const double r,  const double radius,
+        const double diffusion) {
     return 1.0/(std::exp((r-radius)/diffusion)+1.0);
 }
 
@@ -44,10 +43,9 @@ double density_integrand(const double energy, const double momentum_sqr,
  * lam = 1: to Fermion-Dirac distribution
  * lam = 0: to Thermal distribution
  * lam =-1: to Bose-Einstein distribution */
-double juttner_distribution_func(const double momentum_radial, \
-        const double mass, const double temperature, const double  \
-        baryon_chemical_potential, const double lam)
-{
+double juttner_distribution_func(const double momentum_radial,
+        const double mass, const double temperature, const double
+        baryon_chemical_potential, const double lam) {
     return 1.0/(std::exp((sqrt(momentum_radial*
                      momentum_radial+mass*mass)-baryon_chemical_potential)/
                 temperature) + lam);
@@ -100,13 +98,13 @@ double sample_momenta(const double temperature, const double mass) {
 *  where \frac{p}{E} is used as rejection weight.
 * return: themal momenta */
 
-double sample_momenta1(const double temperature, const double mass) {
+double sample_momenta_from_thermal(const double temperature, const double mass) {
     const auto &log = logger<LogArea::Distributions>();
     log.debug("Sample momenta with mass ", mass, " and T ", temperature);
     float momentum_radial, energy;
     float r0, r1, r2, r3, a, b, c;
     float K, I1, I2, I3, Itot;
-    //when temperature/mass
+    // when temperature/mass
     if ( temperature/mass > 0.6f ) {
         while ( true ) {
             r1 = Random::canonical();
@@ -115,10 +113,10 @@ double sample_momenta1(const double temperature, const double mass) {
             a = -std::log(r1);
             b = -std::log(r2);
             c = -std::log(r3);
-            momentum_radial = temperature * ( a + b + c );
+            momentum_radial = temperature * (a + b + c);
             energy = sqrt(momentum_radial * momentum_radial + mass * mass);
-            if ( Random::canonical() < \
-                    exp((momentum_radial-energy)/ temperature) ) {
+            if ( Random::canonical() <
+                    exp((momentum_radial-energy)/temperature) ) {
                 break;
             }
         }
@@ -129,23 +127,21 @@ double sample_momenta1(const double temperature, const double mass) {
             I2 = 2.0*mass*temperature;
             I3 = 2.0*temperature*temperature;
             Itot = I1 + I2 + I3;
-            if ( r0 < I1/Itot ){
+            if ( r0 < I1/Itot ) {
                 r1 = Random::canonical();
                 K = -temperature*std::log(r1);
-            }
-            else if ( r0 < (I1+I2)/Itot ){
+            } else if ( r0 < (I1+I2)/Itot ) {
                 r1 = Random::canonical();
                 r2 = Random::canonical();
                 K = -temperature*std::log(r1*r2);
-            }
-            else {
+            } else {
                 r1 = Random::canonical();
                 r2 = Random::canonical();
                 r3 = Random::canonical();
                 K = -temperature*std::log(r1*r2*r3);
             }
             energy = K + mass;
-            momentum_radial = sqrt( energy*energy - mass*mass );
+            momentum_radial = sqrt(energy*energy - mass*mass);
             r0 = Random::canonical();
             if ( r0 < momentum_radial/energy ) break;
         }
