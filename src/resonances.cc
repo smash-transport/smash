@@ -76,7 +76,8 @@ float sample_resonance_mass(const ParticleType &type_resonance,
   float maximum_mass = std::nextafter(static_cast<float>(cms_energy -
                                                          mass_stable), 0.f);
   double random_number = 1.0;
-  double distribution_max = spectral_function_integrand(type_resonance.mass(),
+  double distribution_max = spectral_function_integrand(
+                                  std::min(maximum_mass, type_resonance.mass()),
                                                         cms_energy, mass_stable,
                                                         type_resonance);
   double distribution_value = 0.0;
