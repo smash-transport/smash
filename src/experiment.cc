@@ -205,7 +205,7 @@ std::ostream &operator<<(std::ostream &out, const Experiment<Modus> &e) {
       out << "Not using time steps\n";
       break;
     case TimeStepMode::Fixed:
-      out << "Starting with temporal stepsize: "
+      out << "Using fixed time step size: "
           << e.parameters_.timestep_duration() << " fm/c\n";
       break;
   }
@@ -591,9 +591,13 @@ size_t Experiment<Modus>::run_time_evolution_without_time_steps(
   modus_.impose_boundary_conditions(&particles_);
   size_t interactions_total = 0, previous_interactions_total = 0,
          total_pauli_blocked = 0;
-  log.info() << format_measurements(
-      particles_, interactions_total, 0u,
-      conserved_initial_, time_start_, parameters_.labclock.current_time());
+
+  // if no output is scheduled, trigger it manually
+  if (!parameters_.is_output_time()) {
+    log.info() << format_measurements(
+        particles_, interactions_total, 0u,
+        conserved_initial_, time_start_, parameters_.labclock.current_time());
+  }
 
   const float start_time = parameters_.labclock.current_time();
   float time_left = end_time_ - start_time;
@@ -637,22 +641,20 @@ size_t Experiment<Modus>::run_time_evolution_without_time_steps(
       // check if we need to do the intermediate output in the time until the
       // next action
       if (parameters_.need_intermediate_output()) {
-        // we now set the clock to the output time and propagate the particles
-        // until that time; then we do the output
-        const float output_time =
-            parameters_.labclock.next_multiple(parameters_.output_interval);
-        parameters_.labclock.set_timestep_duration(
-            output_time - parameters_.labclock.current_time());
-        parameters_.labclock.reset(output_time);
-        propagate_all();
-
+        if (!parameters_.is_output_time()) {
+          // we now set the clock to the output time and propagate the particles
+          // until that time; then we do the output
+          parameters_.set_timestep_for_next_output();
+          ++parameters_.labclock;
+          propagate_all();
+          // after the output, the particles need to be propagated until the
+          // action time
+          const float remaining_dt =
+              action_time - parameters_.labclock.current_time();
+          parameters_.labclock.set_timestep_duration(remaining_dt);
+        }
         intermediate_output(evt_num, interactions_total,
                             previous_interactions_total);
-
-        // after the output, the particles need to be propagated until the
-        // action time
-        const float remaining_dt = action_time - output_time;
-        parameters_.labclock.set_timestep_duration(remaining_dt);
       }
 
       // set the clock manually instead of advancing it with the time step
@@ -695,6 +697,14 @@ size_t Experiment<Modus>::run_time_evolution_without_time_steps(
       actions.insert(finder->find_actions_with_surrounding_particles(
           outgoing_particles, particles_, time_left));
     }
+  }
+  // check if a final intermediate output is needed
+  parameters_.labclock.end_tick_on_multiple(end_time_);
+  ++parameters_.labclock;
+  if (parameters_.is_output_time()) {
+    propagate_all();
+    intermediate_output(evt_num, interactions_total,
+                        previous_interactions_total);
   }
   return interactions_total;
 }
