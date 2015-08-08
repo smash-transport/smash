@@ -10,7 +10,6 @@
 #include "include/cxx14compat.h"
 #include "include/integrate.h"
 #include "include/kinematics.h"
-#include "include/resonances.h"
 
 namespace Smash {
 

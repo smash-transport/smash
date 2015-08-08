@@ -13,7 +13,6 @@
 #include "include/decaymodes.h"
 #include "include/logging.h"
 #include "include/pdgcode.h"
-#include "include/resonances.h"
 
 namespace Smash {
 

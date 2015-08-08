@@ -32,9 +32,8 @@ double clebsch_gordan(const int j_a, const int j_b, const int j_c,
 }
 
 /* Integrand for spectral-function integration */
-double spectral_function_integrand(double resonance_mass, double srts,
-                                   double stable_mass,
-                                   const ParticleType &type) {
+float spectral_function_integrand(float resonance_mass, float srts,
+                                  float stable_mass, const ParticleType &type) {
   if (srts <= stable_mass + resonance_mass) {
     return 0.;
   }
@@ -47,20 +46,20 @@ double spectral_function_integrand(double resonance_mass, double srts,
 
 /* Resonance mass sampling for 2-particle final state */
 float sample_resonance_mass(const ParticleType &type_resonance,
-                            const float mass_stable, const double cms_energy) {
+                            const float mass_stable, const float cms_energy) {
   /* Sample resonance mass from the distribution
    * used for calculating the cross section. */
   float mass_resonance = 0.;
   float maximum_mass = std::nextafter(static_cast<float>(cms_energy -
                                                          mass_stable), 0.f);
-  double random_number = 1.0;
-  double distribution_max = spectral_function_integrand(
+  float random_number = 1.;
+  float distribution_max = spectral_function_integrand(
                                   std::min(maximum_mass, type_resonance.mass()),
                                                         cms_energy, mass_stable,
                                                         type_resonance);
-  double distribution_value = 0.0;
+  float distribution_value = 0.;
   while (random_number > distribution_value) {
-    random_number = Random::uniform(0.0, distribution_max);
+    random_number = Random::uniform(0.f, distribution_max);
     mass_resonance = Random::uniform(type_resonance.minimum_mass(),
                                      maximum_mass);
     distribution_value = spectral_function_integrand(mass_resonance, cms_energy,

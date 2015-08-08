@@ -89,12 +89,9 @@ inline double isospin_clebsch_gordan(const ParticleType &p_a,
  * \param[in] srts sqrt(s) of the process
  * \param[in] stable_mass mass of the stable particle in the final state
  * \param[in] type type of the resonance
- *
- * \fpPrecision Why \c double?
  */
-double spectral_function_integrand(double resonance_mass, double srts,
-                                   double stable_mass,
-                                   const ParticleType &type);
+float spectral_function_integrand(float resonance_mass, float srts,
+                                  float stable_mass, const ParticleType &type);
 
 /**
  * Resonance mass sampling for 2-particle final state
@@ -105,11 +102,9 @@ double spectral_function_integrand(double resonance_mass, double srts,
  * \param[in] cms_energy center-of-mass energy of the 2-particle final state.
  *
  * \return The mass of the resonance particle.
- *
- * \fpPrecision Why \c double?
  */
 float sample_resonance_mass(const ParticleType &type_resonance,
-                            const float mass_stable, const double cms_energy);
+                            const float mass_stable, const float cms_energy);
 
 }  // namespace Smash
 

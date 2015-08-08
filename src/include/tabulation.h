@@ -29,7 +29,7 @@ class Tabulation {
    * \param f one-dimensional function f(x) which is supposed to be tabulated
    */
   Tabulation(float x_min, float range, int num,
-             std::function<double(float)> f);
+             std::function<float(float)> f);
   /** Look up a value from the tabulation (without any interpolation, simply
    * using the closest tabulated value). If x is below the lower tabulation
    * bound we return 0, if it is above the upper bound we return the tabulated

@@ -18,7 +18,6 @@
 #include "include/logging.h"
 #include "include/macros.h"
 #include "include/particles.h"
-#include "include/resonances.h"
 #include "include/scatteraction.h"
 #include "include/scatteractionbaryonbaryon.h"
 #include "include/scatteractionbaryonmeson.h"
