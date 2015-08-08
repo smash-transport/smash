@@ -189,7 +189,15 @@ class ParticleType {
    *          spectral function is supposed to be evaluated.
    */
   float spectral_function(float m) const;
+
+  /* This one uses a constant width and is thus guaranteed to be normalized to 1,
+   * when integrated from 0 to inf. */
   float spectral_function_const_width(float m) const;
+
+  /* This one is the most simple form of the spectral function, using a
+   * non-relativistic Breit-Wigner with constant width. It can be integrated
+   * analytically. */
+  float spectral_function_simple(float m) const;
 
   /**
    * Returns a list of all ParticleType objects.

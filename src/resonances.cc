@@ -45,37 +45,38 @@ float spectral_function_integrand(float resonance_mass, float srts,
 }
 
 /* Resonance mass sampling for 2-particle final state */
-float sample_resonance_mass(const ParticleType &type_resonance,
+float sample_resonance_mass(const ParticleType &type_res,
                             const float mass_stable, const float cms_energy) {
-  /* Sample resonance mass from the distribution
-   * used for calculating the cross section. */
-  float mass_resonance = 0.;
-  float maximum_mass = std::nextafter(static_cast<float>(cms_energy -
-                                                         mass_stable), 0.f);
-  float random_number = 1.;
-  float distribution_max = spectral_function_integrand(
-                                  std::min(maximum_mass, type_resonance.mass()),
-                                                        cms_energy, mass_stable,
-                                                        type_resonance);
-  float distribution_value = 0.;
-  while (random_number > distribution_value) {
-    random_number = Random::uniform(0.f, distribution_max);
-    mass_resonance = Random::uniform(type_resonance.minimum_mass(),
-                                     maximum_mass);
-    distribution_value = spectral_function_integrand(mass_resonance, cms_energy,
-                                                     mass_stable,
-                                                     type_resonance);
-  }
+  // largest possible mass
+  const float max_mass = std::nextafter(cms_energy - mass_stable, 0.f);
+  // largest possible cm momentum (from smallest mass)
+  const float pcm_max = pCM(cms_energy, mass_stable, type_res.minimum_mass());
+  // the maximum of the spectral-function ratio happens at the largest mass
+  const float q_max = type_res.spectral_function(max_mass)
+                    / type_res.spectral_function_simple(max_mass);
+  const float max = pcm_max * q_max;  // maximum value for rejection sampling
+  float mass_res, pcm, q;
+  // Loop: rejection sampling
+  do {
+    // sample mass from simple Breit-Wigner
+    mass_res = Random::breit_wigner(type_res.mass(), type_res.width_at_pole(),
+                                    type_res.minimum_mass(), max_mass);
+    // determine cm momentum for this case
+    pcm = pCM(cms_energy, mass_stable, mass_res);
+    // determine ratio of full to simple spectral function
+    q = type_res.spectral_function(mass_res)
+      / type_res.spectral_function_simple(mass_res);
+  } while (q*pcm < Random::uniform(0.f, max));
 
-  if (distribution_value > distribution_max) {
+  // check that we are using the proper maximum value
+  if (q*pcm > max) {
     const auto &log = logger<LogArea::Resonances>();
-    log.error("distribution value too large in sample_resonance_mass: ",
-              distribution_value, " ", distribution_max, " ",
-              type_resonance.pdgcode(), " ", mass_stable, " ", cms_energy, " ",
-              mass_resonance);
+    log.error("maximum not correct in sample_resonance_mass: ",
+              q*pcm, " ", max, " ", type_res.pdgcode(), " ",
+              mass_stable, " ", cms_energy, " ", mass_res);
   }
 
-  return mass_resonance;
+  return mass_res;
 }
 
 

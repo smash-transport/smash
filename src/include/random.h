@@ -127,6 +127,21 @@ template <typename T = double> T power(T n, T xMin, T xMax) {
     }
 }
 
+/**
+ * Draws a random number from a non-relativistic Breit-Wigner distribution with
+ * the given parameters (constant width!) inside the range [min,max].
+ * \param pole Pole parameter of the Breit-Wigner function, i.e. location of the peak.
+ * \param width Width parameter of the Breit-Wignr function, determining the sharpness of the peak.
+ * \param min Minimum value to be returned.
+ * \param max Maximum value to be returned.
+ */
+template <typename T = double> T breit_wigner(T pole, T width, T min, T max) {
+  const T y_min = 2. * std::atan(2.*(min-pole)/width);
+  const T y_max = 2. * std::atan(2.*(max-pole)/width);
+  const T y = uniform(y_min, y_max);
+  return pole + width/2.*std::tan(y/2.);
+}
+
 }  // namespace Random
 }  // namespace Smash
 

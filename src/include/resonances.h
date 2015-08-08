@@ -97,13 +97,13 @@ float spectral_function_integrand(float resonance_mass, float srts,
  * Resonance mass sampling for 2-particle final state
  * with *one resonance* and one *stable* particle.
  *
- * \param[in] type_resonance Type of the resonance particle.
+ * \param[in] type_res Type of the resonance particle.
  * \param[in] mass_stable Mass of the stable particle.
  * \param[in] cms_energy center-of-mass energy of the 2-particle final state.
  *
  * \return The mass of the resonance particle.
  */
-float sample_resonance_mass(const ParticleType &type_resonance,
+float sample_resonance_mass(const ParticleType &type_res,
                             const float mass_stable, const float cms_energy);
 
 }  // namespace Smash
