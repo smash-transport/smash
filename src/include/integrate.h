@@ -121,7 +121,7 @@ class Integrator {
   double accuracy_absolute_ = 1.0e-5;
 
   /// Parameter to the GSL integration function: desired relative error limit
-  double accuracy_relative_ = 1.0e-3;
+  double accuracy_relative_ = 5.0e-4;
 
   /// Parameter to the GSL integration function: maximum number of subintervals
   /// (may not exceed workspace size)

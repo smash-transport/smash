@@ -25,7 +25,8 @@ TEST(spectral_functions) {
    * so this should really be on the safe side. */
   const float max_mass = 100.;
   // error tolerance (max. deviation from one)
-  const float error_tolerance = 0.40;
+  const float error_tolerance = 0.25;
+  const float warning_level = 0.21;
   // error tolerance (max. deviation from one) for constant-width SF
   const float error_tolerance_const = 0.003;
 
@@ -43,9 +44,9 @@ TEST(spectral_functions) {
                           [&](double m) {
                             return type.spectral_function_const_width(m);
                           });
-    if (result.value() > 1.2) {
+    if (result.value() > 1 + warning_level) {
       std::cout << AnsiColor::blue;
-    } else if (result.value() < 0.7) {
+    } else if (result.value() < 1 - warning_level) {
       std::cout << AnsiColor::yellow;
     }
     std::cout << fill_right(type.name(), 11) << ": "
