@@ -205,6 +205,11 @@ class Experiment : public ExperimentBase {
                            size_t& previous_interactions_total);
 
   /**
+   * Propagate all particles to the current time.
+   */
+  void propagate_all();
+
+  /**
    * Struct of several member variables.
    * These variables are combined into a struct for efficient input to functions
    * outside of this class.

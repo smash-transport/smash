@@ -644,8 +644,7 @@ size_t Experiment<Modus>::run_time_evolution_without_time_steps(
         parameters_.labclock.set_timestep_duration(
             output_time - parameters_.labclock.current_time());
         parameters_.labclock.reset(output_time);
-        propagate_straight_line(&particles_, parameters_);
-        modus_.impose_boundary_conditions(&particles_, outputs_);
+        propagate_all();
 
         intermediate_output(evt_num, interactions_total,
                             previous_interactions_total);
@@ -661,8 +660,7 @@ size_t Experiment<Modus>::run_time_evolution_without_time_steps(
       parameters_.labclock.reset(action_time);
       current_time = action_time;
 
-      propagate_straight_line(&particles_, parameters_);
-      modus_.impose_boundary_conditions(&particles_, outputs_);
+      propagate_all();
     } else {
       // otherwise just keep the current time
       current_time = parameters_.labclock.current_time();
@@ -771,16 +769,7 @@ size_t Experiment<Modus>::run_time_evolution(const int evt_num) {
     modus_.impose_boundary_conditions(&particles_);
 
     /* (3) Do propagation. */
-    if (potentials_) {
-      update_density_lattice(jmu_B_lat_.get(), LatticeUpdate::EveryTimestep,
-                       DensityType::baryon, parameters_, particles_);
-      update_density_lattice(jmu_I3_lat_.get(), LatticeUpdate::EveryTimestep,
-                       DensityType::baryonic_isospin, parameters_, particles_);
-      propagate(&particles_, parameters_, *potentials_);
-    } else {
-      propagate_straight_line(&particles_, parameters_);
-    }
-    modus_.impose_boundary_conditions(&particles_, outputs_);
+    propagate_all();
 
     /* (4) Physics output during the run. */
     // if the timestep of labclock is different in the next tick than
@@ -848,6 +837,20 @@ void Experiment<Modus>::intermediate_output(const int evt_num,
                                                                   evt_num);
     }
   }
+}
+
+template <typename Modus>
+void Experiment<Modus>::propagate_all() {
+  if (potentials_) {
+    update_density_lattice(jmu_B_lat_.get(), LatticeUpdate::EveryTimestep,
+                     DensityType::baryon, parameters_, particles_);
+    update_density_lattice(jmu_I3_lat_.get(), LatticeUpdate::EveryTimestep,
+                     DensityType::baryonic_isospin, parameters_, particles_);
+    propagate(&particles_, parameters_, *potentials_);
+  } else {
+    propagate_straight_line(&particles_, parameters_);
+  }
+  modus_.impose_boundary_conditions(&particles_, outputs_);
 }
 
 template <typename Modus>
