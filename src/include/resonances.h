@@ -79,16 +79,6 @@ inline double isospin_clebsch_gordan(const ParticleType &p_a,
 
 
 /**
- * Spectral function
- * \f$A(m)=\frac{1}{\pi}\frac{m\Gamma(m)}{(m^2-m_0^2)^2+(m\Gamma(m))^2}\f$
- * of the resonance.
- *
- * \fpPrecision Why \c double?
- */
-double spectral_function(double resonance_mass, double resonance_pole,
-                         double resonance_width);
-
-/**
  * Spectral function integrand for GSL integration.
  *
  * The integrand is \f$2m A(m) p_{cm}^f\f$, where \f$m\f$ is the

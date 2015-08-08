@@ -182,6 +182,16 @@ class ParticleType {
                                             const ParticleData &p_b) const;
 
   /**
+   * Spectral function
+   * \f$A(m)=\frac{2}{\pi}\frac{m^2\Gamma(m)}{(m^2-m_0^2)^2+(m\Gamma(m))^2}\f$
+   * of the resonance.
+   * \param m Actual off-shell mass of the resonance, where the
+   *          spectral function is supposed to be evaluated.
+   */
+  float spectral_function(float m) const;
+  float spectral_function_const_width(float m) const;
+
+  /**
    * Returns a list of all ParticleType objects.
    *
    * \note The order of the list may be sorted by PDG codes, but do not rely on

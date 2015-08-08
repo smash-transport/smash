@@ -10,7 +10,6 @@
 
 #include <gsl/gsl_sf_coupling.h>
 
-#include "include/distributions.h"
 #include "include/kinematics.h"
 #include "include/logging.h"
 #include "include/random.h"
@@ -32,39 +31,18 @@ double clebsch_gordan(const int j_a, const int j_b, const int j_c,
   return result;
 }
 
-/* Spectral function of the resonance */
-double spectral_function(double resonance_mass, double resonance_pole,
-                         double resonance_width) {
-  /* breit_wigner is essentially pi * mass * width * spectral function
-   * (mass^2 is called mandelstam_s in breit_wigner)
-   */
-  #pragma GCC diagnostic push
-  #pragma GCC diagnostic ignored "-Wfloat-equal"
-  assert(resonance_mass != 0);
-  assert(resonance_width != 0);
-  #pragma GCC diagnostic pop
-  return breit_wigner(resonance_mass * resonance_mass, resonance_pole,
-                      resonance_width) /
-         (M_PI * resonance_mass * resonance_width);
-}
-
 /* Integrand for spectral-function integration */
 double spectral_function_integrand(double resonance_mass, double srts,
                                    double stable_mass,
                                    const ParticleType &type) {
-  const double resonance_width = type.total_width(resonance_mass);
-
-  if (srts <= stable_mass + resonance_mass
-      || resonance_width < ParticleType::width_cutoff) {
+  if (srts <= stable_mass + resonance_mass) {
     return 0.;
   }
 
   /* Integrand is the spectral function weighted by the CM momentum of the
-    * final state. In addition, dm^2 = 2*m*dm. */
-  const double res_pole_mass = type.mass();
-  return spectral_function(resonance_mass, res_pole_mass, resonance_width)
-          * pCM(srts, stable_mass, resonance_mass)
-          * 2 * resonance_mass;
+   * final state. */
+  return type.spectral_function(resonance_mass)
+         * pCM(srts, stable_mass, resonance_mass);
 }
 
 /* Resonance mass sampling for 2-particle final state */

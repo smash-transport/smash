@@ -16,6 +16,7 @@
 
 #include "include/cxx14compat.h"
 #include "include/decaymodes.h"
+#include "include/distributions.h"
 #include "include/inputfunctions.h"
 #include "include/iomanipulators.h"
 #include "include/isoparticletype.h"
@@ -329,6 +330,30 @@ float ParticleType::get_partial_in_width(const float m,
   }
   return w;
 }
+
+
+float ParticleType::spectral_function(float m) const {
+  /* The spectral function is essentially a Breit-Wigner function with some
+   * prefactors and mass-dependent width. */
+  const float resonance_width = total_width(m);
+  if (resonance_width < ParticleType::width_cutoff) {
+    return 0.;
+  }
+  return breit_wigner(m*m, mass(), resonance_width)
+         * 2. / (M_PI * resonance_width);
+}
+
+float ParticleType::spectral_function_const_width(float m) const {
+  /* The spectral function is essentially a Breit-Wigner function with some
+   * prefactors. This variant is using a constant width (on-shell). */
+  const float resonance_width = width_at_pole();
+  if (resonance_width < ParticleType::width_cutoff) {
+    return 0.;
+  }
+  return breit_wigner(m*m, mass(), resonance_width)
+         * 2. / (M_PI * resonance_width);
+}
+
 
 std::ostream &operator<<(std::ostream &out, const ParticleType &type) {
   const PdgCode &pdg = type.pdgcode();
