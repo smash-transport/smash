@@ -54,9 +54,9 @@ double spectral_function_integrand(double resonance_mass, double srts,
                                    const ParticleType &type) {
   const double resonance_width = type.total_width(resonance_mass);
 
-  if (srts < stable_mass + resonance_mass
-      || resonance_width < really_small) {
-    return 0.0;
+  if (srts <= stable_mass + resonance_mass
+      || resonance_width < ParticleType::width_cutoff) {
+    return 0.;
   }
 
   /* Integrand is the spectral function weighted by the CM momentum of the

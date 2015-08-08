@@ -143,15 +143,18 @@ float TwoBodyDecayStable::in_width(float m0, float G0, float m,
 
 static float integrand_rho_Manley(float mass, float srts, float stable_mass,
                                   ParticleTypePtr type, int L) {
-  if (srts <= mass + stable_mass) {
+  const float width = type->total_width(mass);
+
+  if (srts <= mass + stable_mass
+      || width < ParticleType::width_cutoff) {
     return 0.;
   }
 
   /* center-of-mass momentum of final state particles */
   const float p_f = pCM(srts, stable_mass, mass);
 
-  return p_f/srts * BlattWeisskopf(p_f, L) * 2.*srts
-         * spectral_function(mass, type->mass(), type->total_width(srts));
+  return p_f/srts * BlattWeisskopf(p_f, L) * 2.*mass
+         * spectral_function(mass, type->mass(), width);
 }
 
 static ParticleTypePtrList arrange_particles(ParticleTypePtrList part_types) {
