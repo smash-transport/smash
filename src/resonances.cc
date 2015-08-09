@@ -71,9 +71,10 @@ float sample_resonance_mass(const ParticleType &type_res,
   // check that we are using the proper maximum value
   if (q*pcm > max) {
     const auto &log = logger<LogArea::Resonances>();
-    log.error("maximum not correct in sample_resonance_mass: ",
+    log.fatal("maximum not correct in sample_resonance_mass: ",
               q*pcm, " ", max, " ", type_res.pdgcode(), " ",
               mass_stable, " ", cms_energy, " ", mass_res);
+    throw std::runtime_error("Maximum not correct in sample_resonance_mass!");
   }
 
   return mass_res;

@@ -356,7 +356,7 @@ float ParticleType::spectral_function_const_width(float m) const {
 
 float ParticleType::spectral_function_simple(float m) const {
   const float dm = m - mass();
-  const float w2 = total_width(m)/2.;
+  const float w2 = width_at_pole()/2.;
   return w2 / (M_PI * (dm*dm + w2*w2));
 }
 
