@@ -58,9 +58,9 @@ float sample_resonance_mass(const ParticleType &type_res,
   float mass_res, pcm, q;
   // Loop: rejection sampling
   do {
-    // sample mass from simple Breit-Wigner
-    mass_res = Random::breit_wigner(type_res.mass(), type_res.width_at_pole(),
-                                    type_res.minimum_mass(), max_mass);
+    // sample mass from a simple Breit-Wigner (aka Cauchy) distribution
+    mass_res = Random::cauchy(type_res.mass(), type_res.width_at_pole()/2.f,
+                              type_res.minimum_mass(), max_mass);
     // determine cm momentum for this case
     pcm = pCM(cms_energy, mass_stable, mass_res);
     // determine ratio of full to simple spectral function
