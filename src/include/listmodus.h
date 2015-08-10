@@ -41,7 +41,8 @@ namespace Smash {
 *              # definitions here
 * \endcode
 *
-* The following configuration options are understood: \ref input_modi_list_
+* The following configuration options are understood:
+* \ref input_modi_list_
 */
 class ListModus : public ModusDefault {
  public:
@@ -80,5 +81,7 @@ class ListModus : public ModusDefault {
    */
   friend std::ostream &operator<<(std::ostream &, const ListModus &);
 };
+
 }  // namespace Smash
+
 #endif  // SRC_INCLUDE_LISTMODUS_H_
