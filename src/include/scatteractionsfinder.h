@@ -12,9 +12,9 @@
 
 #include <vector>
 
-#include "action.h"
 #include "actionfinderfactory.h"
 #include "configuration.h"
+#include "scatteraction.h"
 
 namespace Smash {
 
@@ -49,6 +49,20 @@ class ScatterActionsFinder : public ActionFinderInterface {
    * Currently does nothing. */
   ActionList find_final_actions(const Particles &) const override {
     return ActionList();
+  }
+
+  /**
+   * Calculate the minimal size of the cells such that this actionfinder will
+   * find all collisions within the maximal effective collision distance.
+   *
+   * \param testparticles The number of test particles
+   * \param dt The current time step size
+   * \return The minimal required size of cells
+   */
+  static float min_cell_length(int testparticles, float dt) {
+    return std::sqrt(
+        dt * dt +
+        0.25 * ScatterAction::max_eff_collision_distance_sqr(testparticles));
   }
 
  private:

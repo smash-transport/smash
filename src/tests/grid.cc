@@ -72,7 +72,7 @@ TEST(grid_construction) {
   };
   for (const int testparticles : {1, 5, 20, 100}) {
     const double max_interaction_length =
-        GridBase::min_cell_length(testparticles);
+        2.5f / std::sqrt(static_cast<float>(testparticles));
     for (const Parameter &param : std::vector<Parameter>{
              Parameter{
               {make_particle(0., 0., 0.), make_particle(1.9, 1.9, 1.9)},
@@ -129,7 +129,7 @@ TEST(grid_construction) {
         p.set_4position(max_interaction_length * p.position());
         list.insert(p);
       }
-      Grid<GridOptions::Normal> grid(list, testparticles);
+      Grid<GridOptions::Normal> grid(list, max_interaction_length);
       auto idsIt = param.ids.begin();
       auto neighbors = param.neighbors;
       grid.iterate_cells([&](const ParticleList &search) {
@@ -180,7 +180,7 @@ TEST(periodic_grid) {
   for (const int testparticles : {1, 5}) {
     for (const int nparticles : {1, 5, 20, 75, 124, 125}) {
       const double max_interaction_length =
-          GridBase::min_cell_length(testparticles);
+          2.5f / std::sqrt(static_cast<float>(testparticles));
       constexpr float length = 10;
       Particles list;
       auto random_value = Random::make_uniform_distribution(0., 9.99);
@@ -194,7 +194,7 @@ TEST(periodic_grid) {
       Grid<GridOptions::PeriodicBoundaries> grid(
           make_pair(std::array<float, 3>{0, 0, 0},
                     std::array<float, 3>{length, length, length}),
-          list, testparticles);
+          list, max_interaction_length);
 
       // stores the neighbor pairs found via the grid:
       std::vector<std::pair<ParticleData, ParticleData>> neighbor_pairs;
@@ -406,7 +406,7 @@ TEST(periodic_grid) {
 TEST(max_positions_periodic_grid) {
   constexpr int testparticles = 1;
   const double max_interaction_length =
-      GridBase::min_cell_length(testparticles);
+      2.5f / std::sqrt(static_cast<float>(testparticles));
   using Test::Position;
   Particles list;
   list.insert(Test::smashon(Position{0, 0, 0, 0}));
@@ -426,13 +426,13 @@ TEST(max_positions_periodic_grid) {
   // the total length. Thus it would create a 2x2x2 grid and the last particle
   // might result in an out-of-bounds cell index. This constructor call ensures
   // that no assertion/exception in the construction code is hit.
-  Grid<GridOptions::PeriodicBoundaries> grid(list, testparticles);
+  Grid<GridOptions::PeriodicBoundaries> grid(list, max_interaction_length);
 }
 
 TEST(max_positions_normal_grid) {
   constexpr int testparticles = 1;
   const double max_interaction_length =
-      GridBase::min_cell_length(testparticles);
+      2.5f / std::sqrt(static_cast<float>(testparticles));
   using Test::Position;
   Particles list;
   list.insert(Test::smashon(Position{0, 0, 0, -6.2470569610595703125}));
