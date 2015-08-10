@@ -26,9 +26,12 @@ float breit_wigner(const double mandelstam_s, const float resonance_mass,
 /**
  * Returns a Cauchy distribution (sometimes also called Lorentz or
  * non-relativistic Breit-Wigner distribution) with the given parameters.
+ *
  * \param x Argument of the Cauchy function.
- * \param pole Pole parameter of the Cauchy function, i.e. location of the peak.
- * \param width Width parameter of the Cauchy function, determining the sharpness of the peak.
+ * \param pole Pole parameter \f$ m_0 \f$ of the Cauchy function, i.e. location of the peak.
+ * \param width Width parameter \f$ \Gamma \f$ of the Cauchy function, determining the sharpness of the peak.
+ *
+ * \return \f$ \frac{\Gamma}{\pi ((m-m_0)^2+\Gamma^2)}\f$
  */
 float cauchy(float x, float pole, float width);
 

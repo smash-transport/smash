@@ -139,10 +139,10 @@ template <typename T = double> T power(T n, T xMin, T xMax) {
  * \param max Maximum value to be returned.
  */
 template <typename T = double> T cauchy(T pole, T width, T min, T max) {
-  const T u_min = std::atan((min-pole)/width) / M_PI;
-  const T u_max = std::atan((max-pole)/width) / M_PI;
+  const T u_min = std::atan((min-pole)/width);
+  const T u_max = std::atan((max-pole)/width);
   const T u = uniform(u_min, u_max);
-  return pole + width*std::tan(M_PI*u);
+  return pole + width*std::tan(u);
 }
 
 }  // namespace Random
