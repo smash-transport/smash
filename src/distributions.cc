@@ -27,6 +27,11 @@ float breit_wigner(const double mandelstam_s, const float resonance_mass,
   return A / (B*B + A);
 }
 
+float cauchy(float x, float pole, float width) {
+  const float dm = x - pole;
+  return width / (M_PI * (dm*dm + width*width));
+}
+
 /* density_integrand - Maxwell-Boltzmann distribution */
 double density_integrand(const double energy, const double momentum_sqr,
                          const double temperature) {

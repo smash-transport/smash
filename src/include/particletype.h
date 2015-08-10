@@ -182,21 +182,27 @@ class ParticleType {
                                             const ParticleData &p_b) const;
 
   /**
-   * Spectral function
+   * Full spectral function
    * \f$A(m)=\frac{2}{\pi}\frac{m^2\Gamma(m)}{(m^2-m_0^2)^2+(m\Gamma(m))^2}\f$
-   * of the resonance.
+   * of the resonance (relativistic Breit-Wigner distribution with
+   * mass-dependent width).
    * \param m Actual off-shell mass of the resonance, where the
    *          spectral function is supposed to be evaluated.
+   * \todo The normalization is not guaranteed to be unity at present.
    */
   float spectral_function(float m) const;
 
-  /* This one uses a constant width and is thus guaranteed to be normalized to 1,
-   * when integrated from 0 to inf. */
+  /**
+   * The spectral function with a constant width (= width at pole).
+   * It is guaranteed to be normalized to 1, when integrated from 0 to inf. */
   float spectral_function_const_width(float m) const;
 
-  /* This one is the most simple form of the spectral function, using a
-   * non-relativistic Breit-Wigner with constant width. It can be integrated
-   * analytically. */
+  /**
+   * This one is the most simple form of the spectral function, using a
+   * Cauchy distribution (non-relativistic Breit-Wigner with constant width).
+   * It can be integrated analytically, and is normalized to 1 when integrated
+   * from -inf to inf.
+   */
   float spectral_function_simple(float m) const;
 
   /**

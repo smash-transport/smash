@@ -23,6 +23,15 @@ namespace Smash {
 float breit_wigner(const double mandelstam_s, const float resonance_mass,
                     const float resonance_width);
 
+/**
+ * Returns a Cauchy distribution (sometimes also called Lorentz or
+ * non-relativistic Breit-Wigner distribution) with the given parameters.
+ * \param x Argument of the Cauchy function.
+ * \param pole Pole parameter of the Cauchy function, i.e. location of the peak.
+ * \param width Width parameter of the Cauchy function, determining the sharpness of the peak.
+ */
+float cauchy(float x, float pole, float width);
+
 /** Returns the Maxwell-Boltzmann distribution
  *
  * \todo rename this function to make clear what it is
