@@ -228,10 +228,10 @@ ColliderModus::ColliderModus(Configuration modus_config,
       mass_b = target_->mass() / target_->size();
     }
     // Check that input satisfies the lower bound (everything at rest).
-    if (sqrt_s_NN < mass_a + mass_b) {
+    if (sqrt_s_NN <= mass_a + mass_b) {
       throw ModusDefault::InvalidEnergy(
-          "Input Error: sqrt(s_NN) is smaller than masses:\n" +
-          std::to_string(sqrt_s_NN) + " GeV < " + std::to_string(mass_a) +
+          "Input Error: sqrt(s_NN) is not larger than masses:\n" +
+          std::to_string(sqrt_s_NN) + " GeV <= " + std::to_string(mass_a) +
           " GeV + " + std::to_string(mass_b) + " GeV.");
     }
     // Set the total nucleus-nucleus collision energy.

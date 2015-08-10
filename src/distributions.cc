@@ -98,7 +98,8 @@ double sample_momenta(const double temperature, const double mass) {
 *  where \frac{p}{E} is used as rejection weight.
 * return: themal momenta */
 
-double sample_momenta_from_thermal(const double temperature, const double mass) {
+double sample_momenta_from_thermal(const double temperature,
+        const double mass) {
     const auto &log = logger<LogArea::Distributions>();
     log.debug("Sample momenta with mass ", mass, " and T ", temperature);
     float momentum_radial, energy;

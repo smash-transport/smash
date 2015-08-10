@@ -48,13 +48,13 @@ ScatterActionsFinder::ScatterActionsFinder(
 double ScatterActionsFinder::collision_time(const ParticleData &p1,
                                             const ParticleData &p2) {
   const auto &log = logger<LogArea::FindScatter>();
-  /** UrQMD collision time
-   * \iref{Hirano:2012yy} (5.15): in computational frame
-   * position of particle a: x_a
-   * position of particle b: x_b
-   * momentum of particle a: p_a
-   * momentum of particle b: p_b
-   * t_{coll} = - (x_a - x_b) . (p_a - p_b) / (p_a - p_b)^2
+  /** UrQMD collision time in computational frame,
+   * see \iref{Bass:1998ca} (3.28):
+   * position of particle a: x_a [fm]
+   * position of particle b: x_b [fm]
+   * velocity of particle a: v_a
+   * velocity of particle b: v_b
+   * t_{coll} = - (x_a - x_b) . (v_a - v_b) / (v_a - v_b)^2 [fm/c]
    */
   ThreeVector pos_diff = p1.position().threevec() - p2.position().threevec();
   ThreeVector velo_diff = p1.velocity() - p2.velocity();
