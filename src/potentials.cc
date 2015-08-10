@@ -27,13 +27,12 @@ Potentials::Potentials(Configuration conf, const ExperimentParameters &param)
    * section, to switch on only Skyrme or Symmetry potentials uncomment
    * only the part you want to switch on.
    *
-   * Parameters are described at the \ref potentials page.
-   */
-
-  /*!\Userguide
-   * \page potentials Potentials
-   * Skyrme potential:
-   * -----------------
+   * \li \subpage potentials_skyrme_
+   * \li \subpage potentials_sym_
+   *
+   * \page potentials_skyrme_ Skyrme
+   *
+   * The Skyrme potential has the form
    * \f[ U_{Sk} = A(\rho/\rho_0) + B (\rho/\rho_0)^{\tau} \,, \f]
    * where \f$ \rho \f$ is baryon density in the local Eckart rest frame.
    *
@@ -53,9 +52,9 @@ Potentials::Potentials(Configuration conf, const ExperimentParameters &param)
   }
 
   /*!\Userguide
-   * \page potentials Potentials
-   * Symmetry potential:
-   * -------------------
+   * \page potentials_sym_ Symmetry
+   *
+   * The symmetry potential has the form
    * \f[ U_{Sym} = \pm 2 S_{pot} \frac{\rho_n - \rho_p}{\rho_0} \,, \f]
    * where \f$ \rho_n\f$ is neutron density and \f$ \rho_p\f$ is proton
    * density. Definition and implementation are still to be worked out.

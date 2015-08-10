@@ -34,6 +34,14 @@ namespace Smash {
 class ParticleType {
  public:
   /**
+   * Decay width cutoff for considering a particle as stable.
+   *
+   * We currently regard a particle type as stable if its on-shell width is less
+   * than 10 keV.
+   */
+  static constexpr float width_cutoff = 1e-5f;
+
+  /**
    * Creates a fully initialized ParticleType object.
    *
    * \param n The name of the particle.
@@ -102,7 +110,9 @@ class ParticleType {
   int baryon_number() const { return pdgcode_.baryon_number(); }
 
   /// Check if the particle is stable
-  inline bool is_stable() const;
+  inline bool is_stable() const {
+    return width_ < width_cutoff;
+  }
 
   /**
    * The minimum mass of the resonance.
@@ -303,12 +313,6 @@ class ParticleType {
   friend std::ostream &operator<<(std::ostream &out, const ParticleType &type);
 };
 
-inline bool ParticleType::is_stable() const {
-  /* We currently regard a particle type as stable if its on-shell width is
-   * less than 10 keV. */
-  return width_ < 1E-5f;
-}
-
 /**
  * \ingroup data
  *
@@ -354,7 +358,7 @@ class ParticleTypePtr {
   friend ParticleTypePtr ParticleType::operator&() const;
 
   /// Constructs a pointer to the ParticleType object at offset \p i.
-  ParticleTypePtr(std::uint16_t i) : index_(i) {}
+  explicit ParticleTypePtr(std::uint16_t i) : index_(i) {}
 
   /**
    * Helper function that does the ParticleType lookup from the stored index.

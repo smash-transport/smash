@@ -19,8 +19,8 @@ namespace Smash {
 
 namespace Random {
 
-/// The random number engine used is std::randlux48
-using Engine = std::ranlux48;
+/// The random number engine used is the Mersenne Twister.
+using Engine = std::mt19937_64;
 
 /// The engine that is used commonly by all distributions.
 extern /*thread_local*/ Engine engine;
@@ -60,29 +60,44 @@ template <typename T> class uniform_dist {
 template <typename T> void set_seed(T &&seed) {
   engine.seed(std::forward<T>(seed));
 }
+
 /** returns a uniformly distributed random number \f$\chi \in [{\rm
  * min}, {\rm max})\f$ */
 template <typename T> T uniform(T min, T max) {
   return std::uniform_real_distribution<T>(min, max)(engine);
 }
+
 /** returns a uniformly distributed random number \f$\chi \in [0,1)\f$
  */
 template <typename T = double> T canonical() {
   return std::generate_canonical<T, std::numeric_limits<double>::digits>(
       engine);
 }
+
+/** returns a uniformly distributed random number \f$\chi \in (0,1]\f$
+ */
+template <typename T = double> T canonical_nonzero() {
+  return std::nextafter(
+      std::generate_canonical<T, std::numeric_limits<double>::digits>(engine),
+      T(1)
+  );
+}
+
 /** returns a uniform_dist object */
 template <typename T>
 uniform_dist<T> make_uniform_distribution(T min, T max) {
   return uniform_dist<T>(min, max);
 }
+
 /** returns an exponentially distributed random number
  *
  * Probability for a given return value \f$\chi\f$ is \f$p(\chi) =
  * \Theta(\chi) \cdot \exp(-t)\f$
  */
 template <typename T = double> T exponential(T lambda) {
-  return std::exponential_distribution<T>(lambda)(engine);
+  // We are not using std::exponential_distribution because of a bug in the
+  // implementations by clang and gcc.
+  return -std::log(canonical_nonzero()) / lambda;
 }
 
 /** Evaluates a random number x according to an exponential distribution

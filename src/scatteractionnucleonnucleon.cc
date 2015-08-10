@@ -225,7 +225,7 @@ CollisionBranchList ScatterActionNucleonNucleon::nuc_nuc_to_nuc_res(
        * Integrate over the allowed resonance mass range. */
 
       const int res_id = type_resonance->pdgcode().iso_multiplet();
-      if (XS_tabulation[res_id] == NULL) {
+      if (XS_tabulation[res_id] == nullptr) {
         // initialize tabulation, we need one per resonance multiplet
         /* TODO(weil): Move this lazy init to a global initialization function,
          * in order to avoid race conditions in multi-threading. */

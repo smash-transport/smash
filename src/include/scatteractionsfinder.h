@@ -29,7 +29,8 @@ class ScatterActionsFinder : public ActionFinderInterface {
                        const ExperimentParameters &parameters);
   ScatterActionsFinder(float elastic_parameter, int testparticles);
 
-  /** Determine the collision time of the two particles.
+  /** Determine the collision time of the two particles [fm/c].
+   *  Time of the closest approach is taken as collision time.
    *
    * \fpPrecision Why \c double?
    */
@@ -74,7 +75,7 @@ class ScatterActionsFinder : public ActionFinderInterface {
  * Sets up a grid and sorts the particles into grid cells. */
 class GridScatterFinder : public ScatterActionsFinder {
  public:
-  GridScatterFinder(float length);
+  explicit GridScatterFinder(float length);
   void find_possible_actions(std::vector<ActionPtr> &actions,
                              Particles *particles,
                              const ExperimentParameters &parameters,

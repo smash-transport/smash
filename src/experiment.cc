@@ -236,6 +236,8 @@ std::ostream &operator<<(std::ostream &out, const Experiment<Modus> &e) {
  * \key Force_Decays_At_End (bool, optional, default = true): \n
  * true - force all resonances to decay after last timestep \n
  * false - don't force decays (final output can contain resonances)
+ *
+ * \subpage pauliblocker
  */
 template <typename Modus>
 Experiment<Modus>::Experiment(Configuration config, bf::path output_path)
@@ -326,6 +328,8 @@ Experiment<Modus>::Experiment(Configuration config, bf::path output_path)
     *     disk space.\n \subpage format_root
     * \li Dilepton output in Oscar format: \n
     *     \subpage format_dilepton_output
+    * \li \subpage collisions_output_in_box_modus_
+    * \li \subpage output_vtk_lattice_
     */
 
   // loop until all OSCAR outputs are created (create_oscar_output will return
@@ -384,6 +388,36 @@ Experiment<Modus>::Experiment(Configuration config, bf::path output_path)
 
   dens_type_ = config.take({"Output", "Density_Type"}, DensityType::hadron);
   log.info() << "Density type written to headers: " << dens_type_;
+
+  /*!\Userguide
+   * \page input_lattice_ Lattice
+   *
+   * \key Sizes (array<float,3>, required): \n
+   *      Sizes of lattice in x, y, z directions in fm.
+   *
+   * \key Cell_Number (array<int,3>, required): \n
+   *      Number of cells in x, y, z directions.
+   *
+   * \key Origin (array<float,3>, required): \n
+   *      Coordinates of the left, down, near corner of the lattice in fm.
+   *
+   * \key Periodic (bool, required): \n
+   *      Use periodic continuation or not. With periodic continuation
+   *      x + i * lx is equivalent to x, same for y, z.
+   *
+   * \subpage input_vtk_lattice_
+   *
+   * For format of lattice output see \ref output_vtk_lattice_.
+   *
+   * \page input_vtk_lattice_ Printout
+   *
+   * User can print thermodynamical quantities on the lattice to vtk output.
+   * For this one has to use the "Lattice: Printout" section of configuration.
+   * Currently printing of custom density to vtk file is available.
+   *
+   * \key Density (DensityType, optional, default = DensityType::None): \n
+   * Chooses which density to print.
+   */
 
   // Create lattices
   if (config.has_value({"Lattice"})) {
@@ -463,7 +497,7 @@ static std::string format_measurements(const Particles &particles,
   ss << field<5> << time
      << field<12, 3> << difference.momentum().x0()
      << field<12, 3> << difference.momentum().abs3()
-     << field<12, 3> << (scatterings_total
+     << field<12, 3> << ((scatterings_total && time > really_small)
                           ? scatterings_total * 2 / (particles.size() * time)
                           : 0.)
      << field<10, 3> << scatterings_this_interval

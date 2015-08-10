@@ -76,7 +76,7 @@ class DisableFloatTraps {
    *
    * \param mask A bitwise or of the traps you want to keep enabled.
    */
-  DisableFloatTraps(int mask = 0) {
+  explicit DisableFloatTraps(int mask = 0) {
     std::feholdexcept(&environment_);
     if (mask != 0) {
       reenable_traps(mask);
