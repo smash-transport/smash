@@ -11,6 +11,7 @@
 #define SRC_INCLUDE_SCATTERACTION_H_
 
 #include "action.h"
+#include "constants.h"
 
 namespace Smash {
 
@@ -140,6 +141,13 @@ class ScatterAction : public Action {
 
   float cross_section() const {
     return total_cross_section_;
+  }
+
+  /**
+   * Returns the maximal effective collision distance squared.
+   */
+  static float max_eff_collision_distance_sqr(int testparticles) {
+    return max_collision_distance * max_collision_distance / testparticles;
   }
 
  protected:

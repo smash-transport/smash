@@ -39,6 +39,13 @@ constexpr float nuclear_density = 0.168;
  * nucleon mass in GeV
  */
 constexpr float nucleon_mass = 0.938;
+/**
+ * maximal distance (in fm) of two particles which are still able to collide
+ *
+ * 2.5 fm corresponds to a maximal cross section of approx. 200 mb (20 fm^2).
+ * sqrt(20 fm^2/pi) ~ 2.5 fm
+ */
+constexpr float max_collision_distance = 2.5f;
 
 }  // namespace Smash
 
