@@ -127,7 +127,7 @@ ActionPtr ScatterActionsFinder::check_collision(
   act->add_all_processes(elastic_parameter_);
 
   /* distance criterion according to cross_section */
-  const double distance_squared = act->particle_distance();
+  const double distance_squared = act->transverse_distance_sqr();
   if (distance_squared >= act->cross_section() * fm2_mb * M_1_PI
                           * data_a.cross_section_scaling_factor()
                           * data_b.cross_section_scaling_factor()
