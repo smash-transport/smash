@@ -19,13 +19,16 @@
 
 namespace Smash {
 
-/* Breit-Wigner distribution */
-float breit_wigner(const float srts, const float resonance_mass,
-                   const float resonance_width) {
-  const float s = srts * srts;
-  const float A = s * resonance_width * resonance_width;
-  const float B = (s - resonance_mass * resonance_mass);
-  return 2. * s * resonance_width / (M_PI * (B*B + A));
+/* relativistic Breit-Wigner distribution */
+float breit_wigner(const float m, const float pole, const float width) {
+  const float msqr = m*m;
+  const float dmsqr = msqr - pole*pole;
+  return 2.*msqr*width / (M_PI * (dmsqr*dmsqr + msqr*width*width));
+}
+
+/* non-relativistic Breit-Wigner distribution */
+float breit_wigner_nonrel(float m, float pole, float width) {
+  return cauchy(m, pole, width/2.);
 }
 
 float cauchy(float x, float pole, float width) {

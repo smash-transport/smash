@@ -35,6 +35,20 @@ TEST(breitwigner) {
   }
 }
 
+TEST(cauchy) {
+  const float m0 = 0.770;
+  const float gamma = 0.150;
+  const float peak_value = 1.f/(M_PI*gamma);
+  // cauchy: half maximum at full width
+  FUZZY_COMPARE         (cauchy(m0,       m0, gamma), peak_value);
+  COMPARE_ABSOLUTE_ERROR(cauchy(m0+gamma, m0, gamma), peak_value/2.f, 1e-6);
+  COMPARE_ABSOLUTE_ERROR(cauchy(m0-gamma, m0, gamma), peak_value/2.f, 1e-6);
+  // breit_wigner_nonrel: half maximum at half width
+  FUZZY_COMPARE         (breit_wigner_nonrel(m0,          m0, gamma), peak_value*2.f);
+  COMPARE_ABSOLUTE_ERROR(breit_wigner_nonrel(m0+gamma/2., m0, gamma), peak_value, 1e-6);
+  COMPARE_ABSOLUTE_ERROR(breit_wigner_nonrel(m0-gamma/2., m0, gamma), peak_value, 1e-6);
+}
+
 TEST(maxwell) {
   // tests the Maxwell-Boltzmann implementation for energies between 0
   // and 10 GeV and Temperatures between 0.01 and 1 GeV.

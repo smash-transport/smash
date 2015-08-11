@@ -9,17 +9,29 @@
 
 namespace Smash {
 
-/** Returns a relativistic Breit-Wigner distribution. The normalization is such
+/**
+ * Returns a relativistic Breit-Wigner distribution. The normalization is such
  * that integrating over srts from 0 to inf yields one.
  *
- * \param[in] srts sqrt of the Mandelstam s variable (available energy in GeV)
- * \param[in] resonance_mass resonance pole mass \f$ m \f$ in GeV
- * \param[in] resonance_width resonance width \f$ \Gamma \f$ in GeV
+ * \param[in] m Argument of the Breit-Wigner function (off-shell mass m in GeV)
+ * \param[in] pole resonance pole mass \f$ m_0 \f$ in GeV
+ * \param[in] width resonance width \f$ \Gamma \f$ in GeV
  *
- * \return \f$\frac{2}{\pi}\frac{s\Gamma}{(s-m^2)^2 + s\Gamma^2}\f$
+ * \return \f$ \frac{2}{\pi} \frac{m^2\Gamma}{(m^2-m_0^2)^2 + m^2\Gamma^2} \f$
  */
-float breit_wigner(const float srts, const float resonance_mass,
-                   const float resonance_width);
+float breit_wigner(float m, float pole, float width);
+
+/**
+ * Returns a non-relativistic Breit-Wigner distribution, which is essentially
+ * a Cauchy distribution with half width.
+ *
+ * \param[in] m Argument of the Breit-Wigner function (off-shell mass m in GeV)
+ * \param[in] pole resonance pole mass \f$ m_0 \f$ in GeV
+ * \param[in] width resonance width \f$ \Gamma \f$ in GeV
+ *
+ * \return \f$ \frac{\Gamma/2}{\pi ((m-m_0)^2+\Gamma^2/4)}\f$
+ */
+float breit_wigner_nonrel(float m, float pole, float width);
 
 /**
  * Returns a Cauchy distribution (sometimes also called Lorentz or

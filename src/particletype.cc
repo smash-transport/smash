@@ -333,8 +333,8 @@ float ParticleType::get_partial_in_width(const float m,
 
 
 float ParticleType::spectral_function(float m) const {
-  /* The spectral function is essentially a Breit-Wigner function with some
-   * prefactors and mass-dependent width. */
+  /* The spectral function is a relativistic Breit-Wigner function
+   * with mass-dependent width. */
   const float resonance_width = total_width(m);
   if (resonance_width < ParticleType::width_cutoff) {
     return 0.;
@@ -343,8 +343,8 @@ float ParticleType::spectral_function(float m) const {
 }
 
 float ParticleType::spectral_function_const_width(float m) const {
-  /* The spectral function is essentially a Breit-Wigner function with some
-   * prefactors. This variant is using a constant width (on-shell). */
+  /* The spectral function is a relativistic Breit-Wigner function.
+   * This variant is using a constant width (evaluated at the pole mass). */
   const float resonance_width = width_at_pole();
   if (resonance_width < ParticleType::width_cutoff) {
     return 0.;
@@ -353,7 +353,7 @@ float ParticleType::spectral_function_const_width(float m) const {
 }
 
 float ParticleType::spectral_function_simple(float m) const {
-  return cauchy(m, mass(), width_at_pole()/2.);
+  return breit_wigner_nonrel(m, mass(), width_at_pole());
 }
 
 
