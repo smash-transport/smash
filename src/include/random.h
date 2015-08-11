@@ -79,8 +79,7 @@ template <typename T = double> T canonical() {
 template <typename T = double> T canonical_nonzero() {
   return std::nextafter(
       std::generate_canonical<T, std::numeric_limits<double>::digits>(engine),
-      T(1)
-  );
+      T(1));
 }
 
 /** returns a uniform_dist object */
