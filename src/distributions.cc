@@ -19,12 +19,13 @@
 
 namespace Smash {
 
-/* Breit-Wigner distribution for calculating resonance production probability */
-float breit_wigner(const float mandelstam_s, const float resonance_mass,
+/* Breit-Wigner distribution */
+float breit_wigner(const float srts, const float resonance_mass,
                    const float resonance_width) {
-  const float A = mandelstam_s * resonance_width * resonance_width;
-  const float B = (mandelstam_s - resonance_mass * resonance_mass);
-  return A / (B*B + A);
+  const float s = srts * srts;
+  const float A = s * resonance_width * resonance_width;
+  const float B = (s - resonance_mass * resonance_mass);
+  return 2. * s * resonance_width / (M_PI * (B*B + A));
 }
 
 float cauchy(float x, float pole, float width) {

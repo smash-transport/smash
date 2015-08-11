@@ -9,21 +9,22 @@
 
 namespace Smash {
 
-/** Returns a Breit-Wigner distribution
+/** Returns a relativistic Breit-Wigner distribution. The normalization is such
+ * that integrating over srts from 0 to inf yields one.
  *
- * \param[in] mandelstam_s the Mandelstam s variable (available energy
- * squared - in GeV\f$^2\f$)
- * \param[in] resonance_mass resonance pole mass in GeV
- * \param[in] resonance_width resonance width in GeV
+ * \param[in] srts sqrt of the Mandelstam s variable (available energy in GeV)
+ * \param[in] resonance_mass resonance pole mass \f$ m \f$ in GeV
+ * \param[in] resonance_width resonance width \f$ \Gamma \f$ in GeV
  *
- * \return \f$\frac{s \Gamma^2}{(s-m^2)^2 + s\Gamma^2}\f$
+ * \return \f$\frac{2}{\pi}\frac{s\Gamma}{(s-m^2)^2 + s\Gamma^2}\f$
  */
-float breit_wigner(const float mandelstam_s, const float resonance_mass,
+float breit_wigner(const float srts, const float resonance_mass,
                    const float resonance_width);
 
 /**
  * Returns a Cauchy distribution (sometimes also called Lorentz or
  * non-relativistic Breit-Wigner distribution) with the given parameters.
+ * The normalization is such that integrating over x from -inf to inf yields one.
  *
  * \param x Argument of the Cauchy function.
  * \param pole Pole parameter \f$ m_0 \f$ of the Cauchy function, i.e. location of the peak.

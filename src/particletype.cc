@@ -339,8 +339,7 @@ float ParticleType::spectral_function(float m) const {
   if (resonance_width < ParticleType::width_cutoff) {
     return 0.;
   }
-  return breit_wigner(m*m, mass(), resonance_width)
-         * 2. / (M_PI * resonance_width);
+  return breit_wigner(m, mass(), resonance_width);
 }
 
 float ParticleType::spectral_function_const_width(float m) const {
@@ -350,8 +349,7 @@ float ParticleType::spectral_function_const_width(float m) const {
   if (resonance_width < ParticleType::width_cutoff) {
     return 0.;
   }
-  return breit_wigner(m*m, mass(), resonance_width)
-         * 2. / (M_PI * resonance_width);
+  return breit_wigner(m, mass(), resonance_width);
 }
 
 float ParticleType::spectral_function_simple(float m) const {

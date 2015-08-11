@@ -12,10 +12,11 @@
 
 using namespace Smash;
 
-static float test_breit_wigner(const float s, const float m, const float w) {
+static float test_breit_wigner(const float srts, const float m, const float w) {
+  const float s = srts*srts;
   const float sw2 = s * w * w;
   const float smm = s - m * m;
-  return sw2 / (smm * smm + sw2);
+  return 2.*s*w / (M_PI * (smm * smm + sw2));
 }
 
 TEST(breitwigner) {
