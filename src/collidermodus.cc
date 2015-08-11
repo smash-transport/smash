@@ -228,10 +228,10 @@ ColliderModus::ColliderModus(Configuration modus_config,
       mass_b = target_->mass() / target_->size();
     }
     // Check that input satisfies the lower bound (everything at rest).
-    if (sqrt_s_NN < mass_a + mass_b) {
+    if (sqrt_s_NN <= mass_a + mass_b) {
       throw ModusDefault::InvalidEnergy(
-          "Input Error: sqrt(s_NN) is smaller than masses:\n" +
-          std::to_string(sqrt_s_NN) + " GeV < " + std::to_string(mass_a) +
+          "Input Error: sqrt(s_NN) is not larger than masses:\n" +
+          std::to_string(sqrt_s_NN) + " GeV <= " + std::to_string(mass_a) +
           " GeV + " + std::to_string(mass_b) + " GeV.");
     }
     // Set the total nucleus-nucleus collision energy.
@@ -433,30 +433,19 @@ std::pair<double, double> ColliderModus::get_velocities(float s, float m_a,
   // Frame dependent calculations of velocities. Assume v_a >= 0, v_b <= 0.
   switch (frame_) {
     case CalculationFrame::CenterOfVelocity:
-      v_a = std::sqrt((s - (m_a + m_b) * (m_a + m_b)) /
-                      (s - (m_a - m_b) * (m_a - m_b)));
+      v_a = center_of_velocity_v(s, m_a, m_b);
       v_b = -v_a;
       break;
     case CalculationFrame::CenterOfMass:
       {
-        double A = (s -(m_a - m_b) * (m_a - m_b))
-                 * (s -(m_a + m_b) * (m_a + m_b));
-        double B = - 8 * (m_a * m_a) * m_a * (m_b * m_b) * m_b
-                   - ((m_a * m_a) + (m_b * m_b))
-                   * (s - (m_a * m_a) - (m_b * m_b))
-                   * (s - (m_a * m_a) - (m_b * m_b));
-        double C = (m_a * m_a) * (m_b * m_b) * A;
-        // Compute positive center of mass momentum.
-        double abs_p = std::sqrt((-B - std::sqrt(B * B - 4 * A * C)) / (2 * A));
-        v_a = abs_p / m_a;
-        v_b = -abs_p / m_b;
+        // Compute center of mass momentum.
+        double pCM = pCM_from_s(s, m_a, m_b);
+        v_a = pCM / std::sqrt(m_a*m_a + pCM*pCM);
+        v_b = -pCM / std::sqrt(m_b*m_b + pCM*pCM);
       }
       break;
     case CalculationFrame::FixedTarget:
-      v_a = std::sqrt(1 -
-                      4 * (m_a * m_a) * (m_b * m_b) /
-                          ((s - (m_a * m_a) - (m_b * m_b)) *
-                           (s - (m_a * m_a) - (m_b * m_b))));
+      v_a = fixed_target_projectile_v(s, m_a, m_b);
       break;
     default:
       throw std::domain_error(

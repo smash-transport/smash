@@ -20,7 +20,7 @@
 namespace Smash {
 
 
-CollisionBranchPtr ScatterActionNucleonNucleon::elastic_cross_section(float) {
+float ScatterActionNucleonNucleon::elastic_parametrization() {
   const PdgCode &pdg_a = incoming_particles_[0].type().pdgcode();
   const PdgCode &pdg_b = incoming_particles_[1].type().pdgcode();
 
@@ -36,9 +36,7 @@ CollisionBranchPtr ScatterActionNucleonNucleon::elastic_cross_section(float) {
     sig_el = np_elastic(s);
   }
   if (sig_el > 0.) {
-    return make_unique<CollisionBranch>(incoming_particles_[0].type(),
-                                        incoming_particles_[1].type(),
-                                        sig_el, ProcessType::Elastic);
+    return sig_el;
   } else {
     std::stringstream ss;
     ss << "problem in CrossSections::elastic: " << pdg_a.string().c_str()
