@@ -125,7 +125,7 @@ ActionPtr ScatterActionsFinder::check_collision(
   const double distance_squared = act->transverse_distance_sqr();
 
   /* Don't calculate cross section if the particles are very far apart. */
-  if (distance_squared >= max_eff_collision_distance_sqr(testparticles_)) {
+  if (distance_squared >= max_transverse_distance_sqr(testparticles_)) {
     return nullptr;
   }
 

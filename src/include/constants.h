@@ -40,12 +40,13 @@ constexpr float nuclear_density = 0.168;
  */
 constexpr float nucleon_mass = 0.938;
 /**
- * maximal distance (in fm) of two particles which are still able to collide
+ * The maximal cross section (in mb) for which it is guaranteed that all
+ * collisions with this cross section will be found.
  *
- * 2.5 fm corresponds to a maximal cross section of approx. 200 mb (20 fm^2).
- * sqrt(20 fm^2/pi) ~ 2.5 fm
+ * This means that all particle pairs, where the transverse distance is smaller
+ * or equal to \f$ \sqrt{200mb/\pi} \f$, will be checked for collions.
  */
-constexpr float max_collision_distance = 2.5f;
+constexpr float maximum_cross_section = 200.f; // mb
 
 }  // namespace Smash
 

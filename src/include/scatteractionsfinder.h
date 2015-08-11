@@ -53,23 +53,26 @@ class ScatterActionsFinder : public ActionFinderInterface {
   }
 
   /**
-   * Returns the maximal effective collision distance squared.
+   * Returns the maximal transverse distance squared.
+   *
+   * Particle pairs whose transverse distance is larger then this, are not
+   * checked for collisions.
    */
-  static float max_eff_collision_distance_sqr(int testparticles) {
-    return max_collision_distance * max_collision_distance / testparticles;
+  static float max_transverse_distance_sqr(int testparticles) {
+    return (maximum_cross_section / testparticles) * fm2_mb / M_PI;
   }
 
   /**
-   * Calculate the minimal size of the cells such that this actionfinder will
-   * find all collisions within the maximal effective collision distance.
+   * Calculate the minimal size for the grid cells such that the
+   * ScatterActionsFinder will find all collisions within the maximal transverse
+   * distance (which is determined by the maximal cross section).
    *
-   * \param testparticles The number of test particles
+   * \param testparticles The number of testparticles
    * \param dt The current time step size
    * \return The minimal required size of cells
    */
   static float min_cell_length(int testparticles, float dt) {
-    return std::sqrt(dt * dt +
-                     0.25 * max_eff_collision_distance_sqr(testparticles));
+    return std::sqrt(4 * dt * dt + max_transverse_distance_sqr(testparticles));
   }
 
  private:
