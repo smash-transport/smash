@@ -17,11 +17,9 @@ namespace Smash {
  * \param[in] resonance_width resonance width in GeV
  *
  * \return \f$\frac{s \Gamma^2}{(s-m^2)^2 + s\Gamma^2}\f$
- *
- * \fpPrecision Why \c double?
  */
-float breit_wigner(const double mandelstam_s, const float resonance_mass,
-                    const float resonance_width);
+float breit_wigner(const float mandelstam_s, const float resonance_mass,
+                   const float resonance_width);
 
 /**
  * Returns a Cauchy distribution (sometimes also called Lorentz or

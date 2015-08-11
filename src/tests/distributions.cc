@@ -12,21 +12,22 @@
 
 using namespace Smash;
 
-static float test_breit_wigner(const double s, const float m, const float w) {
-  const double sw2 = s * w * w;
-  const double smm = s - m * m;
+static float test_breit_wigner(const float s, const float m, const float w) {
+  const float sw2 = s * w * w;
+  const float smm = s - m * m;
   return sw2 / (smm * smm + sw2);
 }
 
 TEST(breitwigner) {
   // tests the Breit-Wigner implementation for values between 0.05 and 10 GeV
   for (int s_i = 1; s_i < 200; ++s_i) {
-    double s = s_i * 0.05;
+    float s = s_i * 0.05;
     for (int m_i = 1; m_i < 200; ++m_i) {
       float m = m_i * 0.05;
       for (int w_i = 1; w_i < 200; ++w_i) {
         float w = w_i * 0.05;
-        FUZZY_COMPARE(breit_wigner(s, m, w), test_breit_wigner(s, m, w))
+        COMPARE_ABSOLUTE_ERROR(breit_wigner(s, m, w),
+                               test_breit_wigner(s, m, w), 1e-6)
                 << s << "/" << m << "/" << w;
       }
     }
