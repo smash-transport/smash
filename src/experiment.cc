@@ -703,10 +703,12 @@ size_t Experiment<Modus>::run_time_evolution(const int evt_num) {
   Actions actions;
   Actions dilepton_actions;
 
+  // minimal cell length for the grid
+  const float min_cell_length = ScatterActionsFinder::min_cell_length(
+      parameters_.testparticles, parameters_.timestep_duration());
+
   while (!(++parameters_.labclock > end_time_)) {
     /* (1.a) Create grid. */
-    const float min_cell_length = ScatterActionsFinder::min_cell_length(
-        parameters_.testparticles, parameters_.timestep_duration());
     const auto &grid =
         use_grid_ ? modus_.create_grid(particles_, min_cell_length)
                   : modus_.create_grid(particles_, min_cell_length,
