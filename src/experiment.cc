@@ -575,50 +575,50 @@ void Experiment<Modus>::perform_action(
     const ActionPtr &action, size_t &interactions_total,
     size_t &total_pauli_blocked, const Container &particles_before_actions) {
   const auto &log = logger<LogArea::Experiment>();
-  if (action->is_valid(particles_)) {
-    const ParticleList incoming_particles = action->incoming_particles();
-    action->generate_final_state();
-    ProcessType process_type = action->get_type();
-    log.debug("Process Type is: ", process_type);
-    if (pauli_blocker_ &&
-        action->is_pauli_blocked(particles_, *pauli_blocker_.get())) {
-      total_pauli_blocked++;
-      return;
-    }
-    action->perform(&particles_, interactions_total);
-    const ParticleList outgoing_particles = action->outgoing_particles();
-    // Calculate Eckart rest frame density at the interaction point
-    double rho = 0.0;
-    if (dens_type_ != DensityType::None) {
-      const FourVector r_interaction = action->get_interaction_point();
-      constexpr bool compute_grad = false;
-      rho = rho_eckart(r_interaction.threevec(), particles_before_actions,
-                       density_param_, dens_type_, compute_grad).first;
-    }
-    /*!\Userguide
-     * \page collisions_output_in_box_modus_ Collision output in box modus
-     * \note When SMASH is running in the box modus, particle coordinates
-     * in the collision output can be out of the box. This is not an error.
-     * Box boundary conditions are intentionally not imposed before
-     * collision output to allow unambiguous finding of the interaction
-     * point.
-     * <I>Example</I>: two particles in the box have x coordinates 0.1 and
-     * 9.9 fm, while box L = 10 fm. Suppose these particles collide.
-     * For calculating collision the first one is wrapped to 10.1 fm.
-     * Then output contains coordinates of 9.9 fm and 10.1 fm.
-     * From this one can infer interaction point at x = 10 fm.
-     * Were boundary conditions imposed before output,
-     * their x coordinates would be 0.1 and 9.9 fm and interaction point
-     * position could be either at 10 fm or at 5 fm.
-     */
-    for (const auto &output : outputs_) {
-      output->at_interaction(incoming_particles, outgoing_particles, rho,
-                             action->raw_weight_value(), process_type);
-    }
-    log.debug(~einhard::Green(), "✔ ", action);
-  } else {
+  if (!action->is_valid(particles_)) {
     log.debug(~einhard::DRed(), "✘ ", action, " (discarded: invalid)");
+    return;
   }
+  const ParticleList incoming_particles = action->incoming_particles();
+  action->generate_final_state();
+  ProcessType process_type = action->get_type();
+  log.debug("Process Type is: ", process_type);
+  if (pauli_blocker_ &&
+      action->is_pauli_blocked(particles_, *pauli_blocker_.get())) {
+    total_pauli_blocked++;
+    return;
+  }
+  action->perform(&particles_, interactions_total);
+  const ParticleList outgoing_particles = action->outgoing_particles();
+  // Calculate Eckart rest frame density at the interaction point
+  double rho = 0.0;
+  if (dens_type_ != DensityType::None) {
+    const FourVector r_interaction = action->get_interaction_point();
+    constexpr bool compute_grad = false;
+    rho = rho_eckart(r_interaction.threevec(), particles_before_actions,
+                     density_param_, dens_type_, compute_grad).first;
+  }
+  /*!\Userguide
+   * \page collisions_output_in_box_modus_ Collision output in box modus
+   * \note When SMASH is running in the box modus, particle coordinates
+   * in the collision output can be out of the box. This is not an error.
+   * Box boundary conditions are intentionally not imposed before
+   * collision output to allow unambiguous finding of the interaction
+   * point.
+   * <I>Example</I>: two particles in the box have x coordinates 0.1 and
+   * 9.9 fm, while box L = 10 fm. Suppose these particles collide.
+   * For calculating collision the first one is wrapped to 10.1 fm.
+   * Then output contains coordinates of 9.9 fm and 10.1 fm.
+   * From this one can infer interaction point at x = 10 fm.
+   * Were boundary conditions imposed before output,
+   * their x coordinates would be 0.1 and 9.9 fm and interaction point
+   * position could be either at 10 fm or at 5 fm.
+   */
+  for (const auto &output : outputs_) {
+    output->at_interaction(incoming_particles, outgoing_particles, rho,
+                           action->raw_weight_value(), process_type);
+  }
+  log.debug(~einhard::Green(), "✔ ", action);
 }
 
 template <typename Modus>
@@ -884,7 +884,10 @@ size_t Experiment<Modus>::run_time_evolution_adaptive_time_steps(
   float rate =
       adaptive_parameters.rate_from_dt(parameters_.timestep_duration());
   Actions actions;
+  uint32_t num_time_steps = 0u;
+  float min_dt = std::numeric_limits<float>::infinity();
   while (parameters_.labclock.current_time() < end_time_) {
+    num_time_steps++;
     if (parameters_.labclock.next_time() > end_time_) {
       // set the time step size such that we stop at end_time_
       parameters_.labclock.end_tick_on_multiple(end_time_);
@@ -947,10 +950,13 @@ size_t Experiment<Modus>::run_time_evolution_adaptive_time_steps(
     }
     log_ad_ts.debug("Time step size: ",
                     parameters_.labclock.timestep_duration());
+    const float this_dt = parameters_.labclock.timestep_duration();
+    if (this_dt < min_dt) {
+      min_dt = this_dt;
+    }
 
     /* (3) Physics output during the run. */
     if (parameters_.need_intermediate_output()) {
-
       // The following block is necessary because we want to make sure that the
       // intermediate output happens at exactly the requested time and not
       // slightly before.
@@ -1036,6 +1042,8 @@ size_t Experiment<Modus>::run_time_evolution_adaptive_time_steps(
     log.info("Collisions: pauliblocked/total = ", total_pauli_blocked, "/",
              interactions_total);
   }
+  log.info("Number of time steps = ", num_time_steps);
+  log.info("Smallest time step size = ", min_dt);
   return interactions_total;
 }
 
@@ -1172,6 +1180,7 @@ void Experiment<Modus>::final_output(size_t interactions_total,
                                                 particles_.time() /
                                                 particles_.size()))
                << " [fm-1]";
+    log.info() << "Final interaction number: " << interactions_total;
   }
 
   for (const auto &output : outputs_) {

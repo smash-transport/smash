@@ -134,7 +134,16 @@ class Experiment : public ExperimentBase {
    */
   void initialize_new_event();
 
-  /** Perform the given action. */
+  /**
+   * Perform the given action.
+   *
+   * \param action The action to perform
+   * \param[in,out] interactions_total The number of interactions until now
+   * \param[in,out] total_pauliblocked The number of pauli blocked actions until
+   *                                   now
+   * \param particles_before_actions A container with the ParticleData from this
+   *                                 time step before any actions were performed
+   */
   template <typename Container>
   void perform_action(const ActionPtr &action, size_t &interactions_total,
                       size_t &total_pauliblocked,
