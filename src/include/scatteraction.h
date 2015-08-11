@@ -69,16 +69,25 @@ class ScatterAction : public Action {
   }
 
   /**
-   * Determine the elastic cross section for this collision. This routine
-   * by default just gives a constant cross section (corresponding to
-   * elast_par) but can be overriden in child classes for a different behavior.
+   * Determine the (parametrized) elastic cross section for this collision.
+   * It is zero by default, but can be overridden in the child classes.
+   */
+  virtual float elastic_parametrization() {
+    return 0.;
+  }
+
+  /**
+   * Determine the elastic cross section for this collision. If elastic_par is
+   * given (and positive), we just use a constant cross section of that size,
+   * otherwise a parametrization of the elastic cross section is used
+   * (if available).
    *
    * \param[in] elast_par Elastic cross section parameter from the input file.
    *
    * \return A ProcessBranch object containing the cross section and
    * final-state IDs.
    */
-  virtual CollisionBranchPtr elastic_cross_section(float elast_par);
+  CollisionBranchPtr elastic_cross_section(float elast_par);
 
   /**
    * Determine the cross section for string excitations, which is given by the
