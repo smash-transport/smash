@@ -864,6 +864,7 @@ template <typename Modus>
 size_t Experiment<Modus>::run_time_evolution_adaptive_time_steps(
     const int evt_num, const AdaptiveParameters adaptive_parameters) {
   const auto &log = logger<LogArea::Experiment>();
+  const auto &log_ad_ts = logger<LogArea::AdaptiveTS>();
   modus_.impose_boundary_conditions(&particles_);
   size_t interactions_total = 0, previous_interactions_total = 0,
          total_pauli_blocked = 0;
@@ -937,6 +938,12 @@ size_t Experiment<Modus>::run_time_evolution_adaptive_time_steps(
         dt = adaptive_parameters.new_dt(rate);
       }
     }
+    log_ad_ts.debug() << hline;
+    log_ad_ts.debug() << "Averaged rate: " << rate;
+    log_ad_ts.debug() << "Time step size: "
+                      << parameters_.labclock.timestep_duration();
+    log_ad_ts.debug() << "Number of actions this time step: "
+                      <<  n_actions;
 
     /* (3) Physics output during the run. */
     if (parameters_.need_intermediate_output()) {
@@ -987,7 +994,9 @@ size_t Experiment<Modus>::run_time_evolution_adaptive_time_steps(
         if (end_early &&
             action->time_of_execution() > parameters_.labclock.current_time()) {
           actions.clear();
-          log.debug("time step was ended early");
+          log_ad_ts.debug("time step was ended early");
+          log_ad_ts.debug() << "Current time: "
+                            << parameters_.labclock.current_time();
           break;
         }
         perform_action(action, interactions_total, total_pauli_blocked,
