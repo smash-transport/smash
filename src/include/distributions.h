@@ -85,11 +85,11 @@ double juttner_distribution_func(const double momentum_radial,
 
 
 
-/** 1D woods-saxon distribution function  
+/** 1D woods-saxon distribution function
  * \param[in] r Radial coordinates in the nucleus in units of [fm]
  * \param[in] radius Radius parameter of the nucleus in units of [fm]
  * \param[in] diffusion Diffusiveness parameter of the nucleus in units of [fm]
- * \return Unnormalized nucleon density in units [fm^{-3}] 
+ * \return Unnormalized nucleon density in units [fm^{-3}]
  * in the nucleus at r  */
 double woods_saxon_dist_func(const double r,  const double radius,
         const double diffusion);
