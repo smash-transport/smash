@@ -143,7 +143,7 @@ double ScatterAction::cm_momentum_squared() const {
 }
 
 
-double ScatterAction::particle_distance() const {
+double ScatterAction::transverse_distance_sqr() const {
   const auto &log = logger<LogArea::ScatterAction>();
   // local copy of particles (since we need to boost them)
   ParticleData p_a = incoming_particles_[0];
