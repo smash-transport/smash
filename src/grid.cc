@@ -33,7 +33,8 @@ static std::ostream &operator<<(std::ostream &out, const std::vector<T> &v) {
 }
 
 template <typename T>
-static std::ostream &operator<<(std::ostream &out, const std::initializer_list<T> &v) {
+static std::ostream &operator<<(std::ostream &out,
+                                const std::initializer_list<T> &v) {
   auto column = out.tellp();
   out << "{ ";
   for (const auto &x : v) {
@@ -100,7 +101,8 @@ GridBase::find_min_and_length(const Particles &particles) {
 template <GridOptions O>
 Grid<O>::Grid(
     const std::pair<std::array<float, 3>, std::array<float, 3>> &min_and_length,
-    const Particles &particles, float max_interaction_length, CellSizeStrategy strategy)
+    const Particles &particles, float max_interaction_length,
+    CellSizeStrategy strategy)
     : length_(min_and_length.second) {
   const auto min_position = min_and_length.first;
   const SizeType particle_count = particles.size();
@@ -433,8 +435,10 @@ void Grid<GridOptions::PeriodicBoundaries>::iterate_cells(
 
 template Grid<GridOptions::Normal>::Grid(
     const std::pair<std::array<float, 3>, std::array<float, 3>> &min_and_length,
-    const Particles &particles, float max_interaction_length, CellSizeStrategy strategy);
+    const Particles &particles, float max_interaction_length,
+    CellSizeStrategy strategy);
 template Grid<GridOptions::PeriodicBoundaries>::Grid(
     const std::pair<std::array<float, 3>, std::array<float, 3>> &min_and_length,
-    const Particles &particles, float max_interaction_length, CellSizeStrategy strategy);
+    const Particles &particles, float max_interaction_length,
+    CellSizeStrategy strategy);
 }  // namespace Smash
