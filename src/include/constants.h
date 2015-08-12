@@ -39,6 +39,14 @@ constexpr float nuclear_density = 0.168;
  * nucleon mass in GeV
  */
 constexpr float nucleon_mass = 0.938;
+/**
+ * The maximal cross section (in mb) for which it is guaranteed that all
+ * collisions with this cross section will be found.
+ *
+ * This means that all particle pairs, where the transverse distance is smaller
+ * or equal to \f$ \sqrt{200mb/\pi} \f$, will be checked for collions.
+ */
+constexpr float maximum_cross_section = 200.f; // mb
 
 }  // namespace Smash
 

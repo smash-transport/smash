@@ -131,12 +131,17 @@ ActionPtr ScatterActionsFinder::check_collision(
   /* Create ScatterAction object. */
   ScatterActionPtr act = construct_scatter_action(data_a, data_b,
                                                   time_until_collision);
+  const double distance_squared = act->transverse_distance_sqr();
+
+  /* Don't calculate cross section if the particles are very far apart. */
+  if (distance_squared >= max_transverse_distance_sqr(testparticles_)) {
+    return nullptr;
+  }
 
   /* Add various subprocesses.  */
   act->add_all_processes(elastic_parameter_);
 
   /* distance criterion according to cross_section */
-  const double distance_squared = act->particle_distance();
   if (distance_squared >= act->cross_section() * fm2_mb * M_1_PI
                           * data_a.cross_section_scaling_factor()
                           * data_b.cross_section_scaling_factor()

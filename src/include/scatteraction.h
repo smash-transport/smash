@@ -39,12 +39,14 @@ class ScatterAction : public Action {
   void add_collisions(CollisionBranchList pv);
 
   /**
-   * Measure distance between incoming particles in center-of-momentum frame.
+   * Calculate the transverse distance of the two incoming particles in their
+   * local rest frame.
+   *
    * Returns the squared distance.
    *
    * \fpPrecision Why \c double?
    */
-  double particle_distance() const;
+  double transverse_distance_sqr() const;
 
   /**
    * Generate the final-state of the scattering process.

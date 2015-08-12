@@ -11,6 +11,8 @@
 #define SRC_INCLUDE_RANDOM_H_
 
 #include <random>
+#include <limits>
+#include <vector>
 
 namespace Smash {
 
@@ -79,8 +81,7 @@ template <typename T = double> T canonical() {
 template <typename T = double> T canonical_nonzero() {
   return std::nextafter(
       std::generate_canonical<T, std::numeric_limits<double>::digits>(engine),
-      T(1)
-  );
+      T(1));
 }
 
 /** returns a uniform_dist object */
@@ -116,7 +117,7 @@ template <typename T = double> T expo(T A, T x1, T x2) {
 
 // signum function
 template <typename T> int sgn(T val) {
-    return (T(0) < val) - (val < T(0));
+  return (T(0) < val) - (val < T(0));
 }
 
 /**
@@ -127,17 +128,60 @@ template <typename T> int sgn(T val) {
  * \return random number between xMin and xMax
  */
 template <typename T = double> T power(T n, T xMin, T xMax) {
-    const T n1 = n + 1;
-    if (std::abs(n1) < 1E-3) {
-      return xMin * std::pow(xMax/xMin, canonical());
-    } else if (xMin > 0. && xMax > 0.) {
-      return std::pow(uniform(std::pow(xMin, n1), std::pow(xMax, n1)), 1./n1);
-    } else {
-      return sgn(xMin) *
-             std::pow(uniform(std::pow(std::abs(xMin), n1),
-                              std::pow(std::abs(xMax), n1)), 1./n1);
-    }
+  const T n1 = n + 1;
+  if (std::abs(n1) < 1E-3) {
+    return xMin * std::pow(xMax/xMin, canonical());
+  } else if (xMin > 0. && xMax > 0.) {
+    return std::pow(uniform(std::pow(xMin, n1), std::pow(xMax, n1)), 1./n1);
+  } else {
+    return sgn(xMin) *
+           std::pow(uniform(std::pow(std::abs(xMin), n1),
+                            std::pow(std::abs(xMax), n1)), 1./n1);
+  }
 }
+
+/** returns an poisson distributed random number
+ *
+ * Probability for a given return value \f$\chi\f$ is \f$p(\chi) =
+ * \chi^i/i! \cdot \exp(-\chi)\f$
+ */
+template <typename T> int poisson(const T & lam ) {
+  return std::poisson_distribution<int>(lam)(engine);
+}
+
+/** \return: one interger number sampled from discrete distribution
+* whose weight given by probability vector
+*/
+template <typename T>
+class discrete_dist {
+ public:
+  /** default discrete distribution */
+  discrete_dist()
+    : distribution({1.0}) {
+  }
+
+  /** creates the object from probability vector */
+  explicit discrete_dist(const std::vector<T> & plist)
+    : distribution(plist.begin(), plist.end()) {
+  }
+
+  /** creates the object from probability list */
+  discrete_dist(std::initializer_list<T> l)
+    : distribution(l) {
+  }
+
+  /** reset the discrete distribution with new list*/
+  void reset_weights(const std::vector<T> & plist) {
+    distribution = std::discrete_distribution<>(plist.begin(), plist.end());
+  }
+  /** returns a random number in the interval */
+  int operator ()() {
+    return distribution(engine);
+  }
+  /** the distribution object that is being used. */
+ private:
+  std::discrete_distribution<> distribution;
+};
 
 }  // namespace Random
 }  // namespace Smash
