@@ -28,6 +28,7 @@ TEST(constant) {
   FUZZY_COMPARE(tab.get_value_linear( 5.), 1.f);
   FUZZY_COMPARE(tab.get_value_linear(7.5), 1.f);
   FUZZY_COMPARE(tab.get_value_linear(10.), 1.f);
+  // check extrapolated values
   FUZZY_COMPARE(tab.get_value_linear(20.), 1.f);
 }
 
@@ -50,13 +51,15 @@ TEST(linear) {
   FUZZY_COMPARE(tab.get_value_linear(7.5), 7.5f);
   FUZZY_COMPARE(tab.get_value_linear(8.4), 8.4f);
   FUZZY_COMPARE(tab.get_value_linear(10.), 10.f);
-  FUZZY_COMPARE(tab.get_value_linear(11.), 10.f);
+  // check extrapolated values
+  FUZZY_COMPARE(tab.get_value_linear(11.), 11.f);
+  FUZZY_COMPARE(tab.get_value_linear(20.), 20.f);
 }
 
 TEST(quadratic) {
   // tabulate a quadratic function
   const Tabulation tab(-2., 4., 20, [](double x) { return x*x; });
-  const float error = 1E-6f;
+  const float error = 1E-5f;
   // check closest-point values
   FUZZY_COMPARE(tab.get_value_step(-3.), 0.f);
   FUZZY_COMPARE(tab.get_value_step(-2.), 4.f);
@@ -76,5 +79,6 @@ TEST(quadratic) {
   FUZZY_COMPARE(tab.get_value_linear( 1.), 1.f);
   FUZZY_COMPARE(tab.get_value_linear(1.2), 1.44f);
   FUZZY_COMPARE(tab.get_value_linear( 2.), 4.f);
-  FUZZY_COMPARE(tab.get_value_linear( 3.), 4.f);
+  // check extrapolated values
+  COMPARE_ABSOLUTE_ERROR(tab.get_value_linear( 3.), 7.8f, error);
 }
