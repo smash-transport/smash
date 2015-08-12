@@ -42,6 +42,16 @@ static inline ostream &operator<<(ostream &s, const unordered_set<T> &data) {
 }  // namespace std
 
 static inline float minimal_cell_length(int testparticles) {
+  // In SMASH itself the minimal cell length is calculated by the function
+  // ScatterActionsFinder::min_cell_length(). It uses the maximum cross section
+  // of 200mb and the time step size to calculate the cell length. This test was
+  // written before the maximum cross section was introduced and does not
+  // accommodate for time step sizes. It assumes a minimal cell length based on
+  // a maximal interaction length of 2.5fm.
+  //
+  // To make the test work with ScatterActionsFinder::min_cell_length() the
+  // placements of the particles would need to be adapted to the different
+  // minimal cell size.
   return 2.5f / std::sqrt(static_cast<float>(testparticles));
 }
 
