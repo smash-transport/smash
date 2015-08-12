@@ -708,11 +708,15 @@ size_t Experiment<Modus>::run_time_evolution(const int evt_num) {
   Actions actions;
   Actions dilepton_actions;
 
+  // minimal cell length for the grid
+  const float min_cell_length = ScatterActionsFinder::min_cell_length(
+      parameters_.testparticles, parameters_.timestep_duration());
+
   while (!(++parameters_.labclock > end_time_)) {
     /* (1.a) Create grid. */
     const auto &grid =
-        use_grid_ ? modus_.create_grid(particles_, parameters_.testparticles)
-                  : modus_.create_grid(particles_, parameters_.testparticles,
+        use_grid_ ? modus_.create_grid(particles_, min_cell_length)
+                  : modus_.create_grid(particles_, min_cell_length,
                                        CellSizeStrategy::Largest);
     /* (1.b) Iterate over cells and find actions. */
     grid.iterate_cells([&](const ParticleList &search_list) {

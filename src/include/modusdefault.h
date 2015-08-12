@@ -61,9 +61,9 @@ class ModusDefault {
    * \see Grid::Grid
    */
   Grid<GridOptions::Normal> create_grid(
-      const Particles &particles, int testparticles,
+      const Particles &particles, float min_cell_length,
       CellSizeStrategy strategy = CellSizeStrategy::Optimal) const {
-    return {particles, testparticles, strategy};
+    return {particles, min_cell_length, strategy};
   }
 
   /** \ingroup exception
