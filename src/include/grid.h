@@ -84,7 +84,7 @@ class Grid : public GridBase {
    * of the particles.
    *
    * \param particles The particles to place onto the grid.
-   * \param testparticles Number of testparticles used in this event
+   * \param min_cell_length The minimal length a cell must have.
    * \param strategy The strategy for determining the cell size
    */
   Grid(const Particles &particles, float min_cell_length,
@@ -100,7 +100,7 @@ class Grid : public GridBase {
    * \param min_and_length A pair consisting of the three min coordinates and
    * the three lengths.
    * \param particles The particles to place onto the grid.
-   * \param testparticles Number of testparticles used in this event
+   * \param min_cell_length The minimal length a cell must have.
    * \param strategy The strategy for determining the cell size
    */
   Grid(const std::pair<std::array<float, 3>, std::array<float, 3>> &
@@ -155,12 +155,11 @@ class Grid : public GridBase {
    * \li The second tuple entry stores the dimensions of the grid (i.e. the
    * number of cells in each spatial direction).
    *
-   * \param particle_count The number of particles to be placed in the grid.
-   * \param length         Three lengths that identify the total dimensions of
-   *                       the grid.
-   * \param testparticles  The number of testparticles is used to scale the cell
-   *                       size down, since the interaction length is also
-   *                       reduced.
+   * \param particle_count  The number of particles to be placed in the grid.
+   * \param length          Three lengths that identify the total dimensions of
+   *                        the grid.
+   * \param min_cell_length The minimal length a cell must have such that all
+   *                        relevant interactions are included.
    */
   static std::tuple<std::array<float, 3>, std::array<int, 3>>
       determine_cell_sizes(size_type particle_count,
