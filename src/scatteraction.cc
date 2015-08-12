@@ -174,9 +174,17 @@ double ScatterAction::particle_distance() const {
 
 
 CollisionBranchPtr ScatterAction::elastic_cross_section(float elast_par) {
+  float elastic_xs;
+  if (elast_par > 0.) {
+    // use constant elastic cross section from config file
+    elastic_xs = elast_par;
+  } else {
+    // use parametrization
+    elastic_xs = elastic_parametrization();
+  }
   return make_unique<CollisionBranch>(incoming_particles_[0].type(),
                                       incoming_particles_[1].type(),
-                                      elast_par, ProcessType::Elastic);
+                                      elastic_xs, ProcessType::Elastic);
 }
 
 CollisionBranchPtr ScatterAction::string_excitation_cross_section() {

@@ -112,7 +112,7 @@ class ParticleType {
   /// Check if the particle is stable
   inline bool is_stable() const {
     return width_ < width_cutoff;
-  };
+  }
 
   /**
    * The minimum mass of the resonance.

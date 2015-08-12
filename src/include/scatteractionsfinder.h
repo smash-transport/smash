@@ -29,7 +29,8 @@ class ScatterActionsFinder : public ActionFinderInterface {
                        const ExperimentParameters &parameters);
   ScatterActionsFinder(float elastic_parameter, int testparticles);
 
-  /** Determine the collision time of the two particles.
+  /** Determine the collision time of the two particles [fm/c].
+   *  Time of the closest approach is taken as collision time.
    *
    * \fpPrecision Why \c double?
    */

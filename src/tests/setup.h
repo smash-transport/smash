@@ -159,7 +159,7 @@ inline ParticleData smashon_random(int id = -1) {
  * \endcode
  */
 inline Configuration configuration(std::string overrides = {}) {
-  Configuration c{TEST_CONFIG_PATH};
+  Configuration c{bf::path{TEST_CONFIG_PATH} / "input" };
   if (!overrides.empty()) {
     c.merge_yaml(overrides);
   }

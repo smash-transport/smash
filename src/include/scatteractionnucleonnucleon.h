@@ -24,16 +24,9 @@ class ScatterActionNucleonNucleon : public ScatterActionBaryonBaryon {
  public:
   /* Inherit constructor. */
   using ScatterActionBaryonBaryon::ScatterActionBaryonBaryon;
-  /**
-   * Determine the elastic cross section for a nucleon-nucleon collision.
-   * It is given by a parametrization of experimental data.
-   *
-   * \param[in] elast_par Elastic cross section parameter from the input file (not used here).
-   *
-   * \return A ProcessBranch object containing the cross section and
-   * final-state IDs.
-   */
-  CollisionBranchPtr elastic_cross_section(float elast_par) override;
+  /** Determine the (parametrized) elastic cross section for a
+   * nucleon-nucleon collision. */
+  float elastic_parametrization() override;
   /** Find all inelastic 2->2 processes for this reaction. */
   CollisionBranchList two_to_two_cross_sections() override;
 
