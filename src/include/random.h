@@ -183,6 +183,24 @@ class discrete_dist {
   std::discrete_distribution<> distribution;
 };
 
+/**
+ * Draws a random number from a Cauchy distribution (sometimes also called
+ * Lorentz or non-relativistic Breit-Wigner distribution) with the given
+ * parameters (constant width!) inside the range [min,max]. This function is
+ * similar to std::cauchy_distribution, but can return values inside a limited
+ * interval.
+ * \param pole Pole parameter of the Cauchy function, i.e. location of the peak.
+ * \param width Width parameter of the Cauchy function, determining the sharpness of the peak.
+ * \param min Minimum value to be returned.
+ * \param max Maximum value to be returned.
+ */
+template <typename T = double> T cauchy(T pole, T width, T min, T max) {
+  const T u_min = std::atan((min-pole)/width);
+  const T u_max = std::atan((max-pole)/width);
+  const T u = uniform(u_min, u_max);
+  return pole + width*std::tan(u);
+}
+
 }  // namespace Random
 }  // namespace Smash
 

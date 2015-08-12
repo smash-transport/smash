@@ -12,7 +12,6 @@
 #include "include/angles.h"
 #include "include/constants.h"
 #include "include/cxx14compat.h"
-#include "include/distributions.h"
 #include "include/kinematics.h"
 #include "include/logging.h"
 #include "include/pdgcode.h"
@@ -200,7 +199,7 @@ CollisionBranchPtr ScatterAction::string_excitation_cross_section() {
 
 
 double ScatterAction::two_to_one_formation(const ParticleType &type_resonance,
-                                           double s, double cm_momentum_sqr) {
+                                          double srts, double cm_momentum_sqr) {
   const ParticleType &type_particle_a = incoming_particles_[0].type();
   const ParticleType &type_particle_b = incoming_particles_[1].type();
   /* Check for charge conservation. */
@@ -216,8 +215,7 @@ double ScatterAction::two_to_one_formation(const ParticleType &type_resonance,
   }
 
   /* Calculate partial in-width. */
-  double srts = std::sqrt(s);
-  float partial_width = type_resonance.get_partial_in_width(srts,
+  const float partial_width = type_resonance.get_partial_in_width(srts,
                                 incoming_particles_[0], incoming_particles_[1]);
   if (partial_width <= 0.f) {
     return 0.;
@@ -228,17 +226,12 @@ double ScatterAction::two_to_one_formation(const ParticleType &type_resonance,
     / ((type_particle_a.spin() + 1) * (type_particle_b.spin() + 1));
   const int sym_factor = (type_particle_a.pdgcode() ==
                           type_particle_b.pdgcode()) ? 2 : 1;
-  float resonance_width = type_resonance.total_width(srts);
-  if (resonance_width <= 0.f) {
-    return 0.;
-  }
   /** Calculate resonance production cross section
    * using the Breit-Wigner distribution as probability amplitude.
    * See Eq. (176) in \iref{Buss:2011mx}. */
-  return spinfactor * sym_factor * 4.0 * M_PI / cm_momentum_sqr
-         * breit_wigner(s, type_resonance.mass(), resonance_width)
-         * partial_width/resonance_width
-         * hbarc * hbarc / fm2_mb;
+  return spinfactor * sym_factor * 2. * M_PI * M_PI / cm_momentum_sqr
+         * type_resonance.spectral_function(srts)
+         * partial_width * hbarc * hbarc / fm2_mb;
 }
 
 
@@ -248,7 +241,7 @@ CollisionBranchList ScatterAction::resonance_cross_sections() {
   const ParticleType &type_particle_a = incoming_particles_[0].type();
   const ParticleType &type_particle_b = incoming_particles_[1].type();
 
-  const double s = mandelstam_s();
+  const double srts = sqrt_s();
   const double p_cm_sqr = cm_momentum_squared();
 
   /* Find all the possible resonances */
@@ -267,7 +260,7 @@ CollisionBranchList ScatterAction::resonance_cross_sections() {
     }
 
     float resonance_xsection = two_to_one_formation(type_resonance,
-                                                    s, p_cm_sqr);
+                                                    srts, p_cm_sqr);
 
     /* If cross section is non-negligible, add resonance to the list */
     if (resonance_xsection > really_small) {

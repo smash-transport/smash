@@ -10,7 +10,7 @@
 namespace Smash {
 
 Tabulation::Tabulation(float x_min, float range, int num,
-                       std::function<double(float)> f)
+                       std::function<float(float)> f)
                       : x_min_(x_min), inv_dx_(num/range) {
   values_.resize(num+1);
   const float dx = range/num;

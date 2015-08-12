@@ -79,16 +79,6 @@ inline double isospin_clebsch_gordan(const ParticleType &p_a,
 
 
 /**
- * Spectral function
- * \f$A(m)=\frac{1}{\pi}\frac{m\Gamma(m)}{(m^2-m_0^2)^2+(m\Gamma(m))^2}\f$
- * of the resonance.
- *
- * \fpPrecision Why \c double?
- */
-double spectral_function(double resonance_mass, double resonance_pole,
-                         double resonance_width);
-
-/**
  * Spectral function integrand for GSL integration.
  *
  * The integrand is \f$2m A(m) p_{cm}^f\f$, where \f$m\f$ is the
@@ -99,27 +89,22 @@ double spectral_function(double resonance_mass, double resonance_pole,
  * \param[in] srts sqrt(s) of the process
  * \param[in] stable_mass mass of the stable particle in the final state
  * \param[in] type type of the resonance
- *
- * \fpPrecision Why \c double?
  */
-double spectral_function_integrand(double resonance_mass, double srts,
-                                   double stable_mass,
-                                   const ParticleType &type);
+float spectral_function_integrand(float resonance_mass, float srts,
+                                  float stable_mass, const ParticleType &type);
 
 /**
  * Resonance mass sampling for 2-particle final state
  * with *one resonance* and one *stable* particle.
  *
- * \param[in] type_resonance Type of the resonance particle.
+ * \param[in] type_res Type of the resonance particle.
  * \param[in] mass_stable Mass of the stable particle.
  * \param[in] cms_energy center-of-mass energy of the 2-particle final state.
  *
  * \return The mass of the resonance particle.
- *
- * \fpPrecision Why \c double?
  */
-float sample_resonance_mass(const ParticleType &type_resonance,
-                            const float mass_stable, const double cms_energy);
+float sample_resonance_mass(const ParticleType &type_res,
+                            const float mass_stable, const float cms_energy);
 
 }  // namespace Smash
 

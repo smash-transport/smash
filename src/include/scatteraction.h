@@ -118,8 +118,7 @@ class ScatterAction : public Action {
    * Return the 2-to-1 resonance production cross section for a given resonance.
    *
    * \param[in] type_resonance Type information for the resonance to be produced.
-   * \param[in] s Mandelstam-s of the collision
-   * of the two initial particles.
+   * \param[in] srts Total energy in the center-of-mass frame.
    * \param[in] cm_momentum_sqr Square of the center-of-mass momentum of the
    * two initial particles.
    *
@@ -129,7 +128,7 @@ class ScatterAction : public Action {
    * \fpPrecision Why \c double?
    */
   double two_to_one_formation(const ParticleType &type_resonance,
-                              double s, double cm_momentum_sqr);
+                              double srts, double cm_momentum_sqr);
 
   /** Find all inelastic 2->2 processes for this reaction. */
   virtual CollisionBranchList two_to_two_cross_sections() {
