@@ -47,7 +47,8 @@ float spectral_function_integrand(float resonance_mass, float srts,
 /* Resonance mass sampling for 2-particle final state */
 float sample_resonance_mass(const ParticleType &type_res,
                             const float mass_stable, const float cms_energy) {
-  // largest possible mass
+  /* largest possible mass: Use 'nextafter' to make sure it is not above the
+   * physical limit by numerical error. */
   const float max_mass = std::nextafter(cms_energy - mass_stable, 0.f);
   // largest possible cm momentum (from smallest mass)
   const float pcm_max = pCM(cms_energy, mass_stable, type_res.minimum_mass());

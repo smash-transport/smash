@@ -79,6 +79,7 @@ template <typename T = double> T canonical() {
 /** returns a uniformly distributed random number \f$\chi \in (0,1]\f$
  */
 template <typename T = double> T canonical_nonzero() {
+  // use 'nextafter' to generate a value that is guaranteed to be larger than 0
   return std::nextafter(
       std::generate_canonical<T, std::numeric_limits<double>::digits>(engine),
       T(1));
