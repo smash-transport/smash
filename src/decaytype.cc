@@ -181,7 +181,7 @@ float TwoBodyDecaySemistable::rho(float mass) const {
     const_cast<TwoBodyDecaySemistable*>(this)->tabulation_
         = make_unique<Tabulation>(
                 particle_types_[0]->mass() + particle_types_[1]->minimum_mass(),
-                10*particle_types_[1]->width_at_pole(), 50,
+                10*particle_types_[1]->width_at_pole(), 60,
                 [&](float srts) {
                   Integrator integrate;
                   return integrate(particle_types_[1]->minimum_mass(),
