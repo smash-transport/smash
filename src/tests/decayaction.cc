@@ -21,10 +21,10 @@ using namespace Smash;
 TEST(init_particle_types) {
   ParticleType::create_type_list(
       "# NAME MASS[GEV] WIDTH[GEV] PDG\n"
-      "H 8.000 1.0 50661\n"
-      "A1⁰ 1.000 -1.0 10661\n"
-      "A2⁰ 1.500 -1.0 20661\n"
-      "A3⁰ 3.000 0.2 30661");
+      "H 3.000 0.3 50661\n"
+      "A1⁰ 0.400 -1.0 10661\n"
+      "A2⁰ 0.600 -1.0 20661\n"
+      "A3⁰ 1.200 0.2 30661");
 }
 
 TEST(init_decay_channels) {
@@ -48,12 +48,12 @@ TEST(create_decayaction) {
   const float m0_H = H.type().mass();
   const float G0_H = H.type().width_at_pole();
   const float m0_A1 = A1.type().mass();
-  H.set_4momentum(H.type().mass() + 3.0f, ThreeVector(1.0, 0.0, 0.0));
+  H.set_4momentum(H.type().mass() + 1.0f, ThreeVector(1.0, 0.0, 0.0));
   const float m_H = H.effective_mass();
-  COMPARE(m0_H, 8.0f);
-  COMPARE(G0_H, 1.0f);
-  COMPARE(m_H, 11.0f);
-  COMPARE(m0_A1, 1.0f);
+  COMPARE(m0_H, 3.0f);
+  COMPARE(G0_H, 0.3f);
+  COMPARE(m_H,  4.0f);
+  COMPARE(m0_A1, 0.4f);
 
   // Initialize decays of H and check their properties
   DecayBranchList H_decays = H.type().get_partial_widths(m_H);
@@ -75,25 +75,24 @@ TEST(create_decayaction) {
       case 0:
         // Check consistency for width at pole
         COMPARE(mode->type().width(m0_H, G0_H, m0_H), G0_H);
-        /* mA2 = 1.5; mA1 = 1.0; m0A3 = 3.0; G0A3 = 0.2; m0H = 8.0; mH = 11.0;
-           mA3min = 2.5; G0H = 1.0; L = 1.6;
-           PostCutoff[m_] := (L^4 + ((mA3min + mA2)^2 - m0H^2)^2/
-           4)/(L^4 + (m^2 - ((mA3min + mA2)^2 + m0H^2)/2)^2)
-           GA3[mA3_] := G0A3*Sqrt[((1 + (mA1/mA3)^2 - (mA2/mA3)^2)^2 -
-           4 (mA1/mA3)^2)/((1 + (mA1/m0A3)^2 - (mA2/m0A3)^2)^2 -
-           4 (mA1/m0A3)^2)]
-           rho[m_] :=  NIntegrate[
-           2 mA3*(mA3*GA3[mA3]/Pi)/((mA3^2 - m0A3^2)^2 + mA3^2 GA3[mA3]^2)*
-           Sqrt[(m^2 + mA2^2 - mA3^2)^2/m^2/4 - mA2^2], {mA3, mA3min, m - mA2}]
-           rho[mH]/rho[m0H]*PostCutoff[mH]^2*G0H // results in 0.12323
-        */
+        /* Result obtained with MATHEMATICA code:
+          mA2 = 0.9; mA1 = 0.5; m0A3 = 1.0; G0A3 = 0.2; m0H = 3.0; mH = 4.0;
+          mA3min = 1.4; G0H = 0.3; L = 1.6;
+          PostCutoff[m_] := (L^4 + ((mA3min + mA2)^2 - m0H^2)^2/4)/
+          (L^4 + (m^2 - ((mA3min + mA2)^2 + m0H^2)/2)^2)
+          GA3[mA3_] := G0A3*Sqrt[((1 + (mA1/mA3)^2 - (mA2/mA3)^2)^2 -
+          4 (mA1/mA3)^2)/((1 + (mA1/m0A3)^2 - (mA2/m0A3)^2)^2 - 4 (mA1/m0A3)^2)]
+          rho[m_] :=  NIntegrate[
+          2 mA3*(mA3*GA3[mA3]/Pi)/((mA3^2 - m0A3^2)^2 + mA3^2 GA3[mA3]^2)*
+          Sqrt[(m^2 + mA2^2 - mA3^2)^2/m^2/4 - mA2^2], {mA3, mA3min, m - mA2}]
+          rho[mH]/rho[m0H]*PostCutoff[mH]^2*G0H        */
         /* It might seem weird that resulting width is so unphysically
            small. This is because of the Post form-factor, which is intended
            for resonanse masses smaller than 2 GeV. For higher masses it
            does not give physically reasonable results. But this is only
            code test, so we can live with it.
         */
-        COMPARE_RELATIVE_ERROR(width, 0.012323f, 1.e-6);
+        COMPARE_RELATIVE_ERROR(width, 0.0111116f, 5.e-2);
         break;
       // Stable two-body decay H -> A1 + A1
       case 1:
@@ -104,7 +103,7 @@ TEST(create_decayaction) {
         tmp1 = 2 * m0_A1 / m_H;
         tmp2 = 2 * m0_A1 / m0_H;
         width_expected = G0_H * std::sqrt((1.f - tmp1*tmp1)/(1.f - tmp2*tmp2));
-        COMPARE_RELATIVE_ERROR(width, width_expected, 1.e-7);
+        COMPARE_RELATIVE_ERROR(width, width_expected, 1.e-6);
         break;
       // three-body decay H -> A2 + A2 + A1
       case 2:
