@@ -340,7 +340,7 @@ inline float AdaptiveRejectionSampler::sample_x(int j) {
 
 /** if squeezing_test==true, do not need rejection_test (time save) */
 inline bool AdaptiveRejectionSampler::squeezing_test(const float & x,
-                                                     const int & j, const float & rand) {
+                                            const int & j, const float & rand) {
   return rand <= std::exp(lower(j).eval(x) -
                           upper_bounds_.at(j).piecewise_linear_line.eval(x));
 }
@@ -348,7 +348,7 @@ inline bool AdaptiveRejectionSampler::squeezing_test(const float & x,
 /** if squeezing_test==false, do rejection_test
  * if rejection_test=true, keep the sampling*/
 inline bool AdaptiveRejectionSampler::rejection_test(const float & x,
-                                                     const int & j, const float & rand) {
+                                            const int & j, const float & rand) {
   return rand*std::exp(upper_bounds_.at(j).piecewise_linear_line.eval(x))
       <= f_(x);
 }

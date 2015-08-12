@@ -45,8 +45,12 @@ constexpr float nucleon_mass = 0.938;
  *
  * This means that all particle pairs, where the transverse distance is smaller
  * or equal to \f$ \sqrt{200mb/\pi} \f$, will be checked for collions.
+ *
+ * This maximum occurs in the Delta peak of the pi+p cross section.
+ * The only exception of physical cross sections going above 200 mb are the
+ * elastic NN cross sections, which diverge at threshold.
  */
-constexpr float maximum_cross_section = 200.f; // mb
+constexpr float maximum_cross_section = 200.f;  // mb
 
 }  // namespace Smash
 
