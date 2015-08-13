@@ -62,20 +62,27 @@ static float BlattWeisskopf(const float p_ab, const int L)
 /**
  * An additional form factor for unstable final states as used in GiBUU,
  * according to M. Post. Reference: \iref{Buss:2011mx}, eq. (174).
- * The function returns the squared value of the form factor.
+ *
  * \param m Actual mass of the decaying resonance [GeV].
  * \param M0 Pole mass of the decaying resonance [GeV].
  * \param srts0 Threshold of the reaction, i.e. minimum possible sqrt(s) [GeV].
  * \param L Lambda parameter of the form factor [GeV]. This is a cut-off
  * parameter that can be different for baryons and mesons.
+ *
+ * \return The squared value of the form factor (dimensionless).
+ *
+ * \note This form factor is equal to one at m=M0 and m=srts0. For decreasing
+ * values of L, the form factor results in a stronger and stronger suppression
+ * of the high-mass tail (m > M0) and a corresponding enhancement of the
+ * low-mass tail (m < M0).
  */
 static float Post_FF_sqr(float m, float M0, float srts0, float L) {
   const auto L4 = L*L*L*L;
-  const auto m2 = m*m;
   const auto M2 = M0*M0;
   const auto s0 = srts0*srts0;
-  const float FF = (L4 + (s0-M2)*(s0-M2)/4.) /
-                   (L4 + (m2-(s0+M2)/2.) * (m2-(s0+M2)/2.));
+  const auto sminus = (s0-M2)/2.;
+  const auto splus = m*m - (s0+M2)/2.;
+  const auto FF = (L4 + sminus*sminus) / (L4 + splus*splus);
   return FF*FF;
 }
 
