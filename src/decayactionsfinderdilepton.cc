@@ -34,7 +34,7 @@ ActionList DecayActionsFinderDilepton::find_actions_in_cell(
     DecayBranchList dil_modes =
                   p.type().get_partial_widths_dilepton(p.effective_mass());
 
-    // if particle can only decay into dileptons, use shining in only in
+    // if particle can only decay into dileptons, use shining only in
     // find_final_actions and ignore them here
     if (dil_modes.size() == n_all_modes) {
       continue;

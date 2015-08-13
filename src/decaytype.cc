@@ -328,7 +328,8 @@ static float form_factor_sqr_omega(float mass) {
 }
 
 static float form_factor_sqr_delta(float) {
-  return 1.0;  /// not done yet see \iref{Krivoruchenko:2001hs}
+  /// ongoing debate, assumed mass-independent, normalized at real photon mass
+  return 3.12;
 }
 
 
@@ -366,6 +367,7 @@ float ThreeBodyDecayDilepton::diff_width(float m_par, float m_dil,
                                                    form_factor_sqr_omega(m_dil);
       }
       case 0x2214: case 0x2114: /* Delta+ and Delta0 */ {
+        /// see \iref{Krivoruchenko:2001hs}
         float t1 = alpha/16. *
                    (m_par+m_other)*(m_par+m_other)/(m_par_cubed*m_other_sqr) *
                    std::sqrt((m_par+m_other)*(m_par+m_other) - m_dil_sqr);
