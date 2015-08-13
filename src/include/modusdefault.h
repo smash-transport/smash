@@ -55,15 +55,15 @@ class ModusDefault {
    *
    * \param particles The Particles object containing all particles of the
    *                  currently running Experiment.
-   * \param testparticles The number of testparticles.
+   * \param min_cell_length The minimal length of the grid cells.
    * \param strategy The strategy to determine the cell size
    *
    * \see Grid::Grid
    */
   Grid<GridOptions::Normal> create_grid(
-      const Particles &particles, int testparticles,
+      const Particles &particles, float min_cell_length,
       CellSizeStrategy strategy = CellSizeStrategy::Optimal) const {
-    return {particles, testparticles, strategy};
+    return {particles, min_cell_length, strategy};
   }
 
   /** \ingroup exception

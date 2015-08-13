@@ -10,7 +10,6 @@
 
 #include <gsl/gsl_sf_coupling.h>
 
-#include "include/distributions.h"
 #include "include/kinematics.h"
 #include "include/logging.h"
 #include "include/random.h"
@@ -32,64 +31,56 @@ double clebsch_gordan(const int j_a, const int j_b, const int j_c,
   return result;
 }
 
-/* Spectral function of the resonance */
-double spectral_function(double resonance_mass, double resonance_pole,
-                         double resonance_width) {
-  /* breit_wigner is essentially pi * mass * width * spectral function
-   * (mass^2 is called mandelstam_s in breit_wigner)
-   */
-  #pragma GCC diagnostic push
-  #pragma GCC diagnostic ignored "-Wfloat-equal"
-  assert(resonance_mass != 0);
-  assert(resonance_width != 0);
-  #pragma GCC diagnostic pop
-  return breit_wigner(resonance_mass * resonance_mass, resonance_pole,
-                      resonance_width) /
-         (M_PI * resonance_mass * resonance_width);
-}
-
 /* Integrand for spectral-function integration */
-double spectral_function_integrand(double resonance_mass, double srts,
-                                   double stable_mass,
-                                   const ParticleType &type) {
-  const double resonance_width = type.total_width(resonance_mass);
-
-  if (srts < stable_mass + resonance_mass
-      || resonance_width < really_small) {
-    return 0.0;
+float spectral_function_integrand(float resonance_mass, float srts,
+                                  float stable_mass, const ParticleType &type) {
+  if (srts <= stable_mass + resonance_mass) {
+    return 0.;
   }
 
   /* Integrand is the spectral function weighted by the CM momentum of the
-    * final state. In addition, dm^2 = 2*m*dm. */
-  const double res_pole_mass = type.mass();
-  return spectral_function(resonance_mass, res_pole_mass, resonance_width)
-          * pCM(srts, stable_mass, resonance_mass)
-          * 2 * resonance_mass;
+   * final state. */
+  return type.spectral_function(resonance_mass)
+         * pCM(srts, stable_mass, resonance_mass);
 }
 
 /* Resonance mass sampling for 2-particle final state */
-float sample_resonance_mass(const ParticleType &type_resonance,
-                            const float mass_stable, const double cms_energy) {
-  /* Sample resonance mass from the distribution
-   * used for calculating the cross section. */
-  float mass_resonance = 0.;
-  float maximum_mass = std::nextafter(static_cast<float>(cms_energy -
-                                                         mass_stable), 0.f);
-  double random_number = 1.0;
-  double distribution_max = spectral_function_integrand(type_resonance.mass(),
-                                                        cms_energy, mass_stable,
-                                                        type_resonance);
-  double distribution_value = 0.0;
-  while (random_number > distribution_value) {
-    random_number = Random::uniform(0.0, distribution_max);
-    mass_resonance = Random::uniform(type_resonance.minimum_mass(),
-                                     maximum_mass);
-    distribution_value = spectral_function_integrand(mass_resonance, cms_energy,
-                                                     mass_stable,
-                                                     type_resonance);
+float sample_resonance_mass(const ParticleType &type_res,
+                            const float mass_stable, const float cms_energy) {
+  /* largest possible mass: Use 'nextafter' to make sure it is not above the
+   * physical limit by numerical error. */
+  const float max_mass = std::nextafter(cms_energy - mass_stable, 0.f);
+  // largest possible cm momentum (from smallest mass)
+  const float pcm_max = pCM(cms_energy, mass_stable, type_res.minimum_mass());
+  /* The maximum of the spectral-function ratio 'usually' happens at the
+   * largest mass. However, this is not always the case, therefore we need
+   * an additional fudge factor (empirically 2.5 happens to be sufficient). */
+  const float q_max = type_res.spectral_function(max_mass)
+                    / type_res.spectral_function_simple(max_mass) * 2.5;
+  const float max = pcm_max * q_max;  // maximum value for rejection sampling
+  float mass_res, pcm, q;
+  // Loop: rejection sampling
+  do {
+    // sample mass from a simple Breit-Wigner (aka Cauchy) distribution
+    mass_res = Random::cauchy(type_res.mass(), type_res.width_at_pole()/2.f,
+                              type_res.minimum_mass(), max_mass);
+    // determine cm momentum for this case
+    pcm = pCM(cms_energy, mass_stable, mass_res);
+    // determine ratio of full to simple spectral function
+    q = type_res.spectral_function(mass_res)
+      / type_res.spectral_function_simple(mass_res);
+  } while (q*pcm < Random::uniform(0.f, max));
+
+  // check that we are using the proper maximum value
+  if (q*pcm > max) {
+    const auto &log = logger<LogArea::Resonances>();
+    log.fatal("maximum not correct in sample_resonance_mass: ",
+              q*pcm, " ", max, " ", type_res.pdgcode(), " ",
+              mass_stable, " ", cms_energy, " ", mass_res);
+    throw std::runtime_error("Maximum not correct in sample_resonance_mass!");
   }
 
-  return mass_resonance;
+  return mass_res;
 }
 
 

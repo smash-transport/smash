@@ -41,6 +41,20 @@ static inline ostream &operator<<(ostream &s, const unordered_set<T> &data) {
 }
 }  // namespace std
 
+static inline float minimal_cell_length(int testparticles) {
+  // In SMASH itself the minimal cell length is calculated by the function
+  // ScatterActionsFinder::min_cell_length(). It uses the maximum cross section
+  // of 200mb and the time step size to calculate the cell length. This test was
+  // written before the maximum cross section was introduced and does not
+  // accommodate for time step sizes. It assumes a minimal cell length based on
+  // a maximal interaction length of 2.5fm.
+  //
+  // To make the test work with ScatterActionsFinder::min_cell_length() the
+  // placements of the particles would need to be adapted to the different
+  // minimal cell size.
+  return 2.5f / std::sqrt(static_cast<float>(testparticles));
+}
+
 TEST(init) {
   set_default_loglevel(einhard::WARN);
   //create_all_loggers("Grid: DEBUG");
@@ -71,8 +85,7 @@ TEST(grid_construction) {
     return Test::smashon(Test::Position{0., x, y, z});
   };
   for (const int testparticles : {1, 5, 20, 100}) {
-    const double max_interaction_length =
-        GridBase::min_cell_length(testparticles);
+    const double min_cell_length = minimal_cell_length(testparticles);
     for (const Parameter &param : std::vector<Parameter>{
              Parameter{
               {make_particle(0., 0., 0.), make_particle(1.9, 1.9, 1.9)},
@@ -126,10 +139,10 @@ TEST(grid_construction) {
          }) {
       Particles list;
       for (auto p : param.particles) {
-        p.set_4position(max_interaction_length * p.position());
+        p.set_4position(min_cell_length * p.position());
         list.insert(p);
       }
-      Grid<GridOptions::Normal> grid(list, testparticles);
+      Grid<GridOptions::Normal> grid(list, min_cell_length);
       auto idsIt = param.ids.begin();
       auto neighbors = param.neighbors;
       grid.iterate_cells([&](const ParticleList &search) {
@@ -179,8 +192,7 @@ TEST(periodic_grid) {
   using Test::Momentum;
   for (const int testparticles : {1, 5}) {
     for (const int nparticles : {1, 5, 20, 75, 124, 125}) {
-      const double max_interaction_length =
-          GridBase::min_cell_length(testparticles);
+      const double min_cell_length = minimal_cell_length(testparticles);
       constexpr float length = 10;
       Particles list;
       auto random_value = Random::make_uniform_distribution(0., 9.99);
@@ -194,7 +206,7 @@ TEST(periodic_grid) {
       Grid<GridOptions::PeriodicBoundaries> grid(
           make_pair(std::array<float, 3>{0, 0, 0},
                     std::array<float, 3>{length, length, length}),
-          list, testparticles);
+          list, min_cell_length);
 
       // stores the neighbor pairs found via the grid:
       std::vector<std::pair<ParticleData, ParticleData>> neighbor_pairs;
@@ -215,8 +227,7 @@ TEST(periodic_grid) {
                 }
                 const auto sqrDistance =
                     (p.position().threevec() - q.position().threevec()).sqr();
-                if (sqrDistance <=
-                    max_interaction_length * max_interaction_length) {
+                if (sqrDistance <= min_cell_length * min_cell_length) {
                   const auto pair = p.id() < q.id() ? std::make_pair(p, q)
                                                     : std::make_pair(q, p);
                   const auto it = find(neighbor_pairs, pair);
@@ -270,8 +281,7 @@ TEST(periodic_grid) {
                                   << search << '\n' << neighbors;
                 const auto sqrDistance =
                     (p.position().threevec() - q.position().threevec()).sqr();
-                if (sqrDistance <=
-                    max_interaction_length * max_interaction_length) {
+                if (sqrDistance <= min_cell_length * min_cell_length) {
                   auto pair = p.id() < q.id() ? std::make_pair(p, q)
                                               : std::make_pair(q, p);
                   const auto it = find(neighbor_pairs, pair);
@@ -298,80 +308,80 @@ TEST(periodic_grid) {
       for (ParticleData p0 : list) {
         ParticleList p_periodic;
         p_periodic.push_back(p0);
-        if (p0.position()[3] < max_interaction_length) {
+        if (p0.position()[3] < min_cell_length) {
           p_periodic.push_back(wrap(p0, 3));
         }
-        if (p0.position()[3] > length - max_interaction_length) {
+        if (p0.position()[3] > length - min_cell_length) {
           p_periodic.push_back(wrap(p0, -3));
         }
-        if (p0.position()[2] < max_interaction_length) {
+        if (p0.position()[2] < min_cell_length) {
           p_periodic.push_back(wrap(p0, 2));
-          if (p0.position()[3] < max_interaction_length) {
+          if (p0.position()[3] < min_cell_length) {
             p_periodic.push_back(wrap(p0, 3));
           }
-          if (p0.position()[3] > length - max_interaction_length) {
+          if (p0.position()[3] > length - min_cell_length) {
             p_periodic.push_back(wrap(p0, -3));
           }
         }
-        if (p0.position()[2] > length - max_interaction_length) {
+        if (p0.position()[2] > length - min_cell_length) {
           p_periodic.push_back(wrap(p0, -2));
-          if (p0.position()[3] < max_interaction_length) {
+          if (p0.position()[3] < min_cell_length) {
             p_periodic.push_back(wrap(p0, 3));
           }
-          if (p0.position()[3] > length - max_interaction_length) {
+          if (p0.position()[3] > length - min_cell_length) {
             p_periodic.push_back(wrap(p0, -3));
           }
         }
-        if (p0.position()[1] < max_interaction_length) {
+        if (p0.position()[1] < min_cell_length) {
           p_periodic.push_back(wrap(p0, 1));
-          if (p0.position()[3] < max_interaction_length) {
+          if (p0.position()[3] < min_cell_length) {
             p_periodic.push_back(wrap(p0, 3));
           }
-          if (p0.position()[3] > length - max_interaction_length) {
+          if (p0.position()[3] > length - min_cell_length) {
             p_periodic.push_back(wrap(p0, -3));
           }
-          if (p0.position()[2] < max_interaction_length) {
+          if (p0.position()[2] < min_cell_length) {
             p_periodic.push_back(wrap(p0, 2));
-            if (p0.position()[3] < max_interaction_length) {
+            if (p0.position()[3] < min_cell_length) {
               p_periodic.push_back(wrap(p0, 3));
             }
-            if (p0.position()[3] > length - max_interaction_length) {
+            if (p0.position()[3] > length - min_cell_length) {
               p_periodic.push_back(wrap(p0, -3));
             }
           }
-          if (p0.position()[2] > length - max_interaction_length) {
+          if (p0.position()[2] > length - min_cell_length) {
             p_periodic.push_back(wrap(p0, -2));
-            if (p0.position()[3] < max_interaction_length) {
+            if (p0.position()[3] < min_cell_length) {
               p_periodic.push_back(wrap(p0, 3));
             }
-            if (p0.position()[3] > length - max_interaction_length) {
+            if (p0.position()[3] > length - min_cell_length) {
               p_periodic.push_back(wrap(p0, -3));
             }
           }
         }
-        if (p0.position()[1] > length - max_interaction_length) {
+        if (p0.position()[1] > length - min_cell_length) {
           p_periodic.push_back(wrap(p0, -1));
-          if (p0.position()[3] < max_interaction_length) {
+          if (p0.position()[3] < min_cell_length) {
             p_periodic.push_back(wrap(p0, 3));
           }
-          if (p0.position()[3] > length - max_interaction_length) {
+          if (p0.position()[3] > length - min_cell_length) {
             p_periodic.push_back(wrap(p0, -3));
           }
-          if (p0.position()[2] < max_interaction_length) {
+          if (p0.position()[2] < min_cell_length) {
             p_periodic.push_back(wrap(p0, 2));
-            if (p0.position()[3] < max_interaction_length) {
+            if (p0.position()[3] < min_cell_length) {
               p_periodic.push_back(wrap(p0, 3));
             }
-            if (p0.position()[3] > length - max_interaction_length) {
+            if (p0.position()[3] > length - min_cell_length) {
               p_periodic.push_back(wrap(p0, -3));
             }
           }
-          if (p0.position()[2] > length - max_interaction_length) {
+          if (p0.position()[2] > length - min_cell_length) {
             p_periodic.push_back(wrap(p0, -2));
-            if (p0.position()[3] < max_interaction_length) {
+            if (p0.position()[3] < min_cell_length) {
               p_periodic.push_back(wrap(p0, 3));
             }
-            if (p0.position()[3] > length - max_interaction_length) {
+            if (p0.position()[3] > length - min_cell_length) {
               p_periodic.push_back(wrap(p0, -3));
             }
           }
@@ -385,8 +395,7 @@ TEST(periodic_grid) {
             }
             const auto sqrDistance =
                 (p.position().threevec() - q.position().threevec()).sqr();
-            if (sqrDistance <=
-                max_interaction_length * max_interaction_length) {
+            if (sqrDistance <= min_cell_length * min_cell_length) {
               // (p,q) must be in neighbor_pairs
               auto pair =
                   p.id() > q.id() ? std::make_pair(q, p) : std::make_pair(p, q);
@@ -405,8 +414,7 @@ TEST(periodic_grid) {
 
 TEST(max_positions_periodic_grid) {
   constexpr int testparticles = 1;
-  const double max_interaction_length =
-      GridBase::min_cell_length(testparticles);
+  const double min_cell_length = minimal_cell_length(testparticles);
   using Test::Position;
   Particles list;
   list.insert(Test::smashon(Position{0, 0, 0, 0}));
@@ -417,27 +425,26 @@ TEST(max_positions_periodic_grid) {
   list.insert(Test::smashon(Position{0, 0, 0, 0}));
   list.insert(Test::smashon(Position{0, 0, 0, 0}));
   list.insert(Test::smashon(Position{0, 0, 0, 0}));
-  list.insert(Test::smashon(Position{0, 2 * max_interaction_length,
-                                     2 * max_interaction_length,
-                                     2 * max_interaction_length}));
+  list.insert(Test::smashon(Position{0, 2 * min_cell_length,
+                                     2 * min_cell_length,
+                                     2 * min_cell_length}));
   // This grid construction is fragile because there are particles at 0 and 2 *
-  // cell_length. A Normal grid simply would try to create a 3x3x3 grid and be
+  // min_cell_length. A Normal grid simply would try to create a 3x3x3 grid and be
   // fine. The PeriodicBoundaries grid cannot do so as it must fit the cells to
   // the total length. Thus it would create a 2x2x2 grid and the last particle
   // might result in an out-of-bounds cell index. This constructor call ensures
   // that no assertion/exception in the construction code is hit.
-  Grid<GridOptions::PeriodicBoundaries> grid(list, testparticles);
+  Grid<GridOptions::PeriodicBoundaries> grid(list, min_cell_length);
 }
 
 TEST(max_positions_normal_grid) {
   constexpr int testparticles = 1;
-  const double max_interaction_length =
-      GridBase::min_cell_length(testparticles);
+  const double min_cell_length = minimal_cell_length(testparticles);
   using Test::Position;
   Particles list;
   list.insert(Test::smashon(Position{0, 0, 0, -6.2470569610595703125}));
-  list.insert(Test::smashon(Position{0, 2.5 * max_interaction_length,
-                                     2.5 * max_interaction_length,
+  list.insert(Test::smashon(Position{0, 2.5 * min_cell_length,
+                                     2.5 * min_cell_length,
                                      8.0611705780029296875}));
   for (int i = 5 * 5 * 5; i; --i) {
     list.insert(Test::smashon(Position(0, 0, 0, 0)));

@@ -180,11 +180,16 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
   const auto &log = logger<LogArea::Experiment>();
   log.trace() << source_location;
 
+  const int ntest = config.take({"General", "Testparticles"}, 1);
+  if (ntest <= 0) {
+    throw std::invalid_argument("Invalid number of Testparticles "
+                                "in config file!");
+  }
+
   // The clock initializers are only read here and taken later when
   // assigning initial_clock_.
   return {{0.0f, config.read({"General", "Delta_Time"})},
-          config.take({"Output", "Output_Interval"}),
-          config.take({"General", "Testparticles"}, 1),
+          config.take({"Output", "Output_Interval"}), ntest,
           config.take({"General", "Gaussian_Sigma"}, 1.0),
           config.take({"General", "Gauss_Cutoff_In_Sigma"}, 4.0)};
 }
@@ -492,7 +497,7 @@ static std::string format_measurements(const Particles &particles,
   ss << field<5> << time
      << field<12, 3> << difference.momentum().x0()
      << field<12, 3> << difference.momentum().abs3()
-     << field<12, 3> << (scatterings_total
+     << field<12, 3> << ((scatterings_total && time > really_small)
                           ? scatterings_total * 2 / (particles.size() * time)
                           : 0.)
      << field<10, 3> << scatterings_this_interval
@@ -703,11 +708,15 @@ size_t Experiment<Modus>::run_time_evolution(const int evt_num) {
   Actions actions;
   Actions dilepton_actions;
 
+  // minimal cell length for the grid
+  const float min_cell_length = ScatterActionsFinder::min_cell_length(
+      parameters_.testparticles, parameters_.timestep_duration());
+
   while (!(++parameters_.labclock > end_time_)) {
     /* (1.a) Create grid. */
     const auto &grid =
-        use_grid_ ? modus_.create_grid(particles_, parameters_.testparticles)
-                  : modus_.create_grid(particles_, parameters_.testparticles,
+        use_grid_ ? modus_.create_grid(particles_, min_cell_length)
+                  : modus_.create_grid(particles_, min_cell_length,
                                        CellSizeStrategy::Largest);
     /* (1.b) Iterate over cells and find actions. */
     grid.iterate_cells([&](const ParticleList &search_list) {

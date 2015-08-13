@@ -39,12 +39,14 @@ class ScatterAction : public Action {
   void add_collisions(CollisionBranchList pv);
 
   /**
-   * Measure distance between incoming particles in center-of-momentum frame.
+   * Calculate the transverse distance of the two incoming particles in their
+   * local rest frame.
+   *
    * Returns the squared distance.
    *
    * \fpPrecision Why \c double?
    */
-  double particle_distance() const;
+  double transverse_distance_sqr() const;
 
   /**
    * Generate the final-state of the scattering process.
@@ -69,16 +71,25 @@ class ScatterAction : public Action {
   }
 
   /**
-   * Determine the elastic cross section for this collision. This routine
-   * by default just gives a constant cross section (corresponding to
-   * elast_par) but can be overriden in child classes for a different behavior.
+   * Determine the (parametrized) elastic cross section for this collision.
+   * It is zero by default, but can be overridden in the child classes.
+   */
+  virtual float elastic_parametrization() {
+    return 0.;
+  }
+
+  /**
+   * Determine the elastic cross section for this collision. If elastic_par is
+   * given (and positive), we just use a constant cross section of that size,
+   * otherwise a parametrization of the elastic cross section is used
+   * (if available).
    *
    * \param[in] elast_par Elastic cross section parameter from the input file.
    *
    * \return A ProcessBranch object containing the cross section and
    * final-state IDs.
    */
-  virtual CollisionBranchPtr elastic_cross_section(float elast_par);
+  CollisionBranchPtr elastic_cross_section(float elast_par);
 
   /**
    * Determine the cross section for string excitations, which is given by the
@@ -107,8 +118,7 @@ class ScatterAction : public Action {
    * Return the 2-to-1 resonance production cross section for a given resonance.
    *
    * \param[in] type_resonance Type information for the resonance to be produced.
-   * \param[in] s Mandelstam-s of the collision
-   * of the two initial particles.
+   * \param[in] srts Total energy in the center-of-mass frame.
    * \param[in] cm_momentum_sqr Square of the center-of-mass momentum of the
    * two initial particles.
    *
@@ -118,7 +128,7 @@ class ScatterAction : public Action {
    * \fpPrecision Why \c double?
    */
   double two_to_one_formation(const ParticleType &type_resonance,
-                              double s, double cm_momentum_sqr);
+                              double srts, double cm_momentum_sqr);
 
   /** Find all inelastic 2->2 processes for this reaction. */
   virtual CollisionBranchList two_to_two_cross_sections() {

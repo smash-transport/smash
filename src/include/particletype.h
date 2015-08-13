@@ -34,6 +34,14 @@ namespace Smash {
 class ParticleType {
  public:
   /**
+   * Decay width cutoff for considering a particle as stable.
+   *
+   * We currently regard a particle type as stable if its on-shell width is less
+   * than 10 keV.
+   */
+  static constexpr float width_cutoff = 1e-5f;
+
+  /**
    * Creates a fully initialized ParticleType object.
    *
    * \param n The name of the particle.
@@ -102,7 +110,9 @@ class ParticleType {
   int baryon_number() const { return pdgcode_.baryon_number(); }
 
   /// Check if the particle is stable
-  inline bool is_stable() const;
+  inline bool is_stable() const {
+    return width_ < width_cutoff;
+  }
 
   /**
    * The minimum mass of the resonance.
@@ -170,6 +180,30 @@ class ParticleType {
    */
   float get_partial_in_width(const float m, const ParticleData &p_a,
                                             const ParticleData &p_b) const;
+
+  /**
+   * Full spectral function
+   * \f$A(m)=\frac{2}{\pi}\frac{m^2\Gamma(m)}{(m^2-m_0^2)^2+(m\Gamma(m))^2}\f$
+   * of the resonance (relativistic Breit-Wigner distribution with
+   * mass-dependent width).
+   * \param m Actual off-shell mass of the resonance, where the
+   *          spectral function is supposed to be evaluated.
+   * \todo The normalization is not guaranteed to be unity at present.
+   */
+  float spectral_function(float m) const;
+
+  /**
+   * The spectral function with a constant width (= width at pole).
+   * It is guaranteed to be normalized to 1, when integrated from 0 to inf. */
+  float spectral_function_const_width(float m) const;
+
+  /**
+   * This one is the most simple form of the spectral function, using a
+   * Cauchy distribution (non-relativistic Breit-Wigner with constant width).
+   * It can be integrated analytically, and is normalized to 1 when integrated
+   * from -inf to inf.
+   */
+  float spectral_function_simple(float m) const;
 
   /**
    * Returns a list of all ParticleType objects.
@@ -302,12 +336,6 @@ class ParticleType {
    */
   friend std::ostream &operator<<(std::ostream &out, const ParticleType &type);
 };
-
-inline bool ParticleType::is_stable() const {
-  /* We currently regard a particle type as stable if its on-shell width is
-   * less than 10 keV. */
-  return width_ < 1E-5f;
-}
 
 /**
  * \ingroup data

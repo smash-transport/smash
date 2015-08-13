@@ -113,7 +113,7 @@ static bool compare_final_block_header(const int &ev, FILE *file) {
 
 TEST(fullhistory_format) {
   /* Set the most verbose option */
-  Configuration &&op{bf::path{TEST_CONFIG_PATH} / "tests",
+  Configuration &&op{bf::path{TEST_CONFIG_PATH} / "src" / "tests",
                      "test_binary_collisions.yaml"};
 
   /* Create an instance of binary output */
@@ -199,7 +199,7 @@ TEST(fullhistory_format) {
 
 TEST(particles_format) {
   /* Set the most verbose option */
-  Configuration &&op{bf::path{TEST_CONFIG_PATH} / "tests",
+  Configuration &&op{bf::path{TEST_CONFIG_PATH} / "src" / "tests",
                      "test_binary_particles.yaml"};
 
   /* Create an instance of binary output */

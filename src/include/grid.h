@@ -17,6 +17,7 @@
 #include <utility>
 #include <vector>
 
+#include "constants.h"
 #include "forwarddeclarations.h"
 #include "particles.h"
 
@@ -53,15 +54,6 @@ class GridBase {
  public:
   typedef int size_type;
 
-  /**
-   * The minimum cell length for the given testparticles (defaults to 1).
-   */
-  static float min_cell_length(int testparticles = 1) {
-    // 2.5 fm corresponds to maximal cross-section of 200 mb = 20 fm^2
-    // sqrt(20 fm^2/N_{test}/pi) is approximately 2.5/sqrt(N_{test})
-    return 2.5f / std::sqrt(static_cast<float>(testparticles));
-  }
-
  protected:
   /**
    * Returns the minimum x,y,z coordinates and the largest dx,dy,dz distances of
@@ -92,13 +84,13 @@ class Grid : public GridBase {
    * of the particles.
    *
    * \param particles The particles to place onto the grid.
-   * \param testparticles Number of testparticles used in this event
+   * \param min_cell_length The minimal length a cell must have.
    * \param strategy The strategy for determining the cell size
    */
-  Grid(const Particles &particles, int testparticles,
+  Grid(const Particles &particles, float min_cell_length,
        CellSizeStrategy strategy = CellSizeStrategy::Optimal)
       : Grid{find_min_and_length(particles), std::move(particles),
-             testparticles, strategy} {}
+             min_cell_length, strategy} {}
 
   /**
    * Constructs a grid with the given minimum grid coordinates and grid length.
@@ -108,12 +100,12 @@ class Grid : public GridBase {
    * \param min_and_length A pair consisting of the three min coordinates and
    * the three lengths.
    * \param particles The particles to place onto the grid.
-   * \param testparticles Number of testparticles used in this event
+   * \param min_cell_length The minimal length a cell must have.
    * \param strategy The strategy for determining the cell size
    */
   Grid(const std::pair<std::array<float, 3>, std::array<float, 3>> &
            min_and_length,
-       const Particles &particles, int testparticles,
+       const Particles &particles, float min_cell_length,
        CellSizeStrategy strategy = CellSizeStrategy::Optimal)
       : min_position_(min_and_length.first), length_(min_and_length.second) {
     /**
@@ -125,7 +117,7 @@ class Grid : public GridBase {
     switch (strategy) {
       case CellSizeStrategy::Optimal:
         std::tie(index_factor, number_of_cells_) =
-            determine_cell_sizes(particles.size(), length_, testparticles);
+            determine_cell_sizes(particles.size(), length_, min_cell_length);
         break;
       case CellSizeStrategy::Largest:
         // set number of cells
@@ -163,17 +155,16 @@ class Grid : public GridBase {
    * \li The second tuple entry stores the dimensions of the grid (i.e. the
    * number of cells in each spatial direction).
    *
-   * \param particle_count The number of particles to be placed in the grid.
-   * \param length         Three lengths that identify the total dimensions of
-   *                       the grid.
-   * \param testparticles  The number of testparticles is used to scale the cell
-   *                       size down, since the interaction length is also
-   *                       reduced.
+   * \param particle_count  The number of particles to be placed in the grid.
+   * \param length          Three lengths that identify the total dimensions of
+   *                        the grid.
+   * \param min_cell_length The minimal length a cell must have such that all
+   *                        relevant interactions are included.
    */
   static std::tuple<std::array<float, 3>, std::array<int, 3>>
       determine_cell_sizes(size_type particle_count,
                            const std::array<float, 3> &length,
-                           const int testparticles);
+                           const float min_cell_length);
 
   /**
    * Iterates over all cells in the grid and calls the callback arguments with a

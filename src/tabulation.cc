@@ -10,7 +10,7 @@
 namespace Smash {
 
 Tabulation::Tabulation(float x_min, float range, int num,
-                       std::function<double(float)> f)
+                       std::function<float(float)> f)
                       : x_min_(x_min), inv_dx_(num/range) {
   values_.resize(num+1);
   const float dx = range/num;
@@ -37,13 +37,9 @@ float Tabulation::get_value_linear(float x) const {
     return 0.;
   }
   // here n is the lower index
-  const unsigned int n = (x - x_min_) * inv_dx_;
+  const unsigned int n = std::min((x - x_min_) * inv_dx_, values_.size() - 2.f);
   const float r = (x - x_min_) * inv_dx_ - n;
-  if (n >= values_.size() - 1) {
-    return values_.back();
-  } else {
-    return values_[n] * (1. - r) + values_[n + 1] * r;
-  }
+  return values_[n] * (1. - r) + values_[n + 1] * r;
 }
 
 }  // namespace Smash

@@ -98,12 +98,10 @@ template <GridOptions O>
 std::tuple<std::array<float, 3>, std::array<int, 3>>
 Grid<O>::determine_cell_sizes(size_type particle_count,
                               const std::array<float, 3> &length,
-                              const int testparticles) {
+                              const float max_interaction_length) {
   std::tuple<std::array<float, 3>, std::array<int, 3>> r;
   auto &index_factor = std::get<0>(r);
   auto &number_of_cells = std::get<1>(r);
-
-  float max_interaction_length = min_cell_length(testparticles);
 
   // The number of cells is determined by the min and max coordinates where
   // particles are positioned and the maximal interaction length (which equals
@@ -425,10 +423,10 @@ void Grid<GridOptions::PeriodicBoundaries>::iterate_cells(
 template std::tuple<std::array<float, 3>, std::array<int, 3>>
 Grid<GridOptions::Normal>::determine_cell_sizes(size_type,
                                                 const std::array<float, 3> &,
-                                                const int);
+                                                const float);
 template std::tuple<std::array<float, 3>, std::array<int, 3>>
 Grid<GridOptions::PeriodicBoundaries>::determine_cell_sizes(
-    size_type, const std::array<float, 3> &, const int);
+    size_type, const std::array<float, 3> &, const float);
 
 template void Grid<GridOptions::Normal>::build_cells(
     const std::array<float, 3> &, const Particles &);

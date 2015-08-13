@@ -10,7 +10,6 @@
 #include "include/cxx14compat.h"
 #include "include/integrate.h"
 #include "include/kinematics.h"
-#include "include/resonances.h"
 
 namespace Smash {
 
@@ -150,8 +149,8 @@ static float integrand_rho_Manley(float mass, float srts, float stable_mass,
   /* center-of-mass momentum of final state particles */
   const float p_f = pCM(srts, stable_mass, mass);
 
-  return p_f/srts * BlattWeisskopf(p_f, L) * 2.*srts
-         * spectral_function(mass, type->mass(), type->total_width(srts));
+  return p_f/srts * BlattWeisskopf(p_f, L)
+         * type->spectral_function(mass);
 }
 
 static ParticleTypePtrList arrange_particles(ParticleTypePtrList part_types) {
@@ -182,7 +181,7 @@ float TwoBodyDecaySemistable::rho(float mass) const {
     const_cast<TwoBodyDecaySemistable*>(this)->tabulation_
         = make_unique<Tabulation>(
                 particle_types_[0]->mass() + particle_types_[1]->minimum_mass(),
-                1.f, 50,
+                10*particle_types_[1]->width_at_pole(), 60,
                 [&](float srts) {
                   Integrator integrate;
                   return integrate(particle_types_[1]->minimum_mass(),
