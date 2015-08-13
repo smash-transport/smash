@@ -15,6 +15,7 @@
 #include "action.h"
 #include "actionfinderfactory.h"
 #include "configuration.h"
+#include "constants.h"
 
 namespace Smash {
 
@@ -29,7 +30,8 @@ class ScatterActionsFinder : public ActionFinderInterface {
                        const ExperimentParameters &parameters);
   ScatterActionsFinder(float elastic_parameter, int testparticles);
 
-  /** Determine the collision time of the two particles.
+  /** Determine the collision time of the two particles [fm/c].
+   *  Time of the closest approach is taken as collision time.
    *
    * \fpPrecision Why \c double?
    */
@@ -49,6 +51,29 @@ class ScatterActionsFinder : public ActionFinderInterface {
    * Currently does nothing. */
   ActionList find_final_actions(const Particles &) const override {
     return ActionList();
+  }
+
+  /**
+   * Returns the maximal transverse distance squared.
+   *
+   * Particle pairs whose transverse distance is larger then this, are not
+   * checked for collisions.
+   */
+  static float max_transverse_distance_sqr(int testparticles) {
+    return (maximum_cross_section / testparticles) * fm2_mb / M_PI;
+  }
+
+  /**
+   * Calculate the minimal size for the grid cells such that the
+   * ScatterActionsFinder will find all collisions within the maximal transverse
+   * distance (which is determined by the maximal cross section).
+   *
+   * \param testparticles The number of testparticles
+   * \param dt The current time step size
+   * \return The minimal required size of cells
+   */
+  static float min_cell_length(int testparticles, float dt) {
+    return std::sqrt(4 * dt * dt + max_transverse_distance_sqr(testparticles));
   }
 
  private:

@@ -42,8 +42,8 @@ double clebsch_gordan(const int j_a, const int j_b, const int j_c,
 inline double isospin_clebsch_gordan(const ParticleType &p_a,
                                      const ParticleType &p_b,
                                      const int I_tot, const int I_z) {
-  return clebsch_gordan (p_a.isospin(), p_b.isospin(), I_tot,
-                         p_a.isospin3(), p_b.isospin3(), I_z);
+  return clebsch_gordan(p_a.isospin(), p_b.isospin(), I_tot,
+                        p_a.isospin3(), p_b.isospin3(), I_z);
 }
 
 /* Calculate isospin Clebsch-Gordan coefficient for two particles p_a and p_b
@@ -54,8 +54,8 @@ inline double isospin_clebsch_gordan(const ParticleType &p_a,
 inline double isospin_clebsch_gordan(const ParticleType &p_a,
                                      const ParticleType &p_b,
                                      const ParticleType &Res) {
-  return clebsch_gordan (p_a.isospin(), p_b.isospin(), Res.isospin(),
-                         p_a.isospin3(), p_b.isospin3(), Res.isospin3());
+  return clebsch_gordan(p_a.isospin(), p_b.isospin(), Res.isospin(),
+                        p_a.isospin3(), p_b.isospin3(), Res.isospin3());
 }
 
 
@@ -71,22 +71,12 @@ inline double isospin_clebsch_gordan(const ParticleType &p_a,
                                      const ParticleType &p_c,
                                      int I_tot, int I_z, int I_ab) {
     const int I_abz = p_a.isospin3() + p_b.isospin3();
-    return clebsch_gordan (I_ab, p_c.isospin(), I_tot,
-                           I_abz, p_c.isospin3(), I_z)
-         * clebsch_gordan (p_a.isospin(), p_b.isospin(), I_ab,
-                           p_a.isospin3(), p_b.isospin3(), I_abz);
+    return clebsch_gordan(I_ab, p_c.isospin(), I_tot,
+                          I_abz, p_c.isospin3(), I_z)
+         * clebsch_gordan(p_a.isospin(), p_b.isospin(), I_ab,
+                          p_a.isospin3(), p_b.isospin3(), I_abz);
 }
 
-
-/**
- * Spectral function
- * \f$A(m)=\frac{1}{\pi}\frac{m\Gamma(m)}{(m^2-m_0^2)^2+(m\Gamma(m))^2}\f$
- * of the resonance.
- *
- * \fpPrecision Why \c double?
- */
-double spectral_function(double resonance_mass, double resonance_pole,
-                         double resonance_width);
 
 /**
  * Spectral function integrand for GSL integration.
@@ -99,27 +89,22 @@ double spectral_function(double resonance_mass, double resonance_pole,
  * \param[in] srts sqrt(s) of the process
  * \param[in] stable_mass mass of the stable particle in the final state
  * \param[in] type type of the resonance
- *
- * \fpPrecision Why \c double?
  */
-double spectral_function_integrand(double resonance_mass, double srts,
-                                   double stable_mass,
-                                   const ParticleType &type);
+float spectral_function_integrand(float resonance_mass, float srts,
+                                  float stable_mass, const ParticleType &type);
 
 /**
  * Resonance mass sampling for 2-particle final state
  * with *one resonance* and one *stable* particle.
  *
- * \param[in] type_resonance Type of the resonance particle.
+ * \param[in] type_res Type of the resonance particle.
  * \param[in] mass_stable Mass of the stable particle.
  * \param[in] cms_energy center-of-mass energy of the 2-particle final state.
  *
  * \return The mass of the resonance particle.
- *
- * \fpPrecision Why \c double?
  */
-float sample_resonance_mass(const ParticleType &type_resonance,
-                            const float mass_stable, const double cms_energy);
+float sample_resonance_mass(const ParticleType &type_res,
+                            const float mass_stable, const float cms_energy);
 
 }  // namespace Smash
 

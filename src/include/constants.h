@@ -44,8 +44,18 @@ constexpr float nucleon_mass = 0.938;
  */
 constexpr double alpha = 7.2973525698e-3;
 
-
-
+/**
+ * The maximal cross section (in mb) for which it is guaranteed that all
+ * collisions with this cross section will be found.
+ *
+ * This means that all particle pairs, where the transverse distance is smaller
+ * or equal to \f$ \sqrt{200mb/\pi} \f$, will be checked for collions.
+ *
+ * This maximum occurs in the Delta peak of the pi+p cross section.
+ * The only exception of physical cross sections going above 200 mb are the
+ * elastic NN cross sections, which diverge at threshold.
+ */
+constexpr float maximum_cross_section = 200.f;  // mb
 
 }  // namespace Smash
 
