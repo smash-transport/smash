@@ -200,7 +200,7 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
  */
 template <typename Modus>
 std::ostream &operator<<(std::ostream &out, const Experiment<Modus> &e) {
-  switch(e.time_step_mode_) {
+  switch (e.time_step_mode_) {
     case TimeStepMode::None:
       out << "Not using time steps\n";
       break;
@@ -947,7 +947,7 @@ void Experiment<Modus>::run() {
 
     /* the time evolution of the relevant subsystem */
     size_t interactions_total;
-    switch(time_step_mode_) {
+    switch (time_step_mode_) {
       case TimeStepMode::None:
         interactions_total = run_time_evolution_without_time_steps(j);
         break;
