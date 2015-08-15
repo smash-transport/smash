@@ -199,7 +199,8 @@ std::ostream &operator<<(std::ostream &out, const Experiment<Modus> &e) {
           << e.parameters_.timestep_duration() << " fm/c\n";
       break;
     case TimeStepMode::Adaptive:
-      out << "Adaptive time step mode\n";
+      out << "Using adaptive time steps, starting with: "
+          << e.parameters_.timestep_duration() << " fm/c\n";
       break;
   }
   out << "End time: " << e.end_time_ << " fm/c\n";
@@ -276,12 +277,12 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
   if (time_step_mode_ == TimeStepMode::Adaptive) {
     float smoothing_factor =
         config.take({"General", "Adaptive_Time_Step", "Smoothing_Factor"});
-    float rate_target =
-        config.take({"General", "Adaptive_Time_Step", "Target_Rate"});
+    float target_missed_actions =
+        config.take({"General", "Adaptive_Time_Step", "Target_Missed_Actions"});
     float allowed_deviation =
         config.take({"General", "Adaptive_Time_Step", "Allowed_Deviation"});
     adaptive_parameters_ = make_unique<AdaptiveParameters>(
-        smoothing_factor, rate_target, allowed_deviation);
+        smoothing_factor, target_missed_actions, allowed_deviation);
   }
 
   // create outputs
@@ -835,10 +836,6 @@ size_t Experiment<Modus>::run_time_evolution_fixed_time_step(
     propagate_all();
 
     /* (4) Physics output during the run. */
-    // if the timestep of labclock is different in the next tick than
-    // in the current one, I assume it has been changed already. In that
-    // case, I know what the next tick is and I can check whether the
-    // output time is crossed within the next tick.
     if (parameters_.need_intermediate_output()) {
       intermediate_output(evt_num, interactions_total,
                           previous_interactions_total);
@@ -865,9 +862,170 @@ size_t Experiment<Modus>::run_time_evolution_fixed_time_step(
  * and propagating particles. */
 template <typename Modus>
 size_t Experiment<Modus>::run_time_evolution_adaptive_time_steps(
-    const int evt_num, AdaptiveParameters adaptive_parameters) {
-  size_t interactions_total = 0;
-  // TODO: implement adaptive time step mode
+    const int evt_num, const AdaptiveParameters adaptive_parameters) {
+  const auto &log = logger<LogArea::Experiment>();
+  modus_.impose_boundary_conditions(&particles_);
+  size_t interactions_total = 0, previous_interactions_total = 0,
+         total_pauli_blocked = 0;
+  float rate = 0.f;
+
+  // if there is no output scheduled at the beginning, trigger it manually
+  if (!parameters_.is_output_time()) {
+    log.info() << format_measurements(
+        particles_, interactions_total, 0u,
+        conserved_initial_, time_start_, parameters_.labclock.current_time());
+  }
+
+  Actions actions;
+  while (parameters_.labclock.current_time() < end_time_) {
+    if (parameters_.labclock.next_time() > end_time_) {
+      // set the time step size such that we stop at end_time_
+      parameters_.labclock.end_tick_on_multiple(end_time_);
+    }
+    /* (1.a) Create grid. */
+    const auto &grid =
+        modus_.create_grid(particles_, parameters_.testparticles);
+
+    /* (1.b) Iterate over cells and find actions. */
+    grid.iterate_cells([&](const ParticleList &search_list) {
+                         for (const auto &finder : action_finders_) {
+                           actions.insert(finder->find_actions_in_cell(
+                               search_list, parameters_.timestep_duration()));
+                         }
+                       },
+                       [&](const ParticleList &search_list,
+                           const ParticleList &neighbors_list) {
+                         for (const auto &finder : action_finders_) {
+                           actions.insert(finder->find_actions_with_neighbors(
+                               search_list, neighbors_list,
+                               parameters_.timestep_duration()));
+                         }
+                       });
+
+    /* (2) Calculate time step size. */
+    const float n_actions =
+        static_cast<float>(actions.size()) / particles_.size();
+    const float missed_actions = 2.f * n_actions;
+    float dt = parameters_.timestep_duration();
+    const float current_rate = n_actions / dt;
+
+    bool end_early = false;
+    // check if the current rate is approximately what we expected
+    // If dt was determined by dt = target_act_num/rate then the following check
+    // is equivalent to (current_act_num > allowed_deviation * target_act_num).
+    // It is not equivalent at the beginning of the event where dt still has the
+    // default value.
+    if (current_rate > adaptive_parameters.allowed_deviation * rate) {
+      // rate is much higher than in the previous time step
+      // reset the value
+      rate = 0.5f * (current_rate + rate);
+
+      // check if we're still below the target
+      if (missed_actions > adaptive_parameters.target_missed_actions) {
+        // we're not below the target, so end the time step early
+        end_early = true;
+        dt = adaptive_parameters.new_dt(rate);
+        parameters_.labclock.set_timestep_duration(dt);
+      }
+    } else {
+      // the current rate is close to what we predicted
+      // update the estimate
+      rate += adaptive_parameters.smoothing_factor * (current_rate - rate);
+
+      // calculate a new time step size only if the rate is non-zero
+      if (rate > really_small) {
+        dt = adaptive_parameters.new_dt(rate);
+      }
+    }
+
+    /* (3) Physics output during the run. */
+    if (parameters_.need_intermediate_output()) {
+
+      // The following block is necessary because we want to make sure that the
+      // intermediate output happens at exactly the requested time and not
+      // slightly before.
+      if (!parameters_.is_output_time()) {
+        const float next_time = parameters_.labclock.next_time();
+        // set the time step such that it ends on the next output time
+        parameters_.set_timestep_for_next_output();
+        ++parameters_.labclock;
+
+        // perform actions until the output time
+        const auto particles_before_actions = particles_.copy_to_vector();
+        while (!actions.is_empty()) {
+          auto action = actions.pop();
+          if (action->time_of_execution() >
+              parameters_.labclock.current_time()) {
+            // reinsert action
+            actions.insert(std::move(action));
+            break;
+          }
+          perform_action(action, interactions_total, total_pauli_blocked,
+                         particles_before_actions);
+        }
+        modus_.impose_boundary_conditions(&particles_);
+        propagate_all();
+        for (const ActionPtr &action : actions) {
+          if (action->is_valid(particles_)) {
+            action->update_incoming(particles_);
+          }
+        }
+        parameters_.labclock.end_tick_on_multiple(next_time);
+      }
+
+      intermediate_output(evt_num, interactions_total,
+                          previous_interactions_total);
+    }
+
+    ++parameters_.labclock;
+
+    /* (4) Perform actions. */
+    if (!actions.is_empty()) {
+      const auto particles_before_actions = particles_.copy_to_vector();
+      while (!actions.is_empty()) {
+        auto action = actions.pop();
+        if (end_early &&
+            action->time_of_execution() > parameters_.labclock.current_time()) {
+          actions.clear();
+          log.debug("time step was ended early");
+          break;
+        }
+        perform_action(action, interactions_total, total_pauli_blocked,
+                       particles_before_actions);
+      }
+      log.debug(~einhard::Blue(), particles_);
+    } else {
+      log.debug("no actions performed");
+    }
+    modus_.impose_boundary_conditions(&particles_);
+
+    /* (5) Do propagation. */
+    propagate_all();
+
+    /* (6) Set duration of next time step. */
+    parameters_.labclock.set_timestep_duration(dt);
+
+    // Check conservation of conserved quantities if potentials are off.
+    // If potentials are on then momentum is conserved only in average
+    if (!potentials_) {
+      std::string err_msg = conserved_initial_.report_deviations(particles_);
+      if (!err_msg.empty()) {
+        log.error() << err_msg;
+        throw std::runtime_error("Violation of conserved quantities!");
+      }
+    }
+  }
+
+  // check if a final intermediate output is needed
+  if (parameters_.is_output_time()) {
+    intermediate_output(evt_num, interactions_total,
+                        previous_interactions_total);
+  }
+
+  if (pauli_blocker_) {
+    log.info("Collisions: pauliblocked/total = ", total_pauli_blocked, "/",
+             interactions_total);
+  }
   return interactions_total;
 }
 

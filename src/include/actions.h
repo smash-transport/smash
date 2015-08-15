@@ -87,11 +87,48 @@ class Actions {
     const size_t old_end = data_.size();
     data_.insert(data_.end(), std::make_move_iterator(new_acts.begin()),
                  std::make_move_iterator(new_acts.end()));
+    merge(data_, old_end);
+  }
 
-    // merge the two lists while preserving the ordering
-    std::inplace_merge(data_.begin(), data_.begin() + old_end, data_.end(),
-                       [](const ActionPtr &a,
-                          const ActionPtr &b) { return *b < *a; });
+  /**
+   * Insert an action into this container.
+   *
+   * The function makes sure that the action is inserted at the right place.
+   *
+   * \param action The action to insert.
+   */
+  void insert(ActionPtr&& action) {
+    const size_t old_end = data_.size();
+    data_.push_back(std::move(action));
+    merge(data_, old_end);
+  }
+
+  /**
+   * Number of actions.
+   */
+  ActionList::size_type size() const {
+    return data_.size();
+  }
+
+  /**
+   * Delete all actions.
+   */
+  void clear() {
+    data_.clear();
+  }
+
+  /**
+   * Returns an iterator to the earliest action.
+   */
+  std::vector<ActionPtr>::const_reverse_iterator begin() const {
+    return data_.crbegin();
+  }
+
+  /**
+   * Returns an iterator to the place following the last action.
+   */
+  std::vector<ActionPtr>::const_reverse_iterator end() const {
+    return data_.crend();
   }
 
  private:
@@ -103,6 +140,19 @@ class Actions {
   static void sort(ActionList& action_list) {
     std::sort(action_list.begin(), action_list.end(),
           [](const ActionPtr &a, const ActionPtr &b) { return *b < *a; });
+  }
+
+  /**
+   * Merge the two lists while preserving the ordering.
+   *
+   * \param action_list The concatenation of the two lists.
+   * \param separation_index The index of the first element of the second list.
+   */
+  static void merge(ActionList &action_list, size_t separation_index) {
+    std::inplace_merge(
+        action_list.begin(), action_list.begin() + separation_index,
+        action_list.end(),
+        [](const ActionPtr &a, const ActionPtr &b) { return *b < *a; });
   }
 
   /**
