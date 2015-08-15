@@ -385,6 +385,10 @@ Experiment<Modus>::Experiment(Configuration config, bf::path output_path)
   }
 
   if (config.has_value({"Potentials"})) {
+    if (time_step_mode_ == TimeStepMode::None) {
+      log.error() << "Potentials only work with time steps!";
+      throw std::invalid_argument("Can't use potentials without time steps!");
+    }
     log.info() << "Potentials are ON.";
     // potentials need testparticles and gaussian sigma from parameters_
     potentials_ = make_unique<Potentials>(config["Potentials"], parameters_);
