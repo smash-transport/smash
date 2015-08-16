@@ -102,7 +102,7 @@ class RootOutput : public OutputInterface {
                       const ParticleList &outgoing_particles,
                       const double density,
                       const double total_cross_section,
-                      const ProcessBranch::ProcessType process_type) override;
+                      const ProcessType process_type) override;
 
  private:
   const boost::filesystem::path base_path_;

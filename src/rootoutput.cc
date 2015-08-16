@@ -219,8 +219,8 @@ void RootOutput::at_eventend(const Particles &/*particles*/,
 void RootOutput::at_interaction(const ParticleList &incoming,
                                 const ParticleList &outgoing,
                                 const double /*density*/,
-                                const double /*total_cross_section*/
-                                ProcessBranch::ProcessType /*process_type*/) {
+                                const double /*total_cross_section*/,
+                                ProcessType /*process_type*/) {
   if (write_collisions_) {
     collisions_to_tree(incoming, outgoing);
   }
@@ -236,7 +236,7 @@ void RootOutput::particles_to_tree(const Particles &particles,
   tcounter = output_counter_;
   ev = event_number;
 
-  for (const auto &p : particles.data()) {
+  for (const auto &p : particles) {
     // Buffer full - flush to tree, else fill with particles
     if (i >= max_buffer_size_) {
       npart = max_buffer_size_;
