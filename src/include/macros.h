@@ -18,6 +18,4 @@
 
 #define SMASH_DEPRECATED(msg) __attribute__((deprecated(msg)))
 
-#define SMASH_PURE __attribute__((pure))
-
 #endif  // SRC_INCLUDE_MACROS_H_

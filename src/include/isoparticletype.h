@@ -70,7 +70,7 @@ class IsoParticleType {
    *
    * \note The complexity of the search is \f$\mathcal O(\log N)\f$.
    */
-  static const IsoParticleType& find(const std::string &name) SMASH_PURE;
+  static const IsoParticleType& find(const std::string &name);
 
   /// \ingroup exception
   struct ParticleNotFoundFailure : public std::runtime_error {
@@ -82,13 +82,13 @@ class IsoParticleType {
    *
    * \note The complexity of the search is \f$\mathcal O(\log N)\f$.
    */
-  static bool exists(const std::string &name) SMASH_PURE;
+  static bool exists(const std::string &name);
 
   /**
    * Returns the ParticleType object for the given \p name, by first finding the
    * correct multiplet and then looking for the desired state.
    */
-  static const ParticleTypePtr find_state(const std::string &name) SMASH_PURE;
+  static const ParticleTypePtr find_state(const std::string &name);
 
   /**
    * Add a new multiplet to the global list of IsoParticleTypes, which contains
