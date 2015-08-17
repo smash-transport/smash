@@ -296,7 +296,7 @@ float ThreeBodyDecay::in_width(float, float G0, float, float, float) const {
 
 ThreeBodyDecayDilepton::ThreeBodyDecayDilepton(ParticleTypePtrList part_types,
                                            int l)
-                                      : ThreeBodyDecay(part_types, l) {
+                                      : ThreeBodyDecay(part_types, l), tabulation_(nullptr) {
   if (!has_lepton_pair(particle_types_[0]->pdgcode(),
                        particle_types_[1]->pdgcode(),
                        particle_types_[2]->pdgcode())) {
@@ -379,6 +379,64 @@ float ThreeBodyDecayDilepton::diff_width(float m_par, float m_dil,
         throw std::runtime_error("Error in ThreeBodyDecayDilepton");
     }
   }  // else
+}
+
+float ThreeBodyDecayDilepton::width(float, float G0, float m) const {
+
+  PdgCode pdg_par;
+  int non_lepton_position = -1;
+
+  for (int i = 0; i < 3; ++i) {
+    if (particle_types_[i]->pdgcode() == 0x111) {
+      pdg_par = 0x223; // only omega (decays into a lepton pair and a pi0
+      non_lepton_position = i;
+      break;
+    }
+    if (particle_types_[i]->pdgcode() == 0x2212) {
+      pdg_par = 0x2214; // only Delta0 decays into a lepton pair and a proton
+      non_lepton_position = i;
+      break;
+    }
+    if (particle_types_[i]->pdgcode() == 0x2112) {
+      pdg_par = 0x2114; // only omega decays into a lepton pair and a neutron
+      non_lepton_position = i;
+      break;
+    }
+    if (particle_types_[i]->pdgcode() == 0x22) {
+    /**
+     * Only eta and pi0 decay into lepton pair and a photon, we assume here
+     * that their with is on-shell.
+     */
+     return G0; // Does this work (returning here)?
+    }
+  }
+
+  if (pdg_par == 0x0 || non_lepton_position == -1) {
+    throw std::runtime_error("Error unsupported Dalitz Dilepton Decay");
+  }
+
+  // lepton mass
+  const float m_l = particle_types_[(non_lepton_position+1)%3]->mass();
+  // mass of non-leptonic particle in final state
+  const float m_other = particle_types_[non_lepton_position]->mass();
+
+
+  if (tabulation_ == nullptr) {
+    const_cast<ThreeBodyDecayDilepton*>(this)->tabulation_
+          = make_unique<Tabulation>(
+              m_other+2*m_l, 10*G0, 60,
+              [&](float m_parent) {
+                Integrator integrate;
+                return integrate(2*m_l, m_parent-m_other,
+                               [&](float srts) {
+                                  return diff_width(m_parent, srts,
+                                                    m_other,
+                                                    pdg_par);
+                                });
+                });
+  }
+  return tabulation_->get_value_linear(m);
+
 }
 
 }  // namespace Smash

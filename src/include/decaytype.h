@@ -197,6 +197,9 @@ class ThreeBodyDecayDilepton : public ThreeBodyDecay {
    */
   static float diff_width(float m_parent, float m_dil,
                    float m_other, PdgCode pdg);
+  float width(float m0, float G0, float m) const override;
+ protected:
+  std::unique_ptr<Tabulation> tabulation_;
 };
 
 
