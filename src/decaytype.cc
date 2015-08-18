@@ -339,40 +339,42 @@ float ThreeBodyDecayDilepton::diff_width(float m_par, float m_dil,
   } else {
     float gamma = 0.0;
     // abbreviations
-    float m_dil_sqr = m_dil * m_dil;
-    float m_par_sqr = m_par * m_par;
-    float m_par_cubed = m_par * m_par*m_par;
-    float m_other_sqr = m_other*m_other;
+    const float m_dil_sqr = m_dil * m_dil;
+    const float m_par_sqr = m_par * m_par;
+    const float m_par_cubed = m_par * m_par*m_par;
+    const float m_other_sqr = m_other*m_other;
 
     switch (pdg.code()) {
       case 0x111: /*pi0*/ {
         gamma = 7.8e-9;
-        float ff = form_factor_pi(m_dil);
+        const float ff = form_factor_pi(m_dil);
         return (alpha*4./(3.*M_PI)) * gamma/m_dil *
                                     pow(1.-m_dil/m_par*m_dil/m_par, 3.) * ff*ff;
       }
       case 0x221: /*eta*/ {
         gamma = 46e-8;
-        float ff = form_factor_eta(m_dil);
+        const float ff = form_factor_eta(m_dil);
         return (4.*alpha/(3.*M_PI)) * gamma/m_dil *
                                     pow(1.-m_dil/m_par*m_dil/m_par, 3.) * ff*ff;
       }
       case 0x223: /*omega*/ {
         gamma = 0.703e-3;
-        float n1 = (m_par_sqr - m_other_sqr);
-        float n2 = ((m_par_sqr -m_other_sqr)*(m_par_sqr -m_other_sqr));
-        float rad = pow(1+ m_dil_sqr / n1, 2.)  -  4*m_par_sqr*m_dil_sqr / n2;
+        const float n1 = (m_par_sqr - m_other_sqr);
+        const float n2 = ((m_par_sqr -m_other_sqr)*(m_par_sqr -m_other_sqr));
+        const float rad = pow(1+ m_dil_sqr / n1, 2.)  -  4*m_par_sqr*m_dil_sqr / n2;
         return (2.*alpha/(3.*M_PI))  *  gamma/m_dil  *   pow(sqrt(rad), 3.) *
                                                    form_factor_sqr_omega(m_dil);
       }
       case 0x2214: case 0x2114: /* Delta+ and Delta0 */ {
         /// see \iref{Krivoruchenko:2001hs}
-        float t1 = alpha/16. *
+        const float rad1 = (m_par+m_other)*(m_par+m_other) - m_dil_sqr;
+        const float rad2 = (m_par-m_other)*(m_par-m_other) - m_dil_sqr;
+        const float t1 = alpha/16. *
                    (m_par+m_other)*(m_par+m_other)/(m_par_cubed*m_other_sqr) *
-                   std::sqrt((m_par+m_other)*(m_par+m_other) - m_dil_sqr);
-        float t2 =
-              pow(std::sqrt((m_par-m_other)*(m_par-m_other) - m_dil_sqr), 3.0);
-        float gamma_vi = t1 * t2 * form_factor_sqr_delta(m_dil);
+                   std::sqrt(rad1);
+        const float t2 =
+              pow(std::sqrt(rad2), 3.0);
+        const float gamma_vi = t1 * t2 * form_factor_sqr_delta(m_dil);
         return 2.*alpha/(3.*M_PI) * gamma_vi/m_dil;
       }
       default:
@@ -387,7 +389,7 @@ float ThreeBodyDecayDilepton::width(float, float G0, float m) const {
 
   for (int i = 0; i < 3; ++i) {
     if (particle_types_[i]->pdgcode() == 0x111) {
-      pdg_par = 0x223; // only omega (decays into a lepton pair and a pi0
+      pdg_par = 0x223; // only omega decays into a lepton pair and a pi0
       non_lepton_position = i;
       break;
     }
@@ -403,8 +405,8 @@ float ThreeBodyDecayDilepton::width(float, float G0, float m) const {
     }
     if (particle_types_[i]->pdgcode() == 0x22) {
       // Only eta and pi0 decay into lepton pair and a photon, we assume here
-      // that their with is on-shell.
-      return G0; // Does this work (returning here)?
+      // that their width is on-shell.
+      return G0;
     }
   }
 
@@ -423,13 +425,18 @@ float ThreeBodyDecayDilepton::width(float, float G0, float m) const {
           = make_unique<Tabulation>(
               m_other+2*m_l, 10*G0, 60,
               [&](float m_parent) {
+                const float bottom = 2*m_l;
+                const float top = m_parent-m_other;
+                if (top < bottom) {  // numerical problems at lower bound
+                  return 0.0;
+                }
                 Integrator integrate;
-                return integrate(2*m_l, m_parent-m_other,
+                return integrate(bottom, top,
                                [&](float srts) {
                                   return diff_width(m_parent, srts,
                                                     m_other,
                                                     pdg_par);
-                                });
+                                }).value();
                 });
   }
   return tabulation_->get_value_linear(m);
