@@ -404,7 +404,7 @@ float ThreeBodyDecayDilepton::width(float, float G0, float m) const {
       break;
     }
     if (particle_types_[i]->pdgcode() == 0x22) {
-      // Only eta and pi0 decay into lepton pair and a photon, we assume here
+      // Only eta and pi0 decay into lepton pair and a photon. We assume here
       // that their width is on-shell.
       return G0;
     }
@@ -419,7 +419,7 @@ float ThreeBodyDecayDilepton::width(float, float G0, float m) const {
   // mass of non-leptonic particle in final state
   const float m_other = particle_types_[non_lepton_position]->mass();
 
-
+  // integrate differential width to obtain partial width
   if (tabulation_ == nullptr) {
     const_cast<ThreeBodyDecayDilepton*>(this)->tabulation_
           = make_unique<Tabulation>(
