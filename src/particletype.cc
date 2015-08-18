@@ -72,7 +72,7 @@ std::vector<ParticleTypePtr> ParticleType::list_baryon_resonances() {
   return list;
 }
 
-SMASH_CONST const ParticleType &ParticleType::find(PdgCode pdgcode) {
+const ParticleType &ParticleType::find(PdgCode pdgcode) {
   const auto found = std::lower_bound(
       all_particle_types->begin(), all_particle_types->end(), pdgcode,
       [](const ParticleType &l, const PdgCode &r) { return l.pdgcode() < r; });
@@ -82,7 +82,7 @@ SMASH_CONST const ParticleType &ParticleType::find(PdgCode pdgcode) {
   return *found;
 }
 
-SMASH_CONST bool ParticleType::exists(PdgCode pdgcode) {
+bool ParticleType::exists(PdgCode pdgcode) {
   const auto found = std::lower_bound(
       all_particle_types->begin(), all_particle_types->end(), pdgcode,
       [](const ParticleType &l, const PdgCode &r) { return l.pdgcode() < r; });

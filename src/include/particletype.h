@@ -227,7 +227,7 @@ class ParticleType {
    * type. All other internal references for a particle type should use
    * ParticleTypePtr instead.
    */
-  static const ParticleType &find(PdgCode pdgcode) SMASH_CONST;
+  static const ParticleType &find(PdgCode pdgcode);
 
   /// \ingroup exception
   struct PdgNotFoundFailure : public std::runtime_error {
@@ -240,7 +240,7 @@ class ParticleType {
    *
    * \note The complexity of the search is \f$\mathcal O(\log N)\f$.
    */
-  static bool exists(PdgCode pdgcode) SMASH_CONST;
+  static bool exists(PdgCode pdgcode);
 
   /**
    * Initialize the global ParticleType list (list_all) from the given input
