@@ -169,6 +169,14 @@ void DecayModes::load_decaymodes(const std::string &input) {
       decay_modes_to_add.clear();
       decay_modes_to_add.resize(mother_states.size());
       log.debug("reading decay modes for " + name);
+      // check if any of the states have decay modes already
+      for (size_t m = 0; m < mother_states.size(); m++) {
+        PdgCode pdgcode = mother_states[m]->pdgcode();
+        if (!decaymodes[find_offset(pdgcode)].is_empty()) {
+          throw LoadFailure("Duplicate entry for " + name +
+                            " in decaymodes.txt");
+        }
+      }
     } else {
       std::istringstream lineinput(line.text);
       std::vector<std::string> decay_particles;
