@@ -382,7 +382,6 @@ float ThreeBodyDecayDilepton::diff_width(float m_par, float m_dil,
 }
 
 float ThreeBodyDecayDilepton::width(float, float G0, float m) const {
-
   PdgCode pdg_par;
   int non_lepton_position = -1;
 
@@ -393,21 +392,19 @@ float ThreeBodyDecayDilepton::width(float, float G0, float m) const {
       break;
     }
     if (particle_types_[i]->pdgcode() == 0x2212) {
-      pdg_par = 0x2214; // only Delta0 decays into a lepton pair and a proton
+      pdg_par = 0x2214; // only Delta+ decays into a lepton pair and a proton
       non_lepton_position = i;
       break;
     }
     if (particle_types_[i]->pdgcode() == 0x2112) {
-      pdg_par = 0x2114; // only omega decays into a lepton pair and a neutron
+      pdg_par = 0x2114; // only Delta0 decays into a lepton pair and a neutron
       non_lepton_position = i;
       break;
     }
     if (particle_types_[i]->pdgcode() == 0x22) {
-    /**
-     * Only eta and pi0 decay into lepton pair and a photon, we assume here
-     * that their with is on-shell.
-     */
-     return G0; // Does this work (returning here)?
+      // Only eta and pi0 decay into lepton pair and a photon, we assume here
+      // that their with is on-shell.
+      return G0; // Does this work (returning here)?
     }
   }
 
@@ -436,7 +433,6 @@ float ThreeBodyDecayDilepton::width(float, float G0, float m) const {
                 });
   }
   return tabulation_->get_value_linear(m);
-
 }
 
 }  // namespace Smash
