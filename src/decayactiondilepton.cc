@@ -52,7 +52,9 @@ void DecayActionDilepton::one_to_three() {
   double cms_energy = sqrt_s();
 
   // perform non_dilepton/virtual photon decay
-  double momentum_radial = pCM(cms_energy, double(dilepton_mass_), mass_nl);
+  double momentum_radial = pCM(cms_energy,
+                           static_cast<double>(dilepton_mass_),
+                           mass_nl);
 
   const double p0_v_pho = std::sqrt(dilepton_mass_*dilepton_mass_ +
                                     momentum_radial * momentum_radial);
