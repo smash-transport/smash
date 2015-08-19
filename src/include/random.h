@@ -196,9 +196,11 @@ class discrete_dist {
  * \param max Maximum value to be returned.
  */
 template <typename T = double> T cauchy(T pole, T width, T min, T max) {
-  const T u_min = std::atan((min-pole)/width);
-  const T u_max = std::atan((max-pole)/width);
-  const T u = uniform(u_min, u_max);
+  /* Use double-precision variables, in order to work around a glibc bug in tanf:
+   * https://sourceware.org/bugzilla/show_bug.cgi?id=18221 */
+  const double u_min = std::atan((min-pole)/width);
+  const double u_max = std::atan((max-pole)/width);
+  const double u = uniform(u_min, u_max);
   return pole + width*std::tan(u);
 }
 
