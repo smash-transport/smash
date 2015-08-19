@@ -24,7 +24,7 @@ ActionList DecayActionsFinderDilepton::find_actions_in_cell(
   ActionList actions;
 
   for (const auto &p : search_list) {
-    unsigned long n_all_modes =
+    size_t n_all_modes =
                         p.type().get_partial_widths(p.effective_mass()).size();
     if (n_all_modes == 0) {
       continue;
