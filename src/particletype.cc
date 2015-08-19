@@ -350,7 +350,6 @@ DecayBranchList ParticleType::get_partial_widths_dilepton(const float m) const {
       default:
            throw std::runtime_error("Problem in get_partial_widths_dilepton()");
     }
-
   }
   return std::move(partial);
 }

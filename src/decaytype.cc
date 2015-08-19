@@ -296,7 +296,7 @@ float ThreeBodyDecay::in_width(float, float G0, float, float, float) const {
 
 ThreeBodyDecayDilepton::ThreeBodyDecayDilepton(ParticleTypePtrList part_types,
                                            int l)
-                                      : ThreeBodyDecay(part_types, l), tabulation_(nullptr) {
+                         : ThreeBodyDecay(part_types, l), tabulation_(nullptr) {
   if (!has_lepton_pair(particle_types_[0]->pdgcode(),
                        particle_types_[1]->pdgcode(),
                        particle_types_[2]->pdgcode())) {
@@ -368,7 +368,8 @@ float ThreeBodyDecayDilepton::diff_width(float m_par, float m_dil,
         gamma = 0.703e-3;
         const float n1 = (m_par_sqr - m_other_sqr);
         const float n2 = ((m_par_sqr -m_other_sqr)*(m_par_sqr -m_other_sqr));
-        const float rad = pow(1+ m_dil_sqr / n1, 2.)  -  4*m_par_sqr*m_dil_sqr / n2;
+        const float rad = pow(1+ m_dil_sqr / n1, 2.)  -
+                          4*m_par_sqr*m_dil_sqr / n2;
         return (2.*alpha/(3.*M_PI))  *  gamma/m_dil  *   pow(sqrt(rad), 3.) *
                                                    form_factor_sqr_omega(m_dil);
       }
@@ -396,17 +397,17 @@ float ThreeBodyDecayDilepton::width(float, float G0, float m) const {
 
   for (int i = 0; i < 3; ++i) {
     if (particle_types_[i]->pdgcode() == 0x111) {
-      pdg_par = 0x223; // only omega decays into a lepton pair and a pi0
+      pdg_par = 0x223;  // only omega decays into a lepton pair and a pi0
       non_lepton_position = i;
       break;
     }
     if (particle_types_[i]->pdgcode() == 0x2212) {
-      pdg_par = 0x2214; // only Delta+ decays into a lepton pair and a proton
+      pdg_par = 0x2214;  // only Delta+ decays into a lepton pair and a proton
       non_lepton_position = i;
       break;
     }
     if (particle_types_[i]->pdgcode() == 0x2112) {
-      pdg_par = 0x2114; // only Delta0 decays into a lepton pair and a neutron
+      pdg_par = 0x2114;  // only Delta0 decays into a lepton pair and a neutron
       non_lepton_position = i;
       break;
     }

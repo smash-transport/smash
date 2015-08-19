@@ -749,7 +749,7 @@ size_t Experiment<Modus>::run_time_evolution(const int evt_num) {
         }
       }
     }
-    
+
     /* (2) Perform actions. */
     if (!actions.is_empty()) {
       while (!actions.is_empty()) {
