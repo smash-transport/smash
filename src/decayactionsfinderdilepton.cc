@@ -47,7 +47,7 @@ ActionList DecayActionsFinderDilepton::find_actions_in_cell(
       switch (mode->particle_number()) {
         case 2: {
           const float partial_width = mode->weight();
-          // SHINNING as described in \iref{Schmidt:2008hm}, chapter 2D
+          // SHINING as described in \iref{Schmidt:2008hm}, chapter 2D
           sh_weight = dt * inv_gamma * partial_width / hbarc;
           break;
         }

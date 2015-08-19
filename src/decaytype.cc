@@ -311,11 +311,15 @@ ThreeBodyDecayDilepton::ThreeBodyDecayDilepton(ParticleTypePtrList part_types,
 // Little helper functions for the form factor of the dilepton dalitz decays
 
 static float form_factor_pi(float mass) {
+  /// see \iref{Landsberg:1986fd}
   return 1.+5.5*mass*mass;
 }
 
 static float form_factor_eta(float mass) {
-  return 1./(1.-(mass*mass/0.676));
+  /// for lamda_eta values see B. Spruck, Ph.D. thesis
+  /// http://geb.uni-giessen.de/geb/volltexte/2008/6667/
+  const float lambda_eta = 0.676;
+  return 1./(1.-(mass*mass/lambda_eta));
 }
 
 static float form_factor_sqr_omega(float mass) {
@@ -346,18 +350,21 @@ float ThreeBodyDecayDilepton::diff_width(float m_par, float m_dil,
 
     switch (pdg.code()) {
       case 0x111: /*pi0*/ {
+        /// see \iref{Landsberg:1986fd}
         gamma = 7.8e-9;
         const float ff = form_factor_pi(m_dil);
         return (alpha*4./(3.*M_PI)) * gamma/m_dil *
                                     pow(1.-m_dil/m_par*m_dil/m_par, 3.) * ff*ff;
       }
       case 0x221: /*eta*/ {
+        /// see \iref{Landsberg:1986fd}
         gamma = 46e-8;
         const float ff = form_factor_eta(m_dil);
         return (4.*alpha/(3.*M_PI)) * gamma/m_dil *
                                     pow(1.-m_dil/m_par*m_dil/m_par, 3.) * ff*ff;
       }
       case 0x223: /*omega*/ {
+        /// see \iref{Effenberg:1999nia} and \iref{Bratkovskaya:1996qe}
         gamma = 0.703e-3;
         const float n1 = (m_par_sqr - m_other_sqr);
         const float n2 = ((m_par_sqr -m_other_sqr)*(m_par_sqr -m_other_sqr));
