@@ -76,23 +76,21 @@ TEST(create_decayaction) {
         // Check consistency for width at pole
         COMPARE(mode->type().width(m0_H, G0_H, m0_H), G0_H);
         /* Result obtained with MATHEMATICA code:
-          mA2 = 0.9; mA1 = 0.5; m0A3 = 1.0; G0A3 = 0.2; m0H = 3.0; mH = 4.0;
-          mA3min = 1.4; G0H = 0.3; L = 1.6;
-          PostCutoff[m_] := (L^4 + ((mA3min + mA2)^2 - m0H^2)^2/4)/
-          (L^4 + (m^2 - ((mA3min + mA2)^2 + m0H^2)/2)^2)
-          GA3[mA3_] := G0A3*Sqrt[((1 + (mA1/mA3)^2 - (mA2/mA3)^2)^2 -
-          4 (mA1/mA3)^2)/((1 + (mA1/m0A3)^2 - (mA2/m0A3)^2)^2 - 4 (mA1/m0A3)^2)]
-          rho[m_] :=  NIntegrate[
-          2 mA3*(mA3*GA3[mA3]/Pi)/((mA3^2 - m0A3^2)^2 + mA3^2 GA3[mA3]^2)*
-          Sqrt[(m^2 + mA2^2 - mA3^2)^2/m^2/4 - mA2^2], {mA3, mA3min, m - mA2}]
-          rho[mH]/rho[m0H]*PostCutoff[mH]^2*G0H        */
+           mA2 = 0.9; mA1 = 0.5; m0A3 = 1.0; G0A3 = 0.2; m0H = 3.0; mH = 4.0;
+           mA3min = 1.4; G0H = 0.3; L = 1.6; s0 = mA3min + mA2;
+           PostCutoff[m_] := (L^4 + (s0^2 - m0H^2)^2/4)/(L^4 + (m^2 - (s0^2 + m0H^2)/2)^2)
+           PfOverM[m_, m1_, m2_] := Sqrt[(m^2 + m1^2 - m2^2)^2/(4 m^2) - m1^2]/m
+           GA3[mA3_] := G0A3*PfOverM[mA3, mA1, mA2]/PfOverM[m0A3, mA1, mA2]
+           A[m_] := 2/Pi m^2 GA3[m]/((m^2 - m0A3^2)^2 + (m GA3[m])^2)
+           rho[m_] :=  NIntegrate[A[mA3]*PfOverM[mA3, mA1, mA2], {mA3, mA3min, m - mA2}]
+           rho[mH]/rho[m0H]*PostCutoff[mH]^2*G0H // returns 0.00824107*/
         /* It might seem weird that resulting width is so unphysically
            small. This is because of the Post form-factor, which is intended
            for resonanse masses smaller than 2 GeV. For higher masses it
            does not give physically reasonable results. But this is only
            code test, so we can live with it.
         */
-        COMPARE_RELATIVE_ERROR(width, 0.0111116f, 5.e-2);
+        COMPARE_RELATIVE_ERROR(width, 0.00824107f, 5.e-2);
         break;
       // Stable two-body decay H -> A1 + A1
       case 1:
