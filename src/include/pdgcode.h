@@ -263,6 +263,8 @@ class PdgCode {
   bool is_Deltastar() const;
   /// Is this a pion (pi+/pi0/pi-)?
   bool is_pion() const;
+  /// Is this a rho meson (rho+/rho0/rho-)?
+  bool is_rho() const;
 
   /** Determine whether a particle has a distinct antiparticle
     * (or whether it is its own antiparticle). */

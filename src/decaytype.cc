@@ -176,10 +176,26 @@ static ParticleTypePtrList arrange_particles(ParticleTypePtrList part_types) {
   return part_types;
 }
 
+/**
+ * Determine the cutoff parameter Lambda for semistable decays,
+ * given the types of the daughter particles.
+ */
+static float get_Lambda(const ParticleTypePtr type_stable,
+                        const ParticleTypePtr type_unstable) {
+  if (type_unstable->baryon_number() != 0) {
+    return 2.;  // unstable baryons
+  } else if (type_unstable->pdgcode().is_rho() &&
+             type_stable->pdgcode().is_pion()) {
+    return 0.8;  // rho+pi
+  } else {
+    return 1.6;  // other unstable mesons
+  }
+}
+
 TwoBodyDecaySemistable::TwoBodyDecaySemistable(ParticleTypePtrList part_types,
                                                int l)
   : TwoBodyDecay(arrange_particles(part_types), l),
-    Lambda_((particle_types_[1]->baryon_number() != 0) ? 2.0 : 1.6),
+    Lambda_(get_Lambda(particle_types_[0], particle_types_[1])),
     tabulation_(nullptr)
 {}
 
