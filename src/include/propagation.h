@@ -11,6 +11,7 @@
 #include "experimentparameters.h"
 #include "particles.h"
 #include "potentials.h"
+#include "lattice.h"
 
 namespace Smash {
 
@@ -41,7 +42,9 @@ void propagate_straight_line(Particles *particles,
   * \f[ \frac{dp}{dt} = -dU(r)/dr \f]
   */
 void propagate(Particles *particles, const ExperimentParameters &parameters,
-               const Potentials &pot);
+               const Potentials &pot,
+               RectangularLattice<ThreeVector>* UB_grad_lat,
+               RectangularLattice<ThreeVector>* UI3_grad_lat);
 
 }  // namespace Smash
 #endif  // SRC_INCLUDE_PROPAGATION_H_

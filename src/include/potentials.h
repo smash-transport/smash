@@ -37,6 +37,12 @@ class Potentials {
  public:
   Potentials(Configuration conf, const ExperimentParameters &parameters);
   ~Potentials();
+
+  /// Evaluates skyrme potential given baryon density
+  double skyrme_pot(const double baryon_density) const;
+  /// Evaluates symmetry potential given baryon isospin density
+  double symmetry_pot(const double baryon_isospin_density) const;
+
   /** Evaluates potential at point r. Potential is always taken in the local
    * Eckart rest frame, but point r is in the computational frame.
    *

@@ -159,7 +159,7 @@ TEST(nucleus_potential_profile) {
     }
     a_file.close();
     for (auto i = 0; i < 50; i++) {
-      propagate(&P, param, *pot);
+      propagate(&P, param, *pot, nullptr, nullptr);
     }
   }
 }
@@ -215,7 +215,7 @@ TEST(propagation_in_test_potential) {
 
   // Propagate, until particle is at x>>d, where d is parameter of potential
   while (P.front().position().x1() < 20*d) {
-    propagate(&P, param, *pot);
+    propagate(&P, param, *pot, nullptr, nullptr);
   }
   // Calculate 4-momentum, expected from conservation laws
   const FourVector pm = part.momentum();

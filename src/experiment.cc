@@ -445,6 +445,15 @@ Experiment<Modus>::Experiment(Configuration config, bf::path output_path)
                                             LatticeUpdate::EveryTimestep);
       jmu_I3_lat_ = make_unique<DensityLattice>(l, n, origin, periodic,
                                               LatticeUpdate::EveryTimestep);
+      // Create lattices for potentials and their gradients
+      UB_lat_ = make_unique<RectangularLattice<double>>(
+                        l, n, origin, periodic, LatticeUpdate::EveryTimestep);
+      UI3_lat_ = make_unique<RectangularLattice<double>>(
+                        l, n, origin, periodic, LatticeUpdate::EveryTimestep);
+      dUB_dr_lat_ = make_unique<RectangularLattice<ThreeVector>>(
+                        l, n, origin, periodic, LatticeUpdate::EveryTimestep);
+      dUI3_dr_lat_ = make_unique<RectangularLattice<ThreeVector>>(
+                        l, n, origin, periodic, LatticeUpdate::EveryTimestep);
     } else {
       if (dens_type_lattice_printout_ == DensityType::Baryon) {
         jmu_B_lat_ = make_unique<DensityLattice>(l, n, origin, periodic,
@@ -860,7 +869,18 @@ void Experiment<Modus>::propagate_all() {
                      DensityType::Baryon, parameters_, particles_);
     update_density_lattice(jmu_I3_lat_.get(), LatticeUpdate::EveryTimestep,
                      DensityType::BaryonicIsospin, parameters_, particles_);
-    propagate(&particles_, parameters_, *potentials_);
+    const int lattice_size = UB_lat_->size();
+    // update potentials lattices
+    for (int i = 0; i < lattice_size; i++) {
+      (*UB_lat_)[i] = potentials_->skyrme_pot((*jmu_B_lat_)[i].density());
+      (*UI3_lat_)[i] = potentials_->symmetry_pot((*jmu_I3_lat_)[i].density());
+    }
+    // update potential gradient lattices
+    UB_lat_->compute_gradient_lattice(dUB_dr_lat_.get());
+    UI3_lat_->compute_gradient_lattice(dUI3_dr_lat_.get());
+
+    propagate(&particles_, parameters_, *potentials_,
+              dUB_dr_lat_.get(), dUI3_dr_lat_.get());
   } else {
     propagate_straight_line(&particles_, parameters_);
   }
@@ -905,7 +925,8 @@ void Experiment<Modus>::do_final_decays(size_t &interactions_total) {
 
   /* Do one final propagation step. */
   if (potentials_) {
-    propagate(&particles_, parameters_, *potentials_);
+    propagate(&particles_, parameters_, *potentials_,
+              dUB_dr_lat_.get(), dUI3_dr_lat_.get());
   } else {
     propagate_straight_line(&particles_, parameters_);
   }

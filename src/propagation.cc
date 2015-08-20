@@ -38,15 +38,24 @@ void propagate_straight_line(Particles *particles,
 }
 
 void propagate(Particles *particles, const ExperimentParameters &parameters,
-               const Potentials &pot) {
+               const Potentials &pot,
+               RectangularLattice<ThreeVector>* UB_grad_lat,
+               RectangularLattice<ThreeVector>* UI3_grad_lat) {
   // Copy particles before propagation to calculate potentials from them
   const ParticleList plist = particles->copy_to_vector();
   const double dt = parameters.timestep_duration();
   const auto &log = logger<LogArea::Propagation>();
+  bool on_lattice;
+  ThreeVector dUB_dr, dUI3_dr;
 
   for (ParticleData &data : *particles) {
-    ThreeVector dU_dr = pot.potential_gradient(data.position().threevec(),
-                                               plist, data.pdgcode());
+    ThreeVector r = data.position().threevec();
+    on_lattice = (UB_grad_lat != nullptr) && (UI3_grad_lat != nullptr) &&
+                 UB_grad_lat->value_at(r, dUB_dr) &&
+                 UI3_grad_lat->value_at(r, dUI3_dr);
+    // Compute potential gradient from lattice if possible
+    ThreeVector dU_dr = on_lattice ? (dUB_dr + dUI3_dr):
+                        pot.potential_gradient(r, plist, data.pdgcode());
     log.debug("Propagate: dU/dr = ", dU_dr);
     ThreeVector v = data.velocity();
     // predictor step assuming momentum-indep. potential, dU/dp = 0

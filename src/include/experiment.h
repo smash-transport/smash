@@ -265,6 +265,10 @@ class Experiment : public ExperimentBase {
   std::unique_ptr<DensityLattice> jmu_B_lat_, jmu_I3_lat_, jmu_custom_lat_;
   /// Type of density for lattice printout
   DensityType dens_type_lattice_printout_ = DensityType::None;
+  /// Lattices for potentials
+  std::unique_ptr<RectangularLattice<double>> UB_lat_, UI3_lat_;
+  /// Lattices for  potential gradients.
+  std::unique_ptr<RectangularLattice<ThreeVector>> dUB_dr_lat_, dUI3_dr_lat_;
 
   /**
    * Number of events.

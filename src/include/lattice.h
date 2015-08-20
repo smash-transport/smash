@@ -73,7 +73,7 @@ class RectangularLattice {
   }
 
   /// Checks if 3D index is out of lattice bounds
-  inline bool out_of_bounds(int ix, int iy, int iz) {
+  inline bool out_of_bounds(int ix, int iy, int iz) const {
     return !periodic_ &&
            (ix < 0 || ix >= n_cells_[0] ||
             iy < 0 || iy >= n_cells_[1] ||
@@ -81,7 +81,7 @@ class RectangularLattice {
   }
 
   /// Returns coordinate of cell center given its index
-  inline ThreeVector cell_center(int ix, int iy, int iz) {
+  inline ThreeVector cell_center(int ix, int iy, int iz) const {
     return ThreeVector(origin_[0] + cell_sizes_[0] * (ix + 0.5f),
                        origin_[1] + cell_sizes_[1] * (iy + 0.5f),
                        origin_[2] + cell_sizes_[2] * (iz + 0.5f));
@@ -122,6 +122,25 @@ class RectangularLattice {
                       (positive_modulo(iy, n_cells_[1]) + n_cells_[1] *
                          positive_modulo(iz, n_cells_[2]))] :
            lattice_[ix + n_cells_[0] * (iy + n_cells_[1] * iz)];
+  }
+
+  /**
+   * Interpolates lattice quantity to coordinate r. Result is stored
+   * in the value variable. Returns true if coordinate r is on the
+   * lattice, false if out of the lattice.
+   **/
+  // TODO(oliiny): maybe 1-order interpolation instead of 0-order?
+  bool value_at(const ThreeVector& r, T& value) {
+    const int ix = std::floor((r.x1() - origin_[0])/cell_sizes_[0]);
+    const int iy = std::floor((r.x2() - origin_[1])/cell_sizes_[1]);
+    const int iz = std::floor((r.x3() - origin_[2])/cell_sizes_[2]);
+    if (out_of_bounds(ix,iy,iz)) {
+      value = T();
+      return false;
+    } else {
+      value = node(ix, iy, iz);
+      return true;
+    }
   }
 
   /**
@@ -199,7 +218,8 @@ class RectangularLattice {
     iterate_sublattice(l_bounds, u_bounds, std::forward<F>(func));
   }
 
-  void compute_gradient_lattice(RectangularLattice<ThreeVector>* grad_lat) {
+  void compute_gradient_lattice(
+         RectangularLattice<ThreeVector>* grad_lat) const {
     const float inv_2dx = 0.5f / cell_sizes_[0];
     const float inv_2dy = 0.5f / cell_sizes_[1];
     const float inv_2dz = 0.5f / cell_sizes_[2];
@@ -277,7 +297,7 @@ class RectangularLattice {
  private:
   /// Returns division modulo, which is always between 0 and n-1
   // i%n is not suitable, because it returns results from -(n-1) to n-1
-  inline int positive_modulo(int i, int n) {
+  inline int positive_modulo(int i, int n) const {
     /* (i % n + n) % n would be correct, but slow.
        Instead I rely on the fact that i should never go too far
        in negative region and replace i%n + n by i + 256 * n = i + (n << 8) */
