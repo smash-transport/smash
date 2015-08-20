@@ -177,8 +177,17 @@ static ParticleTypePtrList arrange_particles(ParticleTypePtrList part_types) {
 }
 
 /**
- * Determine the cutoff parameter Lambda for semistable decays,
+ * Determine the cutoff parameter Λ for semistable decays,
  * given the types of the daughter particles.
+ *
+ * For the values used in GiBUU, see \iref{Buss:2011mx}, eq. (175).
+ * For the original values used by M. Post, see table A.2 in
+ * http://www.uni-giessen.de/cms/fbz/fb07/fachgebiete/physik/einrichtungen/theorie/inst/theses/dissertation/previous/post_diss
+ *
+ * We mostly stick to the GiBUU values, but use a different value for the ρπ
+ * decay, in order to avoid secondary bumps in the ω spectral function and
+ * achieve a better normalization. In contrast to Smash, GiBUU does not have
+ * an ω → ρ π decay.
  */
 static float get_Lambda(const ParticleTypePtr type_stable,
                         const ParticleTypePtr type_unstable) {
@@ -186,7 +195,7 @@ static float get_Lambda(const ParticleTypePtr type_stable,
     return 2.;  // unstable baryons
   } else if (type_unstable->pdgcode().is_rho() &&
              type_stable->pdgcode().is_pion()) {
-    return 0.8;  // rho+pi
+    return 0.8;  // ρ+π
   } else {
     return 1.6;  // other unstable mesons
   }
