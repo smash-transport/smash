@@ -441,19 +441,22 @@ Experiment<Modus>::Experiment(Configuration config, bf::path output_path)
        if potentials are on. This is because they allow to compute
        potentials faster */
     if (potentials_) {
-      jmu_B_lat_ = make_unique<DensityLattice>(l, n, origin, periodic,
-                                            LatticeUpdate::EveryTimestep);
-      jmu_I3_lat_ = make_unique<DensityLattice>(l, n, origin, periodic,
+      if (potentials_->use_skyrme()) {
+        jmu_B_lat_ = make_unique<DensityLattice>(l, n, origin, periodic,
                                               LatticeUpdate::EveryTimestep);
-      // Create lattices for potentials and their gradients
-      UB_lat_ = make_unique<RectangularLattice<double>>(
+        UB_lat_ = make_unique<RectangularLattice<double>>(
+                       l, n, origin, periodic, LatticeUpdate::EveryTimestep);
+        dUB_dr_lat_ = make_unique<RectangularLattice<ThreeVector>>(
+                       l, n, origin, periodic, LatticeUpdate::EveryTimestep);
+      }
+      if (potentials_->use_symmetry()) {
+        jmu_I3_lat_ = make_unique<DensityLattice>(l, n, origin, periodic,
+                                              LatticeUpdate::EveryTimestep);
+        UI3_lat_ = make_unique<RectangularLattice<double>>(
                         l, n, origin, periodic, LatticeUpdate::EveryTimestep);
-      UI3_lat_ = make_unique<RectangularLattice<double>>(
+        dUI3_dr_lat_ = make_unique<RectangularLattice<ThreeVector>>(
                         l, n, origin, periodic, LatticeUpdate::EveryTimestep);
-      dUB_dr_lat_ = make_unique<RectangularLattice<ThreeVector>>(
-                        l, n, origin, periodic, LatticeUpdate::EveryTimestep);
-      dUI3_dr_lat_ = make_unique<RectangularLattice<ThreeVector>>(
-                        l, n, origin, periodic, LatticeUpdate::EveryTimestep);
+      }
     } else {
       if (dens_type_lattice_printout_ == DensityType::Baryon) {
         jmu_B_lat_ = make_unique<DensityLattice>(l, n, origin, periodic,
@@ -865,20 +868,24 @@ void Experiment<Modus>::intermediate_output(const int evt_num,
 template <typename Modus>
 void Experiment<Modus>::propagate_all() {
   if (potentials_) {
-    update_density_lattice(jmu_B_lat_.get(), LatticeUpdate::EveryTimestep,
-                     DensityType::Baryon, parameters_, particles_);
-    update_density_lattice(jmu_I3_lat_.get(), LatticeUpdate::EveryTimestep,
-                     DensityType::BaryonicIsospin, parameters_, particles_);
-    const int lattice_size = UB_lat_->size();
-    // update potentials lattices
-    for (int i = 0; i < lattice_size; i++) {
-      (*UB_lat_)[i] = potentials_->skyrme_pot((*jmu_B_lat_)[i].density());
-      (*UI3_lat_)[i] = potentials_->symmetry_pot((*jmu_I3_lat_)[i].density());
+    if (potentials_->use_skyrme()) {
+      update_density_lattice(jmu_B_lat_.get(), LatticeUpdate::EveryTimestep,
+                       DensityType::baryon, parameters_, particles_);
+      const int UBlattice_size = UB_lat_->size();
+      for (int i = 0; i < UBlattice_size; i++) {
+        (*UB_lat_)[i] = potentials_->skyrme_pot((*jmu_B_lat_)[i].density());
+      }
+      UB_lat_->compute_gradient_lattice(dUB_dr_lat_.get());
     }
-    // update potential gradient lattices
-    UB_lat_->compute_gradient_lattice(dUB_dr_lat_.get());
-    UI3_lat_->compute_gradient_lattice(dUI3_dr_lat_.get());
-
+    if (potentials_->use_symmetry()) {
+      update_density_lattice(jmu_I3_lat_.get(), LatticeUpdate::EveryTimestep,
+                      DensityType::baryonic_isospin, parameters_, particles_);
+      const int UI3lattice_size = UI3_lat_->size();
+      for (int i = 0; i < UI3lattice_size; i++) {
+        (*UI3_lat_)[i] = potentials_->symmetry_pot((*jmu_I3_lat_)[i].density());
+      }
+      UI3_lat_->compute_gradient_lattice(dUI3_dr_lat_.get());
+    }
     propagate(&particles_, parameters_, *potentials_,
               dUB_dr_lat_.get(), dUI3_dr_lat_.get());
   } else {

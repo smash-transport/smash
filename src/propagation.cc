@@ -45,16 +45,29 @@ void propagate(Particles *particles, const ExperimentParameters &parameters,
   const ParticleList plist = particles->copy_to_vector();
   const double dt = parameters.timestep_duration();
   const auto &log = logger<LogArea::Propagation>();
-  bool on_lattice;
+  bool possibly_use_lattice =
+         (pot.use_skyrme() ? (UB_grad_lat != nullptr) : true) &&
+         (pot.use_symmetry() ? (UI3_grad_lat != nullptr) : true);
+  bool use_lattice;
   ThreeVector dUB_dr, dUI3_dr;
 
   for (ParticleData &data : *particles) {
     ThreeVector r = data.position().threevec();
-    on_lattice = (UB_grad_lat != nullptr) && (UI3_grad_lat != nullptr) &&
-                 UB_grad_lat->value_at(r, dUB_dr) &&
-                 UI3_grad_lat->value_at(r, dUI3_dr);
+    /* Lattices can be used for calculation if 1-2 are fulfilled:
+     * 1) Required lattices are not nullptr - possibly_use_lattice
+     * 2) r is not out of required lattices
+     */
+    use_lattice = possibly_use_lattice &&
+              (pot.use_skyrme() ? UB_grad_lat->value_at(r, dUB_dr) : true) &&
+              (pot.use_symmetry() ? UI3_grad_lat->value_at(r, dUI3_dr) : true);
+    if (!pot.use_skyrme()) {
+      dUB_dr = ThreeVector(0.0, 0.0, 0.0);
+    }
+    if (!pot.use_symmetry()) {
+      dUI3_dr = ThreeVector(0.0, 0.0, 0.0);
+    }
     // Compute potential gradient from lattice if possible
-    ThreeVector dU_dr = on_lattice ? (dUB_dr + dUI3_dr):
+    ThreeVector dU_dr = use_lattice ? (dUB_dr + dUI3_dr):
                         pot.potential_gradient(r, plist, data.pdgcode());
     log.debug("Propagate: dU/dr = ", dU_dr);
     ThreeVector v = data.velocity();

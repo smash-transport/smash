@@ -74,6 +74,11 @@ class Potentials {
                                  const ParticleList &plist,
                                  const PdgCode acts_on) const;
 
+  /// Is Skyrme potential on?
+  bool use_skyrme() const { return use_skyrme_; }
+  /// Is symmetry potential on?
+  bool use_symmetry() const { return use_symmetry_; }
+
  private:
   /** Struct that contains gaussian sigma, cutoff and testparticle number
    *  needed for calculation
