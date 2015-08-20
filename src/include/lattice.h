@@ -199,6 +199,65 @@ class RectangularLattice {
     iterate_sublattice(l_bounds, u_bounds, std::forward<F>(func));
   }
 
+  void compute_gradient_lattice(RectangularLattice<ThreeVector>* grad_lat) {
+    const float inv_2dx = 0.5f / cell_sizes_[0];
+    const float inv_2dy = 0.5f / cell_sizes_[1];
+    const float inv_2dz = 0.5f / cell_sizes_[2];
+    const int dix = 1;
+    const int diy = n_cells_[0];
+    const int diz = n_cells_[0]*n_cells_[1];
+    const int d = diz * n_cells_[2];
+
+    for (int iz = 0; iz < n_cells_[2]; iz++) {
+      const int z_offset = diz * iz;
+      for (int iy = 0; iy < n_cells_[1]; iy++) {
+        const int y_offset = diy * iy + z_offset;
+        for (int ix = 0; ix < n_cells_[0]; ix++) {
+          const int index = ix + y_offset;
+
+          if (ix != 0 && ix != n_cells_[0]-1) {
+            (*grad_lat)[index].set_x1(
+               (lattice_[index+dix]-lattice_[index-dix]) * inv_2dx);
+          } else if (ix == 0) {
+            (*grad_lat)[index].set_x1(periodic_ ?
+               (lattice_[index+dix]-lattice_[index+diy-dix]) * inv_2dx :
+               (lattice_[index+dix]-lattice_[index]) * 2 * inv_2dx);
+          } else if (ix == n_cells_[0]-1) {
+            (*grad_lat)[index].set_x1(periodic_ ?
+               (lattice_[index-diy+dix]-lattice_[index-dix]) * inv_2dx :
+               (lattice_[index]-lattice_[index-dix]) * 2 * inv_2dx);
+          }
+
+          if (iy != 0 && iy != n_cells_[1]-1) {
+            (*grad_lat)[index].set_x2(
+              (lattice_[index+diy]-lattice_[index-diy]) * inv_2dy);
+          } else if (iy == 0) {
+            (*grad_lat)[index].set_x2(periodic_ ?
+               (lattice_[index+diy]-lattice_[index+diz-diy]) * inv_2dy :
+               (lattice_[index+diy]-lattice_[index]) * 2 * inv_2dy);
+          } else if (iy == n_cells_[1]-1) {
+            (*grad_lat)[index].set_x2(periodic_ ?
+               (lattice_[index-diz+diy]-lattice_[index-diy]) * inv_2dy :
+               (lattice_[index]-lattice_[index-diy]) * 2 * inv_2dy);
+          }
+
+          if (iz != 0 && iz != n_cells_[2]-1) {
+            (*grad_lat)[index].set_x3(
+              (lattice_[index+diz]-lattice_[index-diz]) * inv_2dz);
+          } else if (iz == 0) {
+            (*grad_lat)[index].set_x3(periodic_ ?
+               (lattice_[index+diz]-lattice_[index+d-diz]) * inv_2dz :
+               (lattice_[index+diz]-lattice_[index]) * 2 * inv_2dz);
+          } else if (iz == n_cells_[2]-1) {
+            (*grad_lat)[index].set_x3(periodic_ ?
+               (lattice_[index-d+diz]-lattice_[index-diz]) * inv_2dz :
+               (lattice_[index]-lattice_[index-diz]) * 2 * inv_2dz);
+          }
+        }
+      }
+    }
+  }
+
  protected:
   /// The lattice itself, array containing physical quantities
   std::vector<T> lattice_;
