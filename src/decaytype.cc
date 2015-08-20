@@ -61,7 +61,8 @@ static float BlattWeisskopf(const float p_ab, const int L)
 
 /**
  * An additional form factor for unstable final states as used in GiBUU,
- * according to M. Post. Reference: \iref{Buss:2011mx}, eq. (174).
+ * according to M. Post, see eq. (174) in \iref{Buss:2011mx} or eq. (13) in
+ * \iref{Post:2003hu}.
  *
  * \param m Actual mass of the decaying resonance [GeV].
  * \param M0 Pole mass of the decaying resonance [GeV].
@@ -181,8 +182,7 @@ static ParticleTypePtrList arrange_particles(ParticleTypePtrList part_types) {
  * given the types of the daughter particles.
  *
  * For the values used in GiBUU, see \iref{Buss:2011mx}, eq. (175).
- * For the original values used by M. Post, see table A.2 in
- * http://www.uni-giessen.de/cms/fbz/fb07/fachgebiete/physik/einrichtungen/theorie/inst/theses/dissertation/previous/post_diss
+ * For the original values used by M. Post, see table 1 in \iref{Post:2003hu}.
  *
  * We mostly stick to the GiBUU values, but use a different value for the ρπ
  * decay, in order to avoid secondary bumps in the ω spectral function and
