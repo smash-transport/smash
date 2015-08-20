@@ -361,9 +361,6 @@ class ParticleTypePtr {
   /// Default construction initializes with an invalid index.
   ParticleTypePtr() = default;
 
-  /// Initialization with \c nullptr constructs an object with an invalid index.
-  ParticleTypePtr(std::nullptr_t) {}
-
   /// Returns whether the two objects reference the same ParticleType object.
   bool operator==(const ParticleTypePtr &rhs) const {
     return index_ == rhs.index_;
