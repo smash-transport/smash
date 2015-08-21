@@ -166,7 +166,12 @@ TEST(smearing_factor_normalization) {
     int_rho_r_d3r += node.density();
   }
   int_rho_r_d3r *= L*L*L/n[0]/n[1]/n[2]/N;
-  COMPARE_RELATIVE_ERROR(int_rho_r_d3r, 1.0, 1.e-4);
+  COMPARE_RELATIVE_ERROR(int_rho_r_d3r, 1.0, 2.e-6);
+}
+
+TEST(smearing_factor_rcut_correction) {
+  FUZZY_COMPARE(smearing_factor_rcut_correction(3.0), 0.970709f);
+  FUZZY_COMPARE(smearing_factor_rcut_correction(4.0), 0.998866f);
 }
 
 // check that analytical and numerical results for gradient of density coincide

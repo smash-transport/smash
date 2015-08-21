@@ -31,6 +31,7 @@ float density_factor(const PdgCode pdg, DensityType dens_type) {
 
 std::pair<double, ThreeVector> unnormalized_smearing_factor(
                        const ThreeVector &r, const FourVector &p,
+                       const double m,
                        const double two_sigma_sqr, const double r_cut_sqr,
                        const bool compute_gradient) {
   const double r_sqr = r.sqr();
@@ -38,7 +39,6 @@ std::pair<double, ThreeVector> unnormalized_smearing_factor(
     // Distance from particle to point of interest > r_cut
     return std::make_pair(0.0, ThreeVector(0.0, 0.0, 0.0));
   }
-  const double m = p.abs();
   if (m < really_small) {
     const auto &log = logger<LogArea::Density>();
     log.warn("Gaussian smearing is undefined for momentum ", p);
@@ -88,15 +88,17 @@ std::pair<double, ThreeVector> rho_eckart_impl(const ThreeVector &r,
     if (std::abs(dens_factor) < really_small) {
       continue;
     }
+    const FourVector mom = p.momentum();
+    const double m = mom.abs();
     const auto sf_and_grad = unnormalized_smearing_factor(
                             p.position().threevec() -r,
-                            p.momentum(),
+                            mom, m,
                             two_sig_sqr, r_cut_sqr,
                             compute_gradient);
     if (sf_and_grad.first < really_small) {
       continue;
     }
-    const FourVector tmp = p.momentum() * (dens_factor / p.momentum().x0());
+    const FourVector tmp = mom * (dens_factor / mom.x0());
     if (dens_factor > 0.f) {
       jmu_pos[0] += tmp * sf_and_grad.first;
       if (compute_gradient) {
@@ -165,12 +167,14 @@ void update_density_lattice(DensityLattice* lat,
     if (std::abs(dens_factor) < really_small) {
       continue;
     }
+    const FourVector p = part.momentum();
+    const double m = p.abs();
     const ThreeVector pos = part.position().threevec();
     lat->iterate_in_radius(pos, r_cut,
       [&](DensityOnLattice &node, int ix, int iy, int iz){
         const ThreeVector r = lat->cell_center(ix, iy, iz);
-        const double sf = unnormalized_smearing_factor(pos - r,
-                               part.momentum(), two_sig_sqr, r_cut_sqr).first;
+        const double sf = unnormalized_smearing_factor(pos - r, p, m,
+                               two_sig_sqr, r_cut_sqr).first;
         if (sf > really_small) {
           /*std::cout << "Adding particle " << part << " to lattice with"
                     << " smearing factor " << sf <<
@@ -180,8 +184,10 @@ void update_density_lattice(DensityLattice* lat,
       });
   }
   // Compute density from jmus, take care about smearing factor normalization
+  const double norm = smearing_factor_norm(two_sig_sqr) * ntest *
+                    smearing_factor_rcut_correction(par.gauss_cutoff_in_sigma);
   for (auto &node : *lat) {
-    node.compute_density(smearing_factor_norm(two_sig_sqr) * ntest);
+    node.compute_density(norm);
   }
 }
 

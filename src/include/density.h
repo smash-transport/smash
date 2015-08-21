@@ -57,6 +57,7 @@ namespace Smash {
    */
   std::pair<double, ThreeVector> unnormalized_smearing_factor(
                        const ThreeVector &r, const FourVector &p,
+                       const double m,
                        const double two_sigma_sqr, const double r_cut_sqr,
                        const bool compute_gradient = false);
   /**
@@ -70,7 +71,7 @@ namespace Smash {
   }
 
   /**
-   * Norm of the smearing factor gradient, \f[ (2 \pi \sigma^2)^{3/2} *
+   * Norm of the smearing factor gradient, \f[ (2 \pi \sigma^2)^{3/2} \cdot
    * (2 \sigma^2). \f].
    *
    * \param[in] two_sigma_sqr 2*sigma^2, sigma - width of gaussian smearing
@@ -78,6 +79,26 @@ namespace Smash {
   inline double smearing_factor_grad_norm(const double two_sigma_sqr) {
     const double tmp = two_sigma_sqr * M_PI;
     return tmp * std::sqrt(tmp) * 0.5 * two_sigma_sqr;
+  }
+
+  /**
+   * Gaussians used for smearing are cut at radius \f[r_{cut} = a sigma \f]
+   * for calculation speed-up. In the limit of \f[a \to \infty \f] smearing
+   * factor is normalized to 1:
+   * \f[ \frac{4 \pi}{(2 \pi \sigma^2)^{3/2}}
+   *     \int_0^{\infty} e^{-r^2/2 \sigma^2} r^2 dr = 1 \f].
+   * However, for finite \f[ a\f] integral is less than one:
+   * \f[ g(a) \equiv \frac{4 \pi}{(2 \pi \sigma^2)^{3/2}}
+   *    \int_0^{a \sigma} e^{-r^2/2 \sigma^2} r^2 dr =
+   *    -\sqrt{\frac{2}{\pi}} a e^{-a^2/2} + Erf[a/\sqrt{2}]
+   * \f]. This \f[ g(a) \f] is typically close to 1. For example,
+   * for \f[r_{cut} = 3 sigma \f], and thus \f[ a=3 \f], g(3) = 0.9707;
+   * g(4) = 0.9987. The aim of this function is to compensate for this factor.
+   *
+   */
+  inline float smearing_factor_rcut_correction(const float rcut_in_sigma) {
+    const float x = rcut_in_sigma / std::sqrt(2.0);
+    return - 2.0 /std::sqrt(M_PI) * x * std::exp(-x*x) + std::erf(x);
   }
 
   /** Calculates Eckart rest frame density and optionally its gradient.
