@@ -66,6 +66,13 @@ bool PdgCode::is_pion() const {
       || (c == -0x211);  // pi-
 }
 
+bool PdgCode::is_rho() const {
+  const auto c = code();
+  return (c == 0x113)    // rho0
+      || (c == 0x213)    // rho+
+      || (c == -0x213);  // rho-
+}
+
 int PdgCode::isospin_total() const {
   // non-hadrons and η mesons (and ω and stuff):
   if (!is_hadron() || quarks() == 0x22) {
