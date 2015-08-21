@@ -258,20 +258,30 @@ TEST_CATCH(big_timestep_negative, std::range_error) {
   labtime += -0.8f;
 }
 
+TEST(no_overflow_single_increment) {
+  Clock labtime(0.0f, 1.0f);
+  labtime += (std::numeric_limits<Clock::Representation>::max() - 3);
+  ++labtime;
+  ++labtime;
+}
+
 TEST_CATCH(overflow_single_increment, std::overflow_error) {
   Clock labtime(0.0f, 1.0f);
   labtime += (std::numeric_limits<Clock::Representation>::max() - 3);
   ++labtime;
   ++labtime;
   ++labtime;
+}
+
+TEST(no_overflow_large_increment) {
+  Clock labtime(0.0f, 1.0f);
   ++labtime;
   ++labtime;
-  ++labtime;
+  labtime += (std::numeric_limits<Clock::Representation>::max() - 3);
 }
 
 TEST_CATCH(overflow_large_increment, std::overflow_error) {
   Clock labtime(0.0f, 1.0f);
-  ++labtime;
   ++labtime;
   ++labtime;
   ++labtime;

@@ -64,21 +64,29 @@ static float BlattWeisskopf(const float p_ab, const int L)
 
 /**
  * An additional form factor for unstable final states as used in GiBUU,
- * according to M. Post. Reference: \iref{Buss:2011mx}, eq. (174).
- * The function returns the squared value of the form factor.
+ * according to M. Post, see eq. (174) in \iref{Buss:2011mx} or eq. (13) in
+ * \iref{Post:2003hu}.
+ *
  * \param m Actual mass of the decaying resonance [GeV].
  * \param M0 Pole mass of the decaying resonance [GeV].
  * \param srts0 Threshold of the reaction, i.e. minimum possible sqrt(s) [GeV].
  * \param L Lambda parameter of the form factor [GeV]. This is a cut-off
  * parameter that can be different for baryons and mesons.
+ *
+ * \return The squared value of the form factor (dimensionless).
+ *
+ * \note This form factor is equal to one at m=M0 and m=srts0. For decreasing
+ * values of L, the form factor results in a stronger and stronger suppression
+ * of the high-mass tail (m > M0) and a corresponding enhancement of the
+ * low-mass tail (m < M0).
  */
 static float Post_FF_sqr(float m, float M0, float srts0, float L) {
   const auto L4 = L*L*L*L;
-  const auto m2 = m*m;
   const auto M2 = M0*M0;
   const auto s0 = srts0*srts0;
-  const float FF = (L4 + (s0-M2)*(s0-M2)/4.) /
-                   (L4 + (m2-(s0+M2)/2.) * (m2-(s0+M2)/2.));
+  const auto sminus = (s0-M2)/2.;
+  const auto splus = m*m - (s0+M2)/2.;
+  const auto FF = (L4 + sminus*sminus) / (L4 + splus*splus);
   return FF*FF;
 }
 
@@ -171,10 +179,34 @@ static ParticleTypePtrList arrange_particles(ParticleTypePtrList part_types) {
   return part_types;
 }
 
+/**
+ * Determine the cutoff parameter Λ for semistable decays,
+ * given the types of the daughter particles.
+ *
+ * For the values used in GiBUU, see \iref{Buss:2011mx}, eq. (175).
+ * For the original values used by M. Post, see table 1 in \iref{Post:2003hu}.
+ *
+ * We mostly stick to the GiBUU values, but use a different value for the ρπ
+ * decay, in order to avoid secondary bumps in the ω spectral function and
+ * achieve a better normalization. In contrast to Smash, GiBUU does not have
+ * an ω → ρ π decay.
+ */
+static float get_Lambda(const ParticleTypePtr type_stable,
+                        const ParticleTypePtr type_unstable) {
+  if (type_unstable->baryon_number() != 0) {
+    return 2.;  // unstable baryons
+  } else if (type_unstable->pdgcode().is_rho() &&
+             type_stable->pdgcode().is_pion()) {
+    return 0.8;  // ρ+π
+  } else {
+    return 1.6;  // other unstable mesons
+  }
+}
+
 TwoBodyDecaySemistable::TwoBodyDecaySemistable(ParticleTypePtrList part_types,
                                                int l)
   : TwoBodyDecay(arrange_particles(part_types), l),
-    Lambda_((particle_types_[1]->baryon_number() != 0) ? 2.0 : 1.6),
+    Lambda_(get_Lambda(particle_types_[0], particle_types_[1])),
     tabulation_(nullptr)
 {}
 
