@@ -351,14 +351,14 @@ float ThreeBodyDecayDilepton::diff_width(float m_par, float m_dil,
     switch (pdg.code()) {
       case 0x111: /*pi0*/ {
         /// see \iref{Landsberg:1986fd}
-        gamma = 7.8e-9;
+        gamma = 7.6e-9;
         const float ff = form_factor_pi(m_dil);
         return (alpha*4./(3.*M_PI)) * gamma/m_dil *
                                     pow(1.-m_dil/m_par*m_dil/m_par, 3.) * ff*ff;
       }
       case 0x221: /*eta*/ {
         /// see \iref{Landsberg:1986fd}
-        gamma = 46e-8;
+        gamma = 52e-8;
         const float ff = form_factor_eta(m_dil);
         return (4.*alpha/(3.*M_PI)) * gamma/m_dil *
                                     pow(1.-m_dil/m_par*m_dil/m_par, 3.) * ff*ff;
