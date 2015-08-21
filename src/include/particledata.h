@@ -234,9 +234,9 @@ class ParticleData {
 
   /**
    * A reference to the ParticleType object for this particle (this contains
-   * all the static information).
+   * all the static information). Default-initialized with an invalid index.
    */
-  ParticleTypePtr type_ = nullptr;
+  ParticleTypePtr type_;
 
   static_assert(sizeof(ParticleTypePtr) == 2,
                 "");  // this leaves us two Bytes padding to use for "free"

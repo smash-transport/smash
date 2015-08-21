@@ -359,7 +359,7 @@ Experiment<Modus>::Experiment(Configuration config, bf::path output_path)
   if (static_cast<bool>(output_conf.take({"Root", "Enable"}))) {
 #ifdef SMASH_USE_ROOT
     outputs_.emplace_back(new RootOutput(
-                              output_path, output_conf["Root"]));
+                              output_path, std::move(output_conf["Root"])));
 #else
     log.error() << "You requested Root output, but Root support has not been "
                     "compiled in. To enable Root support call: cmake -D "

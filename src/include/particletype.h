@@ -230,7 +230,7 @@ class ParticleType {
    * type. All other internal references for a particle type should use
    * ParticleTypePtr instead.
    */
-  static const ParticleType &find(PdgCode pdgcode) SMASH_CONST;
+  static const ParticleType &find(PdgCode pdgcode);
 
   /// \ingroup exception
   struct PdgNotFoundFailure : public std::runtime_error {
@@ -243,7 +243,7 @@ class ParticleType {
    *
    * \note The complexity of the search is \f$\mathcal O(\log N)\f$.
    */
-  static bool exists(PdgCode pdgcode) SMASH_CONST;
+  static bool exists(PdgCode pdgcode);
 
   /**
    * Initialize the global ParticleType list (list_all) from the given input
@@ -363,9 +363,6 @@ class ParticleTypePtr {
 
   /// Default construction initializes with an invalid index.
   ParticleTypePtr() = default;
-
-  /// Initialization with \c nullptr constructs an object with an invalid index.
-  ParticleTypePtr(std::nullptr_t) {}
 
   /// Returns whether the two objects reference the same ParticleType object.
   bool operator==(const ParticleTypePtr &rhs) const {
