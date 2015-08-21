@@ -75,8 +75,10 @@ class Potentials {
                                  const PdgCode acts_on) const;
 
   /// Is Skyrme potential on?
+  VIRTUAL_FOR_TESTS
   bool use_skyrme() const { return use_skyrme_; }
   /// Is symmetry potential on?
+  VIRTUAL_FOR_TESTS
   bool use_symmetry() const { return use_symmetry_; }
 
  private:
