@@ -134,7 +134,7 @@ class RectangularLattice {
     const int ix = std::floor((r.x1() - origin_[0])/cell_sizes_[0]);
     const int iy = std::floor((r.x2() - origin_[1])/cell_sizes_[1]);
     const int iz = std::floor((r.x3() - origin_[2])/cell_sizes_[2]);
-    if (out_of_bounds(ix,iy,iz)) {
+    if (out_of_bounds(ix, iy, iz)) {
       value = T();
       return false;
     } else {

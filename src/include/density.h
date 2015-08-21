@@ -43,17 +43,18 @@ namespace Smash {
    * Implements gaussian smearing for any quantity.
    * Computes smearing factor taking Lorentz contraction into account.
    * Integral of unnormalized smearing factor over space should be
-   *  \f[ (2 \pi \sigma^2)^{3/2}. \f]. Division over norm is splitted
+   *  \f$ (2 \pi \sigma^2)^{3/2} \f$. Division over norm is splitted
    *  for efficiency: it is not nice to recalculate the same constant
    *  norm at every call.
    *
-   *  Returns smearing factor itself and optionally also its gradient.
-   *
    * \param[in] r vector from the particle to the point of interest
-   * \param[in] p particle momentum to account for Lorentz contraction
-   * \param[in] two_sigma_sqr 2*sigma^2, sigma - width of gaussian smearing
+   * \param[in] p particle 4-momentum to account for Lorentz contraction
+   * \param[in] m particle mass, \f$ m = \sqrt{E^2 - p^2} \f$
+   * \param[in] two_sigma_sqr \f$ 2 \sigma^2 \f$,
+   *            \f$ \sigma \f$ - width of gaussian smearing
    * \param[in] r_cut_sqr radius, where gaussian is cut, squared
-   * \param[in] compute_gradient option, true - compute gradient, false - no.
+   * \param[in] compute_gradient option, true - compute gradient, false - no
+   * \return smearing factor itself and optionally also its gradient
    */
   std::pair<double, ThreeVector> unnormalized_smearing_factor(
                        const ThreeVector &r, const FourVector &p,
@@ -61,9 +62,10 @@ namespace Smash {
                        const double two_sigma_sqr, const double r_cut_sqr,
                        const bool compute_gradient = false);
   /**
-   * Norm of the smearing function, \f[ (2 \pi \sigma^2)^{3/2}. \f].
+   * Norm of the smearing function, \f$ (2 \pi \sigma^2)^{3/2}\f$
    *
-   * \param[in] two_sigma_sqr 2*sigma^2, sigma - width of gaussian smearing
+   * \param[in] two_sigma_sqr \f$2 \sigma^2 \f$,
+   *            \f$ \sigma \f$ - width of gaussian smearing
    */
   inline double smearing_factor_norm(const double two_sigma_sqr) {
     const double tmp = two_sigma_sqr * M_PI;
@@ -71,10 +73,11 @@ namespace Smash {
   }
 
   /**
-   * Norm of the smearing factor gradient, \f[ (2 \pi \sigma^2)^{3/2} \cdot
-   * (2 \sigma^2). \f].
+   * Norm of the smearing factor gradient, \f$ (2 \pi \sigma^2)^{3/2} \cdot
+   * (2 \sigma^2) \f$
    *
-   * \param[in] two_sigma_sqr 2*sigma^2, sigma - width of gaussian smearing
+   * \param[in] two_sigma_sqr \f$2 \sigma^2 \f$,
+   *            \f$ \sigma \f$ - width of gaussian smearing
    */
   inline double smearing_factor_grad_norm(const double two_sigma_sqr) {
     const double tmp = two_sigma_sqr * M_PI;
@@ -82,19 +85,21 @@ namespace Smash {
   }
 
   /**
-   * Gaussians used for smearing are cut at radius \f[r_{cut} = a sigma \f]
-   * for calculation speed-up. In the limit of \f[a \to \infty \f] smearing
+   * Gaussians used for smearing are cut at radius \f$r_{cut} = a \sigma \f$
+   * for calculation speed-up. In the limit of \f$a \to \infty \f$ smearing
    * factor is normalized to 1:
    * \f[ \frac{4 \pi}{(2 \pi \sigma^2)^{3/2}}
-   *     \int_0^{\infty} e^{-r^2/2 \sigma^2} r^2 dr = 1 \f].
-   * However, for finite \f[ a\f] integral is less than one:
+   *     \int_0^{\infty} e^{-r^2/2 \sigma^2} r^2 dr = 1 \f]
+   * However, for finite \f$ a\f$ integral is less than one:
    * \f[ g(a) \equiv \frac{4 \pi}{(2 \pi \sigma^2)^{3/2}}
    *    \int_0^{a \sigma} e^{-r^2/2 \sigma^2} r^2 dr =
    *    -\sqrt{\frac{2}{\pi}} a e^{-a^2/2} + Erf[a/\sqrt{2}]
-   * \f]. This \f[ g(a) \f] is typically close to 1. For example,
-   * for \f[r_{cut} = 3 sigma \f], and thus \f[ a=3 \f], g(3) = 0.9707;
+   * \f] This \f$ g(a) \f$ is typically close to 1. For example,
+   * for \f$r_{cut} = 3 \sigma \f$, and thus \f$ a=3 \f$, g(3) = 0.9707;
    * g(4) = 0.9987. The aim of this function is to compensate for this factor.
    *
+   * \param[in] rcut_in_sigma \f$ a = r_{cut} / \sigma\f$
+   * \return \f$ g(a) \f$
    */
   inline float smearing_factor_rcut_correction(const float rcut_in_sigma) {
     const float x = rcut_in_sigma / std::sqrt(2.0);
@@ -114,6 +119,10 @@ namespace Smash {
    *  For gradient:
    *  \f[ \frac{d\rho_{Eck}}{d \vec r} = \frac{\frac{dj^{\mu}}{d \vec r}
    *  j_{\mu}}{\sqrt{j^{\mu}j_{\mu}}} \f]
+   *
+   *  To avoid the problems with Eckart frame definition, densities for
+   *  positive and negative charges, \f$\rho_+ \f$ and \f$ \rho_-\f$,
+   *  are computed separately and result is \f$\rho_+ - \rho_-\f$.
    *
    * \param[in] r Arbitrary space point where 4-current is calculated
    * \param[in] plist List of all particles to be used in \f$j^{\mu}\f$
@@ -153,10 +162,10 @@ namespace Smash {
  *  problems with the definition of Eckart rest frame.
  *
  *  Intended usage of the class:
- *  1) Add particles from some list using add_particle(...). This sets
+ *  -# Add particles from some list using add_particle(...). This sets
  *     jmu_pos and jmu_neg
- *  2) Compute density from jmus using compute_density(...).
- *  3) Get jmus and density whenever necessary via density(),
+ *  -# Compute density from jmus using compute_density(...).
+ *  -# Get jmus and density whenever necessary via density(),
  *     jmu_pos(), jmu_neg()
  */
 class DensityOnLattice {
@@ -165,7 +174,7 @@ class DensityOnLattice {
   DensityOnLattice() : jmu_pos_(FourVector()),
                        jmu_neg_(FourVector()),
                        density_(0.0) {}
-  /** Adds particle to 4-current: \f$j^{\mu} += p^{\mu}/p^0 * factor \f$
+  /** Adds particle to 4-current: \f$j^{\mu} += p^{\mu}/p^0 \cdot factor \f$
    *  Factor can in principle be any scalar multiplier. Physics-wise it
    *  accounts for smearing on the lattice and for particle contribution
    *  to given density type (e.g. anti-proton contributes with factor -1
