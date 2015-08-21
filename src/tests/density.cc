@@ -137,6 +137,38 @@ TEST(density_eckart_special_cases) {
   COMPARE_ABSOLUTE_ERROR(rho, -0.0003763388107782538, 1.e-15) << rho;
 }
 
+TEST(smearing_factor_normalization) {
+  // Create density lattice with small lattice spacing
+  const std::array<float, 3> l = {10.0f, 10.0f, 10.0f};
+  const std::array<int, 3> n = {50, 60, 70};
+  const std::array<float, 3> origin = {0.0f, 0.0f, 0.0f};
+  bool periodicity = true;
+  auto lat = make_unique<DensityLattice>(
+             l, n, origin, periodicity, LatticeUpdate::EveryTimestep);
+  // Create box with 1 proton
+  const int N = 1;
+  const float L = 10.0f;
+  auto conf = Test::configuration();
+  conf["Modus"] = "Box";
+  conf.take({"Modi", "Box", "Init_Multiplicities"});
+  conf["Modi"]["Box"]["Init_Multiplicities"]["2212"] = N;
+  conf["Modi"]["Box"]["Length"] = L;
+  const ExperimentParameters par = Smash::Test::default_parameters();
+  std::unique_ptr<BoxModus> b = make_unique<BoxModus>(conf["Modi"], par);
+  Particles P;
+  b->initial_conditions(&P, par);
+  // Fill lattice from particles
+  update_density_lattice(lat.get(), LatticeUpdate::EveryTimestep,
+                         DensityType::baryon, par, P);
+  // Compute integral rho(r) d^r. Should be equal to N.
+  double int_rho_r_d3r = 0.0;
+  for (auto &node : *lat) {
+    int_rho_r_d3r += node.density();
+  }
+  int_rho_r_d3r *= L*L*L/n[0]/n[1]/n[2]/N;
+  COMPARE_RELATIVE_ERROR(int_rho_r_d3r, 1.0, 1.e-4);
+}
+
 // check that analytical and numerical results for gradient of density coincide
 TEST(density_gradient) {
   // create two protons
