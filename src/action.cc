@@ -79,7 +79,8 @@ void Action::perform(Particles *particles, uint32_t id_process) {
   const auto &log = logger<LogArea::Action>();
 
   for (ParticleData &p : outgoing_particles_) {
-    p.set_id_process(id_process);  // store the process id
+    // store the history info
+    p.set_history(id_process, process_type_, incoming_particles_[0].pdgcode());
   }
 
   particles->update(incoming_particles_, outgoing_particles_,
