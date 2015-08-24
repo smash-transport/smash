@@ -54,14 +54,21 @@ void DecayModes::add_mode(float ratio, int L,
       }
       break;
     case 3:
+      if (has_lepton_pair(particle_types[0]->pdgcode(),
+                          particle_types[1]->pdgcode(),
+                          particle_types[2]->pdgcode())) {
+        all_decay_types->emplace_back(
+        make_unique<ThreeBodyDecayDilepton>(particle_types, L));
+      } else {
       all_decay_types->emplace_back(
           make_unique<ThreeBodyDecay>(particle_types, L));
+      }
       break;
     default:
       throw InvalidDecay(
-          "DecayModes::add_mode was instructed to add a decay mode with " +
-          std::to_string(particle_types.size()) +
-          " particles. This is an invalid input.");
+        "DecayModes::add_mode was instructed to add a decay mode with " +
+        std::to_string(particle_types.size()) +
+        " particles. This is an invalid input.");
   }
   decay_modes_.push_back(
       make_unique<DecayBranch>(*all_decay_types->back(), ratio));
@@ -124,7 +131,7 @@ void DecayModes::load_decaymodes(const std::string &input) {
     }
     // Loop over all states in the mother multiplet and add modes
     for (size_t m = 0; m < mother_states.size(); m++) {
-      if (decay_modes_to_add[m].is_empty()) {
+      if (decay_modes_to_add[m].is_empty() && !mother_states[m]->is_stable()) {
         throw MissingDecays("No decay modes found for particle " +
                             mother_states[m]->name());
       }

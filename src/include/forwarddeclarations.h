@@ -99,6 +99,15 @@ enum class DensityType {
   pion = 4,
 };
 
+/** The time step mode.
+ */
+enum class TimeStepMode : char {
+  /// Don't use time steps; propagate from action to action.
+  None,
+  /// Use fixed time step.
+  Fixed,
+};
+
 /** Initial condition for a particle in a box.
 *
 * If PeakedMomenta is used, all particles have the same momentum

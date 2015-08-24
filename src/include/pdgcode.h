@@ -248,6 +248,10 @@ class PdgCode {
   inline bool is_hadron() const {
     return (digits_.n_q3_ != 0 && digits_.n_q2_ != 0);
   }
+  /// returns true if this is a lepton.
+  inline bool is_lepton() const {
+    return (digits_.n_q1_ == 0 && digits_.n_q2_ == 0 && digits_.n_q3_ == 1);
+  }
   /// returns the baryon number of the particle.
   inline int baryon_number() const {
     if (!is_hadron() || digits_.n_q1_ == 0) {
@@ -263,6 +267,8 @@ class PdgCode {
   bool is_Deltastar() const;
   /// Is this a pion (pi+/pi0/pi-)?
   bool is_pion() const;
+  /// Is this a rho meson (rho+/rho0/rho-)?
+  bool is_rho() const;
 
   /** Determine whether a particle has a distinct antiparticle
     * (or whether it is its own antiparticle). */
@@ -719,10 +725,21 @@ std::ostream& operator<<(std::ostream& is, const PdgCode& code);
 
 /** Checks if two given particles represent a lepton pair (e+e- or mu+mu-). */
 inline bool is_dilepton(const PdgCode pdg1, const PdgCode pdg2) {
-  return (pdg1 ==  0x11 && pdg2 == -0x11) ||
-         (pdg1 == -0x11 && pdg2 ==  0x11) ||
-         (pdg1 ==  0x13 && pdg2 == -0x13) ||
-         (pdg1 == -0x13 && pdg2 ==  0x13);
+  const auto c1 = pdg1.code();
+  const auto c2 = pdg2.code();
+  const auto min = std::min(c1, c2);
+  const auto max = std::max(c1, c2);
+  return (max ==  0x11 && min == -0x11) ||
+         (max ==  0x13 && min == -0x13);
+}
+
+/** Checks if two of the three given particles represent a lepton pair
+ * (e+e- or mu+mu-).*/
+inline bool has_lepton_pair(const PdgCode pdg1, const PdgCode pdg2,
+                            const PdgCode pdg3) {
+  return is_dilepton(pdg1, pdg2) ||
+         is_dilepton(pdg1, pdg3) ||
+         is_dilepton(pdg2, pdg3);
 }
 
 }  // namespace Smash

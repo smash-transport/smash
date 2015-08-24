@@ -218,6 +218,32 @@ TEST(next_multiple) {
   ++labtime;  // t = +8.2
   COMPARE(labtime.next_multiple(interval), 9.1f) << labtime.current_time();
 }
+TEST(end_tick_on_multiple) {
+  Clock labtime(-1.4f, 0.4);
+  constexpr float interval = 1.3f;
+  labtime.end_tick_on_multiple(interval);
+  ++labtime;  // t = -1.3
+  COMPARE(labtime.current_time(), -interval) << labtime.timestep_duration();
+  labtime.reset(0.1f); // t = 0.1
+  labtime.end_tick_on_multiple(interval);
+  ++labtime;  // t = 1.3
+  COMPARE(labtime.current_time(), interval);
+  labtime.set_timestep_duration(0.2f);
+  VERIFY(labtime.multiple_is_in_next_tick(interval));
+  ++labtime; // t = 1.5
+  labtime.end_tick_on_multiple(interval);
+  ++labtime; // t = 2.6
+  COMPARE(labtime.current_time(), 2 * interval) << labtime.timestep_duration();
+  labtime.end_tick_on_multiple(interval);
+  ++labtime; // t = 3.9
+  COMPARE(labtime.current_time(), 3.9f) << labtime.timestep_duration();
+  labtime.end_tick_on_multiple(interval);
+  ++labtime; // t = 5.2
+  COMPARE(labtime.current_time(), 5.2f) << labtime.timestep_duration();
+  COMPARE(labtime.next_multiple(interval), 6.5f) << labtime.current_time();
+  labtime.set_timestep_duration(0.2f);
+  VERIFY(labtime.multiple_is_in_next_tick(interval));
+}
 
 TEST(longtime_test) {
   // this test is added after assessing Issue #697: At very long times,
@@ -258,20 +284,30 @@ TEST_CATCH(big_timestep_negative, std::range_error) {
   labtime += -0.8f;
 }
 
+TEST(no_overflow_single_increment) {
+  Clock labtime(0.0f, 1.0f);
+  labtime += (std::numeric_limits<Clock::Representation>::max() - 3);
+  ++labtime;
+  ++labtime;
+}
+
 TEST_CATCH(overflow_single_increment, std::overflow_error) {
   Clock labtime(0.0f, 1.0f);
   labtime += (std::numeric_limits<Clock::Representation>::max() - 3);
   ++labtime;
   ++labtime;
   ++labtime;
+}
+
+TEST(no_overflow_large_increment) {
+  Clock labtime(0.0f, 1.0f);
   ++labtime;
   ++labtime;
-  ++labtime;
+  labtime += (std::numeric_limits<Clock::Representation>::max() - 3);
 }
 
 TEST_CATCH(overflow_large_increment, std::overflow_error) {
   Clock labtime(0.0f, 1.0f);
-  ++labtime;
   ++labtime;
   ++labtime;
   ++labtime;

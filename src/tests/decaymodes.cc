@@ -60,9 +60,9 @@ TEST(load_decay_modes) {
 
   // check that the decays of the rho and omega are generated correctly
   {
-    const auto &rho0 = ParticleType::find(0x113).decay_modes();
-    VERIFY(!rho0.is_empty());
-    const auto &modelist = rho0.decay_mode_list();
+    const auto &rho_0 = ParticleType::find(0x113).decay_modes();
+    VERIFY(!rho_0.is_empty());
+    const auto &modelist = rho_0.decay_mode_list();
     COMPARE(modelist.size(), 3u);
     COMPARE(modelist[0]->weight(), 0.495f);
     COMPARE(modelist[0]->particle_number(), 2u);

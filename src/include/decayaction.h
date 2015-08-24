@@ -78,7 +78,7 @@ class DecayAction : public Action {
   /** total decay width */
   float total_width_;
 
- private:
+ protected:
   /**
    * Kinematics of a 1-to-2 decay process.
    *
@@ -93,7 +93,7 @@ class DecayAction : public Action {
    * Sample the masses and momenta of the decay products in the
    * center-of-momentum frame.
    */
-  void one_to_three();
+  virtual void one_to_three();
 };
 
 

@@ -146,6 +146,25 @@ TEST(hadron) {
   VERIFY(    proton.is_hadron());
   VERIFY( antidelta.is_hadron());
 }
+
+TEST(lepton) {
+  VERIFY(electron.is_lepton());
+  VERIFY(antimu.is_lepton());
+
+  VERIFY(!photon.is_lepton());
+  VERIFY(!pion.is_lepton());
+  VERIFY(!proton.is_lepton());
+}
+
+TEST(dilepton) {
+  VERIFY(is_dilepton(0x11, -0x11));
+  VERIFY(is_dilepton(-0x11, 0x11));
+  VERIFY(is_dilepton(0x13, -0x13));
+  VERIFY(!is_dilepton(0x11, 0x11));
+  VERIFY(!is_dilepton(-0x13, -0x13));
+  VERIFY(!is_dilepton(0x211, -0x211));
+}
+
 TEST(baryon_number) {
   COMPARE(   electron.baryon_number(),  0);
   COMPARE(     antimu.baryon_number(),  0);

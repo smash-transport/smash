@@ -61,6 +61,7 @@ class DecayType {
   virtual float in_width(float m0, float G0, float m,
                          float m1, float m2) const = 0;
 
+
  protected:
   /// final-state particles of the decay
   ParticleTypePtrList particle_types_;
@@ -179,6 +180,26 @@ class ThreeBodyDecay : public DecayType {
   float width(float m0, float G0, float m) const override;
   float in_width(float m0, float G0, float m,
                  float m1, float m2) const override;
+};
+
+/**
+ * ThreeBodyDecayDilepton represents a decay type with three final-state
+ * particles. Two of them are a dilepton.
+ */
+class ThreeBodyDecayDilepton : public ThreeBodyDecay {
+ public:
+  ThreeBodyDecayDilepton(ParticleTypePtrList part_types, int l);
+  /**
+   * Get the differential width for dilepton dalitz decay. Because we use the
+   * shining method, we do not need a partial width and can use the differential
+   * width directly for the shinin weights. The differential width is calculated
+   * according to PhD thesis Weil, eq. (30) - (36).
+   */
+  static float diff_width(float m_parent, float m_dil,
+                   float m_other, PdgCode pdg);
+  float width(float m0, float G0, float m) const override;
+ protected:
+  std::unique_ptr<Tabulation> tabulation_;
 };
 
 

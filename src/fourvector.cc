@@ -68,4 +68,5 @@ std::ostream& operator<<(std::ostream& out, const FourVector& vec) {
   return out << ')';
 }
 
+
 }  // namespace Smash

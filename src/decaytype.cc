@@ -7,6 +7,9 @@
 
 #include "include/decaytype.h"
 
+#include <math.h>
+
+#include "include/constants.h"
 #include "include/cxx14compat.h"
 #include "include/integrate.h"
 #include "include/kinematics.h"
@@ -61,7 +64,8 @@ static float BlattWeisskopf(const float p_ab, const int L)
 
 /**
  * An additional form factor for unstable final states as used in GiBUU,
- * according to M. Post. Reference: \iref{Buss:2011mx}, eq. (174).
+ * according to M. Post, see eq. (174) in \iref{Buss:2011mx} or eq. (13) in
+ * \iref{Post:2003hu}.
  *
  * \param m Actual mass of the decaying resonance [GeV].
  * \param M0 Pole mass of the decaying resonance [GeV].
@@ -85,7 +89,6 @@ static float Post_FF_sqr(float m, float M0, float srts0, float L) {
   const auto FF = (L4 + sminus*sminus) / (L4 + splus*splus);
   return FF*FF;
 }
-
 
 
 // TwoBodyDecay
@@ -176,10 +179,34 @@ static ParticleTypePtrList arrange_particles(ParticleTypePtrList part_types) {
   return part_types;
 }
 
+/**
+ * Determine the cutoff parameter Λ for semistable decays,
+ * given the types of the daughter particles.
+ *
+ * For the values used in GiBUU, see \iref{Buss:2011mx}, eq. (175).
+ * For the original values used by M. Post, see table 1 in \iref{Post:2003hu}.
+ *
+ * We mostly stick to the GiBUU values, but use a different value for the ρπ
+ * decay, in order to avoid secondary bumps in the ω spectral function and
+ * achieve a better normalization. In contrast to Smash, GiBUU does not have
+ * an ω → ρ π decay.
+ */
+static float get_Lambda(const ParticleTypePtr type_stable,
+                        const ParticleTypePtr type_unstable) {
+  if (type_unstable->baryon_number() != 0) {
+    return 2.;  // unstable baryons
+  } else if (type_unstable->pdgcode().is_rho() &&
+             type_stable->pdgcode().is_pion()) {
+    return 0.8;  // ρ+π
+  } else {
+    return 1.6;  // other unstable mesons
+  }
+}
+
 TwoBodyDecaySemistable::TwoBodyDecaySemistable(ParticleTypePtrList part_types,
                                                int l)
   : TwoBodyDecay(arrange_particles(part_types), l),
-    Lambda_((particle_types_[1]->baryon_number() != 0) ? 2.0 : 1.6),
+    Lambda_(get_Lambda(particle_types_[0], particle_types_[1])),
     tabulation_(nullptr)
 {}
 
@@ -297,5 +324,162 @@ float ThreeBodyDecay::in_width(float, float G0, float, float, float) const {
   return G0;  // use on-shell width
 }
 
+// ThreeBodyDecayDilepton
+
+ThreeBodyDecayDilepton::ThreeBodyDecayDilepton(ParticleTypePtrList part_types,
+                                           int l)
+                         : ThreeBodyDecay(part_types, l), tabulation_(nullptr) {
+  if (!has_lepton_pair(particle_types_[0]->pdgcode(),
+                       particle_types_[1]->pdgcode(),
+                       particle_types_[2]->pdgcode())) {
+    throw std::runtime_error(
+     "Error: No dilepton in ThreeBodyDecayDilepton constructor: " +
+     part_types[0]->pdgcode().string() + " " +
+     part_types[1]->pdgcode().string() + " " +
+     part_types[2]->pdgcode().string());
+  }
+}
+
+// Little helper functions for the form factor of the dilepton dalitz decays
+
+static float form_factor_pi(float mass) {
+  /// see \iref{Landsberg:1986fd}
+  return 1.+5.5*mass*mass;
+}
+
+static float form_factor_eta(float mass) {
+  /// for lamda_eta values see B. Spruck, Ph.D. thesis
+  /// http://geb.uni-giessen.de/geb/volltexte/2008/6667/
+  const float lambda_eta = 0.676;
+  return 1./(1.-(mass*mass/lambda_eta));
+}
+
+static float form_factor_sqr_omega(float mass) {
+  float lambda = 0.65;
+  float gamma_w = 0.075;
+  float n = pow(lambda*lambda - mass*mass, 2.) +
+             lambda*gamma_w * lambda*gamma_w;
+  return pow(lambda, 4.) / n;
+}
+
+static float form_factor_sqr_delta(float) {
+  /// ongoing debate, assumed mass-independent, normalized at real photon mass
+  return 3.12;
+}
+
+
+float ThreeBodyDecayDilepton::diff_width(float m_par, float m_dil,
+                                             float m_other, PdgCode pdg) {
+  if (m_par < m_dil + m_other) {
+    return 0;
+  } else {
+    float gamma = 0.0;
+    // abbreviations
+    const float m_dil_sqr = m_dil * m_dil;
+    const float m_par_sqr = m_par * m_par;
+    const float m_par_cubed = m_par * m_par*m_par;
+    const float m_other_sqr = m_other*m_other;
+
+    switch (pdg.code()) {
+      case 0x111: /*pi0*/ {
+        /// see \iref{Landsberg:1986fd}
+        gamma = 7.6e-9;
+        const float ff = form_factor_pi(m_dil);
+        return (alpha*4./(3.*M_PI)) * gamma/m_dil *
+                                    pow(1.-m_dil/m_par*m_dil/m_par, 3.) * ff*ff;
+      }
+      case 0x221: /*eta*/ {
+        /// see \iref{Landsberg:1986fd}
+        gamma = 52e-8;
+        const float ff = form_factor_eta(m_dil);
+        return (4.*alpha/(3.*M_PI)) * gamma/m_dil *
+                                    pow(1.-m_dil/m_par*m_dil/m_par, 3.) * ff*ff;
+      }
+      case 0x223: /*omega*/ {
+        /// see \iref{Effenberg:1999nia} and \iref{Bratkovskaya:1996qe}
+        gamma = 0.703e-3;
+        const float n1 = (m_par_sqr - m_other_sqr);
+        const float n2 = ((m_par_sqr -m_other_sqr)*(m_par_sqr -m_other_sqr));
+        const float rad = pow(1+ m_dil_sqr / n1, 2.)  -
+                          4*m_par_sqr*m_dil_sqr / n2;
+        return (2.*alpha/(3.*M_PI))  *  gamma/m_dil  *   pow(sqrt(rad), 3.) *
+                                                   form_factor_sqr_omega(m_dil);
+      }
+      case 0x2214: case 0x2114: /* Delta+ and Delta0 */ {
+        /// see \iref{Krivoruchenko:2001hs}
+        const float rad1 = (m_par+m_other)*(m_par+m_other) - m_dil_sqr;
+        const float rad2 = (m_par-m_other)*(m_par-m_other) - m_dil_sqr;
+        const float t1 = alpha/16. *
+                   (m_par+m_other)*(m_par+m_other)/(m_par_cubed*m_other_sqr) *
+                   std::sqrt(rad1);
+        const float t2 =
+              pow(std::sqrt(rad2), 3.0);
+        const float gamma_vi = t1 * t2 * form_factor_sqr_delta(m_dil);
+        return 2.*alpha/(3.*M_PI) * gamma_vi/m_dil;
+      }
+      default:
+        throw std::runtime_error("Error in ThreeBodyDecayDilepton");
+    }
+  }  // else
+}
+
+float ThreeBodyDecayDilepton::width(float, float G0, float m) const {
+  PdgCode pdg_par;
+  int non_lepton_position = -1;
+
+  for (int i = 0; i < 3; ++i) {
+    if (particle_types_[i]->pdgcode() == 0x111) {
+      pdg_par = 0x223;  // only omega decays into a lepton pair and a pi0
+      non_lepton_position = i;
+      break;
+    }
+    if (particle_types_[i]->pdgcode() == 0x2212) {
+      pdg_par = 0x2214;  // only Delta+ decays into a lepton pair and a proton
+      non_lepton_position = i;
+      break;
+    }
+    if (particle_types_[i]->pdgcode() == 0x2112) {
+      pdg_par = 0x2114;  // only Delta0 decays into a lepton pair and a neutron
+      non_lepton_position = i;
+      break;
+    }
+    if (particle_types_[i]->pdgcode() == 0x22) {
+      // Only eta and pi0 decay into lepton pair and a photon. We assume here
+      // that their width is on-shell.
+      return G0;
+    }
+  }
+
+  if (pdg_par == 0x0 || non_lepton_position == -1) {
+    throw std::runtime_error("Error unsupported Dalitz Dilepton Decay");
+  }
+
+  // lepton mass
+  const float m_l = particle_types_[(non_lepton_position+1)%3]->mass();
+  // mass of non-leptonic particle in final state
+  const float m_other = particle_types_[non_lepton_position]->mass();
+
+  // integrate differential width to obtain partial width
+  if (tabulation_ == nullptr) {
+    const_cast<ThreeBodyDecayDilepton*>(this)->tabulation_
+          = make_unique<Tabulation>(
+              m_other+2*m_l, 10*G0, 60,
+              [&](float m_parent) {
+                const float bottom = 2*m_l;
+                const float top = m_parent-m_other;
+                if (top < bottom) {  // numerical problems at lower bound
+                  return 0.0;
+                }
+                Integrator integrate;
+                return integrate(bottom, top,
+                               [&](float srts) {
+                                  return diff_width(m_parent, srts,
+                                                    m_other,
+                                                    pdg_par);
+                                }).value();
+                });
+  }
+  return tabulation_->get_value_linear(m);
+}
 
 }  // namespace Smash

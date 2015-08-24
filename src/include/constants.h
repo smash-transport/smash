@@ -40,6 +40,11 @@ constexpr float nuclear_density = 0.168;
  */
 constexpr float nucleon_mass = 0.938;
 /**
+ * Fine-struture constant, approximately 1/137
+ */
+constexpr double alpha = 7.2973525698e-3;
+
+/**
  * The maximal cross section (in mb) for which it is guaranteed that all
  * collisions with this cross section will be found.
  *

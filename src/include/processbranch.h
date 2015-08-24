@@ -198,10 +198,10 @@ class CollisionBranch : public ProcessBranch {
    * be more efficient.
    */
   ParticleTypePtrList particle_types_;
-  /** 
-   * Process type are used to distinguish different types of processes, 
-   * e.g. string formation, resonance formation, elastic scattering and so on. 
-   *  
+  /**
+   * Process type are used to distinguish different types of processes,
+   * e.g. string formation, resonance formation, elastic scattering and so on.
+   *
    */
   ProcessType process_type_;
 };

@@ -11,8 +11,8 @@
 #include <stdexcept>
 #include <vector>
 
-#include "forwarddeclarations.h"
 #include "action.h"
+#include "forwarddeclarations.h"
 
 namespace Smash {
 

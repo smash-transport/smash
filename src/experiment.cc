@@ -120,8 +120,8 @@ std::unique_ptr<ExperimentBase> ExperimentBase::create(Configuration config,
                   << "periodic boundaries are not taken into account "
                   << "in the density calculation";
     }
-    if (config.has_value({"General", "Use_Time_Steps"}) &&
-        !config.read({"General", "Use_Time_Steps"})) {
+    if (config.has_value({"General", "Time_Step_Mode"}) &&
+        config.read({"General", "Time_Step_Mode"}) == TimeStepMode::None) {
       log.error() << "Box modus does not work correctly without time steps for "
                   << "now: periodic boundaries are not taken into account when "
                   << "looking for interactions.";
@@ -200,11 +200,14 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
  */
 template <typename Modus>
 std::ostream &operator<<(std::ostream &out, const Experiment<Modus> &e) {
-  if (e.use_time_steps_) {
-    out << "Starting with temporal stepsize: "
-        << e.parameters_.timestep_duration() << " fm/c\n";
-  } else {
-    out << "Not using time steps\n";
+  switch (e.time_step_mode_) {
+    case TimeStepMode::None:
+      out << "Not using time steps\n";
+      break;
+    case TimeStepMode::Fixed:
+      out << "Using fixed time step size: "
+          << e.parameters_.timestep_duration() << " fm/c\n";
+      break;
   }
   out << "End time: " << e.end_time_ << " fm/c\n";
   out << e.modus_;
@@ -250,7 +253,8 @@ Experiment<Modus>::Experiment(Configuration config, bf::path output_path)
       force_decays_(
           config.take({"Collision_Term", "Force_Decays_At_End"}, true)),
       use_grid_(config.take({"General", "Use_Grid"}, true)),
-      use_time_steps_(config.take({"General", "Use_Time_Steps"}, true)) {
+      time_step_mode_(
+          config.take({"General", "Time_Step_Mode"}, TimeStepMode::Fixed)) {
   const auto &log = logger<LogArea::Experiment>();
   log.info() << *this;
 
@@ -359,7 +363,7 @@ Experiment<Modus>::Experiment(Configuration config, bf::path output_path)
   if (static_cast<bool>(output_conf.take({"Root", "Enable"}))) {
 #ifdef SMASH_USE_ROOT
     outputs_.emplace_back(new RootOutput(
-                              output_path, output_conf["Root"]));
+                              output_path, std::move(output_conf["Root"])));
 #else
     log.error() << "You requested Root output, but Root support has not been "
                     "compiled in. To enable Root support call: cmake -D "
@@ -381,6 +385,10 @@ Experiment<Modus>::Experiment(Configuration config, bf::path output_path)
   }
 
   if (config.has_value({"Potentials"})) {
+    if (time_step_mode_ == TimeStepMode::None) {
+      log.error() << "Potentials only work with time steps!";
+      throw std::invalid_argument("Can't use potentials without time steps!");
+    }
     log.info() << "Potentials are ON.";
     // potentials need testparticles and gaussian sigma from parameters_
     potentials_ = make_unique<Potentials>(config["Potentials"], parameters_);
@@ -583,9 +591,13 @@ size_t Experiment<Modus>::run_time_evolution_without_time_steps(
   modus_.impose_boundary_conditions(&particles_);
   size_t interactions_total = 0, previous_interactions_total = 0,
          total_pauli_blocked = 0;
-  log.info() << format_measurements(
-      particles_, interactions_total, 0u,
-      conserved_initial_, time_start_, parameters_.labclock.current_time());
+
+  // if no output is scheduled, trigger it manually
+  if (!parameters_.is_output_time()) {
+    log.info() << format_measurements(
+        particles_, interactions_total, 0u,
+        conserved_initial_, time_start_, parameters_.labclock.current_time());
+  }
 
   const float start_time = parameters_.labclock.current_time();
   float time_left = end_time_ - start_time;
@@ -629,23 +641,20 @@ size_t Experiment<Modus>::run_time_evolution_without_time_steps(
       // check if we need to do the intermediate output in the time until the
       // next action
       if (parameters_.need_intermediate_output()) {
-        // we now set the clock to the output time and propagate the particles
-        // until that time; then we do the output
-        const float output_time =
-            parameters_.labclock.next_multiple(parameters_.output_interval);
-        parameters_.labclock.set_timestep_duration(
-            output_time - parameters_.labclock.current_time());
-        parameters_.labclock.reset(output_time);
-        propagate_straight_line(&particles_, parameters_);
-        modus_.impose_boundary_conditions(&particles_, outputs_);
-
+        if (!parameters_.is_output_time()) {
+          // we now set the clock to the output time and propagate the particles
+          // until that time; then we do the output
+          parameters_.set_timestep_for_next_output();
+          ++parameters_.labclock;
+          propagate_all();
+          // after the output, the particles need to be propagated until the
+          // action time
+          const float remaining_dt =
+              action_time - parameters_.labclock.current_time();
+          parameters_.labclock.set_timestep_duration(remaining_dt);
+        }
         intermediate_output(evt_num, interactions_total,
                             previous_interactions_total);
-
-        // after the output, the particles need to be propagated until the
-        // action time
-        const float remaining_dt = action_time - output_time;
-        parameters_.labclock.set_timestep_duration(remaining_dt);
       }
 
       // set the clock manually instead of advancing it with the time step
@@ -653,8 +662,7 @@ size_t Experiment<Modus>::run_time_evolution_without_time_steps(
       parameters_.labclock.reset(action_time);
       current_time = action_time;
 
-      propagate_straight_line(&particles_, parameters_);
-      modus_.impose_boundary_conditions(&particles_, outputs_);
+      propagate_all();
     } else {
       // otherwise just keep the current time
       current_time = parameters_.labclock.current_time();
@@ -690,13 +698,22 @@ size_t Experiment<Modus>::run_time_evolution_without_time_steps(
           outgoing_particles, particles_, time_left));
     }
   }
+  // check if a final intermediate output is needed
+  parameters_.labclock.end_tick_on_multiple(end_time_);
+  ++parameters_.labclock;
+  if (parameters_.is_output_time()) {
+    propagate_all();
+    intermediate_output(evt_num, interactions_total,
+                        previous_interactions_total);
+  }
   return interactions_total;
 }
 
 /* This is the loop over timesteps, carrying out collisions and decays
  * and propagating particles. */
 template <typename Modus>
-size_t Experiment<Modus>::run_time_evolution(const int evt_num) {
+size_t Experiment<Modus>::run_time_evolution_fixed_time_step(
+    const int evt_num) {
   const auto &log = logger<LogArea::Experiment>();
   modus_.impose_boundary_conditions(&particles_);
   size_t interactions_total = 0, previous_interactions_total = 0,
@@ -763,16 +780,7 @@ size_t Experiment<Modus>::run_time_evolution(const int evt_num) {
     modus_.impose_boundary_conditions(&particles_);
 
     /* (3) Do propagation. */
-    if (potentials_) {
-      update_density_lattice(jmu_B_lat_.get(), LatticeUpdate::EveryTimestep,
-                       DensityType::baryon, parameters_, particles_);
-      update_density_lattice(jmu_I3_lat_.get(), LatticeUpdate::EveryTimestep,
-                       DensityType::baryonic_isospin, parameters_, particles_);
-      propagate(&particles_, parameters_, *potentials_);
-    } else {
-      propagate_straight_line(&particles_, parameters_);
-    }
-    modus_.impose_boundary_conditions(&particles_, outputs_);
+    propagate_all();
 
     /* (4) Physics output during the run. */
     // if the timestep of labclock is different in the next tick than
@@ -840,6 +848,20 @@ void Experiment<Modus>::intermediate_output(const int evt_num,
                                                                   evt_num);
     }
   }
+}
+
+template <typename Modus>
+void Experiment<Modus>::propagate_all() {
+  if (potentials_) {
+    update_density_lattice(jmu_B_lat_.get(), LatticeUpdate::EveryTimestep,
+                     DensityType::baryon, parameters_, particles_);
+    update_density_lattice(jmu_I3_lat_.get(), LatticeUpdate::EveryTimestep,
+                     DensityType::baryonic_isospin, parameters_, particles_);
+    propagate(&particles_, parameters_, *potentials_);
+  } else {
+    propagate_straight_line(&particles_, parameters_);
+  }
+  modus_.impose_boundary_conditions(&particles_, outputs_);
 }
 
 template <typename Modus>
@@ -925,9 +947,16 @@ void Experiment<Modus>::run() {
     }
 
     /* the time evolution of the relevant subsystem */
-    size_t interactions_total = use_time_steps_
-                                    ? run_time_evolution(j)
-                                    : run_time_evolution_without_time_steps(j);
+    size_t interactions_total;
+    switch (time_step_mode_) {
+      case TimeStepMode::None:
+        interactions_total = run_time_evolution_without_time_steps(j);
+        break;
+      case TimeStepMode::Fixed:
+        interactions_total = run_time_evolution_fixed_time_step(j);
+        break;
+    }
+
     if (force_decays_) {
       do_final_decays(interactions_total);
     }

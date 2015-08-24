@@ -275,6 +275,19 @@ class Configuration {
                                       "or \"baryonic isospin\" or \"pion\".");
     }
 
+    operator TimeStepMode() {
+      std::string s = operator std::string();
+      if (s == "None") {
+        return TimeStepMode::None;
+      }
+      if (s == "Fixed") {
+        return TimeStepMode::Fixed;
+      }
+      throw IncorrectTypeInAssignment(
+          "The value for key \"" + std::string(key_) +
+          "\" should be \"None\" or \"Fixed\".");
+    }
+
     operator BoxInitialCondition() {
       std::string s = operator std::string();
       if (s == "thermal momenta") {
@@ -330,7 +343,7 @@ class Configuration {
    * actual SMASH code. The intention is to avoid creating a mock object for
    * Configuration to test other classes of SMASH.
    */
-  Configuration(const char *yaml) : root_node_(YAML::Load(yaml)) {}
+  explicit Configuration(const char *yaml) : root_node_(YAML::Load(yaml)) {}
 #endif
 
   /// if you want to copy this you're doing it wrong
