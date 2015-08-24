@@ -21,16 +21,14 @@ find_package(Eigen3 REQUIRED)
 find_package(Boost 1.49.0 REQUIRED COMPONENTS filesystem system)
 pkg_check_modules(YAML REQUIRED yaml-cpp>=0.5.1)
 
-option(USE_ROOT "Turn this on to build ROOT output support into SMASH." OFF)
+option(USE_ROOT "Turn this off to disable ROOT output support in SMASH." ON)
 if(USE_ROOT)
-   find_package(ROOT 5.34 REQUIRED)
-   include_directories(SYSTEM
-      "${ROOT_INCLUDE_DIR}"
-      )
-   set(SMASH_LIBRARIES
-      ${ROOT_LIBRARIES}
-      )
-   add_definitions(-DSMASH_USE_ROOT)
+  find_package(ROOT 5.34)
+  if(ROOT_FOUND)
+    include_directories(SYSTEM "${ROOT_INCLUDE_DIR}")
+    set(SMASH_LIBRARIES ${ROOT_LIBRARIES})
+    add_definitions(-DSMASH_USE_ROOT)
+  endif()
 endif()
 
 # set up include paths
@@ -110,10 +108,8 @@ set(smash_src
         vtkoutput.cc
         )
 
-if(USE_ROOT)
-   set(smash_src ${smash_src}
-      rootoutput.cc
-      )
+if(USE_ROOT AND ROOT_FOUND)
+  set(smash_src ${smash_src} rootoutput.cc)
 endif()
 
 add_executable(smash smash.cc ${smash_src})

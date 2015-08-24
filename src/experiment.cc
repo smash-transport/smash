@@ -362,8 +362,7 @@ Experiment<Modus>::Experiment(Configuration config, bf::path output_path)
                               output_path, std::move(output_conf["Root"])));
 #else
     log.error() << "You requested Root output, but Root support has not been "
-                    "compiled in. To enable Root support call: cmake -D "
-                    "USE_ROOT=ON <path>.";
+                    "compiled in.";
     output_conf.take({"Root"});
 #endif
   } else {

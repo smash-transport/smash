@@ -13,17 +13,21 @@ required C++11 features):
 
 It requires the following tools & libraries:
 - cmake
-- the GNU Scientific Library.
+- the GNU Scientific Library
 - the Eigen library for linear algebra (see http://eigen.tuxfamily.org)
 - boost filesystem >= 1.49
 - yaml-cpp 0.5.1 (see below if you need to install manually)
 
 Further tools that can be helpful (mainly for development):
-- ROOT
-- doxygen
+- ROOT >= 5.34
+- doxygen >= 1.8.4
 - valgrind
 - cpplint
 - cppcheck
+
+Support for ROOT output is only enabled if a suitable version of ROOT is found
+on the system.
+
 
 Building SMASH
 --------------
@@ -55,15 +59,14 @@ Alternatively the compiler can also be specified to cmake like this:
     cmake .. -DCMAKE_CXX_COMPILER=g++
 
 
-Compiling with ROOT support
+Disabling ROOT support
 ---------------------------
 
 Producing ROOT output requires ROOT installed (see http://root.cern.ch).
-SMASH philosophy is being a self-contained software, so by default SMASH does
-not need ROOT to compile and run. To produce ROOT output one has to compile
-SMASH in a special way:
+If ROOT is found, the support for ROOT output is automatically enabled.
+In order to disable it, one can do the follwoing:
 
-    cmake -D USE_ROOT=ON <source_dir>
+    cmake -D USE_ROOT=OFF <source_dir>
     make
 
 Building the Documentation

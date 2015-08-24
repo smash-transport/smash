@@ -78,13 +78,6 @@ RootOutput::RootOutput(bf::path path, Configuration&& conf)
    * enough to read, write root-file and understand its view in TBrowser.
    *
    * Producing ROOT output requires ROOT installed (see http://root.cern.ch).
-   * SMASH philosophy is being a self-contained software, so by default SMASH
-   * does not need ROOT to compile and run. To produce ROOT output one has to
-   * compile SMASH in a special way:
-   * \code
-   * cmake -D USE_ROOT=ON <source_dir>
-   * make
-   * \endcode
    *
    * SMASH produces one root file per run: \c smash_run.root. This file
    * contains TTree called \c particles and a TTree \c collisions.
