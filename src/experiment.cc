@@ -712,7 +712,8 @@ size_t Experiment<Modus>::run_time_evolution_without_time_steps(
 /* This is the loop over timesteps, carrying out collisions and decays
  * and propagating particles. */
 template <typename Modus>
-size_t Experiment<Modus>::run_time_evolution(const int evt_num) {
+size_t Experiment<Modus>::run_time_evolution_fixed_time_step(
+    const int evt_num) {
   const auto &log = logger<LogArea::Experiment>();
   modus_.impose_boundary_conditions(&particles_);
   size_t interactions_total = 0, previous_interactions_total = 0,
@@ -952,7 +953,7 @@ void Experiment<Modus>::run() {
         interactions_total = run_time_evolution_without_time_steps(j);
         break;
       case TimeStepMode::Fixed:
-        interactions_total = run_time_evolution(j);
+        interactions_total = run_time_evolution_fixed_time_step(j);
         break;
     }
 
