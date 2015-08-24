@@ -275,6 +275,19 @@ class Configuration {
                                       "or \"baryonic isospin\" or \"pion\".");
     }
 
+    operator TimeStepMode() {
+      std::string s = operator std::string();
+      if (s == "None") {
+        return TimeStepMode::None;
+      }
+      if (s == "Fixed") {
+        return TimeStepMode::Fixed;
+      }
+      throw IncorrectTypeInAssignment(
+          "The value for key \"" + std::string(key_) +
+          "\" should be \"None\" or \"Fixed\".");
+    }
+
     operator BoxInitialCondition() {
       std::string s = operator std::string();
       if (s == "thermal momenta") {
