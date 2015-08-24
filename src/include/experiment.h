@@ -8,6 +8,7 @@
 #define SRC_INCLUDE_EXPERIMENT_H_
 
 #include "actionfinderfactory.h"
+#include "adaptiveparameters.h"
 #include "chrono.h"
 #include "pauliblocking.h"
 #include "potentials.h"

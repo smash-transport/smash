@@ -23,8 +23,8 @@ General:
     # additional parameters for the adaptive time step mode
     #Adaptive_Time_Step:
     #    Smoothing_Factor:       0.1
-    #    Target_Missed_Actions:  0.1
-    #    Allowed_Deviation:      3
+    #    Target_Missed_Actions:  0.01
+    #    Allowed_Deviation:      2.5
 
     # temporal grid spacing
     Delta_Time:    0.1

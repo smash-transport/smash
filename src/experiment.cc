@@ -279,10 +279,14 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
         config.take({"General", "Adaptive_Time_Step", "Smoothing_Factor"});
     float target_missed_actions =
         config.take({"General", "Adaptive_Time_Step", "Target_Missed_Actions"});
-    float allowed_deviation =
+    float deviation_factor =
         config.take({"General", "Adaptive_Time_Step", "Allowed_Deviation"});
     adaptive_parameters_ = make_unique<AdaptiveParameters>(
-        smoothing_factor, target_missed_actions, allowed_deviation);
+        smoothing_factor, target_missed_actions, deviation_factor);
+    log.info() << "Smoothing factor: " << smoothing_factor;
+    log.info() << "Target missed actions: "
+               << 100 * target_missed_actions << "%";
+    log.info() << "Allowed deviation: " << deviation_factor;
   }
 
   // create outputs
@@ -868,7 +872,7 @@ size_t Experiment<Modus>::run_time_evolution_adaptive_time_steps(
   modus_.impose_boundary_conditions(&particles_);
   size_t interactions_total = 0, previous_interactions_total = 0,
          total_pauli_blocked = 0;
-  float rate = 0.f;
+  bool observed_first_action = false;
 
   // if there is no output scheduled at the beginning, trigger it manually
   if (!parameters_.is_output_time()) {
@@ -877,15 +881,19 @@ size_t Experiment<Modus>::run_time_evolution_adaptive_time_steps(
         conserved_initial_, time_start_, parameters_.labclock.current_time());
   }
 
+  float rate =
+      adaptive_parameters.rate_from_dt(parameters_.timestep_duration());
   Actions actions;
   while (parameters_.labclock.current_time() < end_time_) {
     if (parameters_.labclock.next_time() > end_time_) {
       // set the time step size such that we stop at end_time_
       parameters_.labclock.end_tick_on_multiple(end_time_);
     }
+    float dt = parameters_.timestep_duration();
     /* (1.a) Create grid. */
-    const auto &grid =
-        modus_.create_grid(particles_, parameters_.testparticles);
+    const float min_cell_length =
+        ScatterActionsFinder::min_cell_length(parameters_.testparticles, dt);
+    const auto &grid = modus_.create_grid(particles_, min_cell_length);
 
     /* (1.b) Iterate over cells and find actions. */
     grid.iterate_cells([&](const ParticleList &search_list) {
@@ -904,46 +912,41 @@ size_t Experiment<Modus>::run_time_evolution_adaptive_time_steps(
                        });
 
     /* (2) Calculate time step size. */
-    const float n_actions =
-        static_cast<float>(actions.size()) / particles_.size();
-    const float missed_actions = 2.f * n_actions;
-    float dt = parameters_.timestep_duration();
-    const float current_rate = n_actions / dt;
+    log_ad_ts.debug() << hline;
+    if (!observed_first_action && actions.size() > 0u) {
+      log_ad_ts.debug("First interaction.");
+      observed_first_action = true;
+    }
 
     bool end_early = false;
-    // check if the current rate is approximately what we expected
-    // If dt was determined by dt = target_act_num/rate then the following check
-    // is equivalent to (current_act_num > allowed_deviation * target_act_num).
-    // It is not equivalent at the beginning of the event where dt still has the
-    // default value.
-    if (current_rate > adaptive_parameters.allowed_deviation * rate) {
-      // rate is much higher than in the previous time step
-      // reset the value
-      rate = 0.5f * (current_rate + rate);
-
-      // check if we're still below the target
-      if (missed_actions > adaptive_parameters.target_missed_actions) {
-        // we're not below the target, so end the time step early
+    if (observed_first_action) {
+      float fraction_missed;
+      float allowed_deviation;
+      std::tie(fraction_missed, allowed_deviation) =
+          adaptive_parameters.calc_missed_actions_allowed_deviation(
+              actions, rate, particles_.size());
+      const float current_rate = fraction_missed / dt;
+      const float rate_deviation = current_rate - rate;
+      // check if the current rate deviates too strongly from the expected value
+      if (rate_deviation > allowed_deviation) {
+        log_ad_ts.debug("End time step early.");
         end_early = true;
-        dt = adaptive_parameters.new_dt(rate);
-        parameters_.labclock.set_timestep_duration(dt);
+        parameters_.labclock.set_timestep_duration(
+            adaptive_parameters.new_dt(current_rate));
       }
-    } else {
-      // the current rate is close to what we predicted
-      // update the estimate
-      rate += adaptive_parameters.smoothing_factor * (current_rate - rate);
-
-      // calculate a new time step size only if the rate is non-zero
-      if (rate > really_small) {
-        dt = adaptive_parameters.new_dt(rate);
-      }
+      // update the estimate of the rate
+      rate += adaptive_parameters.smoothing_factor * rate_deviation;
+      // set the size of the next time step
+      dt = adaptive_parameters.new_dt(rate);
     }
-    log_ad_ts.debug() << hline;
-    log_ad_ts.debug() << "Averaged rate: " << rate;
-    log_ad_ts.debug() << "Time step size: "
-                      << parameters_.labclock.timestep_duration();
-    log_ad_ts.debug() << "Number of actions this time step: "
-                      <<  n_actions;
+
+    if (!observed_first_action) {
+      log_ad_ts.debug("Averaged rate: ", 0.f);
+    } else {
+      log_ad_ts.debug("Averaged rate: ", rate);
+    }
+    log_ad_ts.debug("Time step size: ",
+                    parameters_.labclock.timestep_duration());
 
     /* (3) Physics output during the run. */
     if (parameters_.need_intermediate_output()) {
@@ -994,9 +997,7 @@ size_t Experiment<Modus>::run_time_evolution_adaptive_time_steps(
         if (end_early &&
             action->time_of_execution() > parameters_.labclock.current_time()) {
           actions.clear();
-          log_ad_ts.debug("time step was ended early");
-          log_ad_ts.debug() << "Current time: "
-                            << parameters_.labclock.current_time();
+          log_ad_ts.debug("Actions discarded because of early ending.");
           break;
         }
         perform_action(action, interactions_total, total_pauli_blocked,
