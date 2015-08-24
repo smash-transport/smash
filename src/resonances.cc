@@ -54,9 +54,9 @@ float sample_resonance_mass(const ParticleType &type_res,
   const float pcm_max = pCM(cms_energy, mass_stable, type_res.minimum_mass());
   /* The maximum of the spectral-function ratio 'usually' happens at the
    * largest mass. However, this is not always the case, therefore we need
-   * an additional fudge factor (empirically 2.5 happens to be sufficient). */
+   * an additional fudge factor (empirically 3.0 happens to be sufficient). */
   const float q_max = type_res.spectral_function(max_mass)
-                    / type_res.spectral_function_simple(max_mass) * 2.5;
+                    / type_res.spectral_function_simple(max_mass) * 3.0;
   const float max = pcm_max * q_max;  // maximum value for rejection sampling
   float mass_res, pcm, q;
   // Loop: rejection sampling
