@@ -166,7 +166,7 @@ TEST(smearing_factor_normalization) {
     int_rho_r_d3r += node.density();
   }
   int_rho_r_d3r *= L*L*L/n[0]/n[1]/n[2]/N;
-  COMPARE_RELATIVE_ERROR(int_rho_r_d3r, 1.0, 2.e-6);
+  COMPARE_RELATIVE_ERROR(int_rho_r_d3r, 1.0, 3.e-6);
 }
 
 TEST(smearing_factor_rcut_correction) {
