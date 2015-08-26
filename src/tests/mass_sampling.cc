@@ -7,6 +7,7 @@
 
 #include "unittest.h"
 #include "setup.h"
+#include "histogram.h"
 
 #include "../include/particletype.h"
 #include "../include/decaymodes.h"
@@ -44,9 +45,8 @@ TEST(omega_decay) {
   const auto act = make_unique<DecayAction>(omega, 0.f);
   act->add_decays(type_omega.get_partial_widths_hadronic(omega.effective_mass()));
 
-  // histogram
-  std::map<int, int> hist{};
   const float dm = 0.001;  // bin size
+  Histogram1d hist(dm);    // histogram
 
   // sample the final state threlve gazillion times
   const int N_samples = 1E7;
@@ -62,16 +62,9 @@ TEST(omega_decay) {
     } else if (!fs[0].type().pdgcode().is_pion()) {
       m = fs[0].effective_mass();
     }
-    ++hist[m/dm];
+    hist.add(m);
   }
 
   // print out the histogram
-  std::FILE *file = std::fopen("mass_sampling.dat", "w");
-  for (auto b : hist) {
-    const double m = dm * b.first;         // mass bin
-    const int result = b.second;           // number of counts
-    const double stat_err = sqrt(result);  // statistical error is sqrt(N)
-    fprintf(file, "%7.3f %7d %7.3f\n", m, result, stat_err);
-  }
-  std::fclose(file);
+  hist.print_to_file("mass_sampling.dat");
 }
