@@ -525,11 +525,13 @@ void Experiment<Modus>::perform_action(
     action->perform(&particles_, interactions_total);
     const ParticleList outgoing_particles = action->outgoing_particles();
     // Calculate Eckart rest frame density at the interaction point
-    const FourVector r_interaction = action->get_interaction_point();
-    constexpr bool compute_grad = false;
-    const double rho =
-        rho_eckart(r_interaction.threevec(), particles_before_actions,
-                   parameters_, dens_type_, compute_grad).first;
+    double rho = 0.0;
+    if (dens_type_ != DensityType::none) {
+      const FourVector r_interaction = action->get_interaction_point();
+      constexpr bool compute_grad = false;
+      rho = rho_eckart(r_interaction.threevec(), particles_before_actions,
+                       parameters_, dens_type_, compute_grad).first;
+    }
     /*!\Userguide
      * \page collisions_output_in_box_modus_ Collision output in box modus
      * \note When SMASH is running in the box modus, particle coordinates

@@ -269,6 +269,9 @@ class Configuration {
       if (s == "pion") {
         return DensityType::pion;
       }
+      if (s == "none") {
+        return DensityType::none;
+      }
       throw IncorrectTypeInAssignment("The value for key \"" +
                                       std::string(key_) +
                                       "\" should be \"hadron\" or \"baryon\" "

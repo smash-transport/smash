@@ -200,6 +200,9 @@ std::ostream& operator<<(std::ostream& os, DensityType dens_type) {
     case DensityType::pion:
       os << "pion density";
       break;
+    case DensityType::none:
+      os << "none";
+      break;
     default:
       os.setstate(std::ios_base::failbit);
   }
