@@ -114,7 +114,7 @@ double sample_momenta_from_thermal(const double temperature,
   float r0, r1, r2, r3, a, b, c;
   float K, I1, I2, I3, Itot;
   // when temperature/mass
-  if ( temperature/mass > 0.6f ) {
+  if ( temperature > 0.6f*mass ) {
     while ( true ) {
       r1 = Random::canonical();
       r2 = Random::canonical();
