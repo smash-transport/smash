@@ -269,10 +269,14 @@ class Configuration {
       if (s == "pion") {
         return DensityType::pion;
       }
+      if (s == "none") {
+        return DensityType::none;
+      }
       throw IncorrectTypeInAssignment("The value for key \"" +
                                       std::string(key_) +
                                       "\" should be \"hadron\" or \"baryon\" "
-                                      "or \"baryonic isospin\" or \"pion\".");
+                                      "or \"baryonic isospin\" or \"pion\" "
+                                      "or \"none\".");
     }
 
     operator TimeStepMode() {

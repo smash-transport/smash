@@ -162,13 +162,14 @@ namespace {
  * system in Standard Output and other output formats which support this
  * functionality.
  *
- * \key Density_Type (string, optional, default = "hadron"): \n
+ * \key Density_Type (string, optional, default = "none"): \n
  * Determines which kind of density is written into the collision files.
  * Possible values:\n
  * \li "hadron"           - total hadronic density \n
  * \li "baryon"           - net baryon density \n
  * \li "baryonic isospin" - baryonic isospin density \n
  * \li "pion"             - pion density
+ * \li "none"             - do not calculate density, print 0.0 \n
  */
 /** Gathers all general Experiment parameters
  *
@@ -394,7 +395,7 @@ Experiment<Modus>::Experiment(Configuration config, bf::path output_path)
     potentials_ = make_unique<Potentials>(config["Potentials"], parameters_);
   }
 
-  dens_type_ = config.take({"Output", "Density_Type"}, DensityType::hadron);
+  dens_type_ = config.take({"Output", "Density_Type"}, DensityType::none);
   log.info() << "Density type written to headers: " << dens_type_;
 
   /*!\Userguide
@@ -423,7 +424,7 @@ Experiment<Modus>::Experiment(Configuration config, bf::path output_path)
    * For this one has to use the "Lattice: Printout" section of configuration.
    * Currently printing of custom density to vtk file is available.
    *
-   * \key Density (DensityType, optional, default = DensityType::None): \n
+   * \key Density (string, optional, default = "none"): \n
    * Chooses which density to print.
    */
 
@@ -533,11 +534,13 @@ void Experiment<Modus>::perform_action(
     action->perform(&particles_, interactions_total);
     const ParticleList outgoing_particles = action->outgoing_particles();
     // Calculate Eckart rest frame density at the interaction point
-    const FourVector r_interaction = action->get_interaction_point();
-    constexpr bool compute_grad = false;
-    const double rho =
-        rho_eckart(r_interaction.threevec(), particles_before_actions,
-                   parameters_, dens_type_, compute_grad).first;
+    double rho = 0.0;
+    if (dens_type_ != DensityType::none) {
+      const FourVector r_interaction = action->get_interaction_point();
+      constexpr bool compute_grad = false;
+      rho = rho_eckart(r_interaction.threevec(), particles_before_actions,
+                       parameters_, dens_type_, compute_grad).first;
+    }
     /*!\Userguide
      * \page collisions_output_in_box_modus_ Collision output in box modus
      * \note When SMASH is running in the box modus, particle coordinates
