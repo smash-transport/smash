@@ -12,6 +12,7 @@
 #include "../include/particletype.h"
 #include "../include/decaymodes.h"
 #include "../include/decayaction.h"
+#include "../include/kinematics.h"
 
 using namespace Smash;
 
@@ -43,28 +44,54 @@ TEST(omega_decay) {
   omega.set_4momentum(0.782,                     // pole mass
                       ThreeVector(0., 0., 0.));  // at rest
   const auto act = make_unique<DecayAction>(omega, 0.f);
-  act->add_decays(type_omega.get_partial_widths_hadronic(omega.effective_mass()));
+  const auto srts = omega.effective_mass();
+  act->add_decays(type_omega.get_partial_widths_hadronic(srts));
 
-  const float dm = 0.001;  // bin size
-  Histogram1d hist(dm);    // histogram
+  const float dm = 0.001;        // bin size
+  Histogram1d hist_charged(dm);  // histogram for charged rhos
+  Histogram1d hist_neutral(dm);  // histogram for neutral rhos
 
-  // sample the final state threlve gazillion times
-  const int N_samples = 1E7;
+  // sample the final state
+  const int N_samples = 1E6;
+  printf("sampling ...\n");
   for (int i = 0; i < N_samples; i++) {
     act->generate_final_state();
     const ParticleList &fs = act->outgoing_particles();
     if (fs.size() != 2) {
       std::cout << "unexpected FS size: " << fs.size() << "\n";
     }
-    float m = 0.;
+    const ParticleData *rho = nullptr;
     if (!fs[1].type().pdgcode().is_pion()) {
-      m = fs[1].effective_mass();
+      rho = &fs[1];
     } else if (!fs[0].type().pdgcode().is_pion()) {
-      m = fs[0].effective_mass();
+      rho = &fs[0];
     }
-    hist.add(m);
+    float m = rho->effective_mass();
+    if (rho->type().charge()==0) {
+      hist_neutral.add(m);
+    } else {
+      hist_charged.add(m);
+    }
   }
 
-  // print out the histogram
-  hist.print_to_file("mass_sampling.dat");
+  // test with the analytical function
+  const ParticleType &type_rho_zero = ParticleType::find(0x113);  // rho0
+  const ParticleType &type_rho_plus = ParticleType::find(0x213);  // rho+
+  const ParticleType &type_pi       = ParticleType::find(0x111);  // pi0
+  const auto mass_stable = type_pi.mass();
+
+  printf("testing ρ⁰ distribution ...\n");
+  hist_neutral.test(
+    [&](float m) { return type_rho_zero.spectral_function(m)
+                    * pCM(srts, mass_stable, m); }
+    //,"masses_rho_neutral.dat"
+  );
+
+  printf("testing ρ⁺ distribution ...\n");
+  hist_charged.test(
+    [&](float m) { return type_rho_plus.spectral_function(m)
+                    * pCM(srts, mass_stable, m); }
+    //,"masses_rho_charged.dat"
+  );
+
 }
