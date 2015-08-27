@@ -80,6 +80,7 @@ Output:
         z: 0.0
     Dileptons:
         Enable:             False
+        Format:             Oscar
 
 Collision_Term:
     Collisions:             True

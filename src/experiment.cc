@@ -165,12 +165,24 @@ namespace {
  * \key Density_Type (string, optional, default = "none"): \n
  * Determines which kind of density is written into the collision files.
  * Possible values:\n
- * \li "hadron"           - total hadronic density \n
- * \li "baryon"           - net baryon density \n
- * \li "baryonic isospin" - baryonic isospin density \n
+ * \li "hadron"           - total hadronic density
+ * \li "baryon"           - net baryon density
+ * \li "baryonic isospin" - baryonic isospin density
  * \li "pion"             - pion density
- * \li "none"             - do not calculate density, print 0.0 \n
+ * \li "none"             - do not calculate density, print 0.0
+ *
+ * The output section has several subsections, relating to different output
+ * files. To enable a certain output, set the 'Enable' key in the corresponding
+ * subsection:
+ * \li \subpage input_oscar_particlelist
+ * \li \subpage input_oscar_collisions
+ * \li \subpage input_vtk
+ * \li \subpage input_binary_collisions
+ * \li \subpage input_binary_particles
+ * \li \subpage input_root
+ * \li \subpage input_dileptons
  */
+
 /** Gathers all general Experiment parameters
  *
  * \param[in, out] config Configuration element
@@ -281,26 +293,11 @@ Experiment<Modus>::Experiment(Configuration config, bf::path output_path)
 
   // create outputs
   log.trace(source_location, " create OutputInterface objects");
-  /*!\Userguide
-    * \page input_output_options_ Output
-    *
-    * \key Output: \n
-    * Below this key the configuration for the different output formats is
-    * defined. To enable a certain output, set the 'Enable' key below the
-    * selected format identifier. The identifiers are described below.
-    * The following outputs exist:
-    * \li \subpage input_oscar_particlelist
-    * \li \subpage input_oscar_collisions
-    * \li \subpage input_vtk
-    * \li \subpage input_binary_collisions
-    * \li \subpage input_binary_particles
-    * \li \subpage input_root
-    * \li \subpage input_dileptons
-    */
+
   auto output_conf = config["Output"];
   /*!\Userguide
-    * \page output_general_ Output files
-    * There are different optional formats for SMASH output that are explained
+    * \page output_general_ Output formats
+    * Several different output formats are available in SMASH. They are explained
     * below in more detail. Per default, the selected output files will be
     * saved in the directory ./data/\<run_id\>, where \<run_id\> is an integer
     * number starting from 0. At the beginning
@@ -331,8 +328,6 @@ Experiment<Modus>::Experiment(Configuration config, bf::path output_path)
     * \li Formatted binary output that uses ROOT software
     *     (http://root.cern.ch).\n Fast to read and write, requires less
     *     disk space.\n \subpage format_root
-    * \li Dilepton output in Oscar format: \n
-    *     \subpage format_dilepton_output
     * \li \subpage collisions_output_in_box_modus_
     * \li \subpage output_vtk_lattice_
     */
@@ -381,6 +376,38 @@ Experiment<Modus>::Experiment(Configuration config, bf::path output_path)
     output_conf.take({"Density"});
   }
 
+  /*!\Userguide
+   * \page input_dileptons Dileptons
+   * Enables Dilepton Output together with DecayActionsFinderDilepton.
+   * Dilepton Output saves information about decays, which include Dileptons,
+   * at every timestep.
+   *
+   * The treatment of Dilepton Decays is special:
+   *
+   * \li Dileptons are treated via the time integration method, also called
+   * 'shining', as described in \iref{Schmidt:2008hm}, chapter 2D.
+   * This means that, because dilepton decays are so rare, possible decays are
+   * written in the ouput in every single timestep without ever performing them.
+   * The are weighted with a "shining weight" to compensate for the over-production.
+   * \li The shining weight can be found in the weight element of the ouput.
+   * \li The shining method is implemented in the DecayActionsFinderDilepton,
+   * which is enabled together with the dilepton output.
+   *
+   * \note If you want dilepton decays, you also have to modify decaymodes.txt.
+   * Dilepton decays are commented out by default.
+   *
+   * \key Enable (bool, optional, default = false):\n
+   * true - Dilepton Output and DecayActionsFinderDilepton enabled\n
+   * false - no Dilepton Output and no DecayActionsFinderDilepton
+   *
+   * \key Format (string, required):\n
+   * "Oscar" - The dilepton output is written to the file \c DileptonOutput.oscar
+   * in \ref format_oscar_collisions (OSCAR2013 format) .\n
+   * "Binary" - The dilepton output is written to the file \c DileptonOutput.bin
+   * in \ref format_binary_ .\n
+   * "Root" - The dilepton output is written to the file \c DileptonOutput.root
+   * in \ref format_root .\n
+   **/
   if (dileptons_switch) {
     // create dilepton output object
     std::string format = config.take({"Output", "Dileptons", "Format"});
