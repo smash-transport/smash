@@ -275,7 +275,8 @@ class Configuration {
       throw IncorrectTypeInAssignment("The value for key \"" +
                                       std::string(key_) +
                                       "\" should be \"hadron\" or \"baryon\" "
-                                      "or \"baryonic isospin\" or \"pion\".");
+                                      "or \"baryonic isospin\" or \"pion\" "
+                                      "or \"none\".");
     }
 
     operator BoxInitialCondition() {
