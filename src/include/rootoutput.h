@@ -88,6 +88,7 @@ class Particles;
   **/
 class RootOutput : public OutputInterface {
  public:
+  RootOutput(boost::filesystem::path path, std::string name);
   RootOutput(boost::filesystem::path path, Configuration&& conf);
   ~RootOutput();
 
@@ -133,7 +134,12 @@ class RootOutput : public OutputInterface {
 
   // Option, defines how often root-file is "saved"
   int autosave_frequency_;
+
+  /* Basic initialization routine, creating the TTree objects
+   * for particles and collisions. */
+  void init_trees();
 };
+
 }  // namespace Smash
 
 #endif  // SRC_INCLUDE_ROOTOUTPUT_H_

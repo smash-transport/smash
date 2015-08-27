@@ -17,21 +17,27 @@
 
 namespace Smash {
 
+RootOutput::RootOutput(boost::filesystem::path path, std::string name)
+    : base_path_(std::move(path)),
+      root_out_file_(
+          new TFile((base_path_ / (name + ".root")).native().c_str(), "NEW")),
+      output_counter_(0),
+      write_collisions_(true), write_particles_(false),
+      autosave_frequency_(1000) {
+  init_trees();
+}
+
 /**
- * RootOuput constructor. Creates file smash_run.root in run directory
- * and TTree with the name "particles" in it.
+ * RootOuput constructor. Creates file smash_run.root in the output directory.
  */
 RootOutput::RootOutput(bf::path path, Configuration&& conf)
     : base_path_(std::move(path)),
       root_out_file_(
           new TFile((base_path_ / "smash_run.root").native().c_str(), "NEW")),
       output_counter_(0),
-      write_collisions_(conf.has_value({"Write_Collisions"})
-                                 ? conf.take({"Write_Collisions"}) : false),
-      write_particles_(conf.has_value({"Write_Particles"})
-                                 ? conf.take({"Write_Particles"}) : true),
-      autosave_frequency_(conf.has_value({"Autosave_Frequency"})
-                               ? conf.take({"Autosave_Frequency"}) : 1000) {
+      write_collisions_(conf.take({"Write_Collisions"}, false)),
+      write_particles_(conf.take({"Write_Particles"}, true)),
+      autosave_frequency_(conf.take({"Autosave_Frequency"}, 1000)) {
   /*!\Userguide
    * \page input_root ROOT
    * Enables output in a ROOT format. The latter is a structured binary format
@@ -118,6 +124,10 @@ RootOutput::RootOutput(bf::path path, Configuration&& conf)
    * See also \ref collisions_output_in_box_modus_.
    **/
 
+  init_trees();
+}
+
+void RootOutput::init_trees() {
   if (write_particles_) {
     particles_tree_ = new TTree("particles", "particles");
 

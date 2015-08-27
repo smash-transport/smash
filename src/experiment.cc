@@ -382,7 +382,25 @@ Experiment<Modus>::Experiment(Configuration config, bf::path output_path)
   }
 
   if (dileptons_switch) {
-    dilepton_output_ = create_dilepton_output(output_path);
+    // create dilepton output object
+    std::string format = config.take({"Output", "Dileptons", "Format"});
+    if (format == "Oscar") {
+      dilepton_output_ = make_unique<OscarOutput<OscarFormat2013,
+                            OscarInteractions>>(output_path, "DileptonOutput");
+    } else if (format == "Binary") {
+      dilepton_output_ = make_unique<BinaryOutputCollisions>(output_path,
+                                                             "DileptonOutput");
+    } else if (format == "Root") {
+#ifdef SMASH_USE_ROOT
+      dilepton_output_ = make_unique<RootOutput>(output_path, "DileptonOutput");
+#else
+    log.error() << "You requested Root output, but Root support has not been "
+                   "compiled in.";
+    output_conf.take({"Root"});
+#endif
+    } else {
+        throw std::runtime_error("Bad dilepton output format: " + format);
+    }
   }
 
   if (config.has_value({"Potentials"})) {
