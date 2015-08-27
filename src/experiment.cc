@@ -169,6 +169,7 @@ namespace {
  * \li "baryon"           - net baryon density \n
  * \li "baryonic isospin" - baryonic isospin density \n
  * \li "pion"             - pion density
+ * \li "none"             - do not calculate density, print 0.0 \n
  */
 /** Gathers all general Experiment parameters
  *
@@ -386,7 +387,7 @@ Experiment<Modus>::Experiment(Configuration config, bf::path output_path)
     potentials_ = make_unique<Potentials>(config["Potentials"], parameters_);
   }
 
-  dens_type_ = config.take({"Output", "Density_Type"}, DensityType::hadron);
+  dens_type_ = config.take({"Output", "Density_Type"}, DensityType::none);
   log.info() << "Density type written to headers: " << dens_type_;
 
   /*!\Userguide
