@@ -162,7 +162,7 @@ namespace {
  * system in Standard Output and other output formats which support this
  * functionality.
  *
- * \key Density_Type (string, optional, default = "hadron"): \n
+ * \key Density_Type (string, optional, default = "none"): \n
  * Determines which kind of density is written into the collision files.
  * Possible values:\n
  * \li "hadron"           - total hadronic density \n
@@ -416,7 +416,7 @@ Experiment<Modus>::Experiment(Configuration config, bf::path output_path)
    * For this one has to use the "Lattice: Printout" section of configuration.
    * Currently printing of custom density to vtk file is available.
    *
-   * \key Density (DensityType, optional, default = DensityType::None): \n
+   * \key Density (string, optional, default = "none"): \n
    * Chooses which density to print.
    */
 
