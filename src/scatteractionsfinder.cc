@@ -55,7 +55,6 @@ ScatterActionsFinder::ScatterActionsFinder(
 
 double ScatterActionsFinder::collision_time(const ParticleData &p1,
                                             const ParticleData &p2) {
-  const auto &log = logger<LogArea::FindScatter>();
   /** UrQMD collision time in computational frame,
    * see \iref{Bass:1998ca} (3.28):
    * position of particle a: x_a [fm]
@@ -64,20 +63,20 @@ double ScatterActionsFinder::collision_time(const ParticleData &p1,
    * velocity of particle b: v_b
    * t_{coll} = - (x_a - x_b) . (v_a - v_b) / (v_a - v_b)^2 [fm/c]
    */
-  ThreeVector pos_diff = p1.position().threevec() - p2.position().threevec();
-  ThreeVector velo_diff = p1.velocity() - p2.velocity();
+  const ThreeVector pos_diff = p1.position().threevec() -
+                               p2.position().threevec();
+  const ThreeVector velo_diff = p1.velocity() - p2.velocity();
   double vsqr = velo_diff.sqr();
+#ifndef NDEBUG
+  const auto &log = logger<LogArea::FindScatter>();
   log.trace(source_location, "\n"
             "Scatter ", p1, "\n"
             "    <-> ", p2, "\n"
             "=> position difference: ", pos_diff, " [fm]",
             ", velocity difference: ", velo_diff, " [GeV]");
+#endif
   /* Zero momentum leads to infite distance, particles are not approaching. */
-  if (vsqr < really_small) {
-    return -1.0;
-  } else {
-    return -pos_diff * velo_diff / vsqr;
-  }
+  return (vsqr < really_small) ? -1.0 : -pos_diff * velo_diff / vsqr;
 }
 
 
