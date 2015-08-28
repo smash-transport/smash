@@ -107,14 +107,18 @@ ScatterActionPtr ScatterActionsFinder::construct_scatter_action(
 
 ActionPtr ScatterActionsFinder::check_collision(
     const ParticleData &data_a, const ParticleData &data_b, float dt) const {
+#ifndef NDEBUG
   const auto &log = logger<LogArea::FindScatter>();
+#endif
 
   /* just collided with this particle */
   if (data_a.id_process() >= 0 && data_a.id_process() == data_b.id_process()) {
+#ifndef NDEBUG
     log.debug("Skipping collided particles at time ", data_a.position().x0(),
               " due to process ", data_a.id_process(),
               "\n    ", data_a,
               "\n<-> ", data_b);
+#endif
     return nullptr;
   }
 
@@ -147,9 +151,11 @@ ActionPtr ScatterActionsFinder::check_collision(
     return nullptr;
   }
 
+#ifndef NDEBUG
   log.debug("particle distance squared: ", distance_squared,
             "\n    ", data_a,
             "\n<-> ", data_b);
+#endif
 
   return std::move(act);
 }
