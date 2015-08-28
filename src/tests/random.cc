@@ -14,6 +14,13 @@
 
 using namespace Smash;
 
+TEST(set_random_seed) {
+    std::random_device rd;
+    int64_t seed = rd();
+    Random::set_seed(seed);
+    printf("Random number seed: %ld\n", seed);
+}
+
 int tst_cnt = 0;  // test_counter
 
 /**
@@ -66,7 +73,7 @@ TEST(x_exponential) {
 }
 
 TEST(xsquared_exponential) {
-  test_distribution(N_TEST, 0.1,
+  test_distribution(N_TEST, 0.05,
       []() {
         return Random::exponential(1.0) + Random::exponential(1.0) +
                Random::exponential(1.0);
