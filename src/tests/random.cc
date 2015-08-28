@@ -74,6 +74,22 @@ TEST(xsquared_exponential) {
       [](double x) { return x*x*exp(-x); });
 }
 
+TEST(expo) {
+  test_distribution(N_TEST, 0.001,
+                    []() { return Random::expo(2., -1., -3.); },
+                    [](double x) { return exp(2.*x); });
+}
 
-/* TODO: add tests for the other functions from random.h
- * (e.g. expo, power, cauchy etc)*/
+TEST(power) {
+  test_distribution(N_TEST, 0.001,
+                    []() { return Random::power(3., 0.5, 1.5); },
+                    [](double x) { return x*x*x; });
+}
+
+TEST(cauchy) {
+  const double m0 = 0.770;
+  const double Gamma = 0.150;
+  test_distribution(N_TEST, 0.001,
+                    [&]() { return Random::cauchy(m0, Gamma, 0.280, 1.5); },
+                    [&](double x) { return Gamma/(Gamma*Gamma + (x-m0)*(x-m0)); });
+}
