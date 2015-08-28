@@ -37,13 +37,8 @@ namespace Smash {
  *
  * \key Sqrtsnn (float, optional, no default): \n
  * Defines the energy of the collision as center-of-mass
- * energy in the collision of one participant each from both nuclei.
- * Optional: Since not all participants have the same mass, and hence
- * \f$\sqrt{s_{\rm NN}}\f$ is different for \f$NN\f$ = proton+proton and
- * \f$NN\f$=neutron+neutron, you can specify which \f$NN\f$-pair you
- * want this to refer to with `Sqrts_Reps`. This expects a vector of two
- * PDG Codes, e.g. `Sqrts_n: [2212, 2212]` for proton-proton.
- * Default is the average nucleon mass in the given nucleus.
+ * energy in the collision of one participant each from both nuclei
+ * (using the average participant mass in the given nucleus).
  *
  * \key E_Kin (float, optional, no default): \n
  * Defines the energy of the collision by the kinetic energy per nucleon of
@@ -197,45 +192,24 @@ ColliderModus::ColliderModus(Configuration modus_config,
   // no meaningful choice for a default energy, we require the user to
   // give one (and only one) energy input from the available options.
   int energy_input = 0;
-  float mass_projec = projectile_->mass();
-  float mass_target = target_->mass();
+  const float mass_projec = projectile_->mass();
+  const float mass_target = target_->mass();
+  // average mass of a particle in that nucleus
+  const float mass_a = projectile_->mass() / projectile_->number_of_particles();
+  const float mass_b = target_->mass() / target_->number_of_particles();
   // Option 1: Center of mass energy.
   if (modus_cfg.has_value({"Sqrtsnn"})) {
-    float sqrt_s_NN = modus_cfg.take({"Sqrtsnn"});
-    /* Note that \f$\sqrt{s_{NN}}\f$ is different for neutron-neutron and
-     * proton-proton collisions (because of the different masses). Therefore,
-     * representative particles are needed to specify which two particles'
-     * collisions have this \f$\sqrt{s_{NN}}\f$. The vector specifies a pair
-     * of PDG codes for the two particle species we want to use. The default
-     * is otherwise the average nucleon mass for each nucleus.  */
-    PdgCode id_a = 0, id_b = 0;
-    if (modus_cfg.has_value({"Sqrts_Reps"})) {
-      std::vector<PdgCode> sqrts_reps = modus_cfg.take({"Sqrts_Reps"});
-      id_a = sqrts_reps[0];
-      id_b = sqrts_reps[1];
-    }
-    float mass_a, mass_b;
-    if (id_a != 0) {
-      // If PDG Code is given, use mass of this particle type.
-      mass_a = ParticleType::find(id_a).mass();
-    } else {
-      // else, use average mass of a particle in that nucleus
-      mass_a = projectile_->mass() / projectile_->size();
-    }
-    if (id_b != 0) {
-      mass_b = ParticleType::find(id_b).mass();
-    } else {
-      mass_b = target_->mass() / target_->size();
-    }
+    sqrt_s_NN_ = modus_cfg.take({"Sqrtsnn"});
+
     // Check that input satisfies the lower bound (everything at rest).
-    if (sqrt_s_NN <= mass_a + mass_b) {
+    if (sqrt_s_NN_ <= mass_a + mass_b) {
       throw ModusDefault::InvalidEnergy(
           "Input Error: sqrt(s_NN) is not larger than masses:\n" +
-          std::to_string(sqrt_s_NN) + " GeV <= " + std::to_string(mass_a) +
+          std::to_string(sqrt_s_NN_) + " GeV <= " + std::to_string(mass_a) +
           " GeV + " + std::to_string(mass_b) + " GeV.");
     }
     // Set the total nucleus-nucleus collision energy.
-    total_s_ = (sqrt_s_NN * sqrt_s_NN - mass_a * mass_a - mass_b * mass_b) *
+    total_s_ = (sqrt_s_NN_ * sqrt_s_NN_ - mass_a * mass_a - mass_b * mass_b) *
                    mass_projec * mass_target / (mass_a * mass_b) +
                mass_projec * mass_projec + mass_target * mass_target;
     energy_input++;
@@ -253,6 +227,7 @@ ColliderModus::ColliderModus(Configuration modus_config,
     // Set the total nucleus-nucleus collision energy.
     total_s_ = s_from_Ekin(e_kin * projectile_->number_of_particles(),
                            mass_projec, mass_target);
+    sqrt_s_NN_ = std::sqrt(s_from_Ekin(e_kin, mass_a, mass_b));
     energy_input++;
   }
   // Option 3: Momentum of the projectile nucleus (target at rest).
@@ -267,6 +242,7 @@ ColliderModus::ColliderModus(Configuration modus_config,
     // Set the total nucleus-nucleus collision energy.
     total_s_ = s_from_plab(p_lab * projectile_->number_of_particles(),
                            mass_projec, mass_target);
+    sqrt_s_NN_ = std::sqrt(s_from_plab(p_lab, mass_a, mass_b));
     energy_input++;
   }
   if (energy_input == 0) {
@@ -336,9 +312,11 @@ ColliderModus::ColliderModus(Configuration modus_config,
 
 std::ostream &operator<<(std::ostream &out, const ColliderModus &m) {
   return out << "-- Collider Modus:\n"
-                "sqrt(S) (nucleus-nucleus) = "
-             << format(std::sqrt(m.total_s_), "GeV")
-             << "\nInitial distance between nuclei: "
+             << "sqrt(S) (nucleus-nucleus) = "
+             << format(std::sqrt(m.total_s_), "GeV\n")
+             << "sqrt(S) (nucleon-nucleon) = "
+             << format(m.sqrt_s_NN_, "GeV\n")
+             << "Initial distance between nuclei: "
              << format(2 * m.initial_z_displacement_, "fm") << "\nProjectile:\n"
              << *m.projectile_ << "\nTarget:\n" << *m.target_;
 }

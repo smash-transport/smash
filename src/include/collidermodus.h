@@ -75,10 +75,10 @@ class ColliderModus : public ModusDefault {
    * at rest.
    **/
   std::unique_ptr<Nucleus> target_;
-  /** Center-of-mass energy of the nucleus-nucleus collision.
-   *
-   **/
+  /** Center-of-mass energy squared of the nucleus-nucleus collision. **/
   float total_s_;
+  /** Center-of-mass energy of a nucleon-nucleon collision. **/
+  float sqrt_s_NN_;
   /** Impact parameter.
    *
    * The nuclei projectile_ and target_ will be shifted along the x axis

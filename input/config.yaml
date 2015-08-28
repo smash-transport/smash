@@ -162,9 +162,6 @@ Modi:
 
         # Collision energy (E_Kin, P_Lab, Sqrtsnn).
         Sqrtsnn: 3.0
-        # The representative particles (two PDG IDs) determining the
-        # subsystem "NN" in sqrt(s_NN). Let's try neutron-neutron.
-        Sqrts_Reps: [2112, 2112]
 
         # The reference frame in which to do the calculation.
         # ("center of velocity", "center of mass", "fixed target")
