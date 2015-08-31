@@ -167,7 +167,7 @@ double ScatterAction::transverse_distance_sqr() const {
   const double dpdr = pos_diff * mom_diff;
 
   /** UrQMD squared distance criterion:
-   * \iref{Bass:1998ca} (3.27): in center of momemtum frame
+   * \iref{Bass:1998ca} (3.27): in center of momentum frame
    * position of particle a: x_a
    * position of particle b: x_b
    * momentum of particle a: p_a
