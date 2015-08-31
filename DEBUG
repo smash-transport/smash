@@ -135,6 +135,10 @@ Linux:
     $FGPATH/flamegraph.pl out.perf-folded > perf.svg
     firefox perf.svg
 
+If you get mangled names of the functions, try this as a second line
+
+    perf script | c++filt | $FGPATH/stackcollapse-perf.pl > out.perf-folded
+
 The x axis represents the total duration that the corresponding stack frame
 lived for. The order and the colors are arbitrary and optimized for readability.
 The y axis represents the position on the stack.
