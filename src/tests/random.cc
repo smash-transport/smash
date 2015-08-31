@@ -23,6 +23,10 @@ TEST(set_random_seed) {
 
 int tst_cnt = 0;  // test_counter
 
+// set this to true, in order to generate output files for debugging
+constexpr bool print_output_files = false;
+
+
 /**
  * Compare a random distribution to an analytical function.
  *
@@ -37,9 +41,11 @@ void test_distribution(int n_test, double dx,
   // sample distribution and populate histogram
   hist.populate(n_test, get_chi);
   // test with the analytical function
-  hist.test(get_analyt
-           // ,"random_" + std::to_string(tst_cnt) + ".dat"
-           );
+  if (print_output_files) {
+    hist.test(get_analyt, "random_" + std::to_string(tst_cnt) + ".dat");
+  } else {
+    hist.test(get_analyt);
+  }
   tst_cnt++;
 }
 

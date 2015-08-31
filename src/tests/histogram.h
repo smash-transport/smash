@@ -18,41 +18,51 @@ namespace Smash {
 /** A class for representing a one-dimensional histogram. */
 class Histogram1d {
  public:
-  // construct empty histogram with a given bin size
+  /// construct empty histogram with a given bin size
   Histogram1d(double d) : dx_(d), data_({}) {}
+  /// get the bin size
   double dx () const { return dx_; }
+
+  /// get the total number of entries in the histogram
   int num_entries() const { return entries_; }
+  /// get the minimum value observed in the histogram
   double get_min() const { return min_ * dx_; }
+  /// get the maximum value observed in the histogram
   double get_max() const { return max_ * dx_; }
-  // add an entry at position x
+
+  /// add an entry at position x
   void add(double x) {
-    int n = floor (x / dx_);
+    int n = std::floor (x / dx_);
     ++data_[n];
     ++entries_;
     if (n < min_) min_ = n;
     if (n >= max_) max_ = n + 1;
   }
-  // populate with 'n_test' entries from distribution 'chi'
+
+  /// populate with 'n_test' entries from distribution 'chi'
   template <typename Chi>
   void populate(int n_test, Chi chi) {
     for (int i = 0; i < n_test; i++) {
       add(chi());
     }
   }
+
   // print the histogram to a file
   void print_to_file(std::string fname) const;
+
   // compare a histogram of a sampled distribution to an analytical function
   template <typename Analytical>
   void test(Analytical analyt, std::string dbg_file = "") const;
+
  private:
-  double dx_;                // bin size
-  std::map<int, int> data_;  // data storage
-  int entries_ = 0;          // count number of entries;
-  int min_ = INT_MAX, max_ = INT_MIN;
+  double dx_;                          // bin size
+  std::map<int, int> data_;            // data storage
+  int entries_ = 0;                    // number of entries
+  int min_ = INT_MAX, max_ = INT_MIN;  // minimum & maxiumum values
 };
 
 
-/* Print the histogram to a file. */
+/** Print the histogram to a file. */
 void Histogram1d::print_to_file(std::string fname) const {
   std::FILE *file = std::fopen(fname.c_str(), "w");
   for (auto b : data_) {
