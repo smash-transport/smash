@@ -73,7 +73,7 @@ class ParticleType {
   /// Returns the name of the particle.
   const std::string &name() const { return name_; }
 
-  /// Returns the particle mass.
+  /// Returns the particle pole mass.
   float mass() const { return mass_; }
 
   /// Returns the squared particle mass.
@@ -104,7 +104,7 @@ class ParticleType {
   unsigned int spin() const { return pdgcode_.spin(); }
 
   /// \copydoc PdgCode::is_hadron
-  bool is_hadron() const { return pdgcode_.is_hadron(); }
+  bool is_hadron() const { return is_hadron_; }
 
   /// \copydoc PdgCode::is_lepton
   bool is_lepton() const { return pdgcode_.is_lepton(); }
@@ -317,12 +317,17 @@ class ParticleType {
  private:
   /// name of the particle
   std::string name_;
-  /// mass of the particle
+  /// pole mass of the particle
   float mass_;
   /// width of the particle
   float width_;
   /// PDG Code of the particle
   PdgCode pdgcode_;
+  /// minimum mass of the particle
+  /* Mutable, because it is initialized at first call of minimum mass function,
+     so it's logically const, but not physically const, which is a classical
+     case for using mutable. */
+  mutable float minimum_mass_;
   /** twice the isospin of the particle
    *
    * This is filled automatically from pdgcode_.
@@ -333,6 +338,8 @@ class ParticleType {
    * This is filled automatically from pdgcode_.
    */
   int charge_;
+  /// Is particle hadron?
+  bool is_hadron_;
 
   /**\ingroup logging
    * Writes all information about the particle type to the output stream.
