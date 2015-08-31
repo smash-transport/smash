@@ -141,36 +141,41 @@ double ScatterAction::cm_momentum_squared() const {
   return pCM_sqr(sqrt_s(), m1, m2);
 }
 
-
 double ScatterAction::transverse_distance_sqr() const {
-  const auto &log = logger<LogArea::ScatterAction>();
   // local copy of particles (since we need to boost them)
   ParticleData p_a = incoming_particles_[0];
   ParticleData p_b = incoming_particles_[1];
   /* Boost particles to center-of-momentum frame. */
-  ThreeVector velocity = beta_cm();
+  const ThreeVector velocity = beta_cm();
   p_a.boost(velocity);
   p_b.boost(velocity);
-  ThreeVector pos_diff = p_a.position().threevec() - p_b.position().threevec();
-  ThreeVector mom_diff = p_a.momentum().threevec() - p_b.momentum().threevec();
+  const ThreeVector pos_diff = p_a.position().threevec() -
+                               p_b.position().threevec();
+  const ThreeVector mom_diff = p_a.momentum().threevec() -
+                               p_b.momentum().threevec();
+
+  const auto &log = logger<LogArea::ScatterAction>();
   log.debug("Particle ", incoming_particles_, " position difference [fm]: ",
             pos_diff, ", momentum difference [GeV]: ", mom_diff);
+
+  const double dp2 = mom_diff.sqr();
+  const double dr2 = pos_diff.sqr();
   /* Zero momentum leads to infite distance. */
-  if (std::abs(mom_diff.sqr()) < really_small)
-    return  pos_diff.sqr();
+  if (dp2 < really_small) {
+    return dr2;
+  }
+  const double dpdr = pos_diff * mom_diff;
 
   /** UrQMD squared distance criterion:
    * \iref{Bass:1998ca} (3.27): in center of momemtum frame
    * position of particle a: x_a
    * position of particle b: x_b
-   * velocity of particle a: v_a
-   * velocity of particle b: v_b
-   * d^2_{coll} = (x_a - x_b)^2 - ((x_a - x_a) . (v_a - v_b))^2 / (v_a - v_b)^2
+   * momentum of particle a: p_a
+   * momentum of particle b: p_b
+   * d^2_{coll} = (x_a - x_b)^2 - ((x_a - x_b) . (p_a - p_b))^2 / (p_a - p_b)^2
    */
-  return pos_diff.sqr()
-         - (pos_diff * mom_diff) * (pos_diff * mom_diff) / mom_diff.sqr();
+  return dr2 - dpdr*dpdr/dp2;
 }
-
 
 CollisionBranchPtr ScatterAction::elastic_cross_section(float elast_par) {
   float elastic_xs;
