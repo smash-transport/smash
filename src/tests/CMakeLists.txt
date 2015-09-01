@@ -62,6 +62,9 @@ endmacro()
 
 # test source code to be clean, requires cpplint in the path
 find_program(CPPLINT cpplint.py)
+if(NOT CPPLINT)
+   find_program(CPPLINT cpplint)
+endif()
 if(CPPLINT)
    message(STATUS "cpplint.py found at ${CPPLINT}")
    set(CPPLINT_ARGS --filter=-build/c++11,-build/include,-readability/streams,-runtime/references --counting=detailed)
