@@ -104,7 +104,7 @@ class ParticleType {
   unsigned int spin() const { return pdgcode_.spin(); }
 
   /// \copydoc PdgCode::is_hadron
-  bool is_hadron() const { return is_hadron_; }
+  bool is_hadron() const { return pdgcode_.is_hadron(); }
 
   /// \copydoc PdgCode::is_lepton
   bool is_lepton() const { return pdgcode_.is_lepton(); }
@@ -338,8 +338,6 @@ class ParticleType {
    * This is filled automatically from pdgcode_.
    */
   int charge_;
-  /// Is particle hadron?
-  bool is_hadron_;
 
   /**\ingroup logging
    * Writes all information about the particle type to the output stream.

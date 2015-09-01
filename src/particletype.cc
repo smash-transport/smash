@@ -99,8 +99,7 @@ ParticleType::ParticleType(std::string n, float m, float w, PdgCode id)
       pdgcode_(id),
       minimum_mass_(-1.f),
       isospin_(pdgcode_.isospin_total()),
-      charge_(pdgcode_.charge()),
-      is_hadron_(pdgcode_.is_hadron()) {}
+      charge_(pdgcode_.charge()) {}
 
 /* Construct an antiparticle name-string from the given name-string for the
  * particle and its PDG code. */
