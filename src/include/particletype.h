@@ -73,7 +73,7 @@ class ParticleType {
   /// Returns the name of the particle.
   const std::string &name() const { return name_; }
 
-  /// Returns the particle mass.
+  /// Returns the particle pole mass.
   float mass() const { return mass_; }
 
   /// Returns the squared particle mass.
@@ -317,12 +317,17 @@ class ParticleType {
  private:
   /// name of the particle
   std::string name_;
-  /// mass of the particle
+  /// pole mass of the particle
   float mass_;
   /// width of the particle
   float width_;
   /// PDG Code of the particle
   PdgCode pdgcode_;
+  /// minimum mass of the particle
+  /* Mutable, because it is initialized at first call of minimum mass function,
+     so it's logically const, but not physically const, which is a classical
+     case for using mutable. */
+  mutable float minimum_mass_;
   /** twice the isospin of the particle
    *
    * This is filled automatically from pdgcode_.
