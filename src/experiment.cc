@@ -790,36 +790,7 @@ size_t Experiment<Modus>::run_time_evolution_fixed_time_step(
     modus_.impose_boundary_conditions(&particles_);
 
     /* (3) Do propagation. */
-<<<<<<< HEAD
     propagate_all();
-=======
-    if (potentials_) {
-      if (potentials_->use_skyrme()) {
-        update_density_lattice(jmu_B_lat_.get(), LatticeUpdate::EveryTimestep,
-                         DensityType::baryon, parameters_, particles_);
-        const int UBlattice_size = UB_lat_->size();
-        for (int i = 0; i < UBlattice_size; i++) {
-          (*UB_lat_)[i] = potentials_->skyrme_pot((*jmu_B_lat_)[i].density());
-        }
-        UB_lat_->compute_gradient_lattice(dUB_dr_lat_.get());
-      }
-      if (potentials_->use_symmetry()) {
-        update_density_lattice(jmu_I3_lat_.get(), LatticeUpdate::EveryTimestep,
-                        DensityType::baryonic_isospin, parameters_, particles_);
-        const int UI3lattice_size = UI3_lat_->size();
-        for (int i = 0; i < UI3lattice_size; i++) {
-          (*UI3_lat_)[i] = potentials_->symmetry_pot(
-                                          (*jmu_I3_lat_)[i].density());
-        }
-        UI3_lat_->compute_gradient_lattice(dUI3_dr_lat_.get());
-      }
-      propagate(&particles_, parameters_, *potentials_,
-                dUB_dr_lat_.get(), dUI3_dr_lat_.get());
-    } else {
-      propagate_straight_line(&particles_, parameters_);
-    }
-    modus_.impose_boundary_conditions(&particles_, outputs_);
->>>>>>> Remove "potentials in a box" warning + clean-up
 
     /* (4) Physics output during the run. */
     // if the timestep of labclock is different in the next tick than
@@ -894,7 +865,7 @@ void Experiment<Modus>::propagate_all() {
   if (potentials_) {
     if (potentials_->use_skyrme()) {
       update_density_lattice(jmu_B_lat_.get(), LatticeUpdate::EveryTimestep,
-                       DensityType::baryon, parameters_, particles_);
+                       DensityType::Baryon, parameters_, particles_);
       const int UBlattice_size = UB_lat_->size();
       for (int i = 0; i < UBlattice_size; i++) {
         (*UB_lat_)[i] = potentials_->skyrme_pot((*jmu_B_lat_)[i].density());
@@ -903,10 +874,11 @@ void Experiment<Modus>::propagate_all() {
     }
     if (potentials_->use_symmetry()) {
       update_density_lattice(jmu_I3_lat_.get(), LatticeUpdate::EveryTimestep,
-                      DensityType::baryonic_isospin, parameters_, particles_);
+                      DensityType::BaryonicIsospin, parameters_, particles_);
       const int UI3lattice_size = UI3_lat_->size();
       for (int i = 0; i < UI3lattice_size; i++) {
-        (*UI3_lat_)[i] = potentials_->symmetry_pot((*jmu_I3_lat_)[i].density());
+        (*UI3_lat_)[i] = potentials_->symmetry_pot(
+                                        (*jmu_I3_lat_)[i].density());
       }
       UI3_lat_->compute_gradient_lattice(dUI3_dr_lat_.get());
     }
