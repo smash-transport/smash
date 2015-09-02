@@ -11,9 +11,9 @@
 
 #include "../include/decayaction.h"
 #include "../include/decaymodes.h"
+#include "../include/formfactors.h"
 #include "../include/kinematics.h"
 #include "../include/particletype.h"
-#include "../include/resonances.h"
 
 using namespace Smash;
 
@@ -86,7 +86,7 @@ TEST(omega_decay) {
     [&](float m) {
       float pcm = pCM(srts, mass_stable, m);
       return type_rho_zero.spectral_function(m)
-                    * pcm * BlattWeisskopf(pcm, 1); }
+                    * pcm * blatt_weisskopf_sqr(pcm, 1); }
     //,"masses_rho_neutral.dat"
   );
 
@@ -95,7 +95,7 @@ TEST(omega_decay) {
     [&](float m) {
       float pcm = pCM(srts, mass_stable, m);
       return type_rho_plus.spectral_function(m)
-                    * pcm * BlattWeisskopf(pcm, 1); }
+                    * pcm * blatt_weisskopf_sqr(pcm, 1); }
     //,"masses_rho_charged.dat"
   );
 

@@ -23,21 +23,6 @@ namespace Smash {
 
 
 /**
- * Returns the squared Blatt-Weisskopf functions,
- * which influence the mass dependence of the decay widths.
- * See e.g. Effenberger's thesis, page 28.
- *
- * \param p_ab Momentum of outgoing particles A and B in center-of-mass frame.
- * \param L Angular momentum of outgoing particles A and B.
- */
-float BlattWeisskopf(const float p_ab, const int L)
-#ifdef NDEBUG
-    noexcept
-#endif
-;
-
-
-/**
  * Calculate Clebsch-Gordan coefficient
  *
  * \f$(-1)^{j_a - j_b + m_c} \sqrt(2 j_c + 1) \cdot [Wigner 3J symbol] \f$
