@@ -18,7 +18,7 @@ TEST(average) {
     COMPARE(avg.average(), 3.0);
 }
 
-void test_dedup_avg(
+static void test_dedup_avg(
         std::initializer_list<double>&& a,
         std::initializer_list<double>&& b,
         std::initializer_list<double>&& expected_a,

@@ -240,7 +240,7 @@ static std::unique_ptr<InterpolateDataSpline> kminusp_elastic_interpolation
  * cross section was given for one p_lab value, the corresponding cross sections
  * are averaged.
  */
-float kminusp_elastic_pdg(double mandelstam_s) {
+static float kminusp_elastic_pdg(double mandelstam_s) {
     if (kminusp_elastic_interpolation == nullptr) {
         std::vector<double> x = KMINUSP_ELASTIC_P_LAB;
         std::vector<double> y = KMINUSP_ELASTIC_SIG;
