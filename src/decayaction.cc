@@ -11,8 +11,10 @@
 
 #include "include/angles.h"
 #include "include/decaymodes.h"
+#include "include/kinematics.h"
 #include "include/logging.h"
 #include "include/pdgcode.h"
+#include "include/resonances.h"
 
 namespace Smash {
 
@@ -170,6 +172,7 @@ void DecayAction::generate_final_state() {
       decay_channels_, total_width_);
   outgoing_particles_ = proc->particle_list();
   process_type_ = proc->get_type();
+  L_ = proc->angular_momentum();
 
   switch (outgoing_particles_.size()) {
   case 2:
@@ -196,6 +199,55 @@ void DecayAction::generate_final_state() {
     log.debug("particle momenta in comp ", p);
   }
 }
+
+
+void DecayAction::sample_cms_momenta() {
+  const auto &log = logger<LogArea::Action>();
+  /* This function only operates on 2-particle final states. */
+  assert(outgoing_particles_.size() == 2);
+
+  ParticleData *p_a = &outgoing_particles_[0];
+  ParticleData *p_b = &outgoing_particles_[1];
+
+  const ParticleType &t_a = p_a->type();
+  const ParticleType &t_b = p_b->type();
+
+  double mass_a = t_a.mass();
+  double mass_b = t_b.mass();
+
+  const double cms_energy = sqrt_s();
+
+  if (cms_energy < t_a.minimum_mass() + t_b.minimum_mass()) {
+    throw InvalidResonanceFormation("resonance_formation: not enough energy! " +
+      std::to_string(cms_energy) + " " + std::to_string(t_a.minimum_mass()) +
+      " " + std::to_string(t_b.minimum_mass()) + " " +
+      p_a->pdgcode().string() + " " + p_b->pdgcode().string());
+  }
+
+  /* If one of the particles is a resonance, sample its mass. */
+  /* TODO: Other particle assumed stable! */
+  if (!t_a.is_stable()) {
+    mass_a = sample_resonance_mass(t_a, t_b.mass(), cms_energy, L_);
+  } else if (!t_b.is_stable()) {
+    mass_b = sample_resonance_mass(t_b, t_a.mass(), cms_energy, L_);
+  }
+
+  double momentum_radial = pCM(cms_energy, mass_a, mass_b);
+  if (!(momentum_radial > 0.0)) {
+    log.warn("Particle: ", t_a.pdgcode(),
+             " radial momentum: ", momentum_radial);
+    log.warn("Etot: ", cms_energy, " m_a: ", mass_a, " m_b: ", mass_b);
+  }
+  /* Here we assume an isotropic angular distribution. */
+  Angles phitheta;
+  phitheta.distribute_isotropically();
+
+  p_a->set_4momentum(mass_a,  phitheta.threevec() * momentum_radial);
+  p_b->set_4momentum(mass_b, -phitheta.threevec() * momentum_radial);
+
+  log.debug("p_a: ", *p_a, "\np_b: ", *p_b);
+}
+
 
 float DecayAction::raw_weight_value() const {
   return total_width_;

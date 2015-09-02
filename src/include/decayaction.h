@@ -47,6 +47,8 @@ class DecayAction : public Action {
    */
   void generate_final_state() override;
 
+  void sample_cms_momenta() override;
+
   float raw_weight_value() const override;
 
   float total_width() const {
@@ -77,6 +79,9 @@ class DecayAction : public Action {
 
   /** total decay width */
   float total_width_;
+
+  /** angular momentum of the decay */
+  int L_ = 0;
 
  protected:
   /**
