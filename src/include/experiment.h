@@ -217,6 +217,11 @@ class Experiment : public ExperimentBase {
   ExperimentParameters parameters_;
 
   /**
+   * Structure to precalculate and hold parameters for density computations
+   */
+  DensityParameters density_param_;
+
+  /**
    * Instance of the Modus template parameter. May store modus-specific data
    * and contains modus-specific function implementations.
    */

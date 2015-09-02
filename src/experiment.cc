@@ -186,8 +186,8 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
   // assigning initial_clock_.
   return {{0.0f, config.read({"General", "Delta_Time"})},
           config.take({"Output", "Output_Interval"}), ntest,
-          config.take({"General", "Gaussian_Sigma"}, 1.0),
-          config.take({"General", "Gauss_Cutoff_In_Sigma"}, 4.0)};
+          config.take({"General", "Gaussian_Sigma"}, 1.0f),
+          config.take({"General", "Gauss_Cutoff_In_Sigma"}, 4.0f)};
 }
 }  // unnamed namespace
 
@@ -241,6 +241,7 @@ std::ostream &operator<<(std::ostream &out, const Experiment<Modus> &e) {
 template <typename Modus>
 Experiment<Modus>::Experiment(Configuration config, bf::path output_path)
     : parameters_(create_experiment_parameters(config)),
+      density_param_(DensityParameters(parameters_)),
       modus_(config["Modi"], parameters_),
       particles_(),
       nevents_(config.take({"General", "Nevents"})),

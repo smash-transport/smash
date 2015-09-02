@@ -151,6 +151,50 @@ namespace Smash {
                 const Particles &plist, const ExperimentParameters &par,
                 DensityType dens_type, bool compute_gradient);
 
+/** A class to precalculate and store parameters relevant for density
+ *  calculation. It has to be initialized only once per SMASH run.
+ */
+class DensityParameters {
+ public:
+  DensityParameters(const ExperimentParameters &par) :
+      sig_(par.gaussian_sigma),
+      r_cut_(par.gauss_cutoff_in_sigma * par.gaussian_sigma),
+      ntest_(par.testparticles) {
+    r_cut_sqr_ = r_cut_ * r_cut_;
+    const float two_sig_sqr = 2 * sig_ * sig_;
+    two_sig_sqr_inv_ = 1.f / two_sig_sqr;
+    const float norm1 = smearing_factor_norm(two_sig_sqr);
+    const float norm2 = smearing_factor_grad_norm(two_sig_sqr);
+    const float corr_factor = smearing_factor_rcut_correction(
+                                               par.gauss_cutoff_in_sigma);
+    norm_factor_sf_ = 1.f / (norm1 * ntest_ * corr_factor);
+    norm_factor_sf_grad_ = 1.f / (norm2 * ntest_ * corr_factor);
+  }
+  /// Testparticle number
+  float ntest() const { return ntest_; }
+  /// Cutting radius [fm]
+  float r_cut() const { return r_cut_; }
+  /// Squared cutting radius [fm^2]
+  float r_cut_sqr() const { return r_cut_sqr_; }
+  /// \f$ (2 \sigma^2)^{-1} \f$
+  float two_sig_sqr_inv() const { return two_sig_sqr_inv_; }
+  /** Normalization for smearing factor. Unnormalized smearing factor
+   * \f$ sf(\vec{r}) \f$ has to be multiplied by this to have
+   *  \f$ \int d^3r \, sf(\vec{r}) = 1 \f$.
+   */
+  float norm_factor_sf() const { return norm_factor_sf_; }
+  /// Normalization for smearing factor gradient
+  float norm_factor_sf_grad() const { return norm_factor_sf_grad_; }
+ private:
+  const float sig_;
+  const float r_cut_;
+  float r_cut_sqr_;
+  float two_sig_sqr_inv_;
+  float norm_factor_sf_;
+  float norm_factor_sf_grad_;
+  const int ntest_;
+};
+
 
 /** A class for time-efficient (time-memory trade-off) calculation of density
  *  on the lattice. It holds two FourVectors - positive and negative
