@@ -19,6 +19,7 @@
 #include "forwarddeclarations.h"
 #include "fourvector.h"
 #include "logging.h"
+#include "numerics.h"
 
 namespace Smash {
 
@@ -65,6 +66,15 @@ class RectangularLattice {
              n_cells_[0], ",", n_cells_[1], ",", n_cells_[2], "), origin = (",
              origin_[0], ",", origin_[1], ",", origin_[2],
              "), periodic: ", periodic_);
+    if (n_cells_[0] < 1 ||
+        n_cells_[1] < 1 ||
+        n_cells_[2] < 1 ||
+        lattice_sizes_[0] < 0.0 ||
+        lattice_sizes_[1] < 0.0 ||
+        lattice_sizes_[2] < 0.0) {
+      throw std::invalid_argument("Lattice sizes should be positive, "
+                     "lattice dimensions should be > 0.");
+    }
   }
 
   /// Sets all values on lattice to zeros
@@ -218,8 +228,33 @@ class RectangularLattice {
     iterate_sublattice(l_bounds, u_bounds, std::forward<F>(func));
   }
 
+  /// Checks if lattices of possibly different types have identical structure
+  template <typename L>
+  bool identical_to_lattice(const L* lat) const {
+    return n_cells_[0] == lat->dimensions()[0]
+        && n_cells_[1] == lat->dimensions()[1]
+        && n_cells_[2] == lat->dimensions()[2]
+        && std::abs(lattice_sizes_[0] - lat->lattice_sizes()[0]) < really_small
+        && std::abs(lattice_sizes_[1] - lat->lattice_sizes()[1]) < really_small
+        && std::abs(lattice_sizes_[2] - lat->lattice_sizes()[2]) < really_small
+        && std::abs(origin_[0] - lat->origin()[0]) < really_small
+        && std::abs(origin_[1] - lat->origin()[1]) < really_small
+        && std::abs(origin_[2] - lat->origin()[2]) < really_small
+        && periodic_ == lat->periodic();
+  }
+
   void compute_gradient_lattice(
          RectangularLattice<ThreeVector>* grad_lat) const {
+    if (n_cells_[0] < 2 || n_cells_[1] < 2 || n_cells_[2] < 2) {
+      // Gradient calculation is impossible
+      throw std::runtime_error("Lattice is too small for gradient calculation"
+                               " (should be at least 2x2x2)");
+    }
+    if (!identical_to_lattice(grad_lat)) {
+      // Lattice for gradient should have identical origin/dims/periodicity
+      throw std::invalid_argument("Lattice for gradient should have the"
+                  " same origin/dims/periodicity that the original one.");
+    }
     const float inv_2dx = 0.5f / cell_sizes_[0];
     const float inv_2dy = 0.5f / cell_sizes_[1];
     const float inv_2dz = 0.5f / cell_sizes_[2];
@@ -228,14 +263,15 @@ class RectangularLattice {
     const int diz = n_cells_[0]*n_cells_[1];
     const int d = diz * n_cells_[2];
 
+
+
     for (int iz = 0; iz < n_cells_[2]; iz++) {
       const int z_offset = diz * iz;
       for (int iy = 0; iy < n_cells_[1]; iy++) {
         const int y_offset = diy * iy + z_offset;
         for (int ix = 0; ix < n_cells_[0]; ix++) {
           const int index = ix + y_offset;
-
-          if (ix != 0 && ix != n_cells_[0]-1) {
+          if (likely(ix != 0 && ix != n_cells_[0]-1)) {
             (*grad_lat)[index].set_x1(
                (lattice_[index+dix]-lattice_[index-dix]) * inv_2dx);
           } else if (ix == 0) {
@@ -247,8 +283,7 @@ class RectangularLattice {
                (lattice_[index-diy+dix]-lattice_[index-dix]) * inv_2dx :
                (lattice_[index]-lattice_[index-dix]) * 2 * inv_2dx);
           }
-
-          if (iy != 0 && iy != n_cells_[1]-1) {
+          if (likely(iy != 0 && iy != n_cells_[1]-1)) {
             (*grad_lat)[index].set_x2(
               (lattice_[index+diy]-lattice_[index-diy]) * inv_2dy);
           } else if (iy == 0) {
@@ -260,8 +295,7 @@ class RectangularLattice {
                (lattice_[index-diz+diy]-lattice_[index-diy]) * inv_2dy :
                (lattice_[index]-lattice_[index-diy]) * 2 * inv_2dy);
           }
-
-          if (iz != 0 && iz != n_cells_[2]-1) {
+          if (likely(iz != 0 && iz != n_cells_[2]-1)) {
             (*grad_lat)[index].set_x3(
               (lattice_[index+diz]-lattice_[index-diz]) * inv_2dz);
           } else if (iz == 0) {

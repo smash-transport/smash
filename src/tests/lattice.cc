@@ -275,3 +275,39 @@ TEST(gradient_periodic) {
                        "node: (" << ix << ", " << iy << ", " << iz << ")";
     });
 }
+
+/* Test gradient for 2x2x2 lattice. The test is that it doesn't segfault.
+*/
+TEST(gradient_2x2x2lattice) {
+  const std::array<float, 3> l = {9.0f, 7.0f, 13.0f};
+  const std::array<int, 3> n = {2, 2, 2};
+  const std::array<float, 3> origin = {-5.2f, -4.3f, -6.7f};
+  bool periodicity = false;
+  auto lat = make_unique<RectangularLattice<double>>(
+             l, n, origin, periodicity, LatticeUpdate::EveryTimestep);
+  ThreeVector r;
+  // Fill lattice with (2 pi x/lx) cos(2 pi y/ly) cos(2 pi z/lz) function.
+  lat->iterate_sublattice({0, 0, 0}, lat->dimensions(),
+             [&](double &node, int ix, int iy, int iz){
+      r = lat->cell_center(ix, iy, iz);
+      node = std::cos(2*M_PI*r.x1()/l[0]) *
+             std::cos(2*M_PI*r.x2()/l[1]) *
+             std::cos(2*M_PI*r.x3()/l[2]);
+    });
+  auto grad_lat = make_unique<RectangularLattice<ThreeVector>>(
+             l, n, origin, periodicity, LatticeUpdate::EveryTimestep);
+  lat->compute_gradient_lattice(grad_lat.get());
+}
+
+// If one of the dimensions is 1, then 3D gradient calculation is impossible
+TEST_CATCH(gradient_impossible_lattice, std::runtime_error) {
+  const std::array<float, 3> l = {9.0f, 7.0f, 13.0f};
+  const std::array<int, 3> n = {5, 42, 1};
+  const std::array<float, 3> origin = {-5.2f, -4.3f, -6.7f};
+  bool periodicity = false;
+  auto lat = make_unique<RectangularLattice<double>>(
+             l, n, origin, periodicity, LatticeUpdate::EveryTimestep);
+  auto grad_lat = make_unique<RectangularLattice<ThreeVector>>(
+             l, n, origin, periodicity, LatticeUpdate::EveryTimestep);
+  lat->compute_gradient_lattice(grad_lat.get());
+}
