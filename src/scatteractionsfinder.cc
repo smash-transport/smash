@@ -54,33 +54,6 @@ ScatterActionsFinder::ScatterActionsFinder(
     : elastic_parameter_(elastic_parameter),
       testparticles_(testparticles) {}
 
-double ScatterActionsFinder::collision_time(const ParticleData &p1,
-                                            const ParticleData &p2) {
-  const auto &log = logger<LogArea::FindScatter>();
-  /** UrQMD collision time
-   * \iref{Hirano:2012yy} (5.15): in computational frame
-   * position of particle a: x_a
-   * position of particle b: x_b
-   * momentum of particle a: p_a
-   * momentum of particle b: p_b
-   * t_{coll} = - (x_a - x_b) . (p_a - p_b) / (p_a - p_b)^2
-   */
-  ThreeVector pos_diff = p1.position().threevec() - p2.position().threevec();
-  ThreeVector velo_diff = p1.velocity() - p2.velocity();
-  double vsqr = velo_diff.sqr();
-  log.trace(source_location, "\n"
-            "Scatter ", p1, "\n"
-            "    <-> ", p2, "\n"
-            "=> position difference: ", pos_diff, " [fm]",
-            ", velocity difference: ", velo_diff, " [GeV]");
-  /* Zero momentum leads to infite distance, particles are not approaching. */
-  if (vsqr < really_small) {
-    return -1.0;
-  } else {
-    return -pos_diff * velo_diff / vsqr;
-  }
-}
-
 ScatterActionPtr ScatterActionsFinder::construct_scatter_action(
                                             const ParticleData &data_a,
                                             const ParticleData &data_b,
@@ -111,7 +84,6 @@ ScatterActionPtr ScatterActionsFinder::construct_scatter_action(
   }
   return std::move(act);
 }
-
 
 ActionPtr ScatterActionsFinder::check_collision(
     const ParticleData &data_a, const ParticleData &data_b, float dt) const {

@@ -26,15 +26,10 @@ class ScatterActionNucleonKaon : public ScatterActionBaryonMeson {
   /* Inherit constructor. */
   using ScatterActionBaryonMeson::ScatterActionBaryonMeson;
   /**
-   * Determine the elastic cross section fo a nucleon-kaon collision.
-   * It is given by a parametrization of expreimental data.
-   *
-   * \param[in] elast_par Elastic cross section parameter form the input file (not use here).
-   *
-   * \return A ProcessBranch object containing the cross section and 
-   * final-state IDs.
+   * Determine the elastic cross section for a nucleon-kaon collision.
+   * It is given by a parametrization of experimental data.
    */
-  CollisionBranchPtr elastic_cross_section(float elast_par) override;
+  float elastic_parametrization() override;
 
  protected:
   /**
