@@ -62,7 +62,7 @@ TEST(plab_from_s_KN) {
   // At this value plab should vanish, but the function is very steep there.
   const double s = (kaon_mass + nucleon_mass) * (kaon_mass + nucleon_mass);
   // We add a small constant to avoid numerical issue with the assert.
-  COMPARE_ABSOLUTE_ERROR(plab_from_s(s + 1e-7, kaon_mass, nucleon_mass), 0.0, 1e-4);
+  COMPARE_ABSOLUTE_ERROR(plab_from_s(s + 1e-9, kaon_mass, nucleon_mass), 0.0, 3e-4);
   //std::cout << plab_from_s(1.7, kaon_mass, nucleon_mass) << std::endl;
 }
 
