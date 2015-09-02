@@ -40,35 +40,13 @@ namespace Smash {
   float density_factor(const PdgCode pdg, DensityType dens_type);
 
   /**
-   * Implements gaussian smearing for any quantity.
-   * Computes smearing factor taking Lorentz contraction into account.
-   * Integral of unnormalized smearing factor over space should be
-   *  \f$ (2 \pi \sigma^2)^{3/2} \f$. Division over norm is splitted
-   *  for efficiency: it is not nice to recalculate the same constant
-   *  norm at every call.
-   *
-   * \param[in] r vector from the particle to the point of interest
-   * \param[in] p particle 4-momentum to account for Lorentz contraction
-   * \param[in] m particle mass, \f$ m = \sqrt{E^2 - p^2} \f$
-   * \param[in] two_sigma_sqr \f$ 2 \sigma^2 \f$,
-   *            \f$ \sigma \f$ - width of gaussian smearing
-   * \param[in] r_cut_sqr radius, where gaussian is cut, squared
-   * \param[in] compute_gradient option, true - compute gradient, false - no
-   * \return smearing factor itself and optionally also its gradient
-   */
-  std::pair<double, ThreeVector> unnormalized_smearing_factor(
-                       const ThreeVector &r, const FourVector &p,
-                       const double m,
-                       const double two_sigma_sqr, const double r_cut_sqr,
-                       const bool compute_gradient = false);
-  /**
    * Norm of the smearing function, \f$ (2 \pi \sigma^2)^{3/2}\f$
    *
    * \param[in] two_sigma_sqr \f$2 \sigma^2 \f$,
    *            \f$ \sigma \f$ - width of gaussian smearing
    */
-  inline double smearing_factor_norm(const double two_sigma_sqr) {
-    const double tmp = two_sigma_sqr * M_PI;
+  inline float smearing_factor_norm(const float two_sigma_sqr) {
+    const float tmp = two_sigma_sqr * M_PI;
     return tmp * std::sqrt(tmp);
   }
 
@@ -79,8 +57,8 @@ namespace Smash {
    * \param[in] two_sigma_sqr \f$2 \sigma^2 \f$,
    *            \f$ \sigma \f$ - width of gaussian smearing
    */
-  inline double smearing_factor_grad_norm(const double two_sigma_sqr) {
-    const double tmp = two_sigma_sqr * M_PI;
+  inline float smearing_factor_grad_norm(const float two_sigma_sqr) {
+    const float tmp = two_sigma_sqr * M_PI;
     return tmp * std::sqrt(tmp) * 0.5 * two_sigma_sqr;
   }
 
@@ -105,6 +83,73 @@ namespace Smash {
     const float x = rcut_in_sigma / std::sqrt(2.0);
     return - 2.0 /std::sqrt(M_PI) * x * std::exp(-x*x) + std::erf(x);
   }
+
+/** A class to precalculate and store parameters relevant for density
+ *  calculation. It has to be initialized only once per SMASH run.
+ */
+class DensityParameters {
+ public:
+  DensityParameters(const ExperimentParameters &par) :
+      sig_(par.gaussian_sigma),
+      r_cut_(par.gauss_cutoff_in_sigma * par.gaussian_sigma),
+      ntest_(par.testparticles) {
+    r_cut_sqr_ = r_cut_ * r_cut_;
+    const float two_sig_sqr = 2 * sig_ * sig_;
+    two_sig_sqr_inv_ = 1.f / two_sig_sqr;
+    const float norm1 = smearing_factor_norm(two_sig_sqr);
+    const float norm2 = smearing_factor_grad_norm(two_sig_sqr);
+    const float corr_factor = smearing_factor_rcut_correction(
+                                               par.gauss_cutoff_in_sigma);
+    norm_factor_sf_ = 1.f / (norm1 * ntest_ * corr_factor);
+    norm_factor_sf_grad_ = 1.f / (norm2 * ntest_ * corr_factor);
+  }
+  /// Testparticle number
+  int ntest() const { return ntest_; }
+  /// Cutting radius [fm]
+  float r_cut() const { return r_cut_; }
+  /// Squared cutting radius [fm^2]
+  float r_cut_sqr() const { return r_cut_sqr_; }
+  /// \f$ (2 \sigma^2)^{-1} \f$
+  float two_sig_sqr_inv() const { return two_sig_sqr_inv_; }
+  /** Normalization for smearing factor. Unnormalized smearing factor
+   * \f$ sf(\vec{r}) \f$ has to be multiplied by this to have
+   *  \f$ \int d^3r \, sf(\vec{r}) = 1 \f$.
+   */
+  float norm_factor_sf() const { return norm_factor_sf_; }
+  /// Normalization for smearing factor gradient
+  float norm_factor_sf_grad() const { return norm_factor_sf_grad_; }
+ private:
+  const float sig_;
+  const float r_cut_;
+  float r_cut_sqr_;
+  float two_sig_sqr_inv_;
+  float norm_factor_sf_;
+  float norm_factor_sf_grad_;
+  const int ntest_;
+};
+
+  /**
+   * Implements gaussian smearing for any quantity.
+   * Computes smearing factor taking Lorentz contraction into account.
+   * Integral of unnormalized smearing factor over space should be
+   *  \f$ (2 \pi \sigma^2)^{3/2} \f$. Division over norm is splitted
+   *  for efficiency: it is not nice to recalculate the same constant
+   *  norm at every call.
+   *
+   * \param[in] r vector from the particle to the point of interest
+   * \param[in] p particle 4-momentum to account for Lorentz contraction
+   * \param[in] m particle mass, \f$ m = \sqrt{E^2 - p^2} \f$
+   * \param[in] two_sigma_sqr \f$ 2 \sigma^2 \f$,
+   *            \f$ \sigma \f$ - width of gaussian smearing
+   * \param[in] r_cut_sqr radius, where gaussian is cut, squared
+   * \param[in] compute_gradient option, true - compute gradient, false - no
+   * \return smearing factor itself and optionally also its gradient
+   */
+  std::pair<double, ThreeVector> unnormalized_smearing_factor(
+                       const ThreeVector &r, const FourVector &p,
+                       const double m_inv,
+                       const DensityParameters &dens_par,
+                       const bool compute_gradient = false);
 
   /** Calculates Eckart rest frame density and optionally its gradient.
    *  \f[j^{\mu} = (\sqrt{2\pi} \sigma )^{-3} \sum_{i=1}^N C_i u^{\mu}_i
@@ -144,57 +189,12 @@ namespace Smash {
    *   density should also be.
    */
   std::pair<double, ThreeVector> rho_eckart(const ThreeVector &r,
-                const ParticleList &plist, const ExperimentParameters &par,
+                const ParticleList &plist, const DensityParameters &par,
                 DensityType dens_type, bool compute_gradient);
   /// convenience overload of the above
   std::pair<double, ThreeVector> rho_eckart(const ThreeVector &r,
-                const Particles &plist, const ExperimentParameters &par,
+                const Particles &plist, const DensityParameters &par,
                 DensityType dens_type, bool compute_gradient);
-
-/** A class to precalculate and store parameters relevant for density
- *  calculation. It has to be initialized only once per SMASH run.
- */
-class DensityParameters {
- public:
-  DensityParameters(const ExperimentParameters &par) :
-      sig_(par.gaussian_sigma),
-      r_cut_(par.gauss_cutoff_in_sigma * par.gaussian_sigma),
-      ntest_(par.testparticles) {
-    r_cut_sqr_ = r_cut_ * r_cut_;
-    const float two_sig_sqr = 2 * sig_ * sig_;
-    two_sig_sqr_inv_ = 1.f / two_sig_sqr;
-    const float norm1 = smearing_factor_norm(two_sig_sqr);
-    const float norm2 = smearing_factor_grad_norm(two_sig_sqr);
-    const float corr_factor = smearing_factor_rcut_correction(
-                                               par.gauss_cutoff_in_sigma);
-    norm_factor_sf_ = 1.f / (norm1 * ntest_ * corr_factor);
-    norm_factor_sf_grad_ = 1.f / (norm2 * ntest_ * corr_factor);
-  }
-  /// Testparticle number
-  float ntest() const { return ntest_; }
-  /// Cutting radius [fm]
-  float r_cut() const { return r_cut_; }
-  /// Squared cutting radius [fm^2]
-  float r_cut_sqr() const { return r_cut_sqr_; }
-  /// \f$ (2 \sigma^2)^{-1} \f$
-  float two_sig_sqr_inv() const { return two_sig_sqr_inv_; }
-  /** Normalization for smearing factor. Unnormalized smearing factor
-   * \f$ sf(\vec{r}) \f$ has to be multiplied by this to have
-   *  \f$ \int d^3r \, sf(\vec{r}) = 1 \f$.
-   */
-  float norm_factor_sf() const { return norm_factor_sf_; }
-  /// Normalization for smearing factor gradient
-  float norm_factor_sf_grad() const { return norm_factor_sf_grad_; }
- private:
-  const float sig_;
-  const float r_cut_;
-  float r_cut_sqr_;
-  float two_sig_sqr_inv_;
-  float norm_factor_sf_;
-  float norm_factor_sf_grad_;
-  const int ntest_;
-};
-
 
 /** A class for time-efficient (time-memory trade-off) calculation of density
  *  on the lattice. It holds two FourVectors - positive and negative
@@ -232,8 +232,8 @@ class DensityOnLattice {
     }
   }
   /// Computes density from jmu
-  void compute_density(const double norm) {
-    density_ = (jmu_pos_.abs() - jmu_neg_.abs()) / norm;
+  void compute_density(const double norm_factor) {
+    density_ = (jmu_pos_.abs() - jmu_neg_.abs()) * norm_factor;
   }
   /// Returns the density if it was previously computed
   double density() const { return density_; }
@@ -263,7 +263,7 @@ class DensityOnLattice {
   void update_density_lattice(DensityLattice* lat,
                             const LatticeUpdate update,
                             const DensityType dens_type,
-                            const ExperimentParameters &par,
+                            const DensityParameters &par,
                             const Particles &particles);
 }  // namespace Smash
 

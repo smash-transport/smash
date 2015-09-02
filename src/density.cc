@@ -31,29 +31,24 @@ float density_factor(const PdgCode pdg, DensityType dens_type) {
 
 std::pair<double, ThreeVector> unnormalized_smearing_factor(
                        const ThreeVector &r, const FourVector &p,
-                       const double m,
-                       const double two_sigma_sqr, const double r_cut_sqr,
+                       const double m_inv,
+                       const DensityParameters &dens_par,
                        const bool compute_gradient) {
   const double r_sqr = r.sqr();
-  if (r_sqr > r_cut_sqr) {
+  if (r_sqr > dens_par.r_cut_sqr()) {
     // Distance from particle to point of interest > r_cut
     return std::make_pair(0.0, ThreeVector(0.0, 0.0, 0.0));
   }
-  if (m < really_small) {
-    const auto &log = logger<LogArea::Density>();
-    log.warn("Gaussian smearing is undefined for momentum ", p);
-    return std::make_pair(0.0, ThreeVector(0.0, 0.0, 0.0));
-  }
 
-  const FourVector u = p / m;
+  const FourVector u = p * m_inv;
   const double u_r_scalar = r * u.threevec();
   const double r_rest_sqr = r_sqr + u_r_scalar * u_r_scalar;
 
-  if (r_rest_sqr > r_cut_sqr) {
+  if (r_rest_sqr > dens_par.r_cut_sqr()) {
   // Lorentz contracted distance from particle to point of interest > r_cut
     return std::make_pair(0.0, ThreeVector(0.0, 0.0, 0.0));
   }
-  const double sf = std::exp(- r_rest_sqr / two_sigma_sqr) * u.x0();
+  const double sf = std::exp(- r_rest_sqr * dens_par.two_sig_sqr_inv()) * u.x0();
   const ThreeVector sf_grad = compute_gradient ?
             sf * (r + u.threevec() * u_r_scalar) : ThreeVector(0.0, 0.0, 0.0);
 
@@ -63,7 +58,7 @@ std::pair<double, ThreeVector> unnormalized_smearing_factor(
 template <typename /*ParticlesContainer*/ T>
 std::pair<double, ThreeVector> rho_eckart_impl(const ThreeVector &r,
                                    const T &plist,
-                                   const ExperimentParameters &par,
+                                   const DensityParameters &par,
                                    DensityType dens_type,
                                    bool compute_gradient) {
   /* In the array first FourVector is jmu and next 3 are d jmu / dr.
@@ -77,11 +72,6 @@ std::pair<double, ThreeVector> rho_eckart_impl(const ThreeVector &r,
    it gives no such problem.
   */
   std::array<FourVector, 4> jmu_pos, jmu_neg;
-  const int ntest = par.testparticles;
-  const double sig = par.gaussian_sigma;
-  const double two_sig_sqr = 2 * sig * sig;
-  const double r_cut = par.gauss_cutoff_in_sigma * sig;
-  const double r_cut_sqr = r_cut * r_cut;
 
   for (const auto &p : plist) {
     const float dens_factor = density_factor(p.pdgcode(), dens_type);
@@ -90,10 +80,14 @@ std::pair<double, ThreeVector> rho_eckart_impl(const ThreeVector &r,
     }
     const FourVector mom = p.momentum();
     const double m = mom.abs();
+    if (m < really_small) {
+      continue;
+    }
+    const double m_inv = 1.0 / m;
     const auto sf_and_grad = unnormalized_smearing_factor(
                             p.position().threevec() -r,
-                            mom, m,
-                            two_sig_sqr, r_cut_sqr,
+                            mom, m_inv,
+                            par,
                             compute_gradient);
     if (sf_and_grad.first < really_small) {
       continue;
@@ -116,8 +110,7 @@ std::pair<double, ThreeVector> rho_eckart_impl(const ThreeVector &r,
     }
   }
 
-  const double rho_eck = (jmu_pos[0].abs() - jmu_neg[0].abs()) /
-            smearing_factor_norm(two_sig_sqr) / ntest;
+  const double rho_eck = (jmu_pos[0].abs() - jmu_neg[0].abs()) * par.norm_factor_sf();
 
   ThreeVector rho_eck_grad;
   if (compute_gradient) {
@@ -130,18 +123,18 @@ std::pair<double, ThreeVector> rho_eckart_impl(const ThreeVector &r,
         rho_eck_grad[i-1] -= jmu_neg[i].Dot(jmu_neg[0]) / jmu_neg[0].abs();
       }
     }
-    rho_eck_grad /= smearing_factor_grad_norm(two_sig_sqr) * ntest;
+    rho_eck_grad *= par.norm_factor_sf_grad();
   }
   return std::make_pair(rho_eck, rho_eck_grad);
 }
 
 std::pair<double, ThreeVector> rho_eckart(const ThreeVector &r,
-               const ParticleList &plist, const ExperimentParameters &par,
+               const ParticleList &plist, const DensityParameters &par,
                DensityType dens_type, bool compute_gradient) {
   return rho_eckart_impl(r, plist, par, dens_type, compute_gradient);
 }
 std::pair<double, ThreeVector> rho_eckart(const ThreeVector &r,
-               const Particles &plist, const ExperimentParameters &par,
+               const Particles &plist, const DensityParameters &par,
                DensityType dens_type, bool compute_gradient) {
   return rho_eckart_impl(r, plist, par, dens_type, compute_gradient);
 }
@@ -149,7 +142,7 @@ std::pair<double, ThreeVector> rho_eckart(const ThreeVector &r,
 void update_density_lattice(DensityLattice* lat,
                             const LatticeUpdate update,
                             const DensityType dens_type,
-                            const ExperimentParameters &par,
+                            const DensityParameters &par,
                             const Particles &particles) {
   // Do not proceed if lattice does not exists/update not required
   if (lat == nullptr || lat->when_update() != update) {
@@ -157,11 +150,6 @@ void update_density_lattice(DensityLattice* lat,
   }
   // Add particles to lattice jmus
   lat->reset();
-  const int ntest = par.testparticles;
-  const double sig = par.gaussian_sigma;
-  const double two_sig_sqr = 2 * sig * sig;
-  const double r_cut = par.gauss_cutoff_in_sigma * sig;
-  const double r_cut_sqr = r_cut * r_cut;
   for (const auto &part : particles) {
     const float dens_factor = density_factor(part.pdgcode(), dens_type);
     if (std::abs(dens_factor) < really_small) {
@@ -169,12 +157,19 @@ void update_density_lattice(DensityLattice* lat,
     }
     const FourVector p = part.momentum();
     const double m = p.abs();
+    if (unlikely(m < really_small)) {
+      const auto &log = logger<LogArea::Density>();
+      log.warn("Gaussian smearing is undefined for momentum ", p);
+      continue;
+    }
+    const double m_inv = 1.0 / m;
+
     const ThreeVector pos = part.position().threevec();
-    lat->iterate_in_radius(pos, r_cut,
+    lat->iterate_in_radius(pos, par.r_cut(),
       [&](DensityOnLattice &node, int ix, int iy, int iz){
         const ThreeVector r = lat->cell_center(ix, iy, iz);
-        const double sf = unnormalized_smearing_factor(pos - r, p, m,
-                               two_sig_sqr, r_cut_sqr).first;
+        const double sf = unnormalized_smearing_factor(pos - r, p, m_inv,
+                                                       par).first;
         if (sf > really_small) {
           /*std::cout << "Adding particle " << part << " to lattice with"
                     << " smearing factor " << sf <<
@@ -184,10 +179,9 @@ void update_density_lattice(DensityLattice* lat,
       });
   }
   // Compute density from jmus, take care about smearing factor normalization
-  const double norm = smearing_factor_norm(two_sig_sqr) * ntest *
-                    smearing_factor_rcut_correction(par.gauss_cutoff_in_sigma);
+  const double norm_factor = par.norm_factor_sf();
   for (auto &node : *lat) {
-    node.compute_density(norm);
+    node.compute_density(norm_factor);
   }
 }
 

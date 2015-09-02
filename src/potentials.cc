@@ -17,7 +17,7 @@ namespace Smash {
 /**
  * Potentials constructor. Gets parameters of potentials from configuration.
  */
-Potentials::Potentials(Configuration conf, const ExperimentParameters &param)
+Potentials::Potentials(Configuration conf, const DensityParameters &param)
     : param_(param),
       use_skyrme_(conf.has_value({"Skyrme"})),
       use_symmetry_(conf.has_value({"Symmetry"})) {

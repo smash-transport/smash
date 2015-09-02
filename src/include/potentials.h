@@ -13,7 +13,7 @@
 #include <vector>
 
 #include "configuration.h"
-#include "experimentparameters.h"
+#include "density.h"
 #include "forwarddeclarations.h"
 #include "particledata.h"
 #include "threevector.h"
@@ -35,7 +35,7 @@ namespace Smash {
  */
 class Potentials {
  public:
-  Potentials(Configuration conf, const ExperimentParameters &parameters);
+  Potentials(Configuration conf, const DensityParameters &parameters);
   ~Potentials();
 
   /// Evaluates skyrme potential given baryon density
@@ -85,7 +85,7 @@ class Potentials {
   /** Struct that contains gaussian sigma, cutoff and testparticle number
    *  needed for calculation
    */
-  const ExperimentParameters param_;
+  const DensityParameters param_;
 
   // Skyrme potential on/off
   bool use_skyrme_;

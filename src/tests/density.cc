@@ -90,7 +90,8 @@ TEST(density_value) {
   ParticleList P;
   P.push_back(part_x);
   ThreeVector r;
-  const ExperimentParameters par = Smash::Test::default_parameters();
+  const ExperimentParameters exp_par = Smash::Test::default_parameters();
+  const DensityParameters par(exp_par);
   double rho;
   DensityType bar_dens = DensityType::Baryon;
 
@@ -99,17 +100,19 @@ TEST(density_value) {
      rhoX = SetPrecision[Exp[-1.0/2.0/(1.0 - 0.95*0.95)]/(2*Pi)^(3/2), 16]
    */
 
+  const double f = 1.0 / smearing_factor_rcut_correction(
+                                             exp_par.gauss_cutoff_in_sigma);
   r = ThreeVector(1.0, 0.0, 0.0);
   rho = rho_eckart(r, P, par, bar_dens, false).first;
-  COMPARE_ABSOLUTE_ERROR(rho, 0.0003763388107782538, 1.e-15);
+  COMPARE_RELATIVE_ERROR(rho, 0.0003763388107782538*f, 1.e-5);
 
   r = ThreeVector(0.0, 1.0, 0.0);
   rho = rho_eckart(r, P, par, bar_dens, false).first;
-  COMPARE_ABSOLUTE_ERROR(rho, 0.03851083689074894, 1.e-15);
+  COMPARE_RELATIVE_ERROR(rho, 0.03851083689074894*f, 1.e-5);
 
   r = ThreeVector(0.0, 0.0, 1.0);
   rho = rho_eckart(r, P, par, bar_dens, false).first;
-  COMPARE_ABSOLUTE_ERROR(rho, 0.03851083689074894, 1.e-15);
+  COMPARE_RELATIVE_ERROR(rho, 0.03851083689074894*f, 1.e-5);
 
 }
 
@@ -127,14 +130,17 @@ TEST(density_eckart_special_cases) {
   P.push_back(pr);
   P.push_back(apr);
   ThreeVector r(1.0, 0.0, 0.0);
-  const ExperimentParameters par = Smash::Test::default_parameters();
+  const ExperimentParameters exp_par = Smash::Test::default_parameters();
+  const DensityParameters par(exp_par);
+  const double f = 1.0 / smearing_factor_rcut_correction(
+                                             exp_par.gauss_cutoff_in_sigma);
   double rho = rho_eckart(r, P, par, DensityType::Baryon, false).first;
   COMPARE_ABSOLUTE_ERROR(rho, 0.0, 1.e-15) << rho;
 
   /* Now check for negative baryon density from antiproton */
   P.erase(P.begin()); // Remove proton
   rho = rho_eckart(r, P, par, DensityType::Baryon, false).first;
-  COMPARE_ABSOLUTE_ERROR(rho, -0.0003763388107782538, 1.e-15) << rho;
+  COMPARE_RELATIVE_ERROR(rho, -0.0003763388107782538*f, 1.e-5) << rho;
 }
 
 TEST(smearing_factor_normalization) {
@@ -154,12 +160,13 @@ TEST(smearing_factor_normalization) {
   conf["Modi"]["Box"]["Init_Multiplicities"]["2212"] = N;
   conf["Modi"]["Box"]["Length"] = L;
   const ExperimentParameters par = Smash::Test::default_parameters();
+  const DensityParameters dens_par = DensityParameters(par);
   std::unique_ptr<BoxModus> b = make_unique<BoxModus>(conf["Modi"], par);
   Particles P;
   b->initial_conditions(&P, par);
   // Fill lattice from particles
   update_density_lattice(lat.get(), LatticeUpdate::EveryTimestep,
-                         DensityType::Baryon, par, P);
+                         DensityType::Baryon, dens_par, P);
   // Compute integral rho(r) d^r. Should be equal to N.
   double int_rho_r_d3r = 0.0;
   for (auto &node : *lat) {

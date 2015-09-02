@@ -547,7 +547,7 @@ void Experiment<Modus>::perform_action(
       const FourVector r_interaction = action->get_interaction_point();
       constexpr bool compute_grad = false;
       rho = rho_eckart(r_interaction.threevec(), particles_before_actions,
-                       parameters_, dens_type_, compute_grad).first;
+                       density_param_, dens_type_, compute_grad).first;
     }
     /*!\Userguide
      * \page collisions_output_in_box_modus_ Collision output in box modus
@@ -585,7 +585,7 @@ void Experiment<Modus>::write_dilepton_action(const ActionPtr &action,
     constexpr bool compute_grad = false;
     const double rho =
         rho_eckart(r_interaction.threevec(), particles_before_actions,
-                   parameters_, dens_type_, compute_grad).first;
+                   density_param_, dens_type_, compute_grad).first;
     // write dilepton output
     dilepton_output_->at_interaction(action->incoming_particles(),
                                      action->outgoing_particles(),
@@ -835,18 +835,18 @@ void Experiment<Modus>::intermediate_output(const int evt_num,
   for (const auto &output : outputs_) {
     output->at_intermediate_time(particles_, evt_num, parameters_.labclock);
     // Thermodynamic output at some point versus time
-    output->thermodynamics_output(particles_, parameters_);
+    output->thermodynamics_output(particles_, parameters_, density_param_);
     // Thermodynamic output on the lattice versus time
     switch (dens_type_lattice_printout_) {
       case DensityType::Baryon:
         update_density_lattice(jmu_B_lat_.get(), lat_upd,
-                               DensityType::Baryon, parameters_, particles_);
+                               DensityType::Baryon, density_param_, particles_);
         output->thermodynamics_output(std::string("rhoB"), *jmu_B_lat_,
                                                                  evt_num);
         break;
       case DensityType::BaryonicIsospin:
         update_density_lattice(jmu_I3_lat_.get(), lat_upd,
-                     DensityType::BaryonicIsospin, parameters_, particles_);
+                     DensityType::BaryonicIsospin, density_param_, particles_);
         output->thermodynamics_output(std::string("rhoI3"), *jmu_I3_lat_,
                                                                  evt_num);
         break;
@@ -854,7 +854,7 @@ void Experiment<Modus>::intermediate_output(const int evt_num,
         break;
       default:
         update_density_lattice(jmu_custom_lat_.get(), lat_upd,
-                       dens_type_lattice_printout_, parameters_, particles_);
+                       dens_type_lattice_printout_, density_param_, particles_);
         output->thermodynamics_output(std::string("rho"), *jmu_custom_lat_,
                                                                   evt_num);
     }
@@ -866,7 +866,7 @@ void Experiment<Modus>::propagate_all() {
   if (potentials_) {
     if (potentials_->use_skyrme()) {
       update_density_lattice(jmu_B_lat_.get(), LatticeUpdate::EveryTimestep,
-                       DensityType::Baryon, parameters_, particles_);
+                       DensityType::Baryon, density_param_, particles_);
       const int UBlattice_size = UB_lat_->size();
       for (int i = 0; i < UBlattice_size; i++) {
         (*UB_lat_)[i] = potentials_->skyrme_pot((*jmu_B_lat_)[i].density());
@@ -875,7 +875,7 @@ void Experiment<Modus>::propagate_all() {
     }
     if (potentials_->use_symmetry()) {
       update_density_lattice(jmu_I3_lat_.get(), LatticeUpdate::EveryTimestep,
-                      DensityType::BaryonicIsospin, parameters_, particles_);
+                      DensityType::BaryonicIsospin, density_param_, particles_);
       const int UI3lattice_size = UI3_lat_->size();
       for (int i = 0; i < UI3lattice_size; i++) {
         (*UI3_lat_)[i] = potentials_->symmetry_pot(
