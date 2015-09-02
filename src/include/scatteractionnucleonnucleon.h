@@ -31,17 +31,12 @@ class ScatterActionNucleonNucleon : public ScatterActionBaryonBaryon {
   CollisionBranchList two_to_two_cross_sections() override;
 
  protected:
-  /** Perform an elastic nucleon-nucleon scattering with
-   * anisotropic angular distributions. */
-  void elastic_scattering() override;
-
   /**
-   * Sample final state momenta (and masses) in an inelastic 2->2 collision,
-   * possibly using anisotropic angular distributions.
+   * Sample final-state angles in a 2->2 collision (possibly anisotropic).
    *
    * \throws InvalidResonanceFormation
    */
-  void sample_cms_momenta() override;
+  void sample_angles(std::pair<double, double> masses) override;
 
  private:
   /**

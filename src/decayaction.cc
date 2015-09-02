@@ -35,11 +35,6 @@ double DecayAction::sqrt_s() const {
 }
 
 
-void DecayAction::one_to_two() {
-  /* Sample the masses and momenta. */
-  sample_cms_momenta();
-}
-
 void DecayAction::one_to_three() {
   const auto &log = logger<LogArea::DecayModes>();
   ParticleData &outgoing_a = outgoing_particles_[0];
@@ -176,7 +171,7 @@ void DecayAction::generate_final_state() {
 
   switch (outgoing_particles_.size()) {
   case 2:
-    one_to_two();
+    sample_2body_phasespace();
     break;
   case 3:
     one_to_three();
@@ -201,19 +196,12 @@ void DecayAction::generate_final_state() {
 }
 
 
-void DecayAction::sample_cms_momenta() {
-  const auto &log = logger<LogArea::Action>();
-  /* This function only operates on 2-particle final states. */
-  assert(outgoing_particles_.size() == 2);
+std::pair<double, double> DecayAction::sample_masses() const {
+  const ParticleType &t_a = outgoing_particles_[0].type();
+  const ParticleType &t_b = outgoing_particles_[1].type();
 
-  ParticleData *p_a = &outgoing_particles_[0];
-  ParticleData *p_b = &outgoing_particles_[1];
-
-  const ParticleType &t_a = p_a->type();
-  const ParticleType &t_b = p_b->type();
-
-  double mass_a = t_a.mass();
-  double mass_b = t_b.mass();
+  // start with pole masses
+  std::pair<double, double> masses = {t_a.mass(), t_b.mass()};
 
   const double cms_energy = sqrt_s();
 
@@ -221,31 +209,21 @@ void DecayAction::sample_cms_momenta() {
     throw InvalidResonanceFormation("resonance_formation: not enough energy! " +
       std::to_string(cms_energy) + " " + std::to_string(t_a.minimum_mass()) +
       " " + std::to_string(t_b.minimum_mass()) + " " +
-      p_a->pdgcode().string() + " " + p_b->pdgcode().string());
+      t_a.pdgcode().string() + " " + t_b.pdgcode().string());
   }
 
   /* If one of the particles is a resonance, sample its mass. */
-  /* TODO: Other particle assumed stable! */
-  if (!t_a.is_stable()) {
-    mass_a = sample_resonance_mass(t_a, t_b.mass(), cms_energy, L_);
-  } else if (!t_b.is_stable()) {
-    mass_b = sample_resonance_mass(t_b, t_a.mass(), cms_energy, L_);
+  if (!t_a.is_stable() && t_b.is_stable()) {
+    masses.first = sample_resonance_mass(t_a, t_b.mass(), cms_energy, L_);
+  } else if (!t_b.is_stable() && t_a.is_stable()) {
+    masses.second = sample_resonance_mass(t_b, t_a.mass(), cms_energy, L_);
+  } else if (!t_a.is_stable() && !t_b.is_stable()) {
+    throw std::runtime_error("Double-resonance production not yet implemented! "
+                             + t_a.pdgcode().string() + " "
+                             + t_b.pdgcode().string());
   }
 
-  double momentum_radial = pCM(cms_energy, mass_a, mass_b);
-  if (!(momentum_radial > 0.0)) {
-    log.warn("Particle: ", t_a.pdgcode(),
-             " radial momentum: ", momentum_radial);
-    log.warn("Etot: ", cms_energy, " m_a: ", mass_a, " m_b: ", mass_b);
-  }
-  /* Here we assume an isotropic angular distribution. */
-  Angles phitheta;
-  phitheta.distribute_isotropically();
-
-  p_a->set_4momentum(mass_a,  phitheta.threevec() * momentum_radial);
-  p_b->set_4momentum(mass_b, -phitheta.threevec() * momentum_radial);
-
-  log.debug("p_a: ", *p_a, "\np_b: ", *p_b);
+  return masses;
 }
 
 

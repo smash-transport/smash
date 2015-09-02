@@ -9,7 +9,6 @@
 
 #include "include/scatteraction.h"
 
-#include "include/angles.h"
 #include "include/constants.h"
 #include "include/cxx14compat.h"
 #include "include/kinematics.h"
@@ -66,7 +65,7 @@ void ScatterAction::generate_final_state() {
       /* 2->2 inelastic scattering */
       log.debug("Process: Inelastic scattering.", process_type_);
       /* Sample the particle momenta in CM system. */
-      sample_cms_momenta();
+      sample_2body_phasespace();
       break;
     case ProcessType::String:
       /* string excitation */
@@ -282,28 +281,12 @@ CollisionBranchList ScatterAction::resonance_cross_sections() {
 
 
 void ScatterAction::elastic_scattering() {
-  const auto &log = logger<LogArea::ScatterAction>();
+  // copy initial particles into final state
   outgoing_particles_[0] = incoming_particles_[0];
   outgoing_particles_[1] = incoming_particles_[1];
-
-  /* Determine absolute momentum in center-of-mass frame. */
-  const double momentum_radial = cm_momentum();
-
-  /* Particles exchange momenta and scatter to random direction
-   * (isotropically). */
-  Angles phitheta;
-  phitheta.distribute_isotropically();
-  log.debug("Random momentum: ", momentum_radial, " ", phitheta);
-
-  /* Set 4-momentum: Masses stay the same, 3-momentum changes. */
-  outgoing_particles_[0].set_4momentum(outgoing_particles_[0].effective_mass(),
-                                       phitheta.threevec() * momentum_radial);
-  outgoing_particles_[1].set_4momentum(outgoing_particles_[1].effective_mass(),
-                                       -phitheta.threevec() * momentum_radial);
-
-  /* debug output */
-  log.debug("exchanged momenta a", outgoing_particles_[0].momentum());
-  log.debug("exchanged momenta b", outgoing_particles_[1].momentum());
+  // resample momenta
+  sample_angles({outgoing_particles_[0].effective_mass(),
+                 outgoing_particles_[1].effective_mass()});
 }
 
 
