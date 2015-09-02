@@ -116,6 +116,7 @@ float spectral_function_integrand(float resonance_mass, float srts,
  * \param[in] type_res Type of the resonance particle.
  * \param[in] mass_stable Mass of the stable particle.
  * \param[in] cms_energy center-of-mass energy of the 2-particle final state.
+ * \param[in] L relative angular momentum of the final-state particles
  *
  * \return The mass of the resonance particle.
  */
