@@ -117,4 +117,29 @@ has to interrupt the execution of the program to allocate the page and fill it
 in the page table for use in the TLB. Page-faults must happen after memory
 allocations (unless \c malloc is able to reuse previously deallocated memory)
 and are therefore an indicator for "irresponsible" memory allocations.
+
+\subsection profiling_flamegraph Flame Graphs
+
+Flame graphs are a useful way to visualize the call graph output of a profiler.
+To generate them, do:
+
+    git clone https://github.com/brendangregg/FlameGraph
+    export FGPATH=$(pwd)/FlameGraph
+
+This gives you a collection of Perl scripts for flame graph generation.
+Different profilers are supported. In the following example we are using perf on
+Linux:
+
+    perf record -F 99 -g ./smash
+    perf script | $FGPATH/stackcollapse-perf.pl > out.perf-folded
+    $FGPATH/flamegraph.pl out.perf-folded > perf.svg
+    firefox perf.svg
+
+If you get mangled names of the functions, try this as a second line
+
+    perf script | c++filt | $FGPATH/stackcollapse-perf.pl > out.perf-folded
+
+The x axis represents the total duration that the corresponding stack frame
+lived for. The order and the colors are arbitrary and optimized for readability.
+The y axis represents the position on the stack.
 */

@@ -55,7 +55,7 @@ void DensityOutput::at_intermediate_time(const Particles &/*particles*/,
 void DensityOutput::thermodynamics_output(const Particles &particles,
                                           const ExperimentParameters &param) {
   const bool compute_gradient = false;
-  const double rho = rho_eckart(r_, particles, param, DensityType::baryon,
+  const double rho = rho_eckart(r_, particles, param, DensityType::Baryon,
                                 compute_gradient).first;
   std::fprintf(file_.get(), "%g %g\n", param.labclock.current_time(), rho);
 }

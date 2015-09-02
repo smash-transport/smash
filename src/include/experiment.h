@@ -161,7 +161,7 @@ class Experiment : public ExperimentBase {
   void write_dilepton_action(const ActionPtr &action,
                                const ParticleList &particles_before_actions);
 
-  /** Runs the time evolution of an event
+  /** Runs the time evolution of an event with fixed-sized time steps
    *
    * Here, the time steps are looped over, collisions and decays are
    * carried out and particles are propagated.
@@ -169,7 +169,7 @@ class Experiment : public ExperimentBase {
    * \param evt_num Running number of the event
    * \return The number of interactions from the event
    */
-  size_t run_time_evolution(const int evt_num);
+  size_t run_time_evolution_fixed_time_step(const int evt_num);
 
   /** Runs the time evolution of an event without time steps
    *
@@ -203,6 +203,11 @@ class Experiment : public ExperimentBase {
    */
   void intermediate_output(const int evt_num, size_t& interactions_total,
                            size_t& previous_interactions_total);
+
+  /**
+   * Propagate all particles to the current time.
+   */
+  void propagate_all();
 
   /**
    * Struct of several member variables.
@@ -259,7 +264,7 @@ class Experiment : public ExperimentBase {
    */
   std::unique_ptr<DensityLattice> jmu_B_lat_, jmu_I3_lat_, jmu_custom_lat_;
   /// Type of density for lattice printout
-  DensityType dens_type_lattice_printout_ = DensityType::none;
+  DensityType dens_type_lattice_printout_ = DensityType::None;
 
   /**
    * Number of events.
@@ -298,7 +303,7 @@ class Experiment : public ExperimentBase {
   /**
    * This indicates whether to use time steps.
    */
-  const bool use_time_steps_;
+  const TimeStepMode time_step_mode_;
 
   /** The conserved quantities of the system.
    *
@@ -312,7 +317,7 @@ class Experiment : public ExperimentBase {
   SystemTimePoint time_start_ = SystemClock::now();
 
   /// Type of density to be written to collision headers
-  DensityType dens_type_ = DensityType::none;
+  DensityType dens_type_ = DensityType::None;
 
   /**\ingroup logging
    * Writes the initial state for the Experiment to the output stream.

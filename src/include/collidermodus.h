@@ -87,7 +87,7 @@ class ColliderModus : public ModusDefault {
    **/
   float impact_ = 0.f;
   /// Method used for sampling of impact parameter.
-  Sampling sampling_ = Sampling::QUADRATIC;
+  Sampling sampling_ = Sampling::Quadratic;
   /// Minimum value of impact parameter.
   float imp_min_ = 0.0;
   /// Maximum value of impact parameter.

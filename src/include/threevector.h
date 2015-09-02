@@ -218,9 +218,10 @@ inline double operator* (ThreeVector a, const ThreeVector &b) {
 }
 
 ThreeVector inline ThreeVector::operator/= (const double &a) {
-  x_[0] /= a;
-  x_[1] /= a;
-  x_[2] /= a;
+  const double a_inv = 1.0 / a;
+  x_[0] *= a_inv;
+  x_[1] *= a_inv;
+  x_[2] *= a_inv;
   return *this;
 }
 

@@ -16,8 +16,9 @@ General:
     # Modus decision
     Modus:         Collider
 
-    # determine whether to use time steps (necessary for potentials)
-    Use_Time_Steps: True
+    # Mode of the time evolution:
+    # ("Fixed": fixed-sized time steps, "None": no time steps)
+    Time_Step_Mode: Fixed
 
     # temporal grid spacing
     Delta_Time:    0.1
@@ -48,8 +49,8 @@ Output:
     # how much time before recording measurables
     Output_Interval:  1.0
     # Which density is written to collision headers:
-    # ("hadron", "baryon", "baryonic isospin", "pion")
-    Density_Type:      "baryon"
+    # ("hadron", "baryon", "baryonic isospin", "pion", "none")
+    Density_Type:      "none"
     # output formats
     Oscar_Collisions:
         Enable:             True

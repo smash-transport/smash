@@ -16,13 +16,13 @@ namespace Smash {
 
 float density_factor(const PdgCode pdg, DensityType dens_type) {
   switch (dens_type) {
-    case DensityType::hadron:
+    case DensityType::Hadron:
       return pdg.is_hadron() ? 1.f : 0.f;
-    case DensityType::baryon:
+    case DensityType::Baryon:
       return static_cast<float>(pdg.baryon_number());
-    case DensityType::baryonic_isospin:
+    case DensityType::BaryonicIsospin:
       return pdg.is_baryon() ? pdg.isospin3_rel() : 0.f;
-    case DensityType::pion:
+    case DensityType::Pion:
       return pdg.is_pion() ? 1.f : 0.f;
     default:
       return 0.f;
@@ -188,17 +188,20 @@ void update_density_lattice(DensityLattice* lat,
 
 std::ostream& operator<<(std::ostream& os, DensityType dens_type) {
   switch (dens_type) {
-    case DensityType::hadron:
+    case DensityType::Hadron:
       os << "hadron density";
       break;
-    case DensityType::baryon:
+    case DensityType::Baryon:
       os << "baryon density";
       break;
-    case DensityType::baryonic_isospin:
+    case DensityType::BaryonicIsospin:
       os << "baryonic isospin density";
       break;
-    case DensityType::pion:
+    case DensityType::Pion:
       os << "pion density";
+      break;
+    case DensityType::None:
+      os << "none";
       break;
     default:
       os.setstate(std::ios_base::failbit);

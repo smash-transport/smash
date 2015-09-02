@@ -65,10 +65,17 @@ double sample_momenta(const double temperature, const double mass) {
   const auto &log = logger<LogArea::Distributions>();
   log.debug("Sample momenta with mass ", mass, " and T ", temperature);
   /* Maxwell-Boltzmann average E <E>=3T + m * K_1(m/T) / K_2(m/T) */
-  const float m_over_T = mass / temperature;
-  const float energy_average = 3 * temperature
-                             + mass * gsl_sf_bessel_K1(m_over_T)
-                                    / gsl_sf_bessel_Kn(2, m_over_T);
+  float energy_average;
+  if (mass > 0.) {
+    // massive particles
+    const float m_over_T = mass / temperature;
+    energy_average = 3 * temperature
+                     + mass * gsl_sf_bessel_K1(m_over_T)
+                            / gsl_sf_bessel_Kn(2, m_over_T);
+  } else {
+    // massless particles
+    energy_average = 3 * temperature;
+  }
   const float momentum_average_sqr = (energy_average - mass) *
                                      (energy_average + mass);
   const float energy_min = mass;

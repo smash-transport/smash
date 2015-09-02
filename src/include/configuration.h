@@ -258,21 +258,38 @@ class Configuration {
     operator DensityType() {
       std::string s = operator std::string();
       if (s == "hadron") {
-        return DensityType::hadron;
+        return DensityType::Hadron;
       }
       if (s == "baryon") {
-        return DensityType::baryon;
+        return DensityType::Baryon;
       }
       if (s == "baryonic isospin") {
-        return DensityType::baryonic_isospin;
+        return DensityType::BaryonicIsospin;
       }
       if (s == "pion") {
-        return DensityType::pion;
+        return DensityType::Pion;
+      }
+      if (s == "none") {
+        return DensityType::None;
       }
       throw IncorrectTypeInAssignment("The value for key \"" +
                                       std::string(key_) +
                                       "\" should be \"hadron\" or \"baryon\" "
-                                      "or \"baryonic isospin\" or \"pion\".");
+                                      "or \"baryonic isospin\" or \"pion\" "
+                                      "or \"none\".");
+    }
+
+    operator TimeStepMode() {
+      std::string s = operator std::string();
+      if (s == "None") {
+        return TimeStepMode::None;
+      }
+      if (s == "Fixed") {
+        return TimeStepMode::Fixed;
+      }
+      throw IncorrectTypeInAssignment(
+          "The value for key \"" + std::string(key_) +
+          "\" should be \"None\" or \"Fixed\".");
     }
 
     operator BoxInitialCondition() {
@@ -291,13 +308,13 @@ class Configuration {
     operator Sampling() {
       std::string s = operator std::string();
       if (s == "quadratic") {
-        return Sampling::QUADRATIC;
+        return Sampling::Quadratic;
       }
       if (s == "custom") {
-        return Sampling::CUSTOM;
+        return Sampling::Custom;
       }
       if (s == "uniform") {
-        return Sampling::UNIFORM;
+        return Sampling::Uniform;
       }
       throw IncorrectTypeInAssignment(
           "The value for key \"" + std::string(key_) +
