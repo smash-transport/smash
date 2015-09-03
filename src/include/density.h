@@ -138,10 +138,9 @@ class DensityParameters {
    *
    * \param[in] r vector from the particle to the point of interest
    * \param[in] p particle 4-momentum to account for Lorentz contraction
-   * \param[in] m particle mass, \f$ m = \sqrt{E^2 - p^2} \f$
-   * \param[in] two_sigma_sqr \f$ 2 \sigma^2 \f$,
-   *            \f$ \sigma \f$ - width of gaussian smearing
-   * \param[in] r_cut_sqr radius, where gaussian is cut, squared
+   * \param[in] m_inv particle mass, \f$ (E^2 - p^2)^{-1/2} \f$
+   * \param[in] dens_par object containing precomputed parameters for
+   *            density calculation.
    * \param[in] compute_gradient option, true - compute gradient, false - no
    * \return smearing factor itself and optionally also its gradient
    */

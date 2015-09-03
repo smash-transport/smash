@@ -863,7 +863,7 @@ void Experiment<Modus>::intermediate_output(const int evt_num,
 template <typename Modus>
 void Experiment<Modus>::propagate_all() {
   if (potentials_) {
-    if (potentials_->use_skyrme()) {
+    if (potentials_->use_skyrme() && jmu_B_lat_!= nullptr) {
       update_density_lattice(jmu_B_lat_.get(), LatticeUpdate::EveryTimestep,
                        DensityType::Baryon, density_param_, particles_);
       const int UBlattice_size = UB_lat_->size();
@@ -872,7 +872,7 @@ void Experiment<Modus>::propagate_all() {
       }
       UB_lat_->compute_gradient_lattice(dUB_dr_lat_.get());
     }
-    if (potentials_->use_symmetry()) {
+    if (potentials_->use_symmetry() && jmu_I3_lat_ != nullptr) {
       update_density_lattice(jmu_I3_lat_.get(), LatticeUpdate::EveryTimestep,
                       DensityType::BaryonicIsospin, density_param_, particles_);
       const int UI3lattice_size = UI3_lat_->size();
