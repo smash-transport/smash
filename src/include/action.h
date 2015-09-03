@@ -221,12 +221,24 @@ class Action {
   }
 
   /**
-   * Sample final state momenta (and masses) in general X->2 processes,
-   * using an isotropical angular distribution.
+   * Sample final-state masses in general X->2 processes
+   * (thus also fixing the absolute c.o.m. momentum).
    *
    * \throws InvalidResonanceFormation
    */
-  virtual void sample_cms_momenta();
+  virtual std::pair<double, double> sample_masses() const;
+
+  /**
+   * Sample final-state angles in general X->2 processes
+   * (here: using an isotropical angular distribution).
+   */
+  virtual void sample_angles(std::pair<double, double> masses);
+
+  /**
+   * Sample the full 2-body phase-space (masses, momenta, angles)
+   * in the center-of-mass frame.
+   */
+  void sample_2body_phasespace();
 
   /**
    * \ingroup logging

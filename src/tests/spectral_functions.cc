@@ -9,8 +9,9 @@
 
 #include "unittest.h"
 #include "setup.h"
+
+#include "../include/formfactors.h"
 #include "../include/integrate.h"
-#include "../include/resonances.h"
 #include "../include/stringfunctions.h"
 
 using namespace Smash;

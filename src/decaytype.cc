@@ -11,84 +11,11 @@
 
 #include "include/constants.h"
 #include "include/cxx14compat.h"
+#include "include/formfactors.h"
 #include "include/integrate.h"
 #include "include/kinematics.h"
 
 namespace Smash {
-
-/**
- * Returns the squared Blatt-Weisskopf functions,
- * which influence the mass dependence of the decay widths.
- * See e.g. Effenberger's thesis, page 28.
- *
- * \param p_ab Momentum of outgoing particles A and B in center-of-mass frame.
- * \param L Angular momentum of outgoing particles A and B.
- */
-static float BlattWeisskopf(const float p_ab, const int L)
-#ifdef NDEBUG
-    noexcept
-#endif
-{
-  const float R = 1. / hbarc;  /* interaction radius = 1 fm */
-  const auto x = p_ab * R;
-  const auto x2 = x * x;
-  const auto x4 = x2 * x2;
-  switch (L) {
-    case 0:
-      return 1.f;
-    case 1:
-      return x2 / (1.f + x2);
-    case 2: {
-      return x4 / (9.f + 3.f * x2 + x4);
-    case 3:
-      return x4 * x2 / (225.f + 45.f * x2 + 6.f * x4 + x4 * x2);
-    }
-    /* The following lines should be correct. But since nothing in SMASH uses
-     * L > 3, this code is untested and dead. Therefore we only keep it as a
-     * reference for later.
-     * See also input sanitization in load_decaymodes in decaymodes.cc.
-    case 4:
-      return x4 * x4 /
-             (11025.f + 1575.f * x2 + 135.f * x4 + 10.f * x2 * x4 + x4 * x4);
-    */
-#ifndef NDEBUG
-    default:
-      throw std::invalid_argument(
-          std::string("Wrong angular momentum in BlattWeisskopf: ") +
-          std::to_string(L));
-#endif
-  }
-  return 0.f;
-}
-
-
-/**
- * An additional form factor for unstable final states as used in GiBUU,
- * according to M. Post, see eq. (174) in \iref{Buss:2011mx} or eq. (13) in
- * \iref{Post:2003hu}.
- *
- * \param m Actual mass of the decaying resonance [GeV].
- * \param M0 Pole mass of the decaying resonance [GeV].
- * \param srts0 Threshold of the reaction, i.e. minimum possible sqrt(s) [GeV].
- * \param L Lambda parameter of the form factor [GeV]. This is a cut-off
- * parameter that can be different for baryons and mesons.
- *
- * \return The squared value of the form factor (dimensionless).
- *
- * \note This form factor is equal to one at m=M0 and m=srts0. For decreasing
- * values of L, the form factor results in a stronger and stronger suppression
- * of the high-mass tail (m > M0) and a corresponding enhancement of the
- * low-mass tail (m < M0).
- */
-static float Post_FF_sqr(float m, float M0, float srts0, float L) {
-  const auto L4 = L*L*L*L;
-  const auto M2 = M0*M0;
-  const auto s0 = srts0*srts0;
-  const auto sminus = (s0-M2)/2.;
-  const auto splus = m*m - (s0+M2)/2.;
-  const auto FF = (L4 + sminus*sminus) / (L4 + splus*splus);
-  return FF*FF;
-}
 
 
 // TwoBodyDecay
@@ -130,7 +57,7 @@ float TwoBodyDecayStable::rho(float m) const {
   const float p_ab = pCM(m, particle_types_[0]->mass(),
                             particle_types_[1]->mass());
   // determine rho(m)
-  return p_ab / m * BlattWeisskopf(p_ab, L_);
+  return p_ab / m * blatt_weisskopf_sqr(p_ab, L_);
 }
 
 float TwoBodyDecayStable::width(float m0, float G0, float m) const {
@@ -159,7 +86,7 @@ static float integrand_rho_Manley(float mass, float srts, float stable_mass,
   /* center-of-mass momentum of final state particles */
   const float p_f = pCM(srts, stable_mass, mass);
 
-  return p_f/srts * BlattWeisskopf(p_f, L)
+  return p_f/srts * blatt_weisskopf_sqr(p_f, L)
          * type->spectral_function(mass);
 }
 
@@ -232,7 +159,7 @@ float TwoBodyDecaySemistable::rho(float mass) const {
 
 float TwoBodyDecaySemistable::width(float m0, float G0, float m) const {
   return G0 * rho(m) / rho(m0)
-         * Post_FF_sqr(m, m0, particle_types_[0]->mass()
+         * post_ff_sqr(m, m0, particle_types_[0]->mass()
                               + particle_types_[1]->minimum_mass(), Lambda_);
 }
 
@@ -240,8 +167,8 @@ float TwoBodyDecaySemistable::in_width(float m0, float G0, float m,
                                        float m1, float m2) const {
   const float p_f = pCM(m, m1, m2);
 
-  return G0 * p_f * BlattWeisskopf(p_f, L_)
-         * Post_FF_sqr(m, m0, particle_types_[0]->mass()
+  return G0 * p_f * blatt_weisskopf_sqr(p_f, L_)
+         * post_ff_sqr(m, m0, particle_types_[0]->mass()
                               + particle_types_[1]->minimum_mass(), Lambda_)
          / (m * rho(m0));
 }
@@ -340,33 +267,6 @@ ThreeBodyDecayDilepton::ThreeBodyDecayDilepton(ParticleTypePtrList part_types,
   }
 }
 
-// Little helper functions for the form factor of the dilepton dalitz decays
-
-static float form_factor_pi(float mass) {
-  /// see \iref{Landsberg:1986fd}
-  return 1.+5.5*mass*mass;
-}
-
-static float form_factor_eta(float mass) {
-  /// for lamda_eta values see B. Spruck, Ph.D. thesis
-  /// http://geb.uni-giessen.de/geb/volltexte/2008/6667/
-  const float lambda_eta = 0.676;
-  return 1./(1.-(mass*mass/lambda_eta));
-}
-
-static float form_factor_sqr_omega(float mass) {
-  float lambda = 0.65;
-  float gamma_w = 0.075;
-  float n = pow(lambda*lambda - mass*mass, 2.) +
-             lambda*gamma_w * lambda*gamma_w;
-  return pow(lambda, 4.) / n;
-}
-
-static float form_factor_sqr_delta(float) {
-  /// ongoing debate, assumed mass-independent, normalized at real photon mass
-  return 3.12;
-}
-
 
 float ThreeBodyDecayDilepton::diff_width(float m_par, float m_dil,
                                              float m_other, PdgCode pdg) {
@@ -414,7 +314,8 @@ float ThreeBodyDecayDilepton::diff_width(float m_par, float m_dil,
                    std::sqrt(rad1);
         const float t2 =
               pow(std::sqrt(rad2), 3.0);
-        const float gamma_vi = t1 * t2 * form_factor_sqr_delta(m_dil);
+        const float ff = form_factor_delta(m_dil);
+        const float gamma_vi = t1 * t2 * ff*ff;
         return 2.*alpha/(3.*M_PI) * gamma_vi/m_dil;
       }
       default:

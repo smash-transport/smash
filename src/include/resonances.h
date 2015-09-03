@@ -21,6 +21,7 @@
 
 namespace Smash {
 
+
 /**
  * Calculate Clebsch-Gordan coefficient
  *
@@ -100,11 +101,13 @@ float spectral_function_integrand(float resonance_mass, float srts,
  * \param[in] type_res Type of the resonance particle.
  * \param[in] mass_stable Mass of the stable particle.
  * \param[in] cms_energy center-of-mass energy of the 2-particle final state.
+ * \param[in] L relative angular momentum of the final-state particles
  *
  * \return The mass of the resonance particle.
  */
 float sample_resonance_mass(const ParticleType &type_res,
-                            const float mass_stable, const float cms_energy);
+                            const float mass_stable, const float cms_energy,
+                            int L = 0);
 
 }  // namespace Smash
 
