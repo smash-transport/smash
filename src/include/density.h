@@ -118,6 +118,7 @@ class DensityParameters {
   float norm_factor_sf() const { return norm_factor_sf_; }
   /// Normalization for smearing factor gradient
   float norm_factor_sf_grad() const { return norm_factor_sf_grad_; }
+
  private:
   const float sig_;
   const float r_cut_;

@@ -48,7 +48,7 @@ std::pair<double, ThreeVector> unnormalized_smearing_factor(
   // Lorentz contracted distance from particle to point of interest > r_cut
     return std::make_pair(0.0, ThreeVector(0.0, 0.0, 0.0));
   }
-  const double sf = std::exp(- r_rest_sqr * dens_par.two_sig_sqr_inv()) * u.x0();
+  const double sf = std::exp(-r_rest_sqr * dens_par.two_sig_sqr_inv()) * u.x0();
   const ThreeVector sf_grad = compute_gradient ?
             sf * (r + u.threevec() * u_r_scalar) : ThreeVector(0.0, 0.0, 0.0);
 
@@ -110,7 +110,8 @@ std::pair<double, ThreeVector> rho_eckart_impl(const ThreeVector &r,
     }
   }
 
-  const double rho_eck = (jmu_pos[0].abs() - jmu_neg[0].abs()) * par.norm_factor_sf();
+  const double rho_eck = (jmu_pos[0].abs() - jmu_neg[0].abs())
+                         * par.norm_factor_sf();
 
   ThreeVector rho_eck_grad;
   if (compute_gradient) {
