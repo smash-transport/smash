@@ -14,6 +14,16 @@ include(FindPkgConfig)
 include(GetGitRevisionDescription)
 git_describe(VERSION_MAJOR)
 
+find_package (Git)
+if(GIT_FOUND)
+  #message("git found: ${GIT_EXECUTABLE} in version ${GIT_VERSION_STRING}")
+  execute_process(
+    COMMAND ${GIT_EXECUTABLE} rev-parse --abbrev-ref HEAD
+    OUTPUT_VARIABLE GIT_BRANCH)
+  string(STRIP ${GIT_BRANCH} GIT_BRANCH)
+  #message("git branch: ${GIT_BRANCH}")
+endif (GIT_FOUND)
+
 string(TIMESTAMP BUILD_DATE)
 
 find_package(GSL REQUIRED)
