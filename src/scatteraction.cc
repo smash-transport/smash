@@ -179,7 +179,7 @@ double ScatterAction::transverse_distance_sqr() const {
 
 CollisionBranchPtr ScatterAction::elastic_cross_section(float elast_par) {
   float elastic_xs;
-  if (elast_par > 0.) {
+  if (elast_par >= 0.) {
     // use constant elastic cross section from config file
     elastic_xs = elast_par;
   } else {
