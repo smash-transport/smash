@@ -92,18 +92,24 @@ inline float post_ff_sqr(float m, float M0, float srts0, float L) {
 
 // electromagnetic transition form factors for the dilepton dalitz decays
 
+/** Electromagnetic transition form factor for pi0 -> gamma e+ e-,
+ * taken from \iref{Landsberg:1986fd}, as a function of the dilepton mass. */
 inline float form_factor_pi(float mass) {
-  /// see \iref{Landsberg:1986fd}
   return 1.+5.5*mass*mass;
 }
 
+/** Electromagnetic transition form factor for eta -> gamma e+ e-,
+ * taken from \iref{Landsberg:1986fd}, as a function of the dilepton mass.
+ * For the value of lambda_eta see B. Spruck, Ph.D. thesis,
+ * http://geb.uni-giessen.de/geb/volltexte/2008/6667/. */
 inline float form_factor_eta(float mass) {
-  /// for lamda_eta values see B. Spruck, Ph.D. thesis
-  /// http://geb.uni-giessen.de/geb/volltexte/2008/6667/
   const float lambda_eta = 0.676;
-  return 1./(1.-(mass*mass/lambda_eta));
+  const float m_over_eta = mass / lambda_eta;
+  return 1. / (1. - m_over_eta*m_over_eta);
 }
 
+/** Squared electromagnetic transition form factor for omega -> pi0 e+ e-,
+ * taken from \iref{Bratkovskaya:1996qe}, as a function of the dilepton mass. */
 inline float form_factor_sqr_omega(float mass) {
   float lambda = 0.65;
   float gamma_w = 0.075;
@@ -112,8 +118,10 @@ inline float form_factor_sqr_omega(float mass) {
   return pow(lambda, 4.) / n;
 }
 
+/** Electromagnetic transition form factor for Delta -> N e+ e-
+ * as a function of the dilepton mass. Currently assumed to be constant,
+ * normalized at the real-photon point. */
 inline float form_factor_delta(float) {
-  /// ongoing debate, assumed mass-independent, normalized at real photon mass
   return 3.12;
 }
 
