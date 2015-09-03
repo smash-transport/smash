@@ -83,61 +83,6 @@ static float Cugnon_bnp(float plab) {
 }
 
 
-void ScatterActionNucleonNucleon::elastic_scattering() {
-  const auto &log = logger<LogArea::ScatterAction>();
-  outgoing_particles_[0] = incoming_particles_[0];
-  outgoing_particles_[1] = incoming_particles_[1];
-
-  /* Determine absolute momentum in center-of-mass frame. */
-  const double momentum_radial = cm_momentum();
-
-  Angles phitheta;
-  if (isotropic_) {
-    phitheta.distribute_isotropically();
-  } else {
-    /** Choose angular distribution according to Cugnon parametrization,
-     * see \iref{Cugnon:1996kh}. */
-    double bb, a, plab = plab_from_s_NN(mandelstam_s());
-    if (incoming_particles_[0].type().charge() +
-        incoming_particles_[1].type().charge() == 1) {
-      // pn
-      bb = std::max(Cugnon_bnp(plab), really_small);
-      a = (plab < 0.8) ? 1. : 0.64/(plab*plab);
-    } else {
-      // pp or nn
-      bb = std::max(Cugnon_bpp(plab), really_small);
-      a = 1.;
-    }
-    double t, t_max = -4.*momentum_radial*momentum_radial;
-    if (Random::canonical() <= 1./(1.+a)) {
-      t = Random::expo(bb, 0., t_max);
-    } else {
-      t = t_max - Random::expo(bb, 0., t_max);
-    }
-
-    // determine scattering angles in center-of-mass frame
-    phitheta = Angles(2.*M_PI*Random::canonical(), 1. - 2.*t/t_max);
-  }
-
-  ThreeVector pscatt = phitheta.threevec();
-  // 3-momentum of first incoming particle in center-of-mass frame
-  ThreeVector pcm = incoming_particles_[0].momentum().
-                    LorentzBoost(beta_cm()).threevec();
-
-  pscatt.rotate_to(pcm);
-
-  /* Set 4-momentum: Masses stay the same, 3-momentum changes. */
-  outgoing_particles_[0].set_4momentum(outgoing_particles_[0].effective_mass(),
-                                       pscatt * momentum_radial);
-  outgoing_particles_[1].set_4momentum(outgoing_particles_[1].effective_mass(),
-                                       - pscatt * momentum_radial);
-
-  /* debug output */
-  log.debug("exchanged momenta a", outgoing_particles_[0].momentum());
-  log.debug("exchanged momenta b", outgoing_particles_[1].momentum());
-}
-
-
 CollisionBranchList ScatterActionNucleonNucleon::two_to_two_cross_sections() {
   const ParticleType &type_particle_a = incoming_particles_[0].type();
   const ParticleType &type_particle_b = incoming_particles_[1].type();
@@ -257,56 +202,58 @@ CollisionBranchList ScatterActionNucleonNucleon::nuc_nuc_to_nuc_res(
 }
 
 
-void ScatterActionNucleonNucleon::sample_cms_momenta() {
+void ScatterActionNucleonNucleon::sample_angles(
+                                  std::pair<double, double> masses) {
   const auto &log = logger<LogArea::ScatterAction>();
-  /* This function only operates on 2-particle final states. */
-  assert(outgoing_particles_.size() == 2);
 
   ParticleData *p_a = &outgoing_particles_[0];
   ParticleData *p_b = &outgoing_particles_[1];
 
-  const ParticleType &t_a = p_a->type();
-  const ParticleType &t_b = p_b->type();
-
-  double mass_a = t_a.mass();
-  double mass_b = t_b.mass();
+  const double mass_a = masses.first;
+  const double mass_b = masses.second;
 
   const double cms_energy = sqrt_s();
-
-  if (cms_energy < t_a.minimum_mass() + t_b.minimum_mass()) {
-    throw InvalidResonanceFormation("resonance_formation: not enough energy! " +
-      std::to_string(cms_energy) + " " + std::to_string(t_a.minimum_mass()) +
-      " " + std::to_string(t_b.minimum_mass()) + " " +
-      p_a->pdgcode().string() + " " + p_b->pdgcode().string());
-  }
-
-  /* If one of the particles is a resonance, sample its mass. */
-  /* TODO: Other particle assumed stable! */
-  if (!t_a.is_stable()) {
-    mass_a = sample_resonance_mass(t_a, t_b.mass(), cms_energy);
-  } else if (!t_b.is_stable()) {
-    mass_b = sample_resonance_mass(t_b, t_a.mass(), cms_energy);
-  }
 
   const std::array<double, 2> t_range
       = get_t_range<double>(cms_energy, nucleon_mass, nucleon_mass,
                             mass_a, mass_b);
   Angles phitheta;
-  if (t_a.pdgcode().iso_multiplet() == 0x1114 &&
-      t_b.pdgcode().iso_multiplet() == 0x1112 && !isotropic_) {
+  if (p_a->pdgcode().iso_multiplet() == 0x1112 &&
+      p_b->pdgcode().iso_multiplet() == 0x1112 && !isotropic_) {
+    /** NN->NN: Choose angular distribution according to Cugnon parametrization,
+     * see \iref{Cugnon:1996kh}. */
+    double bb, a, plab = plab_from_s_NN(mandelstam_s());
+    if (p_a->type().charge() + p_b->type().charge() == 1) {
+      // pn
+      bb = std::max(Cugnon_bnp(plab), really_small);
+      a = (plab < 0.8) ? 1. : 0.64/(plab*plab);
+    } else {
+      // pp or nn
+      bb = std::max(Cugnon_bpp(plab), really_small);
+      a = 1.;
+    }
+    double t = Random::expo(bb, t_range[0], t_range[1]);
+    if (Random::canonical() > 1./(1.+a)) {
+      t = t_range[0] + t_range[1] - t;
+    }
+    // determine scattering angles in center-of-mass frame
+    phitheta = Angles(2.*M_PI*Random::canonical(),
+                      1. - 2.*(t-t_range[0])/(t_range[1]-t_range[0]));
+  } else if (p_a->pdgcode().iso_multiplet() == 0x1114 &&
+             p_b->pdgcode().iso_multiplet() == 0x1112 && !isotropic_) {
     /** NN->NDelta: Sample scattering angles in center-of-mass frame from an
      * anisotropic angular distribution, using the same distribution as for
      * elastic pp scattering, as suggested in \iref{Cugnon:1996kh}. */
-    double plab = plab_from_s_NN(mandelstam_s());
-    double bb = std::max(Cugnon_bpp(plab), really_small);
+    const double plab = plab_from_s_NN(mandelstam_s());
+    const double bb = std::max(Cugnon_bpp(plab), really_small);
     double t = Random::expo(bb, t_range[0], t_range[1]);
     if (Random::canonical() > 0.5) {
       t = t_range[0] + t_range[1] - t;  // symmetrize
     }
     phitheta = Angles(2.*M_PI*Random::canonical(),
                       1. - 2.*(t-t_range[0])/(t_range[1]-t_range[0]));
-  } else if (t_b.pdgcode().iso_multiplet() == 0x1112 && !isotropic_ &&
-             (t_a.pdgcode().is_Nstar() || t_a.pdgcode().is_Deltastar())) {
+  } else if (p_b->pdgcode().iso_multiplet() == 0x1112 && !isotropic_ &&
+             (p_a->pdgcode().is_Nstar() || p_a->pdgcode().is_Deltastar())) {
     /** NN->NR: Fit to HADES data, see \iref{Agakishiev:2014wqa}. */
     const std::array<float, 4> p { 1.46434, 5.80311, -6.89358, 1.94302 };
     const double a = p[0] + mass_a * (p[1] + mass_a * (p[2] + mass_a * p[3]));
@@ -330,8 +277,7 @@ void ScatterActionNucleonNucleon::sample_cms_momenta() {
   // final-state CM momentum
   const double p_f = pCM(cms_energy, mass_a, mass_b);
   if (!(p_f > 0.0)) {
-    log.warn("Particle: ", t_a.pdgcode(),
-             " radial momentum: ", p_f);
+    log.warn("Particle: ", p_a->pdgcode(), " radial momentum: ", p_f);
     log.warn("Etot: ", cms_energy, " m_a: ", mass_a, " m_b: ", mass_b);
   }
   p_a->set_4momentum(mass_a,  pscatt * p_f);

@@ -10,6 +10,7 @@
 
 #include <gsl/gsl_sf_coupling.h>
 
+#include "include/formfactors.h"
 #include "include/kinematics.h"
 #include "include/logging.h"
 #include "include/random.h"
@@ -46,19 +47,21 @@ float spectral_function_integrand(float resonance_mass, float srts,
 
 /* Resonance mass sampling for 2-particle final state */
 float sample_resonance_mass(const ParticleType &type_res,
-                            const float mass_stable, const float cms_energy) {
+                            const float mass_stable, const float cms_energy,
+                            int L) {
   /* largest possible mass: Use 'nextafter' to make sure it is not above the
    * physical limit by numerical error. */
   const float max_mass = std::nextafter(cms_energy - mass_stable, 0.f);
   // largest possible cm momentum (from smallest mass)
   const float pcm_max = pCM(cms_energy, mass_stable, type_res.minimum_mass());
+  const float blw_max = pcm_max * blatt_weisskopf_sqr(pcm_max, L);
   /* The maximum of the spectral-function ratio 'usually' happens at the
    * largest mass. However, this is not always the case, therefore we need
    * an additional fudge factor (empirically 3.6 happens to be sufficient). */
   const float q_max = type_res.spectral_function(max_mass)
                     / type_res.spectral_function_simple(max_mass) * 3.6;
-  const float max = pcm_max * q_max;  // maximum value for rejection sampling
-  float mass_res, pcm, q;
+  const float max = blw_max * q_max;  // maximum value for rejection sampling
+  float mass_res, pcm, q, blw;
   // Loop: rejection sampling
   do {
     // sample mass from a simple Breit-Wigner (aka Cauchy) distribution
@@ -66,16 +69,17 @@ float sample_resonance_mass(const ParticleType &type_res,
                               type_res.minimum_mass(), max_mass);
     // determine cm momentum for this case
     pcm = pCM(cms_energy, mass_stable, mass_res);
+    blw = pcm * blatt_weisskopf_sqr(pcm, L);
     // determine ratio of full to simple spectral function
     q = type_res.spectral_function(mass_res)
       / type_res.spectral_function_simple(mass_res);
-  } while (q*pcm < Random::uniform(0.f, max));
+  } while (q*blw < Random::uniform(0.f, max));
 
   // check that we are using the proper maximum value
-  if (q*pcm > max) {
+  if (q*blw > max) {
     const auto &log = logger<LogArea::Resonances>();
     log.fatal("maximum not correct in sample_resonance_mass: ",
-              q*pcm, " ", max, " ", type_res.pdgcode(), " ",
+              q*blw, " ", max, " ", type_res.pdgcode(), " ",
               mass_stable, " ", cms_energy, " ", mass_res);
     throw std::runtime_error("Maximum not correct in sample_resonance_mass!");
   }

@@ -87,7 +87,7 @@ void Histogram1d::test(Analytical analyt, std::string dbg_file) const {
   // We will check that at least the following ratios of numbers of samples lie
   // within the corresponding sigma environment.
   constexpr int sigmabins = 4;
-  constexpr double tolerance = 0.94;
+  constexpr double tolerance = 0.90;
   constexpr double allowed[sigmabins] = {.682 * tolerance, .954 * tolerance,
                                          .997 * tolerance, 1.00};
 
