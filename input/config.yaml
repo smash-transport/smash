@@ -39,7 +39,7 @@ General:
     Gaussian_Sigma: 1.0
 
     # distance at which gaussian values are small enough to set them zero
-    Gauss_Cutoff_In_Sigma: 4.0
+    Gauss_Cutoff_In_Sigma: 3.0
 
     # reduce the combinatorics by placing the particles in a grid structure
     Use_Grid: True

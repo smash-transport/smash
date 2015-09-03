@@ -115,13 +115,8 @@ std::unique_ptr<ExperimentBase> ExperimentBase::create(Configuration config,
 
   typedef std::unique_ptr<ExperimentBase> ExperimentPointer;
   if (modus_chooser.compare("Box") == 0) {
-    if (config.has_value({"Potentials"})) {
-      log.error() << "Box modus does not work with potentials for now: "
-                  << "periodic boundaries are not taken into account "
-                  << "in the density calculation";
-    }
-    if (config.has_value({"General", "Time_Step_Mode"}) &&
-        config.read({"General", "Time_Step_Mode"}) == TimeStepMode::None) {
+    if (config.has_value({"General", "Use_Time_Steps"}) &&
+        !config.read({"General", "Use_Time_Steps"})) {
       log.error() << "Box modus does not work correctly without time steps for "
                   << "now: periodic boundaries are not taken into account when "
                   << "looking for interactions.";
@@ -191,8 +186,8 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
   // assigning initial_clock_.
   return {{0.0f, config.read({"General", "Delta_Time"})},
           config.take({"Output", "Output_Interval"}), ntest,
-          config.take({"General", "Gaussian_Sigma"}, 1.0),
-          config.take({"General", "Gauss_Cutoff_In_Sigma"}, 4.0)};
+          config.take({"General", "Gaussian_Sigma"}, 1.0f),
+          config.take({"General", "Gauss_Cutoff_In_Sigma"}, 4.0f)};
 }
 }  // unnamed namespace
 
@@ -246,6 +241,7 @@ std::ostream &operator<<(std::ostream &out, const Experiment<Modus> &e) {
 template <typename Modus>
 Experiment<Modus>::Experiment(Configuration config, bf::path output_path)
     : parameters_(create_experiment_parameters(config)),
+      density_param_(DensityParameters(parameters_)),
       modus_(config["Modi"], parameters_),
       particles_(),
       nevents_(config.take({"General", "Nevents"})),
@@ -440,10 +436,22 @@ Experiment<Modus>::Experiment(Configuration config, bf::path output_path)
        if potentials are on. This is because they allow to compute
        potentials faster */
     if (potentials_) {
-      jmu_B_lat_ = make_unique<DensityLattice>(l, n, origin, periodic,
-                                            LatticeUpdate::EveryTimestep);
-      jmu_I3_lat_ = make_unique<DensityLattice>(l, n, origin, periodic,
+      if (potentials_->use_skyrme()) {
+        jmu_B_lat_ = make_unique<DensityLattice>(l, n, origin, periodic,
                                               LatticeUpdate::EveryTimestep);
+        UB_lat_ = make_unique<RectangularLattice<double>>(
+                       l, n, origin, periodic, LatticeUpdate::EveryTimestep);
+        dUB_dr_lat_ = make_unique<RectangularLattice<ThreeVector>>(
+                       l, n, origin, periodic, LatticeUpdate::EveryTimestep);
+      }
+      if (potentials_->use_symmetry()) {
+        jmu_I3_lat_ = make_unique<DensityLattice>(l, n, origin, periodic,
+                                              LatticeUpdate::EveryTimestep);
+        UI3_lat_ = make_unique<RectangularLattice<double>>(
+                        l, n, origin, periodic, LatticeUpdate::EveryTimestep);
+        dUI3_dr_lat_ = make_unique<RectangularLattice<ThreeVector>>(
+                        l, n, origin, periodic, LatticeUpdate::EveryTimestep);
+      }
     } else {
       if (dens_type_lattice_printout_ == DensityType::Baryon) {
         jmu_B_lat_ = make_unique<DensityLattice>(l, n, origin, periodic,
@@ -538,7 +546,7 @@ void Experiment<Modus>::perform_action(
       const FourVector r_interaction = action->get_interaction_point();
       constexpr bool compute_grad = false;
       rho = rho_eckart(r_interaction.threevec(), particles_before_actions,
-                       parameters_, dens_type_, compute_grad).first;
+                       density_param_, dens_type_, compute_grad).first;
     }
     /*!\Userguide
      * \page collisions_output_in_box_modus_ Collision output in box modus
@@ -576,7 +584,7 @@ void Experiment<Modus>::write_dilepton_action(const ActionPtr &action,
     constexpr bool compute_grad = false;
     const double rho =
         rho_eckart(r_interaction.threevec(), particles_before_actions,
-                   parameters_, dens_type_, compute_grad).first;
+                   density_param_, dens_type_, compute_grad).first;
     // write dilepton output
     dilepton_output_->at_interaction(action->incoming_particles(),
                                      action->outgoing_particles(),
@@ -826,18 +834,18 @@ void Experiment<Modus>::intermediate_output(const int evt_num,
   for (const auto &output : outputs_) {
     output->at_intermediate_time(particles_, evt_num, parameters_.labclock);
     // Thermodynamic output at some point versus time
-    output->thermodynamics_output(particles_, parameters_);
+    output->thermodynamics_output(particles_, parameters_, density_param_);
     // Thermodynamic output on the lattice versus time
     switch (dens_type_lattice_printout_) {
       case DensityType::Baryon:
         update_density_lattice(jmu_B_lat_.get(), lat_upd,
-                               DensityType::Baryon, parameters_, particles_);
+                               DensityType::Baryon, density_param_, particles_);
         output->thermodynamics_output(std::string("rhoB"), *jmu_B_lat_,
                                                                  evt_num);
         break;
       case DensityType::BaryonicIsospin:
         update_density_lattice(jmu_I3_lat_.get(), lat_upd,
-                     DensityType::BaryonicIsospin, parameters_, particles_);
+                     DensityType::BaryonicIsospin, density_param_, particles_);
         output->thermodynamics_output(std::string("rhoI3"), *jmu_I3_lat_,
                                                                  evt_num);
         break;
@@ -845,7 +853,7 @@ void Experiment<Modus>::intermediate_output(const int evt_num,
         break;
       default:
         update_density_lattice(jmu_custom_lat_.get(), lat_upd,
-                       dens_type_lattice_printout_, parameters_, particles_);
+                       dens_type_lattice_printout_, density_param_, particles_);
         output->thermodynamics_output(std::string("rho"), *jmu_custom_lat_,
                                                                   evt_num);
     }
@@ -855,11 +863,27 @@ void Experiment<Modus>::intermediate_output(const int evt_num,
 template <typename Modus>
 void Experiment<Modus>::propagate_all() {
   if (potentials_) {
-    update_density_lattice(jmu_B_lat_.get(), LatticeUpdate::EveryTimestep,
-                     DensityType::Baryon, parameters_, particles_);
-    update_density_lattice(jmu_I3_lat_.get(), LatticeUpdate::EveryTimestep,
-                     DensityType::BaryonicIsospin, parameters_, particles_);
-    propagate(&particles_, parameters_, *potentials_);
+    if (potentials_->use_skyrme()) {
+      update_density_lattice(jmu_B_lat_.get(), LatticeUpdate::EveryTimestep,
+                       DensityType::Baryon, density_param_, particles_);
+      const int UBlattice_size = UB_lat_->size();
+      for (int i = 0; i < UBlattice_size; i++) {
+        (*UB_lat_)[i] = potentials_->skyrme_pot((*jmu_B_lat_)[i].density());
+      }
+      UB_lat_->compute_gradient_lattice(dUB_dr_lat_.get());
+    }
+    if (potentials_->use_symmetry()) {
+      update_density_lattice(jmu_I3_lat_.get(), LatticeUpdate::EveryTimestep,
+                      DensityType::BaryonicIsospin, density_param_, particles_);
+      const int UI3lattice_size = UI3_lat_->size();
+      for (int i = 0; i < UI3lattice_size; i++) {
+        (*UI3_lat_)[i] = potentials_->symmetry_pot(
+                                        (*jmu_I3_lat_)[i].density());
+      }
+      UI3_lat_->compute_gradient_lattice(dUI3_dr_lat_.get());
+    }
+    propagate(&particles_, parameters_, *potentials_,
+              dUB_dr_lat_.get(), dUI3_dr_lat_.get());
   } else {
     propagate_straight_line(&particles_, parameters_);
   }
@@ -904,7 +928,8 @@ void Experiment<Modus>::do_final_decays(size_t &interactions_total) {
 
   /* Do one final propagation step. */
   if (potentials_) {
-    propagate(&particles_, parameters_, *potentials_);
+    propagate(&particles_, parameters_, *potentials_,
+              dUB_dr_lat_.get(), dUI3_dr_lat_.get());
   } else {
     propagate_straight_line(&particles_, parameters_);
   }

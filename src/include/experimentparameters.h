@@ -55,13 +55,10 @@ struct ExperimentParameters {
   const float output_interval;
   /// number of test particle
   int testparticles;
-  /** width of gaussian Wigner density of particles
-   *
-   * \fpPrecision Why \c double?
-   */
-  double gaussian_sigma;
+  /// width of gaussian Wigner density of particles
+  float gaussian_sigma;
   /// distance at which gaussian is cut, i.e. set to zero, IN SIGMA (not fm)
-  double gauss_cutoff_in_sigma;
+  float gauss_cutoff_in_sigma;
 };
 
 }  // namespace Smash
