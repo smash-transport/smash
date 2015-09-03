@@ -14,14 +14,15 @@ namespace Smash {
 
 
 /**
- * Returns the squared Blatt-Weisskopf functions,
- * which influence the mass dependence of the decay widths.
- * See e.g. Effenberger's thesis, page 28.
+ * Returns the squared Blatt-Weisskopf functions, which influence the mass
+ * dependence of the decay widths. See e.g. \iref{Effenberg:1999nia}, page 28.
  *
  * \param p_ab Momentum of outgoing particles A and B in center-of-mass frame.
  * \param L Angular momentum of outgoing particles A and B.
  *
- * This is used as a standard form factor for all hadronic decays.
+ * This is used as a standard form factor for all hadronic decays. Note that all
+ * the Blatt-Weisskopf functions approach one for large p_ab and behave like
+ * p_ab**L for small p_ab. They are increasing monotonically with p_ab.
  */
 inline float blatt_weisskopf_sqr(const float p_ab, const int L)
 #ifdef NDEBUG
