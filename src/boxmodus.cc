@@ -107,7 +107,7 @@ float BoxModus::initial_conditions(Particles *particles,
       momentum_radial = 3.0 * this->temperature_;
     } else {
       /* thermal momentum according Maxwell-Boltzmann distribution */
-      momentum_radial = sample_momenta_from_thermal(this->temperature_, 
+      momentum_radial = sample_momenta_from_thermal(this->temperature_,
                                                     data.pole_mass());
     }
     phitheta.distribute_isotropically();
