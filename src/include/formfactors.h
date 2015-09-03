@@ -111,11 +111,13 @@ inline float form_factor_eta(float mass) {
 /** Squared electromagnetic transition form factor for omega -> pi0 e+ e-,
  * taken from \iref{Bratkovskaya:1996qe}, as a function of the dilepton mass. */
 inline float form_factor_sqr_omega(float mass) {
-  float lambda = 0.65;
-  float gamma_w = 0.075;
-  float n = pow(lambda*lambda - mass*mass, 2.) +
-             lambda*gamma_w * lambda*gamma_w;
-  return pow(lambda, 4.) / n;
+  constexpr float lambda = 0.65;
+  constexpr float gamma = 0.075;
+  constexpr float lambda_sqr = lambda * lambda;
+  constexpr float gamma_sqr = gamma * gamma;
+  const float tmp = lambda_sqr - mass*mass;
+  const float denom = tmp*tmp + lambda_sqr*gamma_sqr;
+  return lambda_sqr * lambda_sqr / denom;
 }
 
 /** Electromagnetic transition form factor for Delta -> N e+ e-
