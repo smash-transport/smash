@@ -107,7 +107,7 @@ class ScatterActionsFinder : public ActionFinderInterface {
   ActionPtr check_collision(const ParticleData &data_a,
                             const ParticleData &data_b, float dt) const;
   /** Elastic cross section parameter (in mb). */
-  float elastic_parameter_ = 0.0;
+  float elastic_parameter_ = -1.0;
   /** Number of test particles. */
   int testparticles_ = 1;
   /** Do all collisions isotropically. */

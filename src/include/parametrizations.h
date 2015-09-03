@@ -47,6 +47,54 @@ float ppbar_elastic(double mandelstam_s);
  */
 float ppbar_total(double mandelstam_s);
 
+/* K+ p elastic cross section parametrization
+ *
+ * \fpPrecision Why \c double?
+ */
+float kplusp_elastic(double mandelstam_s);
+
+/* K+ n elastic cross section parametrization
+ *
+ * \fpPrecision Why \c double?
+ */
+float kplusn_elastic(double mandelstam_s);
+
+/* K- p elastic cross section parametrization
+ *
+ * \fpPrecision Why \c double?
+ */
+float kminusp_elastic(double mandelstam_s);
+
+/* K- n elastic cross section parametrization
+ *
+ * \fpPrecision Why \c double?
+ */
+float kminusn_elastic(double mandelstam_s);
+
+/* K0 p elastic cross section parametrization
+ *
+ * \fpPrecision Why \c double?
+ */
+float k0p_elastic(double mandelstam_s);
+
+/* K0 n elastic cross section parametrization
+ *
+ * \fpPrecision Why \c double?
+ */
+float k0n_elastic(double mandelstam_s);
+
+/* Kbar0 p elastic cross section parametrization
+ *
+ * \fpPrecision Why \c double?
+ */
+float kbar0p_elastic(double mandelstam_s);
+
+/* Kbar0 n elastic cross section parametrization
+ *
+ * \fpPrecision Why \c double?
+ */
+float kbar0n_elastic(double mandelstam_s);
+
 }  // namespace Smash
 
 #endif  // SRC_INCLUDE_PARAMETRIZATIONS_H_

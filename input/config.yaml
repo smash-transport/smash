@@ -86,7 +86,7 @@ Collision_Term:
     Decays:                 True
     Force_Decays_At_End:    True
     Isotropic:              False
-    Elastic_Cross_Section:  0.     # [mb]
+    Elastic_Cross_Section:  -1.0  # Globally used if non-negative, [mb]
 #    Pauli_Blocking:
 #        Spatial_Averaging_Radius:   1.86
 #        Momentum_Averaging_Radius:  0.08

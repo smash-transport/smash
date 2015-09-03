@@ -87,6 +87,7 @@ set(smash_src
         fpenvironment.cc
         grid.cc
         inputfunctions.cc
+        interpolation.cc
         isoparticletype.cc
         listmodus.cc
         logging.cc
@@ -108,6 +109,7 @@ set(smash_src
         scatteractionbaryonbaryon.cc
         scatteractionbaryonmeson.cc
         scatteractionmesonmeson.cc
+        scatteractionnucleonkaon.cc
         scatteractionnucleonnucleon.cc
         scatteractionsfinder.cc
         spheremodus.cc

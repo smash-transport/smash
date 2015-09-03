@@ -22,13 +22,14 @@
 #include "include/scatteractionbaryonbaryon.h"
 #include "include/scatteractionbaryonmeson.h"
 #include "include/scatteractionmesonmeson.h"
+#include "include/scatteractionnucleonkaon.h"
 #include "include/scatteractionnucleonnucleon.h"
 
 namespace Smash {
 /*!\Userguide
 * \page input_collision_term_ Collision_Term
-* \key Elastic_Cross_Section (float, optional, default = 0.0 [mb]) \n
-* If a positive (non-zero) value is given, it will override the parametrized
+* \key Elastic_Cross_Section (float, optional, default = -1.0 [mb]) \n
+* If a non-negative value is given, it will override the parametrized
 * elastic cross sections (which are energy-dependent) with a constant value.
 * This constant elastic cross section is used for all collisions.
 *
@@ -39,13 +40,9 @@ namespace Smash {
 ScatterActionsFinder::ScatterActionsFinder(
     Configuration config, const ExperimentParameters &parameters)
     : elastic_parameter_(config.take({"Collision_Term",
-                                      "Elastic_Cross_Section"}, 0.f)),
+                                      "Elastic_Cross_Section"}, -1.0f)),
       testparticles_(parameters.testparticles),
       isotropic_(config.take({"Collision_Term", "Isotropic"}, false)) {
-  if (elastic_parameter_ < 0.) {
-    throw std::invalid_argument("Elastic_Cross_Section is negative "
-                                "in config file!");
-  }
 }
 
 ScatterActionsFinder::ScatterActionsFinder(
@@ -57,10 +54,11 @@ ScatterActionPtr ScatterActionsFinder::construct_scatter_action(
                                             const ParticleData &data_a,
                                             const ParticleData &data_b,
                                             float time_until_collision) const {
+  const auto &pdg_a = data_a.pdgcode();
+  const auto &pdg_b = data_b.pdgcode();
   ScatterActionPtr act;
   if (data_a.is_baryon() && data_b.is_baryon()) {
-    if (data_a.pdgcode().iso_multiplet() == 0x1112 &&
-        data_b.pdgcode().iso_multiplet() == 0x1112) {
+    if (pdg_a.is_nucleon() && pdg_b.is_nucleon()) {
       act = make_unique<ScatterActionNucleonNucleon>(data_a, data_b,
                                               time_until_collision, isotropic_);
     } else {
@@ -68,15 +66,20 @@ ScatterActionPtr ScatterActionsFinder::construct_scatter_action(
                                               time_until_collision, isotropic_);
     }
   } else if (data_a.is_baryon() || data_b.is_baryon()) {
-    act = make_unique<ScatterActionBaryonMeson>(data_a, data_b,
-                                              time_until_collision, isotropic_);
+    if ((pdg_a.is_nucleon() && pdg_b.is_kaon()) ||
+        (pdg_b.is_nucleon() && pdg_a.is_kaon())) {
+      act = make_unique<ScatterActionNucleonKaon>(data_a, data_b,
+                                                  time_until_collision, isotropic_);
+    } else {
+      act = make_unique<ScatterActionBaryonMeson>(data_a, data_b,
+                                                  time_until_collision, isotropic_);
+    }
   } else {
     act = make_unique<ScatterActionMesonMeson>(data_a, data_b,
-                                              time_until_collision, isotropic_);
+                                               time_until_collision, isotropic_);
   }
   return std::move(act);
 }
-
 
 ActionPtr ScatterActionsFinder::check_collision(
     const ParticleData &data_a, const ParticleData &data_b, float dt) const {

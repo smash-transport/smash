@@ -9,6 +9,7 @@
 #define SRC_INCLUDE_KINEMATICS_H_
 
 #include <array>
+#include <sstream>
 
 #include "constants.h"
 
@@ -121,14 +122,68 @@ std::array<T, 2> get_t_range(const T srts, const T m1, const T m2,
   return {t_min, t_max};
 }
 
+/// Helper function for plab_from_s.
+static inline void check_energy(double mandelstam_s, double m_sum) {
+  if (mandelstam_s < m_sum*m_sum) {
+      std::stringstream err;
+      err << "plab_from_s: s too small: "
+          << mandelstam_s << " < " << m_sum*m_sum;
+      throw std::runtime_error(err.str());
+  }
+}
 
-/** Convert mandelstam-s to p_lab in a nucleon-nucleon collision.
+/// Helper function for plab_from_s.
+static inline void check_radicand(double mandelstam_s, double radicand) {
+  if (radicand < 0) {
+      std::stringstream err;
+      err << "plab_from_s: negative radicand: " << mandelstam_s;
+      throw std::runtime_error(err.str());
+  };
+}
+
+/** Convert mandelstam-s to p_lab in a fixed-target collision.
+ * This assumes both particles have the given mass.
  *
  * \fpPrecision Why \c double?
  */
-inline double plab_from_s_NN(double s_NN) {
-  const double tmp = s_NN * (s_NN - 4 * nucleon_mass * nucleon_mass);
-  return std::sqrt(tmp) / (2 * nucleon_mass);
+inline double plab_from_s(double mandelstam_s, double mass) {
+  const double radicand = mandelstam_s * (mandelstam_s - 4 * mass * mass);
+#ifndef NDEBUG
+  const double m_sum = 2*mass;
+  check_energy(mandelstam_s, m_sum);
+  check_radicand(mandelstam_s, radicand);
+#endif
+  return std::sqrt(radicand) / (2 * mass);
+}
+/** Convert mandelstam-s to p_lab in a fixed-target collision.
+ * This assumes both particles have the mass of a nucleon.
+ *
+ * \fpPrecision Why \c double?
+ */
+inline double plab_from_s(double mandelstam_s) {
+  return plab_from_s(mandelstam_s, nucleon_mass);
+}
+/** Convert mandelstam-s to p_lab in a fixed-target collision.
+ * The mass of the projectile and the mass of the target have to be given.
+ *
+ * \fpPrecision Why \c double?
+ */
+inline double plab_from_s(double mandelstam_s,
+                          double m_projectile, double m_target) {
+  const double m_sum = m_projectile + m_target;
+  const double m_diff = m_projectile - m_target;
+  const double radicand
+      = (mandelstam_s - m_sum*m_sum) * (mandelstam_s - m_diff*m_diff);
+  /* This is equivalent to:
+  const double radicand
+      = (mandelstam_s - m_a_sq - m_b_sq) * (mandelstam_s - m_a_sq - m_b_sq)
+        - 4 * m_a_sq * m_b_sq;
+  */
+#ifndef NDEBUG
+  check_energy(mandelstam_s, m_sum);
+  check_radicand(mandelstam_s, radicand);
+#endif
+  return std::sqrt(radicand) / (2 * m_target);
 }
 
 

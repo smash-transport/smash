@@ -305,8 +305,8 @@ ColliderModus::ColliderModus(Configuration modus_config,
               "Input Error: Need as many impact parameter values as yields. "
               "Please make sure that Values and Yields have the same length.");
         }
-        impact_interpolation_ = make_unique<InterpolateData<float>>(
-            InterpolateData<float>(impacts, yields));
+        impact_interpolation_ = make_unique<InterpolateDataLinear<float>>(
+            InterpolateDataLinear<float>(impacts, yields));
 
         auto imp_minmax = std::minmax_element(impacts.begin(), impacts.end());
         imp_min_ = *imp_minmax.first;

@@ -39,9 +39,11 @@ float ScatterActionNucleonNucleon::elastic_parametrization() {
     return sig_el;
   } else {
     std::stringstream ss;
-    ss << "problem in CrossSections::elastic: " << pdg_a.string().c_str()
-      << " " << pdg_b.string().c_str() << " " << pdg_a.spin() << " "
-      << pdg_b.spin() << " " << sig_el << " " << s;
+    const auto name_a = incoming_particles_[0].type().name();
+    const auto name_b = incoming_particles_[1].type().name();
+    ss << "problem in CrossSections::elastic: a=" << name_a
+       << " b=" << name_b << " j_a=" << pdg_a.spin() << " j_b="
+       << pdg_b.spin() << " sigma=" << sig_el << " s=" << s;
     throw std::runtime_error(ss.str());
   }
 }
@@ -222,7 +224,7 @@ void ScatterActionNucleonNucleon::sample_angles(
       p_b->pdgcode().iso_multiplet() == 0x1112 && !isotropic_) {
     /** NN->NN: Choose angular distribution according to Cugnon parametrization,
      * see \iref{Cugnon:1996kh}. */
-    double bb, a, plab = plab_from_s_NN(mandelstam_s());
+    double bb, a, plab = plab_from_s(mandelstam_s());
     if (p_a->type().charge() + p_b->type().charge() == 1) {
       // pn
       bb = std::max(Cugnon_bnp(plab), really_small);
@@ -244,7 +246,7 @@ void ScatterActionNucleonNucleon::sample_angles(
     /** NN->NDelta: Sample scattering angles in center-of-mass frame from an
      * anisotropic angular distribution, using the same distribution as for
      * elastic pp scattering, as suggested in \iref{Cugnon:1996kh}. */
-    const double plab = plab_from_s_NN(mandelstam_s());
+    const double plab = plab_from_s(mandelstam_s());
     const double bb = std::max(Cugnon_bpp(plab), really_small);
     double t = Random::expo(bb, t_range[0], t_range[1]);
     if (Random::canonical() > 0.5) {
