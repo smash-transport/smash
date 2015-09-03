@@ -122,6 +122,24 @@ std::array<T, 2> get_t_range(const T srts, const T m1, const T m2,
   return {t_min, t_max};
 }
 
+/// Helper function for plab_from_s.
+static inline void check_energy(double mandelstam_s, double m_sum) {
+  if (mandelstam_s < m_sum*m_sum) {
+      std::stringstream err;
+      err << "plab_from_s: s too small: "
+          << mandelstam_s << " < " << m_sum*m_sum;
+      throw std::runtime_error(err.str());
+  }
+}
+
+/// Helper function for plab_from_s.
+static inline void check_radicand(double mandelstam_s, double radicand) {
+  if (radicand < 0) {
+      std::stringstream err;
+      err << "plab_from_s: negative radicand: " << mandelstam_s;
+      throw std::runtime_error(err.str());
+  };
+}
 
 /** Convert mandelstam-s to p_lab in a fixed-target collision.
  * This assumes both particles have the given mass.
@@ -132,17 +150,8 @@ inline double plab_from_s(double mandelstam_s, double mass) {
   const double radicand = mandelstam_s * (mandelstam_s - 4 * mass * mass);
 #ifndef NDEBUG
   const double m_sum = 2*mass;
-  if (mandelstam_s < m_sum*m_sum) {
-      std::stringstream err;
-      err << "plab_from_s: s too small: "
-          << mandelstam_s << " < " << m_sum*m_sum;
-      throw std::runtime_error(err.str());
-  }
-  if (radicand < 0) {
-      std::stringstream err;
-      err << "plab_from_s: negative radicand: " << mandelstam_s;
-      throw std::runtime_error(err.str());
-  };
+  check_energy(mandelstam_s, m_sum);
+  check_radicand(mandelstam_s, radicand);
 #endif
   return std::sqrt(radicand) / (2 * mass);
 }
@@ -171,18 +180,8 @@ inline double plab_from_s(double mandelstam_s,
         - 4 * m_a_sq * m_b_sq;
   */
 #ifndef NDEBUG
-  if (mandelstam_s < m_sum*m_sum) {
-      std::stringstream err;
-      err << "plab_from_s: s too small: "
-          << mandelstam_s << " < " << m_sum*m_sum
-          << " = (" << m_projectile << " + " << m_target << ")^2";
-      throw std::runtime_error(err.str());
-  }
-  if (radicand < 0) {
-      std::stringstream err;
-      err << "plab_from_s: negative radicand: " << radicand;
-      throw std::runtime_error(err.str());
-  }
+  check_energy(mandelstam_s, m_sum);
+  check_radicand(mandelstam_s, radicand);
 #endif
   return std::sqrt(radicand) / (2 * m_target);
 }
