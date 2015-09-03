@@ -158,8 +158,8 @@ class DensityParameters {
    *  \f[ \rho^{Eckart} = \sqrt{j^{\mu} j_{\mu}} \f]
    *  Here \f$ C_i \f$ is a corresponding value of "charge". If baryon
    *  current option is selected then \f$ C_i \f$ is 1 for baryons,
-   *  -1 for antibaryons and 0 otherwize. For proton/neutron
-   *  current \f$ C_i = 1\f$ for proton/neutron and 0 otherwize.
+   *  -1 for antibaryons and 0 otherwise. For proton/neutron
+   *  current \f$ C_i = 1\f$ for proton/neutron and 0 otherwise.
    *
    *  For gradient:
    *  \f[ \frac{d\rho_{Eck}}{d \vec r} = \frac{\frac{dj^{\mu}}{d \vec r}
