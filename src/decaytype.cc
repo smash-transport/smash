@@ -281,22 +281,22 @@ float ThreeBodyDecayDilepton::diff_width(float m_par, float m_dil,
     const float m_other_sqr = m_other*m_other;
 
     switch (pdg.code()) {
-      case 0x111: /*pi0*/ {
-        /// see \iref{Landsberg:1986fd}
+      case 0x111: /* pi0 */ {
+        /// see \iref{Landsberg:1986fd}, equation (3.8)
         gamma = 7.6e-9;
         const float ff = form_factor_pi(m_dil);
-        return (alpha*4./(3.*M_PI)) * gamma/m_dil *
+        return (4.*alpha/(3.*M_PI)) * gamma/m_dil *
                                     pow(1.-m_dil/m_par*m_dil/m_par, 3.) * ff*ff;
       }
-      case 0x221: /*eta*/ {
-        /// see \iref{Landsberg:1986fd}
+      case 0x221: /* eta */ {
+        /// see \iref{Landsberg:1986fd}, equation (3.8)
         gamma = 52e-8;
         const float ff = form_factor_eta(m_dil);
         return (4.*alpha/(3.*M_PI)) * gamma/m_dil *
                                     pow(1.-m_dil/m_par*m_dil/m_par, 3.) * ff*ff;
       }
-      case 0x223: /*omega*/ {
-        /// see \iref{Effenberg:1999nia} and \iref{Bratkovskaya:1996qe}
+      case 0x223: /* omega */ {
+        /// see \iref{Landsberg:1986fd}, equation (3.4)
         gamma = 0.703e-3;
         const float n1 = (m_par_sqr - m_other_sqr);
         const float n2 = ((m_par_sqr -m_other_sqr)*(m_par_sqr -m_other_sqr));
