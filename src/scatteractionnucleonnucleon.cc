@@ -89,9 +89,11 @@ CollisionBranchList ScatterActionNucleonNucleon::two_to_two_cross_sections() {
   const ParticleType &type_particle_a = incoming_particles_[0].type();
   const ParticleType &type_particle_b = incoming_particles_[1].type();
 
-  /* Find all resonance-production channels. */
+  /* Find all single-resonance production channels. */
   CollisionBranchList process_list = nuc_nuc_to_nuc_res(type_particle_a,
-                                                      type_particle_b);
+                                                        type_particle_b);
+
+  /* TODO: Find all double-resonance production channels. */
 
   return process_list;
 }
@@ -175,7 +177,7 @@ CollisionBranchList ScatterActionNucleonNucleon::nuc_nuc_to_nuc_res(
                 return integrate(type_resonance->minimum_mass(),
                                   sqrts - second_type->mass(),
                                   [&](float m) {
-                                    return spectral_function_integrand(m, sqrts,
+                                    return spec_func_integrand_1res(m, sqrts,
                                                             second_type->mass(),
                                                             *type_resonance);
                                   });

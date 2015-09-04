@@ -218,9 +218,7 @@ std::pair<double, double> DecayAction::sample_masses() const {
   } else if (!t_b.is_stable() && t_a.is_stable()) {
     masses.second = sample_resonance_mass(t_b, t_a.mass(), cms_energy, L_);
   } else if (!t_a.is_stable() && !t_b.is_stable()) {
-    throw std::runtime_error("Double-resonance production not yet implemented! "
-                             + t_a.pdgcode().string() + " "
-                             + t_b.pdgcode().string());
+    masses = sample_resonance_masses(t_a, t_b, cms_energy, L_);  // two resonances in final state
   }
 
   return masses;

@@ -32,9 +32,10 @@ double clebsch_gordan(const int j_a, const int j_b, const int j_c,
   return result;
 }
 
-/* Integrand for spectral-function integration */
-float spectral_function_integrand(float resonance_mass, float srts,
-                                  float stable_mass, const ParticleType &type) {
+
+/* Integrand for spectral-function integration with one resonance. */
+float spec_func_integrand_1res(float resonance_mass, float srts,
+                               float stable_mass, const ParticleType &type) {
   if (srts <= stable_mass + resonance_mass) {
     return 0.;
   }
@@ -42,8 +43,25 @@ float spectral_function_integrand(float resonance_mass, float srts,
   /* Integrand is the spectral function weighted by the CM momentum of the
    * final state. */
   return type.spectral_function(resonance_mass)
-         * pCM(srts, stable_mass, resonance_mass);
+       * pCM(srts, stable_mass, resonance_mass);
 }
+
+
+/* Integrand for spectral-function integration with two resonances. */
+float spec_func_integrand_2res(float srts, float res_mass_1, float res_mass_2,
+                               const ParticleType &t1, const ParticleType &t2) {
+
+  if (srts <= res_mass_1 + res_mass_2) {
+    return 0.;
+  }
+
+  /* Integrand is the product of the spectral function weighted by the
+   * CM momentum of the final state. */
+  return t1.spectral_function(res_mass_1)
+       * t2.spectral_function(res_mass_2)
+       * pCM(srts, res_mass_1, res_mass_2);
+}
+
 
 /* Resonance mass sampling for 2-particle final state */
 float sample_resonance_mass(const ParticleType &type_res,
@@ -85,6 +103,49 @@ float sample_resonance_mass(const ParticleType &type_res,
   }
 
   return mass_res;
+}
+
+
+/* Resonance mass sampling for 2-particle final state with two resonances. */
+std::pair<float, float> sample_resonance_masses(const ParticleType &t1,
+                                                const ParticleType &t2,
+                                                const float cms_energy, int L) {
+  /* Sample resonance mass from the distribution
+   * used for calculating the cross section. */
+  const float max_mass_1 = std::nextafter(cms_energy - t2.minimum_mass(), 0.f);
+  const float max_mass_2 = std::nextafter(cms_energy - t1.minimum_mass(), 0.f);
+  // largest possible cm momentum (from smallest mass)
+  const float pcm_max = pCM(cms_energy, t1.minimum_mass(), t2.minimum_mass());
+  const float blw_max = pcm_max * blatt_weisskopf_sqr(pcm_max, L);
+  const float q_max = 1.;
+  const float max = blw_max * q_max;  // maximum value for rejection sampling
+
+  float mass_res_1, mass_res_2, pcm, blw, q1, q2;
+  do {
+    // sample mass from a simple Breit-Wigner (aka Cauchy) distribution
+    mass_res_1 = Random::cauchy(t1.mass(), t1.width_at_pole()/2.f,
+                                t1.minimum_mass(), max_mass_1);
+    mass_res_2 = Random::cauchy(t2.mass(), t2.width_at_pole()/2.f,
+                                t2.minimum_mass(), max_mass_2);
+    // determine cm momentum for this case
+    pcm = pCM(cms_energy, mass_res_1, mass_res_2);
+    blw = pcm * blatt_weisskopf_sqr(pcm, L);
+    // determine ratio of full to simple spectral function
+    q1 = t1.spectral_function(mass_res_1)
+       / t1.spectral_function_simple(mass_res_1);
+    q2 = t2.spectral_function(mass_res_2)
+       / t2.spectral_function_simple(mass_res_2);
+  } while (q1*q2*blw < Random::uniform(0.f, max));
+
+  if (q1*q2*blw > max) {
+    const auto &log = logger<LogArea::Resonances>();
+    log.error("maximum not correct in sample_resonance_masses: ",
+              q1*q2*blw, " ", max, " ",
+              t1.pdgcode(), " ", t2.pdgcode(), " ", cms_energy, " ",
+              mass_res_1, " ", mass_res_2);
+  }
+
+  return {mass_res_1, mass_res_2};
 }
 
 
