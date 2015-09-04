@@ -185,7 +185,9 @@ TEST(update_incoming) {
 
   // add elastic channel
   constexpr float sigma = 10.0;
-  act.add_all_processes(sigma, true, true);
+  bool string_switch = true;
+ 
+  act.add_all_processes(sigma, true, true, string_switch);
 
   // change the position of one of the particles
   const FourVector new_position(0.1, 0., 0., 0.);
