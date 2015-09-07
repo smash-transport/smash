@@ -1,3 +1,10 @@
+/*
+ *    Copyright (c) 2015
+ *      SMASH Team
+ *
+ *    GNU General Public License (GPLv3 or later)
+ */
+
 #include "include/interpolation.h"
 
 #include <iostream>
@@ -7,10 +14,12 @@ InterpolateDataSpline::InterpolateDataSpline(const std::vector<double>& x,
                                              const std::vector<double>& y) {
     const auto N = x.size();
     if (y.size() != N) {
-      throw std::runtime_error("Need two vectors of equal length for interpolation.");
+      throw std::runtime_error("Need two vectors of equal length "
+                               "for interpolation.");
     }
     if (N < 3) {
-      throw std::runtime_error("Need at least 3 data points for cubic spline interpolation.");
+      throw std::runtime_error("Need at least 3 data points "
+                               "for cubic spline interpolation.");
     }
     const auto p = generate_sort_permutation(
         x, [&](double const& a, double const& b) {

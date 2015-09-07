@@ -59,7 +59,8 @@ float ScatterActionNucleonKaon::elastic_parametrization() {
       }
       break;
     default:
-      throw std::runtime_error("elastic cross section for antinucleon-kaon not implemented");
+      throw std::runtime_error("elastic cross section for antinucleon-kaon "
+                               "not implemented");
   }
 
   if (sig_el > 0) {

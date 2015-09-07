@@ -316,7 +316,6 @@ class PdgCode {
     return (c == 0x113)    // rho0
         || (c == 0x213)    // rho+
         || (c == -0x213);  // rho-
-
   }
 
   /** Determine whether a particle has a distinct antiparticle
