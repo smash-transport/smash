@@ -18,6 +18,7 @@
 #include "include/decaymodes.h"
 #include "include/distributions.h"
 #include "include/inputfunctions.h"
+#include "include/integrate.h"
 #include "include/iomanipulators.h"
 #include "include/isoparticletype.h"
 #include "include/logging.h"
@@ -375,8 +376,22 @@ float ParticleType::get_partial_in_width(const float m,
 
 
 float ParticleType::spectral_function(float m) const {
+  if (norm_factor_ < 0.) {
+    /* Initialize the normalization factor
+     * by integrating over the unnormalized spectral function. */
+    Integrator integrate;
+    const float max_mass = 100.;
+    norm_factor_ = 1./integrate(minimum_mass(), max_mass,
+                                [&](double mm) {
+                                  return spectral_function_no_norm(mm);
+                                });
+  }
+  return norm_factor_ * spectral_function_no_norm(m);
+}
+
+float ParticleType::spectral_function_no_norm(float m) const {
   /* The spectral function is a relativistic Breit-Wigner function
-   * with mass-dependent width. */
+   * with mass-dependent width. Here: without normalization factor. */
   const float resonance_width = total_width(m);
   if (resonance_width < ParticleType::width_cutoff) {
     return 0.;

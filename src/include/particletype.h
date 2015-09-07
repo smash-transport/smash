@@ -186,14 +186,19 @@ class ParticleType {
 
   /**
    * Full spectral function
-   * \f$A(m)=\frac{2}{\pi}\frac{m^2\Gamma(m)}{(m^2-m_0^2)^2+(m\Gamma(m))^2}\f$
+   * \f$ A(m) = \frac{2}{\pi} N \frac{m^2\Gamma(m)}{(m^2-m_0^2)^2+(m\Gamma(m))^2} \f$
    * of the resonance (relativistic Breit-Wigner distribution with
-   * mass-dependent width).
+   * mass-dependent width, where N is a normalization factor).
    * \param m Actual off-shell mass of the resonance, where the
    *          spectral function is supposed to be evaluated.
-   * \todo The normalization is not guaranteed to be unity at present.
+   * \note The normalization factor N ensures that the spectral function is
+   *       normalized to unity.
    */
   float spectral_function(float m) const;
+
+  /**
+   * Full spectral function without normalization factor. */
+  float spectral_function_no_norm(float m) const;
 
   /**
    * The spectral function with a constant width (= width at pole).
@@ -328,6 +333,9 @@ class ParticleType {
      so it's logically const, but not physically const, which is a classical
      case for using mutable. */
   mutable float minimum_mass_;
+  /** This normalization factor ensures that the spectral function is normalized
+   * to unity, when integrated over its full domain. */
+  mutable float norm_factor_ = -1.;
   /** twice the isospin of the particle
    *
    * This is filled automatically from pdgcode_.
