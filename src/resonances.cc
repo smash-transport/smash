@@ -50,7 +50,6 @@ float spec_func_integrand_1res(float resonance_mass, float srts,
 /* Integrand for spectral-function integration with two resonances. */
 float spec_func_integrand_2res(float srts, float res_mass_1, float res_mass_2,
                                const ParticleType &t1, const ParticleType &t2) {
-
   if (srts <= res_mass_1 + res_mass_2) {
     return 0.;
   }
@@ -117,7 +116,7 @@ std::pair<float, float> sample_resonance_masses(const ParticleType &t1,
   // largest possible cm momentum (from smallest mass)
   const float pcm_max = pCM(cms_energy, t1.minimum_mass(), t2.minimum_mass());
   const float blw_max = pcm_max * blatt_weisskopf_sqr(pcm_max, L);
-  const float q_max = 1.;
+  const float q_max = 7.;
   const float max = blw_max * q_max;  // maximum value for rejection sampling
 
   float mass_res_1, mass_res_2, pcm, blw, q1, q2;

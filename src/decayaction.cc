@@ -218,7 +218,8 @@ std::pair<double, double> DecayAction::sample_masses() const {
   } else if (!t_b.is_stable() && t_a.is_stable()) {
     masses.second = sample_resonance_mass(t_b, t_a.mass(), cms_energy, L_);
   } else if (!t_a.is_stable() && !t_b.is_stable()) {
-    masses = sample_resonance_masses(t_a, t_b, cms_energy, L_);  // two resonances in final state
+    // two resonances in final state
+    masses = sample_resonance_masses(t_a, t_b, cms_energy, L_);
   }
 
   return masses;

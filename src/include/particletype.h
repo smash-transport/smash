@@ -218,6 +218,9 @@ class ParticleType {
 
   /** Returns a list of all nucleons (i.e. proton and neutron). */
   static std::vector<ParticleTypePtr> list_nucleons();
+  /** Returns a list of the Delta(1232) baryons
+   *  (i.e. all four charge states). */
+  static std::vector<ParticleTypePtr> list_Deltas();
   /** Returns a list of all baryon resonances,
    * i.e. unstable baryons (not including antibaryons). */
   static std::vector<ParticleTypePtr> list_baryon_resonances();

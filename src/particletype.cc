@@ -58,6 +58,10 @@ std::vector<ParticleTypePtr> ParticleType::list_nucleons() {
   return {&find(0x2212), &find(0x2112)};
 }
 
+std::vector<ParticleTypePtr> ParticleType::list_Deltas() {
+  return {&find(0x2224), &find(0x2214), &find(0x2114), &find(0x1114)};
+}
+
 std::vector<ParticleTypePtr> ParticleType::list_baryon_resonances() {
   std::vector<ParticleTypePtr> list;
   list.reserve(10);

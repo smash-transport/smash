@@ -209,9 +209,8 @@ class Integrator2d {
 
     const gsl_monte_function monte_fun {
         // trick: pass integrand function as 'params'
-        [](double *x, size_t dim, void *params) -> double {
+        [](double *x, size_t /*dim*/, void *params) -> double {
           auto &&f = *static_cast<F *>(params);
-          assert(dim == 2);
           return f(x[0], x[1]);
         },
         2, &fun

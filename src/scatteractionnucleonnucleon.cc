@@ -90,16 +90,14 @@ CollisionBranchList ScatterActionNucleonNucleon::two_to_two_cross_sections() {
   const ParticleType &type_particle_b = incoming_particles_[1].type();
 
   /* Find all single-resonance production channels. */
-  CollisionBranchList process_list = nuc_nuc_to_nuc_res(type_particle_a,
-                                                        type_particle_b);
-
-  /* TODO: Find all double-resonance production channels. */
+  CollisionBranchList process_list = two_to_two_inel(type_particle_a,
+                                                     type_particle_b);
 
   return process_list;
 }
 
 
-CollisionBranchList ScatterActionNucleonNucleon::nuc_nuc_to_nuc_res(
+CollisionBranchList ScatterActionNucleonNucleon::two_to_two_inel(
                             const ParticleType &type_particle_a,
                             const ParticleType &type_particle_b) {
   const auto &log = logger<LogArea::ScatterAction>();
@@ -107,6 +105,7 @@ CollisionBranchList ScatterActionNucleonNucleon::nuc_nuc_to_nuc_res(
   const double s = mandelstam_s();
   const double srts = sqrt_s();
 
+  /* First: Find N N -> N R channels. */
   /* Loop over all baryon resonances. */
   for (ParticleTypePtr type_resonance :
        ParticleType::list_baryon_resonances()) {
@@ -146,8 +145,8 @@ CollisionBranchList ScatterActionNucleonNucleon::nuc_nuc_to_nuc_res(
       }
 
       /* Integration limits. */
-      double lower_limit = type_resonance->minimum_mass();
-      double upper_limit = srts - second_type->mass();
+      const double lower_limit = type_resonance->minimum_mass();
+      const double upper_limit = srts - second_type->mass();
       /* Check the available energy (requiring it to be a little above the
       * threshold, because the integration will not work if it's too close). */
       if (upper_limit - lower_limit < 1E-3) {
@@ -166,12 +165,12 @@ CollisionBranchList ScatterActionNucleonNucleon::nuc_nuc_to_nuc_res(
        * Integrate over the allowed resonance mass range. */
 
       const int res_id = type_resonance->pdgcode().iso_multiplet();
-      if (XS_tabulation[res_id] == nullptr) {
+      if (XS_NR_tabulation[res_id] == nullptr) {
         // initialize tabulation, we need one per resonance multiplet
         /* TODO(weil): Move this lazy init to a global initialization function,
          * in order to avoid race conditions in multi-threading. */
         Integrator integrate;
-        XS_tabulation[res_id] = make_unique<Tabulation>(
+        XS_NR_tabulation[res_id] = make_unique<Tabulation>(
               type_resonance->minimum_mass() + second_type->mass(), 2.f, 100,
               [&](float sqrts) {
                 return integrate(type_resonance->minimum_mass(),
@@ -184,7 +183,7 @@ CollisionBranchList ScatterActionNucleonNucleon::nuc_nuc_to_nuc_res(
               });
       }
       const double resonance_integral =
-                    XS_tabulation[res_id]->get_value_linear(srts);
+                    XS_NR_tabulation[res_id]->get_value_linear(srts);
 
       /** Cross section for 2->2 process with one resonance in final state.
        * Based on Eq. (46) in \iref{Weil:2013mya}. */
@@ -202,6 +201,104 @@ CollisionBranchList ScatterActionNucleonNucleon::nuc_nuc_to_nuc_res(
       }
     }
   }
+
+  /* Second: Find N N -> Delta R channels. */
+  /* Loop over all baryon resonances. */
+  for (ParticleTypePtr type_res_1 : ParticleType::list_baryon_resonances()) {
+    /* Loop over second particle (Delta). */
+    for (ParticleTypePtr type_res_2 : ParticleType::list_Deltas()) {
+      /* Check for charge conservation. */
+      if (type_res_1->charge() + type_res_2->charge() !=
+          type_particle_a.charge() + type_particle_b.charge()) {
+        continue;
+      }
+
+      int I_z = type_res_1->isospin3() + type_res_2->isospin3();
+
+      /* Compute total isospin range with given initial and final particles. */
+      int I_max =
+          std::min(type_res_1->isospin() + type_res_2->isospin(),
+                   type_particle_a.isospin() + type_particle_b.isospin());
+      int I_min = std::max(
+          std::abs(type_res_1->isospin() - type_res_2->isospin()),
+          std::abs(type_particle_a.isospin() - type_particle_b.isospin()));
+      I_min = std::max(I_min, std::abs(I_z));
+
+      /* Loop over total isospin in allowed range.
+      * Use decrement of 2, since isospin is multiplied by 2. */
+      double isospin_factor = 0.;
+      for (int I_tot = I_max; I_tot >= I_min; I_tot -= 2) {
+        isospin_factor = isospin_factor +
+                         isospin_clebsch_gordan(type_particle_a,
+                                                type_particle_b, I_tot, I_z) *
+                             isospin_clebsch_gordan(*type_res_1,
+                                                    *type_res_2, I_tot, I_z);
+      }
+
+      /* If Clebsch-Gordan coefficient is zero, don't bother with the rest. */
+      if (std::abs(isospin_factor) < really_small) {
+        continue;
+      }
+
+      /* Integration limits. */
+      const double lower_limit = type_res_1->minimum_mass();
+      const double upper_limit = srts - type_res_2->minimum_mass();
+      /* Check the available energy (requiring it to be a little above the
+      * threshold, because the integration will not work if it's too close). */
+      if (upper_limit - lower_limit < 1E-3) {
+        continue;
+      }
+
+      /* Calculate matrix element. */
+      const float matrix_element =
+            nn_to_resonance_matrix_element(srts, *type_res_1, *type_res_2);
+      if (matrix_element <= 0.) {
+        continue;
+      }
+
+      /* Calculate resonance production cross section
+       * using the Breit-Wigner distribution as probability amplitude.
+       * Integrate over the allowed resonance mass range. */
+
+      const int res_id = type_res_1->pdgcode().iso_multiplet();
+      if (XS_DR_tabulation[res_id] == nullptr) {
+        // initialize tabulation, we need one per resonance multiplet
+        /* TODO(weil): Move this lazy init to a global initialization function,
+         * in order to avoid race conditions in multi-threading. */
+        Integrator2d integrate(1E5);
+        XS_DR_tabulation[res_id] = make_unique<Tabulation>(
+              type_res_1->minimum_mass() + type_res_2->mass(), 2.f, 100,
+              [&](float sqrts) {
+                return integrate(type_res_1->minimum_mass(),
+                                 sqrts - type_res_2->mass(),
+                                 type_res_2->minimum_mass(),
+                                 sqrts - type_res_1->mass(),
+                                 [&](float m1, float m2) {
+                                    return spec_func_integrand_2res(sqrts,
+                                              m1, m2, *type_res_1, *type_res_2);
+                                 });
+              });
+      }
+      const double resonance_integral =
+                    XS_DR_tabulation[res_id]->get_value_linear(srts);
+
+      /** Cross section for 2->2 process with one resonance in final state.
+       * Based on Eq. (51) in \iref{Weil:2013mya}. */
+      float xsection = isospin_factor * isospin_factor * matrix_element
+                     * resonance_integral / (s * cm_momentum());
+
+      if (xsection > really_small) {
+        process_list.push_back(make_unique<CollisionBranch>
+                               (*type_res_1, *type_res_2, xsection,
+                                ProcessType::TwoToTwo));
+        log.debug("Found 2->2 creation process for resonance ",
+                  *type_res_1);
+        log.debug("2->2 with original particles: ",
+                  type_particle_a, type_particle_b);
+      }
+    }
+  }
+
   return process_list;
 }
 

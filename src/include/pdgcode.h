@@ -266,6 +266,11 @@ class PdgCode {
   inline bool is_nucleon() const {
       return (code() == 0x2212) || (code() == 0x2112);
   }
+  /// Is this a Delta(1232)?
+  inline bool is_Delta() const {
+      return (code() == 0x2224) || (code() == 0x2214) ||
+             (code() == 0x2114) || (code() == 0x1114);
+  }
   /// Is this a kaon (K+, K-, K0, Kbar0)?
   inline bool is_kaon() const {
       const auto abs_code = std::abs(code());
