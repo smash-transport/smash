@@ -13,6 +13,7 @@
 #include "include/pythia.h"
 
 #include "include/action.h"
+#include "include/fpenvironment.h"
 #include "include/forwarddeclarations.h"
 #include "include/logging.h"
 #include "include/particledata.h"
@@ -27,6 +28,10 @@ namespace Smash {
   /* This function will generate outgoing particles in CM frame from a hard process */
   ParticleList string_excitation(const ParticleList &incoming_particles_) {
       const auto &log = logger<LogArea::Pythia>();  
+    /// Disable floating point exception trap for Pythia 
+    {
+    DisableFloatTraps guard(FE_DIVBYZERO | FE_INVALID);
+
     #ifdef PYTHIA_FOUND 
 	  /* set all necessary parameters for Pythia 
 	   * Create Pythia object */
@@ -94,5 +99,6 @@ namespace Smash {
       ParticleList outgoing_particles_; 
     #endif         
     return outgoing_particles_; 
+    }
   }	
 }
