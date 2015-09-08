@@ -175,7 +175,7 @@ void OscarOutput<Format, Contents>::at_eventend(const Particles &particles,
       write(particles);
     }
     // Comment end of an event
-    std::fprintf(file_.get(), "# event %i end\n", event_number + 1);
+    std::fprintf(file_.get(), "# event %i end 0\n", event_number + 1);
   } else {
     // OSCAR line prefix : initial particles; final particles; event id
     // Last block of an event: initial = number of particles, final = 0
@@ -328,7 +328,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
    *
    * **Event end line**
    * \code
-   * # event ev_num end
+   * # event ev_num end 0
    * \endcode
    *
    * \page format_oscar_collisions Oscar collisions format
@@ -375,7 +375,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
    * \endcode
    * **Event end line**
    * \code
-   * # event ev_num end
+   * # event ev_num end 0
    * \endcode
    *
    * Oscar2013
@@ -408,7 +408,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
    *
    * **Event end line**
    * \code
-   * # event ev_num end
+   * # event ev_num end 0
    * \endcode
    **/
 template <OscarOutputFormat Format, int Contents>
