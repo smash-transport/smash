@@ -48,6 +48,7 @@ if(Pythia_FOUND)
 	"${Pythia_INCLUDE_DIRS}"
 	)
   set(SMASH_LIBRARIES
+     ${SMASH_LIBRARIES} 
      ${Pythia_LIBRARIES} -ldl
      )
    add_definitions(
