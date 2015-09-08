@@ -30,7 +30,8 @@ namespace Smash {
       const auto &log = logger<LogArea::Pythia>();  
     /// Disable floating point exception trap for Pythia 
     {
-    DisableFloatTraps guard(FE_DIVBYZERO | FE_INVALID);
+///    DisableFloatTraps guard(FE_DIVBYZERO | FE_INVALID);
+    DisableFloatTraps guard;
 
     #ifdef PYTHIA_FOUND 
 	  /* set all necessary parameters for Pythia 
