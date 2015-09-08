@@ -15,6 +15,7 @@
 #include <tuple>
 
 #include "cxx14compat.h"
+#include "random.h"
 
 namespace Smash {
 
@@ -168,6 +169,10 @@ class Integrator2d {
               rng_(gsl_rng_alloc(gsl_rng_mt19937)),
               number_of_calls_(num_calls) {
     gsl_monte_plain_init(state_);
+    // initialize the GSL RNG with a random seed
+    unsigned long int seed = Random::uniform(0.,
+                                             static_cast<double>(ULONG_MAX));
+    gsl_rng_set(rng_, seed);
   }
 
   /**
