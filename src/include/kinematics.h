@@ -138,7 +138,7 @@ static inline void check_radicand(double mandelstam_s, double radicand) {
       std::stringstream err;
       err << "plab_from_s: negative radicand: " << mandelstam_s;
       throw std::runtime_error(err.str());
-  };
+  }
 }
 
 /** Convert mandelstam-s to p_lab in a fixed-target collision.

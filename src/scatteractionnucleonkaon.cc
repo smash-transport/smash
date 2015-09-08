@@ -24,7 +24,7 @@ float ScatterActionNucleonKaon::elastic_parametrization() {
 
   const double s = mandelstam_s();
 
-  float sig_el;
+  float sig_el = 0.f;
   switch (nucleon.code()) {
     case 0x2212:  // p
       switch (kaon.code()) {
@@ -59,7 +59,8 @@ float ScatterActionNucleonKaon::elastic_parametrization() {
       }
       break;
     default:
-      throw std::runtime_error("elastic cross section for antinucleon-kaon not implemented");
+      throw std::runtime_error("elastic cross section for antinucleon-kaon "
+                               "not implemented");
   }
 
   if (sig_el > 0) {

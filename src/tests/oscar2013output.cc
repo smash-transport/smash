@@ -174,7 +174,7 @@ TEST(full2013_format) {
     outputfile.get();
     /* Check for event end line */
     std::getline(outputfile, line);
-    std::string end_line = "# event " + std::to_string(event_id + 1) + " end";
+    std::string end_line = "# event " + std::to_string(event_id + 1) + " end 0";
     COMPARE(line, end_line);
   }
   outputfile.close();
@@ -261,7 +261,7 @@ TEST(final2013_format) {
     outputfile.get();
     /* Check for event end line */
     std::getline(outputfile, line);
-    std::string end_line = "# event " + std::to_string(event_id + 1) + " end";
+    std::string end_line = "# event " + std::to_string(event_id + 1) + " end 0";
     COMPARE(line, end_line);
   }
   outputfile.close();

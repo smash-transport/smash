@@ -18,8 +18,8 @@
 /// Represent an average value.
 template <typename T>
 class Average {
-    public:
-        Average() : avg_(0), n_(0) {};
+ public:
+        Average() : avg_(0), n_(0) {}
 
         /// Add a value to the set of numbers defining the average.
         void add(T x) {
@@ -42,7 +42,8 @@ class Average {
             avg_ = 0;
             n_ = 0;
         }
-    private:
+
+ private:
         T avg_;
         uint64_t n_;
 };

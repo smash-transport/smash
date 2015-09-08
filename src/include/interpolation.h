@@ -104,7 +104,8 @@ InterpolateDataLinear<T>::InterpolateDataLinear(const std::vector<T>& x,
         #pragma GCC diagnostic ignored "-Wfloat-equal"
         if (a == b) {
         #pragma GCC diagnostic pop
-          throw std::runtime_error("InterpolateDataLinear: Each x value must be unique.");
+          throw std::runtime_error("InterpolateDataLinear: "
+                                   "Each x value must be unique.");
         }
         return a < b;
       });
@@ -164,7 +165,8 @@ class InterpolateDataSpline {
   /// Cubic spline interpolation is used.
   /// Values outside the given samples will use the outmost sample
   /// as a constant extrapolation.
-  InterpolateDataSpline(const std::vector<double>& x, const std::vector<double>& y);
+  InterpolateDataSpline(const std::vector<double>& x,
+                        const std::vector<double>& y);
   ~InterpolateDataSpline();
   double operator()(double x) const;
  private:

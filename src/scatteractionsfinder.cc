@@ -69,14 +69,14 @@ ScatterActionPtr ScatterActionsFinder::construct_scatter_action(
     if ((pdg_a.is_nucleon() && pdg_b.is_kaon()) ||
         (pdg_b.is_nucleon() && pdg_a.is_kaon())) {
       act = make_unique<ScatterActionNucleonKaon>(data_a, data_b,
-                                                  time_until_collision, isotropic_);
+                                              time_until_collision, isotropic_);
     } else {
       act = make_unique<ScatterActionBaryonMeson>(data_a, data_b,
-                                                  time_until_collision, isotropic_);
+                                              time_until_collision, isotropic_);
     }
   } else {
     act = make_unique<ScatterActionMesonMeson>(data_a, data_b,
-                                               time_until_collision, isotropic_);
+                                              time_until_collision, isotropic_);
   }
   return std::move(act);
 }
