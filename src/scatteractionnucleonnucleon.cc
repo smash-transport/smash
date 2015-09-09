@@ -265,14 +265,14 @@ CollisionBranchList ScatterActionNucleonNucleon::two_to_two_inel(
         // initialize tabulation, we need one per resonance multiplet
         /* TODO(weil): Move this lazy init to a global initialization function,
          * in order to avoid race conditions in multi-threading. */
-        Integrator2d integrate(1E5);
+        Integrator2d integrate(1E4);
         XS_DR_tabulation[res_id] = make_unique<Tabulation>(
-              type_res_1->minimum_mass() + type_res_2->mass(), 2.f, 100,
+              type_res_1->minimum_mass() + type_res_2->minimum_mass(), 2.f, 100,
               [&](float sqrts) {
                 return integrate(type_res_1->minimum_mass(),
-                                 sqrts - type_res_2->mass(),
+                                 sqrts - type_res_2->minimum_mass(),
                                  type_res_2->minimum_mass(),
-                                 sqrts - type_res_1->mass(),
+                                 sqrts - type_res_1->minimum_mass(),
                                  [&](float m1, float m2) {
                                     return spec_func_integrand_2res(sqrts,
                                               m1, m2, *type_res_1, *type_res_2);
@@ -291,8 +291,8 @@ CollisionBranchList ScatterActionNucleonNucleon::two_to_two_inel(
         process_list.push_back(make_unique<CollisionBranch>
                                (*type_res_1, *type_res_2, xsection,
                                 ProcessType::TwoToTwo));
-        log.debug("Found 2->2 creation process for resonance ",
-                  *type_res_1);
+        log.debug("Found 2->2 creation process with two resonances: ",
+                  *type_res_1, " ", *type_res_2);
         log.debug("2->2 with original particles: ",
                   type_particle_a, type_particle_b);
       }
