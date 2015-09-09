@@ -157,6 +157,10 @@ class TwoBodyDecayUnstable : public TwoBodyDecay {
   float width(float m0, float G0, float m) const override;
   float in_width(float m0, float G0, float m,
                  float m1, float m2) const override;
+ protected:
+  float rho(float m) const override;
+  float Lambda_;
+  std::unique_ptr<Tabulation> tabulation_;
 };
 
 /**

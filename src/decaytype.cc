@@ -17,6 +17,34 @@
 
 namespace Smash {
 
+// auxiliary functions
+
+static float integrand_rho_Manley_1res(float srts, float mass,
+                              float stable_mass, ParticleTypePtr type, int L) {
+  if (srts <= mass + stable_mass) {
+    return 0.;
+  }
+
+  /* center-of-mass momentum of final state particles */
+  const float p_f = pCM(srts, stable_mass, mass);
+
+  return p_f/srts * blatt_weisskopf_sqr(p_f, L)
+         * type->spectral_function(mass);
+}
+
+static float integrand_rho_Manley_2res(float srts, float m1, float m2,
+                                ParticleTypePtr t1, ParticleTypePtr t2, int L) {
+  if (srts <= m1 + m2) {
+    return 0.;
+  }
+
+  /* center-of-mass momentum of final state particles */
+  const float p_f = pCM(srts, m1, m2);
+
+  return p_f/srts * blatt_weisskopf_sqr(p_f, L)
+         * t1->spectral_function(m1) * t2->spectral_function(m2);
+}
+
 
 // TwoBodyDecay
 
@@ -77,19 +105,6 @@ float TwoBodyDecayStable::in_width(float m0, float G0, float m,
 
 // TwoBodyDecaySemistable
 
-static float integrand_rho_Manley(float mass, float srts, float stable_mass,
-                                  ParticleTypePtr type, int L) {
-  if (srts <= mass + stable_mass) {
-    return 0.;
-  }
-
-  /* center-of-mass momentum of final state particles */
-  const float p_f = pCM(srts, stable_mass, mass);
-
-  return p_f/srts * blatt_weisskopf_sqr(p_f, L)
-         * type->spectral_function(mass);
-}
-
 static ParticleTypePtrList arrange_particles(ParticleTypePtrList part_types) {
   // re-arrange the particle list such that the first particle is the stable one
   if (part_types[1]->is_stable()) {
@@ -148,7 +163,7 @@ float TwoBodyDecaySemistable::rho(float mass) const {
                   return integrate(particle_types_[1]->minimum_mass(),
                                     srts - particle_types_[0]->mass(),
                                     [&](float m) {
-                                      return integrand_rho_Manley(m, srts,
+                                      return integrand_rho_Manley_1res(srts, m,
                                                   particle_types_[0]->mass(),
                                                   particle_types_[1], L_);
                                     });
@@ -178,7 +193,8 @@ float TwoBodyDecaySemistable::in_width(float m0, float G0, float m,
 
 TwoBodyDecayUnstable::TwoBodyDecayUnstable(ParticleTypePtrList part_types,
                                            int l)
-                                          : TwoBodyDecay(part_types, l) {
+                                          : TwoBodyDecay(part_types, l),
+                                            Lambda_(2.0), tabulation_(nullptr) {
   if (part_types[0]->is_stable() || part_types[1]->is_stable()) {
     throw std::runtime_error(
       "Error: Stable particle in TwoBodyDecayUnstable constructor: " +
@@ -187,13 +203,41 @@ TwoBodyDecayUnstable::TwoBodyDecayUnstable(ParticleTypePtrList part_types,
   }
 }
 
-float TwoBodyDecayUnstable::width(float, float G0, float) const {
-  return G0;  // use on-shell width
+float TwoBodyDecayUnstable::rho(float mass) const {
+  if (tabulation_ == nullptr) {
+    const float m1_min = particle_types_[0]->minimum_mass();
+    const float m2_min = particle_types_[1]->minimum_mass();
+    const float sum_gamma = particle_types_[0]->width_at_pole()
+                          + particle_types_[1]->width_at_pole();
+    const_cast<TwoBodyDecayUnstable*>(this)->tabulation_
+          = make_unique<Tabulation>(m1_min + m2_min, 10*sum_gamma, 60,
+            [&](float srts) {
+              Integrator2d integrate(1E4);
+              return integrate(m1_min, srts - m2_min, m2_min, srts - m1_min,
+                                [&](float m1, float m2) {
+                                  return integrand_rho_Manley_2res(srts, m1, m2,
+                                                        particle_types_[0],
+                                                        particle_types_[1], L_);
+                                });
+            });
+  }
+  return tabulation_->get_value_linear(mass);
 }
 
-float TwoBodyDecayUnstable::in_width(float, float G0, float,
-                                     float, float) const {
-  return G0;  // use on-shell width
+float TwoBodyDecayUnstable::width(float m0, float G0, float m) const {
+  return G0 * rho(m) / rho(m0)
+            * post_ff_sqr(m, m0, particle_types_[0]->minimum_mass()
+                               + particle_types_[1]->minimum_mass(), Lambda_);
+}
+
+float TwoBodyDecayUnstable::in_width(float m0, float G0, float m,
+                                     float m1, float m2) const {
+  const float p_f = pCM(m, m1, m2);
+
+  return G0 * p_f * blatt_weisskopf_sqr(p_f, L_)
+         * post_ff_sqr(m, m0, particle_types_[0]->minimum_mass()
+                            + particle_types_[1]->minimum_mass(), Lambda_)
+         / (m * rho(m0));
 }
 
 // TwoBodyDecayDilepton
