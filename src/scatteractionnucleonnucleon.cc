@@ -117,28 +117,8 @@ CollisionBranchList ScatterActionNucleonNucleon::two_to_two_inel(
         continue;
       }
 
-      int I_z = type_resonance->isospin3() + second_type->isospin3();
-
-      /* Compute total isospin range with given initial and final particles. */
-      int I_max =
-          std::min(type_resonance->isospin() + second_type->isospin(),
-                   type_particle_a.isospin() + type_particle_b.isospin());
-      int I_min = std::max(
-          std::abs(type_resonance->isospin() - second_type->isospin()),
-          std::abs(type_particle_a.isospin() - type_particle_b.isospin()));
-      I_min = std::max(I_min, std::abs(I_z));
-
-      /* Loop over total isospin in allowed range.
-      * Use decrement of 2, since isospin is multiplied by 2. */
-      double isospin_factor = 0.;
-      for (int I_tot = I_max; I_tot >= I_min; I_tot -= 2) {
-        isospin_factor = isospin_factor +
-                         isospin_clebsch_gordan(type_particle_a,
-                                                type_particle_b, I_tot, I_z) *
-                             isospin_clebsch_gordan(*type_resonance,
-                                                    *second_type, I_tot, I_z);
-      }
-
+      const double isospin_factor = isospin_clebsch_gordan(type_particle_a,
+                                type_particle_b, *type_resonance, *second_type);
       /* If Clebsch-Gordan coefficient is zero, don't bother with the rest. */
       if (std::abs(isospin_factor) < really_small) {
         continue;
@@ -213,28 +193,8 @@ CollisionBranchList ScatterActionNucleonNucleon::two_to_two_inel(
         continue;
       }
 
-      int I_z = type_res_1->isospin3() + type_res_2->isospin3();
-
-      /* Compute total isospin range with given initial and final particles. */
-      int I_max =
-          std::min(type_res_1->isospin() + type_res_2->isospin(),
-                   type_particle_a.isospin() + type_particle_b.isospin());
-      int I_min = std::max(
-          std::abs(type_res_1->isospin() - type_res_2->isospin()),
-          std::abs(type_particle_a.isospin() - type_particle_b.isospin()));
-      I_min = std::max(I_min, std::abs(I_z));
-
-      /* Loop over total isospin in allowed range.
-      * Use decrement of 2, since isospin is multiplied by 2. */
-      double isospin_factor = 0.;
-      for (int I_tot = I_max; I_tot >= I_min; I_tot -= 2) {
-        isospin_factor = isospin_factor +
-                         isospin_clebsch_gordan(type_particle_a,
-                                                type_particle_b, I_tot, I_z) *
-                             isospin_clebsch_gordan(*type_res_1,
-                                                    *type_res_2, I_tot, I_z);
-      }
-
+      const double isospin_factor = isospin_clebsch_gordan(type_particle_a,
+                                    type_particle_b, *type_res_1, *type_res_2);
       /* If Clebsch-Gordan coefficient is zero, don't bother with the rest. */
       if (std::abs(isospin_factor) < really_small) {
         continue;

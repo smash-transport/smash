@@ -67,24 +67,8 @@ CollisionBranchList ScatterActionBaryonBaryon::bar_bar_to_nuc_nuc(
         continue;
       }
 
-      const int I_z = type_a.isospin3() + type_b.isospin3();
-
-      /* Compute total isospin range with given initial and final particles. */
-      const int I_max = std::min(type_a.isospin() + type_b.isospin(),
-                                 nuc_a->isospin() + nuc_b->isospin());
-      int I_min = std::max(std::abs(type_a.isospin() - type_b.isospin()),
-                           std::abs(nuc_a->isospin() - nuc_b->isospin()));
-      I_min = std::max(I_min, std::abs(I_z));
-
-      /* Loop over total isospin in allowed range.
-      * Use decrement of 2, since isospin is multiplied by 2. */
-      double isospin_factor = 0.;
-      for (int I_tot = I_max; I_tot >= I_min; I_tot -= 2) {
-        isospin_factor = isospin_factor +
-            isospin_clebsch_gordan(*nuc_a, *nuc_b, I_tot, I_z)
-          * isospin_clebsch_gordan(type_a, type_b, I_tot, I_z);
-      }
-
+      double isospin_factor = isospin_clebsch_gordan(type_a, type_b,
+                                                     *nuc_a, *nuc_b);
       /* If Clebsch-Gordan coefficient is zero, don't bother with the rest */
       if (std::abs(isospin_factor) < really_small) {
         continue;

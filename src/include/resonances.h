@@ -35,19 +35,8 @@ double clebsch_gordan(const int j_a, const int j_b, const int j_c,
                       const int m_a, const int m_b, const int m_c);
 
 
-/* Calculate isospin Clebsch-Gordan coefficient for two particles p_a and p_b
- * coupling to a total isospin (I_tot, I_z).
- *
- * \fpPrecision Why \c double?
- */
-inline double isospin_clebsch_gordan(const ParticleType &p_a,
-                                     const ParticleType &p_b,
-                                     const int I_tot, const int I_z) {
-  return clebsch_gordan(p_a.isospin(), p_b.isospin(), I_tot,
-                        p_a.isospin3(), p_b.isospin3(), I_z);
-}
-
-/* Calculate isospin Clebsch-Gordan coefficient for two particles p_a and p_b
+/**
+ * Calculate isospin Clebsch-Gordan coefficient for two particles p_a and p_b
  * coupling to a resonance Res.
  *
  * \fpPrecision Why \c double?
@@ -60,7 +49,8 @@ inline double isospin_clebsch_gordan(const ParticleType &p_a,
 }
 
 
-/* Calculate isospin Clebsch-Gordan coefficient for three particles p_a, p_b and
+/**
+ * Calculate isospin Clebsch-Gordan coefficient for three particles p_a, p_b and
  * p_c coupling to a total isospin (I_tot, I_z) Res.
  *
  * Note that the coefficients also depend on the coupled isospin I_ab.
@@ -77,6 +67,15 @@ inline double isospin_clebsch_gordan(const ParticleType &p_a,
          * clebsch_gordan(p_a.isospin(), p_b.isospin(), I_ab,
                           p_a.isospin3(), p_b.isospin3(), I_abz);
 }
+
+/**
+ * Calculate isospin Clebsch-Gordan coefficient for a 2-to-2 reaction
+ * A + B -> C + D.
+ *
+ * \fpPrecision Why \c double?
+ */
+double isospin_clebsch_gordan(const ParticleType &t_a, const ParticleType &t_b,
+                              const ParticleType &t_c, const ParticleType &t_d);
 
 
 /**
