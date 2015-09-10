@@ -54,16 +54,24 @@ ParticleTypePtr ParticleType::operator&() const {
 }
 #endif
 
-std::vector<ParticleTypePtr> ParticleType::list_nucleons() {
-  return {&find(0x2212), &find(0x2112)};
+ParticleTypePtrList ParticleType::list_nucleons() {
+  if (IsoParticleType::exists("N")) {
+    return IsoParticleType::find("N").get_states();
+  } else {
+    return ParticleTypePtrList();
+  }
 }
 
-std::vector<ParticleTypePtr> ParticleType::list_Deltas() {
-  return {&find(0x2224), &find(0x2214), &find(0x2114), &find(0x1114)};
+ParticleTypePtrList ParticleType::list_Deltas() {
+  if (IsoParticleType::exists("Δ")) {
+    return IsoParticleType::find("Δ").get_states();
+  } else {
+    return ParticleTypePtrList();
+  }
 }
 
-std::vector<ParticleTypePtr> ParticleType::list_baryon_resonances() {
-  std::vector<ParticleTypePtr> list;
+ParticleTypePtrList ParticleType::list_baryon_resonances() {
+  ParticleTypePtrList list;
   list.reserve(10);
   for (const ParticleType &type_resonance : ParticleType::list_all()) {
     /* Only loop over baryon resonances. */

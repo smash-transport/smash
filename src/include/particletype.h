@@ -217,13 +217,13 @@ class ParticleType {
   static const ParticleTypeList &list_all();
 
   /** Returns a list of all nucleons (i.e. proton and neutron). */
-  static std::vector<ParticleTypePtr> list_nucleons();
+  static ParticleTypePtrList list_nucleons();
   /** Returns a list of the Delta(1232) baryons
    *  (i.e. all four charge states). */
-  static std::vector<ParticleTypePtr> list_Deltas();
+  static ParticleTypePtrList list_Deltas();
   /** Returns a list of all baryon resonances,
    * i.e. unstable baryons (not including antibaryons). */
-  static std::vector<ParticleTypePtr> list_baryon_resonances();
+  static ParticleTypePtrList list_baryon_resonances();
 
   /**
    * Returns the ParticleType object for the given \p pdgcode.
