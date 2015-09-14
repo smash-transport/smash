@@ -118,11 +118,12 @@ OscarOutput<Format, Contents>::OscarOutput(bf::path path, std::string name)
    */
 
   if (Format == OscarFormat2013) {
-    std::fprintf(file_.get(), "#!OSCAR2013 %s %s ", name.c_str(),
-                 VERSION_MAJOR);
-    std::fprintf(file_.get(), "t x y z mass p0 px py pz pdg ID\n");
+    std::fprintf(file_.get(),
+                 "#!OSCAR2013 %s t x y z mass p0 px py pz pdg ID\n",
+                 name.c_str());
     std::fprintf(file_.get(),
                  "# Units: fm fm fm fm GeV GeV GeV GeV GeV none none\n");
+    std::fprintf(file_.get(), "# %s\n", VERSION_MAJOR);
   } else {
     if (name == "particle_lists") {
       name = "final_id_p_x";  // FIXME: why is this necessary? I.e. what does
