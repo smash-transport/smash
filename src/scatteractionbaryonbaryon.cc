@@ -54,7 +54,7 @@ CollisionBranchList ScatterActionBaryonBaryon::bar_bar_to_nuc_nuc(
   CollisionBranchList process_list;
 
   const double s = mandelstam_s();
-  const double srts = sqrt_s();
+  const double sqrts = sqrt_s();
   /* CM momentum in final state */
   double p_cm_final = std::sqrt(s - 4.*nucleon_mass*nucleon_mass)/2.;
 
@@ -76,7 +76,7 @@ CollisionBranchList ScatterActionBaryonBaryon::bar_bar_to_nuc_nuc(
 
       /* Calculate matrix element for inverse process. */
       const float matrix_element =
-          nn_to_resonance_matrix_element(srts, type_a, type_b);
+          nn_to_resonance_matrix_element(sqrts, type_a, type_b);
       if (matrix_element <= 0.) {
         continue;
       }
@@ -104,7 +104,7 @@ CollisionBranchList ScatterActionBaryonBaryon::bar_bar_to_nuc_nuc(
 }
 
 
-float ScatterActionBaryonBaryon::nn_to_resonance_matrix_element(double srts,
+float ScatterActionBaryonBaryon::nn_to_resonance_matrix_element(double sqrts,
       const ParticleType &type_a, const ParticleType &type_b) const {
   const float spin_factor = (type_a.spin()+1) * (type_b.spin()+1);
   const float m_plus = type_a.mass() + type_b.mass();
@@ -116,7 +116,7 @@ float ScatterActionBaryonBaryon::nn_to_resonance_matrix_element(double srts,
   if (pdg_a.is_Delta() && pdg_b.is_nucleon()) {
     /** \f$ NN \rightarrow N\Delta \f$:
       * fit sqrt(s)-dependence to OBE model [\iref{Dmitriev:1986st}] */
-    return 57.375 * spin_factor / std::pow(srts - 1.104, 1.951);
+    return 57.375 * spin_factor / std::pow(sqrts - 1.104, 1.951);
   } else if (pdg_a.is_Nstar() && pdg_b.is_nucleon()) {
     /** \f$ NN \rightarrow NN^* \f$:
       * constant matrix element, cf. \iref{Bass:1998ca}, equ. (3.35). */

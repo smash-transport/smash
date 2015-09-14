@@ -19,29 +19,29 @@ namespace Smash {
 
 // auxiliary functions
 
-static float integrand_rho_Manley_1res(float srts, float mass,
+static float integrand_rho_Manley_1res(float sqrts, float mass,
                               float stable_mass, ParticleTypePtr type, int L) {
-  if (srts <= mass + stable_mass) {
+  if (sqrts <= mass + stable_mass) {
     return 0.;
   }
 
   /* center-of-mass momentum of final state particles */
-  const float p_f = pCM(srts, stable_mass, mass);
+  const float p_f = pCM(sqrts, stable_mass, mass);
 
-  return p_f/srts * blatt_weisskopf_sqr(p_f, L)
+  return p_f/sqrts * blatt_weisskopf_sqr(p_f, L)
          * type->spectral_function(mass);
 }
 
-static float integrand_rho_Manley_2res(float srts, float m1, float m2,
+static float integrand_rho_Manley_2res(float sqrts, float m1, float m2,
                                 ParticleTypePtr t1, ParticleTypePtr t2, int L) {
-  if (srts <= m1 + m2) {
+  if (sqrts <= m1 + m2) {
     return 0.;
   }
 
   /* center-of-mass momentum of final state particles */
-  const float p_f = pCM(srts, m1, m2);
+  const float p_f = pCM(sqrts, m1, m2);
 
-  return p_f/srts * blatt_weisskopf_sqr(p_f, L)
+  return p_f/sqrts * blatt_weisskopf_sqr(p_f, L)
          * t1->spectral_function(m1) * t2->spectral_function(m2);
 }
 
@@ -158,12 +158,12 @@ float TwoBodyDecaySemistable::rho(float mass) const {
         = make_unique<Tabulation>(
                 particle_types_[0]->mass() + particle_types_[1]->minimum_mass(),
                 10*particle_types_[1]->width_at_pole(), 60,
-                [&](float srts) {
+                [&](float sqrts) {
                   Integrator integrate;
                   return integrate(particle_types_[1]->minimum_mass(),
-                                    srts - particle_types_[0]->mass(),
+                                    sqrts - particle_types_[0]->mass(),
                                     [&](float m) {
-                                      return integrand_rho_Manley_1res(srts, m,
+                                      return integrand_rho_Manley_1res(sqrts, m,
                                                   particle_types_[0]->mass(),
                                                   particle_types_[1], L_);
                                     });
@@ -211,13 +211,13 @@ float TwoBodyDecayUnstable::rho(float mass) const {
                           + particle_types_[1]->width_at_pole();
     const_cast<TwoBodyDecayUnstable*>(this)->tabulation_
           = make_unique<Tabulation>(m1_min + m2_min, 10*sum_gamma, 60,
-            [&](float srts) {
+            [&](float sqrts) {
               Integrator2d integrate(1E4);
-              return integrate(m1_min, srts - m2_min, m2_min, srts - m1_min,
+              return integrate(m1_min, sqrts - m2_min, m2_min, sqrts - m1_min,
                                 [&](float m1, float m2) {
-                                  return integrand_rho_Manley_2res(srts, m1, m2,
-                                                        particle_types_[0],
-                                                        particle_types_[1], L_);
+                                  return integrand_rho_Manley_2res(sqrts,
+                                                    m1, m2, particle_types_[0],
+                                                    particle_types_[1], L_);
                                 });
             });
   }
@@ -407,8 +407,7 @@ float ThreeBodyDecayDilepton::width(float, float G0, float m) const {
   // integrate differential width to obtain partial width
   if (tabulation_ == nullptr) {
     const_cast<ThreeBodyDecayDilepton*>(this)->tabulation_
-          = make_unique<Tabulation>(
-              m_other+2*m_l, 10*G0, 60,
+          = make_unique<Tabulation>(m_other+2*m_l, 10*G0, 60,
               [&](float m_parent) {
                 const float bottom = 2*m_l;
                 const float top = m_parent-m_other;
@@ -417,10 +416,9 @@ float ThreeBodyDecayDilepton::width(float, float G0, float m) const {
                 }
                 Integrator integrate;
                 return integrate(bottom, top,
-                               [&](float srts) {
-                                  return diff_width(m_parent, srts,
-                                                    m_other,
-                                                    pdg_par);
+                               [&](float sqrts) {
+                                  return diff_width(m_parent, sqrts,
+                                                    m_other, pdg_par);
                                 }).value();
                 });
   }

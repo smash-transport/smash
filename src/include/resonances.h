@@ -87,11 +87,11 @@ double isospin_clebsch_gordan(const ParticleType &t_a, const ParticleType &t_b,
  *  and \f$ p_{cm}^f \f$ is the center-of-mass momentum of the final state.
  *
  * \param[in] resonance_mass Actual mass of the resonance.
- * \param[in] srts sqrt(s) of the process
+ * \param[in] sqrts Center-of-mass energy, i.e. sqrt of Mandelstam s.
  * \param[in] stable_mass mass of the stable particle in the final state
  * \param[in] type type of the resonance
  */
-float spec_func_integrand_1res(float resonance_mass, float srts,
+float spec_func_integrand_1res(float resonance_mass, float sqrts,
                                float stable_mass, const ParticleType &type);
 
 
@@ -104,13 +104,13 @@ float spec_func_integrand_1res(float resonance_mass, float srts,
  * spectral functions and \f$ p_{cm}^f \f$ is the center-of-mass momentum of
  * the final state.
  *
- * \param[in] srts sqrt(s) of the process
+ * \param[in] sqrts Center-of-mass energy, i.e. sqrt of Mandelstam s.
  * \param[in] res_mass_1 Actual mass of the first resonance.
  * \param[in] res_mass_2 Actual mass of the second resonance.
  * \param[in] t1 Type of the first resonance.
  * \param[in] t2 Type of the second resonance.
  */
-float spec_func_integrand_2res(float srts, float res_mass_1, float res_mass_2,
+float spec_func_integrand_2res(float sqrts, float res_mass_1, float res_mass_2,
                                const ParticleType &t1, const ParticleType &t2);
 
 
