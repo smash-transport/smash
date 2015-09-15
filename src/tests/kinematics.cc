@@ -59,6 +59,14 @@ TEST(plab_from_s_NN) {
 }
 
 TEST(plab_from_s_KN) {
+  const double s = 2.9*2.9;
+  const double plab = plab_from_s(s, kaon_mass, nucleon_mass);
+  const double E = std::sqrt(plab*plab + kaon_mass*kaon_mass) + nucleon_mass;
+  COMPARE_RELATIVE_ERROR(s, E*E - plab*plab, 1.e-7);
+  COMPARE_RELATIVE_ERROR(s, s_from_plab(plab, kaon_mass, nucleon_mass), 1.e-7);
+}
+
+TEST(plab_from_s_KN_small) {
   // At this value plab should vanish, but the function is very steep there.
   const double s = (kaon_mass + nucleon_mass) * (kaon_mass + nucleon_mass);
   // We add a small constant to avoid numerical issue with the assert.
