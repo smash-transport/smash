@@ -144,7 +144,7 @@ float kplusp_elastic(double mandelstam_s) {
   constexpr double a3 = -0.764;  // GeV^-1
   constexpr double a4 = 0.508;  // GeV^-2
 
-  const double p_lab = plab_from_s(mandelstam_s, kaon_mass);
+  const double p_lab = plab_from_s(mandelstam_s, kaon_mass, nucleon_mass);
   const double p_lab2 = p_lab*p_lab;
 
   return (a0 + a1*p_lab + a2*p_lab2) / (1 + a3*p_lab + a4*p_lab2);
@@ -261,7 +261,7 @@ static float kminusp_elastic_pdg(double mandelstam_s) {
         std::cout << "-------------------" << std::endl;
         */
     }
-    const double p_lab = plab_from_s(mandelstam_s, kaon_mass);
+    const double p_lab = plab_from_s(mandelstam_s, kaon_mass, nucleon_mass);
     return (*kminusp_elastic_interpolation)(p_lab);
 }
 
@@ -280,7 +280,7 @@ float kminusp_elastic(double mandelstam_s) {
     constexpr double a1 = 0.22002795;  // Gev
     constexpr double a2 = 0.64907116;
 
-    const double p_lab = plab_from_s(mandelstam_s, kaon_mass);
+    const double p_lab = plab_from_s(mandelstam_s, kaon_mass, nucleon_mass);
     const double p_i = p_lab;
     const double p_f = p_lab;
 
