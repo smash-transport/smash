@@ -67,7 +67,6 @@ bool TwoBodyDecay::has_particles(const ParticleType &t_a,
          (*particle_types_[0] == t_b && *particle_types_[1] == t_a);
 }
 
-
 // TwoBodyDecayStable
 
 TwoBodyDecayStable::TwoBodyDecayStable(ParticleTypePtrList part_types, int l)
@@ -121,36 +120,24 @@ static ParticleTypePtrList arrange_particles(ParticleTypePtrList part_types) {
   return part_types;
 }
 
-/**
- * Determine the cutoff parameter Λ for semistable decays,
- * given the types of the daughter particles.
- *
- * For the values used in GiBUU, see \iref{Buss:2011mx}, eq. (175).
- * For the original values used by M. Post, see table 1 in \iref{Post:2003hu}.
- *
- * We mostly stick to the GiBUU values, but use a different value for the ρπ
- * decay, in order to avoid secondary bumps in the ω spectral function and
- * achieve a better normalization. In contrast to Smash, GiBUU does not have
- * an ω → ρ π decay.
- */
-static float get_Lambda(const ParticleTypePtr type_stable,
-                        const ParticleTypePtr type_unstable) {
-  if (type_unstable->baryon_number() != 0) {
+TwoBodyDecaySemistable::TwoBodyDecaySemistable(ParticleTypePtrList part_types,
+                                               int l)
+                              : TwoBodyDecay(arrange_particles(part_types), l),
+                                Lambda_(get_Lambda()),
+                                tabulation_(nullptr)
+{}
+
+float TwoBodyDecaySemistable::get_Lambda() {
+  // "semi-stable" decays (first daughter is stable and second one unstable)
+  if (particle_types_[1]->baryon_number() != 0) {
     return 2.;  // unstable baryons
-  } else if (type_unstable->pdgcode().is_rho() &&
-             type_stable->pdgcode().is_pion()) {
+  } else if (particle_types_[1]->pdgcode().is_rho() &&
+             particle_types_[0]->pdgcode().is_pion()) {
     return 0.8;  // ρ+π
   } else {
     return 1.6;  // other unstable mesons
   }
 }
-
-TwoBodyDecaySemistable::TwoBodyDecaySemistable(ParticleTypePtrList part_types,
-                                               int l)
-  : TwoBodyDecay(arrange_particles(part_types), l),
-    Lambda_(get_Lambda(particle_types_[0], particle_types_[1])),
-    tabulation_(nullptr)
-{}
 
 float TwoBodyDecaySemistable::rho(float mass) const {
   if (tabulation_ == nullptr) {
@@ -194,13 +181,19 @@ float TwoBodyDecaySemistable::in_width(float m0, float G0, float m,
 TwoBodyDecayUnstable::TwoBodyDecayUnstable(ParticleTypePtrList part_types,
                                            int l)
                                           : TwoBodyDecay(part_types, l),
-                                            Lambda_(0.5), tabulation_(nullptr) {
+                                            Lambda_(get_Lambda()),
+                                            tabulation_(nullptr) {
   if (part_types[0]->is_stable() || part_types[1]->is_stable()) {
     throw std::runtime_error(
       "Error: Stable particle in TwoBodyDecayUnstable constructor: " +
       part_types[0]->pdgcode().string() + " " +
       part_types[1]->pdgcode().string());
   }
+}
+
+float TwoBodyDecayUnstable::get_Lambda() {
+  // for now: use the same value for all unstable decays (fixed on f₂ → ρ ρ)
+  return 0.8;
 }
 
 float TwoBodyDecayUnstable::rho(float mass) const {
