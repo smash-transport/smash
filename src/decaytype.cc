@@ -194,7 +194,7 @@ float TwoBodyDecaySemistable::in_width(float m0, float G0, float m,
 TwoBodyDecayUnstable::TwoBodyDecayUnstable(ParticleTypePtrList part_types,
                                            int l)
                                           : TwoBodyDecay(part_types, l),
-                                            Lambda_(2.0), tabulation_(nullptr) {
+                                            Lambda_(0.5), tabulation_(nullptr) {
   if (part_types[0]->is_stable() || part_types[1]->is_stable()) {
     throw std::runtime_error(
       "Error: Stable particle in TwoBodyDecayUnstable constructor: " +
