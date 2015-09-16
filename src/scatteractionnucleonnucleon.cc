@@ -118,7 +118,7 @@ CollisionBranchList ScatterActionNucleonNucleon::two_to_two_inel(
         continue;
       }
 
-      const double isospin_factor = isospin_clebsch_gordan(type_particle_a,
+      const double isospin_factor = isospin_clebsch_gordan_2to2(type_particle_a,
                                 type_particle_b, *type_resonance, *second_type);
       /* If Clebsch-Gordan coefficient is zero, don't bother with the rest. */
       if (std::abs(isospin_factor) < really_small) {
@@ -194,7 +194,7 @@ CollisionBranchList ScatterActionNucleonNucleon::two_to_two_inel(
         continue;
       }
 
-      const double isospin_factor = isospin_clebsch_gordan(type_particle_a,
+      const double isospin_factor = isospin_clebsch_gordan_2to2(type_particle_a,
                                     type_particle_b, *type_res_1, *type_res_2);
       /* If Clebsch-Gordan coefficient is zero, don't bother with the rest. */
       if (std::abs(isospin_factor) < really_small) {

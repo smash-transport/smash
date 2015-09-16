@@ -37,16 +37,18 @@ float clebsch_gordan(const int j_a, const int j_b, const int j_c,
 /* Calculate isospin Clebsch-Gordan coefficient for two particles p_a and p_b
  * coupling to a total isospin (I_tot, I_z).
  */
-static float isospin_clebsch_gordan(const ParticleType &p_a,
-                                    const ParticleType &p_b,
-                                    const int I_tot, const int I_z) {
+static float isospin_clebsch_gordan_2to1(const ParticleType &p_a,
+                                         const ParticleType &p_b,
+                                         const int I_tot, const int I_z) {
   return clebsch_gordan(p_a.isospin(), p_b.isospin(), I_tot,
                         p_a.isospin3(), p_b.isospin3(), I_z);
 }
 
 
-float isospin_clebsch_gordan(const ParticleType &t_a, const ParticleType &t_b,
-                             const ParticleType &t_c, const ParticleType &t_d) {
+float isospin_clebsch_gordan_2to2(const ParticleType &t_a,
+                                  const ParticleType &t_b,
+                                  const ParticleType &t_c,
+                                  const ParticleType &t_d) {
   const int I_z = t_a.isospin3() + t_b.isospin3();
 
   /* Compute total isospin range with given initial and final particles. */
@@ -61,8 +63,8 @@ float isospin_clebsch_gordan(const ParticleType &t_a, const ParticleType &t_b,
   float isospin_factor = 0.;
   for (int I_tot = I_max; I_tot >= I_min; I_tot -= 2) {
     isospin_factor = isospin_factor +
-        isospin_clebsch_gordan(t_c, t_d, I_tot, I_z)
-      * isospin_clebsch_gordan(t_a, t_b, I_tot, I_z);
+        isospin_clebsch_gordan_2to1(t_c, t_d, I_tot, I_z)
+      * isospin_clebsch_gordan_2to1(t_a, t_b, I_tot, I_z);
   }
   return isospin_factor;
 }

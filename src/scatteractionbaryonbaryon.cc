@@ -67,8 +67,8 @@ CollisionBranchList ScatterActionBaryonBaryon::bar_bar_to_nuc_nuc(
         continue;
       }
 
-      double isospin_factor = isospin_clebsch_gordan(type_a, type_b,
-                                                     *nuc_a, *nuc_b);
+      double isospin_factor = isospin_clebsch_gordan_2to2(type_a, type_b,
+                                                          *nuc_a, *nuc_b);
       /* If Clebsch-Gordan coefficient is zero, don't bother with the rest */
       if (std::abs(isospin_factor) < really_small) {
         continue;
