@@ -10,6 +10,7 @@
 #include "include/scatteractionnucleonnucleon.h"
 
 #include "include/angles.h"
+#include "include/clebschgordan.h"
 #include "include/cxx14compat.h"
 #include "include/integrate.h"
 #include "include/kinematics.h"

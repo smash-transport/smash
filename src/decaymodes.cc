@@ -9,20 +9,14 @@
 
 #include "include/decaymodes.h"
 
-#include <cassert>
-#include <cstdio>
-#include <map>
-#include <numeric>
 #include <vector>
 
+#include "include/clebschgordan.h"
 #include "include/constants.h"
 #include "include/cxx14compat.h"
 #include "include/inputfunctions.h"
 #include "include/isoparticletype.h"
 #include "include/logging.h"
-#include "include/pdgcode.h"
-#include "include/processbranch.h"
-#include "include/resonances.h"
 #include "include/stringfunctions.h"
 
 namespace Smash {
