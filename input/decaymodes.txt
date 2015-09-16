@@ -43,9 +43,9 @@
 # 2.87e-4 1  μ⁻ μ⁺
 
 f₂
-0.65  0  π π
+0.65  0  π π   # PDG value: 0.848 (modified to better fit the π⁺π⁻ cross section)
+0.30  0  ρ ρ   # to emulate 4π (whose PDG value is 0.102)
 0.05  0  K K̅
-0.30  0  ρ ρ
 
 #################### strange mesons ####################
 
