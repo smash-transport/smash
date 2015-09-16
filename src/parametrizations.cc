@@ -233,6 +233,30 @@ const std::initializer_list<double> KMINUSP_ELASTIC_SIG = {
 static std::unique_ptr<InterpolateDataSpline> kminusp_elastic_interpolation
     = nullptr;
 
+const std::initializer_list<double> KMINUSP_RES_SQRTS = {
+  1.43, 1.45, 1.47, 1.49, 1.51, 1.53, 1.55, 1.57, 1.59, 1.61, 1.63, 1.65, 1.67,
+  1.69, 1.71, 1.73, 1.75, 1.77, 1.79, 1.81, 1.83, 1.85, 1.87, 1.89, 1.91, 1.93,
+  1.95, 1.97, 1.99, 2.01, 2.03, 2.05, 2.07, 2.09, 2.11, 2.13, 2.15, 2.17, 2.19,
+  2.21, 2.23, 2.25, 2.27, 2.29, 2.31, 2.33, 2.35, 2.37, 2.39, 2.41, 2.43, 2.45,
+  2.47, 2.49, 2.51, 2.53,
+};
+const std::initializer_list<double> KMINUSP_RES_SIG = {
+  0.181508888856, 0.276824217055, 0.52709680347, 0.809170022877, 5.4306649414,
+  2.73623096896, 1.00335277069, 0.831092759384, 0.96487816871, 1.11429990074,
+  1.63535440366, 2.43199415481, 3.35420549211, 3.5880964655, 3.55175458501,
+  4.17980540217, 5.69214168171, 6.8367923342, 9.03411977658, 10.7000792054,
+  10.4654818833, 9.42857422653, 10.2164594715, 10.7163541445, 8.93164259792,
+  7.09269895697, 5.17386434884, 3.75480313343, 2.62782096271, 2.07496543859,
+  1.64469989838, 1.17591535168, 0.966825136065, 0.885320244975, 0.758643195654,
+  0.637513694965, 0.467191033361, 0.462018802703, 0.371174185596,
+  0.366647793383, 0.297093948546, 0.267488464682, 0.256312096717,
+  0.208579409826, 0.190407843837, 0.175917906512, 0.178264019383,
+  0.149864315214, 0.135615565435, 0.13676468557, 0.113707047901,
+  0.127858971204, 0.111330153509, 0.105314540758, 0.0897379082466,
+  0.0810976351292,
+};
+static std::unique_ptr<InterpolateDataSpline> kminusp_elastic_res_interpolation
+    = nullptr;
 
 /** K- p elastic cross section parametrization, PDG data.
  *
@@ -268,8 +292,8 @@ static float kminusp_elastic_pdg(double mandelstam_s) {
 /** K- p elastic cross section parametrization.
  * Source: \iref{Buss:2011mx}, B.3.9 */
 float kminusp_elastic(double mandelstam_s) {
-  // TODO(steinberg):
-  // The elastic contributions from decays still need to be substracted.
+  const double p_lab = plab_from_s(mandelstam_s, kaon_mass, nucleon_mass);
+  double sigma;
   if (std::sqrt(mandelstam_s) < 1.7) {
     // The parametrization here also works for anti-K0 n, Lambda pi0,
     // Sigma+ pi-, Sigma- pi+, Sigma0 pi0 with different parameters a0, a1, a2.
@@ -280,17 +304,26 @@ float kminusp_elastic(double mandelstam_s) {
     constexpr double a1 = 0.22002795;  // Gev
     constexpr double a2 = 0.64907116;
 
-    const double p_lab = plab_from_s(mandelstam_s, kaon_mass, nucleon_mass);
     const double p_i = p_lab;
     const double p_f = p_lab;
 
     const double ratio = a1*a1 / (a1*a1 + p_f*p_f);
-    return a0 * p_f / (p_i * mandelstam_s) * std::pow(ratio, a2);
+    sigma = a0 * p_f / (p_i * mandelstam_s) * std::pow(ratio, a2);
   } else {
-    const double sigma = kminusp_elastic_pdg(mandelstam_s);
-    assert(sigma >= 0);
-    return sigma;
+    sigma = kminusp_elastic_pdg(mandelstam_s);
   }
+  // The elastic contributions from decays still need to be substracted.
+  if (kminusp_elastic_res_interpolation == nullptr) {
+      std::vector<double> x = KMINUSP_RES_SQRTS;
+      for (auto& i : x) {
+          i = plab_from_s(i, kaon_mass, nucleon_mass);
+      }
+      std::vector<double> y = KMINUSP_RES_SIG;
+      kminusp_elastic_interpolation = make_unique<InterpolateDataSpline>(x, y);
+  }
+  sigma -= (*kminusp_elastic_res_interpolation)(p_lab);
+  assert(sigma >= 0);
+  return sigma;
 }
 
 /** K- n elastic cross section parametrization.
