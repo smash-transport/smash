@@ -193,7 +193,7 @@ TwoBodyDecayUnstable::TwoBodyDecayUnstable(ParticleTypePtrList part_types,
 
 float TwoBodyDecayUnstable::get_Lambda() {
   // for now: use the same value for all unstable decays (fixed on f₂ → ρ ρ)
-  return 0.8;
+  return 0.6;
 }
 
 float TwoBodyDecayUnstable::rho(float mass) const {
