@@ -41,6 +41,7 @@ TEST_CATCH(load_decaymodes_incorrect_start, IsoParticleType::ParticleNotFoundFai
   DecayModes::load_decaymodes(decays_input);
 }
 
+const float tolerance = 1.0e-7;
 
 TEST(load_decay_modes) {
   const std::string decays_input(
@@ -64,11 +65,11 @@ TEST(load_decay_modes) {
     VERIFY(!rho_0.is_empty());
     const auto &modelist = rho_0.decay_mode_list();
     COMPARE(modelist.size(), 3u);
-    COMPARE(modelist[0]->weight(), 0.495f);
+    COMPARE_ABSOLUTE_ERROR(modelist[0]->weight(), 0.495f, tolerance);
     COMPARE(modelist[0]->particle_number(), 2u);
     COMPARE(modelist[0]->particle_types()[0]->pdgcode(),  0x211);
     COMPARE(modelist[0]->particle_types()[1]->pdgcode(), -0x211);
-    COMPARE(modelist[1]->weight(), 0.495f);
+    COMPARE_ABSOLUTE_ERROR(modelist[1]->weight(), 0.495f, tolerance);
     COMPARE(modelist[1]->particle_number(), 2u);
     COMPARE(modelist[1]->particle_types()[0]->pdgcode(), -0x211);
     COMPARE(modelist[1]->particle_types()[1]->pdgcode(),  0x211);
@@ -110,15 +111,15 @@ TEST(load_decay_modes) {
     VERIFY(!omega.is_empty());
     const auto &modelist = omega.decay_mode_list();
     COMPARE(modelist.size(), 3u);
-    COMPARE(modelist[0]->weight(), 1.f/3.f);
+    COMPARE_ABSOLUTE_ERROR(modelist[0]->weight(), 1.f/3.f, tolerance);
     COMPARE(modelist[0]->particle_number(), 2u);
     COMPARE(modelist[0]->particle_types()[0]->pdgcode(), 0x111);
     COMPARE(modelist[0]->particle_types()[1]->pdgcode(), 0x113);
-    COMPARE(modelist[1]->weight(), 1.f/3.f);
+    COMPARE_ABSOLUTE_ERROR(modelist[1]->weight(), 1.f/3.f, tolerance);
     COMPARE(modelist[1]->particle_number(), 2u);
     COMPARE(modelist[1]->particle_types()[0]->pdgcode(),  0x211);
     COMPARE(modelist[1]->particle_types()[1]->pdgcode(), -0x213);
-    COMPARE(modelist[2]->weight(), 1.f/3.f);
+    COMPARE_ABSOLUTE_ERROR(modelist[2]->weight(), 1.f/3.f, tolerance);
     COMPARE(modelist[2]->particle_number(), 2u);
     COMPARE(modelist[2]->particle_types()[0]->pdgcode(), -0x211);
     COMPARE(modelist[2]->particle_types()[1]->pdgcode(),  0x213);
@@ -141,7 +142,7 @@ TEST(load_decay_modes) {
     VERIFY(!Delta.is_empty());
     const auto &modelist = Delta.decay_mode_list();
     COMPARE(modelist.size(), 2u);
-    COMPARE(modelist[0]->weight(), 1.f/3.f);
+    COMPARE_ABSOLUTE_ERROR(modelist[0]->weight(), 1.f/3.f, tolerance);
     COMPARE(modelist[0]->particle_number(), 2u);
     COMPARE(modelist[0]->particle_types()[0]->pdgcode(), -0x2112);
     COMPARE(modelist[0]->particle_types()[1]->pdgcode(),  -0x211);
@@ -160,7 +161,7 @@ TEST(load_decay_modes) {
     COMPARE(modelist[0]->particle_number(), 2u);
     COMPARE(modelist[0]->particle_types()[0]->pdgcode(), -0x2112);
     COMPARE(modelist[0]->particle_types()[1]->pdgcode(),   0x111);
-    COMPARE(modelist[1]->weight(), 1.f/3.f);
+    COMPARE_ABSOLUTE_ERROR(modelist[1]->weight(), 1.f/3.f, tolerance);
     COMPARE(modelist[1]->particle_number(), 2u);
     COMPARE(modelist[1]->particle_types()[0]->pdgcode(), -0x2212);
     COMPARE(modelist[1]->particle_types()[1]->pdgcode(),   0x211);
@@ -193,7 +194,7 @@ TEST(load_decaymodes_3body) {
     const auto &modelist = Lambda.decay_mode_list();
     COMPARE(modelist.size(), 3u);
     for (int i = 0; i < 3; i++) {
-      COMPARE(modelist[i]->weight(), 1.f/3.f);
+      COMPARE_ABSOLUTE_ERROR(modelist[i]->weight(), 1.f/3.f, tolerance);
       COMPARE(modelist[i]->particle_types()[0]->pdgcode(), -0x3122);
     }
   }
@@ -203,7 +204,7 @@ TEST(load_decaymodes_3body) {
     const auto &modelist = Lambda.decay_mode_list();
     COMPARE(modelist.size(), 6u);
     for (int i = 0; i < 6; i++) {
-      COMPARE(modelist[i]->weight(), 1.f/6.f);
+      COMPARE_ABSOLUTE_ERROR(modelist[i]->weight(), 1.f/6.f, tolerance);
       int charge = 0;
       // 3 neutral particles are forbidden by isospin.
       bool all_charges_are_zero = true;

@@ -17,8 +17,7 @@
  */
 int spin[7][3];
 int spinz[7][3];
-double correct_coefficient[7];
-const double tolerance = 1.0e-6;
+float correct_coefficient[7];
 
 TEST(coefficient) {
   spin[0][0] = 1;
@@ -77,15 +76,14 @@ TEST(coefficient) {
   spinz[6][2] = 0;
   correct_coefficient[6] = 1 / sqrt(6.0);
   for (int i = 0; i < 7; i++) {
-    double cg = Smash::clebsch_gordan(spin[i][0], spin[i][1], spin[i][2],
-                                      spinz[i][0], spinz[i][1], spinz[i][2]);
-    COMPARE_ABSOLUTE_ERROR(cg, correct_coefficient[i], tolerance)
+    float cg = Smash::clebsch_gordan(spin[i][0], spin[i][1], spin[i][2],
+                                     spinz[i][0], spinz[i][1], spinz[i][2]);
+    COMPARE(cg, correct_coefficient[i])
       << '\n' // Using double quotes here produces an error(?!)
       << "J1: " << spin[i][0] << " Jz1: " << spinz[i][0] << "\n"
       << "J2: " << spin[i][1] << " Jz2: " << spinz[i][1] << "\n"
       << "J3: " << spin[i][2] << " Jz3: " << spinz[i][2] << "\n"
       << "CG: " << cg
-      << " Correct: " << correct_coefficient[i]
-      << " Tol: " << tolerance;
+      << " Correct: " << correct_coefficient[i];
   }
 }
