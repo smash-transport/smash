@@ -234,7 +234,7 @@ static std::unique_ptr<InterpolateDataSpline> kminusp_elastic_interpolation
     = nullptr;
 
 const std::initializer_list<double> KMINUSP_RES_SQRTS = {
-  1.43, 1.45, 1.47, 1.49, 1.51, 1.53, 1.55, 1.57, 1.59, 1.61, 1.63, 1.65, 1.67,
+  1.4325, 1.45, 1.47, 1.49, 1.51, 1.53, 1.55, 1.57, 1.59, 1.61, 1.63, 1.65, 1.67,
   1.69, 1.71, 1.73, 1.75, 1.77, 1.79, 1.81, 1.83, 1.85, 1.87, 1.89, 1.91, 1.93,
   1.95, 1.97, 1.99, 2.01, 2.03, 2.05, 2.07, 2.09, 2.11, 2.13, 2.15, 2.17, 2.19,
   2.21, 2.23, 2.25, 2.27, 2.29, 2.31, 2.33, 2.35, 2.37, 2.39, 2.41, 2.43, 2.45,
@@ -316,10 +316,10 @@ float kminusp_elastic(double mandelstam_s) {
   if (kminusp_elastic_res_interpolation == nullptr) {
       std::vector<double> x = KMINUSP_RES_SQRTS;
       for (auto& i : x) {
-          i = plab_from_s(i, kaon_mass, nucleon_mass);
+          i = plab_from_s(i*i, kaon_mass, nucleon_mass);
       }
       std::vector<double> y = KMINUSP_RES_SIG;
-      kminusp_elastic_interpolation = make_unique<InterpolateDataSpline>(x, y);
+      kminusp_elastic_res_interpolation = make_unique<InterpolateDataSpline>(x, y);
   }
   sigma -= (*kminusp_elastic_res_interpolation)(p_lab);
   assert(sigma >= 0);
