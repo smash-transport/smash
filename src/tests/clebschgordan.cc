@@ -8,18 +8,27 @@
  */
 
 #include "unittest.h"
+#include "setup.h"
+
 #include "../include/clebschgordan.h"
 
-/* spins are two times the actual values,
- * so j = 1 for spin-1/2 particle, 2 for spin-1 particle, etc.
- * Ordering of spins in array:
- *  0: j1, 1: j2, 2: j3, 3: m1, 4: m2, 5: m3
- */
-int spin[7][3];
-int spinz[7][3];
-float correct_coefficient[7];
+using namespace Smash;
+
+TEST(init_particle_types) {
+  Test::create_actual_particletypes();
+}
+
 
 TEST(coefficient) {
+  /* spins are two times the actual values,
+   * so j = 1 for spin-1/2 particle, 2 for spin-1 particle, etc.
+   * Ordering of spins in array:
+   *  0: j1, 1: j2, 2: j3, 3: m1, 4: m2, 5: m3
+   */
+  int spin[7][3];
+  int spinz[7][3];
+  float correct_coefficient[7];
+
   spin[0][0] = 1;
   spin[0][1] = 1;
   spin[0][2] = 2;
@@ -76,8 +85,8 @@ TEST(coefficient) {
   spinz[6][2] = 0;
   correct_coefficient[6] = 1 / sqrt(6.0);
   for (int i = 0; i < 7; i++) {
-    float cg = Smash::clebsch_gordan(spin[i][0], spin[i][1], spin[i][2],
-                                     spinz[i][0], spinz[i][1], spinz[i][2]);
+    float cg = clebsch_gordan(spin[i][0], spin[i][1], spin[i][2],
+                              spinz[i][0], spinz[i][1], spinz[i][2]);
     COMPARE(cg, correct_coefficient[i])
       << '\n' // Using double quotes here produces an error(?!)
       << "J1: " << spin[i][0] << " Jz1: " << spinz[i][0] << "\n"
@@ -86,4 +95,73 @@ TEST(coefficient) {
       << "CG: " << cg
       << " Correct: " << correct_coefficient[i];
   }
+}
+
+
+const float tolerance = 1.0e-7;
+
+TEST (iso_clebsch_2to1) {
+  const ParticleType &pip = ParticleType::find(0x211);
+  const ParticleType &piz = ParticleType::find(0x111);
+  const ParticleType &pim = ParticleType::find(-0x211);
+  const ParticleType &rho_p = ParticleType::find(0x213);
+  const ParticleType &rho_z = ParticleType::find(0x113);
+  const ParticleType &rho_m = ParticleType::find(-0x213);
+  const ParticleType &sigma = ParticleType::find(0x9000221);
+  const ParticleType &proton  = ParticleType::find(0x2212);
+  const ParticleType &neutron = ParticleType::find(0x2112);
+  const ParticleType &Delta_pp = ParticleType::find(0x2224);
+  const ParticleType &Delta_p  = ParticleType::find(0x2214);
+  const ParticleType &Delta_z  = ParticleType::find(0x2114);
+  const ParticleType &Delta_m  = ParticleType::find(0x1114);
+
+  // π π -> X
+  float iso_cg = isospin_clebsch_gordan_2to1(pip, piz, rho_p);
+  COMPARE_ABSOLUTE_ERROR(iso_cg*iso_cg, 1.f/2.f, tolerance);
+  iso_cg = isospin_clebsch_gordan_2to1(piz, pip, rho_p);
+  COMPARE_ABSOLUTE_ERROR(iso_cg*iso_cg, 1.f/2.f, tolerance);
+
+  iso_cg = isospin_clebsch_gordan_2to1(pip, pim, rho_z);
+  COMPARE_ABSOLUTE_ERROR(iso_cg*iso_cg, 1.f/2.f, tolerance);
+  iso_cg = isospin_clebsch_gordan_2to1(pim, pip, rho_z);
+  COMPARE_ABSOLUTE_ERROR(iso_cg*iso_cg, 1.f/2.f, tolerance);
+  iso_cg = isospin_clebsch_gordan_2to1(piz, piz, rho_z);
+  COMPARE_ABSOLUTE_ERROR(iso_cg*iso_cg, 0.f, tolerance);
+  iso_cg = isospin_clebsch_gordan_2to1(pip, pim, sigma);
+  COMPARE_ABSOLUTE_ERROR(iso_cg*iso_cg, 1.f/3.f, tolerance);
+  iso_cg = isospin_clebsch_gordan_2to1(pim, pip, sigma);
+  COMPARE_ABSOLUTE_ERROR(iso_cg*iso_cg, 1.f/3.f, tolerance);
+  iso_cg = isospin_clebsch_gordan_2to1(piz, piz, sigma);
+  COMPARE_ABSOLUTE_ERROR(iso_cg*iso_cg, 1.f/3.f, tolerance);
+
+  iso_cg = isospin_clebsch_gordan_2to1(piz, pim, rho_m);
+  COMPARE_ABSOLUTE_ERROR(iso_cg*iso_cg, 1.f/2.f, tolerance);
+  iso_cg = isospin_clebsch_gordan_2to1(pim, piz, rho_m);
+  COMPARE_ABSOLUTE_ERROR(iso_cg*iso_cg, 1.f/2.f, tolerance);
+
+
+  // π N -> X
+  iso_cg = isospin_clebsch_gordan_2to1(pip, proton, Delta_pp);
+  COMPARE_ABSOLUTE_ERROR(iso_cg*iso_cg, 1.f, tolerance);
+
+  iso_cg = isospin_clebsch_gordan_2to1(pip, neutron, Delta_p);
+  COMPARE_ABSOLUTE_ERROR(iso_cg*iso_cg, 1.f/3.f, tolerance);
+  iso_cg = isospin_clebsch_gordan_2to1(pip, neutron, proton);
+  COMPARE_ABSOLUTE_ERROR(iso_cg*iso_cg, 2.f/3.f, tolerance);
+  iso_cg = isospin_clebsch_gordan_2to1(piz, proton, Delta_p);
+  COMPARE_ABSOLUTE_ERROR(iso_cg*iso_cg, 2.f/3.f, tolerance);
+  iso_cg = isospin_clebsch_gordan_2to1(piz, proton, proton);
+  COMPARE_ABSOLUTE_ERROR(iso_cg*iso_cg, 1.f/3.f, tolerance);
+
+  iso_cg = isospin_clebsch_gordan_2to1(piz, neutron, Delta_z);
+  COMPARE_ABSOLUTE_ERROR(iso_cg*iso_cg, 2.f/3.f, tolerance);
+  iso_cg = isospin_clebsch_gordan_2to1(piz, neutron, neutron);
+  COMPARE_ABSOLUTE_ERROR(iso_cg*iso_cg, 1.f/3.f, tolerance);
+  iso_cg = isospin_clebsch_gordan_2to1(pim, proton, Delta_z);
+  COMPARE_ABSOLUTE_ERROR(iso_cg*iso_cg, 1.f/3.f, tolerance);
+  iso_cg = isospin_clebsch_gordan_2to1(pim, proton, neutron);
+  COMPARE_ABSOLUTE_ERROR(iso_cg*iso_cg, 2.f/3.f, tolerance);
+
+  iso_cg = isospin_clebsch_gordan_2to1(pim, neutron, Delta_m);
+  COMPARE_ABSOLUTE_ERROR(iso_cg*iso_cg, 1.f, tolerance);
 }
