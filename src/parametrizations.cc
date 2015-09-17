@@ -10,6 +10,7 @@
 #include "include/parametrizations.h"
 
 #include <cmath>
+#include <iostream> // FIXME
 #include <memory>
 #include <vector>
 
@@ -324,7 +325,15 @@ float kminusp_elastic(double mandelstam_s) {
       std::vector<double> y = KMINUSP_RES_SIG;
       kminusp_elastic_res_interpolation = make_unique<InterpolateDataSpline>(x, y);
   }
+  const auto old_sigma = sigma;
   sigma -= (*kminusp_elastic_res_interpolation)(p_lab);
+  if (sigma < 0) {
+      std::cout << "NEGATIVE SIGMA: sigma=" << sigma
+                << ", sqrt(s)=" << std::sqrt(mandelstam_s)
+                << ", sig_el_exp=" << old_sigma
+                << ", sig_el_res=" << (*kminusp_elastic_res_interpolation)(p_lab)
+                << std::endl;
+  }
   assert(sigma >= 0);
   return sigma;
 }
