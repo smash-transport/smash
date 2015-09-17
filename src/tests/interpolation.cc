@@ -11,6 +11,9 @@
 
 #include <vector>
 
+#include <gsl/gsl_rng.h>
+#include <gsl/gsl_randist.h>
+
 TEST(interpolate_linear) {
   const auto f = InterpolateLinear<double>(0, 0, 1, 2);
   COMPARE(f(0), 0);
@@ -87,4 +90,55 @@ TEST(interpolate_data_spline_unsorted) {
   COMPARE(f(1.5), 1.5);
   COMPARE(f(0), 1.0);
   COMPARE(f(10), 9.0);
+}
+
+TEST(interpolate_data_bspline) {
+  std::vector<double> x = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+  std::vector<double> y = x;
+  const InterpolateDataBSpline f(x, y, 5);
+  x.resize(0);
+  y.resize(0);
+  UnitTest::setFuzzyness<double>(8);
+  FUZZY_COMPARE(f(1.5), 1.5);
+  //FUZZY_COMPARE(f(0), 1.0);
+  //FUZZY_COMPARE(f(10), 9.0);
+}
+
+TEST(interpolate_data_bspline_example) {
+  constexpr size_t n = 200;
+  constexpr size_t ncoeffs = 12;
+  constexpr size_t k = 4;
+  constexpr size_t nbreak = ncoeffs + 2 - k;
+  constexpr double x_min = 0;
+  constexpr double x_max = 15;
+
+  // Generate data with noise.
+  std::vector<double> x;
+  x.reserve(n);
+  std::vector<double> y;
+  y.reserve(n);
+  std::vector<double> w;
+  w.reserve(n);
+  gsl_rng_env_setup();
+  auto r = gsl_rng_alloc(gsl_rng_default);
+  for (size_t i = 0; i < n; i++) {
+    const double xi = x_min + (x_max / (n - 1)) * i;
+    double yi = cos(xi) * exp(-0.1 * xi);
+    const double sigma = 0.1 * yi;
+    const double dy = gsl_ran_gaussian(r, sigma);
+    yi += dy;
+    x.push_back(xi);
+    y.push_back(yi);
+    w.push_back(1.0 / (sigma * sigma));
+  }
+
+  // Fit.
+  const auto f = InterpolateDataBSpline(x, y, nbreak);
+
+  // Output smoothed curve.
+  for (double xi = x_min; xi < x_max; xi += 0.1) {
+    printf("%f %f\n", xi, f(xi));
+  }
+
+  gsl_rng_free(r);
 }

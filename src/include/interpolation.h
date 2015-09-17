@@ -19,7 +19,8 @@
 
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_spline.h>
-
+#include <gsl/gsl_bspline.h>
+#include <gsl/gsl_multifit.h>
 
 /*
  * Linear interpolation.
@@ -176,6 +177,27 @@ class InterpolateDataSpline {
   double last_y_;
   gsl_interp_accel* acc_;
   gsl_spline* spline_;
+};
+
+class InterpolateDataBSpline {
+ public:
+  /// Interpolate function f given discrete samples f(x_i) = y_i.
+  ///
+  /// Returns the interpolation function.
+  ///
+  /// B-spline interpolation is used. The splines are not required to pass
+  /// through all points, this means the data is smoothed.
+  InterpolateDataBSpline(const std::vector<double>& x,
+                         const std::vector<double>& y,
+                         size_t nbreak=100);
+  ~InterpolateDataBSpline();
+  double operator()(double x) const;
+ private:
+  gsl_bspline_workspace* spline_workspace_;
+  gsl_multifit_linear_workspace* fit_workspace_;
+  gsl_vector* B_;
+  gsl_vector* c_;
+  gsl_matrix* cov_;
 };
 
 #endif  // SRC_INCLUDE_INTERPOLATION_H_
