@@ -107,18 +107,15 @@ TEST(full2013_format) {
   if (outputfile.good()) {
     std::string line, item;
     /* Check header */
-    std::string output_header = "";
-    std::string header =
-        "#!OSCAR2013 "
-        "full_event_history " VERSION_MAJOR
-        " "
-        "t x y z mass p0 px py pz pdg ID\n"
-        "# Units: fm fm fm fm GeV GeV GeV GeV GeV none none\n";
-    do {
-      std::getline(outputfile, line);
-      output_header += line + '\n';
-    } while (line != "# Units: fm fm fm fm GeV GeV GeV GeV GeV none none");
-    COMPARE(output_header, header);
+    std::getline(outputfile, line);
+    COMPARE(line,
+            "#!OSCAR2013 full_event_history t x y z mass p0 px py pz pdg ID");
+    std::getline(outputfile, line);
+    COMPARE(line,
+            "# Units: fm fm fm fm GeV GeV GeV GeV GeV none none");
+    std::getline(outputfile, line);
+    COMPARE(line,
+            "# " VERSION_MAJOR);
     /* Check initial particle list description line */
     std::string initial_line = "# event " + std::to_string(event_id + 1) +
                                " in " +
@@ -233,18 +230,12 @@ TEST(final2013_format) {
   if (outputfile.good()) {
     std::string line, item;
     /* Check header */
-    std::string output_header = "";
-    std::string header =
-        "#!OSCAR2013 "
-        "particle_lists " VERSION_MAJOR
-        " "
-        "t x y z mass p0 px py pz pdg ID\n"
-        "# Units: fm fm fm fm GeV GeV GeV GeV GeV none none\n";
-    do {
-      std::getline(outputfile, line);
-      output_header += line + '\n';
-    } while (line != "# Units: fm fm fm fm GeV GeV GeV GeV GeV none none");
-    COMPARE(output_header, header);
+    std::getline(outputfile, line);
+    COMPARE(line, "#!OSCAR2013 particle_lists t x y z mass p0 px py pz pdg ID");
+    std::getline(outputfile, line);
+    COMPARE(line, "# Units: fm fm fm fm GeV GeV GeV GeV GeV none none");
+    std::getline(outputfile, line);
+    COMPARE(line, "# " VERSION_MAJOR);
     /* Check final particle list */
     std::getline(outputfile, line);
     std::string final_line = "# event " + std::to_string(event_id + 1) +
