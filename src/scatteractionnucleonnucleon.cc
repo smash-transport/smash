@@ -228,7 +228,8 @@ CollisionBranchList ScatterActionNucleonNucleon::two_to_two_inel(
          * in order to avoid race conditions in multi-threading. */
         Integrator2d integrate(1E4);
         XS_DR_tabulation[res_id] = make_unique<Tabulation>(
-              type_res_1->minimum_mass() + type_res_2->minimum_mass(), 2.f, 100,
+              type_res_1->minimum_mass() + type_res_2->minimum_mass(),
+              2.5f, 100,
               [&](float sqrts) {
                 return integrate(type_res_1->minimum_mass(),
                                  sqrts - type_res_2->minimum_mass(),
