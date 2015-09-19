@@ -165,3 +165,39 @@ TEST (iso_clebsch_2to1) {
   iso_cg = isospin_clebsch_gordan_2to1(pim, neutron, Delta_m);
   COMPARE_ABSOLUTE_ERROR(iso_cg*iso_cg, 1.f, tolerance);
 }
+
+
+TEST (iso_clebsch_2to2) {
+  const ParticleType &proton  = ParticleType::find(0x2212);
+  const ParticleType &neutron = ParticleType::find(0x2112);
+  const ParticleType &Delta_pp = ParticleType::find(0x2224);
+  const ParticleType &Delta_p  = ParticleType::find(0x2214);
+  const ParticleType &Delta_z  = ParticleType::find(0x2114);
+  const ParticleType &Delta_m  = ParticleType::find(0x1114);
+
+  // N N -> N N
+  float iso_cg = isospin_clebsch_gordan_sqr_2to2(proton, proton, proton, proton);
+  COMPARE_ABSOLUTE_ERROR(iso_cg, 1.f, tolerance);
+  iso_cg = isospin_clebsch_gordan_sqr_2to2(proton, neutron, proton, neutron);
+  COMPARE_ABSOLUTE_ERROR(iso_cg, 0.5f, tolerance);   // check!
+
+  // N N -> N Delta
+  iso_cg = isospin_clebsch_gordan_sqr_2to2(proton, proton, Delta_pp, neutron);
+  COMPARE_ABSOLUTE_ERROR(iso_cg, 3.f/4.f, tolerance);
+  iso_cg = isospin_clebsch_gordan_sqr_2to2(proton, proton, Delta_p, proton);
+  COMPARE_ABSOLUTE_ERROR(iso_cg, 1.f/4.f, tolerance);
+  iso_cg = isospin_clebsch_gordan_sqr_2to2(proton, neutron, Delta_p, neutron);
+  COMPARE_ABSOLUTE_ERROR(iso_cg, 1.f/4.f, tolerance);
+  iso_cg = isospin_clebsch_gordan_sqr_2to2(proton, neutron, Delta_z, proton);
+  COMPARE_ABSOLUTE_ERROR(iso_cg, 1.f/4.f, tolerance);
+
+  // N N -> Delta Delta
+  iso_cg = isospin_clebsch_gordan_sqr_2to2(proton, proton, Delta_pp, Delta_z);
+  COMPARE_ABSOLUTE_ERROR(iso_cg, 3.f/10.f, tolerance);
+  iso_cg = isospin_clebsch_gordan_sqr_2to2(proton, proton, Delta_p, Delta_p);
+  COMPARE_ABSOLUTE_ERROR(iso_cg, 4.f/10.f, tolerance);
+  iso_cg = isospin_clebsch_gordan_sqr_2to2(proton, neutron, Delta_pp, Delta_m);
+  COMPARE_ABSOLUTE_ERROR(iso_cg, 7.f/20.f, tolerance);  // check!
+  iso_cg = isospin_clebsch_gordan_sqr_2to2(proton, neutron, Delta_p, Delta_z);
+  COMPARE_ABSOLUTE_ERROR(iso_cg, 3.f/20.f, tolerance);  // check!
+}

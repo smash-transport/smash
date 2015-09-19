@@ -45,10 +45,10 @@ static float isospin_clebsch_gordan_2to1(const ParticleType &p_a,
 }
 
 
-float isospin_clebsch_gordan_2to2(const ParticleType &t_a,
-                                  const ParticleType &t_b,
-                                  const ParticleType &t_c,
-                                  const ParticleType &t_d) {
+float isospin_clebsch_gordan_sqr_2to2(const ParticleType &t_a,
+                                      const ParticleType &t_b,
+                                      const ParticleType &t_c,
+                                      const ParticleType &t_d) {
   const int I_z = t_a.isospin3() + t_b.isospin3();
 
   /* Compute total isospin range with given initial and final particles. */
@@ -62,9 +62,9 @@ float isospin_clebsch_gordan_2to2(const ParticleType &t_a,
    * Use decrement of 2, since isospin is multiplied by 2. */
   float isospin_factor = 0.;
   for (int I_tot = I_max; I_tot >= I_min; I_tot -= 2) {
-    isospin_factor = isospin_factor +
-        isospin_clebsch_gordan_2to1(t_c, t_d, I_tot, I_z)
-      * isospin_clebsch_gordan_2to1(t_a, t_b, I_tot, I_z);
+    const float cg_in = isospin_clebsch_gordan_2to1(t_a, t_b, I_tot, I_z);
+    const float cg_out = isospin_clebsch_gordan_2to1(t_c, t_d, I_tot, I_z);
+    isospin_factor = isospin_factor + cg_in*cg_in * cg_out*cg_out;
   }
   return isospin_factor;
 }

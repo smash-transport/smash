@@ -56,7 +56,7 @@ inline float isospin_clebsch_gordan_3to1(const ParticleType &p_a,
  * Calculate isospin Clebsch-Gordan coefficient for a 2-to-2 reaction
  * A + B -> C + D.
  */
-float isospin_clebsch_gordan_2to2(const ParticleType &t_a,
+float isospin_clebsch_gordan_sqr_2to2(const ParticleType &t_a,
                                   const ParticleType &t_b,
                                   const ParticleType &t_c,
                                   const ParticleType &t_d);

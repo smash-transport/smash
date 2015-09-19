@@ -118,8 +118,8 @@ CollisionBranchList ScatterActionNucleonNucleon::two_to_two_inel(
         continue;
       }
 
-      const double isospin_factor = isospin_clebsch_gordan_2to2(type_particle_a,
-                                type_particle_b, *type_resonance, *second_type);
+      const float isospin_factor = isospin_clebsch_gordan_sqr_2to2(
+              type_particle_a, type_particle_b, *type_resonance, *second_type);
       /* If Clebsch-Gordan coefficient is zero, don't bother with the rest. */
       if (std::abs(isospin_factor) < really_small) {
         continue;
@@ -168,7 +168,7 @@ CollisionBranchList ScatterActionNucleonNucleon::two_to_two_inel(
 
       /** Cross section for 2->2 process with one resonance in final state.
        * Based on Eq. (46) in \iref{Weil:2013mya}. */
-      float xsection = isospin_factor * isospin_factor * matrix_element
+      float xsection = isospin_factor * matrix_element
                      * resonance_integral / (s * cm_momentum());
 
       if (xsection > really_small) {
@@ -194,8 +194,8 @@ CollisionBranchList ScatterActionNucleonNucleon::two_to_two_inel(
         continue;
       }
 
-      const double isospin_factor = isospin_clebsch_gordan_2to2(type_particle_a,
-                                    type_particle_b, *type_res_1, *type_res_2);
+      const float isospin_factor = isospin_clebsch_gordan_sqr_2to2(
+                    type_particle_a, type_particle_b, *type_res_1, *type_res_2);
       /* If Clebsch-Gordan coefficient is zero, don't bother with the rest. */
       if (std::abs(isospin_factor) < really_small) {
         continue;
@@ -246,7 +246,7 @@ CollisionBranchList ScatterActionNucleonNucleon::two_to_two_inel(
 
       /** Cross section for 2->2 process with one resonance in final state.
        * Based on Eq. (51) in \iref{Weil:2013mya}. */
-      float xsection = isospin_factor * isospin_factor * matrix_element
+      float xsection = isospin_factor * matrix_element
                      * resonance_integral / (s * cm_momentum());
 
       if (xsection > really_small) {

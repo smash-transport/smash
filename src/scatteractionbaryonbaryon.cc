@@ -67,8 +67,8 @@ CollisionBranchList ScatterActionBaryonBaryon::bar_bar_to_nuc_nuc(
         continue;
       }
 
-      double isospin_factor = isospin_clebsch_gordan_2to2(type_a, type_b,
-                                                          *nuc_a, *nuc_b);
+      const float isospin_factor = isospin_clebsch_gordan_sqr_2to2(type_a,
+                                                        type_b, *nuc_a, *nuc_b);
       /* If Clebsch-Gordan coefficient is zero, don't bother with the rest */
       if (std::abs(isospin_factor) < really_small) {
         continue;
@@ -86,7 +86,7 @@ CollisionBranchList ScatterActionBaryonBaryon::bar_bar_to_nuc_nuc(
        * See eqs. (B.6), (B.9) and (181) in \iref{Buss:2011mx}.
        * There is a symmetry factor 1/2 and a spin factor 4/(2S_a+1)/(2S_b+1)
        * involved. */
-      float xsection = isospin_factor * isospin_factor
+      float xsection = isospin_factor
                      * p_cm_final * matrix_element * 2.
                      / ((type_a.spin()+1)*(type_b.spin()+1) * s*cm_momentum());
 
