@@ -153,7 +153,7 @@ std::pair<float, float> sample_resonance_masses(const ParticleType &t1,
   // largest possible cm momentum (from smallest mass)
   const float pcm_max = pCM(cms_energy, t1.minimum_mass(), t2.minimum_mass());
   const float blw_max = pcm_max * blatt_weisskopf_sqr(pcm_max, L);
-  constexpr float q_max = 11.;        // this value is determined empirically
+  constexpr float q_max = 14.;        // this value is determined empirically
   const float max = blw_max * q_max;  // maximum value for rejection sampling
   float mass_1, mass_2, val;
   // Loop: rejection sampling
