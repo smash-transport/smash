@@ -208,9 +208,8 @@ void DecayModes::load_decaymodes(const std::string &input) {
               for (const auto &daughter1 : isotype_daughter_1.get_states()) {
                 for (const auto &daughter2 : isotype_daughter_2.get_states()) {
                   // calculate Clebsch-Gordan factor
-                  const double cg = isospin_clebsch_gordan_2to1(
-                      *daughter1, *daughter2, *mother_states[m]);
-                  const double cg_sqr = cg * cg;
+                  const float cg_sqr = isospin_clebsch_gordan_sqr_2to1(
+                                    *daughter1, *daughter2, *mother_states[m]);
                   if (cg_sqr > 0.) {
                     // add mode
                     log.debug("decay mode generated: " +
@@ -266,10 +265,9 @@ void DecayModes::load_decaymodes(const std::string &input) {
                     }
                     const auto I_12 = allowed_I_12[0];
                     const auto &mother = *mother_states[m];
-                    const double cg = isospin_clebsch_gordan_3to1(
-                        *daughter1, *daughter2, *daughter3, mother.isospin(),
-                        mother.isospin3(), I_12);
-                    const double cg_sqr = cg * cg;
+                    const float cg_sqr = isospin_clebsch_gordan_sqr_3to1(
+                                    *daughter1, *daughter2, *daughter3,
+                                    mother.isospin(), mother.isospin3(), I_12);
                     if (cg_sqr > 0.) {
                       // add mode
                       log.debug("decay mode generated: " +
