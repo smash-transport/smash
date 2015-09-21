@@ -45,6 +45,41 @@ static float isospin_clebsch_gordan_2to1(const ParticleType &p_a,
 }
 
 
+float isospin_clebsch_gordan_sqr_3to1(const ParticleType &p_a,
+                                      const ParticleType &p_b,
+                                      const ParticleType &p_c,
+                                      const ParticleType &Res) {
+  // calculate allowed I_ab
+  const auto min_I_ab = std::abs(p_a.isospin() - p_b.isospin());
+  const auto max_I_ab = p_a.isospin() + p_b.isospin();
+  std::vector<int> possible_I_ab(max_I_ab - min_I_ab + 1);
+  std::iota(possible_I_ab.begin(), possible_I_ab.end(), min_I_ab);
+  std::vector<int> allowed_I_ab;
+  allowed_I_ab.reserve(possible_I_ab.size());
+  const int target_I = 0;
+  for (const auto Iab : possible_I_ab) {
+    const auto min_I = std::abs(Iab - p_c.isospin());
+    const auto max_I = Iab + p_c.isospin();
+    if (min_I <= target_I && target_I <= max_I) {
+      allowed_I_ab.push_back(Iab);
+    }
+  }
+  if (allowed_I_ab.size() != 1) {
+    throw std::runtime_error(
+        "The coupled 3-body isospin state is not uniquely defined for " +
+        Res.name() + " -> " + p_a.name() + " " + p_b.name() + " " + p_c.name());
+  }
+  const auto I_ab = allowed_I_ab[0];
+
+  const int I_abz = p_a.isospin3() + p_b.isospin3();
+  const float cg = clebsch_gordan(I_ab, p_c.isospin(), Res.isospin(),
+                                  I_abz, p_c.isospin3(), Res.isospin3())
+                  * clebsch_gordan(p_a.isospin(), p_b.isospin(), I_ab,
+                                  p_a.isospin3(), p_b.isospin3(), I_abz);
+  return cg*cg;
+}
+
+
 float isospin_clebsch_gordan_sqr_2to2(const ParticleType &t_a,
                                       const ParticleType &t_b,
                                       const ParticleType &t_c,

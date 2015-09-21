@@ -38,21 +38,12 @@ inline float isospin_clebsch_gordan_sqr_2to1(const ParticleType &p_a,
 
 /**
  * Calculate the squared isospin Clebsch-Gordan coefficient for three particles
- * p_a, p_b and p_c coupling to a total isospin (I_tot, I_z).
- *
- * Note that the coefficients also depend on the coupled isospin I_ab.
+ * p_a, p_b and p_c coupling to a resonance Res.
  */
-inline float isospin_clebsch_gordan_sqr_3to1(const ParticleType &p_a,
-                                             const ParticleType &p_b,
-                                             const ParticleType &p_c,
-                                             int I_tot, int I_z, int I_ab) {
-    const int I_abz = p_a.isospin3() + p_b.isospin3();
-    const float cg = clebsch_gordan(I_ab, p_c.isospin(), I_tot,
-                                    I_abz, p_c.isospin3(), I_z)
-                   * clebsch_gordan(p_a.isospin(), p_b.isospin(), I_ab,
-                                    p_a.isospin3(), p_b.isospin3(), I_abz);
-    return cg*cg;
-}
+float isospin_clebsch_gordan_sqr_3to1(const ParticleType &p_a,
+                                      const ParticleType &p_b,
+                                      const ParticleType &p_c,
+                                      const ParticleType &Res);
 
 /**
  * Calculate the squared isospin Clebsch-Gordan coefficient for a
