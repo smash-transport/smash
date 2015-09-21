@@ -56,11 +56,10 @@ float isospin_clebsch_gordan_sqr_3to1(const ParticleType &p_a,
   std::iota(possible_I_ab.begin(), possible_I_ab.end(), min_I_ab);
   std::vector<int> allowed_I_ab;
   allowed_I_ab.reserve(possible_I_ab.size());
-  const int target_I = 0;
   for (const auto Iab : possible_I_ab) {
     const auto min_I = std::abs(Iab - p_c.isospin());
     const auto max_I = Iab + p_c.isospin();
-    if (min_I <= target_I && target_I <= max_I) {
+    if (min_I <= Res.isospin() && Res.isospin() <= max_I) {
       allowed_I_ab.push_back(Iab);
     }
   }

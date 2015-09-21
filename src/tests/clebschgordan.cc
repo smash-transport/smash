@@ -167,6 +167,32 @@ TEST (iso_clebsch_2to1) {
 }
 
 
+TEST (iso_clebsch_3to1) {
+  const ParticleType &pip = ParticleType::find(0x211);
+  const ParticleType &piz = ParticleType::find(0x111);
+  const ParticleType &pim = ParticleType::find(-0x211);
+  const ParticleType &omega = ParticleType::find(0x223);
+
+  // ω -> π⁺π⁻π⁰ : all permutations are equally likely
+  float iso_cg = isospin_clebsch_gordan_sqr_3to1(pip, piz, pim, omega);
+  COMPARE_ABSOLUTE_ERROR(iso_cg, 1.f/6.f, tolerance);
+  iso_cg = isospin_clebsch_gordan_sqr_3to1(pip, pim, piz, omega);
+  COMPARE_ABSOLUTE_ERROR(iso_cg, 1.f/6.f, tolerance);
+  iso_cg = isospin_clebsch_gordan_sqr_3to1(piz, pip, pim, omega);
+  COMPARE_ABSOLUTE_ERROR(iso_cg, 1.f/6.f, tolerance);
+  iso_cg = isospin_clebsch_gordan_sqr_3to1(piz, pim, pip, omega);
+  COMPARE_ABSOLUTE_ERROR(iso_cg, 1.f/6.f, tolerance);
+  iso_cg = isospin_clebsch_gordan_sqr_3to1(pim, pip, piz, omega);
+  COMPARE_ABSOLUTE_ERROR(iso_cg, 1.f/6.f, tolerance);
+  iso_cg = isospin_clebsch_gordan_sqr_3to1(pim, piz, pip, omega);
+  COMPARE_ABSOLUTE_ERROR(iso_cg, 1.f/6.f, tolerance);
+
+  // ω -> 3π⁰ : forbidden
+  iso_cg = isospin_clebsch_gordan_sqr_3to1(piz, piz, piz, omega);
+  COMPARE_ABSOLUTE_ERROR(iso_cg, 0.f, tolerance);
+}
+
+
 TEST (iso_clebsch_2to2) {
   const ParticleType &proton  = ParticleType::find(0x2212);
   const ParticleType &neutron = ParticleType::find(0x2112);
