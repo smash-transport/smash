@@ -179,13 +179,18 @@ TEST (iso_clebsch_2to2) {
   float iso_cg = isospin_clebsch_gordan_sqr_2to2(proton, proton, proton, proton);
   COMPARE_ABSOLUTE_ERROR(iso_cg, 1.f, tolerance);
   iso_cg = isospin_clebsch_gordan_sqr_2to2(proton, neutron, proton, neutron);
-  COMPARE_ABSOLUTE_ERROR(iso_cg, 0.5f, tolerance);   // check!
+  COMPARE_ABSOLUTE_ERROR(iso_cg, 0.5f, tolerance);
+  iso_cg = isospin_clebsch_gordan_sqr_2to2(proton, neutron, neutron, proton);
+  COMPARE_ABSOLUTE_ERROR(iso_cg, 0.5f, tolerance);
+  iso_cg = isospin_clebsch_gordan_sqr_2to2(neutron, neutron, neutron, neutron);
+  COMPARE_ABSOLUTE_ERROR(iso_cg, 1.f, tolerance);
 
   // N N -> N Delta
   iso_cg = isospin_clebsch_gordan_sqr_2to2(proton, proton, Delta_pp, neutron);
   COMPARE_ABSOLUTE_ERROR(iso_cg, 3.f/4.f, tolerance);
   iso_cg = isospin_clebsch_gordan_sqr_2to2(proton, proton, Delta_p, proton);
   COMPARE_ABSOLUTE_ERROR(iso_cg, 1.f/4.f, tolerance);
+
   iso_cg = isospin_clebsch_gordan_sqr_2to2(proton, neutron, Delta_p, neutron);
   COMPARE_ABSOLUTE_ERROR(iso_cg, 1.f/4.f, tolerance);
   iso_cg = isospin_clebsch_gordan_sqr_2to2(proton, neutron, Delta_z, proton);
@@ -194,10 +199,25 @@ TEST (iso_clebsch_2to2) {
   // N N -> Delta Delta
   iso_cg = isospin_clebsch_gordan_sqr_2to2(proton, proton, Delta_pp, Delta_z);
   COMPARE_ABSOLUTE_ERROR(iso_cg, 3.f/10.f, tolerance);
+  iso_cg = isospin_clebsch_gordan_sqr_2to2(proton, proton, Delta_z, Delta_pp);
+  COMPARE_ABSOLUTE_ERROR(iso_cg, 3.f/10.f, tolerance);
   iso_cg = isospin_clebsch_gordan_sqr_2to2(proton, proton, Delta_p, Delta_p);
   COMPARE_ABSOLUTE_ERROR(iso_cg, 4.f/10.f, tolerance);
+
   iso_cg = isospin_clebsch_gordan_sqr_2to2(proton, neutron, Delta_pp, Delta_m);
-  COMPARE_ABSOLUTE_ERROR(iso_cg, 7.f/20.f, tolerance);  // check!
+  COMPARE_ABSOLUTE_ERROR(iso_cg, 7.f/20.f, tolerance);
+  iso_cg = isospin_clebsch_gordan_sqr_2to2(proton, neutron, Delta_m, Delta_pp);
+  COMPARE_ABSOLUTE_ERROR(iso_cg, 7.f/20.f, tolerance);
   iso_cg = isospin_clebsch_gordan_sqr_2to2(proton, neutron, Delta_p, Delta_z);
-  COMPARE_ABSOLUTE_ERROR(iso_cg, 3.f/20.f, tolerance);  // check!
+  COMPARE_ABSOLUTE_ERROR(iso_cg, 3.f/20.f, tolerance);
+  iso_cg = isospin_clebsch_gordan_sqr_2to2(proton, neutron, Delta_z, Delta_p);
+  COMPARE_ABSOLUTE_ERROR(iso_cg, 3.f/20.f, tolerance);
+
+  // invalid cases
+  iso_cg = isospin_clebsch_gordan_sqr_2to2(proton, proton, proton, neutron);
+  COMPARE_ABSOLUTE_ERROR(iso_cg, 0.f, tolerance);
+  iso_cg = isospin_clebsch_gordan_sqr_2to2(proton, proton, Delta_z, neutron);
+  COMPARE_ABSOLUTE_ERROR(iso_cg, 0.f, tolerance);
+  iso_cg = isospin_clebsch_gordan_sqr_2to2(proton, proton, Delta_m, Delta_m);
+  COMPARE_ABSOLUTE_ERROR(iso_cg, 0.f, tolerance);
 }
