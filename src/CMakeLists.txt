@@ -92,6 +92,7 @@ set(smash_src
         isoparticletype.cc
         listmodus.cc
         logging.cc
+        lowess.cc
         nucleus.cc
         oscaroutput.cc
         pauliblocking.cc

@@ -4,8 +4,8 @@
 #      SMASH Team
 #
 #    BSD 3-clause license
-# 
-######################################################### 
+#
+#########################################################
 
 # remove -Winline for test code
 string(REPLACE "-Winline " "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
@@ -159,6 +159,7 @@ smash_add_unittest(isospin)
 smash_add_unittest(kinematics)
 smash_add_unittest(lattice)
 smash_add_unittest(lorentzboost)
+smash_add_unittest(lowess)
 smash_add_unittest(mass_sampling)
 smash_add_unittest(nucleus)
 smash_add_unittest(oscar2013output)
