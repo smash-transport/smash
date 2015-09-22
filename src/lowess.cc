@@ -16,8 +16,6 @@
 #include <cassert>
 #include <cmath>
 
-#include <iostream> // fixme
-
 #include "include/lowess.h"
 
 namespace Smash {
@@ -26,8 +24,9 @@ namespace Smash {
 /// Fit value at x[i]
 ///  Based on R function lowest: Translated to C++ by C. Stratowa
 ///  (R source file: lowess.c by R Development Core Team (C) 1999-2001)
-static void lowest(double *x, double *y, int n, double &xs, double &ys, int nleft,
-                   int nright, double *w, bool userw, double *rw, bool &ok) {
+static void lowest(double *x, double *y, int n, double &xs, double &ys,
+                   int nleft, int nright, double *w, bool userw, double *rw,
+                   bool &ok) {
   int nrt, j;
   double a, b, c, d, h, h1, h9, r, range;
 
@@ -98,8 +97,8 @@ static void lowest(double *x, double *y, int n, double &xs, double &ys, int nlef
 /// Lowess regression smoother.
 /// Based on R function clowess: Translated to C++ by C. Stratowa
 /// (R source file: lowess.c by R Development Core Team (C) 1999-2001)
-static void lowess(double *x, double *y, int n, double *ys, double span, int iter,
-                   double delta, double *rw, double *res) {
+static void lowess(double *x, double *y, int n, double *ys, double span,
+                   int iter, double delta, double *rw, double *res) {
   int i, iiter, j, last, m1, m2, nleft, nright, ns;
   double alpha, c1, c9, cmad, cut, d1, d2, denom, r;
   bool ok;
@@ -239,17 +238,19 @@ static void lowess(double *x, double *y, int n, double *ys, double span, int ite
 /// - Cleveland, W. S. (1981) LOWESS: A program for smoothing scatterplots
 ///        by robust locally weighted regression.
 ///        The American Statistician, 35, 54.
-std::vector<double> smooth(std::vector<double>& x, std::vector<double>& y, double span, int iter, double delta) {
-    assert(x.size() == y.size());
-    std::vector<double> result;
-    result.resize(x.size());
-    std::vector<double> rw;
-    rw.resize(x.size());
-    std::vector<double> res;
-    res.resize(x.size());
-    // TODO: initialize to zero?
-    lowess(&x.front(), &y.front(), x.size(), &result.front(), span, iter, delta, &rw.front(), &res.front());
-    return std::move(result);
+std::vector<double> smooth(std::vector<double> &x, std::vector<double> &y,
+                           double span, int iter, double delta) {
+  assert(x.size() == y.size());
+  std::vector<double> result;
+  result.resize(x.size());
+  std::vector<double> rw;
+  rw.resize(x.size());
+  std::vector<double> res;
+  res.resize(x.size());
+  // TODO: initialize to zero?
+  lowess(&x.front(), &y.front(), x.size(), &result.front(), span, iter, delta,
+         &rw.front(), &res.front());
+  return std::move(result);
 }
 
 }  // namespace Smash
