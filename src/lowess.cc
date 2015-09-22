@@ -97,10 +97,6 @@ static void lowest(const double *x, const double *y, int n, double xs, double &y
 /// (R source file: lowess.c by R Development Core Team (C) 1999-2001)
 static void lowess(const double *x, const double *y, int n, double *ys, double span,
                    int iter, double delta, double *rw, double *res) {
-  int i, iiter, j, last, m1, m2, nleft, nright, ns;
-  double alpha, c1, c9, cmad, cut, d1, d2, denom, r;
-  bool ok;
-
   if (n < 2) {
     ys[0] = y[0];
     return;
@@ -112,21 +108,21 @@ static void lowess(const double *x, const double *y, int n, double *ys, double s
   ys--;
 
   // at least two, at most n points
-  ns = std::max(2, std::min(n, static_cast<int>(span * n + 1e-7)));
+  const int ns = std::max(2, std::min(n, static_cast<int>(span * n + 1e-7)));
 
   // robustness iterations
-  iiter = 1;
+  int iiter = 1;
   while (iiter <= iter + 1) {
-    nleft = 1;
-    nright = ns;
-    last = 0;  // index of prev estimated point
-    i = 1;     // index of current point
+    int nleft = 1;
+    int nright = ns;
+    int last = 0;  // index of prev estimated point
+    int i = 1;     // index of current point
 
     for (;;) {
       if (nright < n) {
         // move nleft,  nright to right if radius decreases
-        d1 = x[i] - x[nleft];
-        d2 = x[nright + 1] - x[i];
+        const auto d1 = x[i] - x[nleft];
+        const auto d2 = x[nright + 1] - x[i];
 
         // if d1 <= d2 with x[nright+1] == x[nright], lowest fixes
         if (d1 > d2) {
@@ -138,18 +134,19 @@ static void lowess(const double *x, const double *y, int n, double *ys, double s
       }
 
       // fitted value at x[i]
-      bool iterg1 = iiter > 1;
+      const bool iterg1 = iiter > 1;
+      bool ok;
       lowest(&x[1], &y[1], n, x[i], ys[i], nleft, nright, res, iterg1, rw, ok);
       if (!ok)
         ys[i] = y[i];
 
       // all weights zero copy over value (all rw==0)
       if (last < i - 1) {
-        denom = x[i] - x[last];
+        const auto denom = x[i] - x[last];
 
         // skipped points -- interpolate non-zero - proof?
-        for (j = last + 1; j < i; j++) {
-          alpha = (x[j] - x[last]) / denom;
+        for (int j = last + 1; j < i; j++) {
+          const double alpha = (x[j] - x[last]) / denom;
           ys[j] = alpha * ys[i] + (1. - alpha) * ys[last];
         }
       }
@@ -158,7 +155,7 @@ static void lowess(const double *x, const double *y, int n, double *ys, double s
       last = i;
 
       // x coord of close points
-      cut = x[last] + delta;
+      const auto cut = x[last] + delta;
       for (i = last + 1; i <= n; i++) {
         if (x[i] > cut)
           break;
@@ -183,21 +180,22 @@ static void lowess(const double *x, const double *y, int n, double *ys, double s
       rw[i] = std::abs(res[i]);
 
     // compute cmad := 6 * median(rw[], n)
-    m1 = n / 2;
+    const auto m1 = n / 2;
     // partial sort, for m1 & m2
-    std::partial_sort(rw, rw + n, rw + m1);  // Psort(rw, n, m1);
+    std::partial_sort(rw, rw + n, rw + m1);
+    double cmad;
     if (n % 2 == 0) {
-      m2 = n - m1 - 1;
-      std::partial_sort(rw, rw + n, rw + m2);  // Psort(rw, n, m2);
+      const auto m2 = n - m1 - 1;
+      std::partial_sort(rw, rw + n, rw + m2);
       cmad = 3. * (rw[m1] + rw[m2]);
     } else { /* n odd */
       cmad = 6. * rw[m1];
     }
 
-    c9 = 0.999 * cmad;
-    c1 = 0.001 * cmad;
+    const auto c9 = 0.999 * cmad;
+    const auto c1 = 0.001 * cmad;
     for (i = 0; i < n; i++) {
-      r = std::abs(res[i]);
+      const double r = std::abs(res[i]);
       if (r <= c1)
         rw[i] = 1.;
       else if (r <= c9)
