@@ -24,7 +24,7 @@ namespace Smash {
 /// Fit value at x[i]
 ///  Based on R function lowest: Translated to C++ by C. Stratowa
 ///  (R source file: lowess.c by R Development Core Team (C) 1999-2001)
-static void lowest(double *x, double *y, int n, double &xs, double &ys,
+static void lowest(const double *x, const double *y, int n, double xs, double &ys,
                    int nleft, int nright, double *w, bool userw, double *rw,
                    bool &ok) {
   int nrt, j;
@@ -97,7 +97,7 @@ static void lowest(double *x, double *y, int n, double &xs, double &ys,
 /// Lowess regression smoother.
 /// Based on R function clowess: Translated to C++ by C. Stratowa
 /// (R source file: lowess.c by R Development Core Team (C) 1999-2001)
-static void lowess(double *x, double *y, int n, double *ys, double span,
+static void lowess(const double *x, const double *y, int n, double *ys, double span,
                    int iter, double delta, double *rw, double *res) {
   int i, iiter, j, last, m1, m2, nleft, nright, ns;
   double alpha, c1, c9, cmad, cut, d1, d2, denom, r;
@@ -238,7 +238,7 @@ static void lowess(double *x, double *y, int n, double *ys, double span,
 /// - Cleveland, W. S. (1981) LOWESS: A program for smoothing scatterplots
 ///        by robust locally weighted regression.
 ///        The American Statistician, 35, 54.
-std::vector<double> smooth(std::vector<double> &x, std::vector<double> &y,
+std::vector<double> smooth(const std::vector<double> &x, const std::vector<double> &y,
                            double span, int iter, double delta) {
   assert(x.size() == y.size());
   std::vector<double> result;
