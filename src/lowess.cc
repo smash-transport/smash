@@ -24,8 +24,8 @@ namespace Smash {
 /// Fit value at x[i]
 ///  Based on R function lowest: Translated to C++ by C. Stratowa
 ///  (R source file: lowess.c by R Development Core Team (C) 1999-2001)
-static void lowest(const double *x, const double *y, int n, double xs, double &ys,
-                   int nleft, int nright, double *w, bool userw, double *rw,
+static void lowest(const double *x, const double *y, size_t n, double xs, double &ys,
+                   size_t nleft, size_t nright, double *w, bool userw, double *rw,
                    bool &ok) {
   // indices start at 1
   x--;
@@ -40,7 +40,7 @@ static void lowest(const double *x, const double *y, int n, double xs, double &y
 
   // sum of weights
   double a = 0.;
-  int j = nleft;
+  auto j = nleft;
   while (j <= n) {
     // compute weights (pick up all ties on right)
     w[j] = 0.;
@@ -61,7 +61,7 @@ static void lowest(const double *x, const double *y, int n, double xs, double &y
   }
 
   // rightmost pt (may be greater than nright because of ties)
-  const int nrt = j - 1;
+  const auto nrt = j - 1;
   if (a <= 0.)
     ok = false;
   else {
@@ -95,8 +95,8 @@ static void lowest(const double *x, const double *y, int n, double xs, double &y
 /// Lowess regression smoother.
 /// Based on R function clowess: Translated to C++ by C. Stratowa
 /// (R source file: lowess.c by R Development Core Team (C) 1999-2001)
-static void lowess(const double *x, const double *y, int n, double *ys, double span,
-                   int iter, double delta, double *rw, double *res) {
+static void lowess(const double *x, const double *y, size_t n, double *ys, double span,
+                   size_t iter, double delta, double *rw, double *res) {
   if (n < 2) {
     ys[0] = y[0];
     return;
@@ -108,15 +108,16 @@ static void lowess(const double *x, const double *y, int n, double *ys, double s
   ys--;
 
   // at least two, at most n points
-  const int ns = std::max(2, std::min(n, static_cast<int>(span * n + 1e-7)));
+  constexpr size_t two = 2;
+  const auto ns = std::max(two, std::min(n, static_cast<size_t>(span * n + 1e-7)));
 
   // robustness iterations
-  int iiter = 1;
+  size_t iiter = 1;
   while (iiter <= iter + 1) {
-    int nleft = 1;
-    int nright = ns;
-    int last = 0;  // index of prev estimated point
-    int i = 1;     // index of current point
+    size_t nleft = 1;
+    size_t nright = ns;
+    size_t last = 0;  // index of prev estimated point
+    size_t i = 1;     // index of current point
 
     for (;;) {
       if (nright < n) {
@@ -145,7 +146,7 @@ static void lowess(const double *x, const double *y, int n, double *ys, double s
         const auto denom = x[i] - x[last];
 
         // skipped points -- interpolate non-zero - proof?
-        for (int j = last + 1; j < i; j++) {
+        for (auto j = last + 1; j < i; j++) {
           const double alpha = (x[j] - x[last]) / denom;
           ys[j] = alpha * ys[i] + (1. - alpha) * ys[last];
         }
@@ -235,7 +236,7 @@ static void lowess(const double *x, const double *y, int n, double *ys, double s
 ///        by robust locally weighted regression.
 ///        The American Statistician, 35, 54.
 std::vector<double> smooth(const std::vector<double> &x, const std::vector<double> &y,
-                           double span, int iter, double delta) {
+                           double span, size_t iter, double delta) {
   assert(x.size() == y.size());
   std::vector<double> result;
   result.resize(x.size());
