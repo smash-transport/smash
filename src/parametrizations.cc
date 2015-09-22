@@ -17,6 +17,7 @@
 #include "include/cxx14compat.h"
 #include "include/kinematics.h"
 #include "include/interpolation.h"
+#include "include/lowess.h"
 
 namespace Smash {
 
@@ -230,7 +231,7 @@ const std::initializer_list<double> KMINUSP_ELASTIC_SIG = {
   3.2400, 2.9600, 3.0100, 2.4600, 2.5600, 2.3300, 2.5400, 2.5300, 2.5100, 2.5200,
   2.7400, 2.5900
 };
-static std::unique_ptr<InterpolateDataBSpline> kminusp_elastic_interpolation
+static std::unique_ptr<InterpolateDataLinear<double>> kminusp_elastic_interpolation
     = nullptr;
 
 const std::initializer_list<double> KMINUSP_RES_SQRTS = {
@@ -271,7 +272,9 @@ static float kminusp_elastic_pdg(double mandelstam_s) {
         std::vector<double> dedup_x;
         std::vector<double> dedup_y;
         std::tie(dedup_x, dedup_y) = dedup_avg(x, y);
-        kminusp_elastic_interpolation = make_unique<InterpolateDataBSpline>(dedup_x, dedup_y);
+        dedup_x = smooth(dedup_x, dedup_y, 0.1, 5);
+        kminusp_elastic_interpolation
+            = make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);
         /*
         // Output interpolation for plotting.
         constexpr int N = 10000;

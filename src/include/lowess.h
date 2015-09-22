@@ -243,8 +243,8 @@ void lowess(const T *x, const T *y, size_t n, T *ys, T span, size_t iter,
 ///        by robust locally weighted regression.
 ///        The American Statistician, 35, 54.
 template <typename T>
-std::vector<T> smooth(const std::vector<T> &x, const std::vector<T> &y, T span,
-                      size_t iter, T delta) {
+std::vector<T> smooth(const std::vector<T> &x, const std::vector<T> &y, T span=2./3,
+                      size_t iter=3, T delta=0) {
   assert(x.size() == y.size());
   std::vector<T> result;
   result.resize(x.size());
