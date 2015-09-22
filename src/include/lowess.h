@@ -22,6 +22,7 @@
 
 namespace Smash {
 
+namespace lowess {
 ////////////////////////////////////////////////////////////////////////////////
 /// Fit value at x[i]
 ///  Based on R function lowest: Translated to C++ by C. Stratowa
@@ -212,6 +213,8 @@ void lowess(const T *x, const T *y, size_t n, T *ys, T span,
   }
 }
 
+}  // namespace lowess
+
 ////////////////////////////////////////////////////////////////////////////////
 /// Smooth data with Lowess smoother
 ///
@@ -250,8 +253,8 @@ std::vector<T> smooth(const std::vector<T> &x, const std::vector<T> &y,
   std::vector<T> res;
   res.resize(x.size());
   // TODO: initialize to zero?
-  lowess(&x.front(), &y.front(), x.size(), &result.front(), span, iter, delta,
-         &rw.front(), &res.front());
+  lowess::lowess(&x.front(), &y.front(), x.size(), &result.front(), span, iter, delta,
+                 &rw.front(), &res.front());
   return std::move(result);
 }
 
