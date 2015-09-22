@@ -27,31 +27,29 @@ namespace Smash {
 static void lowest(const double *x, const double *y, int n, double xs, double &ys,
                    int nleft, int nright, double *w, bool userw, double *rw,
                    bool &ok) {
-  int nrt, j;
-  double a, b, c, d, h, h1, h9, r, range;
-
+  // indices start at 1
   x--;
   y--;
   w--;
   rw--;
 
-  range = x[n] - x[1];
-  h = std::max(xs - x[nleft], x[nright] - xs);
-  h9 = 0.999 * h;
-  h1 = 0.001 * h;
+  const double range = x[n] - x[1];
+  const double h = std::max(xs - x[nleft], x[nright] - xs);
+  const double h9 = 0.999 * h;
+  const double h1 = 0.001 * h;
 
   // sum of weights
-  a = 0.;
-  j = nleft;
+  double a = 0.;
+  int j = nleft;
   while (j <= n) {
     // compute weights (pick up all ties on right)
     w[j] = 0.;
-    r = std::abs(x[j] - xs);
+    const double r = std::abs(x[j] - xs);
     if (r <= h9) {
       if (r <= h1) {
         w[j] = 1.;
       } else {
-        d = (r / h) * (r / h) * (r / h);
+        const double d = (r / h) * (r / h) * (r / h);
         w[j] = (1. - d) * (1. - d) * (1. - d);
       }
       if (userw)
@@ -59,11 +57,11 @@ static void lowest(const double *x, const double *y, int n, double xs, double &y
       a += w[j];
     } else if (x[j] > xs)
       break;
-    j = j + 1;
+    j += 1;
   }
 
   // rightmost pt (may be greater than nright because of ties)
-  nrt = j - 1;
+  const int nrt = j - 1;
   if (a <= 0.)
     ok = false;
   else {
@@ -76,8 +74,8 @@ static void lowest(const double *x, const double *y, int n, double xs, double &y
       // use linear fit weighted center of x values
       for (j = nleft; j <= nrt; j++)
         a += w[j] * x[j];
-      b = xs - a;
-      c = 0.;
+      double b = xs - a;
+      double c = 0.;
       for (j = nleft; j <= nrt; j++)
         c += w[j] * (x[j] - a) * (x[j] - a);
       if (std::sqrt(c) > 0.001 * range) {
