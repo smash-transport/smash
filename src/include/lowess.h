@@ -1,5 +1,4 @@
 /*
- *
  *    Copyright (c) 2015
  *      SMASH Team
  *
@@ -12,11 +11,14 @@
  *    Copyright (c) 1999-2001 Robert Gentleman, Ross Ihaka and the R
  *                            Development Core Team
  */
+#ifndef SRC_INCLUDE_LOWESS_H_
+#define SRC_INCLUDE_LOWESS_H_
+
+#include <vector>
 #include <algorithm>
 #include <cassert>
 #include <cmath>
-
-#include "include/lowess.h"
+#include <cstddef>
 
 namespace Smash {
 
@@ -24,9 +26,9 @@ namespace Smash {
 /// Fit value at x[i]
 ///  Based on R function lowest: Translated to C++ by C. Stratowa
 ///  (R source file: lowess.c by R Development Core Team (C) 1999-2001)
-static void lowest(const double *x, const double *y, size_t n, double xs, double &ys,
-                   size_t nleft, size_t nright, double *w, bool userw, double *rw,
-                   bool &ok) {
+void lowest(const double *x, const double *y, size_t n, double xs, double &ys,
+            size_t nleft, size_t nright, double *w, bool userw, double *rw,
+            bool &ok) {
   // indices start at 1
   x--;
   y--;
@@ -95,8 +97,8 @@ static void lowest(const double *x, const double *y, size_t n, double xs, double
 /// Lowess regression smoother.
 /// Based on R function clowess: Translated to C++ by C. Stratowa
 /// (R source file: lowess.c by R Development Core Team (C) 1999-2001)
-static void lowess(const double *x, const double *y, size_t n, double *ys, double span,
-                   size_t iter, double delta, double *rw, double *res) {
+void lowess(const double *x, const double *y, size_t n, double *ys, double span,
+            size_t iter, double delta, double *rw, double *res) {
   if (n < 2) {
     ys[0] = y[0];
     return;
@@ -251,3 +253,5 @@ std::vector<double> smooth(const std::vector<double> &x, const std::vector<doubl
 }
 
 }  // namespace Smash
+
+#endif  // SRC_INCLUDE_LOWESS_H_
