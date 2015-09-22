@@ -28,9 +28,8 @@ namespace lowess {
 ///  Based on R function lowest: Translated to C++ by C. Stratowa
 ///  (R source file: lowess.c by R Development Core Team (C) 1999-2001)
 template <typename T>
-void lowest(const T *x, const T *y, size_t n, T xs, T &ys,
-            size_t nleft, size_t nright, T *w, bool userw, T *rw,
-            bool &ok) {
+void lowest(const T *x, const T *y, size_t n, T xs, T &ys, size_t nleft,
+            size_t nright, T *w, bool userw, T *rw, bool &ok) {
   // indices start at 1
   x--;
   y--;
@@ -100,8 +99,8 @@ void lowest(const T *x, const T *y, size_t n, T xs, T &ys,
 /// Based on R function clowess: Translated to C++ by C. Stratowa
 /// (R source file: lowess.c by R Development Core Team (C) 1999-2001)
 template <typename T>
-void lowess(const T *x, const T *y, size_t n, T *ys, T span,
-            size_t iter, T delta, T *rw, T *res) {
+void lowess(const T *x, const T *y, size_t n, T *ys, T span, size_t iter,
+            T delta, T *rw, T *res) {
   if (n < 2) {
     ys[0] = y[0];
     return;
@@ -114,7 +113,8 @@ void lowess(const T *x, const T *y, size_t n, T *ys, T span,
 
   // at least two, at most n points
   constexpr size_t two = 2;
-  const auto ns = std::max(two, std::min(n, static_cast<size_t>(span * n + 1e-7)));
+  const auto ns =
+      std::max(two, std::min(n, static_cast<size_t>(span * n + 1e-7)));
 
   // robustness iterations
   size_t iiter = 1;
@@ -243,8 +243,8 @@ void lowess(const T *x, const T *y, size_t n, T *ys, T span,
 ///        by robust locally weighted regression.
 ///        The American Statistician, 35, 54.
 template <typename T>
-std::vector<T> smooth(const std::vector<T> &x, const std::vector<T> &y,
-                      T span, size_t iter, T delta) {
+std::vector<T> smooth(const std::vector<T> &x, const std::vector<T> &y, T span,
+                      size_t iter, T delta) {
   assert(x.size() == y.size());
   std::vector<T> result;
   result.resize(x.size());
@@ -253,8 +253,8 @@ std::vector<T> smooth(const std::vector<T> &x, const std::vector<T> &y,
   std::vector<T> res;
   res.resize(x.size());
   // TODO: initialize to zero?
-  lowess::lowess(&x.front(), &y.front(), x.size(), &result.front(), span, iter, delta,
-                 &rw.front(), &res.front());
+  lowess::lowess(&x.front(), &y.front(), x.size(), &result.front(), span, iter,
+                 delta, &rw.front(), &res.front());
   return std::move(result);
 }
 
