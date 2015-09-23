@@ -298,7 +298,7 @@ static float kminusp_elastic_pdg(double mandelstam_s) {
 float kminusp_elastic(double mandelstam_s) {
   const double p_lab = plab_from_s(mandelstam_s, kaon_mass, nucleon_mass);
   double sigma;
-  if (std::sqrt(mandelstam_s) < 1.7) {
+  if (std::sqrt(mandelstam_s) < 1.68) {
     // The parametrization here also works for anti-K0 n, Lambda pi0,
     // Sigma+ pi-, Sigma- pi+, Sigma0 pi0 with different parameters a0, a1, a2.
     //
