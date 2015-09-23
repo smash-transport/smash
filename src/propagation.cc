@@ -99,7 +99,8 @@ void propagate(Particles *particles, const ExperimentParameters &parameters,
   constexpr float safety_factor = 0.1f;
   if (parameters.timestep_duration() > safety_factor * min_time_scale) {
     log.warn() << "The time step size is too large for an accurate propagation "
-               << "with potentials.";
+               << "with potentials. Maximum safe value: "
+               << safety_factor * min_time_scale << " fm/c.";
   }
 }
 
