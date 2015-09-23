@@ -273,7 +273,7 @@ static float kminusp_elastic_pdg(double mandelstam_s) {
         std::vector<double> dedup_x;
         std::vector<double> dedup_y;
         std::tie(dedup_x, dedup_y) = dedup_avg(x, y);
-        dedup_x = smooth(dedup_x, dedup_y, 0.1, 5);
+        dedup_y = smooth(dedup_x, dedup_y, 0.1, 5);
         kminusp_elastic_interpolation
             = make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);
         /*
