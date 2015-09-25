@@ -29,18 +29,23 @@ namespace Smash {
 void propagate_straight_line(Particles *particles,
                              const ExperimentParameters &parameters);
 
-/**Propagates the positions and momenta of all particles
-  * through the current time step, according to the equations of motion.
-  *
-  * For each particle, the position is shifted:
-  * \f[\vec x^\prime = \vec x + \vec v \cdot \Delta t\f]
-  * where \f$\vec x\f$ is the current position, \f$\vec v\f$ its
-  * velocity and \f$\Delta t\f$ the duration of this timestep.
-  *
-  * The following equations of motion are solved:
-  * \f[ \frac{dr}{dt} = p/E \f]
-  * \f[ \frac{dp}{dt} = -dU(r)/dr \f]
-  */
+/**
+ * Propagates the positions and momenta of all particles through the current
+ * time step, according to the equations of motion.
+ *
+ * For each particle, the position is shifted:
+ * \f[\vec x^\prime = \vec x + \vec v \cdot \Delta t\f]
+ * where \f$\vec x\f$ is the current position, \f$\vec v\f$ its
+ * velocity and \f$\Delta t\f$ the duration of this timestep.
+ *
+ * The following equations of motion are solved:
+ * \f[ \frac{dr}{dt} = p/E \f]
+ * \f[ \frac{dp}{dt} = -dU(r)/dr \f]
+ *
+ * \param[in,out] particles The particle list in the event
+ * \param parameters Parameters for the experiment
+ * \param pot The potentials in the system
+ */
 void propagate(Particles *particles, const ExperimentParameters &parameters,
                const Potentials &pot,
                RectangularLattice<ThreeVector>* UB_grad_lat,

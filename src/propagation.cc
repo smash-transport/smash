@@ -50,6 +50,7 @@ void propagate(Particles *particles, const ExperimentParameters &parameters,
          (pot.use_symmetry() ? (UI3_grad_lat != nullptr) : true);
   bool use_lattice;
   ThreeVector dUB_dr, dUI3_dr;
+  float min_time_scale = std::numeric_limits<float>::infinity();
 
   for (ParticleData &data : *particles) {
     ThreeVector r = data.position().threevec();
@@ -82,6 +83,24 @@ void propagate(Particles *particles, const ExperimentParameters &parameters,
     FourVector position = data.position() + distance;
     position.set_x0(parameters.new_particle_time());
     data.set_4position(position);
+
+    // calculate the time scale of the change in momentum
+    const double dU_dr_abs = dU_dr.abs();
+    if (dU_dr_abs < really_small) {
+      continue;
+    }
+    const float time_scale = data.momentum().x0() / dU_dr_abs;
+    if (time_scale < min_time_scale) {
+      min_time_scale = time_scale;
+    }
+  }
+
+  // warn if the time step is too big
+  constexpr float safety_factor = 0.1f;
+  if (parameters.timestep_duration() > safety_factor * min_time_scale) {
+    log.warn() << "The time step size is too large for an accurate propagation "
+               << "with potentials. Maximum safe value: "
+               << safety_factor * min_time_scale << " fm/c.";
   }
 }
 
