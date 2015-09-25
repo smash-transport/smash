@@ -110,9 +110,8 @@ class ParticleType {
   /**
    * Returns an identifier for the Isospin-multiplet of this PDG Code.
    */
-  inline std::int32_t iso_multiplet() const {
-    // TODO: implement this!
-    return 0;
+  IsoParticleType *iso_multiplet() const {
+    return iso_multiplet_;
   }
 
   /// \copydoc PdgCode::charge
@@ -381,6 +380,8 @@ class ParticleType {
    * This is filled automatically from pdgcode_.
    */
   int charge_;
+
+  IsoParticleType *iso_multiplet_;
 
   /**\ingroup logging
    * Writes all information about the particle type to the output stream.

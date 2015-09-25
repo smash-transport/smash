@@ -228,8 +228,12 @@ void ParticleType::create_type_list(const std::string &input) {  // {{{
                                     // main().
 
   // create all isospin multiplets
-  for (const auto& t : type_list) {
+  for (const auto &t : type_list) {
     IsoParticleType::create_multiplet(t);
+  }
+  // link the multiplets to the types
+  for (auto &t : type_list) {
+    t.iso_multiplet_ = IsoParticleType::find(t);
   }
 }/*}}}*/
 

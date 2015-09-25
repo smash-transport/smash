@@ -12,7 +12,7 @@
 #include "include/angles.h"
 #include "include/clebschgordan.h"
 #include "include/cxx14compat.h"
-#include "include/integrate.h"
+#include "include/isoparticletype.h"
 #include "include/kinematics.h"
 #include "include/parametrizations.h"
 #include "include/random.h"
@@ -144,27 +144,8 @@ CollisionBranchList ScatterActionNucleonNucleon::two_to_two_inel(
       /* Calculate resonance production cross section
        * using the Breit-Wigner distribution as probability amplitude.
        * Integrate over the allowed resonance mass range. */
-
-      const int res_id = type_resonance->iso_multiplet();
-      if (XS_NR_tabulation[res_id] == nullptr) {
-        // initialize tabulation, we need one per resonance multiplet
-        /* TODO(weil): Move this lazy init to a global initialization function,
-         * in order to avoid race conditions in multi-threading. */
-        Integrator integrate;
-        XS_NR_tabulation[res_id] = make_unique<Tabulation>(
-              type_resonance->minimum_mass() + second_type->mass(), 2.f, 100,
-              [&](float sqrts) {
-                return integrate(type_resonance->minimum_mass(),
-                                  sqrts - second_type->mass(),
-                                  [&](float m) {
-                                    return spec_func_integrand_1res(m, sqrts,
-                                                            second_type->mass(),
-                                                            *type_resonance);
-                                  });
-              });
-      }
       const double resonance_integral =
-                    XS_NR_tabulation[res_id]->get_value_linear(srts);
+                    type_resonance->iso_multiplet()->get_integral_NR(srts);
 
       /** Cross section for 2->2 process with one resonance in final state.
        * Based on Eq. (46) in \iref{Weil:2013mya}. */
@@ -221,28 +202,8 @@ CollisionBranchList ScatterActionNucleonNucleon::two_to_two_inel(
        * using the Breit-Wigner distribution as probability amplitude.
        * Integrate over the allowed resonance mass range. */
 
-      const int res_id = type_res_1->iso_multiplet();
-      if (XS_DR_tabulation[res_id] == nullptr) {
-        // initialize tabulation, we need one per resonance multiplet
-        /* TODO(weil): Move this lazy init to a global initialization function,
-         * in order to avoid race conditions in multi-threading. */
-        Integrator2d integrate(1E4);
-        XS_DR_tabulation[res_id] = make_unique<Tabulation>(
-              type_res_1->minimum_mass() + type_res_2->minimum_mass(),
-              2.5f, 100,
-              [&](float sqrts) {
-                return integrate(type_res_1->minimum_mass(),
-                                 sqrts - type_res_2->minimum_mass(),
-                                 type_res_2->minimum_mass(),
-                                 sqrts - type_res_1->minimum_mass(),
-                                 [&](float m1, float m2) {
-                                    return spec_func_integrand_2res(sqrts,
-                                              m1, m2, *type_res_1, *type_res_2);
-                                 });
-              });
-      }
       const double resonance_integral =
-                    XS_DR_tabulation[res_id]->get_value_linear(srts);
+                    type_res_1->iso_multiplet()->get_integral_DR(srts);
 
       /** Cross section for 2->2 process with one resonance in final state.
        * Based on Eq. (51) in \iref{Weil:2013mya}. */
