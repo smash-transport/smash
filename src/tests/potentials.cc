@@ -29,9 +29,9 @@ using namespace Smash;
 TEST(init_particle_types) {
   ParticleType::create_type_list(
       "# NAME MASS[GEV] WIDTH[GEV] PDG\n"
-      "proton 0.938 0.0 2212\n"
-      "neutron 0.938 0.0 2112\n"
-      "pion    0.138 0.0 211\n");
+      "N+ 0.938 0.0 2212\n"
+      "N0 0.938 0.0 2112\n"
+      "π+  0.138 0.0 211\n");
 }
 
 static ParticleData create_proton(int id = -1) {
@@ -75,15 +75,16 @@ TEST(potential_gradient) {
   r = ThreeVector(0.2, 0.0, 0.0);
 
   // analytical gradient
-  analit_grad = pot->potential_gradient(r, P, 0x2212);
+  const ParticleType &proton = ParticleType::find(0x2212);
+  analit_grad = pot->potential_gradient(r, P, proton);
   // numerical gradient
-  const double U = pot->potential(r, P, 0x2212);
+  const double U = pot->potential(r, P, proton);
   dr = ThreeVector(1.e-4, 0.0, 0.0);
-  num_grad.set_x1((pot->potential(r + dr, P, 0x2212) - U)/dr.x1());
+  num_grad.set_x1((pot->potential(r + dr, P, proton) - U)/dr.x1());
   dr = ThreeVector(0.0, 1.e-4, 0.0);
-  num_grad.set_x2((pot->potential(r + dr, P, 0x2212) - U)/dr.x2());
+  num_grad.set_x2((pot->potential(r + dr, P, proton) - U)/dr.x2());
   dr = ThreeVector(0.0, 0.0, 1.e-4);
-  num_grad.set_x3((pot->potential(r + dr, P, 0x2212) - U)/dr.x3());
+  num_grad.set_x3((pot->potential(r + dr, P, proton) - U)/dr.x3());
   // compare them with: accuracy should not be worse than |dr|
   std::cout << num_grad << analit_grad << std::endl;
   COMPARE_ABSOLUTE_ERROR(num_grad.x1(), analit_grad.x1(), 1.e-4);
@@ -130,6 +131,7 @@ TEST(nucleus_potential_profile) {
   const int nx = 50, ny = 50;
   const double dx = 0.2, dy = 0.2;
   double pot_value;
+  const ParticleType &proton = ParticleType::find(0x2212);
 
   std::ofstream a_file;
   for (auto it = 0; it < 20; it++) {
@@ -152,7 +154,7 @@ TEST(nucleus_potential_profile) {
     for (auto iy = -ny; iy <= ny; iy++) {
       for (auto ix = -nx; ix <= nx; ix++) {
         r = ThreeVector(ix*dx, iy*dy, 8.0);
-        pot_value = pot->potential(r, plist, 0x2212);
+        pot_value = pot->potential(r, plist, proton);
         a_file << pot_value << " ";
       }
       a_file << "\n";

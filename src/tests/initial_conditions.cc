@@ -17,7 +17,7 @@
 using namespace Smash;
 
 TEST(init_particle_types) {
-  ParticleType::create_type_list("smashon 0.4 0.0 661\n");
+  ParticleType::create_type_list("σ 0.4 0.0 661\n");
 }
 
 TEST(initialize_box) {

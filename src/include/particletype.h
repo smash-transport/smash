@@ -91,11 +91,29 @@ class ParticleType {
   /// Return a pointer to the corresponding antiparticle ParticleType object.
   ParticleTypePtr get_antiparticle() const;
 
-  /// \copydoc PdgCode::isospin_total
+  /** Returns twice the isospin vector length \f$I\f$.
+   *
+   * This returns e.g. 1 for nucleons, 2 for pions and 3 for Deltas.
+   * It is always positive.
+   */
   int isospin() const { return isospin_; }
 
   /// \copydoc PdgCode::isospin3
   int isospin3() const { return pdgcode_.isospin3(); }
+
+  /// Returns the isospin-3 component relative to the total isospin.
+  float isospin3_rel() const {
+    unsigned int I = isospin();
+    return (I == 0) ? 0 : static_cast<float>(isospin3())/I;
+  }
+
+  /**
+   * Returns an identifier for the Isospin-multiplet of this PDG Code.
+   */
+  inline std::int32_t iso_multiplet() const {
+    // TODO: implement this!
+    return 0;
+  }
 
   /// \copydoc PdgCode::charge
   int charge() const { return charge_; }
@@ -109,8 +127,23 @@ class ParticleType {
   /// \copydoc PdgCode::is_lepton
   bool is_lepton() const { return pdgcode_.is_lepton(); }
 
+  /// \copydoc PdgCode::is_baryon
+  bool is_baryon() const { return pdgcode_.is_baryon(); }
+
   /// \copydoc PdgCode::baryon_number
   int baryon_number() const { return pdgcode_.baryon_number(); }
+
+  /// Is this a nucleon resonance (N*)?
+  inline bool is_Nstar() const {
+    return is_baryon() && isospin() == 1 && !pdgcode_.is_nucleon() &&
+           pdgcode_.strangeness() == 0 && pdgcode_.charmness() == 0;
+  }
+
+  /// Is this a Delta resonance (Delta*)?
+  inline bool is_Deltastar() const {
+    return is_baryon() && isospin() == 3 && !pdgcode_.is_Delta() &&
+           pdgcode_.strangeness() == 0 && pdgcode_.charmness() == 0;
+  }
 
   /// Check if the particle is stable
   inline bool is_stable() const {
@@ -276,7 +309,6 @@ class ParticleType {
    * Check if unstable particles have any decay modes and throw errors.
    */
   static void check_consistency();
-
 
   /**
    * Returns an object that acts like a pointer, except that it requires only 2

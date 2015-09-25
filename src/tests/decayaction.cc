@@ -21,22 +21,22 @@ using namespace Smash;
 TEST(init_particle_types) {
   ParticleType::create_type_list(
       "# NAME MASS[GEV] WIDTH[GEV] PDG\n"
-      "H 3.000 0.3 50661\n"
-      "A1⁰ 0.400 -1.0 10661\n"
-      "A2⁰ 0.600 -1.0 20661\n"
-      "A3⁰ 1.200 0.2 30661");
+      "Λ 3.000 0.3 50661\n"
+      "η1⁰ 0.400 -1.0 10661\n"
+      "η2⁰ 0.600 -1.0 20661\n"
+      "η3⁰ 1.200 0.2 30661");
 }
 
 TEST(init_decay_channels) {
   // A3 -> A1 + A2
   // H -> A3 + A2, A1 + A1, A2 + A2 + A1
   const std::string decays_input(
-      "A3 \n"
-      "2.0\t0\tA2 A1\n \n"
-      "H\n \n"
-      " 0.5 \t0\tA3 A2\n \n"
-      " 1.0 \t0\tA1 A1\n \n"
-      " 1.5 \t0\tA2⁰ A1⁰ A1⁰\n");
+      "η3 \n"
+      "2.0\t0\tη2 η1\n \n"
+      "Λ\n \n"
+      " 0.5 \t0\tη3 η2\n \n"
+      " 1.0 \t0\tη1 η1\n \n"
+      " 1.5 \t0\tη2⁰ η1⁰ η1⁰\n");
   DecayModes::load_decaymodes(decays_input);
   ParticleType::check_consistency();
 }

@@ -31,13 +31,13 @@ namespace Smash {
    *  Proton contributes with factor 1 to baryon density, anti-proton - with
    *  factor -1 to baryon density, and so on.
    *
-   *  \param pdg PDG code of particle to be tested
+   *  \param type type of the particle to be tested
    *  \param dens_type The density type
    *
    *  \return The corresponding factor (0 if the particle doesn't
    *          contribute at all).
    */
-  float density_factor(const PdgCode pdg, DensityType dens_type);
+  float density_factor(const ParticleType &type, DensityType dens_type);
 
   /**
    * Norm of the smearing function, \f$ (2 \pi \sigma^2)^{3/2}\f$

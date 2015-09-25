@@ -83,7 +83,7 @@ double Potentials::symmetry_pot(const double baryon_isospin_density) const {
 
 double Potentials::potential(const ThreeVector &r,
                              const ParticleList &plist,
-                             const PdgCode acts_on) const {
+                             const ParticleType &acts_on) const {
   double total_potential = 0.0;
   const bool compute_gradient = false;
 
@@ -109,7 +109,7 @@ double Potentials::potential(const ThreeVector &r,
 
 ThreeVector Potentials::potential_gradient(const ThreeVector &r,
                                            const ParticleList &plist,
-                                           const PdgCode acts_on) const {
+                                           const ParticleType &acts_on) const {
   ThreeVector total_gradient(0.0, 0.0, 0.0);
 
   if (!acts_on.is_baryon()) {

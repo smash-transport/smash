@@ -117,11 +117,11 @@ float ScatterActionBaryonBaryon::nn_to_resonance_matrix_element(double sqrts,
     /** \f$ NN \rightarrow N\Delta \f$:
       * fit sqrt(s)-dependence to OBE model [\iref{Dmitriev:1986st}] */
     return 68. * spin_factor / std::pow(sqrts - 1.104, 1.951);
-  } else if (pdg_a.is_Nstar() && pdg_b.is_nucleon()) {
+  } else if (type_a.is_Nstar() && pdg_b.is_nucleon()) {
     /** \f$ NN \rightarrow NN^* \f$:
       * constant matrix element, cf. \iref{Bass:1998ca}, equ. (3.35). */
     return 15. * spin_factor / (m_plus * m_plus + m_minus * m_minus);
-  } else if (pdg_a.is_Deltastar() && pdg_b.is_nucleon()) {
+  } else if (type_a.is_Deltastar() && pdg_b.is_nucleon()) {
     /** \f$ NN \rightarrow N\Delta^* \f$:
       * constant matrix element, cf. \iref{Bass:1998ca}, equ. (3.35). */
     return 25. * spin_factor / (m_plus * m_plus + m_minus * m_minus);
@@ -129,11 +129,11 @@ float ScatterActionBaryonBaryon::nn_to_resonance_matrix_element(double sqrts,
     /** \f$ NN \rightarrow \Delta\Delta \f$:
       * constant matrix element, cf. \iref{Bass:1998ca}, equ. (3.35). */
     return 25. * spin_factor / (m_plus * m_plus + m_minus * m_minus);
-  } else if (pdg_a.is_Nstar() && pdg_b.is_Delta()) {
+  } else if (type_a.is_Nstar() && pdg_b.is_Delta()) {
     /** \f$ NN \rightarrow \Delta N^* \f$:
       * constant matrix element, cf. \iref{Bass:1998ca}, equ. (3.35). */
     return 10. * spin_factor / (m_plus * m_plus + m_minus * m_minus);
-  } else if (pdg_a.is_Deltastar() && pdg_b.is_Delta()) {
+  } else if (type_a.is_Deltastar() && pdg_b.is_Delta()) {
     /** \f$ NN \rightarrow \Delta\Delta^* \f$:
       * constant matrix element, cf. \iref{Bass:1998ca}, equ. (3.35). */
     return 15. * spin_factor / (m_plus * m_plus + m_minus * m_minus);

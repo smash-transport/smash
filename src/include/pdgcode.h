@@ -43,10 +43,6 @@ namespace Smash {
  *   // fill from stringstream:
  *   std::cin >> other_particle;
  * }
- * // check if particle is in the same multiplet as the pions:
- * if (pi_plus.multiplet() == other_particle.multiplet()) {
- *   printf("The other particle is a 0^-- meson.\n");
- * }
  * // is this a Kaon?
  * if (other_particle.code() == 0x311) {
  *   printf("The particle is a K plus\n");
@@ -276,38 +272,6 @@ class PdgCode {
       const auto abs_code = std::abs(code());
       return (abs_code == 0x321) || (abs_code == 0x311);
   }
-  /// Is this a nucleon resonance (N*)?
-  inline bool is_Nstar() const {
-      std::int32_t multi = multiplet();
-      if (multi == 0x10102 ||
-          multi == 0x10122 ||
-          multi == 0x10202 ||
-          multi == 0x10212 ||
-          multi == 0x10104 ||
-          multi == 0x10114 ||
-          multi == 0x10204 ||
-          multi == 0x10214 ||
-          multi == 0x10106 ||
-          multi == 0x10206) {
-        return true;
-      } else {
-        return false;
-      }
-  }
-  /// Is this a Delta resonance (Delta*)?
-  inline bool is_Deltastar() const {
-      std::int32_t multi = multiplet();
-      if (multi == 0x10112 ||
-          multi == 0x10222 ||
-          multi == 0x10124 ||
-          multi == 0x10224 ||
-          multi == 0x10216 ||
-          multi == 0x10208) {
-        return true;
-      } else {
-        return false;
-      }
-  }
   /// Is this a pion (pi+/pi0/pi-)?
   inline bool is_pion() const {
       const auto c = code();
@@ -340,19 +304,6 @@ class PdgCode {
     // net_quark_number(2) is the number of u quarks,
     // net_quark_number(1) is the number of d quarks.
     return net_quark_number(2)-net_quark_number(1);
-  }
-  /** returns twice the isospin vector length \f$I\f$.
-   *
-   * This returns e.g. 2 for all pions and 3 for all Deltas. It is
-   * always positive.
-   */
-  int isospin_total() const;
-  /*
-   * Returns the isospin-3 component relative to the total isospin.
-   */
-  float isospin3_rel() const {
-    unsigned int I = isospin_total();
-    return (I == 0) ? 0 : static_cast<float>(isospin3())/I;
   }
   /** returns the net number of \f$\bar s\f$ quarks.
    *
@@ -449,78 +400,6 @@ class PdgCode {
       return 0;
     }
     return chunks_.quarks_;
-  }
-  /** Returns an identifier for the SU(N) multiplet of this PDG Code.
-   *
-   * This can be used to compare if two particles are in the same SU(N)
-   * multiplet, i.e., p, Λ, Σ and \f$\Xi_{cb}\f$ are in the same
-   * multiplet, as are Δ, Ω, \f$\Omega_{ccc}\f$ and ρ, ω,
-   * \f$D^\ast_s\f$.
-   *
-   * The antiparticle sign is ignored for mesons: Both \f$K^+\f$ and
-   * \f$K^-\f$ are in the same multiplet; the same applies for charmed
-   * and anti-charmed mesons.
-   *
-   * The exact format of this is subject to change; only use this to
-   * check if two particles are in the same multiplet!
-   */
-  inline std::int32_t multiplet() const {
-    if (!is_hadron()) {
-      return 0;
-    }
-    // the multiplet code is the antiparticle_*( baryon number +
-    // excitation_ + n_J_) [the "+" being a concatenation here].  Baryon
-    // number and sign are added later.
-    std::int32_t multiplet_code = ((chunks_.excitation_ << 4) | digits_.n_J_);
-    // if the particle is in a meson multiplet, there are no signs.
-    if (baryon_number() == 0) {
-      return multiplet_code;
-    }
-    // else, return the sign and the baryon number, too.
-    return antiparticle_sign() *
-                  (multiplet_code | ((baryon_number() & 1) << 16));
-  }
-  /** Returns an identifier for the Isospin-multiplet of this PDG Code.
-   *
-   * This can be used to compare if two particles are in the same
-   * isospin multiplet.  For non-hadrons, this returns 0, and for
-   * hadrons, it returns the PDG Code of the similar particle that has
-   * all up quarks replaced with down quarks.
-   *
-   * To distinguish η mesons from \f$\pi^0\f$ and Λ from \f$\Sigma^0\f$, Isopin
-   * = 0 states return the complete code.
-   *
-   * The antiparticle sign is ignored for pi-like mesons, so that \f$\pi^+\f$
-   * and \f$\pi^-\f$ are in the same multiplet. The sign is used for all other
-   * mesons and baryons, so that \f$K^-\f$ and \f$K^+\f$ are not in the same
-   * multiplet, and neither \f$p\f$ and \f$\bar p\f$.
-   *
-   */
-  inline std::int32_t iso_multiplet() const {
-    if (!is_hadron()) {
-      return 0;
-    }
-    // the η meson is NOT in the same multiplet as the π, and Λ and Σ.
-    // We return the complete code for the I=0 state.
-    if (isospin_total() == 0) {
-      return code();
-    }
-    // this is the code with all u quarks changed to d quarks. Note that it
-    // doesn't matter that we change e.g. a proton to an (ddd)-state, because
-    // we can distinguish nucleons and Δ resonances by the other numbers in the
-    // new scheme (it's gotta be good for something!)
-    std::int32_t multiplet_code = ( (chunks_.excitation_  << 16)
-                          | ((digits_.n_q1_ == 2 ? 1 : digits_.n_q1_) << 12)
-                          | ((digits_.n_q2_ == 2 ? 1 : digits_.n_q2_) <<  8)
-                          | ((digits_.n_q3_ == 2 ? 1 : digits_.n_q3_) <<  4)
-                          | (digits_.n_J_));
-    // if we have pion-like particles, return the above code (discard
-    // antiparticle_sign)
-    if ((multiplet_code & 0x0000fff0) == 0x110) {
-      return multiplet_code;
-    }
-    // else, the sign is important!
-    return antiparticle_sign()*multiplet_code;
   }
 
   /****************************************************************************

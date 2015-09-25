@@ -27,55 +27,6 @@ std::istream& operator>>(std::istream& is, PdgCode& code) {
   return is;
 }
 
-int PdgCode::isospin_total() const {
-  // non-hadrons and η mesons (and ω and stuff):
-  if (!is_hadron() || quarks() == 0x22) {
-    return 0;
-  }
-  int number_of_u_or_d_quarks = 0;
-  if (digits_.n_q3_ == 2 || digits_.n_q3_ == 1) { ++number_of_u_or_d_quarks; }
-  if (digits_.n_q2_ == 2 || digits_.n_q2_ == 1) { ++number_of_u_or_d_quarks; }
-  if (digits_.n_q1_ == 2 || digits_.n_q1_ == 1) { ++number_of_u_or_d_quarks; }
-  // Δ and N distinction. I don't know any smart algorithm for this; I am
-  // confident that special casing is the only way to do that.
-  if (number_of_u_or_d_quarks == 3) {
-    std::int32_t multi = std::abs(multiplet());
-    // first the most common ones: p/n and Δ
-    if (multi == 0x10002) { return 1; }
-    if (multi == 0x10004) { return 3; }
-    // now the resonances:
-    if (multi == 0x10102
-     || multi == 0x10122
-     || multi == 0x10202
-     || multi == 0x10212
-     || multi == 0x10104
-     || multi == 0x10114
-     || multi == 0x10204
-     || multi == 0x10214
-     || multi == 0x10106
-     || multi == 0x10206
-       ) { return 1; }
-    if (multi == 0x10112
-     || multi == 0x10222
-     || multi == 0x10124
-     || multi == 0x10224
-     || multi == 0x10216
-     || multi == 0x10208
-       ) { return 3; }
-    throw InvalidPdgCode(
-          "Unknown Nucleon or Delta resonance, cannot determine isospin: "
-          + string());
-  }
-  // special case: Λ. We know already that not three quarks are up or down,
-  // so we need to find where the third is:
-  // 312, 412, 512 are Λ, as is 213. And, well, while this is not yet part of
-  // the standard, I'll throw in 214 and 215 as well.
-  if ((quarks() & 0x0ff) == 0x012 || (quarks() & 0xff0) == 0x210) {
-    return 0;
-  }
-  return number_of_u_or_d_quarks;
-}
-
 int PdgCode::net_quark_number(const int quark) const {
   // input sanitization: Only quark numbers 1 through 8 are allowed.
   if (quark < 1 || quark > 8) {

@@ -14,9 +14,9 @@ using namespace Smash;
 
 TEST(init_particle_types) {
   ParticleType::create_type_list(
-      "species 0.123 -.0 123\n"
-      "species3 0.123 -.0 -1234568\n"
-      "species2 0.245 2.3 2346\n");
+      "σ 0.123 -.0 123\n"
+      "σ3 0.123 -.0 -1234568\n"
+      "σ2 0.245 2.3 2346\n");
 }
 
 TEST(size) {

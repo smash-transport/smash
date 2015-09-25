@@ -21,9 +21,7 @@
 using namespace Smash;
 
 TEST(init_particle_types) {
-  ParticleType::create_type_list(
-      "# NAME MASS[GEV] WIDTH[GEV] PDG\n"
-      "smashon 0.123 1.2 661\n");
+  Test::create_smashon_particletypes();
 }
 
 static ParticleData create_smashon_particle(int id = -1) {

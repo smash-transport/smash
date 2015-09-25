@@ -69,7 +69,7 @@ void propagate(Particles *particles, const ExperimentParameters &parameters,
     }
     // Compute potential gradient from lattice if possible
     ThreeVector dU_dr = use_lattice ? (dUB_dr + dUI3_dr):
-                        pot.potential_gradient(r, plist, data.pdgcode());
+                        pot.potential_gradient(r, plist, data.type());
     log.debug("Propagate: dU/dr = ", dU_dr);
     ThreeVector v = data.velocity();
     // predictor step assuming momentum-indep. potential, dU/dp = 0

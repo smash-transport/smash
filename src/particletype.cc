@@ -105,13 +105,38 @@ bool ParticleType::exists(PdgCode pdgcode) {
   return false;
 }
 
+// determine (doubled) isospin from name
+static int get_isospin(std::string n, PdgCode pdg) {
+  if (!pdg.is_hadron()) {
+    return 0;
+  }
+
+  const std::string first = n.substr(0, utf8::sequence_length(n.begin()));
+  using StringList = build_vector_<std::string>;
+  const StringList list0 {"η", "ω", "φ", "σ", "f", "Λ"};
+  const StringList list1 {"N", "K"};
+  const StringList list2 {"π", "ρ", "Σ"};
+  const StringList list3 {"Δ"};
+  const std::vector<StringList> list {list0, list1, list2, list3};
+
+  for (size_t i = 0; i < list.size(); i++) {
+    if (std::find(std::begin(list[i]), std::end(list[i]), first)
+        != std::end(list[i]))
+      return i;
+  }
+
+  // nothing found!
+  throw std::runtime_error("Unknown particle in get_isospin: " + first);
+  return -1;
+}
+
 ParticleType::ParticleType(std::string n, float m, float w, PdgCode id)
     : name_(n),
       mass_(m),
       width_(w),
       pdgcode_(id),
       minimum_mass_(-1.f),
-      isospin_(pdgcode_.isospin_total()),
+      isospin_(get_isospin(n, id)),
       charge_(pdgcode_.charge()) {}
 
 /* Construct an antiparticle name-string from the given name-string for the
@@ -432,7 +457,7 @@ std::ostream &operator<<(std::ostream &out, const ParticleType &type) {
              << "[mass:" << field<6> << type.mass()
              << ", width:" << field<6> << type.width_at_pole()
              << ", PDG:" << field<6> << pdg
-             << ", Isospin:" << field<2> << pdg.isospin_total()
+             << ", Isospin:" << field<2> << type.isospin_
              << "/2, Charge:" << field<3> << pdg.charge()
              << ", Spin:" << field<2> << pdg.spin() << "/2]";
 }

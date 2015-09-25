@@ -145,7 +145,7 @@ CollisionBranchList ScatterActionNucleonNucleon::two_to_two_inel(
        * using the Breit-Wigner distribution as probability amplitude.
        * Integrate over the allowed resonance mass range. */
 
-      const int res_id = type_resonance->pdgcode().iso_multiplet();
+      const int res_id = type_resonance->iso_multiplet();
       if (XS_NR_tabulation[res_id] == nullptr) {
         // initialize tabulation, we need one per resonance multiplet
         /* TODO(weil): Move this lazy init to a global initialization function,
@@ -221,7 +221,7 @@ CollisionBranchList ScatterActionNucleonNucleon::two_to_two_inel(
        * using the Breit-Wigner distribution as probability amplitude.
        * Integrate over the allowed resonance mass range. */
 
-      const int res_id = type_res_1->pdgcode().iso_multiplet();
+      const int res_id = type_res_1->iso_multiplet();
       if (XS_DR_tabulation[res_id] == nullptr) {
         // initialize tabulation, we need one per resonance multiplet
         /* TODO(weil): Move this lazy init to a global initialization function,
@@ -281,8 +281,8 @@ void ScatterActionNucleonNucleon::sample_angles(
       = get_t_range<double>(cms_energy, nucleon_mass, nucleon_mass,
                             mass_a, mass_b);
   Angles phitheta;
-  if (p_a->pdgcode().iso_multiplet() == 0x1112 &&
-      p_b->pdgcode().iso_multiplet() == 0x1112 && !isotropic_) {
+  if (p_a->pdgcode().is_nucleon() &&
+      p_b->pdgcode().is_nucleon() && !isotropic_) {
     /** NN->NN: Choose angular distribution according to Cugnon parametrization,
      * see \iref{Cugnon:1996kh}. */
     double bb, a, plab = plab_from_s(mandelstam_s());
@@ -302,8 +302,8 @@ void ScatterActionNucleonNucleon::sample_angles(
     // determine scattering angles in center-of-mass frame
     phitheta = Angles(2.*M_PI*Random::canonical(),
                       1. - 2.*(t-t_range[0])/(t_range[1]-t_range[0]));
-  } else if (p_a->pdgcode().iso_multiplet() == 0x1114 &&
-             p_b->pdgcode().iso_multiplet() == 0x1112 && !isotropic_) {
+  } else if (p_a->pdgcode().is_Delta() && p_b->pdgcode().is_nucleon()
+             && !isotropic_) {
     /** NN->NDelta: Sample scattering angles in center-of-mass frame from an
      * anisotropic angular distribution, using the same distribution as for
      * elastic pp scattering, as suggested in \iref{Cugnon:1996kh}. */
@@ -315,8 +315,8 @@ void ScatterActionNucleonNucleon::sample_angles(
     }
     phitheta = Angles(2.*M_PI*Random::canonical(),
                       1. - 2.*(t-t_range[0])/(t_range[1]-t_range[0]));
-  } else if (p_b->pdgcode().iso_multiplet() == 0x1112 && !isotropic_ &&
-             (p_a->pdgcode().is_Nstar() || p_a->pdgcode().is_Deltastar())) {
+  } else if (p_b->pdgcode().is_nucleon() && !isotropic_ &&
+             (p_a->type().is_Nstar() || p_a->type().is_Deltastar())) {
     /** NN->NR: Fit to HADES data, see \iref{Agakishiev:2014wqa}. */
     const std::array<float, 4> p { 1.46434, 5.80311, -6.89358, 1.94302 };
     const double a = p[0] + mass_a * (p[1] + mass_a * (p[2] + mass_a * p[3]));
