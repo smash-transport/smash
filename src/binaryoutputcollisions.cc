@@ -21,13 +21,14 @@
 
 namespace Smash {
 
-BinaryOutputCollisions::BinaryOutputCollisions(bf::path path, std::string name)
+BinaryOutputCollisions::BinaryOutputCollisions(const bf::path &path,
+                                               const std::string &name)
     : BinaryOutputBase(std::fopen(
           (path / (name + ".bin")).native().c_str(), "wb")),
       print_start_end_(false) {
 }
 
-BinaryOutputCollisions::BinaryOutputCollisions(bf::path path,
+BinaryOutputCollisions::BinaryOutputCollisions(const bf::path &path,
                                                Configuration &&config)
     : BinaryOutputBase(std::fopen(
           ((path / "collisions_binary.bin")).native().c_str(), "wb")),

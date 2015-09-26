@@ -56,8 +56,8 @@ class BinaryOutputBase : public OutputInterface {
  */
 class BinaryOutputCollisions : public BinaryOutputBase {
  public:
-  BinaryOutputCollisions(bf::path path, std::string name);
-  BinaryOutputCollisions(bf::path path, Configuration&& config);
+  BinaryOutputCollisions(const bf::path &path, const std::string &name);
+  BinaryOutputCollisions(const bf::path &path, Configuration&& config);
 
   /// writes the initial particle information of an event
   void at_eventstart(const Particles &particles,

@@ -17,7 +17,7 @@
 
 namespace Smash {
 
-RootOutput::RootOutput(boost::filesystem::path path, std::string name)
+RootOutput::RootOutput(const bf::path &path, const std::string &name)
     : base_path_(std::move(path)),
       root_out_file_(
           new TFile((base_path_ / (name + ".root")).native().c_str(), "NEW")),
@@ -30,7 +30,7 @@ RootOutput::RootOutput(boost::filesystem::path path, std::string name)
 /**
  * RootOuput constructor. Creates file smash_run.root in the output directory.
  */
-RootOutput::RootOutput(bf::path path, Configuration&& conf)
+RootOutput::RootOutput(const bf::path &path, Configuration&& conf)
     : base_path_(std::move(path)),
       root_out_file_(
           new TFile((base_path_ / "smash_run.root").native().c_str(), "NEW")),
