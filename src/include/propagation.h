@@ -45,6 +45,8 @@ void propagate_straight_line(Particles *particles,
  * \param[in,out] particles The particle list in the event
  * \param parameters Parameters for the experiment
  * \param pot The potentials in the system
+ * \param UB_grad_lat Lattice for Skyrme potential gradient
+ * \param UI3_grad_lat Lattice for symmetry potential gradient
  */
 void propagate(Particles *particles, const ExperimentParameters &parameters,
                const Potentials &pot,
