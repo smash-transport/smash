@@ -182,13 +182,13 @@ TEST(propagation_in_test_potential) {
        U0_(U0), d_(d) {}
     double potential(const ThreeVector &r,
                      const ParticleList &/*plist*/,
-                     const PdgCode /*acts_on*/) const {
+                     const ParticleType& /*acts_on*/) const override {
       return U0_/(1.0 + std::exp(r.x1()/d_));
     }
 
     ThreeVector potential_gradient(const ThreeVector &r,
                         const ParticleList &/*plist*/,
-                        const PdgCode /*acts_on*/) const {
+                        const ParticleType& /*acts_on*/) const override {
       const double tmp = std::exp(r.x1()/d_);
       return ThreeVector(- U0_/d_ * tmp / ((1.0 + tmp)*(1.0 + tmp)), 0.0, 0.0);
     }
