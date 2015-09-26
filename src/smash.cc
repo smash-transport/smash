@@ -99,7 +99,6 @@ void usage(const int rc, const std::string &progname) {
    */
   std::printf("\nUsage: %s [option]\n\n", progname.c_str());
   std::printf(
-      "Calculate transport box\n"
       "  -h, --help              usage information\n"
       "\n"
       "  -i, --inputfile <file>  path to input configuration file\n"
@@ -243,9 +242,9 @@ int main(int argc, char *argv[]) {
         case 'v':
           std::printf(
               "%s\n"
-              "System   : %s\nCompiler : %s %s\n"
+              "Branch   : %s\nSystem   : %s\nCompiler : %s %s\n"
               "Build    : %s\nDate     : %s\n",
-              VERSION_MAJOR, CMAKE_SYSTEM, CMAKE_CXX_COMPILER_ID,
+              VERSION_MAJOR, GIT_BRANCH, CMAKE_SYSTEM, CMAKE_CXX_COMPILER_ID,
               CMAKE_CXX_COMPILER_VERSION, CMAKE_BUILD_TYPE, BUILD_DATE);
           std::exit(EXIT_SUCCESS);
         default:

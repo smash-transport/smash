@@ -14,6 +14,16 @@ include(FindPkgConfig)
 include(GetGitRevisionDescription)
 git_describe(VERSION_MAJOR)
 
+find_package (Git)
+if(GIT_FOUND)
+  #message("git found: ${GIT_EXECUTABLE} in version ${GIT_VERSION_STRING}")
+  execute_process(
+    COMMAND ${GIT_EXECUTABLE} rev-parse --abbrev-ref HEAD
+    OUTPUT_VARIABLE GIT_BRANCH)
+  string(STRIP ${GIT_BRANCH} GIT_BRANCH)
+  #message("git branch: ${GIT_BRANCH}")
+endif (GIT_FOUND)
+
 string(TIMESTAMP BUILD_DATE)
 
 find_package(GSL REQUIRED)
@@ -21,16 +31,14 @@ find_package(Eigen3 REQUIRED)
 find_package(Boost 1.49.0 REQUIRED COMPONENTS filesystem system)
 pkg_check_modules(YAML REQUIRED yaml-cpp>=0.5.1)
 
-option(USE_ROOT "Turn this on to build ROOT output support into SMASH." OFF)
+option(USE_ROOT "Turn this off to disable ROOT output support in SMASH." ON)
 if(USE_ROOT)
-   find_package(ROOT 5.34 REQUIRED)
-   include_directories(SYSTEM
-      "${ROOT_INCLUDE_DIR}"
-      )
-   set(SMASH_LIBRARIES
-      ${ROOT_LIBRARIES}
-      )
-   add_definitions(-DSMASH_USE_ROOT)
+  find_package(ROOT 5.34)
+  if(ROOT_FOUND)
+    include_directories(SYSTEM "${ROOT_INCLUDE_DIR}")
+    set(SMASH_LIBRARIES ${ROOT_LIBRARIES})
+    add_definitions(-DSMASH_USE_ROOT)
+  endif()
 endif()
 
 # set up include paths
@@ -60,6 +68,7 @@ set(smash_src
         boxmodus.cc
         binaryoutputcollisions.cc
         binaryoutputparticles.cc
+        clebschgordan.cc
         collidermodus.cc
         configuration.cc
         decayaction.cc
@@ -79,6 +88,7 @@ set(smash_src
         fpenvironment.cc
         grid.cc
         inputfunctions.cc
+        interpolation.cc
         isoparticletype.cc
         listmodus.cc
         logging.cc
@@ -100,6 +110,7 @@ set(smash_src
         scatteractionbaryonbaryon.cc
         scatteractionbaryonmeson.cc
         scatteractionmesonmeson.cc
+        scatteractionnucleonkaon.cc
         scatteractionnucleonnucleon.cc
         scatteractionsfinder.cc
         spheremodus.cc
@@ -110,10 +121,8 @@ set(smash_src
         vtkoutput.cc
         )
 
-if(USE_ROOT)
-   set(smash_src ${smash_src}
-      rootoutput.cc
-      )
+if(USE_ROOT AND ROOT_FOUND)
+  set(smash_src ${smash_src} rootoutput.cc)
 endif()
 
 add_executable(smash smash.cc ${smash_src})

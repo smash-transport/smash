@@ -36,28 +36,29 @@ class ScatterActionBaryonBaryon : public ScatterAction {
 
  private:
   /**
-  * Calculate cross sections for resonance absorption on a nucleon
-  * (i.e. NR->NN).
+  * Calculate cross sections for resonance absorption
+  * (i.e. NR->NN and DeltaR->NN).
   *
-  * \param[in] type_particle1 Type information of the first incoming nucleon.
-  * \param[in] type_particle2 Type information of the second incoming nucleon.
+  * \param[in] type_a Type information of the first incoming baryon.
+  * \param[in] type_b Type information of the second incoming baryon.
   *
-  * \return List of resonance absorption processes possible in the collision
-  * with a nucleon. Each element in the list contains the type(s) of the
-  * final state particle(s) and the cross section for that particular process.
+  * \return List of possible resonance absorption processes. Each element of the
+  * list contains the types of the final-state particles and the cross section
+  * for that particular process.
   */
-  CollisionBranchList nuc_res_to_nuc_nuc(const ParticleType &type_particle1,
-                                       const ParticleType &type_particle2);
+  CollisionBranchList bar_bar_to_nuc_nuc(const ParticleType &type_a,
+                                         const ParticleType &type_b);
 
  protected:
   /**
-   * Scattering matrix amplitude squared for \f$ NN \rightarrow NR \f$ processes,
+   * Scattering matrix amplitude squared for resonance production processes like
+   * \f$ NN \rightarrow NR \f$  and \f$ NN \rightarrow \Delta R \f$,
    * where R is a baryon resonance (\f$ \Delta, N^*, \Delta^* \f$).
    * Includes a spin factor \f$ (2S_a+1)(2S_b+1) \f$, but no isospin factors.
    *
    * \param[in] srts sqrt(Mandelstam-s), i.e. collision CMS energy.
-   * \param[in] type_a Type information for the first final state particle.
-   * \param[in] type_b Type information for the second final state particle.
+   * \param[in] type_a Type information for the first final-state particle.
+   * \param[in] type_b Type information for the second final-state particle.
    *
    * \return Matrix amplitude squared \f$ |\mathcal{M}(\sqrt{s})|^2/16\pi \f$.
    */

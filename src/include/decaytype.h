@@ -143,6 +143,19 @@ class TwoBodyDecaySemistable : public TwoBodyDecay {
 
  protected:
   float rho(float m) const override;
+  /**
+   * Determine the cutoff parameter Λ for semi-stable decays,
+   * given the types of the daughter particles.
+   *
+   * For the values used in GiBUU, see \iref{Buss:2011mx}, eq. (175).
+   * For the original values used by M. Post, see table 1 in \iref{Post:2003hu}.
+   *
+   * We mostly stick to the GiBUU values, but use a different value for the ρπ
+   * decay, in order to avoid secondary bumps in the ω spectral function and
+   * achieve a better normalization. In contrast to Smash, GiBUU does not have
+   * an ω → ρ π decay.
+   */
+  float get_Lambda();
   float Lambda_;
   std::unique_ptr<Tabulation> tabulation_;
 };
@@ -157,6 +170,15 @@ class TwoBodyDecayUnstable : public TwoBodyDecay {
   float width(float m0, float G0, float m) const override;
   float in_width(float m0, float G0, float m,
                  float m1, float m2) const override;
+ protected:
+  float rho(float m) const override;
+  /**
+   * Determine the cutoff parameter Λ for unstable decays,
+   * given the types of the daughter particles.
+   */
+  float get_Lambda();
+  float Lambda_;
+  std::unique_ptr<Tabulation> tabulation_;
 };
 
 /**

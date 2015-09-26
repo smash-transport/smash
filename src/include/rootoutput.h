@@ -26,14 +26,10 @@ class Particles;
   *
   * \brief SMASH output to ROOT file
   * ----------------------------------------------------------------------------
-  * SMASH supports ROOT (root.cern.ch) output as an option. By default SMASH
-  * does not need ROOT for compilation. If one wants to produce ROOT output, one
-  * has to compile SMASH as follows:
-  * \code
-  * cd build
-  * cmake -D USE_ROOT=ON ..
-  * make
-  * \endcode
+  * SMASH supports ROOT output as an option (see http://root.cern.ch).
+  * The ROOT framework needs to be installed when building SMASH, otherwise
+  * ROOT support will be disabled.
+  *
   * This class produces file smash_run.root, which contains a
   * ROOT TTree. TTree contains information about particles
   * during simulation from all SMASH events.

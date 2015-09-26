@@ -80,11 +80,11 @@ enum class CalculationFrame {
 /// Possible methods of impact parameter sampling.
 enum class Sampling {
   /// Sample from uniform distribution.
-  UNIFORM,
+  Uniform,
   /// Sample from areal / quadratic distribution.
-  QUADRATIC,
+  Quadratic,
   /// Sample from custom, user-defined distribution.
-  CUSTOM,
+  Custom,
 };
 
 /** Allows to choose which kind of density to calculate.
@@ -92,11 +92,11 @@ enum class Sampling {
 *  For the symmetry potential one needs to know the isospin density.
 */
 enum class DensityType {
-  none = 0,
-  hadron = 1,
-  baryon = 2,
-  baryonic_isospin = 3,
-  pion = 4,
+  None = 0,
+  Hadron = 1,
+  Baryon = 2,
+  BaryonicIsospin = 3,
+  Pion = 4,
 };
 
 /** The time step mode.

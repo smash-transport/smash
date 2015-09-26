@@ -217,6 +217,11 @@ class Experiment : public ExperimentBase {
   ExperimentParameters parameters_;
 
   /**
+   * Structure to precalculate and hold parameters for density computations
+   */
+  DensityParameters density_param_;
+
+  /**
    * Instance of the Modus template parameter. May store modus-specific data
    * and contains modus-specific function implementations.
    */
@@ -264,7 +269,11 @@ class Experiment : public ExperimentBase {
    */
   std::unique_ptr<DensityLattice> jmu_B_lat_, jmu_I3_lat_, jmu_custom_lat_;
   /// Type of density for lattice printout
-  DensityType dens_type_lattice_printout_ = DensityType::none;
+  DensityType dens_type_lattice_printout_ = DensityType::None;
+  /// Lattices for potentials
+  std::unique_ptr<RectangularLattice<double>> UB_lat_, UI3_lat_;
+  /// Lattices for  potential gradients.
+  std::unique_ptr<RectangularLattice<ThreeVector>> dUB_dr_lat_, dUI3_dr_lat_;
 
   /**
    * Number of events.
@@ -317,7 +326,7 @@ class Experiment : public ExperimentBase {
   SystemTimePoint time_start_ = SystemClock::now();
 
   /// Type of density to be written to collision headers
-  DensityType dens_type_ = DensityType::none;
+  DensityType dens_type_ = DensityType::None;
 
   /**\ingroup logging
    * Writes the initial state for the Experiment to the output stream.

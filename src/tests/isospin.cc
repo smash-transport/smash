@@ -70,7 +70,7 @@ TEST(NN_NDelta) {
   ParticleData p2 = ParticleData{*proton, 2};
   ParticleData n  = ParticleData{*neutron,3};
 
-  const double ptot=0.7;
+  const double ptot = 0.4;
   p1.set_4momentum(proton->mass(), 0., 0., ptot);
   p2.set_4momentum(proton->mass(), 0., 0., -ptot);
 
@@ -98,7 +98,7 @@ TEST(NN_NDelta) {
   FUZZY_COMPARE(proc_list_pp[0]->weight(),proc_list_pn[0]->weight());    // ratio 1:1
   FUZZY_COMPARE(proc_list_pp[0]->weight(),proc_list_np[0]->weight());    // ratio 1:1
 
-//   FUZZY_COMPARE(act_pp->weight(),2*act_pn->weight());                  // ratio 2:1
+  FUZZY_COMPARE(act_pp->cross_section(), 2*act_pn->cross_section());     // ratio 2:1
 
   delete act_pp;
   delete act_pn;
@@ -145,7 +145,7 @@ TEST(NDelta_NN) {
   FUZZY_COMPARE(proc_list_Dp[0]->weight(),proc_list_Dn[0]->weight());     // ratio 1:1
   FUZZY_COMPARE(3*proc_list_Dp[0]->weight(),proc_list_DDn[0]->weight());  // ratio 1:3
 
-//   FUZZY_COMPARE(2*act_Dp->weight(),act_Dn->weight());                  // ratio 1:2
+  FUZZY_COMPARE(2*act_Dp->cross_section(), act_Dn->cross_section());      // ratio 1:2
 
   delete act_Dp;
   delete act_Dn;

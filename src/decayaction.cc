@@ -11,8 +11,10 @@
 
 #include "include/angles.h"
 #include "include/decaymodes.h"
+#include "include/kinematics.h"
 #include "include/logging.h"
 #include "include/pdgcode.h"
+#include "include/resonances.h"
 
 namespace Smash {
 
@@ -32,11 +34,6 @@ double DecayAction::sqrt_s() const {
   return incoming_particles_[0].momentum().abs();
 }
 
-
-void DecayAction::one_to_two() {
-  /* Sample the masses and momenta. */
-  sample_cms_momenta();
-}
 
 void DecayAction::one_to_three() {
   const auto &log = logger<LogArea::DecayModes>();
@@ -170,10 +167,11 @@ void DecayAction::generate_final_state() {
       decay_channels_, total_width_);
   outgoing_particles_ = proc->particle_list();
   process_type_ = proc->get_type();
+  L_ = proc->angular_momentum();
 
   switch (outgoing_particles_.size()) {
   case 2:
-    one_to_two();
+    sample_2body_phasespace();
     break;
   case 3:
     one_to_three();
@@ -196,6 +194,37 @@ void DecayAction::generate_final_state() {
     log.debug("particle momenta in comp ", p);
   }
 }
+
+
+std::pair<double, double> DecayAction::sample_masses() const {
+  const ParticleType &t_a = outgoing_particles_[0].type();
+  const ParticleType &t_b = outgoing_particles_[1].type();
+
+  // start with pole masses
+  std::pair<double, double> masses = {t_a.mass(), t_b.mass()};
+
+  const double cms_energy = sqrt_s();
+
+  if (cms_energy < t_a.minimum_mass() + t_b.minimum_mass()) {
+    throw InvalidResonanceFormation("resonance_formation: not enough energy! " +
+      std::to_string(cms_energy) + " " + std::to_string(t_a.minimum_mass()) +
+      " " + std::to_string(t_b.minimum_mass()) + " " +
+      t_a.pdgcode().string() + " " + t_b.pdgcode().string());
+  }
+
+  /* If one of the particles is a resonance, sample its mass. */
+  if (!t_a.is_stable() && t_b.is_stable()) {
+    masses.first = sample_resonance_mass(t_a, t_b.mass(), cms_energy, L_);
+  } else if (!t_b.is_stable() && t_a.is_stable()) {
+    masses.second = sample_resonance_mass(t_b, t_a.mass(), cms_energy, L_);
+  } else if (!t_a.is_stable() && !t_b.is_stable()) {
+    // two resonances in final state
+    masses = sample_resonance_masses(t_a, t_b, cms_energy, L_);
+  }
+
+  return masses;
+}
+
 
 float DecayAction::raw_weight_value() const {
   return total_width_;

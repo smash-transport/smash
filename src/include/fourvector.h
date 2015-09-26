@@ -348,10 +348,11 @@ inline FourVector operator*(double b, FourVector a) {
 
 // assignement factor division
 FourVector inline FourVector::operator/=(const double &a) {
-  this->x_[0] /= a;
-  this->x_[1] /= a;
-  this->x_[2] /= a;
-  this->x_[3] /= a;
+  const double a_inv = 1.0 / a;
+  this->x_[0] *= a_inv;
+  this->x_[1] *= a_inv;
+  this->x_[2] *= a_inv;
+  this->x_[3] *= a_inv;
   return *this;
 }
 

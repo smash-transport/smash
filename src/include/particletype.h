@@ -73,7 +73,7 @@ class ParticleType {
   /// Returns the name of the particle.
   const std::string &name() const { return name_; }
 
-  /// Returns the particle mass.
+  /// Returns the particle pole mass.
   float mass() const { return mass_; }
 
   /// Returns the squared particle mass.
@@ -186,14 +186,19 @@ class ParticleType {
 
   /**
    * Full spectral function
-   * \f$A(m)=\frac{2}{\pi}\frac{m^2\Gamma(m)}{(m^2-m_0^2)^2+(m\Gamma(m))^2}\f$
+   * \f$ A(m) = \frac{2}{\pi} N \frac{m^2\Gamma(m)}{(m^2-m_0^2)^2+(m\Gamma(m))^2} \f$
    * of the resonance (relativistic Breit-Wigner distribution with
-   * mass-dependent width).
+   * mass-dependent width, where N is a normalization factor).
    * \param m Actual off-shell mass of the resonance, where the
    *          spectral function is supposed to be evaluated.
-   * \todo The normalization is not guaranteed to be unity at present.
+   * \note The normalization factor N ensures that the spectral function is
+   *       normalized to unity.
    */
   float spectral_function(float m) const;
+
+  /**
+   * Full spectral function without normalization factor. */
+  float spectral_function_no_norm(float m) const;
 
   /**
    * The spectral function with a constant width (= width at pole).
@@ -217,10 +222,13 @@ class ParticleType {
   static const ParticleTypeList &list_all();
 
   /** Returns a list of all nucleons (i.e. proton and neutron). */
-  static std::vector<ParticleTypePtr> list_nucleons();
+  static ParticleTypePtrList list_nucleons();
+  /** Returns a list of the Delta(1232) baryons
+   *  (i.e. all four charge states). */
+  static ParticleTypePtrList list_Deltas();
   /** Returns a list of all baryon resonances,
    * i.e. unstable baryons (not including antibaryons). */
-  static std::vector<ParticleTypePtr> list_baryon_resonances();
+  static ParticleTypePtrList list_baryon_resonances();
 
   /**
    * Returns the ParticleType object for the given \p pdgcode.
@@ -317,12 +325,20 @@ class ParticleType {
  private:
   /// name of the particle
   std::string name_;
-  /// mass of the particle
+  /// pole mass of the particle
   float mass_;
   /// width of the particle
   float width_;
   /// PDG Code of the particle
   PdgCode pdgcode_;
+  /// minimum mass of the particle
+  /* Mutable, because it is initialized at first call of minimum mass function,
+     so it's logically const, but not physically const, which is a classical
+     case for using mutable. */
+  mutable float minimum_mass_;
+  /** This normalization factor ensures that the spectral function is normalized
+   * to unity, when integrated over its full domain. */
+  mutable float norm_factor_ = -1.;
   /** twice the isospin of the particle
    *
    * This is filled automatically from pdgcode_.

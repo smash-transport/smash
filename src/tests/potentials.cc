@@ -159,7 +159,7 @@ TEST(nucleus_potential_profile) {
     }
     a_file.close();
     for (auto i = 0; i < 50; i++) {
-      propagate(&P, param, *pot);
+      propagate(&P, param, *pot, nullptr, nullptr);
     }
   }
 }
@@ -190,6 +190,9 @@ TEST(propagation_in_test_potential) {
       const double tmp = std::exp(r.x1()/d_);
       return ThreeVector(- U0_/d_ * tmp / ((1.0 + tmp)*(1.0 + tmp)), 0.0, 0.0);
     }
+
+    bool use_skyrme() const { return true; }
+    bool use_symmetry() const { return true; }
    private:
     const double U0_, d_;
   };
@@ -215,7 +218,7 @@ TEST(propagation_in_test_potential) {
 
   // Propagate, until particle is at x>>d, where d is parameter of potential
   while (P.front().position().x1() < 20*d) {
-    propagate(&P, param, *pot);
+    propagate(&P, param, *pot, nullptr, nullptr);
   }
   // Calculate 4-momentum, expected from conservation laws
   const FourVector pm = part.momentum();

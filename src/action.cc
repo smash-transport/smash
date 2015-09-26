@@ -97,19 +97,12 @@ void Action::perform(Particles *particles, size_t &id_process) {
 }
 
 
-void Action::sample_cms_momenta() {
-  const auto &log = logger<LogArea::Action>();
-  /* This function only operates on 2-particle final states. */
-  assert(outgoing_particles_.size() == 2);
+std::pair<double, double> Action::sample_masses() const {
+  const ParticleType &t_a = outgoing_particles_[0].type();
+  const ParticleType &t_b = outgoing_particles_[1].type();
 
-  ParticleData *p_a = &outgoing_particles_[0];
-  ParticleData *p_b = &outgoing_particles_[1];
-
-  const ParticleType &t_a = p_a->type();
-  const ParticleType &t_b = p_b->type();
-
-  double mass_a = t_a.mass();
-  double mass_b = t_b.mass();
+  // start with pole masses
+  std::pair<double, double> masses = {t_a.mass(), t_b.mass()};
 
   const double cms_energy = sqrt_s();
 
@@ -117,31 +110,55 @@ void Action::sample_cms_momenta() {
     throw InvalidResonanceFormation("resonance_formation: not enough energy! " +
       std::to_string(cms_energy) + " " + std::to_string(t_a.minimum_mass()) +
       " " + std::to_string(t_b.minimum_mass()) + " " +
-      p_a->pdgcode().string() + " " + p_b->pdgcode().string());
+      t_a.pdgcode().string() + " " + t_b.pdgcode().string());
   }
 
   /* If one of the particles is a resonance, sample its mass. */
-  /* TODO: Other particle assumed stable! */
-  if (!t_a.is_stable()) {
-    mass_a = sample_resonance_mass(t_a, t_b.mass(), cms_energy);
-  } else if (!t_b.is_stable()) {
-    mass_b = sample_resonance_mass(t_b, t_a.mass(), cms_energy);
+  if (!t_a.is_stable() && t_b.is_stable()) {
+    masses.first = sample_resonance_mass(t_a, t_b.mass(), cms_energy);
+  } else if (!t_b.is_stable() && t_a.is_stable()) {
+    masses.second = sample_resonance_mass(t_b, t_a.mass(), cms_energy);
+  } else if (!t_a.is_stable() && !t_b.is_stable()) {
+    // two resonances in final state
+    masses = sample_resonance_masses(t_a, t_b, cms_energy);
   }
 
-  double momentum_radial = pCM(cms_energy, mass_a, mass_b);
-  if (!(momentum_radial > 0.0)) {
-    log.warn("Particle: ", t_a.pdgcode(),
-             " radial momentum: ", momentum_radial);
-    log.warn("Etot: ", cms_energy, " m_a: ", mass_a, " m_b: ", mass_b);
+  return masses;
+}
+
+
+void Action::sample_angles(std::pair<double, double> masses) {
+  const auto &log = logger<LogArea::Action>();
+
+  ParticleData *p_a = &outgoing_particles_[0];
+  ParticleData *p_b = &outgoing_particles_[1];
+
+  const double cms_energy = sqrt_s();
+
+  const double pcm = pCM(cms_energy, masses.first, masses.second);
+  if (!(pcm > 0.0)) {
+    log.warn("Particle: ", p_a->pdgcode(), " radial momentum: ", pcm);
+    log.warn("Etot: ", cms_energy, " m_a: ", masses.first,
+                                   " m_b: ", masses.second);
   }
   /* Here we assume an isotropic angular distribution. */
   Angles phitheta;
   phitheta.distribute_isotropically();
 
-  p_a->set_4momentum(mass_a,  phitheta.threevec() * momentum_radial);
-  p_b->set_4momentum(mass_b, -phitheta.threevec() * momentum_radial);
+  p_a->set_4momentum(masses.first,   phitheta.threevec() * pcm);
+  p_b->set_4momentum(masses.second, -phitheta.threevec() * pcm);
 
   log.debug("p_a: ", *p_a, "\np_b: ", *p_b);
+}
+
+
+void Action::sample_2body_phasespace() {
+  /* This function only operates on 2-particle final states. */
+  assert(outgoing_particles_.size() == 2);
+  // first sample the masses
+  const std::pair<double, double> masses = sample_masses();
+  // after the masses are fixed (and thus also pcm), sample the angles
+  sample_angles(masses);
 }
 
 

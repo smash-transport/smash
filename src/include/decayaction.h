@@ -47,6 +47,8 @@ class DecayAction : public Action {
    */
   void generate_final_state() override;
 
+  std::pair<double, double> sample_masses() const override;
+
   float raw_weight_value() const override;
 
   float total_width() const {
@@ -78,15 +80,10 @@ class DecayAction : public Action {
   /** total decay width */
   float total_width_;
 
- protected:
-  /**
-   * Kinematics of a 1-to-2 decay process.
-   *
-   * Sample the masses and momenta of the decay products in the
-   * center-of-momentum frame.
-   */
-  void one_to_two();
+  /** angular momentum of the decay */
+  int L_ = 0;
 
+ protected:
   /**
    * Kinematics of a 1-to-3 decay process.
    *

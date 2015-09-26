@@ -173,3 +173,141 @@ TEST(iterate_in_radius) {
     }
   });
 }
+
+/* Create lattice and fill it with 1/r function.
+ * Check if gradient is -\vec{r}/r^3, pay attention to grid edges.
+ */
+TEST(gradient) {
+  // Set a lattice with random parameters, but a relatively fine one.
+  const std::array<float, 3> l = {9.0f, 7.0f, 13.0f};
+  const std::array<int, 3> n = {50, 60, 70};
+  const std::array<float, 3> origin = {-5.2f, -4.3f, -6.7f};
+  bool periodicity = false;
+  auto lat = make_unique<RectangularLattice<double>>(
+             l, n, origin, periodicity, LatticeUpdate::EveryTimestep);
+  ThreeVector r;
+  double d;
+  // Fill lattice with 1/r function.
+  lat->iterate_sublattice({0, 0, 0}, lat->dimensions(),
+             [&](double &node, int ix, int iy, int iz){
+      r = lat->cell_center(ix, iy, iz);
+      d = r.abs();
+      node = (d > 0.0) ? (1.0/d) : 0.0;
+    });
+  ThreeVector expected_grad;
+  auto grad_lat = make_unique<RectangularLattice<ThreeVector>>(
+             l, n, origin, periodicity, LatticeUpdate::EveryTimestep);
+  lat->compute_gradient_lattice(grad_lat.get());
+  /* Error of the derivative calculation is proportional to the
+     lattice spacing squared and to the third derivative of the function.
+     Third derivative of 1/r is getting larger for small r.
+     That is why I only test r larger than some r0. For them the expected
+     precision is better, and test with better precision has better
+     capability to catch potential bugs. Furthermore, precision at the
+     edges of the non-periodic grid is proportional to lattice spacing,
+     not to lattice spacing squared.
+  */
+  grad_lat->iterate_sublattice({0, 0, 0}, grad_lat->dimensions(),
+                  [&](ThreeVector &node, int ix, int iy, int iz){
+      r = grad_lat->cell_center(ix, iy, iz);
+      d = r.abs();
+      if (d > 2.0) {
+        expected_grad = - r / (d*d*d);
+        COMPARE_RELATIVE_ERROR(node.x1(), expected_grad.x1(), 6.e-2) <<
+                               "node: (" << ix << ", " << iy << ", " << iz <<
+                               "), |r| = " << d;
+        COMPARE_RELATIVE_ERROR(node.x2(), expected_grad.x2(), 6.e-2) <<
+                               "node: (" << ix << ", " << iy << ", " << iz <<
+                               "), |r| = " << d;
+        COMPARE_RELATIVE_ERROR(node.x3(), expected_grad.x3(), 6.e-2) <<
+                               "node: (" << ix << ", " << iy << ", " << iz <<
+                               "), |r| = " << d;
+      }
+    });
+}
+
+/* Create periodic lattice and fill it with
+   cos(2 pi x/lx) cos(2 pi y/ly) cos(2 pi z/lz) function.
+   Function is periodic and limited, error of computed gradient should be
+   proportional to lattice spacing squared everywhere, including lattice edges,
+   so computational errors should be smaller than in the "gradient" test.
+   This test checks the gradient on periodic lattice. The only difference
+   with non-periodic is treatment of derivatives on the edges.
+*/
+TEST(gradient_periodic) {
+  const std::array<float, 3> l = {9.0f, 7.0f, 13.0f};
+  const std::array<int, 3> n = {50, 60, 70};
+  const std::array<float, 3> origin = {-5.2f, -4.3f, -6.7f};
+  bool periodicity = true;
+  auto lat = make_unique<RectangularLattice<double>>(
+             l, n, origin, periodicity, LatticeUpdate::EveryTimestep);
+  ThreeVector r;
+  // Fill lattice with (2 pi x/lx) cos(2 pi y/ly) cos(2 pi z/lz) function.
+  lat->iterate_sublattice({0, 0, 0}, lat->dimensions(),
+             [&](double &node, int ix, int iy, int iz){
+      r = lat->cell_center(ix, iy, iz);
+      node = std::cos(2*M_PI*r.x1()/l[0]) *
+             std::cos(2*M_PI*r.x2()/l[1]) *
+             std::cos(2*M_PI*r.x3()/l[2]);
+    });
+  ThreeVector expected_grad;
+  auto grad_lat = make_unique<RectangularLattice<ThreeVector>>(
+             l, n, origin, periodicity, LatticeUpdate::EveryTimestep);
+  lat->compute_gradient_lattice(grad_lat.get());
+  grad_lat->iterate_sublattice({0, 0, 0}, grad_lat->dimensions(),
+                  [&](ThreeVector &node, int ix, int iy, int iz){
+      r = grad_lat->cell_center(ix, iy, iz);
+      expected_grad.set_x1(-2*M_PI/l[0] * std::sin(2*M_PI*r.x1()/l[0]) *
+                                          std::cos(2*M_PI*r.x2()/l[1]) *
+                                          std::cos(2*M_PI*r.x3()/l[2]));
+      expected_grad.set_x2(-2*M_PI/l[1] * std::cos(2*M_PI*r.x1()/l[0]) *
+                                          std::sin(2*M_PI*r.x2()/l[1]) *
+                                          std::cos(2*M_PI*r.x3()/l[2]));
+      expected_grad.set_x3(-2*M_PI/l[2] * std::cos(2*M_PI*r.x1()/l[0]) *
+                                          std::cos(2*M_PI*r.x2()/l[1]) *
+                                          std::sin(2*M_PI*r.x3()/l[2]));
+
+      COMPARE_RELATIVE_ERROR(node.x1(), expected_grad.x1(), 3.e-3) <<
+                       "node: (" << ix << ", " << iy << ", " << iz << ")";
+      COMPARE_RELATIVE_ERROR(node.x2(), expected_grad.x2(), 3.e-3) <<
+                       "node: (" << ix << ", " << iy << ", " << iz << ")";
+      COMPARE_RELATIVE_ERROR(node.x3(), expected_grad.x3(), 3.e-3) <<
+                       "node: (" << ix << ", " << iy << ", " << iz << ")";
+    });
+}
+
+/* Test gradient for 2x2x2 lattice. The test is that it doesn't segfault.
+*/
+TEST(gradient_2x2x2lattice) {
+  const std::array<float, 3> l = {9.0f, 7.0f, 13.0f};
+  const std::array<int, 3> n = {2, 2, 2};
+  const std::array<float, 3> origin = {-5.2f, -4.3f, -6.7f};
+  bool periodicity = false;
+  auto lat = make_unique<RectangularLattice<double>>(
+             l, n, origin, periodicity, LatticeUpdate::EveryTimestep);
+  ThreeVector r;
+  // Fill lattice with (2 pi x/lx) cos(2 pi y/ly) cos(2 pi z/lz) function.
+  lat->iterate_sublattice({0, 0, 0}, lat->dimensions(),
+             [&](double &node, int ix, int iy, int iz){
+      r = lat->cell_center(ix, iy, iz);
+      node = std::cos(2*M_PI*r.x1()/l[0]) *
+             std::cos(2*M_PI*r.x2()/l[1]) *
+             std::cos(2*M_PI*r.x3()/l[2]);
+    });
+  auto grad_lat = make_unique<RectangularLattice<ThreeVector>>(
+             l, n, origin, periodicity, LatticeUpdate::EveryTimestep);
+  lat->compute_gradient_lattice(grad_lat.get());
+}
+
+// If one of the dimensions is 1, then 3D gradient calculation is impossible
+TEST_CATCH(gradient_impossible_lattice, std::runtime_error) {
+  const std::array<float, 3> l = {9.0f, 7.0f, 13.0f};
+  const std::array<int, 3> n = {5, 42, 1};
+  const std::array<float, 3> origin = {-5.2f, -4.3f, -6.7f};
+  bool periodicity = false;
+  auto lat = make_unique<RectangularLattice<double>>(
+             l, n, origin, periodicity, LatticeUpdate::EveryTimestep);
+  auto grad_lat = make_unique<RectangularLattice<ThreeVector>>(
+             l, n, origin, periodicity, LatticeUpdate::EveryTimestep);
+  lat->compute_gradient_lattice(grad_lat.get());
+}

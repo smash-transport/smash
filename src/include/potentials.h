@@ -13,7 +13,7 @@
 #include <vector>
 
 #include "configuration.h"
-#include "experimentparameters.h"
+#include "density.h"
 #include "forwarddeclarations.h"
 #include "particledata.h"
 #include "threevector.h"
@@ -35,8 +35,14 @@ namespace Smash {
  */
 class Potentials {
  public:
-  Potentials(Configuration conf, const ExperimentParameters &parameters);
+  Potentials(Configuration conf, const DensityParameters &parameters);
   ~Potentials();
+
+  /// Evaluates skyrme potential given baryon density
+  double skyrme_pot(const double baryon_density) const;
+  /// Evaluates symmetry potential given baryon isospin density
+  double symmetry_pot(const double baryon_isospin_density) const;
+
   /** Evaluates potential at point r. Potential is always taken in the local
    * Eckart rest frame, but point r is in the computational frame.
    *
@@ -68,11 +74,18 @@ class Potentials {
                                  const ParticleList &plist,
                                  const PdgCode acts_on) const;
 
+  /// Is Skyrme potential on?
+  VIRTUAL_FOR_TESTS
+  bool use_skyrme() const { return use_skyrme_; }
+  /// Is symmetry potential on?
+  VIRTUAL_FOR_TESTS
+  bool use_symmetry() const { return use_symmetry_; }
+
  private:
   /** Struct that contains gaussian sigma, cutoff and testparticle number
    *  needed for calculation
    */
-  const ExperimentParameters param_;
+  const DensityParameters param_;
 
   // Skyrme potential on/off
   bool use_skyrme_;

@@ -18,6 +18,7 @@
 #include "include/decaymodes.h"
 #include "include/distributions.h"
 #include "include/inputfunctions.h"
+#include "include/integrate.h"
 #include "include/iomanipulators.h"
 #include "include/isoparticletype.h"
 #include "include/logging.h"
@@ -54,12 +55,24 @@ ParticleTypePtr ParticleType::operator&() const {
 }
 #endif
 
-std::vector<ParticleTypePtr> ParticleType::list_nucleons() {
-  return {&find(0x2212), &find(0x2112)};
+ParticleTypePtrList ParticleType::list_nucleons() {
+  if (IsoParticleType::exists("N")) {
+    return IsoParticleType::find("N").get_states();
+  } else {
+    return ParticleTypePtrList();
+  }
 }
 
-std::vector<ParticleTypePtr> ParticleType::list_baryon_resonances() {
-  std::vector<ParticleTypePtr> list;
+ParticleTypePtrList ParticleType::list_Deltas() {
+  if (IsoParticleType::exists("Δ")) {
+    return IsoParticleType::find("Δ").get_states();
+  } else {
+    return ParticleTypePtrList();
+  }
+}
+
+ParticleTypePtrList ParticleType::list_baryon_resonances() {
+  ParticleTypePtrList list;
   list.reserve(10);
   for (const ParticleType &type_resonance : ParticleType::list_all()) {
     /* Only loop over baryon resonances. */
@@ -97,6 +110,7 @@ ParticleType::ParticleType(std::string n, float m, float w, PdgCode id)
       mass_(m),
       width_(w),
       pdgcode_(id),
+      minimum_mass_(-1.f),
       isospin_(pdgcode_.isospin_total()),
       charge_(pdgcode_.charge()) {}
 
@@ -196,17 +210,17 @@ void ParticleType::create_type_list(const std::string &input) {  // {{{
 
 
 float ParticleType::minimum_mass() const {
-  float minmass = mass();
-
-  /* If the particle happens to be stable, just return the mass. */
-  if (is_stable()) {
-    return minmass;
+  if (unlikely(minimum_mass_ < 0.f)) {
+    /* If the particle is stable, min. mass is just the mass. */
+    minimum_mass_ = mass_;
+    /* Otherwise, find the lowest mass value needed in any decay mode */
+    if (!is_stable()) {
+      for (const auto &mode : decay_modes().decay_mode_list()) {
+        minimum_mass_ = std::min(minimum_mass_, mode->threshold());
+      }
+    }
   }
-  /* Otherwise, find the lowest mass value needed in any decay mode */
-  for (const auto &mode : decay_modes().decay_mode_list()) {
-    minmass = std::min(minmass, mode->threshold());
-  }
-  return minmass;
+  return minimum_mass_;
 }
 
 
@@ -374,8 +388,22 @@ float ParticleType::get_partial_in_width(const float m,
 
 
 float ParticleType::spectral_function(float m) const {
+  if (norm_factor_ < 0.) {
+    /* Initialize the normalization factor
+     * by integrating over the unnormalized spectral function. */
+    Integrator integrate;
+    const float max_mass = 100.;
+    norm_factor_ = 1./integrate(minimum_mass(), max_mass,
+                                [&](double mm) {
+                                  return spectral_function_no_norm(mm);
+                                });
+  }
+  return norm_factor_ * spectral_function_no_norm(m);
+}
+
+float ParticleType::spectral_function_no_norm(float m) const {
   /* The spectral function is a relativistic Breit-Wigner function
-   * with mass-dependent width. */
+   * with mass-dependent width. Here: without normalization factor. */
   const float resonance_width = total_width(m);
   if (resonance_width < ParticleType::width_cutoff) {
     return 0.;

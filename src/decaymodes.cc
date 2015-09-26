@@ -9,20 +9,14 @@
 
 #include "include/decaymodes.h"
 
-#include <cassert>
-#include <cstdio>
-#include <map>
-#include <numeric>
 #include <vector>
 
+#include "include/clebschgordan.h"
 #include "include/constants.h"
 #include "include/cxx14compat.h"
 #include "include/inputfunctions.h"
 #include "include/isoparticletype.h"
 #include "include/logging.h"
-#include "include/pdgcode.h"
-#include "include/processbranch.h"
-#include "include/resonances.h"
 #include "include/stringfunctions.h"
 
 namespace Smash {
@@ -214,9 +208,8 @@ void DecayModes::load_decaymodes(const std::string &input) {
               for (const auto &daughter1 : isotype_daughter_1.get_states()) {
                 for (const auto &daughter2 : isotype_daughter_2.get_states()) {
                   // calculate Clebsch-Gordan factor
-                  const double cg = isospin_clebsch_gordan(
-                      *daughter1, *daughter2, *mother_states[m]);
-                  const double cg_sqr = cg * cg;
+                  const float cg_sqr = isospin_clebsch_gordan_sqr_2to1(
+                                    *daughter1, *daughter2, *mother_states[m]);
                   if (cg_sqr > 0.) {
                     // add mode
                     log.debug("decay mode generated: " +
@@ -244,38 +237,8 @@ void DecayModes::load_decaymodes(const std::string &input) {
                 for (const auto &daughter2 : isotype_daughter_2.get_states()) {
                   for (const auto &daughter3 :
                        isotype_daughter_3.get_states()) {
-                    // calculate allowed I_12
-                    const auto min_I_12 =
-                        std::abs(daughter1->isospin() - daughter2->isospin());
-                    const auto max_I_12 =
-                        daughter1->isospin() + daughter2->isospin();
-                    std::vector<int> possible_I_12(max_I_12 - min_I_12 + 1);
-                    std::iota(possible_I_12.begin(), possible_I_12.end(),
-                              min_I_12);
-                    std::vector<int> allowed_I_12;
-                    allowed_I_12.reserve(possible_I_12.size());
-                    const int target_I = 0;
-                    for (const auto I_12 : possible_I_12) {
-                      const auto min_I = std::abs(I_12 - daughter3->isospin());
-                      const auto max_I = I_12 + daughter3->isospin();
-                      if (min_I <= target_I && target_I <= max_I) {
-                        allowed_I_12.push_back(I_12);
-                      }
-                    }
-                    if (allowed_I_12.size() != 1) {
-                      throw std::runtime_error(
-                          "The coupled 3-body isospin state is not uniquely "
-                          "defined for " +
-                          mother_states[m]->name() + " -> " +
-                          daughter1->name() + " " + daughter2->name() + " " +
-                          daughter3->name());
-                    }
-                    const auto I_12 = allowed_I_12[0];
-                    const auto &mother = *mother_states[m];
-                    const double cg = isospin_clebsch_gordan(
-                        *daughter1, *daughter2, *daughter3, mother.isospin(),
-                        mother.isospin3(), I_12);
-                    const double cg_sqr = cg * cg;
+                    const float cg_sqr = isospin_clebsch_gordan_sqr_3to1(
+                        *daughter1, *daughter2, *daughter3, *mother_states[m]);
                     if (cg_sqr > 0.) {
                       // add mode
                       log.debug("decay mode generated: " +

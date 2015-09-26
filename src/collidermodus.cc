@@ -290,7 +290,7 @@ ColliderModus::ColliderModus(Configuration modus_config,
     // If impact is not supplied by value, inspect sampling parameters:
     if (modus_cfg.has_value({"Impact", "Sample"})) {
       sampling_ = modus_cfg.take({"Impact", "Sample"});
-      if (sampling_ == Sampling::CUSTOM) {
+      if (sampling_ == Sampling::Custom) {
         if (!(modus_cfg.has_value({"Impact", "Values"}) ||
               modus_cfg.has_value({"Impact", "Yields"}))) {
           throw std::domain_error(
@@ -305,8 +305,8 @@ ColliderModus::ColliderModus(Configuration modus_config,
               "Input Error: Need as many impact parameter values as yields. "
               "Please make sure that Values and Yields have the same length.");
         }
-        impact_interpolation_ = make_unique<InterpolateData<float>>(
-            InterpolateData<float>(impacts, yields));
+        impact_interpolation_ = make_unique<InterpolateDataLinear<float>>(
+            InterpolateDataLinear<float>(impacts, yields));
 
         auto imp_minmax = std::minmax_element(impacts.begin(), impacts.end());
         imp_min_ = *imp_minmax.first;
@@ -400,14 +400,14 @@ float ColliderModus::initial_conditions(Particles *particles,
 }
 
 void ColliderModus::sample_impact() {
-  if (sampling_ == Sampling::QUADRATIC) {
+  if (sampling_ == Sampling::Quadratic) {
     // quadratic sampling: Note that for bmin > bmax, this still yields
     // the correct distribution (only that canonical() = 0 then is the
     // upper end, not the lower).
     impact_ = std::sqrt(imp_min_ * imp_min_ +
                         Random::canonical() *
                             (imp_max_ * imp_max_ - imp_min_ * imp_min_));
-  } else if (sampling_ == Sampling::CUSTOM) {
+  } else if (sampling_ == Sampling::Custom) {
     // rejection sampling based on given distribution
     assert(impact_interpolation_ != nullptr);
     float probability_random = 1;
