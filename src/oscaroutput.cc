@@ -21,7 +21,7 @@
 namespace Smash {
 
 template <OscarOutputFormat Format, int Contents>
-OscarOutput<Format, Contents>::OscarOutput(bf::path path, std::string name)
+OscarOutput<Format, Contents>::OscarOutput(const bf::path &path, std::string name)
     : file_{std::fopen((path / (name + ".oscar")).native().c_str(), "w")} {
   /*!\Userguide
    * \page input_oscar_particlelist Oscar_Particlelist
@@ -433,7 +433,7 @@ void OscarOutput<Format, Contents>::write_particledata(
 
 namespace {
 template <int Contents>
-std::unique_ptr<OutputInterface> create_select_format(bf::path path,
+std::unique_ptr<OutputInterface> create_select_format(const bf::path &path,
                                                       Configuration config,
                                                       std::string name) {
   const bool modern_format =
@@ -448,7 +448,7 @@ std::unique_ptr<OutputInterface> create_select_format(bf::path path,
 }
 }  // unnamed namespace
 
-std::unique_ptr<OutputInterface> create_oscar_output(bf::path path,
+std::unique_ptr<OutputInterface> create_oscar_output(const bf::path &path,
                                                      Configuration config) {
   if (config.has_value({"Oscar_Particlelist", "Enable"})) {
     auto subconfig = config["Oscar_Particlelist"];
@@ -492,47 +492,5 @@ std::unique_ptr<OutputInterface> create_oscar_output(bf::path path,
               // config file
 }
 
-  /*!\Userguide
-   * \page input_dileptons Dileptons
-   * Enables Dilepton Output together with DecayActionsFinderDilepton.
-   * Dilepton Output saves information about decays, which include Dileptons,
-   * at every timestep. The output is formatted in the
-   * \ref format_oscar_collisions (OSCAR2013 format).
-   *
-   * The treatment of Dilepton Decays is special:
-   *
-   * \li Dileptons are treted via the time integration method, also called
-   * shining method as described in \iref{Schmidt:2008hm}, chapter 2D.
-   * This means that, because dilepton decays are so rare , possible decays are
-   * written in the ouput every single timestep without ever performing them
-   * and afterwards you weight them properly with a "shining weight" to
-   * compensate for the over production.
-   * \li The shining weight can be found in the weight element of the ouput.
-   * \li The shining method is implemented in the DecayActionsFinderDilepton,
-   * which is enabled together with the dilepton output.
-   *
-   * \note If you want dilepton decays, you also have to modify decaymodes.txt.
-   * Dilepton decays are commented out by default.
-   *
-   * \key Enable (bool, optional, default = false):\n
-   * true - Dilepton Output and DecayActionsFinderDilepton enabled\n
-   * false - no Dilepton Output and no DecayActionsFinderDilepton
-   **/
-
-   /*!\Userguide
-   * \page format_dilepton_output Dilepton Output
-   * The format follows \ref format_oscar_collisions in the OSCAR2013
-   * version. Dilepton Output produces the \c DileptonOutput.oscar file.
-   * Shining weights are found in the weight element. For further
-   * documentation and input options see: \ref input_dileptons.
-   **/
-
-std::unique_ptr<OutputInterface> create_dilepton_output(bf::path path) {
-  /* for now the Oscar Output in the 2013 format is sufficient
-   * for dilepton output
-   */
-  return make_unique<OscarOutput<OscarFormat2013, OscarInteractions>>(
-                                            std::move(path), "DileptonOutput");
-}
 
 }  // namespace Smash

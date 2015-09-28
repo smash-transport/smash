@@ -14,6 +14,7 @@
 #include <vector>
 
 #include "configuration.h"
+#include "forwarddeclarations.h"
 #include "outputinterface.h"
 #include "TFile.h"
 #include "TTree.h"
@@ -84,7 +85,8 @@ class Particles;
   **/
 class RootOutput : public OutputInterface {
  public:
-  RootOutput(boost::filesystem::path path, Configuration&& conf);
+  RootOutput(const bf::path &path, const std::string &name);
+  RootOutput(const bf::path &path, Configuration&& conf);
   ~RootOutput();
 
   void at_eventstart(const Particles &particles,
@@ -101,7 +103,7 @@ class RootOutput : public OutputInterface {
                       const ProcessType process_type) override;
 
  private:
-  const boost::filesystem::path base_path_;
+  const bf::path base_path_;
   std::unique_ptr<TFile> root_out_file_;
   // TFile takes ownership of all TTrees.
   // That's why TTree is not a unique pointer.
@@ -129,7 +131,12 @@ class RootOutput : public OutputInterface {
 
   // Option, defines how often root-file is "saved"
   int autosave_frequency_;
+
+  /* Basic initialization routine, creating the TTree objects
+   * for particles and collisions. */
+  void init_trees();
 };
+
 }  // namespace Smash
 
 #endif  // SRC_INCLUDE_ROOTOUTPUT_H_

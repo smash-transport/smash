@@ -23,7 +23,7 @@
 
 namespace Smash {
 
-DensityOutput::DensityOutput(bf::path path, Configuration &&config)
+DensityOutput::DensityOutput(const bf::path &path, Configuration &&config)
     : file_{std::fopen((path / ("density_out.dat")).native().c_str(), "w")},
       r_(ThreeVector(config.take({"x"}),
                      config.take({"y"}),
