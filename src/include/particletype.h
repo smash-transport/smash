@@ -108,9 +108,9 @@ class ParticleType {
   }
 
   /**
-   * Returns an identifier for the Isospin-multiplet of this PDG Code.
+   * Returns a pointer to the Isospin-multiplet of this PDG Code.
    */
-  IsoParticleType *iso_multiplet() const {
+  IsoParticleType* iso_multiplet() const {
     return iso_multiplet_;
   }
 

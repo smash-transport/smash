@@ -106,7 +106,7 @@ bool ParticleType::exists(PdgCode pdgcode) {
 }
 
 // determine (doubled) isospin from name
-static int get_isospin(std::string n, PdgCode pdg) {
+static int get_isospin(const std::string &n, PdgCode pdg) {
   if (!pdg.is_hadron()) {
     return 0;
   }

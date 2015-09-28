@@ -105,10 +105,10 @@ class IsoParticleType {
   static void create_multiplet(const ParticleType &type);
 
   /// Look up the tabulated resonance integral for the NN -> NR cross section.
-  double get_integral_NR(double srts);
+  double get_integral_NR(double sqrts);
 
   /// Look up the tabulated resonance integral for the NN -> DR cross section.
-  double get_integral_DR(double srts);
+  double get_integral_DR(double sqrts);
 
  private:
   /// name of the multiplet

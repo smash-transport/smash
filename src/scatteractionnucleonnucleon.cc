@@ -104,7 +104,7 @@ CollisionBranchList ScatterActionNucleonNucleon::two_to_two_inel(
   const auto &log = logger<LogArea::ScatterAction>();
   CollisionBranchList process_list;
   const double s = mandelstam_s();
-  const double srts = sqrt_s();
+  const double sqrts = sqrt_s();
 
   /* First: Find N N -> N R channels. */
   /* Loop over all baryon resonances. */
@@ -127,7 +127,7 @@ CollisionBranchList ScatterActionNucleonNucleon::two_to_two_inel(
 
       /* Integration limits. */
       const double lower_limit = type_resonance->minimum_mass();
-      const double upper_limit = srts - second_type->mass();
+      const double upper_limit = sqrts - second_type->mass();
       /* Check the available energy (requiring it to be a little above the
       * threshold, because the integration will not work if it's too close). */
       if (upper_limit - lower_limit < 1E-3) {
@@ -136,7 +136,7 @@ CollisionBranchList ScatterActionNucleonNucleon::two_to_two_inel(
 
       /* Calculate matrix element. */
       const float matrix_element =
-            nn_to_resonance_matrix_element(srts, *type_resonance, *second_type);
+          nn_to_resonance_matrix_element(sqrts, *type_resonance, *second_type);
       if (matrix_element <= 0.) {
         continue;
       }
@@ -145,7 +145,7 @@ CollisionBranchList ScatterActionNucleonNucleon::two_to_two_inel(
        * using the Breit-Wigner distribution as probability amplitude.
        * Integrate over the allowed resonance mass range. */
       const double resonance_integral =
-                    type_resonance->iso_multiplet()->get_integral_NR(srts);
+                    type_resonance->iso_multiplet()->get_integral_NR(sqrts);
 
       /** Cross section for 2->2 process with one resonance in final state.
        * Based on Eq. (46) in \iref{Weil:2013mya}. */
@@ -184,7 +184,7 @@ CollisionBranchList ScatterActionNucleonNucleon::two_to_two_inel(
 
       /* Integration limits. */
       const double lower_limit = type_res_1->minimum_mass();
-      const double upper_limit = srts - type_res_2->minimum_mass();
+      const double upper_limit = sqrts - type_res_2->minimum_mass();
       /* Check the available energy (requiring it to be a little above the
       * threshold, because the integration will not work if it's too close). */
       if (upper_limit - lower_limit < 1E-3) {
@@ -193,7 +193,7 @@ CollisionBranchList ScatterActionNucleonNucleon::two_to_two_inel(
 
       /* Calculate matrix element. */
       const float matrix_element =
-            nn_to_resonance_matrix_element(srts, *type_res_1, *type_res_2);
+            nn_to_resonance_matrix_element(sqrts, *type_res_1, *type_res_2);
       if (matrix_element <= 0.) {
         continue;
       }
@@ -203,7 +203,7 @@ CollisionBranchList ScatterActionNucleonNucleon::two_to_two_inel(
        * Integrate over the allowed resonance mass range. */
 
       const double resonance_integral =
-                    type_res_1->iso_multiplet()->get_integral_DR(srts);
+                    type_res_1->iso_multiplet()->get_integral_DR(sqrts);
 
       /** Cross section for 2->2 process with one resonance in final state.
        * Based on Eq. (51) in \iref{Weil:2013mya}. */

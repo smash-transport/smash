@@ -59,6 +59,7 @@ TEST(create_type_list) {
 
   COMPARE(ParticleType::list_all().size(), 20u);  // 12 given explicitly + 8 antiparticles
 
+  // pi0
   ParticleTypePtr type = &ParticleType::find(0x111);
   COMPARE(type->mass(), 0.135f);
   COMPARE(type->width_at_pole(), -1.f);
@@ -69,6 +70,7 @@ TEST(create_type_list) {
   COMPARE(type->isospin3(), 0);
   COMPARE(type->isospin3_rel(), 0.f);
 
+  // pi+
   type = &ParticleType::find(0x211);
   COMPARE(type->mass(), 0.1396f);
   COMPARE(type->width_at_pole(), -1.f);
@@ -79,6 +81,7 @@ TEST(create_type_list) {
   COMPARE(type->isospin3(), 2);
   COMPARE(type->isospin3_rel(), 1.f);
 
+  // rho0
   type = &ParticleType::find(0x113);
   COMPARE(type->mass(), 0.7755f);
   COMPARE(type->width_at_pole(), .149f);
@@ -89,6 +92,7 @@ TEST(create_type_list) {
   COMPARE(type->isospin3(), 0);
   COMPARE(type->isospin3_rel(), 0.f);
 
+  // anti-Delta-
   type = &ParticleType::find(-0x1114);
   COMPARE(type->mass(), 1.232f);
   COMPARE(type->width_at_pole(), .117f);
@@ -99,6 +103,7 @@ TEST(create_type_list) {
   COMPARE(type->isospin3(), 3);
   COMPARE(type->isospin3_rel(), 1.f);
 
+  // proton
   type = &ParticleType::find(0x2212);
   COMPARE(type->mass(), .9383f);
   COMPARE(type->width_at_pole(), -1.f);
@@ -109,6 +114,7 @@ TEST(create_type_list) {
   COMPARE(type->isospin3(), 1);
   COMPARE(type->isospin3_rel(), 1.f);
 
+  // neutron
   type = &ParticleType::find(0x2112);
   COMPARE(type->mass(), .9396f);
   COMPARE(type->width_at_pole(), -1.f);
@@ -118,6 +124,17 @@ TEST(create_type_list) {
   COMPARE(type->isospin(), 1);
   COMPARE(type->isospin3(), -1);
   COMPARE(type->isospin3_rel(), -1.f);
+
+  // eta
+  type = &ParticleType::find(0x221);
+  COMPARE(type->mass(), .5479f);
+  COMPARE(type->width_at_pole(), 1.0e-6f);
+  COMPARE(type->pdgcode().dump(), 0x221u);
+  COMPARE(type->charge(), 0);
+  COMPARE(type->spin(), 0u);
+  COMPARE(type->isospin(), 0);
+  COMPARE(type->isospin3(), 0);
+  COMPARE(type->isospin3_rel(), 0.f);
 }
 
 TEST(list_all_iteration) {
@@ -140,8 +157,6 @@ TEST(exists) {
 //   COMPARE(   electron.isospin_total(),  0);
 //   COMPARE(     antimu.isospin_total(),  0);
 //   COMPARE(     photon.isospin_total(),  0);
-//   COMPARE(       pion.isospin_total(), +2);
-//   COMPARE(        eta.isospin_total(),  0);
 //   COMPARE(         K0.isospin_total(),  1);
 //   COMPARE(        K0L.isospin_total(),  1);
 //   COMPARE(        K0S.isospin_total(),  1);
@@ -151,8 +166,6 @@ TEST(exists) {
 //   COMPARE(     bPcbar.isospin_total(),  0);
 //   COMPARE(     eta_pr.isospin_total(),  0);
 //   COMPARE(      j_psi.isospin_total(),  0);
-//   COMPARE(     proton.isospin_total(),  1);
-//   COMPARE(  antidelta.isospin_total(),  3);
 //   COMPARE(      sigma.isospin_total(), +2);
 //   COMPARE(     lambda.isospin_total(),  0);
 //   COMPARE(     antixi.isospin_total(), +1);
