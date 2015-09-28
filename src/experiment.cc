@@ -80,7 +80,7 @@ namespace Smash {
 
 /* ExperimentBase carries everything that is needed for the evolution */
 std::unique_ptr<ExperimentBase> ExperimentBase::create(Configuration config,
-                                                       bf::path output_path) {
+                                                  const bf::path &output_path) {
   const auto &log = logger<LogArea::Experiment>();
   log.trace() << source_location;
   /*!\Userguide
@@ -251,7 +251,7 @@ std::ostream &operator<<(std::ostream &out, const Experiment<Modus> &e) {
  * \subpage pauliblocker
  */
 template <typename Modus>
-Experiment<Modus>::Experiment(Configuration config, bf::path output_path)
+Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     : parameters_(create_experiment_parameters(config)),
       density_param_(DensityParameters(parameters_)),
       modus_(config["Modi"], parameters_),

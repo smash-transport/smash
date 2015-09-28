@@ -21,7 +21,7 @@
 namespace Smash {
 
 template <OscarOutputFormat Format, int Contents>
-OscarOutput<Format, Contents>::OscarOutput(bf::path path, std::string name)
+OscarOutput<Format, Contents>::OscarOutput(const bf::path &path, std::string name)
     : file_{std::fopen((path / (name + ".oscar")).native().c_str(), "w")} {
   /*!\Userguide
    * \page input_oscar_particlelist Oscar_Particlelist
@@ -433,7 +433,7 @@ void OscarOutput<Format, Contents>::write_particledata(
 
 namespace {
 template <int Contents>
-std::unique_ptr<OutputInterface> create_select_format(bf::path path,
+std::unique_ptr<OutputInterface> create_select_format(const bf::path &path,
                                                       Configuration config,
                                                       std::string name) {
   const bool modern_format =
@@ -448,7 +448,7 @@ std::unique_ptr<OutputInterface> create_select_format(bf::path path,
 }
 }  // unnamed namespace
 
-std::unique_ptr<OutputInterface> create_oscar_output(bf::path path,
+std::unique_ptr<OutputInterface> create_oscar_output(const bf::path &path,
                                                      Configuration config) {
   if (config.has_value({"Oscar_Particlelist", "Enable"})) {
     auto subconfig = config["Oscar_Particlelist"];

@@ -35,7 +35,7 @@ namespace Smash {
  **/
 class DensityOutput : public OutputInterface {
  public:
-  DensityOutput(bf::path path, Configuration&& conf);
+  DensityOutput(const bf::path &path, Configuration&& conf);
   ~DensityOutput();
 
   /// writes the initial particle information of an event

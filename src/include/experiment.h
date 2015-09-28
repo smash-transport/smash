@@ -67,7 +67,7 @@ class ExperimentBase {
    * configuration itself is documented in \subpage input_general_
    */
   static std::unique_ptr<ExperimentBase> create(Configuration config,
-                                                bf::path output_path);
+                                                const bf::path &output_path);
 
   /**
    * Runs the experiment.
@@ -139,7 +139,7 @@ class Experiment : public ExperimentBase {
    *                remain were not used.
    * \param output_path The directory where the output files are written.
    */
-  explicit Experiment(Configuration config, bf::path output_path);
+  explicit Experiment(Configuration config, const bf::path &output_path);
 
   /** Reads particle type information and cross sections information and
    * does the initialization of the system
