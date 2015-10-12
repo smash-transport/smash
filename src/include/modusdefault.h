@@ -6,14 +6,13 @@
  *    GNU General Public License (GPLv3 or later)
  *
  */
+
 #ifndef SRC_INCLUDE_MODUSDEFAULT_H_
 #define SRC_INCLUDE_MODUSDEFAULT_H_
 
-#include <stdexcept>
-
 #include "forwarddeclarations.h"
 #include "grid.h"
-
+#include "outputinterface.h"
 #include "potentials.h"
 
 namespace Smash {

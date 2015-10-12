@@ -7,26 +7,11 @@
 #ifndef SRC_INCLUDE_EXPERIMENT_H_
 #define SRC_INCLUDE_EXPERIMENT_H_
 
-#include <boost/filesystem.hpp>
-#include <map>
-#include <memory>
-#include <stdexcept>
-#include <string>
-#include <vector>
-
 #include "actionfinderfactory.h"
 #include "chrono.h"
-#include "density.h"
-#include "experimentparameters.h"
-#include "forwarddeclarations.h"
-#include "outputinterface.h"
-#include "lattice.h"
-#include "particles.h"
 #include "pauliblocking.h"
 #include "potentials.h"
-#include "processbranch.h"
 #include "quantumnumbers.h"
-#include "random.h"
 
 namespace Smash {
 

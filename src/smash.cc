@@ -7,28 +7,16 @@
  *
  */
 
-#include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 
-#include <cfenv>
-#include <cstdio>
-#include <cstdlib>
 #include <getopt.h>
-#include <iterator>
-#include <list>
-#include <stdexcept>
-#include <string>
 
-#include "include/configuration.h"
 #include "include/decaymodes.h"
 #include "include/experiment.h"
 #include "include/filelock.h"
-#include "include/forwarddeclarations.h"
 #include "include/fpenvironment.h"
 #include "include/inputfunctions.h"
-#include "include/logging.h"
-#include "include/macros.h"
-#include "include/particletype.h"
+#include "include/random.h"
 /* build dependent variables */
 #include "include/config.h"
 

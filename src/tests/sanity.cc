@@ -12,7 +12,7 @@
 #include "../include/boxmodus.h"
 #include "../include/configuration.h"
 #include "../include/collidermodus.h"
-#include "../include/experiment.h"
+#include "../include/experimentparameters.h"
 #include "../include/modusdefault.h"
 #include "../include/spheremodus.h"
 

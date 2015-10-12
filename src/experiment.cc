@@ -9,32 +9,14 @@
 
 #include "include/experiment.h"
 
-#include <algorithm>
-#include <cinttypes>
-#include <cstdlib>
-#include <list>
-#include <string>
-#include <vector>
-
-#include "include/action.h"
 #include "include/actions.h"
 #include "include/boxmodus.h"
-#include "include/clock.h"
 #include "include/collidermodus.h"
-#include "include/configuration.h"
 #include "include/cxx14compat.h"
 #include "include/decayactionsfinder.h"
 #include "include/decayactionsfinderdilepton.h"
-#include "include/density.h"
-#include "include/forwarddeclarations.h"
-#include "include/grid.h"
 #include "include/listmodus.h"
-#include "include/logging.h"
-#include "include/macros.h"
-#include "include/pauliblocking.h"
-#include "include/potentials.h"
 #include "include/propagation.h"
-#include "include/random.h"
 #include "include/scatteractionsfinder.h"
 #include "include/spheremodus.h"
 /* Outputs */
