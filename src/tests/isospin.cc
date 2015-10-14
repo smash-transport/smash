@@ -37,8 +37,7 @@ static ScatterAction* set_up_action(const ParticleData &proj,
                                     const ParticleData &targ,
                                     CollisionBranchList &proc_list) {
   ScatterAction *act;
-  if (proj.pdgcode().iso_multiplet() == 0x1112 &&
-      targ.pdgcode().iso_multiplet() == 0x1112) {
+  if (proj.pdgcode().is_nucleon() && targ.pdgcode().is_nucleon()) {
     act = new ScatterActionNucleonNucleon(proj, targ, 0.);
   } else {
     act = new ScatterActionBaryonBaryon(proj, targ, 0.);

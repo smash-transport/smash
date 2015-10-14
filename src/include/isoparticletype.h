@@ -11,6 +11,7 @@
 #include <string>
 
 #include "particletype.h"
+#include "tabulation.h"
 
 namespace Smash {
 
@@ -72,6 +73,13 @@ class IsoParticleType {
    */
   static const IsoParticleType& find(const std::string &name);
 
+  /**
+   * Returns the IsoParticleType object for the given \p type.
+   *
+   * \note The complexity of the search is \f$\mathcal O(\log N)\f$.
+   */
+  static IsoParticleType* find(const ParticleType &type);
+
   /// \ingroup exception
   struct ParticleNotFoundFailure : public std::runtime_error {
     using std::runtime_error::runtime_error;
@@ -96,6 +104,12 @@ class IsoParticleType {
    */
   static void create_multiplet(const ParticleType &type);
 
+  /// Look up the tabulated resonance integral for the NN -> NR cross section.
+  double get_integral_NR(double sqrts);
+
+  /// Look up the tabulated resonance integral for the NN -> DR cross section.
+  double get_integral_DR(double sqrts);
+
  private:
   /// name of the multiplet
   std::string name_;
@@ -107,6 +121,11 @@ class IsoParticleType {
   unsigned int isospin_;
   /// list of states that are contained in the multiplet
   ParticleTypePtrList states_;
+
+  /* A tabulation for the NN -> NR and NN -> DR cross sections,
+   * where R is a resonance from this multiplet. */
+  TabulationPtr XS_NR_tabulation, XS_DR_tabulation;
+
   /**
    * Private version of the 'find' method that returns a non-const reference.
    */

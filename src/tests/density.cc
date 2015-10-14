@@ -36,8 +36,10 @@ TEST(directory_is_created) {
 TEST(init_particle_types) {
   ParticleType::create_type_list(
       "# NAME MASS[GEV] WIDTH[GEV] PDG\n"
-      "proton 0.938 0.0 2212\n"
-      "neutron 0.938 0.0 2112\n");
+      "N+ 0.938 0.0 2212\n"
+      "N0 0.938 0.0 2112\n"
+      "π⁺ 0.138 0.0  211\n"
+      "π⁰ 0.138 0.0  111\n");
 }
 
 static ParticleData create_proton(int id = -1) {
@@ -51,20 +53,19 @@ static ParticleData create_antiproton(int id = -1) {
 
 TEST(density_type) {
   //pions
-  PdgCode pi0("111");
-  PdgCode pi_plus("211");
-  PdgCode pi_minus("-211");
+  const ParticleType &pi_zero  = ParticleType::find(0x111);
+  const ParticleType &pi_plus  = ParticleType::find(0x211);
+  const ParticleType &pi_minus = ParticleType::find(-0x211);
+  // baryons
+  const ParticleType &proton = ParticleType::find(0x2212);
 
   // verify that pions are recognized as pions
-  COMPARE(density_factor(pi0, DensityType::Pion), 1.f);
-  COMPARE(density_factor(pi_plus, DensityType::Pion), 1.f);
+  COMPARE(density_factor(pi_zero,  DensityType::Pion), 1.f);
+  COMPARE(density_factor(pi_plus,  DensityType::Pion), 1.f);
   COMPARE(density_factor(pi_minus, DensityType::Pion), 1.f);
 
   // verify that pions are not recognized as baryons
-  COMPARE(density_factor(pi0, DensityType::Baryon), 0.f);
-
-  // baryons
-  PdgCode proton("2212");
+  COMPARE(density_factor(pi_zero, DensityType::Baryon), 0.f);
 
   // verify that protons are recognized as baryons
   COMPARE(density_factor(proton, DensityType::Baryon), 1.f);
@@ -74,7 +75,7 @@ TEST(density_type) {
 
   // verify that all are recognized as particles
   VERIFY(density_factor(proton,   DensityType::Hadron) == 1.f
-      && density_factor(pi0,      DensityType::Hadron) == 1.f
+      && density_factor(pi_zero,  DensityType::Hadron) == 1.f
       && density_factor(pi_plus,  DensityType::Hadron) == 1.f
       && density_factor(pi_minus, DensityType::Hadron) == 1.f
       );

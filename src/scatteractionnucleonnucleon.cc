@@ -12,7 +12,7 @@
 #include "include/angles.h"
 #include "include/clebschgordan.h"
 #include "include/cxx14compat.h"
-#include "include/integrate.h"
+#include "include/isoparticletype.h"
 #include "include/kinematics.h"
 #include "include/parametrizations.h"
 #include "include/random.h"
@@ -104,7 +104,7 @@ CollisionBranchList ScatterActionNucleonNucleon::two_to_two_inel(
   const auto &log = logger<LogArea::ScatterAction>();
   CollisionBranchList process_list;
   const double s = mandelstam_s();
-  const double srts = sqrt_s();
+  const double sqrts = sqrt_s();
 
   /* First: Find N N -> N R channels. */
   /* Loop over all baryon resonances. */
@@ -127,7 +127,7 @@ CollisionBranchList ScatterActionNucleonNucleon::two_to_two_inel(
 
       /* Integration limits. */
       const double lower_limit = type_resonance->minimum_mass();
-      const double upper_limit = srts - second_type->mass();
+      const double upper_limit = sqrts - second_type->mass();
       /* Check the available energy (requiring it to be a little above the
       * threshold, because the integration will not work if it's too close). */
       if (upper_limit - lower_limit < 1E-3) {
@@ -136,7 +136,7 @@ CollisionBranchList ScatterActionNucleonNucleon::two_to_two_inel(
 
       /* Calculate matrix element. */
       const float matrix_element =
-            nn_to_resonance_matrix_element(srts, *type_resonance, *second_type);
+          nn_to_resonance_matrix_element(sqrts, *type_resonance, *second_type);
       if (matrix_element <= 0.) {
         continue;
       }
@@ -144,27 +144,8 @@ CollisionBranchList ScatterActionNucleonNucleon::two_to_two_inel(
       /* Calculate resonance production cross section
        * using the Breit-Wigner distribution as probability amplitude.
        * Integrate over the allowed resonance mass range. */
-
-      const int res_id = type_resonance->pdgcode().iso_multiplet();
-      if (XS_NR_tabulation[res_id] == nullptr) {
-        // initialize tabulation, we need one per resonance multiplet
-        /* TODO(weil): Move this lazy init to a global initialization function,
-         * in order to avoid race conditions in multi-threading. */
-        Integrator integrate;
-        XS_NR_tabulation[res_id] = make_unique<Tabulation>(
-              type_resonance->minimum_mass() + second_type->mass(), 2.f, 100,
-              [&](float sqrts) {
-                return integrate(type_resonance->minimum_mass(),
-                                  sqrts - second_type->mass(),
-                                  [&](float m) {
-                                    return spec_func_integrand_1res(m, sqrts,
-                                                            second_type->mass(),
-                                                            *type_resonance);
-                                  });
-              });
-      }
       const double resonance_integral =
-                    XS_NR_tabulation[res_id]->get_value_linear(srts);
+                    type_resonance->iso_multiplet()->get_integral_NR(sqrts);
 
       /** Cross section for 2->2 process with one resonance in final state.
        * Based on Eq. (46) in \iref{Weil:2013mya}. */
@@ -203,7 +184,7 @@ CollisionBranchList ScatterActionNucleonNucleon::two_to_two_inel(
 
       /* Integration limits. */
       const double lower_limit = type_res_1->minimum_mass();
-      const double upper_limit = srts - type_res_2->minimum_mass();
+      const double upper_limit = sqrts - type_res_2->minimum_mass();
       /* Check the available energy (requiring it to be a little above the
       * threshold, because the integration will not work if it's too close). */
       if (upper_limit - lower_limit < 1E-3) {
@@ -212,7 +193,7 @@ CollisionBranchList ScatterActionNucleonNucleon::two_to_two_inel(
 
       /* Calculate matrix element. */
       const float matrix_element =
-            nn_to_resonance_matrix_element(srts, *type_res_1, *type_res_2);
+            nn_to_resonance_matrix_element(sqrts, *type_res_1, *type_res_2);
       if (matrix_element <= 0.) {
         continue;
       }
@@ -221,28 +202,8 @@ CollisionBranchList ScatterActionNucleonNucleon::two_to_two_inel(
        * using the Breit-Wigner distribution as probability amplitude.
        * Integrate over the allowed resonance mass range. */
 
-      const int res_id = type_res_1->pdgcode().iso_multiplet();
-      if (XS_DR_tabulation[res_id] == nullptr) {
-        // initialize tabulation, we need one per resonance multiplet
-        /* TODO(weil): Move this lazy init to a global initialization function,
-         * in order to avoid race conditions in multi-threading. */
-        Integrator2d integrate(1E4);
-        XS_DR_tabulation[res_id] = make_unique<Tabulation>(
-              type_res_1->minimum_mass() + type_res_2->minimum_mass(),
-              2.5f, 100,
-              [&](float sqrts) {
-                return integrate(type_res_1->minimum_mass(),
-                                 sqrts - type_res_2->minimum_mass(),
-                                 type_res_2->minimum_mass(),
-                                 sqrts - type_res_1->minimum_mass(),
-                                 [&](float m1, float m2) {
-                                    return spec_func_integrand_2res(sqrts,
-                                              m1, m2, *type_res_1, *type_res_2);
-                                 });
-              });
-      }
       const double resonance_integral =
-                    XS_DR_tabulation[res_id]->get_value_linear(srts);
+                    type_res_1->iso_multiplet()->get_integral_DR(sqrts);
 
       /** Cross section for 2->2 process with one resonance in final state.
        * Based on Eq. (51) in \iref{Weil:2013mya}. */
@@ -281,8 +242,8 @@ void ScatterActionNucleonNucleon::sample_angles(
       = get_t_range<double>(cms_energy, nucleon_mass, nucleon_mass,
                             mass_a, mass_b);
   Angles phitheta;
-  if (p_a->pdgcode().iso_multiplet() == 0x1112 &&
-      p_b->pdgcode().iso_multiplet() == 0x1112 && !isotropic_) {
+  if (p_a->pdgcode().is_nucleon() &&
+      p_b->pdgcode().is_nucleon() && !isotropic_) {
     /** NN->NN: Choose angular distribution according to Cugnon parametrization,
      * see \iref{Cugnon:1996kh}. */
     double bb, a, plab = plab_from_s(mandelstam_s());
@@ -302,8 +263,8 @@ void ScatterActionNucleonNucleon::sample_angles(
     // determine scattering angles in center-of-mass frame
     phitheta = Angles(2.*M_PI*Random::canonical(),
                       1. - 2.*(t-t_range[0])/(t_range[1]-t_range[0]));
-  } else if (p_a->pdgcode().iso_multiplet() == 0x1114 &&
-             p_b->pdgcode().iso_multiplet() == 0x1112 && !isotropic_) {
+  } else if (p_a->pdgcode().is_Delta() && p_b->pdgcode().is_nucleon()
+             && !isotropic_) {
     /** NN->NDelta: Sample scattering angles in center-of-mass frame from an
      * anisotropic angular distribution, using the same distribution as for
      * elastic pp scattering, as suggested in \iref{Cugnon:1996kh}. */
@@ -315,8 +276,8 @@ void ScatterActionNucleonNucleon::sample_angles(
     }
     phitheta = Angles(2.*M_PI*Random::canonical(),
                       1. - 2.*(t-t_range[0])/(t_range[1]-t_range[0]));
-  } else if (p_b->pdgcode().iso_multiplet() == 0x1112 && !isotropic_ &&
-             (p_a->pdgcode().is_Nstar() || p_a->pdgcode().is_Deltastar())) {
+  } else if (p_b->pdgcode().is_nucleon() && !isotropic_ &&
+             (p_a->type().is_Nstar() || p_a->type().is_Deltastar())) {
     /** NN->NR: Fit to HADES data, see \iref{Agakishiev:2014wqa}. */
     const std::array<float, 4> p { 1.46434, 5.80311, -6.89358, 1.94302 };
     const double a = p[0] + mass_a * (p[1] + mass_a * (p[2] + mass_a * p[3]));

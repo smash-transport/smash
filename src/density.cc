@@ -14,16 +14,16 @@
 
 namespace Smash {
 
-float density_factor(const PdgCode pdg, DensityType dens_type) {
+float density_factor(const ParticleType &type, DensityType dens_type) {
   switch (dens_type) {
     case DensityType::Hadron:
-      return pdg.is_hadron() ? 1.f : 0.f;
+      return type.is_hadron() ? 1.f : 0.f;
     case DensityType::Baryon:
-      return static_cast<float>(pdg.baryon_number());
+      return static_cast<float>(type.baryon_number());
     case DensityType::BaryonicIsospin:
-      return pdg.is_baryon() ? pdg.isospin3_rel() : 0.f;
+      return type.is_baryon() ? type.isospin3_rel() : 0.f;
     case DensityType::Pion:
-      return pdg.is_pion() ? 1.f : 0.f;
+      return type.pdgcode().is_pion() ? 1.f : 0.f;
     default:
       return 0.f;
   }
@@ -74,7 +74,7 @@ std::pair<double, ThreeVector> rho_eckart_impl(const ThreeVector &r,
   std::array<FourVector, 4> jmu_pos, jmu_neg;
 
   for (const auto &p : plist) {
-    const float dens_factor = density_factor(p.pdgcode(), dens_type);
+    const float dens_factor = density_factor(p.type(), dens_type);
     if (std::abs(dens_factor) < really_small) {
       continue;
     }
@@ -152,7 +152,7 @@ void update_density_lattice(DensityLattice* lat,
   // Add particles to lattice jmus
   lat->reset();
   for (const auto &part : particles) {
-    const float dens_factor = density_factor(part.pdgcode(), dens_type);
+    const float dens_factor = density_factor(part.type(), dens_type);
     if (std::abs(dens_factor) < really_small) {
       continue;
     }

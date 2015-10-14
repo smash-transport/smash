@@ -10,7 +10,9 @@
 #include <algorithm>
 
 #include "include/forwarddeclarations.h"
+#include "include/integrate.h"
 #include "include/logging.h"
+#include "include/resonances.h"
 
 namespace Smash {
 
@@ -97,6 +99,12 @@ const ParticleTypePtr IsoParticleType::find_state(
   return *found;
 }
 
+IsoParticleType* IsoParticleType::find(const ParticleType &type) {
+  std::string multiname = multiplet_name(type.name());
+  IsoParticleType &multiplet = find_private(multiname);
+  return &multiplet;
+}
+
 void IsoParticleType::create_multiplet(const ParticleType &type) {
   const auto &log = logger<LogArea::ParticleType>();
 
@@ -120,5 +128,53 @@ void IsoParticleType::create_multiplet(const ParticleType &type) {
   IsoParticleType &multiplet = find_private(multiname);
   multiplet.add_state(type);
 }
+
+
+double IsoParticleType::get_integral_NR(double sqrts) {
+  if (XS_NR_tabulation == nullptr) {
+    // initialize tabulation
+    /* TODO(weil): Move this lazy init to a global initialization function,
+      * in order to avoid race conditions in multi-threading. */
+    Integrator integrate;
+    ParticleTypePtr type_res = states_[0];
+    ParticleTypePtr nuc = IsoParticleType::find("N").get_states()[0];
+    XS_NR_tabulation = make_unique<Tabulation>(
+          type_res->minimum_mass() + nuc->mass(), 2.f, 100,
+          [&](float srts) {
+            return integrate(type_res->minimum_mass(), srts - nuc->mass(),
+                             [&](float m) {
+                               return spec_func_integrand_1res(m, srts,
+                                                        nuc->mass(), *type_res);
+                             });
+          });
+  }
+  return XS_NR_tabulation->get_value_linear(sqrts);
+}
+
+
+double IsoParticleType::get_integral_DR(double sqrts) {
+  if (XS_DR_tabulation == nullptr) {
+    // initialize tabulation
+    /* TODO(weil): Move this lazy init to a global initialization function,
+      * in order to avoid race conditions in multi-threading. */
+    Integrator2d integrate(1E4);
+    ParticleTypePtr type_res = states_[0];
+    ParticleTypePtr Delta = IsoParticleType::find("Δ").get_states()[0];
+    XS_DR_tabulation = make_unique<Tabulation>(
+          type_res->minimum_mass() + Delta->minimum_mass(), 2.5f, 100,
+          [&](float srts) {
+            return integrate(type_res->minimum_mass(),
+                             srts - Delta->minimum_mass(),
+                             Delta->minimum_mass(),
+                             srts - type_res->minimum_mass(),
+                             [&](float m1, float m2) {
+                               return spec_func_integrand_2res(srts, m1, m2,
+                                                            *type_res, *Delta);
+                             });
+          });
+  }
+  return XS_DR_tabulation->get_value_linear(sqrts);
+}
+
 
 }  // namespace Smash

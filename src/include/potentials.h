@@ -51,13 +51,13 @@ class Potentials {
    *            calculation. If the distance between particle and calculation
    *            point r, \f$ |r-r_i| > r_{cut} \f$ then particle input
    *            to density will be ignored.
-   * \param[in] acts_on pdg code of particle on which potential is going to act
+   * \param[in] acts_on Type of particle on which potential is going to act
    *
    * \fpPrecision Why \c double?
    **/
   VIRTUAL_FOR_TESTS
   double potential(const ThreeVector &r, const ParticleList &plist,
-                                         const PdgCode acts_on) const;
+                                         const ParticleType &acts_on) const;
 
   /** Evaluates potential gradient at point r. Potential is always taken in
    * the local Eckart rest frame, but point r is in the computational frame.
@@ -67,12 +67,12 @@ class Potentials {
    *            calculation. If the distance between particle and calculation
    *            point r, \f$ |r-r_i| > r_{cut} \f$ then particle input
    *            to density will be ignored.
-   * \param[in] acts_on pdg code of particle on which potential is going to act
+   * \param[in] acts_on Type of particle on which potential is going to act
    **/
   VIRTUAL_FOR_TESTS
   ThreeVector potential_gradient(const ThreeVector &r,
                                  const ParticleList &plist,
-                                 const PdgCode acts_on) const;
+                                 const ParticleType &acts_on) const;
 
   /// Is Skyrme potential on?
   VIRTUAL_FOR_TESTS

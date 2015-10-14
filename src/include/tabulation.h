@@ -47,13 +47,6 @@ class Tabulation {
   const float x_min_, inv_dx_;
 };
 
-
-// a map for storing the tabulation used for the N N -> N R cross sections
-static std::map<int, TabulationPtr> XS_NR_tabulation;
-
-// a map for storing the tabulation used for the N N -> Delta R cross sections
-static std::map<int, TabulationPtr> XS_DR_tabulation;
-
 }  // namespace Smash
 
 #endif  // SRC_INCLUDE_TABULATION_H_
