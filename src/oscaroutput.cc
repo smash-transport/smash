@@ -21,7 +21,8 @@
 namespace Smash {
 
 template <OscarOutputFormat Format, int Contents>
-OscarOutput<Format, Contents>::OscarOutput(const bf::path &path, std::string name)
+OscarOutput<Format, Contents>::OscarOutput(const bf::path &path,
+                                           std::string name)
     : file_{std::fopen((path / (name + ".oscar")).native().c_str(), "w")} {
   /*!\Userguide
    * \page input_oscar_particlelist Oscar_Particlelist
