@@ -132,6 +132,12 @@ class ParticleType {
   /// \copydoc PdgCode::baryon_number
   int baryon_number() const { return pdgcode_.baryon_number(); }
 
+  /// \copydoc PdgCode::is_nucleon
+  bool is_nucleon() const { return pdgcode_.is_nucleon(); }
+
+  /// \copydoc PdgCode::is_Delta
+  bool is_Delta() const { return pdgcode_.is_Delta(); }
+
   /// Is this a nucleon resonance (N*)?
   inline bool is_Nstar() const {
     return is_baryon() && isospin() == 1 && !pdgcode_.is_nucleon() &&
