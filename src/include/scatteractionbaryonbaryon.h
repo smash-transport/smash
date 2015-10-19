@@ -62,9 +62,9 @@ class ScatterActionBaryonBaryon : public ScatterAction {
    *
    * \return Matrix amplitude squared \f$ |\mathcal{M}(\sqrt{s})|^2/16\pi \f$.
    */
-  float nn_to_resonance_matrix_element(const double srts,
-                                       const ParticleType &type_a,
-                                       const ParticleType &type_b) const;
+  static float nn_to_resonance_matrix_element(const double srts,
+                                              const ParticleType &type_a,
+                                              const ParticleType &type_b);
 
   /**
    * \ingroup logging

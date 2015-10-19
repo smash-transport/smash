@@ -105,7 +105,7 @@ CollisionBranchList ScatterActionBaryonBaryon::bar_bar_to_nuc_nuc(
 
 
 float ScatterActionBaryonBaryon::nn_to_resonance_matrix_element(double sqrts,
-      const ParticleType &type_a, const ParticleType &type_b) const {
+      const ParticleType &type_a, const ParticleType &type_b) {
   const float spin_factor = (type_a.spin()+1) * (type_b.spin()+1);
   const float m_plus = type_a.mass() + type_b.mass();
   const float m_minus = type_a.mass() - type_b.mass();
