@@ -53,7 +53,7 @@ class ParticleData {
   float pole_mass() const { return type_->mass(); }
   /** Returns the particle's effective mass
    * (as determined from the 4-momentum, possibly "off-shell"). */
-  float effective_mass() const { return momentum().abs(); }
+  float effective_mass() const;
 
   /**
    * Return the ParticleType object associated to this particle.
@@ -124,14 +124,18 @@ class ParticleData {
   /// Return formation time of the particle
   const float &formation_time() const { return formation_time_; }
   /// Set the formation time
-  void set_formation_time(const float &form_time) { formation_time_ = form_time; }
-  
+  void set_formation_time(const float &form_time) {
+    formation_time_ = form_time;
+  }
+
   /// Return cross section scaling factor
-  const float &cross_section_scaling_factor() const { 
-	return cross_section_scaling_factor_;}
+  const float &cross_section_scaling_factor() const {
+    return cross_section_scaling_factor_;
+  }
   /// Set the cross_section_scaling_factor
   void set_cross_section_scaling_factor(const float &xsec_scal) {
-	cross_section_scaling_factor_ = xsec_scal; }
+    cross_section_scaling_factor_ = xsec_scal;
+  }
 
   /// get the velocity 3-vector
   ThreeVector velocity() const { return momentum_.velocity(); }
@@ -230,9 +234,9 @@ class ParticleData {
 
   /**
    * A reference to the ParticleType object for this particle (this contains
-   * all the static information).
+   * all the static information). Default-initialized with an invalid index.
    */
-  ParticleTypePtr type_ = nullptr;
+  ParticleTypePtr type_;
 
   static_assert(sizeof(ParticleTypePtr) == 2,
                 "");  // this leaves us two Bytes padding to use for "free"
@@ -251,12 +255,12 @@ class ParticleData {
   FourVector momentum_;
   /// position in space: x0, x1, x2, x3 as t, x, y, z
   FourVector position_;
-  /** Formation time at which the particle is fully formed 
+  /** Formation time at which the particle is fully formed
    *  given as an absolute value in the computational frame
    */
   float formation_time_ = 0.0;
   /// cross section scaling factor for unformed particles
-  float cross_section_scaling_factor_ = 1.0; 
+  float cross_section_scaling_factor_ = 1.0;
 };
 
 /**\ingroup logging

@@ -21,26 +21,15 @@ TEST(init_particle_types) {
       "# NAME MASS[GEV] WIDTH[GEV] PDG\n"
       "π⁺  0.138 0.0   211\n"
       "π⁰  0.138 0.0   111\n"
-      "p   0.938 0.0   2212\n"
-      "n   0.938 0.0   2112\n"
+      "N⁺  0.938 0.0   2212\n"
+      "N⁰  0.938 0.0   2112\n"
       "Δ⁺⁺ 1.232 0.117 2224\n"
       "Δ⁺  1.232 0.117 2214\n"
       "Δ⁰  1.232 0.117 2114\n"
       "Δ⁻  1.232 0.117 1114\n");
   DecayModes::load_decaymodes(
-    "2224                  # Δ⁺⁺ →\n"
-    "1.     1 2212 211     #   p π⁺\n"
-    "\n"
-    "2214                  # Δ⁺ →\n"
-    "0.6667 1 2212 111     #   p π⁰\n"
-    "0.3333 1 2112 211     #   n π⁺\n"
-    "\n"
-    "2114                  # Δ⁰ →\n"
-    "0.3333 1 2212 -211    #   p π⁻\n"
-    "0.6667 1 2112 111     #   n π⁰\n"
-    "\n"
-    "1114                  # Δ⁻ →\n"
-    "1.     1 2112 -211    #   n π⁻\n");
+    "Δ          \n"
+    "1.  1  N π \n");
 }
 
 
@@ -48,8 +37,7 @@ static ScatterAction* set_up_action(const ParticleData &proj,
                                     const ParticleData &targ,
                                     CollisionBranchList &proc_list) {
   ScatterAction *act;
-  if (proj.pdgcode().iso_multiplet() == 0x1112 &&
-      targ.pdgcode().iso_multiplet() == 0x1112) {
+  if (proj.pdgcode().is_nucleon() && targ.pdgcode().is_nucleon()) {
     act = new ScatterActionNucleonNucleon(proj, targ, 0.);
   } else {
     act = new ScatterActionBaryonBaryon(proj, targ, 0.);
@@ -81,7 +69,7 @@ TEST(NN_NDelta) {
   ParticleData p2 = ParticleData{*proton, 2};
   ParticleData n  = ParticleData{*neutron,3};
 
-  const double ptot=0.7;
+  const double ptot = 0.4;
   p1.set_4momentum(proton->mass(), 0., 0., ptot);
   p2.set_4momentum(proton->mass(), 0., 0., -ptot);
 
@@ -109,7 +97,7 @@ TEST(NN_NDelta) {
   FUZZY_COMPARE(proc_list_pp[0]->weight(),proc_list_pn[0]->weight());    // ratio 1:1
   FUZZY_COMPARE(proc_list_pp[0]->weight(),proc_list_np[0]->weight());    // ratio 1:1
 
-//   FUZZY_COMPARE(act_pp->weight(),2*act_pn->weight());                  // ratio 2:1
+  FUZZY_COMPARE(act_pp->cross_section(), 2*act_pn->cross_section());     // ratio 2:1
 
   delete act_pp;
   delete act_pn;
@@ -156,7 +144,7 @@ TEST(NDelta_NN) {
   FUZZY_COMPARE(proc_list_Dp[0]->weight(),proc_list_Dn[0]->weight());     // ratio 1:1
   FUZZY_COMPARE(3*proc_list_Dp[0]->weight(),proc_list_DDn[0]->weight());  // ratio 1:3
 
-//   FUZZY_COMPARE(2*act_Dp->weight(),act_Dn->weight());                  // ratio 1:2
+  FUZZY_COMPARE(2*act_Dp->cross_section(), act_Dn->cross_section());      // ratio 1:2
 
   delete act_Dp;
   delete act_Dn;

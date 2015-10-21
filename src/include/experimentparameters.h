@@ -30,6 +30,15 @@ struct ExperimentParameters {
   bool need_intermediate_output() const {
     return labclock.multiple_is_in_next_tick(output_interval);
   }
+  /// sets the time step such that it ends on the next output time
+  void set_timestep_for_next_output() {
+    labclock.end_tick_on_multiple(output_interval);
+  }
+  /// returns if the current time is exactly an output time
+  bool is_output_time() const {
+    return need_intermediate_output() &&
+           labclock.next_time() < labclock.next_multiple(output_interval);
+  }
   /// replaces the current clock with a new one.
   void reset_clock(const Clock initial_clock) {
     labclock = std::move(initial_clock);
@@ -46,13 +55,10 @@ struct ExperimentParameters {
   const float output_interval;
   /// number of test particle
   int testparticles;
-  /** width of gaussian Wigner density of particles
-   *
-   * \fpPrecision Why \c double?
-   */
-  double gaussian_sigma;
+  /// width of gaussian Wigner density of particles
+  float gaussian_sigma;
   /// distance at which gaussian is cut, i.e. set to zero, IN SIGMA (not fm)
-  double gauss_cutoff_in_sigma;
+  float gauss_cutoff_in_sigma;
 };
 
 }  // namespace Smash

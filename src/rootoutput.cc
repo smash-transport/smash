@@ -17,21 +17,27 @@
 
 namespace Smash {
 
+RootOutput::RootOutput(const bf::path &path, const std::string &name)
+    : base_path_(std::move(path)),
+      root_out_file_(
+          new TFile((base_path_ / (name + ".root")).native().c_str(), "NEW")),
+      output_counter_(0),
+      write_collisions_(true), write_particles_(false),
+      autosave_frequency_(1000) {
+  init_trees();
+}
+
 /**
- * RootOuput constructor. Creates file smash_run.root in run directory
- * and TTree with the name "particles" in it.
+ * RootOuput constructor. Creates file smash_run.root in the output directory.
  */
-RootOutput::RootOutput(bf::path path, Configuration&& conf)
+RootOutput::RootOutput(const bf::path &path, Configuration&& conf)
     : base_path_(std::move(path)),
       root_out_file_(
           new TFile((base_path_ / "smash_run.root").native().c_str(), "NEW")),
       output_counter_(0),
-      write_collisions_(conf.has_value({"Write_Collisions"})
-                                 ? conf.take({"Write_Collisions"}) : false),
-      write_particles_(conf.has_value({"Write_Particles"})
-                                 ? conf.take({"Write_Particles"}) : true),
-      autosave_frequency_(conf.has_value({"Autosave_Frequency"})
-                               ? conf.take({"Autosave_Frequency"}) : 1000) {
+      write_collisions_(conf.take({"Write_Collisions"}, false)),
+      write_particles_(conf.take({"Write_Particles"}, true)),
+      autosave_frequency_(conf.take({"Autosave_Frequency"}, 1000)) {
   /*!\Userguide
    * \page input_root ROOT
    * Enables output in a ROOT format. The latter is a structured binary format
@@ -78,13 +84,6 @@ RootOutput::RootOutput(bf::path path, Configuration&& conf)
    * enough to read, write root-file and understand its view in TBrowser.
    *
    * Producing ROOT output requires ROOT installed (see http://root.cern.ch).
-   * SMASH philosophy is being a self-contained software, so by default SMASH
-   * does not need ROOT to compile and run. To produce ROOT output one has to
-   * compile SMASH in a special way:
-   * \code
-   * cmake -D USE_ROOT=ON <source_dir>
-   * make
-   * \endcode
    *
    * SMASH produces one root file per run: \c smash_run.root. This file
    * contains TTree called \c particles and a TTree \c collisions.
@@ -118,6 +117,10 @@ RootOutput::RootOutput(bf::path path, Configuration&& conf)
    * See also \ref collisions_output_in_box_modus_.
    **/
 
+  init_trees();
+}
+
+void RootOutput::init_trees() {
   if (write_particles_) {
     particles_tree_ = new TTree("particles", "particles");
 
@@ -219,8 +222,8 @@ void RootOutput::at_eventend(const Particles &/*particles*/,
 void RootOutput::at_interaction(const ParticleList &incoming,
                                 const ParticleList &outgoing,
                                 const double /*density*/,
-                                const double /*total_cross_section*/
-                                ProcessBranch::ProcessType /*process_type*/) {
+                                const double /*total_cross_section*/,
+                                ProcessType /*process_type*/) {
   if (write_collisions_) {
     collisions_to_tree(incoming, outgoing);
   }
@@ -236,7 +239,7 @@ void RootOutput::particles_to_tree(const Particles &particles,
   tcounter = output_counter_;
   ev = event_number;
 
-  for (const auto &p : particles.data()) {
+  for (const auto &p : particles) {
     // Buffer full - flush to tree, else fill with particles
     if (i >= max_buffer_size_) {
       npart = max_buffer_size_;

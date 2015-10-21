@@ -21,7 +21,8 @@
 namespace Smash {
 
 template <OscarOutputFormat Format, int Contents>
-OscarOutput<Format, Contents>::OscarOutput(bf::path path, std::string name)
+OscarOutput<Format, Contents>::OscarOutput(const bf::path &path,
+                                           std::string name)
     : file_{std::fopen((path / (name + ".oscar")).native().c_str(), "w")} {
   /*!\Userguide
    * \page input_oscar_particlelist Oscar_Particlelist
@@ -118,16 +119,16 @@ OscarOutput<Format, Contents>::OscarOutput(bf::path path, std::string name)
    */
 
   if (Format == OscarFormat2013) {
-    std::fprintf(file_.get(), "#!OSCAR2013 %s %s ", name.c_str(),
-                 VERSION_MAJOR);
-    std::fprintf(file_.get(), "t x y z mass p0 px py pz pdg ID\n");
+    std::fprintf(file_.get(),
+                 "#!OSCAR2013 %s t x y z mass p0 px py pz pdg ID\n",
+                 name.c_str());
     std::fprintf(file_.get(),
                  "# Units: fm fm fm fm GeV GeV GeV GeV GeV none none\n");
+    std::fprintf(file_.get(), "# %s\n", VERSION_MAJOR);
   } else {
     if (name == "particle_lists") {
-      name = "final_id_p_x";  // FIXME: why is this necessary? I.e. what does
-                              // the string on the second line tell, and why
-                              // does it have to be this specific string?
+      name = "final_id_p_x";  // This is necessary because OSCAR199A requires
+                              // this particular string for particle output.
     }
     std::fprintf(file_.get(), "# OSC1999A\n# %s\n# %s\n", name.c_str(),
                  VERSION_MAJOR);
@@ -175,7 +176,7 @@ void OscarOutput<Format, Contents>::at_eventend(const Particles &particles,
       write(particles);
     }
     // Comment end of an event
-    std::fprintf(file_.get(), "# event %i end\n", event_number + 1);
+    std::fprintf(file_.get(), "# event %i end 0\n", event_number + 1);
   } else {
     // OSCAR line prefix : initial particles; final particles; event id
     // Last block of an event: initial = number of particles, final = 0
@@ -204,7 +205,7 @@ void OscarOutput<Format, Contents>::at_interaction(
     if (Format == OscarFormat2013) {
       std::fprintf(
           file_.get(),
-          "# interaction in %zu out %zu rho %12.7f weight %12.7f type %5i \n",
+          "# interaction in %zu out %zu rho %12.7f weight %12.7g type %5i \n",
           incoming_particles.size(), outgoing_particles.size(), density,
           total_cross_section, static_cast<int>(process_type));
     } else {
@@ -217,7 +218,8 @@ void OscarOutput<Format, Contents>::at_interaction(
        */
       std::fprintf(file_.get(), "%zu %zu %12.7f %12.7f %5i \n",
                    incoming_particles.size(), outgoing_particles.size(),
-                   density, total_cross_section, static_cast<int>(process_type));
+                   density, total_cross_section,
+                   static_cast<int>(process_type));
     }
     for (const auto &p : incoming_particles) {
       write_particledata(p);
@@ -306,8 +308,9 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
    * standard. Format specifics are the following:\n
    * **Header**
    * \code
-   * #!OSCAR2013 final_particle_list t x y z mass p0 px py pz pdg ID
+   * #!OSCAR2013 particle_lists t x y z mass p0 px py pz pdg ID
    * # Units: fm fm fm fm GeV GeV GeV GeV GeV none none
+   * # SMASH_version
    * \endcode
    *
    * **Output block header**\n
@@ -327,7 +330,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
    *
    * **Event end line**
    * \code
-   * # event ev_num end
+   * # event ev_num end 0
    * \endcode
    *
    * \page format_oscar_collisions Oscar collisions format
@@ -374,7 +377,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
    * \endcode
    * **Event end line**
    * \code
-   * # event ev_num end
+   * # event ev_num end 0
    * \endcode
    *
    * Oscar2013
@@ -384,6 +387,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
    * \code
    * #!OSCAR2013 full_event_history t x y z mass p0 px py pz pdg ID
    * # Units: fm fm fm fm GeV GeV GeV GeV GeV none none
+   * # SMASH_version
    * \endcode
    *
    * **Output block header**\n
@@ -407,32 +411,30 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
    *
    * **Event end line**
    * \code
-   * # event ev_num end
+   * # event ev_num end 0
    * \endcode
    **/
 template <OscarOutputFormat Format, int Contents>
 void OscarOutput<Format, Contents>::write_particledata(
     const ParticleData &data) {
+  const FourVector pos = data.position();
+  const FourVector mom = data.momentum();
   if (Format == OscarFormat2013) {
-    std::fprintf(
-        file_.get(), "%g %g %g %g %g %g %g %g %g %s %i\n", data.position().x0(),
-        data.position().x1(), data.position().x2(), data.position().x3(),
-        std::sqrt(data.momentum().Dot(data.momentum())), data.momentum().x0(),
-        data.momentum().x1(), data.momentum().x2(), data.momentum().x3(),
+    std::fprintf(file_.get(), "%g %g %g %g %g %.9g %.9g %.9g %.9g %s %i\n",
+        pos.x0(), pos.x1(), pos.x2(), pos.x3(),
+        data.effective_mass(), mom.x0(), mom.x1(), mom.x2(), mom.x3(),
         data.pdgcode().string().c_str(), data.id());
   } else {
-    std::fprintf(
-        file_.get(), "%i %s %i %g %g %g %g %g %g %g %g %g\n", data.id(),
-        data.pdgcode().string().c_str(), 0, data.momentum().x1(),
-        data.momentum().x2(), data.momentum().x3(), data.momentum().x0(),
-        std::sqrt(data.momentum().Dot(data.momentum())), data.position().x1(),
-        data.position().x2(), data.position().x3(), data.position().x0());
+    std::fprintf(file_.get(), "%i %s %i %g %g %g %g %g %g %g %g %g\n",
+        data.id(), data.pdgcode().string().c_str(), 0,
+        mom.x1(), mom.x2(), mom.x3(), mom.x0(), data.effective_mass(),
+        pos.x1(), pos.x2(), pos.x3(), pos.x0());
   }
 }
 
 namespace {
 template <int Contents>
-std::unique_ptr<OutputInterface> create_select_format(bf::path path,
+std::unique_ptr<OutputInterface> create_select_format(const bf::path &path,
                                                       Configuration config,
                                                       std::string name) {
   const bool modern_format =
@@ -447,7 +449,7 @@ std::unique_ptr<OutputInterface> create_select_format(bf::path path,
 }
 }  // unnamed namespace
 
-std::unique_ptr<OutputInterface> create_oscar_output(bf::path path,
+std::unique_ptr<OutputInterface> create_oscar_output(const bf::path &path,
                                                      Configuration config) {
   if (config.has_value({"Oscar_Particlelist", "Enable"})) {
     auto subconfig = config["Oscar_Particlelist"];
@@ -490,5 +492,6 @@ std::unique_ptr<OutputInterface> create_oscar_output(bf::path path,
   return {};  // return a nullptr to signify the end of OSCAR outputs in the
               // config file
 }
+
 
 }  // namespace Smash

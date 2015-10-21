@@ -21,13 +21,18 @@
 
 namespace Smash {
 
-BinaryOutputCollisions::BinaryOutputCollisions(bf::path path,
+BinaryOutputCollisions::BinaryOutputCollisions(const bf::path &path,
+                                               const std::string &name)
+    : BinaryOutputBase(std::fopen(
+          (path / (name + ".bin")).native().c_str(), "wb")),
+      print_start_end_(false) {
+}
+
+BinaryOutputCollisions::BinaryOutputCollisions(const bf::path &path,
                                                Configuration &&config)
     : BinaryOutputBase(std::fopen(
           ((path / "collisions_binary.bin")).native().c_str(), "wb")),
-      print_start_end_(config.has_value({"Print_Start_End"})
-                           ? config.take({"Print_Start_End"})
-                           : false) {
+      print_start_end_(config.take({"Print_Start_End"}, false)) {
   /*!\Userguide
    * \page input_binary_collisions Binary_collisions
    * Saves information about every collision, decay and box

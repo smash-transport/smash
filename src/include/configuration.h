@@ -22,9 +22,7 @@
 namespace YAML {
 template <typename T>
 struct convert {
-  static Node encode(const T &x) {
-    return Node{static_cast<std::string>(x)};
-  }
+  static Node encode(const T &x) { return Node{static_cast<std::string>(x)}; }
   static bool decode(const Node &node, T &x) {
     if (!node.IsScalar()) {
       return false;
@@ -48,9 +46,12 @@ namespace Smash {
  *
  * \par The available keys are documented on the following pages:
  * \li \subpage input_general_
+ * \li \subpage input_logging_
  * \li \subpage input_collision_term_
  * \li \subpage input_modi_
  * \li \subpage input_output_options_
+ * \li \subpage input_lattice_
+ * \li \subpage input_potentials_
  *
  * \ifnot user
  * \par The relevant functions and classes for input are:
@@ -193,8 +194,7 @@ class Configuration {
     operator T() const {
       try {
         return node_.as<T>();
-      }
-      catch (YAML::TypedBadConversion<T> &e) {
+      } catch (YAML::TypedBadConversion<T> &e) {
         throw IncorrectTypeInAssignment(
             "The value for key \"" + std::string(key_) +
             "\" cannot be converted to the requested type.");
@@ -205,16 +205,14 @@ class Configuration {
     operator std::vector<T>() {
       try {
         return node_.as<std::vector<T>>();
-      }
-      catch (YAML::TypedBadConversion<T> &e) {
+      } catch (YAML::TypedBadConversion<T> &e) {
         throw IncorrectTypeInAssignment(
             "One of the values in the sequence for key \"" + std::string(key_) +
             "\" failed to convert to the requested type. E.g. [1 2] is a "
             "sequence of one string \"1 2\" and [1, 2] is a sequence of two "
             "integers. Often there is just a comma missing in the config "
             "file.");
-      }
-      catch (YAML::TypedBadConversion<std::vector<T>> &e) {
+      } catch (YAML::TypedBadConversion<std::vector<T>> &e) {
         throw IncorrectTypeInAssignment(
             "The value for key \"" + std::string(key_) +
             "\" cannot be converted to the requested type. A sequence was "
@@ -228,10 +226,12 @@ class Configuration {
       const size_t n_read = vec.size();
       // Alert if size does not match
       if (n_read != N) {
-        throw IncorrectTypeInAssignment(
-            "Wrong number of values in array \"" + std::string(key_) +
-            "\". Expected " + std::to_string(N) + " values,"
-            " found " + std::to_string(n_read) + ".");
+        throw IncorrectTypeInAssignment("Wrong number of values in array \"" +
+                                        std::string(key_) + "\". Expected " +
+                                        std::to_string(N) +
+                                        " values,"
+                                        " found " +
+                                        std::to_string(n_read) + ".");
       }
       std::array<T, N> arr;
       std::copy_n(vec.begin(), N, arr.begin());
@@ -257,35 +257,68 @@ class Configuration {
 
     operator DensityType() {
       std::string s = operator std::string();
-      if (s == "particle") {
-        return DensityType::particle;
+      if (s == "hadron") {
+        return DensityType::Hadron;
       }
       if (s == "baryon") {
-        return DensityType::baryon;
+        return DensityType::Baryon;
       }
       if (s == "baryonic isospin") {
-        return DensityType::baryonic_isospin;
+        return DensityType::BaryonicIsospin;
       }
       if (s == "pion") {
-        return DensityType::pion;
+        return DensityType::Pion;
+      }
+      if (s == "none") {
+        return DensityType::None;
+      }
+      throw IncorrectTypeInAssignment("The value for key \"" +
+                                      std::string(key_) +
+                                      "\" should be \"hadron\" or \"baryon\" "
+                                      "or \"baryonic isospin\" or \"pion\" "
+                                      "or \"none\".");
+    }
+
+    operator TimeStepMode() {
+      std::string s = operator std::string();
+      if (s == "None") {
+        return TimeStepMode::None;
+      }
+      if (s == "Fixed") {
+        return TimeStepMode::Fixed;
       }
       throw IncorrectTypeInAssignment(
           "The value for key \"" + std::string(key_) +
-          "\" should be \"particle\" or \"baryon\" "
-          "or \"baryonic isospin\" or \"pion\".");
+          "\" should be \"None\" or \"Fixed\".");
     }
 
     operator BoxInitialCondition() {
       std::string s = operator std::string();
       if (s == "thermal momenta") {
-          return BoxInitialCondition::ThermalMomenta;
+        return BoxInitialCondition::ThermalMomenta;
       }
       if (s == "peaked momenta") {
-          return BoxInitialCondition::PeakedMomenta;
+        return BoxInitialCondition::PeakedMomenta;
       }
       throw IncorrectTypeInAssignment(
           "The value for key \"" + std::string(key_) +
           "\" should be \"thermal momenta\" or \"peaked momenta\".");
+    }
+
+    operator Sampling() {
+      std::string s = operator std::string();
+      if (s == "quadratic") {
+        return Sampling::Quadratic;
+      }
+      if (s == "custom") {
+        return Sampling::Custom;
+      }
+      if (s == "uniform") {
+        return Sampling::Uniform;
+      }
+      throw IncorrectTypeInAssignment(
+          "The value for key \"" + std::string(key_) +
+          "\" should be \"quadratic\", \"uniform\" or \"custom\".");
     }
   };
 
@@ -303,8 +336,7 @@ class Configuration {
    * \param filename The filename (without path) of the YAML config file, in
    *                 case you don't want the default "config.yaml".
    */
-  explicit Configuration(const bf::path &path,
-                         const bf::path &filename);
+  explicit Configuration(const bf::path &path, const bf::path &filename);
 
 #ifdef BUILD_TESTS
   /**
@@ -315,7 +347,7 @@ class Configuration {
    * actual SMASH code. The intention is to avoid creating a mock object for
    * Configuration to test other classes of SMASH.
    */
-  Configuration(const char *yaml) : root_node_(YAML::Load(yaml)) {}
+  explicit Configuration(const char *yaml) : root_node_(YAML::Load(yaml)) {}
 #endif
 
   /// if you want to copy this you're doing it wrong
@@ -375,8 +407,9 @@ class Configuration {
    * Additional interface for SMASH to read configuration values without
    * removing them.
    *
-   * The function returns the value at the specified \p keys but does not remove it from
-   * the Configuration object. Semantically, this means the value was not used.
+   * The function returns the value at the specified \p keys but does not remove
+   * it from the Configuration object. Semantically, this means the value was
+   * not used.
    *
    * \param keys You can pass an arbitrary number of keys inside curly braces,
    *             following the nesting structure in the config file.

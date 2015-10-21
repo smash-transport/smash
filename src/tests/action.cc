@@ -41,7 +41,7 @@ TEST(particle_distance) {
                                Momentum{0.1, 0., 0., 0.});
 
   ScatterAction act(a, b, 0.);
-  const auto distance_squared = act.particle_distance();
+  const auto distance_squared = act.transverse_distance_sqr();
   VERIFY(distance_squared >= 0.);
   VERIFY(distance_squared <= 100.);
 }
@@ -53,5 +53,5 @@ TEST(finite_momenta) {
   const auto b = Test::smashon(Position{2., 2., 2., 2.},
                                Momentum{0.1, -10.0, -90.0, -80.0});
   ScatterAction act(a, b, 0.);
-  VERIFY(act.particle_distance() >= 0.);
+  VERIFY(act.transverse_distance_sqr() >= 0.);
 }

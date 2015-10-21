@@ -9,6 +9,7 @@
 
 #include "include/fourvector.h"
 #include "include/iomanipulators.h"
+#include "include/numerics.h"
 
 namespace Smash {
 
@@ -49,8 +50,16 @@ FourVector FourVector::LorentzBoost(const ThreeVector &v) const {
   return FourVector (xprime_0, this->threevec() - v * constantpart);
 }
 
+/* Check if all four vector components are almost equal
+ * (accuracy \f$10^{-12}\f$). */
+bool FourVector::operator==(const FourVector &a) const {
+  return almost_equal(x_[0], a.x_[0])
+      && almost_equal(x_[1], a.x_[1])
+      && almost_equal(x_[2], a.x_[2])
+      && almost_equal(x_[3], a.x_[3]);
+}
+
 std::ostream& operator<<(std::ostream& out, const FourVector& vec) {
-  using namespace std;
   out.put('(');
   out.fill(' ');
   for (auto x : vec) {
@@ -58,5 +67,6 @@ std::ostream& operator<<(std::ostream& out, const FourVector& vec) {
   }
   return out << ')';
 }
+
 
 }  // namespace Smash

@@ -8,6 +8,8 @@
  */
 
 #include "unittest.h"
+#include "setup.h"
+
 #include "../include/configuration.h"
 #include "../include/forwarddeclarations.h"
 #include "../include/macros.h"
@@ -17,12 +19,12 @@
 using namespace Smash;
 
 static Configuration make_test_configuration() {
-  return Configuration{bf::path{TEST_CONFIG_PATH} / "tests",
+  return Configuration{bf::path{TEST_CONFIG_PATH} / "src" / "tests",
                        "test_config.yaml"};
 }
 
 TEST(create_object) {
-  Configuration conf(TEST_CONFIG_PATH);
+  Configuration conf = Test::configuration();
 }
 
 TEST(check_config_general_contents) {

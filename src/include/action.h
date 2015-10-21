@@ -33,9 +33,10 @@ class Action {
    * Construct an action object.
    *
    * \param[in] in_part list of incoming particles
-   * \param[in] time_of_execution time at which the action is supposed to take place
+   * \param[in] time Time at which the action is supposed to take place
+   *                 (relative to the current time of the incoming particles)
    */
-  Action(const ParticleList &in_part, float time_of_execution);
+  Action(const ParticleList &in_part, float time);
 
   /** Copying is disabled. Use pointers or create a new Action. */
   Action(const Action &) = delete;
@@ -51,7 +52,8 @@ class Action {
   }
 
   /** Return the raw weight value, which is a cross section in case of a
-   * ScatterAction and a decay width in case of a DecayAction.
+   * ScatterAction, a decay width in case of a DecayAction and a shining
+   * weight in case of a DecayActionDilepton.
    *
    * Prefer to use a more specific function.
    */
@@ -67,10 +69,8 @@ class Action {
   void add_process(ProcessBranchPtr<Branch> &p,
                    ProcessBranchList<Branch>& subprocesses,
                    float& total_weight) {
-    if (p->weight() > really_small) {
-      total_weight += p->weight();
-      subprocesses.emplace_back(std::move(p));
-    }
+    total_weight += p->weight();
+    subprocesses.emplace_back(std::move(p));
   }
   /** Add several new subprocesses at once.  */
   template<typename Branch>
@@ -134,9 +134,21 @@ class Action {
   const ParticleList& incoming_particles() const;
 
   /**
+   * Update the incoming particles that are stored in this action to the state
+   * they have in the global particle list.
+   */
+  void update_incoming(const Particles &particles);
+
+  /**
    * Return the list of particles that resulted from the interaction.
    */
   const ParticleList &outgoing_particles() const { return outgoing_particles_; }
+
+  /**
+   * Return the time at which the action is supposed to be performed
+   * (absolute time in the lab frame in fm/c).
+   */
+  float time_of_execution() const { return time_of_execution_; }
 
   /** Check various conservation laws. */
   void check_conservation(const size_t &id_process) const;
@@ -164,8 +176,10 @@ class Action {
    * outgoing particles.
    */
   ParticleList outgoing_particles_;
-  /** time at which the action is supposed to be performed  */
-  float time_of_execution_;
+  /**
+   * Time at which the action is supposed to be performed
+   * (absolute time in the lab frame in fm/c). */
+  const float time_of_execution_;
   /** type of process */
   ProcessType process_type_;
 
@@ -207,12 +221,24 @@ class Action {
   }
 
   /**
-   * Sample final state momenta (and masses) in general X->2 processes,
-   * using an isotropical angular distribution.
+   * Sample final-state masses in general X->2 processes
+   * (thus also fixing the absolute c.o.m. momentum).
    *
    * \throws InvalidResonanceFormation
    */
-  virtual void sample_cms_momenta();
+  virtual std::pair<double, double> sample_masses() const;
+
+  /**
+   * Sample final-state angles in general X->2 processes
+   * (here: using an isotropical angular distribution).
+   */
+  virtual void sample_angles(std::pair<double, double> masses);
+
+  /**
+   * Sample the full 2-body phase-space (masses, momenta, angles)
+   * in the center-of-mass frame.
+   */
+  void sample_2body_phasespace();
 
   /**
    * \ingroup logging

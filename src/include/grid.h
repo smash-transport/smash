@@ -32,21 +32,25 @@ enum class GridOptions : char {
 };
 
 /**
+ * Indentifies the strategy of determining the cell size.
+ */
+enum class CellSizeStrategy : char {
+  /// Look for optimal cell size.
+  Optimal,
+  /// Make cells as large as possible.
+  ///
+  /// This means a single cell for normal boundary conditions and 8 cells
+  /// for periodic boundary conditions.
+  Largest
+};
+
+/**
  * Base class for Grid to host common functions that do not depend on the
  * GridOptions parameter.
  */
 class GridBase {
  public:
-  typedef int size_type;
-
-  /**
-   * The minimum cell length for the given testparticles (defaults to 1).
-   */
-  static float min_cell_length(int testparticles = 1) {
-    // 2.5 fm corresponds to maximal cross-section of 200 mb = 20 fm^2
-    // sqrt(20 fm^2/N_{test}/pi) is approximately 2.5/sqrt(N_{test})
-    return 2.5f / std::sqrt(static_cast<float>(testparticles));
-  }
+  typedef int SizeType;
 
  protected:
   /**
@@ -78,11 +82,13 @@ class Grid : public GridBase {
    * of the particles.
    *
    * \param particles The particles to place onto the grid.
-   * \param testparticles Number of testparticles used in this event
+   * \param min_cell_length The minimal length a cell must have.
+   * \param strategy The strategy for determining the cell size
    */
-  Grid(const Particles &particles, int testparticles)
+  Grid(const Particles &particles, float min_cell_length,
+       CellSizeStrategy strategy = CellSizeStrategy::Optimal)
       : Grid{find_min_and_length(particles), std::move(particles),
-             testparticles} {}
+             min_cell_length, strategy} {}
 
   /**
    * Constructs a grid with the given minimum grid coordinates and grid length.
@@ -92,46 +98,13 @@ class Grid : public GridBase {
    * \param min_and_length A pair consisting of the three min coordinates and
    * the three lengths.
    * \param particles The particles to place onto the grid.
-   * \param testparticles Number of testparticles used in this event
+   * \param min_cell_length The minimal length a cell must have.
+   * \param strategy The strategy for determining the cell size
    */
   Grid(const std::pair<std::array<float, 3>, std::array<float, 3>> &
            min_and_length,
-       const Particles &particles, int testparticles)
-      : min_position_(min_and_length.first), length_(min_and_length.second) {
-    /**
-     * This normally equals 1/max_interaction_length, but if the number of cells
-     * is reduced (because of low density) then this value is smaller.
-     */
-    std::array<float, 3> index_factor;
-    std::tie(index_factor, number_of_cells_) =
-        determine_cell_sizes(particles.size(), length_, testparticles);
-
-    build_cells(index_factor, particles);
-  }
-
-  /**
-   * Calculates the factor that, if multiplied with a x/y/z
-   * coordinate, yields the 3-dim cell index and the required number of cells
-   * (without ghost cells).
-   *
-   * \return A tuple of two 3-dim values:
-   * \li The first tuple entry stores the conversion factors to turn a
-   * normalized coordinate (particle position minus minimum position) into a
-   * cell index.
-   * \li The second tuple entry stores the dimensions of the grid (i.e. the
-   * number of cells in each spatial direction).
-   *
-   * \param particle_count The number of particles to be placed in the grid.
-   * \param length         Three lengths that identify the total dimensions of
-   *                       the grid.
-   * \param testparticles  The number of testparticles is used to scale the cell
-   *                       size down, since the interaction length is also
-   *                       reduced.
-   */
-  static std::tuple<std::array<float, 3>, std::array<int, 3>>
-      determine_cell_sizes(size_type particle_count,
-                           const std::array<float, 3> &length,
-                           const int testparticles);
+       const Particles &particles, float min_cell_length,
+       CellSizeStrategy strategy = CellSizeStrategy::Optimal);
 
   /**
    * Iterates over all cells in the grid and calls the callback arguments with a
@@ -156,29 +129,18 @@ class Grid : public GridBase {
 
  private:
   /**
-   * Allocates the cells and fills them with ParticleData objects.
-   *
-   * This is different for the Normal and PeriodicBoundaries cases.
-   */
-  void build_cells(const std::array<float, 3> &index_factor,
-                   const Particles &particles);
-
-  /**
    * Returns the one-dimensional cell-index from the 3-dim index \p x, \p y, \p
    * z.
    */
-  size_type make_index(size_type x, size_type y, size_type z) const;
+  SizeType make_index(SizeType x, SizeType y, SizeType z) const;
 
   /**
    * Returns the one-dimensional cell-index from the 3-dim index \p idx.
    * This is a convenience overload for the above function.
    */
-  size_type make_index(std::array<size_type, 3> idx) const {
+  SizeType make_index(std::array<SizeType, 3> idx) const {
     return make_index(idx[0], idx[1], idx[2]);
   }
-
-  /// The lower bound of the cell coordinates.
-  const std::array<float, 3> min_position_;
 
   /// The 3 lengths of the complete grid. Used for periodic boundary wrapping.
   const std::array<float, 3> length_;

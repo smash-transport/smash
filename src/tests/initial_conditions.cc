@@ -17,18 +17,18 @@
 using namespace Smash;
 
 TEST(init_particle_types) {
-  ParticleType::create_type_list("smashon 0.4 0.0 661\n");
+  ParticleType::create_type_list("σ 0.4 0.0 661\n");
 }
 
 TEST(initialize_box) {
   einhard::Logger<> log(einhard::ALL);
-  BoxModus b({"Box:\n"
+  BoxModus b(Configuration("Box:\n"
               "  Initial_Condition: \"peaked momenta\"\n"
               "  Length: 7.9615\n"
               "  Temperature: 0.5\n"
               "  Start_Time: 0.2\n"
               "  Init_Multiplicities:\n"
-              "    661: 724\n"},
+              "    661: 724\n"),
              Test::default_parameters());
 
   Particles P;
@@ -56,7 +56,7 @@ TEST(initialize_box) {
 }
 
 TEST(initialize_collider_normal) {
-  ColliderModus n({"Collider:\n"
+  ColliderModus n(Configuration("Collider:\n"
                    "  Sqrtsnn: 1.6\n"
                    "  Projectile:\n"
                    "    Particles: {661: 1}\n"
@@ -65,7 +65,7 @@ TEST(initialize_collider_normal) {
                    "  Sqrts_Reps: [661, 661]\n"
                    "  Initial_Distance: 0\n"
                    "  Impact:\n"
-                   "    Value: 0\n"},
+                   "    Value: 0\n"),
                   Test::default_parameters());
   Particles P;
   COMPARE(n.initial_conditions(&P, Test::default_parameters()), 0.f);
@@ -86,53 +86,53 @@ TEST(initialize_collider_normal) {
 }
 
 TEST_CATCH(initialize_collider_low_energy, ModusDefault::InvalidEnergy) {
-  ColliderModus n({"Collider:\n"
+  ColliderModus n(Configuration("Collider:\n"
                    "  Sqrtsnn: 0.5\n"
                    "  Projectile:\n"
                    "    Particles: {661: 1}\n"
                    "  Target:\n"
                    "    Particles: {661: 8}\n"
                    "  Sqrts_Reps: [661, 661]\n"
-                   "  Initial_Distance: 0\n"},
+                   "  Initial_Distance: 0\n"),
                   Test::default_parameters());
   Particles P;
   n.initial_conditions(&P, Test::default_parameters());
 }
 
 TEST_CATCH(initialize_nucleus_empty_projectile, ColliderModus::ColliderEmpty) {
-  ColliderModus n({"Collider:\n"
+  ColliderModus n(Configuration("Collider:\n"
                    "  Sqrtsnn: 1.6\n"
                    "  Projectile:\n"
                    "    Particles: {661: 0}\n"
                    "  Target:\n"
                    "    Particles: {661: 8}\n"
                    "  Sqrts_Reps: [0, 0]\n"
-                   "  Initial_Distance: 0\n"},
+                   "  Initial_Distance: 0\n"),
                   Test::default_parameters());
   Particles P;
   n.initial_conditions(&P, Test::default_parameters());
 }
 
 TEST_CATCH(initialize_nucleus_empty_target, ColliderModus::ColliderEmpty) {
-  ColliderModus n({"Collider:\n"
+  ColliderModus n(Configuration("Collider:\n"
                    "  Sqrtsnn: 1.6\n"
                    "  Projectile:\n"
                    "    Particles: {661: 8}\n"
                    "  Target:\n"
                    "    Particles: {661: 0}\n"
                    "  Sqrts_Reps: [0, 0]\n"
-                   "  Initial_Distance: 0\n"},
+                   "  Initial_Distance: 0\n"),
                   Test::default_parameters());
   Particles P;
   n.initial_conditions(&P, Test::default_parameters());
 }
 
 TEST(initialize_sphere) {
-  SphereModus s({"Sphere:\n"
+  SphereModus s(Configuration("Sphere:\n"
                  "  Radius: 10\n"
                  "  Start_Time: 0.0\n"
                  "  Init_Multiplicities: {661: 500}\n"
-                 "  Sphere_Temperature: 0.2\n"},
+                 "  Sphere_Temperature: 0.2\n"),
                 Test::default_parameters());
   Particles P;
   // Is the correct number of particles in the map?

@@ -14,6 +14,7 @@
 #include <vector>
 
 #include "configuration.h"
+#include "forwarddeclarations.h"
 #include "outputinterface.h"
 #include "TFile.h"
 #include "TTree.h"
@@ -26,14 +27,10 @@ class Particles;
   *
   * \brief SMASH output to ROOT file
   * ----------------------------------------------------------------------------
-  * SMASH supports ROOT (root.cern.ch) output as an option. By default SMASH
-  * does not need ROOT for compilation. If one wants to produce ROOT output, one
-  * has to compile SMASH as follows:
-  * \code
-  * cd build
-  * cmake -D USE_ROOT=ON ..
-  * make
-  * \endcode
+  * SMASH supports ROOT output as an option (see http://root.cern.ch).
+  * The ROOT framework needs to be installed when building SMASH, otherwise
+  * ROOT support will be disabled.
+  *
   * This class produces file smash_run.root, which contains a
   * ROOT TTree. TTree contains information about particles
   * during simulation from all SMASH events.
@@ -88,7 +85,8 @@ class Particles;
   **/
 class RootOutput : public OutputInterface {
  public:
-  RootOutput(boost::filesystem::path path, Configuration&& conf);
+  RootOutput(const bf::path &path, const std::string &name);
+  RootOutput(const bf::path &path, Configuration&& conf);
   ~RootOutput();
 
   void at_eventstart(const Particles &particles,
@@ -102,10 +100,10 @@ class RootOutput : public OutputInterface {
                       const ParticleList &outgoing_particles,
                       const double density,
                       const double total_cross_section,
-                      const ProcessBranch::ProcessType process_type) override;
+                      const ProcessType process_type) override;
 
  private:
-  const boost::filesystem::path base_path_;
+  const bf::path base_path_;
   std::unique_ptr<TFile> root_out_file_;
   // TFile takes ownership of all TTrees.
   // That's why TTree is not a unique pointer.
@@ -133,7 +131,12 @@ class RootOutput : public OutputInterface {
 
   // Option, defines how often root-file is "saved"
   int autosave_frequency_;
+
+  /* Basic initialization routine, creating the TTree objects
+   * for particles and collisions. */
+  void init_trees();
 };
+
 }  // namespace Smash
 
 #endif  // SRC_INCLUDE_ROOTOUTPUT_H_

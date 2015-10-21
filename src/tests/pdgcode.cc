@@ -146,6 +146,25 @@ TEST(hadron) {
   VERIFY(    proton.is_hadron());
   VERIFY( antidelta.is_hadron());
 }
+
+TEST(lepton) {
+  VERIFY(electron.is_lepton());
+  VERIFY(antimu.is_lepton());
+
+  VERIFY(!photon.is_lepton());
+  VERIFY(!pion.is_lepton());
+  VERIFY(!proton.is_lepton());
+}
+
+TEST(dilepton) {
+  VERIFY(is_dilepton(0x11, -0x11));
+  VERIFY(is_dilepton(-0x11, 0x11));
+  VERIFY(is_dilepton(0x13, -0x13));
+  VERIFY(!is_dilepton(0x11, 0x11));
+  VERIFY(!is_dilepton(-0x13, -0x13));
+  VERIFY(!is_dilepton(0x211, -0x211));
+}
+
 TEST(baryon_number) {
   COMPARE(   electron.baryon_number(),  0);
   COMPARE(     antimu.baryon_number(),  0);
@@ -197,34 +216,6 @@ TEST(isospin3) {
   COMPARE(omega_c_bar.isospin3(),  0);
   COMPARE(  xi_cc_bar.isospin3(), -1);
   COMPARE(   omega_bc.isospin3(),  0);
-}
-TEST(isospin_total) {
-  COMPARE(   electron.isospin_total(),  0);
-  COMPARE(     antimu.isospin_total(),  0);
-  COMPARE(     photon.isospin_total(),  0);
-  COMPARE(       pion.isospin_total(), +2);
-  COMPARE(        eta.isospin_total(),  0);
-  COMPARE(         K0.isospin_total(),  1);
-  COMPARE(        K0L.isospin_total(),  1);
-  COMPARE(        K0S.isospin_total(),  1);
-  COMPARE(     Kminus.isospin_total(),  1);
-  COMPARE(     dminus.isospin_total(),  1);
-  COMPARE(     bnulls.isospin_total(),  0);
-  COMPARE(     bPcbar.isospin_total(),  0);
-  COMPARE(     eta_pr.isospin_total(),  0);
-  COMPARE(      j_psi.isospin_total(),  0);
-  COMPARE(     proton.isospin_total(),  1);
-  COMPARE(  antidelta.isospin_total(),  3);
-  COMPARE(      sigma.isospin_total(), +2);
-  COMPARE(     lambda.isospin_total(),  0);
-  COMPARE(     antixi.isospin_total(), +1);
-  COMPARE(  omega_bar.isospin_total(),  0);
-  COMPARE(   lambda_c.isospin_total(),  0);
-  COMPARE(sigma_c_bar.isospin_total(), +2);
-  COMPARE(       xi_c.isospin_total(), +1);
-  COMPARE(omega_c_bar.isospin_total(),  0);
-  COMPARE(  xi_cc_bar.isospin_total(), +1);
-  COMPARE(   omega_bc.isospin_total(),  0);
 }
 TEST(strangeness) {
   COMPARE(   electron.strangeness(),  0);
@@ -354,104 +345,6 @@ TEST(quarks) {
   COMPARE(omega_c_bar.quarks(), 0x433);
   COMPARE(  xi_cc_bar.quarks(), 0x442);
   COMPARE(   omega_bc.quarks(), 0x543);
-}
-TEST(multiplet) {
-  COMPARE(   electron.multiplet(),  0x0);
-  COMPARE(     antimu.multiplet(),  0x0);
-  COMPARE(     photon.multiplet(),  0x0);
-  COMPARE(       pion.multiplet(),  0x1);
-  COMPARE(         K0.multiplet(),  0x1);
-  COMPARE(     Kminus.multiplet(),  0x1);
-  COMPARE(     dminus.multiplet(),  0x1);
-  COMPARE(     bnulls.multiplet(),  0x1);
-  COMPARE(     bPcbar.multiplet(),  0x1);
-  COMPARE(     eta_pr.multiplet(),  0x1);
-  COMPARE(      j_psi.multiplet(),  0x3);
-  COMPARE(     proton.multiplet(),  0x10002);
-  COMPARE(  antidelta.multiplet(), -0x10124);
-  COMPARE(      sigma.multiplet(),  0x10002);
-  COMPARE(     lambda.multiplet(),  0x10002);
-  COMPARE(     antixi.multiplet(), -0x10102);
-  COMPARE(  omega_bar.multiplet(), -0x10004);
-  COMPARE(   lambda_c.multiplet(),  0x10002);
-  COMPARE(sigma_c_bar.multiplet(), -0x10004);
-  COMPARE(       xi_c.multiplet(),  0x10002);
-  COMPARE(omega_c_bar.multiplet(), -0x10002);
-  COMPARE(  xi_cc_bar.multiplet(), -0x10002);
-  COMPARE(   omega_bc.multiplet(),  0x10002);
-}
-TEST(iso_multiplet) {
-  COMPARE(   electron.iso_multiplet(),  0x0000);
-  COMPARE(     antimu.iso_multiplet(),  0x0000);
-  COMPARE(     photon.iso_multiplet(),  0x0000);
-  COMPARE(       pion.iso_multiplet(),  0x0111);
-  COMPARE(     pinull.iso_multiplet(),  0x0111);
-  COMPARE(   rhominus.iso_multiplet(),  0x0113);
-  COMPARE(      omega.iso_multiplet(),  0x0223);
-  COMPARE(         K0.iso_multiplet(),  0x0311);
-  COMPARE(     Kminus.iso_multiplet(), -0x0311);
-  COMPARE(     dminus.iso_multiplet(), -0x0411);
-  COMPARE(     bnulls.iso_multiplet(),  0x0531);
-  COMPARE(     bPcbar.iso_multiplet(), -0x0541);
-  COMPARE(     eta_pr.iso_multiplet(),  0x0331);
-  COMPARE(      j_psi.iso_multiplet(),  0x0443);
-  COMPARE(     proton.iso_multiplet(),  0x1112);
-  COMPARE(  antidelta.iso_multiplet(), -0x121114);
-  COMPARE(      sigma.iso_multiplet(),  0x3112);
-  COMPARE(     lambda.iso_multiplet(),  0x3122);
-  COMPARE(     antixi.iso_multiplet(), -0x103312);
-  COMPARE(  omega_bar.iso_multiplet(), -0x3334);
-  COMPARE(   lambda_c.iso_multiplet(),  0x4122);
-  COMPARE(sigma_c_bar.iso_multiplet(), -0x4114);
-  COMPARE(       xi_c.iso_multiplet(),  0x4312);
-  COMPARE(omega_c_bar.iso_multiplet(), -0x4332);
-  COMPARE(  xi_cc_bar.iso_multiplet(), -0x4412);
-  COMPARE(   omega_bc.iso_multiplet(),  0x5432);
-}
-TEST(same_iso_multiplet) {
-  VERIFY(proton.iso_multiplet() != pion.iso_multiplet());
-  // baryon octett:
-  // - non-strange
-  VERIFY(proton.iso_multiplet() == neutron.iso_multiplet());
-  VERIFY(proton.iso_multiplet() != delta.iso_multiplet());
-  VERIFY(proton.iso_multiplet() != antiproton.iso_multiplet());
-  VERIFY(proton.iso_multiplet() != lambda.iso_multiplet());
-  VERIFY(proton.iso_multiplet() != sigma.iso_multiplet());
-  // - strange:
-  VERIFY(sigma.iso_multiplet() != lambda.iso_multiplet());
-  VERIFY(sigma.iso_multiplet() == sigmanull.iso_multiplet());
-  // different excitations:
-  VERIFY(proton.iso_multiplet() != nstar.iso_multiplet());
-  // 0-- meson nonett:
-  // - non-strange
-  VERIFY(pion.iso_multiplet() == pinull.iso_multiplet());
-  VERIFY(pion.iso_multiplet() != eta_pr.iso_multiplet());
-  VERIFY(pion.iso_multiplet() != K0.iso_multiplet());
-  // - strange:
-  VERIFY(K0.iso_multiplet() != Kminus.iso_multiplet());
-  VERIFY(K0.iso_multiplet() == Kplus.iso_multiplet());
-  // - heavy quarks:
-  VERIFY(j_psi.iso_multiplet() != phi.iso_multiplet());
-}
-TEST(same_multiplet) {
-  VERIFY(proton.multiplet() != pion.multiplet());
-  // baryon octett:
-  VERIFY(proton.multiplet() == neutron.multiplet());
-  VERIFY(proton.multiplet() != delta.multiplet());
-  VERIFY(proton.multiplet() != antiproton.multiplet());
-  VERIFY(proton.multiplet() == lambda.multiplet());
-  VERIFY(proton.multiplet() == sigma.multiplet());
-  VERIFY(sigma.multiplet() == sigmanull.multiplet());
-  VERIFY(proton.multiplet() != nstar.multiplet());
-  // 0-- meson nonett:
-  VERIFY(pion.multiplet() == pinull.multiplet());
-  VERIFY(pion.multiplet() == eta_pr.multiplet());
-  VERIFY(pion.multiplet() == K0.multiplet());
-  VERIFY(K0.multiplet() == Kminus.multiplet());
-  VERIFY(K0.multiplet() == Kplus.multiplet());
-  // - heavy quarks:
-
-  VERIFY(j_psi.multiplet() == phi.multiplet());
 }
 TEST(spin) {
   COMPARE(   electron.spin(), 1u);
@@ -646,4 +539,16 @@ TEST(from_decimal) {
   COMPARE(pion, PdgCode::from_decimal(211));
   COMPARE(Kminus, PdgCode::from_decimal(-321));
   COMPARE(antixi, PdgCode::from_decimal(-103312));
+}
+
+TEST(antiparticles) {
+  COMPARE(pion.has_antiparticle(), true);
+  COMPARE(pinull.has_antiparticle(), false);
+  COMPARE(K0.has_antiparticle(), true);
+  COMPARE(proton.has_antiparticle(), true);
+  COMPARE(delta.has_antiparticle(), true);
+  COMPARE(lambda.has_antiparticle(), true);
+  COMPARE(electron.has_antiparticle(), true);
+  COMPARE(antimu.has_antiparticle(), true);
+  COMPARE(photon.has_antiparticle(), false);
 }

@@ -17,14 +17,19 @@ using Smash::Test::Position;
 using Smash::Test::Momentum;
 
 TEST(init_particle_types) {
-  Test::create_smashon_particletypes();
+  Test::create_actual_particletypes();
+  Test::create_actual_decaymodes();
 }
 
 TEST(sorting) {
-  const auto a = Test::smashon(Position{0., -0.1, 0., 0.},
-                               Momentum{1.1, 1.0, 0., 0.});
-  const auto b = Test::smashon(Position{0., 0.1, 0., 0.},
-                               Momentum{1.1, 1.0, 0., 0.});
+  ParticleData a{ParticleType::find(0x111)};  // pi0
+  a.set_4position(Position{0., -0.1, 0., 0.});
+  a.set_4momentum(Momentum{1.1, 1.0, 0., 0.});
+
+  ParticleData b{ParticleType::find(0x111)};  // pi0
+  b.set_4position(Position{0., 0.1, 0., 0.});
+  a.set_4momentum(Momentum{1.1, 1.0, 0., 0.});
+
   constexpr float time1 = 1.f;
   ScatterAction act1(a, b, time1);
   COMPARE(act1.get_interaction_point(), FourVector(0., 0., 0., 0.));
@@ -37,12 +42,16 @@ TEST(sorting) {
 TEST(elastic_collision) {
   // put particles in list
   Particles particles;
-  particles.insert(Test::smashon(Position{0., -0.1, 0., 0.},
-                               Momentum{1.1, 1.0, 0., 0.}));
-  particles.insert(Test::smashon(Position{0., 0.1, 0., 0.},
-                               Momentum{1.1, 1.0, 0., 0.}));
-  const ParticleData& a = particles.front();
-  const ParticleData& b = particles.back();
+  ParticleData a{ParticleType::find(0x211)};  // pi+
+  a.set_4position(Position{0., -0.1, 0., 0.});
+  a.set_4momentum(Momentum{1.1, 1.0, 0., 0.});
+
+  ParticleData b{ParticleType::find(0x211)};  // pi+
+  b.set_4position(Position{0., 0.1, 0., 0.});
+  b.set_4momentum(Momentum{1.1, 1.0, 0., 0.});
+
+  a = particles.insert(a);
+  b = particles.insert(b);
 
   // create action
   constexpr float time = 1.f;
@@ -81,8 +90,6 @@ TEST(elastic_collision) {
 }
 
 TEST(outgoing_valid) {
-  Test::create_actual_particletypes();
-  Test::create_actual_decaymodes();
   // create a proton and a pion
   ParticleData p1{ParticleType::find(0x2212)};
   ParticleData p2{ParticleType::find(0x111)};
@@ -131,4 +138,36 @@ TEST(outgoing_valid) {
   VERIFY(particles.is_valid(outgoing_particles[0]));
   VERIFY(outgoing_particles[0].id() > p1_copy.id());
   VERIFY(outgoing_particles[0].id() > p2_copy.id());
+}
+
+TEST(update_incoming) {
+  // put particles in list
+  Particles particles;
+  ParticleData a{ParticleType::find(0x211)};  // pi+
+  a.set_4position(Position{0., -0.1, 0., 0.});
+  a.set_4momentum(Momentum{1.1, 1.0, 0., 0.});
+
+  ParticleData b{ParticleType::find(0x211)};  // pi+
+  b.set_4position(Position{0., 0.1, 0., 0.});
+  b.set_4momentum(Momentum{1.1, -1.0, 0., 0.});
+
+  a = particles.insert(a);
+  b = particles.insert(b);
+
+  // create action
+  constexpr float time = 0.2f;
+  ScatterAction act(a, b, time);
+  VERIFY(act.is_valid(particles));
+
+  // add elastic channel
+  constexpr float sigma = 10.0;
+  act.add_all_processes(sigma, true, true);
+
+  // change the position of one of the particles
+  const FourVector new_position(0.1, 0., 0., 0.);
+  particles.front().set_4position(new_position);
+
+  // update the action
+  act.update_incoming(particles);
+  COMPARE(act.incoming_particles()[0].position(), new_position);
 }

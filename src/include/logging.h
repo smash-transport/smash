@@ -21,6 +21,51 @@
 namespace Smash {
 class Configuration;
 
+
+/*!\Userguide
+ * \page input_logging_ Logging
+ * This section controls the logging levels for different areas of the code.
+ * It contains the following keys, all of which have string values and are
+ * optional:
+ * \li \key default (determines the default logging level for all areas)
+ * \li \key Main
+ * \li \key Experiment
+ * \li \key Box
+ * \li \key Collider
+ * \li \key Sphere
+ * \li \key Action
+ * \li \key InputParser
+ * \li \key ParticleType
+ * \li \key FindScatter
+ * \li \key Clock
+ * \li \key DecayModes
+ * \li \key Resonances
+ * \li \key ScatterAction
+ * \li \key Distributions
+ * \li \key Propagation
+ * \li \key Grid
+ * \li \key List
+ * \li \key Nucleus
+ * \li \key Density
+ * \li \key PauliBlocking
+ * \li \key Tmn
+ * \li \key Fpe
+ * \li \key Lattice
+ *
+ * Each key can have one of the following values:
+ * \li ALL   - Log all messages (default)
+ * \li TRACE - The lowest severity for messages describing the program flow
+ * \li DEBUG - Debug messages
+ * \li INFO  - Messages of informational nature
+ * \li WARN  - Warning messages
+ * \li ERROR - Non-fatal errors
+ * \li FATAL - Messages that indicate terminal application failure
+ * \li OFF   - If selected no messages will be output
+ *
+ * Note that the logging levels TRACE and DEBUG are only available in
+ * debugging builds (i.e. with -DCMAKE_BUILD_TYPE=Debug).
+ */
+
 /** \addtogroup logging
  * @{
  *
@@ -89,31 +134,30 @@ DECLARE_LOGAREA(5, Action);
 DECLARE_LOGAREA(6, InputParser);
 DECLARE_LOGAREA(7, ParticleType);
 DECLARE_LOGAREA(8, FindScatter);
-DECLARE_LOGAREA(9, Legacy);
-DECLARE_LOGAREA(10, Clock);
-DECLARE_LOGAREA(11, DecayModes);
-DECLARE_LOGAREA(12, Resonances);
-DECLARE_LOGAREA(13, ScatterAction);
-DECLARE_LOGAREA(14, Distributions);
-DECLARE_LOGAREA(15, Propagation);
-DECLARE_LOGAREA(16, Grid);
-DECLARE_LOGAREA(17, List);    // ListModus
-DECLARE_LOGAREA(18, Nucleus);
-DECLARE_LOGAREA(19, DecayType);
-DECLARE_LOGAREA(20, Density);
-DECLARE_LOGAREA(21, PauliBlocking);
-DECLARE_LOGAREA(22, Tmn);
-DECLARE_LOGAREA(23, Fpe);
-DECLARE_LOGAREA(24, Lattice);
+DECLARE_LOGAREA(9, Clock);
+DECLARE_LOGAREA(10, DecayModes);
+DECLARE_LOGAREA(11, Resonances);
+DECLARE_LOGAREA(12, ScatterAction);
+DECLARE_LOGAREA(13, Distributions);
+DECLARE_LOGAREA(14, Propagation);
+DECLARE_LOGAREA(15, Grid);
+DECLARE_LOGAREA(16, List);    // ListModus
+DECLARE_LOGAREA(17, Nucleus);
+DECLARE_LOGAREA(18, Density);
+DECLARE_LOGAREA(19, PauliBlocking);
+DECLARE_LOGAREA(20, Tmn);
+DECLARE_LOGAREA(21, Fpe);
+DECLARE_LOGAREA(22, Lattice);
+DECLARE_LOGAREA(23, Sampling);
 
 /// This type collects all existing log areas so they will be created with the
 /// correct log level automatically.
-using AreaTuple = std::tuple<Main, Experiment, Box, Collider, Sphere,
-                             Action, InputParser, ParticleType, FindScatter,
-                             Legacy, Clock, DecayModes, Resonances,
-                             ScatterAction, Distributions, Propagation, Grid,
-                             List, Nucleus, DecayType, Density, PauliBlocking,
-                             Tmn, Fpe, Lattice>;
+using AreaTuple = std::tuple<Main, Experiment, Box, Collider, Sphere, Action,
+                             InputParser, ParticleType, FindScatter, Clock,
+                             DecayModes, Resonances, ScatterAction,
+                             Distributions, Propagation, Grid, List, Nucleus,
+                             Density, PauliBlocking, Tmn, Fpe, Lattice,
+                             Sampling>;
 }  // namespace LogArea
 
 /**

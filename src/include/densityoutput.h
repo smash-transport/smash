@@ -35,7 +35,7 @@ namespace Smash {
  **/
 class DensityOutput : public OutputInterface {
  public:
-  DensityOutput(bf::path path, Configuration&& conf);
+  DensityOutput(const bf::path &path, Configuration&& conf);
   ~DensityOutput();
 
   /// writes the initial particle information of an event
@@ -51,13 +51,14 @@ class DensityOutput : public OutputInterface {
 
   /// writes thermodynamics every time interval fixed by option Output_Interval
   void thermodynamics_output(const Particles &particles,
-                             const ExperimentParameters &param) override;
+                             const ExperimentParameters &param,
+                             const DensityParameters &dens_param) override;
 
   /** Prints density along the specified line. Useful to make 1D plots of
     * density profiles.
    */
   void density_along_line(const char * file_name, const ParticleList &plist,
-                        const ExperimentParameters &param,
+                        const DensityParameters &param,
                         DensityType dens_type,
                         const ThreeVector &line_start,
                         const ThreeVector &line_end, int n_points);

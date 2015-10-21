@@ -30,12 +30,15 @@ class DecayAction : public Action {
    * call add_processes after construction.
    *
    * \param[in] p The particle that should decay if the action is performed.
-   * \param[in] time_of_execution time at which the action is supposed to take place
+   * \param[in] time Time at which the action is supposed to take place
    */
-  DecayAction(const ParticleData &p, float time_of_execution);
+  DecayAction(const ParticleData &p, float time);
 
   /** Add several new decays at once. */
   void add_decays(DecayBranchList pv);
+
+  /** Add one new decay.*/
+  void add_decay(DecayBranchPtr p);
 
   /** Generate the final state of the decay process.
    * Performs a decay of one particle to two or three particles.
@@ -43,6 +46,8 @@ class DecayAction : public Action {
    * \throws InvalidDecay
    */
   void generate_final_state() override;
+
+  std::pair<double, double> sample_masses() const override;
 
   float raw_weight_value() const override;
 
@@ -75,22 +80,17 @@ class DecayAction : public Action {
   /** total decay width */
   float total_width_;
 
- private:
-  /**
-   * Kinematics of a 1-to-2 decay process.
-   *
-   * Sample the masses and momenta of the decay products in the
-   * center-of-momentum frame.
-   */
-  void one_to_two();
+  /** angular momentum of the decay */
+  int L_ = 0;
 
+ protected:
   /**
    * Kinematics of a 1-to-3 decay process.
    *
    * Sample the masses and momenta of the decay products in the
    * center-of-momentum frame.
    */
-  void one_to_three();
+  virtual void one_to_three();
 };
 
 

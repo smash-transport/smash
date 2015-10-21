@@ -68,7 +68,7 @@ class ProcessBranch {
  public:
   /// Create a ProcessBranch without final states
   ProcessBranch() : branch_weight_(0.) {}
-  ProcessBranch(float w) : branch_weight_(w) {}
+  explicit ProcessBranch(float w) : branch_weight_(w) {}
 
   /// Copying is disabled. Use std::move or create a new object.
   ProcessBranch(const ProcessBranch &) = delete;
@@ -198,10 +198,10 @@ class CollisionBranch : public ProcessBranch {
    * be more efficient.
    */
   ParticleTypePtrList particle_types_;
-  /** 
-   * Process type are used to distinguish different types of processes, 
-   * e.g. string formation, resonance formation, elastic scattering and so on. 
-   *  
+  /**
+   * Process type are used to distinguish different types of processes,
+   * e.g. string formation, resonance formation, elastic scattering and so on.
+   *
    */
   ProcessType process_type_;
 };
@@ -221,7 +221,9 @@ class DecayBranch : public ProcessBranch {
   DecayBranch(DecayBranch &&rhs) : ProcessBranch(rhs.branch_weight_),
                                    type_(rhs.type_) {}
   /// Get the angular momentum of this branch.
-  inline int angular_momentum() const;
+  inline int angular_momentum() const {
+    return type_.angular_momentum();
+  }
   /// Return the particle types associated with this branch.
   const ParticleTypePtrList &particle_types() const override {
     return type_.particle_types();
@@ -241,11 +243,6 @@ class DecayBranch : public ProcessBranch {
   // decay type (including final-state particles and angular momentum
   const DecayType &type_;
 };
-
-inline int DecayBranch::angular_momentum() const {
-  return type_.angular_momentum();
-}
-
 
 }  // namespace Smash
 

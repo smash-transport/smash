@@ -43,10 +43,6 @@ namespace Smash {
  *   // fill from stringstream:
  *   std::cin >> other_particle;
  * }
- * // check if particle is in the same multiplet as the pions:
- * if (pi_plus.multiplet() == other_particle.multiplet()) {
- *   printf("The other particle is a 0^-- meson.\n");
- * }
  * // is this a Kaon?
  * if (other_particle.code() == 0x311) {
  *   printf("The particle is a K plus\n");
@@ -110,7 +106,7 @@ class PdgCode {
    * The string is interpreted as a hexadecimal number, i.e., \c 211 is
    * interpreted as \c 0x211 = \f$529_{10}\f$.
    */
-  PdgCode(const std::string& codestring) {
+  explicit PdgCode(const std::string& codestring) {
     set_from_string(codestring);
   }
 
@@ -132,7 +128,7 @@ class PdgCode {
   /** receive an unsigned integer and process it into a PDG Code. The
    *  first bit is taken and used as antiparticle boolean.
    */
-  PdgCode(const std::uint32_t abscode) : dump_(0x0) {
+  explicit PdgCode(const std::uint32_t abscode) : dump_(0x0) {
     // use the first bit for the antiparticle_ boolean.
     digits_.antiparticle_ = ((abscode & 0x80000000u) != 0);
     set_fields(abscode);
@@ -248,6 +244,10 @@ class PdgCode {
   inline bool is_hadron() const {
     return (digits_.n_q3_ != 0 && digits_.n_q2_ != 0);
   }
+  /// returns true if this is a lepton.
+  inline bool is_lepton() const {
+    return (digits_.n_q1_ == 0 && digits_.n_q2_ == 0 && digits_.n_q3_ == 1);
+  }
   /// returns the baryon number of the particle.
   inline int baryon_number() const {
     if (!is_hadron() || digits_.n_q1_ == 0) {
@@ -255,14 +255,46 @@ class PdgCode {
     }
     return antiparticle_sign();
   }
-
   /// Returns whether this PDG code identifies a baryon.
-  bool is_baryon() const { return is_hadron() && digits_.n_q1_ != 0; }
+  inline bool is_baryon() const { return is_hadron() && digits_.n_q1_ != 0; }
+
+  /// Is this a nucleon (p, n)?
+  inline bool is_nucleon() const {
+      return (code() == 0x2212) || (code() == 0x2112);
+  }
+  /// Is this a Delta(1232)?
+  inline bool is_Delta() const {
+      return (code() == 0x2224) || (code() == 0x2214) ||
+             (code() == 0x2114) || (code() == 0x1114);
+  }
+  /// Is this a kaon (K+, K-, K0, Kbar0)?
+  inline bool is_kaon() const {
+      const auto abs_code = std::abs(code());
+      return (abs_code == 0x321) || (abs_code == 0x311);
+  }
+  /// Is this a pion (pi+/pi0/pi-)?
+  inline bool is_pion() const {
+      const auto c = code();
+      return (c == 0x111)    // pi0
+          || (c == 0x211)    // pi+
+          || (c == -0x211);  // pi-
+  }
+  /// Is this a rho meson (rho+/rho0/rho-)?
+  inline bool is_rho() const {
+    const auto c = code();
+    return (c == 0x113)    // rho0
+        || (c == 0x213)    // rho+
+        || (c == -0x213);  // rho-
+  }
 
   /** Determine whether a particle has a distinct antiparticle
     * (or whether it is its own antiparticle). */
   bool has_antiparticle() const {
-    return (baryon_number() != 0) || (digits_.n_q2_ != digits_.n_q3_);
+    if (is_hadron()) {
+      return (baryon_number() != 0) || (digits_.n_q2_ != digits_.n_q3_);
+    } else {
+      return digits_.n_q3_ == 1;  // leptons!
+    }
   }
   /** returns twice the isospin-3 component \f$I_3\f$.
    *
@@ -272,19 +304,6 @@ class PdgCode {
     // net_quark_number(2) is the number of u quarks,
     // net_quark_number(1) is the number of d quarks.
     return net_quark_number(2)-net_quark_number(1);
-  }
-  /** returns twice the isospin vector length \f$I\f$.
-   *
-   * This returns e.g. 2 for all pions and 3 for all Deltas. It is
-   * always positive.
-   */
-  int isospin_total() const;
-  /*
-   * Returns the isospin-3 component relative to the total isospin.
-   */
-  float isospin3_rel() const {
-    unsigned int I = isospin_total();
-    return (I == 0) ? 0 : static_cast<float>(isospin3())/I;
   }
   /** returns the net number of \f$\bar s\f$ quarks.
    *
@@ -381,78 +400,6 @@ class PdgCode {
       return 0;
     }
     return chunks_.quarks_;
-  }
-  /** Returns an identifier for the SU(N) multiplet of this PDG Code.
-   *
-   * This can be used to compare if two particles are in the same SU(N)
-   * multiplet, i.e., p, Λ, Σ and \f$\Xi_{cb}\f$ are in the same
-   * multiplet, as are Δ, Ω, \f$\Omega_{ccc}\f$ and ρ, ω,
-   * \f$D^\ast_s\f$.
-   *
-   * The antiparticle sign is ignored for mesons: Both \f$K^+\f$ and
-   * \f$K^-\f$ are in the same multiplet; the same applies for charmed
-   * and anti-charmed mesons.
-   *
-   * The exact format of this is subject to change; only use this to
-   * check if two particles are in the same multiplet!
-   */
-  inline std::int32_t multiplet() const {
-    if (!is_hadron()) {
-      return 0;
-    }
-    // the multiplet code is the antiparticle_*( baryon number +
-    // excitation_ + n_J_) [the "+" being a concatenation here].  Baryon
-    // number and sign are added later.
-    std::int32_t multiplet_code = ((chunks_.excitation_ << 4) | digits_.n_J_);
-    // if the particle is in a meson multiplet, there are no signs.
-    if (baryon_number() == 0) {
-      return multiplet_code;
-    }
-    // else, return the sign and the baryon number, too.
-    return antiparticle_sign() *
-                  (multiplet_code | ((baryon_number() & 1) << 16));
-  }
-  /** Returns an identifier for the Isospin-multiplet of this PDG Code.
-   *
-   * This can be used to compare if two particles are in the same
-   * isospin multiplet.  For non-hadrons, this returns 0, and for
-   * hadrons, it returns the PDG Code of the similar particle that has
-   * all up quarks replaced with down quarks.
-   *
-   * To distinguish η mesons from \f$\pi^0\f$ and Λ from \f$\Sigma^0\f$, Isopin
-   * = 0 states return the complete code.
-   *
-   * The antiparticle sign is ignored for pi-like mesons, so that \f$\pi^+\f$
-   * and \f$\pi^-\f$ are in the same multiplet. The sign is used for all other
-   * mesons and baryons, so that \f$K^-\f$ and \f$K^+\f$ are not in the same
-   * multiplet, and neither \f$p\f$ and \f$\bar p\f$.
-   *
-   */
-  inline std::int32_t iso_multiplet() const {
-    if (!is_hadron()) {
-      return 0;
-    }
-    // the η meson is NOT in the same multiplet as the π, and Λ and Σ.
-    // We return the complete code for the I=0 state.
-    if (isospin_total() == 0) {
-      return code();
-    }
-    // this is the code with all u quarks changed to d quarks. Note that it
-    // doesn't matter that we change e.g. a proton to an (ddd)-state, because
-    // we can distinguish nucleons and Δ resonances by the other numbers in the
-    // new scheme (it's gotta be good for something!)
-    std::int32_t multiplet_code = ( (chunks_.excitation_  << 16)
-                          | ((digits_.n_q1_ == 2 ? 1 : digits_.n_q1_) << 12)
-                          | ((digits_.n_q2_ == 2 ? 1 : digits_.n_q2_) <<  8)
-                          | ((digits_.n_q3_ == 2 ? 1 : digits_.n_q3_) <<  4)
-                          | (digits_.n_J_));
-    // if we have pion-like particles, return the above code (discard
-    // antiparticle_sign)
-    if ((multiplet_code & 0x0000fff0) == 0x110) {
-      return multiplet_code;
-    }
-    // else, the sign is important!
-    return antiparticle_sign()*multiplet_code;
   }
 
   /****************************************************************************
@@ -710,10 +657,21 @@ std::ostream& operator<<(std::ostream& is, const PdgCode& code);
 
 /** Checks if two given particles represent a lepton pair (e+e- or mu+mu-). */
 inline bool is_dilepton(const PdgCode pdg1, const PdgCode pdg2) {
-  return (pdg1 ==  0x11 && pdg2 == -0x11) ||
-         (pdg1 == -0x11 && pdg2 ==  0x11) ||
-         (pdg1 ==  0x13 && pdg2 == -0x13) ||
-         (pdg1 == -0x13 && pdg2 ==  0x13);
+  const auto c1 = pdg1.code();
+  const auto c2 = pdg2.code();
+  const auto min = std::min(c1, c2);
+  const auto max = std::max(c1, c2);
+  return (max ==  0x11 && min == -0x11) ||
+         (max ==  0x13 && min == -0x13);
+}
+
+/** Checks if two of the three given particles represent a lepton pair
+ * (e+e- or mu+mu-).*/
+inline bool has_lepton_pair(const PdgCode pdg1, const PdgCode pdg2,
+                            const PdgCode pdg3) {
+  return is_dilepton(pdg1, pdg2) ||
+         is_dilepton(pdg1, pdg3) ||
+         is_dilepton(pdg2, pdg3);
 }
 
 }  // namespace Smash

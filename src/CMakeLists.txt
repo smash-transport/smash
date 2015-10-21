@@ -4,8 +4,8 @@
 #      SMASH Team
 #
 #    BSD 3-clause license
-# 
-######################################################### 
+#
+#########################################################
 
 include(CheckLibraryExists)
 include(AddCompilerFlag)
@@ -14,6 +14,16 @@ include(FindPkgConfig)
 include(GetGitRevisionDescription)
 git_describe(VERSION_MAJOR)
 
+find_package (Git)
+if(GIT_FOUND)
+  #message("git found: ${GIT_EXECUTABLE} in version ${GIT_VERSION_STRING}")
+  execute_process(
+    COMMAND ${GIT_EXECUTABLE} rev-parse --abbrev-ref HEAD
+    OUTPUT_VARIABLE GIT_BRANCH)
+  string(STRIP ${GIT_BRANCH} GIT_BRANCH)
+  #message("git branch: ${GIT_BRANCH}")
+endif (GIT_FOUND)
+
 string(TIMESTAMP BUILD_DATE)
 
 find_package(GSL REQUIRED)
@@ -21,16 +31,14 @@ find_package(Eigen3 REQUIRED)
 find_package(Boost 1.49.0 REQUIRED COMPONENTS filesystem system)
 pkg_check_modules(YAML REQUIRED yaml-cpp>=0.5.1)
 
-option(USE_ROOT "Turn this on to build ROOT output support into SMASH." OFF)
+option(USE_ROOT "Turn this off to disable ROOT output support in SMASH." ON)
 if(USE_ROOT)
-   find_package(ROOT 5.34 REQUIRED)
-   include_directories(SYSTEM
-      "${ROOT_INCLUDE_DIR}"
-      )
-   set(SMASH_LIBRARIES
-      ${ROOT_LIBRARIES}
-      )
-   add_definitions(-DSMASH_USE_ROOT)
+  find_package(ROOT 5.34)
+  if(ROOT_FOUND)
+    include_directories(SYSTEM "${ROOT_INCLUDE_DIR}")
+    set(SMASH_LIBRARIES ${ROOT_LIBRARIES})
+    add_definitions(-DSMASH_USE_ROOT)
+  endif()
 endif()
 
 # set up include paths
@@ -56,9 +64,11 @@ set(SMASH_LIBRARIES ${SMASH_LIBRARIES}
 # list the source files
 set(smash_src
         action.cc
+        adaptiverejectionsampler.cc
         boxmodus.cc
         binaryoutputcollisions.cc
         binaryoutputparticles.cc
+        clebschgordan.cc
         collidermodus.cc
         configuration.cc
         decayaction.cc
@@ -68,13 +78,18 @@ set(smash_src
         deformednucleus.cc
         density.cc
         densityoutput.cc
+        decayactiondilepton.cc
+        decayactionsfinderdilepton.cc
         distributions.cc
         energymomentumtensor.cc
         experiment.cc
+        filelock.cc
         fourvector.cc
         fpenvironment.cc
         grid.cc
         inputfunctions.cc
+        interpolation.cc
+        isoparticletype.cc
         listmodus.cc
         logging.cc
         nucleus.cc
@@ -88,12 +103,14 @@ set(smash_src
         potentials.cc
         processbranch.cc
         propagation.cc
+        quantumnumbers.cc
         random.cc
         resonances.cc
         scatteraction.cc
         scatteractionbaryonbaryon.cc
         scatteractionbaryonmeson.cc
         scatteractionmesonmeson.cc
+        scatteractionnucleonkaon.cc
         scatteractionnucleonnucleon.cc
         scatteractionsfinder.cc
         spheremodus.cc
@@ -104,10 +121,8 @@ set(smash_src
         vtkoutput.cc
         )
 
-if(USE_ROOT)
-   set(smash_src ${smash_src}
-      rootoutput.cc
-      )
+if(USE_ROOT AND ROOT_FOUND)
+  set(smash_src ${smash_src} rootoutput.cc)
 endif()
 
 add_executable(smash smash.cc ${smash_src})
@@ -119,31 +134,30 @@ configure_file (
   "${CMAKE_CURRENT_BINARY_DIR}/include/config.h"
 )
 
-# directly copy config files to build directory
-configure_file(config.yaml ${PROJECT_BINARY_DIR}/config.yaml COPYONLY)
+# copy config file to build directory
+configure_file(${CMAKE_SOURCE_DIR}/input/config.yaml
+               ${PROJECT_BINARY_DIR}/config.yaml
+               COPYONLY)
+# generate headers from input files
 set(generated_headers)
-macro(copy_at_make)
+macro(generate_headers)
    foreach(filename ${ARGN})
-      configure_file(
-         ${CMAKE_CURRENT_SOURCE_DIR}/${filename}
-         ${PROJECT_BINARY_DIR}/${filename}
-         COPYONLY)
       list(APPEND generated_headers "${CMAKE_CURRENT_BINARY_DIR}/${filename}.h")
       add_custom_command(
          OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${filename}.h
          COMMAND ${CMAKE_COMMAND}
-         -D INPUT_FILE=${CMAKE_CURRENT_SOURCE_DIR}/${filename}
+         -D INPUT_FILE=${CMAKE_SOURCE_DIR}/input/${filename}
          -D OUTPUT_FILE=${CMAKE_CURRENT_BINARY_DIR}/${filename}.h
          -D NAME=data
          -P ${PROJECT_SOURCE_DIR}/cmake/copy_file_contents_to_string.cmake
-         DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${filename}
-         COMMENT "Convert ${CMAKE_CURRENT_SOURCE_DIR}/${filename} to ${CMAKE_CURRENT_BINARY_DIR}/${filename}.h"
+         DEPENDS ${CMAKE_SOURCE_DIR}/input/${filename}
+         COMMENT "Convert ${CMAKE_SOURCE_DIR}/input/${filename} to ${CMAKE_CURRENT_BINARY_DIR}/${filename}.h"
          VERBATIM)
-      add_custom_target(copy_${filename} ALL DEPENDS
+      add_custom_target(generate_${filename}.h ALL DEPENDS
          ${CMAKE_CURRENT_BINARY_DIR}/${filename}.h)
    endforeach()
 endmacro()
-copy_at_make(particles.txt decaymodes.txt)
+generate_headers(particles.txt decaymodes.txt)
 
 set_source_files_properties(experiment.cc PROPERTIES OBJECT_DEPENDS "${generated_headers}")
 

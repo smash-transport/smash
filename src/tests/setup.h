@@ -65,8 +65,7 @@ static constexpr const char smashon_pdg_string[] = "661";
 inline void create_smashon_particletypes() {
   ParticleType::create_type_list(
       "# NAME MASS[GEV] WIDTH[GEV] PDG\n"
-      "⨳ " +
-      std::to_string(smashon_mass) + ' ' + std::to_string(smashon_width) +
+      "σ " + std::to_string(smashon_mass) + " " + std::to_string(smashon_width) +
       " 661\n");
 }
 
@@ -159,7 +158,7 @@ inline ParticleData smashon_random(int id = -1) {
  * \endcode
  */
 inline Configuration configuration(std::string overrides = {}) {
-  Configuration c{TEST_CONFIG_PATH};
+  Configuration c{bf::path{TEST_CONFIG_PATH} / "input" };
   if (!overrides.empty()) {
     c.merge_yaml(overrides);
   }
@@ -174,7 +173,7 @@ inline Configuration configuration(std::string overrides = {}) {
  */
 inline std::unique_ptr<ExperimentBase> experiment(
     const Configuration &c = configuration()) {
-  return ExperimentBase::create(c);
+  return ExperimentBase::create(c, ".");
 }
 
 /**
@@ -182,7 +181,7 @@ inline std::unique_ptr<ExperimentBase> experiment(
  * configOverrides.
  */
 inline std::unique_ptr<ExperimentBase> experiment(const char *configOverrides) {
-  return ExperimentBase::create(configuration(configOverrides));
+  return ExperimentBase::create(configuration(configOverrides), ".");
 }
 
 /**
@@ -234,8 +233,8 @@ inline ParticlesPtr create_particles(
  * If needed you can set the testparticles parameter to a different value than
  * 1.
  */
-inline ExperimentParameters default_parameters(int testparticles = 1) {
-  return ExperimentParameters{{0.f, 1.f}, 1.f, testparticles, 1.0, 4.0};
+inline ExperimentParameters default_parameters(int testparticles = 1, float dt = 0.1f) {
+  return ExperimentParameters{{0.f, dt}, 1.f, testparticles, 1.0, 4.0};
 }
 
 /**

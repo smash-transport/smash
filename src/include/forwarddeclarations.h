@@ -65,6 +65,7 @@ class ParticleData;
 class Particles;
 class ParticleType;
 class ParticleTypePtr;
+class IsoParticleType;
 class PdgCode;
 class DecayBranch;
 class CollisionBranch;
@@ -76,16 +77,35 @@ enum class CalculationFrame {
     FixedTarget,
 };
 
+/// Possible methods of impact parameter sampling.
+enum class Sampling {
+  /// Sample from uniform distribution.
+  Uniform,
+  /// Sample from areal / quadratic distribution.
+  Quadratic,
+  /// Sample from custom, user-defined distribution.
+  Custom,
+};
+
 /** Allows to choose which kind of density to calculate.
 *  The baryon density is necessary for the Skyrme potential.
 *  For the symmetry potential one needs to know the isospin density.
 */
 enum class DensityType {
-  particle = 0,
-  baryon = 1,
-  baryonic_isospin = 2,
-  pion = 3,
-  none = 4,
+  None = 0,
+  Hadron = 1,
+  Baryon = 2,
+  BaryonicIsospin = 3,
+  Pion = 4,
+};
+
+/** The time step mode.
+ */
+enum class TimeStepMode : char {
+  /// Don't use time steps; propagate from action to action.
+  None,
+  /// Use fixed time step.
+  Fixed,
 };
 
 /** Initial condition for a particle in a box.
@@ -113,6 +133,8 @@ using ParticleList = build_vector_<ParticleData>;
 
 using ParticleTypeList = build_vector_<ParticleType>;
 using ParticleTypePtrList = build_vector_<ParticleTypePtr>;
+using IsoParticleTypeList = build_vector_<IsoParticleType>;
+using IsoParticleTypeRefList = build_vector_<const IsoParticleType&>;
 
 template<typename T>
 using ProcessBranchPtr = build_unique_ptr_<T>;

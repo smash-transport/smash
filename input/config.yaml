@@ -16,6 +16,10 @@ General:
     # Modus decision
     Modus:         Collider
 
+    # Mode of the time evolution:
+    # ("Fixed": fixed-sized time steps, "None": no time steps)
+    Time_Step_Mode: Fixed
+
     # temporal grid spacing
     Delta_Time:    0.1
 
@@ -35,13 +39,18 @@ General:
     Gaussian_Sigma: 1.0
 
     # distance at which gaussian values are small enough to set them zero
-    Gauss_Cutoff_In_Sigma: 4.0
+    Gauss_Cutoff_In_Sigma: 3.0
+
+    # reduce the combinatorics by placing the particles in a grid structure
+    Use_Grid: True
 
 
 Output:
     # how much time before recording measurables
     Output_Interval:  1.0
-
+    # Which density is written to collision headers:
+    # ("hadron", "baryon", "baryonic isospin", "pion", "none")
+    Density_Type:      "none"
     # output formats
     Oscar_Collisions:
         Enable:             True
@@ -52,34 +61,33 @@ Output:
         2013_Format:        True
         Only_Final:         True
     Vtk:
-        Enable:             True
+        Enable:             False
     Root:
         Enable:             False
         Write_Collisions:   True
         Write_Particles:    True
         Autosave_Frequency: 1000
     Binary_Collisions:
-        Enable:             True
+        Enable:             False
         Print_Start_End:    True
     Binary_Particles:
-        Enable:             True
+        Enable:             False
         Only_Final:         False
     Density:
-        Enable:             True
+        Enable:             False
         x: 0.0
         y: 0.0
         z: 0.0
-        # Which density is written to collision headers:
-        # ("particle", "baryon", "baryonic isospin", "pion")
-        Density_Type:      "baryon"
+    Dileptons:
+        Enable:             False
+        Format:             Oscar
 
 Collision_Term:
-    Decays:        True
-    Collisions:    True
-    Isotropic:     False
-    Force_Decays_At_End:  True
-    # elastic cross section, mb (= 0.1 fm^2)
-    Sigma:         10.0
+    Collisions:             True
+    Decays:                 True
+    Force_Decays_At_End:    True
+    Isotropic:              False
+    Elastic_Cross_Section:  -1.0  # Globally used if non-negative, [mb]
 #    Pauli_Blocking:
 #        Spatial_Averaging_Radius:   1.86
 #        Momentum_Averaging_Radius:  0.08
@@ -96,7 +104,7 @@ Collision_Term:
 Lattice:
     Origin: [0.0, 0.0, 0.0]    # Coordinates of the left, down, near corner of the lattice
     Sizes: [10.0, 10.0, 10.0]  # Sizes in x, y, z directions in fm
-    CellNumber: [20, 20, 20]   # Number of cells in x, y, z directions
+    Cell_Number: [20, 20, 20]   # Number of cells in x, y, z directions
     Periodic: True             # Periodic continuation: x + i * lx is equivalent to x, same for y, z
     Printout:
         # ("particle", "baryon", "baryonic isospin", "pion")
@@ -120,9 +128,11 @@ Modi:
         Start_Time:    0.0
 
         Init_Multiplicities:
-            221:    100
-            111:    200
-            2112:   20
+            211:    100
+            111:    100
+            -211:   100
+            2212:   50
+            2112:   50
 
     Sphere:
         # Sphere size
@@ -133,10 +143,11 @@ Modi:
         Start_Time: 0.0
         # Number of particles in Sphere
         Init_Multiplicities:
-            221:    100
-            111:    200
-            2112:   20
-
+            211:    100
+            111:    100
+            -211:   100
+            2212:   50
+            2112:   50
 
     Collider:
         # Definitions for the projectile:
@@ -152,9 +163,6 @@ Modi:
 
         # Collision energy (E_Kin, P_Lab, Sqrtsnn).
         Sqrtsnn: 3.0
-        # The representative particles (two PDG IDs) determining the
-        # subsystem "NN" in sqrt(s_NN). Let's try neutron-neutron.
-        Sqrts_Reps: [2112, 2112]
 
         # The reference frame in which to do the calculation.
         # ("center of velocity", "center of mass", "fixed target")

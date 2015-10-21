@@ -9,10 +9,8 @@
 
 #include "include/scatteraction.h"
 
-#include "include/angles.h"
 #include "include/constants.h"
 #include "include/cxx14compat.h"
-#include "include/distributions.h"
 #include "include/kinematics.h"
 #include "include/logging.h"
 #include "include/pdgcode.h"
@@ -22,8 +20,8 @@ namespace Smash {
 
 ScatterAction::ScatterAction(const ParticleData &in_part_a,
                              const ParticleData &in_part_b,
-                             float time_of_execution, bool isotropic)
-    : Action({in_part_a, in_part_b}, time_of_execution),
+                             float time, bool isotropic)
+    : Action({in_part_a, in_part_b}, time),
       total_cross_section_(0.), isotropic_(isotropic) {}
 
 void ScatterAction::add_collision(CollisionBranchPtr p) {
@@ -67,7 +65,7 @@ void ScatterAction::generate_final_state() {
       /* 2->2 inelastic scattering */
       log.debug("Process: Inelastic scattering.", process_type_);
       /* Sample the particle momenta in CM system. */
-      sample_cms_momenta();
+      sample_2body_phasespace();
       break;
     case ProcessType::String:
       /* string excitation */
@@ -147,41 +145,54 @@ double ScatterAction::cm_momentum_squared() const {
   return pCM_sqr(sqrt_s(), m1, m2);
 }
 
-
-double ScatterAction::particle_distance() const {
-  const auto &log = logger<LogArea::ScatterAction>();
+double ScatterAction::transverse_distance_sqr() const {
   // local copy of particles (since we need to boost them)
   ParticleData p_a = incoming_particles_[0];
   ParticleData p_b = incoming_particles_[1];
   /* Boost particles to center-of-momentum frame. */
-  ThreeVector velocity = beta_cm();
+  const ThreeVector velocity = beta_cm();
   p_a.boost(velocity);
   p_b.boost(velocity);
-  ThreeVector pos_diff = p_a.position().threevec() - p_b.position().threevec();
-  ThreeVector mom_diff = p_a.momentum().threevec() - p_b.momentum().threevec();
+  const ThreeVector pos_diff = p_a.position().threevec() -
+                               p_b.position().threevec();
+  const ThreeVector mom_diff = p_a.momentum().threevec() -
+                               p_b.momentum().threevec();
+
+  const auto &log = logger<LogArea::ScatterAction>();
   log.debug("Particle ", incoming_particles_, " position difference [fm]: ",
             pos_diff, ", momentum difference [GeV]: ", mom_diff);
+
+  const double dp2 = mom_diff.sqr();
+  const double dr2 = pos_diff.sqr();
   /* Zero momentum leads to infite distance. */
-  if (std::abs(mom_diff.sqr()) < really_small)
-    return  pos_diff.sqr();
+  if (dp2 < really_small) {
+    return dr2;
+  }
+  const double dpdr = pos_diff * mom_diff;
 
   /** UrQMD squared distance criterion:
-   * \iref{Bass:1998ca} (3.27): in center of momemtum frame
+   * \iref{Bass:1998ca} (3.27): in center of momentum frame
    * position of particle a: x_a
    * position of particle b: x_b
-   * velocity of particle a: v_a
-   * velocity of particle b: v_b
-   * d^2_{coll} = (x_a - x_b)^2 - ((x_a - x_a) . (v_a - v_b))^2 / (v_a - v_b)^2
+   * momentum of particle a: p_a
+   * momentum of particle b: p_b
+   * d^2_{coll} = (x_a - x_b)^2 - ((x_a - x_b) . (p_a - p_b))^2 / (p_a - p_b)^2
    */
-  return pos_diff.sqr()
-         - (pos_diff * mom_diff) * (pos_diff * mom_diff) / mom_diff.sqr();
+  return dr2 - dpdr*dpdr/dp2;
 }
 
-
 CollisionBranchPtr ScatterAction::elastic_cross_section(float elast_par) {
+  float elastic_xs;
+  if (elast_par >= 0.) {
+    // use constant elastic cross section from config file
+    elastic_xs = elast_par;
+  } else {
+    // use parametrization
+    elastic_xs = elastic_parametrization();
+  }
   return make_unique<CollisionBranch>(incoming_particles_[0].type(),
                                       incoming_particles_[1].type(),
-                                      elast_par, ProcessType::Elastic);
+                                      elastic_xs, ProcessType::Elastic);
 }
 
 CollisionBranchPtr ScatterAction::string_excitation_cross_section() {
@@ -197,7 +208,7 @@ CollisionBranchPtr ScatterAction::string_excitation_cross_section() {
 
 
 double ScatterAction::two_to_one_formation(const ParticleType &type_resonance,
-                                           double s, double cm_momentum_sqr) {
+                                          double srts, double cm_momentum_sqr) {
   const ParticleType &type_particle_a = incoming_particles_[0].type();
   const ParticleType &type_particle_b = incoming_particles_[1].type();
   /* Check for charge conservation. */
@@ -213,8 +224,7 @@ double ScatterAction::two_to_one_formation(const ParticleType &type_resonance,
   }
 
   /* Calculate partial in-width. */
-  double srts = std::sqrt(s);
-  float partial_width = type_resonance.get_partial_in_width(srts,
+  const float partial_width = type_resonance.get_partial_in_width(srts,
                                 incoming_particles_[0], incoming_particles_[1]);
   if (partial_width <= 0.f) {
     return 0.;
@@ -225,17 +235,12 @@ double ScatterAction::two_to_one_formation(const ParticleType &type_resonance,
     / ((type_particle_a.spin() + 1) * (type_particle_b.spin() + 1));
   const int sym_factor = (type_particle_a.pdgcode() ==
                           type_particle_b.pdgcode()) ? 2 : 1;
-  float resonance_width = type_resonance.total_width(srts);
-  if (resonance_width <= 0.f) {
-    return 0.;
-  }
   /** Calculate resonance production cross section
    * using the Breit-Wigner distribution as probability amplitude.
    * See Eq. (176) in \iref{Buss:2011mx}. */
-  return spinfactor * sym_factor * 4.0 * M_PI / cm_momentum_sqr
-         * breit_wigner(s, type_resonance.mass(), resonance_width)
-         * partial_width/resonance_width
-         * hbarc * hbarc / fm2_mb;
+  return spinfactor * sym_factor * 2. * M_PI * M_PI / cm_momentum_sqr
+         * type_resonance.spectral_function(srts)
+         * partial_width * hbarc * hbarc / fm2_mb;
 }
 
 
@@ -245,7 +250,7 @@ CollisionBranchList ScatterAction::resonance_cross_sections() {
   const ParticleType &type_particle_a = incoming_particles_[0].type();
   const ParticleType &type_particle_b = incoming_particles_[1].type();
 
-  const double s = mandelstam_s();
+  const double srts = sqrt_s();
   const double p_cm_sqr = cm_momentum_squared();
 
   /* Find all the possible resonances */
@@ -264,7 +269,7 @@ CollisionBranchList ScatterAction::resonance_cross_sections() {
     }
 
     float resonance_xsection = two_to_one_formation(type_resonance,
-                                                    s, p_cm_sqr);
+                                                    srts, p_cm_sqr);
 
     /* If cross section is non-negligible, add resonance to the list */
     if (resonance_xsection > really_small) {
@@ -281,28 +286,12 @@ CollisionBranchList ScatterAction::resonance_cross_sections() {
 
 
 void ScatterAction::elastic_scattering() {
-  const auto &log = logger<LogArea::ScatterAction>();
+  // copy initial particles into final state
   outgoing_particles_[0] = incoming_particles_[0];
   outgoing_particles_[1] = incoming_particles_[1];
-
-  /* Determine absolute momentum in center-of-mass frame. */
-  const double momentum_radial = cm_momentum();
-
-  /* Particles exchange momenta and scatter to random direction
-   * (isotropically). */
-  Angles phitheta;
-  phitheta.distribute_isotropically();
-  log.debug("Random momentum: ", momentum_radial, " ", phitheta);
-
-  /* Set 4-momentum: Masses stay the same, 3-momentum changes. */
-  outgoing_particles_[0].set_4momentum(outgoing_particles_[0].effective_mass(),
-                                       phitheta.threevec() * momentum_radial);
-  outgoing_particles_[1].set_4momentum(outgoing_particles_[1].effective_mass(),
-                                       -phitheta.threevec() * momentum_radial);
-
-  /* debug output */
-  log.debug("exchanged momenta a", outgoing_particles_[0].momentum());
-  log.debug("exchanged momenta b", outgoing_particles_[1].momentum());
+  // resample momenta
+  sample_angles({outgoing_particles_[0].effective_mass(),
+                 outgoing_particles_[1].effective_mass()});
 }
 
 

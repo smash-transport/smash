@@ -7,25 +7,11 @@
 #ifndef SRC_INCLUDE_EXPERIMENT_H_
 #define SRC_INCLUDE_EXPERIMENT_H_
 
-#include <map>
-#include <memory>
-#include <stdexcept>
-#include <string>
-#include <vector>
-
+#include "actionfinderfactory.h"
 #include "chrono.h"
-#include "decayactionsfinder.h"
-#include "density.h"
-#include "experimentparameters.h"
-#include "forwarddeclarations.h"
-#include "outputinterface.h"
-#include "lattice.h"
-#include "particles.h"
 #include "pauliblocking.h"
 #include "potentials.h"
-#include "processbranch.h"
 #include "quantumnumbers.h"
-#include "scatteractionsfinder.h"
 
 namespace Smash {
 
@@ -53,6 +39,7 @@ class ExperimentBase {
    *
    * \param config The configuration object that sets all initial conditions of
    *               the experiment.
+   * \param output_path The directory where the output files are written.
    *
    * \return An owning pointer to the Experiment object, using the
    *         ExperimentBase interface.
@@ -64,7 +51,8 @@ class ExperimentBase {
    * Most of the Configuration values are read starting from this function. The
    * configuration itself is documented in \subpage input_general_
    */
-  static std::unique_ptr<ExperimentBase> create(Configuration config);
+  static std::unique_ptr<ExperimentBase> create(Configuration config,
+                                                const bf::path &output_path);
 
   /**
    * Runs the experiment.
@@ -73,11 +61,6 @@ class ExperimentBase {
    * the complete experiment.
    */
   virtual void run() = 0;
-
-  /**
-   * Sets list of outputs
-   */
-  virtual void set_outputs(OutputsList &&output_list) = 0;
 
   /**
    * \ingroup exception
@@ -124,9 +107,6 @@ class Experiment : public ExperimentBase {
 
  public:
   void run() override;
-  void set_outputs(OutputsList &&output_list) override {
-    outputs_ = std::move(output_list);
-  }
 
  private:
   /**
@@ -142,8 +122,9 @@ class Experiment : public ExperimentBase {
    *                is only necessary for bookkeeping: Values are not only read,
    *                but actually taken out of the object. Thus, all values that
    *                remain were not used.
+   * \param output_path The directory where the output files are written.
    */
-  explicit Experiment(Configuration config);
+  explicit Experiment(Configuration config, const bf::path &output_path);
 
   /** Reads particle type information and cross sections information and
    * does the initialization of the system
@@ -152,18 +133,66 @@ class Experiment : public ExperimentBase {
    */
   void initialize_new_event();
 
-  /** Perform all actions in the given list. */
-  void perform_actions(ActionList &actions, size_t &interactions_total,
-                                            size_t &total_pauliblocked);
+  /** Perform the given action. */
+  template <typename Container>
+  void perform_action(const ActionPtr &action, size_t &interactions_total,
+                      size_t &total_pauliblocked,
+                      const Container &particles_before_actions);
 
-  /** Runs the time evolution of an event
+  /** It generates the final state with the right kinematics and then writes
+   * the given dilepton action in the dilepton output file, instead of
+   * actually performing the action.
+   */
+  void write_dilepton_action(const ActionPtr &action,
+                               const ParticleList &particles_before_actions);
+
+  /** Runs the time evolution of an event with fixed-sized time steps
    *
    * Here, the time steps are looped over, collisions and decays are
    * carried out and particles are propagated.
    *
    * \param evt_num Running number of the event
+   * \return The number of interactions from the event
    */
-  void run_time_evolution(const int evt_num);
+  size_t run_time_evolution_fixed_time_step(const int evt_num);
+
+  /** Runs the time evolution of an event without time steps
+   *
+   * Here, all actions are looped over, collisions and decays are
+   * carried out and particles are propagated.
+   *
+   * \param evt_num Running number of the event
+   * \return The number of interactions from the event
+   */
+  size_t run_time_evolution_without_time_steps(const int evt_num);
+
+  /** Performs the final decays of an event
+   *
+   * \param interactions_total The number of interactions so far
+   */
+  void do_final_decays(size_t &interactions_total);
+
+  /** Output at the end of an event
+   *
+   * \param interactions_total The number of interactions from the event
+   * \param evt_num Number of the event
+   */
+  void final_output(size_t interactions_total, const int evt_num);
+
+  /** Intermediate output during an event
+   *
+   * \param evt_num Number of the event
+   * \param interactions_total The total number of interactions so far
+   * \param previous_interactions_total The number of interactions at the
+   *                                    previous output
+   */
+  void intermediate_output(const int evt_num, size_t& interactions_total,
+                           size_t& previous_interactions_total);
+
+  /**
+   * Propagate all particles to the current time.
+   */
+  void propagate_all();
 
   /**
    * Struct of several member variables.
@@ -171,6 +200,11 @@ class Experiment : public ExperimentBase {
    * outside of this class.
    */
   ExperimentParameters parameters_;
+
+  /**
+   * Structure to precalculate and hold parameters for density computations
+   */
+  DensityParameters density_param_;
 
   /**
    * Instance of the Modus template parameter. May store modus-specific data
@@ -201,8 +235,14 @@ class Experiment : public ExperimentBase {
    */
   OutputsList outputs_;
 
+  /// The Dilepton output
+  std::unique_ptr<OutputInterface> dilepton_output_;
+
   /// The Action finder objects
   std::vector<std::unique_ptr<ActionFinderInterface>> action_finders_;
+
+  /// The Dilepton Action Finder
+  std::unique_ptr<ActionFinderInterface> dilepton_finder_;
 
   /// Lattices holding different physical quantities
 
@@ -214,7 +254,11 @@ class Experiment : public ExperimentBase {
    */
   std::unique_ptr<DensityLattice> jmu_B_lat_, jmu_I3_lat_, jmu_custom_lat_;
   /// Type of density for lattice printout
-  DensityType dens_type_lattice_printout_ = DensityType::none;
+  DensityType dens_type_lattice_printout_ = DensityType::None;
+  /// Lattices for potentials
+  std::unique_ptr<RectangularLattice<double>> UB_lat_, UI3_lat_;
+  /// Lattices for  potential gradients.
+  std::unique_ptr<RectangularLattice<ThreeVector>> dUB_dr_lat_, dUI3_dr_lat_;
 
   /**
    * Number of events.
@@ -245,6 +289,16 @@ class Experiment : public ExperimentBase {
    */
   const bool force_decays_;
 
+  /**
+   * This indicates whether to use the grid.
+   */
+  const bool use_grid_;
+
+  /**
+   * This indicates whether to use time steps.
+   */
+  const TimeStepMode time_step_mode_;
+
   /** The conserved quantities of the system.
    *
    * This struct carries the sums of the single particle's various
@@ -257,7 +311,7 @@ class Experiment : public ExperimentBase {
   SystemTimePoint time_start_ = SystemClock::now();
 
   /// Type of density to be written to collision headers
-  DensityType dens_type_;
+  DensityType dens_type_ = DensityType::None;
 
   /**\ingroup logging
    * Writes the initial state for the Experiment to the output stream.

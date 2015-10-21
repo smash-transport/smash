@@ -19,6 +19,7 @@
 #include "forwarddeclarations.h"
 #include "fourvector.h"
 #include "logging.h"
+#include "numerics.h"
 
 namespace Smash {
 
@@ -65,6 +66,15 @@ class RectangularLattice {
              n_cells_[0], ",", n_cells_[1], ",", n_cells_[2], "), origin = (",
              origin_[0], ",", origin_[1], ",", origin_[2],
              "), periodic: ", periodic_);
+    if (n_cells_[0] < 1 ||
+        n_cells_[1] < 1 ||
+        n_cells_[2] < 1 ||
+        lattice_sizes_[0] < 0.0 ||
+        lattice_sizes_[1] < 0.0 ||
+        lattice_sizes_[2] < 0.0) {
+      throw std::invalid_argument("Lattice sizes should be positive, "
+                     "lattice dimensions should be > 0.");
+    }
   }
 
   /// Sets all values on lattice to zeros
@@ -73,7 +83,7 @@ class RectangularLattice {
   }
 
   /// Checks if 3D index is out of lattice bounds
-  inline bool out_of_bounds(int ix, int iy, int iz) {
+  inline bool out_of_bounds(int ix, int iy, int iz) const {
     return !periodic_ &&
            (ix < 0 || ix >= n_cells_[0] ||
             iy < 0 || iy >= n_cells_[1] ||
@@ -81,7 +91,7 @@ class RectangularLattice {
   }
 
   /// Returns coordinate of cell center given its index
-  inline ThreeVector cell_center(int ix, int iy, int iz) {
+  inline ThreeVector cell_center(int ix, int iy, int iz) const {
     return ThreeVector(origin_[0] + cell_sizes_[0] * (ix + 0.5f),
                        origin_[1] + cell_sizes_[1] * (iy + 0.5f),
                        origin_[2] + cell_sizes_[2] * (iz + 0.5f));
@@ -125,6 +135,25 @@ class RectangularLattice {
   }
 
   /**
+   * Interpolates lattice quantity to coordinate r. Result is stored
+   * in the value variable. Returns true if coordinate r is on the
+   * lattice, false if out of the lattice.
+   **/
+  // TODO(oliiny): maybe 1-order interpolation instead of 0-order?
+  bool value_at(const ThreeVector& r, T& value) {
+    const int ix = std::floor((r.x1() - origin_[0])/cell_sizes_[0]);
+    const int iy = std::floor((r.x2() - origin_[1])/cell_sizes_[1]);
+    const int iz = std::floor((r.x3() - origin_[2])/cell_sizes_[2]);
+    if (out_of_bounds(ix, iy, iz)) {
+      value = T();
+      return false;
+    } else {
+      value = node(ix, iy, iz);
+      return true;
+    }
+  }
+
+  /**
    * A sub-lattice iterator, which iterates in a 3D-structured manner.
    * Gives index of the node it goes through: ix, iy, iz.
    */
@@ -161,7 +190,7 @@ class RectangularLattice {
         }
       }
     }
-  };
+  }
 
   /**
    * Iterates only nodes, whose cell centers lie not further than r_cut in
@@ -197,7 +226,91 @@ class RectangularLattice {
       }
     }
     iterate_sublattice(l_bounds, u_bounds, std::forward<F>(func));
-  };
+  }
+
+  /// Checks if lattices of possibly different types have identical structure
+  template <typename L>
+  bool identical_to_lattice(const L* lat) const {
+    return n_cells_[0] == lat->dimensions()[0]
+        && n_cells_[1] == lat->dimensions()[1]
+        && n_cells_[2] == lat->dimensions()[2]
+        && std::abs(lattice_sizes_[0] - lat->lattice_sizes()[0]) < really_small
+        && std::abs(lattice_sizes_[1] - lat->lattice_sizes()[1]) < really_small
+        && std::abs(lattice_sizes_[2] - lat->lattice_sizes()[2]) < really_small
+        && std::abs(origin_[0] - lat->origin()[0]) < really_small
+        && std::abs(origin_[1] - lat->origin()[1]) < really_small
+        && std::abs(origin_[2] - lat->origin()[2]) < really_small
+        && periodic_ == lat->periodic();
+  }
+
+  void compute_gradient_lattice(
+         RectangularLattice<ThreeVector>* grad_lat) const {
+    if (n_cells_[0] < 2 || n_cells_[1] < 2 || n_cells_[2] < 2) {
+      // Gradient calculation is impossible
+      throw std::runtime_error("Lattice is too small for gradient calculation"
+                               " (should be at least 2x2x2)");
+    }
+    if (!identical_to_lattice(grad_lat)) {
+      // Lattice for gradient should have identical origin/dims/periodicity
+      throw std::invalid_argument("Lattice for gradient should have the"
+                  " same origin/dims/periodicity that the original one.");
+    }
+    const float inv_2dx = 0.5f / cell_sizes_[0];
+    const float inv_2dy = 0.5f / cell_sizes_[1];
+    const float inv_2dz = 0.5f / cell_sizes_[2];
+    const int dix = 1;
+    const int diy = n_cells_[0];
+    const int diz = n_cells_[0]*n_cells_[1];
+    const int d = diz * n_cells_[2];
+
+    for (int iz = 0; iz < n_cells_[2]; iz++) {
+      const int z_offset = diz * iz;
+      for (int iy = 0; iy < n_cells_[1]; iy++) {
+        const int y_offset = diy * iy + z_offset;
+        for (int ix = 0; ix < n_cells_[0]; ix++) {
+          const int index = ix + y_offset;
+          if (unlikely(ix == 0)) {
+            (*grad_lat)[index].set_x1(periodic_ ?
+               (lattice_[index+dix]-lattice_[index+diy-dix]) * inv_2dx :
+               (lattice_[index+dix]-lattice_[index]) * 2 * inv_2dx);
+          } else if (unlikely(ix == n_cells_[0]-1)) {
+            (*grad_lat)[index].set_x1(periodic_ ?
+               (lattice_[index-diy+dix]-lattice_[index-dix]) * inv_2dx :
+               (lattice_[index]-lattice_[index-dix]) * 2 * inv_2dx);
+          } else {
+            (*grad_lat)[index].set_x1(
+               (lattice_[index+dix]-lattice_[index-dix]) * inv_2dx);
+          }
+
+          if (unlikely(iy == 0)) {
+            (*grad_lat)[index].set_x2(periodic_ ?
+               (lattice_[index+diy]-lattice_[index+diz-diy]) * inv_2dy :
+               (lattice_[index+diy]-lattice_[index]) * 2 * inv_2dy);
+          } else if (unlikely(iy == n_cells_[1]-1)) {
+            (*grad_lat)[index].set_x2(periodic_ ?
+               (lattice_[index-diz+diy]-lattice_[index-diy]) * inv_2dy :
+               (lattice_[index]-lattice_[index-diy]) * 2 * inv_2dy);
+          } else {
+            (*grad_lat)[index].set_x2(
+              (lattice_[index+diy]-lattice_[index-diy]) * inv_2dy);
+          }
+
+          if (unlikely(iz == 0)) {
+            (*grad_lat)[index].set_x3(periodic_ ?
+               (lattice_[index+diz]-lattice_[index+d-diz]) * inv_2dz :
+               (lattice_[index+diz]-lattice_[index]) * 2 * inv_2dz);
+          } else if (unlikely(iz == n_cells_[2]-1)) {
+            (*grad_lat)[index].set_x3(periodic_ ?
+               (lattice_[index-d+diz]-lattice_[index-diz]) * inv_2dz :
+               (lattice_[index]-lattice_[index-diz]) * 2 * inv_2dz);
+          } else {
+            (*grad_lat)[index].set_x3(
+              (lattice_[index+diz]-lattice_[index-diz]) * inv_2dz);
+          }
+        }
+      }
+    }
+  }
 
  protected:
   /// The lattice itself, array containing physical quantities
@@ -218,7 +331,7 @@ class RectangularLattice {
  private:
   /// Returns division modulo, which is always between 0 and n-1
   // i%n is not suitable, because it returns results from -(n-1) to n-1
-  inline int positive_modulo(int i, int n) {
+  inline int positive_modulo(int i, int n) const {
     /* (i % n + n) % n would be correct, but slow.
        Instead I rely on the fact that i should never go too far
        in negative region and replace i%n + n by i + 256 * n = i + (n << 8) */

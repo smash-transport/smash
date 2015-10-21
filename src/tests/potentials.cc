@@ -29,9 +29,9 @@ using namespace Smash;
 TEST(init_particle_types) {
   ParticleType::create_type_list(
       "# NAME MASS[GEV] WIDTH[GEV] PDG\n"
-      "proton 0.938 0.0 2212\n"
-      "neutron 0.938 0.0 2112\n"
-      "pion    0.138 0.0 211\n");
+      "N+ 0.938 0.0 2212\n"
+      "N0 0.938 0.0 2112\n"
+      "π+  0.138 0.0 211\n");
 }
 
 static ParticleData create_proton(int id = -1) {
@@ -64,7 +64,7 @@ TEST(potential_gradient) {
   P.push_back(part3);
 
   ThreeVector r,dr;
-  Configuration conf(TEST_CONFIG_PATH);
+  Configuration conf = Test::configuration();
   conf["Potentials"]["Skyrme"]["Skyrme_A"] = -209.2;
   conf["Potentials"]["Skyrme"]["Skyrme_B"] = 156.4;
   conf["Potentials"]["Skyrme"]["Skyrme_Tau"] = 1.35;
@@ -75,15 +75,16 @@ TEST(potential_gradient) {
   r = ThreeVector(0.2, 0.0, 0.0);
 
   // analytical gradient
-  analit_grad = pot->potential_gradient(r, P, 0x2212);
+  const ParticleType &proton = ParticleType::find(0x2212);
+  analit_grad = pot->potential_gradient(r, P, proton);
   // numerical gradient
-  const double U = pot->potential(r, P, 0x2212);
+  const double U = pot->potential(r, P, proton);
   dr = ThreeVector(1.e-4, 0.0, 0.0);
-  num_grad.set_x1((pot->potential(r + dr, P, 0x2212) - U)/dr.x1());
+  num_grad.set_x1((pot->potential(r + dr, P, proton) - U)/dr.x1());
   dr = ThreeVector(0.0, 1.e-4, 0.0);
-  num_grad.set_x2((pot->potential(r + dr, P, 0x2212) - U)/dr.x2());
+  num_grad.set_x2((pot->potential(r + dr, P, proton) - U)/dr.x2());
   dr = ThreeVector(0.0, 0.0, 1.e-4);
-  num_grad.set_x3((pot->potential(r + dr, P, 0x2212) - U)/dr.x3());
+  num_grad.set_x3((pot->potential(r + dr, P, proton) - U)/dr.x3());
   // compare them with: accuracy should not be worse than |dr|
   std::cout << num_grad << analit_grad << std::endl;
   COMPARE_ABSOLUTE_ERROR(num_grad.x1(), analit_grad.x1(), 1.e-4);
@@ -97,7 +98,7 @@ TEST(nucleus_potential_profile) {
   std::map<PdgCode, int> nuc_list = {{0x2212, 79}, {0x2112, 118}};
 
   // Create a nucleus
-  Configuration conf(TEST_CONFIG_PATH);
+  Configuration conf = Test::configuration();
   // All interactions off
   conf["Collision_Term"]["Decays"] = "False";
   conf["Collision_Term"]["Collisions"] = "False";
@@ -130,6 +131,7 @@ TEST(nucleus_potential_profile) {
   const int nx = 50, ny = 50;
   const double dx = 0.2, dy = 0.2;
   double pot_value;
+  const ParticleType &proton = ParticleType::find(0x2212);
 
   std::ofstream a_file;
   for (auto it = 0; it < 20; it++) {
@@ -152,14 +154,14 @@ TEST(nucleus_potential_profile) {
     for (auto iy = -ny; iy <= ny; iy++) {
       for (auto ix = -nx; ix <= nx; ix++) {
         r = ThreeVector(ix*dx, iy*dy, 8.0);
-        pot_value = pot->potential(r, plist, 0x2212);
+        pot_value = pot->potential(r, plist, proton);
         a_file << pot_value << " ";
       }
       a_file << "\n";
     }
     a_file.close();
     for (auto i = 0; i < 50; i++) {
-      propagate(&P, param, *pot);
+      propagate(&P, param, *pot, nullptr, nullptr);
     }
   }
 }
@@ -180,16 +182,19 @@ TEST(propagation_in_test_potential) {
        U0_(U0), d_(d) {}
     double potential(const ThreeVector &r,
                      const ParticleList &/*plist*/,
-                     const PdgCode /*acts_on*/) const {
+                     const ParticleType& /*acts_on*/) const override {
       return U0_/(1.0 + std::exp(r.x1()/d_));
     }
 
     ThreeVector potential_gradient(const ThreeVector &r,
                         const ParticleList &/*plist*/,
-                        const PdgCode /*acts_on*/) const {
+                        const ParticleType& /*acts_on*/) const override {
       const double tmp = std::exp(r.x1()/d_);
       return ThreeVector(- U0_/d_ * tmp / ((1.0 + tmp)*(1.0 + tmp)), 0.0, 0.0);
     }
+
+    bool use_skyrme() const { return true; }
+    bool use_symmetry() const { return true; }
    private:
     const double U0_, d_;
   };
@@ -197,7 +202,7 @@ TEST(propagation_in_test_potential) {
   // Create spheremodus with arbitrary parameters
   // Do not initialize particles: just artificially put one particle to list
   const double p_mass = 0.938;
-  Configuration conf(TEST_CONFIG_PATH);
+  Configuration conf = Test::configuration();
   ExperimentParameters param = Smash::Test::default_parameters();
 
   // Create dummy outputs and our test potential
@@ -215,7 +220,7 @@ TEST(propagation_in_test_potential) {
 
   // Propagate, until particle is at x>>d, where d is parameter of potential
   while (P.front().position().x1() < 20*d) {
-    propagate(&P, param, *pot);
+    propagate(&P, param, *pot, nullptr, nullptr);
   }
   // Calculate 4-momentum, expected from conservation laws
   const FourVector pm = part.momentum();

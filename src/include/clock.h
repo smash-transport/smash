@@ -191,6 +191,22 @@ class Clock {
     }
     return convert((current / int_interval + 1) * int_interval);
   }
+  /** set the time step such that it ends on the next multiple of the interval
+   *
+   * \param interval The given interval
+   */
+  void end_tick_on_multiple(const float interval) {
+    const Representation int_interval = convert(interval);
+    const auto current = reset_time_ + timestep_duration_ * counter_;
+    reset_time_ = current;
+    counter_ = 0;
+    if (unlikely(current < 0)) {
+      timestep_duration_ = current / int_interval * int_interval - current;
+    } else {
+      timestep_duration_ =
+          (current / int_interval + 1) * int_interval - current;
+    }
+  }
   /** resets the time to a pre-defined value
    *
    * This is the only way of turning the clock back. It is needed so
@@ -214,8 +230,7 @@ class Clock {
    */
   Clock& operator++() {
     // guard against overflow:
-    if (counter_ * timestep_duration_ >=
-        std::numeric_limits<Representation>::max() - timestep_duration_) {
+    if (counter_ >= std::numeric_limits<Representation>::max() - 1) {
       throw std::overflow_error("Too many timesteps, clock overflow imminent");
     }
     ++counter_;
@@ -238,9 +253,8 @@ class Clock {
   }
   /// advances the clock by an arbitrary number of ticks.
   Clock& operator+=(Representation advance_several_timesteps) {
-    if (counter_ * timestep_duration_ >=
-        std::numeric_limits<Representation>::max() -
-            advance_several_timesteps * timestep_duration_) {
+    if (counter_  >= std::numeric_limits<Representation>::max()
+                     - advance_several_timesteps) {
       throw std::overflow_error("Too many timesteps, clock overflow imminent");
     }
     counter_ += advance_several_timesteps;

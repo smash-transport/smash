@@ -11,7 +11,6 @@
 #include <cmath>
 #include <iosfwd>
 
-#include "numerics.h"
 #include "threevector.h"
 
 namespace Smash {
@@ -124,7 +123,7 @@ class FourVector {
   FourVector LorentzBoost(const ThreeVector &v) const;
 
   /// checks component-wise equality (accuracy \f$10^{-12}\f$)
-  bool inline operator==(const FourVector &a) const;
+  bool operator==(const FourVector &a) const;
   /// checks inequality (logical complement to
   /// FourVector::operator==(const FourVector&) const)
   bool inline operator!=(const FourVector &a) const;
@@ -228,14 +227,6 @@ ThreeVector inline FourVector::threevec() const {
 
 ThreeVector inline FourVector::velocity() const {
   return threevec() / x0();
-}
-
-// check if all four vector components are equal
-bool inline FourVector::operator==(const FourVector &a) const {
-  return almost_equal(x_[0], a.x_[0])
-      && almost_equal(x_[1], a.x_[1])
-      && almost_equal(x_[2], a.x_[2])
-      && almost_equal(x_[3], a.x_[3]);
 }
 
 // use == operator for the inverse != check
@@ -357,10 +348,11 @@ inline FourVector operator*(double b, FourVector a) {
 
 // assignement factor division
 FourVector inline FourVector::operator/=(const double &a) {
-  this->x_[0] /= a;
-  this->x_[1] /= a;
-  this->x_[2] /= a;
-  this->x_[3] /= a;
+  const double a_inv = 1.0 / a;
+  this->x_[0] *= a_inv;
+  this->x_[1] *= a_inv;
+  this->x_[2] *= a_inv;
+  this->x_[3] *= a_inv;
   return *this;
 }
 

@@ -55,7 +55,7 @@ enum OscarOutputContents {
 template <OscarOutputFormat Format, int Contents>
 class OscarOutput : public OutputInterface {
  public:
-  OscarOutput(bf::path path, std::string name);
+  OscarOutput(const bf::path &path, std::string name);
 
   /// writes the initial particle information of an event
   void at_eventstart(const Particles &particles,
@@ -89,10 +89,13 @@ class OscarOutput : public OutputInterface {
  *             placed.
  * \param config A Configuration object that has direct entries for OSCAR.
  */
-std::unique_ptr<OutputInterface> create_oscar_output(bf::path path,
+std::unique_ptr<OutputInterface> create_oscar_output(const bf::path &path,
                                                      Configuration config);
 
+
 // @}
+
+
 }  // namespace Smash
 
 #endif  // SRC_INCLUDE_OSCAROUTPUT_H_

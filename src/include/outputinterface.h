@@ -84,9 +84,11 @@ class OutputInterface {
    * It is launched after every N'th timestep. N is controlled by an option.
    */
   virtual void thermodynamics_output(const Particles &particles,
-                                     const ExperimentParameters &param) {
+                                     const ExperimentParameters &param,
+                                     const DensityParameters &dens_param) {
     SMASH_UNUSED(particles);
     SMASH_UNUSED(param);
+    SMASH_UNUSED(dens_param);
   }
 
   /**
@@ -99,7 +101,6 @@ class OutputInterface {
     SMASH_UNUSED(lattice);
     SMASH_UNUSED(event_number);
   }
-
 };
 
 }  // namespace Smash

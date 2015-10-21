@@ -23,7 +23,7 @@
 
 namespace Smash {
 
-DensityOutput::DensityOutput(bf::path path, Configuration &&config)
+DensityOutput::DensityOutput(const bf::path &path, Configuration &&config)
     : file_{std::fopen((path / ("density_out.dat")).native().c_str(), "w")},
       r_(ThreeVector(config.take({"x"}),
                      config.take({"y"}),
@@ -53,16 +53,17 @@ void DensityOutput::at_intermediate_time(const Particles &/*particles*/,
 }
 
 void DensityOutput::thermodynamics_output(const Particles &particles,
-                                          const ExperimentParameters &param) {
+                                          const ExperimentParameters &param,
+                                          const DensityParameters &dens_param) {
   const bool compute_gradient = false;
-  const double rho = rho_eckart(r_, particles, param, DensityType::baryon,
+  const double rho = rho_eckart(r_, particles, dens_param, DensityType::Baryon,
                                 compute_gradient).first;
   std::fprintf(file_.get(), "%g %g\n", param.labclock.current_time(), rho);
 }
 
 void DensityOutput::density_along_line(const char * file_name,
                         const ParticleList &plist,
-                        const ExperimentParameters &param,
+                        const DensityParameters &param,
                          DensityType dens_type,
                         const ThreeVector &line_start,
                         const ThreeVector &line_end, int n_points) {

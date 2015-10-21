@@ -24,36 +24,24 @@ class ScatterActionNucleonNucleon : public ScatterActionBaryonBaryon {
  public:
   /* Inherit constructor. */
   using ScatterActionBaryonBaryon::ScatterActionBaryonBaryon;
-  /**
-   * Determine the elastic cross section for a nucleon-nucleon collision.
-   * It is given by a parametrization of experimental data.
-   *
-   * \param[in] elast_par Elastic cross section parameter from the input file (not used here).
-   *
-   * \return A ProcessBranch object containing the cross section and
-   * final-state IDs.
-   */
-  CollisionBranchPtr elastic_cross_section(float elast_par) override;
+  /** Determine the (parametrized) elastic cross section for a
+   * nucleon-nucleon collision. */
+  float elastic_parametrization() override;
   /** Find all inelastic 2->2 processes for this reaction. */
   CollisionBranchList two_to_two_cross_sections() override;
 
  protected:
-  /** Perform an elastic nucleon-nucleon scattering with
-   * anisotropic angular distributions. */
-  void elastic_scattering() override;
-
   /**
-   * Sample final state momenta (and masses) in an inelastic 2->2 collision,
-   * possibly using anisotropic angular distributions.
+   * Sample final-state angles in a 2->2 collision (possibly anisotropic).
    *
    * \throws InvalidResonanceFormation
    */
-  void sample_cms_momenta() override;
+  void sample_angles(std::pair<double, double> masses) override;
 
  private:
   /**
-   * Calculate cross sections for single-resonance production from
-   * nucleon-nucleon collisions (i.e. NN->NR).
+   * Calculate cross sections for resonance production from
+   * nucleon-nucleon collisions (i.e. N N -> N R, N N -> Delta R).
    *
    * Checks are processed in the following order:
    * 1. Charge conservation
@@ -67,8 +55,8 @@ class ScatterActionNucleonNucleon : public ScatterActionBaryonBaryon {
    * of the two nucleons. Each element in the list contains the type(s) of the
    * final state particle(s) and the cross section for that particular process.
    */
-  CollisionBranchList nuc_nuc_to_nuc_res(const ParticleType &type_particle1,
-                                       const ParticleType &type_particle2);
+  CollisionBranchList two_to_two_inel(const ParticleType &type_particle1,
+                                      const ParticleType &type_particle2);
 };
 
 

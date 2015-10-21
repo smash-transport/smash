@@ -61,9 +61,8 @@ class DecayType {
   virtual float in_width(float m0, float G0, float m,
                          float m1, float m2) const = 0;
 
+
  protected:
-  // Evaluate rho_ab according to equ. (2.76) in Effenberger's thesis.
-  virtual float rho(float m) const = 0;
   /// final-state particles of the decay
   ParticleTypePtrList particle_types_;
   /// angular momentum of the decay
@@ -80,6 +79,13 @@ class TwoBodyDecay : public DecayType {
   int particle_number() const override;
   bool has_particles(const ParticleType &t_a,
                      const ParticleType &t_b) const override;
+
+ protected:
+  /* This is a virtual helper method which is used to write the width as
+   * Gamma(m) = Gamma_0 * rho(m) / rho(m_0). This ensures that the width is
+   * properly normalized at the pole mass to Gamma(m_0) = Gamma_0.
+   * By default rho simply equals one, which corresponds to a constant width. */
+  virtual float rho(float) const { return 1.; }
 };
 
 
@@ -137,8 +143,21 @@ class TwoBodyDecaySemistable : public TwoBodyDecay {
 
  protected:
   float rho(float m) const override;
+  /**
+   * Determine the cutoff parameter Λ for semi-stable decays,
+   * given the types of the daughter particles.
+   *
+   * For the values used in GiBUU, see \iref{Buss:2011mx}, eq. (175).
+   * For the original values used by M. Post, see table 1 in \iref{Post:2003hu}.
+   *
+   * We mostly stick to the GiBUU values, but use a different value for the ρπ
+   * decay, in order to avoid secondary bumps in the ω spectral function and
+   * achieve a better normalization. In contrast to Smash, GiBUU does not have
+   * an ω → ρ π decay.
+   */
+  float get_Lambda();
   float Lambda_;
-  Tabulation tabulation_;
+  std::unique_ptr<Tabulation> tabulation_;
 };
 
 
@@ -153,8 +172,24 @@ class TwoBodyDecayUnstable : public TwoBodyDecay {
                  float m1, float m2) const override;
  protected:
   float rho(float m) const override;
+  /**
+   * Determine the cutoff parameter Λ for unstable decays,
+   * given the types of the daughter particles.
+   */
+  float get_Lambda();
+  float Lambda_;
+  std::unique_ptr<Tabulation> tabulation_;
 };
 
+/**
+ * TwoBodyDecayDilepton represents a decay with a lepton and it's antilepton
+ * as the final state particles.
+ */
+class TwoBodyDecayDilepton : public TwoBodyDecayStable {
+ public:
+  TwoBodyDecayDilepton(ParticleTypePtrList part_types, int l);
+  float width(float m0, float G0, float m) const override;
+};
 
 /**
  * ThreeBodyDecay represents a decay type with three final-state particles.
@@ -167,8 +202,26 @@ class ThreeBodyDecay : public DecayType {
   float width(float m0, float G0, float m) const override;
   float in_width(float m0, float G0, float m,
                  float m1, float m2) const override;
+};
+
+/**
+ * ThreeBodyDecayDilepton represents a decay type with three final-state
+ * particles. Two of them are a dilepton.
+ */
+class ThreeBodyDecayDilepton : public ThreeBodyDecay {
+ public:
+  ThreeBodyDecayDilepton(ParticleTypePtrList part_types, int l);
+  /**
+   * Get the differential width for dilepton dalitz decay. Because we use the
+   * shining method, we do not need a partial width and can use the differential
+   * width directly for the shinin weights. The differential width is calculated
+   * according to PhD thesis Weil, eq. (30) - (36).
+   */
+  static float diff_width(float m_parent, float m_dil,
+                   float m_other, PdgCode pdg);
+  float width(float m0, float G0, float m) const override;
  protected:
-  float rho(float m) const override;
+  std::unique_ptr<Tabulation> tabulation_;
 };
 
 

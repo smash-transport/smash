@@ -6,289 +6,103 @@
  *    GNU General Public License (GPLv3 or later)
  *
  */
-#include "unittest.h"
 
-#include <map>
+#include "unittest.h"
+#include "histogram.h"
+
 #include "../include/random.h"
 
 using namespace Smash;
 
-// we might want to print the distribution (for plotting) instead of
-// testing it!
-constexpr bool PRINT = true;
-
-constexpr int N_TEST = 10000000;
-constexpr int sigmabins = 4;
-constexpr double allowed[sigmabins] = {.682*.99, .954*.99, .997*.99, 1.0};
-
-// all tests work similarly, only the first is extensively commented.
-TEST(exponential) {
-  std::map<int, int> hist {};
-  constexpr float dx = 0.10;
-  for (int i = 0; i < N_TEST; i++) {
-    double chi = Random::exponential();
-    ++hist[chi/dx];
-  }
-  int diffbad[sigmabins] = {0};
-  int total = 0;
-  // this comes from the integral of the exponential inside the bins.
-  double normalize = (1 - exp(-dx)) * N_TEST;
-  for (auto b : hist) {
-    // the result that I got:
-    int result = b.second;
-    // statistical error is sqrt(N)
-    int stat_err = sqrt(b.second);
-    // the analytical value (stuff that is independent of x is only
-    // calculated once before the loop)
-    int analyt = exp(- dx * b.first) * normalize;
-    // if we want to print the distribution, print!
-    if (PRINT) {
-      printf("%7.3f %d %d %d\n", dx * b.first, result, stat_err, analyt);
-    }
-    // normalize the deviation
-    int diffbin = std::abs(result - analyt)/stat_err;
-    diffbin = (diffbin >= sigmabins) ? sigmabins - 1 : diffbin;
-    // this will be checked: how many points have been correct up to
-    // one, two, three, ... sigmas?
-    ++diffbad[diffbin];
-    ++total;
-  }
-  if (!PRINT) {
-    // the integral (in each loop, this holds how many particles have a
-    // normalized deviation less than this).
-    int totalbad = 0;
-    for (int unit = 0; unit < sigmabins - 1; ++unit) {
-      totalbad += diffbad[unit];
-      double fraction = (totalbad + 0.0) / (total + 0.0);
-      VERIFY(fraction > allowed[unit]) << " too few entries have less than "
-                << unit+1 << " sigma deviation ("
-                << totalbad << "/" << total << "=" << fraction
-                << ", required minimal fraction: " << allowed[unit];
-    }
-  }
+TEST(set_random_seed) {
+    std::random_device rd;
+    int64_t seed = rd();
+    Random::set_seed(seed);
+    printf("Random number seed: %ld\n", seed);
 }
 
-TEST(x_exponential) {
-  std::map<int, int> hist {};
-  constexpr float dx = 0.10;
-  for (int i = 0; i < N_TEST; i++) {
-    double chi = Random::exponential();
-    chi += Random::exponential();
-    ++hist[chi/dx];
-  }
-  int diffbad[sigmabins] = {0};
-  int total = 0;
-  double normalize_1 = (1 - exp(-dx)) * N_TEST;
-  double normalize_2 = (1 + dx) * normalize_1 - dx * N_TEST;
+int tst_cnt = 0;  // test_counter
 
-  for (auto b : hist) {
-    int result = b.second;
-    int stat_err = sqrt(b.second);
-    double x = dx * b.first;
-    double analyt = exp(-x) * (x * normalize_1 + normalize_2);
-    if (PRINT) {
-      printf("%7.3f %d %d %13.6e\n", dx * b.first, result, stat_err, analyt);
-    }
-    int diffbin = std::abs(result - analyt)/stat_err;
-    diffbin = (diffbin >= sigmabins) ? sigmabins - 1 : diffbin;
-    ++diffbad[diffbin];
-    ++total;
+// set this to true, in order to generate output files for debugging
+constexpr bool print_output_files = false;
+
+
+/**
+ * Compare a random distribution to an analytical function.
+ *
+ * The distribution 'get_chi' is sampled 'n_test' times and put into a histogram
+ * with bin size 'dx'. Then it is compared to the analytical function
+ * 'get_analyt'.
+ */
+template <typename Chi, typename Analytical>
+void test_distribution(int n_test, double dx,
+                       Chi get_chi, Analytical get_analyt) {
+  Histogram1d hist(dx);
+  // sample distribution and populate histogram
+  hist.populate(n_test, get_chi);
+  // test with the analytical function
+  if (print_output_files) {
+    hist.test(get_analyt, "random_" + std::to_string(tst_cnt) + ".dat");
+  } else {
+    hist.test(get_analyt);
   }
-  if (!PRINT) {
-    int totalbad = 0;
-    for (int unit = 0; unit < sigmabins - 1; ++unit) {
-      totalbad += diffbad[unit];
-      double fraction = (totalbad + 0.0) / (total + 0.0);
-      VERIFY(fraction > allowed[unit]) << " too few entries have less than "
-                << unit+1 << " sigma deviation ("
-                << totalbad << "/" << total << "=" << fraction
-                << ", required minimal fraction: " << allowed[unit];
-    }
-  }
+  tst_cnt++;
 }
 
-TEST(xsquared_exponential) {
-  std::map<int, int> hist {};
-  constexpr float dx = 0.10;
-  for (int i = 0; i < N_TEST; i++) {
-    double chi  = Random::exponential();
-           chi += Random::exponential();
-           chi += Random::exponential();
-    ++hist[chi/dx];
-  }
-  int diffbad[sigmabins] = {0};
-  int total = 0;
-  // this comes from the integral of the exponential inside the bins.
-  double normalize_1 = (1 - exp(-dx)) * N_TEST / 2.0;
-  double normalize_2 = 2.0 * (dx + 1.0);
-  double normalize_3 = N_TEST * (1.0 - exp(-dx) * ( dx * (dx / 2.0 + 1.0) + 1.0));
 
-  for (auto b : hist) {
-    int result = b.second;
-    int stat_err = sqrt(b.second);
-    double x = dx * b.first;
-    double analyt = exp(-x) * (normalize_1 * (x * x + x * normalize_2)
-                              - x * dx * N_TEST + normalize_3);
-    if (PRINT) {
-      printf("%7.3f %d %d %13.6e\n", dx * b.first, result, stat_err, analyt);
-    }
-    int diffbin = std::abs(result - analyt)/stat_err;
-    diffbin = (diffbin >= sigmabins) ? sigmabins - 1 : diffbin;
-    ++diffbad[diffbin];
-    ++total;
-  }
-  if (!PRINT) {
-    int totalbad = 0;
-    for (int unit = 0; unit < sigmabins - 1; ++unit) {
-      totalbad += diffbad[unit];
-      double fraction = (totalbad + 0.0) / (total + 0.0);
-      VERIFY(fraction > allowed[unit]) << " too few entries have less than "
-                << unit+1 << " sigma deviation ("
-                << totalbad << "/" << total << "=" << fraction
-                << ", required minimal fraction: " << allowed[unit];
-    }
-  }
-}
+constexpr int N_TEST = 1E7;  // number of samples
+
 
 TEST(canonical) {
-  std::map<int, int> hist {};
-  constexpr float dx = 0.001;
-  for (int i = 0; i < N_TEST; i++) {
-    double chi = Random::canonical();
-    ++hist[chi/dx];
-  }
-  int diffbad[sigmabins] = {0};
-  int total = 0;
-  // here, all bins are equally likely.
-  constexpr double analyt = N_TEST * dx;
-  for (auto b : hist) {
-    int result = b.second;
-    int stat_err = sqrt(b.second);
-    if (PRINT) {
-      printf("%7.3f %d %d %13.6e\n", dx * b.first, result, stat_err, analyt);
-    }
-    int diffbin = std::abs(result - analyt)/stat_err;
-    diffbin = (diffbin >= sigmabins) ? sigmabins - 1 : diffbin;
-    ++diffbad[diffbin];
-    ++total;
-  }
-  if (!PRINT) {
-    int totalbad = 0;
-    for (int unit = 0; unit < sigmabins - 1; ++unit) {
-      totalbad += diffbad[unit];
-      double fraction = (totalbad + 0.0) / (total + 0.0);
-      VERIFY(fraction > allowed[unit]) << " too few entries have less than "
-                << unit+1 << " sigma deviation ("
-                << totalbad << "/" << total << "=" << fraction
-                << ", required minimal fraction: " << allowed[unit];
-    }
-  }
+  test_distribution(N_TEST, 0.0001,
+                    []() { return Random::canonical(); },
+                    [](double) { return 1.0; });
 }
 
 TEST(uniform) {
-  std::map<int, int> hist {};
-  constexpr float dx = 0.01;
-  auto random_4_6 = Random::make_uniform_distribution(-4.0,6.0);
-  for (int i = 0; i < N_TEST; i++) {
-    double chi = random_4_6();
-    ++hist[floor(chi/dx)];
-  }
-  int diffbad[sigmabins] = {0};
-  int total = 0;
-  // here, all bins are equally likely.
-  constexpr double analyt = N_TEST * dx / 10.0;
-  for (auto b : hist) {
-    int result = b.second;
-    int stat_err = sqrt(b.second);
-    if (PRINT) {
-      printf("%7.3f %d %d %13.6e\n", dx * b.first, result, stat_err, analyt);
-    }
-    int diffbin = std::abs(result - analyt)/stat_err;
-    diffbin = (diffbin >= sigmabins) ? sigmabins - 1 : diffbin;
-    ++diffbad[diffbin];
-    ++total;
-  }
-  if (!PRINT) {
-    int totalbad = 0;
-    for (int unit = 0; unit < sigmabins - 1; ++unit) {
-      totalbad += diffbad[unit];
-      double fraction = (totalbad + 0.0) / (total + 0.0);
-      VERIFY(fraction > allowed[unit]) << " too few entries have less than "
-                << unit+1 << " sigma deviation ("
-                << totalbad << "/" << total << "=" << fraction
-                << ", required minimal fraction: " << allowed[unit];
-    }
-  }
+  auto random_4_6 = Random::make_uniform_distribution(-4.0, 6.0);
+  test_distribution(N_TEST, 0.01,
+                    [&]() { return random_4_6(); },
+                    [](double) { return 1.0; });
 }
 
-TEST(cos_like) {
-  std::map<int, int> hist {};
-  constexpr float dx = 0.01;
-  auto cos_like = Random::make_uniform_distribution(-1.0, +1.0);
-  for (int i = 0; i < N_TEST; i++) {
-    double chi = cos_like();
-    ++hist[floor(chi/dx)];
-  }
-  int diffbad[sigmabins] = {0};
-  int total = 0;
-  // here, all bins are equally likely.
-  constexpr double analyt = N_TEST * dx / 2.0;
-  for (auto b : hist) {
-    int result = b.second;
-    int stat_err = sqrt(b.second);
-    if (PRINT) {
-      printf("%7.3f %d %d %13.6e\n", dx * b.first, result, stat_err, analyt);
-    }
-    int diffbin = std::abs(result - analyt)/stat_err;
-    diffbin = (diffbin >= sigmabins) ? sigmabins - 1 : diffbin;
-    ++diffbad[diffbin];
-    ++total;
-  }
-  if (!PRINT) {
-    int totalbad = 0;
-    for (int unit = 0; unit < sigmabins - 1; ++unit) {
-      totalbad += diffbad[unit];
-      double fraction = (totalbad + 0.0) / (total + 0.0);
-      VERIFY(fraction > allowed[unit]) << " too few entries have less than "
-                << unit+1 << " sigma deviation ("
-                << totalbad << "/" << total << "=" << fraction
-                << ", required minimal fraction: " << allowed[unit];
-    }
-  }
+TEST(exponential) {
+  test_distribution(N_TEST, 0.1,
+                    []() { return Random::exponential(1.0); },
+                    [](double x) { return exp(-x); });
 }
 
-TEST(phi_like) {
-  std::map<int, int> hist {};
-  constexpr float dx = 2.0 * M_PI / 10000.0;
-  auto phi_like = Random::make_uniform_distribution(0.0, 2 * M_PI);
-  for (int i = 0; i < N_TEST; i++) {
-    double chi = phi_like();
-    ++hist[floor(chi/dx)];
-  }
-  int diffbad[sigmabins] = {0};
-  int total = 0;
-  // here, all bins are equally likely.
-  constexpr double analyt = N_TEST * dx / (2.0 * M_PI);
-  for (auto b : hist) {
-    int result = b.second;
-    int stat_err = sqrt(b.second);
-    if (PRINT) {
-      printf("%7.3f %d %d %13.6e\n", dx * b.first, result, stat_err, analyt);
-    }
-    int diffbin = std::abs(result - analyt)/stat_err;
-    diffbin = (diffbin >= sigmabins) ? sigmabins - 1 : diffbin;
-    ++diffbad[diffbin];
-    ++total;
-  }
-  if (!PRINT) {
-    int totalbad = 0;
-    for (int unit = 0; unit < sigmabins - 1; ++unit) {
-      totalbad += diffbad[unit];
-      double fraction = (totalbad + 0.0) / (total + 0.0);
-      VERIFY(fraction > allowed[unit]) << " too few entries have less than "
-                << unit+1 << " sigma deviation ("
-                << totalbad << "/" << total << "=" << fraction
-                << ", required minimal fraction: " << allowed[unit];
-    }
-  }
+TEST(x_exponential) {
+  test_distribution(N_TEST, 0.05,
+      []() { return Random::exponential(1.0) + Random::exponential(1.0); },
+      [](double x) { return x*exp(-x); });
+}
+
+TEST(xsquared_exponential) {
+  test_distribution(N_TEST, 0.05,
+      []() {
+        return Random::exponential(1.0) + Random::exponential(1.0) +
+               Random::exponential(1.0);
+      },
+      [](double x) { return x*x*exp(-x); });
+}
+
+TEST(expo) {
+  test_distribution(N_TEST, 0.001,
+                    []() { return Random::expo(2., -1., -3.); },
+                    [](double x) { return exp(2.*x); });
+}
+
+TEST(power) {
+  test_distribution(N_TEST, 0.001,
+                    []() { return Random::power(3., 0.5, 1.5); },
+                    [](double x) { return x*x*x; });
+}
+
+TEST(cauchy) {
+  const double m0 = 0.770;
+  const double Gamma = 0.150;
+  test_distribution(N_TEST, 0.001,
+                    [&]() { return Random::cauchy(m0, Gamma, 0.280, 1.5); },
+                    [&](double x) { return Gamma/(Gamma*Gamma + (x-m0)*(x-m0)); });
 }

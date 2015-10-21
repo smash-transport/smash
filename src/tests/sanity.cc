@@ -12,7 +12,7 @@
 #include "../include/boxmodus.h"
 #include "../include/configuration.h"
 #include "../include/collidermodus.h"
-#include "../include/experiment.h"
+#include "../include/experimentparameters.h"
 #include "../include/modusdefault.h"
 #include "../include/spheremodus.h"
 
@@ -21,9 +21,7 @@
 using namespace Smash;
 
 TEST(init_particle_types) {
-  ParticleType::create_type_list(
-      "# NAME MASS[GEV] WIDTH[GEV] PDG\n"
-      "smashon 0.123 1.2 661\n");
+  Test::create_smashon_particletypes();
 }
 
 static ParticleData create_smashon_particle(int id = -1) {
@@ -88,7 +86,7 @@ TEST(sanity_default) {
 }
 
 TEST(sanity_box) {
-  Configuration conf(TEST_CONFIG_PATH);
+  Configuration conf = Test::configuration();
   conf["Modi"]["Box"]["Initial_Condition"] = "peaked momenta";
   conf["Modi"]["Box"]["Length"] = 5.0;
   conf["Modi"]["Box"]["Temperature"] = 0.13;
@@ -101,7 +99,7 @@ TEST(sanity_box) {
 }
 
 TEST(sanity_collider) {
-  Configuration conf(TEST_CONFIG_PATH);
+  Configuration conf = Test::configuration();
   conf.take({"Modi", "Collider", "Projectile"});
   conf.take({"Modi", "Collider", "Target"});
   conf["Modi"]["Collider"]["Sqrtsnn"] = 1.0;
@@ -117,7 +115,7 @@ TEST(sanity_collider) {
 }
 
 TEST(sanity_sphere) {
-  Configuration conf(TEST_CONFIG_PATH);
+  Configuration conf = Test::configuration();
   conf["Modi"]["Sphere"]["Radius"] = 10;
   conf["Modi"]["Sphere"]["Sphere_Temperature"] = 0.2;
   conf["Modi"]["Sphere"]["Start_Time"] = 0.0;
