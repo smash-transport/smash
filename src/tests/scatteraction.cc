@@ -45,10 +45,12 @@ TEST(elastic_collision) {
   ParticleData a{ParticleType::find(0x211)};  // pi+
   a.set_4position(Position{0., -0.1, 0., 0.});
   a.set_4momentum(Momentum{1.1, 1.0, 0., 0.});
+  a.set_id_process(1);
 
   ParticleData b{ParticleType::find(0x211)};  // pi+
   b.set_4position(Position{0., 0.1, 0., 0.});
   b.set_4momentum(Momentum{1.1, 1.0, 0., 0.});
+  b.set_id_process(1);
 
   a = particles.insert(a);
   b = particles.insert(b);
@@ -56,7 +58,9 @@ TEST(elastic_collision) {
   // create action
   constexpr float time = 1.f;
   ScatterAction act(a, b, time);
+  ScatterAction act_copy(a, b, time);
   VERIFY(act.is_valid(particles));
+  VERIFY(act_copy.is_valid(particles));
 
   // add elastic channel
   constexpr float sigma = 10.0;
@@ -78,11 +82,16 @@ TEST(elastic_collision) {
          || (in[0] == out[1] && in[1] == out[0]));
 
   // perform the action
-  size_t id_process = 1u;
+  COMPARE(particles.front().id_process(), 1);
+  size_t id_process = 2u;
   act.perform(&particles, id_process);
+  COMPARE(particles.front().id_process(), 2);
+  COMPARE(particles.back().id_process(), 2);
+  COMPARE(id_process, 3u);
 
   // action should not be valid anymore
   VERIFY(!act.is_valid(particles));
+  VERIFY(!act_copy.is_valid(particles));
 
   // verify that the particles don't change in the particle list
   VERIFY((in[0] == particles.front() && in[1] == particles.back())
