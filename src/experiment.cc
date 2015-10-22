@@ -283,10 +283,10 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
         config.take({"General", "Adaptive_Time_Step", "Allowed_Deviation"});
     adaptive_parameters_ = make_unique<AdaptiveParameters>(
         smoothing_factor, target_missed_actions, deviation_factor);
-    log.info() << "Smoothing factor: " << smoothing_factor;
-    log.info() << "Target missed actions: "
-               << 100 * target_missed_actions << "%";
-    log.info() << "Allowed deviation: " << deviation_factor;
+    log.info("Parameters for the adaptive time step:\n",
+             "  Smoothing factor: ", smoothing_factor, "\n",
+             "  Target missed actions: ", 100 * target_missed_actions, "%", "\n",
+             "  Allowed deviation: ", deviation_factor);
   }
 
   // create outputs
