@@ -339,7 +339,7 @@ class Experiment : public ExperimentBase {
   /**
    * Pointer to additional parameters that are needed for adaptive time steps.
    */
-  std::unique_ptr<AdaptiveParameters> adaptive_parameters_ = nullptr;
+  std::unique_ptr<const AdaptiveParameters> adaptive_parameters_ = nullptr;
 
   /**\ingroup logging
    * Writes the initial state for the Experiment to the output stream.

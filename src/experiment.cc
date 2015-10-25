@@ -221,6 +221,16 @@ std::ostream &operator<<(std::ostream &out, const Experiment<Modus> &e) {
  * \key Nevents (int, required): \n
  * Number of events to calculate.
  *
+ * \key Use_Grid (bool, optional, default = true): \n
+ * true - a grid is used to reduce the combinatorics of interaction lookup \n
+ * false - no grid is used
+ *
+ * \key Time_Step_Mode (string, optional, default = Fixed): \n
+ * The mode of time stepping. Possible values: \n
+ * None - No time steps are used. Cannot be used with potentials \n
+ * Fixed - Fixed-sized time steps \n
+ * Adaptive - Time steps with adaptive sizes
+ *
  * \page input_collision_term_ Collision_Term
  * \key Decays (bool, optional, default = true): \n
  * true - decays are enabled\n
@@ -273,20 +283,49 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
         config["Collision_Term"]["Pauli_Blocking"], parameters_);
   }
 
-  // get adaptive time step parameters
+  /*!\Userguide
+   * \page input_general_ General
+   * \subpage input_general_adaptive_
+   * (optional)
+   *
+   * \page input_general_adaptive_ Adaptive_Time_Step
+   * Additional parameters for the adaptive time step mode.
+   *
+   * \key Smoothing_Factor (float, optional, default = 0.1) \n
+   * Parameter of the exponential smoothing of the rate estimate.
+   *
+   * \key Target_Missed_Actions (float, optional, default = 0.01) \n
+   * The fraction of missed actions that is targeted by the algorithm.
+   *
+   * \key Allowed_Deviation (float, optional, default = 2.5) \n
+   * Limit by how much the target can be exceeded before the time step is
+   * aborted.
+   *
+   **/
   if (time_step_mode_ == TimeStepMode::Adaptive) {
-    float smoothing_factor =
-        config.take({"General", "Adaptive_Time_Step", "Smoothing_Factor"});
-    float target_missed_actions =
-        config.take({"General", "Adaptive_Time_Step", "Target_Missed_Actions"});
-    float deviation_factor =
-        config.take({"General", "Adaptive_Time_Step", "Allowed_Deviation"});
-    adaptive_parameters_ = make_unique<AdaptiveParameters>(
-        smoothing_factor, target_missed_actions, deviation_factor);
+    std::unique_ptr<AdaptiveParameters> adapt_params =
+        make_unique<AdaptiveParameters>();
+    if (config.has_value(
+            {"General", "Adaptive_Time_Step", "Smoothing_Factor"})) {
+      adapt_params->smoothing_factor =
+          config.take({"General", "Adaptive_Time_Step", "Smoothing_Factor"});
+    }
+    if (config.has_value(
+            {"General", "Adaptive_Time_Step", "Target_Missed_Actions"})) {
+      adapt_params->target_missed_actions = config.take(
+          {"General", "Adaptive_Time_Step", "Target_Missed_Actions"});
+    }
+    if (config.has_value(
+            {"General", "Adaptive_Time_Step", "Allowed_Deviation"})) {
+      adapt_params->deviation_factor =
+          config.take({"General", "Adaptive_Time_Step", "Allowed_Deviation"});
+    }
     log.info("Parameters for the adaptive time step:\n",
-             "  Smoothing factor: ", smoothing_factor, "\n",
-             "  Target missed actions: ", 100 * target_missed_actions, "%", "\n",
-             "  Allowed deviation: ", deviation_factor);
+             "  Smoothing factor: ", adapt_params->smoothing_factor, "\n",
+             "  Target missed actions: ",
+             100 * adapt_params->target_missed_actions, "%", "\n",
+             "  Allowed deviation: ", adapt_params->deviation_factor);
+    adaptive_parameters_ = std::move(adapt_params);
   }
 
   // create outputs

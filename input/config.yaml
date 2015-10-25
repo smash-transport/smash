@@ -16,8 +16,7 @@ General:
     # Modus decision
     Modus:         Collider
 
-    # use of time steps for the time evolution
-    # ("None", "Fixed", "Adaptive")
+    # Mode of time stepping. Possible values: None, Fixed, Adaptive
     Time_Step_Mode: Fixed
 
     # additional parameters for the adaptive time step mode
