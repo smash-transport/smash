@@ -8,6 +8,7 @@
 #define SRC_INCLUDE_EXPERIMENT_H_
 
 #include "actionfinderfactory.h"
+#include "adaptiveparameters.h"
 #include "chrono.h"
 #include "pauliblocking.h"
 #include "potentials.h"
@@ -133,7 +134,16 @@ class Experiment : public ExperimentBase {
    */
   void initialize_new_event();
 
-  /** Perform the given action. */
+  /**
+   * Perform the given action.
+   *
+   * \param action The action to perform
+   * \param[in,out] interactions_total The number of interactions until now
+   * \param[in,out] total_pauliblocked The number of pauli blocked actions until
+   *                                   now
+   * \param particles_before_actions A container with the ParticleData from this
+   *                                 time step before any actions were performed
+   */
   template <typename Container>
   void perform_action(const ActionPtr &action, size_t &interactions_total,
                       size_t &total_pauliblocked,
@@ -165,6 +175,19 @@ class Experiment : public ExperimentBase {
    * \return The number of interactions from the event
    */
   size_t run_time_evolution_without_time_steps(const int evt_num);
+
+  /** Runs the time evolution of an event with adaptive time steps
+   *
+   * Here, the time steps are looped over, collisions and decays are carried
+   * out and particles are propagated while the size of the time step is adapted
+   * to the state of the system.
+   *
+   * \param evt_num Running number of the event
+   * \param adaptive_parameters Additional parameters for adaptive time steps
+   * \return The number of interactions from the event
+   */
+  size_t run_time_evolution_adaptive_time_steps(
+      const int evt_num, const AdaptiveParameters adaptive_parameters);
 
   /** Performs the final decays of an event
    *
@@ -312,6 +335,11 @@ class Experiment : public ExperimentBase {
 
   /// Type of density to be written to collision headers
   DensityType dens_type_ = DensityType::None;
+
+  /**
+   * Pointer to additional parameters that are needed for adaptive time steps.
+   */
+  std::unique_ptr<const AdaptiveParameters> adaptive_parameters_ = nullptr;
 
   /**\ingroup logging
    * Writes the initial state for the Experiment to the output stream.

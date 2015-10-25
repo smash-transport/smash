@@ -106,6 +106,8 @@ enum class TimeStepMode : char {
   None,
   /// Use fixed time step.
   Fixed,
+  /// Use time step that adapts to the state of the system.
+  Adaptive,
 };
 
 /** Initial condition for a particle in a box.

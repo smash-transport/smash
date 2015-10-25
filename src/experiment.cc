@@ -198,6 +198,10 @@ std::ostream &operator<<(std::ostream &out, const Experiment<Modus> &e) {
       out << "Using fixed time step size: "
           << e.parameters_.timestep_duration() << " fm/c\n";
       break;
+    case TimeStepMode::Adaptive:
+      out << "Using adaptive time steps, starting with: "
+          << e.parameters_.timestep_duration() << " fm/c\n";
+      break;
   }
   out << "End time: " << e.end_time_ << " fm/c\n";
   out << e.modus_;
@@ -216,6 +220,16 @@ std::ostream &operator<<(std::ostream &out, const Experiment<Modus> &e) {
  *
  * \key Nevents (int, required): \n
  * Number of events to calculate.
+ *
+ * \key Use_Grid (bool, optional, default = true): \n
+ * true - a grid is used to reduce the combinatorics of interaction lookup \n
+ * false - no grid is used
+ *
+ * \key Time_Step_Mode (string, optional, default = Fixed): \n
+ * The mode of time stepping. Possible values: \n
+ * None - No time steps are used. Cannot be used with potentials \n
+ * Fixed - Fixed-sized time steps \n
+ * Adaptive - Time steps with adaptive sizes
  *
  * \page input_collision_term_ Collision_Term
  * \key Decays (bool, optional, default = true): \n
@@ -267,6 +281,51 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     log.info() << "Pauli blocking is ON.";
     pauli_blocker_ = make_unique<PauliBlocker>(
         config["Collision_Term"]["Pauli_Blocking"], parameters_);
+  }
+
+  /*!\Userguide
+   * \page input_general_ General
+   * \subpage input_general_adaptive_
+   * (optional)
+   *
+   * \page input_general_adaptive_ Adaptive_Time_Step
+   * Additional parameters for the adaptive time step mode.
+   *
+   * \key Smoothing_Factor (float, optional, default = 0.1) \n
+   * Parameter of the exponential smoothing of the rate estimate.
+   *
+   * \key Target_Missed_Actions (float, optional, default = 0.01) \n
+   * The fraction of missed actions that is targeted by the algorithm.
+   *
+   * \key Allowed_Deviation (float, optional, default = 2.5) \n
+   * Limit by how much the target can be exceeded before the time step is
+   * aborted.
+   *
+   **/
+  if (time_step_mode_ == TimeStepMode::Adaptive) {
+    std::unique_ptr<AdaptiveParameters> adapt_params =
+        make_unique<AdaptiveParameters>();
+    if (config.has_value(
+            {"General", "Adaptive_Time_Step", "Smoothing_Factor"})) {
+      adapt_params->smoothing_factor =
+          config.take({"General", "Adaptive_Time_Step", "Smoothing_Factor"});
+    }
+    if (config.has_value(
+            {"General", "Adaptive_Time_Step", "Target_Missed_Actions"})) {
+      adapt_params->target_missed_actions = config.take(
+          {"General", "Adaptive_Time_Step", "Target_Missed_Actions"});
+    }
+    if (config.has_value(
+            {"General", "Adaptive_Time_Step", "Allowed_Deviation"})) {
+      adapt_params->deviation_factor =
+          config.take({"General", "Adaptive_Time_Step", "Allowed_Deviation"});
+    }
+    log.info("Parameters for the adaptive time step:\n",
+             "  Smoothing factor: ", adapt_params->smoothing_factor, "\n",
+             "  Target missed actions: ",
+             100 * adapt_params->target_missed_actions, "%", "\n",
+             "  Allowed deviation: ", adapt_params->deviation_factor);
+    adaptive_parameters_ = std::move(adapt_params);
   }
 
   // create outputs
@@ -555,50 +614,50 @@ void Experiment<Modus>::perform_action(
     const ActionPtr &action, size_t &interactions_total,
     size_t &total_pauli_blocked, const Container &particles_before_actions) {
   const auto &log = logger<LogArea::Experiment>();
-  if (action->is_valid(particles_)) {
-    const ParticleList incoming_particles = action->incoming_particles();
-    action->generate_final_state();
-    ProcessType process_type = action->get_type();
-    log.debug("Process Type is: ", process_type);
-    if (pauli_blocker_ &&
-        action->is_pauli_blocked(particles_, *pauli_blocker_.get())) {
-      total_pauli_blocked++;
-      return;
-    }
-    action->perform(&particles_, interactions_total);
-    const ParticleList outgoing_particles = action->outgoing_particles();
-    // Calculate Eckart rest frame density at the interaction point
-    double rho = 0.0;
-    if (dens_type_ != DensityType::None) {
-      const FourVector r_interaction = action->get_interaction_point();
-      constexpr bool compute_grad = false;
-      rho = rho_eckart(r_interaction.threevec(), particles_before_actions,
-                       density_param_, dens_type_, compute_grad).first;
-    }
-    /*!\Userguide
-     * \page collisions_output_in_box_modus_ Collision output in box modus
-     * \note When SMASH is running in the box modus, particle coordinates
-     * in the collision output can be out of the box. This is not an error.
-     * Box boundary conditions are intentionally not imposed before
-     * collision output to allow unambiguous finding of the interaction
-     * point.
-     * <I>Example</I>: two particles in the box have x coordinates 0.1 and
-     * 9.9 fm, while box L = 10 fm. Suppose these particles collide.
-     * For calculating collision the first one is wrapped to 10.1 fm.
-     * Then output contains coordinates of 9.9 fm and 10.1 fm.
-     * From this one can infer interaction point at x = 10 fm.
-     * Were boundary conditions imposed before output,
-     * their x coordinates would be 0.1 and 9.9 fm and interaction point
-     * position could be either at 10 fm or at 5 fm.
-     */
-    for (const auto &output : outputs_) {
-      output->at_interaction(incoming_particles, outgoing_particles, rho,
-                             action->raw_weight_value(), process_type);
-    }
-    log.debug(~einhard::Green(), "✔ ", action);
-  } else {
+  if (!action->is_valid(particles_)) {
     log.debug(~einhard::DRed(), "✘ ", action, " (discarded: invalid)");
+    return;
   }
+  const ParticleList incoming_particles = action->incoming_particles();
+  action->generate_final_state();
+  ProcessType process_type = action->get_type();
+  log.debug("Process Type is: ", process_type);
+  if (pauli_blocker_ &&
+      action->is_pauli_blocked(particles_, *pauli_blocker_.get())) {
+    total_pauli_blocked++;
+    return;
+  }
+  action->perform(&particles_, interactions_total);
+  const ParticleList outgoing_particles = action->outgoing_particles();
+  // Calculate Eckart rest frame density at the interaction point
+  double rho = 0.0;
+  if (dens_type_ != DensityType::None) {
+    const FourVector r_interaction = action->get_interaction_point();
+    constexpr bool compute_grad = false;
+    rho = rho_eckart(r_interaction.threevec(), particles_before_actions,
+                     density_param_, dens_type_, compute_grad).first;
+  }
+  /*!\Userguide
+   * \page collisions_output_in_box_modus_ Collision output in box modus
+   * \note When SMASH is running in the box modus, particle coordinates
+   * in the collision output can be out of the box. This is not an error.
+   * Box boundary conditions are intentionally not imposed before
+   * collision output to allow unambiguous finding of the interaction
+   * point.
+   * <I>Example</I>: two particles in the box have x coordinates 0.1 and
+   * 9.9 fm, while box L = 10 fm. Suppose these particles collide.
+   * For calculating collision the first one is wrapped to 10.1 fm.
+   * Then output contains coordinates of 9.9 fm and 10.1 fm.
+   * From this one can infer interaction point at x = 10 fm.
+   * Were boundary conditions imposed before output,
+   * their x coordinates would be 0.1 and 9.9 fm and interaction point
+   * position could be either at 10 fm or at 5 fm.
+   */
+  for (const auto &output : outputs_) {
+    output->at_interaction(incoming_particles, outgoing_particles, rho,
+                           action->raw_weight_value(), process_type);
+  }
+  log.debug(~einhard::Green(), "✔ ", action);
 }
 
 template <typename Modus>
@@ -820,10 +879,6 @@ size_t Experiment<Modus>::run_time_evolution_fixed_time_step(
     propagate_all();
 
     /* (4) Physics output during the run. */
-    // if the timestep of labclock is different in the next tick than
-    // in the current one, I assume it has been changed already. In that
-    // case, I know what the next tick is and I can check whether the
-    // output time is crossed within the next tick.
     if (parameters_.need_intermediate_output()) {
       intermediate_output(evt_num, interactions_total,
                           previous_interactions_total);
@@ -843,6 +898,191 @@ size_t Experiment<Modus>::run_time_evolution_fixed_time_step(
     log.info("Collisions: pauliblocked/total = ", total_pauli_blocked, "/",
              interactions_total);
   }
+  return interactions_total;
+}
+
+/* This is the loop over timesteps, carrying out collisions and decays
+ * and propagating particles. */
+template <typename Modus>
+size_t Experiment<Modus>::run_time_evolution_adaptive_time_steps(
+    const int evt_num, const AdaptiveParameters adaptive_parameters) {
+  const auto &log = logger<LogArea::Experiment>();
+  const auto &log_ad_ts = logger<LogArea::AdaptiveTS>();
+  modus_.impose_boundary_conditions(&particles_);
+  size_t interactions_total = 0, previous_interactions_total = 0,
+         total_pauli_blocked = 0;
+  bool observed_first_action = false;
+
+  // if there is no output scheduled at the beginning, trigger it manually
+  if (!parameters_.is_output_time()) {
+    log.info() << format_measurements(
+        particles_, interactions_total, 0u,
+        conserved_initial_, time_start_, parameters_.labclock.current_time());
+  }
+
+  float rate =
+      adaptive_parameters.rate_from_dt(parameters_.timestep_duration());
+  Actions actions;
+  uint32_t num_time_steps = 0u;
+  float min_dt = std::numeric_limits<float>::infinity();
+  while (parameters_.labclock.current_time() < end_time_) {
+    num_time_steps++;
+    if (parameters_.labclock.next_time() > end_time_) {
+      // set the time step size such that we stop at end_time_
+      parameters_.labclock.end_tick_on_multiple(end_time_);
+    }
+    float dt = parameters_.timestep_duration();
+    /* (1.a) Create grid. */
+    const float min_cell_length =
+        ScatterActionsFinder::min_cell_length(parameters_.testparticles, dt);
+    const auto &grid = modus_.create_grid(particles_, min_cell_length);
+
+    /* (1.b) Iterate over cells and find actions. */
+    grid.iterate_cells([&](const ParticleList &search_list) {
+                         for (const auto &finder : action_finders_) {
+                           actions.insert(finder->find_actions_in_cell(
+                               search_list, parameters_.timestep_duration()));
+                         }
+                       },
+                       [&](const ParticleList &search_list,
+                           const ParticleList &neighbors_list) {
+                         for (const auto &finder : action_finders_) {
+                           actions.insert(finder->find_actions_with_neighbors(
+                               search_list, neighbors_list,
+                               parameters_.timestep_duration()));
+                         }
+                       });
+
+    /* (2) Calculate time step size. */
+    log_ad_ts.debug() << hline;
+    if (!observed_first_action && actions.size() > 0u) {
+      log_ad_ts.debug("First interaction.");
+      observed_first_action = true;
+    }
+
+    bool end_early = false;
+    if (observed_first_action) {
+      float fraction_missed;
+      float allowed_deviation;
+      std::tie(fraction_missed, allowed_deviation) =
+          adaptive_parameters.calc_missed_actions_allowed_deviation(
+              actions, rate, particles_.size());
+      const float current_rate = fraction_missed / dt;
+      const float rate_deviation = current_rate - rate;
+      // check if the current rate deviates too strongly from the expected value
+      if (rate_deviation > allowed_deviation) {
+        log_ad_ts.debug("End time step early.");
+        end_early = true;
+        parameters_.labclock.set_timestep_duration(
+            adaptive_parameters.new_dt(current_rate));
+      }
+      // update the estimate of the rate
+      rate += adaptive_parameters.smoothing_factor * rate_deviation;
+      // set the size of the next time step
+      dt = adaptive_parameters.new_dt(rate);
+    }
+
+    if (!observed_first_action) {
+      log_ad_ts.debug("Averaged rate: ", 0.f);
+    } else {
+      log_ad_ts.debug("Averaged rate: ", rate);
+    }
+    log_ad_ts.debug("Time step size: ",
+                    parameters_.labclock.timestep_duration());
+    const float this_dt = parameters_.labclock.timestep_duration();
+    if (this_dt < min_dt) {
+      min_dt = this_dt;
+    }
+
+    /* (3) Physics output during the run. */
+    if (parameters_.need_intermediate_output()) {
+      // The following block is necessary because we want to make sure that the
+      // intermediate output happens at exactly the requested time and not
+      // slightly before.
+      if (!parameters_.is_output_time()) {
+        const float next_time = parameters_.labclock.next_time();
+        // set the time step such that it ends on the next output time
+        parameters_.set_timestep_for_next_output();
+        ++parameters_.labclock;
+
+        // perform actions until the output time
+        const auto particles_before_actions = particles_.copy_to_vector();
+        while (!actions.is_empty()) {
+          auto action = actions.pop();
+          if (action->time_of_execution() >
+              parameters_.labclock.current_time()) {
+            // reinsert action
+            actions.insert(std::move(action));
+            break;
+          }
+          perform_action(action, interactions_total, total_pauli_blocked,
+                         particles_before_actions);
+        }
+        modus_.impose_boundary_conditions(&particles_);
+        propagate_all();
+        for (const ActionPtr &action : actions) {
+          if (action->is_valid(particles_)) {
+            action->update_incoming(particles_);
+          }
+        }
+        parameters_.labclock.end_tick_on_multiple(next_time);
+      }
+
+      intermediate_output(evt_num, interactions_total,
+                          previous_interactions_total);
+    }
+
+    ++parameters_.labclock;
+
+    /* (4) Perform actions. */
+    if (!actions.is_empty()) {
+      const auto particles_before_actions = particles_.copy_to_vector();
+      while (!actions.is_empty()) {
+        auto action = actions.pop();
+        if (end_early &&
+            action->time_of_execution() > parameters_.labclock.current_time()) {
+          actions.clear();
+          log_ad_ts.debug("Actions discarded because of early ending.");
+          break;
+        }
+        perform_action(action, interactions_total, total_pauli_blocked,
+                       particles_before_actions);
+      }
+      log.debug(~einhard::Blue(), particles_);
+    } else {
+      log.debug("no actions performed");
+    }
+    modus_.impose_boundary_conditions(&particles_);
+
+    /* (5) Do propagation. */
+    propagate_all();
+
+    /* (6) Set duration of next time step. */
+    parameters_.labclock.set_timestep_duration(dt);
+
+    // Check conservation of conserved quantities if potentials are off.
+    // If potentials are on then momentum is conserved only in average
+    if (!potentials_) {
+      std::string err_msg = conserved_initial_.report_deviations(particles_);
+      if (!err_msg.empty()) {
+        log.error() << err_msg;
+        throw std::runtime_error("Violation of conserved quantities!");
+      }
+    }
+  }
+
+  // check if a final intermediate output is needed
+  if (parameters_.is_output_time()) {
+    intermediate_output(evt_num, interactions_total,
+                        previous_interactions_total);
+  }
+
+  if (pauli_blocker_) {
+    log.info("Collisions: pauliblocked/total = ", total_pauli_blocked, "/",
+             interactions_total);
+  }
+  log.info("Number of time steps = ", num_time_steps);
+  log.info("Smallest time step size = ", min_dt);
   return interactions_total;
 }
 
@@ -979,6 +1219,7 @@ void Experiment<Modus>::final_output(size_t interactions_total,
                                                 particles_.time() /
                                                 particles_.size()))
                << " [fm-1]";
+    log.info() << "Final interaction number: " << interactions_total;
   }
 
   for (const auto &output : outputs_) {
@@ -1008,6 +1249,10 @@ void Experiment<Modus>::run() {
         break;
       case TimeStepMode::Fixed:
         interactions_total = run_time_evolution_fixed_time_step(j);
+        break;
+      case TimeStepMode::Adaptive:
+        interactions_total =
+            run_time_evolution_adaptive_time_steps(j, *adaptive_parameters_);
         break;
     }
 

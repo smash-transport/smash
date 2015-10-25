@@ -287,9 +287,12 @@ class Configuration {
       if (s == "Fixed") {
         return TimeStepMode::Fixed;
       }
+      if (s == "Adaptive") {
+        return TimeStepMode::Adaptive;
+      }
       throw IncorrectTypeInAssignment(
           "The value for key \"" + std::string(key_) +
-          "\" should be \"None\" or \"Fixed\".");
+          "\" should be \"None\", \"Fixed\" or \"Adaptive\".");
     }
 
     operator BoxInitialCondition() {
