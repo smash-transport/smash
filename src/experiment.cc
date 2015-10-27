@@ -218,13 +218,12 @@ std::ostream &operator<<(std::ostream &out, const Experiment<Modus> &e) {
  * Number of events to calculate.
  *
  * \page input_collision_term_ Collision_Term
- * \key Decays (bool, optional, default = true): \n
- * true - decays are enabled\n
- * false - disable all decays
  *
- * \key Collisions (bool, optional, default = true): \n
- * true - collisions are enabled\n
- * false - all collisions are disabled
+ * \key Two_to_One (bool, optional, default = true) \n
+ * Enable 2 <--> 1 processes (resonance formation and decays).
+ *
+ * \key Two_to_Two (bool, optional, default = true) \n
+ * Enable 2 <--> 2 collisions.
  *
  * \key Force_Decays_At_End (bool, optional, default = true): \n
  * true - force all resonances to decay after last timestep \n
@@ -249,19 +248,21 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
   const auto &log = logger<LogArea::Experiment>();
   log.info() << *this;
 
-  // dilepton switch
+  const bool two_to_one = config.take({"Collision_Term", "Two_to_One"}, true);
+  const bool two_to_two = config.take({"Collision_Term", "Two_to_Two"}, true);
   const bool dileptons_switch = config.take(
                                       {"Output", "Dileptons", "Enable"}, false);
 
   // create finders
-  if (config.take({"Collision_Term", "Decays"}, true)) {
+  if (two_to_one) {
     action_finders_.emplace_back(new DecayActionsFinder());
+  }
+  if (two_to_one || two_to_two) {
+    action_finders_.emplace_back(new ScatterActionsFinder(config, parameters_,
+                                                      two_to_one, two_to_two));
   }
   if (dileptons_switch) {
     dilepton_finder_ = make_unique<DecayActionsFinderDilepton>();
-  }
-  if (config.take({"Collision_Term", "Collisions"}, true)) {
-    action_finders_.emplace_back(new ScatterActionsFinder(config, parameters_));
   }
   if (config.has_value({"Collision_Term", "Pauli_Blocking"})) {
     log.info() << "Pauli blocking is ON.";

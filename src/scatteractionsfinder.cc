@@ -35,20 +35,17 @@ namespace Smash {
 *
 * \key Isotropic (bool, optional, default = false) \n
 * Do all collisions isotropically.
-* * \key Two_to_One (bool, optional, default = true) \n
-* Enable 2->1 processes
-* * \key Two_to_Two (bool, optional, default = true) \n
-* Enable 2->2 processes
 */
 
 ScatterActionsFinder::ScatterActionsFinder(
-    Configuration config, const ExperimentParameters &parameters)
+    Configuration config, const ExperimentParameters &parameters,
+    bool two_to_one, bool two_to_two)
     : elastic_parameter_(config.take({"Collision_Term",
                                       "Elastic_Cross_Section"}, -1.0f)),
       testparticles_(parameters.testparticles),
       isotropic_(config.take({"Collision_Term", "Isotropic"}, false)),
-      two_to_one_(config.take({"Collision_Term", "Two_to_One"}, true)),
-      two_to_two_(config.take({"Collision_Term", "Two_to_Two"}, true)) {}
+      two_to_one_(two_to_one),
+      two_to_two_(two_to_two) {}
 
 ScatterActionsFinder::ScatterActionsFinder(
     float elastic_parameter, int testparticles)
