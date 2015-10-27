@@ -88,8 +88,8 @@ Output:
         Format:             Oscar
 
 Collision_Term:
-    Collisions:             True
-    Decays:                 True
+    Two_to_One:             True
+    Two_to_Two:             True
     Force_Decays_At_End:    True
     Isotropic:              False
     Elastic_Cross_Section:  -1.0  # Globally used if non-negative, [mb]

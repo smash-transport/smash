@@ -27,7 +27,9 @@ class ScatterActionsFinder : public ActionFinderInterface {
  public:
   /** Initialize the finder with the given parameters. */
   ScatterActionsFinder(Configuration config,
-                       const ExperimentParameters &parameters);
+                       const ExperimentParameters &parameters,
+                       bool two_to_one, bool two_to_two);
+  /** Constructor for testing purposes. */
   ScatterActionsFinder(float elastic_parameter, int testparticles);
 
   /** Determine the collision time of the two particles [fm/c].
@@ -112,6 +114,10 @@ class ScatterActionsFinder : public ActionFinderInterface {
   int testparticles_ = 1;
   /** Do all collisions isotropically. */
   bool isotropic_ = false;
+  /** Enable 2->1 processes. */
+  bool two_to_one_ = true;
+  /** Enable 2->2 processes. */
+  bool two_to_two_ = true;
 };
 
 #if 0

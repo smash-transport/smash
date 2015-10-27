@@ -38,12 +38,14 @@ namespace Smash {
 */
 
 ScatterActionsFinder::ScatterActionsFinder(
-    Configuration config, const ExperimentParameters &parameters)
+    Configuration config, const ExperimentParameters &parameters,
+    bool two_to_one, bool two_to_two)
     : elastic_parameter_(config.take({"Collision_Term",
                                       "Elastic_Cross_Section"}, -1.0f)),
       testparticles_(parameters.testparticles),
-      isotropic_(config.take({"Collision_Term", "Isotropic"}, false)) {
-}
+      isotropic_(config.take({"Collision_Term", "Isotropic"}, false)),
+      two_to_one_(two_to_one),
+      two_to_two_(two_to_two) {}
 
 ScatterActionsFinder::ScatterActionsFinder(
     float elastic_parameter, int testparticles)
@@ -117,7 +119,7 @@ ActionPtr ScatterActionsFinder::check_collision(
   }
 
   /* Add various subprocesses.  */
-  act->add_all_processes(elastic_parameter_);
+  act->add_all_processes(elastic_parameter_, two_to_one_, two_to_two_);
 
   /* distance criterion according to cross_section */
   if (distance_squared >= act->cross_section() * fm2_mb * M_1_PI
