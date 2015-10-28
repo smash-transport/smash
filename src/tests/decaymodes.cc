@@ -41,6 +41,18 @@ TEST_CATCH(load_decaymodes_incorrect_start, IsoParticleType::ParticleNotFoundFai
   DecayModes::load_decaymodes(decays_input);
 }
 
+TEST_CATCH(load_decaymodes_duplicate, DecayModes::LoadFailure) {
+  const std::string decays_input(
+      "σ \n"
+      "1.  0  π π\n"
+      "\n"
+      "σ \n"
+      "1.  0  π π\n"
+      );
+  DecayModes::load_decaymodes(decays_input);
+}
+
+
 const float tolerance = 1.0e-7;
 
 TEST(load_decay_modes) {
