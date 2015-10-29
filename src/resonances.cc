@@ -58,7 +58,7 @@ float sample_resonance_mass(const ParticleType &type_res,
    * largest mass. However, this is not always the case, therefore we need
    * an additional fudge factor (empirically 3.6 happens to be sufficient). */
   const float q_max = type_res.spectral_function(max_mass)
-                    / type_res.spectral_function_simple(max_mass) * 3.6;
+                    / type_res.spectral_function_simple(max_mass) * 13.2;
   const float max = blw_max * q_max;  // maximum value for rejection sampling
   float mass_res, val;
   // Loop: rejection sampling
