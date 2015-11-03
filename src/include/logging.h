@@ -151,11 +151,8 @@ DECLARE_LOGAREA(20, Tmn);
 DECLARE_LOGAREA(21, Fpe);
 DECLARE_LOGAREA(22, Lattice);
 DECLARE_LOGAREA(23, Sampling);
-<<<<<<< HEAD
 DECLARE_LOGAREA(24, AdaptiveTS);
-=======
-DECLARE_LOGAREA(24, Pythia);
->>>>>>> Logarea Pythia added
+DECLARE_LOGAREA(25, Pythia);
 
 /// This type collects all existing log areas so they will be created with the
 /// correct log level automatically.
@@ -164,13 +161,7 @@ using AreaTuple = std::tuple<Main, Experiment, Box, Collider, Sphere, Action,
                              DecayModes, Resonances, ScatterAction,
                              Distributions, Propagation, Grid, List, Nucleus,
                              Density, PauliBlocking, Tmn, Fpe, Lattice,
-<<<<<<< HEAD
-                             Sampling, AdaptiveTS>;
-=======
-                             Sampling, Pythia>;
-
-
->>>>>>> Logarea Pythia added
+                             Sampling, AdaptiveTS, Pythia>;
 }  // namespace LogArea
 
 /**

@@ -48,19 +48,15 @@ ScatterActionsFinder::ScatterActionsFinder(
       testparticles_(parameters.testparticles),
       isotropic_(config.take({"Collision_Term", "Isotropic"}, false)),
       two_to_one_(two_to_one),
-      two_to_two_(two_to_two) {
-  if (is_constant_elastic_isotropic()) {
-    const auto &log = logger<LogArea::FindScatter>();
-    log.info("Constant elastic isotropic cross-section mode:",
-             " using ", elastic_parameter_, " mb as maximal cross-section.");
-  }
-}
-
-    /* Read in switch to turn off strings. */
-    if (config.has_value({"Collision_Term", "Strings"})) {
-      strings_switch_ = config.take({"Collision_Term", "Strings"});
-    }
-
+      two_to_two_(two_to_two),
+      strings_switch_(config.take({"Collision_Term", "Strings"}, false)) {
+        if (is_constant_elastic_isotropic()) {
+          const auto &log = logger<LogArea::FindScatter>();
+          log.info("Constant elastic isotropic cross-section mode:",
+          " using ", elastic_parameter_, " mb as maximal cross-section.");
+        }
+      }
+    
 ScatterActionsFinder::ScatterActionsFinder(
     float elastic_parameter, int testparticles)
     : elastic_parameter_(elastic_parameter),
@@ -136,17 +132,9 @@ ActionPtr ScatterActionsFinder::check_collision(
   }
 
   /* Add various subprocesses.  */
-<<<<<<< HEAD
-  act->add_all_processes(elastic_parameter_, two_to_one_, two_to_two_);
-  /* (4) string excitation */
-  if (strings_switch_) {
-    act->add_process(act->string_excitation_cross_section());
-  }
+  act->add_all_processes(elastic_parameter_, two_to_one_,
+                         two_to_two_, strings_switch_);
 
-=======
-  act->add_all_processes(elastic_parameter_, strings_switch_);
-  
->>>>>>> Small fixes to make the branch compile again
   /* distance criterion according to cross_section */
   if (distance_squared >= act->cross_section() * fm2_mb * M_1_PI
                           * data_a.cross_section_scaling_factor()
