@@ -362,7 +362,7 @@ float kminusp_elastic(double mandelstam_s) {
 
 /** K- n elastic cross section parametrization.
  * Source: \iref{Buss:2011mx}, B.3.9 */
-float kminusn_elastic(double mandelstam_s) { return 4.0; }
+float kminusn_elastic(double) { return 4.0; }
 
 /** K0 p elastic cross section parametrization.
  * Source: \iref{Buss:2011mx}, B.3.9 */
