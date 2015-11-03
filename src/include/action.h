@@ -10,8 +10,6 @@
 #ifndef SRC_INCLUDE_ACTION_H_
 #define SRC_INCLUDE_ACTION_H_
 
-#include "lowess.h"
-
 #include <stdexcept>
 #include <vector>
 
