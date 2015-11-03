@@ -58,16 +58,17 @@ void lowest(const T *x, const T *y, size_t n, T xs, T &ys, size_t nleft,
       if (userw)
         w[j] *= rw[j];
       a += w[j];
-    } else if (x[j] > xs)
+    } else if (x[j] > xs) {
       break;
+    }
     j += 1;
   }
 
   // rightmost pt (may be greater than nright because of ties)
   const auto nrt = j - 1;
-  if (a <= 0.)
+  if (a <= 0.) {
     ok = false;
-  else {
+  } else {
     ok = true;
     // weighted least squares: make sum of w[j] == 1
     for (j = nleft; j <= nrt; j++)
@@ -246,8 +247,8 @@ void lowess(const T *x, const T *y, size_t n, T *ys, T span, size_t iter,
 ///        by robust locally weighted regression.
 ///        The American Statistician, 35, 54.
 template <typename T>
-std::vector<T> smooth(const std::vector<T> &x, const std::vector<T> &y, T span=2./3,
-                      size_t iter=3, T delta=0) {
+std::vector<T> smooth(const std::vector<T> &x, const std::vector<T> &y,
+                      T span = 2. / 3, size_t iter = 3, T delta = 0) {
   assert(x.size() == y.size());
   std::vector<T> result;
   result.resize(x.size());
@@ -255,7 +256,7 @@ std::vector<T> smooth(const std::vector<T> &x, const std::vector<T> &y, T span=2
   rw.resize(x.size());
   std::vector<T> res;
   res.resize(x.size());
-  // TODO: initialize to zero?
+  // TODO(steinberg): initialize to zero?
   lowess::lowess(&x.front(), &y.front(), x.size(), &result.front(), span, iter,
                  delta, &rw.front(), &res.front());
   return std::move(result);
