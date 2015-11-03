@@ -8,7 +8,7 @@
 #include "include/clebschgordan.h"
 
 #include <gsl/gsl_sf_coupling.h>
-
+#include <numeric>
 #include "include/constants.h"
 #include "include/logging.h"
 
