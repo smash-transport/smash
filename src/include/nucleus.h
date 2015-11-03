@@ -152,7 +152,7 @@ class Nucleus {
 
   /// Number of physical particles in the nucleus:
   inline size_t number_of_particles() const {
-    int nop = particles_.size()/testparticles_;
+    size_t nop = particles_.size()/testparticles_;
     // if size() is not a multiple of testparticles_, this will throw an
     // error.
     if (nop * testparticles_ != particles_.size()) {

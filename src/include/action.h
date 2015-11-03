@@ -106,8 +106,11 @@ class Action {
    * and then inserts the final-state particles. It does not do any sanity
    * checks, but assumes that is_valid has been called to determine if the
    * action is still valid.
+   *
+   * Note that you are required to increase id_process before the next call,
+   * such that you get unique numbers.
    */
-  virtual void perform(Particles *particles, size_t &id_process);
+  virtual void perform(Particles *particles, uint32_t id_process);
 
   /**
    * Check whether the action still applies.
@@ -150,8 +153,10 @@ class Action {
    */
   float time_of_execution() const { return time_of_execution_; }
 
-  /** Check various conservation laws. */
-  void check_conservation(const size_t &id_process) const;
+  /** Check various conservation laws.
+   *
+   * `id_process` is only used for debugging output. */
+  void check_conservation(const uint32_t &id_process) const;
 
   /** Get the interaction point */
   FourVector get_interaction_point();
