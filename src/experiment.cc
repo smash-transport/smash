@@ -272,8 +272,11 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     action_finders_.emplace_back(new DecayActionsFinder());
   }
   if (two_to_one || two_to_two) {
-    action_finders_.emplace_back(new ScatterActionsFinder(config, parameters_,
-                                                      two_to_one, two_to_two));
+    auto scat_finder = make_unique<ScatterActionsFinder>(config, parameters_,
+                                                       two_to_one, two_to_two);
+    max_transverse_distance_sqr_ = scat_finder->max_transverse_distance_sqr(
+                                                    parameters_.testparticles);
+    action_finders_.emplace_back(std::move(scat_finder));
   }
   if (dileptons_switch) {
     dilepton_finder_ = make_unique<DecayActionsFinderDilepton>();
@@ -836,10 +839,9 @@ uint64_t Experiment<Modus>::run_time_evolution_fixed_time_step(
 
   Actions actions;
   Actions dilepton_actions;
-
-  // minimal cell length for the grid
-  const float min_cell_length = ScatterActionsFinder::min_cell_length(
-      parameters_.testparticles, parameters_.timestep_duration());
+  const float dt = parameters_.timestep_duration();
+  // minimal cell length of the grid for collision finding
+  const float min_cell_length = compute_min_cell_length(dt);
 
   while (!(++parameters_.labclock > end_time_)) {
     /* (1.a) Create grid. */
@@ -851,15 +853,14 @@ uint64_t Experiment<Modus>::run_time_evolution_fixed_time_step(
     grid.iterate_cells([&](const ParticleList &search_list) {
                          for (const auto &finder : action_finders_) {
                            actions.insert(finder->find_actions_in_cell(
-                               search_list, parameters_.timestep_duration()));
+                               search_list, dt));
                          }
                        },
                        [&](const ParticleList &search_list,
                            const ParticleList &neighbors_list) {
                          for (const auto &finder : action_finders_) {
                            actions.insert(finder->find_actions_with_neighbors(
-                               search_list, neighbors_list,
-                               parameters_.timestep_duration()));
+                               search_list, neighbors_list, dt));
                          }
                        });
 
@@ -868,8 +869,7 @@ uint64_t Experiment<Modus>::run_time_evolution_fixed_time_step(
     /* (1.d) Dileptons */
     if (dilepton_finder_ != nullptr) {
       dilepton_actions.insert(dilepton_finder_->find_actions_in_cell(
-                                              particles_before_actions,
-                                              parameters_.timestep_duration()));
+                                              particles_before_actions, dt));
 
       if (!dilepton_actions.is_empty()) {
         while (!dilepton_actions.is_empty()) {
@@ -950,9 +950,9 @@ uint64_t Experiment<Modus>::run_time_evolution_adaptive_time_steps(
       parameters_.labclock.end_tick_on_multiple(end_time_);
     }
     float dt = parameters_.timestep_duration();
+
     /* (1.a) Create grid. */
-    const float min_cell_length =
-        ScatterActionsFinder::min_cell_length(parameters_.testparticles, dt);
+    float min_cell_length = compute_min_cell_length(dt);
     const auto &grid = modus_.create_grid(particles_, min_cell_length);
 
     /* (1.b) Iterate over cells and find actions. */

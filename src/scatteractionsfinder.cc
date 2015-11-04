@@ -45,12 +45,21 @@ ScatterActionsFinder::ScatterActionsFinder(
       testparticles_(parameters.testparticles),
       isotropic_(config.take({"Collision_Term", "Isotropic"}, false)),
       two_to_one_(two_to_one),
-      two_to_two_(two_to_two) {}
+      two_to_two_(two_to_two) {
+  if (is_constant_elastic_isotropic()) {
+    const auto &log = logger<LogArea::FindScatter>();
+    log.info("Constant elastic isotropic cross-section mode:",
+             " using ", elastic_parameter_, " mb as maximal cross-section.");
+  }
+}
 
 ScatterActionsFinder::ScatterActionsFinder(
     float elastic_parameter, int testparticles)
     : elastic_parameter_(elastic_parameter),
-      testparticles_(testparticles) {}
+      testparticles_(testparticles),
+      isotropic_(false),
+      two_to_one_(true),
+      two_to_two_(true) {}
 
 ScatterActionPtr ScatterActionsFinder::construct_scatter_action(
                                             const ParticleData &data_a,
