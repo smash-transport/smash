@@ -76,13 +76,15 @@ class ScatterActionsFinder : public ActionFinderInterface {
   }
 
   /**
-   * If there is only one particle sort (only elastic scatterings are possible),
+   * If there is only one particle sort, no decays
+   * (only elastic scatterings are possible),
    * scatterings are isotropic and cros-section fixed to elastic_parameter_
    * independently on momenta, then maximal cross-section is elastic_parameter_.
    * This knowledge can be used for improving performance.
    */
   inline bool is_constant_elastic_isotropic() const {
     return ParticleType::list_all().size() == 1 &&
+           !two_to_one_ &&
            isotropic_ &&
            elastic_parameter_ > 0.0f;
   }
