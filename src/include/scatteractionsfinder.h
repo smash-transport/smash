@@ -76,26 +76,26 @@ class ScatterActionsFinder : public ActionFinderInterface {
   }
 
   /**
+   * If there is only one particle sort (only elastic scatterings are possible),
+   * scatterings are isotropic and cros-section fixed to elastic_parameter_
+   * independently on momenta, then maximal cross-section is elastic_parameter_.
+   * This knowledge can be used for improving performance.
+   */
+  inline bool is_constant_elastic_isotropic() const {
+    return ParticleType::list_all().size() == 1 &&
+           isotropic_ &&
+           elastic_parameter_ > 0.0f;
+  }
+
+  /**
    * Returns the maximal transverse distance squared.
    *
    * Particle pairs whose transverse distance is larger then this, are not
    * checked for collisions.
    */
-  static float max_transverse_distance_sqr(int testparticles) {
-    return (maximum_cross_section / testparticles) * fm2_mb / M_PI;
-  }
-
-  /**
-   * Calculate the minimal size for the grid cells such that the
-   * ScatterActionsFinder will find all collisions within the maximal transverse
-   * distance (which is determined by the maximal cross section).
-   *
-   * \param testparticles The number of testparticles
-   * \param dt The current time step size
-   * \return The minimal required size of cells
-   */
-  static float min_cell_length(int testparticles, float dt) {
-    return std::sqrt(4 * dt * dt + max_transverse_distance_sqr(testparticles));
+  float max_transverse_distance_sqr(int testparticles) const {
+    return (is_constant_elastic_isotropic() ? elastic_parameter_ :
+            maximum_cross_section) / testparticles * fm2_mb * M_1_PI;
   }
 
  private:
@@ -109,15 +109,15 @@ class ScatterActionsFinder : public ActionFinderInterface {
   ActionPtr check_collision(const ParticleData &data_a,
                             const ParticleData &data_b, float dt) const;
   /** Elastic cross section parameter (in mb). */
-  float elastic_parameter_ = -1.0;
+  const float elastic_parameter_;
   /** Number of test particles. */
-  int testparticles_ = 1;
+  const int testparticles_;
   /** Do all collisions isotropically. */
-  bool isotropic_ = false;
+  const bool isotropic_;
   /** Enable 2->1 processes. */
-  bool two_to_one_ = true;
+  const bool two_to_one_;
   /** Enable 2->2 processes. */
-  bool two_to_two_ = true;
+  const bool two_to_two_;
 };
 
 #if 0

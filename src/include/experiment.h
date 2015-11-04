@@ -218,6 +218,19 @@ class Experiment : public ExperimentBase {
   void propagate_all();
 
   /**
+   * Calculate the minimal size for the grid cells such that the
+   * ScatterActionsFinder will find all collisions within the maximal transverse
+   * distance (which is determined by the maximal cross section).
+   *
+   * \param dt The current time step size
+   * \return The minimal required size of cells
+   */
+  float compute_min_cell_length(float dt) const {
+    return std::sqrt(4 * dt * dt + max_transverse_distance_sqr_);
+  }
+
+
+  /**
    * Struct of several member variables.
    * These variables are combined into a struct for efficient input to functions
    * outside of this class.
@@ -321,6 +334,11 @@ class Experiment : public ExperimentBase {
    * This indicates whether to use time steps.
    */
   const TimeStepMode time_step_mode_;
+
+  /**
+   * Maximal distance at which particles can interact, squared
+   */
+  float max_transverse_distance_sqr_ = std::numeric_limits<float>::max();
 
   /** The conserved quantities of the system.
    *
