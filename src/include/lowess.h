@@ -256,7 +256,6 @@ std::vector<T> smooth(const std::vector<T> &x, const std::vector<T> &y,
   rw.resize(x.size());
   std::vector<T> res;
   res.resize(x.size());
-  // TODO(steinberg): initialize to zero?
   lowess::lowess(&x.front(), &y.front(), x.size(), &result.front(), span, iter,
                  delta, &rw.front(), &res.front());
   return std::move(result);
