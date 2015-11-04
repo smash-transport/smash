@@ -222,19 +222,19 @@ void lowess(const T *x, const T *y, size_t n, T *ys, T span, size_t iter,
 ////////////////////////////////////////////////////////////////////////////////
 /// Smooth data with Lowess smoother
 ///
-/// This function performs the computations for the LOWESS smoother
-/// (see the reference below). Lowess returns the output points
-/// x and y which give the coordinates of the smooth.
+/// Apply the LOWESS smoother (see the reference below) to the given data (x, y).
 ///
-/// \param[in] grin Input graph
-/// \param[in] span the smoother span. This gives the proportion of points in
+/// \returns smoothed y-values
+/// \param x x-values.
+/// \param y y-values.
+/// \param span the smoother span. This gives the proportion of points in
 /// the plot
 ///     which influence the smooth at each value. Larger values give more
 ///     smoothness.
-/// \param[in] iter the number of robustifying iterations which should be
+/// \param iter the number of robustifying iterations which should be
 /// performed.
 ///     Using smaller values of iter will make lowess run faster.
-/// \param[in] delta values of x which lie within delta of each other replaced
+/// \param delta values of x which lie within delta of each other replaced
 /// by a
 ///     single value in the output from lowess.
 ///     For delta = 0, delta will be calculated.
