@@ -93,6 +93,17 @@ std::unique_ptr<OutputInterface> create_oscar_output(const bf::path &path,
                                                      Configuration config);
 
 
+/**
+ * Returns a OscarOutput for the dilepton output routine in the
+ * DecayActionsFinderDilepton. The Format is always 2013 and OscarInterations.
+ *
+ * \param path The path to the output directory where the file(s) will be
+ *             placed.
+ */
+
+std::unique_ptr<OutputInterface> create_dilepton_output(bf::path path);
+
+
 // @}
 
 

@@ -452,8 +452,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     // create dilepton output object
     std::string format = config.take({"Output", "Dileptons", "Format"});
     if (format == "Oscar") {
-      dilepton_output_ = make_unique<OscarOutput<OscarFormat2013,
-                            OscarInteractions>>(output_path, "DileptonOutput");
+      dilepton_output_ = create_dilepton_output(output_path);
     } else if (format == "Binary") {
       dilepton_output_ = make_unique<BinaryOutputCollisions>(output_path,
                                                              "DileptonOutput");
