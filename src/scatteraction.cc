@@ -89,7 +89,9 @@ void ScatterAction::generate_final_state() {
 
   /* Set positions & boost to computational frame. */
   for (ParticleData &new_particle : outgoing_particles_) {
-    new_particle.set_4position(middle_point);
+    if (proc->get_type() != ProcessType::Elastic) {
+      new_particle.set_4position(middle_point);
+    }
     new_particle.boost_momentum(-beta_cm());
   }
 }
