@@ -222,7 +222,7 @@ void lowess(const T *x, const T *y, size_t n, T *ys, T span, size_t iter,
 ////////////////////////////////////////////////////////////////////////////////
 /// Smooth data with Lowess smoother
 ///
-/// Apply the LOWESS smoother (see the reference below) to the given data (x, y).
+/// Apply the LOWESS smoother (see the reference below) to the given data (x, y)
 ///
 /// \returns smoothed y-values
 /// \param x x-values.
