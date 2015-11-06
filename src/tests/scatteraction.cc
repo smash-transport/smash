@@ -21,18 +21,23 @@ TEST(init_particle_types) {
   Test::create_actual_decaymodes();
 }
 
+constexpr double r_x = 0.1;
+const FourVector pos_a = Position{0., -r_x, 0., 0.};
+const FourVector pos_b = Position{0.,  r_x, 0., 0.};
+const FourVector middle = (pos_a + pos_b) / 2.;
+
 TEST(sorting) {
   ParticleData a{ParticleType::find(0x111)};  // pi0
-  a.set_4position(Position{0., -0.1, 0., 0.});
+  a.set_4position(pos_a);
   a.set_4momentum(Momentum{1.1, 1.0, 0., 0.});
 
   ParticleData b{ParticleType::find(0x111)};  // pi0
-  b.set_4position(Position{0., 0.1, 0., 0.});
+  b.set_4position(pos_b);
   a.set_4momentum(Momentum{1.1, 1.0, 0., 0.});
 
   constexpr float time1 = 1.f;
   ScatterAction act1(a, b, time1);
-  COMPARE(act1.get_interaction_point(), FourVector(0., 0., 0., 0.));
+  COMPARE(act1.get_interaction_point(), middle);
 
   constexpr float time2 = 1.1f;
   ScatterAction act2(a, b, time2);
@@ -43,12 +48,12 @@ TEST(elastic_collision) {
   // put particles in list
   Particles particles;
   ParticleData a{ParticleType::find(0x211)};  // pi+
-  a.set_4position(Position{0., -0.1, 0., 0.});
+  a.set_4position(pos_a);
   a.set_4momentum(Momentum{1.1, 1.0, 0., 0.});
   a.set_id_process(1);
 
   ParticleData b{ParticleType::find(0x211)};  // pi+
-  b.set_4position(Position{0., 0.1, 0., 0.});
+  b.set_4position(pos_b);
   b.set_4momentum(Momentum{1.1, 1.0, 0., 0.});
   b.set_id_process(1);
 
@@ -81,11 +86,16 @@ TEST(elastic_collision) {
   VERIFY((in[0] == out[0] && in[1] == out[1])
          || (in[0] == out[1] && in[1] == out[0]));
 
+  // verify that the particles keep their positions after elastic scattering
+  COMPARE(out[0].position(), pos_a);
+  COMPARE(out[1].position(), pos_b);
+
   // perform the action
   COMPARE(particles.front().id_process(), 1u);
   uint32_t id_process = 2;
   act.perform(&particles, id_process);
   id_process++;
+  // check id_process
   COMPARE(particles.front().id_process(), 2u);
   COMPARE(particles.back().id_process(), 2u);
   COMPARE(id_process, 3u);
@@ -104,9 +114,8 @@ TEST(outgoing_valid) {
   ParticleData p1{ParticleType::find(0x2212)};
   ParticleData p2{ParticleType::find(0x111)};
   // set position
-  constexpr double r_x = 0.1;
-  p1.set_4position(Position{0., -r_x, 0., 0.});
-  p2.set_4position(Position{0., r_x, 0., 0.});
+  p1.set_4position(pos_a);
+  p2.set_4position(pos_b);
   // set momenta
   constexpr double p_x = 0.1;
   p1.set_4momentum(p1.pole_mass(), p_x, 0., 0.);
@@ -148,17 +157,19 @@ TEST(outgoing_valid) {
   VERIFY(particles.is_valid(outgoing_particles[0]));
   VERIFY(outgoing_particles[0].id() > p1_copy.id());
   VERIFY(outgoing_particles[0].id() > p2_copy.id());
+  // verify that particle is placed in the middle between the incoming ones
+  COMPARE(outgoing_particles[0].position(), middle);
 }
 
 TEST(update_incoming) {
   // put particles in list
   Particles particles;
   ParticleData a{ParticleType::find(0x211)};  // pi+
-  a.set_4position(Position{0., -0.1, 0., 0.});
+  a.set_4position(pos_a);
   a.set_4momentum(Momentum{1.1, 1.0, 0., 0.});
 
   ParticleData b{ParticleType::find(0x211)};  // pi+
-  b.set_4position(Position{0., 0.1, 0., 0.});
+  b.set_4position(pos_b);
   b.set_4momentum(Momentum{1.1, -1.0, 0., 0.});
 
   a = particles.insert(a);
