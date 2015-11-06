@@ -111,10 +111,10 @@ TEST(insert) {
   ParticleData smashon = Test::smashon();
   smashon.set_id_process(1);
   p.insert(smashon);
-  COMPARE(p.back().id_process(), 1);
+  COMPARE(p.back().id_process(), 1u);
   smashon.set_id_process(2);
   p.insert(smashon);
-  COMPARE(p.back().id_process(), 2);
+  COMPARE(p.back().id_process(), 2u);
 }
 
 TEST(insert_2) {
@@ -224,7 +224,7 @@ TEST(id_process) {
   p.create(1000, Test::smashon().pdgcode());
   uint32_t id = 0;
   for (auto &pd : p) {
-    COMPARE(pd.id_process(), 0);
+    COMPARE(pd.id_process(), 0u);
     pd.set_id_process(++id);
   }
   id = 0;
@@ -236,7 +236,7 @@ TEST(id_process) {
   p.create(999, Test::smashon().pdgcode());
   id = 0;
   for (auto &pd : p) {
-    COMPARE(pd.id_process(), 0);
+    COMPARE(pd.id_process(), 0u);
     pd.set_id_process(++id);
   }
   id = 0;
@@ -248,7 +248,7 @@ TEST(id_process) {
     p.insert(Test::smashon());
   }
   for (auto &pd : p) {
-    COMPARE(pd.id_process(), 0);
+    COMPARE(pd.id_process(), 0u);
   }
 }
 
@@ -327,7 +327,7 @@ TEST(update) {
   COMPARE(p.size(), 3u);
   COMPARE(p.front().momentum(), FourVector(1, 1, 1, 1));
   COMPARE(p.front().position(), FourVector(1, 1, 1, 1));
-  COMPARE(p.front().id_process(), 1);
+  COMPARE(p.front().id_process(), 1u);
   pd.set_id_process(2);
   pd.set_4momentum({2, 2, 2, 2});
   pd.set_4position({3, 3, 3, 3});
@@ -335,5 +335,5 @@ TEST(update) {
   COMPARE(p.size(), 3u);
   COMPARE(p.front().momentum(), FourVector(2, 2, 2, 2));
   COMPARE(p.front().position(), FourVector(3, 3, 3, 3));
-  COMPARE(p.front().id_process(), 2);
+  COMPARE(p.front().id_process(), 2u);
 }

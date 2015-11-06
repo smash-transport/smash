@@ -82,12 +82,12 @@ TEST(elastic_collision) {
          || (in[0] == out[1] && in[1] == out[0]));
 
   // perform the action
-  COMPARE(particles.front().id_process(), 1);
+  COMPARE(particles.front().id_process(), 1u);
   uint32_t id_process = 2;
   act.perform(&particles, id_process);
   id_process++;
-  COMPARE(particles.front().id_process(), 2);
-  COMPARE(particles.back().id_process(), 2);
+  COMPARE(particles.front().id_process(), 2u);
+  COMPARE(particles.back().id_process(), 2u);
   COMPARE(id_process, 3u);
 
   // action should not be valid anymore

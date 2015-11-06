@@ -37,7 +37,7 @@ TEST(create_particledata_piplus) {
 
   COMPARE(p.id(), -1);
   COMPARE(p.pdgcode(), pdg);
-  COMPARE(p.id_process(), 0);
+  COMPARE(p.id_process(), 0u);
   COMPARE(p.momentum().x0(), 0.0);
   COMPARE(p.momentum().x1(), 0.0);
   COMPARE(p.momentum().x2(), 0.0);
@@ -59,9 +59,9 @@ TEST(set_get) {
   COMPARE(p.pdgcode(), smashon);
   COMPARE(p.is_hadron(), smashon.is_hadron());
   p.set_id_process(5);
-  COMPARE(p.id_process(), 5);
+  COMPARE(p.id_process(), 5u);
   p.set_id_process(6);
-  COMPARE(p.id_process(), 6);
+  COMPARE(p.id_process(), 6u);
   FourVector m(1.0, 1.2, 1.4, 1.6);
   p.set_4momentum(m);
   COMPARE(p.momentum(), FourVector(1.0, 1.2, 1.4, 1.6));
