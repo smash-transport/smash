@@ -80,9 +80,10 @@ namespace Smash {
 	  if (event[i].isHadron()) {
              const int pythia_id = event[i].id();
              log.debug("PDG ID from Pythia:", pythia_id);
-	     std::string s = std::to_string(pythia_id);
+	         std::string s = std::to_string(pythia_id);
              PdgCode pythia_code(s); 
-             ParticleData new_particle_(ParticleType::pythiafind());    
+             ParticleData new_particle_(ParticleType::find(pythia_code));
+///             ParticleData new_particle_(ParticleType::pythiafind());    
              FourVector momentum;
              momentum.set_x0(event[i].e());
              momentum.set_x1(event[i].px());
