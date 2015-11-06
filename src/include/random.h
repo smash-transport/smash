@@ -69,6 +69,12 @@ template <typename T> T uniform(T min, T max) {
   return std::uniform_real_distribution<T>(min, max)(engine);
 }
 
+/** returns a uniformly distributed random number \f$\chi \in [{\rm
+ * min}, {\rm max})\f$ */
+template <typename T> T uniform_int(T min, T max) {
+  return std::uniform_int_distribution<T>(min, max)(engine);
+}
+
 /** returns a uniformly distributed random number \f$\chi \in [0,1)\f$
  */
 template <typename T = double> T canonical() {
