@@ -1244,6 +1244,9 @@ void Experiment<Modus>::final_output(uint64_t interactions_total,
   for (const auto &output : outputs_) {
     output->at_eventend(particles_, evt_num);
   }
+  if (dilepton_output_ != nullptr) {
+    dilepton_output_->at_eventend(particles_, evt_num);
+  }
 }
 
 template <typename Modus>
