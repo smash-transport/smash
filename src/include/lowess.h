@@ -101,30 +101,30 @@ void lowest(const T *x, const T *y, size_t n, T xs, T &ys, size_t nleft,
 /// (R source file: R_sort.c by R Development Core Team (C) 1999-2001)
 template <typename T>
 void psort(T *x, size_t n, size_t k) {
-    for (size_t pL = 0, pR = n - 1; pL < pR; ) {
-        const auto v = x[k];
-        size_t i;
-        size_t j;
-        for (i = pL, j = pR; i <= j; ) {
-            while (x[i] < v) {
-                i++;
-            }
-            while (v < x[j]) {
-                j--;
-            }
-            if (i <= j) {
-                const auto w = x[i];
-                x[i++] = x[j];
-                x[j--] = w;
-            }
-        }
-        if (j < k) {
-            pL = i;
-        }
-        if (k < i) {
-            pR = j;
-        }
+  for (size_t pL = 0, pR = n - 1; pL < pR;) {
+    const auto v = x[k];
+    size_t i;
+    size_t j;
+    for (i = pL, j = pR; i <= j;) {
+      while (x[i] < v) {
+        i++;
+      }
+      while (v < x[j]) {
+        j--;
+      }
+      if (i <= j) {
+        const auto w = x[i];
+        x[i++] = x[j];
+        x[j--] = w;
+      }
     }
+    if (j < k) {
+      pL = i;
+    }
+    if (k < i) {
+      pR = j;
+    }
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -224,6 +224,7 @@ void lowess(const T *x, const T *y, size_t n, T *ys, T span, size_t iter,
     // compute cmad := 6 * median(rw[], n)
     const auto m1 = n / 2;
     // partial sort, for m1 & m2
+    // TODO(steinberg): consider replacing psort with std::partial_sort
     psort(rw, n, m1);
     T cmad;
     if (n % 2 == 0) {
