@@ -1262,6 +1262,9 @@ void Experiment<Modus>::run() {
     for (const auto &output : outputs_) {
       output->at_eventstart(particles_, j);
     }
+    if (dilepton_output_ != nullptr) {
+      dilepton_output_->at_eventstart(particles_, j);
+    }
 
     /* the time evolution of the relevant subsystem */
     uint64_t interactions_total;

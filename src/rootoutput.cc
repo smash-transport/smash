@@ -178,9 +178,12 @@ RootOutput::~RootOutput() {
  */
 void RootOutput::at_eventstart(const Particles &particles,
                                const int event_number) {
+  // save event number
+  current_event_ = event_number;
+
   if (write_particles_) {
     output_counter_ = 0;
-    particles_to_tree(particles, event_number);
+    particles_to_tree(particles);
     output_counter_++;
   }
 }
@@ -189,13 +192,10 @@ void RootOutput::at_eventstart(const Particles &particles,
  * Writes to tree "at_tstep_N", where N is timestep number counting from 1.
  */
 void RootOutput::at_intermediate_time(const Particles &particles,
-                                    const int event_number,
+                                    const int /*event_number*/,
                                     const Clock &/*clock*/) {
   if (write_particles_) {
-    // This is needed by collision output
-    current_event_ = event_number;
-
-    particles_to_tree(particles, event_number);
+    particles_to_tree(particles);
     output_counter_++;
   }
 }
@@ -204,10 +204,10 @@ void RootOutput::at_intermediate_time(const Particles &particles,
  * Writes to tree "at_eventend".
  */
 void RootOutput::at_eventend(const Particles &/*particles*/,
-                             const int event_number) {
+                             const int /*event_number*/) {
   // Forced regular dump from operational memory to disk. Very demanding!
   // If program crashes written data will NOT be lost
-  if (event_number > 0  && event_number % autosave_frequency_ == 0) {
+  if (current_event_ > 0  && current_event_ % autosave_frequency_ == 0) {
     if (write_particles_) {
       particles_tree_->AutoSave("SaveSelf");
     }
@@ -233,12 +233,11 @@ void RootOutput::at_interaction(const ParticleList &incoming,
 /**
  * Writes particles to a tree defined by treename.
  */
-void RootOutput::particles_to_tree(const Particles &particles,
-                                   const int event_number) {
+void RootOutput::particles_to_tree(const Particles &particles) {
   int i = 0;
 
   tcounter = output_counter_;
-  ev = event_number;
+  ev = current_event_;
 
   for (const auto &p : particles) {
     // Buffer full - flush to tree, else fill with particles

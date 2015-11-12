@@ -109,8 +109,7 @@ class RootOutput : public OutputInterface {
   // That's why TTree is not a unique pointer.
   TTree* particles_tree_;
   TTree* collisions_tree_;
-  void particles_to_tree(const Particles &particles,
-                         const int event_number);
+  void particles_to_tree(const Particles &particles);
   void collisions_to_tree(const ParticleList &incoming,
                           const ParticleList &outgoing, const double weight);
   // Counts number of output in a given event
