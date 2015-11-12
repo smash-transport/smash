@@ -99,7 +99,7 @@ class RootOutput : public OutputInterface {
   void at_interaction(const ParticleList &incoming_particles,
                       const ParticleList &outgoing_particles,
                       const double density,
-                      const double total_cross_section,
+                      const double weight,
                       const ProcessType process_type) override;
 
  private:
@@ -112,7 +112,7 @@ class RootOutput : public OutputInterface {
   void particles_to_tree(const Particles &particles,
                          const int event_number);
   void collisions_to_tree(const ParticleList &incoming,
-                          const ParticleList &outgoing);
+                          const ParticleList &outgoing, const double weight);
   // Counts number of output in a given event
   int output_counter_;
   int current_event_;
@@ -122,6 +122,7 @@ class RootOutput : public OutputInterface {
   std::array<double, max_buffer_size_> p0, px, py, pz, t, x, y, z;
   std::array<int, max_buffer_size_>    pdgcode;
   int npart, tcounter, ev, nin, nout;
+  double wgt;
 
   // Option to write collisions tree
   bool write_collisions_;

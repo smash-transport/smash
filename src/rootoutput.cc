@@ -148,6 +148,7 @@ void RootOutput::init_trees() {
     collisions_tree_->Branch("nout", &nout, "nout/I");
     collisions_tree_->Branch("npart", &npart, "npart/I");
     collisions_tree_->Branch("ev", &ev, "ev/I");
+    collisions_tree_->Branch("weight", &wgt, "weight/D");
 
     collisions_tree_->Branch("pdgcode", &pdgcode[0], "pdgcode[npart]/I");
 
@@ -222,10 +223,10 @@ void RootOutput::at_eventend(const Particles &/*particles*/,
 void RootOutput::at_interaction(const ParticleList &incoming,
                                 const ParticleList &outgoing,
                                 const double /*density*/,
-                                const double /*total_cross_section*/,
+                                const double weight,
                                 ProcessType /*process_type*/) {
   if (write_collisions_) {
-    collisions_to_tree(incoming, outgoing);
+    collisions_to_tree(incoming, outgoing, weight);
   }
 }
 
@@ -269,11 +270,13 @@ void RootOutput::particles_to_tree(const Particles &particles,
 }
 
 void RootOutput::collisions_to_tree(const ParticleList &incoming,
-                                    const ParticleList &outgoing) {
+                                    const ParticleList &outgoing,
+                                    const double weight) {
   ev = current_event_;
   nin = incoming.size();
   nout = outgoing.size();
   npart = nin + nout;
+  wgt = weight;
 
   int i = 0;
 
