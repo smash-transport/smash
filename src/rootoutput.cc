@@ -73,46 +73,57 @@ RootOutput::RootOutput(const bf::path &path, Configuration&& conf)
 
   /*!\Userguide
    * \page format_root ROOT format
-   * SMASH ROOT output has the same functionality as OSCAR output, but
-   * root-files are faster to read, write and they need less disk space
-   * for the same amount of information. This is reached due to complex
-   * internal structure of ROOT file. ROOT file is not human-readable, but it
-   * can be viewed using ROOT TBrowser. One can also open and read it using
-   * ROOT functions. Full memory structure of the ROOT-file can be found
-   * here http://root.cern.ch/root/html/TFile.html. We only desribe the logical
-   * structure of the SMASH root output. Knowing the logical structure is
-   * enough to read, write root-file and understand its view in TBrowser.
+   * SMASH ROOT output has the same functionality as OSCAR output, but ROOT
+   * files are faster to read and write and they need less disk space for the
+   * same amount of information. This is achieved due to an optimized internal
+   * structure of ROOT files (and compression). ROOT files are not
+   * human-readable, but they can be viewed using ROOT's TBrowser. One can also
+   * access them using ROOT functions. The full memory structure of the ROOT
+   * files can be found here: http://root.cern.ch/root/html/TFile.html. We only
+   * desribe the logical structure of the SMASH ROOT output. Knowing the logical
+   * structure is enough to read and write ROOT files and understand their view
+   * in TBrowser.
    *
    * Producing ROOT output requires ROOT installed (see http://root.cern.ch).
    *
-   * SMASH produces one root file per run: \c smash_run.root. This file
-   * contains TTree called \c particles and a TTree \c collisions.
-   * The latter can be switched on and off by an option (see \ref input_root).
-   * Particles tree contains the same information as OSCAR particles output
-   * and collisions tree contains the same information as OSCAR collision output.
+   * SMASH produces one ROOT file per run: \c smash_run.root. This file contains
+   * a TTree called \c particles and a TTree called \c collisions. Both can be
+   * switched on and off by an option (see \ref input_root). The \c particles
+   * tree contains the same information as OSCAR particles output and the
+   * \c collisions tree contains the same information as OSCAR collision output.
    *
-   * Every physical quantity is in separate TBranch.\n
-   * One entry in the particles TTree is:
+   * In case that the ROOT format is used for dilepton output
+   * (see \ref input_dileptons), the file is called \c DileptonOutput.root and
+   * only contains a \c collisions tree with all the dilepton decays.
+   *
+   * Every physical quantity is in a separate TBranch.
+   * One entry in the \c particles TTree is:
    * \code
-   * ev tcounter npart pdgcode[npart] t[npart] x[npart] y[npart] z[npart] ->
-   * -> p0[npart] px[npart] py[npart] pz[npart]
+   * ev tcounter npart pdgcode[npart] t[npart] x[npart] y[npart] z[npart] p0[npart] px[npart] py[npart] pz[npart]
    * \endcode
-   * One tree entry is analogous to OSCAR output block, but maximal size of
-   * ROOT entry is limited to 10000. This is done to limit buffer size needed
-   * for root output. If number of particles in one block exceeds 10000,
-   * then they are written in separate blocks with the same tcounter and ev.
+   * One tree entry is analogous to an OSCAR output block, but the maximal
+   * number of particles in one entry is limited to 10000. This is done to limit
+   * the buffer size needed for ROOT output. If the number of particles in one
+   * block exceeds 10000, then they are written in separate blocks with the same
+   * \c tcounter and \c ev. The fields have the following meaning:
    *
-   * \li ev is event number
-   * \li tcounter is number of output block in a given event in terms of OSCAR
-   * \li npart is number of particles in the block
-   * \li pdgcode is PDG id array
-   * \li t, x, y, z are position arrays
-   * \li p0, px, py, pz are 4-momenta arrays
+   * \li \c ev is event number
+   * \li \c tcounter is number of output block in a given event in terms of OSCAR
+   * \li \c npart is number of particles in the block
+   * \li \c pdgcode is PDG id array
+   * \li \c t, \c x, \c y, \c z are position arrays
+   * \li \c p0, \c px, \c py, \c pz are 4-momenta arrays
    *
-   * In collisions tree entries are organized in the same way, but additional
-   * fields \c nin and \c nout are added to characterize number of incoming
-   * and outgoing particles in the reaction, nin + nout = npart. Currently
-   * writing initial and final configuration to collisions tree is not supported.
+   * The entries in the \c collisions tree are organized in the same way, but
+   * a few additional fields are present:
+   * \li \c nin and \c nout are added to characterize number of incoming and
+   *     outgoing particles in the reaction, with nin + nout = npart.
+   * \li \c weight is an action weight, whose meaning depends on the type of
+   *     action: For collisions it is the total cross section, for decays it is
+   *     the total decay width and for dilepton decays it is the shining weight.
+   *
+   * Currently writing initial and final configuration to collisions tree is
+   * not supported.
    *
    * See also \ref collisions_output_in_box_modus_.
    **/
