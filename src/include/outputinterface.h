@@ -76,8 +76,8 @@ class OutputInterface {
   /**
    * Output launched after every N'th timestep. N is controlled by an option.
    */
-  virtual void at_intermediate_time(const Particles &, const int,
-                                  const Clock &) = 0;
+  virtual void at_intermediate_time(const Particles &, const Clock &) {
+  }
 
   /**
    * Output intended for writing out thermodynamics.
@@ -95,11 +95,9 @@ class OutputInterface {
    * Output to write thermodynamics from the lattice.
    */
   virtual void thermodynamics_output(const std::string varname,
-                            RectangularLattice<DensityOnLattice> &lattice,
-                            const int event_number) {
+                            RectangularLattice<DensityOnLattice> &lattice) {
     SMASH_UNUSED(varname);
     SMASH_UNUSED(lattice);
-    SMASH_UNUSED(event_number);
   }
 };
 

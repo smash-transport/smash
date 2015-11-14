@@ -94,8 +94,7 @@ class RootOutput : public OutputInterface {
   void at_eventend(const Particles &particles,
                    const int event_number) override;
   void at_intermediate_time(const Particles &particles,
-                          const int event_number,
-                          const Clock &) override;
+                            const Clock &) override;
   void at_interaction(const ParticleList &incoming_particles,
                       const ParticleList &outgoing_particles,
                       const double density,

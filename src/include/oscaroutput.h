@@ -71,13 +71,14 @@ class OscarOutput : public OutputInterface {
                       const double total_cross_section,
                       const ProcessType process_type) override;
 
-  void at_intermediate_time(const Particles &particles, const int event_number,
+  void at_intermediate_time(const Particles &particle,
                             const Clock &clock) override;
 
  private:
   void write_particledata(const ParticleData &data);
   void write(const Particles &particles);
 
+  int current_event_;
   FilePtr file_;
 };
 

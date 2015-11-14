@@ -697,8 +697,7 @@ static void check_interactions_total(uint64_t interactions_total) {
 }
 
 template <typename Modus>
-uint64_t Experiment<Modus>::run_time_evolution_without_time_steps(
-    const int evt_num) {
+uint64_t Experiment<Modus>::run_time_evolution_without_time_steps() {
   const auto &log = logger<LogArea::Experiment>();
   modus_.impose_boundary_conditions(&particles_);
   uint64_t interactions_total = 0, previous_interactions_total = 0,
@@ -765,8 +764,7 @@ uint64_t Experiment<Modus>::run_time_evolution_without_time_steps(
               action_time - parameters_.labclock.current_time();
           parameters_.labclock.set_timestep_duration(remaining_dt);
         }
-        intermediate_output(evt_num, interactions_total,
-                            previous_interactions_total);
+        intermediate_output(interactions_total, previous_interactions_total);
       }
 
       // set the clock manually instead of advancing it with the time step
@@ -817,8 +815,7 @@ uint64_t Experiment<Modus>::run_time_evolution_without_time_steps(
   ++parameters_.labclock;
   if (parameters_.is_output_time()) {
     propagate_all();
-    intermediate_output(evt_num, interactions_total,
-                        previous_interactions_total);
+    intermediate_output(interactions_total, previous_interactions_total);
   }
   return interactions_total;
 }
@@ -826,8 +823,7 @@ uint64_t Experiment<Modus>::run_time_evolution_without_time_steps(
 /* This is the loop over timesteps, carrying out collisions and decays
  * and propagating particles. */
 template <typename Modus>
-uint64_t Experiment<Modus>::run_time_evolution_fixed_time_step(
-    const int evt_num) {
+uint64_t Experiment<Modus>::run_time_evolution_fixed_time_step() {
   const auto &log = logger<LogArea::Experiment>();
   modus_.impose_boundary_conditions(&particles_);
   uint64_t interactions_total = 0, previous_interactions_total = 0,
@@ -895,8 +891,7 @@ uint64_t Experiment<Modus>::run_time_evolution_fixed_time_step(
 
     /* (4) Physics output during the run. */
     if (parameters_.need_intermediate_output()) {
-      intermediate_output(evt_num, interactions_total,
-                          previous_interactions_total);
+      intermediate_output(interactions_total, previous_interactions_total);
     }
     // Check conservation of conserved quantities if potentials are off.
     // If potentials are on then momentum is conserved only in average
@@ -922,7 +917,7 @@ uint64_t Experiment<Modus>::run_time_evolution_fixed_time_step(
  * and propagating particles. */
 template <typename Modus>
 uint64_t Experiment<Modus>::run_time_evolution_adaptive_time_steps(
-    const int evt_num, const AdaptiveParameters adaptive_parameters) {
+                                const AdaptiveParameters adaptive_parameters) {
   const auto &log = logger<LogArea::Experiment>();
   const auto &log_ad_ts = logger<LogArea::AdaptiveTS>();
   modus_.impose_boundary_conditions(&particles_);
@@ -1045,8 +1040,7 @@ uint64_t Experiment<Modus>::run_time_evolution_adaptive_time_steps(
         parameters_.labclock.end_tick_on_multiple(next_time);
       }
 
-      intermediate_output(evt_num, interactions_total,
-                          previous_interactions_total);
+      intermediate_output(interactions_total, previous_interactions_total);
     }
 
     ++parameters_.labclock;
@@ -1092,8 +1086,7 @@ uint64_t Experiment<Modus>::run_time_evolution_adaptive_time_steps(
 
   // check if a final intermediate output is needed
   if (parameters_.is_output_time()) {
-    intermediate_output(evt_num, interactions_total,
-                        previous_interactions_total);
+    intermediate_output(interactions_total, previous_interactions_total);
   }
 
   if (pauli_blocker_) {
@@ -1106,8 +1099,8 @@ uint64_t Experiment<Modus>::run_time_evolution_adaptive_time_steps(
 }
 
 template<typename Modus>
-void Experiment<Modus>::intermediate_output(const int evt_num,
-    uint64_t& interactions_total, uint64_t& previous_interactions_total) {
+void Experiment<Modus>::intermediate_output(uint64_t& interactions_total,
+                                        uint64_t& previous_interactions_total) {
   const auto &log = logger<LogArea::Experiment>();
   const uint64_t interactions_this_interval =
       interactions_total - previous_interactions_total;
@@ -1118,7 +1111,7 @@ void Experiment<Modus>::intermediate_output(const int evt_num,
   const LatticeUpdate lat_upd = LatticeUpdate::AtOutput;
   /* save evolution data */
   for (const auto &output : outputs_) {
-    output->at_intermediate_time(particles_, evt_num, parameters_.labclock);
+    output->at_intermediate_time(particles_, parameters_.labclock);
     // Thermodynamic output at some point versus time
     output->thermodynamics_output(particles_, parameters_, density_param_);
     // Thermodynamic output on the lattice versus time
@@ -1126,22 +1119,19 @@ void Experiment<Modus>::intermediate_output(const int evt_num,
       case DensityType::Baryon:
         update_density_lattice(jmu_B_lat_.get(), lat_upd,
                                DensityType::Baryon, density_param_, particles_);
-        output->thermodynamics_output(std::string("rhoB"), *jmu_B_lat_,
-                                                                 evt_num);
+        output->thermodynamics_output(std::string("rhoB"), *jmu_B_lat_);
         break;
       case DensityType::BaryonicIsospin:
         update_density_lattice(jmu_I3_lat_.get(), lat_upd,
                      DensityType::BaryonicIsospin, density_param_, particles_);
-        output->thermodynamics_output(std::string("rhoI3"), *jmu_I3_lat_,
-                                                                 evt_num);
+        output->thermodynamics_output(std::string("rhoI3"), *jmu_I3_lat_);
         break;
       case DensityType::None:
         break;
       default:
         update_density_lattice(jmu_custom_lat_.get(), lat_upd,
                        dens_type_lattice_printout_, density_param_, particles_);
-        output->thermodynamics_output(std::string("rho"), *jmu_custom_lat_,
-                                                                  evt_num);
+        output->thermodynamics_output(std::string("rho"), *jmu_custom_lat_);
     }
   }
 }
@@ -1270,14 +1260,14 @@ void Experiment<Modus>::run() {
     uint64_t interactions_total;
     switch (time_step_mode_) {
       case TimeStepMode::None:
-        interactions_total = run_time_evolution_without_time_steps(j);
+        interactions_total = run_time_evolution_without_time_steps();
         break;
       case TimeStepMode::Fixed:
-        interactions_total = run_time_evolution_fixed_time_step(j);
+        interactions_total = run_time_evolution_fixed_time_step();
         break;
       case TimeStepMode::Adaptive:
         interactions_total =
-            run_time_evolution_adaptive_time_steps(j, *adaptive_parameters_);
+            run_time_evolution_adaptive_time_steps(*adaptive_parameters_);
         break;
     }
 

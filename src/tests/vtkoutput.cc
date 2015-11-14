@@ -72,7 +72,7 @@ TEST(vtkoutputfile) {
   VERIFY(bf::exists(outputfilepath));
   /* Time step output */
   Clock clock(0.0, 1.0);
-  vtkop->at_intermediate_time(particles, event_id, clock);
+  vtkop->at_intermediate_time(particles, clock);
   const bf::path outputfile2path =
       testoutputpath / "pos_ev00000_tstep00001.vtk";
   VERIFY(bf::exists(outputfile2path));

@@ -71,9 +71,6 @@ class BinaryOutputCollisions : public BinaryOutputBase {
                       const double density,
                       const double total_cross_section,
                       const ProcessType process_type) override;
-  /// writes particles every time interval fixed by option OUTPUT_INTERVAL
-  void at_intermediate_time(const Particles &particles, const int event_number,
-                          const Clock &clock) override;
 
  private:
   /// Option: print initial and final particles or not

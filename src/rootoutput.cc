@@ -203,8 +203,7 @@ void RootOutput::at_eventstart(const Particles &particles,
  * Writes to tree "at_tstep_N", where N is timestep number counting from 1.
  */
 void RootOutput::at_intermediate_time(const Particles &particles,
-                                    const int /*event_number*/,
-                                    const Clock &/*clock*/) {
+                                      const Clock &/*clock*/) {
   if (write_particles_) {
     particles_to_tree(particles);
     output_counter_++;

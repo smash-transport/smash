@@ -47,11 +47,6 @@ void DensityOutput::at_eventend(const Particles &/*particles*/,
   std::fflush(file_.get());
 }
 
-void DensityOutput::at_intermediate_time(const Particles &/*particles*/,
-                                      const int /*event_number*/,
-                                      const Clock &/*t*/) {
-}
-
 void DensityOutput::thermodynamics_output(const Particles &particles,
                                           const ExperimentParameters &param,
                                           const DensityParameters &dens_param) {

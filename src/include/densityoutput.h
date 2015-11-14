@@ -45,10 +45,6 @@ class DensityOutput : public OutputInterface {
   /// writes the final particle information of an event
   void at_eventend(const Particles &particles, const int event_number) override;
 
-  /// writes particles every time interval fixed by option Output_Interval
-  void at_intermediate_time(const Particles &particles, const int event_number,
-                          const Clock &clock) override;
-
   /// writes thermodynamics every time interval fixed by option Output_Interval
   void thermodynamics_output(const Particles &particles,
                              const ExperimentParameters &param,

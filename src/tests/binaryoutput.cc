@@ -221,7 +221,7 @@ TEST(particles_format) {
   ParticleList final_particles = particles->copy_to_vector();
   Clock clock;
 
-  bin_output->at_intermediate_time(*particles, event_id, clock);
+  bin_output->at_intermediate_time(*particles, clock);
 
   /* Final state output */
   bin_output->at_eventend(*particles, event_id);

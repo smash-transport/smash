@@ -68,7 +68,8 @@ void VtkOutput::at_eventstart(const Particles &particles,
                               const int event_number) {
   vtk_output_counter_ = 0;
   vtk_thermodynamics_output_counter_ = 0;
-  write(particles, event_number);
+  current_event_ = event_number;
+  write(particles);
   vtk_output_counter_++;
 }
 
@@ -77,16 +78,15 @@ void VtkOutput::at_eventend(const Particles &/*particles*/,
 }
 
 void VtkOutput::at_intermediate_time(const Particles &particles,
-                                   const int event_number,
                                    const Clock& /*clock*/) {
-  write(particles, event_number);
+  write(particles);
   vtk_output_counter_++;
 }
 
-void VtkOutput::write(const Particles &particles, const int event_number) {
+void VtkOutput::write(const Particles &particles) {
   char filename[32];
-  snprintf(filename, sizeof(filename), "pos_ev%05i_tstep%05i.vtk", event_number,
-           vtk_output_counter_);
+  snprintf(filename, sizeof(filename), "pos_ev%05i_tstep%05i.vtk",
+           current_event_, vtk_output_counter_);
   FilePtr file_{std::fopen((base_path_ / filename).native().c_str(), "w")};
 
   /* Legacy VTK file format */
@@ -136,12 +136,11 @@ void VtkOutput::write(const Particles &particles, const int event_number) {
  */
 
 void VtkOutput::thermodynamics_output(const std::string varname,
-                               RectangularLattice<DensityOnLattice> &lattice,
-                               const int event_number) {
+                               RectangularLattice<DensityOnLattice> &lattice) {
   std::ofstream file;
   char suffix[22];
-  snprintf(suffix, sizeof(suffix), "_%05i_tstep%05i.vtk",
-                        event_number, vtk_thermodynamics_output_counter_);
+  snprintf(suffix, sizeof(suffix), "_%05i_tstep%05i.vtk", current_event_,
+           vtk_thermodynamics_output_counter_);
   const auto dim = lattice.dimensions();
   const auto cs = lattice.cell_sizes();
   const auto orig = lattice.origin();

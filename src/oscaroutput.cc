@@ -150,6 +150,7 @@ inline void OscarOutput<Format, Contents>::write(const Particles &particles) {
 template <OscarOutputFormat Format, int Contents>
 void OscarOutput<Format, Contents>::at_eventstart(const Particles &particles,
                                                   const int event_number) {
+  current_event_ = event_number;
   if (Contents & OscarAtEventstart) {
     if (Format == OscarFormat2013) {
       std::fprintf(file_.get(), "# event %i in %zu\n", event_number + 1,
@@ -232,16 +233,15 @@ void OscarOutput<Format, Contents>::at_interaction(
 
 template <OscarOutputFormat Format, int Contents>
 void OscarOutput<Format, Contents>::at_intermediate_time(
-    const Particles &particles, const int event_number,
-    const Clock & /*clock*/) {
+    const Particles &particles, const Clock & /*clock*/) {
   if (Contents & OscarTimesteps) {
     if (Format == OscarFormat2013) {
-      std::fprintf(file_.get(), "# event %i out %zu\n", event_number + 1,
+      std::fprintf(file_.get(), "# event %i out %zu\n", current_event_ + 1,
                    particles.size());
     } else {
       const size_t zero = 0;
       std::fprintf(file_.get(), "%zu %zu %i\n", particles.size(), zero,
-                   event_number + 1);
+                   current_event_ + 1);
     }
     write(particles);
   }
