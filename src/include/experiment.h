@@ -145,7 +145,7 @@ class Experiment : public ExperimentBase {
    *                                 time step before any actions were performed
    */
   template <typename Container>
-  void perform_action(const ActionPtr &action, uint64_t &interactions_total,
+  void perform_action(Action &action, uint64_t &interactions_total,
                       uint64_t &total_pauliblocked,
                       const Container &particles_before_actions);
 
@@ -153,7 +153,7 @@ class Experiment : public ExperimentBase {
    * the given dilepton action in the dilepton output file, instead of
    * actually performing the action.
    */
-  void write_dilepton_action(const ActionPtr &action,
+  void write_dilepton_action(Action &action,
                              const ParticleList &particles_before_actions);
 
   /** Runs the time evolution of an event with fixed-sized time steps

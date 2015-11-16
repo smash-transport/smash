@@ -7,6 +7,7 @@
  *
  */
 
+#include "include/action.h"
 #include "include/clock.h"
 #include "include/forwarddeclarations.h"
 #include "include/inputfunctions.h"
@@ -230,13 +231,12 @@ void RootOutput::at_eventend(const Particles &/*particles*/,
 /**
  * Writes interactions to ROOT-file
  */
-void RootOutput::at_interaction(const ParticleList &incoming,
-                                const ParticleList &outgoing,
-                                const double /*density*/,
-                                const double weight,
-                                ProcessType /*process_type*/) {
+void RootOutput::at_interaction(const Action &action,
+                                const double /*density*/) {
   if (write_collisions_) {
-    collisions_to_tree(incoming, outgoing, weight);
+    collisions_to_tree(action.incoming_particles(),
+                       action.outgoing_particles(),
+                       action.raw_weight_value());
   }
 }
 

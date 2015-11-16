@@ -38,6 +38,13 @@ class Action {
    */
   Action(const ParticleList &in_part, float time);
 
+  Action(const ParticleData &in_part, const ParticleData &out_part,
+         float time, ProcessType type)
+        : incoming_particles_({in_part}),
+          outgoing_particles_({out_part}),
+          time_of_execution_(time+in_part.position().x0()),
+          process_type_(type) {}
+
   /** Copying is disabled. Use pointers or create a new Action. */
   Action(const Action &) = delete;
 

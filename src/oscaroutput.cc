@@ -11,6 +11,7 @@
 #include <boost/filesystem.hpp>
 #include <string>
 
+#include "include/action.h"
 #include "include/clock.h"
 #include "include/config.h"
 #include "include/configuration.h"
@@ -196,19 +197,15 @@ void OscarOutput<Format, Contents>::at_eventend(const Particles &particles,
 }
 
 template <OscarOutputFormat Format, int Contents>
-void OscarOutput<Format, Contents>::at_interaction(
-    const ParticleList &incoming_particles,
-    const ParticleList &outgoing_particles,
-    const double density,
-    const double total_cross_section,
-    const ProcessType process_type) {
+void OscarOutput<Format, Contents>::at_interaction(const Action &action,
+                                                   const double density) {
   if (Contents & OscarInteractions) {
     if (Format == OscarFormat2013) {
-      std::fprintf(
-          file_.get(),
+      std::fprintf(file_.get(),
           "# interaction in %zu out %zu rho %12.7f weight %12.7g type %5i \n",
-          incoming_particles.size(), outgoing_particles.size(), density,
-          total_cross_section, static_cast<int>(process_type));
+          action.incoming_particles().size(),
+          action.outgoing_particles().size(), density,
+          action.raw_weight_value(), static_cast<int>(action.get_type()));
     } else {
       /* OSCAR line prefix : initial final
        * particle creation: 0 1
@@ -218,14 +215,15 @@ void OscarOutput<Format, Contents>::at_interaction(
        * etc.
        */
       std::fprintf(file_.get(), "%zu %zu %12.7f %12.7f %5i \n",
-                   incoming_particles.size(), outgoing_particles.size(),
-                   density, total_cross_section,
-                   static_cast<int>(process_type));
+                   action.incoming_particles().size(),
+                   action.outgoing_particles().size(), density,
+                   action.raw_weight_value(),
+                   static_cast<int>(action.get_type()));
     }
-    for (const auto &p : incoming_particles) {
+    for (const auto &p : action.incoming_particles()) {
       write_particledata(p);
     }
-    for (const auto &p : outgoing_particles) {
+    for (const auto &p : action.outgoing_particles()) {
       write_particledata(p);
     }
   }

@@ -12,6 +12,7 @@
 #include <boost/filesystem.hpp>
 #include <string>
 
+#include "include/action.h"
 #include "include/clock.h"
 #include "include/config.h"
 #include "include/configuration.h"
@@ -97,20 +98,19 @@ void BinaryOutputCollisions::at_eventend(const Particles &particles,
   std::fflush(file_.get());
 }
 
-void BinaryOutputCollisions::at_interaction(const ParticleList &incoming,
-                             const ParticleList &outgoing,
-                             const double density,
-                             const double total_cross_section,
-                             const ProcessType process_type) {
+void BinaryOutputCollisions::at_interaction(const Action &action,
+                                            const double density) {
   char ichar = 'i';
   std::fwrite(&ichar, sizeof(char), 1, file_.get());
-  write(incoming.size());
-  write(outgoing.size());
+  write(action.incoming_particles().size());
+  write(action.outgoing_particles().size());
   std::fwrite(&density, sizeof(double), 1, file_.get());
-  std::fwrite(&total_cross_section, sizeof(double), 1, file_.get());
-  std::fwrite(&process_type, sizeof(int), 1, file_.get());
-  write(incoming);
-  write(outgoing);
+  const double weight = action.raw_weight_value();
+  std::fwrite(&weight, sizeof(double), 1, file_.get());
+  const ProcessType type = action.get_type();
+  std::fwrite(&type, sizeof(int), 1, file_.get());
+  write(action.incoming_particles());
+  write(action.outgoing_particles());
 }
 
 

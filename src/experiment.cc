@@ -614,32 +614,29 @@ static std::string format_measurements(const Particles &particles,
 template <typename Modus>
 template <typename Container>
 void Experiment<Modus>::perform_action(
-    const ActionPtr &action, uint64_t &interactions_total,
+    Action &action, uint64_t &interactions_total,
     uint64_t &total_pauli_blocked, const Container &particles_before_actions) {
   const auto &log = logger<LogArea::Experiment>();
-  if (!action->is_valid(particles_)) {
+  if (!action.is_valid(particles_)) {
     log.debug(~einhard::DRed(), "✘ ", action, " (discarded: invalid)");
     return;
   }
-  const ParticleList incoming_particles = action->incoming_particles();
-  action->generate_final_state();
-  ProcessType process_type = action->get_type();
-  log.debug("Process Type is: ", process_type);
+  action.generate_final_state();
+  log.debug("Process Type is: ", action.get_type());
   if (pauli_blocker_ &&
-      action->is_pauli_blocked(particles_, *pauli_blocker_.get())) {
+      action.is_pauli_blocked(particles_, *pauli_blocker_.get())) {
     total_pauli_blocked++;
     return;
   }
   // Make sure to pick a non-zero integer, because 0 is reserved for "no
   // interaction yet".
   const auto id_process = static_cast<uint32_t>(interactions_total + 1);
-  action->perform(&particles_, id_process);
+  action.perform(&particles_, id_process);
   interactions_total++;
-  const ParticleList outgoing_particles = action->outgoing_particles();
   // Calculate Eckart rest frame density at the interaction point
   double rho = 0.0;
   if (dens_type_ != DensityType::None) {
-    const FourVector r_interaction = action->get_interaction_point();
+    const FourVector r_interaction = action.get_interaction_point();
     constexpr bool compute_grad = false;
     rho = rho_eckart(r_interaction.threevec(), particles_before_actions,
                      density_param_, dens_type_, compute_grad).first;
@@ -661,29 +658,24 @@ void Experiment<Modus>::perform_action(
    * position could be either at 10 fm or at 5 fm.
    */
   for (const auto &output : outputs_) {
-    output->at_interaction(incoming_particles, outgoing_particles, rho,
-                           action->raw_weight_value(), process_type);
+    output->at_interaction(action, rho);
   }
   log.debug(~einhard::Green(), "✔ ", action);
 }
 
 template <typename Modus>
-void Experiment<Modus>::write_dilepton_action(const ActionPtr &action,
+void Experiment<Modus>::write_dilepton_action(Action &action,
                                  const ParticleList &particles_before_actions) {
-  if (action->is_valid(particles_)) {
-    action->generate_final_state();
+  if (action.is_valid(particles_)) {
+    action.generate_final_state();
     // Calculate Eckart rest frame density at the interaction point
-    const FourVector r_interaction = action->get_interaction_point();
+    const FourVector r_interaction = action.get_interaction_point();
     constexpr bool compute_grad = false;
     const double rho =
         rho_eckart(r_interaction.threevec(), particles_before_actions,
                    density_param_, dens_type_, compute_grad).first;
     // write dilepton output
-    dilepton_output_->at_interaction(action->incoming_particles(),
-                                     action->outgoing_particles(),
-                                     rho,
-                                     action->raw_weight_value(),
-                                     action->get_type());
+    dilepton_output_->at_interaction(action, rho);
   }
 }
 
@@ -786,7 +778,7 @@ uint64_t Experiment<Modus>::run_time_evolution_without_time_steps() {
     // propagated since the construction of the action.
     act->update_incoming(particles_);
 
-    perform_action(act, interactions_total, total_pauli_blocked, particles_);
+    perform_action(*act, interactions_total, total_pauli_blocked, particles_);
     modus_.impose_boundary_conditions(&particles_);
 
     /* (3) Check conservation laws. */
@@ -868,7 +860,7 @@ uint64_t Experiment<Modus>::run_time_evolution_fixed_time_step() {
 
       if (!dilepton_actions.is_empty()) {
         while (!dilepton_actions.is_empty()) {
-          write_dilepton_action(dilepton_actions.pop(),
+          write_dilepton_action(*dilepton_actions.pop(),
                                 particles_before_actions);
         }
       }
@@ -877,7 +869,7 @@ uint64_t Experiment<Modus>::run_time_evolution_fixed_time_step() {
     /* (2) Perform actions. */
     if (!actions.is_empty()) {
       while (!actions.is_empty()) {
-        perform_action(actions.pop(), interactions_total, total_pauli_blocked,
+        perform_action(*actions.pop(), interactions_total, total_pauli_blocked,
                        particles_before_actions);
       }
       log.debug(~einhard::Blue(), particles_);
@@ -1027,7 +1019,7 @@ uint64_t Experiment<Modus>::run_time_evolution_adaptive_time_steps(
             actions.insert(std::move(action));
             break;
           }
-          perform_action(action, interactions_total, total_pauli_blocked,
+          perform_action(*action, interactions_total, total_pauli_blocked,
                          particles_before_actions);
         }
         modus_.impose_boundary_conditions(&particles_);
@@ -1056,7 +1048,7 @@ uint64_t Experiment<Modus>::run_time_evolution_adaptive_time_steps(
           log_ad_ts.debug("Actions discarded because of early ending.");
           break;
         }
-        perform_action(action, interactions_total, total_pauli_blocked,
+        perform_action(*action, interactions_total, total_pauli_blocked,
                        particles_before_actions);
       }
       log.debug(~einhard::Blue(), particles_);
@@ -1185,7 +1177,7 @@ void Experiment<Modus>::do_final_decays(uint64_t &interactions_total) {
 
       if (!dilepton_actions.is_empty()) {
         while (!dilepton_actions.is_empty()) {
-          write_dilepton_action(dilepton_actions.pop(),
+          write_dilepton_action(*dilepton_actions.pop(),
                                 particles_before_actions);
         }
       }
@@ -1196,7 +1188,7 @@ void Experiment<Modus>::do_final_decays(uint64_t &interactions_total) {
     }
     /* Perform actions. */
     while (!actions.is_empty()) {
-      perform_action(actions.pop(), interactions_total, total_pauli_blocked,
+      perform_action(*actions.pop(), interactions_total, total_pauli_blocked,
                      particles_before_actions);
     }
     // loop until no more decays occur

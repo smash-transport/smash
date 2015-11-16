@@ -49,28 +49,14 @@ class OutputInterface {
   /**
    * Called whenever an action modified one or more particles.
    *
-   * \param incoming_particles The list of particles before the Action was
-   *                          performed.
-   * \param outgoing_particles   The list of particles after the Action was
-   *                          performed.
-   * \param density The density at the interaction point
-   * \param total_cross_section The total cross section of this interaction
-   *                           or total width in case of decays
-   * \param process_type Identifier for the type of process, e.g.
-   *  		elastic scattering, resonance formation,...
+   * \param action The action object, containing the initial and final state etc.
+   * \param density The density at the interaction point.
    *
    * \fpPrecision Why \c double?
    */
-  virtual void at_interaction(const ParticleList &incoming_particles,
-                              const ParticleList &outgoing_particles,
-                              const double density,
-                              const double total_cross_section,
-                              const ProcessType process_type) {
-    SMASH_UNUSED(incoming_particles);
-    SMASH_UNUSED(outgoing_particles);
+  virtual void at_interaction(const Action &action, const double density) {
+    SMASH_UNUSED(action);
     SMASH_UNUSED(density);
-    SMASH_UNUSED(total_cross_section);
-    SMASH_UNUSED(process_type);
   }
 
   /**
