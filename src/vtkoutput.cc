@@ -77,8 +77,8 @@ void VtkOutput::at_eventend(const Particles &/*particles*/,
                             const int /*event_number*/) {
 }
 
-void VtkOutput::at_intermediate_time(const Particles &particles,
-                                   const Clock& /*clock*/) {
+void VtkOutput::at_intermediate_time(const Particles &particles, const Clock&,
+                                     const DensityParameters &) {
   write(particles);
   vtk_output_counter_++;
 }

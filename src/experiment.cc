@@ -1103,10 +1103,9 @@ void Experiment<Modus>::intermediate_output(uint64_t& interactions_total,
   const LatticeUpdate lat_upd = LatticeUpdate::AtOutput;
   /* save evolution data */
   for (const auto &output : outputs_) {
-    output->at_intermediate_time(particles_, parameters_.labclock);
-    // Thermodynamic output at some point versus time
-    output->thermodynamics_output(particles_, parameters_.labclock,
-                                  density_param_);
+    output->at_intermediate_time(particles_, parameters_.labclock,
+                                 density_param_);
+
     // Thermodynamic output on the lattice versus time
     switch (dens_type_lattice_printout_) {
       case DensityType::Baryon:

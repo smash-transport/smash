@@ -93,7 +93,8 @@ class RootOutput : public OutputInterface {
                      const int event_number) override;
   void at_eventend(const Particles &particles,
                    const int event_number) override;
-  void at_intermediate_time(const Particles &particles, const Clock &) override;
+  void at_intermediate_time(const Particles &particles, const Clock &clock,
+                            const DensityParameters &dens_param) override;
   void at_interaction(const Action &action, const double density) override;
 
  private:

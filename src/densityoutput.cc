@@ -47,9 +47,9 @@ void DensityOutput::at_eventend(const Particles &/*particles*/,
   std::fflush(file_.get());
 }
 
-void DensityOutput::thermodynamics_output(const Particles &particles,
-                                          const Clock &clock,
-                                          const DensityParameters &dens_param) {
+void DensityOutput::at_intermediate_time(const Particles &particles,
+                                         const Clock &clock,
+                                         const DensityParameters &dens_param) {
   const bool compute_gradient = false;
   const double rho = rho_eckart(r_, particles, dens_param, DensityType::Baryon,
                                 compute_gradient).first;

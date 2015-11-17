@@ -219,7 +219,8 @@ TEST(particles_format) {
   ParticleList final_particles = particles->copy_to_vector();
   Clock clock;
 
-  bin_output->at_intermediate_time(*particles, clock);
+  DensityParameters dens_par(Test::default_parameters());
+  bin_output->at_intermediate_time(*particles, clock, dens_par);
 
   /* Final state output */
   bin_output->at_eventend(*particles, event_id);

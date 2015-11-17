@@ -203,8 +203,8 @@ void RootOutput::at_eventstart(const Particles &particles,
 /**
  * Writes to tree "at_tstep_N", where N is timestep number counting from 1.
  */
-void RootOutput::at_intermediate_time(const Particles &particles,
-                                      const Clock &/*clock*/) {
+void RootOutput::at_intermediate_time(const Particles &particles, const Clock &,
+                                      const DensityParameters &) {
   if (write_particles_) {
     particles_to_tree(particles);
     output_counter_++;

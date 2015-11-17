@@ -231,7 +231,7 @@ void OscarOutput<Format, Contents>::at_interaction(const Action &action,
 
 template <OscarOutputFormat Format, int Contents>
 void OscarOutput<Format, Contents>::at_intermediate_time(
-    const Particles &particles, const Clock & /*clock*/) {
+    const Particles &particles, const Clock &, const DensityParameters &) {
   if (Contents & OscarTimesteps) {
     if (Format == OscarFormat2013) {
       std::fprintf(file_.get(), "# event %i out %zu\n", current_event_ + 1,

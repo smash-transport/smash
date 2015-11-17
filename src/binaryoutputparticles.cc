@@ -137,7 +137,8 @@ void BinaryOutputParticles::at_eventend(const Particles &particles,
 }
 
 void BinaryOutputParticles::at_intermediate_time(const Particles &particles,
-                                                 const Clock &) {
+                                                 const Clock &,
+                                                 const DensityParameters &) {
   char pchar = 'p';
   if (!only_final_) {
     std::fwrite(&pchar, sizeof(char), 1, file_.get());

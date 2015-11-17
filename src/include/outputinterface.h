@@ -66,23 +66,11 @@ class OutputInterface {
    * Output launched after every N'th timestep. N is controlled by an option.
    * \param particles List of particles.
    * \param clock System clock.
-   */
-  virtual void at_intermediate_time(const Particles &particles,
-                                    const Clock &clock) {
-    SMASH_UNUSED(particles);
-    SMASH_UNUSED(clock);
-  }
-
-  /**
-   * Output intended for writing out thermodynamics.
-   * It is launched after every N'th timestep. N is controlled by an option.
-   * \param particles List of particles.
-   * \param clock System clock.
    * \param dens_param Parameters for density calculation.
    */
-  virtual void thermodynamics_output(const Particles &particles,
-                                     const Clock &clock,
-                                     const DensityParameters &dens_param) {
+  virtual void at_intermediate_time(const Particles &particles,
+                                    const Clock &clock,
+                                    const DensityParameters &dens_param) {
     SMASH_UNUSED(particles);
     SMASH_UNUSED(clock);
     SMASH_UNUSED(dens_param);
