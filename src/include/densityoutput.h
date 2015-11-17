@@ -46,8 +46,7 @@ class DensityOutput : public OutputInterface {
   void at_eventend(const Particles &particles, const int event_number) override;
 
   /// writes thermodynamics every time interval fixed by option Output_Interval
-  void thermodynamics_output(const Particles &particles,
-                             const ExperimentParameters &param,
+  void thermodynamics_output(const Particles &particles, const Clock &clock,
                              const DensityParameters &dens_param) override;
 
   /** Prints density along the specified line. Useful to make 1D plots of

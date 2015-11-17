@@ -10,13 +10,10 @@
 #ifndef SRC_INCLUDE_OUTPUTINTERFACE_H_
 #define SRC_INCLUDE_OUTPUTINTERFACE_H_
 
-#include <map>
-
 #include "forwarddeclarations.h"
 #include "density.h"
 #include "lattice.h"
 #include "macros.h"
-#include "processbranch.h"
 
 namespace Smash {
 
@@ -28,7 +25,7 @@ namespace Smash {
  * be called at predefined moments:
  * 1) At event start and event end
  * 2) After every N'th timestep
- * 3) Before and after collision
+ * 3) At each interaction
  */
 class OutputInterface {
  public:
@@ -36,15 +33,21 @@ class OutputInterface {
 
   /**
    * Output launched at event start after initialization, when particles are
-   * generated, but not yet propagated.
+   * generated but not yet propagated.
+   * \param particles List of particles.
+   * \param event_number Number of the current event.
    */
-  virtual void at_eventstart(const Particles &, const int) = 0;
+  virtual void at_eventstart(const Particles &particles,
+                             const int event_number) = 0;
 
   /**
    * Output launched at event end. Event end is determined by maximal timestep
    * option.
+   * \param particles List of particles.
+   * \param event_number Number of the current event.
    */
-  virtual void at_eventend(const Particles &, const int) = 0;
+  virtual void at_eventend(const Particles &particles,
+                           const int event_number) = 0;
 
   /**
    * Called whenever an action modified one or more particles.
@@ -61,24 +64,34 @@ class OutputInterface {
 
   /**
    * Output launched after every N'th timestep. N is controlled by an option.
+   * \param particles List of particles.
+   * \param clock System clock.
    */
-  virtual void at_intermediate_time(const Particles &, const Clock &) {
+  virtual void at_intermediate_time(const Particles &particles,
+                                    const Clock &clock) {
+    SMASH_UNUSED(particles);
+    SMASH_UNUSED(clock);
   }
 
   /**
    * Output intended for writing out thermodynamics.
    * It is launched after every N'th timestep. N is controlled by an option.
+   * \param particles List of particles.
+   * \param clock System clock.
+   * \param dens_param Parameters for density calculation.
    */
   virtual void thermodynamics_output(const Particles &particles,
-                                     const ExperimentParameters &param,
+                                     const Clock &clock,
                                      const DensityParameters &dens_param) {
     SMASH_UNUSED(particles);
-    SMASH_UNUSED(param);
+    SMASH_UNUSED(clock);
     SMASH_UNUSED(dens_param);
   }
 
   /**
    * Output to write thermodynamics from the lattice.
+   * \param varname Variable name, used for file name etc.
+   * \param lattice Lattice of tabulated values.
    */
   virtual void thermodynamics_output(const std::string varname,
                             RectangularLattice<DensityOnLattice> &lattice) {

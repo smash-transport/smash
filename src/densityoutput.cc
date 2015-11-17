@@ -48,12 +48,12 @@ void DensityOutput::at_eventend(const Particles &/*particles*/,
 }
 
 void DensityOutput::thermodynamics_output(const Particles &particles,
-                                          const ExperimentParameters &param,
+                                          const Clock &clock,
                                           const DensityParameters &dens_param) {
   const bool compute_gradient = false;
   const double rho = rho_eckart(r_, particles, dens_param, DensityType::Baryon,
                                 compute_gradient).first;
-  std::fprintf(file_.get(), "%g %g\n", param.labclock.current_time(), rho);
+  std::fprintf(file_.get(), "%g %g\n", clock.current_time(), rho);
 }
 
 void DensityOutput::density_along_line(const char * file_name,
