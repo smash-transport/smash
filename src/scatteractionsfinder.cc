@@ -42,19 +42,19 @@ namespace Smash {
 
 ScatterActionsFinder::ScatterActionsFinder(
     Configuration config, const ExperimentParameters &parameters,
-    bool two_to_one, bool two_to_two)
+    bool two_to_one, bool two_to_two, bool strings_switch)
     : elastic_parameter_(config.take({"Collision_Term",
                                       "Elastic_Cross_Section"}, -1.0f)),
       testparticles_(parameters.testparticles),
       isotropic_(config.take({"Collision_Term", "Isotropic"}, false)),
       two_to_one_(two_to_one),
       two_to_two_(two_to_two),
-      strings_switch_(config.take({"Collision_Term", "Strings"}, false)) {
-        if (is_constant_elastic_isotropic()) {
-          const auto &log = logger<LogArea::FindScatter>();
-          log.info("Constant elastic isotropic cross-section mode:",
-          " using ", elastic_parameter_, " mb as maximal cross-section.");
-        }
+      strings_switch_(strings_switch) {
+      if (is_constant_elastic_isotropic()) {
+        const auto &log = logger<LogArea::FindScatter>();
+        log.info("Constant elastic isotropic cross-section mode:",
+        " using ", elastic_parameter_, " mb as maximal cross-section.");
+      }
       }
     
 ScatterActionsFinder::ScatterActionsFinder(
@@ -63,7 +63,8 @@ ScatterActionsFinder::ScatterActionsFinder(
       testparticles_(testparticles),
       isotropic_(false),
       two_to_one_(true),
-      two_to_two_(true) {}
+      two_to_two_(true),
+      strings_switch_(true) {}
 
 ScatterActionPtr ScatterActionsFinder::construct_scatter_action(
                                             const ParticleData &data_a,

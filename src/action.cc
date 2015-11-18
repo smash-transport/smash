@@ -93,7 +93,7 @@ void Action::perform(Particles *particles, uint32_t id_process) {
 
   log.debug("Particle map now has ", particles->size(), " elements.");
 
-  check_conservation(id_process);
+  check_conservation(id_process, process_type_);
 
 }
 
@@ -163,7 +163,8 @@ void Action::sample_2body_phasespace() {
 }
 
 
-void Action::check_conservation(const uint32_t &id_process, const ProcessBranch::ProcessType &process_type) const {
+void Action::check_conservation(const uint32_t &id_process, 
+								const ProcessType &process_type) const {
   const auto &log = logger<LogArea::Action>();
   /* If the process is not a string excitation, check all quantum numbers */
    

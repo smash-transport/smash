@@ -28,7 +28,8 @@ class ScatterActionsFinder : public ActionFinderInterface {
   /** Initialize the finder with the given parameters. */
   ScatterActionsFinder(Configuration config,
                        const ExperimentParameters &parameters,
-                       bool two_to_one, bool two_to_two);
+                       bool two_to_one, bool two_to_two, 
+                       bool strings_switch);
   /** Constructor for testing purposes. */
   ScatterActionsFinder(float elastic_parameter, int testparticles);
 
@@ -122,7 +123,6 @@ class ScatterActionsFinder : public ActionFinderInterface {
   const bool two_to_two_;
   /** Switch to turn off string excitation. */
   const bool strings_switch_; 
-
 };
 
 #if 0
