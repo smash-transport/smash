@@ -121,6 +121,10 @@ if(CPPCHECK)
                      COMMAND ${CPPCHECK} "--enable=performance" ${CPPCHECK_ARGS}
                      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
                      COMMENT "Executing test cppcheck_performance")
+   add_custom_target(cppcheck_portability
+                     COMMAND ${CPPCHECK} "--enable=portability" ${CPPCHECK_ARGS}
+                     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+                     COMMENT "Executing test cppcheck_portability")
    add_custom_target(cppcheck_information
                      COMMAND ${CPPCHECK} "--enable=information" ${CPPCHECK_ARGS}
                      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
