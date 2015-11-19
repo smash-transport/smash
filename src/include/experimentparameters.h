@@ -40,7 +40,7 @@ struct ExperimentParameters {
            labclock.next_time() < labclock.next_multiple(output_interval);
   }
   /// replaces the current clock with a new one.
-  void reset_clock(const Clock initial_clock) {
+  void reset_clock(const Clock &initial_clock) {
     labclock = std::move(initial_clock);
   }
   /// this is the time particles will have after propagating through the

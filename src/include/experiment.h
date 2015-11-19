@@ -184,7 +184,7 @@ class Experiment : public ExperimentBase {
    * \return The number of interactions from the event
    */
   uint64_t run_time_evolution_adaptive_time_steps(
-                                  const AdaptiveParameters adaptive_parameters);
+                                const AdaptiveParameters &adaptive_parameters);
 
   /** Performs the final decays of an event
    *

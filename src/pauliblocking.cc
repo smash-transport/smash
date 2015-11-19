@@ -58,7 +58,7 @@ PauliBlocker::PauliBlocker(Configuration conf,
 PauliBlocker::~PauliBlocker() {
 }
 
-float PauliBlocker::phasespace_dens(const ThreeVector r, const ThreeVector p,
+float PauliBlocker::phasespace_dens(const ThreeVector &r, const ThreeVector &p,
                         const Particles &particles, const PdgCode pdg) const {
   float f = 0.0;
   float rdist_sqr, pdist_sqr;

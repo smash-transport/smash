@@ -37,7 +37,7 @@ class VtkOutput : public OutputInterface {
                             const DensityParameters &dens_param) override;
 
   /// Prints 3D Lattice in vtk format on a grid
-  void thermodynamics_output(const std::string varname,
+  void thermodynamics_output(const std::string &varname,
                         RectangularLattice<DensityOnLattice> &lattice) override;
 
  private:
@@ -47,7 +47,7 @@ class VtkOutput : public OutputInterface {
   const bf::path base_path_;
 
   /// Event number
-  int current_event_;
+  int current_event_ = 0;
   /// Number of vtk output in current event
   int vtk_output_counter_ = 0;
 

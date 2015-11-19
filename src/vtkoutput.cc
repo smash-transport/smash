@@ -135,7 +135,7 @@ void VtkOutput::write(const Particles &particles) {
  * directly with paraview (paraview.org).
  */
 
-void VtkOutput::thermodynamics_output(const std::string varname,
+void VtkOutput::thermodynamics_output(const std::string &varname,
                                RectangularLattice<DensityOnLattice> &lattice) {
   std::ofstream file;
   char suffix[22];

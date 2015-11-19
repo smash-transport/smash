@@ -130,7 +130,7 @@ InterpolateDataLinear<T>::InterpolateDataLinear(const std::vector<T>& x,
 /// >>> find_index(x, 3)
 /// 1
 template <typename T>
-size_t find_index(const std::vector<T> v, T x) {
+size_t find_index(const std::vector<T> &v, T x) {
   const auto it = std::lower_bound(v.begin(), v.end(), x);
   if (it == v.begin()) {
     return 0;
