@@ -125,8 +125,7 @@ float ScatterActionBaryonBaryon::nn_to_resonance_matrix_element(double sqrts,
     /** \f$ NN \rightarrow N\Delta^* \f$:
       * constant matrix element, cf. \iref{Bass:1998ca}, equ. (3.35). */
     return 15. * spin_factor / (m_plus * m_plus + m_minus * m_minus);
-  } else if ((type_a.is_Delta() && type_b.is_Delta()) ||
-             (type_b.is_Delta() && type_a.is_Delta())) {
+  } else if (type_a.is_Delta() && type_b.is_Delta()) {
     /** \f$ NN \rightarrow \Delta\Delta \f$:
       * constant matrix element, cf. \iref{Bass:1998ca}, equ. (3.35). */
     return 45. * spin_factor / (m_plus * m_plus + m_minus * m_minus);

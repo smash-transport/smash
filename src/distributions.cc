@@ -118,17 +118,16 @@ double sample_momenta_from_thermal(const double temperature,
   const auto &log = logger<LogArea::Distributions>();
   log.debug("Sample momenta with mass ", mass, " and T ", temperature);
   float momentum_radial, energy;
-  float r0, r1, r2, r3, a, b, c;
-  float K, I1, I2, I3, Itot;
+  float r1, r2, r3;
   // when temperature/mass
   if ( temperature > 0.6f*mass ) {
     while ( true ) {
       r1 = Random::canonical();
       r2 = Random::canonical();
       r3 = Random::canonical();
-      a = -std::log(r1);
-      b = -std::log(r2);
-      c = -std::log(r3);
+      const float a = -std::log(r1);
+      const float b = -std::log(r2);
+      const float c = -std::log(r3);
       momentum_radial = temperature * (a + b + c);
       energy = sqrt(momentum_radial * momentum_radial + mass * mass);
       if ( Random::canonical() <
@@ -138,11 +137,12 @@ double sample_momenta_from_thermal(const double temperature,
     }
   } else {
     while ( true ) {
-      r0 = Random::canonical();
-      I1 = mass*mass;
-      I2 = 2.0*mass*temperature;
-      I3 = 2.0*temperature*temperature;
-      Itot = I1 + I2 + I3;
+      float r0 = Random::canonical();
+      const float I1 = mass*mass;
+      const float I2 = 2.0*mass*temperature;
+      const float I3 = 2.0*temperature*temperature;
+      const float Itot = I1 + I2 + I3;
+      float K;
       if ( r0 < I1/Itot ) {
         r1 = Random::canonical();
         K = -temperature*std::log(r1);

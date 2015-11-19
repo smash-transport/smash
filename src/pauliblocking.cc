@@ -105,13 +105,13 @@ void PauliBlocker::init_weights_analytical() {
   const float norm = std::erf(rc_/sqrt2/sig_) -
             rc_* 2 / sqrt_2pi / sig_ * std::exp(-0.5f*rc_*rc_/sig_/sig_);
 
-  float rj, integral;
+  float integral;
   // Step of the table for tabulated integral
   const float d_pos = (rr_ + rc_) / static_cast<float>(weights_.size());
 
   for (size_t k = 0; k < weights_.size(); k++) {
     // rdist = 0 ... rc_ (gauss cut) + rr_ (position cut)
-    rj = d_pos * k;
+    const float rj = d_pos * k;
     if (rj < really_small) {
       // Assuming rc_ > rr_
       const float A = rr_/sqrt2/sig_;

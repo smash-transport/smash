@@ -63,14 +63,14 @@ void DensityOutput::density_along_line(const char * file_name,
                         const ThreeVector &line_start,
                         const ThreeVector &line_end, int n_points) {
   ThreeVector r;
-  double rho_eck;
   std::ofstream a_file;
   a_file.open(file_name, std::ios::out);
   const bool compute_gradient = false;
 
   for (int i = 0; i <= n_points; i++) {
     r = line_start + (line_end - line_start) * (1.0 * i / n_points);
-    rho_eck = rho_eckart(r, plist, param, dens_type, compute_gradient).first;
+    double rho_eck = rho_eckart(r, plist, param,
+                                dens_type, compute_gradient).first;
     a_file << r.x1() << " " <<
               r.x2() << " " <<
               r.x3() << " " << rho_eck << "\n";
