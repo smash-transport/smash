@@ -104,10 +104,35 @@ endif()
 find_program(CPPCHECK cppcheck)
 if(CPPCHECK)
    message(STATUS "cppcheck found at ${CPPCHECK}")
+   set(CPPCHECK_ARGS "-q" "-I" "src/include/" "-i" "src/tests/" "src")
    add_custom_target(cppcheck
-                     COMMAND ${CPPCHECK} "--enable=all" "-q" "-I" "include/" "."
-                     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/src/
+                     COMMAND ${CPPCHECK} "--enable=all" ${CPPCHECK_ARGS}
+                     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
                      COMMENT "Executing test cppcheck")
+   add_custom_target(cppcheck_error
+                     COMMAND ${CPPCHECK} ${CPPCHECK_ARGS}
+                     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+                     COMMENT "Executing test cppcheck_error")
+   add_custom_target(cppcheck_warning
+                     COMMAND ${CPPCHECK} "--enable=warning" ${CPPCHECK_ARGS}
+                     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+                     COMMENT "Executing test cppcheck_warning")
+   add_custom_target(cppcheck_performance
+                     COMMAND ${CPPCHECK} "--enable=performance" ${CPPCHECK_ARGS}
+                     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+                     COMMENT "Executing test cppcheck_performance")
+   add_custom_target(cppcheck_information
+                     COMMAND ${CPPCHECK} "--enable=information" ${CPPCHECK_ARGS}
+                     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+                     COMMENT "Executing test cppcheck_information")
+   add_custom_target(cppcheck_style
+                     COMMAND ${CPPCHECK} "--enable=style" ${CPPCHECK_ARGS}
+                     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+                     COMMENT "Executing test cppcheck_style")
+   add_custom_target(cppcheck_unused
+                     COMMAND ${CPPCHECK} "--enable=unusedFunction" ${CPPCHECK_ARGS}
+                     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+                     COMMENT "Executing test cppcheck_unused")
 else()
    message(WARNING "cppcheck was not found. The cppcheck test will be disabled.")
 endif()
