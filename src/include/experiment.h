@@ -145,7 +145,7 @@ class Experiment : public ExperimentBase {
    *                                 time step before any actions were performed
    */
   template <typename Container>
-  void perform_action(const ActionPtr &action, uint64_t &interactions_total,
+  void perform_action(Action &action, uint64_t &interactions_total,
                       uint64_t &total_pauliblocked,
                       const Container &particles_before_actions);
 
@@ -153,7 +153,7 @@ class Experiment : public ExperimentBase {
    * the given dilepton action in the dilepton output file, instead of
    * actually performing the action.
    */
-  void write_dilepton_action(const ActionPtr &action,
+  void write_dilepton_action(Action &action,
                              const ParticleList &particles_before_actions);
 
   /** Runs the time evolution of an event with fixed-sized time steps
@@ -161,20 +161,18 @@ class Experiment : public ExperimentBase {
    * Here, the time steps are looped over, collisions and decays are
    * carried out and particles are propagated.
    *
-   * \param evt_num Running number of the event
    * \return The number of interactions from the event
    */
-  uint64_t run_time_evolution_fixed_time_step(const int evt_num);
+  uint64_t run_time_evolution_fixed_time_step();
 
   /** Runs the time evolution of an event without time steps
    *
    * Here, all actions are looped over, collisions and decays are
    * carried out and particles are propagated.
    *
-   * \param evt_num Running number of the event
    * \return The number of interactions from the event
    */
-  uint64_t run_time_evolution_without_time_steps(const int evt_num);
+  uint64_t run_time_evolution_without_time_steps();
 
   /** Runs the time evolution of an event with adaptive time steps
    *
@@ -182,12 +180,11 @@ class Experiment : public ExperimentBase {
    * out and particles are propagated while the size of the time step is adapted
    * to the state of the system.
    *
-   * \param evt_num Running number of the event
    * \param adaptive_parameters Additional parameters for adaptive time steps
    * \return The number of interactions from the event
    */
   uint64_t run_time_evolution_adaptive_time_steps(
-      const int evt_num, const AdaptiveParameters adaptive_parameters);
+                                  const AdaptiveParameters adaptive_parameters);
 
   /** Performs the final decays of an event
    *
@@ -204,12 +201,11 @@ class Experiment : public ExperimentBase {
 
   /** Intermediate output during an event
    *
-   * \param evt_num Number of the event
    * \param interactions_total The total number of interactions so far
    * \param previous_interactions_total The number of interactions at the
    *                                    previous output
    */
-  void intermediate_output(const int evt_num, uint64_t& interactions_total,
+  void intermediate_output(uint64_t& interactions_total,
                            uint64_t& previous_interactions_total);
 
   /**

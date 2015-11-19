@@ -33,20 +33,21 @@ class VtkOutput : public OutputInterface {
   void at_eventstart(const Particles &particles,
                      const int event_number) override;
   void at_eventend(const Particles &particles, const int event_number) override;
-  void at_intermediate_time(const Particles &particles, const int event_number,
-                          const Clock &clock) override;
+  void at_intermediate_time(const Particles &particles, const Clock &clock,
+                            const DensityParameters &dens_param) override;
 
   /// Prints 3D Lattice in vtk format on a grid
   void thermodynamics_output(const std::string varname,
-                             RectangularLattice<DensityOnLattice> &lattice,
-                             const int event_number) override;
+                        RectangularLattice<DensityOnLattice> &lattice) override;
 
  private:
-  void write(const Particles &particles, const int event_number);
+  void write(const Particles &particles);
 
   /// filesystem path for output
   const bf::path base_path_;
 
+  /// Event number
+  int current_event_;
   /// Number of vtk output in current event
   int vtk_output_counter_;
 

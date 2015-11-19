@@ -17,6 +17,7 @@
 #include "include/boxmodus.h"
 #include "include/configuration.h"
 #include "include/constants.h"
+#include "include/cxx14compat.h"
 #include "include/distributions.h"
 #include "include/experimentparameters.h"
 #include "include/logging.h"
@@ -26,6 +27,7 @@
 #include "include/processbranch.h"
 #include "include/random.h"
 #include "include/threevector.h"
+#include "include/wallcrossingaction.h"
 
 namespace Smash {
 
@@ -153,12 +155,13 @@ int BoxModus::impose_boundary_conditions(Particles *particles,
     bool wall_hit = enforce_periodic_boundaries(position.begin() + 1,
                                                 position.end(), length_);
     if (wall_hit) {
-      const ParticleList incoming_particle{1, data};
+      const ParticleData incoming_particle(data);
       data.set_4position(position);
       ++wraps;
+      ActionPtr action = make_unique<WallcrossingAction>(incoming_particle,
+                                                         data);
       for (const auto &output : output_list) {
-        output->at_interaction(incoming_particle, {1, data},
-                               0., 0., ProcessType::Wall);
+        output->at_interaction(*action, 0.);
       }
     }
   }
