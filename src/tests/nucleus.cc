@@ -26,34 +26,29 @@ TEST(init_particle_types) {
 }
 
 TEST(initialize_realparticles) {
-  Nucleus lead;
-  // fill with 208 nucleons:
-  lead.fill_from_list(list, 1);
+  Nucleus lead(list, 1);  // fill with 208 nucleons
   COMPARE(lead.number_of_particles(), 208u);
   COMPARE(lead.size(), 208u);
 }
 
 TEST(initialize_testparticles) {
-  Nucleus lead;
   constexpr int N_TEST = 10;
-  lead.fill_from_list(list, N_TEST);
+  Nucleus lead(list, N_TEST);
   COMPARE(lead.number_of_particles(), 208u);
   COMPARE(lead.size(), 208u * N_TEST);
 }
 
 TEST(initialize_testparticles_multiple) {
-  Nucleus lead;
   constexpr int N_TEST = 10;
-  lead.fill_from_list(list, N_TEST);
+  Nucleus lead(list, N_TEST);
   lead.fill_from_list(list, N_TEST);
   COMPARE(lead.number_of_particles(), 416u);
   COMPARE(lead.size(), 416u * N_TEST);
 }
 
 TEST_CATCH(initialize_testparticles_wrong, Nucleus::TestparticleConfusion) {
-  Nucleus lead;
   constexpr int N_TEST = 10;
-  lead.fill_from_list(list, 1);
+  Nucleus lead(list, 1);
   lead.fill_from_list(list, N_TEST);
   COMPARE(lead.number_of_particles(), 208u);
   // this should throw an error: list size is (N_TEST+1)*208 = 2288, not
@@ -63,17 +58,15 @@ TEST_CATCH(initialize_testparticles_wrong, Nucleus::TestparticleConfusion) {
 }
 
 TEST(nuclear_radius) {
-  Nucleus lead;
-  lead.fill_from_list(list, 1);
+  Nucleus lead(list, 1);
   FUZZY_COMPARE(lead.default_nuclear_radius(),
                 static_cast<float>(1.2f * std::pow(208, 1. / 3.)));
 }
 
 // check that center is at (0/0/0):
 TEST(center) {
-  Nucleus lead;
   constexpr int N_TEST = 20000;
-  lead.fill_from_list(list, N_TEST);
+  Nucleus lead(list, N_TEST);
   lead.set_nuclear_radius(lead.default_nuclear_radius());
   lead.arrange_nucleons();
   FourVector middle = lead.center();
@@ -100,9 +93,8 @@ TEST(center) {
 }
 
 TEST(center_hard_sphere) {
-  Nucleus lead;
   constexpr int N_TEST = 20000;
-  lead.fill_from_list(list, N_TEST);
+  Nucleus lead(list, N_TEST);
   lead.set_diffusiveness(0.0);
   lead.set_nuclear_radius(lead.default_nuclear_radius());
   lead.arrange_nucleons();
@@ -122,9 +114,8 @@ TEST(center_hard_sphere) {
 // maximum z value of all particles. Using many test particles and a
 // hard sphere, I try to make this less random.
 TEST(shift_zero) {
-  Nucleus lead;
   constexpr int N_TEST = 1000;
-  lead.fill_from_list(list, N_TEST);
+  Nucleus lead(list, N_TEST);
   lead.set_diffusiveness(0.0);
   lead.set_nuclear_radius(lead.default_nuclear_radius());
   lead.arrange_nucleons();
@@ -142,9 +133,8 @@ TEST(shift_zero) {
 }
 
 TEST(shift_x) {
-  Nucleus lead;
   constexpr int N_TEST = 1000;
-  lead.fill_from_list(list, N_TEST);
+  Nucleus lead(list, N_TEST);
   lead.set_diffusiveness(0.0);
   lead.set_nuclear_radius(lead.default_nuclear_radius());
   lead.arrange_nucleons();
@@ -160,9 +150,8 @@ TEST(shift_x) {
 }
 
 TEST(shift_z) {
-  Nucleus lead;
   constexpr int N_TEST = 1000;
-  lead.fill_from_list(list, N_TEST);
+  Nucleus lead(list, N_TEST);
   lead.set_diffusiveness(0.0);
   lead.set_nuclear_radius(lead.default_nuclear_radius());
   lead.arrange_nucleons();
@@ -186,8 +175,7 @@ TEST(woods_saxon) {
   // binning width for the distribution:
   constexpr float dx = 0.01;
   // the nucleus. Fill it from list with 1 testparticle.
-  Nucleus projectile;
-  projectile.fill_from_list(list, 1);
+  Nucleus projectile(list, 1);
   float R = projectile.default_nuclear_radius();
   projectile.set_nuclear_radius(R);
   // this is the number of times we access the distribution.
