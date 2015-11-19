@@ -104,7 +104,7 @@ endif()
 find_program(CPPCHECK cppcheck)
 if(CPPCHECK)
    message(STATUS "cppcheck found at ${CPPCHECK}")
-   set(CPPCHECK_ARGS "-q" "-I" "src/include/" "-i" "src/tests/" "src")
+   set(CPPCHECK_ARGS -q -U_LIBCPP_BEGIN_NAMESPACE_STD -U_LIBCPP_END_NAMESPACE_STD -I src/include/ -i src/tests/ src)
    add_custom_target(cppcheck
                      COMMAND ${CPPCHECK} "--enable=all" ${CPPCHECK_ARGS}
                      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
