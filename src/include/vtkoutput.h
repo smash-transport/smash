@@ -48,10 +48,10 @@ class VtkOutput : public OutputInterface {
   const bf::path base_path_;
 
   /// Number of vtk output in current event
-  int vtk_output_counter_;
+  int vtk_output_counter_ = 0;
 
   /// Number of thermodynamical vtk output in current event
-  int vtk_thermodynamics_output_counter_;
+  int vtk_thermodynamics_output_counter_ = 0;
 };
 
 }  // namespace Smash

@@ -20,7 +20,7 @@
 namespace Smash {
 
 VtkOutput::VtkOutput(const bf::path &path, Configuration&& /*conf*/)
-  : base_path_(std::move(path)), vtk_output_counter_(0) {}
+  : base_path_(std::move(path)) {}
 /*!\Userguide
  * \page input_vtk Vtk
  *

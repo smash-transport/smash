@@ -113,8 +113,8 @@ class RootOutput : public OutputInterface {
   void collisions_to_tree(const ParticleList &incoming,
                           const ParticleList &outgoing, const double weight);
   // Counts number of output in a given event
-  int output_counter_;
-  int current_event_;
+  int output_counter_ = 0;
+  int current_event_ = 0;
 
   static const int max_buffer_size_ = 10000;
   // Variables that serve as buffer for filling TTree

@@ -21,7 +21,6 @@ RootOutput::RootOutput(const bf::path &path, const std::string &name)
     : base_path_(std::move(path)),
       root_out_file_(
           new TFile((base_path_ / (name + ".root")).native().c_str(), "NEW")),
-      output_counter_(0),
       write_collisions_(true), write_particles_(false),
       autosave_frequency_(1000) {
   init_trees();
@@ -34,7 +33,6 @@ RootOutput::RootOutput(const bf::path &path, Configuration&& conf)
     : base_path_(std::move(path)),
       root_out_file_(
           new TFile((base_path_ / "smash_run.root").native().c_str(), "NEW")),
-      output_counter_(0),
       write_collisions_(conf.take({"Write_Collisions"}, false)),
       write_particles_(conf.take({"Write_Particles"}, true)),
       autosave_frequency_(conf.take({"Autosave_Frequency"}, 1000)) {
