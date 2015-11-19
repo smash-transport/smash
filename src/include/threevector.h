@@ -39,13 +39,10 @@ namespace Smash {
 class ThreeVector {
  public:
   /// default constructor (nulls all components)
-  ThreeVector() {
-    x_ = {0., 0., 0.};
-  }
+  ThreeVector() : x_({0., 0., 0.}) {}
+
   /// copy constructor
-  ThreeVector(double y1, double y2, double y3) {
-    x_ = {y1, y2, y3};
-  }
+  ThreeVector(double y1, double y2, double y3) : x_({y1, y2, y3}) {}
 
   /// access the component at offset \p i.
   double &operator[](std::size_t i) { return x_[i]; }

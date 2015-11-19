@@ -45,17 +45,15 @@ namespace Smash {
 class FourVector {
  public:
   /// default constructor nulls the fourvector components
-  FourVector() {
-    x_ = {0., 0., 0., 0.};
-  }
+  FourVector() : x_({0., 0., 0., 0.}) {}
+
   /// copy constructor
-  FourVector(double y0, double y1, double y2, double y3) {
-    x_ = {y0, y1, y2, y3};
-  }
+  FourVector(double y0, double y1, double y2, double y3)
+            : x_({y0, y1, y2, y3}) {}
+
   /// construct from time-like component and a ThreeVector.
-  FourVector(double y0, ThreeVector vec) {
-      x_ = {y0, vec.x1(), vec.x2(), vec.x3()};
-  }
+  FourVector(double y0, ThreeVector vec)
+            : x_({y0, vec.x1(), vec.x2(), vec.x3()}) {}
 
   /// access the component at offset \p i.
   double &operator[](std::size_t i) { return x_[i]; }
