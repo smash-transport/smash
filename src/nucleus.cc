@@ -440,7 +440,7 @@ void Nucleus::copy_particles(Particles* external_particles) {
   }
 }
 
-void Nucleus::print_nucleus(const char * file_name) const {
+/*void Nucleus::print_nucleus(const char * file_name) const {
   for (auto i = cbegin(); i != cend(); i++) {
     FourVector this_position = i->position();
     std::ofstream a_file;
@@ -450,7 +450,7 @@ void Nucleus::print_nucleus(const char * file_name) const {
               std::to_string(this_position.x3()) << std::endl;
     a_file.close();
   }
-}
+}*/
 
 FourVector Nucleus::center() const {
   FourVector centerpoint(0.0, 0.0, 0.0, 0.0);

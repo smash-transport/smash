@@ -87,10 +87,10 @@ AdaptiveRejectionSampler::AdaptiveRejectionSampler(
 }
 
 /** Set max_refine_loops by hand */
-void AdaptiveRejectionSampler::reset_max_refine_loops(const int
+/*void AdaptiveRejectionSampler::reset_max_refine_loops(const int
                                                       new_max_refine_loops) {
   max_refine_loops_ = new_max_refine_loops;
-}
+}*/
 
 
 inline Line AdaptiveRejectionSampler::create_line(Point p0, Point p1) {
