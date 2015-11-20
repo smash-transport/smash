@@ -112,7 +112,7 @@ void ScatterAction::add_all_processes(float elastic_parameter,
     add_collisions(two_to_two_cross_sections());
   }
   /* string excitation */
-  if(strings_switch) {
+  if(strings_switch && sqrt_s()>=3.) {
     add_collision(string_excitation_cross_section());
   }
 }
@@ -205,9 +205,9 @@ CollisionBranchPtr ScatterAction::string_excitation_cross_section() {
   const auto &log = logger<LogArea::ScatterAction>();
   /* Calculate string-excitation cross section:
    * Parametrized total minus all other present channels. */
-  float sig_string = std::max(0.f, total_cross_section() - cross_section());
-  log.debug("String cross section is: ", sig_string);
-  return make_unique<CollisionBranch>(sig_string, ProcessType::String);
+   float sig_string = std::max(0.f, total_cross_section() - cross_section());
+   log.debug("String cross section is: ", sig_string);
+   return make_unique<CollisionBranch>(sig_string, ProcessType::String);
 }
 
 
