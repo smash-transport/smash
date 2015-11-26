@@ -55,12 +55,18 @@ static void read_binary(std::int32_t &x, FILE *file) {
   VERIFY(std::fread(&x, sizeof(x), 1, file) == 1);
 }
 
+static void read_binary(double &x, FILE *file) {
+  VERIFY(std::fread(&x, sizeof(x), 1, file) == 1);
+}
+
 /* Function to read and compare particle */
 static bool compare_particle(const ParticleData &p, FILE *file) {
-  int id, pdgcode;
+  int id, pdgcode; 
+  double mass;
   FourVector pos, mom;
-  read_binary(mom, file);
   read_binary(pos, file);
+  read_binary(mass, file);
+  read_binary(mom, file);
   read_binary(pdgcode, file);
   read_binary(id, file);
   // std::cout << p.id() << " " << id << std::endl;
