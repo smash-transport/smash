@@ -121,8 +121,10 @@ template <typename T = double> T expo(T A, T x1, T x2) {
   const T r2 = a2 > a_min ? std::exp(a2) : T(0.);  // prevent underflow
   T x;
   do {
+    /* sample repeatedly until x is in the requested range
+     * (it can get outside due to numerical errors, see issue #2959) */
     x = std::log(uniform(r1, r2)) / A;
-  } while (!(x<=x1 && x>x2));
+  } while (!(x <= x1 && x > x2));
   return x;
 }
 
