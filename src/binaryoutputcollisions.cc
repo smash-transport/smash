@@ -141,22 +141,12 @@ void BinaryOutputBase::write(const FourVector &v) {
 
 void BinaryOutputBase::write(const Particles &particles) {
   for (const auto &p : particles) {
-    //write(p.position());
-    //double mass= p.pole_mass();
-    //std::fwrite(&mass, sizeof(mass), 1, file_.get());
-    //write(p.momentum());
-    //write(p.pdgcode().get_decimal());
-    //write(p.id());
     write_particledata(p);
   }
 }
 
 void BinaryOutputBase::write(const ParticleList &particles) {
   for (const auto &p : particles) {
-    //write(p.momentum());
-    //write(p.position());
-    //write(p.pdgcode().get_decimal());
-    //write(p.id());
     write_particledata(p);
   }
 }
