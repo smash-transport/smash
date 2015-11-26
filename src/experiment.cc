@@ -899,8 +899,8 @@ uint64_t Experiment<Modus>::run_time_evolution_fixed_time_step() {
   }
 
   if (pauli_blocker_) {
-    log.info("Collisions: pauliblocked/total = ", total_pauli_blocked, "/",
-             interactions_total);
+    log.info("Interactions: Pauli-blocked/performed = ", total_pauli_blocked,
+             "/", interactions_total);
   }
   return interactions_total;
 }
