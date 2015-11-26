@@ -144,45 +144,26 @@ ColliderModus::ColliderModus(Configuration modus_config,
     frame_ = modus_cfg.take({"Calculation_Frame"});
   }
 
-  // Decide which type of nucleus: deformed or not (default).
-  if (modus_cfg.has_value({"Projectile", "Deformed"}) &&
-      modus_cfg.take({"Projectile", "Deformed"})) {
-    projectile_ = std::unique_ptr<DeformedNucleus>(new DeformedNucleus());
+  // Set up the projectile nucleus
+  Configuration proj_cfg = modus_cfg["Projectile"];
+  if (proj_cfg.has_value({"Deformed"}) && proj_cfg.take({"Deformed"})) {
+    projectile_ = make_unique<DeformedNucleus>(proj_cfg, params.testparticles);
   } else {
-    projectile_ = std::unique_ptr<Nucleus>(new Nucleus());
+    projectile_ = make_unique<Nucleus>(proj_cfg, params.testparticles);
   }
-  if (modus_cfg.has_value({"Target", "Deformed"}) &&
-      modus_cfg.take({"Target", "Deformed"})) {
-    target_ = std::unique_ptr<DeformedNucleus>(new DeformedNucleus());
-  } else {
-    target_ = std::unique_ptr<Nucleus>(new Nucleus());
-  }
-
-  // Fill nuclei with particles.
-  std::map<PdgCode, int> pro = modus_cfg.take({"Projectile", "Particles"});
-  projectile_->fill_from_list(pro, params.testparticles);
   if (projectile_->size() < 1) {
     throw ColliderEmpty("Input Error: Projectile nucleus is empty.");
   }
-  std::map<PdgCode, int> tar = modus_cfg.take({"Target", "Particles"});
-  target_->fill_from_list(tar, params.testparticles);
+
+  // Set up the target nucleus
+  Configuration targ_cfg = modus_cfg["Target"];
+  if (targ_cfg.has_value({"Deformed"}) && targ_cfg.take({"Deformed"})) {
+    target_ = make_unique<DeformedNucleus>(targ_cfg, params.testparticles);
+  } else {
+    target_ = make_unique<Nucleus>(targ_cfg, params.testparticles);
+  }
   if (target_->size() < 1) {
     throw ColliderEmpty("Input Error: Target nucleus is empty.");
-  }
-
-  // Ask to construct nuclei based on atomic number; otherwise, look
-  // for the user defined values or take the default parameters.
-  if (modus_cfg.has_value({"Projectile", "Automatic"}) &&
-      modus_cfg.take({"Projectile", "Automatic"})) {
-    projectile_->set_parameters_automatic();
-  } else {
-    projectile_->set_parameters_from_config("Projectile", modus_cfg);
-  }
-  if (modus_cfg.has_value({"Target", "Automatic"}) &&
-      modus_cfg.take({"Target", "Automatic"})) {
-    target_->set_parameters_automatic();
-  } else {
-    target_->set_parameters_from_config("Target", modus_cfg);
   }
 
   // Consider an option to include Fermi-motion

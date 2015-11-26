@@ -14,7 +14,7 @@
 
 namespace Smash {
 
-std::string fill_left(const std::string &s, int width, char fill = ' ');
+// std::string fill_left(const std::string &s, int width, char fill = ' ');
 std::string fill_right(const std::string &s, int width, char fill = ' ');
 std::string fill_both(const std::string &s, int width, char fill = ' ');
 

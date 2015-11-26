@@ -387,7 +387,7 @@ class ParticleType {
    */
   int charge_;
 
-  IsoParticleType *iso_multiplet_;
+  IsoParticleType *iso_multiplet_ = nullptr;
 
   /**\ingroup logging
    * Writes all information about the particle type to the output stream.

@@ -39,7 +39,8 @@ namespace Smash {
 
 class DeformedNucleus : public Nucleus {
  public:
-  DeformedNucleus();
+  DeformedNucleus(const std::map<PdgCode, int>& particle_list, int nTest);
+  DeformedNucleus(Configuration &config, int nTest);
 
   /** Return the deformed Woods-Saxon probability for the given position.
    *
@@ -58,7 +59,7 @@ class DeformedNucleus : public Nucleus {
    * @return a spatial position from uniformly sampling
    * the deformed woods-saxon distribution
    **/
-  virtual ThreeVector distribute_nucleon() const;
+  ThreeVector distribute_nucleon() const override;
 
   /** Sets the deformation parameters of the Woods-Saxon distribution
    * according to the current mass number.
@@ -69,23 +70,22 @@ class DeformedNucleus : public Nucleus {
    * density and radius, see \iref{Hirano:2009ah} for copper and gold,
    * and \iref{Hirano:2010jg} for uranium.
    */
-  virtual void set_parameters_automatic();
+  void set_parameters_automatic() override;
 
   /** Set parameters for Woods-Saxon by hand using the configuration file.
    * \see Nucleus::set_parameters_from_config
    */
-  virtual void set_parameters_from_config(const char *nucleus_type,
-                                          Configuration &config);
+  void set_parameters_from_config(Configuration &config) override;
 
   /** Rotates the nucleus according to members nucleus_polar_angle_
    * and nucleus_azimuthal_angle_ and updates nucleon positions.
    */
-  virtual void rotate();
+  void rotate() override;
 
   /**
    * Does not allow to generate Fermi-momenta for a deformed nucleus.
    **/
-  virtual void generate_fermi_momenta();
+  void generate_fermi_momenta() override;
 
   /// Spherical harmonics Y_2_0 and Y_4_0.
   double y_l_0(int l, double cosx) const;

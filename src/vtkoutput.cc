@@ -20,7 +20,7 @@
 namespace Smash {
 
 VtkOutput::VtkOutput(const bf::path &path, Configuration&& /*conf*/)
-  : base_path_(std::move(path)), vtk_output_counter_(0) {}
+  : base_path_(std::move(path)) {}
 /*!\Userguide
  * \page input_vtk Vtk
  *
@@ -135,7 +135,7 @@ void VtkOutput::write(const Particles &particles) {
  * directly with paraview (paraview.org).
  */
 
-void VtkOutput::thermodynamics_output(const std::string varname,
+void VtkOutput::thermodynamics_output(const std::string &varname,
                                RectangularLattice<DensityOnLattice> &lattice) {
   std::ofstream file;
   char suffix[22];

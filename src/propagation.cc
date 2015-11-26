@@ -48,7 +48,6 @@ void propagate(Particles *particles, const ExperimentParameters &parameters,
   bool possibly_use_lattice =
          (pot.use_skyrme() ? (UB_grad_lat != nullptr) : true) &&
          (pot.use_symmetry() ? (UI3_grad_lat != nullptr) : true);
-  bool use_lattice;
   ThreeVector dUB_dr, dUI3_dr;
   float min_time_scale = std::numeric_limits<float>::infinity();
 
@@ -58,7 +57,7 @@ void propagate(Particles *particles, const ExperimentParameters &parameters,
      * 1) Required lattices are not nullptr - possibly_use_lattice
      * 2) r is not out of required lattices
      */
-    use_lattice = possibly_use_lattice &&
+    const bool use_lattice = possibly_use_lattice &&
               (pot.use_skyrme() ? UB_grad_lat->value_at(r, dUB_dr) : true) &&
               (pot.use_symmetry() ? UI3_grad_lat->value_at(r, dUI3_dr) : true);
     if (!pot.use_skyrme()) {

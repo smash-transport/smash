@@ -81,7 +81,7 @@ class OutputInterface {
    * \param varname Variable name, used for file name etc.
    * \param lattice Lattice of tabulated values.
    */
-  virtual void thermodynamics_output(const std::string varname,
+  virtual void thermodynamics_output(const std::string &varname,
                             RectangularLattice<DensityOnLattice> &lattice) {
     SMASH_UNUSED(varname);
     SMASH_UNUSED(lattice);

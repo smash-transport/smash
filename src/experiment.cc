@@ -909,7 +909,7 @@ uint64_t Experiment<Modus>::run_time_evolution_fixed_time_step() {
  * and propagating particles. */
 template <typename Modus>
 uint64_t Experiment<Modus>::run_time_evolution_adaptive_time_steps(
-                                const AdaptiveParameters adaptive_parameters) {
+                                const AdaptiveParameters &adaptive_parameters) {
   const auto &log = logger<LogArea::Experiment>();
   const auto &log_ad_ts = logger<LogArea::AdaptiveTS>();
   modus_.impose_boundary_conditions(&particles_);

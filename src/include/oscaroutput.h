@@ -74,7 +74,7 @@ class OscarOutput : public OutputInterface {
   void write_particledata(const ParticleData &data);
   void write(const Particles &particles);
 
-  int current_event_;
+  int current_event_ = 0;
   FilePtr file_;
 };
 
