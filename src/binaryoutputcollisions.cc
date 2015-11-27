@@ -153,11 +153,11 @@ void BinaryOutputBase::write(const ParticleList &particles) {
 
 void BinaryOutputBase::write_particledata(const ParticleData &p) {
   write(p.position());
-  double mass = p.pole_mass();
+  double mass = p.effective_mass();
   std::fwrite(&mass, sizeof(mass), 1, file_.get());
   write(p.momentum());
   write(p.pdgcode().get_decimal());
   write(p.id());
-} 
+}
 
 }  // namespace Smash

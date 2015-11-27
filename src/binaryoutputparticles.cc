@@ -67,7 +67,7 @@ BinaryOutputParticles::BinaryOutputParticles(const bf::path &path,
    * magic_number, format_version, len, smash_version
    * \endcode
    * \li magic_number - 4 bytes that in ASCII read as "SMSH".
-   * \li Format version is an integer number, currently it is 0.
+   * \li Format version is an integer number, currently it is 4.
    * \li len is the length of smash version string
    * \li smash_version is len chars that give information about SMASH version.
    *
