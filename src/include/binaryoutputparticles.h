@@ -36,7 +36,7 @@ namespace Smash {
  **/
 class BinaryOutputParticles : public BinaryOutputBase {
  public:
-  BinaryOutputParticles(const bf::path &path, Configuration&& config);
+  BinaryOutputParticles(const bf::path &path, Configuration &&config);
 
   /// writes the initial particle information of an event
   void at_eventstart(const Particles &particles,
