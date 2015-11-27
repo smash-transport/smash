@@ -593,16 +593,16 @@ static std::string format_measurements(const Particles &particles,
                                        const QuantumNumbers &conserved_initial,
                                        SystemTimePoint time_start,
                                        double time) {
-  SystemTimeSpan elapsed_seconds = SystemClock::now() - time_start;
+  const SystemTimeSpan elapsed_seconds = SystemClock::now() - time_start;
 
-  QuantumNumbers current_values(particles);
-  QuantumNumbers difference = conserved_initial - current_values;
+  const QuantumNumbers current_values(particles);
+  const QuantumNumbers difference = conserved_initial - current_values;
 
   std::ostringstream ss;
   ss << field<5> << time
      << field<12, 3> << difference.momentum().x0()
      << field<12, 3> << difference.momentum().abs3()
-     << field<12, 3> << ((scatterings_total && time > really_small)
+     << field<12, 3> << (time > really_small
                           ? scatterings_total * 2 / (particles.size() * time)
                           : 0.)
      << field<10, 3> << scatterings_this_interval
