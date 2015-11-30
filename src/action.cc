@@ -82,13 +82,9 @@ void Action::perform(Particles *particles, uint32_t id_process) {
     p.set_id_process(id_process);  // store the process id
   }
   if (process_type_ == ProcessType::Elastic) {
-    for (std::size_t i = 0; i < incoming_particles_.size(); ++i) {
-      outgoing_particles_[i] =
-          particles->update(incoming_particles_[i], outgoing_particles_[i]);
-    }
+    particles->update(incoming_particles_, outgoing_particles_);
   } else {
-    outgoing_particles_ = particles->replace(incoming_particles_,
-                                             std::move(outgoing_particles_));
+    particles->replace(incoming_particles_, outgoing_particles_);
   }
 
   log.debug("Particle map now has ", particles->size(), " elements.");

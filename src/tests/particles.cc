@@ -69,7 +69,7 @@ TEST(replace) {
 
   COMPARE(to_remove.front().id(), 0);
   COMPARE(to_add.front().id(), -1);
-  to_add = p.replace(to_remove, std::move(to_add));
+  p.replace(to_remove, to_add);
   COMPARE(p.size(), 1u);
   COMPARE(to_add.front().id(), 1);
   COMPARE(p.front().id(), 1);
@@ -80,7 +80,7 @@ TEST(replace) {
 
   to_remove = {p.front()};
   to_add = {Test::smashon(), Test::smashon(), Test::smashon()};
-  p.replace(to_remove, std::move(to_add));
+  p.replace(to_remove, to_add);
   COMPARE(p.size(), 3u);
   COMPARE(p.front().id(), 2);
   COMPARE(p.back().id(), 4);
@@ -181,11 +181,13 @@ TEST(iterate_particle_data) {
   p.create(0x211);
   check_particle_data_iteration(&p, 3);
   check_particle_data_iteration(p2, 3);
-  p.replace({p.front(), p.back()}, {Test::smashon()});
+  ParticleList out1 = {Test::smashon()};
+  p.replace({p.front(), p.back()}, out1);
   check_particle_data_iteration(&p, 2);
   check_particle_data_iteration(p2, 2);
   p.create(-0x211);
-  p.replace({p.front(), *(++p.begin())}, {Test::smashon()});
+  ParticleList out2 = {Test::smashon()};
+  p.replace({p.front(), *(++p.begin())}, out2);
   check_particle_data_iteration(&p, 2);
   check_particle_data_iteration(p2, 2);
 }

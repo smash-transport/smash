@@ -215,7 +215,8 @@ TEST(particles_format) {
 
   /* Interaction smashon + smashon -> smashon */
   ParticleList initial_particles = particles->copy_to_vector();
-  particles->replace(initial_particles, {Test::smashon_random()});
+  ParticleList final_state = {Test::smashon_random()};
+  particles->replace(initial_particles, final_state);
   ParticleList final_particles = particles->copy_to_vector();
   Clock clock;
 
