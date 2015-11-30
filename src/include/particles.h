@@ -160,8 +160,8 @@ class Particles {
    * true) and it expects the ParticleType of \p p and \p new_state to be
    * equal. This is enforced in DEBUG builds.
    */
-  const ParticleData &update(const ParticleData &p,
-                             const ParticleData &new_state) {
+  const ParticleData &update_particle(const ParticleData &p,
+                                      const ParticleData &new_state) {
     assert(is_valid(p));
     assert(p.type() == new_state.type());
     ParticleData &original = data_[p.index_];
@@ -170,18 +170,24 @@ class Particles {
   }
 
   /**
-   * Updates the particle list \p old_state with the new list \p new_state.
+   * Updates the Particles object, replacing the particles in \p old_state with
+   * the particles in \p new_state.
    *
-   * The state update copies the id_process, momentum, and position from
-   * \p new_state.
+   * The third parameter \p do_replace determines whether the particles are
+   * actually replaced (so that they get new IDs etc) or if the old particles
+   * are kept and just updated with new properties (e.g. in an elastic collision).
    *
    * This function expects \p old_state to be a valid copy (i.e. is_valid
-   * returns \c true) and it expects the ParticleTypes in \p old_state and
-   * \p new_state to be equal. This is enforced in DEBUG builds.
+   * returns \c true). This is enforced in DEBUG builds.
    */
-  void update(const ParticleList &old_state, ParticleList &new_state) {
-    for (std::size_t i = 0; i < old_state.size(); ++i) {
-      new_state[i] = update(old_state[i], new_state[i]);
+  void update(const ParticleList &old_state, ParticleList &new_state,
+              bool do_replace) {
+    if (do_replace) {
+      replace(old_state, new_state);
+    } else {
+      for (std::size_t i = 0; i < old_state.size(); ++i) {
+        new_state[i] = update_particle(old_state[i], new_state[i]);
+      }
     }
   }
 

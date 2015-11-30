@@ -333,7 +333,7 @@ TEST(update) {
   pd.set_id_process(2);
   pd.set_4momentum({2, 2, 2, 2});
   pd.set_4position({3, 3, 3, 3});
-  p.update(p.front(), pd);
+  p.update_particle(p.front(), pd);
   COMPARE(p.size(), 3u);
   COMPARE(p.front().momentum(), FourVector(2, 2, 2, 2));
   COMPARE(p.front().position(), FourVector(3, 3, 3, 3));

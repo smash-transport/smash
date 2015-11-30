@@ -81,11 +81,9 @@ void Action::perform(Particles *particles, uint32_t id_process) {
   for (ParticleData &p : outgoing_particles_) {
     p.set_id_process(id_process);  // store the process id
   }
-  if (process_type_ == ProcessType::Elastic) {
-    particles->update(incoming_particles_, outgoing_particles_);
-  } else {
-    particles->replace(incoming_particles_, outgoing_particles_);
-  }
+
+  particles->update(incoming_particles_, outgoing_particles_,
+                    process_type_ != ProcessType::Elastic);
 
   log.debug("Particle map now has ", particles->size(), " elements.");
 
