@@ -33,13 +33,14 @@ class BinaryOutputBase : public OutputInterface {
   }
   void write(const Particles &particles);
   void write(const ParticleList &particles);
+  void write_particledata(const ParticleData &p);
 
   /// Binary particles output
   FilePtr file_;
 
  private:
   /// file format version number
-  const int format_version_ = 3;
+  const int format_version_ = 4;
 };
 
 /**
