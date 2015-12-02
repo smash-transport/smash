@@ -117,8 +117,7 @@ void Particles::remove(const ParticleData &p) {
   }
 }
 
-ParticleList Particles::replace(const ParticleList &to_remove,
-                                ParticleList &&to_add) {
+void Particles::replace(const ParticleList &to_remove, ParticleList &to_add) {
   std::size_t i = 0;
   for (; i < std::min(to_remove.size(), to_add.size()); ++i) {
     assert(is_valid(to_remove[i]));
@@ -135,7 +134,6 @@ ParticleList Particles::replace(const ParticleList &to_remove,
     to_add[i].id_ = p.id_;
     to_add[i].index_ = p.index_;
   }
-  return std::move(to_add);
 }
 
 void Particles::reset() {

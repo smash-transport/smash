@@ -135,25 +135,18 @@ class Particles {
   /**
    * Replace the particles in \p to_remove with the particles in \p to_add in
    * the list of current particles. The particles in \p to_remove must be valid
-   * copies obtained from Particles. The particles in \p to_add are consumed by
-   * the function in order to adjust them to be valid copies of the new
-   * particles in the Particles list. This new list of valid copies is returned
-   * by the function.
+   * copies obtained from Particles. The particles in \p to_add are adjusted
+   * to be valid copies of the new particles in the Particles list.
    *
    * \param to_remove A list of particles which are valid copies out of the
    * Particles list. They identify the entries in Particles to be replaced.
    *
    * \param to_add A list of (invalid) ParticleData objects to be placed into
-   * the Particles list. You must either pass a temporary or move the list into
-   * the function argument. This ensures that you do not hold a copy of invalid
-   * ParticleData objects (invalid id and reference into Particles).
-   *
-   * \return Returns a list of valid copies of the new particles in the
-   * Particles list.
+   * the Particles list.
    *
    * \note The validity of \p to_remove is only enforced in DEBUG builds.
    */
-  ParticleList replace(const ParticleList &to_remove, ParticleList &&to_add);
+  void replace(const ParticleList &to_remove, ParticleList &to_add);
 
   /**
    * Updates the particle identified by \p p with the state stored in \p
@@ -167,13 +160,35 @@ class Particles {
    * true) and it expects the ParticleType of \p p and \p new_state to be
    * equal. This is enforced in DEBUG builds.
    */
-  const ParticleData &update(const ParticleData &p,
-                             const ParticleData &new_state) {
+  const ParticleData &update_particle(const ParticleData &p,
+                                      const ParticleData &new_state) {
     assert(is_valid(p));
     assert(p.type() == new_state.type());
     ParticleData &original = data_[p.index_];
     new_state.copy_to(original);
     return original;
+  }
+
+  /**
+   * Updates the Particles object, replacing the particles in \p old_state with
+   * the particles in \p new_state.
+   *
+   * The third parameter \p do_replace determines whether the particles are
+   * actually replaced (so that they get new IDs etc) or if the old particles
+   * are kept and just updated with new properties (e.g. in an elastic collision).
+   *
+   * This function expects \p old_state to be a valid copy (i.e. is_valid
+   * returns \c true). This is enforced in DEBUG builds.
+   */
+  void update(const ParticleList &old_state, ParticleList &new_state,
+              bool do_replace) {
+    if (do_replace) {
+      replace(old_state, new_state);
+    } else {
+      for (std::size_t i = 0; i < old_state.size(); ++i) {
+        new_state[i] = update_particle(old_state[i], new_state[i]);
+      }
+    }
   }
 
   /**
