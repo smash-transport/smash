@@ -65,19 +65,16 @@ class OscarOutput : public OutputInterface {
   void at_eventend(const Particles &particles, const int event_number) override;
 
   /// Write a prefix line and a line per particle to OSCAR output.
-  void at_interaction(const ParticleList &incoming_particles,
-                      const ParticleList &outgoing_particles,
-                      const double density,
-                      const double total_cross_section,
-                      const ProcessType process_type) override;
+  void at_interaction(const Action &action, const double density) override;
 
-  void at_intermediate_time(const Particles &particles, const int event_number,
-                            const Clock &clock) override;
+  void at_intermediate_time(const Particles &particle, const Clock &clock,
+                            const DensityParameters &dens_param) override;
 
  private:
   void write_particledata(const ParticleData &data);
   void write(const Particles &particles);
 
+  int current_event_ = 0;
   FilePtr file_;
 };
 

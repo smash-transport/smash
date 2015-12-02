@@ -47,18 +47,13 @@ void DensityOutput::at_eventend(const Particles &/*particles*/,
   std::fflush(file_.get());
 }
 
-void DensityOutput::at_intermediate_time(const Particles &/*particles*/,
-                                      const int /*event_number*/,
-                                      const Clock &/*t*/) {
-}
-
-void DensityOutput::thermodynamics_output(const Particles &particles,
-                                          const ExperimentParameters &param,
-                                          const DensityParameters &dens_param) {
+void DensityOutput::at_intermediate_time(const Particles &particles,
+                                         const Clock &clock,
+                                         const DensityParameters &dens_param) {
   const bool compute_gradient = false;
   const double rho = rho_eckart(r_, particles, dens_param, DensityType::Baryon,
                                 compute_gradient).first;
-  std::fprintf(file_.get(), "%g %g\n", param.labclock.current_time(), rho);
+  std::fprintf(file_.get(), "%g %g\n", clock.current_time(), rho);
 }
 
 void DensityOutput::density_along_line(const char * file_name,
@@ -68,14 +63,14 @@ void DensityOutput::density_along_line(const char * file_name,
                         const ThreeVector &line_start,
                         const ThreeVector &line_end, int n_points) {
   ThreeVector r;
-  double rho_eck;
   std::ofstream a_file;
   a_file.open(file_name, std::ios::out);
   const bool compute_gradient = false;
 
   for (int i = 0; i <= n_points; i++) {
     r = line_start + (line_end - line_start) * (1.0 * i / n_points);
-    rho_eck = rho_eckart(r, plist, param, dens_type, compute_gradient).first;
+    double rho_eck = rho_eckart(r, plist, param,
+                                dens_type, compute_gradient).first;
     a_file << r.x1() << " " <<
               r.x2() << " " <<
               r.x3() << " " << rho_eck << "\n";

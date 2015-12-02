@@ -27,31 +27,32 @@ namespace Smash {
  */
 class VtkOutput : public OutputInterface {
  public:
-  VtkOutput(const bf::path &path, Configuration&& conf);
+  VtkOutput(const bf::path &path, Configuration &&conf);
   ~VtkOutput();
 
   void at_eventstart(const Particles &particles,
                      const int event_number) override;
   void at_eventend(const Particles &particles, const int event_number) override;
-  void at_intermediate_time(const Particles &particles, const int event_number,
-                          const Clock &clock) override;
+  void at_intermediate_time(const Particles &particles, const Clock &clock,
+                            const DensityParameters &dens_param) override;
 
   /// Prints 3D Lattice in vtk format on a grid
-  void thermodynamics_output(const std::string varname,
-                             RectangularLattice<DensityOnLattice> &lattice,
-                             const int event_number) override;
+  void thermodynamics_output(const std::string &varname,
+                        RectangularLattice<DensityOnLattice> &lattice) override;
 
  private:
-  void write(const Particles &particles, const int event_number);
+  void write(const Particles &particles);
 
   /// filesystem path for output
   const bf::path base_path_;
 
+  /// Event number
+  int current_event_ = 0;
   /// Number of vtk output in current event
-  int vtk_output_counter_;
+  int vtk_output_counter_ = 0;
 
   /// Number of thermodynamical vtk output in current event
-  int vtk_thermodynamics_output_counter_;
+  int vtk_thermodynamics_output_counter_ = 0;
 };
 
 }  // namespace Smash

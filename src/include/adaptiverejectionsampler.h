@@ -120,7 +120,7 @@ class AdaptiveRejectionSampler {
                            float xmin, float xmax);
 
   /*reset max refine loops for AdaptiveRejectionSampler*/
-  void reset_max_refine_loops(const int new_max_refine_loops);
+//   void reset_max_refine_loops(const int new_max_refine_loops);
 
   /*sample one x from distribution function f(x) */
   float get_one_sample();

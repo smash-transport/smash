@@ -24,7 +24,7 @@ namespace Smash {
  * PdgCode stores a Particle Data Group Particle Numbering Scheme
  * particle type number.
  *
- * \see http://pdg.lbl.gov/2013/reviews/rpp2012-rev-monte-carlo-numbering.pdf
+ * \see http://pdg.lbl.gov/2014/reviews/rpp2014-rev-monte-carlo-numbering.pdf
  *
  * Usage:
  * ------
@@ -648,6 +648,8 @@ class PdgCode {
     check();
   }
 };
+
+static_assert(sizeof(PdgCode) == 4, "should fit into 32 bit integer");
 
 std::istream& operator>>(std::istream& is, PdgCode& code);
 /**\ingroup logging

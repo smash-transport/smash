@@ -32,8 +32,7 @@ TEST(init_particle_types) {
 }
 
 TEST(rotate_phi) {
-  DeformedNucleus dnucleus;
-  dnucleus.fill_from_list(small_list, 1);
+  DeformedNucleus dnucleus(small_list, 1);
   // Plan is to rotate the (0, 1, 0, 1) vector by pi/2.
   // Rotation by pi/2 means (0, 1, 0, 1) -> (0, 0, 1, 1)
   dnucleus.set_azimuthal_angle(M_PI/2);

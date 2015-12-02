@@ -136,17 +136,9 @@ void BinaryOutputParticles::at_eventend(const Particles &particles,
   std::fflush(file_.get());
 }
 
-void BinaryOutputParticles::at_interaction(const ParticleList &/*incoming*/,
-                          const ParticleList &/*outgoing*/,
-                          const double /*density*/,
-                          const double /*total_cross_section*/,
-                          const ProcessType /*process_type*/ ) {
-  /* No output of this kind in particles output */
-}
-
 void BinaryOutputParticles::at_intermediate_time(const Particles &particles,
-                                      const int /*event_number*/,
-                                      const Clock &) {
+                                                 const Clock &,
+                                                 const DensityParameters &) {
   char pchar = 'p';
   if (!only_final_) {
     std::fwrite(&pchar, sizeof(char), 1, file_.get());

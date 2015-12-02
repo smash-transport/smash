@@ -39,7 +39,6 @@ AdaptiveRejectionSampler::AdaptiveRejectionSampler(
   /** judge if f_(xmin_)<FLT_MIN or f_(xmax_)<FLT_MIN,
    * change the range automatically to make it work
    * in ARS since we need log(f_(x))*/
-  int nloop = 1;
 
   {
     /** disable float traps here since probability can goes to
@@ -47,6 +46,7 @@ AdaptiveRejectionSampler::AdaptiveRejectionSampler(
      * shrink the range (xmin, xmax) to get ride of it */
     DisableFloatTraps guard(FE_DIVBYZERO | FE_INVALID);
 
+    int nloop = 1;
     while ( f_(xmin_) < std::numeric_limits<float>::min() ) {
       xmin_ += nloop*really_small;
       nloop *= 2;
@@ -87,10 +87,10 @@ AdaptiveRejectionSampler::AdaptiveRejectionSampler(
 }
 
 /** Set max_refine_loops by hand */
-void AdaptiveRejectionSampler::reset_max_refine_loops(const int
+/*void AdaptiveRejectionSampler::reset_max_refine_loops(const int
                                                       new_max_refine_loops) {
   max_refine_loops_ = new_max_refine_loops;
-}
+}*/
 
 
 inline Line AdaptiveRejectionSampler::create_line(Point p0, Point p1) {
@@ -359,11 +359,10 @@ float AdaptiveRejectionSampler::get_one_sample() {
   const auto & log = logger<LogArea::Sampling>();
 
   int rejections = 0;
-  float x;
   while ( true ) {
-    int j = sample_j();
-    x = sample_x(j);
-    float rand = Random::canonical<float>();
+    const int j = sample_j();
+    const float x = sample_x(j);
+    const float rand = Random::canonical<float>();
     if ( squeezing_test(x, j, rand) ) {
       return x;
     } else if ( rejection_test(x, j, rand) ) {

@@ -23,6 +23,7 @@
 #include "../include/clock.h"
 #include "../include/outputinterface.h"
 #include "../include/processbranch.h"
+#include "../include/scatteraction.h"
 
 using namespace Smash;
 
@@ -88,11 +89,12 @@ static bool compare_particles_block_header(const int &npart, FILE *file) {
 
 /* function to read and compare collision block header */
 static bool compare_interaction_block_header(const int &nin, const int &nout,
-                                             double rho, double weight,
-                                             int process_type, FILE *file) {
+                                             const Action &action,
+                                             double rho, FILE *file) {
   int nin_read, nout_read, process_type_read;
   double rho_read, weight_read;
   char c_read;
+  int process_type = static_cast<int>(action.get_type());
   VERIFY(std::fread(&c_read, sizeof(char), 1, file) == 1);
   read_binary(nin_read, file);
   read_binary(nout_read, file);
@@ -104,7 +106,7 @@ static bool compare_interaction_block_header(const int &nin, const int &nout,
   // std::cout << nout_read << " " << nout << std::endl;
   // std::cout << rho << std::endl;
   return (c_read == 'i') && (nin_read == nin) && (nout_read == nout) &&
-         (rho_read == rho) && (weight_read == weight) &&
+         (rho_read == rho) && (weight_read == action.raw_weight_value()) &&
          (process_type_read == process_type);
 }
 
@@ -130,25 +132,25 @@ TEST(fullhistory_format) {
   VERIFY(bf::exists(collisionsoutputfilepath));
 
   /* create two smashon particles */
-  const auto particles =
-      Test::create_particles(2, [] { return Test::smashon_random(); });
+  Particles particles;
+  const ParticleData p1 = particles.insert(Test::smashon_random());
+  const ParticleData p2 = particles.insert(Test::smashon_random());
 
   int event_id = 0;
   /* Write initial state output: the two smashons we created */
-  bin_output->at_eventstart(*particles, event_id);
+  bin_output->at_eventstart(particles, event_id);
 
-  /* Create interaction smashon + smashon -> smashon */
-  ParticleList initial_particles = particles->copy_to_vector();
-  particles->replace(initial_particles, {Test::smashon_random()});
-  ParticleList final_particles = particles->copy_to_vector();
+  /* Create elastic interaction (smashon + smashon). */
+  ScatterActionPtr action = make_unique<ScatterAction>(p1, p2, 0.f);
+  action->add_all_processes(10., true, true);
+  action->generate_final_state();
+  ParticleList final_particles = action->outgoing_particles();
   const double rho = 0.123;
-  const double weight = 3.21;
-  ProcessType process_type = ProcessType::None;
-  bin_output->at_interaction(initial_particles, final_particles, rho, weight,
-                             process_type);
+  bin_output->at_interaction(*action, rho);
 
   /* Final state output */
-  bin_output->at_eventend(*particles, event_id);
+  action->perform(&particles, 1);
+  bin_output->at_eventend(particles, event_id);
 
   /*
    * Now we have an artificially generated binary output.
@@ -175,25 +177,21 @@ TEST(fullhistory_format) {
   VERIFY(smash_version == VERSION_MAJOR);
 
   // particles at event atart: expect two smashons
-  int nin, nout, npart;
-  npart = 2;  // our two smashons
-  VERIFY(compare_particles_block_header(npart, binF));
-  VERIFY(compare_particle(initial_particles[0], binF));
-  VERIFY(compare_particle(initial_particles[1], binF));
+  VERIFY(compare_particles_block_header(2, binF));
+  VERIFY(compare_particle(p1, binF));
+  VERIFY(compare_particle(p2, binF));
 
-  // interaction:2 smashons -> 1 smashon
-  nin = 2;
-  nout = 1;
-  VERIFY(compare_interaction_block_header(
-      nin, nout, rho, weight, static_cast<int>(process_type), binF));
-  VERIFY(compare_particle(initial_particles[0], binF));
-  VERIFY(compare_particle(initial_particles[1], binF));
+  // interaction: 2 smashons -> 2 smashons
+  VERIFY(compare_interaction_block_header(2, 2, *action, rho, binF));
+  VERIFY(compare_particle(p1, binF));
+  VERIFY(compare_particle(p2, binF));
   VERIFY(compare_particle(final_particles[0], binF));
+  VERIFY(compare_particle(final_particles[1], binF));
 
-  // paricles at event end: one smashon
-  npart = 1;
-  VERIFY(compare_particles_block_header(npart, binF));
+  // paricles at event end: two smashons
+  VERIFY(compare_particles_block_header(2, binF));
   VERIFY(compare_particle(final_particles[0], binF));
+  VERIFY(compare_particle(final_particles[1], binF));
 
   // event end line
   VERIFY(compare_final_block_header(event_id, binF));
@@ -227,7 +225,8 @@ TEST(particles_format) {
   ParticleList final_particles = particles->copy_to_vector();
   Clock clock;
 
-  bin_output->at_intermediate_time(*particles, event_id, clock);
+  DensityParameters dens_par(Test::default_parameters());
+  bin_output->at_intermediate_time(*particles, clock, dens_par);
 
   /* Final state output */
   bin_output->at_eventend(*particles, event_id);
