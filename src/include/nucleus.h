@@ -60,7 +60,7 @@ class Nucleus {
  /** Sets the deformation parameters of the Woods-Saxon distribution
   * according to the current mass number.
   *
-  * Ref. for nuclear radii is \iref{De_Jager:1987qc}.
+  * Ref. for nuclear radii is \iref{DeJager:1987qc}.
   * For diffusiveness and saturation density, see [insert reference].
   */
   virtual void set_parameters_automatic();
