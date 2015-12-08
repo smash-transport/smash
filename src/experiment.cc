@@ -97,8 +97,8 @@ std::unique_ptr<ExperimentBase> ExperimentBase::create(Configuration config,
 
   typedef std::unique_ptr<ExperimentBase> ExperimentPointer;
   if (modus_chooser.compare("Box") == 0) {
-    if (config.has_value({"General", "Use_Time_Steps"}) &&
-        !config.read({"General", "Use_Time_Steps"})) {
+    if (config.has_value({"General", "Time_Step_Mode"}) &&
+        config.read({"General", "Time_Step_Mode"}) == TimeStepMode::None) {
       log.error() << "Box modus does not work correctly without time steps for "
                   << "now: periodic boundaries are not taken into account when "
                   << "looking for interactions.";
@@ -123,6 +123,7 @@ namespace {
  * \page input_general_ General
  * \key Delta_Time (float, required): \n
  * Time step for the calculation, in fm/c.
+ * Not required for timestepless mode.
  *
  * \key Testparticles (int, optional, default = 1): \n
  * How many test particles per real particles should be simulated.
@@ -176,9 +177,11 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
                                 "in config file!");
   }
 
-  // The clock initializers are only read here and taken later when
-  // assigning initial_clock_.
-  return {{0.0f, config.read({"General", "Delta_Time"})},
+  float dt = (config.has_value({"General", "Time_Step_Mode"}) &&
+             config.read({"General", "Time_Step_Mode"}) == TimeStepMode::None)
+             ? 0.0f
+             : config.take({"General", "Delta_Time"});
+  return {{0.0f, dt},
           config.take({"Output", "Output_Interval"}), ntest,
           config.take({"General", "Gaussian_Sigma"}, 1.0f),
           config.take({"General", "Gauss_Cutoff_In_Sigma"}, 4.0f)};
@@ -253,7 +256,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
       particles_(),
       nevents_(config.take({"General", "Nevents"})),
       end_time_(config.take({"General", "End_Time"})),
-      delta_time_startup_(config.take({"General", "Delta_Time"})),
+      delta_time_startup_(parameters_.timestep_duration()),
       force_decays_(
           config.take({"Collision_Term", "Force_Decays_At_End"}, true)),
       use_grid_(config.take({"General", "Use_Grid"}, true)),
