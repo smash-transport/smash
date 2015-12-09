@@ -177,7 +177,7 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
                                 "in config file!");
   }
 
-  float dt = (config.has_value({"General", "Time_Step_Mode"}) &&
+  const float dt = (config.has_value({"General", "Time_Step_Mode"}) &&
              config.read({"General", "Time_Step_Mode"}) == TimeStepMode::None)
              ? 0.0f
              : config.take({"General", "Delta_Time"});
