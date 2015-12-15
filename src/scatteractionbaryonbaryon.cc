@@ -84,11 +84,15 @@ CollisionBranchList ScatterActionBaryonBaryon::bar_bar_to_nuc_nuc(
       /** Cross section for 2->2 resonance absorption, obtained via detailed
        * balance from the inverse reaction.
        * See eqs. (B.6), (B.9) and (181) in \iref{Buss:2011mx}.
-       * There is a symmetry factor 1/2 and a spin factor 4/(2S_a+1)/(2S_b+1)
-       * involved. */
-      float xsection = isospin_factor
-                     * p_cm_final * matrix_element * 2.
-                     / ((type_a.spin()+1)*(type_b.spin()+1) * s*cm_momentum());
+       * There are factors for spin, isospin and symmetry involved. */
+      const float spin_factor = 4. / ((type_a.spin()+1)*(type_b.spin()+1));
+      const int sym_fac_in =
+                    (type_a.iso_multiplet() == type_b.iso_multiplet()) ? 2 : 1;
+      const int sym_fac_out =
+                    (nuc_a->iso_multiplet() == nuc_b->iso_multiplet()) ? 2 : 1;
+      const float xsection = isospin_factor * spin_factor
+                             * sym_fac_in / sym_fac_out
+                             * p_cm_final * matrix_element / (s*cm_momentum());
 
       if (xsection > really_small) {
         process_list.push_back(make_unique<CollisionBranch>
