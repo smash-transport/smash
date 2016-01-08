@@ -6,6 +6,7 @@
  *    GNU General Public License (GPLv3 or later)
  *
  */
+#include <sstream>
 
 #include <boost/filesystem/fstream.hpp>
 
@@ -253,14 +254,31 @@ int main(int argc, char *argv[]) {
     for (const auto &config : extra_config) {
       configuration.merge_yaml(config);
     }
-    if (particles)
+    if (particles) {
+      std::cout << "particles: " << particles << std::endl;
+      if (!bf::exists(particles)) {
+        std::stringstream err;
+        err << "The particles file was expected at '" << particles
+            << "', but the file does not exist.";
+        throw std::runtime_error(err.str());
+      }
       configuration["particles"] = read_all(bf::ifstream{particles});
-    if (decaymodes)
+    }
+    if (decaymodes) {
+      if (!bf::exists(decaymodes)) {
+        std::stringstream err;
+        err << "The decay modes file was expected at '" << decaymodes
+            << "', but the file does not exist.";
+        throw std::runtime_error(err.str());
+      }
       configuration["decaymodes"] = read_all(bf::ifstream{decaymodes});
-    if (modus)
+    }
+    if (modus) {
       configuration["General"]["Modus"] = std::string(modus);
-    if (end_time)
+    }
+    if (end_time) {
       configuration["General"]["End_Time"] = std::abs(std::atof(end_time));
+    }
 
     /* set up logging */
     set_default_loglevel(
