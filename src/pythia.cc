@@ -7,7 +7,7 @@
  *    If Pythia cite 
  *    T. Sjöstrand, S. Mrenna and P. Skands, JHEP05 (2006) 026,
  *                          Comput. Phys. Comm. 178 (2008) 852.
- *    
+ *
  */
 
 #include "include/pythia.h"
@@ -26,6 +26,7 @@
 #endif
 
 namespace Smash {
+
   /* This function will generate outgoing particles in CM frame
    * from a hard process. */
   ParticleList string_excitation(const ParticleList &incoming_particles_) {
@@ -126,4 +127,5 @@ namespace Smash {
     return outgoing_particles_;
     }
   }
-}
+
+}  // namespace Smash

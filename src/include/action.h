@@ -164,7 +164,7 @@ class Action {
    *
    * `id_process` is only used for debugging output. */
   void check_conservation(const uint32_t &id_process,
-						  const ProcessType &process_type_) const;
+                          const ProcessType &process_type_) const;
 
   /** Get the interaction point */
   FourVector get_interaction_point();

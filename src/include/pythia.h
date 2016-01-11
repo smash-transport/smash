@@ -7,12 +7,16 @@
  *    If Pythia cite 
  *    T. Sjöstrand, S. Mrenna and P. Skands, JHEP05 (2006) 026,
  *                          Comput. Phys. Comm. 178 (2008) 852.
- *    
+ *
  */
 
-#include "forwarddeclarations.h"
+#ifndef SRC_INCLUDE_PYTHIA_H_
+#define SRC_INCLUDE_PYTHIA_H_
 
+#include "forwarddeclarations.h"
 
 namespace Smash {
   ParticleList string_excitation(const ParticleList &incoming_particles_);
 }
+
+#endif  // SRC_INCLUDE_PYTHIA_H_
