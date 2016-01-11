@@ -131,6 +131,7 @@ Installing yaml-cpp manually
 
       export PKG_CONFIG_PATH=[prefix]/lib/pkgconfig
 
+
 Including Eigen header files from custom location
 -------------------------------------------------
 
@@ -144,17 +145,14 @@ Let's assume Eigen headers will be unpacked in $HOME.
 
   cmake -DCMAKE_INSTALL_PREFIX=$HOME/[latest-eigen]/ ..
 
-Installing Pythia
+
+Compiling Pythia
 ------------------------------
 
-- get the Pythia tarball from http://home.thep.lu.se/~torbjorn/Pythia.html
-
-- Unzip and expand it with tar xvfz pythia8205.tgz
-
-- Move to the created pythia8205 directory and compile as described there
+The Pythia code is provided in the directory 3rdparty/pythia8215 and can be
+compiled by doing
 
    ./configure
    make
 
-- Set the path so that pythia8-config (in pythia8205/bin) is found and 
-  make it executable if necessary
+in that directory.
