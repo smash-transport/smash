@@ -16,7 +16,6 @@ It requires the following tools & libraries:
 - the GNU Scientific Library
 - the Eigen library for linear algebra (see http://eigen.tuxfamily.org)
 - boost filesystem >= 1.49
-- yaml-cpp 0.5.1 (see below if you need to install manually)
 
 Further tools that can be helpful (mainly for development):
 - ROOT >= 5.34
@@ -102,33 +101,6 @@ a multicore machine, e.g. via
 
 (on a quad-core machine).
 
-
-Installing yaml-cpp manually
-----------------------------
-
-- get the yaml-cpp tarball
-
-      wget http://yaml-cpp.googlecode.com/files/yaml-cpp-0.5.1.tar.gz
-
-- unpack
-
-      tar -xf yaml-cpp-0.5.1.tar.gz
-
-- build in a build directory
-
-      cd yaml-cpp-0.5.1
-      mkdir build
-      cd build
-      cmake -DCMAKE_INSTALL_PREFIX=[prefix] -DCMAKE_BUILD_TYPE=Release ..
-      make
-      make install
-
-  Replace [prefix] above with the place where you want to install yaml-cpp. You
-  can e.g. install it to $HOME.
-- If you did not install you a standard location you'll need to set the
-  PKG_CONFIG_PATH environment variable for SMASH to find it:
-
-      export PKG_CONFIG_PATH=[prefix]/lib/pkgconfig
 
 Including Eigen header files from custom location
 -------------------------------------------------
