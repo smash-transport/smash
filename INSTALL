@@ -156,3 +156,5 @@ compiled by doing
    make
 
 in that directory.
+In addition, the file pythia8-config in the folder 3rdparty/pythia8215/bin 
+needs to be executable.  
