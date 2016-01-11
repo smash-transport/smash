@@ -31,13 +31,13 @@ inline static int utf8_adjust(const std::string &s, int width) {
   return width;
 }
 
-std::string fill_left(const std::string &s, int width, char fill) {
+/*std::string fill_left(const std::string &s, int width, char fill) {
   width = utf8_adjust(s, width - s.size());
   if (width > 0) {
     return std::string(width, fill) + s;
   }
   return s;
-}
+}*/
 
 std::string fill_right(const std::string &s, int width, char fill) {
   width = utf8_adjust(s, width - s.size());

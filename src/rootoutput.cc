@@ -7,6 +7,7 @@
  *
  */
 
+#include "include/action.h"
 #include "include/clock.h"
 #include "include/forwarddeclarations.h"
 #include "include/inputfunctions.h"
@@ -21,7 +22,6 @@ RootOutput::RootOutput(const bf::path &path, const std::string &name)
     : base_path_(std::move(path)),
       root_out_file_(
           new TFile((base_path_ / (name + ".root")).native().c_str(), "NEW")),
-      output_counter_(0),
       write_collisions_(true), write_particles_(false),
       autosave_frequency_(1000) {
   init_trees();
@@ -34,7 +34,6 @@ RootOutput::RootOutput(const bf::path &path, Configuration&& conf)
     : base_path_(std::move(path)),
       root_out_file_(
           new TFile((base_path_ / "smash_run.root").native().c_str(), "NEW")),
-      output_counter_(0),
       write_collisions_(conf.take({"Write_Collisions"}, false)),
       write_particles_(conf.take({"Write_Particles"}, true)),
       autosave_frequency_(conf.take({"Autosave_Frequency"}, 1000)) {
@@ -202,9 +201,8 @@ void RootOutput::at_eventstart(const Particles &particles,
 /**
  * Writes to tree "at_tstep_N", where N is timestep number counting from 1.
  */
-void RootOutput::at_intermediate_time(const Particles &particles,
-                                    const int /*event_number*/,
-                                    const Clock &/*clock*/) {
+void RootOutput::at_intermediate_time(const Particles &particles, const Clock &,
+                                      const DensityParameters &) {
   if (write_particles_) {
     particles_to_tree(particles);
     output_counter_++;
@@ -231,13 +229,12 @@ void RootOutput::at_eventend(const Particles &/*particles*/,
 /**
  * Writes interactions to ROOT-file
  */
-void RootOutput::at_interaction(const ParticleList &incoming,
-                                const ParticleList &outgoing,
-                                const double /*density*/,
-                                const double weight,
-                                ProcessType /*process_type*/) {
+void RootOutput::at_interaction(const Action &action,
+                                const double /*density*/) {
   if (write_collisions_) {
-    collisions_to_tree(incoming, outgoing, weight);
+    collisions_to_tree(action.incoming_particles(),
+                       action.outgoing_particles(),
+                       action.raw_weight_value());
   }
 }
 

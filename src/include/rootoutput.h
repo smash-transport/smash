@@ -93,14 +93,9 @@ class RootOutput : public OutputInterface {
                      const int event_number) override;
   void at_eventend(const Particles &particles,
                    const int event_number) override;
-  void at_intermediate_time(const Particles &particles,
-                          const int event_number,
-                          const Clock &) override;
-  void at_interaction(const ParticleList &incoming_particles,
-                      const ParticleList &outgoing_particles,
-                      const double density,
-                      const double weight,
-                      const ProcessType process_type) override;
+  void at_intermediate_time(const Particles &particles, const Clock &clock,
+                            const DensityParameters &dens_param) override;
+  void at_interaction(const Action &action, const double density) override;
 
  private:
   const bf::path base_path_;
@@ -113,8 +108,8 @@ class RootOutput : public OutputInterface {
   void collisions_to_tree(const ParticleList &incoming,
                           const ParticleList &outgoing, const double weight);
   // Counts number of output in a given event
-  int output_counter_;
-  int current_event_;
+  int output_counter_ = 0;
+  int current_event_ = 0;
 
   static const int max_buffer_size_ = 10000;
   // Variables that serve as buffer for filling TTree

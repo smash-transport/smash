@@ -86,9 +86,6 @@ TEST(write_codes) {
   printf("bar Ξ_cc:  %8s %8x 0x%08x\n",   xi_cc_bar.string().c_str(),   xi_cc_bar.code(),   xi_cc_bar.dump());
   printf("Ω_bc:      %8s %8x 0x%08x\n",    omega_bc.string().c_str(),    omega_bc.code(),    omega_bc.dump());
 }
-TEST(size) {
-  COMPARE(sizeof(PdgCode), sizeof(std::uint32_t));
-}
 TEST(code) {
   COMPARE( electron.code(),  0x11);
   COMPARE(   antimu.code(),  static_cast<int>(0xffffffedu));

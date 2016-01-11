@@ -32,7 +32,8 @@ namespace Smash {
  */
 class Nucleus {
  public:
-  Nucleus();
+  Nucleus(const std::map<PdgCode, int>& particle_list, int nTest);
+  Nucleus(Configuration &config, int nTest);
 
   /// returns the mass of the nucleus
   float mass() const;
@@ -59,7 +60,7 @@ class Nucleus {
  /** Sets the deformation parameters of the Woods-Saxon distribution
   * according to the current mass number.
   *
-  * Ref. for nuclear radii is \iref{De_Jager:1987qc}.
+  * Ref. for nuclear radii is \iref{DeJager:1987qc}.
   * For diffusiveness and saturation density, see [insert reference].
   */
   virtual void set_parameters_automatic();
@@ -67,12 +68,9 @@ class Nucleus {
   /** Sets the parameters of the Woods-Saxon according to
    * manually added values in the configuration file.
    *
-   * @param nucleus_type A string determining the nucleus type
-   *                     (either "Projectile" or "Target")
-   * @param config The configuration file located at node Nucleus
+   * @param config The configuration for this nucleus (projectile or target).
    **/
-  virtual void set_parameters_from_config(const char *nucleus_type,
-                                          Configuration &config);
+  virtual void set_parameters_from_config(Configuration &config);
 
   /**
    * Generates momenta of the Fermi motion of the nucleus constituents.
@@ -181,7 +179,7 @@ class Nucleus {
   }
 
   /// Write the nucleon positions to a text file.
-  void print_nucleus(const char * file_name) const;
+//   void print_nucleus(const char * file_name) const;
 
   /// \ingroup exception
   struct TestparticleConfusion : public std::length_error {

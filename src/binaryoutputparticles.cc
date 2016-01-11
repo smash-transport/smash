@@ -67,7 +67,7 @@ BinaryOutputParticles::BinaryOutputParticles(const bf::path &path,
    * magic_number, format_version, len, smash_version
    * \endcode
    * \li magic_number - 4 bytes that in ASCII read as "SMSH".
-   * \li Format version is an integer number, currently it is 0.
+   * \li Format version is an integer number, currently it is 4.
    * \li len is the length of smash version string
    * \li smash_version is len chars that give information about SMASH version.
    *
@@ -136,17 +136,9 @@ void BinaryOutputParticles::at_eventend(const Particles &particles,
   std::fflush(file_.get());
 }
 
-void BinaryOutputParticles::at_interaction(const ParticleList &/*incoming*/,
-                          const ParticleList &/*outgoing*/,
-                          const double /*density*/,
-                          const double /*total_cross_section*/,
-                          const ProcessType /*process_type*/ ) {
-  /* No output of this kind in particles output */
-}
-
 void BinaryOutputParticles::at_intermediate_time(const Particles &particles,
-                                      const int /*event_number*/,
-                                      const Clock &) {
+                                                 const Clock &,
+                                                 const DensityParameters &) {
   char pchar = 'p';
   if (!only_final_) {
     std::fwrite(&pchar, sizeof(char), 1, file_.get());

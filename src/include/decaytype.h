@@ -130,7 +130,7 @@ class TwoBodyDecaySemistable : public TwoBodyDecay {
   /**
    * Get the mass-dependent in-width for a resonance formation process from one
    * stable and one unstable particle according to \iref{Manley:1992yb},
-   * see also PhD thesis Effenberger, eq. (2.77).
+   * see also \iref{Effenberger:1999wlg}, eq. (2.77).
    *
    * \param m0 Pole mass of the produced resonance [GeV].
    * \param G0 Partial width at the pole mass [GeV].

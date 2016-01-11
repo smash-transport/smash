@@ -22,7 +22,22 @@
 
 namespace Smash {
 
-Nucleus::Nucleus() {}
+Nucleus::Nucleus(const std::map<PdgCode, int>& particle_list, int nTest) {
+  fill_from_list(particle_list, nTest);
+}
+
+Nucleus::Nucleus(Configuration &config, int nTest) {
+  // Fill nuclei with particles.
+  std::map<PdgCode, int> part = config.take({"Particles"});
+  fill_from_list(part, nTest);
+  // Ask to construct nuclei based on atomic number;
+  // otherwise, look for the user-defined values or take the default parameters.
+  if (config.has_value({"Automatic"}) && config.take({"Automatic"})) {
+    set_parameters_automatic();
+  } else {
+    set_parameters_from_config(config);
+  }
+}
 
 float Nucleus::mass() const {
   float total_mass = 0.f;
@@ -304,17 +319,14 @@ void Nucleus::set_parameters_automatic() {
   }
 }
 
-void Nucleus::set_parameters_from_config(const char *nucleus_type,
-                                         Configuration &config) {
+void Nucleus::set_parameters_from_config(Configuration &config) {
   // Diffusiveness
-  if (config.has_value({nucleus_type, "Diffusiveness"})) {
-    set_diffusiveness(static_cast<float>(config.take(
-                      {nucleus_type, "Diffusiveness"})));
+  if (config.has_value({"Diffusiveness"})) {
+    set_diffusiveness(static_cast<float>(config.take({"Diffusiveness"})));
   }
   // Radius
-  if (config.has_value({nucleus_type, "Radius"})) {
-    set_nuclear_radius(static_cast<float>(config.take(
-                       {nucleus_type, "Radius"})));
+  if (config.has_value({"Radius"})) {
+    set_nuclear_radius(static_cast<float>(config.take({"Radius"})));
   } else {
     set_nuclear_radius(default_nuclear_radius());
   }
@@ -428,7 +440,7 @@ void Nucleus::copy_particles(Particles* external_particles) {
   }
 }
 
-void Nucleus::print_nucleus(const char * file_name) const {
+/*void Nucleus::print_nucleus(const char * file_name) const {
   for (auto i = cbegin(); i != cend(); i++) {
     FourVector this_position = i->position();
     std::ofstream a_file;
@@ -438,7 +450,7 @@ void Nucleus::print_nucleus(const char * file_name) const {
               std::to_string(this_position.x3()) << std::endl;
     a_file.close();
   }
-}
+}*/
 
 FourVector Nucleus::center() const {
   FourVector centerpoint(0.0, 0.0, 0.0, 0.0);

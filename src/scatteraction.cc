@@ -53,37 +53,27 @@ void ScatterAction::generate_final_state() {
   switch (process_type_) {
     case ProcessType::Elastic:
       /* 2->2 elastic scattering */
-      log.debug("Process: Elastic collision.", process_type_);
       elastic_scattering();
       break;
     case ProcessType::TwoToOne:
       /* resonance formation */
-      log.debug("Process: Resonance formation.", process_type_);
       /* processes computed in the center of momenta */
       resonance_formation();
       break;
     case ProcessType::TwoToTwo:
       /* 2->2 inelastic scattering */
-      log.debug("Process: Inelastic scattering.", process_type_);
       /* Sample the particle momenta in CM system. */
       sample_2body_phasespace();
       break;
     case ProcessType::String:
       /* string excitation */
-      log.debug("Process: String Excitation.");
       outgoing_particles_ = string_excitation(incoming_particles_);
-      break;
-    case ProcessType::None:
-      log.debug("ProcessType None should not have been selected");
-      break;
-    case ProcessType::Decay:
-      log.debug("ProcessType Decay should have been handled as DecayAction");
       break;
     default:
       throw InvalidScatterAction(
-        "ScatterAction::perform: Unknown Process Type. "
-        "ProcessType " + std::to_string(static_cast<int>(process_type_)) +
-        " was requested. (PDGcode1=" + incoming_particles_[0].pdgcode().string()
+        "ScatterAction::generate_final_state: Invalid process type "
+        + std::to_string(static_cast<int>(process_type_)) + " was requested. "
+        + "(PDGcode1=" + incoming_particles_[0].pdgcode().string()
         + ", PDGcode2=" + incoming_particles_[1].pdgcode().string()
         + ")");
   }

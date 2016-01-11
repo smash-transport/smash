@@ -37,7 +37,11 @@ namespace Smash {
  * The azimuthal angle by which to rotate the nucleus.
  */
 
-DeformedNucleus::DeformedNucleus() {}
+DeformedNucleus::DeformedNucleus(const std::map<PdgCode, int>& particle_list,
+                                 int nTest) : Nucleus(particle_list, nTest) {}
+
+DeformedNucleus::DeformedNucleus(Configuration &config, int nTest)
+                                : Nucleus(config, nTest) {}
 
 double DeformedNucleus::deformed_woods_saxon(double r, double cosx) const {
   // Return the deformed woods-saxon calculation
@@ -103,33 +107,31 @@ void DeformedNucleus::set_parameters_automatic() {
   nuclear_orientation_.distribute_isotropically();
 }
 
-void DeformedNucleus::set_parameters_from_config(const char *nucleus_type,
-                                                 Configuration &config) {
+void DeformedNucleus::set_parameters_from_config(Configuration &config) {
   // Inherited nucleus parameters.
-  Nucleus::set_parameters_from_config(nucleus_type, config);
+  Nucleus::set_parameters_from_config(config);
 
   // Deformation parameters.
-  if (config.has_value({nucleus_type, "Beta_2"})) {
-    set_beta_2(static_cast<double>(config.take({nucleus_type, "Beta_2"})));
+  if (config.has_value({"Beta_2"})) {
+    set_beta_2(static_cast<double>(config.take({"Beta_2"})));
   }
-  if (config.has_value({nucleus_type, "Beta_4"})) {
-    set_beta_4(static_cast<double>(config.take({nucleus_type, "Beta_4"})));
+  if (config.has_value({"Beta_4"})) {
+    set_beta_4(static_cast<double>(config.take({"Beta_4"})));
   }
 
   // Saturation density (normalization for accept/reject sampling)
-  if (config.has_value({nucleus_type, "Saturation_Density"})) {
+  if (config.has_value({"Saturation_Density"})) {
     Nucleus::set_saturation_density(
-        static_cast<double>(config.take({nucleus_type, "Saturation_Density"})));
+        static_cast<double>(config.take({"Saturation_Density"})));
   }
 
   // Polar angle
-  if (config.has_value({nucleus_type, "Theta"})) {
-    set_polar_angle(static_cast<double>(config.take({nucleus_type, "Theta"})));
+  if (config.has_value({"Theta"})) {
+    set_polar_angle(static_cast<double>(config.take({"Theta"})));
   }
   // Azimuth
-  if (config.has_value({nucleus_type, "Phi"})) {
-    set_azimuthal_angle(static_cast<double>(config.take({nucleus_type,
-                                                         "Phi"})));
+  if (config.has_value({"Phi"})) {
+    set_azimuthal_angle(static_cast<double>(config.take({"Phi"})));
   }
 }
 

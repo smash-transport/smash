@@ -10,13 +10,10 @@
 #ifndef SRC_INCLUDE_OUTPUTINTERFACE_H_
 #define SRC_INCLUDE_OUTPUTINTERFACE_H_
 
-#include <map>
-
 #include "forwarddeclarations.h"
 #include "density.h"
 #include "lattice.h"
 #include "macros.h"
-#include "processbranch.h"
 
 namespace Smash {
 
@@ -28,7 +25,7 @@ namespace Smash {
  * be called at predefined moments:
  * 1) At event start and event end
  * 2) After every N'th timestep
- * 3) Before and after collision
+ * 3) At each interaction
  */
 class OutputInterface {
  public:
@@ -36,70 +33,58 @@ class OutputInterface {
 
   /**
    * Output launched at event start after initialization, when particles are
-   * generated, but not yet propagated.
+   * generated but not yet propagated.
+   * \param particles List of particles.
+   * \param event_number Number of the current event.
    */
-  virtual void at_eventstart(const Particles &, const int) = 0;
+  virtual void at_eventstart(const Particles &particles,
+                             const int event_number) = 0;
 
   /**
    * Output launched at event end. Event end is determined by maximal timestep
    * option.
+   * \param particles List of particles.
+   * \param event_number Number of the current event.
    */
-  virtual void at_eventend(const Particles &, const int) = 0;
+  virtual void at_eventend(const Particles &particles,
+                           const int event_number) = 0;
 
   /**
    * Called whenever an action modified one or more particles.
    *
-   * \param incoming_particles The list of particles before the Action was
-   *                          performed.
-   * \param outgoing_particles   The list of particles after the Action was
-   *                          performed.
-   * \param density The density at the interaction point
-   * \param total_cross_section The total cross section of this interaction
-   *                           or total width in case of decays
-   * \param process_type Identifier for the type of process, e.g.
-   *  		elastic scattering, resonance formation,...
+   * \param action The action object, containing the initial and final state etc.
+   * \param density The density at the interaction point.
    *
    * \fpPrecision Why \c double?
    */
-  virtual void at_interaction(const ParticleList &incoming_particles,
-                              const ParticleList &outgoing_particles,
-                              const double density,
-                              const double total_cross_section,
-                              const ProcessType process_type) {
-    SMASH_UNUSED(incoming_particles);
-    SMASH_UNUSED(outgoing_particles);
+  virtual void at_interaction(const Action &action, const double density) {
+    SMASH_UNUSED(action);
     SMASH_UNUSED(density);
-    SMASH_UNUSED(total_cross_section);
-    SMASH_UNUSED(process_type);
   }
 
   /**
    * Output launched after every N'th timestep. N is controlled by an option.
+   * \param particles List of particles.
+   * \param clock System clock.
+   * \param dens_param Parameters for density calculation.
    */
-  virtual void at_intermediate_time(const Particles &, const int,
-                                  const Clock &) = 0;
-
-  /**
-   * Output intended for writing out thermodynamics.
-   * It is launched after every N'th timestep. N is controlled by an option.
-   */
-  virtual void thermodynamics_output(const Particles &particles,
-                                     const ExperimentParameters &param,
-                                     const DensityParameters &dens_param) {
+  virtual void at_intermediate_time(const Particles &particles,
+                                    const Clock &clock,
+                                    const DensityParameters &dens_param) {
     SMASH_UNUSED(particles);
-    SMASH_UNUSED(param);
+    SMASH_UNUSED(clock);
     SMASH_UNUSED(dens_param);
   }
 
   /**
    * Output to write thermodynamics from the lattice.
+   * \param varname Variable name, used for file name etc.
+   * \param lattice Lattice of tabulated values.
    */
-  virtual void thermodynamics_output(const std::string varname,
-                            RectangularLattice<DensityOnLattice> &lattice,
-                            const int event_number) {
+  virtual void thermodynamics_output(const std::string &varname,
+                            RectangularLattice<DensityOnLattice> &lattice) {
     SMASH_UNUSED(varname);
     SMASH_UNUSED(lattice);
-    SMASH_UNUSED(event_number);
   }
 };
 

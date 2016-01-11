@@ -16,11 +16,13 @@
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include <include/config.h>
+
 #include "../include/outputinterface.h"
 #include "../include/oscaroutput.h"
 #include "../include/particles.h"
 #include "../include/processbranch.h"
 #include "../include/random.h"
+#include "../include/scatteraction.h"
 
 using namespace Smash;
 
@@ -86,19 +88,22 @@ TEST(full2013_format) {
   Test::create_smashon_particletypes();
 
   Particles particles;
-  particles.insert(Test::smashon_random());
-  particles.insert(Test::smashon_random());
+  const ParticleData p1 = particles.insert(Test::smashon_random());
+  const ParticleData p2 = particles.insert(Test::smashon_random());
 
   int event_id = 0;
   /* Initial state output */
   osc2013full->at_eventstart(particles, event_id);
-  /* Create interaction ("resonance formation") */
-  ParticleList initial_particles = particles.copy_to_vector();
-  particles.replace(initial_particles, {Test::smashon_random()});
-  ParticleList final_particles = particles.copy_to_vector();
-  osc2013full->at_interaction(initial_particles, final_particles, 0.0, 0.0,
-                              ProcessType::None);
+
+  /* Create elastic interaction (smashon + smashon). */
+  ScatterActionPtr action = make_unique<ScatterAction>(p1, p2, 0.f);
+  action->add_all_processes(10., true, true);
+  action->generate_final_state();
+  ParticleList final_particles = action->outgoing_particles();
+  osc2013full->at_interaction(*action, 0.);
+
   /* Final state output */
+  action->perform(&particles, 1);
   osc2013full->at_eventend(particles, event_id);
 
   bf::fstream outputfile;
@@ -118,12 +123,11 @@ TEST(full2013_format) {
             "# " VERSION_MAJOR);
     /* Check initial particle list description line */
     std::string initial_line = "# event " + std::to_string(event_id + 1) +
-                               " in " +
-                               std::to_string(initial_particles.size());
+                               " in " + std::to_string(2);
     std::getline(outputfile, line);
     COMPARE(line, initial_line);
     /* Check initial particle data lines item by item */
-    for (ParticleData &data : initial_particles) {
+    for (const ParticleData &data : action->incoming_particles()) {
       std::array<std::string, data_elements> datastring;
       for (int j = 0; j < data_elements; j++) {
         outputfile >> datastring.at(j);
@@ -135,11 +139,11 @@ TEST(full2013_format) {
     /* Check interaction block */
     std::getline(outputfile, line);
     std::string interaction_line =
-        "# interaction in " + std::to_string(initial_particles.size()) +
+        "# interaction in " + std::to_string(2) +
         " out " + std::to_string(final_particles.size());
     // Allow additional fields
     COMPARE(line.substr(0, interaction_line.size()), interaction_line);
-    for (ParticleData &data : initial_particles) {
+    for (const ParticleData &data : action->incoming_particles()) {
       std::array<std::string, data_elements> datastring;
       for (int j = 0; j < data_elements; j++) {
         outputfile >> datastring.at(j);
@@ -199,30 +203,28 @@ TEST(final2013_format) {
 
   Particles particles;
 
-  /* Create 5 particles */
-  for (int i = 0; i < 5; i++) {
-    particles.insert(Test::smashon_random());
-  }
+  /* Create 2 particles */
+  const ParticleData p1 = particles.insert(Test::smashon_random());
+  const ParticleData p2 = particles.insert(Test::smashon_random());
+
   int event_id = 0;
 
   /* Initial state output (note that this should not do anything!) */
   osc2013final->at_eventstart(particles, event_id);
+
   /* Create interaction ("elastic scattering") */
-  ParticleList initial_particles = particles.copy_to_vector();
-  ParticleList final_particles = initial_particles;
-  /* Change the momenta */
-  final_particles[0].set_4momentum(Test::smashon_mass, random_value(),
-                                   random_value(), random_value());
-  final_particles[1].set_4momentum(Test::smashon_mass, random_value(),
-                                   random_value(), random_value());
-  final_particles =
-      particles.replace(initial_particles, std::move(final_particles));
-  COMPARE(final_particles, particles.copy_to_vector());
+  ScatterActionPtr action = make_unique<ScatterAction>(p1, p2, 0.f);
+  action->add_all_processes(10., true, true);
+  action->generate_final_state();
+
   /* As with initial state output, this should not do anything */
-  osc2013final->at_interaction(initial_particles, final_particles, 0.0, 0.0,
-                               ProcessType::None);
+  osc2013final->at_interaction(*action, 0.);
+
   /* Final state output; this is the only thing we expect to find in file */
+  action->perform(&particles, 1);
   osc2013final->at_eventend(particles, event_id);
+  COMPARE(action->outgoing_particles(), particles.copy_to_vector());
+
 
   bf::fstream outputfile;
   outputfile.open(outputfilepath, std::ios_base::in);

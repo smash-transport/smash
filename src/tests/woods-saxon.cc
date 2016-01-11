@@ -37,8 +37,7 @@ TEST(woods_saxon) {
   constexpr int N_TEST = 10000;
   for (int i = 0; i < N_TEST; i++) {
     // initialize nucleus.
-    Nucleus projectile;
-    projectile.fill_from_list(list, 1);
+    Nucleus projectile(list, 1);
     projectile.arrange_nucleons();
     // com = center of mass.
     FourVector com = projectile.center();
