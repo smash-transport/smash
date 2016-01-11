@@ -15,7 +15,7 @@
 #  Pythia_LHAPDFDummy_LIBRARY - The LHAPDF dummy library, use if the real LHAPDF is not installed / found
 
 
-FIND_PROGRAM(Pythia_CONFIG_EXECUTABLE NAMES pythia8-config)
+FIND_PROGRAM(Pythia_CONFIG_EXECUTABLE NAMES pythia8-config HINTS ../3rdparty/pythia8215/bin)
 IF(${Pythia_CONFIG_EXECUTABLE} MATCHES "Pythia_CONFIG_EXECUTABLE-NOTFOUND")
   MESSAGE(STATUS "Looking for Pythia... - pythia8-config executable not found")
 ELSE(${Pythia_CONFIG_EXECUTABLE} MATCHES "Pythia_CONFIG_EXECUTABLE-NOTFOUND")
