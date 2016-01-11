@@ -18,7 +18,7 @@
 #include "include/random.h"
 
 namespace Smash {
-     
+
 ScatterAction::ScatterAction(const ParticleData &in_part_a,
                              const ParticleData &in_part_b,
                              float time, bool isotropic)
@@ -89,7 +89,7 @@ void ScatterAction::generate_final_state() {
 
 
 void ScatterAction::add_all_processes(float elastic_parameter,
-                                      bool two_to_one, bool two_to_two, 
+                                      bool two_to_one, bool two_to_two,
                                       bool strings_switch) {
   if (two_to_one) {
     /* resonance formation (2->1) */
@@ -104,7 +104,7 @@ void ScatterAction::add_all_processes(float elastic_parameter,
   /* string excitation: the sqrt(s) cut-off is the sum of the masses of the
    * incoming particles + 2 GeV, which is given by PYTHIA as the
    * minimum energy that needs to be available for particle production */
-  if(strings_switch &&
+  if (strings_switch &&
      sqrt_s() >= incoming_particles_[0].type().mass() +
                  incoming_particles_[1].type().mass() + 2.) {
     add_collision(string_excitation_cross_section());
@@ -199,9 +199,9 @@ CollisionBranchPtr ScatterAction::string_excitation_cross_section() {
   const auto &log = logger<LogArea::ScatterAction>();
   /* Calculate string-excitation cross section:
    * Parametrized total minus all other present channels. */
-   float sig_string = std::max(0.f, total_cross_section() - cross_section());
-   log.debug("String cross section is: ", sig_string);
-   return make_unique<CollisionBranch>(sig_string, ProcessType::String);
+  float sig_string = std::max(0.f, total_cross_section() - cross_section());
+  log.debug("String cross section is: ", sig_string);
+  return make_unique<CollisionBranch>(sig_string, ProcessType::String);
 }
 
 

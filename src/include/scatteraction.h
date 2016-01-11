@@ -195,7 +195,6 @@ class ScatterAction : public Action {
 
   /** Perform a 2->1 resonance-formation process. */
   void resonance_formation();
-    
 };
 
 

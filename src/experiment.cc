@@ -277,7 +277,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
   }
   if (two_to_one || two_to_two) {
     auto scat_finder = make_unique<ScatterActionsFinder>(config, parameters_,
-                                                       two_to_one, two_to_two, 
+                                                       two_to_one, two_to_two,
                                                        strings_switch);
     max_transverse_distance_sqr_ = scat_finder->max_transverse_distance_sqr(
                                                     parameters_.testparticles);

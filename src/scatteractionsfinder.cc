@@ -56,7 +56,7 @@ ScatterActionsFinder::ScatterActionsFinder(
         " using ", elastic_parameter_, " mb as maximal cross-section.");
       }
       }
-    
+
 ScatterActionsFinder::ScatterActionsFinder(
     float elastic_parameter, int testparticles)
     : elastic_parameter_(elastic_parameter),
@@ -142,7 +142,6 @@ ActionPtr ScatterActionsFinder::check_collision(
                           * data_b.cross_section_scaling_factor()
                           / static_cast<float>(testparticles_)) {
     return nullptr;
-  
   }
 
 #ifndef NDEBUG
