@@ -119,7 +119,7 @@ static int get_isospin(const std::string &n, PdgCode pdg) {
   const std::string first = n.substr(0, utf8::sequence_length(n.begin()));
   using StringList = build_vector_<std::string>;
   const StringList list0 {"η", "ω", "φ", "σ", "f", "Λ"};
-  const StringList list1 {"N", "K"};
+  const StringList list1 {"N", "K","X"};
   const StringList list2 {"π", "ρ", "Σ"};
   const StringList list3 {"Δ"};
   const std::vector<StringList> list {list0, list1, list2, list3};
