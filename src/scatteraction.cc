@@ -107,7 +107,25 @@ void ScatterAction::add_all_processes(float elastic_parameter,
   if (strings_switch &&
      sqrt_s() >= incoming_particles_[0].type().mass() +
                  incoming_particles_[1].type().mass() + 2.) {
-    add_collision(string_excitation_cross_section());
+  /* Only allow string excitation for the particles that PYTHIA can cope 
+   * with, i.e. p/n, p/nbar, pi+, pi- and pi0 */
+    bool a_in_pythia = false;
+    bool b_in_pythia = false;
+    if (incoming_particles_[0].type().is_nucleon() ||
+        incoming_particles_[0].type().pdgcode() == -0x2212 ||
+        incoming_particles_[0].type().pdgcode() == -0x2112 ||
+        incoming_particles_[0].type().pdgcode().is_pion() ) {
+		a_in_pythia = true; 
+	}
+	if (incoming_particles_[1].type().is_nucleon() ||
+        incoming_particles_[1].type().pdgcode() == -0x2212 ||
+        incoming_particles_[1].type().pdgcode() == -0x2112 ||
+        incoming_particles_[1].type().pdgcode().is_pion() ) {
+		b_in_pythia = true; 
+	}
+	if (a_in_pythia && b_in_pythia) {    		  					 
+      add_collision(string_excitation_cross_section());
+    }
   }
 }
 

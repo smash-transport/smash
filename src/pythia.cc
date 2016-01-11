@@ -56,25 +56,6 @@ namespace Smash {
       std::stringstream buffer1;
       buffer1 << "Random:seed = " << Random::canonical();
       pythia.readString(buffer1.str());
-      /* project non-strange resonances to nucleons and pions */
-      /* TODO: How to cope with anti-particles?*/
-      PdgCode pi_plus(0x211);
-      for (const ParticleData &p : incoming_particles_) {
-        if (p.type().pdgcode().strangeness() == 0 &&
-            p.type().pdgcode().charmness() == 0) {
-          if ( p.type().is_Nstar() || p.type().is_Delta()
-            || p.type().is_Deltastar() || p.type().is_nucleon()) {
-            p.type().pdgcode().from_decimal(2212);
-//           } else if (p.type().multiplet == pi_plus.multiplet()) {
-//             p.type().pdgcode().from_decimal(211);
-          } else {
-                /* TODO: What do we do with these particles? How to make sure,
-                  * that no cross-section is lost? */
-                log.info("Pythia is not available for these beams ",
-                         p.type().pdgcode());
-              }
-            }
-      }
       /* set the incoming particles */
       std::stringstream buffer2;
       buffer2 << "Beams:idA = " << incoming_particles_[0].type().pdgcode();
@@ -107,7 +88,6 @@ namespace Smash {
             std::string s = std::to_string(pythia_id);
             PdgCode pythia_code(s);
             ParticleData new_particle_(ParticleType::find(pythia_code));
-///             ParticleData new_particle_(ParticleType::pythiafind());
             FourVector momentum;
             momentum.set_x0(event[i].e());
             momentum.set_x1(event[i].px());
