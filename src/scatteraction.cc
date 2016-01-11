@@ -101,10 +101,12 @@ void ScatterAction::add_all_processes(float elastic_parameter,
     /* 2->2 (inelastic) */
     add_collisions(two_to_two_cross_sections());
   }
-  /* string excitation, the sqrts cut-off is twice the mass of the
-   * heaviest hadron in SMASH + 2. which is given by PYTHIA as the 
+  /* string excitation: the sqrt(s) cut-off is the sum of the masses of the
+   * incoming particles + 2 GeV, which is given by PYTHIA as the
    * minimum energy that needs to be available for particle production */
-  if(strings_switch && sqrt_s()>=6.) {
+  if(strings_switch &&
+     sqrt_s() >= incoming_particles_[0].type().mass() +
+                 incoming_particles_[1].type().mass() + 2.) {
     add_collision(string_excitation_cross_section());
   }
 }
