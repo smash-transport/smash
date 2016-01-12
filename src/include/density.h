@@ -14,6 +14,7 @@
 #include <iostream>
 
 #include "experimentparameters.h"
+#include "energymomentumtensor.h"
 #include "forwarddeclarations.h"
 #include "fourvector.h"
 #include "lattice.h"
@@ -232,7 +233,7 @@ class DensityOnLattice {
     }
   }
   /// Computes density from jmu
-  void compute_density(const double norm_factor) {
+  void compute_density(const double norm_factor = 1.0) {
     density_ = (jmu_pos_.abs() - jmu_neg_.abs()) * norm_factor;
   }
   /// Returns the density if it was previously computed
@@ -265,6 +266,21 @@ class DensityOnLattice {
                             const DensityType dens_type,
                             const DensityParameters &par,
                             const Particles &particles);
+
+  /** Calculates energy-momentum tensor on the lattice in an time-efficient way.
+   *  \param lat pointer to the lattice
+   *  \param update tells if called for update at printout or at timestep
+   *  \param dens_type density type to be computed on the lattice
+   *  \param par a structure containing testparticles number and gaussian
+   *         smearing parameters.
+   *  \param particles the particles vector
+   */
+  void update_Tmn_lattice(RectangularLattice<EnergyMomentumTensor>* lat,
+                            const LatticeUpdate update,
+                            const DensityType dens_type,
+                            const DensityParameters &par,
+                            const Particles &particles);
+
 }  // namespace Smash
 
 #endif  // SRC_INCLUDE_DENSITY_H_

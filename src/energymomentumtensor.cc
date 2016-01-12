@@ -124,6 +124,10 @@ void EnergyMomentumTensor::add_particle(const FourVector& mom) {
   Tmn_[9] += mom[3] * tmp.x3();
 }
 
+void EnergyMomentumTensor::add_particle(const ParticleData& p, double factor) {
+  add_particle(p.momentum()*factor);
+}
+
 std::ostream &operator<<(std::ostream &out, const EnergyMomentumTensor &Tmn) {
   out.width(12);
   for (size_t mu = 0; mu < 4; mu++) {
