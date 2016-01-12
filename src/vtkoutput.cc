@@ -67,7 +67,11 @@ VtkOutput::~VtkOutput() {
 void VtkOutput::at_eventstart(const Particles &particles,
                               const int event_number) {
   vtk_output_counter_ = 0;
-  vtk_thermodynamics_output_counter_ = 0;
+  vtk_density_output_counter_ = 0;
+  vtk_tmn_output_counter_ = 0;
+  vtk_tmn_landau_output_counter_ = 0;
+  vtk_v_landau_output_counter_ = 0;
+
   current_event_ = event_number;
   write(particles);
   vtk_output_counter_++;
@@ -140,7 +144,7 @@ void VtkOutput::thermodynamics_output(const std::string &varname,
   std::ofstream file;
   char suffix[22];
   snprintf(suffix, sizeof(suffix), "_%05i_tstep%05i.vtk", current_event_,
-           vtk_thermodynamics_output_counter_);
+           vtk_density_output_counter_);
   const auto dim = lattice.dimensions();
   const auto cs = lattice.cell_sizes();
   const auto orig = lattice.origin();
@@ -166,7 +170,62 @@ void VtkOutput::thermodynamics_output(const std::string &varname,
       }
     });
   file.close();
-  vtk_thermodynamics_output_counter_++;
+  vtk_density_output_counter_++;
 }
+
+void VtkOutput::thermodynamics_output(const std::string &varname,
+                               RectangularLattice<EnergyMomentumTensor> &Tmn_lattice) {
+  std::ofstream file;
+  char suffix[22];
+  const auto dim = Tmn_lattice.dimensions();
+  const auto cs = Tmn_lattice.cell_sizes();
+  const auto orig = Tmn_lattice.origin();
+
+  if (varname != "Tmn" && varname != "Tmn_Landau" && varname != "v_Landau") {
+    throw std::invalid_argument(
+               "Variable name should be Tmn or Tmn_Landau or v_Landau.");
+  }
+  snprintf(suffix, sizeof(suffix), "_%05i_tstep%05i.vtk", current_event_,
+           (varname == "Tmn") ?  vtk_tmn_output_counter_++ :
+           (varname == "Tmn_Landau") ? vtk_tmn_landau_output_counter_++ :
+           vtk_v_landau_output_counter_++);
+
+  file.open(base_path_.string() + std::string("/") + varname +
+                std::string(suffix), std::ios::out);
+  file  << "# vtk DataFile Version 2.0\n" << varname << "\n" <<
+           "ASCII\n" <<
+           "DATASET STRUCTURED_POINTS\n"
+           "DIMENSIONS " << dim[0] << " " << dim[1] << " " << dim[2] << "\n" <<
+           "SPACING " << cs[0] << " " << cs[1] << " " << cs[2] << "\n" <<
+           "ORIGIN " << orig[0] << " " << orig[1] << " " << orig[2] << "\n" <<
+           "POINT_DATA " << Tmn_lattice.size() << "\n";
+  file << std::setprecision(3);
+  file << std::fixed;
+  if (varname == "Tmn" || varname == "Tmn_Landau" ) {
+    for (int i = 0; i < 4; i++) {
+      for (int j = i; j < 4; j++) {
+        file << "SCALARS " << varname << i << j << " float 1\n" <<
+                "LOOKUP_TABLE default\n";
+        Tmn_lattice.iterate_sublattice({0, 0, 0}, dim,
+          [&](EnergyMomentumTensor &node, int,  int, int) {
+             const FourVector u = node.landau_frame_4velocity();
+             const EnergyMomentumTensor Tmn_L = node.boosted(u);
+             file << (varname == "Tmn" ?
+                      node[EnergyMomentumTensor::tmn_index(i,j)] :
+                      Tmn_L[EnergyMomentumTensor::tmn_index(i,j)]) << "\n";
+          });
+      }
+    }
+  } else {
+    file << "VECTORS " << varname << " float\n";
+    Tmn_lattice.iterate_sublattice({0, 0, 0}, dim,
+      [&](EnergyMomentumTensor &node, int,  int, int) {
+        const FourVector u = node.landau_frame_4velocity();
+        file << -u[1]/u[0] << " " << -u[2]/u[0] << " " << -u[3]/u[0] << "\n";
+      });
+  }
+  file.close();
+}
+
 
 }  // namespace Smash

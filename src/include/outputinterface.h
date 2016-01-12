@@ -12,6 +12,7 @@
 
 #include "forwarddeclarations.h"
 #include "density.h"
+#include "energymomentumtensor.h"
 #include "lattice.h"
 #include "macros.h"
 
@@ -86,6 +87,18 @@ class OutputInterface {
     SMASH_UNUSED(varname);
     SMASH_UNUSED(lattice);
   }
+
+  /**
+   * Output to write energy-momentum tensor and related quantities from the lattice.
+   * \param varname Variable name: Tmn, Tmn_Landau, v_Landau
+   * \param lattice Lattice of tabulated values.
+   */
+  virtual void thermodynamics_output(const std::string &varname,
+                            RectangularLattice<EnergyMomentumTensor> &lattice) {
+    SMASH_UNUSED(varname);
+    SMASH_UNUSED(lattice);
+  }
+
 };
 
 }  // namespace Smash

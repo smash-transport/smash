@@ -113,9 +113,10 @@ Lattice:
     Periodic: True             # Periodic continuation: x + i * lx is equivalent to x, same for y, z
     Printout:
         # ("particle", "baryon", "baryonic isospin", "pion")
-        #Density: "baryon"
-        #LandauEnergyDensity: False, not implemented
-        #LandauVelocity: False, not implemented
+        Density: "baryon"
+        Tmn:        False
+        Tmn_Landau: False
+        Landau_Velocity: False
 
 Modi:
     Box:

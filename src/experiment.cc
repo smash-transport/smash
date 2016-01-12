@@ -527,6 +527,13 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     /* Create baryon and isospin density lattices regardless of config
        if potentials are on. This is because they allow to compute
        potentials faster */
+    printout_tmn_ = config.take({"Lattice", "Printout", "Tmn"}, false);
+    printout_tmn_landau_ = config.take({"Lattice", "Printout", "Tmn_Landau"}, false);
+    printout_v_landau_ = config.take({"Lattice", "Printout", "Landau_Velocity"}, false);
+    if (printout_tmn_ || printout_tmn_landau_ || printout_v_landau_) {
+      Tmn_ = make_unique<RectangularLattice<EnergyMomentumTensor>>(
+                l, n, origin, periodic, LatticeUpdate::AtOutput);
+    }
     if (potentials_) {
       if (potentials_->use_skyrme()) {
         jmu_B_lat_ = make_unique<DensityLattice>(l, n, origin, periodic,
@@ -1127,6 +1134,20 @@ void Experiment<Modus>::intermediate_output(uint64_t& interactions_total,
         update_density_lattice(jmu_custom_lat_.get(), lat_upd,
                        dens_type_lattice_printout_, density_param_, particles_);
         output->thermodynamics_output(std::string("rho"), *jmu_custom_lat_);
+    }
+    if (printout_tmn_ || printout_tmn_landau_ || printout_v_landau_) {
+      // ToDo(oliiny): sort out which type to print (tmn from all particles/baryons/pions/etc)
+      update_Tmn_lattice(Tmn_.get(), lat_upd, dens_type_lattice_printout_,
+                          density_param_, particles_);
+      if (printout_tmn_) {
+        output->thermodynamics_output(std::string("Tmn"), *Tmn_);
+      }
+      if (printout_tmn_landau_) {
+        output->thermodynamics_output(std::string("Tmn_Landau"), *Tmn_);
+      }
+      if (printout_v_landau_) {
+        output->thermodynamics_output(std::string("v_Landau"), *Tmn_);
+      }
     }
   }
 }
