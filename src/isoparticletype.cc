@@ -19,8 +19,10 @@ namespace Smash {
 
 static IsoParticleTypeList iso_type_list;
 
-IsoParticleType::IsoParticleType(const std::string &n, float m, float w, int i)
-                                : name_(n), mass_(m), width_(w), isospin_(i) {}
+IsoParticleType::IsoParticleType(const std::string &n, float m, float w,
+                                 unsigned int i, unsigned int s)
+                                : name_(n), mass_(m), width_(w),
+                                  isospin_(i), spin_(s) {}
 
 const IsoParticleType& IsoParticleType::find(const std::string &name) {
   const auto found = std::lower_bound(
@@ -113,11 +115,15 @@ void IsoParticleType::add_state(const ParticleType &type) {
   const auto &log = logger<LogArea::ParticleType>();
   if (std::abs(mass() - type.mass()) > really_small) {
     log.warn() << "Isospin symmetry is broken by mass of " << type.name()
-                << ": " << type.mass() << " vs. " << mass();
+               << ": " << type.mass() << " vs. " << mass();
   }
   if (std::abs(width() - type.width_at_pole()) > really_small) {
     log.warn() << "Isospin symmetry is broken by width of " << type.name()
-                << ": " << type.width_at_pole() << " vs. " << width();
+               << ": " << type.width_at_pole() << " vs. " << width();
+  }
+  if (std::abs(spin() - type.spin()) > really_small) {
+    log.error() << "Isospin symmetry is broken by spin of " << type.name()
+                << ": " << type.spin() << " vs. " << spin();
   }
 }
 
@@ -128,7 +134,7 @@ void IsoParticleType::create_multiplet(const ParticleType &type) {
   std::string multiname = multiplet_name(type.name());
   if (!exists(multiname)) {
     iso_type_list.emplace_back(multiname, type.mass(), type.width_at_pole(),
-                               type.isospin());
+                               type.isospin(), type.spin());
     log.debug() << "Creating isospin multiplet " << multiname
                 << " [ I = " << type.isospin() << "/2, m = " << type.mass()
                 << ", Γ = " << type.width_at_pole() << " ]";
