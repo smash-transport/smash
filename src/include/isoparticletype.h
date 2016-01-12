@@ -57,8 +57,11 @@ class IsoParticleType {
 
   ParticleTypePtrList get_states() const { return states_; }
 
-  /// Add a new state to an existing multiplet.
-  void add_state(const ParticleType &type) { states_.push_back(&type); }
+  /**
+   * Add a new state to an existing multiplet
+   * (and check if isospin symmetry is fulfilled).
+   */
+  void add_state(const ParticleType &type);
 
   /**
    * Check if there is a multiplet of antiparticles, which is different from

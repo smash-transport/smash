@@ -9,6 +9,7 @@
 
 #include <algorithm>
 
+#include "include/constants.h"
 #include "include/forwarddeclarations.h"
 #include "include/integrate.h"
 #include "include/logging.h"
@@ -103,6 +104,21 @@ IsoParticleType* IsoParticleType::find(const ParticleType &type) {
   std::string multiname = multiplet_name(type.name());
   IsoParticleType &multiplet = find_private(multiname);
   return &multiplet;
+}
+
+void IsoParticleType::add_state(const ParticleType &type) {
+  states_.push_back(&type);
+
+  // check if isospin symmetry is fulfilled
+  const auto &log = logger<LogArea::ParticleType>();
+  if (std::abs(mass() - type.mass()) > really_small) {
+    log.warn() << "Isospin symmetry is broken by mass of " << type.name()
+                << ": " << type.mass() << " vs. " << mass();
+  }
+  if (std::abs(width() - type.width_at_pole()) > really_small) {
+    log.warn() << "Isospin symmetry is broken by width of " << type.name()
+                << ": " << type.width_at_pole() << " vs. " << width();
+  }
 }
 
 void IsoParticleType::create_multiplet(const ParticleType &type) {
