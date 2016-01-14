@@ -48,6 +48,9 @@ class DecayModes {
    */
   static void load_decaymodes(const std::string &input);
 
+  /** Retrieve a decay type. */
+  static DecayType* get_decay_type(ParticleTypePtrList particle_types, int L);
+
   /// \ingroup exception
   struct InvalidDecay : public std::invalid_argument {
     using std::invalid_argument::invalid_argument;

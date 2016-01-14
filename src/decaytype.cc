@@ -57,14 +57,16 @@ TwoBodyDecay::TwoBodyDecay(ParticleTypePtrList part_types, int l)
   }
 }
 
-int TwoBodyDecay::particle_number() const {
+unsigned int TwoBodyDecay::particle_number() const {
   return 2;
 }
 
-bool TwoBodyDecay::has_particles(const ParticleType &t_a,
-                                 const ParticleType &t_b) const {
-  return (*particle_types_[0] == t_a && *particle_types_[1] == t_b) ||
-         (*particle_types_[0] == t_b && *particle_types_[1] == t_a);
+bool TwoBodyDecay::has_particles(ParticleTypePtrList list) const {
+  if (list.size() != particle_number()) {
+    return false;
+  }
+  return (particle_types_[0] == list[0] && particle_types_[1] == list[1]) ||
+         (particle_types_[0] == list[1] && particle_types_[1] == list[0]);
 }
 
 // TwoBodyDecayStable
@@ -271,12 +273,15 @@ ThreeBodyDecay::ThreeBodyDecay(ParticleTypePtrList part_types, int l)
   }
 }
 
-int ThreeBodyDecay::particle_number() const {
+unsigned int ThreeBodyDecay::particle_number() const {
   return 3;
 }
 
-bool ThreeBodyDecay::has_particles(const ParticleType &,
-                                   const ParticleType &) const {
+bool ThreeBodyDecay::has_particles(ParticleTypePtrList list) const {
+  if (list.size() != particle_number()) {
+    return false;
+  }
+  // TODO(weil): check all permutations!
   return false;
 }
 

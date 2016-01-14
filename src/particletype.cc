@@ -407,7 +407,8 @@ float ParticleType::get_partial_in_width(const float m,
   float w = 0.;
   for (const auto &mode : decaymodes) {
     float partial_width_at_pole = width_at_pole()*mode->weight();
-    if (mode->type().has_particles(p_a.type(), p_b.type())) {
+    const ParticleTypePtrList l = {&p_a.type(), &p_b.type()};
+    if (mode->type().has_particles(l)) {
       w += mode->type().in_width(mass(), partial_width_at_pole, m,
                                  p_a.effective_mass(), p_b.effective_mass());
     }
