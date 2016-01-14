@@ -187,7 +187,7 @@ void DecayModes::load_decaymodes(const std::string &input) {
 
       int L;
       lineinput >> L;
-      if (L < 0 || L > 3) {  // at some point we might need to support L up to 4
+      if (L < 0 || L > 4) {  // at some point we might need to support L up to 4
                              // (cf. BlattWeisskopf in decaytype.cc)
         throw LoadFailure("Invalid angular momentum '" + std::to_string(L) +
                           "' in decaymodes.txt:" + std::to_string(line.number) +
