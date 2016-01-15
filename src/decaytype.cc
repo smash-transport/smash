@@ -7,6 +7,7 @@
 
 #include "include/decaytype.h"
 
+#include <algorithm>
 #include <math.h>
 
 #include "include/constants.h"
@@ -264,8 +265,14 @@ float TwoBodyDecayDilepton::width(float m0, float G0, float m) const {
 
 // ThreeBodyDecay
 
+static ParticleTypePtrList sort_particles(ParticleTypePtrList part_types) {
+  // sort the particle list
+  std::sort(part_types.begin(), part_types.end());
+  return part_types;
+}
+
 ThreeBodyDecay::ThreeBodyDecay(ParticleTypePtrList part_types, int l)
-                               : DecayType(part_types, l) {
+                               : DecayType(sort_particles(part_types), l) {
   if (part_types.size() != 3) {
     throw std::runtime_error(
       "Wrong number of particles in ThreeBodyDecay constructor: " +
@@ -281,8 +288,10 @@ bool ThreeBodyDecay::has_particles(ParticleTypePtrList list) const {
   if (list.size() != particle_number()) {
     return false;
   }
-  // TODO(weil): check all permutations!
-  return false;
+  // compare sorted vectors (particle_types_ is already sorted)
+  std::sort(list.begin(), list.end());
+  return particle_types_[0] == list[0] && particle_types_[1] == list[1] &&
+         particle_types_[2] == list[2];
 }
 
 float ThreeBodyDecay::width(float, float G0, float) const {
