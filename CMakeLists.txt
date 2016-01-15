@@ -30,6 +30,13 @@ if(NOT CMAKE_BUILD_TYPE)
       FORCE)
 endif(NOT CMAKE_BUILD_TYPE)
 
+
+# add 3rd-party libraries (before setting compiler flags etc)
+include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/einhard")
+include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/yaml-cpp-0.5.3/include")
+add_subdirectory(3rdparty)
+
+
 # RelWithDebInfo is just like Release, it only adds -g to add debug symbols
 # (useful for better debug and profiling information on Release builds)
 set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELEASE} -g" CACHE
@@ -84,8 +91,6 @@ endif()
 # have binary in the build directory
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR})
 
-include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/einhard")
-
 # enable standard CTest
 # tests are enabled/disabled with the BUILD_TESTING switch to cmake
 # uncomment the next line to default BUILD_TESTING to OFF
@@ -93,6 +98,5 @@ include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/einhard")
 include(CTest)
 
 # subdirectories where the code is
-add_subdirectory(3rdparty)
 add_subdirectory(src)
 add_subdirectory(doc)
