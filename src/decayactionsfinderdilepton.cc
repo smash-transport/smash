@@ -91,7 +91,7 @@ ActionList DecayActionsFinderDilepton::find_actions_in_cell(
     }
   }
 
-  return std::move(actions);
+  return actions;
 }
 
 
@@ -159,7 +159,7 @@ ActionList DecayActionsFinderDilepton::find_final_actions(
     }
   }
 
-  return std::move(actions);
+  return actions;
 }
 
 }  // namespace Smash

@@ -21,7 +21,7 @@ ParticleList ProcessBranch::particle_list() const {
   for (const auto &type : particle_types()) {
     l.push_back(ParticleData{*type});
   }
-  return std::move(l);
+  return l;
 }
 
 float ProcessBranch::threshold() const {

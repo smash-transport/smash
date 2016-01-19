@@ -89,7 +89,7 @@ ScatterActionPtr ScatterActionsFinder::construct_scatter_action(
     act = make_unique<ScatterActionMesonMeson>(data_a, data_b,
                                               time_until_collision, isotropic_);
   }
-  return std::move(act);
+  return act;
 }
 
 ActionPtr ScatterActionsFinder::check_collision(

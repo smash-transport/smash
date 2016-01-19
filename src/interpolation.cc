@@ -25,8 +25,8 @@ InterpolateDataSpline::InterpolateDataSpline(const std::vector<double>& x,
         x, [&](double const& a, double const& b) {
           return a < b;
         });
-    const std::vector<double> sorted_x = std::move(apply_permutation(x, p));
-    const std::vector<double> sorted_y = std::move(apply_permutation(y, p));
+    const std::vector<double> sorted_x = apply_permutation(x, p);
+    const std::vector<double> sorted_y = apply_permutation(y, p);
     for (size_t i = 0; i < sorted_x.size() - 1; i++) {
         #pragma GCC diagnostic push
         #pragma GCC diagnostic ignored "-Wfloat-equal"

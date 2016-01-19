@@ -310,7 +310,7 @@ DecayBranchList ParticleType::get_partial_widths(const float m) const {
           make_unique<DecayBranch>(decay_mode_list[i]->type(), w));
     }
   }
-  return std::move(partial);
+  return partial;
 }
 
 DecayBranchList ParticleType::get_partial_widths_hadronic(const float m) const {
@@ -352,7 +352,7 @@ DecayBranchList ParticleType::get_partial_widths_hadronic(const float m) const {
            throw std::runtime_error("Problem in get_partial_widths_hadronic()");
     }
   }
-  return std::move(partial);
+  return partial;
 }
 
 DecayBranchList ParticleType::get_partial_widths_dilepton(const float m) const {
@@ -394,7 +394,7 @@ DecayBranchList ParticleType::get_partial_widths_dilepton(const float m) const {
            throw std::runtime_error("Problem in get_partial_widths_dilepton()");
     }
   }
-  return std::move(partial);
+  return partial;
 }
 
 float ParticleType::get_partial_in_width(const float m,

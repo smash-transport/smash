@@ -159,7 +159,7 @@ inline void AdaptiveRejectionSampler::create_rightend() {
 void AdaptiveRejectionSampler::init_inter() {
   for (auto l0=scants_.begin(); l0 != std::prev(scants_.end(), 2); l0++) {
     auto l2 = std::next(l0, 2);
-    inters_.emplace_back(std::move(create_inter(*l0, *l2)));
+    inters_.emplace_back(create_inter(*l0, *l2));
   }
   create_leftend();
   create_rightend();
