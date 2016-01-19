@@ -383,25 +383,27 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     outputs_.emplace_back(std::move(oscar));
   }
   if (static_cast<bool>(output_conf.take({"Vtk", "Enable"}))) {
-    outputs_.emplace_back(new VtkOutput(output_path, output_conf["Vtk"]));
+    outputs_.emplace_back(new VtkOutput(output_path,
+                                        std::move(output_conf["Vtk"])));
   } else {
     output_conf.take({"Vtk"});
   }
   if (static_cast<bool>(output_conf.take({"Binary_Collisions", "Enable"}))) {
     outputs_.emplace_back(new BinaryOutputCollisions(output_path,
-                                            output_conf["Binary_Collisions"]));
+                                  std::move(output_conf["Binary_Collisions"])));
   } else {
     output_conf.take({"Binary_Collisions"});
   }
   if (static_cast<bool>(output_conf.take({"Binary_Particles", "Enable"}))) {
     outputs_.emplace_back(new BinaryOutputParticles(output_path,
-                                              output_conf["Binary_Particles"]));
+                                  std::move(output_conf["Binary_Particles"])));
   } else {
     output_conf.take({"Binary_Particles"});
   }
   if (static_cast<bool>(output_conf.take({"Root", "Enable"}))) {
 #ifdef SMASH_USE_ROOT
-    outputs_.emplace_back(new RootOutput(output_path, output_conf["Root"]));
+    outputs_.emplace_back(new RootOutput(output_path,
+                                         std::move(output_conf["Root"])));
 #else
     log.error() << "You requested Root output, but Root support has not been "
                     "compiled in.";
@@ -412,7 +414,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
   }
   if (static_cast<bool>(output_conf.take({"Density", "Enable"}))) {
     outputs_.emplace_back(new DensityOutput(output_path,
-                                            output_conf["Density"]));
+                                            std::move(output_conf["Density"])));
   } else {
     output_conf.take({"Density"});
   }
