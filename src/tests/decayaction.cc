@@ -64,10 +64,11 @@ TEST(create_decayaction) {
 
   int decaymodes_counter = 0;
   for (const auto &mode : H_decays) {
-    float ang_mom = mode->type().angular_momentum();
-    float width = mode->weight();
+    const float ang_mom = mode->type().angular_momentum();
+    const float width = mode->weight();
+    const DecayType &type = mode->type();
     std::cout << "Decaymode " << decaymodes_counter << ": " <<
-                 typeid(mode->type()).name() << ", " <<
+                 typeid(type).name() << ", " <<
                  "angular momentum: " << ang_mom <<
                  ", width: " << width << std::endl;
     VERIFY(ang_mom == 0);

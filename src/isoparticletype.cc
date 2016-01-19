@@ -121,7 +121,7 @@ void IsoParticleType::add_state(const ParticleType &type) {
     log.warn() << "Isospin symmetry is broken by width of " << type.name()
                << ": " << type.width_at_pole() << " vs. " << width();
   }
-  if (std::abs(spin() - type.spin()) > really_small) {
+  if (spin() != type.spin()) {
     log.error() << "Isospin symmetry is broken by spin of " << type.name()
                 << ": " << type.spin() << " vs. " << spin();
   }
