@@ -268,7 +268,7 @@ class Experiment : public ExperimentBase {
   OutputsList outputs_;
 
   /// The Dilepton output
-  std::unique_ptr<OutputInterface> dilepton_output_;
+  OutputPtr dilepton_output_;
 
   /// The Action finder objects
   std::vector<std::unique_ptr<ActionFinderInterface>> action_finders_;
