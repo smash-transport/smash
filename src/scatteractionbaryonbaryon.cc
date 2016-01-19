@@ -123,7 +123,7 @@ float ScatterActionBaryonBaryon::nn_to_resonance_matrix_element(double sqrts,
              (type_b.is_Nstar() && type_a.is_nucleon())) {
     /** \f$ NN \rightarrow NN^* \f$:
       * constant matrix element, cf. \iref{Bass:1998ca}, equ. (3.35). */
-    return 9. * spin_factor / (m_plus * m_plus + m_minus * m_minus);
+    return 7. * spin_factor / (m_plus * m_plus + m_minus * m_minus);
   } else if ((type_a.is_Deltastar() && type_b.is_nucleon()) ||
              (type_b.is_Deltastar() && type_a.is_nucleon())) {
     /** \f$ NN \rightarrow N\Delta^* \f$:
@@ -137,7 +137,7 @@ float ScatterActionBaryonBaryon::nn_to_resonance_matrix_element(double sqrts,
              (type_b.is_Nstar() && type_a.is_Delta())) {
     /** \f$ NN \rightarrow \Delta N^* \f$:
       * constant matrix element, cf. \iref{Bass:1998ca}, equ. (3.35). */
-    return 8. * spin_factor / (m_plus * m_plus + m_minus * m_minus);
+    return 7. * spin_factor / (m_plus * m_plus + m_minus * m_minus);
   } else if ((type_a.is_Deltastar() && type_b.is_Delta()) ||
              (type_b.is_Deltastar() && type_a.is_Delta())) {
     /** \f$ NN \rightarrow \Delta\Delta^* \f$:
