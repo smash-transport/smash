@@ -173,6 +173,18 @@ void VtkOutput::thermodynamics_output(const std::string &varname,
   vtk_density_output_counter_++;
 }
 
+/*!\Userguide
+ * \page output_vtk_lattice_ Thermodynamics vtk output
+ * Additionally to density, energy-momentum tensor \f[T^{\mu\nu} \f],
+ * energy-momentum tensor in Landau rest frame \f[T^{\mu\nu}_L \f] and
+ * velocity of Landau rest frame on the lattice can be printed out
+ * in the VTK format of structured grid. At every output moment a new vtk file is created.
+ * The name format is
+ * \<quantity_name\>_\<event_number\>_tstep\<number_of_output_moment\>.vtk,
+ * where \<quantity_name\> is "Tmn", "Tmn_Landau" or "v_Landau". Files can be opened
+ * directly with paraview (paraview.org).
+ */
+
 void VtkOutput::thermodynamics_output(const std::string &varname,
                                RectangularLattice<EnergyMomentumTensor> &Tmn_lattice) {
   std::ofstream file;

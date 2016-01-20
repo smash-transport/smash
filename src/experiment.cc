@@ -513,6 +513,22 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    *
    * \key Density (string, optional, default = "none"): \n
    * Chooses which density to print.
+   *
+   * \key Tmn (bool, optional, default = False): \n
+   * Print energy-momentum tensor \f[T^{\mu\nu}(t,x,y,z) \f]. Type of particles
+   * that contribute to \f[T^{\mu\nu}(t,x,y,z) \f] is the same that for Density option.
+   * For example, if Density option is "pion" then \f[T^{\mu\nu}(t,x,y,z) \f] will
+   * also be computed for pions.
+   *
+   * \key Tmn_Landau (bool, optional, default = False): \n
+   * Print energy-momentum tensor in the Landau rest frame. This tensor is computed
+   * by boosting \f[T^{\mu\nu}(t,x,y,z) \f] to the local rest frame, where
+   * \f[T^{0i} \f] = 0.
+   *
+   * \key Landau_Velocity (bool, optional, default = False): \n
+   * Print velocity of the Landau rest frame. The velocity is obtained from
+   * the energy-momentum tensor \f[T^{\mu\nu}(t,x,y,z) \f] by solving the
+   * generalized eigenvalue equation \f[(T^{\mu\nu} - \lambda g^{\mu\nu})u_{mu}=0 \f].
    */
 
   // Create lattices
@@ -1136,7 +1152,6 @@ void Experiment<Modus>::intermediate_output(uint64_t& interactions_total,
         output->thermodynamics_output(std::string("rho"), *jmu_custom_lat_);
     }
     if (printout_tmn_ || printout_tmn_landau_ || printout_v_landau_) {
-      // ToDo(oliiny): sort out which type to print (tmn from all particles/baryons/pions/etc)
       update_Tmn_lattice(Tmn_.get(), lat_upd, dens_type_lattice_printout_,
                           density_param_, particles_);
       if (printout_tmn_) {
