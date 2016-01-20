@@ -107,8 +107,8 @@ float TwoBodyDecayStable::in_width(float m0, float G0, float m,
 
 // TwoBodyDecaySemistable
 
+/// re-arrange the particle list such that the first particle is the stable one
 static ParticleTypePtrList arrange_particles(ParticleTypePtrList part_types) {
-  // re-arrange the particle list such that the first particle is the stable one
   if (part_types[1]->is_stable()) {
     std::swap(part_types[0], part_types[1]);
   }
@@ -265,8 +265,8 @@ float TwoBodyDecayDilepton::width(float m0, float G0, float m) const {
 
 // ThreeBodyDecay
 
+/// sort the particle list
 static ParticleTypePtrList sort_particles(ParticleTypePtrList part_types) {
-  // sort the particle list
   std::sort(part_types.begin(), part_types.end());
   return part_types;
 }
