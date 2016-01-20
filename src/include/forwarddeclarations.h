@@ -110,6 +110,14 @@ enum class TimeStepMode : char {
   Adaptive,
 };
 
+/// Represents thermodynamic quantities that can be printed out
+enum class ThermodynamicQuantity : char {
+  Density,
+  Tmn,
+  TmnLandau,
+  LandauVelocity,
+};
+
 /** Initial condition for a particle in a box.
 *
 * If PeakedMomenta is used, all particles have the same momentum

@@ -37,15 +37,19 @@ class VtkOutput : public OutputInterface {
                             const DensityParameters &dens_param) override;
 
   /// Prints 3D Lattice in vtk format on a grid
-  void thermodynamics_output(const std::string &varname,
+  void thermodynamics_output(const ThermodynamicQuantity tq, const DensityType dt,
                         RectangularLattice<DensityOnLattice> &lattice) override;
 
   /// Prints 3D Lattice in vtk format on a grid
-  void thermodynamics_output(const std::string &varname,
+  void thermodynamics_output(const ThermodynamicQuantity tq, const DensityType dt,
                         RectangularLattice<EnergyMomentumTensor> &lattice) override;
 
  private:
   void write(const Particles &particles);
+  /// Name of thermodynamic quantity to be used in output file names
+  const char* to_string(const ThermodynamicQuantity tq);
+  /// Name of density type (baryon, hadron, pion, etc) to be used in output file names
+  const char* to_string(const DensityType dens_type);
 
   /// filesystem path for output
   const bf::path base_path_;

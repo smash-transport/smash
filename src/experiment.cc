@@ -1137,31 +1137,37 @@ void Experiment<Modus>::intermediate_output(uint64_t& interactions_total,
       case DensityType::Baryon:
         update_density_lattice(jmu_B_lat_.get(), lat_upd,
                                DensityType::Baryon, density_param_, particles_);
-        output->thermodynamics_output(std::string("rhoB"), *jmu_B_lat_);
+        output->thermodynamics_output(ThermodynamicQuantity::Density,
+                                      DensityType::Baryon, *jmu_B_lat_);
         break;
       case DensityType::BaryonicIsospin:
         update_density_lattice(jmu_I3_lat_.get(), lat_upd,
                      DensityType::BaryonicIsospin, density_param_, particles_);
-        output->thermodynamics_output(std::string("rhoI3"), *jmu_I3_lat_);
+        output->thermodynamics_output(ThermodynamicQuantity::Density,
+                                      DensityType::BaryonicIsospin, *jmu_I3_lat_);
         break;
       case DensityType::None:
         break;
       default:
         update_density_lattice(jmu_custom_lat_.get(), lat_upd,
                        dens_type_lattice_printout_, density_param_, particles_);
-        output->thermodynamics_output(std::string("rho"), *jmu_custom_lat_);
+        output->thermodynamics_output(ThermodynamicQuantity::Density,
+                                       dens_type_lattice_printout_, *jmu_custom_lat_);
     }
     if (printout_tmn_ || printout_tmn_landau_ || printout_v_landau_) {
       update_Tmn_lattice(Tmn_.get(), lat_upd, dens_type_lattice_printout_,
                           density_param_, particles_);
       if (printout_tmn_) {
-        output->thermodynamics_output(std::string("Tmn"), *Tmn_);
+        output->thermodynamics_output(ThermodynamicQuantity::Tmn,
+                                      dens_type_lattice_printout_, *Tmn_);
       }
       if (printout_tmn_landau_) {
-        output->thermodynamics_output(std::string("Tmn_Landau"), *Tmn_);
+        output->thermodynamics_output(ThermodynamicQuantity::TmnLandau,
+                                      dens_type_lattice_printout_, *Tmn_);
       }
       if (printout_v_landau_) {
-        output->thermodynamics_output(std::string("v_Landau"), *Tmn_);
+        output->thermodynamics_output(ThermodynamicQuantity::LandauVelocity,
+                                      dens_type_lattice_printout_, *Tmn_);
       }
     }
   }

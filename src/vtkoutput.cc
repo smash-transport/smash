@@ -128,18 +128,47 @@ void VtkOutput::write(const Particles &particles) {
   }
 }
 
+const char* VtkOutput::to_string(const ThermodynamicQuantity tq) {
+  switch (tq) {
+    case ThermodynamicQuantity::Density:
+      return "rho_eckart";
+    case ThermodynamicQuantity::Tmn:
+      return "tmn";
+    case ThermodynamicQuantity::TmnLandau:
+      return "tmn_landau";
+    case ThermodynamicQuantity::LandauVelocity:
+      return "v_landau";
+    default:
+      throw std::invalid_argument("Unknown thermodynamic quantity.");
+  }
+}
+
+const char* VtkOutput::to_string(const DensityType dens_type) {
+  switch (dens_type) {
+    case DensityType::Hadron:
+      return "hadron";
+    case DensityType::Baryon:
+      return "net_baryon";
+    case DensityType::BaryonicIsospin:
+      return "net_baryonI3";
+    case DensityType::Pion:
+      return "pion";
+    default:
+      throw std::invalid_argument("Unexpected density type.");
+  }
+}
+
 /*!\Userguide
  * \page output_vtk_lattice_ Thermodynamics vtk output
  * Density on the lattice can be printed out in the VTK format of
  * structured grid. At every output moment a new vtk file is created.
  * The name format is
  * \<density_name\>_\<event_number\>_tstep\<number_of_output_moment\>.vtk,
- * where \<density_name\> is "rhoB" for baryon density, "rhoI3" for baryon
- * isospin density and "rho" for other density types. Files can be opened
- * directly with paraview (paraview.org).
+ * Files can be opened directly with ParaView (http://paraview.org).
  */
 
-void VtkOutput::thermodynamics_output(const std::string &varname,
+void VtkOutput::thermodynamics_output(const ThermodynamicQuantity tq,
+                               const DensityType dens_type,
                                RectangularLattice<DensityOnLattice> &lattice) {
   std::ofstream file;
   char suffix[22];
@@ -148,9 +177,11 @@ void VtkOutput::thermodynamics_output(const std::string &varname,
   const auto dim = lattice.dimensions();
   const auto cs = lattice.cell_sizes();
   const auto orig = lattice.origin();
+  const std::string varname = std::string(to_string(dens_type)) +
+            std::string("_") + std::string(to_string(tq));
 
   file.open(base_path_.string() + std::string("/") + varname +
-                std::string(suffix), std::ios::out);
+            std::string(suffix), std::ios::out);
   file  << "# vtk DataFile Version 2.0\n" << varname << "\n" <<
            "ASCII\n" <<
            "DATASET STRUCTURED_POINTS\n"
@@ -177,33 +208,31 @@ void VtkOutput::thermodynamics_output(const std::string &varname,
  * \page output_vtk_lattice_ Thermodynamics vtk output
  * Additionally to density, energy-momentum tensor \f$T^{\mu\nu} \f$,
  * energy-momentum tensor in Landau rest frame \f$T^{\mu\nu}_L \f$ and
- * velocity of Landau rest frame on the lattice can be printed out
+ * velocity of Landau rest frame \f$v_L\f$ on the lattice can be printed out
  * in the VTK format of structured grid. At every output moment a new vtk file is created.
  * The name format is
- * \<quantity_name\>_\<event_number\>_tstep\<number_of_output_moment\>.vtk,
- * where \<quantity_name\> is "Tmn", "Tmn_Landau" or "v_Landau". Files can be opened
- * directly with paraview (paraview.org).
+ * \<quantity\>_\<event_number\>_tstep\<number_of_output_moment\>.vtk. Files can be opened
+ * directly with ParaView (http://paraview.org).
  */
 
-void VtkOutput::thermodynamics_output(const std::string &varname,
+void VtkOutput::thermodynamics_output(const ThermodynamicQuantity tq,
+                               const DensityType dens_type,
                                RectangularLattice<EnergyMomentumTensor> &Tmn_lattice) {
   std::ofstream file;
   char suffix[22];
   const auto dim = Tmn_lattice.dimensions();
   const auto cs = Tmn_lattice.cell_sizes();
   const auto orig = Tmn_lattice.origin();
+  const std::string varname = std::string(to_string(dens_type)) + std::string("_") +
+                              std::string(to_string(tq));
 
-  if (varname != "Tmn" && varname != "Tmn_Landau" && varname != "v_Landau") {
-    throw std::invalid_argument(
-               "Variable name should be Tmn or Tmn_Landau or v_Landau.");
-  }
   snprintf(suffix, sizeof(suffix), "_%05i_tstep%05i.vtk", current_event_,
-           (varname == "Tmn") ?  vtk_tmn_output_counter_++ :
-           (varname == "Tmn_Landau") ? vtk_tmn_landau_output_counter_++ :
+           (tq == ThermodynamicQuantity::Tmn) ?  vtk_tmn_output_counter_++ :
+           (tq == ThermodynamicQuantity::TmnLandau) ? vtk_tmn_landau_output_counter_++ :
            vtk_v_landau_output_counter_++);
 
   file.open(base_path_.string() + std::string("/") + varname +
-                std::string(suffix), std::ios::out);
+            std::string(suffix), std::ios::out);
   file  << "# vtk DataFile Version 2.0\n" << varname << "\n" <<
            "ASCII\n" <<
            "DATASET STRUCTURED_POINTS\n"
@@ -213,7 +242,7 @@ void VtkOutput::thermodynamics_output(const std::string &varname,
            "POINT_DATA " << Tmn_lattice.size() << "\n";
   file << std::setprecision(3);
   file << std::fixed;
-  if (varname == "Tmn" || varname == "Tmn_Landau" ) {
+  if (tq == ThermodynamicQuantity::Tmn || tq == ThermodynamicQuantity::TmnLandau) {
     for (int i = 0; i < 4; i++) {
       for (int j = i; j < 4; j++) {
         file << "SCALARS " << varname << i << j << " float 1\n" <<
@@ -222,7 +251,7 @@ void VtkOutput::thermodynamics_output(const std::string &varname,
           [&](EnergyMomentumTensor &node, int,  int, int) {
              const FourVector u = node.landau_frame_4velocity();
              const EnergyMomentumTensor Tmn_L = node.boosted(u);
-             file << (varname == "Tmn" ?
+             file << (tq == ThermodynamicQuantity::Tmn ?
                       node[EnergyMomentumTensor::tmn_index(i,j)] :
                       Tmn_L[EnergyMomentumTensor::tmn_index(i,j)]) << "\n";
           });
