@@ -515,20 +515,20 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    * Chooses which density to print.
    *
    * \key Tmn (bool, optional, default = False): \n
-   * Print energy-momentum tensor \f[T^{\mu\nu}(t,x,y,z) \f]. Type of particles
-   * that contribute to \f[T^{\mu\nu}(t,x,y,z) \f] is the same that for Density option.
-   * For example, if Density option is "pion" then \f[T^{\mu\nu}(t,x,y,z) \f] will
+   * Print energy-momentum tensor \f$T^{\mu\nu}(t,x,y,z) \f$. Type of particles
+   * that contribute to \f$T^{\mu\nu}(t,x,y,z) \f$ is the same that for Density option.
+   * For example, if Density option is "pion" then \f$T^{\mu\nu}(t,x,y,z) \f$ will
    * also be computed for pions.
    *
    * \key Tmn_Landau (bool, optional, default = False): \n
    * Print energy-momentum tensor in the Landau rest frame. This tensor is computed
-   * by boosting \f[T^{\mu\nu}(t,x,y,z) \f] to the local rest frame, where
-   * \f[T^{0i} \f] = 0.
+   * by boosting \f$T^{\mu\nu}(t,x,y,z) \f$ to the local rest frame, where
+   * \f$T^{0i} \f$ = 0.
    *
    * \key Landau_Velocity (bool, optional, default = False): \n
    * Print velocity of the Landau rest frame. The velocity is obtained from
-   * the energy-momentum tensor \f[T^{\mu\nu}(t,x,y,z) \f] by solving the
-   * generalized eigenvalue equation \f[(T^{\mu\nu} - \lambda g^{\mu\nu})u_{mu}=0 \f].
+   * the energy-momentum tensor \f$T^{\mu\nu}(t,x,y,z) \f$ by solving the
+   * generalized eigenvalue equation \f$(T^{\mu\nu} - \lambda g^{\mu\nu})u_{\mu}=0 \f$.
    */
 
   // Create lattices
