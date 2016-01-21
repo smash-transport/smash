@@ -109,7 +109,6 @@ class Experiment : public ExperimentBase {
  public:
   void run() override;
 
- private:
   /**
    * Create a new Experiment.
    *
@@ -127,6 +126,7 @@ class Experiment : public ExperimentBase {
    */
   explicit Experiment(Configuration config, const bf::path &output_path);
 
+ private:
   /** Reads particle type information and cross sections information and
    * does the initialization of the system
    *

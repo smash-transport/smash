@@ -103,13 +103,13 @@ ExperimentPtr ExperimentBase::create(Configuration config,
                   << "looking for interactions.";
       throw std::invalid_argument("Can't use box modus without time steps!");
     }
-    return ExperimentPtr(new Experiment<BoxModus>(config, output_path));
+    return make_unique<Experiment<BoxModus>>(config, output_path);
   } else if (modus_chooser.compare("List") == 0) {
-    return ExperimentPtr(new Experiment<ListModus>(config, output_path));
+    return make_unique<Experiment<ListModus>>(config, output_path);
   } else if (modus_chooser.compare("Collider") == 0) {
-    return ExperimentPtr(new Experiment<ColliderModus>(config, output_path));
+    return make_unique<Experiment<ColliderModus>>(config, output_path);
   } else if (modus_chooser.compare("Sphere") == 0) {
-    return ExperimentPtr(new Experiment<SphereModus>(config, output_path));
+    return make_unique<Experiment<SphereModus>>(config, output_path);
   } else {
     throw InvalidModusRequest("Invalid Modus (" + modus_chooser +
                               ") requested from ExperimentBase::create.");
