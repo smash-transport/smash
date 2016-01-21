@@ -128,7 +128,7 @@ void VtkOutput::write(const Particles &particles) {
   }
 }
 
-const char* VtkOutput::to_string(const ThermodynamicQuantity tq) {
+static const char* to_string(const ThermodynamicQuantity tq) {
   switch (tq) {
     case ThermodynamicQuantity::Density:
       return "rho_eckart";
@@ -143,7 +143,7 @@ const char* VtkOutput::to_string(const ThermodynamicQuantity tq) {
   }
 }
 
-const char* VtkOutput::to_string(const DensityType dens_type) {
+static const char* to_string(const DensityType dens_type) {
   switch (dens_type) {
     case DensityType::Hadron:
       return "hadron";

@@ -46,10 +46,6 @@ class VtkOutput : public OutputInterface {
 
  private:
   void write(const Particles &particles);
-  /// Name of thermodynamic quantity to be used in output file names
-  const char* to_string(const ThermodynamicQuantity tq);
-  /// Name of density type (baryon, hadron, pion, etc) to be used in output file names
-  const char* to_string(const DensityType dens_type);
 
   /// filesystem path for output
   const bf::path base_path_;
