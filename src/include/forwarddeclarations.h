@@ -70,6 +70,7 @@ class PdgCode;
 class DecayBranch;
 class CollisionBranch;
 class Tabulation;
+class ExperimentBase;
 struct ExperimentParameters;
 enum class CalculationFrame {
     CenterOfVelocity,
@@ -130,9 +131,10 @@ using ActionPtr = build_unique_ptr_<Action>;
 using ScatterActionPtr = build_unique_ptr_<ScatterAction>;
 using ActionList = build_vector_<ActionPtr>;
 
-using OutputsList = build_vector_<build_unique_ptr_<OutputInterface>>;
-using ParticleList = build_vector_<ParticleData>;
+using OutputPtr = build_unique_ptr_<OutputInterface>;
+using OutputsList = build_vector_<OutputPtr>;
 
+using ParticleList = build_vector_<ParticleData>;
 using ParticleTypeList = build_vector_<ParticleType>;
 using ParticleTypePtrList = build_vector_<ParticleTypePtr>;
 using IsoParticleTypeList = build_vector_<IsoParticleType>;
@@ -148,6 +150,7 @@ using CollisionBranchPtr = build_unique_ptr_<CollisionBranch>;
 using CollisionBranchList = build_vector_<CollisionBranchPtr>;
 
 using TabulationPtr = build_unique_ptr_<Tabulation>;
+using ExperimentPtr = build_unique_ptr_<ExperimentBase>;
 
 namespace bf = boost::filesystem;
 

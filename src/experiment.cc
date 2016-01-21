@@ -61,8 +61,8 @@ static ostream &operator<<(ostream &out,
 namespace Smash {
 
 /* ExperimentBase carries everything that is needed for the evolution */
-std::unique_ptr<ExperimentBase> ExperimentBase::create(Configuration config,
-                                                  const bf::path &output_path) {
+ExperimentPtr ExperimentBase::create(Configuration config,
+                                     const bf::path &output_path) {
   const auto &log = logger<LogArea::Experiment>();
   log.trace() << source_location;
   /*!\Userguide
@@ -95,7 +95,6 @@ std::unique_ptr<ExperimentBase> ExperimentBase::create(Configuration config,
   // remove config maps of unused Modi
   config["Modi"].remove_all_but(modus_chooser);
 
-  typedef std::unique_ptr<ExperimentBase> ExperimentPointer;
   if (modus_chooser.compare("Box") == 0) {
     if (config.has_value({"General", "Time_Step_Mode"}) &&
         config.read({"General", "Time_Step_Mode"}) == TimeStepMode::None) {
@@ -104,14 +103,13 @@ std::unique_ptr<ExperimentBase> ExperimentBase::create(Configuration config,
                   << "looking for interactions.";
       throw std::invalid_argument("Can't use box modus without time steps!");
     }
-    return ExperimentPointer(new Experiment<BoxModus>(config, output_path));
+    return make_unique<Experiment<BoxModus>>(config, output_path);
   } else if (modus_chooser.compare("List") == 0) {
-    return ExperimentPointer(new Experiment<ListModus>(config, output_path));
+    return make_unique<Experiment<ListModus>>(config, output_path);
   } else if (modus_chooser.compare("Collider") == 0) {
-    return ExperimentPointer(new Experiment<ColliderModus>(config,
-                                                           output_path));
+    return make_unique<Experiment<ColliderModus>>(config, output_path);
   } else if (modus_chooser.compare("Sphere") == 0) {
-    return ExperimentPointer(new Experiment<SphereModus>(config, output_path));
+    return make_unique<Experiment<SphereModus>>(config, output_path);
   } else {
     throw InvalidModusRequest("Invalid Modus (" + modus_chooser +
                               ") requested from ExperimentBase::create.");
@@ -272,7 +270,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
 
   // create finders
   if (two_to_one) {
-    action_finders_.emplace_back(new DecayActionsFinder());
+    action_finders_.emplace_back(make_unique<DecayActionsFinder>());
   }
   if (two_to_one || two_to_two) {
     auto scat_finder = make_unique<ScatterActionsFinder>(config, parameters_,
@@ -378,32 +376,31 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
 
   // loop until all OSCAR outputs are created (create_oscar_output will return
   // nullptr then).
-  while (std::unique_ptr<OutputInterface> oscar =
-              create_oscar_output(output_path, output_conf)) {
+  while (OutputPtr oscar = create_oscar_output(output_path, output_conf)) {
     outputs_.emplace_back(std::move(oscar));
   }
   if (static_cast<bool>(output_conf.take({"Vtk", "Enable"}))) {
-    outputs_.emplace_back(new VtkOutput(output_path,
-                                        std::move(output_conf["Vtk"])));
+    outputs_.emplace_back(make_unique<VtkOutput>(output_path,
+                                                 output_conf["Vtk"]));
   } else {
     output_conf.take({"Vtk"});
   }
   if (static_cast<bool>(output_conf.take({"Binary_Collisions", "Enable"}))) {
-    outputs_.emplace_back(new BinaryOutputCollisions(output_path,
-                                  std::move(output_conf["Binary_Collisions"])));
+    outputs_.emplace_back(make_unique<BinaryOutputCollisions>(output_path,
+                                            output_conf["Binary_Collisions"]));
   } else {
     output_conf.take({"Binary_Collisions"});
   }
   if (static_cast<bool>(output_conf.take({"Binary_Particles", "Enable"}))) {
-    outputs_.emplace_back(new BinaryOutputParticles(output_path,
-                                  std::move(output_conf["Binary_Particles"])));
+    outputs_.emplace_back(make_unique<BinaryOutputParticles>(output_path,
+                                              output_conf["Binary_Particles"]));
   } else {
     output_conf.take({"Binary_Particles"});
   }
   if (static_cast<bool>(output_conf.take({"Root", "Enable"}))) {
 #ifdef SMASH_USE_ROOT
-    outputs_.emplace_back(new RootOutput(output_path,
-                                         std::move(output_conf["Root"])));
+    outputs_.emplace_back(make_unique<RootOutput>(output_path,
+                                                  output_conf["Root"]));
 #else
     log.error() << "You requested Root output, but Root support has not been "
                     "compiled in.";
@@ -413,8 +410,8 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     output_conf.take({"Root"});
   }
   if (static_cast<bool>(output_conf.take({"Density", "Enable"}))) {
-    outputs_.emplace_back(new DensityOutput(output_path,
-                                            std::move(output_conf["Density"])));
+    outputs_.emplace_back(make_unique<DensityOutput>(output_path,
+                                                     output_conf["Density"]));
   } else {
     output_conf.take({"Density"});
   }
