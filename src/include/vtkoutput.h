@@ -10,7 +10,6 @@
 #ifndef SRC_INCLUDE_VTKOUTPUT_H_
 #define SRC_INCLUDE_VTKOUTPUT_H_
 
-
 #include <boost/filesystem.hpp>
 
 #include "configuration.h"
@@ -37,12 +36,14 @@ class VtkOutput : public OutputInterface {
                             const DensityParameters &dens_param) override;
 
   /// Prints 3D Lattice in vtk format on a grid
-  void thermodynamics_output(const ThermodynamicQuantity tq, const DensityType dt,
-                        RectangularLattice<DensityOnLattice> &lattice) override;
+  void thermodynamics_output(
+      const ThermodynamicQuantity tq, const DensityType dt,
+      RectangularLattice<DensityOnLattice> &lattice) override;
 
   /// Prints 3D Lattice in vtk format on a grid
-  void thermodynamics_output(const ThermodynamicQuantity tq, const DensityType dt,
-                        RectangularLattice<EnergyMomentumTensor> &lattice) override;
+  void thermodynamics_output(
+      const ThermodynamicQuantity tq, const DensityType dt,
+      RectangularLattice<EnergyMomentumTensor> &lattice) override;
 
  private:
   void write(const Particles &particles);

@@ -544,8 +544,10 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
        if potentials are on. This is because they allow to compute
        potentials faster */
     printout_tmn_ = config.take({"Lattice", "Printout", "Tmn"}, false);
-    printout_tmn_landau_ = config.take({"Lattice", "Printout", "Tmn_Landau"}, false);
-    printout_v_landau_ = config.take({"Lattice", "Printout", "Landau_Velocity"}, false);
+    printout_tmn_landau_ =
+                 config.take({"Lattice", "Printout", "Tmn_Landau"}, false);
+    printout_v_landau_ =
+                 config.take({"Lattice", "Printout", "Landau_Velocity"}, false);
     if (printout_tmn_ || printout_tmn_landau_ || printout_v_landau_) {
       Tmn_ = make_unique<RectangularLattice<EnergyMomentumTensor>>(
                 l, n, origin, periodic, LatticeUpdate::AtOutput);
@@ -1144,7 +1146,7 @@ void Experiment<Modus>::intermediate_output(uint64_t& interactions_total,
         update_density_lattice(jmu_I3_lat_.get(), lat_upd,
                      DensityType::BaryonicIsospin, density_param_, particles_);
         output->thermodynamics_output(ThermodynamicQuantity::Density,
-                                      DensityType::BaryonicIsospin, *jmu_I3_lat_);
+                                   DensityType::BaryonicIsospin, *jmu_I3_lat_);
         break;
       case DensityType::None:
         break;
@@ -1152,7 +1154,7 @@ void Experiment<Modus>::intermediate_output(uint64_t& interactions_total,
         update_density_lattice(jmu_custom_lat_.get(), lat_upd,
                        dens_type_lattice_printout_, density_param_, particles_);
         output->thermodynamics_output(ThermodynamicQuantity::Density,
-                                       dens_type_lattice_printout_, *jmu_custom_lat_);
+                                 dens_type_lattice_printout_, *jmu_custom_lat_);
     }
     if (printout_tmn_ || printout_tmn_landau_ || printout_v_landau_) {
       update_Tmn_lattice(Tmn_.get(), lat_upd, dens_type_lattice_printout_,
