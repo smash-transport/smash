@@ -10,6 +10,7 @@
 #include "actionfinderfactory.h"
 #include "adaptiveparameters.h"
 #include "chrono.h"
+#include "energymomentumtensor.h"
 #include "pauliblocking.h"
 #include "potentials.h"
 #include "quantumnumbers.h"
@@ -291,6 +292,10 @@ class Experiment : public ExperimentBase {
   std::unique_ptr<RectangularLattice<double>> UB_lat_, UI3_lat_;
   /// Lattices for  potential gradients.
   std::unique_ptr<RectangularLattice<ThreeVector>> dUB_dr_lat_, dUI3_dr_lat_;
+
+  /// Lattices of energy-momentum tensors for printout
+  std::unique_ptr<RectangularLattice<EnergyMomentumTensor>> Tmn_;
+  bool printout_tmn_, printout_tmn_landau_, printout_v_landau_;
 
   /**
    * Number of events.

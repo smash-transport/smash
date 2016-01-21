@@ -10,7 +10,6 @@
 #ifndef SRC_INCLUDE_VTKOUTPUT_H_
 #define SRC_INCLUDE_VTKOUTPUT_H_
 
-
 #include <boost/filesystem.hpp>
 
 #include "configuration.h"
@@ -37,8 +36,14 @@ class VtkOutput : public OutputInterface {
                             const DensityParameters &dens_param) override;
 
   /// Prints 3D Lattice in vtk format on a grid
-  void thermodynamics_output(const std::string &varname,
-                        RectangularLattice<DensityOnLattice> &lattice) override;
+  void thermodynamics_output(
+      const ThermodynamicQuantity tq, const DensityType dt,
+      RectangularLattice<DensityOnLattice> &lattice) override;
+
+  /// Prints 3D Lattice in vtk format on a grid
+  void thermodynamics_output(
+      const ThermodynamicQuantity tq, const DensityType dt,
+      RectangularLattice<EnergyMomentumTensor> &lattice) override;
 
  private:
   void write(const Particles &particles);
@@ -51,8 +56,14 @@ class VtkOutput : public OutputInterface {
   /// Number of vtk output in current event
   int vtk_output_counter_ = 0;
 
-  /// Number of thermodynamical vtk output in current event
-  int vtk_thermodynamics_output_counter_ = 0;
+  /// Number of density lattice vtk output in current event
+  int vtk_density_output_counter_ = 0;
+  /// Number of energy-momentum tensor lattice vtk output in current event
+  int vtk_tmn_output_counter_ = 0;
+  /// Number of Landau frame energy-momentum tensor vtk output in current event
+  int vtk_tmn_landau_output_counter_ = 0;
+  /// Number of Landau rest frame velocity vtk output in current event
+  int vtk_v_landau_output_counter_ = 0;
 };
 
 }  // namespace Smash

@@ -12,10 +12,19 @@
 
 #include "forwarddeclarations.h"
 #include "density.h"
+#include "energymomentumtensor.h"
 #include "lattice.h"
 #include "macros.h"
 
 namespace Smash {
+
+/// Represents thermodynamic quantities that can be printed out
+enum class ThermodynamicQuantity : char {
+  Density,
+  Tmn,
+  TmnLandau,
+  LandauVelocity,
+};
 
 /**
  * \ingroup output
@@ -81,11 +90,27 @@ class OutputInterface {
    * \param varname Variable name, used for file name etc.
    * \param lattice Lattice of tabulated values.
    */
-  virtual void thermodynamics_output(const std::string &varname,
+  virtual void thermodynamics_output(const ThermodynamicQuantity tq,
+                            const DensityType dt,
                             RectangularLattice<DensityOnLattice> &lattice) {
-    SMASH_UNUSED(varname);
+    SMASH_UNUSED(tq);
+    SMASH_UNUSED(dt);
     SMASH_UNUSED(lattice);
   }
+
+  /**
+   * Output to write energy-momentum tensor and related quantities from the lattice.
+   * \param varname Variable name: Tmn, Tmn_Landau, v_Landau
+   * \param lattice Lattice of tabulated values.
+   */
+  virtual void thermodynamics_output(const ThermodynamicQuantity tq,
+                            const DensityType dt,
+                            RectangularLattice<EnergyMomentumTensor> &lattice) {
+    SMASH_UNUSED(tq);
+    SMASH_UNUSED(dt);
+    SMASH_UNUSED(lattice);
+  }
+
 };
 
 }  // namespace Smash

@@ -510,6 +510,22 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    *
    * \key Density (string, optional, default = "none"): \n
    * Chooses which density to print.
+   *
+   * \key Tmn (bool, optional, default = False): \n
+   * Print energy-momentum tensor \f$T^{\mu\nu}(t,x,y,z) \f$. Type of particles
+   * that contribute to \f$T^{\mu\nu}(t,x,y,z) \f$ is the same that for Density option.
+   * For example, if Density option is "pion" then \f$T^{\mu\nu}(t,x,y,z) \f$ will
+   * also be computed for pions.
+   *
+   * \key Tmn_Landau (bool, optional, default = False): \n
+   * Print energy-momentum tensor in the Landau rest frame. This tensor is computed
+   * by boosting \f$T^{\mu\nu}(t,x,y,z) \f$ to the local rest frame, where
+   * \f$T^{0i} \f$ = 0.
+   *
+   * \key Landau_Velocity (bool, optional, default = False): \n
+   * Print velocity of the Landau rest frame. The velocity is obtained from
+   * the energy-momentum tensor \f$T^{\mu\nu}(t,x,y,z) \f$ by solving the
+   * generalized eigenvalue equation \f$(T^{\mu\nu} - \lambda g^{\mu\nu})u_{\mu}=0 \f$.
    */
 
   // Create lattices
@@ -524,6 +540,15 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     /* Create baryon and isospin density lattices regardless of config
        if potentials are on. This is because they allow to compute
        potentials faster */
+    printout_tmn_ = config.take({"Lattice", "Printout", "Tmn"}, false);
+    printout_tmn_landau_ =
+                 config.take({"Lattice", "Printout", "Tmn_Landau"}, false);
+    printout_v_landau_ =
+                 config.take({"Lattice", "Printout", "Landau_Velocity"}, false);
+    if (printout_tmn_ || printout_tmn_landau_ || printout_v_landau_) {
+      Tmn_ = make_unique<RectangularLattice<EnergyMomentumTensor>>(
+                l, n, origin, periodic, LatticeUpdate::AtOutput);
+    }
     if (potentials_) {
       if (potentials_->use_skyrme()) {
         jmu_B_lat_ = make_unique<DensityLattice>(l, n, origin, periodic,
@@ -1111,19 +1136,38 @@ void Experiment<Modus>::intermediate_output(uint64_t& interactions_total,
       case DensityType::Baryon:
         update_density_lattice(jmu_B_lat_.get(), lat_upd,
                                DensityType::Baryon, density_param_, particles_);
-        output->thermodynamics_output(std::string("rhoB"), *jmu_B_lat_);
+        output->thermodynamics_output(ThermodynamicQuantity::Density,
+                                      DensityType::Baryon, *jmu_B_lat_);
         break;
       case DensityType::BaryonicIsospin:
         update_density_lattice(jmu_I3_lat_.get(), lat_upd,
                      DensityType::BaryonicIsospin, density_param_, particles_);
-        output->thermodynamics_output(std::string("rhoI3"), *jmu_I3_lat_);
+        output->thermodynamics_output(ThermodynamicQuantity::Density,
+                                   DensityType::BaryonicIsospin, *jmu_I3_lat_);
         break;
       case DensityType::None:
         break;
       default:
         update_density_lattice(jmu_custom_lat_.get(), lat_upd,
                        dens_type_lattice_printout_, density_param_, particles_);
-        output->thermodynamics_output(std::string("rho"), *jmu_custom_lat_);
+        output->thermodynamics_output(ThermodynamicQuantity::Density,
+                                 dens_type_lattice_printout_, *jmu_custom_lat_);
+    }
+    if (printout_tmn_ || printout_tmn_landau_ || printout_v_landau_) {
+      update_Tmn_lattice(Tmn_.get(), lat_upd, dens_type_lattice_printout_,
+                          density_param_, particles_);
+      if (printout_tmn_) {
+        output->thermodynamics_output(ThermodynamicQuantity::Tmn,
+                                      dens_type_lattice_printout_, *Tmn_);
+      }
+      if (printout_tmn_landau_) {
+        output->thermodynamics_output(ThermodynamicQuantity::TmnLandau,
+                                      dens_type_lattice_printout_, *Tmn_);
+      }
+      if (printout_v_landau_) {
+        output->thermodynamics_output(ThermodynamicQuantity::LandauVelocity,
+                                      dens_type_lattice_printout_, *Tmn_);
+      }
     }
   }
 }

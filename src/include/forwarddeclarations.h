@@ -90,18 +90,6 @@ enum class Sampling {
   Custom,
 };
 
-/** Allows to choose which kind of density to calculate.
-*  The baryon density is necessary for the Skyrme potential.
-*  For the symmetry potential one needs to know the isospin density.
-*/
-enum class DensityType {
-  None = 0,
-  Hadron = 1,
-  Baryon = 2,
-  BaryonicIsospin = 3,
-  Pion = 4,
-};
-
 /** The time step mode.
  */
 enum class TimeStepMode : char {

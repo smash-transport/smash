@@ -112,10 +112,14 @@ Lattice:
     Cell_Number: [20, 20, 20]   # Number of cells in x, y, z directions
     Periodic: True             # Periodic continuation: x + i * lx is equivalent to x, same for y, z
     Printout:
-        # ("particle", "baryon", "baryonic isospin", "pion")
-        #Density: "baryon"
-        #LandauEnergyDensity: False, not implemented
-        #LandauVelocity: False, not implemented
+        # ("hadron", "baryon", "baryonic isospin", "pion")
+        # For Tmn, Tmn_Landau, etc the same type is used that for Density, e.g.
+        # if Density is "baryon" then Tmn will be computed for net baryons: anti-baryon
+        # contributions will be taken with negative sign.
+        Density: "none"
+        Tmn:        False         # energy-momentum tensor
+        Tmn_Landau: False         # energy-momentum tensor in Landau rest frame
+        Landau_Velocity: False    # velocity of Landau rest frame
 
 Modi:
     Box:

@@ -15,6 +15,7 @@
 #include <string>
 
 #include "fourvector.h"
+#include "particledata.h"
 
 namespace Smash {
 
@@ -100,6 +101,8 @@ class EnergyMomentumTensor {
     * Input momentum is fourvector with upper index, as all 4-momenta in SMASH
     */
   void add_particle(const FourVector& mom);
+  /// Same, but \f$ p^{\mu}p^{\mu}/p^0\f$ times factor is added.
+  void add_particle(const ParticleData& p, double factor);
 
   /**
    * Returns an iterator starting at the (0,0)th component.

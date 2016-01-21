@@ -140,7 +140,8 @@ std::pair<double, ThreeVector> rho_eckart(const ThreeVector &r,
   return rho_eckart_impl(r, plist, par, dens_type, compute_gradient);
 }
 
-void update_density_lattice(DensityLattice* lat,
+template <typename /*LatticeType*/ T>
+void update_general_lattice(RectangularLattice<T>* lat,
                             const LatticeUpdate update,
                             const DensityType dens_type,
                             const DensityParameters &par,
@@ -149,8 +150,8 @@ void update_density_lattice(DensityLattice* lat,
   if (lat == nullptr || lat->when_update() != update) {
     return;
   }
-  // Add particles to lattice jmus
   lat->reset();
+  const double norm_factor = par.norm_factor_sf();
   for (const auto &part : particles) {
     const float dens_factor = density_factor(part.type(), dens_type);
     if (std::abs(dens_factor) < really_small) {
@@ -167,10 +168,10 @@ void update_density_lattice(DensityLattice* lat,
 
     const ThreeVector pos = part.position().threevec();
     lat->iterate_in_radius(pos, par.r_cut(),
-      [&](DensityOnLattice &node, int ix, int iy, int iz){
+      [&](T &node, int ix, int iy, int iz){
         const ThreeVector r = lat->cell_center(ix, iy, iz);
-        const double sf = unnormalized_smearing_factor(pos - r, p, m_inv,
-                                                       par).first;
+        const double sf = norm_factor * unnormalized_smearing_factor(
+                                              pos - r, p, m_inv, par).first;
         if (sf > really_small) {
           /*std::cout << "Adding particle " << part << " to lattice with"
                     << " smearing factor " << sf <<
@@ -179,11 +180,27 @@ void update_density_lattice(DensityLattice* lat,
         }
       });
   }
-  // Compute density from jmus, take care about smearing factor normalization
-  const double norm_factor = par.norm_factor_sf();
+}
+
+
+void update_density_lattice(RectangularLattice<DensityOnLattice>* lat,
+                            const LatticeUpdate update,
+                            const DensityType dens_type,
+                            const DensityParameters &par,
+                            const Particles &particles) {
+  update_general_lattice(lat, update, dens_type, par, particles);
+  // Compute density from jmus
   for (auto &node : *lat) {
-    node.compute_density(norm_factor);
+    node.compute_density();
   }
+}
+
+void update_Tmn_lattice(RectangularLattice<EnergyMomentumTensor>* lat,
+                            const LatticeUpdate update,
+                            const DensityType dens_type,
+                            const DensityParameters &par,
+                            const Particles &particles) {
+  update_general_lattice(lat, update, dens_type, par, particles);
 }
 
 
