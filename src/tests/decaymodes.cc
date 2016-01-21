@@ -53,7 +53,7 @@ TEST_CATCH(load_decaymodes_duplicate, DecayModes::LoadFailure) {
 }
 
 
-const float tolerance = 1.0e-7;
+const float tolerance = 2.0e-7;
 
 TEST(load_decay_modes) {
   const std::string decays_input(
@@ -76,47 +76,35 @@ TEST(load_decay_modes) {
     const auto &rho_0 = ParticleType::find(0x113).decay_modes();
     VERIFY(!rho_0.is_empty());
     const auto &modelist = rho_0.decay_mode_list();
-    COMPARE(modelist.size(), 3u);
-    COMPARE_ABSOLUTE_ERROR(modelist[0]->weight(), 0.495f, tolerance);
+    COMPARE(modelist.size(), 2u);
+    COMPARE_ABSOLUTE_ERROR(modelist[0]->weight(), 0.99f, tolerance);
     COMPARE(modelist[0]->particle_number(), 2u);
     COMPARE(modelist[0]->particle_types()[0]->pdgcode(),  0x211);
     COMPARE(modelist[0]->particle_types()[1]->pdgcode(), -0x211);
-    COMPARE_ABSOLUTE_ERROR(modelist[1]->weight(), 0.495f, tolerance);
+    COMPARE(modelist[1]->weight(), 0.01f);
     COMPARE(modelist[1]->particle_number(), 2u);
-    COMPARE(modelist[1]->particle_types()[0]->pdgcode(), -0x211);
-    COMPARE(modelist[1]->particle_types()[1]->pdgcode(),  0x211);
-    COMPARE(modelist[2]->weight(), 0.01f);
-    COMPARE(modelist[2]->particle_number(), 2u);
-    COMPARE(modelist[2]->particle_types()[0]->pdgcode(),  0x11);
-    COMPARE(modelist[2]->particle_types()[1]->pdgcode(), -0x11);
+    COMPARE(modelist[1]->particle_types()[0]->pdgcode(),  0x11);
+    COMPARE(modelist[1]->particle_types()[1]->pdgcode(), -0x11);
   }
   {
     const auto &rhoplus = ParticleType::find(0x213).decay_modes();
     VERIFY(!rhoplus.is_empty());
     const auto &modelist = rhoplus.decay_mode_list();
-    COMPARE(modelist.size(), 2u);
-    COMPARE(modelist[0]->weight(), 0.5);
+    COMPARE(modelist.size(), 1u);
+    COMPARE(modelist[0]->weight(), 1.);
     COMPARE(modelist[0]->particle_number(), 2u);
     COMPARE(modelist[0]->particle_types()[0]->pdgcode(), 0x111);
     COMPARE(modelist[0]->particle_types()[1]->pdgcode(), 0x211);
-    COMPARE(modelist[1]->weight(), 0.5);
-    COMPARE(modelist[1]->particle_number(), 2u);
-    COMPARE(modelist[1]->particle_types()[0]->pdgcode(), 0x211);
-    COMPARE(modelist[1]->particle_types()[1]->pdgcode(), 0x111);
   }
   {
     const auto &rhominus = ParticleType::find(-0x213).decay_modes();
     VERIFY(!rhominus.is_empty());
     const auto &modelist = rhominus.decay_mode_list();
-    COMPARE(modelist.size(), 2u);
-    COMPARE(modelist[0]->weight(), 0.5);
+    COMPARE(modelist.size(), 1u);
+    COMPARE(modelist[0]->weight(), 1.);
     COMPARE(modelist[0]->particle_number(), 2u);
     COMPARE(modelist[0]->particle_types()[0]->pdgcode(),  0x111);
     COMPARE(modelist[0]->particle_types()[1]->pdgcode(), -0x211);
-    COMPARE(modelist[1]->weight(), 0.5);
-    COMPARE(modelist[1]->particle_number(), 2u);
-    COMPARE(modelist[1]->particle_types()[0]->pdgcode(), -0x211);
-    COMPARE(modelist[1]->particle_types()[1]->pdgcode(),  0x111);
   }
   {
     const auto &omega = ParticleType::find(0x223).decay_modes();
@@ -198,25 +186,29 @@ TEST(load_decaymodes_3body) {
       "\n"
       "Λ(1690)\n"
       "1.0 1 Σ π π\n"
+      "\n"
+      "ω\n"
+      "1.0 1 π π π\n"
       );
   DecayModes::load_decaymodes(decays_input);
   {
-    const auto &Lambda = ParticleType::find(-0x3124).decay_modes();
-    VERIFY(!Lambda.is_empty());
-    const auto &modelist = Lambda.decay_mode_list();
-    COMPARE(modelist.size(), 3u);
-    for (int i = 0; i < 3; i++) {
-      COMPARE_ABSOLUTE_ERROR(modelist[i]->weight(), 1.f/3.f, tolerance);
-      COMPARE(modelist[i]->particle_types()[0]->pdgcode(), -0x3122);
+    const auto &antiLambda = ParticleType::find(-0x3124).decay_modes();
+    VERIFY(!antiLambda.is_empty());
+    const auto &modelist = antiLambda.decay_mode_list();
+    COMPARE(modelist.size(), 2u);
+    COMPARE_ABSOLUTE_ERROR(modelist[0]->weight(), 1.f/3.f, tolerance);
+    COMPARE_ABSOLUTE_ERROR(modelist[1]->weight(), 2.f/3.f, tolerance);
+    for (int i = 0; i < 2; i++) {
+      COMPARE(modelist[i]->particle_types()[2]->pdgcode(), -0x3122);
     }
   }
   {
-    const auto &Lambda = ParticleType::find(-0x13124).decay_modes();
-    VERIFY(!Lambda.is_empty());
-    const auto &modelist = Lambda.decay_mode_list();
-    COMPARE(modelist.size(), 6u);
-    for (int i = 0; i < 6; i++) {
-      COMPARE_ABSOLUTE_ERROR(modelist[i]->weight(), 1.f/6.f, tolerance);
+    const auto &antiLambda = ParticleType::find(-0x13124).decay_modes();
+    VERIFY(!antiLambda.is_empty());
+    const auto &modelist = antiLambda.decay_mode_list();
+    COMPARE(modelist.size(), 3u);
+    for (int i = 0; i < 3; i++) {
+      COMPARE_ABSOLUTE_ERROR(modelist[i]->weight(), 1.f/3.f, tolerance);
       int charge = 0;
       // 3 neutral particles are forbidden by isospin.
       bool all_charges_are_zero = true;
@@ -227,6 +219,14 @@ TEST(load_decaymodes_3body) {
       VERIFY(!all_charges_are_zero);
       COMPARE(charge, 0);
     }
+  }
+  {
+    const auto &omega = ParticleType::find(0x223).decay_modes();
+    VERIFY(!omega.is_empty());
+    const auto &modelist = omega.decay_mode_list();
+    COMPARE(modelist.size(), 1u);
+    COMPARE_ABSOLUTE_ERROR(modelist[0]->weight(), 1.f, tolerance);
+    VERIFY(modelist[0]->particle_types()[0]->pdgcode().is_pion());
   }
 }
 

@@ -29,10 +29,9 @@ class DecayType {
    */
   virtual ~DecayType() = default;
   // Get the number of particles in the final state
-  virtual int particle_number() const = 0;
-  // Check if the final state consists of the given two particles.
-  virtual bool has_particles(const ParticleType &t_a,
-                             const ParticleType &t_b) const = 0;
+  virtual unsigned int particle_number() const = 0;
+  // Check if the final state consists of the given particle list
+  virtual bool has_particles(ParticleTypePtrList list) const = 0;
   /// Return the particle types associated with this branch.
   const ParticleTypePtrList &particle_types() const {
     return particle_types_;
@@ -76,9 +75,8 @@ class DecayType {
 class TwoBodyDecay : public DecayType {
  public:
   TwoBodyDecay(ParticleTypePtrList part_types, int l);
-  int particle_number() const override;
-  bool has_particles(const ParticleType &t_a,
-                     const ParticleType &t_b) const override;
+  unsigned int particle_number() const override;
+  bool has_particles(ParticleTypePtrList list) const override;
 
  protected:
   /* This is a virtual helper method which is used to write the width as
@@ -197,8 +195,8 @@ class TwoBodyDecayDilepton : public TwoBodyDecayStable {
 class ThreeBodyDecay : public DecayType {
  public:
   ThreeBodyDecay(ParticleTypePtrList part_types, int l);
-  int particle_number() const override;
-  bool has_particles(const ParticleType &, const ParticleType &) const override;
+  unsigned int particle_number() const override;
+  bool has_particles(ParticleTypePtrList list) const override;
   float width(float m0, float G0, float m) const override;
   float in_width(float m0, float G0, float m,
                  float m1, float m2) const override;

@@ -57,6 +57,7 @@ class Clock;
 class Configuration;
 class CrossSections;
 class DecayModes;
+class DecayType;
 class FourVector;
 class ThreeVector;
 class ModusDefault;
@@ -72,6 +73,7 @@ class CollisionBranch;
 class Tabulation;
 class ExperimentBase;
 struct ExperimentParameters;
+
 enum class CalculationFrame {
     CenterOfVelocity,
     CenterOfMass,
@@ -151,6 +153,7 @@ using CollisionBranchList = build_vector_<CollisionBranchPtr>;
 
 using TabulationPtr = build_unique_ptr_<Tabulation>;
 using ExperimentPtr = build_unique_ptr_<ExperimentBase>;
+using DecayTypePtr = build_unique_ptr_<DecayType>;
 
 namespace bf = boost::filesystem;
 
