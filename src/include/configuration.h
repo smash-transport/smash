@@ -17,6 +17,7 @@
 #include <string>
 #include <vector>
 
+#include "density.h"
 #include "forwarddeclarations.h"
 
 namespace YAML {

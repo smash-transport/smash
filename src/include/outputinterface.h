@@ -18,6 +18,14 @@
 
 namespace Smash {
 
+/// Represents thermodynamic quantities that can be printed out
+enum class ThermodynamicQuantity : char {
+  Density,
+  Tmn,
+  TmnLandau,
+  LandauVelocity,
+};
+
 /**
  * \ingroup output
  *
