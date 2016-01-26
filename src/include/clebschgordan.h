@@ -52,8 +52,16 @@ float isospin_clebsch_gordan_sqr_3to1(const ParticleType &p_a,
 float isospin_clebsch_gordan_sqr_2to2(const ParticleType &t_a,
                                       const ParticleType &t_b,
                                       const ParticleType &t_c,
-                                      const ParticleType &t_d);
+                                      const ParticleType &t_d, const int I);
 
+/** Get the allowed range of total isospin for a collision A + B. Returns a
+ * vector of allowed values, where each entry represents twice the isospin. */
+std::vector<int> I_tot_range(const ParticleType &t_a, const ParticleType &t_b);
+/** Get the allowed range of total isospin for a collision A + B <-> C + D.
+ * Returns a vector of allowed values, where each entry represents twice the
+ * isospin. */
+std::vector<int> I_tot_range(const ParticleType &t_a, const ParticleType &t_b,
+                             const ParticleType &t_c, const ParticleType &t_d);
 
 }  // namespace Smash
 

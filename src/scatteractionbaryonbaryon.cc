@@ -1,3 +1,4 @@
+
 /*
  *
  *    Copyright (c) 2015
@@ -66,41 +67,43 @@ CollisionBranchList ScatterActionBaryonBaryon::bar_bar_to_nuc_nuc(
           != nuc_a->charge() + nuc_b->charge()) {
         continue;
       }
+      // loop over total isospin
+      for (const int twoI : I_tot_range(*nuc_a, *nuc_b)) {
+        const float isospin_factor = isospin_clebsch_gordan_sqr_2to2(type_a,
+                                                  type_b, *nuc_a, *nuc_b, twoI);
+        /* If Clebsch-Gordan coefficient is zero, don't bother with the rest */
+        if (std::abs(isospin_factor) < really_small) {
+          continue;
+        }
 
-      const float isospin_factor = isospin_clebsch_gordan_sqr_2to2(type_a,
-                                                        type_b, *nuc_a, *nuc_b);
-      /* If Clebsch-Gordan coefficient is zero, don't bother with the rest */
-      if (std::abs(isospin_factor) < really_small) {
-        continue;
-      }
+        /* Calculate matrix element for inverse process. */
+        const float matrix_element =
+            nn_to_resonance_matrix_element(sqrts, type_a, type_b, twoI);
+        if (matrix_element <= 0.) {
+          continue;
+        }
 
-      /* Calculate matrix element for inverse process. */
-      const float matrix_element =
-          nn_to_resonance_matrix_element(sqrts, type_a, type_b);
-      if (matrix_element <= 0.) {
-        continue;
-      }
-
-      /** Cross section for 2->2 resonance absorption, obtained via detailed
-       * balance from the inverse reaction.
-       * See eqs. (B.6), (B.9) and (181) in \iref{Buss:2011mx}.
-       * There are factors for spin, isospin and symmetry involved. */
-      const float spin_factor = 4. / ((type_a.spin()+1)*(type_b.spin()+1));
-      const int sym_fac_in =
+        /** Cross section for 2->2 resonance absorption, obtained via detailed
+        * balance from the inverse reaction.
+        * See eqs. (B.6), (B.9) and (181) in \iref{Buss:2011mx}.
+        * There are factors for spin, isospin and symmetry involved. */
+        const float spin_factor = 4. / ((type_a.spin()+1)*(type_b.spin()+1));
+        const int sym_fac_in =
                     (type_a.iso_multiplet() == type_b.iso_multiplet()) ? 2 : 1;
-      const int sym_fac_out =
+        const int sym_fac_out =
                     (nuc_a->iso_multiplet() == nuc_b->iso_multiplet()) ? 2 : 1;
-      const float xsection = isospin_factor * spin_factor
-                             * sym_fac_in / sym_fac_out
-                             * p_cm_final * matrix_element / (s*cm_momentum());
+        const float xsection = isospin_factor * spin_factor
+                              * sym_fac_in / sym_fac_out
+                              * p_cm_final * matrix_element / (s*cm_momentum());
 
-      if (xsection > really_small) {
-        process_list.push_back(make_unique<CollisionBranch>
-                               (*nuc_a, *nuc_b, xsection,
-                                ProcessType::TwoToTwo));
-        const auto &log = logger<LogArea::ScatterAction>();
-        log.debug("2->2 absorption with original particles: ",
-                  type_a, type_b);
+        if (xsection > really_small) {
+          process_list.push_back(make_unique<CollisionBranch>
+                                (*nuc_a, *nuc_b, xsection,
+                                  ProcessType::TwoToTwo));
+          const auto &log = logger<LogArea::ScatterAction>();
+          log.debug("2->2 absorption with original particles: ",
+                    type_a, type_b);
+        }
       }
     }
   }
@@ -109,43 +112,52 @@ CollisionBranchList ScatterActionBaryonBaryon::bar_bar_to_nuc_nuc(
 
 
 float ScatterActionBaryonBaryon::nn_to_resonance_matrix_element(double sqrts,
-      const ParticleType &type_a, const ParticleType &type_b) {
+      const ParticleType &type_a, const ParticleType &type_b, const int twoI) {
   const float spin_factor = (type_a.spin()+1) * (type_b.spin()+1);
   const float m_plus = type_a.mass() + type_b.mass();
   const float m_minus = type_a.mass() - type_b.mass();
+  const float msqr = m_plus * m_plus + m_minus * m_minus;
 
+  /** NN → NΔ: fit sqrt(s)-dependence to OBE model [\iref{Dmitriev:1986st}] */
   if ((type_a.is_Delta() && type_b.is_nucleon()) ||
       (type_b.is_Delta() && type_a.is_nucleon())) {
-    /** \f$ NN \rightarrow N\Delta \f$:
-      * fit sqrt(s)-dependence to OBE model [\iref{Dmitriev:1986st}] */
     return 68. * spin_factor / std::pow(sqrts - 1.104, 1.951);
+  /** All other processes use a constant matrix element,
+   *  cf. \iref{Bass:1998ca}, equ. (3.35). */
   } else if ((type_a.is_Nstar() && type_b.is_nucleon()) ||
              (type_b.is_Nstar() && type_a.is_nucleon())) {
-    /** \f$ NN \rightarrow NN^* \f$:
-      * constant matrix element, cf. \iref{Bass:1998ca}, equ. (3.35). */
-    return 7. * spin_factor / (m_plus * m_plus + m_minus * m_minus);
+    // NN → NN*
+    if (twoI == 2) {
+      return 7. * spin_factor / msqr;
+    } else if (twoI == 0) {
+      return 14. * spin_factor / msqr;
+    }
   } else if ((type_a.is_Deltastar() && type_b.is_nucleon()) ||
              (type_b.is_Deltastar() && type_a.is_nucleon())) {
-    /** \f$ NN \rightarrow N\Delta^* \f$:
-      * constant matrix element, cf. \iref{Bass:1998ca}, equ. (3.35). */
-    return 15. * spin_factor / (m_plus * m_plus + m_minus * m_minus);
+    // NN → NΔ*
+    return 15. * spin_factor / msqr;
   } else if (type_a.is_Delta() && type_b.is_Delta()) {
-    /** \f$ NN \rightarrow \Delta\Delta \f$:
-      * constant matrix element, cf. \iref{Bass:1998ca}, equ. (3.35). */
-    return 45. * spin_factor / (m_plus * m_plus + m_minus * m_minus);
+    // NN → ΔΔ
+    if (twoI == 2) {
+      return 45. * spin_factor / msqr;
+    } else if (twoI == 0) {
+      return 120. * spin_factor / msqr;
+    }
   } else if ((type_a.is_Nstar() && type_b.is_Delta()) ||
              (type_b.is_Nstar() && type_a.is_Delta())) {
-    /** \f$ NN \rightarrow \Delta N^* \f$:
-      * constant matrix element, cf. \iref{Bass:1998ca}, equ. (3.35). */
-    return 7. * spin_factor / (m_plus * m_plus + m_minus * m_minus);
+    // NN → ΔN*
+    return 7. * spin_factor / msqr;
   } else if ((type_a.is_Deltastar() && type_b.is_Delta()) ||
              (type_b.is_Deltastar() && type_a.is_Delta())) {
-    /** \f$ NN \rightarrow \Delta\Delta^* \f$:
-      * constant matrix element, cf. \iref{Bass:1998ca}, equ. (3.35). */
-    return 15. * spin_factor / (m_plus * m_plus + m_minus * m_minus);
-  } else {
-    return 0.0;
+    // NN → ΔΔ*
+    if (twoI == 2) {
+      return 15. * spin_factor / msqr;
+    } else if (twoI == 0) {
+      return 25. * spin_factor / msqr;
+    }
   }
+  // all cases not listed: zero!
+  return 0.;
 }
 
 
