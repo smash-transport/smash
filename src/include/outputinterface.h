@@ -87,7 +87,8 @@ class OutputInterface {
 
   /**
    * Output to write thermodynamics from the lattice.
-   * \param varname Variable name, used for file name etc.
+   * \param tq Thermodynamic quantity to be written, used for file name etc.
+   * \param dt Type of density, i.e. which particles to take into account.
    * \param lattice Lattice of tabulated values.
    */
   virtual void thermodynamics_output(const ThermodynamicQuantity tq,
@@ -100,7 +101,8 @@ class OutputInterface {
 
   /**
    * Output to write energy-momentum tensor and related quantities from the lattice.
-   * \param varname Variable name: Tmn, Tmn_Landau, v_Landau
+   * \param tq Thermodynamic quantity to be written: Tmn, Tmn_Landau, v_Landau
+   * \param dt Type of density, i.e. which particles to take into account.
    * \param lattice Lattice of tabulated values.
    */
   virtual void thermodynamics_output(const ThermodynamicQuantity tq,
@@ -110,7 +112,6 @@ class OutputInterface {
     SMASH_UNUSED(dt);
     SMASH_UNUSED(lattice);
   }
-
 };
 
 }  // namespace Smash
