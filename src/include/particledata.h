@@ -25,8 +25,8 @@ struct HistoryData {
   uint32_t id_process = 0;
   // type of the last action
   ProcessType process_type = ProcessType::None;
-  // PdgCode of the mother particle (in case of a decay)
-  PdgCode p1;
+  // PdgCodes of the partent particles
+  PdgCode p1 = 0x0, p2 = 0x0;
 };
 
 
@@ -79,15 +79,9 @@ class ParticleData {
   uint32_t id_process() const { return history_.id_process; }
   /// get history information
   HistoryData get_history() const { return history_; }
-  /// store history information
-  void set_history(uint32_t pid, ProcessType pt, PdgCode pdg1 = 0x0) {
-    history_.id_process = pid;
-    history_.process_type = pt;
-    if (pt == ProcessType::Decay) {
-      // the particle info is currently only used for decays
-      history_.p1 = pdg1;
-    }
-  }
+  /** Store history information, i.e. the type of process and possibly the
+   * PdgCodes of the parent particles (\p plist). */
+  void set_history(uint32_t pid, ProcessType pt, const ParticleList& plist);
 
   /// return the particle's 4-momentum
   const FourVector &momentum() const { return momentum_; }
