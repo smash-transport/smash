@@ -84,6 +84,8 @@ void ScatterAction::generate_final_state() {
       new_particle.set_4position(middle_point);
     }
     new_particle.boost_momentum(-beta_cm());
+    /* Formation time needs to be adjusted to computational frame */
+    new_particle.set_formation_time(new_particle.formation_time()*gamma_cm());
   }
 }
 
@@ -140,6 +142,9 @@ ThreeVector ScatterAction::beta_cm() const {
           incoming_particles_[1].momentum()).velocity();
 }
 
+double ScatterAction::gamma_cm() const {
+  return (1./sqrt(1-beta_cm().sqr()));
+}
 
 double ScatterAction::mandelstam_s() const {
   return (incoming_particles_[0].momentum() +

@@ -94,6 +94,12 @@ namespace Smash {
             momentum.set_x2(event[i].py());
             momentum.set_x3(event[i].pz());
             new_particle_.set_4momentum(momentum);
+            /* The hadrons are not immediately formed, currently a formation
+             *  time of 1 fm is universally applied and cross section is reduced 
+             * to zero */ 
+            /** TODO: assign proper cross-section to valence quarks */
+            new_particle_.set_formation_time(1.0); 
+            new_particle_.set_cross_section_scaling_factor(0.0);
             log.debug("4-momentum from Pythia: ", momentum);
             outgoing_particles_.push_back(new_particle_);
           }

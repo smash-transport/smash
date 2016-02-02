@@ -170,6 +170,8 @@ class ScatterAction : public Action {
   double cm_momentum_squared() const;
   /// determine the velocity of the center-of-mass frame in the lab
   ThreeVector beta_cm() const;
+  /// determine the corresponding gamma factor
+  double gamma_cm() const;
 
   /** Perform an elastic two-body scattering, i.e. just exchange momentum. */
   void elastic_scattering();
