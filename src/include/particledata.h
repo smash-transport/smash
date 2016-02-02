@@ -25,7 +25,7 @@ struct HistoryData {
   uint32_t id_process = 0;
   // type of the last action
   ProcessType process_type = ProcessType::None;
-  // PdgCodes of the partent particles
+  // PdgCodes of the parent particles
   PdgCode p1 = 0x0, p2 = 0x0;
 };
 
