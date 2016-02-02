@@ -60,11 +60,11 @@ namespace Smash {
       std::stringstream buffer2;
       buffer2 << "Beams:idA = " << incoming_particles_[0].type().pdgcode();
       pythia.readString(buffer2.str());
-      log.info("First particle in string excitation: ",
+      log.debug("First particle in string excitation: ",
                incoming_particles_[0].type().pdgcode());
       std::stringstream buffer3;
       buffer3 << "Beams:idB = " << incoming_particles_[1].type().pdgcode();
-      log.info("Second particle in string excitation: ",
+      log.debug("Second particle in string excitation: ",
                incoming_particles_[1].type().pdgcode());
       pythia.readString(buffer3.str());
       /* Calculate the center-of-mass energy of this collision */
@@ -73,7 +73,7 @@ namespace Smash {
       std::stringstream buffer4;
       buffer4 << "Beams:eCM = " << sqrts;
       pythia.readString(buffer4.str());
-      log.info("Pythia call with eCM = ", buffer4.str());
+      log.debug("Pythia call with eCM = ", buffer4.str());
       /* Initialize. */
       pythia.init();
       /* Short notation for Pythia event */
