@@ -48,7 +48,7 @@ float isospin_clebsch_gordan_sqr_3to1(const ParticleType &p_a,
 /**
  * Calculate the squared isospin Clebsch-Gordan coefficient for a
  * 2-to-2 reaction A + B -> C + D. If a total isospin value I is given
- * (doubled in oder to be integer), then only contributions with that total
+ * (doubled in order to be integer), then only contributions with that total
  * isospin will be counted.
  */
 float isospin_clebsch_gordan_sqr_2to2(const ParticleType &t_a,
