@@ -329,18 +329,6 @@ float ColliderModus::initial_conditions(Particles *particles,
         "the center of velocity reference frame.");
   }
 
-  // Shift the nuclei into starting positions. Keep the pair separated
-  // in z by some small distance and shift in x by the impact parameter.
-  // (Projectile is chosen to hit at positive x.)
-  // After shifting, set the time component of the particles to
-  // -initial_z_displacement_/average_velocity.
-  float avg_velocity = std::sqrt(v_a * v_a + v_b * v_b);
-  float simulation_time = -initial_z_displacement_ / avg_velocity;
-  projectile_->shift(true, -initial_z_displacement_, +impact_ / 2.0,
-                     simulation_time);
-  target_->shift(false, initial_z_displacement_, -impact_ / 2.0,
-                 simulation_time);
-
   // Generate Fermi momenta if necessary
   if (fermi_motion_) {
     log.info() << "Fermi motion is ON";
@@ -351,6 +339,23 @@ float ColliderModus::initial_conditions(Particles *particles,
   // Boost the nuclei to the appropriate velocity.
   projectile_->boost(v_a);
   target_->boost(v_b);
+
+  // Shift the nuclei into starting positions. Contracted spheres with
+  // nuclear radii should touch exactly at t=0. Modus starts at negative
+  // time corresponding to additinal initial displacement.
+  float d_a = projectile_->get_diffusiveness();
+  float d_b = target_->get_diffusiveness();
+  d_a = (d_a < 0.0) ? 0.0 : d_a;
+  d_b = (d_b < 0.0) ? 0.0 : d_b;
+  float r_a = projectile_->get_nuclear_radius();
+  float r_b = target_->get_nuclear_radius();
+  float dz = initial_z_displacement_;
+
+  float simulation_time = -dz / std::abs(v_a);
+  float proj_z = -dz                     - std::sqrt(1.0-v_a*v_a) * (r_a+d_a);
+  float targ_z = +dz * std::abs(v_b/v_a) + std::sqrt(1.0-v_b*v_b) * (r_b+d_b);
+  projectile_->shift(proj_z, +impact_ / 2.0, simulation_time);
+  target_->    shift(targ_z, -impact_ / 2.0, simulation_time);
 
   // Put the particles in the nuclei into code particles.
   projectile_->copy_particles(particles);

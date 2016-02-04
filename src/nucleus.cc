@@ -261,10 +261,6 @@ void Nucleus::arrange_nucleons() {
 
     // Set the position of the nucleon.
     i->set_4position(FourVector(0.0, pos));
-
-    // Update the radial bound of the nucleus.
-    double r_tmp = pos.abs();
-    r_max_ = (r_tmp > r_max_) ? r_tmp : r_max_;
   }
 
   // Recenter and rotate
@@ -397,8 +393,6 @@ void Nucleus::boost(double beta_scalar) {
     // *do* want to transform the zero-component (i.e., the energy).
     i->boost_momentum(beta);
   }
-  // we also need to update r_max_:
-  r_max_ *= one_over_gamma;
 }
 
 void Nucleus::fill_from_list(const std::map<PdgCode, int>& particle_list,
@@ -415,14 +409,8 @@ void Nucleus::fill_from_list(const std::map<PdgCode, int>& particle_list,
   }
 }
 
-void Nucleus::shift(bool is_projectile, double initial_z_displacement,
+void Nucleus::shift(double z_offset,
                     double x_offset, float simulation_time) {
-  // The amount to shift the z coordinates. If is_projectile, we shift
-  // back by -r_max_, else we shift forward r_max_.
-  double z_offset = is_projectile ? -r_max_ : r_max_;
-  // In the current system, the nuclei would touch. We want them to be
-  // a little apart, so we need a slightly bigger offset.
-  z_offset += initial_z_displacement;
   // Move the nucleus in z and x directions, and set the time.
   for (auto i = begin(); i != end(); i++) {
     FourVector this_position = i->position();
