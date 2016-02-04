@@ -351,9 +351,9 @@ float ColliderModus::initial_conditions(Particles *particles,
 
   const float simulation_time = -dz / std::abs(v_a);
   const float proj_z = -dz -
-                        std::sqrt(1.0-v_a*v_a) * (r_a+d_a);
+                        std::sqrt(1.0 - v_a*v_a) * (r_a + d_a);
   const float targ_z = +dz * std::abs(v_b/v_a) +
-                        std::sqrt(1.0-v_b*v_b) * (r_b+d_b);
+                        std::sqrt(1.0 - v_b*v_b) * (r_b + d_b);
   projectile_->shift(proj_z, +impact_ / 2.0, simulation_time);
   target_->    shift(targ_z, -impact_ / 2.0, simulation_time);
 
