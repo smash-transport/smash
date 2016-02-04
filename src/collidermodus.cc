@@ -343,17 +343,17 @@ float ColliderModus::initial_conditions(Particles *particles,
   // Shift the nuclei into starting positions. Contracted spheres with
   // nuclear radii should touch exactly at t=0. Modus starts at negative
   // time corresponding to additinal initial displacement.
-  float d_a = projectile_->get_diffusiveness();
-  float d_b = target_->get_diffusiveness();
-  d_a = (d_a < 0.0) ? 0.0 : d_a;
-  d_b = (d_b < 0.0) ? 0.0 : d_b;
-  float r_a = projectile_->get_nuclear_radius();
-  float r_b = target_->get_nuclear_radius();
-  float dz = initial_z_displacement_;
+  const float d_a = std::max(0.0f, projectile_->get_diffusiveness());
+  const float d_b = std::max(0.0f, target_->get_diffusiveness());
+  const float r_a = projectile_->get_nuclear_radius();
+  const float r_b = target_->get_nuclear_radius();
+  const float dz = initial_z_displacement_;
 
-  float simulation_time = -dz / std::abs(v_a);
-  float proj_z = -dz                     - std::sqrt(1.0-v_a*v_a) * (r_a+d_a);
-  float targ_z = +dz * std::abs(v_b/v_a) + std::sqrt(1.0-v_b*v_b) * (r_b+d_b);
+  const float simulation_time = -dz / std::abs(v_a);
+  const float proj_z = -dz -
+                        std::sqrt(1.0-v_a*v_a) * (r_a+d_a);
+  const float targ_z = +dz * std::abs(v_b/v_a) +
+                        std::sqrt(1.0-v_b*v_b) * (r_b+d_b);
   projectile_->shift(proj_z, +impact_ / 2.0, simulation_time);
   target_->    shift(targ_z, -impact_ / 2.0, simulation_time);
 

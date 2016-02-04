@@ -114,58 +114,49 @@ TEST(center_hard_sphere) {
 // maximum z value of all particles. Using many test particles and a
 // hard sphere, I try to make this less random.
 TEST(shift_zero) {
-  constexpr int N_TEST = 1000;
+  constexpr int N_TEST = 1;
   Nucleus lead(list, N_TEST);
-  lead.set_diffusiveness(0.0);
   lead.set_nuclear_radius(lead.default_nuclear_radius());
   lead.arrange_nucleons();
   FourVector precenter = lead.center();
   // shift with zero displacement: shouldn't change x and y, but note
   // that the z-parameter is the distance between the outer edges of the
   // nucleus!
-  lead.shift(true, 0, 0.0, 0.0);
+  lead.shift(0, 0.0, 0.0);
   FourVector postcenter = lead.center();
-  UnitTest::setFuzzyness<double>(10);
+  UnitTest::setFuzzyness<double>(30);
   FUZZY_COMPARE(postcenter.x1(), precenter.x1());
   FUZZY_COMPARE(postcenter.x2(), precenter.x2());
-  COMPARE_RELATIVE_ERROR(postcenter.x3(), precenter.x3()-lead.default_nuclear_radius(),
-                         0.2);
+  FUZZY_COMPARE(postcenter.x3(), precenter.x3());
 }
 
 TEST(shift_x) {
-  constexpr int N_TEST = 1000;
+  constexpr int N_TEST = 1;
   Nucleus lead(list, N_TEST);
-  lead.set_diffusiveness(0.0);
   lead.set_nuclear_radius(lead.default_nuclear_radius());
   lead.arrange_nucleons();
   FourVector precenter = lead.center();
   // shift only in x.
-  lead.shift(true, 0, 4.0, 0.0);
+  lead.shift(0, 4.0, 0.0);
   FourVector postcenter = lead.center();
-  UnitTest::setFuzzyness<double>(150);
+  UnitTest::setFuzzyness<double>(30);
   FUZZY_COMPARE(postcenter.x1(), precenter.x1()+4.0);
   FUZZY_COMPARE(postcenter.x2(), precenter.x2());
-  COMPARE_RELATIVE_ERROR(postcenter.x3(), precenter.x3()-lead.default_nuclear_radius(),
-                        0.2);
+  FUZZY_COMPARE(postcenter.x3(), precenter.x3());
 }
 
 TEST(shift_z) {
-  constexpr int N_TEST = 1000;
+  constexpr int N_TEST = 1;
   Nucleus lead(list, N_TEST);
-  lead.set_diffusiveness(0.0);
   lead.set_nuclear_radius(lead.default_nuclear_radius());
   lead.arrange_nucleons();
   FourVector precenter = lead.center();
-  // shift in z. Here, we cannot exactly predict what happens, because
-  // the shift depends on the outermost particle. That's why we use many
-  // test particles and a hard sphere.
-  lead.shift(true, 4.0, 0.0, 0.0);
+  lead.shift(4.0, 0.0, 0.0);
   FourVector postcenter = lead.center();
-  UnitTest::setFuzzyness<double>(10);
+  UnitTest::setFuzzyness<double>(30);
   FUZZY_COMPARE(postcenter.x1(), precenter.x1());
   FUZZY_COMPARE(postcenter.x2(), precenter.x2());
-  COMPARE_RELATIVE_ERROR(postcenter.x3(),
-      precenter.x3() - lead.default_nuclear_radius() + 4.0, 0.2);
+  FUZZY_COMPARE(postcenter.x3(), precenter.x3() + 4.0);
 }
 
 // test the woods-saxon distribution at various discrete points:
