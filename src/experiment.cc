@@ -409,11 +409,11 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
   } else {
     output_conf.take({"Root"});
   }
-  if (static_cast<bool>(output_conf.take({"Density", "Enable"}))) {
+  if (static_cast<bool>(output_conf.take({"Thermodynamics", "Enable"}))) {
     outputs_.emplace_back(make_unique<DensityOutput>(output_path,
-                                                     output_conf["Density"]));
+                                               output_conf["Thermodynamics"]));
   } else {
-    output_conf.take({"Density"});
+    output_conf.take({"Thermodynamics"});
   }
 
   /*!\Userguide
@@ -536,19 +536,21 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     const std::array<float, 3> origin = config.take({"Lattice", "Origin"});
     const bool periodic = config.take({"Lattice", "Periodic"});
     dens_type_lattice_printout_ = config.take(
-                  {"Lattice", "Printout", "Density"}, DensityType::None);
-    /* Create baryon and isospin density lattices regardless of config
-       if potentials are on. This is because they allow to compute
-       potentials faster */
-    printout_tmn_ = config.take({"Lattice", "Printout", "Tmn"}, false);
+            {"Lattice", "Printout", "Type"}, DensityType::None);
+    const std::set<ThermodynamicQuantity> td_to_print = config.take(
+            {"Lattice", "Printout", "Quantities"});
+    printout_tmn_ = (td_to_print.count(ThermodynamicQuantity::Tmn) > 0);
     printout_tmn_landau_ =
-                 config.take({"Lattice", "Printout", "Tmn_Landau"}, false);
+           (td_to_print.count(ThermodynamicQuantity::TmnLandau) > 0);
     printout_v_landau_ =
-                 config.take({"Lattice", "Printout", "Landau_Velocity"}, false);
+           (td_to_print.count(ThermodynamicQuantity::LandauVelocity) > 0);
     if (printout_tmn_ || printout_tmn_landau_ || printout_v_landau_) {
       Tmn_ = make_unique<RectangularLattice<EnergyMomentumTensor>>(
                 l, n, origin, periodic, LatticeUpdate::AtOutput);
     }
+    /* Create baryon and isospin density lattices regardless of config
+       if potentials are on. This is because they allow to compute
+       potentials faster */
     if (potentials_) {
       if (potentials_->use_skyrme()) {
         jmu_B_lat_ = make_unique<DensityLattice>(l, n, origin, periodic,
@@ -1136,13 +1138,13 @@ void Experiment<Modus>::intermediate_output(uint64_t& interactions_total,
       case DensityType::Baryon:
         update_density_lattice(jmu_B_lat_.get(), lat_upd,
                                DensityType::Baryon, density_param_, particles_);
-        output->thermodynamics_output(ThermodynamicQuantity::Density,
+        output->thermodynamics_output(ThermodynamicQuantity::EckartDensity,
                                       DensityType::Baryon, *jmu_B_lat_);
         break;
       case DensityType::BaryonicIsospin:
         update_density_lattice(jmu_I3_lat_.get(), lat_upd,
                      DensityType::BaryonicIsospin, density_param_, particles_);
-        output->thermodynamics_output(ThermodynamicQuantity::Density,
+        output->thermodynamics_output(ThermodynamicQuantity::EckartDensity,
                                    DensityType::BaryonicIsospin, *jmu_I3_lat_);
         break;
       case DensityType::None:
@@ -1150,7 +1152,7 @@ void Experiment<Modus>::intermediate_output(uint64_t& interactions_total,
       default:
         update_density_lattice(jmu_custom_lat_.get(), lat_upd,
                        dens_type_lattice_printout_, density_param_, particles_);
-        output->thermodynamics_output(ThermodynamicQuantity::Density,
+        output->thermodynamics_output(ThermodynamicQuantity::EckartDensity,
                                  dens_type_lattice_printout_, *jmu_custom_lat_);
     }
     if (printout_tmn_ || printout_tmn_landau_ || printout_v_landau_) {

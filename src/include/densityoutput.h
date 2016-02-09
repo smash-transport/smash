@@ -60,9 +60,12 @@ class DensityOutput : public OutputInterface {
 
  private:
   FilePtr file_;
-
-  /// Point, where density is calculated
-  const ThreeVector r_;
+  /// Set of quantities to be computed
+  const std::set<ThermodynamicQuantity> td_set_;
+  /// Point, where thermodynamic quantities are calculated
+  ThreeVector r_;
+  /// Type (e.g., baryon/pion/hadron) of thermodynamic quantity
+  const DensityType dens_type_;
 };
 
 

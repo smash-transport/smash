@@ -78,11 +78,12 @@ Output:
     Binary_Particles:
         Enable:             False
         Only_Final:         False
-    Density:
+    Thermodynamics:
         Enable:             False
-        x: 0.0
-        y: 0.0
-        z: 0.0
+        # ("hadron", "baryon", "baryonic isospin", "pion", "none")
+        Type:               "baryon"
+        Quantities:         ["rho_eckart", "tmn", "tmn_landau", "landau_velocity"]
+        R:                  [0.0, 0.0, 0.0]
     Dileptons:
         Enable:             False
         Format:             Oscar
@@ -107,19 +108,14 @@ Collision_Term:
 #        S_Pot: 18.0
 
 Lattice:
-    Origin: [0.0, 0.0, 0.0]    # Coordinates of the left, down, near corner of the lattice
-    Sizes: [10.0, 10.0, 10.0]  # Sizes in x, y, z directions in fm
-    Cell_Number: [20, 20, 20]   # Number of cells in x, y, z directions
-    Periodic: True             # Periodic continuation: x + i * lx is equivalent to x, same for y, z
+    Origin:      [0.0, 0.0, 0.0]     # Coordinates of the left, down, near corner of the lattice
+    Sizes:       [10.0, 10.0, 10.0]  # Sizes in x, y, z directions in fm
+    Cell_Number: [20, 20, 20]        # Number of cells in x, y, z directions
+    Periodic:    True                # Periodic continuation: x + i * lx is equivalent to x, same for y, z
     Printout:
-        # ("hadron", "baryon", "baryonic isospin", "pion")
-        # For Tmn, Tmn_Landau, etc the same type is used that for Density, e.g.
-        # if Density is "baryon" then Tmn will be computed for net baryons: anti-baryon
-        # contributions will be taken with negative sign.
-        Density: "none"
-        Tmn:        False         # energy-momentum tensor
-        Tmn_Landau: False         # energy-momentum tensor in Landau rest frame
-        Landau_Velocity: False    # velocity of Landau rest frame
+        # ("hadron", "baryon", "baryonic isospin", "pion"), baryon := net baryon
+        Type:       "none"
+        Quantities: ["rho_eckart", "tmn", "tmn_landau", "landau_velocity"]
 
 Modi:
     Box:

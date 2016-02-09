@@ -18,14 +18,6 @@
 
 namespace Smash {
 
-/// Represents thermodynamic quantities that can be printed out
-enum class ThermodynamicQuantity : char {
-  Density,
-  Tmn,
-  TmnLandau,
-  LandauVelocity,
-};
-
 /**
  * \ingroup output
  *
@@ -112,6 +104,37 @@ class OutputInterface {
     SMASH_UNUSED(dt);
     SMASH_UNUSED(lattice);
   }
+
+  static const char *to_string(const ThermodynamicQuantity tq) {
+    switch (tq) {
+      case ThermodynamicQuantity::EckartDensity:
+        return "rho_eckart";
+      case ThermodynamicQuantity::Tmn:
+        return "tmn";
+      case ThermodynamicQuantity::TmnLandau:
+        return "tmn_landau";
+      case ThermodynamicQuantity::LandauVelocity:
+        return "v_landau";
+      default:
+        throw std::invalid_argument("Unknown thermodynamic quantity.");
+    }
+  }
+
+  static const char *to_string(const DensityType dens_type) {
+    switch (dens_type) {
+      case DensityType::Hadron:
+        return "hadron";
+      case DensityType::Baryon:
+        return "net_baryon";
+      case DensityType::BaryonicIsospin:
+        return "net_baryonI3";
+      case DensityType::Pion:
+        return "pion";
+      default:
+        throw std::invalid_argument("Unexpected density type.");
+    }
+  }
+
 };
 
 }  // namespace Smash

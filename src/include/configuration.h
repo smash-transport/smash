@@ -239,6 +239,28 @@ class Configuration {
       return arr;
     }
 
+    operator std::set<ThermodynamicQuantity>() const {
+      std::vector<std::string> v = operator std::vector<std::string>();
+      std::set<ThermodynamicQuantity> s;
+      for (const auto &x : v) {
+          if (x == "rho_eckart") {
+            s.insert(ThermodynamicQuantity::EckartDensity);
+          } else if (x == "tmn") {
+            s.insert(ThermodynamicQuantity::Tmn);
+          } else if (x == "tmn_landau") {
+            s.insert(ThermodynamicQuantity::TmnLandau);
+          } else if (x == "landau_velocity") {
+            s.insert(ThermodynamicQuantity::LandauVelocity);
+          } else {
+            throw IncorrectTypeInAssignment(
+              "The value for key \"" + std::string(key_) +
+              "\" should be \"rho_eckart\", \"tmn\""
+              ", \"tmn_landau\" or \"landau_velocity\".");
+          }
+      }
+      return s;
+    }
+
     operator CalculationFrame() {
       std::string s = operator std::string();
       if (s == "center of velocity") {
@@ -324,6 +346,7 @@ class Configuration {
           "The value for key \"" + std::string(key_) +
           "\" should be \"quadratic\", \"uniform\" or \"custom\".");
     }
+
   };
 
   /**

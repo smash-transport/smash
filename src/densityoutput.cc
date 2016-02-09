@@ -16,22 +16,43 @@
 #include "include/clock.h"
 #include "include/config.h"
 #include "include/density.h"
+#include "include/energymomentumtensor.h"
 #include "include/experimentparameters.h"
 #include "include/filedeleter.h"
 #include "include/forwarddeclarations.h"
 #include "include/particles.h"
+#include "include/vtkoutput.h"
 
 namespace Smash {
 
 DensityOutput::DensityOutput(const bf::path &path, Configuration &&config)
-    : file_{std::fopen((path / ("density_out.dat")).native().c_str(), "w")},
-      r_(ThreeVector(config.take({"x"}),
-                     config.take({"y"}),
-                     config.take({"z"}))) {
-  std::fprintf(file_.get(), "# %s density output\n", VERSION_MAJOR);
-  std::fprintf(file_.get(),
-               "# time[fm/c] density[fm^-3] @ (%6.2f, %6.2f, %6.2f)\n", r_.x1(),
-               r_.x2(), r_.x3());
+    : file_{std::fopen((path / ("thermodynamics.dat")).native().c_str(), "w")},
+      td_set_(config.take({"Quantities"}).convert_for(td_set_)),
+      dens_type_(config.take({"Type"})) {
+  const std::array<double, 3> a = config.take({"R"});
+  r_ = ThreeVector(a[0], a[1], a[2]);
+  std::fprintf(file_.get(), "# %s thermodynamics output\n", VERSION_MAJOR);
+  std::fprintf(file_.get(), "# @ point (%6.2f, %6.2f, %6.2f) [fm]\n",
+                                      r_.x1(), r_.x2(), r_.x3());
+  std::fprintf(file_.get(), "# %s\n",  to_string(dens_type_));
+  std::fprintf(file_.get(), "# time [fm/c], ");
+  if (td_set_.count(ThermodynamicQuantity::EckartDensity) > 0) {
+    std::fprintf(file_.get(), "%s [fm^-3], ",
+       to_string(ThermodynamicQuantity::EckartDensity));
+  }
+  if (td_set_.count(ThermodynamicQuantity::Tmn) > 0) {
+    std::fprintf(file_.get(), "%s [GeV/fm^-3] 00 01 02 03 11 12 13 22 23 33, ",
+       to_string(ThermodynamicQuantity::Tmn));
+  }
+  if (td_set_.count(ThermodynamicQuantity::TmnLandau) > 0) {
+    std::fprintf(file_.get(), "%s [GeV/fm^-3] 00 01 02 03 11 12 13 22 23 33, ",
+       to_string(ThermodynamicQuantity::TmnLandau));
+  }
+  if (td_set_.count(ThermodynamicQuantity::LandauVelocity) > 0) {
+    std::fprintf(file_.get(), "%s x y z ",
+       to_string(ThermodynamicQuantity::LandauVelocity));
+  }
+  std::fprintf(file_.get(), "\n");
 }
 
 DensityOutput::~DensityOutput() {
@@ -50,10 +71,49 @@ void DensityOutput::at_eventend(const Particles &/*particles*/,
 void DensityOutput::at_intermediate_time(const Particles &particles,
                                          const Clock &clock,
                                          const DensityParameters &dens_param) {
-  const bool compute_gradient = false;
-  const double rho = rho_eckart(r_, particles, dens_param, DensityType::Baryon,
+  std::fprintf(file_.get(), "%6.2f ", clock.current_time());
+  constexpr bool compute_gradient = false;
+  if (td_set_.count(ThermodynamicQuantity::EckartDensity) > 0) {
+    const double rho = rho_eckart(r_, particles, dens_param, dens_type_,
                                 compute_gradient).first;
-  std::fprintf(file_.get(), "%g %g\n", clock.current_time(), rho);
+    std::fprintf(file_.get(), "%7.4f ", rho);
+  }
+  if (td_set_.count(ThermodynamicQuantity::Tmn) > 0 ||
+      td_set_.count(ThermodynamicQuantity::TmnLandau) > 0 ||
+      td_set_.count(ThermodynamicQuantity::LandauVelocity) > 0) {
+    EnergyMomentumTensor Tmn;
+    for (const auto &p : particles) {
+      const float dens_factor = density_factor(p.type(), dens_type_);
+      if (std::abs(dens_factor) < really_small) {
+        continue;
+      }
+      const auto sf = unnormalized_smearing_factor(
+                            p.position().threevec() -r_,
+                            p.momentum(), 1.0/p.momentum().abs(),
+                            dens_param, compute_gradient).first;
+      if (sf < really_small) {
+        continue;
+      }
+      Tmn.add_particle(p, dens_factor * sf * dens_param.norm_factor_sf());
+    }
+    const FourVector u = Tmn.landau_frame_4velocity();
+    const EnergyMomentumTensor Tmn_L = Tmn.boosted(u);
+    if (td_set_.count(ThermodynamicQuantity::Tmn) > 0) {
+      for (int i = 0; i < 10; i++) {
+        std::fprintf(file_.get(), "%7.4f ", Tmn[i]);
+      }
+    }
+    if (td_set_.count(ThermodynamicQuantity::TmnLandau) > 0) {
+      for (int i = 0; i < 10; i++) {
+        std::fprintf(file_.get(), "%7.4f ", Tmn_L[i]);
+      }
+    }
+    if (td_set_.count(ThermodynamicQuantity::LandauVelocity) > 0) {
+      std::fprintf(file_.get(), "%7.4f %7.4f %7.4f",
+                              -u[1]/u[0], -u[2]/u[0], -u[3]/u[0]);
+    }
+  }
+  std::fprintf(file_.get(), "\n");
 }
 
 void DensityOutput::density_along_line(const char * file_name,
