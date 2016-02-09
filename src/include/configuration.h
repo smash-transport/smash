@@ -203,7 +203,7 @@ class Configuration {
     }
 
     template <typename T>
-    operator std::vector<T>() {
+    operator std::vector<T>() const {
       try {
         return node_.as<std::vector<T>>();
       } catch (YAML::TypedBadConversion<T> &e) {
@@ -222,8 +222,8 @@ class Configuration {
     }
 
     template <typename T, size_t N>
-    operator std::array<T, N>() {
-      std::vector<T> vec = operator std::vector<T>();
+    operator std::array<T, N>() const {
+      const std::vector<T> vec = operator std::vector<T>();
       const size_t n_read = vec.size();
       // Alert if size does not match
       if (n_read != N) {
@@ -240,7 +240,7 @@ class Configuration {
     }
 
     operator std::set<ThermodynamicQuantity>() const {
-      std::vector<std::string> v = operator std::vector<std::string>();
+      const std::vector<std::string> v = operator std::vector<std::string>();
       std::set<ThermodynamicQuantity> s;
       for (const auto &x : v) {
           if (x == "rho_eckart") {
@@ -261,8 +261,8 @@ class Configuration {
       return s;
     }
 
-    operator CalculationFrame() {
-      std::string s = operator std::string();
+    operator CalculationFrame() const {
+      const std::string s = operator std::string();
       if (s == "center of velocity") {
         return CalculationFrame::CenterOfVelocity;
       }
@@ -278,8 +278,8 @@ class Configuration {
           "or \"fixed target\".");
     }
 
-    operator DensityType() {
-      std::string s = operator std::string();
+    operator DensityType() const {
+      const std::string s = operator std::string();
       if (s == "hadron") {
         return DensityType::Hadron;
       }
@@ -302,8 +302,8 @@ class Configuration {
                                       "or \"none\".");
     }
 
-    operator TimeStepMode() {
-      std::string s = operator std::string();
+    operator TimeStepMode() const {
+      const std::string s = operator std::string();
       if (s == "None") {
         return TimeStepMode::None;
       }
@@ -318,8 +318,8 @@ class Configuration {
           "\" should be \"None\", \"Fixed\" or \"Adaptive\".");
     }
 
-    operator BoxInitialCondition() {
-      std::string s = operator std::string();
+    operator BoxInitialCondition() const {
+      const std::string s = operator std::string();
       if (s == "thermal momenta") {
         return BoxInitialCondition::ThermalMomenta;
       }
@@ -331,8 +331,8 @@ class Configuration {
           "\" should be \"thermal momenta\" or \"peaked momenta\".");
     }
 
-    operator Sampling() {
-      std::string s = operator std::string();
+    operator Sampling() const {
+      const std::string s = operator std::string();
       if (s == "quadratic") {
         return Sampling::Quadratic;
       }
