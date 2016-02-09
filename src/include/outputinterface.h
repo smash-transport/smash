@@ -105,7 +105,7 @@ class OutputInterface {
     SMASH_UNUSED(lattice);
   }
 
-  static const char *to_string(const ThermodynamicQuantity tq) {
+  const char *to_string(const ThermodynamicQuantity tq) {
     switch (tq) {
       case ThermodynamicQuantity::EckartDensity:
         return "rho_eckart";
@@ -115,12 +115,11 @@ class OutputInterface {
         return "tmn_landau";
       case ThermodynamicQuantity::LandauVelocity:
         return "v_landau";
-      default:
-        throw std::invalid_argument("Unknown thermodynamic quantity.");
     }
+    throw std::invalid_argument("Unknown thermodynamic quantity.");
   }
 
-  static const char *to_string(const DensityType dens_type) {
+  const char *to_string(const DensityType dens_type) {
     switch (dens_type) {
       case DensityType::Hadron:
         return "hadron";
@@ -130,9 +129,10 @@ class OutputInterface {
         return "net_baryonI3";
       case DensityType::Pion:
         return "pion";
-      default:
-        throw std::invalid_argument("Unexpected density type.");
+      case DensityType::None:
+        return "none";
     }
+    throw std::invalid_argument("Unknown density type.");
   }
 
 };
