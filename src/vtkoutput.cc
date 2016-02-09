@@ -126,36 +126,6 @@ void VtkOutput::write(const Particles &particles) {
   }
 }
 
-static const char *to_string(const ThermodynamicQuantity tq) {
-  switch (tq) {
-    case ThermodynamicQuantity::Density:
-      return "rho_eckart";
-    case ThermodynamicQuantity::Tmn:
-      return "tmn";
-    case ThermodynamicQuantity::TmnLandau:
-      return "tmn_landau";
-    case ThermodynamicQuantity::LandauVelocity:
-      return "v_landau";
-    default:
-      throw std::invalid_argument("Unknown thermodynamic quantity.");
-  }
-}
-
-static const char *to_string(const DensityType dens_type) {
-  switch (dens_type) {
-    case DensityType::Hadron:
-      return "hadron";
-    case DensityType::Baryon:
-      return "net_baryon";
-    case DensityType::BaryonicIsospin:
-      return "net_baryonI3";
-    case DensityType::Pion:
-      return "pion";
-    default:
-      throw std::invalid_argument("Unexpected density type.");
-  }
-}
-
 /*!\Userguide
  * \page output_vtk_lattice_ Thermodynamics vtk output
  * Density on the lattice can be printed out in the VTK format of

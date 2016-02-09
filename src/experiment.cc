@@ -22,7 +22,7 @@
 /* Outputs */
 #include "include/binaryoutputcollisions.h"
 #include "include/binaryoutputparticles.h"
-#include "include/densityoutput.h"
+#include "include/thermodynamicoutput.h"
 #include "include/oscaroutput.h"
 #ifdef SMASH_USE_ROOT
 #  include "include/rootoutput.h"
@@ -409,11 +409,11 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
   } else {
     output_conf.take({"Root"});
   }
-  if (static_cast<bool>(output_conf.take({"Density", "Enable"}))) {
-    outputs_.emplace_back(make_unique<DensityOutput>(output_path,
-                                                     output_conf["Density"]));
+  if (static_cast<bool>(output_conf.take({"Thermodynamics", "Enable"}))) {
+    outputs_.emplace_back(make_unique<ThermodynamicOutput>(output_path,
+                                               output_conf["Thermodynamics"]));
   } else {
-    output_conf.take({"Density"});
+    output_conf.take({"Thermodynamics"});
   }
 
   /*!\Userguide
@@ -508,24 +508,20 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    * For this one has to use the "Lattice: Printout" section of configuration.
    * Currently printing of custom density to vtk file is available.
    *
-   * \key Density (string, optional, default = "none"): \n
-   * Chooses which density to print.
+   * \key Type (string, optional, default = "none"): \n
+   * Chooses hadron/baryon/pion/baryonic isospin thermodynamic quantities
    *
-   * \key Tmn (bool, optional, default = False): \n
-   * Print energy-momentum tensor \f$T^{\mu\nu}(t,x,y,z) \f$. Type of particles
-   * that contribute to \f$T^{\mu\nu}(t,x,y,z) \f$ is the same that for Density option.
-   * For example, if Density option is "pion" then \f$T^{\mu\nu}(t,x,y,z) \f$ will
-   * also be computed for pions.
-   *
-   * \key Tmn_Landau (bool, optional, default = False): \n
-   * Print energy-momentum tensor in the Landau rest frame. This tensor is computed
-   * by boosting \f$T^{\mu\nu}(t,x,y,z) \f$ to the local rest frame, where
-   * \f$T^{0i} \f$ = 0.
-   *
-   * \key Landau_Velocity (bool, optional, default = False): \n
-   * Print velocity of the Landau rest frame. The velocity is obtained from
-   * the energy-momentum tensor \f$T^{\mu\nu}(t,x,y,z) \f$ by solving the
-   * generalized eigenvalue equation \f$(T^{\mu\nu} - \lambda g^{\mu\nu})u_{\mu}=0 \f$.
+   * \key Quantities (list of strings, optional, default = []): \n
+   * List of quantities that can be printed:
+   *  \li "rho_eckart": Eckart rest frame density
+   *  \li "tmn": Energy-momentum tensor \f$T^{\mu\nu}(t,x,y,z) \f$
+   *  \li "tmn_landau": Energy-momentum tensor in the Landau rest frame.
+   *      This tensor is computed by boosting \f$T^{\mu\nu}(t,x,y,z) \f$
+   *      to the local rest frame, where \f$T^{0i} \f$ = 0.
+   *  \li "landau_velocity": Velocity of the Landau rest frame.
+   *      The velocity is obtained from the energy-momentum tensor
+   *      \f$T^{\mu\nu}(t,x,y,z) \f$ by solving the generalized eigenvalue
+   *      equation \f$(T^{\mu\nu} - \lambda g^{\mu\nu})u_{\mu}=0 \f$.
    */
 
   // Create lattices
@@ -536,19 +532,21 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     const std::array<float, 3> origin = config.take({"Lattice", "Origin"});
     const bool periodic = config.take({"Lattice", "Periodic"});
     dens_type_lattice_printout_ = config.take(
-                  {"Lattice", "Printout", "Density"}, DensityType::None);
-    /* Create baryon and isospin density lattices regardless of config
-       if potentials are on. This is because they allow to compute
-       potentials faster */
-    printout_tmn_ = config.take({"Lattice", "Printout", "Tmn"}, false);
+            {"Lattice", "Printout", "Type"}, DensityType::None);
+    const std::set<ThermodynamicQuantity> td_to_print = config.take(
+            {"Lattice", "Printout", "Quantities"});
+    printout_tmn_ = (td_to_print.count(ThermodynamicQuantity::Tmn) > 0);
     printout_tmn_landau_ =
-                 config.take({"Lattice", "Printout", "Tmn_Landau"}, false);
+           (td_to_print.count(ThermodynamicQuantity::TmnLandau) > 0);
     printout_v_landau_ =
-                 config.take({"Lattice", "Printout", "Landau_Velocity"}, false);
+           (td_to_print.count(ThermodynamicQuantity::LandauVelocity) > 0);
     if (printout_tmn_ || printout_tmn_landau_ || printout_v_landau_) {
       Tmn_ = make_unique<RectangularLattice<EnergyMomentumTensor>>(
                 l, n, origin, periodic, LatticeUpdate::AtOutput);
     }
+    /* Create baryon and isospin density lattices regardless of config
+       if potentials are on. This is because they allow to compute
+       potentials faster */
     if (potentials_) {
       if (potentials_->use_skyrme()) {
         jmu_B_lat_ = make_unique<DensityLattice>(l, n, origin, periodic,
@@ -1136,13 +1134,13 @@ void Experiment<Modus>::intermediate_output(uint64_t& interactions_total,
       case DensityType::Baryon:
         update_density_lattice(jmu_B_lat_.get(), lat_upd,
                                DensityType::Baryon, density_param_, particles_);
-        output->thermodynamics_output(ThermodynamicQuantity::Density,
+        output->thermodynamics_output(ThermodynamicQuantity::EckartDensity,
                                       DensityType::Baryon, *jmu_B_lat_);
         break;
       case DensityType::BaryonicIsospin:
         update_density_lattice(jmu_I3_lat_.get(), lat_upd,
                      DensityType::BaryonicIsospin, density_param_, particles_);
-        output->thermodynamics_output(ThermodynamicQuantity::Density,
+        output->thermodynamics_output(ThermodynamicQuantity::EckartDensity,
                                    DensityType::BaryonicIsospin, *jmu_I3_lat_);
         break;
       case DensityType::None:
@@ -1150,7 +1148,7 @@ void Experiment<Modus>::intermediate_output(uint64_t& interactions_total,
       default:
         update_density_lattice(jmu_custom_lat_.get(), lat_upd,
                        dens_type_lattice_printout_, density_param_, particles_);
-        output->thermodynamics_output(ThermodynamicQuantity::Density,
+        output->thermodynamics_output(ThermodynamicQuantity::EckartDensity,
                                  dens_type_lattice_printout_, *jmu_custom_lat_);
     }
     if (printout_tmn_ || printout_tmn_landau_ || printout_v_landau_) {

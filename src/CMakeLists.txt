@@ -75,7 +75,6 @@ set(smash_src
         decaytype.cc
         deformednucleus.cc
         density.cc
-        densityoutput.cc
         decayactiondilepton.cc
         decayactionsfinderdilepton.cc
         distributions.cc
@@ -114,6 +113,7 @@ set(smash_src
         spheremodus.cc
         stringfunctions.cc
         tabulation.cc
+        thermodynamicoutput.cc
         threevector.cc
         tsc.cc
         vtkoutput.cc

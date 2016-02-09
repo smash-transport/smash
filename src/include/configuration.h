@@ -203,7 +203,7 @@ class Configuration {
     }
 
     template <typename T>
-    operator std::vector<T>() {
+    operator std::vector<T>() const {
       try {
         return node_.as<std::vector<T>>();
       } catch (YAML::TypedBadConversion<T> &e) {
@@ -222,8 +222,8 @@ class Configuration {
     }
 
     template <typename T, size_t N>
-    operator std::array<T, N>() {
-      std::vector<T> vec = operator std::vector<T>();
+    operator std::array<T, N>() const {
+      const std::vector<T> vec = operator std::vector<T>();
       const size_t n_read = vec.size();
       // Alert if size does not match
       if (n_read != N) {
@@ -239,8 +239,30 @@ class Configuration {
       return arr;
     }
 
-    operator CalculationFrame() {
-      std::string s = operator std::string();
+    operator std::set<ThermodynamicQuantity>() const {
+      const std::vector<std::string> v = operator std::vector<std::string>();
+      std::set<ThermodynamicQuantity> s;
+      for (const auto &x : v) {
+          if (x == "rho_eckart") {
+            s.insert(ThermodynamicQuantity::EckartDensity);
+          } else if (x == "tmn") {
+            s.insert(ThermodynamicQuantity::Tmn);
+          } else if (x == "tmn_landau") {
+            s.insert(ThermodynamicQuantity::TmnLandau);
+          } else if (x == "landau_velocity") {
+            s.insert(ThermodynamicQuantity::LandauVelocity);
+          } else {
+            throw IncorrectTypeInAssignment(
+              "The value for key \"" + std::string(key_) +
+              "\" should be \"rho_eckart\", \"tmn\""
+              ", \"tmn_landau\" or \"landau_velocity\".");
+          }
+      }
+      return s;
+    }
+
+    operator CalculationFrame() const {
+      const std::string s = operator std::string();
       if (s == "center of velocity") {
         return CalculationFrame::CenterOfVelocity;
       }
@@ -256,8 +278,8 @@ class Configuration {
           "or \"fixed target\".");
     }
 
-    operator DensityType() {
-      std::string s = operator std::string();
+    operator DensityType() const {
+      const std::string s = operator std::string();
       if (s == "hadron") {
         return DensityType::Hadron;
       }
@@ -280,8 +302,8 @@ class Configuration {
                                       "or \"none\".");
     }
 
-    operator TimeStepMode() {
-      std::string s = operator std::string();
+    operator TimeStepMode() const {
+      const std::string s = operator std::string();
       if (s == "None") {
         return TimeStepMode::None;
       }
@@ -296,8 +318,8 @@ class Configuration {
           "\" should be \"None\", \"Fixed\" or \"Adaptive\".");
     }
 
-    operator BoxInitialCondition() {
-      std::string s = operator std::string();
+    operator BoxInitialCondition() const {
+      const std::string s = operator std::string();
       if (s == "thermal momenta") {
         return BoxInitialCondition::ThermalMomenta;
       }
@@ -309,8 +331,8 @@ class Configuration {
           "\" should be \"thermal momenta\" or \"peaked momenta\".");
     }
 
-    operator Sampling() {
-      std::string s = operator std::string();
+    operator Sampling() const {
+      const std::string s = operator std::string();
       if (s == "quadratic") {
         return Sampling::Quadratic;
       }
@@ -324,6 +346,7 @@ class Configuration {
           "The value for key \"" + std::string(key_) +
           "\" should be \"quadratic\", \"uniform\" or \"custom\".");
     }
+
   };
 
   /**

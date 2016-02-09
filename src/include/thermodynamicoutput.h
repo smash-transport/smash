@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef SRC_INCLUDE_DENSITYOUTPUT_H_
-#define SRC_INCLUDE_DENSITYOUTPUT_H_
+#ifndef SRC_INCLUDE_THERMODYNAMICOUTPUT_H_
+#define SRC_INCLUDE_THERMODYNAMICOUTPUT_H_
 
 #include <string>
 
@@ -25,7 +25,7 @@ namespace Smash {
 /**
  * \ingroup output
  *
- * \brief Writes the density at a specified point versus time
+ * \brief Writes the thermodynamic quantities at a specified point versus time
  *
  * This class is a temporary solution to write thermodynamic
  * quantities out. Calculations are called directly inside the
@@ -33,10 +33,10 @@ namespace Smash {
  * more general output.
  *
  **/
-class DensityOutput : public OutputInterface {
+class ThermodynamicOutput : public OutputInterface {
  public:
-  DensityOutput(const bf::path &path, Configuration&& conf);
-  ~DensityOutput();
+  ThermodynamicOutput(const bf::path &path, Configuration&& conf);
+  ~ThermodynamicOutput();
 
   /// writes the initial particle information of an event
   void at_eventstart(const Particles &particles,
@@ -60,12 +60,15 @@ class DensityOutput : public OutputInterface {
 
  private:
   FilePtr file_;
-
-  /// Point, where density is calculated
-  const ThreeVector r_;
+  /// Set of quantities to be computed
+  const std::set<ThermodynamicQuantity> td_set_;
+  /// Point, where thermodynamic quantities are calculated
+  ThreeVector r_;
+  /// Type (e.g., baryon/pion/hadron) of thermodynamic quantity
+  const DensityType dens_type_;
 };
 
 
 }  // namespace Smash
 
-#endif  // SRC_INCLUDE_DENSITYOUTPUT_H_
+#endif  // SRC_INCLUDE_THERMODYNAMICOUTPUT_H_

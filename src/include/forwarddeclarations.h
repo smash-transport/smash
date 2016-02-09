@@ -116,6 +116,13 @@ enum class BoxInitialCondition {
   PeakedMomenta,
 };
 
+/// Represents thermodynamic quantities that can be printed out
+enum class ThermodynamicQuantity : char {
+  EckartDensity,
+  Tmn,
+  TmnLandau,
+  LandauVelocity,
+};
 
 using ActionPtr = build_unique_ptr_<Action>;
 using ScatterActionPtr = build_unique_ptr_<ScatterAction>;
