@@ -22,7 +22,7 @@
 /* Outputs */
 #include "include/binaryoutputcollisions.h"
 #include "include/binaryoutputparticles.h"
-#include "include/densityoutput.h"
+#include "include/thermodynamicoutput.h"
 #include "include/oscaroutput.h"
 #ifdef SMASH_USE_ROOT
 #  include "include/rootoutput.h"
@@ -410,7 +410,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     output_conf.take({"Root"});
   }
   if (static_cast<bool>(output_conf.take({"Thermodynamics", "Enable"}))) {
-    outputs_.emplace_back(make_unique<DensityOutput>(output_path,
+    outputs_.emplace_back(make_unique<ThermodynamicOutput>(output_path,
                                                output_conf["Thermodynamics"]));
   } else {
     output_conf.take({"Thermodynamics"});

@@ -7,7 +7,7 @@
  *
  */
 
-#include "include/densityoutput.h"
+#include "include/thermodynamicoutput.h"
 
 #include <boost/filesystem.hpp>
 #include <fstream>
@@ -25,7 +25,8 @@
 
 namespace Smash {
 
-DensityOutput::DensityOutput(const bf::path &path, Configuration &&config)
+ThermodynamicOutput::ThermodynamicOutput(const bf::path &path,
+                                         Configuration &&config)
     : file_{std::fopen((path / ("thermodynamics.dat")).native().c_str(), "w")},
       td_set_(config.take({"Quantities"}).convert_for(td_set_)),
       dens_type_(config.take({"Type"})) {
@@ -55,20 +56,20 @@ DensityOutput::DensityOutput(const bf::path &path, Configuration &&config)
   std::fprintf(file_.get(), "\n");
 }
 
-DensityOutput::~DensityOutput() {
+ThermodynamicOutput::~ThermodynamicOutput() {
 }
 
-void DensityOutput::at_eventstart(const Particles &/*particles*/,
+void ThermodynamicOutput::at_eventstart(const Particles &/*particles*/,
                                const int event_number) {
   std::fprintf(file_.get(), "# event %i\n", event_number);
 }
 
-void DensityOutput::at_eventend(const Particles &/*particles*/,
+void ThermodynamicOutput::at_eventend(const Particles &/*particles*/,
                                const int /*event_number*/) {
   std::fflush(file_.get());
 }
 
-void DensityOutput::at_intermediate_time(const Particles &particles,
+void ThermodynamicOutput::at_intermediate_time(const Particles &particles,
                                          const Clock &clock,
                                          const DensityParameters &dens_param) {
   std::fprintf(file_.get(), "%6.2f ", clock.current_time());
@@ -116,7 +117,7 @@ void DensityOutput::at_intermediate_time(const Particles &particles,
   std::fprintf(file_.get(), "\n");
 }
 
-void DensityOutput::density_along_line(const char * file_name,
+void ThermodynamicOutput::density_along_line(const char * file_name,
                         const ParticleList &plist,
                         const DensityParameters &param,
                          DensityType dens_type,

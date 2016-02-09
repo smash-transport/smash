@@ -18,7 +18,7 @@
 #include "../include/configuration.h"
 #include "../include/cxx14compat.h"
 #include "../include/density.h"
-#include "../include/densityoutput.h"
+#include "../include/thermodynamicoutput.h"
 #include "../include/experiment.h"
 #include "../include/modusdefault.h"
 #include "../include/nucleus.h"
@@ -333,7 +333,7 @@ TEST(nucleus_density) {
 
   Configuration&& conf{testoutputpath, configfilename};
   ExperimentParameters par = Smash::Test::default_parameters(Ntest);
-  std::unique_ptr<DensityOutput> out = make_unique<DensityOutput>(testoutputpath, std::move(conf));
+  std::unique_ptr<ThermodynamicOutput> out = make_unique<ThermodynamicOutput>(testoutputpath, std::move(conf));
   out->density_along_line("lead_densityX.dat", plist, par, dens_type,
                           lstart, lend, npoints);
 
@@ -367,7 +367,7 @@ ParticleList plist = P.copy_to_vector();
 conf["Output"]["Density"]["x"] = 0.0;
 conf["Output"]["Density"]["y"] = 0.0;
 conf["Output"]["Density"]["z"] = 0.0;
-std::unique_ptr<DensityOutput> out = make_unique<DensityOutput>(testoutputpath,
+std::unique_ptr<ThermodynamicOutput> out = make_unique<ThermodynamicOutput>(testoutputpath,
                                          conf["Output"]["Density"]);
 const ThreeVector lstart = ThreeVector(0.0, 0.0, 0.0);
 const ThreeVector lend = ThreeVector(L, L, L);
