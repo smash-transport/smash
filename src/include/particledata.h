@@ -115,7 +115,8 @@ class ParticleData {
                            px, py, pz);
   }
   /**
-   * Set the momentum of the particle without modifying the currently set mass.
+   * Set the momentum of the particle without modifying the energy.
+   * WARNING: Mass gets modified.
    */
   void set_3momentum(const ThreeVector &mom) {
     momentum_ = FourVector(momentum_.x0(), mom);

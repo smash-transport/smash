@@ -12,6 +12,7 @@
 #include "../include/nucleus.h"
 #include "../include/pdgcode.h"
 #include "../include/threevector.h"
+#include "../include/particles.h"
 
 namespace particles_txt {
 #include <particles.txt.h>
@@ -198,4 +199,42 @@ TEST(woods_saxon) {
             << " vs. calculated: " << expec
             << " (allowed distance: " << margin << ")";
   }
+}
+
+TEST(Fermi_motion) {
+  std::map<PdgCode, int> myfunnylist = {{0x2212, 22}, // protons
+                                        {0x2112, 35}, // neutrons
+                                         {0x111, 5},  // pions
+                                        {0x3122, 1},  // Lambda
+                                         {0x13, 1}};  // muon
+  Nucleus myfunnynucleus(myfunnylist, 1);
+  VERIFY(myfunnynucleus.size() == 22+35+5+1+1);
+  // Set some arbitrary radius and diffusiveness
+  myfunnynucleus.set_nuclear_radius(3.0f);
+  myfunnynucleus.set_diffusiveness(0.5f);
+  // Arrange coordinate space, because Fermi momenta depend on positions
+  myfunnynucleus.arrange_nucleons();
+  myfunnynucleus.generate_fermi_momenta();
+
+  /* Check that: (i) only protons and neutrons get Fermi momenta
+   *             (ii) total momentum is 0
+   *             (iii) particles are on the mass shell
+   */
+  Particles particles;
+  myfunnynucleus.copy_particles(&particles);
+  ThreeVector ptot = ThreeVector();
+  for (const auto &p : particles) {
+    const ThreeVector mom3 = p.momentum().threevec();
+    ptot += mom3;
+    if (p.pdgcode() != 0x2212 && p.pdgcode() != 0x2112) {
+      VERIFY(mom3.x1() == 0.0);
+      VERIFY(mom3.x2() == 0.0);
+      VERIFY(mom3.x3() == 0.0);
+    }
+    FUZZY_COMPARE(static_cast<float>(p.momentum().sqr()),
+                  p.pole_mass()*p.pole_mass());
+  }
+  COMPARE_ABSOLUTE_ERROR(ptot.x1(), 0.0, 1.0e-15) << ptot.x1();
+  COMPARE_ABSOLUTE_ERROR(ptot.x2(), 0.0, 1.0e-15) << ptot.x2();
+  COMPARE_ABSOLUTE_ERROR(ptot.x3(), 0.0, 1.0e-15) << ptot.x3();
 }
