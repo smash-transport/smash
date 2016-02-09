@@ -29,7 +29,7 @@ DensityOutput::DensityOutput(const bf::path &path, Configuration &&config)
     : file_{std::fopen((path / ("thermodynamics.dat")).native().c_str(), "w")},
       td_set_(config.take({"Quantities"}).convert_for(td_set_)),
       dens_type_(config.take({"Type"})) {
-  const std::array<double, 3> a = config.take({"R"});
+  const std::array<double, 3> a = config.take({"Position"});
   r_ = ThreeVector(a[0], a[1], a[2]);
   std::fprintf(file_.get(), "# %s thermodynamics output\n", VERSION_MAJOR);
   std::fprintf(file_.get(), "# @ point (%6.2f, %6.2f, %6.2f) [fm]\n",

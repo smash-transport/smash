@@ -83,7 +83,7 @@ Output:
         # ("hadron", "baryon", "baryonic isospin", "pion", "none")
         Type:               "baryon"
         Quantities:         ["rho_eckart", "tmn", "tmn_landau", "landau_velocity"]
-        R:                  [0.0, 0.0, 0.0]
+        Position:           [0.0, 0.0, 0.0]
     Dileptons:
         Enable:             False
         Format:             Oscar
