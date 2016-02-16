@@ -24,7 +24,7 @@ constexpr float fm2_mb = 0.1;
 /**
  * Numerical error tolerance
  */
-constexpr float really_small = 1.0e-4;
+constexpr float really_small = 1.0e-6;
 /**
  * \f$ 2\pi \f$
  *
