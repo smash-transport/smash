@@ -21,9 +21,11 @@ namespace Smash {
 
 ScatterAction::ScatterAction(const ParticleData &in_part_a,
                              const ParticleData &in_part_b,
-                             float time, bool isotropic)
+                             float time, bool isotropic, 
+                             float formation_time)
     : Action({in_part_a, in_part_b}, time),
-      total_cross_section_(0.), isotropic_(isotropic) {}
+      total_cross_section_(0.), isotropic_(isotropic), 
+      formation_time_(formation_time) {}
 
 void ScatterAction::add_collision(CollisionBranchPtr p) {
   add_process<CollisionBranch>(p, collision_channels_, total_cross_section_);
@@ -67,7 +69,8 @@ void ScatterAction::generate_final_state() {
       break;
     case ProcessType::String:
       /* string excitation */
-      outgoing_particles_ = string_excitation(incoming_particles_);
+      outgoing_particles_ = string_excitation(incoming_particles_, 
+											  formation_time_);
       break;
     default:
       throw InvalidScatterAction(

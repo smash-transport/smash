@@ -30,7 +30,8 @@ namespace Smash {
 
   /* This function will generate outgoing particles in CM frame
    * from a hard process. */
-  ParticleList string_excitation(const ParticleList &incoming_particles_) {
+  ParticleList string_excitation(const ParticleList &incoming_particles_,
+								 const float formation_time_) {
       const auto &log = logger<LogArea::Pythia>();
     /// Disable floating point exception trap for Pythia
     {
@@ -106,7 +107,8 @@ namespace Smash {
              *  time of 1 fm is universally applied and cross section is reduced 
              * to zero */ 
             /** TODO: assign proper cross-section to valence quarks */
-            new_particle_.set_formation_time(1.0); 
+            log.info("The formation time is: ", formation_time_, "fm/c.");
+            new_particle_.set_formation_time(formation_time_); 
             new_particle_.set_cross_section_scaling_factor(0.0);
             log.debug("4-momentum from Pythia: ", momentum);
             outgoing_particles_.push_back(new_particle_);

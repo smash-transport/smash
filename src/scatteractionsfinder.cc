@@ -38,6 +38,8 @@ namespace Smash {
 * \key Strings (bool, optional, default = true): \n
 * true - string excitation is enabled\n
 * false - string excitation is disabled
+* \key Formation_Time (float, optional, default = 1.0) \n
+* Parameter for formation time in string fragmentation in fm/c
 */
 
 ScatterActionsFinder::ScatterActionsFinder(
@@ -49,7 +51,9 @@ ScatterActionsFinder::ScatterActionsFinder(
       isotropic_(config.take({"Collision_Term", "Isotropic"}, false)),
       two_to_one_(two_to_one),
       two_to_two_(two_to_two),
-      strings_switch_(strings_switch) {
+      strings_switch_(strings_switch),
+      formation_time_(config.take({"Collision_Term",
+		                           "Formation_Time"}, 1.0f)) {
       if (is_constant_elastic_isotropic()) {
         const auto &log = logger<LogArea::FindScatter>();
         log.info("Constant elastic isotropic cross-section mode:",
@@ -64,35 +68,42 @@ ScatterActionsFinder::ScatterActionsFinder(
       isotropic_(false),
       two_to_one_(true),
       two_to_two_(true),
-      strings_switch_(true) {}
+      strings_switch_(true),
+      formation_time_(1.0f) {}
 
 ScatterActionPtr ScatterActionsFinder::construct_scatter_action(
                                             const ParticleData &data_a,
                                             const ParticleData &data_b,
-                                            float time_until_collision) const {
+                                            float time_until_collision
+                                            ) const {
   const auto &pdg_a = data_a.pdgcode();
   const auto &pdg_b = data_b.pdgcode();
   ScatterActionPtr act;
   if (data_a.is_baryon() && data_b.is_baryon()) {
     if (pdg_a.is_nucleon() && pdg_b.is_nucleon()) {
       act = make_unique<ScatterActionNucleonNucleon>(data_a, data_b,
-                                              time_until_collision, isotropic_);
+                                              time_until_collision, isotropic_, 
+                                              formation_time_);
     } else {
       act = make_unique<ScatterActionBaryonBaryon>(data_a, data_b,
-                                              time_until_collision, isotropic_);
+                                              time_until_collision, isotropic_,
+                                              formation_time_);
     }
   } else if (data_a.is_baryon() || data_b.is_baryon()) {
     if ((pdg_a.is_nucleon() && pdg_b.is_kaon()) ||
         (pdg_b.is_nucleon() && pdg_a.is_kaon())) {
       act = make_unique<ScatterActionNucleonKaon>(data_a, data_b,
-                                              time_until_collision, isotropic_);
+                                              time_until_collision, isotropic_,
+                                              formation_time_);
     } else {
       act = make_unique<ScatterActionBaryonMeson>(data_a, data_b,
-                                              time_until_collision, isotropic_);
+                                              time_until_collision, isotropic_,
+                                              formation_time_);
     }
   } else {
     act = make_unique<ScatterActionMesonMeson>(data_a, data_b,
-                                              time_until_collision, isotropic_);
+                                              time_until_collision, isotropic_,
+                                              formation_time_);
   }
   return std::move(act);
 }

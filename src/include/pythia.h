@@ -16,7 +16,8 @@
 #include "forwarddeclarations.h"
 
 namespace Smash {
-  ParticleList string_excitation(const ParticleList &incoming_particles_);
+  ParticleList string_excitation(const ParticleList &incoming_particles_,
+								 const float formation_time_);
 }
 
 #endif  // SRC_INCLUDE_PYTHIA_H_

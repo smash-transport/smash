@@ -123,6 +123,8 @@ class ScatterActionsFinder : public ActionFinderInterface {
   const bool two_to_two_;
   /** Switch to turn off string excitation. */
   const bool strings_switch_;
+  /** Parameter for formation time */
+  const float formation_time_;
 };
 
 #if 0
