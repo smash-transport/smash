@@ -107,7 +107,7 @@ namespace Smash {
              *  time of 1 fm is universally applied and cross section is reduced 
              * to zero */ 
             /** TODO: assign proper cross-section to valence quarks */
-            log.info("The formation time is: ", formation_time_, "fm/c.");
+            log.debug("The formation time is: ", formation_time_, "fm/c.");
             new_particle_.set_formation_time(formation_time_); 
             new_particle_.set_cross_section_scaling_factor(0.0);
             log.debug("4-momentum from Pythia: ", momentum);
