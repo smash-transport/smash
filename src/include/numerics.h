@@ -43,6 +43,15 @@ bool almost_equal(const N x, const N y) {
        || std::abs(x - y) <= N(0.5 * really_small)
                                    * (std::abs(x) + std::abs(y)));
 }
+/** Same as above, but for physical checks like energy-momentum conser-
+ * vation small_number is enough precision-wise
+ */
+template <typename N>
+bool almost_equal_physics(const N x, const N y) {
+  return (std::abs(x - y) <= N(small_number)
+       || std::abs(x - y) <= N(0.5 * small_number)
+                                   * (std::abs(x) + std::abs(y)));
+}
 
 }  // namespace Smash
 
