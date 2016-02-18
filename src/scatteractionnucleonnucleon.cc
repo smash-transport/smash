@@ -118,48 +118,52 @@ CollisionBranchList ScatterActionNucleonNucleon::two_to_two_inel(
         continue;
       }
 
-      const float isospin_factor = isospin_clebsch_gordan_sqr_2to2(
-              type_particle_a, type_particle_b, *type_resonance, *second_type);
-      /* If Clebsch-Gordan coefficient is zero, don't bother with the rest. */
-      if (std::abs(isospin_factor) < really_small) {
-        continue;
-      }
+      // loop over total isospin
+      for (const int twoI : I_tot_range(type_particle_a, type_particle_b)) {
+        const float isospin_factor = isospin_clebsch_gordan_sqr_2to2(
+                                          type_particle_a, type_particle_b,
+                                          *type_resonance, *second_type, twoI);
+        /* If Clebsch-Gordan coefficient is zero, don't bother with the rest. */
+        if (std::abs(isospin_factor) < really_small) {
+          continue;
+        }
 
-      /* Integration limits. */
-      const double lower_limit = type_resonance->minimum_mass();
-      const double upper_limit = sqrts - second_type->mass();
-      /* Check the available energy (requiring it to be a little above the
-      * threshold, because the integration will not work if it's too close). */
-      if (upper_limit - lower_limit < 1E-3) {
-        continue;
-      }
+        /* Integration limits. */
+        const double lower_limit = type_resonance->minimum_mass();
+        const double upper_limit = sqrts - second_type->mass();
+        /* Check the available energy (requiring it to be a little above the
+        * threshold, because the integration will not work if it's too close). */
+        if (upper_limit - lower_limit < 1E-3) {
+          continue;
+        }
 
-      /* Calculate matrix element. */
-      const float matrix_element =
-          nn_to_resonance_matrix_element(sqrts, *type_resonance, *second_type);
-      if (matrix_element <= 0.) {
-        continue;
-      }
+        /* Calculate matrix element. */
+        const float matrix_element = nn_to_resonance_matrix_element(sqrts,
+                                          *type_resonance, *second_type, twoI);
+        if (matrix_element <= 0.) {
+          continue;
+        }
 
-      /* Calculate resonance production cross section
-       * using the Breit-Wigner distribution as probability amplitude.
-       * Integrate over the allowed resonance mass range. */
-      const double resonance_integral =
-                    type_resonance->iso_multiplet()->get_integral_NR(sqrts);
+        /* Calculate resonance production cross section
+        * using the Breit-Wigner distribution as probability amplitude.
+        * Integrate over the allowed resonance mass range. */
+        const double resonance_integral =
+                      type_resonance->iso_multiplet()->get_integral_NR(sqrts);
 
-      /** Cross section for 2->2 process with one resonance in final state.
-       * Based on Eq. (46) in \iref{Weil:2013mya}. */
-      float xsection = isospin_factor * matrix_element
-                     * resonance_integral / (s * cm_momentum());
+        /** Cross section for 2->2 process with one resonance in final state.
+        * Based on Eq. (46) in \iref{Weil:2013mya}. */
+        float xsection = isospin_factor * matrix_element
+                      * resonance_integral / (s * cm_momentum());
 
-      if (xsection > really_small) {
-        process_list.push_back(make_unique<CollisionBranch>
-                               (*type_resonance, *second_type, xsection,
-                                ProcessType::TwoToTwo));
-        log.debug("Found 2->2 creation process for resonance ",
-                  *type_resonance);
-        log.debug("2->2 with original particles: ",
-                  type_particle_a, type_particle_b);
+        if (xsection > really_small) {
+          process_list.push_back(make_unique<CollisionBranch>
+                                (*type_resonance, *second_type, xsection,
+                                  ProcessType::TwoToTwo));
+          log.debug("Found 2->2 creation process for resonance ",
+                    *type_resonance);
+          log.debug("2->2 with original particles: ",
+                    type_particle_a, type_particle_b);
+        }
       }
     }
   }
@@ -175,49 +179,52 @@ CollisionBranchList ScatterActionNucleonNucleon::two_to_two_inel(
         continue;
       }
 
-      const float isospin_factor = isospin_clebsch_gordan_sqr_2to2(
-                    type_particle_a, type_particle_b, *type_res_1, *type_res_2);
-      /* If Clebsch-Gordan coefficient is zero, don't bother with the rest. */
-      if (std::abs(isospin_factor) < really_small) {
-        continue;
-      }
+      // loop over total isospin
+      for (const int twoI : I_tot_range(type_particle_a, type_particle_b)) {
+        const float isospin_factor = isospin_clebsch_gordan_sqr_2to2(
+              type_particle_a, type_particle_b, *type_res_1, *type_res_2, twoI);
+        /* If Clebsch-Gordan coefficient is zero, don't bother with the rest. */
+        if (std::abs(isospin_factor) < really_small) {
+          continue;
+        }
 
-      /* Integration limits. */
-      const double lower_limit = type_res_1->minimum_mass();
-      const double upper_limit = sqrts - type_res_2->minimum_mass();
-      /* Check the available energy (requiring it to be a little above the
-      * threshold, because the integration will not work if it's too close). */
-      if (upper_limit - lower_limit < 1E-3) {
-        continue;
-      }
+        /* Integration limits. */
+        const double lower_limit = type_res_1->minimum_mass();
+        const double upper_limit = sqrts - type_res_2->minimum_mass();
+        /* Check the available energy (requiring it to be a little above the
+        * threshold, because the integration will not work if it's too close). */
+        if (upper_limit - lower_limit < 1E-3) {
+          continue;
+        }
 
-      /* Calculate matrix element. */
-      const float matrix_element =
-            nn_to_resonance_matrix_element(sqrts, *type_res_1, *type_res_2);
-      if (matrix_element <= 0.) {
-        continue;
-      }
+        /* Calculate matrix element. */
+        const float matrix_element = nn_to_resonance_matrix_element(sqrts,
+                                                *type_res_1, *type_res_2, twoI);
+        if (matrix_element <= 0.) {
+          continue;
+        }
 
-      /* Calculate resonance production cross section
-       * using the Breit-Wigner distribution as probability amplitude.
-       * Integrate over the allowed resonance mass range. */
+        /* Calculate resonance production cross section
+        * using the Breit-Wigner distribution as probability amplitude.
+        * Integrate over the allowed resonance mass range. */
 
-      const double resonance_integral =
-                    type_res_1->iso_multiplet()->get_integral_DR(sqrts);
+        const double resonance_integral =
+                      type_res_1->iso_multiplet()->get_integral_DR(sqrts);
 
-      /** Cross section for 2->2 process with one resonance in final state.
-       * Based on Eq. (51) in \iref{Weil:2013mya}. */
-      float xsection = isospin_factor * matrix_element
-                     * resonance_integral / (s * cm_momentum());
+        /** Cross section for 2->2 process with one resonance in final state.
+        * Based on Eq. (51) in \iref{Weil:2013mya}. */
+        float xsection = isospin_factor * matrix_element
+                      * resonance_integral / (s * cm_momentum());
 
-      if (xsection > really_small) {
-        process_list.push_back(make_unique<CollisionBranch>
-                               (*type_res_1, *type_res_2, xsection,
-                                ProcessType::TwoToTwo));
-        log.debug("Found 2->2 creation process with two resonances: ",
-                  *type_res_1, " ", *type_res_2);
-        log.debug("2->2 with original particles: ",
-                  type_particle_a, type_particle_b);
+        if (xsection > really_small) {
+          process_list.push_back(make_unique<CollisionBranch>
+                                (*type_res_1, *type_res_2, xsection,
+                                  ProcessType::TwoToTwo));
+          log.debug("Found 2->2 creation process with two resonances: ",
+                    *type_res_1, " ", *type_res_2);
+          log.debug("2->2 with original particles: ",
+                    type_particle_a, type_particle_b);
+        }
       }
     }
   }

@@ -39,7 +39,7 @@ std::vector<Line> line_parser(const std::string &input) {
     lines.emplace_back(line_number, std::move(line));
     line = std::string();
   }
-  return std::move(lines);
+  return lines;
 }
 
 }  // namespace Smash

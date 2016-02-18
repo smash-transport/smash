@@ -68,7 +68,7 @@ class Actions {
     }
     ActionPtr act = std::move(data_.back());
     data_.pop_back();
-    return std::move(act);
+    return act;
   }
 
   /**

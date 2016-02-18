@@ -261,10 +261,6 @@ void Nucleus::arrange_nucleons() {
 
     // Set the position of the nucleon.
     i->set_4position(FourVector(0.0, pos));
-
-    // Update the radial bound of the nucleus.
-    double r_tmp = pos.abs();
-    r_max_ = (r_tmp > r_max_) ? r_tmp : r_max_;
   }
 
   // Recenter and rotate
@@ -346,10 +342,14 @@ void Nucleus::generate_fermi_momenta() {
 
   log.debug() << N_n << " neutrons, " << N_p << " protons.";
 
+  ThreeVector ptot = ThreeVector(0.0, 0.0, 0.0);
   for (auto i = begin(); i != end(); i++) {
-    if (i->is_baryon() && i->pdgcode() != 0x2212 && i->pdgcode() != 0x2112) {
-      log.error() << "No rule to calculate Fermi momentum " <<
-                     "for particle " << i->pdgcode();
+    // Only protons and neutrons get Fermi momenta
+    if (i->pdgcode() != 0x2212 && i->pdgcode() != 0x2112) {
+      if (i->is_baryon()) {
+        log.error() << "No rule to calculate Fermi momentum " <<
+                       "for particle " << i->pdgcode();
+      }
       continue;
     }
     r = (i->position() - nucleus_center).abs3();
@@ -363,11 +363,30 @@ void Nucleus::generate_fermi_momenta() {
     }
     p = hbarc * std::pow(pi2_3 * rho * Random::uniform(0.0, 1.0), 1.0/3.0);
     phitheta.distribute_isotropically();
-    i->set_4momentum(i->pole_mass(), phitheta.threevec() * p);
+    const ThreeVector ith_3momentum = phitheta.threevec() * p;
+    ptot += ith_3momentum;
+    i->set_3momentum(ith_3momentum);
     log.debug() << "Particle: " << *i <<
                ", pF[GeV]: " << hbarc * std::pow(pi2_3 * rho, 1.0/3.0) <<
                " r[fm]: " << r <<
                " Nuclear radius[fm]: " << nuclear_radius_;
+  }
+  if (A == 0) {
+    // No Fermi momenta should be assigned
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wfloat-equal"
+    assert(ptot.x1() == 0.0 && ptot.x2() == 0.0 && ptot.x3() == 0.0);
+    #pragma GCC diagnostic pop
+  } else {
+    // Make sure that total momentum is zero - redistribute ptot equally among
+    // protons and neutrons
+    const ThreeVector centralizer = ptot/A;
+    for (auto i = begin(); i != end(); i++) {
+      if (i->pdgcode() == 0x2212 || i->pdgcode() == 0x2112) {
+        i->set_4momentum(i->pole_mass(),
+                         i->momentum().threevec() - centralizer);
+      }
+    }
   }
 }
 
@@ -397,8 +416,6 @@ void Nucleus::boost(double beta_scalar) {
     // *do* want to transform the zero-component (i.e., the energy).
     i->boost_momentum(beta);
   }
-  // we also need to update r_max_:
-  r_max_ *= one_over_gamma;
 }
 
 void Nucleus::fill_from_list(const std::map<PdgCode, int>& particle_list,
@@ -415,14 +432,8 @@ void Nucleus::fill_from_list(const std::map<PdgCode, int>& particle_list,
   }
 }
 
-void Nucleus::shift(bool is_projectile, double initial_z_displacement,
+void Nucleus::shift(double z_offset,
                     double x_offset, float simulation_time) {
-  // The amount to shift the z coordinates. If is_projectile, we shift
-  // back by -r_max_, else we shift forward r_max_.
-  double z_offset = is_projectile ? -r_max_ : r_max_;
-  // In the current system, the nuclei would touch. We want them to be
-  // a little apart, so we need a slightly bigger offset.
-  z_offset += initial_z_displacement;
   // Move the nucleus in z and x directions, and set the time.
   for (auto i = begin(); i != end(); i++) {
     FourVector this_position = i->position();

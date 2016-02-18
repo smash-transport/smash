@@ -29,7 +29,7 @@ TEST(spectral_functions) {
   const float error_tolerance_no_norm = 0.25;
   const float warning_level = 0.21;
   // error tolerance (max. deviation from one) for constant-width SF
-  const float error_tolerance_const = 0.003;
+  const float error_tolerance_const = 0.0032;
 
   /* Loop over all resonances. */
   for (const ParticleType &type : ParticleType::list_all()) {

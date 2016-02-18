@@ -12,6 +12,7 @@
 
 #include "forwarddeclarations.h"
 #include "density.h"
+#include "energymomentumtensor.h"
 #include "lattice.h"
 #include "macros.h"
 
@@ -78,14 +79,62 @@ class OutputInterface {
 
   /**
    * Output to write thermodynamics from the lattice.
-   * \param varname Variable name, used for file name etc.
+   * \param tq Thermodynamic quantity to be written, used for file name etc.
+   * \param dt Type of density, i.e. which particles to take into account.
    * \param lattice Lattice of tabulated values.
    */
-  virtual void thermodynamics_output(const std::string &varname,
+  virtual void thermodynamics_output(const ThermodynamicQuantity tq,
+                            const DensityType dt,
                             RectangularLattice<DensityOnLattice> &lattice) {
-    SMASH_UNUSED(varname);
+    SMASH_UNUSED(tq);
+    SMASH_UNUSED(dt);
     SMASH_UNUSED(lattice);
   }
+
+  /**
+   * Output to write energy-momentum tensor and related quantities from the lattice.
+   * \param tq Thermodynamic quantity to be written: Tmn, Tmn_Landau, v_Landau
+   * \param dt Type of density, i.e. which particles to take into account.
+   * \param lattice Lattice of tabulated values.
+   */
+  virtual void thermodynamics_output(const ThermodynamicQuantity tq,
+                            const DensityType dt,
+                            RectangularLattice<EnergyMomentumTensor> &lattice) {
+    SMASH_UNUSED(tq);
+    SMASH_UNUSED(dt);
+    SMASH_UNUSED(lattice);
+  }
+
+  const char *to_string(const ThermodynamicQuantity tq) {
+    switch (tq) {
+      case ThermodynamicQuantity::EckartDensity:
+        return "rho_eckart";
+      case ThermodynamicQuantity::Tmn:
+        return "tmn";
+      case ThermodynamicQuantity::TmnLandau:
+        return "tmn_landau";
+      case ThermodynamicQuantity::LandauVelocity:
+        return "v_landau";
+    }
+    throw std::invalid_argument("Unknown thermodynamic quantity.");
+  }
+
+  const char *to_string(const DensityType dens_type) {
+    switch (dens_type) {
+      case DensityType::Hadron:
+        return "hadron";
+      case DensityType::Baryon:
+        return "net_baryon";
+      case DensityType::BaryonicIsospin:
+        return "net_baryonI3";
+      case DensityType::Pion:
+        return "pion";
+      case DensityType::None:
+        return "none";
+    }
+    throw std::invalid_argument("Unknown density type.");
+  }
+
 };
 
 }  // namespace Smash

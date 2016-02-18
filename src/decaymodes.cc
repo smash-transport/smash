@@ -23,11 +23,35 @@ namespace Smash {
 
 std::vector<DecayModes> *DecayModes::all_decay_modes = nullptr;
 
-std::vector<std::unique_ptr<DecayType>> *all_decay_types = nullptr;
+std::vector<DecayTypePtr> *all_decay_types = nullptr;
 
 void DecayModes::add_mode(float ratio, int L,
                           ParticleTypePtrList particle_types) {
+  DecayType *type = get_decay_type(particle_types, L);
+  // check if mode already exists: if yes, add weight
+  for (auto &mode : decay_modes_) {
+    if (type == &mode->type()) {
+      mode->set_weight(mode->weight()+ratio);
+      return;
+    }
+  }
+  // add new mode
+  decay_modes_.push_back(make_unique<DecayBranch>(*type, ratio));
+}
+
+
+DecayType* DecayModes::get_decay_type(ParticleTypePtrList particle_types,
+                                      int L) {
   assert(all_decay_types != nullptr);
+
+  // check if the decay type already exisits
+  for (const auto &type : *all_decay_types) {
+    if (type->has_particles(particle_types) && type->angular_momentum() == L) {
+      return type.get();
+    }
+  }
+
+  // if the type does not exist yet, create a new one
   switch (particle_types.size()) {
     case 2:
       if (is_dilepton(particle_types[0]->pdgcode(),
@@ -60,13 +84,14 @@ void DecayModes::add_mode(float ratio, int L,
       break;
     default:
       throw InvalidDecay(
-        "DecayModes::add_mode was instructed to add a decay mode with " +
+        "DecayModes::get_decay_type was instructed to add a decay mode with " +
         std::to_string(particle_types.size()) +
         " particles. This is an invalid input.");
   }
-  decay_modes_.push_back(
-      make_unique<DecayBranch>(*all_decay_types->back(), ratio));
+
+  return all_decay_types->back().get();
 }
+
 
 void DecayModes::renormalize(std::string name) {
   const auto &log = logger<LogArea::DecayModes>();
@@ -104,7 +129,7 @@ void DecayModes::load_decaymodes(const std::string &input) {
   const auto &log = logger<LogArea::DecayModes>();
   // create the DecayType vector first, then it outlives the DecayModes vector,
   // which references the DecayType objects.
-  static std::vector<std::unique_ptr<DecayType>> decaytypes;
+  static std::vector<DecayTypePtr> decaytypes;
   decaytypes.clear();  // in case an exception was thrown and should try again
   // ten decay types per decay mode should be a good guess.
   decaytypes.reserve(10 * ParticleType::list_all().size());
@@ -187,8 +212,8 @@ void DecayModes::load_decaymodes(const std::string &input) {
 
       int L;
       lineinput >> L;
-      if (L < 0 || L > 3) {  // at some point we might need to support L up to 4
-                             // (cf. BlattWeisskopf in decaytype.cc)
+      if (L < 0 || L > 4) {  // at some point we might need to support L > 4 ?
+                             // (cf. blatt_weisskopf_sqr in formfactors.h)
         throw LoadFailure("Invalid angular momentum '" + std::to_string(L) +
                           "' in decaymodes.txt:" + std::to_string(line.number) +
                           ": '" + line.text + "'");

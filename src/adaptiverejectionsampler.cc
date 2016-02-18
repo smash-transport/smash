@@ -74,7 +74,7 @@ AdaptiveRejectionSampler::AdaptiveRejectionSampler(
   float dx = (xmax_ - xmin_)/static_cast<float>(init_npoint_-1);
 
   Point p;
-  for ( int i=0; i < init_npoint_; i++ ) {
+  for ( int i = 0; i < init_npoint_; i++ ) {
     p.x = xmin_+i*dx;
     p.expy = f_(p.x);
     p.y = std::log(p.expy);
@@ -111,7 +111,7 @@ inline Line AdaptiveRejectionSampler::create_line(Point p0, Point p1) {
 
 /** Get scants_ according to points_ */
 void AdaptiveRejectionSampler::init_scant() {
-  for ( auto p0=points_.begin(); p0 != std::prev(points_.end(), 1);
+  for ( auto p0 = points_.begin(); p0 != std::prev(points_.end(), 1);
        p0++ ) {
     auto p1 = std::next(p0, 1);
     scants_.emplace_back(create_line(*p0, *p1));
@@ -157,9 +157,9 @@ inline void AdaptiveRejectionSampler::create_rightend() {
 
 /** get all intersection points in upper bounds */
 void AdaptiveRejectionSampler::init_inter() {
-  for (auto l0=scants_.begin(); l0 != std::prev(scants_.end(), 2); l0++) {
+  for (auto l0 = scants_.begin(); l0 != std::prev(scants_.end(), 2); l0++) {
     auto l2 = std::next(l0, 2);
-    inters_.emplace_back(std::move(create_inter(*l0, *l2)));
+    inters_.emplace_back(create_inter(*l0, *l2));
   }
   create_leftend();
   create_rightend();

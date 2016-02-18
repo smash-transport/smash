@@ -116,14 +116,7 @@ class Nucleus {
   /**
    * Shifts the nucleus to correct impact parameter and z displacement.
    *
-   * @param is_projectile switches if the projectile is shifted to
-   * -z_max_ or -z_min_ (the projetcile is shifted to -z_max_, so that
-   *  the particle at highest z is at z = 0, and the target is shifted
-   *  to -z_min_, so that the leftmost particle is at z = 0.
-   *
-   * @param initial_z_displacement is the additional shift in z
-   * direction, so that two nuclei do not touch each other at the
-   * beginning.
+   * @param z_offset is the shift in z-direction
    *
    * @param x_offset is the shift in x-direction (for impact parameter
    * setting).
@@ -132,8 +125,8 @@ class Nucleus {
    *
    * \fpPrecision Why \c double?
    **/
-  void shift(bool is_projectile, double initial_z_displacement,
-                     double x_offset, float simulation_time);
+  void shift(double z_offset,
+             double x_offset, float simulation_time);
 
   /** Rotates the nucleus. (Spherical symmetry of nondeformed nuclei
    * means there is nothing to do.)
@@ -200,8 +193,6 @@ class Nucleus {
    * \see default_nuclear_radius
    * */
   float proton_radius_ = 1.2f;
-  /// Coordinate of the outermost particle.
-  float r_max_ = 0.f;
   /// Number of testparticles per physical particle
   size_t testparticles_ = 1;
   /// particles associated with this nucleus.

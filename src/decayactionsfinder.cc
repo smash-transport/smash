@@ -63,7 +63,7 @@ ActionList DecayActionsFinder::find_actions_in_cell(
       actions.emplace_back(std::move(act));
     }
   }
-  return std::move(actions);
+  return actions;
 }
 
 ActionList DecayActionsFinder::find_final_actions
@@ -78,7 +78,7 @@ ActionList DecayActionsFinder::find_final_actions
     act->add_decays(p.type().get_partial_widths(p.effective_mass()));
     actions.emplace_back(std::move(act));
   }
-  return std::move(actions);
+  return actions;
 }
 
 }  // namespace Smash

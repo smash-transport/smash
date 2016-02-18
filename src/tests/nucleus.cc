@@ -12,6 +12,7 @@
 #include "../include/nucleus.h"
 #include "../include/pdgcode.h"
 #include "../include/threevector.h"
+#include "../include/particles.h"
 
 namespace particles_txt {
 #include <particles.txt.h>
@@ -114,58 +115,49 @@ TEST(center_hard_sphere) {
 // maximum z value of all particles. Using many test particles and a
 // hard sphere, I try to make this less random.
 TEST(shift_zero) {
-  constexpr int N_TEST = 1000;
+  constexpr int N_TEST = 1;
   Nucleus lead(list, N_TEST);
-  lead.set_diffusiveness(0.0);
   lead.set_nuclear_radius(lead.default_nuclear_radius());
   lead.arrange_nucleons();
   FourVector precenter = lead.center();
   // shift with zero displacement: shouldn't change x and y, but note
   // that the z-parameter is the distance between the outer edges of the
   // nucleus!
-  lead.shift(true, 0, 0.0, 0.0);
+  lead.shift(0, 0.0, 0.0);
   FourVector postcenter = lead.center();
-  UnitTest::setFuzzyness<double>(10);
+  UnitTest::setFuzzyness<double>(30);
   FUZZY_COMPARE(postcenter.x1(), precenter.x1());
   FUZZY_COMPARE(postcenter.x2(), precenter.x2());
-  COMPARE_RELATIVE_ERROR(postcenter.x3(), precenter.x3()-lead.default_nuclear_radius(),
-                         0.2);
+  FUZZY_COMPARE(postcenter.x3(), precenter.x3());
 }
 
 TEST(shift_x) {
-  constexpr int N_TEST = 1000;
+  constexpr int N_TEST = 1;
   Nucleus lead(list, N_TEST);
-  lead.set_diffusiveness(0.0);
   lead.set_nuclear_radius(lead.default_nuclear_radius());
   lead.arrange_nucleons();
   FourVector precenter = lead.center();
   // shift only in x.
-  lead.shift(true, 0, 4.0, 0.0);
+  lead.shift(0, 4.0, 0.0);
   FourVector postcenter = lead.center();
-  UnitTest::setFuzzyness<double>(150);
+  UnitTest::setFuzzyness<double>(30);
   FUZZY_COMPARE(postcenter.x1(), precenter.x1()+4.0);
   FUZZY_COMPARE(postcenter.x2(), precenter.x2());
-  COMPARE_RELATIVE_ERROR(postcenter.x3(), precenter.x3()-lead.default_nuclear_radius(),
-                        0.2);
+  FUZZY_COMPARE(postcenter.x3(), precenter.x3());
 }
 
 TEST(shift_z) {
-  constexpr int N_TEST = 1000;
+  constexpr int N_TEST = 1;
   Nucleus lead(list, N_TEST);
-  lead.set_diffusiveness(0.0);
   lead.set_nuclear_radius(lead.default_nuclear_radius());
   lead.arrange_nucleons();
   FourVector precenter = lead.center();
-  // shift in z. Here, we cannot exactly predict what happens, because
-  // the shift depends on the outermost particle. That's why we use many
-  // test particles and a hard sphere.
-  lead.shift(true, 4.0, 0.0, 0.0);
+  lead.shift(4.0, 0.0, 0.0);
   FourVector postcenter = lead.center();
-  UnitTest::setFuzzyness<double>(10);
+  UnitTest::setFuzzyness<double>(30);
   FUZZY_COMPARE(postcenter.x1(), precenter.x1());
   FUZZY_COMPARE(postcenter.x2(), precenter.x2());
-  COMPARE_RELATIVE_ERROR(postcenter.x3(),
-      precenter.x3() - lead.default_nuclear_radius() + 4.0, 0.2);
+  FUZZY_COMPARE(postcenter.x3(), precenter.x3() + 4.0);
 }
 
 // test the woods-saxon distribution at various discrete points:
@@ -207,4 +199,42 @@ TEST(woods_saxon) {
             << " vs. calculated: " << expec
             << " (allowed distance: " << margin << ")";
   }
+}
+
+TEST(Fermi_motion) {
+  std::map<PdgCode, int> myfunnylist = {{0x2212, 22}, // protons
+                                        {0x2112, 35}, // neutrons
+                                         {0x111, 5},  // pions
+                                        {0x3122, 1},  // Lambda
+                                         {0x13, 1}};  // muon
+  Nucleus myfunnynucleus(myfunnylist, 1);
+  VERIFY(myfunnynucleus.size() == 22+35+5+1+1);
+  // Set some arbitrary radius and diffusiveness
+  myfunnynucleus.set_nuclear_radius(3.0f);
+  myfunnynucleus.set_diffusiveness(0.5f);
+  // Arrange coordinate space, because Fermi momenta depend on positions
+  myfunnynucleus.arrange_nucleons();
+  myfunnynucleus.generate_fermi_momenta();
+
+  /* Check that: (i) only protons and neutrons get Fermi momenta
+   *             (ii) total momentum is 0
+   *             (iii) particles are on the mass shell
+   */
+  Particles particles;
+  myfunnynucleus.copy_particles(&particles);
+  ThreeVector ptot = ThreeVector();
+  for (const auto &p : particles) {
+    const ThreeVector mom3 = p.momentum().threevec();
+    ptot += mom3;
+    if (p.pdgcode() != 0x2212 && p.pdgcode() != 0x2112) {
+      VERIFY(mom3.x1() == 0.0);
+      VERIFY(mom3.x2() == 0.0);
+      VERIFY(mom3.x3() == 0.0);
+    }
+    FUZZY_COMPARE(static_cast<float>(p.momentum().sqr()),
+                  p.pole_mass()*p.pole_mass());
+  }
+  COMPARE_ABSOLUTE_ERROR(ptot.x1(), 0.0, 1.0e-15) << ptot.x1();
+  COMPARE_ABSOLUTE_ERROR(ptot.x2(), 0.0, 1.0e-15) << ptot.x2();
+  COMPARE_ABSOLUTE_ERROR(ptot.x3(), 0.0, 1.0e-15) << ptot.x3();
 }

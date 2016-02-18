@@ -79,11 +79,12 @@ Output:
     Binary_Particles:
         Enable:             False
         Only_Final:         False
-    Density:
+    Thermodynamics:
         Enable:             False
-        x: 0.0
-        y: 0.0
-        z: 0.0
+        # ("hadron", "baryon", "baryonic isospin", "pion", "none")
+        Type:               "baryon"
+        Quantities:         ["rho_eckart", "tmn", "tmn_landau", "landau_velocity"]
+        Position:           [0.0, 0.0, 0.0]
     Dileptons:
         Enable:             False
         Format:             Oscar
@@ -109,15 +110,14 @@ Collision_Term:
 #        S_Pot: 18.0
 
 Lattice:
-    Origin: [0.0, 0.0, 0.0]    # Coordinates of the left, down, near corner of the lattice
-    Sizes: [10.0, 10.0, 10.0]  # Sizes in x, y, z directions in fm
-    Cell_Number: [20, 20, 20]   # Number of cells in x, y, z directions
-    Periodic: True             # Periodic continuation: x + i * lx is equivalent to x, same for y, z
+    Origin:      [0.0, 0.0, 0.0]     # Coordinates of the left, down, near corner of the lattice
+    Sizes:       [10.0, 10.0, 10.0]  # Sizes in x, y, z directions in fm
+    Cell_Number: [20, 20, 20]        # Number of cells in x, y, z directions
+    Periodic:    True                # Periodic continuation: x + i * lx is equivalent to x, same for y, z
     Printout:
-        # ("particle", "baryon", "baryonic isospin", "pion")
-        #Density: "baryon"
-        #LandauEnergyDensity: False, not implemented
-        #LandauVelocity: False, not implemented
+        # ("hadron", "baryon", "baryonic isospin", "pion"), baryon := net baryon
+        Type:       "none"
+        Quantities: ["rho_eckart", "tmn", "tmn_landau", "landau_velocity"]
 
 Modi:
     Box:

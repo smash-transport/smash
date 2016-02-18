@@ -105,7 +105,7 @@ ScatterActionPtr ScatterActionsFinder::construct_scatter_action(
                                               time_until_collision, isotropic_,
                                               formation_time_);
   }
-  return std::move(act);
+  return act;
 }
 
 ActionPtr ScatterActionsFinder::check_collision(

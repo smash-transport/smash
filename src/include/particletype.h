@@ -315,6 +315,10 @@ class ParticleType {
   bool operator!=(const ParticleType &rhs) const {
     return pdgcode() != rhs.pdgcode();
   }
+  /// "Less than" operator for sorting the ParticleType list (by PDG code)
+  bool operator<(const ParticleType &rhs) const {
+    return pdgcode() < rhs.pdgcode();
+  }
 
   /**
    * Check if unstable particles have any decay modes and throw errors.
@@ -433,6 +437,10 @@ class ParticleTypePtr {
   /// Returns whether the two objects reference different ParticleType objects.
   bool operator!=(const ParticleTypePtr &rhs) const {
     return index_ != rhs.index_;
+  }
+  // "Less than" operator
+  bool operator<(const ParticleTypePtr &rhs) const {
+    return index_ < rhs.index_;
   }
 
   /// Returns whether the objects stores a valid ParticleType reference.

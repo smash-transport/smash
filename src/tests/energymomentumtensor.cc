@@ -6,9 +6,10 @@
  *    GNU General Public License (GPLv3 or later)
  *
  */
+#include "unittest.h"
+
 #include "../include/energymomentumtensor.h"
 #include "../include/fourvector.h"
-#include "unittest.h"
 
 using namespace Smash;
 

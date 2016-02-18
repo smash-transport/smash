@@ -22,7 +22,7 @@
 /* Outputs */
 #include "include/binaryoutputcollisions.h"
 #include "include/binaryoutputparticles.h"
-#include "include/densityoutput.h"
+#include "include/thermodynamicoutput.h"
 #include "include/oscaroutput.h"
 #ifdef SMASH_USE_ROOT
 #  include "include/rootoutput.h"
@@ -61,8 +61,8 @@ static ostream &operator<<(ostream &out,
 namespace Smash {
 
 /* ExperimentBase carries everything that is needed for the evolution */
-std::unique_ptr<ExperimentBase> ExperimentBase::create(Configuration config,
-                                                  const bf::path &output_path) {
+ExperimentPtr ExperimentBase::create(Configuration config,
+                                     const bf::path &output_path) {
   const auto &log = logger<LogArea::Experiment>();
   log.trace() << source_location;
   /*!\Userguide
@@ -95,7 +95,6 @@ std::unique_ptr<ExperimentBase> ExperimentBase::create(Configuration config,
   // remove config maps of unused Modi
   config["Modi"].remove_all_but(modus_chooser);
 
-  typedef std::unique_ptr<ExperimentBase> ExperimentPointer;
   if (modus_chooser.compare("Box") == 0) {
     if (config.has_value({"General", "Time_Step_Mode"}) &&
         config.read({"General", "Time_Step_Mode"}) == TimeStepMode::None) {
@@ -104,14 +103,13 @@ std::unique_ptr<ExperimentBase> ExperimentBase::create(Configuration config,
                   << "looking for interactions.";
       throw std::invalid_argument("Can't use box modus without time steps!");
     }
-    return ExperimentPointer(new Experiment<BoxModus>(config, output_path));
+    return make_unique<Experiment<BoxModus>>(config, output_path);
   } else if (modus_chooser.compare("List") == 0) {
-    return ExperimentPointer(new Experiment<ListModus>(config, output_path));
+    return make_unique<Experiment<ListModus>>(config, output_path);
   } else if (modus_chooser.compare("Collider") == 0) {
-    return ExperimentPointer(new Experiment<ColliderModus>(config,
-                                                           output_path));
+    return make_unique<Experiment<ColliderModus>>(config, output_path);
   } else if (modus_chooser.compare("Sphere") == 0) {
-    return ExperimentPointer(new Experiment<SphereModus>(config, output_path));
+    return make_unique<Experiment<SphereModus>>(config, output_path);
   } else {
     throw InvalidModusRequest("Invalid Modus (" + modus_chooser +
                               ") requested from ExperimentBase::create.");
@@ -273,7 +271,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
 
   // create finders
   if (two_to_one) {
-    action_finders_.emplace_back(new DecayActionsFinder());
+    action_finders_.emplace_back(make_unique<DecayActionsFinder>());
   }
   if (two_to_one || two_to_two) {
     auto scat_finder = make_unique<ScatterActionsFinder>(config, parameters_,
@@ -380,32 +378,31 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
 
   // loop until all OSCAR outputs are created (create_oscar_output will return
   // nullptr then).
-  while (std::unique_ptr<OutputInterface> oscar =
-              create_oscar_output(output_path, output_conf)) {
+  while (OutputPtr oscar = create_oscar_output(output_path, output_conf)) {
     outputs_.emplace_back(std::move(oscar));
   }
   if (static_cast<bool>(output_conf.take({"Vtk", "Enable"}))) {
-    outputs_.emplace_back(new VtkOutput(output_path,
-                                        std::move(output_conf["Vtk"])));
+    outputs_.emplace_back(make_unique<VtkOutput>(output_path,
+                                                 output_conf["Vtk"]));
   } else {
     output_conf.take({"Vtk"});
   }
   if (static_cast<bool>(output_conf.take({"Binary_Collisions", "Enable"}))) {
-    outputs_.emplace_back(new BinaryOutputCollisions(output_path,
-                                  std::move(output_conf["Binary_Collisions"])));
+    outputs_.emplace_back(make_unique<BinaryOutputCollisions>(output_path,
+                                            output_conf["Binary_Collisions"]));
   } else {
     output_conf.take({"Binary_Collisions"});
   }
   if (static_cast<bool>(output_conf.take({"Binary_Particles", "Enable"}))) {
-    outputs_.emplace_back(new BinaryOutputParticles(output_path,
-                                  std::move(output_conf["Binary_Particles"])));
+    outputs_.emplace_back(make_unique<BinaryOutputParticles>(output_path,
+                                              output_conf["Binary_Particles"]));
   } else {
     output_conf.take({"Binary_Particles"});
   }
   if (static_cast<bool>(output_conf.take({"Root", "Enable"}))) {
 #ifdef SMASH_USE_ROOT
-    outputs_.emplace_back(new RootOutput(
-                              output_path, std::move(output_conf["Root"])));
+    outputs_.emplace_back(make_unique<RootOutput>(output_path,
+                                                  output_conf["Root"]));
 #else
     log.error() << "You requested Root output, but Root support has not been "
                     "compiled in.";
@@ -414,11 +411,11 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
   } else {
     output_conf.take({"Root"});
   }
-  if (static_cast<bool>(output_conf.take({"Density", "Enable"}))) {
-    outputs_.emplace_back(new DensityOutput(output_path,
-                              std::move(output_conf["Density"])));
+  if (static_cast<bool>(output_conf.take({"Thermodynamics", "Enable"}))) {
+    outputs_.emplace_back(make_unique<ThermodynamicOutput>(output_path,
+                                               output_conf["Thermodynamics"]));
   } else {
-    output_conf.take({"Density"});
+    output_conf.take({"Thermodynamics"});
   }
 
   /*!\Userguide
@@ -513,8 +510,20 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    * For this one has to use the "Lattice: Printout" section of configuration.
    * Currently printing of custom density to vtk file is available.
    *
-   * \key Density (string, optional, default = "none"): \n
-   * Chooses which density to print.
+   * \key Type (string, optional, default = "none"): \n
+   * Chooses hadron/baryon/pion/baryonic isospin thermodynamic quantities
+   *
+   * \key Quantities (list of strings, optional, default = []): \n
+   * List of quantities that can be printed:
+   *  \li "rho_eckart": Eckart rest frame density
+   *  \li "tmn": Energy-momentum tensor \f$T^{\mu\nu}(t,x,y,z) \f$
+   *  \li "tmn_landau": Energy-momentum tensor in the Landau rest frame.
+   *      This tensor is computed by boosting \f$T^{\mu\nu}(t,x,y,z) \f$
+   *      to the local rest frame, where \f$T^{0i} \f$ = 0.
+   *  \li "landau_velocity": Velocity of the Landau rest frame.
+   *      The velocity is obtained from the energy-momentum tensor
+   *      \f$T^{\mu\nu}(t,x,y,z) \f$ by solving the generalized eigenvalue
+   *      equation \f$(T^{\mu\nu} - \lambda g^{\mu\nu})u_{\mu}=0 \f$.
    */
 
   // Create lattices
@@ -525,7 +534,18 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     const std::array<float, 3> origin = config.take({"Lattice", "Origin"});
     const bool periodic = config.take({"Lattice", "Periodic"});
     dens_type_lattice_printout_ = config.take(
-                  {"Lattice", "Printout", "Density"}, DensityType::None);
+            {"Lattice", "Printout", "Type"}, DensityType::None);
+    const std::set<ThermodynamicQuantity> td_to_print = config.take(
+            {"Lattice", "Printout", "Quantities"});
+    printout_tmn_ = (td_to_print.count(ThermodynamicQuantity::Tmn) > 0);
+    printout_tmn_landau_ =
+           (td_to_print.count(ThermodynamicQuantity::TmnLandau) > 0);
+    printout_v_landau_ =
+           (td_to_print.count(ThermodynamicQuantity::LandauVelocity) > 0);
+    if (printout_tmn_ || printout_tmn_landau_ || printout_v_landau_) {
+      Tmn_ = make_unique<RectangularLattice<EnergyMomentumTensor>>(
+                l, n, origin, periodic, LatticeUpdate::AtOutput);
+    }
     /* Create baryon and isospin density lattices regardless of config
        if potentials are on. This is because they allow to compute
        potentials faster */
@@ -1118,19 +1138,38 @@ void Experiment<Modus>::intermediate_output(uint64_t& interactions_total,
       case DensityType::Baryon:
         update_density_lattice(jmu_B_lat_.get(), lat_upd,
                                DensityType::Baryon, density_param_, particles_);
-        output->thermodynamics_output(std::string("rhoB"), *jmu_B_lat_);
+        output->thermodynamics_output(ThermodynamicQuantity::EckartDensity,
+                                      DensityType::Baryon, *jmu_B_lat_);
         break;
       case DensityType::BaryonicIsospin:
         update_density_lattice(jmu_I3_lat_.get(), lat_upd,
                      DensityType::BaryonicIsospin, density_param_, particles_);
-        output->thermodynamics_output(std::string("rhoI3"), *jmu_I3_lat_);
+        output->thermodynamics_output(ThermodynamicQuantity::EckartDensity,
+                                   DensityType::BaryonicIsospin, *jmu_I3_lat_);
         break;
       case DensityType::None:
         break;
       default:
         update_density_lattice(jmu_custom_lat_.get(), lat_upd,
                        dens_type_lattice_printout_, density_param_, particles_);
-        output->thermodynamics_output(std::string("rho"), *jmu_custom_lat_);
+        output->thermodynamics_output(ThermodynamicQuantity::EckartDensity,
+                                 dens_type_lattice_printout_, *jmu_custom_lat_);
+    }
+    if (printout_tmn_ || printout_tmn_landau_ || printout_v_landau_) {
+      update_Tmn_lattice(Tmn_.get(), lat_upd, dens_type_lattice_printout_,
+                          density_param_, particles_);
+      if (printout_tmn_) {
+        output->thermodynamics_output(ThermodynamicQuantity::Tmn,
+                                      dens_type_lattice_printout_, *Tmn_);
+      }
+      if (printout_tmn_landau_) {
+        output->thermodynamics_output(ThermodynamicQuantity::TmnLandau,
+                                      dens_type_lattice_printout_, *Tmn_);
+      }
+      if (printout_v_landau_) {
+        output->thermodynamics_output(ThermodynamicQuantity::LandauVelocity,
+                                      dens_type_lattice_printout_, *Tmn_);
+      }
     }
   }
 }

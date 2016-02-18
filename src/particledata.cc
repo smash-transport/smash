@@ -28,6 +28,30 @@ float ParticleData::effective_mass() const {
   }
 }
 
+void ParticleData::set_history(uint32_t pid, ProcessType pt,
+                               const ParticleList& plist) {
+  history_.id_process = pid;
+  history_.process_type = pt;
+  switch (pt) {
+  case ProcessType::Decay: case ProcessType::Wall:
+    // only store one parent
+    history_.p1 = plist[0].pdgcode();
+    history_.p2 = 0x0;
+    break;
+  case ProcessType::Elastic: case ProcessType::TwoToOne:
+  case ProcessType::TwoToTwo: case ProcessType::String:
+    // store two parent particles
+    history_.p1 = plist[0].pdgcode();
+    history_.p2 = plist[1].pdgcode();
+    break;
+  case ProcessType::None:
+    // nullify parents
+    history_.p1 = 0x0;
+    history_.p2 = 0x0;
+    break;
+  }
+}
+
 std::ostream &operator<<(std::ostream &out, const ParticleData &p) {
   out.fill(' ');
   return out

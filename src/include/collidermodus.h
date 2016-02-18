@@ -109,13 +109,11 @@ class ColliderModus : public ModusDefault {
   void sample_impact();
   /** Initial z displacement of nuclei.
    *
-   * Each nucleus is shifted so that
-   * the outermost particle on the side facing the other nucleus is at
-   * \f$\pm\f$ this value.
-   *
-   * \fpPrecision Why \c double?
+   * Projectile is shifted on -(this value) in z-direction
+   * and target on +(this value)*v_target/v_projectile. In this way
+   * projectile and target touch at t=0 in z=0.
    **/
-  double initial_z_displacement_ = 1.0;
+  float initial_z_displacement_ = 2.0;
   /**
    * Reference frame for the system.
    */

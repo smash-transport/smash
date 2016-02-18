@@ -25,10 +25,10 @@ TEST(permutation) {
       x, [&](double a, double b) {
         return a < b;
       });
-  const std::vector<double> sorted_x = std::move(apply_permutation(x, p));
+  const std::vector<double> sorted_x = apply_permutation(x, p);
   const std::vector<double> correctly_sorted_x = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
   COMPARE(sorted_x, correctly_sorted_x);
-  const std::vector<double> permuted_y = std::move(apply_permutation(y, p));
+  const std::vector<double> permuted_y = apply_permutation(y, p);
   const std::vector<double> correctly_permuted_y = {9, 8, 7, 6, 5, 4, 3, 2, 1, 0};
   COMPARE(permuted_y, correctly_permuted_y);
 }

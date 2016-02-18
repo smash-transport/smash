@@ -211,6 +211,20 @@ TEST (iso_clebsch_2to2) {
   iso_cg = isospin_clebsch_gordan_sqr_2to2(neutron, neutron, neutron, neutron);
   COMPARE_ABSOLUTE_ERROR(iso_cg, 1.f, tolerance);
 
+  // N N -> N N with given total isospsin
+  iso_cg = isospin_clebsch_gordan_sqr_2to2(proton, proton, proton, proton, 2);
+  COMPARE_ABSOLUTE_ERROR(iso_cg, 1.f, tolerance);
+  iso_cg = isospin_clebsch_gordan_sqr_2to2(proton, proton, proton, proton, 0);
+  COMPARE_ABSOLUTE_ERROR(iso_cg, 0.f, tolerance);
+  iso_cg = isospin_clebsch_gordan_sqr_2to2(proton, neutron, proton, neutron, 2);
+  COMPARE_ABSOLUTE_ERROR(iso_cg, 0.25f, tolerance);
+  iso_cg = isospin_clebsch_gordan_sqr_2to2(proton, neutron, proton, neutron, 0);
+  COMPARE_ABSOLUTE_ERROR(iso_cg, 0.25f, tolerance);
+  iso_cg = isospin_clebsch_gordan_sqr_2to2(neutron, neutron, neutron, neutron, 2);
+  COMPARE_ABSOLUTE_ERROR(iso_cg, 1.f, tolerance);
+  iso_cg = isospin_clebsch_gordan_sqr_2to2(neutron, neutron, neutron, neutron, 0);
+  COMPARE_ABSOLUTE_ERROR(iso_cg, 0.f, tolerance);
+
   // N N -> N Delta
   iso_cg = isospin_clebsch_gordan_sqr_2to2(proton, proton, Delta_pp, neutron);
   COMPARE_ABSOLUTE_ERROR(iso_cg, 3.f/4.f, tolerance);

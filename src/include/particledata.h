@@ -7,13 +7,28 @@
 #ifndef SRC_INCLUDE_PARTICLEDATA_H_
 #define SRC_INCLUDE_PARTICLEDATA_H_
 
+#include <limits>
+
 #include "forwarddeclarations.h"
 #include "fourvector.h"
 #include "particletype.h"
 #include "pdgcode.h"
-#include <limits>
+#include "processbranch.h"
 
 namespace Smash {
+
+
+/* A structure to hold information about the history of the particle,
+ * e.g. the last interaction etc. */
+struct HistoryData {
+  // id of the last action
+  uint32_t id_process = 0;
+  // type of the last action
+  ProcessType process_type = ProcessType::None;
+  // PdgCodes of the parent particles
+  PdgCode p1 = 0x0, p2 = 0x0;
+};
+
 
 /**
  * \ingroup data
@@ -60,10 +75,13 @@ class ParticleData {
    */
   const ParticleType &type() const { return *type_; }
 
-  /// look up the id of the collision process
-  uint32_t id_process() const { return id_process_; }
-  /// set the id of the collision process
-  void set_id_process(uint32_t i) { id_process_ = i; }
+  /// look up the id of the last action
+  uint32_t id_process() const { return history_.id_process; }
+  /// get history information
+  HistoryData get_history() const { return history_; }
+  /** Store history information, i.e. the type of process and possibly the
+   * PdgCodes of the parent particles (\p plist). */
+  void set_history(uint32_t pid, ProcessType pt, const ParticleList& plist);
 
   /// return the particle's 4-momentum
   const FourVector &momentum() const { return momentum_; }
@@ -97,7 +115,8 @@ class ParticleData {
                            px, py, pz);
   }
   /**
-   * Set the momentum of the particle without modifying the currently set mass.
+   * Set the momentum of the particle without modifying the energy.
+   * WARNING: Mass gets modified.
    */
   void set_3momentum(const ThreeVector &mom) {
     momentum_ = FourVector(momentum_.x0(), mom);
@@ -202,7 +221,7 @@ class ParticleData {
    * three are handled by Particles.
    */
   void copy_to(ParticleData &dst) const {
-    dst.id_process_ = id_process_;
+    dst.history_ = history_;
     dst.momentum_ = momentum_;
     dst.position_ = position_;
     dst.formation_time_ = formation_time_;
@@ -228,9 +247,6 @@ class ParticleData {
    * \see Particles::data_
    */
   unsigned index_ = std::numeric_limits<unsigned>::max();
-
-  /// counter of the last collision/decay
-  uint32_t id_process_ = 0;
 
   /**
    * A reference to the ParticleType object for this particle (this contains
@@ -261,6 +277,9 @@ class ParticleData {
   float formation_time_ = 0.0;
   /// cross section scaling factor for unformed particles
   float cross_section_scaling_factor_ = 1.0;
+
+  // history information
+  HistoryData history_;
 };
 
 /**\ingroup logging

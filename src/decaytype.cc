@@ -7,6 +7,7 @@
 
 #include "include/decaytype.h"
 
+#include <algorithm>
 #include <math.h>
 
 #include "include/constants.h"
@@ -57,14 +58,16 @@ TwoBodyDecay::TwoBodyDecay(ParticleTypePtrList part_types, int l)
   }
 }
 
-int TwoBodyDecay::particle_number() const {
+unsigned int TwoBodyDecay::particle_number() const {
   return 2;
 }
 
-bool TwoBodyDecay::has_particles(const ParticleType &t_a,
-                                 const ParticleType &t_b) const {
-  return (*particle_types_[0] == t_a && *particle_types_[1] == t_b) ||
-         (*particle_types_[0] == t_b && *particle_types_[1] == t_a);
+bool TwoBodyDecay::has_particles(ParticleTypePtrList list) const {
+  if (list.size() != particle_number()) {
+    return false;
+  }
+  return (particle_types_[0] == list[0] && particle_types_[1] == list[1]) ||
+         (particle_types_[0] == list[1] && particle_types_[1] == list[0]);
 }
 
 // TwoBodyDecayStable
@@ -104,8 +107,8 @@ float TwoBodyDecayStable::in_width(float m0, float G0, float m,
 
 // TwoBodyDecaySemistable
 
+/// re-arrange the particle list such that the first particle is the stable one
 static ParticleTypePtrList arrange_particles(ParticleTypePtrList part_types) {
-  // re-arrange the particle list such that the first particle is the stable one
   if (part_types[1]->is_stable()) {
     std::swap(part_types[0], part_types[1]);
   }
@@ -262,8 +265,14 @@ float TwoBodyDecayDilepton::width(float m0, float G0, float m) const {
 
 // ThreeBodyDecay
 
+/// sort the particle list
+static ParticleTypePtrList sort_particles(ParticleTypePtrList part_types) {
+  std::sort(part_types.begin(), part_types.end());
+  return part_types;
+}
+
 ThreeBodyDecay::ThreeBodyDecay(ParticleTypePtrList part_types, int l)
-                               : DecayType(part_types, l) {
+                               : DecayType(sort_particles(part_types), l) {
   if (part_types.size() != 3) {
     throw std::runtime_error(
       "Wrong number of particles in ThreeBodyDecay constructor: " +
@@ -271,13 +280,18 @@ ThreeBodyDecay::ThreeBodyDecay(ParticleTypePtrList part_types, int l)
   }
 }
 
-int ThreeBodyDecay::particle_number() const {
+unsigned int ThreeBodyDecay::particle_number() const {
   return 3;
 }
 
-bool ThreeBodyDecay::has_particles(const ParticleType &,
-                                   const ParticleType &) const {
-  return false;
+bool ThreeBodyDecay::has_particles(ParticleTypePtrList list) const {
+  if (list.size() != particle_number()) {
+    return false;
+  }
+  // compare sorted vectors (particle_types_ is already sorted)
+  std::sort(list.begin(), list.end());
+  return particle_types_[0] == list[0] && particle_types_[1] == list[1] &&
+         particle_types_[2] == list[2];
 }
 
 float ThreeBodyDecay::width(float, float G0, float) const {

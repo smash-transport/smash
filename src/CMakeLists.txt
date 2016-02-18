@@ -29,7 +29,6 @@ string(TIMESTAMP BUILD_DATE)
 find_package(GSL REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(Boost 1.49.0 REQUIRED COMPONENTS filesystem system)
-pkg_check_modules(YAML REQUIRED yaml-cpp=0.5.1)
 
 option(USE_ROOT "Turn this off to disable ROOT output support in SMASH." ON)
 if(USE_ROOT)
@@ -66,7 +65,6 @@ include_directories(SYSTEM
     "${GSL_INCLUDES}"
     ${Boost_INCLUDE_DIRS}
     ${EIGEN3_INCLUDE_DIR}
-    ${YAML_INCLUDE_DIRS}
     )
 
 # set default libraries for linking
@@ -74,8 +72,8 @@ set(SMASH_LIBRARIES ${SMASH_LIBRARIES}
    ${GSL_LIBRARY}
    ${GSL_CBLAS_LIBRARY}
    ${Boost_LIBRARIES}
-   ${YAML_LDFLAGS}
    einhard
+   yaml-cpp
    )
 
 # list the source files
@@ -94,7 +92,6 @@ set(smash_src
         decaytype.cc
         deformednucleus.cc
         density.cc
-        densityoutput.cc
         decayactiondilepton.cc
         decayactionsfinderdilepton.cc
         distributions.cc
@@ -134,6 +131,7 @@ set(smash_src
         spheremodus.cc
         stringfunctions.cc
         tabulation.cc
+        thermodynamicoutput.cc
         threevector.cc
         tsc.cc
         vtkoutput.cc

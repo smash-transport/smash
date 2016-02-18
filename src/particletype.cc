@@ -210,10 +210,7 @@ void ParticleType::create_type_list(const std::string &input) {  // {{{
   type_list.shrink_to_fit();
 
   /* Sort the type list by PDG code. */
-  std::sort(type_list.begin(), type_list.end(),
-            [](const ParticleType &l, const ParticleType &r) {
-              return l.pdgcode() < r.pdgcode();
-            });
+  std::sort(type_list.begin(), type_list.end());
 
   /* Look for duplicates. */
   PdgCode prev_pdg = 0;
@@ -315,7 +312,7 @@ DecayBranchList ParticleType::get_partial_widths(const float m) const {
           make_unique<DecayBranch>(decay_mode_list[i]->type(), w));
     }
   }
-  return std::move(partial);
+  return partial;
 }
 
 DecayBranchList ParticleType::get_partial_widths_hadronic(const float m) const {
@@ -357,7 +354,7 @@ DecayBranchList ParticleType::get_partial_widths_hadronic(const float m) const {
            throw std::runtime_error("Problem in get_partial_widths_hadronic()");
     }
   }
-  return std::move(partial);
+  return partial;
 }
 
 DecayBranchList ParticleType::get_partial_widths_dilepton(const float m) const {
@@ -399,7 +396,7 @@ DecayBranchList ParticleType::get_partial_widths_dilepton(const float m) const {
            throw std::runtime_error("Problem in get_partial_widths_dilepton()");
     }
   }
-  return std::move(partial);
+  return partial;
 }
 
 float ParticleType::get_partial_in_width(const float m,
@@ -412,7 +409,8 @@ float ParticleType::get_partial_in_width(const float m,
   float w = 0.;
   for (const auto &mode : decaymodes) {
     float partial_width_at_pole = width_at_pole()*mode->weight();
-    if (mode->type().has_particles(p_a.type(), p_b.type())) {
+    const ParticleTypePtrList l = {&p_a.type(), &p_b.type()};
+    if (mode->type().has_particles(l)) {
       w += mode->type().in_width(mass(), partial_width_at_pole, m,
                                  p_a.effective_mass(), p_b.effective_mass());
     }

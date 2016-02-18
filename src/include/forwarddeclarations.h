@@ -57,6 +57,7 @@ class Clock;
 class Configuration;
 class CrossSections;
 class DecayModes;
+class DecayType;
 class FourVector;
 class ThreeVector;
 class ModusDefault;
@@ -70,7 +71,9 @@ class PdgCode;
 class DecayBranch;
 class CollisionBranch;
 class Tabulation;
+class ExperimentBase;
 struct ExperimentParameters;
+
 enum class CalculationFrame {
     CenterOfVelocity,
     CenterOfMass,
@@ -85,18 +88,6 @@ enum class Sampling {
   Quadratic,
   /// Sample from custom, user-defined distribution.
   Custom,
-};
-
-/** Allows to choose which kind of density to calculate.
-*  The baryon density is necessary for the Skyrme potential.
-*  For the symmetry potential one needs to know the isospin density.
-*/
-enum class DensityType {
-  None = 0,
-  Hadron = 1,
-  Baryon = 2,
-  BaryonicIsospin = 3,
-  Pion = 4,
 };
 
 /** The time step mode.
@@ -125,14 +116,22 @@ enum class BoxInitialCondition {
   PeakedMomenta,
 };
 
+/// Represents thermodynamic quantities that can be printed out
+enum class ThermodynamicQuantity : char {
+  EckartDensity,
+  Tmn,
+  TmnLandau,
+  LandauVelocity,
+};
 
 using ActionPtr = build_unique_ptr_<Action>;
 using ScatterActionPtr = build_unique_ptr_<ScatterAction>;
 using ActionList = build_vector_<ActionPtr>;
 
-using OutputsList = build_vector_<build_unique_ptr_<OutputInterface>>;
-using ParticleList = build_vector_<ParticleData>;
+using OutputPtr = build_unique_ptr_<OutputInterface>;
+using OutputsList = build_vector_<OutputPtr>;
 
+using ParticleList = build_vector_<ParticleData>;
 using ParticleTypeList = build_vector_<ParticleType>;
 using ParticleTypePtrList = build_vector_<ParticleTypePtr>;
 using IsoParticleTypeList = build_vector_<IsoParticleType>;
@@ -148,6 +147,8 @@ using CollisionBranchPtr = build_unique_ptr_<CollisionBranch>;
 using CollisionBranchList = build_vector_<CollisionBranchPtr>;
 
 using TabulationPtr = build_unique_ptr_<Tabulation>;
+using ExperimentPtr = build_unique_ptr_<ExperimentBase>;
+using DecayTypePtr = build_unique_ptr_<DecayType>;
 
 namespace bf = boost::filesystem;
 
