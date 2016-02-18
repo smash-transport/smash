@@ -24,7 +24,7 @@ constexpr float fm2_mb = 0.1;
 /**
  * Numerical error tolerance
  */
-constexpr float really_small = 1.0e-6;
+constexpr float really_small = 1.0e-4;
 /**
  * \f$ 2\pi \f$
  *
@@ -38,9 +38,8 @@ constexpr float nuclear_density = 0.168;
 /**
  * Physical error tolerance
  *
- * \fpPrecision Why \c double?
  */
-constexpr double small_number = 1.0e-4;
+constexpr float small_number = 1.0e-4;
 /**
  * nucleon mass in GeV
  *
