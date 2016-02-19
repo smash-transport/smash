@@ -149,6 +149,13 @@
  * actual SMASH classes to easily construct mock objects
  *
  * See \subpage unittest_mocking.
+ * 
+ * \subsection unittest_smash_good_example Good Example
+ * While implementing the initial conditions (see 
+ * \c src/test/initial_conditions.cc at the very end), the test to verify
+ * momentum conservation was written first and then the code has been adjusted,
+ * until the test passed successfully. This can serve as a positive example of 
+ * test-driven development. 
  *
  ******************************************************************************
  * \section unittest_run Running tests & Test-driven development
