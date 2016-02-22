@@ -82,6 +82,7 @@ namespace Smash {
       Pythia8::Event& event = pythia.event;
       pythia.next();
       ParticleList outgoing_particles_;
+      ParticleList new_intermediate_particles; 
       for (int i = 0; i< event.size(); i++) {
         if (event[i].isFinal()) {
           if (event[i].isHadron()) {
@@ -96,18 +97,25 @@ namespace Smash {
             momentum.set_x2(event[i].py());
             momentum.set_x3(event[i].pz());
             new_particle_.set_4momentum(momentum);
-            /* The hadrons are not immediately formed, currently a formation
-             *  time of 1 fm is universally applied and cross section is reduced 
-             * to zero */ 
-            /** TODO: assign proper cross-section to valence quarks */
-            log.debug("The formation time is: ", formation_time_, "fm/c.");
-            new_particle_.set_formation_time(formation_time_); 
-            new_particle_.set_cross_section_scaling_factor(0.0);
             log.debug("4-momentum from Pythia: ", momentum);
-            outgoing_particles_.push_back(new_particle_);
+            new_intermediate_particles.push_back(new_particle_);         
           }
         }
       }
+      /* 
+       * sort new_intermediate_particles according to z-Momentum
+       */ 
+      for (new_intermediate_particles) { 
+		/* The hadrons are not immediately formed, currently a formation
+         *  time of 1 fm is universally applied and cross section is reduced 
+         * to zero */ 
+        /** TODO: assign proper cross-section to valence quarks */
+        log.debug("The formation time is: ", formation_time_, "fm/c.");
+        /* new_particle_ does not work, need to access the vector element */ 
+        new_particle_.set_formation_time(formation_time_); 
+        new_particle_.set_cross_section_scaling_factor(0.0);   
+        outgoing_particles_.push_back(new_particle_);
+      }  
     #else
       std::string errMsg = "Pythia 8 not available for string excitation";
       throw std::runtime_error(errMsg);
