@@ -8,7 +8,6 @@
 #include "include/interpolation.h"
 
 #include <iostream>
-#include <sstream>
 
 InterpolateDataSpline::InterpolateDataSpline(const std::vector<double>& x,
                                              const std::vector<double>& y) {
