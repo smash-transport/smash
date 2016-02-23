@@ -28,6 +28,19 @@
 
 namespace Smash {
 
+  bool sortfunc(ParticleList p1, ParticleList p2) {
+    for (ParticleData d1 : p1) {
+      for (ParticleData d2 : p2) {
+        if(d1.momentum().x3() < d2.momentum().x3()) {
+          return true;
+        }
+        else {
+          return false; 
+        }
+      }
+    }
+  }  
+
   /* This function will generate outgoing particles in CM frame
    * from a hard process. */
   ParticleList string_excitation(const ParticleList &incoming_particles_,
@@ -105,16 +118,21 @@ namespace Smash {
       /* 
        * sort new_intermediate_particles according to z-Momentum
        */ 
-      for (new_intermediate_particles) { 
-		/* The hadrons are not immediately formed, currently a formation
+      std::sort(new_intermediate_particles.begin(), 
+                new_intermediate_particles.end(), sortfunc);
+
+      for (ParticleData data_ : new_intermediate_particles) { 
+	/* The hadrons are not immediately formed, currently a formation
          *  time of 1 fm is universally applied and cross section is reduced 
          * to zero */ 
         /** TODO: assign proper cross-section to valence quarks */
+        log.info("Particle momenta: ", data_.momentum());
         log.debug("The formation time is: ", formation_time_, "fm/c.");
         /* new_particle_ does not work, need to access the vector element */ 
-        new_particle_.set_formation_time(formation_time_); 
-        new_particle_.set_cross_section_scaling_factor(0.0);   
-        outgoing_particles_.push_back(new_particle_);
+             
+        data_.set_formation_time(formation_time_); 
+        data_.set_cross_section_scaling_factor(0.0);   
+        outgoing_particles_.push_back(data_);
       }  
     #else
       std::string errMsg = "Pythia 8 not available for string excitation";

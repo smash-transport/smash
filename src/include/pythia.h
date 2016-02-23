@@ -16,6 +16,7 @@
 #include "forwarddeclarations.h"
 
 namespace Smash {
+  bool sortfunc (ParticleList p1, ParticleList p2);
   ParticleList string_excitation(const ParticleList &incoming_particles_,
 								 const float formation_time_);
 }
