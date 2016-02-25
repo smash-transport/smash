@@ -28,18 +28,6 @@
 
 namespace Smash {
 
-  bool sortfunc(ParticleList p1, ParticleList p2) {
-    for (ParticleData d1 : p1) {
-      for (ParticleData d2 : p2) {
-        if(d1.momentum().x3() < d2.momentum().x3()) {
-          return true;
-        }
-        else {
-          return false; 
-        }
-      }
-    }
-  }  
 
   /* This function will generate outgoing particles in CM frame
    * from a hard process. */
@@ -118,21 +106,44 @@ namespace Smash {
       /* 
        * sort new_intermediate_particles according to z-Momentum
        */ 
-      std::sort(new_intermediate_particles.begin(), 
-                new_intermediate_particles.end(), sortfunc);
-
+       std::sort(new_intermediate_particles.begin(),
+                 new_intermediate_particles.end(),
+                 [&](ParticleData i, ParticleData j) 
+                 { return abs(i.momentum().x3()) < abs(j.momentum().x3()); });
+       std::reverse(new_intermediate_particles.begin(), 
+                    new_intermediate_particles.end());          
       for (ParticleData data_ : new_intermediate_particles) { 
-	/* The hadrons are not immediately formed, currently a formation
+		log.debug("Particle momenta after sorting: ", data_.momentum());
+	    /* The hadrons are not immediately formed, currently a formation
          *  time of 1 fm is universally applied and cross section is reduced 
-         * to zero */ 
-        /** TODO: assign proper cross-section to valence quarks */
-        log.info("Particle momenta: ", data_.momentum());
+         * to zero and to a fraction corresponding to the 
+         * valence quark content. Hadrons containing a valence quark are
+         * determined by highest z-momentum. */ 
+        
         log.debug("The formation time is: ", formation_time_, "fm/c.");
-        /* new_particle_ does not work, need to access the vector element */ 
              
         data_.set_formation_time(formation_time_); 
-        data_.set_cross_section_scaling_factor(0.0);   
-        outgoing_particles_.push_back(data_);
+        if(incoming_particles_[0].is_baryon() || 
+           incoming_particles_[1].is_baryon()) {
+		  if(data_ == 0) {
+			data_.set_cross_section_scaling_factor(0.66);
+		  }
+		  else if (data_ == 1) {
+			data_.set_cross_section_scaling_factor(0.34);
+		  } 	 
+		  else {
+			data_.set_cross_section_scaling_factor(0.0);
+		  }
+		}  
+		else{ 
+		  if(data_ == 0 || data_ ==1) {
+		    data_.set_cross_section_scaling_factor(0.50);
+		  }   	       	    
+		  else {
+			data_.set_cross_section_scaling_factor(0.0);
+		  }
+		}  
+		outgoing_particles_.push_back(data_);
       }  
     #else
       std::string errMsg = "Pythia 8 not available for string excitation";
