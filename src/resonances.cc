@@ -45,45 +45,50 @@ float spec_func_integrand_2res(float sqrts, float res_mass_1, float res_mass_2,
 
 
 /* Resonance mass sampling for 2-particle final state */
-float sample_resonance_mass(const ParticleType &type_res,
-                            const float mass_stable, const float cms_energy,
-                            int L) {
+float sample_resonance_mass(ParticleType &type_res, const float mass_stable,
+                            const float cms_energy, int L) {
   /* largest possible mass: Use 'nextafter' to make sure it is not above the
    * physical limit by numerical error. */
   const float max_mass = std::nextafter(cms_energy - mass_stable, 0.f);
   // largest possible cm momentum (from smallest mass)
   const float pcm_max = pCM(cms_energy, mass_stable, type_res.minimum_mass());
   const float blw_max = pcm_max * blatt_weisskopf_sqr(pcm_max, L);
-  /* The maximum of the spectral-function ratio 'usually' happens at the
-   * largest mass. However, this is not always the case, therefore we need
-   * an additional fudge factor (purely empirical). */
-  const float max_factor = (type_res.pdgcode() == 0x223) ? 16.4 : 3.6;
-  const float q_max = type_res.spectral_function(max_mass)
-                    / type_res.spectral_function_simple(max_mass) * max_factor;
-  const float max = blw_max * q_max;  // maximum value for rejection sampling
-  float mass_res, val;
-  // Loop: rejection sampling
-  do {
-    // sample mass from a simple Breit-Wigner (aka Cauchy) distribution
-    mass_res = Random::cauchy(type_res.mass(), type_res.width_at_pole()/2.f,
-                              type_res.minimum_mass(), max_mass);
-    // determine cm momentum for this case
-    const float pcm = pCM(cms_energy, mass_stable, mass_res);
-    const float blw = pcm * blatt_weisskopf_sqr(pcm, L);
-    // determine ratio of full to simple spectral function
-    const float q = type_res.spectral_function(mass_res)
-                  / type_res.spectral_function_simple(mass_res);
-    val = q * blw;
-  } while (val < Random::uniform(0.f, max));
 
-  // check that we are using the proper maximum value
-  if (val > max) {
-    const auto &log = logger<LogArea::Resonances>();
-    log.fatal("maximum not correct in sample_resonance_mass: ",
-              val, " ", max, " ", type_res.pdgcode(), " ",
-              mass_stable, " ", cms_energy, " ", mass_res);
-    throw std::runtime_error("Maximum not correct in sample_resonance_mass!");
-  }
+  float mass_res, val;
+  // outer loop: repeat if maximum is too small
+  do {
+    /* The maximum of the spectral-function ratio 'usually' happens at the
+    * largest mass. However, this is not always the case, therefore we need
+    * an additional fudge factor (purely empirical). */
+    const float q_max = type_res.spectral_function(max_mass)
+                      / type_res.spectral_function_simple(max_mass)
+                      * type_res.max_factor();
+    const float max = blw_max * q_max;  // maximum value for rejection sampling
+    // inner loop: rejection sampling
+    do {
+      // sample mass from a simple Breit-Wigner (aka Cauchy) distribution
+      mass_res = Random::cauchy(type_res.mass(), type_res.width_at_pole()/2.f,
+                                type_res.minimum_mass(), max_mass);
+      // determine cm momentum for this case
+      const float pcm = pCM(cms_energy, mass_stable, mass_res);
+      const float blw = pcm * blatt_weisskopf_sqr(pcm, L);
+      // determine ratio of full to simple spectral function
+      const float q = type_res.spectral_function(mass_res)
+                    / type_res.spectral_function_simple(mass_res);
+      val = q * blw;
+    } while (val < Random::uniform(0.f, max));
+
+    // check that we are using the proper maximum value
+    if (val > max) {
+      const auto &log = logger<LogArea::Resonances>();
+      log.warn("maximum is being increased in sample_resonance_mass: ",
+               type_res.max_factor(), " ", val/max, " ", type_res.pdgcode(),
+               " ", mass_stable, " ", cms_energy, " ", mass_res);
+      type_res.increase_max_factor(val/max);
+    } else {
+      break;  // maximum ok, exit loop
+    }
+  } while (true);
 
   return mass_res;
 }

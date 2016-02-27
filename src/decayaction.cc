@@ -197,8 +197,8 @@ void DecayAction::generate_final_state() {
 
 
 std::pair<double, double> DecayAction::sample_masses() const {
-  const ParticleType &t_a = outgoing_particles_[0].type();
-  const ParticleType &t_b = outgoing_particles_[1].type();
+  ParticleType &t_a = const_cast<ParticleType&>(outgoing_particles_[0].type());
+  ParticleType &t_b = const_cast<ParticleType&>(outgoing_particles_[1].type());
 
   // start with pole masses
   std::pair<double, double> masses = {t_a.mass(), t_b.mass()};

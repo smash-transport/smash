@@ -251,6 +251,14 @@ class ParticleType {
    */
   float spectral_function_simple(float m) const;
 
+  float max_factor() const {
+    return max_factor_;
+  }
+
+  void increase_max_factor(float inc) {
+    max_factor_ *= inc;
+  }
+
   /**
    * Returns a list of all ParticleType objects.
    *
@@ -392,6 +400,9 @@ class ParticleType {
   int charge_;
 
   IsoParticleType *iso_multiplet_ = nullptr;
+
+  // Maximum factor for mass sampling, cf. sample_resonance_mass.
+  mutable float max_factor_ = 1.;
 
   /**\ingroup logging
    * Writes all information about the particle type to the output stream.
