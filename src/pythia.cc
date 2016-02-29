@@ -123,24 +123,32 @@ namespace Smash {
         log.debug("The formation time is: ", formation_time_, "fm/c.");
              
         data_.set_formation_time(formation_time_); 
+        /* Additional suppression factor to mimic coherence taken as 0.7
+         * from UrQMD (CTParam(59) */
+        const float suppression_factor = 0.7;   
         if(incoming_particles_[0].is_baryon() || 
            incoming_particles_[1].is_baryon()) {
 		  if(data_ == 0) {
-			data_.set_cross_section_scaling_factor(0.66);
+			data_.set_cross_section_scaling_factor
+			(suppression_factor*0.66);
 		  }
 		  else if (data_ == 1) {
-			data_.set_cross_section_scaling_factor(0.34);
+			data_.set_cross_section_scaling_factor
+			(suppression_factor*0.34);
 		  } 	 
 		  else {
-			data_.set_cross_section_scaling_factor(0.0);
+			data_.set_cross_section_scaling_factor
+			(suppression_factor*0.0);
 		  }
 		}  
 		else{ 
 		  if(data_ == 0 || data_ ==1) {
-		    data_.set_cross_section_scaling_factor(0.50);
+		    data_.set_cross_section_scaling_factor
+		    (suppression_factor*0.50);
 		  }   	       	    
 		  else {
-			data_.set_cross_section_scaling_factor(0.0);
+			data_.set_cross_section_scaling_factor
+			(suppression_factor*0.0);
 		  }
 		}  
 		outgoing_particles_.push_back(data_);
