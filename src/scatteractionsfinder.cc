@@ -53,7 +53,7 @@ ScatterActionsFinder::ScatterActionsFinder(
       two_to_two_(two_to_two),
       strings_switch_(strings_switch),
       formation_time_(config.take({"Collision_Term",
-		                           "Formation_Time"}, 1.0f)) {
+                                   "Formation_Time"}, 1.0f)) {
       if (is_constant_elastic_isotropic()) {
         const auto &log = logger<LogArea::FindScatter>();
         log.info("Constant elastic isotropic cross-section mode:",
@@ -74,15 +74,15 @@ ScatterActionsFinder::ScatterActionsFinder(
 ScatterActionPtr ScatterActionsFinder::construct_scatter_action(
                                             const ParticleData &data_a,
                                             const ParticleData &data_b,
-                                            float time_until_collision
-                                            ) const {
+                                            float time_until_collision)
+                                            const {
   const auto &pdg_a = data_a.pdgcode();
   const auto &pdg_b = data_b.pdgcode();
   ScatterActionPtr act;
   if (data_a.is_baryon() && data_b.is_baryon()) {
     if (pdg_a.is_nucleon() && pdg_b.is_nucleon()) {
       act = make_unique<ScatterActionNucleonNucleon>(data_a, data_b,
-                                              time_until_collision, isotropic_, 
+                                              time_until_collision, isotropic_,
                                               formation_time_);
     } else {
       act = make_unique<ScatterActionBaryonBaryon>(data_a, data_b,

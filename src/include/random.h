@@ -179,7 +179,7 @@ class discrete_dist {
   }
 
   /** creates the object from probability list */
-  discrete_dist(std::initializer_list<T> l)
+  explicit discrete_dist(std::initializer_list<T> l)
     : distribution(l) {
   }
 
@@ -188,7 +188,7 @@ class discrete_dist {
     distribution = std::discrete_distribution<>(plist.begin(), plist.end());
   }
   /** returns a random number in the interval */
-  int operator ()() {
+  int operator()() {
     return distribution(engine);
   }
   /** the distribution object that is being used. */

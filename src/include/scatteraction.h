@@ -32,7 +32,7 @@ class ScatterAction : public Action {
    * \param[in] isotropic if true, do the collision isotropically
    */
   ScatterAction(const ParticleData &in_part1, const ParticleData &in_part2,
-                float time, bool isotropic = false, 
+                float time, bool isotropic = false,
                 float formation_time = 1.0f);
 
   /** Add a new collision channel. */
@@ -192,9 +192,9 @@ class ScatterAction : public Action {
   /** Do this collision isotropically. */
   bool isotropic_ = false;
 
-  /** Formation time parameter */ 
+  /** Formation time parameter */
   float formation_time_ = 1.0f;
-  
+
  private:
   /** Check if the scattering is elastic. */
   bool is_elastic() const;

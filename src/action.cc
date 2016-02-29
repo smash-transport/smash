@@ -188,19 +188,23 @@ void Action::check_conservation(const uint32_t &id_process,
     momentum_diff = incoming_momentum - outgoing_momentum;
     if (std::abs(momentum_diff.x0()) > small_number) {
       log.error("Energy is not conserved by: ", momentum_diff.x0());
-      throw std::runtime_error("Conservation laws violated in string excitation.");
+      throw std::runtime_error
+      ("Conservation laws violated in string excitation.");
     }
     if (std::abs(momentum_diff.x1()) > small_number) {
       log.error("x-momentum is not conserved by: ", momentum_diff.x1());
-      throw std::runtime_error("Conservation laws violated in string excitation.");
+      throw std::runtime_error
+      ("Conservation laws violated in string excitation.");
     }
     if (std::abs(momentum_diff.x2()) > small_number) {
       log.error("y-momentum is not conserved by: ", momentum_diff.x2());
-      throw std::runtime_error("Conservation laws violated in string excitation.");
+      throw std::runtime_error
+      ("Conservation laws violated in string excitation.");
     }
     if (std::abs(momentum_diff.x3()) > small_number) {
       log.error("z-momentum is not conserved by: ", momentum_diff.x3());
-      throw std::runtime_error("Conservation laws violated in string excitation.");
+      throw std::runtime_error
+      ("Conservation laws violated in string excitation.");
     }
   }
 }

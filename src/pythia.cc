@@ -32,7 +32,7 @@ namespace Smash {
   /* This function will generate outgoing particles in CM frame
    * from a hard process. */
   ParticleList string_excitation(const ParticleList &incoming_particles_,
-								 const float formation_time_) {
+                                 const float formation_time_) {
       const auto &log = logger<LogArea::Pythia>();
     /// Disable floating point exception trap for Pythia
     {
@@ -83,7 +83,7 @@ namespace Smash {
       Pythia8::Event& event = pythia.event;
       pythia.next();
       ParticleList outgoing_particles_;
-      ParticleList new_intermediate_particles; 
+      ParticleList new_intermediate_particles;
       for (int i = 0; i< event.size(); i++) {
         if (event[i].isFinal()) {
           if (event[i].isHadron()) {
@@ -99,7 +99,7 @@ namespace Smash {
             momentum.set_x3(event[i].pz());
             new_particle_.set_4momentum(momentum);
             log.debug("4-momentum from Pythia: ", momentum);
-            new_intermediate_particles.push_back(new_particle_);         
+            new_intermediate_particles.push_back(new_particle_);
           }
         }
       }
@@ -108,51 +108,45 @@ namespace Smash {
        */ 
        std::sort(new_intermediate_particles.begin(),
                  new_intermediate_particles.end(),
-                 [&](ParticleData i, ParticleData j) 
+                 [&](ParticleData i, ParticleData j)
                  { return abs(i.momentum().x3()) < abs(j.momentum().x3()); });
-       std::reverse(new_intermediate_particles.begin(), 
-                    new_intermediate_particles.end());          
-      for (ParticleData data_ : new_intermediate_particles) { 
-		log.debug("Particle momenta after sorting: ", data_.momentum());
+       std::reverse(new_intermediate_particles.begin(),
+                    new_intermediate_particles.end());
+      for (ParticleData data_ : new_intermediate_particles) {
+        log.debug("Particle momenta after sorting: ", data_.momentum());
 	    /* The hadrons are not immediately formed, currently a formation
          *  time of 1 fm is universally applied and cross section is reduced 
          * to zero and to a fraction corresponding to the 
          * valence quark content. Hadrons containing a valence quark are
          * determined by highest z-momentum. */ 
-        
         log.debug("The formation time is: ", formation_time_, "fm/c.");
-             
-        data_.set_formation_time(formation_time_); 
+        data_.set_formation_time(formation_time_);
         /* Additional suppression factor to mimic coherence taken as 0.7
          * from UrQMD (CTParam(59) */
-        const float suppression_factor = 0.7;   
-        if(incoming_particles_[0].is_baryon() || 
-           incoming_particles_[1].is_baryon()) {
-		  if(data_ == 0) {
-			data_.set_cross_section_scaling_factor
-			(suppression_factor*0.66);
-		  }
-		  else if (data_ == 1) {
-			data_.set_cross_section_scaling_factor
-			(suppression_factor*0.34);
-		  } 	 
-		  else {
-			data_.set_cross_section_scaling_factor
-			(suppression_factor*0.0);
-		  }
-		}  
-		else{ 
-		  if(data_ == 0 || data_ ==1) {
-		    data_.set_cross_section_scaling_factor
-		    (suppression_factor*0.50);
-		  }   	       	    
-		  else {
-			data_.set_cross_section_scaling_factor
-			(suppression_factor*0.0);
-		  }
-		}  
-		outgoing_particles_.push_back(data_);
-      }  
+        const float suppression_factor = 0.7;
+        if (incoming_particles_[0].is_baryon() ||
+            incoming_particles_[1].is_baryon()) {
+          if (data_ == 0) {
+            data_.set_cross_section_scaling_factor
+            (suppression_factor*0.66);
+          } else if (data_ == 1) {
+            data_.set_cross_section_scaling_factor
+            (suppression_factor*0.34);
+          } else {
+            data_.set_cross_section_scaling_factor
+            (suppression_factor*0.0);
+          }
+        } else {
+          if (data_ == 0 || data_ ==1) {
+            data_.set_cross_section_scaling_factor
+            (suppression_factor*0.50);
+          } else {
+            data_.set_cross_section_scaling_factor
+            (suppression_factor*0.0);
+          }
+        }
+        outgoing_particles_.push_back(data_);
+      }
     #else
       std::string errMsg = "Pythia 8 not available for string excitation";
       throw std::runtime_error(errMsg);
@@ -161,5 +155,4 @@ namespace Smash {
     return outgoing_particles_;
     }
   }
-
 }  // namespace Smash

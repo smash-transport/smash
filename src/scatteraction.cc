@@ -21,10 +21,10 @@ namespace Smash {
 
 ScatterAction::ScatterAction(const ParticleData &in_part_a,
                              const ParticleData &in_part_b,
-                             float time, bool isotropic, 
+                             float time, bool isotropic,
                              float formation_time)
     : Action({in_part_a, in_part_b}, time),
-      total_cross_section_(0.), isotropic_(isotropic), 
+      total_cross_section_(0.), isotropic_(isotropic),
       formation_time_(formation_time) {}
 
 void ScatterAction::add_collision(CollisionBranchPtr p) {
@@ -69,8 +69,8 @@ void ScatterAction::generate_final_state() {
       break;
     case ProcessType::String:
       /* string excitation */
-      outgoing_particles_ = string_excitation(incoming_particles_, 
-											  formation_time_);
+      outgoing_particles_ = string_excitation(incoming_particles_,
+                                              formation_time_);
       break;
     default:
       throw InvalidScatterAction(
@@ -120,15 +120,15 @@ void ScatterAction::add_all_processes(float elastic_parameter,
         incoming_particles_[0].type().pdgcode() == -0x2212 ||
         incoming_particles_[0].type().pdgcode() == -0x2112 ||
         incoming_particles_[0].type().pdgcode().is_pion() ) {
-		a_in_pythia = true; 
-	}
-	if (incoming_particles_[1].type().is_nucleon() ||
+        a_in_pythia = true;
+    }
+    if (incoming_particles_[1].type().is_nucleon() ||
         incoming_particles_[1].type().pdgcode() == -0x2212 ||
         incoming_particles_[1].type().pdgcode() == -0x2112 ||
         incoming_particles_[1].type().pdgcode().is_pion() ) {
-		b_in_pythia = true; 
-	}
-	if (a_in_pythia && b_in_pythia) {    		  					 
+        b_in_pythia = true;
+    }
+    if (a_in_pythia && b_in_pythia) {
       add_collision(string_excitation_cross_section());
     }
   }
