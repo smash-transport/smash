@@ -67,8 +67,9 @@ static void compare_in_vs_out_width(const ParticleType &t,
                                             * pt[1]->spectral_function(m);
                                   });
 
-//   COMPARE(Gam_out, Gam_in);
-  printf("width comparison at m=%7.4f: %7.4f %7.4f \n", m_R, Gam_out, Gam_in);
+  printf("width comparison at m=%5.3f: %8.6f %8.6f %8.6f %8.6f \n",
+         m_R, Gam_out, Gam_in, std::abs(Gam_out-Gam_in), Gam_out/Gam_in);
+//   COMPARE_ABSOLUTE_ERROR(Gam_out, Gam_in, 1E-4);
 }
 
 
@@ -89,8 +90,13 @@ TEST(Roper_in_vs_out_width) {
   }
 
   // test width for N* <-> σN at different resonance masses
+  compare_in_vs_out_width(t, *the_branch, 1.25);
   compare_in_vs_out_width(t, *the_branch, 1.3);
   compare_in_vs_out_width(t, *the_branch, 1.4);
   compare_in_vs_out_width(t, *the_branch, 1.5);
   compare_in_vs_out_width(t, *the_branch, 1.6);
+  compare_in_vs_out_width(t, *the_branch, 1.7);
+  compare_in_vs_out_width(t, *the_branch, 1.8);
+  compare_in_vs_out_width(t, *the_branch, 1.9);
+  compare_in_vs_out_width(t, *the_branch, 2.0);
 }
