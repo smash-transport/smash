@@ -251,10 +251,12 @@ class ParticleType {
    */
   float spectral_function_simple(float m) const;
 
+  /// Retrieve the maximum factor for mass sampling
   float max_factor() const {
     return max_factor_;
   }
 
+  /// Increase the maximum factor for mass sampling (by multiplying with 'inc')
   void increase_max_factor(float inc) const {
     max_factor_ *= inc;
   }
