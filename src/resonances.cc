@@ -45,7 +45,7 @@ float spec_func_integrand_2res(float sqrts, float res_mass_1, float res_mass_2,
 
 
 /* Resonance mass sampling for 2-particle final state */
-float sample_resonance_mass(ParticleType &type_res, const float mass_stable,
+float sample_resonance_mass(const ParticleType &type_res, const float mass_stable,
                             const float cms_energy, int L) {
   /* largest possible mass: Use 'nextafter' to make sure it is not above the
    * physical limit by numerical error. */

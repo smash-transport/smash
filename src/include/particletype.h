@@ -255,7 +255,7 @@ class ParticleType {
     return max_factor_;
   }
 
-  void increase_max_factor(float inc) {
+  void increase_max_factor(float inc) const {
     max_factor_ *= inc;
   }
 

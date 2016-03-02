@@ -93,8 +93,8 @@ void Action::perform(Particles *particles, uint32_t id_process) {
 
 
 std::pair<double, double> Action::sample_masses() const {
-  ParticleType &t_a = const_cast<ParticleType&>(outgoing_particles_[0].type());
-  ParticleType &t_b = const_cast<ParticleType&>(outgoing_particles_[1].type());
+  const ParticleType &t_a = outgoing_particles_[0].type();
+  const ParticleType &t_b = outgoing_particles_[1].type();
 
   // start with pole masses
   std::pair<double, double> masses = {t_a.mass(), t_b.mass()};

@@ -64,7 +64,7 @@ float spec_func_integrand_2res(float sqrts, float res_mass_1, float res_mass_2,
  *
  * \return The mass of the resonance particle.
  */
-float sample_resonance_mass(ParticleType &type_res, const float mass_stable,
+float sample_resonance_mass(const ParticleType &type_res, const float mass_stable,
                             const float cms_energy, int L = 0);
 
 /**
