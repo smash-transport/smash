@@ -142,12 +142,15 @@ float TwoBodyDecaySemistable::get_Lambda() {
   }
 }
 
+// number of tabulation points
+const int num_tab_pts = 200;
+
 float TwoBodyDecaySemistable::rho(float mass) const {
   if (tabulation_ == nullptr) {
     const_cast<TwoBodyDecaySemistable*>(this)->tabulation_
         = make_unique<Tabulation>(
                 particle_types_[0]->mass() + particle_types_[1]->minimum_mass(),
-                10*particle_types_[1]->width_at_pole(), 60,
+                10*particle_types_[1]->width_at_pole(), num_tab_pts,
                 [&](float sqrts) {
                   Integrator integrate;
                   return integrate(particle_types_[1]->minimum_mass(),
@@ -206,7 +209,7 @@ float TwoBodyDecayUnstable::rho(float mass) const {
     const float sum_gamma = particle_types_[0]->width_at_pole()
                           + particle_types_[1]->width_at_pole();
     const_cast<TwoBodyDecayUnstable*>(this)->tabulation_
-          = make_unique<Tabulation>(m1_min + m2_min, 10*sum_gamma, 60,
+          = make_unique<Tabulation>(m1_min + m2_min, 10*sum_gamma, num_tab_pts,
             [&](float sqrts) {
               Integrator2d integrate(1E4);
               return integrate(m1_min, sqrts - m2_min, m2_min, sqrts - m1_min,
@@ -414,7 +417,7 @@ float ThreeBodyDecayDilepton::width(float, float G0, float m) const {
   // integrate differential width to obtain partial width
   if (tabulation_ == nullptr) {
     const_cast<ThreeBodyDecayDilepton*>(this)->tabulation_
-          = make_unique<Tabulation>(m_other+2*m_l, 10*G0, 60,
+          = make_unique<Tabulation>(m_other+2*m_l, 10*G0, num_tab_pts,
               [&](float m_parent) {
                 const float bottom = 2*m_l;
                 const float top = m_parent-m_other;
