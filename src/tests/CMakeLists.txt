@@ -211,6 +211,7 @@ smash_add_unittest(stringfunctions)
 smash_add_unittest(tabulation)
 smash_add_unittest(threevector)
 smash_add_unittest(vtkoutput)
+smash_add_unittest(width)
 smash_add_unittest(without_float_traps)
 smash_add_unittest(yamltest)
 
