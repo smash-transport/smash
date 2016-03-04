@@ -112,22 +112,17 @@ double sample_momenta(const double temperature, const double mass) {
  * \f$ = dK (K^2 + 2mK + m^2) e^{-K/T} \frac{p}{E}\f$
  *  where \frac{p}{E} is used as rejection weight.
  * return: themal momenta */
-
 double sample_momenta_from_thermal(const double temperature,
                                    const double mass) {
   const auto &log = logger<LogArea::Distributions>();
   log.debug("Sample momenta with mass ", mass, " and T ", temperature);
   float momentum_radial, energy;
-  float r1, r2, r3;
   // when temperature/mass
   if ( temperature > 0.6f*mass ) {
     while ( true ) {
-      r1 = Random::canonical();
-      r2 = Random::canonical();
-      r3 = Random::canonical();
-      const float a = -std::log(r1);
-      const float b = -std::log(r2);
-      const float c = -std::log(r3);
+      const float a = -std::log(Random::canonical_nonzero());
+      const float b = -std::log(Random::canonical_nonzero());
+      const float c = -std::log(Random::canonical_nonzero());
       momentum_radial = temperature * (a + b + c);
       energy = sqrt(momentum_radial * momentum_radial + mass * mass);
       if ( Random::canonical() <
@@ -137,31 +132,31 @@ double sample_momenta_from_thermal(const double temperature,
     }
   } else {
     while ( true ) {
-      float r0 = Random::canonical();
+      const float r0 = Random::canonical();
       const float I1 = mass*mass;
       const float I2 = 2.0*mass*temperature;
       const float I3 = 2.0*temperature*temperature;
       const float Itot = I1 + I2 + I3;
-      float K;
+      float r1, r2, r3, K;
       if ( r0 < I1/Itot ) {
-        r1 = Random::canonical();
+        r1 = Random::canonical_nonzero();
         K = -temperature*std::log(r1);
       } else if ( r0 < (I1+I2)/Itot ) {
-        r1 = Random::canonical();
-        r2 = Random::canonical();
+        r1 = Random::canonical_nonzero();
+        r2 = Random::canonical_nonzero();
         K = -temperature*std::log(r1*r2);
       } else {
-        r1 = Random::canonical();
-        r2 = Random::canonical();
-        r3 = Random::canonical();
+        r1 = Random::canonical_nonzero();
+        r2 = Random::canonical_nonzero();
+        r3 = Random::canonical_nonzero();
         K = -temperature*std::log(r1*r2*r3);
       }
       energy = K + mass;
       momentum_radial = sqrt(energy*energy - mass*mass);
-      r0 = Random::canonical();
-      if ( r0 < momentum_radial/energy ) break;
+      if (Random::canonical() < momentum_radial/energy) break;
     }
   }
   return momentum_radial;
 }
+
 }  // namespace Smash
