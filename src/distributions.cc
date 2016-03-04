@@ -152,7 +152,7 @@ double sample_momenta_from_thermal(const double temperature,
         K = -temperature*std::log(r1*r2*r3);
       }
       energy = K + mass;
-      momentum_radial = sqrt(energy*energy - mass*mass);
+      momentum_radial = sqrt((energy+mass)*(energy-mass));
       if (Random::canonical() < momentum_radial/energy) break;
     }
   }
