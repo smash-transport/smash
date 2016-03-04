@@ -125,8 +125,7 @@ double sample_momenta_from_thermal(const double temperature,
       const float c = -std::log(Random::canonical_nonzero());
       momentum_radial = temperature * (a + b + c);
       energy = sqrt(momentum_radial * momentum_radial + mass * mass);
-      if ( Random::canonical() <
-          exp((momentum_radial-energy)/temperature) ) {
+      if (Random::canonical() < exp((momentum_radial-energy)/temperature)) {
         break;
       }
     }
@@ -152,8 +151,10 @@ double sample_momenta_from_thermal(const double temperature,
         K = -temperature*std::log(r1*r2*r3);
       }
       energy = K + mass;
-      momentum_radial = sqrt((energy+mass)*(energy-mass));
-      if (Random::canonical() < momentum_radial/energy) break;
+      momentum_radial = sqrt((energy + mass)*(energy - mass));
+      if (Random::canonical() < momentum_radial/energy) {
+        break;
+      }
     }
   }
   return momentum_radial;
