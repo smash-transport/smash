@@ -352,12 +352,15 @@ float ThreeBodyDecayDilepton::diff_width(float m_par, float m_dil,
       case 0x223: /* omega */ {
         /// see \iref{Landsberg:1986fd}, equation (3.4)
         gamma = 0.703e-3;
-        const float n1 = (m_par_sqr - m_other_sqr);
-        const float n2 = ((m_par_sqr -m_other_sqr)*(m_par_sqr -m_other_sqr));
-        const float rad = pow(1+ m_dil_sqr / n1, 2.)  -
-                          4*m_par_sqr*m_dil_sqr / n2;
-        return (2.*alpha/(3.*M_PI))  *  gamma/m_dil  *   pow(sqrt(rad), 3.) *
+        const float n1 = m_par_sqr - m_other_sqr;
+        const float rad = pow(1. + m_dil_sqr/n1, 2)
+                          - 4.*m_par_sqr*m_dil_sqr/(n1*n1);
+        if (rad<0.) {
+          return 0.;
+        } else {
+          return (2.*alpha/(3.*M_PI)) * gamma/m_dil * pow(rad, 3./2.) *
                                                    form_factor_sqr_omega(m_dil);
+        }
       }
       case 0x2214: case 0x2114: /* Delta+ and Delta0 */ {
         /// see \iref{Krivoruchenko:2001hs}
@@ -426,8 +429,8 @@ float ThreeBodyDecayDilepton::width(float, float G0, float m) const {
                 }
                 Integrator integrate;
                 return integrate(bottom, top,
-                               [&](float sqrts) {
-                                  return diff_width(m_parent, sqrts,
+                                [&](float m_dil) {
+                                  return diff_width(m_parent, m_dil,
                                                     m_other, pdg_par);
                                 }).value();
                 });
