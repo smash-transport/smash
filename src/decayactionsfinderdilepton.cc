@@ -24,15 +24,15 @@ ActionList DecayActionsFinderDilepton::find_actions_in_cell(
   ActionList actions;
 
   for (const auto &p : search_list) {
-    const auto n_all_modes =
-                        p.type().get_partial_widths(p.effective_mass()).size();
+    // effective mass of decaying particle
+    const float m_eff = p.effective_mass();
+    const auto n_all_modes = p.type().get_partial_widths(m_eff).size();
     if (n_all_modes == 0) {
       continue;
     }
 
     const float inv_gamma = p.inverse_gamma();
-    DecayBranchList dil_modes =
-                  p.type().get_partial_widths_dilepton(p.effective_mass());
+    DecayBranchList dil_modes = p.type().get_partial_widths_dilepton(m_eff);
 
     // if particle can only decay into dileptons or is stable, use shining only
     // in find_final_actions and ignore them here
@@ -69,11 +69,10 @@ ActionList DecayActionsFinderDilepton::find_actions_in_cell(
                       mode->particle_types()[(non_lepton_position+1)%3]->mass();
 
           // randomly select a mass
-          dilepton_mass = Random::uniform(2*m_l, p.effective_mass()-m_nl);
+          dilepton_mass = Random::uniform(2*m_l, m_eff-m_nl);
 
-          const float diff_width = ThreeBodyDecayDilepton::diff_width(
-                                              p.effective_mass(), dilepton_mass,
-                                              m_nl, p.type().pdgcode());
+          const float diff_width = ThreeBodyDecayDilepton::diff_width(m_eff,
+                                      dilepton_mass, m_nl, p.type().pdgcode());
 
           sh_weight = dt * inv_gamma * diff_width / hbarc;
           break;
@@ -104,12 +103,13 @@ ActionList DecayActionsFinderDilepton::find_final_actions(
       continue;
     }
 
-    DecayBranchList dil_modes =
-                  p.type().get_partial_widths_dilepton(p.effective_mass());
+    // effective mass of decaying particle
+    const float m_eff = p.effective_mass();
+    DecayBranchList dil_modes = p.type().get_partial_widths_dilepton(m_eff);
 
     // total decay width, also hadronic decays
     const float width_tot = total_weight<DecayBranch>(
-                               p.type().get_partial_widths(p.effective_mass()));
+                                            p.type().get_partial_widths(m_eff));
 
     for (DecayBranchPtr & mode : dil_modes) {
       float sh_weight;
@@ -138,11 +138,10 @@ ActionList DecayActionsFinderDilepton::find_final_actions(
                       mode->particle_types()[(non_lepton_position+1)%3]->mass();
 
           // randomly select a mass
-          dilepton_mass = Random::uniform(2*m_l, p.effective_mass()-m_nl);
+          dilepton_mass = Random::uniform(2*m_l, m_eff-m_nl);
 
-          const float diff_width = ThreeBodyDecayDilepton::diff_width(
-                                              p.effective_mass(), dilepton_mass,
-                                              m_nl, p.type().pdgcode());
+          const float diff_width = ThreeBodyDecayDilepton::diff_width(m_eff,
+                                      dilepton_mass, m_nl, p.type().pdgcode());
 
           sh_weight = diff_width / width_tot;
           break;

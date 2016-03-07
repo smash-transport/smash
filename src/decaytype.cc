@@ -355,7 +355,7 @@ float ThreeBodyDecayDilepton::diff_width(float m_par, float m_dil,
         const float n1 = m_par_sqr - m_other_sqr;
         const float rad = pow(1. + m_dil_sqr/n1, 2)
                           - 4.*m_par_sqr*m_dil_sqr/(n1*n1);
-        if (rad<0.) {
+        if (rad < 0.) {
           return 0.;
         } else {
           return (2.*alpha/(3.*M_PI)) * gamma/m_dil * pow(rad, 3./2.) *
