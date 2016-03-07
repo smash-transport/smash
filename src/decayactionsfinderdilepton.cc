@@ -70,7 +70,7 @@ ActionList DecayActionsFinderDilepton::find_actions_in_cell(
 
           // randomly select a mass
           dilepton_mass = Random::uniform(2*m_l, m_eff-m_nl);
-          delta_m = m_eff - m_nl - 2*m_l
+          const float delta_m = m_eff - m_nl - 2*m_l;
 
           const float diff_width = ThreeBodyDecayDilepton::diff_width(m_eff,
                                       dilepton_mass, m_nl, p.type().pdgcode());
@@ -140,7 +140,7 @@ ActionList DecayActionsFinderDilepton::find_final_actions(
 
           // randomly select a mass
           dilepton_mass = Random::uniform(2*m_l, m_eff-m_nl);
-          delta_m = m_eff - m_nl - 2*m_l
+          const float delta_m = m_eff - m_nl - 2*m_l;
 
           const float diff_width = ThreeBodyDecayDilepton::diff_width(m_eff,
                                       dilepton_mass, m_nl, p.type().pdgcode());
