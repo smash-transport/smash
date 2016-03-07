@@ -70,11 +70,12 @@ ActionList DecayActionsFinderDilepton::find_actions_in_cell(
 
           // randomly select a mass
           dilepton_mass = Random::uniform(2*m_l, m_eff-m_nl);
+          delta_m = m_eff - m_nl - 2*m_l
 
           const float diff_width = ThreeBodyDecayDilepton::diff_width(m_eff,
                                       dilepton_mass, m_nl, p.type().pdgcode());
 
-          sh_weight = dt * inv_gamma * diff_width / hbarc;
+          sh_weight = dt * inv_gamma * delta_m * diff_width / hbarc;
           break;
           }
         default:
@@ -139,11 +140,12 @@ ActionList DecayActionsFinderDilepton::find_final_actions(
 
           // randomly select a mass
           dilepton_mass = Random::uniform(2*m_l, m_eff-m_nl);
+          delta_m = m_eff - m_nl - 2*m_l
 
           const float diff_width = ThreeBodyDecayDilepton::diff_width(m_eff,
                                       dilepton_mass, m_nl, p.type().pdgcode());
 
-          sh_weight = diff_width / width_tot;
+          sh_weight = delta_m * diff_width / width_tot;
           break;
         }
         default:
