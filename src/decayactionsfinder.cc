@@ -26,7 +26,8 @@ ActionList DecayActionsFinder::find_actions_in_cell(
                         // less than 10 decays in most time steps
 
   for (const auto &p : search_list) {
-    if (p.type().is_stable() || p.formation_time() > p.position().x0()) {
+    if (p.type().is_stable() || (p.formation_time() > p.position().x0() 
+        && p.cross_section_scaling_factor() <= 0.0)) {
       continue;      /* particle doesn't decay or is not yet formed*/
     }
 
