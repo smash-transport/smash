@@ -82,9 +82,9 @@ float sample_resonance_mass(const ParticleType &type_res,
     // check that we are using the proper maximum value
     if (val > max) {
       const auto &log = logger<LogArea::Resonances>();
-      log.warn("maximum is being increased in sample_resonance_mass: ",
-               type_res.max_factor(), " ", val/max, " ", type_res.pdgcode(),
-               " ", mass_stable, " ", cms_energy, " ", mass_res);
+      log.debug("maximum is being increased in sample_resonance_mass: ",
+                type_res.max_factor(), " ", val/max, " ", type_res.pdgcode(),
+                " ", mass_stable, " ", cms_energy, " ", mass_res);
       type_res.increase_max_factor(val/max);
     } else {
       break;  // maximum ok, exit loop
