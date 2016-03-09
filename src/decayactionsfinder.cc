@@ -54,7 +54,7 @@ ActionList DecayActionsFinder::find_actions_in_cell(
         one_over_hbarc *
         p.inverse_gamma()  // The clock goes slower in the rest frame of the
                            // resonance
-        * width);
+        * width * p.cross_section_scaling_factor());
 
     if (decay_time < dt) {
       // => decay_time ∈ [0, dt[
