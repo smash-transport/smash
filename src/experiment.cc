@@ -379,25 +379,29 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
   while (OutputPtr oscar = create_oscar_output(output_path, output_conf)) {
     outputs_.emplace_back(std::move(oscar));
   }
-  if (static_cast<bool>(output_conf.take({"Vtk", "Enable"}))) {
+  const bool vtk = output_conf.take({"Vtk", "Enable"}, false);
+  if (vtk) {
     outputs_.emplace_back(make_unique<VtkOutput>(output_path,
                                                  output_conf["Vtk"]));
   } else {
     output_conf.take({"Vtk"});
   }
-  if (static_cast<bool>(output_conf.take({"Binary_Collisions", "Enable"}))) {
+  const bool bcoll = output_conf.take({"Binary_Collisions", "Enable"}, false);
+  if (bcoll) {
     outputs_.emplace_back(make_unique<BinaryOutputCollisions>(output_path,
                                             output_conf["Binary_Collisions"]));
   } else {
     output_conf.take({"Binary_Collisions"});
   }
-  if (static_cast<bool>(output_conf.take({"Binary_Particles", "Enable"}))) {
+  const bool bpart = output_conf.take({"Binary_Particles", "Enable"}, false);
+  if (bpart) {
     outputs_.emplace_back(make_unique<BinaryOutputParticles>(output_path,
                                               output_conf["Binary_Particles"]));
   } else {
     output_conf.take({"Binary_Particles"});
   }
-  if (static_cast<bool>(output_conf.take({"Root", "Enable"}))) {
+  const bool root = output_conf.take({"Root", "Enable"}, false);
+  if (root) {
 #ifdef SMASH_USE_ROOT
     outputs_.emplace_back(make_unique<RootOutput>(output_path,
                                                   output_conf["Root"]));
@@ -409,7 +413,8 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
   } else {
     output_conf.take({"Root"});
   }
-  if (static_cast<bool>(output_conf.take({"Thermodynamics", "Enable"}))) {
+  const bool td = output_conf.take({"Thermodynamics", "Enable"}, false);
+  if (td) {
     outputs_.emplace_back(make_unique<ThermodynamicOutput>(output_path,
                                                output_conf["Thermodynamics"]));
   } else {
