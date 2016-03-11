@@ -251,14 +251,32 @@ class ParticleType {
    */
   float spectral_function_simple(float m) const;
 
-  /// Retrieve the maximum factor for mass sampling
-  float max_factor() const {
-    return max_factor_;
+  /**
+   * Retrieve the maximum factor for mass sampling (single resonance production)
+   */
+  float max_factor1() const {
+    return max_factor1_;
   }
 
-  /// Increase the maximum factor for mass sampling (by multiplying with 'inc')
-  void increase_max_factor(float inc) const {
-    max_factor_ *= inc;
+  /**
+   * Increase the maximum factor for single-res mass sampling
+   * (by multiplying with 'inc'). */
+  void increase_max_factor1(float inc) const {
+    max_factor1_ *= inc;
+  }
+
+  /**
+   * Retrieve the maximum factor for mass sampling (double resonance production)
+   */
+  float max_factor2() const {
+    return max_factor2_;
+  }
+
+  /**
+   * Increase the maximum factor for double-res mass sampling
+   * (by multiplying with 'inc'). */
+  void increase_max_factor2(float inc) const {
+    max_factor2_ *= inc;
   }
 
   /**
@@ -403,8 +421,10 @@ class ParticleType {
 
   IsoParticleType *iso_multiplet_ = nullptr;
 
-  // Maximum factor for mass sampling, cf. sample_resonance_mass.
-  mutable float max_factor_ = 1.;
+  // Maximum factor for single-res mass sampling, cf. sample_resonance_mass.
+  mutable float max_factor1_ = 1.;
+  // Maximum factor for double-res mass sampling, cf. sample_resonance_masses.
+  mutable float max_factor2_ = 1.;
 
   /**\ingroup logging
    * Writes all information about the particle type to the output stream.

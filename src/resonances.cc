@@ -63,7 +63,7 @@ float sample_resonance_mass(const ParticleType &type_res,
     * an additional fudge factor (purely empirical). */
     const float q_max = type_res.spectral_function(max_mass)
                       / type_res.spectral_function_simple(max_mass)
-                      * type_res.max_factor();
+                      * type_res.max_factor1();
     const float max = blw_max * q_max;  // maximum value for rejection sampling
     // inner loop: rejection sampling
     do {
@@ -83,9 +83,9 @@ float sample_resonance_mass(const ParticleType &type_res,
     if (val > max) {
       const auto &log = logger<LogArea::Resonances>();
       log.debug("maximum is being increased in sample_resonance_mass: ",
-                type_res.max_factor(), " ", val/max, " ", type_res.pdgcode(),
+                type_res.max_factor1(), " ", val/max, " ", type_res.pdgcode(),
                 " ", mass_stable, " ", cms_energy, " ", mass_res);
-      type_res.increase_max_factor(val/max);
+      type_res.increase_max_factor1(val/max);
     } else {
       break;  // maximum ok, exit loop
     }
@@ -106,33 +106,40 @@ std::pair<float, float> sample_resonance_masses(const ParticleType &t1,
   // largest possible cm momentum (from smallest mass)
   const float pcm_max = pCM(cms_energy, t1.minimum_mass(), t2.minimum_mass());
   const float blw_max = pcm_max * blatt_weisskopf_sqr(pcm_max, L);
-  constexpr float q_max = 14.;        // this value is determined empirically
-  const float max = blw_max * q_max;  // maximum value for rejection sampling
-  float mass_1, mass_2, val;
-  // Loop: rejection sampling
-  do {
-    // sample mass from a simple Breit-Wigner (aka Cauchy) distribution
-    mass_1 = Random::cauchy(t1.mass(), t1.width_at_pole()/2.f,
-                            t1.minimum_mass(), max_mass_1);
-    mass_2 = Random::cauchy(t2.mass(), t2.width_at_pole()/2.f,
-                            t2.minimum_mass(), max_mass_2);
-    // determine cm momentum for this case
-    const float pcm = pCM(cms_energy, mass_1, mass_2);
-    const float blw = pcm * blatt_weisskopf_sqr(pcm, L);
-    // determine ratios of full to simple spectral function
-    const float q1 = t1.spectral_function(mass_1)
-                   / t1.spectral_function_simple(mass_1);
-    const float q2 = t2.spectral_function(mass_2)
-                   / t2.spectral_function_simple(mass_2);
-    val = q1 * q2 * blw;
-  } while (val < Random::uniform(0.f, max));
 
-  if (val > max) {
-    const auto &log = logger<LogArea::Resonances>();
-    log.error("maximum not correct in sample_resonance_masses: ",
-              val, " ", max, " ", t1.pdgcode(), " ", t2.pdgcode(), " ",
-              cms_energy, " ", mass_1, " ", mass_2);
-  }
+  float mass_1, mass_2, val;
+  // outer loop: repeat if maximum is too small
+  do {
+    // maximum value for rejection sampling (determined empirically)
+    const float max = blw_max * t1.max_factor2();
+    // inner loop: rejection sampling
+    do {
+      // sample mass from a simple Breit-Wigner (aka Cauchy) distribution
+      mass_1 = Random::cauchy(t1.mass(), t1.width_at_pole()/2.f,
+                              t1.minimum_mass(), max_mass_1);
+      mass_2 = Random::cauchy(t2.mass(), t2.width_at_pole()/2.f,
+                              t2.minimum_mass(), max_mass_2);
+      // determine cm momentum for this case
+      const float pcm = pCM(cms_energy, mass_1, mass_2);
+      const float blw = pcm * blatt_weisskopf_sqr(pcm, L);
+      // determine ratios of full to simple spectral function
+      const float q1 = t1.spectral_function(mass_1)
+                    / t1.spectral_function_simple(mass_1);
+      const float q2 = t2.spectral_function(mass_2)
+                    / t2.spectral_function_simple(mass_2);
+      val = q1 * q2 * blw;
+    } while (val < Random::uniform(0.f, max));
+
+    if (val > max) {
+      const auto &log = logger<LogArea::Resonances>();
+      log.debug("maximum is being increased in sample_resonance_masses: ",
+                t1.max_factor2(), " ", val/max, " ", t1.pdgcode(), " ",
+                t2.pdgcode(), " ", cms_energy, " ", mass_1, " ", mass_2);
+      t1.increase_max_factor2(val/max);
+    } else {
+      break;  // maximum ok, exit loop
+    }
+  } while (true);
 
   return {mass_1, mass_2};
 }
