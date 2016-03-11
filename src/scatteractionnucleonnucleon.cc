@@ -15,8 +15,6 @@
 #include "include/isoparticletype.h"
 #include "include/kinematics.h"
 #include "include/parametrizations.h"
-#include "include/random.h"
-#include "include/resonances.h"
 
 namespace Smash {
 
