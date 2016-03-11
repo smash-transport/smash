@@ -49,6 +49,8 @@ namespace Smash {
       pythia.readString("SoftQCD:inelastic = on");
       /* suppress unnecessary output */
       pythia.readString("Print:quiet = on");
+      /* Create output of the Pythia particle list */
+      ///pythia.readString("Init:showAllParticleData = on");
       /* No resonance decays, since the resonances will be handled by SMASH */
       pythia.readString("HadronLevel:Decay = off");
       /* Set the random seed of the Pythia Random Number Generator.
@@ -109,7 +111,7 @@ namespace Smash {
        std::sort(new_intermediate_particles.begin(),
                  new_intermediate_particles.end(),
                  [&](ParticleData i, ParticleData j)
-                 { return abs(i.momentum().x3()) < abs(j.momentum().x3()); });
+                 { return fabs(i.momentum().x3()) < fabs(j.momentum().x3()); });
        std::reverse(new_intermediate_particles.begin(),
                     new_intermediate_particles.end());
       for (ParticleData data_ : new_intermediate_particles) {
