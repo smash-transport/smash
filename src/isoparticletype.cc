@@ -189,8 +189,9 @@ static float spec_func_integrand_1res(float resonance_mass, float sqrts,
  * \param[in] t1 Type of the first resonance.
  * \param[in] t2 Type of the second resonance.
  */
-static float spec_func_integrand_2res(float sqrts, float res_mass_1, float res_mass_2,
-                               const ParticleType &t1, const ParticleType &t2) {
+static float spec_func_integrand_2res(float sqrts,
+                              float res_mass_1, float res_mass_2,
+                              const ParticleType &t1, const ParticleType &t2) {
   if (sqrts <= res_mass_1 + res_mass_2) {
     return 0.;
   }

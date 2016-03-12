@@ -20,7 +20,6 @@
 #include "include/pauliblocking.h"
 #include "include/processbranch.h"
 #include "include/quantumnumbers.h"
-#include "include/resonances.h"
 
 namespace Smash {
 
@@ -110,12 +109,12 @@ std::pair<double, double> Action::sample_masses() const {
 
   /* If one of the particles is a resonance, sample its mass. */
   if (!t_a.is_stable() && t_b.is_stable()) {
-    masses.first = sample_resonance_mass(t_a, t_b.mass(), cms_energy);
+    masses.first = t_a.sample_resonance_mass(t_b.mass(), cms_energy);
   } else if (!t_b.is_stable() && t_a.is_stable()) {
-    masses.second = sample_resonance_mass(t_b, t_a.mass(), cms_energy);
+    masses.second = t_b.sample_resonance_mass(t_a.mass(), cms_energy);
   } else if (!t_a.is_stable() && !t_b.is_stable()) {
     // two resonances in final state
-    masses = sample_resonance_masses(t_a, t_b, cms_energy);
+    masses = t_a.sample_resonance_masses(t_b, cms_energy);
   }
 
   return masses;

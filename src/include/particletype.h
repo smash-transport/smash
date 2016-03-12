@@ -252,32 +252,32 @@ class ParticleType {
   float spectral_function_simple(float m) const;
 
   /**
-   * Retrieve the maximum factor for mass sampling (single resonance production)
-   */
-  float max_factor1() const {
-    return max_factor1_;
-  }
+  * Resonance mass sampling for 2-particle final state
+  * with *one resonance* and one *stable* particle.
+  *
+  * \param[in] this Type of the resonance particle.
+  * \param[in] mass_stable Mass of the stable particle.
+  * \param[in] cms_energy center-of-mass energy of the 2-particle final state.
+  * \param[in] L relative angular momentum of the final-state particles
+  *
+  * \return The mass of the resonance particle.
+  */
+  float sample_resonance_mass(const float mass_stable,
+                              const float cms_energy, int L = 0) const;
 
   /**
-   * Increase the maximum factor for single-res mass sampling
-   * (by multiplying with 'inc'). */
-  void increase_max_factor1(float inc) const {
-    max_factor1_ *= inc;
-  }
-
-  /**
-   * Retrieve the maximum factor for mass sampling (double resonance production)
-   */
-  float max_factor2() const {
-    return max_factor2_;
-  }
-
-  /**
-   * Increase the maximum factor for double-res mass sampling
-   * (by multiplying with 'inc'). */
-  void increase_max_factor2(float inc) const {
-    max_factor2_ *= inc;
-  }
+  * Resonance mass sampling for 2-particle final state with two resonances.
+  *
+  * \param[in] this Type of the first resonance.
+  * \param[in] t2 Type of the second resonance.
+  * \param[in] cms_energy center-of-mass energy of the 2-particle final state.
+  * \param[in] L relative angular momentum of the final-state particles
+  *
+  * \return The masses of the resonance particles.
+  */
+  std::pair<float, float> sample_resonance_masses(const ParticleType &t2,
+                                                  const float cms_energy,
+                                                  int L = 0) const;
 
   /**
    * Returns a list of all ParticleType objects.

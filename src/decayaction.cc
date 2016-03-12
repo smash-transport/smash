@@ -14,7 +14,6 @@
 #include "include/kinematics.h"
 #include "include/logging.h"
 #include "include/pdgcode.h"
-#include "include/resonances.h"
 
 namespace Smash {
 
@@ -214,12 +213,12 @@ std::pair<double, double> DecayAction::sample_masses() const {
 
   /* If one of the particles is a resonance, sample its mass. */
   if (!t_a.is_stable() && t_b.is_stable()) {
-    masses.first = sample_resonance_mass(t_a, t_b.mass(), cms_energy, L_);
+    masses.first = t_a.sample_resonance_mass(t_b.mass(), cms_energy, L_);
   } else if (!t_b.is_stable() && t_a.is_stable()) {
-    masses.second = sample_resonance_mass(t_b, t_a.mass(), cms_energy, L_);
+    masses.second = t_b.sample_resonance_mass(t_a.mass(), cms_energy, L_);
   } else if (!t_a.is_stable() && !t_b.is_stable()) {
     // two resonances in final state
-    masses = sample_resonance_masses(t_a, t_b, cms_energy, L_);
+    masses = t_a.sample_resonance_masses(t_b, cms_energy, L_);
   }
 
   return masses;
