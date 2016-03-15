@@ -469,8 +469,8 @@ float ParticleType::sample_resonance_mass(const float mass_stable,
   // outer loop: repeat if maximum is too small
   do {
     /* The maximum of the spectral-function ratio 'usually' happens at the
-    * largest mass. However, this is not always the case, therefore we need
-    * an additional fudge factor (purely empirical). */
+     * largest mass. However, this is not always the case, therefore we need
+     * and additional fudge factor (determined automatically). */
     const float q_max = this->spectral_function(max_mass)
                       / this->spectral_function_simple(max_mass)
                       * this->max_factor1_;
@@ -520,7 +520,7 @@ std::pair<float, float> ParticleType::sample_resonance_masses(
   float mass_1, mass_2, val;
   // outer loop: repeat if maximum is too small
   do {
-    // maximum value for rejection sampling (determined empirically)
+    // maximum value for rejection sampling (determined automatically)
     const float max = blw_max * t1.max_factor2_;
     // inner loop: rejection sampling
     do {
