@@ -134,7 +134,6 @@ class OutputInterface {
     }
     throw std::invalid_argument("Unknown density type.");
   }
-
 };
 
 }  // namespace Smash
