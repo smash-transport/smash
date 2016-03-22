@@ -346,7 +346,6 @@ class Configuration {
           "The value for key \"" + std::string(key_) +
           "\" should be \"quadratic\", \"uniform\" or \"custom\".");
     }
-
   };
 
   /**

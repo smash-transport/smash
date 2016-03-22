@@ -75,33 +75,32 @@ T pCM_from_s(const T s, const T mass_a, const T mass_b) noexcept {
  * Return the center-of-mass momentum of two particles,
  * given sqrt(s) and their masses.
  *
- * \param srts sqrt(s) of the process [GeV].
+ * \param sqrts sqrt(s) of the process [GeV].
  * \param mass_a Mass of first particle [GeV].
  * \param mass_b Mass of second particle [GeV].
  */
 template <typename T>
-T pCM(const T srts, const T mass_a, const T mass_b) noexcept {
-  const auto psqr = pCM_sqr_from_s(srts*srts, mass_a, mass_b);
-  return psqr > T(0.) ? std::sqrt(psqr) : T(0.);
+T pCM(const T sqrts, const T mass_a, const T mass_b) noexcept {
+  return pCM_from_s(sqrts * sqrts, mass_a, mass_b);
 }
 
 /**
  * Return the squared center-of-mass momentum of two particles,
  * given sqrt(s) and their masses.
  *
- * \param srts sqrt(s) of the process [GeV].
+ * \param sqrts sqrt(s) of the process [GeV].
  * \param mass_a Mass of first particle [GeV].
  * \param mass_b Mass of second particle [GeV].
  */
 template <typename T>
-T pCM_sqr(const T srts, const T mass_a, const T mass_b) noexcept {
-  return pCM_sqr_from_s(srts * srts, mass_a, mass_b);
+T pCM_sqr(const T sqrts, const T mass_a, const T mass_b) noexcept {
+  return pCM_sqr_from_s(sqrts * sqrts, mass_a, mass_b);
 }
 
 /**
  * Get the range of mandelstam-t values allowed in a particular 2->2 process,
  * see PDG 2014 booklet, equ. (46.34).
- * \param srts sqrt(s) of the process [GeV].
+ * \param sqrts sqrt(s) of the process [GeV].
  * \param m1 Mass of first  incoming particle [GeV].
  * \param m2 Mass of second incoming particle [GeV].
  * \param m3 Mass of first  outgoing particle [GeV].
@@ -111,11 +110,11 @@ T pCM_sqr(const T srts, const T mass_a, const T mass_b) noexcept {
  * with |t_min| < |t_max|, i.e. t_min > t_max.
  */
 template <typename T>
-std::array<T, 2> get_t_range(const T srts, const T m1, const T m2,
+std::array<T, 2> get_t_range(const T sqrts, const T m1, const T m2,
                                            const T m3, const T m4) {
-  const T p_i = pCM(srts, m1, m2);  // initial-state CM momentum
-  const T p_f = pCM(srts, m3, m4);  // final-state CM momentum
-  const T sqrt_t0 = (m1*m1 - m2*m2 - m3*m3 + m4*m4) / (2.*srts);
+  const T p_i = pCM(sqrts, m1, m2);  // initial-state CM momentum
+  const T p_f = pCM(sqrts, m3, m4);  // final-state CM momentum
+  const T sqrt_t0 = (m1*m1 - m2*m2 - m3*m3 + m4*m4) / (2.*sqrts);
   const T t0 = sqrt_t0 * sqrt_t0;
   const T t_min = t0 - (p_i-p_f)*(p_i-p_f),
           t_max = t0 - (p_i+p_f)*(p_i+p_f);

@@ -251,15 +251,33 @@ class ParticleType {
    */
   float spectral_function_simple(float m) const;
 
-  /// Retrieve the maximum factor for mass sampling
-  float max_factor() const {
-    return max_factor_;
-  }
+  /**
+  * Resonance mass sampling for 2-particle final state
+  * with *one resonance* and one *stable* particle.
+  *
+  * \param[in] this Type of the resonance particle.
+  * \param[in] mass_stable Mass of the stable particle.
+  * \param[in] cms_energy center-of-mass energy of the 2-particle final state.
+  * \param[in] L relative angular momentum of the final-state particles
+  *
+  * \return The mass of the resonance particle.
+  */
+  float sample_resonance_mass(const float mass_stable,
+                              const float cms_energy, int L = 0) const;
 
-  /// Increase the maximum factor for mass sampling (by multiplying with 'inc')
-  void increase_max_factor(float inc) const {
-    max_factor_ *= inc;
-  }
+  /**
+  * Resonance mass sampling for 2-particle final state with two resonances.
+  *
+  * \param[in] this Type of the first resonance.
+  * \param[in] t2 Type of the second resonance.
+  * \param[in] cms_energy center-of-mass energy of the 2-particle final state.
+  * \param[in] L relative angular momentum of the final-state particles
+  *
+  * \return The masses of the resonance particles.
+  */
+  std::pair<float, float> sample_resonance_masses(const ParticleType &t2,
+                                                  const float cms_energy,
+                                                  int L = 0) const;
 
   /**
    * Returns a list of all ParticleType objects.
@@ -403,8 +421,10 @@ class ParticleType {
 
   IsoParticleType *iso_multiplet_ = nullptr;
 
-  // Maximum factor for mass sampling, cf. sample_resonance_mass.
-  mutable float max_factor_ = 1.;
+  // Maximum factor for single-res mass sampling, cf. sample_resonance_mass.
+  mutable float max_factor1_ = 1.;
+  // Maximum factor for double-res mass sampling, cf. sample_resonance_masses.
+  mutable float max_factor2_ = 1.;
 
   /**\ingroup logging
    * Writes all information about the particle type to the output stream.

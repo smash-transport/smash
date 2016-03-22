@@ -102,7 +102,6 @@ set(smash_src
         propagation.cc
         quantumnumbers.cc
         random.cc
-        resonances.cc
         scatteraction.cc
         scatteractionbaryonbaryon.cc
         scatteractionbaryonmeson.cc

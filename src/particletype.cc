@@ -17,10 +17,12 @@
 #include "include/cxx14compat.h"
 #include "include/decaymodes.h"
 #include "include/distributions.h"
+#include "include/formfactors.h"
 #include "include/inputfunctions.h"
 #include "include/integrate.h"
 #include "include/iomanipulators.h"
 #include "include/isoparticletype.h"
+#include "include/kinematics.h"
 #include "include/logging.h"
 #include "include/particledata.h"
 #include "include/pdgcode.h"
@@ -450,6 +452,106 @@ float ParticleType::spectral_function_const_width(float m) const {
 
 float ParticleType::spectral_function_simple(float m) const {
   return breit_wigner_nonrel(m, mass(), width_at_pole());
+}
+
+
+/* Resonance mass sampling for 2-particle final state */
+float ParticleType::sample_resonance_mass(const float mass_stable,
+                                          const float cms_energy, int L) const {
+  /* largest possible mass: Use 'nextafter' to make sure it is not above the
+   * physical limit by numerical error. */
+  const float max_mass = std::nextafter(cms_energy - mass_stable, 0.f);
+  // largest possible cm momentum (from smallest mass)
+  const float pcm_max = pCM(cms_energy, mass_stable, this->minimum_mass());
+  const float blw_max = pcm_max * blatt_weisskopf_sqr(pcm_max, L);
+
+  float mass_res, val;
+  // outer loop: repeat if maximum is too small
+  do {
+    /* The maximum of the spectral-function ratio 'usually' happens at the
+     * largest mass. However, this is not always the case, therefore we need
+     * and additional fudge factor (determined automatically). */
+    const float q_max = this->spectral_function(max_mass)
+                      / this->spectral_function_simple(max_mass)
+                      * this->max_factor1_;
+    const float max = blw_max * q_max;  // maximum value for rejection sampling
+    // inner loop: rejection sampling
+    do {
+      // sample mass from a simple Breit-Wigner (aka Cauchy) distribution
+      mass_res = Random::cauchy(this->mass(), this->width_at_pole()/2.f,
+                                this->minimum_mass(), max_mass);
+      // determine cm momentum for this case
+      const float pcm = pCM(cms_energy, mass_stable, mass_res);
+      const float blw = pcm * blatt_weisskopf_sqr(pcm, L);
+      // determine ratio of full to simple spectral function
+      const float q = this->spectral_function(mass_res)
+                    / this->spectral_function_simple(mass_res);
+      val = q * blw;
+    } while (val < Random::uniform(0.f, max));
+
+    // check that we are using the proper maximum value
+    if (val > max) {
+      const auto &log = logger<LogArea::Resonances>();
+      log.debug("maximum is being increased in sample_resonance_mass: ",
+                this->max_factor1_, " ", val/max, " ", this->pdgcode(),
+                " ", mass_stable, " ", cms_energy, " ", mass_res);
+      this->max_factor1_ *= val/max;
+    } else {
+      break;  // maximum ok, exit loop
+    }
+  } while (true);
+
+  return mass_res;
+}
+
+
+/* Resonance mass sampling for 2-particle final state with two resonances. */
+std::pair<float, float> ParticleType::sample_resonance_masses(
+                  const ParticleType &t2, const float cms_energy, int L) const {
+  const ParticleType &t1 = *this;
+  /* Sample resonance mass from the distribution
+   * used for calculating the cross section. */
+  const float max_mass_1 = std::nextafter(cms_energy - t2.minimum_mass(), 0.f);
+  const float max_mass_2 = std::nextafter(cms_energy - t1.minimum_mass(), 0.f);
+  // largest possible cm momentum (from smallest mass)
+  const float pcm_max = pCM(cms_energy, t1.minimum_mass(), t2.minimum_mass());
+  const float blw_max = pcm_max * blatt_weisskopf_sqr(pcm_max, L);
+
+  float mass_1, mass_2, val;
+  // outer loop: repeat if maximum is too small
+  do {
+    // maximum value for rejection sampling (determined automatically)
+    const float max = blw_max * t1.max_factor2_;
+    // inner loop: rejection sampling
+    do {
+      // sample mass from a simple Breit-Wigner (aka Cauchy) distribution
+      mass_1 = Random::cauchy(t1.mass(), t1.width_at_pole()/2.f,
+                              t1.minimum_mass(), max_mass_1);
+      mass_2 = Random::cauchy(t2.mass(), t2.width_at_pole()/2.f,
+                              t2.minimum_mass(), max_mass_2);
+      // determine cm momentum for this case
+      const float pcm = pCM(cms_energy, mass_1, mass_2);
+      const float blw = pcm * blatt_weisskopf_sqr(pcm, L);
+      // determine ratios of full to simple spectral function
+      const float q1 = t1.spectral_function(mass_1)
+                    / t1.spectral_function_simple(mass_1);
+      const float q2 = t2.spectral_function(mass_2)
+                    / t2.spectral_function_simple(mass_2);
+      val = q1 * q2 * blw;
+    } while (val < Random::uniform(0.f, max));
+
+    if (val > max) {
+      const auto &log = logger<LogArea::Resonances>();
+      log.debug("maximum is being increased in sample_resonance_masses: ",
+                t1.max_factor2_, " ", val/max, " ", t1.pdgcode(), " ",
+                t2.pdgcode(), " ", cms_energy, " ", mass_1, " ", mass_2);
+      t1.max_factor2_ *= val/max;
+    } else {
+      break;  // maximum ok, exit loop
+    }
+  } while (true);
+
+  return {mass_1, mass_2};
 }
 
 
