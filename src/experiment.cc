@@ -265,8 +265,9 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
 
   const bool two_to_one = config.take({"Collision_Term", "Two_to_One"}, true);
   const bool two_to_two = config.take({"Collision_Term", "Two_to_Two"}, true);
-  const bool dileptons_switch = config.take(
-                                      {"Output", "Dileptons", "Enable"}, false);
+  const bool dileptons_switch = config.has_value({"Output", "Dileptons"}) ?
+                    config.take({"Output", "Dileptons", "Enable"}, false) :
+                    false;
 
   // create finders
   if (two_to_one) {
@@ -383,21 +384,21 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
   if (vtk) {
     outputs_.emplace_back(make_unique<VtkOutput>(output_path,
                                                  output_conf["Vtk"]));
-  } else {
+  } else if (output_conf.has_value({"Vtk"})) {
     output_conf.take({"Vtk"});
   }
   const bool bcoll = output_conf.take({"Binary_Collisions", "Enable"}, false);
   if (bcoll) {
     outputs_.emplace_back(make_unique<BinaryOutputCollisions>(output_path,
                                             output_conf["Binary_Collisions"]));
-  } else {
+  } else if (output_conf.has_value({"Binary_Collisions"})) {
     output_conf.take({"Binary_Collisions"});
   }
   const bool bpart = output_conf.take({"Binary_Particles", "Enable"}, false);
   if (bpart) {
     outputs_.emplace_back(make_unique<BinaryOutputParticles>(output_path,
                                               output_conf["Binary_Particles"]));
-  } else {
+  } else if (output_conf.has_value({"Binary_Particles"})) {
     output_conf.take({"Binary_Particles"});
   }
   const bool root = output_conf.take({"Root", "Enable"}, false);
@@ -410,14 +411,14 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
                     "compiled in.";
     output_conf.take({"Root"});
 #endif
-  } else {
+  } else if (output_conf.has_value({"Root"})) {
     output_conf.take({"Root"});
   }
   const bool td = output_conf.take({"Thermodynamics", "Enable"}, false);
   if (td) {
     outputs_.emplace_back(make_unique<ThermodynamicOutput>(output_path,
                                                output_conf["Thermodynamics"]));
-  } else {
+  } else if (output_conf.has_value({"Thermodynamics"})) {
     output_conf.take({"Thermodynamics"});
   }
 
