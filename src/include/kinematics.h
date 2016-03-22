@@ -81,8 +81,7 @@ T pCM_from_s(const T s, const T mass_a, const T mass_b) noexcept {
  */
 template <typename T>
 T pCM(const T srts, const T mass_a, const T mass_b) noexcept {
-  const auto psqr = pCM_sqr_from_s(srts*srts, mass_a, mass_b);
-  return psqr > T(0.) ? std::sqrt(psqr) : T(0.);
+  return pCM_from_s(srts * srts, mass_a, mass_b);
 }
 
 /**
