@@ -49,11 +49,9 @@ namespace Smash {
  * of the projectile nucleus (in AGeV). This assumes the target nucleus is at
  * rest.
  *
- * \key Calculation_Frame (int, required, default = 1): \n
+ * \key Calculation_Frame (string, required, default = "center of velocity"): \n
  * The frame in which the collision is calculated.\n
- * 1 - center of velocity frame\n
- * 2 - center of mass frame\n
- * 3 - fixed target frame
+ * "center of velocity", "center of mass" or "fixed target"
  *
  * \key Projectile: \n
  * Section for projectile nucleus. The projectile will
