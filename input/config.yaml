@@ -57,36 +57,28 @@ Output:
     # ("hadron", "baryon", "baryonic isospin", "pion", "none")
     Density_Type:      "none"
     # output formats
-    Oscar_Collisions:
-        Enable:             True
-        2013_Format:        True
-        Print_Start_End:    False
-    Oscar_Particlelist:
-        Enable:             True
-        2013_Format:        True
-        Only_Final:         True
-    Vtk:
-        Enable:             False
-    Root:
-        Enable:             False
-        Write_Collisions:   True
-        Write_Particles:    True
-        Autosave_Frequency: 1000
-    Binary_Collisions:
-        Enable:             False
-        Print_Start_End:    True
-    Binary_Particles:
-        Enable:             False
-        Only_Final:         False
-    Thermodynamics:
-        Enable:             False
-        # ("hadron", "baryon", "baryonic isospin", "pion", "none")
-        Type:               "baryon"
-        Quantities:         ["rho_eckart", "tmn", "tmn_landau", "landau_velocity"]
-        Position:           [0.0, 0.0, 0.0]
-    Dileptons:
-        Enable:             False
-        Format:             Oscar
+#    Oscar_Collisions:
+#        2013_Format:        True
+#        Print_Start_End:    False
+#    Oscar_Particlelist:
+#        2013_Format:        True
+#        Only_Final:         True
+#    Vtk:
+#    Root:
+#        Write_Collisions:   True
+#        Write_Particles:    True
+#        Autosave_Frequency: 1000
+#    Binary_Collisions:
+#        Print_Start_End:    True
+#    Binary_Particles:
+#        Only_Final:         False
+#    Thermodynamics:
+#        # ("hadron", "baryon", "baryonic isospin", "pion", "none")
+#        Type:               "baryon"
+#        Quantities:         ["rho_eckart", "tmn", "tmn_landau", "landau_velocity"]
+#        Position:           [0.0, 0.0, 0.0]
+#    Dileptons:
+#        Format:             Oscar
 
 Collision_Term:
     Two_to_One:             True

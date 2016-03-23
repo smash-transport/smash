@@ -209,6 +209,29 @@ std::ostream &operator<<(std::ostream &out, const Experiment<Modus> &e) {
   return out;
 }
 
+template <typename Modus>
+template <typename TOutput>
+void Experiment<Modus>::create_output(const char * name,
+                   const bf::path &output_path,
+                   Configuration&& conf) {
+  const bool exists = conf.has_value_including_empty({name});
+  if (!exists) {
+    return;
+  }
+  if (conf.has_value({name, "Enable"})) {
+    const auto &log = logger<LogArea::Experiment>();
+    log.warn("Enable option is deprecated."
+             " To disable/enable output comment/uncomment"
+             " it out in the config.yaml.");
+  }
+  const bool enable = conf.take({name, "Enable"}, true);
+  if (!enable) {
+    conf.take({name});
+    return;
+  }
+  outputs_.emplace_back(make_unique<TOutput>(output_path, conf[name]));
+}
+
 /*!\Userguide
  * \page input_general_
  * \key End_Time (float, required): \n
@@ -266,7 +289,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
   const bool two_to_one = config.take({"Collision_Term", "Two_to_One"}, true);
   const bool two_to_two = config.take({"Collision_Term", "Two_to_Two"}, true);
   const bool dileptons_switch = config.has_value({"Output", "Dileptons"}) ?
-                    config.take({"Output", "Dileptons", "Enable"}, false) :
+                    config.take({"Output", "Dileptons", "Enable"}, true) :
                     false;
 
   // create finders
@@ -380,47 +403,21 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
   while (OutputPtr oscar = create_oscar_output(output_path, output_conf)) {
     outputs_.emplace_back(std::move(oscar));
   }
-  const bool vtk = output_conf.take({"Vtk", "Enable"}, false);
-  if (vtk) {
-    outputs_.emplace_back(make_unique<VtkOutput>(output_path,
-                                                 output_conf["Vtk"]));
-  } else if (output_conf.has_value({"Vtk"})) {
-    output_conf.take({"Vtk"});
-  }
-  const bool bcoll = output_conf.take({"Binary_Collisions", "Enable"}, false);
-  if (bcoll) {
-    outputs_.emplace_back(make_unique<BinaryOutputCollisions>(output_path,
-                                            output_conf["Binary_Collisions"]));
-  } else if (output_conf.has_value({"Binary_Collisions"})) {
-    output_conf.take({"Binary_Collisions"});
-  }
-  const bool bpart = output_conf.take({"Binary_Particles", "Enable"}, false);
-  if (bpart) {
-    outputs_.emplace_back(make_unique<BinaryOutputParticles>(output_path,
-                                              output_conf["Binary_Particles"]));
-  } else if (output_conf.has_value({"Binary_Particles"})) {
-    output_conf.take({"Binary_Particles"});
-  }
-  const bool root = output_conf.take({"Root", "Enable"}, false);
-  if (root) {
-#ifdef SMASH_USE_ROOT
-    outputs_.emplace_back(make_unique<RootOutput>(output_path,
-                                                  output_conf["Root"]));
+  create_output<VtkOutput>("Vtk", output_path, std::move(output_conf));
+  create_output<BinaryOutputCollisions>("Binary_Collisions",
+                                        output_path, std::move(output_conf));
+  create_output<BinaryOutputParticles>("Binary_Particles",
+                                        output_path, std::move(output_conf));
+#ifdef USE_ROOT
+  create_output<RootOutput>("Root", output_path, std::move(output_conf));
 #else
-    log.error() << "You requested Root output, but Root support has not been "
-                    "compiled in.";
-    output_conf.take({"Root"});
+  const bool enable_root = output_conf.take({"Root", "Enable"}, true);
+  if (enable_root && output_conf.has_value_including_empty({"Root"})) {
+    log.error("Root output requested, but Root support not compiled in");
+  }
 #endif
-  } else if (output_conf.has_value({"Root"})) {
-    output_conf.take({"Root"});
-  }
-  const bool td = output_conf.take({"Thermodynamics", "Enable"}, false);
-  if (td) {
-    outputs_.emplace_back(make_unique<ThermodynamicOutput>(output_path,
-                                               output_conf["Thermodynamics"]));
-  } else if (output_conf.has_value({"Thermodynamics"})) {
-    output_conf.take({"Thermodynamics"});
-  }
+  create_output<ThermodynamicOutput>("Thermodynamics",
+                                     output_path, std::move(output_conf));
 
   /*!\Userguide
    * \page input_dileptons Dileptons

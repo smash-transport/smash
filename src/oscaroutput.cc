@@ -451,10 +451,9 @@ std::unique_ptr<OutputInterface> create_oscar_output(const bf::path &path,
                                                      Configuration config) {
   if (config.has_value({"Oscar_Particlelist"})) {
     auto subconfig = config["Oscar_Particlelist"];
-    const bool enabled = subconfig.take({"Enable"}, false);
-    if (!enabled) {
-      config.take({"Oscar_Particlelist"});
-    } else {
+    const bool enabled = subconfig.take({"Enable"}, true);
+    config.take({"Oscar_Particlelist"});
+    if (enabled) {
       const bool only_final = subconfig.take({"Only_Final"}, true);
       if (only_final) {
         return create_select_format<OscarParticlesAtEventend>(
@@ -468,10 +467,9 @@ std::unique_ptr<OutputInterface> create_oscar_output(const bf::path &path,
   }
   if (config.has_value({"Oscar_Collisions"})) {
     auto subconfig = config["Oscar_Collisions"];
-    const bool enabled = subconfig.take({"Enable"}, false);
-    if (!enabled) {
-      config.take({"Oscar_Collisions"});
-    } else {
+    const bool enabled = subconfig.take({"Enable"}, true);
+    config.take({"Oscar_Collisions"});
+    if (enabled) {
       const bool print_start_end = subconfig.take({"Print_Start_End"}, false);
       if (print_start_end) {
         return create_select_format<OscarInteractions | OscarAtEventstart |

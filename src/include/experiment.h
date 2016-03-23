@@ -150,6 +150,11 @@ class Experiment : public ExperimentBase {
                       uint64_t &total_pauliblocked,
                       const Container &particles_before_actions);
 
+  template <typename TOutput>
+  void create_output(const char * output_name,
+                     const bf::path &output_path,
+                     Configuration&& conf);
+
   /** It generates the final state with the right kinematics and then writes
    * the given dilepton action in the dilepton output file, instead of
    * actually performing the action.
