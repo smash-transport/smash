@@ -41,50 +41,11 @@ ActionList DecayActionsFinderDilepton::find_actions_in_cell(
     }
 
     for (DecayBranchPtr & mode : dil_modes) {
-      float sh_weight = 0.0;
-      float dilepton_mass = 0.f;
-
-      switch (mode->particle_number()) {
-        case 2: {
-          const float partial_width = mode->weight();
-          // SHINING as described in \iref{Schmidt:2008hm}, chapter 2D
-          sh_weight = dt * inv_gamma * partial_width / hbarc;
-          break;
-        }
-        case 3: {
-          // find the non lepton particle position
-          int non_lepton_position = -1;
-          for (int i = 0; i < 3; ++i) {
-            if (!(mode->particle_types()[i]->is_lepton())) {
-              non_lepton_position = i;
-              break;
-            }
-          }
-
-          // mass of non-lepton final state particle
-          const float m_nl =
-                            mode->particle_types()[non_lepton_position]->mass();
-          // mass of leptons in final state
-          const float m_l =
-                      mode->particle_types()[(non_lepton_position+1)%3]->mass();
-
-          // randomly select a mass
-          dilepton_mass = Random::uniform(2*m_l, m_eff-m_nl);
-          const float delta_m = m_eff - m_nl - 2*m_l;
-
-          const float diff_width = ThreeBodyDecayDilepton::diff_width(m_eff,
-                                      dilepton_mass, m_nl, p.type().pdgcode());
-
-          sh_weight = dt * inv_gamma * delta_m * diff_width / hbarc;
-          break;
-          }
-        default:
-          throw std::runtime_error("Error in DecayActionFinderDilepton");
-      }
+      // SHINING as described in \iref{Schmidt:2008hm}, chapter 2D
+      const float sh_weight = dt * inv_gamma * mode->weight() / hbarc;
 
       if (sh_weight > 0.0) {  // decays that can happen
-        auto act = make_unique<DecayActionDilepton>(p, 0.f, sh_weight,
-                                                                 dilepton_mass);
+        auto act = make_unique<DecayActionDilepton>(p, 0.f, sh_weight);
         act->add_decay(std::move(mode));
         actions.emplace_back(std::move(act));
       }
@@ -113,47 +74,10 @@ ActionList DecayActionsFinderDilepton::find_final_actions(
                                             p.type().get_partial_widths(m_eff));
 
     for (DecayBranchPtr & mode : dil_modes) {
-      float sh_weight;
-      float dilepton_mass = 0.f;
+      const float sh_weight = mode->weight() / width_tot;
 
-      switch (mode->particle_number()) {
-        case 2: {
-          const float partial_width = mode->weight();
-          sh_weight = partial_width / width_tot;
-          break;
-        }
-        case 3: {
-          // find the non lepton particle position
-          int non_lepton_position = -1;
-          for (int i = 0; i < 3; ++i) {
-            if (!(mode->particle_types()[i]->is_lepton())) {
-              non_lepton_position = i;
-              break;
-            }
-          }
-          // mass of non-lepton final state particle
-          const float m_nl =
-                            mode->particle_types()[non_lepton_position]->mass();
-          // mass of leptons in final state
-          const float m_l =
-                      mode->particle_types()[(non_lepton_position+1)%3]->mass();
-
-          // randomly select a mass
-          dilepton_mass = Random::uniform(2*m_l, m_eff-m_nl);
-          const float delta_m = m_eff - m_nl - 2*m_l;
-
-          const float diff_width = ThreeBodyDecayDilepton::diff_width(m_eff,
-                                      dilepton_mass, m_nl, p.type().pdgcode());
-
-          sh_weight = delta_m * diff_width / width_tot;
-          break;
-        }
-        default:
-          throw std::runtime_error("Error in DecayActionFinderDilepton");
-      }
       if (sh_weight > 0.0) {  // decays that can happen
-        auto act = make_unique<DecayActionDilepton>(p, 0.f, sh_weight,
-                                                                 dilepton_mass);
+        auto act = make_unique<DecayActionDilepton>(p, 0.f, sh_weight);
         act->add_decay(std::move(mode));
         actions.emplace_back(std::move(act));
       }

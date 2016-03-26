@@ -17,7 +17,7 @@ namespace Smash {
 class DecayActionDilepton : public DecayAction {
  public:
   DecayActionDilepton(const ParticleData &p, float time_of_execution,
-                      float shining_weight, float dilepton_mass);
+                      float shining_weight);
 
   float raw_weight_value() const override {
     return shining_weight_;
@@ -32,12 +32,6 @@ class DecayActionDilepton : public DecayAction {
    * afterwards weight them to correct the dilepton decay yields.
    */
   float shining_weight_;
-  /**
-   * For dalitz dilepton decays we sample randomly the possible dilepton_mass_
-   * first and then apply the differential width.
-   * For two body dilepton decays we do not need this member. It is zero.
-   */
-  float dilepton_mass_;
 };
 
 }  // namespace Smash
