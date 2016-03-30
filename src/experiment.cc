@@ -148,8 +148,8 @@ namespace {
  * \li "none"             - do not calculate density, print 0.0
  *
  * The output section has several subsections, relating to different output
- * files. To enable a certain output, set the 'Enable' key in the corresponding
- * subsection:
+ * files. To disable a certain output, comment the corresponding section out:
+ *
  * \li \subpage input_oscar_particlelist
  * \li \subpage input_oscar_collisions
  * \li \subpage input_vtk
@@ -375,7 +375,8 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     * \code smash -o <user_output_dir> \endcode
     * SMASH supports several kinds of configurable output formats.
     * They are called OSCAR1999, OSCAR2013, binary OSCAR2013, VTK and ROOT
-    * outputs. Every format can be switched on/off using option Enable in the
+    * outputs. Every format can be switched on/off by commenting/uncommenting the
+    * corresponding section in the
     * configuration file config.yaml. For more information on configuring the
     * output see corresponding pages: \ref input_oscar_particlelist,
     * \ref input_oscar_collisions, \ref input_binary_collisions,
@@ -438,10 +439,6 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    *
    * \note If you want dilepton decays, you also have to modify decaymodes.txt.
    * Dilepton decays are commented out by default.
-   *
-   * \key Enable (bool, optional, default = false):\n
-   * true - Dilepton Output and DecayActionsFinderDilepton enabled\n
-   * false - no Dilepton Output and no DecayActionsFinderDilepton
    *
    * \key Format (string, required):\n
    * "Oscar" - The dilepton output is written to the file \c DileptonOutput.oscar

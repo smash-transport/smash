@@ -35,10 +35,6 @@ OscarOutput<Format, Contents>::OscarOutput(const bf::path &path,
    * Writing (or not writing) output at these moments is controlled by options.
    * Output time interval \f$\Delta t \f$ is also regulated by an option.
    *
-   * \key Enable (bool, optional, default = false):\n
-   * true - OSCAR particle list output enabled\n
-   * false - no OSCAR particle list output
-   *
    * \key 2013_Format (bool, optional, default = false): \n
    * true - output will be in OSCAR2013 format\n
    * false - output will be in OSCAR1999 format
@@ -54,10 +50,6 @@ OscarOutput<Format, Contents>::OscarOutput(const bf::path &path,
    * Enables OSCAR collisions output. The latter saves information about
    * every collision, decay and box wall crossing in OSCAR1999 or OSCAR2013 format.
    * Optionally initial and final particle configurations can be written out.
-   *
-   * \key Enable (bool, optional, default = false):\n
-   * true - OSCAR collision output enabled
-   * false - no OSCAR collision output
    *
    * \key 2013_Format (bool, optional, default = false): \n
    * true - output will be in OSCAR2013 format\n
