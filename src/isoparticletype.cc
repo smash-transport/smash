@@ -203,13 +203,13 @@ static float spec_func_integrand_2res(float sqrts,
        * pCM(sqrts, res_mass_1, res_mass_2);
 }
 
+static thread_local Integrator integrate;
 
 double IsoParticleType::get_integral_NR(double sqrts) {
   if (XS_NR_tabulation == nullptr) {
     // initialize tabulation
     /* TODO(weil): Move this lazy init to a global initialization function,
       * in order to avoid race conditions in multi-threading. */
-    Integrator integrate;
     ParticleTypePtr type_res = states_[0];
     ParticleTypePtr nuc = IsoParticleType::find("N").get_states()[0];
     XS_NR_tabulation = make_unique<Tabulation>(
@@ -225,26 +225,24 @@ double IsoParticleType::get_integral_NR(double sqrts) {
   return XS_NR_tabulation->get_value_linear(sqrts);
 }
 
+static thread_local Integrator2d integrate2d(1E4);
 
 double IsoParticleType::get_integral_DR(double sqrts) {
   if (XS_DR_tabulation == nullptr) {
     // initialize tabulation
-    /* TODO(weil): Move this lazy init to a global initialization function,
-      * in order to avoid race conditions in multi-threading. */
-    Integrator2d integrate(1E4);
     ParticleTypePtr type_res = states_[0];
     ParticleTypePtr Delta = IsoParticleType::find("Δ").get_states()[0];
     XS_DR_tabulation = make_unique<Tabulation>(
           type_res->minimum_mass() + Delta->minimum_mass(), 2.5f, 100,
           [&](float srts) {
-            return integrate(type_res->minimum_mass(),
-                             srts - Delta->minimum_mass(),
-                             Delta->minimum_mass(),
-                             srts - type_res->minimum_mass(),
-                             [&](float m1, float m2) {
-                               return spec_func_integrand_2res(srts, m1, m2,
-                                                            *type_res, *Delta);
-                             });
+            return integrate2d(type_res->minimum_mass(),
+                               srts - Delta->minimum_mass(),
+                               Delta->minimum_mass(),
+                               srts - type_res->minimum_mass(),
+                               [&](float m1, float m2) {
+                                 return spec_func_integrand_2res(srts, m1, m2,
+                                                              *type_res, *Delta);
+                               });
           });
   }
   return XS_DR_tabulation->get_value_linear(sqrts);
