@@ -148,6 +148,8 @@ static thread_local Integrator integrate;
 
 float TwoBodyDecaySemistable::rho(float mass) const {
   if (tabulation_ == nullptr) {
+    /* TODO(weil): Move this lazy init to a global initialization function,
+      * in order to avoid race conditions in multi-threading. */
     const_cast<TwoBodyDecaySemistable*>(this)->tabulation_
         = make_unique<Tabulation>(
                 particle_types_[0]->mass() + particle_types_[1]->minimum_mass(),
@@ -206,6 +208,8 @@ static thread_local Integrator2d integrate2d(1E4);
 
 float TwoBodyDecayUnstable::rho(float mass) const {
   if (tabulation_ == nullptr) {
+    /* TODO(weil): Move this lazy init to a global initialization function,
+      * in order to avoid race conditions in multi-threading. */
     const float m1_min = particle_types_[0]->minimum_mass();
     const float m2_min = particle_types_[1]->minimum_mass();
     const float sum_gamma = particle_types_[0]->width_at_pole()
@@ -421,6 +425,8 @@ float ThreeBodyDecayDilepton::width(float, float G0, float m) const {
 
   // integrate differential width to obtain partial width
   if (tabulation_ == nullptr) {
+    /* TODO(weil): Move this lazy init to a global initialization function,
+      * in order to avoid race conditions in multi-threading. */
     const_cast<ThreeBodyDecayDilepton*>(this)->tabulation_
           = make_unique<Tabulation>(m_other+2*m_l, 10*G0, num_tab_pts,
               [&](float m_parent) {

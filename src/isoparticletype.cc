@@ -230,6 +230,8 @@ static thread_local Integrator2d integrate2d(1E4);
 double IsoParticleType::get_integral_DR(double sqrts) {
   if (XS_DR_tabulation == nullptr) {
     // initialize tabulation
+    /* TODO(weil): Move this lazy init to a global initialization function,
+      * in order to avoid race conditions in multi-threading. */
     ParticleTypePtr type_res = states_[0];
     ParticleTypePtr Delta = IsoParticleType::find("Δ").get_states()[0];
     XS_DR_tabulation = make_unique<Tabulation>(
