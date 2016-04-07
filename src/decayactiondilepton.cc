@@ -58,8 +58,11 @@ void DecayActionDilepton::one_to_three() {
                                       cms_energy, dil_mass, mass_nl,
                                       incoming_particles_[0].type().pdgcode());
 
-  // correct shining weight for differential width at particular dilepton mass
-  shining_weight_ *= delta_m * diff_width / decay_channels_[0]->weight();
+  /* Branching factor, which corrects the shining weight for the differential
+   * width at a particular dilepton mass. We do an implicit Monte-Carlo
+   * integration over the dilepton mass here, and delta_m is simply the
+   * integration volume. */
+  branching = delta_m * diff_width / decay_channels_[0]->weight();
 
 
   // perform decay into non-lepton and virtual photon (dilepton)

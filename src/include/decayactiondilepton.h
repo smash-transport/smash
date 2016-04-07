@@ -20,7 +20,7 @@ class DecayActionDilepton : public DecayAction {
                       float shining_weight);
 
   float raw_weight_value() const override {
-    return shining_weight_;
+    return shining_weight_ * branching;
   }
 
   void one_to_three() override;
@@ -31,7 +31,16 @@ class DecayActionDilepton : public DecayAction {
    * we radiate dileptons at every timestep to increase statistics, we
    * afterwards weight them to correct the dilepton decay yields.
    */
-  float shining_weight_;
+  const float shining_weight_;
+  /**
+   * An additional branching factor that is multiplied with the shining weight.
+   * For Dalitz decays, the primary shining weight is based on the integrated
+   * width for the channel, and the branching factor corrects for the
+   * differential width (evaluated at a particular dilepton mass), relative
+   * to the integrated width. It is determined after the dilepton mass is fixed.
+   * For direct (2-body) decays, the branching factor equals one.
+   */
+  float branching = 1.;
 };
 
 }  // namespace Smash
