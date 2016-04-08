@@ -132,6 +132,9 @@ class ParticleType {
   /// \copydoc PdgCode::baryon_number
   int baryon_number() const { return pdgcode_.baryon_number(); }
 
+  /// \copydoc PdgCode::strangeness
+  int strangeness() const {return pdgcode_.strangeness(); }
+
   /// \copydoc PdgCode::is_nucleon
   bool is_nucleon() const { return pdgcode_.is_nucleon(); }
 
