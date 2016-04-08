@@ -416,7 +416,8 @@ float ThreeBodyDecayDilepton::diff_width(float m_par, float m_dil,
         return (2.*alpha/(3.*M_PI)) * gamma/m_dil * pow(rad, 3./2.) * ff_sqr;
       }
     }
-    case 0x2214: case 0x2114: /* Δ⁺, Δ⁰ */ {
+    case 0x2214: case -0x2214:
+    case 0x2114: case -0x2114:  /* Δ⁺, Δ⁰ (and antiparticles) */ {
       /// see \iref{Krivoruchenko:2001hs}
       const float rad1 = (m_par+m_other)*(m_par+m_other) - m_dil_sqr;
       const float rad2 = (m_par-m_other)*(m_par-m_other) - m_dil_sqr;
@@ -429,7 +430,8 @@ float ThreeBodyDecayDilepton::diff_width(float m_par, float m_dil,
       return 2.*alpha/(3.*M_PI) * gamma_vi/m_dil;
     }
     default:
-      throw std::runtime_error("Error in ThreeBodyDecayDilepton");
+      throw std::runtime_error("Error in ThreeBodyDecayDilepton: "
+                               + pdg.string());
   }
 }
 
