@@ -42,10 +42,10 @@ ActionList DecayActionsFinderDilepton::find_actions_in_cell(
 
     for (DecayBranchPtr & mode : dil_modes) {
       // SHINING as described in \iref{Schmidt:2008hm}, chapter 2D
-      const float sh_weight = dt * inv_gamma * mode->weight() / hbarc;
+      const float shining_weight = dt * inv_gamma * mode->weight() / hbarc;
 
-      if (sh_weight > 0.0) {  // decays that can happen
-        auto act = make_unique<DecayActionDilepton>(p, 0.f, sh_weight);
+      if (shining_weight > 0.0) {  // decays that can happen
+        auto act = make_unique<DecayActionDilepton>(p, 0.f, shining_weight);
         act->add_decay(std::move(mode));
         actions.emplace_back(std::move(act));
       }
@@ -74,10 +74,10 @@ ActionList DecayActionsFinderDilepton::find_final_actions(
                                             p.type().get_partial_widths(m_eff));
 
     for (DecayBranchPtr & mode : dil_modes) {
-      const float sh_weight = mode->weight() / width_tot;
+      const float shining_weight = mode->weight() / width_tot;
 
-      if (sh_weight > 0.0) {  // decays that can happen
-        auto act = make_unique<DecayActionDilepton>(p, 0.f, sh_weight);
+      if (shining_weight > 0.0) {  // decays that can happen
+        auto act = make_unique<DecayActionDilepton>(p, 0.f, shining_weight);
         act->add_decay(std::move(mode));
         actions.emplace_back(std::move(act));
       }

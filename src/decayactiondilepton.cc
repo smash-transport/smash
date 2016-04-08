@@ -39,13 +39,9 @@ void DecayActionDilepton::one_to_three() {
   ParticleData &l1 = outgoing_particles_[(non_lepton_position+1)%3];
   ParticleData &l2 = outgoing_particles_[(non_lepton_position+2)%3];
 
-  const ParticleType &l1_type = l1.type();
-  const ParticleType &l2_type = l2.type();
-  const ParticleType &nl_type = nl.type();
-
-  const double mass_l1 = l1_type.mass();
-  const double mass_l2 = l2_type.mass();
-  const double mass_nl = nl_type.mass();
+  const double mass_l1 = l1.type().mass();  // mass of first lepton
+  const double mass_l2 = l2.type().mass();  // mass of second lepton
+  const double mass_nl = nl.type().mass();  // mass of non-lepton
 
   const double cms_energy = sqrt_s();
 
@@ -62,7 +58,7 @@ void DecayActionDilepton::one_to_three() {
    * width at a particular dilepton mass. We do an implicit Monte-Carlo
    * integration over the dilepton mass here, and delta_m is simply the
    * integration volume. */
-  branching = delta_m * diff_width / decay_channels_[0]->weight();
+  branching_ = delta_m * diff_width / decay_channels_[0]->weight();
 
 
   // perform decay into non-lepton and virtual photon (dilepton)

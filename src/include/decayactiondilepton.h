@@ -20,7 +20,7 @@ class DecayActionDilepton : public DecayAction {
                       float shining_weight);
 
   float raw_weight_value() const override {
-    return shining_weight_ * branching;
+    return shining_weight_ * branching_;
   }
 
   void one_to_three() override;
@@ -40,7 +40,7 @@ class DecayActionDilepton : public DecayAction {
    * to the integrated width. It is determined after the dilepton mass is fixed.
    * For direct (2-body) decays, the branching factor equals one.
    */
-  float branching = 1.;
+  float branching_ = 1.;
 };
 
 }  // namespace Smash
