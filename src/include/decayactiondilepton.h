@@ -17,10 +17,10 @@ namespace Smash {
 class DecayActionDilepton : public DecayAction {
  public:
   DecayActionDilepton(const ParticleData &p, float time_of_execution,
-                      float shining_weight, float dilepton_mass);
+                      float shining_weight);
 
   float raw_weight_value() const override {
-    return shining_weight_;
+    return shining_weight_ * branching_;
   }
 
   void one_to_three() override;
@@ -31,13 +31,16 @@ class DecayActionDilepton : public DecayAction {
    * we radiate dileptons at every timestep to increase statistics, we
    * afterwards weight them to correct the dilepton decay yields.
    */
-  float shining_weight_;
+  const float shining_weight_;
   /**
-   * For dalitz dilepton decays we sample randomly the possible dilepton_mass_
-   * first and then apply the differential width.
-   * For two body dilepton decays we do not need this member. It is zero.
+   * An additional branching factor that is multiplied with the shining weight.
+   * For Dalitz decays, the primary shining weight is based on the integrated
+   * width for the channel, and the branching factor corrects for the
+   * differential width (evaluated at a particular dilepton mass), relative
+   * to the integrated width. It is determined after the dilepton mass is fixed.
+   * For direct (2-body) decays, the branching factor equals one.
    */
-  float dilepton_mass_;
+  float branching_ = 1.;
 };
 
 }  // namespace Smash
