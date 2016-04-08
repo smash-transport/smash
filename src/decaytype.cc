@@ -328,7 +328,7 @@ ThreeBodyDecayDilepton::ThreeBodyDecayDilepton(ParticleTypePtrList part_types,
 
 
 float ThreeBodyDecayDilepton::diff_width(float m_par, float m_dil,
-                                             float m_other, PdgCode pdg) {
+                                         float m_other, PdgCode pdg) {
   if (m_par < m_dil + m_other) {
     return 0;
   } else {
@@ -340,23 +340,29 @@ float ThreeBodyDecayDilepton::diff_width(float m_par, float m_dil,
     const float m_other_sqr = m_other*m_other;
 
     switch (pdg.code()) {
-      case 0x111: /* pi0 */ {
+      case 0x111: case 0x221:  /* pseudoscalars: π⁰, η */ {
+        float ff;
+        if (pdg.code() == 0x111) {  /* π⁰ */
+          gamma = 7.6e-9;
+          ff = form_factor_pi(m_dil);
+        } else {                    /* η */
+          gamma = 5.2e-7;
+          ff = form_factor_eta(m_dil);
+        }
         /// see \iref{Landsberg:1986fd}, equation (3.8)
-        gamma = 7.6e-9;
-        const float ff = form_factor_pi(m_dil);
         return (4.*alpha/(3.*M_PI)) * gamma/m_dil *
                                     pow(1.-m_dil/m_par*m_dil/m_par, 3.) * ff*ff;
       }
-      case 0x221: /* eta */ {
-        /// see \iref{Landsberg:1986fd}, equation (3.8)
-        gamma = 52e-8;
-        const float ff = form_factor_eta(m_dil);
-        return (4.*alpha/(3.*M_PI)) * gamma/m_dil *
-                                    pow(1.-m_dil/m_par*m_dil/m_par, 3.) * ff*ff;
-      }
-      case 0x223: /* omega */ {
+      case 0x223: case 0x333: /* vectors: ω, φ */ {
+        float ff_sqr;
+        if (pdg.code() == 0x223) {  /* ω */
+          gamma = 7.03e-4;
+          ff_sqr = form_factor_sqr_omega(m_dil);
+        } else {                    /* φ */
+          gamma = 5.41e-6;
+          ff_sqr = 1.;  // use QED approximation for now
+        }
         /// see \iref{Landsberg:1986fd}, equation (3.4)
-        gamma = 0.703e-3;
         const float n1 = m_par_sqr - m_other_sqr;
         const float rad = pow(1. + m_dil_sqr/n1, 2)
                           - 4.*m_par_sqr*m_dil_sqr/(n1*n1);
@@ -364,11 +370,10 @@ float ThreeBodyDecayDilepton::diff_width(float m_par, float m_dil,
           assert(rad > -1E-5);
           return 0.;
         } else {
-          return (2.*alpha/(3.*M_PI)) * gamma/m_dil * pow(rad, 3./2.) *
-                                                   form_factor_sqr_omega(m_dil);
+          return (2.*alpha/(3.*M_PI)) * gamma/m_dil * pow(rad, 3./2.) * ff_sqr;
         }
       }
-      case 0x2214: case 0x2114: /* Delta+ and Delta0 */ {
+      case 0x2214: case 0x2114: /* Δ⁺, Δ⁰ */ {
         /// see \iref{Krivoruchenko:2001hs}
         const float rad1 = (m_par+m_other)*(m_par+m_other) - m_dil_sqr;
         const float rad2 = (m_par-m_other)*(m_par-m_other) - m_dil_sqr;
@@ -384,7 +389,7 @@ float ThreeBodyDecayDilepton::diff_width(float m_par, float m_dil,
       default:
         throw std::runtime_error("Error in ThreeBodyDecayDilepton");
     }
-  }  // else
+  }
 }
 
 float ThreeBodyDecayDilepton::width(float, float G0, float m) const {
@@ -393,6 +398,7 @@ float ThreeBodyDecayDilepton::width(float, float G0, float m) const {
 
   for (int i = 0; i < 3; ++i) {
     if (particle_types_[i]->pdgcode() == 0x111) {
+      // TODO(weil): handle the phi!
       pdg_par = 0x223;  // only omega decays into a lepton pair and a pi0
       non_lepton_position = i;
       break;
@@ -426,7 +432,7 @@ float ThreeBodyDecayDilepton::width(float, float G0, float m) const {
   // integrate differential width to obtain partial width
   if (tabulation_ == nullptr) {
     /* TODO(weil): Move this lazy init to a global initialization function,
-      * in order to avoid race conditions in multi-threading. */
+     * in order to avoid race conditions in multi-threading. */
     const_cast<ThreeBodyDecayDilepton*>(this)->tabulation_
           = make_unique<Tabulation>(m_other+2*m_l, 10*G0, num_tab_pts,
               [&](float m_parent) {
