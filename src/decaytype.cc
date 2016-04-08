@@ -329,68 +329,69 @@ ThreeBodyDecayDilepton::ThreeBodyDecayDilepton(ParticleTypePtrList part_types,
 
 float ThreeBodyDecayDilepton::diff_width(float m_par, float m_dil,
                                          float m_other, PdgCode pdg) {
+  // check threshold
   if (m_par < m_dil + m_other) {
     return 0;
-  } else {
-    float gamma = 0.0;
-    // abbreviations
-    const float m_dil_sqr = m_dil * m_dil;
-    const float m_par_sqr = m_par * m_par;
-    const float m_par_cubed = m_par * m_par*m_par;
-    const float m_other_sqr = m_other*m_other;
+  }
 
-    switch (pdg.code()) {
-      case 0x111: case 0x221:  /* pseudoscalars: π⁰, η */ {
-        float ff;
-        if (pdg.code() == 0x111) {  /* π⁰ */
-          gamma = 7.6e-9;
-          ff = form_factor_pi(m_dil);
-        } else {                    /* η */
-          gamma = 5.2e-7;
-          ff = form_factor_eta(m_dil);
-        }
-        /// see \iref{Landsberg:1986fd}, equation (3.8)
-        return (4.*alpha/(3.*M_PI)) * gamma/m_dil *
-                                    pow(1.-m_dil/m_par*m_dil/m_par, 3.) * ff*ff;
+  float gamma = 0.0;
+  // abbreviations
+  const float m_dil_sqr = m_dil * m_dil;
+  const float m_par_sqr = m_par * m_par;
+  const float m_par_cubed = m_par * m_par*m_par;
+  const float m_other_sqr = m_other*m_other;
+
+  switch (pdg.code()) {
+    case 0x111: case 0x221:  /* pseudoscalars: π⁰, η */ {
+      float ff;
+      if (pdg.code() == 0x111) {  /* π⁰ */
+        gamma = 7.6e-9;
+        ff = form_factor_pi(m_dil);
+      } else {                    /* η */
+        gamma = 5.2e-7;
+        ff = form_factor_eta(m_dil);
       }
-      case 0x223: case 0x333: /* vectors: ω, φ */ {
-        float ff_sqr;
-        if (pdg.code() == 0x223) {  /* ω */
-          gamma = 7.03e-4;
-          ff_sqr = form_factor_sqr_omega(m_dil);
-        } else {                    /* φ */
-          gamma = 5.41e-6;
-          ff_sqr = 1.;  // use QED approximation for now
-        }
-        /// see \iref{Landsberg:1986fd}, equation (3.4)
-        const float n1 = m_par_sqr - m_other_sqr;
-        const float rad = pow(1. + m_dil_sqr/n1, 2)
-                          - 4.*m_par_sqr*m_dil_sqr/(n1*n1);
-        if (rad < 0.) {
-          assert(rad > -1E-5);
-          return 0.;
-        } else {
-          return (2.*alpha/(3.*M_PI)) * gamma/m_dil * pow(rad, 3./2.) * ff_sqr;
-        }
-      }
-      case 0x2214: case 0x2114: /* Δ⁺, Δ⁰ */ {
-        /// see \iref{Krivoruchenko:2001hs}
-        const float rad1 = (m_par+m_other)*(m_par+m_other) - m_dil_sqr;
-        const float rad2 = (m_par-m_other)*(m_par-m_other) - m_dil_sqr;
-        const float t1 = alpha/16. *
-                   (m_par+m_other)*(m_par+m_other)/(m_par_cubed*m_other_sqr) *
-                   std::sqrt(rad1);
-        const float t2 =
-              pow(std::sqrt(rad2), 3.0);
-        const float ff = form_factor_delta(m_dil);
-        const float gamma_vi = t1 * t2 * ff*ff;
-        return 2.*alpha/(3.*M_PI) * gamma_vi/m_dil;
-      }
-      default:
-        throw std::runtime_error("Error in ThreeBodyDecayDilepton");
+      /// see \iref{Landsberg:1986fd}, equation (3.8)
+      return (4.*alpha/(3.*M_PI)) * gamma/m_dil
+                                  * pow(1.-m_dil/m_par*m_dil/m_par, 3.) * ff*ff;
     }
+    case 0x223: case 0x333: /* vectors: ω, φ */ {
+      float ff_sqr;
+      if (pdg.code() == 0x223) {  /* ω */
+        gamma = 7.03e-4;
+        ff_sqr = form_factor_sqr_omega(m_dil);
+      } else {                    /* φ */
+        gamma = 5.41e-6;
+        ff_sqr = 1.;  // use QED approximation for now
+      }
+      /// see \iref{Landsberg:1986fd}, equation (3.4)
+      const float n1 = m_par_sqr - m_other_sqr;
+      const float rad = pow(1. + m_dil_sqr/n1, 2)
+                        - 4.*m_par_sqr*m_dil_sqr/(n1*n1);
+      if (rad < 0.) {
+        assert(rad > -1E-5);
+        return 0.;
+      } else {
+        return (2.*alpha/(3.*M_PI)) * gamma/m_dil * pow(rad, 3./2.) * ff_sqr;
+      }
+    }
+    case 0x2214: case 0x2114: /* Δ⁺, Δ⁰ */ {
+      /// see \iref{Krivoruchenko:2001hs}
+      const float rad1 = (m_par+m_other)*(m_par+m_other) - m_dil_sqr;
+      const float rad2 = (m_par-m_other)*(m_par-m_other) - m_dil_sqr;
+      const float t1 = alpha/16. *
+                  (m_par+m_other)*(m_par+m_other)/(m_par_cubed*m_other_sqr) *
+                  std::sqrt(rad1);
+      const float t2 = pow(std::sqrt(rad2), 3.0);
+      const float ff = form_factor_delta(m_dil);
+      const float gamma_vi = t1 * t2 * ff*ff;
+      return 2.*alpha/(3.*M_PI) * gamma_vi/m_dil;
+    }
+    default:
+      throw std::runtime_error("Error in ThreeBodyDecayDilepton");
   }
 }
+
 
 float ThreeBodyDecayDilepton::width(float, float G0, float m) const {
   PdgCode pdg_par;
