@@ -18,7 +18,7 @@ namespace Smash {
 HadgasEos::HadgasEos() :
   x_(gsl_vector_alloc(n_equations_)) {
   const gsl_multiroot_fsolver_type *solver_type;
-  solver_type = gsl_multiroot_fsolver_hybrids;
+  solver_type = gsl_multiroot_fsolver_broyden;
   solver_ = gsl_multiroot_fsolver_alloc(solver_type, n_equations_);
 }
 
@@ -36,6 +36,9 @@ double HadgasEos::hadgas_partial_density(const ParticleType& ptype,
 }
 
 double HadgasEos::hadgas_energy_density(double T, double mub, double mus) {
+  if (T < really_small) {
+    return 0.0;
+  }
   const double beta = 1.0/T;
   double e = 0.0;
   for (const ParticleType &ptype : ParticleType::list_all()) {
@@ -53,6 +56,9 @@ double HadgasEos::hadgas_energy_density(double T, double mub, double mus) {
 }
 
 double HadgasEos::hadgas_density(double T, double mub, double mus) {
+  if (T < really_small) {
+    return 0.0;
+  }
   const double beta = 1.0/T;
   double rho = 0.0;
   for (const ParticleType &ptype : ParticleType::list_all()) {
@@ -66,6 +72,9 @@ double HadgasEos::hadgas_density(double T, double mub, double mus) {
 }
 
 double HadgasEos::hadgas_net_baryon_density(double T, double mub, double mus) {
+  if (T < really_small) {
+    return 0.0;
+  }
   const double beta = 1.0/T;
   double rho = 0.0;
   for (const ParticleType &ptype : ParticleType::list_all()) {
@@ -80,6 +89,9 @@ double HadgasEos::hadgas_net_baryon_density(double T, double mub, double mus) {
 }
 
 double HadgasEos::hadgas_net_strange_density(double T, double mub, double mus) {
+  if (T < really_small) {
+    return 0.0;
+  }
   const double beta = 1.0/T;
   double rho = 0.0;
   for (const ParticleType &ptype : ParticleType::list_all()) {
@@ -143,12 +155,11 @@ std::array<double, 3> HadgasEos::solve_hadgas_eos(double e,
   gsl_multiroot_function f = {&HadgasEos::hadgas_eos_equations,
                               n_equations_, &p};
   // Initial approximation
-  gsl_vector_set(x_, 0, 0.15);
-  gsl_vector_set(x_, 1, 0.2);
+  gsl_vector_set(x_, 0, 0.2);
+  gsl_vector_set(x_, 1, 0.4);
   gsl_vector_set(x_, 2, 0.05);
 
   gsl_multiroot_fsolver_set(solver_, &f, x_);
-
   do {
     iter++;
     status = gsl_multiroot_fsolver_iterate(solver_);
@@ -170,7 +181,7 @@ std::array<double, 3> HadgasEos::solve_hadgas_eos(double e,
           gsl_vector_get(solver_->x, 2)};
 }
 
-void HadgasEos::print_solver_state(size_t iter) {
+void HadgasEos::print_solver_state(size_t iter) const {
   std::cout <<
           "iter = " << iter << "," <<
           " x = "   << gsl_vector_get(solver_->x, 0) << " " <<

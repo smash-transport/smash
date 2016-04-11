@@ -74,7 +74,7 @@ class HadgasEos {
   static int hadgas_eos_equations(const gsl_vector* x,
                                   void* params, gsl_vector* f);
   /// Helpful printout, useful for debugging if gnu equation solving goes crazy
-  void print_solver_state(size_t iter);
+  void print_solver_state(size_t iter) const;
   /// Constant factor, that appears in front of many thermodyn. expressions
   static constexpr double prefactor_ = 0.5*M_1_PI*M_1_PI/(hbarc*hbarc*hbarc);
   /// Precision of equation solving
