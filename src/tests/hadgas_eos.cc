@@ -28,7 +28,7 @@ TEST(td_simple_gas) {
   COMPARE_ABSOLUTE_ERROR(HadgasEos::hadgas_net_strange_density(T, mub, mus), 0.002152896, 1.e-6);
   COMPARE_ABSOLUTE_ERROR(HadgasEos::hadgas_density(T, mub, mus), 0.15637968, 1.e-6);
   COMPARE_ABSOLUTE_ERROR(HadgasEos::hadgas_pressure(T, mub, mus), 0.015637968, 1.e-6);
-  COMPARE_ABSOLUTE_ERROR(HadgasEos::hadgas_energy_density(T, mub, mus), 0.05995127, 1.e-6);
+  COMPARE_ABSOLUTE_ERROR(HadgasEos::hadgas_energy_density(T, mub, mus), 0.16493153, 1.e-6);
 }
 
 TEST(mu_zero_net_strangeness) {

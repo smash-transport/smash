@@ -49,7 +49,7 @@ double HadgasEos::hadgas_energy_density(double T, double mub, double mus) {
     const double mu = mub*ptype.baryon_number() + mus*ptype.strangeness();
     const unsigned int g = ptype.spin() + 1;
     e += z*z * g * std::exp(mu*beta) * (3.0*gsl_sf_bessel_Kn(2, z) +
-                                       gsl_sf_bessel_K1(z));
+                                       z * gsl_sf_bessel_K1(z));
   }
   e *= prefactor_ * T*T*T*T;
   return e;
