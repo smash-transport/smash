@@ -31,7 +31,8 @@ namespace Smash {
  */
 enum class LatticeUpdate {
   AtOutput = 0,
-  EveryTimestep = 1
+  EveryTimestep = 1,
+  EveryFixedInterval = 2,
 };
 
 /**

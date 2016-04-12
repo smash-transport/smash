@@ -49,30 +49,30 @@ TEST(rest_frame_transformation) {
   Particles P;
   b->initial_conditions(&P, par);
 
-  std::unique_ptr<HadgasEos> eos = make_unique<HadgasEos>();
-  std::unique_ptr<ThermLatticeNode> node = make_unique<ThermLatticeNode>();
+  HadronGasEos eos = HadronGasEos();
+  ThermLatticeNode node = ThermLatticeNode();
   for (auto &part : P) {
     part.boost(v_boost);
-    node->add_particle(part, std::sqrt(1.0 - v_boost.sqr())/(L*L*L));
+    node.add_particle(part, std::sqrt(1.0 - v_boost.sqr())/(L*L*L));
   }
-  node->compute_rest_frame_quantities(*eos);
+  node.compute_rest_frame_quantities(eos);
 
   // Tmu0 should satisfy ideal hydro form
-  const double ep_gamm_sqr = (node->e()+node->p())/(1.0 - node->v().sqr());
-  COMPARE_ABSOLUTE_ERROR(node->Tmu0().x0(), ep_gamm_sqr - node->p(), 1.e-8);
-  COMPARE_ABSOLUTE_ERROR(node->Tmu0().x1(), ep_gamm_sqr*node->v().x1(), 1.e-8);
-  COMPARE_ABSOLUTE_ERROR(node->Tmu0().x2(), ep_gamm_sqr*node->v().x2(), 1.e-8);
-  COMPARE_ABSOLUTE_ERROR(node->Tmu0().x3(), ep_gamm_sqr*node->v().x3(), 1.e-8);
+  const double ep_gamm_sqr = (node.e()+node.p())/(1.0 - node.v().sqr());
+  COMPARE_ABSOLUTE_ERROR(node.Tmu0().x0(), ep_gamm_sqr - node.p(), 1.e-8);
+  COMPARE_ABSOLUTE_ERROR(node.Tmu0().x1(), ep_gamm_sqr*node.v().x1(), 1.e-8);
+  COMPARE_ABSOLUTE_ERROR(node.Tmu0().x2(), ep_gamm_sqr*node.v().x2(), 1.e-8);
+  COMPARE_ABSOLUTE_ERROR(node.Tmu0().x3(), ep_gamm_sqr*node.v().x3(), 1.e-8);
 
   // EoS should be satisfied
-  const double T = node->T();
-  const double mub = node->mub();
-  const double mus = node->mus();
-  const double gamma = 1.0/std::sqrt(1.0 - node->v().sqr());
-  COMPARE_ABSOLUTE_ERROR(node->p(), eos->hadgas_pressure(T, mub, mus), 1.e-5);
-  COMPARE_ABSOLUTE_ERROR(node->e(), eos->hadgas_energy_density(T, mub, mus), 1.e-5);
-  COMPARE_ABSOLUTE_ERROR(node->nb(), eos->hadgas_net_baryon_density(T, mub, mus)*gamma, 1.e-5);
-  COMPARE_ABSOLUTE_ERROR(node->ns(), eos->hadgas_net_strange_density(T, mub, mus)*gamma, 1.e-5);
+  const double T = node.T();
+  const double mub = node.mub();
+  const double mus = node.mus();
+  const double gamma = 1.0/std::sqrt(1.0 - node.v().sqr());
+  COMPARE_ABSOLUTE_ERROR(node.p(), eos.pressure(T, mub, mus), 1.e-5);
+  COMPARE_ABSOLUTE_ERROR(node.e(), eos.energy_density(T, mub, mus), 1.e-5);
+  COMPARE_ABSOLUTE_ERROR(node.nb(), eos.net_baryon_density(T, mub, mus)*gamma, 1.e-5);
+  COMPARE_ABSOLUTE_ERROR(node.ns(), eos.net_strange_density(T, mub, mus)*gamma, 1.e-5);
 }
 
 

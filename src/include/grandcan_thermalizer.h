@@ -9,28 +9,18 @@
 
 #include "hadgas_eos.h"
 
+#include "density.h"
 #include "particledata.h"
+#include "lattice.h"
 
 
 namespace Smash {
-
-/*
-class GrandCanThermalizer {
- public:
-  /// Create the thermalizer: allocate the lattice
-  GrandCanThermalizer(e_critical, lattice parameters);
-  update_lattice(const Particles& particles);
-  thermalize(Particles& particles);
-
- private:
-  std::unique_ptr<RectangularLattice<ThermLatticeNode>> lat;
-}*/
 
 class ThermLatticeNode {
  public:
   ThermLatticeNode();
   void add_particle(const ParticleData& p, double factor);
-  void compute_rest_frame_quantities(HadgasEos& eos);
+  void compute_rest_frame_quantities(HadronGasEos& eos);
 
   FourVector Tmu0() const { return Tmu0_; }
   double nb() const { return nb_; }
@@ -54,6 +44,26 @@ class ThermLatticeNode {
 };
 
 std::ostream &operator<<(std::ostream &s, const ThermLatticeNode &node);
+
+class GrandCanThermalizer {
+ public:
+  /// Create the thermalizer: allocate the lattice
+  GrandCanThermalizer(const std::array<float, 3> cell_sizes,
+                      const std::array<int, 3> n_cells,
+                      float e_critical //, Clock update_interval
+                      );
+  void update_lattice(const Particles& particles, const DensityParameters& par);
+  void thermalize(Particles& particles);
+
+  std::unique_ptr<RectangularLattice<ThermLatticeNode>> lattice() {
+    return std::move(lat_);
+  }
+  float e_crit() const { return e_crit_; }
+
+ private:
+  std::unique_ptr<RectangularLattice<ThermLatticeNode>> lat_;
+  const float e_crit_;
+};
 
 }  // namespace Smash
 
