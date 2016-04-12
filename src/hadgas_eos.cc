@@ -15,19 +15,19 @@
 
 namespace Smash {
 
-HadgasEos::HadgasEos() :
+HadronGasEos::HadronGasEos() :
   x_(gsl_vector_alloc(n_equations_)) {
   const gsl_multiroot_fsolver_type *solver_type;
   solver_type = gsl_multiroot_fsolver_broyden;
   solver_ = gsl_multiroot_fsolver_alloc(solver_type, n_equations_);
 }
 
-HadgasEos::~HadgasEos() {
+HadronGasEos::~HadronGasEos() {
   gsl_multiroot_fsolver_free(solver_);
   gsl_vector_free(x_);
 }
 
-double HadgasEos::hadgas_partial_density(const ParticleType& ptype,
+double HadronGasEos::partial_density(const ParticleType& ptype,
                                          double beta, double mub, double mus) {
   const double z = ptype.mass()*beta;
   const double mu = ptype.baryon_number()*mub + ptype.strangeness()*mus;
@@ -35,7 +35,7 @@ double HadgasEos::hadgas_partial_density(const ParticleType& ptype,
   return z*z * g * std::exp(mu*beta) * gsl_sf_bessel_Kn(2, z);
 }
 
-double HadgasEos::hadgas_energy_density(double T, double mub, double mus) {
+double HadronGasEos::energy_density(double T, double mub, double mus) {
   if (T < really_small) {
     return 0.0;
   }
@@ -55,7 +55,7 @@ double HadgasEos::hadgas_energy_density(double T, double mub, double mus) {
   return e;
 }
 
-double HadgasEos::hadgas_density(double T, double mub, double mus) {
+double HadronGasEos::density(double T, double mub, double mus) {
   if (T < really_small) {
     return 0.0;
   }
@@ -65,13 +65,13 @@ double HadgasEos::hadgas_density(double T, double mub, double mus) {
     if (!ptype.is_hadron()) {
       continue;
     }
-    rho += hadgas_partial_density(ptype, beta, mub, mus);
+    rho += partial_density(ptype, beta, mub, mus);
   }
   rho *= prefactor_ * T*T*T;
   return rho;
 }
 
-double HadgasEos::hadgas_net_baryon_density(double T, double mub, double mus) {
+double HadronGasEos::net_baryon_density(double T, double mub, double mus) {
   if (T < really_small) {
     return 0.0;
   }
@@ -81,14 +81,14 @@ double HadgasEos::hadgas_net_baryon_density(double T, double mub, double mus) {
     if (!ptype.is_baryon()) {
       continue;
     }
-    rho += hadgas_partial_density(ptype, beta, mub, mus) *
+    rho += partial_density(ptype, beta, mub, mus) *
            ptype.baryon_number();
   }
   rho *= prefactor_ * T*T*T;
   return rho;
 }
 
-double HadgasEos::hadgas_net_strange_density(double T, double mub, double mus) {
+double HadronGasEos::net_strange_density(double T, double mub, double mus) {
   if (T < really_small) {
     return 0.0;
   }
@@ -98,14 +98,14 @@ double HadgasEos::hadgas_net_strange_density(double T, double mub, double mus) {
     if (ptype.strangeness() == 0) {
       continue;
     }
-    rho += hadgas_partial_density(ptype, beta, mub, mus) *
+    rho += partial_density(ptype, beta, mub, mus) *
            ptype.strangeness();
   }
   rho *= prefactor_ * T*T*T;
   return rho;
 }
 
-double HadgasEos::mus_net_strangeness0(double T, double mub) {
+double HadronGasEos::mus_net_strangeness0(double T, double mub) {
   // Binary search
   double mus_u = mub + T;
   double mus_l = 0.0;
@@ -115,7 +115,7 @@ double HadgasEos::mus_net_strangeness0(double T, double mub) {
   const int max_iteration = 30;
   do {
     mus = 0.5 * (mus_u + mus_l);
-    rhos = hadgas_net_strange_density(T, mub, mus);
+    rhos = net_strange_density(T, mub, mus);
     if (rhos > 0.0) {
       mus_u = mus;
     } else {
@@ -129,7 +129,7 @@ double HadgasEos::mus_net_strangeness0(double T, double mub) {
   return mus;
 }
 
-int HadgasEos::hadgas_eos_equations(const gsl_vector* x,
+int HadronGasEos::eos_equations(const gsl_vector* x,
                                     void *params, gsl_vector* f) {
   double e =  reinterpret_cast<struct rparams*>(params)->e;
   double nb = reinterpret_cast<struct rparams*>(params)->nb;
@@ -139,20 +139,19 @@ int HadgasEos::hadgas_eos_equations(const gsl_vector* x,
   const double mub = gsl_vector_get(x, 1);
   const double mus = gsl_vector_get(x, 2);
 
-  gsl_vector_set(f, 0, hadgas_energy_density(T, mub, mus) - e);
-  gsl_vector_set(f, 1, hadgas_net_baryon_density(T, mub, mus) - nb);
-  gsl_vector_set(f, 2, hadgas_net_strange_density(T, mub, mus) - ns);
+  gsl_vector_set(f, 0, energy_density(T, mub, mus) - e);
+  gsl_vector_set(f, 1, net_baryon_density(T, mub, mus) - nb);
+  gsl_vector_set(f, 2, net_strange_density(T, mub, mus) - ns);
 
   return GSL_SUCCESS;
 }
 
-std::array<double, 3> HadgasEos::solve_hadgas_eos(double e,
-                                                  double nb, double ns) {
+std::array<double, 3> HadronGasEos::solve_eos(double e, double nb, double ns) {
   int status;
   size_t iter = 0;
 
   struct rparams p = {e, nb, ns};
-  gsl_multiroot_function f = {&HadgasEos::hadgas_eos_equations,
+  gsl_multiroot_function f = {&HadronGasEos::eos_equations,
                               n_equations_, &p};
   // Initial approximation
   gsl_vector_set(x_, 0, 0.2);
@@ -181,7 +180,7 @@ std::array<double, 3> HadgasEos::solve_hadgas_eos(double e,
           gsl_vector_get(solver_->x, 2)};
 }
 
-void HadgasEos::print_solver_state(size_t iter) const {
+void HadronGasEos::print_solver_state(size_t iter) const {
   std::cout <<
           "iter = " << iter << "," <<
           " x = "   << gsl_vector_get(solver_->x, 0) << " " <<
