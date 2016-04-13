@@ -144,10 +144,10 @@ TEST(initialize_sphere) {
   // total momentum check
   FourVector momentum(0.0, 0.0, 0.0, 0.0);
   // position less than radius?
-  float radius = 0.0;
   for (auto p : P) {
     momentum += p.momentum();
-    radius = sqrt(p.position().x1() * p.position().x1() +
+    const float radius =
+             sqrt(p.position().x1() * p.position().x1() +
                   p.position().x2() * p.position().x2() +
                   p.position().x3() * p.position().x3());
     VERIFY(radius < 10.0);
