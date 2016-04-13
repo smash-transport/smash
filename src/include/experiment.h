@@ -11,6 +11,7 @@
 #include "adaptiveparameters.h"
 #include "chrono.h"
 #include "energymomentumtensor.h"
+#include "grandcan_thermalizer.h"
 #include "pauliblocking.h"
 #include "potentials.h"
 #include "quantumnumbers.h"
@@ -302,6 +303,9 @@ class Experiment : public ExperimentBase {
   std::unique_ptr<RectangularLattice<EnergyMomentumTensor>> Tmn_;
   bool printout_tmn_ = false, printout_tmn_landau_ = false,
        printout_v_landau_ = false;
+
+  /// Instance of class used for forced thermalization
+  std::unique_ptr<GrandCanThermalizer> gc_thermalizer_;
 
   /**
    * Number of events.

@@ -13,6 +13,7 @@
 #include "forwarddeclarations.h"
 #include "density.h"
 #include "energymomentumtensor.h"
+#include "grandcan_thermalizer.h"
 #include "lattice.h"
 #include "macros.h"
 
@@ -103,6 +104,10 @@ class OutputInterface {
     SMASH_UNUSED(tq);
     SMASH_UNUSED(dt);
     SMASH_UNUSED(lattice);
+  }
+
+  virtual void thermodynamics_output(const GrandCanThermalizer& gct) {
+    SMASH_UNUSED(gct);
   }
 
   const char *to_string(const ThermodynamicQuantity tq) {

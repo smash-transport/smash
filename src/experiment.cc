@@ -581,6 +581,15 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
                                           periodic, LatticeUpdate::AtOutput);
     }
   }
+
+  // Create forced thermalizer
+  if (config.has_value({"Forced_Thermalization"})) {
+    const std::array<float, 3> lat_spacing = config.take({"Lattice_Spacing"});
+    const std::array<int, 3> nx_ny_nz = config.take({"Cell_Number"});
+    const float e_crit = config.take({"Critical_Edens"});
+    gc_thermalizer_ = make_unique<GrandCanThermalizer>(lat_spacing,
+                                                       nx_ny_nz, e_crit);
+  }
 }
 
 const std::string hline(80, '-');
@@ -1166,6 +1175,11 @@ void Experiment<Modus>::intermediate_output(uint64_t& interactions_total,
         output->thermodynamics_output(ThermodynamicQuantity::LandauVelocity,
                                       dens_type_lattice_printout_, *Tmn_);
       }
+    }
+
+    if (gc_thermalizer_) {
+      gc_thermalizer_->update_lattice(particles_, density_param_);
+      output->thermodynamics_output(*gc_thermalizer_);
     }
   }
 }
