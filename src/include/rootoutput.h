@@ -50,7 +50,7 @@ class Particles;
   *   // open SMASH output file to be read in
   *   TFile *input_file = TFile::Open("../build/data/0/smash_run.root");
   *   if (input_file->IsOpen()) {
-  *     printf("Succesfully opened file %s\n", input_file->GetName());
+  *     printf("Successfully opened file %s\n", input_file->GetName());
   *   } else {
   *     printf("Error at opening file %s\n", input_file->GetName());
   *   }

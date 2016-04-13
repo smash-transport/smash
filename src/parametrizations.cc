@@ -258,7 +258,7 @@ const std::initializer_list<double> KMINUSP_RES_SQRTS = {
 };
 /// Elastic K- p cross section contributions from decays.
 ///
-/// These need to be substracted from the interpolation of the PDG data on
+/// These need to be subtracted from the interpolation of the PDG data on
 /// elastic cross sections. This data was generated using the SMASH analysis
 /// suite and should be updated when strange resonances are changed or added.
 const std::initializer_list<double> KMINUSP_RES_SIG = {
@@ -337,7 +337,7 @@ float kminusp_elastic(double mandelstam_s) {
   } else {
     sigma = kminusp_elastic_pdg(mandelstam_s);
   }
-  // The elastic contributions from decays still need to be substracted.
+  // The elastic contributions from decays still need to be subtracted.
   if (kminusp_elastic_res_interpolation == nullptr) {
     std::vector<double> x = KMINUSP_RES_SQRTS;
     for (auto& i : x) {
