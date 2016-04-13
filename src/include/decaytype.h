@@ -183,8 +183,8 @@ class TwoBodyDecayUnstable : public TwoBodyDecay {
 };
 
 /**
- * TwoBodyDecayDilepton represents a decay with a lepton and it's antilepton
- * as the final state particles.
+ * TwoBodyDecayDilepton represents a decay with a lepton and its antilepton
+ * as the final-state particles.
  */
 class TwoBodyDecayDilepton : public TwoBodyDecayStable {
  public:
@@ -207,7 +207,7 @@ class ThreeBodyDecay : public DecayType {
 
 /**
  * ThreeBodyDecayDilepton represents a decay type with three final-state
- * particles. Two of them are a dilepton.
+ * particles, two of which are leptons.
  */
 class ThreeBodyDecayDilepton : public ThreeBodyDecay {
  public:
@@ -215,10 +215,10 @@ class ThreeBodyDecayDilepton : public ThreeBodyDecay {
                          ParticleTypePtrList part_types, int l);
   bool has_mother(ParticleTypePtr mother) const override;
   /**
-   * Get the differential width for dilepton dalitz decay. Because we use the
-   * shining method, we do not need a partial width and can use the differential
-   * width directly for the shining weights. The differential width is
-   * calculated according to \iref{Weil:2013mya}, eq. (30)-(36).
+   * Get the mass-differential width \f$ d\Gamma / dm \f$ for a dilepton Dalitz
+   * decay, where \f$ m \f$ is the invariant mass of the lepton pair.
+   * This differential width is used directly for the dilepton shining weights.
+   * It is calculated according to \iref{Weil:2013mya}, eq. (30)-(36).
    */
   static float diff_width(float m_parent, float m_dil,
                           float m_other, PdgCode pdg);
