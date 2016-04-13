@@ -55,8 +55,8 @@ class GrandCanThermalizer {
   void update_lattice(const Particles& particles, const DensityParameters& par);
   void thermalize(Particles& particles);
 
-  std::unique_ptr<RectangularLattice<ThermLatticeNode>> lattice() {
-    return std::move(lat_);
+  RectangularLattice<ThermLatticeNode>& lattice() const {
+    return *lat_;
   }
   float e_crit() const { return e_crit_; }
 
