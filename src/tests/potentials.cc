@@ -95,9 +95,6 @@ TEST(potential_gradient) {
 // Create nuclear potential profile in XY plane
 TEST(nucleus_potential_profile) {
   // Create a nucleus
-  std::map<PdgCode, int> nuc_list = {{0x2212, 79}, {0x2112, 118}};
-
-  // Create a nucleus
   Configuration conf = Test::configuration();
   // All interactions off
   conf["Collision_Term"]["Decays"] = "False";
