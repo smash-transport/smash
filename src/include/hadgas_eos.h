@@ -19,6 +19,30 @@
 
 namespace Smash {
 
+// Forward declaration of HadronGasEos - it is used in EosTable
+class HadronGasEos;
+
+class EosTable {
+ public:
+  EosTable(double de, double dnb, int n_e, int n_b);
+  struct table_element {
+    double p;
+    double T;
+    double mub;
+    double mus;
+  };
+  void compile_table(HadronGasEos &eos);
+  const struct table_element* get(double e, double nb) const;
+
+ private:
+  int index(int ie, int inb) const { return ie*n_nb_ + inb; }
+  std::vector<table_element> table_;
+  double de_;
+  double dnb_;
+  int n_e_;
+  int n_nb_;
+};
+
 /**
  * Class to handle the equation of state (EoS) of the hadron gas, consisting
  * of all hadrons included into SMASH. This implementation deals with ideal
@@ -56,6 +80,10 @@ class HadronGasEos {
   std::array<double, 3> solve_eos(double e, double nb, double ns);
   /// Compute strange chemical potential, requiring that net strangeness = 0
   static double mus_net_strangeness0(double T, double mub);
+  /// Get the element of eos table
+  const struct EosTable::table_element* from_table(double e, double nb) {
+    return eos_table_.get(e, nb);
+  }
 
  private:
   /// A structure for passing equation parameters to the gnu library
@@ -80,6 +108,7 @@ class HadronGasEos {
   static constexpr double tolerance_ = 1.e-5;
   /// Number of equations in the system of equations to be solved
   static constexpr size_t n_equations_ = 3;
+  EosTable eos_table_ = EosTable(1.e-3, 1.e-3, 900, 900);
   /**
    * Variables used by gnu equation solver. They are stored here to allocate
    * and deallocate memory for them only once. It is expected that this class

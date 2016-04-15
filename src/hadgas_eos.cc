@@ -10,16 +10,98 @@
 #include <gsl/gsl_sf_bessel.h>
 
 #include <iostream>
+#include <fstream>
+#include <iomanip>
+#include <boost/filesystem.hpp>
 
+#include "include/constants.h"
+#include "include/forwarddeclarations.h"
 #include "include/hadgas_eos.h"
 
 namespace Smash {
 
+EosTable::EosTable(double de, double dnb, int n_e, int n_nb) :
+  de_(de),
+  dnb_(dnb),
+  n_e_(n_e),
+  n_nb_(n_nb) {
+  table_.resize(n_e_*n_nb_);
+}
+
+void EosTable::compile_table(HadronGasEos &eos) {
+  const std::string eos_savefile_name("hadgas_eos.dat");
+  if (boost::filesystem::exists(eos_savefile_name)) {
+    // Read table from file
+    std::cout << "Reading table from file " << eos_savefile_name << std::endl;
+    std::ifstream file;
+    file.open(eos_savefile_name, std::ios::in);
+    file >> de_ >> dnb_;
+    file >> n_e_ >> n_nb_;
+    table_.resize(n_e_*n_nb_);
+    for (int ie = 0; ie < n_e_; ie++) {
+      for (int inb = 0; inb < n_nb_; inb++) {
+        double p, T, mub, mus;
+        file >> p >> T >> mub >> mus;
+        table_[index(ie, inb)] = {p, T, mub, mus};
+      }
+    }
+  } else {
+    std::cout << "Compiling an EoS table..." << std::endl;
+    const double ns = 0.0;
+    for (int ie = 0; ie < n_e_; ie++) {
+      const double e = ie * de_;
+      for (int inb = 0; inb < n_nb_; inb++) {
+        const double nb = inb * dnb_;
+        // It is physically impossible to have energy density > nucleon mass*nb,
+        // therefore eqns have no solutions.
+        if (nb*nucleon_mass >= e) {
+          table_[index(ie, inb)] = {0.0, 0.0, 0.0, 0.0};
+          continue;
+        }
+        const std::array<double, 3> res = eos.solve_eos(e, nb, ns);
+        const double T   = res[0];
+        const double mub = res[1];
+        const double mus = res[2];
+        table_[index(ie, inb)] = {eos.pressure(T, mub, mus), T, mub, mus};
+      }
+    }
+    // Save table to file
+    std::cout << "Saving table to file " << eos_savefile_name << std::endl;
+    std::ofstream file;
+    file.open(eos_savefile_name, std::ios::out);
+    file << de_ << " " << dnb_ << std::endl;
+    file << n_e_ << " " << n_nb_ << std::endl;
+    file << std::setprecision(3);
+    file << std::fixed;
+    for (int ie = 0; ie < n_e_; ie++) {
+      for (int inb = 0; inb < n_nb_; inb++) {
+        const struct EosTable::table_element x = table_[index(ie, inb)];
+        file << x.p << " " <<
+                x.T << " " <<
+                x.mub << " " <<
+                x.mus << std::endl;
+      }
+    }
+  }
+}
+
+const struct EosTable::table_element* EosTable::get(double e, double nb) const {
+  const int ie  = static_cast<int>(std::round(e/de_));
+  const int inb = static_cast<int>(std::round(nb/dnb_));
+  if (ie < 0 || ie >= n_e_ ||
+      inb < 0 || inb >= n_nb_) {
+    return nullptr;
+  }
+  // 0-th order interpolation
+  return &table_[index(ie, inb)];
+}
+
 HadronGasEos::HadronGasEos() :
   x_(gsl_vector_alloc(n_equations_)) {
   const gsl_multiroot_fsolver_type *solver_type;
-  solver_type = gsl_multiroot_fsolver_broyden;
+  solver_type = gsl_multiroot_fsolver_hybrid;
   solver_ = gsl_multiroot_fsolver_alloc(solver_type, n_equations_);
+  eos_table_.compile_table(*this);
 }
 
 HadronGasEos::~HadronGasEos() {
@@ -30,9 +112,12 @@ HadronGasEos::~HadronGasEos() {
 double HadronGasEos::partial_density(const ParticleType& ptype,
                                          double beta, double mub, double mus) {
   const double z = ptype.mass()*beta;
-  const double mu = ptype.baryon_number()*mub + ptype.strangeness()*mus;
+  const double x = beta*(ptype.baryon_number()*mub + ptype.strangeness()*mus);
   const unsigned int g = ptype.spin() + 1;
-  return z*z * g * std::exp(mu*beta) * gsl_sf_bessel_Kn(2, z);
+  if (z > 400.0 || x - z < -100.0 || x > 200.0) {
+    return 0.0;
+  }
+  return z*z * g * std::exp(x) * gsl_sf_bessel_Kn(2, z);
 }
 
 double HadronGasEos::energy_density(double T, double mub, double mus) {
@@ -46,10 +131,14 @@ double HadronGasEos::energy_density(double T, double mub, double mus) {
       continue;
     }
     const double z = ptype.mass()*beta;
-    const double mu = mub*ptype.baryon_number() + mus*ptype.strangeness();
+    const double x = beta * (mub*ptype.baryon_number() +
+                             mus*ptype.strangeness());
+    if (z > 400.0 || x - z < -100.0 || x > 200.0) {
+      continue;
+    }
     const unsigned int g = ptype.spin() + 1;
-    e += z*z * g * std::exp(mu*beta) * (3.0*gsl_sf_bessel_Kn(2, z) +
-                                       z * gsl_sf_bessel_K1(z));
+      e += z*z * g * std::exp(x) * (3.0*gsl_sf_bessel_Kn(2, z) +
+                                    z * gsl_sf_bessel_K1(z));
   }
   e *= prefactor_ * T*T*T*T;
   return e;
@@ -147,6 +236,7 @@ int HadronGasEos::eos_equations(const gsl_vector* x,
 }
 
 std::array<double, 3> HadronGasEos::solve_eos(double e, double nb, double ns) {
+
   int status;
   size_t iter = 0;
 
@@ -154,8 +244,8 @@ std::array<double, 3> HadronGasEos::solve_eos(double e, double nb, double ns) {
   gsl_multiroot_function f = {&HadronGasEos::eos_equations,
                               n_equations_, &p};
   // Initial approximation
-  gsl_vector_set(x_, 0, 0.2);
-  gsl_vector_set(x_, 1, 0.4);
+  gsl_vector_set(x_, 0, 0.15);
+  gsl_vector_set(x_, 1, 0.5);
   gsl_vector_set(x_, 2, 0.05);
 
   gsl_multiroot_fsolver_set(solver_, &f, x_);
@@ -164,6 +254,10 @@ std::array<double, 3> HadronGasEos::solve_eos(double e, double nb, double ns) {
     status = gsl_multiroot_fsolver_iterate(solver_);
 
     // print_solver_state(iter);
+    // Avoiding too low temperature
+    if (gsl_vector_get(solver_->x, 0) < 0.015) {
+      return {0.0, 0.0, 0.0};
+    }
 
     // check if solver is stuck
     if (status) {
@@ -173,6 +267,7 @@ std::array<double, 3> HadronGasEos::solve_eos(double e, double nb, double ns) {
   } while (status == GSL_CONTINUE && iter < 1000);
 
   if (status != GSL_SUCCESS) {
+    print_solver_state(iter);
     throw std::runtime_error(gsl_strerror(status));
   }
   return {gsl_vector_get(solver_->x, 0),

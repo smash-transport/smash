@@ -61,6 +61,7 @@ class GrandCanThermalizer {
   float e_crit() const { return e_crit_; }
 
  private:
+  HadronGasEos eos_ = HadronGasEos();
   std::unique_ptr<RectangularLattice<ThermLatticeNode>> lat_;
   const float e_crit_;
 };

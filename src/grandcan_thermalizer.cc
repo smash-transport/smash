@@ -23,7 +23,7 @@ GrandCanThermalizer::GrandCanThermalizer(const std::array<float, 3> cell_sizes,
      If one wants to have a central cell with center at 0,0,0 then
      number of cells should be odd (2k+1) in each direction.
    */
-  const std::array<float, 3> origin = {0.5f*l[0], 0.5f*l[1], 0.5f*l[2]};
+  const std::array<float, 3> origin = {-0.5f*l[0], -0.5f*l[1], -0.5f*l[2]};
   const bool periodicity = false;
   const LatticeUpdate upd = LatticeUpdate::EveryFixedInterval;
   lat_ = make_unique<RectangularLattice<ThermLatticeNode>>(l,
@@ -39,6 +39,17 @@ void GrandCanThermalizer::update_lattice(const Particles& particles,
   // ToDo(oliiny): fix this stuff with LatticeUpdate
   const LatticeUpdate update = LatticeUpdate::EveryFixedInterval;
   update_general_lattice(lat_.get(), update, dens_type, dens_par, particles);
+  for (auto &node : *lat_) {
+    /* If energy density is definitely below e_crit -
+       no need to find T, mu, etc. So if e = T00 - T0i*vi <=
+       T00 + sum abs(T0i) < e_crit, no efforts are necessary. */
+    if (node.Tmu0().x0() +
+        std::abs(node.Tmu0().x1()) +
+        std::abs(node.Tmu0().x2()) +
+        std::abs(node.Tmu0().x3()) >= e_crit_) {
+      node.compute_rest_frame_quantities(eos_);
+    }
+  }
 }
 
 void GrandCanThermalizer::thermalize(Particles& particles) {
@@ -59,7 +70,13 @@ void GrandCanThermalizer::thermalize(Particles& particles) {
 ThermLatticeNode::ThermLatticeNode() :
   Tmu0_(FourVector()),
   nb_(0.0),
-  ns_(0.0) {}
+  ns_(0.0),
+  e_(0.0),
+  p_(0.0),
+  v_(ThreeVector()),
+  T_(0.0),
+  mub_(0.0),
+  mus_(0.0) {}
 
 void ThermLatticeNode::add_particle(const ParticleData& part, double factor) {
   Tmu0_ += part.momentum() * factor;
@@ -79,12 +96,19 @@ void ThermLatticeNode::compute_rest_frame_quantities(HadronGasEos& eos) {
       break;
     }
     const double gamma_inv = std::sqrt(1.0 - v_.sqr());
-    const std::array<double, 3> T_mub_mus = eos.solve_eos(e_,
-                                                 gamma_inv*nb_, gamma_inv*ns_);
-    T_ = T_mub_mus[0];
-    mub_ = T_mub_mus[1];
-    mus_ = T_mub_mus[2];
-    p_ = HadronGasEos::pressure(T_, mub_, mus_);
+    auto tabulated = eos.from_table(e_, gamma_inv*nb_);
+    if (tabulated == nullptr) {
+      auto T_mub_mus = eos.solve_eos(e_, gamma_inv*nb_, gamma_inv*ns_);
+      T_   = T_mub_mus[0];
+      mub_ = T_mub_mus[1];
+      mus_ = T_mub_mus[2];
+      p_ = HadronGasEos::pressure(T_, mub_, mus_);
+    } else {
+      p_ = tabulated->p;
+      T_ = tabulated->T;
+      mub_ = tabulated->mub;
+      mus_ = tabulated->mus;
+    }
     v_ = Tmu0_.threevec()/(Tmu0_.x0() + p_);
   }
 }
