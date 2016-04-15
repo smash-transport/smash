@@ -109,7 +109,7 @@ HadronGasEos::~HadronGasEos() {
   gsl_vector_free(x_);
 }
 
-double HadronGasEos::partial_density(const ParticleType& ptype,
+double HadronGasEos::scaled_partial_density(const ParticleType& ptype,
                                          double beta, double mub, double mus) {
   const double z = ptype.mass()*beta;
   const double x = beta*(ptype.baryon_number()*mub + ptype.strangeness()*mus);
@@ -118,6 +118,11 @@ double HadronGasEos::partial_density(const ParticleType& ptype,
     return 0.0;
   }
   return z*z * g * std::exp(x) * gsl_sf_bessel_Kn(2, z);
+}
+
+double HadronGasEos::partial_density(const ParticleType& ptype,
+                                     double T, double mub, double mus) {
+  return prefactor_ * T*T*T * scaled_partial_density(ptype, 1.0/T, mub, mus);
 }
 
 double HadronGasEos::energy_density(double T, double mub, double mus) {
@@ -154,7 +159,7 @@ double HadronGasEos::density(double T, double mub, double mus) {
     if (!ptype.is_hadron()) {
       continue;
     }
-    rho += partial_density(ptype, beta, mub, mus);
+    rho += scaled_partial_density(ptype, beta, mub, mus);
   }
   rho *= prefactor_ * T*T*T;
   return rho;

@@ -66,6 +66,8 @@ class HadronGasEos {
   }
   static double net_baryon_density(double T, double mub, double mus);
   static double net_strange_density(double T, double mub, double mus);
+  static double partial_density(const ParticleType& ptype,
+                                double T, double mub, double mus);
   /**
    * Computes temperature and chemical potentials given energy-,
    * net baryon- and net strangeness density.
@@ -96,7 +98,7 @@ class HadronGasEos {
    * Compute (unnormalized) density of one hadron sort - helper function
    * used to reduce code duplication.
    */
-  static double partial_density(const ParticleType& ptype,
+  static double scaled_partial_density(const ParticleType& ptype,
                                        double beta, double mub, double mus);
   /// Interfaces EoS equations to be solved to gnu library
   static int eos_equations(const gsl_vector* x, void* params, gsl_vector* f);
