@@ -66,7 +66,7 @@ float PauliBlocker::phasespace_dens(const ThreeVector &r, const ThreeVector &p,
 
   // TODO(oliiny): looping over all particles is inefficient,
   // I need only particles within rp_ radius in momentum and
-  // within rr_+rc_ in coordinate space. Some search algorythm might help.
+  // within rr_+rc_ in coordinate space. Some search algorithm might help.
   for (const auto &part : particles) {
     // Only consider identical particles
     if (part.pdgcode() != pdg) {

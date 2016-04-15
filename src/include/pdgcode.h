@@ -31,9 +31,9 @@ namespace Smash {
  * \code
  * #include "include/pdgcode.h"
  *
- * // initalize with an integer: make sure it is hex-encoded!
+ * // initialize with an integer: make sure it is hex-encoded!
  * PdgCode pi_plus(0x211);
- * // you can also initalize from a string:
+ * // you can also initialize from a string:
  * PdgCode pi_minus("-211");
  * // initialize a PDG Code that knows it is not set yet:
  * PdgCode other_particle();

@@ -162,7 +162,7 @@ template <typename T> int poisson(const T & lam ) {
   return std::poisson_distribution<int>(lam)(engine);
 }
 
-/** \return: one interger number sampled from discrete distribution
+/** \return: one integer number sampled from discrete distribution
 * whose weight given by probability vector
 */
 template <typename T>

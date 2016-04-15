@@ -165,7 +165,7 @@ TEST(scatter_particle_pair_only_once) {
     COMPARE(search_list[1].id(), 1);
   }
   for (auto i = 10; i; --i) {  // make "sure" it's not the random numbers that
-                               // supress the problem
+                               // suppress the problem
     actions = finder.find_actions_in_cell(search_list, dt);
     COMPARE(actions.size(), 0u);
   }
