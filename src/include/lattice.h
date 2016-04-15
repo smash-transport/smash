@@ -98,6 +98,15 @@ class RectangularLattice {
                        origin_[2] + cell_sizes_[2] * (iz + 0.5f));
   }
 
+  /// Returns coordinate of cell center given the 1d index of the cell
+  inline ThreeVector cell_center(int index) const {
+    const int ix = index % n_cells_[0];
+    index = index / n_cells_[0];
+    const int iy = index % n_cells_[1];
+    const int iz = index / n_cells_[1];
+    return cell_center(ix, iy, iz);
+  }
+
   /// Returns lengths of the lattice in x,y,z directions
   const std::array<float, 3>& lattice_sizes() const { return lattice_sizes_; }
 
