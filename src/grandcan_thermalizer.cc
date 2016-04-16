@@ -7,8 +7,13 @@
 
 #include "include/grandcan_thermalizer.h"
 
+#include "include/angles.h"
 #include "include/cxx14compat.h"
+#include "include/distributions.h"
+#include "include/forwarddeclarations.h"
 #include "include/particles.h"
+#include "include/quantumnumbers.h"
+#include "include/random.h"
 
 namespace Smash {
 
@@ -31,6 +36,57 @@ GrandCanThermalizer::GrandCanThermalizer(const std::array<float, 3> cell_sizes,
                                                            origin,
                                                            periodicity,
                                                            upd);
+  cell_volume_ = cell_sizes[0] * cell_sizes[1] * cell_sizes[2];
+  cells_to_sample_.resize(50000);
+}
+
+ThreeVector GrandCanThermalizer::uniform_in_cell() const {
+  return ThreeVector(Random::uniform(-0.5 * static_cast<double>(lat_->cell_sizes()[0]),
+                       +0.5 * static_cast<double>(lat_->cell_sizes()[0])),
+       Random::uniform(-0.5 * static_cast<double>(lat_->cell_sizes()[1]),
+                       +0.5 * static_cast<double>(lat_->cell_sizes()[1])),
+       Random::uniform(-0.5 * static_cast<double>(lat_->cell_sizes()[2]),
+                       +0.5 * static_cast<double>(lat_->cell_sizes()[2])));
+}
+
+void GrandCanThermalizer::sample_in_random_cell(ParticleList& plist,
+                                                QuantumNumbers& conserved,
+                                                const double time) {
+  // Choose random cell
+  int cells_to_sample_size = cells_to_sample_.size();
+  const int cell_index =
+              cells_to_sample_[Random::uniform_int(0, cells_to_sample_size-1)];
+  const ThermLatticeNode cell = (*lat_)[cell_index];
+  const ThreeVector cell_center = lat_->cell_center(cell_index);
+  const double gamma = 1.0 / std::sqrt(1.0 - cell.v().sqr());
+  // Loop over all existing hadrons (no leptons/quarks/etc)
+  for (const ParticleType &ptype : ParticleType::list_all()) {
+    if (!ptype.is_hadron()) {
+      continue;
+    }
+    // First find out how many particles of this kind to sample
+    // N = n u^mu dsigma_mu = (isochronous hypersurface) n * V * gamma
+    const double N_average = cell_volume_ * gamma *
+      HadronGasEos::partial_density(ptype, cell.T(), cell.mub(), cell.mus());
+    const int N_to_sample = Random::poisson(N_average);
+    // Sample particles: uniform in the cell, momenta from Cooper-Frye
+    for (int i = 0; i < N_to_sample; i++) {
+      ParticleData particle(ptype);
+      // Note: it's pole mass for resonances!
+      const double m = static_cast<double>(ptype.mass());
+      // Position
+      particle.set_4position(FourVector(time, cell_center + uniform_in_cell()));
+      // Momentum
+      double momentum_radial = sample_momenta_from_thermal(cell.T(), m);
+      Angles phitheta;
+      phitheta.distribute_isotropically();
+      particle.set_4momentum(m, phitheta.threevec() * momentum_radial);
+      particle.boost_momentum(cell.v());
+      // Add to the list and sum up conserved quantities
+      plist.push_back(particle);
+      conserved.add_values(particle);
+    }
+  }
 }
 
 void GrandCanThermalizer::update_lattice(const Particles& particles,
@@ -52,19 +108,49 @@ void GrandCanThermalizer::update_lattice(const Particles& particles,
   }
 }
 
-void GrandCanThermalizer::thermalize(Particles& particles) {
-  // 1. Loop over particles, remove those which lie in the cells with e > e_crit_
-  // 2. Loop over cells, sample particles according isochronous Cooper-Frye
-
+void GrandCanThermalizer::thermalize(Particles& particles, double time) {
+  // Remove particles from the cells with e > e_crit_,
+  // sum up their conserved quantities
+  QuantumNumbers conserved_initial = QuantumNumbers(),
+                 conserved_sampled = QuantumNumbers(),
+                 conserved_mode    = QuantumNumbers();
   ThermLatticeNode node;
   for (auto &particle : particles) {
     const bool is_on_lattice = lat_->value_at(particle.position().threevec(),
                                               node);
     if (is_on_lattice && node.e() > e_crit_) {
+      conserved_initial.add_values(particle);
       particles.remove(particle);
     }
   }
 
+  // Exit if there is nothing to thermalize
+  if (conserved_initial == QuantumNumbers()) {
+    return;
+  }
+
+  // Save the indices of cells inside the volume with e > e_crit_
+  const size_t lattice_total_cells = lat_->size();
+  for (size_t i = 0; i < lattice_total_cells; i++) {
+    if ((*lat_)[i].e() > e_crit_) {
+      cells_to_sample_.push_back(i);
+    }
+  }
+
+  ParticleList sampled;
+  // Mode 1: sample until energy is conserved, then throw out
+  //         all the particles with strangeness >= 0
+  while (conserved_initial.momentum().x0() > conserved_mode.momentum().x0()) {
+    sample_in_random_cell(sampled, conserved_mode, time);
+  }
+  sampled.erase(std::remove_if(sampled.begin(), sampled.end(),
+    [&](ParticleData &p) {
+      return (p.pdgcode().strangeness() >= 0);
+    }), sampled.end());
+  for (auto &particle : sampled) {
+    conserved_sampled.add_values(particle);
+  }
+  // Mode 2: sample until strangeness is conserved
 }
 
 ThermLatticeNode::ThermLatticeNode() :

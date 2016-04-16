@@ -12,6 +12,7 @@
 #include "density.h"
 #include "particledata.h"
 #include "lattice.h"
+#include "quantumnumbers.h"
 
 
 namespace Smash {
@@ -53,7 +54,10 @@ class GrandCanThermalizer {
                       float e_critical //, Clock update_interval
                       );
   void update_lattice(const Particles& particles, const DensityParameters& par);
-  void thermalize(Particles& particles);
+  ThreeVector uniform_in_cell() const; 
+  void sample_in_random_cell(ParticleList& plist, QuantumNumbers& conserved,
+                             const double time);
+  void thermalize(Particles& particles, double time);
 
   RectangularLattice<ThermLatticeNode>& lattice() const {
     return *lat_;
@@ -61,8 +65,10 @@ class GrandCanThermalizer {
   float e_crit() const { return e_crit_; }
 
  private:
+  std::vector<size_t> cells_to_sample_;
   HadronGasEos eos_ = HadronGasEos();
   std::unique_ptr<RectangularLattice<ThermLatticeNode>> lat_;
+  float cell_volume_;
   const float e_crit_;
 };
 
