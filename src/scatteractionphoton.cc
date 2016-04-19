@@ -1,5 +1,3 @@
-//all further changes to this will happen directly in the src folder
-
 #include "include/ScatterActionPhoton.h"
 
 #include "include/constants.h"
