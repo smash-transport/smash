@@ -158,7 +158,7 @@ class TwoBodyDecaySemistable : public TwoBodyDecay {
    */
   float get_Lambda();
   float Lambda_;
-  std::unique_ptr<Tabulation> tabulation_;
+  mutable std::unique_ptr<Tabulation> tabulation_;
 };
 
 
@@ -179,7 +179,7 @@ class TwoBodyDecayUnstable : public TwoBodyDecay {
    */
   float get_Lambda();
   float Lambda_;
-  std::unique_ptr<Tabulation> tabulation_;
+  mutable std::unique_ptr<Tabulation> tabulation_;
 };
 
 /**
