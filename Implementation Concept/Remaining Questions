@@ -1,0 +1,31 @@
+Remaining Questions:
+
+- What is the correct weighing prescription? How to chose delta t?
+
+- How do I handle the different rho masses for the incoming particles? 
+
+- How to use GIT properly and how to document my code?
+
+
+- In the end should I use find_actions_in_cell(..) like for the dileptons or better implement it more generally with all three alternatives(neighbor, surrounding)?
+
+- How will I implement the reactions with their cross sections?
+-> How to take into account these Breit-Wigner distributions for resonances in the final state?
+-> What about the reaction with the intermediate a1?
+
+- Is it better for the future to let ScatterActionPhoton inherit from ScatterActionMesonMeson?
+
+- Can the photon_output be created/instantiated as suggested?
+-> Is there maybe a better format?
+
+
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+Remaining tasks:
+
+-add cc files to SMASH/src/CMakeLists.txt
+
+-read in number of fractional photons from config file on SMASH start
+
+
+- log entries in ScatterAction construction

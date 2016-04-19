@@ -103,7 +103,7 @@ class ScatterActionsFinder : public ActionFinderInterface {
  private:
   /* Construct a ScatterAction object,
    * based on the types of the incoming particles. */
-  ScatterActionPtr construct_scatter_action(const ParticleData &data_a,
+  virtual ScatterActionPtr construct_scatter_action(const ParticleData &data_a,
                                             const ParticleData &data_b,
                                             float time_until_collision) const;
   /** Check for a single pair of particles (id_a, id_b) if a collision will happen

@@ -1,0 +1,129 @@
+#include "include/scatteractionsfinderphotons.h" //in cc
+
+namespace Smash{ 
+  
+  template <typename Modus>
+  class Experiment : public ExperimentBase {
+    ...
+    private:
+      ...
+      /** Generates kinematics and weighing of final states and writes them into output file,
+      * the actions are NOT performed. 
+      */
+      void write_photon_action(Action &action, const ParticleList &particles_before_actions);
+      ...
+      /// The Photon output
+      OutputPtr photon_output_;
+      ...
+      /// The (Scatter) Actions Finder for Direct Photons
+      std::unique_ptr<ActionFinderInterface> photon_finder_;
+      ...
+  }
+  
+  template <typename Modus>
+  Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path):
+  ...{
+    ...
+    const bool photons_switch = config.take({"Output", "Photons", "Enable"}, false);
+    ...
+    if (photons_switch) {
+      photon_finder_ = make_unique<ScatterActionsFinderPhoton>(); 
+    }
+    ...
+    if (photons_switch) { //should this be similar to dileptons?
+      // create photon output object
+      std::string format = config.take({"Output", "Photons", "Format"});
+      if (format == "Oscar") {
+	photon_output_ = create_photon_output(output_path); 
+      } else if (format == "Binary") {
+	photon_output_ = make_unique<BinaryOutputCollisions>(output_path, "PhotonOutput");
+      } else if (format == "Root") {
+	#ifdef SMASH_USE_ROOT
+	  photon_output_ = make_unique<RootOutput>(output_path, "PhotonOutput");
+	#else
+	  log.error() << "You requested Root output, but Root support has not been compiled in.";
+	  output_conf.take({"Root"});
+	#endif
+      } else {
+	 throw std::runtime_error("Bad Photon output format: " + format);
+      }
+    }
+  }
+  
+  template<typename Modus >
+  void Experiment< Modus >::write_photon_action(Action& action, const ParticleList& particles_before_actions){
+    if (action.is_valid(particles_)) {
+      // loop over action to get many fractional photons
+      for (i=0; i<number_of_fractional_photons; i++){ //where to store number_of_fractional_photons? -> needed for weighing?
+	action.generate_final_state();
+	const FourVector r_interaction = action.get_interaction_point();
+	constexpr bool compute_grad = false;
+	const double rho = rho_eckart(r_interaction.threevec(), particles_before_actions, density_param_, dens_type_, compute_grad).first;
+	photon_output_->at_interaction(action, rho); // generate output
+      }
+    }
+  }
+  
+  template<typename Modus >
+  uint64_t Experiment< Modus >::run_time_evolution_fixed_time_step(){
+    ...
+    Actions actions;
+    Actions dilepton_actions;
+    Actions photon_actions;
+    ...
+    while (!(++parameters_.labclock > end_time_)) {
+      ...
+      if (photon_finder_ != nullptr) {
+	photon_actions.insert(photon_finder_->find_actions_in_cell(particles_before_actions, dt));
+	if (!photon_actions.is_empty()) {
+	  while (!photon_actions.is_empty()) {
+	    write_photon_action(*photon_actions.pop(), particles_before_actions);
+	  }
+	}
+      }
+      ...
+    }
+    ...
+  }
+/// NOT in SMASH right no  
+  template<typename Modus >
+  void Experiment< Modus >::do_final_decays(uint64_t& interactions_total){
+    ... //This is only for the end, the photons from these reactions are NOT direct photons
+    do {
+      Actions actions;
+      Actions dilepton_actions;
+      Actions photon_actions;
+      ...
+      /* Photons */
+      if (photon_finder_ != nullptr) {
+	photon_actions.insert(photon_finder_->find_final_actions(particles_));
+	if (!photon_actions.is_empty()) {
+	  while (!photon_actions.is_empty()) {
+	    write_photon_action(*photon_actions.pop(), particles_before_actions);
+	  }
+	}
+      }
+      ...
+    } while (interactions_total > interactions_old);
+    ...
+  }
+  
+  template <typename Modus>
+  void Experiment<Modus>::final_output(uint64_t interactions_total, const int evt_num) {
+    ...
+    if (photon_output_ != nullptr) {
+      photon_output_->at_eventend(particles_, evt_num);
+    }
+    ...
+  }
+ /// up to here NOT in SMASH 
+  template <typename Modus>
+  void Experiment<Modus>::run() {
+    ...
+    if (photon_output_ != nullptr) {
+      photon_output_->at_eventstart(particles_, j);
+    }
+    ...
+  }
+  
+} //namespace Smash

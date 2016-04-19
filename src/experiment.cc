@@ -267,6 +267,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
   const bool two_to_two = config.take({"Collision_Term", "Two_to_Two"}, true);
   const bool dileptons_switch = config.take(
                                       {"Output", "Dileptons", "Enable"}, false);
+  const bool photons_switch = config.take({"Output", "Photons", "Enable"}, false);
 
   // create finders
   if (two_to_one) {
@@ -282,6 +283,9 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
   if (dileptons_switch) {
     dilepton_finder_ = make_unique<DecayActionsFinderDilepton>();
   }
+  if (photons_switch) {
+      photon_finder_ = make_unique<ScatterActionsFinderPhoton>(); 
+    }
   if (config.has_value({"Collision_Term", "Pauli_Blocking"})) {
     log.info() << "Pauli blocking is ON.";
     pauli_blocker_ = make_unique<PauliBlocker>(
@@ -469,6 +473,25 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     }
   }
 
+  if (photons_switch) { 
+      // create photon output object
+      std::string format = config.take({"Output", "Photons", "Format"});
+      if (format == "Oscar") {
+	photon_output_ = create_photon_output(output_path); 
+      } else if (format == "Binary") {
+	photon_output_ = make_unique<BinaryOutputCollisions>(output_path, "PhotonOutput");
+      } else if (format == "Root") {
+	#ifdef SMASH_USE_ROOT
+	  photon_output_ = make_unique<RootOutput>(output_path, "PhotonOutput");
+	#else
+	  log.error() << "You requested Root output, but Root support has not been compiled in.";
+	  output_conf.take({"Root"});
+	#endif
+      } else {
+	 throw std::runtime_error("Bad Photon output format: " + format);
+      }
+  }
+    
   if (config.has_value({"Potentials"})) {
     if (time_step_mode_ == TimeStepMode::None) {
       log.error() << "Potentials only work with time steps!";
@@ -702,6 +725,24 @@ void Experiment<Modus>::write_dilepton_action(Action &action,
   }
 }
 
+template<typename Modus >
+void Experiment< Modus >::write_photon_action(Action& action, const ParticleList& particles_before_actions){
+  if (action.is_valid(particles_)) {
+    int number_of_fractional_photons = 100;
+    // loop over action to get many fractional photons
+    // where to store number_of_fractional_photons? -> needed for weighing?
+    // maybe read in from config file?
+    for (int i=0; i<number_of_fractional_photons; i++){ 
+      action.generate_final_state();
+      const FourVector r_interaction = action.get_interaction_point();
+      constexpr bool compute_grad = false;
+      const double rho = rho_eckart(r_interaction.threevec(), particles_before_actions, density_param_, dens_type_, compute_grad).first;
+      photon_output_->at_interaction(action, rho); // generate output
+    }
+  }
+}
+
+
 /// Make sure `interactions_total` can be represented as a 32-bit integer.
 /// This is necessary for converting to a `id_process`.
 static void check_interactions_total(uint64_t interactions_total) {
@@ -849,6 +890,7 @@ uint64_t Experiment<Modus>::run_time_evolution_fixed_time_step() {
 
   Actions actions;
   Actions dilepton_actions;
+  Actions photon_actions;
   const float dt = parameters_.timestep_duration();
   // minimal cell length of the grid for collision finding
   const float min_cell_length = compute_min_cell_length(dt);
@@ -886,6 +928,16 @@ uint64_t Experiment<Modus>::run_time_evolution_fixed_time_step() {
           write_dilepton_action(*dilepton_actions.pop(),
                                 particles_before_actions);
         }
+      }
+    }
+    
+    /* (1.e) Photons */
+    if (photon_finder_ != nullptr) {
+      photon_actions.insert(photon_finder_->find_actions_in_cell(particles_before_actions, dt));
+      if (!photon_actions.is_empty()) {
+	while (!photon_actions.is_empty()) {
+	  write_photon_action(*photon_actions.pop(), particles_before_actions);
+	}
       }
     }
 
@@ -1288,6 +1340,9 @@ void Experiment<Modus>::run() {
     }
     if (dilepton_output_ != nullptr) {
       dilepton_output_->at_eventstart(particles_, j);
+    }
+    if (photon_output_ != nullptr) {
+      photon_output_->at_eventstart(particles_, j);
     }
 
     /* the time evolution of the relevant subsystem */

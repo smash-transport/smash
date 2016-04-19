@@ -85,7 +85,7 @@ Output:
         Quantities:         ["rho_eckart", "tmn", "tmn_landau", "landau_velocity"]
         Position:           [0.0, 0.0, 0.0]
     Dileptons:
-        Enable:             False
+        Enable:             True
         Format:             Oscar
 
 Collision_Term:
