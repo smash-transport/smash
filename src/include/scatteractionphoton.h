@@ -23,7 +23,7 @@ class ScatterActionPhoton : public ScatterAction {
     // All photon reactions are added to a separarte CollisionList, which is later used to chose the scatteraction taking place
     // The total cross section is still the sum of both lists
     CollisionBranchList collision_channels_photons_;
-    float cross_section_photons_;
+    float cross_section_photons_=0.0;
 
     // fill with values:
 	const float m_rho = ParticleType::find(0x113).mass();
