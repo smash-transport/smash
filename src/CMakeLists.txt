@@ -108,7 +108,9 @@ set(smash_src
         scatteractionmesonmeson.cc
         scatteractionnucleonkaon.cc
         scatteractionnucleonnucleon.cc
+	scatteractionphoton.cc
         scatteractionsfinder.cc
+	scatteractionsfinderphoton.cc
         spheremodus.cc
         stringfunctions.cc
         tabulation.cc

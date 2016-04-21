@@ -4,6 +4,8 @@ Remaining Questions:
 
 - How do I handle the different rho masses for the incoming particles? 
 
+- Include only photons in output or both final state particles?
+
 - How to use GIT properly and how to document my code?
 
 
@@ -22,8 +24,6 @@ Remaining Questions:
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------
 Remaining tasks:
-
--add cc files to SMASH/src/CMakeLists.txt
 
 -read in number of fractional photons from config file on SMASH start
 
