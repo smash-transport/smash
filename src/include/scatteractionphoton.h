@@ -25,13 +25,13 @@ class ScatterActionPhoton : public ScatterAction {
     float cross_section_photons_;
 
     // fill with values:
-	const float m_rho = ;
+	const float m_rho = ParticleType::find(0x113).mass();
 	const float m_rho_2 = std::sqr(m_rho);
-	const float m_pi = ;
+	const float m_pi = ParticleType::find(0x111).mass();
 	const float m_pi_2 = std::sqr(m_pi);
-	const float m_eta = ;
+	const float m_eta =ParticleType::find(0x221).mass(); 
 	const float m_eta_2 = std::sqr(m_eta);
-    	const float gamma_rho_tot = ;
+    	const float gamma_rho_tot = 0.1491;
     	const float g_rho_2 = 48*acos(0)*gamma_rho_tot*std::pow(m_rho,2)/std::pow(std::pow(m_rho,2)-4*std::pow(m_pi,2),3/2);
    	const float DM = std::pow(m_rho,2)-4*std::pow(m_pi,2);
 };

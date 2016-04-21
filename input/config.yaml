@@ -87,6 +87,9 @@ Output:
     Dileptons:
         Enable:             True
         Format:             Oscar
+    Photons:
+	Enable:		    True
+	Format:             Oscar	
 
 Collision_Term:
     Two_to_One:             True

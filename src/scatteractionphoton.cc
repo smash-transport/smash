@@ -133,9 +133,15 @@ namespace Smash {
 	    mandelstam_t = get_t_range(sqrt_s,m1,m2,m3,0);
 	    t1 = mandelstam_t[0];
 	    t2 = mandelstam_t[1];
-	    u1 = pow(m1,2)+pow(m2,2)+pow(m3,2)-s-t1;
-	    u2 = pow(m1,2)+pow(m2,2)+pow(m3,2)-s-t2;
-	    
+	    xsection = 4*acos(0)*pow(alpha,2)/(s*p_cm_2);
+            t1 += -m_pi_2; //is t+
+            t2 += -m_pi_2;
+            u1 = - s - t1;
+            u2 = - s - t2;
+            e = t2-t1+2*m_pi_2*((1-2*m_pi_2/s)*log(t2/t1)+m_pi_2*(t2-t1)/(t1*t2));
+            e+= 2*m_pi_2*((1-2*m_pi_2/s)*log(u1/u2)+m_pi_2*(u1-u2)/(u1*u2));
+            xsection = xsection*e;
+	    process_list.push_back(make_unique<CollisionBranch>(*part_out, *photon_out, xsection,ProcessType::TwoToTwo));
 	  break;
 	  case pi0_pi:
 	      
