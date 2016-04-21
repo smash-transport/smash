@@ -18,6 +18,7 @@
 #include "include/listmodus.h"
 #include "include/propagation.h"
 #include "include/scatteractionsfinder.h"
+#include "include/scatteractionsfinderphoton.h"
 #include "include/spheremodus.h"
 /* Outputs */
 #include "include/binaryoutputcollisions.h"
@@ -284,7 +285,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     dilepton_finder_ = make_unique<DecayActionsFinderDilepton>();
   }
   if (photons_switch) {
-      photon_finder_ = make_unique<ScatterActionsFinderPhoton>(); 
+      photon_finder_ = make_unique<ScatterActionsFinderPhoton>(config, parameters_,two_to_one, two_to_two); 
     }
   if (config.has_value({"Collision_Term", "Pauli_Blocking"})) {
     log.info() << "Pauli blocking is ON.";

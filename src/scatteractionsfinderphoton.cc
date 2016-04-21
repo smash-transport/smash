@@ -13,7 +13,7 @@
 
 namespace Smash{
   
-  ScatterActionPtr ScatterActionsFinderPhoton::construct_scatter_action(const ParticleData &data_a, const ParticleData &data_b, float time_until_collision) const override {
+  ScatterActionPtr ScatterActionsFinderPhoton::construct_scatter_action(const ParticleData &data_a, const ParticleData &data_b, float time_until_collision) const {
     return make_unique<ScatterActionPhoton>(data_a, data_b, time_until_collision);
   }
   

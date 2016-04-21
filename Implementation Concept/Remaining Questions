@@ -25,6 +25,8 @@ Remaining Questions:
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------
 Remaining tasks:
 
+-forbidden u-channel in reaction b should be deleted
+-weigh the photons correctly in generate_final_state
 -read in number of fractional photons from config file on SMASH start
 
 

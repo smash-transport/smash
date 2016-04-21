@@ -101,6 +101,15 @@ std::unique_ptr<OutputInterface> create_oscar_output(const bf::path &path,
 
 std::unique_ptr<OutputInterface> create_dilepton_output(bf::path path);
 
+/**
+ * Returns a OscarOutput for the photon output routine in the
+ * ScatterActionsFinderPhoton. The Format is always 2013 and OscarInterations.
+ *
+ * \param path The path to the output directory where the file(s) will be
+ *             placed.
+ */
+
+std::unique_ptr<OutputInterface> create_photon_output(bf::path path);
 
 // @}
 

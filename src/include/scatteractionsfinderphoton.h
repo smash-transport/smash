@@ -11,9 +11,8 @@ namespace Smash {
 
 class ScatterActionsFinderPhoton : public ScatterActionsFinder {
   public:
-    /** Initialize the finder */
-    ScatterActionsFinderPhoton() {} 
-
+    /** Initialize the finder (inherited) */
+	using ScatterActionsFinder::ScatterActionsFinder;
     /** At the moment no final scattering actions are implemented in SMASH */
     // ActionList find_final_actions(const Particles &search_list) const override;
     

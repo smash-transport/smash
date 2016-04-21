@@ -500,5 +500,12 @@ std::unique_ptr<OutputInterface> create_dilepton_output(bf::path path) {
 }
 
 
+std::unique_ptr<OutputInterface> create_photon_output(bf::path path) {
+  /* for now the Oscar Output in the 2013 format is sufficient
+   * for photon output */
+  return make_unique<OscarOutput<OscarFormat2013, OscarInteractions>>(
+                                            std::move(path), "PhotonOutput");
+}
+
 
 }  // namespace Smash
