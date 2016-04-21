@@ -146,7 +146,7 @@ class ScatterAction : public Action {
     using std::invalid_argument::invalid_argument;
   };
 
-  float cross_section() const {
+  virtual float cross_section() const {
     return total_cross_section_;
   }
 

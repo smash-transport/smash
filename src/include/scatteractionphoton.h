@@ -13,6 +13,7 @@ class ScatterActionPhoton : public ScatterAction {
     
     void generate_final_state() override; 
     float raw_weight_value() const override { return weight_; } 
+    float cross_section() const override {return cross_section_photons_;} 
     
     CollisionBranchList two_to_two_cross_sections() override;
      
