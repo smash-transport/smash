@@ -31,6 +31,7 @@ TEST(width_Delta) {
 TEST(width_Roper) {
   const ParticleType &t = ParticleType::find(0x202212);
   printf("%7.4f \n",t.minimum_mass());
+  const int nModes = t.decay_modes().decay_mode_list().size();
   for (int i = 0; i < 100; i++) {
     float m = 1. + i*0.01;
     float wtot = t.total_width (m);
@@ -39,6 +40,10 @@ TEST(width_Roper) {
     ProcessBranchList<DecayBranch> partial = t.get_partial_widths(m);
     for (const auto &branch : partial) {
       printf("%7.4f ", branch->weight());
+    }
+    // print zeros for missing modes
+    for (int j=partial.size(); j<nModes; j++) {
+      printf("%7.4f ", 0.);
     }
     printf("\n");
   }
