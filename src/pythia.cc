@@ -148,7 +148,14 @@ namespace Smash {
           }
         }
         outgoing_particles_.push_back(data_);
-      }
+        /* If the incoming particles already were unformed, the formation
+         * times and cross section scaling factors need to be adjusted */
+        if (incoming_particles_[0].formation_time() > 
+            incoming_particles_[0].position[0] && 
+            incoming_particles_[0].formation_time() > 
+            outgoing_particles_[0].formation_time()) {
+          outgoing_particles_[0].
+        }
     #else
       std::string errMsg = "Pythia 8 not available for string excitation";
       throw std::runtime_error(errMsg);
