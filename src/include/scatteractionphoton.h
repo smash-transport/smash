@@ -24,17 +24,6 @@ class ScatterActionPhoton : public ScatterAction {
     // The total cross section is still the sum of both lists
     CollisionBranchList collision_channels_photons_;
     float cross_section_photons_=0.0;
-
-    // fill with values:
-	const float m_rho = ParticleType::find(0x113).mass();
-	const float m_rho_2 = std::pow(m_rho,2);
-	const float m_pi = ParticleType::find(0x111).mass();
-	const float m_pi_2 = std::pow(m_pi,2);
-	const float m_eta =ParticleType::find(0x221).mass(); 
-	const float m_eta_2 = std::pow(m_eta,2);
-    	const float gamma_rho_tot = ParticleType::find(0x113).width_at_pole();
-    	const float g_rho_2 = 48*acos(0)*gamma_rho_tot*std::pow(m_rho,2)/std::pow(std::pow(m_rho,2)-4*std::pow(m_pi,2),3/2);
-   	const float DM = std::pow(m_rho,2)-4*std::pow(m_pi,2);
 };
 
 }  // namespace Smash

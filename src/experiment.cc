@@ -934,7 +934,13 @@ uint64_t Experiment<Modus>::run_time_evolution_fixed_time_step() {
     
     /* (1.e) Photons */
     if (photon_finder_ != nullptr) {
-      photon_actions.insert(photon_finder_->find_actions_in_cell(particles_before_actions, dt));
+      //photon_actions.insert(photon_finder_->find_actions_in_cell(particles_before_actions, dt));
+      grid.iterate_cells([&](const ParticleList &search_list) {
+	  photon_actions.insert(photon_finder_->find_actions_in_cell(search_list, dt));
+	},[&](const ParticleList &search_list, const ParticleList &neighbors_list) {
+	  photon_actions.insert(photon_finder_->find_actions_with_neighbors(search_list, neighbors_list, dt));
+	});
+	  
       if (!photon_actions.is_empty()) {
 	while (!photon_actions.is_empty()) {
 	  write_photon_action(*photon_actions.pop(), particles_before_actions);
@@ -1323,6 +1329,9 @@ void Experiment<Modus>::final_output(uint64_t interactions_total,
   }
   if (dilepton_output_ != nullptr) {
     dilepton_output_->at_eventend(particles_, evt_num);
+  }
+  if (photon_output_ != nullptr) {
+    photon_output_->at_eventend(particles_, evt_num);
   }
 }
 

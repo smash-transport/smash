@@ -36,7 +36,17 @@ namespace Smash {
 
     
     CollisionBranchList ScatterActionPhoton::two_to_two_cross_sections() {
+      
       CollisionBranchList process_list;
+      const float m_rho = ParticleType::find(0x113).mass();
+      const float m_rho_2 = std::pow(m_rho,2);
+      const float m_pi = ParticleType::find(0x111).mass();
+      const float m_pi_2 = std::pow(m_pi,2);
+      const float m_eta =ParticleType::find(0x221).mass(); 
+      const float m_eta_2 = std::pow(m_eta,2);
+      const float gamma_rho_tot = ParticleType::find(0x113).width_at_pole();
+      const float g_rho_2 = 48*acos(0)*gamma_rho_tot*std::pow(m_rho,2)/std::pow(std::pow(m_rho,2)-4*std::pow(m_pi,2),3/2);
+      const float DM = std::pow(m_rho,2)-4*std::pow(m_pi,2);
 
       ParticleData &part_a = incoming_particles_[0];
       ParticleData &part_b = incoming_particles_[1];
@@ -53,14 +63,14 @@ namespace Smash {
       
       if (no_pion) {
 	
-      } else { 
+      } else { // do a check according to incoming_particles_ and calculate the cross sections (xsection) for all possible reactions
 
 	const double s = mandelstam_s();
 	const double &m1 = part_a.pole_mass();
 	const double &m2 = part_b.pole_mass();
 	double m3=0.0;
 	const double p_cm_2 = cm_momentum_squared();
-	ParticleTypePtr part_out;  // = ParticleType("ρ⁺",0.776,0.149,PdgCode(0x213));  // work over this, so the right particles are created
+	ParticleTypePtr part_out;  
 	ParticleTypePtr photon_out = &ParticleType::find(0x022);
 	
 	enum ReactionType {pi_pi, pi0_pi, piplus_rho0, pi_rho, pi0_rho, piplus_eta, no_reaction};
@@ -70,7 +80,7 @@ namespace Smash {
 	    if (part_b.type().pdgcode().is_pion()){
 	      reac = pi0_pi;
 	      m3 = m_rho;
-	      part_out = &ParticleType::find(0x213); // ParticleType("ρ⁺",0.776,0.149,PdgCode(0x213)); 
+	      part_out = &ParticleType::find(0x213); 
 	    }
 	    if (part_b.type().pdgcode().is_rho()){
 	      reac = pi0_rho;
@@ -212,12 +222,7 @@ namespace Smash {
 	    
 	  break;  
 	}
-
-	// do a check according to incoming_particles_ and calculate the cross sections (xsection) for all possible reactions
-	
-      
-       
-	// create extra CollisionBranch only for photon producing reactions!
+	// add to extra CollisionBranch only for photon producing reactions!
 	add_processes<CollisionBranch>(std::move(process_list), collision_channels_photons_,cross_section_photons_);
       
       }
