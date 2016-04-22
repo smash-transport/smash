@@ -935,7 +935,7 @@ uint64_t Experiment<Modus>::run_time_evolution_fixed_time_step() {
     /* (1.e) Photons */
     if (photon_finder_ != nullptr) {
       //photon_actions.insert(photon_finder_->find_actions_in_cell(particles_before_actions, dt));
-      grid.iterate_cells([&](const ParticleList &search_list) {
+     grid.iterate_cells([&](const ParticleList &search_list) {
 	  photon_actions.insert(photon_finder_->find_actions_in_cell(search_list, dt));
 	},[&](const ParticleList &search_list, const ParticleList &neighbors_list) {
 	  photon_actions.insert(photon_finder_->find_actions_with_neighbors(search_list, neighbors_list, dt));

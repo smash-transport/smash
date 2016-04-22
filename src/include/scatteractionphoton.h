@@ -13,12 +13,16 @@ class ScatterActionPhoton : public ScatterAction {
     
     void generate_final_state() override; 
     float raw_weight_value() const override { return weight_; } 
-    float cross_section() const override {return cross_section_photons_;} 
+    float cross_section() const override {
+	if (cross_section_photons_<1.0e-10) {
+		return cross_section_photons_;
+	} else return total_cross_section_;
+    } 
     
     CollisionBranchList two_to_two_cross_sections() override;
      
   private:
-    float weight_;
+    float weight_=0.0;
     /** List of possible collisions producing photons */
     // All photon reactions are added to a separarte CollisionList, which is later used to chose the scatteraction taking place
     // The total cross section is still the sum of both lists
