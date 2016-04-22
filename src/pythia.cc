@@ -122,7 +122,6 @@ namespace Smash {
          * valence quark content. Hadrons containing a valence quark are
          * determined by highest z-momentum. */ 
         log.debug("The formation time is: ", formation_time_, "fm/c.");
-        data_.set_formation_time(formation_time_);
         /* Additional suppression factor to mimic coherence taken as 0.7
          * from UrQMD (CTParam(59) */
         const float suppression_factor = 0.7;
@@ -147,15 +146,34 @@ namespace Smash {
             (suppression_factor*0.0);
           }
         }
-        outgoing_particles_.push_back(data_);
-        /* If the incoming particles already were unformed, the formation
-         * times and cross section scaling factors need to be adjusted */
-        if (incoming_particles_[0].formation_time() > 
-            incoming_particles_[0].position[0] && 
-            incoming_particles_[0].formation_time() > 
-            outgoing_particles_[0].formation_time()) {
-          outgoing_particles_[0].
+        /* Boost the formation time to the laboratory frame */
+        ThreeVector beta_cm = (incoming_particles_[0].momentum() +
+                      incoming_particles_[1].momentum()).velocity();
+        
+        double gamma_cm =  1./sqrt(1-beta_cm.sqr());
+        data_.set_formation_time(formation_time_*gamma_cm);
+                outgoing_particles_.push_back(data_);
+      }
+      /* If the incoming particles already were unformed, the formation
+       * times and cross section scaling factors need to be adjusted */
+      if (incoming_particles_[0].formation_time() >
+          incoming_particles_[0].position().x0()) {
+        outgoing_particles_[0].set_cross_section_scaling_factor(
+        outgoing_particles_[0].cross_section_scaling_factor()*incoming_particles_[0].cross_section_scaling_factor());
+        if(incoming_particles_[0].formation_time() >
+          outgoing_particles_[0].formation_time()) {
+          outgoing_particles_[0].set_formation_time(incoming_particles_[0].formation_time());
         }
+      }
+      if (incoming_particles_[1].formation_time() >
+          incoming_particles_[1].position().x0()) {
+        outgoing_particles_[1].set_cross_section_scaling_factor(
+        outgoing_particles_[1].cross_section_scaling_factor()*incoming_particles_[1].cross_section_scaling_factor());
+        if(incoming_particles_[1].formation_time() >
+          outgoing_particles_[1].formation_time()) {
+          outgoing_particles_[1].set_formation_time(incoming_particles_[1].formation_time());
+        }
+      }
     #else
       std::string errMsg = "Pythia 8 not available for string excitation";
       throw std::runtime_error(errMsg);

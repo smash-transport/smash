@@ -87,8 +87,6 @@ void ScatterAction::generate_final_state() {
       new_particle.set_4position(middle_point);
     }
     new_particle.boost_momentum(-beta_cm());
-    /* Formation time needs to be adjusted to computational frame */
-    new_particle.set_formation_time(new_particle.formation_time()*gamma_cm());
   }
 }
 
