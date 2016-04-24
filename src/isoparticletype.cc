@@ -243,7 +243,7 @@ double IsoParticleType::get_integral_DR(double sqrts) {
                                srts - type_res->minimum_mass(),
                                [&](float m1, float m2) {
                                  return spec_func_integrand_2res(srts, m1, m2,
-                                                              *type_res, *Delta);
+                                                            *type_res, *Delta);
                                });
           });
   }
