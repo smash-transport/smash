@@ -2,6 +2,7 @@
 #define SRC_INCLUDE_SCATTERACTIONPHOTON_H_
 
 #include "scatteraction.h"
+#include "constants.h"
 
 namespace Smash {
 
@@ -14,7 +15,7 @@ class ScatterActionPhoton : public ScatterAction {
     void generate_final_state() override; 
     float raw_weight_value() const override { return weight_; } 
     float cross_section() const override {
-	if (cross_section_photons_<1.0e-10) {
+	if (cross_section_photons_<really_small) {
 		return cross_section_photons_;
 	} else return total_cross_section_;
     } 
