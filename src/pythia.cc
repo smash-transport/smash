@@ -23,7 +23,6 @@
 
 #ifdef PYTHIA_FOUND
 #include "Pythia8/Pythia.h"
-/* #include "Pythia8/LHAPDFInterface.h" */
 #endif
 
 namespace Smash {
@@ -36,7 +35,6 @@ namespace Smash {
       const auto &log = logger<LogArea::Pythia>();
     /// Disable floating point exception trap for Pythia
     {
-///    DisableFloatTraps guard(FE_DIVBYZERO | FE_INVALID);
     DisableFloatTraps guard;
 
     #ifdef PYTHIA_FOUND
@@ -50,7 +48,7 @@ namespace Smash {
       /* suppress unnecessary output */
       pythia.readString("Print:quiet = on");
       /* Create output of the Pythia particle list */
-      ///pythia.readString("Init:showAllParticleData = on");
+      /// pythia.readString("Init:showAllParticleData = on");
       /* No resonance decays, since the resonances will be handled by SMASH */
       pythia.readString("HadronLevel:Decay = off");
       /* Set the random seed of the Pythia Random Number Generator.
@@ -149,7 +147,6 @@ namespace Smash {
         /* Boost the formation time to the laboratory frame */
         ThreeVector beta_cm = (incoming_particles_[0].momentum() +
                       incoming_particles_[1].momentum()).velocity();
-        
         double gamma_cm =  1./sqrt(1-beta_cm.sqr());
         data_.set_formation_time(formation_time_*gamma_cm);
                 outgoing_particles_.push_back(data_);
@@ -159,27 +156,30 @@ namespace Smash {
       if (incoming_particles_[0].formation_time() >
           incoming_particles_[0].position().x0()) {
         outgoing_particles_[0].set_cross_section_scaling_factor(
-        outgoing_particles_[0].cross_section_scaling_factor()*incoming_particles_[0].cross_section_scaling_factor());
-        if(incoming_particles_[0].formation_time() >
+        outgoing_particles_[0].cross_section_scaling_factor()*
+        incoming_particles_[0].cross_section_scaling_factor());
+        if (incoming_particles_[0].formation_time() >
           outgoing_particles_[0].formation_time()) {
-          outgoing_particles_[0].set_formation_time(incoming_particles_[0].formation_time());
+          outgoing_particles_[0].set_formation_time
+          (incoming_particles_[0].formation_time());
         }
       }
       if (incoming_particles_[1].formation_time() >
           incoming_particles_[1].position().x0()) {
         outgoing_particles_[1].set_cross_section_scaling_factor(
-        outgoing_particles_[1].cross_section_scaling_factor()*incoming_particles_[1].cross_section_scaling_factor());
-        if(incoming_particles_[1].formation_time() >
+        outgoing_particles_[1].cross_section_scaling_factor()
+        *incoming_particles_[1].cross_section_scaling_factor());
+        if (incoming_particles_[1].formation_time() >
           outgoing_particles_[1].formation_time()) {
-          outgoing_particles_[1].set_formation_time(incoming_particles_[1].formation_time());
+          outgoing_particles_[1].set_formation_time
+          (incoming_particles_[1].formation_time());
         }
       }
     #else
       std::string errMsg = "Pythia 8 not available for string excitation";
       throw std::runtime_error(errMsg);
-      ParticleList outgoing_particles_;
     #endif
-    return outgoing_particles_;
+      return outgoing_particles_;
     }
   }
 }  // namespace Smash

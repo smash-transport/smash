@@ -335,23 +335,21 @@ void ScatterAction::resonance_formation() {
 
   /* Set the formation time of the resonance to the larger formation time of the
    * incoming particles */
-  if(incoming_particles_[0].formation_time() > time_of_execution_ ||
+  if (incoming_particles_[0].formation_time() > time_of_execution_ ||
      incoming_particles_[1].formation_time() > time_of_execution_) {
-    if(incoming_particles_[0].formation_time() >
+    if (incoming_particles_[0].formation_time() >
        incoming_particles_[1].formation_time()) {
       outgoing_particles_[0].set_formation_time(
         incoming_particles_[0].formation_time());
       outgoing_particles_[0].set_cross_section_scaling_factor(
         incoming_particles_[0].cross_section_scaling_factor());
-    }
-    else {
+    } else {
       outgoing_particles_[0].set_formation_time(
         incoming_particles_[1].formation_time());
       outgoing_particles_[0].set_cross_section_scaling_factor(
         incoming_particles_[1].cross_section_scaling_factor());
     }
   }
-    
   log.debug("Momentum of the new particle: ",
             outgoing_particles_[0].momentum());
 }

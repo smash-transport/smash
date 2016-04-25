@@ -193,7 +193,7 @@ void DecayAction::generate_final_state() {
     p.set_4position(incoming_particles_[0].position());
     p.set_formation_time(incoming_particles_[0].formation_time());
     p.set_cross_section_scaling_factor(
-      incoming_particles_[0].cross_section_scaling_factor());  
+      incoming_particles_[0].cross_section_scaling_factor());
     log.debug("particle momenta in comp ", p);
   }
 }
