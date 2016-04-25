@@ -238,6 +238,7 @@ void GrandCanThermalizer::thermalize(Particles& particles, double time) {
       }
     }
   }
+  std::cout << "Sampled " << sampled_list.size() << " particles." << std::endl;
 
   // Report conservation laws:
   QuantumNumbers conserved_final = QuantumNumbers(sampled_list);
