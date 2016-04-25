@@ -122,6 +122,9 @@ double HadronGasEos::scaled_partial_density(const ParticleType& ptype,
 
 double HadronGasEos::partial_density(const ParticleType& ptype,
                                      double T, double mub, double mus) {
+  if (T < really_small) {
+    return 0.0;
+  }
   return prefactor_ * T*T*T * scaled_partial_density(ptype, 1.0/T, mub, mus);
 }
 
