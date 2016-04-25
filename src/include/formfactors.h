@@ -96,10 +96,9 @@ inline float form_factor_pi(float mass) {
 
 /** Electromagnetic transition form factor for eta -> gamma e+ e-,
  * taken from \iref{Landsberg:1986fd}, as a function of the dilepton mass.
- * For the value of lambda_eta see B. Spruck, Ph.D. thesis,
- * http://geb.uni-giessen.de/geb/volltexte/2008/6667/. */
+ * The Lambda parameter is fitted to NA60 data, see \iref{Arnaldi:2009aa}. */
 inline float form_factor_eta(float mass) {
-  const float lambda_eta = 0.676;
+  const float lambda_eta = 0.716;
   const float m_over_eta = mass / lambda_eta;
   return 1. / (1. - m_over_eta*m_over_eta);
 }

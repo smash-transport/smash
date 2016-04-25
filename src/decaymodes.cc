@@ -25,9 +25,9 @@ std::vector<DecayModes> *DecayModes::all_decay_modes = nullptr;
 
 std::vector<DecayTypePtr> *all_decay_types = nullptr;
 
-void DecayModes::add_mode(float ratio, int L,
+void DecayModes::add_mode(ParticleTypePtr mother, float ratio, int L,
                           ParticleTypePtrList particle_types) {
-  DecayType *type = get_decay_type(particle_types, L);
+  DecayType *type = get_decay_type(mother, particle_types, L);
   // check if mode already exists: if yes, add weight
   for (auto &mode : decay_modes_) {
     if (type == &mode->type()) {
@@ -40,13 +40,15 @@ void DecayModes::add_mode(float ratio, int L,
 }
 
 
-DecayType* DecayModes::get_decay_type(ParticleTypePtrList particle_types,
+DecayType* DecayModes::get_decay_type(ParticleTypePtr mother,
+                                      ParticleTypePtrList particle_types,
                                       int L) {
   assert(all_decay_types != nullptr);
 
   // check if the decay type already exisits
   for (const auto &type : *all_decay_types) {
-    if (type->has_particles(particle_types) && type->angular_momentum() == L) {
+    if (type->has_mother(mother) && type->has_particles(particle_types)
+        && type->angular_momentum() == L) {
       return type.get();
     }
   }
@@ -76,7 +78,7 @@ DecayType* DecayModes::get_decay_type(ParticleTypePtrList particle_types,
                           particle_types[1]->pdgcode(),
                           particle_types[2]->pdgcode())) {
         all_decay_types->emplace_back(
-        make_unique<ThreeBodyDecayDilepton>(particle_types, L));
+        make_unique<ThreeBodyDecayDilepton>(mother, particle_types, L));
       } else {
       all_decay_types->emplace_back(
           make_unique<ThreeBodyDecay>(particle_types, L));
@@ -166,6 +168,7 @@ void DecayModes::load_decaymodes(const std::string &input) {
       for (const auto &state : mother_states) {
         PdgCode pdg = state->pdgcode();
         PdgCode pdg_anti = pdg.get_antiparticle();
+        const ParticleType &type_anti = ParticleType::find(pdg_anti);
         DecayModes &decay_modes_orig = decaymodes[find_offset(pdg)];
         DecayModes &decay_modes_anti = decaymodes[find_offset(pdg_anti)];
         for (const auto &mode : decay_modes_orig.decay_mode_list()) {
@@ -175,8 +178,8 @@ void DecayModes::load_decaymodes(const std::string &input) {
               type = type->get_antiparticle();
             }
           }
-          decay_modes_anti.add_mode(mode->weight(), mode->angular_momentum(),
-                                    list);
+          decay_modes_anti.add_mode(&type_anti, mode->weight(),
+                                    mode->angular_momentum(), list);
         }
       }
     }
@@ -249,7 +252,8 @@ void DecayModes::load_decaymodes(const std::string &input) {
                               mother_states[m]->name() + " -> " +
                               daughter1->name() + " " + daughter2->name() +
                               " (" + std::to_string(ratio * cg_sqr) + ")");
-                    decay_modes_to_add[m].add_mode(ratio * cg_sqr, L,
+                    decay_modes_to_add[m].add_mode(mother_states[m],
+                                                   ratio * cg_sqr, L,
                                                    {daughter1, daughter2});
                   }
                 }
@@ -279,7 +283,7 @@ void DecayModes::load_decaymodes(const std::string &input) {
                                 daughter1->name() + " " + daughter2->name() +
                                 " " + daughter3->name() + " (" +
                                 std::to_string(ratio * cg_sqr) + ")");
-                      decay_modes_to_add[m].add_mode(
+                      decay_modes_to_add[m].add_mode(mother_states[m],
                           ratio * cg_sqr, L, {daughter1, daughter2, daughter3});
                     }
                   }
@@ -308,7 +312,7 @@ void DecayModes::load_decaymodes(const std::string &input) {
           if (mother_states[m]->charge() == charge) {
             log.debug("decay mode found: " + mother_states[m]->name() + " -> " +
                       std::to_string(decay_particles.size()));
-            decay_modes_to_add[m].add_mode(ratio, L, types);
+            decay_modes_to_add[m].add_mode(mother_states[m], ratio, L, types);
             no_decays = false;
           }
         }
