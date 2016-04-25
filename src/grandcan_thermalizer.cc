@@ -112,14 +112,17 @@ void GrandCanThermalizer::thermalize(Particles& particles, double time) {
   QuantumNumbers conserved_initial   = QuantumNumbers(),
                  conserved_remaining = QuantumNumbers();
   ThermLatticeNode node;
+  int particles_removed = 0;
   for (auto &particle : particles) {
     const bool is_on_lattice = lat_->value_at(particle.position().threevec(),
                                               node);
     if (is_on_lattice && node.e() > e_crit_) {
       conserved_initial.add_values(particle);
       particles.remove(particle);
+      particles_removed ++;
     }
   }
+  std::cout << "Removed " << particles_removed << " particles." << std::endl;
 
   // Exit if there is nothing to thermalize
   if (conserved_initial == QuantumNumbers()) {
@@ -140,30 +143,34 @@ void GrandCanThermalizer::thermalize(Particles& particles, double time) {
       B_plus = 0, B_minus = 0,
       E_plus = 0, E_minus = 0;
   // Mode 1: sample until energy is conserved, take only strangeness < 0
-  while (conserved_initial.momentum().x0() > energy) {
+  while (conserved_initial.momentum().x0() > energy ||
+         S_plus < conserved_initial.strangeness()) {
     sample_in_random_cell(mode_list, time);
     for (auto &particle : mode_list) {
       energy += particle.momentum().x0();
-      if (particle.pdgcode().strangeness() < 0) {
+      if (particle.pdgcode().strangeness() > 0) {
         sampled_list.push_back(particle);
         S_plus += particle.pdgcode().strangeness();
       }
     }
   }
+
   // Mode 2: sample until strangeness is conserved
   while (S_plus + S_minus > conserved_initial.strangeness()) {
     sample_in_random_cell(mode_list, time);
     for (auto &particle : mode_list) {
-      if (particle.pdgcode().strangeness() > 0) {
+      if (particle.pdgcode().strangeness() < 0) {
         sampled_list.push_back(particle);
         S_minus += particle.pdgcode().strangeness();
       }
     }
   }
+
   // Mode 3: sample non-strange baryons
   conserved_remaining = conserved_initial - QuantumNumbers(sampled_list);
   energy = 0.0;
-  while (conserved_remaining.momentum().x0() > energy) {
+  while (conserved_remaining.momentum().x0() > energy ||
+         B_plus < conserved_remaining.baryon_number()) {
     sample_in_random_cell(mode_list, time);
     for (auto &particle : mode_list) {
       energy += particle.momentum().x0();
@@ -174,8 +181,9 @@ void GrandCanThermalizer::thermalize(Particles& particles, double time) {
       }
     }
   }
+
   // Mode 4: sample non-strange anti-baryons
-  while (B_plus + B_minus > conserved_initial.baryon_number()) {
+  while (B_plus + B_minus > conserved_remaining.baryon_number()) {
     sample_in_random_cell(mode_list, time);
     for (auto &particle : mode_list) {
       if (particle.pdgcode().strangeness() == 0 &&
@@ -185,10 +193,12 @@ void GrandCanThermalizer::thermalize(Particles& particles, double time) {
       }
     }
   }
+
   // Mode 5: sample non_strange mesons, but take only with charge > 0
   conserved_remaining = conserved_initial - QuantumNumbers(sampled_list);
   energy = 0.0;
-  while (conserved_remaining.momentum().x0() > energy) {
+  while (conserved_remaining.momentum().x0() > energy ||
+         E_plus < conserved_remaining.charge()) {
     sample_in_random_cell(mode_list, time);
     for (auto &particle : mode_list) {
       energy += particle.momentum().x0();
@@ -200,8 +210,9 @@ void GrandCanThermalizer::thermalize(Particles& particles, double time) {
       }
     }
   }
+
   // Mode 6: sample non_strange mesons to conserve charge
-  while (E_plus + E_minus > conserved_initial.charge()) {
+  while (E_plus + E_minus > conserved_remaining.charge()) {
     sample_in_random_cell(mode_list, time);
     for (auto &particle : mode_list) {
       if (particle.pdgcode().strangeness() == 0 &&
@@ -212,6 +223,7 @@ void GrandCanThermalizer::thermalize(Particles& particles, double time) {
       }
     }
   }
+
   // Mode 7: sample neutral non-strange mesons to conserve energy
   conserved_remaining = conserved_initial - QuantumNumbers(sampled_list);
   energy = 0.0;
