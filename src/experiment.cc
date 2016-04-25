@@ -899,6 +899,11 @@ uint64_t Experiment<Modus>::run_time_evolution_fixed_time_step() {
       }
     }
 
+    if (gc_thermalizer_ && std::abs(parameters_.labclock.current_time() - 8.0f) < 0.1f) {
+      gc_thermalizer_->update_lattice(particles_, density_param_);
+      gc_thermalizer_->thermalize(particles_, parameters_.labclock.current_time());
+    }
+
     /* (2) Perform actions. */
     if (!actions.is_empty()) {
       while (!actions.is_empty()) {
