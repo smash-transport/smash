@@ -65,15 +65,14 @@ namespace Smash {
       } else { // do a check according to incoming_particles_ and calculate the cross sections (xsection) for all possible reactions
 
 	const double s = mandelstam_s();
-	const double &m1 = part_a.pole_mass();
-	const double &m2 = part_b.pole_mass();
+	const double &m1 = part_a.effective_mass();
+	const double &m2 = part_b.effective_mass();
 	double m3 = 0.0; // will be fixed according to reaction outcome
 	const double p_cm_2 = cm_momentum_squared();
 	ParticleTypePtr part_out = &ParticleType::find(0x022);  
 	ParticleTypePtr photon_out = &ParticleType::find(0x022);
 	
-	enum ReactionType {pi_pi, pi0_pi, piplus_rho0, pi_rho, pi0_rho, piplus_eta, no_reaction};
-	ReactionType reac = no_reaction;
+	reac = no_reaction;
 	if (part_a.type().charge()==0){
 	  if (part_b.type().charge()!=0) {
 	    if (part_b.type().pdgcode().is_pion()){
@@ -185,7 +184,7 @@ namespace Smash {
 	    xsection = alpha*g_rho_2/(12*s*p_cm_2);
             t1 += -m_pi_2;
             t2 += -m_pi_2;
-            xsection=xsection*(2*(t2-t1)-s*(DM)/pow(s-m_pi_2,2)*(t2-t1)-DM*((s-m_rho_2+m_pi_2)/(s-m_pi_2)*std::log(t2/t1)+m_pi_2*(t2-t1)/(t1*t2)));
+            xsection=xsection*(2*(t2-t1)-s*(pow(m2,2)-4*m_pi_2)/pow(s-m_pi_2,2)*(t2-t1)-(pow(m2,2)-4*m_pi_2)*((s-pow(m2,2)+m_pi_2)/(s-m_pi_2)*std::log(t2/t1)+m_pi_2*(t2-t1)/(t1*t2)));
 	    process_list.push_back(make_unique<CollisionBranch>(*part_out, *photon_out, xsection,ProcessType::TwoToTwo));
 	  break;
 	  case pi_rho:
@@ -194,18 +193,18 @@ namespace Smash {
             t2 += -m_pi_2;
             u1 += -m_rho_2;
             u2 += -m_rho_2;
-            e = 4*DM*(m_rho_2*(t2-t1)/(u1*u2)+m_pi_2*(t2-t1)/(t2*t1)+std::log(u1/u2*t2/t1)-m_rho_2/(s-m_pi_2)*std::log(t2/t1*u1/u2));
-            e+= (s-m_pi_2)*(3.0+(s-m_pi_2)/m_rho_2)*std::log(u1/u2);
-            e+= (t2-t1)*(s/m_rho_2-0.5-pow(s-m_pi_2,2)/(u1*u2));
+            e = 4*(pow(m2,2)-4*m_pi_2)*(pow(m2,2)*(t2-t1)/(u1*u2)+m_pi_2*(t2-t1)/(t2*t1)+std::log(u1/u2*t2/t1)-pow(m2,2)/(s-m_pi_2)*std::log(t2/t1*u1/u2));
+            e+= (s-m_pi_2)*(3.0+(s-m_pi_2)/pow(m2,2))*std::log(u1/u2);
+            e+= (t2-t1)*(s/pow(m2,2)-0.5-pow(s-m_pi_2,2)/(u1*u2));
             xsection = xsection*e;
 	    process_list.push_back(make_unique<CollisionBranch>(*part_out, *photon_out, xsection,ProcessType::TwoToTwo));
 	  break;
 	  case pi0_rho:
 	    xsection = alpha*g_rho_2/(48*s*p_cm_2);
-            u1 += -m_rho_2; //is u+
-            u2 += -m_rho_2;
-            e = (t2-t1)*(4.5-s/m_rho_2-4*s*DM/pow(s-m_pi_2,2)+(pow(s-m_pi_2,2)-4*m_rho_2*DM)/(u1*u2));
-            e+= std::log(u1/u2)*(5*(s-m_pi_2)-pow(s-m_pi_2,2)/m_rho_2-4*DM*(s-m_pi_2+m_rho_2)/(s-m_pi_2));
+            u1 += -pow(m2,2); //is u+
+            u2 += -pow(m2,2);
+            e = (t2-t1)*(4.5-s/pow(m2,2)-4*s*(pow(m2,2)-4*m_pi_2)/pow(s-m_pi_2,2)+(pow(s-m_pi_2,2)-4*pow(m2,2)*(pow(m2,2)-4*m_pi_2))/(u1*u2));
+            e+= std::log(u1/u2)*(5*(s-m_pi_2)-pow(s-m_pi_2,2)/pow(m2,2)-4*(pow(m2,2)-4*m_pi_2)*(s-m_pi_2+pow(m2,2))/(s-m_pi_2));
             xsection = xsection*e; 
 	    process_list.push_back(make_unique<CollisionBranch>(*part_out, *photon_out, xsection,ProcessType::TwoToTwo));
 	  break;
@@ -230,5 +229,29 @@ namespace Smash {
       }
       return process_list;
     }
-    
+  
+  float ScatterActionPhoton::diff_cross_section() const {
+    /*
+      const float m_rho = ParticleType::find(0x113).mass();
+      const float m_rho_2 = pow(m_rho,2);
+      const float m_pi = ParticleType::find(0x111).mass();
+      const float m_pi_2 = pow(m_pi,2);
+      const float m_eta =ParticleType::find(0x221).mass(); 
+      const float m_eta_2 = pow(m_eta,2);
+      const float gamma_rho_tot = ParticleType::find(0x113).width_at_pole();
+      const float g_rho_2 = 12*twopi*gamma_rho_tot*pow(m_rho,2)/pow(pow(m_rho,2)-4*pow(m_pi,2),3/2);
+      const float DM = pow(m_rho,2)-4*pow(m_pi,2);
+      float diff_xsection = 0.0;
+      
+      switch (reac){
+	case pi_pi:
+	  if (outgoing_particles_[0].type().pdgcode().is_rho()) {
+	    
+	  }
+	break;
+      }
+      */
+      return 0.0;
+  }
+  
 }  // namespace Smash

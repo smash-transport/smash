@@ -25,10 +25,11 @@ class ScatterActionPhoton : public ScatterAction {
   private:
     float weight_=0.0;
     /** List of possible collisions producing photons */
-    // All photon reactions are added to a separarte CollisionList, which is later used to chose the scatteraction taking place
-    // The total cross section is still the sum of both lists
     CollisionBranchList collision_channels_photons_;
     float cross_section_photons_=0.0;
+    enum ReactionType {pi_pi, pi0_pi, piplus_rho0, pi_rho, pi0_rho, piplus_eta, no_reaction};
+    ReactionType reac = no_reaction;
+    float diff_cross_section() const;
 };
 
 }  // namespace Smash
