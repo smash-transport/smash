@@ -55,8 +55,7 @@ class GrandCanThermalizer {
                       );
   void update_lattice(const Particles& particles, const DensityParameters& par);
   ThreeVector uniform_in_cell() const; 
-  void sample_in_random_cell(ParticleList& plist, QuantumNumbers& conserved,
-                             const double time);
+  void sample_in_random_cell(ParticleList& plist, const double time);
   void thermalize(Particles& particles, double time);
 
   RectangularLattice<ThermLatticeNode>& lattice() const {

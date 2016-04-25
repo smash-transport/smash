@@ -50,8 +50,8 @@ ThreeVector GrandCanThermalizer::uniform_in_cell() const {
 }
 
 void GrandCanThermalizer::sample_in_random_cell(ParticleList& plist,
-                                                QuantumNumbers& conserved,
                                                 const double time) {
+  plist.clear();
   // Choose random cell
   int cells_to_sample_size = cells_to_sample_.size();
   const int cell_index =
@@ -82,9 +82,7 @@ void GrandCanThermalizer::sample_in_random_cell(ParticleList& plist,
       phitheta.distribute_isotropically();
       particle.set_4momentum(m, phitheta.threevec() * momentum_radial);
       particle.boost_momentum(cell.v());
-      // Add to the list and sum up conserved quantities
       plist.push_back(particle);
-      conserved.add_values(particle);
     }
   }
 }
@@ -111,9 +109,8 @@ void GrandCanThermalizer::update_lattice(const Particles& particles,
 void GrandCanThermalizer::thermalize(Particles& particles, double time) {
   // Remove particles from the cells with e > e_crit_,
   // sum up their conserved quantities
-  QuantumNumbers conserved_initial = QuantumNumbers(),
-                 conserved_sampled = QuantumNumbers(),
-                 conserved_mode    = QuantumNumbers();
+  QuantumNumbers conserved_initial   = QuantumNumbers(),
+                 conserved_remaining = QuantumNumbers();
   ThermLatticeNode node;
   for (auto &particle : particles) {
     const bool is_on_lattice = lat_->value_at(particle.position().threevec(),
@@ -137,20 +134,107 @@ void GrandCanThermalizer::thermalize(Particles& particles, double time) {
     }
   }
 
-  ParticleList sampled;
-  // Mode 1: sample until energy is conserved, then throw out
-  //         all the particles with strangeness >= 0
-  while (conserved_initial.momentum().x0() > conserved_mode.momentum().x0()) {
-    sample_in_random_cell(sampled, conserved_mode, time);
-  }
-  sampled.erase(std::remove_if(sampled.begin(), sampled.end(),
-    [&](ParticleData &p) {
-      return (p.pdgcode().strangeness() >= 0);
-    }), sampled.end());
-  for (auto &particle : sampled) {
-    conserved_sampled.add_values(particle);
+  ParticleList mode_list, sampled_list;
+  double energy = 0.0;
+  int S_plus = 0, S_minus = 0,
+      B_plus = 0, B_minus = 0,
+      E_plus = 0, E_minus = 0;
+  // Mode 1: sample until energy is conserved, take only strangeness < 0
+  while (conserved_initial.momentum().x0() > energy) {
+    sample_in_random_cell(mode_list, time);
+    for (auto &particle : mode_list) {
+      energy += particle.momentum().x0();
+      if (particle.pdgcode().strangeness() < 0) {
+        sampled_list.push_back(particle);
+        S_plus += particle.pdgcode().strangeness();
+      }
+    }
   }
   // Mode 2: sample until strangeness is conserved
+  while (S_plus + S_minus > conserved_initial.strangeness()) {
+    sample_in_random_cell(mode_list, time);
+    for (auto &particle : mode_list) {
+      if (particle.pdgcode().strangeness() > 0) {
+        sampled_list.push_back(particle);
+        S_minus += particle.pdgcode().strangeness();
+      }
+    }
+  }
+  // Mode 3: sample non-strange baryons
+  conserved_remaining = conserved_initial - QuantumNumbers(sampled_list);
+  energy = 0.0;
+  while (conserved_remaining.momentum().x0() > energy) {
+    sample_in_random_cell(mode_list, time);
+    for (auto &particle : mode_list) {
+      energy += particle.momentum().x0();
+      if (particle.pdgcode().strangeness() == 0 &&
+          particle.pdgcode().baryon_number() > 0) {
+        sampled_list.push_back(particle);
+        B_plus += particle.pdgcode().baryon_number();
+      }
+    }
+  }
+  // Mode 4: sample non-strange anti-baryons
+  while (B_plus + B_minus > conserved_initial.baryon_number()) {
+    sample_in_random_cell(mode_list, time);
+    for (auto &particle : mode_list) {
+      if (particle.pdgcode().strangeness() == 0 &&
+          particle.pdgcode().baryon_number() < 0) {
+        sampled_list.push_back(particle);
+        B_minus += particle.pdgcode().baryon_number();
+      }
+    }
+  }
+  // Mode 5: sample non_strange mesons, but take only with charge > 0
+  conserved_remaining = conserved_initial - QuantumNumbers(sampled_list);
+  energy = 0.0;
+  while (conserved_remaining.momentum().x0() > energy) {
+    sample_in_random_cell(mode_list, time);
+    for (auto &particle : mode_list) {
+      energy += particle.momentum().x0();
+      if (particle.pdgcode().strangeness() == 0 &&
+          particle.pdgcode().baryon_number() == 0 &&
+          particle.pdgcode().charge() > 0) {
+        sampled_list.push_back(particle);
+        E_plus += particle.pdgcode().charge();
+      }
+    }
+  }
+  // Mode 6: sample non_strange mesons to conserve charge
+  while (E_plus + E_minus > conserved_initial.charge()) {
+    sample_in_random_cell(mode_list, time);
+    for (auto &particle : mode_list) {
+      if (particle.pdgcode().strangeness() == 0 &&
+          particle.pdgcode().baryon_number() == 0 &&
+          particle.pdgcode().charge() < 0) {
+        sampled_list.push_back(particle);
+        E_minus += particle.pdgcode().charge();
+      }
+    }
+  }
+  // Mode 7: sample neutral non-strange mesons to conserve energy
+  conserved_remaining = conserved_initial - QuantumNumbers(sampled_list);
+  energy = 0.0;
+  while (conserved_remaining.momentum().x0() > energy) {
+    sample_in_random_cell(mode_list, time);
+    for (auto &particle : mode_list) {
+      if (particle.pdgcode().strangeness() == 0 &&
+          particle.pdgcode().baryon_number() == 0 &&
+          particle.pdgcode().charge() == 0) {
+        sampled_list.push_back(particle);
+        energy += particle.momentum().x0();
+      }
+    }
+  }
+
+  // Report conservation laws:
+  QuantumNumbers conserved_final = QuantumNumbers(sampled_list);
+  std::cout << conserved_initial.report_deviations(conserved_final) << std::endl;
+
+  // Add sampled particles to particles
+  for (auto &particle : sampled_list) {
+    particles.insert(particle);
+  }
 }
 
 ThermLatticeNode::ThermLatticeNode() :
