@@ -178,7 +178,7 @@ double HadronGasEos::net_baryon_density(double T, double mub, double mus) {
     if (!ptype.is_baryon()) {
       continue;
     }
-    rho += partial_density(ptype, beta, mub, mus) *
+    rho += scaled_partial_density(ptype, beta, mub, mus) *
            ptype.baryon_number();
   }
   rho *= prefactor_ * T*T*T;
@@ -195,7 +195,7 @@ double HadronGasEos::net_strange_density(double T, double mub, double mus) {
     if (ptype.strangeness() == 0) {
       continue;
     }
-    rho += partial_density(ptype, beta, mub, mus) *
+    rho += scaled_partial_density(ptype, beta, mub, mus) *
            ptype.strangeness();
   }
   rho *= prefactor_ * T*T*T;
