@@ -57,7 +57,7 @@ class EosTable {
  */
 class HadronGasEos {
  public:
-  HadronGasEos();
+  HadronGasEos(const bool tabulate);
   ~HadronGasEos();
   static double energy_density(double T, double mub, double mus);
   static double density(double T, double mub, double mus);
@@ -86,6 +86,7 @@ class HadronGasEos {
   const struct EosTable::table_element* from_table(double e, double nb) {
     return eos_table_.get(e, nb);
   }
+  bool is_tabulated() const { return tabulate_; }
 
  private:
   /// A structure for passing equation parameters to the gnu library
@@ -119,6 +120,8 @@ class HadronGasEos {
    */
   gsl_vector *x_;
   gsl_multiroot_fsolver *solver_;
+  /// Create an EoS table or not?
+  const bool tabulate_;
 };
 
 }  // namespace Smash

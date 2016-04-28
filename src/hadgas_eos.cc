@@ -96,12 +96,15 @@ const struct EosTable::table_element* EosTable::get(double e, double nb) const {
   return &table_[index(ie, inb)];
 }
 
-HadronGasEos::HadronGasEos() :
-  x_(gsl_vector_alloc(n_equations_)) {
+HadronGasEos::HadronGasEos(const bool tabulate) :
+  x_(gsl_vector_alloc(n_equations_)),
+  tabulate_(tabulate) {
   const gsl_multiroot_fsolver_type *solver_type;
   solver_type = gsl_multiroot_fsolver_hybrid;
   solver_ = gsl_multiroot_fsolver_alloc(solver_type, n_equations_);
-  eos_table_.compile_table(*this);
+  if (tabulate_) {
+    eos_table_.compile_table(*this);
+  }
 }
 
 HadronGasEos::~HadronGasEos() {
@@ -145,7 +148,7 @@ double HadronGasEos::energy_density(double T, double mub, double mus) {
       continue;
     }
     const unsigned int g = ptype.spin() + 1;
-      e += z*z * g * std::exp(x) * (3.0*gsl_sf_bessel_Kn(2, z) +
+    e += z*z * g * std::exp(x) * (3.0*gsl_sf_bessel_Kn(2, z) +
                                     z * gsl_sf_bessel_K1(z));
   }
   e *= prefactor_ * T*T*T*T;

@@ -49,7 +49,7 @@ TEST(rest_frame_transformation) {
   Particles P;
   b->initial_conditions(&P, par);
 
-  HadronGasEos eos = HadronGasEos();
+  HadronGasEos eos = HadronGasEos(false);
   ThermLatticeNode node = ThermLatticeNode();
   for (auto &part : P) {
     part.boost(v_boost);
