@@ -17,17 +17,17 @@
 #include "include/decayactionsfinderdilepton.h"
 #include "include/listmodus.h"
 #include "include/propagation.h"
+#include "include/scatteractionphoton.h"
 #include "include/scatteractionsfinder.h"
 #include "include/scatteractionsfinderphoton.h"
-#include "include/scatteractionphoton.h"
 #include "include/spheremodus.h"
 /* Outputs */
 #include "include/binaryoutputcollisions.h"
 #include "include/binaryoutputparticles.h"
-#include "include/thermodynamicoutput.h"
 #include "include/oscaroutput.h"
+#include "include/thermodynamicoutput.h"
 #ifdef SMASH_USE_ROOT
-#  include "include/rootoutput.h"
+#include "include/rootoutput.h"
 #endif
 #include "include/vtkoutput.h"
 
@@ -173,16 +173,19 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
 
   const int ntest = config.take({"General", "Testparticles"}, 1);
   if (ntest <= 0) {
-    throw std::invalid_argument("Invalid number of Testparticles "
-                                "in config file!");
+    throw std::invalid_argument(
+        "Invalid number of Testparticles "
+        "in config file!");
   }
 
-  const float dt = (config.has_value({"General", "Time_Step_Mode"}) &&
-             config.read({"General", "Time_Step_Mode"}) == TimeStepMode::None)
-             ? 0.0f
-             : config.take({"General", "Delta_Time"});
+  const float dt =
+      (config.has_value({"General", "Time_Step_Mode"}) &&
+       config.read({"General", "Time_Step_Mode"}) == TimeStepMode::None)
+          ? 0.0f
+          : config.take({"General", "Delta_Time"});
   return {{0.0f, dt},
-          config.take({"Output", "Output_Interval"}), ntest,
+          config.take({"Output", "Output_Interval"}),
+          ntest,
           config.take({"General", "Gaussian_Sigma"}, 1.0f),
           config.take({"General", "Gauss_Cutoff_In_Sigma"}, 4.0f)};
 }
@@ -198,8 +201,8 @@ std::ostream &operator<<(std::ostream &out, const Experiment<Modus> &e) {
       out << "Not using time steps\n";
       break;
     case TimeStepMode::Fixed:
-      out << "Using fixed time step size: "
-          << e.parameters_.timestep_duration() << " fm/c\n";
+      out << "Using fixed time step size: " << e.parameters_.timestep_duration()
+          << " fm/c\n";
       break;
     case TimeStepMode::Adaptive:
       out << "Using adaptive time steps, starting with: "
@@ -267,27 +270,29 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
 
   const bool two_to_one = config.take({"Collision_Term", "Two_to_One"}, true);
   const bool two_to_two = config.take({"Collision_Term", "Two_to_Two"}, true);
-  const bool dileptons_switch = config.take(
-                                      {"Output", "Dileptons", "Enable"}, false);
-  const bool photons_switch = config.take({"Output", "Photons", "Enable"}, false);
+  const bool dileptons_switch =
+      config.take({"Output", "Dileptons", "Enable"}, false);
+  const bool photons_switch =
+      config.take({"Output", "Photons", "Enable"}, false);
 
   // create finders
   if (two_to_one) {
     action_finders_.emplace_back(make_unique<DecayActionsFinder>());
   }
   if (two_to_one || two_to_two) {
-    auto scat_finder = make_unique<ScatterActionsFinder>(config, parameters_,
-                                                       two_to_one, two_to_two);
-    max_transverse_distance_sqr_ = scat_finder->max_transverse_distance_sqr(
-                                                    parameters_.testparticles);
+    auto scat_finder = make_unique<ScatterActionsFinder>(
+        config, parameters_, two_to_one, two_to_two);
+    max_transverse_distance_sqr_ =
+        scat_finder->max_transverse_distance_sqr(parameters_.testparticles);
     action_finders_.emplace_back(std::move(scat_finder));
   }
   if (dileptons_switch) {
     dilepton_finder_ = make_unique<DecayActionsFinderDilepton>();
   }
   if (photons_switch) {
-      photon_finder_ = make_unique<ScatterActionsFinderPhoton>(config, parameters_,two_to_one, two_to_two); 
-    }
+    photon_finder_ = make_unique<ScatterActionsFinderPhoton>(
+        config, parameters_, two_to_one, two_to_two);
+  }
   if (config.has_value({"Collision_Term", "Pauli_Blocking"})) {
     log.info() << "Pauli blocking is ON.";
     pauli_blocker_ = make_unique<PauliBlocker>(
@@ -331,9 +336,8 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
       adapt_params->deviation_factor =
           config.take({"General", "Adaptive_Time_Step", "Allowed_Deviation"});
     }
-    log.info("Parameters for the adaptive time step:\n",
-             "  Smoothing factor: ", adapt_params->smoothing_factor, "\n",
-             "  Target missed actions: ",
+    log.info("Parameters for the adaptive time step:\n", "  Smoothing factor: ",
+             adapt_params->smoothing_factor, "\n", "  Target missed actions: ",
              100 * adapt_params->target_missed_actions, "%", "\n",
              "  Allowed deviation: ", adapt_params->deviation_factor);
     adaptive_parameters_ = std::move(adapt_params);
@@ -345,11 +349,13 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
   auto output_conf = config["Output"];
   /*!\Userguide
     * \page output_general_ Output formats
-    * Several different output formats are available in SMASH. They are explained
+    * Several different output formats are available in SMASH. They are
+   * explained
     * below in more detail. Per default, the selected output files will be
     * saved in the directory ./data/\<run_id\>, where \<run_id\> is an integer
     * number starting from 0. At the beginning
-    * of a run SMASH checks, if the ./data/0 directory exists. If it does not exist, it
+    * of a run SMASH checks, if the ./data/0 directory exists. If it does not
+   * exist, it
     * is created and all output files are written there. If the directory
     * already exists, SMASH tries for ./data/1, ./data/2 and so on until it
     * finds a free number. The user can change output directory by a command
@@ -386,38 +392,38 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     outputs_.emplace_back(std::move(oscar));
   }
   if (static_cast<bool>(output_conf.take({"Vtk", "Enable"}))) {
-    outputs_.emplace_back(make_unique<VtkOutput>(output_path,
-                                                 output_conf["Vtk"]));
+    outputs_.emplace_back(
+        make_unique<VtkOutput>(output_path, output_conf["Vtk"]));
   } else {
     output_conf.take({"Vtk"});
   }
   if (static_cast<bool>(output_conf.take({"Binary_Collisions", "Enable"}))) {
-    outputs_.emplace_back(make_unique<BinaryOutputCollisions>(output_path,
-                                            output_conf["Binary_Collisions"]));
+    outputs_.emplace_back(make_unique<BinaryOutputCollisions>(
+        output_path, output_conf["Binary_Collisions"]));
   } else {
     output_conf.take({"Binary_Collisions"});
   }
   if (static_cast<bool>(output_conf.take({"Binary_Particles", "Enable"}))) {
-    outputs_.emplace_back(make_unique<BinaryOutputParticles>(output_path,
-                                              output_conf["Binary_Particles"]));
+    outputs_.emplace_back(make_unique<BinaryOutputParticles>(
+        output_path, output_conf["Binary_Particles"]));
   } else {
     output_conf.take({"Binary_Particles"});
   }
   if (static_cast<bool>(output_conf.take({"Root", "Enable"}))) {
 #ifdef SMASH_USE_ROOT
-    outputs_.emplace_back(make_unique<RootOutput>(output_path,
-                                                  output_conf["Root"]));
+    outputs_.emplace_back(
+        make_unique<RootOutput>(output_path, output_conf["Root"]));
 #else
     log.error() << "You requested Root output, but Root support has not been "
-                    "compiled in.";
+                   "compiled in.";
     output_conf.take({"Root"});
 #endif
   } else {
     output_conf.take({"Root"});
   }
   if (static_cast<bool>(output_conf.take({"Thermodynamics", "Enable"}))) {
-    outputs_.emplace_back(make_unique<ThermodynamicOutput>(output_path,
-                                               output_conf["Thermodynamics"]));
+    outputs_.emplace_back(make_unique<ThermodynamicOutput>(
+        output_path, output_conf["Thermodynamics"]));
   } else {
     output_conf.take({"Thermodynamics"});
   }
@@ -434,7 +440,8 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    * 'shining', as described in \iref{Schmidt:2008hm}, chapter 2D.
    * This means that, because dilepton decays are so rare, possible decays are
    * written in the ouput in every single timestep without ever performing them.
-   * The are weighted with a "shining weight" to compensate for the over-production.
+   * The are weighted with a "shining weight" to compensate for the
+   *over-production.
    * \li The shining weight can be found in the weight element of the ouput.
    * \li The shining method is implemented in the DecayActionsFinderDilepton,
    * which is enabled together with the dilepton output.
@@ -447,7 +454,8 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    * false - no Dilepton Output and no DecayActionsFinderDilepton
    *
    * \key Format (string, required):\n
-   * "Oscar" - The dilepton output is written to the file \c DileptonOutput.oscar
+   * "Oscar" - The dilepton output is written to the file \c
+   *DileptonOutput.oscar
    * in \ref format_oscar_collisions (OSCAR2013 format) .\n
    * "Binary" - The dilepton output is written to the file \c DileptonOutput.bin
    * in \ref format_binary_ .\n
@@ -460,40 +468,42 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     if (format == "Oscar") {
       dilepton_output_ = create_dilepton_output(output_path);
     } else if (format == "Binary") {
-      dilepton_output_ = make_unique<BinaryOutputCollisions>(output_path,
-                                                             "DileptonOutput");
+      dilepton_output_ =
+          make_unique<BinaryOutputCollisions>(output_path, "DileptonOutput");
     } else if (format == "Root") {
 #ifdef SMASH_USE_ROOT
       dilepton_output_ = make_unique<RootOutput>(output_path, "DileptonOutput");
 #else
-    log.error() << "You requested Root output, but Root support has not been "
-                   "compiled in.";
-    output_conf.take({"Root"});
+      log.error() << "You requested Root output, but Root support has not been "
+                     "compiled in.";
+      output_conf.take({"Root"});
 #endif
     } else {
-        throw std::runtime_error("Bad dilepton output format: " + format);
+      throw std::runtime_error("Bad dilepton output format: " + format);
     }
   }
 
-  if (photons_switch) { 
-      // create photon output object
-      std::string format = config.take({"Output", "Photons", "Format"});
-      if (format == "Oscar") {
-	photon_output_ = create_photon_output(output_path); 
-      } else if (format == "Binary") {
-	photon_output_ = make_unique<BinaryOutputCollisions>(output_path, "PhotonOutput");
-      } else if (format == "Root") {
-	#ifdef SMASH_USE_ROOT
-	  photon_output_ = make_unique<RootOutput>(output_path, "PhotonOutput");
-	#else
-	  log.error() << "You requested Root output, but Root support has not been compiled in.";
-	  output_conf.take({"Root"});
-	#endif
-      } else {
-	 throw std::runtime_error("Bad Photon output format: " + format);
-      }
+  if (photons_switch) {
+    // create photon output object
+    std::string format = config.take({"Output", "Photons", "Format"});
+    if (format == "Oscar") {
+      photon_output_ = create_photon_output(output_path);
+    } else if (format == "Binary") {
+      photon_output_ =
+          make_unique<BinaryOutputCollisions>(output_path, "PhotonOutput");
+    } else if (format == "Root") {
+#ifdef SMASH_USE_ROOT
+      photon_output_ = make_unique<RootOutput>(output_path, "PhotonOutput");
+#else
+      log.error() << "You requested Root output, but Root support has not been "
+                     "compiled in.";
+      output_conf.take({"Root"});
+#endif
+    } else {
+      throw std::runtime_error("Bad Photon output format: " + format);
+    }
   }
-    
+
   if (config.has_value({"Potentials"})) {
     if (time_step_mode_ == TimeStepMode::None) {
       log.error() << "Potentials only work with time steps!";
@@ -556,18 +566,18 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     const std::array<int, 3> n = config.take({"Lattice", "Cell_Number"});
     const std::array<float, 3> origin = config.take({"Lattice", "Origin"});
     const bool periodic = config.take({"Lattice", "Periodic"});
-    dens_type_lattice_printout_ = config.take(
-            {"Lattice", "Printout", "Type"}, DensityType::None);
-    const std::set<ThermodynamicQuantity> td_to_print = config.take(
-            {"Lattice", "Printout", "Quantities"});
+    dens_type_lattice_printout_ =
+        config.take({"Lattice", "Printout", "Type"}, DensityType::None);
+    const std::set<ThermodynamicQuantity> td_to_print =
+        config.take({"Lattice", "Printout", "Quantities"});
     printout_tmn_ = (td_to_print.count(ThermodynamicQuantity::Tmn) > 0);
     printout_tmn_landau_ =
-           (td_to_print.count(ThermodynamicQuantity::TmnLandau) > 0);
+        (td_to_print.count(ThermodynamicQuantity::TmnLandau) > 0);
     printout_v_landau_ =
-           (td_to_print.count(ThermodynamicQuantity::LandauVelocity) > 0);
+        (td_to_print.count(ThermodynamicQuantity::LandauVelocity) > 0);
     if (printout_tmn_ || printout_tmn_landau_ || printout_v_landau_) {
       Tmn_ = make_unique<RectangularLattice<EnergyMomentumTensor>>(
-                l, n, origin, periodic, LatticeUpdate::AtOutput);
+          l, n, origin, periodic, LatticeUpdate::AtOutput);
     }
     /* Create baryon and isospin density lattices regardless of config
        if potentials are on. This is because they allow to compute
@@ -575,35 +585,35 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     if (potentials_) {
       if (potentials_->use_skyrme()) {
         jmu_B_lat_ = make_unique<DensityLattice>(l, n, origin, periodic,
-                                              LatticeUpdate::EveryTimestep);
+                                                 LatticeUpdate::EveryTimestep);
         UB_lat_ = make_unique<RectangularLattice<double>>(
-                       l, n, origin, periodic, LatticeUpdate::EveryTimestep);
+            l, n, origin, periodic, LatticeUpdate::EveryTimestep);
         dUB_dr_lat_ = make_unique<RectangularLattice<ThreeVector>>(
-                       l, n, origin, periodic, LatticeUpdate::EveryTimestep);
+            l, n, origin, periodic, LatticeUpdate::EveryTimestep);
       }
       if (potentials_->use_symmetry()) {
         jmu_I3_lat_ = make_unique<DensityLattice>(l, n, origin, periodic,
-                                              LatticeUpdate::EveryTimestep);
+                                                  LatticeUpdate::EveryTimestep);
         UI3_lat_ = make_unique<RectangularLattice<double>>(
-                        l, n, origin, periodic, LatticeUpdate::EveryTimestep);
+            l, n, origin, periodic, LatticeUpdate::EveryTimestep);
         dUI3_dr_lat_ = make_unique<RectangularLattice<ThreeVector>>(
-                        l, n, origin, periodic, LatticeUpdate::EveryTimestep);
+            l, n, origin, periodic, LatticeUpdate::EveryTimestep);
       }
     } else {
       if (dens_type_lattice_printout_ == DensityType::Baryon) {
         jmu_B_lat_ = make_unique<DensityLattice>(l, n, origin, periodic,
-                                                  LatticeUpdate::AtOutput);
+                                                 LatticeUpdate::AtOutput);
       }
       if (dens_type_lattice_printout_ == DensityType::BaryonicIsospin) {
         jmu_I3_lat_ = make_unique<DensityLattice>(l, n, origin, periodic,
-                                             LatticeUpdate::AtOutput);
+                                                  LatticeUpdate::AtOutput);
       }
     }
     if (dens_type_lattice_printout_ != DensityType::None &&
         dens_type_lattice_printout_ != DensityType::BaryonicIsospin &&
         dens_type_lattice_printout_ != DensityType::Baryon) {
-        jmu_custom_lat_ = make_unique<DensityLattice>(l, n, origin,
-                                          periodic, LatticeUpdate::AtOutput);
+      jmu_custom_lat_ = make_unique<DensityLattice>(l, n, origin, periodic,
+                                                    LatticeUpdate::AtOutput);
     }
   }
 }
@@ -647,23 +657,21 @@ static std::string format_measurements(const Particles &particles,
   const QuantumNumbers difference = conserved_initial - current_values;
 
   std::ostringstream ss;
-  ss << field<5> << time
-     << field<12, 3> << difference.momentum().x0()
+  ss << field<5> << time << field<12, 3> << difference.momentum().x0()
      << field<12, 3> << difference.momentum().abs3()
      << field<12, 3> << (time > really_small
-                          ? scatterings_total * 2 / (particles.size() * time)
-                          : 0.)
+                             ? scatterings_total * 2 / (particles.size() * time)
+                             : 0.)
      << field<10, 3> << scatterings_this_interval
-     << field<12, 3> << particles.size()
-     << field<10, 3> << elapsed_seconds;
+     << field<12, 3> << particles.size() << field<10, 3> << elapsed_seconds;
   return ss.str();
 }
 
 template <typename Modus>
 template <typename Container>
 void Experiment<Modus>::perform_action(
-    Action &action, uint64_t &interactions_total,
-    uint64_t &total_pauli_blocked, const Container &particles_before_actions) {
+    Action &action, uint64_t &interactions_total, uint64_t &total_pauli_blocked,
+    const Container &particles_before_actions) {
   const auto &log = logger<LogArea::Experiment>();
   if (!action.is_valid(particles_)) {
     log.debug(~einhard::DRed(), "✘ ", action, " (discarded: invalid)");
@@ -687,7 +695,8 @@ void Experiment<Modus>::perform_action(
     const FourVector r_interaction = action.get_interaction_point();
     constexpr bool compute_grad = false;
     rho = rho_eckart(r_interaction.threevec(), particles_before_actions,
-                     density_param_, dens_type_, compute_grad).first;
+                     density_param_, dens_type_, compute_grad)
+              .first;
   }
   /*!\Userguide
    * \page collisions_output_in_box_modus_ Collision output in box modus
@@ -712,8 +721,8 @@ void Experiment<Modus>::perform_action(
 }
 
 template <typename Modus>
-void Experiment<Modus>::write_dilepton_action(Action &action,
-                                 const ParticleList &particles_before_actions) {
+void Experiment<Modus>::write_dilepton_action(
+    Action &action, const ParticleList &particles_before_actions) {
   if (action.is_valid(particles_)) {
     action.generate_final_state();
     // Calculate Eckart rest frame density at the interaction point
@@ -721,28 +730,33 @@ void Experiment<Modus>::write_dilepton_action(Action &action,
     constexpr bool compute_grad = false;
     const double rho =
         rho_eckart(r_interaction.threevec(), particles_before_actions,
-                   density_param_, dens_type_, compute_grad).first;
+                   density_param_, dens_type_, compute_grad)
+            .first;
     // write dilepton output
     dilepton_output_->at_interaction(action, rho);
   }
 }
 
-template<typename Modus >
-void Experiment< Modus >::write_photon_action(Action& action, const ParticleList& particles_before_actions){
+template <typename Modus>
+void Experiment<Modus>::write_photon_action(
+    Action &action, const ParticleList &particles_before_actions) {
   if (action.is_valid(particles_)) {
     // loop over action to get many fractional photons
     // where to store number_of_fractional_photons? -> needed for weighing?
     // maybe read in from config file?
-    for (int i=0; i<ScatterActionPhoton::number_of_fractional_photons; i++){ 
+    for (int i = 0; i < ScatterActionPhoton::number_of_fractional_photons;
+         i++) {
       action.generate_final_state();
       const FourVector r_interaction = action.get_interaction_point();
       constexpr bool compute_grad = false;
-      const double rho = rho_eckart(r_interaction.threevec(), particles_before_actions, density_param_, dens_type_, compute_grad).first;
-      photon_output_->at_interaction(action, rho); // generate output
+      const double rho =
+          rho_eckart(r_interaction.threevec(), particles_before_actions,
+                     density_param_, dens_type_, compute_grad)
+              .first;
+      photon_output_->at_interaction(action, rho);  // generate output
     }
   }
 }
-
 
 /// Make sure `interactions_total` can be represented as a 32-bit integer.
 /// This is necessary for converting to a `id_process`.
@@ -762,9 +776,9 @@ uint64_t Experiment<Modus>::run_time_evolution_without_time_steps() {
 
   // if no output is scheduled, trigger it manually
   if (!parameters_.is_output_time()) {
-    log.info() << format_measurements(
-        particles_, interactions_total, 0u,
-        conserved_initial_, time_start_, parameters_.labclock.current_time());
+    log.info() << format_measurements(particles_, interactions_total, 0u,
+                                      conserved_initial_, time_start_,
+                                      parameters_.labclock.current_time());
   }
 
   const float start_time = parameters_.labclock.current_time();
@@ -857,7 +871,7 @@ uint64_t Experiment<Modus>::run_time_evolution_without_time_steps() {
     /* (4) Find new actions. */
 
     time_left = end_time_ - current_time;
-    const ParticleList& outgoing_particles = act->outgoing_particles();
+    const ParticleList &outgoing_particles = act->outgoing_particles();
     for (const auto &finder : action_finders_) {
       actions.insert(
           finder->find_actions_in_cell(outgoing_particles, time_left));
@@ -884,10 +898,10 @@ uint64_t Experiment<Modus>::run_time_evolution_fixed_time_step() {
   const auto &log = logger<LogArea::Experiment>();
   modus_.impose_boundary_conditions(&particles_);
   uint64_t interactions_total = 0, previous_interactions_total = 0,
-         total_pauli_blocked = 0;
-  log.info() << format_measurements(
-      particles_, interactions_total, 0u,
-      conserved_initial_, time_start_, parameters_.labclock.current_time());
+           total_pauli_blocked = 0;
+  log.info() << format_measurements(particles_, interactions_total, 0u,
+                                    conserved_initial_, time_start_,
+                                    parameters_.labclock.current_time());
 
   Actions actions;
   Actions dilepton_actions;
@@ -898,31 +912,31 @@ uint64_t Experiment<Modus>::run_time_evolution_fixed_time_step() {
 
   while (!(++parameters_.labclock > end_time_)) {
     /* (1.a) Create grid. */
-    const auto &grid =
-        use_grid_ ? modus_.create_grid(particles_, min_cell_length)
-                  : modus_.create_grid(particles_, min_cell_length,
-                                       CellSizeStrategy::Largest);
+    const auto &grid = use_grid_
+                           ? modus_.create_grid(particles_, min_cell_length)
+                           : modus_.create_grid(particles_, min_cell_length,
+                                                CellSizeStrategy::Largest);
     /* (1.b) Iterate over cells and find actions. */
-    grid.iterate_cells([&](const ParticleList &search_list) {
-                         for (const auto &finder : action_finders_) {
-                           actions.insert(finder->find_actions_in_cell(
-                               search_list, dt));
-                         }
-                       },
-                       [&](const ParticleList &search_list,
-                           const ParticleList &neighbors_list) {
-                         for (const auto &finder : action_finders_) {
-                           actions.insert(finder->find_actions_with_neighbors(
-                               search_list, neighbors_list, dt));
-                         }
-                       });
+    grid.iterate_cells(
+        [&](const ParticleList &search_list) {
+          for (const auto &finder : action_finders_) {
+            actions.insert(finder->find_actions_in_cell(search_list, dt));
+          }
+        },
+        [&](const ParticleList &search_list,
+            const ParticleList &neighbors_list) {
+          for (const auto &finder : action_finders_) {
+            actions.insert(finder->find_actions_with_neighbors(
+                search_list, neighbors_list, dt));
+          }
+        });
 
     const auto particles_before_actions = particles_.copy_to_vector();
 
     /* (1.d) Dileptons */
     if (dilepton_finder_ != nullptr) {
-      dilepton_actions.insert(dilepton_finder_->find_actions_in_cell(
-                                              particles_before_actions, dt));
+      dilepton_actions.insert(
+          dilepton_finder_->find_actions_in_cell(particles_before_actions, dt));
 
       if (!dilepton_actions.is_empty()) {
         while (!dilepton_actions.is_empty()) {
@@ -931,20 +945,26 @@ uint64_t Experiment<Modus>::run_time_evolution_fixed_time_step() {
         }
       }
     }
-    
+
     /* (1.e) Photons */
     if (photon_finder_ != nullptr) {
-      //photon_actions.insert(photon_finder_->find_actions_in_cell(particles_before_actions, dt));
-     grid.iterate_cells([&](const ParticleList &search_list) {
-	  photon_actions.insert(photon_finder_->find_actions_in_cell(search_list, dt));
-	},[&](const ParticleList &search_list, const ParticleList &neighbors_list) {
-	  photon_actions.insert(photon_finder_->find_actions_with_neighbors(search_list, neighbors_list, dt));
-	});
-	  
+      // photon_actions.insert(photon_finder_->find_actions_in_cell(particles_before_actions,
+      // dt));
+      grid.iterate_cells(
+          [&](const ParticleList &search_list) {
+            photon_actions.insert(
+                photon_finder_->find_actions_in_cell(search_list, dt));
+          },
+          [&](const ParticleList &search_list,
+              const ParticleList &neighbors_list) {
+            photon_actions.insert(photon_finder_->find_actions_with_neighbors(
+                search_list, neighbors_list, dt));
+          });
+
       if (!photon_actions.is_empty()) {
-	while (!photon_actions.is_empty()) {
-	  write_photon_action(*photon_actions.pop(), particles_before_actions);
-	}
+        while (!photon_actions.is_empty()) {
+          write_photon_action(*photon_actions.pop(), particles_before_actions);
+        }
       }
     }
 
@@ -991,7 +1011,7 @@ uint64_t Experiment<Modus>::run_time_evolution_fixed_time_step() {
  * and propagating particles. */
 template <typename Modus>
 uint64_t Experiment<Modus>::run_time_evolution_adaptive_time_steps(
-                                const AdaptiveParameters &adaptive_parameters) {
+    const AdaptiveParameters &adaptive_parameters) {
   const auto &log = logger<LogArea::Experiment>();
   const auto &log_ad_ts = logger<LogArea::AdaptiveTS>();
   modus_.impose_boundary_conditions(&particles_);
@@ -1001,9 +1021,9 @@ uint64_t Experiment<Modus>::run_time_evolution_adaptive_time_steps(
 
   // if there is no output scheduled at the beginning, trigger it manually
   if (!parameters_.is_output_time()) {
-    log.info() << format_measurements(
-        particles_, interactions_total, 0u,
-        conserved_initial_, time_start_, parameters_.labclock.current_time());
+    log.info() << format_measurements(particles_, interactions_total, 0u,
+                                      conserved_initial_, time_start_,
+                                      parameters_.labclock.current_time());
   }
 
   float rate =
@@ -1024,20 +1044,20 @@ uint64_t Experiment<Modus>::run_time_evolution_adaptive_time_steps(
     const auto &grid = modus_.create_grid(particles_, min_cell_length);
 
     /* (1.b) Iterate over cells and find actions. */
-    grid.iterate_cells([&](const ParticleList &search_list) {
-                         for (const auto &finder : action_finders_) {
-                           actions.insert(finder->find_actions_in_cell(
-                               search_list, parameters_.timestep_duration()));
-                         }
-                       },
-                       [&](const ParticleList &search_list,
-                           const ParticleList &neighbors_list) {
-                         for (const auto &finder : action_finders_) {
-                           actions.insert(finder->find_actions_with_neighbors(
-                               search_list, neighbors_list,
-                               parameters_.timestep_duration()));
-                         }
-                       });
+    grid.iterate_cells(
+        [&](const ParticleList &search_list) {
+          for (const auto &finder : action_finders_) {
+            actions.insert(finder->find_actions_in_cell(
+                search_list, parameters_.timestep_duration()));
+          }
+        },
+        [&](const ParticleList &search_list,
+            const ParticleList &neighbors_list) {
+          for (const auto &finder : action_finders_) {
+            actions.insert(finder->find_actions_with_neighbors(
+                search_list, neighbors_list, parameters_.timestep_duration()));
+          }
+        });
 
     /* (2) Calculate time step size. */
     log_ad_ts.debug() << hline;
@@ -1172,9 +1192,9 @@ uint64_t Experiment<Modus>::run_time_evolution_adaptive_time_steps(
   return interactions_total;
 }
 
-template<typename Modus>
-void Experiment<Modus>::intermediate_output(uint64_t& interactions_total,
-                                        uint64_t& previous_interactions_total) {
+template <typename Modus>
+void Experiment<Modus>::intermediate_output(
+    uint64_t &interactions_total, uint64_t &previous_interactions_total) {
   const auto &log = logger<LogArea::Experiment>();
   const uint64_t interactions_this_interval =
       interactions_total - previous_interactions_total;
@@ -1191,28 +1211,32 @@ void Experiment<Modus>::intermediate_output(uint64_t& interactions_total,
     // Thermodynamic output on the lattice versus time
     switch (dens_type_lattice_printout_) {
       case DensityType::Baryon:
-        update_density_lattice(jmu_B_lat_.get(), lat_upd,
-                               DensityType::Baryon, density_param_, particles_);
+        update_density_lattice(jmu_B_lat_.get(), lat_upd, DensityType::Baryon,
+                               density_param_, particles_);
         output->thermodynamics_output(ThermodynamicQuantity::EckartDensity,
                                       DensityType::Baryon, *jmu_B_lat_);
         break;
       case DensityType::BaryonicIsospin:
         update_density_lattice(jmu_I3_lat_.get(), lat_upd,
-                     DensityType::BaryonicIsospin, density_param_, particles_);
+                               DensityType::BaryonicIsospin, density_param_,
+                               particles_);
         output->thermodynamics_output(ThermodynamicQuantity::EckartDensity,
-                                   DensityType::BaryonicIsospin, *jmu_I3_lat_);
+                                      DensityType::BaryonicIsospin,
+                                      *jmu_I3_lat_);
         break;
       case DensityType::None:
         break;
       default:
         update_density_lattice(jmu_custom_lat_.get(), lat_upd,
-                       dens_type_lattice_printout_, density_param_, particles_);
+                               dens_type_lattice_printout_, density_param_,
+                               particles_);
         output->thermodynamics_output(ThermodynamicQuantity::EckartDensity,
-                                 dens_type_lattice_printout_, *jmu_custom_lat_);
+                                      dens_type_lattice_printout_,
+                                      *jmu_custom_lat_);
     }
     if (printout_tmn_ || printout_tmn_landau_ || printout_v_landau_) {
       update_Tmn_lattice(Tmn_.get(), lat_upd, dens_type_lattice_printout_,
-                          density_param_, particles_);
+                         density_param_, particles_);
       if (printout_tmn_) {
         output->thermodynamics_output(ThermodynamicQuantity::Tmn,
                                       dens_type_lattice_printout_, *Tmn_);
@@ -1232,9 +1256,9 @@ void Experiment<Modus>::intermediate_output(uint64_t& interactions_total,
 template <typename Modus>
 void Experiment<Modus>::propagate_all() {
   if (potentials_) {
-    if (potentials_->use_skyrme() && jmu_B_lat_!= nullptr) {
+    if (potentials_->use_skyrme() && jmu_B_lat_ != nullptr) {
       update_density_lattice(jmu_B_lat_.get(), LatticeUpdate::EveryTimestep,
-                       DensityType::Baryon, density_param_, particles_);
+                             DensityType::Baryon, density_param_, particles_);
       const size_t UBlattice_size = UB_lat_->size();
       for (size_t i = 0; i < UBlattice_size; i++) {
         (*UB_lat_)[i] = potentials_->skyrme_pot((*jmu_B_lat_)[i].density());
@@ -1243,16 +1267,16 @@ void Experiment<Modus>::propagate_all() {
     }
     if (potentials_->use_symmetry() && jmu_I3_lat_ != nullptr) {
       update_density_lattice(jmu_I3_lat_.get(), LatticeUpdate::EveryTimestep,
-                      DensityType::BaryonicIsospin, density_param_, particles_);
+                             DensityType::BaryonicIsospin, density_param_,
+                             particles_);
       const size_t UI3lattice_size = UI3_lat_->size();
       for (size_t i = 0; i < UI3lattice_size; i++) {
-        (*UI3_lat_)[i] = potentials_->symmetry_pot(
-                                        (*jmu_I3_lat_)[i].density());
+        (*UI3_lat_)[i] = potentials_->symmetry_pot((*jmu_I3_lat_)[i].density());
       }
       UI3_lat_->compute_gradient_lattice(dUI3_dr_lat_.get());
     }
-    propagate(&particles_, parameters_, *potentials_,
-              dUB_dr_lat_.get(), dUI3_dr_lat_.get());
+    propagate(&particles_, parameters_, *potentials_, dUB_dr_lat_.get(),
+              dUI3_dr_lat_.get());
   } else {
     propagate_straight_line(&particles_, parameters_);
   }
@@ -1297,8 +1321,8 @@ void Experiment<Modus>::do_final_decays(uint64_t &interactions_total) {
 
   /* Do one final propagation step. */
   if (potentials_) {
-    propagate(&particles_, parameters_, *potentials_,
-              dUB_dr_lat_.get(), dUI3_dr_lat_.get());
+    propagate(&particles_, parameters_, *potentials_, dUB_dr_lat_.get(),
+              dUI3_dr_lat_.get());
   } else {
     propagate_straight_line(&particles_, parameters_);
   }

@@ -28,7 +28,8 @@ OscarOutput<Format, Contents>::OscarOutput(const bf::path &path,
   /*!\Userguide
    * \page input_oscar_particlelist Oscar_Particlelist
    * Enables OSCAR particles output.
-   * OSCAR particles output provides the particle list at the output intervals. The text format
+   * OSCAR particles output provides the particle list at the output intervals.
+   * The text format
    * is either OSCAR1999 or OSCAR2013, this is controlled by an option.
    * Fixed moments of output can be: event start, event end, every next
    * output interval \f$\Delta t \f$.
@@ -52,7 +53,8 @@ OscarOutput<Format, Contents>::OscarOutput(const bf::path &path,
    *
    * \page input_oscar_collisions Oscar_Collisions
    * Enables OSCAR collisions output. The latter saves information about
-   * every collision, decay and box wall crossing in OSCAR1999 or OSCAR2013 format.
+   * every collision, decay and box wall crossing in OSCAR1999 or OSCAR2013
+   * format.
    * Optionally initial and final particle configurations can be written out.
    *
    * \key Enable (bool, optional, default = false):\n
@@ -201,7 +203,8 @@ void OscarOutput<Format, Contents>::at_interaction(const Action &action,
                                                    const double density) {
   if (Contents & OscarInteractions) {
     if (Format == OscarFormat2013) {
-      std::fprintf(file_.get(),
+      std::fprintf(
+          file_.get(),
           "# interaction in %zu out %zu rho %12.7f weight %12.7g type %5i \n",
           action.incoming_particles().size(),
           action.outgoing_particles().size(), density,
@@ -245,173 +248,173 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
   }
 }
 
-  /*!\Userguide
-   * \page format_oscar_particlelist Oscar particles format
-   * The format follows general block structure of OSCAR format:
-   * \ref oscar_general_. There are two kinds of this format -
-   * OSCAR2013 and OSCAR1999. Information about OSCAR standard can be found at
-   * https://karman.physics.purdue.edu/OSCAR and
-   * http://phy.duke.edu/~jeb65/oscar2013. SMASH OSCAR particles output
-   * produces \c particle_lists.oscar file. Format is flexible, options that
-   * regulate output can be found at \ref input_oscar_particlelist
-   * and at \ref input_general_. **Particle output always gives
-   * the current particle list at a specific time.**
-   * Oscar1999
-   * ---------
-   * This is ASCII (text) human-readable output according to OSCAR 1999
-   * standard. Format specifics are the following:\n
-   * **Header**
-   * \code
-   * # OSC1999A
-   * # final_id_p_x
-   * # smash <version>
-   * # Block format:
-   * # nin nout event_number
-   * # id pdg 0 px py pz p0 mass x y z t
-   * # End of event: 0 0 event_number
-   * #
-   * \endcode
-   *
-   * **Output block header**
-   * \code
-   * nin nout /(not guaranteed) event_number/
-   * \endcode
-   *
-   * For initial particles block (nin, nout) = (0, npart), for intermediate
-   * and final - (nin, nout) = (npart, 0). Here npart - total number of
-   * particles. Output block header is followed by npart particle lines.
-   *
-   * **Particle line**
-   * \code
-   * id pdg 0 px py pz p0 mass x y z t
-   * \endcode
-   *
-   * \li \c id is an integer particle identifier.
-   *     It is unique for every particle in event.
-   * \li \c pdg is a PDG code of the particle (see http://pdg.lbl.gov/).
-   * It contains all the quantum numbers of the particle and uniquely
-   * identifies its type.
-   * \li \c px \c py \c pz \c p0 - 3-momentum and energy
-   * \li \c x \c y \c z \c t - coordinates and time
-   *
-   * **Event end line**
-   * \code
-   * 0 0 event_number
-   * \endcode
-   *
-   * Oscar2013
-   * ---------
-   *
-   * This is ASCII (text) human-readable output according to OSCAR 2013
-   * standard. Format specifics are the following:\n
-   * **Header**
-   * \code
-   * #!OSCAR2013 particle_lists t x y z mass p0 px py pz pdg ID
-   * # Units: fm fm fm fm GeV GeV GeV GeV GeV none none
-   * # SMASH_version
-   * \endcode
-   *
-   * **Output block header**\n
-   * At start of event:
-   * \code
-   * # event ev_num in npart
-   * \endcode
-   * At end of event or intermediate particle list output:
-   * \code
-   * # event ev_num out npart
-   * \endcode
-   *
-   * **Particle line**
-   * \code
-   * t x y z mass p0 px py pz pdg ID
-   * \endcode
-   *
-   * **Event end line**
-   * \code
-   * # event ev_num end 0
-   * \endcode
-   *
-   * \page format_oscar_collisions Oscar collisions format
-   * The format follows general block structure of OSCAR format:
-   * \ref oscar_general_. There are two kinds of this format -
-   * OSCAR2013 and OSCAR1999. Information about OSCAR standard can be found at
-   * https://karman.physics.purdue.edu/OSCAR and
-   * http://phy.duke.edu/~jeb65/oscar2013. SMASH OSCAR collisions output
-   * produces \c full_event_history.oscar file. Format is flexible, options
-   * that regulate output can be found at \ref input_oscar_collisions
-   * and at \ref input_general_. **Collision output always gives
-   * a list of collisions/decays/box wall crossings plus optionally
-   * initial and final configuration.**
-   *
-   * See also \ref collisions_output_in_box_modus_.
-   *
-   * Oscar1999
-   * ---------
-   * Format specifics are the following:\n
-   * **Header**
-   * \code
-   * # OSC1999A
-   * # full_event_history
-   * # smash <version>
-   * # Block format:
-   * # nin nout event_number
-   * # id pdg 0 px py pz p0 mass x y z t
-   * # End of event: 0 0 event_number
-   * #
-   * \endcode
-   *
-   * **Output block header**
-   * \code
-   * nin nout /(not guaranteed) event_number/
-   * \endcode
-   * nin, nout are numbers of incoming and outgoing particles in a given
-   * reaction in collision output file. If initial and final configurations
-   * are written to collision file then (nin nout) = (0 npart) in the initial
-   * configuration and (nin nout) = (npart 0) in the final.
-   *
-   * **Particle line**
-   * \code
-   * id pdg 0 px py pz p0 mass x y z t
-   * \endcode
-   * **Event end line**
-   * \code
-   * # event ev_num end 0
-   * \endcode
-   *
-   * Oscar2013
-   * ---------
-   *  Format specifics are the following:\n
-   * **Header**
-   * \code
-   * #!OSCAR2013 full_event_history t x y z mass p0 px py pz pdg ID
-   * # Units: fm fm fm fm GeV GeV GeV GeV GeV none none
-   * # SMASH_version
-   * \endcode
-   *
-   * **Output block header**\n
-   * At start of event:
-   * \code
-   * # event ev_num in npart
-   * \endcode
-   * At end of event:
-   * \code
-   * # event ev_num out npart
-   * \endcode
-   * At interaction:
-   * \code
-   * # interaction in nin out nout
-   * \endcode
-   *
-   * **Particle line**
-   * \code
-   * t x y z mass p0 px py pz pdg ID
-   * \endcode
-   *
-   * **Event end line**
-   * \code
-   * # event ev_num end 0
-   * \endcode
-   **/
+/*!\Userguide
+ * \page format_oscar_particlelist Oscar particles format
+ * The format follows general block structure of OSCAR format:
+ * \ref oscar_general_. There are two kinds of this format -
+ * OSCAR2013 and OSCAR1999. Information about OSCAR standard can be found at
+ * https://karman.physics.purdue.edu/OSCAR and
+ * http://phy.duke.edu/~jeb65/oscar2013. SMASH OSCAR particles output
+ * produces \c particle_lists.oscar file. Format is flexible, options that
+ * regulate output can be found at \ref input_oscar_particlelist
+ * and at \ref input_general_. **Particle output always gives
+ * the current particle list at a specific time.**
+ * Oscar1999
+ * ---------
+ * This is ASCII (text) human-readable output according to OSCAR 1999
+ * standard. Format specifics are the following:\n
+ * **Header**
+ * \code
+ * # OSC1999A
+ * # final_id_p_x
+ * # smash <version>
+ * # Block format:
+ * # nin nout event_number
+ * # id pdg 0 px py pz p0 mass x y z t
+ * # End of event: 0 0 event_number
+ * #
+ * \endcode
+ *
+ * **Output block header**
+ * \code
+ * nin nout /(not guaranteed) event_number/
+ * \endcode
+ *
+ * For initial particles block (nin, nout) = (0, npart), for intermediate
+ * and final - (nin, nout) = (npart, 0). Here npart - total number of
+ * particles. Output block header is followed by npart particle lines.
+ *
+ * **Particle line**
+ * \code
+ * id pdg 0 px py pz p0 mass x y z t
+ * \endcode
+ *
+ * \li \c id is an integer particle identifier.
+ *     It is unique for every particle in event.
+ * \li \c pdg is a PDG code of the particle (see http://pdg.lbl.gov/).
+ * It contains all the quantum numbers of the particle and uniquely
+ * identifies its type.
+ * \li \c px \c py \c pz \c p0 - 3-momentum and energy
+ * \li \c x \c y \c z \c t - coordinates and time
+ *
+ * **Event end line**
+ * \code
+ * 0 0 event_number
+ * \endcode
+ *
+ * Oscar2013
+ * ---------
+ *
+ * This is ASCII (text) human-readable output according to OSCAR 2013
+ * standard. Format specifics are the following:\n
+ * **Header**
+ * \code
+ * #!OSCAR2013 particle_lists t x y z mass p0 px py pz pdg ID
+ * # Units: fm fm fm fm GeV GeV GeV GeV GeV none none
+ * # SMASH_version
+ * \endcode
+ *
+ * **Output block header**\n
+ * At start of event:
+ * \code
+ * # event ev_num in npart
+ * \endcode
+ * At end of event or intermediate particle list output:
+ * \code
+ * # event ev_num out npart
+ * \endcode
+ *
+ * **Particle line**
+ * \code
+ * t x y z mass p0 px py pz pdg ID
+ * \endcode
+ *
+ * **Event end line**
+ * \code
+ * # event ev_num end 0
+ * \endcode
+ *
+ * \page format_oscar_collisions Oscar collisions format
+ * The format follows general block structure of OSCAR format:
+ * \ref oscar_general_. There are two kinds of this format -
+ * OSCAR2013 and OSCAR1999. Information about OSCAR standard can be found at
+ * https://karman.physics.purdue.edu/OSCAR and
+ * http://phy.duke.edu/~jeb65/oscar2013. SMASH OSCAR collisions output
+ * produces \c full_event_history.oscar file. Format is flexible, options
+ * that regulate output can be found at \ref input_oscar_collisions
+ * and at \ref input_general_. **Collision output always gives
+ * a list of collisions/decays/box wall crossings plus optionally
+ * initial and final configuration.**
+ *
+ * See also \ref collisions_output_in_box_modus_.
+ *
+ * Oscar1999
+ * ---------
+ * Format specifics are the following:\n
+ * **Header**
+ * \code
+ * # OSC1999A
+ * # full_event_history
+ * # smash <version>
+ * # Block format:
+ * # nin nout event_number
+ * # id pdg 0 px py pz p0 mass x y z t
+ * # End of event: 0 0 event_number
+ * #
+ * \endcode
+ *
+ * **Output block header**
+ * \code
+ * nin nout /(not guaranteed) event_number/
+ * \endcode
+ * nin, nout are numbers of incoming and outgoing particles in a given
+ * reaction in collision output file. If initial and final configurations
+ * are written to collision file then (nin nout) = (0 npart) in the initial
+ * configuration and (nin nout) = (npart 0) in the final.
+ *
+ * **Particle line**
+ * \code
+ * id pdg 0 px py pz p0 mass x y z t
+ * \endcode
+ * **Event end line**
+ * \code
+ * # event ev_num end 0
+ * \endcode
+ *
+ * Oscar2013
+ * ---------
+ *  Format specifics are the following:\n
+ * **Header**
+ * \code
+ * #!OSCAR2013 full_event_history t x y z mass p0 px py pz pdg ID
+ * # Units: fm fm fm fm GeV GeV GeV GeV GeV none none
+ * # SMASH_version
+ * \endcode
+ *
+ * **Output block header**\n
+ * At start of event:
+ * \code
+ * # event ev_num in npart
+ * \endcode
+ * At end of event:
+ * \code
+ * # event ev_num out npart
+ * \endcode
+ * At interaction:
+ * \code
+ * # interaction in nin out nout
+ * \endcode
+ *
+ * **Particle line**
+ * \code
+ * t x y z mass p0 px py pz pdg ID
+ * \endcode
+ *
+ * **Event end line**
+ * \code
+ * # event ev_num end 0
+ * \endcode
+ **/
 template <OscarOutputFormat Format, int Contents>
 void OscarOutput<Format, Contents>::write_particledata(
     const ParticleData &data) {
@@ -419,14 +422,14 @@ void OscarOutput<Format, Contents>::write_particledata(
   const FourVector mom = data.momentum();
   if (Format == OscarFormat2013) {
     std::fprintf(file_.get(), "%g %g %g %g %g %.9g %.9g %.9g %.9g %s %i\n",
-        pos.x0(), pos.x1(), pos.x2(), pos.x3(),
-        data.effective_mass(), mom.x0(), mom.x1(), mom.x2(), mom.x3(),
-        data.pdgcode().string().c_str(), data.id());
+                 pos.x0(), pos.x1(), pos.x2(), pos.x3(), data.effective_mass(),
+                 mom.x0(), mom.x1(), mom.x2(), mom.x3(),
+                 data.pdgcode().string().c_str(), data.id());
   } else {
     std::fprintf(file_.get(), "%i %s %i %g %g %g %g %g %g %g %g %g\n",
-        data.id(), data.pdgcode().string().c_str(), 0,
-        mom.x1(), mom.x2(), mom.x3(), mom.x0(), data.effective_mass(),
-        pos.x1(), pos.x2(), pos.x3(), pos.x0());
+                 data.id(), data.pdgcode().string().c_str(), 0, mom.x1(),
+                 mom.x2(), mom.x3(), mom.x0(), data.effective_mass(), pos.x1(),
+                 pos.x2(), pos.x3(), pos.x0());
   }
 }
 
@@ -475,8 +478,8 @@ std::unique_ptr<OutputInterface> create_oscar_output(const bf::path &path,
       config.take({"Oscar_Collisions"});
     } else {
       const bool print_start_end = subconfig.has_value({"Print_Start_End"})
-                                  ? subconfig.take({"Print_Start_End"})
-                                  : false;
+                                       ? subconfig.take({"Print_Start_End"})
+                                       : false;
       if (print_start_end) {
         return create_select_format<OscarInteractions | OscarAtEventstart |
                                     OscarParticlesAtEventend>(
@@ -491,21 +494,18 @@ std::unique_ptr<OutputInterface> create_oscar_output(const bf::path &path,
               // config file
 }
 
-
 std::unique_ptr<OutputInterface> create_dilepton_output(bf::path path) {
   /* for now the Oscar Output in the 2013 format is sufficient
    * for dilepton output */
   return make_unique<OscarOutput<OscarFormat2013, OscarInteractions>>(
-                                            std::move(path), "DileptonOutput");
+      std::move(path), "DileptonOutput");
 }
-
 
 std::unique_ptr<OutputInterface> create_photon_output(bf::path path) {
   /* for now the Oscar Output in the 2013 format is sufficient
    * for photon output */
   return make_unique<OscarOutput<OscarFormat2013, OscarInteractions>>(
-                                            std::move(path), "PhotonOutput");
+      std::move(path), "PhotonOutput");
 }
-
 
 }  // namespace Smash

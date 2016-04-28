@@ -1,3 +1,12 @@
+/*
+ *
+ *    Copyright (c) 2016
+ *      SMASH Team
+ *
+ *    GNU General Public License (GPLv3 or later)
+ *
+ */
+
 #ifndef SRC_INCLUDE_SCATTERACTIONFINDERPHOTON_H_
 #define SRC_INCLUDE_SCATTERACTIONFINDERPHOTON_H_
 
@@ -10,18 +19,19 @@ namespace Smash {
 */
 
 class ScatterActionsFinderPhoton : public ScatterActionsFinder {
-  public:
-    /** Initialize the finder (inherited) */
-	using ScatterActionsFinder::ScatterActionsFinder;
-    /** At the moment no final scattering actions are implemented in SMASH */
-    // ActionList find_final_actions(const Particles &search_list) const override;
-    
-  private:
-    /* Construct only ScatterActionPhoton objects. */
-    ScatterActionPtr construct_scatter_action(const ParticleData &data_a, const ParticleData &data_b, float time_until_collision) const override;
+ public:
+  /** Initialize the finder (inherited) */
+  using ScatterActionsFinder::ScatterActionsFinder;
+  /** At the moment no final scattering actions are implemented in SMASH */
+  // ActionList find_final_actions(const Particles &search_list) const override;
+
+ private:
+  /* Construct only ScatterActionPhoton objects. */
+  ScatterActionPtr construct_scatter_action(
+      const ParticleData &data_a, const ParticleData &data_b,
+      float time_until_collision) const override;
 };
 
 }  // namespace Smash
 
 #endif  // SRC_INCLUDE_SCATTERACTIONFINDERPHOTON_H_
-
