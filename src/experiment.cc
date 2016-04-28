@@ -19,6 +19,7 @@
 #include "include/propagation.h"
 #include "include/scatteractionsfinder.h"
 #include "include/scatteractionsfinderphoton.h"
+#include "include/scatteractionphoton.h"
 #include "include/spheremodus.h"
 /* Outputs */
 #include "include/binaryoutputcollisions.h"
@@ -729,11 +730,10 @@ void Experiment<Modus>::write_dilepton_action(Action &action,
 template<typename Modus >
 void Experiment< Modus >::write_photon_action(Action& action, const ParticleList& particles_before_actions){
   if (action.is_valid(particles_)) {
-    int number_of_fractional_photons = 100;
     // loop over action to get many fractional photons
     // where to store number_of_fractional_photons? -> needed for weighing?
     // maybe read in from config file?
-    for (int i=0; i<number_of_fractional_photons; i++){ 
+    for (int i=0; i<ScatterActionPhoton::number_of_fractional_photons; i++){ 
       action.generate_final_state();
       const FourVector r_interaction = action.get_interaction_point();
       constexpr bool compute_grad = false;

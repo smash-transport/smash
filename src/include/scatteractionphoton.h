@@ -21,6 +21,7 @@ class ScatterActionPhoton : public ScatterAction {
     } 
     
     CollisionBranchList two_to_two_cross_sections() override;
+    const static int number_of_fractional_photons = 100;
      
   private:
     float weight_=0.0;
@@ -29,7 +30,9 @@ class ScatterActionPhoton : public ScatterAction {
     float cross_section_photons_=0.0;
     enum ReactionType {pi_pi, pi0_pi, piplus_rho0, pi_rho, pi0_rho, piplus_eta, no_reaction};
     ReactionType reac = no_reaction;
-    float diff_cross_section() const;
+    float pi_pi_rho0(float M) const;
+    float pi_pi0_rho(float M) const;
+    float diff_cross_section(float t) const;
 };
 
 }  // namespace Smash
