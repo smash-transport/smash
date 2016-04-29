@@ -409,7 +409,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
                                         output_path, std::move(output_conf));
   create_output<BinaryOutputParticles>("Binary_Particles",
                                         output_path, std::move(output_conf));
-#ifdef USE_ROOT
+#ifdef SMASH_USE_ROOT
   create_output<RootOutput>("Root", output_path, std::move(output_conf));
 #else
   const bool enable_root = output_conf.take({"Root", "Enable"}, true);
