@@ -282,17 +282,17 @@ void ThermLatticeNode::compute_rest_frame_quantities(HadronGasEos& eos) {
     }
     const double gamma_inv = std::sqrt(1.0 - v_.sqr());
     auto tabulated = eos.from_table(e_, gamma_inv*nb_);
-    if (!eos.is_tabulated() || tabulated == nullptr) {
+    if (!eos.is_tabulated() || tabulated.p < 0.0) {
       auto T_mub_mus = eos.solve_eos(e_, gamma_inv*nb_, gamma_inv*ns_);
       T_   = T_mub_mus[0];
       mub_ = T_mub_mus[1];
       mus_ = T_mub_mus[2];
       p_ = HadronGasEos::pressure(T_, mub_, mus_);
     } else {
-      p_ = tabulated->p;
-      T_ = tabulated->T;
-      mub_ = tabulated->mub;
-      mus_ = tabulated->mus;
+      p_ = tabulated.p;
+      T_ = tabulated.T;
+      mub_ = tabulated.mub;
+      mus_ = tabulated.mus;
     }
     v_ = Tmu0_.threevec()/(Tmu0_.x0() + p_);
   }
