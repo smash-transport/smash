@@ -69,10 +69,11 @@ TEST(rest_frame_transformation) {
   const double mub = node.mub();
   const double mus = node.mus();
   const double gamma = 1.0/std::sqrt(1.0 - node.v().sqr());
-  COMPARE_ABSOLUTE_ERROR(node.p(), eos.pressure(T, mub, mus), 1.e-5);
-  COMPARE_ABSOLUTE_ERROR(node.e(), eos.energy_density(T, mub, mus), 1.e-5);
-  COMPARE_ABSOLUTE_ERROR(node.nb(), eos.net_baryon_density(T, mub, mus)*gamma, 1.e-5);
-  COMPARE_ABSOLUTE_ERROR(node.ns(), eos.net_strange_density(T, mub, mus)*gamma, 1.e-5);
+  const double tolerance = 5.e-4;
+  COMPARE_ABSOLUTE_ERROR(node.p(), eos.pressure(T, mub, mus), tolerance);
+  COMPARE_ABSOLUTE_ERROR(node.e(), eos.energy_density(T, mub, mus), tolerance);
+  COMPARE_ABSOLUTE_ERROR(node.nb(), eos.net_baryon_density(T, mub, mus)*gamma, tolerance);
+  COMPARE_ABSOLUTE_ERROR(node.ns(), eos.net_strange_density(T, mub, mus)*gamma, tolerance);
 }
 
 

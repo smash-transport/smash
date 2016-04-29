@@ -269,10 +269,10 @@ void ThermLatticeNode::add_particle(const ParticleData& part, double factor) {
 
 void ThermLatticeNode::compute_rest_frame_quantities(HadronGasEos& eos) {
   // ToDo(oliiny): use Newton's method instead of these iterations
-  const int max_iter = 1000;
+  const int max_iter = 50;
   v_ = ThreeVector(0.0, 0.0, 0.0);
   double e_previous_step = 0.0;
-  const double tolerance = 1.e-8;
+  const double tolerance = 5.e-4;
   int iter;
   for(iter = 0; iter < max_iter; iter++) {
     e_previous_step = e_;
