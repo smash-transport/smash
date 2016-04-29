@@ -268,6 +268,7 @@ void ThermLatticeNode::add_particle(const ParticleData& part, double factor) {
 }
 
 void ThermLatticeNode::compute_rest_frame_quantities(HadronGasEos& eos) {
+  // ToDo(oliiny): use Newton's method instead of these iterations
   const int max_iter = 1000;
   v_ = ThreeVector(0.0, 0.0, 0.0);
   double e_previous_step = 0.0;
@@ -281,7 +282,7 @@ void ThermLatticeNode::compute_rest_frame_quantities(HadronGasEos& eos) {
     }
     const double gamma_inv = std::sqrt(1.0 - v_.sqr());
     auto tabulated = eos.from_table(e_, gamma_inv*nb_);
-    if (!eos.is_tabulated()) {
+    if (!eos.is_tabulated() || tabulated == nullptr) {
       auto T_mub_mus = eos.solve_eos(e_, gamma_inv*nb_, gamma_inv*ns_);
       T_   = T_mub_mus[0];
       mub_ = T_mub_mus[1];
@@ -296,7 +297,9 @@ void ThermLatticeNode::compute_rest_frame_quantities(HadronGasEos& eos) {
     v_ = Tmu0_.threevec()/(Tmu0_.x0() + p_);
   }
   if (iter == max_iter) {
-    std::cout << "Warning from solver: max iterations exceeded." << std::endl;
+    std::cout << "Warning from solver: max iterations exceeded." <<
+                 " Accuracy: " << std::abs(e_ - e_previous_step) <<
+                 " is less than tolerance " << tolerance << std::endl;
   }
 }
 
