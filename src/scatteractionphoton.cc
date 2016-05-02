@@ -85,7 +85,7 @@ CollisionBranchList ScatterActionPhoton::two_to_two_cross_sections() {
   const float m_eta = ParticleType::find(0x221).mass();
   const float m_eta_2 = pow(m_eta, 2);
   const float gamma_rho_tot = ParticleType::find(0x113).width_at_pole();
-  const float g_rho_2 = 12 * twopi * gamma_rho_tot * pow(m_rho, 2) /
+  const float g_rho_2 = 24 * twopi * gamma_rho_tot * pow(m_rho, 2) /
                         pow(pow(m_rho, 2) - 4 * pow(m_pi, 2), 3.0 / 2.0);
   const float to_mb = 0.3894;
 
@@ -353,7 +353,7 @@ float ScatterActionPhoton::pi_pi_rho0(const float M, const float s,
   const float m_pi_2 = pow(m_pi, 2);
   const float m_rho = ParticleType::find(0x113).mass();
   const float gamma_rho_tot = ParticleType::find(0x113).width_at_pole();
-  const float g_rho_2 = 12 * twopi * gamma_rho_tot * pow(m_rho, 2) /
+  const float g_rho_2 = 24 * twopi * gamma_rho_tot * pow(m_rho, 2) /
                         pow(pow(m_rho, 2) - 4 * pow(m_pi, 2), 3.0 / 2.0);
   // const float s = mandelstam_s();
   // const float p_cm_2 = cm_momentum_squared();
@@ -399,7 +399,7 @@ float ScatterActionPhoton::pi_pi0_rho(const float M, const float s,
   const float m_pi_2 = pow(m_pi, 2);
   const float m_rho = ParticleType::find(0x113).mass();
   const float gamma_rho_tot = ParticleType::find(0x113).width_at_pole();
-  const float g_rho_2 = 12 * twopi * gamma_rho_tot * pow(m_rho, 2) /
+  const float g_rho_2 = 24 * twopi * gamma_rho_tot * pow(m_rho, 2) /
                         pow(pow(m_rho, 2) - 4 * pow(m_pi, 2), 3.0 / 2.0);
   // const float s = mandelstam_s();
   // const float p_cm_2 = cm_momentum_squared();
@@ -449,7 +449,7 @@ float ScatterActionPhoton::diff_cross_section(float t) const {
   const float m_eta = ParticleType::find(0x221).mass();
   const float m_eta_2 = pow(m_eta, 2);
   const float gamma_rho_tot = ParticleType::find(0x113).width_at_pole();
-  const float g_rho_2 = 12 * twopi * gamma_rho_tot * pow(m_rho, 2) /
+  const float g_rho_2 = 24 * twopi * gamma_rho_tot * pow(m_rho, 2) /
                         pow(pow(m_rho, 2) - 4 * pow(m_pi, 2), 3.0 / 2.0);
   const float s = mandelstam_s();
   const float p_cm_2 = cm_momentum_squared();
