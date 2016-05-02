@@ -240,9 +240,65 @@ void GrandCanThermalizer::thermalize(Particles& particles, double time) {
   }
   std::cout << "Sampled " << sampled_list.size() << " particles." << std::endl;
 
-  // Report conservation laws:
+  // Centralize momenta
   QuantumNumbers conserved_final = QuantumNumbers(sampled_list);
-  std::cout << conserved_initial.report_deviations(conserved_final) << std::endl;
+  const QuantumNumbers deviation = conserved_initial - conserved_final;
+  const ThreeVector mom_to_add = deviation.momentum().threevec() /
+                                 sampled_list.size();
+  std::cout << "Adjusting momenta by " << mom_to_add << std::endl;
+  for (auto &particle : sampled_list) {
+    particle.set_4momentum(particle.type().mass(),
+                           particle.momentum().threevec() + mom_to_add);
+  }
+
+  // Boost every particle to the common center of mass frame
+  conserved_final = QuantumNumbers(sampled_list);
+  const ThreeVector beta_CM_generated = conserved_final.momentum().velocity();
+  const ThreeVector beta_CM_initial = conserved_initial.momentum().velocity();
+
+  double E = 0.0;
+  double E_expected = conserved_initial.momentum().abs();
+  for (auto &particle : sampled_list) {
+    particle.boost_momentum(beta_CM_generated);
+    E += particle.momentum().x0();
+  }
+  // Renorm. momenta by factor (1+a) to get the right energy, binary search
+  const double tolerance = really_small;
+  double a, a_min, a_max, er;
+  const int max_iter = 30;
+  int iter = 0;
+  if (E_expected >= E) {
+    a_min = 0.0;
+    a_max = 0.05;
+  } else {
+    a_min = -0.05;
+    a_max = 0.0;
+  }
+  do {
+    a = 0.5 * (a_min + a_max);
+    E = 0.0;
+    for (const auto &particle : sampled_list) {
+      const double p2 = particle.momentum().threevec().sqr();
+      const double E2 = particle.momentum().x0() * particle.momentum().x0();
+      E += std::sqrt(E2 + a*(a + 2.0) * p2);
+    }
+    er = E - E_expected;
+    if (er >= 0.0) {
+      a_max = a;
+    } else {
+      a_min = a;
+    }
+    //std::cout << "Iteration " << iter << ": a = " << a <<
+    //             ", Δ = " << er << std::endl;
+    iter++;
+  } while (std::abs(er) > tolerance && iter < max_iter);
+
+  std::cout << "Renormalizing momenta by factor 1+a, a = " << a << std::endl;
+  for (auto &particle : sampled_list) {
+    particle.set_4momentum(particle.type().mass(),
+                           (1+a)*particle.momentum().threevec());
+    particle.boost_momentum(-beta_CM_initial);
+  }
 
   // Add sampled particles to particles
   for (auto &particle : sampled_list) {
