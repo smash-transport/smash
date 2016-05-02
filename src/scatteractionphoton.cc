@@ -17,6 +17,9 @@
 #include "include/pdgcode.h"
 #include "include/random.h"
 
+#include <fstream>
+#include <iostream>
+
 using std::sqrt;
 using std::pow;
 using std::atan;
@@ -105,7 +108,7 @@ CollisionBranchList ScatterActionPhoton::two_to_two_cross_sections() {
             // cross sections (xsection) for all possible reactions
 
     const double s = mandelstam_s();
-    const double sqrts = sqrt_s();
+    double sqrts = sqrt_s();
     const double &m1 = part_a.effective_mass();
     const double &m2 = part_b.effective_mass();
     double m3 = 0.0;  // will be fixed according to reaction outcome
@@ -164,7 +167,7 @@ CollisionBranchList ScatterActionPhoton::two_to_two_cross_sections() {
       double e, I0, I1;
       float xsection = 0.0;
 
-      Integrator integrate;
+      Integrator2d integrate(5e7);
 
       switch (reac) {
         case pi_pi:
@@ -207,17 +210,18 @@ CollisionBranchList ScatterActionPhoton::two_to_two_cross_sections() {
           // and the third possible reaction (produces rho0)
           part_out = &ParticleType::find(0x113);
           m3 = part_out->mass();
-          // xsection = integrate(2*m_pi, sqrts, [&](float M) { return
-          // pi_pi_rho0(M)*part_out->spectral_function(M); });
-          xsection = pi_pi_rho0(m3);
+          // xsection = integrate(2*m_pi, std::nextafter(sqrts,2*m_pi),
+          // [&](float M) {
+          // return pi_pi_rho0(M,s,p_cm_2)*part_out->spectral_function(M); });
+          xsection = pi_pi_rho0(m3, s, p_cm_2);
           process_list.push_back(make_unique<CollisionBranch>(
               *part_out, *photon_out, xsection, ProcessType::TwoToTwo));
 
           break;
         case pi0_pi:
           // xsection = integrate(2*m_pi, sqrts, [&](float M) { return
-          // pi_pi0_rho(M)*part_out->spectral_function(M); });
-          xsection = pi_pi0_rho(m3);
+          // pi_pi0_rho(M,s,p_cm_2)*part_out->spectral_function(M); });
+          xsection = pi_pi0_rho(m3, s, p_cm_2);
           process_list.push_back(make_unique<CollisionBranch>(
               *part_out, *photon_out, xsection, ProcessType::TwoToTwo));
           break;
@@ -296,28 +300,68 @@ CollisionBranchList ScatterActionPhoton::two_to_two_cross_sections() {
           // never reached
           break;
       }
+
+      std::ofstream data;
+      std::ofstream data2;
+      data.open("../../pi_pi_rho0.dat");
+      data << "# integrated pi_pi_rho0 with spectral_function, SMASH Monte "
+              "Carlo, 5e7 calls "
+           << std::endl;
+      data << "sqrts  xsection" << std::endl;
+      data2.open("../../pi_pi0_rho.dat");
+      data2 << "# integrated pi_pi0_rho with spectral_function, SMASH Monte "
+               "Carlo, 5e7 calls "
+            << std::endl;
+      data2 << "sqrts  xsection" << std::endl;
+      std::cout << "integrations started" << std::endl;
+      sqrts = 2 * m_pi;
+      float ds = (20 - 2 * m_pi) / 2000.0;
+      for (int i = 0; i < 2000; i++) {
+        sqrts += ds;
+        float p_cm_sqr = 0.25 * s - m_pi_2;
+        std::cout << i / 2000.0 * 100 << "%" << std::endl;
+        xsection = integrate(2 * m_pi, sqrts, 0, 1, [&](float M, float dummy) {
+          return pi_pi_rho0(M, pow(sqrts, 2), p_cm_sqr) *
+                 part_out->spectral_function(M);
+        });
+        data << sqrts << " " << xsection << std::endl;
+        std::cout << sqrts << " " << xsection << std::endl;
+        xsection = integrate(2 * m_pi, sqrts, 0, 1, [&](float M, float dummy) {
+          return pi_pi0_rho(M, pow(sqrts, 2), p_cm_sqr) *
+                 part_out->spectral_function(M);
+        });
+        data2 << sqrts << " " << xsection << std::endl;
+        std::cout << sqrts << " " << xsection << std::endl;
+      }
+      data.close();
+      data2.close();
     }
+
     // add to extra CollisionBranch only for photon producing reactions!
     add_processes<CollisionBranch>(std::move(process_list),
                                    collision_channels_photons_,
                                    cross_section_photons_);
   }
+
   return process_list;
 }
 
-float ScatterActionPhoton::pi_pi_rho0(float M) const {
+float ScatterActionPhoton::pi_pi_rho0(const float M, const float s,
+                                      const float p_cm_2) const {
   const float to_mb = 0.3894;
   const float m_pi = ParticleType::find(0x111).mass();
   const float m_pi_2 = pow(m_pi, 2);
+  const float m_rho = ParticleType::find(0x113).mass();
   const float gamma_rho_tot = ParticleType::find(0x113).width_at_pole();
-  const float g_rho_2 = 12 * twopi * gamma_rho_tot * pow(M, 2) /
-                        pow(pow(M, 2) - 4 * pow(m_pi, 2), 3.0 / 2.0);
-  const float s = mandelstam_s();
-  const float p_cm_2 = cm_momentum_squared();
+  const float g_rho_2 = 12 * twopi * gamma_rho_tot * pow(m_rho, 2) /
+                        pow(pow(m_rho, 2) - 4 * pow(m_pi, 2), 3.0 / 2.0);
+  // const float s = mandelstam_s();
+  // const float p_cm_2 = cm_momentum_squared();
   const float DM = pow(M, 2) - 4 * pow(m_pi, 2);
-  const float sqrts = sqrt_s();
-  if (sqrts <= M)
+  const float sqrts = sqrt(s);
+  if (sqrts <= M) {
     return 0;
+  }
   std::array<float, 2> mandelstam_t = get_t_range(sqrts, m_pi, m_pi, M, 0.0f);
   float t1 = mandelstam_t[1];
   float t2 = mandelstam_t[0];
@@ -326,12 +370,14 @@ float ScatterActionPhoton::pi_pi_rho0(float M) const {
   float xsection = alpha * g_rho_2 / (4 * s * p_cm_2);
   t1 += -m_pi_2;
   t2 += -m_pi_2;
-  if (t2 / t1 <= 0)
+  if (t2 / t1 <= 0) {
     return 0;
+  }
   u1 += -m_pi_2;
   u2 += -m_pi_2;
-  if (u1 / u2 <= 0)
+  if (u1 / u2 <= 0) {
     return 0;
+  }
   xsection = xsection *
              (2 * (t2 - t1) -
               DM * ((s - 2 * m_pi_2) / (s - pow(M, 2)) * std::log(t2 / t1) +
@@ -339,22 +385,29 @@ float ScatterActionPhoton::pi_pi_rho0(float M) const {
                     (s - 2 * m_pi_2) / (s - pow(M, 2)) * std::log(u1 / u2) +
                     m_pi_2 * (u1 - u2) / (u1 * u2))) *
              to_mb;
-  return xsection;
+  if (xsection > 0) {
+    return xsection;
+  } else {
+    return really_small;
+  }
 }
 
-float ScatterActionPhoton::pi_pi0_rho(float M) const {
+float ScatterActionPhoton::pi_pi0_rho(const float M, const float s,
+                                      const float p_cm_2) const {
   const float to_mb = 0.3894;
   const float m_pi = ParticleType::find(0x111).mass();
   const float m_pi_2 = pow(m_pi, 2);
+  const float m_rho = ParticleType::find(0x113).mass();
   const float gamma_rho_tot = ParticleType::find(0x113).width_at_pole();
-  const float g_rho_2 = 12 * twopi * gamma_rho_tot * pow(M, 2) /
-                        pow(pow(M, 2) - 4 * pow(m_pi, 2), 3.0 / 2.0);
-  const float s = mandelstam_s();
-  const float p_cm_2 = cm_momentum_squared();
+  const float g_rho_2 = 12 * twopi * gamma_rho_tot * pow(m_rho, 2) /
+                        pow(pow(m_rho, 2) - 4 * pow(m_pi, 2), 3.0 / 2.0);
+  // const float s = mandelstam_s();
+  // const float p_cm_2 = cm_momentum_squared();
   const float DM = pow(M, 2) - 4 * pow(m_pi, 2);
-  const float sqrts = sqrt_s();
-  if (sqrts <= M)
+  const float sqrts = sqrt(s);
+  if (sqrts <= M) {
     return 0;
+  }
   std::array<float, 2> mandelstam_t = get_t_range(sqrts, m_pi, m_pi, M, 0.0f);
   float t1 = mandelstam_t[1];
   float t2 = mandelstam_t[0];
@@ -362,25 +415,30 @@ float ScatterActionPhoton::pi_pi0_rho(float M) const {
   float u2 = 2 * m_pi_2 + pow(M, 2) - s - t2;
   float xsection = -alpha * g_rho_2 / (16 * s * p_cm_2);
   float e = 1.0 / 3.0 * (s - 2 * pow(M, 2)) / pow(M, 2) /
-                pow(s - pow(M, 2), 2) * (pow(t2, 3) - pow(t1, 3)) +
-            1.0 / 3.0 * (s - 2 * pow(M, 2)) / pow(M, 2) /
-                pow(s - pow(M, 2), 2) * (pow(u1, 3) - pow(u2, 3));
+            pow(s - pow(M, 2), 2) * (pow(t2, 3) - pow(t1, 3));  //+
+  // 1.0 / 3.0 * (s - 2 * pow(M, 2)) / pow(M, 2) /
+  //   pow(s - pow(M, 2), 2) * (pow(u1, 3) - pow(u2, 3));
   e += 0.5 * (s - 6 * pow(M, 2)) / pow(M, 2) / (s - pow(M, 2)) *
-           (pow(t2, 2) - pow(t1, 2)) +
-       0.5 * (s - 6 * pow(M, 2)) / pow(M, 2) / (s - pow(M, 2)) *
-           (pow(u1, 2) - pow(u2, 2));
+       (pow(t2, 2) - pow(t1, 2));  //+
+  // 0.5 * (s - 6 * pow(M, 2)) / pow(M, 2) / (s - pow(M, 2)) *
+  //   (pow(u1, 2) - pow(u2, 2));
   t1 += -m_pi_2;
   t2 += -m_pi_2;
   u1 += -m_pi_2;
   u2 += -m_pi_2;
-  if (t2 / t1 * u1 / u2 <= 0)
+  if (t2 / t1 /* * u1 / u2 */ <= 0) {
     return 0;
+  }
   e += (4 * s * DM / pow(s - pow(M, 2), 2) + m_pi_2 / pow(M, 2) - 4.5) *
-       (t2 - t1 + u1 - u2);
-  e += 4 * s * DM / (s - pow(M, 2)) * std::log(t2 / t1 * u1 / u2);
-  e += 4 * m_pi_2 * DM * ((t2 - t1) / (t2 * t1) + (u1 - u2) / (u1 * u2));
+       (t2 - t1 /*+ u1 - u2*/);
+  e += 4 * s * DM / (s - pow(M, 2)) * std::log(t2 / t1 /* * u1 / u2*/);
+  e += 4 * m_pi_2 * DM * ((t2 - t1) / (t2 * t1) /*+ (u1 - u2) / (u1 * u2)*/);
   xsection = xsection * e * to_mb;
-  return xsection;
+  if (xsection > 0) {
+    return xsection;
+  } else {
+    return really_small;
+  }
 }
 
 float ScatterActionPhoton::diff_cross_section(float t) const {

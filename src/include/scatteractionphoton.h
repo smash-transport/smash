@@ -49,8 +49,8 @@ class ScatterActionPhoton : public ScatterAction {
     no_reaction
   };
   ReactionType reac = no_reaction;
-  float pi_pi_rho0(float M) const;
-  float pi_pi0_rho(float M) const;
+  float pi_pi_rho0(const float M, const float s, const float p_cm_2) const;
+  float pi_pi0_rho(const float M, const float s, const float p_cm_2) const;
   float diff_cross_section(float t) const;
 };
 
