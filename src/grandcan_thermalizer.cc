@@ -11,6 +11,7 @@
 #include "include/cxx14compat.h"
 #include "include/distributions.h"
 #include "include/forwarddeclarations.h"
+#include "include/logging.h"
 #include "include/particles.h"
 #include "include/quantumnumbers.h"
 #include "include/random.h"
@@ -102,11 +103,14 @@ void GrandCanThermalizer::update_lattice(const Particles& particles,
         std::abs(node.Tmu0().x2()) +
         std::abs(node.Tmu0().x3()) >= e_crit_) {
       node.compute_rest_frame_quantities(eos_);
+    } else {
+      node = ThermLatticeNode();
     }
   }
 }
 
 void GrandCanThermalizer::thermalize(Particles& particles, double time) {
+  const auto &log = logger<LogArea::GrandcanThermalizer>();
   // Remove particles from the cells with e > e_crit_,
   // sum up their conserved quantities
   QuantumNumbers conserved_initial   = QuantumNumbers(),
@@ -122,7 +126,7 @@ void GrandCanThermalizer::thermalize(Particles& particles, double time) {
       particles_removed ++;
     }
   }
-  std::cout << "Removed " << particles_removed << " particles." << std::endl;
+  log.info("Removed ", particles_removed, " particles.");
 
   // Exit if there is nothing to thermalize
   if (conserved_initial == QuantumNumbers()) {
@@ -238,14 +242,16 @@ void GrandCanThermalizer::thermalize(Particles& particles, double time) {
       }
     }
   }
-  std::cout << "Sampled " << sampled_list.size() << " particles." << std::endl;
+  log.info("Sampled ", sampled_list.size(), " particles.");
 
   // Centralize momenta
   QuantumNumbers conserved_final = QuantumNumbers(sampled_list);
+  log.info("Initial particles' 4-momentum: ", conserved_initial.momentum());
+  log.info("Samples particles' 4-momentum: ", conserved_final.momentum());
   const QuantumNumbers deviation = conserved_initial - conserved_final;
   const ThreeVector mom_to_add = deviation.momentum().threevec() /
                                  sampled_list.size();
-  std::cout << "Adjusting momenta by " << mom_to_add << std::endl;
+  log.info("Adjusting momenta by ", mom_to_add);
   for (auto &particle : sampled_list) {
     particle.set_4momentum(particle.type().mass(),
                            particle.momentum().threevec() + mom_to_add);
@@ -288,12 +294,11 @@ void GrandCanThermalizer::thermalize(Particles& particles, double time) {
     } else {
       a_min = a;
     }
-    //std::cout << "Iteration " << iter << ": a = " << a <<
-    //             ", Δ = " << er << std::endl;
+    log.debug("Iteration ", iter, ": a = ", a, ", Δ = ", er);
     iter++;
   } while (std::abs(er) > tolerance && iter < max_iter);
 
-  std::cout << "Renormalizing momenta by factor 1+a, a = " << a << std::endl;
+  log.info("Renormalizing momenta by factor 1+a, a = ", a);
   for (auto &particle : sampled_list) {
     particle.set_4momentum(particle.type().mass(),
                            (1+a)*particle.momentum().threevec());
