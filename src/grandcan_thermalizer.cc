@@ -20,8 +20,12 @@ namespace Smash {
 
 GrandCanThermalizer::GrandCanThermalizer(const std::array<float, 3> cell_sizes,
                                          const std::array<int, 3> n_cells,
-                                         float e_critical) :
-  e_crit_(e_critical) {
+                                         float e_critical,
+                                         float t_start,
+                                         float delta_t) :
+  e_crit_(e_critical),
+  t_start_(t_start),
+  period_(delta_t) {
   const std::array<float, 3> l = {cell_sizes[0]*n_cells[0],
                                   cell_sizes[1]*n_cells[1],
                                   cell_sizes[2]*n_cells[2]};
@@ -91,7 +95,6 @@ void GrandCanThermalizer::sample_in_random_cell(ParticleList& plist,
 void GrandCanThermalizer::update_lattice(const Particles& particles,
                                          const DensityParameters& dens_par) {
   const DensityType dens_type = DensityType::Hadron;
-  // ToDo(oliiny): fix this stuff with LatticeUpdate
   const LatticeUpdate update = LatticeUpdate::EveryFixedInterval;
   update_general_lattice(lat_.get(), update, dens_type, dens_par, particles);
   for (auto &node : *lat_) {
@@ -111,6 +114,7 @@ void GrandCanThermalizer::update_lattice(const Particles& particles,
 
 void GrandCanThermalizer::thermalize(Particles& particles, double time) {
   const auto &log = logger<LogArea::GrandcanThermalizer>();
+  log.info("Starting forced thermalization, time ", time, " fm/c");
   // Remove particles from the cells with e > e_crit_,
   // sum up their conserved quantities
   QuantumNumbers conserved_initial   = QuantumNumbers(),
