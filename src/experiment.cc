@@ -584,12 +584,8 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
 
   // Create forced thermalizer
   if (config.has_value({"Forced_Thermalization"})) {
-    auto th_conf = config["Forced_Thermalization"];
-    const std::array<float, 3> lat_spacing = th_conf.take({"Lattice_Spacing"});
-    const std::array<int, 3> nx_ny_nz = th_conf.take({"Cell_Number"});
-    const float e_crit = th_conf.take({"Critical_Edens"});
-    gc_thermalizer_ = make_unique<GrandCanThermalizer>(lat_spacing,
-                                                       nx_ny_nz, e_crit);
+    Configuration&& th_conf = config["Forced_Thermalization"];
+    gc_thermalizer_ = make_unique<GrandCanThermalizer>(th_conf);
   }
 }
 

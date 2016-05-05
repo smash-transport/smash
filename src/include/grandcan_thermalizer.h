@@ -9,6 +9,7 @@
 
 #include "hadgas_eos.h"
 
+#include "configuration.h"
 #include "density.h"
 #include "particledata.h"
 #include "lattice.h"
@@ -53,6 +54,10 @@ class GrandCanThermalizer {
                       const std::array<int, 3> n_cells,
                       float e_critical //, Clock update_interval
                       );
+  GrandCanThermalizer(Configuration& conf) :
+    GrandCanThermalizer(conf.take({"Lattice_Spacing"}),
+                        conf.take({"Cell_Number"}),
+                        conf.take({"Critical_Edens"})) {};
   void update_lattice(const Particles& particles, const DensityParameters& par);
   ThreeVector uniform_in_cell() const;
   void sample_in_random_cell(ParticleList& plist, const double time);
