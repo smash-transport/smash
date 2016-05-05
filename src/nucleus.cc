@@ -393,9 +393,7 @@ void Nucleus::generate_fermi_momenta() {
 void Nucleus::boost(double beta_scalar) {
   double beta_squared = beta_scalar * beta_scalar;
   double one_over_gamma = std::sqrt(1.0 - beta_squared);
-  /*double gamma = 1.0/one_over_gamma;
-    double gammabeta = sign*sqrt(beta_squared)*gamma;
-   */
+  double gamma = 1.0/one_over_gamma;
   // We are talking about a /passive/ lorentz transformation here, as
   // far as I can see, so we need to boost in the direction opposite to
   // where we want to go
@@ -403,7 +401,6 @@ void Nucleus::boost(double beta_scalar) {
   //       a system that moves with -beta. Now in this frame, it seems
   //       like p has been accelerated with +beta.
   //     )
-  ThreeVector beta(0., 0., -beta_scalar);
   for (auto i = begin(); i != end(); i++) {
     // a real Lorentz Transformation would leave the particles at
     // different times here, which we would then have to propagate back
@@ -412,9 +409,14 @@ void Nucleus::boost(double beta_scalar) {
     FourVector this_position = i->position();
     this_position.set_x3(this_position.x3() * one_over_gamma);
     i->set_4position(this_position);
-    // for momenta, though, we CAN do normal Lorentz Boosts, since we
-    // *do* want to transform the zero-component (i.e., the energy).
-    i->boost_momentum(beta);
+    // The simple Lorentz transformation of momenta does not take into account
+    // that nucleus has binding energy. Here we apply the method used
+    // in the JAM code \iref{Nara:1999dz}: p' = p_beam + gamma*p_F.
+    // This formula is derived under assumption that all nucleons have
+    // the same binding energy.
+    ThreeVector mom_i = i->momentum().threevec();
+    i->set_4momentum(i->pole_mass(), mom_i.x1(), mom_i.x2(),
+                     gamma*(beta_scalar*i->pole_mass() + mom_i.x3()));
   }
 }
 
