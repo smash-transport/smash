@@ -138,14 +138,17 @@ void GrandCanThermalizer::thermalize(Particles& particles, double time) {
   }
 
   // Save the indices of cells inside the volume with e > e_crit_
+  cells_to_sample_.clear();
   const size_t lattice_total_cells = lat_->size();
   for (size_t i = 0; i < lattice_total_cells; i++) {
     if ((*lat_)[i].e() > e_crit_) {
       cells_to_sample_.push_back(i);
     }
   }
-  log.info("Volume of the thermalization region [fm]: ",
-           cells_to_sample_.size()*cell_volume_);
+  log.info("Number of cells in the thermalization region = ",
+           cells_to_sample_.size(), ", its total volume [fm^3]: ",
+           cells_to_sample_.size()*cell_volume_, ", in \% of lattice: ",
+           100.0*cells_to_sample_.size()*cell_volume_/lattice_total_cells);
 
   ParticleList mode_list, sampled_list;
   double energy = 0.0;
