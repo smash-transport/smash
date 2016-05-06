@@ -93,7 +93,8 @@ void GrandCanThermalizer::sample_in_random_cell(ParticleList& plist,
 }
 
 void GrandCanThermalizer::update_lattice(const Particles& particles,
-                                         const DensityParameters& dens_par) {
+                                         const DensityParameters& dens_par,
+                                         bool ignore_cells_under_treshold) {
   const DensityType dens_type = DensityType::Hadron;
   const LatticeUpdate update = LatticeUpdate::EveryFixedInterval;
   update_general_lattice(lat_.get(), update, dens_type, dens_par, particles);
@@ -101,7 +102,8 @@ void GrandCanThermalizer::update_lattice(const Particles& particles,
     /* If energy density is definitely below e_crit -
        no need to find T, mu, etc. So if e = T00 - T0i*vi <=
        T00 + sum abs(T0i) < e_crit, no efforts are necessary. */
-    if (node.Tmu0().x0() +
+    if (!ignore_cells_under_treshold ||
+        node.Tmu0().x0() +
         std::abs(node.Tmu0().x1()) +
         std::abs(node.Tmu0().x2()) +
         std::abs(node.Tmu0().x3()) >= e_crit_) {

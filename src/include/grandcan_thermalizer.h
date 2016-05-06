@@ -68,7 +68,8 @@ class GrandCanThermalizer {
     return (t > t_start_ &&
             t < t_start_ + n*period_ + clock.timestep_duration());
   }
-  void update_lattice(const Particles& particles, const DensityParameters& par);
+  void update_lattice(const Particles& particles, const DensityParameters& par,
+                      bool ignore_cells_under_treshold = true);
   ThreeVector uniform_in_cell() const;
   void sample_in_random_cell(ParticleList& plist, const double time);
   void thermalize(Particles& particles, double time);

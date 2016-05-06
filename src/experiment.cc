@@ -863,7 +863,9 @@ uint64_t Experiment<Modus>::run_time_evolution_fixed_time_step() {
     /* Perform forced thermalization every fixed time interval if required */
     if (gc_thermalizer_ &&
         gc_thermalizer_->is_time_to_thermalize(parameters_.labclock)) {
-      gc_thermalizer_->update_lattice(particles_, density_param_);
+      const bool ignore_cells_under_treshold = false;
+      gc_thermalizer_->update_lattice(particles_, density_param_,
+                                      ignore_cells_under_treshold);
       gc_thermalizer_->print_statistics();
       gc_thermalizer_->thermalize(particles_,
                                   parameters_.labclock.current_time());
