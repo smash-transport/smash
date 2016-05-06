@@ -144,6 +144,8 @@ void GrandCanThermalizer::thermalize(Particles& particles, double time) {
       cells_to_sample_.push_back(i);
     }
   }
+  log.info("Volume of the thermalization region [fm]: ",
+           cells_to_sample_.size()*cell_volume_);
 
   ParticleList mode_list, sampled_list;
   double energy = 0.0;
@@ -316,6 +318,60 @@ void GrandCanThermalizer::thermalize(Particles& particles, double time) {
   for (auto &particle : sampled_list) {
     particles.insert(particle);
   }
+}
+
+void GrandCanThermalizer::print_statistics() const {
+  struct to_average {
+    double T;
+    double mub;
+    double mus;
+    double nb;
+    double ns;
+  };
+  struct to_average on_lattice = {0.0, 0.0, 0.0, 0.0, 0.0};
+  struct to_average in_therm_reg = {0.0, 0.0, 0.0, 0.0, 0.0};
+  double e_sum_on_lattice = 0.0, e_sum_in_therm_reg = 0.0;
+  for (const auto &node : *lat_) {
+    const double e = node.e();
+    on_lattice.T   += node.T()   * e;
+    on_lattice.mub += node.mub() * e;
+    on_lattice.mus += node.mus() * e;
+    on_lattice.nb  += node.nb()  * e;
+    on_lattice.ns  += node.ns()  * e;
+    e_sum_on_lattice += e;
+    if (e >= e_crit_) {
+      in_therm_reg.T   += node.T()   * e;
+      in_therm_reg.mub += node.mub() * e;
+      in_therm_reg.mus += node.mus() * e;
+      in_therm_reg.nb  += node.nb()  * e;
+      in_therm_reg.ns  += node.ns()  * e;
+      e_sum_in_therm_reg += e;
+    }
+  }
+  if (e_sum_on_lattice > really_small) {
+    on_lattice.T   /= e_sum_on_lattice;
+    on_lattice.mub /= e_sum_on_lattice;
+    on_lattice.mus /= e_sum_on_lattice;
+    on_lattice.nb  /= e_sum_on_lattice;
+    on_lattice.ns  /= e_sum_on_lattice;
+  }
+  if (e_sum_in_therm_reg > really_small) {
+    in_therm_reg.T   /= e_sum_in_therm_reg;
+    in_therm_reg.mub /= e_sum_in_therm_reg;
+    in_therm_reg.mus /= e_sum_in_therm_reg;
+    in_therm_reg.nb  /= e_sum_in_therm_reg;
+    in_therm_reg.ns  /= e_sum_in_therm_reg;
+  }
+
+  std::cout << "Averages on the lattice - T[GeV], mub[GeV], mus[GeV], "
+            << "nb[fm^-3], ns[fm^-3]: "
+            << on_lattice.T << " " << on_lattice.mub << " " << on_lattice.mus
+            << " " << on_lattice.nb << " " << on_lattice.ns << std::endl;
+  std::cout << "Averages in therm. region - T[GeV], mub[GeV], mus[GeV], "
+            << "nb[fm^-3], ns[fm^-3]: "
+            << in_therm_reg.T << " " << in_therm_reg.mub << " "
+            << in_therm_reg.mus << " " << in_therm_reg.nb << " "
+            << in_therm_reg.ns << std::endl;
 }
 
 ThermLatticeNode::ThermLatticeNode() :
