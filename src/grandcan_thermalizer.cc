@@ -167,9 +167,12 @@ void GrandCanThermalizer::thermalize(Particles& particles, double time) {
   while (S_plus + S_minus > conserved_initial.strangeness()) {
     sample_in_random_cell(mode_list, time);
     for (auto &particle : mode_list) {
-      if (particle.pdgcode().strangeness() < 0) {
+      const int s_part = particle.pdgcode().strangeness();
+      if (s_part < 0 &&
+          // Do not allow particles with S = -2 or -3 spoil the total sum
+          S_plus + S_minus + s_part >= conserved_initial.strangeness()) {
         sampled_list.push_back(particle);
-        S_minus += particle.pdgcode().strangeness();
+        S_minus += s_part;
       }
     }
   }
