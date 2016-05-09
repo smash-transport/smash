@@ -290,8 +290,9 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     dilepton_finder_ = make_unique<DecayActionsFinderDilepton>();
   }
   if (photons_switch) {
+    number_of_fractional_photons = config.take({"Output", "Photons", "Fractions"}, false);
     photon_finder_ = make_unique<ScatterActionsFinderPhoton>(
-        config, parameters_, two_to_one, two_to_two);
+        config, parameters_, two_to_one, two_to_two, number_of_fractional_photons);
   }
   if (config.has_value({"Collision_Term", "Pauli_Blocking"})) {
     log.info() << "Pauli blocking is ON.";
@@ -744,7 +745,7 @@ void Experiment<Modus>::write_photon_action(
     // loop over action to get many fractional photons
     // where to store number_of_fractional_photons? -> needed for weighing?
     // maybe read in from config file?
-    for (int i = 0; i < ScatterActionPhoton::number_of_fractional_photons;
+    for (int i = 0; i < number_of_fractional_photons;
          i++) {
       action.generate_final_state();
       const FourVector r_interaction = action.get_interaction_point();

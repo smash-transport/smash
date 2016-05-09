@@ -288,6 +288,9 @@ class Experiment : public ExperimentBase {
   /// The (Scatter) Actions Finder for Direct Photons
   std::unique_ptr<ActionFinderInterface> photon_finder_;
 
+  /// Number of fractional photons produced per single reaction
+  int number_of_fractional_photons = 100;
+
   /// Lattices holding different physical quantities
 
   /** Baryon density, isospin projection density, custom density.

@@ -19,8 +19,9 @@ class ScatterActionPhoton : public ScatterAction {
  public:
   // using ScatterAction::ScatterAction;
   ScatterActionPhoton(const ParticleData &in_part1,
-                      const ParticleData &in_part2, float time)
-      : ScatterAction(in_part1, in_part2, time) {}
+                      const ParticleData &in_part2, float time, int nofp)
+      : ScatterAction(in_part1, in_part2, time),
+        number_of_fractional_photons(nofp) {}
 
   // ScatterActionPhoton():
   // ScatterAction(ParticleData(ParticleType::find(0x111)),
@@ -28,17 +29,17 @@ class ScatterActionPhoton : public ScatterAction {
 
   void generate_final_state() override;
   float raw_weight_value() const override { return weight_; }
+  void set_weight(float weight) {weight_ = weight;}
   float cross_section() const override {
     if (cross_section_photons_ < really_small) {
       return cross_section_photons_;
     } else
       return total_cross_section_;
   }
-
   CollisionBranchList two_to_two_cross_sections() override;
-  const static int number_of_fractional_photons = 100;
 
  private:
+  int const number_of_fractional_photons;
   float weight_ = 0.0;
   /** List of possible collisions producing photons */
   CollisionBranchList collision_channels_photons_;
