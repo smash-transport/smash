@@ -17,10 +17,14 @@ namespace Smash {
 
 class ScatterActionPhoton : public ScatterAction {
  public:
-  using ScatterAction::ScatterAction;
-  // ScatterActionPhoton(const ParticleData &in_part1, const ParticleData
-  // &in_part2, float time_of_execution):
-  //  ScatterAction(in_part1, in_part2, time_of_execution){}
+  // using ScatterAction::ScatterAction;
+  ScatterActionPhoton(const ParticleData &in_part1,
+                      const ParticleData &in_part2, float time)
+      : ScatterAction(in_part1, in_part2, time) {}
+
+  // ScatterActionPhoton():
+  // ScatterAction(ParticleData(ParticleType::find(0x111)),
+  // ParticleData(ParticleType::find(0x111)), 1.0){}
 
   void generate_final_state() override;
   float raw_weight_value() const override { return weight_; }
@@ -39,6 +43,7 @@ class ScatterActionPhoton : public ScatterAction {
   /** List of possible collisions producing photons */
   CollisionBranchList collision_channels_photons_;
   float cross_section_photons_ = 0.0;
+  const static int num_tab_pts = 200;
   enum ReactionType {
     pi_pi,
     pi0_pi,
@@ -49,8 +54,8 @@ class ScatterActionPhoton : public ScatterAction {
     no_reaction
   };
   ReactionType reac = no_reaction;
-  float pi_pi_rho0(const float M, const float s, const float p_cm_2) const;
-  float pi_pi0_rho(const float M, const float s, const float p_cm_2) const;
+  float pi_pi_rho0(const float M, const float s) const;
+  float pi_pi0_rho(const float M, const float s) const;
   float diff_cross_section(float t) const;
 };
 
