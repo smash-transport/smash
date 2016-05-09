@@ -290,7 +290,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     dilepton_finder_ = make_unique<DecayActionsFinderDilepton>();
   }
   if (photons_switch) {
-    number_of_fractional_photons = config.take({"Output", "Photons", "Fractions"}, false);
+    number_of_fractional_photons = config.take({"Output", "Photons", "Fractions"});
     photon_finder_ = make_unique<ScatterActionsFinderPhoton>(
         config, parameters_, two_to_one, two_to_two, number_of_fractional_photons);
   }
