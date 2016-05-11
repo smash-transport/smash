@@ -175,6 +175,24 @@ static std::string antiname(const std::string &name, PdgCode code) {
   return basename+charge;
 }
 
+/* Construct a charge string, given the charge as integer. */
+static std::string chargestr(int charge) {
+  switch (charge) {
+  case 2:
+    return "⁺⁺";
+  case 1:
+    return "⁺";
+  case 0:
+    return "⁰";
+  case -1:
+    return "⁻";
+  case -2:
+    return "⁻⁻";
+  default:
+    throw std::runtime_error("Invalid charge " + charge);
+  }
+}
+
 void ParticleType::create_type_list(const std::string &input) {  // {{{
   const auto &log = logger<LogArea::ParticleType>();
   static ParticleTypeList type_list;
@@ -184,24 +202,41 @@ void ParticleType::create_type_list(const std::string &input) {  // {{{
     std::istringstream lineinput(line.text);
     std::string name;
     float mass, width;
-    PdgCode pdgcode;
-    lineinput >> name >> mass >> width >> pdgcode;
+    std::array<PdgCode,4> pdgcode;
+    lineinput >> name >> mass >> width >> pdgcode[0];
     if (lineinput.fail()) {
       throw ParticleType::LoadFailure(build_error_string(
           "While loading the ParticleType data:\nFailed to convert the input "
-          "string to the expected data types.",
-          line));
+          "string to the expected data types.", line));
+    }
+    // read additional PDG codes (if present)
+    unsigned int n = 1;  // number of PDG codes found
+    while (!lineinput.eof() && n<pdgcode.size()) {
+      lineinput >> pdgcode[n++];
+      if (lineinput.fail()) {
+        throw ParticleType::LoadFailure(build_error_string(
+            "While loading the ParticleType data:\nFailed to convert the input "
+            "string to the expected data types.", line));
+      }
     }
     ensure_all_read(lineinput, line);
 
-    type_list.emplace_back(name, mass, width, pdgcode);
-    log.debug() << "Setting     particle type: " << type_list.back();
-    if (pdgcode.has_antiparticle()) {
-      /* add corresponding antiparticle */
-      PdgCode anti = pdgcode.get_antiparticle();
-      name = antiname(name, pdgcode);
-      type_list.emplace_back(name, mass, width, anti);
-      log.debug() << "Setting antiparticle type: " << type_list.back();
+    // add all states to type list
+    for (unsigned int i=0; i<n; i++) {
+      std::string full_name = name;
+      if (n>1) {
+        // for multiplets: add charge string to name
+        full_name += chargestr(pdgcode[i].charge());
+      }
+      type_list.emplace_back(full_name, mass, width, pdgcode[i]);
+      log.debug() << "Setting     particle type: " << type_list.back();
+      if (pdgcode[i].has_antiparticle()) {
+        /* add corresponding antiparticle */
+        PdgCode anti = pdgcode[i].get_antiparticle();
+        full_name = antiname(full_name, pdgcode[i]);
+        type_list.emplace_back(full_name, mass, width, anti);
+        log.debug() << "Setting antiparticle type: " << type_list.back();
+      }
     }
   }
   type_list.shrink_to_fit();
