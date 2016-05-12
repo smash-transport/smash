@@ -88,31 +88,41 @@ inline float post_ff_sqr(float m, float M0, float srts0, float L) {
 
 // electromagnetic transition form factors for the dilepton dalitz decays
 
-/** Electromagnetic transition form factor for pi0 -> gamma e+ e-,
- * taken from \iref{Landsberg:1986fd}, as a function of the dilepton mass. */
-inline float form_factor_pi(float mass) {
-  return 1.+5.5*mass*mass;
+/** Electromagnetic transition form factor for P → γ e⁺ e⁻, with a
+ * pseudoscalar meson P = π⁰,η,η', as a function of the dilepton mass.
+ * For the π⁰ see \iref{Landsberg:1986fd}. For the η the Lambda parameter is
+ * fitted to NA60 data, see \iref{Arnaldi:2009aa}. */
+inline float em_form_factor_ps(PdgCode pdg, float mass) {
+  switch (pdg.code()) {
+  case 0x111:  /* π⁰ */
+    return 1. + 5.5*mass*mass;
+  case 0x221:  /* η */ {
+    const float lambda_eta = 0.716;
+    const float m_over_eta = mass / lambda_eta;
+    return 1. / (1. - m_over_eta*m_over_eta);
+  }
+  default:  /* η' etc */
+    return 1.;  // use QED approximation
+  }
 }
 
-/** Electromagnetic transition form factor for eta -> gamma e+ e-,
- * taken from \iref{Landsberg:1986fd}, as a function of the dilepton mass.
- * The Lambda parameter is fitted to NA60 data, see \iref{Arnaldi:2009aa}. */
-inline float form_factor_eta(float mass) {
-  const float lambda_eta = 0.716;
-  const float m_over_eta = mass / lambda_eta;
-  return 1. / (1. - m_over_eta*m_over_eta);
-}
-
-/** Squared electromagnetic transition form factor for omega -> pi0 e+ e-,
- * taken from \iref{Bratkovskaya:1996qe}, as a function of the dilepton mass. */
-inline float form_factor_sqr_omega(float mass) {
-  constexpr float lambda = 0.65;
-  constexpr float gamma = 0.075;
-  constexpr float lambda_sqr = lambda * lambda;
-  constexpr float gamma_sqr = gamma * gamma;
-  const float tmp = lambda_sqr - mass*mass;
-  const float denom = tmp*tmp + lambda_sqr*gamma_sqr;
-  return lambda_sqr * lambda_sqr / denom;
+/** Squared electromagnetic transition form factor for V → π⁰ e⁺ e⁻, with a
+ * vector meson V = ω,φ, as a function of the dilepton mass.
+ * For the ω see \iref{Bratkovskaya:1996qe}. */
+inline float em_form_factor_sqr_vec(PdgCode pdg, float mass) {
+  switch (pdg.code()) {
+  case 0x223:  /* ω */ {
+    constexpr float lambda = 0.65;
+    constexpr float gamma = 0.075;
+    constexpr float lambda_sqr = lambda * lambda;
+    constexpr float gamma_sqr = gamma * gamma;
+    const float tmp = lambda_sqr - mass*mass;
+    const float denom = tmp*tmp + lambda_sqr*gamma_sqr;
+    return lambda_sqr * lambda_sqr / denom;
+  }
+  default:  /* φ etc */
+    return 1.;  // use QED approximation
+  }
 }
 
 /** Electromagnetic transition form factor for Delta -> N e+ e-

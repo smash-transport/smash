@@ -388,18 +388,7 @@ float ThreeBodyDecayDilepton::diff_width(float m_par, float m_dil,
     case 0x111: case 0x221: case 0x331:  /* pseudoscalars: π⁰, η, η' */ {
       // width for decay into 2γ
       const float gamma_2g = t->get_partial_width(m_par, photon, photon);
-      float ff = 1.;         // form factor
-      switch (pdg.code()) {
-      case 0x111:  /* π⁰ */
-        ff = form_factor_pi(m_dil);
-        break;
-      case 0x221:  /* η */
-        ff = form_factor_eta(m_dil);
-        break;
-      case 0x331:  /* η' */
-        ff = 1.;  // use QED approximation for now
-        break;
-      }
+      float ff = em_form_factor_ps(pdg, m_dil);  // form factor
       /// see \iref{Landsberg:1986fd}, equation (3.8)
       return (4.*alpha/(3.*M_PI)) * gamma_2g/m_dil
                                   * pow(1.-m_dil/m_par*m_dil/m_par, 3.) * ff*ff;
@@ -407,12 +396,7 @@ float ThreeBodyDecayDilepton::diff_width(float m_par, float m_dil,
     case 0x223: case 0x333: /* vectors: ω, φ */ {
       // width for decay into π⁰γ
       const float gamma_pig = t->get_partial_width(m_par, pi0, photon);
-      float ff_sqr = 1.;     // form factor squared
-      if (pdg.code() == 0x223) {  /* ω */
-        ff_sqr = form_factor_sqr_omega(m_dil);
-      } else {                    /* φ */
-        ff_sqr = 1.;  // use QED approximation for now
-      }
+      float ff_sqr = em_form_factor_sqr_vec(pdg, m_dil);  // form factor squared
       /// see \iref{Landsberg:1986fd}, equation (3.4)
       const float n1 = m_par_sqr - m_other_sqr;
       const float rad = pow(1. + m_dil_sqr/n1, 2)
