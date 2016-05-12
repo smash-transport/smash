@@ -325,9 +325,8 @@ ThreeBodyDecayDilepton::ThreeBodyDecayDilepton(ParticleTypePtr mother,
      part_types[1]->pdgcode().string() + " " +
      part_types[2]->pdgcode().string());
   }
-  PdgCode pdg_par = mother->pdgcode();
-  int non_lepton_position = -1;
 
+  int non_lepton_position = -1;
   for (int i = 0; i < 3; ++i) {
     if (!particle_types_[i]->is_lepton()) {
       non_lepton_position = i;
@@ -335,7 +334,7 @@ ThreeBodyDecayDilepton::ThreeBodyDecayDilepton(ParticleTypePtr mother,
     }
   }
 
-  if (pdg_par == 0x0 || non_lepton_position == -1) {
+  if (mother->pdgcode() == 0x0 || non_lepton_position == -1) {
     throw std::runtime_error("Error: Unsupported dilepton Dalitz decay!");
   }
 
@@ -358,8 +357,8 @@ ThreeBodyDecayDilepton::ThreeBodyDecayDilepton(ParticleTypePtr mother,
                 }
                 return integrate(bottom, top,
                                 [&](float m_dil) {
-                                  return diff_width(m_parent, m_dil,
-                                                    m_other, pdg_par);
+                                  return diff_width(m_parent, m_dil, m_other,
+                                                    mother);
                                 }).value();
                 });
   }
@@ -370,7 +369,7 @@ bool ThreeBodyDecayDilepton::has_mother(ParticleTypePtr mother) const {
 }
 
 float ThreeBodyDecayDilepton::diff_width(float m_par, float m_dil,
-                                         float m_other, PdgCode pdg) {
+                                         float m_other, ParticleTypePtr t) {
   // check threshold
   if (m_par < m_dil + m_other) {
     return 0;
@@ -382,21 +381,22 @@ float ThreeBodyDecayDilepton::diff_width(float m_par, float m_dil,
   const float m_par_cubed = m_par * m_par*m_par;
   const float m_other_sqr = m_other*m_other;
 
+  const ParticleType &photon = ParticleType::find(0x22);
+  const ParticleType &pi0 = ParticleType::find(0x111);
+  PdgCode pdg = t->pdgcode();
   switch (pdg.code()) {
     case 0x111: case 0x221: case 0x331:  /* pseudoscalars: π⁰, η, η' */ {
-      float gamma_2g = 0.;   // width for decay into 2γ (in GeV)
+      // width for decay into 2γ
+      const float gamma_2g = t->get_partial_width(m_par, photon, photon);
       float ff = 1.;         // form factor
       switch (pdg.code()) {
       case 0x111:  /* π⁰ */
-        gamma_2g = 7.6e-9;
         ff = form_factor_pi(m_dil);
         break;
       case 0x221:  /* η */
-        gamma_2g = 5.16e-7;
         ff = form_factor_eta(m_dil);
         break;
       case 0x331:  /* η' */
-        gamma_2g = 4.36e-6;
         ff = 1.;  // use QED approximation for now
         break;
       }
@@ -405,13 +405,12 @@ float ThreeBodyDecayDilepton::diff_width(float m_par, float m_dil,
                                   * pow(1.-m_dil/m_par*m_dil/m_par, 3.) * ff*ff;
     }
     case 0x223: case 0x333: /* vectors: ω, φ */ {
-      float gamma_pig = 0.;  // width for decay into π⁰γ (in GeV)
+      // width for decay into π⁰γ
+      float gamma_pig = t->get_partial_width(m_par, pi0, photon);
       float ff_sqr = 1.;     // form factor squared
       if (pdg.code() == 0x223) {  /* ω */
-        gamma_pig = 7.03e-4;
         ff_sqr = form_factor_sqr_omega(m_dil);
       } else {                    /* φ */
-        gamma_pig = 5.41e-6;
         ff_sqr = 1.;  // use QED approximation for now
       }
       /// see \iref{Landsberg:1986fd}, equation (3.4)

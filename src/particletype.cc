@@ -396,6 +396,24 @@ DecayBranchList ParticleType::get_partial_widths_dilepton(const float m) const {
   return partial;
 }
 
+float ParticleType::get_partial_width(const float m,
+                                      const ParticleType &t_a,
+                                      const ParticleType &t_b) const {
+  /* Get all decay modes. */
+  const auto &decaymodes = decay_modes().decay_mode_list();
+
+  /* Find the right one(s) and add up corresponding widths. */
+  float w = 0.;
+  for (const auto &mode : decaymodes) {
+    float partial_width_at_pole = width_at_pole()*mode->weight();
+    const ParticleTypePtrList l = {&t_a, &t_b};
+    if (mode->type().has_particles(l)) {
+      w += mode->type().width(mass(), partial_width_at_pole, m);
+    }
+  }
+  return w;
+}
+
 float ParticleType::get_partial_in_width(const float m,
                                          const ParticleData &p_a,
                                          const ParticleData &p_b) const {
