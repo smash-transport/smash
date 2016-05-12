@@ -258,6 +258,9 @@ class PdgCode {
   /// Returns whether this PDG code identifies a baryon.
   inline bool is_baryon() const { return is_hadron() && digits_.n_q1_ != 0; }
 
+  /// Returns whether this PDG code identifies a meson.
+  inline bool is_meson() const { return is_hadron() && digits_.n_q1_ == 0; }
+
   /// Is this a nucleon (p, n)?
   inline bool is_nucleon() const {
       return (code() == 0x2212) || (code() == 0x2112);

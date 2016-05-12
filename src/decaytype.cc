@@ -381,11 +381,12 @@ float ThreeBodyDecayDilepton::diff_width(float m_par, float m_dil,
   const float m_par_cubed = m_par * m_par*m_par;
   const float m_other_sqr = m_other*m_other;
 
-  const ParticleType &photon = ParticleType::find(0x22);
-  const ParticleType &pi0 = ParticleType::find(0x111);
   PdgCode pdg = t->pdgcode();
-  switch (pdg.code()) {
-    case 0x111: case 0x221: case 0x331:  /* pseudoscalars: π⁰, η, η' */ {
+  if (pdg.is_meson()) {
+    const ParticleType &photon = ParticleType::find(0x22);
+    const ParticleType &pi0 = ParticleType::find(0x111);
+    switch (pdg.spin()) {
+    case 0:  /* pseudoscalars: π⁰, η, η' */ {
       // width for decay into 2γ
       const float gamma_2g = t->get_partial_width(m_par, photon, photon);
       float ff = em_form_factor_ps(pdg, m_dil);  // form factor
@@ -393,7 +394,7 @@ float ThreeBodyDecayDilepton::diff_width(float m_par, float m_dil,
       return (4.*alpha/(3.*M_PI)) * gamma_2g/m_dil
                                   * pow(1.-m_dil/m_par*m_dil/m_par, 3.) * ff*ff;
     }
-    case 0x223: case 0x333: /* vectors: ω, φ */ {
+    case 2: /* vectors: ω, φ */ {
       // width for decay into π⁰γ
       const float gamma_pig = t->get_partial_width(m_par, pi0, photon);
       float ff_sqr = em_form_factor_sqr_vec(pdg, m_dil);  // form factor squared
@@ -409,6 +410,12 @@ float ThreeBodyDecayDilepton::diff_width(float m_par, float m_dil,
                * pow(rad, 3./2.) * ff_sqr;
       }
     }
+    default:
+      throw std::runtime_error("Bad meson in ThreeBodyDecayDilepton: "
+                               + pdg.string());
+    }
+  } else if (pdg.is_baryon()) {
+    switch (pdg.code()) {
     case 0x2214: case -0x2214:
     case 0x2114: case -0x2114:  /* Δ⁺, Δ⁰ (and antiparticles) */ {
       /// see \iref{Krivoruchenko:2001hs}
@@ -423,8 +430,12 @@ float ThreeBodyDecayDilepton::diff_width(float m_par, float m_dil,
       return 2.*alpha/(3.*M_PI) * gamma_vi/m_dil;
     }
     default:
-      throw std::runtime_error("Error in ThreeBodyDecayDilepton: "
+      throw std::runtime_error("Bad baryon in ThreeBodyDecayDilepton: "
                                + pdg.string());
+    }
+  } else {
+    throw std::runtime_error("Non-hadron in ThreeBodyDecayDilepton: "
+                             + pdg.string());
   }
 }
 
