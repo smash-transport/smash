@@ -406,7 +406,7 @@ float ThreeBodyDecayDilepton::diff_width(float m_par, float m_dil,
     }
     case 0x223: case 0x333: /* vectors: ω, φ */ {
       // width for decay into π⁰γ
-      float gamma_pig = t->get_partial_width(m_par, pi0, photon);
+      const float gamma_pig = t->get_partial_width(m_par, pi0, photon);
       float ff_sqr = 1.;     // form factor squared
       if (pdg.code() == 0x223) {  /* ω */
         ff_sqr = form_factor_sqr_omega(m_dil);
