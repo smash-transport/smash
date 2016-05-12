@@ -10,7 +10,6 @@
  *
  */
 
-#include "include/pythia.h"
 
 #include "include/action.h"
 #include "include/constants.h"
@@ -20,6 +19,7 @@
 #include "include/particledata.h"
 #include "include/pdgcode.h"
 #include "include/random.h"
+#include "include/scatteraction.h"
 
 #include "Pythia8/Pythia.h"
 
@@ -28,8 +28,7 @@ namespace Smash {
 
 /* This function will generate outgoing particles in CM frame
  * from a hard process. */
-  ParticleList string_excitation(const ParticleList &incoming_particles_,
-                                 const float formation_time_) {
+    ParticleList ScatterAction::string_excitation(const ParticleList &incoming_particles_, const float formation_time_) {
     const auto &log = logger<LogArea::Pythia>();
 /// Disable floating point exception trap for Pythia
   {

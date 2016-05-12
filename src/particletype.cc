@@ -95,11 +95,6 @@ const ParticleType &ParticleType::find(PdgCode pdgcode) {
   return *found;
 }
 
-const ParticleType &ParticleType::pythiafind() {
-  static ParticleType pythia_type("PY", 0.01f, 0.f, 0x661);
-  return pythia_type;
-}
-
 bool ParticleType::exists(PdgCode pdgcode) {
   const auto found = std::lower_bound(
       all_particle_types->begin(), all_particle_types->end(), pdgcode,

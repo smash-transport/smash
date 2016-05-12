@@ -14,7 +14,6 @@
 #include "include/kinematics.h"
 #include "include/logging.h"
 #include "include/pdgcode.h"
-#include "include/pythia.h"
 #include "include/random.h"
 
 namespace Smash {
