@@ -109,7 +109,7 @@ void ScatterAction::add_all_processes(float elastic_parameter,
   if (strings_switch &&
      sqrt_s() >= incoming_particles_[0].type().mass() +
                  incoming_particles_[1].type().mass() + 2.) {
-  /* Only allow string excitation for the particles that PYTHIA can cope 
+  /* Only allow string excitation for the particles that PYTHIA can cope
    * with, i.e. p/n, p/nbar, pi+, pi- and pi0 */
     bool a_in_pythia = false;
     bool b_in_pythia = false;
