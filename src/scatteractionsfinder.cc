@@ -54,11 +54,11 @@ ScatterActionsFinder::ScatterActionsFinder(
       strings_switch_(strings_switch),
       formation_time_(config.take({"Collision_Term",
                                    "Formation_Time"}, 1.0f)) {
-      if (is_constant_elastic_isotropic()) {
-        const auto &log = logger<LogArea::FindScatter>();
-        log.info("Constant elastic isotropic cross-section mode:",
-        " using ", elastic_parameter_, " mb as maximal cross-section.");
-      }
+        if (is_constant_elastic_isotropic()) {
+          const auto &log = logger<LogArea::FindScatter>();
+          log.info("Constant elastic isotropic cross-section mode:",
+          " using ", elastic_parameter_, " mb as maximal cross-section.");
+        }
       }
 
 ScatterActionsFinder::ScatterActionsFinder(
