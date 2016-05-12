@@ -192,7 +192,7 @@ class ScatterAction : public Action {
   /** Do this collision isotropically. */
   bool isotropic_ = false;
 
-  /** Formation time parameter */
+  /** Formation time parameter for string fragmentation*/
   float formation_time_ = 1.0f;
 
  private:
