@@ -216,8 +216,8 @@ CollisionBranchList ScatterActionPhoton::two_to_two_cross_sections() {
           m3 = part_out->mass();
           if (tabulation_pi_pi_rho0 == nullptr) {
             tabulation_pi_pi_rho0 = make_unique<Tabulation>(
-                2 * m_pi, 15.0 - 2 * m_pi, num_tab_pts, [&](float sqrts1) {
-                  return integrate(2 * m_pi, sqrts1, [&](float M) {
+                2.0f * m_pi, 15.0f - 2.0f * m_pi, num_tab_pts, [&](float sqrts1) {
+                  return integrate(2.0f * m_pi, sqrts1, [&](float M) {
                     return pi_pi_rho0(M, pow(sqrts1, 2)) *
                            part_out->spectral_function(M);
                   });
@@ -231,8 +231,8 @@ CollisionBranchList ScatterActionPhoton::two_to_two_cross_sections() {
         case pi0_pi:
           if (tabulation_pi0_pi_rho == nullptr) {
             tabulation_pi0_pi_rho = make_unique<Tabulation>(
-                2 * m_pi, 15.0 - 2 * m_pi, num_tab_pts, [&](float sqrts1) {
-                  return integrate(2 * m_pi, sqrts1, [&](float M) {
+                2.0f * m_pi, 15.0f - 2.0f * m_pi, num_tab_pts, [&](float sqrts1) {
+                  return integrate(2.0f * m_pi, sqrts1, [&](float M) {
                     return pi_pi0_rho(M, pow(sqrts1, 2)) *
                            part_out->spectral_function(M);
                   });
