@@ -337,31 +337,6 @@ ThreeBodyDecayDilepton::ThreeBodyDecayDilepton(ParticleTypePtr mother,
   if (mother->pdgcode() == 0x0 || non_lepton_position == -1) {
     throw std::runtime_error("Error: Unsupported dilepton Dalitz decay!");
   }
-
-  if (!mother->is_stable()) {
-    // lepton mass
-    const float m_l = particle_types_[(non_lepton_position+1)%3]->mass();
-    // mass of non-leptonic particle in final state
-    const float m_other = particle_types_[non_lepton_position]->mass();
-
-    // integrate differential width to obtain partial width
-    float M0 = mother->mass();
-    float G0 = mother->width_at_pole();
-    tabulation_
-          = make_unique<Tabulation>(m_other+2*m_l, M0 + 10*G0, num_tab_pts,
-              [&](float m_parent) {
-                const float bottom = 2*m_l;
-                const float top = m_parent-m_other;
-                if (top < bottom) {  // numerical problems at lower bound
-                  return 0.0;
-                }
-                return integrate(bottom, top,
-                                [&](float m_dil) {
-                                  return diff_width(m_parent, m_dil, m_other,
-                                                    mother);
-                                }).value();
-                });
-  }
 }
 
 bool ThreeBodyDecayDilepton::has_mother(ParticleTypePtr mother) const {
@@ -443,9 +418,41 @@ float ThreeBodyDecayDilepton::diff_width(float m_par, float m_dil,
 float ThreeBodyDecayDilepton::width(float, float G0, float m) const {
   if (mother_->is_stable()) {
     return G0;
-  } else {
-    return tabulation_->get_value_linear(m);
   }
+
+  if (!tabulation_) {
+    int non_lepton_position = -1;
+    for (int i = 0; i < 3; ++i) {
+      if (!particle_types_[i]->is_lepton()) {
+        non_lepton_position = i;
+        break;
+      }
+    }
+    // lepton mass
+    const float m_l = particle_types_[(non_lepton_position+1)%3]->mass();
+    // mass of non-leptonic particle in final state
+    const float m_other = particle_types_[non_lepton_position]->mass();
+
+    // integrate differential width to obtain partial width
+    float M0 = mother_->mass();
+    float G0tot = mother_->width_at_pole();
+    tabulation_
+          = make_unique<Tabulation>(m_other+2*m_l, M0 + 10*G0tot, num_tab_pts,
+              [&](float m_parent) {
+                const float bottom = 2*m_l;
+                const float top = m_parent-m_other;
+                if (top < bottom) {  // numerical problems at lower bound
+                  return 0.;
+                }
+                return integrate(bottom, top,
+                                 [&](float m_dil) {
+                                    return diff_width(m_parent, m_dil, m_other,
+                                                      mother_);
+                                 }).value();
+                });
+  }
+
+  return tabulation_->get_value_linear(m);
 }
 
 }  // namespace Smash

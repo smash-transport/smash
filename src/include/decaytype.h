@@ -224,7 +224,7 @@ class ThreeBodyDecayDilepton : public ThreeBodyDecay {
                           ParticleTypePtr t);
   float width(float m0, float G0, float m) const override;
  protected:
-  std::unique_ptr<Tabulation> tabulation_;
+  mutable std::unique_ptr<Tabulation> tabulation_;
   ParticleTypePtr mother_;
 };
 
