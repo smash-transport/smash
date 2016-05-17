@@ -43,11 +43,11 @@ endif()
 ######### Find Pythia8 library #########
 find_package(Pythia REQUIRED)
 if(Pythia_FOUND)
-  include_directories(SYSTEM 
+  include_directories(SYSTEM
 	"${Pythia_INCLUDE_DIRS}"
   )
   set(SMASH_LIBRARIES
-     ${SMASH_LIBRARIES} 
+     ${SMASH_LIBRARIES}
      ${Pythia_LIBRARIES} -ldl
   )
   add_definitions(
