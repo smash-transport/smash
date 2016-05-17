@@ -96,7 +96,7 @@ class ParticleType {
    * This returns e.g. 1 for nucleons, 2 for pions and 3 for Deltas.
    * It is always positive.
    */
-  int isospin() const { return isospin_; }
+  int isospin() const;
 
   /// \copydoc PdgCode::isospin3
   int isospin3() const { return pdgcode_.isospin3(); }
@@ -408,11 +408,6 @@ class ParticleType {
   /** This normalization factor ensures that the spectral function is normalized
    * to unity, when integrated over its full domain. */
   mutable float norm_factor_ = -1.;
-  /** twice the isospin of the particle
-   *
-   * This is filled automatically from pdgcode_.
-   */
-  unsigned int isospin_;
   /** charge of the particle
    *
    * This is filled automatically from pdgcode_.

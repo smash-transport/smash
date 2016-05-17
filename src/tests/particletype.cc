@@ -8,11 +8,16 @@
  */
 
 #include "unittest.h"
+#include "../include/configuration.h"
+#include "../include/logging.h"
 #include "../include/particletype.h"
 
 using namespace Smash;
 
 TEST(assign) {
+  // enable debugging output
+  create_all_loggers(Configuration(""));
+
   PdgCode smashon("9003234");
   // there is a double for mass and a float for width. This is
   // intentional.
@@ -54,17 +59,14 @@ TEST(create_type_list) {
       "K⁰ 0.494 0.0    311\n"
       "N⁺ 0.9383 -1.0 2212\n"
       "N⁰ 0.9396 -1.0 2112\n"
-      "Δ⁺⁺ 1.232 0.117 2224\n"
-      "Δ⁺ 1.232 0.117 2214\n"
-      "Δ⁰ 1.232 0.117 2114\n"
-      "Δ- 1.232 0.117 1114\n"
+      "Δ  1.232 0.117 2224 2214 2114 1114\n"  // full multiplet in one line
       "Λ  1.116 0.0   3122\n"
-      "Σ⁺ 1.189 0.0   3222\n"
+      "Σ  1.189 0.0   3222 3212 3112\n"       // full multiplet in one line
       "e⁻ 0.000511 0.0 11\n"
       "μ⁻ 0.105 0.0 13\n"
       "γ  0.0  0.0  22");
 
-  COMPARE(ParticleType::list_all().size(), 33u);  // 19 given explicitly + 14 antiparticles
+  COMPARE(ParticleType::list_all().size(), 37u);  // 21 given explicitly + 16 antiparticles
 
   // pi0
   ParticleTypePtr type = &ParticleType::find(0x111);
@@ -98,6 +100,17 @@ TEST(create_type_list) {
   COMPARE(type->isospin(), 2);
   COMPARE(type->isospin3(), 0);
   COMPARE(type->isospin3_rel(), 0.f);
+
+  // Delta+
+  type = &ParticleType::find(0x2214);
+  COMPARE(type->mass(), 1.232f);
+  COMPARE(type->width_at_pole(), .117f);
+  COMPARE(type->pdgcode().dump(), 0x2214);
+  COMPARE(type->charge(), 1);
+  COMPARE(type->spin(), 3u);
+  COMPARE(type->isospin(), 3);
+  COMPARE(type->isospin3(), 1);
+  COMPARE(type->isospin3_rel(), 1.f/3.f);
 
   // anti-Delta-
   type = &ParticleType::find(-0x1114);

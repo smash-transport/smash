@@ -8,6 +8,7 @@
  */
 
 #include "include/inputfunctions.h"
+#include "include/stringfunctions.h"
 
 #include <sstream>
 #include <vector>
@@ -36,6 +37,7 @@ std::vector<Line> line_parser(const std::string &input) {
       // only whitespace (or nothing) on this line. Next, please.
       continue;
     }
+    line = trim(line);
     lines.emplace_back(line_number, std::move(line));
     line = std::string();
   }
