@@ -105,7 +105,7 @@ TEST(create_type_list) {
   type = &ParticleType::find(0x2214);
   COMPARE(type->mass(), 1.232f);
   COMPARE(type->width_at_pole(), .117f);
-  COMPARE(type->pdgcode().dump(), 0x2214);
+  COMPARE(type->pdgcode().dump(), 0x2214u);
   COMPARE(type->charge(), 1);
   COMPARE(type->spin(), 3u);
   COMPARE(type->isospin(), 3);
@@ -116,7 +116,7 @@ TEST(create_type_list) {
   type = &ParticleType::find(-0x1114);
   COMPARE(type->mass(), 1.232f);
   COMPARE(type->width_at_pole(), .117f);
-  COMPARE(type->pdgcode().dump(), 0x80001114);
+  COMPARE(type->pdgcode().dump(), 0x80001114u);
   COMPARE(type->charge(), 1);
   COMPARE(type->spin(), 3u);
   COMPARE(type->isospin(), 3);

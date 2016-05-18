@@ -163,7 +163,7 @@ static std::string chargestr(int charge) {
   case -2:
     return "⁻⁻";
   default:
-    throw std::runtime_error("Invalid charge " + charge);
+    throw std::runtime_error("Invalid charge " + std::to_string(charge));
   }
 }
 
