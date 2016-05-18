@@ -50,9 +50,9 @@ void DecayActionDilepton::one_to_three() {
                                           cms_energy - mass_nl);
   const float delta_m = cms_energy - mass_nl - mass_l1 - mass_l2;
 
-  const float diff_width = ThreeBodyDecayDilepton::diff_width(
-                                      cms_energy, dil_mass, mass_nl,
-                                      incoming_particles_[0].type().pdgcode());
+  const float diff_width = ThreeBodyDecayDilepton::diff_width(cms_energy,
+                                                dil_mass, mass_nl,
+                                                &incoming_particles_[0].type());
 
   /* Branching factor, which corrects the shining weight for the differential
    * width at a particular dilepton mass. We do an implicit Monte-Carlo

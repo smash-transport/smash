@@ -129,6 +129,9 @@ class ParticleType {
   /// \copydoc PdgCode::is_baryon
   bool is_baryon() const { return pdgcode_.is_baryon(); }
 
+  /// \copydoc PdgCode::is_meson
+  bool is_meson() const { return pdgcode_.is_meson(); }
+
   /// \copydoc PdgCode::baryon_number
   int baryon_number() const { return pdgcode_.baryon_number(); }
 
@@ -208,6 +211,17 @@ class ParticleType {
   * \param m Invariant mass of the decaying particle.
   */
   DecayBranchList get_partial_widths_dilepton(const float m) const;
+
+  /**
+   * Get the mass-dependent partial width of a resonance with mass m,
+   * decaying into two given daughter particles.
+   *
+   * \param m Invariant mass of the decaying resonance.
+   * \param t_a Type of first daughter particle.
+   * \param t_b Type of second daughter particle.
+   */
+  float get_partial_width(const float m, const ParticleType &t_a,
+                                         const ParticleType &t_b) const;
 
   /**
    * Get the mass-dependent partial in-width of a resonance with mass m,
