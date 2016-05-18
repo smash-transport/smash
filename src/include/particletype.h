@@ -252,10 +252,9 @@ class ParticleType {
   float spectral_function_simple(float m) const;
 
   /**
-  * Resonance mass sampling for 2-particle final state
-  * with *one resonance* and one *stable* particle.
+  * Resonance mass sampling for 2-particle final state with one resonance
+  * (type given by 'this') and one stable particle.
   *
-  * \param[in] this Type of the resonance particle.
   * \param[in] mass_stable Mass of the stable particle.
   * \param[in] cms_energy center-of-mass energy of the 2-particle final state.
   * \param[in] L relative angular momentum of the final-state particles
@@ -268,8 +267,8 @@ class ParticleType {
   /**
   * Resonance mass sampling for 2-particle final state with two resonances.
   *
-  * \param[in] this Type of the first resonance.
-  * \param[in] t2 Type of the second resonance.
+  * \param[in] t2 Type of the second resonance
+  *               (the first resonance is given by 'this').
   * \param[in] cms_energy center-of-mass energy of the 2-particle final state.
   * \param[in] L relative angular momentum of the final-state particles
   *
