@@ -85,10 +85,10 @@ Output:
         Quantities:         ["rho_eckart", "tmn", "tmn_landau", "landau_velocity"]
         Position:           [0.0, 0.0, 0.0]
     Dileptons:
-        Enable:             True
+        Enable:             False
         Format:             Oscar
     Photons:
-        Enable:             True
+        Enable:             False
         Format:             Oscar
         # number of fractional photons produced per single reaction
         Fractions:          100

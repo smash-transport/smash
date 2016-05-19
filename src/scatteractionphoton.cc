@@ -216,7 +216,8 @@ CollisionBranchList ScatterActionPhoton::two_to_two_cross_sections() {
           m3 = part_out->mass();
           if (tabulation_pi_pi_rho0 == nullptr) {
             tabulation_pi_pi_rho0 = make_unique<Tabulation>(
-                2.0f * m_pi, 15.0f - 2.0f * m_pi, num_tab_pts, [&](float sqrts1) {
+                2.0f * m_pi, 15.0f - 2.0f * m_pi, num_tab_pts,
+                [&](float sqrts1) {
                   return integrate(2.0f * m_pi, sqrts1, [&](float M) {
                     return pi_pi_rho0(M, pow(sqrts1, 2)) *
                            part_out->spectral_function(M);
@@ -231,7 +232,8 @@ CollisionBranchList ScatterActionPhoton::two_to_two_cross_sections() {
         case pi0_pi:
           if (tabulation_pi0_pi_rho == nullptr) {
             tabulation_pi0_pi_rho = make_unique<Tabulation>(
-                2.0f * m_pi, 15.0f - 2.0f * m_pi, num_tab_pts, [&](float sqrts1) {
+                2.0f * m_pi, 15.0f - 2.0f * m_pi, num_tab_pts,
+                [&](float sqrts1) {
                   return integrate(2.0f * m_pi, sqrts1, [&](float M) {
                     return pi_pi0_rho(M, pow(sqrts1, 2)) *
                            part_out->spectral_function(M);
@@ -396,32 +398,23 @@ float ScatterActionPhoton::pi_pi0_rho(const float M, const float s) const {
   std::array<float, 2> mandelstam_t = get_t_range(sqrts, m_pi, m_pi, M, 0.0f);
   float t1 = mandelstam_t[1];
   float t2 = mandelstam_t[0];
-  // Does the u-channel exist or not? still a physical debate to hold
-  // float u1 = 2 * m_pi_2 + pow(M, 2) - s - t1;
-  // float u2 = 2 * m_pi_2 + pow(M, 2) - s - t2;
   float xsection = -alpha * g_rho_2 / (16 * s * p_cm_2);
   float e = 1.0 / 3.0 * (s - 2 * pow(M, 2)) / pow(M, 2) /
-            pow(s - pow(M, 2), 2) * (pow(t2, 3) - pow(t1, 3));  //+
-  // 1.0 / 3.0 * (s - 2 * pow(M, 2)) / pow(M, 2) /
-  //   pow(s - pow(M, 2), 2) * (pow(u1, 3) - pow(u2, 3));
+            pow(s - pow(M, 2), 2) * (pow(t2, 3) - pow(t1, 3));
   e += 0.5 * (s - 6 * pow(M, 2)) / pow(M, 2) / (s - pow(M, 2)) *
-       (pow(t2, 2) - pow(t1, 2));  //+
-  // 0.5 * (s - 6 * pow(M, 2)) / pow(M, 2) / (s - pow(M, 2)) *
-  //   (pow(u1, 2) - pow(u2, 2));
+       (pow(t2, 2) - pow(t1, 2));
   t1 += -m_pi_2;
   t2 += -m_pi_2;
-  // u1 += -m_pi_2;
-  // u2 += -m_pi_2;
   if (std::abs(t1) < really_small) {
     t1 = -really_small;
   }
-  if (t2 / t1 /* * u1 / u2 */ <= 0) {
+  if (t2 / t1 <= 0) {
     return 0;
   }
   e += (4 * s * DM / pow(s - pow(M, 2), 2) + m_pi_2 / pow(M, 2) - 4.5) *
-       (t2 - t1 /*+ u1 - u2*/);
-  e += 4 * s * DM / (s - pow(M, 2)) * std::log(t2 / t1 /* * u1 / u2*/);
-  e += 4 * m_pi_2 * DM * ((t2 - t1) / (t2 * t1) /*+ (u1 - u2) / (u1 * u2)*/);
+       (t2 - t1);
+  e += 4 * s * DM / (s - pow(M, 2)) * std::log(t2 / t1);
+  e += 4 * m_pi_2 * DM * ((t2 - t1) / (t2 * t1));
   xsection = xsection * e * to_mb;
   if (xsection > 0) {
     return xsection;

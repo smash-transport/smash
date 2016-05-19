@@ -17,19 +17,12 @@ namespace Smash {
 
 class ScatterActionPhoton : public ScatterAction {
  public:
-  // using ScatterAction::ScatterAction;
   ScatterActionPhoton(const ParticleData &in_part1,
                       const ParticleData &in_part2, float time, int nofp)
       : ScatterAction(in_part1, in_part2, time),
         number_of_fractional_photons(nofp) {}
-
-  // ScatterActionPhoton():
-  // ScatterAction(ParticleData(ParticleType::find(0x111)),
-  // ParticleData(ParticleType::find(0x111)), 1.0){}
-
   void generate_final_state() override;
   float raw_weight_value() const override { return weight_; }
-  void set_weight(float weight) {weight_ = weight;}
   float cross_section() const override {
     if (cross_section_photons_ < really_small) {
       return cross_section_photons_;

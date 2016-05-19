@@ -20,21 +20,18 @@ namespace Smash {
 
 class ScatterActionsFinderPhoton : public ScatterActionsFinder {
  public:
-    /** Initialize the finder with the given parameters. */
+  /** Initialize the finder with the given parameters. */
   ScatterActionsFinderPhoton(Configuration config,
-                       const ExperimentParameters &parameters,
-                       bool two_to_one, bool two_to_two, int nofp):
-    ScatterActionsFinder(config, parameters, two_to_one, two_to_two),
-    number_of_fractional_photons(nofp) {}
+                             const ExperimentParameters &parameters,
+                             bool two_to_one, bool two_to_two, int nofp)
+      : ScatterActionsFinder(config, parameters, two_to_one, two_to_two),
+        number_of_fractional_photons(nofp = 100) {}
   /** Constructor for testing purposes. */
-  ScatterActionsFinderPhoton(float elastic_parameter, int testparticles):
-    ScatterActionsFinder(elastic_parameter, testparticles){}
-
-  /* At the moment no final scattering actions are implemented in SMASH */
-  // ActionList find_final_actions(const Particles &search_list) const override;
+  ScatterActionsFinderPhoton(float elastic_parameter, int testparticles)
+      : ScatterActionsFinder(elastic_parameter, testparticles) {}
 
   /// Number of fractional photons produced per single reaction
-  int number_of_fractional_photons = 100;
+  int number_of_fractional_photons;
 
  private:
   /* Construct only ScatterActionPhoton objects. */
