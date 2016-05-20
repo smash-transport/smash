@@ -12,3 +12,4 @@ build
 *.diff
 *.orig
 *.rej
+.DS_Store

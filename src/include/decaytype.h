@@ -220,11 +220,11 @@ class ThreeBodyDecayDilepton : public ThreeBodyDecay {
    * This differential width is used directly for the dilepton shining weights.
    * It is calculated according to \iref{Weil:2013mya}, eq. (30)-(36).
    */
-  static float diff_width(float m_parent, float m_dil,
-                          float m_other, PdgCode pdg);
+  static float diff_width(float m_parent, float m_dil, float m_other,
+                          ParticleTypePtr t);
   float width(float m0, float G0, float m) const override;
  protected:
-  std::unique_ptr<Tabulation> tabulation_;
+  mutable std::unique_ptr<Tabulation> tabulation_;
   ParticleTypePtr mother_;
 };
 

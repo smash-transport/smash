@@ -15,6 +15,9 @@
 using namespace Smash;
 
 TEST(init_particle_types) {
+  // enable debugging output
+  create_all_loggers(Configuration(""));
+
   Test::create_actual_particletypes();
   Test::create_actual_decaymodes();
 }
@@ -104,4 +107,24 @@ TEST(Roper_in_vs_out_width) {
   compare_in_vs_out_width(t, *the_branch, 1.8);
   compare_in_vs_out_width(t, *the_branch, 1.9);
   compare_in_vs_out_width(t, *the_branch, 2.0);
+}
+
+
+TEST(photon_widths) {
+  // test the photon widths that are used as a baseline for the dilepton Dalitz widths
+  const ParticleType &photon = ParticleType::find(0x22);
+  const ParticleType &pi0 = ParticleType::find(0x111);
+  const ParticleType &eta  = ParticleType::find(0x221);
+  const ParticleType &etap = ParticleType::find(0x331);
+  const ParticleType &omega = ParticleType::find(0x223);
+  const ParticleType &phi = ParticleType::find(0x333);
+
+  const float err = 1E-10;
+
+  COMPARE_ABSOLUTE_ERROR( pi0.get_partial_width( pi0.mass(), photon, photon), 7.699999749e-09f, err);
+  COMPARE_ABSOLUTE_ERROR( eta.get_partial_width( eta.mass(), photon, photon), 5.189818921e-07f, err);
+  COMPARE_ABSOLUTE_ERROR(etap.get_partial_width(etap.mass(), photon, photon), 4.393343261e-06f, err);
+
+  COMPARE_ABSOLUTE_ERROR(omega.get_partial_width(omega.mass(), pi0, photon), 0.0007108373102f, err);
+  COMPARE_ABSOLUTE_ERROR(  phi.get_partial_width(  phi.mass(), pi0, photon), 5.470464203e-06f, err);
 }

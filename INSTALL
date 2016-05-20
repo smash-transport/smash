@@ -58,6 +58,20 @@ Alternatively the compiler can also be specified to cmake like this:
     cmake .. -DCMAKE_CXX_COMPILER=g++
 
 
+Compiling SMASH on Mac OS
+-------------------------
+
+Unfortunately the Clang Compiler shipped with XCode or the Command Line Tools from Apple does not support all C++11 features that we use.
+
+The workaround is to install the official clang version. For example, this can be done with Homebrew (http://brew.sh):
+
+    brew install llvm --with--compiler-rt --with-libcxx --with-clang
+
+After that you have to instruct cmake that it should use the newly installed clang compiler and also tell the linker where the libraries are by altering some cmake flags. Enter cmake like below:
+
+    cmake .. -DCMAKE_CXX_COMPILER=/usr/local/opt/llvm/bin/clang++ -DCMAKE_EXE_LINKER_FLAGS="-L/usr/local/opt/llvm/lib -lc++abi" -DCMAKE_CXX_FLAGS=-I/usr/local/opt/llvm/include
+
+
 Disabling ROOT support
 ---------------------------
 
