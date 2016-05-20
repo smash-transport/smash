@@ -424,6 +424,7 @@ float ScatterActionPhoton::pi_pi0_rho(const float M, const float s) const {
 }
 
 float ScatterActionPhoton::diff_cross_section(float t) const {
+  const float to_mb = 0.3894;
   const float m_rho = ParticleType::find(0x113).mass();
   const float m_rho_2 = pow(m_rho, 2);
   const float m_pi = ParticleType::find(0x111).mass();
@@ -525,7 +526,7 @@ float ScatterActionPhoton::diff_cross_section(float t) const {
       // never reached
       break;
   }
-  return diff_xsection;
+  return diff_xsection*to_mb;
 }
 
 }  // namespace Smash
