@@ -27,7 +27,7 @@ namespace Smash {
 /* This function will generate outgoing particles in CM frame
  * from a hard process. */
 ParticleList ScatterAction::string_excitation(
-    const ParticleList &incoming_particles_, float formation_time) {
+    const ParticleList &incoming_particles, float formation_time) {
   const auto &log = logger<LogArea::Pythia>();
   // Disable floating point exception trap for Pythia
   {
@@ -56,18 +56,18 @@ ParticleList ScatterAction::string_excitation(
     pythia.readString(buffer1.str());
     /* set the incoming particles */
     std::stringstream buffer2;
-    buffer2 << "Beams:idA = " << incoming_particles_[0].type().pdgcode();
+    buffer2 << "Beams:idA = " << incoming_particles[0].type().pdgcode();
     pythia.readString(buffer2.str());
     log.debug("First particle in string excitation: ",
-              incoming_particles_[0].type().pdgcode());
+              incoming_particles[0].type().pdgcode());
     std::stringstream buffer3;
-    buffer3 << "Beams:idB = " << incoming_particles_[1].type().pdgcode();
+    buffer3 << "Beams:idB = " << incoming_particles[1].type().pdgcode();
     log.debug("Second particle in string excitation: ",
-              incoming_particles_[1].type().pdgcode());
+              incoming_particles[1].type().pdgcode());
     pythia.readString(buffer3.str());
     /* Calculate the center-of-mass energy of this collision */
-    double sqrts = (incoming_particles_[0].momentum() +
-                    incoming_particles_[1].momentum()).abs();
+    double sqrts = (incoming_particles[0].momentum() +
+                    incoming_particles[1].momentum()).abs();
     std::stringstream buffer4;
     buffer4 << "Beams:eCM = " << sqrts;
     pythia.readString(buffer4.str());
@@ -77,7 +77,7 @@ ParticleList ScatterAction::string_excitation(
     /* Short notation for Pythia event */
     Pythia8::Event &event = pythia.event;
     pythia.next();
-    ParticleList outgoing_particles_;
+    ParticleList outgoing_particles;
     ParticleList new_intermediate_particles;
     for (int i = 0; i < event.size(); i++) {
       if (event[i].isFinal()) {
@@ -86,15 +86,15 @@ ParticleList ScatterAction::string_excitation(
           log.debug("PDG ID from Pythia:", pythia_id);
           const std::string s = std::to_string(pythia_id);
           PdgCode pythia_code(s);
-          ParticleData new_particle_(ParticleType::find(pythia_code));
+          ParticleData new_particle(ParticleType::find(pythia_code));
           FourVector momentum;
           momentum.set_x0(event[i].e());
           momentum.set_x1(event[i].px());
           momentum.set_x2(event[i].py());
           momentum.set_x3(event[i].pz());
-          new_particle_.set_4momentum(momentum);
+          new_particle.set_4momentum(momentum);
           log.debug("4-momentum from Pythia: ", momentum);
-          new_intermediate_particles.push_back(new_particle_);
+          new_intermediate_particles.push_back(new_particle);
         }
       }
     }
@@ -106,8 +106,8 @@ ParticleList ScatterAction::string_excitation(
               [&](ParticleData i, ParticleData j) {
                 return fabs(i.momentum().x3()) > fabs(j.momentum().x3());
               });
-    for (ParticleData data_ : new_intermediate_particles) {
-      log.debug("Particle momenta after sorting: ", data_.momentum());
+    for (ParticleData data : new_intermediate_particles) {
+      log.debug("Particle momenta after sorting: ", data.momentum());
       /* The hadrons are not immediately formed, currently a formation time of
        * 1 fm is universally applied and cross section is reduced to zero and
        * to a fraction corresponding to the valence quark content. Hadrons
@@ -116,50 +116,50 @@ ParticleList ScatterAction::string_excitation(
       /* Additional suppression factor to mimic coherence taken as 0.7
        * from UrQMD (CTParam(59) */
       const float suppression_factor = 0.7;
-      if (incoming_particles_[0].is_baryon() ||
-          incoming_particles_[1].is_baryon()) {
-        if (data_ == 0) {
-          data_.set_cross_section_scaling_factor(suppression_factor * 0.66);
-        } else if (data_ == 1) {
-          data_.set_cross_section_scaling_factor(suppression_factor * 0.34);
+      if (incoming_particles[0].is_baryon() ||
+          incoming_particles[1].is_baryon()) {
+        if (data == 0) {
+          data.set_cross_section_scaling_factor(suppression_factor * 0.66);
+        } else if (data == 1) {
+          data.set_cross_section_scaling_factor(suppression_factor * 0.34);
         } else {
-          data_.set_cross_section_scaling_factor(suppression_factor * 0.0);
+          data.set_cross_section_scaling_factor(suppression_factor * 0.0);
         }
       } else {
-        if (data_ == 0 || data_ == 1) {
-          data_.set_cross_section_scaling_factor(suppression_factor * 0.50);
+        if (data == 0 || data == 1) {
+          data.set_cross_section_scaling_factor(suppression_factor * 0.50);
         } else {
-          data_.set_cross_section_scaling_factor(suppression_factor * 0.0);
+          data.set_cross_section_scaling_factor(suppression_factor * 0.0);
         }
       }
-      data_.set_formation_time(formation_time * gamma_cm());
-      outgoing_particles_.push_back(data_);
+      data.set_formation_time(formation_time * gamma_cm());
+      outgoing_particles.push_back(data);
     }
     /* If the incoming particles already were unformed, the formation
      * times and cross section scaling factors need to be adjusted */
-    if (incoming_particles_[0].formation_time() >
-        incoming_particles_[0].position().x0()) {
-      outgoing_particles_[0].set_cross_section_scaling_factor(
-          outgoing_particles_[0].cross_section_scaling_factor() *
-          incoming_particles_[0].cross_section_scaling_factor());
-      if (incoming_particles_[0].formation_time() >
-          outgoing_particles_[0].formation_time()) {
-        outgoing_particles_[0].set_formation_time(
-            incoming_particles_[0].formation_time());
+    if (incoming_particles[0].formation_time() >
+        incoming_particles[0].position().x0()) {
+      outgoing_particles[0].set_cross_section_scaling_factor(
+          outgoing_particles[0].cross_section_scaling_factor() *
+          incoming_particles[0].cross_section_scaling_factor());
+      if (incoming_particles[0].formation_time() >
+          outgoing_particles[0].formation_time()) {
+        outgoing_particles[0].set_formation_time(
+            incoming_particles[0].formation_time());
       }
     }
-    if (incoming_particles_[1].formation_time() >
-        incoming_particles_[1].position().x0()) {
-      outgoing_particles_[1].set_cross_section_scaling_factor(
-          outgoing_particles_[1].cross_section_scaling_factor() *
-          incoming_particles_[1].cross_section_scaling_factor());
-      if (incoming_particles_[1].formation_time() >
-          outgoing_particles_[1].formation_time()) {
-        outgoing_particles_[1].set_formation_time(
-            incoming_particles_[1].formation_time());
+    if (incoming_particles[1].formation_time() >
+        incoming_particles[1].position().x0()) {
+      outgoing_particles[1].set_cross_section_scaling_factor(
+          outgoing_particles[1].cross_section_scaling_factor() *
+          incoming_particles[1].cross_section_scaling_factor());
+      if (incoming_particles[1].formation_time() >
+          outgoing_particles[1].formation_time()) {
+        outgoing_particles[1].set_formation_time(
+            incoming_particles[1].formation_time());
       }
     }
-    return outgoing_particles_;
+    return outgoing_particles;
   }
 }
 }  // namespace Smash
