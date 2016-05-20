@@ -69,7 +69,7 @@ void ScatterActionPhoton::generate_final_state() {
 
   /* Weighing of the fractional photons */
   weight_ = diff_cross_section(t) * (t2 - t1) / number_of_fractional_photons /
-            proc->weight();
+            total_cross_section_;
 
   /* Set positions & boost to computational frame. */
   for (ParticleData &new_particle : outgoing_particles_) {
