@@ -6,7 +6,7 @@
 
 # Try to find a Pythia 8.x installation
 #
-# Relies on info given by the executable 'pythia8-config'
+# Will use info given by the executable 'pythia8-config'. Otherwise, tries to use a local build.
 #
 # This package defines
 #  Pythia_FOUND - Pythia has been found
@@ -15,25 +15,31 @@
 #  Pythia_LHAPDFDummy_LIBRARY - The LHAPDF dummy library, use if the real LHAPDF is not installed / found
 
 
-FIND_PROGRAM(Pythia_CONFIG_EXECUTABLE NAMES pythia8-config HINTS ../3rdparty/pythia8215/bin)
+FIND_PROGRAM(Pythia_CONFIG_EXECUTABLE NAMES pythia8-config)
 IF(${Pythia_CONFIG_EXECUTABLE} MATCHES "Pythia_CONFIG_EXECUTABLE-NOTFOUND")
-  MESSAGE(STATUS "Looking for Pythia... - pythia8-config executable not found")
-ELSE(${Pythia_CONFIG_EXECUTABLE} MATCHES "Pythia_CONFIG_EXECUTABLE-NOTFOUND")
+  MESSAGE(STATUS "Looking for Pythia... - pythia8-config executable not found, trying to use local build")
+  SET( Pythia_INCLUDE_DIR ../3rdparty/pythia8215/include )
+  SET( Pythia_LIBDIR ../3rdparty/pythia8215/lib )
+  SET( Pythia_xmldoc_PATH ../3rdparty/pythia8215/share/Pythia8/xmldoc )
+ELSE()
   MESSAGE(STATUS "Looking for Pythia... - using pythia8-config executable")
   EXEC_PROGRAM(${Pythia_CONFIG_EXECUTABLE} ARGS "--libdir" OUTPUT_VARIABLE Pythia_LIBDIR)
-  FIND_LIBRARY( Pythia_LIBRARY
-    NAMES pythia8
-    PATHS ${Pythia_LIBDIR}
-    PATH_SUFFIXES PYTHIA pythia Pythia PYTHIA8 Pythia8 pythia8  # suggest some path suffixes in which the headers could be located
-    )
- # FIND_LIBRARY( Pythia_LHAPDFDummy_LIBRARY
- #   NAMES lhapdfdummy
- #   PATHS ${Pythia_LIBDIR}
- #   PATH_SUFFIXES PYTHIA pythia Pythia PYTHIA8 Pythia8 pythia8  # suggest some path suffixes in which the headers could be located
- # )
   EXEC_PROGRAM(${Pythia_CONFIG_EXECUTABLE} ARGS "--includedir" OUTPUT_VARIABLE Pythia_INCLUDE_DIR)
   EXEC_PROGRAM(${Pythia_CONFIG_EXECUTABLE} ARGS "--xmldoc" OUTPUT_VARIABLE Pythia_xmldoc_PATH)
 ENDIF()
+
+message(${Pythia_LIBDIR})
+FIND_LIBRARY( Pythia_LIBRARY
+  NAMES pythia8
+  ATHS ${Pythia_LIBDIR}
+  PATH_SUFFIXES PYTHIA pythia Pythia PYTHIA8 Pythia8 pythia8  # suggest some path suffixes in which the headers could be located
+)
+# FIND_LIBRARY( Pythia_LHAPDFDummy_LIBRARY
+#   NAMES lhapdfdummy
+#   PATHS ${Pythia_LIBDIR}
+#   PATH_SUFFIXES PYTHIA pythia Pythia PYTHIA8 Pythia8 pythia8  # suggest some path suffixes in which the headers could be located
+#   HINTS ../3rdparty/pythia8125/lib
+# )
 
 
 # adhere to the standard nomenclature for find_package routines and set some variables
