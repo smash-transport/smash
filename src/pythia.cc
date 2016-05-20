@@ -27,7 +27,7 @@ namespace Smash {
 /* This function will generate outgoing particles in CM frame
  * from a hard process. */
 ParticleList ScatterAction::string_excitation(
-    const ParticleList &incoming_particles_, const float formation_time_) {
+    const ParticleList &incoming_particles_, float formation_time) {
   const auto &log = logger<LogArea::Pythia>();
   // Disable floating point exception trap for Pythia
   {
@@ -112,7 +112,7 @@ ParticleList ScatterAction::string_excitation(
        * 1 fm is universally applied and cross section is reduced to zero and
        * to a fraction corresponding to the valence quark content. Hadrons
        * containing a valence quark are determined by highest z-momentum. */
-      log.debug("The formation time is: ", formation_time_, "fm/c.");
+      log.debug("The formation time is: ", formation_time, "fm/c.");
       /* Additional suppression factor to mimic coherence taken as 0.7
        * from UrQMD (CTParam(59) */
       const float suppression_factor = 0.7;
@@ -132,12 +132,7 @@ ParticleList ScatterAction::string_excitation(
           data_.set_cross_section_scaling_factor(suppression_factor * 0.0);
         }
       }
-      /* Boost the formation time to the laboratory frame */
-      ThreeVector const beta_cm =
-          (incoming_particles_[0].momentum() +
-           incoming_particles_[1].momentum()).velocity();
-      double const gamma_cm = 1. / sqrt(1 - beta_cm.sqr());
-      data_.set_formation_time(formation_time_ * gamma_cm);
+      data_.set_formation_time(formation_time * gamma_cm());
       outgoing_particles_.push_back(data_);
     }
     /* If the incoming particles already were unformed, the formation

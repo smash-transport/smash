@@ -105,7 +105,7 @@ class ScatterAction : public Action {
   /** Perform the string excitation and decay via Pythia
    */
   virtual ParticleList string_excitation(const ParticleList &incoming_particles_,
-                                           const float formation_time_);
+                                           const float formation_time);
   
   /**
   * Find all resonances that can be produced in a 2->1 collision of the two
