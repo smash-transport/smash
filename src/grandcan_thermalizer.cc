@@ -335,7 +335,7 @@ void GrandCanThermalizer::thermalize(Particles& particles, double time) {
   }
 }
 
-void GrandCanThermalizer::print_statistics() const {
+void GrandCanThermalizer::print_statistics(const Clock& clock) const {
   struct to_average {
     double T;
     double mub;
@@ -346,6 +346,7 @@ void GrandCanThermalizer::print_statistics() const {
   struct to_average on_lattice = {0.0, 0.0, 0.0, 0.0, 0.0};
   struct to_average in_therm_reg = {0.0, 0.0, 0.0, 0.0, 0.0};
   double e_sum_on_lattice = 0.0, e_sum_in_therm_reg = 0.0;
+  int node_counter = 0;
   for (const auto &node : *lat_) {
     const double e = node.e();
     on_lattice.T   += node.T()   * e;
@@ -361,6 +362,7 @@ void GrandCanThermalizer::print_statistics() const {
       in_therm_reg.nb  += node.nb()  * e;
       in_therm_reg.ns  += node.ns()  * e;
       e_sum_in_therm_reg += e;
+      node_counter++;
     }
   }
   if (e_sum_on_lattice > really_small) {
@@ -378,6 +380,7 @@ void GrandCanThermalizer::print_statistics() const {
     in_therm_reg.ns  /= e_sum_in_therm_reg;
   }
 
+  std::cout << "Current time [fm/c]: " << clock.current_time() << std::endl;
   std::cout << "Averages on the lattice - T[GeV], mub[GeV], mus[GeV], "
             << "nb[fm^-3], ns[fm^-3]: "
             << on_lattice.T << " " << on_lattice.mub << " " << on_lattice.mus
@@ -387,6 +390,8 @@ void GrandCanThermalizer::print_statistics() const {
             << in_therm_reg.T << " " << in_therm_reg.mub << " "
             << in_therm_reg.mus << " " << in_therm_reg.nb << " "
             << in_therm_reg.ns << std::endl;
+  std::cout << "Volume with e > e_crit [fm^3]: "
+            << cell_volume_ * node_counter << std::endl;
 }
 
 ThermLatticeNode::ThermLatticeNode() :

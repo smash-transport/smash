@@ -73,7 +73,7 @@ class GrandCanThermalizer {
   ThreeVector uniform_in_cell() const;
   void sample_in_random_cell(ParticleList& plist, const double time);
   void thermalize(Particles& particles, double time);
-  void print_statistics() const;
+  void print_statistics(const Clock& clock) const;
 
   RectangularLattice<ThermLatticeNode>& lattice() const {
     return *lat_;
