@@ -211,10 +211,11 @@ void GrandCanThermalizer::thermalize(Particles& particles, double time) {
   while (B_plus + B_minus > conserved_remaining.baryon_number()) {
     sample_in_random_cell(mode_list, time);
     for (auto &particle : mode_list) {
-      if (particle.pdgcode().strangeness() == 0 &&
-          particle.pdgcode().baryon_number() < 0) {
+      const int bar = particle.pdgcode().baryon_number();
+      if (particle.pdgcode().strangeness() == 0 && bar < 0 &&
+          B_plus + B_minus + bar >= conserved_remaining.baryon_number()) {
         sampled_list.push_back(particle);
-        B_minus += particle.pdgcode().baryon_number();
+        B_minus += bar;
       }
     }
   }
@@ -240,11 +241,13 @@ void GrandCanThermalizer::thermalize(Particles& particles, double time) {
   while (E_plus + E_minus > conserved_remaining.charge()) {
     sample_in_random_cell(mode_list, time);
     for (auto &particle : mode_list) {
+      const int charge = particle.pdgcode().charge();
       if (particle.pdgcode().strangeness() == 0 &&
           particle.pdgcode().baryon_number() == 0 &&
-          particle.pdgcode().charge() < 0) {
+          charge < 0 &&
+          E_plus + E_minus + charge >= conserved_remaining.charge()) {
         sampled_list.push_back(particle);
-        E_minus += particle.pdgcode().charge();
+        E_minus += charge;
       }
     }
   }
@@ -292,13 +295,13 @@ void GrandCanThermalizer::thermalize(Particles& particles, double time) {
   // Renorm. momenta by factor (1+a) to get the right energy, binary search
   const double tolerance = really_small;
   double a, a_min, a_max, er;
-  const int max_iter = 30;
+  const int max_iter = 50;
   int iter = 0;
   if (E_expected >= E) {
     a_min = 0.0;
-    a_max = 0.05;
+    a_max = 0.5;
   } else {
-    a_min = -0.05;
+    a_min = -0.5;
     a_max = 0.0;
   }
   do {
