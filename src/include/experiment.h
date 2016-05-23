@@ -165,8 +165,9 @@ class Experiment : public ExperimentBase {
    /** Generates kinematics and weighing of final states and writes them into output file,
     * the actions are NOT performed. 
     */
-  void write_photon_action(Action &action, const ParticleList &particles_before_actions);
-  
+  void write_photon_action(Action &action,
+                           const ParticleList &particles_before_actions);
+
   /** Runs the time evolution of an event with fixed-sized time steps
    *
    * Here, the time steps are looped over, collisions and decays are
@@ -280,7 +281,7 @@ class Experiment : public ExperimentBase {
 
   /// The Dilepton output
   OutputPtr dilepton_output_;
-  
+
   /// The Photon output
   OutputPtr photon_output_;
 
@@ -289,7 +290,7 @@ class Experiment : public ExperimentBase {
 
   /// The Dilepton Action Finder
   std::unique_ptr<ActionFinderInterface> dilepton_finder_;
-  
+
   /// The (Scatter) Actions Finder for Direct Photons
   std::unique_ptr<ActionFinderInterface> photon_finder_;
 

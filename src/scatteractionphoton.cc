@@ -101,8 +101,9 @@ CollisionBranchList ScatterActionPhoton::two_to_two_cross_sections() {
       ParticleData dummy = part_a;
       part_a = part_b;
       part_b = dummy;
-    } else
+    } else {
       no_pion = true;
+    }
   }
 
   if (no_pion) {

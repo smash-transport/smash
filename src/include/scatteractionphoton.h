@@ -26,8 +26,9 @@ class ScatterActionPhoton : public ScatterAction {
   float cross_section() const override {
     if (cross_section_photons_ < really_small) {
       return cross_section_photons_;
-    } else
+    } else {
       return total_cross_section_;
+    }
   }
   CollisionBranchList two_to_two_cross_sections() override;
 
@@ -37,7 +38,7 @@ class ScatterActionPhoton : public ScatterAction {
   /** List of possible collisions producing photons */
   CollisionBranchList collision_channels_photons_;
   float cross_section_photons_ = 0.0;
-  const static int num_tab_pts = 200;
+  static const int num_tab_pts = 200;
   enum ReactionType {
     pi_pi,
     pi0_pi,

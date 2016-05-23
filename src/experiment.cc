@@ -297,8 +297,8 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
                     config.take({"Output", "Dileptons", "Enable"}, true) :
                     false;
   const bool photons_switch = config.has_value({"Output", "Photons"}) ?
-		    config.take({"Output", "Photons", "Enable"}, true) :
-		    false;
+                    config.take({"Output", "Photons", "Enable"}, true) :
+                    false;
 
   // create finders
   if (two_to_one) {
@@ -315,9 +315,11 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     dilepton_finder_ = make_unique<DecayActionsFinderDilepton>();
   }
   if (photons_switch) {
-    number_of_fractional_photons = config.take({"Output", "Photons", "Fractions"});
+    number_of_fractional_photons = config.take(
+         {"Output", "Photons", "Fractions"});
     photon_finder_ = make_unique<ScatterActionsFinderPhoton>(
-        config, parameters_, two_to_one, two_to_two, number_of_fractional_photons);
+        config, parameters_, two_to_one,
+        two_to_two, number_of_fractional_photons);
   }
   if (config.has_value({"Collision_Term", "Pauli_Blocking"})) {
     log.info() << "Pauli blocking is ON.";

@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef SRC_INCLUDE_SCATTERACTIONFINDERPHOTON_H_
-#define SRC_INCLUDE_SCATTERACTIONFINDERPHOTON_H_
+#ifndef SRC_INCLUDE_SCATTERACTIONSFINDERPHOTON_H_
+#define SRC_INCLUDE_SCATTERACTIONSFINDERPHOTON_H_
 
 #include "scatteractionsfinder.h"
 
@@ -42,4 +42,4 @@ class ScatterActionsFinderPhoton : public ScatterActionsFinder {
 
 }  // namespace Smash
 
-#endif  // SRC_INCLUDE_SCATTERACTIONFINDERPHOTON_H_
+#endif  // SRC_INCLUDE_SCATTERACTIONSFINDERPHOTON_H_
