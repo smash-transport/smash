@@ -20,6 +20,7 @@
 #include "include/cxx14compat.h"
 #include "include/distributions.h"
 #include "include/experimentparameters.h"
+#include "include/hadgas_eos.h"
 #include "include/logging.h"
 #include "include/macros.h"
 #include "include/outputinterface.h"
@@ -37,9 +38,16 @@ std::ostream &operator<<(std::ostream &out, const BoxModus &m) {
       << "\nInitial temperature: " << m.temperature_ << " GeV"
       << "\nInitial condition type " << static_cast<int>(m.initial_condition_)
       << "\n";
-  for (const auto &p : m.init_multipl_) {
-    out << "Particle " << p.first << " initial multiplicity "
-                       << p.second << '\n';
+  if (m.use_thermal_) {
+    out << "Using thermal initialization instead of initial multiplicities\n";
+    out << "Baryon chemical potential: " << m.mub_ << "\n"
+        << "Strange chemical potential: " << m.mus_ << "\n";
+  }
+  else {
+    for (const auto &p : m.init_multipl_) {
+      out << "Particle " << p.first << " initial multiplicity "
+                         << p.second << '\n';
+    }
   }
   return out;
 }
@@ -82,6 +90,8 @@ BoxModus::BoxModus(Configuration modus_config, const ExperimentParameters &)
             temperature_(modus_config.take({"Box", "Temperature"})),
              start_time_(modus_config.take({"Box", "Start_Time"})),
             use_thermal_(modus_config.take({"Box", "Use_Thermal"})),
+                    mub_(modus_config.take({"Box", "Baryon_Chemical_Potential"})),
+                    mus_(modus_config.take({"Box", "Strange_Chemical_Potential"})),
            init_multipl_(modus_config.take({"Box", "Init_Multiplicities"}).
                                                 convert_for(init_multipl_)) {
 }
@@ -96,11 +106,23 @@ float BoxModus::initial_conditions(Particles *particles,
   auto uniform_length = Random::make_uniform_distribution(0.0,
                                          static_cast<double>(this->length_));
 
-  /* Create NUMBER OF PARTICLES according to configuration */
-  for (const auto &p : init_multipl_) {
-    particles->create(p.second*parameters.testparticles, p.first);
-    log.debug() << "Particle " << p.first
-                << " initial multiplicity " << p.second;
+  /* Create NUMBER OF PARTICLES according to configuration, or thermal case */
+  if (use_thermal_) {
+    const HadronGasEos &had_gas_eos = HadronGasEos();
+    for (const ParticleType &ptype : ParticleType::list_all()) {
+      int thermal_particles = length_*length_*length_*
+                              had_gas_eos.partial_density(ptype,temperature_,mub_,mus_);
+      particles->create(thermal_particles*parameters.testparticles, ptype.pdgcode());
+      log.debug() << "Particle " << ptype.pdgcode()
+                  << " initial multiplicity " << thermal_particles;
+    }
+  }
+  else {
+    for (const auto &p : init_multipl_) {
+      particles->create(p.second*parameters.testparticles, p.first);
+      log.debug() << "Particle " << p.first
+                  << " initial multiplicity " << p.second;
+    }
   }
 
   for (ParticleData &data : *particles) {
