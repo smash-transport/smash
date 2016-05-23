@@ -81,6 +81,7 @@ BoxModus::BoxModus(Configuration modus_config, const ExperimentParameters &)
                  length_(modus_config.take({"Box", "Length"})),
             temperature_(modus_config.take({"Box", "Temperature"})),
              start_time_(modus_config.take({"Box", "Start_Time"})),
+            use_thermal_(modus_config.take({"Box", "Use_Thermal"})),
            init_multipl_(modus_config.take({"Box", "Init_Multiplicities"}).
                                                 convert_for(init_multipl_)) {
 }

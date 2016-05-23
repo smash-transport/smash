@@ -66,6 +66,9 @@ class ThermodynamicOutput : public OutputInterface {
   ThreeVector r_;
   /// Type (e.g., baryon/pion/hadron) of thermodynamic quantity
   const DensityType dens_type_;
+  /// Whether smearing is on or off; WARNING : if smearing is on,
+  /// then final result is in GeV instead of GeV/fm3
+  const bool smearing_;
 };
 
 

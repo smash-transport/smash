@@ -83,6 +83,8 @@ class BoxModus : public ModusDefault {
   const float temperature_;
   /// initial time of the box
   const float start_time_ = 0.0f;
+  /// whether to use a thermal box initialization
+  const bool use_thermal_ = false;
   /// particle multiplicities at initialization
   const std::map<PdgCode, int> init_multipl_;
 
