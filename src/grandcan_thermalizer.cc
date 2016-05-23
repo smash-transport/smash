@@ -122,23 +122,30 @@ void GrandCanThermalizer::thermalize(Particles& particles, double time) {
   QuantumNumbers conserved_initial   = QuantumNumbers(),
                  conserved_remaining = QuantumNumbers();
   ThermLatticeNode node;
-  int particles_removed = 0;
+  ParticleList to_remove;
   for (auto &particle : particles) {
     const bool is_on_lattice = lat_->value_at(particle.position().threevec(),
                                               node);
     if (is_on_lattice && node.e() > e_crit_) {
-      conserved_initial.add_values(particle);
-      particles.remove(particle);
-      particles_removed ++;
+      to_remove.push_back(particle);
     }
   }
-  log.info("Removed ", particles_removed, " particles.");
+  // Do not thermalize too small number of particles
+  if (to_remove.size() > 30) {
+    for (auto &particle : to_remove) {
+      conserved_initial.add_values(particle);
+      particles.remove(particle);
+    }
+  } else {
+    to_remove.clear();
+    conserved_initial = QuantumNumbers();
+  }
+  log.info("Removed ", to_remove.size(), " particles.");
 
   // Exit if there is nothing to thermalize
   if (conserved_initial == QuantumNumbers()) {
     return;
   }
-
   // Save the indices of cells inside the volume with e > e_crit_
   cells_to_sample_.clear();
   const size_t lattice_total_cells = lat_->size();
