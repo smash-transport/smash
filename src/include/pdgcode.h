@@ -31,9 +31,9 @@ namespace Smash {
  * \code
  * #include "include/pdgcode.h"
  *
- * // initalize with an integer: make sure it is hex-encoded!
+ * // initialize with an integer: make sure it is hex-encoded!
  * PdgCode pi_plus(0x211);
- * // you can also initalize from a string:
+ * // you can also initialize from a string:
  * PdgCode pi_minus("-211");
  * // initialize a PDG Code that knows it is not set yet:
  * PdgCode other_particle();
@@ -257,6 +257,9 @@ class PdgCode {
   }
   /// Returns whether this PDG code identifies a baryon.
   inline bool is_baryon() const { return is_hadron() && digits_.n_q1_ != 0; }
+
+  /// Returns whether this PDG code identifies a meson.
+  inline bool is_meson() const { return is_hadron() && digits_.n_q1_ == 0; }
 
   /// Is this a nucleon (p, n)?
   inline bool is_nucleon() const {

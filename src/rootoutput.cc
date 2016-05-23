@@ -45,10 +45,6 @@ RootOutput::RootOutput(const bf::path &path, Configuration&& conf)
    * information about the particle list at fixed moments of time and
    * the other one containing information about the collision history.
    *
-   * \key Enable (bool, optional, default = false):\n
-   * true - Root output enabled\n
-   * false - no Root output
-   *
    * \key Write_Collisions (bool, optional, default = false): \n
    * true - information about collisions, decays and box wall
    * crossings will be written out \n

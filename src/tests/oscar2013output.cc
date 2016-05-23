@@ -110,7 +110,7 @@ TEST(full2013_format) {
   outputfile.open(outputfilepath, std::ios_base::in);
   VERIFY(outputfile.good());
   if (outputfile.good()) {
-    std::string line, item;
+    std::string line;
     /* Check header */
     std::getline(outputfile, line);
     COMPARE(line,
@@ -230,7 +230,7 @@ TEST(final2013_format) {
   outputfile.open(outputfilepath, std::ios_base::in);
   VERIFY(outputfile.good());
   if (outputfile.good()) {
-    std::string line, item;
+    std::string line;
     /* Check header */
     std::getline(outputfile, line);
     COMPARE(line, "#!OSCAR2013 particle_lists t x y z mass p0 px py pz pdg ID");

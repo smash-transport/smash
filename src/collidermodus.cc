@@ -105,7 +105,7 @@ namespace Smash {
  * length as \key Yields. Required for \key Sample = "custom".
  * \li \key Yields (floats, optional):
  * Values of the particle yields, corresponding to \key Values. Must be same
- * lenght as \key Values. Required for \key Sample = "custom".
+ * length as \key Values. Required for \key Sample = "custom".
  *
  * \li \key Range (float, float, optional, default = 0.0f):\n
  * A vector of minimal and maximal impact parameters

@@ -24,7 +24,8 @@ namespace Smash {
 class DecayModes {
  public:
   /* Add a decay mode */
-  void add_mode(float ratio, int L, ParticleTypePtrList particle_types);
+  void add_mode(ParticleTypePtr mother, float ratio, int L,
+                ParticleTypePtrList particle_types);
   void add_mode(DecayBranchPtr branch) {
     decay_modes_.push_back(std::move(branch));
   }
@@ -49,7 +50,8 @@ class DecayModes {
   static void load_decaymodes(const std::string &input);
 
   /** Retrieve a decay type. */
-  static DecayType* get_decay_type(ParticleTypePtrList particle_types, int L);
+  static DecayType* get_decay_type(ParticleTypePtr mother,
+                                   ParticleTypePtrList particle_types, int L);
 
   /// \ingroup exception
   struct InvalidDecay : public std::invalid_argument {

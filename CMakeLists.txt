@@ -16,7 +16,7 @@ if(CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
 endif()
 
 # Minimum cmake version this is tested on
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 2.8.11)
 
 # Tell cmake where to find our modules
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")

@@ -104,7 +104,7 @@ CollisionBranchList ScatterActionNucleonNucleon::two_to_two_inel(
   const double s = mandelstam_s();
   const double sqrts = sqrt_s();
 
-  /* First: Find N N -> N R channels. */
+  /* First: Find N N → N R channels. */
   /* Loop over all baryon resonances. */
   for (ParticleTypePtr type_resonance :
        ParticleType::list_baryon_resonances()) {
@@ -130,7 +130,7 @@ CollisionBranchList ScatterActionNucleonNucleon::two_to_two_inel(
         const double lower_limit = type_resonance->minimum_mass();
         const double upper_limit = sqrts - second_type->mass();
         /* Check the available energy (requiring it to be a little above the
-        * threshold, because the integration will not work if it's too close). */
+         * threshold, because the integration will not work if it's too close). */
         if (upper_limit - lower_limit < 1E-3) {
           continue;
         }
@@ -143,13 +143,13 @@ CollisionBranchList ScatterActionNucleonNucleon::two_to_two_inel(
         }
 
         /* Calculate resonance production cross section
-        * using the Breit-Wigner distribution as probability amplitude.
-        * Integrate over the allowed resonance mass range. */
+         * using the Breit-Wigner distribution as probability amplitude.
+         * Integrate over the allowed resonance mass range. */
         const double resonance_integral =
                       type_resonance->iso_multiplet()->get_integral_NR(sqrts);
 
         /** Cross section for 2->2 process with one resonance in final state.
-        * Based on Eq. (46) in \iref{Weil:2013mya}. */
+         * Based on Eq. (46) in \iref{Weil:2013mya}. */
         float xsection = isospin_factor * matrix_element
                       * resonance_integral / (s * cm_momentum());
 
@@ -166,10 +166,10 @@ CollisionBranchList ScatterActionNucleonNucleon::two_to_two_inel(
     }
   }
 
-  /* Second: Find N N -> Delta R channels. */
+  /* Second: Find N N → Δ R channels. */
   /* Loop over all baryon resonances. */
   for (ParticleTypePtr type_res_1 : ParticleType::list_baryon_resonances()) {
-    /* Loop over second particle (Delta). */
+    /* Loop over second particle (Δ). */
     for (ParticleTypePtr type_res_2 : ParticleType::list_Deltas()) {
       /* Check for charge conservation. */
       if (type_res_1->charge() + type_res_2->charge() !=
@@ -190,7 +190,7 @@ CollisionBranchList ScatterActionNucleonNucleon::two_to_two_inel(
         const double lower_limit = type_res_1->minimum_mass();
         const double upper_limit = sqrts - type_res_2->minimum_mass();
         /* Check the available energy (requiring it to be a little above the
-        * threshold, because the integration will not work if it's too close). */
+         * threshold, because the integration will not work if it's too close). */
         if (upper_limit - lower_limit < 1E-3) {
           continue;
         }
@@ -203,14 +203,14 @@ CollisionBranchList ScatterActionNucleonNucleon::two_to_two_inel(
         }
 
         /* Calculate resonance production cross section
-        * using the Breit-Wigner distribution as probability amplitude.
-        * Integrate over the allowed resonance mass range. */
+         * using the Breit-Wigner distribution as probability amplitude.
+         * Integrate over the allowed resonance mass range. */
 
         const double resonance_integral =
                       type_res_1->iso_multiplet()->get_integral_DR(sqrts);
 
-        /** Cross section for 2->2 process with one resonance in final state.
-        * Based on Eq. (51) in \iref{Weil:2013mya}. */
+        /** Cross section for 2->2 process with two resonances in final state.
+         * Based on Eq. (51) in \iref{Weil:2013mya}. */
         float xsection = isospin_factor * matrix_element
                       * resonance_integral / (s * cm_momentum());
 
@@ -249,7 +249,7 @@ void ScatterActionNucleonNucleon::sample_angles(
   Angles phitheta;
   if (p_a->pdgcode().is_nucleon() &&
       p_b->pdgcode().is_nucleon() && !isotropic_) {
-    /** NN->NN: Choose angular distribution according to Cugnon parametrization,
+    /** NN → NN: Choose angular distribution according to Cugnon parametrization,
      * see \iref{Cugnon:1996kh}. */
     double bb, a, plab = plab_from_s(mandelstam_s());
     if (p_a->type().charge() + p_b->type().charge() == 1) {
@@ -270,7 +270,7 @@ void ScatterActionNucleonNucleon::sample_angles(
                       1. - 2.*(t-t_range[0])/(t_range[1]-t_range[0]));
   } else if (p_a->pdgcode().is_Delta() && p_b->pdgcode().is_nucleon()
              && !isotropic_) {
-    /** NN->NDelta: Sample scattering angles in center-of-mass frame from an
+    /** NN → NΔ: Sample scattering angles in center-of-mass frame from an
      * anisotropic angular distribution, using the same distribution as for
      * elastic pp scattering, as suggested in \iref{Cugnon:1996kh}. */
     const double plab = plab_from_s(mandelstam_s());
@@ -283,7 +283,7 @@ void ScatterActionNucleonNucleon::sample_angles(
                       1. - 2.*(t-t_range[0])/(t_range[1]-t_range[0]));
   } else if (p_b->pdgcode().is_nucleon() && !isotropic_ &&
              (p_a->type().is_Nstar() || p_a->type().is_Deltastar())) {
-    /** NN->NR: Fit to HADES data, see \iref{Agakishiev:2014wqa}. */
+    /** NN → NR: Fit to HADES data, see \iref{Agakishiev:2014wqa}. */
     const std::array<float, 4> p { 1.46434, 5.80311, -6.89358, 1.94302 };
     const double a = p[0] + mass_a * (p[1] + mass_a * (p[2] + mass_a * p[3]));
     double t = Random::power(-a, t_range[0], t_range[1]);

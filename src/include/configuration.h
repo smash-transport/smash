@@ -484,6 +484,11 @@ class Configuration {
   }
 
   /**
+   *  Returns if there is a (maybe empty) value behind the requested \p keys.
+   */
+  bool has_value_including_empty(
+                               std::initializer_list<const char *> keys) const;
+  /**
    * Returns whether there is a non-empty value behind the requested \p keys.
    */
   bool has_value(std::initializer_list<const char *> keys) const;

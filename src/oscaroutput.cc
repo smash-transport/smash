@@ -36,10 +36,6 @@ OscarOutput<Format, Contents>::OscarOutput(const bf::path &path,
    * Writing (or not writing) output at these moments is controlled by options.
    * Output time interval \f$\Delta t \f$ is also regulated by an option.
    *
-   * \key Enable (bool, optional, default = false):\n
-   * true - OSCAR particle list output enabled\n
-   * false - no OSCAR particle list output
-   *
    * \key 2013_Format (bool, optional, default = false): \n
    * true - output will be in OSCAR2013 format\n
    * false - output will be in OSCAR1999 format
@@ -56,10 +52,6 @@ OscarOutput<Format, Contents>::OscarOutput(const bf::path &path,
    * every collision, decay and box wall crossing in OSCAR1999 or OSCAR2013
    * format.
    * Optionally initial and final particle configurations can be written out.
-   *
-   * \key Enable (bool, optional, default = false):\n
-   * true - OSCAR collision output enabled
-   * false - no OSCAR collision output
    *
    * \key 2013_Format (bool, optional, default = false): \n
    * true - output will be in OSCAR2013 format\n
@@ -452,15 +444,12 @@ std::unique_ptr<OutputInterface> create_select_format(const bf::path &path,
 
 std::unique_ptr<OutputInterface> create_oscar_output(const bf::path &path,
                                                      Configuration config) {
-  if (config.has_value({"Oscar_Particlelist", "Enable"})) {
+  if (config.has_value({"Oscar_Particlelist"})) {
     auto subconfig = config["Oscar_Particlelist"];
-    const bool enabled = subconfig.take({"Enable"});
-    if (!enabled) {
-      config.take({"Oscar_Particlelist"});
-    } else {
-      const bool only_final = subconfig.has_value({"Only_Final"})
-                                  ? subconfig.take({"Only_Final"})
-                                  : true;
+    const bool enabled = subconfig.take({"Enable"}, true);
+    config.take({"Oscar_Particlelist"});
+    if (enabled) {
+      const bool only_final = subconfig.take({"Only_Final"}, true);
       if (only_final) {
         return create_select_format<OscarParticlesAtEventend>(
             std::move(path), std::move(subconfig), "particle_lists");
@@ -471,15 +460,12 @@ std::unique_ptr<OutputInterface> create_oscar_output(const bf::path &path,
       }
     }
   }
-  if (config.has_value({"Oscar_Collisions", "Enable"})) {
+  if (config.has_value({"Oscar_Collisions"})) {
     auto subconfig = config["Oscar_Collisions"];
-    const bool enabled = subconfig.take({"Enable"});
-    if (!enabled) {
-      config.take({"Oscar_Collisions"});
-    } else {
-      const bool print_start_end = subconfig.has_value({"Print_Start_End"})
-                                       ? subconfig.take({"Print_Start_End"})
-                                       : false;
+    const bool enabled = subconfig.take({"Enable"}, true);
+    config.take({"Oscar_Collisions"});
+    if (enabled) {
+      const bool print_start_end = subconfig.take({"Print_Start_End"}, false);
       if (print_start_end) {
         return create_select_format<OscarInteractions | OscarAtEventstart |
                                     OscarParticlesAtEventend>(

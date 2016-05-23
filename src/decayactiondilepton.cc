@@ -17,10 +17,8 @@ namespace Smash {
 
 DecayActionDilepton::DecayActionDilepton(const ParticleData &p,
                                          float time,
-                                         float shining_weight,
-                                         float dilepton_mass)
-  : DecayAction({p}, time), shining_weight_(shining_weight)
-                                              , dilepton_mass_(dilepton_mass) {}
+                                         float shining_weight)
+  : DecayAction({p}, time), shining_weight_(shining_weight) {}
 
 
 void DecayActionDilepton::one_to_three() {
@@ -41,46 +39,54 @@ void DecayActionDilepton::one_to_three() {
   ParticleData &l1 = outgoing_particles_[(non_lepton_position+1)%3];
   ParticleData &l2 = outgoing_particles_[(non_lepton_position+2)%3];
 
-  const ParticleType &l1_type = l1.type();
-  const ParticleType &l2_type = l2.type();
-  const ParticleType &nl_type = nl.type();
+  const double mass_l1 = l1.type().mass();  // mass of first lepton
+  const double mass_l2 = l2.type().mass();  // mass of second lepton
+  const double mass_nl = nl.type().mass();  // mass of non-lepton
 
-  const double mass_l1 = l1_type.mass();
-  const double mass_l2 = l2_type.mass();
-  const double mass_nl = nl_type.mass();
+  const double cms_energy = sqrt_s();
 
-  double cms_energy = sqrt_s();
+  // randomly select a dilepton mass
+  const double dil_mass = Random::uniform(mass_l1 + mass_l2,
+                                          cms_energy - mass_nl);
+  const float delta_m = cms_energy - mass_nl - mass_l1 - mass_l2;
 
-  // perform non_dilepton/virtual photon decay
-  double momentum_radial = pCM(cms_energy,
-                           static_cast<double>(dilepton_mass_),
-                           mass_nl);
+  const float diff_width = ThreeBodyDecayDilepton::diff_width(cms_energy,
+                                                dil_mass, mass_nl,
+                                                &incoming_particles_[0].type());
 
-  const double p0_v_pho = std::sqrt(dilepton_mass_*dilepton_mass_ +
-                                    momentum_radial * momentum_radial);
+  /* Branching factor, which corrects the shining weight for the differential
+   * width at a particular dilepton mass. We do an implicit Monte-Carlo
+   * integration over the dilepton mass here, and delta_m is simply the
+   * integration volume. */
+  branching_ = delta_m * diff_width / decay_channels_[0]->weight();
+
+
+  // perform decay into non-lepton and virtual photon (dilepton)
+  const double dil_mom = pCM(cms_energy, dil_mass, mass_nl);
 
   /* Here we assume an isotropic angular distribution. */
   Angles phitheta;
   phitheta.distribute_isotropically();
 
-  FourVector virtual_pho_4mom(p0_v_pho,  phitheta.threevec() * momentum_radial);
-  nl.set_4momentum(mass_nl, -phitheta.threevec() * momentum_radial);
+  FourVector dil_4mom(std::sqrt(dil_mass*dil_mass + dil_mom*dil_mom),
+                      phitheta.threevec() * dil_mom);
+  nl.set_4momentum(mass_nl, -phitheta.threevec() * dil_mom);
 
-  // perform virtual photon -> dilepton decay
-  cms_energy = virtual_pho_4mom.abs();
 
-  momentum_radial = pCM(cms_energy, mass_l1, mass_l2);
+  // perform decay of virtual photon into two leptons
+  const double mom_lep = pCM(dil_mass, mass_l1, mass_l2);
 
   /* Here we assume an isotropic angular distribution. */
   phitheta.distribute_isotropically();
 
-  l1.set_4momentum(mass_l1,  phitheta.threevec() * momentum_radial);
-  l2.set_4momentum(mass_l2, -phitheta.threevec() * momentum_radial);
+  l1.set_4momentum(mass_l1,  phitheta.threevec() * mom_lep);
+  l2.set_4momentum(mass_l2, -phitheta.threevec() * mom_lep);
 
   // Boost Dileptons back in parent particle rest frame
-  ThreeVector velocity_CM = virtual_pho_4mom.velocity();
+  ThreeVector velocity_CM = dil_4mom.velocity();
   l1.boost_momentum(-velocity_CM);
   l2.boost_momentum(-velocity_CM);
 }
+
 
 }  // namespace Smash

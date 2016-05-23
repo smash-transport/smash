@@ -32,6 +32,9 @@ class DecayType {
   virtual unsigned int particle_number() const = 0;
   // Check if the final state consists of the given particle list
   virtual bool has_particles(ParticleTypePtrList list) const = 0;
+  /* Check if this decay type has the right mother
+   * (most decays do not depend on the mother type). */
+  virtual bool has_mother(ParticleTypePtr) const { return true; }
   /// Return the particle types associated with this branch.
   const ParticleTypePtrList &particle_types() const {
     return particle_types_;
@@ -155,7 +158,7 @@ class TwoBodyDecaySemistable : public TwoBodyDecay {
    */
   float get_Lambda();
   float Lambda_;
-  std::unique_ptr<Tabulation> tabulation_;
+  mutable std::unique_ptr<Tabulation> tabulation_;
 };
 
 
@@ -176,12 +179,12 @@ class TwoBodyDecayUnstable : public TwoBodyDecay {
    */
   float get_Lambda();
   float Lambda_;
-  std::unique_ptr<Tabulation> tabulation_;
+  mutable std::unique_ptr<Tabulation> tabulation_;
 };
 
 /**
- * TwoBodyDecayDilepton represents a decay with a lepton and it's antilepton
- * as the final state particles.
+ * TwoBodyDecayDilepton represents a decay with a lepton and its antilepton
+ * as the final-state particles.
  */
 class TwoBodyDecayDilepton : public TwoBodyDecayStable {
  public:
@@ -204,22 +207,25 @@ class ThreeBodyDecay : public DecayType {
 
 /**
  * ThreeBodyDecayDilepton represents a decay type with three final-state
- * particles. Two of them are a dilepton.
+ * particles, two of which are leptons.
  */
 class ThreeBodyDecayDilepton : public ThreeBodyDecay {
  public:
-  ThreeBodyDecayDilepton(ParticleTypePtrList part_types, int l);
+  ThreeBodyDecayDilepton(ParticleTypePtr mother,
+                         ParticleTypePtrList part_types, int l);
+  bool has_mother(ParticleTypePtr mother) const override;
   /**
-   * Get the differential width for dilepton dalitz decay. Because we use the
-   * shining method, we do not need a partial width and can use the differential
-   * width directly for the shinin weights. The differential width is calculated
-   * according to PhD thesis Weil, eq. (30) - (36).
+   * Get the mass-differential width \f$ d\Gamma / dm \f$ for a dilepton Dalitz
+   * decay, where \f$ m \f$ is the invariant mass of the lepton pair.
+   * This differential width is used directly for the dilepton shining weights.
+   * It is calculated according to \iref{Weil:2013mya}, eq. (30)-(36).
    */
-  static float diff_width(float m_parent, float m_dil,
-                   float m_other, PdgCode pdg);
+  static float diff_width(float m_parent, float m_dil, float m_other,
+                          ParticleTypePtr t);
   float width(float m0, float G0, float m) const override;
  protected:
-  std::unique_ptr<Tabulation> tabulation_;
+  mutable std::unique_ptr<Tabulation> tabulation_;
+  ParticleTypePtr mother_;
 };
 
 

@@ -96,7 +96,7 @@ class ParticleType {
    * This returns e.g. 1 for nucleons, 2 for pions and 3 for Deltas.
    * It is always positive.
    */
-  int isospin() const { return isospin_; }
+  int isospin() const;
 
   /// \copydoc PdgCode::isospin3
   int isospin3() const { return pdgcode_.isospin3(); }
@@ -128,6 +128,9 @@ class ParticleType {
 
   /// \copydoc PdgCode::is_baryon
   bool is_baryon() const { return pdgcode_.is_baryon(); }
+
+  /// \copydoc PdgCode::is_meson
+  bool is_meson() const { return pdgcode_.is_meson(); }
 
   /// \copydoc PdgCode::baryon_number
   int baryon_number() const { return pdgcode_.baryon_number(); }
@@ -210,6 +213,17 @@ class ParticleType {
   DecayBranchList get_partial_widths_dilepton(const float m) const;
 
   /**
+   * Get the mass-dependent partial width of a resonance with mass m,
+   * decaying into two given daughter particles.
+   *
+   * \param m Invariant mass of the decaying resonance.
+   * \param t_a Type of first daughter particle.
+   * \param t_b Type of second daughter particle.
+   */
+  float get_partial_width(const float m, const ParticleType &t_a,
+                                         const ParticleType &t_b) const;
+
+  /**
    * Get the mass-dependent partial in-width of a resonance with mass m,
    * decaying into two given daughter particles. For stable daughter
    * particles, the in-width equals the 'normal' partial decay width
@@ -252,10 +266,9 @@ class ParticleType {
   float spectral_function_simple(float m) const;
 
   /**
-  * Resonance mass sampling for 2-particle final state
-  * with *one resonance* and one *stable* particle.
+  * Resonance mass sampling for 2-particle final state with one resonance
+  * (type given by 'this') and one stable particle.
   *
-  * \param[in] this Type of the resonance particle.
   * \param[in] mass_stable Mass of the stable particle.
   * \param[in] cms_energy center-of-mass energy of the 2-particle final state.
   * \param[in] L relative angular momentum of the final-state particles
@@ -268,8 +281,8 @@ class ParticleType {
   /**
   * Resonance mass sampling for 2-particle final state with two resonances.
   *
-  * \param[in] this Type of the first resonance.
-  * \param[in] t2 Type of the second resonance.
+  * \param[in] t2 Type of the second resonance
+  *               (the first resonance is given by 'this').
   * \param[in] cms_energy center-of-mass energy of the 2-particle final state.
   * \param[in] L relative angular momentum of the final-state particles
   *
@@ -408,11 +421,6 @@ class ParticleType {
   /** This normalization factor ensures that the spectral function is normalized
    * to unity, when integrated over its full domain. */
   mutable float norm_factor_ = -1.;
-  /** twice the isospin of the particle
-   *
-   * This is filled automatically from pdgcode_.
-   */
-  unsigned int isospin_;
   /** charge of the particle
    *
    * This is filled automatically from pdgcode_.

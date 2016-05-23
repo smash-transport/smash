@@ -136,18 +136,18 @@ double sample_momenta_from_thermal(const double temperature,
       const float I2 = 2.0*mass*temperature;
       const float I3 = 2.0*temperature*temperature;
       const float Itot = I1 + I2 + I3;
-      float r1, r2, r3, K;
+      float K;
       if ( r0 < I1/Itot ) {
-        r1 = Random::canonical_nonzero();
+        const float r1 = Random::canonical_nonzero();
         K = -temperature*std::log(r1);
       } else if ( r0 < (I1+I2)/Itot ) {
-        r1 = Random::canonical_nonzero();
-        r2 = Random::canonical_nonzero();
+        const float r1 = Random::canonical_nonzero();
+        const float r2 = Random::canonical_nonzero();
         K = -temperature*std::log(r1*r2);
       } else {
-        r1 = Random::canonical_nonzero();
-        r2 = Random::canonical_nonzero();
-        r3 = Random::canonical_nonzero();
+        const float r1 = Random::canonical_nonzero();
+        const float r2 = Random::canonical_nonzero();
+        const float r3 = Random::canonical_nonzero();
         K = -temperature*std::log(r1*r2*r3);
       }
       energy = K + mass;
