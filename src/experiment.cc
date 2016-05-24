@@ -1140,6 +1140,10 @@ void Experiment<Modus>::intermediate_output(uint64_t& interactions_total,
       particles_, interactions_total, interactions_this_interval,
       conserved_initial_, time_start_, parameters_.labclock.current_time());
   const LatticeUpdate lat_upd = LatticeUpdate::AtOutput;
+  if (gc_thermalizer_) {
+    gc_thermalizer_->update_lattice(particles_, density_param_);
+    gc_thermalizer_->print_statistics(parameters_.labclock);
+  }
   /* save evolution data */
   for (const auto &output : outputs_) {
     output->at_intermediate_time(particles_, parameters_.labclock,
@@ -1185,8 +1189,6 @@ void Experiment<Modus>::intermediate_output(uint64_t& interactions_total,
     }
 
     if (gc_thermalizer_) {
-      gc_thermalizer_->update_lattice(particles_, density_param_);
-      gc_thermalizer_->print_statistics(parameters_.labclock);
       output->thermodynamics_output(*gc_thermalizer_);
     }
   }
