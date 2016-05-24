@@ -89,7 +89,7 @@ BoxModus::BoxModus(Configuration modus_config, const ExperimentParameters &)
                  length_(modus_config.take({"Box", "Length"})),
             temperature_(modus_config.take({"Box", "Temperature"})),
              start_time_(modus_config.take({"Box", "Start_Time"})),
-            use_thermal_(modus_config.take({"Box", "Use_Thermal"})),
+            use_thermal_(modus_config.take({"Box", "Use_Thermal"}, false)),
                     mub_(modus_config.take({"Box", "Baryon_Chemical_Potential"})),
                     mus_(modus_config.take({"Box", "Strange_Chemical_Potential"})),
            init_multipl_(modus_config.take({"Box", "Init_Multiplicities"}).
@@ -110,11 +110,13 @@ float BoxModus::initial_conditions(Particles *particles,
   if (use_thermal_) {
     const HadronGasEos &had_gas_eos = HadronGasEos();
     for (const ParticleType &ptype : ParticleType::list_all()) {
-      int thermal_particles = length_*length_*length_*
-                              had_gas_eos.partial_density(ptype,temperature_,mub_,mus_);
-      particles->create(thermal_particles*parameters.testparticles, ptype.pdgcode());
-      log.debug() << "Particle " << ptype.pdgcode()
-                  << " initial multiplicity " << thermal_particles;
+      if (ptype.is_hadron()) {
+        int thermal_particles = length_*length_*length_*
+                                had_gas_eos.partial_density(ptype,temperature_,mub_,mus_);
+        particles->create(thermal_particles*parameters.testparticles, ptype.pdgcode());
+        log.debug() << "Particle " << ptype.pdgcode()
+                    << " initial multiplicity " << thermal_particles;
+      }
     }
   }
   else {

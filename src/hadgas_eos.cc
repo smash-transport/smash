@@ -107,14 +107,6 @@ const struct EosTable::table_element EosTable::get(double e, double nb) const {
   return res;
 }
 
-HadronGasEos::HadronGasEos() : 
-              x_(gsl_vector_alloc(n_equations_)),
-              tabulate_(false) {
-  const gsl_multiroot_fsolver_type *solver_type;
-  solver_type = gsl_multiroot_fsolver_hybrid;
-  solver_ = gsl_multiroot_fsolver_alloc(solver_type, n_equations_);
-}
-
 HadronGasEos::HadronGasEos(const bool tabulate) :
               x_(gsl_vector_alloc(n_equations_)),
               tabulate_(tabulate) {

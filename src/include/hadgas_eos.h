@@ -57,8 +57,7 @@ class EosTable {
  */
 class HadronGasEos {
  public:
-  HadronGasEos();
-  HadronGasEos(const bool tabulate);
+  HadronGasEos(const bool tabulate = false);
   ~HadronGasEos();
   static double energy_density(double T, double mub, double mus);
   static double density(double T, double mub, double mus);
