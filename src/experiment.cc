@@ -866,7 +866,6 @@ uint64_t Experiment<Modus>::run_time_evolution_fixed_time_step() {
       const bool ignore_cells_under_treshold = false;
       gc_thermalizer_->update_lattice(particles_, density_param_,
                                       ignore_cells_under_treshold);
-      gc_thermalizer_->print_statistics(parameters_.labclock);
       gc_thermalizer_->thermalize(particles_,
                                   parameters_.labclock.current_time());
     }
@@ -1187,6 +1186,7 @@ void Experiment<Modus>::intermediate_output(uint64_t& interactions_total,
 
     if (gc_thermalizer_) {
       gc_thermalizer_->update_lattice(particles_, density_param_);
+      gc_thermalizer_->print_statistics(parameters_.labclock);
       output->thermodynamics_output(*gc_thermalizer_);
     }
   }
